@@ -6506,42 +6506,42 @@ class MyDataItemFieldPatchStruct final  {
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> s_ref() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_s, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_s, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> s_ref() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_s), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_s), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> s_ref() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_s, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_s, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> s_ref() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_s), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_s), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> s() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_s, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_s, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> s() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_s), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_s), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> s() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_s, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_s, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> s() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_s), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_s), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>};
   }
 
   template <class Protocol_>
@@ -7207,322 +7207,322 @@ class MyStructFieldPatchStruct final  {
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::op::I64Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> inty_ref() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_inty, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I64PatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::I64PatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_inty, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I64PatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::I64PatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::op::I64Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> inty_ref() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_inty), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I64PatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::I64PatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_inty), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I64PatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::I64PatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::op::I64Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> inty_ref() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_inty, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I64PatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::I64PatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_inty, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I64PatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::I64PatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::op::I64Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> inty_ref() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_inty), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I64PatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::I64PatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_inty), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I64PatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::I64PatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::op::I64Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> inty() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_inty, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I64PatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::I64PatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_inty, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I64PatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::I64PatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::op::I64Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> inty() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_inty), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I64PatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::I64PatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_inty), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I64PatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::I64PatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::op::I64Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> inty() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_inty, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I64PatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::I64PatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_inty, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I64PatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::I64PatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::op::I64Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> inty() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_inty), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I64PatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::I64PatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_inty), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I64PatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::I64PatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> stringy_ref() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_stringy, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_stringy, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> stringy_ref() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_stringy), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_stringy), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> stringy_ref() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_stringy, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_stringy, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> stringy_ref() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_stringy), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_stringy), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> stringy() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_stringy, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_stringy, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> stringy() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_stringy), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_stringy), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> stringy() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_stringy, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_stringy, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> stringy() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_stringy), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_stringy), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyDataItemPatch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> myItemy_ref() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_myItemy, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_myItemy, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyDataItemPatch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> myItemy_ref() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_myItemy), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_myItemy), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyDataItemPatch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> myItemy_ref() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_myItemy, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_myItemy, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyDataItemPatch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> myItemy_ref() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_myItemy), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_myItemy), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyDataItemPatch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> myItemy() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_myItemy, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_myItemy, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyDataItemPatch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> myItemy() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_myItemy), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_myItemy), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyDataItemPatch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> myItemy() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_myItemy, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_myItemy, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyDataItemPatch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> myItemy() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_myItemy), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_myItemy), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField4Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> myEnumy_ref() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_myEnumy, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_myEnumy, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField4Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> myEnumy_ref() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_myEnumy), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_myEnumy), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField4Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> myEnumy_ref() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_myEnumy, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_myEnumy, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField4Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> myEnumy_ref() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_myEnumy), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_myEnumy), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField4Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> myEnumy() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_myEnumy, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_myEnumy, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField4Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> myEnumy() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_myEnumy), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_myEnumy), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField4Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> myEnumy() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_myEnumy, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_myEnumy, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField4Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> myEnumy() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_myEnumy), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_myEnumy), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::op::BoolPatch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> booly_ref() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_booly, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::BoolPatchAdapter<::apache::thrift::op::BoolPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::BoolPatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_booly, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::BoolPatchAdapter<::apache::thrift::op::BoolPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::BoolPatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::op::BoolPatch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> booly_ref() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_booly), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::BoolPatchAdapter<::apache::thrift::op::BoolPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::BoolPatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_booly), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::BoolPatchAdapter<::apache::thrift::op::BoolPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::BoolPatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::op::BoolPatch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> booly_ref() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_booly, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::BoolPatchAdapter<::apache::thrift::op::BoolPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::BoolPatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_booly, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::BoolPatchAdapter<::apache::thrift::op::BoolPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::BoolPatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::op::BoolPatch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> booly_ref() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_booly), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::BoolPatchAdapter<::apache::thrift::op::BoolPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::BoolPatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_booly), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::BoolPatchAdapter<::apache::thrift::op::BoolPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::BoolPatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::op::BoolPatch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> booly() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_booly, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::BoolPatchAdapter<::apache::thrift::op::BoolPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::BoolPatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_booly, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::BoolPatchAdapter<::apache::thrift::op::BoolPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::BoolPatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::op::BoolPatch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> booly() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_booly), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::BoolPatchAdapter<::apache::thrift::op::BoolPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::BoolPatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_booly), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::BoolPatchAdapter<::apache::thrift::op::BoolPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::BoolPatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::op::BoolPatch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> booly() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_booly, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::BoolPatchAdapter<::apache::thrift::op::BoolPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::BoolPatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_booly, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::BoolPatchAdapter<::apache::thrift::op::BoolPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::BoolPatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::op::BoolPatch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> booly() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_booly), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::BoolPatchAdapter<::apache::thrift::op::BoolPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::BoolPatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_booly), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::BoolPatchAdapter<::apache::thrift::op::BoolPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::BoolPatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField6Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> floatListy_ref() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_floatListy, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_floatListy, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField6Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> floatListy_ref() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_floatListy), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_floatListy), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField6Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> floatListy_ref() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_floatListy, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_floatListy, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField6Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> floatListy_ref() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_floatListy), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_floatListy), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField6Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> floatListy() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_floatListy, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_floatListy, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField6Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> floatListy() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_floatListy), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_floatListy), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField6Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> floatListy() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_floatListy, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_floatListy, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField6Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> floatListy() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_floatListy), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_floatListy), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField7Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> strMappy_ref() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_strMappy, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_strMappy, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField7Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> strMappy_ref() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_strMappy), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_strMappy), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField7Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> strMappy_ref() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_strMappy, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_strMappy, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField7Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> strMappy_ref() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_strMappy), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_strMappy), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField7Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> strMappy() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_strMappy, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_strMappy, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField7Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> strMappy() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_strMappy), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_strMappy), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField7Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> strMappy() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_strMappy, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_strMappy, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField7Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> strMappy() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_strMappy), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_strMappy), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField8Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> intSetty_ref() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_intSetty, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::SetPatchAdapter<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_intSetty, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::SetPatchAdapter<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField8Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> intSetty_ref() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_intSetty), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::SetPatchAdapter<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_intSetty), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::SetPatchAdapter<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField8Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> intSetty_ref() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_intSetty, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::SetPatchAdapter<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_intSetty, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::SetPatchAdapter<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField8Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> intSetty_ref() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_intSetty), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::SetPatchAdapter<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_intSetty), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::SetPatchAdapter<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField8Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> intSetty() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_intSetty, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::SetPatchAdapter<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_intSetty, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::SetPatchAdapter<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField8Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> intSetty() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_intSetty), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::SetPatchAdapter<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_intSetty), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::SetPatchAdapter<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField8Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> intSetty() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_intSetty, ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::SetPatchAdapter<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_intSetty, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::SetPatchAdapter<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField8Patch>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> intSetty() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_intSetty), ::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::SetPatchAdapter<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_intSetty), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::SetPatchAdapter<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>>>};
   }
 
   template <class Protocol_>

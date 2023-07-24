@@ -14,4 +14,8 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><%#field:intern_boxed_ref?%>, <% > module_types_h/intern_box_default%><%/field:intern_boxed_ref?%><%#field:has_isset?%>, __isset.at(<%field:isset_index%>), __isset.bit(<%field:isset_index%>)<%/field:has_isset?%>
+  For an efficient pointer comparison, we construct and reset an intern boxed field to the
+  intrinsic default when there is no custom default value on a field. Note, we always clear
+  to the intrinsic default.
+%><%#field:value%>::apache::thrift::op::getDefault<<% > field/tag%>><%/field:value%><%!
+%><%^field:value%>::apache::thrift::op::getIntrinsicDefault<<% > field/tag%>><%/field:value%>

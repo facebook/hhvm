@@ -346,12 +346,15 @@ TEST(References, intern_box_access) {
       &*std::as_const(a).intern_box_field(),
       &*std::as_const(b).intern_box_field());
 
-  // reset sets fill boxed intern field to the shared default.
-  b.intern_box_field().reset();
+  b.intern_box_field().emplace();
   // address does not match.
   EXPECT_NE(
       &*std::as_const(a).intern_box_field(),
       &*std::as_const(b).intern_box_field());
+
+  // reset sets fill boxed intern field to the shared intrinsic default when the
+  // field does not have custom default.
+  b.intern_box_field().reset();
   // value should still be equal.
   EXPECT_EQ(
       *std::as_const(a).intern_box_field(),

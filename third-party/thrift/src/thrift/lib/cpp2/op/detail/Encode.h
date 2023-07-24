@@ -817,14 +817,19 @@ struct Decode<type::set<Tag>> {
       return;
     }
 
+    bool sorted = true;
     typename Set::container_type tmp(set.get_allocator());
     apache::thrift::detail::pm::reserve_if_possible(&tmp, set_size);
-    for (size_t i = 0; i < set_size; ++i) {
+    {
+      auto& elem0 = apache::thrift::detail::pm::emplace_back_default(tmp);
+      Decode<Tag>{}(prot, elem0);
+    }
+    for (size_t i = 1; i < set_size; ++i) {
       auto& elem = apache::thrift::detail::pm::emplace_back_default(tmp);
       Decode<Tag>{}(prot, elem);
+      sorted = sorted && set.key_comp()(tmp[i - 1], elem);
     }
 
-    const bool sorted = std::is_sorted(tmp.begin(), tmp.end(), set.key_comp());
     using folly::sorted_unique;
     set = sorted ? Set(sorted_unique, std::move(tmp)) : Set(std::move(tmp));
   }

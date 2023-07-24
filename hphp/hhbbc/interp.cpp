@@ -3015,15 +3015,10 @@ void in(ISS& env, const bc::CombineAndResolveTypeStruct& op) {
     }
 
     // Optimize double input that needs a single combination and looks of the
-    // form ?T, @T or ~T
+    // form ?T or @T
     if (op.arg1 == 2 && get_ts_kind(ts) == TypeStructure::Kind::T_reifiedtype) {
       BytecodeVec instrs { bc::PopC {} };
       auto const tv_true = gen_constant(make_tv<KindOfBoolean>(true));
-      if (ts->exists(s_like.get())) {
-        instrs.push_back(gen_constant(make_tv<KindOfString>(s_like.get())));
-        instrs.push_back(tv_true);
-        instrs.push_back(bc::AddElemC {});
-      }
       if (ts->exists(s_nullable.get())) {
         instrs.push_back(gen_constant(make_tv<KindOfString>(s_nullable.get())));
         instrs.push_back(tv_true);

@@ -88,7 +88,6 @@ struct TSCtx {
 const StaticString
   s_nullable("nullable"),
   s_exact("exact"),
-  s_like("like"),
   s_name("name"),
   s_classname("classname"),
   s_kind("kind"),
@@ -300,11 +299,6 @@ void shapeTypeName(const Array& arr, std::string& name,
 
 std::string fullName(const Array& arr, TypeStructure::TSDisplayType type) {
   std::string name;
-
-  if (arr.exists(s_like)) {
-    assertx(arr[s_like].toBoolean());
-    name += '~';
-  }
 
   if (arr.exists(s_nullable)) {
     assertx(arr[s_nullable].toBoolean());
@@ -690,7 +684,6 @@ Array resolveUnion(TSEnv& env, const TSCtx& ctx, const Array& arr) {
  * Copy modifiers, i.e. whether the type is nullable, soft, or a like-type.
  */
 void copyTypeModifiers(const Array& from, Array& to) {
-  if (from.exists(s_like))     to.set(s_like, make_tv<KindOfBoolean>(true));
   if (from.exists(s_nullable)) to.set(s_nullable, make_tv<KindOfBoolean>(true));
   if (from.exists(s_soft))     to.set(s_soft, make_tv<KindOfBoolean>(true));
 }

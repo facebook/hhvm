@@ -125,10 +125,8 @@ dict(1) {
     int(1)
   }
 }
-dict(5) {
+dict(4) {
   ["soft"]=>
-  bool(true)
-  ["like"]=>
   bool(true)
   ["kind"]=>
   int(1)
@@ -137,9 +135,7 @@ dict(5) {
   ["alias"]=>
   string(10) "FooSoftInt"
 }
-dict(5) {
-  ["like"]=>
-  bool(true)
+dict(4) {
   ["soft"]=>
   bool(true)
   ["kind"]=>

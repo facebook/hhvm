@@ -29,7 +29,6 @@ function main(): void {
   $ts = type_structure('TString');
   var_dump(HH\TypeStructure\get_nullable($ts));
   var_dump(HH\TypeStructure\get_soft($ts));
-  var_dump(HH\TypeStructure\get_like($ts));
   var_dump(HH\TypeStructure\get_opaque($ts));
   var_dump(HH\TypeStructure\get_optional_shape_field($ts));
 

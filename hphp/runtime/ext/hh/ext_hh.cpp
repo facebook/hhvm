@@ -1126,13 +1126,6 @@ bool HHVM_FUNCTION(get_soft, const Array& ts) {
   return getBool(ts, s_soft);
 }
 
-bool HHVM_FUNCTION(get_like, const Array& ts) {
-  if (auto const bespokeTS = getBespokeTS(ts)) {
-    return bespokeTS->like();
-  }
-  return getBool(ts, s_like);
-}
-
 bool HHVM_FUNCTION(get_opaque, const Array& ts) {
   if (auto const bespokeTS = getBespokeTS(ts)) {
     return bespokeTS->opaque();
@@ -1538,7 +1531,6 @@ static struct HHExtension final : Extension {
     X(get_kind);
     X(get_nullable);
     X(get_soft);
-    X(get_like);
     X(get_opaque);
     X(get_optional_shape_field);
     X(get_alias);

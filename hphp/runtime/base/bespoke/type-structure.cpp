@@ -265,8 +265,6 @@ bool TypeStructure::setField(
     tad->setBitField(v, kNullableOffset);
   } else if (s_soft.same(k)) {
     tad->setBitField(v, kSoftOffset);
-  } else if (s_like.same(k)) {
-    tad->setBitField(v, kLikeOffset);
   } else if (s_opaque.same(k)) {
     tad->setBitField(v, kOpaqueOffset);
   } else if (s_optional_shape_field.same(k)) {
@@ -573,8 +571,6 @@ size_t TypeStructure::getFieldOffset(const StringData* key) {
     return bitFieldOffset();
   } else if (s_soft.same(key)) {
     return bitFieldOffset();
-  } else if (s_like.same(key)) {
-    return bitFieldOffset();
   } else if (s_opaque.same(key)) {
     return bitFieldOffset();
   } else if (s_optional_shape_field.same(key)) {
@@ -596,8 +592,6 @@ size_t TypeStructure::getFieldOffset(const StringData* key) {
 
 uint8_t TypeStructure::getBooleanBitOffset(const StringData* key) {
   if (s_nullable.same(key)) return kNullableOffset;
-  if (s_soft.same(key)) return kSoftOffset;
-  if (s_like.same(key)) return kLikeOffset;
   if (s_opaque.same(key)) return kOpaqueOffset;
   if (s_optional_shape_field.same(key)) return kOptionalShapeFieldOffset;
   // otherwise the boolean field does not require an offset

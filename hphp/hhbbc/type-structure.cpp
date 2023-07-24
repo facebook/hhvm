@@ -135,7 +135,6 @@ struct Builder {
   Builder& copyModifiers(SArray from) {
     assertx(from->isStatic());
     assertx(from->isDictType());
-    if (from->exists(s_like))     set(s_like, make_tv<KindOfBoolean>(true));
     if (from->exists(s_nullable)) set(s_nullable, make_tv<KindOfBoolean>(true));
     if (from->exists(s_soft))     set(s_soft, make_tv<KindOfBoolean>(true));
     return *this;

@@ -51,7 +51,6 @@ TEST(BespokeTypeStructure, Methods) {
     EXPECT_FALSE(ts->nullable());
     EXPECT_FALSE(ts->soft());
     EXPECT_FALSE(ts->opaque());
-    EXPECT_FALSE(ts->like());
     EXPECT_FALSE(ts->optionalShapeField());
   }
   {
@@ -63,7 +62,6 @@ TEST(BespokeTypeStructure, Methods) {
     EXPECT_TRUE(ts->nullable());
     EXPECT_TRUE(ts->soft());
     EXPECT_FALSE(ts->opaque());
-    EXPECT_FALSE(ts->like());
     EXPECT_FALSE(ts->optionalShapeField());
   }
   {
@@ -195,9 +193,6 @@ TEST(BespokeTypeStructure, Methods) {
   EXPECT_TRUE(vadKind.m_type == KindOfInt64);
   EXPECT_TRUE(val(vadKind).num == uint64_t(TypeStructure::Kind::T_int));
 
-  auto const vadLike = vad->get(Variant{"like"});
-  EXPECT_TRUE(vadLike.m_type == KindOfUninit);
-
   auto const vadAlias = vad->get(Variant{"alias"});
   EXPECT_TRUE(isStringType(vadAlias.m_type));
   EXPECT_TRUE(val(vadAlias).pstr->same(t));
@@ -207,7 +202,6 @@ TEST(BespokeTypeStructure, Methods) {
   EXPECT_TRUE(ts2->nullable());
   EXPECT_TRUE(ts2->soft());
   EXPECT_FALSE(ts2->opaque());
-  EXPECT_FALSE(ts2->like());
   EXPECT_FALSE(ts2->optionalShapeField());
   EXPECT_TRUE(ts2->alias() != nullptr);
   EXPECT_TRUE(ts2->alias()->same(t));

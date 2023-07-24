@@ -95,7 +95,7 @@ using Kind = HPHP::TypeStructure::Kind;
 #define TYPE_STRUCTURE_FIELDS                                     \
   X(nullable,           nullable,             KindOfBoolean,  1)  \
   X(soft,               soft,                 KindOfBoolean,  2)  \
-  X(like,               like,                 KindOfBoolean,  3)  \
+  /* position 3 unused */                                         \
   X(opaque,             opaque,               KindOfBoolean,  4)  \
   X(optionalShapeField, optional_shape_field, KindOfBoolean,  5)  \
   X(kind,               kind,                 KindOfInt64,    6)  \
@@ -225,7 +225,7 @@ struct TypeStructure : BespokeArray {
   enum BitFieldOffsets : uint8_t {
     kNullableOffset = 0,
     kSoftOffset = 1,
-    kLikeOffset = 2,
+    // offset 2 unused
     kOpaqueOffset = 3,
     kOptionalShapeFieldOffset = 4
   };
@@ -260,7 +260,6 @@ struct TypeStructure : BespokeArray {
 
   bool nullable() const { return m_extra_lo8 & (1 << kNullableOffset); }
   bool soft() const     { return m_extra_lo8 & (1 << kSoftOffset); }
-  bool like() const     { return m_extra_lo8 & (1 << kLikeOffset); }
   bool opaque() const   { return m_extra_lo8 & (1 << kOpaqueOffset); }
   bool optionalShapeField() const {
     return m_extra_lo8 & (1 << kOptionalShapeFieldOffset);

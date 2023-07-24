@@ -449,7 +449,6 @@ fn hint_to_type_constant_list<'arena>(
         }
         Hint_::Hlike(h) => {
             let mut r = bumpalo::vec![in alloc];
-            r.push(encode_entry("like", TypedValue::Bool(true)));
             r.append(&mut hint_to_type_constant_list(
                 alloc,
                 opts,

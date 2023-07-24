@@ -445,9 +445,6 @@ function get_nullable(dict<string, mixed> $ts): bool;
 function get_soft(dict<string, mixed> $ts): bool;
 
 <<__Native>>
-function get_like(dict<string, mixed> $ts): bool;
-
-<<__Native>>
 function get_opaque(dict<string, mixed> $ts): bool;
 
 <<__Native>>

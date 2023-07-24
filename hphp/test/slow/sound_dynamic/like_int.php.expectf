@@ -5,13 +5,13 @@ Warning: Argument 1 to f_like() must be of type @int, string given in %s/test/sl
 $li: not like int
 $t: 4 [reified]
 
-Warning: Argument 1 passed to f() must be an instance of ~@int, string given in %s/test/slow/sound_dynamic/like_int.php on line 5
+Warning: Argument 1 passed to f() must be an instance of @int, string given in %s/test/slow/sound_dynamic/like_int.php on line 5
 $t: not like int [reified]
 
 ===== Typeconsts::Tlike =====
 $t: 4 [reified]
 
-Warning: Argument 1 passed to f() must be an instance of ~@int, string given in %s/test/slow/sound_dynamic/like_int.php on line 5
+Warning: Argument 1 passed to f() must be an instance of @int, string given in %s/test/slow/sound_dynamic/like_int.php on line 5
 $t: not like int [typeconst] [reified]
 Type structure kind: 1
-Assigned type text: ~HH\int
+Assigned type text: HH\int

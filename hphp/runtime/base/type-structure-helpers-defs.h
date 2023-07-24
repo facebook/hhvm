@@ -30,7 +30,6 @@ const StaticString s_kind("kind");
 const StaticString s_value("value");
 const StaticString s_nullable("nullable");
 const StaticString s_soft("soft");
-const StaticString s_like("like");
 const StaticString s_opaque("opaque");
 const StaticString s_optional_shape_field("optional_shape_field");
 const StaticString s_classname("classname");
@@ -117,10 +116,6 @@ ALWAYS_INLINE const StringData* get_ts_string_opt(const ArrayData* ts,
 
 ALWAYS_INLINE bool is_ts_nullable(const ArrayData* ts) {
   return detail::is_ts_bool(ts, s_nullable);
-}
-
-ALWAYS_INLINE bool is_ts_like(const ArrayData* ts) {
-  return detail::is_ts_bool(ts, s_like);
 }
 
 ALWAYS_INLINE bool is_ts_soft(const ArrayData* ts) {

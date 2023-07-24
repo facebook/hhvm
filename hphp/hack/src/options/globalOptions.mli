@@ -175,12 +175,6 @@ type t = {
    * (skipping post parse error checks) *)
   po_parser_errors_only: bool;
   tco_check_attribute_locations: bool;
-  (* Service name for glean connection; default "" to autoselect server *)
-  glean_service: string;
-  (* Hostname for glean connection; default "" to autoselect server *)
-  glean_hostname: string;
-  (* Port number for glean connection; default 0 to autoselect server *)
-  glean_port: int;
   (* Reponame used for glean connection, default to "www.autocomplete" *)
   glean_reponame: string;
   (* Path prefix to use for files relative to the repository root when writing symbol info to JSON *)
@@ -392,9 +386,6 @@ val set :
   ?po_abstract_static_props:bool ->
   ?po_parser_errors_only:bool ->
   ?tco_check_attribute_locations:bool ->
-  ?glean_service:string ->
-  ?glean_hostname:string ->
-  ?glean_port:int ->
   ?glean_reponame:string ->
   ?symbol_write_ownership:bool ->
   ?symbol_write_root_path:string ->

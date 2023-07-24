@@ -119,9 +119,6 @@ type t = {
   po_abstract_static_props: bool;
   po_parser_errors_only: bool;
   tco_check_attribute_locations: bool;
-  glean_service: string;
-  glean_hostname: string;
-  glean_port: int;
   glean_reponame: string;
   symbol_write_ownership: bool;
   symbol_write_root_path: string;
@@ -247,9 +244,6 @@ let default =
     po_abstract_static_props = false;
     po_parser_errors_only = false;
     tco_check_attribute_locations = true;
-    glean_service = "";
-    glean_hostname = "";
-    glean_port = 0;
     glean_reponame = "www.autocomplete";
     symbol_write_ownership = false;
     symbol_write_root_path = "www";
@@ -372,9 +366,6 @@ let set
     ?po_abstract_static_props
     ?po_parser_errors_only
     ?tco_check_attribute_locations
-    ?glean_service
-    ?glean_hostname
-    ?glean_port
     ?glean_reponame
     ?symbol_write_ownership
     ?symbol_write_root_path
@@ -590,9 +581,6 @@ let set
       setting
         tco_check_attribute_locations
         options.tco_check_attribute_locations;
-    glean_service = setting glean_service options.glean_service;
-    glean_hostname = setting glean_hostname options.glean_hostname;
-    glean_port = setting glean_port options.glean_port;
     glean_reponame = setting glean_reponame options.glean_reponame;
     symbol_write_ownership =
       setting symbol_write_ownership options.symbol_write_ownership;

@@ -268,9 +268,6 @@ let parse_options () =
   let const_default_lambda_args = ref false in
   let disallow_silence = ref false in
   let abstract_static_props = ref false in
-  let glean_service = ref (GleanOptions.service GlobalOptions.default) in
-  let glean_hostname = ref (GleanOptions.hostname GlobalOptions.default) in
-  let glean_port = ref (GleanOptions.port GlobalOptions.default) in
   let glean_reponame = ref (GleanOptions.reponame GlobalOptions.default) in
   let disallow_func_ptrs_in_constants = ref false in
   let error_php_lambdas = ref false in
@@ -643,13 +640,6 @@ let parse_options () =
       ( "--abstract-static-props",
         Arg.Set abstract_static_props,
         " Static properties can be abstract" );
-      ( "--glean-service",
-        Arg.String (fun str -> glean_service := str),
-        " glean service name" );
-      ( "--glean-hostname",
-        Arg.String (fun str -> glean_hostname := str),
-        " glean hostname" );
-      ("--glean-port", Arg.Int (fun x -> glean_port := x), " glean port number");
       ( "--glean-reponame",
         Arg.String (fun str -> glean_reponame := str),
         " glean repo name" );
@@ -951,9 +941,6 @@ let parse_options () =
       ~tco_error_php_lambdas:!error_php_lambdas
       ~tco_disallow_discarded_nullable_awaitables:
         !disallow_discarded_nullable_awaitables
-      ~glean_service:!glean_service
-      ~glean_hostname:!glean_hostname
-      ~glean_port:!glean_port
       ~glean_reponame:!glean_reponame
       ~po_disable_xhp_element_mangling:!disable_xhp_element_mangling
       ~po_disable_xhp_children_declarations:!disable_xhp_children_declarations

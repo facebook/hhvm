@@ -14,12 +14,6 @@ open Hh_prelude
 
 type t = GlobalOptions.t [@@deriving show]
 
-let service t = t.GlobalOptions.glean_service
-
-let hostname t = t.GlobalOptions.glean_hostname
-
-let port t = t.GlobalOptions.glean_port
-
 let reponame t = t.GlobalOptions.glean_reponame
 
 let default = GlobalOptions.default

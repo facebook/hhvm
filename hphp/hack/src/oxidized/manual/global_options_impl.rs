@@ -97,9 +97,6 @@ impl Default for GlobalOptions {
             po_disable_xhp_element_mangling: false, // true in ocaml
             po_disable_xhp_children_declarations: false, // true in ocaml
             po_keep_user_attributes: false,
-            glean_service: String::new(),
-            glean_hostname: String::new(),
-            glean_port: 0,
             glean_reponame: String::new(), // "www.autocomplete" in ocaml
             symbol_write_ownership: false,
             symbol_write_root_path: String::new(), // "www" in ocaml

@@ -360,6 +360,19 @@ TEST(References, intern_box_access) {
       std::as_const(a).intern_box_field(), std::as_const(b).intern_box_field());
 }
 
+TEST(References, intern_box_empty) {
+  TerseInternBox obj;
+  EXPECT_TRUE(apache::thrift::empty(obj));
+
+  // own the field.
+  obj.intern_box_field().emplace();
+  EXPECT_TRUE(apache::thrift::empty(obj));
+
+  // explicitly set the inner field.
+  obj.intern_box_field().value().field() = 0;
+  EXPECT_TRUE(apache::thrift::empty(obj));
+}
+
 TEST(References, structured_annotation) {
   StructuredAnnotation a;
   EXPECT_EQ(nullptr, a.opt_unique_field_ref());

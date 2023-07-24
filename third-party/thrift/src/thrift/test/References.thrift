@@ -31,6 +31,12 @@ struct PlainStruct {
   1: i32 field;
 }
 
+@thrift.Experimental
+struct EmptiableStruct {
+  @thrift.TerseWrite
+  1: i32 field;
+}
+
 struct ReferringStruct {
   1: PlainStruct def_field (cpp2.ref = "true");
   2: optional PlainStruct opt_field (cpp2.ref = "true");
@@ -241,6 +247,13 @@ struct StructuredAnnotation {
 
   @thrift.InternBox
   4: PlainStruct intern_box_field;
+}
+
+@thrift.Experimental
+struct TerseInternBox {
+  @thrift.InternBox
+  @thrift.TerseWrite
+  1: EmptiableStruct intern_box_field;
 }
 
 struct StructWithString {

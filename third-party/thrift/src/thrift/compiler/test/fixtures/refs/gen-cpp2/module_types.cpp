@@ -1792,8 +1792,8 @@ void StructWithTerseInternBox::__fbthrift_clear_terse_fields() {
 }
 
 bool StructWithTerseInternBox::__fbthrift_is_empty() const {
-  return this->__fbthrift_field_field1 && ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::cpp2::Empty>>(*this->__fbthrift_field_field1) &&
- this->__fbthrift_field_field2 && ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::cpp2::MyField>>(*this->__fbthrift_field_field2);
+  return (this->__fbthrift_field_field1.get() == &::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>() || ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::cpp2::Empty>>(*this->__fbthrift_field_field1)) &&
+ (this->__fbthrift_field_field2.get() == &::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>() || ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::cpp2::MyField>>(*this->__fbthrift_field_field2));
 }
 
 bool StructWithTerseInternBox::operator==(FOLLY_MAYBE_UNUSED const StructWithTerseInternBox& rhs) const {
@@ -2079,8 +2079,8 @@ void AdaptedStructWithTerseInternBox::__fbthrift_clear_terse_fields() {
 }
 
 bool AdaptedStructWithTerseInternBox::__fbthrift_is_empty() const {
-  return this->__fbthrift_field_field1 && ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<1>>>(*this->__fbthrift_field_field1) &&
- this->__fbthrift_field_field2 && ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<2>>>(*this->__fbthrift_field_field2);
+  return (this->__fbthrift_field_field1.get() == &::apache::thrift::op::getIntrinsicDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<1>>>() || ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<1>>>(*this->__fbthrift_field_field1)) &&
+ (this->__fbthrift_field_field2.get() == &::apache::thrift::op::getIntrinsicDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<2>>>() || ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<2>>>(*this->__fbthrift_field_field2));
 }
 
 bool AdaptedStructWithTerseInternBox::operator==(FOLLY_MAYBE_UNUSED const AdaptedStructWithTerseInternBox& rhs) const {

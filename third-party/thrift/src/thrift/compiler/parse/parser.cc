@@ -654,8 +654,10 @@ class parser {
 
     try_parse_deprecated_annotations(attrs);
     if (token_.kind == ',' || token_.kind == ';') {
+      // Use to_tok instead of a token_kind ctor to work around an MSVC bug
+      // (https://godbolt.org/z/8f6GE9545).
       token_kind delimiter =
-          kind == field_kind::field ? token_kind(';') : token_kind(',');
+          kind == field_kind::field ? to_tok(';') : to_tok(',');
       if (token_.kind != delimiter) {
         diags_.warning(
             token_.range.begin, "unexpected '{}'", to_string(token_.kind));

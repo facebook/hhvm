@@ -43,7 +43,7 @@ let ensure_valid_switch_case_value_types env scrutinee_ty casel =
   in
   List.iter casel ~f:ensure_valid_switch_case_value_type
 
-let check_exhaustiveness_lint env pos ty hasdfl =
+let check_exhaustiveness_lint env pos ty has_default =
   let rec has_infinite_values ty =
     match Typing.get_node ty with
     | Typing.Tunion tyl -> List.exists tyl ~f:has_infinite_values
@@ -60,7 +60,12 @@ let check_exhaustiveness_lint env pos ty hasdfl =
     end
     | _ -> false
   in
-  if has_infinite_values ty && not hasdfl then
+  let under_dynamic_assumptions =
+    Tast.is_under_dynamic_assumptions @@ Env.get_check_status env
+  in
+  if
+    (not under_dynamic_assumptions) && has_infinite_values ty && not has_default
+  then
     Lints_errors.switch_nonexhaustive pos
 
 let handler =

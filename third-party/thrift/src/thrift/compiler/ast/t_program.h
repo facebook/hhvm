@@ -263,7 +263,8 @@ class t_program : public t_named {
   enum class value_id : int64_t {};
 
   // Adds value to intern list and returns ID
-  value_id intern_value(std::unique_ptr<t_const_value> val, t_type_ref type) {
+  value_id intern_value(std::unique_ptr<t_const_value> val) {
+    auto type = val->ttype();
     intern_list_.push_back(
         std::make_unique<t_const>(this, type, "", std::move(val)));
     return static_cast<value_id>(intern_list_.size());

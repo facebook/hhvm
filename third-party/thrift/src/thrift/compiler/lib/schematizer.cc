@@ -101,10 +101,7 @@ void add_definition(
         }
         annot->add_map(val("fields"), std::move(fields));
       };
-      auto id = intern_value(
-          std::move(annot),
-          structured_annotation_ttype,
-          const_cast<t_program*>(program));
+      auto id = intern_value(std::move(annot), const_cast<t_program*>(program));
       annots->add_list(val(id));
     }
 
@@ -408,8 +405,9 @@ void add_fields(
         val("type"), gen_type(generator, program, defns_schema, *field.type()));
     if (auto deflt = field.default_value()) {
       assert(program);
-      auto id = intern_value(
-          deflt->clone(), field.type(), const_cast<t_program*>(program));
+      auto clone = deflt->clone();
+      clone->set_ttype(field.type());
+      auto id = intern_value(std::move(clone), const_cast<t_program*>(program));
       field_schema->add_map(val("customDefault"), val(id));
     }
     fields_schema->add_list(std::move(field_schema));
@@ -567,8 +565,9 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_const& node) {
 
   schema->add_map(val("type"), gen_type(*node.type(), program));
 
-  auto id = intern_value_(
-      node.value()->clone(), node.type(), const_cast<t_program*>(program));
+  auto clone = node.value()->clone();
+  clone->set_ttype(node.type());
+  auto id = intern_value_(std::move(clone), const_cast<t_program*>(program));
   schema->add_map(val("value"), val(id));
 
   return schema;
@@ -614,8 +613,8 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_typedef& node) {
 }
 
 t_program::value_id schematizer::default_intern_value(
-    std::unique_ptr<t_const_value> val, t_type_ref type, t_program* program) {
-  return program->intern_value(std::move(val), std::move(type));
+    std::unique_ptr<t_const_value> val, t_program* program) {
+  return program->intern_value(std::move(val));
 }
 
 std::unique_ptr<t_const_value> wrap_with_protocol_value(

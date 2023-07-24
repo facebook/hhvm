@@ -122,7 +122,6 @@ void t_ast_generator::generate_program() {
       definition_index;
 
   auto intern_value = [&](std::unique_ptr<t_const_value> val,
-                          t_type_ref = {},
                           t_program* = nullptr) {
     // TODO: deduplication
     auto& values = ast.values().ensure();

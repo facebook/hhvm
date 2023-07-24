@@ -8,6 +8,7 @@
 #include "Mercurial.h"
 #include <fmt/core.h>
 #include <folly/String.h>
+#include <folly/portability/SysTime.h>
 #include <chrono>
 #include <cmath>
 #include <cstdio>

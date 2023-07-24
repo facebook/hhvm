@@ -9,6 +9,7 @@
 
 #include <fmt/ranges.h>
 #include <folly/Synchronized.h>
+#include <folly/portability/Windows.h> // For timeval. Replace this.
 
 #include "watchman/PubSub.h"
 #include "watchman/watchman_preprocessor.h"

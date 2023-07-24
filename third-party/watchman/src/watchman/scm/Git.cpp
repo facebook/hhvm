@@ -8,6 +8,7 @@
 #include "watchman/scm/Git.h"
 #include <fmt/core.h>
 #include <folly/String.h>
+#include <folly/portability/SysTime.h>
 #include "watchman/ChildProcess.h"
 #include "watchman/CommandRegistry.h"
 #include "watchman/Logging.h"

@@ -292,11 +292,6 @@ let main_internal
     in
     ClientFindRefs.go results args.output_json;
     Lwt.return (Exit_status.No_error, Telemetry.create ())
-  | MODE_GO_TO_IMPL_CLASS_REMOTE class_name ->
-    let results = Glean_dependency_graph.go_to_implementation ~class_name in
-    HashSet.iter results ~f:(fun cls -> Printf.printf "%s\n" cls);
-    Printf.printf "%d total results\n" (HashSet.length results);
-    Lwt.return (Exit_status.No_error, Telemetry.create ())
   | MODE_GO_TO_IMPL_METHOD name ->
     let action =
       parse_function_or_method_id

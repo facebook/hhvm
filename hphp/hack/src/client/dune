@@ -17,7 +17,6 @@
   clowder_paste
   flytrap
   formatting_stubs
-  glean_dependency_graph_stubs
   hh_server_monitor
   logging
   lwt

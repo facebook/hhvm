@@ -414,10 +414,6 @@ let parse_check_args cmd ~from_default =
         Arg.String (fun x -> set_mode (MODE_GO_TO_IMPL_CLASS x)),
         " (mode) goes to implementation of the provided class/trait/interface/etc. with the given name"
       );
-      ( "--go-to-impl-class-remote",
-        Arg.String (fun x -> set_mode (MODE_GO_TO_IMPL_CLASS_REMOTE x)),
-        " (mode) similar to go-to-class-impl, but uses a glean database for faster but potentially out-of-date results"
-      );
       ( "--go-to-impl-method",
         Arg.String (fun x -> set_mode (MODE_GO_TO_IMPL_METHOD x)),
         " (mode) goes to implementation of the provided method name" );

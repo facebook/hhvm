@@ -34,7 +34,6 @@ type client_mode =
   | MODE_FULL_FIDELITY_SCHEMA
   | MODE_POPULATE_REMOTE_DECLS of string list option
   | MODE_GO_TO_IMPL_CLASS of string
-  | MODE_GO_TO_IMPL_CLASS_REMOTE of string
   | MODE_GO_TO_IMPL_METHOD of string
   | MODE_IDE_FIND_REFS of string
   | MODE_IDE_FIND_REFS_BY_SYMBOL of string

@@ -59,7 +59,6 @@ type mode =
   | Decl_compare
   | Shallow_class_diff
   | Go_to_impl of int * int
-  | Dump_glean_deps
   | Hover of (int * int) option
   | Apply_quickfixes
   | Shape_analysis of string
@@ -419,9 +418,6 @@ let parse_options () =
       ( "--dump-dep-hashes",
         Arg.Unit (set_mode Dump_dep_hashes),
         " Print dependency hashes" );
-      ( "--dump-glean-deps",
-        Arg.Unit (set_mode Dump_glean_deps),
-        " Print dependencies in the Glean format" );
       ( "--dump-inheritance",
         Arg.Unit (set_mode Dump_inheritance),
         " Print inheritance" );
@@ -1582,17 +1578,6 @@ let sort_debug_deps deps =
 let dump_debug_deps dbg_deps =
   dbg_deps |> sort_debug_deps |> show_debug_deps |> Printf.printf "%s\n"
 
-let dump_debug_glean_deps
-    (deps :
-      (Typing_deps.Dep.dependency Typing_deps.Dep.variant
-      * Typing_deps.Dep.dependent Typing_deps.Dep.variant)
-      HashSet.t) =
-  let json_opt = Glean_dependency_graph_convert.convert_deps_to_json ~deps in
-  match json_opt with
-  | Some json_obj ->
-    Printf.printf "%s\n" (Hh_json.json_to_string ~pretty:true json_obj)
-  | None -> Printf.printf "No dependencies\n"
-
 let handle_constraint_mode
     ~do_
     name
@@ -1774,7 +1759,6 @@ let handle_mode
     batch_mode
     out_extension
     dbg_deps
-    dbg_glean_deps
     ~should_print_position
     ~profile_type_check_multi
     ~memtrace
@@ -1982,11 +1966,6 @@ let handle_mode
         let nasts = create_nasts ctx files_info in
         Relative_path.Map.iter nasts ~f:(fun _ nast ->
             Dep_hash_to_symbol.dump nast))
-  | Dump_glean_deps ->
-    Relative_path.Map.iter files_info ~f:(fun fn _fileinfo ->
-        let full_ast = Ast_provider.get_ast ctx fn ~full:true in
-        ignore @@ Typing_check_job.calc_errors_and_tast ctx fn ~full_ast);
-    dump_debug_glean_deps dbg_glean_deps
   | Get_some_file_deps depth ->
     let file_deps = traverse_file_dependencies ctx filenames ~depth in
     Relative_path.Set.iter file_deps ~f:(fun file ->
@@ -2598,17 +2577,6 @@ let decl_and_run_mode
     in
     Typing_deps.add_dependency_callback ~name:"get_debug_trace" get_debug_trace
   | _ -> ());
-  let dbg_glean_deps = HashSet.create () in
-  (match mode with
-  | Dump_glean_deps ->
-    (* In addition to actually recording the dependencies in shared memory,
-       we build a non-hashed respresentation of the dependency graph
-       for printing. In the callback we receive this as dep_right uses dep_left. *)
-    let get_debug_trace dep_right dep_left =
-      HashSet.add dbg_glean_deps (dep_left, dep_right)
-    in
-    Typing_deps.add_dependency_callback ~name:"get_debug_trace" get_debug_trace
-  | _ -> ());
   let package_info =
     match packages_config_path with
     | None -> PackageInfo.empty
@@ -2676,7 +2644,6 @@ let decl_and_run_mode
     batch_mode
     out_extension
     dbg_deps
-    dbg_glean_deps
     ~should_print_position
     ~profile_type_check_multi
     ~memtrace

@@ -564,8 +564,28 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyUnion {
         #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             2 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             _ => {}
         }
@@ -833,22 +853,112 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyField {
         #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             2 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             3 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             4 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             5 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             6 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             7 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             8 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             9 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             _ => {}
         }
@@ -962,10 +1072,40 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
         #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             2 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             3 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             _ => {}
         }
@@ -1077,8 +1217,28 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithUnion {
         #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             2 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             3 => {
             },
@@ -1314,16 +1474,76 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithContainers {
         #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             2 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             3 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             4 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             5 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::SharedMutable,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             6 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::Shared,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             _ => {}
         }
@@ -1437,10 +1657,40 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithSharedConst {
         #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::Shared,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             2 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::Shared,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             3 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::Shared,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             _ => {}
         }
@@ -1636,10 +1886,40 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithRef {
         #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             2 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             3 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             _ => {}
         }
@@ -1757,10 +2037,37 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithBox {
         #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
+
+                if type_id == ::std::any::TypeId::of::<thrift::types::Box>() {
+                    let mut tmp = Some(thrift::types::Box {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             2 => {
+
+                if type_id == ::std::any::TypeId::of::<thrift::types::Box>() {
+                    let mut tmp = Some(thrift::types::Box {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             3 => {
+
+                if type_id == ::std::any::TypeId::of::<thrift::types::Box>() {
+                    let mut tmp = Some(thrift::types::Box {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             _ => {}
         }
@@ -2496,10 +2803,40 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithRefTypeUnique {
         #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             2 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             3 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             _ => {}
         }
@@ -2613,10 +2950,40 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithRefTypeShared {
         #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::SharedMutable,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             2 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::SharedMutable,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             3 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::SharedMutable,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             _ => {}
         }
@@ -2730,10 +3097,40 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithRefTypeSharedConst {
         #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::Shared,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             2 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::Shared,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             3 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::Shared,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             _ => {}
         }
@@ -2827,6 +3224,16 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithRefAndAnnotCppNoexcep
         #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             _ => {}
         }
@@ -2956,14 +3363,64 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithString {
         #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             2 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::SharedMutable,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             3 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::Shared,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             4 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             5 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::SharedMutable,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             _ => {}
         }

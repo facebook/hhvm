@@ -631,7 +631,7 @@ cdef __StructSpec get_reflection__Bar():
             qualifier=__Qualifier.UNQUALIFIED,
             default=None,
             annotations={
-                """cpp.ref""": """1""",            },
+            },
         ),
     )
     return spec

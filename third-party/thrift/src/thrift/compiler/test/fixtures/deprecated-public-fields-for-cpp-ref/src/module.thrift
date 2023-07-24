@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/cpp.thrift"
+
 struct Foo {
-  1: optional Foo foo (cpp.ref);
-  2: optional Foo bar (cpp.ref_type = "shared");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional Foo foo;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: optional Foo bar;
 }

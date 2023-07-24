@@ -22,8 +22,9 @@ namespace cpp2 some.valid.ns
 
 typedef includes.AStruct AStruct
 
+@cpp.Type{name = "::folly::IOBuf"}
 @cpp.Adapter{name = '::CustomProtocolAdapter'}
-typedef binary (cpp.type = "::folly::IOBuf") CustomProtocolType
+typedef binary CustomProtocolType
 
 // Generate base consts
 const bool aBool = true;
@@ -140,8 +141,10 @@ union ComplexUnion {
   20: binary MyBinaryField;
   21: binary MyBinaryField2;
   23: list<binary> MyBinaryListField4;
-  24: MyStruct ref_field (cpp.ref);
-  25: MyStruct ref_field2 (cpp.ref_type = "shared_const");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  24: MyStruct ref_field;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  25: MyStruct ref_field2;
   26: AnException excp_field;
   27: CustomProtocolType MyCustomField;
 } (cpp.methods = "void foo(const std::string& bar) {}")
@@ -172,10 +175,14 @@ exception AnotherException {
   2: string message;
 } (cpp.virtual)
 
-typedef i64 (cpp.type = "Foo", cpp.indirection) IndirectionA
-typedef i32 (cpp.type = "Baz", cpp.indirection) IndirectionC
-typedef double (cpp.type = "Bar", cpp.indirection) IndirectionB
-typedef string (cpp.type = "FooBar", cpp.indirection) IndirectionD
+@cpp.Type{name = "Foo"}
+typedef i64 (cpp.indirection) IndirectionA
+@cpp.Type{name = "Baz"}
+typedef i32 (cpp.indirection) IndirectionC
+@cpp.Type{name = "Bar"}
+typedef double (cpp.indirection) IndirectionB
+@cpp.Type{name = "FooBar"}
+typedef string (cpp.indirection) IndirectionD
 typedef map<MyEnumA, string> (
   cpp.declare_hash,
   cpp.declare_equal_to,
@@ -240,50 +247,68 @@ enum MyEnumB {
 struct MyIncludedStruct {
   1: includes.IncludedInt64 MyIncludedInt = includes.IncludedConstant;
   2: AStruct MyIncludedStruct;
-  3: AStruct ARefField (cpp.ref = "true");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  3: AStruct ARefField;
   4: required AStruct ARequiredField;
 } (cpp2.declare_hash = 1, cpp2.declare_equal_to)
 
-typedef i32 (cpp.type = "CppFakeI32") CppFakeI32
-typedef list<i64> (
-  cpp.type = "folly::small_vector<int64_t, 8 /* maxInline */>",
-) FollySmallVectorI64
-typedef set<string> (
-  cpp.type = "folly::sorted_vector_set<std::string>",
-) SortedVectorSetString
-typedef map<i64, double> (cpp.type = "FakeMap") FakeMap
-typedef map<string, containerStruct> (
-  cpp.type = "std::unordered_map<std::string, containerStruct>",
-) UnorderedMapStruct
-typedef list<i32> (cpp.template = "std::list") std_list
-typedef list<string> (cpp2.template = "std::deque") std_deque
-typedef set<string> (cpp.template = "folly::sorted_vector_set") folly_set
-typedef map<i64, string> (cpp2.template = "folly::sorted_vector_map") folly_map
+@cpp.Type{name = "CppFakeI32"}
+typedef i32 CppFakeI32
+@cpp.Type{name = "folly::small_vector<int64_t, 8 /* maxInline */>"}
+typedef list<i64> FollySmallVectorI64
+@cpp.Type{name = "folly::sorted_vector_set<std::string>"}
+typedef set<string> SortedVectorSetString
+@cpp.Type{name = "FakeMap"}
+typedef map<i64, double> FakeMap
+@cpp.Type{name = "std::unordered_map<std::string, containerStruct>"}
+typedef map<string, containerStruct> UnorderedMapStruct
+@cpp.Type{template = "std::list"}
+typedef list<i32> std_list
+@cpp.Type{template = "std::deque"}
+typedef list<string> std_deque
+@cpp.Type{template = "folly::sorted_vector_set"}
+typedef set<string> folly_set
+@cpp.Type{template = "folly::sorted_vector_map"}
+typedef map<i64, string> folly_map
 
 struct AnnotatedStruct {
   1: containerStruct no_annotation;
-  2: containerStruct cpp_unique_ref (cpp.ref);
-  3: containerStruct cpp2_unique_ref (cpp2.ref);
-  4: map<i32, list<string>> container_with_ref (cpp2.ref);
-  5: required containerStruct req_cpp_unique_ref (cpp.ref);
-  6: required containerStruct req_cpp2_unique_ref (cpp2.ref);
-  7: required list<string> req_container_with_ref (cpp2.ref);
-  8: optional containerStruct opt_cpp_unique_ref (cpp.ref);
-  9: optional containerStruct opt_cpp2_unique_ref (cpp2.ref);
-  10: optional set<i32> opt_container_with_ref (cpp2.ref);
-  11: containerStruct ref_type_unique (cpp.ref_type = "unique");
-  12: containerStruct ref_type_shared (cpp2.ref_type = "shared");
-  13: map<i32, list<string>> ref_type_const (cpp2.ref_type = "shared_const");
-  14: required containerStruct req_ref_type_shared (cpp.ref_type = "shared");
-  15: required containerStruct req_ref_type_const (
-    cpp2.ref_type = "shared_const",
-  );
-  16: required list<string> req_ref_type_unique (cpp2.ref_type = "unique");
-  17: optional containerStruct opt_ref_type_const (
-    cpp.ref_type = "shared_const",
-  );
-  18: optional containerStruct opt_ref_type_unique (cpp2.ref_type = "unique");
-  19: optional set<i32> opt_ref_type_shared (cpp2.ref_type = "shared");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: containerStruct cpp_unique_ref;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  3: containerStruct cpp2_unique_ref;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  4: map<i32, list<string>> container_with_ref;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  5: required containerStruct req_cpp_unique_ref;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  6: required containerStruct req_cpp2_unique_ref;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  7: required list<string> req_container_with_ref;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  8: optional containerStruct opt_cpp_unique_ref;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  9: optional containerStruct opt_cpp2_unique_ref;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  10: optional set<i32> opt_container_with_ref;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  11: containerStruct ref_type_unique;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  12: containerStruct ref_type_shared;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  13: map<i32, list<string>> ref_type_const;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  14: required containerStruct req_ref_type_shared;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  15: required containerStruct req_ref_type_const;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  16: required list<string> req_ref_type_unique;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  17: optional containerStruct opt_ref_type_const;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  18: optional containerStruct opt_ref_type_unique;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  19: optional set<i32> opt_ref_type_shared;
   20: CppFakeI32 base_type;
   21: FollySmallVectorI64 list_type;
   22: SortedVectorSetString set_type;
@@ -291,12 +316,14 @@ struct AnnotatedStruct {
   24: UnorderedMapStruct map_struct_type;
   25: IOBuf iobuf_type;
   26: IOBufPtr iobuf_ptr;
-  27: list<i32> (cpp.template = "std::list") list_i32_template;
-  28: list<string> (cpp2.template = "std::deque") list_string_template;
-  29: set<string> (cpp.template = "folly::sorted_vector_set") set_template;
-  30: map<i64, string> (
-    cpp2.template = "folly::sorted_vector_map",
-  ) map_template;
+  @cpp.Type{template = "std::list"}
+  27: list<i32> list_i32_template;
+  @cpp.Type{template = "std::deque"}
+  28: list<string> list_string_template;
+  @cpp.Type{template = "folly::sorted_vector_set"}
+  29: set<string> set_template;
+  @cpp.Type{template = "folly::sorted_vector_map"}
+  30: map<i64, string> map_template;
   31: std_list typedef_list_template;
   32: std_deque typedef_deque_template;
   33: folly_set typedef_set_template;
@@ -404,8 +431,10 @@ service ParamService {
   list<ComplexUnion> listunion_string_param(1: string param1);
 }
 
-typedef binary (cpp2.type = "folly::IOBuf") IOBuf
-typedef binary (cpp2.type = "std::unique_ptr<folly::IOBuf>") IOBufPtr
+@cpp.Type{name = "folly::IOBuf"}
+typedef binary IOBuf
+@cpp.Type{name = "std::unique_ptr<folly::IOBuf>"}
+typedef binary IOBufPtr
 
 struct FloatStruct {
   1: float floatField;

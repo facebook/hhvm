@@ -1693,6 +1693,17 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
             -8 => {
             },
             -9 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Type>() {
+                    let mut tmp = Some(cpp::types::Type {
+                        name: "folly::IOBuf".to_owned(),
+                        template: ::std::default::Default::default(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             -10 => {
             },
@@ -1719,6 +1730,17 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
             -21 => {
             },
             -22 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Type>() {
+                    let mut tmp = Some(cpp::types::Type {
+                        name: "folly::IOBuf".to_owned(),
+                        template: ::std::default::Default::default(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             -23 => {
             },
@@ -2040,6 +2062,16 @@ impl ::fbthrift::metadata::ThriftAnnotations for Bar {
         #[allow(clippy::match_single_binding)]
         match field_id {
             -1 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             _ => {}
         }

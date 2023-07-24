@@ -16,8 +16,11 @@
 
 namespace cpp2 apache.thrift.test
 
+include "thrift/annotation/cpp.thrift"
+
 struct A {
-  1: optional map<i32, B> (cpp2.template = "std::unordered_map") some_map;
+  @cpp.Type{template = "std::unordered_map"}
+  1: optional map<i32, B> some_map;
 }
 
 struct B {

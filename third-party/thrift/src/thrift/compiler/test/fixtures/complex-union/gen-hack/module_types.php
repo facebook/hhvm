@@ -444,6 +444,16 @@ class ComplexUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
     return shape(
       'struct' => dict[],
       'fields' => dict[
+        'stringRef' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\cpp\Ref' => \facebook\thrift\annotation\cpp\Ref::fromShape(
+              shape(
+                "type" => \facebook\thrift\annotation\cpp\RefType::Unique,
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
       ],
     );
   }

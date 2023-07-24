@@ -69,7 +69,7 @@ cdef __StructSpec get_reflection__AStructB():
             qualifier=__Qualifier.UNQUALIFIED,
             default=None,
             annotations={
-                """cpp2.ref_type""": """shared_const""",            },
+            },
         ),
     )
     return spec

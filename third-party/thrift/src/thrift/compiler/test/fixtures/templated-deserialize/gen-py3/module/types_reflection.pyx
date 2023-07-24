@@ -285,7 +285,7 @@ cdef __StructSpec get_reflection__containerStruct():
             qualifier=__Qualifier.UNQUALIFIED,
             default=None,
             annotations={
-                """cpp.ref""": """1""",            },
+            },
         ),
     )
     spec.add_field(
@@ -297,7 +297,7 @@ cdef __StructSpec get_reflection__containerStruct():
             qualifier=__Qualifier.UNQUALIFIED,
             default=None,
             annotations={
-                """cpp.ref_type""": """unique""",            },
+            },
         ),
     )
     spec.add_field(
@@ -309,7 +309,7 @@ cdef __StructSpec get_reflection__containerStruct():
             qualifier=__Qualifier.UNQUALIFIED,
             default=None,
             annotations={
-                """cpp.ref_type""": """shared""",            },
+            },
         ),
     )
     spec.add_field(
@@ -321,7 +321,7 @@ cdef __StructSpec get_reflection__containerStruct():
             qualifier=__Qualifier.UNQUALIFIED,
             default=None,
             annotations={
-                """cpp.ref_type""": """shared_const""",            },
+            },
         ),
     )
     spec.add_field(
@@ -333,7 +333,7 @@ cdef __StructSpec get_reflection__containerStruct():
             qualifier=__Qualifier.UNQUALIFIED,
             default=None,
             annotations={
-                """cpp.ref""": """1""",            },
+            },
         ),
     )
     return spec

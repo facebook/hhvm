@@ -99,7 +99,7 @@ cdef __StructSpec get_reflection__ComplexUnion():
             qualifier=__Qualifier.UNQUALIFIED,
             default=None,
             annotations={
-                """cpp2.ref""": """true""",            },
+            },
         ),
     )
     return spec

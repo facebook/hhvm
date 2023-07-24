@@ -402,7 +402,7 @@ StructMetadata<::test_cpp2::cpp_reflection::struct4>::gen(ThriftMetadata& metada
     {1, "field0", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
     {2, "field1", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
     {3, "field2", false, std::make_unique<Enum<::test_cpp2::cpp_reflection::enum1>>("module.enum1"), std::vector<ThriftConstStruct>{}},
-    {6, "field3", false, std::make_unique<Struct<::test_cpp2::cpp_reflection::structA>>("module.structA"), std::vector<ThriftConstStruct>{}},
+    {6, "field3", false, std::make_unique<Struct<::test_cpp2::cpp_reflection::structA>>("module.structA"), std::vector<ThriftConstStruct>{*cvStruct("cpp.Ref", {{"type", cvInteger(0)}}).cv_struct_ref(), }},
   }};
   for (const auto& f : *module_struct4_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -657,10 +657,10 @@ StructMetadata<::test_cpp2::cpp_reflection::struct_with_indirections>::gen(Thrif
   static const auto* const
   module_struct_with_indirections_fields = new std::array<EncodedThriftField, 5>{{
     {1, "real", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
-    {2, "fake", false, std::make_unique<Typedef>("module.FakeI32", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
-    {3, "number", false, std::make_unique<Typedef>("module.HasANumber", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
-    {4, "result", false, std::make_unique<Typedef>("module.HasAResult", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
-    {5, "phrase", false, std::make_unique<Typedef>("module.HasAPhrase", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
+    {2, "fake", false, std::make_unique<Typedef>("module.FakeI32", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"name", cvString("CppFakeI32")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{}},
+    {3, "number", false, std::make_unique<Typedef>("module.HasANumber", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"name", cvString("CppHasANumber")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{}},
+    {4, "result", false, std::make_unique<Typedef>("module.HasAResult", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"name", cvString("CppHasAResult")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{}},
+    {5, "phrase", false, std::make_unique<Typedef>("module.HasAPhrase", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"name", cvString("CppHasAPhrase")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{}},
   }};
   for (const auto& f : *module_struct_with_indirections_fields) {
     ::apache::thrift::metadata::ThriftField field;

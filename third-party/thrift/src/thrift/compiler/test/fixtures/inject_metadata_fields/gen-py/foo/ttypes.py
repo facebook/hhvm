@@ -262,9 +262,6 @@ Fields.thrift_spec = (
 Fields.thrift_struct_annotations = {
 }
 Fields.thrift_field_annotations = {
-  102: {
-    "thrift.box": "1",
-  },
 }
 
 def Fields__init__(self, injected_field=None, injected_structured_annotation_field=None, injected_unstructured_annotation_field=None,):

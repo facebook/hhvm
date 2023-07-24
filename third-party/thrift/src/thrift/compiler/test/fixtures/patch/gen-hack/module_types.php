@@ -1924,6 +1924,26 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
         ),
       ],
       'fields' => dict[
+        'binaryVal' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\cpp\Type' => \facebook\thrift\annotation\cpp\Type::fromShape(
+              shape(
+                "name" => "folly::IOBuf",
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+        'optBinaryVal' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\cpp\Type' => \facebook\thrift\annotation\cpp\Type::fromShape(
+              shape(
+                "name" => "folly::IOBuf",
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
       ],
     );
   }
@@ -2610,7 +2630,13 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
       'struct' => dict[],
       'fields' => dict[
         'loop' => shape(
-          'field' => dict[],
+          'field' => dict[
+            '\facebook\thrift\annotation\cpp\Ref' => \facebook\thrift\annotation\cpp\Ref::fromShape(
+              shape(
+                "type" => \facebook\thrift\annotation\cpp\RefType::Unique,
+              )
+            ),
+          ],
           'type' => dict[
             '\facebook\thrift\op\AssignOnlyPatch' => \facebook\thrift\op\AssignOnlyPatch::fromShape(
               shape(

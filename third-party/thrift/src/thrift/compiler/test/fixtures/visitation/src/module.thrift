@@ -24,6 +24,7 @@ namespace py3 test_py.cpp_reflection
 
 include "reflection_dep_B.thrift"
 include "reflection_dep_C.thrift"
+include "thrift/annotation/cpp.thrift"
 
 cpp_include "thrift/test/fatal_custom_types.h"
 
@@ -77,7 +78,8 @@ struct structA {
   2: string b;
 }
 
-typedef structA (cpp.type = "test_cpp_reflection::custom_structA") my_structA
+@cpp.Type{name = "test_cpp_reflection::custom_structA"}
+typedef structA my_structA
 
 union unionA {
   1: i32 i;
@@ -177,7 +179,8 @@ struct struct4 {
   1: required i32 field0;
   2: optional string field1;
   3: enum1 field2;
-  6: structA field3 (cpp2.ref = "true");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  6: structA field3;
 }
 
 struct struct5 {
@@ -387,10 +390,14 @@ service service_with_special_names {
 
 const i32 constant_with_special_name = 42;
 
-typedef i32 (cpp.type = 'CppFakeI32') FakeI32
-typedef i32 (cpp.type = 'CppHasANumber', cpp.indirection) HasANumber
-typedef i32 (cpp.type = 'CppHasAResult', cpp.indirection) HasAResult
-typedef string (cpp.type = 'CppHasAPhrase', cpp.indirection) HasAPhrase
+@cpp.Type{name = "CppFakeI32"}
+typedef i32 FakeI32
+@cpp.Type{name = "CppHasANumber"}
+typedef i32 (cpp.indirection) HasANumber
+@cpp.Type{name = "CppHasAResult"}
+typedef i32 (cpp.indirection) HasAResult
+@cpp.Type{name = "CppHasAPhrase"}
+typedef string (cpp.indirection) HasAPhrase
 
 struct struct_with_indirections {
   1: i32 real;

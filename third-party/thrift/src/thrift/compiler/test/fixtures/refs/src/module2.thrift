@@ -15,7 +15,9 @@
  */
 
 include "includes.thrift"
+include "thrift/annotation/cpp.thrift"
 
 struct StructUsingOtherNamespace {
-  1: optional includes.Included other (cpp.ref = "true", cpp2.ref = "true");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional includes.Included other;
 }

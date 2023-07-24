@@ -32,22 +32,22 @@ struct ContainerStruct {
   12: list<i32> fieldA;
   @cpp.Type{template = "std::list"}
   2: list<i32> fieldB;
-  3: list<i32> (cpp.template = "std::deque") fieldC;
-  4: list<i32> (cpp.template = "folly::fbvector") fieldD;
-  5: list<i32> (cpp.template = "folly::small_vector") fieldE;
-  6: set<i32> (
-    cpp.template = "folly::sorted_vector_set",
-    rust.type = "sorted_vector_map::SortedVectorSet",
-  ) fieldF;
-  7: map<i32, string> (
-    cpp.template = "folly::sorted_vector_map",
-    rust.type = "sorted_vector_map::SortedVectorMap",
-  ) fieldG;
+  @cpp.Type{template = "std::deque"}
+  3: list<i32> fieldC;
+  @cpp.Type{template = "folly::fbvector"}
+  4: list<i32> fieldD;
+  @cpp.Type{template = "folly::small_vector"}
+  5: list<i32> fieldE;
+  @cpp.Type{template = "folly::sorted_vector_set"}
+  6: set<i32> (rust.type = "sorted_vector_map::SortedVectorSet") fieldF;
+  @cpp.Type{template = "folly::sorted_vector_map"}
+  7: map<i32, string> (rust.type = "sorted_vector_map::SortedVectorMap") fieldG;
   8: included.SomeMap fieldH;
 }
 
 struct CppTypeStruct {
-  1: list<i32> (cpp.type = "std::list<int32_t>") fieldA;
+  @cpp.Type{name = "std::list<int32_t>"}
+  1: list<i32> fieldA;
 }
 
 enum has_bitwise_ops {
@@ -148,15 +148,18 @@ struct ForwardUsageRoot {
   1: optional ForwardUsageStruct ForwardUsageStruct;
   # use the type before it is defined, but mark it as a ref in C++
   # (no need for it to be defined before this struct in generated code)
-  2: optional ForwardUsageByRef ForwardUsageByRef (cpp.ref = "true");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: optional ForwardUsageByRef ForwardUsageByRef;
 }
 
 struct ForwardUsageStruct {
-  1: optional ForwardUsageRoot foo (cpp.ref = "true");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional ForwardUsageRoot foo;
 }
 
 struct ForwardUsageByRef {
-  1: optional ForwardUsageRoot foo (cpp.ref = "true");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional ForwardUsageRoot foo;
 }
 
 struct IncompleteMap {
@@ -165,21 +168,20 @@ struct IncompleteMap {
 struct IncompleteMapDep {}
 
 struct CompleteMap {
-  1: optional map<i32, CompleteMapDep> (
-    cpp2.template = "std::unordered_map",
-  ) field;
+  @cpp.Type{template = "std::unordered_map"}
+  1: optional map<i32, CompleteMapDep> field;
 }
 struct CompleteMapDep {}
 
 struct IncompleteList {
-  1: optional list<IncompleteListDep> (cpp.template = "::std::list") field;
+  @cpp.Type{template = "::std::list"}
+  1: optional list<IncompleteListDep> field;
 }
 struct IncompleteListDep {}
 
 struct CompleteList {
-  1: optional list<CompleteListDep> (
-    cpp2.template = "folly::small_vector",
-  ) field;
+  @cpp.Type{template = "folly::small_vector"}
+  1: optional list<CompleteListDep> field;
 }
 struct CompleteListDep {}
 

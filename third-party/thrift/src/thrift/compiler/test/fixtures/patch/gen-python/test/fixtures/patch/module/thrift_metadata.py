@@ -151,6 +151,7 @@ def _fbthrift_gen_metadata_struct_MyStruct(metadata_struct: _fbthrift_metadata.T
         _fbthrift_metadata.ThriftField(id=-23, type=_fbthrift_metadata.ThriftType(t_enum=_fbthrift_metadata.ThriftEnumType(name="module.MyEnum")), name="optEnumVal", is_optional=False, structured_annotations=[
         ]),
         _fbthrift_metadata.ThriftField(id=-22, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_BINARY_TYPE), name="optBinaryVal", is_optional=False, structured_annotations=[
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Type"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="folly::IOBuf"),  }),
         ]),
         _fbthrift_metadata.ThriftField(id=-21, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE), name="optStringVal", is_optional=False, structured_annotations=[
         ]),
@@ -177,6 +178,7 @@ def _fbthrift_gen_metadata_struct_MyStruct(metadata_struct: _fbthrift_metadata.T
         _fbthrift_metadata.ThriftField(id=-10, type=_fbthrift_metadata.ThriftType(t_enum=_fbthrift_metadata.ThriftEnumType(name="module.MyEnum")), name="enumVal", is_optional=False, structured_annotations=[
         ]),
         _fbthrift_metadata.ThriftField(id=-9, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_BINARY_TYPE), name="binaryVal", is_optional=False, structured_annotations=[
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Type"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="folly::IOBuf"),  }),
         ]),
         _fbthrift_metadata.ThriftField(id=-8, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE), name="stringVal", is_optional=False, structured_annotations=[
         ]),
@@ -303,6 +305,7 @@ def _fbthrift_gen_metadata_struct_Bar(metadata_struct: _fbthrift_metadata.Thrift
         return metadata_struct
     fields = [
         _fbthrift_metadata.ThriftField(id=-1, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.Loop")), name="loop", is_optional=False, structured_annotations=[
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Ref"), fields= { "type": _fbthrift_metadata.ThriftConstValue(cv_integer=0),  }),
         ]),
     ]
     struct_dict = dict(metadata_struct.structs)

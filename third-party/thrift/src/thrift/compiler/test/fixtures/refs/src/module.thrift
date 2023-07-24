@@ -15,6 +15,7 @@
  */
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
 
 namespace java.swift test.fixtures.refs
 
@@ -24,8 +25,10 @@ enum MyEnum {
 }
 
 union MyUnion {
-  1: i32 anInteger (cpp.ref = "true", cpp2.ref = "true");
-  2: string aString (cpp.ref = "true", cpp2.ref = "true");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: i32 anInteger;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: string aString;
 }
 
 union NonTriviallyDestructibleUnion {
@@ -34,28 +37,42 @@ union NonTriviallyDestructibleUnion {
 }
 
 struct MyField {
-  1: optional i64 opt_value (cpp.ref = "true", cpp2.ref = "true");
-  2: i64 value (cpp.ref = "true", cpp2.ref = "true");
-  3: required i64 req_value (cpp.ref = "true", cpp2.ref = "true");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional i64 opt_value;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: i64 value;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  3: required i64 req_value;
 
-  4: optional MyEnum opt_enum_value (cpp.ref = "true", cpp2.ref = "true");
-  5: MyEnum enum_value (cpp.ref = "true", cpp2.ref = "true");
-  6: required MyEnum req_enum_value (cpp.ref = "true", cpp2.ref = "true");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  4: optional MyEnum opt_enum_value;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  5: MyEnum enum_value;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  6: required MyEnum req_enum_value;
 
-  7: optional string opt_str_value (cpp.ref = "true", cpp2.ref = "true");
-  8: string str_value (cpp.ref = "true", cpp2.ref = "true");
-  9: required string req_str_value (cpp.ref = "true", cpp2.ref = "true");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  7: optional string opt_str_value;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  8: string str_value;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  9: required string req_str_value;
 }
 
 struct MyStruct {
-  1: optional MyField opt_ref (cpp.ref = "true", cpp2.ref = "true");
-  2: MyField ref (cpp.ref = "true", cpp2.ref = "true");
-  3: required MyField req_ref (cpp.ref = "true", cpp2.ref = "true");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional MyField opt_ref;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: MyField ref;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  3: required MyField req_ref;
 }
 
 struct StructWithUnion {
-  1: MyUnion u (cpp.ref = "true");
-  2: double aDouble (cpp.ref = "true", cpp2.ref = "true");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: MyUnion u;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: double aDouble;
   3: MyField f;
 }
 
@@ -64,36 +81,27 @@ struct RecursiveStruct {
 }
 
 struct StructWithContainers {
-  1: list<i32> list_ref (cpp.ref = "true", cpp2.ref = "true");
-  2: set<i32> set_ref (cpp.ref = "true", cpp2.ref = "true");
-  3: map<i32, i32> map_ref (cpp.ref = "true", cpp2.ref = "true");
-  4: list<i32> list_ref_unique (
-    cpp.ref_type = "unique",
-    cpp2.ref_type = "unique",
-  );
-  5: set<i32> set_ref_shared (
-    cpp.ref_type = "shared",
-    cpp2.ref_type = "shared",
-  );
-  6: list<i32> list_ref_shared_const (
-    cpp.ref_type = "shared_const",
-    cpp2.ref_type = "shared_const",
-  );
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: list<i32> list_ref;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: set<i32> set_ref;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  3: map<i32, i32> map_ref;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  4: list<i32> list_ref_unique;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  5: set<i32> set_ref_shared;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  6: list<i32> list_ref_shared_const;
 }
 
 struct StructWithSharedConst {
-  1: optional MyField opt_shared_const (
-    cpp.ref_type = "shared_const",
-    cpp2.ref_type = "shared_const",
-  );
-  2: MyField shared_const (
-    cpp.ref_type = "shared_const",
-    cpp2.ref_type = "shared_const",
-  );
-  3: required MyField req_shared_const (
-    cpp.ref_type = "shared_const",
-    cpp2.ref_type = "shared_const",
-  );
+  @cpp.Ref{type = cpp.RefType.Shared}
+  1: optional MyField opt_shared_const;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  2: MyField shared_const;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  3: required MyField req_shared_const;
 }
 
 @cpp.EnumType{type = cpp.EnumUnderlyingType.I16}
@@ -105,15 +113,21 @@ enum TypedEnum {
 struct Empty {}
 
 struct StructWithRef {
-  1: Empty def_field (cpp.ref);
-  2: optional Empty opt_field (cpp.ref);
-  3: required Empty req_field (cpp.ref);
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: Empty def_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: optional Empty opt_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  3: required Empty req_field;
 }
 
 struct StructWithBox {
-  1: optional string a (thrift.box);
-  2: optional list<i64> b (thrift.box);
-  3: optional StructWithRef c (thrift.box);
+  @thrift.Box
+  1: optional string a;
+  @thrift.Box
+  2: optional list<i64> b;
+  @thrift.Box
+  3: optional StructWithRef c;
 }
 
 struct StructWithInternBox {
@@ -161,9 +175,12 @@ const StructWithRef kStructWithRef = {
 };
 
 struct StructWithRefTypeUnique {
-  1: Empty def_field (cpp.ref_type = "unique");
-  2: optional Empty opt_field (cpp.ref_type = "unique");
-  3: required Empty req_field (cpp.ref_type = "unique");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: Empty def_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: optional Empty opt_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  3: required Empty req_field;
 }
 
 const StructWithRefTypeUnique kStructWithRefTypeUnique = {
@@ -173,9 +190,12 @@ const StructWithRefTypeUnique kStructWithRefTypeUnique = {
 };
 
 struct StructWithRefTypeShared {
-  1: Empty def_field (cpp.ref_type = "shared");
-  2: optional Empty opt_field (cpp.ref_type = "shared");
-  3: required Empty req_field (cpp.ref_type = "shared");
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: Empty def_field;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: optional Empty opt_field;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  3: required Empty req_field;
 }
 
 const StructWithRefTypeShared kStructWithRefTypeShared = {
@@ -185,9 +205,12 @@ const StructWithRefTypeShared kStructWithRefTypeShared = {
 };
 
 struct StructWithRefTypeSharedConst {
-  1: Empty def_field (cpp.ref_type = "shared_const");
-  2: optional Empty opt_field (cpp.ref_type = "shared_const");
-  3: required Empty req_field (cpp.ref_type = "shared_const");
+  @cpp.Ref{type = cpp.RefType.Shared}
+  1: Empty def_field;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  2: optional Empty opt_field;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  3: required Empty req_field;
 }
 
 const StructWithRefTypeSharedConst kStructWithRefTypeSharedConst = {
@@ -197,28 +220,19 @@ const StructWithRefTypeSharedConst kStructWithRefTypeSharedConst = {
 };
 
 struct StructWithRefAndAnnotCppNoexceptMoveCtor {
-  1: Empty def_field (cpp.ref);
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: Empty def_field;
 }
 
 struct StructWithString {
-  1: string def_unique_string_ref = "..." (
-    cpp.ref_type = "unique",
-    cpp2.ref_type = "unique",
-  );
-  2: string def_shared_string_ref = "..." (
-    cpp.ref_type = "shared",
-    cpp2.ref_type = "shared",
-  );
-  3: string def_shared_string_const_ref = "..." (
-    cpp.ref_type = "shared_const",
-    cpp2.ref_type = "shared_const",
-  );
-  4: string unique_string_ref (
-    cpp.ref_type = "unique",
-    cpp2.ref_type = "unique",
-  );
-  5: string shared_string_ref (
-    cpp.ref_type = "shared",
-    cpp2.ref_type = "shared",
-  );
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: string def_unique_string_ref = "...";
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: string def_shared_string_ref = "...";
+  @cpp.Ref{type = cpp.RefType.Shared}
+  3: string def_shared_string_const_ref = "...";
+  @cpp.Ref{type = cpp.RefType.Unique}
+  4: string unique_string_ref;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  5: string shared_string_ref;
 }

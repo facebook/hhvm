@@ -662,6 +662,66 @@ class ContainerStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
           'type' => dict[],
         ),
+        'fieldC' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\cpp\Type' => \facebook\thrift\annotation\cpp\Type::fromShape(
+              shape(
+                "template" => "std::deque",
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+        'fieldD' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\cpp\Type' => \facebook\thrift\annotation\cpp\Type::fromShape(
+              shape(
+                "template" => "folly::fbvector",
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+        'fieldE' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\cpp\Type' => \facebook\thrift\annotation\cpp\Type::fromShape(
+              shape(
+                "template" => "folly::small_vector",
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+        'fieldF' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\cpp\Type' => \facebook\thrift\annotation\cpp\Type::fromShape(
+              shape(
+                "template" => "folly::sorted_vector_set",
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+        'fieldG' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\cpp\Type' => \facebook\thrift\annotation\cpp\Type::fromShape(
+              shape(
+                "template" => "folly::sorted_vector_map",
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+        'fieldH' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\cpp\Type' => \facebook\thrift\annotation\cpp\Type::fromShape(
+              shape(
+                "template" => "std::unordered_map",
+              )
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -880,6 +940,16 @@ class CppTypeStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     return shape(
       'struct' => dict[],
       'fields' => dict[
+        'fieldA' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\cpp\Type' => \facebook\thrift\annotation\cpp\Type::fromShape(
+              shape(
+                "name" => "std::list<int32_t>",
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
       ],
     );
   }
@@ -2938,6 +3008,16 @@ class ForwardUsageRoot implements \IThriftSyncStruct, \IThriftStructMetadata {
     return shape(
       'struct' => dict[],
       'fields' => dict[
+        'ForwardUsageByRef' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\cpp\Ref' => \facebook\thrift\annotation\cpp\Ref::fromShape(
+              shape(
+                "type" => \facebook\thrift\annotation\cpp\RefType::Unique,
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
       ],
     );
   }
@@ -3051,6 +3131,16 @@ class ForwardUsageStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     return shape(
       'struct' => dict[],
       'fields' => dict[
+        'foo' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\cpp\Ref' => \facebook\thrift\annotation\cpp\Ref::fromShape(
+              shape(
+                "type" => \facebook\thrift\annotation\cpp\RefType::Unique,
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
       ],
     );
   }
@@ -3158,6 +3248,16 @@ class ForwardUsageByRef implements \IThriftSyncStruct, \IThriftStructMetadata {
     return shape(
       'struct' => dict[],
       'fields' => dict[
+        'foo' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\cpp\Ref' => \facebook\thrift\annotation\cpp\Ref::fromShape(
+              shape(
+                "type" => \facebook\thrift\annotation\cpp\RefType::Unique,
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
       ],
     );
   }
@@ -3510,6 +3610,16 @@ class CompleteMap implements \IThriftSyncStruct, \IThriftStructMetadata {
     return shape(
       'struct' => dict[],
       'fields' => dict[
+        'field' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\cpp\Type' => \facebook\thrift\annotation\cpp\Type::fromShape(
+              shape(
+                "template" => "std::unordered_map",
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
       ],
     );
   }
@@ -3715,6 +3825,16 @@ class IncompleteList implements \IThriftSyncStruct, \IThriftStructMetadata {
     return shape(
       'struct' => dict[],
       'fields' => dict[
+        'field' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\cpp\Type' => \facebook\thrift\annotation\cpp\Type::fromShape(
+              shape(
+                "template" => "::std::list",
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
       ],
     );
   }
@@ -3920,6 +4040,16 @@ class CompleteList implements \IThriftSyncStruct, \IThriftStructMetadata {
     return shape(
       'struct' => dict[],
       'fields' => dict[
+        'field' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\cpp\Type' => \facebook\thrift\annotation\cpp\Type::fromShape(
+              shape(
+                "template" => "folly::small_vector",
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
       ],
     );
   }

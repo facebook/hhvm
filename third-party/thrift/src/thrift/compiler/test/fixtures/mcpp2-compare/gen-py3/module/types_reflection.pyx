@@ -568,7 +568,7 @@ cdef __StructSpec get_reflection__ComplexUnion():
             qualifier=__Qualifier.UNQUALIFIED,
             default=None,
             annotations={
-                """cpp.ref""": """1""",            },
+            },
         ),
     )
     spec.add_field(
@@ -580,7 +580,7 @@ cdef __StructSpec get_reflection__ComplexUnion():
             qualifier=__Qualifier.UNQUALIFIED,
             default=None,
             annotations={
-                """cpp.ref_type""": """shared_const""",            },
+            },
         ),
     )
     spec.add_field(
@@ -1484,7 +1484,7 @@ cdef __StructSpec get_reflection__MyIncludedStruct():
             qualifier=__Qualifier.UNQUALIFIED,
             default=None,
             annotations={
-                """cpp.ref""": """true""",            },
+            },
         ),
     )
     spec.add_field(
@@ -1533,7 +1533,7 @@ cdef __StructSpec get_reflection__AnnotatedStruct():
             qualifier=__Qualifier.UNQUALIFIED,
             default=None,
             annotations={
-                """cpp.ref""": """1""",            },
+            },
         ),
     )
     spec.add_field(
@@ -1545,7 +1545,7 @@ cdef __StructSpec get_reflection__AnnotatedStruct():
             qualifier=__Qualifier.UNQUALIFIED,
             default=None,
             annotations={
-                """cpp2.ref""": """1""",            },
+            },
         ),
     )
     spec.add_field(
@@ -1557,7 +1557,7 @@ cdef __StructSpec get_reflection__AnnotatedStruct():
             qualifier=__Qualifier.UNQUALIFIED,
             default=None,
             annotations={
-                """cpp2.ref""": """1""",            },
+            },
         ),
     )
     spec.add_field(
@@ -1569,7 +1569,7 @@ cdef __StructSpec get_reflection__AnnotatedStruct():
             qualifier=__Qualifier.REQUIRED,
             default=None,
             annotations={
-                """cpp.ref""": """1""",            },
+            },
         ),
     )
     spec.add_field(
@@ -1581,7 +1581,7 @@ cdef __StructSpec get_reflection__AnnotatedStruct():
             qualifier=__Qualifier.REQUIRED,
             default=None,
             annotations={
-                """cpp2.ref""": """1""",            },
+            },
         ),
     )
     spec.add_field(
@@ -1593,7 +1593,7 @@ cdef __StructSpec get_reflection__AnnotatedStruct():
             qualifier=__Qualifier.REQUIRED,
             default=None,
             annotations={
-                """cpp2.ref""": """1""",            },
+            },
         ),
     )
     spec.add_field(
@@ -1605,7 +1605,7 @@ cdef __StructSpec get_reflection__AnnotatedStruct():
             qualifier=__Qualifier.OPTIONAL,
             default=None,
             annotations={
-                """cpp.ref""": """1""",            },
+            },
         ),
     )
     spec.add_field(
@@ -1617,7 +1617,7 @@ cdef __StructSpec get_reflection__AnnotatedStruct():
             qualifier=__Qualifier.OPTIONAL,
             default=None,
             annotations={
-                """cpp2.ref""": """1""",            },
+            },
         ),
     )
     spec.add_field(
@@ -1629,7 +1629,7 @@ cdef __StructSpec get_reflection__AnnotatedStruct():
             qualifier=__Qualifier.OPTIONAL,
             default=None,
             annotations={
-                """cpp2.ref""": """1""",            },
+            },
         ),
     )
     spec.add_field(
@@ -1641,7 +1641,7 @@ cdef __StructSpec get_reflection__AnnotatedStruct():
             qualifier=__Qualifier.UNQUALIFIED,
             default=None,
             annotations={
-                """cpp.ref_type""": """unique""",            },
+            },
         ),
     )
     spec.add_field(
@@ -1653,7 +1653,7 @@ cdef __StructSpec get_reflection__AnnotatedStruct():
             qualifier=__Qualifier.UNQUALIFIED,
             default=None,
             annotations={
-                """cpp2.ref_type""": """shared""",            },
+            },
         ),
     )
     spec.add_field(
@@ -1665,7 +1665,7 @@ cdef __StructSpec get_reflection__AnnotatedStruct():
             qualifier=__Qualifier.UNQUALIFIED,
             default=None,
             annotations={
-                """cpp2.ref_type""": """shared_const""",            },
+            },
         ),
     )
     spec.add_field(
@@ -1677,7 +1677,7 @@ cdef __StructSpec get_reflection__AnnotatedStruct():
             qualifier=__Qualifier.REQUIRED,
             default=None,
             annotations={
-                """cpp.ref_type""": """shared""",            },
+            },
         ),
     )
     spec.add_field(
@@ -1689,7 +1689,7 @@ cdef __StructSpec get_reflection__AnnotatedStruct():
             qualifier=__Qualifier.REQUIRED,
             default=None,
             annotations={
-                """cpp2.ref_type""": """shared_const""",            },
+            },
         ),
     )
     spec.add_field(
@@ -1701,7 +1701,7 @@ cdef __StructSpec get_reflection__AnnotatedStruct():
             qualifier=__Qualifier.REQUIRED,
             default=None,
             annotations={
-                """cpp2.ref_type""": """unique""",            },
+            },
         ),
     )
     spec.add_field(
@@ -1713,7 +1713,7 @@ cdef __StructSpec get_reflection__AnnotatedStruct():
             qualifier=__Qualifier.OPTIONAL,
             default=None,
             annotations={
-                """cpp.ref_type""": """shared_const""",            },
+            },
         ),
     )
     spec.add_field(
@@ -1725,7 +1725,7 @@ cdef __StructSpec get_reflection__AnnotatedStruct():
             qualifier=__Qualifier.OPTIONAL,
             default=None,
             annotations={
-                """cpp2.ref_type""": """unique""",            },
+            },
         ),
     )
     spec.add_field(
@@ -1737,7 +1737,7 @@ cdef __StructSpec get_reflection__AnnotatedStruct():
             qualifier=__Qualifier.OPTIONAL,
             default=None,
             annotations={
-                """cpp2.ref_type""": """shared""",            },
+            },
         ),
     )
     spec.add_field(

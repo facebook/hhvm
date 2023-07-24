@@ -409,6 +409,16 @@ class structured_annotation_recursive implements \IThriftSyncStruct, \IThriftStr
     return shape(
       'struct' => dict[],
       'fields' => dict[
+        'recurse' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\cpp\Ref' => \facebook\thrift\annotation\cpp\Ref::fromShape(
+              shape(
+                "type" => \facebook\thrift\annotation\cpp\RefType::Unique,
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
       ],
     );
   }

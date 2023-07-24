@@ -721,7 +721,7 @@ cdef __StructSpec get_reflection__ForwardUsageRoot():
             qualifier=__Qualifier.OPTIONAL,
             default=None,
             annotations={
-                """cpp.ref""": """true""",            },
+            },
         ),
     )
     return spec
@@ -746,7 +746,7 @@ cdef __StructSpec get_reflection__ForwardUsageStruct():
             qualifier=__Qualifier.OPTIONAL,
             default=None,
             annotations={
-                """cpp.ref""": """true""",            },
+            },
         ),
     )
     return spec
@@ -771,7 +771,7 @@ cdef __StructSpec get_reflection__ForwardUsageByRef():
             qualifier=__Qualifier.OPTIONAL,
             default=None,
             annotations={
-                """cpp.ref""": """true""",            },
+            },
         ),
     )
     return spec

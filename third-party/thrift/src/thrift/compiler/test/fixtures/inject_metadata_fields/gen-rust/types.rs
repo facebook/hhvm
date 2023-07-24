@@ -506,6 +506,15 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldsInjectedWithIncludedStruc
                 }
             },
             -1102 => {
+
+                if type_id == ::std::any::TypeId::of::<thrift::types::Box>() {
+                    let mut tmp = Some(thrift::types::Box {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             _ => {}
         }

@@ -17,6 +17,7 @@
 include "thrift/annotation/thrift.thrift"
 include "thrift/lib/thrift/patch.thrift"
 include "thrift/lib/thrift/standard.thrift"
+include "thrift/annotation/cpp.thrift"
 
 @thrift.Experimental
 @thrift.TerseWrite
@@ -61,7 +62,8 @@ struct MyStruct {
   float floatVal;
   double doubleVal;
   string stringVal;
-  binary (cpp.type = "folly::IOBuf") binaryVal;
+  @cpp.Type{name = "folly::IOBuf"}
+  binary binaryVal;
   MyEnum enumVal;
   MyData structVal;
   MyUnion unionVal;
@@ -75,7 +77,8 @@ struct MyStruct {
   optional float optFloatVal;
   optional double optDoubleVal;
   optional string optStringVal;
-  optional binary (cpp.type = "folly::IOBuf") optBinaryVal;
+  @cpp.Type{name = "folly::IOBuf"}
+  optional binary optBinaryVal;
   optional MyEnum optEnumVal;
   optional MyData optStructVal;
   optional LateDefStruct optLateStructVal;
@@ -101,7 +104,8 @@ struct Recursive {
 }
 
 struct Bar {
-  Loop loop (cpp.ref);
+  @cpp.Ref{type = cpp.RefType.Unique}
+  Loop loop;
 }
 
 @patch.AssignOnlyPatch

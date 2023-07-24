@@ -98,6 +98,7 @@ def _fbthrift_gen_metadata_struct_FieldsInjectedWithIncludedStruct(metadata_stru
         return metadata_struct
     fields = [
         _fbthrift_metadata.ThriftField(id=-1102, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE), name="injected_unstructured_annotation_field", is_optional=False, structured_annotations=[
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="thrift.Box"), fields= {  }),
         ]),
         _fbthrift_metadata.ThriftField(id=-1101, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE), name="injected_structured_annotation_field", is_optional=False, structured_annotations=[
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="thrift.Box"), fields= {  }),

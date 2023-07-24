@@ -2840,9 +2840,6 @@ FieldsInjectedWithIncludedStruct.thrift_spec = (
 FieldsInjectedWithIncludedStruct.thrift_struct_annotations = {
 }
 FieldsInjectedWithIncludedStruct.thrift_field_annotations = {
-  -1102: {
-    "thrift.box": "1",
-  },
 }
 
 def FieldsInjectedWithIncludedStruct__init__(self, string_field=None, injected_field=None, injected_structured_annotation_field=None, injected_unstructured_annotation_field=None,):

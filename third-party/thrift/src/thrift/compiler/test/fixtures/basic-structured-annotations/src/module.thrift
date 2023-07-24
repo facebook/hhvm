@@ -16,6 +16,7 @@
 
 include "included.thrift"
 include "namespaced.thrift"
+include "thrift/annotation/cpp.thrift"
 
 @included.structured_annotation_included{name = 'aba'}
 package "test.dev/fixtures/basic-structured-annotations"
@@ -31,7 +32,8 @@ struct structured_annotation_with_default {
 
 struct structured_annotation_recursive {
   1: string name;
-  2: optional structured_annotation_recursive recurse (cpp.ref);
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: optional structured_annotation_recursive recurse;
   3: structured_annotation_forward forward;
 }
 

@@ -1,0 +1,640 @@
+{
+  "__fbthrift": {"@generated": 0},
+  "thrift_module" : "thrift",
+  "includes": {
+    "scope" : {
+      "path" : "thrift/annotation/scope.thrift"
+    }
+  },
+  "structs" : {
+    "Beta" : {
+      "lineno" : 28,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Program" : {  },
+        "scope.Definition" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 28,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 30,
+          "column" : 15
+        }
+      }
+    },
+    "Experimental" : {
+      "lineno" : 37,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Program" : {  },
+        "scope.Definition" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 37,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 39,
+          "column" : 23
+        }
+      }
+    },
+    "Testing" : {
+      "lineno" : 49,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Program" : {  },
+        "scope.Definition" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 49,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 51,
+          "column" : 18
+        }
+      }
+    },
+    "Deprecated" : {
+      "lineno" : 56,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "Beta" : {  },
+        "scope.Program" : {  },
+        "scope.Definition" : {  }
+      },
+      "fields" : {
+        "message" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 60,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 60,
+              "column" : 21
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 56,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 61,
+          "column" : 2
+        }
+      }
+    },
+    "ReserveIds" : {
+      "lineno" : 80,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Structured" : {  },
+        "scope.Enum" : {  }
+      },
+      "fields" : {
+        "ids" : {
+          "type_enum" : "LIST",
+          "spec_args" : { "type_enum" : "I32", "spec_args" : null} ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 84,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 84,
+              "column" : 20
+            }
+          }
+        },
+        "id_ranges" : {
+          "type_enum" : "MAP",
+          "spec_args" : { "key_type" : { "type_enum" : "I32", "spec_args" : null }, "val_type" : { "type_enum" : "I32", "spec_args" : null} } ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 94,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 94,
+              "column" : 30
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 80,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 95,
+          "column" : 2
+        }
+      }
+    },
+    "RequiresBackwardCompatibility" : {
+      "lineno" : 102,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Structured" : {  },
+        "Experimental" : {  }
+      },
+      "fields" : {
+        "field_name" : {
+          "type_enum" : "BOOL",
+          "spec_args" : null,
+          "required" : true,
+          "default_value" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 105,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 105,
+              "column" : 30
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 102,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 106,
+          "column" : 2
+        }
+      }
+    },
+    "NoTesting" : {
+      "lineno" : 109,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Program" : {  },
+        "scope.Definition" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 109,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 111,
+          "column" : 20
+        }
+      }
+    },
+    "NoExperimental" : {
+      "lineno" : 114,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Program" : {  },
+        "scope.Definition" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 114,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 116,
+          "column" : 25
+        }
+      }
+    },
+    "NoBeta" : {
+      "lineno" : 119,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "NoExperimental" : {  },
+        "scope.Transitive" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 119,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 121,
+          "column" : 17
+        }
+      }
+    },
+    "Released" : {
+      "lineno" : 127,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "NoBeta" : {  },
+        "NoTesting" : {  },
+        "scope.Transitive" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 127,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 130,
+          "column" : 19
+        }
+      }
+    },
+    "NoLegacy" : {
+      "lineno" : 137,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Program" : {  },
+        "scope.Definition" : {  },
+        "Experimental" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 137,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 140,
+          "column" : 19
+        }
+      }
+    },
+    "NoDeprecated" : {
+      "lineno" : 149,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "NoLegacy" : {  },
+        "Beta" : {  },
+        "scope.Transitive" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 149,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 152,
+          "column" : 23
+        }
+      }
+    },
+    "TerseWrite" : {
+      "lineno" : 171,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Program" : {  },
+        "scope.Struct" : {  },
+        "scope.Exception" : {  },
+        "scope.Field" : {  },
+        "Experimental" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 171,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 176,
+          "column" : 21
+        }
+      }
+    },
+    "Box" : {
+      "lineno" : 179,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Field" : {  },
+        "Beta" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 179,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 181,
+          "column" : 14
+        }
+      }
+    },
+    "Mixin" : {
+      "lineno" : 184,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Field" : {  },
+        "Beta" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 184,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 186,
+          "column" : 16
+        }
+      }
+    },
+    "SerializeInFieldIdOrder" : {
+      "lineno" : 194,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Struct" : {  },
+        "Experimental" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 194,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 196,
+          "column" : 34
+        }
+      }
+    },
+    "BitmaskEnum" : {
+      "lineno" : 201,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Enum" : {  },
+        "Experimental" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 201,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 203,
+          "column" : 22
+        }
+      }
+    },
+    "v1" : {
+      "lineno" : 211,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Transitive" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 211,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 212,
+          "column" : 13
+        }
+      }
+    },
+    "v1beta" : {
+      "lineno" : 222,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "v1" : {  },
+        "Beta" : {  },
+        "scope.Transitive" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 222,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 227,
+          "column" : 17
+        }
+      }
+    },
+    "v1alpha" : {
+      "lineno" : 236,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "v1beta" : {  },
+        "SerializeInFieldIdOrder" : {  },
+        "Experimental" : {  },
+        "scope.Transitive" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 236,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 240,
+          "column" : 18
+        }
+      }
+    },
+    "v1test" : {
+      "lineno" : 246,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "NoDeprecated" : {  },
+        "v1alpha" : {  },
+        "Testing" : {  },
+        "scope.Transitive" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 246,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 250,
+          "column" : 17
+        }
+      }
+    },
+    "ExceptionMessage" : {
+      "lineno" : 259,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Exception" : {  },
+        "Experimental" : {  }
+      },
+      "fields" : {
+        "field" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 262,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 262,
+              "column" : 19
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 259,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 263,
+          "column" : 2
+        }
+      }
+    },
+    "GenerateRuntimeSchema" : {
+      "lineno" : 270,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Structured" : {  },
+        "scope.Service" : {  },
+        "scope.Const" : {  },
+        "scope.Enum" : {  },
+        "scope.Typedef" : {  },
+        "Experimental" : {  }
+      },
+      "fields" : {
+        "name" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 277,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 277,
+              "column" : 18
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 270,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 278,
+          "column" : 2
+        }
+      }
+    },
+    "InternBox" : {
+      "lineno" : 284,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Field" : {  },
+        "Experimental" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 284,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 286,
+          "column" : 20
+        }
+      }
+    }
+  }
+}

@@ -1148,14 +1148,69 @@ impl ::fbthrift::metadata::ThriftAnnotations for ContainerStruct {
                 }
             },
             3 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Type>() {
+                    let mut tmp = Some(cpp::types::Type {
+                        name: ::std::default::Default::default(),
+                        template: "std::deque".to_owned(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             4 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Type>() {
+                    let mut tmp = Some(cpp::types::Type {
+                        name: ::std::default::Default::default(),
+                        template: "folly::fbvector".to_owned(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             5 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Type>() {
+                    let mut tmp = Some(cpp::types::Type {
+                        name: ::std::default::Default::default(),
+                        template: "folly::small_vector".to_owned(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             6 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Type>() {
+                    let mut tmp = Some(cpp::types::Type {
+                        name: ::std::default::Default::default(),
+                        template: "folly::sorted_vector_set".to_owned(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             7 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Type>() {
+                    let mut tmp = Some(cpp::types::Type {
+                        name: ::std::default::Default::default(),
+                        template: "folly::sorted_vector_map".to_owned(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             8 => {
             },
@@ -1257,6 +1312,17 @@ impl ::fbthrift::metadata::ThriftAnnotations for CppTypeStruct {
         #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Type>() {
+                    let mut tmp = Some(cpp::types::Type {
+                        name: "std::list<int32_t>".to_owned(),
+                        template: ::std::default::Default::default(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             _ => {}
         }
@@ -2817,6 +2883,16 @@ impl ::fbthrift::metadata::ThriftAnnotations for ForwardUsageRoot {
             1 => {
             },
             2 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             _ => {}
         }
@@ -2918,6 +2994,16 @@ impl ::fbthrift::metadata::ThriftAnnotations for ForwardUsageStruct {
         #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             _ => {}
         }
@@ -3019,6 +3105,16 @@ impl ::fbthrift::metadata::ThriftAnnotations for ForwardUsageByRef {
         #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             _ => {}
         }
@@ -3309,6 +3405,17 @@ impl ::fbthrift::metadata::ThriftAnnotations for CompleteMap {
         #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Type>() {
+                    let mut tmp = Some(cpp::types::Type {
+                        name: ::std::default::Default::default(),
+                        template: "std::unordered_map".to_owned(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             _ => {}
         }
@@ -3498,6 +3605,17 @@ impl ::fbthrift::metadata::ThriftAnnotations for IncompleteList {
         #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Type>() {
+                    let mut tmp = Some(cpp::types::Type {
+                        name: ::std::default::Default::default(),
+                        template: "::std::list".to_owned(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             _ => {}
         }
@@ -3687,6 +3805,17 @@ impl ::fbthrift::metadata::ThriftAnnotations for CompleteList {
         #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Type>() {
+                    let mut tmp = Some(cpp::types::Type {
+                        name: ::std::default::Default::default(),
+                        template: "folly::small_vector".to_owned(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             _ => {}
         }

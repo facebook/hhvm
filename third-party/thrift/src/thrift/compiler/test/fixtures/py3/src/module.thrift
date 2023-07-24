@@ -19,8 +19,12 @@ include "thrift/annotation/python.thrift"
 
 namespace cpp2 py3.simple
 
-typedef binary (cpp2.type = "std::unique_ptr<folly::IOBuf>", py3.iobuf) IOBufPtr
-typedef binary (cpp2.type = "folly::IOBuf", py3.iobuf) IOBuf
+@cpp.Type{name = "std::unique_ptr<folly::IOBuf>"}
+@python.IOBuf
+typedef binary IOBufPtr
+@cpp.Type{name = "folly::IOBuf"}
+@python.IOBuf
+typedef binary IOBuf
 
 enum AnEnum {
   @python.Name{name = "NOTSET"}
@@ -34,16 +38,19 @@ enum AnEnum {
 enum AnEnumRenamed {
   @python.Name{name = "name_"}
   name = 0,
-  value = 1 (py3.name = "value_"),
-  normal = 2 (py3.name = "renamed_"),
+  @python.Name{name = "value_"}
+  value = 1,
+  @python.Name{name = "renamed_"}
+  normal = 2,
 }
 
+@python.Flags
 enum Flags {
   flag_A = 1,
   flag_B = 2,
   flag_C = 4,
   flag_D = 8,
-} (py3.flags)
+}
 
 exception SimpleException {
   1: i16 err_code;
@@ -68,14 +75,17 @@ struct SimpleStruct {
 
 @cpp.Adapter{name = "Adapter"}
 typedef SimpleStruct AdaptedTypeDef
-typedef SimpleStruct HiddenTypeDef (py3.hidden)
+@python.Hidden
+typedef SimpleStruct HiddenTypeDef
 
 struct HiddenTypeFieldsStruct {
-  1: AdaptedTypeDef field1 (py3.hidden);
-  2: list<AdaptedTypeDef> field2 (py3.hidden);
-  3: map<i32, AdaptedTypeDef> (cpp.template = "::std::unordered_map") field3 (
-    py3.hidden,
-  );
+  @python.Hidden
+  1: AdaptedTypeDef field1;
+  @python.Hidden
+  2: list<AdaptedTypeDef> field2;
+  @cpp.Type{template = "::std::unordered_map"}
+  @python.Hidden
+  3: map<i32, AdaptedTypeDef> field3;
 }
 
 @cpp.Adapter{name = "Adapter"}
@@ -83,13 +93,15 @@ union AdaptedUnion {
   1: i16 best;
 }
 
+@python.Hidden
 safe exception HiddenException {
   1: i16 test;
-} (py3.hidden)
+}
 
 typedef AdaptedUnion ImplicitlyHiddenTypeDef
 
-typedef binary (cpp.type = "foo::Bar") foo_bar
+@cpp.Type{name = "foo::Bar"}
+typedef binary foo_bar
 
 struct ComplexStruct {
   1: SimpleStruct structOne;
@@ -98,7 +110,8 @@ struct ComplexStruct {
   4: string name;
   5: AnEnum an_enum;
   6: binary some_bytes;
-  7: string from (py3.name = "sender");
+  @python.Name{name = "sender"}
+  7: string from;
   8: string cdef;
   9: foo_bar bytes_with_cpp_type;
 }
@@ -195,7 +208,8 @@ service SimpleService {
   set<binary> contain_binary(1: list<binary> binaries);
   list<AnEnum> contain_enum(1: list<AnEnum> the_enum);
   BinaryUnionStruct get_binary_union_struct(1: BinaryUnion u);
-  SimpleStruct get_struct_hidden() (py3.hidden);
+  @python.Hidden
+  SimpleStruct get_struct_hidden();
 }
 
 service DerivedService extends SimpleService {

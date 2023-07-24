@@ -16,5 +16,8 @@
 
 package "apache.org/thrift/fixtures/types"
 
-typedef map<i32, string> (cpp.template = "std::unordered_map") SomeMap
+include "thrift/annotation/cpp.thrift"
+
+@cpp.Type{template = "std::unordered_map"}
+typedef map<i32, string> SomeMap
 typedef list<SomeMap> SomeListOfTypeMap

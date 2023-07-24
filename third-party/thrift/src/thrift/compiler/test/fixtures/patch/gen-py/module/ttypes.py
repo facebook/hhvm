@@ -9212,9 +9212,6 @@ Bar.thrift_spec = (
 Bar.thrift_struct_annotations = {
 }
 Bar.thrift_field_annotations = {
-  -1: {
-    "cpp.ref": "1",
-  },
 }
 
 def Bar__init__(self, loop=None,):

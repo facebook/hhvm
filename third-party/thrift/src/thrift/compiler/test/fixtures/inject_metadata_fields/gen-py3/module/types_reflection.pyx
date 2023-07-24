@@ -168,7 +168,7 @@ cdef __StructSpec get_reflection__FieldsInjectedWithIncludedStruct():
             qualifier=__Qualifier.OPTIONAL,
             default=None,
             annotations={
-                """thrift.box""": """1""",            },
+            },
         ),
     )
     return spec

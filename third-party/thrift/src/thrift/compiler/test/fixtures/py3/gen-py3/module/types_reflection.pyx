@@ -276,7 +276,7 @@ cdef __StructSpec get_reflection__ComplexStruct():
             qualifier=__Qualifier.UNQUALIFIED,
             default=None,
             annotations={
-                """py3.name""": """sender""",            },
+            },
         ),
     )
     spec.add_field(

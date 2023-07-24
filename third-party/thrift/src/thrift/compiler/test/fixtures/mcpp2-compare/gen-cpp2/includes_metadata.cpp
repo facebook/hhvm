@@ -73,7 +73,7 @@ StructMetadata<::a::different::ns::AStructB>::gen(ThriftMetadata& metadata) {
   includes_AStructB.is_union() = false;
   static const auto* const
   includes_AStructB_fields = new std::array<EncodedThriftField, 1>{{
-    {1, "FieldA", false, std::make_unique<Struct<::a::different::ns::AStruct>>("includes.AStruct"), std::vector<ThriftConstStruct>{}},
+    {1, "FieldA", false, std::make_unique<Struct<::a::different::ns::AStruct>>("includes.AStruct"), std::vector<ThriftConstStruct>{*cvStruct("cpp.Ref", {{"type", cvInteger(1)}}).cv_struct_ref(), }},
   }};
   for (const auto& f : *includes_AStructB_fields) {
     ::apache::thrift::metadata::ThriftField field;

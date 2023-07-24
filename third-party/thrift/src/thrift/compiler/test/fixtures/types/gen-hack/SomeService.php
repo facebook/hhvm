@@ -293,6 +293,16 @@ class SomeService_bounce_map_args implements \IThriftSyncStruct, \IThriftStructM
     return shape(
       'struct' => dict[],
       'fields' => dict[
+        'm' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\cpp\Type' => \facebook\thrift\annotation\cpp\Type::fromShape(
+              shape(
+                "template" => "std::unordered_map",
+              )
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -422,6 +432,16 @@ class SomeService_bounce_map_result extends \ThriftSyncStructWithResult implemen
     return shape(
       'struct' => dict[],
       'fields' => dict[
+        'success' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\cpp\Type' => \facebook\thrift\annotation\cpp\Type::fromShape(
+              shape(
+                "template" => "std::unordered_map",
+              )
+            ),
+          ],
+        ),
       ],
     );
   }

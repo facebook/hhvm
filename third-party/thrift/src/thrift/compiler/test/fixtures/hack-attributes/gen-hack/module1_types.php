@@ -35,7 +35,16 @@ class MyThriftEnum_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
 
   public static function getAllStructuredAnnotations()[write_props]: \TEnumAnnotations {
     return shape(
-      'enum' => dict[],
+      'enum' => dict[
+        '\facebook\thrift\annotation\hack\Attributes' => \facebook\thrift\annotation\hack\Attributes::fromShape(
+          shape(
+            "attributes" => vec[
+              "ApiEnum",
+              "JSEnum",
+            ],
+          )
+        ),
+      ],
       'constants' => dict[
       ],
     );
@@ -165,8 +174,28 @@ class MyThriftStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
 
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
-      'struct' => dict[],
+      'struct' => dict[
+        '\facebook\thrift\annotation\hack\Attributes' => \facebook\thrift\annotation\hack\Attributes::fromShape(
+          shape(
+            "attributes" => vec[
+              "ClassAttribute",
+            ],
+          )
+        ),
+      ],
       'fields' => dict[
+        'foo' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\hack\Attributes' => \facebook\thrift\annotation\hack\Attributes::fromShape(
+              shape(
+                "attributes" => vec[
+                  "FieldAttribute",
+                ],
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
       ],
     );
   }
@@ -310,6 +339,31 @@ class MySecondThriftStruct implements \IThriftSyncStruct, \IThriftStructMetadata
     return shape(
       'struct' => dict[],
       'fields' => dict[
+        'foo' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\hack\Attributes' => \facebook\thrift\annotation\hack\Attributes::fromShape(
+              shape(
+                "attributes" => vec[
+                  "ApiEnum",
+                  "JSEnum",
+                ],
+              )
+            ),
+          ],
+        ),
+        'bar' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\hack\Attributes' => \facebook\thrift\annotation\hack\Attributes::fromShape(
+              shape(
+                "attributes" => vec[
+                  "ClassAttribute",
+                ],
+              )
+            ),
+          ],
+        ),
       ],
     );
   }

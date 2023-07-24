@@ -18,6 +18,8 @@ cpp_include "folly/sorted_vector_types.h"
 
 namespace cpp2 a.different.ns
 
+include "thrift/annotation/cpp.thrift"
+
 typedef i64 IncludedInt64
 
 const i64 IncludedConstant = 42;
@@ -32,5 +34,6 @@ struct AStruct {
 }
 
 struct AStructB {
-  1: AStruct FieldA (cpp2.ref_type = "shared_const");
+  @cpp.Ref{type = cpp.RefType.Shared}
+  1: AStruct FieldA;
 }

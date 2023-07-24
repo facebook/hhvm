@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
-typedef i64 (cpp.type = "Foo", cpp.indirection) IndirectionA
-typedef i32 (cpp.type = "Baz", cpp.indirection) IndirectionC
-typedef double (cpp.type = "Bar", cpp.indirection) IndirectionB
+include "thrift/annotation/cpp.thrift"
+
+@cpp.Type{name = "Foo"}
+typedef i64 (cpp.indirection) IndirectionA
+@cpp.Type{name = "Baz"}
+typedef i32 (cpp.indirection) IndirectionC
+@cpp.Type{name = "Bar"}
+typedef double (cpp.indirection) IndirectionB
 
 enum MyEnumA {
   fieldA = 1,
@@ -50,9 +55,14 @@ struct containerStruct {
   15: list<IndirectionB> fieldO;
   16: list<IndirectionC> fieldP;
   17: MyEnumA fieldQ;
-  18: map<string, bool> fieldR (cpp.ref);
-  19: SmallStruct fieldS (cpp.ref_type = "unique");
-  20: SmallStruct fieldT (cpp.ref_type = "shared");
-  21: SmallStruct fieldU (cpp.ref_type = "shared_const");
-  23: SmallStruct fieldX (cpp.ref);
+  @cpp.Ref{type = cpp.RefType.Unique}
+  18: map<string, bool> fieldR;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  19: SmallStruct fieldS;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  20: SmallStruct fieldT;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  21: SmallStruct fieldU;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  23: SmallStruct fieldX;
 }

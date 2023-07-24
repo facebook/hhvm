@@ -17,7 +17,10 @@
 namespace cpp test.fixtures.tablebased
 namespace cpp2 test.fixtures.tablebased
 
-typedef binary (cpp2.type = "std::unique_ptr<folly::IOBuf>") IOBufPtr
+include "thrift/annotation/cpp.thrift"
+
+@cpp.Type{name = "std::unique_ptr<folly::IOBuf>"}
+typedef binary IOBufPtr
 
 enum ExampleEnum {
   ZERO = 0,
@@ -34,12 +37,18 @@ struct TrivialTypesStruct {
 
 struct ContainerStruct {
   12: list<i32> fieldA;
-  2: list<i32> (cpp.template = "std::list") fieldB;
-  3: list<i32> (cpp.template = "std::deque") fieldC;
-  4: list<i32> (cpp.template = "folly::fbvector") fieldD;
-  5: list<i32> (cpp.template = "folly::small_vector") fieldE;
-  6: set<i32> (cpp.template = "folly::sorted_vector_set") fieldF;
-  7: map<i32, string> (cpp.template = "folly::sorted_vector_map") fieldG;
+  @cpp.Type{template = "std::list"}
+  2: list<i32> fieldB;
+  @cpp.Type{template = "std::deque"}
+  3: list<i32> fieldC;
+  @cpp.Type{template = "folly::fbvector"}
+  4: list<i32> fieldD;
+  @cpp.Type{template = "folly::small_vector"}
+  5: list<i32> fieldE;
+  @cpp.Type{template = "folly::sorted_vector_set"}
+  6: set<i32> fieldF;
+  @cpp.Type{template = "folly::sorted_vector_map"}
+  7: map<i32, string> fieldG;
   8: list<TrivialTypesStruct> fieldH;
 }
 

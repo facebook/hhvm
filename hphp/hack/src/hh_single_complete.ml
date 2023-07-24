@@ -8,7 +8,6 @@
  *)
 
 open Hh_prelude
-open Sys_utils
 
 let comma_string_to_iset (s : string) : ISet.t =
   Str.split (Str.regexp ", *") s |> List.map ~f:int_of_string |> ISet.of_list
@@ -284,62 +283,68 @@ let handle_mode mode filenames ctx (sienv : SearchUtils.si_env) naming_table =
   | NoMode -> die "Exactly one mode must be setup"
   | Autocomplete
   | Autocomplete_manually_invoked ->
-    let path = expect_single_file () in
-    let contents = cat (Relative_path.to_absolute path) in
-    (* Search backwards: there should only be one /real/ case. If there's multiple, *)
-    (* guess that the others are preceding explanation comments *)
-    let offset =
-      Str.search_backward
-        (Str.regexp AutocompleteTypes.autocomplete_token)
-        contents
-        (String.length contents)
+    let files_contents = Multifile.file_to_file_list (expect_single_file ()) in
+    let files_with_token =
+      files_contents
+      |> List.filter ~f:(fun (_path, contents) ->
+             String.is_substring
+               contents
+               ~substring:AutocompleteTypes.autocomplete_token)
     in
-    let pos = File_content.offset_to_position contents offset in
-    let is_manually_invoked =
-      match mode with
-      | Autocomplete_manually_invoked -> true
-      | _ -> false
-    in
-    let (ctx, entry) =
-      Provider_context.add_or_overwrite_entry_contents ~ctx ~path ~contents
-    in
-    let autocomplete_context =
-      ServerAutoComplete.get_autocomplete_context
-        ~file_content:contents
-        ~pos
-        ~is_manually_invoked
-    in
-    let result =
-      ServerAutoComplete.go_at_auto332_ctx
-        ~ctx
-        ~entry
-        ~sienv
-        ~autocomplete_context
-        ~naming_table
-    in
-    List.iter
-      ~f:
-        begin
-          fun r ->
-            begin
-              let open AutocompleteTypes in
-              Printf.printf "%s\n" r.res_label;
-              List.iter r.res_additional_edits ~f:(fun (s, _) ->
-                  Printf.printf "  INSERT %s\n" s);
-              Printf.printf
-                "  INSERT %s\n"
-                (match r.res_insert_text with
-                | InsertLiterally s -> s
-                | InsertAsSnippet { snippet; _ } -> snippet);
-              Printf.printf "  %s\n" r.res_detail;
-              match r.res_documentation with
-              | Some doc ->
-                List.iter (String.split_lines doc) ~f:(fun line ->
-                    Printf.printf "  %s\n" line)
-              | None -> ()
-            end
-        end
-      result.Utils.With_complete_flag.value
+    let show_file_titles = List.length files_with_token > 1 in
+    List.iter files_with_token ~f:(fun (path, contents) ->
+        (* Search backwards: there should only be one /real/ case. If there's multiple, *)
+        (* guess that the others are preceding explanation comments *)
+        let offset =
+          Str.search_backward
+            (Str.regexp AutocompleteTypes.autocomplete_token)
+            contents
+            (String.length contents)
+        in
+        let pos = File_content.offset_to_position contents offset in
+        let is_manually_invoked =
+          match mode with
+          | Autocomplete_manually_invoked -> true
+          | _ -> false
+        in
+        let (ctx, entry) =
+          Provider_context.add_or_overwrite_entry_contents ~ctx ~path ~contents
+        in
+        let autocomplete_context =
+          ServerAutoComplete.get_autocomplete_context
+            ~file_content:contents
+            ~pos
+            ~is_manually_invoked
+        in
+        let result =
+          ServerAutoComplete.go_at_auto332_ctx
+            ~ctx
+            ~entry
+            ~sienv
+            ~autocomplete_context
+            ~naming_table
+        in
+        if show_file_titles then
+          Printf.printf
+            "//// %s\n"
+            (Relative_path.suffix path
+            |> Str.replace_first (Str.regexp "^.*--") "");
+        List.iter result.Utils.With_complete_flag.value ~f:(fun r ->
+            let open AutocompleteTypes in
+            Printf.printf "%s\n" r.res_label;
+            List.iter r.res_additional_edits ~f:(fun (s, _) ->
+                Printf.printf "  INSERT %s\n" s);
+            Printf.printf
+              "  INSERT %s\n"
+              (match r.res_insert_text with
+              | InsertLiterally s -> s
+              | InsertAsSnippet { snippet; _ } -> snippet);
+            Printf.printf "  %s\n" r.res_detail;
+            match r.res_documentation with
+            | Some doc ->
+              List.iter (String.split_lines doc) ~f:(fun line ->
+                  Printf.printf "  %s\n" line)
+            | None -> ()))
 
 (*****************************************************************************)
 (* Main entry point *)

@@ -1,0 +1,11 @@
+//// file1.php
+t_alpha
+  INSERT t_alpha()
+  (function(): void)
+t_beta
+  INSERT t_beta()
+  (function(): void)
+//// file2.php
+t_beta
+  INSERT t_beta()
+  (function(): void)

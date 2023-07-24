@@ -137,10 +137,10 @@ Generating autoload files
 As a toy example, we're going to create a function that squares a vector of
 numbers; save the following as `src/square_vec.hack`:
 
-```Hack
+```Hack error
 use namespace HH\Lib\Vec;
 
-function square_vec(vec<num> $numbers): vec<num> {
+function square_vec(vec<num> $numbers): vec<int> {
   return Vec\map($numbers, $number ==> $number * $number);
 }
 ```

@@ -14,6 +14,7 @@ The following attributes are defined:
 * [__Memoize](#__memoize)
 * [__MemoizeLSB](#__memoizelsb)
 * [__MockClass](#__mockclass)
+* [__ModuleLevelTrait](#__moduleleveltrait)
 * [__Newable](#__newable)
 * [__Override](#__override)
 * [__PHPStdLib](#__phpstdlib)
@@ -359,6 +360,10 @@ function main(): void {
 ```
 
 Mock classes *cannot* extend types `vec`, `dict`, and `keyset`, or the Hack legacy types `Vector`, `Map`, and `Set`.
+
+## __ModuleLevelTrait
+
+Can be used on public traits.  The elements of a trait annotated with `<<__ModuleLevelTrait>>` are considered to belong to the module where the trait is defined, and can access other internal symbols of the module.  For more information see [Traits and Modules](../modules/traits.md).
 
 ## __Newable
 

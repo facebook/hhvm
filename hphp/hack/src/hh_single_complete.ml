@@ -247,7 +247,9 @@ let parse_and_name ctx files_contents =
       in
       match Direct_decl_utils.direct_decl_parse ctx fn with
       | None -> failwith "no file contents"
-      | Some decls -> Direct_decl_utils.decls_to_fileinfo fn decls)
+      | Some decls ->
+        ( Direct_decl_parser.decls_to_fileinfo fn decls,
+          Direct_decl_parser.decls_to_addenda decls ))
 
 (** This function is used for gathering naming and parsing errors,
 and the side-effect of updating the global reverse naming table (and
@@ -256,19 +258,21 @@ of updating the decl heap (and picking up decling errors along the way). *)
 let parse_name_and_decl ctx files_contents =
   Errors.do_ (fun () ->
       (* parse_and_name has side effect of reporting errors *)
-      let files_info = parse_and_name ctx files_contents in
+      let files_info_and_addenda = parse_and_name ctx files_contents in
       (* ndecl_file has side effect of updating the global reverse naming-table,
          and reporting errors. *)
-      Relative_path.Map.iter files_info ~f:(fun fn fileinfo ->
+      Relative_path.Map.iter
+        files_info_and_addenda
+        ~f:(fun fn (fileinfo, _addenda) ->
           let _failed_naming_fns =
             Naming_global.ndecl_file_and_get_conflict_files ctx fn fileinfo
           in
           ());
       (* Decl.make_env has the side effect of updating the decl heap, and
          reporting errors. *)
-      Relative_path.Map.iter files_info ~f:(fun fn _ ->
+      Relative_path.Map.iter files_info_and_addenda ~f:(fun fn _ ->
           Decl.make_env ~sh:SharedMem.Uses ctx fn);
-      files_info)
+      files_info_and_addenda)
 
 let handle_mode mode filenames ctx (sienv : SearchUtils.si_env) naming_table =
   let expect_single_file () : Relative_path.t =
@@ -464,9 +468,10 @@ let decl_and_run_mode
   (* NAMING PHASE 3: for the reverse naming table delta, add all new items from files we're declaring.
      Note that [to_decl] either omits or includes builtins, according to whether we're
      working from a sqlite naming table or from nothing. *)
-  let (_errors, files_info) = parse_name_and_decl ctx to_decl in
+  let (_errors, files_info_and_addenda) = parse_name_and_decl ctx to_decl in
 
   (* NAMING PHASE 4: for the forward naming table delta, add all new items *)
+  let files_info = Relative_path.Map.map files_info_and_addenda ~f:fst in
   let naming_table =
     Naming_table.combine naming_table (Naming_table.create files_info)
   in
@@ -498,15 +503,13 @@ let decl_and_run_mode
   in
 
   (* SYMBOL INDEX PHASE 2: update *)
-  (* TODO(ljw): this should use addenda *)
-  let transformed_list =
-    files_info
+  let paths_with_addenda =
+    files_info_and_addenda
     |> Relative_path.Map.elements
-    |> List.map ~f:(fun (path, fi) -> (path, fi, SearchUtils.TypeChecker))
+    |> List.map ~f:(fun (path, (_fi, addenda)) ->
+           (path, addenda, SearchUtils.TypeChecker))
   in
-  let sienv =
-    SymbolIndexCore.update_files ~ctx ~sienv ~paths:transformed_list
-  in
+  let sienv = SymbolIndexCore.update_from_addenda ~sienv ~paths_with_addenda in
 
   handle_mode mode files ctx sienv naming_table
 

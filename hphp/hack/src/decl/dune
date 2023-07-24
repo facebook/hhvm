@@ -109,7 +109,8 @@
   shallow_decl_defs
   pos_or_decl
   typing_defs
-  rust_decl_ffi)
+  rust_decl_ffi
+  search_utils)
  (preprocess
   (pps ppx_deriving.std)))
 

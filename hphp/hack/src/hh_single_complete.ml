@@ -90,6 +90,8 @@ let parse_options () =
   let root = ref None in
   let naming_table = ref None in
   let saved_state_manifold_api_key = ref None in
+  let glean_reponame = ref "" in
+  let auto_namespace_map = ref None in
   let options =
     [
       ( "--extra-builtin",
@@ -112,6 +114,12 @@ let parse_options () =
         Arg.Set enable_xhp_class_modifier,
         "Enable the XHP class modifier, xhp class name {} will define an xhp class."
       );
+      ( "--auto-namespace-map",
+        Arg.String
+          (fun m ->
+            auto_namespace_map :=
+              Some (ServerConfig.convert_auto_namespace_to_map m)),
+        " Alias namespaces" );
       ( "--auto-complete",
         Arg.Unit (set_mode Autocomplete),
         " Produce autocomplete suggestions as if triggered by trigger character"
@@ -124,11 +132,15 @@ let parse_options () =
         " API key used to download a saved state from Manifold (optional)" );
       ( "--naming-table",
         Arg.String (fun s -> naming_table := Some s),
-        " Naming table, to look up undefined symbols; needs --root."
+        " Naming table, to typecheck undefined symbols; needs --root."
         ^ " (Hint: buck2 run //hphp/hack/src/hh_naming_table_builder)" );
       ( "--root",
         Arg.String (fun s -> root := Some s),
-        " Root for where to look up undefined symbols; needs --naming-table" );
+        " Root for where to typecheck undefined symbols; needs --naming-table"
+      );
+      ( "--glean-reponame",
+        Arg.String (fun str -> glean_reponame := str),
+        " Glean repo for autocompleting undefined symbols" );
     ]
   in
   let options = Arg.align ~limit:25 options in
@@ -143,40 +155,30 @@ let parse_options () =
     failwith "--naming-table needs --root";
 
   (* --root implies certain things... *)
-  let ( allowed_fixme_codes_strict,
-        auto_namespace_map,
-        sharedmem_config,
-        no_builtins,
-        root ) =
+  let (allowed_fixme_codes_strict, sharedmem_config, root) =
     match !root with
     | None ->
       let allowed_fixme_codes_strict = None in
-      let auto_namespace_map = None in
       let sharedmem_config = SharedMem.default_config in
-      let no_builtins = false in
       let root = Path.make "/" (* if none specified, we use this dummy *) in
-      ( allowed_fixme_codes_strict,
-        auto_namespace_map,
-        sharedmem_config,
-        no_builtins,
-        root )
+      (allowed_fixme_codes_strict, sharedmem_config, root)
     | Some root ->
       if Option.is_none !naming_table then
         failwith "--root needs --naming-table";
 
       (* builtins are already provided by project at --root, so we shouldn't provide our own *)
-      let no_builtins = true in
+      no_builtins := true;
       (* Following will throw an exception if .hhconfig not found *)
       let (_config_hash, config) =
         Config_file.parse_hhconfig
           (Filename.concat root Config_file.file_path_relative_to_repo_root)
       in
       (* We will pick up values from .hhconfig, unless they've been overridden at the command-line. *)
-      let auto_namespace_map =
-        config
-        |> Config_file.Getters.string_opt "auto_namespace_map"
-        |> Option.map ~f:ServerConfig.convert_auto_namespace_to_map
-      in
+      if Option.is_none !auto_namespace_map then
+        auto_namespace_map :=
+          config
+          |> Config_file.Getters.string_opt "auto_namespace_map"
+          |> Option.map ~f:ServerConfig.convert_auto_namespace_to_map;
       let allowed_fixme_codes_strict =
         config
         |> Config_file.Getters.string_opt "allowed_fixme_codes_strict"
@@ -190,11 +192,7 @@ let parse_options () =
       in
       (* Path.make canonicalizes it, i.e. resolves symlinks *)
       let root = Path.make root in
-      ( allowed_fixme_codes_strict,
-        auto_namespace_map,
-        sharedmem_config,
-        no_builtins,
-        root )
+      (allowed_fixme_codes_strict, sharedmem_config, root)
   in
 
   let tcopt =
@@ -209,39 +207,20 @@ let parse_options () =
       ~po_enable_xhp_class_modifier:!enable_xhp_class_modifier
       ~tco_everything_sdt:true
       ~tco_enable_sound_dynamic:true
-      ?po_auto_namespace_map:auto_namespace_map
+      ?po_auto_namespace_map:!auto_namespace_map
       ~allowed_fixme_codes_strict:
         (Option.value allowed_fixme_codes_strict ~default:ISet.empty)
+      ~glean_reponame:!glean_reponame
       GlobalOptions.default
-  in
-  (* Configure symbol index settings *)
-  let namespace_map = ParserOptions.auto_namespace_map tcopt in
-  let sienv =
-    SymbolIndex.initialize
-      ~gleanopt:tcopt
-      ~namespace_map
-      ~provider_name:"LocalIndex"
-      ~quiet:true
-      ~savedstate_file_opt:None
-      ~workers:None
-  in
-  let sienv =
-    {
-      sienv with
-      SearchUtils.sie_resolve_signatures = true;
-      SearchUtils.sie_resolve_positions = true;
-      SearchUtils.sie_resolve_local_decl = true;
-    }
   in
   ( {
       files = fns;
       extra_builtins = !extra_builtins;
       mode = !mode;
-      no_builtins;
+      no_builtins = !no_builtins;
       naming_table_path = !naming_table;
       tcopt;
     },
-    sienv,
     root,
     sharedmem_config )
 
@@ -291,21 +270,6 @@ let parse_name_and_decl ctx files_contents =
           Decl.make_env ~sh:SharedMem.Uses ctx fn);
       files_info)
 
-let scan_files_for_symbol_index
-    (filename : Relative_path.t)
-    (sienv : SearchUtils.si_env)
-    (ctx : Provider_context.t) : SearchUtils.si_env =
-  let files_contents = Multifile.file_to_files filename in
-  let individual_file_info =
-    Errors.ignore_ (fun () -> parse_and_name ctx files_contents)
-  in
-  let fileinfo_list = Relative_path.Map.values individual_file_info in
-  let transformed_list =
-    List.map fileinfo_list ~f:(fun fileinfo ->
-        (filename, fileinfo, SearchUtils.TypeChecker))
-  in
-  SymbolIndexCore.update_files ~ctx ~sienv ~paths:transformed_list
-
 let handle_mode mode filenames ctx (sienv : SearchUtils.si_env) naming_table =
   let expect_single_file () : Relative_path.t =
     match filenames with
@@ -341,7 +305,6 @@ let handle_mode mode filenames ctx (sienv : SearchUtils.si_env) naming_table =
         ~pos
         ~is_manually_invoked
     in
-    let sienv = scan_files_for_symbol_index path sienv ctx in
     let result =
       ServerAutoComplete.go_at_auto332_ctx
         ~ctx
@@ -381,8 +344,7 @@ let handle_mode mode filenames ctx (sienv : SearchUtils.si_env) naming_table =
 let decl_and_run_mode
     { files; extra_builtins; mode; no_builtins; tcopt; naming_table_path }
     (popt : TypecheckerOptions.t)
-    (hhi_root : Path.t)
-    (sienv : SearchUtils.si_env) : unit =
+    (hhi_root : Path.t) : unit =
   Ident.track_names := true;
   let builtins =
     if no_builtins then
@@ -509,13 +471,48 @@ let decl_and_run_mode
     Naming_table.combine naming_table (Naming_table.create files_info)
   in
 
+  (* SYMBOL INDEX PHASE 1: initialize *)
+  let glean_reponame = GleanOptions.reponame tcopt in
+  let namespace_map = ParserOptions.auto_namespace_map tcopt in
+  let sienv =
+    SymbolIndex.initialize
+      ~gleanopt:tcopt
+      ~namespace_map
+      ~provider_name:
+        (if String.is_empty glean_reponame then
+          "LocalIndex"
+        else
+          "CustomIndex")
+      ~quiet:true
+      ~savedstate_file_opt:None
+      ~workers:None
+  in
+  let sienv =
+    {
+      sienv with
+      SearchUtils.sie_quiet_mode = false;
+      SearchUtils.sie_resolve_signatures = true;
+      SearchUtils.sie_resolve_positions = true;
+      SearchUtils.sie_resolve_local_decl = true;
+    }
+  in
+
+  (* SYMBOL INDEX PHASE 2: update *)
+  (* TODO(ljw): this should use addenda *)
+  let transformed_list =
+    files_info
+    |> Relative_path.Map.elements
+    |> List.map ~f:(fun (path, fi) -> (path, fi, SearchUtils.TypeChecker))
+  in
+  let sienv =
+    SymbolIndexCore.update_files ~ctx ~sienv ~paths:transformed_list
+  in
+
   handle_mode mode files ctx sienv naming_table
 
 let main_hack
-    ({ tcopt; _ } as opts)
-    (sienv : SearchUtils.si_env)
-    (root : Path.t)
-    (sharedmem_config : SharedMem.config) : unit =
+    ({ tcopt; _ } as opts) (root : Path.t) (sharedmem_config : SharedMem.config)
+    : unit =
   (* TODO: We should have a per file config *)
   Sys_utils.signal Sys.sigusr1 (Sys.Signal_handle Typing.debug_print_last_pos);
   EventLogger.init_fake ();
@@ -528,7 +525,7 @@ let main_hack
       Relative_path.set_path_prefix Relative_path.Root root;
       Relative_path.set_path_prefix Relative_path.Hhi hhi_root;
       Relative_path.set_path_prefix Relative_path.Tmp (Path.make "tmp");
-      decl_and_run_mode opts tcopt hhi_root sienv;
+      decl_and_run_mode opts tcopt hhi_root;
       TypingLogger.flush_buffers ())
 
 (* command line driver *)
@@ -541,5 +538,5 @@ let () =
        it breaks the testsuite where the output is compared to the
        expected one (i.e. in given file without CRLF). *)
     Out_channel.set_binary_mode stdout true;
-  let (options, sienv, root, sharedmem_config) = parse_options () in
-  Unix.handle_unix_error main_hack options sienv root sharedmem_config
+  let (options, root, sharedmem_config) = parse_options () in
+  Unix.handle_unix_error main_hack options root sharedmem_config

@@ -258,9 +258,7 @@ impl InferOpts {
 
         let (result, textual_t) = Timing::time(path, || {
             let mut out = Vec::new();
-            // Temporary migration flag. I name it so it will be easier to grep
-            let experimental_self_parent_in_trait = false;
-            textual::textual_writer(&mut out, path, ir, false, experimental_self_parent_in_trait)
+            textual::textual_writer(&mut out, path, ir, false)
         });
 
         let total_t = compile_profile.codegen_t

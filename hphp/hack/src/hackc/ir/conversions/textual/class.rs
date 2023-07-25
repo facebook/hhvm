@@ -45,13 +45,7 @@ pub(crate) fn write_class(
 ) -> Result {
     trace!("Convert Class {}", class.name.as_bstr(&unit_state.strings));
 
-    let experimental_self_parent_in_trait = unit_state.experimental_self_parent_in_trait;
-
-    let class = crate::lower::lower_class(
-        class,
-        Arc::clone(&unit_state.strings),
-        experimental_self_parent_in_trait,
-    );
+    let class = crate::lower::lower_class(class, Arc::clone(&unit_state.strings));
 
     let mut state = ClassState::new(txf, unit_state, class);
     state.write_class()

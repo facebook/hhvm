@@ -1,4 +1,4 @@
-// RUN: %hackc compile-infer %s --experimental-self-parent-in-trait | FileCheck %s
+// RUN: %hackc compile-infer %s | FileCheck %s
 
 // TEST-CHECK-BAL: type C$static
 // CHECK: type C$static = .kind="class" .static {

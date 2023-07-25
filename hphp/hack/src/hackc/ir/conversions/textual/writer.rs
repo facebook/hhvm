@@ -26,7 +26,6 @@ pub fn textual_writer(
     path: &Path,
     unit: ir::Unit<'_>,
     no_builtins: bool,
-    experimental_self_parent_in_trait: bool,
 ) -> Result<()> {
     let mut txf = TextualFile::new(w, Arc::clone(&unit.strings));
 
@@ -34,16 +33,9 @@ pub fn textual_writer(
     txf.write_comment(&format!("{UNIT_START_MARKER} {escaped_path}"))?;
 
     txf.set_attribute(textual::FileAttribute::SourceLanguage("hack".to_string()))?;
-    let mut experimental_opts = vec![];
-    if experimental_self_parent_in_trait {
-        experimental_opts.push(textual::ExperimentalOption::SelfParentInTrait);
-    }
-    txf.set_attribute(textual::FileAttribute::ExperimentalOptions(
-        experimental_opts,
-    ))?;
     txf.debug_separator()?;
 
-    let mut state = UnitState::new(Arc::clone(&unit.strings), experimental_self_parent_in_trait);
+    let mut state = UnitState::new(Arc::clone(&unit.strings));
     check_fatal(path, unit.fatal.as_ref())?;
 
     for cls in unit.classes {

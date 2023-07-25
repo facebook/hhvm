@@ -28,7 +28,6 @@ pub(crate) fn lower_func<'a>(
     mut func: Func<'a>,
     func_info: &mut FuncInfo<'_>,
     strings: Arc<StringInterner>,
-    experimental_self_parent_in_trait: bool,
 ) -> Func<'a> {
     trace!(
         "{} Before Lower: {}",
@@ -67,7 +66,7 @@ pub(crate) fn lower_func<'a>(
     }
 
     // Simplify various Instrs.
-    super::instrs::lower_instrs(&mut builder, func_info, experimental_self_parent_in_trait);
+    super::instrs::lower_instrs(&mut builder, func_info);
 
     trace!(
         "After lower_instrs: {}",

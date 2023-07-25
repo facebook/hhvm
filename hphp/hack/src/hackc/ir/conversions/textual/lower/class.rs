@@ -28,11 +28,7 @@ use crate::class::IsStatic;
 /// This indicates a static property that started life as a class constant.
 pub(crate) const INFER_CONSTANT: &str = "__Infer_Constant__";
 
-pub(crate) fn lower_class<'a>(
-    mut class: Class<'a>,
-    strings: Arc<StringInterner>,
-    experimental_self_parent_in_trait: bool,
-) -> Class<'a> {
+pub(crate) fn lower_class<'a>(mut class: Class<'a>, strings: Arc<StringInterner>) -> Class<'a> {
     if !class.ctx_constants.is_empty() {
         textual_todo! {
             trace!("TODO: class.ctx_constants");
@@ -56,7 +52,7 @@ pub(crate) fn lower_class<'a>(
             // We want closure bodies to be 'instance' but hackc marks it as 'static'.
             method.attrs -= Attr::AttrStatic;
         }
-        if experimental_self_parent_in_trait && classish_is_trait {
+        if classish_is_trait {
             // Let's insert a `self` parameter so infer's analysis can
             // do its job. We don't use `$` so we are sure we don't clash with
             // existing Hack user defined variables.

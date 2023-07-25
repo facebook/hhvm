@@ -9,17 +9,10 @@ use ir::StringInterner;
 
 pub(crate) struct UnitState {
     pub(crate) strings: Arc<StringInterner>,
-    pub(crate) experimental_self_parent_in_trait: bool,
 }
 
 impl UnitState {
-    pub(crate) fn new(
-        strings: Arc<StringInterner>,
-        experimental_self_parent_in_trait: bool,
-    ) -> Self {
-        Self {
-            strings,
-            experimental_self_parent_in_trait,
-        }
+    pub(crate) fn new(strings: Arc<StringInterner>) -> Self {
+        Self { strings }
     }
 }

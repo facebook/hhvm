@@ -124,13 +124,7 @@ pub(crate) fn lower_and_write_func(
         func: ir::Func<'_>,
         mut func_info: FuncInfo<'_>,
     ) -> Result {
-        let experimental_self_parent_in_trait = unit_state.experimental_self_parent_in_trait;
-        let func = lower::lower_func(
-            func,
-            &mut func_info,
-            Arc::clone(&unit_state.strings),
-            experimental_self_parent_in_trait,
-        );
+        let func = lower::lower_func(func, &mut func_info, Arc::clone(&unit_state.strings));
         ir::verify::verify_func(&func, &Default::default(), &unit_state.strings);
 
         write_func(txf, unit_state, this_ty, func, Arc::new(func_info))
@@ -295,15 +289,7 @@ fn write_func(
                 let mut func = rewrite_jmp_ops(func);
                 ir::passes::clean::run(&mut func);
 
-                let experimental_self_parent_in_trait =
-                    unit_state.experimental_self_parent_in_trait;
-                let mut state = FuncState::new(
-                    fb,
-                    Arc::clone(&strings),
-                    &func,
-                    func_info,
-                    experimental_self_parent_in_trait,
-                );
+                let mut state = FuncState::new(fb, Arc::clone(&strings), &func, func_info);
 
                 for bid in func.block_ids() {
                     write_block(&mut state, bid)?;
@@ -967,7 +953,7 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
                 // self::foo() - Static call to the method in the current class.
                 let mi = state.expect_method_info();
                 let is_static = mi.is_static;
-                let target = if state.experimental_self_parent_in_trait && in_trait {
+                let target = if in_trait {
                     let base = ClassId::from_str("__self__", &state.strings);
                     FunctionName::method(base, is_static, method)
                 } else {
@@ -987,7 +973,7 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
                 // parent::foo() - Static call to the method in the parent class.
                 let mi = state.expect_method_info();
                 let is_static = mi.is_static;
-                let target = if state.experimental_self_parent_in_trait && in_trait {
+                let target = if in_trait {
                     let base = ClassId::from_str("__parent__", &state.strings);
                     FunctionName::method(base, is_static, method)
                 } else {
@@ -1077,7 +1063,6 @@ pub(crate) struct FuncState<'a, 'b, 'c> {
     iid_mapping: ir::InstrIdMap<textual::Expr>,
     func_info: Arc<FuncInfo<'a>>,
     pub(crate) strings: Arc<StringInterner>,
-    pub(crate) experimental_self_parent_in_trait: bool,
 }
 
 impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
@@ -1086,7 +1071,6 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
         strings: Arc<StringInterner>,
         func: &'a ir::Func<'a>,
         func_info: Arc<FuncInfo<'a>>,
-        experimental_self_parent_in_trait: bool,
     ) -> Self {
         Self {
             fb,
@@ -1094,7 +1078,6 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
             iid_mapping: Default::default(),
             func_info,
             strings,
-            experimental_self_parent_in_trait,
         }
     }
 

@@ -1,0 +1,2 @@
+File "this-error.php", line 6, characters 5-22:
+You cannot declare $this as a typed local. (Parsing[1002])

@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::matches;
 use std::str::FromStr;
@@ -5430,6 +5431,14 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             UnsetStatement(x) => {
                 for expr in syntax_to_list_no_separators(&x.variables) {
                     self.check_lvalue_and_inout(expr, LvalRoot::Unset);
+                }
+            }
+            DeclareLocalStatement(x) => {
+                if self.text(&x.variable) == sn::special_idents::THIS {
+                    self.errors.push(make_error_from_node(
+                        node,
+                        Cow::Owned("You cannot declare $this as a typed local.".to_string()),
+                    ));
                 }
             }
             PackageExpression(_) => {

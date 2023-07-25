@@ -208,7 +208,15 @@ let rec check_stmt on_expr env (id_pos, stmt_) =
     let env = check_catches on_expr env catches in
     let env = check_block env finally_block in
     env
-  | Using _
+  | Using
+      {
+        us_is_block_scoped = _;
+        us_has_await = _;
+        us_exprs = (_, exprs);
+        us_block = block;
+      } ->
+    let env = List.fold_left exprs ~init:env ~f:(check_assign_expr on_expr) in
+    check_block env block
   | Return None
   | Fallthrough
   | Break

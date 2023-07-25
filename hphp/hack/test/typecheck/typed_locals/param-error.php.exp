@@ -1,3 +1,5 @@
+File "param-error.php", line 13, characters 5-17:
+You cannot declare $this as a typed local. (Parsing[1002])
 File "param-error.php", line 5, characters 3-18:
 Illegal definition of typed local variable $x. (Naming[2126])
   File "param-error.php", line 4, characters 16-17:

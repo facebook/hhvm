@@ -18,6 +18,7 @@ use nast::Lid;
 use nast::Pos;
 use nast::Stmt;
 use nast::Stmt_;
+use nast::UsingStmt;
 use oxidized::aast_visitor::AstParams;
 use oxidized::aast_visitor::NodeMut;
 use oxidized::aast_visitor::VisitorMut;
@@ -287,7 +288,18 @@ impl<'a> VisitorMut<'a> for TypedLocal {
                 }
                 Ok(())
             }
-            Stmt_::Using(_) => elem.recurse(env, self.object()), // TODO
+            Stmt_::Using(box UsingStmt {
+                is_block_scoped: _,
+                has_await: _,
+                exprs,
+                block,
+            }) => {
+                for expr in exprs.1.iter_mut() {
+                    expr.recurse(env, self.object())?;
+                    self.enforce_assign_expr(expr);
+                }
+                block.recurse(env, self.object())
+            }
             Stmt_::Switch(box (cond, cases, default)) => {
                 cond.recurse(env, self.object())?;
                 let mut envs = cases

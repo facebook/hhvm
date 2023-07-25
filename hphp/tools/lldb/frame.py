@@ -124,7 +124,7 @@ def create_php(
     idx: int,
     ar: lldb.SBValue,
     rip: typing.Union[str, lldb.SBValue]='0x????????',
-    pc: lldb.SBValue=None,
+    pc: typing.Union[int, lldb.SBValue]=None,
 ) -> Frame:
     """Collect metadata for a PHP frame.
 
@@ -132,11 +132,15 @@ def create_php(
         idx: Index of the current frame
         ar: The activation record (lldb.SBValue[HPHP::ActRec])
         rip: The instruction pointer
+        pc: The PC
 
     Returns:
         A Frame object
     """
-    utils.debug_print(f"create_php(idx={idx}, ar=0x{ar.unsigned:x}, rip={format_ptr(rip)}, pc={pc.unsigned if pc else None}")
+    if isinstance(pc, lldb.SBValue):
+        pc = pc.unsigned
+
+    utils.debug_print(f"create_php(idx={idx}, ar=0x{ar.unsigned:x}, rip={format_ptr(rip)}, pc={pc if pc else None}")
     func = lookup.lookup_func_from_frame_pointer(ar)  # lldb.SBValue[HPHP::Func *]
     shared = utils.rawptr(utils.get(func, "m_shared"))  # lldb.SBValue[HPHP::SharedData]
     flags = utils.get(shared, "m_allFlags")  # lldb.SBValue[HPHP::Func::SharedData::Flags]

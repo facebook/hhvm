@@ -566,10 +566,7 @@ class HHBC(object):
             if immtype.unsigned >= 0:
                 table = op_table(OpTableNames.ImmSize, target)
                 size = idx.at(table, utils.unsigned_cast(immtype, utils.Type('size_t', target))).unsigned
-
-                uint = utils.Type(uints_by_size()[size], target)
-                imm = ptr.Cast(uint.GetPointerType()).Dereference()
-                au = imm.Cast(utils.Type('HPHP::ArgUnion', target))
+                au = ptr.Cast(utils.Type('HPHP::ArgUnion', target).GetPointerType()).Dereference()
 
                 info['size'] = size
                 info['value'] = utils.get(au, 'u_' + str(immtype.value))
@@ -683,8 +680,10 @@ the previous call left off.
 
         utils.debug_print(f"HhxCommand:__init__(): bcpos=0x{self.bcpos.unsigned:x}, bcoff={self.bcoff}, count={self.count}, end={hex(self.end.unsigned) if self.end else None}")
 
-        bctype = utils.Type('HPHP::PC', target)
+        bctype = utils.Type("uint8_t", target).GetPointerType()  # TODO(T159273123): This was HPHP::PC, but looking up typedefs often fails
         self.bcpos = self.bcpos.Cast(bctype)
+
+        assert self.bcpos.GetError().Success(), f"Unable to cast bcpos: {self.bcpos.GetError()}"
 
         bcstart = utils.ptr_add(self.bcpos, -self.bcoff)
 

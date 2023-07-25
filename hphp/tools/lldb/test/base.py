@@ -21,7 +21,7 @@ sys.path.append(lldb_path)
 import lldb
 from fblldb.utils import run_lldb_command, get_lldb_object_description
 
-hhvm_path = pathlib.Path(__file__).parent.parent / "hhvm_cpp"
+hhvm_path = pathlib.Path(__file__).parent.parent / "hhvm"
 hhvm_types_path = pathlib.Path(__file__).parent.parent / "hhvm_types_for_lldb_tests"
 hhvm_test_path = os.environ["HHVM_TEST_DIR"]
 scripts_path = os.environ["HHVM_LLDB_SCRIPTS"]

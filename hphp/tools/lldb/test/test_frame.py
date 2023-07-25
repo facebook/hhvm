@@ -23,6 +23,6 @@ class FrameTestCase(base.TestHHVMBinary):
         ar = utils.reg("fp", frame1).Cast(utils.Type("HPHP::ActRec", self.target).GetPointerType())
         rip = utils.reg("ip", frame1)
         self.assertTrue(frame.is_jitted(rip))
-        php_frame = frame.create_php(1, ar, rip, frame1)
+        php_frame = frame.create_php(1, ar, rip, frame1.pc)
         self.assertEqual(php_frame.func.split("(")[0], "[PHP] C::86reifiedinit")
         self.assertTrue(php_frame.file.split("/")[-1], "reified-parent.php")

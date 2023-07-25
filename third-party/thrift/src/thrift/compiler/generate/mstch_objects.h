@@ -1379,7 +1379,7 @@ class mstch_const_value : public mstch_base {
   mstch::node map_elems();
   mstch::node const_struct();
   mstch::node referenceable() {
-    return current_const_ && const_value_->get_owner() &&
+    return const_value_->get_owner() &&
         current_const_ != const_value_->get_owner() && same_type_as_expected();
   }
   mstch::node owning_const();

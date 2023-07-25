@@ -103,7 +103,7 @@ public final class DefaultStruct implements com.facebook.thrift.payload.ThriftSe
         .add(new test.fixtures.complex_struct.SimpleStruct.Builder().setAge(40L).setName("IronMan").build())
         .add(new test.fixtures.complex_struct.SimpleStruct.Builder().setAge(999L).setName("Thanos").build())
         .build();
-      this.myUnion = test.fixtures.complex_struct.MyUnion.fromMyEnum(test.fixtures.complex_struct.MyEnum.MY_VALUE2);
+      this.myUnion = test.fixtures.complex_struct.Constants.CONST_ENUM_UNION;
       this.listUnionDFset = ImmutableList.<test.fixtures.complex_struct.MyUnion>builder()
         .add(test.fixtures.complex_struct.MyUnion.fromMyEnum(test.fixtures.complex_struct.MyEnum.MY_VALUE2))
         .add(test.fixtures.complex_struct.MyUnion.fromIntValue(123))
@@ -176,7 +176,7 @@ public final class DefaultStruct implements com.facebook.thrift.payload.ThriftSe
         .add(new test.fixtures.complex_struct.SimpleStruct.Builder().setAge(40L).setName("IronMan").build())
         .add(new test.fixtures.complex_struct.SimpleStruct.Builder().setAge(999L).setName("Thanos").build())
         .build();
-        private test.fixtures.complex_struct.MyUnion myUnion = test.fixtures.complex_struct.MyUnion.fromMyEnum(test.fixtures.complex_struct.MyEnum.MY_VALUE2);
+        private test.fixtures.complex_struct.MyUnion myUnion = test.fixtures.complex_struct.Constants.CONST_ENUM_UNION;
         private List<test.fixtures.complex_struct.MyUnion> listUnionDFset = ImmutableList.<test.fixtures.complex_struct.MyUnion>builder()
         .add(test.fixtures.complex_struct.MyUnion.fromMyEnum(test.fixtures.complex_struct.MyEnum.MY_VALUE2))
         .add(test.fixtures.complex_struct.MyUnion.fromIntValue(123))

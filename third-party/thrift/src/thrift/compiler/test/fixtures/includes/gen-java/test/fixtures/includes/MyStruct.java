@@ -35,13 +35,13 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
     @ThriftConstructor
     protected MyStruct() {
-      this.myIncludedField = new test.fixtures.includes.includes.Included.Builder().setMyIntField(2L).setMyTransitiveField(test.fixtures.includes.transitive.Constants.EXAMPLE_FOO).build();
+      this.myIncludedField = test.fixtures.includes.includes.Constants.EXAMPLE_INCLUDED;
       this.myOtherIncludedField = null;
       this.myIncludedInt = 42L;
     }
     
     public static class Builder {
-        private test.fixtures.includes.includes.Included myIncludedField = new test.fixtures.includes.includes.Included.Builder().setMyIntField(2L).setMyTransitiveField(test.fixtures.includes.transitive.Constants.EXAMPLE_FOO).build();
+        private test.fixtures.includes.includes.Included myIncludedField = test.fixtures.includes.includes.Constants.EXAMPLE_INCLUDED;
         private test.fixtures.includes.includes.Included myOtherIncludedField = null;
         private long myIncludedInt = 42L;
     

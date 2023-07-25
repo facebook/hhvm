@@ -34,12 +34,12 @@ public final class Included implements com.facebook.thrift.payload.ThriftSeriali
     @ThriftConstructor
     protected Included() {
       this.myIntField = 0L;
-      this.myTransitiveField = new test.fixtures.includes.transitive.Foo.Builder().setA(2L).build();
+      this.myTransitiveField = test.fixtures.includes.transitive.Constants.EXAMPLE_FOO;
     }
     
     public static class Builder {
         private long myIntField = 0L;
-        private test.fixtures.includes.transitive.Foo myTransitiveField = new test.fixtures.includes.transitive.Foo.Builder().setA(2L).build();
+        private test.fixtures.includes.transitive.Foo myTransitiveField = test.fixtures.includes.transitive.Constants.EXAMPLE_FOO;
     
         @com.facebook.swift.codec.ThriftField(value=1, name="MyIntField", requiredness=Requiredness.NONE)
         public Builder setMyIntField(long myIntField) {

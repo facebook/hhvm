@@ -4,7 +4,7 @@ Typing error (Typing[4110])
   Expected `num` because this is used in an arithmetic operation
   File "foreach_vector.php", line 18, characters 19-21:
   But got `Foo`
-  File "collections/Vector.hhi", line 46, characters 52-53:
+  File "collections/Vector.hhi", line 45, characters 52-53:
     via this generic `Tv`
   File "collections/interfaces.hhi", line 571, characters 25-26:
     via this generic `Tv`

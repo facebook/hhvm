@@ -13,22 +13,25 @@ class Wrap<+T> implements I<T> {
 function getVecInt():~vec<int> { return vec[3]; }
 
 <<__SupportDynamicType>>
-function vectorAppend<Tv as supportdyn<mixed> >(Vector<Tv> $v, Tv $item):void { }
+function vectorAppend<Tv as supportdyn<mixed> >(MyVector<Tv> $v, Tv $item):void { }
 
-function vectorAppend_likes<Tv as supportdyn<mixed> >(~Vector<Tv> $v, ~Tv $item):void { }
+function vectorAppend_likes<Tv as supportdyn<mixed> >(~MyVector<Tv> $v, ~Tv $item):void { }
 
-function vectorAppend_likes_special(~Vector<~Wrap<int>> $v, ~Wrap<~int> $item):void { }
+function vectorAppend_likes_special(~MyVector<~Wrap<int>> $v, ~Wrap<~int> $item):void { }
 
-function vectorAppend_likes2<Tv as supportdyn<mixed> >(~Tv $item, ~Vector<Tv> $v):void { }
+function vectorAppend_likes2<Tv as supportdyn<mixed> >(~Tv $item, ~MyVector<Tv> $v):void { }
 
 function test_transitive<T as I<int>>(~T $_):void { }
 
 <<__SupportDynamicType>>
-function makeVector<T as supportdyn<mixed>>():Vector<T> {
-  return Vector<T>{};
+class MyVector<T as supportdyn<mixed>> {}
+
+<<__SupportDynamicType>>
+function makeVector<T as supportdyn<mixed>>():MyVector<T> {
+  return new MyVector<T>();
 }
 
-function simple(~Vector<~Wrap<int>> $_):void { }
+function simple(~MyVector<~Wrap<int>> $_):void { }
 
 
 <<__SupportDynamicType>>

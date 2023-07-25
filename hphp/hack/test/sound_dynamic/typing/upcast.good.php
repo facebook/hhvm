@@ -18,11 +18,6 @@ function h(vec<int> $x) : void {
   hh_expect_equivalent<dynamic>($z);
 }
 
-function i(Vector<dynamic> $x) : void {
-  $z = $x upcast dynamic;
-  hh_expect_equivalent<dynamic>($z);
-}
-
 function k() : void {
   $z = 1 upcast dynamic;
   hh_expect_equivalent<dynamic>($z);

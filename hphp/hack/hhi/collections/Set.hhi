@@ -44,7 +44,6 @@ namespace HH {
    * @guide /hack/collections/introduction
    * @guide /hack/collections/classes
    */
-  <<__SupportDynamicType>>
   final class Set<Tv as arraykey>
     implements \MutableSet<Tv> {
     /**

@@ -43,7 +43,6 @@ namespace HH {
    * @guide /hack/collections/introduction
    * @guide /hack/collections/classes
    */
-  <<__SupportDynamicType>>
   final class ImmSet<+Tv as arraykey>
     implements \ConstSet<Tv> {
     /**

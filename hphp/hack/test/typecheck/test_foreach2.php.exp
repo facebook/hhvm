@@ -4,7 +4,7 @@ Invalid return type (Typing[4110])
   Expected `int`
   File "test_foreach2.php", line 12, characters 24-29:
   But got `string`
-  File "collections/Map.hhi", line 56, characters 32-33:
+  File "collections/Map.hhi", line 55, characters 32-33:
     via this generic `Tv`
   File "collections/interfaces.hhi", line 1106, characters 26-27:
     via this generic `Tv`

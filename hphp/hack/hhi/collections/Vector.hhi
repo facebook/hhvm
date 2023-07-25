@@ -42,7 +42,6 @@ namespace HH {
    * @guide /hack/collections/introduction
    * @guide /hack/collections/classes
    */
-  <<__SupportDynamicType>>
   final class Vector<Tv> implements \MutableVector<Tv> {
     /**
      * Creates a `Vector` from the given `Traversable`, or an empty `Vector`

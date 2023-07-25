@@ -42,7 +42,6 @@ namespace HH {
    * @guide /hack/collections/introduction
    * @guide /hack/collections/classes
    */
-  <<__SupportDynamicType>>
   final class Pair<+Tv1, +Tv2>
     implements \ConstVector<(Tv1 | Tv2)> {
     /**

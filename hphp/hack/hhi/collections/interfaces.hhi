@@ -566,7 +566,7 @@ namespace {
    * @guide /hack/collections/introduction
    * @guide /hack/collections/interfaces
    */
-  <<__Sealed(Vector::class), __SupportDynamicType>>
+  <<__Sealed(Vector::class)>>
   interface MutableVector<Tv>
     extends ConstVector<Tv>, Collection<Tv>, IndexAccess<int, Tv> {
     /**
@@ -1635,7 +1635,7 @@ namespace {
    * @guide /hack/collections/introduction
    * @guide /hack/collections/interfaces
    */
-  <<__Sealed(Set::class), __SupportDynamicType>>
+  <<__Sealed(Set::class)>>
   interface MutableSet<Tv as arraykey>
     extends ConstSet<Tv>, Collection<Tv>, SetAccess<Tv> {
     /**

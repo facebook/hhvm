@@ -42,7 +42,6 @@ namespace HH {
    * @guide /hack/collections/introduction
    * @guide /hack/collections/classes
    */
-  <<__SupportDynamicType>>
   final class ImmMap<
     Tk as arraykey,
     +Tv,

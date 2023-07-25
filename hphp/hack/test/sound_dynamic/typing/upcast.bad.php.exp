@@ -4,11 +4,11 @@ Typing error (Typing[4110])
   Expected `dynamic`
   File "upcast.bad.php", line 4, characters 12-16:
   Type `mixed` is not a subtype of `dynamic` under dynamic-aware subtyping
-File "upcast.bad.php", line 9, characters 3-27:
+File "upcast.bad.php", line 12, characters 3-29:
 Typing error (Typing[4110])
-  File "upcast.bad.php", line 8, characters 19-21:
+  File "upcast.bad.php", line 11, characters 21-23:
   Expected `int`
-  File "upcast.bad.php", line 9, characters 20-26:
+  File "upcast.bad.php", line 12, characters 22-28:
   But got `dynamic`
-  File "upcast.bad.php", line 9, characters 20-26:
-  This type argument to `Vector` must match exactly (it is invariant)
+  File "upcast.bad.php", line 12, characters 22-28:
+  This type argument to `MyVector` must match exactly (it is invariant)

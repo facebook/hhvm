@@ -1,6 +1,6 @@
 File "shape_with_required_supertype_field_and_optional_subtype_field.php", line 13, characters 21-37:
 Invalid argument (Typing[4163])
-  File "shape_with_required_supertype_field_and_optional_subtype_field.php", line 4, characters 23-25:
+  File "shape_with_required_supertype_field_and_optional_subtype_field.php", line 8, characters 29-35:
   The field `a` is **optional**
   File "shape_with_required_supertype_field_and_optional_subtype_field.php", line 6, characters 28-36:
   The field `a` is defined as **required**

@@ -1,6 +1,6 @@
 File "shape_modified4.php", line 22, characters 10-11:
 Invalid return type (Typing[4163])
-  File "shape_modified4.php", line 20, characters 8-10:
+  File "shape_modified4.php", line 18, characters 8-22:
   The field `y` is **optional**
   File "shape_modified4.php", line 17, characters 27-34:
   The field `y` is defined as **required**

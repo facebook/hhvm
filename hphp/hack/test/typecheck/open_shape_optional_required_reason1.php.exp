@@ -1,0 +1,8 @@
+File "open_shape_optional_required_reason1.php", line 6, characters 7-8:
+Invalid argument (Typing[4163])
+  File "open_shape_optional_required_reason1.php", line 5, characters 14-23:
+  The field `field` is **optional**
+  File "open_shape_optional_required_reason1.php", line 3, characters 14-42:
+  The field `field` is defined as **required**
+  File "open_shape_optional_required_reason1.php", line 3, characters 31-36:
+  `field` is defined here

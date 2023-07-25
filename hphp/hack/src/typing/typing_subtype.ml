@@ -3073,7 +3073,7 @@ and simplify_subtype_shape
                 apply_reasons ~on_error
                 @@ Secondary.Required_field_is_optional
                      {
-                       pos = field_pos;
+                       pos = Reason.to_pos r_sub;
                        decl_pos = Reason.to_pos r_super;
                        name = printable_name;
                        def_pos = get_pos super_ty;

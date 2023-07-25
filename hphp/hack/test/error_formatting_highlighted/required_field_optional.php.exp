@@ -10,9 +10,9 @@ required_field_optional.php:13:10
      6 | );
      7 | 
 [3]  8 | function foo(bool $cond): my_shape {
-     9 |   $s = shape('x' => 0);
+[2]  9 |   $s = shape('x' => 0);
     10 |   if ($cond) {
-[2] 11 |     $s['y'] = true;
+    11 |     $s['y'] = true;
     12 |   }
 [1] 13 |   return $s;
     14 | }

@@ -910,19 +910,23 @@ struct Decode<type::map<Key, Value>> {
       return;
     }
 
+    bool sorted = true;
     typename Map::container_type tmp(map.get_allocator());
     apache::thrift::detail::pm::reserve_if_possible(&tmp, map_size);
-    for (size_t i = 0; i < map_size; ++i) {
+    {
+      auto& elem0 =
+          apache::thrift::detail::pm::emplace_back_default_map(tmp, map);
+      Decode<Key>{}(prot, elem0.first);
+      Decode<Value>{}(prot, elem0.second);
+    }
+    for (size_t i = 1; i < map_size; ++i) {
       auto& elem =
           apache::thrift::detail::pm::emplace_back_default_map(tmp, map);
       Decode<Key>{}(prot, elem.first);
       Decode<Value>{}(prot, elem.second);
+      sorted = sorted && map.key_comp()(tmp[i - 1].first, elem.first);
     }
 
-    const bool sorted =
-        std::is_sorted(tmp.begin(), tmp.end(), [&](auto& l, auto& r) {
-          return map.key_comp()(l.first, r.first);
-        });
     using folly::sorted_unique;
     map = sorted ? Map(sorted_unique, std::move(tmp)) : Map(std::move(tmp));
   }

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <sys/resource.h>
+
 #include <gflags/gflags.h>
 #include <glog/logging.h>
 

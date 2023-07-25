@@ -30,9 +30,9 @@ namespace py.asyncio apache_thrift_asyncio.field_mask
 namespace go thrift.lib.thrift.field_mask
 namespace py thrift.lib.thrift.field_mask
 
-typedef map<i16, Mask> (cpp.template = "folly::F14VectorMap") FieldIdToMask
-typedef map<i64, Mask> (cpp.template = "folly::F14VectorMap") MapIdToMask
-typedef map<string, Mask> (cpp.template = "folly::F14VectorMap") MapStringToMask
+typedef map<i16, Mask> FieldIdToMask
+typedef map<i64, Mask> MapIdToMask
+typedef map<string, Mask> MapStringToMask
 
 /**
  *  Overview

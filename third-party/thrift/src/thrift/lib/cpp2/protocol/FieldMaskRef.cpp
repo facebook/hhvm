@@ -151,7 +151,7 @@ const Mask& getMask(const MapIdToMask& map, detail::MapId id) {
 
 // Gets the mask of the given string if it exists in the string map, otherwise,
 // returns noneMask.
-const Mask& getMask(const MapStringToMask& map, std::string_view key) {
+const Mask& getMask(const MapStringToMask& map, const std::string& key) {
   return folly::get_ref_default(map, key, field_mask_constants::noneMask());
 }
 
@@ -198,7 +198,7 @@ MaskRef MaskRef::get(detail::MapId id) const {
   return MaskRef{getMask(mask.excludes_map_ref().value(), id), !is_exclusion};
 }
 
-MaskRef MaskRef::get(std::string_view key) const {
+MaskRef MaskRef::get(const std::string& key) const {
   if (isAllMask() || isNoneMask()) { // This whole map is included or excluded.
     return *this;
   }

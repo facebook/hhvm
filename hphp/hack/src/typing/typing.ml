@@ -3954,7 +3954,7 @@ and expr_
           (fun th elements -> Aast.ValCollection ((p, Vec), th, elements)),
           (fun value_ty -> MakeType.vec (Reason.Rwitness p) value_ty),
           None,
-          true )
+          false )
       | _ ->
         (* The parent match makes this case impossible *)
         failwith "impossible match case"
@@ -4012,7 +4012,7 @@ and expr_
           name,
           (fun th pairs -> Aast.KeyValCollection ((p, Dict), th, pairs)),
           (fun k v -> MakeType.dict (Reason.Rwitness p) k v),
-          true )
+          false )
       | _ ->
         (* The parent match makes this case impossible *)
         failwith "impossible match case"

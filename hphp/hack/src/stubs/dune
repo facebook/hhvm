@@ -100,6 +100,14 @@
     (pps lwt_ppx ppx_deriving.std)))
 
 (library
+  (name depgraph_decompress_ffi)
+  (wrapped false)
+  (modules
+    depgraph_decompress_ffi)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))
+
+(library
  (name experiments_config_file_stubs)
  (wrapped false)
  (modules experiments_config_file)

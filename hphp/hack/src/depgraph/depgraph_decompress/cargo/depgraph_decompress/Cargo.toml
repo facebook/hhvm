@@ -10,10 +10,5 @@ name = "depgraph_decompress"
 path = "../../main.rs"
 
 [dependencies]
-bytemuck = { version = "1.12.3", features = ["derive"] }
 clap = { version = "3.2.25", features = ["derive", "env", "regex", "unicode", "wrap_help"] }
-depgraph_reader = { version = "0.0.0", path = "../../../cargo/depgraph_reader" }
-memmap2 = "0.5.10"
-rayon = "1.2"
-vint64 = "1.0.1"
-zstd = { version = "0.11.2+zstd.1.5.2", features = ["experimental", "zstdmt"] }
+decompress = { version = "0.0.0", path = "../../decompress" }

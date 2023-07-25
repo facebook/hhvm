@@ -124,16 +124,22 @@ let run_saved_state_future
     let use_compressed_dep_graph =
       genv.local_config.ServerLocalConfig.use_compressed_dep_graph
     in
-    if use_compressed_dep_graph then (
-      let _ = compressed_dep_table_path in
-      (* TODO: Decompress and load deptable *)
-      Hh_logger.log
-        "Dep graph decompression unimplemented. Falling back to old implementation for now";
-      lock_and_load_deptable
-        ~base_file_name:(Path.to_string deptable_naming_table_blob_path)
-        ~deptable
-        ~ignore_hh_version
-    ) else
+    if use_compressed_dep_graph then
+      let deptable_result =
+        Depgraph_decompress_ffi.decompress
+          ~compressed_dg_path:(Path.to_string compressed_dep_table_path)
+      in
+      match deptable_result with
+      | Ok decompressed_depgraph_path ->
+        let deptable = deptable_with_filename decompressed_depgraph_path in
+        Hh_logger.log "Done decompressing dep graph";
+        lock_and_load_deptable
+          ~base_file_name:(Path.to_string deptable_naming_table_blob_path)
+          ~deptable
+          ~ignore_hh_version
+      | Error error ->
+        failwith (Printf.sprintf "Failed to decompress dep graph: %s" error)
+    else
       lock_and_load_deptable
         ~base_file_name:(Path.to_string deptable_naming_table_blob_path)
         ~deptable

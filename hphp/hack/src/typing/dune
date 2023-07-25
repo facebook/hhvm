@@ -478,6 +478,7 @@
   core_kernel
   decl_counters
   hh_distc_ffi
+  depgraph_decompress_ffi
   decl_service
   server_env
   server_env_build

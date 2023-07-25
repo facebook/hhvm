@@ -1,7 +1,0 @@
-File "print_big_union.php", line 17, characters 3-14:
-  ~?(int | string)
-File "print_big_union.php", line 21, characters 3-14:
-  ~?arraykey
-File "print_big_union.php", line 30, characters 3-14:
-  ~?(int | string)
-No errors

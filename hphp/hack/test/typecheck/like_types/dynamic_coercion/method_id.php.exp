@@ -1,6 +1,0 @@
-File "method_id.php", line 10, characters 26-27:
-Invalid argument (Typing[4110])
-  File "method_id.php", line 5, characters 21-23:
-  Expected `int`
-  File "method_id.php", line 8, characters 15-21:
-  But got `dynamic`

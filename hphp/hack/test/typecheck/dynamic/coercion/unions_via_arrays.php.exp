@@ -1,4 +1,0 @@
-File "unions_via_arrays.php", line 6, characters 7-16:
-You are trying to access the method `someMethod` but this is a string (Typing[4062])
-File "unions_via_arrays.php", line 4, characters 16-20:
-Definition is here

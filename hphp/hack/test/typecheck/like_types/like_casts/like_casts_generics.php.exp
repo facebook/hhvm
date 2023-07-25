@@ -1,8 +1,0 @@
-File "like_casts_generics.php", line 4, characters 8-9:
-Invalid `as` expression hint (Typing[4195])
-File "like_casts_generics.php", line 4, characters 8-9:
-The `as` operator cannot be used with an erased generic type parameter
-File "like_casts_generics.php", line 6, characters 8-9:
-Invalid `as` expression hint (Typing[4195])
-File "like_casts_generics.php", line 6, characters 8-9:
-The `as` operator cannot be used with a reified type parameter that is not marked `<<__Enforceable>>`

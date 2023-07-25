@@ -1,6 +1,0 @@
-File "lambda_hint.php", line 5, characters 6-7:
-Invalid argument (Typing[4110])
-File "lambda_hint.php", line 4, characters 23-25:
-Expected `int`
-File "lambda_hint.php", line 4, characters 39-45:
-But got `dynamic`

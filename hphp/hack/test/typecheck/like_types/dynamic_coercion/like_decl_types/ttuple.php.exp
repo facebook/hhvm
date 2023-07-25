@@ -1,6 +1,0 @@
-File "ttuple.php", line 5, characters 10-11:
-Invalid return type (Typing[4110])
-File "ttuple.php", line 4, characters 29-38:
-Expected `(int, int)`
-File "ttuple.php", line 4, characters 12-22:
-But got `dynamic`

@@ -1,6 +1,0 @@
-File "return.php", line 8, characters 10-17:
-Invalid return type (Typing[4110])
-  File "return.php", line 7, characters 22-25:
-  Expected `dynamic`
-  File "return.php", line 8, characters 10-17:
-  But got `string`

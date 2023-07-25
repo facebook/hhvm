@@ -1,6 +1,0 @@
-File "vecs.php", line 20, characters 10-11:
-Invalid return type (Typing[4110])
-  File "vecs.php", line 19, characters 29-37:
-  Expected `dynamic`
-  File "vecs.php", line 19, characters 14-22:
-  But got `vec<~int>`

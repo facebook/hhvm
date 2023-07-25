@@ -1,6 +1,0 @@
-File "tapply_enum.php", line 9, characters 10-14:
-Invalid return type (Typing[4110])
-File "tapply_enum.php", line 8, characters 15-17:
-Expected `Pos`
-File "tapply_enum.php", line 4, characters 17-23:
-But got `dynamic`

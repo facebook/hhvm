@@ -1,6 +1,0 @@
-File "toption.php", line 11, characters 10-14:
-Invalid return type (Typing[4110])
-File "toption.php", line 10, characters 28-37:
-Expected `(int, int)`
-File "toption.php", line 4, characters 17-23:
-But got `dynamic`

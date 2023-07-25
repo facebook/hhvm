@@ -1,8 +1,0 @@
-File "taccess.php", line 10, characters 12-16:
-Invalid return type (Typing[4110])
-  File "taccess.php", line 7, characters 18-20:
-  Expected `int`
-  File "taccess.php", line 9, characters 24-30:
-    resulting from expanding the type constant `this::T`
-  File "taccess.php", line 4, characters 17-23:
-  But got `dynamic`

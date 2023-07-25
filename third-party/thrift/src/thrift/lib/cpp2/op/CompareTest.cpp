@@ -252,5 +252,17 @@ TEST(CompareTest, UnorderedFields) {
   EXPECT_TRUE(op::less<test::CppTemplateListField>(lhs, rhs));
 }
 
+TEST(CompareTest, Union) {
+  using detail::UnionLessThan;
+  test::UnionIntegers empty, u1, u2;
+  u1.myI16_ref() = 10;
+  u2.myI32_ref() = 1;
+  EXPECT_TRUE(UnionLessThan{}(empty, u1));
+  EXPECT_TRUE(UnionLessThan{}(u1, u2));
+  EXPECT_FALSE(UnionLessThan{}(u1, u1));
+  EXPECT_FALSE(UnionLessThan{}(u2, u1));
+  EXPECT_FALSE(UnionLessThan{}(empty, empty));
+}
+
 } // namespace
 } // namespace apache::thrift::op

@@ -145,3 +145,8 @@ struct NonStringMapKeyFields {
   // @lint-ignore THRIFTCHECKS
   7: map<double, i32> f7;
 }
+
+union UnionIntegers {
+  1: i16 myI16;
+  2: i32 myI32;
+}

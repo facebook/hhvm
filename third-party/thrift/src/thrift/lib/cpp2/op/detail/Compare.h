@@ -592,6 +592,27 @@ struct StructLessThan {
   }
 };
 
+template <template <class...> class LessThanImpl = LessThan>
+struct UnionLessThan {
+  template <class T>
+  bool operator()(const T& lhs, const T& rhs) const {
+    if (lhs.getType() != rhs.getType()) {
+      return lhs.getType() < rhs.getType();
+    }
+
+    return invoke_by_field_id<T>(
+        static_cast<FieldId>(lhs.getType()),
+        [&](auto id) {
+          using Id = decltype(id);
+          using Tag = get_type_tag<T, Id>;
+          return LessThanImpl<Tag>{}(*get<Id>(lhs), *get<Id>(rhs));
+        },
+        [] {
+          return false; // union is __EMPTY__
+        });
+  }
+};
+
 } // namespace detail
 } // namespace op
 } // namespace thrift

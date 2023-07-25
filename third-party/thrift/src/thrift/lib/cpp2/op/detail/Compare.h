@@ -528,8 +528,8 @@ template <typename Adapter, typename Tag>
 struct EqualTo<type::adapted<Adapter, Tag>> {
   using adapted_tag = type::adapted<Adapter, Tag>;
   static_assert(type::is_concrete_v<adapted_tag>, "");
-  template <typename T1, typename T2 = T1>
-  constexpr bool operator()(const T1& lhs, const T2& rhs) const {
+  template <typename T>
+  constexpr bool operator()(const T& lhs, const T& rhs) const {
     return ::apache::thrift::adapt_detail::equal<Adapter>(lhs, rhs);
   }
 };
@@ -537,8 +537,8 @@ template <typename Adapter, typename Tag>
 struct LessThan<type::adapted<Adapter, Tag>> {
   using adapted_tag = type::adapted<Adapter, Tag>;
   static_assert(type::is_concrete_v<adapted_tag>, "");
-  template <typename T1, typename T2 = T1>
-  constexpr bool operator()(const T1& lhs, const T2& rhs) const {
+  template <typename T>
+  constexpr bool operator()(const T& lhs, const T& rhs) const {
     return ::apache::thrift::adapt_detail::less<Adapter>(lhs, rhs);
   }
 };

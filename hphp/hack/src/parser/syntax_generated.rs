@@ -859,6 +859,30 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_match_statement(_: &C, match_statement_keyword: Self, match_statement_left_paren: Self, match_statement_expression: Self, match_statement_right_paren: Self, match_statement_left_brace: Self, match_statement_arms: Self, match_statement_right_brace: Self) -> Self {
+        let syntax = SyntaxVariant::MatchStatement(Box::new(MatchStatementChildren {
+            match_statement_keyword,
+            match_statement_left_paren,
+            match_statement_expression,
+            match_statement_right_paren,
+            match_statement_left_brace,
+            match_statement_arms,
+            match_statement_right_brace,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
+    fn make_match_statement_arm(_: &C, match_statement_arm_pattern: Self, match_statement_arm_arrow: Self, match_statement_arm_body: Self) -> Self {
+        let syntax = SyntaxVariant::MatchStatementArm(Box::new(MatchStatementArmChildren {
+            match_statement_arm_pattern,
+            match_statement_arm_arrow,
+            match_statement_arm_body,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
     fn make_return_statement(_: &C, return_keyword: Self, return_expression: Self, return_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::ReturnStatement(Box::new(ReturnStatementChildren {
             return_keyword,
@@ -976,6 +1000,35 @@ where
             anonymous_use_left_paren,
             anonymous_use_variables,
             anonymous_use_right_paren,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
+    fn make_variable_pattern(_: &C, variable_pattern_variable: Self) -> Self {
+        let syntax = SyntaxVariant::VariablePattern(Box::new(VariablePatternChildren {
+            variable_pattern_variable,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
+    fn make_constructor_pattern(_: &C, constructor_pattern_constructor: Self, constructor_pattern_left_paren: Self, constructor_pattern_members: Self, constructor_pattern_right_paren: Self) -> Self {
+        let syntax = SyntaxVariant::ConstructorPattern(Box::new(ConstructorPatternChildren {
+            constructor_pattern_constructor,
+            constructor_pattern_left_paren,
+            constructor_pattern_members,
+            constructor_pattern_right_paren,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
+    fn make_refinement_pattern(_: &C, refinement_pattern_variable: Self, refinement_pattern_colon: Self, refinement_pattern_specifier: Self) -> Self {
+        let syntax = SyntaxVariant::RefinementPattern(Box::new(RefinementPatternChildren {
+            refinement_pattern_variable,
+            refinement_pattern_colon,
+            refinement_pattern_specifier,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
@@ -2591,6 +2644,24 @@ where
                 let acc = f(default_colon, acc);
                 acc
             },
+            SyntaxVariant::MatchStatement(x) => {
+                let MatchStatementChildren { match_statement_keyword, match_statement_left_paren, match_statement_expression, match_statement_right_paren, match_statement_left_brace, match_statement_arms, match_statement_right_brace } = *x;
+                let acc = f(match_statement_keyword, acc);
+                let acc = f(match_statement_left_paren, acc);
+                let acc = f(match_statement_expression, acc);
+                let acc = f(match_statement_right_paren, acc);
+                let acc = f(match_statement_left_brace, acc);
+                let acc = f(match_statement_arms, acc);
+                let acc = f(match_statement_right_brace, acc);
+                acc
+            },
+            SyntaxVariant::MatchStatementArm(x) => {
+                let MatchStatementArmChildren { match_statement_arm_pattern, match_statement_arm_arrow, match_statement_arm_body } = *x;
+                let acc = f(match_statement_arm_pattern, acc);
+                let acc = f(match_statement_arm_arrow, acc);
+                let acc = f(match_statement_arm_body, acc);
+                acc
+            },
             SyntaxVariant::ReturnStatement(x) => {
                 let ReturnStatementChildren { return_keyword, return_expression, return_semicolon } = *x;
                 let acc = f(return_keyword, acc);
@@ -2678,6 +2749,26 @@ where
                 let acc = f(anonymous_use_left_paren, acc);
                 let acc = f(anonymous_use_variables, acc);
                 let acc = f(anonymous_use_right_paren, acc);
+                acc
+            },
+            SyntaxVariant::VariablePattern(x) => {
+                let VariablePatternChildren { variable_pattern_variable } = *x;
+                let acc = f(variable_pattern_variable, acc);
+                acc
+            },
+            SyntaxVariant::ConstructorPattern(x) => {
+                let ConstructorPatternChildren { constructor_pattern_constructor, constructor_pattern_left_paren, constructor_pattern_members, constructor_pattern_right_paren } = *x;
+                let acc = f(constructor_pattern_constructor, acc);
+                let acc = f(constructor_pattern_left_paren, acc);
+                let acc = f(constructor_pattern_members, acc);
+                let acc = f(constructor_pattern_right_paren, acc);
+                acc
+            },
+            SyntaxVariant::RefinementPattern(x) => {
+                let RefinementPatternChildren { refinement_pattern_variable, refinement_pattern_colon, refinement_pattern_specifier } = *x;
+                let acc = f(refinement_pattern_variable, acc);
+                let acc = f(refinement_pattern_colon, acc);
+                let acc = f(refinement_pattern_specifier, acc);
                 acc
             },
             SyntaxVariant::LambdaExpression(x) => {
@@ -3464,6 +3555,8 @@ where
             SyntaxVariant::SwitchFallthrough {..} => SyntaxKind::SwitchFallthrough,
             SyntaxVariant::CaseLabel {..} => SyntaxKind::CaseLabel,
             SyntaxVariant::DefaultLabel {..} => SyntaxKind::DefaultLabel,
+            SyntaxVariant::MatchStatement {..} => SyntaxKind::MatchStatement,
+            SyntaxVariant::MatchStatementArm {..} => SyntaxKind::MatchStatementArm,
             SyntaxVariant::ReturnStatement {..} => SyntaxKind::ReturnStatement,
             SyntaxVariant::YieldBreakStatement {..} => SyntaxKind::YieldBreakStatement,
             SyntaxVariant::ThrowStatement {..} => SyntaxKind::ThrowStatement,
@@ -3475,6 +3568,9 @@ where
             SyntaxVariant::AnonymousClass {..} => SyntaxKind::AnonymousClass,
             SyntaxVariant::AnonymousFunction {..} => SyntaxKind::AnonymousFunction,
             SyntaxVariant::AnonymousFunctionUseClause {..} => SyntaxKind::AnonymousFunctionUseClause,
+            SyntaxVariant::VariablePattern {..} => SyntaxKind::VariablePattern,
+            SyntaxVariant::ConstructorPattern {..} => SyntaxKind::ConstructorPattern,
+            SyntaxVariant::RefinementPattern {..} => SyntaxKind::RefinementPattern,
             SyntaxVariant::LambdaExpression {..} => SyntaxKind::LambdaExpression,
             SyntaxVariant::LambdaSignature {..} => SyntaxKind::LambdaSignature,
             SyntaxVariant::CastExpression {..} => SyntaxKind::CastExpression,
@@ -4112,6 +4208,22 @@ where
                  default_keyword: ts.pop().unwrap(),
                  
              })),
+             (SyntaxKind::MatchStatement, 7) => SyntaxVariant::MatchStatement(Box::new(MatchStatementChildren {
+                 match_statement_right_brace: ts.pop().unwrap(),
+                 match_statement_arms: ts.pop().unwrap(),
+                 match_statement_left_brace: ts.pop().unwrap(),
+                 match_statement_right_paren: ts.pop().unwrap(),
+                 match_statement_expression: ts.pop().unwrap(),
+                 match_statement_left_paren: ts.pop().unwrap(),
+                 match_statement_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::MatchStatementArm, 3) => SyntaxVariant::MatchStatementArm(Box::new(MatchStatementArmChildren {
+                 match_statement_arm_body: ts.pop().unwrap(),
+                 match_statement_arm_arrow: ts.pop().unwrap(),
+                 match_statement_arm_pattern: ts.pop().unwrap(),
+                 
+             })),
              (SyntaxKind::ReturnStatement, 3) => SyntaxVariant::ReturnStatement(Box::new(ReturnStatementChildren {
                  return_semicolon: ts.pop().unwrap(),
                  return_expression: ts.pop().unwrap(),
@@ -4188,6 +4300,23 @@ where
                  anonymous_use_variables: ts.pop().unwrap(),
                  anonymous_use_left_paren: ts.pop().unwrap(),
                  anonymous_use_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::VariablePattern, 1) => SyntaxVariant::VariablePattern(Box::new(VariablePatternChildren {
+                 variable_pattern_variable: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::ConstructorPattern, 4) => SyntaxVariant::ConstructorPattern(Box::new(ConstructorPatternChildren {
+                 constructor_pattern_right_paren: ts.pop().unwrap(),
+                 constructor_pattern_members: ts.pop().unwrap(),
+                 constructor_pattern_left_paren: ts.pop().unwrap(),
+                 constructor_pattern_constructor: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::RefinementPattern, 3) => SyntaxVariant::RefinementPattern(Box::new(RefinementPatternChildren {
+                 refinement_pattern_specifier: ts.pop().unwrap(),
+                 refinement_pattern_colon: ts.pop().unwrap(),
+                 refinement_pattern_variable: ts.pop().unwrap(),
                  
              })),
              (SyntaxKind::LambdaExpression, 5) => SyntaxVariant::LambdaExpression(Box::new(LambdaExpressionChildren {
@@ -4882,6 +5011,8 @@ where
             SyntaxVariant::SwitchFallthrough(x) => unsafe { std::slice::from_raw_parts(&x.fallthrough_keyword, 2) },
             SyntaxVariant::CaseLabel(x) => unsafe { std::slice::from_raw_parts(&x.case_keyword, 3) },
             SyntaxVariant::DefaultLabel(x) => unsafe { std::slice::from_raw_parts(&x.default_keyword, 2) },
+            SyntaxVariant::MatchStatement(x) => unsafe { std::slice::from_raw_parts(&x.match_statement_keyword, 7) },
+            SyntaxVariant::MatchStatementArm(x) => unsafe { std::slice::from_raw_parts(&x.match_statement_arm_pattern, 3) },
             SyntaxVariant::ReturnStatement(x) => unsafe { std::slice::from_raw_parts(&x.return_keyword, 3) },
             SyntaxVariant::YieldBreakStatement(x) => unsafe { std::slice::from_raw_parts(&x.yield_break_keyword, 3) },
             SyntaxVariant::ThrowStatement(x) => unsafe { std::slice::from_raw_parts(&x.throw_keyword, 3) },
@@ -4893,6 +5024,9 @@ where
             SyntaxVariant::AnonymousClass(x) => unsafe { std::slice::from_raw_parts(&x.anonymous_class_class_keyword, 9) },
             SyntaxVariant::AnonymousFunction(x) => unsafe { std::slice::from_raw_parts(&x.anonymous_attribute_spec, 12) },
             SyntaxVariant::AnonymousFunctionUseClause(x) => unsafe { std::slice::from_raw_parts(&x.anonymous_use_keyword, 4) },
+            SyntaxVariant::VariablePattern(x) => unsafe { std::slice::from_raw_parts(&x.variable_pattern_variable, 1) },
+            SyntaxVariant::ConstructorPattern(x) => unsafe { std::slice::from_raw_parts(&x.constructor_pattern_constructor, 4) },
+            SyntaxVariant::RefinementPattern(x) => unsafe { std::slice::from_raw_parts(&x.refinement_pattern_variable, 3) },
             SyntaxVariant::LambdaExpression(x) => unsafe { std::slice::from_raw_parts(&x.lambda_attribute_spec, 5) },
             SyntaxVariant::LambdaSignature(x) => unsafe { std::slice::from_raw_parts(&x.lambda_left_paren, 7) },
             SyntaxVariant::CastExpression(x) => unsafe { std::slice::from_raw_parts(&x.cast_left_paren, 4) },
@@ -5067,6 +5201,8 @@ where
             SyntaxVariant::SwitchFallthrough(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.fallthrough_keyword, 2) },
             SyntaxVariant::CaseLabel(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.case_keyword, 3) },
             SyntaxVariant::DefaultLabel(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.default_keyword, 2) },
+            SyntaxVariant::MatchStatement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.match_statement_keyword, 7) },
+            SyntaxVariant::MatchStatementArm(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.match_statement_arm_pattern, 3) },
             SyntaxVariant::ReturnStatement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.return_keyword, 3) },
             SyntaxVariant::YieldBreakStatement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.yield_break_keyword, 3) },
             SyntaxVariant::ThrowStatement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.throw_keyword, 3) },
@@ -5078,6 +5214,9 @@ where
             SyntaxVariant::AnonymousClass(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.anonymous_class_class_keyword, 9) },
             SyntaxVariant::AnonymousFunction(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.anonymous_attribute_spec, 12) },
             SyntaxVariant::AnonymousFunctionUseClause(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.anonymous_use_keyword, 4) },
+            SyntaxVariant::VariablePattern(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.variable_pattern_variable, 1) },
+            SyntaxVariant::ConstructorPattern(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.constructor_pattern_constructor, 4) },
+            SyntaxVariant::RefinementPattern(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.refinement_pattern_variable, 3) },
             SyntaxVariant::LambdaExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.lambda_attribute_spec, 5) },
             SyntaxVariant::LambdaSignature(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.lambda_left_paren, 7) },
             SyntaxVariant::CastExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.cast_left_paren, 4) },
@@ -5862,6 +6001,26 @@ pub struct DefaultLabelChildren<T, V> {
 
 #[derive(Debug, Clone)]
 #[repr(C)]
+pub struct MatchStatementChildren<T, V> {
+    pub match_statement_keyword: Syntax<T, V>,
+    pub match_statement_left_paren: Syntax<T, V>,
+    pub match_statement_expression: Syntax<T, V>,
+    pub match_statement_right_paren: Syntax<T, V>,
+    pub match_statement_left_brace: Syntax<T, V>,
+    pub match_statement_arms: Syntax<T, V>,
+    pub match_statement_right_brace: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
+#[repr(C)]
+pub struct MatchStatementArmChildren<T, V> {
+    pub match_statement_arm_pattern: Syntax<T, V>,
+    pub match_statement_arm_arrow: Syntax<T, V>,
+    pub match_statement_arm_body: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
+#[repr(C)]
 pub struct ReturnStatementChildren<T, V> {
     pub return_keyword: Syntax<T, V>,
     pub return_expression: Syntax<T, V>,
@@ -5958,6 +6117,29 @@ pub struct AnonymousFunctionUseClauseChildren<T, V> {
     pub anonymous_use_left_paren: Syntax<T, V>,
     pub anonymous_use_variables: Syntax<T, V>,
     pub anonymous_use_right_paren: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
+#[repr(C)]
+pub struct VariablePatternChildren<T, V> {
+    pub variable_pattern_variable: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
+#[repr(C)]
+pub struct ConstructorPatternChildren<T, V> {
+    pub constructor_pattern_constructor: Syntax<T, V>,
+    pub constructor_pattern_left_paren: Syntax<T, V>,
+    pub constructor_pattern_members: Syntax<T, V>,
+    pub constructor_pattern_right_paren: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
+#[repr(C)]
+pub struct RefinementPatternChildren<T, V> {
+    pub refinement_pattern_variable: Syntax<T, V>,
+    pub refinement_pattern_colon: Syntax<T, V>,
+    pub refinement_pattern_specifier: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
@@ -6833,6 +7015,8 @@ pub enum SyntaxVariant<T, V> {
     SwitchFallthrough(Box<SwitchFallthroughChildren<T, V>>),
     CaseLabel(Box<CaseLabelChildren<T, V>>),
     DefaultLabel(Box<DefaultLabelChildren<T, V>>),
+    MatchStatement(Box<MatchStatementChildren<T, V>>),
+    MatchStatementArm(Box<MatchStatementArmChildren<T, V>>),
     ReturnStatement(Box<ReturnStatementChildren<T, V>>),
     YieldBreakStatement(Box<YieldBreakStatementChildren<T, V>>),
     ThrowStatement(Box<ThrowStatementChildren<T, V>>),
@@ -6844,6 +7028,9 @@ pub enum SyntaxVariant<T, V> {
     AnonymousClass(Box<AnonymousClassChildren<T, V>>),
     AnonymousFunction(Box<AnonymousFunctionChildren<T, V>>),
     AnonymousFunctionUseClause(Box<AnonymousFunctionUseClauseChildren<T, V>>),
+    VariablePattern(Box<VariablePatternChildren<T, V>>),
+    ConstructorPattern(Box<ConstructorPatternChildren<T, V>>),
+    RefinementPattern(Box<RefinementPatternChildren<T, V>>),
     LambdaExpression(Box<LambdaExpressionChildren<T, V>>),
     LambdaSignature(Box<LambdaSignatureChildren<T, V>>),
     CastExpression(Box<CastExpressionChildren<T, V>>),
@@ -7718,6 +7905,28 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     }
                 })
             },
+            MatchStatement(x) => {
+                get_index(7).and_then(|index| { match index {
+                        0 => Some(&x.match_statement_keyword),
+                    1 => Some(&x.match_statement_left_paren),
+                    2 => Some(&x.match_statement_expression),
+                    3 => Some(&x.match_statement_right_paren),
+                    4 => Some(&x.match_statement_left_brace),
+                    5 => Some(&x.match_statement_arms),
+                    6 => Some(&x.match_statement_right_brace),
+                        _ => None,
+                    }
+                })
+            },
+            MatchStatementArm(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.match_statement_arm_pattern),
+                    1 => Some(&x.match_statement_arm_arrow),
+                    2 => Some(&x.match_statement_arm_body),
+                        _ => None,
+                    }
+                })
+            },
             ReturnStatement(x) => {
                 get_index(3).and_then(|index| { match index {
                         0 => Some(&x.return_keyword),
@@ -7825,6 +8034,32 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     1 => Some(&x.anonymous_use_left_paren),
                     2 => Some(&x.anonymous_use_variables),
                     3 => Some(&x.anonymous_use_right_paren),
+                        _ => None,
+                    }
+                })
+            },
+            VariablePattern(x) => {
+                get_index(1).and_then(|index| { match index {
+                        0 => Some(&x.variable_pattern_variable),
+                        _ => None,
+                    }
+                })
+            },
+            ConstructorPattern(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.constructor_pattern_constructor),
+                    1 => Some(&x.constructor_pattern_left_paren),
+                    2 => Some(&x.constructor_pattern_members),
+                    3 => Some(&x.constructor_pattern_right_paren),
+                        _ => None,
+                    }
+                })
+            },
+            RefinementPattern(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.refinement_pattern_variable),
+                    1 => Some(&x.refinement_pattern_colon),
+                    2 => Some(&x.refinement_pattern_specifier),
                         _ => None,
                     }
                 })

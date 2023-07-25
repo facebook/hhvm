@@ -296,6 +296,12 @@ where S: SmartConstructors<State = St>,
     fn make_default_label(&mut self, arg0 : Self::Output, arg1 : Self::Output) -> Self::Output {
         compose(SyntaxKind::DefaultLabel, self.s.make_default_label(arg0.1, arg1.1))
     }
+    fn make_match_statement(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output, arg5 : Self::Output, arg6 : Self::Output) -> Self::Output {
+        compose(SyntaxKind::MatchStatement, self.s.make_match_statement(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1, arg5.1, arg6.1))
+    }
+    fn make_match_statement_arm(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output) -> Self::Output {
+        compose(SyntaxKind::MatchStatementArm, self.s.make_match_statement_arm(arg0.1, arg1.1, arg2.1))
+    }
     fn make_return_statement(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output) -> Self::Output {
         compose(SyntaxKind::ReturnStatement, self.s.make_return_statement(arg0.1, arg1.1, arg2.1))
     }
@@ -328,6 +334,15 @@ where S: SmartConstructors<State = St>,
     }
     fn make_anonymous_function_use_clause(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output) -> Self::Output {
         compose(SyntaxKind::AnonymousFunctionUseClause, self.s.make_anonymous_function_use_clause(arg0.1, arg1.1, arg2.1, arg3.1))
+    }
+    fn make_variable_pattern(&mut self, arg0 : Self::Output) -> Self::Output {
+        compose(SyntaxKind::VariablePattern, self.s.make_variable_pattern(arg0.1))
+    }
+    fn make_constructor_pattern(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output) -> Self::Output {
+        compose(SyntaxKind::ConstructorPattern, self.s.make_constructor_pattern(arg0.1, arg1.1, arg2.1, arg3.1))
+    }
+    fn make_refinement_pattern(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output) -> Self::Output {
+        compose(SyntaxKind::RefinementPattern, self.s.make_refinement_pattern(arg0.1, arg1.1, arg2.1))
     }
     fn make_lambda_expression(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output) -> Self::Output {
         compose(SyntaxKind::LambdaExpression, self.s.make_lambda_expression(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1))

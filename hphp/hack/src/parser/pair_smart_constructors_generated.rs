@@ -377,6 +377,14 @@ where
         Node(self.0.make_default_label(keyword.0, colon.0), self.1.make_default_label(keyword.1, colon.1))
     }
 
+    fn make_match_statement(&mut self, keyword: Self::Output, left_paren: Self::Output, expression: Self::Output, right_paren: Self::Output, left_brace: Self::Output, arms: Self::Output, right_brace: Self::Output) -> Self::Output {
+        Node(self.0.make_match_statement(keyword.0, left_paren.0, expression.0, right_paren.0, left_brace.0, arms.0, right_brace.0), self.1.make_match_statement(keyword.1, left_paren.1, expression.1, right_paren.1, left_brace.1, arms.1, right_brace.1))
+    }
+
+    fn make_match_statement_arm(&mut self, pattern: Self::Output, arrow: Self::Output, body: Self::Output) -> Self::Output {
+        Node(self.0.make_match_statement_arm(pattern.0, arrow.0, body.0), self.1.make_match_statement_arm(pattern.1, arrow.1, body.1))
+    }
+
     fn make_return_statement(&mut self, keyword: Self::Output, expression: Self::Output, semicolon: Self::Output) -> Self::Output {
         Node(self.0.make_return_statement(keyword.0, expression.0, semicolon.0), self.1.make_return_statement(keyword.1, expression.1, semicolon.1))
     }
@@ -419,6 +427,18 @@ where
 
     fn make_anonymous_function_use_clause(&mut self, keyword: Self::Output, left_paren: Self::Output, variables: Self::Output, right_paren: Self::Output) -> Self::Output {
         Node(self.0.make_anonymous_function_use_clause(keyword.0, left_paren.0, variables.0, right_paren.0), self.1.make_anonymous_function_use_clause(keyword.1, left_paren.1, variables.1, right_paren.1))
+    }
+
+    fn make_variable_pattern(&mut self, variable: Self::Output) -> Self::Output {
+        Node(self.0.make_variable_pattern(variable.0), self.1.make_variable_pattern(variable.1))
+    }
+
+    fn make_constructor_pattern(&mut self, constructor: Self::Output, left_paren: Self::Output, members: Self::Output, right_paren: Self::Output) -> Self::Output {
+        Node(self.0.make_constructor_pattern(constructor.0, left_paren.0, members.0, right_paren.0), self.1.make_constructor_pattern(constructor.1, left_paren.1, members.1, right_paren.1))
+    }
+
+    fn make_refinement_pattern(&mut self, variable: Self::Output, colon: Self::Output, specifier: Self::Output) -> Self::Output {
+        Node(self.0.make_refinement_pattern(variable.0, colon.0, specifier.0), self.1.make_refinement_pattern(variable.1, colon.1, specifier.1))
     }
 
     fn make_lambda_expression(&mut self, attribute_spec: Self::Output, async_: Self::Output, signature: Self::Output, arrow: Self::Output, body: Self::Output) -> Self::Output {

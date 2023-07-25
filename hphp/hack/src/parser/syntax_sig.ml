@@ -482,6 +482,20 @@ module type Syntax_S = sig
         default_keyword: t;
         default_colon: t;
       }
+    | MatchStatement of {
+        match_statement_keyword: t;
+        match_statement_left_paren: t;
+        match_statement_expression: t;
+        match_statement_right_paren: t;
+        match_statement_left_brace: t;
+        match_statement_arms: t;
+        match_statement_right_brace: t;
+      }
+    | MatchStatementArm of {
+        match_statement_arm_pattern: t;
+        match_statement_arm_arrow: t;
+        match_statement_arm_body: t;
+      }
     | ReturnStatement of {
         return_keyword: t;
         return_expression: t;
@@ -548,6 +562,18 @@ module type Syntax_S = sig
         anonymous_use_left_paren: t;
         anonymous_use_variables: t;
         anonymous_use_right_paren: t;
+      }
+    | VariablePattern of { variable_pattern_variable: t }
+    | ConstructorPattern of {
+        constructor_pattern_constructor: t;
+        constructor_pattern_left_paren: t;
+        constructor_pattern_members: t;
+        constructor_pattern_right_paren: t;
+      }
+    | RefinementPattern of {
+        refinement_pattern_variable: t;
+        refinement_pattern_colon: t;
+        refinement_pattern_specifier: t;
       }
     | LambdaExpression of {
         lambda_attribute_spec: t;
@@ -1275,6 +1301,10 @@ module type Syntax_S = sig
 
   val make_default_label : t -> t -> t
 
+  val make_match_statement : t -> t -> t -> t -> t -> t -> t -> t
+
+  val make_match_statement_arm : t -> t -> t -> t
+
   val make_return_statement : t -> t -> t -> t
 
   val make_yield_break_statement : t -> t -> t -> t
@@ -1297,6 +1327,12 @@ module type Syntax_S = sig
     t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
 
   val make_anonymous_function_use_clause : t -> t -> t -> t -> t
+
+  val make_variable_pattern : t -> t
+
+  val make_constructor_pattern : t -> t -> t -> t -> t
+
+  val make_refinement_pattern : t -> t -> t -> t
 
   val make_lambda_expression : t -> t -> t -> t -> t -> t
 
@@ -1639,6 +1675,10 @@ module type Syntax_S = sig
 
   val is_default_label : t -> bool
 
+  val is_match_statement : t -> bool
+
+  val is_match_statement_arm : t -> bool
+
   val is_return_statement : t -> bool
 
   val is_yield_break_statement : t -> bool
@@ -1660,6 +1700,12 @@ module type Syntax_S = sig
   val is_anonymous_function : t -> bool
 
   val is_anonymous_function_use_clause : t -> bool
+
+  val is_variable_pattern : t -> bool
+
+  val is_constructor_pattern : t -> bool
+
+  val is_refinement_pattern : t -> bool
 
   val is_lambda_expression : t -> bool
 

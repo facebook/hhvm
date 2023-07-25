@@ -1,6 +1,6 @@
 { "description" :
   "@generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2023-06-05-0000",
+  "version" : "2023-07-25-0000",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -141,6 +141,8 @@
       "token_text" : "lateinit" },
     { "token_kind" : "List",
       "token_text" : "list" },
+    { "token_kind" : "Match",
+      "token_text" : "match" },
     { "token_kind" : "Mixed",
       "token_text" : "mixed" },
     { "token_kind" : "Module",
@@ -1194,6 +1196,28 @@
         { "field_name" : "keyword" },
         { "field_name" : "colon" }
       ] },
+    { "kind_name" : "MatchStatement",
+      "type_name" : "match_statement",
+      "description" : "match_statement",
+      "prefix" : "match_statement",
+      "fields" : [
+        { "field_name" : "keyword" },
+        { "field_name" : "left_paren" },
+        { "field_name" : "expression" },
+        { "field_name" : "right_paren" },
+        { "field_name" : "left_brace" },
+        { "field_name" : "arms" },
+        { "field_name" : "right_brace" }
+      ] },
+    { "kind_name" : "MatchStatementArm",
+      "type_name" : "match_statement_arm",
+      "description" : "match_statement_arm",
+      "prefix" : "match_statement_arm",
+      "fields" : [
+        { "field_name" : "pattern" },
+        { "field_name" : "arrow" },
+        { "field_name" : "body" }
+      ] },
     { "kind_name" : "ReturnStatement",
       "type_name" : "return_statement",
       "description" : "return_statement",
@@ -1304,6 +1328,32 @@
         { "field_name" : "left_paren" },
         { "field_name" : "variables" },
         { "field_name" : "right_paren" }
+      ] },
+    { "kind_name" : "VariablePattern",
+      "type_name" : "variable_pattern",
+      "description" : "variable_pattern",
+      "prefix" : "variable_pattern",
+      "fields" : [
+        { "field_name" : "variable" }
+      ] },
+    { "kind_name" : "ConstructorPattern",
+      "type_name" : "constructor_pattern",
+      "description" : "constructor_pattern",
+      "prefix" : "constructor_pattern",
+      "fields" : [
+        { "field_name" : "constructor" },
+        { "field_name" : "left_paren" },
+        { "field_name" : "members" },
+        { "field_name" : "right_paren" }
+      ] },
+    { "kind_name" : "RefinementPattern",
+      "type_name" : "refinement_pattern",
+      "description" : "refinement_pattern",
+      "prefix" : "refinement_pattern",
+      "fields" : [
+        { "field_name" : "variable" },
+        { "field_name" : "colon" },
+        { "field_name" : "specifier" }
       ] },
     { "kind_name" : "LambdaExpression",
       "type_name" : "lambda_expression",

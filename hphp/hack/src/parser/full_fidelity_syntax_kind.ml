@@ -95,6 +95,8 @@ type t =
   | SwitchFallthrough
   | CaseLabel
   | DefaultLabel
+  | MatchStatement
+  | MatchStatementArm
   | ReturnStatement
   | YieldBreakStatement
   | ThrowStatement
@@ -106,6 +108,9 @@ type t =
   | AnonymousClass
   | AnonymousFunction
   | AnonymousFunctionUseClause
+  | VariablePattern
+  | ConstructorPattern
+  | RefinementPattern
   | LambdaExpression
   | LambdaSignature
   | CastExpression
@@ -279,6 +284,8 @@ let to_string kind =
   | SwitchFallthrough -> "switch_fallthrough"
   | CaseLabel -> "case_label"
   | DefaultLabel -> "default_label"
+  | MatchStatement -> "match_statement"
+  | MatchStatementArm -> "match_statement_arm"
   | ReturnStatement -> "return_statement"
   | YieldBreakStatement -> "yield_break_statement"
   | ThrowStatement -> "throw_statement"
@@ -290,6 +297,9 @@ let to_string kind =
   | AnonymousClass -> "anonymous_class"
   | AnonymousFunction -> "anonymous_function"
   | AnonymousFunctionUseClause -> "anonymous_function_use_clause"
+  | VariablePattern -> "variable_pattern"
+  | ConstructorPattern -> "constructor_pattern"
+  | RefinementPattern -> "refinement_pattern"
   | LambdaExpression -> "lambda_expression"
   | LambdaSignature -> "lambda_signature"
   | CastExpression -> "cast_expression"

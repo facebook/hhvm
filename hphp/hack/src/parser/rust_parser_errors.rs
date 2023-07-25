@@ -107,6 +107,7 @@ pub enum UnstableFeatures {
     CaseTypes,
     ModuleLevelTraits,
     TypedLocalVariables,
+    MatchStatements,
 }
 impl UnstableFeatures {
     // Preview features are allowed to run in prod. This function decides
@@ -136,6 +137,7 @@ impl UnstableFeatures {
             UnstableFeatures::CaseTypes => Unstable,
             UnstableFeatures::ModuleLevelTraits => Preview,
             UnstableFeatures::TypedLocalVariables => Unstable,
+            UnstableFeatures::MatchStatements => Unstable,
         }
     }
 }
@@ -5485,6 +5487,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             }
             OldAttributeSpecification(x) => {
                 self.old_attr_spec(node, &x.attributes);
+            }
+            MatchStatement(_) => {
+                self.check_can_use_feature(node, &UnstableFeatures::MatchStatements);
             }
             _ => {}
         }

@@ -160,6 +160,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
     | Syntax.NullableTypeSpecifier _
     | Syntax.LikeTypeSpecifier _
     | Syntax.SoftTypeSpecifier _
+    | Syntax.VariablePattern _
     | Syntax.ListItem _ ->
       transform_simple env node
     | Syntax.ReifiedTypeArgument
@@ -1361,6 +1362,51 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
     | Syntax.SwitchFallthrough
         { fallthrough_keyword = kw; fallthrough_semicolon = semi } ->
       Concat [t env kw; t env semi]
+    | Syntax.MatchStatement
+        {
+          match_statement_keyword = kw;
+          match_statement_left_paren = left_p;
+          match_statement_expression = expr;
+          match_statement_right_paren = right_p;
+          match_statement_left_brace = left_b;
+          match_statement_arms = arms;
+          match_statement_right_brace = right_b;
+        } ->
+      let arms = Syntax.syntax_node_to_list arms in
+      Concat
+        [
+          t env kw;
+          Space;
+          delimited_nest env left_p right_p [t env expr];
+          Space;
+          braced_block_nest env left_b right_b (List.map arms ~f:(t env));
+          Newline;
+        ]
+    | Syntax.MatchStatementArm
+        {
+          match_statement_arm_pattern = pat;
+          match_statement_arm_arrow = arrow;
+          match_statement_arm_body = body;
+        } ->
+      Concat
+        [
+          t env pat;
+          Space;
+          t env arrow;
+          Space;
+          (match Syntax.syntax body with
+          | Syntax.CompoundStatement
+              { compound_left_brace; compound_statements; compound_right_brace }
+            ->
+            handle_compound_statement
+              env
+              ~allow_collapse:true
+              compound_left_brace
+              compound_statements
+              compound_right_brace
+          | _ -> Concat [SplitWith Cost.Base; Nest [t env body]]);
+          Newline;
+        ]
     | Syntax.ReturnStatement
         {
           return_keyword = kw;
@@ -1456,6 +1502,28 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         } ->
       (* TODO: Revisit *)
       Concat [Space; t env kw; Space; transform_argish env left_p vars right_p]
+    | Syntax.ConstructorPattern
+        {
+          constructor_pattern_constructor = name;
+          constructor_pattern_left_paren = lp;
+          constructor_pattern_members = members;
+          constructor_pattern_right_paren = rp;
+        } ->
+      if
+        Syntax.is_missing lp
+        && Syntax.is_missing members
+        && Syntax.is_missing rp
+      then
+        t env name
+      else
+        transform_container_literal env name lp members rp
+    | Syntax.RefinementPattern
+        {
+          refinement_pattern_variable = var;
+          refinement_pattern_colon = colon;
+          refinement_pattern_specifier = ty;
+        } ->
+      Concat [t env var; t env colon; Space; t env ty]
     | Syntax.LambdaExpression
         {
           lambda_attribute_spec = attr;

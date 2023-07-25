@@ -94,6 +94,8 @@ pub trait SyntaxType<C>: SyntaxTypeBase<C>
     fn make_switch_fallthrough(ctx: &C, fallthrough_keyword: Self, fallthrough_semicolon: Self) -> Self;
     fn make_case_label(ctx: &C, case_keyword: Self, case_expression: Self, case_colon: Self) -> Self;
     fn make_default_label(ctx: &C, default_keyword: Self, default_colon: Self) -> Self;
+    fn make_match_statement(ctx: &C, match_statement_keyword: Self, match_statement_left_paren: Self, match_statement_expression: Self, match_statement_right_paren: Self, match_statement_left_brace: Self, match_statement_arms: Self, match_statement_right_brace: Self) -> Self;
+    fn make_match_statement_arm(ctx: &C, match_statement_arm_pattern: Self, match_statement_arm_arrow: Self, match_statement_arm_body: Self) -> Self;
     fn make_return_statement(ctx: &C, return_keyword: Self, return_expression: Self, return_semicolon: Self) -> Self;
     fn make_yield_break_statement(ctx: &C, yield_break_keyword: Self, yield_break_break: Self, yield_break_semicolon: Self) -> Self;
     fn make_throw_statement(ctx: &C, throw_keyword: Self, throw_expression: Self, throw_semicolon: Self) -> Self;
@@ -105,6 +107,9 @@ pub trait SyntaxType<C>: SyntaxTypeBase<C>
     fn make_anonymous_class(ctx: &C, anonymous_class_class_keyword: Self, anonymous_class_left_paren: Self, anonymous_class_argument_list: Self, anonymous_class_right_paren: Self, anonymous_class_extends_keyword: Self, anonymous_class_extends_list: Self, anonymous_class_implements_keyword: Self, anonymous_class_implements_list: Self, anonymous_class_body: Self) -> Self;
     fn make_anonymous_function(ctx: &C, anonymous_attribute_spec: Self, anonymous_async_keyword: Self, anonymous_function_keyword: Self, anonymous_left_paren: Self, anonymous_parameters: Self, anonymous_right_paren: Self, anonymous_ctx_list: Self, anonymous_colon: Self, anonymous_readonly_return: Self, anonymous_type: Self, anonymous_use: Self, anonymous_body: Self) -> Self;
     fn make_anonymous_function_use_clause(ctx: &C, anonymous_use_keyword: Self, anonymous_use_left_paren: Self, anonymous_use_variables: Self, anonymous_use_right_paren: Self) -> Self;
+    fn make_variable_pattern(ctx: &C, variable_pattern_variable: Self) -> Self;
+    fn make_constructor_pattern(ctx: &C, constructor_pattern_constructor: Self, constructor_pattern_left_paren: Self, constructor_pattern_members: Self, constructor_pattern_right_paren: Self) -> Self;
+    fn make_refinement_pattern(ctx: &C, refinement_pattern_variable: Self, refinement_pattern_colon: Self, refinement_pattern_specifier: Self) -> Self;
     fn make_lambda_expression(ctx: &C, lambda_attribute_spec: Self, lambda_async: Self, lambda_signature: Self, lambda_arrow: Self, lambda_body: Self) -> Self;
     fn make_lambda_signature(ctx: &C, lambda_left_paren: Self, lambda_parameters: Self, lambda_right_paren: Self, lambda_contexts: Self, lambda_colon: Self, lambda_readonly_return: Self, lambda_type: Self) -> Self;
     fn make_cast_expression(ctx: &C, cast_left_paren: Self, cast_type: Self, cast_right_paren: Self, cast_operand: Self) -> Self;

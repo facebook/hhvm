@@ -865,6 +865,30 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_match_statement(ctx: &C, keyword: Self, left_paren: Self, expression: Self, right_paren: Self, left_brace: Self, arms: Self, right_brace: Self) -> Self {
+        let syntax = SyntaxVariant::MatchStatement(ctx.get_arena().alloc(MatchStatementChildren {
+            keyword,
+            left_paren,
+            expression,
+            right_paren,
+            left_brace,
+            arms,
+            right_brace,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
+    fn make_match_statement_arm(ctx: &C, pattern: Self, arrow: Self, body: Self) -> Self {
+        let syntax = SyntaxVariant::MatchStatementArm(ctx.get_arena().alloc(MatchStatementArmChildren {
+            pattern,
+            arrow,
+            body,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
     fn make_return_statement(ctx: &C, keyword: Self, expression: Self, semicolon: Self) -> Self {
         let syntax = SyntaxVariant::ReturnStatement(ctx.get_arena().alloc(ReturnStatementChildren {
             keyword,
@@ -982,6 +1006,35 @@ where
             left_paren,
             variables,
             right_paren,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
+    fn make_variable_pattern(ctx: &C, variable: Self) -> Self {
+        let syntax = SyntaxVariant::VariablePattern(ctx.get_arena().alloc(VariablePatternChildren {
+            variable,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
+    fn make_constructor_pattern(ctx: &C, constructor: Self, left_paren: Self, members: Self, right_paren: Self) -> Self {
+        let syntax = SyntaxVariant::ConstructorPattern(ctx.get_arena().alloc(ConstructorPatternChildren {
+            constructor,
+            left_paren,
+            members,
+            right_paren,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
+    fn make_refinement_pattern(ctx: &C, variable: Self, colon: Self, specifier: Self) -> Self {
+        let syntax = SyntaxVariant::RefinementPattern(ctx.get_arena().alloc(RefinementPatternChildren {
+            variable,
+            colon,
+            specifier,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)

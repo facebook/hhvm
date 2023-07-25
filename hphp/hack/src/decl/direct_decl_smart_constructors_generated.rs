@@ -362,6 +362,14 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> SmartConstructors for DirectDec
         <Self as FlattenSmartConstructors>::make_default_label(self, keyword, colon)
     }
 
+    fn make_match_statement(&mut self, keyword: Self::Output, left_paren: Self::Output, expression: Self::Output, right_paren: Self::Output, left_brace: Self::Output, arms: Self::Output, right_brace: Self::Output) -> Self::Output {
+        <Self as FlattenSmartConstructors>::make_match_statement(self, keyword, left_paren, expression, right_paren, left_brace, arms, right_brace)
+    }
+
+    fn make_match_statement_arm(&mut self, pattern: Self::Output, arrow: Self::Output, body: Self::Output) -> Self::Output {
+        <Self as FlattenSmartConstructors>::make_match_statement_arm(self, pattern, arrow, body)
+    }
+
     fn make_return_statement(&mut self, keyword: Self::Output, expression: Self::Output, semicolon: Self::Output) -> Self::Output {
         <Self as FlattenSmartConstructors>::make_return_statement(self, keyword, expression, semicolon)
     }
@@ -404,6 +412,18 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> SmartConstructors for DirectDec
 
     fn make_anonymous_function_use_clause(&mut self, keyword: Self::Output, left_paren: Self::Output, variables: Self::Output, right_paren: Self::Output) -> Self::Output {
         <Self as FlattenSmartConstructors>::make_anonymous_function_use_clause(self, keyword, left_paren, variables, right_paren)
+    }
+
+    fn make_variable_pattern(&mut self, variable: Self::Output) -> Self::Output {
+        <Self as FlattenSmartConstructors>::make_variable_pattern(self, variable)
+    }
+
+    fn make_constructor_pattern(&mut self, constructor: Self::Output, left_paren: Self::Output, members: Self::Output, right_paren: Self::Output) -> Self::Output {
+        <Self as FlattenSmartConstructors>::make_constructor_pattern(self, constructor, left_paren, members, right_paren)
+    }
+
+    fn make_refinement_pattern(&mut self, variable: Self::Output, colon: Self::Output, specifier: Self::Output) -> Self::Output {
+        <Self as FlattenSmartConstructors>::make_refinement_pattern(self, variable, colon, specifier)
     }
 
     fn make_lambda_expression(&mut self, attribute_spec: Self::Output, async_: Self::Output, signature: Self::Output, arrow: Self::Output, body: Self::Output) -> Self::Output {

@@ -729,6 +729,26 @@ SyntaxVariant::DefaultLabel (DefaultLabelChildren{keyword,colon} ) => {
 ss.serialize_field("default_colon", &self.with(colon))?;
       ss.end()
 } 
+SyntaxVariant::MatchStatement (MatchStatementChildren{keyword,left_paren,expression,right_paren,left_brace,arms,right_brace} ) => {
+      let mut ss = s.serialize_struct("", 8)?;
+      ss.serialize_field("kind", "match_statement")?;
+      ss.serialize_field("match_statement_keyword", &self.with(keyword))?;
+ss.serialize_field("match_statement_left_paren", &self.with(left_paren))?;
+ss.serialize_field("match_statement_expression", &self.with(expression))?;
+ss.serialize_field("match_statement_right_paren", &self.with(right_paren))?;
+ss.serialize_field("match_statement_left_brace", &self.with(left_brace))?;
+ss.serialize_field("match_statement_arms", &self.with(arms))?;
+ss.serialize_field("match_statement_right_brace", &self.with(right_brace))?;
+      ss.end()
+} 
+SyntaxVariant::MatchStatementArm (MatchStatementArmChildren{pattern,arrow,body} ) => {
+      let mut ss = s.serialize_struct("", 4)?;
+      ss.serialize_field("kind", "match_statement_arm")?;
+      ss.serialize_field("match_statement_arm_pattern", &self.with(pattern))?;
+ss.serialize_field("match_statement_arm_arrow", &self.with(arrow))?;
+ss.serialize_field("match_statement_arm_body", &self.with(body))?;
+      ss.end()
+} 
 SyntaxVariant::ReturnStatement (ReturnStatementChildren{keyword,expression,semicolon} ) => {
       let mut ss = s.serialize_struct("", 4)?;
       ss.serialize_field("kind", "return_statement")?;
@@ -827,6 +847,29 @@ SyntaxVariant::AnonymousFunctionUseClause (AnonymousFunctionUseClauseChildren{ke
 ss.serialize_field("anonymous_use_left_paren", &self.with(left_paren))?;
 ss.serialize_field("anonymous_use_variables", &self.with(variables))?;
 ss.serialize_field("anonymous_use_right_paren", &self.with(right_paren))?;
+      ss.end()
+} 
+SyntaxVariant::VariablePattern (VariablePatternChildren{variable} ) => {
+      let mut ss = s.serialize_struct("", 2)?;
+      ss.serialize_field("kind", "variable_pattern")?;
+      ss.serialize_field("variable_pattern_variable", &self.with(variable))?;
+      ss.end()
+} 
+SyntaxVariant::ConstructorPattern (ConstructorPatternChildren{constructor,left_paren,members,right_paren} ) => {
+      let mut ss = s.serialize_struct("", 5)?;
+      ss.serialize_field("kind", "constructor_pattern")?;
+      ss.serialize_field("constructor_pattern_constructor", &self.with(constructor))?;
+ss.serialize_field("constructor_pattern_left_paren", &self.with(left_paren))?;
+ss.serialize_field("constructor_pattern_members", &self.with(members))?;
+ss.serialize_field("constructor_pattern_right_paren", &self.with(right_paren))?;
+      ss.end()
+} 
+SyntaxVariant::RefinementPattern (RefinementPatternChildren{variable,colon,specifier} ) => {
+      let mut ss = s.serialize_struct("", 4)?;
+      ss.serialize_field("kind", "refinement_pattern")?;
+      ss.serialize_field("refinement_pattern_variable", &self.with(variable))?;
+ss.serialize_field("refinement_pattern_colon", &self.with(colon))?;
+ss.serialize_field("refinement_pattern_specifier", &self.with(specifier))?;
       ss.end()
 } 
 SyntaxVariant::LambdaExpression (LambdaExpressionChildren{attribute_spec,async_,signature,arrow,body} ) => {

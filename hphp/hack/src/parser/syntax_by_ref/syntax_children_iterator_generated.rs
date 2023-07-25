@@ -802,6 +802,28 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     }
                 })
             },
+            MatchStatement(x) => {
+                get_index(7).and_then(|index| { match index {
+                        0 => Some(&x.keyword),
+                    1 => Some(&x.left_paren),
+                    2 => Some(&x.expression),
+                    3 => Some(&x.right_paren),
+                    4 => Some(&x.left_brace),
+                    5 => Some(&x.arms),
+                    6 => Some(&x.right_brace),
+                        _ => None,
+                    }
+                })
+            },
+            MatchStatementArm(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.pattern),
+                    1 => Some(&x.arrow),
+                    2 => Some(&x.body),
+                        _ => None,
+                    }
+                })
+            },
             ReturnStatement(x) => {
                 get_index(3).and_then(|index| { match index {
                         0 => Some(&x.keyword),
@@ -909,6 +931,32 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     1 => Some(&x.left_paren),
                     2 => Some(&x.variables),
                     3 => Some(&x.right_paren),
+                        _ => None,
+                    }
+                })
+            },
+            VariablePattern(x) => {
+                get_index(1).and_then(|index| { match index {
+                        0 => Some(&x.variable),
+                        _ => None,
+                    }
+                })
+            },
+            ConstructorPattern(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.constructor),
+                    1 => Some(&x.left_paren),
+                    2 => Some(&x.members),
+                    3 => Some(&x.right_paren),
+                        _ => None,
+                    }
+                })
+            },
+            RefinementPattern(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.variable),
+                    1 => Some(&x.colon),
+                    2 => Some(&x.specifier),
                         _ => None,
                     }
                 })

@@ -906,6 +906,11 @@ pub const empty_expression_illegal: Error =
 pub const empty_switch_cases: Error =
     Cow::Borrowed("`switch` statements need to have at least one `case` or a `default` block");
 
+pub const empty_match_statement: Error =
+    Cow::Borrowed("`match` statements need to have at least one arm");
+
+pub const expected_pattern: Error = Cow::Borrowed("A pattern is expected here.");
+
 pub const preceding_backslash: Error = Cow::Borrowed("Unnecessary preceding backslash");
 
 pub fn multiple_entrypoints(loc: &str) -> Error {

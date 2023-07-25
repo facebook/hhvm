@@ -23,6 +23,7 @@ type aggregate_type =
   | NamespaceInternals
   | XHPAttribute
   | ObjectCreationWhat
+  | Pattern
   | TODO
   | Name
 
@@ -1088,6 +1089,38 @@ let schema : schema_node list =
       fields = [("keyword", Token); ("colon", Token)];
     };
     {
+      kind_name = "MatchStatement";
+      type_name = "match_statement";
+      func_name = "match_statement";
+      description = "match_statement";
+      prefix = "match_statement";
+      aggregates = [Statement];
+      fields =
+        [
+          ("keyword", Token);
+          ("left_paren", Token);
+          ("expression", Aggregate Expression);
+          ("right_paren", Token);
+          ("left_brace", Token);
+          ("arms", ZeroOrMore (Just "MatchStatementArm"));
+          ("right_brace", Token);
+        ];
+    };
+    {
+      kind_name = "MatchStatementArm";
+      type_name = "match_statement_arm";
+      func_name = "match_statement_arm";
+      description = "match_statement_arm";
+      prefix = "match_statement_arm";
+      aggregates = [];
+      fields =
+        [
+          ("pattern", Aggregate Pattern);
+          ("arrow", Token);
+          ("body", Aggregate Statement);
+        ];
+    };
+    {
       kind_name = "ReturnStatement";
       type_name = "return_statement";
       func_name = "return_statement";
@@ -1230,6 +1263,44 @@ let schema : schema_node list =
           ("left_paren", Token);
           ("variables", ZeroOrMore (Aggregate Expression));
           ("right_paren", Token);
+        ];
+    };
+    {
+      kind_name = "VariablePattern";
+      type_name = "variable_pattern";
+      func_name = "variable_pattern";
+      description = "variable_pattern";
+      prefix = "variable_pattern";
+      aggregates = [Pattern];
+      fields = [("variable", Token)];
+    };
+    {
+      kind_name = "ConstructorPattern";
+      type_name = "constructor_pattern";
+      func_name = "constructor_pattern";
+      description = "constructor_pattern";
+      prefix = "constructor_pattern";
+      aggregates = [Pattern];
+      fields =
+        [
+          ("constructor", Aggregate Name);
+          ("left_paren", Token);
+          ("members", ZeroOrMore (Aggregate Pattern));
+          ("right_paren", Token);
+        ];
+    };
+    {
+      kind_name = "RefinementPattern";
+      type_name = "refinement_pattern";
+      func_name = "refinement_pattern";
+      description = "refinement_pattern";
+      prefix = "refinement_pattern";
+      aggregates = [Pattern];
+      fields =
+        [
+          ("variable", Token);
+          ("colon", Token);
+          ("specifier", Aggregate Specifier);
         ];
     };
     {
@@ -2538,6 +2609,7 @@ let string_of_aggregate_type = function
   | NamespaceInternals -> "NamespaceInternals"
   | XHPAttribute -> "XHPAttribute"
   | ObjectCreationWhat -> "ObjectCreationWhat"
+  | Pattern -> "Pattern"
   | TODO -> "TODO"
   | Name -> "Name"
 
@@ -2594,6 +2666,9 @@ let aggregation_of_xhp_attribute =
 let aggregation_of_object_creation_what =
   List.filter (fun x -> List.mem ObjectCreationWhat x.aggregates) schema
 
+let aggregation_of_pattern =
+  List.filter (fun x -> List.mem Pattern x.aggregates) schema
+
 let aggregation_of_todo_aggregate =
   List.filter (fun x -> List.mem TODO x.aggregates) schema
 
@@ -2616,6 +2691,7 @@ let aggregation_of = function
   | NamespaceInternals -> aggregation_of_namespace_internals
   | XHPAttribute -> aggregation_of_xhp_attribute
   | ObjectCreationWhat -> aggregation_of_object_creation_what
+  | Pattern -> aggregation_of_pattern
   | TODO -> aggregation_of_todo_aggregate
   | Name -> aggregation_of_name_aggregate
 
@@ -2635,6 +2711,7 @@ let aggregate_type_name = function
   | NamespaceInternals -> "namespace_internals"
   | XHPAttribute -> "xhp_attribute"
   | ObjectCreationWhat -> "object_creation_what"
+  | Pattern -> "pattern"
   | TODO -> "todo_aggregate"
   | Name -> "name_aggregate"
 
@@ -2654,6 +2731,7 @@ let aggregate_type_pfx_trim = function
   | NamespaceInternals -> ("NSI", "")
   | XHPAttribute -> ("XHPAttr", "")
   | ObjectCreationWhat -> ("New", "")
+  | Pattern -> ("Patt", "Pattern$")
   | TODO -> ("TODO", "")
   | Name -> ("Name", "")
 

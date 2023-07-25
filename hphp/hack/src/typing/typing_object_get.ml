@@ -1211,8 +1211,19 @@ and obj_get_inner args env receiver_ty ((id_pos, id_str) as id) on_error :
   let read_context = Option.is_none args.coerce_from_ty in
   match deref ety1 with
   | (r, Tunion tyl) ->
-    merge_ty_err expand_ty_err_opt
-    @@ obj_get_inner_union args env on_error id r tyl
+    (* Filter out null elements *)
+    let is_null ty =
+      let (_, _, ty) = TUtils.strip_supportdyn env ty in
+      match get_node ty with
+      | Tprim Tnull -> true
+      | _ -> false
+    in
+    let (tyl_null, tyl_nonnull) = List.partition_tf tyl ~f:is_null in
+    if List.is_empty tyl_null then
+      merge_ty_err expand_ty_err_opt
+      @@ obj_get_inner_union args env on_error id r tyl
+    else
+      nullable_obj_get ~read_context (MakeType.union r tyl_nonnull)
   | (r, Tintersection tyl) ->
     let (is_nonnull, subty_err_opt) =
       if args.is_nonnull then

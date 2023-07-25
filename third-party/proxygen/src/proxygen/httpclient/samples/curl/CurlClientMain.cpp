@@ -56,7 +56,7 @@ int main(int argc, char* argv[]) {
   gflags::SetCommandLineOptionWithMode(
       "logtostderr", "1", gflags::SET_FLAGS_DEFAULT);
 #endif
-  folly::init(&argc, &argv, false);
+  auto _ = folly::Init(&argc, &argv, false);
   folly::ssl::init();
 
   EventBase evb;

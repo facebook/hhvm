@@ -51,7 +51,7 @@ class StaticHandlerFactory : public RequestHandlerFactory {
 } // namespace
 
 int main(int argc, char* argv[]) {
-  folly::init(&argc, &argv, true);
+  auto _ = folly::Init(&argc, &argv, true);
 
   std::vector<HTTPServer::IPConfig> IPs = {
       {SocketAddress(FLAGS_ip, FLAGS_http_port, true), Protocol::HTTP},
@@ -75,7 +75,7 @@ int main(int argc, char* argv[]) {
   auto diskIOThreadPool = std::make_shared<folly::CPUThreadPoolExecutor>(
       FLAGS_threads,
       std::make_shared<folly::NamedThreadFactory>("StaticDiskIOThread"));
-  folly::setCPUExecutor(diskIOThreadPool);
+  folly::setUnsafeMutableGlobalCPUExecutor(diskIOThreadPool);
 
   HTTPServer server(std::move(options));
   server.bind(IPs);

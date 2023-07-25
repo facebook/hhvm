@@ -65,6 +65,7 @@ class CompressionFilterUtils {
       case CodecType::NO_COMPRESSION:
         return folly::none;
     }
+    folly::assume_unreachable();
   }
 
   // Filter helpers

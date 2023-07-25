@@ -12,7 +12,7 @@
 
 int main(int argc, char* argv[]) {
   gflags::SetUsageMessage(std::string("\n\nusage: httperf2 (see flags)\n"));
-  folly::init(&argc, &argv, true);
+  auto _ = folly::Init(&argc, &argv, true);
 
   return proxygen::httperf2();
 }

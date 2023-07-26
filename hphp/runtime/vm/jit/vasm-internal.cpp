@@ -248,26 +248,6 @@ bool emit(Venv& env, const fallbackcc& i) {
   return true;
 }
 
-bool emit(Venv& env, const movqs& i) {
-  auto const mov = emitSmashableMovq(*env.cb, env.meta, i.s.q(), r64(i.d));
-  if (i.addr.isValid()) {
-    env.vaddrs[i.addr] = mov;
-  }
-  return true;
-}
-
-bool emit(Venv& env, const jmps& i) {
-  auto const jmp = emitSmashableJmp(*env.cb, env.meta, env.cb->frontier());
-  env.jmps.push_back({jmp, i.targets[0]});
-  if (i.jmp_addr.isValid()) {
-    env.vaddrs[i.jmp_addr] = jmp;
-  }
-  if (i.taken_addr.isValid()) {
-    env.pending_vaddrs.push_back({i.taken_addr, i.targets[1]});
-  }
-  return true;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 /*

@@ -111,8 +111,6 @@ bool emit(Venv& env, const bindaddr& i);
 bool emit(Venv& env, const ldbindaddr& i);
 bool emit(Venv& env, const fallback& i);
 bool emit(Venv& env, const fallbackcc& i);
-bool emit(Venv& env, const movqs& i);
-bool emit(Venv& env, const jmps& i);
 
 inline bool emit(Venv& env, const pushframe&) {
   if (env.frame == -1) return true; // unreachable block
@@ -363,12 +361,6 @@ void vasm_emit(Vunit& unit, Vtext& text, CGMeta& fixups,
   Vemit::emitVeneers(env);
 
   Vemit::handleLiterals(env);
-
-  // Bind any Vaddrs that correspond to Vlabels.
-  for (auto const& p : env.pending_vaddrs) {
-    assertx(env.addrs[p.target]);
-    env.vaddrs[p.vaddr] = env.addrs[p.target];
-  }
 
   // Retarget smashable binds.
   Vemit::retargetBinds(env);

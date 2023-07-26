@@ -351,7 +351,6 @@ struct Vgen {
   void emit(const ldbindretaddr& i);
   void emit(const lea& i);
   void emit(const leap& i);
-  void emit(const leav& i);
   void emit(const lead& i);
   void emit(const loadb& i) { a->Ldrb(W(i.d), M(i.s)); }
   void emit(const loadl& i) { a->Ldr(W(i.d), M(i.s)); }
@@ -1048,12 +1047,6 @@ void Vgen::emit(const lea& i) {
   } else {
     a->Add(X(i.d), X(p.base), p.disp);
   }
-}
-
-void Vgen::emit(const leav& i) {
-  auto const addr = a->frontier();
-  emit(leap{reg::rip[(intptr_t)addr], i.d});
-  env.leas.push_back({addr, i.s});
 }
 
 void Vgen::emit(const leap& i) {

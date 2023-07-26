@@ -253,7 +253,7 @@ class pp_ArrayData:
         )
         char_ptr_type = utils.Type("char", self.val_obj.target).GetPointerType()
         base = specialized_obj.CreateValueFromAddress("tmp", specialized_obj.load_addr + specialized_obj.type.size, char_ptr_type)
-        assert base.IsValid(), "Couldn't get base address of array"
+        assert base.GetError().Success(), "Couldn't get base address of array"
 
         if utils.has_array_kind(self.val_obj, 'Vec'):
             self.at_func = lambda ix: idx.vec_at(base, ix)

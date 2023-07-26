@@ -26,6 +26,6 @@ class LookupHelperTestCase(base.TestHHVMBinary):
         fp1 = utils.reg("fp", self.frame.parent)
         self.assertIsNotNone(fp1)
         func1 = lookup.lookup_func_from_frame_pointer(fp1.Cast(act_rec_type))
-        self.assertTrue(func1.IsValid())
+        self.assertTrue(func1 is not None and func1.GetError().Success())
         fname = utils.nameof(func1)
         self.assertEqual(fname, "C::86reifiedinit")

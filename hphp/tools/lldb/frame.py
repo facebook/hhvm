@@ -47,7 +47,7 @@ def is_jitted(ip: lldb.SBValue) -> bool:
     tc_end = lldb.SBAddress(tc_base.unsigned, tc_base.target)
     tc_end.OffsetAddress(code_size.unsigned)
 
-    if not tc_base.IsValid() or not tc_end.IsValid():
+    if not tc_end.IsValid():
         # We can't access `g_code' for whatever reason---maybe it's gotten
         # corrupted somehow.  Assume that the TC is above the data section,
         # but restricted to low memory.

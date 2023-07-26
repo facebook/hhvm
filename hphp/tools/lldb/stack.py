@@ -138,7 +138,7 @@ The output backtrace has the following format:
                 try:
                     result.write(frame.stringify(frame.create_php(idx=i, ar=utils.unsigned_cast(fp, ar_type), rip=rip)) + "\n")
                 except Exception:
-                    utils.debug_print(f"Failed to create jitted frame (FP: 0x{fp.unsigned:x}, RIP: 0x{rip.unsigned:x})")
+                    utils.debug_print(f"#{i} Failed to create jitted frame (FP: 0x{fp.unsigned:x}, RIP: 0x{rip.unsigned:x})")
                     if utils._Debug:
                         traceback.print_exc()
                     result.write(frame.stringify(frame.create_native(idx=i, fp=fp, rip=rip, native_frame=native_frame)) + "\n")
@@ -253,19 +253,20 @@ The output backtrace has the following format:
             fp_raw = target.CreateValueFromExpression("fp", str(options.fp))
         else:
             fp_raw = utils.reg("fp", exe_ctx.frame)
-        fp = utils.unsigned_cast(fp_raw, fp_type)
+        try:
+            fp = utils.unsigned_cast(fp_raw, fp_type)
+        except Exception:
+            result.SetError("couldn't get valid FP value")
+            return
 
         if options.rip:
             rip_raw = target.CreateValueFromExpression("rip", str(options.rip))
         else:
             rip_raw = utils.reg("ip", exe_ctx.frame)
-        rip = utils.unsigned_cast(rip_raw, uintptr_type)
-
-        if not fp.IsValid():
-            result.SetError("couldn't get valid FP value")
-            return
-        if not rip.IsValid():
-            result.SetError("couldn't get valid RIP valud")
+        try:
+            rip = utils.unsigned_cast(rip_raw, uintptr_type)
+        except Exception:
+            result.SetError("couldn't get valid RIP value")
             return
 
         i = 0

@@ -18,10 +18,11 @@ def at(ptr: lldb.SBValue, idx: typing.Union[int, lldb.SBValue]) -> typing.Option
     if isinstance(idx, lldb.SBValue):
         idx = idx.unsigned
 
-    #utils.debug_print(f"idx.at(ptr={ptr} ({ptr.type.name}), idx={idx})")
-
     val = ptr.GetChildAtIndex(idx, lldb.eDynamicDontRunTarget, True)
-    if not val.IsValid():
+
+    utils.debug_print(f"idx.at(ptr={ptr} ({ptr.type.name}), idx={idx}) = {val.unsigned} (0x{val.unsigned:x}) (error={val.GetError()})")
+
+    if val.GetError().Fail():
         return None
     return val
 
@@ -39,6 +40,7 @@ def atomic_low_ptr_vector_at(av: lldb.SBValue, idx: int, hasher=None) -> typing.
     Returns:
         av[ix] if valid, otherwise None
     """
+    utils.debug_print("atomic_low_ptr_vector_at()")
 
     if hasher:
         # TODO implement
@@ -66,6 +68,8 @@ def fixed_vector_at(fv: lldb.SBValue, idx: int, hasher=None) -> typing.Optional[
     Returns:
         fv[ix] if valid, otherwise None
     """
+    utils.debug_print("fixed_vector_at()")
+
     if hasher is not None:
         # TODO implement
         raise NotImplementedError("hasher argument currently unused")
@@ -87,6 +91,7 @@ def compact_vector_at(cv: lldb.SBValue, idx: int, hasher=None) -> typing.Optiona
 
     See hphp/util/compact-vector.h
     """
+    utils.debug_print("compact_vector_at()")
 
     if hasher is not None:
         # TODO implement

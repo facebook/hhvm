@@ -100,6 +100,8 @@ def memoized(func):
 def Type(name: str, target: lldb.SBTarget) -> lldb.SBType:
     """ Look up an HHVM type
 
+    Raises an exception if the type cannot be found.
+
     Arguments:
         name: name of the type
         targ: optional target from the execution context
@@ -119,15 +121,18 @@ def Type(name: str, target: lldb.SBTarget) -> lldb.SBType:
 def Global(name: str, target: lldb.SBTarget) -> lldb.SBValue:
     """ Look up the value of a global variable (including static)
 
+    Falls back to evaluating the variable as an expression, which
+    raises an exception on failure.
+
     Arguments:
         name: name of the global variable
-        targ: target from the execution context
+        target: target from the execution context
 
     Returns:
         SBValue wrapping the global variable
     """
     g = target.FindFirstGlobalVariable(name)
-    if not g.IsValid():
+    if g.GetError().Fail():
         debug_print(f"couldn't find global variable '{name}'; attempting to find it by evaluating it")
         return Value(name, target)
     return g
@@ -136,9 +141,12 @@ def Global(name: str, target: lldb.SBTarget) -> lldb.SBValue:
 def Enum(enum_name: str, elem: typing.Union[str, int], target: lldb.SBTarget) -> lldb.SBTypeEnumMember:
     """ Look up the value of an enum member
 
+    Raises an exception if the enum or member cannot be found.
+
     Arguments:
         enum_name: name of the enumeration
         elem: name or index of the enumerator element
+        target: target from the execution context
 
     Returns:
         SBTypeEnumMember wrapping the enumerator element
@@ -148,14 +156,25 @@ def Enum(enum_name: str, elem: typing.Union[str, int], target: lldb.SBTarget) ->
     members = enum.GetEnumMembers()
     assert members.IsValid(), f"'{enum_name} is not an enumeration"
     val = members[elem]
-    assert val.IsValid(), f"couldn't find enumerator '{elem}' in '{enum_name}'"
+    assert val is not None and val.IsValid(), f"couldn't find enumerator '{elem}' in '{enum_name}'"
     return val
 
 
 def Value(name: str, target: lldb.SBTarget) -> lldb.SBValue:
-    """ Look up the value of a symbol """
-    v = target.CreateValueFromExpression("(tmp)", name)
-    assert v.IsValid(), f"couldn't find symbol {name}"
+    """ Look up the value of a symbol, by evaluating it as an expression
+
+    Raises an exception if the symbol cannot be found/expression evaluated.
+    You typically should call Global(), which calls this as a fallback.
+
+    Arguments:
+        name: the symbol to evaluate
+        target: target from the execution context
+
+    Returns:
+        SBValue wrapping the value
+    """
+    v = target.EvaluateExpression(name)
+    assert v.GetError().Success(), f"couldn't find symbol {name}"
     return v
 
 
@@ -192,10 +211,10 @@ def get(struct: lldb.SBValue, *field_names: str) -> lldb.SBValue:
     This is supposed to be semi-equivalent to gdb's struct[field_name] syntax.
     """
 
-    assert struct.IsValid(), f"invalid struct '{struct.name}'"
+    assert struct.GetError().Success(), f"invalid struct '{struct.name}'"
     # Note: You can also do lldb.value(val).<name>
     v = struct.GetChildMemberWithName(field_names[0])
-    assert v.IsValid(), f"couldn't find field '{field_names[0]}' in struct '{struct.name}' with type '{struct.type.name}'"
+    assert v.GetError().Success(), f"couldn't find field '{field_names[0]}' in struct '{struct.name}' with type '{struct.type.name}'"
 
     if len(field_names) == 1:
         return v
@@ -270,7 +289,7 @@ def unsigned_cast(v: lldb.SBValue, t: lldb.SBValue) -> lldb.SBValue:
     # opposed to forcing no sign extension).
     ret = v.target.EvaluateExpression(f"({t.name}){v.unsigned}")
 
-    assert ret is not None and ret.IsValid(), f"Failed to cast {v} ({v.unsigned}) to {t.name}"
+    assert ret is not None and ret.GetError().Success(), f"Failed to cast {v} ({v.unsigned}) to {t.name}"
     return ret
 
 
@@ -329,7 +348,7 @@ def rawptr(val: lldb.SBValue) -> typing.Optional[lldb.SBValue]:
     elif name == "HPHP::CompactTaggedPtr":
         inner = val.type.GetTemplateArgumentType(0)
         addr = get(val, "m_data").unsigned & 0xffffffffffff
-        ptr = val.CreateValueFromAddress("(tmp)", addr, inner.GetPointerType())
+        ptr = val.CreateValueFromExpression("(tmp)", f"({inner.GetPointerType()}) {addr}")
     elif name == "HPHP::CompactSizedPtr":
         ptr = rawptr(get(val, "m_data"))
     elif name == "HPHP::LockFreePtrWrapper":

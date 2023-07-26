@@ -34,18 +34,11 @@ class UtilsGivenTargetTestCase(base.TestHHVMBinary):
 
     def test_Global(self):
         g_code = utils.Global("HPHP::jit::tc::g_code", self.target)
-        self.assertTrue(g_code.IsValid())
         self.assertTrue(g_code.type.IsPointerType())
 
     def test_Enum(self):
         k_vec_kind = utils.Enum("HPHP::ArrayData::ArrayKind", "kVecKind", self.target)
-        self.assertTrue(k_vec_kind.IsValid())
         self.assertTrue(k_vec_kind.GetName(), "kVecKind")
-
-    def test_get(self):
-        g_code = utils.Global("HPHP::jit::tc::g_code", self.target)
-        code_size = utils.get(g_code, "m_threadLocalStart")
-        self.assertTrue(code_size.IsValid())
 
     def test_rawtype_remove_typedef(self):
         ty = utils.Type("HPHP::Native::NativeDataInfo::InitFunc", self.target)
@@ -64,6 +57,14 @@ class UtilsGivenTargetTestCase(base.TestHHVMBinary):
 class UtilsGivenFrameTestCase(base.TestHHVMBinary):
     def setUp(self):
         super().setUp(test_file="quick/method2.php", interp = True)
+
+    def test_get(self):
+        self.run_until_breakpoint("lookupObjMethod")
+        g_code = utils.Global("HPHP::jit::tc::g_code", self.target)
+        try:
+            utils.get(g_code, "m_threadLocalStart")
+        except Exception:
+            self.fail("Unable to get m_threadLocalStart from HPHP::jit::tc::g_code")
 
     def test_nameof_func(self):
         self.run_commands(["b lookupObjMethod", "continue", "thread step-out"])
@@ -100,8 +101,9 @@ class UtilsGivenFrameTestCase(base.TestHHVMBinary):
 
     def test_rawptr_std_unique_ptr(self):
         self.run_until_breakpoint("lookupObjMethod")
-        s_func_vec = self.target.FindFirstGlobalVariable("HPHP::Func::s_funcVec")
-        if not s_func_vec.IsValid():
+        try:
+            s_func_vec = utils.Global("HPHP::Func::s_funcVec")
+        except Exception:
             # lowptr builds don't have a funcVec
             return
         smart_ptr = utils.get(s_func_vec, "m_vals")

@@ -19,3 +19,5 @@ class IdxCommandTestCase(base.TestHHVMBinary):
         slot_index = self.frame.FindVariable("c").GetChildMemberWithName("m_slotIndex")
         val = idx.idx(slot_index, 0)
         self.assertEqual(val.unsigned, 0)
+        val = idx.idx(slot_index, 1)
+        self.assertEqual(val.unsigned, 1)

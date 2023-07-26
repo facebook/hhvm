@@ -1,1 +1,2 @@
-%s
+
+Fatal error: Expected constant expression for initializer in %s/hphp/test/slow/like_types/like_casts_bad3.php on line 4

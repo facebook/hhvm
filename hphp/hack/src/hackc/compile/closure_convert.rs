@@ -1078,12 +1078,6 @@ impl<'ast, 'a: 'b, 'b, 'arena: 'a> VisitorMut<'ast> for ClosureVisitor<'a, 'b, '
                     res.recurse(scope, self)?;
                     res
                 }
-                Expr_::As(x) if (x.1).is_hlike() => {
-                    let mut res = x.0;
-                    res.recurse(scope, self)?;
-                    *pos = res.1;
-                    res.2
-                }
                 Expr_::As(x)
                     if (x.1)
                         .as_happly()

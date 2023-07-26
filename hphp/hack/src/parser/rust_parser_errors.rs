@@ -4611,9 +4611,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     && is_good_scope_resolution_name(&x.name)
                     && !is_parent_class_access(&x.qualifier, &x.name) => {}
             AsExpression(x) => match &x.right_operand.children {
-                LikeTypeSpecifier(_) => {
-                    self.check_constant_expression(&x.left_operand, static_allowed)
-                }
                 GenericTypeSpecifier(y)
                     if self.text(&y.class_type) == sn::fb::INCORRECT_TYPE
                         || self.text(&y.class_type) == strip_ns(sn::fb::INCORRECT_TYPE) =>

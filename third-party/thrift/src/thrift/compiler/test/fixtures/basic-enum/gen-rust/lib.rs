@@ -8,21 +8,7 @@ pub use self::consts::*;
 pub use self::errors::*;
 pub use self::types::*;
 
-/// Constant definitions for `module`.
-pub mod consts {
-    pub const kOne: crate::types::MyEnum = crate::types::MyEnum::ONE;
-
-    pub static enumNames: ::once_cell::sync::Lazy<::std::collections::BTreeMap<crate::types::MyEnum, ::std::string::String>> = ::once_cell::sync::Lazy::new(|| {
-            let mut map = ::std::collections::BTreeMap::new();
-            map.insert(crate::types::MyEnum::ONE, "one".to_owned());
-            map.insert(crate::types::MyEnum::TWO, "two".to_owned());
-            map
-        });
-
-}
+pub mod consts;
 
 pub use :: as types;
-
-/// Error return types.
-pub mod errors {
-}
+pub mod errors;

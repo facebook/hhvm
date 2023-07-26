@@ -8,10 +8,7 @@ pub use self::errors::*;
 pub use self::types::*;
 
 pub use :: as types;
-
-/// Error return types.
-pub mod errors {
-}
+pub mod errors;
 
 pub(crate) mod r#impl {
     use ref_cast::RefCast;

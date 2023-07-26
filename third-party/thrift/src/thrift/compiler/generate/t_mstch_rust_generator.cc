@@ -2036,6 +2036,13 @@ void t_mstch_rust_generator::generate_program() {
   const auto& prog = cached_program(program_);
   render_to_file(prog, "lib.rs", "lib.rs");
   render_to_file(prog, "types.rs", "types.rs");
+  render_to_file(prog, "services.rs", "services.rs");
+  render_to_file(prog, "errors.rs", "errors.rs");
+  render_to_file(prog, "consts.rs", "consts.rs");
+  render_to_file(prog, "dependencies.rs", "dependencies.rs");
+  render_to_file(prog, "client.rs", "client.rs");
+  render_to_file(prog, "server.rs", "server.rs");
+  render_to_file(prog, "mock.rs", "mock.rs");
   write_output("namespace", namespace_rust);
 }
 

@@ -19,26 +19,26 @@
 {{#constant:rust}}
 {{#constant:type}}
 {{#constant:docs?}}
-    #[doc = {{constant:docs}}]
+#[doc = {{constant:docs}}]
 {{/constant:docs?}}{{^constant:lazy?}}
-    pub const {{constant:name}}{{!
-    }}: {{!
-    }}{{#type:string?}}&::std::primitive::str = {{value:quoted}}{{/type:string?}}{{!
-    }}{{^type:string?}}{{>lib/type}} = {{>lib/value}}{{/type:string?}}{{!
-    }};
+pub const {{constant:name}}{{!
+}}: {{!
+}}{{#type:string?}}&::std::primitive::str = {{value:quoted}}{{/type:string?}}{{!
+}}{{^type:string?}}{{>lib/type}} = {{>lib/value}}{{/type:string?}}{{!
+}};
 {{/constant:lazy?}}
 {{#constant:lazy?}}
-    pub static {{constant:name}}{{!
-    }}: ::once_cell::sync::Lazy<{{!
-    }}{{#constant:type}}{{!
-        }}{{#type:has_adapter?}}{{>lib/adapter/qualified}}::AdaptedType{{/type:has_adapter?}}{{!
-        }}{{^type:has_adapter?}}{{>lib/type}}{{/type:has_adapter?}}{{!
-    }}{{/constant:type}}{{!
-    }}> = ::once_cell::sync::Lazy::new(|| {{!
-        }}{{#constant:type}}{{#type:has_adapter?}}{{>lib/adapter/qualified}}::from_thrift({{/type:has_adapter?}}{{/constant:type}}{{!
-        }}{{>lib/value}}{{!
-        }}{{#constant:type}}{{#type:has_adapter?}}).expect("constant Thrift value should adapt without error"){{/type:has_adapter?}}{{/constant:type}}{{!
-    }});
+pub static {{constant:name}}{{!
+}}: ::once_cell::sync::Lazy<{{!
+}}{{#constant:type}}{{!
+    }}{{#type:has_adapter?}}{{>lib/adapter/qualified}}::AdaptedType{{/type:has_adapter?}}{{!
+    }}{{^type:has_adapter?}}{{>lib/type}}{{/type:has_adapter?}}{{!
+}}{{/constant:type}}{{!
+}}> = ::once_cell::sync::Lazy::new(|| {{!
+    }}{{#constant:type}}{{#type:has_adapter?}}{{>lib/adapter/qualified}}::from_thrift({{/type:has_adapter?}}{{/constant:type}}{{!
+    }}{{>lib/value}}{{!
+    }}{{#constant:type}}{{#type:has_adapter?}}).expect("constant Thrift value should adapt without error"){{/type:has_adapter?}}{{/constant:type}}{{!
+}});
 {{/constant:lazy?}}
 {{/constant:type}}
 {{/constant:rust}}

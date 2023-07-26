@@ -16,684 +16,685 @@
 
 }}
 
-    {{#service:interactions}}{{>lib/service}}
-    {{/service:interactions}}
-    pub mod {{service:snake}} {{>lib/block}}{{!
-        }}{{#service:docs?}}
-        #![doc = {{service:docs}}]
-        {{/service:docs?}}{{!
-        }}{{#service:rustFunctions}}{{^function:starts_interaction?}}{{#function:returns_stream?}}
+{{#service:interactions}}{{>lib/service}}
+{{/service:interactions}}
+/// Service definitions for `{{service:name}}`.
+pub mod {{service:snake}} {{>lib/block}}{{!
+    }}{{#service:docs?}}
+    #![doc = {{service:docs}}]
+    {{/service:docs?}}{{!
+    }}{{#service:rustFunctions}}{{^function:starts_interaction?}}{{#function:returns_stream?}}
 
-        #[derive(Clone, Debug)]
-        pub enum {{function:upcamel}}StreamExn {
-            #[doc(hidden)]
-            Success({{#function:return_type}}{{#type:stream_elem_type}}{{>lib/type}}{{/type:stream_elem_type}}{{/function:return_type}}),{{!
-            }}{{#function:stream_exceptions}}
-            {{field:rust_name}}({{#field:type}}{{>lib/type}}{{/field:type}}),{{!
-            }}{{/function:stream_exceptions}}
-            ApplicationException(::fbthrift::ApplicationException),
-        }
+    #[derive(Clone, Debug)]
+    pub enum {{function:upcamel}}StreamExn {
+        #[doc(hidden)]
+        Success({{#function:return_type}}{{#type:stream_elem_type}}{{>lib/type}}{{/type:stream_elem_type}}{{/function:return_type}}),{{!
+        }}{{#function:stream_exceptions}}
+        {{field:rust_name}}({{#field:type}}{{>lib/type}}{{/field:type}}),{{!
+        }}{{/function:stream_exceptions}}
+        ApplicationException(::fbthrift::ApplicationException),
+    }
 
-        impl ::fbthrift::ExceptionInfo for {{function:upcamel}}StreamExn {
-            fn exn_name(&self) -> &'static str {
-                match self {
-                    Self::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
-                    Self::ApplicationException(aexn) => aexn.exn_name(),
-                    {{#function:stream_exceptions}}
-                    Self::{{field:rust_name}}(exn) => exn.exn_name(),
-                    {{/function:stream_exceptions}}
-                }
-            }
-
-            fn exn_value(&self) -> String {
-                match self {
-                    Self::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
-                    Self::ApplicationException(aexn) => aexn.exn_value(),
-                    {{#function:stream_exceptions}}
-                    Self::{{field:rust_name}}(exn) => exn.exn_value(),
-                    {{/function:stream_exceptions}}
-                }
-            }
-
-            fn exn_is_declared(&self) -> bool {
-                match self {
-                    Self::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
-                    Self::ApplicationException(aexn) => aexn.exn_is_declared(),
-                    {{#function:stream_exceptions}}
-                    Self::{{field:rust_name}}(exn) => exn.exn_is_declared(),
-                    {{/function:stream_exceptions}}
-                }
+    impl ::fbthrift::ExceptionInfo for {{function:upcamel}}StreamExn {
+        fn exn_name(&self) -> &'static str {
+            match self {
+                Self::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
+                Self::ApplicationException(aexn) => aexn.exn_name(),
+                {{#function:stream_exceptions}}
+                Self::{{field:rust_name}}(exn) => exn.exn_name(),
+                {{/function:stream_exceptions}}
             }
         }
 
-        impl ::fbthrift::ResultInfo for {{function:upcamel}}StreamExn {
-            fn result_type(&self) -> ::fbthrift::ResultType {
-                match self {
-                    Self::Success(_) => ::fbthrift::ResultType::Return,
-                    Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
-                    {{#function:stream_exceptions}}
-                    Self::{{field:rust_name}}(_exn) => fbthrift::ResultType::Error,
-                    {{/function:stream_exceptions}}
-                }
-            }
-        }{{!
-        }}{{#function:uniqueStreamExceptions}}
-
-        impl ::std::convert::From<{{#field:type}}{{>lib/type}}{{/field:type}}> for {{function:upcamel}}StreamExn {
-            fn from(exn: {{#field:type}}{{>lib/type}}{{/field:type}}) -> Self {
-                Self::{{field:rust_name}}(exn)
-            }
-        }{{!
-        }}{{/function:uniqueStreamExceptions}}
-
-        impl ::std::convert::From<::fbthrift::ApplicationException> for {{function:upcamel}}StreamExn {
-            fn from(exn: ::fbthrift::ApplicationException) -> Self {
-                Self::ApplicationException(exn)
+        fn exn_value(&self) -> String {
+            match self {
+                Self::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
+                Self::ApplicationException(aexn) => aexn.exn_value(),
+                {{#function:stream_exceptions}}
+                Self::{{field:rust_name}}(exn) => exn.exn_value(),
+                {{/function:stream_exceptions}}
             }
         }
-        {{#function:check_service_for_enable_anyhow_to_application_exn}}{{#service:enable_anyhow_to_application_exn}}
 
-        impl ::std::convert::From<::anyhow::Error> for {{function:upcamel}}StreamExn {
-            fn from(exn: ::anyhow::Error) -> Self {
-                Self::ApplicationException(
-                    ::fbthrift::ApplicationException {
-                        message: format!("{exn:#}"),
-                        type_: ::fbthrift::ApplicationExceptionErrorCode::Unknown,
+        fn exn_is_declared(&self) -> bool {
+            match self {
+                Self::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
+                Self::ApplicationException(aexn) => aexn.exn_is_declared(),
+                {{#function:stream_exceptions}}
+                Self::{{field:rust_name}}(exn) => exn.exn_is_declared(),
+                {{/function:stream_exceptions}}
+            }
+        }
+    }
+
+    impl ::fbthrift::ResultInfo for {{function:upcamel}}StreamExn {
+        fn result_type(&self) -> ::fbthrift::ResultType {
+            match self {
+                Self::Success(_) => ::fbthrift::ResultType::Return,
+                Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
+                {{#function:stream_exceptions}}
+                Self::{{field:rust_name}}(_exn) => fbthrift::ResultType::Error,
+                {{/function:stream_exceptions}}
+            }
+        }
+    }{{!
+    }}{{#function:uniqueStreamExceptions}}
+
+    impl ::std::convert::From<{{#field:type}}{{>lib/type}}{{/field:type}}> for {{function:upcamel}}StreamExn {
+        fn from(exn: {{#field:type}}{{>lib/type}}{{/field:type}}) -> Self {
+            Self::{{field:rust_name}}(exn)
+        }
+    }{{!
+    }}{{/function:uniqueStreamExceptions}}
+
+    impl ::std::convert::From<::fbthrift::ApplicationException> for {{function:upcamel}}StreamExn {
+        fn from(exn: ::fbthrift::ApplicationException) -> Self {
+            Self::ApplicationException(exn)
+        }
+    }
+    {{#function:check_service_for_enable_anyhow_to_application_exn}}{{#service:enable_anyhow_to_application_exn}}
+
+    impl ::std::convert::From<::anyhow::Error> for {{function:upcamel}}StreamExn {
+        fn from(exn: ::anyhow::Error) -> Self {
+            Self::ApplicationException(
+                ::fbthrift::ApplicationException {
+                    message: format!("{exn:#}"),
+                    type_: ::fbthrift::ApplicationExceptionErrorCode::Unknown,
+                }
+            )
+        }
+    }
+    {{/service:enable_anyhow_to_application_exn}}{{/function:check_service_for_enable_anyhow_to_application_exn}}
+    {{^function:check_service_for_enable_anyhow_to_application_exn}}{{#function:enable_anyhow_to_application_exn}}
+
+    impl ::std::convert::From<::anyhow::Error> for {{function:upcamel}}StreamExn {
+        fn from(exn: ::anyhow::Error) -> Self {
+            Self::ApplicationException(
+                ::fbthrift::ApplicationException {
+                    message: format!("{exn:#}"),
+                    type_: ::fbthrift::ApplicationExceptionErrorCode::Unknown,
+                }
+            )
+        }
+    }
+    {{/function:enable_anyhow_to_application_exn}}{{/function:check_service_for_enable_anyhow_to_application_exn}}
+
+    impl ::fbthrift::GetTType for {{function:upcamel}}StreamExn {
+        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+    }
+
+    impl<P> ::fbthrift::Serialize<P> for {{function:upcamel}}StreamExn
+    where
+        P: ::fbthrift::ProtocolWriter,
+    {
+        fn write(&self, p: &mut P) {
+            if let Self::ApplicationException(aexn) = self {
+                return aexn.write(p);
+            }
+            p.write_struct_begin("{{function:upcamel}}");
+            match self {
+                Self::Success(inner) => {
+                    p.write_field_begin(
+                        "Success",
+                        {{#function:return_type}}{{#type:stream_elem_type}}{{>lib/ttype}}{{/type:stream_elem_type}}{{/function:return_type}},
+                        0i16,
+                    );
+                    inner.write(p);
+                    p.write_field_end();
+                }{{!
+                }}{{#function:stream_exceptions}}
+                Self::{{field:rust_name}}(inner) => {
+                    p.write_field_begin(
+                        "{{field:name}}",
+                        {{#field:type}}{{>lib/ttype}}{{/field:type}},
+                        {{field:key}},
+                    );
+                    inner.write(p);
+                    p.write_field_end();
+                }{{!
+                }}{{/function:stream_exceptions}}
+                Self::ApplicationException(_) => unreachable!(),
+            }
+            p.write_field_stop();
+            p.write_struct_end();
+        }
+    }
+
+    impl<P> ::fbthrift::Deserialize<P> for {{function:upcamel}}StreamExn
+    where
+        P: ::fbthrift::ProtocolReader,
+    {
+        fn read(p: &mut P) -> ::anyhow::Result<Self> {
+            static RETURNS: &[::fbthrift::Field] = &[
+                {{#function:returns_by_name}}
+                ::fbthrift::Field::new("{{field:name}}", {{#field:type}}{{>lib/ttype}}{{/field:type}}, {{field:key}}),
+                {{/function:returns_by_name}}
+            ];
+            let _ = p.read_struct_begin(|_| ())?;
+            let mut once = false;
+            let mut alt = {{!
+                }}{{#function:void_excluding_interaction?}}{{!
+                    }}Self::Success(()){{!
+                }}{{/function:void_excluding_interaction?}}{{!
+                }}{{^function:void_excluding_interaction?}}::std::option::Option::None{{/function:void_excluding_interaction?}}{{!
+            }};
+            loop {
+                let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
+                match ((fty, fid as ::std::primitive::i32), once) {
+                    ((::fbthrift::TType::Stop, _), _) => {
+                        p.read_field_end()?;
+                        break;
                     }
-                )
-            }
-        }
-        {{/service:enable_anyhow_to_application_exn}}{{/function:check_service_for_enable_anyhow_to_application_exn}}
-        {{^function:check_service_for_enable_anyhow_to_application_exn}}{{#function:enable_anyhow_to_application_exn}}
-
-        impl ::std::convert::From<::anyhow::Error> for {{function:upcamel}}StreamExn {
-            fn from(exn: ::anyhow::Error) -> Self {
-                Self::ApplicationException(
-                    ::fbthrift::ApplicationException {
-                        message: format!("{exn:#}"),
-                        type_: ::fbthrift::ApplicationExceptionErrorCode::Unknown,
-                    }
-                )
-            }
-        }
-        {{/function:enable_anyhow_to_application_exn}}{{/function:check_service_for_enable_anyhow_to_application_exn}}
-
-        impl ::fbthrift::GetTType for {{function:upcamel}}StreamExn {
-            const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-        }
-
-        impl<P> ::fbthrift::Serialize<P> for {{function:upcamel}}StreamExn
-        where
-            P: ::fbthrift::ProtocolWriter,
-        {
-            fn write(&self, p: &mut P) {
-                if let Self::ApplicationException(aexn) = self {
-                    return aexn.write(p);
-                }
-                p.write_struct_begin("{{function:upcamel}}");
-                match self {
-                    Self::Success(inner) => {
-                        p.write_field_begin(
-                            "Success",
-                            {{#function:return_type}}{{#type:stream_elem_type}}{{>lib/ttype}}{{/type:stream_elem_type}}{{/function:return_type}},
-                            0i16,
-                        );
-                        inner.write(p);
-                        p.write_field_end();
+                    (({{#function:return_type}}{{#type:stream_elem_type}}{{>lib/ttype}}{{/type:stream_elem_type}}{{/function:return_type}}, 0i32), false) => {
+                        once = true;
+                        alt = {{!
+                            }}{{^function:void_excluding_interaction?}}::std::option::Option::Some({{/function:void_excluding_interaction?}}{{!
+                            }}Self::Success(::fbthrift::Deserialize::read(p)?){{!
+                            }}{{^function:void_excluding_interaction?}}){{/function:void_excluding_interaction?}}{{!
+                        }};
                     }{{!
                     }}{{#function:stream_exceptions}}
-                    Self::{{field:rust_name}}(inner) => {
-                        p.write_field_begin(
-                            "{{field:name}}",
-                            {{#field:type}}{{>lib/ttype}}{{/field:type}},
-                            {{field:key}},
-                        );
-                        inner.write(p);
-                        p.write_field_end();
+                    (({{#field:type}}{{>lib/ttype}}{{/field:type}}, {{field:key}}), false) => {
+                        once = true;
+                        alt = {{!
+                            }}{{^function:void_excluding_interaction?}}::std::option::Option::Some({{/function:void_excluding_interaction?}}{{!
+                            }}Self::{{field:rust_name}}(::fbthrift::Deserialize::read(p)?){{!
+                            }}{{^function:void_excluding_interaction?}}){{/function:void_excluding_interaction?}}{{!
+                        }};
                     }{{!
                     }}{{/function:stream_exceptions}}
-                    Self::ApplicationException(_) => unreachable!(),
+                    ((ty, _id), false) => p.skip(ty)?,
+                    ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
+                        ::fbthrift::ApplicationException::new(
+                            ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
+                            format!(
+                                "unwanted extra union {} field ty {:?} id {}",
+                                "{{function:upcamel}}StreamExn",
+                                badty,
+                                badid,
+                            ),
+                        )
+                    )),
                 }
-                p.write_field_stop();
-                p.write_struct_end();
+                p.read_field_end()?;
             }
-        }
-
-        impl<P> ::fbthrift::Deserialize<P> for {{function:upcamel}}StreamExn
-        where
-            P: ::fbthrift::ProtocolReader,
-        {
-            fn read(p: &mut P) -> ::anyhow::Result<Self> {
-                static RETURNS: &[::fbthrift::Field] = &[
-                    {{#function:returns_by_name}}
-                    ::fbthrift::Field::new("{{field:name}}", {{#field:type}}{{>lib/ttype}}{{/field:type}}, {{field:key}}),
-                    {{/function:returns_by_name}}
-                ];
-                let _ = p.read_struct_begin(|_| ())?;
-                let mut once = false;
-                let mut alt = {{!
-                    }}{{#function:void_excluding_interaction?}}{{!
-                        }}Self::Success(()){{!
-                    }}{{/function:void_excluding_interaction?}}{{!
-                    }}{{^function:void_excluding_interaction?}}::std::option::Option::None{{/function:void_excluding_interaction?}}{{!
-                }};
-                loop {
-                    let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
-                    match ((fty, fid as ::std::primitive::i32), once) {
-                        ((::fbthrift::TType::Stop, _), _) => {
-                            p.read_field_end()?;
-                            break;
-                        }
-                        (({{#function:return_type}}{{#type:stream_elem_type}}{{>lib/ttype}}{{/type:stream_elem_type}}{{/function:return_type}}, 0i32), false) => {
-                            once = true;
-                            alt = {{!
-                                }}{{^function:void_excluding_interaction?}}::std::option::Option::Some({{/function:void_excluding_interaction?}}{{!
-                                }}Self::Success(::fbthrift::Deserialize::read(p)?){{!
-                                }}{{^function:void_excluding_interaction?}}){{/function:void_excluding_interaction?}}{{!
-                            }};
-                        }{{!
-                        }}{{#function:stream_exceptions}}
-                        (({{#field:type}}{{>lib/ttype}}{{/field:type}}, {{field:key}}), false) => {
-                            once = true;
-                            alt = {{!
-                                }}{{^function:void_excluding_interaction?}}::std::option::Option::Some({{/function:void_excluding_interaction?}}{{!
-                                }}Self::{{field:rust_name}}(::fbthrift::Deserialize::read(p)?){{!
-                                }}{{^function:void_excluding_interaction?}}){{/function:void_excluding_interaction?}}{{!
-                            }};
-                        }{{!
-                        }}{{/function:stream_exceptions}}
-                        ((ty, _id), false) => p.skip(ty)?,
-                        ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
-                            ::fbthrift::ApplicationException::new(
-                                ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
-                                format!(
-                                    "unwanted extra union {} field ty {:?} id {}",
-                                    "{{function:upcamel}}StreamExn",
-                                    badty,
-                                    badid,
-                                ),
-                            )
-                        )),
-                    }
-                    p.read_field_end()?;
-                }
-                p.read_struct_end()?;{{!
-                }}{{#function:void_excluding_interaction?}}
-                ::std::result::Result::Ok(alt){{!
-                }}{{/function:void_excluding_interaction?}}{{!
-                }}{{^function:void_excluding_interaction?}}
-                alt.ok_or_else(||
-                    ::fbthrift::ApplicationException::new(
-                        ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
-                        format!("Empty union {}", "{{function:upcamel}}StreamExn"),
-                    )
-                    .into(),
-                ){{!
-                }}{{/function:void_excluding_interaction?}}
-            }
-        }
-
-        #[derive(Clone, Debug)]
-        pub enum {{function:upcamel}}ResponseExn {
-            #[doc(hidden)]
-            {{#function:stream_has_first_response?}}
-            Success({{#function:return_type}}{{#type:stream_first_response_type}}{{>lib/type}}{{/type:stream_first_response_type}}{{/function:return_type}}),
-            {{/function:stream_has_first_response?}}
-            {{^function:stream_has_first_response?}}
-            Success(()),
-            {{/function:stream_has_first_response?}}{{!
-            }}{{#function:exceptions}}
-            {{field:rust_name}}({{#field:type}}{{>lib/type}}{{/field:type}}),{{!
-            }}{{/function:exceptions}}
-            ApplicationException(::fbthrift::ApplicationException),
-        }{{!
-        }}
-
-        impl ::fbthrift::ExceptionInfo for {{function:upcamel}}ResponseExn {
-            fn exn_name(&self) -> &'static str {
-                match self {
-                    Self::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
-                    Self::ApplicationException(aexn) => aexn.exn_name(),
-                    {{#function:exceptions}}
-                    Self::{{field:rust_name}}(exn) => exn.exn_name(),
-                    {{/function:exceptions}}
-                }
-            }
-
-            fn exn_value(&self) -> String {
-                match self {
-                    Self::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
-                    Self::ApplicationException(aexn) => aexn.exn_value(),
-                    {{#function:exceptions}}
-                    Self::{{field:rust_name}}(exn) => exn.exn_value(),
-                    {{/function:exceptions}}
-                }
-            }
-
-            fn exn_is_declared(&self) -> bool {
-                match self {
-                    Self::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
-                    Self::ApplicationException(aexn) => aexn.exn_is_declared(),
-                    {{#function:exceptions}}
-                    Self::{{field:rust_name}}(exn) => exn.exn_is_declared(),
-                    {{/function:exceptions}}
-                }
-            }
-        }
-
-        impl ::fbthrift::ResultInfo for {{function:upcamel}}ResponseExn {
-            fn result_type(&self) -> ::fbthrift::ResultType {
-                match self {
-                    Self::Success(_) => ::fbthrift::ResultType::Return,
-                    Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
-                    {{#function:exceptions}}
-                    Self::{{field:rust_name}}(_exn) => fbthrift::ResultType::Error,
-                    {{/function:exceptions}}
-                }
-            }
-        }
-
-        {{#function:uniqueExceptions}}
-        impl ::std::convert::From<{{#field:type}}{{>lib/type}}{{/field:type}}> for {{function:upcamel}}ResponseExn {
-            fn from(exn: {{#field:type}}{{>lib/type}}{{/field:type}}) -> Self {
-                Self::{{field:rust_name}}(exn)
-            }
-        }{{!
-        }}{{/function:uniqueExceptions}}
-
-        impl ::std::convert::From<::fbthrift::ApplicationException> for {{function:upcamel}}ResponseExn {
-            fn from(exn: ::fbthrift::ApplicationException) -> Self {
-                Self::ApplicationException(exn)
-            }
-        }
-        {{#function:check_service_for_enable_anyhow_to_application_exn}}{{#service:enable_anyhow_to_application_exn}}
-
-        impl ::std::convert::From<::anyhow::Error> for {{function:upcamel}}ResponseExn {
-            fn from(exn: ::anyhow::Error) -> Self {
-                Self::ApplicationException(
-                    ::fbthrift::ApplicationException {
-                        message: format!("{exn:#}"),
-                        type_: ::fbthrift::ApplicationExceptionErrorCode::Unknown,
-                    }
+            p.read_struct_end()?;{{!
+            }}{{#function:void_excluding_interaction?}}
+            ::std::result::Result::Ok(alt){{!
+            }}{{/function:void_excluding_interaction?}}{{!
+            }}{{^function:void_excluding_interaction?}}
+            alt.ok_or_else(||
+                ::fbthrift::ApplicationException::new(
+                    ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
+                    format!("Empty union {}", "{{function:upcamel}}StreamExn"),
                 )
-            }
+                .into(),
+            ){{!
+            }}{{/function:void_excluding_interaction?}}
         }
-        {{/service:enable_anyhow_to_application_exn}}{{/function:check_service_for_enable_anyhow_to_application_exn}}
-        {{^function:check_service_for_enable_anyhow_to_application_exn}}{{#function:enable_anyhow_to_application_exn}}
-
-        impl ::std::convert::From<::anyhow::Error> for {{function:upcamel}}ResponseExn {
-            fn from(exn: ::anyhow::Error) -> Self {
-                Self::ApplicationException(
-                    ::fbthrift::ApplicationException {
-                        message: format!("{exn:#}"),
-                        type_: ::fbthrift::ApplicationExceptionErrorCode::Unknown,
-                    }
-                )
-            }
-        }
-        {{/function:enable_anyhow_to_application_exn}}{{/function:check_service_for_enable_anyhow_to_application_exn}}
-
-        impl ::fbthrift::GetTType for {{function:upcamel}}ResponseExn {
-            {{#function:stream_has_first_response?}}
-            const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-            {{/function:stream_has_first_response?}}
-            {{^function:stream_has_first_response?}}
-            const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Void;
-            {{/function:stream_has_first_response?}}
-        }
-
-        impl<P> ::fbthrift::Serialize<P> for {{function:upcamel}}ResponseExn
-        where
-            P: ::fbthrift::ProtocolWriter,
-        {
-            fn write(&self, p: &mut P) {
-                if let Self::ApplicationException(aexn) = self {
-                    return aexn.write(p);
-                }
-                p.write_struct_begin("{{function:upcamel}}");
-                match self {
-                    Self::Success(_inner) => {
-                        p.write_field_begin(
-                            "Success",
-                            {{#function:stream_has_first_response?}}
-                            {{#function:return_type}}{{#type:stream_first_response_type}}{{>lib/ttype}}{{/type:stream_first_response_type}}{{/function:return_type}},
-                            {{/function:stream_has_first_response?}}
-                            {{^function:stream_has_first_response?}}
-                            ::fbthrift::TType::Void,
-                            {{/function:stream_has_first_response?}}
-                            0i16,
-                        );
-                        {{#function:stream_has_first_response?}}
-                        _inner.write(p);
-                        {{/function:stream_has_first_response?}}
-                        p.write_field_end();
-                    }{{!
-                    }}{{#function:exceptions}}
-                    Self::{{field:rust_name}}(inner) => {
-                        p.write_field_begin(
-                            "{{field:name}}",
-                            {{#field:type}}{{>lib/ttype}}{{/field:type}},
-                            {{field:key}},
-                        );
-                        inner.write(p);
-                        p.write_field_end();
-                    }{{!
-                    }}{{/function:exceptions}}
-                    Self::ApplicationException(_) => unreachable!(),
-                }
-                p.write_field_stop();
-                p.write_struct_end();
-            }
-        }
-
-        impl<P> ::fbthrift::Deserialize<P> for {{function:upcamel}}ResponseExn
-        where
-            P: ::fbthrift::ProtocolReader,
-        {
-            fn read(p: &mut P) -> ::anyhow::Result<Self> {
-                static RETURNS: &[::fbthrift::Field] = &[
-                    {{#function:returns_by_name}}
-                    ::fbthrift::Field::new("{{field:name}}", {{#field:type}}{{>lib/ttype}}{{/field:type}}, {{field:key}}),
-                    {{/function:returns_by_name}}
-                ];
-                let _ = p.read_struct_begin(|_| ())?;
-                let mut once = false;
-                let mut alt = {{!
-                    }}{{^function:stream_has_first_response?}}{{!
-                        }}Self::Success(()){{!
-                    }}{{/function:stream_has_first_response?}}{{!
-                    }}{{#function:stream_has_first_response?}}::std::option::Option::None{{/function:stream_has_first_response?}}{{!
-                }};
-                loop {
-                    let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
-                    match ((fty, fid as ::std::primitive::i32), once) {
-                        ((::fbthrift::TType::Stop, _), _) => {
-                            p.read_field_end()?;
-                            break;
-                        }
-                        (({{^function:stream_has_first_response?}}::fbthrift::TType::Void{{/function:stream_has_first_response?}}{{!
-                          }}{{#function:stream_has_first_response?}}{{#function:return_type}}{{#type:stream_first_response_type}}{{>lib/ttype}}{{/type:stream_first_response_type}}{{/function:return_type}}{{/function:stream_has_first_response?}}{{!
-                          }}, 0i32), false) => {
-                            once = true;
-                            alt = {{!
-                                }}{{#function:stream_has_first_response?}}::std::option::Option::Some({{/function:stream_has_first_response?}}{{!
-                                }}Self::Success(::fbthrift::Deserialize::read(p)?){{!
-                                }}{{#function:stream_has_first_response?}}){{/function:stream_has_first_response?}}{{!
-                            }};
-                        }{{!
-                        }}{{#function:exceptions}}
-                        (({{#field:type}}{{>lib/ttype}}{{/field:type}}, {{field:key}}), false) => {
-                            once = true;
-                            alt = {{!
-                                }}{{#function:stream_has_first_response?}}::std::option::Option::Some({{/function:stream_has_first_response?}}{{!
-                                }}Self::{{field:rust_name}}(::fbthrift::Deserialize::read(p)?){{!
-                                }}{{#function:stream_has_first_response?}}){{/function:stream_has_first_response?}}{{!
-                            }};
-                        }{{!
-                        }}{{/function:exceptions}}
-                        ((ty, _id), false) => p.skip(ty)?,
-                        ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
-                            ::fbthrift::ApplicationException::new(
-                                ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
-                                format!(
-                                    "unwanted extra union {} field ty {:?} id {}",
-                                    "{{function:upcamel}}ResponseExn",
-                                    badty,
-                                    badid,
-                                ),
-                            )
-                        )),
-                    }
-                    p.read_field_end()?;
-                }
-                p.read_struct_end()?;{{!
-                }}{{^function:stream_has_first_response?}}
-                ::std::result::Result::Ok(alt){{!
-                }}{{/function:stream_has_first_response?}}{{!
-                }}{{#function:stream_has_first_response?}}
-                alt.ok_or_else(||
-                    ::fbthrift::ApplicationException::new(
-                        ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
-                        format!("Empty union {}", "{{function:upcamel}}ResponseExn"),
-                    )
-                    .into(),
-                ){{!
-                }}{{/function:stream_has_first_response?}}
-            }
-        }
-        {{/function:returns_stream?}}
-
-        {{^function:returns_stream?}}
-        #[derive(Clone, Debug)]
-        {{/function:returns_stream?}}
-        pub enum {{function:upcamel}}Exn {
-            #[doc(hidden)]
-            Success({{>lib/server_ok_type}}),{{!
-            }}{{#function:exceptions}}
-            {{field:rust_name}}({{#field:type}}{{>lib/type}}{{/field:type}}),{{!
-            }}{{/function:exceptions}}
-            ApplicationException(::fbthrift::ApplicationException),
-        }{{!
-        }}{{#function:uniqueExceptions}}
-
-        impl ::std::convert::From<{{#field:type}}{{>lib/type}}{{/field:type}}> for {{function:upcamel}}Exn {
-            fn from(exn: {{#field:type}}{{>lib/type}}{{/field:type}}) -> Self {
-                Self::{{field:rust_name}}(exn)
-            }
-        }{{!
-        }}{{/function:uniqueExceptions}}
-        {{#function:check_service_for_enable_anyhow_to_application_exn}}{{#service:enable_anyhow_to_application_exn}}
-
-        impl ::std::convert::From<::anyhow::Error> for {{function:upcamel}}Exn {
-            fn from(exn: ::anyhow::Error) -> Self {
-                Self::ApplicationException(
-                    ::fbthrift::ApplicationException {
-                        message: format!("{exn:#}"),
-                        type_: ::fbthrift::ApplicationExceptionErrorCode::Unknown,
-                    }
-                )
-            }
-        }
-        {{/service:enable_anyhow_to_application_exn}}{{/function:check_service_for_enable_anyhow_to_application_exn}}
-        {{^function:check_service_for_enable_anyhow_to_application_exn}}{{#function:enable_anyhow_to_application_exn}}
-
-        impl ::std::convert::From<::anyhow::Error> for {{function:upcamel}}Exn {
-            fn from(exn: ::anyhow::Error) -> Self {
-                Self::ApplicationException(
-                    ::fbthrift::ApplicationException {
-                        message: format!("{exn:#}"),
-                        type_: ::fbthrift::ApplicationExceptionErrorCode::Unknown,
-                    }
-                )
-            }
-        }
-        {{/function:enable_anyhow_to_application_exn}}{{/function:check_service_for_enable_anyhow_to_application_exn}}
-
-        impl ::std::convert::From<{{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Error> for {{function:upcamel}}Exn {
-            fn from(err: {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Error) -> Self {
-                match err {
-                    {{#function:exceptions}}
-                    {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Error::{{field:rust_name}}(err) => {{function:upcamel}}Exn::{{field:rust_name}}(err),
-                    {{/function:exceptions}}
-                    {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Error::ApplicationException(aexn) => {{function:upcamel}}Exn::ApplicationException(aexn),
-                    {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Error::ThriftError(err) => {{function:upcamel}}Exn::ApplicationException(::fbthrift::ApplicationException {
-                        message: err.to_string(),
-                        type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
-                    }),
-                }
-            }
-        }
-
-        impl ::std::convert::From<::fbthrift::ApplicationException> for {{function:upcamel}}Exn {
-            fn from(exn: ::fbthrift::ApplicationException) -> Self {
-                Self::ApplicationException(exn)
-            }
-        }
-
-        impl ::fbthrift::ExceptionInfo for {{function:upcamel}}Exn {
-            fn exn_name(&self) -> &'static str {
-                match self {
-                    Self::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
-                    Self::ApplicationException(aexn) => aexn.exn_name(),
-                    {{#function:exceptions}}
-                    Self::{{field:rust_name}}(exn) => exn.exn_name(),
-                    {{/function:exceptions}}
-                }
-            }
-
-            fn exn_value(&self) -> String {
-                match self {
-                    Self::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
-                    Self::ApplicationException(aexn) => aexn.exn_value(),
-                    {{#function:exceptions}}
-                    Self::{{field:rust_name}}(exn) => exn.exn_value(),
-                    {{/function:exceptions}}
-                }
-            }
-
-            fn exn_is_declared(&self) -> bool {
-                match self {
-                    Self::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
-                    Self::ApplicationException(aexn) => aexn.exn_is_declared(),
-                    {{#function:exceptions}}
-                    Self::{{field:rust_name}}(exn) => exn.exn_is_declared(),
-                    {{/function:exceptions}}
-                }
-            }
-        }
-
-        impl ::fbthrift::ResultInfo for {{function:upcamel}}Exn {
-            fn result_type(&self) -> ::fbthrift::ResultType {
-                match self {
-                    Self::Success(_) => ::fbthrift::ResultType::Return,
-                    Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
-                    {{#function:exceptions}}
-                    Self::{{field:rust_name}}(_exn) => fbthrift::ResultType::Error,
-                    {{/function:exceptions}}
-                }
-            }
-        }
-
-        impl ::fbthrift::GetTType for {{function:upcamel}}Exn {
-            const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
-        }
-
-        {{^function:returns_streams?}}
-        impl<P> ::fbthrift::Serialize<P> for {{function:upcamel}}Exn
-        where
-            P: ::fbthrift::ProtocolWriter,
-        {
-            fn write(&self, p: &mut P) {
-                if let Self::ApplicationException(aexn) = self {
-                    return aexn.write(p);
-                }
-                p.write_struct_begin("{{function:upcamel}}");
-                match self {
-                    {{!We handle serialization of response and stream items with a separate logic.
-                    However, the service exceptions can have the same serialization logic}}
-                    Self::Success(inner) => {
-                        p.write_field_begin(
-                            "Success",
-                            {{#function:return_type}}{{>lib/ttype}}{{/function:return_type}},
-                            0i16,
-                        );
-                        inner.write(p);
-                        p.write_field_end();
-                    }{{!
-                    }}{{#function:exceptions}}
-                    Self::{{field:rust_name}}(inner) => {
-                        p.write_field_begin(
-                            "{{field:name}}",
-                            {{#field:type}}{{>lib/ttype}}{{/field:type}},
-                            {{field:key}},
-                        );
-                        inner.write(p);
-                        p.write_field_end();
-                    }{{!
-                    }}{{/function:exceptions}}
-                    Self::ApplicationException(_aexn) => unreachable!(),
-                }
-                p.write_field_stop();
-                p.write_struct_end();
-            }
-        }
-        {{/function:returns_streams?}}
-
-        {{^function:returns_streams?}}
-        impl<P> ::fbthrift::Deserialize<P> for {{function:upcamel}}Exn
-        where
-            P: ::fbthrift::ProtocolReader,
-        {
-            fn read(p: &mut P) -> ::anyhow::Result<Self> {
-                static RETURNS: &[::fbthrift::Field] = &[
-                    {{#function:returns_by_name}}
-                    ::fbthrift::Field::new("{{field:name}}", {{#field:type}}{{>lib/ttype}}{{/field:type}}, {{field:key}}),
-                    {{/function:returns_by_name}}
-                ];
-                let _ = p.read_struct_begin(|_| ())?;
-                let mut once = false;
-                let mut alt = {{!
-                    }}{{#function:void_excluding_interaction?}}{{!
-                        }}Self::Success(()){{!
-                    }}{{/function:void_excluding_interaction?}}{{!
-                    }}{{^function:void_excluding_interaction?}}::std::option::Option::None{{/function:void_excluding_interaction?}}{{!
-                }};
-                loop {
-                    let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
-                    match ((fty, fid as ::std::primitive::i32), once) {
-                        ((::fbthrift::TType::Stop, _), _) => {
-                            p.read_field_end()?;
-                            break;
-                        }
-                        (({{#function:return_type}}{{>lib/ttype}}{{/function:return_type}}, 0i32), false) => {
-                            once = true;
-                            alt = {{!
-                                }}{{^function:void_excluding_interaction?}}::std::option::Option::Some({{/function:void_excluding_interaction?}}{{!
-                                }}Self::Success(::fbthrift::Deserialize::read(p)?){{!
-                                }}{{^function:void_excluding_interaction?}}){{/function:void_excluding_interaction?}}{{!
-                            }};
-                        }{{!
-                        }}{{#function:exceptions}}
-                        (({{#field:type}}{{>lib/ttype}}{{/field:type}}, {{field:key}}), false) => {
-                            once = true;
-                            alt = {{!
-                                }}{{^function:void_excluding_interaction?}}::std::option::Option::Some({{/function:void_excluding_interaction?}}{{!
-                                }}Self::{{field:rust_name}}(::fbthrift::Deserialize::read(p)?){{!
-                                }}{{^function:void_excluding_interaction?}}){{/function:void_excluding_interaction?}}{{!
-                            }};
-                        }{{!
-                        }}{{/function:exceptions}}
-                        ((ty, _id), false) => p.skip(ty)?,
-                        ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
-                            ::fbthrift::ApplicationException::new(
-                                ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
-                                format!(
-                                    "unwanted extra union {} field ty {:?} id {}",
-                                    "{{function:upcamel}}Exn",
-                                    badty,
-                                    badid,
-                                ),
-                            )
-                        )),
-                    }
-                    p.read_field_end()?;
-                }
-                p.read_struct_end()?;{{!
-                }}{{#function:void_excluding_interaction?}}
-                ::std::result::Result::Ok(alt){{!
-                }}{{/function:void_excluding_interaction?}}{{!
-                }}{{^function:void_excluding_interaction?}}
-                alt.ok_or_else(||
-                    ::fbthrift::ApplicationException::new(
-                        ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
-                        format!("Empty union {}", "{{function:upcamel}}Exn"),
-                    )
-                    .into(),
-                ){{!
-                }}{{/function:void_excluding_interaction?}}
-            }
-        }
-        {{/function:returns_streams?}}{{!
-        }}{{/function:starts_interaction?}}{{/service:rustFunctions}}
     }
-    {{!newline}}
+
+    #[derive(Clone, Debug)]
+    pub enum {{function:upcamel}}ResponseExn {
+        #[doc(hidden)]
+        {{#function:stream_has_first_response?}}
+        Success({{#function:return_type}}{{#type:stream_first_response_type}}{{>lib/type}}{{/type:stream_first_response_type}}{{/function:return_type}}),
+        {{/function:stream_has_first_response?}}
+        {{^function:stream_has_first_response?}}
+        Success(()),
+        {{/function:stream_has_first_response?}}{{!
+        }}{{#function:exceptions}}
+        {{field:rust_name}}({{#field:type}}{{>lib/type}}{{/field:type}}),{{!
+        }}{{/function:exceptions}}
+        ApplicationException(::fbthrift::ApplicationException),
+    }{{!
+    }}
+
+    impl ::fbthrift::ExceptionInfo for {{function:upcamel}}ResponseExn {
+        fn exn_name(&self) -> &'static str {
+            match self {
+                Self::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
+                Self::ApplicationException(aexn) => aexn.exn_name(),
+                {{#function:exceptions}}
+                Self::{{field:rust_name}}(exn) => exn.exn_name(),
+                {{/function:exceptions}}
+            }
+        }
+
+        fn exn_value(&self) -> String {
+            match self {
+                Self::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
+                Self::ApplicationException(aexn) => aexn.exn_value(),
+                {{#function:exceptions}}
+                Self::{{field:rust_name}}(exn) => exn.exn_value(),
+                {{/function:exceptions}}
+            }
+        }
+
+        fn exn_is_declared(&self) -> bool {
+            match self {
+                Self::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
+                Self::ApplicationException(aexn) => aexn.exn_is_declared(),
+                {{#function:exceptions}}
+                Self::{{field:rust_name}}(exn) => exn.exn_is_declared(),
+                {{/function:exceptions}}
+            }
+        }
+    }
+
+    impl ::fbthrift::ResultInfo for {{function:upcamel}}ResponseExn {
+        fn result_type(&self) -> ::fbthrift::ResultType {
+            match self {
+                Self::Success(_) => ::fbthrift::ResultType::Return,
+                Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
+                {{#function:exceptions}}
+                Self::{{field:rust_name}}(_exn) => fbthrift::ResultType::Error,
+                {{/function:exceptions}}
+            }
+        }
+    }
+
+    {{#function:uniqueExceptions}}
+    impl ::std::convert::From<{{#field:type}}{{>lib/type}}{{/field:type}}> for {{function:upcamel}}ResponseExn {
+        fn from(exn: {{#field:type}}{{>lib/type}}{{/field:type}}) -> Self {
+            Self::{{field:rust_name}}(exn)
+        }
+    }{{!
+    }}{{/function:uniqueExceptions}}
+
+    impl ::std::convert::From<::fbthrift::ApplicationException> for {{function:upcamel}}ResponseExn {
+        fn from(exn: ::fbthrift::ApplicationException) -> Self {
+            Self::ApplicationException(exn)
+        }
+    }
+    {{#function:check_service_for_enable_anyhow_to_application_exn}}{{#service:enable_anyhow_to_application_exn}}
+
+    impl ::std::convert::From<::anyhow::Error> for {{function:upcamel}}ResponseExn {
+        fn from(exn: ::anyhow::Error) -> Self {
+            Self::ApplicationException(
+                ::fbthrift::ApplicationException {
+                    message: format!("{exn:#}"),
+                    type_: ::fbthrift::ApplicationExceptionErrorCode::Unknown,
+                }
+            )
+        }
+    }
+    {{/service:enable_anyhow_to_application_exn}}{{/function:check_service_for_enable_anyhow_to_application_exn}}
+    {{^function:check_service_for_enable_anyhow_to_application_exn}}{{#function:enable_anyhow_to_application_exn}}
+
+    impl ::std::convert::From<::anyhow::Error> for {{function:upcamel}}ResponseExn {
+        fn from(exn: ::anyhow::Error) -> Self {
+            Self::ApplicationException(
+                ::fbthrift::ApplicationException {
+                    message: format!("{exn:#}"),
+                    type_: ::fbthrift::ApplicationExceptionErrorCode::Unknown,
+                }
+            )
+        }
+    }
+    {{/function:enable_anyhow_to_application_exn}}{{/function:check_service_for_enable_anyhow_to_application_exn}}
+
+    impl ::fbthrift::GetTType for {{function:upcamel}}ResponseExn {
+        {{#function:stream_has_first_response?}}
+        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+        {{/function:stream_has_first_response?}}
+        {{^function:stream_has_first_response?}}
+        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Void;
+        {{/function:stream_has_first_response?}}
+    }
+
+    impl<P> ::fbthrift::Serialize<P> for {{function:upcamel}}ResponseExn
+    where
+        P: ::fbthrift::ProtocolWriter,
+    {
+        fn write(&self, p: &mut P) {
+            if let Self::ApplicationException(aexn) = self {
+                return aexn.write(p);
+            }
+            p.write_struct_begin("{{function:upcamel}}");
+            match self {
+                Self::Success(_inner) => {
+                    p.write_field_begin(
+                        "Success",
+                        {{#function:stream_has_first_response?}}
+                        {{#function:return_type}}{{#type:stream_first_response_type}}{{>lib/ttype}}{{/type:stream_first_response_type}}{{/function:return_type}},
+                        {{/function:stream_has_first_response?}}
+                        {{^function:stream_has_first_response?}}
+                        ::fbthrift::TType::Void,
+                        {{/function:stream_has_first_response?}}
+                        0i16,
+                    );
+                    {{#function:stream_has_first_response?}}
+                    _inner.write(p);
+                    {{/function:stream_has_first_response?}}
+                    p.write_field_end();
+                }{{!
+                }}{{#function:exceptions}}
+                Self::{{field:rust_name}}(inner) => {
+                    p.write_field_begin(
+                        "{{field:name}}",
+                        {{#field:type}}{{>lib/ttype}}{{/field:type}},
+                        {{field:key}},
+                    );
+                    inner.write(p);
+                    p.write_field_end();
+                }{{!
+                }}{{/function:exceptions}}
+                Self::ApplicationException(_) => unreachable!(),
+            }
+            p.write_field_stop();
+            p.write_struct_end();
+        }
+    }
+
+    impl<P> ::fbthrift::Deserialize<P> for {{function:upcamel}}ResponseExn
+    where
+        P: ::fbthrift::ProtocolReader,
+    {
+        fn read(p: &mut P) -> ::anyhow::Result<Self> {
+            static RETURNS: &[::fbthrift::Field] = &[
+                {{#function:returns_by_name}}
+                ::fbthrift::Field::new("{{field:name}}", {{#field:type}}{{>lib/ttype}}{{/field:type}}, {{field:key}}),
+                {{/function:returns_by_name}}
+            ];
+            let _ = p.read_struct_begin(|_| ())?;
+            let mut once = false;
+            let mut alt = {{!
+                }}{{^function:stream_has_first_response?}}{{!
+                    }}Self::Success(()){{!
+                }}{{/function:stream_has_first_response?}}{{!
+                }}{{#function:stream_has_first_response?}}::std::option::Option::None{{/function:stream_has_first_response?}}{{!
+            }};
+            loop {
+                let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
+                match ((fty, fid as ::std::primitive::i32), once) {
+                    ((::fbthrift::TType::Stop, _), _) => {
+                        p.read_field_end()?;
+                        break;
+                    }
+                    (({{^function:stream_has_first_response?}}::fbthrift::TType::Void{{/function:stream_has_first_response?}}{{!
+                      }}{{#function:stream_has_first_response?}}{{#function:return_type}}{{#type:stream_first_response_type}}{{>lib/ttype}}{{/type:stream_first_response_type}}{{/function:return_type}}{{/function:stream_has_first_response?}}{{!
+                      }}, 0i32), false) => {
+                        once = true;
+                        alt = {{!
+                            }}{{#function:stream_has_first_response?}}::std::option::Option::Some({{/function:stream_has_first_response?}}{{!
+                            }}Self::Success(::fbthrift::Deserialize::read(p)?){{!
+                            }}{{#function:stream_has_first_response?}}){{/function:stream_has_first_response?}}{{!
+                        }};
+                    }{{!
+                    }}{{#function:exceptions}}
+                    (({{#field:type}}{{>lib/ttype}}{{/field:type}}, {{field:key}}), false) => {
+                        once = true;
+                        alt = {{!
+                            }}{{#function:stream_has_first_response?}}::std::option::Option::Some({{/function:stream_has_first_response?}}{{!
+                            }}Self::{{field:rust_name}}(::fbthrift::Deserialize::read(p)?){{!
+                            }}{{#function:stream_has_first_response?}}){{/function:stream_has_first_response?}}{{!
+                        }};
+                    }{{!
+                    }}{{/function:exceptions}}
+                    ((ty, _id), false) => p.skip(ty)?,
+                    ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
+                        ::fbthrift::ApplicationException::new(
+                            ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
+                            format!(
+                                "unwanted extra union {} field ty {:?} id {}",
+                                "{{function:upcamel}}ResponseExn",
+                                badty,
+                                badid,
+                            ),
+                        )
+                    )),
+                }
+                p.read_field_end()?;
+            }
+            p.read_struct_end()?;{{!
+            }}{{^function:stream_has_first_response?}}
+            ::std::result::Result::Ok(alt){{!
+            }}{{/function:stream_has_first_response?}}{{!
+            }}{{#function:stream_has_first_response?}}
+            alt.ok_or_else(||
+                ::fbthrift::ApplicationException::new(
+                    ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
+                    format!("Empty union {}", "{{function:upcamel}}ResponseExn"),
+                )
+                .into(),
+            ){{!
+            }}{{/function:stream_has_first_response?}}
+        }
+    }
+    {{/function:returns_stream?}}
+
+    {{^function:returns_stream?}}
+    #[derive(Clone, Debug)]
+    {{/function:returns_stream?}}
+    pub enum {{function:upcamel}}Exn {
+        #[doc(hidden)]
+        Success({{>lib/server_ok_type}}),{{!
+        }}{{#function:exceptions}}
+        {{field:rust_name}}({{#field:type}}{{>lib/type}}{{/field:type}}),{{!
+        }}{{/function:exceptions}}
+        ApplicationException(::fbthrift::ApplicationException),
+    }{{!
+    }}{{#function:uniqueExceptions}}
+
+    impl ::std::convert::From<{{#field:type}}{{>lib/type}}{{/field:type}}> for {{function:upcamel}}Exn {
+        fn from(exn: {{#field:type}}{{>lib/type}}{{/field:type}}) -> Self {
+            Self::{{field:rust_name}}(exn)
+        }
+    }{{!
+    }}{{/function:uniqueExceptions}}
+    {{#function:check_service_for_enable_anyhow_to_application_exn}}{{#service:enable_anyhow_to_application_exn}}
+
+    impl ::std::convert::From<::anyhow::Error> for {{function:upcamel}}Exn {
+        fn from(exn: ::anyhow::Error) -> Self {
+            Self::ApplicationException(
+                ::fbthrift::ApplicationException {
+                    message: format!("{exn:#}"),
+                    type_: ::fbthrift::ApplicationExceptionErrorCode::Unknown,
+                }
+            )
+        }
+    }
+    {{/service:enable_anyhow_to_application_exn}}{{/function:check_service_for_enable_anyhow_to_application_exn}}
+    {{^function:check_service_for_enable_anyhow_to_application_exn}}{{#function:enable_anyhow_to_application_exn}}
+
+    impl ::std::convert::From<::anyhow::Error> for {{function:upcamel}}Exn {
+        fn from(exn: ::anyhow::Error) -> Self {
+            Self::ApplicationException(
+                ::fbthrift::ApplicationException {
+                    message: format!("{exn:#}"),
+                    type_: ::fbthrift::ApplicationExceptionErrorCode::Unknown,
+                }
+            )
+        }
+    }
+    {{/function:enable_anyhow_to_application_exn}}{{/function:check_service_for_enable_anyhow_to_application_exn}}
+
+    impl ::std::convert::From<{{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Error> for {{function:upcamel}}Exn {
+        fn from(err: {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Error) -> Self {
+            match err {
+                {{#function:exceptions}}
+                {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Error::{{field:rust_name}}(err) => {{function:upcamel}}Exn::{{field:rust_name}}(err),
+                {{/function:exceptions}}
+                {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Error::ApplicationException(aexn) => {{function:upcamel}}Exn::ApplicationException(aexn),
+                {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Error::ThriftError(err) => {{function:upcamel}}Exn::ApplicationException(::fbthrift::ApplicationException {
+                    message: err.to_string(),
+                    type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                }),
+            }
+        }
+    }
+
+    impl ::std::convert::From<::fbthrift::ApplicationException> for {{function:upcamel}}Exn {
+        fn from(exn: ::fbthrift::ApplicationException) -> Self {
+            Self::ApplicationException(exn)
+        }
+    }
+
+    impl ::fbthrift::ExceptionInfo for {{function:upcamel}}Exn {
+        fn exn_name(&self) -> &'static str {
+            match self {
+                Self::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
+                Self::ApplicationException(aexn) => aexn.exn_name(),
+                {{#function:exceptions}}
+                Self::{{field:rust_name}}(exn) => exn.exn_name(),
+                {{/function:exceptions}}
+            }
+        }
+
+        fn exn_value(&self) -> String {
+            match self {
+                Self::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
+                Self::ApplicationException(aexn) => aexn.exn_value(),
+                {{#function:exceptions}}
+                Self::{{field:rust_name}}(exn) => exn.exn_value(),
+                {{/function:exceptions}}
+            }
+        }
+
+        fn exn_is_declared(&self) -> bool {
+            match self {
+                Self::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
+                Self::ApplicationException(aexn) => aexn.exn_is_declared(),
+                {{#function:exceptions}}
+                Self::{{field:rust_name}}(exn) => exn.exn_is_declared(),
+                {{/function:exceptions}}
+            }
+        }
+    }
+
+    impl ::fbthrift::ResultInfo for {{function:upcamel}}Exn {
+        fn result_type(&self) -> ::fbthrift::ResultType {
+            match self {
+                Self::Success(_) => ::fbthrift::ResultType::Return,
+                Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
+                {{#function:exceptions}}
+                Self::{{field:rust_name}}(_exn) => fbthrift::ResultType::Error,
+                {{/function:exceptions}}
+            }
+        }
+    }
+
+    impl ::fbthrift::GetTType for {{function:upcamel}}Exn {
+        const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+    }
+
+    {{^function:returns_streams?}}
+    impl<P> ::fbthrift::Serialize<P> for {{function:upcamel}}Exn
+    where
+        P: ::fbthrift::ProtocolWriter,
+    {
+        fn write(&self, p: &mut P) {
+            if let Self::ApplicationException(aexn) = self {
+                return aexn.write(p);
+            }
+            p.write_struct_begin("{{function:upcamel}}");
+            match self {
+                {{!We handle serialization of response and stream items with a separate logic.
+                However, the service exceptions can have the same serialization logic}}
+                Self::Success(inner) => {
+                    p.write_field_begin(
+                        "Success",
+                        {{#function:return_type}}{{>lib/ttype}}{{/function:return_type}},
+                        0i16,
+                    );
+                    inner.write(p);
+                    p.write_field_end();
+                }{{!
+                }}{{#function:exceptions}}
+                Self::{{field:rust_name}}(inner) => {
+                    p.write_field_begin(
+                        "{{field:name}}",
+                        {{#field:type}}{{>lib/ttype}}{{/field:type}},
+                        {{field:key}},
+                    );
+                    inner.write(p);
+                    p.write_field_end();
+                }{{!
+                }}{{/function:exceptions}}
+                Self::ApplicationException(_aexn) => unreachable!(),
+            }
+            p.write_field_stop();
+            p.write_struct_end();
+        }
+    }
+    {{/function:returns_streams?}}
+
+    {{^function:returns_streams?}}
+    impl<P> ::fbthrift::Deserialize<P> for {{function:upcamel}}Exn
+    where
+        P: ::fbthrift::ProtocolReader,
+    {
+        fn read(p: &mut P) -> ::anyhow::Result<Self> {
+            static RETURNS: &[::fbthrift::Field] = &[
+                {{#function:returns_by_name}}
+                ::fbthrift::Field::new("{{field:name}}", {{#field:type}}{{>lib/ttype}}{{/field:type}}, {{field:key}}),
+                {{/function:returns_by_name}}
+            ];
+            let _ = p.read_struct_begin(|_| ())?;
+            let mut once = false;
+            let mut alt = {{!
+                }}{{#function:void_excluding_interaction?}}{{!
+                    }}Self::Success(()){{!
+                }}{{/function:void_excluding_interaction?}}{{!
+                }}{{^function:void_excluding_interaction?}}::std::option::Option::None{{/function:void_excluding_interaction?}}{{!
+            }};
+            loop {
+                let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
+                match ((fty, fid as ::std::primitive::i32), once) {
+                    ((::fbthrift::TType::Stop, _), _) => {
+                        p.read_field_end()?;
+                        break;
+                    }
+                    (({{#function:return_type}}{{>lib/ttype}}{{/function:return_type}}, 0i32), false) => {
+                        once = true;
+                        alt = {{!
+                            }}{{^function:void_excluding_interaction?}}::std::option::Option::Some({{/function:void_excluding_interaction?}}{{!
+                            }}Self::Success(::fbthrift::Deserialize::read(p)?){{!
+                            }}{{^function:void_excluding_interaction?}}){{/function:void_excluding_interaction?}}{{!
+                        }};
+                    }{{!
+                    }}{{#function:exceptions}}
+                    (({{#field:type}}{{>lib/ttype}}{{/field:type}}, {{field:key}}), false) => {
+                        once = true;
+                        alt = {{!
+                            }}{{^function:void_excluding_interaction?}}::std::option::Option::Some({{/function:void_excluding_interaction?}}{{!
+                            }}Self::{{field:rust_name}}(::fbthrift::Deserialize::read(p)?){{!
+                            }}{{^function:void_excluding_interaction?}}){{/function:void_excluding_interaction?}}{{!
+                        }};
+                    }{{!
+                    }}{{/function:exceptions}}
+                    ((ty, _id), false) => p.skip(ty)?,
+                    ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
+                        ::fbthrift::ApplicationException::new(
+                            ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
+                            format!(
+                                "unwanted extra union {} field ty {:?} id {}",
+                                "{{function:upcamel}}Exn",
+                                badty,
+                                badid,
+                            ),
+                        )
+                    )),
+                }
+                p.read_field_end()?;
+            }
+            p.read_struct_end()?;{{!
+            }}{{#function:void_excluding_interaction?}}
+            ::std::result::Result::Ok(alt){{!
+            }}{{/function:void_excluding_interaction?}}{{!
+            }}{{^function:void_excluding_interaction?}}
+            alt.ok_or_else(||
+                ::fbthrift::ApplicationException::new(
+                    ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
+                    format!("Empty union {}", "{{function:upcamel}}Exn"),
+                )
+                .into(),
+            ){{!
+            }}{{/function:void_excluding_interaction?}}
+        }
+    }
+    {{/function:returns_streams?}}{{!
+    }}{{/function:starts_interaction?}}{{/service:rustFunctions}}
+}
+{{!newline}}

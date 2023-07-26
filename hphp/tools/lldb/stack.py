@@ -3,6 +3,7 @@
 import argparse
 import lldb
 import shlex
+import traceback
 import typing
 
 try:
@@ -136,8 +137,10 @@ The output backtrace has the following format:
             if frame.is_jitted(rip):
                 try:
                     result.write(frame.stringify(frame.create_php(idx=i, ar=utils.unsigned_cast(fp, ar_type), rip=rip)) + "\n")
-                except Exception as e:
-                    utils.debug_print(f"Failed to create jitted frame (FP: 0x{fp.unsigned:x}, RIP: 0x{rip.unsigned:x}) with error: {str(e)}")
+                except Exception:
+                    utils.debug_print(f"Failed to create jitted frame (FP: 0x{fp.unsigned:x}, RIP: 0x{rip.unsigned:x})")
+                    if utils._Debug:
+                        traceback.print_exc()
                     result.write(frame.stringify(frame.create_native(idx=i, fp=fp, rip=rip, native_frame=native_frame)) + "\n")
 
                 if native_frame is not None:

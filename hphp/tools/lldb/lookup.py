@@ -28,7 +28,7 @@ def lookup_func(func_id: lldb.SBValue) -> typing.Optional[lldb.SBValue]:
     target = func_id.target
     assert func_id.type.name == "HPHP::FuncId", f"invalid func_id, type given is {func_id.type.name} but expected HPHP::FuncId"
     func_vec = utils.Global("HPHP::Func::s_funcVec", target)
-    if func_vec.IsValid():
+    if func_vec.IsValid() and func_vec.GetError().Success():
         # Non-LowPtr
         utils.debug_print(f"lookup_func({func_id.signed}): identified as non-lowptr")
         func_id_val = utils.get(func_id, "m_id").unsigned

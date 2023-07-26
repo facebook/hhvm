@@ -17,22 +17,40 @@ import com.facebook.hyperthrift.reflect.HyperThriftType;
 
 @Immutable
 @HyperThriftType
-public class NestedMixedx2 extends HyperThriftBase {
-  public static final String TYPE_NAME = "thrift.test.NestedMixedx2";
+public class XUnion extends HyperThriftBase {
+  public static final String TYPE_NAME = "thrift.test.XUnion";
 
+  @IntDef({
+    Fields.first,
+    Fields.second,
+    Fields.third,
+  })
+  public @interface Fields {
+    int first = 1;
+    int second = 2;
+    int third = 3;
+  }
+
+  public @Fields int getUnionFieldId() {
+    return getUnionFieldIdInternal();
+  }
+
+  public Object getUnionFieldValue() {
+    return getFieldValue(getUnionFieldIndex());
+  }
 
   @Nullable
-  public List<Set<Integer>> int_set_list() {
+  public thrift.test.Xtruct first() {
     return getFieldValue(0);
   }
 
   @Nullable
-  public Map<Integer, Set<String>> map_int_strset() {
+  public thrift.test.Xtruct2 second() {
     return getFieldValue(1);
   }
 
   @Nullable
-  public List<Map<Integer, Set<String>>> map_int_strset_list() {
+  public thrift.test.Xtruct3 third() {
     return getFieldValue(2);
   }
 
@@ -43,44 +61,48 @@ public class NestedMixedx2 extends HyperThriftBase {
       super(3);
     }
 
-    public Builder(NestedMixedx2 other) {
+    public Builder(XUnion other) {
       super(other);
     }
 
     @Nullable
-    public List<Set<Integer>> int_set_list() {
+    public thrift.test.Xtruct first() {
       return getFieldValue(0);
     }
 
-    public Builder NestedMixedx2( List<Set<Integer>> value) {
+    public Builder XUnion( thrift.test.Xtruct value) {
       setFieldValue(0, value);
+      mUnionFieldId = 1;
       return this;
     }
 
     @Nullable
-    public Map<Integer, Set<String>> map_int_strset() {
+    public thrift.test.Xtruct2 second() {
       return getFieldValue(1);
     }
 
-    public Builder NestedMixedx2( Map<Integer, Set<String>> value) {
+    public Builder XUnion( thrift.test.Xtruct2 value) {
       setFieldValue(1, value);
+      mUnionFieldId = 2;
       return this;
     }
 
     @Nullable
-    public List<Map<Integer, Set<String>>> map_int_strset_list() {
+    public thrift.test.Xtruct3 third() {
       return getFieldValue(2);
     }
 
-    public Builder NestedMixedx2( List<Map<Integer, Set<String>>> value) {
+    public Builder XUnion( thrift.test.Xtruct3 value) {
       setFieldValue(2, value);
+      mUnionFieldId = 3;
       return this;
     }
 
-    public NestedMixedx2 build() {
+    public XUnion build() {
       Object[] fields = markBuilt();
-      NestedMixedx2 instance = new NestedMixedx2();
+      XUnion instance = new XUnion();
       instance.init(TYPE_NAME, fields);
+      instance.assignUnionFieldId(mUnionFieldId);
       return instance;
     }
   }

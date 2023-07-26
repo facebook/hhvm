@@ -1,6 +1,6 @@
 {{> generated}}
 
-package {{packageName}};
+package {{struct:javaPackage}};
 
 import java.util.List;
 import java.util.Map;
@@ -20,14 +20,14 @@ public class {{struct:javaCapitalName}} extends HyperThriftBase {
 
 {{#struct:union?}}
   @IntDef({
-  {{#fields}}
-    Fields.{{javaName}},
-  {{/fields}}
+  {{#struct:fields}}
+    Fields.{{field:javaName}},
+  {{/struct:fields}}
   })
   public @interface Fields {
-  {{#fields}}
-    int {{javaName}} = {{id}};
-  {{/fields}}
+  {{#struct:fields}}
+    int {{field:javaName}} = {{field:key}};
+  {{/struct:fields}}
   }
 
   public @Fields int getUnionFieldId() {
@@ -81,9 +81,9 @@ public class {{struct:javaCapitalName}} extends HyperThriftBase {
 
     public Builder {{struct:javaCapitalName}}({{#field:required?}}@Nullable{{/field:required?}} {{> fieldtype}} value) {
       setFieldValue({{field:index}}, value);
-    {{#isUnion}}
-      mUnionFieldId = {{id}};
-    {{/isUnion}}
+    {{#struct:union?}}
+      mUnionFieldId = {{field:key}};
+    {{/struct:union?}}
       return this;
     }
 
@@ -102,9 +102,9 @@ public class {{struct:javaCapitalName}} extends HyperThriftBase {
       instance.assertRequired({{field:index}}, "{{field:name}}");
     {{/field:required?}}
   {{/struct:fields}}
-  {{#isUnion}}
+  {{#struct:union?}}
       instance.assignUnionFieldId(mUnionFieldId);
-  {{/isUnion}}
+  {{/struct:union?}}
       return instance;
     }
   }

@@ -81,6 +81,12 @@ struct Xtruct3 {
   11: i64 i64_thing;
 }
 
+union XUnion {
+  1: Xtruct first;
+  2: Xtruct2 second;
+  3: Xtruct3 third;
+}
+
 struct Insanity {
   1: map<Numberz, UserId> userMap;
   2: list<Xtruct> xtructs;
@@ -124,7 +130,6 @@ struct VersioningTestV1 {
 
 struct VersioningTestV2 {
   1: i32 begin_in_both;
-
   2: i32 newint;
   3: byte newbyte;
   4: i16 newshort;

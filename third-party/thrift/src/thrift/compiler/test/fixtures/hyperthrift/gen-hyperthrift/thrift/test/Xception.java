@@ -5,7 +5,7 @@
  *  @generated
  */
 
-package ;
+package thrift.test;
 
 import java.util.List;
 import java.util.Map;

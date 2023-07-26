@@ -56,30 +56,6 @@ std::string get_namespace_or_default(const t_program& prog) {
       "No namespace 'hyperthrift' or 'java' in " + prog.name()};
 }
 
-std::string get_constants_class_name(const t_program& prog) {
-  const auto& constant_name = prog.get_namespace("java.swift.constants");
-  if (constant_name == "") {
-    return "Constants";
-  } else {
-    auto java_name_space = get_namespace_or_default(prog);
-    std::string java_class_name;
-    if (constant_name.rfind(java_name_space) == 0) {
-      java_class_name = constant_name.substr(java_name_space.length() + 1);
-    } else {
-      java_class_name = constant_name;
-    }
-
-    if (java_class_name == "" ||
-        java_class_name.find('.') != std::string::npos) {
-      throw std::runtime_error{
-          "Java Constants Class Name `" + java_class_name +
-          "` is not well formatted."};
-    }
-
-    return java_class_name;
-  }
-}
-
 template <typename Node>
 mstch::node get_structed_annotation_attribute(
     const Node* node, const char* uri, const std::string& key) {
@@ -179,7 +155,7 @@ class t_mstch_hyperthrift_generator : public t_mstch_generator {
         ? "data-type" / raw_package_dir
         : raw_package_dir;
 
-    auto constant_file_name = get_constants_class_name(*program) + ".java";
+    auto constant_file_name = "Constants.java";
     render_to_file(prog, "constants", package_dir / constant_file_name);
   }
 };
@@ -195,38 +171,9 @@ class mstch_hyperthrift_program : public mstch_program {
         this,
         {
             {"program:javaPackage", &mstch_hyperthrift_program::java_package},
-            {"program:constantClassName",
-             &mstch_hyperthrift_program::constant_class_name},
-            {"program:typeList", &mstch_hyperthrift_program::list},
-            {"program:typeListHash", &mstch_hyperthrift_program::list_hash},
         });
   }
   mstch::node java_package() { return get_namespace_or_default(*program_); }
-  mstch::node constant_class_name() {
-    return get_constants_class_name(*program_);
-  }
-  mstch::node list_hash() { return type_list_hash; }
-  mstch::node list() {
-    int32_t size = type_list.size();
-    mstch::array arr;
-    int n = 0;
-    while (n * BATCH_SIZE < size) {
-      mstch::array a;
-      for (int32_t i = n * BATCH_SIZE; i < std::min((n + 1) * BATCH_SIZE, size);
-           i++) {
-        const auto& m = type_list[i];
-        a.push_back(mstch::map{
-            {"typeList:uri", m.uri},
-            {"typeList:className", m.className},
-        });
-      }
-      arr.push_back(mstch::map{
-          {"typeList:index", n++},
-          {"typeList:batch", a},
-      });
-    }
-    return arr;
-  }
 };
 
 class mstch_hyperthrift_struct : public mstch_struct {
@@ -244,25 +191,8 @@ class mstch_hyperthrift_struct : public mstch_struct {
         this,
         {
             {"struct:javaPackage", &mstch_hyperthrift_struct::java_package},
-            {"struct:unionFieldTypeUnique?",
-             &mstch_hyperthrift_struct::is_union_field_type_unique},
-            {"struct:asBean?", &mstch_hyperthrift_struct::is_as_bean},
-            {"struct:isBigStruct?", &mstch_hyperthrift_struct::is_BigStruct},
             {"struct:javaCapitalName",
              &mstch_hyperthrift_struct::java_capital_name},
-            {"struct:javaAnnotations?",
-             &mstch_hyperthrift_struct::has_java_annotations},
-            {"struct:isUnion?", &mstch_hyperthrift_struct::is_struct_union},
-            {"struct:javaAnnotations",
-             &mstch_hyperthrift_struct::java_annotations},
-            {"struct:exceptionMessage",
-             &mstch_hyperthrift_struct::exception_message},
-            {"struct:needsExceptionMessage?",
-             &mstch_hyperthrift_struct::needs_exception_message},
-            {"struct:hasTerseField?",
-             &mstch_hyperthrift_struct::has_terse_field},
-            {"struct:hasWrapper?", &mstch_hyperthrift_struct::has_wrapper},
-            {"struct:clearAdapter", &mstch_hyperthrift_struct::clear_adapter},
             {"struct:shouldGenerateBuilder",
              &mstch_hyperthrift_struct::has_builder},
             {"struct:numFields", &mstch_hyperthrift_struct::num_fields},
@@ -271,89 +201,8 @@ class mstch_hyperthrift_struct : public mstch_struct {
   mstch::node java_package() {
     return get_namespace_or_default(*struct_->program());
   }
-  mstch::node is_struct_union() { return struct_->is_union(); }
-  mstch::node is_union_field_type_unique() {
-    std::set<std::string> field_types;
-    for (const auto& field : struct_->fields()) {
-      auto type_name = field.type()->get_true_type()->get_full_name();
-      std::string type_with_erasure = type_name.substr(0, type_name.find('<'));
-      if (field_types.find(type_with_erasure) != field_types.end()) {
-        return false;
-      } else {
-        field_types.insert(type_with_erasure);
-      }
-    }
-    return true;
-  }
-  mstch::node has_terse_field() {
-    for (const auto& field : struct_->fields()) {
-      if (field.qualifier() == t_field_qualifier::terse) {
-        return true;
-      }
-    }
-    return false;
-  }
-  mstch::node clear_adapter() {
-    adapterDefinitionSet.clear();
-    return mstch::node();
-  }
-  mstch::node has_wrapper() {
-    for (const auto& field : struct_->fields()) {
-      auto has_annotation =
-          field.find_structured_annotation_or_null(kJavaWrapperUri);
-      if (has_annotation) {
-        return true;
-      }
-    }
-    return false;
-  }
-  mstch::node is_as_bean() {
-    if (!struct_->is_exception() && !struct_->is_union()) {
-      return struct_->get_annotation("java.swift.mutable") == "true" ||
-          struct_->find_structured_annotation_or_null(kJavaMutableUri);
-    } else {
-      return false;
-    }
-  }
-
-  mstch::node is_BigStruct() {
-    return (
-        struct_->is_struct() && struct_->fields().size() > bigStructThreshold);
-  }
-
   mstch::node java_capital_name() {
     return java::mangle_java_name(struct_->get_name(), true);
-  }
-  mstch::node has_java_annotations() {
-    return struct_->has_annotation("java.swift.annotations") ||
-        struct_->find_structured_annotation_or_null(kJavaAnnotationUri) !=
-        nullptr;
-  }
-  mstch::node java_annotations() {
-    if (struct_->has_annotation("java.swift.annotations")) {
-      return struct_->get_annotation("java.swift.annotations");
-    }
-
-    return get_structed_annotation_attribute(
-        struct_, kJavaAnnotationUri, "java_annotation");
-  }
-  mstch::node exception_message() {
-    const auto& field_name_to_use = struct_->get_annotation("message");
-    if (const auto* field = struct_->get_field_by_name(field_name_to_use)) {
-      return get_java_swift_name(field);
-    }
-
-    throw std::runtime_error{
-        "The exception message field '" + field_name_to_use +
-        "' is not found in " + struct_->get_name() + "!"};
-  }
-  // we can only override Throwable's getMessage() if:
-  //  1 - there is provided 'message' annotation
-  //  2 - there is no struct field named 'message'
-  //      (since it will generate getMessage() as well)
-  mstch::node needs_exception_message() {
-    return struct_->is_exception() && struct_->has_annotation("message") &&
-        struct_->get_field_by_name("message") == nullptr;
   }
   // default generating builder for now
   mstch::node has_builder() { return true; }
@@ -378,13 +227,6 @@ class mstch_hyperthrift_field : public mstch_field {
              &mstch_hyperthrift_field::java_default_value},
             {"field:javaAllCapsName",
              &mstch_hyperthrift_field::java_all_caps_name},
-            {"field:recursive?",
-             &mstch_hyperthrift_field::is_recursive_reference},
-            {"field:negativeId?", &mstch_hyperthrift_field::is_negative_id},
-            {"field:javaAnnotations?",
-             &mstch_hyperthrift_field::has_java_annotations},
-            {"field:javaAnnotations",
-             &mstch_hyperthrift_field::java_annotations},
             {"field:javaTFieldName",
              &mstch_hyperthrift_field::java_tfield_name},
             {"field:isNullableOrOptionalNotEnum?",
@@ -392,98 +234,13 @@ class mstch_hyperthrift_field : public mstch_field {
             {"field:isEnum?", &mstch_hyperthrift_field::is_enum},
             {"field:isObject?", &mstch_hyperthrift_field::is_object},
             {"field:isUnion?", &mstch_hyperthrift_field::is_union},
-            {"field:nestedDepth", &mstch_hyperthrift_field::get_nested_depth},
-            {"field:nestedDepth++",
-             &mstch_hyperthrift_field::increment_nested_depth},
-            {"field:nestedDepth--",
-             &mstch_hyperthrift_field::decrement_nested_depth},
-            {"field:isFirstDepth?", &mstch_hyperthrift_field::is_first_depth},
-            {"field:prevNestedDepth",
-             &mstch_hyperthrift_field::preceding_nested_depth},
             {"field:isContainer?", &mstch_hyperthrift_field::is_container},
-            {"field:isNested?",
-             &mstch_hyperthrift_field::get_nested_container_flag},
-            {"field:setIsNested",
-             &mstch_hyperthrift_field::set_nested_container_flag},
             {"field:typeFieldName", &mstch_hyperthrift_field::type_field_name},
             {"field:isSensitive?", &mstch_hyperthrift_field::is_sensitive},
             {"field:hasInitialValue?",
              &mstch_hyperthrift_field::has_initial_value},
-            {"field:isPrimitive?", &mstch_hyperthrift_field::is_primitive},
-            {"field:hasWrapper?", &mstch_hyperthrift_field::has_wrapper},
-            {"field:wrapper",
-             &mstch_hyperthrift_field::get_structured_wrapper_class_name},
-            {"field:wrapperType",
-             &mstch_hyperthrift_field::get_structured_wrapper_type_class_name},
-            {"field:hasAdapterOrWrapper?",
-             &mstch_hyperthrift_field::has_adapter_or_wrapper},
-            {"field:hasAdapter?", &mstch_hyperthrift_field::has_adapter},
-            {"field:hasTypeAdapter?",
-             &mstch_hyperthrift_field::has_type_adapter},
-            {"field:typeAdapterTypeClassName",
-             &mstch_hyperthrift_field::get_typedef_adapter_type_class_name},
-            {"field:typeAdapterClassName",
-             &mstch_hyperthrift_field::get_typedef_adapter_class_name},
-            {"field:hasFieldAdapter?",
-             &mstch_hyperthrift_field::has_field_adapter},
-            {"field:fieldAdapterTypeClassName",
-             &mstch_hyperthrift_field::get_field_adapter_type_class_name},
-            {"field:fieldAdapterClassName",
-             &mstch_hyperthrift_field::get_field_adapter_class_name},
         });
   }
-
-  int32_t nestedDepth = 0;
-  bool isNestedContainerFlag = false;
-
-  bool _has_wrapper() {
-    return field_->find_structured_annotation_or_null(kJavaWrapperUri) !=
-        nullptr;
-  }
-
-  mstch::node has_wrapper() { return _has_wrapper(); }
-
-  mstch::node get_structured_wrapper_class_name() {
-    return get_structed_annotation_attribute(
-        field_, kJavaWrapperUri, "wrapperClassName");
-  }
-
-  mstch::node get_structured_wrapper_type_class_name() {
-    return get_structed_annotation_attribute(
-        field_, kJavaWrapperUri, "typeClassName");
-  }
-
-  mstch::node has_adapter_or_wrapper() {
-    return _has_field_adapter() || _has_type_adapter() || _has_wrapper();
-  }
-
-  mstch::node has_adapter() {
-    return _has_field_adapter() || _has_type_adapter();
-  }
-
-  bool _has_type_adapter() {
-    auto type = field_->get_type();
-    if (type->is_typedef()) {
-      if (auto annotation = t_typedef::get_first_structured_annotation_or_null(
-              type, kJavaAdapterUri)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  mstch::node has_type_adapter() { return _has_type_adapter(); }
-
-  mstch::node get_typedef_adapter_type_class_name() {
-    return get_typedef_structed_annotation_attribute(
-        kJavaAdapterUri, "typeClassName");
-  }
-
-  mstch::node get_typedef_adapter_class_name() {
-    return get_typedef_structed_annotation_attribute(
-        kJavaAdapterUri, "adapterClassName");
-  }
-
   mstch::node get_typedef_structed_annotation_attribute(
       const char* uri, const std::string& field) {
     auto type = field_->get_type();
@@ -501,23 +258,6 @@ class mstch_hyperthrift_field : public mstch_field {
     return nullptr;
   }
 
-  bool _has_field_adapter() {
-    return field_->find_structured_annotation_or_null(kJavaAdapterUri) !=
-        nullptr;
-  }
-
-  mstch::node has_field_adapter() { return _has_field_adapter(); }
-
-  mstch::node get_field_adapter_type_class_name() {
-    return get_structed_annotation_attribute(
-        field_, kJavaAdapterUri, "typeClassName");
-  }
-
-  mstch::node get_field_adapter_class_name() {
-    return get_structed_annotation_attribute(
-        field_, kJavaAdapterUri, "adapterClassName");
-  }
-
   mstch::node has_initial_value() {
     if (field_->get_req() == t_field::e_req::optional) {
       // default values are ignored for optional fields
@@ -525,29 +265,6 @@ class mstch_hyperthrift_field : public mstch_field {
     }
     return field_->get_value();
   }
-  mstch::node get_nested_depth() { return nestedDepth; }
-  mstch::node preceding_nested_depth() { return (nestedDepth - 1); }
-  mstch::node is_first_depth() { return (nestedDepth == 1); }
-  mstch::node get_nested_container_flag() { return isNestedContainerFlag; }
-  mstch::node set_nested_container_flag() {
-    isNestedContainerFlag = true;
-    return mstch::node();
-  }
-  mstch::node increment_nested_depth() {
-    nestedDepth++;
-    return mstch::node();
-  }
-  mstch::node decrement_nested_depth() {
-    nestedDepth--;
-    return mstch::node();
-  }
-  mstch::node is_primitive() {
-    auto type = field_->get_type()->get_true_type();
-    return type->is_void() || type->is_bool() || type->is_byte() ||
-        type->is_i16() || type->is_i32() || type->is_i64() ||
-        type->is_double() || type->is_float();
-  }
-
   mstch::node is_nullable_or_optional_not_enum() {
     if (field_->get_req() == t_field::e_req::optional) {
       return true;
@@ -599,10 +316,6 @@ class mstch_hyperthrift_field : public mstch_field {
     return field_name;
   }
   mstch::node java_default_value() { return default_value_for_field(field_); }
-  mstch::node is_recursive_reference() {
-    return field_->get_annotation("swift.recursive_reference") == "true";
-  }
-  mstch::node is_negative_id() { return field_->get_key() < 0; }
   std::string default_value_for_field(const t_field* field) {
     if (field_->get_req() == t_field::e_req::optional) {
       return "null";
@@ -656,19 +369,6 @@ class mstch_hyperthrift_field : public mstch_field {
     }
     return constant_str;
   }
-  mstch::node has_java_annotations() {
-    return field_->has_annotation("java.swift.annotations") ||
-        field_->find_structured_annotation_or_null(kJavaAnnotationUri) !=
-        nullptr;
-  }
-  mstch::node java_annotations() {
-    if (field_->has_annotation("java.swift.annotations")) {
-      return field_->get_annotation("java.swift.annotations");
-    }
-
-    return get_structed_annotation_attribute(
-        field_, kJavaAnnotationUri, "java_annotation");
-  }
 };
 
 class mstch_hyperthrift_enum : public mstch_enum {
@@ -682,22 +382,14 @@ class mstch_hyperthrift_enum : public mstch_enum {
             {"enum:javaPackage", &mstch_hyperthrift_enum::java_package},
             {"enum:javaCapitalName",
              &mstch_hyperthrift_enum::java_capital_name},
-            {"enum:skipEnumNameMap?",
-             &mstch_hyperthrift_enum::java_skip_enum_name_map},
-            {"enum:ordinal++", &mstch_hyperthrift_enum::get_ordinal},
         });
   }
-  int32_t ordinal = 0;
   mstch::node java_package() {
     return get_namespace_or_default(*enum_->program());
   }
   mstch::node java_capital_name() {
     return java::mangle_java_name(enum_->get_name(), true);
   }
-  mstch::node java_skip_enum_name_map() {
-    return enum_->has_annotation("java.swift.skip_enum_name_map");
-  }
-  mstch::node get_ordinal() { return ordinal++; }
 };
 
 class mstch_hyperthrift_enum_value : public mstch_enum_value {
@@ -734,8 +426,6 @@ class mstch_hyperthrift_const : public mstch_const {
              &mstch_hyperthrift_const::java_capital_name},
             {"constant:javaFieldName",
              &mstch_hyperthrift_const::java_field_name},
-            {"constant:javaIgnoreConstant?",
-             &mstch_hyperthrift_const::java_ignore_constant},
         });
   }
   mstch::node java_capital_name() {
@@ -743,32 +433,6 @@ class mstch_hyperthrift_const : public mstch_const {
   }
   mstch::node java_field_name() {
     return java::mangle_java_name(field_->get_name(), true);
-  }
-  mstch::node java_ignore_constant() {
-    // we have to ignore constants if they are enums that we handled as ints, as
-    // we don't have the constant values to work with.
-    if (const_->get_type()->is_map()) {
-      t_map* map = (t_map*)const_->get_type();
-      if (map->get_key_type()->is_enum()) {
-        return map->get_key_type()->has_annotation(
-            "java.swift.skip_enum_name_map");
-      }
-    }
-    if (const_->get_type()->is_list()) {
-      t_list* list = (t_list*)const_->get_type();
-      if (list->get_elem_type()->is_enum()) {
-        return list->get_elem_type()->has_annotation(
-            "java.swift.skip_enum_name_map");
-      }
-    }
-    if (const_->get_type()->is_set()) {
-      t_set* set = (t_set*)const_->get_type();
-      if (set->get_elem_type()->is_enum()) {
-        return set->get_elem_type()->has_annotation(
-            "java.swift.skip_enum_name_map");
-      }
-    }
-    return mstch::node();
   }
 };
 
@@ -803,7 +467,6 @@ class mstch_hyperthrift_const_value : public mstch_const_value {
     }
     return mstch::node();
   }
-  bool same_type_as_expected() const override { return true; }
 };
 
 class mstch_hyperthrift_type : public mstch_type {

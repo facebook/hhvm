@@ -235,6 +235,10 @@ struct InferOpts {
     /// Attempt to keep going instead of panicking on unimplemented code.
     #[clap(long)]
     keep_going: bool,
+
+    /// Rewrite concurrent blocks as a regular sequence of awaits.
+    #[clap(long)]
+    unwrap_concurrent: bool,
 }
 
 impl InferOpts {

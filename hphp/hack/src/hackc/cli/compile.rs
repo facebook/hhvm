@@ -75,6 +75,12 @@ pub(crate) struct SingleFileOpts {
     #[command(flatten)]
     hhvm_options: HhvmOptions,
 
+    /// Unwrap concurrent blocks as a regular sequence of awaits.
+    ///
+    /// Currently, used only for infer/textual.
+    #[clap(long, action, hide(true))]
+    pub(crate) unwrap_concurrent: bool,
+
     /// The level of verbosity (can be set multiple times)
     #[clap(long = "verbose", action(clap::ArgAction::Count))]
     pub(crate) verbosity: u8,
@@ -143,6 +149,7 @@ pub(crate) fn native_env(filepath: RelativePath, opts: &SingleFileOpts) -> Resul
     let hhvm_config = hhvm_options.to_config()?;
     let parser_options = ParserOptions {
         po_auto_namespace_map: auto_namespace_map().collect(),
+        po_unwrap_concurrent: opts.unwrap_concurrent,
         ..hhvm_config::parser_options(&hhvm_config)?
     };
     let hhbc_flags = hhvm_config::hhbc_flags(&hhvm_config)?;

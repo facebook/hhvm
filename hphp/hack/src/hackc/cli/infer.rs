@@ -47,14 +47,13 @@ pub struct Opts {
     /// instructions for unimplemented code but will rather completely skip the file.
     #[clap(long)]
     skip_unimplemented: bool,
-
-    /// Unwrap concurrent blocks as a regular sequence of awaits.
-    #[clap(long)]
-    unwrap_concurrent: bool,
 }
 
-pub fn run(opts: Opts) -> Result<()> {
+pub fn run(mut opts: Opts) -> Result<()> {
     textual::KEEP_GOING.store(opts.keep_going, std::sync::atomic::Ordering::Release);
+    // Always unwrap concurrent blocks for infer use-cases. We can make it configurable later on if
+    // needed.
+    opts.single_file_opts.unwrap_concurrent = true;
 
     let writer: SyncWrite = match &opts.output_file {
         None => Mutex::new(Box::new(io::stdout())),

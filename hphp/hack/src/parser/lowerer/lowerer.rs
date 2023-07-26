@@ -3047,6 +3047,11 @@ fn p_concurrent_stmt<'a>(
     let new = Stmt::new;
 
     let keyword_pos = p_pos(&c.keyword, env);
+
+    if env.parser_options.po_unwrap_concurrent {
+        return p_stmt(&c.statement, env);
+    }
+
     let (lifted_awaits, Stmt(stmt_pos, stmt)) =
         with_new_concurrent_scope(env, |e| p_stmt(&c.statement, e))?;
     let stmt = match stmt {

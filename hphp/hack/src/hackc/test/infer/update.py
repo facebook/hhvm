@@ -171,9 +171,13 @@ def update_test(filename, input, idx, check):
 
 
 def update_file(filename):
-    stdout = subprocess.check_output((HACKC, "compile-infer", filename)).decode(
-        "utf-8", "ignore"
-    )
+    stdout = subprocess.check_output(
+        (
+            HACKC,
+            "compile-infer",
+            filename,
+        )
+    ).decode("utf-8", "ignore")
     check = stdout.split("\n")
 
     with open(filename, "r") as f:

@@ -34,6 +34,6 @@ An implementation **may** provide customizations for [value operators](../featur
 An implementation **may** provide in-place deserialization optimization for wrapper-like adapted types. During deserialization, Thrift Adapter requires to create a temporary instance of standard type, deserialize binary into the temporary instance, and call `fromThrift` to convert the temporary instance to the desired adapted type. Instead, the optimization can be performed by directly deserializing into internal standard value inside wrapper-like adapted types with `toThrift`. This requires Thrift Adapter to expose access to internal standard thrift value from `toThrift`.
 
 ## Certain details to note while implementing the APIs
-* Each language **may** provide additional features in Thrift Adapter to support additional needs in each language. For example, Thrift C++ Adapter provides [`moveOnly`](../features/adapters/#other-codegen-customizations) flag to support move-only adapted types.
+* Each language **may** provide additional features in Thrift Adapter to support additional needs in each language.
 * Type and Field Wrapper **may** not exist in some languages (C++ and Python), as these implementation does not differentiate Adapter and Wrapper.
 * Thrift Adapter serves as a building block for many Thrift features, such as [Thrift Patch](../features/patch), [Thrift Any](../features/any), and more.

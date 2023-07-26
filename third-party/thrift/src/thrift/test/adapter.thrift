@@ -225,21 +225,6 @@ struct SameNamespaceStruct {
   1: i64 data;
 }
 
-@cpp.Adapter{name = "::apache::thrift::test::MoveOnlyAdapter", moveOnly = true}
-struct HeapAllocated {}
-
-struct MoveOnly {
-  1: HeapAllocated ptr;
-}
-
-struct AlsoMoveOnly {
-  @cpp.Adapter{
-    name = "::apache::thrift::test::MoveOnlyAdapter",
-    moveOnly = true,
-  }
-  1: i64 ptr;
-}
-
 @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
 @scope.Transitive
 struct ApplyAdapter {}
@@ -296,7 +281,6 @@ struct EncodeComposedStruct {
 
 service AdapterService {
   CountingStruct count();
-  HeapAllocated adaptedTypes(1: HeapAllocated arg);
 }
 
 @cpp.Adapter{name = "::apache::thrift::test::VariableAdapter"}
@@ -328,8 +312,6 @@ const string msg_no_transitive = "hello, world 2";
 const Person2 person_no_transitive = Person2{name = "DefaultName 2"};
 
 const AdaptedBool type_adapted = true;
-
-const MoveOnly nested_adapted = {"ptr": {}};
 
 const list<AdaptedByte> container_of_adapted = [1, 2, 3];
 

@@ -7438,9 +7438,11 @@ class MoveOnly final  {
   MoveOnly(apache::thrift::FragileConstructor, ::facebook::thrift::test::HeapAllocated ptr__arg);
 
   MoveOnly(MoveOnly&&) = default;
+  MoveOnly(const MoveOnly& src);
 
 
   MoveOnly& operator=(MoveOnly&&) = default;
+  MoveOnly& operator=(const MoveOnly& src);
  private:
   ::facebook::thrift::test::HeapAllocated __fbthrift_field_ptr;
  private:
@@ -7574,9 +7576,11 @@ class AlsoMoveOnly final  {
   AlsoMoveOnly(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::MoveOnlyAdapter, 1, ::std::int64_t, AlsoMoveOnly> ptr__arg);
 
   AlsoMoveOnly(AlsoMoveOnly&&) = default;
+  AlsoMoveOnly(const AlsoMoveOnly& src);
 
 
   AlsoMoveOnly& operator=(AlsoMoveOnly&&) = default;
+  AlsoMoveOnly& operator=(const AlsoMoveOnly& src);
  private:
   ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::MoveOnlyAdapter, 1, ::std::int64_t, AlsoMoveOnly> __fbthrift_field_ptr;
  private:

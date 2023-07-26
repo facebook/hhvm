@@ -3655,6 +3655,18 @@ const folly::StringPiece MoveOnly::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<MoveOnly>::name;
 }
 
+MoveOnly::MoveOnly(const MoveOnly& srcObj) :
+    __fbthrift_field_ptr(srcObj.__fbthrift_field_ptr),
+    __isset(srcObj.__isset) {
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::test::MoveOnlyAdapter, 1>(__fbthrift_field_ptr, *this);
+}
+
+MoveOnly& MoveOnly::operator=(const MoveOnly& other) {
+  MoveOnly tmp(other);
+  swap(*this, tmp);
+  return *this;
+}
+
 
 MoveOnly::MoveOnly(apache::thrift::FragileConstructor, ::facebook::thrift::test::HeapAllocated ptr__arg) :
     __fbthrift_field_ptr(std::move(ptr__arg)) {
@@ -3745,6 +3757,18 @@ const folly::StringPiece AlsoMoveOnly::__fbthrift_get_field_name(::apache::thrif
 }
 const folly::StringPiece AlsoMoveOnly::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<AlsoMoveOnly>::name;
+}
+
+AlsoMoveOnly::AlsoMoveOnly(const AlsoMoveOnly& srcObj) :
+    __fbthrift_field_ptr(srcObj.__fbthrift_field_ptr),
+    __isset(srcObj.__isset) {
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::test::MoveOnlyAdapter, 1>(__fbthrift_field_ptr, *this);
+}
+
+AlsoMoveOnly& AlsoMoveOnly::operator=(const AlsoMoveOnly& other) {
+  AlsoMoveOnly tmp(other);
+  swap(*this, tmp);
+  return *this;
 }
 
 

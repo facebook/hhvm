@@ -1285,21 +1285,8 @@ class cpp_mstch_struct : public mstch_struct {
 
     bool result = false;
     cpp2::for_each_transitive_field(struct_, [&result](const t_field* field) {
-      auto has_move_only_adapter = [](const auto* strct) {
-        if (auto adapter =
-                strct->find_structured_annotation_or_null(kCppAdapterUri)) {
-          if (auto val = adapter->get_value_from_structured_annotation_or_null(
-                  "moveOnly")) {
-            return val->get_bool();
-          }
-        }
-        return false;
-      };
-
       if (!field->get_type()->has_annotation(
-              {"cpp.noncopyable", "cpp2.noncopyable"}) &&
-          !has_move_only_adapter(field) &&
-          !has_move_only_adapter(field->get_type())) {
+              {"cpp.noncopyable", "cpp2.noncopyable"})) {
         return true;
       }
       switch (gen::cpp::find_ref_type(*field)) {

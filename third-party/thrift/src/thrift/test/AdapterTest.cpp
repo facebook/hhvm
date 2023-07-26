@@ -907,33 +907,6 @@ TEST(AdaptTest, TransitiveAdapter) {
   EXPECT_EQ(obj.value, basic::detail::TransitiveAdapted{});
 }
 
-TEST(AdaptTest, MoveOnlyAdapter) {
-  basic::MoveOnly obj;
-  obj.ptr() = std::make_unique<basic::detail::HeapAllocated>();
-  auto objs = CompactSerializer::serialize<std::string>(obj);
-  basic::MoveOnly objd;
-  EXPECT_FALSE(*objd.ptr());
-  CompactSerializer::deserialize(objs, objd);
-  EXPECT_TRUE(*objd.ptr());
-
-  EXPECT_FALSE(std::is_copy_constructible_v<basic::MoveOnly>);
-  EXPECT_FALSE(std::is_copy_constructible_v<basic::AlsoMoveOnly>);
-}
-
-TEST(AdaptTest, MoveOnlyArgsReturn) {
-  struct Handler : apache::thrift::ServiceHandler<basic::AdapterService> {
-    void sync_adaptedTypes(
-        basic::HeapAllocated& ret, std::unique_ptr<basic::HeapAllocated> arg) {
-      ret = std::move(*arg);
-    }
-  };
-  basic::HeapAllocated arg = std::make_unique<basic::detail::HeapAllocated>();
-  basic::HeapAllocated ret;
-  EXPECT_FALSE(ret);
-  makeTestClient(std::make_shared<Handler>())->sync_adaptedTypes(ret, arg);
-  EXPECT_TRUE(ret);
-}
-
 TEST(AdaptTest, NumAdapterConversions) {
   // When an adapter implements serializedSize we guarantee to only call
   // toThrift once during deserialization.
@@ -997,9 +970,6 @@ TEST(AdaptTest, EncodeComposedAdapter) {
 TEST(AdaptTest, Constants) {
   // const AdaptedBool type_adapted = true;
   EXPECT_EQ(basic::adapter_constants::type_adapted().value, true);
-
-  // const MoveOnly nested_adapted = {"ptr": {}};
-  EXPECT_TRUE(basic::adapter_constants::nested_adapted().ptr()->get());
 
   // const list<AdaptedByte> container_of_adapted = [1, 2, 3];
   EXPECT_EQ(basic::adapter_constants::container_of_adapted()[0].value, 1);

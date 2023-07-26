@@ -156,6 +156,7 @@ impl Default for GlobalOptions {
             dump_tast_hashes: false,
             tco_autocomplete_mode: false,
             tco_package_info: PackageInfo::default(),
+            po_unwrap_concurrent: false,
         }
     }
 }

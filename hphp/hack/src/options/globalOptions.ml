@@ -185,6 +185,7 @@ type t = {
   dump_tast_hashes: bool;
   tco_autocomplete_mode: bool;
   tco_package_info: PackageInfo.t;
+  po_unwrap_concurrent: bool;
 }
 [@@deriving eq, show]
 
@@ -310,6 +311,7 @@ let default =
     dump_tast_hashes = false;
     tco_autocomplete_mode = false;
     tco_package_info = PackageInfo.empty;
+    po_unwrap_concurrent = false;
   }
 
 let set
@@ -433,6 +435,7 @@ let set
     ?dump_tast_hashes
     ?tco_autocomplete_mode
     ?tco_package_info
+    ?po_unwrap_concurrent
     options =
   let setting setting option =
     match setting with
@@ -758,6 +761,8 @@ let set
     tco_autocomplete_mode =
       setting tco_autocomplete_mode options.tco_autocomplete_mode;
     tco_package_info = setting tco_package_info options.tco_package_info;
+    po_unwrap_concurrent =
+      setting po_unwrap_concurrent options.po_unwrap_concurrent;
   }
 
 let so_naming_sqlite_path t = t.so_naming_sqlite_path

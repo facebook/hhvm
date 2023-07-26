@@ -329,6 +329,8 @@ type t = {
   tco_autocomplete_mode: bool;  (** Are we running in autocomplete mode ? *)
   tco_package_info: PackageInfo.t;
       (** Information used to determine which package a module belongs to during typechecking. *)
+  po_unwrap_concurrent: bool;
+      (** Replace concurrent blocks with their bodies in the AST *)
 }
 [@@deriving eq, show]
 
@@ -453,6 +455,7 @@ val set :
   ?dump_tast_hashes:bool ->
   ?tco_autocomplete_mode:bool ->
   ?tco_package_info:PackageInfo.t ->
+  ?po_unwrap_concurrent:bool ->
   t ->
   t
 

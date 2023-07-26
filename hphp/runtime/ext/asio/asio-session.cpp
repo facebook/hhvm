@@ -125,11 +125,15 @@ void AsioSession::onIOWaitEnter() {
   runCallback(m_onIOWaitEnter, empty_vec_array(), "Awaitable::onIOWaitEnter");
 }
 
-void AsioSession::onIOWaitExit() {
-  runCallback(m_onIOWaitExit, empty_vec_array(), "Awaitable::onIOWaitExit");
+void AsioSession::onIOWaitExit(c_WaitableWaitHandle* waitHandle) {
+  runCallback(
+    m_onIOWaitExit,
+    make_vec_array(waitHandle),
+    "Awaitable::onIOWaitExit"
+  );
 }
 
-void AsioSession::onJoin(c_Awaitable* waitHandle) {
+void AsioSession::onJoin(c_WaitableWaitHandle* waitHandle) {
   runCallback(m_onJoin, make_vec_array(waitHandle), "Awaitable::onJoin");
 }
 

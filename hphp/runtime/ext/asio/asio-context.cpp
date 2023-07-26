@@ -98,7 +98,7 @@ namespace {
     }
 
     if (UNLIKELY(session->hasOnIOWaitExit())) {
-      session->onIOWaitExit();
+      session->onIOWaitExit(context->getBlamedWaitHandle());
     }
   }
 }

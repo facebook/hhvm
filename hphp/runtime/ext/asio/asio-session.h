@@ -108,8 +108,8 @@ struct AsioSession final {
   bool hasOnIOWaitExit() { return !!m_onIOWaitExit; }
   bool hasOnJoin() { return !!m_onJoin; }
   void onIOWaitEnter();
-  void onIOWaitExit();
-  void onJoin(c_Awaitable* waitHandle);
+  void onIOWaitExit(c_WaitableWaitHandle* waitHandle);
+  void onJoin(c_WaitableWaitHandle* waitHandle);
 
   // ResumableWaitHandle callbacks:
   void setOnResumableCreate(const Variant& callback);

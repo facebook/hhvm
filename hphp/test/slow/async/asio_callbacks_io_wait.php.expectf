@@ -1,0 +1,24 @@
+going to sleep
+io wait enter
+io wait exit
+vec(3) {
+  dict(2) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(17)
+  }
+  dict(3) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(17)
+    ["function"]=>
+    string(12) "HH\Asio\join"
+  }
+  dict(1) {
+    ["function"]=>
+    string(27) "main_asio_callbacks_io_wait"
+  }
+}
+sleep finished

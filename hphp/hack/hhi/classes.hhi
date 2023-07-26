@@ -168,7 +168,7 @@ namespace HH {
       ?(function(): void) $callback,
     ): \HH\FIXME\MISSING_RETURN_TYPE {}
     public static function setOnIOWaitExitCallback(
-      ?(function(): void) $callback,
+      ?(function(?WaitableWaitHandle<mixed>): void) $callback,
     ): \HH\FIXME\MISSING_RETURN_TYPE {}
     public static function setOnJoinCallback(
       ?(function(WaitableWaitHandle<mixed>): void) $callback,

@@ -75,7 +75,6 @@ let on_expr_top_down
        canonical *)
     | Aast.(As (_, (_, hint_), _)) -> begin
       match hint_ with
-      | Aast.(Hlike _) -> (ctx, Ok expr)
       | Aast.(Happly ((_, nm), _)) when String.(equal nm SN.FB.cIncorrectType)
         ->
         (ctx, Ok expr)

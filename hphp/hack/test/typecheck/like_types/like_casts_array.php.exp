@@ -1,0 +1,8 @@
+File "like_casts_array.php", line 4, characters 9-20:
+Invalid `as` expression hint (Typing[4195])
+  File "like_casts_array.php", line 4, characters 10-20:
+  The `as` operator cannot be used with a type with an erased generic type argument
+File "like_casts_array.php", line 5, characters 9-30:
+Invalid `as` expression hint (Typing[4195])
+  File "like_casts_array.php", line 5, characters 10-30:
+  The `as` operator cannot be used with a type with an erased generic type argument

@@ -1,0 +1,12 @@
+File "like_casts3.php", line 4, characters 9-11:
+Invalid `as` expression hint (Typing[4195])
+  File "like_casts3.php", line 4, characters 10-11:
+  The `as` operator cannot be used with an erased generic type parameter
+File "like_casts3.php", line 8, characters 9-11:
+Invalid `as` expression hint (Typing[4195])
+  File "like_casts3.php", line 8, characters 10-11:
+  The `as` operator cannot be used with an erased generic type parameter
+File "like_casts3.php", line 12, characters 9-11:
+Invalid `as` expression hint (Typing[4195])
+  File "like_casts3.php", line 12, characters 10-11:
+  The `as` operator cannot be used with an erased generic type parameter

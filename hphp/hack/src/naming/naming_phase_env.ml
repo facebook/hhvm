@@ -122,12 +122,6 @@ module Elab_shape_field_name = struct
   let empty = { current_class = None }
 end
 
-module Validate_like_hint = struct
-  type t = { allow_like: bool }
-
-  let empty = { allow_like = false }
-end
-
 module Elab_retonly_hint = struct
   type t = { allow_retonly: bool }
 
@@ -146,7 +140,6 @@ type t = {
   elab_retonly_hint: Elab_retonly_hint.t;
   elab_wildcard_hint: Elab_wildcard_hint.t;
   elab_shape_field_name: Elab_shape_field_name.t;
-  validate_like_hint: Validate_like_hint.t;
   everything_sdt: bool;
   soft_as_like: bool;
   consistent_ctor_level: int;
@@ -171,7 +164,6 @@ let empty =
     elab_retonly_hint = Elab_retonly_hint.empty;
     elab_wildcard_hint = Elab_wildcard_hint.empty;
     elab_shape_field_name = Elab_shape_field_name.empty;
-    validate_like_hint = Validate_like_hint.empty;
     everything_sdt = false;
     soft_as_like = false;
     consistent_ctor_level = 0;

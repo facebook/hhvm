@@ -1,3 +1,5 @@
+Errors:
+  [7:18-20] Cannot use experimental feature: like-types
 [(Stmt ([2:1-5], (Expr ((), [2:1-5], (Eif (((), [2:1-2], (Id ([2:1-2], "\\<"))), (Some ((), [2:3-5], (Id ([2:3-5], "\\hh")))), ((), [3:1-4:1], Null)))))));
   (Class
      { c_span = [4:1-11]; c_annotation = (); c_mode = Mstrict; c_final = false; 

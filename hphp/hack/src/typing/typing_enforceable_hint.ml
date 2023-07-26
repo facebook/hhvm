@@ -70,12 +70,7 @@ let validator =
       else
         this#invalid acc r "a `newtype`"
 
-    method! on_tlike acc r ty =
-      if TypecheckerOptions.like_casts (Env.get_tcopt acc.Type_validator.env)
-      then
-        super#on_tlike { acc with Type_validator.like_context = true } r ty
-      else
-        this#invalid acc r "a like type"
+    method! on_tlike acc _r ty = this#on_type acc ty
 
     method! on_class acc r cls tyl =
       match Env.get_class acc.Type_validator.env (snd cls) with
@@ -105,16 +100,6 @@ let validator =
                         let error_message =
                           "a type with an erased generic type argument"
                         in
-                        let error_message =
-                          if
-                            TypecheckerOptions.like_casts
-                              (Env.get_tcopt acc.Type_validator.env)
-                          then
-                            error_message
-                            ^ ", except in a like cast when the corresponding type parameter is covariant"
-                          else
-                            error_message
-                        in
                         this#invalid acc r error_message)
                 with
                 | Ok new_acc -> new_acc
@@ -127,6 +112,7 @@ let validator =
       if List.is_empty tyl then
         this#on_type acc ty
       else if
+        (* TODO(T159289477) Eliminate this + like_context *)
         String.equal (snd id) SN.FB.cIncorrectType
         && Int.equal (List.length tyl) 1
       then

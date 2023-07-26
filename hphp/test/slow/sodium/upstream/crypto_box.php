@@ -106,17 +106,11 @@ $bob_message_decrypted_by_alice = sodium_crypto_box_open($bob_to_alice_ciphertex
 var_dump($alice_message_decrypted_by_bob);
 var_dump($bob_message_decrypted_by_alice);
 
-if (SODIUM_LIBRARY_MAJOR_VERSION > 7 ||
-    (SODIUM_LIBRARY_MAJOR_VERSION == 7 &&
-     SODIUM_LIBRARY_MINOR_VERSION >= 5)) {
-    $anonymous_message_to_alice = sodium_crypto_box_seal('Anonymous message',
-                                                          $alice_publickey);
+$anonymous_message_to_alice = sodium_crypto_box_seal('Anonymous message',
+                                                        $alice_publickey);
 
-    $decrypted_message = sodium_crypto_box_seal_open($anonymous_message_to_alice,
-                                                      $alice_kp);
-} else {
-    $decrypted_message = 'Anonymous message';
-}
+$decrypted_message = sodium_crypto_box_seal_open($anonymous_message_to_alice,
+                                                    $alice_kp);
 var_dump($decrypted_message);
 
 $msg = sodium_hex2bin(

@@ -26,26 +26,6 @@
 
 #include <limits>
 
-#ifndef crypto_pwhash_scryptsalsa208sha256_STRPREFIX
-#define crypto_pwhash_scryptsalsa208sha256_STRPREFIX "$7$"
-#endif
-
-#if defined(crypto_aead_chacha20poly1305_IETF_NPUBBYTES) \
- && !defined(crypto_aead_chacha20poly1305_ietf_NPUBBYTES)
-#define crypto_aead_chacha20poly1305_ietf_NPUBBYTES \
-  crypto_aead_chacha20poly1305_IETF_NPUBBYTES
-#endif
-
-#if defined(crypto_aead_chacha20poly1305_KEYBYTES) \
-  && !defined(crypto_aead_chacha20poly1305_ietf_KEYBYTES)
-#define crypto_aead_chacha20poly1305_ietf_KEYBYTES \
-  crypto_aead_chacha20poly1305_KEYBYTES
-#define crypto_aead_chacha20poly1305_ietf_NSECBYTES \
-  crypto_aead_chacha20poly1305_NSECBYTES
-#define crypto_aead_chacha20poly1305_ietf_ABYTES \
-  crypto_aead_chacha20poly1305_ABYTES
-#endif
-
 namespace HPHP {
 
 namespace {
@@ -502,7 +482,6 @@ String HHVM_FUNCTION(sodium_crypto_shorthash,
   return hash;
 }
 
-#ifdef crypto_pwhash_SALTBYTES
 const StaticString
   s_pwhash_salt_size("salt should be CRYPTO_PWHASH_SALTBYTES bytes");
 
@@ -588,7 +567,6 @@ bool HHVM_FUNCTION(sodium_crypto_pwhash_str_verify,
   );
   return result == 0;
 }
-#endif // crypto_pwhash_SALTBYTES
 
 const StaticString
   s_pwhash_scrypt_bad_salt_size(
@@ -896,7 +874,6 @@ String HHVM_FUNCTION(sodium_crypto_box_publickey_from_secretkey,
   return publickey;
 }
 
-#ifdef crypto_kx_SEEDBYTES
 String HHVM_FUNCTION(sodium_crypto_kx_keypair) {
   String keypair(crypto_kx_SECRETKEYBYTES + crypto_kx_PUBLICKEYBYTES,
                  ReserveString);
@@ -973,7 +950,6 @@ Array HHVM_FUNCTION(sodium_crypto_kx_##SIDE##_session_keys,\
 }
 DEFINE_KX_SESSION_KEYS_FUNC(client);
 DEFINE_KX_SESSION_KEYS_FUNC(server);
-#endif // crypto_kx_SEEDBYTES
 
 const StaticString
   s_crypto_box_nonce_size(
@@ -1066,8 +1042,6 @@ Variant HHVM_FUNCTION(sodium_crypto_box_open,
   return plaintext;
 }
 
-#ifdef crypto_box_SEALBYTES
-
 const StaticString
   s_crypto_box_seal_key_size(
     "public key size should be "
@@ -1139,7 +1113,6 @@ Variant HHVM_FUNCTION(sodium_crypto_box_seal_open,
   plaintext.setSize(plaintext_len);
   return plaintext;
 }
-#endif // crypto_box_SEALBYTES
 
 String HHVM_FUNCTION(sodium_crypto_sign_keypair) {
   // Using this construction to avoid leaving secretkey in memory somewhere from
@@ -1496,7 +1469,6 @@ String HHVM_FUNCTION(sodium_crypto_stream_xor,
   return ciphertext;
 }
 
-#ifdef crypto_core_ristretto255_SCALARBYTES
 const StaticString s_crypto_core_ristretto255_from_hash(
   "scalar must be CRYPTO_CORE_RISTRETTO255_HASHBYTES bytes"
 );
@@ -1706,9 +1678,7 @@ String HHVM_FUNCTION(sodium_crypto_core_ristretto255_scalar_mul,
   r.setSize(crypto_core_ristretto255_SCALARBYTES);
   return r;
 }
-#endif
 
-#ifdef crypto_kdf_KEYBYTES
 const StaticString
   s_subkey_too_small(
     "subkey can not be smaller than sodium_crypto_kdf_BYTES_MIN"),
@@ -1756,9 +1726,7 @@ String HHVM_FUNCTION(sodium_crypto_kdf_derive_from_key,
   subkey.setSize(subkey_len);
   return subkey;
 }
-#endif // crypto_kdf_KEYBYTES
 
-#ifdef crypto_core_hchacha20_KEYBYTES
 const StaticString
   s_crypto_core_hchacha20_input_size(
     "input must be CRYPTO_CORE_HCHACHA20_INPUTBYTES bytes"),
@@ -1800,7 +1768,6 @@ String HHVM_FUNCTION(sodium_crypto_core_hchacha20,
   out.setSize(crypto_core_hchacha20_OUTPUTBYTES);
   return out;
 }
-#endif // crypto_core_hchacha20_KEYBYTES
 
 #define HHVM_SODIUM_AEAD_DECRYPT_FUNCTION(lowercase, uppercase) \
 const StaticString\
@@ -1908,25 +1875,19 @@ String HHVM_FUNCTION(sodium_crypto_aead_##lowercase##_encrypt,\
 HHVM_SODIUM_AEAD_ENCRYPT_FUNCTION(chacha20poly1305, CHACHA20POLY1305);
 HHVM_SODIUM_AEAD_DECRYPT_FUNCTION(chacha20poly1305, CHACHA20POLY1305);
 
-#ifdef crypto_aead_aes256gcm_KEYBYTES
 bool HHVM_FUNCTION(sodium_crypto_aead_aes256gcm_is_available) {
   return crypto_aead_aes256gcm_is_available();
 }
 HHVM_SODIUM_AEAD_ENCRYPT_FUNCTION(aes256gcm, AES256GCM);
 HHVM_SODIUM_AEAD_DECRYPT_FUNCTION(aes256gcm, AES256GCM);
-#endif
 
-#ifdef crypto_aead_chacha20poly1305_IETF_NPUBBYTES
 HHVM_SODIUM_AEAD_ENCRYPT_FUNCTION(chacha20poly1305_ietf, CHACHA20POLY1305_IETF);
 HHVM_SODIUM_AEAD_DECRYPT_FUNCTION(chacha20poly1305_ietf, CHACHA20POLY1305_IETF);
-#endif
 
-#ifdef crypto_aead_xchacha20poly1305_IETF_NPUBBYTES
 HHVM_SODIUM_AEAD_ENCRYPT_FUNCTION(xchacha20poly1305_ietf,
                                   XCHACHA20POLY1305_IETF);
 HHVM_SODIUM_AEAD_DECRYPT_FUNCTION(xchacha20poly1305_ietf,
                                   XCHACHA20POLY1305_IETF);
-#endif
 
 #define HHVM_REGISTER_AEAD_DEFINITIONS(lowercase, uppercase)\
     HHVM_RC_INT(\
@@ -1949,7 +1910,6 @@ HHVM_SODIUM_AEAD_DECRYPT_FUNCTION(xchacha20poly1305_ietf,
     HHVM_FE(sodium_crypto_aead_##lowercase##_encrypt)
 
 
-#ifdef crypto_secretstream_xchacha20poly1305_KEYBYTES
 const StaticString s_crypto_secretstream_xchacha20poly130_state_string_required(
   "incorrect state type, a string is required"
 ),
@@ -2106,9 +2066,7 @@ void HHVM_FUNCTION(sodium_crypto_secretstream_xchacha20poly1305_rekey,
   // copy state back to string
   memcpy(state.mutableData(), &st, state_len);
 }
-#endif // crypto_secretstream_xchacha20poly1305_KEYBYTES
 
-#ifdef crypto_core_ed25519_SCALARBYTES
 const StaticString s_crypto_core_ed25519_scalar_size(
   "scalars must be crypto_core_ed25519_SCALARBYTES bytes"
 );
@@ -2201,8 +2159,6 @@ String HHVM_FUNCTION(sodium_crypto_scalarmult_ed25519_base,
   return r;
 }
 
-#endif // crypto_core_ed25519_SCALARBYTES
-
 struct SodiumExtension final : Extension {
   SodiumExtension() : Extension("sodium", "7.2-hhvm1", NO_ONCALL_YET) {}
 
@@ -2245,7 +2201,6 @@ struct SodiumExtension final : Extension {
     HHVM_RC_INT(SODIUM_CRYPTO_SHORTHASH_KEYBYTES,crypto_shorthash_KEYBYTES);
     HHVM_FE(sodium_crypto_shorthash);
 
-#ifdef crypto_pwhash_SALTBYTES
     HHVM_RC_INT(SODIUM_CRYPTO_PWHASH_SALTBYTES, crypto_pwhash_SALTBYTES);
     HHVM_RC_STR(SODIUM_CRYPTO_PWHASH_STRPREFIX, crypto_pwhash_STRPREFIX);
     HHVM_RC_INT(
@@ -2275,7 +2230,6 @@ struct SodiumExtension final : Extension {
     HHVM_FE(sodium_crypto_pwhash);
     HHVM_FE(sodium_crypto_pwhash_str);
     HHVM_FE(sodium_crypto_pwhash_str_verify);
-#endif
 
     HHVM_RC_STR(
       SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_STRPREFIX,
@@ -2337,11 +2291,9 @@ struct SodiumExtension final : Extension {
     HHVM_FE(sodium_crypto_box);
     HHVM_FE(sodium_crypto_box_open);
 
-#ifdef crypto_box_SEALBYTES
     HHVM_RC_INT(SODIUM_CRYPTO_BOX_SEALBYTES, crypto_box_SEALBYTES);
     HHVM_FE(sodium_crypto_box_seal);
     HHVM_FE(sodium_crypto_box_seal_open);
-#endif
 
     HHVM_RC_INT(SODIUM_CRYPTO_SIGN_BYTES, crypto_sign_BYTES);
     HHVM_RC_INT(SODIUM_CRYPTO_SIGN_SEEDBYTES, crypto_sign_SEEDBYTES);
@@ -2369,38 +2321,27 @@ struct SodiumExtension final : Extension {
     HHVM_FE(sodium_crypto_stream_xor);
 
     HHVM_REGISTER_AEAD_DEFINITIONS(chacha20poly1305, CHACHA20POLY1305);
-#ifdef crypto_aead_aes256gcm_KEYBYTES
     HHVM_FE(sodium_crypto_aead_aes256gcm_is_available);
-    if (crypto_aead_aes256gcm_is_available()) {
-      HHVM_REGISTER_AEAD_DEFINITIONS(aes256gcm, AES256GCM);
-    }
-#endif
-#ifdef crypto_aead_chacha20poly1305_IETF_NPUBBYTES
+    HHVM_REGISTER_AEAD_DEFINITIONS(aes256gcm, AES256GCM);
+
     HHVM_REGISTER_AEAD_DEFINITIONS(chacha20poly1305_ietf,
                                    CHACHA20POLY1305_IETF);
-#endif
-#ifdef crypto_aead_xchacha20poly1305_IETF_NPUBBYTES
+
     HHVM_REGISTER_AEAD_DEFINITIONS(xchacha20poly1305_ietf,
                                    XCHACHA20POLY1305_IETF);
-#endif
 
-#ifdef crypto_kdf_KEYBYTES
     HHVM_FE(sodium_crypto_kdf_derive_from_key);
     HHVM_RC_INT(SODIUM_CRYPTO_KDF_BYTES_MIN, crypto_kdf_BYTES_MIN);
     HHVM_RC_INT(SODIUM_CRYPTO_KDF_BYTES_MAX, crypto_kdf_BYTES_MAX);
     HHVM_RC_INT(SODIUM_CRYPTO_KDF_CONTEXTBYTES, crypto_kdf_CONTEXTBYTES);
     HHVM_RC_INT(SODIUM_CRYPTO_KDF_KEYBYTES, crypto_kdf_KEYBYTES);
-#endif
 
-#ifdef crypto_core_hchacha20_KEYBYTES
     HHVM_FE(sodium_crypto_core_hchacha20);
     HHVM_RC_INT(SODIUM_CRYPTO_CORE_HCHACHA20_INPUTBYTES, crypto_core_hchacha20_INPUTBYTES);
     HHVM_RC_INT(SODIUM_CRYPTO_CORE_HCHACHA20_KEYBYTES, crypto_core_hchacha20_KEYBYTES);
     HHVM_RC_INT(SODIUM_CRYPTO_CORE_HCHACHA20_OUTPUTBYTES, crypto_core_hchacha20_OUTPUTBYTES);
     HHVM_RC_INT(SODIUM_CRYPTO_CORE_HCHACHA20_CONSTBYTES, crypto_core_hchacha20_CONSTBYTES);
-#endif
 
-#ifdef crypto_kx_SEEDBYTES
     HHVM_RC_INT(SODIUM_CRYPTO_KX_PUBLICKEYBYTES, crypto_kx_PUBLICKEYBYTES);
     HHVM_RC_INT(SODIUM_CRYPTO_KX_SESSIONKEYBYTES, crypto_kx_SESSIONKEYBYTES);
     HHVM_RC_INT(SODIUM_CRYPTO_KX_SECRETKEYBYTES, crypto_kx_SECRETKEYBYTES);
@@ -2410,9 +2351,7 @@ struct SodiumExtension final : Extension {
     HHVM_FE(sodium_crypto_kx_seed_keypair);
     HHVM_FE(sodium_crypto_kx_client_session_keys);
     HHVM_FE(sodium_crypto_kx_server_session_keys);
-#endif
 
-#ifdef crypto_core_ristretto255_SCALARBYTES
     HHVM_RC_INT(
       SODIUM_CRYPTO_SCALARMULT_RISTRETTO255_BYTES,
       crypto_scalarmult_ristretto255_BYTES
@@ -2446,9 +2385,7 @@ struct SodiumExtension final : Extension {
     HHVM_FE(sodium_crypto_core_ristretto255_scalar_add);
     HHVM_FE(sodium_crypto_core_ristretto255_scalar_sub);
     HHVM_FE(sodium_crypto_core_ristretto255_scalar_mul);
-#endif
 
-#ifdef crypto_secretstream_xchacha20poly1305_KEYBYTES
     HHVM_RC_INT(
       SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_ABYTES,
       crypto_secretstream_xchacha20poly1305_ABYTES
@@ -2487,9 +2424,7 @@ struct SodiumExtension final : Extension {
     HHVM_FE(sodium_crypto_secretstream_xchacha20poly1305_init_pull);
     HHVM_FE(sodium_crypto_secretstream_xchacha20poly1305_pull);
     HHVM_FE(sodium_crypto_secretstream_xchacha20poly1305_rekey);
-#endif // crypto_secretstream_xchacha20poly1305_KEYBYTES
 
-#ifdef crypto_core_ed25519_SCALARBYTES
     HHVM_RC_INT(
       SODIUM_CRYPTO_CORE_ED25519_SCALARBYTES,
       crypto_core_ed25519_SCALARBYTES
@@ -2507,7 +2442,6 @@ struct SodiumExtension final : Extension {
     HHVM_FE(sodium_crypto_core_ed25519_scalar_add);
     HHVM_FE(sodium_crypto_scalarmult_ed25519_base);
     HHVM_FE(sodium_crypto_scalarmult_ed25519_base_noclamp);
-#endif // crypto_core_ed25519_SCALARBYTES
 
     loadSystemlib();
   }

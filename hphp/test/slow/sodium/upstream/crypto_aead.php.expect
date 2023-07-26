@@ -16,5 +16,6 @@ bool(true)
 aead_aes256gcm:
 bool(true)
 bool(true)
+bool(true)
 bool(false)
 bool(true)

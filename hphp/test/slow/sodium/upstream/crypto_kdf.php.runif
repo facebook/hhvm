@@ -1,2 +1,1 @@
 extension sodium
-const SODIUM_CRYPTO_KDF_KEYBYTES

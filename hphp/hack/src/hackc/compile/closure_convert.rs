@@ -16,7 +16,6 @@ use hash::IndexSet;
 use hhbc::Coeffects;
 use hhbc_string_utils as string_utils;
 use itertools::Itertools;
-use naming_special_names_rust::fb;
 use naming_special_names_rust::members;
 use naming_special_names_rust::pseudo_consts;
 use naming_special_names_rust::pseudo_functions;
@@ -1077,21 +1076,6 @@ impl<'ast, 'a: 'b, 'b, 'arena: 'a> VisitorMut<'ast> for ClosureVisitor<'a, 'b, '
                     let mut res = Expr_::Call(x);
                     res.recurse(scope, self)?;
                     res
-                }
-                Expr_::As(x)
-                    if (x.1)
-                        .as_happly()
-                        .map(|(id, args)| {
-                            (id.name() == fb::INCORRECT_TYPE
-                                || id.name() == fb::INCORRECT_TYPE_NO_NS)
-                                && args.len() == 1
-                        })
-                        .unwrap_or_default() =>
-                {
-                    let mut res = x.0;
-                    res.recurse(scope, self)?;
-                    *pos = res.1;
-                    res.2
                 }
                 Expr_::ClassGet(mut x) => {
                     if let (ClassGetExpr::CGstring(id), PropOrMethod::IsMethod) = (&x.1, x.2) {

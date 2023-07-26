@@ -75,9 +75,6 @@ let on_expr_top_down
        canonical *)
     | Aast.(As (_, (_, hint_), _)) -> begin
       match hint_ with
-      | Aast.(Happly ((_, nm), _)) when String.(equal nm SN.FB.cIncorrectType)
-        ->
-        (ctx, Ok expr)
       | Aast.(Happly ((pos, _), _)) ->
         on_error (Err.naming @@ Naming_error.Illegal_constant pos);
         (ctx, Error (Err.invalid_expr expr))

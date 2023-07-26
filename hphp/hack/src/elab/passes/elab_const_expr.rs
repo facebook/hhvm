@@ -111,7 +111,6 @@ impl Pass for ElabConstExprPass {
                 Expr_::As(box (_, Hint(_, box hint_), _)) => match hint_ {
                     // NB we can perform this top-down since the all valid hints
                     // are already in canonical
-                    Hint_::Happly(id, _) if id.name() == sn::fb::INCORRECT_TYPE => Continue(()),
                     // TODO[mjt] another example of inconsistency around error positions
                     Hint_::Happly(id, _) => {
                         env.emit_error(NamingError::IllegalConstant(id.0.clone()));

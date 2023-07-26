@@ -57,16 +57,11 @@ let validator =
     method! on_tgeneric acc r name _tyargs =
       (* If we allow higher-kinded generics to be enforceable at some point,
          handle type arguments here *)
-      if acc.Type_validator.like_context then
-        acc
-      else
-        this#check_generic acc r name
+      this#check_generic acc r name
 
     method! on_newtype acc r sid _ as_cstr _super_cstr _ =
       if String.equal (snd sid) SN.Classes.cSupportDyn then
         this#on_type acc (with_reason as_cstr r)
-      else if acc.Type_validator.like_context then
-        acc
       else
         this#invalid acc r "a `newtype`"
 
@@ -86,14 +81,9 @@ let validator =
               begin
                 match
                   List.fold2 ~init:acc targs tparams ~f:(fun acc targ tparam ->
-                      let covariant =
-                        Ast_defs.(equal_variance tparam.tp_variance Covariant)
-                      in
                       if this#is_wildcard targ then
                         acc
-                      else if
-                        Aast.(equal_reify_kind tparam.tp_reified Reified)
-                        || (acc.Type_validator.like_context && covariant)
+                      else if Aast.(equal_reify_kind tparam.tp_reified Reified)
                       then
                         this#on_type acc targ
                       else
@@ -108,18 +98,9 @@ let validator =
         end
       | None -> acc
 
-    method! on_alias acc r id tyl ty =
+    method! on_alias acc r _id tyl ty =
       if List.is_empty tyl then
         this#on_type acc ty
-      else if
-        (* TODO(T159289477) Eliminate this + like_context *)
-        String.equal (snd id) SN.FB.cIncorrectType
-        && Int.equal (List.length tyl) 1
-      then
-        let ty = List.hd_exn tyl in
-        this#on_type { acc with Type_validator.like_context = true } ty
-      else if acc.Type_validator.like_context then
-        super#on_alias acc r id tyl ty
       else
         this#invalid
           acc

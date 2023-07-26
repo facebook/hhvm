@@ -338,8 +338,6 @@ function int_mul_overflow(int $a, int $b): int;
 <<__Native, __IsFoldable>>
 function int_mul_add_overflow(int $a, int $b, int $bias): int;
 
-type INCORRECT_TYPE<T> = T;
-
 //////////////////////////////////////////////////////////////////////////////
 
 /**

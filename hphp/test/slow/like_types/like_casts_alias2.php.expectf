@@ -1,1 +1,0 @@
-Catchable fatal error: Value returned from function f() must be of type int, string given in %s/test/slow/like_types/like_casts_alias2.php on line 6

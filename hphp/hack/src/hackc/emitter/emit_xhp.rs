@@ -320,12 +320,7 @@ fn emit_xhp_attribute_array<'arena>(
         hint: &Hint,
         enum_opt: Option<&Vec<Expr>>,
     ) -> Result<(Expr, Expr)> {
-        use naming_special_names_rust::fb;
         match &*(hint.1) {
-            Hint_::Happly(ast_defs::Id(_, inc), hs) if inc == fb::INCORRECT_TYPE => match &hs[..] {
-                [h] => extract_from_hint(alloc, h, enum_opt),
-                _ => get_attribute_array_values(alloc, inc, enum_opt),
-            },
             Hint_::Hlike(h) | Hint_::Hoption(h) => extract_from_hint(alloc, h, enum_opt),
             Hint_::Happly(ast_defs::Id(_, id), _) => {
                 get_attribute_array_values(alloc, id, enum_opt)

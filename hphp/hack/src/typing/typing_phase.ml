@@ -368,9 +368,6 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
     let pos = Reason.to_pos r in
     let (env, ft) = localize_ft ~ety_env ~def_pos:pos env ft in
     (env, mk (r, Tfun ft))
-  | Tapply ((_, x), [arg])
-    when String.equal x SN.FB.cIncorrectType && Env.is_typedef env x ->
-    localize ~ety_env env (mk (get_reason dty, Tlike arg))
   | Tapply ((_, x), [arg]) when String.equal x SN.HH.FIXME.tTanyMarker ->
     if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
       localize ~ety_env env arg

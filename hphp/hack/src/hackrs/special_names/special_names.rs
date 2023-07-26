@@ -549,10 +549,9 @@ pub mod fb {
     pub static tInner: Lazy<TypeConstName> = lazy!(sn::fb::INNER);
     pub static idx: Lazy<FunName> = lazy!(sn::fb::IDX);
     pub static cTypeStructure: Lazy<TypeName> = lazy!(sn::fb::TYPE_STRUCTURE);
-    pub static cIncorrectType: Lazy<TypeName> = lazy!(sn::fb::INCORRECT_TYPE);
 
     pub fn types() -> impl Iterator<Item = TypeName> {
-        [*cEnum, *cTypeStructure, *cIncorrectType].into_iter()
+        [*cEnum, *cTypeStructure].into_iter()
     }
 
     pub fn functions() -> impl Iterator<Item = FunName> {

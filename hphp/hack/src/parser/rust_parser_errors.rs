@@ -4610,15 +4610,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 if is_good_scope_resolution_qualifier(&x.qualifier, static_allowed)
                     && is_good_scope_resolution_name(&x.name)
                     && !is_parent_class_access(&x.qualifier, &x.name) => {}
-            AsExpression(x) => match &x.right_operand.children {
-                GenericTypeSpecifier(y)
-                    if self.text(&y.class_type) == sn::fb::INCORRECT_TYPE
-                        || self.text(&y.class_type) == strip_ns(sn::fb::INCORRECT_TYPE) =>
-                {
-                    self.check_constant_expression(&x.left_operand, static_allowed)
-                }
-                _ => default(self),
-            },
             FunctionCallExpression(x) => {
                 let mut check_receiver_and_arguments = |receiver| {
                     if is_whitelisted_function(self, receiver) {

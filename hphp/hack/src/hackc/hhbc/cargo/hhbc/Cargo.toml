@@ -21,5 +21,5 @@ hhvm_types_ffi = { version = "0.0.0", path = "../../../hhvm_cxx/hhvm_types" }
 naming_special_names_rust = { version = "0.0.0", path = "../../../../naming" }
 oxidized = { version = "0.0.0", path = "../../../../oxidized" }
 relative_path = { version = "0.0.0", path = "../../../../utils/rust/relative_path" }
-serde = { version = "1.0.167", features = ["derive", "rc"] }
+serde = { version = "1.0.176", features = ["derive", "rc"] }
 write_bytes = { version = "0.0.0", path = "../../../../utils/write_bytes/write_bytes" }

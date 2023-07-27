@@ -19,8 +19,8 @@ fbthrift = { path = "../../../.." }
 futures = { version = "0.3.28", features = ["async-await", "compat"] }
 indexmap = { version = "1.9.2", features = ["arbitrary", "rayon", "serde-1"] }
 ref-cast = "1.0.18"
-serde = { version = "1.0.167", features = ["derive", "rc"] }
-serde_derive = "1.0.167"
+serde = { version = "1.0.176", features = ["derive", "rc"] }
+serde_derive = "1.0.176"
 smallvec = { version = "1.6.1", features = ["serde", "specialization", "union"] }
 thiserror = "1.0.43"
 

@@ -18,8 +18,8 @@ codegen_includer_proc_macro = { path = "../../../../../../../common/rust/shed/co
 fbthrift = { path = "../../../.." }
 futures = { version = "0.3.28", features = ["async-await", "compat"] }
 ref-cast = "1.0.18"
-serde = { version = "1.0.167", features = ["derive", "rc"] }
-serde_derive = "1.0.167"
+serde = { version = "1.0.176", features = ["derive", "rc"] }
+serde_derive = "1.0.176"
 thiserror = "1.0.43"
 
 [build-dependencies]

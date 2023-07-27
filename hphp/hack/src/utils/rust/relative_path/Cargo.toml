@@ -13,7 +13,7 @@ arena_trait = { version = "0.0.0", path = "../../../arena_trait" }
 eq_modulo_pos = { version = "0.0.0", path = "../../eq_modulo_pos" }
 no_pos_hash = { version = "0.0.0", path = "../../no_pos_hash" }
 ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
-serde = { version = "1.0.167", features = ["derive", "rc"] }
+serde = { version = "1.0.176", features = ["derive", "rc"] }
 
 [dev-dependencies]
 pretty_assertions = { version = "1.2", features = ["alloc"], default-features = false }

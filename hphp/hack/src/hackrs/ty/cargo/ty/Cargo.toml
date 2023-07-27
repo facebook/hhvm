@@ -20,6 +20,6 @@ once_cell = "1.12"
 oxidized = { version = "0.0.0", path = "../../../../oxidized" }
 oxidized_by_ref = { version = "0.0.0", path = "../../../../oxidized_by_ref" }
 pos = { version = "0.0.0", path = "../../../pos/cargo/pos" }
-serde = { version = "1.0.167", features = ["derive", "rc"] }
+serde = { version = "1.0.176", features = ["derive", "rc"] }
 static_assertions = "1.1.0"
 utils = { version = "0.0.0", path = "../../../utils/cargo/utils" }

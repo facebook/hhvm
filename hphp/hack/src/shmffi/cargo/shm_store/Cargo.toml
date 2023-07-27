@@ -26,6 +26,6 @@ ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", b
 ocamlrep_marshal = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 parking_lot = { version = "0.12.1", features = ["send_guard"] }
 pos = { version = "0.0.0", path = "../../../hackrs/pos/cargo/pos" }
-serde = { version = "1.0.167", features = ["derive", "rc"] }
+serde = { version = "1.0.176", features = ["derive", "rc"] }
 shmffi = { version = "0.0.0", path = "../shmffi" }
 zstd = { version = "0.11.2+zstd.1.5.2", features = ["experimental", "zstdmt"] }

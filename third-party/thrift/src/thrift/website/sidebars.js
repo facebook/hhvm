@@ -345,7 +345,17 @@ module.exports = {
             id: 'fb/server/overload-protection/index',
           },
           items: [
-            'fb/server/overload-protection/cpuconcurrencycontroller',
+            {
+              type: 'category',
+              label: 'CPUConcurrencyController',
+              link: {
+                type: 'doc',
+                id: 'fb/server/overload-protection/cpuconcurrencycontroller/index',
+              },
+              items: [
+                'fb/server/overload-protection/cpuconcurrencycontroller/rollout',
+              ]
+            },
             'fb/server/overload-protection/adaptive-concurrency',
             'fb/server/overload-protection/queue-timeout'
           ]

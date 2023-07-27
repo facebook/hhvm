@@ -58,6 +58,8 @@ std::atomic<int> s_pendingOOMs{0};
 std::atomic_size_t
 RequestInfo::s_OOMKillThreshold{std::numeric_limits<int64_t>::max()};
 
+thread_local size_t RequestInfo::s_stackLimitWithSlack;
+
 RDS_LOCAL_NO_CHECK(RequestInfo, RequestInfo::s_requestInfo);
 
 RequestInfo::RequestInfo() {
@@ -69,6 +71,7 @@ RequestInfo::~RequestInfo() {
 }
 
 void RequestInfo::init() {
+  s_stackLimitWithSlack = s_stackLimit + StackSlack;
   m_reqInjectionData.threadInit();
   onSessionInit();
   // TODO(20427335): Get rid of the illogical onSessionInit() call above.

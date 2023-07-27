@@ -37,6 +37,8 @@ Whitespace is used to separate tokens in source files. The following characters 
 
 Thrift supports single-line and multiline comments. Single-line comments start with `//` or `#` and continue until the end of the line which is determined as the nearest line feed (U+000A) or, if there is none, the end of file. Multiline comments start with `/*` and end with the nearest `*/`. Comments are treated as whitespace.
 
+Thrift recognizes Doxygen- and Javadoc-style docblocks for definitions. These start with `/// ` or `/** `. In addition, fields, parameters, and enum values can have inline docs which follow the definition and start with `///<` or `/**<`. Docblocks are exported in the AST and may be replicated in generated code. They are otherwise treated the same as regular comments.
+
 ### Identifiers
 
 Identifiers begin with an uppercase or lowercase letter `A` through `Z` or an underscore (`_`). Subsequent characters can also be digits `0` through `9`.

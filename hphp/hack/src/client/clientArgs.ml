@@ -523,7 +523,6 @@ let parse_check_args cmd ~from_default =
       ( "--json",
         Arg.Set output_json,
         " output json for machine consumption. (default: false)" );
-      ("--prefer-stdout", Arg.Unit (fun () -> ()), " (dead option)");
       ( "--lint",
         Arg.Unit (fun () -> set_mode MODE_LINT),
         " (mode) lint the given list of files" );

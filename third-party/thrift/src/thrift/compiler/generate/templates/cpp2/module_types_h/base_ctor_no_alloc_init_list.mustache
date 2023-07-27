@@ -23,7 +23,7 @@
       %><%#field:cpp_ref_not_boxed?%><% > module_types_h/smart_ptr_constructor%><%/field:cpp_ref_not_boxed?%><%!
       %><%#field:boxed_ref?%><% > field/default%><%/field:boxed_ref?%><%!
         TODO(dokwon): Support custom default for intern boxed field.
-      %><%#field:intern_boxed_ref?%><%field:cpp_storage_type%>::fromStaticConstant(&<% > module_types_h/intern_box_default%>())<%/field:intern_boxed_ref?%><%!
+      %><%#field:intern_boxed_ref?%><%field:cpp_storage_type%>::fromStaticConstant(&::apache::thrift::op::getDefault<<% > field/tag%>>())<%/field:intern_boxed_ref?%><%!
       %><%^field:cpp_ref?%><%#field:value%><%!
           Use value initialization when no custom default is provided.
         %><% > field/default%><%/field:value%><%!

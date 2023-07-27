@@ -3258,82 +3258,82 @@ class StructWithInternBox final  {
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::cpp2::Empty>>
   FOLLY_ERASE ::apache::thrift::intern_boxed_field_ref<const T&> field1_ref() const& {
-    return {this->__fbthrift_field_field1, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>, __isset.at(0), __isset.bit(0)};
+    return {this->__fbthrift_field_field1, ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>, __isset.at(0), __isset.bit(0)};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::cpp2::Empty>>
   FOLLY_ERASE ::apache::thrift::intern_boxed_field_ref<const T&&> field1_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_field1), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>, __isset.at(0), __isset.bit(0)};
+    return {static_cast<const T&&>(this->__fbthrift_field_field1), ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>, __isset.at(0), __isset.bit(0)};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::cpp2::Empty>>
   FOLLY_ERASE ::apache::thrift::intern_boxed_field_ref<T&> field1_ref() & {
-    return {this->__fbthrift_field_field1, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>, __isset.at(0), __isset.bit(0)};
+    return {this->__fbthrift_field_field1, ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>, __isset.at(0), __isset.bit(0)};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::cpp2::Empty>>
   FOLLY_ERASE ::apache::thrift::intern_boxed_field_ref<T&&> field1_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_field1), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>, __isset.at(0), __isset.bit(0)};
+    return {static_cast<T&&>(this->__fbthrift_field_field1), ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>, __isset.at(0), __isset.bit(0)};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::cpp2::Empty>>
   FOLLY_ERASE ::apache::thrift::intern_boxed_field_ref<const T&> field1() const& {
-    return {this->__fbthrift_field_field1, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>, __isset.at(0), __isset.bit(0)};
+    return {this->__fbthrift_field_field1, ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>, __isset.at(0), __isset.bit(0)};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::cpp2::Empty>>
   FOLLY_ERASE ::apache::thrift::intern_boxed_field_ref<const T&&> field1() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_field1), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>, __isset.at(0), __isset.bit(0)};
+    return {static_cast<const T&&>(this->__fbthrift_field_field1), ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>, __isset.at(0), __isset.bit(0)};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::cpp2::Empty>>
   FOLLY_ERASE ::apache::thrift::intern_boxed_field_ref<T&> field1() & {
-    return {this->__fbthrift_field_field1, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>, __isset.at(0), __isset.bit(0)};
+    return {this->__fbthrift_field_field1, ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>, __isset.at(0), __isset.bit(0)};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::cpp2::Empty>>
   FOLLY_ERASE ::apache::thrift::intern_boxed_field_ref<T&&> field1() && {
-    return {static_cast<T&&>(this->__fbthrift_field_field1), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>, __isset.at(0), __isset.bit(0)};
+    return {static_cast<T&&>(this->__fbthrift_field_field1), ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>, __isset.at(0), __isset.bit(0)};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::cpp2::MyField>>
   FOLLY_ERASE ::apache::thrift::intern_boxed_field_ref<const T&> field2_ref() const& {
-    return {this->__fbthrift_field_field2, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>, __isset.at(1), __isset.bit(1)};
+    return {this->__fbthrift_field_field2, ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>, __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::cpp2::MyField>>
   FOLLY_ERASE ::apache::thrift::intern_boxed_field_ref<const T&&> field2_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_field2), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>, __isset.at(1), __isset.bit(1)};
+    return {static_cast<const T&&>(this->__fbthrift_field_field2), ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>, __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::cpp2::MyField>>
   FOLLY_ERASE ::apache::thrift::intern_boxed_field_ref<T&> field2_ref() & {
-    return {this->__fbthrift_field_field2, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>, __isset.at(1), __isset.bit(1)};
+    return {this->__fbthrift_field_field2, ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>, __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::cpp2::MyField>>
   FOLLY_ERASE ::apache::thrift::intern_boxed_field_ref<T&&> field2_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_field2), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>, __isset.at(1), __isset.bit(1)};
+    return {static_cast<T&&>(this->__fbthrift_field_field2), ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>, __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::cpp2::MyField>>
   FOLLY_ERASE ::apache::thrift::intern_boxed_field_ref<const T&> field2() const& {
-    return {this->__fbthrift_field_field2, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>, __isset.at(1), __isset.bit(1)};
+    return {this->__fbthrift_field_field2, ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>, __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::cpp2::MyField>>
   FOLLY_ERASE ::apache::thrift::intern_boxed_field_ref<const T&&> field2() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_field2), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>, __isset.at(1), __isset.bit(1)};
+    return {static_cast<const T&&>(this->__fbthrift_field_field2), ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>, __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::cpp2::MyField>>
   FOLLY_ERASE ::apache::thrift::intern_boxed_field_ref<T&> field2() & {
-    return {this->__fbthrift_field_field2, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>, __isset.at(1), __isset.bit(1)};
+    return {this->__fbthrift_field_field2, ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>, __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::cpp2::MyField>>
   FOLLY_ERASE ::apache::thrift::intern_boxed_field_ref<T&&> field2() && {
-    return {static_cast<T&&>(this->__fbthrift_field_field2), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>, __isset.at(1), __isset.bit(1)};
+    return {static_cast<T&&>(this->__fbthrift_field_field2), ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>, __isset.at(1), __isset.bit(1)};
   }
 
   template <class Protocol_>
@@ -3439,82 +3439,82 @@ class StructWithTerseInternBox final  {
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::cpp2::Empty>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> field1_ref() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_field1, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_field1, ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::cpp2::Empty>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> field1_ref() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_field1), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_field1), ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::cpp2::Empty>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> field1_ref() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_field1, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_field1, ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::cpp2::Empty>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> field1_ref() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_field1), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_field1), ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::cpp2::Empty>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> field1() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_field1, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_field1, ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::cpp2::Empty>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> field1() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_field1), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_field1), ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::cpp2::Empty>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> field1() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_field1, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_field1, ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::cpp2::Empty>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> field1() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_field1), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_field1), ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::cpp2::MyField>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> field2_ref() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_field2, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_field2, ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::cpp2::MyField>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> field2_ref() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_field2), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_field2), ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::cpp2::MyField>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> field2_ref() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_field2, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_field2, ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::cpp2::MyField>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> field2_ref() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_field2), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_field2), ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::cpp2::MyField>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> field2() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_field2, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_field2, ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::cpp2::MyField>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> field2() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_field2), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_field2), ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::cpp2::MyField>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> field2() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_field2, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_field2, ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::cpp2::MyField>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> field2() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_field2), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_field2), ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>};
   }
 
   template <class Protocol_>
@@ -3621,82 +3621,82 @@ class AdaptedStructWithInternBox final  {
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::cpp2::Empty, AdaptedStructWithInternBox>>>
   FOLLY_ERASE ::apache::thrift::intern_boxed_field_ref<const T&> field1_ref() const& {
-    return {this->__fbthrift_field_field1, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<1>>>, __isset.at(0), __isset.bit(0)};
+    return {this->__fbthrift_field_field1, ::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<1>>>, __isset.at(0), __isset.bit(0)};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::cpp2::Empty, AdaptedStructWithInternBox>>>
   FOLLY_ERASE ::apache::thrift::intern_boxed_field_ref<const T&&> field1_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_field1), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<1>>>, __isset.at(0), __isset.bit(0)};
+    return {static_cast<const T&&>(this->__fbthrift_field_field1), ::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<1>>>, __isset.at(0), __isset.bit(0)};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::cpp2::Empty, AdaptedStructWithInternBox>>>
   FOLLY_ERASE ::apache::thrift::intern_boxed_field_ref<T&> field1_ref() & {
-    return {this->__fbthrift_field_field1, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<1>>>, __isset.at(0), __isset.bit(0)};
+    return {this->__fbthrift_field_field1, ::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<1>>>, __isset.at(0), __isset.bit(0)};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::cpp2::Empty, AdaptedStructWithInternBox>>>
   FOLLY_ERASE ::apache::thrift::intern_boxed_field_ref<T&&> field1_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_field1), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<1>>>, __isset.at(0), __isset.bit(0)};
+    return {static_cast<T&&>(this->__fbthrift_field_field1), ::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<1>>>, __isset.at(0), __isset.bit(0)};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::cpp2::Empty, AdaptedStructWithInternBox>>>
   FOLLY_ERASE ::apache::thrift::intern_boxed_field_ref<const T&> field1() const& {
-    return {this->__fbthrift_field_field1, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<1>>>, __isset.at(0), __isset.bit(0)};
+    return {this->__fbthrift_field_field1, ::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<1>>>, __isset.at(0), __isset.bit(0)};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::cpp2::Empty, AdaptedStructWithInternBox>>>
   FOLLY_ERASE ::apache::thrift::intern_boxed_field_ref<const T&&> field1() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_field1), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<1>>>, __isset.at(0), __isset.bit(0)};
+    return {static_cast<const T&&>(this->__fbthrift_field_field1), ::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<1>>>, __isset.at(0), __isset.bit(0)};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::cpp2::Empty, AdaptedStructWithInternBox>>>
   FOLLY_ERASE ::apache::thrift::intern_boxed_field_ref<T&> field1() & {
-    return {this->__fbthrift_field_field1, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<1>>>, __isset.at(0), __isset.bit(0)};
+    return {this->__fbthrift_field_field1, ::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<1>>>, __isset.at(0), __isset.bit(0)};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::cpp2::Empty, AdaptedStructWithInternBox>>>
   FOLLY_ERASE ::apache::thrift::intern_boxed_field_ref<T&&> field1() && {
-    return {static_cast<T&&>(this->__fbthrift_field_field1), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<1>>>, __isset.at(0), __isset.bit(0)};
+    return {static_cast<T&&>(this->__fbthrift_field_field1), ::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<1>>>, __isset.at(0), __isset.bit(0)};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::cpp2::MyField, AdaptedStructWithInternBox>>>
   FOLLY_ERASE ::apache::thrift::intern_boxed_field_ref<const T&> field2_ref() const& {
-    return {this->__fbthrift_field_field2, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<2>>>, __isset.at(1), __isset.bit(1)};
+    return {this->__fbthrift_field_field2, ::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<2>>>, __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::cpp2::MyField, AdaptedStructWithInternBox>>>
   FOLLY_ERASE ::apache::thrift::intern_boxed_field_ref<const T&&> field2_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_field2), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<2>>>, __isset.at(1), __isset.bit(1)};
+    return {static_cast<const T&&>(this->__fbthrift_field_field2), ::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<2>>>, __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::cpp2::MyField, AdaptedStructWithInternBox>>>
   FOLLY_ERASE ::apache::thrift::intern_boxed_field_ref<T&> field2_ref() & {
-    return {this->__fbthrift_field_field2, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<2>>>, __isset.at(1), __isset.bit(1)};
+    return {this->__fbthrift_field_field2, ::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<2>>>, __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::cpp2::MyField, AdaptedStructWithInternBox>>>
   FOLLY_ERASE ::apache::thrift::intern_boxed_field_ref<T&&> field2_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_field2), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<2>>>, __isset.at(1), __isset.bit(1)};
+    return {static_cast<T&&>(this->__fbthrift_field_field2), ::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<2>>>, __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::cpp2::MyField, AdaptedStructWithInternBox>>>
   FOLLY_ERASE ::apache::thrift::intern_boxed_field_ref<const T&> field2() const& {
-    return {this->__fbthrift_field_field2, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<2>>>, __isset.at(1), __isset.bit(1)};
+    return {this->__fbthrift_field_field2, ::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<2>>>, __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::cpp2::MyField, AdaptedStructWithInternBox>>>
   FOLLY_ERASE ::apache::thrift::intern_boxed_field_ref<const T&&> field2() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_field2), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<2>>>, __isset.at(1), __isset.bit(1)};
+    return {static_cast<const T&&>(this->__fbthrift_field_field2), ::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<2>>>, __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::cpp2::MyField, AdaptedStructWithInternBox>>>
   FOLLY_ERASE ::apache::thrift::intern_boxed_field_ref<T&> field2() & {
-    return {this->__fbthrift_field_field2, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<2>>>, __isset.at(1), __isset.bit(1)};
+    return {this->__fbthrift_field_field2, ::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<2>>>, __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::cpp2::MyField, AdaptedStructWithInternBox>>>
   FOLLY_ERASE ::apache::thrift::intern_boxed_field_ref<T&&> field2() && {
-    return {static_cast<T&&>(this->__fbthrift_field_field2), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<2>>>, __isset.at(1), __isset.bit(1)};
+    return {static_cast<T&&>(this->__fbthrift_field_field2), ::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<2>>>, __isset.at(1), __isset.bit(1)};
   }
 
   template <class Protocol_>
@@ -3801,82 +3801,82 @@ class AdaptedStructWithTerseInternBox final  {
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::cpp2::Empty, AdaptedStructWithTerseInternBox>>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> field1_ref() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_field1, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<1>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_field1, ::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<1>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::cpp2::Empty, AdaptedStructWithTerseInternBox>>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> field1_ref() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_field1), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<1>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_field1), ::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<1>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::cpp2::Empty, AdaptedStructWithTerseInternBox>>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> field1_ref() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_field1, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<1>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_field1, ::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<1>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::cpp2::Empty, AdaptedStructWithTerseInternBox>>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> field1_ref() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_field1), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<1>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_field1), ::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<1>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::cpp2::Empty, AdaptedStructWithTerseInternBox>>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> field1() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_field1, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<1>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_field1, ::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<1>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::cpp2::Empty, AdaptedStructWithTerseInternBox>>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> field1() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_field1), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<1>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_field1), ::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<1>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::cpp2::Empty, AdaptedStructWithTerseInternBox>>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> field1() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_field1, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<1>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_field1, ::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<1>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::cpp2::Empty, AdaptedStructWithTerseInternBox>>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> field1() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_field1), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<1>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_field1), ::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<1>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::cpp2::MyField, AdaptedStructWithTerseInternBox>>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> field2_ref() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_field2, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<2>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_field2, ::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<2>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::cpp2::MyField, AdaptedStructWithTerseInternBox>>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> field2_ref() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_field2), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<2>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_field2), ::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<2>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::cpp2::MyField, AdaptedStructWithTerseInternBox>>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> field2_ref() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_field2, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<2>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_field2, ::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<2>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::cpp2::MyField, AdaptedStructWithTerseInternBox>>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> field2_ref() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_field2), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<2>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_field2), ::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<2>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::cpp2::MyField, AdaptedStructWithTerseInternBox>>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> field2() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_field2, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<2>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_field2, ::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<2>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::cpp2::MyField, AdaptedStructWithTerseInternBox>>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> field2() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_field2), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<2>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_field2), ::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<2>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::cpp2::MyField, AdaptedStructWithTerseInternBox>>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> field2() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_field2, ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<2>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_field2, ::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<2>>>};
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::cpp2::MyField, AdaptedStructWithTerseInternBox>>>
   FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> field2() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_field2), ::apache::thrift::op::getIntrinsicDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<2>>>};
+    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_field2), ::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<2>>>};
   }
 
   template <class Protocol_>

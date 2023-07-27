@@ -26,7 +26,7 @@
         %><% > module_types_h/smart_ptr_constructor%><%!
       %><%/field:cpp_ref_not_boxed?%><%!
       %><%#field:boxed_ref?%><% > field/default%><%/field:boxed_ref?%><%!
-      %><%#field:intern_boxed_ref?%><%field:cpp_storage_type%>::fromStaticConstant(&<% > module_types_h/intern_box_default%>())<%/field:intern_boxed_ref?%><%!
+      %><%#field:intern_boxed_ref?%><%field:cpp_storage_type%>::fromStaticConstant(&::apache::thrift::op::getDefault<<% > field/tag%>>())<%/field:intern_boxed_ref?%><%!
       %><%^field:cpp_ref?%><%!
         %><%#type:cpp_use_allocator?%>__fbthrift_alloc<%/type:cpp_use_allocator?%><%!
       %><%/field:cpp_ref?%><%!

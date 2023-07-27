@@ -121,6 +121,11 @@ constexpr auto kHackWrapperUri = "facebook.com/thrift/annotation/hack/Wrapper";
 constexpr auto kHackModuleInternalUri =
     "facebook.com/thrift/annotation/hack/ModuleInternal";
 
+// go
+constexpr auto kGoNameUri = "facebook.com/thrift/annotation/go/Name";
+constexpr auto kGoTagUri = "facebook.com/thrift/annotation/go/Tag";
+constexpr auto kGoNewTypeUri = "facebook.com/thrift/annotation/go/NewType";
+
 constexpr auto kGeneratePatchUri = "facebook.com/thrift/op/GeneratePatch";
 constexpr auto kAssignOnlyPatchUri = "facebook.com/thrift/op/AssignOnlyPatch";
 

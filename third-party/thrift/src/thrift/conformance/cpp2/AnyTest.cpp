@@ -55,42 +55,42 @@ TEST(AnyTest, None) {
   Any any;
   validateAny(any);
   EXPECT_EQ(getProtocol(any), getStandardProtocol<StandardProtocol::Compact>());
-  any.set_protocol(StandardProtocol::Custom);
+  any.protocol_ref() = StandardProtocol::Custom;
   validateAny(any);
   EXPECT_EQ(getProtocol(any), getStandardProtocol<StandardProtocol::Custom>());
-  any.set_customProtocol("");
+  any.customProtocol_ref() = "";
   validateAny(any);
   EXPECT_EQ(getProtocol(any), getStandardProtocol<StandardProtocol::Custom>());
 
-  any.set_customProtocol("Custom");
+  any.customProtocol_ref() = "Custom";
   EXPECT_NE(getProtocol(any), getStandardProtocol<StandardProtocol::Custom>());
   EXPECT_THROW(validateAny(any), std::invalid_argument);
 }
 
 TEST(AnyTest, Standard) {
   Any any;
-  any.set_protocol(StandardProtocol::Binary);
+  any.protocol_ref() = StandardProtocol::Binary;
   EXPECT_EQ(getProtocol(any), getStandardProtocol<StandardProtocol::Binary>());
   EXPECT_TRUE(
       hasProtocol(any, getStandardProtocol<StandardProtocol::Binary>()));
 
   // Junk in the customProtocol.
-  any.set_customProtocol("Ignored");
+  any.customProtocol_ref() = "Ignored";
   EXPECT_EQ(getProtocol(any), getStandardProtocol<StandardProtocol::Binary>());
   EXPECT_TRUE(
       hasProtocol(any, getStandardProtocol<StandardProtocol::Binary>()));
 
   // Unnormalize name.
-  any.set_protocol(StandardProtocol::Custom);
-  any.set_customProtocol("Binary");
+  any.protocol_ref() = StandardProtocol::Custom;
+  any.customProtocol_ref() = "Binary";
   EXPECT_NE(getProtocol(any), getStandardProtocol<StandardProtocol::Binary>());
   EXPECT_THROW(validateAny(any), std::invalid_argument);
 }
 
 TEST(AnyTest, Custom) {
   Any any;
-  any.set_protocol(StandardProtocol::Custom);
-  any.set_customProtocol("Hi");
+  any.protocol_ref() = StandardProtocol::Custom;
+  any.customProtocol_ref() = "Hi";
   EXPECT_EQ(getProtocol(any), Protocol("Hi"));
   EXPECT_TRUE(hasProtocol(any, Protocol("Hi")));
   EXPECT_NE(getProtocol(any), Protocol("Bye"));
@@ -103,7 +103,7 @@ TEST(AnyTest, Custom) {
 
 TEST(AnyTest, Unknown) {
   Any any;
-  any.set_protocol(kUnknownStdProtocol);
+  any.protocol_ref() = kUnknownStdProtocol;
   EXPECT_EQ(getProtocol(any), UnknownProtocol());
   EXPECT_TRUE(hasProtocol(any, UnknownProtocol()));
   EXPECT_EQ(getProtocol(any).name(), "");
@@ -112,8 +112,8 @@ TEST(AnyTest, Unknown) {
 TEST(AnyTest, Custom_EmptyString) {
   Any any;
   // Empty string protocol is the same as None
-  any.set_protocol(StandardProtocol::Custom);
-  any.set_customProtocol("");
+  any.protocol_ref() = StandardProtocol::Custom;
+  any.customProtocol_ref() = "";
   EXPECT_TRUE(any.customProtocol().has_value());
   EXPECT_EQ(getProtocol(any), kNoProtocol);
   EXPECT_TRUE(hasProtocol(any, kNoProtocol));
@@ -124,8 +124,8 @@ TEST(AnyTest, ValidateAny) {
   const auto good = "foo.com/my/type";
   Any any;
   validateAny(any);
-  any.set_type("");
-  any.set_customProtocol("");
+  any.type_ref() = "";
+  any.customProtocol_ref() = "";
   validateAny(any);
   any.type().ensure() = bad;
   EXPECT_THROW(validateAny(any), std::invalid_argument);

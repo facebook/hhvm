@@ -57,11 +57,11 @@ void setProtocol(const Protocol& protocol, Any& any) noexcept {
       any.customProtocol().reset();
       break;
     case StandardProtocol::Custom:
-      any.set_protocol(StandardProtocol::Custom);
-      any.set_customProtocol(protocol.custom());
+      any.protocol_ref().emplace(StandardProtocol::Custom);
+      any.customProtocol_ref() = protocol.custom();
       break;
     default:
-      any.set_protocol(protocol.standard());
+      any.protocol_ref().emplace(protocol.standard());
       any.customProtocol().reset();
       break;
   }

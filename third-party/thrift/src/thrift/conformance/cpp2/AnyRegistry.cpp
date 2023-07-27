@@ -150,12 +150,12 @@ Any AnyRegistry::store(any_ref value, const Protocol& protocol) const {
 
   Any result;
   if (entry.typeHash.empty()) {
-    result.set_type(entry.type.uri().value());
+    result.type_ref() = entry.type.uri().value();
   } else {
-    result.set_typeHashPrefixSha2_256(entry.typeHash);
+    result.typeHashPrefixSha2_256_ref() = entry.typeHash;
   }
   setProtocol(protocol, result);
-  result.set_data(queue.moveAsValue());
+  result.data_ref() = queue.moveAsValue();
   return result;
 }
 
@@ -216,8 +216,8 @@ bool AnyRegistry::forceRegisterType(
   }
 
   ThriftTypeInfo info;
-  info.set_uri(std::move(type));
-  info.set_typeHashBytes(0);
+  info.uri_ref() = std::move(type);
+  info.typeHashBytes_ref() = 0;
 
   auto result = registry_.emplace(
       std::type_index(typeInfo), TypeEntry(typeInfo, std::move(info)));

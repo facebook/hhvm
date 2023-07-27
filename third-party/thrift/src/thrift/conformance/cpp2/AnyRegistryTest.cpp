@@ -50,7 +50,7 @@ void checkLongType(int typeBytes, int expectedOutBytes) {
   if (typeBytes == kTypeHashBytesNotSpecified) {
     longType.typeHashBytes().reset();
   } else {
-    longType.set_typeHashBytes(typeBytes);
+    longType.typeHashBytes_ref() = typeBytes;
   }
   EXPECT_TRUE(registry.registerType<int>(longType, {&intCodec}));
 
@@ -101,7 +101,7 @@ TEST(AnyRegistryTest, ShortTypeHash) {
   auto longType = longThriftType();
   EXPECT_TRUE(registry.registerType<int>(longType, {&intCodec}));
   Any any = registry.store(1, kFollyToStringProtocol);
-  any.set_typeHashPrefixSha2_256(any.typeHashPrefixSha2_256()->substr(0, 7));
+  any.typeHashPrefixSha2_256_ref() = any.typeHashPrefixSha2_256()->substr(0, 7);
   EXPECT_THROW(registry.load<int>(any), std::out_of_range);
 }
 
@@ -114,9 +114,9 @@ TEST(AnyRegistryTest, TypeNotFound) {
 
   Any any;
   EXPECT_THROW(registry.load<int>(any), std::invalid_argument);
-  any.set_type(thriftType("int"));
+  any.type_ref() = thriftType("int");
   EXPECT_THROW(registry.load<int>(any), std::out_of_range);
-  any.set_protocol(StandardProtocol::Binary);
+  any.protocol_ref() = StandardProtocol::Binary;
   EXPECT_THROW(registry.load<int>(any), std::out_of_range);
 
   FollyToStringSerializer<int> intCodec;
@@ -133,9 +133,9 @@ TEST(AnyRegistryTest, ProtocolNotFound) {
 
   Any any;
   EXPECT_THROW(registry.load<int>(any), std::invalid_argument);
-  any.set_type(thriftType("int"));
+  any.type_ref() = thriftType("int");
   EXPECT_THROW(registry.load<int>(any), std::out_of_range);
-  any.set_protocol(StandardProtocol::Binary);
+  any.protocol_ref() = StandardProtocol::Binary;
   EXPECT_THROW(registry.load<int>(any), std::out_of_range);
 }
 
@@ -143,17 +143,17 @@ TEST(AnyRegistryTest, TypeHashToShort) {
   AnyRegistry registry;
   FollyToStringSerializer<int> intCodec;
   auto anyType = longThriftType();
-  anyType.set_typeHashBytes(17);
+  anyType.typeHashBytes_ref() = 17;
   EXPECT_TRUE(registry.registerType<int>(anyType, {&intCodec}));
   Any any = registry.store(1, intCodec.getProtocol());
   ASSERT_TRUE(any.typeHashPrefixSha2_256());
   EXPECT_EQ(any.typeHashPrefixSha2_256()->size(), 17);
   EXPECT_EQ(registry.load<int>(any), 1);
 
-  any.set_typeHashPrefixSha2_256(any.typeHashPrefixSha2_256()->substr(0, 8));
+  any.typeHashPrefixSha2_256_ref() = any.typeHashPrefixSha2_256()->substr(0, 8);
   EXPECT_EQ(registry.load<int>(any), 1);
 
-  any.set_typeHashPrefixSha2_256(any.typeHashPrefixSha2_256()->substr(0, 7));
+  any.typeHashPrefixSha2_256_ref() = any.typeHashPrefixSha2_256()->substr(0, 7);
   EXPECT_THROW(registry.load<int>(any), std::out_of_range);
 }
 
@@ -258,7 +258,7 @@ TEST(AnyRegistryTest, Behavior) {
       hasProtocol(value, getStandardProtocol<StandardProtocol::Compact>()));
   EXPECT_THROW(cregistry.load(value), std::invalid_argument);
   EXPECT_THROW(cregistry.load<float>(value), std::invalid_argument);
-  value.set_type("foo");
+  value.type_ref() = "foo";
   EXPECT_THROW(cregistry.load(value), std::out_of_range);
   EXPECT_THROW(cregistry.load<float>(value), std::out_of_range);
 
@@ -307,13 +307,13 @@ TEST(AnyRegistryTest, Aliases) {
   EXPECT_EQ(any.type().value_or(""), thriftType("int"));
   EXPECT_EQ(cregistry.load<int>(any), 1);
 
-  any.set_type(thriftType("Int"));
+  any.type_ref() = thriftType("Int");
   EXPECT_EQ(cregistry.load<int>(any), 1);
 
-  any.set_type(thriftType("Integer"));
+  any.type_ref() = thriftType("Integer");
   EXPECT_EQ(cregistry.load<int>(any), 1);
 
-  any.set_type(thriftType("Unknown"));
+  any.type_ref() = thriftType("Unknown");
   EXPECT_THROW(cregistry.load<int>(any), std::out_of_range);
 }
 
@@ -376,7 +376,7 @@ TEST(AnyRegistryTest, ForceRegister) {
   EXPECT_TRUE(registry.registerSerializer<protocol::Value>(
       &getAnyStandardSerializer<protocol::Value, StandardProtocol::Compact>()));
   protocol::Value expected;
-  expected.set_boolValue(true);
+  expected.boolValue_ref() = true;
   Any any = registry.store(
       expected, getStandardProtocol<StandardProtocol::Compact>());
   EXPECT_EQ(any.type(), "va");

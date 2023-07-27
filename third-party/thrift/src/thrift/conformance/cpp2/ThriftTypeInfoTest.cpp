@@ -33,16 +33,16 @@ TEST(ThriftTypeInfoTest, ValidateThriftTypeInfo) {
   validateThriftTypeInfo(typeInfo);
   typeInfo.altUris()->emplace(good2);
   validateThriftTypeInfo(typeInfo);
-  typeInfo.set_typeHashBytes(kMinTypeHashBytes);
+  typeInfo.typeHashBytes_ref() = kMinTypeHashBytes;
   validateThriftTypeInfo(typeInfo);
-  typeInfo.set_typeHashBytes(32);
+  typeInfo.typeHashBytes_ref() = 32;
   validateThriftTypeInfo(typeInfo);
-  typeInfo.set_typeHashBytes(64);
+  typeInfo.typeHashBytes_ref() = 64;
   validateThriftTypeInfo(typeInfo);
 
   {
     ThriftTypeInfo badType(typeInfo);
-    badType.set_uri(bad);
+    badType.uri_ref() = bad;
     EXPECT_THROW(validateThriftTypeInfo(badType), std::invalid_argument);
   }
 
@@ -59,7 +59,7 @@ TEST(ThriftTypeInfoTest, ValidateThriftTypeInfo) {
 
   {
     ThriftTypeInfo badType(typeInfo);
-    badType.set_typeHashBytes(1);
+    badType.typeHashBytes_ref() = 1;
     EXPECT_THROW(validateThriftTypeInfo(badType), std::invalid_argument);
   }
 }

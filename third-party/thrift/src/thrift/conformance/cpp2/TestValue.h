@@ -36,14 +36,14 @@ Any encodeValue(const Protocol& protocol, const EncodeValue& value) {
   Any result;
   result.type() = *value.type();
   setProtocol(protocol, result);
-  result.set_data(queue.moveAsValue());
+  result.data_ref() = queue.moveAsValue();
   return result;
 }
 
 template <typename T>
 EncodeValue asEncodeValue(const T& value) {
   EncodeValue result;
-  result.set_type(*getGeneratedThriftTypeInfo<T>().uri());
+  result.type_ref() = *getGeneratedThriftTypeInfo<T>().uri();
 
   detail::EncodeValueRecorder recorder(&result);
   value.write(&recorder);

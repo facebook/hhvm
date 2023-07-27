@@ -572,12 +572,21 @@ base_service_name ::=  maybe_qualified_id
 function ::=
   [annotations]
   [function_qualifier] return_type identifier
-    "(" (parameter [","])* ")" throws [";"]
+    "(" (parameter [","])* ")" [throws] [";"]
 
 function_qualifier ::=  "oneway" | "idempotent" | "readonly"
-return_type        ::=  "void" | type | stream_return_type
-stream_return_type ::=  [("void" | type) ","] "stream" "<" type [throws] ">"
-throws             ::=  ["throws" "(" field+ ")"]
+
+return_type ::=
+    type
+  | "void"
+  | [initial_response_type ","] (sink | stream)
+
+initial_response_type ::=  type | "void"
+
+sink   ::=  "sink" "<" type [throws], type [throws] ">"
+stream ::=  "stream" "<" type [throws] ">"
+
+throws ::=  "throws" "(" (parameter [","])* ")"
 
 parameter ::=
   [annotations]

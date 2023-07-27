@@ -806,8 +806,12 @@ std::string describe_actual_type(tv_rval val) {
     }
     case KindOfPersistentKeyset:
     case KindOfKeyset:        return "HH\\keyset";
-    case KindOfResource:
-      return val.val().pres->data()->o_getClassName().c_str();
+    case KindOfResource: {
+      auto pres = val.val().pres;
+      // pres should never be null - but sometimes it is anyway so let's guard
+      // against that.
+      return pres ? pres->data()->o_getClassName().c_str() : "resource(null)";
+    }
     case KindOfRFunc:         return "reified function";
     case KindOfFunc:          return "func";
     case KindOfClass:         return "class";

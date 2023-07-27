@@ -2465,7 +2465,6 @@ let decl_and_run_mode
       naming_table_path;
       packages_config_path;
     }
-    (popt : TypecheckerOptions.t)
     (hhi_root : Path.t) : unit =
   Ident.track_names := true;
   let builtins =
@@ -2591,15 +2590,15 @@ let decl_and_run_mode
   let tcopt = { tcopt with GlobalOptions.tco_package_info = package_info } in
   let ctx =
     if rust_provider_backend then (
-      Provider_backend.set_rust_backend popt;
+      Provider_backend.set_rust_backend tcopt;
       Provider_context.empty_for_tool
-        ~popt
+        ~popt:tcopt
         ~tcopt
         ~backend:(Provider_backend.get ())
         ~deps_mode:(Typing_deps_mode.InMemoryMode None)
     ) else
       Provider_context.empty_for_test
-        ~popt
+        ~popt:tcopt
         ~tcopt
         ~deps_mode:(Typing_deps_mode.InMemoryMode None)
   in
@@ -2649,9 +2648,8 @@ let decl_and_run_mode
     ~memtrace
     ~verbosity
 
-let main_hack
-    ({ tcopt; _ } as opts) (root : Path.t) (sharedmem_config : SharedMem.config)
-    : unit =
+let main_hack opts (root : Path.t) (sharedmem_config : SharedMem.config) : unit
+    =
   (* TODO: We should have a per file config *)
   Sys_utils.signal Sys.sigusr1 (Sys.Signal_handle Typing.debug_print_last_pos);
   EventLogger.init_fake ();
@@ -2673,7 +2671,7 @@ let main_hack
     Relative_path.set_path_prefix Relative_path.Root root;
     Relative_path.set_path_prefix Relative_path.Hhi hhi_root;
     Relative_path.set_path_prefix Relative_path.Tmp (Path.make "tmp");
-    decl_and_run_mode opts tcopt hhi_root;
+    decl_and_run_mode opts hhi_root;
     TypingLogger.flush_buffers ()
   in
   match opts.custom_hhi_path with

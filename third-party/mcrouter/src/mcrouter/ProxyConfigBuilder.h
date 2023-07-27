@@ -34,7 +34,7 @@ class ProxyConfigBuilder {
       const McrouterOptions& opts,
       ConfigApi& configApi,
       folly::StringPiece jsonC,
-      const std::string& name);
+      const std::string& routerInfoName);
 
   template <class RouterInfo>
   std::shared_ptr<ProxyConfig<RouterInfo>> buildConfig(
@@ -47,6 +47,10 @@ class ProxyConfigBuilder {
   const folly::dynamic& preprocessedConfig() const {
     return json_;
   }
+
+  static folly::StringKeyedUnorderedMap<folly::dynamic> buildGlobalParams(
+      const McrouterOptions& opts,
+      const std::string& routerInfoName);
 
  private:
   folly::dynamic json_;

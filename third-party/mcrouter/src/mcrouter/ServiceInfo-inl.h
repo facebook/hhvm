@@ -549,6 +549,18 @@ ServiceInfo<RouterInfo>::ServiceInfoImpl::ServiceInfoImpl(
 
         return toPrettySortedJson(result);
       });
+
+  commands_.emplace(
+      "global_params",
+      [this](const std::vector<folly::StringPiece>& /* args */) {
+        folly::dynamic result = folly::dynamic::object;
+        auto globalParams = ProxyConfigBuilder::buildGlobalParams(
+            proxy_.router().opts(), RouterInfo::name);
+        for (const auto& [key, value] : globalParams) {
+          result[key] = value;
+        }
+        return toPrettySortedJson(result);
+      });
 }
 
 template <class RouterInfo>

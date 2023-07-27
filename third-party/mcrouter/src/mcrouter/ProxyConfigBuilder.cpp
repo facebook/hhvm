@@ -31,29 +31,9 @@ ProxyConfigBuilder::ProxyConfigBuilder(
     const std::string& routerInfoName)
     : json_(nullptr) {
   McImportResolver importResolver(configApi);
-  int sr_linked = 0;
-  if (opts.enable_service_router && mcrouter::gSRInitHook) {
-    sr_linked = 1;
-  }
-  folly::StringKeyedUnorderedMap<folly::dynamic> globalParams{
-      {"default-route", opts.default_route.str()},
-      {"default-region", opts.default_route.getRegion().str()},
-      {"default-cluster", opts.default_route.getCluster().str()},
-      {"hostid", globals::hostid()},
-      {"router-name", opts.router_name},
-      {"service-name", opts.service_name},
-      {"service-router-capable", sr_linked},
-      {"router-info-name", routerInfoName}};
-
-  auto additionalParams = additionalConfigParams();
   folly::json::metadata_map configMetadataMap;
-  for (auto& it : additionalParams) {
-    globalParams.emplace(it.first, std::move(it.second));
-  }
-  for (const auto& param : opts.config_params) {
-    globalParams.emplace(param.first, param.second);
-  }
 
+  auto globalParams = buildGlobalParams(opts, routerInfoName);
   json_ = ConfigPreprocessor::getConfigWithoutMacros(
       jsonC, importResolver, std::move(globalParams), &configMetadataMap);
 
@@ -76,6 +56,35 @@ ProxyConfigBuilder::ProxyConfigBuilder(
       }
     }
   }
+}
+
+folly::StringKeyedUnorderedMap<folly::dynamic>
+ProxyConfigBuilder::buildGlobalParams(
+    const McrouterOptions& opts,
+    const std::string& routerInfoName) {
+  int sr_linked = 0;
+  if (opts.enable_service_router && mcrouter::gSRInitHook) {
+    sr_linked = 1;
+  }
+  folly::StringKeyedUnorderedMap<folly::dynamic> globalParams{
+      {"default-route", opts.default_route.str()},
+      {"default-region", opts.default_route.getRegion().str()},
+      {"default-cluster", opts.default_route.getCluster().str()},
+      {"hostid", globals::hostid()},
+      {"router-name", opts.router_name},
+      {"service-name", opts.service_name},
+      {"service-router-capable", sr_linked},
+      {"router-info-name", routerInfoName}};
+
+  auto additionalParams = additionalConfigParams();
+  for (auto& it : additionalParams) {
+    globalParams.emplace(it.first, std::move(it.second));
+  }
+
+  for (const auto& param : opts.config_params) {
+    globalParams.emplace(param.first, param.second);
+  }
+  return globalParams;
 }
 } // namespace mcrouter
 } // namespace memcache

@@ -242,7 +242,7 @@ public class MyServicePrioParentRpcServerHandler
   @java.lang.Override
   public reactor.core.publisher.Flux<com.facebook.thrift.payload.ServerResponsePayload> singleRequestStreamingResponse(com.facebook.thrift.payload.ServerRequestPayload _payload) {
     final String _name = _payload.getRequestRpcMetadata().getName();
-
+    return reactor.core.publisher.Flux.defer(() -> {
     com.facebook.swift.service.ContextChain _chain;
     try {
       _chain = new com.facebook.swift.service.ContextChain(_eventHandlers, _name, _payload.getRequestContext());
@@ -269,12 +269,13 @@ public class MyServicePrioParentRpcServerHandler
       _result = reactor.core.publisher.Flux.error(_t);
     }
     return _result;
+    });
   }
 
   @java.lang.Override
   public reactor.core.publisher.Mono<com.facebook.thrift.payload.ServerResponsePayload> singleRequestSingleResponse(com.facebook.thrift.payload.ServerRequestPayload _payload) {
     final String _name = _payload.getRequestRpcMetadata().getName();
-
+    return reactor.core.publisher.Mono.defer(() -> {
     com.facebook.swift.service.ContextChain _chain;
     try {
       _chain = new com.facebook.swift.service.ContextChain(_eventHandlers, _name, _payload.getRequestContext());
@@ -308,12 +309,14 @@ public class MyServicePrioParentRpcServerHandler
     }
 
     return _result;
+    });
   }
 
   @java.lang.Override
   public reactor.core.publisher.Mono<Void> singleRequestNoResponse(com.facebook.thrift.payload.ServerRequestPayload _payload) {
     final String _name = _payload.getRequestRpcMetadata().getName();
 
+    return reactor.core.publisher.Mono.defer(() -> {
     com.facebook.swift.service.ContextChain _chain;
     try {
       _chain = new com.facebook.swift.service.ContextChain(_eventHandlers, _name, _payload.getRequestContext());
@@ -333,6 +336,7 @@ public class MyServicePrioParentRpcServerHandler
     }
 
     return _result;
+    });
   }
 
   public java.util.Map<String, com.facebook.thrift.server.RpcServerHandler> getMethodMap() {

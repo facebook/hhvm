@@ -719,15 +719,7 @@ class ast_builder : public parser_actions {
     return function;
   }
 
-  t_type_ref on_stream_return_type(
-      source_range range, type_throws_spec spec) override {
-    auto stream_response =
-        std::make_unique<t_stream_response>(std::move(spec.type));
-    stream_response->set_exceptions(std::move(spec.throws));
-    return new_type_ref(range, std::move(stream_response), {});
-  }
-
-  t_type_ref on_sink_return_type(
+  t_type_ref on_sink(
       source_range range,
       type_throws_spec sink_spec,
       type_throws_spec final_response_spec) override {
@@ -736,6 +728,13 @@ class ast_builder : public parser_actions {
     sink->set_sink_exceptions(std::move(sink_spec.throws));
     sink->set_final_response_exceptions(std::move(final_response_spec.throws));
     return new_type_ref(range, std::move(sink), {});
+  }
+
+  t_type_ref on_stream(source_range range, type_throws_spec spec) override {
+    auto stream_response =
+        std::make_unique<t_stream_response>(std::move(spec.type));
+    stream_response->set_exceptions(std::move(spec.throws));
+    return new_type_ref(range, std::move(stream_response), {});
   }
 
   t_type_ref on_list_type(

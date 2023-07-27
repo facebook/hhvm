@@ -115,12 +115,11 @@ class parser_actions {
       t_field_list params,
       std::unique_ptr<t_throws> throws) = 0;
 
-  virtual t_type_ref on_stream_return_type(
-      source_range range, type_throws_spec spec) = 0;
-  virtual t_type_ref on_sink_return_type(
+  virtual t_type_ref on_sink(
       source_range range,
       type_throws_spec sink_spec,
       type_throws_spec final_response_spec) = 0;
+  virtual t_type_ref on_stream(source_range range, type_throws_spec spec) = 0;
 
   virtual t_type_ref on_list_type(
       source_range range,

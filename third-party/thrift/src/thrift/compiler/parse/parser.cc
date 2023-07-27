@@ -99,6 +99,12 @@ class parser {
     throw parse_error();
   }
 
+  // Reports a recoverable error without aborting the parse process.
+  template <typename... T>
+  void report_error(fmt::format_string<T...> msg, T&&... args) {
+    diags_.error(token_.range.begin, msg, std::forward<T>(args)...);
+  }
+
   source_range expect_and_consume(token_kind expected) {
     auto range = token_.range;
     if (token_.kind != expected) {
@@ -445,54 +451,88 @@ class parser {
         std::move(throws));
   }
 
-  // return_type: (return_type_element ",")* return_type_element
+  // return_type: [interaction_name ","] basic_return_type
+  // interaction_name: maybe_qualified_id
   //
-  // return_type_element: type | stream_return_type | sink_return_type | "void"
+  // basic_return_type:
+  //     type
+  //   | "void"
+  //   | [initial_response_type ","] (sink | stream)
   //
-  // stream_return_type: "stream" "<" type_throws_spec ">"
-  // sink_return_type: "sink" "<" type_throws_spec "," type_throws_spec ">"
-  // type_throws_spec: type throws?
+  // initial_response_type: type
   std::vector<t_type_ref> parse_return_type() {
     auto return_type = std::vector<t_type_ref>();
-    auto parse_type_throws = [this]() -> type_throws_spec {
-      auto type = parse_type();
-      auto throws = try_parse_throws();
-      return {std::move(type), std::move(throws)};
-    };
-    do {
-      auto range = track_range();
-      auto type = t_type_ref();
-      switch (token_.kind) {
-        case tok::kw_void:
-          type = t_base_type::t_void();
-          consume_token();
-          break;
-        case tok::kw_stream: {
-          consume_token();
-          expect_and_consume('<');
-          auto response = parse_type_throws();
-          expect_and_consume('>');
-          type = actions_.on_stream_return_type(range, std::move(response));
-          break;
-        }
-        case tok::kw_sink: {
-          consume_token();
-          expect_and_consume('<');
-          auto sink = parse_type_throws();
-          expect_and_consume(',');
-          auto final_response = parse_type_throws();
-          expect_and_consume('>');
-          type = actions_.on_sink_return_type(
-              range, std::move(sink), std::move(final_response));
-          break;
-        }
-        default:
-          type = parse_type();
-          break;
+    if (token_.kind == tok::identifier) {
+      // Parse a type or an interaction.
+      auto range = token_.range;
+      auto name = consume_token().string_value();
+      return_type.push_back(actions_.on_type(range, name, {}));
+      if (!try_consume_token(',')) {
+        return return_type;
       }
-      return_type.push_back(std::move(type));
-    } while (try_consume_token(','));
+    }
+    bool is_void = false;
+    switch (token_.kind) {
+      case tok::kw_void:
+        is_void = true;
+        return_type.push_back(t_base_type::t_void());
+        consume_token();
+        break;
+      case tok::kw_sink:
+        return_type.push_back(parse_sink());
+        return return_type;
+      case tok::kw_stream:
+        return_type.push_back(parse_stream());
+        return return_type;
+      default:
+        return_type.push_back(parse_type());
+        break;
+    }
+    if (!try_consume_token(',')) {
+      return return_type;
+    }
+    if (is_void) {
+      report_error("cannot use 'void' as an initial response type");
+    }
+    switch (token_.kind) {
+      case tok::kw_sink:
+        return_type.push_back(parse_sink());
+        break;
+      case tok::kw_stream:
+        return_type.push_back(parse_stream());
+        break;
+      default:
+        report_expected("'sink' or 'stream' after the initial response type");
+    }
     return return_type;
+  }
+
+  // sink: "sink" "<" type [throws], type [throws] ">"
+  t_type_ref parse_sink() {
+    auto range = track_range();
+    consume_token();
+    expect_and_consume('<');
+    auto sink = parse_type_throws();
+    expect_and_consume(',');
+    auto final_response = parse_type_throws();
+    expect_and_consume('>');
+    return actions_.on_sink(range, std::move(sink), std::move(final_response));
+  }
+
+  // stream: "stream" "<" type [throws] ">"
+  t_type_ref parse_stream() {
+    auto range = track_range();
+    consume_token();
+    expect_and_consume('<');
+    auto response = parse_type_throws();
+    expect_and_consume('>');
+    return actions_.on_stream(range, std::move(response));
+  }
+
+  type_throws_spec parse_type_throws() {
+    auto type = parse_type();
+    auto throws = try_parse_throws();
+    return {std::move(type), std::move(throws)};
   }
 
   // throws: "throws" "(" field* ")"

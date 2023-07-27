@@ -1256,34 +1256,6 @@ class CompilerFailureTest(unittest.TestCase):
             "[ERROR:foo.thrift:6] Oneway methods must have void return type: foo\n",
         )
 
-    def test_interaction_return_type_order(self):
-        write_file(
-            "foo.thrift",
-            textwrap.dedent(
-                """\
-                interaction I {
-                    void foo();
-                }
-
-                service S {
-                    i32, I foo();
-                    i32, i32 bar();
-                    i32, I, stream<i32> baz();
-                }
-                """
-            ),
-        )
-
-        ret, out, err = self.run_thrift("foo.thrift")
-
-        self.assertEqual(ret, 1)
-        self.assertEqual(
-            err,
-            "[ERROR:foo.thrift:6] Interactions are only allowed as the leftmost return type: foo.I\n"
-            "[ERROR:foo.thrift:7] Too many return types: i32\n"
-            "[ERROR:foo.thrift:8] Interactions are only allowed as the leftmost return type: foo.I\n",
-        )
-
     def test_interaction_in_return_type(self):
         write_file(
             "foo.thrift",

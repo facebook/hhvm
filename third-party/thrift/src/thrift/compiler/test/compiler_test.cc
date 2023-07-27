@@ -220,6 +220,48 @@ TEST(CompilerTest, oneway_return) {
   )");
 }
 
+TEST(CompilerTest, return_sink) {
+  check_compile(R"(
+    service S {
+      sink<i32, i32> getSink();
+      i32, sink<i32, i32> getStreamWithInitialResponse();
+      sink<i32, i32>, i32 bad(); # expected-error: expected identifier
+    }
+  )");
+}
+
+TEST(CompilerTest, return_stream) {
+  check_compile(R"(
+    service S {
+      stream<i32> getStream();
+      i32, stream<i32> getStreamWithInitialResponse();
+      stream<i32>, i32 bad(); # expected-error: expected identifier
+    }
+  )");
+}
+
+TEST(CompilerTest, return_interaction) {
+  check_compile(R"(
+    interaction I {
+      void foo();
+    }
+
+    service S {
+      I, i32 good();
+      i32, I bad(); # expected-error: expected 'sink' or 'stream' after the initial response type
+    }
+  )");
+}
+
+TEST(CompilerTest, void_as_initial_response_type) {
+  check_compile(R"(
+    service S {
+      void, stream<i32> getStream(); # expected-error: cannot use 'void' as an initial response type
+      void, sink<i32, i32> getSink(); # expected-error: cannot use 'void' as an initial response type
+    }
+  )");
+}
+
 TEST(CompilerTest, enum_wrong_default_value) {
   check_compile(R"(
     enum Color {

@@ -572,15 +572,8 @@ struct StructLessThan {
         return;
       }
 
-      LessThanImpl<Tag> less;
-      if (less(*lhsValue, *rhsValue)) {
-        result = true;
-        return;
-      }
-
-      if (less(*rhsValue, *lhsValue)) {
-        result = false;
-        return;
+      if (!EqualTo<Tag>{}(*lhsValue, *rhsValue)) {
+        result = LessThanImpl<Tag>{}(*lhsValue, *rhsValue);
       }
     });
 

@@ -69,7 +69,7 @@ cdef class TypeInfo:
     # validate and convert to format serializer may understand
     def to_internal_data(self, object value):
         if not isinstance(value, self.pytypes):
-            raise TypeError(f'value {value} is not a {self.pytypes !r}.')
+            raise TypeError(f'value {value} is not a {self.pytypes !r}, is actually of type {type(value)}')
         return value
 
     # convert deserialized data to user format
@@ -92,7 +92,7 @@ cdef class IntegerTypeInfo:
     # validate and convert to format serializer may understand
     def to_internal_data(self, object value not None):
         if not isinstance(value, pint):
-            raise TypeError(f"value {value} is not a <class 'int'>.")
+            raise TypeError(f"value {value} is not a <class 'int'>, is actually of type {type(value)}")
         cdef int64_t cvalue = value
         if cvalue > self.max_value or cvalue < self.min_value:
             raise OverflowError()
@@ -123,7 +123,7 @@ cdef class StringTypeInfo:
 
     def to_container_value(self, object value not None):
         if not isinstance(value, str):
-            raise TypeError(f"value {value} is not a <class 'str'>.")
+            raise TypeError(f"value {value} is not a <class 'str'>, is actually of type {type(value)}")
         return value
 
 
@@ -372,7 +372,7 @@ cdef class StructTypeInfo:
     # validate and convert to format serializer may understand
     def to_internal_data(self, value not None):
         if not isinstance(value, self._class):
-            raise TypeError(f"value {value} is not a {self._class !r}.")
+            raise TypeError(f"value {value} is not a {self._class !r}, is actually of type {type(value)}.")
         if isinstance(value, Struct):
             return (<Struct>value)._fbthrift_data
         if isinstance(value, GeneratedError):
@@ -387,7 +387,7 @@ cdef class StructTypeInfo:
 
     def to_container_value(self, object value not None):
         if not isinstance(value, self._class):
-            raise TypeError(f"value {value} is not a {self._class !r}.")
+            raise TypeError(f"value {value} is not a {self._class !r}, is actually of type {type(value)}.")
         return value
 
 
@@ -400,7 +400,7 @@ cdef class EnumTypeInfo:
         if isinstance(value, BadEnum):
             return int(value)
         if not isinstance(value, self._class):
-            raise TypeError(f"value {value} is not '{self._class}'.")
+            raise TypeError(f"value {value} is not '{self._class}', is actually of type {type(value)}.")
         return value._fbthrift_value_
 
     # convert deserialized data to user format
@@ -412,7 +412,7 @@ cdef class EnumTypeInfo:
 
     def to_container_value(self, object value not None):
         if not isinstance(value, self._class):
-            raise TypeError(f"value {value} is not '{self._class}'.")
+            raise TypeError(f"value {value} is not '{self._class}', is actually of type {type(value)}.")
         return value
 
 

@@ -1232,35 +1232,6 @@ class CompilerFailureTest(unittest.TestCase):
             "[ERROR:foo.thrift:16] `@thrift.TerseWrite` cannot be applied to union fields (in `TerseUnion`).\n",
         )
 
-    def test_interaction_nesting(self):
-        write_file(
-            "foo.thrift",
-            textwrap.dedent(
-                """\
-                interaction I {
-                    void foo();
-                }
-
-                interaction J {
-                    performs I;
-                }
-
-                interaction K {
-                    I foo();
-                }
-                """
-            ),
-        )
-
-        ret, out, err = self.run_thrift("foo.thrift")
-
-        self.assertEqual(ret, 1)
-        self.assertEqual(
-            err,
-            "[ERROR:foo.thrift:6] Nested interactions are forbidden.\n"
-            "[ERROR:foo.thrift:10] Nested interactions are forbidden: foo\n",
-        )
-
     def test_interaction_oneway_factory(self):
         write_file(
             "foo.thrift",

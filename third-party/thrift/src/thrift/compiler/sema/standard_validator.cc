@@ -881,10 +881,17 @@ void validate_stream_exceptions_return_type(
       node.name());
 }
 
-void validate_interaction_factories(
-    diagnostic_context& ctx, const t_function& node) {
-  if (node.is_interaction_member() && node.returned_interaction()) {
-    ctx.error("Nested interactions are forbidden: {}", node.name());
+void validate_interaction_nesting(
+    diagnostic_context& ctx, const t_interaction& node) {
+  for (auto* func : node.get_functions()) {
+    auto ret = func->get_returntype();
+    if (ret->is_service() &&
+        static_cast<const t_service*>(ret)->is_interaction()) {
+      ctx.error(*func, "Nested interactions are forbidden.");
+    }
+    if (func->returned_interaction()) {
+      ctx.error(*func, "Nested interactions are forbidden: {}", func->name());
+    }
   }
 }
 
@@ -1184,6 +1191,36 @@ struct ValidateAnnotationPositions {
     return false;
   }
 };
+
+void validate_struct_names_uniqueness(
+    diagnostic_context& ctx, const t_program& p) {
+  std::unordered_set<std::string> seen;
+  for (auto* object : p.objects()) {
+    if (!seen.emplace(object->name()).second) {
+      ctx.error(*object, "Redefinition of type `{}`.", object->name());
+    }
+  }
+  for (auto* interaction : p.interactions()) {
+    if (!seen.emplace(interaction->name()).second) {
+      ctx.error(
+          *interaction, "Redefinition of type `{}`.", interaction->name());
+    }
+  }
+}
+
+void validate_performs(diagnostic_context& ctx, const t_service& s) {
+  for (auto* func : s.get_functions()) {
+    auto ret = func->get_returntype();
+    if (func->is_interaction_constructor()) {
+      if (!ret->is_service() ||
+          !static_cast<const t_service*>(ret)->is_interaction()) {
+        ctx.error(*func, "Only interactions can be performed.");
+        continue;
+      }
+    }
+  }
+}
+
 } // namespace
 
 ast_validator standard_validator() {
@@ -1192,12 +1229,13 @@ ast_validator standard_validator() {
   validator.add_interface_visitor(&validate_function_priority_annotation);
   validator.add_service_visitor(
       &validate_extends_service_function_name_uniqueness);
+  validator.add_service_visitor(&validate_performs);
+  validator.add_interaction_visitor(&validate_interaction_nesting);
   validator.add_throws_visitor(&validate_throws_exceptions);
   validator.add_function_visitor(&validate_oneway_function);
   validator.add_function_visitor(&validate_function_return_type);
   validator.add_function_visitor(&validate_stream_exceptions_return_type);
   validator.add_function_visitor(&validate_function_priority_annotation);
-  validator.add_function_visitor(&validate_interaction_factories);
   validator.add_function_visitor(ValidateAnnotationPositions{});
 
   validator.add_structured_definition_visitor(&validate_field_names_uniqueness);
@@ -1251,6 +1289,7 @@ ast_validator standard_validator() {
   validator.add_const_visitor(&validate_const_type_and_value);
   validator.add_const_visitor(ValidateAnnotationPositions{});
   validator.add_program_visitor(&validate_uri_uniqueness);
+  validator.add_program_visitor(&validate_struct_names_uniqueness);
   return validator;
 }
 

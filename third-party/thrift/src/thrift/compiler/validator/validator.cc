@@ -22,14 +22,6 @@ namespace apache {
 namespace thrift {
 namespace compiler {
 
-// fill_validators - the validator registry
-//
-// This is where all concrete validator types must be registered.
-static void fill_validators(validator_list& vs) {
-  vs.add<struct_names_uniqueness_validator>();
-  vs.add<interactions_validator>();
-}
-
 void validator_list::traverse(t_program* const program) {
   auto pointers = std::vector<visitor*>{};
   for (const auto& v : validators_) {
@@ -38,67 +30,7 @@ void validator_list::traverse(t_program* const program) {
   interleaved_visitor(pointers).traverse(program);
 }
 
-void validator::validate(t_program* program, diagnostics_engine& diags) {
-  auto validators = validator_list(diags);
-  fill_validators(validators);
-  validators.traverse(program);
-}
-
-bool struct_names_uniqueness_validator::visit(t_program* p) {
-  std::unordered_set<std::string> seen;
-  for (auto* object : p->objects()) {
-    if (!seen.emplace(object->name()).second) {
-      report_error(*object, "Redefinition of type `{}`.", object->name());
-    }
-  }
-  for (auto* interaction : p->interactions()) {
-    if (!seen.emplace(interaction->name()).second) {
-      report_error(
-          *interaction, "Redefinition of type `{}`.", interaction->name());
-    }
-  }
-  return true;
-}
-
-bool interactions_validator::visit(t_program* p) {
-  for (auto* interaction : p->interactions()) {
-    for (auto* func : interaction->get_functions()) {
-      auto ret = func->get_returntype();
-      if (ret->is_service() &&
-          static_cast<const t_service*>(ret)->is_interaction()) {
-        report_error(*func, "Nested interactions are forbidden.");
-      }
-    }
-  }
-  return true;
-}
-
-bool interactions_validator::visit(t_service* s) {
-  std::unordered_set<std::string> seen;
-  for (auto* func : s->get_functions()) {
-    auto ret = func->get_returntype();
-    if (func->is_interaction_constructor()) {
-      if (!ret->is_service() ||
-          !static_cast<const t_service*>(ret)->is_interaction()) {
-        report_error(*func, "Only interactions can be performed.");
-        continue;
-      }
-    }
-
-    if (!func->is_interaction_constructor()) {
-      continue;
-    }
-
-    if (!seen.emplace(ret->name()).second) {
-      report_error(
-          *func,
-          "Service `{}` has multiple methods for creating interaction `{}`.",
-          s->name(),
-          ret->name());
-    }
-  }
-  return true;
-}
+void validator::validate(t_program*, diagnostics_engine&) {}
 
 } // namespace compiler
 } // namespace thrift

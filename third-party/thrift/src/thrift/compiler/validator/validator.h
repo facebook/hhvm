@@ -80,33 +80,6 @@ class validator_list {
   std::vector<std::unique_ptr<validator>> validators_;
 };
 
-class struct_names_uniqueness_validator : virtual public validator {
- public:
-  using validator::visit;
-
-  /**
-   * Enforces that there are no duplicate names between structs, exceptions, and
-   * interactions
-   */
-  bool visit(t_program* s) override;
-};
-
-class interactions_validator : virtual public validator {
- public:
-  using validator::visit;
-
-  /**
-   * Enforces that interactions are not nested
-   */
-  bool visit(t_program* s) override;
-
-  /**
-   * Enforces that services have at most one method for starting each
-   * interaction
-   */
-  bool visit(t_service* s) override;
-};
-
 } // namespace compiler
 } // namespace thrift
 } // namespace apache

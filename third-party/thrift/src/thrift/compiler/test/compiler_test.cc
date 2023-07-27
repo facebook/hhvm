@@ -500,3 +500,27 @@ TEST(CompilerTest, annotation_positions) {
       }
 )");
 }
+
+TEST(CompilerTest, duplicated_struct_names) {
+  check_compile(
+      R"(
+      struct Foo {}
+      struct Bar {}
+      struct Foo {} # expected-error: Redefinition of type `Foo`.
+)");
+}
+
+TEST(CompilerTest, interactions) {
+  check_compile(
+      R"(
+      interaction J {}
+      interaction I {
+        performs J; # expected-error: Nested interactions are forbidden.
+        J foo(); # expected-error: Nested interactions are forbidden: foo
+      }
+      service T {
+        performs I;
+        performs I; # expected-error: Function `createI` is already defined for `T`.
+      }
+)");
+}

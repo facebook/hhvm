@@ -132,6 +132,8 @@ The output backtrace has the following format:
                 rip = utils.unsigned_cast(idx.at(fp, 1), rip_type)
                 fp = utils.unsigned_cast(idx.at(fp, 0), fp_type)
 
+            utils.debug_print(f"walkstk(): rip=0x{rip.unsigned:x}, fp=0x{fp.unsigned:x}")
+
             # Try to get the PHP function name from the ActRec at `fp` if we're
             # executing in the TC.
             if frame.is_jitted(rip):
@@ -161,8 +163,7 @@ The output backtrace has the following format:
                     # Pop native frames until we hit our caller's rip.
                     frames = []
 
-                    saved_rip = idx.at(fp, 1).unsigned
-                    while (native_frame.IsValid() and (fp.unsigned == 0x0 or saved_rip != native_frame.pc)):
+                    while (native_frame.IsValid() and (fp.unsigned == 0x0 or idx.at(fp, 1).unsigned != native_frame.pc)):
                         frames.append(frame.create_native(
                             idx=i,
                             fp='{inline frame}',

@@ -34,6 +34,12 @@ template <class L, class Enable = void>
 struct ListDedup;
 
 /**
+ * ListSubtract<L, M>::type is a list of all elements of L that are not in M
+ */
+template <typename L, typename M>
+struct ListSubtract;
+
+/**
  * (First, List<P...>) -> Second
  */
 template <class First, class PairList>

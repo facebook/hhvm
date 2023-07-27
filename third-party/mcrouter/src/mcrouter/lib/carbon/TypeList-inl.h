@@ -44,6 +44,45 @@ struct ListDedup<
   using type = typename ListDedup<List<Xs...>>::type;
 };
 
+template <typename L, typename Y>
+struct ListWithout;
+
+template <typename Y>
+struct ListWithout<List<>, Y> {
+  using type = List<>;
+};
+
+template <typename X, typename... Xs, typename Y>
+struct ListWithout<List<X, Xs...>, Y> {
+  using tail = typename ListWithout<List<Xs...>, Y>::type;
+  using type = std::conditional_t<
+      std::is_same_v<X, Y>,
+      tail,
+      typename Prepend<X, tail>::type>;
+};
+
+template <typename L, typename M>
+struct ListSubtractUnique;
+
+template <typename L>
+struct ListSubtractUnique<L, List<>> {
+  using type = L;
+};
+
+template <typename L, typename Y, typename... Ys>
+struct ListSubtractUnique<L, List<Y, Ys...>> {
+  using type = typename ListSubtractUnique<
+      typename ListWithout<L, Y>::type,
+      List<Ys...>>::type;
+};
+
+template <typename L, typename M>
+struct ListSubtract {
+  using type = typename ListSubtractUnique<
+      typename ListDedup<L>::type,
+      typename ListDedup<M>::type>::type;
+};
+
 template <class First>
 struct FindByPairFirst<First, List<>> {
   using type = void;

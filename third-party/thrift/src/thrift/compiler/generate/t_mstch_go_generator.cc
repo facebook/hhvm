@@ -654,7 +654,10 @@ class mstch_go_typedef : public mstch_typedef {
         });
   }
   mstch::node go_name() { return go_name_(); }
-  mstch::node go_newtype() { return typedef_->has_annotation("go.newtype"); }
+  mstch::node go_newtype() {
+    return typedef_->find_structured_annotation_or_null(kGoNewTypeUri) !=
+        nullptr;
+  }
   mstch::node go_qualified_name() {
     auto prefix = go_package_alias_prefix(typedef_->program(), data_);
     auto name = go_name_();

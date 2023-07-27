@@ -31,6 +31,8 @@ typedef struct aegis256_state {
 } aegis256_state;
 
 typedef struct fizz_aegis_evp_ctx {
+  unsigned long long mlen;
+  unsigned long long adlen;
   union {
     aegis128l_state aegis128l;
     aegis256_state aegis256;

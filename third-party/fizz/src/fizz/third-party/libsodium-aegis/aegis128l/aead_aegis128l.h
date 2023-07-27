@@ -34,8 +34,7 @@ typedef struct aegis128l_evp {
   int (*encrypt_final)(
       unsigned char* c,
       unsigned long long* c_writtenlen_p,
-      unsigned long long mlen,
-      unsigned long long adlen,
+      unsigned char *mac,
       fizz_aegis_evp_ctx* ctx);
   int (*decrypt_update)(
       unsigned char* m,
@@ -46,8 +45,6 @@ typedef struct aegis128l_evp {
   int (*decrypt_final)(
       unsigned char* m,
       unsigned long long* outlen,
-      unsigned long long mlen,
-      unsigned long long adlen,
       const unsigned char* mac,
       fizz_aegis_evp_ctx* ctx);
 } aegis128l_evp;

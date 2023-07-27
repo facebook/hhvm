@@ -115,9 +115,8 @@ SODIUM_EXPORT
 int aegis256_encrypt_final(
     unsigned char* c,
     unsigned long long* c_writtenlen_p,
-    unsigned long long mlen,
-    unsigned long long adlen,
-    fizz_aegis_evp_ctx* ctx) __attribute__((nonnull(1, 5)));
+    unsigned char *mac,
+    fizz_aegis_evp_ctx* ctx) __attribute__((nonnull(1, 3, 4)));
 
 SODIUM_EXPORT
 int aegis256_decrypt_update(
@@ -131,10 +130,8 @@ SODIUM_EXPORT
 int aegis256_decrypt_final(
       unsigned char* m,
       unsigned long long* outlen,
-      unsigned long long mlen,
-      unsigned long long adlen,
       const unsigned char* mac,
-      fizz_aegis_evp_ctx* ctx) __attribute__((nonnull(1, 5, 6)));
+      fizz_aegis_evp_ctx* ctx) __attribute__((nonnull(1, 3, 4)));
 
 SODIUM_EXPORT
 int fizz_aegis256_pick_best_implementation(void);

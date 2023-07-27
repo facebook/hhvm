@@ -52,7 +52,6 @@ std::unique_ptr<folly::IOBuf> aegisEncrypt(
   output->append(inputLength + tagLen);
   input = plaintext.get();
 
-  unsigned long long adlen = 0;
   if (associatedData) {
     for (auto current : *associatedData) {
       if (current.size() > std::numeric_limits<int>::max()) {
@@ -61,7 +60,6 @@ std::unique_ptr<folly::IOBuf> aegisEncrypt(
       if (aadUpdate(current.data(), current.size(), &ctx) != 0) {
         throw std::runtime_error("Encryption aad update error");
       }
-      adlen += current.size();
     }
     if (aadFinal(&ctx) != 0) {
       throw std::runtime_error("Encryption aad final error");
@@ -87,8 +85,7 @@ std::unique_ptr<folly::IOBuf> aegisEncrypt(
   if (encryptFinal(
           output->writableData() + totalWritten,
           &writtenlen,
-          inputLength,
-          adlen,
+          output->writableData() + inputLength,
           &ctx) != 0 ||
       totalWritten + writtenlen != (inputLength + tagLen)) {
     throw std::runtime_error("Encryption error");
@@ -119,7 +116,6 @@ folly::Optional<std::unique_ptr<folly::IOBuf>> aegisDecrypt(
   output->append(inputLength);
   input = ciphertext.get();
 
-  unsigned long long adlen = 0;
   if (associatedData) {
     for (auto current : *associatedData) {
       if (current.size() > std::numeric_limits<int>::max()) {
@@ -128,7 +124,6 @@ folly::Optional<std::unique_ptr<folly::IOBuf>> aegisDecrypt(
       if (aadUpdate(current.data(), current.size(), &ctx) != 0) {
         throw std::runtime_error("Decryption aad update error");
       }
-      adlen += current.size();
     }
     if (aadFinal(&ctx) != 0) {
       throw std::runtime_error("Decryption aad final error");
@@ -155,8 +150,6 @@ folly::Optional<std::unique_ptr<folly::IOBuf>> aegisDecrypt(
   if (decryptFinal(
           output->writableData() + totalWritten,
           &writtenlen,
-          inputLength,
-          adlen,
           tagOut.data(),
           &ctx) != 0 ||
       totalWritten + writtenlen != inputLength) {

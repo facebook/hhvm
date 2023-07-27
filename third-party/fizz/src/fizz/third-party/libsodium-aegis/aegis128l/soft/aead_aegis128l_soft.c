@@ -260,6 +260,8 @@ static int aegis128l_init_state(
   STATE ctx->aegis128l.soft_state;
   aegis128l_init(key, nonce, state);
   ctx->aegis128l.buffer_size = 0;
+  ctx->adlen = 0;
+  ctx->mlen = 0;
   return 0;
 }
 
@@ -298,6 +300,7 @@ static int aegis128l_aad_update(
     buffer_size = leftover;
   }
   ctx->aegis128l.buffer_size = buffer_size;
+  ctx->adlen += adlen;
   return 0;
 }
 
@@ -359,14 +362,14 @@ static int aegis128l_encrypt_update(
     *outlen = writtenlen;
   }
   ctx->aegis128l.buffer_size = buffer_size;
+  ctx->mlen += mlen;
   return 0;
 }
 
 static int aegis128l_encrypt_final(
     unsigned char* c,
     unsigned long long* outlen,
-    unsigned long long mlen,
-    unsigned long long adlen,
+    unsigned char *mac,
     fizz_aegis_evp_ctx *ctx) {
   unsigned int buffer_size = ctx->aegis128l.buffer_size;
   STATE ctx->aegis128l.soft_state;
@@ -384,7 +387,7 @@ static int aegis128l_encrypt_final(
     ctx->aegis128l.buffer_size = 0;
   }
 
-  aegis128l_mac(c + buffer_size, adlen, mlen, state);
+  aegis128l_mac(mac, ctx->adlen, ctx->mlen, state);
   sodium_memzero(state, sizeof state);
   // total final written length is the buffer length plus tag length
   if (outlen != NULL) {
@@ -438,14 +441,13 @@ static int aegis128l_decrypt_update(
     *outlen = writtenlen;
   }
   ctx->aegis128l.buffer_size = buffer_size;
+  ctx->mlen += clen;
   return 0;
 }
 
 static int aegis128l_decrypt_final(
     unsigned char* m,
     unsigned long long* outlen,
-    unsigned long long mlen,
-    unsigned long long adlen,
     const unsigned char* mac,
     fizz_aegis_evp_ctx* ctx) {
   unsigned int buffer_size = ctx->aegis128l.buffer_size;
@@ -473,7 +475,7 @@ static int aegis128l_decrypt_final(
     *outlen = buffer_size;
   }
 
-  aegis128l_mac(computed_mac, adlen, mlen, state);
+  aegis128l_mac(computed_mac, ctx->adlen, ctx->mlen, state);
   ret = crypto_verify_16(computed_mac, mac);
   sodium_memzero(computed_mac, sizeof computed_mac);
   sodium_memzero(state, sizeof state);

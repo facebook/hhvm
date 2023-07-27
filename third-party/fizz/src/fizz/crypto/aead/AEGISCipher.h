@@ -63,8 +63,7 @@ class AEGISCipher : public Aead {
   using EncryptFinalFn = int (*const)(
       unsigned char* c,
       unsigned long long* c_writtenlen_p,
-      unsigned long long mlen,
-      unsigned long long adlen,
+      unsigned char* mac,
       AegisEVPCtx* ctx);
   using DecryptUpdateFn = int (*const)(
       unsigned char* m,
@@ -75,8 +74,6 @@ class AEGISCipher : public Aead {
   using DecryptFinalFn = int (*const)(
       unsigned char* m,
       unsigned long long* outlen,
-      unsigned long long mlen,
-      unsigned long long adlen,
       const unsigned char* mac,
       AegisEVPCtx* ctx);
 

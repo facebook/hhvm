@@ -150,10 +150,9 @@ int aegis256_encrypt_update(
 int aegis256_encrypt_final(
     unsigned char* c,
     unsigned long long* c_writtenlen_p,
-    unsigned long long mlen,
-    unsigned long long adlen,
+    unsigned char *mac,
     fizz_aegis_evp_ctx *ctx) {
-  return aegis_evp->encrypt_final(c, c_writtenlen_p, mlen, adlen, ctx);
+  return aegis_evp->encrypt_final(c, c_writtenlen_p, mac, ctx);
 }
 
 int aegis256_decrypt_update(
@@ -168,11 +167,9 @@ int aegis256_decrypt_update(
 int aegis256_decrypt_final(
     unsigned char* m,
     unsigned long long* outlen,
-    unsigned long long mlen,
-    unsigned long long adlen,
     const unsigned char* mac,
     fizz_aegis_evp_ctx* ctx) {
-  return aegis_evp->decrypt_final(m, outlen, mlen, adlen, mac, ctx);
+  return aegis_evp->decrypt_final(m, outlen, mac, ctx);
 }
 
 

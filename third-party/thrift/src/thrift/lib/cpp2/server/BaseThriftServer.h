@@ -296,7 +296,19 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
 
  private:
   AdaptiveConcurrencyController adaptiveConcurrencyController_;
+
+  folly::observer::SimpleObservable<
+      std::optional<CPUConcurrencyController::Config>>
+      mockCPUConcurrencyControllerConfig_;
+  folly::observer::Observer<CPUConcurrencyController::Config>
+  makeCPUConcurrencyControllerConfigInternal();
   CPUConcurrencyController cpuConcurrencyController_;
+
+ public:
+  void setMockCPUConcurrencyControllerConfig(
+      CPUConcurrencyController::Config config) {
+    mockCPUConcurrencyControllerConfig_.setValue(config);
+  }
 
  protected:
   //! The server's listening addresses

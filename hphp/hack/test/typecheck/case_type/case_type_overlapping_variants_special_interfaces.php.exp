@@ -65,6 +65,12 @@ The case type `KeyedContainerData` cannot be decomposed because it contains over
   File "case_type_overlapping_variants_special_interfaces.php", line 20, characters 5-19:
   keyset<|()>
 File "case_type_overlapping_variants_special_interfaces.php", line 17, characters 11-28:
+The case type `KeyedContainerData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `vec`: (Typing[4475])
+  File "case_type_overlapping_variants_special_interfaces.php", line 18, characters 5-36:
+  KeyedContainer<|(), |()>
+  File "case_type_overlapping_variants_special_interfaces.php", line 21, characters 5-16:
+  vec<|()>
+File "case_type_overlapping_variants_special_interfaces.php", line 17, characters 11-28:
 The case type `KeyedContainerData` is invalid because one or more of its variants cannot be recovered using type tests (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 18, characters 5-36:
   `KeyedContainer<|(), |()>` cannot be recovered
@@ -106,6 +112,12 @@ The case type `KeyedTraversableData` cannot be decomposed because it contains ov
   KeyedTraversable<|(), |()>
   File "case_type_overlapping_variants_special_interfaces.php", line 32, characters 5-19:
   keyset<|()>
+File "case_type_overlapping_variants_special_interfaces.php", line 29, characters 11-30:
+The case type `KeyedTraversableData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `vec`: (Typing[4475])
+  File "case_type_overlapping_variants_special_interfaces.php", line 30, characters 5-38:
+  KeyedTraversable<|(), |()>
+  File "case_type_overlapping_variants_special_interfaces.php", line 33, characters 5-16:
+  vec<|()>
 File "case_type_overlapping_variants_special_interfaces.php", line 29, characters 11-30:
 The case type `KeyedTraversableData` is invalid because one or more of its variants cannot be recovered using type tests (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 30, characters 5-38:

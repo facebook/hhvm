@@ -87,6 +87,11 @@ val is_sub_type_ignore_generic_params_ref : is_sub_type_type ref
 val is_sub_type_ignore_generic_params :
   Typing_env_types.env -> Typing_defs.locl_ty -> Typing_defs.locl_ty -> bool
 
+val can_sub_type_ref : is_sub_type_type ref
+
+val can_sub_type :
+  Typing_env_types.env -> Typing_defs.locl_ty -> Typing_defs.locl_ty -> bool
+
 val unwrap_class_type :
   Typing_defs.decl_phase Typing_defs.ty ->
   Typing_defs.decl_phase Typing_defs.Reason.t_

@@ -117,6 +117,11 @@ let (add_constraint_ref : add_constraint ref) =
 
 let add_constraint x = !add_constraint_ref x
 
+let (can_sub_type_ref : is_sub_type_type ref) =
+  ref (not_implemented "can_sub_type_ref")
+
+let can_sub_type x = !can_sub_type_ref x
+
 type expand_typeconst =
   expand_env ->
   env ->

@@ -83,51 +83,98 @@ module DataType = struct
     | Tarraykey -> Set.of_list [Tag.IntData; Tag.StringData]
     | Tnoreturn -> Set.empty
 
-  (* Set of interfaces that contain non-object members *)
-  let special_interfaces =
-    SSet.of_list
-      [
-        SN.Classes.cStringish;
-        SN.Classes.cXHPChild;
-        SN.Collections.cTraversable;
-        SN.Collections.cKeyedTraversable;
-        SN.Collections.cContainer;
-        SN.Collections.cKeyedContainer;
-      ]
+  module Class = struct
+    (* Set of interfaces that contain non-object members *)
+    let special_interfaces =
+      SSet.of_list
+        [
+          SN.Classes.cStringish;
+          SN.Classes.cXHPChild;
+          SN.Collections.cTraversable;
+          SN.Collections.cKeyedTraversable;
+          SN.Collections.cContainer;
+          SN.Collections.cKeyedContainer;
+        ]
 
-  (** The [special_interfaces] contain additional data type tags beside
-    * [Tag.ObjectData]. These special interfaces are handled in [Typing_subtype].
-    * To avoid duplicating the logic, we check if a certain tag should be included
-    * by doing a subtype test against the interface type. If the type
-    * corresponding to a tag is a subtype then it will be included in the list.
+    (** The [special_interfaces] contain additional data type tags beside
+     [Tag.ObjectData]. These special interfaces are handled in [Typing_subtype].
+     To avoid duplicating the logic, we check if a certain tag should be included
+     by doing a subtype test against the interface type. If the type
+     corresponding to a tag is a subtype then it will be included in the list.
     *)
-  let special_interface_to_datatypes env interface_ty =
-    let open Typing_make_type in
-    let r = Typing_reason.none in
-    let tag_to_type =
-      [
-        (Tag.DictData, dict r (nothing r) (nothing r));
-        (Tag.VecData, vec r (nothing r));
-        (Tag.KeysetData, keyset r (nothing r));
-        (Tag.StringData, string r);
-        (Tag.ResourceData, resource r);
-        (Tag.BoolData, bool r);
-        (Tag.IntData, int r);
-        (Tag.FloatData, float r);
-        (Tag.NullData, null r);
-      ]
-    in
-    List.fold
-      tag_to_type
-      ~init:Set.empty
-      ~f:
-        begin
-          fun acc (tag, tag_ty) ->
-            if Typing_utils.is_sub_type env tag_ty interface_ty then
-              Set.add tag acc
-            else
-              acc
-        end
+    let special_interface_to_datatypes env interface =
+      let open Typing_make_type in
+      let r = Typing_reason.none in
+      let tag_to_type =
+        [
+          (Tag.DictData, dict r (nothing r) (nothing r));
+          (Tag.VecData, vec r (nothing r));
+          (Tag.KeysetData, keyset r (nothing r));
+          (Tag.StringData, string r);
+          (Tag.ResourceData, resource r);
+          (Tag.BoolData, bool r);
+          (Tag.IntData, int r);
+          (Tag.FloatData, float r);
+          (Tag.NullData, null r);
+        ]
+      in
+      let (env, interface_ty) =
+        match interface with
+        | name
+          when String.equal name SN.Collections.cTraversable
+               || String.equal name SN.Collections.cContainer ->
+          let (env, targ) = Env.fresh_type env Pos.none in
+          let ty = Typing_make_type.class_type Reason.none name [targ] in
+          (env, ty)
+        | name
+          when String.equal name SN.Collections.cKeyedTraversable
+               || String.equal name SN.Collections.cKeyedContainer ->
+          let (env, targ1) = Env.fresh_type env Pos.none in
+          let (env, targ2) = Env.fresh_type env Pos.none in
+          let ty =
+            Typing_make_type.class_type Reason.none name [targ1; targ2]
+          in
+          (env, ty)
+        | name
+          when String.equal name SN.Classes.cStringish
+               || String.equal name SN.Classes.cXHPChild ->
+          (env, Typing_make_type.class_type Reason.none name [])
+        | name ->
+          failwithf
+            "Unexpected special interface `%s` when determining data types"
+            name
+            ()
+      in
+      List.fold
+        tag_to_type
+        ~init:Set.empty
+        ~f:
+          begin
+            fun acc (tag, tag_ty) ->
+              if Typing_utils.can_sub_type env tag_ty interface_ty then
+                Set.add tag acc
+              else
+                acc
+          end
+
+    let special_interface_cache : t String.Table.t = String.Table.create ()
+
+    let to_datatypes (env : env) cls : t =
+      match cls with
+      | cls when String.equal cls SN.Collections.cDict ->
+        Set.singleton Tag.DictData
+      | cls when String.equal cls SN.Collections.cKeyset ->
+        Set.singleton Tag.KeysetData
+      | cls when String.equal cls SN.Collections.cVec ->
+        Set.singleton Tag.VecData
+      | cls when String.equal cls SN.Collections.cAnyArray ->
+        Set.of_list [Tag.DictData; Tag.KeysetData; Tag.VecData]
+      | cls when SSet.mem cls special_interfaces ->
+        String.Table.find_or_add special_interface_cache cls ~default:(fun () ->
+            let tags = special_interface_to_datatypes env cls in
+            Set.add Tag.ObjectData tags)
+      | _ -> Set.singleton Tag.ObjectData
+  end
 
   let union (left : t) (right : t) : t = Set.union left right
 
@@ -213,28 +260,12 @@ module DataType = struct
       fromTy env ty
     | Tunapplied_alias _ ->
       Typing_defs.error_Tunapplied_alias_in_illegal_context ()
-    | Tclass ((_, cls), _, _) when String.equal cls SN.Collections.cDict ->
-      Set.singleton Tag.DictData
-    | Tclass ((_, cls), _, _) when String.equal cls SN.Collections.cKeyset ->
-      Set.singleton Tag.KeysetData
-    | Tclass ((_, cls), _, _) when String.equal cls SN.Collections.cVec ->
-      Set.singleton Tag.VecData
-    | Tclass ((_, cls), _, _) when String.equal cls SN.Collections.cAnyArray ->
-      Set.of_list [Tag.DictData; Tag.KeysetData; Tag.VecData]
-    | Tclass ((_, cls), _, _) when SSet.mem cls special_interfaces ->
-      let tags = special_interface_to_datatypes env ty in
-      Set.add Tag.ObjectData tags
-    | Tclass (_, _, _) -> Set.singleton Tag.ObjectData
+    | Tclass ((_, cls), _, _) -> Class.to_datatypes env cls
     | Tneg n ->
       let right =
         match n with
         | Neg_prim prim -> prim_to_datatypes prim
-        | Neg_class (_, cls) ->
-          (* This creates a class type ignoring if the class actually defines generics.
-           * This should be ok since this type won't leak outside this function, but if
-           * subtyping changes to reject these ill-formed types then this code would
-           * need to change. *)
-          fromTy env @@ Typing_make_type.class_type Reason.none cls []
+        | Neg_class (_, cls) -> Class.to_datatypes env cls
       in
       minus mixed right
 end

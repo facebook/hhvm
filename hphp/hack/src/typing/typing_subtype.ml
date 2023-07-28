@@ -5742,6 +5742,7 @@ let set_fun_refs () =
   TUtils.is_sub_type_for_union_i_ref := is_sub_type_for_union_i;
   TUtils.is_sub_type_ignore_generic_params_ref :=
     is_sub_type_ignore_generic_params;
-  TUtils.is_type_disjoint_ref := is_type_disjoint
+  TUtils.is_type_disjoint_ref := is_type_disjoint;
+  TUtils.can_sub_type_ref := can_sub_type
 
 let () = set_fun_refs ()

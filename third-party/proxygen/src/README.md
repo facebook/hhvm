@@ -31,7 +31,7 @@ dependencies.
 ##### Easy Install
 
 Just run `./build.sh` from the `proxygen/` directory to get and build all
-the dependencies and `proxygen`. You can run the tests manually with `cd _build/ && make test`. 
+the dependencies and `proxygen`. You can run the tests manually with `cd _build/ && make test`.
 Then run `./install.sh` to install it. You can remove the temporary build directory (`_build`) and `./build.sh && ./install.sh`
 to rebase the dependencies, and then rebuild and reinstall `proxygen`.
 
@@ -122,8 +122,8 @@ $ curl -v http://localhost:11000/
 * Connection #0 to host localhost left intact
 ```
 
-You can find other samples: 
-  * a simple server that supports HTTP/2 server push (`_build/proxygen/httpserver/proxygen_push`), 
+You can find other samples:
+  * a simple server that supports HTTP/2 server push (`_build/proxygen/httpserver/proxygen_push`),
   * a simple server for static files (`_build/proxygen/httpserver/proxygen_static`)
   * a simple fwdproxy (`_build/proxygen/httpserver/proxygen_proxy`)
   * a curl-like client (`_build/proxygen/httpclient/samples/curl/proxygen_curl`)
@@ -132,7 +132,7 @@ You can find other samples:
 
 Proxygen supports HTTP/3!
 
-It depends on Facebook's [mvfst](https://github.com/facebookincubator/mvfst)
+It depends on Facebook's [mvfst](https://github.com/facebook/mvfst)
 library for the [IETF QUIC](https://github.com/quicwg/base-drafts) transport
 implementation, so we have made that dependency optional.  You can build the
 HTTP/3 code, tests and sample binaries with `./build.sh --with-quic`.

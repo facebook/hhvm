@@ -23,6 +23,18 @@
 namespace facebook {
 namespace memcache {
 namespace mcrouter {
+namespace {
+const std::string kMcrouterOptionPrefix = "mcr_opts-";
+
+template <class T>
+bool tryToString(const boost::any& value, std::string& res) {
+  if (boost::any_cast<T*>(&value) != nullptr) {
+    res = folly::to<std::string>(*boost::any_cast<T*>(value));
+    return true;
+  }
+  return false;
+}
+} // namespace
 
 ProxyConfigBuilder::ProxyConfigBuilder(
     const McrouterOptions& opts,
@@ -84,6 +96,28 @@ ProxyConfigBuilder::buildGlobalParams(
   for (const auto& param : opts.config_params) {
     globalParams.emplace(param.first, param.second);
   }
+
+  opts.forEach([&globalParams](
+                   const std::string& name,
+                   McrouterOptionData::Type type,
+                   const boost::any& value) {
+    if (type == McrouterOptionData::Type::integer ||
+        type == McrouterOptionData::Type::toggle) {
+      std::string res;
+      if (tryToString<int64_t>(value, res) || tryToString<bool>(value, res) ||
+          tryToString<int>(value, res) || tryToString<uint32_t>(value, res) ||
+          tryToString<size_t>(value, res) ||
+          tryToString<uint16_t>(value, res) ||
+          tryToString<unsigned int>(value, res)) {
+        globalParams.emplace(kMcrouterOptionPrefix + name, res);
+        return;
+      }
+      throwLogic(
+          "ProxyConfigBuilder::buildGlobalParams: Unsupported option type: {}, {}",
+          value.type().name(),
+          name);
+    }
+  });
   return globalParams;
 }
 } // namespace mcrouter

@@ -1,1 +1,4 @@
-No errors
+File "valid_targ_wildcard_is_as.php", line 8, characters 8-14:
+Invalid `as` expression hint (Typing[4195])
+  File "valid_targ_wildcard_is_as.php", line 8, characters 10-13:
+  The `as` operator cannot be used with a reified type containing a wildcard (`_`)

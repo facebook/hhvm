@@ -81,10 +81,28 @@ let validator =
               begin
                 match
                   List.fold2 ~init:acc targs tparams ~f:(fun acc targ tparam ->
-                      if this#is_wildcard targ then
-                        acc
-                      else if Aast.(equal_reify_kind tparam.tp_reified Reified)
-                      then
+                      let inside_reified_class_generic_position =
+                        acc.Type_validator.inside_reified_class_generic_position
+                      in
+                      if this#is_wildcard targ then begin
+                        if inside_reified_class_generic_position then
+                          this#invalid
+                            acc
+                            r
+                            "a reified type containing a wildcard (`_`)"
+                        else
+                          acc
+                      end else if
+                            Aast.(equal_reify_kind tparam.tp_reified Reified)
+                          then
+                        this#on_type
+                          {
+                            acc with
+                            Type_validator.inside_reified_class_generic_position =
+                              true;
+                          }
+                          targ
+                      else if inside_reified_class_generic_position then
                         this#on_type acc targ
                       else
                         let error_message =
@@ -155,10 +173,15 @@ let validator =
       | (Aast.SoftReified, _) ->
         this#invalid acc r "a soft reified generic type parameter"
       | (Aast.Reified, false) ->
-        this#invalid
+        (* If a reified generic is an argument to a reified class it does not
+         * need to be enforceable *)
+        if acc.Type_validator.inside_reified_class_generic_position then
           acc
-          r
-          "a reified type parameter that is not marked `<<__Enforceable>>`"
+        else
+          this#invalid
+            acc
+            r
+            "a reified type parameter that is not marked `<<__Enforceable>>`"
       | (Aast.Reified, true) -> acc
   end
 

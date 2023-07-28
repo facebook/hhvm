@@ -1,12 +1,6 @@
 File "enforceable_targ_methcall.php", line 13, characters 9-19:
 Invalid type (Typing[4302])
-File "enforceable_targ_methcall.php", line 8, characters 39-40:
-Type parameter `Tf` was declared `__Enforceable` here
-File "enforceable_targ_methcall.php", line 13, characters 9-19:
-This type is not enforceable because it has a type with an erased generic type argument
-File "enforceable_targ_methcall.php", line 15, characters 9-28:
-Invalid type (Typing[4302])
-File "enforceable_targ_methcall.php", line 8, characters 39-40:
-Type parameter `Tf` was declared `__Enforceable` here
-File "enforceable_targ_methcall.php", line 15, characters 17-27:
-This type is not enforceable because it has a type with an erased generic type argument
+  File "enforceable_targ_methcall.php", line 8, characters 39-40:
+  Type parameter `Tf` was declared `__Enforceable` here
+  File "enforceable_targ_methcall.php", line 13, characters 9-19:
+  This type is not enforceable because it has a type with an erased generic type argument

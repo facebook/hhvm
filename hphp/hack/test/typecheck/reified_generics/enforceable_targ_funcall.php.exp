@@ -1,12 +1,6 @@
 File "enforceable_targ_funcall.php", line 11, characters 5-15:
 Invalid type (Typing[4302])
-File "enforceable_targ_funcall.php", line 8, characters 30-31:
-Type parameter `Tf` was declared `__Enforceable` here
-File "enforceable_targ_funcall.php", line 11, characters 5-15:
-This type is not enforceable because it has a type with an erased generic type argument
-File "enforceable_targ_funcall.php", line 13, characters 5-24:
-Invalid type (Typing[4302])
-File "enforceable_targ_funcall.php", line 8, characters 30-31:
-Type parameter `Tf` was declared `__Enforceable` here
-File "enforceable_targ_funcall.php", line 13, characters 13-23:
-This type is not enforceable because it has a type with an erased generic type argument
+  File "enforceable_targ_funcall.php", line 8, characters 30-31:
+  Type parameter `Tf` was declared `__Enforceable` here
+  File "enforceable_targ_funcall.php", line 11, characters 5-15:
+  This type is not enforceable because it has a type with an erased generic type argument

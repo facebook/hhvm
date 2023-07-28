@@ -25,6 +25,7 @@ type validation_state = {
   env: Typing_env_types.env;
   ety_env: expand_env;
   validity: validity;
+  inside_reified_class_generic_position: bool;
   reification: reification;
   expanded_typedefs: SSet.t;
 }
@@ -163,6 +164,7 @@ class virtual type_validator =
               };
             expanded_typedefs = SSet.empty;
             validity = Valid;
+            inside_reified_class_generic_position = false;
             reification;
           }
           root_ty

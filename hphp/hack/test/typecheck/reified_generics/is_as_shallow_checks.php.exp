@@ -1,12 +1,8 @@
 File "is_as_shallow_checks.php", line 10, characters 13-23:
 Invalid `as` expression hint (Typing[4195])
-File "is_as_shallow_checks.php", line 10, characters 13-23:
-The `as` operator cannot be used with a type with an erased generic type argument
-File "is_as_shallow_checks.php", line 17, characters 13-50:
-Invalid `as` expression hint (Typing[4195])
-File "is_as_shallow_checks.php", line 17, characters 37-47:
-The `as` operator cannot be used with a type with an erased generic type argument
+  File "is_as_shallow_checks.php", line 10, characters 13-23:
+  The `as` operator cannot be used with a type with an erased generic type argument
 File "is_as_shallow_checks.php", line 23, characters 13-24:
 Invalid `as` expression hint (Typing[4195])
-File "is_as_shallow_checks.php", line 23, characters 13-24:
-The `as` operator cannot be used with a type with an erased generic type argument
+  File "is_as_shallow_checks.php", line 23, characters 13-24:
+  The `as` operator cannot be used with a type with an erased generic type argument

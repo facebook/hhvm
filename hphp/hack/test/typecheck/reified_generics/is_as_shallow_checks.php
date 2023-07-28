@@ -14,7 +14,7 @@ function reified_test(): void {
   "good" as Reified<_>;
   "good" as Reified<int>;
   "good" as Reified<Reified<int>>;
-  "bad"  as Reified<Reified<Reified<Erased<int>>>>;
+  "good" as Reified<Reified<Reified<Erased<int>>>>;
 }
 
 function both_test(): void {
@@ -22,4 +22,5 @@ function both_test(): void {
   "good" as Both<_, int>;
   "bad"  as Both<int, _>;
   "good" as Both<_, Reified<int>>;
+  "good" as Both<_, Erased<int>>;
 }

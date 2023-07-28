@@ -1,8 +1,16 @@
 File "is_as_generic_simple.php", line 4, characters 8-8:
 Invalid `as` expression hint (Typing[4195])
-File "is_as_generic_simple.php", line 4, characters 8-8:
-The `as` operator cannot be used with an erased generic type parameter
-File "is_as_generic_simple.php", line 8, characters 8-8:
+  File "is_as_generic_simple.php", line 4, characters 8-8:
+  The `as` operator cannot be used with an erased generic type parameter
+File "is_as_generic_simple.php", line 5, characters 8-15:
 Invalid `as` expression hint (Typing[4195])
-File "is_as_generic_simple.php", line 8, characters 8-8:
-The `as` operator cannot be used with a reified type parameter that is not marked `<<__Enforceable>>`
+  File "is_as_generic_simple.php", line 5, characters 14-14:
+  The `as` operator cannot be used with an erased generic type parameter
+File "is_as_generic_simple.php", line 9, characters 8-8:
+Invalid `as` expression hint (Typing[4195])
+  File "is_as_generic_simple.php", line 9, characters 8-8:
+  The `as` operator cannot be used with a reified type parameter that is not marked `<<__Enforceable>>`
+File "is_as_generic_simple.php", line 10, characters 8-15:
+Invalid `as` expression hint (Typing[4195])
+  File "is_as_generic_simple.php", line 10, characters 14-14:
+  The `as` operator cannot be used with a reified type parameter that is not marked `<<__Enforceable>>`

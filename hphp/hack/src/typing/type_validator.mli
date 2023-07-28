@@ -16,6 +16,7 @@ type validation_state = {
   env: Typing_env_types.env;
   ety_env: Typing_defs.expand_env;
   validity: validity;
+  inside_reified_class_generic_position: bool;
   reification: reification;
   expanded_typedefs: SSet.t;
 }

@@ -1,2 +1,10 @@
 File "wildcard_as.php", line 7, characters 8-8:
 Wildcard typehints are not allowed in this position (Naming[2084])
+File "wildcard_as.php", line 9, characters 8-14:
+Invalid `as` expression hint (Typing[4195])
+  File "wildcard_as.php", line 9, characters 10-13:
+  The `as` operator cannot be used with a reified type containing a wildcard (`_`)
+File "wildcard_as.php", line 10, characters 8-17:
+Invalid `as` expression hint (Typing[4195])
+  File "wildcard_as.php", line 10, characters 12-15:
+  The `as` operator cannot be used with a reified type containing a wildcard (`_`)

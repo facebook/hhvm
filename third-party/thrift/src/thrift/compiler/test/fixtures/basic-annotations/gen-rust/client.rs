@@ -2257,3 +2257,482 @@ impl ::fbthrift::ClientFactory for make_BadService {
     }
 }
 
+
+/// Client definitions for `FooBarBazService`.
+pub struct FooBarBazServiceImpl<P, T, S = ::fbthrift::NoopSpawner> {
+    transport: T,
+    _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
+}
+
+impl<P, T, S> FooBarBazServiceImpl<P, T, S>
+where
+    P: ::fbthrift::Protocol,
+    T: ::fbthrift::Transport,
+    P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+    ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+    P::Deserializer: ::std::marker::Send,
+    S: ::fbthrift::help::Spawner,
+{
+    pub fn new(
+        transport: T,
+    ) -> Self {
+        Self {
+            transport,
+            _phantom: ::std::marker::PhantomData,
+        }
+    }
+
+    pub fn transport(&self) -> &T {
+        &self.transport
+    }
+
+
+    fn _foo_impl(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::foo_bar_baz_service::FooError>> {
+        use ::const_cstr::const_cstr;
+        use ::tracing::Instrument as _;
+        use ::futures::FutureExt as _;
+
+        const_cstr! {
+            SERVICE_NAME = "FooBarBazService";
+            SERVICE_METHOD_NAME = "FooBarBazService.foo";
+        }
+        let args = self::Args_FooBarBazService_foo {
+            _phantom: ::std::marker::PhantomData,
+        };
+
+        let transport = self.transport();
+
+        // need to do call setup outside of async block because T: Transport isn't Send
+        let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("foo", &args) {
+            ::std::result::Result::Ok(res) => res,
+            ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+        };
+
+        let call = transport
+            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .instrument(::tracing::trace_span!("call", method = "FooBarBazService.foo"));
+
+        async move {
+            let reply_env = call.await?;
+
+            let de = P::deserializer(reply_env);
+            let (res, _de): (::std::result::Result<crate::services::foo_bar_baz_service::FooExn, _>, _) =
+                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
+
+            let res = match res {
+                ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
+                ::std::result::Result::Err(aexn) =>
+                    ::std::result::Result::Err(crate::errors::foo_bar_baz_service::FooError::ApplicationException(aexn))
+            };
+            res
+        }
+        .instrument(::tracing::info_span!("stream", method = "FooBarBazService.foo"))
+        .boxed()
+    }
+
+    fn _bar_impl(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::foo_bar_baz_service::BarError>> {
+        use ::const_cstr::const_cstr;
+        use ::tracing::Instrument as _;
+        use ::futures::FutureExt as _;
+
+        const_cstr! {
+            SERVICE_NAME = "FooBarBazService";
+            SERVICE_METHOD_NAME = "FooBarBazService.bar";
+        }
+        let args = self::Args_FooBarBazService_bar {
+            _phantom: ::std::marker::PhantomData,
+        };
+
+        let transport = self.transport();
+
+        // need to do call setup outside of async block because T: Transport isn't Send
+        let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("bar", &args) {
+            ::std::result::Result::Ok(res) => res,
+            ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+        };
+
+        let call = transport
+            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .instrument(::tracing::trace_span!("call", method = "FooBarBazService.bar"));
+
+        async move {
+            let reply_env = call.await?;
+
+            let de = P::deserializer(reply_env);
+            let (res, _de): (::std::result::Result<crate::services::foo_bar_baz_service::BarExn, _>, _) =
+                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
+
+            let res = match res {
+                ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
+                ::std::result::Result::Err(aexn) =>
+                    ::std::result::Result::Err(crate::errors::foo_bar_baz_service::BarError::ApplicationException(aexn))
+            };
+            res
+        }
+        .instrument(::tracing::info_span!("stream", method = "FooBarBazService.bar"))
+        .boxed()
+    }
+
+    fn _baz_impl(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::foo_bar_baz_service::BazError>> {
+        use ::const_cstr::const_cstr;
+        use ::tracing::Instrument as _;
+        use ::futures::FutureExt as _;
+
+        const_cstr! {
+            SERVICE_NAME = "FooBarBazService";
+            SERVICE_METHOD_NAME = "FooBarBazService.baz";
+        }
+        let args = self::Args_FooBarBazService_baz {
+            _phantom: ::std::marker::PhantomData,
+        };
+
+        let transport = self.transport();
+
+        // need to do call setup outside of async block because T: Transport isn't Send
+        let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("baz", &args) {
+            ::std::result::Result::Ok(res) => res,
+            ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+        };
+
+        let call = transport
+            .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
+            .instrument(::tracing::trace_span!("call", method = "FooBarBazService.baz"));
+
+        async move {
+            let reply_env = call.await?;
+
+            let de = P::deserializer(reply_env);
+            let (res, _de): (::std::result::Result<crate::services::foo_bar_baz_service::BazExn, _>, _) =
+                ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
+
+            let res = match res {
+                ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
+                ::std::result::Result::Err(aexn) =>
+                    ::std::result::Result::Err(crate::errors::foo_bar_baz_service::BazError::ApplicationException(aexn))
+            };
+            res
+        }
+        .instrument(::tracing::info_span!("stream", method = "FooBarBazService.baz"))
+        .boxed()
+    }
+}
+
+pub trait FooBarBazService: ::std::marker::Send {
+    fn foo(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::foo_bar_baz_service::FooError>>;
+
+    fn bar(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::foo_bar_baz_service::BarError>>;
+
+    fn baz(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::foo_bar_baz_service::BazError>>;
+}
+
+pub trait FooBarBazServiceExt<T>: FooBarBazService
+where
+    T: ::fbthrift::Transport,
+{
+    fn foo_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::foo_bar_baz_service::FooError>>;
+    fn bar_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::foo_bar_baz_service::BarError>>;
+    fn baz_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::foo_bar_baz_service::BazError>>;
+
+    fn transport(&self) -> &T;
+}
+
+struct Args_FooBarBazService_foo<'a> {
+    _phantom: ::std::marker::PhantomData<&'a ()>,
+}
+
+impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_FooBarBazService_foo<'a> {
+    #[inline]
+    #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "FooBarBazService.foo"))]
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("args");
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+struct Args_FooBarBazService_bar<'a> {
+    _phantom: ::std::marker::PhantomData<&'a ()>,
+}
+
+impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_FooBarBazService_bar<'a> {
+    #[inline]
+    #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "FooBarBazService.bar"))]
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("args");
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+struct Args_FooBarBazService_baz<'a> {
+    _phantom: ::std::marker::PhantomData<&'a ()>,
+}
+
+impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_FooBarBazService_baz<'a> {
+    #[inline]
+    #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "FooBarBazService.baz"))]
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("args");
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P, T, S> FooBarBazService for FooBarBazServiceImpl<P, T, S>
+where
+    P: ::fbthrift::Protocol,
+    T: ::fbthrift::Transport,
+    P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+    ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+    P::Deserializer: ::std::marker::Send,
+    S: ::fbthrift::help::Spawner,
+{
+    fn foo(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::foo_bar_baz_service::FooError>> {
+        let rpc_options = T::RpcOptions::default();
+        self._foo_impl(
+            rpc_options,
+        )
+    }
+    fn bar(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::foo_bar_baz_service::BarError>> {
+        let rpc_options = T::RpcOptions::default();
+        self._bar_impl(
+            rpc_options,
+        )
+    }
+    fn baz(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::foo_bar_baz_service::BazError>> {
+        let rpc_options = T::RpcOptions::default();
+        self._baz_impl(
+            rpc_options,
+        )
+    }
+}
+
+impl<P, T, S> FooBarBazServiceExt<T> for FooBarBazServiceImpl<P, T, S>
+where
+    P: ::fbthrift::Protocol,
+    T: ::fbthrift::Transport,
+    P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+    ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+    P::Deserializer: ::std::marker::Send,
+    S: ::fbthrift::help::Spawner,
+{
+    fn foo_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::foo_bar_baz_service::FooError>> {
+        self._foo_impl(
+            rpc_options,
+        )
+    }
+    fn bar_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::foo_bar_baz_service::BarError>> {
+        self._bar_impl(
+            rpc_options,
+        )
+    }
+    fn baz_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::foo_bar_baz_service::BazError>> {
+        self._baz_impl(
+            rpc_options,
+        )
+    }
+
+    fn transport(&self) -> &T {
+      self.transport()
+    }
+}
+
+impl<'a, S> FooBarBazService for S
+where
+    S: ::std::convert::AsRef<dyn FooBarBazService + 'a>,
+    S: ::std::marker::Send,
+{
+    fn foo(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::foo_bar_baz_service::FooError>> {
+        self.as_ref().foo(
+        )
+    }
+    fn bar(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::foo_bar_baz_service::BarError>> {
+        self.as_ref().bar(
+        )
+    }
+    fn baz(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::foo_bar_baz_service::BazError>> {
+        self.as_ref().baz(
+        )
+    }
+}
+
+impl<S, T> FooBarBazServiceExt<T> for S
+where
+    S: ::std::convert::AsRef<dyn FooBarBazService + 'static>,
+    S: ::std::convert::AsRef<dyn FooBarBazServiceExt<T> + 'static>,
+    S: ::std::marker::Send,
+    T: ::fbthrift::Transport,
+{
+    fn foo_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::foo_bar_baz_service::FooError>> {
+        <Self as ::std::convert::AsRef<dyn FooBarBazServiceExt<T>>>::as_ref(self).foo_with_rpc_opts(
+            rpc_options,
+        )
+    }
+    fn bar_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::foo_bar_baz_service::BarError>> {
+        <Self as ::std::convert::AsRef<dyn FooBarBazServiceExt<T>>>::as_ref(self).bar_with_rpc_opts(
+            rpc_options,
+        )
+    }
+    fn baz_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::foo_bar_baz_service::BazError>> {
+        <Self as ::std::convert::AsRef<dyn FooBarBazServiceExt<T>>>::as_ref(self).baz_with_rpc_opts(
+            rpc_options,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        <dyn FooBarBazServiceExt<T> as FooBarBazServiceExt<T>>::transport(<Self as ::std::convert::AsRef<dyn FooBarBazServiceExt<T>>>::as_ref(self))
+    }
+}
+
+#[derive(Clone)]
+pub struct make_FooBarBazService;
+
+/// To be called by user directly setting up a client. Avoids
+/// needing ClientFactory trait in scope, avoids unidiomatic
+/// make_Trait name.
+///
+/// ```
+/// # const _: &str = stringify! {
+/// use bgs::client::BuckGraphService;
+///
+/// let protocol = BinaryProtocol::new();
+/// let transport = HttpClient::new();
+/// let client = <dyn BuckGraphService>::new(protocol, transport);
+/// # };
+/// ```
+impl dyn FooBarBazService {
+    pub fn new<P, T>(
+        protocol: P,
+        transport: T,
+    ) -> ::std::sync::Arc<impl FooBarBazService + ::std::marker::Send + ::std::marker::Sync + 'static>
+    where
+        P: ::fbthrift::Protocol<Frame = T>,
+        T: ::fbthrift::Transport,
+        P::Deserializer: ::std::marker::Send,
+    {
+        let spawner = ::fbthrift::help::NoopSpawner;
+        Self::with_spawner(protocol, transport, spawner)
+    }
+
+    pub fn with_spawner<P, T, S>(
+        protocol: P,
+        transport: T,
+        spawner: S,
+    ) -> ::std::sync::Arc<impl FooBarBazService + ::std::marker::Send + ::std::marker::Sync + 'static>
+    where
+        P: ::fbthrift::Protocol<Frame = T>,
+        T: ::fbthrift::Transport,
+        P::Deserializer: ::std::marker::Send,
+        S: ::fbthrift::help::Spawner,
+    {
+        let _ = protocol;
+        let _ = spawner;
+        ::std::sync::Arc::new(FooBarBazServiceImpl::<P, T, S>::new(transport))
+    }
+}
+
+impl<T> dyn FooBarBazServiceExt<T>
+where
+    T: ::fbthrift::Transport,
+{
+    pub fn new<P>(
+        protocol: P,
+        transport: T,
+    ) -> ::std::sync::Arc<impl FooBarBazServiceExt<T> + ::std::marker::Send + ::std::marker::Sync + 'static>
+    where
+        P: ::fbthrift::Protocol<Frame = T>,
+        P::Deserializer: ::std::marker::Send,
+    {
+        let spawner = ::fbthrift::help::NoopSpawner;
+        Self::with_spawner(protocol, transport, spawner)
+    }
+
+    pub fn with_spawner<P, S>(
+        protocol: P,
+        transport: T,
+        spawner: S,
+    ) -> ::std::sync::Arc<impl FooBarBazServiceExt<T> + ::std::marker::Send + ::std::marker::Sync + 'static>
+    where
+        P: ::fbthrift::Protocol<Frame = T>,
+        P::Deserializer: ::std::marker::Send,
+        S: ::fbthrift::help::Spawner,
+    {
+        let _ = protocol;
+        let _ = spawner;
+        ::std::sync::Arc::new(FooBarBazServiceImpl::<P, T, S>::new(transport))
+    }
+}
+
+pub type FooBarBazServiceDynClient = <make_FooBarBazService as ::fbthrift::ClientFactory>::Api;
+pub type FooBarBazServiceClient = ::std::sync::Arc<FooBarBazServiceDynClient>;
+
+/// The same thing, but to be called from generic contexts where we are
+/// working with a type parameter `C: ClientFactory` to produce clients.
+impl ::fbthrift::ClientFactory for make_FooBarBazService {
+    type Api = dyn FooBarBazService + ::std::marker::Send + ::std::marker::Sync + 'static;
+
+    fn with_spawner<P, T, S>(protocol: P, transport: T, spawner: S) -> ::std::sync::Arc<Self::Api>
+    where
+        P: ::fbthrift::Protocol<Frame = T>,
+        T: ::fbthrift::Transport,
+        P::Deserializer: ::std::marker::Send,
+        S: ::fbthrift::help::Spawner,
+    {
+        <dyn FooBarBazService>::with_spawner(protocol, transport, spawner)
+    }
+}
+

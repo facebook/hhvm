@@ -286,4 +286,67 @@ BadServiceClientWrapper::BadInteractionInteractionWrapper::foo(
   return _future;
 }
 
+folly::Future<folly::Unit>
+FooBarBazServiceClientWrapper::foo(
+    apache::thrift::RpcOptions& rpcOptions) {
+  auto* client = static_cast<::cpp2::FooBarBazServiceAsyncClient*>(async_client_.get());
+  folly::Promise<folly::Unit> _promise;
+  auto _future = _promise.getFuture();
+  auto callback = std::make_unique<::thrift::py3::FutureCallback<folly::Unit>>(
+    std::move(_promise), rpcOptions, client->recv_wrapped_foo, channel_);
+  try {
+    client->foo(
+      rpcOptions,
+      std::move(callback)
+    );
+  } catch (...) {
+    return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
+      std::current_exception()
+    ));
+  }
+  return _future;
+}
+
+folly::Future<folly::Unit>
+FooBarBazServiceClientWrapper::bar(
+    apache::thrift::RpcOptions& rpcOptions) {
+  auto* client = static_cast<::cpp2::FooBarBazServiceAsyncClient*>(async_client_.get());
+  folly::Promise<folly::Unit> _promise;
+  auto _future = _promise.getFuture();
+  auto callback = std::make_unique<::thrift::py3::FutureCallback<folly::Unit>>(
+    std::move(_promise), rpcOptions, client->recv_wrapped_bar, channel_);
+  try {
+    client->bar(
+      rpcOptions,
+      std::move(callback)
+    );
+  } catch (...) {
+    return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
+      std::current_exception()
+    ));
+  }
+  return _future;
+}
+
+folly::Future<folly::Unit>
+FooBarBazServiceClientWrapper::baz(
+    apache::thrift::RpcOptions& rpcOptions) {
+  auto* client = static_cast<::cpp2::FooBarBazServiceAsyncClient*>(async_client_.get());
+  folly::Promise<folly::Unit> _promise;
+  auto _future = _promise.getFuture();
+  auto callback = std::make_unique<::thrift::py3::FutureCallback<folly::Unit>>(
+    std::move(_promise), rpcOptions, client->recv_wrapped_baz, channel_);
+  try {
+    client->baz(
+      rpcOptions,
+      std::move(callback)
+    );
+  } catch (...) {
+    return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
+      std::current_exception()
+    ));
+  }
+  return _future;
+}
+
 } // namespace cpp2

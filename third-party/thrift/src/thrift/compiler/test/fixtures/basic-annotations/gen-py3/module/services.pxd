@@ -35,3 +35,10 @@ cdef class BadServiceInterface(ServiceInterface):
     cdef bint _for_cython_bar
     pass
 
+cdef class FooBarBazServiceInterface(ServiceInterface):
+    # these are to avoid weird Cython multiple inheritance issue
+    cdef bint _for_cython_foo
+    cdef bint _for_cython_bar
+    cdef bint _for_cython_baz
+    pass
+

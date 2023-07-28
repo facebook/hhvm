@@ -17,7 +17,7 @@ if sys.version_info[0] >= 3:
   long = int
 
 
-from .ttypes import UTF8STRINGS, MyEnum, MyStructNestedAnnotation, MyUnion, MyException, MyStruct, SecretStruct
+from .ttypes import UTF8STRINGS, MyEnum, MyStructNestedAnnotation, MyUnion, MyException, MyStruct, SecretStruct, AwesomeStruct, FantasticStruct
 
 myStruct = MyStruct(**{
   "major" : 42,

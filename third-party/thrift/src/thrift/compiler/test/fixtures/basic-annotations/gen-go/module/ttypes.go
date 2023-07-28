@@ -68,6 +68,18 @@ func MyEnumFromString(s string) (MyEnum, error) {
 
 func MyEnumPtr(v MyEnum) *MyEnum { return &v }
 
+type AwesomeStruct = MyStruct
+
+func AwesomeStructPtr(v AwesomeStruct) *AwesomeStruct { return &v }
+
+func NewAwesomeStruct() *AwesomeStruct { return NewMyStruct() }
+
+type FantasticStruct = MyStruct
+
+func FantasticStructPtr(v FantasticStruct) *FantasticStruct { return &v }
+
+func NewFantasticStruct() *FantasticStruct { return NewMyStruct() }
+
 // Attributes:
 //  - Name
 type MyStructNestedAnnotation struct {

@@ -32,7 +32,7 @@ except ImportError:
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'MyEnum', 'MyStructNestedAnnotation', 'MyUnion', 'MyException', 'MyStruct', 'SecretStruct']
+__all__ = ['UTF8STRINGS', 'MyEnum', 'MyStructNestedAnnotation', 'MyUnion', 'MyException', 'MyStruct', 'SecretStruct', 'AwesomeStruct', 'FantasticStruct']
 
 class MyEnum:
   MyValue1 = 0
@@ -731,6 +731,8 @@ class SecretStruct:
   def _to_py_deprecated(self):
     return self
 
+AwesomeStruct = MyStruct
+FantasticStruct = MyStruct
 all_structs.append(MyStructNestedAnnotation)
 MyStructNestedAnnotation.thrift_spec = (
   None, # 0

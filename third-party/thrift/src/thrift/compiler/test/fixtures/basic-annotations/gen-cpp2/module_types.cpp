@@ -661,5 +661,7 @@ template uint32_t SecretStruct::serializedSizeZC<>(apache::thrift::CompactProtoc
 namespace cpp2 { namespace {
 FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
   ::apache::thrift::adapt_detail::validateFieldAdapter<::StaticCast, 9, ::cpp2::detail::YourUnion, ::cpp2::detail::YourStruct>();
+  ::apache::thrift::adapt_detail::validateAdapter<::StaticCast, ::cpp2::detail::YourStruct>();
+  ::apache::thrift::adapt_detail::validateAdapter<::StaticCast, ::cpp2::detail::YourStruct>();
 }
 }} // cpp2

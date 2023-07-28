@@ -57,6 +57,7 @@ from module.clients_wrapper cimport cMyServicePrioParentAsyncClient, cMyServiceP
 from module.clients_wrapper cimport cMyServicePrioChildAsyncClient, cMyServicePrioChildClientWrapper
 from module.clients_wrapper cimport cBadServiceAsyncClient, cBadServiceClientWrapper
 from module.clients_wrapper cimport cBadServiceClientWrapper_BadInteractionInteractionWrapper
+from module.clients_wrapper cimport cFooBarBazServiceAsyncClient, cFooBarBazServiceClientWrapper
 
 
 cdef void MyService_ping_callback(
@@ -210,6 +211,45 @@ cdef void BadService_bar_callback(
             pyfuture.set_exception(ex.with_traceback(None))
 
 cdef void BadService_BadInteraction_foo_callback(
+    cFollyTry[cFollyUnit]&& result,
+    PyObject* userdata
+):
+    client, pyfuture, options = <object> userdata  
+    if result.hasException():
+        pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
+    else:
+        try:
+            pyfuture.set_result(None)
+        except Exception as ex:
+            pyfuture.set_exception(ex.with_traceback(None))
+
+cdef void FooBarBazService_foo_callback(
+    cFollyTry[cFollyUnit]&& result,
+    PyObject* userdata
+):
+    client, pyfuture, options = <object> userdata  
+    if result.hasException():
+        pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
+    else:
+        try:
+            pyfuture.set_result(None)
+        except Exception as ex:
+            pyfuture.set_exception(ex.with_traceback(None))
+
+cdef void FooBarBazService_bar_callback(
+    cFollyTry[cFollyUnit]&& result,
+    PyObject* userdata
+):
+    client, pyfuture, options = <object> userdata  
+    if result.hasException():
+        pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
+    else:
+        try:
+            pyfuture.set_result(None)
+        except Exception as ex:
+            pyfuture.set_exception(ex.with_traceback(None))
+
+cdef void FooBarBazService_baz_callback(
     cFollyTry[cFollyUnit]&& result,
     PyObject* userdata
 ):
@@ -631,4 +671,95 @@ cdef class BadService_BadInteraction(thrift.py3.client.Client):
             <PyObject *> __userdata
         )
         return asyncio_shield(__future)
+
+cdef object _FooBarBazService_annotations = _py_types.MappingProxyType({
+})
+
+
+@cython.auto_pickle(False)
+cdef class FooBarBazService(thrift.py3.client.Client):
+    annotations = _FooBarBazService_annotations
+
+    cdef const type_info* _typeid(FooBarBazService self):
+        return &typeid(cFooBarBazServiceAsyncClient)
+
+    cdef bind_client(FooBarBazService self, cRequestChannel_ptr&& channel):
+        self._client = makeClientWrapper[cFooBarBazServiceAsyncClient, cFooBarBazServiceClientWrapper](
+            cmove(channel)
+        )
+
+    @cython.always_allow_keywords(True)
+    def foo(
+            FooBarBazService self,
+            __RpcOptions rpc_options=None
+    ):
+        if rpc_options is None:
+            rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
+        self._check_connect_future()
+        __loop = asyncio_get_event_loop()
+        __future = __loop.create_future()
+        __userdata = (self, __future, rpc_options)
+        bridgeFutureWith[cFollyUnit](
+            self._executor,
+            down_cast_ptr[cFooBarBazServiceClientWrapper, cClientWrapper](self._client.get()).foo(rpc_options._cpp_obj, 
+            ),
+            FooBarBazService_foo_callback,
+            <PyObject *> __userdata
+        )
+        return asyncio_shield(__future)
+
+    @cython.always_allow_keywords(True)
+    def bar(
+            FooBarBazService self,
+            __RpcOptions rpc_options=None
+    ):
+        if rpc_options is None:
+            rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
+        self._check_connect_future()
+        __loop = asyncio_get_event_loop()
+        __future = __loop.create_future()
+        __userdata = (self, __future, rpc_options)
+        bridgeFutureWith[cFollyUnit](
+            self._executor,
+            down_cast_ptr[cFooBarBazServiceClientWrapper, cClientWrapper](self._client.get()).bar(rpc_options._cpp_obj, 
+            ),
+            FooBarBazService_bar_callback,
+            <PyObject *> __userdata
+        )
+        return asyncio_shield(__future)
+
+    @cython.always_allow_keywords(True)
+    def baz(
+            FooBarBazService self,
+            __RpcOptions rpc_options=None
+    ):
+        if rpc_options is None:
+            rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
+        self._check_connect_future()
+        __loop = asyncio_get_event_loop()
+        __future = __loop.create_future()
+        __userdata = (self, __future, rpc_options)
+        bridgeFutureWith[cFollyUnit](
+            self._executor,
+            down_cast_ptr[cFooBarBazServiceClientWrapper, cClientWrapper](self._client.get()).baz(rpc_options._cpp_obj, 
+            ),
+            FooBarBazService_baz_callback,
+            <PyObject *> __userdata
+        )
+        return asyncio_shield(__future)
+
+
+    @classmethod
+    def __get_reflection__(cls):
+        return _services_reflection.get_reflection__FooBarBazService(for_clients=True)
+
+    @staticmethod
+    def __get_metadata__():
+        cdef __fbthrift_cThriftServiceMetadataResponse response
+        ServiceMetadata[_services_reflection.cFooBarBazServiceSvIf].gen(response)
+        return __MetadataBox.box(cmove(deref(response.metadata_ref())))
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.FooBarBazService"
 

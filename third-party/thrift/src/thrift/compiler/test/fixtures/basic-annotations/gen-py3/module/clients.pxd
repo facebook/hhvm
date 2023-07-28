@@ -22,3 +22,6 @@ cdef class BadService(thrift.py3.client.Client):
 cdef class BadService_BadInteraction(thrift.py3.client.Client):
     pass
 
+cdef class FooBarBazService(thrift.py3.client.Client):
+    pass
+

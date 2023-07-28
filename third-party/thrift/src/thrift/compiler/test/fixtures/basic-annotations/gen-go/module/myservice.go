@@ -27,7 +27,7 @@ type MyService interface {
   HasDataById(id int64) (_r bool, err error)
   // Parameters:
   //  - Id
-  GetDataById(id int64) (_r string, err error)
+  GoGetDataById(id int64) (_r string, err error)
   // Parameters:
   //  - Id
   //  - Data
@@ -48,7 +48,7 @@ type MyServiceClientInterface interface {
   HasDataById(id int64) (_r bool, err error)
   // Parameters:
   //  - Id
-  GetDataById(id int64) (_r string, err error)
+  GoGetDataById(id int64) (_r string, err error)
   // Parameters:
   //  - Id
   //  - Data
@@ -146,7 +146,7 @@ func (p *MyServiceClient) recvHasDataById() (value bool, err error) {
 
 // Parameters:
 //  - Id
-func (p *MyServiceClient) GetDataById(id int64) (_r string, err error) {
+func (p *MyServiceClient) GoGetDataById(id int64) (_r string, err error) {
   args := MyServiceGetDataByIdArgs{
     Id : id,
   }
@@ -309,7 +309,7 @@ func (p *MyServiceThreadsafeClient) recvHasDataById() (value bool, err error) {
 
 // Parameters:
 //  - Id
-func (p *MyServiceThreadsafeClient) GetDataById(id int64) (_r string, err error) {
+func (p *MyServiceThreadsafeClient) GoGetDataById(id int64) (_r string, err error) {
   p.Mu.Lock()
   defer p.Mu.Unlock()
   args := MyServiceGetDataByIdArgs{
@@ -439,7 +439,7 @@ func (p *MyServiceChannelClient) HasDataById(ctx context.Context, id int64) (_r 
 
 // Parameters:
 //  - Id
-func (p *MyServiceChannelClient) GetDataById(ctx context.Context, id int64) (_r string, err error) {
+func (p *MyServiceChannelClient) GoGetDataById(ctx context.Context, id int64) (_r string, err error) {
   args := MyServiceGetDataByIdArgs{
     Id : id,
   }
@@ -750,7 +750,7 @@ func (p *myServiceProcessorGetDataById) Write(seqId int32, result thrift.Writabl
 func (p *myServiceProcessorGetDataById) Run(argStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
   args := argStruct.(*MyServiceGetDataByIdArgs)
   var __result MyServiceGetDataByIdResult
-  if retval, err := p.handler.GetDataById(args.Id); err != nil {
+  if retval, err := p.handler.GoGetDataById(args.Id); err != nil {
     switch err.(type) {
     default:
       x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing getDataById: " + err.Error(), err)

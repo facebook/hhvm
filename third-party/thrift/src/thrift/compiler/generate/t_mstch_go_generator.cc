@@ -693,11 +693,11 @@ class mstch_go_typedef : public mstch_typedef {
   go_codegen_data& data_;
 
   std::string go_name_() {
-    if (typedef_->has_annotation("go.name")) {
-      return typedef_->get_annotation("go.name");
-    } else {
-      return go::munge_ident(typedef_->name());
+    auto name_override = go::get_go_name_annotation(typedef_);
+    if (name_override != nullptr) {
+      return *name_override;
     }
+    return go::munge_ident(typedef_->name());
   }
 };
 

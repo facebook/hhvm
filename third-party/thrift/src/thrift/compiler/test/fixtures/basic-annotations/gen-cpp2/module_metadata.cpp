@@ -117,7 +117,7 @@ StructMetadata<::cpp2::detail::YourStruct>::gen(ThriftMetadata& metadata) {
   static const auto* const
   module_MyStruct_fields = new std::array<EncodedThriftField, 9>{{
     {2, "major", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}},
-    {1, "package", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
+    {1, "package", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{*cvStruct("go.Name", {{"name", cvString("PackageName")}}).cv_struct_ref(), }},
     {3, "annotation_with_quote", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
     {4, "class_", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
     {5, "annotation_with_trailing_comma", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
@@ -231,6 +231,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_g
   module_MyService_getDataById_id_1_type->writeAndGenType(*module_MyService_getDataById_id_1.type(), metadata);
   func.arguments()->push_back(std::move(module_MyService_getDataById_id_1));
   func.is_oneway() = false;
+  func.structured_annotations()->push_back(*cvStruct("go.Name", {{"name", cvString("GoGetDataById")}}).cv_struct_ref());
   service.functions()->push_back(std::move(func));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_putDataById(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, ThriftService& service) {
@@ -448,6 +449,64 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("module.BadService", std::move(module_BadService));
   context.service_name() = "module.BadService";
+  ::apache::thrift::metadata::ThriftModuleContext module;
+  module.name() = "module";
+  context.module() = std::move(module);
+  return &context;
+}
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::FooBarBazService>>::gen_foo(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, ThriftService& service) {
+  ::apache::thrift::metadata::ThriftFunction func;
+  func.name() = "foo";
+  auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
+  func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  func.is_oneway() = false;
+  func.structured_annotations()->push_back(*cvStruct("go.Name", {{"name", cvString("FooStructured")}}).cv_struct_ref());
+  service.functions()->push_back(std::move(func));
+}
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::FooBarBazService>>::gen_bar(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, ThriftService& service) {
+  ::apache::thrift::metadata::ThriftFunction func;
+  func.name() = "bar";
+  auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
+  func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  func.is_oneway() = false;
+  service.functions()->push_back(std::move(func));
+}
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::FooBarBazService>>::gen_baz(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, ThriftService& service) {
+  ::apache::thrift::metadata::ThriftFunction func;
+  func.name() = "baz";
+  auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
+  func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  func.is_oneway() = false;
+  service.functions()->push_back(std::move(func));
+}
+
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::FooBarBazService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
+  const ::apache::thrift::metadata::ThriftServiceContextRef* self = genRecurse(*response.metadata(), *response.services());
+  DCHECK(self != nullptr);
+  // TODO(praihan): Remove ThriftServiceContext from response. But in the meantime, we need to fill the field with the result of looking up in ThriftMetadata.
+  ::apache::thrift::metadata::ThriftServiceContext context;
+  context.module() = *self->module();
+  context.service_info() = response.metadata()->services()->at(*self->service_name());
+  response.context() = std::move(context);
+}
+
+const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::FooBarBazService>>::genRecurse(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+  ::apache::thrift::metadata::ThriftService module_FooBarBazService;
+  module_FooBarBazService.name() = "module.FooBarBazService";
+  static const ThriftFunctionGenerator functions[] = {
+    ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::FooBarBazService>>::gen_foo,
+    ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::FooBarBazService>>::gen_bar,
+    ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::FooBarBazService>>::gen_baz,
+  };
+  for (auto& function_gen : functions) {
+    function_gen(metadata, module_FooBarBazService);
+  }
+  // We need to keep the index around because a reference or iterator could be invalidated.
+  auto selfIndex = services.size();
+  services.emplace_back();
+  ThriftServiceContextRef& context = services[selfIndex];
+  metadata.services()->emplace("module.FooBarBazService", std::move(module_FooBarBazService));
+  context.service_name() = "module.FooBarBazService";
   ::apache::thrift::metadata::ThriftModuleContext module;
   module.name() = "module";
   context.module() = std::move(module);

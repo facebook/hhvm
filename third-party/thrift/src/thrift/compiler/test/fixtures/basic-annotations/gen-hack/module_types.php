@@ -639,6 +639,16 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
         ),
       ],
       'fields' => dict[
+        'package' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\go\Name' => \facebook\thrift\annotation\go\Name::fromShape(
+              shape(
+                "name" => "PackageName",
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
         'my_union' => shape(
           'field' => dict[],
           'type' => dict[

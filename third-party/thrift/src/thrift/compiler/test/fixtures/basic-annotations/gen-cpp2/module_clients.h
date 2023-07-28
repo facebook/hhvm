@@ -10,3 +10,4 @@
 #include "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/MyServicePrioParentAsyncClient.h"
 #include "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/MyServicePrioChildAsyncClient.h"
 #include "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/BadServiceAsyncClient.h"
+#include "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/FooBarBazServiceAsyncClient.h"

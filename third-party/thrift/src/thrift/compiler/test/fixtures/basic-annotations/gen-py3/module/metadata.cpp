@@ -18,6 +18,7 @@ namespace cpp2 {
   ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServicePrioParent>>::gen(response);
   ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServicePrioChild>>::gen(response);
   ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::GoodService>>::gen(response);
+  ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::FooBarBazService>>::gen(response);
   return metadata;
 }
 } // namespace cpp2

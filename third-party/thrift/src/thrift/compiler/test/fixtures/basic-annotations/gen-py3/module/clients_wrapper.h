@@ -26,6 +26,11 @@
 #else
 #include <thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/module_clients.h>
 #endif
+#if __has_include(<thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/FooBarBazService.h>)
+#include <thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/FooBarBazService.h>
+#else
+#include <thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/module_clients.h>
+#endif
 
 #include <folly/futures/Future.h>
 #include <folly/futures/Promise.h>
@@ -107,6 +112,19 @@ class BadServiceClientWrapper : public ::thrift::py3::ClientWrapper {
           apache::thrift::RpcOptions& rpcOptions);
     };
     folly::Future<std::unique_ptr<::thrift::py3::ClientWrapper>> createBadInteraction();
+};
+
+
+class FooBarBazServiceClientWrapper : public ::thrift::py3::ClientWrapper {
+  public:
+    using ::thrift::py3::ClientWrapper::ClientWrapper;
+
+    folly::Future<folly::Unit> foo(
+      apache::thrift::RpcOptions& rpcOptions);
+    folly::Future<folly::Unit> bar(
+      apache::thrift::RpcOptions& rpcOptions);
+    folly::Future<folly::Unit> baz(
+      apache::thrift::RpcOptions& rpcOptions);
 };
 
 

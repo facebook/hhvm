@@ -15,6 +15,60 @@ var _ = fmt.Printf
 var _ = thrift.ZERO
 
 
+type IncredibleStruct = MyStruct
+
+func NewIncredibleStruct() *IncredibleStruct {
+  return NewMyStruct()
+}
+
+func WriteIncredibleStruct(item *IncredibleStruct, p thrift.Protocol) error {
+  if err := item.Write(p); err != nil {
+    return err
+}
+  return nil
+}
+
+func ReadIncredibleStruct(p thrift.Protocol) (IncredibleStruct, error) {
+  var decodeResult IncredibleStruct
+  decodeErr := func() error {
+    result := *NewMyStruct()
+err := result.Read(p)
+if err != nil {
+    return err
+}
+    decodeResult = result
+    return nil
+  }()
+  return decodeResult, decodeErr
+}
+
+type BrilliantStruct = MyStruct
+
+func NewBrilliantStruct() *BrilliantStruct {
+  return NewMyStruct()
+}
+
+func WriteBrilliantStruct(item *BrilliantStruct, p thrift.Protocol) error {
+  if err := item.Write(p); err != nil {
+    return err
+}
+  return nil
+}
+
+func ReadBrilliantStruct(p thrift.Protocol) (BrilliantStruct, error) {
+  var decodeResult BrilliantStruct
+  decodeErr := func() error {
+    result := *NewMyStruct()
+err := result.Read(p)
+if err != nil {
+    return err
+}
+    decodeResult = result
+    return nil
+  }()
+  return decodeResult, decodeErr
+}
+
 type MyEnum int32
 
 const (
@@ -400,7 +454,7 @@ func (x *MyException) Read(p thrift.Protocol) error {
 
 type MyStruct struct {
     MajorVer int64 `thrift:"major,2" json:"major" db:"major"`
-    Package string `thrift:"package,1" json:"package" db:"package"`
+    PackageName string `thrift:"package,1" json:"package" db:"package"`
     AnnotationWithQuote string `thrift:"annotation_with_quote,3" tag:"somevalue"`
     Class_ string `thrift:"class_,4" json:"class_" db:"class_"`
     AnnotationWithTrailingComma string `thrift:"annotation_with_trailing_comma,5" json:"annotation_with_trailing_comma" db:"annotation_with_trailing_comma"`
@@ -415,7 +469,7 @@ var _ thrift.Struct = &MyStruct{}
 func NewMyStruct() *MyStruct {
     return (&MyStruct{}).
         SetMajorVerNonCompat(0).
-        SetPackageNonCompat("").
+        SetPackageNameNonCompat("").
         SetAnnotationWithQuoteNonCompat("").
         SetClass_NonCompat("").
         SetAnnotationWithTrailingCommaNonCompat("").
@@ -433,12 +487,12 @@ func (x *MyStruct) GetMajorVer() int64 {
     return x.MajorVer
 }
 
-func (x *MyStruct) GetPackageNonCompat() string {
-    return x.Package
+func (x *MyStruct) GetPackageNameNonCompat() string {
+    return x.PackageName
 }
 
-func (x *MyStruct) GetPackage() string {
-    return x.Package
+func (x *MyStruct) GetPackageName() string {
+    return x.PackageName
 }
 
 func (x *MyStruct) GetAnnotationWithQuoteNonCompat() string {
@@ -515,13 +569,13 @@ func (x *MyStruct) SetMajorVer(value int64) *MyStruct {
     return x
 }
 
-func (x *MyStruct) SetPackageNonCompat(value string) *MyStruct {
-    x.Package = value
+func (x *MyStruct) SetPackageNameNonCompat(value string) *MyStruct {
+    x.PackageName = value
     return x
 }
 
-func (x *MyStruct) SetPackage(value string) *MyStruct {
-    x.Package = value
+func (x *MyStruct) SetPackageName(value string) *MyStruct {
+    x.PackageName = value
     return x
 }
 
@@ -619,12 +673,12 @@ func (x *MyStruct) writeField2(p thrift.Protocol) error {  // MajorVer
     return nil
 }
 
-func (x *MyStruct) writeField1(p thrift.Protocol) error {  // Package
+func (x *MyStruct) writeField1(p thrift.Protocol) error {  // PackageName
     if err := p.WriteFieldBegin("package", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPackageNonCompat()
+    item := x.GetPackageNameNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -776,13 +830,13 @@ if err != nil {
     return nil
 }
 
-func (x *MyStruct) readField1(p thrift.Protocol) error {  // Package
+func (x *MyStruct) readField1(p thrift.Protocol) error {  // PackageName
     result, err := p.ReadString()
 if err != nil {
     return err
 }
 
-    x.SetPackageNonCompat(result)
+    x.SetPackageNameNonCompat(result)
     return nil
 }
 
@@ -910,8 +964,8 @@ func (x *MyStructBuilder) MajorVer(value int64) *MyStructBuilder {
     return x
 }
 
-func (x *MyStructBuilder) Package(value string) *MyStructBuilder {
-    x.obj.Package = value
+func (x *MyStructBuilder) PackageName(value string) *MyStructBuilder {
+    x.obj.PackageName = value
     return x
 }
 

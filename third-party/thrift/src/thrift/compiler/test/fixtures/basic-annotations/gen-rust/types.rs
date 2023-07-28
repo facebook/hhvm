@@ -8,6 +8,10 @@
 #[allow(unused_imports)]
 pub(crate) use crate as types;
 
+pub type AwesomeStruct = crate::types::MyStruct;
+
+pub type FantasticStruct = crate::types::MyStruct;
+
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct MyStructNestedAnnotation {
     pub name: ::std::string::String,
@@ -666,6 +670,16 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
             2 => {
             },
             1 => {
+
+                if type_id == ::std::any::TypeId::of::<go::types::Name>() {
+                    let mut tmp = Some(go::types::Name {
+                        name: "PackageName".to_owned(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             3 => {
             },

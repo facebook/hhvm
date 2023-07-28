@@ -66,6 +66,7 @@ from module.services_wrapper cimport cMyServiceInterface
 from module.services_wrapper cimport cMyServicePrioParentInterface
 from module.services_wrapper cimport cMyServicePrioChildInterface
 from module.services_wrapper cimport cBadServiceInterface
+from module.services_wrapper cimport cFooBarBazServiceInterface
 
 
 
@@ -304,6 +305,48 @@ cdef class BadServiceInterface(
     @staticmethod
     def __get_thrift_name__():
         return "module.BadService"
+
+cdef object _FooBarBazService_annotations = _py_types.MappingProxyType({
+})
+
+
+@cython.auto_pickle(False)
+cdef class FooBarBazServiceInterface(
+    ServiceInterface
+):
+    annotations = _FooBarBazService_annotations
+
+    def __cinit__(self):
+        self._cpp_obj = cFooBarBazServiceInterface(
+            <PyObject *> self,
+            get_executor()
+        )
+
+    async def foo(
+            self):
+        raise NotImplementedError("async def foo is not implemented")
+
+    async def bar(
+            self):
+        raise NotImplementedError("async def bar is not implemented")
+
+    async def baz(
+            self):
+        raise NotImplementedError("async def baz is not implemented")
+
+    @classmethod
+    def __get_reflection__(cls):
+        return _services_reflection.get_reflection__FooBarBazService(for_clients=False)
+
+    @staticmethod
+    def __get_metadata__():
+        cdef __fbthrift_cThriftServiceMetadataResponse response
+        ServiceMetadata[_services_reflection.cFooBarBazServiceSvIf].gen(response)
+        return __MetadataBox.box(cmove(deref(response.metadata_ref())))
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.FooBarBazService"
 
 
 
@@ -1097,6 +1140,213 @@ async def BadService_onStartServing_coro(
         promise.cPromise.setValue(c_unit)
 
 async def BadService_onStopRequested_coro(
+    object self,
+    Promise_cFollyUnit promise
+):
+    try:
+        result = await self.onStopRequested()
+    except __ApplicationError as ex:
+        # If the handler raised an ApplicationError convert it to a C++ one
+        promise.cPromise.setException(cTApplicationException(
+            ex.type.value, ex.message.encode('UTF-8')
+        ))
+    except Exception as ex:
+        print(
+            "Unexpected error in service handler onStopRequested:",
+            file=sys.stderr)
+        traceback.print_exc()
+        promise.cPromise.setException(cTApplicationException(
+            cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
+        ))
+    except asyncio.CancelledError as ex:
+        print("Coroutine was cancelled in service handler onStopRequested:", file=sys.stderr)
+        traceback.print_exc()
+        promise.cPromise.setException(cTApplicationException(
+            cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
+        ))
+    else:
+        promise.cPromise.setValue(c_unit)
+
+cdef api void call_cy_FooBarBazService_foo(
+    object self,
+    Cpp2RequestContext* ctx,
+    cFollyPromise[cFollyUnit] cPromise
+):
+    cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
+    __context = RequestContext._fbthrift_create(ctx)
+    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    asyncio.get_event_loop().create_task(
+        FooBarBazService_foo_coro(
+            self,
+            __promise
+        )
+    )
+    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+cdef api void call_cy_FooBarBazService_bar(
+    object self,
+    Cpp2RequestContext* ctx,
+    cFollyPromise[cFollyUnit] cPromise
+):
+    cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
+    __context = RequestContext._fbthrift_create(ctx)
+    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    asyncio.get_event_loop().create_task(
+        FooBarBazService_bar_coro(
+            self,
+            __promise
+        )
+    )
+    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+cdef api void call_cy_FooBarBazService_baz(
+    object self,
+    Cpp2RequestContext* ctx,
+    cFollyPromise[cFollyUnit] cPromise
+):
+    cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
+    __context = RequestContext._fbthrift_create(ctx)
+    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    asyncio.get_event_loop().create_task(
+        FooBarBazService_baz_coro(
+            self,
+            __promise
+        )
+    )
+    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+cdef api void call_cy_FooBarBazService_onStartServing(
+    object self,
+    cFollyPromise[cFollyUnit] cPromise
+):
+    cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
+    asyncio.get_event_loop().create_task(
+        FooBarBazService_onStartServing_coro(
+            self,
+            __promise
+        )
+    )
+cdef api void call_cy_FooBarBazService_onStopRequested(
+    object self,
+    cFollyPromise[cFollyUnit] cPromise
+):
+    cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
+    asyncio.get_event_loop().create_task(
+        FooBarBazService_onStopRequested_coro(
+            self,
+            __promise
+        )
+    )
+async def FooBarBazService_foo_coro(
+    object self,
+    Promise_cFollyUnit promise
+):
+    try:
+        result = await self.foo()
+    except __ApplicationError as ex:
+        # If the handler raised an ApplicationError convert it to a C++ one
+        promise.cPromise.setException(cTApplicationException(
+            ex.type.value, ex.message.encode('UTF-8')
+        ))
+    except Exception as ex:
+        print(
+            "Unexpected error in service handler foo:",
+            file=sys.stderr)
+        traceback.print_exc()
+        promise.cPromise.setException(cTApplicationException(
+            cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
+        ))
+    except asyncio.CancelledError as ex:
+        print("Coroutine was cancelled in service handler foo:", file=sys.stderr)
+        traceback.print_exc()
+        promise.cPromise.setException(cTApplicationException(
+            cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
+        ))
+    else:
+        promise.cPromise.setValue(c_unit)
+
+async def FooBarBazService_bar_coro(
+    object self,
+    Promise_cFollyUnit promise
+):
+    try:
+        result = await self.bar()
+    except __ApplicationError as ex:
+        # If the handler raised an ApplicationError convert it to a C++ one
+        promise.cPromise.setException(cTApplicationException(
+            ex.type.value, ex.message.encode('UTF-8')
+        ))
+    except Exception as ex:
+        print(
+            "Unexpected error in service handler bar:",
+            file=sys.stderr)
+        traceback.print_exc()
+        promise.cPromise.setException(cTApplicationException(
+            cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
+        ))
+    except asyncio.CancelledError as ex:
+        print("Coroutine was cancelled in service handler bar:", file=sys.stderr)
+        traceback.print_exc()
+        promise.cPromise.setException(cTApplicationException(
+            cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
+        ))
+    else:
+        promise.cPromise.setValue(c_unit)
+
+async def FooBarBazService_baz_coro(
+    object self,
+    Promise_cFollyUnit promise
+):
+    try:
+        result = await self.baz()
+    except __ApplicationError as ex:
+        # If the handler raised an ApplicationError convert it to a C++ one
+        promise.cPromise.setException(cTApplicationException(
+            ex.type.value, ex.message.encode('UTF-8')
+        ))
+    except Exception as ex:
+        print(
+            "Unexpected error in service handler baz:",
+            file=sys.stderr)
+        traceback.print_exc()
+        promise.cPromise.setException(cTApplicationException(
+            cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
+        ))
+    except asyncio.CancelledError as ex:
+        print("Coroutine was cancelled in service handler baz:", file=sys.stderr)
+        traceback.print_exc()
+        promise.cPromise.setException(cTApplicationException(
+            cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
+        ))
+    else:
+        promise.cPromise.setValue(c_unit)
+
+async def FooBarBazService_onStartServing_coro(
+    object self,
+    Promise_cFollyUnit promise
+):
+    try:
+        result = await self.onStartServing()
+    except __ApplicationError as ex:
+        # If the handler raised an ApplicationError convert it to a C++ one
+        promise.cPromise.setException(cTApplicationException(
+            ex.type.value, ex.message.encode('UTF-8')
+        ))
+    except Exception as ex:
+        print(
+            "Unexpected error in service handler onStartServing:",
+            file=sys.stderr)
+        traceback.print_exc()
+        promise.cPromise.setException(cTApplicationException(
+            cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
+        ))
+    except asyncio.CancelledError as ex:
+        print("Coroutine was cancelled in service handler onStartServing:", file=sys.stderr)
+        traceback.print_exc()
+        promise.cPromise.setException(cTApplicationException(
+            cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
+        ))
+    else:
+        promise.cPromise.setValue(c_unit)
+
+async def FooBarBazService_onStopRequested_coro(
     object self,
     Promise_cFollyUnit promise
 ):

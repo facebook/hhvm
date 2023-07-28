@@ -23,6 +23,9 @@ class MyServicePrioChild;
 namespace cpp2 {
 class GoodService;
 } // namespace cpp2
+namespace cpp2 {
+class FooBarBazService;
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -128,6 +131,20 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::GoodService>> {
   friend class ServiceMetadata;
 
   static void gen_bar(ThriftMetadata& metadata, ThriftService& context);
+};
+template <>
+class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::FooBarBazService>> {
+ public:
+  static void gen(ThriftServiceMetadataResponse& response);
+ private:
+  static const ThriftServiceContextRef* genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services);
+
+  template <typename T>
+  friend class ServiceMetadata;
+
+  static void gen_foo(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_bar(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_baz(ThriftMetadata& metadata, ThriftService& context);
 };
 } // namespace md
 } // namespace detail

@@ -1,0 +1,104 @@
+{
+  "__fbthrift": {"@generated": 0},
+  "thrift_module" : "go",
+  "includes": {
+    "scope" : {
+      "path" : "thrift/annotation/scope.thrift"
+    }
+  },
+  "structs" : {
+    "Name" : {
+      "lineno" : 28,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Field" : {  },
+        "scope.Function" : {  },
+        "scope.Typedef" : {  }
+      },
+      "fields" : {
+        "name" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 32,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 32,
+              "column" : 18
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 28,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 33,
+          "column" : 2
+        }
+      }
+    },
+    "Tag" : {
+      "lineno" : 36,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Field" : {  }
+      },
+      "fields" : {
+        "tag" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 38,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 38,
+              "column" : 17
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 36,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 39,
+          "column" : 2
+        }
+      }
+    },
+    "NewType" : {
+      "lineno" : 45,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Typedef" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 45,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 46,
+          "column" : 18
+        }
+      }
+    }
+  }
+}

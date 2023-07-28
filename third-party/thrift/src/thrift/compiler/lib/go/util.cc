@@ -356,15 +356,17 @@ bool is_type_go_comparable(
 }
 
 std::string get_go_func_name(const t_function* func) {
-  if (func->has_annotation("go.name")) {
-    return func->get_annotation("go.name");
+  auto name_override = get_go_name_annotation(func);
+  if (name_override != nullptr) {
+    return *name_override;
   }
   return munge_ident(func->name());
 }
 
 std::string get_go_field_name(const t_field* field) {
-  if (field->has_annotation("go.name")) {
-    return field->get_annotation("go.name");
+  auto name_override = get_go_name_annotation(field);
+  if (name_override != nullptr) {
+    return *name_override;
   }
 
   auto name = munge_ident(field->name());
@@ -420,6 +422,19 @@ std::vector<t_struct*> get_service_req_resp_structs(const t_service* service) {
     req_resp_structs.push_back(resp_struct);
   }
   return req_resp_structs;
+}
+
+const std::string* get_go_name_annotation(const t_named* node) {
+  auto name_annotation = node->find_structured_annotation_or_null(kGoNameUri);
+  if (name_annotation != nullptr) {
+    return &(name_annotation->get_value_from_structured_annotation("name")
+                 .get_string());
+  } else if (node->has_annotation("go.name")) {
+    // TODO: remove this else-if clause once
+    // all non-structured annotations are migrated.
+    return &(node->get_annotation("go.name"));
+  }
+  return nullptr;
 }
 
 } // namespace go

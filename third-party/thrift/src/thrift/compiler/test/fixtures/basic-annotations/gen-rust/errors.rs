@@ -320,3 +320,56 @@ pub mod bad_service {
 
 }
 
+/// Error definitions for `FooBarBazService`.
+pub mod foo_bar_baz_service {
+
+    pub type FooError = ::fbthrift::NonthrowingFunctionError;
+
+    impl ::std::convert::From<crate::services::foo_bar_baz_service::FooExn> for
+        ::std::result::Result<(), FooError>
+    {
+        fn from(e: crate::services::foo_bar_baz_service::FooExn) -> Self {
+            match e {
+                crate::services::foo_bar_baz_service::FooExn::Success(res) => {
+                    ::std::result::Result::Ok(res)
+                }
+                crate::services::foo_bar_baz_service::FooExn::ApplicationException(aexn) =>
+                    ::std::result::Result::Err(FooError::ApplicationException(aexn)),
+            }
+        }
+    }
+
+    pub type BarError = ::fbthrift::NonthrowingFunctionError;
+
+    impl ::std::convert::From<crate::services::foo_bar_baz_service::BarExn> for
+        ::std::result::Result<(), BarError>
+    {
+        fn from(e: crate::services::foo_bar_baz_service::BarExn) -> Self {
+            match e {
+                crate::services::foo_bar_baz_service::BarExn::Success(res) => {
+                    ::std::result::Result::Ok(res)
+                }
+                crate::services::foo_bar_baz_service::BarExn::ApplicationException(aexn) =>
+                    ::std::result::Result::Err(BarError::ApplicationException(aexn)),
+            }
+        }
+    }
+
+    pub type BazError = ::fbthrift::NonthrowingFunctionError;
+
+    impl ::std::convert::From<crate::services::foo_bar_baz_service::BazExn> for
+        ::std::result::Result<(), BazError>
+    {
+        fn from(e: crate::services::foo_bar_baz_service::BazExn) -> Self {
+            match e {
+                crate::services::foo_bar_baz_service::BazExn::Success(res) => {
+                    ::std::result::Result::Ok(res)
+                }
+                crate::services::foo_bar_baz_service::BazExn::ApplicationException(aexn) =>
+                    ::std::result::Result::Err(BazError::ApplicationException(aexn)),
+            }
+        }
+    }
+
+}
+

@@ -10,3 +10,4 @@
 #include "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/MyServicePrioParent.h"
 #include "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/MyServicePrioChild.h"
 #include "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/BadService.h"
+#include "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/FooBarBazService.h"

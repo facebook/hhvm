@@ -26,6 +26,11 @@
 #else
 #include <thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/module_handlers.h>
 #endif
+#if __has_include(<thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/FooBarBazService.h>)
+#include <thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/FooBarBazService.h>
+#else
+#include <thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/module_handlers.h>
+#endif
 #include <folly/python/futures.h>
 #include <Python.h>
 
@@ -102,4 +107,20 @@ folly::SemiFuture<folly::Unit> semifuture_onStopRequested() override;
 };
 
 std::shared_ptr<apache::thrift::ServerInterface> BadServiceInterface(PyObject *if_object, folly::Executor *exc);
+
+
+class FooBarBazServiceWrapper : virtual public FooBarBazServiceSvIf {
+  protected:
+    PyObject *if_object;
+    folly::Executor *executor;
+  public:
+    explicit FooBarBazServiceWrapper(PyObject *if_object, folly::Executor *exc);
+    void async_tm_foo(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) override;
+    void async_tm_bar(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) override;
+    void async_tm_baz(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) override;
+folly::SemiFuture<folly::Unit> semifuture_onStartServing() override;
+folly::SemiFuture<folly::Unit> semifuture_onStopRequested() override;
+};
+
+std::shared_ptr<apache::thrift::ServerInterface> FooBarBazServiceInterface(PyObject *if_object, folly::Executor *exc);
 } // namespace cpp2

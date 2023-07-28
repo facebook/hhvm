@@ -33,3 +33,9 @@ cdef __InterfaceSpec get_reflection__BadService(bint for_clients)
 cdef extern from "thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/module_handlers.h" namespace "::cpp2":
     cdef cppclass cGoodServiceSvIf "::cpp2::GoodServiceSvIf":
         pass
+
+cdef __InterfaceSpec get_reflection__FooBarBazService(bint for_clients)
+
+cdef extern from "thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/module_handlers.h" namespace "::cpp2":
+    cdef cppclass cFooBarBazServiceSvIf "::cpp2::FooBarBazServiceSvIf":
+        pass

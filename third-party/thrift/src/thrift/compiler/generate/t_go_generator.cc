@@ -40,6 +40,7 @@
 #include <sstream>
 #include <thrift/compiler/generate/t_concat_generator.h>
 #include <thrift/compiler/generate/t_generator.h>
+#include <thrift/compiler/lib/go/util.h>
 
 using namespace std;
 
@@ -58,11 +59,11 @@ static std::string package_flag;
  * considering annotations (if any are set).
  */
 const string get_func_name(const t_function* tfunction) {
-  auto func_name_override = tfunction->find_annotation_or_null("go.name");
-  if (func_name_override == nullptr) {
-    return tfunction->get_name();
+  auto name_override = go::get_go_name_annotation(tfunction);
+  if (name_override != nullptr) {
+    return *name_override;
   }
-  return *func_name_override;
+  return tfunction->get_name();
 }
 
 /**

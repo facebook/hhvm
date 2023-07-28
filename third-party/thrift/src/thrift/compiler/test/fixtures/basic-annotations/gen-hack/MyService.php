@@ -2634,6 +2634,13 @@ class MyServiceStaticMetadata implements \IThriftServiceStaticMetadata {
     return shape(
       'service' => dict[],
       'functions' => dict[
+        'getDataById' => dict[
+          '\facebook\thrift\annotation\go\Name' => \facebook\thrift\annotation\go\Name::fromShape(
+            shape(
+              "name" => "GoGetDataById",
+            )
+          ),
+        ],
       ],
     );
   }

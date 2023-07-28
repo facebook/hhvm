@@ -16,3 +16,4 @@ cdef extern from "thrift/compiler/test/fixtures/basic-annotations/src/gen-py3/mo
     shared_ptr[cAsyncProcessorFactory] cMyServicePrioParentInterface "::cpp2::MyServicePrioParentInterface"(PyObject *if_object, cFollyExecutor* Q) except *
     shared_ptr[cAsyncProcessorFactory] cMyServicePrioChildInterface "::cpp2::MyServicePrioChildInterface"(PyObject *if_object, cFollyExecutor* Q) except *
     shared_ptr[cAsyncProcessorFactory] cBadServiceInterface "::cpp2::BadServiceInterface"(PyObject *if_object, cFollyExecutor* Q) except *
+    shared_ptr[cAsyncProcessorFactory] cFooBarBazServiceInterface "::cpp2::FooBarBazServiceInterface"(PyObject *if_object, cFollyExecutor* Q) except *

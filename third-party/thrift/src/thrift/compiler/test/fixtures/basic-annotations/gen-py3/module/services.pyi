@@ -124,3 +124,31 @@ class BadServiceInterface(
     pass
 
 
+_FooBarBazServiceInterfaceT = _typing.TypeVar('_FooBarBazServiceInterfaceT', bound='FooBarBazServiceInterface')
+
+
+class FooBarBazServiceInterface(
+    ServiceInterface,
+    metaclass=ABCMeta,
+):
+
+
+    @abstractmethod
+    async def foo(
+        self
+    ) -> None: ...
+
+
+    @abstractmethod
+    async def bar(
+        self
+    ) -> None: ...
+
+
+    @abstractmethod
+    async def baz(
+        self
+    ) -> None: ...
+    pass
+
+

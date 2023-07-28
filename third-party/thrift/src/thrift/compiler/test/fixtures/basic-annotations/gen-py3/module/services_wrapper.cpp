@@ -343,4 +343,86 @@ folly::SemiFuture<folly::Unit> BadServiceWrapper::semifuture_onStopRequested() {
   );
   return std::move(future);
 }
+
+
+FooBarBazServiceWrapper::FooBarBazServiceWrapper(PyObject *obj, folly::Executor* exc)
+  : if_object(obj), executor(exc)
+  {
+    import_module__services();
+  }
+
+
+void FooBarBazServiceWrapper::async_tm_foo(
+  std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) {
+  auto ctx = callback->getRequestContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     callback = std::move(callback)    ]() mutable {
+        auto [promise, future] = folly::makePromiseContract<folly::Unit>();
+        call_cy_FooBarBazService_foo(
+            this->if_object,
+            ctx,
+            std::move(promise)        );
+        std::move(future).via(this->executor).thenTry([callback = std::move(callback)](folly::Try<folly::Unit>&& t) {
+          (void)t;
+          callback->complete(std::move(t));
+        });
+    });
+}
+void FooBarBazServiceWrapper::async_tm_bar(
+  std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) {
+  auto ctx = callback->getRequestContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     callback = std::move(callback)    ]() mutable {
+        auto [promise, future] = folly::makePromiseContract<folly::Unit>();
+        call_cy_FooBarBazService_bar(
+            this->if_object,
+            ctx,
+            std::move(promise)        );
+        std::move(future).via(this->executor).thenTry([callback = std::move(callback)](folly::Try<folly::Unit>&& t) {
+          (void)t;
+          callback->complete(std::move(t));
+        });
+    });
+}
+void FooBarBazServiceWrapper::async_tm_baz(
+  std::unique_ptr<apache::thrift::HandlerCallback<void>> callback) {
+  auto ctx = callback->getRequestContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     callback = std::move(callback)    ]() mutable {
+        auto [promise, future] = folly::makePromiseContract<folly::Unit>();
+        call_cy_FooBarBazService_baz(
+            this->if_object,
+            ctx,
+            std::move(promise)        );
+        std::move(future).via(this->executor).thenTry([callback = std::move(callback)](folly::Try<folly::Unit>&& t) {
+          (void)t;
+          callback->complete(std::move(t));
+        });
+    });
+}
+std::shared_ptr<apache::thrift::ServerInterface> FooBarBazServiceInterface(PyObject *if_object, folly::Executor *exc) {
+  return std::make_shared<FooBarBazServiceWrapper>(if_object, exc);
+}
+folly::SemiFuture<folly::Unit> FooBarBazServiceWrapper::semifuture_onStartServing() {
+  auto [promise, future] = folly::makePromiseContract<folly::Unit>();
+  call_cy_FooBarBazService_onStartServing(
+      this->if_object,
+      std::move(promise)
+  );
+  return std::move(future);
+}
+folly::SemiFuture<folly::Unit> FooBarBazServiceWrapper::semifuture_onStopRequested() {
+  auto [promise, future] = folly::makePromiseContract<folly::Unit>();
+  call_cy_FooBarBazService_onStopRequested(
+      this->if_object,
+      std::move(promise)
+  );
+  return std::move(future);
+}
 } // namespace cpp2

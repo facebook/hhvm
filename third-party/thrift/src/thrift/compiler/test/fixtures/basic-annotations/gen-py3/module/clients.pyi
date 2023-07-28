@@ -114,3 +114,25 @@ class BadService_BadInteraction(thrift.py3.client.Client):
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
+
+
+_FooBarBazServiceT = _typing.TypeVar('_FooBarBazServiceT', bound='FooBarBazService')
+
+
+class FooBarBazService(thrift.py3.client.Client):
+
+    async def foo(
+        self,
+        rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
+    ) -> None: ...
+
+    async def bar(
+        self,
+        rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
+    ) -> None: ...
+
+    async def baz(
+        self,
+        rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
+    ) -> None: ...
+

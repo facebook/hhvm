@@ -152,7 +152,7 @@ class HeaderSerializer {
   FOLLY_ALWAYS_INLINE void incrementPosition(size_t size) { pos_ += size; }
 
   FOLLY_ALWAYS_INLINE void writeInt24BE(size_t nbytes) {
-    DCHECK_LE(nbytes, (1ull << (kBytesForFrameOrMetadataLength * 8)));
+    DCHECK_LT(nbytes, (1ull << (kBytesForFrameOrMetadataLength * 8)));
     buf_[pos_] = (nbytes >> 16) & 0xFF;
     buf_[pos_ + 1] = (nbytes >> 8) & 0xFF;
     buf_[pos_ + 2] = nbytes & 0xFF;

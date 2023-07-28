@@ -28,6 +28,7 @@ class AtoiAdapter(Adapter[str, int]):
         original: str,
         *,
         transitive_annotation: Optional[Struct] = None,
+        constant_uri: Optional[str] = None,
     ) -> int:
         return int(original)
 
@@ -37,6 +38,7 @@ class AtoiAdapter(Adapter[str, int]):
         adapted: int,
         *,
         transitive_annotation: Optional[Struct] = None,
+        constant_uri: Optional[str] = None,
     ) -> str:
         return str(adapted)
 
@@ -48,6 +50,7 @@ class ItoaListAdapter(Adapter[Sequence[int], Sequence[str]]):
         original: Sequence[int],
         *,
         transitive_annotation: Optional[Struct] = None,
+        constant_uri: Optional[str] = None,
     ) -> Sequence[str]:
         return [str(i) for i in original]
 
@@ -57,6 +60,7 @@ class ItoaListAdapter(Adapter[Sequence[int], Sequence[str]]):
         adapted: Sequence[str],
         *,
         transitive_annotation: Optional[Struct] = None,
+        constant_uri: Optional[str] = None,
     ) -> Sequence[int]:
         return [int(a) for a in adapted]
 
@@ -72,6 +76,7 @@ class ItoaNestedListAdapter(
         original: Sequence[Sequence[Mapping[int, int]]],
         *,
         transitive_annotation: Optional[Struct] = None,
+        constant_uri: Optional[str] = None,
     ) -> Sequence[Sequence[Mapping[str, str]]]:
         return [
             [{str(key): str(value) for key, value in j.items()} for j in i]
@@ -84,6 +89,7 @@ class ItoaNestedListAdapter(
         adapted: Sequence[Sequence[Mapping[str, str]]],
         *,
         transitive_annotation: Optional[Struct] = None,
+        constant_uri: Optional[str] = None,
     ) -> Sequence[Sequence[Mapping[int, int]]]:
         return [
             [{int(key): int(value) for key, value in j.items()} for j in i]

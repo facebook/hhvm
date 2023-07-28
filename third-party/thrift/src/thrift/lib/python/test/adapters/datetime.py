@@ -29,6 +29,7 @@ class DatetimeAdapter(Adapter[int, datetime]):
         original: int,
         *,
         transitive_annotation: Optional[Struct] = None,
+        constant_uri: Optional[str] = None,
     ) -> datetime:
         return datetime.fromtimestamp(original)
 
@@ -38,5 +39,6 @@ class DatetimeAdapter(Adapter[int, datetime]):
         adapted: datetime,
         *,
         transitive_annotation: Optional[Struct] = None,
+        constant_uri: Optional[str] = None,
     ) -> int:
         return int(adapted.timestamp())

@@ -1202,6 +1202,7 @@ class python_mstch_const : public mstch_const {
              &python_mstch_const::is_adapter_transitive},
             {"constant:transitive_adapter_annotation",
              &python_mstch_const::transitive_adapter_annotation},
+            {"constant:uri", &python_mstch_const::uri},
         });
   }
 
@@ -1227,6 +1228,8 @@ class python_mstch_const : public mstch_const {
         transitive_adapter_annotation_,
         &*transitive_adapter_annotation_->type());
   }
+
+  mstch::node uri() { return const_->uri(); }
 
  private:
   const t_const* adapter_annotation_;

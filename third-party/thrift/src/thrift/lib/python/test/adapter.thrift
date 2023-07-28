@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-namespace py3 thrift.python.test
+package "thrift.com/python/test"
 
 include "thrift/annotation/python.thrift"
 include "thrift/annotation/scope.thrift"

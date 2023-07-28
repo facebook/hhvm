@@ -38,6 +38,7 @@ class Wrapper(Adapter[T, Wrapped[T]]):
         original: T,
         *,
         transitive_annotation: typing.Optional[Struct] = None,
+        constant_uri: typing.Optional[str] = None,
     ) -> Wrapped[T]:
         return Wrapped(value=original)
 
@@ -47,6 +48,7 @@ class Wrapper(Adapter[T, Wrapped[T]]):
         adapted: Wrapped[T],
         *,
         transitive_annotation: typing.Optional[Struct] = None,
+        constant_uri: typing.Optional[str] = None,
     ) -> T:
         return adapted.value
 

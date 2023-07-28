@@ -30,6 +30,7 @@ class Adapter(typing.Generic[TAdaptFrom, TAdaptTo]):
         original: TAdaptFrom,
         *,
         transitive_annotation: "typing.Optional[thrift.python.types.Struct]" = None,
+        constant_uri: typing.Optional[str] = None,
     ) -> TAdaptTo: ...
     @classmethod
     def to_thrift(
@@ -37,6 +38,7 @@ class Adapter(typing.Generic[TAdaptFrom, TAdaptTo]):
         adapted: TAdaptTo,
         *,
         transitive_annotation: "typing.Optional[thrift.python.types.Struct]" = None,
+        constant_uri: typing.Optional[str] = None,
     ) -> TAdaptFrom: ...
 
     """

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b061bec42cda3e8acf35bfa395fffcd4>>
+// @generated SignedSource<<1e1b8786a83645eeb331d1df9bcf9bfb>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -640,6 +640,24 @@ impl<'a> Node<'a> for RefinedConstBounds<'a> {
                     __binding_0.accept(v)
                 }
                 { __binding_1.accept(v) }
+            }
+        }
+    }
+}
+impl<'a> Node<'a> for ShapeType<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_shape_type(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            ShapeType(ref __binding_0, ref __binding_1, ref __binding_2) => {
+                {
+                    __binding_0.accept(v)
+                }
+                {
+                    __binding_1.accept(v)
+                }
+                { __binding_2.accept(v) }
             }
         }
     }

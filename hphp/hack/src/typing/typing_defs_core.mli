@@ -271,12 +271,8 @@ and _ ty_ =
   | Tfun : 'phase ty fun_type -> 'phase ty_
   (* Tuple, with ordered list of the types of the elements of the tuple. *)
   | Ttuple : 'phase ty list -> 'phase ty_
-  (* Whether all fields of this shape are known, types of each of the
-   * known arms.
-   *)
-  | Tshape :
-      type_origin * 'phase ty * 'phase shape_field_type TShapeMap.t
-      -> 'phase ty_
+  (* A wrapper around shape_type, which contains information about shape fields *)
+  | Tshape : 'phase shape_type -> 'phase ty_
   (* The type of a generic parameter. The constraints on a generic parameter
    * are accessed through the lenv.tpenv component of the environment, which
    * is set up when checking the body of a function or method. See uses of
@@ -353,6 +349,11 @@ and 'phase refined_const_bounds = {
 }
 
 and 'phase taccess_type = 'phase ty * pos_id
+
+(* Whether all fields of this shape are known, types of each of the
+ * known arms. *)
+and 'phase shape_type =
+  type_origin * 'phase ty * 'phase shape_field_type TShapeMap.t
 
 (* Because Tfun is currently used as both a decl and locl ty, without this,
  * the HH\Contexts\defaults alias must be stored in shared memory for a

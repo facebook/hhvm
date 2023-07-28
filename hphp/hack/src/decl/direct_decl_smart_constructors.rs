@@ -73,6 +73,7 @@ use oxidized_by_ref::typing_defs::RefinedConst;
 use oxidized_by_ref::typing_defs::RefinedConstBound;
 use oxidized_by_ref::typing_defs::RefinedConstBounds;
 use oxidized_by_ref::typing_defs::ShapeFieldType;
+use oxidized_by_ref::typing_defs::ShapeType;
 use oxidized_by_ref::typing_defs::TaccessType;
 use oxidized_by_ref::typing_defs::Tparam;
 use oxidized_by_ref::typing_defs::TshapeFieldName;
@@ -2151,7 +2152,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                     ..*fun_type
                 }))
             }
-            Ty_::Tshape(&(_, kind, fields)) => {
+            Ty_::Tshape(&ShapeType(_, kind, fields)) => {
                 let mut converted_fields = AssocListMut::with_capacity_in(fields.len(), self.arena);
                 for (&name, ty) in fields.iter() {
                     converted_fields.insert(
@@ -2163,7 +2164,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                     );
                 }
                 let origin = TypeOrigin::MissingOrigin;
-                Ty_::Tshape(self.alloc((origin, kind, converted_fields.into())))
+                Ty_::Tshape(self.alloc(ShapeType(origin, kind, converted_fields.into())))
             }
             Ty_::TvecOrDict(&(tk, tv)) => Ty_::TvecOrDict(self.alloc((
                 self.convert_tapply_to_tgeneric(tk),
@@ -5274,7 +5275,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         };
         let pos = self.merge_positions(shape, rparen);
         let origin = TypeOrigin::MissingOrigin;
-        self.hint_ty(pos, Ty_::Tshape(self.alloc((origin, kind, fields.into()))))
+        self.hint_ty(
+            pos,
+            Ty_::Tshape(self.alloc(ShapeType(origin, kind, fields.into()))),
+        )
     }
 
     fn make_classname_type_specifier(

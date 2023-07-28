@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6998fd9a98b48f04413e32f9a201f868>>
+// @generated SignedSource<<2d458ca5379337cb980ed1c1cf70bd6d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -518,17 +518,8 @@ pub enum Ty_<'a> {
     /// Tuple, with ordered list of the types of the elements of the tuple.
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Ttuple(&'a [&'a Ty<'a>]),
-    /// Whether all fields of this shape are known, types of each of the
-    /// known arms.
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(inline_tuple)]
-    Tshape(
-        &'a (
-            TypeOrigin<'a>,
-            &'a Ty<'a>,
-            t_shape_map::TShapeMap<'a, &'a ShapeFieldType<'a>>,
-        ),
-    ),
+    Tshape(&'a ShapeType<'a>),
     /// The type of a generic parameter. The constraints on a generic parameter
     /// are accessed through the lenv.tpenv component of the environment, which
     /// is set up when checking the body of a function or method. See uses of
@@ -764,6 +755,34 @@ pub struct RefinedConstBounds<'a> {
 }
 impl<'a> TrivialDrop for RefinedConstBounds<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(RefinedConstBounds<'arena>);
+
+/// Whether all fields of this shape are known, types of each of the
+/// known arms.
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[repr(C)]
+pub struct ShapeType<'a>(
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub TypeOrigin<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Ty<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub  t_shape_map::TShapeMap<'a, &'a ShapeFieldType<'a>>,
+);
+impl<'a> TrivialDrop for ShapeType<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(ShapeType<'arena>);
 
 #[derive(
     Clone,

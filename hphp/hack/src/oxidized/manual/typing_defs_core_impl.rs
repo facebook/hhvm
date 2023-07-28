@@ -81,12 +81,7 @@ impl std::fmt::Debug for Ty_ {
             Tneg(tprim) => write!(f, "Tneg({:?})", tprim),
             Tfun(fun_type) => f.debug_tuple("Tfun").field(fun_type).finish(),
             Ttuple(tys) => f.debug_tuple("Ttuple").field(tys).finish(),
-            Tshape(origin, kind, fields) => f
-                .debug_tuple("Tshape")
-                .field(origin)
-                .field(kind)
-                .field(fields)
-                .finish(),
+            Tshape(shape) => f.debug_tuple("Tshape").field(shape).finish(),
             Tvar(ident) => f.debug_tuple("Tvar").field(ident).finish(),
             Tgeneric(name, tys) => write!(f, "Tgeneric({:?}, {:?})", name, tys),
             Tunion(tys) => f.debug_tuple("Tunion").field(tys).finish(),

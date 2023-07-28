@@ -7,6 +7,7 @@ use std::collections::BTreeMap;
 
 use pos::TypeName;
 use ty::decl::subst::Subst;
+use ty::decl::ty::ShapeType;
 use ty::decl::AbstractTypeconst;
 use ty::decl::ClassConst;
 use ty::decl::ClassRefinement;
@@ -198,7 +199,7 @@ impl<'a, R: Reason> Substitution<'a, R> {
                 )))
             }
             Ty_::Tshape(params) => {
-                let (ref shape_kind, ref fdm) = **params;
+                let ShapeType(ref shape_kind, ref fdm) = **params;
                 let shape_kind = self.instantiate(shape_kind);
                 let fdm = fdm
                     .iter()
@@ -213,7 +214,7 @@ impl<'a, R: Reason> Substitution<'a, R> {
                         )
                     })
                     .collect::<BTreeMap<_, _>>();
-                Ty_::Tshape(Box::new((shape_kind, fdm)))
+                Ty_::Tshape(Box::new(ShapeType(shape_kind, fdm)))
             }
             Ty_::Trefinement(tr) => Ty_::Trefinement(Box::new(TrefinementType {
                 ty: self.instantiate(&tr.ty),

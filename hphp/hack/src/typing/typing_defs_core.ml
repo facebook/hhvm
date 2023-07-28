@@ -298,12 +298,7 @@ and _ ty_ =
        * function, method, lambda, etc. *)
   | Ttuple : 'phase ty list -> 'phase ty_
       (** Tuple, with ordered list of the types of the elements of the tuple. *)
-  | Tshape :
-      type_origin * 'phase ty * 'phase shape_field_type TShapeMap.t
-      -> 'phase ty_
-      (** Whether all fields of this shape are known, types of each of the
-       * known arms.
-       *)
+  | Tshape : 'phase shape_type -> 'phase ty_
   | Tgeneric : string * 'phase ty list -> 'phase ty_
       (** The type of a generic parameter. The constraints on a generic parameter
        * are accessed through the lenv.tpenv component of the environment, which
@@ -390,6 +385,12 @@ and 'phase refined_const_bounds = {
   tr_lower: 'phase ty list;
   tr_upper: 'phase ty list;
 }
+
+(** Whether all fields of this shape are known, types of each of the
+  * known arms.
+  *)
+and 'phase shape_type =
+  type_origin * 'phase ty * 'phase shape_field_type TShapeMap.t
 
 and 'ty capability =
   | CapDefaults of Pos_or_decl.t

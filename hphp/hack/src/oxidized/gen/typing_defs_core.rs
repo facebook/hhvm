@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0bde22294fc5ee2b076e9e692360a038>>
+// @generated SignedSource<<20c4efefe7c37d0a182e2f7c75e498aa>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -579,9 +579,7 @@ pub enum Ty_ {
     Tfun(FunType),
     /// Tuple, with ordered list of the types of the elements of the tuple.
     Ttuple(Vec<Ty>),
-    /// Whether all fields of this shape are known, types of each of the
-    /// known arms.
-    Tshape(TypeOrigin, Ty, t_shape_map::TShapeMap<ShapeFieldType>),
+    Tshape(ShapeType),
     /// The type of a generic parameter. The constraints on a generic parameter
     /// are accessed through the lenv.tpenv component of the environment, which
     /// is set up when checking the body of a function or method. See uses of
@@ -774,6 +772,31 @@ pub struct RefinedConstBounds {
     pub lower: Vec<Ty>,
     pub upper: Vec<Ty>,
 }
+
+/// Whether all fields of this shape are known, types of each of the
+/// known arms.
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[repr(C)]
+pub struct ShapeType(
+    pub TypeOrigin,
+    pub Ty,
+    pub t_shape_map::TShapeMap<ShapeFieldType>,
+);
 
 #[derive(
     Clone,

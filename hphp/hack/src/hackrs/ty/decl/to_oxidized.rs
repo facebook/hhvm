@@ -171,14 +171,14 @@ impl<'a, R: Reason> ToOxidized<'a> for Ty_<R> {
             Ty_::Ttuple(x) => typing_defs::Ty_::Ttuple(x.to_oxidized(arena)),
             Ty_::Tshape(shape) => {
                 let mut shape_fields = arena_collections::AssocListMut::new_in(arena);
-                let (shape_kind, shape_field_type_map): &(_, _) = shape;
+                let ShapeType(shape_kind, shape_field_type_map) = &**shape;
                 for (k, v) in shape_field_type_map.iter() {
                     let k = oxidize_shape_field_name(arena, *k, &v.field_name_pos);
                     shape_fields.insert_or_replace(TShapeField(k), v.to_oxidized(arena));
                 }
                 let shape_kind = shape_kind.to_oxidized(arena);
                 let shape_origin = typing_defs::TypeOrigin::MissingOrigin;
-                typing_defs::Ty_::Tshape(arena.alloc((
+                typing_defs::Ty_::Tshape(arena.alloc(typing_defs::ShapeType(
                     shape_origin,
                     shape_kind,
                     TShapeMap::from(shape_fields),

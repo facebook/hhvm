@@ -254,6 +254,71 @@ impl<R: Reason> ToOcamlRep for ShapeFieldType<R> {
     }
 }
 
+impl<R: Reason> ToOcamlRep for ShapeType<R> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
+        let Self(shape_kind, shape_field_type_map) = &self;
+        let map = if shape_field_type_map.is_empty() {
+            ocamlrep::Value::int(0)
+        } else {
+            let len = shape_field_type_map.len();
+            let mut iter = shape_field_type_map.iter().map(|(k, v)| {
+                let k = shape_field_name_to_ocamlrep(alloc, k, &v.field_name_pos);
+                (k, v.to_ocamlrep(alloc))
+            });
+            let (map, _) = ocamlrep::sorted_iter_to_ocaml_map(&mut iter, alloc, len);
+            map
+        };
+
+        let mut block = alloc.block_with_size(3);
+        // Note: we always set decl shapes to Missing_origin (0) as it is only for type aliases
+        alloc.set_field(&mut block, 0, ocamlrep::Value::int(0));
+        alloc.set_field(&mut block, 1, alloc.add(shape_kind));
+        alloc.set_field(&mut block, 2, map);
+        block.build()
+    }
+}
+
+impl<R: Reason> FromOcamlRep for ShapeType<R> {
+    fn from_ocamlrep(value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
+        let block = ocamlrep::from::expect_tuple(value, 3)?;
+        Ok(ShapeType(
+            ocamlrep::from::field(block, 1)?,
+            ocamlrep::vec_from_ocaml_map(block[2])?
+                .into_iter()
+                .map(|(k, (optional, ty))| match k {
+                    OcamlShapeFieldName::Int(pos_id) => (
+                        TshapeFieldName::TSFlitInt(pos_id.id()),
+                        ShapeFieldType {
+                            optional,
+                            ty,
+                            field_name_pos: ShapeFieldNamePos::Simple(pos_id.into_pos()),
+                        },
+                    ),
+                    OcamlShapeFieldName::Str(pos_id) => (
+                        TshapeFieldName::TSFlitStr(pos_id.id()),
+                        ShapeFieldType {
+                            optional,
+                            ty,
+                            field_name_pos: ShapeFieldNamePos::Simple(pos_id.into_pos()),
+                        },
+                    ),
+                    OcamlShapeFieldName::ClassConst(cls_id, const_id) => (
+                        TshapeFieldName::TSFclassConst(cls_id.id(), const_id.id()),
+                        ShapeFieldType {
+                            optional,
+                            ty,
+                            field_name_pos: ShapeFieldNamePos::ClassConst(
+                                cls_id.into_pos(),
+                                const_id.into_pos(),
+                            ),
+                        },
+                    ),
+                })
+                .collect(),
+        ))
+    }
+}
+
 // Hand-written because we represent shape field names differently (see comment
 // on `shape_field_name_to_ocamlrep`) and don't represent TanySentinel.
 impl<R: Reason> ToOcamlRep for Ty_<R> {
@@ -307,23 +372,8 @@ impl<R: Reason> ToOcamlRep for Ty_<R> {
                 block.build()
             }
             Ty_::Tshape(shape) => {
-                let (shape_kind, shape_field_type_map): &(_, _) = shape;
-                let map = if shape_field_type_map.is_empty() {
-                    ocamlrep::Value::int(0)
-                } else {
-                    let len = shape_field_type_map.len();
-                    let mut iter = shape_field_type_map.iter().map(|(k, v)| {
-                        let k = shape_field_name_to_ocamlrep(alloc, k, &v.field_name_pos);
-                        (k, v.to_ocamlrep(alloc))
-                    });
-                    let (map, _) = ocamlrep::sorted_iter_to_ocaml_map(&mut iter, alloc, len);
-                    map
-                };
-
-                let mut block = alloc.block_with_size_and_tag(3usize, 8u8);
-                alloc.set_field(&mut block, 0, ocamlrep::Value::int(0));
-                alloc.set_field(&mut block, 1, alloc.add(shape_kind));
-                alloc.set_field(&mut block, 2, map);
+                let mut block = alloc.block_with_size_and_tag(1usize, 8u8);
+                alloc.set_field(&mut block, 0, alloc.add(&**shape));
                 block.build()
             }
             Ty_::Tgeneric(x) => {
@@ -413,46 +463,8 @@ impl<R: Reason> FromOcamlRep for Ty_<R> {
                     Ok(Ty_::Ttuple(ocamlrep::from::field(block, 0)?))
                 }
                 8 => {
-                    ocamlrep::from::expect_block_size(block, 3)?;
-                    Ok(Ty_::Tshape(Box::new((
-                        ocamlrep::from::field(block, 1)?,
-                        ocamlrep::vec_from_ocaml_map(block[2])?
-                            .into_iter()
-                            .map(|(k, (optional, ty))| match k {
-                                OcamlShapeFieldName::Int(pos_id) => (
-                                    TshapeFieldName::TSFlitInt(pos_id.id()),
-                                    ShapeFieldType {
-                                        optional,
-                                        ty,
-                                        field_name_pos: ShapeFieldNamePos::Simple(
-                                            pos_id.into_pos(),
-                                        ),
-                                    },
-                                ),
-                                OcamlShapeFieldName::Str(pos_id) => (
-                                    TshapeFieldName::TSFlitStr(pos_id.id()),
-                                    ShapeFieldType {
-                                        optional,
-                                        ty,
-                                        field_name_pos: ShapeFieldNamePos::Simple(
-                                            pos_id.into_pos(),
-                                        ),
-                                    },
-                                ),
-                                OcamlShapeFieldName::ClassConst(cls_id, const_id) => (
-                                    TshapeFieldName::TSFclassConst(cls_id.id(), const_id.id()),
-                                    ShapeFieldType {
-                                        optional,
-                                        ty,
-                                        field_name_pos: ShapeFieldNamePos::ClassConst(
-                                            cls_id.into_pos(),
-                                            const_id.into_pos(),
-                                        ),
-                                    },
-                                ),
-                            })
-                            .collect(),
-                    ))))
+                    ocamlrep::from::expect_block_size(block, 1)?;
+                    Ok(Ty_::Tshape(ocamlrep::from::field(block, 0)?))
                 }
                 9 => {
                     ocamlrep::from::expect_block_size(block, 2)?;

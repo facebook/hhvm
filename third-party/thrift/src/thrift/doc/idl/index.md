@@ -583,7 +583,7 @@ return_type ::=
   | "void"
   | [initial_response_type ","] (sink | stream)
 
-initial_response_type ::=  type | "void"
+initial_response_type ::=  type
 
 sink   ::=  "sink" "<" type [throws], type [throws] ">"
 stream ::=  "stream" "<" type [throws] ">"

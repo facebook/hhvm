@@ -42,22 +42,10 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
   return folly::observer::makeStaticObserver(
       AdaptiveConcurrencyController::Config{});
 }
+
 } // namespace detail
 
 using namespace std;
-
-folly::observer::Observer<CPUConcurrencyController::Config>
-BaseThriftServer::makeCPUConcurrencyControllerConfigInternal() {
-  return folly::observer::makeObserver(
-      [mockConfig = mockCPUConcurrencyControllerConfig_.getObserver(),
-       config = detail::makeCPUConcurrencyControllerConfig(
-           this)]() -> CPUConcurrencyController::Config {
-        if (auto config = **mockConfig) {
-          return *config;
-        }
-        return **config;
-      });
-}
 
 BaseThriftServer::BaseThriftServer()
     : thriftConfig_(),
@@ -66,7 +54,7 @@ BaseThriftServer::BaseThriftServer()
           thriftConfig_.getMaxRequests().getObserver(),
           detail::getThriftServerConfig(*this)},
       cpuConcurrencyController_{
-          makeCPUConcurrencyControllerConfigInternal(),
+          detail::makeCPUConcurrencyControllerConfig(this),
           *this,
           detail::getThriftServerConfig(*this)},
       addresses_(1) {}

@@ -88,19 +88,10 @@ public class MyRootRpcServerHandler
 
           _chain.postRead(_data);
 
-          reactor.core.publisher.Mono<Void> _delegateResponse = null;
-
-          if (com.facebook.thrift.util.resources.RpcResources.isForceExecutionOffEventLoop()) {
-            _delegateResponse = reactor.core.publisher.Mono.defer(() -> {
-                com.facebook.nifty.core.RequestContexts.setCurrentContext(_payload.getRequestContext());
-                return _delegate.doRoot();
-              });
-            _delegateResponse = _delegateResponse.publishOn(com.facebook.thrift.util.resources.RpcResources.getOffLoopScheduler());
-          } else {
-            _delegateResponse = _delegate
+          reactor.core.publisher.Mono<Void> _delegateResponse =
+            _delegate
               .doRoot()
               .doFirst(() -> com.facebook.nifty.core.RequestContexts.setCurrentContext(_payload.getRequestContext()));
-          }
 
           reactor.core.publisher.Mono<com.facebook.thrift.payload.ServerResponsePayload> _internalResponse =
             _delegateResponse.map(_response -> {
@@ -134,9 +125,6 @@ public class MyRootRpcServerHandler
 
                 return reactor.core.publisher.Mono.just(_serverResponsePayload);
             });
-          if (com.facebook.thrift.util.resources.RpcResources.isForceExecutionOffEventLoop()) {
-            _internalResponse = _internalResponse.subscribeOn(com.facebook.thrift.util.resources.RpcResources.getOffLoopScheduler());
-          }
 
           return _internalResponse;
   }
@@ -145,7 +133,7 @@ public class MyRootRpcServerHandler
   @java.lang.Override
   public reactor.core.publisher.Flux<com.facebook.thrift.payload.ServerResponsePayload> singleRequestStreamingResponse(com.facebook.thrift.payload.ServerRequestPayload _payload) {
     final String _name = _payload.getRequestRpcMetadata().getName();
-    return reactor.core.publisher.Flux.defer(() -> {
+    reactor.core.publisher.Flux<com.facebook.thrift.payload.ServerResponsePayload> _retVal = reactor.core.publisher.Flux.defer(() -> {
     com.facebook.swift.service.ContextChain _chain;
     try {
       _chain = new com.facebook.swift.service.ContextChain(_eventHandlers, _name, _payload.getRequestContext());
@@ -173,12 +161,16 @@ public class MyRootRpcServerHandler
     }
     return _result;
     });
+    if (com.facebook.thrift.util.resources.RpcResources.isForceExecutionOffEventLoop()) {
+      _retVal = _retVal.subscribeOn(com.facebook.thrift.util.resources.RpcResources.getOffLoopScheduler());
+    }
+    return _retVal;
   }
 
   @java.lang.Override
   public reactor.core.publisher.Mono<com.facebook.thrift.payload.ServerResponsePayload> singleRequestSingleResponse(com.facebook.thrift.payload.ServerRequestPayload _payload) {
     final String _name = _payload.getRequestRpcMetadata().getName();
-    return reactor.core.publisher.Mono.defer(() -> {
+    reactor.core.publisher.Mono<com.facebook.thrift.payload.ServerResponsePayload> _retVal = reactor.core.publisher.Mono.defer(() -> {
     com.facebook.swift.service.ContextChain _chain;
     try {
       _chain = new com.facebook.swift.service.ContextChain(_eventHandlers, _name, _payload.getRequestContext());
@@ -210,13 +202,18 @@ public class MyRootRpcServerHandler
 
     return _result;
     });
+
+    if (com.facebook.thrift.util.resources.RpcResources.isForceExecutionOffEventLoop()) {
+      _retVal = _retVal.subscribeOn(com.facebook.thrift.util.resources.RpcResources.getOffLoopScheduler());
+    }
+    return _retVal;
   }
 
   @java.lang.Override
   public reactor.core.publisher.Mono<Void> singleRequestNoResponse(com.facebook.thrift.payload.ServerRequestPayload _payload) {
     final String _name = _payload.getRequestRpcMetadata().getName();
 
-    return reactor.core.publisher.Mono.defer(() -> {
+    reactor.core.publisher.Mono<Void> _retVal = reactor.core.publisher.Mono.defer(() -> {
     com.facebook.swift.service.ContextChain _chain;
     try {
       _chain = new com.facebook.swift.service.ContextChain(_eventHandlers, _name, _payload.getRequestContext());
@@ -237,6 +234,11 @@ public class MyRootRpcServerHandler
 
     return _result;
     });
+
+    if (com.facebook.thrift.util.resources.RpcResources.isForceExecutionOffEventLoop()) {
+      _retVal = _retVal.subscribeOn(com.facebook.thrift.util.resources.RpcResources.getOffLoopScheduler());
+    }
+    return _retVal;
   }
 
   public java.util.Map<String, com.facebook.thrift.server.RpcServerHandler> getMethodMap() {

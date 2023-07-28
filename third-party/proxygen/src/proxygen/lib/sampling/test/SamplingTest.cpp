@@ -64,3 +64,32 @@ TEST(SamplingTests, HashKey) {
   // repeat
   EXPECT_FALSE(sampling.isLucky(key));
 }
+
+TEST(SamplingTests, runSampled) {
+  {
+    int counter = 0;
+
+    Sampling sampling(1.0);
+    for (int i = 0; i < 3; i++) {
+      sampling.runSampled([&] { ++counter; });
+    }
+    EXPECT_EQ(counter, 3);
+  }
+  {
+    int counter = 0;
+    Sampling sampling(0);
+    for (int i = 0; i < 3; i++) {
+      sampling.runSampled([&] { ++counter; });
+    }
+    EXPECT_EQ(counter, 0);
+  }
+  {
+    int counter = 0;
+    Sampling sampling(0.5);
+    for (int i = 0; i < 100; i++) {
+      sampling.runSampled([&] { ++counter; });
+    }
+    EXPECT_GT(counter, 0);
+    EXPECT_LT(counter, 100);
+  }
+}

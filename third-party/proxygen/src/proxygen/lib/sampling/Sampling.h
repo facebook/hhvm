@@ -11,6 +11,7 @@
 #include <cstdint>
 #include <string>
 
+#include <folly/Function.h>
 #include <folly/Range.h>
 
 namespace proxygen {
@@ -40,6 +41,12 @@ class Sampling {
   void updateRate(double rate);
 
   uint32_t getIntRate() const;
+
+  void runSampled(folly::FunctionRef<void()> func) {
+    if (isLucky()) {
+      func();
+    }
+  }
 
  private:
   double rate_{0.0};

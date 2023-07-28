@@ -64,6 +64,7 @@ std::set<std::string> get_struct_go_field_names(const t_struct* struct_);
 std::vector<t_struct*> get_service_req_resp_structs(const t_service* service);
 
 const std::string* get_go_name_annotation(const t_named* node);
+const std::string* get_go_tag_annotation(const t_named* node);
 
 } // namespace go
 } // namespace compiler

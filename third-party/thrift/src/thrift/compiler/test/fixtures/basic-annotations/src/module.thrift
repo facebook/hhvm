@@ -42,6 +42,7 @@ struct MyStruct {
   2: i64 major (cpp.name = 'majorVer', go.name = 'MajorVer');
   # package is a reserved keyword in Java, Thrift should be able to handle this
   @go.Name{name = "PackageName"}
+  @go.Tag{tag = 'tag:"some_package"'}
   1: string package (java.swift.name = '_package');
   # should generate valid code even with double quotes in an annotation
   3: string annotation_with_quote (go.tag = 'tag:"somevalue"');

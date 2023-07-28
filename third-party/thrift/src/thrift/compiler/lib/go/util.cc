@@ -437,6 +437,19 @@ const std::string* get_go_name_annotation(const t_named* node) {
   return nullptr;
 }
 
+const std::string* get_go_tag_annotation(const t_named* node) {
+  auto tag_annotation = node->find_structured_annotation_or_null(kGoTagUri);
+  if (tag_annotation != nullptr) {
+    return &(tag_annotation->get_value_from_structured_annotation("tag")
+                 .get_string());
+  } else if (node->has_annotation("go.tag")) {
+    // TODO: remove this else-if clause once
+    // all non-structured annotations are migrated.
+    return &(node->get_annotation("go.tag"));
+  }
+  return nullptr;
+}
+
 } // namespace go
 } // namespace compiler
 } // namespace thrift

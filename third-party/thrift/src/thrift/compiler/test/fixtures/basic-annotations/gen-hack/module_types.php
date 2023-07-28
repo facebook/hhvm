@@ -646,6 +646,11 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
                 "name" => "PackageName",
               )
             ),
+            '\facebook\thrift\annotation\go\Tag' => \facebook\thrift\annotation\go\Tag::fromShape(
+              shape(
+                "tag" => "tag:\"some_package\"",
+              )
+            ),
           ],
           'type' => dict[],
         ),

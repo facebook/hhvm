@@ -336,7 +336,7 @@ func (p *MyException) Error() string {
 //  - CppTypeAnnotation
 //  - MyUnion
 type MyStruct struct {
-  Package string `thrift:"package,1" db:"package" json:"package"`
+  Package string `thrift:"package,1" tag:"some_package"`
   Major int64 `thrift:"major,2" db:"major" json:"major"`
   AnnotationWithQuote string `thrift:"annotation_with_quote,3" tag:"somevalue"`
   Class_ string `thrift:"class_,4" db:"class_" json:"class_"`

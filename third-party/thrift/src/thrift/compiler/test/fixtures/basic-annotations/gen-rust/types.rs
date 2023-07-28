@@ -680,6 +680,16 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
                     let r: &mut Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
+
+                if type_id == ::std::any::TypeId::of::<go::types::Tag>() {
+                    let mut tmp = Some(go::types::Tag {
+                        tag: "tag:\"some_package\"".to_owned(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             3 => {
             },

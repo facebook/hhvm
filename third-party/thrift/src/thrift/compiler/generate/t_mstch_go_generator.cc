@@ -395,10 +395,10 @@ class mstch_go_field : public mstch_field {
     }
   }
   mstch::node has_go_tag() {
-    return field_->find_annotation_or_null("go.tag") != nullptr;
+    return go::get_go_tag_annotation(field_) != nullptr;
   }
   mstch::node go_tag() {
-    auto tag = field_->find_annotation_or_null("go.tag");
+    auto tag = go::get_go_tag_annotation(field_);
     if (tag != nullptr) {
       return *tag;
     }

@@ -454,7 +454,7 @@ func (x *MyException) Read(p thrift.Protocol) error {
 
 type MyStruct struct {
     MajorVer int64 `thrift:"major,2" json:"major" db:"major"`
-    PackageName string `thrift:"package,1" json:"package" db:"package"`
+    PackageName string `thrift:"package,1" tag:"some_package"`
     AnnotationWithQuote string `thrift:"annotation_with_quote,3" tag:"somevalue"`
     Class_ string `thrift:"class_,4" json:"class_" db:"class_"`
     AnnotationWithTrailingComma string `thrift:"annotation_with_trailing_comma,5" json:"annotation_with_trailing_comma" db:"annotation_with_trailing_comma"`

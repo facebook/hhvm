@@ -1478,7 +1478,7 @@ void t_go_generator::generate_go_struct_definition(
           type_to_go_type_with_opt(fieldType, is_pointer_field(*m_iter));
       string gotag;
       // Check for user override of db and json tags using "go.tag"
-      if (const auto* val = (*m_iter)->find_annotation_or_null("go.tag")) {
+      if (const auto* val = go::get_go_tag_annotation(*m_iter)) {
         gotag = *val;
       } else {
         gotag = "db:\"" + escape_string((*m_iter)->get_name()) + "\" ";

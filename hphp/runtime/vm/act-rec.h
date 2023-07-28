@@ -68,8 +68,9 @@ struct ActRec {
   uint64_t m_savedRip; // native (in-TC) return address
   FuncId m_funcId;
   // bit 0: LocalsDecRefd
-  // bit 1: AsyncEagerRet
-  // bits 2-31: bc offset of call opcode from caller func entry
+  // bit 1: IsInlined
+  // bit 2: AsyncEagerRet
+  // bits 3-31: bc offset of call opcode from caller func entry
   uint32_t m_callOffAndFlags;
   union {
     ObjectData* m_thisUnsafe; // This.

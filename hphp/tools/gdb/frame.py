@@ -201,7 +201,7 @@ def create_php(idx, ar, rip='0x????????', pc=None):
     # Pull the PC from Func::base() and ar->m_callOff if necessary.
     if pc is None:
         bc = rawptr(shared['m_bc'])
-        pc = bc + (ar['m_callOffAndFlags'] >> 2)
+        pc = bc + (ar['m_callOffAndFlags'] >> 3)
 
     frame['file'] = php_filename(func)
     frame['line'] = php_line_number(func, pc)

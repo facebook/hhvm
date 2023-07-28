@@ -53,6 +53,8 @@
 #include <folly/system/ThreadName.h>
 #include <folly/test/TestUtils.h>
 #include <proxygen/httpserver/HTTPServerOptions.h>
+#include <quic/client/QuicClientAsyncTransport.h>
+#include <quic/fizz/client/handshake/FizzClientQuicHandshakeContext.h>
 #include <thrift/lib/cpp/server/TServerEventHandler.h>
 #include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/cpp2/Flags.h>
@@ -90,6 +92,7 @@ using namespace std::literals;
 using std::string;
 
 THRIFT_FLAG_DECLARE_bool(server_rocket_upgrade_enabled);
+THRIFT_FLAG_DECLARE_bool(enable_quic);
 DECLARE_int32(thrift_cpp2_protocol_reader_string_limit);
 
 std::unique_ptr<HTTP2RoutingHandler> createHTTP2RoutingHandler(
@@ -3284,6 +3287,70 @@ TEST(ThriftServer, PooledRocketSyncChannel) {
         return RocketClientChannel::newChannel(std::move(sslSock));
       });
   TestServiceAsyncClient client(std::move(channel));
+
+  std::string response;
+  client.sync_sendResponse(response, 64);
+  EXPECT_EQ(response, "test64");
+}
+
+static std::shared_ptr<quic::QuicClientTransport> makeQuicClient(
+    folly::EventBase& evb, folly::SocketAddress&& peerAddr) {
+  auto sock = std::make_unique<folly::AsyncUDPSocket>(&evb);
+  auto ctx = std::make_shared<fizz::client::FizzClientContext>();
+  ctx->setSupportedAlpns({"rs"});
+  auto verifier = fizz::DefaultCertificateVerifier::createFromCAFiles(
+      fizz::VerificationContext::Client, {folly::kTestCA});
+
+  {
+    // set up fizz client cert
+    std::string certData;
+    folly::readFile(folly::kTestCert, certData);
+
+    std::string keyData;
+    folly::readFile(folly::kTestKey, keyData);
+
+    if (!certData.empty() && !keyData.empty()) {
+      auto cert = fizz::CertUtils::makeSelfCert(
+          std::move(certData), std::move(keyData));
+      ctx->setClientCertificate(std::move(cert));
+    }
+  }
+
+  auto quicClient = std::make_shared<quic::QuicClientTransport>(
+      &evb,
+      std::move(sock),
+      quic::FizzClientQuicHandshakeContext::Builder()
+          .setFizzClientContext(std::move(ctx))
+          .setCertificateVerifier(std::move(verifier))
+          .build());
+  quicClient->addNewPeerAddress(std::move(peerAddr));
+  return quicClient;
+}
+
+TEST(ThriftServer, RocketOverQuic) {
+  THRIFT_FLAG_SET_MOCK(enable_quic, true);
+  auto server = std::static_pointer_cast<ThriftServer>(
+      TestThriftServerFactory<TestInterface>().create());
+  server->setSSLPolicy(SSLPolicy::REQUIRED);
+
+  auto sslConfig = std::make_shared<wangle::SSLContextConfig>();
+  sslConfig->setCertificate(folly::kTestCert, folly::kTestKey, "");
+  sslConfig->clientCAFiles = std::vector<std::string>{folly::kTestCA};
+  sslConfig->sessionContext = "ThriftServerTest";
+  sslConfig->setNextProtocols({"rs"});
+  server->setSSLConfig(std::move(sslConfig));
+  ScopedServerThread sst(std::move(server));
+
+  folly::EventBase base;
+  auto port = sst.getAddress()->getPort();
+  folly::SocketAddress loopback("::1", port);
+
+  folly::AsyncTransport::UniquePtr asyncTransport(
+      new quic::QuicClientAsyncTransport(
+          makeQuicClient(base, std::move(loopback))));
+
+  TestServiceAsyncClient client(
+      RocketClientChannel::newChannel(std::move(asyncTransport)));
 
   std::string response;
   client.sync_sendResponse(response, 64);

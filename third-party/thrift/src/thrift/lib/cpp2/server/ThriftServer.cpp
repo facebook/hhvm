@@ -41,6 +41,7 @@
 #include <folly/io/GlobalShutdownSocketSet.h>
 #include <folly/portability/Sockets.h>
 #include <folly/system/Pid.h>
+#include <quic/server/async_tran/QuicAsyncTransportServer.h>
 #include <thrift/lib/cpp/concurrency/InitThreadFactory.h>
 #include <thrift/lib/cpp/concurrency/PosixThreadFactory.h>
 #include <thrift/lib/cpp/concurrency/Thread.h>
@@ -94,6 +95,8 @@ THRIFT_FLAG_DEFINE_bool(enable_io_queue_lag_detection, true);
 
 THRIFT_FLAG_DEFINE_bool(enforce_queue_concurrency_resource_pools, false);
 
+THRIFT_FLAG_DEFINE_bool(enable_quic, false);
+
 namespace apache::thrift::detail {
 THRIFT_PLUGGABLE_FUNC_REGISTER(
     apache::thrift::ThriftServer::DumpSnapshotOnLongShutdownResult,
@@ -126,6 +129,29 @@ namespace {
   std::exit(code);
 #endif
 }
+
+const quic::TransportSettings& getQuicTransportSettings() {
+  static quic::TransportSettings ts = ([]() {
+    quic::TransportSettings ts_;
+    ts_.advertisedInitialConnectionWindowSize = 60 * 1024 * 1024;
+    ts_.advertisedInitialBidiLocalStreamWindowSize = 60 * 1024 * 1024;
+    ts_.advertisedInitialMaxStreamsBidi = 1;
+    ts_.advertisedInitialMaxStreamsUni = 0;
+    ts_.numGROBuffers_ = quic::kMaxNumGROBuffers;
+    ts_.writeConnectionDataPacketsLimit = 50;
+    ts_.batchingMode = quic::QuicBatchingMode::BATCHING_MODE_GSO;
+    ts_.maxBatchSize = 50;
+    ts_.initCwndInMss = 100;
+    ts_.maxCwndInMss = quic::kLargeMaxCwndInMss;
+    ts_.maxRecvBatchSize = 64;
+    ts_.shouldRecvBatch = true;
+    ts_.shouldUseRecvmmsgForBatchRecv = true;
+    return ts_;
+  })();
+
+  return ts;
+}
+
 } // namespace
 
 namespace apache {
@@ -570,6 +596,10 @@ void ThriftServer::setup() {
                      << folly::exceptionStr(ex);
         }
       });
+    }
+
+    if (THRIFT_FLAG(enable_quic)) {
+      startQuicServer();
     }
 
 #if FOLLY_HAS_COROUTINES
@@ -1349,6 +1379,9 @@ void ThriftServer::stop() {
   if (auto s = stopController_.lock()) {
     s->stop();
   }
+  if (quicServer_) {
+    quicServer_->shutdown();
+  }
 }
 
 void ThriftServer::stopListening() {
@@ -2056,6 +2089,54 @@ ThriftServer::extractNewConnectionContext(folly::AsyncTransport& transport) {
     }
   }
   return folly::none;
+}
+
+void ThriftServer::startQuicServer() {
+  // add hook into quic server
+  quicServer_ = std::make_unique<quic::QuicAsyncTransportServer>(
+      [this](folly::AsyncTransport::UniquePtr asyncTransport) {
+        auto* evb = asyncTransport->getEventBase();
+        // get worker associated with evb
+        auto** worker = evbToWorker_.get(*evb);
+        if (!worker) {
+          // worker destructed or hasn't begun yet, either way close to
+          // prevent connection from lingering
+          asyncTransport->closeWithReset();
+          return;
+        }
+
+        auto clientAddr = asyncTransport->getPeerAddress();
+        auto alpn = asyncTransport->getApplicationProtocol();
+        (*worker)->onNewConnection(
+            std::move(asyncTransport),
+            &clientAddr,
+            alpn,
+            wangle::SecureTransportType::TLS,
+            wangle::TransportInfo());
+      });
+  auto keepalives = ioThreadPool_->getAllEventBases();
+  std::vector<folly::EventBase*> evbs(keepalives.size());
+  std::transform(
+      keepalives.begin(),
+      keepalives.end(),
+      evbs.begin(),
+      [](folly::Executor::KeepAlive<folly::EventBase>& in) {
+        return in->getEventBase();
+      });
+
+  auto server_addr = socket_ ? socket_->getAddress() : getAddress();
+  CHECK(server_addr.isInitialized());
+
+  auto wangleConfig = getServerSocketConfig();
+  auto fizzCertManager = std::shared_ptr<fizz::server::CertManager>(
+      wangle::FizzConfigUtil::createCertManager(wangleConfig, nullptr)
+          .release());
+  auto fizzContext = wangle::FizzConfigUtil::createFizzContext(wangleConfig);
+  fizzContext->setCertManager(fizzCertManager);
+
+  quicServer_->setFizzContext(std::move(fizzContext));
+  quicServer_->setTransportSettings(getQuicTransportSettings());
+  quicServer_->start(server_addr, evbs);
 }
 
 } // namespace thrift

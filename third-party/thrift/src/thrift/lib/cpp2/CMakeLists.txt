@@ -315,6 +315,7 @@ add_dependencies(
   thrifttyperep
   thrifttype
   thriftanyrep
+  mvfst::mvfst_server_async_tran
 )
 target_link_libraries(
   thriftcpp2
@@ -328,6 +329,7 @@ target_link_libraries(
     thrifttyperep
     thrifttype
     thriftanyrep
+    mvfst::mvfst_server_async_tran
 )
 
 # Install includes

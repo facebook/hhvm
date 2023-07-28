@@ -65,6 +65,8 @@ void Cpp2Worker::initRequestsRegistry() {
           *evb, memPerReq, memPerWorker, maxFinished);
       self->workerProvider_ =
           detail::createIOWorkerProvider(evb, requestsRegistry_);
+      // add mapping from evb to worker
+      self->server_->evbToWorker_.emplace(*evb, this);
     }
   });
 }
@@ -329,6 +331,7 @@ void Cpp2Worker::requestStop() {
     }
     cancelQueuedRequests();
     stopping_.store(true, std::memory_order_relaxed);
+    server_->evbToWorker_.erase(*getEventBase());
     if (activeRequests_ == 0) {
       stopBaton_.post();
     }

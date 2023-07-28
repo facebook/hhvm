@@ -103,6 +103,7 @@ if (THRIFT_LIB_ONLY OR build_all)
   find_package(wangle CONFIG REQUIRED)
   find_package(ZLIB REQUIRED)
   find_package(Zstd REQUIRED)
+  find_package(mvfst CONFIG REQUIRED)
   # https://cmake.org/cmake/help/v3.9/module/FindThreads.html
   set(THREADS_PREFER_PTHREAD_FLAG ON)
   find_package(Threads)

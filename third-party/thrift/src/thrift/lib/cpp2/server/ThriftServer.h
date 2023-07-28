@@ -40,6 +40,7 @@
 #include <folly/io/ShutdownSocketSet.h>
 #include <folly/io/async/AsyncServerSocket.h>
 #include <folly/io/async/EventBase.h>
+#include <folly/io/async/EventBaseLocal.h>
 #include <folly/io/async/EventBaseManager.h>
 #include <folly/lang/Badge.h>
 #include <folly/synchronization/CallOnce.h>
@@ -76,6 +77,10 @@ THRIFT_FLAG_DECLARE_bool(dump_snapshot_on_long_shutdown);
 THRIFT_FLAG_DECLARE_bool(server_check_unimplemented_extra_interfaces);
 THRIFT_FLAG_DECLARE_bool(enable_io_queue_lag_detection);
 THRIFT_FLAG_DECLARE_bool(enforce_queue_concurrency_resource_pools);
+
+namespace quic {
+class QuicAsyncTransportServer;
+}
 
 namespace apache {
 namespace thrift {
@@ -186,6 +191,12 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   //! Listen socket
   folly::AsyncServerSocket::UniquePtr socket_;
 
+  // quic server
+  std::unique_ptr<quic::QuicAsyncTransportServer> quicServer_;
+
+  // evb->worker eventbase local
+  folly::EventBaseLocal<Cpp2Worker*> evbToWorker_;
+
   struct IdleServerAction : public folly::HHWheelTimer::Callback {
     IdleServerAction(
         ThriftServer& server,
@@ -267,6 +278,8 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   void ensureDecoratedProcessorFactoryInitialized();
 
   bool serverRanWithDCHECK();
+
+  void startQuicServer();
 
 #if FOLLY_HAS_COROUTINES
   std::unique_ptr<folly::coro::CancellableAsyncScope> asyncScope_;

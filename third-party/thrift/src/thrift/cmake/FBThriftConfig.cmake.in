@@ -29,6 +29,7 @@ else()
 endif()
 
 find_dependency(ZLIB REQUIRED)
+find_package(mvfst CONFIG REQUIRED)
 
 if (NOT TARGET FBThrift::thriftcpp2)
   include("${FBTHRIFT_CMAKE_DIR}/FBThriftTargets.cmake")

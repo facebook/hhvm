@@ -2271,7 +2271,7 @@ func (p *IndependentDirectlyAdapted) String() string {
 //  - OptBoxedField
 type StructWithFieldAdapter struct {
   Field int32 `thrift:"field,1" db:"field" json:"field"`
-  SharedField int32 `thrift:"shared_field,2" db:"shared_field" json:"shared_field"`
+  SharedField *int32 `thrift:"shared_field,2" db:"shared_field" json:"shared_field"`
   OptSharedField *int32 `thrift:"opt_shared_field,3,optional" db:"opt_shared_field" json:"opt_shared_field,omitempty"`
   OptBoxedField *int32 `thrift:"opt_boxed_field,4,optional" db:"opt_boxed_field" json:"opt_boxed_field,omitempty"`
 }
@@ -2284,9 +2284,12 @@ func NewStructWithFieldAdapter() *StructWithFieldAdapter {
 func (p *StructWithFieldAdapter) GetField() int32 {
   return p.Field
 }
-
+var StructWithFieldAdapter_SharedField_DEFAULT int32
 func (p *StructWithFieldAdapter) GetSharedField() int32 {
-  return p.SharedField
+  if !p.IsSetSharedField() {
+    return StructWithFieldAdapter_SharedField_DEFAULT
+  }
+  return *p.SharedField
 }
 var StructWithFieldAdapter_OptSharedField_DEFAULT int32
 func (p *StructWithFieldAdapter) GetOptSharedField() int32 {
@@ -2302,6 +2305,10 @@ func (p *StructWithFieldAdapter) GetOptBoxedField() int32 {
   }
   return *p.OptBoxedField
 }
+func (p *StructWithFieldAdapter) IsSetSharedField() bool {
+  return p != nil && p.SharedField != nil
+}
+
 func (p *StructWithFieldAdapter) IsSetOptSharedField() bool {
   return p != nil && p.OptSharedField != nil
 }
@@ -2334,7 +2341,7 @@ func (s *StructWithFieldAdapterBuilder) Field(field int32) *StructWithFieldAdapt
   return s
 }
 
-func (s *StructWithFieldAdapterBuilder) SharedField(sharedField int32) *StructWithFieldAdapterBuilder {
+func (s *StructWithFieldAdapterBuilder) SharedField(sharedField *int32) *StructWithFieldAdapterBuilder {
   s.obj.SharedField = sharedField
   return s
 }
@@ -2354,7 +2361,7 @@ func (s *StructWithFieldAdapter) SetField(field int32) *StructWithFieldAdapter {
   return s
 }
 
-func (s *StructWithFieldAdapter) SetSharedField(sharedField int32) *StructWithFieldAdapter {
+func (s *StructWithFieldAdapter) SetSharedField(sharedField *int32) *StructWithFieldAdapter {
   s.SharedField = sharedField
   return s
 }
@@ -2426,7 +2433,7 @@ func (p *StructWithFieldAdapter)  ReadField2(iprot thrift.Protocol) error {
   if v, err := iprot.ReadI32(); err != nil {
     return thrift.PrependError("error reading field 2: ", err)
   } else {
-    p.SharedField = v
+    p.SharedField = &v
   }
   return nil
 }
@@ -2476,7 +2483,7 @@ func (p *StructWithFieldAdapter) writeField1(oprot thrift.Protocol) (err error) 
 func (p *StructWithFieldAdapter) writeField2(oprot thrift.Protocol) (err error) {
   if err := oprot.WriteFieldBegin("shared_field", thrift.I32, 2); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:shared_field: ", p), err) }
-  if err := oprot.WriteI32(int32(p.SharedField)); err != nil {
+  if err := oprot.WriteI32(int32(*p.SharedField)); err != nil {
   return thrift.PrependError(fmt.Sprintf("%T.shared_field (2) field write error: ", p), err) }
   if err := oprot.WriteFieldEnd(); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field end error 2:shared_field: ", p), err) }
@@ -2513,7 +2520,12 @@ func (p *StructWithFieldAdapter) String() string {
   }
 
   fieldVal := fmt.Sprintf("%v", p.Field)
-  sharedFieldVal := fmt.Sprintf("%v", p.SharedField)
+  var sharedFieldVal string
+  if p.SharedField == nil {
+    sharedFieldVal = "<nil>"
+  } else {
+    sharedFieldVal = fmt.Sprintf("%v", *p.SharedField)
+  }
   var optSharedFieldVal string
   if p.OptSharedField == nil {
     optSharedFieldVal = "<nil>"

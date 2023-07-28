@@ -5077,8 +5077,8 @@ type AllocatorAware struct {
   AaMap map[int32]int32 `thrift:"aa_map,3" db:"aa_map" json:"aa_map"`
   AaString string `thrift:"aa_string,4" db:"aa_string" json:"aa_string"`
   NotAContainer int32 `thrift:"not_a_container,5" db:"not_a_container" json:"not_a_container"`
-  AaUnique int32 `thrift:"aa_unique,6" db:"aa_unique" json:"aa_unique"`
-  AaShared int32 `thrift:"aa_shared,7" db:"aa_shared" json:"aa_shared"`
+  AaUnique *int32 `thrift:"aa_unique,6" db:"aa_unique" json:"aa_unique"`
+  AaShared *int32 `thrift:"aa_shared,7" db:"aa_shared" json:"aa_shared"`
 }
 
 func NewAllocatorAware() *AllocatorAware {
@@ -5105,14 +5105,28 @@ func (p *AllocatorAware) GetAaString() string {
 func (p *AllocatorAware) GetNotAContainer() int32 {
   return p.NotAContainer
 }
-
+var AllocatorAware_AaUnique_DEFAULT int32
 func (p *AllocatorAware) GetAaUnique() int32 {
-  return p.AaUnique
+  if !p.IsSetAaUnique() {
+    return AllocatorAware_AaUnique_DEFAULT
+  }
+  return *p.AaUnique
+}
+var AllocatorAware_AaShared_DEFAULT int32
+func (p *AllocatorAware) GetAaShared() int32 {
+  if !p.IsSetAaShared() {
+    return AllocatorAware_AaShared_DEFAULT
+  }
+  return *p.AaShared
+}
+func (p *AllocatorAware) IsSetAaUnique() bool {
+  return p != nil && p.AaUnique != nil
 }
 
-func (p *AllocatorAware) GetAaShared() int32 {
-  return p.AaShared
+func (p *AllocatorAware) IsSetAaShared() bool {
+  return p != nil && p.AaShared != nil
 }
+
 type AllocatorAwareBuilder struct {
   obj *AllocatorAware
 }
@@ -5160,12 +5174,12 @@ func (a *AllocatorAwareBuilder) NotAContainer(notAContainer int32) *AllocatorAwa
   return a
 }
 
-func (a *AllocatorAwareBuilder) AaUnique(aaUnique int32) *AllocatorAwareBuilder {
+func (a *AllocatorAwareBuilder) AaUnique(aaUnique *int32) *AllocatorAwareBuilder {
   a.obj.AaUnique = aaUnique
   return a
 }
 
-func (a *AllocatorAwareBuilder) AaShared(aaShared int32) *AllocatorAwareBuilder {
+func (a *AllocatorAwareBuilder) AaShared(aaShared *int32) *AllocatorAwareBuilder {
   a.obj.AaShared = aaShared
   return a
 }
@@ -5195,12 +5209,12 @@ func (a *AllocatorAware) SetNotAContainer(notAContainer int32) *AllocatorAware {
   return a
 }
 
-func (a *AllocatorAware) SetAaUnique(aaUnique int32) *AllocatorAware {
+func (a *AllocatorAware) SetAaUnique(aaUnique *int32) *AllocatorAware {
   a.AaUnique = aaUnique
   return a
 }
 
-func (a *AllocatorAware) SetAaShared(aaShared int32) *AllocatorAware {
+func (a *AllocatorAware) SetAaShared(aaShared *int32) *AllocatorAware {
   a.AaShared = aaShared
   return a
 }
@@ -5355,7 +5369,7 @@ func (p *AllocatorAware)  ReadField6(iprot thrift.Protocol) error {
   if v, err := iprot.ReadI32(); err != nil {
     return thrift.PrependError("error reading field 6: ", err)
   } else {
-    p.AaUnique = v
+    p.AaUnique = &v
   }
   return nil
 }
@@ -5364,7 +5378,7 @@ func (p *AllocatorAware)  ReadField7(iprot thrift.Protocol) error {
   if v, err := iprot.ReadI32(); err != nil {
     return thrift.PrependError("error reading field 7: ", err)
   } else {
-    p.AaShared = v
+    p.AaShared = &v
   }
   return nil
 }
@@ -5472,7 +5486,7 @@ func (p *AllocatorAware) writeField5(oprot thrift.Protocol) (err error) {
 func (p *AllocatorAware) writeField6(oprot thrift.Protocol) (err error) {
   if err := oprot.WriteFieldBegin("aa_unique", thrift.I32, 6); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 6:aa_unique: ", p), err) }
-  if err := oprot.WriteI32(int32(p.AaUnique)); err != nil {
+  if err := oprot.WriteI32(int32(*p.AaUnique)); err != nil {
   return thrift.PrependError(fmt.Sprintf("%T.aa_unique (6) field write error: ", p), err) }
   if err := oprot.WriteFieldEnd(); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field end error 6:aa_unique: ", p), err) }
@@ -5482,7 +5496,7 @@ func (p *AllocatorAware) writeField6(oprot thrift.Protocol) (err error) {
 func (p *AllocatorAware) writeField7(oprot thrift.Protocol) (err error) {
   if err := oprot.WriteFieldBegin("aa_shared", thrift.I32, 7); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 7:aa_shared: ", p), err) }
-  if err := oprot.WriteI32(int32(p.AaShared)); err != nil {
+  if err := oprot.WriteI32(int32(*p.AaShared)); err != nil {
   return thrift.PrependError(fmt.Sprintf("%T.aa_shared (7) field write error: ", p), err) }
   if err := oprot.WriteFieldEnd(); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field end error 7:aa_shared: ", p), err) }
@@ -5499,8 +5513,18 @@ func (p *AllocatorAware) String() string {
   aaMapVal := fmt.Sprintf("%v", p.AaMap)
   aaStringVal := fmt.Sprintf("%v", p.AaString)
   notAContainerVal := fmt.Sprintf("%v", p.NotAContainer)
-  aaUniqueVal := fmt.Sprintf("%v", p.AaUnique)
-  aaSharedVal := fmt.Sprintf("%v", p.AaShared)
+  var aaUniqueVal string
+  if p.AaUnique == nil {
+    aaUniqueVal = "<nil>"
+  } else {
+    aaUniqueVal = fmt.Sprintf("%v", *p.AaUnique)
+  }
+  var aaSharedVal string
+  if p.AaShared == nil {
+    aaSharedVal = "<nil>"
+  } else {
+    aaSharedVal = fmt.Sprintf("%v", *p.AaShared)
+  }
   return fmt.Sprintf("AllocatorAware({AaList:%s AaSet:%s AaMap:%s AaString:%s NotAContainer:%s AaUnique:%s AaShared:%s})", aaListVal, aaSetVal, aaMapVal, aaStringVal, notAContainerVal, aaUniqueVal, aaSharedVal)
 }
 

@@ -447,7 +447,8 @@ bool t_go_generator::type_need_reference(const t_type* type) {
 bool t_go_generator::is_pointer_field(
     const t_field* tfield, bool in_container_value) {
   (void)in_container_value;
-  if (tfield->has_annotation("cpp.ref")) {
+  if (tfield->find_structured_annotation_or_null(kCppRefUri) != nullptr ||
+      tfield->has_annotation("cpp.ref")) {
     return true;
   }
   const t_type* type = tfield->get_type()->get_true_type();

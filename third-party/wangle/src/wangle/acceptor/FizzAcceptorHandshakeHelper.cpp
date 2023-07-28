@@ -15,6 +15,7 @@
  */
 
 #include <fizz/record/Types.h>
+#include <fizz/server/State.h>
 #include <folly/experimental/io/AsyncIoUringSocketFactory.h>
 #include <wangle/acceptor/FizzAcceptorHandshakeHelper.h>
 #include <wangle/acceptor/SSLAcceptorHandshakeHelper.h>
@@ -91,6 +92,9 @@ void FizzAcceptorHandshakeHelper::fizzHandshakeSuccess(
   tinfo_.securityType = transport->getSecurityProtocol();
   tinfo_.sslSetupTime = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::steady_clock::now() - acceptTime_);
+  tinfo_.echStatus =
+      fizz::server::toString(transport->getState().echStatus()).str();
+
   if (tokenBindingExtension_ &&
       tokenBindingExtension_->getNegotiatedKeyParam().has_value()) {
     tinfo_.negotiatedTokenBindingKeyParameters =

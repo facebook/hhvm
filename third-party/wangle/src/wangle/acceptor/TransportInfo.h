@@ -342,6 +342,12 @@ struct TransportInfo {
    */
   bool initWithSocket(const folly::AsyncSocket* sock);
 
+  /*
+   * Stores status of ech request.
+   * May hold the following values: { "Not requested", "Rejected", "Accepted" }
+   */
+  std::string echStatus;
+
 #if defined(__linux__) || defined(__FreeBSD__)
   /*
    * Perform the getsockopt(2) syscall to fetch TCP congestion control algorithm

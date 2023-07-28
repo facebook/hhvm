@@ -115,9 +115,14 @@ class HeaderSerializer {
 
   template <class T>
   size_t writeBE(T value) {
-    const auto bigEndianValue = folly::Endian::big(value);
-    const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&bigEndianValue);
-    return push(bytes, sizeof(T));
+    constexpr auto size = sizeof(T);
+    if (FOLLY_LIKELY(canWrite(size))) {
+      T* target = reinterpret_cast<T*>(buf_ + pos_);
+      *target = folly::Endian::big(value);
+      incrementPosition(size);
+      return size;
+    }
+    return 0;
   }
 
   size_t writeFrameTypeAndFlags(FrameType frameType, Flags flags) {
@@ -131,24 +136,26 @@ class HeaderSerializer {
   }
 
   size_t writeFrameOrMetadataSize(size_t nbytes) {
-    // Frame and metadata lengths are BE-encoded in 3 bytes
-    DCHECK_LT(nbytes, (1ull << (kBytesForFrameOrMetadataLength * 8)));
-
-    const size_t beSize = folly::Endian::big(nbytes);
-    const uint8_t* start = reinterpret_cast<const uint8_t*>(&beSize) +
-        (sizeof(beSize) - kBytesForFrameOrMetadataLength);
-    return push(start, kBytesForFrameOrMetadataLength);
+    if (FOLLY_LIKELY(canWrite(kBytesForFrameOrMetadataLength))) {
+      writeInt24BE(nbytes);
+      incrementPosition(kBytesForFrameOrMetadataLength);
+      return kBytesForFrameOrMetadataLength;
+    }
+    return 0;
   }
 
  private:
-  size_t push(const uint8_t* buf, size_t len) {
-    if (LIKELY(pos_ + len <= maxLen_)) {
-      memcpy(buf_ + pos_, buf, len);
-      pos_ += len;
-      return len;
-    }
-    pos_ = maxLen_ + 1;
-    return 0;
+  FOLLY_ALWAYS_INLINE bool canWrite(size_t size) {
+    return maxLen_ - pos_ >= size;
+  }
+
+  FOLLY_ALWAYS_INLINE void incrementPosition(size_t size) { pos_ += size; }
+
+  FOLLY_ALWAYS_INLINE void writeInt24BE(size_t nbytes) {
+    DCHECK_LE(nbytes, (1ull << (kBytesForFrameOrMetadataLength * 8)));
+    buf_[pos_] = (nbytes >> 16) & 0xFF;
+    buf_[pos_ + 1] = (nbytes >> 8) & 0xFF;
+    buf_[pos_ + 2] = nbytes & 0xFF;
   }
 
   uint8_t* buf_;

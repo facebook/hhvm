@@ -240,6 +240,10 @@ type t = {
   tco_typecheck_sample_rate: float;
   (* Experimental implementation of a "sound" dynamic type *)
   tco_enable_sound_dynamic: bool;
+  (* Under sound dynamic, introduce like-types for built-in operations e.g. on Vector.
+     This is done anyway if everything_sdt=true
+  *)
+  tco_pessimise_builtins: bool;
   (* Allow use of attribute <<__NoAutoDynamic>> *)
   tco_enable_no_auto_dynamic: bool;
   (* Skip second check of method under dynamic assumptions *)
@@ -416,6 +420,7 @@ val set :
   ?tco_report_pos_from_reason:bool ->
   ?tco_typecheck_sample_rate:float ->
   ?tco_enable_sound_dynamic:bool ->
+  ?tco_pessimise_builtins:bool ->
   ?tco_enable_no_auto_dynamic:bool ->
   ?tco_skip_check_under_dynamic:bool ->
   ?tco_ifc_enabled:string list ->

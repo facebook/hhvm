@@ -224,6 +224,10 @@ let enforce_sealed_subclasses t = t.GlobalOptions.tco_enforce_sealed_subclasses
 
 let everything_sdt t = t.GlobalOptions.tco_everything_sdt
 
+let pessimise_builtins t =
+  enable_sound_dynamic t
+  && (everything_sdt t || t.GlobalOptions.tco_pessimise_builtins)
+
 let explicit_consistent_constructors t =
   t.GlobalOptions.tco_explicit_consistent_constructors
 

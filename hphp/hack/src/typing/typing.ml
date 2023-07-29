@@ -1278,7 +1278,7 @@ let fun_type_of_id env x tal el =
     (match get_node fd.fe_type with
     | Tfun ft ->
       let ft =
-        let pessimise = TCO.enable_sound_dynamic (Env.get_tcopt env) in
+        let pessimise = TCO.pessimise_builtins (Env.get_tcopt env) in
         Typing_special_fun.transform_special_fun_ty
           ~pessimise
           ft
@@ -3644,7 +3644,7 @@ and expr_
       expr_infer =
     (* Is this a pessimisable builtin constructor *and* the flag is set? *)
     let do_pessimise_builtin =
-      can_pessimise && TCO.enable_sound_dynamic (Env.get_tcopt env)
+      can_pessimise && TCO.pessimise_builtins (Env.get_tcopt env)
     in
     (* Under Sound Dynamic, for pessimisable builtins we add a like to the expected type
      * that is used to check the element expressions.
@@ -3656,7 +3656,7 @@ and expr_
      *      and      Pair<int,string> { $li, "A" } which has type Pair<~int,string>
      *)
     let non_pessimised_builtin_explicit =
-      TCO.enable_sound_dynamic (Env.get_tcopt env)
+      TCO.pessimise_builtins (Env.get_tcopt env)
       && explicit
       && not do_pessimise_builtin
     in
@@ -6426,7 +6426,7 @@ and et_splice env dsl_opt p e =
     let raw_spliceable_type =
       MakeType.spliceable (Reason.Rsplice p) ty_visitor ty_res ty_infer
     in
-    if TCO.enable_sound_dynamic (Env.get_tcopt env) then
+    if TCO.pessimise_builtins (Env.get_tcopt env) then
       MakeType.locl_like (Reason.Rsplice p) raw_spliceable_type
     else
       raw_spliceable_type

@@ -146,6 +146,7 @@ type t = {
   tco_report_pos_from_reason: bool;
   tco_typecheck_sample_rate: float;
   tco_enable_sound_dynamic: bool;
+  tco_pessimise_builtins: bool;
   tco_enable_no_auto_dynamic: bool;
   tco_skip_check_under_dynamic: bool;
   tco_ifc_enabled: string list;
@@ -272,6 +273,7 @@ let default =
     tco_report_pos_from_reason = false;
     tco_typecheck_sample_rate = 1.0;
     tco_enable_sound_dynamic = false;
+    tco_pessimise_builtins = false;
     tco_enable_no_auto_dynamic = false;
     tco_skip_check_under_dynamic = false;
     tco_ifc_enabled = [];
@@ -396,6 +398,7 @@ let set
     ?tco_report_pos_from_reason
     ?tco_typecheck_sample_rate
     ?tco_enable_sound_dynamic
+    ?tco_pessimise_builtins
     ?tco_enable_no_auto_dynamic
     ?tco_skip_check_under_dynamic
     ?tco_ifc_enabled
@@ -650,6 +653,8 @@ let set
       setting tco_typecheck_sample_rate options.tco_typecheck_sample_rate;
     tco_enable_sound_dynamic =
       setting tco_enable_sound_dynamic options.tco_enable_sound_dynamic;
+    tco_pessimise_builtins =
+      setting tco_pessimise_builtins options.tco_pessimise_builtins;
     tco_enable_no_auto_dynamic =
       setting tco_enable_no_auto_dynamic options.tco_enable_no_auto_dynamic;
     tco_skip_check_under_dynamic =

@@ -104,6 +104,7 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_report_pos_from_reason: false,
     tco_typecheck_sample_rate: 1.0,
     tco_enable_sound_dynamic: false,
+    tco_pessimise_builtins: false,
     tco_skip_check_under_dynamic: false,
     tco_ifc_enabled: &[],
     tco_global_access_check_enabled: false,

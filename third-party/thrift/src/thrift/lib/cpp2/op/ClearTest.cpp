@@ -196,5 +196,21 @@ TEST(ClearTest, CustomDefaultFieldAdapter) {
 
   test_custom_default<Tag, true>();
 }
+
+TEST(ClearTest, Default) {
+  // Default of structured with no custom default returns the reference of
+  // intrinsic default for the terse intern box optimization.
+  using TagWithNoCustomDefault = type::struct_t<testset::struct_i64>;
+  using TagWithCustomDefault =
+      type::struct_t<testset::struct_i64_custom_default>;
+
+  EXPECT_EQ(
+      &getDefault<TagWithNoCustomDefault>(),
+      &getIntrinsicDefault<TagWithNoCustomDefault>());
+  EXPECT_NE(
+      &getDefault<TagWithCustomDefault>(),
+      &getIntrinsicDefault<TagWithCustomDefault>());
+}
+
 } // namespace
 } // namespace apache::thrift::op

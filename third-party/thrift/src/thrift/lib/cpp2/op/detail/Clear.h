@@ -156,9 +156,16 @@ struct ThriftClearDefault {
 // Gets the intrinsic default via `op::create`
 template <typename Tag>
 struct CreateDefault {
-  const auto& operator()() const {
-    static const auto* p = new type::native_type<Tag>();
-    return *p;
+  FOLLY_EXPORT const auto& operator()() const {
+    // If all nested fields does not have custom default (or default equals to
+    // the intrinsic default), returns the reference to the intrinsic default.
+    // This allows us to optimize for terse intern box so that the default
+    // constructed field will be eligible for pointer comparison for empty
+    // check.
+    static const auto& id = GetIntrinsicDefault<Tag>{}();
+    static const auto& d =
+        op::equal<Tag, Tag>({}, id) ? id : *(new type::native_type<Tag>);
+    return d;
   }
 };
 

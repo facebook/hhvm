@@ -24,6 +24,7 @@ let initialize
       SearchUtils.default_si_env with
       sie_provider = SearchUtils.provider_of_string provider_name;
       sie_quiet_mode = quiet;
+      glean_reponame = GleanOptions.reponame gleanopt;
     }
   in
   (* Basic initialization *)
@@ -36,7 +37,7 @@ let initialize
         ~savedstate_file_opt
         ~namespace_map
     | CustomIndex ->
-      CustomSearchService.initialize ~gleanopt;
+      CustomSearchService.initialize ~sienv;
       sienv
     | NoIndex
     | LocalIndex ->
@@ -46,7 +47,7 @@ let initialize
   let namespace_list =
     match sienv.sie_provider with
     | SqliteIndex -> SqliteSearchService.fetch_namespaces ~sienv
-    | CustomIndex -> CustomSearchService.fetch_namespaces ()
+    | CustomIndex -> CustomSearchService.fetch_namespaces ~sienv
     | NoIndex
     | LocalIndex ->
       []
@@ -121,6 +122,7 @@ let find_matching_symbols
       | CustomIndex ->
         let r =
           CustomSearchService.search_symbols
+            ~sienv
             ~query_text
             ~max_results
             ~context

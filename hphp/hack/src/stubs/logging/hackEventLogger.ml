@@ -68,6 +68,7 @@ type rollout_flags = {
   ide_naming_table_update_threshold: int;
   ide_batch_process_changes: bool;
   use_compressed_dep_graph: bool;
+  glean_v2: bool;
 }
 
 let flush () = ()

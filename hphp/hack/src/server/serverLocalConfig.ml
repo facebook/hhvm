@@ -260,6 +260,7 @@ type t = {
       (** Dump tast hashes into /tmp/hh_server/tast_hashes*)
   use_compressed_dep_graph: bool;
       (** POC: @bobren, use new fancy compressed dep graph that is 25% the size of the old one *)
+  glean_v2: bool;  (** use newer glean database schema *)
 }
 
 let default =
@@ -355,6 +356,7 @@ let default =
     ide_naming_table_update_threshold = 0;
     ide_batch_process_changes = true;
     dump_tast_hashes = false;
+    glean_v2 = false;
   }
 
 let system_config_path =
@@ -1071,6 +1073,7 @@ let load_
   let dump_tast_hashes =
     bool_ "dump_tast_hashes" ~default:default.dump_tast_hashes config
   in
+  let glean_v2 = bool_ "glean_v2" ~default:default.glean_v2 config in
   {
     saved_state =
       {
@@ -1180,6 +1183,7 @@ let load_
     ide_naming_table_update_threshold;
     ide_batch_process_changes;
     dump_tast_hashes;
+    glean_v2;
   }
 
 (** Loads the config from [path]. Uses JustKnobs and ExperimentsConfig to override.
@@ -1231,4 +1235,5 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       ide_naming_table_update_threshold =
         options.ide_naming_table_update_threshold;
       ide_batch_process_changes = options.ide_batch_process_changes;
+      glean_v2 = options.glean_v2;
     }

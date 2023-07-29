@@ -1,6 +1,7 @@
 open Hh_prelude
 open IndexBuilderTypes
 open SearchUtils
+open SearchTypes
 open Test_harness
 module Args = Test_harness_common_args
 module SA = Asserter.String_asserter
@@ -27,8 +28,8 @@ let rec assert_docblock_markdown
       in
       assert_docblock_markdown exp_list act_list)
 
-let assert_ns_matches (expected_ns : string) (actual : SearchUtils.si_results) :
-    unit =
+let assert_ns_matches (expected_ns : string) (actual : SearchTypes.si_item list)
+    : unit =
   let found =
     List.fold actual ~init:false ~f:(fun acc item ->
         String.equal item.si_name expected_ns || acc)

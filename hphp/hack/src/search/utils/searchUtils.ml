@@ -7,7 +7,7 @@
  *
  *)
 open Reordered_argument_collections
-include SearchTypes
+open SearchTypes
 
 (* Known search providers *)
 type search_provider =
@@ -16,15 +16,6 @@ type search_provider =
   | SqliteIndex
   | LocalIndex
 [@@deriving show]
-
-(* The context in which autocomplete is being performed *)
-type autocomplete_type =
-  | Acid
-  | Acnew
-  | Actype
-  | Actrait_only
-  | Ac_workspace_symbol (* Excludes namespaces; used for symbol search *)
-[@@deriving eq, show]
 
 (* Convert a string to a provider *)
 let provider_of_string (provider_str : string) : search_provider =
@@ -77,72 +68,6 @@ type legacy_symbol = (FileInfo.pos, si_kind) term
 
 (* Collected results as known by the autocomplete system *)
 type result = symbol list
-
-(*
- * Convert the enum to an integer whose value will not change accidentally.
- *
- * Although [@@deriving] would be a very ocaml-ish way to solve this same
- * problem, we would run the risk that anyone who edits the code to reorder
- * list of si_kinds, perhaps by adding something new in its correct
- * alphabetic order, would cause unexpected autocomplete behavior due to
- * mismatches between the [@@deriving] ordinal values and the integers
- * stored in sqlite.
- *)
-let kind_to_int (kind : si_kind) : int =
-  match kind with
-  | SI_Class -> 1
-  | SI_Interface -> 2
-  | SI_Enum -> 3
-  | SI_Trait -> 4
-  | SI_Unknown -> 5
-  | SI_Mixed -> 6
-  | SI_Function -> 7
-  | SI_Typedef -> 8
-  | SI_GlobalConstant -> 9
-  | SI_XHP -> 10
-  | SI_Namespace -> 11
-  | SI_ClassMethod -> 12
-  | SI_Literal -> 13
-  | SI_ClassConstant -> 14
-  | SI_Property -> 15
-  | SI_LocalVariable -> 16
-  | SI_Keyword -> 17
-  | SI_Constructor -> 18
-
-(* Convert an integer back to an enum *)
-let int_to_kind (kind_num : int) : si_kind =
-  match kind_num with
-  | 1 -> SI_Class
-  | 2 -> SI_Interface
-  | 3 -> SI_Enum
-  | 4 -> SI_Trait
-  | 5 -> SI_Unknown
-  | 6 -> SI_Mixed
-  | 7 -> SI_Function
-  | 8 -> SI_Typedef
-  | 9 -> SI_GlobalConstant
-  | 10 -> SI_XHP
-  | 11 -> SI_Namespace
-  | 12 -> SI_ClassMethod
-  | 13 -> SI_Literal
-  | 14 -> SI_ClassConstant
-  | 15 -> SI_Property
-  | 16 -> SI_LocalVariable
-  | 17 -> SI_Keyword
-  | 18 -> SI_Constructor
-  | _ -> SI_Unknown
-
-type si_file =
-  | SI_Filehash of string  (** string represent Int64 *)
-  | SI_Path of Relative_path.t
-
-(* Internal representation of a single item stored by the symbol list *)
-type si_item = {
-  si_name: string;
-  si_kind: si_kind;
-  si_file: si_file;
-  si_fullname: string;
-}
 
 (* Determine the best "ty" string for an item *)
 let kind_to_string (kind : si_kind) : string =
@@ -203,38 +128,6 @@ type si_fullitem = {
   sif_is_abstract: bool;
   sif_is_final: bool;
 }
-
-(* ACID represents a statement.  Everything other than interfaces are valid *)
-let valid_for_acid (s : si_fullitem) : bool =
-  match s.sif_kind with
-  | SI_Mixed
-  | SI_Unknown
-  | SI_Interface ->
-    false
-  | _ -> true
-
-(* ACTYPE represents a type definition that can be passed as a parameter *)
-let valid_for_actype (s : si_fullitem) : bool =
-  match s.sif_kind with
-  | SI_Mixed
-  | SI_Unknown
-  | SI_Trait
-  | SI_Function
-  | SI_GlobalConstant ->
-    false
-  | _ -> true
-
-(* ACNEW represents instantiation of an object, so cannot be abstract *)
-let valid_for_acnew (s : si_fullitem) : bool =
-  match s.sif_kind with
-  | SI_Class
-  | SI_Typedef
-  | SI_XHP ->
-    not s.sif_is_abstract
-  | _ -> false
-
-(* Internal representation of a full list of results *)
-type si_results = si_item list
 
 (* Fully captured information from a scan of WWW *)
 type si_capture = si_fullitem list

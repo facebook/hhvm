@@ -8,7 +8,7 @@
  *)
 
 val add_position_to_results :
-  Provider_context.t -> SearchUtils.si_results -> SearchUtils.result
+  Provider_context.t -> SearchTypes.si_item list -> SearchUtils.result
 
 val autocomplete_result_to_json :
   AutocompleteTypes.autocomplete_item -> Hh_json.json

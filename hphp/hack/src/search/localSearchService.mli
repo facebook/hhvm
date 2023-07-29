@@ -22,7 +22,7 @@ val update_file :
 val update_file_from_addenda :
   sienv:SearchUtils.si_env ->
   path:Relative_path.t ->
-  addenda:SearchUtils.si_addendum list ->
+  addenda:SearchTypes.si_addendum list ->
   SearchUtils.si_env
 
 (* Returns an updated env clearing out tracked information for a file *)
@@ -34,12 +34,12 @@ val search_local_symbols :
   sienv:SearchUtils.si_env ->
   query_text:string ->
   max_results:int ->
-  context:SearchUtils.autocomplete_type option ->
-  kind_filter:SearchUtils.si_kind option ->
-  SearchUtils.si_results
+  context:SearchTypes.autocomplete_type option ->
+  kind_filter:SearchTypes.si_kind option ->
+  SearchTypes.si_item list
 
 (* Filter out anything that's been removed locally *)
 val extract_dead_results :
   sienv:SearchUtils.si_env ->
-  results:SearchUtils.si_results ->
-  SearchUtils.si_results
+  results:SearchTypes.si_item list ->
+  SearchTypes.si_item list

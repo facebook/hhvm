@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<95cc519ba21d63979a4c56e80c11f935>>
+// @generated SignedSource<<8ab7f2894ead524d06020552c7e358ac>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -99,8 +99,91 @@ arena_deserializer::impl_deserialize_in_arena!(SiKind);
 #[rust_to_ocaml(prefix = "sia_")]
 #[repr(C)]
 pub struct SiAddendum {
+    /// This is expected not to contain the leading namespace backslash! See [Utils.strip_ns].
     pub name: String,
     pub kind: SiKind,
     pub is_abstract: bool,
     pub is_final: bool,
+}
+
+/// The context in which autocomplete is being performed
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
+#[repr(u8)]
+pub enum AutocompleteType {
+    Acid,
+    Acnew,
+    Actype,
+    #[rust_to_ocaml(name = "Actrait_only")]
+    ActraitOnly,
+    /// Excludes namespaces; used for symbol search
+    #[rust_to_ocaml(name = "Ac_workspace_symbol")]
+    AcWorkspaceSymbol,
+}
+impl TrivialDrop for AutocompleteType {}
+arena_deserializer::impl_deserialize_in_arena!(AutocompleteType);
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C, u8)]
+pub enum SiFile {
+    /// string represent Int64
+    #[rust_to_ocaml(name = "SI_Filehash")]
+    SIFilehash(String),
+    #[rust_to_ocaml(name = "SI_Path")]
+    SIPath(relative_path::RelativePath),
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(prefix = "si_")]
+#[repr(C)]
+pub struct SiItem {
+    pub name: String,
+    pub kind: SiKind,
+    /// needed so that local file deletes can "tombstone" the item
+    pub file: SiFile,
+    pub fullname: String,
 }

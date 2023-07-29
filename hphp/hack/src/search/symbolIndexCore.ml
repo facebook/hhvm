@@ -9,6 +9,7 @@
 
 open Hh_prelude
 open SearchUtils
+open SearchTypes
 
 (* Log information about calls to the symbol index service *)
 let log_symbol_index_search
@@ -79,7 +80,7 @@ let update_files
         | _ -> sienv)
 
 type paths_with_addenda =
-  (Relative_path.t * SearchUtils.si_addendum list * SearchUtils.file_source)
+  (Relative_path.t * SearchTypes.si_addendum list * SearchUtils.file_source)
   list
 
 let update_from_addenda

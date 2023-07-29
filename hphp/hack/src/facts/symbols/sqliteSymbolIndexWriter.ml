@@ -113,19 +113,27 @@ let record_in_db (filename : string) (symbols : si_scan_result) : unit =
         Sqlite3.bind
           stmt
           4
-          (Sqlite3.Data.INT (Int64.of_int (kind_to_int symbol.sif_kind)))
+          (Sqlite3.Data.INT
+             (Int64.of_int (SearchTypes.kind_to_int symbol.sif_kind)))
         |> check_rc db;
-        Sqlite3.bind stmt 5 (bool_to_sqlite (SearchUtils.valid_for_acid symbol))
+        Sqlite3.bind
+          stmt
+          5
+          (bool_to_sqlite
+             (SearchTypes.valid_for_acid symbol.SearchUtils.sif_kind))
         |> check_rc db;
         Sqlite3.bind
           stmt
           6
-          (bool_to_sqlite (SearchUtils.valid_for_acnew symbol))
+          (bool_to_sqlite
+             (SearchTypes.valid_for_acnew symbol.SearchUtils.sif_kind
+             && not symbol.SearchUtils.sif_is_abstract))
         |> check_rc db;
         Sqlite3.bind
           stmt
           7
-          (bool_to_sqlite (SearchUtils.valid_for_actype symbol))
+          (bool_to_sqlite
+             (SearchTypes.valid_for_actype symbol.SearchUtils.sif_kind))
         |> check_rc db;
         Sqlite3.bind stmt 8 (bool_to_sqlite symbol.sif_is_abstract)
         |> check_rc db;

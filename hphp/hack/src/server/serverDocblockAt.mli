@@ -21,14 +21,14 @@ val go_docblock_ctx :
   entry:Provider_context.entry ->
   line:int ->
   column:int ->
-  kind:SearchUtils.si_kind ->
+  kind:SearchTypes.si_kind ->
   DocblockService.result
 
 (** Simplified one-step symbol/docblock *)
 val go_docblock_for_symbol :
   ctx:Provider_context.t ->
   symbol:string ->
-  kind:SearchUtils.si_kind ->
+  kind:SearchTypes.si_kind ->
   DocblockService.result
 
 (** strips boilerplate copyright/codegen comments *)

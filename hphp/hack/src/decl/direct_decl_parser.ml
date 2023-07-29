@@ -68,24 +68,24 @@ let decls_to_fileinfo fn (parsed_file : parsed_file_with_hashes) =
         FileInfo.{ acc with modules = info :: acc.modules })
 
 let decls_to_addenda (parsed_file : parsed_file_with_hashes) :
-    SearchUtils.si_addendum list =
+    SearchTypes.si_addendum list =
   (* NB: Must be manually kept in sync with Rust function `si_addenum::get_si_addenda` *)
   List.filter_map parsed_file.pfh_decls ~f:(fun (name, decl, _hash) ->
       let sia_name = Utils.strip_ns name in
       let sia_kind =
         match decl with
         | Shallow_decl_defs.(Class { sc_kind = Ast_defs.Cclass _; _ }) ->
-          Some SearchUtils.SI_Class
+          Some SearchTypes.SI_Class
         | Shallow_decl_defs.(Class { sc_kind = Ast_defs.Cinterface; _ }) ->
-          Some SearchUtils.SI_Interface
+          Some SearchTypes.SI_Interface
         | Shallow_decl_defs.(Class { sc_kind = Ast_defs.Ctrait; _ }) ->
-          Some SearchUtils.SI_Trait
+          Some SearchTypes.SI_Trait
         | Shallow_decl_defs.(
             Class { sc_kind = Ast_defs.(Cenum | Cenum_class _); _ }) ->
-          Some SearchUtils.SI_Enum
-        | Shallow_decl_defs.Fun _ -> Some SearchUtils.SI_Function
-        | Shallow_decl_defs.Typedef _ -> Some SearchUtils.SI_Typedef
-        | Shallow_decl_defs.Const _ -> Some SearchUtils.SI_GlobalConstant
+          Some SearchTypes.SI_Enum
+        | Shallow_decl_defs.Fun _ -> Some SearchTypes.SI_Function
+        | Shallow_decl_defs.Typedef _ -> Some SearchTypes.SI_Typedef
+        | Shallow_decl_defs.Const _ -> Some SearchTypes.SI_GlobalConstant
         | Shallow_decl_defs.Module _ -> None
       in
       let (sia_is_abstract, sia_is_final) =

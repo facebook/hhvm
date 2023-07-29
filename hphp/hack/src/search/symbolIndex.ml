@@ -9,6 +9,7 @@
 
 open Hh_prelude
 open SearchUtils
+open SearchTypes
 
 (* Set the currently selected search provider *)
 let initialize
@@ -79,7 +80,7 @@ let find_matching_symbols
     ~(query_text : string)
     ~(max_results : int)
     ~(context : autocomplete_type option)
-    ~(kind_filter : si_kind option) : si_results =
+    ~(kind_filter : si_kind option) : SearchTypes.si_item list =
   (*
    * Nuclide often sends this exact request to verify that HH is working.
    * Let's capture it and avoid doing unnecessary work.

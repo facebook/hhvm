@@ -7,6 +7,7 @@
  *
  *)
 open SearchUtils
+open SearchTypes
 
 (* Register a namespace *)
 let register_namespace ~(sienv : si_env) ~(namespace : string) : unit =
@@ -65,7 +66,7 @@ let find_exact_match ~(sienv : si_env) ~(namespace : string) : nss_node =
           current_node)
 
 (* Produce a list of results for the current node *)
-let get_matches_for_node (node : nss_node) : si_results =
+let get_matches_for_node (node : nss_node) : si_item list =
   Hashtbl.fold
     (fun _key value acc ->
       {
@@ -80,7 +81,7 @@ let get_matches_for_node (node : nss_node) : si_results =
 
 (* Find all namespaces that match this prefix *)
 let find_matching_namespaces ~(sienv : si_env) ~(query_text : string) :
-    si_results =
+    si_item list =
   (* Trivial case *)
   if query_text = "" then
     []

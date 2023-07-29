@@ -9,6 +9,7 @@
 
 open Hh_prelude
 open SearchUtils
+open SearchTypes
 open Sqlite_utils
 
 (* SQL statements used by the autocomplete system *)
@@ -111,7 +112,7 @@ let is_row = function
   | _ -> false
 
 (* Single function for reading results from an executed statement *)
-let read_si_results (stmt : Sqlite3.stmt) : si_results =
+let read_si_results (stmt : Sqlite3.stmt) : si_item list =
   let results = ref [] in
   while is_row (Sqlite3.step stmt) do
     let name = Sqlite3.Data.to_string (Sqlite3.column stmt 0) in
@@ -138,7 +139,7 @@ let search_symbols_by_kind
     ~(sienv : si_env)
     ~(query_text : string)
     ~(max_results : int)
-    ~(kind_filter : si_kind) : si_results =
+    ~(kind_filter : si_kind) : si_item list =
   let stmt =
     prepare_or_reset_statement
       sienv.sql_symbolindex_db
@@ -157,7 +158,8 @@ let search_symbols_by_kind
 
 (* Symbol search for all symbols. *)
 let search_all_symbols
-    ~(sienv : si_env) ~(query_text : string) ~(max_results : int) : si_results =
+    ~(sienv : si_env) ~(query_text : string) ~(max_results : int) : si_item list
+    =
   let stmt =
     prepare_or_reset_statement
       sienv.sql_symbolindex_db
@@ -171,7 +173,8 @@ let search_all_symbols
 
 (* Symbol search for symbols containing a string. *)
 let search_namespaced_symbols
-    ~(sienv : si_env) ~(query_text : string) ~(max_results : int) : si_results =
+    ~(sienv : si_env) ~(query_text : string) ~(max_results : int) : si_item list
+    =
   let stmt =
     prepare_or_reset_statement
       sienv.sql_symbolindex_db
@@ -186,7 +189,7 @@ let search_namespaced_symbols
 
 (* Symbol search for symbols valid in ACID context *)
 let search_acid ~(sienv : si_env) ~(query_text : string) ~(max_results : int) :
-    si_results =
+    si_item list =
   let stmt =
     prepare_or_reset_statement
       sienv.sql_symbolindex_db
@@ -200,7 +203,7 @@ let search_acid ~(sienv : si_env) ~(query_text : string) ~(max_results : int) :
 
 (* Symbol search for symbols valid in ACNEW context *)
 let search_acnew ~(sienv : si_env) ~(query_text : string) ~(max_results : int) :
-    si_results =
+    si_item list =
   let stmt =
     prepare_or_reset_statement
       sienv.sql_symbolindex_db
@@ -214,7 +217,7 @@ let search_acnew ~(sienv : si_env) ~(query_text : string) ~(max_results : int) :
 
 (* Symbol search for symbols valid in ACTYPE context *)
 let search_actype ~(sienv : si_env) ~(query_text : string) ~(max_results : int)
-    : si_results =
+    : si_item list =
   let stmt =
     prepare_or_reset_statement
       sienv.sql_symbolindex_db
@@ -232,7 +235,7 @@ let sqlite_search
     ~(query_text : string)
     ~(max_results : int)
     ~(context : autocomplete_type option)
-    ~(kind_filter : SearchUtils.si_kind option) : si_results =
+    ~(kind_filter : SearchTypes.si_kind option) : si_item list =
   let query_text = sqlite_escape_str query_text in
   match (context, kind_filter) with
   | (Some Acid, _) -> search_acid ~sienv ~query_text ~max_results

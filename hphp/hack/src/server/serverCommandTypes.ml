@@ -468,10 +468,10 @@ type _ t =
   | TAST_HOLES_BATCH : string list -> TastHolesService.result t
   | IDE_HOVER : string * int * int -> HoverService.result t
   | DOCBLOCK_AT :
-      (string * int * int * string option * SearchUtils.si_kind)
+      (string * int * int * string option * SearchTypes.si_kind)
       -> DocblockService.result t
   | DOCBLOCK_FOR_SYMBOL :
-      (string * SearchUtils.si_kind)
+      (string * SearchTypes.si_kind)
       -> DocblockService.result t
   | IDE_SIGNATURE_HELP : (string * int * int) -> Lsp.SignatureHelp.result t
   | XHP_AUTOCOMPLETE_SNIPPET : string -> string option t

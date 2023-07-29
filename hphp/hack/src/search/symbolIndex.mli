@@ -22,6 +22,6 @@ val find_matching_symbols :
   sienv:SearchUtils.si_env ->
   query_text:string ->
   max_results:int ->
-  context:SearchUtils.autocomplete_type option ->
-  kind_filter:SearchUtils.si_kind option ->
-  SearchUtils.si_results
+  context:SearchTypes.autocomplete_type option ->
+  kind_filter:SearchTypes.si_kind option ->
+  SearchTypes.si_item list

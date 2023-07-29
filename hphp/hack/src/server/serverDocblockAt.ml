@@ -173,7 +173,7 @@ let go_comments_for_symbol_ctx
 
 (* Locate a symbol and return file, line, column, and base_class *)
 let go_locate_symbol
-    ~(ctx : Provider_context.t) ~(symbol : string) ~(kind : SearchUtils.si_kind)
+    ~(ctx : Provider_context.t) ~(symbol : string) ~(kind : SearchTypes.si_kind)
     : DocblockService.dbs_symbol_location_result =
   (* Look up this class name *)
   match SymbolIndexCore.get_position_for_symbol ctx symbol kind with
@@ -183,13 +183,13 @@ let go_locate_symbol
     (* Determine base class properly *)
     let base_class_name =
       match kind with
-      | SearchUtils.SI_Class
-      | SearchUtils.SI_Enum
-      | SearchUtils.SI_Function
-      | SearchUtils.SI_GlobalConstant
-      | SearchUtils.SI_Interface
-      | SearchUtils.SI_Trait
-      | SearchUtils.SI_Typedef ->
+      | SearchTypes.SI_Class
+      | SearchTypes.SI_Enum
+      | SearchTypes.SI_Function
+      | SearchTypes.SI_GlobalConstant
+      | SearchTypes.SI_Interface
+      | SearchTypes.SI_Trait
+      | SearchTypes.SI_Typedef ->
         Some (Utils.add_ns symbol)
       | _ -> None
     in
@@ -202,42 +202,42 @@ let go_locate_symbol
         dbs_base_class = base_class_name;
       }
 
-let symboldefinition_kind_from_si_kind (kind : SearchUtils.si_kind) :
+let symboldefinition_kind_from_si_kind (kind : SearchTypes.si_kind) :
     SymbolDefinition.kind =
   match kind with
-  | SearchUtils.SI_Class -> SymbolDefinition.Class
-  | SearchUtils.SI_Interface -> SymbolDefinition.Interface
-  | SearchUtils.SI_Enum -> SymbolDefinition.Enum
-  | SearchUtils.SI_Trait -> SymbolDefinition.Trait
-  | SearchUtils.SI_Unknown -> SymbolDefinition.Class
-  | SearchUtils.SI_Mixed -> SymbolDefinition.LocalVar
-  | SearchUtils.SI_Function -> SymbolDefinition.Function
-  | SearchUtils.SI_Typedef -> SymbolDefinition.Typedef
-  | SearchUtils.SI_GlobalConstant -> SymbolDefinition.GlobalConst
-  | SearchUtils.SI_XHP -> SymbolDefinition.Class
-  | SearchUtils.SI_ClassMethod -> SymbolDefinition.Method
-  | SearchUtils.SI_Literal -> SymbolDefinition.LocalVar
-  | SearchUtils.SI_ClassConstant -> SymbolDefinition.ClassConst
-  | SearchUtils.SI_Property -> SymbolDefinition.Property
-  | SearchUtils.SI_LocalVariable -> SymbolDefinition.LocalVar
-  | SearchUtils.SI_Constructor -> SymbolDefinition.Method
-  | SearchUtils.SI_Keyword -> failwith "Cannot look up a keyword"
-  | SearchUtils.SI_Namespace -> failwith "Cannot look up a namespace"
+  | SearchTypes.SI_Class -> SymbolDefinition.Class
+  | SearchTypes.SI_Interface -> SymbolDefinition.Interface
+  | SearchTypes.SI_Enum -> SymbolDefinition.Enum
+  | SearchTypes.SI_Trait -> SymbolDefinition.Trait
+  | SearchTypes.SI_Unknown -> SymbolDefinition.Class
+  | SearchTypes.SI_Mixed -> SymbolDefinition.LocalVar
+  | SearchTypes.SI_Function -> SymbolDefinition.Function
+  | SearchTypes.SI_Typedef -> SymbolDefinition.Typedef
+  | SearchTypes.SI_GlobalConstant -> SymbolDefinition.GlobalConst
+  | SearchTypes.SI_XHP -> SymbolDefinition.Class
+  | SearchTypes.SI_ClassMethod -> SymbolDefinition.Method
+  | SearchTypes.SI_Literal -> SymbolDefinition.LocalVar
+  | SearchTypes.SI_ClassConstant -> SymbolDefinition.ClassConst
+  | SearchTypes.SI_Property -> SymbolDefinition.Property
+  | SearchTypes.SI_LocalVariable -> SymbolDefinition.LocalVar
+  | SearchTypes.SI_Constructor -> SymbolDefinition.Method
+  | SearchTypes.SI_Keyword -> failwith "Cannot look up a keyword"
+  | SearchTypes.SI_Namespace -> failwith "Cannot look up a namespace"
 
 let rec go_docblock_ctx
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
     ~(line : int)
     ~(column : int)
-    ~(kind : SearchUtils.si_kind) : DocblockService.result =
+    ~(kind : SearchTypes.si_kind) : DocblockService.result =
   let def_kind = symboldefinition_kind_from_si_kind kind in
   match
     go_comments_from_source_text ~ctx ~entry ~line ~column ~kind:def_kind
   with
   | None ->
     (* Special case: Classes with an assumed default constructor *)
-    if SearchUtils.equal_si_kind kind SearchUtils.SI_Constructor then
-      go_docblock_ctx ~ctx ~entry ~line ~column ~kind:SearchUtils.SI_Class
+    if SearchTypes.equal_si_kind kind SearchTypes.SI_Constructor then
+      go_docblock_ctx ~ctx ~entry ~line ~column ~kind:SearchTypes.SI_Class
     else
       []
   | Some "" -> []
@@ -245,13 +245,13 @@ let rec go_docblock_ctx
 
 (* Locate a symbol and return its docblock, no extra steps *)
 let go_docblock_for_symbol
-    ~(ctx : Provider_context.t) ~(symbol : string) ~(kind : SearchUtils.si_kind)
+    ~(ctx : Provider_context.t) ~(symbol : string) ~(kind : SearchTypes.si_kind)
     : DocblockService.result =
   (* Shortcut for namespaces, since they don't have locations *)
-  if SearchUtils.equal_si_kind kind SearchUtils.SI_Namespace then
+  if SearchTypes.equal_si_kind kind SearchTypes.SI_Namespace then
     let namespace_declaration = Printf.sprintf "namespace %s;" symbol in
     [DocblockService.HackSnippet namespace_declaration]
-  else if SearchUtils.equal_si_kind kind SearchUtils.SI_Keyword then
+  else if SearchTypes.equal_si_kind kind SearchTypes.SI_Keyword then
     let txt = Printf.sprintf "Hack language keyword: %s;" symbol in
     [DocblockService.HackSnippet txt]
   else
@@ -261,7 +261,7 @@ let go_docblock_for_symbol
         Printf.sprintf
           "Could not find the symbol '%s' (expected to be a %s). This symbol may need namespace information (e.g. HH\\a\\b\\c) to resolve correctly. You can also consider rebasing."
           symbol
-          (SearchUtils.show_si_kind kind)
+          (SearchTypes.show_si_kind kind)
       in
       [DocblockService.Markdown msg]
     | Some location ->

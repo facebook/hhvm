@@ -97,7 +97,7 @@ type _ t =
       -> AutocompleteTypes.ide_result t
       (** Handles "textDocument/completion" LSP messages *)
   | Completion_resolve_location :
-      Path.t * location * SearchUtils.si_kind
+      Path.t * location * SearchTypes.si_kind
       -> DocblockService.result t
       (** "completionItem/resolve" LSP messages - if we have file/line/column.
       The scenario is that VSCode requests textDocument/completion in A.PHP line 5 col 6,
@@ -106,7 +106,7 @@ type _ t =
       and this method will look up B.PHP to find the docblock for that class and return it.
       Typically B.PHP won't even be open. That's why we only provide it as Path.t *)
   | Completion_resolve :
-      string * SearchUtils.si_kind
+      string * SearchTypes.si_kind
       -> DocblockService.result t
       (** "completionItem/resolve" LSP messages - if we have symbol name, and [Completion_resolve_location] failed *)
   | Document_highlight : document * location -> Ide_api_types.range list t

@@ -11,6 +11,7 @@
 open Hh_prelude
 open IndexBuilderTypes
 open SearchUtils
+open SearchTypes
 open Facts
 
 (* Keep track of all references yet to scan *)

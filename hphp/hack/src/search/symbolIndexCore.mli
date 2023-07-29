@@ -13,9 +13,9 @@ val log_symbol_index_search :
   query_text:string ->
   max_results:int ->
   results:int ->
-  kind_filter:SearchUtils.si_kind option ->
+  kind_filter:SearchTypes.si_kind option ->
   start_time:float ->
-  context:SearchUtils.autocomplete_type option ->
+  context:SearchTypes.autocomplete_type option ->
   caller:string ->
   unit
 
@@ -28,7 +28,7 @@ val update_files :
   SearchUtils.si_env
 
 type paths_with_addenda =
-  (Relative_path.t * SearchUtils.si_addendum list * SearchUtils.file_source)
+  (Relative_path.t * SearchTypes.si_addendum list * SearchUtils.file_source)
   list
 
 (* FASTER: update from addenda directly *)
@@ -45,12 +45,12 @@ val remove_files :
 val get_position_for_symbol :
   Provider_context.t ->
   string ->
-  SearchUtils.si_kind ->
+  SearchTypes.si_kind ->
   (Relative_path.t * int * int) option
 
 (* Take an item and produce a position, or none if it cannot be found *)
 val get_pos_for_item_opt :
-  Provider_context.t -> SearchUtils.si_item -> Pos.absolute option
+  Provider_context.t -> SearchTypes.si_item -> Pos.absolute option
 
 (* Take an item and produce a position, or a fake one if it cannot be found *)
-val get_pos_for_item : Provider_context.t -> SearchUtils.si_item -> Pos.absolute
+val get_pos_for_item : Provider_context.t -> SearchTypes.si_item -> Pos.absolute

@@ -495,9 +495,9 @@ let state_to_string (state : state) : string =
 (** This conversion is imprecise.  Comments indicate potential gaps *)
 let completion_kind_to_si_kind
     (completion_kind : Completion.completionItemKind option) :
-    SearchUtils.si_kind =
+    SearchTypes.si_kind =
   let open Lsp in
-  let open SearchUtils in
+  let open SearchTypes in
   match completion_kind with
   | Some Completion.Class -> SI_Class
   | Some Completion.Method -> SI_ClassMethod
@@ -516,30 +516,30 @@ let completion_kind_to_si_kind
   (* The completion enum includes things we don't really support *)
   | _ -> SI_Unknown
 
-let si_kind_to_completion_kind (kind : SearchUtils.si_kind) :
+let si_kind_to_completion_kind (kind : SearchTypes.si_kind) :
     Completion.completionItemKind option =
   match kind with
-  | SearchUtils.SI_XHP
-  | SearchUtils.SI_Class ->
+  | SearchTypes.SI_XHP
+  | SearchTypes.SI_Class ->
     Some Completion.Class
-  | SearchUtils.SI_ClassMethod -> Some Completion.Method
-  | SearchUtils.SI_Function -> Some Completion.Function
-  | SearchUtils.SI_Mixed
-  | SearchUtils.SI_LocalVariable ->
+  | SearchTypes.SI_ClassMethod -> Some Completion.Method
+  | SearchTypes.SI_Function -> Some Completion.Function
+  | SearchTypes.SI_Mixed
+  | SearchTypes.SI_LocalVariable ->
     Some Completion.Variable
-  | SearchUtils.SI_Property -> Some Completion.Field
-  | SearchUtils.SI_ClassConstant -> Some Completion.Constant
-  | SearchUtils.SI_Interface
-  | SearchUtils.SI_Trait ->
+  | SearchTypes.SI_Property -> Some Completion.Field
+  | SearchTypes.SI_ClassConstant -> Some Completion.Constant
+  | SearchTypes.SI_Interface
+  | SearchTypes.SI_Trait ->
     Some Completion.Interface
-  | SearchUtils.SI_Enum -> Some Completion.Enum
-  | SearchUtils.SI_Namespace -> Some Completion.Module
-  | SearchUtils.SI_Constructor -> Some Completion.Constructor
-  | SearchUtils.SI_Keyword -> Some Completion.Keyword
-  | SearchUtils.SI_Literal -> Some Completion.Value
-  | SearchUtils.SI_GlobalConstant -> Some Completion.Constant
-  | SearchUtils.SI_Typedef -> Some Completion.TypeParameter
-  | SearchUtils.SI_Unknown -> None
+  | SearchTypes.SI_Enum -> Some Completion.Enum
+  | SearchTypes.SI_Namespace -> Some Completion.Module
+  | SearchTypes.SI_Constructor -> Some Completion.Constructor
+  | SearchTypes.SI_Keyword -> Some Completion.Keyword
+  | SearchTypes.SI_Literal -> Some Completion.Value
+  | SearchTypes.SI_GlobalConstant -> Some Completion.Constant
+  | SearchTypes.SI_Typedef -> Some Completion.TypeParameter
+  | SearchTypes.SI_Unknown -> None
 
 let read_hhconfig_version () : string Lwt.t =
   match get_root_opt () with
@@ -2106,10 +2106,10 @@ let docblock_with_ranking_detail
   | None -> raw_docblock
 
 let resolve_ranking_source
-    (kind : SearchUtils.si_kind) (ranking_source : int option) :
-    SearchUtils.si_kind =
+    (kind : SearchTypes.si_kind) (ranking_source : int option) :
+    SearchTypes.si_kind =
   match ranking_source with
-  | Some x -> SearchUtils.int_to_kind x
+  | Some x -> SearchTypes.int_to_kind x
   | None -> kind
 
 (*
@@ -2191,40 +2191,39 @@ let do_resolve_local
     Lwt.return result
 
 let hack_symbol_to_lsp (symbol : SearchUtils.symbol) =
-  let open SearchUtils in
   (* Hack sometimes gives us back items with an empty path, by which it
      intends "whichever path you asked me about". That would be meaningless
      here. If it does, then it'll pick up our default path (also empty),
      which will throw and go into our telemetry. That's the best we can do. *)
   let hack_to_lsp_kind = function
-    | SearchUtils.SI_Class -> SymbolInformation.Class
-    | SearchUtils.SI_Interface -> SymbolInformation.Interface
-    | SearchUtils.SI_Trait -> SymbolInformation.Interface
+    | SearchTypes.SI_Class -> SymbolInformation.Class
+    | SearchTypes.SI_Interface -> SymbolInformation.Interface
+    | SearchTypes.SI_Trait -> SymbolInformation.Interface
     (* LSP doesn't have traits, so we approximate with interface *)
-    | SearchUtils.SI_Enum -> SymbolInformation.Enum
+    | SearchTypes.SI_Enum -> SymbolInformation.Enum
     (* TODO(T36697624): Add SymbolInformation.Record *)
-    | SearchUtils.SI_ClassMethod -> SymbolInformation.Method
-    | SearchUtils.SI_Function -> SymbolInformation.Function
-    | SearchUtils.SI_Typedef -> SymbolInformation.Class
+    | SearchTypes.SI_ClassMethod -> SymbolInformation.Method
+    | SearchTypes.SI_Function -> SymbolInformation.Function
+    | SearchTypes.SI_Typedef -> SymbolInformation.Class
     (* LSP doesn't have typedef, so we approximate with class *)
-    | SearchUtils.SI_GlobalConstant -> SymbolInformation.Constant
-    | SearchUtils.SI_Namespace -> SymbolInformation.Namespace
-    | SearchUtils.SI_Mixed -> SymbolInformation.Variable
-    | SearchUtils.SI_XHP -> SymbolInformation.Class
-    | SearchUtils.SI_Literal -> SymbolInformation.Variable
-    | SearchUtils.SI_ClassConstant -> SymbolInformation.Constant
-    | SearchUtils.SI_Property -> SymbolInformation.Property
-    | SearchUtils.SI_LocalVariable -> SymbolInformation.Variable
-    | SearchUtils.SI_Constructor -> SymbolInformation.Constructor
+    | SearchTypes.SI_GlobalConstant -> SymbolInformation.Constant
+    | SearchTypes.SI_Namespace -> SymbolInformation.Namespace
+    | SearchTypes.SI_Mixed -> SymbolInformation.Variable
+    | SearchTypes.SI_XHP -> SymbolInformation.Class
+    | SearchTypes.SI_Literal -> SymbolInformation.Variable
+    | SearchTypes.SI_ClassConstant -> SymbolInformation.Constant
+    | SearchTypes.SI_Property -> SymbolInformation.Property
+    | SearchTypes.SI_LocalVariable -> SymbolInformation.Variable
+    | SearchTypes.SI_Constructor -> SymbolInformation.Constructor
     (* Do these happen in practice? *)
-    | SearchUtils.SI_Keyword
-    | SearchUtils.SI_Unknown ->
+    | SearchTypes.SI_Keyword
+    | SearchTypes.SI_Unknown ->
       failwith "Unknown symbol kind"
   in
   {
-    SymbolInformation.name = Utils.strip_ns symbol.name;
-    kind = hack_to_lsp_kind symbol.result_type;
-    location = hack_pos_to_lsp_location symbol.pos ~default_path:"";
+    SymbolInformation.name = Utils.strip_ns symbol.SearchUtils.name;
+    kind = hack_to_lsp_kind symbol.SearchUtils.result_type;
+    location = hack_pos_to_lsp_location symbol.SearchUtils.pos ~default_path:"";
     containerName = None;
   }
 

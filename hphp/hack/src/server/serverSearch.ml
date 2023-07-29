@@ -33,13 +33,13 @@ let go ctx query_text ~(kind_filter : string) (sienv : SearchUtils.si_env) :
   let max_results = 100 in
   let start_time = Unix.gettimeofday () in
   let kind_filter = SearchUtils.string_to_kind kind_filter in
-  let context = Some SearchUtils.Ac_workspace_symbol in
+  let context = Some SearchTypes.Ac_workspace_symbol in
   let results =
     (* If query contains "::", search class methods instead of top level definitions *)
     match Str.split_delim re_colon_colon query_text with
     | [class_name_query; method_query] ->
       (* Fixup the kind filter *)
-      let kind_filter = Some SearchUtils.SI_Class in
+      let kind_filter = Some SearchTypes.SI_Class in
       (* Get the class with the most similar name to `class_name_query` *)
       let class_ =
         SymbolIndex.find_matching_symbols
@@ -49,7 +49,7 @@ let go ctx query_text ~(kind_filter : string) (sienv : SearchUtils.si_env) :
           ~context
           ~sienv
         |> List.hd
-        |> Option.map ~f:(fun r -> r.SearchUtils.si_name)
+        |> Option.map ~f:(fun r -> r.SearchTypes.si_name)
       in
       begin
         match class_ with

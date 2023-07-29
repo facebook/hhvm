@@ -13,6 +13,7 @@ open Typing_defs_core
 open Utils
 open String_utils
 open SearchUtils
+open SearchTypes
 include AutocompleteTypes
 open Tast
 module Phase = Typing_phase
@@ -41,7 +42,7 @@ let autocomplete_is_complete : bool ref = ref true
  * Take the results, look them up, and add file position information.
  *)
 let add_position_to_results
-    (ctx : Provider_context.t) (raw_results : SearchUtils.si_results) :
+    (ctx : Provider_context.t) (raw_results : SearchTypes.si_item list) :
     SearchUtils.result =
   SearchUtils.(
     List.filter_map raw_results ~f:(fun r ->
@@ -426,7 +427,7 @@ let autocomplete_member ~is_static autocomplete_context env class_ cid id =
            class_
            cid
            (Cls.smethods class_ |> sort))
-        ~f:(add SearchUtils.SI_ClassMethod);
+        ~f:(add SearchTypes.SI_ClassMethod);
       List.iter
         (get_class_elt_types
            ~is_method:false
@@ -434,11 +435,11 @@ let autocomplete_member ~is_static autocomplete_context env class_ cid id =
            class_
            cid
            (Cls.sprops class_ |> sort))
-        ~f:(add SearchUtils.SI_Property);
+        ~f:(add SearchTypes.SI_Property);
       List.iter
         (Cls.consts class_ |> sort)
         ~f:(fun (name, cc) ->
-          add SearchUtils.SI_ClassConstant (name, cc.cc_type))
+          add SearchTypes.SI_ClassConstant (name, cc.cc_type))
     );
     if (not is_static) || parent_receiver then (
       List.iter
@@ -448,7 +449,7 @@ let autocomplete_member ~is_static autocomplete_context env class_ cid id =
            class_
            cid
            (Cls.methods class_ |> sort))
-        ~f:(add SearchUtils.SI_ClassMethod);
+        ~f:(add SearchTypes.SI_ClassMethod);
       List.iter
         (get_class_elt_types
            ~is_method:false
@@ -456,7 +457,7 @@ let autocomplete_member ~is_static autocomplete_context env class_ cid id =
            class_
            cid
            (Cls.props class_ |> sort))
-        ~f:(add SearchUtils.SI_Property)
+        ~f:(add SearchTypes.SI_Property)
     );
     (* Only complete __construct() when we see parent::, as we don't
        allow __construct to be called as e.g. $foo->__construct(). *)
@@ -473,7 +474,7 @@ let autocomplete_member ~is_static autocomplete_context env class_ cid id =
            class_
            cid
            (Option.to_list constructor))
-        ~f:(add SearchUtils.SI_ClassMethod)
+        ~f:(add SearchTypes.SI_ClassMethod)
   )
 
 (*
@@ -501,7 +502,7 @@ let autocomplete_xhp_attributes env class_ cid id attrs =
                (fun key -> String.equal (":" ^ key) name)
                existing_attr_names)
         then
-          let kind = SearchUtils.SI_Property in
+          let kind = SearchTypes.SI_Property in
           let res_detail = Tast_env.print_decl_ty env ty in
           let ty = Phase.decl ty in
           let complete =
@@ -536,7 +537,7 @@ let autocomplete_xhp_bool_value attr_ty id_id env =
     in
 
     if is_bool_or_bool_option attr_ty then (
-      let kind = SearchUtils.SI_Literal in
+      let kind = SearchTypes.SI_Literal in
       let ty = Phase.locl attr_ty in
       let complete =
         {
@@ -592,7 +593,7 @@ let autocomplete_xhp_enum_attribute_value attr_name ty id_id env cls =
         | Ast_defs.XEV_String value -> "\"" ^ value ^ "\""
       in
       let name = suggestion xev in
-      let kind = SearchUtils.SI_Enum in
+      let kind = SearchTypes.SI_Enum in
       let ty = Phase.locl ty in
       let complete =
         {
@@ -671,7 +672,7 @@ let autocomplete_xhp_enum_class_value attr_ty id_id env =
            |> List.iter ~f:(fun (const_name, ty) ->
                   let dty = Phase.decl ty.cc_type in
                   let name = Utils.strip_ns class_name ^ "::" ^ const_name in
-                  let kind = SearchUtils.SI_Enum in
+                  let kind = SearchTypes.SI_Enum in
                   let res_base_class = Option.map ~f:Cls.name enum_class in
 
                   let complete =
@@ -954,7 +955,7 @@ let autocomplete_enum_class_label env opt_cname pos_labelname expected_ty =
           Tast_env.print_decl_ty env (unwrap_enum_memberof cc.cc_type)
         in
         let ty = Phase.decl cc.cc_type in
-        let kind = SearchUtils.SI_ClassConstant in
+        let kind = SearchTypes.SI_ClassConstant in
         let complete =
           {
             res_decl_pos = get_pos_for env ty;
@@ -1432,7 +1433,7 @@ let builtin_type_hints =
 let find_global_results
     ~(env : Tast_env.env)
     ~(id : Pos.t * string)
-    ~(completion_type : SearchUtils.autocomplete_type option)
+    ~(completion_type : SearchTypes.autocomplete_type option)
     ~(autocomplete_context : AutocompleteTypes.legacy_autocomplete_context)
     ~(sienv : SearchUtils.si_env)
     ~(pctx : Provider_context.t) : unit =
@@ -1719,7 +1720,7 @@ let compute_complete_local env ctx tast =
 
   Local_id.Map.iter
     (fun id ty ->
-      let kind = SearchUtils.SI_LocalVariable in
+      let kind = SearchTypes.SI_LocalVariable in
       let name = Local_id.get_name id in
       if String.is_prefix name ~prefix:id_prefix then
         let complete =

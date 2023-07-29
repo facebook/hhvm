@@ -1,1 +1,6 @@
-No errors
+File "dynamic_subtype.php", line 4, characters 10-11:
+Invalid return type (Typing[4110])
+  File "dynamic_subtype.php", line 3, characters 44-46:
+  Expected `int`
+  File "dynamic_subtype.php", line 3, characters 21-27:
+  But got `dynamic`

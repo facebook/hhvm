@@ -7,7 +7,7 @@ File "static_props.php", line 21, characters 3-22:
 File "static_props.php", line 22, characters 3-26:
   nothing
 File "static_props.php", line 27, characters 3-22:
-  _
+  dynamic
 File "static_props.php", line 28, characters 3-25:
   dynamic
 File "static_props.php", line 33, characters 3-24:
@@ -15,7 +15,7 @@ File "static_props.php", line 33, characters 3-24:
 File "static_props.php", line 34, characters 3-26:
   float
 File "static_props.php", line 37, characters 3-22:
-  _
+  dynamic
 File "static_props.php", line 38, characters 3-25:
   dynamic
 File "static_props.php", line 27, characters 16-19:

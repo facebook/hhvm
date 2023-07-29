@@ -26,6 +26,12 @@ File "invalid_operator.php", line 32, characters 34-40:
 You are trying to access the method `__unsupported` but this is an int (Typing[4062])
   File "invalid_operator.php", line 32, characters 20-22:
   Definition is here
+File "invalid_operator.php", line 29, characters 38-46:
+Typing error (Typing[4110])
+  File "expr_tree.hhi", line 31, characters 37-46:
+  Expected `dynamic`
+  File "expr_tree.hhi", line 31, characters 37-46:
+  Type `ExampleInt` is not a subtype of `dynamic` under dynamic-aware subtyping
 File "invalid_operator.php", line 26, characters 31-32:
 Wrong type hint (Typing[4331])
   File "invalid_operator.php", line 26, characters 20-29:

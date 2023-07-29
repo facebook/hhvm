@@ -1,1 +1,6 @@
-No errors
+File "dynamic_error_message1.php", line 5, characters 10-11:
+Invalid return type (Typing[4110])
+  File "dynamic_error_message1.php", line 3, characters 34-36:
+  Expected `int`
+  File "dynamic_error_message1.php", line 4, characters 12-12:
+  But got `dynamic`, the result of accessing a property of a `dynamic` type

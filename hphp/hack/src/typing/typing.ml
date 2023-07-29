@@ -2037,7 +2037,7 @@ let refine_for_is ~hint_first env tparamet ivar reason hint =
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
     let hint_ty = strip_supportdyn hint_ty in
     let hint_ty =
-      if Env.get_tcopt env |> TCO.enable_sound_dynamic then
+      if Env.get_tcopt env |> TCO.pessimise_builtins then
         ish_weakening env hint hint_ty
       else
         hint_ty
@@ -3729,7 +3729,7 @@ and expr_
     in
     let (exprs, tys) = List.unzip exprs_and_tys in
     let coerce_for_op =
-      Option.is_some bound && not (TCO.enable_sound_dynamic (Env.get_tcopt env))
+      Option.is_some bound && not (TCO.pessimise_builtins (Env.get_tcopt env))
     in
     (* Take the inferred type ty of each value and assert that it's a subtype
      * of the (optionally with like type added) result type argument.
@@ -5104,15 +5104,15 @@ and expr_
     in
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt1;
     let hint_ty = strip_supportdyn hint_ty in
-    let enable_sound_dynamic = TCO.enable_sound_dynamic env.genv.tcopt in
     let hint_ty =
-      if enable_sound_dynamic then
+      if TCO.pessimise_builtins (Env.get_tcopt env) then
         ish_weakening env hint hint_ty
       else
         hint_ty
     in
     let ((env, ty_err_opt2), hint_ty) =
       if Typing_defs.is_dynamic hint_ty then
+        let enable_sound_dynamic = TCO.enable_sound_dynamic env.genv.tcopt in
         let (env, ty_err_opt) =
           if enable_sound_dynamic then
             TUtils.supports_dynamic env expr_ty

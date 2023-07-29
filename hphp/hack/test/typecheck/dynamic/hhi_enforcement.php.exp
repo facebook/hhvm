@@ -4,3 +4,9 @@ Invalid argument (Typing[4110])
   Expected `int`
   File "hhi_enforcement.php", line 3, characters 12-18:
   But got `dynamic`
+File "hhi_enforcement.php", line 8, characters 44-45:
+Invalid argument (Typing[4110])
+  File "hsl/ext_random.hhi", line 16, characters 30-32:
+  Expected `int`
+  File "hhi_enforcement.php", line 3, characters 12-18:
+  But got `dynamic`

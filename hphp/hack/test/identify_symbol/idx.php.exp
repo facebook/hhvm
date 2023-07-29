@@ -4,7 +4,7 @@ definition:
    kind: function
    id: function::HH\idx
    position: line 30, characters 12-14
-   span: line 30, character 3 - line 34, character 39
+   span: line 30, character 3 - line 34, character 12
    modifiers: 
    params:
      $collection

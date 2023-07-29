@@ -10,7 +10,7 @@ Invalid return type (Typing[4323])
   But got `void`
 File "tparam_constraints2.php", line 3, characters 10-23:
 Invalid return type (Typing[4336])
-  File "tparam_constraints2.php", line 6, characters 4-24:
+  File "tparam_constraints2.php", line 6, characters 14-23:
   Expected `Awaitable<keyset<Tk>>`
   File "tparam_constraints2.php", line 3, characters 10-23:
   But got `void` because this function does not always return a value

@@ -1,13 +1,13 @@
 File "T90699200.php", line 5, characters 8-25:
 Invalid `echo`/`print` argument (Typing[4438])
   File "T90699200.php", line 5, characters 3-6:
-  Expected `dynamic`
+  Expected `arraykey`
   File "T90699200.php", line 5, characters 8-25:
   But got `shape('key' => int)`
 File "T90699200.php", line 7, characters 8-11:
 Invalid `echo`/`print` argument (Typing[4438])
   File "T90699200.php", line 7, characters 3-6:
-  Expected `dynamic`
+  Expected `arraykey`
   File "T90699200.php", line 7, characters 8-11:
   But got `bool`
 File "T90699200.php", line 9, characters 9-29:
@@ -19,6 +19,6 @@ Invalid `echo`/`print` argument (Typing[4438])
 File "T90699200.php", line 11, characters 8-22:
 Invalid `echo`/`print` argument (Typing[4438])
   File "T90699200.php", line 11, characters 3-6:
-  Expected `dynamic`
+  Expected `arraykey`
   File "T90699200.php", line 11, characters 12-20:
   But got `Exception`

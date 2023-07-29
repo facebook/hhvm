@@ -69,12 +69,12 @@ Typing error (Typing[4429])
   File "math_ops.php", line 30, characters 3-10:
   Expected `int` because this is used in an arithmetic operation
   File "math_ops.php", line 29, characters 3-10:
-  But got `num` because it is the result of a division `/`
+  But got `float` because it is the result of a division `/`
 File "math_ops.php", line 30, characters 9-10:
 Typing error (Typing[4429])
   File "math_ops.php", line 30, characters 3-10:
   Expected `int` because this is used in an arithmetic operation
   File "math_ops.php", line 28, characters 3-9:
-  But got `num` because this is the result of an arithmetic operation with a `num` as the first argument, and no `float`s.
+  But got `float` because this is the result of an arithmetic operation with a `num` as the first argument, and no `float`s.
   File "math_ops.php", line 19, characters 27-29:
   Here is why I think the argument is a `num`: this is a `num`

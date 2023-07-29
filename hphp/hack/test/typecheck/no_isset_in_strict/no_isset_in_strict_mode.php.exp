@@ -4,3 +4,9 @@ File "no_isset_in_strict_mode.php", line 15, characters 8-16:
 `isset` tends to hide errors due to variable typos and so is limited to dynamic checks in `strict` mode (Typing[4016])
 File "no_isset_in_strict_mode.php", line 16, characters 8-30:
 `isset` tends to hide errors due to variable typos and so is limited to dynamic checks in `strict` mode (Typing[4016])
+File "no_isset_in_strict_mode.php", line 18, characters 13-32:
+Typing error (Typing[4110])
+  File "no_isset_in_strict_mode.php", line 18, characters 17-19:
+  Expected `dynamic`
+  File "no_isset_in_strict_mode.php", line 18, characters 17-19:
+  Type `Foo` is not a subtype of `dynamic` under dynamic-aware subtyping

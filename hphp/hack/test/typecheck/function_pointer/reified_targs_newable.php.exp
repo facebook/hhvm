@@ -1,4 +1,10 @@
+File "reified_targs_newable.php", line 9, characters 10-16:
+Invalid return type (Typing[4110])
+  File "reified_targs_newable.php", line 8, characters 45-51:
+  Expected `dynamic`
+  File "reified_targs_newable.php", line 9, characters 14-14:
+  Type `T` is not a subtype of `dynamic` under dynamic-aware subtyping
 File "reified_targs_newable.php", line 15, characters 12-12:
 A newable type argument must be a concrete class or a newable type parameter. (Typing[4307])
-File "reified_targs_newable.php", line 8, characters 34-34:
-Type parameter `T` was declared `__Newable` here
+  File "reified_targs_newable.php", line 8, characters 34-34:
+  Type parameter `T` was declared `__Newable` here

@@ -15,6 +15,7 @@
           --program %{exe:../../src/hh_single_type_check.exe}
           --batch
       --flags
+      --enable-sound-dynamic-type
       --error-format plain)))
 
 (rule
@@ -50,6 +51,7 @@
           --timeout 20
       --verbose
       --flags
+      --enable-sound-dynamic-type
       --error-format plain)))
 
 

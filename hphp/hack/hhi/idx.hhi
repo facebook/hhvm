@@ -31,7 +31,7 @@ namespace HH {
     ?KeyedContainer<Tk, Tv> $collection,
     ?Tk $index,
     \HH\FIXME\MISSING_PARAM_TYPE $default = null,
-  )[]: \HH\FIXME\MISSING_RETURN_TYPE {}
+  )[]: Tv {}
 
   function idx_readonly<Tk as arraykey, Tv>(
     readonly ?KeyedContainer<Tk, Tv> $collection,

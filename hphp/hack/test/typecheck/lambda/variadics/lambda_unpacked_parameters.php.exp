@@ -13,7 +13,7 @@ Invalid argument (Typing[4110])
 File "lambda_unpacked_parameters.php", line 39, characters 11-12:
 Invalid argument (Typing[4110])
   File "lambda_unpacked_parameters.php", line 38, characters 25-29:
-  Expected `dynamic`
+  Expected `bool`
   File "lambda_unpacked_parameters.php", line 3, characters 69-70:
   But got `vec<string>` (variadic argument)
 File "lambda_unpacked_parameters.php", line 42, characters 25-29:

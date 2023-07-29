@@ -1,20 +1,10 @@
 File "union_dynamic.php", line 15, characters 3-13:
-  (S<T#1> & ~C<int>)
+  ~S<int>
 File "union_dynamic.php", line 17, characters 3-13:
-  T#1
-File "union_dynamic.php", line 18, characters 10-23:
-Invalid return type (Typing[4110])
-  File "union_dynamic.php", line 8, characters 50-52:
-  Expected `int`
-  File "union_dynamic.php", line 14, characters 3-4:
-  But got `T#1` from this "as" assertion
-  File "union_dynamic.php", line 5, characters 27-27:
-    via this generic `T`
-File "union_dynamic.php", line 18, characters 10-23:
-Some elements in this collection are incompatible (Typing[4110])
-  File "union_dynamic.php", line 8, characters 50-52:
-  Expected `int`
-  File "union_dynamic.php", line 14, characters 3-4:
-  But got `T#1` from this "as" assertion
-  File "union_dynamic.php", line 5, characters 27-27:
-    via this generic `T`
+  int
+File "union_dynamic.php", line 25, characters 17-34:
+Invalid argument (Typing[4110])
+  File "union_dynamic.php", line 8, characters 21-27:
+  Expected `dynamic`
+  File "union_dynamic.php", line 25, characters 21-21:
+  Type `S<string>` is not a subtype of `dynamic` under dynamic-aware subtyping

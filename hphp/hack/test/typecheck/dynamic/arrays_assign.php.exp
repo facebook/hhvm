@@ -1,3 +1,15 @@
+File "arrays_assign.php", line 68, characters 3-17:
+Typing error (Typing[4110])
+  File "arrays_assign.php", line 68, characters 10-10:
+  Expected `dynamic`
+  File "arrays_assign.php", line 68, characters 10-10:
+  Type `C` is not a subtype of `dynamic` under dynamic-aware subtyping
+File "arrays_assign.php", line 71, characters 3-13:
+Typing error (Typing[4110])
+  File "arrays_assign.php", line 71, characters 10-10:
+  Expected `dynamic`
+  File "arrays_assign.php", line 71, characters 10-10:
+  Type `C` is not a subtype of `dynamic` under dynamic-aware subtyping
 File "arrays_assign.php", line 16, characters 3-12:
 Invalid index type for this Map (Typing[4324])
   File "arrays_assign.php", line 15, characters 12-14:

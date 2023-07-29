@@ -8,3 +8,9 @@ File "dynamic_property_access.php", line 12, characters 9-10:
 Variable `$z` is undefined, or not always defined. (Naming[2050])
   File "dynamic_property_access.php", line 9, characters 62-72:
   Did you mean `$splice_var` instead?
+File "dynamic_property_access.php", line 12, characters 5-10:
+Dynamic access of property (Typing[4110])
+  File "dynamic_property_access.php", line 12, characters 5-10:
+  Expected `dynamic`
+  File "dynamic_property_access.php", line 10, characters 15-21:
+  Type `MyClass` is not a subtype of `dynamic` under dynamic-aware subtyping

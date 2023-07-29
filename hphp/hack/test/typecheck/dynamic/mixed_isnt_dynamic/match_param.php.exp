@@ -2,7 +2,5 @@ File "match_param.php", line 14, characters 19-20:
 The method `do` is not compatible with the overridden method (Typing[4341])
   File "match_param.php", line 14, characters 22-28:
   Expected `dynamic`
-  File "match_param.php", line 13, characters 33-37:
-  But got `mixed`
   File "match_param.php", line 4, characters 22-24:
-    via this generic `Tin`
+  Type `mixed` is not a subtype of `dynamic` under dynamic-aware subtyping

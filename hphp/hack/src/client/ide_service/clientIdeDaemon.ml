@@ -1098,16 +1098,18 @@ let handle_request
     ) ->
     (* Update the state of the world with the document as it exists in the IDE *)
     let (istate, ctx, entry, _) = update_file_ctx istate document in
+    let sienv_ref = ref istate.sienv in
     let result =
       ServerAutoComplete.go_ctx
         ~ctx
         ~entry
-        ~sienv:istate.sienv
+        ~sienv_ref
         ~is_manually_invoked
         ~line
         ~column
         ~naming_table:istate.naming_table
     in
+    let istate = { istate with sienv = !sienv_ref } in
     Lwt.return (Initialized istate, Ok result)
   (* Autocomplete docblock resolve *)
   | (Initialized istate, Completion_resolve (symbol, kind)) ->
@@ -1232,7 +1234,9 @@ let handle_request
        decl for Foo. *)
     (* Note: we intentionally don't give results from unsaved files *)
     let ctx = make_empty_ctx istate.icommon in
-    let result = ServerSearch.go ctx query ~kind_filter:"" istate.sienv in
+    let sienv_ref = ref istate.sienv in
+    let result = ServerSearch.go ctx query ~kind_filter:"" sienv_ref in
+    let istate = { istate with sienv = !sienv_ref } in
     Lwt.return (Initialized istate, Ok result)
 
 let write_status ~(out_fd : Lwt_unix.file_descr) (state : state) : unit Lwt.t =

@@ -316,11 +316,12 @@ let handle_mode mode filenames ctx (sienv : SearchUtils.si_env) naming_table =
             ~pos
             ~is_manually_invoked
         in
+        let sienv_ref = ref sienv in
         let result =
           ServerAutoComplete.go_at_auto332_ctx
             ~ctx
             ~entry
-            ~sienv
+            ~sienv_ref
             ~autocomplete_context
             ~naming_table
         in

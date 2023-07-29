@@ -45,12 +45,14 @@ let assert_ns_matches (expected_ns : string) (actual : SearchTypes.si_item list)
   ()
 
 let assert_autocomplete
-    ~(query_text : string) ~(kind : si_kind) ~(expected : int) ~(sienv : si_env)
-    : unit =
+    ~(query_text : string)
+    ~(kind : si_kind)
+    ~(expected : int)
+    ~(sienv_ref : si_env ref) : unit =
   (* Search for the symbol *)
   let results =
     SymbolIndex.find_matching_symbols
-      ~sienv
+      ~sienv_ref
       ~query_text
       ~max_results:100
       ~kind_filter:(Some kind)
@@ -109,21 +111,25 @@ let run_index_builder (harness : Test_harness.t) : si_env =
   sienv
 
 let test_sqlite_plus_local (harness : Test_harness.t) : bool =
-  let sienv = run_index_builder harness in
+  let sienv_ref = ref (run_index_builder harness) in
 
   (* Find one of each major type *)
-  assert_autocomplete ~query_text:"UsesA" ~kind:SI_Class ~expected:1 ~sienv;
-  assert_autocomplete ~query_text:"NoBigTrait" ~kind:SI_Trait ~expected:1 ~sienv;
+  assert_autocomplete ~query_text:"UsesA" ~kind:SI_Class ~expected:1 ~sienv_ref;
+  assert_autocomplete
+    ~query_text:"NoBigTrait"
+    ~kind:SI_Trait
+    ~expected:1
+    ~sienv_ref;
   assert_autocomplete
     ~query_text:"some_long_function_name"
     ~kind:SI_Function
     ~expected:1
-    ~sienv;
+    ~sienv_ref;
   assert_autocomplete
     ~query_text:"ClassToBeIdentified"
     ~kind:SI_Class
     ~expected:1
-    ~sienv;
+    ~sienv_ref;
   Hh_logger.log "First pass complete";
 
   (* Now, let's remove a few files and try again - assertions should change *)
@@ -132,22 +138,26 @@ let test_sqlite_plus_local (harness : Test_harness.t) : bool =
   let s = Relative_path.Set.empty in
   let s = Relative_path.Set.add s bar1path in
   let s = Relative_path.Set.add s foo3path in
-  let sienv = SymbolIndexCore.remove_files ~sienv ~paths:s in
+  sienv_ref := SymbolIndexCore.remove_files ~sienv:!sienv_ref ~paths:s;
   Hh_logger.log "Removed files";
 
   (* Two of these have been removed! *)
-  assert_autocomplete ~query_text:"UsesA" ~kind:SI_Class ~expected:1 ~sienv;
-  assert_autocomplete ~query_text:"NoBigTrait" ~kind:SI_Trait ~expected:0 ~sienv;
+  assert_autocomplete ~query_text:"UsesA" ~kind:SI_Class ~expected:1 ~sienv_ref;
+  assert_autocomplete
+    ~query_text:"NoBigTrait"
+    ~kind:SI_Trait
+    ~expected:0
+    ~sienv_ref;
   assert_autocomplete
     ~query_text:"some_long_function_name"
     ~kind:SI_Function
     ~expected:0
-    ~sienv;
+    ~sienv_ref;
   assert_autocomplete
     ~query_text:"ClassToBeIdentified"
     ~kind:SI_Class
     ~expected:1
-    ~sienv;
+    ~sienv_ref;
   Hh_logger.log "Second pass complete";
 
   (* Add the files back! *)
@@ -195,23 +205,28 @@ let test_sqlite_plus_local (harness : Test_harness.t) : bool =
       ServerConfig.default_config
   in
   let ctx = Provider_utils.ctx_from_server_env env in
-  let sienv = SymbolIndexCore.update_files ~ctx ~sienv ~paths:changelist in
-  let n = LocalSearchService.count_local_fileinfos ~sienv in
+  sienv_ref :=
+    SymbolIndexCore.update_files ~ctx ~sienv:!sienv_ref ~paths:changelist;
+  let n = LocalSearchService.count_local_fileinfos ~sienv:!sienv_ref in
   Hh_logger.log "Added back; local search service now contains %d files" n;
 
   (* Find one of each major type *)
-  assert_autocomplete ~query_text:"UsesA" ~kind:SI_Class ~expected:1 ~sienv;
-  assert_autocomplete ~query_text:"NoBigTrait" ~kind:SI_Trait ~expected:1 ~sienv;
+  assert_autocomplete ~query_text:"UsesA" ~kind:SI_Class ~expected:1 ~sienv_ref;
+  assert_autocomplete
+    ~query_text:"NoBigTrait"
+    ~kind:SI_Trait
+    ~expected:1
+    ~sienv_ref;
   assert_autocomplete
     ~query_text:"some_long_function_name"
     ~kind:SI_Function
     ~expected:1
-    ~sienv;
+    ~sienv_ref;
   assert_autocomplete
     ~query_text:"ClassToBeIdentified"
     ~kind:SI_Class
     ~expected:1
-    ~sienv;
+    ~sienv_ref;
   Hh_logger.log "Third pass complete";
 
   (* If we got here, all is well *)
@@ -221,40 +236,45 @@ let test_sqlite_plus_local (harness : Test_harness.t) : bool =
  * names and kinds correctly *)
 let test_builder_names (harness : Test_harness.t) : bool =
   let sienv = run_index_builder harness in
+  let sienv_ref = ref sienv in
 
   (* Assert that we can capture all kinds of symbols *)
-  assert_autocomplete ~query_text:"UsesA" ~kind:SI_Class ~expected:1 ~sienv;
-  assert_autocomplete ~query_text:"NoBigTrait" ~kind:SI_Trait ~expected:1 ~sienv;
+  assert_autocomplete ~query_text:"UsesA" ~kind:SI_Class ~expected:1 ~sienv_ref;
+  assert_autocomplete
+    ~query_text:"NoBigTrait"
+    ~kind:SI_Trait
+    ~expected:1
+    ~sienv_ref;
   assert_autocomplete
     ~query_text:"some_long_function_name"
     ~kind:SI_Function
     ~expected:1
-    ~sienv;
+    ~sienv_ref;
   assert_autocomplete
     ~query_text:"ClassToBeIdentified"
     ~kind:SI_Class
     ~expected:1
-    ~sienv;
+    ~sienv_ref;
   assert_autocomplete
     ~query_text:"CONST_SOME_COOL_VALUE"
     ~kind:SI_GlobalConstant
     ~expected:1
-    ~sienv;
+    ~sienv_ref;
   assert_autocomplete
     ~query_text:"IMyFooInterface"
     ~kind:SI_Interface
     ~expected:1
-    ~sienv;
+    ~sienv_ref;
   assert_autocomplete
     ~query_text:"SomeTypeAlias"
     ~kind:SI_Typedef
     ~expected:1
-    ~sienv;
+    ~sienv_ref;
   assert_autocomplete
     ~query_text:"FbidMapField"
     ~kind:SI_Enum
     ~expected:1
-    ~sienv;
+    ~sienv_ref;
 
   (* XHP is considered a class at the moment - this may change.
    * Note that XHP classes are saved WITH a leading colon.
@@ -264,7 +284,7 @@ let test_builder_names (harness : Test_harness.t) : bool =
     ~query_text:":xhp:helloworld"
     ~kind:SI_Class
     ~expected:1
-    ~sienv;
+    ~sienv_ref;
 
   (* All good *)
   true

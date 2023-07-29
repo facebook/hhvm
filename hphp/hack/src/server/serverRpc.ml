@@ -321,8 +321,9 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       (env, Error "There are typecheck errors; cannot generate saved state.")
   | SEARCH (query, type_) ->
     let ctx = Provider_utils.ctx_from_server_env env in
-    let lst = env.ServerEnv.local_symbol_table in
-    (env, ServerSearch.go ctx query ~kind_filter:type_ lst)
+    let sienv_ref = ref env.ServerEnv.local_symbol_table in
+    let r = ServerSearch.go ctx query ~kind_filter:type_ sienv_ref in
+    ({ env with ServerEnv.local_symbol_table = !sienv_ref }, r)
   | LINT fnl ->
     let ctx = Provider_utils.ctx_from_server_env env in
     (env, ServerLint.go genv ctx fnl)
@@ -361,17 +362,19 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         ~path:(Relative_path.create_detect_prefix filename)
         ~contents
     in
+    let sienv_ref = ref env.ServerEnv.local_symbol_table in
     let results =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerAutoComplete.go_ctx
             ~ctx
             ~entry
-            ~sienv:env.ServerEnv.local_symbol_table
+            ~sienv_ref
             ~is_manually_invoked
             ~line:pos.File_content.line
             ~column:pos.File_content.column
             ~naming_table:env.naming_table)
     in
+    let env = { env with ServerEnv.local_symbol_table = !sienv_ref } in
     (env, results)
   | CODE_ACTION { path; range } ->
     let (ctx, entry) = single_ctx_path env path in

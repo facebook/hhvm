@@ -17,7 +17,7 @@ val go_ctx :
   ctx:Provider_context.t ->
   entry:Provider_context.entry ->
   autocomplete_context:AutocompleteTypes.legacy_autocomplete_context ->
-  sienv:SearchUtils.si_env ->
+  sienv_ref:SearchUtils.si_env ref ->
   naming_table:Naming_table.t ->
   AutocompleteTypes.autocomplete_item list Utils.With_complete_flag.t
 

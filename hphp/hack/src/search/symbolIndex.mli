@@ -19,7 +19,7 @@ val initialize :
 
 (* This is the proper search function everyone should use *)
 val find_matching_symbols :
-  sienv:SearchUtils.si_env ->
+  sienv_ref:SearchUtils.si_env ref ->
   query_text:string ->
   max_results:int ->
   context:SearchTypes.autocomplete_type option ->

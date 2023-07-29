@@ -1435,7 +1435,7 @@ let find_global_results
     ~(id : Pos.t * string)
     ~(completion_type : SearchTypes.autocomplete_type option)
     ~(autocomplete_context : AutocompleteTypes.legacy_autocomplete_context)
-    ~(sienv : SearchUtils.si_env)
+    ~(sienv_ref : SearchUtils.si_env ref)
     ~(pctx : Provider_context.t) : unit =
   (* First step: Check obvious cases where autocomplete is not warranted.   *)
   (*                                                                        *)
@@ -1489,7 +1489,7 @@ let find_global_results
 
     let results =
       SymbolIndex.find_matching_symbols
-        ~sienv
+        ~sienv_ref
         ~query_text
         ~max_results
         ~kind_filter
@@ -1508,7 +1508,9 @@ let find_global_results
         let (res_label, res_fullname) = (r.si_name, r.si_fullname) in
         (* Only load func details if the flag sie_resolve_signatures is true *)
         let (res_detail, res_insert_text) =
-          if sienv.sie_resolve_signatures && equal_si_kind r.si_kind SI_Function
+          if
+            !sienv_ref.sie_resolve_signatures
+            && equal_si_kind r.si_kind SI_Function
           then
             let fixed_name = ns ^ r.si_name in
             match Tast_env.get_fun tast_env fixed_name with
@@ -1527,7 +1529,7 @@ let find_global_results
         in
         (* Only load exact positions if specially requested *)
         let res_decl_pos =
-          if sienv.sie_resolve_positions then
+          if !sienv_ref.sie_resolve_positions then
             let fixed_name = ns ^ r.si_name in
             match Tast_env.get_fun tast_env fixed_name with
             | None -> absolute_none
@@ -1586,7 +1588,7 @@ let find_global_results
 let complete_xhp_tag
     ~(id : Pos.t * string)
     ~(does_autocomplete_snippet : bool)
-    ~(sienv : SearchUtils.si_env)
+    ~(sienv_ref : SearchUtils.si_env ref)
     ~(pctx : Provider_context.t) : unit =
   let tast_env = Tast_env.empty pctx in
   let query_text = strip_suffix (snd id) in
@@ -1595,7 +1597,7 @@ let complete_xhp_tag
   let absolute_none = Pos.none |> Pos.to_absolute in
   let results =
     SymbolIndex.find_matching_symbols
-      ~sienv
+      ~sienv_ref
       ~query_text
       ~max_results
       ~kind_filter:None
@@ -1746,7 +1748,7 @@ let compute_complete_local env ctx tast =
 let visitor
     (ctx : Provider_context.t)
     (autocomplete_context : legacy_autocomplete_context)
-    (sienv : si_env)
+    (sienv_ref : si_env ref)
     (naming_table : Naming_table.t)
     (toplevel_tast : Tast.def list) =
   object (self)
@@ -1761,7 +1763,7 @@ let visitor
           ~id
           ~completion_type
           ~autocomplete_context
-          ~sienv
+          ~sienv_ref
           ~pctx:ctx
 
     method complete_id env (id : Ast_defs.id) : unit =
@@ -1898,7 +1900,7 @@ let visitor
         complete_xhp_tag
           ~id:sid
           ~does_autocomplete_snippet:(List.length attrs <= 0)
-          ~sienv
+          ~sienv_ref
           ~pctx:ctx;
 
       let cid = Aast.CI sid in
@@ -2323,7 +2325,7 @@ let go_ctx
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
     ~(autocomplete_context : AutocompleteTypes.legacy_autocomplete_context)
-    ~(sienv : SearchUtils.si_env)
+    ~(sienv_ref : SearchUtils.si_env ref)
     ~(naming_table : Naming_table.t) =
   reset ();
 
@@ -2335,7 +2337,7 @@ let go_ctx
     Tast_provider.compute_tast_quarantined ~ctx ~entry
   in
   let tast = tast.Tast_with_dynamic.under_normal_assumptions in
-  (visitor ctx autocomplete_context sienv naming_table tast)#go ctx tast;
+  (visitor ctx autocomplete_context sienv_ref naming_table tast)#go ctx tast;
 
   Errors.ignore_ (fun () ->
       let start_time = Unix.gettimeofday () in
@@ -2347,7 +2349,7 @@ let go_ctx
         }
       in
       SymbolIndexCore.log_symbol_index_search
-        ~sienv
+        ~sienv:!sienv_ref
         ~start_time
         ~query_text:!auto_complete_for_global
         ~max_results

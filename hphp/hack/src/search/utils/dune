@@ -1,6 +1,15 @@
 (library
  (name search_utils)
+ (modules searchUtils)
  (wrapped false)
- (libraries ast file_info pos sqlite3)
+ (libraries ast file_info glean pos search_types sqlite3)
+ (preprocess
+  (pps ppx_deriving.std)))
+
+(library
+ (name search_types)
+ (modules searchTypes)
+ (wrapped false)
+ (libraries relative_path)
  (preprocess
   (pps ppx_deriving.std)))

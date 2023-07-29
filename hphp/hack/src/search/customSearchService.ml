@@ -4,12 +4,12 @@
  *)
 
 (* Put any initialization code necessary here *)
-let initialize ~sienv:_ = ()
+let initialize ~sienv = sienv
 
 (* If you have a way of listing namespaces, put it here *)
 let fetch_namespaces ~sienv:_ = []
 
 (* Use the custom search service to find symbols by autocomplete context *)
 let search_symbols
-    ~sienv:_ ~query_text:_ ~max_results:_ ~context:_ ~kind_filter:_ =
+    ~sienv_ref:_ ~query_text:_ ~max_results:_ ~context:_ ~kind_filter:_ =
   []

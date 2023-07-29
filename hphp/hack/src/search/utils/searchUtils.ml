@@ -208,6 +208,7 @@ type si_env = {
   nss_root_namespace: nss_node;
   (* CustomSearchService *)
   glean_reponame: string;
+  glean_handle: Glean.handle option;
 }
 
 (* Default provider with no functionality *)
@@ -242,6 +243,7 @@ let default_si_env =
       };
     (* CustomSearchService *)
     glean_reponame = "";
+    glean_handle = None;
   }
 
 (* Default provider, but no logging *)

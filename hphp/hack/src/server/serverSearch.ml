@@ -28,8 +28,9 @@ let result_to_json res =
 
 let re_colon_colon = Str.regexp "::"
 
-let go ctx query_text ~(kind_filter : string) (sienv : SearchUtils.si_env) :
-    SearchUtils.result =
+let go
+    ctx query_text ~(kind_filter : string) (sienv_ref : SearchUtils.si_env ref)
+    : SearchUtils.result =
   let max_results = 100 in
   let start_time = Unix.gettimeofday () in
   let kind_filter = SearchUtils.string_to_kind kind_filter in
@@ -47,7 +48,7 @@ let go ctx query_text ~(kind_filter : string) (sienv : SearchUtils.si_env) :
           ~max_results:1
           ~kind_filter
           ~context
-          ~sienv
+          ~sienv_ref
         |> List.hd
         |> Option.map ~f:(fun r -> r.SearchTypes.si_name)
       in
@@ -66,7 +67,7 @@ let go ctx query_text ~(kind_filter : string) (sienv : SearchUtils.si_env) :
     | _ ->
       let temp_results =
         SymbolIndex.find_matching_symbols
-          ~sienv
+          ~sienv_ref
           ~query_text
           ~max_results
           ~context
@@ -75,7 +76,7 @@ let go ctx query_text ~(kind_filter : string) (sienv : SearchUtils.si_env) :
       AutocompleteService.add_position_to_results ctx temp_results
   in
   SymbolIndexCore.log_symbol_index_search
-    ~sienv
+    ~sienv:!sienv_ref
     ~start_time
     ~query_text
     ~max_results

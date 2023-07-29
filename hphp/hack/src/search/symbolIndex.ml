@@ -37,9 +37,7 @@ let initialize
         ~workers
         ~savedstate_file_opt
         ~namespace_map
-    | CustomIndex ->
-      CustomSearchService.initialize ~sienv;
-      sienv
+    | CustomIndex -> CustomSearchService.initialize ~sienv
     | NoIndex
     | LocalIndex ->
       sienv
@@ -76,7 +74,7 @@ let initialize
  * - Goal is to route ALL searches through one function for consistency
  *)
 let find_matching_symbols
-    ~(sienv : si_env)
+    ~(sienv_ref : si_env ref)
     ~(query_text : string)
     ~(max_results : int)
     ~(context : autocomplete_type option)
@@ -99,19 +97,22 @@ let find_matching_symbols
     let namespace_results =
       match context with
       | Some Ac_workspace_symbol -> []
-      | _ -> NamespaceSearchService.find_matching_namespaces ~sienv ~query_text
+      | _ ->
+        NamespaceSearchService.find_matching_namespaces
+          ~sienv:!sienv_ref
+          ~query_text
     in
     (* The local index captures symbols in files that have been changed on disk.
      * Search it first for matches, then search global and add any elements
      * that we haven't seen before *)
     let local_results =
-      match sienv.sie_provider with
+      match !sienv_ref.sie_provider with
       | NoIndex -> []
       | CustomIndex
       | LocalIndex
       | SqliteIndex ->
         LocalSearchService.search_local_symbols
-          ~sienv
+          ~sienv:!sienv_ref
           ~query_text
           ~max_results
           ~context
@@ -119,27 +120,27 @@ let find_matching_symbols
     in
     (* Next search globals *)
     let global_results =
-      match sienv.sie_provider with
+      match !sienv_ref.sie_provider with
       | CustomIndex ->
         let r =
           CustomSearchService.search_symbols
-            ~sienv
+            ~sienv_ref
             ~query_text
             ~max_results
             ~context
             ~kind_filter
         in
-        LocalSearchService.extract_dead_results ~sienv ~results:r
+        LocalSearchService.extract_dead_results ~sienv:!sienv_ref ~results:r
       | SqliteIndex ->
         let results =
           SqliteSearchService.sqlite_search
-            ~sienv
+            ~sienv:!sienv_ref
             ~query_text
             ~max_results
             ~context
             ~kind_filter
         in
-        LocalSearchService.extract_dead_results ~sienv ~results
+        LocalSearchService.extract_dead_results ~sienv:!sienv_ref ~results
       | LocalIndex
       | NoIndex ->
         []

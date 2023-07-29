@@ -98,7 +98,7 @@ let get_autocomplete_context
 let go_at_auto332_ctx
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
-    ~(sienv : SearchUtils.si_env)
+    ~(sienv_ref : SearchUtils.si_env ref)
     ~(autocomplete_context : AutocompleteTypes.legacy_autocomplete_context)
     ~(naming_table : Naming_table.t) :
     AutocompleteTypes.autocomplete_item list Utils.With_complete_flag.t =
@@ -107,7 +107,7 @@ let go_at_auto332_ctx
   AutocompleteService.go_ctx
     ~ctx
     ~entry
-    ~sienv
+    ~sienv_ref
     ~autocomplete_context
     ~naming_table
 
@@ -115,7 +115,7 @@ let go_at_auto332_ctx
 let go_ctx
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
-    ~(sienv : SearchUtils.si_env)
+    ~(sienv_ref : SearchUtils.si_env ref)
     ~(naming_table : Naming_table.t)
     ~(is_manually_invoked : bool)
     ~(line : int)
@@ -152,7 +152,7 @@ let go_ctx
     go_at_auto332_ctx
       ~ctx:modified_auto332_context
       ~entry:modified_auto332_entry
-      ~sienv
+      ~sienv_ref
       ~autocomplete_context
       ~naming_table
   in

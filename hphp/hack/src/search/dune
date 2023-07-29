@@ -43,3 +43,10 @@
   sqlite3
   state_loader
   trie))
+
+(library
+ (name glean)
+ (wrapped false)
+ (modules
+  glean)
+ )

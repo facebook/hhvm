@@ -132,11 +132,15 @@ let int_to_kind (kind_num : int) : si_kind =
   | 18 -> SI_Constructor
   | _ -> SI_Unknown
 
+type si_file =
+  | SI_Filehash of string  (** string represent Int64 *)
+  | SI_Path of Relative_path.t
+
 (* Internal representation of a single item stored by the symbol list *)
 type si_item = {
   si_name: string;
   si_kind: si_kind;
-  si_filehash: int64;
+  si_file: si_file;
   si_fullname: string;
 }
 
@@ -291,7 +295,13 @@ type si_env = {
   sie_resolve_local_decl: bool;
   (* LocalSearchService *)
   lss_fullitems: si_capture Relative_path.Map.t;
-  lss_tombstones: Tombstone_set.t;
+  lss_tombstones: Relative_path.Set.t;
+      (** files that have been locally modified *)
+  lss_tombstone_hashes: Tombstone_set.t;
+      (** hashes of suffixes of files that have been locally modified -
+      this only exists for compatibility with stores (sql, www.autocomplete)
+      that use filehashes, and won't be needed once we move solely
+      to stures that use paths (local, www.hack.light). *)
   (* SqliteSearchService *)
   sql_symbolindex_db: Sqlite3.db option ref;
   sql_select_symbols_stmt: Sqlite3.stmt option ref;
@@ -319,7 +329,8 @@ let default_si_env =
     sie_resolve_local_decl = false;
     (* LocalSearchService *)
     lss_fullitems = Relative_path.Map.empty;
-    lss_tombstones = Tombstone_set.empty;
+    lss_tombstones = Relative_path.Set.empty;
+    lss_tombstone_hashes = Tombstone_set.empty;
     (* SqliteSearchService *)
     sql_symbolindex_db = ref None;
     sql_select_symbols_stmt = ref None;

@@ -117,7 +117,9 @@ let update_file
     sienv with
     lss_fullitems =
       Relative_path.Map.add sienv.lss_fullitems ~key:path ~data:contents;
-    lss_tombstones = Tombstone_set.add sienv.lss_tombstones tombstone;
+    lss_tombstones = Relative_path.Set.add sienv.lss_tombstones path;
+    lss_tombstone_hashes =
+      Tombstone_set.add sienv.lss_tombstone_hashes tombstone;
   }
 
 let update_file_from_addenda
@@ -140,7 +142,9 @@ let update_file_from_addenda
     sienv with
     lss_fullitems =
       Relative_path.Map.add sienv.lss_fullitems ~key:path ~data:contents;
-    lss_tombstones = Tombstone_set.add sienv.lss_tombstones tombstone;
+    lss_tombstones = Relative_path.Set.add sienv.lss_tombstones path;
+    lss_tombstone_hashes =
+      Tombstone_set.add sienv.lss_tombstone_hashes tombstone;
   }
 
 (* Remove files from local when they are deleted *)
@@ -149,7 +153,9 @@ let remove_file ~(sienv : si_env) ~(path : Relative_path.t) : si_env =
   {
     sienv with
     lss_fullitems = Relative_path.Map.remove sienv.lss_fullitems path;
-    lss_tombstones = Tombstone_set.add sienv.lss_tombstones tombstone;
+    lss_tombstones = Relative_path.Set.add sienv.lss_tombstones path;
+    lss_tombstone_hashes =
+      Tombstone_set.add sienv.lss_tombstone_hashes tombstone;
   }
 
 (* Exception we use to short-circuit out of a loop if we find enough results.
@@ -197,7 +203,7 @@ let search_local_symbols
         {
           si_name = fullname;
           si_kind = symbol.sif_kind;
-          si_filehash = get_tombstone path;
+          si_file = SI_Path path;
           si_fullname = fullname;
         }
         :: acc
@@ -234,8 +240,10 @@ let search_local_symbols
 let extract_dead_results
     ~(sienv : SearchUtils.si_env) ~(results : SearchUtils.si_results) :
     si_results =
-  List.filter results ~f:(fun r ->
-      let is_valid_result =
-        not (Tombstone_set.mem sienv.lss_tombstones r.si_filehash)
-      in
-      is_valid_result)
+  List.filter results ~f:(fun item ->
+      match item.si_file with
+      | SearchUtils.SI_Path path ->
+        not (Relative_path.Set.mem sienv.lss_tombstones path)
+      | SearchUtils.SI_Filehash hash_str ->
+        let hash = Int64.of_string hash_str in
+        not (Tombstone_set.mem sienv.lss_tombstone_hashes hash))

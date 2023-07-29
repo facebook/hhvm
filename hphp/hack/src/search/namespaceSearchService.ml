@@ -71,7 +71,7 @@ let get_matches_for_node (node : nss_node) : si_results =
       {
         si_name = value.nss_name;
         si_kind = SI_Namespace;
-        si_filehash = 0L;
+        si_file = SI_Filehash "0";
         si_fullname = value.nss_name;
       }
       :: acc)
@@ -115,7 +115,7 @@ let find_matching_namespaces ~(sienv : si_env) ~(query_text : string) :
                     {
                       si_name = node.nss_name;
                       si_kind = SI_Namespace;
-                      si_filehash = 0L;
+                      si_file = SI_Filehash "0";
                       si_fullname = node.nss_name;
                     }
                     :: !matches)

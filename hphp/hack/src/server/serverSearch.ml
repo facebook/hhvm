@@ -34,7 +34,7 @@ let go
   let max_results = 100 in
   let start_time = Unix.gettimeofday () in
   let kind_filter = SearchUtils.string_to_kind kind_filter in
-  let context = Some SearchTypes.Ac_workspace_symbol in
+  let context = SearchTypes.Ac_workspace_symbol in
   let results =
     (* If query contains "::", search class methods instead of top level definitions *)
     match Str.split_delim re_colon_colon query_text with
@@ -82,6 +82,5 @@ let go
     ~max_results
     ~kind_filter
     ~results:(List.length results)
-    ~context
     ~caller:"ServerSearch.go";
   results

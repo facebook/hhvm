@@ -15,7 +15,6 @@ val log_symbol_index_search :
   results:int ->
   kind_filter:SearchTypes.si_kind option ->
   start_time:float ->
-  context:SearchTypes.autocomplete_type option ->
   caller:string ->
   unit
 

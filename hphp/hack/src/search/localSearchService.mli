@@ -34,7 +34,7 @@ val search_local_symbols :
   sienv:SearchUtils.si_env ->
   query_text:string ->
   max_results:int ->
-  context:SearchTypes.autocomplete_type option ->
+  context:SearchTypes.autocomplete_type ->
   kind_filter:SearchTypes.si_kind option ->
   SearchTypes.si_item list
 

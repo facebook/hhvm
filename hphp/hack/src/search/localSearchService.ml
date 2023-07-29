@@ -169,7 +169,7 @@ let search_local_symbols
     ~(sienv : si_env)
     ~(query_text : string)
     ~(max_results : int)
-    ~(context : autocomplete_type option)
+    ~(context : autocomplete_type)
     ~(kind_filter : si_kind option) : si_item list =
   (* case insensitive search, must include namespace, escaped for regex *)
   let query_text_regex_case_insensitive =
@@ -179,20 +179,20 @@ let search_local_symbols
   let check_symbol_and_add_to_accumulator_and_break_if_max_reached
       ~(acc : si_item list)
       ~(symbol : si_fullitem)
-      ~(context : autocomplete_type option)
+      ~(context : autocomplete_type)
       ~(kind_filter : si_kind option)
       ~(path : Relative_path.t) : si_item list =
     let is_valid_match =
       match (context, kind_filter) with
-      | (Some Actype, _) ->
-        SearchTypes.valid_for_actype symbol.SearchUtils.sif_kind
-      | (Some Acnew, _) ->
+      | (Actype, _) -> SearchTypes.valid_for_actype symbol.SearchUtils.sif_kind
+      | (Acnew, _) ->
         SearchTypes.valid_for_acnew symbol.SearchUtils.sif_kind
         && not symbol.SearchUtils.sif_is_abstract
-      | (Some Acid, _) -> SearchTypes.valid_for_acid symbol.SearchUtils.sif_kind
-      | (Some Actrait_only, _) -> is_si_trait symbol.sif_kind
-      | (_, Some kind_match) -> equal_si_kind symbol.sif_kind kind_match
-      | _ -> true
+      | (Acid, _) -> SearchTypes.valid_for_acid symbol.SearchUtils.sif_kind
+      | (Actrait_only, _) -> is_si_trait symbol.sif_kind
+      | (Ac_workspace_symbol, Some kind_match) ->
+        equal_si_kind symbol.sif_kind kind_match
+      | (Ac_workspace_symbol, None) -> true
     in
     if
       is_valid_match

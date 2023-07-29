@@ -19,7 +19,6 @@ let log_symbol_index_search
     ~(results : int)
     ~(kind_filter : si_kind option)
     ~(start_time : float)
-    ~(context : autocomplete_type option)
     ~(caller : string) : unit =
   (* In quiet mode we don't log anything to either scuba or console *)
   if sienv.sie_quiet_mode then
@@ -34,19 +33,13 @@ let log_symbol_index_search
       | None -> "None"
       | Some kind -> show_si_kind kind
     in
-    let actype_str =
-      match context with
-      | None -> "None"
-      | Some actype -> show_autocomplete_type actype
-    in
     let search_provider = descriptive_name_of_provider sienv.sie_provider in
     (* Send information to remote logging system *)
     if sienv.sie_log_timings then
       Hh_logger.log
-        "[symbolindex] Search [%s] for [%s] [%s] found %d results in [%0.3f]"
+        "[symbolindex] Search [%s] for [%s] found %d results in [%0.3f]"
         search_provider
         query_text
-        actype_str
         results
         duration;
     HackEventLogger.search_symbol_index
@@ -55,7 +48,6 @@ let log_symbol_index_search
       ~results
       ~kind_filter:kind_filter_str
       ~duration
-      ~actype:actype_str
       ~caller
       ~search_provider
 

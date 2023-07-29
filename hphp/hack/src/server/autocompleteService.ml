@@ -1433,7 +1433,7 @@ let builtin_type_hints =
 let find_global_results
     ~(env : Tast_env.env)
     ~(id : Pos.t * string)
-    ~(completion_type : SearchTypes.autocomplete_type option)
+    ~(completion_type : SearchTypes.autocomplete_type)
     ~(autocomplete_context : AutocompleteTypes.legacy_autocomplete_context)
     ~(sienv_ref : SearchUtils.si_env ref)
     ~(pctx : Provider_context.t) : unit =
@@ -1482,9 +1482,12 @@ let find_global_results
     let absolute_none = Pos.none |> Pos.to_absolute in
     let kind_filter =
       match completion_type with
-      | Some Acnew -> Some SI_Class
-      | Some Actrait_only -> Some SI_Trait
-      | _ -> None
+      | Acnew -> Some SI_Class
+      | Actrait_only -> Some SI_Trait
+      | Acid
+      | Actype
+      | Ac_workspace_symbol ->
+        None
     in
 
     let results =
@@ -1561,8 +1564,12 @@ let find_global_results
 
     (* Add any builtins that match *)
     match completion_type with
-    | Some Actype
-    | None ->
+    | Acid
+    | Actrait_only
+    | Ac_workspace_symbol
+    | Acnew ->
+      ()
+    | Actype ->
       builtin_type_hints
       |> List.filter ~f:(fun (_, name) ->
              String.is_prefix name ~prefix:query_text)
@@ -1583,7 +1590,6 @@ let find_global_results
                  res_filter_text = None;
                  res_additional_edits = [];
                })
-    | _ -> ()
 
 let complete_xhp_tag
     ~(id : Pos.t * string)
@@ -1601,7 +1607,7 @@ let complete_xhp_tag
       ~query_text
       ~max_results
       ~kind_filter:None
-      ~context:(Some Acid)
+      ~context:Acid
   in
   List.iter results ~f:(fun r ->
       let (res_label, res_fullname) =
@@ -1755,9 +1761,9 @@ let visitor
     inherit Tast_visitor.iter as super
 
     method complete_global
-        (env : Tast_env.env) (id : sid) (ac_type : autocomplete_type) : unit =
+        (env : Tast_env.env) (id : sid) (completion_type : autocomplete_type)
+        : unit =
       if is_auto_complete (snd id) then
-        let completion_type = Some ac_type in
         find_global_results
           ~env
           ~id
@@ -2355,6 +2361,5 @@ let go_ctx
         ~max_results
         ~kind_filter:None
         ~results:(List.length results.With_complete_flag.value)
-        ~context:None
         ~caller:"AutocompleteService.go";
       results)

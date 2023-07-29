@@ -77,7 +77,7 @@ let find_matching_symbols
     ~(sienv_ref : si_env ref)
     ~(query_text : string)
     ~(max_results : int)
-    ~(context : autocomplete_type option)
+    ~(context : autocomplete_type)
     ~(kind_filter : si_kind option) : SearchTypes.si_item list =
   (*
    * Nuclide often sends this exact request to verify that HH is working.
@@ -96,8 +96,11 @@ let find_matching_symbols
     (* Potential namespace matches always show up first *)
     let namespace_results =
       match context with
-      | Some Ac_workspace_symbol -> []
-      | _ ->
+      | Ac_workspace_symbol -> []
+      | Acid
+      | Acnew
+      | Actype
+      | Actrait_only ->
         NamespaceSearchService.find_matching_namespaces
           ~sienv:!sienv_ref
           ~query_text

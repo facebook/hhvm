@@ -49,6 +49,14 @@ let assert_autocomplete
     ~(kind : si_kind)
     ~(expected : int)
     ~(sienv_ref : si_env ref) : unit =
+  let context =
+    match kind with
+    | SI_Interface
+    | SI_Enum ->
+      Actype
+      (* the `Acid` context rules out interfaces+enums, so we pick one that allows them *)
+    | _ -> Acid
+  in
   (* Search for the symbol *)
   let results =
     SymbolIndex.find_matching_symbols
@@ -56,7 +64,7 @@ let assert_autocomplete
       ~query_text
       ~max_results:100
       ~kind_filter:(Some kind)
-      ~context:None
+      ~context
   in
   (* Verify correct number of results *)
   IA.assert_equals

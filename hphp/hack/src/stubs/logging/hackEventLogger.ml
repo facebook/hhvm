@@ -471,7 +471,6 @@ let search_symbol_index
     ~results:_
     ~kind_filter:_
     ~duration:_
-    ~actype:_
     ~caller:_
     ~search_provider:_ =
   ()

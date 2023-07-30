@@ -260,7 +260,37 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
   | RENAME rename_action ->
     let ctx = Provider_utils.ctx_from_server_env env in
     Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-        ServerRename.go ctx rename_action genv env ~definition_for_wrapper:None)
+        let definition_for_wrapper =
+          match rename_action with
+          | ServerRenameTypes.ClassRename _
+          | ServerRenameTypes.ClassConstRename _
+          | ServerRenameTypes.LocalVarRename _ ->
+            None
+          | ServerRenameTypes.MethodRename { class_name; old_name; _ } ->
+            ServerSymbolDefinition.go
+              ctx
+              None
+              {
+                SymbolOccurrence.name = "unused for lookup";
+                type_ =
+                  SymbolOccurrence.Method
+                    ( SymbolOccurrence.ClassName (Utils.add_ns class_name),
+                      old_name );
+                is_declaration = false;
+                pos = Pos.none;
+              }
+          | ServerRenameTypes.FunctionRename { old_name; _ } ->
+            ServerSymbolDefinition.go
+              ctx
+              None
+              {
+                SymbolOccurrence.name = Utils.add_ns old_name;
+                type_ = SymbolOccurrence.Function;
+                is_declaration = false;
+                pos = Pos.none;
+              }
+        in
+        ServerRename.go ctx rename_action genv env ~definition_for_wrapper)
   | IDE_RENAME
       { ServerCommandTypes.Ide_rename_type.filename; line; char; new_name } ->
     let ctx = Provider_utils.ctx_from_server_env env in

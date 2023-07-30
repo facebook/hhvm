@@ -1140,23 +1140,22 @@ class CommonTests(BarebonesTests):
         self.test_driver.check_cmd_and_json_cmd(
             ["Rewrote 1 file."],
             [
-                '[{{"filename":"{root}foo_4.php","patches":[{{'
-                '"char_start":74,"char_end":75,"line":4,"col_start":33,'
-                '"col_end":33,"patch_type":"replace","replacement":"wat"}},'
-                '{{"char_start":254,"char_end":255,"line":10,"col_start":28,'
-                '"col_end":28,"patch_type":"replace","replacement":"wat"}}]}}]'
+                '[{{"filename":"{root}foo_4.php","patches":['
+                '{{"char_start":74,"char_end":75,"line":4,"col_start":33,"col_end":33,"patch_type":"replace","replacement":"wat"}},'
+                '{{"char_start":254,"char_end":255,"line":10,"col_start":28,"col_end":28,"patch_type":"replace","replacement":"wat"}},'
+                '{{"char_start":42,"char_end":42,"line":4,"col_start":1,"col_end":1,"patch_type":"insert","replacement":"\\n                <<__Deprecated(\\"Use `wat` instead\\")>>\\n                public function f(): void {{\\n                  $this->wat();\\n                }}\\n"}}'
+                "]}}]"
             ],
             options=["--refactor", "Method", "Bar::f", "Bar::wat"],
         )
         self.test_driver.check_cmd_and_json_cmd(
             ["Rewrote 1 file."],
             [
-                '[{{"filename":"{root}foo_4.php","patches":[{{'
-                '"char_start":121,"char_end":122,"line":5,"col_start":33,'
-                '"col_end":33,"patch_type":"replace",'
-                '"replacement":"overrideMe"}},{{"char_start":217,'
-                '"char_end":218,"line":9,"col_start":33,"col_end":33,'
-                '"patch_type":"replace","replacement":"overrideMe"}}]}}]'
+                '[{{"filename":"{root}foo_4.php","patches":['
+                '{{"char_start":270,"char_end":271,"line":10,"col_start":33,"col_end":33,"patch_type":"replace","replacement":"overrideMe"}},'
+                '{{"char_start":366,"char_end":367,"line":14,"col_start":33,"col_end":33,"patch_type":"replace","replacement":"overrideMe"}},'
+                '{{"char_start":238,"char_end":238,"line":10,"col_start":1,"col_end":1,"patch_type":"insert","replacement":"\\n                <<__Deprecated(\\"Use `overrideMe` instead\\")>>\\n                public function g(): void {{\\n                  $this->overrideMe();\\n                }}\\n"}}'
+                "]}}]"
             ],
             options=["--refactor", "Method", "Bar::g", "Bar::overrideMe"],
         )
@@ -1168,7 +1167,17 @@ class CommonTests(BarebonesTests):
                 """<?hh
 
             class Bar extends Foo {
+
+                <<__Deprecated("Use `wat` instead")>>
+                public function f(): void {
+                  $this->wat();
+                }
                 public function wat(): void {}
+
+                <<__Deprecated("Use `overrideMe` instead")>>
+                public function g(): void {
+                  $this->overrideMe();
+                }
                 public function overrideMe(): void {}
             }
 
@@ -1330,25 +1339,23 @@ class CommonTests(BarebonesTests):
         self.test_driver.check_cmd_and_json_cmd(
             ["Rewrote 1 file."],
             [
-                '[{{"filename":"{root}foo_4.php","patches":[{{'
-                '"char_start":127,"char_end":130,"line":8,"col_start":22,'
-                '"col_end":24,"patch_type":"replace","replacement":"woah"}},'
-                '{{"char_start":56,"char_end":59,"line":4,"col_start":17,'
-                '"col_end":19,"patch_type":"replace","replacement":"woah"}}]'
-                "}}]"
+                '[{{"filename":"{root}foo_4.php","patches":['
+                '{{"char_start":127,"char_end":130,"line":8,"col_start":22,"col_end":24,"patch_type":"replace","replacement":"woah"}},'
+                '{{"char_start":56,"char_end":59,"line":4,"col_start":17,"col_end":19,"patch_type":"replace","replacement":"woah"}},'
+                '{{"char_start":105,"char_end":105,"line":7,"col_start":1,"col_end":1,"patch_type":"insert","replacement":"\\n            <<__Deprecated(\\"Use `woah` instead\\")>>\\n            function wat(): void {{\\n              woah();\\n            }}\\n"}}'
+                "]}}]"
             ],
             options=["--refactor", "Function", "wat", "woah"],
         )
         self.test_driver.check_cmd_and_json_cmd(
             ["Rewrote 2 files."],
             [
-                '[{{"filename":"{root}foo_4.php","patches":[{{'
-                '"char_start":87,"char_end":88,"line":5,"col_start":24,'
-                '"col_end":24,"patch_type":"replace","replacement":"fff"}}]}},'
-                '{{"filename":"{root}foo_1.php","patches":[{{'
-                '"char_start":23,"char_end":24,"line":3,"col_start":18,'
-                '"col_end":18,"patch_type":"replace","replacement":"fff"}}]'
-                "}}]"
+                '[{{"filename":"{root}foo_4.php","patches":['
+                '{{"char_start":87,"char_end":88,"line":5,"col_start":24,"col_end":24,"patch_type":"replace","replacement":"fff"}}'
+                ']}},{{"filename":"{root}foo_1.php","patches":['
+                '{{"char_start":23,"char_end":24,"line":3,"col_start":18,"col_end":18,"patch_type":"replace","replacement":"fff"}},'
+                '{{"char_start":5,"char_end":5,"line":2,"col_start":1,"col_end":1,"patch_type":"insert","replacement":"\\n        <<__Deprecated(\\"Use `fff` instead\\")>>\\n        function f(): int {{\\n          return fff();\\n        }}\\n"}}'
+                "]}}]"
             ],
             options=["--refactor", "Function", "f", "fff"],
         )
@@ -1364,6 +1371,11 @@ class CommonTests(BarebonesTests):
                 return fff();
             }
 
+            <<__Deprecated("Use `woah` instead")>>
+            function wat(): void {
+              woah();
+            }
+
             function woah(): void {}
             """,
             )
@@ -1373,6 +1385,11 @@ class CommonTests(BarebonesTests):
             self.assertEqual(
                 out,
                 """<?hh
+
+        <<__Deprecated("Use `fff` instead")>>
+        function f(): int {
+          return fff();
+        }
 
         function fff(): int {
             return g() + 1;

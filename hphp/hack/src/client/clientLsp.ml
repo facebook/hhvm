@@ -144,7 +144,6 @@ module Lost_env = struct
         symbol_definition: Relative_path.t SymbolDefinition.t;
         find_refs_action: ServerCommandTypes.Find_refs.action;
         new_name: string;
-        filename: string;
         ide_calculated_patches: ServerRenameTypes.patch list;
       }
 end
@@ -1711,13 +1710,11 @@ let kickoff_shell_out_and_maybe_cancel
               symbol_action_arg
           in
           cmd
-        | Rename { symbol_definition; find_refs_action; new_name; filename; _ }
-          ->
+        | Rename { symbol_definition; find_refs_action; new_name; _ } ->
           let name_action_definition_string =
             ServerCommandTypes.Rename.arguments_to_string_exn
               new_name
               find_refs_action
-              filename
               symbol_definition
           in
           let cmd =
@@ -2783,14 +2780,12 @@ let do_documentRename_local
         shellout = Some (symbol_definition, find_refs_action);
         local = ide_calculated_patches;
       } ->
-    let (filename, _line, _col) = lsp_file_position_to_hack document_position in
     let shellable_type =
       Lost_env.Rename
         {
           symbol_definition;
           find_refs_action;
           new_name;
-          filename;
           ide_calculated_patches;
         }
     in

@@ -271,7 +271,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         with
         | Error e -> (env, Done (Error e))
         | Ok r -> map_env r ~f:(fun x -> Ok x))
-  | IDE_RENAME_BY_SYMBOL (action, new_name, filename, symbol_definition) ->
+  | IDE_RENAME_BY_SYMBOL (action, new_name, symbol_definition) ->
     let ctx = Provider_utils.ctx_from_server_env env in
     Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
         let open Done_or_retry in
@@ -280,7 +280,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
             ctx
             ~find_refs_action:action
             ~new_name
-            ~filename
             ~symbol_definition
             genv
             env

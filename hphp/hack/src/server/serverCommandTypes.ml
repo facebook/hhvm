@@ -266,32 +266,31 @@ module Rename = struct
   type result_or_retry = result Done_or_retry.t
 
   (** Returns a string in the form of
-   * NEW_NAME|COMMA_SEPARATED_FIND_REFS_ACTION|FILENAME|OCaml_marshalled_SymbolDefinition.T
+   * NEW_NAME|COMMA_SEPARATED_FIND_REFS_ACTION|OCaml_marshalled_SymbolDefinition.T
   *)
   let arguments_to_string_exn
       (new_name : string)
       (action : Find_refs.action)
-      (filename : string)
       (symbol_def : Relative_path.t SymbolDefinition.t) : string =
     let symbol_and_action =
       Find_refs.symbol_and_action_to_string_exn new_name action
     in
     let marshalled_def = Marshal.to_string symbol_def [] in
     let encoded = Base64.encode_exn marshalled_def in
-    Printf.sprintf "%s|%s|%s" symbol_and_action filename encoded
+    Printf.sprintf "%s|%s" symbol_and_action encoded
 
   (** Expects a string in the form of
-   * NEW_NAME|COMMA_SEPARATED_FIND_REFS_ACTION|filename|OCaml_marshalled_SymbolDefinition.T
+   * NEW_NAME|COMMA_SEPARATED_FIND_REFS_ACTION|OCaml_marshalled_SymbolDefinition.T
    * For example, a valid entry is
-   * HackTypecheckerQueryBase::WWWDir|Member,\HackTypecheckerQueryBase,Method,getWWWDir|foo.php|<byte_string>
+   * HackTypecheckerQueryBase::WWWDir|Member,\HackTypecheckerQueryBase,Method,getWWWDir|<byte_string>
   *)
   let string_to_args arg :
-      string * Find_refs.action * string * Relative_path.t SymbolDefinition.t =
+      string * Find_refs.action * Relative_path.t SymbolDefinition.t =
     let split_arg = Str.split (Str.regexp "|") arg in
-    let (symbol_name, action_arg, filename, marshalled_def) =
+    let (symbol_name, action_arg, marshalled_def) =
       match split_arg with
-      | [symbol_name; action_arg; filename; marshalled_def] ->
-        (symbol_name, action_arg, filename, marshalled_def)
+      | [symbol_name; action_arg; marshalled_def] ->
+        (symbol_name, action_arg, marshalled_def)
       | _ ->
         Printf.eprintf "Invalid input\n";
         raise Exit_status.(Exit_with Input_error)
@@ -302,7 +301,7 @@ module Rename = struct
     let symbol_definition : Relative_path.t SymbolDefinition.t =
       Marshal.from_string decoded_str 0
     in
-    (new_name, action, filename, symbol_definition)
+    (new_name, action, symbol_definition)
 end
 
 module Symbol_type = struct
@@ -505,10 +504,7 @@ type _ t =
   | RENAME : ServerRenameTypes.action -> Rename.result_or_retry t
   | IDE_RENAME : Ide_rename_type.t -> Rename.ide_result_or_retry t
   | IDE_RENAME_BY_SYMBOL :
-      Find_refs.action
-      * string
-      * Relative_path.t
-      * Relative_path.t SymbolDefinition.t
+      Find_refs.action * string * Relative_path.t SymbolDefinition.t
       -> Rename.ide_result_or_retry t
   | CODEMOD_SDT :
       string

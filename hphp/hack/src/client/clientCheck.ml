@@ -396,13 +396,10 @@ let main_internal
     Lwt.return (Exit_status.No_error, Telemetry.create ())
   | MODE_IDE_RENAME_BY_SYMBOL arg ->
     let open ServerCommandTypes in
-    let (new_name, action, filename, symbol_definition) =
-      Rename.string_to_args arg
-    in
-    let filename = Relative_path.create_detect_prefix filename in
+    let (new_name, action, symbol_definition) = Rename.string_to_args arg in
     let%lwt results =
       rpc_with_retry args
-      @@ Rpc.IDE_RENAME_BY_SYMBOL (action, new_name, filename, symbol_definition)
+      @@ Rpc.IDE_RENAME_BY_SYMBOL (action, new_name, symbol_definition)
     in
     begin
       match results with

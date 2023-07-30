@@ -311,13 +311,21 @@ let classish_is_interface (ctx : Provider_context.t) (name : string) : bool =
     | Ast_defs.Cinterface -> true
     | _ -> false)
 
-(* Produce a "deprecated" version of the old function so that calls to it can be rerouted.
-   If the [filename] or [definition] parameters are None, this is a no-op. *)
+(* Produce a "deprecated" version of the old [definition] so that calls to it can be rerouted.
+   If [definition] is None, this is a no-op. *)
 let get_deprecated_wrapper_patch
-    ~(filename : Relative_path.t option)
     ~(definition : Relative_path.t SymbolDefinition.t option)
     ~(ctx : Provider_context.t)
     (new_name : string) : patch option =
+  let filename =
+    Option.bind definition ~f:(fun definition ->
+        let filename = Pos.filename definition.SymbolDefinition.pos in
+        let is_dummy = Relative_path.equal filename Relative_path.default in
+        if is_dummy then
+          HackEventLogger.invariant_violation_bug
+            "--refactor has empty filename";
+        Option.some_if (not is_dummy) filename)
+  in
   SymbolDefinition.(
     Full_fidelity_positioned_syntax.(
       Option.Monad_infix.(
@@ -485,19 +493,12 @@ let go
          in
          let deprecated_wrapper_patch =
            match action with
-           | FunctionRename { filename_for_deprecated_wrapper = filename; _ } ->
+           | FunctionRename _ ->
              get_deprecated_wrapper_patch
-               ~filename
                ~definition:definition_for_wrapper
                ~ctx
                new_name
-           | MethodRename
-               {
-                 filename_for_deprecated_wrapper = filename;
-                 class_name;
-                 old_name;
-                 _;
-               } ->
+           | MethodRename { class_name; old_name; _ } ->
              if
                method_might_support_dynamic
                  ctx
@@ -505,7 +506,6 @@ let go
                  ~method_name:old_name
              then
                get_deprecated_wrapper_patch
-                 ~filename
                  ~definition:definition_for_wrapper
                  ~ctx
                  new_name
@@ -590,23 +590,17 @@ let go_for_single_file
         filename
         (Pos.filename symbol_definition.SymbolDefinition.pos)
     in
+    let definition =
+      Option.some_if should_write_deprecated_wrapper_patch symbol_definition
+    in
     let deprecated_wrapper_patch =
       let open ServerCommandTypes.Find_refs in
       match find_refs_action with
-      | Function _ ->
-        get_deprecated_wrapper_patch
-          ~filename:(Some filename)
-          ~definition:(Some symbol_definition)
-          ~ctx
-          new_name
+      | Function _ -> get_deprecated_wrapper_patch ~definition ~ctx new_name
       | Member (class_name, Method old_name) ->
         if method_might_support_dynamic ctx ~class_name ~method_name:old_name
         then
-          get_deprecated_wrapper_patch
-            ~filename:(Some filename)
-            ~definition:(Some symbol_definition)
-            ~ctx
-            new_name
+          get_deprecated_wrapper_patch ~definition ~ctx new_name
         else
           None
       | Class _
@@ -632,6 +626,8 @@ let go_for_single_file
 *)
 let go_ide_with_find_refs_action
     ctx ~find_refs_action ~new_name ~filename ~symbol_definition genv env =
+  let _ = filename in
+  (* TODO(ljw): unused *)
   let include_defs = true in
   ServerFindRefs.go ctx find_refs_action include_defs genv env
   |> ServerCommandTypes.Done_or_retry.map_env ~f:(fun refs ->
@@ -654,7 +650,6 @@ let go_ide_with_find_refs_action
            match find_refs_action with
            | Function _ ->
              get_deprecated_wrapper_patch
-               ~filename:(Some filename)
                ~definition:(Some symbol_definition)
                ~ctx
                new_name
@@ -666,7 +661,6 @@ let go_ide_with_find_refs_action
                  ~method_name:old_name
              then
                get_deprecated_wrapper_patch
-                 ~filename:(Some filename)
                  ~definition:(Some symbol_definition)
                  ~ctx
                  new_name
@@ -701,12 +695,7 @@ let go_ide ctx (filename, line, column) new_name genv env =
     (match (kind, pieces) with
     | (Function, [function_name]) ->
       let command =
-        ServerRenameTypes.FunctionRename
-          {
-            filename_for_deprecated_wrapper = Some filename;
-            old_name = function_name;
-            new_name;
-          }
+        ServerRenameTypes.FunctionRename { old_name = function_name; new_name }
       in
       Ok (go ctx command genv env ~definition_for_wrapper:(Some definition))
     | (Enum, [enum_name]) ->
@@ -726,12 +715,7 @@ let go_ide ctx (filename, line, column) new_name genv env =
     | (Method, [class_name; method_name]) ->
       let command =
         ServerRenameTypes.MethodRename
-          {
-            filename_for_deprecated_wrapper = Some filename;
-            class_name;
-            old_name = method_name;
-            new_name;
-          }
+          { class_name; old_name = method_name; new_name }
       in
       Ok (go ctx command genv env ~definition_for_wrapper:(Some definition))
     | (LocalVar, _) ->

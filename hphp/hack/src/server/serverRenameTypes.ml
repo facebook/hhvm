@@ -24,17 +24,11 @@ type action =
   | ClassConstRename of string * string * string
   (* class_name * old_name * new_name *)
   | MethodRename of {
-      filename_for_deprecated_wrapper: Relative_path.t option;
-          (** This field must be None for client->server communication, since relative-paths can't be marshalled.
-          If None, no wrapper will be created *)
       class_name: string;
       old_name: string;
       new_name: string;
     }
   | FunctionRename of {
-      filename_for_deprecated_wrapper: Relative_path.t option;
-          (** This field must be None for client->server communication, since relative-paths can't be marshalled.
-          If None, no wrapper will be created *)
       old_name: string;
       new_name: string;
     }

@@ -127,14 +127,7 @@ let go
     match mode with
     | Class -> ServerRenameTypes.ClassRename (before, after)
     | Function ->
-      (* We set [filename_for_deprecated_wrapper] to None because we don't want
-         to add the wrapper. Likewise for [MethodRename]. *)
-      ServerRenameTypes.FunctionRename
-        {
-          filename_for_deprecated_wrapper = None;
-          old_name = before;
-          new_name = after;
-        }
+      ServerRenameTypes.FunctionRename { old_name = before; new_name = after }
     | Method ->
       let befores = Str.split (Str.regexp "::") before in
       if List.length befores <> 2 then
@@ -152,7 +145,6 @@ let go
       ) else
         ServerRenameTypes.MethodRename
           {
-            filename_for_deprecated_wrapper = None;
             class_name = before_class;
             old_name = before_method;
             new_name = after_method;

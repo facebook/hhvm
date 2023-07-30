@@ -132,7 +132,6 @@ let go
       ServerRenameTypes.FunctionRename
         {
           filename_for_deprecated_wrapper = None;
-          definition = None;
           old_name = before;
           new_name = after;
         }
@@ -154,7 +153,6 @@ let go
         ServerRenameTypes.MethodRename
           {
             filename_for_deprecated_wrapper = None;
-            definition = None;
             class_name = before_class;
             old_name = before_method;
             new_name = after_method;

@@ -315,7 +315,7 @@ let classish_is_interface (ctx : Provider_context.t) (name : string) : bool =
    If the [filename] or [definition] parameters are None, this is a no-op. *)
 let get_deprecated_wrapper_patch
     ~(filename : Relative_path.t option)
-    ~(definition : string SymbolDefinition.t option)
+    ~(definition : Relative_path.t SymbolDefinition.t option)
     ~(ctx : Provider_context.t)
     (new_name : string) : patch option =
   SymbolDefinition.(
@@ -323,8 +323,6 @@ let get_deprecated_wrapper_patch
       Option.Monad_infix.(
         filename >>= fun filename ->
         definition >>= fun definition ->
-        let definition = SymbolDefinition.to_relative definition in
-
         (* We need the number of spaces that the function declaration is offsetted so that we can
            format our wrapper properly with the correct indent (i.e. we need 0-indexed columns).
 
@@ -439,7 +437,12 @@ let method_might_support_dynamic ctx ~class_name ~method_name =
              is_dynamicallycallable flags || supports_dynamic_type flags))
      |> Option.value ~default:true
 
-let go ctx action genv env =
+let go
+    ctx
+    action
+    genv
+    env
+    ~(definition_for_wrapper : Relative_path.t SymbolDefinition.t option) =
   let module Types = ServerCommandTypes.Find_refs in
   let (find_refs_action, new_name) =
     match action with
@@ -482,13 +485,15 @@ let go ctx action genv env =
          in
          let deprecated_wrapper_patch =
            match action with
-           | FunctionRename
-               { filename_for_deprecated_wrapper = filename; definition; _ } ->
-             get_deprecated_wrapper_patch ~filename ~definition ~ctx new_name
+           | FunctionRename { filename_for_deprecated_wrapper = filename; _ } ->
+             get_deprecated_wrapper_patch
+               ~filename
+               ~definition:definition_for_wrapper
+               ~ctx
+               new_name
            | MethodRename
                {
                  filename_for_deprecated_wrapper = filename;
-                 definition;
                  class_name;
                  old_name;
                  _;
@@ -499,7 +504,11 @@ let go ctx action genv env =
                  ~class_name
                  ~method_name:old_name
              then
-               get_deprecated_wrapper_patch ~filename ~definition ~ctx new_name
+               get_deprecated_wrapper_patch
+                 ~filename
+                 ~definition:definition_for_wrapper
+                 ~ctx
+                 new_name
              else
                None
            | ClassRename _
@@ -581,14 +590,13 @@ let go_for_single_file
         filename
         (Pos.filename symbol_definition.SymbolDefinition.pos)
     in
-    let definition = SymbolDefinition.to_absolute symbol_definition in
     let deprecated_wrapper_patch =
       let open ServerCommandTypes.Find_refs in
       match find_refs_action with
       | Function _ ->
         get_deprecated_wrapper_patch
           ~filename:(Some filename)
-          ~definition:(Some definition)
+          ~definition:(Some symbol_definition)
           ~ctx
           new_name
       | Member (class_name, Method old_name) ->
@@ -596,7 +604,7 @@ let go_for_single_file
         then
           get_deprecated_wrapper_patch
             ~filename:(Some filename)
-            ~definition:(Some definition)
+            ~definition:(Some symbol_definition)
             ~ctx
             new_name
         else
@@ -641,14 +649,13 @@ let go_ide_with_find_refs_action
                end
              ~init:[]
          in
-         let definition = SymbolDefinition.to_absolute symbol_definition in
          let deprecated_wrapper_patch =
            let open ServerCommandTypes.Find_refs in
            match find_refs_action with
            | Function _ ->
              get_deprecated_wrapper_patch
                ~filename:(Some filename)
-               ~definition:(Some definition)
+               ~definition:(Some symbol_definition)
                ~ctx
                new_name
            | Member (class_name, Method old_name) ->
@@ -660,7 +667,7 @@ let go_ide_with_find_refs_action
              then
                get_deprecated_wrapper_patch
                  ~filename:(Some filename)
-                 ~definition:(Some definition)
+                 ~definition:(Some symbol_definition)
                  ~ctx
                  new_name
              else
@@ -685,7 +692,7 @@ let go_ide ctx (filename, line, column) new_name genv env =
   in
   let file_content = Provider_context.read_file_contents_exn entry in
   let definitions =
-    ServerIdentifyFunction.go_quarantined_absolute ~ctx ~entry ~line ~column
+    ServerIdentifyFunction.go_quarantined ~ctx ~entry ~line ~column
   in
   match definitions with
   | [(_, Some definition)] ->
@@ -697,38 +704,36 @@ let go_ide ctx (filename, line, column) new_name genv env =
         ServerRenameTypes.FunctionRename
           {
             filename_for_deprecated_wrapper = Some filename;
-            definition = Some definition;
             old_name = function_name;
             new_name;
           }
       in
-      Ok (go ctx command genv env)
+      Ok (go ctx command genv env ~definition_for_wrapper:(Some definition))
     | (Enum, [enum_name]) ->
       let command = ServerRenameTypes.ClassRename (enum_name, new_name) in
-      Ok (go ctx command genv env)
+      Ok (go ctx command genv env ~definition_for_wrapper:None)
     | (Class, [class_name]) ->
       let command = ServerRenameTypes.ClassRename (class_name, new_name) in
-      Ok (go ctx command genv env)
+      Ok (go ctx command genv env ~definition_for_wrapper:None)
     | (Typedef, [class_name]) ->
       let command = ServerRenameTypes.ClassRename (class_name, new_name) in
-      Ok (go ctx command genv env)
+      Ok (go ctx command genv env ~definition_for_wrapper:None)
     | (ClassConst, [class_name; const_name]) ->
       let command =
         ServerRenameTypes.ClassConstRename (class_name, const_name, new_name)
       in
-      Ok (go ctx command genv env)
+      Ok (go ctx command genv env ~definition_for_wrapper:None)
     | (Method, [class_name; method_name]) ->
       let command =
         ServerRenameTypes.MethodRename
           {
             filename_for_deprecated_wrapper = Some filename;
-            definition = Some definition;
             class_name;
             old_name = method_name;
             new_name;
           }
       in
-      Ok (go ctx command genv env)
+      Ok (go ctx command genv env ~definition_for_wrapper:(Some definition))
     | (LocalVar, _) ->
       let command =
         ServerRenameTypes.LocalVarRename
@@ -740,7 +745,7 @@ let go_ide ctx (filename, line, column) new_name genv env =
             new_name = maybe_add_dollar new_name;
           }
       in
-      Ok (go ctx command genv env)
+      Ok (go ctx command genv env ~definition_for_wrapper:None)
     | (_, _) -> Error "Tried to rename a non-renameable symbol")
   (* We have 0 or >1 definitions so correct behavior is unknown *)
   | _ -> Error "Tried to rename a non-renameable symbol"

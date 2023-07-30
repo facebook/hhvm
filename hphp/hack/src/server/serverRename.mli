@@ -14,11 +14,14 @@ val get_dead_unsafe_cast_patches : ServerEnv.env -> ServerRenameTypes.patch list
 val get_lambda_parameter_rewrite_patches :
   Provider_context.t -> string list -> ServerRenameTypes.patch list
 
+(** Does the rename. [definition_for_wrapper] is the definition where a deprecated-wrapper may
+be generated, or None to suppress any possible generation. *)
 val go :
   Provider_context.t ->
   ServerRenameTypes.action ->
   ServerEnv.genv ->
   ServerEnv.env ->
+  definition_for_wrapper:Relative_path.t SymbolDefinition.t option ->
   ServerEnv.env
   * ServerRenameTypes.patch list ServerCommandTypes.Done_or_retry.t
 

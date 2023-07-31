@@ -241,7 +241,7 @@ CmdLineOptions parseCmdLineOptions(int argc, char** argv, std::string pkgName) {
   res.commandArgs = constructArgString(argc, argv);
 
   std::vector<option> longOptions = {
-      {"verbosity", 1, nullptr, 'v'},
+      {"verbosity", 0, nullptr, 'v'},
       {"help", 0, nullptr, 'h'},
       {"version", 0, nullptr, 'V'},
       {"validate-config", 2, nullptr, 0},

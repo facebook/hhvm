@@ -373,6 +373,62 @@ function get_product_attribution_id()[leak_safe]: ?int {
   // Otherwise it must be a `(function(): int)`, lets invoke it.
   return HH\FIXME\UNSAFE_CAST<mixed, (function()[leak_safe]: int)>($value)();
 }
+
+/**
+ * Propagates the current product ID attribution into a lambda so that attempts
+ * to retrieve attribution inside the lambda will return the creator's
+ * attribution instead of the eventual caller's attribution.
+ */
+function embed_product_attribution_id_in_closure<T>(
+  (function ()[defaults]: T) $f,
+)[leak_safe]: (function ()[defaults]: T) {
+  $attribution = get_product_attribution_id_internal();
+  if ($attribution is null) {
+    // No attribution, return the original function without attribution
+    return $f;
+  }
+  if ($attribution is int) {
+    return ()[defaults] ==> {
+      set_product_attribution_id($attribution);
+      return $f();
+    };
+  }
+  // Otherwise it must be a `(function(): int)`
+  return ()[defaults] ==> {
+    set_product_attribution_id_deferred(
+      HH\FIXME\UNSAFE_CAST<mixed, (function()[leak_safe]: int)>($attribution)
+    );
+    return $f();
+  };
+}
+
+/**
+ * Propagates the current product ID attribution into an async lambda so that
+ * attempts to retrieve attribution inside the lambda will return the creator's
+ * attribution instead of the eventual caller's attribution.
+ */
+function embed_product_attribution_id_in_async_closure<T>(
+  (function ()[defaults]: Awaitable<T>) $f,
+)[leak_safe]: (function ()[defaults]: Awaitable<T>) {
+  $attribution = get_product_attribution_id_internal();
+  if ($attribution is null) {
+    // No attribution, return the original function without attribution
+    return $f;
+  }
+  if ($attribution is int) {
+    return async ()[defaults] ==> {
+      set_product_attribution_id($attribution);
+      return await $f();
+    };
+  }
+  // Otherwise it must be a `(function(): int)`
+  return async ()[defaults] ==> {
+    set_product_attribution_id_deferred(
+      HH\FIXME\UNSAFE_CAST<mixed, (function()[leak_safe]: int)>($attribution)
+    );
+    return await $f();
+  };
+}
 //////////////////////////////////////////////////////////////////////////////
 
 } // HH namespace

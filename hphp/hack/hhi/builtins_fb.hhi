@@ -151,4 +151,22 @@ namespace HH {
    */
   function get_product_attribution_id()[leak_safe]: ?int;
 
+  /**
+   * Propagates the current product ID attribution into a lambda so that attempts
+   * to retrieve attribution inside the lambda will return the creator's
+   * attribution instead of the eventual caller's attribution.
+   */
+  function embed_product_attribution_id_in_closure<T>(
+    (function ()[defaults]: T) $f,
+  )[leak_safe]: (function ()[defaults]: T);
+
+  /**
+   * Propagates the current product ID attribution into an async lambda so that
+   * attempts to retrieve attribution inside the lambda will return the creator's
+   * attribution instead of the eventual caller's attribution.
+   */
+  function embed_product_attribution_id_in_async_closure<T>(
+    (function ()[defaults]: Awaitable<T>) $f,
+  )[leak_safe]: (function ()[defaults]: Awaitable<T>);
+
 } // HH namespace

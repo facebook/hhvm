@@ -4778,7 +4778,7 @@ void setupClass(Class* newClass, NamedType* nameList) {
       for (auto i = newClass->numMethods(); i--;) {
         auto const func = newClass->getMethod(i);
         if (func->isCPPBuiltin() && func->isStatic()) {
-          assertx(func->isUnique());
+          assertx(func->isPersistent());
         }
       }
     }

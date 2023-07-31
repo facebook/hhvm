@@ -95,7 +95,7 @@ enum Attr {
   // classes across the codebase.  Note that function and class names are in
   // separate namespaces, so it is possible to have a Func and Class which
   // share a name but both of which are unique.   |          |         //
-  AttrUnique               = (1u << 10), //    X  |          |    X    //
+  AttrUnique               = (1u << 10), //    X  |          |         //
                                          //       |          |         //
   // Indicates that this property is definitely not redeclaring a property in a
   // parent, or if it is, the type-hints of the two properties are equivalent

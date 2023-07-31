@@ -14768,7 +14768,7 @@ res::Func Index::resolve_func(SString name) const {
   auto const it = m_data->funcs.find(name);
   if (it == end(m_data->funcs)) return res::Func { res::Func::Missing { name } };
   auto const func = it->second;
-  assertx(func->attrs & AttrUnique);
+  assertx(func->attrs & AttrPersistent);
   return res::Func { res::Func::Fun { func_info(*m_data, func) } };
 }
 

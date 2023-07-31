@@ -219,7 +219,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
 
   auto attrs = this->attrs;
   assertx(IMPLIES(attrs & AttrIsMethCaller && RO::RepoAuthoritative,
-    attrs & AttrPersistent && attrs & AttrUnique));
+    attrs & AttrPersistent));
 
   DEBUG_ONLY auto persistent = ue().isASystemLib() &&
     (!RO::funcIsRenamable(name) || preClass || isGenerated);

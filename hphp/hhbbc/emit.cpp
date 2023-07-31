@@ -1057,7 +1057,6 @@ void emit_init_func(FuncEmitter& fe, const php::Func& func) {
 void emit_func(EmitUnitState& state, UnitEmitter& ue,
                FuncEmitter& fe, php::Func& f) {
   FTRACE(2,  "    func {}\n", f.name->data());
-  assertx(f.attrs & AttrUnique);
   assertx(f.attrs & AttrPersistent);
   renumber_locals(f);
   emit_init_func(fe, f);

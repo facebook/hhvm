@@ -73,7 +73,6 @@ fn emit_constant_cinit<'a, 'arena, 'decl>(
         let mut attrs = Attr::AttrNoInjection;
         attrs.set(Attr::AttrPersistent, e.systemlib());
         attrs.set(Attr::AttrBuiltin, e.systemlib());
-        attrs.set(Attr::AttrUnique, e.systemlib());
 
         Ok(Function {
             attributes: Slice::empty(),

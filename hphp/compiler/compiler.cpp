@@ -310,10 +310,10 @@ struct SymbolSets {
     for (auto& fe : ue.fevec()) {
       if (fe->attrs & AttrIsMethCaller) {
         if (addNoFail(funcs, fe->name, path, "function")) {
-          fe->attrs |= AttrUnique | AttrPersistent;
+          fe->attrs |= AttrPersistent;
         }
       } else {
-        fe->attrs |= AttrUnique | AttrPersistent;
+        fe->attrs |= AttrPersistent;
         add(funcs, fe->name, path, "function");
       }
     }

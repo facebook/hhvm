@@ -74,7 +74,7 @@ struct IOBuf {}
 struct Adapter {
   // Fully qualified name of a Python adapter class, which should inherit from thrift.python.adapter.Adapter
   1: string name;
-  // Fully qualified type hint the above implmenantion adapts to.
+  // Fully qualified type hint the above implementation adapts to.
   // If ending with "[]", it becomes a generic, and the unadapted type will be filled between the brackets.
   2: string typeHint;
 } (thrift.uri = "facebook.com/thrift/annotation/python/Adapter")

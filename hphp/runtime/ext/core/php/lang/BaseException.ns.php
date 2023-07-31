@@ -197,8 +197,8 @@ trait BaseException {
     $res = "";
     $lst = darray[];
     $ex = $throwable;
-    while ($ex != null && !\array_key_exists(\spl_object_hash($ex), $lst)) {
-      $lst[\spl_object_hash($ex)] = $ex;
+    while ($ex != null && !\array_key_exists(\spl_object_hash(HH\FIXME\UNSAFE_CAST<mixed,dynamic>($ex)), $lst)) {
+      $lst[\spl_object_hash(HH\FIXME\UNSAFE_CAST<mixed,dynamic>($ex))] = $ex;
       $ex = $ex->getPrevious();
     }
     $lst = HH\FIXME\UNSAFE_CAST<

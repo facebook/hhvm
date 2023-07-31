@@ -586,7 +586,7 @@ namespace __SystemLib {
         $this->body->appendChild($this->element('br'));
         $this->xml->appendChild($html);
         \header('content-type: text/html; charset=UTF-8');
-        echo $this->xml->saveHTML() as dynamic;
+        echo HH\FIXME\UNSAFE_CAST<mixed, arraykey>($this->xml->saveHTML());
       }
     }
   }

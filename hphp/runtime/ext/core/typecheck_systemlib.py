@@ -28,6 +28,7 @@ FLAGS: List[str] = [
     "--is-systemlib",
     "--config",
     "enable_no_auto_dynamic=true",
+    "--enable-sound-dynamic-type",
     # TODO(T118594542)
     "--allowed-fixme-codes-strict",
     ",".join(map(str, FIXME_CODES)),

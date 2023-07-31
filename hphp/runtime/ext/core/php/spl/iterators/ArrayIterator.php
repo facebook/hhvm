@@ -38,7 +38,7 @@ class ArrayIterator implements \HH\Iterator<mixed> {
     if (HH\is_any_array($array)) {
       $this->vals = $array;
     } else if (gettype($array) === 'object') {
-      $this->vals = get_object_vars($array);
+      $this->vals = get_object_vars(HH\FIXME\UNSAFE_CAST<mixed,object>($array));
     } else {
       throw new InvalidArgumentException(
         "ArrayIterator takes an array or object input.",

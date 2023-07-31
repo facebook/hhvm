@@ -213,7 +213,7 @@ impl TypedLocal {
                 (),
                 pos,
                 Expr_::Binop(box Binop {
-                    bop: Bop::Eq(_), // TODO, check all possibilities
+                    bop: Bop::Eq(None),
                     lhs,
                     rhs,
                 }),
@@ -225,6 +225,15 @@ impl TypedLocal {
                 Ok(None) => Ok(()),
                 Err(()) => Err(()),
             },
+            Expr(
+                (),
+                _pos,
+                Expr_::Binop(box Binop {
+                    bop: Bop::Eq(Some(_)),
+                    lhs: _,
+                    rhs: _,
+                }),
+            ) => Err(()),
             _ => Ok(()),
         }
     }
@@ -260,7 +269,7 @@ impl TypedLocal {
                 (),
                 _pos,
                 Expr_::Binop(box Binop {
-                    bop: Bop::Eq(_), // TODO, check all possibilities
+                    bop: Bop::Eq(_),
                     lhs,
                     rhs: _,
                 }),
@@ -528,7 +537,9 @@ impl<'a> VisitorMut<'a> for TypedLocal {
                 for expr in exprs.1.iter_mut() {
                     expr.recurse(env, self.object())?;
                     if let Err(()) = self.enforce_assign_expr_rhs(expr) {
-                        // TODO
+                        // This shouldn't happen. If the expression in the using is not
+                        // an assignment to a variable, then the general prohibition on
+                        // assignments in expressions should kick in.
                     }
                 }
                 block.recurse(env, self.object())
@@ -941,6 +952,118 @@ mod tests {
         let res = build_program(hack_stmts!(
             "$x = 1 as t; $y = 1 as t; foreach (e as $x[0] => $y[0]) { $x as t; $y as t; 1;}"
         ));
+        self::elaborate_program(&mut env, &mut orig, true);
+        assert_eq!(orig, res);
+    }
+
+    #[test]
+    fn test_eqop() {
+        let mut env = Env::default();
+        // hack_stmts! macro brolen on += operator
+        let mut orig = build_program(vec![
+            Stmt(
+                Pos::NONE,
+                Stmt_::DeclareLocal(Box::new((
+                    Lid(Pos::NONE, (0, "$x".to_string())),
+                    Hint(
+                        Pos::NONE,
+                        Box::new(Hint_::Happly(nast::Id(Pos::NONE, "t".to_string()), vec![])),
+                    ),
+                    Some(Expr((), Pos::NONE, Expr_::Int("1".to_string()))),
+                ))),
+            ),
+            Stmt(
+                Pos::NONE,
+                Stmt_::Expr(Box::new(Expr(
+                    (),
+                    Pos::NONE,
+                    Expr_::Binop(Box::new(Binop {
+                        bop: Bop::Eq(Some(Box::new(Bop::Plus))),
+                        lhs: Expr(
+                            (),
+                            Pos::NONE,
+                            Expr_::Lvar(Box::new(Lid(Pos::NONE, (0, "$x".to_string())))),
+                        ),
+                        rhs: Expr((), Pos::NONE, Expr_::Int("1".to_string())),
+                    })),
+                ))),
+            ),
+        ]);
+        let res = build_program(vec![
+            Stmt(
+                Pos::NONE,
+                Stmt_::Expr(Box::new(Expr(
+                    (),
+                    Pos::NONE,
+                    Expr_::Binop(Box::new(Binop {
+                        bop: Bop::Eq(None),
+                        lhs: Expr(
+                            (),
+                            Pos::NONE,
+                            Expr_::Lvar(Box::new(Lid(Pos::NONE, (0, "$x".to_string())))),
+                        ),
+                        rhs: Expr(
+                            (),
+                            Pos::NONE,
+                            Expr_::As(Box::new((
+                                Expr((), Pos::NONE, Expr_::Int("1".to_string())),
+                                Hint(
+                                    Pos::NONE,
+                                    Box::new(Hint_::Happly(
+                                        nast::Id(Pos::NONE, "t".to_string()),
+                                        vec![],
+                                    )),
+                                ),
+                                false,
+                            ))),
+                        ),
+                    })),
+                ))),
+            ),
+            Stmt(
+                Pos::NONE,
+                Stmt_::Block(Block(vec![
+                    Stmt(
+                        Pos::NONE,
+                        Stmt_::Expr(Box::new(Expr(
+                            (),
+                            Pos::NONE,
+                            Expr_::Binop(Box::new(Binop {
+                                bop: Bop::Eq(Some(Box::new(Bop::Plus))),
+                                lhs: Expr(
+                                    (),
+                                    Pos::NONE,
+                                    Expr_::Lvar(Box::new(Lid(Pos::NONE, (0, "$x".to_string())))),
+                                ),
+                                rhs: Expr((), Pos::NONE, Expr_::Int("1".to_string())),
+                            })),
+                        ))),
+                    ),
+                    Stmt(
+                        Pos::NONE,
+                        Stmt_::Expr(Box::new(Expr(
+                            (),
+                            Pos::NONE,
+                            Expr_::As(Box::new((
+                                Expr(
+                                    (),
+                                    Pos::NONE,
+                                    Expr_::Lvar(Box::new(Lid(Pos::NONE, (0, "$x".to_string())))),
+                                ),
+                                Hint(
+                                    Pos::NONE,
+                                    Box::new(Hint_::Happly(
+                                        nast::Id(Pos::NONE, "t".to_string()),
+                                        vec![],
+                                    )),
+                                ),
+                                false,
+                            ))),
+                        ))),
+                    ),
+                ])),
+            ),
+        ]);
         self::elaborate_program(&mut env, &mut orig, true);
         assert_eq!(orig, res);
     }

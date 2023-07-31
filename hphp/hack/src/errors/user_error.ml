@@ -145,4 +145,11 @@ let to_json error =
             ("code", Hh_json.int_ error_code);
           ])
   in
-  Hh_json.JSON_Object [("message", Hh_json.JSON_Array elts)]
+  let custom_msgs =
+    List.map ~f:(fun msg -> Hh_json.JSON_String msg) error.custom_msgs
+  in
+  Hh_json.JSON_Object
+    [
+      ("message", Hh_json.JSON_Array elts);
+      ("custom_messages", Hh_json.JSON_Array custom_msgs);
+    ]

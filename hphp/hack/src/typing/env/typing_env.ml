@@ -608,6 +608,25 @@ let is_package_loaded env package = SSet.mem package env.loaded_packages
 let load_packages env packages =
   { env with loaded_packages = SSet.union env.loaded_packages packages }
 
+let load_cross_packages_from_attr env attr =
+  match
+    Naming_attributes.find
+      Naming_special_names.UserAttributes.uaCrossPackage
+      attr
+  with
+  | Some attr ->
+    let pkgs_to_load =
+      List.fold
+        ~init:SSet.empty
+        ~f:
+          (fun acc -> function
+            | (_, _, Aast.String pkg) -> SSet.add pkg acc
+            | _ -> acc)
+        attr.ua_params
+    in
+    load_packages env pkgs_to_load
+  | _ -> env
+
 let with_packages env packages f =
   let old_loaded_packages = env.loaded_packages in
   let env = load_packages env packages in

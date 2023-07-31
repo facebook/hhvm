@@ -105,25 +105,7 @@ let fun_def ctx fd : Tast.fun_def Tast_with_dynamic.t option =
     else
       env
   in
-  let env =
-    match
-      Naming_attributes.find
-        SN.UserAttributes.uaCrossPackage
-        f.f_user_attributes
-    with
-    | Some attr ->
-      let pkgs_to_load =
-        List.fold
-          ~init:SSet.empty
-          ~f:
-            (fun acc -> function
-              | (_, _, Aast.String pkg) -> SSet.add pkg acc
-              | _ -> acc)
-          attr.ua_params
-      in
-      Env.load_packages env pkgs_to_load
-    | _ -> env
-  in
+  let env = Env.load_cross_packages_from_attr env f.f_user_attributes in
   (* Is sound dynamic enabled, and the function marked <<__SupportDynamicType>> explicitly or implicitly? *)
   let sdt_function =
     TCO.enable_sound_dynamic (Provider_context.get_tcopt (Env.get_ctx env))

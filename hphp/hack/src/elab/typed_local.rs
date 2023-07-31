@@ -15,7 +15,10 @@ use nast::Expr_;
 use nast::Hint;
 use nast::Hint_;
 use nast::Lid;
+use nast::NastShapeInfo;
 use nast::Pos;
+use nast::ReifyKind;
+use nast::ShapeFieldInfo;
 use nast::Stmt;
 use nast::Stmt_;
 use nast::UsingStmt;
@@ -33,18 +36,21 @@ use crate::Env;
 pub struct TypedLocal {
     // The locals in scope. The hint is present iff this is a typed local.
     // Union at join points to keep the locals that might be in scope.
-    // The position is where the local was first declared.
-    locals: BTreeMap<String, (Option<Hint>, Pos)>,
+    // The position is where the local was first declared. The bool if true
+    // if the hint could potentially be a shape.
+    locals: BTreeMap<String, (Option<(Hint, bool)>, Pos)>,
     // The subset of typed locals declared in the current scope, rather than preceding it.
     // declared_ids and assigned_ids should be disjoint
     declared_ids: HashSet<String>,
     // The subset of untyped locals first assigned in the current scope, rather than preceding it.
     assigned_ids: HashSet<String>,
+    // The in-scope erased generics
+    erased_generics: HashSet<String>,
     should_elab: bool,
 }
 
 impl TypedLocal {
-    fn add_local(&mut self, id: String, hint: Option<Hint>, pos: &Pos) {
+    fn add_local(&mut self, id: String, hint: Option<(Hint, bool)>, pos: &Pos) {
         self.locals.insert(id, (hint, pos.clone()));
     }
 
@@ -55,7 +61,7 @@ impl TypedLocal {
         self.declared_ids.insert(id.to_string());
     }
 
-    fn get_local(&self, id: &str) -> Option<&(Option<Hint>, Pos)> {
+    fn get_local(&self, id: &str) -> Option<&(Option<(Hint, bool)>, Pos)> {
         self.locals.get(id)
     }
 
@@ -70,15 +76,16 @@ impl TypedLocal {
     fn new_block_env(&self) -> Self {
         TypedLocal {
             locals: self.locals.clone(),
+            erased_generics: self.erased_generics.clone(),
             should_elab: self.should_elab,
             ..Default::default()
         }
     }
 
     fn restrict_env(&self, ids: &Vec<CaptureLid>) -> TypedLocal {
-        let should_elab = self.should_elab;
         let mut new_env = TypedLocal {
-            should_elab,
+            erased_generics: self.erased_generics.clone(),
+            should_elab: self.should_elab,
             ..Default::default()
         };
         for cid in ids {
@@ -142,7 +149,7 @@ impl TypedLocal {
 
     // join a list of TypedLocals together. self should be the TypedLocal from
     // before the split
-    fn join(&mut self, envs: &mut [TypedLocal], env: &mut Env) {
+    fn join(&mut self, envs: &mut [Self], env: &mut Env) {
         let mut error_map = BTreeMap::default();
         let before_declared_ids = std::mem::take(&mut self.declared_ids);
         let before_assigned_ids = std::mem::take(&mut self.assigned_ids);
@@ -161,7 +168,7 @@ impl TypedLocal {
         self.assigned_ids.extend(before_assigned_ids);
     }
 
-    fn get_hint(&mut self, expr: &Expr) -> Option<Hint> {
+    fn get_hint(&mut self, expr: &Expr) -> Option<(Hint, bool)> {
         match expr {
             Expr(_, pos, Expr_::Lvar(box lid)) => {
                 let name = local_id::get_name(&lid.1);
@@ -181,8 +188,8 @@ impl TypedLocal {
         }
     }
 
-    fn wrap_rhs_with_as(&self, rhs: &mut Expr, hint: Option<Hint>, pos: &Pos) {
-        if self.should_elab && let Some(hint) = hint {
+    fn wrap_rhs_with_as(&self, rhs: &mut Expr, hint: Hint, pos: &Pos) {
+        if self.should_elab {
             let mut init_expr = Expr((), Pos::NONE, Expr_::Null);
             std::mem::swap(rhs, &mut init_expr);
             let as_expr_ = Expr_::As(Box::new((init_expr, hint, false)));
@@ -202,8 +209,9 @@ impl TypedLocal {
                     rhs,
                 }),
             ) => {
-                let hint = self.get_hint(lhs);
-                self.wrap_rhs_with_as(rhs, hint, pos);
+                if let Some((hint, _)) = self.get_hint(lhs) {
+                    self.wrap_rhs_with_as(rhs, hint, pos);
+                }
             }
             _ => {}
         }
@@ -215,6 +223,123 @@ impl TypedLocal {
             self.add_assigned_id(param.name.clone());
         }
         elem.body.fb_ast.recurse(env, self.object())
+    }
+
+    // Replaces definitely unenforceable parts of the hint with _
+    fn simplify_hint(&self, hint: &mut Hint) -> bool {
+        let Hint(_, box hint_) = hint;
+        match hint_ {
+            Hint_::Hoption(h) | Hint_::Hlike(h) => self.simplify_hint(h),
+            Hint_::Htuple(hints) => {
+                for h in hints {
+                    self.simplify_hint(h);
+                }
+                false
+            }
+            Hint_::Happly(cn, hints) => match cn.1.as_str() {
+                "\\HH\\void"
+                | "\\HH\\int"
+                | "\\HH\\bool"
+                | "\\HH\\float"
+                | "\\HH\\string"
+                | "\\HH\\resource"
+                | "\\HH\\num"
+                | "\\HH\\noreturn"
+                | "\\HH\\arraykey"
+                | "\\HH\\mixed"
+                | "\\HH\\dict"
+                | "\\HH\\vec"
+                | "\\HH\\keyset"
+                | "\\HH\\vec_or_dict"
+                | "\\HH\\nonnull"
+                | "\\HH\\darray"
+                | "\\HH\\varray"
+                | "\\HH\\varray_or_darray"
+                | "\\HH\\anyarray"
+                | "\\HH\\null"
+                | "\\HH\\nothing" => {
+                    if self.should_elab {
+                        for Hint(_, box hint_) in hints {
+                            let _ = std::mem::replace(hint_, Hint_::Hwildcard);
+                        }
+                    }
+                    false
+                }
+                "\\HH\\dynamic" => {
+                    if self.should_elab {
+                        let _ = std::mem::replace(hint_, Hint_::Hwildcard);
+                    }
+                    false
+                }
+                s => {
+                    if self.erased_generics.contains(s) {
+                        if self.should_elab {
+                            let _ = std::mem::replace(hint_, Hint_::Hwildcard);
+                        }
+                        false
+                    } else {
+                        if self.should_elab {
+                            for h in hints {
+                                self.simplify_hint(h);
+                            }
+                        }
+                        true
+                    }
+                }
+            },
+            Hint_::Hshape(NastShapeInfo {
+                allows_unknown_fields: _,
+                field_map,
+            }) => {
+                for ShapeFieldInfo {
+                    optional: _,
+                    hint,
+                    name: _,
+                } in field_map
+                {
+                    self.simplify_hint(hint);
+                }
+                true
+            }
+            Hint_::Haccess(h, _) => {
+                self.simplify_hint(h);
+                true
+            }
+            Hint_::HvecOrDict(None, Hint(_, box hint_)) => {
+                if self.should_elab {
+                    let _ = std::mem::replace(hint_, Hint_::Hwildcard);
+                }
+                false
+            }
+            Hint_::HvecOrDict(Some(Hint(_, box hint_1)), Hint(_, box hint_2)) => {
+                if self.should_elab {
+                    let _ = std::mem::replace(hint_1, Hint_::Hwildcard);
+                    let _ = std::mem::replace(hint_2, Hint_::Hwildcard);
+                }
+                false
+            }
+            Hint_::Hnonnull | Hint_::Hprim(_) | Hint_::Hthis | Hint_::Hnothing | Hint_::Hmixed => {
+                false
+            }
+            // The following are unenforced, so we replace with a wildcard
+            Hint_::Hfun(_)
+            | Hint_::Hany
+            | Hint_::Herr
+            | Hint_::Hwildcard
+            | Hint_::Hdynamic
+            | Hint_::Hunion(_)
+            | Hint_::Hintersection(_)
+            | Hint_::Hrefinement(_, _)
+            | Hint_::Hsoft(_)
+            | Hint_::HfunContext(_)
+            | Hint_::Hvar(_)
+            | Hint_::Habstr(_, _) => {
+                if self.should_elab {
+                    let _ = std::mem::replace(hint_, Hint_::Hwildcard);
+                }
+                false
+            }
+        }
     }
 }
 
@@ -238,12 +363,13 @@ impl<'a> VisitorMut<'a> for TypedLocal {
                         def_pos: def_pos.clone(),
                     });
                 } else {
-                    self.add_local(name.to_string(), Some(hint.clone()), pos);
+                    let mut as_hint = Hint(Pos::NONE, Box::new(Hint_::Hnothing));
+                    std::mem::swap(hint, &mut as_hint);
+                    let maybe_shape = self.simplify_hint(&mut as_hint);
+                    self.add_local(name.to_string(), Some((as_hint.clone(), maybe_shape)), pos);
                     self.add_declared_id(name);
                     if self.should_elab && let Some(expr) = expr {
-                        let mut as_hint = Hint(Pos::NONE, Box::new(Hint_::Hnothing));
-                        std::mem::swap(hint, &mut as_hint);
-                        self.wrap_rhs_with_as(expr, Some(as_hint), pos);
+                        self.wrap_rhs_with_as(expr, as_hint, pos);
                         let mut init_lid = Lid(Pos::NONE, (0, "".to_string()));
                         std::mem::swap(&mut init_lid, lid);
                         let mut init_expr = Expr((), Pos::NONE, Expr_::Null);
@@ -257,6 +383,8 @@ impl<'a> VisitorMut<'a> for TypedLocal {
                         *stmt_ = Stmt_::Expr(Box::new(assign_expr));
                     } else if self.should_elab {
                         *stmt_ = Stmt_::Noop;
+                    } else{
+                        std::mem::swap(hint, &mut as_hint);
                     }
                 };
                 Ok(())
@@ -388,7 +516,16 @@ impl<'a> VisitorMut<'a> for TypedLocal {
 
     fn visit_fun_def(&mut self, env: &mut Env, elem: &mut nast::FunDef) -> Result<(), ()> {
         self.clear();
-        self.visit_fun_helper(env, &mut elem.fun)
+        let mut generics = self.erased_generics.clone();
+        for tp in &elem.tparams {
+            if tp.reified != ReifyKind::Reified {
+                generics.insert(tp.name.1.clone());
+            }
+        }
+        std::mem::swap(&mut self.erased_generics, &mut generics);
+        self.visit_fun_helper(env, &mut elem.fun)?;
+        std::mem::swap(&mut self.erased_generics, &mut generics);
+        Ok(())
     }
 
     fn visit_method_(&mut self, env: &mut Env, elem: &mut nast::Method_) -> Result<(), ()> {
@@ -397,7 +534,28 @@ impl<'a> VisitorMut<'a> for TypedLocal {
             self.add_local(param.name.clone(), None, &param.pos);
             self.add_assigned_id(param.name.clone());
         }
-        elem.body.fb_ast.recurse(env, self.object())
+        let mut generics = self.erased_generics.clone();
+        for tp in &elem.tparams {
+            if tp.reified != ReifyKind::Reified {
+                generics.insert(tp.name.1.clone());
+            }
+        }
+        std::mem::swap(&mut self.erased_generics, &mut generics);
+        elem.body.fb_ast.recurse(env, self.object())?;
+        std::mem::swap(&mut self.erased_generics, &mut generics);
+        Ok(())
+    }
+
+    fn visit_class_(&mut self, env: &mut Env, elem: &mut nast::Class_) -> Result<(), ()> {
+        let mut generics = HashSet::<String>::default();
+        for tp in &elem.tparams {
+            if tp.reified != ReifyKind::Reified {
+                generics.insert(tp.name.1.clone());
+            }
+        }
+        let _ = std::mem::replace(&mut self.erased_generics, generics);
+        elem.methods.recurse(env, self.object())?;
+        Ok(())
     }
 }
 
@@ -527,6 +685,55 @@ mod tests {
             "for (; ; $x = 1 as t) { $x = 1 as t; $x = 22 as t;} $x = 3 as t;"
         ));
         self::elaborate_program(&mut env, &mut orig, true);
+        assert_eq!(orig, res);
+    }
+
+    #[test]
+    fn test_simplify_hint1() {
+        let mut env = Env::default();
+        let mut orig = build_program(hack_stmts!(
+            "let $x:\\HH\\vec<\\HH\\int> = vec[]; $x = vec[];"
+        ));
+        let res = build_program(hack_stmts!(
+            "$x = vec[] as \\HH\\vec<_>; $x = vec[] as \\HH\\vec<_>;"
+        ));
+        self::elaborate_program(&mut env, &mut orig, true);
+        assert_eq!(orig, res);
+    }
+
+    #[test]
+    fn test_simplify_hint2() {
+        let mut env = Env::default();
+        let mut orig = build_program(hack_stmts!(
+            "let $x:C<\\HH\\vec<\\HH\\int>> = vec[]; $x = vec[];"
+        ));
+        let res = build_program(hack_stmts!(
+            "$x = vec[] as C<\\HH\\vec<_>>; $x = vec[] as C<\\HH\\vec<_>>;"
+        ));
+        self::elaborate_program(&mut env, &mut orig, true);
+        assert_eq!(orig, res);
+    }
+
+    #[test]
+    fn test_simplify_hint3() {
+        let mut env = Env::default();
+        let mut orig = build_program(hack_stmts!("let $x:C<T> = vec[]; $x = vec[];"));
+        let res = build_program(hack_stmts!("$x = vec[] as C<T>; $x = vec[] as C<T>;"));
+        self::elaborate_program(&mut env, &mut orig, true);
+        assert_eq!(orig, res);
+    }
+
+    #[test]
+    fn test_simplify_hint4() {
+        let mut env = Env::default();
+        let mut orig = build_program(hack_stmts!("let $x:C<T> = vec[]; $x = vec[];"));
+        let res = build_program(hack_stmts!("$x = vec[] as C<_>; $x = vec[] as C<_>;"));
+        let mut tl = TypedLocal {
+            should_elab: true,
+            ..Default::default()
+        };
+        tl.erased_generics.insert("T".to_string());
+        tl.visit_program(&mut env, &mut orig).unwrap();
         assert_eq!(orig, res);
     }
 }

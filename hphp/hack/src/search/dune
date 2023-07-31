@@ -48,5 +48,5 @@
  (name glean)
  (wrapped false)
  (modules
-  glean)
+  glean glean_autocomplete_query)
  )

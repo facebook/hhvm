@@ -20,6 +20,7 @@ type mode =
   | NoMode
   | Autocomplete
   | Autocomplete_manually_invoked
+  | Glean_query of { dry_run: bool }
 
 type options = {
   files: string list;
@@ -126,6 +127,13 @@ let parse_options () =
       ( "--auto-complete-manually-invoked",
         Arg.Unit (set_mode Autocomplete_manually_invoked),
         " Produce autocomplete suggestions as if manually triggered by user" );
+      ( "--glean-show-query",
+        Arg.Unit (set_mode (Glean_query { dry_run = true })),
+        " Show the glean query for the prefix contained in the file" );
+      ( "--glean-query",
+        Arg.Unit (set_mode (Glean_query { dry_run = false })),
+        " Show the glean query for the prefix contained in the file, and run that query"
+      );
       ( "--manifold-api-key",
         Arg.String (set "manifold api key" saved_state_manifold_api_key),
         " API key used to download a saved state from Manifold (optional)" );
@@ -281,6 +289,60 @@ let handle_mode mode filenames ctx (sienv : SearchUtils.si_env) naming_table =
   in
   match mode with
   | NoMode -> die "Exactly one mode must be setup"
+  | Glean_query { dry_run } ->
+    let path = expect_single_file () in
+    let prefixes =
+      path
+      |> Relative_path.to_absolute
+      |> Sys_utils.cat
+      |> String_utils.split_on_newlines
+      |> List.filter ~f:(fun s -> not (String.is_empty s))
+    in
+    let handle =
+      if dry_run then
+        None
+      else
+        let reponame = sienv.SearchUtils.glean_reponame in
+        let () =
+          if String.is_empty reponame then failwith "--glean-reponame required"
+        in
+        let () = Folly.ensure_folly_init () in
+        Some (Glean.initialize ~reponame |> Option.value_exn)
+    in
+    List.iter prefixes ~f:(fun query_text ->
+        if List.length prefixes > 1 then Printf.printf "//// %s\n" query_text;
+        let angle = Glean_autocomplete_query.top_level ~prefix:query_text in
+        Printf.printf "query:\n%s\n\n%!" angle;
+        if not dry_run then begin
+          let start_time = Unix.gettimeofday () in
+          let results =
+            Glean.query_autocomplete
+              (Option.value_exn handle)
+              ~query_text
+              ~max_results:100
+              ~context:SearchTypes.Acid
+              ~kind_filter:None
+          in
+          List.iter
+            results
+            ~f:(fun { SearchTypes.si_name; si_kind; si_file; si_fullname = _ }
+               ->
+              let file =
+                match si_file with
+                | SearchTypes.SI_Filehash hash -> Printf.sprintf "#%s" hash
+                | SearchTypes.SI_Path path -> Relative_path.show path
+              in
+              Printf.printf
+                "[%s] %s - %s\n%!"
+                (SearchTypes.show_si_kind si_kind)
+                si_name
+                file);
+          Printf.printf
+            "--> %s - %d results, %0.3fs\n%!"
+            query_text
+            (List.length results)
+            (Unix.gettimeofday () -. start_time)
+        end)
   | Autocomplete
   | Autocomplete_manually_invoked ->
     let files_contents = Multifile.file_to_file_list (expect_single_file ()) in

@@ -6,12 +6,4 @@
  *
  *)
 
-type handle = unit
-
-let initialize ~reponame:_ = None
-
-let fetch_namespaces _ = []
-
-let query_autocomplete _ ~query_text:_ ~max_results:_ ~context:_ ~kind_filter:_
-    =
-  []
+let top_level ~prefix:_ = ""

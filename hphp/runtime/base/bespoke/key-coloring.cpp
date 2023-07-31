@@ -167,36 +167,38 @@ ColoringMetaData findKeyColoring(LayoutWeightVector& layouts) {
   );
 
   // Binary search for max number of distinctly colorable fields.
-  size_t maxColored = (StructLayout::kMaxColor - 2) / 2;
-  auto lastHigh = StructLayout::kMaxColor - 1; // lowest unsuccessful so far
-  auto lastLow = 1; // highest successful so far
-  size_t newMaxColored;
+  // performColoring is non-deterministic because it uses F14 maps and sets,
+  // so it should not be called more than once for same input. The greedy
+  // algorithm is also non-monotonic, so the search might return a local optima,
+  // but that is acceptable.
+  size_t lastHigh = StructLayout::kMaxColor - 1; // lowest unsuccessful so far
+  size_t lastLow = 1; // highest successful so far
   Optional<ColorMap> result;
-  do {
-    result = performColoring(layouts, maxColored);
-    if (result) {
-      newMaxColored = (maxColored + lastHigh) / 2;
-      if (newMaxColored == maxColored) break;
-      lastLow = maxColored;
-      maxColored = newMaxColored;
+  while (lastLow + 1 < lastHigh) {
+    auto const mid = (lastLow + lastHigh) / 2;
+    auto res = performColoring(layouts, mid);
+    if (res) {
+      lastLow = mid;
+      result = std::move(res);
     } else {
-      newMaxColored = (lastLow + maxColored) / 2;
-      lastHigh = maxColored;
-      maxColored = newMaxColored;
+      lastHigh = mid;
     }
-  } while(1);
-  assertx(maxColored > 0);
+  }
+  assertx(lastLow + 1 == lastHigh);
+  if (!result) {
+    assertx(lastLow == 1);
+    // Coloring always succeeds when there is just one field to color in each
+    // layout.
+    result = performColoring(layouts, 1);
+  }
   assertx(result);
-  assert_flog(maxColored + 1 == lastHigh,
-              "maxColored: {}, newMaxColored: {}, lastHigh: {}, lastLow: {}",
-              maxColored, newMaxColored, lastHigh, lastLow);
 
   s_metadata.coloring = *result;
-  s_metadata.numColoredFields = maxColored;
+  s_metadata.numColoredFields = lastLow;
 
-  FTRACE(3, "Final coloring: {} max colored fields.\n", maxColored);
+  FTRACE(3, "Final coloring: {} max colored fields.\n", lastLow);
 
-  return {*result, maxColored};
+  return {*result, lastLow};
 }
 
 void applyColoring(const ColoringMetaData& coloring,

@@ -146,9 +146,15 @@ void rename_function(const String& old_name, const String& new_name) {
     not_reached();
   }
 
-  if (!RuntimeOption::EvalJitEnableRenameFunction) {
-    raise_error("fb_rename_function must be explicitly enabled"
-                "(-v Eval.JitEnableRenameFunction=1)");
+  if (!RuntimeOption::funcIsRenamable(old)) {
+    if (RuntimeOption::EvalJitEnableRenameFunction == 2) {
+      raise_error("fb_rename_function must be explicitly enabled for %s "
+                  "(when Eval.JitEnableRenameFunction=2 by adding it to "
+                  "option Eval.RenamableFunctions)", old->data());
+    } else {
+      raise_error("fb_rename_function must be explicitly enabled"
+                  "(-v Eval.JitEnableRenameFunction=1)");
+    }
   }
 
   auto const fnew = Func::lookup(newNe);

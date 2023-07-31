@@ -2615,6 +2615,7 @@ dependencies = [
 name = "hhbc_string_utils"
 version = "0.0.0"
 dependencies = [
+ "bstr 1.6.0",
  "escaper",
  "lazy_static",
  "libc",
@@ -3664,6 +3665,7 @@ name = "options"
 version = "0.0.0"
 dependencies = [
  "bstr 1.6.0",
+ "hhbc_string_utils",
  "oxidized",
  "serde",
 ]

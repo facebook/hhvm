@@ -2059,10 +2059,7 @@ void emitFCallClsMethodSD(IRGS& env, FCallArgs fca, const StringData* clsHint,
 Type callReturnType(const Func* callee) {
   // Don't make any assumptions about functions which can be intercepted. The
   // interception functions can return arbitrary types.
-  if (RuntimeOption::EvalJitEnableRenameFunction ||
-      callee->attrs() & AttrInterceptable) {
-    return TInitCell;
-  }
+  if (callee->attrs() & AttrInterceptable) return TInitCell;
 
   if (callee->isCPPBuiltin()) {
     // If the function is builtin, use the builtin's return type, then take into
@@ -2088,10 +2085,7 @@ Type callOutType(const Func* callee, uint32_t index) {
 
   // Don't make any assumptions about functions which can be intercepted. The
   // interception functions can return arbitrary types.
-  if (RuntimeOption::EvalJitEnableRenameFunction ||
-      callee->attrs() & AttrInterceptable) {
-    return TInitCell;
-  }
+  if (callee->attrs() & AttrInterceptable) return TInitCell;
 
   if (callee->isCPPBuiltin()) {
     uint32_t param_idx = 0;
@@ -2117,10 +2111,7 @@ Type callOutType(const Func* callee, uint32_t index) {
 Type awaitedCallReturnType(const Func* callee) {
   // Don't make any assumptions about functions which can be intercepted. The
   // interception functions can return arbitrary types.
-  if (RuntimeOption::EvalJitEnableRenameFunction ||
-      callee->attrs() & AttrInterceptable) {
-    return TInitCell;
-  }
+  if (callee->attrs() & AttrInterceptable) return TInitCell;
 
   return typeFromRAT(callee->repoAwaitedReturnType(), callee->cls());
 }

@@ -72,17 +72,6 @@ enum class UnitOrigin {
   Eval = 1
 };
 
-enum MergeTypes : uint8_t {
-  None        = 0,
-  Function    = 1 << 0,
-  NotFunction = 1 << 1,
-  Everything  = 3,
-};
-
-constexpr MergeTypes operator&(MergeTypes a, MergeTypes b) { return MergeTypes((int)a & (int)b); }
-constexpr MergeTypes operator^(MergeTypes a, MergeTypes b) { return MergeTypes((int)a ^ (int)b); }
-constexpr MergeTypes operator~(MergeTypes a) { return MergeTypes((int)MergeTypes::Everything - (int)a); }
-
 /////////////////////////////////////////////////////////////////////////////
 //
 // Fatal info
@@ -156,9 +145,10 @@ private:
    * invoke its pseudomain only if necessary.
    */
   enum MergeState : uint8_t {
-    Unmerged      = 0,
-    InitialMerged = 1,
-    Merged        = 2,
+    Unmerged                 = 0,
+    InitialMerged            = 1,
+    NeedsNonPersistentMerged = 2,
+    Merged                   = 3,
   };
 
 public:
@@ -551,7 +541,7 @@ public:
 
 private:
   void initialMerge();
-  void mergeImpl(MergeTypes mergeTypes);
+  template<bool mergeOnlyNonPersistentFuncs> void mergeImpl();
   UnitExtended* getExtended();
   const UnitExtended* getExtended() const;
 

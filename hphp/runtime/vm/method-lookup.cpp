@@ -346,7 +346,7 @@ ImmutableFuncLookup lookupImmutableFunc(const StringData* name) {
   auto const ne = NamedFunc::get(name);
   if (auto const f = ne->getCachedFunc()) {
     if (f->isUnique()) {
-      // We have an unique function. However, it may be interceptable, which means
+      // We have a unique function. However, it may be interceptable, which means
       // we can't use it directly.
       if (f->isInterceptable()) return {nullptr, true};
 
@@ -369,7 +369,7 @@ ImmutableFuncLookup lookupImmutableFunc(const StringData* name) {
         if (!RO::EvalJitEnableRenameFunction || f->isMethCaller()) {
           return {f, false};
         }
-      } else if (RO::EvalJitEnableRenameFunction) {
+      } else if (RO::funcIsRenamable(name)) {
         return {nullptr, true};
       }
       // Use the function, but ensure its unit is loaded.

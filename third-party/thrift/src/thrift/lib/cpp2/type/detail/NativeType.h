@@ -90,18 +90,12 @@ struct CppTag {
   using type = cpp_type<T, Tag>;
 };
 
-template <template <typename...> class T, typename VTag>
+template <template <typename...> class T, typename... ParamTags>
 using parameterized_type = folly::conditional_t<
-    is_concrete_v<VTag>,
-    ConcreteType<standard_template_t<T, VTag>, native_template_t<T, VTag>>,
-    AbstractType>;
-
-template <template <typename...> class T, typename KTag, typename VTag>
-using parameterized_kv_type = folly::conditional_t<
-    is_concrete_v<KTag> && is_concrete_v<VTag>,
+    (is_concrete_v<ParamTags> && ...),
     ConcreteType<
-        standard_template_t<T, KTag, VTag>,
-        native_template_t<T, KTag, VTag>>,
+        standard_template_t<T, ParamTags...>,
+        native_template_t<T, ParamTags...>>,
     AbstractType>;
 
 template <>
@@ -198,8 +192,8 @@ struct InferTag<std::set<T>> {
 
 // Traits for maps.
 template <typename KTag, typename VTag>
-struct NativeTypes<map<KTag, VTag>>
-    : parameterized_kv_type<std::map, KTag, VTag> {};
+struct NativeTypes<map<KTag, VTag>> : parameterized_type<std::map, KTag, VTag> {
+};
 template <typename K, typename V>
 struct InferTag<std::map<K, V>> {
   using type =

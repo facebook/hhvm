@@ -36,12 +36,7 @@ namespace detail {
 template <typename... Tags>
 struct types {
   static constexpr bool contains(BaseType baseType) {
-    for (bool i : {(base_type_v<Tags> == baseType)...}) {
-      if (i) {
-        return true;
-      }
-    }
-    return false;
+    return (... || (base_type_v<Tags> == baseType));
   }
 
   template <typename Tag>

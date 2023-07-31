@@ -110,7 +110,8 @@ inline typename RouterInfo::RouteHandlePtr makeClientCompatibilityCheckerRoute(
 
   auto jChild = json.get_ptr("child");
   checkLogic(
-      jChild != nullptr, "LatencyInjectionRoute: 'child' property is missing.");
+      jChild != nullptr,
+      "ClientCompatibilityCheckerRoute: 'child' property is missing.");
   auto child = factory.create(*jChild);
 
   uint32_t maxClientVersion = 0;

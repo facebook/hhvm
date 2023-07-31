@@ -1,7 +1,7 @@
 //// main.php
 <?hh
-// This test runs against the deprecated "www.autocomplete" glean database, which stores predicates from the hack.1 schema fbcode/glean/schema/source/hack.angle
-// RUN: %hh_single_complete --auto-complete --glean-reponame www.autocomplete --auto-namespace-map '{"Vec": "FlibSL\\Vec"}' %s | FileCheck %s
+// This test runs against the "www.hack.light" glean database, which stores predicates from the hack.6 schema fbcode/glean/schema/source/hack.angle
+// RUN: %hh_single_complete --auto-complete --glean-reponame www.hack.light --auto-namespace-map '{"Vec": "FlibSL\\Vec"}' %s | FileCheck %s
 
 //// glean1_vec.php
 <?hh

@@ -42,7 +42,7 @@ class FakeOwner : public folly::DelayedDestruction {
 // THRIFT_FLAG(rocket_parser_dont_hold_buffer_enabled) is stable.
 TEST(ParserTest, resizeBufferTest) {
   FakeOwner owner;
-  Parser<FakeOwner> parser(owner, std::chrono::milliseconds(0));
+  Parser<FakeOwner> parser(owner);
   parser.setReadBufferSize(Parser<FakeOwner>::kMaxBufferSize * 2);
 
   folly::IOBuf iobuf{folly::IOBuf::CreateOp(), parser.getReadBufferSize()};
@@ -59,7 +59,7 @@ TEST(ParserTest, resizeBufferTest) {
 // THRIFT_FLAG(rocket_parser_dont_hold_buffer_enabled) is stable.
 TEST(ParserTest, noResizeBufferReadBufGtMaxTest) {
   FakeOwner owner;
-  Parser<FakeOwner> parser(owner, std::chrono::milliseconds(0));
+  Parser<FakeOwner> parser(owner);
   parser.setReadBufferSize(Parser<FakeOwner>::kMaxBufferSize * 2);
 
   folly::IOBuf iobuf{folly::IOBuf::CreateOp(), parser.getReadBufferSize()};
@@ -76,7 +76,7 @@ TEST(ParserTest, noResizeBufferReadBufGtMaxTest) {
 // THRIFT_FLAG(rocket_parser_dont_hold_buffer_enabled) is stable.
 TEST(ParserTest, noResizeBufferReadBufEqMaxTest) {
   FakeOwner owner;
-  Parser<FakeOwner> parser(owner, std::chrono::milliseconds(0));
+  Parser<FakeOwner> parser(owner);
   parser.setReadBufferSize(Parser<FakeOwner>::kMaxBufferSize * 2);
 
   folly::IOBuf iobuf{folly::IOBuf::CreateOp(), parser.getReadBufferSize()};

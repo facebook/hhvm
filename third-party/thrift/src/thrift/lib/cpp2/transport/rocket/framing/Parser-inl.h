@@ -98,13 +98,6 @@ void Parser<T>::getReadBufferOld(void** bufout, size_t* lenout) {
   if (LIKELY(
           allocType_ ==
           apache::thrift::RpcOptions::MemAllocType::ALLOC_DEFAULT)) {
-    if (periodicResizeBufferTimeout_ == 0) {
-      const auto now = std::chrono::steady_clock::now();
-      if (now - lastResizeTime_ > resizeBufferTimeout_) {
-        resizeBuffer();
-        lastResizeTime_ = now;
-      }
-    }
     readBuffer_.unshareOne();
     if (readBuffer_.length() == 0) {
       DCHECK(readBuffer_.capacity() > 0);
@@ -229,10 +222,8 @@ void Parser<T>::readDataAvailableOld(size_t nbytes) {
     owner_.handleFrame(std::move(frame));
   }
 
-  if (periodicResizeBufferTimeout_ != 0 && !isScheduled() &&
-      bufferSize_ > kMaxBufferSize) {
-    owner_.scheduleTimeout(
-        this, std::chrono::seconds(periodicResizeBufferTimeout_));
+  if (!isScheduled() && bufferSize_ > kMaxBufferSize) {
+    owner_.scheduleTimeout(this, kDefaultBufferResizeInterval);
   }
 }
 

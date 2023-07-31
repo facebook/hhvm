@@ -16,10 +16,6 @@
 
 #include <thrift/lib/cpp2/transport/rocket/framing/Parser.h>
 
-// timeout value for true resizng timer mechanism, if 0 fallback to
-// the old mechanism
-THRIFT_FLAG_DEFINE_int64(rocket_parser_resize_period_seconds, 3);
-
 // Flag to control whether or not the new parser memory manangement logic is
 // enabled. (Do not hold buffer internally in rocket parser. Always hand
 // payloads to application as soon as they are read from the socket.)

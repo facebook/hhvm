@@ -208,19 +208,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     Done_or_retry.(
       ServerGoToImpl.go ~action:go_to_impl_action ~genv ~env
       |> map_env ~f:ServerFindRefs.to_absolute)
-  | IDE_FIND_REFS (labelled_file, line, column, include_defs) ->
-    Done_or_retry.(
-      let (path, file_input) =
-        ServerCommandTypesUtils.extract_labelled_file labelled_file
-      in
-      let (ctx, entry) = single_ctx env path file_input in
-      Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-          match ServerFindRefs.go_from_file_ctx ~ctx ~entry ~line ~column with
-          | None -> (env, Done None)
-          | Some (name, action) ->
-            map_env
-              ~f:(ServerFindRefs.to_ide name)
-              (ServerFindRefs.go ctx action include_defs genv env)))
   | IDE_FIND_REFS_BY_SYMBOL (find_refs_action, name) ->
     let ctx = Provider_utils.ctx_from_server_env env in
     Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
@@ -229,18 +216,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         map_env
           ~f:(ServerFindRefs.to_ide name)
           (ServerFindRefs.go ctx find_refs_action include_defs genv env))
-  | IDE_GO_TO_IMPL (labelled_file, line, column) ->
-    Done_or_retry.(
-      let (path, file_input) =
-        ServerCommandTypesUtils.extract_labelled_file labelled_file
-      in
-      let (ctx, entry) = single_ctx env path file_input in
-      (match ServerFindRefs.go_from_file_ctx ~ctx ~entry ~line ~column with
-      | None -> (env, Done None)
-      | Some (name, action) ->
-        map_env
-          ~f:(ServerFindRefs.to_ide name)
-          (ServerGoToImpl.go ~action ~genv ~env)))
   | IDE_GO_TO_IMPL_BY_SYMBOL (action, name) ->
     let ctx = Provider_utils.ctx_from_server_env env in
     Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
@@ -248,15 +223,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         map_env
           ~f:(ServerFindRefs.to_ide name)
           (ServerGoToImpl.go ~action ~genv ~env))
-  | IDE_HIGHLIGHT_REFS (path, file_input, line, column) ->
-    let (ctx, entry) =
-      single_ctx env (Relative_path.create_detect_prefix path) file_input
-    in
-    let r =
-      Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-          (env, ServerHighlightRefs.go_quarantined ~ctx ~entry ~line ~column))
-    in
-    r
   | RENAME rename_action ->
     let ctx = Provider_utils.ctx_from_server_env env in
     Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
@@ -291,16 +257,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
               }
         in
         ServerRename.go ctx rename_action genv env ~definition_for_wrapper)
-  | IDE_RENAME
-      { ServerCommandTypes.Ide_rename_type.filename; line; char; new_name } ->
-    let ctx = Provider_utils.ctx_from_server_env env in
-    Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-        let open Done_or_retry in
-        match
-          ServerRename.go_ide ctx (filename, line, char) new_name genv env
-        with
-        | Error e -> (env, Done (Error e))
-        | Ok r -> map_env r ~f:(fun x -> Ok x))
   | IDE_RENAME_BY_SYMBOL (action, new_name, symbol_definition) ->
     let ctx = Provider_utils.ctx_from_server_env env in
     Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->

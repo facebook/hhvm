@@ -29,16 +29,13 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   (* Finding references/implementations uses global dependency table *)
   | FIND_REFS _ -> true
   | GO_TO_IMPL _ -> true
-  | IDE_FIND_REFS _ -> true
   | IDE_FIND_REFS_BY_SYMBOL _ -> true
-  | IDE_GO_TO_IMPL _ -> true
   | IDE_GO_TO_IMPL_BY_SYMBOL _ -> true
   | METHOD_JUMP (_, _, find_children) -> find_children (* uses find refs *)
   | SAVE_NAMING _ -> false
   | SAVE_STATE _ -> true
   (* Codebase-wide rename, uses find references *)
   | RENAME _ -> true
-  | IDE_RENAME _ -> true
   | IDE_RENAME_BY_SYMBOL _ -> true
   (* Same case as Ai commands *)
   | CREATE_CHECKPOINT _ -> true
@@ -64,7 +61,6 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | IDENTIFY_FUNCTION _ -> false
   | IDENTIFY_SYMBOL _ -> false
   | METHOD_JUMP_BATCH _ -> false
-  | IDE_HIGHLIGHT_REFS _ -> false
   | DUMP_SYMBOL_INFO _ -> false
   | LINT _ -> false
   | LINT_STDIN _ -> false

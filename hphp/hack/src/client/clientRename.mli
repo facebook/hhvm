@@ -21,14 +21,4 @@ val go :
   after:string ->
   unit Lwt.t
 
-val go_ide :
-  (unit -> ClientConnect.conn Lwt.t) ->
-  desc:string ->
-  ClientEnv.client_check_env ->
-  filename:Relative_path.t ->
-  line:int ->
-  char:int ->
-  new_name:string ->
-  unit Lwt.t
-
 val go_ide_from_patches : ServerRenameTypes.patch list -> bool -> unit

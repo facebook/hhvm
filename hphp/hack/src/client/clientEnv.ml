@@ -35,12 +35,8 @@ type client_mode =
   | MODE_POPULATE_REMOTE_DECLS of string list option
   | MODE_GO_TO_IMPL_CLASS of string
   | MODE_GO_TO_IMPL_METHOD of string
-  | MODE_IDE_FIND_REFS of string
   | MODE_IDE_FIND_REFS_BY_SYMBOL of string
-  | MODE_IDE_GO_TO_IMPL of string
   | MODE_IDE_GO_TO_IMPL_BY_SYMBOL of string
-  | MODE_IDE_HIGHLIGHT_REFS of string
-  | MODE_IDE_RENAME of string
   | MODE_IDE_RENAME_BY_SYMBOL of string
   | MODE_IDENTIFY_SYMBOL1 of string
   | MODE_IDENTIFY_SYMBOL2 of string

@@ -25,17 +25,6 @@ val go :
   ServerEnv.env
   * ServerRenameTypes.patch list ServerCommandTypes.Done_or_retry.t
 
-val go_ide :
-  Provider_context.t ->
-  Relative_path.t * int * int ->
-  string ->
-  ServerEnv.genv ->
-  ServerEnv.env ->
-  ( ServerEnv.env
-    * ServerRenameTypes.patch list ServerCommandTypes.Done_or_retry.t,
-    string )
-  result
-
 val go_for_single_file :
   Provider_context.t ->
   find_refs_action:ServerCommandTypes.Find_refs.action ->

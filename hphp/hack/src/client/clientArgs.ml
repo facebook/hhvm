@@ -417,16 +417,10 @@ let parse_check_args cmd ~from_default =
       ( "--go-to-impl-method",
         Arg.String (fun x -> set_mode (MODE_GO_TO_IMPL_METHOD x)),
         " (mode) goes to implementation of the provided method name" );
-      ( "--ide-find-refs",
-        Arg.String (fun x -> set_mode (MODE_IDE_FIND_REFS x)),
-        "" );
       ( "--ide-find-refs-by-symbol",
         Arg.String (fun x -> set_mode (MODE_IDE_FIND_REFS_BY_SYMBOL x)),
         "(mode) similar to IDE_FIND_REFS, but takes a symbol name rather than position"
       );
-      ( "--ide-go-to-impl",
-        Arg.String (fun x -> set_mode (MODE_IDE_GO_TO_IMPL x)),
-        "" );
       ( "--ide-go-to-impl-by-symbol",
         Arg.String (fun x -> set_mode (MODE_IDE_GO_TO_IMPL_BY_SYMBOL x)),
         "(mode) similar to IDE_GO_TO_IMPL, but takes a symbol name rather than position"
@@ -434,19 +428,10 @@ let parse_check_args cmd ~from_default =
       ( "--ide-get-definition",
         Arg.String (fun x -> set_mode (MODE_IDENTIFY_SYMBOL2 x)),
         (* alias for --identify-function *) "" );
-      ( "--ide-highlight-refs",
-        Arg.String (fun x -> set_mode (MODE_IDE_HIGHLIGHT_REFS x)),
-        (* Similar to --ide-find-refs, but returns references in current file only,
-         * and is optimized to be faster in that case *)
-        "" );
       ("--ide-outline", Arg.Unit (fun () -> set_mode MODE_OUTLINE2), "");
-      ( "--ide-refactor",
-        Arg.String (fun x -> set_mode (MODE_IDE_RENAME x)),
-        " (mode) rename a symbol, Usage: --ide-refactor "
-        ^ " <filename>:<line number>:<col number>:<new name>" );
       ( "--ide-rename-by-symbol",
         Arg.String (fun x -> set_mode (MODE_IDE_RENAME_BY_SYMBOL x)),
-        " (mode) like --ide-refactor, but takes a Find_refs.action. Usage: "
+        " (mode) renames, but takes a Find_refs.action. Usage: "
         ^ " <new name>|<comma_separated_action>" );
       ( "--identify-function",
         Arg.String (fun x -> set_mode (MODE_IDENTIFY_SYMBOL1 x)),

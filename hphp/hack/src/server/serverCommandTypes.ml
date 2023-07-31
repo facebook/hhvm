@@ -486,23 +486,13 @@ type _ t =
       -> Method_jumps.result list t
   | FIND_REFS : Find_refs.action -> Find_refs.result_or_retry t
   | GO_TO_IMPL : Find_refs.action -> Find_refs.result_or_retry t
-  | IDE_FIND_REFS :
-      labelled_file * int * int * bool
-      -> Find_refs.ide_result_or_retry t
   | IDE_FIND_REFS_BY_SYMBOL :
       Find_refs.action * string
-      -> Find_refs.ide_result_or_retry t
-  | IDE_GO_TO_IMPL :
-      labelled_file * int * int
       -> Find_refs.ide_result_or_retry t
   | IDE_GO_TO_IMPL_BY_SYMBOL :
       Find_refs.action * string
       -> Find_refs.ide_result_or_retry t
-  | IDE_HIGHLIGHT_REFS :
-      string * file_input * int * int
-      -> ServerHighlightRefsTypes.result t
   | RENAME : ServerRenameTypes.action -> Rename.result_or_retry t
-  | IDE_RENAME : Ide_rename_type.t -> Rename.ide_result_or_retry t
   | IDE_RENAME_BY_SYMBOL :
       Find_refs.action * string * Relative_path.t SymbolDefinition.t
       -> Rename.ide_result_or_retry t

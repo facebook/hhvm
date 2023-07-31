@@ -198,7 +198,7 @@ type ide_shell_out_pos = {
   char_end: int;
 }
 
-(* --ide-refactor returns a list of patches *)
+(* --ide-rename-by-symbol returns a list of patches *)
 type ide_refactor_patch = {
   filename: string;
   line: int;

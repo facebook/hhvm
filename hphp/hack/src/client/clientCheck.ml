@@ -84,17 +84,6 @@ let expand_path file =
       exit 2
     )
 
-let parse_ide_find_refs_arg arg =
-  let pair = Str.split (Str.regexp ":") arg in
-  try
-    match pair with
-    | [filename; pos] -> (filename, pos)
-    | _ -> raise Exit
-  with
-  | _ ->
-    Printf.eprintf "Invalid input\n";
-    raise Exit_status.(Exit_with Input_error)
-
 let parse_position_string ~(split_on : string) arg =
   let tpos = Str.split (Str.regexp split_on) arg in
   try
@@ -310,17 +299,6 @@ let main_internal
     | _ ->
       Printf.eprintf "Invalid input\n";
       Lwt.return (Exit_status.Input_error, Telemetry.create ()))
-  | MODE_IDE_FIND_REFS arg ->
-    let (filename, pos) = parse_ide_find_refs_arg arg in
-    let (line, char) = parse_position_string ~split_on:"," pos in
-    let include_defs = true in
-    let labelled_file = ServerCommandTypes.LabelledFileName filename in
-    let%lwt results =
-      rpc_with_retry args
-      @@ Rpc.IDE_FIND_REFS (labelled_file, line, char, include_defs)
-    in
-    ClientFindRefs.go_ide results args.output_json;
-    Lwt.return (Exit_status.No_error, Telemetry.create ())
   | MODE_IDE_FIND_REFS_BY_SYMBOL arg ->
     let open ServerCommandTypes in
     let (symbol_name, action) = Find_refs.string_to_symbol_and_action_exn arg in
@@ -337,25 +315,6 @@ let main_internal
     in
     ClientFindRefs.go_ide results args.output_json;
     Lwt.return (Exit_status.No_error, Telemetry.create ())
-  | MODE_IDE_GO_TO_IMPL arg ->
-    let (filename, pos) = parse_ide_find_refs_arg arg in
-    let (line, char) = parse_position_string ~split_on:"," pos in
-    let labelled_file = ServerCommandTypes.LabelledFileName filename in
-    let%lwt results =
-      rpc_with_retry args @@ Rpc.IDE_GO_TO_IMPL (labelled_file, line, char)
-    in
-    ClientFindRefs.go_ide results args.output_json;
-    Lwt.return (Exit_status.No_error, Telemetry.create ())
-  | MODE_IDE_HIGHLIGHT_REFS arg ->
-    let (line, char) = parse_position_string ~split_on:":" arg in
-    let content =
-      ServerCommandTypes.FileContent (Sys_utils.read_stdin_to_string ())
-    in
-    let%lwt (results, telemetry) =
-      rpc args @@ Rpc.IDE_HIGHLIGHT_REFS ("", content, line, char)
-    in
-    ClientHighlightRefs.go results ~output_json:args.output_json;
-    Lwt.return (Exit_status.No_error, telemetry)
   | MODE_DUMP_SYMBOL_INFO files ->
     let%lwt conn = connect args in
     let%lwt () = ClientSymbolInfo.go conn ~desc:args.desc files expand_path in
@@ -364,34 +323,6 @@ let main_internal
     let conn () = connect args in
     let%lwt () =
       ClientRename.go conn ~desc:args.desc args ref_mode ~before ~after
-    in
-    Lwt.return (Exit_status.No_error, Telemetry.create ())
-  | MODE_IDE_RENAME arg ->
-    let conn () = connect args in
-    let tpos = Str.split (Str.regexp ":") arg in
-    let (filename, line, char, new_name) =
-      try
-        match tpos with
-        | [filename; line; char; new_name] ->
-          let filename =
-            expand_path filename |> Relative_path.create_detect_prefix
-          in
-          (filename, int_of_string line, int_of_string char, new_name)
-        | _ -> raise Exit
-      with
-      | _ ->
-        Printf.eprintf "Invalid input\n";
-        raise Exit_status.(Exit_with Input_error)
-    in
-    let%lwt () =
-      ClientRename.go_ide
-        conn
-        ~desc:args.desc
-        args
-        ~filename
-        ~line
-        ~char
-        ~new_name
     in
     Lwt.return (Exit_status.No_error, Telemetry.create ())
   | MODE_IDE_RENAME_BY_SYMBOL arg ->

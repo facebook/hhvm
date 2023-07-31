@@ -86,30 +86,6 @@ let patches_to_json_string patches =
 
 let print_patches_json patches = print_endline (patches_to_json_string patches)
 
-let go_ide
-    (conn : unit -> ClientConnect.conn Lwt.t)
-    ~(desc : string)
-    (args : client_check_env)
-    ~(filename : Relative_path.t)
-    ~(line : int)
-    ~(char : int)
-    ~(new_name : string) : unit Lwt.t =
-  let%lwt patches =
-    ClientConnect.rpc_with_retry conn ~desc
-    @@ ServerCommandTypes.IDE_RENAME
-         { ServerCommandTypes.Ide_rename_type.filename; line; char; new_name }
-  in
-  let patches =
-    match patches with
-    | Ok patches -> patches
-    | Error message -> failwith message
-  in
-  if args.output_json then
-    print_patches_json patches
-  else
-    apply_patches patches;
-  Lwt.return_unit
-
 let go_ide_from_patches patches json =
   if json then
     print_patches_json patches

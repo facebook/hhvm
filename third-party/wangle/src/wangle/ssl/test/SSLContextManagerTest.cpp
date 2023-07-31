@@ -756,4 +756,41 @@ TEST(
       sslCtxMgr.getSSLCtxByExactDomain(SSLContextKey(".test4.com")),
       sslCtxMgr.getSSLCtx("foo.test4.com"s));
 }
+
+TEST(SSLContextManagerTest, TestNoSNIContextConfiguration) {
+  using namespace std::string_literals;
+  SSLContextManagerForTest sslCtxMgr(
+      "vip_ssl_context_manager_test_",
+      SSLContextManagerSettings().setEnableSNICallback(false),
+      nullptr);
+  SSLCacheOptions cacheOptions;
+  SocketAddress addr;
+  TLSTicketKeySeeds seeds{{"67"}, {"68"}, {"69"}};
+
+  SSLContextConfig ctxConfig;
+  ctxConfig.domains = {"www.test4.com"};
+  ctxConfig.setCertificateBuf(kTestCert4PEM, kTestCert4Key);
+  ctxConfig.clientVerification =
+      folly::SSLContext::VerifyClientCertificate::DO_NOT_REQUEST;
+  ctxConfig.isDefault = true;
+
+  SNIConfig sniConfig;
+  SSLContextConfig noSNIContextConfig = ctxConfig;
+  noSNIContextConfig.isDefault = false;
+  sniConfig.contextConfig = noSNIContextConfig;
+  ;
+
+  sslCtxMgr.resetSSLContextConfigs(
+      {ctxConfig}, {sniConfig}, cacheOptions, &seeds, addr, nullptr);
+
+  EXPECT_EQ(
+      sslCtxMgr.getSSLCtx("www.test4.com"s), sslCtxMgr.getDefaultSSLCtx());
+  EXPECT_NE(nullptr, sslCtxMgr.getNoSNICtx());
+  EXPECT_NE(sslCtxMgr.getNoSNICtx(), sslCtxMgr.getDefaultSSLCtx());
+
+  sslCtxMgr.resetSSLContextConfigs(
+      {ctxConfig}, {}, cacheOptions, &seeds, addr, nullptr);
+
+  EXPECT_EQ(nullptr, sslCtxMgr.getNoSNICtx());
+}
 } // namespace wangle

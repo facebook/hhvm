@@ -204,6 +204,13 @@ class SSLContextManager {
   std::shared_ptr<folly::SSLContext> getDefaultSSLCtx() const;
 
   /**
+   * Gets the SSL_CTX for connection requests that does not
+   * present SNI extension if a no SNI context configured.
+   * Returns nullptr otherwise.
+   */
+  std::shared_ptr<folly::SSLContext> getNoSNICtx() const;
+
+  /**
    * Gets the SSLContext for the given SNI.
    * Searches first by exact domain, then by one level up.
    * Returns nullptr if nothing matches.

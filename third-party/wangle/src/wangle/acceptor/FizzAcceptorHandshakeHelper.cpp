@@ -186,8 +186,13 @@ std::shared_ptr<folly::SSLContext> FizzAcceptorHandshakeHelper::selectSSLCtx(
     if (auto context = sslContextManager_->getSSLCtx(sni.value())) {
       return context;
     }
-  } else if (auto stats = sslContextManager_->getClientHelloExtStats()) {
-    stats->recordAbsentHostname();
+  } else {
+    if (auto context = sslContextManager_->getNoSNICtx()) {
+      return context;
+    }
+    if (auto stats = sslContextManager_->getClientHelloExtStats()) {
+      stats->recordAbsentHostname();
+    }
   }
   return sslContextManager_->getDefaultSSLCtx();
 }

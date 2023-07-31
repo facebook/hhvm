@@ -28,8 +28,7 @@ namespace compiler {
 
 class diagnostics_engine;
 
-using doc_comment_handler =
-    std::function<void(fmt::string_view, source_location)>;
+using doc_comment_handler = std::function<void(fmt::string_view, source_range)>;
 
 // A Thrift lexer.
 class lexer {
@@ -77,7 +76,7 @@ class lexer {
   comment_lex_result lex_block_comment();
   comment_lex_result lex_whitespace_or_comment();
 
-  static void ignore_comments(fmt::string_view, source_location) {}
+  static void ignore_comments(fmt::string_view, source_range) {}
 
  public:
   // on_doc_comment is invoked on a documentation comment such as

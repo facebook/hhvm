@@ -261,7 +261,7 @@ bool lexer::lex_doc_comment() {
     }
   } while (strncmp(ptr_, prefix, prefix_size) == 0);
   if (!is_inline) {
-    on_doc_comment_(token_text(), location(ptr_));
+    on_doc_comment_(token_text(), token_source_range());
   }
   return is_inline;
 }
@@ -286,7 +286,7 @@ lexer::comment_lex_result lexer::lex_block_comment() {
     auto non_star = std::find_if(
         token_start_ + 2, ptr_ - 1, [](char c) { return c != '*'; });
     if (non_star != ptr_ - 1) {
-      on_doc_comment_(token_text(), location(ptr_));
+      on_doc_comment_(token_text(), token_source_range());
     }
   }
   return comment_lex_result::skipped;

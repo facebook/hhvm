@@ -279,9 +279,8 @@ class parser {
   }
 
   boost::optional<comment> try_parse_inline_doc() {
-    auto loc = token_.range.begin;
     return token_.kind == tok::inline_doc
-        ? actions_.on_inline_doc(loc, consume_token().string_value())
+        ? actions_.on_inline_doc(token_.range, consume_token().string_value())
         : boost::optional<comment>();
   }
 

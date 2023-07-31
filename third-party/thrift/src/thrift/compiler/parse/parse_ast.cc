@@ -288,7 +288,7 @@ class ast_builder : public parser_actions {
   // information is discarded.
   void clear_doctext() {
     if (doctext_) {
-      diags_.warning_legacy_strict(doctext_->loc, "uncaptured doctext");
+      diags_.warning_legacy_strict(doctext_->range.end, "uncaptured doctext");
     }
     doctext_ = boost::none;
   }
@@ -320,9 +320,15 @@ class ast_builder : public parser_actions {
     }
     // Concatenate prefix doctext with inline doctext via a newline
     // (discouraged).
+    if (node.has_doc()) {
+      diags_.warning(
+          doc->range.begin,
+          "Combining prefix and inline doctext. Tracked source range will be inaccurate.");
+    }
     node.set_doc(
-        node.has_doc() ? node.doc() + "\n" + std::move(doc->text)
-                       : std::move(doc->text));
+        node.has_doc() ? fmt::format("{}\n{}", node.doc(), doc->text)
+                       : std::move(doc->text),
+        doc->range);
   }
 
   // Sets the annotations on the given node.
@@ -343,7 +349,7 @@ class ast_builder : public parser_actions {
       return;
     }
     if (attrs->doc) {
-      node.set_doc(std::move(attrs->doc->text));
+      node.set_doc(std::move(attrs->doc->text), attrs->doc->range);
     }
     for (auto& annotation : attrs->annotations) {
       node.add_structured_annotation(std::move(annotation));
@@ -634,8 +640,8 @@ class ast_builder : public parser_actions {
     set_doctext(program_, pop_doctext());
   }
 
-  comment on_inline_doc(source_location loc, fmt::string_view text) override {
-    return {strip_doctext(text), loc};
+  comment on_inline_doc(source_range range, fmt::string_view text) override {
+    return {strip_doctext(text), range};
   }
 
   std::unique_ptr<t_const> on_structured_annotation(
@@ -1030,9 +1036,9 @@ class ast_builder : public parser_actions {
     // Consume doctext and store it in `doctext_`. Documentation comments are
     // handled separately to avoid complicating the main parser logic and the
     // grammar.
-    auto on_doc_comment = [this](fmt::string_view text, source_location loc) {
+    auto on_doc_comment = [this](fmt::string_view text, source_range range) {
       clear_doctext();
-      doctext_ = comment{strip_doctext(text), loc};
+      doctext_ = comment{strip_doctext(text), range};
     };
     auto lexer = compiler::lexer(*src, diags_, on_doc_comment);
 

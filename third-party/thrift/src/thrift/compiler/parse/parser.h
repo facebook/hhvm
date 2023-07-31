@@ -43,7 +43,7 @@ struct identifier {
 
 struct comment {
   std::string text;
-  source_location loc;
+  source_range range;
 };
 
 struct deprecated_annotations {
@@ -86,7 +86,7 @@ class parser_actions {
 
   virtual boost::optional<comment> on_doctext() = 0;
   virtual void on_program_doctext() = 0;
-  virtual comment on_inline_doc(source_location loc, fmt::string_view text) = 0;
+  virtual comment on_inline_doc(source_range range, fmt::string_view text) = 0;
 
   virtual std::unique_ptr<t_const> on_structured_annotation(
       source_range range, fmt::string_view name) = 0;

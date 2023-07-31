@@ -21,6 +21,8 @@
 #include <string>
 #include <vector>
 
+#include <boost/optional.hpp>
+
 #include <thrift/compiler/ast/alias_span.h>
 #include <thrift/compiler/source_location.h>
 
@@ -45,12 +47,13 @@ class t_node {
   const source_range& src_range() const { return range_; }
   void set_src_range(const source_range& r) { range_ = r; }
 
-  const std::string& doc() const { return doc_; }
-  bool has_doc() const { return has_doc_; }
-  void set_doc(std::string doc) {
-    doc_ = std::move(doc);
-    has_doc_ = true;
+  // TODO: move to t_named.
+  const std::string& doc() const { return doc_ ? doc_->value : kEmptyString; }
+  bool has_doc() const { return !!doc_; }
+  void set_doc(std::string doc, source_range range) {
+    doc_ = node_doc{std::move(doc), range};
   }
+  source_range doc_range() const { return doc_ ? doc_->range : source_range{}; }
 
   // The annotations declared directly on this node.
   const auto& annotations() const { return annotations_; }
@@ -124,14 +127,17 @@ class t_node {
  private:
   source_range range_;
 
-  std::string doc_;
-  bool has_doc_ = false;
+  struct node_doc {
+    std::string value;
+    source_range range;
+  };
+  boost::optional<node_doc> doc_;
 
   std::map<std::string, annotation_value> annotations_;
   // TODO(afuller): Remove everything below this comment. It is only provideed
   // for backwards compatibility.
  public:
-  const std::string& get_doc() const { return doc_; }
+  const std::string& get_doc() const { return doc(); }
 };
 
 using t_annotation = std::map<std::string, annotation_value>::value_type;

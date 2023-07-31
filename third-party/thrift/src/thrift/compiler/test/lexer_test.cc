@@ -30,7 +30,7 @@ class LexerTest : public testing::Test {
     return {
         source_mgr.add_virtual_file("", source),
         diags,
-        [this](fmt::string_view text, source_location) { doc_comment = text; }};
+        [this](fmt::string_view text, source_range) { doc_comment = text; }};
   }
 
   LexerTest() : diags(source_mgr, [](diagnostic) {}) {}

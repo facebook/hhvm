@@ -33,12 +33,12 @@ everything_sdt = true
     def expect_contents(self, expected):
         with open(self.filename(), "r") as f:
             actual = f.read()
-            self.assertEqual(actual, expected)
+            self.assertEqual(expected, actual)
 
-    def rename(self, line, col, new_name):
+    def rename(self, kind, old_name, new_name):
         self.check_cmd(
             expected_output=None,
-            options=["--ide-refactor", f"{self.filename()}:{line}:{col}:{new_name}"],
+            options=["--refactor", kind, old_name, new_name],
         )
 
     def test_no_auto_dynamic(self) -> None:
@@ -58,11 +58,10 @@ class Nad {
 }
 """
         )
-        # rename later lines first to avoid line numbers interfering. `<<__Deprecated>>`s can add lines
-        self.rename(12, 23, "meth3b")
-        self.rename(9, 23, "meth2b")
-        self.rename(6, 23, "meth1b")
-        self.rename(4, 28, "smethb")
+        self.rename("Method", "Nad::meth3", "Nad::meth3b")
+        self.rename("Method", "Nad::meth2", "Nad::meth2b")
+        self.rename("Method", "Nad::meth1", "Nad::meth1b")
+        self.rename("Method", "Nad::smeth", "Nad::smethb")
         self.expect_contents(
             """<?hh
 <<__NoAutoDynamic>>
@@ -110,12 +109,11 @@ class Sd {
 }
 """
         )
-        # rename later lines first to avoid line numbers interfering. `<<__Deprecated>>`s can add lines
-        self.rename(15, 23, "meth4b")
-        self.rename(12, 23, "meth3b")
-        self.rename(9, 23, "meth2b")
-        self.rename(6, 23, "meth1b")
-        self.rename(4, 28, "smethb")
+        self.rename("Method", "Sd::meth4", "Sd::meth4b")
+        self.rename("Method", "Sd::meth3", "Sd::meth3b")
+        self.rename("Method", "Sd::meth2", "Sd::meth2b")
+        self.rename("Method", "Sd::meth1", "Sd::meth1b")
+        self.rename("Method", "Sd::smeth", "Sd::smethb")
 
         self.expect_contents(
             """<?hh

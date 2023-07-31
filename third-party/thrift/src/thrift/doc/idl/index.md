@@ -388,12 +388,12 @@ A struct definition introduces a named struct type into your program and has the
 struct ::=
   [annotations]
   "struct" identifier "{"
-    (field [";"])*
+    field*
   "}"
 
 field ::=
   [annotations]
-  field_id ":" [field_qualifier] type identifier [default_value]
+  field_id ":" [field_qualifier] type identifier [default_value] [";"]
 
 field_id ::=  integer
 ```
@@ -461,7 +461,7 @@ A union definition introduces a named union type into your program and has the f
 union ::=
   [annotations]
   "union" identifier "{"
-    (field [";"])*
+    field*
   "}"
 ```
 
@@ -489,7 +489,7 @@ An exception definition introduces a named exception type into your program and 
 exception ::=
   [annotations] [error_safety] [error_kind] [error_blame]
   "exception" identifier "{"
-    (field [";"])*
+    field*
   "}"
 
 error_safety ::=  "safe"

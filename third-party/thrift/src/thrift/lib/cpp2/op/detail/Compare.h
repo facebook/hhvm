@@ -585,6 +585,44 @@ struct StructLessThan {
   }
 };
 
+template <template <class...> class Equality = EqualTo>
+struct StructEquality {
+  template <class T>
+  bool operator()(const T& lhs, const T& rhs) const {
+    bool result = true;
+    for_each_ordinal<T>([&](auto ord) {
+      if (result == false) {
+        return;
+      }
+
+      using Ord = decltype(ord);
+      using Tag = get_type_tag<T, Ord>;
+      const auto* lhsValue = getValueOrNull(get<Ord>(lhs));
+      const auto* rhsValue = getValueOrNull(get<Ord>(rhs));
+
+      if (lhsValue == rhsValue) {
+        return;
+      }
+
+      if (lhsValue == nullptr) {
+        result = false;
+        return;
+      }
+
+      if (rhsValue == nullptr) {
+        result = false;
+        return;
+      }
+
+      if (!Equality<Tag>{}(*lhsValue, *rhsValue)) {
+        result = false;
+      }
+    });
+
+    return result;
+  }
+};
+
 template <template <class...> class LessThanImpl = LessThan>
 struct UnionLessThan {
   template <class T>
@@ -602,6 +640,27 @@ struct UnionLessThan {
         },
         [] {
           return false; // union is __EMPTY__
+        });
+  }
+};
+
+template <template <class...> class Equality = EqualTo>
+struct UnionEquality {
+  template <class T>
+  bool operator()(const T& lhs, const T& rhs) const {
+    if (lhs.getType() != rhs.getType()) {
+      return false;
+    }
+
+    return invoke_by_field_id<T>(
+        static_cast<FieldId>(lhs.getType()),
+        [&](auto id) {
+          using Id = decltype(id);
+          using Tag = get_type_tag<T, Id>;
+          return Equality<Tag>{}(*get<Id>(lhs), *get<Id>(rhs));
+        },
+        [] {
+          return true; // union is __EMPTY__
         });
   }
 };

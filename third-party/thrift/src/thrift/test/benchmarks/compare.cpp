@@ -25,7 +25,7 @@
 namespace apache::thrift::test {
 
 std::mt19937 rng;
-constexpr int N = 10;
+constexpr int N = 20;
 MyStruct structs[N];
 MyUnion unions[N];
 
@@ -52,6 +52,13 @@ void init() {
     CHECK_EQ(
         unions[i - 1] < unions[i],
         apache::thrift::op::detail::UnionLessThan{}(unions[i - 1], unions[i]));
+    CHECK_EQ(
+        structs[i - 1] == structs[i],
+        apache::thrift::op::detail::StructEquality{}(
+            structs[i - 1], structs[i]));
+    CHECK_EQ(
+        unions[i - 1] == unions[i],
+        apache::thrift::op::detail::UnionEquality{}(unions[i - 1], unions[i]));
   }
 }
 
@@ -73,6 +80,27 @@ BENCHMARK(UnionLess) {
 BENCHMARK_RELATIVE(UnionOpLess) {
   for (int i = 1; i < N; i++) {
     apache::thrift::op::detail::UnionLessThan{}(unions[i - 1], unions[i]);
+  }
+}
+
+BENCHMARK(StructEqual) {
+  for (int i = 1; i < N; i++) {
+    static_cast<void>(structs[i - 1] == structs[i]);
+  }
+}
+BENCHMARK_RELATIVE(StructOpEqual) {
+  for (int i = 1; i < N; i++) {
+    apache::thrift::op::detail::StructEquality{}(structs[i - 1], structs[i]);
+  }
+}
+BENCHMARK(UnionEqual) {
+  for (int i = 1; i < N; i++) {
+    static_cast<void>(unions[i - 1] == unions[i]);
+  }
+}
+BENCHMARK_RELATIVE(UnionOpEqual) {
+  for (int i = 1; i < N; i++) {
+    apache::thrift::op::detail::UnionEquality{}(unions[i - 1], unions[i]);
   }
 }
 } // namespace apache::thrift::test

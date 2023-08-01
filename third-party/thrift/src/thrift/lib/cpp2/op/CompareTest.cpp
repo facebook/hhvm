@@ -235,33 +235,68 @@ TEST(CompareTest, InternMap_Flt) {
 }
 
 TEST(CompareTest, Struct) {
+  detail::StructEquality equalTo;
+  detail::StructLessThan lessThan;
   test::OneOfEach lhs;
   test::OneOfEach rhs;
-  --*lhs.myStruct()->mySubI64();
+  EXPECT_TRUE(equalTo(lhs, rhs));
+  EXPECT_FALSE(lessThan(lhs, rhs));
 
-  EXPECT_FALSE(op::less<test::OneOfEach>(lhs, lhs));
-  EXPECT_TRUE(op::less<test::OneOfEach>(lhs, rhs));
+  --*lhs.myStruct()->mySubI64();
+  EXPECT_FALSE(equalTo(lhs, rhs));
+  EXPECT_TRUE(lessThan(lhs, rhs));
+
+  --*rhs.myStruct()->mySubI64();
+  EXPECT_TRUE(equalTo(lhs, rhs));
+  EXPECT_FALSE(lessThan(lhs, rhs));
+
+  // compare lhs with lhs
+  EXPECT_TRUE(equalTo(lhs, lhs));
+  EXPECT_FALSE(lessThan(lhs, lhs));
 }
 
 TEST(CompareTest, UnorderedFields) {
+  detail::StructEquality equalTo;
+  detail::StructLessThan lessThan;
+
   test::CppTemplateListField lhs;
   test::CppTemplateListField rhs;
-  lhs.f1()->push_front("0");
+  EXPECT_TRUE(equalTo(lhs, rhs));
+  EXPECT_FALSE(lessThan(lhs, rhs));
 
-  EXPECT_FALSE(op::less<test::CppTemplateListField>(lhs, lhs));
-  EXPECT_TRUE(op::less<test::CppTemplateListField>(lhs, rhs));
+  lhs.f1()->push_front("0");
+  EXPECT_FALSE(equalTo(lhs, rhs));
+  EXPECT_TRUE(lessThan(lhs, rhs));
+
+  rhs.f1()->push_front("0");
+  EXPECT_TRUE(equalTo(lhs, rhs));
+  EXPECT_FALSE(lessThan(lhs, rhs));
+
+  // compare lhs with lhs
+  EXPECT_TRUE(equalTo(lhs, lhs));
+  EXPECT_FALSE(lessThan(lhs, lhs));
 }
 
 TEST(CompareTest, Union) {
-  using detail::UnionLessThan;
+  detail::UnionEquality equalTo;
+  detail::UnionLessThan lessThan;
   test::UnionIntegers empty, u1, u2;
   u1.myI16_ref() = 10;
   u2.myI32_ref() = 1;
-  EXPECT_TRUE(UnionLessThan{}(empty, u1));
-  EXPECT_TRUE(UnionLessThan{}(u1, u2));
-  EXPECT_FALSE(UnionLessThan{}(u1, u1));
-  EXPECT_FALSE(UnionLessThan{}(u2, u1));
-  EXPECT_FALSE(UnionLessThan{}(empty, empty));
+  EXPECT_TRUE(lessThan(empty, u1));
+  EXPECT_FALSE(equalTo(empty, u1));
+  EXPECT_TRUE(lessThan(u1, u2));
+  EXPECT_FALSE(equalTo(u1, u2));
+  EXPECT_FALSE(lessThan(u1, u1));
+  EXPECT_TRUE(equalTo(u1, u1));
+  EXPECT_FALSE(lessThan(u2, u1));
+  EXPECT_FALSE(equalTo(u2, u1));
+  EXPECT_FALSE(lessThan(empty, empty));
+  EXPECT_TRUE(equalTo(empty, empty));
+
+  u2.myI16_ref() = 10;
+  EXPECT_FALSE(lessThan(u1, u2));
+  EXPECT_TRUE(equalTo(u1, u2));
 }
 
 } // namespace

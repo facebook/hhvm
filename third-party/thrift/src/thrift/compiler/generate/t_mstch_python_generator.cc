@@ -50,8 +50,28 @@ bool is_type_iobuf(const std::string& name) {
 
 bool is_type_iobuf(const t_type* type) {
   return type->has_annotation("py3.iobuf") ||
-      is_type_iobuf(type->get_annotation("cpp2.type")) ||
-      is_type_iobuf(type->get_annotation("cpp.type"));
+      is_type_iobuf(fmt::to_string(cpp2::get_type(type)));
+}
+
+const t_const_value* structured_type_override(
+    const t_named& node, const char* key = "name") {
+  if (auto annotation = node.find_structured_annotation_or_null(kCppTypeUri)) {
+    if (auto type_name =
+            annotation->get_value_from_structured_annotation_or_null(key)) {
+      return type_name;
+    }
+  }
+  return nullptr;
+}
+
+std::string cpp_type_override(const t_field& field) {
+  if (auto type_override = structured_type_override(field)) {
+    return type_override->get_string();
+  }
+  if (auto typedef_override = structured_type_override(*field.get_type())) {
+    return typedef_override->get_string();
+  }
+  return fmt::to_string(cpp2::get_type(field.get_type()->get_true_type()));
 }
 
 const t_const* find_structured_adapter_annotation(const t_named& node) {
@@ -146,34 +166,39 @@ mstch::node adapter_node(
   return node;
 }
 
-std::string get_cpp_template(const t_type& type, const char* default_ = "") {
+std::string get_cpp_template(const t_field& field) {
+  if (auto template_override = structured_type_override(field, "template")) {
+    return template_override->get_string();
+  }
   if (const auto* val =
-          type.find_annotation_or_null({"cpp.template", "cpp2.template"})) {
+          field.get_type()->get_true_type()->find_annotation_or_null(
+              {"cpp.template", "cpp2.template"})) {
     return *val;
   }
-  return default_;
+  return "";
 }
 
 std::string format_marshal_type(
-    const t_type* field_type, std::string type_override = "");
+    const t_type* field_type,
+    const t_field& field,
+    std::string type_override = "");
 
 std::string format_unary_type(
-    const t_type* type,
+    const t_field& field,
     const t_type* elem_type,
     const char* container,
     std::string type_override) {
   if (type_override.empty()) {
-    // gets cpp.type overrides
-    type_override = fmt::to_string(cpp2::get_type(type));
+    type_override = cpp_type_override(field);
   }
   if (!type_override.empty()) {
     std::string elem_thrift_type = format_marshal_type(
-        elem_type, fmt::format("{}::value_type", type_override));
+        elem_type, field, fmt::format("{}::value_type", type_override));
     return fmt::format(
         "{}<{}, {}>", container, elem_thrift_type, type_override);
   }
-  auto template_override = get_cpp_template(*type);
-  std::string elem_thrift_type = format_marshal_type(elem_type);
+  auto template_override = get_cpp_template(field);
+  std::string elem_thrift_type = format_marshal_type(elem_type, field);
   if (!template_override.empty()) {
     return fmt::format(
         "{}<{}, {}<native_t<{}>>>",
@@ -186,25 +211,24 @@ std::string format_unary_type(
 }
 
 std::string format_map_type(
-    const t_type* type,
+    const t_field& field,
     const t_type* key_type,
     const t_type* val_type,
     std::string type_override) {
   if (type_override.empty()) {
-    // gets cpp.type overrides
-    type_override = fmt::to_string(cpp2::get_type(type));
+    type_override = cpp_type_override(field);
   }
   if (!type_override.empty()) {
     std::string key_thrift_type = format_marshal_type(
-        key_type, fmt::format("{}::key_type", type_override));
+        key_type, field, fmt::format("{}::key_type", type_override));
     std::string val_thrift_type = format_marshal_type(
-        val_type, fmt::format("{}::mapped_type", type_override));
+        val_type, field, fmt::format("{}::mapped_type", type_override));
     return fmt::format(
         "map<{}, {}, {}>", key_thrift_type, val_thrift_type, type_override);
   }
-  auto template_override = get_cpp_template(*type);
-  std::string key_thrift_type = format_marshal_type(key_type);
-  std::string val_thrift_type = format_marshal_type(val_type);
+  auto template_override = get_cpp_template(field);
+  std::string key_thrift_type = format_marshal_type(key_type, field);
+  std::string val_thrift_type = format_marshal_type(val_type, field);
   if (!template_override.empty()) {
     return fmt::format(
         "map<{}, {}, {}<native_t<{}>, native_t<{}>>>",
@@ -218,7 +242,7 @@ std::string format_map_type(
 }
 
 std::string format_marshal_type(
-    const t_type* field_type, std::string type_override) {
+    const t_type* field_type, const t_field& field, std::string type_override) {
   const t_type* type = field_type->get_true_type();
   if (type->is_bool()) {
     return "bool";
@@ -253,14 +277,15 @@ std::string format_marshal_type(
         cpp2::get_name(type));
   } else if (type->is_list()) {
     const auto* elem_type = dynamic_cast<const t_list*>(type)->get_elem_type();
-    return format_unary_type(type, elem_type, "list", std::move(type_override));
+    return format_unary_type(
+        field, elem_type, "list", std::move(type_override));
   } else if (type->is_set()) {
     const auto* elem_type = dynamic_cast<const t_set*>(type)->get_elem_type();
-    return format_unary_type(type, elem_type, "set", std::move(type_override));
+    return format_unary_type(field, elem_type, "set", std::move(type_override));
   } else if (type->is_map()) {
     const auto* key_type = dynamic_cast<const t_map*>(type)->get_key_type();
     const auto* val_type = dynamic_cast<const t_map*>(type)->get_val_type();
-    return format_map_type(type, key_type, val_type, std::move(type_override));
+    return format_map_type(field, key_type, val_type, std::move(type_override));
   }
   // if not supported, empty string to cause compile error
   return "";
@@ -653,8 +678,8 @@ class python_mstch_service : public mstch_service {
   const t_program* prog_;
 };
 
-// Generator-specific validator that enforces that a reserved key is not used as
-// a namespace component.
+// Generator-specific validator that enforces that a reserved key is not used
+// as a namespace component.
 class no_reserved_key_in_namespace_validator : virtual public validator {
  public:
   using validator::visit;
@@ -1041,7 +1066,9 @@ class python_mstch_field : public mstch_field {
         adapter_annotation_, transitive_adapter_annotation_, context_, pos_);
   }
 
-  mstch::node marshal_type() { return format_marshal_type(field_->get_type()); }
+  mstch::node marshal_type() {
+    return format_marshal_type(field_->get_type(), *field_);
+  }
 
  private:
   const std::string py_name_;

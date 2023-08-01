@@ -1498,6 +1498,7 @@ let find_global_results
         ~kind_filter
         ~context:completion_type
     in
+    autocomplete_is_complete := List.length results < max_results;
     (* Looking up a function signature using Tast_env.get_fun consumes ~67KB
      * and can cause complex typechecking which can take from 2-100 milliseconds
      * per result.  When tested in summer 2019 it was possible to load 1.4GB of data
@@ -1560,7 +1561,6 @@ let find_global_results
           }
         in
         add_res complete);
-    autocomplete_is_complete := List.length !autocomplete_items < max_results;
 
     (* Add any builtins that match *)
     match completion_type with

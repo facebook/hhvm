@@ -14,53 +14,6 @@
 namespace fizz {
 
 namespace {
-
-void encFuncBlocks(
-    EVP_CIPHER_CTX* encryptCtx,
-    const folly::IOBuf& plaintext,
-    folly::IOBuf& output) {
-  size_t totalWritten = 0;
-  size_t totalInput = 0;
-  int outLen = 0;
-  auto outputCursor = transformBufferBlocks<16>(
-      plaintext,
-      output,
-      [&](uint8_t* cipher, const uint8_t* plain, size_t len) {
-        if (len > std::numeric_limits<int>::max()) {
-          throw std::runtime_error("Encryption error: too much plain text");
-        }
-        if (len == 0) {
-          return static_cast<size_t>(0);
-        }
-        if (EVP_EncryptUpdate(
-                encryptCtx, cipher, &outLen, plain, static_cast<int>(len)) !=
-                1 ||
-            outLen < 0) {
-          throw std::runtime_error("Encryption error");
-        }
-        totalWritten += outLen;
-        totalInput += len;
-        return static_cast<size_t>(outLen);
-      });
-
-  // We might end up needing to write more in the final encrypt stage
-  auto numBuffered = totalInput - totalWritten;
-  auto numLeftInOutput = outputCursor.length();
-  if (numBuffered <= numLeftInOutput) {
-    if (EVP_EncryptFinal_ex(encryptCtx, outputCursor.writableData(), &outLen) !=
-        1) {
-      throw std::runtime_error("Encryption error");
-    }
-  } else {
-    // we need to copy nicely - this should be at most one block
-    std::array<uint8_t, 16> block = {};
-    if (EVP_EncryptFinal_ex(encryptCtx, block.data(), &outLen) != 1) {
-      throw std::runtime_error("Encryption error");
-    }
-    outputCursor.push(block.data(), outLen);
-  }
-}
-
 void encFunc(
     EVP_CIPHER_CTX* encryptCtx,
     const folly::IOBuf& plaintext,
@@ -200,7 +153,22 @@ std::unique_ptr<folly::IOBuf> evpEncrypt(
   }
 
   if (useBlockOps) {
-    encFuncBlocks(encryptCtx, *input, *output);
+    struct Impl {
+      EVP_CIPHER_CTX* encryptCtx;
+      bool encryptUpdate(
+          uint8_t* cipher,
+          int* outLen,
+          const uint8_t* plain,
+          size_t len) {
+        return EVP_EncryptUpdate(
+                   encryptCtx, cipher, outLen, plain, static_cast<int>(len)) ==
+            1;
+      }
+      bool encryptFinal(uint8_t* cipher, int* outLen) {
+        return EVP_EncryptFinal_ex(encryptCtx, cipher, outLen) == 1;
+      }
+    };
+    encFuncBlocks<16>(Impl{encryptCtx}, *input, *output);
   } else {
     encFunc(encryptCtx, *input, *output);
   }

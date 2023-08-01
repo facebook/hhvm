@@ -75,4 +75,56 @@ bool decFuncBlocks(
   }
 }
 
+/**
+ * EVPEncImp has the following requirements:
+ *     * bool EVPDecImp::encryptUpdate - returns if each evp is encrypted
+ * successfully
+ *     * bool EVPDecImp::encryptFinal - returns if encryption is finalized
+ * successfully
+ */
+template <size_t BS, class EVPEncImpl>
+void encFuncBlocks(
+    EVPEncImpl&& impl,
+    const folly::IOBuf& plaintext,
+    folly::IOBuf& output) {
+  size_t totalWritten = 0;
+  size_t totalInput = 0;
+  int outLen = 0;
+  auto outputCursor = transformBufferBlocks<BS>(
+      plaintext,
+      output,
+      [&](uint8_t* cipher, const uint8_t* plain, size_t len) {
+        if (len > std::numeric_limits<int>::max()) {
+          throw std::runtime_error("Encryption error: too much plain text");
+        }
+        if (len == 0) {
+          return static_cast<size_t>(0);
+        }
+        if (!impl.encryptUpdate(
+                cipher, &outLen, plain, static_cast<int>(len)) ||
+            outLen < 0) {
+          throw std::runtime_error("Encryption error");
+        }
+        totalWritten += outLen;
+        totalInput += len;
+        return static_cast<size_t>(outLen);
+      });
+
+  // We might end up needing to write more in the final encrypt stage
+  auto numBuffered = totalInput - totalWritten;
+  auto numLeftInOutput = outputCursor.length();
+  if (numBuffered <= numLeftInOutput) {
+    if (!impl.encryptFinal(outputCursor.writableData(), &outLen)) {
+      throw std::runtime_error("Encryption error");
+    }
+  } else {
+    // we need to copy nicely - this should be at most one block
+    std::array<uint8_t, BS> block = {};
+    if (!impl.encryptFinal(block.data(), &outLen)) {
+      throw std::runtime_error("Encryption error");
+    }
+    outputCursor.push(block.data(), outLen);
+  }
+}
+
 } // namespace fizz

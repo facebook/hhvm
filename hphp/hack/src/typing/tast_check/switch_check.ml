@@ -14,11 +14,32 @@ open Utils
 module Env = Tast_env
 module Cls = Decl_provider.Class
 module SN = Naming_special_names
+module MakeType = Typing_make_type
+module Reason = Typing_reason
 
 type kind =
   | Enum
   | EnumClass
   | EnumClassLabel
+
+let is_arraykey env ty = Env.is_sub_type env ty (MakeType.arraykey Reason.Rnone)
+
+let is_dynamic env ty = Env.is_sub_type env ty (MakeType.dynamic Reason.Rnone)
+
+let is_enum env ty =
+  let (env, ty) = Env.expand_type env ty in
+  match Typing_defs.get_node ty with
+  | Tnewtype (name, _, _) -> Env.is_enum env name
+  | _ -> false
+
+let is_like_enum env ty =
+  let (env, ty) = Env.expand_type env ty in
+  match Typing_defs.get_node ty with
+  | Typing_defs.Tunion [ty; dynamic_ty] when is_dynamic env dynamic_ty ->
+    is_enum env ty
+  | Typing_defs.Tunion [dynamic_ty; ty] when is_dynamic env dynamic_ty ->
+    is_enum env ty
+  | _ -> false
 
 let get_constant env tc kind (seen, has_default) case =
   let (kind, is_enum_class_label) =
@@ -202,6 +223,9 @@ let rec check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved =
     in
     List.fold_left tyl ~init:env ~f:(fun env ty ->
         check_exhaustiveness_ env pos ty caselist new_enum)
+  | Tintersection [arraykey; like_ty]
+    when is_arraykey env arraykey && is_like_enum env like_ty ->
+    check_exhaustiveness_ env pos like_ty caselist enum_coming_from_unresolved
   | Tintersection tyl ->
     fst
     @@ Typing_utils.run_on_intersection env tyl ~f:(fun env ty ->

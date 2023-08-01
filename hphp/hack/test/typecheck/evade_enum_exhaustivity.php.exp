@@ -1,0 +1,4 @@
+File "evade_enum_exhaustivity.php", line 14, characters 11-12:
+`switch` statement nonexhaustive; at least the following cases are missing: `B` (Typing[4019])
+  File "evade_enum_exhaustivity.php", line 3, characters 6-6:
+  Enum declared here

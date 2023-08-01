@@ -8,7 +8,7 @@
 #[allow(unused_imports)]
 pub(crate) use crate as types;
 
-pub type MyCompany = crate::types::Company;
+pub use crate::types::Company as MyCompany;
 
 pub type MyStringIdentifier = ::std::string::String;
 

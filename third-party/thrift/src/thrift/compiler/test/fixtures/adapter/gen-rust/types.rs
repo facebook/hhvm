@@ -52,7 +52,7 @@ pub type CustomProtocolType = ::std::vec::Vec<::std::primitive::u8>;
 
 pub type IndirectionString = ::std::string::String;
 
-pub type AdaptedEnum = crate::types::ThriftAdaptedEnum;
+pub use crate::types::ThriftAdaptedEnum as AdaptedEnum;
 
 pub type AdaptedTypedef = crate::types::AdaptedStruct;
 

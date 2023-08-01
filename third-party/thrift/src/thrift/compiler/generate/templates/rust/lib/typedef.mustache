@@ -19,21 +19,28 @@
 {{#typedef:docs?}}
 #[doc = {{typedef:docs}}]
 {{/typedef:docs?}}{{!
-}}{{^typedef:newtype?}}
+}}{{^typedef:newtype?}}{{!
+}}{{#typedef:has_adapter?}}
 pub type {{typedef:rust_name}} = {{!
-  }}{{#typedef:has_adapter?}}{{!
-    }}{{#adapter:transitive_only?}}{{!
+  }}{{#adapter:transitive_only?}}{{!
     }}{{#adapter:underlying_type}}{{>lib/type}}{{/adapter:underlying_type}}{{!
-    }}{{/adapter:transitive_only?}}{{!
-    }}{{^adapter:transitive_only?}}{{!
+  }}{{/adapter:transitive_only?}}{{!
+  }}{{^adapter:transitive_only?}}{{!
     }}{{>lib/adapter/qualified}}::AdaptedType{{!
-    }}{{/adapter:transitive_only?}}{{!
-  }}{{/typedef:has_adapter?}}{{!
-  }}{{^typedef:has_adapter?}}{{!
-  }}{{#typedef:type}}{{>lib/type}}{{/typedef:type}}{{!
-  }}{{/typedef:has_adapter?}};
-{{/typedef:newtype?}}
-{{#typedef:newtype?}}
+  }}{{/adapter:transitive_only?}};
+{{/typedef:has_adapter?}}{{!
+}}{{^typedef:has_adapter?}}{{!
+  }}{{#typedef:type}}{{!
+    }}{{#type:enum}}
+pub use {{type:package}}::types::{{type:rust_name}} as {{typedef:rust_name}};
+{{/type:enum}}{{!
+    }}{{^type:enum}}
+pub type {{typedef:rust_name}} = {{>lib/type}};
+{{/type:enum}}{{!
+  }}{{/typedef:type}}{{!
+}}{{/typedef:has_adapter?}}{{!
+}}{{/typedef:newtype?}}{{!
+}}{{#typedef:newtype?}}
 #[derive({{!
     }}{{^typedef:has_adapter?}}{{!
     }}Default, {{!

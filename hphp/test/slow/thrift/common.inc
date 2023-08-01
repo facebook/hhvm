@@ -52,6 +52,12 @@ class DummyTransport {
     $this->buff .= $buff;
   }
   function read($n) {
+    $rem = strlen($this->buff) - $this->pos;
+    if ($rem === 0) {
+        throw new Exception("Out of input");
+    } else if ($rem < $n) {
+        $n = $rem;
+    }
     $r = \substr($this->buff, $this->pos, $n);
     $this->pos += $n;
     return $r;

@@ -113,6 +113,15 @@ size_t VanillaVec::capacityToSizeIndex(size_t capacity) {
 }
 
 ALWAYS_INLINE
+bool VanillaVec::checkCapacity(size_t capacity) {
+  if (capacity <= VanillaVec::SmallSize) {
+    return true;
+  }
+  const auto index = MemoryManager::size2Index(capacityToSizeBytes(capacity));
+  return index <= VanillaVec::MaxSizeIndex;
+}
+
+ALWAYS_INLINE
 uint32_t VanillaVec::capacity(const ArrayData* ad) {
   return kSizeIndex2VanillaVecCapacity[ad->sizeIndex()];
 }
@@ -151,4 +160,3 @@ void VanillaVec::IterateKV(const ArrayData* arr, F fn) {
 //////////////////////////////////////////////////////////////////////
 
 }
-

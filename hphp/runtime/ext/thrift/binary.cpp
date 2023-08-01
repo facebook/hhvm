@@ -237,13 +237,16 @@ Variant binary_deserialize_internal(int8_t thrift_typeID,
       auto const& val_spec = fieldspec.val();
       hasTypeWrapper = hasTypeWrapper || val_spec.isTypeWrapped;
       if (s_harray.equal(fieldspec.format)) {
-        VecInit arr(size);
+        // Reserve up to 16k entries for perf - but after that use "normal"
+        // array expansion so that we ensure the data is actually there before
+        // allocating massive arrays.
+        auto arr = Array::attach(VanillaVec::MakeReserveVec(std::min(16384u, size)));
         for (uint32_t i = 0; i < size; i++) {
           arr.append(
             binary_deserialize(type, transport, val_spec, options, hasTypeWrapper)
           );
         }
-        return arr.toVariant();
+        return arr;
       } else if (s_collection.equal(fieldspec.format)) {
         if (size == 0) {
           return Variant(req::make<c_Vector>());
@@ -257,7 +260,10 @@ Variant binary_deserialize_internal(int8_t thrift_typeID,
         } while (++i < size);
         return Variant(std::move(vec));
       } else {
-        VecInit vai(size);
+        // Reserve up to 16k entries for perf - but after that use "normal"
+        // array expansion so that we ensure the data is actually there before
+        // allocating massive arrays.
+        auto vai = Array::attach(VanillaVec::MakeReserveVec(std::min(16384u, size)));
         if (options & k_THRIFT_MARK_LEGACY_ARRAYS) {
           vai.setLegacyArray(true);
         }
@@ -266,7 +272,7 @@ Variant binary_deserialize_internal(int8_t thrift_typeID,
             binary_deserialize(type, transport, val_spec, options, hasTypeWrapper)
           );
         }
-        return vai.toVariant();
+        return vai;
       }
     }
     case T_SET: { // array of key -> TRUE

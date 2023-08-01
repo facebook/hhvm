@@ -196,6 +196,10 @@ struct VanillaVec final : type_scan::MarkCollectable<VanillaVec> {
 
   static size_t capacityToSizeBytes(size_t);
   static size_t capacityToSizeIndex(size_t);
+  // Return false if the capacity exceeds the allowable limits. Note that this
+  // doesn't check available (or reservable) memory but checks that the size
+  // won't exceed internal limits.
+  static bool checkCapacity(size_t);
 
   static constexpr auto SizeIndexOffset = HeaderAuxOffset + 1;
 private:

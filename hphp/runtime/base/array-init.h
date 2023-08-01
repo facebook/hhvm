@@ -281,8 +281,18 @@ struct VecInit final : ArrayInitBase<detail::Vec, KindOfVec> {
   VecInit(size_t n, CheckAllocation) : ArrayInitBase(n, CheckAllocation{})
   {
     auto allocsz = sizeof(ArrayData) + sizeof(TypedValue) * n;
-    if (UNLIKELY(allocsz > kMaxSmallSize && tl_heap->preAllocOOM(allocsz))) {
-      check_non_safepoint_surprise();
+    if (UNLIKELY(allocsz > kMaxSmallSize)) {
+      // If they're asking to check allocation then also check that the size
+      // doesn't exceed our max capacity. The error message is a bit misleading
+      // (OOM) but it's better than a crash later on.
+      if (UNLIKELY(!VanillaVec::checkCapacity(n))) {
+        setSurpriseFlag(MemExceededFlag);
+        RID().setRequestOOMFlag();
+        check_non_safepoint_surprise();
+      }
+      if (UNLIKELY(tl_heap->preAllocOOM(allocsz))) {
+        check_non_safepoint_surprise();
+      }
     }
     m_arr = detail::Vec::MakeReserve(n);
     assertx(m_arr->hasExactlyOneRef());

@@ -234,8 +234,12 @@ let rec check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved =
     Typing_defs.error_Tunapplied_alias_in_illegal_context ()
 
 let check_exhaustiveness env pos ty caselist =
-  let (_ : Env.env) = check_exhaustiveness_ env pos ty caselist false in
-  ()
+  let env = check_exhaustiveness_ env pos ty caselist false in
+  let tcopt = env |> Env.get_decl_env |> Decl_env.tcopt in
+  if TypecheckerOptions.tco_log_exhaustivity_check tcopt then
+    Env.ty_to_json env ty
+    |> Hh_json.json_to_string
+    |> Hh_logger.log "[hh_tco_log_exhaustivity_check] %s"
 
 let handler =
   object

@@ -296,3 +296,5 @@ let set_tco_autocomplete_mode t =
   { t with GlobalOptions.tco_autocomplete_mode = true }
 
 let package_info t = t.GlobalOptions.tco_package_info
+
+let tco_log_exhaustivity_check t = t.GlobalOptions.tco_log_exhaustivity_check

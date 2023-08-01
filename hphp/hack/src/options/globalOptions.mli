@@ -335,6 +335,8 @@ type t = {
       (** Information used to determine which package a module belongs to during typechecking. *)
   po_unwrap_concurrent: bool;
       (** Replace concurrent blocks with their bodies in the AST *)
+  tco_log_exhaustivity_check: bool;
+      (** Instrument the existing exhaustivity lint (for strict switch statements) *)
 }
 [@@deriving eq, show]
 
@@ -461,6 +463,7 @@ val set :
   ?tco_autocomplete_mode:bool ->
   ?tco_package_info:PackageInfo.t ->
   ?po_unwrap_concurrent:bool ->
+  ?tco_log_exhaustivity_check:bool ->
   t ->
   t
 

@@ -376,6 +376,9 @@ impl HhConfig {
                 "hh_distc_should_disable_trace_store" => {
                     c.hh_distc_should_disable_trace_store = parse_json(&value)?;
                 }
+                "log_exhaustivity_check" => {
+                    go.tco_log_exhaustivity_check = parse_json(&value)?;
+                }
                 _ => c.unknown.push((key, value)),
             }
         }

@@ -158,6 +158,7 @@ impl Default for GlobalOptions {
             tco_autocomplete_mode: false,
             tco_package_info: PackageInfo::default(),
             po_unwrap_concurrent: false,
+            tco_log_exhaustivity_check: false,
         }
     }
 }

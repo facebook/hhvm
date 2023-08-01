@@ -187,6 +187,7 @@ type t = {
   tco_autocomplete_mode: bool;
   tco_package_info: PackageInfo.t;
   po_unwrap_concurrent: bool;
+  tco_log_exhaustivity_check: bool;
 }
 [@@deriving eq, show]
 
@@ -314,6 +315,7 @@ let default =
     tco_autocomplete_mode = false;
     tco_package_info = PackageInfo.empty;
     po_unwrap_concurrent = false;
+    tco_log_exhaustivity_check = false;
   }
 
 let set
@@ -439,6 +441,7 @@ let set
     ?tco_autocomplete_mode
     ?tco_package_info
     ?po_unwrap_concurrent
+    ?tco_log_exhaustivity_check
     options =
   let setting setting option =
     match setting with
@@ -768,6 +771,8 @@ let set
     tco_package_info = setting tco_package_info options.tco_package_info;
     po_unwrap_concurrent =
       setting po_unwrap_concurrent options.po_unwrap_concurrent;
+    tco_log_exhaustivity_check =
+      setting tco_log_exhaustivity_check options.tco_log_exhaustivity_check;
   }
 
 let so_naming_sqlite_path t = t.so_naming_sqlite_path

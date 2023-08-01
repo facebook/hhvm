@@ -353,7 +353,7 @@ let default =
     (* Cutoff derived from https://fburl.com/scuba/hh_server_events/jvja9qns *)
     hh_distc_fanout_threshold = 500_000;
     ide_load_naming_table_on_disk = true;
-    ide_naming_table_update_threshold = 0;
+    ide_naming_table_update_threshold = 1000;
     ide_batch_process_changes = true;
     dump_tast_hashes = false;
     glean_v2 = false;

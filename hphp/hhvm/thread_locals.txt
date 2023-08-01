@@ -12,7 +12,7 @@ HPHP::s_hugeRange
 HPHP::s_stackSize
 HPHP::tl_regState   # okay always clean at context switch.
 HPHP::tl_sweeping
-HPHP::(anonymous namespace)::tl_cliSock
+HPHP::(anonymous namespace)::tl_context
 HPHP::(anonymous namespace)::tl_traceTask
 HPHP::(anonymous namespace)::s_connections
 HPHP::(anonymous namespace)::tl_perf_event
@@ -21,7 +21,6 @@ HPHP::(anonymous namespace)::tl_loaded_units
 HPHP::(anonymous namespace)::tl_env
 HPHP::(anonymous namespace)::tl_rng
 HPHP::(anonymous namespace)::tl_proc
-HPHP::(anonymous namespace)::tl_ucred
 HPHP::ResolverInit::s_res
 HPHP::s_stackLimit
 HPHP::RequestInfo::s_stackLimitWithSlack

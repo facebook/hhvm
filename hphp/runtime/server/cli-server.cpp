@@ -196,8 +196,6 @@ namespace {
 const uint32_t CLI_SERVER_API_BASE_VERSION = 6;
 std::atomic<uint64_t> s_cliServerComputedVersion(0);
 
-const StaticString s_hphp_cli_server_api_version("hphp.cli_server_api_version");
-
 // When running with Eval.UnixServerRunPSPInBackground this pipe allows us to
 // send an exit code to the foreground process prior to PSP completing.
 int s_foreground_pipe = -1;
@@ -516,9 +514,11 @@ private:
 
 CLIServer* s_cliServer{nullptr};
 std::map<std::string, void(*)(detail::CLIServerInterface&)> s_extensionHandlers;
-__thread ucred* tl_ucred{nullptr};
-__thread int tl_cliSock{-1};
-__thread Array* tl_env;
+
+__thread Array* tl_env{nullptr};
+__thread CLIContext* tl_context{nullptr};
+
+int cli_sock() { assertx(tl_context); return tl_context->client(); }
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -615,8 +615,6 @@ void CLIServer::stop() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace {
-
 struct CliStdoutHook final : ExecutionContext::StdoutHook {
   int fd;
   explicit CliStdoutHook(int fd) : fd(fd) {}
@@ -643,68 +641,49 @@ struct CliLoggerHook final : LoggerHook {
   }
 };
 
-}
-
-const StaticString
-  s_local_value("local_value"),
-  s_access("access");
-
-Array init_ini_settings(const std::string& settings) {
-  String s(settings.c_str(), CopyString);
-  auto var = Variant::attach(HHVM_FN(json_decode)(s, true));
-
+void load_ini_settings(const folly::dynamic& ini) {
   FTRACE(1, "init_ini_settings: CLI server decoding settings\n");
 
-  if (!var.isArray()) {
-    Logger::Warning("CLI server received malformed INI settings: %.64s%s",
-                    settings.c_str(), settings.size() > 64 ? "..." : "");
-    return Array{};
+  if (!ini.isObject()) {
+    Logger::Warning("CLI server received malformed INI settings");
+    return;
   }
 
-  FTRACE(1, "init_ini_settings: {} settings to process\n",
-         var.toArray().size());
+  FTRACE(1, "init_ini_settings: {} settings to process\n", ini.size());
 
   UNUSED int count = 0;
-  for (ArrayIter it(var.toArray()); it; ++it) {
-    if (!it.first().isString()) {
-      Logger::Warning("CLI server received a malformed INI setting name");
-      continue;
-    }
-    if (!it.second().isString() && !it.second().isArray()) {
+  for (auto& [name, opt] : ini.items()) {
+    if (!opt.isObject() || !opt.count("local_value")) {
       Logger::Warning("CLI server received a malformed INI setting value");
       continue;
     }
 
-    auto name = it.first().toString();
-    auto detail = it.second().toArray();
-    auto value = detail[s_local_value];
-
-    if ((detail[s_access].toInt64() & IniSetting::PHP_INI_USER) == 0) {
-      FTRACE(5, "init_ini_settings: skipping INI setting {} = {}\n",
-             name.data(),
-             value.isArray() || value.isObject()
-               ? "[array]"
-               : value.toString().c_str());
+    auto const nameStr = name.asString();
+    auto value = opt["local_value"];
+    if ((opt["access"].asInt() & IniSetting::PHP_INI_USER) == 0) {
+      FTRACE(5, "init_ini_settings: skipping INI setting {}\n", nameStr);
       continue;
     }
-    FTRACE(5, "init_ini_settings: loading INI setting {} = {}\n",
-           name.data(),
-           value.isArray() ? "[array]" : value.toString().c_str());
+    FTRACE(5, "init_ini_settings: loading INI setting {} = {}\n", nameStr,
+           folly::toJson(value));
 
-    bool res = IniSetting::SetUser(name, value);
+    bool res = false;
+    if (value.isString()) res = IniSetting::SetUser(nameStr, value.asString());
+    if (value.isInt())    res = IniSetting::SetUser(nameStr, value.asInt());
+    if (value.isBool())   res = IniSetting::SetUser(nameStr, value.asBool());
+    if (value.isDouble()) res = IniSetting::SetUser(nameStr, value.asDouble());
     if (!res) {
       FTRACE(5, "init_ini_settings: unable to set PHP_INI_USER setting: {} "
-             "(access = {})\n", name, detail[s_access].toInt64());
+             "(access = {})\n", nameStr, opt["access"].asInt());
       Logger::Warning("CLI server received an invalid INI setting: %s "
                       "(access = %" PRId64 ")",
-                      name.data(), detail[s_access].toInt64());
+                      nameStr.c_str(), opt["access"].asInt());
     } else {
       count++;
     }
   }
 
   FTRACE(1, "init_ini_settings: loaded {} settings\n", count);
-  return var.toArray();
 }
 
 std::unordered_set<uid_t> s_allowedUsers;
@@ -754,75 +733,6 @@ void check_cli_server_access(ucred& cred) {
 
   throw Exception("access denied");
 }
-
-const StaticString
-  s_serverVariablesIni("hhvm.server_variables"),
-  s_envVariablesIni("hhvm.env_variables");
-
-Array init_cli_globals(int argc, char** argv, Array& ini, char** envp) {
-  auto make_map = [] (const Variant& v) {
-    std::map<std::string,std::string> ret;
-    if (!v.isArray()) return ret;
-    auto ar = v.toArray();
-    for (ArrayIter iter(ar); iter; ++iter) {
-      if (iter.first().isString() && iter.second().isString()) {
-        ret.emplace(
-          std::string(iter.first().toString().data()),
-          std::string(iter.second().toString().data())
-        );
-      }
-    }
-    return ret;
-  };
-
-  Array retEnv;
-  std::map<std::string,std::string> envVariables;
-  std::map<std::string,std::string> serverVariables;
-
-  if (ini.exists(s_serverVariablesIni)) {
-    serverVariables = make_map(ini[s_serverVariablesIni]);
-  }
-  if (ini.exists(s_envVariablesIni)) {
-    envVariables = make_map(ini[s_envVariablesIni]);
-    for (const auto& envvar : envVariables) {
-      retEnv.set(String(envvar.first), String(envvar.second));
-    }
-  } else {
-    retEnv = empty_dict_array();
-  }
-
-  for (auto env = envp; *env; ++env) {
-    char *p = strchr(*env, '=');
-    if (p) {
-      String name(*env, p - *env, CopyString);
-      String val(p + 1, CopyString);
-      retEnv.set(name, val);
-    }
-  }
-
-  init_command_line_globals(argc, argv, envp, envVariables, serverVariables);
-
-  return retEnv;
-}
-
-struct RemoteFile final {
-  explicit RemoteFile(int client, const char* name, const char* mode) {
-    fd =  cli_read_fd(client);
-    file = fdopen(fd, mode);
-    FTRACE(2, "CLIWorker::doJob({}): {} = {}\n", client, name, fd);
-  }
-  ~RemoteFile() { if (file) fclose(file); }
-  FILE* release() {
-    auto r = file;
-    file = nullptr;
-    return r;
-  }
-
-  int fd{-1};
-
-private:
-  FILE* file{nullptr};
-};
 
 struct MonitorThread final {
   explicit MonitorThread(int client);
@@ -886,205 +796,213 @@ MonitorThread::MonitorThread(int client) {
   }
 }
 
-const StaticString s_hhvm_prelude_path("hhvm.prelude_path");
-const StaticString s_hhvm_background_psp_path(
-  "hhvm.unix_server_run_psp_in_background"
-);
+////////////////////////////////////////////////////////////////////////////////
+
+int read_file_helper(int client, const char* name) {
+  auto const fd = cli_read_fd(client);
+  FTRACE(2, "CLIContext::initFromClient({}): {} = {}\n", client, name, fd);
+  return fd;
+}
+
+FILE* read_file_helper(int client, const char* name, const char* mode) {
+  return fdopen(read_file_helper(client, name), mode);
+}
+
+folly::dynamic get_setting(
+  const folly::dynamic& ini,
+  const std::string& setting
+) {
+  if (!ini.count(setting)) return {};
+  if (!ini[setting].isObject() || !ini[setting].count("local_value")) return {};
+  return ini[setting]["local_value"];
+}
+
+int64_t get_setting_int(const folly::dynamic& ini, const std::string& setting) {
+  auto const r = get_setting(ini, setting);
+  if (r.isString()) {
+    if (auto const v = folly::tryTo<int64_t>(r.asString())) return v.value();
+  }
+  return r.isInt() ? r.asInt() : 0;
+}
+
+bool get_setting_bool(const folly::dynamic& ini, const std::string& setting) {
+  auto const r = get_setting(ini, setting);
+  if (r.isString()) {
+    if (auto const v = folly::tryTo<int64_t>(r.asString())) return v.value();
+  }
+  return r.isBool() && r.asBool();
+}
+
+std::string get_setting_string(
+  const folly::dynamic& ini,
+  const std::string& setting,
+  const std::string& def
+) {
+  auto const r = get_setting(ini, setting);
+  return r.isString() ? r.asString() : def;
+}
+
+Array init_cli_globals(int argc, char** argv,
+                       const folly::dynamic& ini, char** envp) {
+  auto make_map = [] (const folly::dynamic& v) {
+    std::map<std::string,std::string> ret;
+    if (!v.isObject()) return ret;
+    for (auto& [k, v] : v.items()) {
+      if (v.isString()) {
+        ret.emplace(k.asString(), v.asString());
+      }
+    }
+    return ret;
+  };
+
+  auto retEnv = empty_dict_array();
+  auto envVariables = make_map(get_setting(ini, "hhvm.env_variables"));
+  auto serverVariables = make_map(get_setting(ini, "hhvm.server_variables"));
+
+  for (const auto& envvar : envVariables) {
+    retEnv.set(String(envvar.first), String(envvar.second));
+  }
+
+  for (auto env = envp; *env; ++env) {
+    char *p = strchr(*env, '=');
+    if (p) {
+      String name(*env, p - *env, CopyString);
+      String val(p + 1, CopyString);
+      retEnv.set(name, val);
+    }
+  }
+
+  init_command_line_globals(argc, argv, envp, envVariables,
+                            serverVariables);
+
+  return retEnv;
+}
+
+template<class Init, class Run, class Finish, class Teardown>
+void runInContext(CLIContext&& ctx,
+                  bool enableBackgroundPSP,
+                  Init&& init,
+                  Run&& run,
+                  Finish&& finish,
+                  Teardown&& teardown) {
+  auto data = ctx.getData();
+  auto shared = ctx.getShared();
+  std::vector<char*> argv;
+  std::vector<char*> envp;
+  int ret = EXIT_FAILURE;
+
+  auto const pspInBackground = get_setting_bool(
+    shared->ini,
+    "hhvm.unix_server_run_psp_in_background"
+  );
+
+  auto const prelude = get_setting_string(
+    shared->ini,
+    "hhvm.prelude_path",
+    RO::EvalPreludePath
+  );
+
+  for (auto& a : shared->argv) argv.emplace_back(a.data());
+  for (auto& e : shared->envp) envp.emplace_back(e.data());
+  argv.emplace_back(nullptr);
+  envp.emplace_back(nullptr);
+
+  init(shared->cwd, argv);
+  load_ini_settings(shared->ini);
+  auto env = init_cli_globals(argv.size() - 1, &argv[0],
+                              shared->ini, &envp[0]);
+
+  SCOPE_EXIT {
+    Logger::FInfo("Completed command with return code {}", ret);
+    teardown();
+  };
+
+  MonitorThread monitor(data->client);
+  CliStdoutHook stdout_hook(fileno(data->out));
+  CliLoggerHook logging_hook(fileno(data->err));
+  CLIWrapper wrapper(data->client);
+
+  g_context->addStdoutHook(&stdout_hook);
+  setThreadLocalIO(data->in, data->out, data->err);
+  LightProcess::setThreadLocalAfdtOverride(data->lwp_afdt);
+  Logger::SetThreadHook(&logging_hook);
+  Stream::setThreadLocalFileHandler(&wrapper);
+  RID().setSafeFileAccess(false);
+  tl_env = &env;
+	tl_context = &ctx;
+
+  SCOPE_EXIT {
+    finish(argv[0]);
+
+    LightProcess::setThreadLocalAfdtOverride(nullptr);
+    Stream::setThreadLocalFileHandler(nullptr);
+    Logger::SetThreadHook(nullptr);
+    clearThreadLocalIO();
+    tl_env = nullptr;
+    tl_context = nullptr;
+    env.detach();
+
+    try {
+      cli_write(data->client, "exit", ret);
+      Logger::FInfo("Completed command with return code {}", ret);
+    } catch (const Exception& ex) {
+      Logger::Warning("Could not send exit code %i to CLI socket: %s\n",
+                      ret, ex.what());
+    }
+  };
+
+  ret = run(argv[0], prelude);
+
+  if (enableBackgroundPSP && pspInBackground) {
+    g_context->obFlushAll();
+    Logger::SetThreadHook(nullptr);
+    clearThreadLocalIO();
+    cli_write(data->client, "background", ret);
+  }
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
 
 void CLIWorker::doJob(int client) {
   FTRACE(1, "CLIWorker::doJob({}): starting job...\n", client);
   try {
-    auto uc = cli_read_ucred(client);
-
-    // Throw if the client is not authorized to access the CLI server
-    check_cli_server_access(uc);
-
-    std::string magic;
-    cli_read(client, magic);
-    FTRACE(2, "CLIWorker::doJob({}): magic = {}\n", client, magic);
-    if (magic != "hello_server") {
-      throw Exception("Got bad magic from client: %s", magic.c_str());
-    }
-
-    std::string cwd;
-    cli_read(client, cwd);
-    FTRACE(1, "CLIWorker::doJob({}): cwd = {}\n", client, cwd);
-
-    std::string iniSettings;
-    cli_read(client, iniSettings);
-
-    RemoteFile cli_in(client, "stdin", "r");
-    RemoteFile cli_out(client, "stdout", "w");
-    RemoteFile cli_err(client, "stderr", "w");
-    RemoteFile cli_afdt(client, "afdt", "rw");
-
-    int unused_flag;
-    std::vector<std::string> args;
-    std::vector<std::string> env;
-    cli_read(client, unused_flag, args, env);
-
-    FTRACE(2, "CLIWorker::doJob({}): args = \n", client);
-
-    auto buf = std::make_unique<char*[]>(args.size());
-    for (int i = 0; i < args.size(); ++i) {
-      FTRACE(2, "CLIWorker::doJob({}):          {}\n", client, args[i]);
-      buf[i] = const_cast<char*>(args[i].c_str());
-    }
-
-    FTRACE(3, "CLIWorker::doJob({}): env = \n", client);
-
-    auto envp = std::make_unique<char*[]>(env.size() + 1);
-
-    for (int i = 0; i < env.size(); ++i) {
-      FTRACE(3, "CLIWorker::doJob({}):          {}\n", client, env[i]);
-      envp[i] = const_cast<char*>(env[i].c_str());
-    }
-    envp[env.size()] = nullptr;
-
-    UserInfo user(uc.uid);
-    Logger::FInfo("Running `{}` for user {}",
-                  folly::join(" ", args), user.pw->pw_name);
-
-    tl_ucred = &uc;
-    SCOPE_EXIT { tl_ucred = nullptr; };
-
-    tl_cliSock = client;
-    SCOPE_EXIT { tl_cliSock = -1; };
-
-    Array envArr;
-
-    int ret = 1;
-    init_command_line_session(args.size(), buf.get());
-
-    SCOPE_EXIT {
-      Logger::FInfo("Completed command with return code {}", ret);
-
-      hphp_context_exit();
-      hphp_session_exit();
-    };
-
-    MonitorThread monitor(client);
-    CliStdoutHook stdout_hook(cli_out.fd);
-    CliLoggerHook logging_hook(cli_err.fd);
-    CLIWrapper wrapper(client);
-
-    {
-      SCOPE_EXIT {
-        execute_command_line_end(true, args[0].c_str(), false);
-        envArr.detach();
-        tl_env = nullptr;
-        LightProcess::setThreadLocalAfdtOverride(nullptr);
-        Stream::setThreadLocalFileHandler(nullptr);
-        Logger::SetThreadHook(nullptr);
-        clearThreadLocalIO();
-        try {
-          cli_write(client, "exit", ret);
-        } catch (const Exception& ex) {
-          Logger::Warning("Could not send exit code %i to CLI socket: %s\n",
-                          ret, ex.what());
-        }
-      };
-
-      auto ini = init_ini_settings(iniSettings);
-      auto const pspInBackground = [&] () -> bool {
-        if (!ini.exists(s_hhvm_background_psp_path, true)) return false;
-        auto const detail = ini[s_hhvm_background_psp_path];
-        if (!detail.isArray()) return false;
-        auto const detailArr = detail.toArray();
-        if (!detailArr.exists(s_local_value)) return false;
-        auto const val = detailArr[s_local_value];
-        return val.isString() ? val.toString().toBoolean() : false;
-      }();
-
-      auto const api_version = [&] () -> uint64_t {
-        // Treat the absence of a version as being the same as version 0.
-        if (!ini.exists(s_hphp_cli_server_api_version)) return 0;
-        auto const detail = ini[s_hphp_cli_server_api_version];
-        if (!detail.isArray()) return 0;
-        auto const detailArr = detail.toArray();
-        if (!detailArr.exists(s_local_value)) return 0;
-        auto const val = detailArr[s_local_value];
-        return val.isString() ? val.toString().toInt64() : 0;
-      }();
-
-      if (api_version != cli_server_api_version()) {
-        cli_write(client, "version_bad");
-        throw Exception(
-          "cli_server_api_version() (%" PRIu64") "
-          "does not match client (%" PRIu64 ")",
-          cli_server_api_version(), api_version
+    runInContext(
+      CLIContext::initFromClient(client),
+      true,
+      [&] (const std::string& cwd, std::vector<char*>& argv) {
+        init_command_line_session(argv.size() - 1, &argv[0]);
+        g_context->setCwd(cwd);
+      },
+      [&] (const char* argv0, const std::string& prelude) {
+        bool error;
+        std::string errorMsg;
+        auto const invoke_result = hphp_invoke(
+          g_context.getNoCheck(),
+          argv0,
+          false,
+          null_array,
+          nullptr,
+          "",
+          "",
+          error,
+          errorMsg,
+          true /* once */,
+          false /* warmup only */,
+          false /* richErrorMsg */,
+          prelude,
+          true /* allowDynCallNoPointer */
         );
-      } else {
-        // Even if the client is too old to understand this command, unknown
-        // commands are handled silently.
-        cli_write(client, "version_ok");
+        return invoke_result ? *rl_exit_code : EXIT_FAILURE;
+      },
+      [&] (const char* argv0) {
+        execute_command_line_end(true, argv0, false);
+      },
+      [&] {
+        hphp_context_exit();
+        hphp_session_exit();
       }
-
-      envArr = init_cli_globals(args.size(), buf.get(), ini,
-                                envp.get());
-      tl_env = &envArr;
-
-      g_context->addStdoutHook(&stdout_hook);
-      g_context->setCwd(String(cwd.c_str(), CopyString));
-      setThreadLocalIO(cli_in.release(), cli_out.release(), cli_err.release());
-      LightProcess::setThreadLocalAfdtOverride(cli_afdt.fd);
-      Logger::SetThreadHook(&logging_hook);
-
-      Stream::setThreadLocalFileHandler(&wrapper);
-      RID().setSafeFileAccess(false);
-
-      FTRACE(1, "CLIWorker::doJob({}): invoking {}...\n", client, args[0]);
-      auto const prelude = [&] () -> std::string {
-        if (!ini.exists(s_hhvm_prelude_path, true)) {
-          return RuntimeOption::EvalPreludePath;
-        }
-        auto const pp = ini[s_hhvm_prelude_path];
-        if (!pp.isArray()) return RuntimeOption::EvalPreludePath;
-
-        auto const ppArr = pp.toArray();
-        if (!ppArr.exists(s_local_value, true)) {
-          return RuntimeOption::EvalPreludePath;
-        }
-
-        auto const lv = ppArr[s_local_value];
-        if (!lv.isString()) return RuntimeOption::EvalPreludePath;
-
-        return lv.toString().toCppString();
-      }();
-
-      ini.detach();
-
-      bool error;
-      std::string errorMsg;
-      auto const invoke_result = hphp_invoke(
-        g_context.getNoCheck(),
-        args[0],
-        false,
-        null_array,
-        nullptr,
-        "",
-        "",
-        error,
-        errorMsg,
-        true /* once */,
-        false /* warmup only */,
-        false /* richErrorMsg */,
-        prelude,
-        true /* allowDynCallNoPointer */
-      );
-      if (invoke_result) {
-        ret = *rl_exit_code;
-      }
-
-      if (pspInBackground) {
-        g_context->obFlushAll();
-        Logger::SetThreadHook(nullptr);
-        clearThreadLocalIO();
-        cli_write(client, "background", ret);
-      }
-
-      FTRACE(2, "CLIWorker::doJob({}): waiting for monitor...\n", client);
-    }
+    );
   } catch (const Exception& ex) {
     Logger::Warning("CLI Job failed: %s", ex.what());
   } catch (const std::exception& ex) {
@@ -1093,12 +1011,6 @@ void CLIWorker::doJob(int client) {
     Logger::Error("CLI Job failed with unknown exception");
   }
 
-  if (close(client) == -1) {
-    if (errno == EBADF || close(client) == -1) {
-      Logger::Warning("CLIWorker::doJob(%i): failed to close socket: %s\n",
-                      client, folly::errnoStr(errno).c_str());
-    }
-  }
   FTRACE(1, "CLIWorker::doJob({}): done.\n", client);
 }
 
@@ -1332,9 +1244,11 @@ int mkdir_recursive(const char* path, int mode) {
 }
 
 Optional<int> cli_process_command_loop(int fd, bool ignore_bg) {
-  FTRACE(1, "cli_process_command_loop({}): starting...\n", fd);
+  FTRACE(1, "{}({}): starting...\n", __func__, fd);
   std::string cmd;
   cli_read(fd, cmd);
+
+  FTRACE(2, "{}({}): initial command: {}\n", __func__, fd, cmd);
 
   if (cmd == "version_bad") {
     // Returning will cause us to re-run the script locally when not in force
@@ -1352,13 +1266,12 @@ Optional<int> cli_process_command_loop(int fd, bool ignore_bg) {
 
   cli_client_init();
   for (;; cli_read(fd, cmd)) {
-    FTRACE(2, "cli_process_command_loop({}): got command: {}\n", fd, cmd);
+    FTRACE(2, "{}({}): got command: {}\n", __func__, fd, cmd);
 
     if (cmd == "exit") {
       int ret;
       cli_read(fd, ret);
-      FTRACE(1, "cli_process_command_loop({}): exiting with code {}\n",
-             fd, ret);
+      FTRACE(1, "{}({}): exiting with code {}\n", __func__, fd, ret);
       return ret;
     }
 
@@ -1372,8 +1285,7 @@ Optional<int> cli_process_command_loop(int fd, bool ignore_bg) {
         ? open(name.c_str(), flags, mode)
         : open(name.c_str(), flags);
 
-      FTRACE(2, "cli_process_command_loop({}): {} = open({}, {})\n",
-             fd, new_fd, name, mode);
+      FTRACE(2, "{}({}): {} = open({}, {})\n", __func__, fd, new_fd, name,mode);
 
       if (new_fd < 0) {
         cli_write(fd, false, folly::errnoStr(errno).c_str());
@@ -1390,8 +1302,7 @@ Optional<int> cli_process_command_loop(int fd, bool ignore_bg) {
       cli_read(fd, name);
       int dir_fd = open(name.c_str(), O_RDONLY|O_DIRECTORY);
 
-      FTRACE(2, "cli_process_command_loop({}): {} = diropen({})\n",
-             fd, dir_fd, name);
+      FTRACE(2, "{}({}): {} = diropen({})\n", __func__, fd, dir_fd, name);
 
       if (dir_fd < 0) {
         cli_write(fd, false, folly::errnoStr(errno).c_str());
@@ -1407,8 +1318,7 @@ Optional<int> cli_process_command_loop(int fd, bool ignore_bg) {
       std::string path;
       struct stat st;
       cli_read(fd, path);
-      FTRACE(2, "cli_process_command_loop({}): lstat({})\n",
-             fd, path);
+      FTRACE(2, "{}({}): lstat({})\n", __func__, fd, path);
       int res = lstat(path.c_str(), &st);
       cli_write(fd, res, st);
       continue;
@@ -1418,8 +1328,7 @@ Optional<int> cli_process_command_loop(int fd, bool ignore_bg) {
       std::string path;
       struct stat st;
       cli_read(fd, path);
-      FTRACE(2, "cli_process_command_loop({}): stat({})\n",
-             fd, path);
+      FTRACE(2, "{}({}): stat({})\n", __func__, fd, path);
       int res = stat(path.c_str(), &st);
       cli_write(fd, res, st);
       continue;
@@ -1429,8 +1338,7 @@ Optional<int> cli_process_command_loop(int fd, bool ignore_bg) {
       std::string path;
       int mode;
       cli_read(fd, path, mode);
-      FTRACE(2, "cli_process_command_loop({}): access({}, {})\n",
-             fd, path, mode);
+      FTRACE(2, "{}({}): access({}, {})\n", __func__, fd, path, mode);
       cli_write(fd, access(path.c_str(), mode));
       continue;
     }
@@ -1438,8 +1346,7 @@ Optional<int> cli_process_command_loop(int fd, bool ignore_bg) {
     if (cmd == "unlink") {
       std::string path;
       cli_read(fd, path);
-      FTRACE(2, "cli_process_command_loop({}): unlink({})\n",
-             fd, path);
+      FTRACE(2, "{}({}): unlink({})\n", __func__, fd, path);
       auto ret = unlink(path.c_str());
       cli_write(fd, ret);
       if (ret != 0) cli_write(fd, errno);
@@ -1451,8 +1358,7 @@ Optional<int> cli_process_command_loop(int fd, bool ignore_bg) {
       std::string newp;
       cli_read(fd, oldp, newp);
 
-      FTRACE(2, "cli_process_command_loop({}): rename({}, {})\n",
-             fd, oldp, newp);
+      FTRACE(2, "{}({}): rename({}, {})\n", __func__, fd, oldp, newp);
 
       int ret = RuntimeOption::UseDirectCopy
         ? FileUtil::directRename(oldp.c_str(), newp.c_str())
@@ -1468,8 +1374,7 @@ Optional<int> cli_process_command_loop(int fd, bool ignore_bg) {
       std::string path;
       cli_read(fd, path, mode, options);
 
-      FTRACE(2, "cli_process_command_loop({}): mkdir({}, {}, {})\n",
-             fd, path, mode, options);
+      FTRACE(2, "{}({}): mkdir({}, {}, {})\n", __func__,fd,path, mode, options);
 
       if (options & k_STREAM_MKDIR_RECURSIVE) {
         cli_write(fd, mkdir_recursive(path.c_str(), mode));
@@ -1485,7 +1390,7 @@ Optional<int> cli_process_command_loop(int fd, bool ignore_bg) {
       int options;
       cli_read(fd, path, options);
 
-      FTRACE(2, "cli_process_command_loop({}): rmdir({})\n", fd, path);
+      FTRACE(2, "{}({}): rmdir({})\n", __func__, fd, path);
 
       cli_write(fd, rmdir(path.c_str()));
       continue;
@@ -1517,8 +1422,7 @@ Optional<int> cli_process_command_loop(int fd, bool ignore_bg) {
         newtime.modtime = mtime;
         cli_write(fd, utime(path.c_str(), &newtime));
       }
-      FTRACE(2, "cli_process_command_loop({}): touch({}, {}, {})\n",
-             fd, path, mtime, atime);
+      FTRACE(2, "{}({}): touch({}, {}, {})\n", __func__, fd, path, mtime,atime);
       continue;
     }
 
@@ -1527,8 +1431,7 @@ Optional<int> cli_process_command_loop(int fd, bool ignore_bg) {
       int64_t mode;
       cli_read(fd, path, mode);
 
-      FTRACE(2, "cli_process_command_loop({}): chmod({}, {})\n",
-             fd, path, mode);
+      FTRACE(2, "{}({}): chmod({}, {})\n", __func__, fd, path, mode);
 
       cli_write(fd, chmod(path.c_str(), mode));
       continue;
@@ -1540,8 +1443,7 @@ Optional<int> cli_process_command_loop(int fd, bool ignore_bg) {
       int64_t gid;
       cli_read(fd, path, uid, gid);
 
-      FTRACE(2, "cli_process_command_loop({}): chown({}, {}, {})\n",
-             fd, path, uid, gid);
+      FTRACE(2, "{}({}): chown({}, {}, {})\n", __func__, fd, path, uid, gid);
 
       cli_write(fd, chown(path.c_str(), (uid_t)uid, (gid_t)gid));
       continue;
@@ -1550,7 +1452,7 @@ Optional<int> cli_process_command_loop(int fd, bool ignore_bg) {
     if (cmd == "mkstemp") {
       std::string path;
       cli_read(fd, path);
-      FTRACE(2, "cli_process_command_loop({}): mkstemp({})\n", fd, path);
+      FTRACE(2, "{}({}): mkstemp({})\n", __func__, fd, path);
       char* str = strdup(path.data());
       SCOPE_EXIT { free(str); };
       auto tempfd = mkstemp(str);
@@ -1567,7 +1469,7 @@ Optional<int> cli_process_command_loop(int fd, bool ignore_bg) {
     if (cmd == "realpath") {
       std::string path;
       cli_read(fd, path);
-      FTRACE(2, "cli_process_command_loop({}): realpath({})\n", fd, path);
+      FTRACE(2, "{}({}): realpath({})\n", __func__, fd, path);
       char resolved_path[PATH_MAX];
       if (!realpath(path.c_str(), resolved_path)) {
         cli_write(fd, false, "ERROR");
@@ -1581,7 +1483,7 @@ Optional<int> cli_process_command_loop(int fd, bool ignore_bg) {
     if (cmd == "ext") {
       std::string name;
       cli_read(fd, name);
-      FTRACE(2, "cli_process_command_loop({}): {}\n", fd, name);
+      FTRACE(2, "{}({}): {}\n", __func__, fd, name);
       auto handler = s_extensionHandlers.find(name);
       if (handler == s_extensionHandlers.end()) {
         cli_write(fd, /* handler_recognized = */ false);
@@ -1660,7 +1562,7 @@ Optional<int> cli_process_command_loop(int fd, bool ignore_bg) {
     //   string argument as a command on the next loop; recurse. Then we get
     //   unpredicatble behavior depending on the value of the arg
     // - once we hit a non-string argument, we'll get an error from cli_read(cmd)
-    FTRACE(2, "cli_process_command_loop({}): bad command: {}\n", fd, cmd);
+    FTRACE(2, "{}({}): bad command: {}\n", __func__, fd, cmd);
     if (RuntimeOption::CheckCLIClientCommands == 1) {
       Logger::Warning("Unrecognized CLI client command: %s\n", cmd.c_str());
     } else if (RuntimeOption::CheckCLIClientCommands == 2) {
@@ -1792,6 +1694,138 @@ void moveToBackground(int count) {
 ////////////////////////////////////////////////////////////////////////////////
 }
 
+CLIContext::CLIContext(CLIContext&& other)
+  : m_data(other.m_data)
+  , m_shared(std::move(other.m_shared))
+{
+  other.m_data.client = -1;
+}
+
+CLIContext& CLIContext::operator=(CLIContext&& other) {
+  std::swap(m_data, other.m_data);
+  std::swap(m_shared, other.m_shared);
+  return *this;
+}
+
+CLIContext::~CLIContext() {
+  if (m_data.client == -1) return;
+
+  assertx(m_data.client != -1 && m_data.lwp_afdt != -1);
+  assertx(m_data.in && m_data.out && m_data.err);
+
+  close(m_data.client);
+  close(m_data.lwp_afdt);
+
+  auto const sync_and_close = [] (FILE* f) {
+    fflush(f);
+    fsync(fileno(f));
+    fclose(f);
+  };
+  sync_and_close(m_data.in);
+  sync_and_close(m_data.out);
+  sync_and_close(m_data.err);
+}
+
+CLIContext CLIContext::initFromParent(const CLIContext& other) {
+  CLIContext::Data data;
+  auto const old_client = other.m_data.client;
+
+  auto const fail = [&] {
+    if (data.client != -1) close(data.client);
+    if (data.lwp_afdt != -1) close(data.lwp_afdt);
+    if (data.in) fclose(data.in);
+    if (data.out) fclose(data.out);
+    if (data.err) fclose(data.err);
+  };
+  auto guard = folly::makeGuard(fail);
+
+  cli_write(old_client, "clone");
+  data.client = cli_read_fd(old_client);
+  data.lwp_afdt = cli_read_fd(old_client);
+
+  data.in = fdopen(dup(fileno(other.m_data.in)), "r");
+  data.out = fdopen(dup(fileno(other.m_data.out)), "w");
+  data.err = fdopen(dup(fileno(other.m_data.err)), "w");
+
+  FTRACE(2, "{}({}): clone() = {} (afdt = {})\n", __func__,
+         old_client, data.client, data.lwp_afdt);
+
+  guard.dismiss();
+  return CLIContext{std::move(data), other.m_shared};
+}
+
+
+CLIContext CLIContext::initFromClient(int client) {
+  CLIContext::Data data;
+  CLIContext::SharedData shared;
+
+  auto const fail = [&] {
+    close(client);
+    if (data.lwp_afdt != -1) close(data.lwp_afdt);
+    if (data.in) fclose(data.in);
+    if (data.out) fclose(data.out);
+    if (data.err) fclose(data.err);
+  };
+  auto guard = folly::makeGuard(fail);
+
+  data.client = client;
+  shared.user = cli_read_ucred(client);
+
+  // Throw if the client is not authorized to access the CLI server
+  check_cli_server_access(shared.user);
+
+  std::string magic;
+  cli_read(client, magic);
+  FTRACE(2, "{}({}): magic = {}\n", __func__, client, magic);
+  if (magic != "hello_server") {
+    throw Exception("Got bad magic from client: %s", magic.c_str());
+  }
+
+  std::string iniSettings;
+  cli_read(client, shared.cwd, iniSettings);
+  shared.ini = folly::parseJson(iniSettings);
+
+  FTRACE(1, "{}({}): cwd = {}\n", __func__, client, shared.cwd);
+  FTRACE(4, "{}({}): iniSettings = {}\n", __func__, client,
+         folly::toPrettyJson(shared.ini));
+
+  data.in = read_file_helper(client, "stdin", "r");
+  data.out = read_file_helper(client, "stdout", "w");
+  data.err = read_file_helper(client, "stderr", "w");
+  data.lwp_afdt = read_file_helper(client, "afdt");
+
+  int unused_flag;
+  cli_read(client, unused_flag, shared.argv, shared.envp);
+
+  FTRACE(2, "{}({}): args = \n\t{}\n", __func__, client,
+         folly::join("\n\t", shared.argv));
+  FTRACE(3, "{}({}): env = \n\t{}\n", __func__, client,
+         folly::join("\n\t", shared.envp));
+
+  auto const api_version = get_setting_int(shared.ini,
+                                           "hphp.cli_server_api_version");
+
+  if (api_version != cli_server_api_version()) {
+    FTRACE(2, "{}({}): detected bad version got: {}, wanted: {}\n",
+           __func__, client, api_version, cli_server_api_version());
+    cli_write(client, "version_bad");
+    throw Exception(
+      "cli_server_api_version() (%" PRIu64") "
+      "does not match client (%" PRIu64 ")",
+      cli_server_api_version(), api_version
+    );
+  } else {
+    // Even if the client is too old to understand this command, unknown
+    // commands are handled silently.
+    cli_write(client, "version_ok");
+  }
+
+  guard.dismiss();
+  return CLIContext{std::move(data), std::move(shared)};
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 void init_cli_server(const char* socket_path) {
   if (RuntimeOption::RepoAuthoritative) return;
 
@@ -1841,16 +1875,17 @@ void teardown_cli_server() {
   s_cliServer = nullptr;
 }
 
-ucred* get_cli_ucred() { return tl_ucred; }
+ucred* get_cli_ucred() {
+  return tl_context ? tl_context->user() : nullptr;
+}
 
 bool cli_mkstemp(char* buf) {
-  assertx(tl_cliSock >= 0);
-  FTRACE(2, "cli_mkstemp({}): fd = {}\n", buf, tl_cliSock);
+  FTRACE(2, "cli_mkstemp({}): fd = {}\n", buf, cli_sock());
   std::string out = buf;
-  cli_write(tl_cliSock, "mkstemp", out);
+  cli_write(cli_sock(), "mkstemp", out);
   bool status;
   std::string path;
-  cli_read(tl_cliSock, status, path);
+  cli_read(cli_sock(), status, path);
   if (!status) return false;
   memcpy(buf, path.c_str(), std::min(strlen(buf), path.size()));
   return true;
@@ -1881,11 +1916,11 @@ int cli_openfd_unsafe(const String& filename, int flags, mode_t mode,
   bool res;
   std::string error;
   FTRACE(3, "cli_openfd[{}]({}, {}, {}): calling remote...\n",
-         tl_cliSock, fname.data(), flags, mode);
-  cli_write(tl_cliSock, "open", fname.data(), flags, mode);
-  cli_read(tl_cliSock, res, error);
+         cli_sock(), fname.data(), flags, mode);
+  cli_write(cli_sock(), "open", fname.data(), flags, mode);
+  cli_read(cli_sock(), res, error);
   FTRACE(3, "{} = cli_openfd[{}](...) [err = {}]\n",
-         res, tl_cliSock, error);
+         res, cli_sock(), error);
 
   if (!res) {
     if (!quiet) {
@@ -1894,7 +1929,7 @@ int cli_openfd_unsafe(const String& filename, int flags, mode_t mode,
     return -1;
   }
 
-  return cli_read_fd(tl_cliSock);
+  return cli_read_fd(cli_sock());
 }
 
 Array cli_env() {
@@ -1902,7 +1937,7 @@ Array cli_env() {
 }
 
 bool is_cli_server_mode() {
-  return tl_cliSock !=  -1;
+  return tl_context != nullptr;
 }
 
 bool is_any_cli_mode() {
@@ -1977,10 +2012,9 @@ void cli_register_handler(
 ) {
   s_extensionHandlers.emplace(id, impl);
 }
-// This is defined here so that tl_cliSock does not need to be exposed
+// This is defined here so that cli_sock does not need to be exposed
 CLIClientInterface::CLIClientInterface(const std::string& id)
-: CLIServerExtensionInterface(tl_cliSock), id(id) {
-  assertx(tl_cliSock >= 0);
+: CLIServerExtensionInterface(cli_sock()), id(id) {
 }
 
 } // namespace HPHP::detail

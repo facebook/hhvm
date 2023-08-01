@@ -404,7 +404,7 @@ const RepoOptions& RepoOptions::forFile(const std::string& path) {
 
   // Wrap filesystem accesses if needed to proxy info from cli server client.
   Stream::Wrapper* wrapper = nullptr;
-  if (get_cli_ucred()) {
+  if (is_cli_server_mode()) {
     wrapper = Stream::getWrapperFromURI(path);
     if (wrapper && !wrapper->isNormalFileStream()) wrapper = nullptr;
   }

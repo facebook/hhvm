@@ -55,14 +55,6 @@ void setThreadLocalIO(FILE* in, FILE* out, FILE* err) {
 }
 
 void clearThreadLocalIO() {
-  auto const sync_and_close = [] (FILE* f) {
-    fflush(f);
-    fsync(fileno(f));
-    fclose(f);
-  };
-  if (rl_stdfiles->stdin)  sync_and_close(rl_stdfiles->stdin);
-  if (rl_stdfiles->stdout) sync_and_close(rl_stdfiles->stdout);
-  if (rl_stdfiles->stderr) sync_and_close(rl_stdfiles->stderr);
   rl_stdfiles->stdin = rl_stdfiles->stdout = rl_stdfiles->stderr = nullptr;
 }
 
@@ -296,10 +288,11 @@ BuiltinFile::~BuiltinFile() {
 }
 
 bool BuiltinFile::close(int*) {
-  if (m_stream == rl_stdfiles->stdin)  rl_stdfiles->stdin = nullptr;
-  if (m_stream == rl_stdfiles->stdout) rl_stdfiles->stdout = nullptr;
-  if (m_stream == rl_stdfiles->stderr) rl_stdfiles->stderr = nullptr;
-  auto status = ::fclose(m_stream);
+  int status = 0;
+       if (m_stream == rl_stdfiles->stdin)  rl_stdfiles->stdin = nullptr;
+  else if (m_stream == rl_stdfiles->stdout) rl_stdfiles->stdout = nullptr;
+  else if (m_stream == rl_stdfiles->stderr) rl_stdfiles->stderr = nullptr;
+  else                                      status = ::fclose(m_stream);
   setIsClosed(true);
   m_stream = nullptr;
   setFd(-1);

@@ -81,6 +81,60 @@ struct ucred {
 };
 #endif
 
+struct CLIContext {
+  struct Data {
+    int client{-1};
+    int lwp_afdt{-1};
+
+    FILE* in{nullptr};
+    FILE* out{nullptr};
+    FILE* err{nullptr};
+  };
+
+  struct SharedData {
+    ucred user;
+    std::string cwd;
+    std::vector<std::string> argv;
+    std::vector<std::string> envp;
+    folly::dynamic ini;
+  };
+
+  ~CLIContext();
+
+  CLIContext(CLIContext&&);
+  CLIContext& operator=(CLIContext&&);
+
+  static CLIContext initFromClient(int client);
+  static CLIContext initFromParent(const CLIContext& parent);
+
+  int client() const { assertx(m_data.client != -1); return m_data.client; }
+  ucred* user() const { assertx(m_data.client != -1); return &m_shared->user; }
+
+  Data* getData() { assertx(m_data.client != -1); return &m_data; }
+  SharedData* getShared() {
+    assertx(m_data.client != -1);
+    return m_shared.get();
+  }
+
+  std::shared_ptr<SharedData> copyShared() {
+    assertx(m_data.client != -1);
+    return m_shared;
+  }
+
+private:
+  CLIContext(Data&& data, SharedData&& sd)
+    : m_data(std::move(data))
+    , m_shared(std::make_shared<SharedData>(std::move(sd)))
+  {}
+  CLIContext(Data&& data, std::shared_ptr<SharedData> sd)
+    : m_data(std::move(data))
+    , m_shared(std::move(sd))
+  {}
+
+  Data m_data;
+  std::shared_ptr<SharedData> m_shared;
+};
+
 /*
  * The API version of the CLI-Server protocol
  */

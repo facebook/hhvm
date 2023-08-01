@@ -948,9 +948,10 @@ CachedFilePtr createUnitFromFile(const StringData* const path,
 // alternative per client cache may be used.
 std::pair<NonRepoUnitCache*, Stream::Wrapper*>
 getNonRepoCacheWithWrapper(const StringData* rpath) {
-  auto const uc = get_cli_ucred();
   // If this isn't a CLI server request, this is a normal file access
-  if (!uc) return std::make_pair(&s_nonRepoUnitCache, nullptr);
+  if (!is_cli_server_mode()) {
+    return std::make_pair(&s_nonRepoUnitCache, nullptr);
+  }
 
   // If the server cannot access rpath attempt to open the unit on the client
   if (access(rpath->data(), R_OK) == -1) {

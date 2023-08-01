@@ -85,6 +85,7 @@ cdef __StructSpec get_reflection__{{struct:name}}():
         __FieldSpec._fbthrift_create(
             id={{field:key}},
             name="{{field:name}}",
+            py_name="{{field:py_name}}",
             type={{#field:type}}{{> types/python_type}}{{/field:type}},
             kind={{#field:type}}{{> types/thrift_number_type}}{{/field:type}},
             qualifier=__Qualifier.{{!

@@ -39,6 +39,7 @@ cdef __StructSpec get_reflection__Internship():
         __FieldSpec._fbthrift_create(
             id=1,
             name="weeks",
+            py_name="weeks",
             type=int,
             kind=__NumberType.I32,
             qualifier=__Qualifier.REQUIRED,
@@ -51,6 +52,7 @@ cdef __StructSpec get_reflection__Internship():
         __FieldSpec._fbthrift_create(
             id=2,
             name="title",
+            py_name="title",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -63,6 +65,7 @@ cdef __StructSpec get_reflection__Internship():
         __FieldSpec._fbthrift_create(
             id=3,
             name="employer",
+            py_name="employer",
             type=_module_types.Company,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.OPTIONAL,
@@ -75,6 +78,7 @@ cdef __StructSpec get_reflection__Internship():
         __FieldSpec._fbthrift_create(
             id=4,
             name="compensation",
+            py_name="compensation",
             type=float,
             kind=__NumberType.DOUBLE,
             qualifier=__Qualifier.OPTIONAL,
@@ -87,6 +91,7 @@ cdef __StructSpec get_reflection__Internship():
         __FieldSpec._fbthrift_create(
             id=5,
             name="school",
+            py_name="school",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.OPTIONAL,
@@ -112,6 +117,7 @@ cdef __StructSpec get_reflection__Range():
         __FieldSpec._fbthrift_create(
             id=1,
             name="min",
+            py_name="min",
             type=int,
             kind=__NumberType.I32,
             qualifier=__Qualifier.REQUIRED,
@@ -124,6 +130,7 @@ cdef __StructSpec get_reflection__Range():
         __FieldSpec._fbthrift_create(
             id=2,
             name="max",
+            py_name="max",
             type=int,
             kind=__NumberType.I32,
             qualifier=__Qualifier.REQUIRED,
@@ -149,6 +156,7 @@ cdef __StructSpec get_reflection__struct1():
         __FieldSpec._fbthrift_create(
             id=1,
             name="a",
+            py_name="a",
             type=int,
             kind=__NumberType.I32,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -161,6 +169,7 @@ cdef __StructSpec get_reflection__struct1():
         __FieldSpec._fbthrift_create(
             id=2,
             name="b",
+            py_name="b",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -186,6 +195,7 @@ cdef __StructSpec get_reflection__struct2():
         __FieldSpec._fbthrift_create(
             id=1,
             name="a",
+            py_name="a",
             type=int,
             kind=__NumberType.I32,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -198,6 +208,7 @@ cdef __StructSpec get_reflection__struct2():
         __FieldSpec._fbthrift_create(
             id=2,
             name="b",
+            py_name="b",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -210,6 +221,7 @@ cdef __StructSpec get_reflection__struct2():
         __FieldSpec._fbthrift_create(
             id=3,
             name="c",
+            py_name="c",
             type=_module_types.struct1,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -222,6 +234,7 @@ cdef __StructSpec get_reflection__struct2():
         __FieldSpec._fbthrift_create(
             id=4,
             name="d",
+            py_name="d",
             type=_module_types.List__i32,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -247,6 +260,7 @@ cdef __StructSpec get_reflection__struct3():
         __FieldSpec._fbthrift_create(
             id=1,
             name="a",
+            py_name="a",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -259,6 +273,7 @@ cdef __StructSpec get_reflection__struct3():
         __FieldSpec._fbthrift_create(
             id=2,
             name="b",
+            py_name="b",
             type=int,
             kind=__NumberType.I32,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -271,6 +286,7 @@ cdef __StructSpec get_reflection__struct3():
         __FieldSpec._fbthrift_create(
             id=3,
             name="c",
+            py_name="c",
             type=_module_types.struct2,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -296,6 +312,7 @@ cdef __StructSpec get_reflection__struct4():
         __FieldSpec._fbthrift_create(
             id=1,
             name="a",
+            py_name="a",
             type=int,
             kind=__NumberType.I32,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -308,6 +325,7 @@ cdef __StructSpec get_reflection__struct4():
         __FieldSpec._fbthrift_create(
             id=2,
             name="b",
+            py_name="b",
             type=float,
             kind=__NumberType.DOUBLE,
             qualifier=__Qualifier.OPTIONAL,
@@ -320,6 +338,7 @@ cdef __StructSpec get_reflection__struct4():
         __FieldSpec._fbthrift_create(
             id=3,
             name="c",
+            py_name="c",
             type=int,
             kind=__NumberType.BYTE,
             qualifier=__Qualifier.OPTIONAL,
@@ -340,6 +359,7 @@ cdef __StructSpec get_reflection__union1():
         __FieldSpec._fbthrift_create(
             id=1,
             name="i",
+            py_name="i",
             type=int,
             kind=__NumberType.I32,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -352,6 +372,7 @@ cdef __StructSpec get_reflection__union1():
         __FieldSpec._fbthrift_create(
             id=2,
             name="d",
+            py_name="d",
             type=float,
             kind=__NumberType.DOUBLE,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -372,6 +393,7 @@ cdef __StructSpec get_reflection__union2():
         __FieldSpec._fbthrift_create(
             id=1,
             name="i",
+            py_name="i",
             type=int,
             kind=__NumberType.I32,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -384,6 +406,7 @@ cdef __StructSpec get_reflection__union2():
         __FieldSpec._fbthrift_create(
             id=2,
             name="d",
+            py_name="d",
             type=float,
             kind=__NumberType.DOUBLE,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -396,6 +419,7 @@ cdef __StructSpec get_reflection__union2():
         __FieldSpec._fbthrift_create(
             id=3,
             name="s",
+            py_name="s",
             type=_module_types.struct1,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -408,6 +432,7 @@ cdef __StructSpec get_reflection__union2():
         __FieldSpec._fbthrift_create(
             id=4,
             name="u",
+            py_name="u",
             type=_module_types.union1,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,

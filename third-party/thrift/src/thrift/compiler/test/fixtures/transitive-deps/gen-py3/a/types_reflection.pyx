@@ -41,6 +41,7 @@ cdef __StructSpec get_reflection__A():
         __FieldSpec._fbthrift_create(
             id=1,
             name="b",
+            py_name="b",
             type=_a_types.List__List__c_C,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -53,6 +54,7 @@ cdef __StructSpec get_reflection__A():
         __FieldSpec._fbthrift_create(
             id=2,
             name="other",
+            py_name="other",
             type=_a_types.List__c_C,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,

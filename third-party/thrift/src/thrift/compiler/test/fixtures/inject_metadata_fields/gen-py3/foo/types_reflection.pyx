@@ -39,6 +39,7 @@ cdef __StructSpec get_reflection__Fields():
         __FieldSpec._fbthrift_create(
             id=100,
             name="injected_field",
+            py_name="injected_field",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -51,6 +52,7 @@ cdef __StructSpec get_reflection__Fields():
         __FieldSpec._fbthrift_create(
             id=101,
             name="injected_structured_annotation_field",
+            py_name="injected_structured_annotation_field",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.OPTIONAL,
@@ -63,6 +65,7 @@ cdef __StructSpec get_reflection__Fields():
         __FieldSpec._fbthrift_create(
             id=102,
             name="injected_unstructured_annotation_field",
+            py_name="injected_unstructured_annotation_field",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.OPTIONAL,

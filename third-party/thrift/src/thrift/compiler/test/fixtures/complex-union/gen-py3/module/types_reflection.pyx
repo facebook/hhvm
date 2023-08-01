@@ -34,6 +34,7 @@ cdef __StructSpec get_reflection__ComplexUnion():
         __FieldSpec._fbthrift_create(
             id=1,
             name="intValue",
+            py_name="intValue",
             type=int,
             kind=__NumberType.I64,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -46,6 +47,7 @@ cdef __StructSpec get_reflection__ComplexUnion():
         __FieldSpec._fbthrift_create(
             id=5,
             name="stringValue",
+            py_name="stringValue",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -58,6 +60,7 @@ cdef __StructSpec get_reflection__ComplexUnion():
         __FieldSpec._fbthrift_create(
             id=2,
             name="intListValue",
+            py_name="intListValue",
             type=_module_types.List__i64,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -70,6 +73,7 @@ cdef __StructSpec get_reflection__ComplexUnion():
         __FieldSpec._fbthrift_create(
             id=3,
             name="stringListValue",
+            py_name="stringListValue",
             type=_module_types.List__string,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -82,6 +86,7 @@ cdef __StructSpec get_reflection__ComplexUnion():
         __FieldSpec._fbthrift_create(
             id=9,
             name="typedefValue",
+            py_name="typedefValue",
             type=_module_types.Map__i16_string,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -94,6 +99,7 @@ cdef __StructSpec get_reflection__ComplexUnion():
         __FieldSpec._fbthrift_create(
             id=14,
             name="stringRef",
+            py_name="stringRef",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -114,6 +120,7 @@ cdef __StructSpec get_reflection__ListUnion():
         __FieldSpec._fbthrift_create(
             id=2,
             name="intListValue",
+            py_name="intListValue",
             type=_module_types.List__i64,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -126,6 +133,7 @@ cdef __StructSpec get_reflection__ListUnion():
         __FieldSpec._fbthrift_create(
             id=3,
             name="stringListValue",
+            py_name="stringListValue",
             type=_module_types.List__string,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -146,6 +154,7 @@ cdef __StructSpec get_reflection__DataUnion():
         __FieldSpec._fbthrift_create(
             id=1,
             name="binaryData",
+            py_name="binaryData",
             type=bytes,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -158,6 +167,7 @@ cdef __StructSpec get_reflection__DataUnion():
         __FieldSpec._fbthrift_create(
             id=2,
             name="stringData",
+            py_name="stringData",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -183,6 +193,7 @@ cdef __StructSpec get_reflection__Val():
         __FieldSpec._fbthrift_create(
             id=1,
             name="strVal",
+            py_name="strVal",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -195,6 +206,7 @@ cdef __StructSpec get_reflection__Val():
         __FieldSpec._fbthrift_create(
             id=2,
             name="intVal",
+            py_name="intVal",
             type=int,
             kind=__NumberType.I32,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -207,6 +219,7 @@ cdef __StructSpec get_reflection__Val():
         __FieldSpec._fbthrift_create(
             id=9,
             name="typedefValue",
+            py_name="typedefValue",
             type=_module_types.Map__i16_string,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -227,6 +240,7 @@ cdef __StructSpec get_reflection__ValUnion():
         __FieldSpec._fbthrift_create(
             id=1,
             name="v1",
+            py_name="v1",
             type=_module_types.Val,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -239,6 +253,7 @@ cdef __StructSpec get_reflection__ValUnion():
         __FieldSpec._fbthrift_create(
             id=2,
             name="v2",
+            py_name="v2",
             type=_module_types.Val,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -259,6 +274,7 @@ cdef __StructSpec get_reflection__VirtualComplexUnion():
         __FieldSpec._fbthrift_create(
             id=1,
             name="thingOne",
+            py_name="thingOne",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -271,6 +287,7 @@ cdef __StructSpec get_reflection__VirtualComplexUnion():
         __FieldSpec._fbthrift_create(
             id=2,
             name="thingTwo",
+            py_name="thingTwo",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -296,6 +313,7 @@ cdef __StructSpec get_reflection__NonCopyableStruct():
         __FieldSpec._fbthrift_create(
             id=1,
             name="num",
+            py_name="num",
             type=int,
             kind=__NumberType.I64,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -316,6 +334,7 @@ cdef __StructSpec get_reflection__NonCopyableUnion():
         __FieldSpec._fbthrift_create(
             id=1,
             name="s",
+            py_name="s",
             type=_module_types.NonCopyableStruct,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,

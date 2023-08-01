@@ -39,6 +39,7 @@ cdef __StructSpec get_reflection__TestError():
         __FieldSpec._fbthrift_create(
             id=1,
             name="test_enum",
+            py_name="test_enum",
             type=_test_fixtures_nolegacy_module_types.TestEnum,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -51,6 +52,7 @@ cdef __StructSpec get_reflection__TestError():
         __FieldSpec._fbthrift_create(
             id=2,
             name="code",
+            py_name="code",
             type=int,
             kind=__NumberType.I32,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -76,6 +78,7 @@ cdef __StructSpec get_reflection__TestMixin():
         __FieldSpec._fbthrift_create(
             id=1,
             name="field1",
+            py_name="field1",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -101,6 +104,7 @@ cdef __StructSpec get_reflection__TestStruct():
         __FieldSpec._fbthrift_create(
             id=1,
             name="bar",
+            py_name="bar",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -113,6 +117,7 @@ cdef __StructSpec get_reflection__TestStruct():
         __FieldSpec._fbthrift_create(
             id=2,
             name="baropt",
+            py_name="baropt",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.OPTIONAL,
@@ -125,6 +130,7 @@ cdef __StructSpec get_reflection__TestStruct():
         __FieldSpec._fbthrift_create(
             id=3,
             name="test_error",
+            py_name="test_error",
             type=_test_fixtures_nolegacy_module_types.TestError,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -137,6 +143,7 @@ cdef __StructSpec get_reflection__TestStruct():
         __FieldSpec._fbthrift_create(
             id=4,
             name="test_mixin",
+            py_name="test_mixin",
             type=_test_fixtures_nolegacy_module_types.TestMixin,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -157,6 +164,7 @@ cdef __StructSpec get_reflection__TestUnion():
         __FieldSpec._fbthrift_create(
             id=1,
             name="enumVal",
+            py_name="enumVal",
             type=_test_fixtures_nolegacy_module_types.TestEnum,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -169,6 +177,7 @@ cdef __StructSpec get_reflection__TestUnion():
         __FieldSpec._fbthrift_create(
             id=2,
             name="structVal",
+            py_name="structVal",
             type=_test_fixtures_nolegacy_module_types.TestStruct,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,

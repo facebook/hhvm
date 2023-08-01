@@ -39,6 +39,7 @@ cdef __StructSpec get_reflection__Foo():
         __FieldSpec._fbthrift_create(
             id=1,
             name="MyInt",
+            py_name="MyInt",
             type=int,
             kind=__NumberType.I64,
             qualifier=__Qualifier.UNQUALIFIED,

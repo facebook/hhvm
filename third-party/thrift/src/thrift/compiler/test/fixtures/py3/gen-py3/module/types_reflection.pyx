@@ -39,6 +39,7 @@ cdef __StructSpec get_reflection__SimpleException():
         __FieldSpec._fbthrift_create(
             id=1,
             name="err_code",
+            py_name="err_code",
             type=int,
             kind=__NumberType.I16,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -64,6 +65,7 @@ cdef __StructSpec get_reflection__OptionalRefStruct():
         __FieldSpec._fbthrift_create(
             id=1,
             name="optional_blob",
+            py_name="optional_blob",
             type=_fbthrift_iobuf.IOBuf,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.OPTIONAL,
@@ -89,6 +91,7 @@ cdef __StructSpec get_reflection__SimpleStruct():
         __FieldSpec._fbthrift_create(
             id=1,
             name="is_on",
+            py_name="is_on",
             type=bool,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -101,6 +104,7 @@ cdef __StructSpec get_reflection__SimpleStruct():
         __FieldSpec._fbthrift_create(
             id=2,
             name="tiny_int",
+            py_name="tiny_int",
             type=int,
             kind=__NumberType.BYTE,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -113,6 +117,7 @@ cdef __StructSpec get_reflection__SimpleStruct():
         __FieldSpec._fbthrift_create(
             id=3,
             name="small_int",
+            py_name="small_int",
             type=int,
             kind=__NumberType.I16,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -125,6 +130,7 @@ cdef __StructSpec get_reflection__SimpleStruct():
         __FieldSpec._fbthrift_create(
             id=4,
             name="nice_sized_int",
+            py_name="nice_sized_int",
             type=int,
             kind=__NumberType.I32,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -137,6 +143,7 @@ cdef __StructSpec get_reflection__SimpleStruct():
         __FieldSpec._fbthrift_create(
             id=5,
             name="big_int",
+            py_name="big_int",
             type=int,
             kind=__NumberType.I64,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -149,6 +156,7 @@ cdef __StructSpec get_reflection__SimpleStruct():
         __FieldSpec._fbthrift_create(
             id=6,
             name="real",
+            py_name="real",
             type=float,
             kind=__NumberType.DOUBLE,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -161,6 +169,7 @@ cdef __StructSpec get_reflection__SimpleStruct():
         __FieldSpec._fbthrift_create(
             id=7,
             name="smaller_real",
+            py_name="smaller_real",
             type=float,
             kind=__NumberType.FLOAT,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -199,6 +208,7 @@ cdef __StructSpec get_reflection__ComplexStruct():
         __FieldSpec._fbthrift_create(
             id=1,
             name="structOne",
+            py_name="structOne",
             type=_module_types.SimpleStruct,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -211,6 +221,7 @@ cdef __StructSpec get_reflection__ComplexStruct():
         __FieldSpec._fbthrift_create(
             id=2,
             name="structTwo",
+            py_name="structTwo",
             type=_module_types.SimpleStruct,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -223,6 +234,7 @@ cdef __StructSpec get_reflection__ComplexStruct():
         __FieldSpec._fbthrift_create(
             id=3,
             name="an_integer",
+            py_name="an_integer",
             type=int,
             kind=__NumberType.I32,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -235,6 +247,7 @@ cdef __StructSpec get_reflection__ComplexStruct():
         __FieldSpec._fbthrift_create(
             id=4,
             name="name",
+            py_name="name",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -247,6 +260,7 @@ cdef __StructSpec get_reflection__ComplexStruct():
         __FieldSpec._fbthrift_create(
             id=5,
             name="an_enum",
+            py_name="an_enum",
             type=_module_types.AnEnum,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -259,6 +273,7 @@ cdef __StructSpec get_reflection__ComplexStruct():
         __FieldSpec._fbthrift_create(
             id=6,
             name="some_bytes",
+            py_name="some_bytes",
             type=bytes,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -271,6 +286,7 @@ cdef __StructSpec get_reflection__ComplexStruct():
         __FieldSpec._fbthrift_create(
             id=7,
             name="from",
+            py_name="sender",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -283,6 +299,7 @@ cdef __StructSpec get_reflection__ComplexStruct():
         __FieldSpec._fbthrift_create(
             id=8,
             name="cdef",
+            py_name="cdef_",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -295,6 +312,7 @@ cdef __StructSpec get_reflection__ComplexStruct():
         __FieldSpec._fbthrift_create(
             id=9,
             name="bytes_with_cpp_type",
+            py_name="bytes_with_cpp_type",
             type=bytes,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -315,6 +333,7 @@ cdef __StructSpec get_reflection__BinaryUnion():
         __FieldSpec._fbthrift_create(
             id=1,
             name="iobuf_val",
+            py_name="iobuf_val",
             type=_fbthrift_iobuf.IOBuf,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -340,6 +359,7 @@ cdef __StructSpec get_reflection__BinaryUnionStruct():
         __FieldSpec._fbthrift_create(
             id=1,
             name="u",
+            py_name="u",
             type=_module_types.BinaryUnion,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,

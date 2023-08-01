@@ -39,6 +39,7 @@ cdef __StructSpec get_reflection__Color():
         __FieldSpec._fbthrift_create(
             id=1,
             name="red",
+            py_name="red",
             type=float,
             kind=__NumberType.DOUBLE,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -51,6 +52,7 @@ cdef __StructSpec get_reflection__Color():
         __FieldSpec._fbthrift_create(
             id=2,
             name="green",
+            py_name="green",
             type=float,
             kind=__NumberType.DOUBLE,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -63,6 +65,7 @@ cdef __StructSpec get_reflection__Color():
         __FieldSpec._fbthrift_create(
             id=3,
             name="blue",
+            py_name="blue",
             type=float,
             kind=__NumberType.DOUBLE,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -75,6 +78,7 @@ cdef __StructSpec get_reflection__Color():
         __FieldSpec._fbthrift_create(
             id=4,
             name="alpha",
+            py_name="alpha",
             type=float,
             kind=__NumberType.DOUBLE,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -100,6 +104,7 @@ cdef __StructSpec get_reflection__Vehicle():
         __FieldSpec._fbthrift_create(
             id=1,
             name="color",
+            py_name="color",
             type=_module_types.Color,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -112,6 +117,7 @@ cdef __StructSpec get_reflection__Vehicle():
         __FieldSpec._fbthrift_create(
             id=2,
             name="licensePlate",
+            py_name="licensePlate",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.OPTIONAL,
@@ -124,6 +130,7 @@ cdef __StructSpec get_reflection__Vehicle():
         __FieldSpec._fbthrift_create(
             id=3,
             name="description",
+            py_name="description",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.OPTIONAL,
@@ -136,6 +143,7 @@ cdef __StructSpec get_reflection__Vehicle():
         __FieldSpec._fbthrift_create(
             id=4,
             name="name",
+            py_name="name",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.OPTIONAL,
@@ -148,6 +156,7 @@ cdef __StructSpec get_reflection__Vehicle():
         __FieldSpec._fbthrift_create(
             id=5,
             name="hasAC",
+            py_name="hasAC",
             type=bool,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.OPTIONAL,
@@ -173,6 +182,7 @@ cdef __StructSpec get_reflection__Person():
         __FieldSpec._fbthrift_create(
             id=1,
             name="id",
+            py_name="id",
             type=int,
             kind=__NumberType.I64,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -185,6 +195,7 @@ cdef __StructSpec get_reflection__Person():
         __FieldSpec._fbthrift_create(
             id=2,
             name="name",
+            py_name="name",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -197,6 +208,7 @@ cdef __StructSpec get_reflection__Person():
         __FieldSpec._fbthrift_create(
             id=3,
             name="age",
+            py_name="age",
             type=int,
             kind=__NumberType.I16,
             qualifier=__Qualifier.OPTIONAL,
@@ -209,6 +221,7 @@ cdef __StructSpec get_reflection__Person():
         __FieldSpec._fbthrift_create(
             id=4,
             name="address",
+            py_name="address",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.OPTIONAL,
@@ -221,6 +234,7 @@ cdef __StructSpec get_reflection__Person():
         __FieldSpec._fbthrift_create(
             id=5,
             name="favoriteColor",
+            py_name="favoriteColor",
             type=_module_types.Color,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.OPTIONAL,
@@ -233,6 +247,7 @@ cdef __StructSpec get_reflection__Person():
         __FieldSpec._fbthrift_create(
             id=6,
             name="friends",
+            py_name="friends",
             type=_module_types.Set__i64,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.OPTIONAL,
@@ -245,6 +260,7 @@ cdef __StructSpec get_reflection__Person():
         __FieldSpec._fbthrift_create(
             id=7,
             name="bestFriend",
+            py_name="bestFriend",
             type=int,
             kind=__NumberType.I64,
             qualifier=__Qualifier.OPTIONAL,
@@ -257,6 +273,7 @@ cdef __StructSpec get_reflection__Person():
         __FieldSpec._fbthrift_create(
             id=8,
             name="petNames",
+            py_name="petNames",
             type=_module_types.Map__Animal_string,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.OPTIONAL,
@@ -269,6 +286,7 @@ cdef __StructSpec get_reflection__Person():
         __FieldSpec._fbthrift_create(
             id=9,
             name="afraidOfAnimal",
+            py_name="afraidOfAnimal",
             type=_module_types.Animal,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.OPTIONAL,
@@ -281,6 +299,7 @@ cdef __StructSpec get_reflection__Person():
         __FieldSpec._fbthrift_create(
             id=10,
             name="vehicles",
+            py_name="vehicles",
             type=_module_types.List__Vehicle,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.OPTIONAL,

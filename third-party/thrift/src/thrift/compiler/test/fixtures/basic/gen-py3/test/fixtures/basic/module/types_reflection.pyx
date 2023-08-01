@@ -39,6 +39,7 @@ cdef __StructSpec get_reflection__MyStruct():
         __FieldSpec._fbthrift_create(
             id=1,
             name="MyIntField",
+            py_name="MyIntField",
             type=int,
             kind=__NumberType.I64,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -51,6 +52,7 @@ cdef __StructSpec get_reflection__MyStruct():
         __FieldSpec._fbthrift_create(
             id=2,
             name="MyStringField",
+            py_name="MyStringField",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -63,6 +65,7 @@ cdef __StructSpec get_reflection__MyStruct():
         __FieldSpec._fbthrift_create(
             id=3,
             name="MyDataField",
+            py_name="MyDataField",
             type=_test_fixtures_basic_module_types.MyDataItem,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -75,6 +78,7 @@ cdef __StructSpec get_reflection__MyStruct():
         __FieldSpec._fbthrift_create(
             id=4,
             name="myEnum",
+            py_name="myEnum",
             type=_test_fixtures_basic_module_types.MyEnum,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -87,6 +91,7 @@ cdef __StructSpec get_reflection__MyStruct():
         __FieldSpec._fbthrift_create(
             id=5,
             name="oneway",
+            py_name="oneway",
             type=bool,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -99,6 +104,7 @@ cdef __StructSpec get_reflection__MyStruct():
         __FieldSpec._fbthrift_create(
             id=6,
             name="readonly",
+            py_name="readonly",
             type=bool,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -111,6 +117,7 @@ cdef __StructSpec get_reflection__MyStruct():
         __FieldSpec._fbthrift_create(
             id=7,
             name="idempotent",
+            py_name="idempotent",
             type=bool,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -123,6 +130,7 @@ cdef __StructSpec get_reflection__MyStruct():
         __FieldSpec._fbthrift_create(
             id=8,
             name="floatSet",
+            py_name="floatSet",
             type=_test_fixtures_basic_module_types.Set__float,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -135,6 +143,7 @@ cdef __StructSpec get_reflection__MyStruct():
         __FieldSpec._fbthrift_create(
             id=9,
             name="no_hack_codegen_field",
+            py_name="no_hack_codegen_field",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -168,6 +177,7 @@ cdef __StructSpec get_reflection__MyUnion():
         __FieldSpec._fbthrift_create(
             id=1,
             name="myEnum",
+            py_name="myEnum",
             type=_test_fixtures_basic_module_types.MyEnum,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -180,6 +190,7 @@ cdef __StructSpec get_reflection__MyUnion():
         __FieldSpec._fbthrift_create(
             id=2,
             name="myStruct",
+            py_name="myStruct",
             type=_test_fixtures_basic_module_types.MyStruct,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -192,6 +203,7 @@ cdef __StructSpec get_reflection__MyUnion():
         __FieldSpec._fbthrift_create(
             id=3,
             name="myDataItem",
+            py_name="myDataItem",
             type=_test_fixtures_basic_module_types.MyDataItem,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -204,6 +216,7 @@ cdef __StructSpec get_reflection__MyUnion():
         __FieldSpec._fbthrift_create(
             id=4,
             name="floatSet",
+            py_name="floatSet",
             type=_test_fixtures_basic_module_types.Set__float,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -229,6 +242,7 @@ cdef __StructSpec get_reflection__ReservedKeyword():
         __FieldSpec._fbthrift_create(
             id=1,
             name="reserved_field",
+            py_name="reserved_field",
             type=int,
             kind=__NumberType.I32,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -249,6 +263,7 @@ cdef __StructSpec get_reflection__UnionToBeRenamed():
         __FieldSpec._fbthrift_create(
             id=1,
             name="reserved_field",
+            py_name="reserved_field",
             type=int,
             kind=__NumberType.I32,
             qualifier=__Qualifier.UNQUALIFIED,

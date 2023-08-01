@@ -78,6 +78,7 @@ class StructSpec:
 class FieldSpec:
     id: int
     name: str
+    py_name: str
     # pyre-ignore[4]: it can be any type
     type: Type[Any]
     kind: NumberType

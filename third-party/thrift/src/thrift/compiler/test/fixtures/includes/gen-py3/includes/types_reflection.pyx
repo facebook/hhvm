@@ -40,6 +40,7 @@ cdef __StructSpec get_reflection__Included():
         __FieldSpec._fbthrift_create(
             id=1,
             name="MyIntField",
+            py_name="MyIntField",
             type=int,
             kind=__NumberType.I64,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -52,6 +53,7 @@ cdef __StructSpec get_reflection__Included():
         __FieldSpec._fbthrift_create(
             id=2,
             name="MyTransitiveField",
+            py_name="MyTransitiveField",
             type=_transitive_types.Foo,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,

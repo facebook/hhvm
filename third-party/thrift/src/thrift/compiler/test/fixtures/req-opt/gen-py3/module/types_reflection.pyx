@@ -39,6 +39,7 @@ cdef __StructSpec get_reflection__Foo():
         __FieldSpec._fbthrift_create(
             id=1,
             name="myInteger",
+            py_name="myInteger",
             type=int,
             kind=__NumberType.I32,
             qualifier=__Qualifier.REQUIRED,
@@ -51,6 +52,7 @@ cdef __StructSpec get_reflection__Foo():
         __FieldSpec._fbthrift_create(
             id=2,
             name="myString",
+            py_name="myString",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.OPTIONAL,
@@ -63,6 +65,7 @@ cdef __StructSpec get_reflection__Foo():
         __FieldSpec._fbthrift_create(
             id=3,
             name="myBools",
+            py_name="myBools",
             type=_module_types.List__bool,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -75,6 +78,7 @@ cdef __StructSpec get_reflection__Foo():
         __FieldSpec._fbthrift_create(
             id=4,
             name="myNumbers",
+            py_name="myNumbers",
             type=_module_types.List__i32,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.REQUIRED,

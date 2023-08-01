@@ -36,9 +36,7 @@ cdef object _to_py_struct(object cls, object obj):
     if isinstance(obj, py3_Struct):
         try:
             field_id_to_name = {
-                field_spec.id: (
-                    field_spec.annotations.get("py3.name") or field_spec.name
-                )
+                field_spec.id: field_spec.py_name
                 for field_spec in py3_reflection.inspect(obj).fields
             }
         except TypeError:

@@ -40,6 +40,7 @@ cdef __StructSpec get_reflection__MyStruct():
         __FieldSpec._fbthrift_create(
             id=1,
             name="field",
+            py_name="field",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -65,6 +66,7 @@ cdef __StructSpec get_reflection__Combo():
         __FieldSpec._fbthrift_create(
             id=1,
             name="listOfOurMyStructLists",
+            py_name="listOfOurMyStructLists",
             type=_matching_struct_names_types.List__List__MyStruct,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -77,6 +79,7 @@ cdef __StructSpec get_reflection__Combo():
         __FieldSpec._fbthrift_create(
             id=2,
             name="theirMyStructList",
+            py_name="theirMyStructList",
             type=_matching_struct_names_types.List__module_MyStruct,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -89,6 +92,7 @@ cdef __StructSpec get_reflection__Combo():
         __FieldSpec._fbthrift_create(
             id=3,
             name="ourMyStructList",
+            py_name="ourMyStructList",
             type=_matching_struct_names_types.List__MyStruct,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -101,6 +105,7 @@ cdef __StructSpec get_reflection__Combo():
         __FieldSpec._fbthrift_create(
             id=4,
             name="listOfTheirMyStructList",
+            py_name="listOfTheirMyStructList",
             type=_matching_struct_names_types.List__List__module_MyStruct,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,

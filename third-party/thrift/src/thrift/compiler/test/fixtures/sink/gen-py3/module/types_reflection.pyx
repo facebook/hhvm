@@ -39,6 +39,7 @@ cdef __StructSpec get_reflection__InitialResponse():
         __FieldSpec._fbthrift_create(
             id=1,
             name="content",
+            py_name="content",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -64,6 +65,7 @@ cdef __StructSpec get_reflection__FinalResponse():
         __FieldSpec._fbthrift_create(
             id=1,
             name="content",
+            py_name="content",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -89,6 +91,7 @@ cdef __StructSpec get_reflection__SinkPayload():
         __FieldSpec._fbthrift_create(
             id=1,
             name="content",
+            py_name="content",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -114,6 +117,7 @@ cdef __StructSpec get_reflection__CompatibleWithKeywordSink():
         __FieldSpec._fbthrift_create(
             id=1,
             name="sink",
+            py_name="sink",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -139,6 +143,7 @@ cdef __StructSpec get_reflection__InitialException():
         __FieldSpec._fbthrift_create(
             id=1,
             name="reason",
+            py_name="reason",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -164,6 +169,7 @@ cdef __StructSpec get_reflection__SinkException1():
         __FieldSpec._fbthrift_create(
             id=1,
             name="reason",
+            py_name="reason",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -189,6 +195,7 @@ cdef __StructSpec get_reflection__SinkException2():
         __FieldSpec._fbthrift_create(
             id=1,
             name="reason",
+            py_name="reason",
             type=int,
             kind=__NumberType.I64,
             qualifier=__Qualifier.UNQUALIFIED,

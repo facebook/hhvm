@@ -35,7 +35,7 @@ cdef object _to_py3_struct(object cls, object obj):
     if struct_spec.kind == StructType.STRUCT:
         return cls(
             **{
-                _py3_field_name(field_spec): _to_py3_field(
+                field_spec.py_name: _to_py3_field(
                     field_spec.type, _get_src_field(obj, field_spec)
                 )
                 for field_spec in struct_spec.fields
@@ -47,7 +47,7 @@ cdef object _to_py3_struct(object cls, object obj):
             try:
                 value = _get_src_union_field(obj, field_spec)
                 field = _to_py3_field(field_spec.type, value)
-                return cls(**{_py3_field_name(field_spec): field})
+                return cls(**{field_spec.py_name: field})
             except (AssertionError, AttributeError):
                 pass
         return cls()
@@ -57,18 +57,14 @@ cdef object _to_py3_struct(object cls, object obj):
 
 cdef object _get_src_field(object obj, FieldSpec field_spec):
     if isinstance(obj, PythonStruct):
-        return getattr(obj, _py3_field_name(field_spec), None)
+        return getattr(obj, field_spec.py_name, None)
     return getattr(obj, field_spec.name, None)
 
 
 cdef object _get_src_union_field(object obj, FieldSpec field_spec):
     if isinstance(obj, PythonUnion):
-        return getattr(obj, _py3_field_name(field_spec))
+        return getattr(obj, field_spec.py_name)
     return getattr(obj, "get_" + field_spec.name)()
-
-
-cdef str _py3_field_name(FieldSpec field_spec):
-    return field_spec.annotations.get("py3.name") or field_spec.name
 
 
 cdef bool _should_ignore_field(object obj, FieldSpec field_spec):

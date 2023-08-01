@@ -39,6 +39,7 @@ cdef __StructSpec get_reflection__SomeStruct():
         __FieldSpec._fbthrift_create(
             id=1,
             name="reasonable",
+            py_name="reasonable",
             type=_test_fixtures_enums_module_types.Metasyntactic,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -51,6 +52,7 @@ cdef __StructSpec get_reflection__SomeStruct():
         __FieldSpec._fbthrift_create(
             id=2,
             name="fine",
+            py_name="fine",
             type=_test_fixtures_enums_module_types.Metasyntactic,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -63,6 +65,7 @@ cdef __StructSpec get_reflection__SomeStruct():
         __FieldSpec._fbthrift_create(
             id=3,
             name="questionable",
+            py_name="questionable",
             type=_test_fixtures_enums_module_types.Metasyntactic,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -75,6 +78,7 @@ cdef __StructSpec get_reflection__SomeStruct():
         __FieldSpec._fbthrift_create(
             id=4,
             name="tags",
+            py_name="tags",
             type=_test_fixtures_enums_module_types.Set__i32,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -100,6 +104,7 @@ cdef __StructSpec get_reflection__MyStruct():
         __FieldSpec._fbthrift_create(
             id=1,
             name="me2_3",
+            py_name="me2_3",
             type=_test_fixtures_enums_module_types.MyEnum2,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -112,6 +117,7 @@ cdef __StructSpec get_reflection__MyStruct():
         __FieldSpec._fbthrift_create(
             id=2,
             name="me3_n3",
+            py_name="me3_n3",
             type=_test_fixtures_enums_module_types.MyEnum3,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -124,6 +130,7 @@ cdef __StructSpec get_reflection__MyStruct():
         __FieldSpec._fbthrift_create(
             id=4,
             name="me1_t1",
+            py_name="me1_t1",
             type=_test_fixtures_enums_module_types.MyEnum1,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -136,6 +143,7 @@ cdef __StructSpec get_reflection__MyStruct():
         __FieldSpec._fbthrift_create(
             id=6,
             name="me1_t2",
+            py_name="me1_t2",
             type=_test_fixtures_enums_module_types.MyEnum1,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,

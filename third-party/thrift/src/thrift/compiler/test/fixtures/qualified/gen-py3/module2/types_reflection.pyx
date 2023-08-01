@@ -41,6 +41,7 @@ cdef __StructSpec get_reflection__Struct():
         __FieldSpec._fbthrift_create(
             id=1,
             name="first",
+            py_name="first",
             type=_module0_types.Struct,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -53,6 +54,7 @@ cdef __StructSpec get_reflection__Struct():
         __FieldSpec._fbthrift_create(
             id=2,
             name="second",
+            py_name="second",
             type=_module1_types.Struct,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -78,6 +80,7 @@ cdef __StructSpec get_reflection__BigStruct():
         __FieldSpec._fbthrift_create(
             id=1,
             name="s",
+            py_name="s",
             type=_module2_types.Struct,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -90,6 +93,7 @@ cdef __StructSpec get_reflection__BigStruct():
         __FieldSpec._fbthrift_create(
             id=2,
             name="id",
+            py_name="id",
             type=int,
             kind=__NumberType.I32,
             qualifier=__Qualifier.UNQUALIFIED,

@@ -40,6 +40,7 @@ cdef __StructSpec get_reflection__MyStruct():
         __FieldSpec._fbthrift_create(
             id=1,
             name="MyIncludedField",
+            py_name="MyIncludedField",
             type=_includes_types.Included,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -52,6 +53,7 @@ cdef __StructSpec get_reflection__MyStruct():
         __FieldSpec._fbthrift_create(
             id=2,
             name="MyOtherIncludedField",
+            py_name="MyOtherIncludedField",
             type=_includes_types.Included,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -64,6 +66,7 @@ cdef __StructSpec get_reflection__MyStruct():
         __FieldSpec._fbthrift_create(
             id=3,
             name="MyIncludedInt",
+            py_name="MyIncludedInt",
             type=int,
             kind=__NumberType.I64,
             qualifier=__Qualifier.UNQUALIFIED,

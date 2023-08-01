@@ -39,6 +39,7 @@ cdef __StructSpec get_reflection__Struct():
         __FieldSpec._fbthrift_create(
             id=1,
             name="first",
+            py_name="first",
             type=int,
             kind=__NumberType.I32,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -51,6 +52,7 @@ cdef __StructSpec get_reflection__Struct():
         __FieldSpec._fbthrift_create(
             id=2,
             name="second",
+            py_name="second",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,

@@ -39,6 +39,7 @@ cdef __StructSpec get_reflection__MyStruct():
         __FieldSpec._fbthrift_create(
             id=1,
             name="myEnum",
+            py_name="myEnum",
             type=_test_fixtures_enumstrict_module_types.MyEnum,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -51,6 +52,7 @@ cdef __StructSpec get_reflection__MyStruct():
         __FieldSpec._fbthrift_create(
             id=2,
             name="myBigEnum",
+            py_name="myBigEnum",
             type=_test_fixtures_enumstrict_module_types.MyBigEnum,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,

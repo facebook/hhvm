@@ -39,6 +39,7 @@ cdef __StructSpec get_reflection__MyStruct():
         __FieldSpec._fbthrift_create(
             id=1,
             name="myIntField",
+            py_name="myIntField",
             type=int,
             kind=__NumberType.I64,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -51,6 +52,7 @@ cdef __StructSpec get_reflection__MyStruct():
         __FieldSpec._fbthrift_create(
             id=2,
             name="myStringField",
+            py_name="myStringField",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -71,6 +73,7 @@ cdef __StructSpec get_reflection__MyUnion():
         __FieldSpec._fbthrift_create(
             id=1,
             name="myEnum",
+            py_name="myEnum",
             type=_test_fixtures_basic_module_types.MyEnum,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -83,6 +86,7 @@ cdef __StructSpec get_reflection__MyUnion():
         __FieldSpec._fbthrift_create(
             id=2,
             name="myDataItem",
+            py_name="myDataItem",
             type=_test_fixtures_basic_module_types.MyStruct,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,

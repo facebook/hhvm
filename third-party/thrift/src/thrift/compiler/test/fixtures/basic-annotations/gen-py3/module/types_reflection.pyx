@@ -39,6 +39,7 @@ cdef __StructSpec get_reflection__MyStructNestedAnnotation():
         __FieldSpec._fbthrift_create(
             id=1,
             name="name",
+            py_name="name",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -64,6 +65,7 @@ cdef __StructSpec get_reflection__SecretStruct():
         __FieldSpec._fbthrift_create(
             id=1,
             name="id",
+            py_name="id",
             type=int,
             kind=__NumberType.I64,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -76,6 +78,7 @@ cdef __StructSpec get_reflection__SecretStruct():
         __FieldSpec._fbthrift_create(
             id=2,
             name="password",
+            py_name="password",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,

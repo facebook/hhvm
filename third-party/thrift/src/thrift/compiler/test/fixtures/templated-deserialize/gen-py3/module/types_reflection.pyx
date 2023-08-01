@@ -39,6 +39,7 @@ cdef __StructSpec get_reflection__SmallStruct():
         __FieldSpec._fbthrift_create(
             id=1,
             name="small_A",
+            py_name="small_A",
             type=bool,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -51,6 +52,7 @@ cdef __StructSpec get_reflection__SmallStruct():
         __FieldSpec._fbthrift_create(
             id=2,
             name="small_B",
+            py_name="small_B",
             type=int,
             kind=__NumberType.I32,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -76,6 +78,7 @@ cdef __StructSpec get_reflection__containerStruct():
         __FieldSpec._fbthrift_create(
             id=1,
             name="fieldA",
+            py_name="fieldA",
             type=bool,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -88,6 +91,7 @@ cdef __StructSpec get_reflection__containerStruct():
         __FieldSpec._fbthrift_create(
             id=2,
             name="fieldB",
+            py_name="fieldB",
             type=_module_types.Map__string_bool,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -100,6 +104,7 @@ cdef __StructSpec get_reflection__containerStruct():
         __FieldSpec._fbthrift_create(
             id=3,
             name="fieldC",
+            py_name="fieldC",
             type=_module_types.Set__i32,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -112,6 +117,7 @@ cdef __StructSpec get_reflection__containerStruct():
         __FieldSpec._fbthrift_create(
             id=4,
             name="fieldD",
+            py_name="fieldD",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -124,6 +130,7 @@ cdef __StructSpec get_reflection__containerStruct():
         __FieldSpec._fbthrift_create(
             id=5,
             name="fieldE",
+            py_name="fieldE",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -136,6 +143,7 @@ cdef __StructSpec get_reflection__containerStruct():
         __FieldSpec._fbthrift_create(
             id=6,
             name="fieldF",
+            py_name="fieldF",
             type=_module_types.List__List__List__i32,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -148,6 +156,7 @@ cdef __StructSpec get_reflection__containerStruct():
         __FieldSpec._fbthrift_create(
             id=7,
             name="fieldG",
+            py_name="fieldG",
             type=_module_types.Map__string_Map__string_Map__string_i32,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -160,6 +169,7 @@ cdef __StructSpec get_reflection__containerStruct():
         __FieldSpec._fbthrift_create(
             id=8,
             name="fieldH",
+            py_name="fieldH",
             type=_module_types.List__Set__i32,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -172,6 +182,7 @@ cdef __StructSpec get_reflection__containerStruct():
         __FieldSpec._fbthrift_create(
             id=9,
             name="fieldI",
+            py_name="fieldI",
             type=bool,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -184,6 +195,7 @@ cdef __StructSpec get_reflection__containerStruct():
         __FieldSpec._fbthrift_create(
             id=10,
             name="fieldJ",
+            py_name="fieldJ",
             type=_module_types.Map__string_List__i32,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -196,6 +208,7 @@ cdef __StructSpec get_reflection__containerStruct():
         __FieldSpec._fbthrift_create(
             id=11,
             name="fieldK",
+            py_name="fieldK",
             type=_module_types.List__List__List__List__i32,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -208,6 +221,7 @@ cdef __StructSpec get_reflection__containerStruct():
         __FieldSpec._fbthrift_create(
             id=12,
             name="fieldL",
+            py_name="fieldL",
             type=_module_types.Set__Set__Set__bool,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -220,6 +234,7 @@ cdef __StructSpec get_reflection__containerStruct():
         __FieldSpec._fbthrift_create(
             id=13,
             name="fieldM",
+            py_name="fieldM",
             type=_module_types.Map__Set__List__i32_Map__List__Set__string_string,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -232,6 +247,7 @@ cdef __StructSpec get_reflection__containerStruct():
         __FieldSpec._fbthrift_create(
             id=14,
             name="fieldN",
+            py_name="fieldN",
             type=_module_types.List__Foo__i64,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -244,6 +260,7 @@ cdef __StructSpec get_reflection__containerStruct():
         __FieldSpec._fbthrift_create(
             id=15,
             name="fieldO",
+            py_name="fieldO",
             type=_module_types.List__Bar__double,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -256,6 +273,7 @@ cdef __StructSpec get_reflection__containerStruct():
         __FieldSpec._fbthrift_create(
             id=16,
             name="fieldP",
+            py_name="fieldP",
             type=_module_types.List__Baz__i32,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -268,6 +286,7 @@ cdef __StructSpec get_reflection__containerStruct():
         __FieldSpec._fbthrift_create(
             id=17,
             name="fieldQ",
+            py_name="fieldQ",
             type=_module_types.MyEnumA,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -280,6 +299,7 @@ cdef __StructSpec get_reflection__containerStruct():
         __FieldSpec._fbthrift_create(
             id=18,
             name="fieldR",
+            py_name="fieldR",
             type=_module_types.Map__string_bool,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -292,6 +312,7 @@ cdef __StructSpec get_reflection__containerStruct():
         __FieldSpec._fbthrift_create(
             id=19,
             name="fieldS",
+            py_name="fieldS",
             type=_module_types.SmallStruct,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -304,6 +325,7 @@ cdef __StructSpec get_reflection__containerStruct():
         __FieldSpec._fbthrift_create(
             id=20,
             name="fieldT",
+            py_name="fieldT",
             type=_module_types.SmallStruct,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -316,6 +338,7 @@ cdef __StructSpec get_reflection__containerStruct():
         __FieldSpec._fbthrift_create(
             id=21,
             name="fieldU",
+            py_name="fieldU",
             type=_module_types.SmallStruct,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -328,6 +351,7 @@ cdef __StructSpec get_reflection__containerStruct():
         __FieldSpec._fbthrift_create(
             id=23,
             name="fieldX",
+            py_name="fieldX",
             type=_module_types.SmallStruct,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,

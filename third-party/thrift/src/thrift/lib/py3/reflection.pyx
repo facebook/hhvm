@@ -101,6 +101,7 @@ cdef class FieldSpec:
         self,
         int id,
         str name,
+        str py_name,
         type,
         NumberType kind,
         Qualifier qualifier,
@@ -109,6 +110,7 @@ cdef class FieldSpec:
     ):
         self.id = id
         self.name = name
+        self.py_name = py_name
         self.type = type
         self.kind = NumberType(kind)
         self.qualifier = Qualifier(qualifier)
@@ -119,13 +121,14 @@ cdef class FieldSpec:
     cdef _fbthrift_create(
         int id,
         str name,
+        str py_name,
         object type,
         NumberType kind,
         Qualifier qualifier,
         object default,
         dict annotations,
     ):
-        return FieldSpec.__new__(FieldSpec, id, name, type, kind, qualifier, default, annotations)
+        return FieldSpec.__new__(FieldSpec, id, name, py_name, type, kind, qualifier, default, annotations)
 
     def __iter__(self):
         yield self.id

@@ -39,6 +39,7 @@ cdef __StructSpec get_reflection__CustomException():
         __FieldSpec._fbthrift_create(
             id=1,
             name="message",
+            py_name="message",
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,

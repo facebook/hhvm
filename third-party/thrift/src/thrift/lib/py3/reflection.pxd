@@ -54,6 +54,7 @@ cdef class StructSpec:
 cdef class FieldSpec:
     cdef readonly int id
     cdef readonly str name
+    cdef readonly str py_name
     cdef readonly object type
     cdef readonly object kind
     cdef readonly object qualifier
@@ -64,6 +65,7 @@ cdef class FieldSpec:
     cdef _fbthrift_create(
         int id,
         str name,
+        str py_name,
         object type,
         NumberType kind,
         Qualifier qualifier,

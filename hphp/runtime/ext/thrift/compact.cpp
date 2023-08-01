@@ -45,6 +45,7 @@
 #include <folly/AtomicHashMap.h>
 #include <folly/Bits.h>
 #include <folly/Format.h>
+#include <folly/Likely.h>
 
 #include <limits>
 #include <stack>
@@ -825,7 +826,7 @@ struct CompactReader {
     Variant readField(const FieldSpec& spec, TType type, bool& hasTypeWrapper) {
       const auto thriftValue = readFieldInternal(spec, type, hasTypeWrapper);
       hasTypeWrapper = hasTypeWrapper || spec.isTypeWrapped;
-      if (spec.adapter) {
+      if (UNLIKELY(spec.adapter != nullptr)) {
         return transformToHackType(thriftValue, *spec.adapter);
       }
       return thriftValue;
@@ -1010,12 +1011,27 @@ struct CompactReader {
           case TType::T_I16:
           case TType::T_I32:
           case TType::T_I64: {
-            for (uint32_t i = 0; i < size; i++) {
-              int64_t key = readField(
-                spec.key(), keyType, hasTypeWrapper
-              ).toInt64();
-              Variant value = readField(spec.val(), valueType, hasTypeWrapper);
-              arr.set(key, value);
+            if (
+                typeIsInt(valueType) &&
+                spec.key().adapter == nullptr &&
+                spec.val().adapter == nullptr
+              ) {
+              hasTypeWrapper = hasTypeWrapper || spec.key().isTypeWrapped;
+              // read map<integral, integral>
+              for (uint32_t i = 0; i < size; i++) {
+                int64_t key = readI();
+                int64_t value = readI();
+                arr.set(key, value);
+              }
+            } else {
+              // generic map deserialization
+              for (uint32_t i = 0; i < size; i++) {
+                int64_t key = readField(
+                  spec.key(), keyType, hasTypeWrapper
+                ).toInt64();
+                Variant value = readField(spec.val(), valueType, hasTypeWrapper);
+                arr.set(key, value);
+              }
             }
             break;
           }

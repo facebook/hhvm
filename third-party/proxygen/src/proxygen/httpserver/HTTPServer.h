@@ -120,10 +120,11 @@ class HTTPServer final {
    * `ioExecutor` will be used for for IO threads if it is set. Otherwise, we
    * will create a new IOThreadPoolExectutor for IO threads.
    */
-  void start(std::function<void()> onSuccess = nullptr,
-             std::function<void(std::exception_ptr)> onError = nullptr,
-             std::shared_ptr<wangle::AcceptorFactory> acceptorFactory = nullptr,
-             std::shared_ptr<folly::IOThreadPoolExecutor> ioExecutor = nullptr);
+  void start(
+      std::function<void()> onSuccess = nullptr,
+      std::function<void(std::exception_ptr)> onError = nullptr,
+      std::shared_ptr<wangle::AcceptorFactory> acceptorFactory = nullptr,
+      std::shared_ptr<folly::IOThreadPoolExecutorBase> ioExecutor = nullptr);
 
   /**
    * Stop listening on bound ports. (Stop accepting new work).
@@ -190,7 +191,7 @@ class HTTPServer final {
    */
   folly::Expected<folly::Unit, std::exception_ptr> startTcpServer(
       std::shared_ptr<wangle::AcceptorFactory> acceptorFactory,
-      std::shared_ptr<folly::IOThreadPoolExecutor> ioExecutor);
+      std::shared_ptr<folly::IOThreadPoolExecutorBase> ioExecutor);
 
  private:
   std::shared_ptr<HTTPServerOptions> options_;

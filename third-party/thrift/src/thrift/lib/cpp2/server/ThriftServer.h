@@ -227,10 +227,10 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   folly::EventBaseManager* eventBaseManager_ = folly::EventBaseManager::get();
 
   // Creates the default ThriftIO IOThreadPoolExecutor
-  static std::shared_ptr<folly::IOThreadPoolExecutor> createIOThreadPool();
+  static std::shared_ptr<folly::IOThreadPoolExecutorBase> createIOThreadPool();
 
   //! IO thread pool. Drives Cpp2Workers.
-  std::shared_ptr<folly::IOThreadPoolExecutor> ioThreadPool_ =
+  std::shared_ptr<folly::IOThreadPoolExecutorBase> ioThreadPool_ =
       createIOThreadPool();
 
   /**
@@ -257,13 +257,13 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
 
   folly::AsyncServerSocket::CallbackAssignFunction callbackAssignFunc_;
 
-  std::shared_ptr<folly::IOThreadPoolExecutor> acceptPool_;
+  std::shared_ptr<folly::IOThreadPoolExecutorBase> acceptPool_;
   int nAcceptors_ = 1;
   uint16_t socketMaxReadsPerEvent_{16};
 
   mutable std::mutex ioGroupMutex_;
 
-  std::shared_ptr<folly::IOThreadPoolExecutor> getIOGroupSafe() const {
+  std::shared_ptr<folly::IOThreadPoolExecutorBase> getIOGroupSafe() const {
     std::lock_guard<std::mutex> lock(ioGroupMutex_);
     return getIOGroup();
   }
@@ -467,7 +467,7 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
    * @param the new thread pool
    */
   void setIOThreadPool(
-      std::shared_ptr<folly::IOThreadPoolExecutor> ioThreadPool) {
+      std::shared_ptr<folly::IOThreadPoolExecutorBase> ioThreadPool) {
     CHECK(configMutable());
     ioThreadPool_ = ioThreadPool;
 
@@ -481,7 +481,7 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
    * stall servicing requests. Be careful about using this executor for anything
    * other than its main purpose.
    */
-  std::shared_ptr<folly::IOThreadPoolExecutor> getIOThreadPool() {
+  std::shared_ptr<folly::IOThreadPoolExecutorBase> getIOThreadPool() {
     return ioThreadPool_;
   }
 
@@ -561,7 +561,8 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
     return callbackAssignFunc_;
   }
 
-  void setAcceptExecutor(std::shared_ptr<folly::IOThreadPoolExecutor> pool) {
+  void setAcceptExecutor(
+      std::shared_ptr<folly::IOThreadPoolExecutorBase> pool) {
     acceptPool_ = pool;
   }
 
@@ -569,7 +570,7 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
    * Generally the acceptor should not do any work other than
    * accepting connections, so use this with care.
    */
-  std::shared_ptr<folly::IOThreadPoolExecutor> getAcceptExecutor() {
+  std::shared_ptr<folly::IOThreadPoolExecutorBase> getAcceptExecutor() {
     return acceptPool_;
   }
 

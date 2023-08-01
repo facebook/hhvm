@@ -43,7 +43,7 @@ folly::IoUringBackend::Options getDefaultIOUringOptions() {
   return options;
 }
 
-std::shared_ptr<folly::IOThreadPoolExecutor> getDefaultIOUringExecutor(
+std::shared_ptr<folly::IOThreadPoolExecutorBase> getDefaultIOUringExecutor(
     bool enableThreadIdCollection) {
   folly::EventBaseBackendBase::FactoryFunc func(getIOUringEventbaseBackendFunc);
   static folly::EventBaseManager ebm(
@@ -63,10 +63,11 @@ std::shared_ptr<folly::IOThreadPoolExecutor> getDefaultIOUringExecutor(
 }
 
 bool validateExecutorSupportsIOUring(
-    const std::shared_ptr<folly::IOThreadPoolExecutor>& executor) {
+    const std::shared_ptr<folly::IOThreadPoolExecutorBase>& executor) {
   VLOG(1) << "checking to see if supports io_uring";
   try {
-    if (auto eventBase = executor->getEventBase()) {
+    if (auto eventBase =
+            static_cast<folly::IOExecutor*>(executor.get())->getEventBase()) {
       VLOG(1) << "checking found event base";
       auto t = dynamic_cast<folly::IoUringBackend*>(eventBase->getBackend());
       VLOG(1) << "event base supports io_uring " << t;

@@ -19,7 +19,7 @@ class ExecutorObserver : public folly::ThreadPoolExecutor::Observer {
       folly::ThreadPoolExecutor::ThreadHandle* threadHandle) override {
     CHECK(!initializationComplete_);
     evbs_.wlock()->push_back(
-        folly::IOThreadPoolExecutor::getEventBase(threadHandle));
+        folly::IOThreadPoolExecutorBase::getEventBase(threadHandle));
   }
   void threadStopped(folly::ThreadPoolExecutor::ThreadHandle*) override {}
 

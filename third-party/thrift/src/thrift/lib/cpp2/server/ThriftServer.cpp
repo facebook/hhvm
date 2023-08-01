@@ -2040,7 +2040,7 @@ void ThriftServer::addIOThreadPoolObserverFactory(
   ioObserverFactories.wlock()->push_back(std::move(factory));
 }
 
-/* static */ std::shared_ptr<folly::IOThreadPoolExecutor>
+/* static */ std::shared_ptr<folly::IOThreadPoolExecutorBase>
 ThriftServer::createIOThreadPool() {
   return std::make_shared<folly::IOThreadPoolExecutor>(
       0,

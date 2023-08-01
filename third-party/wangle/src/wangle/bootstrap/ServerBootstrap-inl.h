@@ -368,7 +368,7 @@ class ServerWorkerPool : public folly::ThreadPoolExecutor::Observer {
  public:
   explicit ServerWorkerPool(
       std::shared_ptr<AcceptorFactory> acceptorFactory,
-      folly::IOThreadPoolExecutor* exec,
+      folly::IOThreadPoolExecutorBase* exec,
       std::shared_ptr<std::vector<std::shared_ptr<folly::AsyncSocketBase>>>
           sockets,
       std::shared_ptr<ServerSocketFactory> socketFactory)
@@ -407,7 +407,7 @@ class ServerWorkerPool : public folly::ThreadPoolExecutor::Observer {
   std::shared_ptr<WorkerMap> workers_;
   std::shared_ptr<Mutex> workersMutex_;
   std::shared_ptr<AcceptorFactory> acceptorFactory_;
-  folly::IOThreadPoolExecutor* exec_{nullptr};
+  folly::IOThreadPoolExecutorBase* exec_{nullptr};
   std::shared_ptr<std::vector<std::shared_ptr<folly::AsyncSocketBase>>>
       sockets_;
   std::shared_ptr<ServerSocketFactory> socketFactory_;

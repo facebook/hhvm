@@ -31,11 +31,11 @@ std::unique_ptr<folly::EventBaseBackendBase> getIOUringEventbaseBackendFunc();
 
 folly::IoUringBackend::Options getDefaultIOUringOptions();
 
-std::shared_ptr<folly::IOThreadPoolExecutor> getDefaultIOUringExecutor(
+std::shared_ptr<folly::IOThreadPoolExecutorBase> getDefaultIOUringExecutor(
     bool enableThreadIdCollection = true);
 
 bool validateExecutorSupportsIOUring(
-    const std::shared_ptr<folly::IOThreadPoolExecutor>& executor);
+    const std::shared_ptr<folly::IOThreadPoolExecutorBase>& executor);
 
 } // namespace io_uring_util
 } // namespace thrift

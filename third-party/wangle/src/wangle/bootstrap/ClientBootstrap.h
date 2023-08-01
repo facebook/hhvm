@@ -85,7 +85,8 @@ class ClientBootstrap : public BaseClientBootstrap<Pipeline>,
  public:
   ClientBootstrap() {}
 
-  ClientBootstrap* group(std::shared_ptr<folly::IOThreadPoolExecutor> group) {
+  ClientBootstrap* group(
+      std::shared_ptr<folly::IOThreadPoolExecutorBase> group) {
     group_ = group;
     return this;
   }
@@ -137,7 +138,7 @@ class ClientBootstrap : public BaseClientBootstrap<Pipeline>,
 
  protected:
   int port_;
-  std::shared_ptr<folly::IOThreadPoolExecutor> group_;
+  std::shared_ptr<folly::IOThreadPoolExecutorBase> group_;
 };
 
 class ClientBootstrapFactory

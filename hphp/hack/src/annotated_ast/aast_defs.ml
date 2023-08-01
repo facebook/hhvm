@@ -195,6 +195,17 @@ and ('ex, 'en) stmt_ =
        *         baz();
        *         break;
        *     } *)
+  | Match of ('ex, 'en) stmt_match
+      (** Match statement.
+       *
+       *     match ($x) {
+       *       _: FooClass => {
+       *         foo($x);
+       *       }
+       *       _ => {
+       *         bar();
+       *       }
+       *     } *)
   | Foreach of ('ex, 'en) expr * ('ex, 'en) as_expr * ('ex, 'en) block
       (** For-each loop.
        *
@@ -256,6 +267,33 @@ and ('ex, 'en) as_expr =
 and ('ex, 'en) block = ('ex, 'en) stmt list
 
 and ('ex, 'en) finally_block = ('ex, 'en) stmt list
+
+and ('ex, 'en) stmt_match = {
+  sm_expr: ('ex, 'en) expr;
+  sm_arms: ('ex, 'en) stmt_match_arm list;
+}
+
+and ('ex, 'en) stmt_match_arm = {
+  sma_pat: pattern;
+  sma_body: ('ex, 'en) stmt;
+}
+
+and pattern =
+  | PVar of pat_var
+      (** Variable patterns *)
+  | PRefinement of pat_refinement
+      (** Refinement patterns *)
+
+and pat_var = {
+  pv_pos: pos; [@transform.opaque]
+  pv_id: lid option;
+}
+
+and pat_refinement = {
+  pr_pos: pos; [@transform.opaque]
+  pr_id: lid option;
+  pr_hint: hint;
+}
 
 and ('ex, 'en) class_id = 'ex * (pos[@transform.opaque]) * ('ex, 'en) class_id_
 

@@ -303,7 +303,12 @@ let box_variant () =
   (match Configuration.mode () with
   | Configuration.ByRef -> [("typing_defs_core", "Ty_")]
   | Configuration.ByBox -> [])
-  @ [("aast_defs", "Expr_"); ("aast_defs", "Stmt_"); ("aast_defs", "Def")]
+  @ [
+      ("aast_defs", "Expr_");
+      ("aast_defs", "Stmt_");
+      ("aast_defs", "Def");
+      ("aast_defs", "Pattern");
+    ]
 
 let equal_s2 = [%derive.eq: string * string]
 

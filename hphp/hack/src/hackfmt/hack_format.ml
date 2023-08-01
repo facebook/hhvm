@@ -1384,13 +1384,13 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         ]
     | Syntax.MatchStatementArm
         {
-          match_statement_arm_pattern = pat;
+          match_statement_arm_pattern = pattern;
           match_statement_arm_arrow = arrow;
           match_statement_arm_body = body;
         } ->
       Concat
         [
-          t env pat;
+          t env pattern;
           Space;
           t env arrow;
           Space;

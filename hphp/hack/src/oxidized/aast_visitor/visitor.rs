@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0e444ed0afed4a32cb8dce256c3dacc1>>
+// @generated SignedSource<<4f35e079ad72abd142dbbda23b95e5ad>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -482,6 +482,27 @@ pub trait Visitor<'node> {
     ) -> Result<(), <Self::Params as Params>::Error> {
         p.recurse(c, self.object())
     }
+    fn visit_pat_refinement(
+        &mut self,
+        c: &mut <Self::Params as Params>::Context,
+        p: &'node PatRefinement,
+    ) -> Result<(), <Self::Params as Params>::Error> {
+        p.recurse(c, self.object())
+    }
+    fn visit_pat_var(
+        &mut self,
+        c: &mut <Self::Params as Params>::Context,
+        p: &'node PatVar,
+    ) -> Result<(), <Self::Params as Params>::Error> {
+        p.recurse(c, self.object())
+    }
+    fn visit_pattern(
+        &mut self,
+        c: &mut <Self::Params as Params>::Context,
+        p: &'node Pattern,
+    ) -> Result<(), <Self::Params as Params>::Error> {
+        p.recurse(c, self.object())
+    }
     fn visit_program(
         &mut self,
         c: &mut <Self::Params as Params>::Context,
@@ -542,6 +563,20 @@ pub trait Visitor<'node> {
         &mut self,
         c: &mut <Self::Params as Params>::Context,
         p: &'node Stmt<<Self::Params as Params>::Ex, <Self::Params as Params>::En>,
+    ) -> Result<(), <Self::Params as Params>::Error> {
+        p.recurse(c, self.object())
+    }
+    fn visit_stmt_match(
+        &mut self,
+        c: &mut <Self::Params as Params>::Context,
+        p: &'node StmtMatch<<Self::Params as Params>::Ex, <Self::Params as Params>::En>,
+    ) -> Result<(), <Self::Params as Params>::Error> {
+        p.recurse(c, self.object())
+    }
+    fn visit_stmt_match_arm(
+        &mut self,
+        c: &mut <Self::Params as Params>::Context,
+        p: &'node StmtMatchArm<<Self::Params as Params>::Ex, <Self::Params as Params>::En>,
     ) -> Result<(), <Self::Params as Params>::Error> {
         p.recurse(c, self.object())
     }

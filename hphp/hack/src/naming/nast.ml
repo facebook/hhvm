@@ -75,6 +75,10 @@ type catch = (unit, unit) Aast.catch
 
 type case = (unit, unit) Aast.case
 
+type stmt_match = (unit, unit) Aast.stmt_match
+
+type stmt_match_arm = (unit, unit) Aast.stmt_match_arm
+
 type default_case = (unit, unit) Aast.default_case
 
 type gen_case = (unit, unit) Aast.gen_case
@@ -448,6 +452,16 @@ module Visitor_DEPRECATED = struct
 
       method on_switch : 'a -> expr -> case list -> default_case option -> 'a
 
+      method on_stmt_match : 'a -> stmt_match -> 'a
+
+      method on_stmt_match_arm : 'a -> stmt_match_arm -> 'a
+
+      method on_pat : 'a -> pattern -> 'a
+
+      method on_pat_var : 'a -> pat_var -> 'a
+
+      method on_pat_refinement : 'a -> pat_refinement -> 'a
+
       method on_throw : 'a -> expr -> 'a
 
       method on_try : 'a -> block -> catch list -> block -> 'a
@@ -691,6 +705,27 @@ module Visitor_DEPRECATED = struct
         in
         acc
 
+      method on_stmt_match acc { sm_expr; sm_arms } =
+        let acc = this#on_expr acc sm_expr in
+        let acc = List.fold_left sm_arms ~f:this#on_stmt_match_arm ~init:acc in
+        acc
+
+      method on_stmt_match_arm acc { sma_pat; sma_body } =
+        let acc = this#on_pat acc sma_pat in
+        let acc = this#on_stmt acc sma_body in
+        acc
+
+      method on_pat acc =
+        function
+        | PVar pv -> this#on_pat_var acc pv
+        | PRefinement pr -> this#on_pat_refinement acc pr
+
+      method on_pat_var acc { pv_pos = _; pv_id = _ } = acc
+
+      method on_pat_refinement acc { pr_pos = _; pr_id = _; pr_hint } =
+        let acc = this#on_hint acc pr_hint in
+        acc
+
       method on_foreach acc e ae b =
         let acc = this#on_expr acc e in
         let acc = this#on_as_expr acc ae in
@@ -749,6 +784,7 @@ module Visitor_DEPRECATED = struct
         | Using us -> this#on_using acc us
         | For (e1, e2, e3, b) -> this#on_for acc e1 e2 e3 b
         | Switch (e, cl, dfl) -> this#on_switch acc e cl dfl
+        | Match sm -> this#on_stmt_match acc sm
         | Foreach (e, ae, b) -> this#on_foreach acc e ae b
         | Try (b, cl, fb) -> this#on_try acc b cl fb
         | Noop -> this#on_noop acc

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f70c73adc0f8be6a5d8912adfb784065>>
+// @generated SignedSource<<13355517614d7e246777a44851a92dd7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -210,6 +210,17 @@ pub enum Stmt_<Ex, En> {
     ///     }
     #[rust_to_ocaml(inline_tuple)]
     Switch(Box<(Expr<Ex, En>, Vec<Case<Ex, En>>, Option<DefaultCase<Ex, En>>)>),
+    /// Match statement.
+    ///
+    ///     match ($x) {
+    ///       _: FooClass => {
+    ///         foo($x);
+    ///       }
+    ///       _ => {
+    ///         bar();
+    ///       }
+    ///     }
+    Match(Box<StmtMatch<Ex, En>>),
     /// For-each loop.
     ///
     ///     foreach ($items as $item) { ... }
@@ -368,6 +379,120 @@ pub struct Block<Ex, En>(pub Vec<Stmt<Ex, En>>);
 #[rust_to_ocaml(and)]
 #[repr(C)]
 pub struct FinallyBlock<Ex, En>(pub Vec<Stmt<Ex, En>>);
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[rust_to_ocaml(prefix = "sm_")]
+#[repr(C)]
+pub struct StmtMatch<Ex, En> {
+    pub expr: Expr<Ex, En>,
+    pub arms: Vec<StmtMatchArm<Ex, En>>,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[rust_to_ocaml(prefix = "sma_")]
+#[repr(C)]
+pub struct StmtMatchArm<Ex, En> {
+    pub pat: Pattern,
+    pub body: Stmt<Ex, En>,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[repr(C, u8)]
+pub enum Pattern {
+    /// Variable patterns
+    PVar(Box<PatVar>),
+    /// Refinement patterns
+    PRefinement(Box<PatRefinement>),
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[rust_to_ocaml(prefix = "pv_")]
+#[repr(C)]
+pub struct PatVar {
+    #[rust_to_ocaml(attr = "transform.opaque")]
+    pub pos: Pos,
+    pub id: Option<Lid>,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[rust_to_ocaml(prefix = "pr_")]
+#[repr(C)]
+pub struct PatRefinement {
+    #[rust_to_ocaml(attr = "transform.opaque")]
+    pub pos: Pos,
+    pub id: Option<Lid>,
+    pub hint: Hint,
+}
 
 #[derive(
     Clone,

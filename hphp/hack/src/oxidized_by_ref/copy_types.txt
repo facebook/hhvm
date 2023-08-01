@@ -28,6 +28,7 @@ aast_defs::HoleSource
 aast_defs::LocalIdMap
 aast_defs::MdNameKind
 aast_defs::ParamKind
+aast_defs::Pattern
 aast_defs::Program
 aast_defs::ReifyKind
 aast_defs::RequireKind

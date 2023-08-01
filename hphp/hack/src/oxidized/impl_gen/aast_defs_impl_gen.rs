@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8e994880e5fe969324808ed7be1a0641>>
+// @generated SignedSource<<882cd6bc03356d847900c351f3bfe650>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -62,6 +62,9 @@ impl<Ex, En> Stmt_<Ex, En> {
         p2: Option<DefaultCase<Ex, En>>,
     ) -> Self {
         Stmt_::Switch(Box::new((p0, p1, p2)))
+    }
+    pub fn mk_match(p0: StmtMatch<Ex, En>) -> Self {
+        Stmt_::Match(Box::new(p0))
     }
     pub fn mk_foreach(p0: Expr<Ex, En>, p1: AsExpr<Ex, En>, p2: Block<Ex, En>) -> Self {
         Stmt_::Foreach(Box::new((p0, p1, p2)))
@@ -165,6 +168,12 @@ impl<Ex, En> Stmt_<Ex, En> {
     pub fn is_switch(&self) -> bool {
         match self {
             Stmt_::Switch(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_match(&self) -> bool {
+        match self {
+            Stmt_::Match(..) => true,
             _ => false,
         }
     }
@@ -283,6 +292,12 @@ impl<Ex, En> Stmt_<Ex, En> {
             _ => None,
         }
     }
+    pub fn as_match(&self) -> Option<&StmtMatch<Ex, En>> {
+        match self {
+            Stmt_::Match(p0) => Some(&p0),
+            _ => None,
+        }
+    }
     pub fn as_foreach(&self) -> Option<(&Expr<Ex, En>, &AsExpr<Ex, En>, &Block<Ex, En>)> {
         match self {
             Stmt_::Foreach(p0) => Some((&p0.0, &p0.1, &p0.2)),
@@ -393,6 +408,12 @@ impl<Ex, En> Stmt_<Ex, En> {
     )> {
         match self {
             Stmt_::Switch(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2)),
+            _ => None,
+        }
+    }
+    pub fn as_match_mut(&mut self) -> Option<&mut StmtMatch<Ex, En>> {
+        match self {
+            Stmt_::Match(p0) => Some(p0.as_mut()),
             _ => None,
         }
     }
@@ -508,6 +529,12 @@ impl<Ex, En> Stmt_<Ex, En> {
     ) -> Option<(Expr<Ex, En>, Vec<Case<Ex, En>>, Option<DefaultCase<Ex, En>>)> {
         match self {
             Stmt_::Switch(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
+            _ => None,
+        }
+    }
+    pub fn as_match_into(self) -> Option<StmtMatch<Ex, En>> {
+        match self {
+            Stmt_::Match(p0) => Some(*p0),
             _ => None,
         }
     }
@@ -676,6 +703,62 @@ impl<Ex, En> AsExpr<Ex, En> {
     pub fn as_await_as_kv_into(self) -> Option<(Pos, Expr<Ex, En>, Expr<Ex, En>)> {
         match self {
             AsExpr::AwaitAsKv(p0, p1, p2) => Some((p0, p1, p2)),
+            _ => None,
+        }
+    }
+}
+impl Pattern {
+    pub fn mk_pvar(p0: PatVar) -> Self {
+        Pattern::PVar(Box::new(p0))
+    }
+    pub fn mk_prefinement(p0: PatRefinement) -> Self {
+        Pattern::PRefinement(Box::new(p0))
+    }
+    pub fn is_pvar(&self) -> bool {
+        match self {
+            Pattern::PVar(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_prefinement(&self) -> bool {
+        match self {
+            Pattern::PRefinement(..) => true,
+            _ => false,
+        }
+    }
+    pub fn as_pvar(&self) -> Option<&PatVar> {
+        match self {
+            Pattern::PVar(p0) => Some(&p0),
+            _ => None,
+        }
+    }
+    pub fn as_prefinement(&self) -> Option<&PatRefinement> {
+        match self {
+            Pattern::PRefinement(p0) => Some(&p0),
+            _ => None,
+        }
+    }
+    pub fn as_pvar_mut(&mut self) -> Option<&mut PatVar> {
+        match self {
+            Pattern::PVar(p0) => Some(p0.as_mut()),
+            _ => None,
+        }
+    }
+    pub fn as_prefinement_mut(&mut self) -> Option<&mut PatRefinement> {
+        match self {
+            Pattern::PRefinement(p0) => Some(p0.as_mut()),
+            _ => None,
+        }
+    }
+    pub fn as_pvar_into(self) -> Option<PatVar> {
+        match self {
+            Pattern::PVar(p0) => Some(*p0),
+            _ => None,
+        }
+    }
+    pub fn as_prefinement_into(self) -> Option<PatRefinement> {
+        match self {
+            Pattern::PRefinement(p0) => Some(*p0),
             _ => None,
         }
     }

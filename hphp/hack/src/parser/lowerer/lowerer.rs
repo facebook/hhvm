@@ -2939,6 +2939,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
     let new = Stmt::new;
     match &node.children {
         SwitchStatement(c) => p_switch_stmt_(env, pos, c, node),
+        MatchStatement(c) => p_match_stmt(env, pos, c, node),
         IfStatement(c) => p_if_stmt(env, pos, c, node),
         ExpressionStatement(c) => p_expression_stmt(env, pos, c, node),
         CompoundStatement(c) => handle_loop_body(pos, &c.statements, env),
@@ -3521,6 +3522,103 @@ fn p_switch_stmt_<'a>(
         ))
     };
     lift_awaits_in_statement(node, env, f)
+}
+
+fn p_match_stmt<'a>(
+    env: &mut Env<'a>,
+    pos: Pos,
+    c: &'a MatchStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
+    node: S<'a>,
+) -> Result<ast::Stmt> {
+    let f = |env: &mut Env<'a>| -> Result<ast::Stmt> {
+        let expr = p_expr(&c.expression, env)?;
+        let arms = could_map(&c.arms, env, p_match_stmt_arm)?;
+        Ok(ast::Stmt::new(
+            pos,
+            ast::Stmt_::Match(Box::new(ast::StmtMatch { expr, arms })),
+        ))
+    };
+    lift_awaits_in_statement(node, env, f)
+}
+
+fn p_match_stmt_arm<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::StmtMatchArm> {
+    let c = match &node.children {
+        MatchStatementArm(c) => c,
+        _ => return missing_syntax("match statement", node, env),
+    };
+    let pat = p_pat(&c.pattern, env)?;
+    let body = p_stmt(&c.body, env)?;
+    Ok(ast::StmtMatchArm { pat, body })
+}
+
+fn p_pat<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Pattern> {
+    let pos = p_pos(node, env);
+    match &node.children {
+        VariablePattern(c) => p_variable_pat(env, pos, c),
+        RefinementPattern(c) => p_refinement_pat(env, pos, c),
+        ConstructorPattern(c) => {
+            // Constructor patterns are not yet supported. Wildcard patterns
+            // are, and they're represented in the CST as constructor patterns
+            // with no members.
+            if !c.members.is_missing() {
+                raise_parsing_error(node, env, &syntax_error::destructuring_patterns_nyi);
+            }
+            if token_kind(&c.constructor) == Some(TK::Name) {
+                let name = c.constructor.text(env.source_text());
+                if !name.starts_with('_') {
+                    raise_parsing_error_pos(&pos, env, &syntax_error::wildcard_underscore(name));
+                }
+            } else {
+                raise_parsing_error(node, env, &syntax_error::constructor_patterns_nyi);
+            }
+            Ok(ast::Pattern::PVar(Box::new(ast::PatVar { pos, id: None })))
+        }
+        _ => missing_syntax("pattern", node, env),
+    }
+}
+
+fn p_variable_or_wildcard<'a>(
+    pos: Pos,
+    name: S<'a>,
+    env: &mut Env<'a>,
+) -> Result<Option<ast::Lid>> {
+    match token_kind(name) {
+        Some(TK::Variable) => {
+            raise_parsing_error_pos(&pos, env, &syntax_error::variable_patterns_nyi);
+            Ok(Some(lid_from_pos_name(pos, name, env)?))
+        }
+        Some(TK::Name) => {
+            let name = name.text(env.source_text());
+            if !name.starts_with('_') {
+                raise_parsing_error_pos(&pos, env, &syntax_error::wildcard_underscore(name));
+            }
+            Ok(None)
+        }
+        _ => missing_syntax("variable or wildcard", name, env),
+    }
+}
+
+fn p_variable_pat<'a>(
+    env: &mut Env<'a>,
+    pos: Pos,
+    c: &'a VariablePatternChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
+) -> Result<ast::Pattern> {
+    Ok(ast::Pattern::PVar(Box::new(ast::PatVar {
+        pos: pos.clone(),
+        id: p_variable_or_wildcard(pos, &c.variable, env)?,
+    })))
+}
+
+fn p_refinement_pat<'a>(
+    env: &mut Env<'a>,
+    pos: Pos,
+    c: &'a RefinementPatternChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
+) -> Result<ast::Pattern> {
+    Ok(ast::Pattern::PRefinement(Box::new(ast::PatRefinement {
+        pos: pos.clone(),
+        id: p_variable_or_wildcard(pos, &c.variable, env)?,
+        hint: p_hint(&c.specifier, env)?,
+    })))
 }
 
 fn p_markup<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {

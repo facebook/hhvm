@@ -23,6 +23,7 @@ let stmt_name = function
   | A.Using _ -> "Using"
   | A.For _ -> "For"
   | A.Switch _ -> "Switch"
+  | A.Match _ -> "Match"
   | A.Foreach _ -> "Foreach"
   | A.Try _ -> "Try"
   | A.Noop -> "Noop"

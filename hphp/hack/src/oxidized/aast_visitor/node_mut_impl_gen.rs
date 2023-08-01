@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d3a3d8fcf730cb778bc7d9cf97e1d12b>>
+// @generated SignedSource<<c29487fccaaf7af9e4ae42aed1d6fd58>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1691,6 +1691,60 @@ impl<P: Params> NodeMut<P> for ParamKind {
         }
     }
 }
+impl<P: Params> NodeMut<P> for PatRefinement {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_pat_refinement(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        self.pos.accept(c, v)?;
+        self.id.accept(c, v)?;
+        self.hint.accept(c, v)
+    }
+}
+impl<P: Params> NodeMut<P> for PatVar {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_pat_var(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        self.pos.accept(c, v)?;
+        self.id.accept(c, v)
+    }
+}
+impl<P: Params> NodeMut<P> for Pattern {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_pattern(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        match self {
+            Pattern::PVar(a0) => a0.accept(c, v),
+            Pattern::PRefinement(a0) => a0.accept(c, v),
+        }
+    }
+}
 impl<P: Params> NodeMut<P> for Program<P::Ex, P::En> {
     fn accept<'node>(
         &'node mut self,
@@ -1867,6 +1921,40 @@ impl<P: Params> NodeMut<P> for Stmt<P::Ex, P::En> {
         self.1.accept(c, v)
     }
 }
+impl<P: Params> NodeMut<P> for StmtMatch<P::Ex, P::En> {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_stmt_match(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        self.expr.accept(c, v)?;
+        self.arms.accept(c, v)
+    }
+}
+impl<P: Params> NodeMut<P> for StmtMatchArm<P::Ex, P::En> {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_stmt_match_arm(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        self.pat.accept(c, v)?;
+        self.body.accept(c, v)
+    }
+}
 impl<P: Params> NodeMut<P> for Stmt_<P::Ex, P::En> {
     fn accept<'node>(
         &'node mut self,
@@ -1997,6 +2085,7 @@ impl<P: Params> NodeMut<P> for Stmt_<P::Ex, P::En> {
             Stmt_::Using(a0) => a0.accept(c, v),
             Stmt_::For(a) => helper4(a, c, v),
             Stmt_::Switch(a) => helper5(a, c, v),
+            Stmt_::Match(a0) => a0.accept(c, v),
             Stmt_::Foreach(a) => helper6(a, c, v),
             Stmt_::Try(a) => helper7(a, c, v),
             Stmt_::Noop => Ok(()),

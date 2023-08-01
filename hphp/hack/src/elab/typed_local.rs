@@ -571,6 +571,20 @@ impl<'a> VisitorMut<'a> for TypedLocal {
                 self.join(&mut envs, env);
                 Ok(())
             }
+            Stmt_::Match(box nast::StmtMatch { expr, arms }) => {
+                expr.recurse(env, self.object())?;
+                let mut envs = arms
+                    .iter_mut()
+                    .map(|nast::StmtMatchArm { pat, body }| {
+                        let _ = pat.recurse(env, self.object());
+                        let mut new_env = self.new_block_env();
+                        let _ = body.recurse(env, new_env.object());
+                        new_env
+                    })
+                    .collect::<Vec<_>>();
+                self.join(&mut envs, env);
+                Ok(())
+            }
             Stmt_::Foreach(box (expr, as_expr, block)) => {
                 expr.recurse(env, self.object())?;
                 let mut hints = vec![];

@@ -181,6 +181,11 @@ let rec check_stmt on_expr env (id_pos, stmt_) =
       | Some (_, block) -> check_block new_env block
     in
     join (envs @ [default_env]) env
+  | Match { sm_expr; sm_arms } ->
+    on_expr env sm_expr;
+    let new_env = { empty with locals = env.locals } in
+    let envs = List.map ~f:(check_stmt_match_arm on_expr new_env) sm_arms in
+    join envs env
   | Do (block, cond) ->
     let env = check_block env block in
     on_expr env cond;
@@ -259,6 +264,9 @@ and check_catches on_expr env catches =
 and check_case on_expr env (expr, block) =
   on_expr env expr;
   check_block on_expr env block
+
+and check_stmt_match_arm on_expr env { sma_pat = _; sma_body } =
+  check_stmt on_expr env sma_body
 
 let ignorefn f x y = ignore (f x y)
 

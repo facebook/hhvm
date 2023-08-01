@@ -425,6 +425,7 @@ and stmt env acc st =
   | Block b -> block acc b
   | Markup _ -> acc
   | AssertEnv _ -> acc
+  | Match _ -> failwith "TODO(jakebailey): match statements"
 
 and toplevel env acc l =
   try List.fold_left ~f:(stmt env) ~init:acc l with

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4d7ab0e936a54ee4f495c4c7bdb901d1>>
+// @generated SignedSource<<2aac5de012416a3ef9b43c670a1db6a6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -24,6 +24,8 @@ pub type UsingStmt = aast_defs::UsingStmt<Ex, En>;
 pub type AsExpr = aast_defs::AsExpr<Ex, En>;
 pub type Block = aast_defs::Block<Ex, En>;
 pub type FinallyBlock = aast_defs::FinallyBlock<Ex, En>;
+pub type StmtMatch = aast_defs::StmtMatch<Ex, En>;
+pub type StmtMatchArm = aast_defs::StmtMatchArm<Ex, En>;
 pub type ClassId = aast_defs::ClassId<Ex, En>;
 pub type ClassId_ = aast_defs::ClassId_<Ex, En>;
 pub type Expr = aast_defs::Expr<Ex, En>;

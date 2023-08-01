@@ -1,0 +1,62 @@
+[(Fun
+    { fd_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+        ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-11], "\\f");
+      fd_fun =
+      { f_span = [3:1-10:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((), (Some ([3:23-27], (Hprim Tvoid))));
+        f_params =
+        [{ param_annotation = (); param_type_hint = ((), (Some ([3:12-17], Hmixed))); 
+           param_is_variadic = false; param_pos = [3:18-20]; param_name = "$v"; 
+           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+           param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None;
+        f_body =
+        { fb_ast =
+          [([4:3-9:4],
+            (Match
+               { sm_expr = ((), [4:10-12], (Lvar ([4:10-12], $v)));
+                 sm_arms =
+                 [{ sma_pat = (PRefinement { pr_pos = [5:5-12]; pr_id = (Some ([5:5-12], $i)); pr_hint = ([5:9-12], (Hprim Tint)) });
+                    sma_body =
+                    ([5:16-32],
+                     (Expr
+                        ((), [5:16-32],
+                         (Call
+                            { func = ((), [5:16-20], (Id ([5:16-20], "echo"))); 
+                              targs = []; args = [(Pnormal, ((), [5:21-31], (String2 [((), [5:22-26], (String "int ")); ((), [5:26-28], (Lvar ([5:26-28], $i))); ((), [5:28-30], (String "\n"))])))];
+                              unpacked_arg = None }))))
+                    };
+                   { sma_pat = (PRefinement { pr_pos = [6:5-14]; pr_id = None; pr_hint = ([6:8-14], (Hprim Tstring)) });
+                     sma_body =
+                     ([6:18-37],
+                      (Expr
+                         ((), [6:18-37],
+                          (Call
+                             { func = ((), [6:18-22], (Id ([6:18-22], "echo"))); 
+                               targs = [];
+                               args = [(Pnormal, ((), [6:23-36], (String2 [((), [6:24-31], (String "string ")); ((), [6:31-33], (Lvar ([6:31-33], $v))); ((), [6:33-35], (String "\n"))])))];
+                               unpacked_arg = None }))))
+                     };
+                   { sma_pat = (PVar { pv_pos = [7:5-6]; pv_id = None });
+                     sma_body =
+                     ([7:10-27],
+                      (Expr ((), [7:10-27], (Call { func = ((), [7:10-14], (Id ([7:10-14], "echo"))); targs = []; args = [(Pnormal, ((), [7:15-26], (String "unknown\n")))]; unpacked_arg = None }))))
+                     };
+                   { sma_pat = (PVar { pv_pos = [8:5-7]; pv_id = (Some ([8:5-7], $x)) });
+                     sma_body =
+                     ([8:11-32],
+                      (Expr
+                         ((), [8:11-32], (Call { func = ((), [8:11-15], (Id ([8:11-15], "echo"))); targs = []; args = [(Pnormal, ((), [8:16-31], (String "unreachable\n")))]; unpacked_arg = None }))))
+                     }
+                   ]
+                 }))
+            ]
+          };
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None };
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })
+  ]

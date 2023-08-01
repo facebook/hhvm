@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6e054c19409a6e35979c9d88bda21a5a>>
+// @generated SignedSource<<52f2ea8b732cb52d43c43d39da79a6f7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -92,6 +92,70 @@ pub trait Pass {
         &mut self,
         env: &Env,
         elem: &mut FinallyBlock<Ex, En>,
+    ) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_stmt_match_top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut StmtMatch<Ex, En>,
+    ) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_stmt_match_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut StmtMatch<Ex, En>,
+    ) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_stmt_match_arm_top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut StmtMatchArm<Ex, En>,
+    ) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_stmt_match_arm_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut StmtMatchArm<Ex, En>,
+    ) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_pattern_top_down(&mut self, env: &Env, elem: &mut Pattern) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_pattern_bottom_up(&mut self, env: &Env, elem: &mut Pattern) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_pat_var_top_down(&mut self, env: &Env, elem: &mut PatVar) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_pat_var_bottom_up(&mut self, env: &Env, elem: &mut PatVar) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_pat_refinement_top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut PatRefinement,
+    ) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_pat_refinement_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut PatRefinement,
     ) -> ControlFlow<()> {
         Continue(())
     }
@@ -1234,6 +1298,80 @@ where
     ) -> ControlFlow<()> {
         self.fst.on_ty_finally_block_bottom_up(env, elem)?;
         self.snd.on_ty_finally_block_bottom_up(env, elem)
+    }
+    #[inline(always)]
+    fn on_ty_stmt_match_top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut StmtMatch<Ex, En>,
+    ) -> ControlFlow<()> {
+        self.fst.on_ty_stmt_match_top_down(env, elem)?;
+        self.snd.on_ty_stmt_match_top_down(env, elem)
+    }
+    #[inline(always)]
+    fn on_ty_stmt_match_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut StmtMatch<Ex, En>,
+    ) -> ControlFlow<()> {
+        self.fst.on_ty_stmt_match_bottom_up(env, elem)?;
+        self.snd.on_ty_stmt_match_bottom_up(env, elem)
+    }
+    #[inline(always)]
+    fn on_ty_stmt_match_arm_top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut StmtMatchArm<Ex, En>,
+    ) -> ControlFlow<()> {
+        self.fst.on_ty_stmt_match_arm_top_down(env, elem)?;
+        self.snd.on_ty_stmt_match_arm_top_down(env, elem)
+    }
+    #[inline(always)]
+    fn on_ty_stmt_match_arm_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut StmtMatchArm<Ex, En>,
+    ) -> ControlFlow<()> {
+        self.fst.on_ty_stmt_match_arm_bottom_up(env, elem)?;
+        self.snd.on_ty_stmt_match_arm_bottom_up(env, elem)
+    }
+    #[inline(always)]
+    fn on_ty_pattern_top_down(&mut self, env: &Env, elem: &mut Pattern) -> ControlFlow<()> {
+        self.fst.on_ty_pattern_top_down(env, elem)?;
+        self.snd.on_ty_pattern_top_down(env, elem)
+    }
+    #[inline(always)]
+    fn on_ty_pattern_bottom_up(&mut self, env: &Env, elem: &mut Pattern) -> ControlFlow<()> {
+        self.fst.on_ty_pattern_bottom_up(env, elem)?;
+        self.snd.on_ty_pattern_bottom_up(env, elem)
+    }
+    #[inline(always)]
+    fn on_ty_pat_var_top_down(&mut self, env: &Env, elem: &mut PatVar) -> ControlFlow<()> {
+        self.fst.on_ty_pat_var_top_down(env, elem)?;
+        self.snd.on_ty_pat_var_top_down(env, elem)
+    }
+    #[inline(always)]
+    fn on_ty_pat_var_bottom_up(&mut self, env: &Env, elem: &mut PatVar) -> ControlFlow<()> {
+        self.fst.on_ty_pat_var_bottom_up(env, elem)?;
+        self.snd.on_ty_pat_var_bottom_up(env, elem)
+    }
+    #[inline(always)]
+    fn on_ty_pat_refinement_top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut PatRefinement,
+    ) -> ControlFlow<()> {
+        self.fst.on_ty_pat_refinement_top_down(env, elem)?;
+        self.snd.on_ty_pat_refinement_top_down(env, elem)
+    }
+    #[inline(always)]
+    fn on_ty_pat_refinement_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut PatRefinement,
+    ) -> ControlFlow<()> {
+        self.fst.on_ty_pat_refinement_bottom_up(env, elem)?;
+        self.snd.on_ty_pat_refinement_bottom_up(env, elem)
     }
     #[inline(always)]
     fn on_ty_class_id_top_down(

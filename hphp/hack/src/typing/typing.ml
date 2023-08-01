@@ -3176,6 +3176,7 @@ and stmt_ env pos st =
     in
     let env = set_valid_rvalue ~is_defined p env lvar (Some hty) ety in
     (env, Aast.Declare_local ((p, lvar), hint, te))
+  | Match _ -> failwith "TODO(jakebailey): match statements"
   | Block _
   | Markup _ ->
     failwith

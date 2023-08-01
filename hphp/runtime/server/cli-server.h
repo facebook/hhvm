@@ -85,6 +85,8 @@ struct CLIContext {
   enum Flags {
     None = 0,
     ProxyXbox = 1,
+    AssumeRepoReadable = 2,
+    AssumeRepoRealpath = 4,
   };
   struct Data {
     int client{-1};
@@ -102,6 +104,7 @@ struct CLIContext {
     std::vector<std::string> envp;
     folly::dynamic ini;
     Flags flags{Flags::None};
+    std::filesystem::path repo;
   };
 
   ~CLIContext();

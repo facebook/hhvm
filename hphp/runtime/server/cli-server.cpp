@@ -131,6 +131,7 @@ way to determine how much progress the server made.
 
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/memory-manager.h"
@@ -173,6 +174,8 @@ way to determine how much progress the server made.
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/xattr.h>
+
+#include <boost/algorithm/string/predicate.hpp>
 
 
 TRACE_SET_MOD(clisrv);
@@ -978,6 +981,14 @@ void CLIWorker::doJob(int client) {
         g_context->setCwd(cwd);
       },
       [&] (const char* argv0, const std::string& prelude) {
+        if (tl_context->getShared()->flags & CLIContext::AssumeRepoReadable) {
+          auto const& ro = RepoOptions::forFile(argv0);
+          if (!ro.path().empty()) {
+            g_context->onLoadWithOptions(argv0, ro);
+            tl_context->getShared()->repo = ro.dir();
+          }
+        }
+
         bool error;
         std::string errorMsg;
         auto const invoke_result = hphp_invoke(
@@ -1019,9 +1030,24 @@ void CLIWorker::doJob(int client) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+namespace {
+bool path_in_repo(const String& path) {
+  auto const& p = tl_context->getShared()->repo;
+  if (p.empty()) return false;
+  return boost::starts_with(std::filesystem::path{path.toCppString()}, p);
+}
+
+bool use_local_fs(const String& path) {
+  if (!(tl_context->getShared()->flags & CLIContext::AssumeRepoReadable)) {
+    return false;
+  }
+  return path_in_repo(path);
+}
+}
+
 req::ptr<File>
 CLIWrapper::open(const String& filename, const String& mode, int options,
-                 const req::ptr<StreamContext>& /*context*/) {
+                 const req::ptr<StreamContext>& context) {
   mode_t md = static_cast<mode_t>(-1);
   const char* mstr = mode.data();
   int fl = 0;
@@ -1055,6 +1081,9 @@ CLIWrapper::open(const String& filename, const String& mode, int options,
     raise_warning("Invalid mode string");
     return nullptr;
   }
+  if (fl == O_RDONLY && use_local_fs(filename)) {
+    return FileStreamWrapper().open(filename, mode, options, context);
+  }
   auto fd = cli_openfd_unsafe(
     filename,
     fl,
@@ -1068,8 +1097,11 @@ CLIWrapper::open(const String& filename, const String& mode, int options,
 }
 
 req::ptr<Directory> CLIWrapper::opendir(const String& path) {
-  auto tpath = File::TranslatePath(path);
+  if (use_local_fs(path)) {
+    return FileStreamWrapper().opendir(path);
+  }
 
+  auto tpath = File::TranslatePath(path);
   bool res;
   std::string error;
 
@@ -1091,6 +1123,10 @@ req::ptr<Directory> CLIWrapper::opendir(const String& path) {
 }
 
 int CLIWrapper::lstat(const String& path, struct stat* buf) {
+  if (use_local_fs(path)) {
+    return FileStreamWrapper().lstat(path, buf);
+  }
+
   FTRACE(3, "CLIWrapper({})::lstat({}) calling remote...\n",
          m_cli_fd, path.data());
   cli_write(m_cli_fd, "lstat", File::TranslatePath(path).data());
@@ -1100,6 +1136,10 @@ int CLIWrapper::lstat(const String& path, struct stat* buf) {
 }
 
 int CLIWrapper::stat(const String& path, struct stat* buf) {
+  if (use_local_fs(path)) {
+    return FileStreamWrapper().stat(path, buf);
+  }
+
   FTRACE(3, "CLIWrapper({})::stat({}) calling remote...\n",
          m_cli_fd, path.data());
   cli_write(m_cli_fd, "stat", File::TranslatePath(path).data());
@@ -1109,6 +1149,22 @@ int CLIWrapper::stat(const String& path, struct stat* buf) {
 }
 
 String CLIWrapper::realpath(const String& path) {
+  if (path_in_repo(path)) {
+    auto const flags = tl_context->getShared()->flags;
+    if (flags & CLIContext::AssumeRepoRealpath) {
+      auto con = FileUtil::canonicalize(path);
+      if (con.size() > 1 && con[con.size() - 1] == '/') {
+        con.shrink(con.size() - 1);
+        assertx(con[con.size()] != '/');
+      }
+      return con;
+    } else if (flags & CLIContext::AssumeRepoReadable) {
+      char resolved_path[PATH_MAX];
+      if (!::realpath(path.data(), resolved_path)) return null_string;
+      return String(resolved_path, CopyString);
+    }
+  }
+
   bool status;
   std::string ret;
   cli_write(m_cli_fd, "realpath", File::TranslatePath(path).data());
@@ -1923,6 +1979,28 @@ CLIContext CLIContext::initFromClient(int client) {
       RO::ServerThreadDropStack
     );
     shared.flags = static_cast<Flags>(shared.flags | Flags::ProxyXbox);
+  }
+
+  auto const assume_readable = get_setting_bool(
+    shared.ini,
+    "hhvm.unix_server_assume_repo_readable"
+  );
+
+  if (assume_readable && RO::EvalUnixServerAssumeRepoReadable) {
+    shared.flags = static_cast<Flags>(
+      shared.flags | Flags::AssumeRepoReadable
+    );
+  }
+
+  auto const assume_realpath = get_setting_bool(
+    shared.ini,
+    "hhvm.unix_server_assume_repo_realpath"
+  );
+
+  if (assume_realpath && RO::EvalUnixServerAssumeRepoRealpath) {
+    shared.flags = static_cast<Flags>(
+      shared.flags | Flags::AssumeRepoRealpath
+    );
   }
 
   guard.dismiss();

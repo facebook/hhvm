@@ -1414,6 +1414,8 @@ struct RuntimeOption {
                                             std::vector<std::string>()) \
   F(bool, UnixServerRunPSPInBackground, true)                           \
   F(bool, UnixServerProxyXbox, true)                                    \
+  F(bool, UnixServerAssumeRepoReadable, true)                           \
+  F(bool, UnixServerAssumeRepoRealpath, true)                           \
   /* Options for testing */                                             \
   F(bool, TrashFillOnRequestExit, false)                                \
   /******************                                                   \

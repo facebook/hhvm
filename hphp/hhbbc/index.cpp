@@ -4317,7 +4317,7 @@ void add_system_constants_to_index(IndexData& index) {
     auto pc = new php::Constant {
       cnsPair.first,
       cnsPair.second,
-      AttrUnique | AttrPersistent
+      AttrPersistent
     };
     add_symbol_to_index(index.constants, pc, "constant");
   }

@@ -91,7 +91,7 @@ SSATmp* implInstanceCheck(IRGS& env, SSATmp* src, const StringData* className,
   }
 
   auto knownCls = checkCls->hasConstVal(TCls) ? checkCls->clsVal() : nullptr;
-  assertx(IMPLIES(knownCls, classIsUniqueOrCtxParent(env, knownCls)));
+  assertx(IMPLIES(knownCls, classIsPersistentOrCtxParent(env, knownCls)));
   assertx(IMPLIES(knownCls, knownCls->name()->isame(className)));
 
   auto const srcType = src->type();

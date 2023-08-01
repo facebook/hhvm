@@ -1,6 +1,6 @@
 # Test making closures
 
-.class [no_override unique] Closure$Test extends Closure {
+.class [no_override] Closure$Test extends Closure {
   .property [private] x = uninit;
   .method [public static] __invoke() isClosureBody {
     .declvars $x;

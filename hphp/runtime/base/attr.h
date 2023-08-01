@@ -91,12 +91,6 @@ enum Attr {
   AttrInitialSatisfiesTC   = (1u <<  9), //       |    X     |         //
   // Indicates this class or any of its subclasses is not mocked.
   AttrNoMock               = (1u <<  9), //    X  |          |         //
-  // Indicates that the function or class is uniquely named among functions or
-  // classes across the codebase.  Note that function and class names are in
-  // separate namespaces, so it is possible to have a Func and Class which
-  // share a name but both of which are unique.   |          |         //
-  AttrUnique               = (1u << 10), //    X  |          |         //
-                                         //       |          |         //
   // Indicates that this property is definitely not redeclaring a property in a
   // parent, or if it is, the type-hints of the two properties are equivalent
   // (and therefore requires no runtime check).

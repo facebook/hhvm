@@ -459,7 +459,7 @@ std::unique_ptr<ProfTransRec> read_prof_trans_rec(ProfDataDeserializer& ser) {
 bool write_seen_type(ProfDataSerializer& ser, const NamedType* ne) {
   if (!ne) return false;
   if (auto const cls = ne->clsList()) {
-    if (!(cls->attrs() & AttrUnique)) return false;
+    if (!(cls->attrs() & AttrPersistent)) return false;
     auto const filepath = cls->preClass()->unit()->origFilepath();
     if (!filepath || filepath->empty()) return false;
     if (!ser.present(cls)) {

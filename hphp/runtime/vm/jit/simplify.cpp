@@ -1797,10 +1797,10 @@ SSATmp* simplifyInstanceOf(State& env, const IRInstruction* inst) {
   auto const spec2 = src2->type().clsSpec();
 
   if (auto const cls = spec2.exactCls()) {
-    if (isNormalClass(cls) && (cls->attrs() & AttrUnique)) {
+    if (isNormalClass(cls) && (cls->attrs() & AttrPersistent)) {
       return gen(env, ExtendsClass, ExtendsClassData{ cls }, src1);
     }
-    if (isInterface(cls) && (cls->attrs() & AttrUnique)) {
+    if (isInterface(cls) && (cls->attrs() & AttrPersistent)) {
       return gen(env, InstanceOfIface, src1, cns(env, cls->name()));
     }
   }

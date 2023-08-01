@@ -251,388 +251,388 @@ Index make_index() {
     # only one we have to make sure the type system can see for unit
     # test purposes, so we can just define it here.  We don't need to
     # give it any of its functions currently.
-    .class [abstract unique builtin] HH\Awaitable {
+    .class [abstract builtin] HH\Awaitable {
     }
 
-    .class [unique builtin] HH\AwaitableChild extends HH\Awaitable {
+    .class [builtin] HH\AwaitableChild extends HH\Awaitable {
     }
 
-    .class [unique builtin] HH\AwaitableChild2 extends HH\Awaitable {
+    .class [builtin] HH\AwaitableChild2 extends HH\Awaitable {
     }
 
-    .class [unique builtin] Closure {
+    .class [builtin] Closure {
     }
 
-    .class [unique] Closure$ChildClosure1 extends Closure {
+    .class Closure$ChildClosure1 extends Closure {
       .method [public static] __invoke() isClosureBody {
         Null
         RetC
       }
     }
-    .class [unique] Closure$ChildClosure2 extends Closure {
+    .class Closure$ChildClosure2 extends Closure {
       .method [public static] __invoke() isClosureBody {
         Null
         RetC
       }
     }
-    .class [unique] Closure$ChildClosure3 extends Closure {
+    .class Closure$ChildClosure3 extends Closure {
       .method [public static] __invoke() isClosureBody {
         Null
         RetC
       }
     }
 
-    .class [interface unique] IBase {
+    .class [interface ] IBase {
     }
 
-    .class [interface unique] IA implements (IBase) {
+    .class [interface] IA implements (IBase) {
     }
 
-    .class [interface unique] IB implements (IBase) {
+    .class [interface] IB implements (IBase) {
     }
 
-    .class [interface unique] IAA implements (IA) {
+    .class [interface] IAA implements (IA) {
     }
 
-    .class [unique] Base {
+    .class Base {
       .default_ctor;
     }
 
-    .class [unique] A extends Base implements (IA) {
+    .class  A extends Base implements (IA) {
       .default_ctor;
     }
 
-    .class [no_override unique] AA extends A implements (IAA) {
+    .class [no_override] AA extends A implements (IAA) {
       .default_ctor;
     }
 
-    .class [no_override unique] AB extends A {
+    .class [no_override] AB extends A {
       .default_ctor;
     }
 
-    .class [unique] B extends Base {
+    .class B extends Base {
       .default_ctor;
     }
 
-    .class [unique] BA extends B {
+    .class BA extends B {
       .default_ctor;
     }
 
-    .class [no_override unique] BB extends B {
+    .class [no_override] BB extends B {
       .default_ctor;
     }
 
-    .class [unique] BAA extends BA {
+    .class BAA extends BA {
       .default_ctor;
     }
 
     # Make sure BAA doesn't get AttrNoOverride:
-    .class [unique] BAADeriver extends BAA {
+    .class BAADeriver extends BAA {
       .default_ctor;
     }
 
-    .class [unique] TestClass {
+    .class TestClass {
       .default_ctor;
     }
 
     # Make sure TestClass doesn't get AttrNoOverride:
-    .class [unique] TestClassDeriver extends TestClass {
+    .class TestClassDeriver extends TestClass {
       .default_ctor;
     }
 
-    .class [interface unique] I_A {
+    .class [interface] I_A {
     }
-    .class [interface unique] I_B {
+    .class [interface] I_B {
     }
-    .class [interface unique] I_C {
+    .class [interface] I_C {
     }
-    .class [interface unique] I_D {
+    .class [interface] I_D {
     }
-    .class [interface unique] I_E {
+    .class [interface] I_E {
     }
-    .class [interface unique] I_F {
+    .class [interface] I_F {
     }
-    .class [interface unique] I_G {
+    .class [interface] I_G {
     }
-    .class [interface unique] I_H {
+    .class [interface] I_H {
     }
-    .class [interface unique] I_I {
+    .class [interface] I_I {
     }
-    .class [interface unique] I_J {
+    .class [interface] I_J {
     }
-    .class [interface unique] I_K {
-    }
-
-    .class [unique] X1 {
-    }
-    .class [unique] X2 extends X1 implements (I_A) {
-    }
-    .class [unique] X3 extends X1 implements (I_B) {
-    }
-    .class [unique] X4 extends X1 implements (I_C) {
-    }
-    .class [unique] X5 extends X1 implements (I_D) {
-    }
-    .class [unique] X6 extends X2 implements (I_E) {
-    }
-    .class [unique] X7 extends X6 implements (I_I) {
-    }
-    .class [unique] X8 extends X6 implements (I_J) {
-    }
-    .class [unique] X9 extends X5 implements (I_I) {
-    }
-    .class [unique] X10 extends X2 implements (I_D) {
-    }
-    .class [unique] X11 extends X10 implements (I_I) {
-    }
-    .class [unique] X12 extends X2 implements (I_F) {
-    }
-    .class [unique] X13 extends X12 implements (I_J) {
-    }
-    .class [unique] X14 extends X2 implements (I_J) {
-    }
-    .class [unique] X15 extends X2 implements (I_G) {
-    }
-    .class [unique] X16 extends X1 implements (I_G) {
-    }
-    .class [unique] X17 extends X3 implements (I_G) {
-    }
-    .class [unique] X18 extends X3 implements (I_H) {
-    }
-    .class [unique] X19 extends X3 implements (I_K) {
-    }
-    .class [unique] X20 extends X1 implements (I_K) {
-    }
-    .class [unique] X21 {
-    }
-    .class [unique] X22 extends X21 implements (I_A) {
-    }
-    .class [unique] X23 extends X21 implements (I_B) {
-    }
-    .class [unique] X24 extends X21 implements (I_C) {
-    }
-    .class [unique] X25 extends X21 implements (I_E) {
-    }
-    .class [unique] X26 extends X21 implements (I_F) {
-    }
-    .class [unique] X27 extends X21 implements (I_H) {
-    }
-    .class [unique] X28 extends X21 {
-    }
-    .class [unique] X29 extends X1 {
+    .class [interface] I_K {
     }
 
-    .class [interface unique] I_Y1 {
+    .class X1 {
     }
-    .class [interface unique] I_Y2 {
+    .class X2 extends X1 implements (I_A) {
     }
-    .class [interface unique] I_Y3 {
+    .class X3 extends X1 implements (I_B) {
     }
-
-    .class [unique] Y1 implements (I_Y2 I_Y3) {
+    .class X4 extends X1 implements (I_C) {
     }
-    .class [unique] Y2 extends Y1 {
+    .class X5 extends X1 implements (I_D) {
     }
-    .class [unique] Y3 extends Y1 {
+    .class X6 extends X2 implements (I_E) {
     }
-    .class [unique] Y4 extends Y2 implements (I_Y1) {
+    .class X7 extends X6 implements (I_I) {
     }
-    .class [unique] Y5 extends Y3 implements (I_Y1) {
+    .class X8 extends X6 implements (I_J) {
     }
-    .class [unique] Y6 implements (I_Y2 I_Y3) {
+    .class X9 extends X5 implements (I_I) {
     }
-    .class [unique] Y7 implements (I_Y1 I_Y2 I_Y3) {
+    .class X10 extends X2 implements (I_D) {
     }
-    .class [unique] Y8 implements (I_Y2) {
+    .class X11 extends X10 implements (I_I) {
     }
-    .class [unique] Y9 implements (I_Y3) {
+    .class X12 extends X2 implements (I_F) {
     }
-
-    .class [interface unique] I_Z1 {
+    .class X13 extends X12 implements (I_J) {
     }
-    .class [interface unique] I_Z2 {
+    .class X14 extends X2 implements (I_J) {
     }
-    .class [interface unique] I_Z3 {
+    .class X15 extends X2 implements (I_G) {
     }
-    .class [interface unique] I_Z4 {
+    .class X16 extends X1 implements (I_G) {
     }
-    .class [interface unique] I_Z5 {
+    .class X17 extends X3 implements (I_G) {
     }
-    .class [interface unique] I_Z6 {
+    .class X18 extends X3 implements (I_H) {
     }
-
-    .class [abstract unique] Z1 implements (I_Z2) {
+    .class X19 extends X3 implements (I_K) {
     }
-    .class [unique] Z2 extends Z1 implements (I_Z1) {
+    .class X20 extends X1 implements (I_K) {
     }
-    .class [unique] Z3 extends Z1 implements (I_Z1) {
+    .class X21 {
     }
-    .class [unique] Z4 {
+    .class X22 extends X21 implements (I_A) {
     }
-    .class [abstract unique] Z5 extends Z4 implements (I_Z4) {
+    .class X23 extends X21 implements (I_B) {
     }
-    .class [unique] Z6 extends Z4 implements (I_Z3 I_Z4) {
+    .class X24 extends X21 implements (I_C) {
     }
-    .class [unique] Z7 implements (I_Z5 I_Z6) {
+    .class X25 extends X21 implements (I_E) {
     }
-    .class [unique] Z8 implements (I_Z5 I_Z6) {
+    .class X26 extends X21 implements (I_F) {
     }
-    .class [unique] Z9 implements (I_Z5) {
+    .class X27 extends X21 implements (I_H) {
     }
-    .class [abstract unique] Z10 implements (I_Z6) {
+    .class X28 extends X21 {
     }
-
-    .class [interface unique] ICanon1 {
+    .class X29 extends X1 {
     }
 
-    .class [interface unique] ICanon2 implements (ICanon1) {
+    .class [interface] I_Y1 {
+    }
+    .class [interface] I_Y2 {
+    }
+    .class [interface] I_Y3 {
     }
 
-    .class [interface unique] ICanon3 {
+    .class Y1 implements (I_Y2 I_Y3) {
+    }
+    .class Y2 extends Y1 {
+    }
+    .class Y3 extends Y1 {
+    }
+    .class Y4 extends Y2 implements (I_Y1) {
+    }
+    .class Y5 extends Y3 implements (I_Y1) {
+    }
+    .class Y6 implements (I_Y2 I_Y3) {
+    }
+    .class Y7 implements (I_Y1 I_Y2 I_Y3) {
+    }
+    .class Y8 implements (I_Y2) {
+    }
+    .class Y9 implements (I_Y3) {
     }
 
-    .class [interface unique] ICanon4 {
+    .class [interface] I_Z1 {
+    }
+    .class [interface] I_Z2 {
+    }
+    .class [interface] I_Z3 {
+    }
+    .class [interface] I_Z4 {
+    }
+    .class [interface] I_Z5 {
+    }
+    .class [interface] I_Z6 {
     }
 
-    .class [interface unique] ICanon5 {
+    .class [abstract] Z1 implements (I_Z2) {
+    }
+    .class Z2 extends Z1 implements (I_Z1) {
+    }
+    .class Z3 extends Z1 implements (I_Z1) {
+    }
+    .class Z4 {
+    }
+    .class [abstract] Z5 extends Z4 implements (I_Z4) {
+    }
+    .class Z6 extends Z4 implements (I_Z3 I_Z4) {
+    }
+    .class Z7 implements (I_Z5 I_Z6) {
+    }
+    .class Z8 implements (I_Z5 I_Z6) {
+    }
+    .class Z9 implements (I_Z5) {
+    }
+    .class [abstract] Z10 implements (I_Z6) {
     }
 
-    .class [interface unique] ICanon6 implements (ICanon5) {
+    .class [interface] ICanon1 {
     }
 
-    .class [interface unique] ICanon7 {
+    .class [interface] ICanon2 implements (ICanon1) {
     }
 
-    .class [interface unique] ICanon8 {
+    .class [interface] ICanon3 {
     }
 
-    .class [interface unique] ICanon9 {
+    .class [interface] ICanon4 {
     }
 
-    .class [interface unique] ICanon10 {
+    .class [interface] ICanon5 {
     }
 
-    .class [interface unique] ICanon11 {
+    .class [interface] ICanon6 implements (ICanon5) {
     }
 
-    .class [interface unique] ICanon12 {
+    .class [interface] ICanon7 {
     }
 
-    .class [interface unique] ICanon13 {
+    .class [interface] ICanon8 {
     }
 
-    .class [interface unique] ICanon14 {
+    .class [interface] ICanon9 {
     }
 
-    .class [unique] Canon1 implements (ICanon3 ICanon4) {
+    .class [interface] ICanon10 {
     }
 
-    .class [unique] Canon2 implements (ICanon3 ICanon4) {
+    .class [interface] ICanon11 {
     }
 
-    .class [unique] Canon3 implements (ICanon6) {
+    .class [interface] ICanon12 {
     }
 
-    .class [unique] Canon4 implements (ICanon9 ICanon10) {
+    .class [interface] ICanon13 {
     }
 
-    .class [abstract unique] Canon5 implements (ICanon11 ICanon12) {
+    .class [interface] ICanon14 {
     }
 
-    .class [abstract unique] Canon6 implements (ICanon11 ICanon12) {
+    .class Canon1 implements (ICanon3 ICanon4) {
     }
 
-    .class [unique] Canon7 implements (ICanon11) {
+    .class Canon2 implements (ICanon3 ICanon4) {
     }
 
-    .class [unique] Canon8 implements (ICanon12) {
+    .class Canon3 implements (ICanon6) {
     }
 
-    .class [unique] Canon9 implements (ICanon11) {
+    .class Canon4 implements (ICanon9 ICanon10) {
     }
 
-    .class [unique] Canon10 implements (ICanon12 ICanon13) {
+    .class [abstract] Canon5 implements (ICanon11 ICanon12) {
     }
 
-    .class [abstract unique] Canon11 implements (ICanon12 ICanon13) {
+    .class [abstract] Canon6 implements (ICanon11 ICanon12) {
     }
 
-    .class [unique] Canon12 implements (ICanon11 ICanon13) {
+    .class Canon7 implements (ICanon11) {
     }
 
-    .class [unique] Canon13 implements (ICanon11 ICanon13) {
+    .class Canon8 implements (ICanon12) {
     }
 
-    .class [abstract unique] Canon14 {
+    .class Canon9 implements (ICanon11) {
     }
 
-    .class [abstract unique] Canon15 extends Canon14 {
+    .class Canon10 implements (ICanon12 ICanon13) {
     }
 
-    .class [unique] Canon16 extends Canon14 implements (ICanon14) {
+    .class [abstract] Canon11 implements (ICanon12 ICanon13) {
     }
 
-    .class [unique] Canon17 extends Canon14 implements (ICanon14) {
+    .class Canon12 implements (ICanon11 ICanon13) {
     }
 
-    .class [unique] Canon18 implements (ICanon14) {
+    .class Canon13 implements (ICanon11 ICanon13) {
     }
 
-    .class [trait unique "__NoFlatten"("""v:0:{}""")] T1 {
+    .class [abstract] Canon14 {
     }
 
-    .class [trait unique "__NoFlatten"("""v:0:{}""")] T2 implements (ICanon7) {
+    .class [abstract] Canon15 extends Canon14 {
     }
 
-    .class [trait unique "__NoFlatten"("""v:0:{}""")] T3 implements (ICanon7) {
+    .class Canon16 extends Canon14 implements (ICanon14) {
     }
 
-    .class [trait unique "__NoFlatten"("""v:0:{}""")] T4 implements (ICanon8) {
+    .class Canon17 extends Canon14 implements (ICanon14) {
     }
 
-    .class [abstract unique] Abs1 implements (ICanon7) {
+    .class Canon18 implements (ICanon14) {
     }
 
-    .class [abstract unique] Abs2 {
+    .class [trait "__NoFlatten"("""v:0:{}""")] T1 {
+    }
+
+    .class [trait "__NoFlatten"("""v:0:{}""")] T2 implements (ICanon7) {
+    }
+
+    .class [trait "__NoFlatten"("""v:0:{}""")] T3 implements (ICanon7) {
+    }
+
+    .class [trait "__NoFlatten"("""v:0:{}""")] T4 implements (ICanon8) {
+    }
+
+    .class [abstract] Abs1 implements (ICanon7) {
+    }
+
+    .class [abstract] Abs2 {
       .use T4;
     }
 
-    .class [abstract unique] Abs3 {
+    .class [abstract] Abs3 {
     }
 
-    .class [abstract unique] Abs4 {
+    .class [abstract] Abs4 {
     }
 
-    .class [unique] T1_C1 {
+    .class T1_C1 {
       .use T1;
     }
 
-    .class [unique] T4_C1 {
+    .class T4_C1 {
       .use T4;
     }
 
-    .class [unique] Abs3_C1 extends Abs3 {
+    .class Abs3_C1 extends Abs3 {
     }
-    .class [unique] Abs3_C2 extends Abs3_C1 {
+    .class Abs3_C2 extends Abs3_C1 {
     }
-    .class [abstract unique] Abs3_C3 extends Abs3 {
-    }
-
-    .class [unique] Abs4_C1 extends Abs4 {
-    }
-    .class [unique] Abs4_C2 extends Abs4 {
+    .class [abstract] Abs3_C3 extends Abs3 {
     }
 
-    .class [unique] Abs5_P {
+    .class Abs4_C1 extends Abs4 {
     }
-    .class [abstract unique] Abs5 extends Abs5_P {
+    .class Abs4_C2 extends Abs4 {
     }
 
-    .class [unique] Abs6_P {
+    .class Abs5_P {
     }
-    .class [abstract unique] Abs6 extends Abs6_P {
+    .class [abstract] Abs5 extends Abs5_P {
     }
-    .class [unique] Abs6_C1 extends Abs6 {
+
+    .class Abs6_P {
+    }
+    .class [abstract] Abs6 extends Abs6_P {
+    }
+    .class Abs6_C1 extends Abs6 {
     }
 
     .function test() {

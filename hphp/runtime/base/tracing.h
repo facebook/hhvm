@@ -189,6 +189,7 @@ struct RequestState {
   hphp_fast_string_map<Stat> m_stats;
   Clock::duration m_total{};
   size_t m_pauseCount = 0;
+  std::string m_requestGroup = "";
 };
 
 // The current request
@@ -197,6 +198,7 @@ extern THREAD_LOCAL_FLAT(RequestState, tl_active);
 extern std::unique_ptr<RequestImplFactory> s_factory;
 
 RequestState* startRequestImpl(folly::StringPiece,
+                               folly::StringPiece,
                                folly::StringPiece);
 BlockState& startBlockNoTraceImpl(folly::StringPiece);
 void stopBlockImpl();
@@ -211,8 +213,9 @@ BlockState& addPointNoTraceImpl(folly::StringPiece);
 template <typename F = detail::EmptyProps>
 inline void startRequest(folly::StringPiece name,
                          folly::StringPiece url,
+                         folly::StringPiece group,
                          F f = F()) {
-  auto active = detail::startRequestImpl(name, url);
+  auto active = detail::startRequestImpl(name, url, group);
   if (active && active->m_impl) {
     // Provide properties to backend if its enabled.
     auto const props = f();
@@ -364,10 +367,19 @@ struct Request {
   template <typename F = detail::EmptyProps>
   explicit Request(folly::StringPiece name,
                    folly::StringPiece url,
+                   folly::StringPiece group,
                    F f = F())
   {
-    startRequest(name, url, f);
+    startRequest(name, url, group, f);
   }
+
+  template <typename F = detail::EmptyProps>
+  explicit Request(folly::StringPiece name,
+                   folly::StringPiece url,
+                   F f = F())
+  : Request(name, url, "", std::forward<F>(f))
+  {}
+
   ~Request() { stopRequest(); }
 
   Request(const Request&) = delete;

@@ -143,6 +143,7 @@ way to determine how much progress the server made.
 #include "hphp/runtime/base/stream-wrapper.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/request-info.h"
+#include "hphp/runtime/base/tracing.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-variant.h"
@@ -176,6 +177,8 @@ way to determine how much progress the server made.
 #include <sys/xattr.h>
 
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/uuid/uuid_io.hpp>
+#include <boost/uuid/uuid_generators.hpp>
 
 
 TRACE_SET_MOD(clisrv);
@@ -886,6 +889,7 @@ Array init_cli_globals(int argc, char** argv,
 
 template<class Init, class Run, class Finish, class Teardown>
 void runInContext(CLIContext&& ctx,
+                  bool xbox,
                   bool enableBackgroundPSP,
                   Init&& init,
                   Run&& run,
@@ -912,6 +916,13 @@ void runInContext(CLIContext&& ctx,
   for (auto& e : shared->envp) envp.emplace_back(e.data());
   argv.emplace_back(nullptr);
   envp.emplace_back(nullptr);
+
+  tracing::Request _{
+    xbox ? "cli-server-request-xbox" : "cli-server-request",
+    argv[0],
+    shared->uuid,
+    [&] { return tracing::Props{}.add("file", argv[0]); }
+  };
 
   init(shared->cwd, argv);
   load_ini_settings(shared->ini);
@@ -975,7 +986,8 @@ void CLIWorker::doJob(int client) {
   try {
     runInContext(
       CLIContext::initFromClient(client),
-      true,
+      false, // xbox
+      true,  // enableBackgroundPSP
       [&] (const std::string& cwd, std::vector<char*>& argv) {
         init_command_line_session(argv.size() - 1, &argv[0]);
         g_context->setCwd(cwd);
@@ -1915,6 +1927,7 @@ CLIContext CLIContext::initFromClient(int client) {
 
   data.client = client;
   shared.user = cli_read_ucred(client);
+  shared.uuid = boost::uuids::to_string(boost::uuids::random_generator()());
 
   // Throw if the client is not authorized to access the CLI server
   check_cli_server_access(shared.user);
@@ -2153,7 +2166,8 @@ void cli_invoke(
   try {
     runInContext(
       std::move(ctx),
-      true,
+      true, // xbox
+      true, // enableBackgroundPSP
       [&] (const std::string& cwd, std::vector<char*>&) {
         g_context->setCwd(cwd);
       },

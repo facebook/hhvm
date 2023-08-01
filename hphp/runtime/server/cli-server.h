@@ -105,6 +105,7 @@ struct CLIContext {
     folly::dynamic ini;
     Flags flags{Flags::None};
     std::filesystem::path repo;
+    std::string uuid;
   };
 
   ~CLIContext();

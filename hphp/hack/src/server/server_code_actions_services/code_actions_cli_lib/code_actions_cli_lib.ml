@@ -50,11 +50,7 @@ let patched_text_of_command_or_action ~source_text path = function
   | CodeAction.Command _ ->
     None
 
-(** Corresponds experimental snippetTextEdit LSP client capability.
-We test the `true` and `false` paths in D47348001 *)
-let use_snippet_edits = true
-
-let run_exn ctx entry range ~title_prefix =
+let run_exn ctx entry range ~title_prefix ~use_snippet_edits =
   let commands_or_actions =
     Server_code_actions_services.go ~ctx ~entry ~range
   in
@@ -139,7 +135,7 @@ let run_exn ctx entry range ~title_prefix =
       Printf.printf "\nNo code action titles match prefix: %s\n" title_prefix
   end
 
-let run ctx entry range ~title_prefix =
-  match run_exn ctx entry range ~title_prefix with
+let run ctx entry range ~title_prefix ~use_snippet_edits =
+  match run_exn ctx entry range ~title_prefix ~use_snippet_edits with
   | exception exn -> print_endline @@ Exn.to_string exn
   | () -> ()

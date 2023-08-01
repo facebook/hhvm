@@ -47,7 +47,10 @@ type mode =
   | Dump_dep_hashes
   | Get_some_file_deps of int
   | Identify_symbol of int * int
-  | Ide_code_actions of string
+  | Ide_code_actions of {
+      title_prefix: string;
+      use_snippet_edits: bool;
+    }
   | Find_local of int * int
   | Get_member of string
   | Outline
@@ -427,8 +430,19 @@ let parse_options () =
       );
       ( "--ide-code-actions",
         Arg.String
-          (fun title_prefix -> set_mode (Ide_code_actions title_prefix) ()),
+          (fun title_prefix ->
+            set_mode
+              (Ide_code_actions { title_prefix; use_snippet_edits = true })
+              ()),
         "<title_prefix> Apply a code action with the given title prefix to the given file, where the selection is indicated with markers in comments (see tests)"
+      );
+      ( "--ide-code-actions-no-experimental-capabilities",
+        Arg.String
+          (fun title_prefix ->
+            set_mode
+              (Ide_code_actions { title_prefix; use_snippet_edits = false })
+              ()),
+        "<title_prefix> Like --ide-code-actions, but do not use any nonstandard LSP features (experimental capabilities)."
       );
       ( "--identify-symbol",
         (let line = ref 0 in
@@ -2032,12 +2046,12 @@ let handle_mode
       | [] -> print_endline "None"
       | result -> ClientGetDefinition.print_readable ~short_pos:true result
     end
-  | Ide_code_actions title_prefix ->
+  | Ide_code_actions { title_prefix; use_snippet_edits } ->
     let path = expect_single_file () in
     let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
     let src = Provider_context.read_file_contents_exn entry in
     let range = find_ide_range src in
-    Code_actions_cli_lib.run ctx entry range ~title_prefix
+    Code_actions_cli_lib.run ctx entry range ~title_prefix ~use_snippet_edits
   | Find_local (line, char) ->
     let filename = expect_single_file () in
     let (ctx, entry) =

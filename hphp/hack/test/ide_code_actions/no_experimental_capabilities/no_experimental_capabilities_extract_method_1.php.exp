@@ -1,0 +1,48 @@
+Code actions available:
+------------------------------------------
+Extract into method (CodeActionKind: refactor) SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"  private function method0(int $x): int {\n    $y = $x + 1;\n    $z = $y + 1;\n    return $z;\n  }\n\n",
+          "range":{"end":{"character":0,"line":3},"start":{"character":0,"line":3}}
+        },
+        {
+          "newText":"$z = $this->method0($x);",
+          "range":{"end":{"character":16,"line":9},"start":{"character":4,"line":8}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Extract into method"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+class A {
+  private function method0(int $x): int {
+    $y = $x + 1;
+    $z = $y + 1;
+    return $z;
+  }
+
+  public function foo(int $x): void {
+    // The extracted method should *NOT* contain snippets (like `${0:placeholder}`),
+    // because we are passing `--ide-code-actions-no-experimental-capabilities` to simulate
+    // a client that doesn't have client experimental capability `snippetTextEdit`
+    /*range-start*/
+    $z = $this->method0($x);
+    /*range-end*/
+    $zz = $z;
+  }
+}
+

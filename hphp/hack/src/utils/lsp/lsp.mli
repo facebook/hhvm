@@ -345,11 +345,19 @@ module Initialize : sig
   end
 
   module ServerExperimentalCapabilities : sig
-    type t = { snippetTextEdit: bool }
+    type t = {
+      snippetTextEdit: bool;
+          (** see ClientExperimentalCapabilities.snippetTextEdit *)
+    }
   end
 
   module ClientExperimentalCapabilities : sig
-    type t = { snippetTextEdit: bool }
+    type t = {
+      snippetTextEdit: bool;
+          (** A client that supports this capability accepts snippet text edits like `${0:foo}`.
+       * https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#snippet_syntax
+       **)
+    }
   end
 
   type params = {

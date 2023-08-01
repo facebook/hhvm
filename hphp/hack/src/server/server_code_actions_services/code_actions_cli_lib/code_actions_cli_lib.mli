@@ -15,4 +15,6 @@ val run :
   Provider_context.entry ->
   Ide_api_types.range ->
   title_prefix:string ->
+  use_snippet_edits:bool ->
+  (* Corresponds experimental snippetTextEdit LSP client capability.*)
   unit

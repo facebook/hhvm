@@ -61,7 +61,9 @@ let update_files
     ~(sienv : si_env)
     ~(paths : (Relative_path.t * FileInfo.t * file_source) list) : si_env =
   match sienv.sie_provider with
-  | NoIndex -> sienv
+  | NoIndex
+  | MockIndex _ ->
+    sienv
   | CustomIndex
   | LocalIndex
   | SqliteIndex ->
@@ -78,7 +80,9 @@ type paths_with_addenda =
 let update_from_addenda
     ~(sienv : si_env) ~(paths_with_addenda : paths_with_addenda) : si_env =
   match sienv.sie_provider with
-  | NoIndex -> sienv
+  | NoIndex
+  | MockIndex _ ->
+    sienv
   | CustomIndex
   | LocalIndex
   | SqliteIndex ->
@@ -98,7 +102,9 @@ let update_from_addenda
 let remove_files ~(sienv : SearchUtils.si_env) ~(paths : Relative_path.Set.t) :
     si_env =
   match sienv.sie_provider with
-  | NoIndex -> sienv
+  | NoIndex
+  | MockIndex _ ->
+    sienv
   | CustomIndex
   | LocalIndex
   | SqliteIndex ->

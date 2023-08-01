@@ -7,7 +7,7 @@
  *
  *)
 
-(* Get or set the currently selected search provider *)
+(** Get or set the currently selected search provider *)
 val initialize :
   gleanopt:GleanOptions.t ->
   namespace_map:(string * string) list ->
@@ -17,7 +17,16 @@ val initialize :
   workers:MultiWorker.worker list option ->
   SearchUtils.si_env
 
-(* This is the proper search function everyone should use *)
+(** Constructs+returns a mockable symbol-index *)
+val mock :
+  on_find:
+    (query_text:string ->
+    context:SearchTypes.autocomplete_type ->
+    kind_filter:SearchTypes.si_kind option ->
+    SearchTypes.si_item list) ->
+  SearchUtils.si_env
+
+(** This is the proper search function everyone should use *)
 val find_matching_symbols :
   sienv_ref:SearchUtils.si_env ref ->
   query_text:string ->

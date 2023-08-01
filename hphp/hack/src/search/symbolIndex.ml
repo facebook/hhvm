@@ -39,6 +39,7 @@ let initialize
         ~namespace_map
     | CustomIndex -> CustomSearchService.initialize ~sienv
     | NoIndex
+    | MockIndex _
     | LocalIndex ->
       sienv
   in
@@ -48,6 +49,7 @@ let initialize
     | SqliteIndex -> SqliteSearchService.fetch_namespaces ~sienv
     | CustomIndex -> CustomSearchService.fetch_namespaces ~sienv
     | NoIndex
+    | MockIndex _
     | LocalIndex ->
       []
   in
@@ -66,6 +68,13 @@ let initialize
       (SearchUtils.descriptive_name_of_provider sienv.sie_provider)
       provider_name;
   sienv
+
+let mock ~on_find =
+  {
+    SearchUtils.default_si_env with
+    sie_provider = SearchUtils.MockIndex { mock_on_find = on_find };
+    sie_quiet_mode = true;
+  }
 
 (*
  * Core search function
@@ -113,7 +122,9 @@ let find_matching_symbols
      * that we haven't seen before *)
     let local_results =
       match !sienv_ref.sie_provider with
-      | NoIndex -> []
+      | NoIndex
+      | MockIndex _ ->
+        []
       | CustomIndex
       | LocalIndex
       | SqliteIndex ->
@@ -153,6 +164,8 @@ let find_matching_symbols
           else
             SearchTypes.Incomplete;
         LocalSearchService.extract_dead_results ~sienv:!sienv_ref ~results
+      | MockIndex { mock_on_find } ->
+        mock_on_find ~query_text ~context ~kind_filter
       | LocalIndex
       | NoIndex ->
         []

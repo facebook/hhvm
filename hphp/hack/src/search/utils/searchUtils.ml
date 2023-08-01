@@ -9,10 +9,18 @@
 open Reordered_argument_collections
 open SearchTypes
 
+type mock_on_find =
+  query_text:string ->
+  context:SearchTypes.autocomplete_type ->
+  kind_filter:SearchTypes.si_kind option ->
+  SearchTypes.si_item list
+
 (* Known search providers *)
 type search_provider =
   | CustomIndex
   | NoIndex
+  | MockIndex of { mock_on_find: mock_on_find [@opaque] }
+      (** used in testing and debugging *)
   | SqliteIndex
   | LocalIndex
 [@@deriving show]
@@ -22,6 +30,7 @@ let provider_of_string (provider_str : string) : search_provider =
   match provider_str with
   | "SqliteIndex" -> SqliteIndex
   | "NoIndex" -> NoIndex
+  | "MockIndex" -> failwith ("unsupported provider " ^ provider_str)
   | "CustomIndex" -> CustomIndex
   | "LocalIndex" -> LocalIndex
   | _ -> SqliteIndex
@@ -31,6 +40,7 @@ let descriptive_name_of_provider (provider : search_provider) : string =
   match provider with
   | CustomIndex -> "Custom symbol index"
   | NoIndex -> "Symbol index disabled"
+  | MockIndex _ -> "Mock index"
   | SqliteIndex -> "Sqlite"
   | LocalIndex -> "Local file index only"
 
@@ -186,6 +196,8 @@ type si_env = {
   sie_resolve_signatures: bool;
   sie_resolve_positions: bool;
   sie_resolve_local_decl: bool;
+  (* MockIndex *)
+  mock_on_find: mock_on_find;
   (* LocalSearchService *)
   lss_fullitems: si_capture Relative_path.Map.t;
   lss_tombstones: Relative_path.Set.t;
@@ -221,6 +233,8 @@ let default_si_env =
     sie_resolve_signatures = false;
     sie_resolve_positions = false;
     sie_resolve_local_decl = false;
+    (* MockIndex *)
+    mock_on_find = (fun ~query_text:_ ~context:_ ~kind_filter:_ -> []);
     (* LocalSearchService *)
     lss_fullitems = Relative_path.Map.empty;
     lss_tombstones = Relative_path.Set.empty;

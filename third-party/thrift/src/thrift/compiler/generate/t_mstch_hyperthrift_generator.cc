@@ -117,9 +117,7 @@ class t_mstch_hyperthrift_generator : public t_mstch_generator {
     }
     auto raw_package_dir = boost::filesystem::path{
         java::package_to_path(get_namespace_or_default(*program))};
-    auto package_dir = has_option("separate_data_type_from_services")
-        ? "data-type" / raw_package_dir
-        : raw_package_dir;
+    auto package_dir = "java" / raw_package_dir;
     std::string package_name = get_namespace_or_default(*program_);
 
     for (const T* item : items) {
@@ -131,12 +129,6 @@ class t_mstch_hyperthrift_generator : public t_mstch_generator {
       }
 
       render_to_file(c[item_id], tpl_path, package_dir / filename);
-
-      auto uri = item->uri();
-      if (!uri.empty()) {
-        type_list.push_back(type_mapping{uri, package_name + "." + classname});
-        str_type_list += uri;
-      }
     }
   }
 
@@ -150,9 +142,7 @@ class t_mstch_hyperthrift_generator : public t_mstch_generator {
 
     auto raw_package_dir = boost::filesystem::path{
         java::package_to_path(get_namespace_or_default(*program))};
-    auto package_dir = has_option("separate_data_type_from_services")
-        ? "data-type" / raw_package_dir
-        : raw_package_dir;
+    auto package_dir = "java" / raw_package_dir;
     auto constant_file_name = "Constants.java";
     render_to_file(prog, "constants", package_dir / constant_file_name);
   }

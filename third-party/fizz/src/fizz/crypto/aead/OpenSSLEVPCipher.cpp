@@ -91,58 +91,6 @@ void encFunc(
   }
 }
 
-bool decFuncBlocks(
-    EVP_CIPHER_CTX* decryptCtx,
-    const folly::IOBuf& ciphertext,
-    folly::IOBuf& output,
-    folly::MutableByteRange tagOut) {
-  if (EVP_CIPHER_CTX_ctrl(
-          decryptCtx,
-          EVP_CTRL_GCM_SET_TAG,
-          tagOut.size(),
-          static_cast<void*>(tagOut.begin())) != 1) {
-    throw std::runtime_error("Decryption error");
-  }
-
-  size_t totalWritten = 0;
-  size_t totalInput = 0;
-  int outLen = 0;
-  auto outputCursor = transformBufferBlocks<16>(
-      ciphertext,
-      output,
-      [&](uint8_t* plain, const uint8_t* cipher, size_t len) {
-        if (len > std::numeric_limits<int>::max()) {
-          throw std::runtime_error("Decryption error: too much cipher text");
-        }
-        if (EVP_DecryptUpdate(
-                decryptCtx, plain, &outLen, cipher, static_cast<int>(len)) !=
-            1) {
-          throw std::runtime_error("Decryption error");
-        }
-        totalWritten += outLen;
-        totalInput += len;
-        return static_cast<size_t>(outLen);
-      });
-
-  // We might end up needing to write more in the final encrypt stage
-  auto numBuffered = totalInput - totalWritten;
-  auto numLeftInOutput = outputCursor.length();
-  if (numBuffered <= numLeftInOutput) {
-    auto res =
-        EVP_DecryptFinal_ex(decryptCtx, outputCursor.writableData(), &outLen);
-    return res == 1;
-  } else {
-    // we need to copy nicely - this should be at most one block
-    std::array<uint8_t, 16> block = {};
-    auto res = EVP_DecryptFinal_ex(decryptCtx, block.data(), &outLen);
-    if (res != 1) {
-      return false;
-    }
-    outputCursor.push(block.data(), outLen);
-    return true;
-  }
-}
-
 bool decFunc(
     EVP_CIPHER_CTX* decryptCtx,
     const folly::IOBuf& ciphertext,
@@ -330,9 +278,34 @@ folly::Optional<std::unique_ptr<folly::IOBuf>> evpDecrypt(
     }
   }
 
-  auto decrypted = useBlockOps
-      ? decFuncBlocks(decryptCtx, *input, *output, tagOut)
-      : decFunc(decryptCtx, *input, *output, tagOut);
+  bool decrypted;
+  if (useBlockOps) {
+    struct Impl {
+      EVP_CIPHER_CTX* decryptCtx;
+      bool decryptUpdate(
+          uint8_t* plain,
+          const uint8_t* cipher,
+          size_t len,
+          int* outLen) {
+        return EVP_DecryptUpdate(
+                   decryptCtx, plain, outLen, cipher, static_cast<int>(len)) ==
+            1;
+      }
+      bool setExpectedTag(int tagSize, unsigned char* tag) {
+        return EVP_CIPHER_CTX_ctrl(
+                   decryptCtx,
+                   EVP_CTRL_GCM_SET_TAG,
+                   tagSize,
+                   static_cast<void*>(tag)) == 1;
+      }
+      bool decryptFinal(unsigned char* outm, int* outLen) {
+        return EVP_DecryptFinal_ex(decryptCtx, outm, outLen) == 1;
+      }
+    };
+    decrypted = decFuncBlocks<16>(Impl{decryptCtx}, *input, *output, tagOut);
+  } else {
+    decrypted = decFunc(decryptCtx, *input, *output, tagOut);
+  }
   if (!decrypted) {
     return folly::none;
   }

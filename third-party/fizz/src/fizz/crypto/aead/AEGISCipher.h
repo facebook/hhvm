@@ -25,26 +25,6 @@ namespace fizz {
 class AEGISCipher : public Aead {
  public:
   using AegisEVPCtx = fizz_aegis_evp_ctx;
-  using EncryptFn = int (*const)(
-      unsigned char* c,
-      unsigned long long* clen_p,
-      const unsigned char* m,
-      unsigned long long mlen,
-      const unsigned char* ad,
-      unsigned long long adlen,
-      const unsigned char* nsec,
-      const unsigned char* npub,
-      const unsigned char* k);
-  using DecryptFn = int (*const)(
-      unsigned char* m,
-      unsigned long long* mlen_p,
-      unsigned char* nsec,
-      const unsigned char* c,
-      unsigned long long clen,
-      const unsigned char* ad,
-      unsigned long long adlen,
-      const unsigned char* npub,
-      const unsigned char* k);
   using InitStateFn = int (*const)(
       const unsigned char* key,
       const unsigned char* nonce,
@@ -79,6 +59,8 @@ class AEGISCipher : public Aead {
 
   static constexpr size_t kMaxIVLength = 32;
   static constexpr size_t kTagLength = 16;
+  static constexpr size_t kAEGIS28LStateSize = 32;
+  static constexpr size_t kAEGIS256StateSize = 16;
 
   static std::unique_ptr<Aead> make128L();
   static std::unique_ptr<Aead> make256();
@@ -93,6 +75,14 @@ class AEGISCipher : public Aead {
   size_t ivLength() const override {
     return ivLength_;
   }
+
+  folly::Optional<std::unique_ptr<folly::IOBuf>> doDecrypt(
+      std::unique_ptr<folly::IOBuf>&& ciphertext,
+      const folly::IOBuf* associatedData,
+      folly::ByteRange iv,
+      folly::ByteRange key,
+      folly::MutableByteRange tagOut,
+      bool inPlace) const;
 
   std::unique_ptr<folly::IOBuf> encrypt(
       std::unique_ptr<folly::IOBuf>&& plaintext,
@@ -130,9 +120,16 @@ class AEGISCipher : public Aead {
     headroom_ = headroom;
   }
 
+  InitStateFn initstate_;
+  AadUpdateFn aadUpdate_;
+  AadFinalFn aadFinal_;
+  EncryptUpdateFn encryptUpdate_;
+  EncryptFinalFn encryptFinal_;
+  DecryptUpdateFn decryptUpdate_;
+  DecryptFinalFn decryptFinal_;
+
  private:
   AEGISCipher(
-      DecryptFn decrypt,
       InitStateFn init,
       AadUpdateFn aadUpdate,
       AadFinalFn aadFinal_,
@@ -142,26 +139,21 @@ class AEGISCipher : public Aead {
       DecryptFinalFn decryptFinal,
       size_t keyLength,
       size_t ivLength,
-      size_t tagLength);
+      size_t tagLength,
+      size_t stateSize);
 
   TrafficKey trafficKey_;
   folly::ByteRange trafficIvKey_;
   folly::ByteRange trafficKeyKey_;
-  size_t headroom_{0};
+  /* When allocating a new IOBUF for encryption, we need to save 5 bytes of
+  headroom for TLS 1.3 record header. */
+  size_t headroom_{5};
 
   // set by the ctor
-  DecryptFn decrypt_;
-  InitStateFn initstate_;
-  AadUpdateFn aadUpdate_;
-  AadFinalFn aadFinal_;
-  EncryptUpdateFn encryptUpdate_;
-  EncryptFinalFn encryptFinal_;
-  DecryptUpdateFn decryptUpdate_;
-  DecryptFinalFn decryptFinal_;
-  AegisEVPCtx ctx_;
   size_t keyLength_;
   size_t ivLength_;
   size_t tagLength_;
+  int stateSize_;
 };
 } // namespace fizz
 #endif

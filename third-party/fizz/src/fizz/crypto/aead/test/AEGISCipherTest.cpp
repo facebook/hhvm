@@ -48,6 +48,57 @@ std::unique_ptr<Aead> getTestCipher(const AEGISCipherParams& params) {
   return cipher;
 }
 
+std::list<Aead::AeadOptions> getOptionPairs() {
+  std::list<Aead::AeadOptions> out;
+  for (auto aOpt :
+       {Aead::AllocationOption::Allow, Aead::AllocationOption::Deny}) {
+    for (auto bOpt :
+         {Aead::BufferOption::RespectSharedPolicy,
+          Aead::BufferOption::AllowInPlace,
+          Aead::BufferOption::AllowFullModification}) {
+      out.push_back({bOpt, aOpt});
+    }
+  }
+  return out;
+}
+
+std::unique_ptr<IOBuf> callDecrypt(
+    std::unique_ptr<Aead>& cipher,
+    const AEGISCipherParams& params,
+    std::unique_ptr<IOBuf> ciphertext = nullptr,
+    Aead::BufferOption buffOption = Aead::BufferOption::RespectSharedPolicy,
+    Aead::AllocationOption allocOption = Aead::AllocationOption::Allow,
+    bool throwExceptions = false,
+    std::unique_ptr<IOBuf> aad = nullptr) {
+  if (!ciphertext) {
+    ciphertext = toIOBuf(params.ciphertext);
+  }
+  if (!aad && !params.aad.empty()) {
+    aad = toIOBuf(params.aad);
+  }
+  try {
+    auto origLength = ciphertext->computeChainDataLength();
+    auto nonce_iobuf = toIOBuf(params.iv);
+    auto nonce = folly::ByteRange(nonce_iobuf->data(), nonce_iobuf->length());
+    auto out = cipher->decrypt(
+        std::move(ciphertext), aad.get(), nonce, {buffOption, allocOption});
+    EXPECT_TRUE(params.valid);
+    EXPECT_TRUE(IOBufEqualTo()(toIOBuf(params.plaintext), out));
+    EXPECT_EQ(
+        out->computeChainDataLength(),
+        origLength - cipher->getCipherOverhead());
+    return out;
+  } catch (const std::runtime_error&) {
+    if (throwExceptions) {
+      // Indicates test case wants to receive any exceptions thrown
+      throw;
+    } else {
+      EXPECT_FALSE(params.valid);
+    }
+    return nullptr;
+  }
+}
+
 TEST_P(AEGISCipherTest, TestEncrypt) {
   std::unique_ptr<Aead> cipher = getTestCipher(GetParam());
   auto plaintext = toIOBuf(GetParam().plaintext);
@@ -60,25 +111,6 @@ TEST_P(AEGISCipherTest, TestEncrypt) {
   EXPECT_EQ(valid, GetParam().valid);
   EXPECT_EQ(
       out->computeChainDataLength(), origLength + cipher->getCipherOverhead());
-}
-
-TEST_P(AEGISCipherTest, TestDecrypt) {
-  auto cipher = getTestCipher(GetParam());
-  auto ciphertext = toIOBuf(GetParam().ciphertext);
-  auto aad = toIOBuf(GetParam().aad);
-  auto nonce_iobuf = toIOBuf(GetParam().iv);
-  auto nonce = folly::ByteRange(nonce_iobuf->data(), nonce_iobuf->length());
-  auto origLength = ciphertext->computeChainDataLength();
-  try {
-    auto out = cipher->decrypt(std::move(ciphertext), aad.get(), nonce);
-    EXPECT_TRUE(GetParam().valid);
-    EXPECT_TRUE(IOBufEqualTo()(toIOBuf(GetParam().plaintext), out));
-    EXPECT_EQ(
-        out->computeChainDataLength(),
-        origLength - cipher->getCipherOverhead());
-  } catch (const std::runtime_error&) {
-    EXPECT_FALSE(GetParam().valid);
-  }
 }
 
 TEST_P(AEGISCipherTest, TestEncryptChunkedAad) {
@@ -118,24 +150,151 @@ TEST_P(AEGISCipherTest, TestEncryptChunkedInput) {
   }
 }
 
+TEST_P(AEGISCipherTest, TestDecrypt) {
+  for (auto opts : getOptionPairs()) {
+    // Should work for all modes (contiguous unshared buf)
+    auto cipher = getTestCipher(GetParam());
+    auto output = toIOBuf(GetParam().ciphertext);
+    auto cipherLen = output->length();
+    auto out =
+        callDecrypt(cipher, GetParam(), nullptr, opts.bufferOpt, opts.allocOpt);
+    if (out) {
+      EXPECT_FALSE(out->isChained());
+      EXPECT_FALSE(out->isShared());
+      EXPECT_EQ(out->length(), cipherLen - cipher->getCipherOverhead());
+    }
+  }
+}
+
+TEST_P(AEGISCipherTest, TestDecryptReusedCipher) {
+  for (auto opts : getOptionPairs()) {
+    // Same as before
+    auto cipher = getTestCipher(GetParam());
+    auto params = GetParam();
+    callDecrypt(cipher, params, nullptr, opts.bufferOpt, opts.allocOpt);
+    callDecrypt(cipher, GetParam(), nullptr, opts.bufferOpt, opts.allocOpt);
+  }
+}
+
+TEST_P(AEGISCipherTest, TestDecryptInputTooSmall) {
+  for (auto opts : getOptionPairs()) {
+    // This should behave identically (the input size check comes early)
+    auto cipher = getTestCipher(GetParam());
+    auto in = IOBuf::copyBuffer("in");
+    auto paramsCopy = GetParam();
+    paramsCopy.valid = false;
+    callDecrypt(
+        cipher, paramsCopy, std::move(in), opts.bufferOpt, opts.allocOpt);
+  }
+}
+
 TEST_P(AEGISCipherTest, TestDecryptChunkedInput) {
-  std::unique_ptr<Aead> cipher = getTestCipher(GetParam());
-  auto origLength = toIOBuf(GetParam().ciphertext)->computeChainDataLength();
-  auto aad = toIOBuf(GetParam().aad);
-  auto nonce_iobuf = toIOBuf(GetParam().iv);
-  auto nonce = folly::ByteRange(nonce_iobuf->data(), nonce_iobuf->length());
-  for (size_t i = 2; i < origLength; i++) {
-    auto ciphertext = toIOBuf(GetParam().ciphertext);
-    auto chunkedInput = chunkIOBuf(std::move(ciphertext), i);
-    try {
-      auto out = cipher->decrypt(std::move(chunkedInput), aad.get(), nonce);
-      bool valid = IOBufEqualTo()(toIOBuf(GetParam().plaintext), out);
-      EXPECT_EQ(valid, GetParam().valid);
-      EXPECT_EQ(
-          out->computeChainDataLength(),
-          origLength - cipher->getCipherOverhead());
-    } catch (const std::runtime_error&) {
-      EXPECT_FALSE(GetParam().valid);
+  for (auto opts : getOptionPairs()) {
+    std::unique_ptr<Aead> cipher = getTestCipher(GetParam());
+    auto origLength = toIOBuf(GetParam().ciphertext)->computeChainDataLength();
+    auto aad = toIOBuf(GetParam().aad);
+    for (size_t i = 2; i < origLength; i++) {
+      auto ciphertext = toIOBuf(GetParam().ciphertext);
+      auto chunkedInput = chunkIOBuf(std::move(ciphertext), i);
+      auto lastBufLength = chunkedInput->prev()->length();
+      if (opts.allocOpt == Aead::AllocationOption::Deny &&
+          lastBufLength < cipher->getCipherOverhead()) {
+        // If the last buf isn't big enough to hold the entire tag and
+        // allocation isn't allowed, decrypt will fail
+        EXPECT_THROW(
+            callDecrypt(
+                cipher,
+                GetParam(),
+                std::move(chunkedInput),
+                opts.bufferOpt,
+                opts.allocOpt,
+                true),
+            std::runtime_error);
+      } else {
+        // In all other cases this should always succeed
+        callDecrypt(
+            cipher,
+            GetParam(),
+            std::move(chunkedInput),
+            opts.bufferOpt,
+            opts.allocOpt);
+      }
+    }
+  }
+}
+
+TEST_P(AEGISCipherTest, TestDecryptWithChunkedSharedInput) {
+  for (auto opts : getOptionPairs()) {
+    std::unique_ptr<Aead> cipher = getTestCipher(GetParam());
+    auto origLength = toIOBuf(GetParam().ciphertext)->computeChainDataLength();
+    auto aad = toIOBuf(GetParam().aad);
+    for (size_t i = 2; i < origLength; i++) {
+      auto ciphertext = toIOBuf(GetParam().ciphertext);
+      auto chunkedInput = chunkIOBuf(std::move(ciphertext), i);
+      auto lastBufLength = chunkedInput->prev()->length();
+      if (opts.allocOpt == Aead::AllocationOption::Deny &&
+          (lastBufLength < cipher->getCipherOverhead() ||
+           opts.bufferOpt == Aead::BufferOption::RespectSharedPolicy)) {
+        // If the last buf isn't big enough to hold the entire tag and
+        // allocation isn't allowed, decrypt will fail
+        EXPECT_THROW(
+            callDecrypt(
+                cipher,
+                GetParam(),
+                chunkedInput->clone(),
+                opts.bufferOpt,
+                opts.allocOpt,
+                true),
+            std::runtime_error);
+      } else {
+        // In all other cases this should always succeed
+        auto out = callDecrypt(
+            cipher,
+            GetParam(),
+            chunkedInput->clone(),
+            opts.bufferOpt,
+            opts.allocOpt);
+        if (out) {
+          // for valid cases:
+          EXPECT_EQ(
+              out->computeChainDataLength(),
+              chunkedInput->computeChainDataLength() -
+                  cipher->getCipherOverhead());
+          if (opts.bufferOpt != Aead::BufferOption::RespectSharedPolicy) {
+            // In-place edit
+            EXPECT_EQ(chunkedInput->data(), out->data());
+            EXPECT_TRUE(out->isChained());
+            EXPECT_TRUE(out->isShared());
+            EXPECT_EQ(
+                out->countChainElements(), chunkedInput->countChainElements());
+          } else {
+            // New buffer.
+            EXPECT_NE(chunkedInput->data(), out->data());
+            EXPECT_FALSE(out->isChained());
+            EXPECT_FALSE(out->isShared());
+          }
+        }
+      }
+    }
+  }
+}
+
+TEST_P(AEGISCipherTest, TestDecryptWithChunkedAad) {
+  for (auto opts : getOptionPairs()) {
+    // Behaviorally same as the regular decrypt test wrt variations
+    auto cipher = getTestCipher(GetParam());
+    auto aadLength = toIOBuf(GetParam().aad)->computeChainDataLength();
+    for (size_t i = 2; i < aadLength; i++) {
+      auto aad = toIOBuf(GetParam().aad);
+      auto chunkedAad = chunkIOBuf(std::move(aad), i);
+      callDecrypt(
+          cipher,
+          GetParam(),
+          nullptr,
+          opts.bufferOpt,
+          opts.allocOpt,
+          false,
+          std::move(chunkedAad));
     }
   }
 }

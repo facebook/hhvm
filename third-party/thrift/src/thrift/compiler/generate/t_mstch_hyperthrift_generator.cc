@@ -46,6 +46,7 @@ std::string get_namespace_or_default(const t_program& prog) {
   if (hyperthrift_namespace != "") {
     return hyperthrift_namespace;
   }
+  // Fallback to java namespace if hyperthrift namespace is not found.
   auto java_namespace =
       boost::algorithm::join(prog.gen_namespace_or_default("java", {}), ".");
   if (java_namespace != "") {
@@ -86,7 +87,6 @@ struct type_mapping {
 
 std::vector<type_mapping> type_list;
 
-std::set<std::string> adapterDefinitionSet;
 std::string prevTypeName;
 
 } // namespace
@@ -120,7 +120,6 @@ class t_mstch_hyperthrift_generator : public t_mstch_generator {
     auto package_dir = has_option("separate_data_type_from_services")
         ? "data-type" / raw_package_dir
         : raw_package_dir;
-
     std::string package_name = get_namespace_or_default(*program_);
 
     for (const T* item : items) {
@@ -154,7 +153,6 @@ class t_mstch_hyperthrift_generator : public t_mstch_generator {
     auto package_dir = has_option("separate_data_type_from_services")
         ? "data-type" / raw_package_dir
         : raw_package_dir;
-
     auto constant_file_name = "Constants.java";
     render_to_file(prog, "constants", package_dir / constant_file_name);
   }
@@ -485,21 +483,6 @@ class mstch_hyperthrift_type : public mstch_type {
             {"type:isMapValue?", &mstch_hyperthrift_type::get_map_value_flag},
             {"type:isBinaryString?", &mstch_hyperthrift_type::is_binary_string},
             {"type:setIsNotMap", &mstch_hyperthrift_type::set_is_not_map},
-            {"type:hasAdapter?", &mstch_hyperthrift_type::has_type_adapter},
-            {"type:adapterClassName",
-             &mstch_hyperthrift_type::get_structured_adapter_class_name},
-            {"type:typeClassName",
-             &mstch_hyperthrift_type::get_structured_type_class_name},
-            {"type:setAdapter", &mstch_hyperthrift_type::set_adapter},
-            {"type:unsetAdapter", &mstch_hyperthrift_type::unset_adapter},
-            {"type:isAdapterSet?", &mstch_hyperthrift_type::is_adapter_set},
-            {"type:addAdapter", &mstch_hyperthrift_type::add_type_adapter},
-            {"type:adapterDefined?",
-             &mstch_hyperthrift_type::is_type_adapter_defined},
-            {"type:lastAdapter?",
-             &mstch_hyperthrift_type::is_last_type_adapter},
-            {"type:setTypeName", &mstch_hyperthrift_type::set_type_name},
-            {"type:getTypeName", &mstch_hyperthrift_type::get_type_name},
         });
   }
   bool isMapValueFlag = false;
@@ -533,10 +516,6 @@ class mstch_hyperthrift_type : public mstch_type {
     return type_->get_true_type()->get_annotation("java.swift.binary_string");
   }
 
-  mstch::node has_type_adapter() {
-    return has_structured_annotation(kJavaAdapterUri);
-  }
-
   mstch::node has_structured_annotation(const char* uri) {
     if (type_->is_typedef()) {
       if (auto annotation =
@@ -546,86 +525,6 @@ class mstch_hyperthrift_type : public mstch_type {
     }
     return false;
   }
-
-  mstch::node get_structured_adapter_class_name() {
-    return get_structed_annotation_attribute(
-        kJavaAdapterUri, "adapterClassName");
-  }
-
-  mstch::node get_structured_type_class_name() {
-    return get_structed_annotation_attribute(kJavaAdapterUri, "typeClassName");
-  }
-
-  mstch::node get_structed_annotation_attribute(
-      const char* uri, const std::string& field) {
-    if (type_->is_typedef()) {
-      if (auto annotation =
-              t_typedef::get_first_structured_annotation_or_null(type_, uri)) {
-        for (const auto& item : annotation->value()->get_map()) {
-          if (item.first->get_string() == field) {
-            return item.second->get_string();
-          }
-        }
-      }
-    }
-
-    return nullptr;
-  }
-
-  mstch::node set_adapter() {
-    hasTypeAdapter = true;
-    return mstch::node();
-  }
-
-  mstch::node unset_adapter() {
-    hasTypeAdapter = false;
-    return mstch::node();
-  }
-
-  mstch::node is_adapter_set() { return hasTypeAdapter; }
-
-  mstch::node add_type_adapter() {
-    adapterDefinitionSet.insert(type_->get_name());
-    return mstch::node();
-  }
-
-  mstch::node is_type_adapter_defined() {
-    return adapterDefinitionSet.find(type_->get_name()) !=
-        adapterDefinitionSet.end();
-  }
-
-  int32_t nested_adapter_count() {
-    int32_t count = 0;
-    auto type = type_;
-    while (type) {
-      if (type_->is_typedef() &&
-          type->find_structured_annotation_or_null(kJavaAdapterUri) !=
-              nullptr) {
-        count++;
-        if (const auto* as_typedef = dynamic_cast<const t_typedef*>(type)) {
-          type = as_typedef->get_type();
-        } else {
-          type = nullptr;
-        }
-      } else {
-        type = nullptr;
-      }
-    }
-
-    return count;
-  }
-
-  mstch::node is_last_type_adapter() { return nested_adapter_count() < 2; }
-
-  mstch::node set_type_name() {
-    if (nested_adapter_count() > 0) {
-      prevTypeName = type_->get_name();
-    }
-
-    return mstch::node();
-  }
-
-  mstch::node get_type_name() { return prevTypeName; }
 };
 
 void t_mstch_hyperthrift_generator::generate_program() {

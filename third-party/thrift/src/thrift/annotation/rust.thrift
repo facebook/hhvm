@@ -71,9 +71,10 @@ struct Adapter {
   1: string name;
 } (thrift.uri = "facebook.com/thrift/annotation/rust/Adapter")
 
+@scope.Enum
 @scope.Struct
 struct Derive {
-  // List of additional derives to apply to the struct.
+  // List of additional derives to apply to the generated struct.
   //
   // Example:
   // ```

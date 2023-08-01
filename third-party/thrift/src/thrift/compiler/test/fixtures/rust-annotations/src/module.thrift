@@ -21,6 +21,12 @@ include "thrift/annotation/scope.thrift"
 @scope.Transitive
 struct TransitiveDerives {}
 
+@rust.Derive{derives = ["Foo"]}
+enum EnumWithDerives {
+  UNKNOWN = 0,
+  STUFF = 420,
+}
+
 @TransitiveDerives
 struct StructWithTransitiveDerives {}
 

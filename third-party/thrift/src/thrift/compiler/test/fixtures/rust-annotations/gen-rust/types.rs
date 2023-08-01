@@ -55,6 +55,116 @@ impl ::std::fmt::Display for SomeError {
     }
 }
 
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Foo)]
+pub struct EnumWithDerives(pub ::std::primitive::i32);
+
+impl EnumWithDerives {
+    pub const UNKNOWN: Self = EnumWithDerives(0i32);
+    pub const STUFF: Self = EnumWithDerives(420i32);
+}
+
+impl ::fbthrift::ThriftEnum for EnumWithDerives {
+    fn enumerate() -> &'static [(Self, &'static str)] {
+        &[
+            (Self::UNKNOWN, "UNKNOWN"),
+            (Self::STUFF, "STUFF"),
+        ]
+    }
+
+    fn variants() -> &'static [&'static str] {
+        &[
+            "UNKNOWN",
+            "STUFF",
+        ]
+    }
+
+    fn variant_values() -> &'static [Self] {
+        &[
+            Self::UNKNOWN,
+            Self::STUFF,
+        ]
+    }
+}
+
+impl ::std::default::Default for EnumWithDerives {
+    fn default() -> Self {
+        Self(::std::primitive::i32::MIN)
+    }
+}
+
+impl<'a> ::std::convert::From<&'a EnumWithDerives> for ::std::primitive::i32 {
+    #[inline]
+    fn from(x: &'a EnumWithDerives) -> Self {
+        x.0
+    }
+}
+
+impl ::std::convert::From<EnumWithDerives> for ::std::primitive::i32 {
+    #[inline]
+    fn from(x: EnumWithDerives) -> Self {
+        x.0
+    }
+}
+
+impl ::std::convert::From<::std::primitive::i32> for EnumWithDerives {
+    #[inline]
+    fn from(x: ::std::primitive::i32) -> Self {
+        Self(x)
+    }
+}
+
+impl ::std::fmt::Display for EnumWithDerives {
+    fn fmt(&self, fmt: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        static VARIANTS_BY_NUMBER: &[(&::std::primitive::str, ::std::primitive::i32)] = &[
+            ("UNKNOWN", 0),
+            ("STUFF", 420),
+        ];
+        ::fbthrift::help::enum_display(VARIANTS_BY_NUMBER, fmt, self.0)
+    }
+}
+
+impl ::std::fmt::Debug for EnumWithDerives {
+    fn fmt(&self, fmt: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        write!(fmt, "EnumWithDerives::{}", self)
+    }
+}
+
+impl ::std::str::FromStr for EnumWithDerives {
+    type Err = ::anyhow::Error;
+
+    fn from_str(string: &::std::primitive::str) -> ::std::result::Result<Self, Self::Err> {
+        static VARIANTS_BY_NAME: &[(&::std::primitive::str, ::std::primitive::i32)] = &[
+            ("STUFF", 420),
+            ("UNKNOWN", 0),
+        ];
+        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "EnumWithDerives").map(Self)
+    }
+}
+
+impl ::fbthrift::GetTType for EnumWithDerives {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::I32;
+}
+
+impl<P> ::fbthrift::Serialize<P> for EnumWithDerives
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    #[inline]
+    fn write(&self, p: &mut P) {
+        p.write_i32(self.into())
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for EnumWithDerives
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    #[inline]
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        ::std::result::Result::Ok(Self::from(p.read_i32()?))
+    }
+}
+
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::TransitiveDerives {
     fn default() -> Self {

@@ -1197,7 +1197,40 @@ class rust_mstch_enum : public mstch_enum {
             {"enum:docs?", &rust_mstch_enum::rust_has_doc},
             {"enum:docs", &rust_mstch_enum::rust_doc},
             {"enum:serde?", &rust_mstch_enum::rust_serde},
+            {"enum:derive", &rust_mstch_enum::rust_derive},
         });
+  }
+  mstch::node rust_derive() {
+    if (auto annotation = find_structured_derive_annotation(*enum_)) {
+      // Always replace `crate::` with the package name of where this annotation
+      // originated to support derives applied with `@scope.Transitive`.
+      // If the annotation originates from the same module, this will just
+      // return `crate::` anyways to be a no-op.
+      std::string package = get_import_name(annotation->program(), options_);
+
+      std::string ret;
+      std::string delimiter = "";
+
+      for (const auto& item : annotation->value()->get_map()) {
+        if (item.first->get_string() == "derives") {
+          for (const t_const_value* val : item.second->get_list()) {
+            auto str_val = val->get_string();
+
+            if (!package.empty() &&
+                boost::algorithm::starts_with(str_val, kRustCratePrefix)) {
+              str_val =
+                  package + "::" + str_val.substr(kRustCratePrefix.length());
+            }
+
+            ret = ret + delimiter + str_val;
+            delimiter = ", ";
+          }
+        }
+      }
+
+      return ret;
+    }
+    return mstch::node();
   }
   mstch::node rust_name() {
     if (!enum_->has_annotation("rust.name")) {

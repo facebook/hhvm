@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3d4a52a7687ce8c15034eea88d9996df>>
+// @generated SignedSource<<9092b1b00ad8a5cf8fa733140ba93478>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -106,7 +106,7 @@ pub struct SiAddendum {
     pub is_final: bool,
 }
 
-/// The context in which autocomplete is being performed
+/// This is used as a filter on top-level symbol searches, for both autocomplete and symbol-search.
 #[derive(
     Clone,
     Copy,
@@ -127,12 +127,16 @@ pub struct SiAddendum {
 #[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(u8)]
 pub enum AutocompleteType {
+    /// satisfies [valid_for_acid], e.g. in autocomplete contexts like `|` at the start of a statement
     Acid,
+    /// satisfies [valid_for_acnew] AND isn't an abstract class, e.g. in autocomplete contexts like `$x = new |`
     Acnew,
+    /// satisfies [valid_for_actype], e.g. in autocomplete contexts like `Foo<|`
     Actype,
+    /// is [SI_Trait], e.g. in autocomplete contexts like `uses |`
     #[rust_to_ocaml(name = "Actrait_only")]
     ActraitOnly,
-    /// Excludes namespaces; used for symbol search
+    /// isn't [SI_Namespace]; repo-wide symbol search
     #[rust_to_ocaml(name = "Ac_workspace_symbol")]
     AcWorkspaceSymbol,
 }

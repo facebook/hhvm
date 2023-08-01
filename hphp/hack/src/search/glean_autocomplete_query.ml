@@ -6,4 +6,4 @@
  *
  *)
 
-let top_level ~prefix:_ = ""
+let top_level ~prefix:_ ~context:_ ~kind_filter:_ = ""

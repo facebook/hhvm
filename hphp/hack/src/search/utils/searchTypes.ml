@@ -36,13 +36,17 @@ type si_addendum = {
 }
 [@@deriving show]
 
-(** The context in which autocomplete is being performed *)
+(** This is used as a filter on top-level symbol searches, for both autocomplete and symbol-search. *)
 type autocomplete_type =
   | Acid
+      (** satisfies [valid_for_acid], e.g. in autocomplete contexts like `|` at the start of a statement *)
   | Acnew
+      (** satisfies [valid_for_acnew] AND isn't an abstract class, e.g. in autocomplete contexts like `$x = new |` *)
   | Actype
+      (** satisfies [valid_for_actype], e.g. in autocomplete contexts like `Foo<|` *)
   | Actrait_only
-  | Ac_workspace_symbol  (** Excludes namespaces; used for symbol search *)
+      (** is [SI_Trait], e.g. in autocomplete contexts like `uses |` *)
+  | Ac_workspace_symbol  (** isn't [SI_Namespace]; repo-wide symbol search *)
 [@@deriving eq, show]
 
 type si_file =

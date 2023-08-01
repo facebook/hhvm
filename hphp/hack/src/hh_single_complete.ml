@@ -309,9 +309,17 @@ let handle_mode mode filenames ctx (sienv : SearchUtils.si_env) naming_table =
         let () = Folly.ensure_folly_init () in
         Some (Glean.initialize ~reponame |> Option.value_exn)
     in
+    (* This tool only searches for [context=SearchTypes.Acid]. It might be nice to expose this at the CLI? *)
+    let context = SearchTypes.Acid in
+    let kind_filter = None in
     List.iter prefixes ~f:(fun query_text ->
         if List.length prefixes > 1 then Printf.printf "//// %s\n" query_text;
-        let angle = Glean_autocomplete_query.top_level ~prefix:query_text in
+        let angle =
+          Glean_autocomplete_query.top_level
+            ~prefix:query_text
+            ~context
+            ~kind_filter
+        in
         Printf.printf "query:\n%s\n\n%!" angle;
         if not dry_run then begin
           let start_time = Unix.gettimeofday () in
@@ -320,8 +328,8 @@ let handle_mode mode filenames ctx (sienv : SearchUtils.si_env) naming_table =
               (Option.value_exn handle)
               ~query_text
               ~max_results:100
-              ~context:SearchTypes.Acid
-              ~kind_filter:None
+              ~context
+              ~kind_filter
           in
           List.iter
             results

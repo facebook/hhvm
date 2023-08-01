@@ -2388,6 +2388,18 @@ void cli_client_init() {
   *s_sessionInitialized = true;
 }
 
+void cli_client_thread_init() {
+  if (*s_sessionInitialized) return;
+  g_context.getCheck();
+  AsioSession::Init();
+  Socket::clearLastError();
+  RI().onSessionInit();
+  tl_heap->resetExternalStats();
+  g_thread_safe_locale_handler->reset();
+  Treadmill::startRequest(Treadmill::SessionKind::CLIServer);
+  *s_sessionInitialized = true;
+}
+
 void init_current_pthread_stack_limits() {
   pthread_attr_t attr;
 // Linux+GNU extension
@@ -2907,6 +2919,18 @@ void hphp_memory_cleanup() {
   weakref_cleanup();
   mm.resetAllocator();
   mm.resetCouldOOM();
+}
+
+void cli_client_thread_exit() {
+  assertx(*s_sessionInitialized);
+
+  g_thread_safe_locale_handler->reset();
+  Treadmill::finishRequest();
+  RI().onSessionExit();
+  hphp_memory_cleanup();
+  assertx(tl_heap->empty());
+
+  *s_sessionInitialized = false;
 }
 
 void hphp_session_exit(Transport* transport) {

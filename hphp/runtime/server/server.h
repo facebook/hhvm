@@ -23,6 +23,7 @@
 #include <memory>
 #include <string>
 
+#include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/takeover-agent.h"
 #include "hphp/runtime/server/transport.h"
 #include "hphp/util/exception.h"
@@ -118,6 +119,8 @@ struct RequestHandler {
    * Write an entry to the handler's access log.
    */
   virtual void logToAccessLog(Transport* /*transport*/) {}
+
+  virtual void setCliContext(CLIContext&& ctx) {}
 
   int getDefaultTimeout() const { return m_timeout; }
 

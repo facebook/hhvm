@@ -17,6 +17,7 @@
 #pragma once
 
 #include "hphp/runtime/server/access-log.h"
+#include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/server.h"
 #include "hphp/runtime/base/execution-context.h"
 
@@ -50,6 +51,9 @@ struct RPCRequestHandler : RequestHandler {
 
   time_t getLastResetTime() const { return m_lastReset; }
 
+  void setCliContext(CLIContext&& ctx) override {
+    m_cli.emplace(std::move(ctx));
+  }
 private:
   ExecutionContext *m_context;
   std::shared_ptr<SatelliteServerInfo> m_serverInfo;
@@ -57,6 +61,7 @@ private:
   bool m_reset;
   bool m_logResets;
   time_t m_lastReset;
+  Optional<CLIContext> m_cli;
 
   void initState();
   bool needReset() const;

@@ -169,8 +169,11 @@ way to determine how much progress the server made.
 #include <pwd.h>
 #include <utime.h>
 
+#include <sys/socket.h>
+#include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/xattr.h>
+
 
 TRACE_SET_MOD(clisrv);
 
@@ -1207,6 +1210,18 @@ Optional<std::string> CLIWrapper::getxattr(const char* path,
 
 ////////////////////////////////////////////////////////////////////////////////
 
+struct CLIXboxWorker
+  : JobQueueWorker<int,void*,true,false,JobQueueDropVMStack>
+{
+  void doJob(int fd) override;
+  void abortJob(int fd) override {
+    Logger::Warning("CLI xbox-request (%i) dropped because of timeout.", fd);
+    close(fd);
+  }
+};
+
+JobQueueDispatcher<CLIXboxWorker>* s_xbox_dispatcher = nullptr;
+
 int mkdir_recursive(const char* path, int mode) {
   auto path_len = strlen(path);
   if (path_len > PATH_MAX) {
@@ -1243,28 +1258,46 @@ int mkdir_recursive(const char* path, int mode) {
   return 0;
 }
 
-Optional<int> cli_process_command_loop(int fd, bool ignore_bg) {
+Optional<int> cli_process_command_loop(int fd, bool ignore_bg, bool isclone) {
   FTRACE(1, "{}({}): starting...\n", __func__, fd);
   std::string cmd;
   cli_read(fd, cmd);
 
   FTRACE(2, "{}({}): initial command: {}\n", __func__, fd, cmd);
 
-  if (cmd == "version_bad") {
-    // Returning will cause us to re-run the script locally when not in force
-    // server mode.
-    return std::nullopt;
-  }
+  if (!isclone) {
+    if (cmd == "version_bad") {
+      // Returning will cause us to re-run the script locally when not in force
+      // server mode.
+      return std::nullopt;
+    }
 
-  if (cmd != "version_ok") {
-    // Server is too old / didn't send a version. Only version 0 is compatible
-    // with an unversioned server.
-    return std::nullopt;
+    if (cmd != "version_ok") {
+      // Server is too old / didn't send a version. Only version 0 is compatible
+      // with an unversioned server.
+      return std::nullopt;
+    } else {
+      cli_read(fd, cmd);
+    }
+
+    cli_client_init();
   } else {
-    cli_read(fd, cmd);
+    cli_client_thread_init();
   }
 
-  cli_client_init();
+  SCOPE_EXIT {
+    if (!isclone) {
+      if (s_xbox_dispatcher) {
+        s_xbox_dispatcher->stop();
+        delete s_xbox_dispatcher;
+        s_xbox_dispatcher = nullptr;
+      }
+    } else {
+      assertx(s_xbox_dispatcher);
+      cli_client_thread_exit();
+    }
+  };
+
   for (;; cli_read(fd, cmd)) {
     FTRACE(2, "{}({}): got command: {}\n", __func__, fd, cmd);
 
@@ -1557,6 +1590,60 @@ Optional<int> cli_process_command_loop(int fd, bool ignore_bg) {
       continue;
     }
 
+    if (cmd == "xbox-init") {
+      int XboxServerThreadCount;
+      int ServerThreadDropCacheTimeoutSeconds;
+      bool ServerThreadDropStack;
+
+      cli_read(
+        fd,
+        XboxServerThreadCount,
+        ServerThreadDropCacheTimeoutSeconds,
+        ServerThreadDropStack
+      );
+
+      FTRACE(2, "{}({}): xbox-init: ThreadCount = {}\n",
+             __func__, fd, XboxServerThreadCount);
+
+      assertx(!s_xbox_dispatcher);
+      s_xbox_dispatcher = new JobQueueDispatcher<CLIXboxWorker>(
+        XboxServerThreadCount,
+        XboxServerThreadCount,
+        ServerThreadDropCacheTimeoutSeconds,
+        ServerThreadDropStack,
+        nullptr
+      );
+      s_xbox_dispatcher->start();
+      continue;
+    }
+
+    if (cmd == "clone") {
+      assertx(s_xbox_dispatcher);
+
+      int socks[2];
+      if (socketpair(AF_UNIX, SOCK_STREAM, 0, socks) == -1) {
+        Logger::FError("socketpair() failed: {}", folly::errnoStr(errno));
+        exit(-1);
+      }
+      auto const delegate = LightProcess::createDelegate();
+      if (delegate == -1) {
+        Logger::FError("LightProcess::createDelegate() failed: {}",
+                       folly::errnoStr(errno));
+        exit(-1);
+      }
+
+      FTRACE(2, "{}({}): clone(): {} (local) <-> {} (remote)\n", __func__,
+             fd, socks[0], socks[1]);
+
+      cli_write_fd(fd, socks[1]);
+      cli_write_fd(fd, delegate);
+
+      close(socks[1]);
+      close(delegate);
+      s_xbox_dispatcher->enqueue(socks[0]);
+      continue;
+    }
+
     // - if the unrecognized command takes no arguments, everything's fine
     // - if the unrecognized command takes a string first arg, we'll treat that
     //   string argument as a command on the next loop; recurse. Then we get
@@ -1571,6 +1658,8 @@ Optional<int> cli_process_command_loop(int fd, bool ignore_bg) {
     }
   }
 }
+
+void CLIXboxWorker::doJob(int fd) { cli_process_command_loop(fd, true, true); }
 
 Optional<int> run_client(const char* sock_path,
                          const std::vector<std::string>& args,
@@ -1635,7 +1724,7 @@ Optional<int> run_client(const char* sock_path,
 
     FTRACE(2, "run_command_on_cli_server(): file/args...\n", fd);
     cli_write(fd, 0 /* unused */, args, env_vec);
-    return cli_process_command_loop(fd, ignore_bg);
+    return cli_process_command_loop(fd, ignore_bg, false);
   } catch (const Exception& ex) {
     Logger::Error(
       "Problem communicating with CLI server: %s\n"
@@ -1820,6 +1909,22 @@ CLIContext CLIContext::initFromClient(int client) {
     cli_write(client, "version_ok");
   }
 
+  auto const proxy_xbox = get_setting_bool(shared.ini,
+                                           "hhvm.unix_server_proxy_xbox");
+
+  if (proxy_xbox) {
+    FTRACE(2, "{}({}): Sending xbox-init: ThreadCount = {}\n",
+           __func__, client, RO::XboxServerThreadCount);
+    cli_write(
+      client,
+      "xbox-init",
+      RO::XboxServerThreadCount,
+      RO::ServerThreadDropCacheTimeoutSeconds,
+      RO::ServerThreadDropStack
+    );
+    shared.flags = static_cast<Flags>(shared.flags | Flags::ProxyXbox);
+  }
+
   guard.dismiss();
   return CLIContext{std::move(data), std::move(shared)};
 }
@@ -1958,6 +2063,48 @@ uint64_t cli_server_api_version() {
     CLI_SERVER_API_BASE_VERSION
   );
   return s_cliServerComputedVersion;
+}
+
+void cli_invoke(
+  CLIContext&& ctx,
+  std::function<void(const std::string&)>&& invoke
+) {
+  Logger::FInfo("Starting CLI Proxied XBox request...");
+  UNUSED auto const client = ctx.client();
+  FTRACE(2, "{}({}): starting...\n", __func__, client);
+  try {
+    runInContext(
+      std::move(ctx),
+      true,
+      [&] (const std::string& cwd, std::vector<char*>&) {
+        g_context->setCwd(cwd);
+      },
+      [&] (const char*, const std::string& prelude) {
+        invoke(prelude);
+        return 0;
+      },
+      [&] (const char*) {},
+      [&] {}
+    );
+  } catch (const Exception& ex) {
+    Logger::Warning("CLI Xbox Job failed: %s", ex.what());
+  } catch (const std::exception& ex) {
+    Logger::FError("CLI Xbox Job failed with C++ exception: {}", ex.what());
+  } catch (...) {
+    Logger::Error("CLI Xbox Job failed with unknown exception");
+  }
+
+  FTRACE(1, "{}({}): done.\n", __func__, client);
+}
+
+CLIContext cli_clone_context() {
+  assertx(is_cli_server_mode());
+  return CLIContext::initFromParent(*tl_context);
+}
+
+bool cli_supports_clone() {
+  return tl_context &&
+    (tl_context->getShared()->flags & CLIContext::ProxyXbox);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

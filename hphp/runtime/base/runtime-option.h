@@ -1413,6 +1413,7 @@ struct RuntimeOption {
   F(std::vector<std::string>, UnixServerAllowedGroups,                  \
                                             std::vector<std::string>()) \
   F(bool, UnixServerRunPSPInBackground, true)                           \
+  F(bool, UnixServerProxyXbox, true)                                    \
   /* Options for testing */                                             \
   F(bool, TrashFillOnRequestExit, false)                                \
   /******************                                                   \

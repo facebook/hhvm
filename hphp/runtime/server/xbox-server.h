@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/satellite-server.h"
 #include "hphp/runtime/server/server-task-event.h"
 #include "hphp/runtime/server/transport.h"
@@ -149,6 +150,11 @@ struct XboxTransport final : Transport, Synchronizable {
     }
   }
 
+  void setCliContext(CLIContext&& ctx) {
+    m_cli.emplace(std::move(ctx));
+  }
+  Optional<CLIContext> detachCliContext() { return std::move(m_cli); }
+
 private:
   std::atomic<int> m_refCount;
 
@@ -159,6 +165,8 @@ private:
   int m_code;
   std::string m_host;
   std::string m_reqInitDoc;
+
+  Optional<CLIContext> m_cli;
 
   // points to an event with an attached waithandle from a different request
   ServerTaskEvent<XboxServer, XboxTransport> *m_event;

@@ -153,8 +153,18 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
   }
 
   // record request for debugging purpose
+  bool ret;
   std::string tmpfile = HttpProtocol::RecordRequest(transport);
-  bool ret = executePHPFunction(transport, sourceRootInfo);
+  if (m_cli) {
+    cli_invoke(
+      std::move(m_cli).value(),
+      [&] (const std::string& prelude) {
+        ret = executePHPFunction(transport, sourceRootInfo);
+      }
+    );
+  } else {
+    ret = executePHPFunction(transport, sourceRootInfo);
+  }
   GetAccessLog().log(transport, vhost);
   /*
    * HPHP logs may need to access data in ServerStats, so we have to

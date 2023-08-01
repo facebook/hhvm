@@ -82,6 +82,10 @@ struct ucred {
 #endif
 
 struct CLIContext {
+  enum Flags {
+    None = 0,
+    ProxyXbox = 1,
+  };
   struct Data {
     int client{-1};
     int lwp_afdt{-1};
@@ -97,6 +101,7 @@ struct CLIContext {
     std::vector<std::string> argv;
     std::vector<std::string> envp;
     folly::dynamic ini;
+    Flags flags{Flags::None};
   };
 
   ~CLIContext();
@@ -191,6 +196,11 @@ ucred* get_cli_ucred();
 bool cli_mkstemp(char* buf);
 
 /*
+ * Can the current CLIContext be cloned to start a new xbox thread?
+ */
+bool cli_supports_clone();
+
+/*
  * Explicitly open a file via the CLI-server client.
  *
  * WARNING: use of this function should be considered a last resort, it's
@@ -207,6 +217,19 @@ int cli_openfd_unsafe(const String& filename, int flags, mode_t mode,
  * Fetch the environment for the CLI process.
  */
 Array cli_env();
+
+/*
+ * Invoke a function using the CLI context ctx, created using clone.
+ */
+void cli_invoke(
+  CLIContext&& ctx,
+  std::function<void(const std::string&)>&& invoke
+);
+
+/*
+ * Clone the current CLI context
+ */
+CLIContext cli_clone_context();
 
 }
 

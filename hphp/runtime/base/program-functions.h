@@ -84,6 +84,8 @@ struct ExecutionContext;
 
 void hphp_process_init(bool skipExtensions = false);
 void cli_client_init();
+void cli_client_thread_init();
+void cli_client_thread_exit();
 void hphp_session_init(Treadmill::SessionKind session_kind,
                        Transport* transport = nullptr);
 

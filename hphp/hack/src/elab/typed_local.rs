@@ -38,7 +38,10 @@ pub struct TypedLocal {
     // The locals in scope. The hint is present iff this is a typed local.
     // Union at join points to keep the locals that might be in scope.
     // The position is where the local was first declared. The bool if true
-    // if the hint could potentially be a shape.
+    // if the hint could potentially be a shape or a tuple. If there is an
+    // assignment like `$x[e1] = e2` than we should enforce after (instead of on the rhs)
+    // in case the assignment changed the shape or tuple type at runtime. Shapes and tuples are
+    // special because their contents are enforced.
     locals: BTreeMap<String, (Option<(Hint, bool)>, Pos)>,
     // The subset of typed locals declared in the current scope, rather than preceding it.
     // declared_ids and assigned_ids should be disjoint
@@ -239,12 +242,13 @@ impl TypedLocal {
     }
 
     // Collect all of the variables a lhs might need to enforce and put them in hints as 'as' expressions
-    // These include list() variables, and $x[e] array index where the hint to enforce might be a shape
+    // These include list() variables, and $x[e] array index where the hint to enforce might be a shape or tuple
     fn get_vars_to_enforce_lhs(&mut self, expr: &Expr, in_array_get: bool, hints: &mut Vec<Expr>) {
         match expr {
             Expr(_, pos, Expr_::Lvar(box lid)) => {
-                if let Some((hint, could_be_shape)) = self.get_hint_or_add_assign(lid, pos) {
-                    if !in_array_get || could_be_shape {
+                if let Some((hint, could_be_shape_or_tuple)) = self.get_hint_or_add_assign(lid, pos)
+                {
+                    if !in_array_get || could_be_shape_or_tuple {
                         let mut expr = expr.clone();
                         self.wrap_rhs_with_as(&mut expr, hint, pos);
                         hints.push(expr);
@@ -320,7 +324,7 @@ impl TypedLocal {
                 for h in hints {
                     self.simplify_hint(h);
                 }
-                false
+                true
             }
             Hint_::Happly(cn, hints) => match cn.1.as_str() {
                 "\\HH\\void"
@@ -471,8 +475,12 @@ impl<'a> VisitorMut<'a> for TypedLocal {
                 } else {
                     let mut as_hint = Hint(Pos::NONE, Box::new(Hint_::Hnothing));
                     std::mem::swap(hint, &mut as_hint);
-                    let maybe_shape = self.simplify_hint(&mut as_hint);
-                    self.add_local(name.to_string(), Some((as_hint.clone(), maybe_shape)), pos);
+                    let maybe_shape_or_tuple = self.simplify_hint(&mut as_hint);
+                    self.add_local(
+                        name.to_string(),
+                        Some((as_hint.clone(), maybe_shape_or_tuple)),
+                        pos,
+                    );
                     self.add_declared_id(name);
                     if self.should_elab && let Some(expr) = expr {
                         self.wrap_rhs_with_as(expr, as_hint, pos);

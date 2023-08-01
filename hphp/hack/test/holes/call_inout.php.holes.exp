@@ -14,8 +14,8 @@
            param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-20], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
@@ -39,11 +39,11 @@
              (Expr
                 ((void), [7:3-23],
                  (Call
-                    { func = (((function(inout int $i): void)), [7:3-13], (Id ([7:3-13], "\\with_inout"))); 
-                      targs = []; args = [((Pinout [7:14-19]), ((float), [7:20-22], (Hole (((float), [7:20-22], (Lvar ([7:20-22], $f))), (float), (int), Typing))))]; 
+                    { func = (((function(inout ~int $i): void)), [7:3-13], (Id ([7:3-13], "\\with_inout"))); 
+                      targs = []; args = [((Pinout [7:14-19]), ((float), [7:20-22], (Hole (((float), [7:20-22], (Lvar ([7:20-22], $f))), (float), (~int), Typing))))]; 
                       unpacked_arg = None }))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([5:10-20], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

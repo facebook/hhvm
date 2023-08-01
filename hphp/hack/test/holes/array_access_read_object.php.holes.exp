@@ -32,6 +32,6 @@ Errors:
                      }))));
             ([7:3-9], (Expr ((nothing), [7:3-8], (Array_get (((nothing), [7:3-5], (Lvar ([7:3-5], $x))), (Some ((int), [7:6-7], (Int "1"))))))))]
           };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([4:10-34], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

@@ -16,12 +16,12 @@
           cv_user_attributes = []; cv_doc_comment = None; cv_is_promoted_variadic = false; 
           cv_is_static = true; cv_span = [5:23-44] };
         { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
-          cv_readonly = false; cv_visibility = Private; cv_type = (((int, string)), (Some ([6:18-31], (Htuple [([6:19-22], (Hprim Tint)); ([6:24-30], (Hprim Tstring))]))));
+          cv_readonly = false; cv_visibility = Private; cv_type = ((~(int, string)), (Some ([6:18-31], (Htuple [([6:19-22], (Hprim Tint)); ([6:24-30], (Hprim Tstring))]))));
           cv_id = ([6:32-42], "pair_prop"); cv_expr = (Some (((int, string)), [6:45-57], (Tuple [((int), [6:51-52], (Int "0")); ((string), [6:54-56], (String ""))]))); 
           cv_user_attributes = []; cv_doc_comment = None; cv_is_promoted_variadic = false; 
           cv_is_static = true; cv_span = [6:32-57] };
         { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
-          cv_readonly = false; cv_visibility = Private; cv_type = ((Vector<string>), (Some ([7:18-32], (Happly (([7:18-24], "\\HH\\Vector"), [([7:25-31], (Hprim Tstring))])))));
+          cv_readonly = false; cv_visibility = Private; cv_type = ((~Vector<string>), (Some ([7:18-32], (Happly (([7:18-24], "\\HH\\Vector"), [([7:25-31], (Hprim Tstring))])))));
           cv_id = ([7:33-42], "vec_prop"); cv_expr = (Some ((Vector<string>), [7:45-54], (ValCollection (([7:45-51], Vector), None, [])))); 
           cv_user_attributes = []; cv_doc_comment = None; cv_is_promoted_variadic = false; 
           cv_is_static = true; cv_span = [7:33-54] }
@@ -113,8 +113,8 @@
               (Expr
                  (((int, bool)), [25:5-26],
                   (Binop
-                     { bop = (Eq None); lhs = (((int, string)), [25:5-21], (Class_get (((C), [25:5-9], CIself), (CGstring ([25:11-21], "$pair_prop")), Is_prop)));
-                       rhs = (((int, bool)), [25:24-26], (Hole ((((int, bool)), [25:24-26], (Lvar ([25:24-26], $x))), ((int, bool)), ((int, string)), Typing))) }))))
+                     { bop = (Eq None); lhs = ((~(int, string)), [25:5-21], (Class_get (((C), [25:5-9], CIself), (CGstring ([25:11-21], "$pair_prop")), Is_prop)));
+                       rhs = (((int, bool)), [25:24-26], (Hole ((((int, bool)), [25:24-26], (Lvar ([25:24-26], $x))), ((int, bool)), (~(int, string)), Typing))) }))))
               ]
             };
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -137,8 +137,8 @@
                  ((bool), [30:5-27],
                   (Binop
                      { bop = (Eq None);
-                       lhs = ((bool), [30:5-22], (Array_get (((Vector<string>), [30:5-20], (Class_get (((C), [30:5-9], CIself), (CGstring ([30:11-20], "$vec_prop")), Is_prop))), None)));
-                       rhs = ((bool), [30:25-27], (Hole (((bool), [30:25-27], (Lvar ([30:25-27], $x))), (bool), (string), Typing))) }))))
+                       lhs = ((bool), [30:5-22], (Array_get (((~Vector<string>), [30:5-20], (Class_get (((C), [30:5-9], CIself), (CGstring ([30:11-20], "$vec_prop")), Is_prop))), None)));
+                       rhs = ((bool), [30:25-27], (Hole (((bool), [30:25-27], (Lvar ([30:25-27], $x))), (bool), (~(bool | string)), Typing))) }))))
               ]
             };
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -164,7 +164,7 @@
                      { bop = (Eq None);
                        lhs =
                        ((bool), [35:5-24],
-                        (Array_get ((((int, string)), [35:5-21], (Class_get (((C), [35:5-9], CIself), (CGstring ([35:11-21], "$pair_prop")), Is_prop))), (Some ((int), [35:22-23], (Int "0"))))));
+                        (Array_get (((~(int, string)), [35:5-21], (Class_get (((C), [35:5-9], CIself), (CGstring ([35:11-21], "$pair_prop")), Is_prop))), (Some ((int), [35:22-23], (Int "0"))))));
                        rhs = ((bool), [35:27-29], (Lvar ([35:27-29], $x))) }))))
               ]
             };
@@ -191,7 +191,7 @@
                      { bop = (Eq None);
                        lhs =
                        ((bool), [40:5-24],
-                        (Array_get ((((int, string)), [40:5-21], (Class_get (((C), [40:5-9], CIself), (CGstring ([40:11-21], "$pair_prop")), Is_prop))), (Some ((int), [40:22-23], (Int "1"))))));
+                        (Array_get (((~(int, string)), [40:5-21], (Class_get (((C), [40:5-9], CIself), (CGstring ([40:11-21], "$pair_prop")), Is_prop))), (Some ((int), [40:22-23], (Int "1"))))));
                        rhs = ((bool), [40:27-29], (Lvar ([40:27-29], $x))) }))))
               ]
             };
@@ -204,6 +204,68 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
-      c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
-      c_module = None })
+      c_user_attributes = [{ ua_name = ([3:7-8], "__SupportDynamicType"); ua_params = [] }]; 
+      c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+      c_emit_id = None; c_internal = false; c_module = None });
+  (Class
+     { c_span = [3:1-42:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
+       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
+       c_name = ([3:7-8], "\\C"); c_tparams = []; c_extends = []; c_uses = []; 
+       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = []; 
+       c_where_constraints = []; c_consts = []; c_typeconsts = [];
+       c_vars =
+       [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
+          cv_readonly = false; cv_visibility = Private; cv_type = ((int), (Some ([4:18-21], (Hprim Tint)))); 
+          cv_id = ([4:22-27], "prop"); cv_expr = (Some ((int), [4:30-31], (Int "0"))); 
+          cv_user_attributes = []; cv_doc_comment = None; cv_is_promoted_variadic = false; 
+          cv_is_static = true; cv_span = [4:22-31] };
+         { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
+           cv_readonly = false; cv_visibility = Private; cv_type = ((?int), (Some ([5:18-22], (Hoption ([5:19-22], (Hprim Tint)))))); 
+           cv_id = ([5:23-37], "nullable_prop"); cv_expr = (Some ((null), [5:40-44], Null)); 
+           cv_user_attributes = []; cv_doc_comment = None; cv_is_promoted_variadic = false; 
+           cv_is_static = true; cv_span = [5:23-44] };
+         { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
+           cv_readonly = false; cv_visibility = Private; cv_type = ((~(int, string)), (Some ([6:18-31], (Htuple [([6:19-22], (Hprim Tint)); ([6:24-30], (Hprim Tstring))]))));
+           cv_id = ([6:32-42], "pair_prop"); cv_expr = (Some (((int, string)), [6:45-57], (Tuple [((int), [6:51-52], (Int "0")); ((string), [6:54-56], (String ""))]))); 
+           cv_user_attributes = []; cv_doc_comment = None; cv_is_promoted_variadic = false; 
+           cv_is_static = true; cv_span = [6:32-57] };
+         { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
+           cv_readonly = false; cv_visibility = Private; cv_type = ((~Vector<string>), (Some ([7:18-32], (Happly (([7:18-24], "\\HH\\Vector"), [([7:25-31], (Hprim Tstring))])))));
+           cv_id = ([7:33-42], "vec_prop"); cv_expr = (Some ((Vector<string>), [7:45-54], (ValCollection (([7:45-51], Vector), None, [])))); 
+           cv_user_attributes = []; cv_doc_comment = None; cv_is_promoted_variadic = false; 
+           cv_is_static = true; cv_span = [7:33-54] }
+         ];
+       c_methods =
+       [{ m_span = [14:3-17:4]; m_annotation = (); m_final = false; m_abstract = false; 
+          m_static = false; m_readonly_this = false; m_visibility = Public; 
+          m_name = ([14:19-37], "set_prop_intersect"); m_tparams = []; 
+          m_where_constraints = [];
+          m_params =
+          [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([14:38-53], (Hintersection [([14:39-43], (Hprim Tbool)); ([14:46-52], (Hprim Tstring))])))); 
+             param_is_variadic = false; param_pos = [14:54-56]; param_name = "$x"; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+             param_user_attributes = []; param_visibility = None }
+            ];
+          m_ctxs = None; m_unsafe_ctxs = None;
+          m_body =
+          { fb_ast =
+            [([16:5-31],
+              (Expr
+                 ((dynamic), [16:5-30],
+                  (Binop
+                     { bop = (Eq None); lhs = ((?int), [16:5-25], (Class_get (((C), [16:5-9], CIself), (CGstring ([16:11-25], "$nullable_prop")), Is_prop)));
+                       rhs = ((dynamic), [16:28-30], (Lvar ([16:28-30], $x))) }))))
+              ]
+            };
+          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+          m_ret = ((dynamic), (Some ([14:59-63], (Hprim Tvoid)))); m_external = false; 
+          m_doc_comment = None }
+         ];
+       c_xhp_children = []; c_xhp_attrs = [];
+       c_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       c_user_attributes = [{ ua_name = ([3:7-8], "__SupportDynamicType"); ua_params = [] }]; 
+       c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+       c_emit_id = None; c_internal = false; c_module = None })

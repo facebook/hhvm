@@ -22,8 +22,8 @@
                 (Obj_get (((null), [5:3-6], (Hole (((null), [5:3-6], (Lvar ([5:3-6], $xs))), (null), (nothing), Typing))), ((nothing), [5:8-9], (Id ([5:8-9], "c"))), OG_nullthrows, Is_prop)))))
             ]
           };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-40], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
@@ -50,8 +50,8 @@
                     (nothing), [10:8-9], (Id ([10:8-9], "c"))), OG_nullthrows, Is_prop)))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([8:10-44], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
@@ -63,7 +63,7 @@
        { f_span = [13:1-16:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([13:55-59], (Hprim Tvoid))));
          f_params =
-         [{ param_annotation = (mixed); param_type_hint = ((mixed), (Some ([13:42-47], Hmixed))); 
+         [{ param_annotation = (mixed); param_type_hint = ((mixed), (Some ([13:42-47], (Happly (([13:42-47], "\\HH\\supportdyn"), [([13:42-47], Hmixed)]))))); 
             param_is_variadic = false; param_pos = [13:48-51]; param_name = "$xs"; 
             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
@@ -77,6 +77,6 @@
                  (Obj_get (((mixed), [15:3-6], (Hole (((mixed), [15:3-6], (Lvar ([15:3-6], $xs))), (mixed), (nothing), Typing))), ((nothing), [15:8-9], (Id ([15:8-9], "c"))), OG_nullthrows, Is_prop)))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([13:10-41], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

@@ -12,7 +12,7 @@
            param_is_variadic = false; param_pos = [3:40-43]; param_name = "$xs"; 
            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
            param_user_attributes = []; param_visibility = None };
-          { param_annotation = (mixed); param_type_hint = ((mixed), (Some ([3:45-50], Hmixed))); 
+          { param_annotation = (mixed); param_type_hint = ((mixed), (Some ([3:45-50], (Happly (([3:45-50], "\\HH\\supportdyn"), [([3:45-50], Hmixed)]))))); 
             param_is_variadic = false; param_pos = [3:51-55]; param_name = "$idx"; 
             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
@@ -25,6 +25,6 @@
                ((string), [5:3-12], (Array_get (((string), [5:3-6], (Lvar ([5:3-6], $xs))), (Some ((mixed), [5:7-11], (Hole (((mixed), [5:7-11], (Lvar ([5:7-11], $idx))), (mixed), (int), Typing)))))))))
             ]
           };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-32], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

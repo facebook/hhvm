@@ -8,7 +8,7 @@
       { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((void), (Some ([3:55-59], (Hprim Tvoid))));
         f_params =
-        [{ param_annotation = (nonnull); param_type_hint = ((nonnull), (Some ([3:40-47], Hnonnull))); 
+        [{ param_annotation = (nonnull); param_type_hint = ((nonnull), (Some ([3:40-47], (Happly (([3:40-47], "\\HH\\supportdyn"), [([3:40-47], Hnonnull)]))))); 
            param_is_variadic = false; param_pos = [3:48-51]; param_name = "$xs"; 
            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
            param_user_attributes = []; param_visibility = None }
@@ -27,6 +27,6 @@
                      targs = []; args = []; unpacked_arg = None }))))
             ]
           };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-39], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

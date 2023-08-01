@@ -6,7 +6,7 @@
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-32], "\\append_string_datetime");
       fd_fun =
       { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((string), (Some ([3:58-64], (Hprim Tstring))));
+        f_readonly_ret = None; f_ret = ((~string), (Some ([3:58-64], (Hprim Tstring))));
         f_params =
         [{ param_annotation = (string); param_type_hint = ((string), (Some ([3:33-39], (Hprim Tstring)))); 
            param_is_variadic = false; param_pos = [3:40-42]; param_name = "$x"; 
@@ -28,6 +28,6 @@
                            rhs = ((DateTime), [5:13-15], (Hole (((DateTime), [5:13-15], (Lvar ([5:13-15], $y))), (DateTime), (~(arraykey | HH\FormatString<nothing>)), Typing))) })))))
             ]
           };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-32], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

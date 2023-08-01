@@ -26,9 +26,9 @@
                (((int | string)), [5:3-14],
                 (Binop
                    { bop = (Eq None); lhs = (((int | string)), [5:3-9], (Array_get (((Vector<(int | bool)>), [5:3-6], (Lvar ([5:3-6], $xs))), (Some ((int), [5:7-8], (Int "0"))))));
-                     rhs = (((int | string)), [5:12-14], (Hole ((((int | string)), [5:12-14], (Lvar ([5:12-14], $x))), ((int | string)), ((int | bool)), Typing))) }))))
+                     rhs = (((int | string)), [5:12-14], (Hole ((((int | string)), [5:12-14], (Lvar ([5:12-14], $x))), ((int | string)), (~(int | bool)), Typing))) }))))
             ]
           };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-32], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

@@ -12,7 +12,7 @@
            param_is_variadic = false; param_pos = [3:47-50]; param_name = "$xs"; 
            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
            param_user_attributes = []; param_visibility = None };
-          { param_annotation = (mixed); param_type_hint = ((mixed), (Some ([3:52-57], Hmixed))); 
+          { param_annotation = (mixed); param_type_hint = ((mixed), (Some ([3:52-57], (Happly (([3:52-57], "\\HH\\supportdyn"), [([3:52-57], Hmixed)]))))); 
             param_is_variadic = false; param_pos = [3:58-62]; param_name = "$idx"; 
             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
@@ -31,6 +31,6 @@
                      rhs = ((string), [5:15-18], (String "a")) }))))
             ]
           };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-39], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

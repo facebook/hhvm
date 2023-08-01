@@ -14,9 +14,9 @@ Errors:
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
-      c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
-      c_module = None });
+      c_user_attributes = [{ ua_name = ([3:7-8], "__SupportDynamicType"); ua_params = [] }]; 
+      c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+      c_emit_id = None; c_internal = false; c_module = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -41,8 +41,8 @@ Errors:
                  (Obj_get (((C), [7:3-5], (Hole (((C), [7:3-5], (Lvar ([7:3-5], $c))), (C), (nothing), Typing))), ((nothing), [7:7-21], (Id ([7:7-21], "does_not_exist"))), OG_nullthrows, Is_prop)))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([5:11-42], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
@@ -69,6 +69,6 @@ Errors:
                     (nothing), [12:7-21], (Id ([12:7-21], "does_not_exist"))), OG_nullthrows, Is_prop)))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([11:11-45], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

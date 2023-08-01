@@ -27,11 +27,11 @@
                      ((int), [6:3-11],
                       (Array_get ((((bool | Vector<string>)), [6:4-7], (Hole ((((bool | Vector<string>)), [6:4-7], (Lvar ([6:4-7], $xs))), ((bool | Vector<string>)), (Vector<string>), Typing))),
                          (Some ((int), [6:9-10], (Int "0"))))));
-                     rhs = ((int), [6:14-15], (Hole (((int), [6:14-15], (Int "1")), (int), (string), Typing))) }))))
+                     rhs = ((int), [6:14-15], (Hole (((int), [6:14-15], (Int "1")), (int), (~string), Typing))) }))))
             ]
           };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-41], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
@@ -66,6 +66,6 @@
                       rhs = ((int), [12:12-13], (Int "1")) }))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([9:10-38], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

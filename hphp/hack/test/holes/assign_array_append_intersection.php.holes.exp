@@ -27,6 +27,38 @@
                 (Binop { bop = (Eq None); lhs = ((nothing), [5:3-8], (Array_get (((Vector<nothing>), [5:3-6], (Lvar ([5:3-6], $xs))), None))); rhs = ((nothing), [5:11-13], (Lvar ([5:11-13], $x))) }))))
             ]
           };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
-      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-42], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_doc_comment = None };
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-42], "\\assign_array_append_intersection");
+       fd_fun =
+       { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((dynamic), (Some ([3:91-95], (Hprim Tvoid))));
+         f_params =
+         [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([3:43-57], (Hintersection [([3:44-47], (Hprim Tint)); ([3:50-56], (Hprim Tstring))])))); 
+            param_is_variadic = false; param_pos = [3:58-60]; param_name = "$x"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None };
+           { param_annotation = (dynamic);
+             param_type_hint = ((dynamic), (Some ([3:62-83], (Happly (([3:62-68], "\\HH\\Vector"), [([3:69-82], (Hintersection [([3:70-73], (Hprim Tint)); ([3:76-81], (Hprim Tfloat))]))])))));
+             param_is_variadic = false; param_pos = [3:84-87]; param_name = "$xs"; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+             param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([5:3-14],
+             (Expr
+                ((dynamic), [5:3-13],
+                 (Binop { bop = (Eq None); lhs = ((dynamic), [5:3-8], (Array_get (((dynamic), [5:3-6], (Lvar ([5:3-6], $xs))), None))); rhs = ((dynamic), [5:11-13], (Lvar ([5:11-13], $x))) }))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-42], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

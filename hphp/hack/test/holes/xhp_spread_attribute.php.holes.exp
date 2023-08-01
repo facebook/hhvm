@@ -6,12 +6,12 @@
       c_implements = []; c_where_constraints = []; c_consts = []; c_typeconsts = [];
       c_vars =
       [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false; cv_readonly = false; 
-         cv_visibility = Public; cv_type = ((dict<string, dynamic>), (Some ([8:14-37], (Happly (([8:14-20], "\\HH\\dict"), [([8:21-27], (Hprim Tstring)); ([8:29-36], Hdynamic)])))));
+         cv_visibility = Public; cv_type = ((~dict<string, dynamic>), (Some ([8:14-37], (Happly (([8:14-20], "\\HH\\dict"), [([8:21-27], (Hprim Tstring)); ([8:29-36], Hdynamic)])))));
          cv_id = ([8:38-49], "attributes"); cv_expr = None; cv_user_attributes = []; 
          cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
          cv_span = [8:38-49] };
         { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
-          cv_readonly = false; cv_visibility = Public; cv_type = ((vec<dynamic>), (Some ([9:14-29], (Happly (([9:14-20], "\\HH\\vec"), [([9:21-28], Hdynamic)]))))); 
+          cv_readonly = false; cv_visibility = Public; cv_type = ((~vec<dynamic>), (Some ([9:14-29], (Happly (([9:14-20], "\\HH\\vec"), [([9:21-28], Hdynamic)]))))); 
           cv_id = ([9:30-39], "children"); cv_expr = None; cv_user_attributes = []; 
           cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
           cv_span = [9:30-39] };
@@ -27,13 +27,13 @@
           cv_span = [11:18-23] };
         { cv_final = false; cv_xhp_attr = (Some { xai_like = None; xai_tag = None; xai_enum_values = [] }); 
           cv_abstract = false; cv_readonly = false; cv_visibility = Public; 
-          cv_type = ((?int), (Some ([5:15-18], (Hoption ([5:15-18], (Hprim Tint)))))); 
+          cv_type = ((~?int), (Some ([5:15-18], (Hoption ([5:15-18], (Hprim Tint)))))); 
           cv_id = ([5:19-24], ":prop1"); cv_expr = None; cv_user_attributes = []; 
           cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
           cv_span = [5:19-24] };
         { cv_final = false; cv_xhp_attr = (Some { xai_like = None; xai_tag = None; xai_enum_values = [] }); 
           cv_abstract = false; cv_readonly = false; cv_visibility = Public; 
-          cv_type = ((?int), (Some ([6:15-18], (Hoption ([6:15-18], (Hprim Tint)))))); 
+          cv_type = ((~?int), (Some ([6:15-18], (Hoption ([6:15-18], (Hprim Tint)))))); 
           cv_id = ([6:19-24], ":prop3"); cv_expr = None; cv_user_attributes = []; 
           cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
           cv_span = [6:19-24] }
@@ -69,13 +69,13 @@
                 ((dict<string, dynamic>), [8:38-49],
                  (Binop
                     { bop = (Eq None);
-                      lhs = ((dict<string, dynamic>), [8:38-49], (Obj_get (((this), [8:38-49], This), ((dict<string, dynamic>), [8:38-49], (Id ([8:38-49], "attributes"))), OG_nullthrows, Is_prop)));
+                      lhs = ((~dict<string, dynamic>), [8:38-49], (Obj_get (((this), [8:38-49], This), ((~dict<string, dynamic>), [8:38-49], (Id ([8:38-49], "attributes"))), OG_nullthrows, Is_prop)));
                       rhs = ((dict<string, dynamic>), [8:38-49], (Lvar ([8:38-49], $attributes))) }))));
              ([9:30-39],
               (Expr
                  ((vec<dynamic>), [9:30-39],
                   (Binop
-                     { bop = (Eq None); lhs = ((vec<dynamic>), [9:30-39], (Obj_get (((this), [9:30-39], This), ((vec<dynamic>), [9:30-39], (Id ([9:30-39], "children"))), OG_nullthrows, Is_prop)));
+                     { bop = (Eq None); lhs = ((~vec<dynamic>), [9:30-39], (Obj_get (((this), [9:30-39], This), ((~vec<dynamic>), [9:30-39], (Id ([9:30-39], "children"))), OG_nullthrows, Is_prop)));
                        rhs = ((vec<dynamic>), [9:30-39], (Lvar ([9:30-39], $children))) }))));
              ([10:21-26],
               (Expr
@@ -100,9 +100,9 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = (Some "XhpSpread"); 
         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
-      c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
-      c_module = None });
+      c_user_attributes = [{ ua_name = ([4:9-17], "__SupportDynamicType"); ua_params = [] }]; 
+      c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+      c_emit_id = None; c_internal = false; c_module = None });
   (Class
      { c_span = [14:3-23:4]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = true; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
@@ -113,12 +113,12 @@
        c_vars =
        [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
           cv_readonly = false; cv_visibility = Public;
-          cv_type = ((dict<string, dynamic>), (Some ([18:14-37], (Happly (([18:14-20], "\\HH\\dict"), [([18:21-27], (Hprim Tstring)); ([18:29-36], Hdynamic)]))))); 
+          cv_type = ((~dict<string, dynamic>), (Some ([18:14-37], (Happly (([18:14-20], "\\HH\\dict"), [([18:21-27], (Hprim Tstring)); ([18:29-36], Hdynamic)])))));
           cv_id = ([18:38-49], "attributes"); cv_expr = None; cv_user_attributes = []; 
           cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
           cv_span = [18:38-49] };
          { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
-           cv_readonly = false; cv_visibility = Public; cv_type = ((vec<dynamic>), (Some ([19:14-29], (Happly (([19:14-20], "\\HH\\vec"), [([19:21-28], Hdynamic)])))));
+           cv_readonly = false; cv_visibility = Public; cv_type = ((~vec<dynamic>), (Some ([19:14-29], (Happly (([19:14-20], "\\HH\\vec"), [([19:21-28], Hdynamic)])))));
            cv_id = ([19:30-39], "children"); cv_expr = None; cv_user_attributes = []; 
            cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
            cv_span = [19:30-39] };
@@ -134,13 +134,13 @@
            cv_span = [21:18-23] };
          { cv_final = false; cv_xhp_attr = (Some { xai_like = None; xai_tag = None; xai_enum_values = [] }); 
            cv_abstract = false; cv_readonly = false; cv_visibility = Public; 
-           cv_type = ((?string), (Some ([15:15-21], (Hoption ([15:15-21], (Hprim Tstring)))))); 
+           cv_type = ((~?string), (Some ([15:15-21], (Hoption ([15:15-21], (Hprim Tstring)))))); 
            cv_id = ([15:22-27], ":prop1"); cv_expr = None; cv_user_attributes = []; 
            cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
            cv_span = [15:22-27] };
          { cv_final = false; cv_xhp_attr = (Some { xai_like = None; xai_tag = None; xai_enum_values = [] }); 
            cv_abstract = false; cv_readonly = false; cv_visibility = Public; 
-           cv_type = ((?int), (Some ([16:15-18], (Hoption ([16:15-18], (Hprim Tint)))))); 
+           cv_type = ((~?int), (Some ([16:15-18], (Hoption ([16:15-18], (Hprim Tint)))))); 
            cv_id = ([16:19-24], ":prop2"); cv_expr = None; cv_user_attributes = []; 
            cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
            cv_span = [16:19-24] }
@@ -177,14 +177,14 @@
                   (Binop
                      { bop = (Eq None);
                        lhs =
-                       ((dict<string, dynamic>), [18:38-49], (Obj_get (((this), [18:38-49], This), ((dict<string, dynamic>), [18:38-49], (Id ([18:38-49], "attributes"))), OG_nullthrows, Is_prop)));
+                       ((~dict<string, dynamic>), [18:38-49], (Obj_get (((this), [18:38-49], This), ((~dict<string, dynamic>), [18:38-49], (Id ([18:38-49], "attributes"))), OG_nullthrows, Is_prop)));
                        rhs = ((dict<string, dynamic>), [18:38-49], (Lvar ([18:38-49], $attributes))) }))));
               ([19:30-39],
                (Expr
                   ((vec<dynamic>), [19:30-39],
                    (Binop
                       { bop = (Eq None);
-                        lhs = ((vec<dynamic>), [19:30-39], (Obj_get (((this), [19:30-39], This), ((vec<dynamic>), [19:30-39], (Id ([19:30-39], "children"))), OG_nullthrows, Is_prop)));
+                        lhs = ((~vec<dynamic>), [19:30-39], (Obj_get (((this), [19:30-39], This), ((~vec<dynamic>), [19:30-39], (Id ([19:30-39], "children"))), OG_nullthrows, Is_prop)));
                         rhs = ((vec<dynamic>), [19:30-39], (Lvar ([19:30-39], $children))) }))));
               ([20:21-26],
                (Expr
@@ -209,9 +209,9 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = (Some "XhpSpread"); 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
-       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
-       c_module = None });
+       c_user_attributes = [{ ua_name = ([14:9-18], "__SupportDynamicType"); ua_params = [] }]; 
+       c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+       c_emit_id = None; c_internal = false; c_module = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -243,6 +243,6 @@
                       }))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([25:12-32], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

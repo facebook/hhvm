@@ -18,12 +18,12 @@
         { fb_ast =
           [([5:3-17],
             (Expr
-               ((float), [5:3-16],
+               ((~float), [5:3-16],
                 (Binop
-                   { bop = (Eq (Some Slash)); lhs = ((float), [5:3-9], (Array_get (((Vector<int>), [5:3-6], (Lvar ([5:3-6], $xs))), (Some ((int), [5:7-8], (Int "0"))))));
-                     rhs = ((float), [5:13-16], (Hole (((float), [5:13-16], (Float "1.0")), (float), (int), Typing))) }))))
+                   { bop = (Eq (Some Slash)); lhs = ((~float), [5:3-9], (Array_get (((Vector<int>), [5:3-6], (Lvar ([5:3-6], $xs))), (Some ((int), [5:7-8], (Int "0"))))));
+                     rhs = ((~float), [5:13-16], (Hole (((float), [5:13-16], (Float "1.0")), (~float), (~int), Typing))) }))))
             ]
           };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-29], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

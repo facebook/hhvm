@@ -23,6 +23,8 @@
    --fallback-expect-extension
    .exp
    --flags
+   --enable-sound-dynamic-type
+   --everything-sdt
    --tast
    --error-format
    plain)))

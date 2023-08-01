@@ -14,8 +14,8 @@
            param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-14], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
@@ -55,8 +55,8 @@
                        unpacked_arg = None }))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([5:10-19], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
@@ -82,28 +82,28 @@
          { fb_ast =
            [([15:5-48],
              (Expr
-                ((void), [15:5-47],
+                ((~void), [15:5-47],
                  (Call
                     { func = (((function(int $i): void)), [15:5-9], (Id ([15:5-9], "\\prim"))); 
                       targs = [];
                       args =
-                      [(Pnormal, ((int), [15:10-46], (Hole (((float), [15:43-45], (Lvar ([15:43-45], $f))), (float), (int), (UnsafeCast [([15:32-37], (Hprim Tfloat)); ([15:38-41], (Hprim Tint))])))))
+                      [(Pnormal, ((~int), [15:10-46], (Hole (((float), [15:43-45], (Lvar ([15:43-45], $f))), (float), (int), (UnsafeCast [([15:32-37], (Hprim Tfloat)); ([15:38-41], (Hprim Tint))])))))
                         ];
                       unpacked_arg = None }))));
              ([18:5-47],
               (Expr
-                 ((void), [18:5-46],
+                 ((~void), [18:5-46],
                   (Call
                      { func = (((function(int $i): void)), [18:5-9], (Id ([18:5-9], "\\prim"))); 
                        targs = [];
                        args =
                        [(Pnormal,
-                         ((int), [18:10-45],
+                         ((~int), [18:10-45],
                           (Hole (((?int), [18:42-44], (Lvar ([18:42-44], $x))), (?int), (int), (UnsafeCast [([18:32-36], (Hoption ([18:33-36], (Hprim Tint)))); ([18:37-40], (Hprim Tint))])))))
                          ];
                        unpacked_arg = None }))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([13:10-24], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

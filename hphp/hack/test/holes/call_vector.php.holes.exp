@@ -25,9 +25,9 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
-      c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
-      c_module = None });
+      c_user_attributes = [{ ua_name = ([3:7-17], "__SupportDynamicType"); ua_params = [] }]; 
+      c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+      c_emit_id = None; c_internal = false; c_module = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -44,8 +44,8 @@
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([7:10-11], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
@@ -89,8 +89,8 @@
                        unpacked_arg = None }))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([9:10-21], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
@@ -112,13 +112,13 @@
          { fb_ast =
            [([25:3-59],
              (Expr
-                ((void), [25:3-58],
+                ((~void), [25:3-58],
                  (Call
                     { func = (((function(Vector<int> $g): void)), [25:3-4], (Id ([25:3-4], "\\g"))); 
                       targs = [];
                       args =
                       [(Pnormal,
-                        ((Vector<int>), [25:5-57],
+                        ((~Vector<int>), [25:5-57],
                          (Hole (((Vector<float>), [25:54-56], (Lvar ([25:54-56], $g))), (Vector<float>), (Vector<int>),
                             (UnsafeCast
                                [([25:27-40], (Happly (([25:27-33], "\\HH\\Vector"), [([25:34-39], (Hprim Tfloat))])));
@@ -134,7 +134,7 @@
                        rhs = ((TestVector), [27:10-26], (New (((TestVector), [27:14-24], (CI ([27:14-24], "\\TestVector"))), [], [], None, ((function(): void))))) }))));
              ([30:3-65],
               (Expr
-                 ((void), [30:3-64],
+                 ((~void), [30:3-64],
                   (Call
                      { func =
                        (((function(Vector<int> $g): void)), [30:3-10],
@@ -142,7 +142,7 @@
                        targs = [];
                        args =
                        [(Pnormal,
-                         ((Vector<int>), [30:11-63],
+                         ((~Vector<int>), [30:11-63],
                           (Hole (((Vector<float>), [30:60-62], (Lvar ([30:60-62], $g))), (Vector<float>), (Vector<int>),
                              (UnsafeCast
                                 [([30:33-46], (Happly (([30:33-39], "\\HH\\Vector"), [([30:40-45], (Hprim Tfloat))])));
@@ -152,6 +152,118 @@
                        unpacked_arg = None }))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([21:10-26], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
+  (Class
+     { c_span = [3:1-5:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
+       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
+       c_name = ([3:7-17], "\\TestVector"); c_tparams = []; c_extends = []; 
+       c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
+       c_implements = []; c_where_constraints = []; c_consts = []; c_typeconsts = []; 
+       c_vars = [];
+       c_methods =
+       [{ m_span = [4:3-45]; m_annotation = (); m_final = false; m_abstract = false; 
+          m_static = false; m_readonly_this = false; m_visibility = Public; 
+          m_name = ([4:19-20], "g"); m_tparams = []; m_where_constraints = [];
+          m_params =
+          [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([4:21-32], (Happly (([4:21-27], "\\HH\\Vector"), [([4:28-31], (Hprim Tint))]))))); 
+             param_is_variadic = false; param_pos = [4:33-35]; param_name = "$g"; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+             param_user_attributes = []; param_visibility = None }
+            ];
+          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 
+          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+          m_ret = ((dynamic), (Some ([4:38-42], (Hprim Tvoid)))); m_external = false; 
+          m_doc_comment = None }
+         ];
+       c_xhp_children = []; c_xhp_attrs = [];
+       c_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       c_user_attributes = [{ ua_name = ([3:7-17], "__SupportDynamicType"); ua_params = [] }]; 
+       c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+       c_emit_id = None; c_internal = false; c_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([7:10-11], "\\g");
+       fd_fun =
+       { f_span = [7:1-36]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((dynamic), (Some ([7:29-33], (Hprim Tvoid))));
+         f_params =
+         [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([7:12-23], (Happly (([7:12-18], "\\HH\\Vector"), [([7:19-22], (Hprim Tint))]))))); 
+            param_is_variadic = false; param_pos = [7:24-26]; param_name = "$g"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([7:10-11], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([21:10-26], "\\call_vector_cast");
+       fd_fun =
+       { f_span = [21:1-31:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((dynamic), (Some ([23:4-8], (Hprim Tvoid))));
+         f_params =
+         [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([22:3-16], (Happly (([22:3-9], "\\HH\\Vector"), [([22:10-15], (Hprim Tfloat))]))))); 
+            param_is_variadic = false; param_pos = [22:17-19]; param_name = "$g"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([25:3-59],
+             (Expr
+                ((~void), [25:3-58],
+                 (Call
+                    { func = (((function(Vector<int> $g): void)), [25:3-4], (Id ([25:3-4], "\\g"))); 
+                      targs = [];
+                      args =
+                      [(Pnormal,
+                        ((~Vector<int>), [25:5-57],
+                         (Hole (((dynamic), [25:54-56], (Lvar ([25:54-56], $g))), (Vector<float>), (Vector<int>),
+                            (UnsafeCast
+                               [([25:27-40], (Happly (([25:27-33], "\\HH\\Vector"), [([25:34-39], (Hprim Tfloat))])));
+                                 ([25:41-52], (Happly (([25:41-47], "\\HH\\Vector"), [([25:48-51], (Hprim Tint))])))])
+                            ))))
+                        ];
+                      unpacked_arg = None }))));
+             ([27:3-27],
+              (Expr
+                 ((TestVector), [27:3-26],
+                  (Binop
+                     { bop = (Eq None); lhs = ((TestVector), [27:3-7], (Lvar ([27:3-7], $foo)));
+                       rhs = ((TestVector), [27:10-26], (New (((TestVector), [27:14-24], (CI ([27:14-24], "\\TestVector"))), [], [], None, ((function(): void))))) }))));
+             ([30:3-65],
+              (Expr
+                 ((~void), [30:3-64],
+                  (Call
+                     { func =
+                       (((function(Vector<int> $g): void)), [30:3-10],
+                        (Obj_get (((TestVector), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(Vector<int> $g): void)), [30:9-10], (Id ([30:9-10], "g"))), OG_nullthrows, Is_method)));
+                       targs = [];
+                       args =
+                       [(Pnormal,
+                         ((~Vector<int>), [30:11-63],
+                          (Hole (((dynamic), [30:60-62], (Lvar ([30:60-62], $g))), (Vector<float>), (Vector<int>),
+                             (UnsafeCast
+                                [([30:33-46], (Happly (([30:33-39], "\\HH\\Vector"), [([30:40-45], (Hprim Tfloat))])));
+                                  ([30:47-58], (Happly (([30:47-53], "\\HH\\Vector"), [([30:54-57], (Hprim Tint))])))])
+                             ))))
+                         ];
+                       unpacked_arg = None }))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([21:10-26], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

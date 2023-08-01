@@ -26,9 +26,9 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
-      c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
-      c_module = None });
+      c_user_attributes = [{ ua_name = ([3:7-15], "__SupportDynamicType"); ua_params = [] }]; 
+      c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+      c_emit_id = None; c_internal = false; c_module = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -46,8 +46,8 @@
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([7:10-11], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
@@ -116,8 +116,8 @@
                        unpacked_arg = None }))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([9:10-19], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
@@ -145,13 +145,13 @@
          { fb_ast =
            [([31:3-65],
              (Expr
-                ((void), [31:3-64],
+                ((~void), [31:3-64],
                  (Call
                     { func = (((function(dict<int, int> $n): void)), [31:3-4], (Id ([31:3-4], "\\n"))); 
                       targs = [];
                       args =
                       [(Pnormal,
-                        ((dict<int, int>), [31:5-63],
+                        ((~dict<int, int>), [31:5-63],
                          (Hole (((dict<string, int>), [31:59-62], (Lvar ([31:59-62], $n1))), (dict<string, int>), (dict<int, int>),
                             (UnsafeCast
                                [([31:27-43], (Happly (([31:27-31], "\\HH\\dict"), [([31:32-38], (Hprim Tstring)); ([31:39-42], (Hprim Tint))])));
@@ -161,13 +161,13 @@
                       unpacked_arg = None }))));
              ([33:3-65],
               (Expr
-                 ((void), [33:3-64],
+                 ((~void), [33:3-64],
                   (Call
                      { func = (((function(dict<int, int> $n): void)), [33:3-4], (Id ([33:3-4], "\\n"))); 
                        targs = [];
                        args =
                        [(Pnormal,
-                         ((dict<int, int>), [33:5-63],
+                         ((~dict<int, int>), [33:5-63],
                           (Hole (((dict<int, string>), [33:59-62], (Lvar ([33:59-62], $n2))), (dict<int, string>), (dict<int, int>),
                              (UnsafeCast
                                 [([33:27-43], (Happly (([33:27-31], "\\HH\\dict"), [([33:32-35], (Hprim Tint)); ([33:36-42], (Hprim Tstring))])));
@@ -183,7 +183,7 @@
                        rhs = ((TestDict), [35:10-24], (New (((TestDict), [35:14-22], (CI ([35:14-22], "\\TestDict"))), [], [], None, ((function(): void))))) }))));
              ([38:3-71],
               (Expr
-                 ((void), [38:3-70],
+                 ((~void), [38:3-70],
                   (Call
                      { func =
                        (((function(dict<int, int> $n): void)), [38:3-10],
@@ -191,7 +191,7 @@
                        targs = [];
                        args =
                        [(Pnormal,
-                         ((dict<int, int>), [38:11-69],
+                         ((~dict<int, int>), [38:11-69],
                           (Hole (((dict<string, int>), [38:65-68], (Lvar ([38:65-68], $n1))), (dict<string, int>), (dict<int, int>),
                              (UnsafeCast
                                 [([38:33-49], (Happly (([38:33-37], "\\HH\\dict"), [([38:38-44], (Hprim Tstring)); ([38:45-48], (Hprim Tint))])));
@@ -201,7 +201,7 @@
                        unpacked_arg = None }))));
              ([40:3-71],
               (Expr
-                 ((void), [40:3-70],
+                 ((~void), [40:3-70],
                   (Call
                      { func =
                        (((function(dict<int, int> $n): void)), [40:3-10],
@@ -209,7 +209,7 @@
                        targs = [];
                        args =
                        [(Pnormal,
-                         ((dict<int, int>), [40:11-69],
+                         ((~dict<int, int>), [40:11-69],
                           (Hole (((dict<int, string>), [40:65-68], (Lvar ([40:65-68], $n2))), (dict<int, string>), (dict<int, int>),
                              (UnsafeCast
                                 [([40:33-49], (Happly (([40:33-37], "\\HH\\dict"), [([40:38-41], (Hprim Tint)); ([40:42-48], (Hprim Tstring))])));
@@ -219,6 +219,156 @@
                        unpacked_arg = None }))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([26:10-24], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
+  (Class
+     { c_span = [3:1-5:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
+       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
+       c_name = ([3:7-15], "\\TestDict"); c_tparams = []; c_extends = []; 
+       c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
+       c_implements = []; c_where_constraints = []; c_consts = []; c_typeconsts = []; 
+       c_vars = [];
+       c_methods =
+       [{ m_span = [4:3-48]; m_annotation = (); m_final = false; m_abstract = false; 
+          m_static = false; m_readonly_this = false; m_visibility = Public; 
+          m_name = ([4:19-20], "n"); m_tparams = []; m_where_constraints = [];
+          m_params =
+          [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([4:21-35], (Happly (([4:21-25], "\\HH\\dict"), [([4:26-29], (Hprim Tint)); ([4:31-34], (Hprim Tint))])))));
+             param_is_variadic = false; param_pos = [4:36-38]; param_name = "$n"; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+             param_user_attributes = []; param_visibility = None }
+            ];
+          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 
+          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+          m_ret = ((dynamic), (Some ([4:41-45], (Hprim Tvoid)))); m_external = false; 
+          m_doc_comment = None }
+         ];
+       c_xhp_children = []; c_xhp_attrs = [];
+       c_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       c_user_attributes = [{ ua_name = ([3:7-15], "__SupportDynamicType"); ua_params = [] }]; 
+       c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+       c_emit_id = None; c_internal = false; c_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([7:10-11], "\\n");
+       fd_fun =
+       { f_span = [7:1-39]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((dynamic), (Some ([7:32-36], (Hprim Tvoid))));
+         f_params =
+         [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([7:12-26], (Happly (([7:12-16], "\\HH\\dict"), [([7:17-20], (Hprim Tint)); ([7:22-25], (Hprim Tint))])))));
+            param_is_variadic = false; param_pos = [7:27-29]; param_name = "$n"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([7:10-11], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([26:10-24], "\\call_dict_cast");
+       fd_fun =
+       { f_span = [26:1-41:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((dynamic), (Some ([29:4-8], (Hprim Tvoid))));
+         f_params =
+         [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([27:3-20], (Happly (([27:3-7], "\\HH\\dict"), [([27:8-14], (Hprim Tstring)); ([27:16-19], (Hprim Tint))])))));
+            param_is_variadic = false; param_pos = [27:21-24]; param_name = "$n1"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None };
+           { param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([28:3-20], (Happly (([28:3-7], "\\HH\\dict"), [([28:8-11], (Hprim Tint)); ([28:13-19], (Hprim Tstring))])))));
+             param_is_variadic = false; param_pos = [28:21-24]; param_name = "$n2"; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+             param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([31:3-65],
+             (Expr
+                ((~void), [31:3-64],
+                 (Call
+                    { func = (((function(dict<int, int> $n): void)), [31:3-4], (Id ([31:3-4], "\\n"))); 
+                      targs = [];
+                      args =
+                      [(Pnormal,
+                        ((~dict<int, int>), [31:5-63],
+                         (Hole (((dynamic), [31:59-62], (Lvar ([31:59-62], $n1))), (dict<string, int>), (dict<int, int>),
+                            (UnsafeCast
+                               [([31:27-43], (Happly (([31:27-31], "\\HH\\dict"), [([31:32-38], (Hprim Tstring)); ([31:39-42], (Hprim Tint))])));
+                                 ([31:44-57], (Happly (([31:44-48], "\\HH\\dict"), [([31:49-52], (Hprim Tint)); ([31:53-56], (Hprim Tint))])))])
+                            ))))
+                        ];
+                      unpacked_arg = None }))));
+             ([33:3-65],
+              (Expr
+                 ((~void), [33:3-64],
+                  (Call
+                     { func = (((function(dict<int, int> $n): void)), [33:3-4], (Id ([33:3-4], "\\n"))); 
+                       targs = [];
+                       args =
+                       [(Pnormal,
+                         ((~dict<int, int>), [33:5-63],
+                          (Hole (((dynamic), [33:59-62], (Lvar ([33:59-62], $n2))), (dict<int, string>), (dict<int, int>),
+                             (UnsafeCast
+                                [([33:27-43], (Happly (([33:27-31], "\\HH\\dict"), [([33:32-35], (Hprim Tint)); ([33:36-42], (Hprim Tstring))])));
+                                  ([33:44-57], (Happly (([33:44-48], "\\HH\\dict"), [([33:49-52], (Hprim Tint)); ([33:53-56], (Hprim Tint))])))])
+                             ))))
+                         ];
+                       unpacked_arg = None }))));
+             ([35:3-25],
+              (Expr
+                 ((TestDict), [35:3-24],
+                  (Binop
+                     { bop = (Eq None); lhs = ((TestDict), [35:3-7], (Lvar ([35:3-7], $foo)));
+                       rhs = ((TestDict), [35:10-24], (New (((TestDict), [35:14-22], (CI ([35:14-22], "\\TestDict"))), [], [], None, ((function(): void))))) }))));
+             ([38:3-71],
+              (Expr
+                 ((~void), [38:3-70],
+                  (Call
+                     { func =
+                       (((function(dict<int, int> $n): void)), [38:3-10],
+                        (Obj_get (((TestDict), [38:3-7], (Lvar ([38:3-7], $foo))), (((function(dict<int, int> $n): void)), [38:9-10], (Id ([38:9-10], "n"))), OG_nullthrows, Is_method)));
+                       targs = [];
+                       args =
+                       [(Pnormal,
+                         ((~dict<int, int>), [38:11-69],
+                          (Hole (((dynamic), [38:65-68], (Lvar ([38:65-68], $n1))), (dict<string, int>), (dict<int, int>),
+                             (UnsafeCast
+                                [([38:33-49], (Happly (([38:33-37], "\\HH\\dict"), [([38:38-44], (Hprim Tstring)); ([38:45-48], (Hprim Tint))])));
+                                  ([38:50-63], (Happly (([38:50-54], "\\HH\\dict"), [([38:55-58], (Hprim Tint)); ([38:59-62], (Hprim Tint))])))])
+                             ))))
+                         ];
+                       unpacked_arg = None }))));
+             ([40:3-71],
+              (Expr
+                 ((~void), [40:3-70],
+                  (Call
+                     { func =
+                       (((function(dict<int, int> $n): void)), [40:3-10],
+                        (Obj_get (((TestDict), [40:3-7], (Lvar ([40:3-7], $foo))), (((function(dict<int, int> $n): void)), [40:9-10], (Id ([40:9-10], "n"))), OG_nullthrows, Is_method)));
+                       targs = [];
+                       args =
+                       [(Pnormal,
+                         ((~dict<int, int>), [40:11-69],
+                          (Hole (((dynamic), [40:65-68], (Lvar ([40:65-68], $n2))), (dict<int, string>), (dict<int, int>),
+                             (UnsafeCast
+                                [([40:33-49], (Happly (([40:33-37], "\\HH\\dict"), [([40:38-41], (Hprim Tint)); ([40:42-48], (Hprim Tstring))])));
+                                  ([40:50-63], (Happly (([40:50-54], "\\HH\\dict"), [([40:55-58], (Hprim Tint)); ([40:59-62], (Hprim Tint))])))])
+                             ))))
+                         ];
+                       unpacked_arg = None }))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([26:10-24], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

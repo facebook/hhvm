@@ -25,15 +25,14 @@ Errors:
         { fb_ast =
           [([4:3-16],
             (Expr
-               ((Set<?string>), [4:3-15],
+               ((~Set<?string>), [4:3-15],
                 (Call
                    { func =
-                     (((function()[]: Set<?string>)), [4:3-13],
-                      (Obj_get (((Vector<?string>), [4:3-6], (Hole (((Vector<?string>), [4:3-6], (Lvar ([4:3-6], $xs))), (Vector<?string>), (nothing), Typing))),
-                         (((function()[]: Set<?string>)), [4:8-13], (Id ([4:8-13], "toSet"))), OG_nullthrows, Is_method)));
+                     (((function()[]: ~Set<?string>)), [4:3-13],
+                      (Obj_get (((Vector<?string>), [4:3-6], (Lvar ([4:3-6], $xs))), (((function()[]: ~Set<?string>)), [4:8-13], (Id ([4:8-13], "toSet"))), OG_nullthrows, Is_method)));
                      targs = []; args = []; unpacked_arg = None }))))
             ]
           };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-36], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

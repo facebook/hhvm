@@ -6,7 +6,10 @@
       c_where_constraints = []; c_consts = []; c_typeconsts = [];
       c_vars =
       [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false; cv_readonly = false; 
-         cv_visibility = Private; cv_type = ((dict<string, mixed>), (Some ([5:39-58], (Happly (([5:39-43], "\\HH\\dict"), [([5:44-50], (Hprim Tstring)); ([5:52-57], Hmixed)])))));
+         cv_visibility = Private;
+         cv_type =
+         ((~dict<string, mixed>),
+          (Some ([5:39-58], (Happly (([5:39-43], "\\HH\\dict"), [([5:44-50], (Hprim Tstring)); ([5:52-57], (Happly (([5:52-57], "\\HH\\supportdyn"), [([5:52-57], Hmixed)])))])))));
          cv_id = ([5:59-64], "spec"); cv_expr = None; cv_user_attributes = []; 
          cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
          cv_span = [5:59-64] }
@@ -17,7 +20,9 @@
          m_name = ([5:19-30], "__construct"); m_tparams = []; m_where_constraints = [];
          m_params =
          [{ param_annotation = (dict<string, mixed>);
-            param_type_hint = ((dict<string, mixed>), (Some ([5:39-58], (Happly (([5:39-43], "\\HH\\dict"), [([5:44-50], (Hprim Tstring)); ([5:52-57], Hmixed)]))))); 
+            param_type_hint =
+            ((dict<string, mixed>),
+             (Some ([5:39-58], (Happly (([5:39-43], "\\HH\\dict"), [([5:44-50], (Hprim Tstring)); ([5:52-57], (Happly (([5:52-57], "\\HH\\supportdyn"), [([5:52-57], Hmixed)])))])))));
             param_is_variadic = false; param_pos = [5:59-64]; param_name = "$spec"; 
             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = (Some Private) }
@@ -30,7 +35,7 @@
                 ((dict<string, mixed>), [5:59-64],
                  (Binop
                     { bop = (Eq None);
-                      lhs = ((dict<string, mixed>), [5:59-64], (Obj_get (((this), [5:59-64], This), ((dict<string, mixed>), [5:59-64], (Id ([5:59-64], "spec"))), OG_nullthrows, Is_prop)));
+                      lhs = ((~dict<string, mixed>), [5:59-64], (Obj_get (((this), [5:59-64], This), ((~dict<string, mixed>), [5:59-64], (Id ([5:59-64], "spec"))), OG_nullthrows, Is_prop)));
                       rhs = ((dict<string, mixed>), [5:59-64], (Lvar ([5:59-64], $spec))) }))));
              ([Pos.none], Noop)]
            };
@@ -43,9 +48,9 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
-      c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
-      c_module = None });
+      c_user_attributes = [{ ua_name = ([4:13-14], "__SupportDynamicType"); ua_params = [] }]; 
+      c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+      c_emit_id = None; c_internal = false; c_module = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -57,7 +62,9 @@
          f_readonly_ret = None; f_ret = ((void), (Some ([8:40-44], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (dict<string, mixed>);
-            param_type_hint = ((dict<string, mixed>), (Some ([8:14-33], (Happly (([8:14-18], "\\HH\\dict"), [([8:19-25], (Hprim Tstring)); ([8:27-32], Hmixed)]))))); 
+            param_type_hint =
+            ((dict<string, mixed>),
+             (Some ([8:14-33], (Happly (([8:14-18], "\\HH\\dict"), [([8:19-25], (Hprim Tstring)); ([8:27-32], (Happly (([8:27-32], "\\HH\\supportdyn"), [([8:27-32], Hmixed)])))])))));
             param_is_variadic = false; param_pos = [8:34-37]; param_name = "$xs"; 
             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
@@ -67,13 +74,13 @@
          { fb_ast =
            [([9:3-29],
              (Expr
-                ((mixed), [9:3-28],
+                ((~?mixed), [9:3-28],
                  (Binop
-                    { bop = (Eq None); lhs = ((mixed), [9:3-5], (Lvar ([9:3-5], $x)));
+                    { bop = (Eq None); lhs = ((~?mixed), [9:3-5], (Lvar ([9:3-5], $x)));
                       rhs =
-                      ((mixed), [9:8-28],
+                      ((~?mixed), [9:8-28],
                        (Call
-                          { func = (((function<Tk as arraykey, Tv>(?KeyedContainer<string, mixed> $collection, ?string $index)[]: mixed)), [9:8-11], (Id ([9:8-11], "\\HH\\idx")));
+                          { func = (((function<Tk as arraykey, Tv>(?KeyedContainer<string, mixed> $collection, ?string $index)[]: ~?mixed)), [9:8-11], (Id ([9:8-11], "\\HH\\idx")));
                             targs = [((string), ([9:8-11], Hwildcard)); ((mixed), ([9:8-11], Hwildcard))];
                             args = [(Pnormal, ((dict<string, mixed>), [9:12-15], (Lvar ([9:12-15], $xs)))); (Pnormal, ((string), [9:17-27], (String "whatever")))]; 
                             unpacked_arg = None }))
@@ -83,7 +90,7 @@
                  ((bool), [10:7-26],
                   (Call
                      { func = (((function(readonly mixed $arg)[]: bool)), [10:7-22], (Id ([10:7-22], "\\HH\\is_any_array"))); 
-                       targs = []; args = [(Pnormal, ((mixed), [10:23-25], (Lvar ([10:23-25], $x))))]; 
+                       targs = []; args = [(Pnormal, ((~?mixed), [10:23-25], (Lvar ([10:23-25], $x))))]; 
                        unpacked_arg = None })),
                  [([10:3-13:4], (AssertEnv (Refinement, {$x})));
                    ([12:5-21],
@@ -91,14 +98,14 @@
                        ((C), [12:5-20],
                         (New (((C), [12:9-10], (CI ([12:9-10], "\\C"))), 
                            [],
-                           [((dict<nothing, nothing>), [12:11-19],
+                           [((~dict<nothing, nothing>), [12:11-19],
                              (Call
                                 { func = (((function<Tk as arraykey, Tv>(KeyedTraversable<nothing, nothing> $arr)[]: dict<nothing, nothing>)), [12:11-15], (Id ([12:11-15], "\\HH\\dict")));
                                   targs = [((nothing), ([12:11-15], Hwildcard)); ((nothing), ([12:11-15], Hwildcard))];
                                   args =
                                   [(Pnormal,
-                                    ((AnyArray<arraykey, mixed>), [12:16-18],
-                                     (Hole (((AnyArray<arraykey, mixed>), [12:16-18], (Lvar ([12:16-18], $x))), (AnyArray<arraykey, mixed>), (KeyedTraversable<nothing, nothing>), Typing))))
+                                    ((~AnyArray<arraykey, mixed>), [12:16-18],
+                                     (Hole (((~AnyArray<arraykey, mixed>), [12:16-18], (Lvar ([12:16-18], $x))), (~AnyArray<arraykey, mixed>), (KeyedTraversable<nothing, nothing>), Typing))))
                                     ];
                                   unpacked_arg = None }))
                              ],
@@ -107,8 +114,8 @@
                  [([10:3-13:4], (AssertEnv (Refinement, {$x}))); ([Pos.none], Noop)])))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([8:10-13], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
@@ -121,7 +128,9 @@
          f_readonly_ret = None; f_ret = ((void), (Some ([16:40-44], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (dict<string, mixed>);
-            param_type_hint = ((dict<string, mixed>), (Some ([16:14-33], (Happly (([16:14-18], "\\HH\\dict"), [([16:19-25], (Hprim Tstring)); ([16:27-32], Hmixed)]))))); 
+            param_type_hint =
+            ((dict<string, mixed>),
+             (Some ([16:14-33], (Happly (([16:14-18], "\\HH\\dict"), [([16:19-25], (Hprim Tstring)); ([16:27-32], (Happly (([16:27-32], "\\HH\\supportdyn"), [([16:27-32], Hmixed)])))])))));
             param_is_variadic = false; param_pos = [16:34-37]; param_name = "$xs"; 
             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
@@ -131,13 +140,13 @@
          { fb_ast =
            [([17:3-29],
              (Expr
-                ((mixed), [17:3-28],
+                ((~?mixed), [17:3-28],
                  (Binop
-                    { bop = (Eq None); lhs = ((mixed), [17:3-5], (Lvar ([17:3-5], $x)));
+                    { bop = (Eq None); lhs = ((~?mixed), [17:3-5], (Lvar ([17:3-5], $x)));
                       rhs =
-                      ((mixed), [17:8-28],
+                      ((~?mixed), [17:8-28],
                        (Call
-                          { func = (((function<Tk as arraykey, Tv>(?KeyedContainer<string, mixed> $collection, ?string $index)[]: mixed)), [17:8-11], (Id ([17:8-11], "\\HH\\idx")));
+                          { func = (((function<Tk as arraykey, Tv>(?KeyedContainer<string, mixed> $collection, ?string $index)[]: ~?mixed)), [17:8-11], (Id ([17:8-11], "\\HH\\idx")));
                             targs = [((string), ([17:8-11], Hwildcard)); ((mixed), ([17:8-11], Hwildcard))];
                             args = [(Pnormal, ((dict<string, mixed>), [17:12-15], (Lvar ([17:12-15], $xs)))); (Pnormal, ((string), [17:17-27], (String "whatever")))]; 
                             unpacked_arg = None }))
@@ -147,20 +156,20 @@
                  ((bool), [18:7-26],
                   (Call
                      { func = (((function(readonly mixed $arg)[]: bool)), [18:7-22], (Id ([18:7-22], "\\HH\\is_any_array"))); 
-                       targs = []; args = [(Pnormal, ((mixed), [18:23-25], (Lvar ([18:23-25], $x))))]; 
+                       targs = []; args = [(Pnormal, ((~?mixed), [18:23-25], (Lvar ([18:23-25], $x))))]; 
                        unpacked_arg = None })),
                  [([18:3-22:4], (AssertEnv (Refinement, {$x})));
                    ([19:5-19],
                     (Expr
-                       ((dict<arraykey, mixed>), [19:5-18],
+                       ((~dict<arraykey, mixed>), [19:5-18],
                         (Binop
-                           { bop = (Eq None); lhs = ((dict<arraykey, mixed>), [19:5-7], (Lvar ([19:5-7], $y)));
+                           { bop = (Eq None); lhs = ((~dict<arraykey, mixed>), [19:5-7], (Lvar ([19:5-7], $y)));
                              rhs =
-                             ((dict<arraykey, mixed>), [19:10-18],
+                             ((~dict<arraykey, mixed>), [19:10-18],
                               (Call
                                  { func = (((function<Tk as arraykey, Tv>(KeyedTraversable<arraykey, mixed> $arr)[]: dict<arraykey, mixed>)), [19:10-14], (Id ([19:10-14], "\\HH\\dict")));
                                    targs = [((arraykey), ([19:10-14], Hwildcard)); ((mixed), ([19:10-14], Hwildcard))];
-                                   args = [(Pnormal, ((AnyArray<arraykey, mixed>), [19:15-17], (Lvar ([19:15-17], $x))))]; 
+                                   args = [(Pnormal, ((~AnyArray<arraykey, mixed>), [19:15-17], (Lvar ([19:15-17], $x))))]; 
                                    unpacked_arg = None }))
                              }))));
                    ([21:5-15],
@@ -168,12 +177,12 @@
                        ((C), [21:5-14],
                         (New (((C), [21:9-10], (CI ([21:9-10], "\\C"))), 
                            [],
-                           [((dict<arraykey, mixed>), [21:11-13], (Hole (((dict<arraykey, mixed>), [21:11-13], (Lvar ([21:11-13], $y))), (dict<arraykey, mixed>), (dict<string, mixed>), Typing)))],
+                           [((~dict<arraykey, mixed>), [21:11-13], (Hole (((~dict<arraykey, mixed>), [21:11-13], (Lvar ([21:11-13], $y))), (~dict<arraykey, mixed>), (dict<string, mixed>), Typing)))],
                            None, ((function(dict<string, mixed> $spec): void)))))))
                    ],
                  [([18:3-22:4], (AssertEnv (Refinement, {$x}))); ([Pos.none], Noop)])))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([16:10-13], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

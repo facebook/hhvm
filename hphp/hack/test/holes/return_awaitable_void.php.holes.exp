@@ -6,7 +6,7 @@
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([2:16-19], "\\err");
       fd_fun =
       { f_span = [2:1-50]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((Awaitable<void>), (Some ([2:32-47], (Happly (([2:32-41], "\\HH\\Awaitable"), [([2:42-46], (Hprim Tvoid))])))));
+        f_readonly_ret = None; f_ret = ((Awaitable<~void>), (Some ([2:32-47], (Happly (([2:32-41], "\\HH\\Awaitable"), [([2:42-46], (Hprim Tvoid))])))));
         f_params =
         [{ param_annotation = (string); param_type_hint = ((string), (Some ([2:20-26], (Hprim Tstring)))); 
            param_is_variadic = false; param_pos = [2:27-29]; param_name = "$x"; 
@@ -14,8 +14,8 @@
            param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
-        f_fun_kind = FAsync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
+        f_fun_kind = FAsync; f_user_attributes = [{ ua_name = ([2:16-19], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
@@ -25,10 +25,10 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:16-17], "\\f");
        fd_fun =
        { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((Awaitable<int>), (Some ([3:21-35], (Happly (([3:21-30], "\\HH\\Awaitable"), [([3:31-34], (Hprim Tint))]))))); 
+         f_readonly_ret = None; f_ret = ((Awaitable<~int>), (Some ([3:21-35], (Happly (([3:21-30], "\\HH\\Awaitable"), [([3:31-34], (Hprim Tint))]))))); 
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-12], (Return (Some ((int), [4:10-11], (Int "1")))))] }; 
-         f_fun_kind = FAsync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FAsync; f_user_attributes = [{ ua_name = ([3:16-17], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
@@ -38,7 +38,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([6:16-17], "\\g");
        fd_fun =
        { f_span = [6:1-12:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((Awaitable<int>), (Some ([6:31-45], (Happly (([6:31-40], "\\HH\\Awaitable"), [([6:41-44], (Hprim Tint))])))));
+         f_readonly_ret = None; f_ret = ((Awaitable<~int>), (Some ([6:31-45], (Happly (([6:31-40], "\\HH\\Awaitable"), [([6:41-44], (Hprim Tint))])))));
          f_params =
          [{ param_annotation = (?string); param_type_hint = ((?string), (Some ([6:18-25], (Hoption ([6:19-25], (Hprim Tstring)))))); 
             param_is_variadic = false; param_pos = [6:26-28]; param_name = "$x"; 
@@ -59,18 +59,18 @@
                 [([7:3-9:4], (AssertEnv (Refinement, {$x}))); ([Pos.none], Noop)])));
              ([11:3-24],
               (Return
-                 (Some ((void), [11:10-23],
+                 (Some ((~void), [11:10-23],
                         (Hole (
-                           ((void), [11:10-23],
+                           ((~void), [11:10-23],
                             (Await
-                               ((Awaitable<void>), [11:16-23],
+                               ((Awaitable<~void>), [11:16-23],
                                 (Call
-                                   { func = (((function(string $x): Awaitable<void>)), [11:16-19], (Id ([11:16-19], "\\err"))); 
+                                   { func = (((function(string $x): Awaitable<~void>)), [11:16-19], (Id ([11:16-19], "\\err"))); 
                                      targs = []; args = [(Pnormal, ((string), [11:20-22], (Lvar ([11:20-22], $x))))]; 
                                      unpacked_arg = None })))),
-                           (void), (int), Typing))))))
+                           (~void), (~int), Typing))))))
              ]
            };
-         f_fun_kind = FAsync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FAsync; f_user_attributes = [{ ua_name = ([6:16-17], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

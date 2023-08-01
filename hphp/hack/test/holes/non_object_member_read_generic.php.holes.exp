@@ -1,7 +1,15 @@
+Errors:
+  [6:9-12] You are trying to access the method `bar` but this is a mixed value. Use a **specific** class or interface name.
+  [3:9-10] Definition is here
 [(Class
     { c_span = [3:1-8:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
-      c_name = ([3:7-8], "\\C"); c_tparams = [{ tp_variance = Invariant; tp_name = ([3:9-10], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
+      c_name = ([3:7-8], "\\C");
+      c_tparams =
+      [{ tp_variance = Invariant; tp_name = ([3:9-10], "T"); tp_parameters = []; 
+         tp_constraints = [(Constraint_as, ([3:9-10], (Happly (([3:9-10], "\\HH\\supportdyn"), [([3:9-10], Hmixed)]))))]; 
+         tp_reified = Erased; tp_user_attributes = [] }
+        ];
       c_extends = []; c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; 
       c_reqs = []; c_implements = []; c_where_constraints = []; c_consts = []; 
       c_typeconsts = []; c_vars = [];
@@ -25,7 +33,8 @@
                  (Call
                     { func =
                       ((nothing), [6:5-12],
-                       (Obj_get (((T), [6:5-7], (Hole (((T), [6:5-7], (Lvar ([6:5-7], $x))), (T), (nothing), Typing))), ((nothing), [6:9-12], (Id ([6:9-12], "bar"))), OG_nullthrows, Is_method)));
+                       (Obj_get (((mixed), [6:5-7], (Hole (((T), [6:5-7], (Lvar ([6:5-7], $x))), (mixed), (nothing), Typing))), (
+                          (nothing), [6:9-12], (Id ([6:9-12], "bar"))), OG_nullthrows, Is_method)));
                       targs = []; args = []; unpacked_arg = None }))))
              ]
            };
@@ -38,6 +47,6 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
-      c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
-      c_module = None })
+      c_user_attributes = [{ ua_name = ([3:7-8], "__SupportDynamicType"); ua_params = [] }]; 
+      c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+      c_emit_id = None; c_internal = false; c_module = None })

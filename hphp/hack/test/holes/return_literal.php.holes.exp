@@ -6,8 +6,8 @@
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-24], "\\return_literal");
       fd_fun =
       { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((int), (Some ([3:27-30], (Hprim Tint)))); 
-        f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([5:3-16], (Return (Some ((bool), [5:10-15], (Hole (((bool), [5:10-15], False), (bool), (int), Typing))))))] };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
+        f_readonly_ret = None; f_ret = ((~int), (Some ([3:27-30], (Hprim Tint)))); 
+        f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([5:3-16], (Return (Some ((bool), [5:10-15], (Hole (((bool), [5:10-15], False), (bool), (~int), Typing))))))] };
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-24], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

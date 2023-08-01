@@ -10,7 +10,7 @@ Errors:
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-26], "\\__return_3_tuple");
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = (((int, int, int)), (Some ([3:37-52], (Htuple [([3:38-41], (Hprim Tint)); ([3:43-46], (Hprim Tint)); ([3:48-51], (Hprim Tint))]))));
+        f_readonly_ret = None; f_ret = ((~(int, int, int)), (Some ([3:37-52], (Htuple [([3:38-41], (Hprim Tint)); ([3:43-46], (Hprim Tint)); ([3:48-51], (Hprim Tint))]))));
         f_params =
         [{ param_annotation = (bool); param_type_hint = ((bool), (Some ([3:27-31], (Hprim Tbool)))); 
            param_is_variadic = false; param_pos = [3:32-34]; param_name = "$x"; 
@@ -19,8 +19,8 @@ Errors:
           ];
         f_ctxs = None; f_unsafe_ctxs = None;
         f_body = { fb_ast = [([4:3-25], (Return (Some (((int, int, int)), [4:10-24], (Tuple [((int), [4:16-17], (Int "1")); ((int), [4:19-20], (Int "1")); ((int), [4:22-23], (Int "1"))])))))] };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-26], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
@@ -30,7 +30,7 @@ Errors:
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([7:10-26], "\\__return_2_tuple");
        fd_fun =
        { f_span = [7:1-9:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = (((int, int)), (Some ([7:37-47], (Htuple [([7:38-41], (Hprim Tint)); ([7:43-46], (Hprim Tint))]))));
+         f_readonly_ret = None; f_ret = ((~(int, int)), (Some ([7:37-47], (Htuple [([7:38-41], (Hprim Tint)); ([7:43-46], (Hprim Tint))]))));
          f_params =
          [{ param_annotation = (bool); param_type_hint = ((bool), (Some ([7:27-31], (Hprim Tbool)))); 
             param_is_variadic = false; param_pos = [7:32-34]; param_name = "$x"; 
@@ -38,8 +38,8 @@ Errors:
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([8:3-22], (Return (Some (((int, int)), [8:10-21], (Tuple [((int), [8:16-17], (Int "1")); ((int), [8:19-20], (Int "1"))])))))] };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([7:10-26], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
@@ -61,22 +61,23 @@ Errors:
          { fb_ast =
            [([12:3-43],
              (Expr
-                (((int, int, int)), [12:3-42],
+                ((~(int, int, int)), [12:3-42],
                  (Binop
                     { bop = (Eq None);
                       lhs =
-                      (((int, int, int)), [12:3-19], (List [((int), [12:8-10], (Lvar ([12:8-10], $u))); ((int), [12:12-14], (Lvar ([12:12-14], $v))); ((int), [12:16-18], (Lvar ([12:16-18], $w)))]));
+                      ((~(int, int, int)), [12:3-19],
+                       (List [((~int), [12:8-10], (Lvar ([12:8-10], $u))); ((~int), [12:12-14], (Lvar ([12:12-14], $v))); ((~int), [12:16-18], (Lvar ([12:16-18], $w)))]));
                       rhs =
-                      (((int, int, int)), [12:22-42],
+                      ((~(int, int, int)), [12:22-42],
                        (Call
-                          { func = (((function(bool $x): (int, int, int))), [12:22-38], (Id ([12:22-38], "\\__return_3_tuple"))); 
+                          { func = (((function(bool $x): ~(int, int, int))), [12:22-38], (Id ([12:22-38], "\\__return_3_tuple"))); 
                             targs = []; args = [(Pnormal, ((bool), [12:39-41], (Lvar ([12:39-41], $x))))]; 
                             unpacked_arg = None }))
                       }))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([11:10-24], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
@@ -98,24 +99,24 @@ Errors:
          { fb_ast =
            [([17:3-43],
              (Expr
-                (((int, int)), [17:3-42],
+                ((~(int, int)), [17:3-42],
                  (Binop
                     { bop = (Eq None);
                       lhs =
-                      (((int, int)), [17:3-19],
+                      ((~(int, int)), [17:3-19],
                        (List [((nothing), [17:8-10], (Lvar ([17:8-10], $u))); ((nothing), [17:12-14], (Lvar ([17:12-14], $v))); ((nothing), [17:16-18], (Lvar ([17:16-18], $w)))]));
                       rhs =
-                      (((int, int)), [17:22-42],
+                      ((~(int, int)), [17:22-42],
                        (Hole (
-                          (((int, int)), [17:22-42],
+                          ((~(int, int)), [17:22-42],
                            (Call
-                              { func = (((function(bool $x): (int, int))), [17:22-38], (Id ([17:22-38], "\\__return_2_tuple"))); 
+                              { func = (((function(bool $x): ~(int, int))), [17:22-38], (Id ([17:22-38], "\\__return_2_tuple"))); 
                                 targs = []; args = [(Pnormal, ((bool), [17:39-41], (Lvar ([17:39-41], $x))))]; 
                                 unpacked_arg = None })),
-                          ((int, int)), ({suggest:nothing}), Typing)))
+                          (~(int, int)), ({suggest:nothing}), Typing)))
                       }))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([15:10-25], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

@@ -26,9 +26,9 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
-      c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
-      c_module = None });
+      c_user_attributes = [{ ua_name = ([3:7-15], "__SupportDynamicType"); ua_params = [] }]; 
+      c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+      c_emit_id = None; c_internal = false; c_module = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -46,8 +46,8 @@
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([7:10-11], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
@@ -115,8 +115,8 @@
                        unpacked_arg = None }))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([9:10-19], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
@@ -144,13 +144,13 @@
          { fb_ast =
            [([31:3-63],
              (Expr
-                ((void), [31:3-62],
+                ((~void), [31:3-62],
                  (Call
                     { func = (((function(Pair<int, int> $b): void)), [31:3-4], (Id ([31:3-4], "\\b"))); 
                       targs = [];
                       args =
                       [(Pnormal,
-                        ((Pair<int, int>), [31:5-61],
+                        ((~Pair<int, int>), [31:5-61],
                          (Hole (((Pair<bool, int>), [31:57-60], (Lvar ([31:57-60], $b1))), (Pair<bool, int>), (Pair<int, int>),
                             (UnsafeCast
                                [([31:27-41], (Happly (([31:27-31], "\\HH\\Pair"), [([31:32-36], (Hprim Tbool)); ([31:37-40], (Hprim Tint))])));
@@ -160,13 +160,13 @@
                       unpacked_arg = None }))));
              ([33:3-63],
               (Expr
-                 ((void), [33:3-62],
+                 ((~void), [33:3-62],
                   (Call
                      { func = (((function(Pair<int, int> $b): void)), [33:3-4], (Id ([33:3-4], "\\b"))); 
                        targs = [];
                        args =
                        [(Pnormal,
-                         ((Pair<int, int>), [33:5-61],
+                         ((~Pair<int, int>), [33:5-61],
                           (Hole (((Pair<int, bool>), [33:57-60], (Lvar ([33:57-60], $b2))), (Pair<int, bool>), (Pair<int, int>),
                              (UnsafeCast
                                 [([33:27-41], (Happly (([33:27-31], "\\HH\\Pair"), [([33:32-35], (Hprim Tint)); ([33:36-40], (Hprim Tbool))])));
@@ -182,7 +182,7 @@
                        rhs = ((TestPair), [35:10-24], (New (((TestPair), [35:14-22], (CI ([35:14-22], "\\TestPair"))), [], [], None, ((function(): void))))) }))));
              ([38:3-69],
               (Expr
-                 ((void), [38:3-68],
+                 ((~void), [38:3-68],
                   (Call
                      { func =
                        (((function(Pair<int, int> $b): void)), [38:3-10],
@@ -190,7 +190,7 @@
                        targs = [];
                        args =
                        [(Pnormal,
-                         ((Pair<int, int>), [38:11-67],
+                         ((~Pair<int, int>), [38:11-67],
                           (Hole (((Pair<bool, int>), [38:63-66], (Lvar ([38:63-66], $b1))), (Pair<bool, int>), (Pair<int, int>),
                              (UnsafeCast
                                 [([38:33-47], (Happly (([38:33-37], "\\HH\\Pair"), [([38:38-42], (Hprim Tbool)); ([38:43-46], (Hprim Tint))])));
@@ -200,7 +200,7 @@
                        unpacked_arg = None }))));
              ([40:3-69],
               (Expr
-                 ((void), [40:3-68],
+                 ((~void), [40:3-68],
                   (Call
                      { func =
                        (((function(Pair<int, int> $b): void)), [40:3-10],
@@ -208,7 +208,7 @@
                        targs = [];
                        args =
                        [(Pnormal,
-                         ((Pair<int, int>), [40:11-67],
+                         ((~Pair<int, int>), [40:11-67],
                           (Hole (((Pair<int, bool>), [40:63-66], (Lvar ([40:63-66], $b2))), (Pair<int, bool>), (Pair<int, int>),
                              (UnsafeCast
                                 [([40:33-47], (Happly (([40:33-37], "\\HH\\Pair"), [([40:38-41], (Hprim Tint)); ([40:42-46], (Hprim Tbool))])));
@@ -218,6 +218,156 @@
                        unpacked_arg = None }))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([26:10-24], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
+  (Class
+     { c_span = [3:1-5:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
+       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
+       c_name = ([3:7-15], "\\TestPair"); c_tparams = []; c_extends = []; 
+       c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
+       c_implements = []; c_where_constraints = []; c_consts = []; c_typeconsts = []; 
+       c_vars = [];
+       c_methods =
+       [{ m_span = [4:3-48]; m_annotation = (); m_final = false; m_abstract = false; 
+          m_static = false; m_readonly_this = false; m_visibility = Public; 
+          m_name = ([4:19-20], "b"); m_tparams = []; m_where_constraints = [];
+          m_params =
+          [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([4:21-35], (Happly (([4:21-25], "\\HH\\Pair"), [([4:26-29], (Hprim Tint)); ([4:31-34], (Hprim Tint))])))));
+             param_is_variadic = false; param_pos = [4:36-38]; param_name = "$b"; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+             param_user_attributes = []; param_visibility = None }
+            ];
+          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 
+          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+          m_ret = ((dynamic), (Some ([4:41-45], (Hprim Tvoid)))); m_external = false; 
+          m_doc_comment = None }
+         ];
+       c_xhp_children = []; c_xhp_attrs = [];
+       c_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       c_user_attributes = [{ ua_name = ([3:7-15], "__SupportDynamicType"); ua_params = [] }]; 
+       c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+       c_emit_id = None; c_internal = false; c_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([7:10-11], "\\b");
+       fd_fun =
+       { f_span = [7:1-39]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((dynamic), (Some ([7:32-36], (Hprim Tvoid))));
+         f_params =
+         [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([7:12-26], (Happly (([7:12-16], "\\HH\\Pair"), [([7:17-20], (Hprim Tint)); ([7:22-25], (Hprim Tint))])))));
+            param_is_variadic = false; param_pos = [7:27-29]; param_name = "$b"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([7:10-11], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([26:10-24], "\\call_pair_cast");
+       fd_fun =
+       { f_span = [26:1-41:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((dynamic), (Some ([29:4-8], (Hprim Tvoid))));
+         f_params =
+         [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([27:3-18], (Happly (([27:3-7], "\\HH\\Pair"), [([27:8-12], (Hprim Tbool)); ([27:14-17], (Hprim Tint))])))));
+            param_is_variadic = false; param_pos = [27:19-22]; param_name = "$b1"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None };
+           { param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([28:3-18], (Happly (([28:3-7], "\\HH\\Pair"), [([28:8-11], (Hprim Tint)); ([28:13-17], (Hprim Tbool))])))));
+             param_is_variadic = false; param_pos = [28:19-22]; param_name = "$b2"; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+             param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([31:3-63],
+             (Expr
+                ((~void), [31:3-62],
+                 (Call
+                    { func = (((function(Pair<int, int> $b): void)), [31:3-4], (Id ([31:3-4], "\\b"))); 
+                      targs = [];
+                      args =
+                      [(Pnormal,
+                        ((~Pair<int, int>), [31:5-61],
+                         (Hole (((dynamic), [31:57-60], (Lvar ([31:57-60], $b1))), (Pair<bool, int>), (Pair<int, int>),
+                            (UnsafeCast
+                               [([31:27-41], (Happly (([31:27-31], "\\HH\\Pair"), [([31:32-36], (Hprim Tbool)); ([31:37-40], (Hprim Tint))])));
+                                 ([31:42-55], (Happly (([31:42-46], "\\HH\\Pair"), [([31:47-50], (Hprim Tint)); ([31:51-54], (Hprim Tint))])))])
+                            ))))
+                        ];
+                      unpacked_arg = None }))));
+             ([33:3-63],
+              (Expr
+                 ((~void), [33:3-62],
+                  (Call
+                     { func = (((function(Pair<int, int> $b): void)), [33:3-4], (Id ([33:3-4], "\\b"))); 
+                       targs = [];
+                       args =
+                       [(Pnormal,
+                         ((~Pair<int, int>), [33:5-61],
+                          (Hole (((dynamic), [33:57-60], (Lvar ([33:57-60], $b2))), (Pair<int, bool>), (Pair<int, int>),
+                             (UnsafeCast
+                                [([33:27-41], (Happly (([33:27-31], "\\HH\\Pair"), [([33:32-35], (Hprim Tint)); ([33:36-40], (Hprim Tbool))])));
+                                  ([33:42-55], (Happly (([33:42-46], "\\HH\\Pair"), [([33:47-50], (Hprim Tint)); ([33:51-54], (Hprim Tint))])))])
+                             ))))
+                         ];
+                       unpacked_arg = None }))));
+             ([35:3-25],
+              (Expr
+                 ((TestPair), [35:3-24],
+                  (Binop
+                     { bop = (Eq None); lhs = ((TestPair), [35:3-7], (Lvar ([35:3-7], $foo)));
+                       rhs = ((TestPair), [35:10-24], (New (((TestPair), [35:14-22], (CI ([35:14-22], "\\TestPair"))), [], [], None, ((function(): void))))) }))));
+             ([38:3-69],
+              (Expr
+                 ((~void), [38:3-68],
+                  (Call
+                     { func =
+                       (((function(Pair<int, int> $b): void)), [38:3-10],
+                        (Obj_get (((TestPair), [38:3-7], (Lvar ([38:3-7], $foo))), (((function(Pair<int, int> $b): void)), [38:9-10], (Id ([38:9-10], "b"))), OG_nullthrows, Is_method)));
+                       targs = [];
+                       args =
+                       [(Pnormal,
+                         ((~Pair<int, int>), [38:11-67],
+                          (Hole (((dynamic), [38:63-66], (Lvar ([38:63-66], $b1))), (Pair<bool, int>), (Pair<int, int>),
+                             (UnsafeCast
+                                [([38:33-47], (Happly (([38:33-37], "\\HH\\Pair"), [([38:38-42], (Hprim Tbool)); ([38:43-46], (Hprim Tint))])));
+                                  ([38:48-61], (Happly (([38:48-52], "\\HH\\Pair"), [([38:53-56], (Hprim Tint)); ([38:57-60], (Hprim Tint))])))])
+                             ))))
+                         ];
+                       unpacked_arg = None }))));
+             ([40:3-69],
+              (Expr
+                 ((~void), [40:3-68],
+                  (Call
+                     { func =
+                       (((function(Pair<int, int> $b): void)), [40:3-10],
+                        (Obj_get (((TestPair), [40:3-7], (Lvar ([40:3-7], $foo))), (((function(Pair<int, int> $b): void)), [40:9-10], (Id ([40:9-10], "b"))), OG_nullthrows, Is_method)));
+                       targs = [];
+                       args =
+                       [(Pnormal,
+                         ((~Pair<int, int>), [40:11-67],
+                          (Hole (((dynamic), [40:63-66], (Lvar ([40:63-66], $b2))), (Pair<int, bool>), (Pair<int, int>),
+                             (UnsafeCast
+                                [([40:33-47], (Happly (([40:33-37], "\\HH\\Pair"), [([40:38-41], (Hprim Tint)); ([40:42-46], (Hprim Tbool))])));
+                                  ([40:48-61], (Happly (([40:48-52], "\\HH\\Pair"), [([40:53-56], (Hprim Tint)); ([40:57-60], (Hprim Tint))])))])
+                             ))))
+                         ];
+                       unpacked_arg = None }))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([26:10-24], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

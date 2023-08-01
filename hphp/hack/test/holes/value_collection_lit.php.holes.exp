@@ -6,7 +6,7 @@
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:11-31], "\\value_collection_lit");
       fd_fun =
       { f_span = [3:2-6:3]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((keyset<int>), (Some ([3:34-45], (Happly (([3:34-40], "\\HH\\keyset"), [([3:41-44], (Hprim Tint))]))))); 
+        f_readonly_ret = None; f_ret = ((~keyset<int>), (Some ([3:34-45], (Happly (([3:34-40], "\\HH\\keyset"), [([3:41-44], (Hprim Tint))]))))); 
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
@@ -16,6 +16,6 @@
                       (ValCollection (([5:11-17], Keyset), None, [((string), [5:20-25], (Hole (((string), [5:20-25], (String "bad")), (string), (int), Typing))); ((int), [5:28-29], (Int "1"))]))))))
             ]
           };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:11-31], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

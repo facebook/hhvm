@@ -26,8 +26,8 @@
                      targs = []; args = []; unpacked_arg = None }))))
             ]
           };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-38], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
@@ -58,8 +58,8 @@
                       targs = []; args = []; unpacked_arg = None }))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([8:10-42], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
@@ -71,7 +71,7 @@
        { f_span = [13:1-16:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([13:53-57], (Hprim Tvoid))));
          f_params =
-         [{ param_annotation = (mixed); param_type_hint = ((mixed), (Some ([13:40-45], Hmixed))); 
+         [{ param_annotation = (mixed); param_type_hint = ((mixed), (Some ([13:40-45], (Happly (([13:40-45], "\\HH\\supportdyn"), [([13:40-45], Hmixed)]))))); 
             param_is_variadic = false; param_pos = [13:46-49]; param_name = "$xs"; 
             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
@@ -90,6 +90,6 @@
                       targs = []; args = []; unpacked_arg = None }))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([13:10-39], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

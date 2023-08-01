@@ -36,6 +36,6 @@ Errors:
                  (Binop { bop = (Eq None); lhs = ((bool), [7:3-10], (Array_get (((nothing), [7:3-7], (Lvar ([7:3-7], $obj))), (Some ((int), [7:8-9], (Int "1")))))); rhs = ((bool), [7:13-17], True) }))))
             ]
           };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([4:10-35], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

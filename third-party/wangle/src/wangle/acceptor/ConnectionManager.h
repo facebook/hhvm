@@ -198,6 +198,12 @@ class ConnectionManager : public folly::DelayedDestruction,
   size_t dropIdleConnections(size_t num);
 
   /**
+   * Drop conections based on idle timeout.
+   */
+  size_t dropIdleConnectionsBasedOnTimeout(
+      std::chrono::milliseconds targetIdleTimeMs);
+
+  /**
    * reportActivity is meant to be called when significant activity occurred on
    * the connection. reportActivity puts the connection in the front of the
    * active connections list and captures the current timestamp. For more

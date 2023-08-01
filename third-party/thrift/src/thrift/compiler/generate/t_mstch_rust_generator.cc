@@ -1336,7 +1336,8 @@ class mstch_rust_value : public mstch_base {
     return context_.type_factory->make_mstch_object(type_, context_, pos_);
   }
   mstch::node local_type() {
-    return context_.type_factory->make_mstch_object(local_type_, context_, pos_);
+    return context_.type_factory->make_mstch_object(
+        local_type_, context_, pos_);
   }
   mstch::node is_newtype() {
     return type_->is_typedef() && type_->has_annotation("rust.newtype");

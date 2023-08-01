@@ -213,6 +213,23 @@ struct PHPInputTransport {
     }
   }
 
+  size_t skipNoAdvance(size_t len) {
+    if (len > buffer_used) {
+      len = buffer_used;
+    }
+    buffer_ptr += len;
+    buffer_used -= len;
+    return len;
+  }
+
+  size_t getBufferSize() noexcept {
+    return buffer_used;
+  }
+
+  const char* getBuffer() noexcept {
+    return buffer_ptr;
+  }
+
   void readBytes(void* buf, size_t len) {
     if (LIKELY(len < buffer_used)) {
       // Fast path if we have enough data

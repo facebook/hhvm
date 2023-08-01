@@ -42,6 +42,7 @@
 #include "hphp/util/fixed-vector.h"
 #include "hphp/util/rds-local.h"
 
+#include <cstdint>
 #include <folly/AtomicHashMap.h>
 #include <folly/Bits.h>
 #include <folly/Format.h>
@@ -57,6 +58,55 @@ namespace HPHP::thrift {
 
 namespace {
 const StaticString SKIP_CHECKS_ATTR("ThriftDeprecatedSkipSerializerChecks");
+
+// Assumes that at least 10 bytes available in the input buffer
+static int64_t readVarintFast(const char **ptr) {
+  uint8_t byte = *((*ptr)++);
+  uint64_t result = (uint64_t)(byte & 0x7f);
+  if ((byte & 0x80) == 0) goto ret;
+  // Byte 2
+  byte = *((*ptr)++);
+  result = result | (uint64_t)(byte & 0x7f) << 7;
+  if ((byte & 0x80) == 0) goto ret;
+  // Byte 3
+  byte = *((*ptr)++);
+  result = result | (uint64_t)(byte & 0x7f) << 14;
+  if ((byte & 0x80) == 0) goto ret;
+  // Byte 4
+  byte = *((*ptr)++);
+  result = result | (uint64_t)(byte & 0x7f) << 21;
+  if ((byte & 0x80) == 0) goto ret;
+  // Byte 5
+  byte = *((*ptr)++);
+  result = result | (uint64_t)(byte & 0x7f) << 28;
+  if ((byte & 0x80) == 0) goto ret;
+  // Byte 6
+  byte = *((*ptr)++);
+  result = result | (uint64_t)(byte & 0x7f) << 35;
+  if ((byte & 0x80) == 0) goto ret;
+  // Byte 7
+  byte = *((*ptr)++);
+  result = result | (uint64_t)(byte & 0x7f) << 42;
+  if ((byte & 0x80) == 0) goto ret;
+  // Byte 8
+  byte = *((*ptr)++);
+  result = result | (uint64_t)(byte & 0x7f) << 49;
+  if ((byte & 0x80) == 0) goto ret;
+  // Byte 9
+  byte = *((*ptr)++);
+  result = result | (uint64_t)(byte & 0x7f) << 56;
+  if ((byte & 0x80) == 0) goto ret;
+  // Byte 10
+  byte = *((*ptr)++);
+  result = result | (uint64_t)(byte & 0x7f) << 63;
+  if ((byte & 0x80) == 0) goto ret;
+
+  thrift_error("Variable-length int over 10 bytes", ERR_INVALID_DATA);
+
+ret:
+  return result;
+}
+
 }
 
 const uint8_t VERSION_MASK = 0x1f;
@@ -999,6 +1049,30 @@ struct CompactReader {
       }
     }
 
+    void readIntegralMapFast(DictInit &arr, size_t size) {
+      const char *startPtr = transport.getBuffer();
+      const char *ptr = startPtr;
+      const char *endPtr = startPtr + transport.getBufferSize() - 20;
+      while ((ptr <= endPtr) && (size > 0)) {
+        // We definately should have enough data to read 2 VarInts
+        int64_t key = zigzagToI64(readVarintFast(&ptr));
+        int64_t value = zigzagToI64(readVarintFast(&ptr));
+        arr.set(key, value);
+        size--;
+      }
+      intptr_t skipLen = ptr - startPtr;
+      if (transport.skipNoAdvance(skipLen) != skipLen) {
+        thrift_error("Invalid skip value", ERR_INVALID_DATA);
+      }
+      // Finish tail using slow byte-by-byte path
+      while (size > 0) {
+        int64_t key = readI();
+        int64_t value = readI();
+        arr.set(key, value);
+        size--;
+      }
+    }
+
     Variant readMap(const FieldSpec& spec, bool& hasTypeWrapper) {
       TType keyType, valueType;
       uint32_t size;
@@ -1015,16 +1089,10 @@ struct CompactReader {
                 typeIsInt(valueType) &&
                 spec.key().adapter == nullptr &&
                 spec.val().adapter == nullptr
-              ) {
+                ) {
               hasTypeWrapper = hasTypeWrapper || spec.key().isTypeWrapped;
-              // read map<integral, integral>
-              for (uint32_t i = 0; i < size; i++) {
-                int64_t key = readI();
-                int64_t value = readI();
-                arr.set(key, value);
-              }
+              readIntegralMapFast(arr, size);
             } else {
-              // generic map deserialization
               for (uint32_t i = 0; i < size; i++) {
                 int64_t key = readField(
                   spec.key(), keyType, hasTypeWrapper

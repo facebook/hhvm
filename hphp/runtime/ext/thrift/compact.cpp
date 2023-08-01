@@ -1005,32 +1005,36 @@ struct CompactReader {
       hasTypeWrapper = hasTypeWrapper || spec.val().isTypeWrapped;
       if (s_harray.equal(spec.format)) {
         DictInit arr(size);
-        for (uint32_t i = 0; i < size; i++) {
-          switch (keyType) {
-            case TType::T_I08:
-            case TType::T_I16:
-            case TType::T_I32:
-            case TType::T_I64: {
+        switch (keyType) {
+          case TType::T_I08:
+          case TType::T_I16:
+          case TType::T_I32:
+          case TType::T_I64: {
+            for (uint32_t i = 0; i < size; i++) {
               int64_t key = readField(
                 spec.key(), keyType, hasTypeWrapper
               ).toInt64();
               Variant value = readField(spec.val(), valueType, hasTypeWrapper);
               arr.set(key, value);
-              break;
             }
-            case TType::T_STRING: {
+            break;
+          }
+          case TType::T_STRING: {
+            for (uint32_t i = 0; i < size; i++) {
               String key = readField(
                 spec.key(), keyType, hasTypeWrapper
               ).toString();
               Variant value = readField(spec.val(), valueType, hasTypeWrapper);
               arr.set(key, value);
-              break;
             }
-            default:
+            break;
+          }
+          default:
+            if (size > 0) {
               thrift_error(
                   "Unable to deserialize non int/string array keys",
                   ERR_INVALID_DATA);
-          }
+            }
         }
         readCollectionEnd();
         return arr.toVariant();

@@ -63,8 +63,6 @@ class AstGeneratorTest(unittest.TestCase):
                 struct Foo {
                     1: i64 int;
                 }
-
-                const i16 answer = 42;
                 """
             ),
         )
@@ -138,3 +136,42 @@ class AstGeneratorTest(unittest.TestCase):
         self.assertEqual(
             len(serviceDef.functions[2].returnTypes), 0
         )  # streams not supported yet
+
+    def test_docs(self):
+        write_file(
+            "foo.thrift",
+            textwrap.dedent(
+                """
+                /** This is a struct and its name is Foo. */
+                struct Foo {
+                    1: i64 Bar;  ///< This is a field and its name is Bar.
+                }
+                """
+            ),
+        )
+
+        ast = self.run_thrift("foo.thrift")
+        print(ast.definitions)
+        self.assertEqual(ast.definitions[0].structDef.attrs.name, "Foo")
+        srcRange = ast.definitions[0].structDef.attrs.sourceRange
+        self.assertEqual(srcRange.programId, 1)
+        self.assertEqual(srcRange.beginLine, 3)
+        docs = ast.definitions[0].structDef.attrs.docs
+        self.assertEqual(
+            docs.contents.rstrip(), "This is a struct and its name is Foo."
+        )
+        self.assertEqual(docs.sourceRange.programId, 1)
+        self.assertEqual(docs.sourceRange.beginLine, 2)
+        self.assertEqual(docs.sourceRange.beginColumn, 1)
+        self.assertEqual(docs.sourceRange.endLine, 2)
+        self.assertEqual(docs.sourceRange.endColumn, 45)
+
+        docs = ast.definitions[0].structDef.fields[0].attrs.docs
+        self.assertEqual(docs.contents.rstrip(), "This is a field and its name is Bar.")
+        if os.name == "nt":
+            return  # line separators differ on windows and mess up source ranges
+        self.assertEqual(docs.sourceRange.programId, 1)
+        self.assertEqual(docs.sourceRange.beginLine, 4)
+        self.assertEqual(docs.sourceRange.beginColumn, 18)
+        self.assertEqual(docs.sourceRange.endLine, 5)
+        self.assertEqual(docs.sourceRange.endColumn, 1)

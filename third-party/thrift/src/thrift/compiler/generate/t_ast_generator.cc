@@ -146,15 +146,49 @@ void t_ast_generator::generate_program() {
   };
 
   auto set_source_range = [&](const t_named& def,
-                              type::DefinitionAttrs& attrs) {
-    resolved_location begin(def.src_range().begin, source_mgr_);
-    resolved_location end(def.src_range().end, source_mgr_);
-    type::SourceRange& range = *attrs.sourceRange();
-    range.programId() = program_index.at(def.program());
-    range.beginLine() = begin.line();
-    range.beginColumn() = begin.column();
-    range.endLine() = end.line();
-    range.endColumn() = end.column();
+                              type::DefinitionAttrs& attrs,
+                              const t_program* program = nullptr) {
+    program = program ? program : def.program();
+
+    {
+      resolved_location begin(def.src_range().begin, source_mgr_);
+      resolved_location end(def.src_range().end, source_mgr_);
+      type::SourceRange& range = *attrs.sourceRange();
+      range.programId() = program_index.at(program);
+      range.beginLine() = begin.line();
+      range.beginColumn() = begin.column();
+      range.endLine() = end.line();
+      range.endColumn() = end.column();
+    }
+
+    if (def.has_doc()) {
+      resolved_location begin(def.doc_range().begin, source_mgr_);
+      resolved_location end(def.doc_range().end, source_mgr_);
+      type::SourceRange& range = *attrs.docs()->sourceRange();
+      range.programId() = program_index.at(program);
+      range.beginLine() = begin.line();
+      range.beginColumn() = begin.column();
+      range.endLine() = end.line();
+      range.endColumn() = end.column();
+    }
+  };
+  auto set_child_source_ranges = [&](const auto& node, auto& parent_def) {
+    using Node = std::decay_t<decltype(node)>;
+    if constexpr (std::is_base_of_v<t_structured, Node>) {
+      int i = 0;
+      for (const auto& field : node.fields()) {
+        auto& def = parent_def.fields()[i++];
+        assert(def.name() == field.name());
+        set_source_range(field, *def.attrs(), node.program());
+      }
+    } else if constexpr (std::is_same_v<Node, t_enum>) {
+      int i = 0;
+      for (const auto& value : node.values()) {
+        auto& def = parent_def.values()[i++];
+        assert(def.name() == value.name());
+        set_source_range(value, *def.attrs(), node.program());
+      }
+    }
   };
 
   schematizer schema_source(intern_value);
@@ -210,6 +244,7 @@ void t_ast_generator::generate_program() {
     auto& def = definitions.emplace_back().kind##Def_ref().ensure(); \
     hydrate_const(def, *schema_source.gen_schema(node));             \
     set_source_range(node, *def.attrs());                            \
+    set_child_source_ranges(node, def);                              \
   })
   THRIFT_ADD_VISITOR(service);
   THRIFT_ADD_VISITOR(interaction);

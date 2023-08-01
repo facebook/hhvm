@@ -120,6 +120,12 @@ void add_definition(
     definition->add_map(val("unstructuredAnnotations"), std::move(annots));
   }
 
+  if (node.has_doc()) {
+    auto docs = mapval();
+    docs->add_map(val("contents"), val(node.doc()));
+    definition->add_map(val("docs"), std::move(docs));
+  }
+
   schema.add_map(val("attrs"), std::move(definition));
 }
 

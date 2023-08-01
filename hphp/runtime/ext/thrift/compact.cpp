@@ -1192,24 +1192,50 @@ struct CompactReader {
     }
 
     uint64_t readVarint(void) {
-      uint64_t result = 0;
-      uint8_t shift = 0;
+      uint8_t byte = readUByte();
+      uint64_t result = (uint64_t)(byte & 0x7f);
+      if ((byte & 0x80) == 0) goto ret;
+      // Byte 2
+      byte = readUByte();
+      result = result | (uint64_t)(byte & 0x7f) << 7;
+      if ((byte & 0x80) == 0) goto ret;
+      // Byte 3
+      byte = readUByte();
+      result = result | (uint64_t)(byte & 0x7f) << 14;
+      if ((byte & 0x80) == 0) goto ret;
+      // Byte 4
+      byte = readUByte();
+      result = result | (uint64_t)(byte & 0x7f) << 21;
+      if ((byte & 0x80) == 0) goto ret;
+      // Byte 5
+      byte = readUByte();
+      result = result | (uint64_t)(byte & 0x7f) << 28;
+      if ((byte & 0x80) == 0) goto ret;
+      // Byte 6
+      byte = readUByte();
+      result = result | (uint64_t)(byte & 0x7f) << 35;
+      if ((byte & 0x80) == 0) goto ret;
+      // Byte 7
+      byte = readUByte();
+      result = result | (uint64_t)(byte & 0x7f) << 42;
+      if ((byte & 0x80) == 0) goto ret;
+      // Byte 8
+      byte = readUByte();
+      result = result | (uint64_t)(byte & 0x7f) << 49;
+      if ((byte & 0x80) == 0) goto ret;
+      // Byte 9
+      byte = readUByte();
+      result = result | (uint64_t)(byte & 0x7f) << 56;
+      if ((byte & 0x80) == 0) goto ret;
+      // Byte 10
+      byte = readUByte();
+      result = result | (uint64_t)(byte & 0x7f) << 63;
+      if ((byte & 0x80) == 0) goto ret;
 
-      while (true) {
-        uint8_t byte = readUByte();
-        result |= (uint64_t)(byte & 0x7f) << shift;
-        shift += 7;
+      thrift_error("Variable-length int over 10 bytes", ERR_INVALID_DATA);
 
-        if (!(byte & 0x80)) {
-          return result;
-        }
-
-        // Should never read more than 10 bytes, which is the max for a 64-bit
-        // int
-        if (shift >= 10 * 7) {
-          thrift_error("Variable-length int over 10 bytes", ERR_INVALID_DATA);
-        }
-      }
+    ret:
+      return result;
     }
 
     String readString(void) {

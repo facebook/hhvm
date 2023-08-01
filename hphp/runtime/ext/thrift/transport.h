@@ -214,17 +214,25 @@ struct PHPInputTransport {
   }
 
   void readBytes(void* buf, size_t len) {
-    while (len) {
-      size_t chunk_size = len < buffer_used ? len : buffer_used;
-      if (chunk_size) {
-        memcpy(buf, buffer_ptr, chunk_size);
-        buffer_ptr += chunk_size;
-        buffer_used -= chunk_size;
-        buf = reinterpret_cast<char*>(buf) + chunk_size;
-        len -= chunk_size;
+    if (LIKELY(len < buffer_used)) {
+      // Fast path if we have enough data
+      memcpy(buf, buffer_ptr, len);
+      buffer_ptr += len;
+      buffer_used -= len;
+    } else {
+      // Slow path at the end of the buffer
+      while (len) {
+        size_t chunk_size = len < buffer_used ? len : buffer_used;
+        if (chunk_size) {
+          memcpy(buf, buffer_ptr, chunk_size);
+          buffer_ptr += chunk_size;
+          buffer_used -= chunk_size;
+          buf = reinterpret_cast<char*>(buf) + chunk_size;
+          len -= chunk_size;
+        }
+        if (! len) break;
+        refill(len);
       }
-      if (! len) break;
-      refill(len);
     }
   }
 

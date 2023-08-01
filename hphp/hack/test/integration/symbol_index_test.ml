@@ -58,7 +58,7 @@ let assert_autocomplete
     | _ -> Acid
   in
   (* Search for the symbol *)
-  let results =
+  let (results, _is_complete) =
     SymbolIndex.find_matching_symbols
       ~sienv_ref
       ~query_text

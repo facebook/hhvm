@@ -24,4 +24,4 @@ val find_matching_symbols :
   max_results:int ->
   context:SearchTypes.autocomplete_type ->
   kind_filter:SearchTypes.si_kind option ->
-  SearchTypes.si_item list
+  SearchTypes.si_item list * SearchTypes.si_complete

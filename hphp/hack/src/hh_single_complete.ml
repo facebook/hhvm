@@ -315,7 +315,7 @@ let handle_mode mode filenames ctx (sienv : SearchUtils.si_env) naming_table =
         Printf.printf "query:\n%s\n\n%!" angle;
         if not dry_run then begin
           let start_time = Unix.gettimeofday () in
-          let results =
+          let (results, _is_complete) =
             Glean.query_autocomplete
               (Option.value_exn handle)
               ~query_text

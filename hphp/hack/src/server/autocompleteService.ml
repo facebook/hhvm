@@ -1490,7 +1490,7 @@ let find_global_results
         None
     in
 
-    let results =
+    let (results, is_complete) =
       SymbolIndex.find_matching_symbols
         ~sienv_ref
         ~query_text
@@ -1498,7 +1498,8 @@ let find_global_results
         ~kind_filter
         ~context:completion_type
     in
-    autocomplete_is_complete := List.length results < max_results;
+    autocomplete_is_complete :=
+      SearchTypes.equal_si_complete is_complete SearchTypes.Complete;
     (* Looking up a function signature using Tast_env.get_fun consumes ~67KB
      * and can cause complex typechecking which can take from 2-100 milliseconds
      * per result.  When tested in summer 2019 it was possible to load 1.4GB of data
@@ -1601,7 +1602,7 @@ let complete_xhp_tag
   let query_text = Utils.strip_ns query_text in
   auto_complete_for_global := query_text;
   let absolute_none = Pos.none |> Pos.to_absolute in
-  let results =
+  let (results, _is_complete) =
     SymbolIndex.find_matching_symbols
       ~sienv_ref
       ~query_text

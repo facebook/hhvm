@@ -78,20 +78,23 @@ let find_matching_symbols
     ~(query_text : string)
     ~(max_results : int)
     ~(context : autocomplete_type)
-    ~(kind_filter : si_kind option) : SearchTypes.si_item list =
+    ~(kind_filter : si_kind option) :
+    SearchTypes.si_item list * SearchTypes.si_complete =
+  let is_complete = ref SearchTypes.Complete in
   (*
    * Nuclide often sends this exact request to verify that HH is working.
    * Let's capture it and avoid doing unnecessary work.
    *)
   if String.equal query_text "this_is_just_to_check_liveness_of_hh_server" then
-    [
-      {
-        si_name = "Yes_hh_server_is_alive";
-        si_kind = SI_Unknown;
-        si_file = SI_Filehash "0";
-        si_fullname = "";
-      };
-    ]
+    ( [
+        {
+          si_name = "Yes_hh_server_is_alive";
+          si_kind = SI_Unknown;
+          si_file = SI_Filehash "0";
+          si_fullname = "";
+        };
+      ],
+      !is_complete )
   else
     (* Potential namespace matches always show up first *)
     let namespace_results =
@@ -125,7 +128,7 @@ let find_matching_symbols
     let global_results =
       match !sienv_ref.sie_provider with
       | CustomIndex ->
-        let r =
+        let (r, custom_is_complete) =
           CustomSearchService.search_symbols
             ~sienv_ref
             ~query_text
@@ -133,6 +136,7 @@ let find_matching_symbols
             ~context
             ~kind_filter
         in
+        is_complete := custom_is_complete;
         LocalSearchService.extract_dead_results ~sienv:!sienv_ref ~results:r
       | SqliteIndex ->
         let results =
@@ -143,6 +147,11 @@ let find_matching_symbols
             ~context
             ~kind_filter
         in
+        is_complete :=
+          if List.length results < max_results then
+            SearchTypes.Complete
+          else
+            SearchTypes.Incomplete;
         LocalSearchService.extract_dead_results ~sienv:!sienv_ref ~results
       | LocalIndex
       | NoIndex ->
@@ -166,4 +175,4 @@ let find_matching_symbols
     in
     (* Namespaces should always appear first *)
     let results = List.append namespace_results clean_results in
-    List.take results max_results
+    (List.take results max_results, !is_complete)

@@ -42,15 +42,16 @@ let go
       (* Fixup the kind filter *)
       let kind_filter = Some SearchTypes.SI_Class in
       (* Get the class with the most similar name to `class_name_query` *)
-      let class_ =
+      let (candidates, _is_complete) =
         SymbolIndex.find_matching_symbols
           ~query_text:class_name_query
           ~max_results:1
           ~kind_filter
           ~context
           ~sienv_ref
-        |> List.hd
-        |> Option.map ~f:(fun r -> r.SearchTypes.si_name)
+      in
+      let class_ =
+        candidates |> List.hd |> Option.map ~f:(fun r -> r.SearchTypes.si_name)
       in
       begin
         match class_ with
@@ -65,7 +66,7 @@ let go
           []
       end
     | _ ->
-      let temp_results =
+      let (temp_results, _is_complete) =
         SymbolIndex.find_matching_symbols
           ~sienv_ref
           ~query_text

@@ -8,10 +8,10 @@
 
 type handle = unit
 
-let initialize ~reponame:_ = None
+let initialize ~reponame:_ = failwith "not implemented"
 
-let fetch_namespaces _ = []
+let fetch_namespaces _ = failwith "not implemented"
 
 let query_autocomplete _ ~query_text:_ ~max_results:_ ~context:_ ~kind_filter:_
     =
-  []
+  failwith "not implemented"

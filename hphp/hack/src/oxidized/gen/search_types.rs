@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8ab7f2894ead524d06020552c7e358ac>>
+// @generated SignedSource<<3d4a52a7687ce8c15034eea88d9996df>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -187,3 +187,29 @@ pub struct SiItem {
     pub file: SiFile,
     pub fullname: String,
 }
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving eq")]
+#[repr(u8)]
+pub enum SiComplete {
+    Complete,
+    Incomplete,
+}
+impl TrivialDrop for SiComplete {}
+arena_deserializer::impl_deserialize_in_arena!(SiComplete);

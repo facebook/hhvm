@@ -57,6 +57,11 @@ type si_item = {
   si_fullname: string;
 }
 
+type si_complete =
+  | Complete
+  | Incomplete
+[@@deriving eq]
+
 (**
  * Convert the enum to an integer whose value will not change accidentally.
  *

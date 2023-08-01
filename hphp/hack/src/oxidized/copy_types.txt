@@ -87,6 +87,7 @@ naming_types::NameKind
 saved_state_rollouts::Flag
 search_types::SiKind
 search_types::AutocompleteType
+search_types::SiComplete
 tast::CheckStatus
 typing_defs::ClassConstKind
 typing_defs_core::ConsistentKind

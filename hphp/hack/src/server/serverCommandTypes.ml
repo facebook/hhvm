@@ -541,6 +541,7 @@ type _ t =
       path: string;
       range: range;
       resolve_title: string;
+      use_snippet_edits: bool;
     }
       -> Lsp.CodeActionResolve.result t
   | DISCONNECT : unit t

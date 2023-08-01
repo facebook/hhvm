@@ -2631,6 +2631,17 @@ let do_willSaveWaitUntil
   else
     []
 
+let should_use_snippet_edits (initialize_params : Initialize.params option) :
+    bool =
+  initialize_params
+  |> Option.map
+       ~f:
+         Initialize.(
+           fun { client_capabilities = caps; _ } ->
+             caps.client_experimental
+               .ClientExperimentalCapabilities.snippetTextEdit)
+  |> Option.value ~default:false
+
 let do_codeAction_local
     (ide_service : ClientIdeService.t ref)
     (env : env)
@@ -2675,12 +2686,14 @@ let do_codeAction_resolve_local
   in
   let document = lsp_document_to_ide text_document in
   let range = lsp_range_to_ide params.CodeActionRequest.range in
+  let use_snippet_edits = should_use_snippet_edits !initialize_params_ref in
   ide_rpc
     ide_service
     ~env
     ~tracking_id
     ~ref_unblocked_time
-    (ClientIdeMessage.Code_action_resolve { document; range; resolve_title })
+    (ClientIdeMessage.Code_action_resolve
+       { document; range; resolve_title; use_snippet_edits })
 
 let do_signatureHelp_local
     (ide_service : ClientIdeService.t ref)

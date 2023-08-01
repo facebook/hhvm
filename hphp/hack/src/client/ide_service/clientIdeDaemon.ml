@@ -1201,13 +1201,19 @@ let handle_request
     in
     Lwt.return (Initialized istate, Ok (results, errors_opt))
   (* Code action resolve (refactorings, quickfixes) *)
-  | (Initialized istate, Code_action_resolve { document; range; resolve_title })
-    ->
+  | ( Initialized istate,
+      Code_action_resolve { document; range; resolve_title; use_snippet_edits }
+    ) ->
     let (istate, ctx, entry, _) = update_file_ctx istate document in
 
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-          Server_code_actions_services.resolve ~ctx ~entry ~range ~resolve_title)
+          Server_code_actions_services.resolve
+            ~ctx
+            ~entry
+            ~range
+            ~resolve_title
+            ~use_snippet_edits)
     in
     Lwt.return (Initialized istate, Ok result)
   (* Go to definition *)

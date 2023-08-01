@@ -17,4 +17,5 @@ val resolve :
   entry:Provider_context.entry ->
   range:Ide_api_types.range ->
   resolve_title:string ->
+  use_snippet_edits:bool ->
   Lsp.CodeActionResolve.result

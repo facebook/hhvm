@@ -365,10 +365,15 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     let (ctx, entry) = single_ctx_path env path in
     let actions = Server_code_actions_services.go ~ctx ~entry ~range in
     (env, actions)
-  | CODE_ACTION_RESOLVE { path; range; resolve_title } ->
+  | CODE_ACTION_RESOLVE { path; range; resolve_title; use_snippet_edits } ->
     let (ctx, entry) = single_ctx_path env path in
     let action =
-      Server_code_actions_services.resolve ~ctx ~entry ~range ~resolve_title
+      Server_code_actions_services.resolve
+        ~ctx
+        ~entry
+        ~range
+        ~resolve_title
+        ~use_snippet_edits
     in
     (env, action)
   | DISCONNECT -> (ServerFileSync.clear_sync_data env, ())

@@ -77,7 +77,6 @@ let go
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
     ~(range : Ide_api_types.range) =
-  (*: Lsp.CodeAction.command_or_action list*)
   let strip = update_edit ~f:(fun _ -> Lsp.CodeAction.UnresolvedEdit ()) in
   find ~ctx ~entry ~range:(lsp_range_of_ide_range range) |> List.map ~f:strip
 
@@ -99,7 +98,9 @@ let resolve
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
     ~(range : Ide_api_types.range)
-    ~(resolve_title : string) =
+    ~(resolve_title : string)
+    ~(use_snippet_edits : bool) =
+  let _ = use_snippet_edits in
   let resolve_command_or_action =
     update_edit ~f:(fun lazy_edit ->
         Lsp.CodeAction.EditOnly (Lazy.force lazy_edit))

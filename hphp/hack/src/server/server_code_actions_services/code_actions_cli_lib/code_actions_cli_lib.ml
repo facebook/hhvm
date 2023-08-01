@@ -50,6 +50,10 @@ let patched_text_of_command_or_action ~source_text path = function
   | CodeAction.Command _ ->
     None
 
+(** Corresponds experimental snippetTextEdit LSP client capability.
+We test the `true` and `false` paths in D47348001 *)
+let use_snippet_edits = true
+
 let run_exn ctx entry range ~title_prefix =
   let commands_or_actions =
     Server_code_actions_services.go ~ctx ~entry ~range
@@ -95,6 +99,7 @@ let run_exn ctx entry range ~title_prefix =
           ~entry
           ~range
           ~resolve_title:selected_title
+          ~use_snippet_edits
         |> Result.map_error ~f:(fun e ->
                Hh_json.json_to_string ~sort_keys:true ~pretty:true
                @@ Lsp_fmt.print_error e)

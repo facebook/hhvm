@@ -171,6 +171,7 @@ type _ t =
       document: document;
       range: Ide_api_types.range;
       resolve_title: string;
+      use_snippet_edits: bool;
     }
       -> Lsp.CodeActionResolve.result t
   | Type_Hierarchy : document * location -> ServerTypeHierarchyTypes.result t

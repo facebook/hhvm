@@ -102,6 +102,9 @@ val expand_type : env -> Tast.ty -> env * Tast.ty
     recursively replacing them with the type they refer to. *)
 val fully_expand : env -> Tast.ty -> Tast.ty
 
+(** Strip ~ from type *)
+val strip_dynamic : env -> Tast.ty -> Tast.ty
+
 (** Types that can have methods called on them. Usually a class but
     also includes dynamic types *)
 type receiver_identifier =

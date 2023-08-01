@@ -93,6 +93,8 @@ let get_ctx = Typing_env.get_ctx
 
 let expand_type = Typing_env.expand_type
 
+let strip_dynamic = Typing_utils.strip_dynamic
+
 let set_static = Typing_env.set_static
 
 let set_val_kind = Typing_env.set_val_kind

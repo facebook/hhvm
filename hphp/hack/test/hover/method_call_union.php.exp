@@ -1,0 +1,5 @@
+// Defined in FooParent
+public function bar(): (int | string)
+-------------
+// Defined in Other
+public function bar(): (int | string)

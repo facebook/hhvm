@@ -451,6 +451,7 @@ let make_hover_info under_dynamic_result ctx env_and_ty entry occurrence def_opt
         | ({ type_ = Method _; _ }, Some (env, ty))
         | ({ type_ = ClassConst _; _ }, Some (env, ty))
         | ({ type_ = Property _; _ }, Some (env, ty)) ->
+          let ty = Tast_env.strip_dynamic env ty in
           defined_in
           ^ Tast_env.print_ty_with_identity env (LoclTy ty) occurrence def_opt
         | ({ type_ = GConst; _ }, Some (env, ty)) ->

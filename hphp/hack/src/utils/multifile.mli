@@ -43,6 +43,11 @@ val file_to_file_list : Relative_path.t -> (Relative_path.t * content) list
   *)
 val file_to_files : Relative_path.t -> content Relative_path.Map.t
 
+(** Multifile pathnames are like (DummyRoot, "/home/ljw/a.php--chess.php"),
+or just (DummyRoot, "/home/ljw/chess.php") if there weren't any multifiles within the file.
+This function strips both to "chess.php", a more appropriate rendering for test output. *)
+val short_suffix : Relative_path.t -> string
+
 (** Given a path of the form `sample/file/name.php--another/file/name.php`,
   read in the portion of multifile `sample/file/name.php` corresponding
   to `another/file/name.php`. *)

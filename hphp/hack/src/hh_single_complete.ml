@@ -281,141 +281,216 @@ let parse_name_and_decl ctx files_contents =
           Decl.make_env ~sh:SharedMem.Uses ctx fn);
       files_info_and_addenda)
 
+let do_auto332
+    ~(ctx : Provider_context.t)
+    ~(is_manually_invoked : bool)
+    ~(sienv_ref : SearchUtils.si_env ref)
+    ~(naming_table : Naming_table.t)
+    (path : Relative_path.t)
+    (contents : string) :
+    AutocompleteTypes.autocomplete_item list Utils.With_complete_flag.t =
+  (* Search backwards: there should only be one /real/ case. If there's multiple, *)
+  (* guess that the others are preceding explanation comments *)
+  let offset =
+    Str.search_backward
+      (Str.regexp AutocompleteTypes.autocomplete_token)
+      contents
+      (String.length contents)
+  in
+  let pos = File_content.offset_to_position contents offset in
+  let (ctx, entry) =
+    Provider_context.add_or_overwrite_entry_contents ~ctx ~path ~contents
+  in
+  let autocomplete_context =
+    ServerAutoComplete.get_autocomplete_context
+      ~file_content:contents
+      ~pos
+      ~is_manually_invoked
+  in
+  ServerAutoComplete.go_at_auto332_ctx
+    ~ctx
+    ~entry
+    ~sienv_ref
+    ~autocomplete_context
+    ~naming_table
+
+let handle_glean_query ctx sienv naming_table ~dry_run filename =
+  let handle =
+    if dry_run then
+      None
+    else
+      let reponame = sienv.SearchUtils.glean_reponame in
+      let () =
+        if String.is_empty reponame then failwith "--glean-reponame required"
+      in
+      let () = Folly.ensure_folly_init () in
+      Some (Glean.initialize ~reponame |> Option.value_exn)
+  in
+  (* We support single-file and multi-file.
+     Each file can be either a hack file starting with <?hh (in which case we calculate the query_text + context + filter implied by AUTO332)
+     or a flat list of newline-separated query_text (in which case we default to context=Acid filter=None). *)
+  let files_contents = Multifile.file_to_file_list filename in
+  let any_hack_files =
+    List.exists files_contents ~f:(fun (_path, content) ->
+        String.is_prefix content ~prefix:"<?hh")
+  in
+  let searches =
+    if any_hack_files then
+      files_contents
+      |> List.filter_map ~f:(fun (path, contents) ->
+             (* We're going to run the file through autocomplete, but with a mock sienv, one which tells us
+                what [SymbolIndex.find] was performed -- i.e. what query_text, context, filter. *)
+             let search = ref None in
+             let mock_sienv =
+               SymbolIndex.mock
+                 ~on_find:(fun ~query_text ~context ~kind_filter ->
+                   search :=
+                     Some
+                       ( Multifile.short_suffix path,
+                         query_text,
+                         context,
+                         kind_filter );
+                   [])
+             in
+             let sienv_ref = ref mock_sienv in
+             let _results =
+               do_auto332
+                 ~ctx
+                 ~is_manually_invoked:true
+                 ~naming_table
+                 ~sienv_ref
+                 path
+                 contents
+             in
+             !search)
+    else
+      files_contents
+      |> List.concat_map ~f:(fun (_path, contents) ->
+             String_utils.split_on_newlines contents
+             |> List.map ~f:String.strip
+             |> List.filter ~f:(fun s ->
+                    if String.is_substring s ~substring:" " then
+                      failwith
+                        ("Files must be either hack, or lists of query_text; not "
+                        ^ s);
+                    (not (String.is_empty s))
+                    && not (String.is_prefix s ~prefix:"//"))
+             |> List.map ~f:(fun s -> (s, s, SearchTypes.Acid, None)))
+  in
+  List.iter searches ~f:(fun (title, query_text, context, kind_filter) ->
+      if List.length searches > 1 then Printf.printf "//// %s\n" title;
+      let angle =
+        Glean_autocomplete_query.top_level
+          ~prefix:query_text
+          ~context
+          ~kind_filter
+      in
+      let show_query_text =
+        Printf.sprintf
+          "%s [%s,%s]"
+          query_text
+          (SearchTypes.show_autocomplete_type context)
+          (Option.value_map
+             kind_filter
+             ~default:"*"
+             ~f:SearchTypes.show_si_kind)
+      in
+      if any_hack_files then Printf.printf "query_text:\n%s\n\n" show_query_text;
+      Printf.printf "query:\n%s\n\n%!" angle;
+      if not dry_run then begin
+        let start_time = Unix.gettimeofday () in
+        let (results, _is_complete) =
+          Glean.query_autocomplete
+            (Option.value_exn handle)
+            ~query_text
+            ~max_results:100
+            ~context
+            ~kind_filter
+        in
+        List.iter
+          results
+          ~f:(fun { SearchTypes.si_name; si_kind; si_file; si_fullname = _ } ->
+            let file =
+              match si_file with
+              | SearchTypes.SI_Filehash hash -> Printf.sprintf "#%s" hash
+              | SearchTypes.SI_Path path -> Relative_path.show path
+            in
+            Printf.printf
+              "[%s] %s - %s\n%!"
+              (SearchTypes.show_si_kind si_kind)
+              si_name
+              file);
+        Printf.printf
+          "\n--> %s - %d results, %0.3fs\n\n%!"
+          show_query_text
+          (List.length results)
+          (Unix.gettimeofday () -. start_time)
+      end)
+
+let handle_autocomplete ctx sienv naming_table ~is_manually_invoked filename =
+  let files_contents = Multifile.file_to_file_list filename in
+  let files_with_token =
+    files_contents
+    |> List.filter ~f:(fun (_path, contents) ->
+           String.is_substring
+             contents
+             ~substring:AutocompleteTypes.autocomplete_token)
+  in
+  let show_file_titles = List.length files_with_token > 1 in
+  List.iter files_with_token ~f:(fun (path, contents) ->
+      let sienv_ref = ref sienv in
+      let result =
+        do_auto332
+          ~ctx
+          ~is_manually_invoked
+          ~sienv_ref
+          ~naming_table
+          path
+          contents
+      in
+      if show_file_titles then
+        Printf.printf "//// %s\n" (Multifile.short_suffix path);
+      List.iter result.Utils.With_complete_flag.value ~f:(fun r ->
+          let open AutocompleteTypes in
+          Printf.printf "%s\n" r.res_label;
+          List.iter r.res_additional_edits ~f:(fun (s, _) ->
+              Printf.printf "  INSERT %s\n" s);
+          Printf.printf
+            "  INSERT %s\n"
+            (match r.res_insert_text with
+            | InsertLiterally s -> s
+            | InsertAsSnippet { snippet; _ } -> snippet);
+          Printf.printf "  %s\n" r.res_detail;
+          match r.res_documentation with
+          | Some doc ->
+            List.iter (String.split_lines doc) ~f:(fun line ->
+                Printf.printf "  %s\n" line)
+          | None -> ()))
+
 let handle_mode mode filenames ctx (sienv : SearchUtils.si_env) naming_table =
-  let expect_single_file () : Relative_path.t =
+  let filename =
     match filenames with
     | [x] -> x
     | _ -> die "Only single file expected"
   in
   match mode with
-  | NoMode -> die "Exactly one mode must be setup"
+  | NoMode -> die "Exactly one mode must be set up"
   | Glean_query { dry_run } ->
-    let path = expect_single_file () in
-    let prefixes =
-      path
-      |> Relative_path.to_absolute
-      |> Sys_utils.cat
-      |> String_utils.split_on_newlines
-      |> List.filter ~f:(fun s -> not (String.is_empty s))
-    in
-    let handle =
-      if dry_run then
-        None
-      else
-        let reponame = sienv.SearchUtils.glean_reponame in
-        let () =
-          if String.is_empty reponame then failwith "--glean-reponame required"
-        in
-        let () = Folly.ensure_folly_init () in
-        Some (Glean.initialize ~reponame |> Option.value_exn)
-    in
-    (* This tool only searches for [context=SearchTypes.Acid]. It might be nice to expose this at the CLI? *)
-    let context = SearchTypes.Acid in
-    let kind_filter = None in
-    List.iter prefixes ~f:(fun query_text ->
-        if List.length prefixes > 1 then Printf.printf "//// %s\n" query_text;
-        let angle =
-          Glean_autocomplete_query.top_level
-            ~prefix:query_text
-            ~context
-            ~kind_filter
-        in
-        Printf.printf "query:\n%s\n\n%!" angle;
-        if not dry_run then begin
-          let start_time = Unix.gettimeofday () in
-          let (results, _is_complete) =
-            Glean.query_autocomplete
-              (Option.value_exn handle)
-              ~query_text
-              ~max_results:100
-              ~context
-              ~kind_filter
-          in
-          List.iter
-            results
-            ~f:(fun { SearchTypes.si_name; si_kind; si_file; si_fullname = _ }
-               ->
-              let file =
-                match si_file with
-                | SearchTypes.SI_Filehash hash -> Printf.sprintf "#%s" hash
-                | SearchTypes.SI_Path path -> Relative_path.show path
-              in
-              Printf.printf
-                "[%s] %s - %s\n%!"
-                (SearchTypes.show_si_kind si_kind)
-                si_name
-                file);
-          Printf.printf
-            "--> %s - %d results, %0.3fs\n%!"
-            query_text
-            (List.length results)
-            (Unix.gettimeofday () -. start_time)
-        end)
-  | Autocomplete
+    handle_glean_query ctx sienv naming_table ~dry_run filename
+  | Autocomplete ->
+    handle_autocomplete
+      ctx
+      sienv
+      naming_table
+      ~is_manually_invoked:false
+      filename
   | Autocomplete_manually_invoked ->
-    let files_contents = Multifile.file_to_file_list (expect_single_file ()) in
-    let files_with_token =
-      files_contents
-      |> List.filter ~f:(fun (_path, contents) ->
-             String.is_substring
-               contents
-               ~substring:AutocompleteTypes.autocomplete_token)
-    in
-    let show_file_titles = List.length files_with_token > 1 in
-    List.iter files_with_token ~f:(fun (path, contents) ->
-        (* Search backwards: there should only be one /real/ case. If there's multiple, *)
-        (* guess that the others are preceding explanation comments *)
-        let offset =
-          Str.search_backward
-            (Str.regexp AutocompleteTypes.autocomplete_token)
-            contents
-            (String.length contents)
-        in
-        let pos = File_content.offset_to_position contents offset in
-        let is_manually_invoked =
-          match mode with
-          | Autocomplete_manually_invoked -> true
-          | _ -> false
-        in
-        let (ctx, entry) =
-          Provider_context.add_or_overwrite_entry_contents ~ctx ~path ~contents
-        in
-        let autocomplete_context =
-          ServerAutoComplete.get_autocomplete_context
-            ~file_content:contents
-            ~pos
-            ~is_manually_invoked
-        in
-        let sienv_ref = ref sienv in
-        let result =
-          ServerAutoComplete.go_at_auto332_ctx
-            ~ctx
-            ~entry
-            ~sienv_ref
-            ~autocomplete_context
-            ~naming_table
-        in
-        if show_file_titles then
-          Printf.printf
-            "//// %s\n"
-            (Relative_path.suffix path
-            |> Str.replace_first (Str.regexp "^.*--") "");
-        List.iter result.Utils.With_complete_flag.value ~f:(fun r ->
-            let open AutocompleteTypes in
-            Printf.printf "%s\n" r.res_label;
-            List.iter r.res_additional_edits ~f:(fun (s, _) ->
-                Printf.printf "  INSERT %s\n" s);
-            Printf.printf
-              "  INSERT %s\n"
-              (match r.res_insert_text with
-              | InsertLiterally s -> s
-              | InsertAsSnippet { snippet; _ } -> snippet);
-            Printf.printf "  %s\n" r.res_detail;
-            match r.res_documentation with
-            | Some doc ->
-              List.iter (String.split_lines doc) ~f:(fun line ->
-                  Printf.printf "  %s\n" line)
-            | None -> ()))
+    handle_autocomplete
+      ctx
+      sienv
+      naming_table
+      ~is_manually_invoked:true
+      filename
 
 (*****************************************************************************)
 (* Main entry point *)

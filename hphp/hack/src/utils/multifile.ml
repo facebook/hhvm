@@ -22,6 +22,9 @@ let delim_regexp = "////.*\n"
 
 let delim = Str.regexp delim_regexp
 
+let short_suffix path =
+  Relative_path.suffix path |> Str.replace_first (Str.regexp "^.*--") ""
+
 let split_multifile_content content =
   let rec make_files = function
     | [] -> []

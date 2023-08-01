@@ -35,7 +35,7 @@ pub const zeroDoubleValue: ::std::primitive::f64 = 0.0;
 
 pub const longDoubleValue: ::std::primitive::f64 = 2.59961000990301e-05;
 
-pub const my_company: crate::types::MyCompany = crate::types::Company::FACEBOOK;
+pub const my_company: crate::types::MyCompany = crate::types::MyCompany::FACEBOOK;
 
 pub const foo: &::std::primitive::str = "foo";
 

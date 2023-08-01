@@ -136,10 +136,7 @@
     }}{{/value:unionVariant}}{{!
 }}{{/value:union?}}{{!
 }}{{#value:enum?}}{{!
-    }}{{value:enumPackage}}::types::{{!
-    }}{{#value:type}}{{#type:enum}}{{!
-    }}{{enum:rust_name}}{{!
-    }}{{/type:enum}}{{/value:type}}{{!
+    }}{{#value:local_type}}{{type:package}}::types::{{type:rust_name}}{{/value:local_type}}{{!
     }}{{#value:enumVariant}}::{{value:enumVariant}}{{/value:enumVariant}}{{!
     }}{{^value:enumVariant}}({{value:integer_value}}){{/value:enumVariant}}{{!
 }}{{/value:enum?}}{{!

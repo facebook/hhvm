@@ -3384,7 +3384,7 @@ impl ::std::default::Default for self::AdaptTemplatedTestStruct {
             adaptedLongDefault: 4,
             adaptedDoubleDefault: 5.0,
             adaptedStringDefault: "6".to_owned(),
-            adaptedEnum: crate::types::ThriftAdaptedEnum::One,
+            adaptedEnum: crate::types::AdaptedEnum::One,
             adaptedListDefault: <::fbthrift_adapters::test::TestAdapter as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default::<AdaptTemplatedTestStruct>(vec![
                     1,
                 ], 19),
@@ -3626,7 +3626,7 @@ where
             adaptedLongDefault: field_adaptedLongDefault.unwrap_or(4),
             adaptedDoubleDefault: field_adaptedDoubleDefault.unwrap_or(5.0),
             adaptedStringDefault: field_adaptedStringDefault.unwrap_or_else(|| "6".to_owned()),
-            adaptedEnum: field_adaptedEnum.unwrap_or(crate::types::ThriftAdaptedEnum::One),
+            adaptedEnum: field_adaptedEnum.unwrap_or(crate::types::AdaptedEnum::One),
             adaptedListDefault: field_adaptedListDefault.unwrap_or_else(|| <::fbthrift_adapters::test::TestAdapter as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default::<AdaptTemplatedTestStruct>(vec![
                     1,
                 ], 19)),

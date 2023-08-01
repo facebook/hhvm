@@ -1292,16 +1292,15 @@ class mstch_rust_value : public mstch_base {
       const rust_codegen_options& options)
       : mstch_base(ctx, pos),
         const_value_(const_value),
-        type_(type),
+        local_type_(type),
+        type_(step_through_typedefs(type, false)),
         depth_(depth),
         options_(options) {
-    // Step through any non-newtype typedefs.
-    type_ = step_through_typedefs(type_, false);
-
     register_methods(
         this,
         {
             {"value:type", &mstch_rust_value::type},
+            {"value:local_type", &mstch_rust_value::local_type},
             {"value:newtype?", &mstch_rust_value::is_newtype},
             {"value:inner", &mstch_rust_value::inner},
             {"value:bool?", &mstch_rust_value::is_bool},
@@ -1327,7 +1326,6 @@ class mstch_rust_value : public mstch_base {
             {"value:unionVariant", &mstch_rust_value::union_variant},
             {"value:unionValue", &mstch_rust_value::union_value},
             {"value:enum?", &mstch_rust_value::is_enum},
-            {"value:enumPackage", &mstch_rust_value::enum_package},
             {"value:enumVariant", &mstch_rust_value::enum_variant},
             {"value:empty?", &mstch_rust_value::is_empty},
             {"value:indent", &mstch_rust_value::indent},
@@ -1336,6 +1334,9 @@ class mstch_rust_value : public mstch_base {
   }
   mstch::node type() {
     return context_.type_factory->make_mstch_object(type_, context_, pos_);
+  }
+  mstch::node local_type() {
+    return context_.type_factory->make_mstch_object(local_type_, context_, pos_);
   }
   mstch::node is_newtype() {
     return type_->is_typedef() && type_->has_annotation("rust.newtype");
@@ -1471,12 +1472,6 @@ class mstch_rust_value : public mstch_base {
     return mstch::node();
   }
   mstch::node is_enum() { return type_->is_enum(); }
-  mstch::node enum_package() {
-    if (type_->is_enum()) {
-      return get_import_name(type_->program(), options_);
-    }
-    return mstch::node();
-  }
   mstch::node enum_variant() {
     if (const_value_->is_enum()) {
       auto enum_value = const_value_->get_enum_value();
@@ -1514,7 +1509,15 @@ class mstch_rust_value : public mstch_base {
 
  private:
   const t_const_value* const_value_;
+
+  // The type (potentially a typedef) by which the value's type is known to the
+  // current crate.
+  const t_type* local_type_;
+
+  // The underlying type of the value after stepping through any non-newtype
+  // typedefs.
   const t_type* type_;
+
   unsigned depth_;
   const rust_codegen_options& options_;
 };

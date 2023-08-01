@@ -20,6 +20,28 @@
 
 namespace HPHP {
 namespace stream_transport {
+
+void HttpStreamServerTransport::doOnData(std::unique_ptr<folly::IOBuf> buf) {
+  if (m_onData) {
+    m_onData(std::move(buf));
+  }
+}
+
+void HttpStreamServerTransport::doOnClose() {
+  if (m_onClose) {
+    m_onClose();
+  }
+  m_eom_received = true;
+}
+
+void HttpStreamServerTransport::setOnClose(OnCloseType callback) {
+  assertx(!callback || !m_onClose);
+  m_onClose = callback;
+  if (m_eom_received && m_onClose) {
+    m_onClose();
+  }
+}
+
 void HttpStreamServerTransport::write(folly::StringPiece data) {
   assertx(m_transport);
   if (m_eom_sent) {

@@ -45,26 +45,15 @@ struct HttpStreamServerTransport final : StreamTransport {
   }
 
   void setOnData(OnDataType callback) override;
-  void setOnClose(OnCloseType callback) override {
-    assertx(!callback || !m_onClose);
-    m_onClose = callback;
-  }
+  void setOnClose(OnCloseType callback) override;
 
-  void doOnData(std::unique_ptr<folly::IOBuf> buf) {
-    if (m_onData) {
-      m_onData(std::move(buf));
-    }
-  }
-
-  void doOnClose() {
-    if (m_onClose) {
-      m_onClose();
-    }
-  }
+  void doOnData(std::unique_ptr<folly::IOBuf> buf);
+  void doOnClose();
 
 private:
   Transport* m_transport;
   bool m_eom_sent{false};
+  bool m_eom_received{false};
   OnDataType m_onData;
   OnCloseType m_onClose;
 };

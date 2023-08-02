@@ -27,7 +27,7 @@ namespace apache {
 namespace thrift {
 namespace op {
 
-class StdHasherNoIOBuf {
+class StdHasher {
  public:
   size_t getResult() const { return result_; }
 
@@ -44,11 +44,15 @@ class StdHasherNoIOBuf {
     result_ = folly::hash::hash_combine(
         folly::hash::hash_range(value.begin(), value.end()), result_);
   }
-  void combine(const StdHasherNoIOBuf& other) { combine(other.result_); }
+  void combine(const StdHasher& other) { combine(other.result_); }
+
+  void combine(const folly::IOBuf& value) {
+    combine(folly::IOBufHash{}(value));
+  }
 
   void finalize() {}
 
-  bool operator<(const StdHasherNoIOBuf other) const {
+  bool operator<(const StdHasher& other) const {
     return result_ < other.result_;
   }
 
@@ -56,18 +60,12 @@ class StdHasherNoIOBuf {
   size_t result_ = 0;
 };
 
-struct StdHasherDeprecated : StdHasherNoIOBuf {
-  using StdHasherNoIOBuf::combine;
+struct StdHasherDeprecated : StdHasher {
+  using StdHasher::combine;
   void combine(const folly::IOBuf& value) {
     for (const auto& buf : value) {
       combine(buf);
     }
-  }
-};
-struct StdHasher : StdHasherNoIOBuf {
-  using StdHasherNoIOBuf::combine;
-  void combine(const folly::IOBuf& value) {
-    combine(folly::IOBufHash{}(value));
   }
 };
 

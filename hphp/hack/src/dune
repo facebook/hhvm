@@ -84,6 +84,7 @@
   hhi
   search
   server_autocomplete_services
+  server_search
   string
   sys_utils
   utils_core))

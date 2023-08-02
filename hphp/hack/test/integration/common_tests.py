@@ -726,56 +726,6 @@ class CommonTests(BarebonesTests):
             options=["--identify", "f"],
         )
 
-    def test_search(self) -> None:
-        """
-        Test hh_client --search
-        """
-
-        self.test_driver.start_hh_server()
-
-        self.test_driver.check_cmd_and_json_cmd(
-            [
-                'File "{root}foo_3.php", line 9, characters 18-40: some_long_function_name, function'
-            ],
-            [
-                '[{{"name":"some_long_function_name","filename":"{root}foo_3.php","desc":"function","line":9,"char_start":18,"char_end":40,"scope":""}}]'
-            ],
-            options=["--search", "some_lo"],
-        )
-
-    def test_search_case_insensitive1(self) -> None:
-        """
-        Test that global search is not case sensitive
-        """
-        self.maxDiff = None
-        self.test_driver.start_hh_server()
-
-        self.test_driver.check_cmd(
-            [
-                'File "{root}foo_4.php", line 4, characters 10-24: '
-                "aaaaaaaaaaa_fun, function",
-                'File "{root}foo_4.php", line 3, characters 7-23: '
-                "Aaaaaaaaaaa_class, class",
-            ],
-            options=["--search", "Aaaaaaaaaaa"],
-        )
-
-    def test_search_case_insensitive2(self) -> None:
-        """
-        Test that global search is not case sensitive
-        """
-        self.test_driver.start_hh_server()
-
-        self.test_driver.check_cmd(
-            [
-                'File "{root}foo_4.php", line 4, characters 10-24: '
-                "aaaaaaaaaaa_fun, function",
-                'File "{root}foo_4.php", line 3, characters 7-23: '
-                "Aaaaaaaaaaa_class, class",
-            ],
-            options=["--search", "aaaaaaaaaaa"],
-        )
-
     def test_list_files(self) -> None:
         """
         Test hh_client --list-files

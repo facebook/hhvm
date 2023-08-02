@@ -18,9 +18,13 @@ let comma_string_to_iset (s : string) : ISet.t =
 
 type mode =
   | NoMode
-  | Autocomplete
-  | Autocomplete_manually_invoked
+  | Autocomplete of { is_manually_invoked: bool }
   | Autocomplete_glean of { dry_run: bool }
+  | Search of {
+      glean_only: bool;  (** if true, uses glean; if false, uses ServerSearch *)
+      dry_run: bool;
+          (** only applies to [glean_only]; skips actually running the glean query *)
+    }
 
 type options = {
   files: string list;
@@ -121,11 +125,11 @@ let parse_options () =
               Some (ServerConfig.convert_auto_namespace_to_map m)),
         " Alias namespaces" );
       ( "--auto-complete",
-        Arg.Unit (set_mode Autocomplete),
+        Arg.Unit (set_mode (Autocomplete { is_manually_invoked = false })),
         " Produce autocomplete suggestions as if triggered by trigger character"
       );
       ( "--auto-complete-manually-invoked",
-        Arg.Unit (set_mode Autocomplete_manually_invoked),
+        Arg.Unit (set_mode (Autocomplete { is_manually_invoked = true })),
         " Produce autocomplete suggestions as if manually triggered by user" );
       ( "--auto-complete-show-glean",
         Arg.Unit (set_mode (Autocomplete_glean { dry_run = true })),
@@ -133,6 +137,16 @@ let parse_options () =
       ( "--auto-complete-glean",
         Arg.Unit (set_mode (Autocomplete_glean { dry_run = false })),
         " Show the glean query for the prefix contained in the file, and run that query"
+      );
+      ( "--search-show-glean",
+        Arg.Unit (set_mode (Search { glean_only = true; dry_run = true })),
+        " Show the glean query for newline-separated queries in file" );
+      ( "--search-glean",
+        Arg.Unit (set_mode (Search { glean_only = true; dry_run = false })),
+        " Show+run the glean query for newline-separated queries in file" );
+      ( "--search",
+        Arg.Unit (set_mode (Search { glean_only = false; dry_run = false })),
+        " Run the search (including new definitions) for newline-separated queries in file"
       );
       ( "--manifold-api-key",
         Arg.String (set "manifold api key" saved_state_manifold_api_key),
@@ -160,6 +174,17 @@ let parse_options () =
 
   if Option.is_some !naming_table && Option.is_none !root then
     failwith "--naming-table needs --root";
+
+  begin
+    match !mode with
+    | Search { glean_only = false; _ }
+      when (not (String.is_empty !glean_reponame))
+           && (Option.is_none !root || Option.is_none !naming_table) ->
+      (* --search --glean-reponame looks up glean to find symbol names, but then
+         uses reverse-naming-table and root to fetch the AST and find its position. *)
+      failwith "--search --glean-reponame needs --naming-table and --root"
+    | _ -> ()
+  end;
 
   (* --root implies certain things... *)
   let (allowed_fixme_codes_strict, sharedmem_config, root) =
@@ -281,6 +306,33 @@ let parse_name_and_decl ctx files_contents =
           Decl.make_env ~sh:SharedMem.Uses ctx fn);
       files_info_and_addenda)
 
+(** Our tests expect files that contain newline-separated queries.
+This function takes a file and splits it on newlines into queries,
+trimming and filtering out blank lines and //comment lines.
+To help avoid foot-guns (in the form of the tester accidentally forgetting <?hh
+so that hack source code would get interpreted as queries),
+we fail if any line contains a space in it... all the queries
+we care about don't have spaces in it.
+*)
+let extract_nonblank_lines contents =
+  String_utils.split_on_newlines contents
+  |> List.map ~f:String.strip
+  |> List.filter ~f:(fun s ->
+         if String.is_empty s then
+           false
+         else if String.is_prefix s ~prefix:"//" then
+           false
+         else begin
+           if String.is_substring s ~substring:" " then
+             failwith
+               ("Files must be either hack with <?hh, or lists of query_text; not "
+               ^ s);
+           true
+         end)
+
+(** This helper invokes ServerAutoComplete, with the additional
+arguments it needs to describe the "context" of the AUTO332
+i.e. surrounding characters. *)
 let do_auto332
     ~(ctx : Provider_context.t)
     ~(is_manually_invoked : bool)
@@ -314,21 +366,89 @@ let do_auto332
     ~autocomplete_context
     ~naming_table
 
-let handle_autocomplete_glean ctx sienv naming_table ~dry_run filename =
+(** This function takes a list of searches of the form (title, query_text, context, kind_filter).
+If [show_query_text] then it prints each search.
+It obtains and prints the Glean angle query for it, using [Glean_autocomplete_query.top_level].
+If not [dry_run] then it runs the query against [reponame] and displays the results, plus timing information. *)
+let do_glean_symbol_searches
+    ~reponame
+    ~dry_run
+    ~show_query_text
+    (searches :
+      (string
+      * string
+      * SearchTypes.autocomplete_type
+      * SearchTypes.si_kind option)
+      list) : unit =
   let handle =
     if dry_run then
       None
     else
-      let reponame = sienv.SearchUtils.glean_reponame in
       let () =
         if String.is_empty reponame then failwith "--glean-reponame required"
       in
       let () = Folly.ensure_folly_init () in
       Some (Glean.initialize ~reponame |> Option.value_exn)
   in
-  (* We support single-file and multi-file.
-     Each file can be either a hack file starting with <?hh (in which case we calculate the query_text + context + filter implied by AUTO332)
-     or a flat list of newline-separated query_text (in which case we default to context=Acid filter=None). *)
+  List.iter searches ~f:(fun (title, query_text, context, kind_filter) ->
+      if List.length searches > 1 then Printf.printf "//// %s\n" title;
+      let angle =
+        Glean_autocomplete_query.top_level
+          ~prefix:query_text
+          ~context
+          ~kind_filter
+      in
+      let query_text_for_show =
+        Printf.sprintf
+          "%s [%s,%s]"
+          query_text
+          (SearchTypes.show_autocomplete_type context)
+          (Option.value_map
+             kind_filter
+             ~default:"*"
+             ~f:SearchTypes.show_si_kind)
+      in
+      if show_query_text then
+        Printf.printf "query_text:\n%s\n\n" query_text_for_show;
+      Printf.printf "query:\n%s\n\n%!" angle;
+      if not dry_run then begin
+        let start_time = Unix.gettimeofday () in
+        let (results, _is_complete) =
+          Glean.query_autocomplete
+            (Option.value_exn handle)
+            ~query_text
+            ~max_results:100
+            ~context
+            ~kind_filter
+        in
+        List.iter
+          results
+          ~f:(fun { SearchTypes.si_name; si_kind; si_file; si_fullname = _ } ->
+            let file =
+              match si_file with
+              | SearchTypes.SI_Filehash hash -> Printf.sprintf "#%s" hash
+              | SearchTypes.SI_Path path -> Relative_path.show path
+            in
+            Printf.printf
+              "[%s] %s - %s\n%!"
+              (SearchTypes.show_si_kind si_kind)
+              si_name
+              file);
+        Printf.printf
+          "\n--> %s - %d results, %0.3fs\n\n%!"
+          query_text_for_show
+          (List.length results)
+          (Unix.gettimeofday () -. start_time)
+      end)
+
+(** This handles "--auto-complete-show-glean" and "--auto-complete-glean".
+The input [filename] is either a single file or a multifile.
+It can contain <?hh files, or newline-separated query_text files.
+In the case of <?hh files, it figures out query_text+context+filter based on the AUTO332 in that file (if any).
+Once it has the search (comprising query_text, context, filter)
+it either simply shows the glean angle query,
+or also runs the query against glean and shows the results. *)
+let handle_autocomplete_glean ctx sienv naming_table ~dry_run filename =
   let files_contents = Multifile.file_to_file_list filename in
   let any_hack_files =
     List.exists files_contents ~f:(fun (_path, content) ->
@@ -366,67 +486,21 @@ let handle_autocomplete_glean ctx sienv naming_table ~dry_run filename =
     else
       files_contents
       |> List.concat_map ~f:(fun (_path, contents) ->
-             String_utils.split_on_newlines contents
-             |> List.map ~f:String.strip
-             |> List.filter ~f:(fun s ->
-                    if String.is_substring s ~substring:" " then
-                      failwith
-                        ("Files must be either hack, or lists of query_text; not "
-                        ^ s);
-                    (not (String.is_empty s))
-                    && not (String.is_prefix s ~prefix:"//"))
+             extract_nonblank_lines contents
              |> List.map ~f:(fun s -> (s, s, SearchTypes.Acid, None)))
   in
-  List.iter searches ~f:(fun (title, query_text, context, kind_filter) ->
-      if List.length searches > 1 then Printf.printf "//// %s\n" title;
-      let angle =
-        Glean_autocomplete_query.top_level
-          ~prefix:query_text
-          ~context
-          ~kind_filter
-      in
-      let show_query_text =
-        Printf.sprintf
-          "%s [%s,%s]"
-          query_text
-          (SearchTypes.show_autocomplete_type context)
-          (Option.value_map
-             kind_filter
-             ~default:"*"
-             ~f:SearchTypes.show_si_kind)
-      in
-      if any_hack_files then Printf.printf "query_text:\n%s\n\n" show_query_text;
-      Printf.printf "query:\n%s\n\n%!" angle;
-      if not dry_run then begin
-        let start_time = Unix.gettimeofday () in
-        let (results, _is_complete) =
-          Glean.query_autocomplete
-            (Option.value_exn handle)
-            ~query_text
-            ~max_results:100
-            ~context
-            ~kind_filter
-        in
-        List.iter
-          results
-          ~f:(fun { SearchTypes.si_name; si_kind; si_file; si_fullname = _ } ->
-            let file =
-              match si_file with
-              | SearchTypes.SI_Filehash hash -> Printf.sprintf "#%s" hash
-              | SearchTypes.SI_Path path -> Relative_path.show path
-            in
-            Printf.printf
-              "[%s] %s - %s\n%!"
-              (SearchTypes.show_si_kind si_kind)
-              si_name
-              file);
-        Printf.printf
-          "\n--> %s - %d results, %0.3fs\n\n%!"
-          show_query_text
-          (List.length results)
-          (Unix.gettimeofday () -. start_time)
-      end)
+  do_glean_symbol_searches
+    searches
+    ~reponame:sienv.SearchUtils.glean_reponame
+    ~dry_run
+    ~show_query_text:any_hack_files;
+  ()
 
+(** This handles "--auto-complete" and "--auto-complete-manually-invoked".
+It parses the input file/multifiles for AUTO332, and runs them through
+ServerAutoComplete, and shows the results. These results will include
+both locally defined symbols in input files if present, and glean
+results if --glean-reponame has been provided. *)
 let handle_autocomplete ctx sienv naming_table ~is_manually_invoked filename =
   let files_contents = Multifile.file_to_file_list filename in
   let files_with_token =
@@ -467,6 +541,52 @@ let handle_autocomplete ctx sienv naming_table ~is_manually_invoked filename =
                 Printf.printf "  %s\n" line)
           | None -> ()))
 
+(** This handles --search, --search-glean, --search-show-glean.
+The filename be a single file or a multifile,
+and accepts both <?hh files that define symbols, and newline-separated
+lists of search queries.
+For each query, it either shows the angle query (--search-show-glean)
+or shows the query and runs it and shows the results (--search-glean)
+or runs the query through ServerSearch (--search) which will also pick up
+any symbols defined in <?hh files. Note that in the final case, ServerSearch
+uses the naming-table and root in [ctx] to validate the results it got from
+glean -- to find their filename and load the file and get its AST -- and
+if glean gives results without [ctx] being set up right then the glean
+results will be filtered out. *)
+let handle_search ctx sienv ~glean_only ~dry_run filename =
+  let queries =
+    Multifile.file_to_file_list filename
+    |> List.filter ~f:(fun (_path, contents) ->
+           not (String.is_prefix contents ~prefix:"<?hh"))
+    |> List.concat_map ~f:(fun (_path, contents) ->
+           extract_nonblank_lines contents)
+  in
+  if glean_only then
+    queries
+    |> List.map ~f:(fun query ->
+           (query, query, SearchTypes.Ac_workspace_symbol, None))
+    |> do_glean_symbol_searches
+         ~reponame:sienv.SearchUtils.glean_reponame
+         ~dry_run
+         ~show_query_text:true
+  else
+    List.iter queries ~f:(fun query ->
+        Printf.printf "query: %s\n%!" query;
+        let sienv_ref = ref sienv in
+        let results = ServerSearch.go ctx query ~kind_filter:"" sienv_ref in
+        List.iter results ~f:(fun { SearchUtils.name; pos; result_type } ->
+            let filename = Pos.filename pos |> Filename.basename in
+            let (line, start_, end_) = Pos.info_pos pos in
+            Printf.printf
+              "  %s:%s - %s:%d:%d-%d\n%!"
+              name
+              (SearchTypes.show_si_kind result_type)
+              filename
+              line
+              start_
+              end_));
+  ()
+
 let handle_mode mode filenames ctx (sienv : SearchUtils.si_env) naming_table =
   let filename =
     match filenames with
@@ -475,22 +595,12 @@ let handle_mode mode filenames ctx (sienv : SearchUtils.si_env) naming_table =
   in
   match mode with
   | NoMode -> die "Exactly one mode must be set up"
+  | Search { glean_only; dry_run } ->
+    handle_search ctx sienv ~glean_only ~dry_run filename
   | Autocomplete_glean { dry_run } ->
     handle_autocomplete_glean ctx sienv naming_table ~dry_run filename
-  | Autocomplete ->
-    handle_autocomplete
-      ctx
-      sienv
-      naming_table
-      ~is_manually_invoked:false
-      filename
-  | Autocomplete_manually_invoked ->
-    handle_autocomplete
-      ctx
-      sienv
-      naming_table
-      ~is_manually_invoked:true
-      filename
+  | Autocomplete { is_manually_invoked } ->
+    handle_autocomplete ctx sienv naming_table ~is_manually_invoked filename
 
 (*****************************************************************************)
 (* Main entry point *)

@@ -300,6 +300,7 @@ let load_config config options =
     ?po_const_default_func_args:(bool_opt "const_default_func_args" config)
     ?po_const_default_lambda_args:(bool_opt "const_default_lambda_args" config)
     ?po_disallow_silence:(bool_opt "disallow_silence" config)
+    ?po_keep_user_attributes:(bool_opt "keep_user_attributes" config)
     ?tco_const_static_props:(bool_opt "const_static_props" config)
     ?po_abstract_static_props:(bool_opt "abstract_static_props" config)
     ?tco_check_attribute_locations:(bool_opt "check_attribute_locations" config)

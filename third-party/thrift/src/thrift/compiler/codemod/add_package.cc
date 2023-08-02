@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-#include <string>
 #include <vector>
-
-#include <fmt/core.h>
 
 #include <thrift/compiler/ast/t_program_bundle.h>
 #include <thrift/compiler/codemod/file_manager.h>
+#include <thrift/compiler/codemod/package_generator.h>
 #include <thrift/compiler/compiler.h>
 
 using apache::thrift::compiler::source_manager;
 using apache::thrift::compiler::t_program;
 using apache::thrift::compiler::codemod::file_manager;
+using apache::thrift::compiler::codemod::package_name_generator;
 
 namespace {
 
@@ -57,8 +56,10 @@ class add_package {
   static inline const std::map<std::string, std::string> default_namespaces_ = {
       {"cpp2", "cpp2"}, {"hack", ""}};
 
-  // Placeholder method that will be replaced later with the real logic
-  std::string get_package() const { return ""; }
+  std::string get_package() const {
+    // use file path for package name
+    return package_name_generator::from_file_path(prog_.path());
+  }
 
   std::string get_replacement_content(const std::string& pkg) const {
     auto content = fmt::format("package \"{}\"\n\n", pkg);

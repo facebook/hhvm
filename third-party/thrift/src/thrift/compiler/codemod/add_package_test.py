@@ -62,14 +62,29 @@ class ThriftPackage(unittest.TestCase):
                 """,
         )
 
-    def test_no_change(self):
+    def test_package_from_file_path(self):
         self.write_and_test(
-            "foo.thrift",
+            "fbcode/thrift/test/foo.thrift",
             """\
-                struct Bar {}
+                /*
+                 *  **License docblock**
+                 */
+
+                struct S {
+                }
 
                 """,
             """\
-                struct Bar {}
+                /*
+                 *  **License docblock**
+                 */
+
+                package "meta.com/thrift/test/foo"
+
+                namespace cpp2 "cpp2"
+                namespace hack ""
+
+                struct S {
+                }
                 """,
         )

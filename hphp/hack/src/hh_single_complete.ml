@@ -20,7 +20,7 @@ type mode =
   | NoMode
   | Autocomplete
   | Autocomplete_manually_invoked
-  | Glean_query of { dry_run: bool }
+  | Autocomplete_glean of { dry_run: bool }
 
 type options = {
   files: string list;
@@ -127,11 +127,11 @@ let parse_options () =
       ( "--auto-complete-manually-invoked",
         Arg.Unit (set_mode Autocomplete_manually_invoked),
         " Produce autocomplete suggestions as if manually triggered by user" );
-      ( "--glean-show-query",
-        Arg.Unit (set_mode (Glean_query { dry_run = true })),
+      ( "--auto-complete-show-glean",
+        Arg.Unit (set_mode (Autocomplete_glean { dry_run = true })),
         " Show the glean query for the prefix contained in the file" );
-      ( "--glean-query",
-        Arg.Unit (set_mode (Glean_query { dry_run = false })),
+      ( "--auto-complete-glean",
+        Arg.Unit (set_mode (Autocomplete_glean { dry_run = false })),
         " Show the glean query for the prefix contained in the file, and run that query"
       );
       ( "--manifold-api-key",
@@ -314,7 +314,7 @@ let do_auto332
     ~autocomplete_context
     ~naming_table
 
-let handle_glean_query ctx sienv naming_table ~dry_run filename =
+let handle_autocomplete_glean ctx sienv naming_table ~dry_run filename =
   let handle =
     if dry_run then
       None
@@ -475,8 +475,8 @@ let handle_mode mode filenames ctx (sienv : SearchUtils.si_env) naming_table =
   in
   match mode with
   | NoMode -> die "Exactly one mode must be set up"
-  | Glean_query { dry_run } ->
-    handle_glean_query ctx sienv naming_table ~dry_run filename
+  | Autocomplete_glean { dry_run } ->
+    handle_autocomplete_glean ctx sienv naming_table ~dry_run filename
   | Autocomplete ->
     handle_autocomplete
       ctx

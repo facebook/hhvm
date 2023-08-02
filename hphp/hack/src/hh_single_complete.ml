@@ -550,27 +550,31 @@ let decl_and_run_mode
             ~data:src)
   in
   let files = files |> List.map ~f:(Relative_path.create Relative_path.Dummy) in
-  let files_contents =
+  let hh_files_contents =
     List.fold
       files
       ~f:(fun acc filename ->
-        let files_contents = Multifile.file_to_files filename in
-        Relative_path.Map.union acc files_contents)
+        let hh_files_contents =
+          Multifile.file_to_files filename
+          |> Relative_path.Map.filter ~f:(fun _path contents ->
+                 String.is_prefix contents ~prefix:"<?hh")
+        in
+        Relative_path.Map.union acc hh_files_contents)
       ~init:Relative_path.Map.empty
   in
   (* Merge in builtins *)
-  let files_contents_with_builtins =
+  let hh_files_contents_with_builtins =
     Relative_path.Map.fold
       builtins
       ~f:
         begin
           (fun k src acc -> Relative_path.Map.add acc ~key:k ~data:src)
         end
-      ~init:files_contents
+      ~init:hh_files_contents
   in
-  Relative_path.Map.iter files_contents ~f:(fun filename contents ->
+  Relative_path.Map.iter hh_files_contents ~f:(fun filename contents ->
       File_provider.provide_file_for_tests filename contents);
-  let to_decl = files_contents_with_builtins in
+  let to_decl = hh_files_contents_with_builtins in
   let ctx =
     Provider_context.empty_for_test
       ~popt
@@ -601,7 +605,7 @@ let decl_and_run_mode
   (* NAMING PHASE 2: for the reverse naming table delta, remove any old names from the files
      we're about to redeclare -- otherwise when we declare them it'd count as a duplicate definition! *)
   if Option.is_some naming_table_path then begin
-    Relative_path.Map.iter files_contents ~f:(fun file _content ->
+    Relative_path.Map.iter hh_files_contents ~f:(fun file _content ->
         let file_info = Naming_table.get_file_info naming_table file in
         Option.iter file_info ~f:(fun file_info ->
             let ids_to_strings ids =

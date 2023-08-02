@@ -129,6 +129,10 @@ class Factory {
     return CertUtils::makePeerCert(std::move(certEntry.cert_data));
   }
 
+  virtual std::shared_ptr<Cert> makeIdentityOnlyCert(std::string ident) const {
+    return std::make_shared<IdentityCert>(std::move(ident));
+  }
+
   virtual std::string getHkdfPrefix() const {
     return kHkdfLabelPrefix.str();
   }

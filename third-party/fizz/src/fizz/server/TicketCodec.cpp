@@ -75,7 +75,7 @@ std::shared_ptr<const Cert> readClientCertificate(
     case CertificateStorage::IdentityOnly: {
       Buf ident;
       fizz::detail::readBuf<uint16_t>(ident, cursor);
-      return std::make_shared<const IdentityCert>(
+      return factory.makeIdentityOnlyCert(
           ident->moveToFbString().toStdString());
     }
   }

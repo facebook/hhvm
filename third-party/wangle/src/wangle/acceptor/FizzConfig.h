@@ -39,6 +39,9 @@ struct FizzConfig {
   // EXPERIMENTAL: Attempt to switch to kTLS Rx only
   // Requires preferKTLS to be enabled
   bool preferKTLSRx{false};
+  // EXPERIMENTAL: Attempt opportunistic zero-copy
+  // Requires preferKTLS to be enabled
+  bool expectNoPadKTLSRx{false};
 
   folly::Optional<uint16_t> maxRecord;
   folly::Optional<uint16_t> paddingModulo;

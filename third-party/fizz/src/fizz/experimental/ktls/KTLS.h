@@ -72,6 +72,14 @@ enum class TrafficDirection {
 };
 
 /**
+ * TLS 1.3 only. Expect the sender to not pad records if enabled
+ * This allows the data to be decrypted directly into user space buffers with
+ * TLS 1.3.
+ */
+
+enum class KTLSRxPad { RxPadUnknown, RxExpectNoPad };
+
+/**
  * KTLSDirectionalCryptoParams is the same as KTLSCryptoParams, except tagged
  * with a compile time `TrafficDirection`.
  *
@@ -123,7 +131,8 @@ class KTLSNetworkSocket : public folly::NetworkSocket {
   tryEnableKTLS(
       NetworkSocket fd,
       const KTLSDirectionalCryptoParams<TrafficDirection::Receive>& rx,
-      const KTLSDirectionalCryptoParams<TrafficDirection::Transmit>& tx)
+      const KTLSDirectionalCryptoParams<TrafficDirection::Transmit>& tx,
+      KTLSRxPad rxPad = KTLSRxPad::RxPadUnknown)
 #if FIZZ_PLATFORM_CAPABLE_KTLS
       ;
 #else
@@ -136,7 +145,8 @@ class KTLSNetworkSocket : public folly::NetworkSocket {
   static folly::Expected<KTLSNetworkSocket, folly::exception_wrapper>
   tryEnableKTLS(
       NetworkSocket fd,
-      const KTLSDirectionalCryptoParams<TrafficDirection::Receive>& rx)
+      const KTLSDirectionalCryptoParams<TrafficDirection::Receive>& rx,
+      KTLSRxPad rxPad = KTLSRxPad::RxPadUnknown)
 #if FIZZ_PLATFORM_CAPABLE_KTLS
       ;
 #else

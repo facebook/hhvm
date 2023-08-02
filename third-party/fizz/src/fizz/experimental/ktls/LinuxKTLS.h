@@ -62,6 +62,14 @@
 #define TLS_RX 2
 #endif
 
+#ifndef TLS_TX_ZEROCOPY_RO
+#define TLS_TX_ZEROCOPY_RO 3
+#endif
+
+#ifndef TLS_RX_EXPECT_NO_PAD
+#define TLS_RX_EXPECT_NO_PAD 4
+#endif
+
 #ifndef TLS_1_3_VERSION_MAJOR
 #define TLS_1_3_VERSION_MAJOR 0x3
 #endif

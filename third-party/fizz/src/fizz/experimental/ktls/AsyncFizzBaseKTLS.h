@@ -66,7 +66,10 @@ enum class AsyncKTLSSocketType { RxOnly = 1, Both = 2 };
 
 template <class FizzSocket>
 folly::Expected<AsyncKTLSSocket::UniquePtr, folly::exception_wrapper>
-tryConvertKTLSBase(FizzSocket& fizzSock, AsyncKTLSSocketType socketType) {
+tryConvertKTLSBase(
+    FizzSocket& fizzSock,
+    AsyncKTLSSocketType socketType,
+    KTLSRxPad rxPad) {
 #if defined(__linux__) && !defined(__ANDROID__)
   static_assert(
       std::is_base_of<AsyncFizzBase, FizzSocket>::value,
@@ -127,9 +130,11 @@ tryConvertKTLSBase(FizzSocket& fizzSock, AsyncKTLSSocketType socketType) {
   if (socketType == AsyncKTLSSocketType::Both) {
     auto tx = KTLSDirectionalCryptoParams<TrafficDirection::Transmit>(
         KTLSCryptoParams::fromRecordState(ciphersuite, wstate));
-    result = KTLSNetworkSocket::tryEnableKTLS(sock->getNetworkSocket(), rx, tx);
+    result = KTLSNetworkSocket::tryEnableKTLS(
+        sock->getNetworkSocket(), rx, tx, rxPad);
   } else if (socketType == AsyncKTLSSocketType::RxOnly) {
-    result = KTLSNetworkSocket::tryEnableKTLS(sock->getNetworkSocket(), rx);
+    result =
+        KTLSNetworkSocket::tryEnableKTLS(sock->getNetworkSocket(), rx, rxPad);
   }
 
   if (!result) {
@@ -200,13 +205,18 @@ tryConvertKTLSBase(FizzSocket& fizzSock, AsyncKTLSSocketType socketType) {
  */
 template <class FizzSocket>
 folly::Expected<AsyncKTLSSocket::UniquePtr, folly::exception_wrapper>
-tryConvertKTLS(FizzSocket& fizzSock) {
-  return tryConvertKTLSBase(fizzSock, detail::AsyncKTLSSocketType::Both);
+tryConvertKTLS(
+    FizzSocket& fizzSock,
+    KTLSRxPad rxPad = KTLSRxPad::RxPadUnknown) {
+  return tryConvertKTLSBase(fizzSock, detail::AsyncKTLSSocketType::Both, rxPad);
 }
 
 template <class FizzSocket>
 folly::Expected<AsyncKTLSRxSocket::UniquePtr, folly::exception_wrapper>
-tryConvertKTLSRx(FizzSocket& fizzSock) {
-  return tryConvertKTLSBase(fizzSock, detail::AsyncKTLSSocketType::RxOnly);
+tryConvertKTLSRx(
+    FizzSocket& fizzSock,
+    KTLSRxPad rxPad = KTLSRxPad::RxPadUnknown) {
+  return tryConvertKTLSBase(
+      fizzSock, detail::AsyncKTLSSocketType::RxOnly, rxPad);
 }
 } // namespace fizz

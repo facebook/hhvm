@@ -279,7 +279,8 @@ folly::Expected<KTLSNetworkSocket, folly::exception_wrapper>
 KTLSNetworkSocket::tryEnableKTLS(
     NetworkSocket fd,
     const KTLSDirectionalCryptoParams<TrafficDirection::Receive>& rx,
-    const KTLSDirectionalCryptoParams<TrafficDirection::Transmit>& tx) {
+    const KTLSDirectionalCryptoParams<TrafficDirection::Transmit>& tx,
+    KTLSRxPad rxPad) {
   if (!platformSupportsKTLS()) {
     return folly::makeUnexpected<folly::exception_wrapper>(
         std::runtime_error("platform does not support ktls"));
@@ -321,13 +322,19 @@ KTLSNetworkSocket::tryEnableKTLS(
         errno, std::system_category(), "could not configure ktls tx"));
   }
 
+  // best effort
+  int noPad = (rxPad == KTLSRxPad::RxExpectNoPad) ? 1 : 0;
+  folly::netops::setsockopt(
+      fd, SOL_TLS, TLS_RX_EXPECT_NO_PAD, &noPad, sizeof(noPad));
+
   return folly::makeExpected<folly::exception_wrapper>(KTLSNetworkSocket(fd));
 }
 
 folly::Expected<KTLSNetworkSocket, folly::exception_wrapper>
 KTLSNetworkSocket::tryEnableKTLS(
     NetworkSocket fd,
-    const KTLSDirectionalCryptoParams<TrafficDirection::Receive>& rx) {
+    const KTLSDirectionalCryptoParams<TrafficDirection::Receive>& rx,
+    KTLSRxPad rxPad) {
   if (!platformSupportsKTLS()) {
     return folly::makeUnexpected<folly::exception_wrapper>(
         std::runtime_error("platform does not support ktls"));
@@ -357,6 +364,11 @@ KTLSNetworkSocket::tryEnableKTLS(
     return folly::makeUnexpected<folly::exception_wrapper>(std::system_error(
         errno, std::system_category(), "could not configure ktls rx"));
   }
+
+  // best effort
+  int noPad = (rxPad == KTLSRxPad::RxExpectNoPad) ? 1 : 0;
+  folly::netops::setsockopt(
+      fd, SOL_TLS, TLS_RX_EXPECT_NO_PAD, &noPad, sizeof(noPad));
 
   return folly::makeExpected<folly::exception_wrapper>(KTLSNetworkSocket(fd));
 }

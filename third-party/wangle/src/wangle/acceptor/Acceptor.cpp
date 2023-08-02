@@ -395,6 +395,9 @@ static std::string logContext(folly::AsyncTransport& transport) {
 AsyncTransport::UniquePtr Acceptor::transformTransport(
     AsyncTransport::UniquePtr sock) {
   if constexpr (fizz::platformCapableOfKTLS) {
+    fizz::KTLSRxPad rxPad = accConfig_.fizzConfig.expectNoPadKTLSRx
+        ? fizz::KTLSRxPad::RxExpectNoPad
+        : fizz::KTLSRxPad::RxPadUnknown;
     if (accConfig_.fizzConfig.preferKTLS) {
       if (accConfig_.fizzConfig.preferKTLSRx) {
         std::string sockLogContext;
@@ -410,7 +413,7 @@ AsyncTransport::UniquePtr Acceptor::transformTransport(
               << sockLogContext;
           return sock;
         }
-        auto ktlsRxSockResult = fizz::tryConvertKTLSRx(*fizzSocket);
+        auto ktlsRxSockResult = fizz::tryConvertKTLSRx(*fizzSocket, rxPad);
         if (ktlsRxSockResult.hasValue()) {
           VLOG(5) << "Upgraded socket to kTLS Rx. " << sockLogContext;
           return std::move(ktlsRxSockResult).value();
@@ -434,7 +437,7 @@ AsyncTransport::UniquePtr Acceptor::transformTransport(
               << sockLogContext;
           return sock;
         }
-        auto ktlsSockResult = fizz::tryConvertKTLS(*fizzSocket);
+        auto ktlsSockResult = fizz::tryConvertKTLS(*fizzSocket, rxPad);
         if (ktlsSockResult.hasValue()) {
           VLOG(5) << "Upgraded socket to kTLS. " << sockLogContext;
           return std::move(ktlsSockResult).value();

@@ -77,11 +77,79 @@
               (Expr
                  ((dict<string, int>), [10:3-22],
                   (Call
-                     { func = (((function(shape(...) $shape)[]: dict<string, int>)), [10:3-18], (Class_const (((Shapes), [10:3-9], (CI ([10:3-9], "\\HH\\Shapes"))), ([10:11-18], "toArray"))));
+                     { func = (((function(shape(...) $shape)[]: dict<arraykey, mixed>)), [10:3-18], (Class_const (((Shapes), [10:3-9], (CI ([10:3-9], "\\HH\\Shapes"))), ([10:11-18], "toArray"))));
                        targs = []; args = [(Pnormal, ((shape('x' => int)), [10:19-21], (Lvar ([10:19-21], $p))))]; 
                        unpacked_arg = None }))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([5:10-14], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([5:10-14], "\\test");
+       fd_fun =
+       { f_span = [5:1-11:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((dynamic), (Some ([5:26-30], (Hprim Tvoid))));
+         f_params =
+         [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([5:15-20], (Happly (([5:15-20], "\\Point"), []))))); 
+            param_is_variadic = false; param_pos = [5:21-23]; param_name = "$p"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([6:3-24],
+             (Expr
+                ((~null), [6:3-23],
+                 (Call
+                    { func =
+                      (((function<Tv>(?shape(?'x' => nothing, ...) $shape, arraykey $index)[]: null)), [6:3-14],
+                       (Class_const (((Shapes), [6:3-9], (CI ([6:3-9], "\\HH\\Shapes"))), ([6:11-14], "idx"))));
+                      targs = [((nothing), ([6:11-14], Hwildcard))]; 
+                      args = [(Pnormal, ((dynamic), [6:15-17], (Lvar ([6:15-17], $p)))); (Pnormal, ((string), [6:19-22], (String "x")))]; 
+                      unpacked_arg = None }))));
+             ([7:3-27],
+              (Expr
+                 ((~int), [7:3-26],
+                  (Call
+                     { func =
+                       (((function<Tv>(?shape(?'x' => int, ...) $shape, arraykey $index, int $default = _)[]: int)), [7:3-14],
+                        (Class_const (((Shapes), [7:3-9], (CI ([7:3-9], "\\HH\\Shapes"))), ([7:11-14], "idx"))));
+                       targs = [((int), ([7:11-14], Hwildcard))];
+                       args = [(Pnormal, ((dynamic), [7:15-17], (Lvar ([7:15-17], $p)))); (Pnormal, ((string), [7:19-22], (String "x"))); (Pnormal, ((int), [7:24-25], (Int "3")))];
+                       unpacked_arg = None }))));
+             ([8:3-30],
+              (Expr
+                 ((~bool), [8:3-29],
+                  (Call
+                     { func =
+                       (((function(readonly shape(...) $shape, arraykey $index)[]: bool)), [8:3-20], (Class_const (((Shapes), [8:3-9], (CI ([8:3-9], "\\HH\\Shapes"))), ([8:11-20], "keyExists"))));
+                       targs = []; args = [(Pnormal, ((dynamic), [8:21-23], (Lvar ([8:21-23], $p)))); (Pnormal, ((string), [8:25-28], (String "y")))]; 
+                       unpacked_arg = None }))));
+             ([9:3-36],
+              (Expr
+                 ((~void), [9:3-35],
+                  (Call
+                     { func =
+                       (((function<T as shape(...)>(inout nothing $shape, arraykey $index)[]: void)), [9:3-20],
+                        (Class_const (((Shapes), [9:3-9], (CI ([9:3-9], "\\HH\\Shapes"))), ([9:11-20], "removeKey"))));
+                       targs = [((nothing), ([9:11-20], Hwildcard))]; 
+                       args = [((Pinout [9:21-26]), ((dynamic), [9:27-29], (Lvar ([9:27-29], $p)))); (Pnormal, ((string), [9:31-34], (String "y")))]; 
+                       unpacked_arg = None }))));
+             ([10:3-23],
+              (Expr
+                 ((dynamic), [10:3-22],
+                  (Call
+                     { func = (((function(shape(...) $shape)[]: dict<arraykey, mixed>)), [10:3-18], (Class_const (((Shapes), [10:3-9], (CI ([10:3-9], "\\HH\\Shapes"))), ([10:11-18], "toArray"))));
+                       targs = []; args = [(Pnormal, ((dynamic), [10:19-21], (Lvar ([10:19-21], $p))))]; 
+                       unpacked_arg = None }))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([5:10-14], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

@@ -15,15 +15,15 @@ Errors:
           [([13:3-10], (Expr ((int), [13:3-9], (Binop { bop = (Eq None); lhs = ((int), [13:3-5], (Lvar ([13:3-5], $y))); rhs = ((int), [13:8-9], (Int "2")) }))));
             ([15:3-23],
              (Expr
-                (((function(int $z): int)), [15:3-22],
+                (((function(int $z): ~int)), [15:3-22],
                  (Binop
-                    { bop = (Eq None); lhs = (((function(int $z): int)), [15:3-5], (Lvar ([15:3-5], $x)));
+                    { bop = (Eq None); lhs = (((function(int $z): ~int)), [15:3-5], (Lvar ([15:3-5], $x)));
                       rhs =
-                      (((function(int $z): int)), [15:8-22],
+                      (((function(int $z): ~int)), [15:8-22],
                        (Lfun (
                           { f_span = [15:8-22]; f_readonly_this = None; 
                             f_annotation = (); f_readonly_ret = None; 
-                            f_ret = ((int), None);
+                            f_ret = ((~int), None);
                             f_params =
                             [{ param_annotation = (int); param_type_hint = ((int), None); 
                                param_is_variadic = false; param_pos = [15:8-10]; 
@@ -35,7 +35,7 @@ Errors:
                             f_body =
                             { fb_ast =
                               [([15:15-22],
-                                (Return (Some ((int), [15:15-22], (Binop { bop = Plus; lhs = ((int), [15:15-17], (Lvar ([15:15-17], $y))); rhs = ((int), [15:20-22], (Lvar ([15:20-22], $z))) })))))]
+                                (Return (Some ((~int), [15:15-22], (Binop { bop = Plus; lhs = ((~int), [15:15-17], (Lvar ([15:15-17], $y))); rhs = ((int), [15:20-22], (Lvar ([15:20-22], $z))) })))))]
                               };
                             f_fun_kind = FSync; f_user_attributes = []; 
                             f_external = false; f_doc_comment = None },
@@ -43,25 +43,25 @@ Errors:
                       }))));
             ([16:3-14],
              (Expr
-                ((int), [16:3-13],
+                ((~int), [16:3-13],
                  (Binop
-                    { bop = (Eq None); lhs = ((int), [16:3-5], (Lvar ([16:3-5], $l)));
+                    { bop = (Eq None); lhs = ((~int), [16:3-5], (Lvar ([16:3-5], $l)));
                       rhs =
-                      ((int), [16:8-13],
-                       (Call { func = (((function(int $z): int)), [16:8-10], (Lvar ([16:8-10], $x))); targs = []; args = [(Pnormal, ((int), [16:11-12], (Int "2")))]; unpacked_arg = None }))
+                      ((~int), [16:8-13],
+                       (Call { func = (((function(int $z): ~int)), [16:8-10], (Lvar ([16:8-10], $x))); targs = []; args = [(Pnormal, ((int), [16:11-12], (Int "2")))]; unpacked_arg = None }))
                       }))));
             ([18:3-20:4],
              (Expr
-                (((function(int $z): int)), [18:3-20:4],
+                (((function(int $z): ~int)), [18:3-20:4],
                  (Binop
-                    { bop = (Eq None); lhs = (((function(int $z): int)), [18:3-5], (Lvar ([18:3-5], $x)));
+                    { bop = (Eq None); lhs = (((function(int $z): ~int)), [18:3-5], (Lvar ([18:3-5], $x)));
                       rhs =
-                      (((function(int $z): int)), [18:8-20:4],
+                      (((function(int $z): ~int)), [18:8-20:4],
                        (Efun
                           { ef_fun =
                             { f_span = [18:8-20:4]; f_readonly_this = None; 
                               f_annotation = (); f_readonly_ret = None; 
-                              f_ret = ((int), None);
+                              f_ret = ((~int), None);
                               f_params =
                               [{ param_annotation = (int); param_type_hint = ((int), None); 
                                  param_is_variadic = false; param_pos = [18:17-19]; 
@@ -73,7 +73,8 @@ Errors:
                               f_body =
                               { fb_ast =
                                 [([19:5-20],
-                                  (Return (Some ((int), [19:12-19], (Binop { bop = Plus; lhs = ((int), [19:12-14], (Lvar ([19:12-14], $y))); rhs = ((int), [19:17-19], (Lvar ([19:17-19], $z))) })))))]
+                                  (Return (Some ((~int), [19:12-19], (Binop { bop = Plus; lhs = ((~int), [19:12-14], (Lvar ([19:12-14], $y))); rhs = ((int), [19:17-19], (Lvar ([19:17-19], $z))) })))))
+                                  ]
                                 };
                               f_fun_kind = FSync; f_user_attributes = []; 
                               f_external = false; f_doc_comment = None };
@@ -81,12 +82,12 @@ Errors:
                       }))));
             ([21:3-14],
              (Expr
-                ((int), [21:3-13],
+                ((~int), [21:3-13],
                  (Binop
-                    { bop = (Eq None); lhs = ((int), [21:3-5], (Lvar ([21:3-5], $l)));
+                    { bop = (Eq None); lhs = ((~int), [21:3-5], (Lvar ([21:3-5], $l)));
                       rhs =
-                      ((int), [21:8-13],
-                       (Call { func = (((function(int $z): int)), [21:8-10], (Lvar ([21:8-10], $x))); targs = []; args = [(Pnormal, ((int), [21:11-12], (Int "2")))]; unpacked_arg = None }))
+                      ((~int), [21:8-13],
+                       (Call { func = (((function(int $z): ~int)), [21:8-10], (Lvar ([21:8-10], $x))); targs = []; args = [(Pnormal, ((int), [21:11-12], (Int "2")))]; unpacked_arg = None }))
                       }))));
             ([23:3-29],
              (Expr
@@ -135,7 +136,8 @@ Errors:
                       }))))
             ]
           };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false;
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([12:10-13], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false;
         f_doc_comment =
         (Some ([2:1-10:4],
                "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */"))

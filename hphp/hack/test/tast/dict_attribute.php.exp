@@ -25,7 +25,7 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = [];
+      c_user_attributes = [{ ua_name = ([5:7-8], "__SupportDynamicType"); ua_params = [] }];
       c_file_attributes =
       [{ fa_user_attributes =
          [{ ua_name = ([3:9-11], "\\Fi");
@@ -56,7 +56,7 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       c_user_attributes = [];
+       c_user_attributes = [{ ua_name = ([9:7-8], "__SupportDynamicType"); ua_params = [] }];
        c_file_attributes =
        [{ fa_user_attributes =
           [{ ua_name = ([3:9-11], "\\Fi");
@@ -87,7 +87,7 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       c_user_attributes = [];
+       c_user_attributes = [{ ua_name = ([10:7-8], "__SupportDynamicType"); ua_params = [] }];
        c_file_attributes =
        [{ fa_user_attributes =
           [{ ua_name = ([3:9-11], "\\Fi");
@@ -118,7 +118,7 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       c_user_attributes = [];
+       c_user_attributes = [{ ua_name = ([11:7-8], "__SupportDynamicType"); ua_params = [] }];
        c_file_attributes =
        [{ fa_user_attributes =
           [{ ua_name = ([3:9-11], "\\Fi");
@@ -149,7 +149,7 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       c_user_attributes = [];
+       c_user_attributes = [{ ua_name = ([12:7-10], "__SupportDynamicType"); ua_params = [] }];
        c_file_attributes =
        [{ fa_user_attributes =
           [{ ua_name = ([3:9-11], "\\Fi");
@@ -180,7 +180,7 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       c_user_attributes = [];
+       c_user_attributes = [{ ua_name = ([13:7-12], "__SupportDynamicType"); ua_params = [] }];
        c_file_attributes =
        [{ fa_user_attributes =
           [{ ua_name = ([3:9-11], "\\Fi");
@@ -211,7 +211,7 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       c_user_attributes = [];
+       c_user_attributes = [{ ua_name = ([14:7-12], "__SupportDynamicType"); ua_params = [] }];
        c_file_attributes =
        [{ fa_user_attributes =
           [{ ua_name = ([3:9-11], "\\Fi");
@@ -242,7 +242,7 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       c_user_attributes = [];
+       c_user_attributes = [{ ua_name = ([15:7-8], "__SupportDynamicType"); ua_params = [] }];
        c_file_attributes =
        [{ fa_user_attributes =
           [{ ua_name = ([3:9-11], "\\Fi");
@@ -273,7 +273,7 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       c_user_attributes = [];
+       c_user_attributes = [{ ua_name = ([16:7-13], "__SupportDynamicType"); ua_params = [] }];
        c_file_attributes =
        [{ fa_user_attributes =
           [{ ua_name = ([3:9-11], "\\Fi");
@@ -304,7 +304,7 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       c_user_attributes = [];
+       c_user_attributes = [{ ua_name = ([17:7-9], "__SupportDynamicType"); ua_params = [] }];
        c_file_attributes =
        [{ fa_user_attributes =
           [{ ua_name = ([3:9-11], "\\Fi");
@@ -366,13 +366,14 @@
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync;
          f_user_attributes =
-         [{ ua_name = ([19:3-4], "\\F");
-            ua_params =
-            [((dict<string, int>), [19:5-29],
-              (KeyValCollection (([19:5-9], Dict), None,
-                 [(((string), [19:10-13], (String "a")), ((int), [19:17-18], (Int "1"))); (((string), [19:20-23], (String "b")), ((int), [19:27-28], (Int "2")))])))
-              ]
-            }
+         [{ ua_name = ([20:10-12], "__SupportDynamicType"); ua_params = [] };
+           { ua_name = ([19:3-4], "\\F");
+             ua_params =
+             [((dict<string, int>), [19:5-29],
+               (KeyValCollection (([19:5-9], Dict), None,
+                  [(((string), [19:10-13], (String "a")), ((int), [19:17-18], (Int "1"))); (((string), [19:20-23], (String "b")), ((int), [19:27-28], (Int "2")))])))
+               ]
+             }
            ];
          f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
@@ -436,13 +437,14 @@
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        c_user_attributes =
-       [{ ua_name = ([22:3-4], "\\C");
-          ua_params =
-          [((dict<string, int>), [22:5-29],
-            (KeyValCollection (([22:5-9], Dict), None, [(((string), [22:10-13], (String "a")), ((int), [22:17-18], (Int "1"))); (((string), [22:20-23], (String "b")), ((int), [22:27-28], (Int "2")))]
-               )))
-            ]
-          }
+       [{ ua_name = ([23:7-9], "__SupportDynamicType"); ua_params = [] };
+         { ua_name = ([22:3-4], "\\C");
+           ua_params =
+           [((dict<string, int>), [22:5-29],
+             (KeyValCollection (([22:5-9], Dict), None,
+                [(((string), [22:10-13], (String "a")), ((int), [22:17-18], (Int "1"))); (((string), [22:20-23], (String "b")), ((int), [22:27-28], (Int "2")))])))
+             ]
+           }
          ];
        c_file_attributes =
        [{ fa_user_attributes =

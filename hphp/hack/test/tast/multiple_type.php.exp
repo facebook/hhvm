@@ -10,7 +10,7 @@
          m_name = ([5:19-22], "foo"); m_tparams = []; m_where_constraints = []; 
          m_params = []; m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([6:5-14], (Return (Some ((int), [6:12-13], (Int "5")))))] }; 
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
-         m_ret = ((int), (Some ([5:26-29], (Hprim Tint)))); m_external = false; 
+         m_ret = ((~int), (Some ([5:26-29], (Hprim Tint)))); m_external = false; 
          m_doc_comment = None }
         ];
       c_xhp_children = []; c_xhp_attrs = [];
@@ -18,9 +18,9 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
-      c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
-      c_module = None });
+      c_user_attributes = [{ ua_name = ([4:7-9], "__SupportDynamicType"); ua_params = [] }]; 
+      c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+      c_emit_id = None; c_internal = false; c_module = None });
   (Class
      { c_span = [10:1-14:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
@@ -33,17 +33,17 @@
           m_name = ([11:19-22], "foo"); m_tparams = []; m_where_constraints = []; 
           m_params = []; m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([12:5-16], (Return (Some ((string), [12:12-15], (String "s")))))] }; 
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
-          m_ret = ((string), (Some ([11:26-32], (Hprim Tstring)))); m_external = false; 
-          m_doc_comment = None }
+          m_ret = ((~string), (Some ([11:26-32], (Hprim Tstring)))); 
+          m_external = false; m_doc_comment = None }
          ];
        c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
-       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
-       c_module = None });
+       c_user_attributes = [{ ua_name = ([10:7-9], "__SupportDynamicType"); ua_params = [] }]; 
+       c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+       c_emit_id = None; c_internal = false; c_module = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -52,7 +52,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([16:10-14], "\\test");
        fd_fun =
        { f_span = [16:1-19:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((arraykey), (Some ([16:44-52], (Hprim Tarraykey))));
+         f_readonly_ret = None; f_ret = ((~arraykey), (Some ([16:44-52], (Hprim Tarraykey))));
          f_params =
          [{ param_annotation = (C1); param_type_hint = ((C1), (Some ([16:15-17], (Happly (([16:15-17], "\\C1"), []))))); 
             param_is_variadic = false; param_pos = [16:18-21]; param_name = "$c1"; 
@@ -89,6 +89,6 @@
                              targs = []; args = []; unpacked_arg = None })))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([16:10-14], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

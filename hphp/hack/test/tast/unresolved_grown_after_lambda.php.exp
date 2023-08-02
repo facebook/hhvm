@@ -10,7 +10,7 @@ Errors:
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-14], "\\test");
       fd_fun =
       { f_span = [3:1-15:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((int), (Some ([3:35-38], (Hprim Tint))));
+        f_readonly_ret = None; f_ret = ((~int), (Some ([3:35-38], (Hprim Tint))));
         f_params =
         [{ param_annotation = (int); param_type_hint = ((int), (Some ([3:15-18], (Hprim Tint)))); 
            param_is_variadic = false; param_pos = [3:19-21]; param_name = "$i"; 
@@ -32,25 +32,25 @@ Errors:
                      rhs = ((Vector<int>), [4:12-25], (ValCollection (([4:12-18], Vector), None, [((int), [4:21-23], (Lvar ([4:21-23], $i)))]))) }))));
             ([5:3-12:5],
              (Expr
-                (((function(): int)), [5:3-12:4],
+                (((function(): ~int)), [5:3-12:4],
                  (Binop
-                    { bop = (Eq None); lhs = (((function(): int)), [5:3-5], (Lvar ([5:3-5], $f)));
+                    { bop = (Eq None); lhs = (((function(): ~int)), [5:3-5], (Lvar ([5:3-5], $f)));
                       rhs =
-                      (((function(): int)), [5:8-12:4],
+                      (((function(): ~int)), [5:8-12:4],
                        (Lfun (
                           { f_span = [5:8-12:4]; f_readonly_this = None; 
                             f_annotation = (); f_readonly_ret = None; 
-                            f_ret = ((int), (Some ([5:12-15], (Hprim Tint)))); 
+                            f_ret = ((~int), (Some ([5:12-15], (Hprim Tint)))); 
                             f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                             f_body =
                             { fb_ast =
                               [([10:5-23],
                                 (Expr
-                                   ((int), [10:5-22],
+                                   ((~int), [10:5-22],
                                     (Binop
-                                       { bop = (Eq None); lhs = ((int), [10:5-10], (Lvar ([10:5-10], $item)));
-                                         rhs = ((int), [10:13-22], (Array_get (((Vector<int>), [10:13-19], (Lvar ([10:13-19], $items))), (Some ((int), [10:20-21], (Int "1")))))) }))));
-                                ([11:5-18], (Return (Some ((int), [11:12-17], (Lvar ([11:12-17], $item))))))]
+                                       { bop = (Eq None); lhs = ((~int), [10:5-10], (Lvar ([10:5-10], $item)));
+                                         rhs = ((~int), [10:13-22], (Array_get (((~Vector<int>), [10:13-19], (Lvar ([10:13-19], $items))), (Some ((int), [10:20-21], (Int "1")))))) }))));
+                                ([11:5-18], (Return (Some ((~int), [11:12-17], (Lvar ([11:12-17], $item))))))]
                               };
                             f_fun_kind = FSync; f_user_attributes = []; 
                             f_external = false; f_doc_comment = None },
@@ -61,9 +61,9 @@ Errors:
                 ((string), [13:3-16],
                  (Binop
                     { bop = (Eq None); lhs = ((string), [13:3-11], (Array_get (((Vector<int>), [13:3-9], (Lvar ([13:3-9], $items))), None)));
-                      rhs = ((string), [13:14-16], (Hole (((string), [13:14-16], (Lvar ([13:14-16], $s))), (string), (int), Typing))) }))));
-            ([14:3-15], (Return (Some ((int), [14:10-14], (Call { func = (((function(): int)), [14:10-12], (Lvar ([14:10-12], $f))); targs = []; args = []; unpacked_arg = None })))))]
+                      rhs = ((string), [13:14-16], (Hole (((string), [13:14-16], (Lvar ([13:14-16], $s))), (string), (~int), Typing))) }))));
+            ([14:3-15], (Return (Some ((~int), [14:10-14], (Call { func = (((function(): ~int)), [14:10-12], (Lvar ([14:10-12], $f))); targs = []; args = []; unpacked_arg = None })))))]
           };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-14], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

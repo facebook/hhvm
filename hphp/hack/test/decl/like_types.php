@@ -1,6 +1,7 @@
 <?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
+<<__SupportDynamicType>>
 function expect_int(int $i): void {}
 
 function f<T as ~int>(T $t): void {

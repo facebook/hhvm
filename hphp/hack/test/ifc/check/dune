@@ -15,6 +15,7 @@
    --in-extension
    .php
    --flags
+   --like-type-hints
    --ifc
    check
    ""

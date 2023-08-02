@@ -1,7 +1,12 @@
 [(Class
     { c_span = [4:1-19]; c_annotation = (); c_mode = Mstrict; c_final = false; 
       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cinterface; 
-      c_name = ([4:11-12], "\\I"); c_tparams = [{ tp_variance = Contravariant; tp_name = ([4:14-15], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
+      c_name = ([4:11-12], "\\I");
+      c_tparams =
+      [{ tp_variance = Contravariant; tp_name = ([4:14-15], "T"); tp_parameters = [];
+         tp_constraints = [(Constraint_as, ([4:14-15], (Happly (([4:14-15], "\\HH\\supportdyn"), [([4:14-15], Hmixed)]))))]; 
+         tp_reified = Erased; tp_user_attributes = [] }
+        ];
       c_extends = []; c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; 
       c_reqs = []; c_implements = []; c_where_constraints = []; c_consts = []; 
       c_typeconsts = []; c_vars = []; c_methods = []; c_xhp_children = []; 
@@ -10,13 +15,18 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
-      c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
-      c_module = None });
+      c_user_attributes = [{ ua_name = ([4:11-12], "__SupportDynamicType"); ua_params = [] }]; 
+      c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+      c_emit_id = None; c_internal = false; c_module = None });
   (Class
      { c_span = [6:1-30]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
-       c_name = ([6:7-8], "\\E"); c_tparams = [{ tp_variance = Invariant; tp_name = ([6:9-10], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
+       c_name = ([6:7-8], "\\E");
+       c_tparams =
+       [{ tp_variance = Invariant; tp_name = ([6:9-10], "T"); tp_parameters = []; 
+          tp_constraints = [(Constraint_as, ([6:9-10], (Happly (([6:9-10], "\\HH\\supportdyn"), [([6:9-10], Hmixed)]))))]; 
+          tp_reified = Erased; tp_user_attributes = [] }
+         ];
        c_extends = []; c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; 
        c_reqs = []; c_implements = [([6:23-27], (Happly (([6:23-24], "\\I"), [([6:25-26], (Habstr ("T", [])))])))]; 
        c_where_constraints = []; c_consts = []; c_typeconsts = []; c_vars = []; 
@@ -25,9 +35,9 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
-       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
-       c_module = None });
+       c_user_attributes = [{ ua_name = ([6:7-8], "__SupportDynamicType"); ua_params = [] }]; 
+       c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+       c_emit_id = None; c_internal = false; c_module = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -36,7 +46,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([8:10-11], "\\f");
        fd_fun =
        { f_span = [8:1-10:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((I<T>), (Some ([8:34-38], (Happly (([8:34-35], "\\I"), [([8:36-37], (Habstr ("T", [])))])))));
+         f_readonly_ret = None; f_ret = ((~I<T>), (Some ([8:34-38], (Happly (([8:34-35], "\\I"), [([8:36-37], (Habstr ("T", [])))])))));
          f_params =
          [{ param_annotation = (I<T>); param_type_hint = ((I<T>), (Some ([8:15-19], (Happly (([8:15-16], "\\I"), [([8:17-18], (Habstr ("T", [])))]))))); 
             param_is_variadic = false; param_pos = [8:20-22]; param_name = "$_"; 
@@ -56,10 +66,14 @@
                  (New (((Exception), [9:13-22], (CI ([9:13-22], "\\Exception"))), [], [], None, ((function(string $message = _, int $code = _, ?Exception $previous = _)[]: void)))))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([8:10-11], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None;
-       fd_tparams = [{ tp_variance = Invariant; tp_name = ([8:12-13], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }]; 
+       fd_tparams =
+       [{ tp_variance = Invariant; tp_name = ([8:12-13], "T"); tp_parameters = []; 
+          tp_constraints = [(Constraint_as, ([8:12-13], (Happly (([8:12-13], "\\HH\\supportdyn"), [([8:12-13], Hmixed)]))))]; 
+          tp_reified = Erased; tp_user_attributes = [] }
+         ];
        fd_where_constraints = [] });
   (Fun
      { fd_namespace =
@@ -69,7 +83,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([12:10-11], "\\g");
        fd_fun =
        { f_span = [12:1-14:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((E<T>), (Some ([12:22-26], (Happly (([12:22-23], "\\E"), [([12:24-25], (Habstr ("T", [])))])))));
+         f_readonly_ret = None; f_ret = ((~E<T>), (Some ([12:22-26], (Happly (([12:22-23], "\\E"), [([12:24-25], (Habstr ("T", [])))])))));
          f_params =
          [{ param_annotation = (T); param_type_hint = ((T), (Some ([12:15-16], (Habstr ("T", []))))); 
             param_is_variadic = false; param_pos = [12:17-19]; param_name = "$_"; 
@@ -85,10 +99,14 @@
                  (New (((Exception), [13:13-22], (CI ([13:13-22], "\\Exception"))), [], [], None, ((function(string $message = _, int $code = _, ?Exception $previous = _)[]: void)))))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([12:10-11], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None;
-       fd_tparams = [{ tp_variance = Invariant; tp_name = ([12:12-13], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }]; 
+       fd_tparams =
+       [{ tp_variance = Invariant; tp_name = ([12:12-13], "T"); tp_parameters = [];
+          tp_constraints = [(Constraint_as, ([12:12-13], (Happly (([12:12-13], "\\HH\\supportdyn"), [([12:12-13], Hmixed)]))))]; 
+          tp_reified = Erased; tp_user_attributes = [] }
+         ];
        fd_where_constraints = [] });
   (Fun
      { fd_namespace =
@@ -108,22 +126,22 @@
                  (Binop
                     { bop = (Eq None); lhs = ((void), [17:3-5], (Lplaceholder [17:3-5]));
                       rhs =
-                      ((I<int>), [17:8-21],
+                      ((~I<int>), [17:8-21],
                        (Call
-                          { func = (((function<T>(I<int> $_, I<int> $_): I<int>)), [17:8-9], (Id ([17:8-9], "\\f"))); 
+                          { func = (((function<T>(I<int> $_, I<int> $_): ~I<int>)), [17:8-9], (Id ([17:8-9], "\\f"))); 
                             targs = [((int), ([17:8-9], Hwildcard))];
                             args =
                             [(Pnormal,
-                              ((E<int>), [17:10-14],
+                              ((~E<int>), [17:10-14],
                                (Call
-                                  { func = (((function<T>(int $_): E<int>)), [17:10-11], (Id ([17:10-11], "\\g"))); 
+                                  { func = (((function<T>(int $_): ~E<int>)), [17:10-11], (Id ([17:10-11], "\\g"))); 
                                     targs = [((int), ([17:10-11], Hwildcard))]; 
                                     args = [(Pnormal, ((int), [17:12-13], (Int "1")))]; 
                                     unpacked_arg = None })));
                               (Pnormal,
-                               ((E<int>), [17:16-20],
+                               ((~E<int>), [17:16-20],
                                 (Call
-                                   { func = (((function<T>(int $_): E<int>)), [17:16-17], (Id ([17:16-17], "\\g"))); 
+                                   { func = (((function<T>(int $_): ~E<int>)), [17:16-17], (Id ([17:16-17], "\\g"))); 
                                      targs = [((int), ([17:16-17], Hwildcard))]; 
                                      args = [(Pnormal, ((int), [17:18-19], (Int "2")))]; 
                                      unpacked_arg = None })))
@@ -132,6 +150,76 @@
                       }))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
-       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([16:10-14], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([8:10-11], "\\f");
+       fd_fun =
+       { f_span = [8:1-10:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((dynamic), (Some ([8:34-38], (Happly (([8:34-35], "\\I"), [([8:36-37], (Habstr ("T", [])))])))));
+         f_params =
+         [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([8:15-19], (Happly (([8:15-16], "\\I"), [([8:17-18], (Habstr ("T", [])))]))))); 
+            param_is_variadic = false; param_pos = [8:20-22]; param_name = "$_"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None };
+           { param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([8:24-28], (Happly (([8:24-25], "\\I"), [([8:26-27], (Habstr ("T", [])))]))))); 
+             param_is_variadic = false; param_pos = [8:29-31]; param_name = "$_"; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+             param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([9:3-25],
+             (Throw
+                ((Exception), [9:9-24],
+                 (New (((Exception), [9:13-22], (CI ([9:13-22], "\\Exception"))), [], [], None, ((function(string $message = _, int $code = _, ?Exception $previous = _)[]: void)))))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([8:10-11], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None;
+       fd_tparams =
+       [{ tp_variance = Invariant; tp_name = ([8:12-13], "T"); tp_parameters = []; 
+          tp_constraints = [(Constraint_as, ([8:12-13], (Happly (([8:12-13], "\\HH\\supportdyn"), [([8:12-13], Hmixed)]))))]; 
+          tp_reified = Erased; tp_user_attributes = [] }
+         ];
+       fd_where_constraints = [] });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([12:10-11], "\\g");
+       fd_fun =
+       { f_span = [12:1-14:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((dynamic), (Some ([12:22-26], (Happly (([12:22-23], "\\E"), [([12:24-25], (Habstr ("T", [])))])))));
+         f_params =
+         [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([12:15-16], (Habstr ("T", []))))); 
+            param_is_variadic = false; param_pos = [12:17-19]; param_name = "$_"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([13:3-25],
+             (Throw
+                ((Exception), [13:9-24],
+                 (New (((Exception), [13:13-22], (CI ([13:13-22], "\\Exception"))), [], [], None, ((function(string $message = _, int $code = _, ?Exception $previous = _)[]: void)))))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([12:10-11], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None;
+       fd_tparams =
+       [{ tp_variance = Invariant; tp_name = ([12:12-13], "T"); tp_parameters = [];
+          tp_constraints = [(Constraint_as, ([12:12-13], (Happly (([12:12-13], "\\HH\\supportdyn"), [([12:12-13], Hmixed)]))))]; 
+          tp_reified = Erased; tp_user_attributes = [] }
+         ];
+       fd_where_constraints = [] })

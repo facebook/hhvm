@@ -8,22 +8,26 @@
       { f_span = [3:1-54]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((void), (Some ([3:47-51], (Hprim Tvoid))));
         f_params =
-        [{ param_annotation = ((function(int): num));
+        [{ param_annotation = ((function(int): ~num));
            param_type_hint =
-           (((function(int): num)),
+           (((function(int): ~num)),
             (Some ([3:20-41],
-                   (Hfun
-                      { hf_is_readonly = None; hf_param_tys = [([3:31-34], (Hprim Tint))]; 
-                        hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None })]; 
-                        hf_variadic_ty = None; hf_ctxs = None; hf_return_ty = ([3:37-40], (Hprim Tnum)); 
-                        hf_is_readonly_return = None }))));
+                   (Happly (([3:20-41], "\\HH\\supportdyn"),
+                      [([3:20-41],
+                        (Hfun
+                           { hf_is_readonly = None; hf_param_tys = [([3:31-34], (Hprim Tint))]; 
+                             hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None })]; 
+                             hf_variadic_ty = None; hf_ctxs = None; hf_return_ty = ([3:37-40], (Hlike ([3:37-40], (Hprim Tnum)))); 
+                             hf_is_readonly_return = None }))
+                        ]
+                      )))));
            param_is_variadic = false; param_pos = [3:42-44]; param_name = "$f"; 
            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
            param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-19], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
@@ -41,15 +45,15 @@
              (Expr
                 ((void), [6:3-23],
                  (Call
-                    { func = (((function((function(int): num) $f): void)), [6:3-12], (Id ([6:3-12], "\\takes_fun"))); 
+                    { func = (((function((function(int): ~num) $f): void)), [6:3-12], (Id ([6:3-12], "\\takes_fun"))); 
                       targs = [];
                       args =
                       [(Pnormal,
-                        (((function(int $x): num)), [6:13-22],
+                        (((function(int $x): ~num)), [6:13-22],
                          (Lfun (
                             { f_span = [6:13-22]; f_readonly_this = None; 
                               f_annotation = (); f_readonly_ret = None; 
-                              f_ret = ((num), None);
+                              f_ret = ((~num), None);
                               f_params =
                               [{ param_annotation = (int); param_type_hint = ((int), None); 
                                  param_is_variadic = false; param_pos = [6:13-15]; 
@@ -65,6 +69,38 @@
                       unpacked_arg = None }))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([5:10-14], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-19], "\\takes_fun");
+       fd_fun =
+       { f_span = [3:1-54]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((dynamic), (Some ([3:47-51], (Hprim Tvoid))));
+         f_params =
+         [{ param_annotation = (dynamic);
+            param_type_hint =
+            ((dynamic),
+             (Some ([3:20-41],
+                    (Happly (([3:20-41], "\\HH\\supportdyn"),
+                       [([3:20-41],
+                         (Hfun
+                            { hf_is_readonly = None; hf_param_tys = [([3:31-34], (Hprim Tint))]; 
+                              hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None })]; 
+                              hf_variadic_ty = None; hf_ctxs = None; 
+                              hf_return_ty = ([3:37-40], (Hlike ([3:37-40], (Hprim Tnum)))); 
+                              hf_is_readonly_return = None }))
+                         ]
+                       )))));
+            param_is_variadic = false; param_pos = [3:42-44]; param_name = "$f"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-19], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

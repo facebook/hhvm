@@ -3,12 +3,13 @@
 
 class C {
   <<__Policied("PRIVATE")>>
-  public int $priv = 0;
+  public ~int $priv = 0;
 
   <<__Policied("PUBLIC")>>
-  public int $pub = 0;
+  public ~int $pub = 0;
 }
 
+<<__SupportDynamicType>>
 class A {
   public int $val = 0;
 }
@@ -34,7 +35,7 @@ function write_public(dynamic $d, C $c): void {
 }
 
 <<__InferFlows>>
-function read_dyn(dynamic $d): int {
+function read_dyn(dynamic $d): ~int {
   return $d->val;
 }
 

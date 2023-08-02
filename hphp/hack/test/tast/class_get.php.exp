@@ -26,7 +26,7 @@
              ]
            };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
-         m_ret = ((int), (Some ([15:33-36], (Hprim Tint)))); m_external = false; 
+         m_ret = ((~int), (Some ([15:33-36], (Hprim Tint)))); m_external = false; 
          m_doc_comment = None }
         ];
       c_xhp_children = []; c_xhp_attrs = [];
@@ -34,8 +34,8 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
-      c_enum = None;
+      c_user_attributes = [{ ua_name = ([12:7-16], "__SupportDynamicType"); ua_params = [] }]; 
+      c_file_attributes = []; c_docs_url = None; c_enum = None;
       c_doc_comment =
       (Some ([2:1-10:4],
              "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */"));

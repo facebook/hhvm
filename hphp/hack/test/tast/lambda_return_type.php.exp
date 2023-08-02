@@ -29,8 +29,8 @@
                    [])))))
             ]
           };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-11], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
@@ -40,7 +40,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([8:16-17], "\\g");
        fd_fun =
        { f_span = [8:1-13:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((Awaitable<void>), (Some ([8:21-36], (Happly (([8:21-30], "\\HH\\Awaitable"), [([8:31-35], (Hprim Tvoid))]))))); 
+         f_readonly_ret = None; f_ret = ((Awaitable<~void>), (Some ([8:21-36], (Happly (([8:21-30], "\\HH\\Awaitable"), [([8:31-35], (Hprim Tvoid))]))))); 
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
@@ -64,6 +64,6 @@
                           targs = []; args = []; unpacked_arg = None }))))))
              ]
            };
-         f_fun_kind = FAsync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FAsync; f_user_attributes = [{ ua_name = ([8:16-17], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

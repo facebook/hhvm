@@ -9,9 +9,9 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
-      c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
-      c_module = None });
+      c_user_attributes = [{ ua_name = ([3:7-8], "__SupportDynamicType"); ua_params = [] }]; 
+      c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+      c_emit_id = None; c_internal = false; c_module = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -20,11 +20,11 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([5:10-19], "\\get_A_opt");
        fd_fun =
        { f_span = [5:1-7:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((?A), (Some ([5:23-25], (Hoption ([5:24-25], (Happly (([5:24-25], "\\A"), []))))))); 
+         f_readonly_ret = None; f_ret = ((~?A), (Some ([5:23-25], (Hoption ([5:24-25], (Happly (([5:24-25], "\\A"), []))))))); 
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body = { fb_ast = [([6:3-18], (Return (Some ((A), [6:10-17], (New (((A), [6:14-15], (CI ([6:14-15], "\\A"))), [], [], None, ((function(): void))))))))] }; 
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([5:10-19], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
@@ -57,8 +57,8 @@
                  )));
              ([11:3-13:4], (AssertEnv (Refinement, {$x})))]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([9:10-16], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
@@ -88,6 +88,6 @@
                 [([17:3-18:4], (AssertEnv (Join, {$#capability $#local_capability $x}))); ([17:3-18:4], (AssertEnv (Refinement, {$x})))])));
              ([17:3-18:4], (AssertEnv (Refinement, {$x})))]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([16:10-14], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

@@ -2,7 +2,11 @@
     { c_span = [12:1-40]; c_annotation = (); c_mode = Mstrict; c_final = false; 
       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
       c_name = ([12:7-19], "\\SingleConstr");
-      c_tparams = [{ tp_variance = Invariant; tp_name = ([12:21-22], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }]; 
+      c_tparams =
+      [{ tp_variance = Invariant; tp_name = ([12:21-22], "T"); tp_parameters = [];
+         tp_constraints = [(Constraint_as, ([12:21-22], (Happly (([12:21-22], "\\HH\\supportdyn"), [([12:21-22], Hmixed)]))))]; 
+         tp_reified = Erased; tp_user_attributes = [] }
+        ];
       c_extends = []; c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; 
       c_reqs = []; c_implements = []; c_where_constraints = [(([12:30-31], (Habstr ("T", []))), Constraint_eq, ([12:34-37], (Hprim Tint)))]; 
       c_consts = []; c_typeconsts = []; c_vars = []; c_methods = []; 
@@ -11,8 +15,8 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
-      c_enum = None;
+      c_user_attributes = [{ ua_name = ([12:7-19], "__SupportDynamicType"); ua_params = [] }]; 
+      c_file_attributes = []; c_docs_url = None; c_enum = None;
       c_doc_comment =
       (Some ([2:1-10:4],
              "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */"));
@@ -21,7 +25,11 @@
      { c_span = [14:1-50]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
        c_name = ([14:7-18], "\\ListConstrs");
-       c_tparams = [{ tp_variance = Invariant; tp_name = ([14:20-21], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }]; 
+       c_tparams =
+       [{ tp_variance = Invariant; tp_name = ([14:20-21], "T"); tp_parameters = [];
+          tp_constraints = [(Constraint_as, ([14:20-21], (Happly (([14:20-21], "\\HH\\supportdyn"), [([14:20-21], Hmixed)]))))]; 
+          tp_reified = Erased; tp_user_attributes = [] }
+         ];
        c_extends = []; c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; 
        c_reqs = []; c_implements = [];
        c_where_constraints = [(([14:29-30], (Habstr ("T", []))), Constraint_eq, ([14:33-36], (Hprim Tint))); (([14:37-38], (Habstr ("T", []))), Constraint_eq, ([14:41-47], (Hprim Tstring)))];
@@ -31,16 +39,21 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
-       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
-       c_module = None });
+       c_user_attributes = [{ ua_name = ([14:7-18], "__SupportDynamicType"); ua_params = [] }]; 
+       c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+       c_emit_id = None; c_internal = false; c_module = None });
   (Class
      { c_span = [16:1-66]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
        c_name = ([16:7-19], "\\MultiConstrs");
        c_tparams =
-       [{ tp_variance = Invariant; tp_name = ([16:21-22], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] };
-         { tp_variance = Invariant; tp_name = ([16:24-26], "Tu"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
+       [{ tp_variance = Invariant; tp_name = ([16:21-22], "T"); tp_parameters = [];
+          tp_constraints = [(Constraint_as, ([16:21-22], (Happly (([16:21-22], "\\HH\\supportdyn"), [([16:21-22], Hmixed)]))))]; 
+          tp_reified = Erased; tp_user_attributes = [] };
+         { tp_variance = Invariant; tp_name = ([16:24-26], "Tu"); tp_parameters = [];
+           tp_constraints = [(Constraint_as, ([16:24-26], (Happly (([16:24-26], "\\HH\\supportdyn"), [([16:24-26], Hmixed)]))))]; 
+           tp_reified = Erased; tp_user_attributes = [] }
+         ];
        c_extends = []; c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; 
        c_reqs = []; c_implements = [];
        c_where_constraints =
@@ -53,14 +66,18 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
-       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
-       c_module = None });
+       c_user_attributes = [{ ua_name = ([16:7-19], "__SupportDynamicType"); ua_params = [] }]; 
+       c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+       c_emit_id = None; c_internal = false; c_module = None });
   (Class
      { c_span = [18:1-37]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
        c_name = ([18:7-15], "\\AsConstr");
-       c_tparams = [{ tp_variance = Invariant; tp_name = ([18:17-18], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }]; 
+       c_tparams =
+       [{ tp_variance = Invariant; tp_name = ([18:17-18], "T"); tp_parameters = [];
+          tp_constraints = [(Constraint_as, ([18:17-18], (Happly (([18:17-18], "\\HH\\supportdyn"), [([18:17-18], Hmixed)]))))]; 
+          tp_reified = Erased; tp_user_attributes = [] }
+         ];
        c_extends = []; c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; 
        c_reqs = []; c_implements = []; c_where_constraints = [(([18:26-27], (Habstr ("T", []))), Constraint_as, ([18:31-34], (Hprim Tint)))]; 
        c_consts = []; c_typeconsts = []; c_vars = []; c_methods = []; 
@@ -69,14 +86,18 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
-       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
-       c_module = None });
+       c_user_attributes = [{ ua_name = ([18:7-15], "__SupportDynamicType"); ua_params = [] }]; 
+       c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+       c_emit_id = None; c_internal = false; c_module = None });
   (Class
      { c_span = [20:1-43]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
        c_name = ([20:7-18], "\\SuperConstr");
-       c_tparams = [{ tp_variance = Invariant; tp_name = ([20:20-21], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }]; 
+       c_tparams =
+       [{ tp_variance = Invariant; tp_name = ([20:20-21], "T"); tp_parameters = [];
+          tp_constraints = [(Constraint_as, ([20:20-21], (Happly (([20:20-21], "\\HH\\supportdyn"), [([20:20-21], Hmixed)]))))]; 
+          tp_reified = Erased; tp_user_attributes = [] }
+         ];
        c_extends = []; c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; 
        c_reqs = []; c_implements = []; c_where_constraints = [(([20:29-30], (Habstr ("T", []))), Constraint_super, ([20:37-40], (Hprim Tint)))]; 
        c_consts = []; c_typeconsts = []; c_vars = []; c_methods = []; 
@@ -85,6 +106,6 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
-       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
-       c_module = None })
+       c_user_attributes = [{ ua_name = ([20:7-18], "__SupportDynamicType"); ua_params = [] }]; 
+       c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+       c_emit_id = None; c_internal = false; c_module = None })

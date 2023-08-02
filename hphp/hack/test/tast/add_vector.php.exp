@@ -2,13 +2,17 @@
     { c_span = [12:1-26:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
       c_name = ([12:7-20], "\\MyPhonyVector");
-      c_tparams = [{ tp_variance = Invariant; tp_name = ([12:21-22], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }]; 
+      c_tparams =
+      [{ tp_variance = Invariant; tp_name = ([12:21-22], "T"); tp_parameters = [];
+         tp_constraints = [(Constraint_as, ([12:21-22], (Happly (([12:21-22], "\\HH\\supportdyn"), [([12:21-22], Hmixed)]))))]; 
+         tp_reified = Erased; tp_user_attributes = [] }
+        ];
       c_extends = []; c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; 
       c_reqs = []; c_implements = []; c_where_constraints = []; c_consts = []; 
       c_typeconsts = [];
       c_vars =
       [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false; cv_readonly = false; 
-         cv_visibility = Private; cv_type = ((Vector<T>), (Some ([13:11-20], (Happly (([13:11-17], "\\HH\\Vector"), [([13:18-19], (Habstr ("T", [])))]))))); 
+         cv_visibility = Private; cv_type = ((~Vector<T>), (Some ([13:11-20], (Happly (([13:11-17], "\\HH\\Vector"), [([13:18-19], (Habstr ("T", [])))]))))); 
          cv_id = ([13:21-23], "x"); cv_expr = None; cv_user_attributes = []; 
          cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
          cv_span = [13:21-23] }
@@ -24,7 +28,7 @@
              (Expr
                 ((Vector<T>), [16:5-25],
                  (Binop
-                    { bop = (Eq None); lhs = ((Vector<T>), [16:5-13], (Obj_get (((this), [16:5-10], This), ((Vector<T>), [16:12-13], (Id ([16:12-13], "x"))), OG_nullthrows, Is_prop)));
+                    { bop = (Eq None); lhs = ((~Vector<T>), [16:5-13], (Obj_get (((this), [16:5-10], This), ((~Vector<T>), [16:12-13], (Id ([16:12-13], "x"))), OG_nullthrows, Is_prop)));
                       rhs = ((Vector<T>), [16:16-25], (ValCollection (([16:16-22], Vector), None, []))) }))))
              ]
            };
@@ -49,7 +53,8 @@
                   (Binop
                      { bop = (Eq None);
                        lhs =
-                       ((T), [20:5-15], (Array_get (((Vector<T>), [20:5-13], (Obj_get (((this), [20:5-10], This), ((Vector<T>), [20:12-13], (Id ([20:12-13], "x"))), OG_nullthrows, Is_prop))), None)));
+                       ((T), [20:5-15],
+                        (Array_get (((~Vector<T>), [20:5-13], (Obj_get (((this), [20:5-10], This), ((~Vector<T>), [20:12-13], (Id ([20:12-13], "x"))), OG_nullthrows, Is_prop))), None)));
                        rhs = ((T), [20:18-20], (Lvar ([20:18-20], $x))) }))))
               ]
             };
@@ -70,13 +75,13 @@
           { fb_ast =
             [([24:5-24],
               (Return
-                 (Some ((T), [24:12-23],
-                        (Array_get (((Vector<T>), [24:12-20], (Obj_get (((this), [24:12-17], This), ((Vector<T>), [24:19-20], (Id ([24:19-20], "x"))), OG_nullthrows, Is_prop))),
+                 (Some ((~T), [24:12-23],
+                        (Array_get (((~Vector<T>), [24:12-20], (Obj_get (((this), [24:12-17], This), ((~Vector<T>), [24:19-20], (Id ([24:19-20], "x"))), OG_nullthrows, Is_prop))),
                            (Some ((int), [24:21-22], (Int "0")))))))))
               ]
             };
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
-          m_ret = ((T), (Some ([23:32-33], (Habstr ("T", []))))); m_external = false; 
+          m_ret = ((~T), (Some ([23:32-33], (Habstr ("T", []))))); m_external = false; 
           m_doc_comment = None }
         ];
       c_xhp_children = []; c_xhp_attrs = [];
@@ -84,8 +89,8 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
-      c_enum = None;
+      c_user_attributes = [{ ua_name = ([12:7-20], "__SupportDynamicType"); ua_params = [] }]; 
+      c_file_attributes = []; c_docs_url = None; c_enum = None;
       c_doc_comment =
       (Some ([2:1-10:4],
              "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */"));
@@ -101,9 +106,9 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
-       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
-       c_module = None });
+       c_user_attributes = [{ ua_name = ([28:7-8], "__SupportDynamicType"); ua_params = [] }]; 
+       c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+       c_emit_id = None; c_internal = false; c_module = None });
   (Class
      { c_span = [29:1-21]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
@@ -115,9 +120,9 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
-       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
-       c_module = None });
+       c_user_attributes = [{ ua_name = ([29:7-8], "__SupportDynamicType"); ua_params = [] }]; 
+       c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+       c_emit_id = None; c_internal = false; c_module = None });
   (Class
      { c_span = [30:1-21]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
@@ -129,9 +134,9 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
-       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
-       c_module = None });
+       c_user_attributes = [{ ua_name = ([30:7-8], "__SupportDynamicType"); ua_params = [] }]; 
+       c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+       c_emit_id = None; c_internal = false; c_module = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -186,6 +191,121 @@
                        unpacked_arg = None }))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([32:10-14], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
+  (Class
+     { c_span = [12:1-26:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
+       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
+       c_name = ([12:7-20], "\\MyPhonyVector");
+       c_tparams =
+       [{ tp_variance = Invariant; tp_name = ([12:21-22], "T"); tp_parameters = [];
+          tp_constraints = [(Constraint_as, ([12:21-22], (Happly (([12:21-22], "\\HH\\supportdyn"), [([12:21-22], Hmixed)]))))]; 
+          tp_reified = Erased; tp_user_attributes = [] }
+         ];
+       c_extends = []; c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; 
+       c_reqs = []; c_implements = []; c_where_constraints = []; c_consts = []; 
+       c_typeconsts = [];
+       c_vars =
+       [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
+          cv_readonly = false; cv_visibility = Private; cv_type = ((~Vector<T>), (Some ([13:11-20], (Happly (([13:11-17], "\\HH\\Vector"), [([13:18-19], (Habstr ("T", [])))])))));
+          cv_id = ([13:21-23], "x"); cv_expr = None; cv_user_attributes = []; 
+          cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
+          cv_span = [13:21-23] }
+         ];
+       c_methods =
+       [{ m_span = [19:3-21:4]; m_annotation = (); m_final = false; m_abstract = false; 
+          m_static = false; m_readonly_this = false; m_visibility = Public; 
+          m_name = ([19:19-22], "add"); m_tparams = []; m_where_constraints = [];
+          m_params =
+          [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([19:23-24], (Habstr ("T", []))))); 
+             param_is_variadic = false; param_pos = [19:25-27]; param_name = "$x"; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+             param_user_attributes = []; param_visibility = None }
+            ];
+          m_ctxs = None; m_unsafe_ctxs = None;
+          m_body =
+          { fb_ast =
+            [([20:5-21],
+              (Expr
+                 ((dynamic), [20:5-20],
+                  (Binop
+                     { bop = (Eq None);
+                       lhs =
+                       ((dynamic), [20:5-15],
+                        (Array_get (((~Vector<T>), [20:5-13], (Obj_get ((((this & dynamic)), [20:5-10], This), ((~Vector<T>), [20:12-13], (Id ([20:12-13], "x"))), OG_nullthrows, Is_prop))), None)));
+                       rhs = ((dynamic), [20:18-20], (Lvar ([20:18-20], $x))) }))))
+              ]
+            };
+          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+          m_ret = ((dynamic), (Some ([19:30-34], (Hprim Tvoid)))); m_external = false; 
+          m_doc_comment = None }
+         ];
+       c_xhp_children = []; c_xhp_attrs = [];
+       c_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       c_user_attributes = [{ ua_name = ([12:7-20], "__SupportDynamicType"); ua_params = [] }]; 
+       c_file_attributes = []; c_docs_url = None; c_enum = None;
+       c_doc_comment =
+       (Some ([2:1-10:4],
+              "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */"));
+       c_emit_id = None; c_internal = false; c_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([32:10-14], "\\test");
+       fd_fun =
+       { f_span = [32:1-37:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((dynamic), (Some ([32:37-41], (Hprim Tvoid))));
+         f_params =
+         [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([32:15-31], (Happly (([32:15-28], "\\MyPhonyVector"), [([32:29-30], (Happly (([32:29-30], "\\X"), [])))])))));
+            param_is_variadic = false; param_pos = [32:32-34]; param_name = "$v"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([33:3-28],
+             (Expr
+                ((MyPhonyVector<#3>), [33:3-27],
+                 (Binop
+                    { bop = (Eq None); lhs = ((MyPhonyVector<#3>), [33:3-5], (Lvar ([33:3-5], $x)));
+                      rhs =
+                      ((MyPhonyVector<#3>), [33:8-27],
+                       (New (((MyPhonyVector<#3>), [33:12-25], (CI ([33:12-25], "\\MyPhonyVector"))), [((#3), ([33:12-25], Hwildcard))], [], None, ((function(): void)))))
+                      }))));
+             ([34:3-20],
+              (Expr
+                 ((void), [34:3-19],
+                  (Call
+                     { func =
+                       (((function(#3 $x): void)), [34:3-10],
+                        (Obj_get (((MyPhonyVector<#3>), [34:3-5], (Lvar ([34:3-5], $x))), (((function(#3 $x): void)), [34:7-10], (Id ([34:7-10], "add"))), OG_nullthrows, Is_method)));
+                       targs = []; args = [(Pnormal, ((B), [34:11-18], (New (((B), [34:15-16], (CI ([34:15-16], "\\B"))), [], [], None, ((function(): void))))))]; 
+                       unpacked_arg = None }))));
+             ([35:3-20],
+              (Expr
+                 ((void), [35:3-19],
+                  (Call
+                     { func =
+                       (((function(#3 $x): void)), [35:3-10],
+                        (Obj_get (((MyPhonyVector<#3>), [35:3-5], (Lvar ([35:3-5], $x))), (((function(#3 $x): void)), [35:7-10], (Id ([35:7-10], "add"))), OG_nullthrows, Is_method)));
+                       targs = []; args = [(Pnormal, ((A), [35:11-18], (New (((A), [35:15-16], (CI ([35:15-16], "\\A"))), [], [], None, ((function(): void))))))]; 
+                       unpacked_arg = None }))));
+             ([36:3-12],
+              (Expr
+                 ((void), [36:3-11],
+                  (Call
+                     { func = (((function(MyPhonyVector<X> $v): void)), [36:3-7], (Id ([36:3-7], "\\test"))); 
+                       targs = []; args = [(Pnormal, ((MyPhonyVector<#3>), [36:8-10], (Lvar ([36:8-10], $x))))]; 
+                       unpacked_arg = None }))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([32:10-14], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

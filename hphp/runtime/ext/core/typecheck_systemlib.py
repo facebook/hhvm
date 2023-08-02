@@ -26,6 +26,7 @@ FIXME_CODES: List[int] = [
 FLAGS: List[str] = [
     "--no-builtins",
     "--is-systemlib",
+    # "--everything-sdt",
     "--config",
     "enable_no_auto_dynamic=true",
     "--enable-sound-dynamic-type",

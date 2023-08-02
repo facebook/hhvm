@@ -10,7 +10,7 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = (Some "A"); 
         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = [];
+      c_user_attributes = [{ ua_name = ([7:7-12], "__SupportDynamicType"); ua_params = [] }];
       c_file_attributes =
       [{ fa_user_attributes = [{ ua_name = ([5:9-14], "\\A\\AttrA"); ua_params = [] }];
          fa_namespace =
@@ -39,7 +39,7 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = (Some "B"); 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       c_user_attributes = [];
+       c_user_attributes = [{ ua_name = ([13:7-12], "__SupportDynamicType"); ua_params = [] }];
        c_file_attributes =
        [{ fa_user_attributes = [{ ua_name = ([5:9-14], "\\A\\AttrA"); ua_params = [] }];
           fa_namespace =

@@ -15,6 +15,7 @@
    --in-extension
    .php
    --flags
+   --like-type-hints
    --union-intersection-type-hints
    --ifc
    analyse

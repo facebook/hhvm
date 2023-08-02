@@ -21,13 +21,15 @@ function ok(A $c): void {
   $c->public = 0;
 }
 
+<<__SupportDynamicType>>
 class D {
   public bool $data = true;
 }
 
+<<__SupportDynamicType>>
 class C {
   <<__Policied("B")>> public bool $b = false;
-  <<__Policied("D")>> public ?D $d = null;
+  <<__Policied("D")>> public ~?D $d = null;
 }
 
 <<__InferFlows>>

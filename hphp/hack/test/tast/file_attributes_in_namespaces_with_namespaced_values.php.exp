@@ -45,7 +45,7 @@ Errors:
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = (Some "A"); 
         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = [];
+      c_user_attributes = [{ ua_name = ([4:9-30], "__SupportDynamicType"); ua_params = [] }];
       c_file_attributes =
       [{ fa_user_attributes =
          [{ ua_name = ([12:11-32], "\\A\\MyStringFileAttribute");
@@ -76,7 +76,7 @@ Errors:
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = (Some "A"); 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       c_user_attributes = [];
+       c_user_attributes = [{ ua_name = ([8:9-16], "__SupportDynamicType"); ua_params = [] }];
        c_file_attributes =
        [{ fa_user_attributes =
           [{ ua_name = ([12:11-32], "\\A\\MyStringFileAttribute");
@@ -101,7 +101,7 @@ Errors:
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = (Some "B"); 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       c_user_attributes = [];
+       c_user_attributes = [{ ua_name = ([16:9-21], "__SupportDynamicType"); ua_params = [] }];
        c_file_attributes =
        [{ fa_user_attributes =
           [{ ua_name = ([12:11-32], "\\A\\MyStringFileAttribute");

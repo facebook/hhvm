@@ -10,10 +10,10 @@ Errors:
       fd_fun =
       { f_span = [4:1-6:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None;
-        f_ret = ((Awaitable<shape()>), (Some ([4:35-53], (Happly (([4:35-44], "\\HH\\Awaitable"), [([4:45-52], (Hshape { nsi_allows_unknown_fields = false; nsi_field_map = [] }))])))));
+        f_ret = ((Awaitable<~shape()>), (Some ([4:35-53], (Happly (([4:35-44], "\\HH\\Awaitable"), [([4:45-52], (Hshape { nsi_allows_unknown_fields = false; nsi_field_map = [] }))])))));
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([5:3-18], (Return (Some ((shape()), [5:10-17], (Shape [])))))] }; 
-        f_fun_kind = FAsync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
+        f_fun_kind = FAsync; f_user_attributes = [{ ua_name = ([4:16-31], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
@@ -23,7 +23,7 @@ Errors:
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([8:16-20], "\\test");
        fd_fun =
        { f_span = [8:1-16:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((Awaitable<void>), (Some ([8:24-39], (Happly (([8:24-33], "\\HH\\Awaitable"), [([8:34-38], (Hprim Tvoid))]))))); 
+         f_readonly_ret = None; f_ret = ((Awaitable<~void>), (Some ([8:24-39], (Happly (([8:24-33], "\\HH\\Awaitable"), [([8:34-38], (Hprim Tvoid))]))))); 
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
@@ -37,29 +37,29 @@ Errors:
                 [(([11:12-21], "\\Exception"), ([11:22-24], $_), [])],
                 [([13:5-34],
                   (Expr
-                     ((shape()), [13:5-33],
+                     ((~shape()), [13:5-33],
                       (Binop
-                         { bop = (Eq None); lhs = ((shape()), [13:5-7], (Lvar ([13:5-7], $s)));
+                         { bop = (Eq None); lhs = ((~shape()), [13:5-7], (Lvar ([13:5-7], $s)));
                            rhs =
-                           ((shape()), [13:10-33],
+                           ((~shape()), [13:10-33],
                             (Await
-                               ((Awaitable<shape()>), [13:16-33],
-                                (Call { func = (((function(): Awaitable<shape()>)), [13:16-31], (Id ([13:16-31], "\\gen_empty_shape"))); targs = []; args = []; unpacked_arg = None }))))
+                               ((Awaitable<~shape()>), [13:16-33],
+                                (Call { func = (((function(): Awaitable<~shape()>)), [13:16-31], (Id ([13:16-31], "\\gen_empty_shape"))); targs = []; args = []; unpacked_arg = None }))))
                            }))));
                   ([14:5-28],
                    (Expr
-                      ((null), [14:5-27],
+                      ((~null), [14:5-27],
                        (Call
                           { func =
                             (((function<Tv>(?shape(?'foo' => nothing, ...) $shape, arraykey $index)[]: null)), [14:5-16],
                              (Class_const (((Shapes), [14:5-11], (CI ([14:5-11], "\\HH\\Shapes"))), ([14:13-16], "idx"))));
                             targs = [((nothing), ([14:13-16], Hwildcard))]; 
-                            args = [(Pnormal, ((shape()), [14:17-19], (Lvar ([14:17-19], $s)))); (Pnormal, ((string), [14:21-26], (String "foo")))]; 
+                            args = [(Pnormal, ((~shape()), [14:17-19], (Lvar ([14:17-19], $s)))); (Pnormal, ((string), [14:21-26], (String "foo")))]; 
                             unpacked_arg = None }))))
                   ]
                 )))
              ]
            };
-         f_fun_kind = FAsync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FAsync; f_user_attributes = [{ ua_name = ([8:16-20], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

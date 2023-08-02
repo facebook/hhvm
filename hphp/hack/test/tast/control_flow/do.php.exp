@@ -27,6 +27,6 @@
                ((bool), [7:12-14], (Lvar ([7:12-14], $b))))));
             ([8:3-6], (Expr ((string), [8:3-5], (Lvar ([8:3-5], $a)))))]
           };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-11], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

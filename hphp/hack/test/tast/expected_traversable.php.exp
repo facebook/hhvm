@@ -6,10 +6,11 @@
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-21], "\\traversable");
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((Traversable<mixed>), (Some ([3:25-43], (Happly (([3:25-36], "\\HH\\Traversable"), [([3:37-42], Hmixed)]))))); 
+        f_readonly_ret = None;
+        f_ret = ((~Traversable<mixed>), (Some ([3:25-43], (Happly (([3:25-36], "\\HH\\Traversable"), [([3:37-42], (Happly (([3:37-42], "\\HH\\supportdyn"), [([3:37-42], Hmixed)])))])))));
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-19], (Return (Some ((keyset<arraykey>), [4:10-18], (ValCollection (([4:10-16], Keyset), None, []))))))] };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-21], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
@@ -19,9 +20,14 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([7:10-27], "\\keyed_traversable");
        fd_fun =
        { f_span = [7:1-9:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((KeyedTraversable<mixed, mixed>), (Some ([7:31-61], (Happly (([7:31-47], "\\HH\\KeyedTraversable"), [([7:48-53], Hmixed); ([7:55-60], Hmixed)])))));
+         f_readonly_ret = None;
+         f_ret =
+         ((~KeyedTraversable<mixed, mixed>),
+          (Some ([7:31-61],
+                 (Happly (([7:31-47], "\\HH\\KeyedTraversable"),
+                    [([7:48-53], (Happly (([7:48-53], "\\HH\\supportdyn"), [([7:48-53], Hmixed)]))); ([7:55-60], (Happly (([7:55-60], "\\HH\\supportdyn"), [([7:55-60], Hmixed)])))])))));
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body = { fb_ast = [([8:3-17], (Return (Some ((dict<arraykey, mixed>), [8:10-16], (KeyValCollection (([8:10-14], Dict), None, []))))))] }; 
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([7:10-27], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

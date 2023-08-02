@@ -20,6 +20,6 @@ Errors:
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast = [([6:3-20], (Expr ((void), [6:3-19], (Binop { bop = (Eq None); lhs = ((void), [6:3-5], (Lplaceholder [6:3-5])); rhs = ((bool), [6:16-19], (Package ([6:16-19], "foo"))) }))))] };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([5:10-14], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

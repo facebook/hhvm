@@ -25,7 +25,9 @@
    %{project_root}/hack/test/verify.py
    %{project_root}/hack/test/tast
    --program
-   %{exe:../../src/hh_single_type_check.exe})))
+   %{exe:../../src/hh_single_type_check.exe}
+   --flags
+   --everything-sdt)))
 
 (rule
  (alias tast_ordered_solving)
@@ -56,7 +58,8 @@
    --program
    %{exe:../../src/hh_single_type_check.exe}
    --flags
-   --ordered-solving)))
+   --ordered-solving
+   --everything-sdt)))
 
 (alias
  (name runtest)

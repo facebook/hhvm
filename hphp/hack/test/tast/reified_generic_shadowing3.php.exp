@@ -17,8 +17,12 @@ Errors:
           [([5:3-11], (Expr ((T), [5:3-10], (New (((T), [5:7-8], (CI ([5:7-8], "T"))), [], [], None, (nothing))))));
             ([6:3-11], (Expr ((nothing), [6:3-10], (New (((nothing), [6:7-8], (CI ([6:7-8], "\\U"))), [], [], None, (nothing))))))]
           };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([4:10-11], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None;
-      fd_tparams = [{ tp_variance = Invariant; tp_name = ([4:12-13], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }]; 
+      fd_tparams =
+      [{ tp_variance = Invariant; tp_name = ([4:12-13], "T"); tp_parameters = []; 
+         tp_constraints = [(Constraint_as, ([4:12-13], (Happly (([4:12-13], "\\HH\\supportdyn"), [([4:12-13], Hmixed)]))))]; 
+         tp_reified = Erased; tp_user_attributes = [] }
+        ];
       fd_where_constraints = [] })

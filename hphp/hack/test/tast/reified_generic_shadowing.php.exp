@@ -12,9 +12,9 @@ Errors:
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
-      c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
-      c_module = None });
+      c_user_attributes = [{ ua_name = ([4:7-11], "__SupportDynamicType"); ua_params = [] }]; 
+      c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+      c_emit_id = None; c_internal = false; c_module = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -26,10 +26,14 @@ Errors:
          f_readonly_ret = None; f_ret = ((void), (Some ([6:21-25], (Hprim Tvoid)))); 
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body = { fb_ast = [([7:3-14], (Expr ((Tcat), [7:3-13], (New (((Tcat), [7:7-11], (CI ([7:7-11], "Tcat"))), [], [], None, (nothing))))))] }; 
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([6:10-11], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None;
-       fd_tparams = [{ tp_variance = Invariant; tp_name = ([6:12-16], "Tcat"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }]; 
+       fd_tparams =
+       [{ tp_variance = Invariant; tp_name = ([6:12-16], "Tcat"); tp_parameters = [];
+          tp_constraints = [(Constraint_as, ([6:12-16], (Happly (([6:12-16], "\\HH\\supportdyn"), [([6:12-16], Hmixed)]))))]; 
+          tp_reified = Erased; tp_user_attributes = [] }
+         ];
        fd_where_constraints = [] });
   (Fun
      { fd_namespace =
@@ -42,6 +46,6 @@ Errors:
          f_readonly_ret = None; f_ret = ((void), (Some ([10:15-19], (Hprim Tvoid)))); 
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body = { fb_ast = [([11:3-14], (Expr ((Tcat), [11:3-13], (New (((Tcat), [11:7-11], (CI ([11:7-11], "\\Tcat"))), [], [], None, ((function(): void)))))))] }; 
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([10:10-11], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

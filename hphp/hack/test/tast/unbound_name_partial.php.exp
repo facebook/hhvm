@@ -10,8 +10,8 @@ Errors:
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-14], "\\test");
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((mixed), (Some ([3:18-23], Hmixed))); 
+        f_readonly_ret = None; f_ret = ((~mixed), (Some ([3:18-23], (Happly (([3:18-23], "\\HH\\supportdyn"), [([3:18-23], Hmixed)]))))); 
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-37], (Expr ((nothing), [4:3-36], (Method_caller (([4:15-28], "\\NoSuchClass"), ([4:30-35], "foo"))))))] };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-14], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

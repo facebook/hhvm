@@ -24,9 +24,9 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
-      c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
-      c_module = None });
+      c_user_attributes = [{ ua_name = ([3:7-10], "__SupportDynamicType"); ua_params = [] }]; 
+      c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+      c_emit_id = None; c_internal = false; c_module = None });
   (Class
      { c_span = [4:1-46]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
@@ -39,9 +39,9 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
-       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
-       c_module = None });
+       c_user_attributes = [{ ua_name = ([4:7-10], "__SupportDynamicType"); ua_params = [] }]; 
+       c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+       c_emit_id = None; c_internal = false; c_module = None });
   (Class
      { c_span = [5:1-58]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
@@ -54,9 +54,9 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
-       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
-       c_module = None });
+       c_user_attributes = [{ ua_name = ([5:7-22], "__SupportDynamicType"); ua_params = [] }]; 
+       c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+       c_emit_id = None; c_internal = false; c_module = None });
   (Typedef
      { t_annotation = (); t_name = ([8:6-8], "\\T1"); t_tparams = []; 
        t_as_constraint = None; t_super_constraint = None; t_kind = ([8:11-14], (Hprim Tint));
@@ -82,7 +82,11 @@
        t_module = None; t_docs_url = None; t_doc_comment = None });
   (Typedef
      { t_annotation = (); t_name = ([13:6-23], "\\Serialized_contra");
-       t_tparams = [{ tp_variance = Contravariant; tp_name = ([13:25-26], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }]; 
+       t_tparams =
+       [{ tp_variance = Contravariant; tp_name = ([13:25-26], "T"); tp_parameters = [];
+          tp_constraints = [(Constraint_as, ([13:25-26], (Happly (([13:25-26], "\\HH\\supportdyn"), [([13:25-26], Hmixed)]))))]; 
+          tp_reified = Erased; tp_user_attributes = [] }
+         ];
        t_as_constraint = None; t_super_constraint = None; t_kind = ([13:30-36], (Hprim Tstring)); 
        t_user_attributes = []; t_file_attributes = []; t_mode = Mstrict; 
        t_vis = Transparent;
@@ -94,7 +98,11 @@
        t_module = None; t_docs_url = None; t_doc_comment = None });
   (Typedef
      { t_annotation = (); t_name = ([14:6-19], "\\Serialized_co");
-       t_tparams = [{ tp_variance = Covariant; tp_name = ([14:21-22], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }]; 
+       t_tparams =
+       [{ tp_variance = Covariant; tp_name = ([14:21-22], "T"); tp_parameters = [];
+          tp_constraints = [(Constraint_as, ([14:21-22], (Happly (([14:21-22], "\\HH\\supportdyn"), [([14:21-22], Hmixed)]))))]; 
+          tp_reified = Erased; tp_user_attributes = [] }
+         ];
        t_as_constraint = None; t_super_constraint = None; t_kind = ([14:26-32], (Hprim Tstring)); 
        t_user_attributes = []; t_file_attributes = []; t_mode = Mstrict; 
        t_vis = Transparent;

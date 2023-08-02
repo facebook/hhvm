@@ -29,23 +29,23 @@ Errors:
                      rhs = ((HH\Lib\Regex\Pattern<shape(0 => string)>), [4:8-19], (PrefixedString ("re", ((string), [4:10-19], (String "/Hello/"))))) }))));
             ([7:3-20],
              (Expr
-                ((shape(0 => string)), [7:3-19],
+                ((~shape(0 => string)), [7:3-19],
                  (Binop
-                    { bop = (Eq None); lhs = ((shape(0 => string)), [7:3-5], (Lvar ([7:3-5], $y)));
+                    { bop = (Eq None); lhs = ((~shape(0 => string)), [7:3-5], (Lvar ([7:3-5], $y)));
                       rhs =
-                      ((shape(0 => string)), [7:8-19],
+                      ((~shape(0 => string)), [7:8-19],
                        (Call
-                          { func = (((function<T as shape(...)>(HH\Lib\Regex\Pattern<shape(0 => string)> $pattern): shape(0 => string))), [7:8-15], (Id ([7:8-15], "\\goodbye")));
+                          { func = (((function<T as shape(...)>(HH\Lib\Regex\Pattern<shape(0 => string)> $pattern): ~shape(0 => string))), [7:8-15], (Id ([7:8-15], "\\goodbye")));
                             targs = [((shape(0 => string)), ([7:8-15], Hwildcard))]; 
                             args = [(Pnormal, ((HH\Lib\Regex\Pattern<shape(0 => string)>), [7:16-18], (Lvar ([7:16-18], $x))))]; 
                             unpacked_arg = None }))
                       }))));
             ([12:3-16],
              (Expr
-                ((string), [12:3-15],
+                ((~string), [12:3-15],
                  (Binop
-                    { bop = (Eq None); lhs = ((string), [12:3-7], (Lvar ([12:3-7], $y_0)));
-                      rhs = ((string), [12:10-15], (Array_get (((shape(0 => string)), [12:10-12], (Lvar ([12:10-12], $y))), (Some ((int), [12:13-14], (Int "0")))))) }))));
+                    { bop = (Eq None); lhs = ((~string), [12:3-7], (Lvar ([12:3-7], $y_0)));
+                      rhs = ((~string), [12:10-15], (Array_get (((~shape(0 => string)), [12:10-12], (Lvar ([12:10-12], $y))), (Some ((int), [12:13-14], (Int "0")))))) }))));
             ([15:3-22],
              (Expr
                 ((string), [15:3-21],
@@ -57,8 +57,8 @@ Errors:
                       }))))
             ]
           };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-11], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
@@ -68,7 +68,7 @@ Errors:
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([18:10-17], "\\goodbye");
        fd_fun =
        { f_span = [18:1-20:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((T), (Some ([18:78-79], (Habstr ("T", [])))));
+         f_readonly_ret = None; f_ret = ((~T), (Some ([18:78-79], (Habstr ("T", [])))));
          f_params =
          [{ param_annotation = (HH\Lib\Regex\Pattern<T>);
             param_type_hint = ((HH\Lib\Regex\Pattern<T>), (Some ([18:43-66], (Happly (([18:43-63], "\\HH\\Lib\\Regex\\Pattern"), [([18:64-65], (Habstr ("T", [])))]))))); 
@@ -85,12 +85,13 @@ Errors:
                  (New (((Exception), [19:13-22], (CI ([19:13-22], "\\Exception"))), [], [], None, ((function(string $message = _, int $code = _, ?Exception $previous = _)[]: void)))))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([18:10-17], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None;
        fd_tparams =
-       [{ tp_variance = Invariant; tp_name = ([18:18-19], "T"); tp_parameters = []; 
-          tp_constraints = [(Constraint_as, ([18:23-41], (Happly (([18:23-41], "\\HH\\Lib\\Regex\\Match"), []))))]; 
+       [{ tp_variance = Invariant; tp_name = ([18:18-19], "T"); tp_parameters = [];
+          tp_constraints =
+          [(Constraint_as, ([18:18-19], (Happly (([18:18-19], "\\HH\\supportdyn"), [([18:18-19], Hmixed)])))); (Constraint_as, ([18:23-41], (Happly (([18:23-41], "\\HH\\Lib\\Regex\\Match"), []))))];
           tp_reified = Erased; tp_user_attributes = [] }
          ];
        fd_where_constraints = [] });
@@ -222,8 +223,8 @@ Errors:
                        }))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([24:10-21], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
@@ -275,8 +276,8 @@ Errors:
              ([57:3-26], (Expr ((nothing), [57:3-25], (Binop { bop = (Eq None); lhs = ((nothing), [57:3-9], (Lvar ([57:3-9], $bad10))); rhs = ((nothing), [57:14-25], (String "\\Hello\\")) }))));
              ([58:3-23], (Expr ((nothing), [58:3-22], (Binop { bop = (Eq None); lhs = ((nothing), [58:3-9], (Lvar ([58:3-9], $bad11))); rhs = ((nothing), [58:14-22], (String "HelloH")) }))))]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([46:10-27], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
@@ -301,6 +302,40 @@ Errors:
                       }))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
-       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([61:10-31], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([18:10-17], "\\goodbye");
+       fd_fun =
+       { f_span = [18:1-20:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((dynamic), (Some ([18:78-79], (Habstr ("T", [])))));
+         f_params =
+         [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([18:43-66], (Happly (([18:43-63], "\\HH\\Lib\\Regex\\Pattern"), [([18:64-65], (Habstr ("T", [])))])))));
+            param_is_variadic = false; param_pos = [18:67-75]; param_name = "$pattern"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([19:3-25],
+             (Throw
+                ((Exception), [19:9-24],
+                 (New (((Exception), [19:13-22], (CI ([19:13-22], "\\Exception"))), [], [], None, ((function(string $message = _, int $code = _, ?Exception $previous = _)[]: void)))))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([18:10-17], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None;
+       fd_tparams =
+       [{ tp_variance = Invariant; tp_name = ([18:18-19], "T"); tp_parameters = [];
+          tp_constraints =
+          [(Constraint_as, ([18:18-19], (Happly (([18:18-19], "\\HH\\supportdyn"), [([18:18-19], Hmixed)])))); (Constraint_as, ([18:23-41], (Happly (([18:23-41], "\\HH\\Lib\\Regex\\Match"), []))))];
+          tp_reified = Erased; tp_user_attributes = [] }
+         ];
+       fd_where_constraints = [] })

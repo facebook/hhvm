@@ -8,7 +8,8 @@
       { f_span = [11:1-32]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((void), (Some ([11:25-29], (Hprim Tvoid)))); 
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false;
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([11:10-21], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false;
         f_doc_comment =
         (Some ([2:1-10:4],
                "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */"))
@@ -22,7 +23,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([13:10-40], "\\terminal_catch_can_do_whatever");
        fd_fun =
        { f_span = [13:1-31:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((int), (Some ([13:44-47], (Hprim Tint)))); 
+         f_readonly_ret = None; f_ret = ((~int), (Some ([13:44-47], (Hprim Tint)))); 
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
@@ -39,8 +40,8 @@
                  [([27:5-12], (Expr ((int), [27:5-11], (Binop { bop = (Eq None); lhs = ((int), [27:5-7], (Lvar ([27:5-7], $a))); rhs = ((int), [27:10-11], (Int "4")) }))))])));
              ([30:3-13], (Return (Some ((int), [30:10-12], (Lvar ([30:10-12], $a))))))]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([13:10-40], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Class
      { c_span = [33:1-41]; c_annotation = (); c_mode = Mstrict; c_final = false; 
@@ -53,9 +54,9 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
-       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
-       c_module = None });
+       c_user_attributes = [{ ua_name = ([33:7-20], "__SupportDynamicType"); ua_params = [] }]; 
+       c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+       c_emit_id = None; c_internal = false; c_module = None });
   (Class
      { c_span = [34:1-39]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
@@ -67,6 +68,6 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
-       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
-       c_module = None })
+       c_user_attributes = [{ ua_name = ([34:7-18], "__SupportDynamicType"); ua_params = [] }]; 
+       c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+       c_emit_id = None; c_internal = false; c_module = None })

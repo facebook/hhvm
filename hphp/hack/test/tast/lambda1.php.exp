@@ -42,7 +42,7 @@
                                                ((string), [4:24-31],
                                                 (Binop
                                                    { bop = Dot; lhs = ((~?(bool | float | resource | arraykey | HH\FormatString<nothing>)), [4:24-26], (Lvar ([4:24-26], $n)));
-                                                     rhs = ((string), [4:29-31], (Lvar ([4:29-31], $s))) }));
+                                                     rhs = ((~string), [4:29-31], (Lvar ([4:29-31], $s))) }));
                                                rhs = ((string), [4:34-38], (String "\\n")) })))))
                                 ]
                               };
@@ -76,6 +76,6 @@
                       }))))
             ]
           };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([2:10-22], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

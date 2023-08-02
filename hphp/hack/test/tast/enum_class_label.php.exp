@@ -4,11 +4,18 @@
       c_name = ([3:12-23], "\\MyEnumClass"); c_tparams = [];
       c_extends =
       [([3:12-23],
-        (Happly (([3:12-23], "\\HH\\BuiltinEnumClass"), [([3:12-23], (Happly (([3:12-23], "\\HH\\MemberOf"), [([3:12-23], (Happly (([3:12-23], "\\MyEnumClass"), []))); ([3:25-30], Hmixed)])))])))];
+        (Happly (([3:12-23], "\\HH\\BuiltinEnumClass"),
+           [([3:12-23],
+             (Happly (([3:12-23], "\\HH\\MemberOf"),
+                [([3:12-23], (Happly (([3:12-23], "\\MyEnumClass"), []))); ([3:25-30], (Hlike ([3:25-30], (Happly (([3:25-30], "\\HH\\supportdyn"), [([3:25-30], Hmixed)])))))])))
+             ]
+           )))
+        ];
       c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
       c_implements = []; c_where_constraints = [];
       c_consts =
-      [{ cc_user_attributes = []; cc_type = (Some ([4:7-8], (Happly (([4:7-8], "\\HH\\MemberOf"), [([4:7-8], (Happly (([4:7-8], "\\MyEnumClass"), []))); ([4:3-6], (Hprim Tint))]))));
+      [{ cc_user_attributes = [];
+         cc_type = (Some ([4:7-8], (Happly (([4:7-8], "\\HH\\MemberOf"), [([4:7-8], (Happly (([4:7-8], "\\MyEnumClass"), []))); ([4:7-8], (Hlike ([4:3-6], (Hprim Tint))))]))));
          cc_id = ([4:7-8], "Y"); cc_kind = (CCConcrete ((HH\MemberOf<MyEnumClass, int>), [4:11-12], (Int "1"))); 
          cc_span = [3:1-5:2]; cc_doc_comment = None }
         ];
@@ -19,7 +26,8 @@
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       c_user_attributes = [{ ua_name = ([3:12-23], "__EnumClass"); ua_params = [] }]; 
-      c_file_attributes = []; c_docs_url = None; c_enum = (Some { e_base = ([3:25-30], Hmixed); e_constraint = None; e_includes = [] }); 
+      c_file_attributes = []; c_docs_url = None;
+      c_enum = (Some { e_base = ([3:25-30], (Hlike ([3:25-30], (Happly (([3:25-30], "\\HH\\supportdyn"), [([3:25-30], Hmixed)]))))); e_constraint = None; e_includes = [] }); 
       c_doc_comment = None; c_emit_id = None; c_internal = false; c_module = None });
   (Fun
      { fd_namespace =
@@ -31,7 +39,7 @@
        { f_span = [7:1-9:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([7:17-21], (Hprim Tvoid)))); 
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-         f_body = { fb_ast = [([8:3-17], (Expr ((HH\EnumClass\Label<MyEnumClass, int>), [8:3-16], (EnumClassLabel ((Some ([8:3-14], "\\MyEnumClass")), "Y")))))] }; 
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_body = { fb_ast = [([8:3-17], (Expr ((HH\EnumClass\Label<MyEnumClass, ~int>), [8:3-16], (EnumClassLabel ((Some ([8:3-14], "\\MyEnumClass")), "Y")))))] }; 
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([7:10-13], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

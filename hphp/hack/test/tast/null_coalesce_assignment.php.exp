@@ -6,7 +6,7 @@
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-12], "\\f0");
       fd_fun =
       { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((int), (Some ([3:23-26], (Hprim Tint))));
+        f_readonly_ret = None; f_ret = ((~int), (Some ([3:23-26], (Hprim Tint))));
         f_params =
         [{ param_annotation = (?int); param_type_hint = ((?int), (Some ([3:13-17], (Hoption ([3:14-17], (Hprim Tint)))))); 
            param_is_variadic = false; param_pos = [3:18-20]; param_name = "$x"; 
@@ -19,6 +19,6 @@
           [([4:3-12], (Expr ((int), [4:3-11], (Binop { bop = (Eq (Some QuestionQuestion)); lhs = ((int), [4:3-5], (Lvar ([4:3-5], $x))); rhs = ((int), [4:10-11], (Int "0")) }))));
             ([5:3-13], (Return (Some ((int), [5:10-12], (Lvar ([5:10-12], $x))))))]
           };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-12], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

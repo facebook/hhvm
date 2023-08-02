@@ -9,7 +9,7 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = [{ ua_name = ([3:3-9], "__Docs"); ua_params = [((string), [3:10-30], (String "http://example.com"))] }]; 
+      c_user_attributes = [{ ua_name = ([4:7-10], "__SupportDynamicType"); ua_params = [] }; { ua_name = ([3:3-9], "__Docs"); ua_params = [((string), [3:10-30], (String "http://example.com"))] }];
       c_file_attributes = []; c_docs_url = (Some "http://example.com"); 
       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
       c_module = None })

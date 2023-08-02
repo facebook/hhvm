@@ -11,15 +11,20 @@ Errors:
       { f_span = [2:1-6:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None;
         f_ret =
-        ((Pure<(function(int): void)>),
+        ((~Pure<(function(int): ~void)>),
          (Some ([4:18-47],
                 (Happly (([4:18-22], "\\Pure"),
                    [([4:23-46],
-                     (Hfun
-                        { hf_is_readonly = None; hf_param_tys = [([4:34-37], (Hprim Tint))]; 
-                          hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None })]; 
-                          hf_variadic_ty = None; hf_ctxs = None; hf_return_ty = ([4:41-45], (Hprim Tvoid)); 
-                          hf_is_readonly_return = None }))
+                     (Happly (([4:23-46], "\\HH\\supportdyn"),
+                        [([4:23-46],
+                          (Hfun
+                             { hf_is_readonly = None; hf_param_tys = [([4:34-37], (Hprim Tint))]; 
+                               hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None })]; 
+                               hf_variadic_ty = None; hf_ctxs = None; 
+                               hf_return_ty = ([4:41-45], (Hlike ([4:41-45], (Hprim Tvoid)))); 
+                               hf_is_readonly_return = None }))
+                          ]
+                        )))
                      ]
                    )))));
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
@@ -31,6 +36,6 @@ Errors:
                 (New (((Exception), [5:13-22], (CI ([5:13-22], "\\Exception"))), [], [], None, ((function(string $message = _, int $code = _, ?Exception $previous = _)[]: void)))))))
             ]
           };
-        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([2:3-7], "__Rx"); ua_params = [] }]; 
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([4:10-13], "__SupportDynamicType"); ua_params = [] }; { ua_name = ([2:3-7], "__Rx"); ua_params = [] }]; 
         f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

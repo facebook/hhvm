@@ -6,10 +6,10 @@
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-29], "\\returnsTheStringFoo");
       fd_fun =
       { f_span = [3:1-57]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((string), (Some ([3:33-39], (Hprim Tstring)))); 
+        f_readonly_ret = None; f_ret = ((~string), (Some ([3:33-39], (Hprim Tstring)))); 
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([3:42-55], (Return (Some ((string), [3:49-54], (String "foo")))))] }; 
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-29], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
@@ -40,6 +40,6 @@
                      Is_prop)))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([5:10-14], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

@@ -8,14 +8,14 @@
       { f_span = [4:1-41]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((void), (Some ([4:34-38], (Hprim Tvoid))));
         f_params =
-        [{ param_annotation = (mixed); param_type_hint = ((mixed), (Some ([4:23-28], Hmixed))); 
+        [{ param_annotation = (mixed); param_type_hint = ((mixed), (Some ([4:23-28], (Happly (([4:23-28], "\\HH\\supportdyn"), [([4:23-28], Hmixed)]))))); 
            param_is_variadic = false; param_pos = [4:29-31]; param_name = "$_"; 
            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
            param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([4:10-22], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
@@ -47,7 +47,7 @@
                       targs = [];
                       args =
                       [(Pnormal,
-                        ((dict<arraykey, mixed>), [8:5-11:6],
+                        ((dict<string, (int | string)>), [8:5-11:6],
                          (KeyValCollection (([8:5-9], Dict), None,
                             [(((string), [9:7-10], (String "a")), ((int), [9:14-16], (Lvar ([9:14-16], $a)))); (((string), [10:7-10], (String "b")), ((string), [10:14-16], (Lvar ([10:14-16], $b))))]
                             ))))
@@ -55,6 +55,6 @@
                       unpacked_arg = None }))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([6:10-14], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

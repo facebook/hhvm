@@ -26,38 +26,39 @@ class PoolKey {
     full_hash_ = folly::hash::hash_combine(connKey_.hash(), options_hash_);
   }
 
-  bool operator==(const PoolKey& rhs) const {
+  FOLLY_NODISCARD bool operator==(const PoolKey& rhs) const noexcept {
     return full_hash_ == rhs.full_hash_ && options_hash_ == rhs.options_hash_ &&
         connKey_ == rhs.connKey_;
   }
 
-  bool operator!=(const PoolKey& rhs) const {
+  FOLLY_NODISCARD bool operator!=(const PoolKey& rhs) const noexcept {
     return !(*this == rhs);
   }
 
-  bool partialCompare(const PoolKey& rhs) const {
+  FOLLY_NODISCARD bool partialCompare(const PoolKey& rhs) const noexcept {
     return partial_hash_ == rhs.partial_hash_ &&
         options_hash_ == rhs.options_hash_ &&
         connKey_.partialEqual(rhs.connKey_);
   }
 
-  const ConnectionKey& getConnectionKey() const noexcept {
+  FOLLY_NODISCARD const ConnectionKey& getConnectionKey() const noexcept {
     return connKey_;
   }
 
-  const ConnectionOptions& getConnectionOptions() const noexcept {
+  FOLLY_NODISCARD const ConnectionOptions& getConnectionOptions()
+      const noexcept {
     return connOptions_;
   }
 
-  size_t getHash() const {
+  FOLLY_NODISCARD size_t getHash() const noexcept {
     return full_hash_;
   }
 
-  size_t getPartialHash() const {
+  FOLLY_NODISCARD size_t getPartialHash() const noexcept {
     return partial_hash_;
   }
 
-  size_t getOptionsHash() const {
+  FOLLY_NODISCARD size_t getOptionsHash() const noexcept {
     return options_hash_;
   }
 

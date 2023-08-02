@@ -36,14 +36,14 @@ ConnectionKey::ConnectionKey(
       port_(port),
       ignoreDbName_(ignore_db_name) {}
 
-bool ConnectionKey::operator==(const ConnectionKey& rhs) const {
+bool ConnectionKey::operator==(const ConnectionKey& rhs) const noexcept {
   return hash_ == rhs.hash_ && host_ == rhs.host_ && port_ == rhs.port_ &&
       (ignoreDbName_ || dbName_ == rhs.dbName_) && user_ == rhs.user_ &&
       password_ == rhs.password_ && specialTag_ == rhs.specialTag_ &&
       unixSocketPath_ == rhs.unixSocketPath_;
 }
 
-bool ConnectionKey::partialEqual(const ConnectionKey& rhs) const {
+bool ConnectionKey::partialEqual(const ConnectionKey& rhs) const noexcept {
   return partialHash_ == rhs.partialHash_ && host_ == rhs.host_ &&
       port_ == rhs.port_ && user_ == rhs.user_ && password_ == rhs.password_ &&
       specialTag_ == rhs.specialTag_ && unixSocketPath_ == rhs.unixSocketPath_;
@@ -51,23 +51,21 @@ bool ConnectionKey::partialEqual(const ConnectionKey& rhs) const {
 
 std::string ConnectionKey::getDisplayString(bool level2) const {
   if (unixSocketPath_.empty()) {
-    return folly::format(
-               "{} [{}] ({}@{}:{})",
-               level2 ? "" : dbName_,
-               specialTag_,
-               user_,
-               host_,
-               port_)
-        .str();
+    return folly::sformat(
+        "{} [{}] ({}@{}:{})",
+        level2 ? "" : dbName_,
+        specialTag_,
+        user_,
+        host_,
+        port_);
   }
 
-  return folly::format(
-             "{} [{}] ({}@{})",
-             level2 ? "" : dbName_,
-             specialTag_,
-             user_,
-             unixSocketPath_)
-      .str();
+  return folly::sformat(
+      "{} [{}] ({}@{})",
+      level2 ? "" : dbName_,
+      specialTag_,
+      user_,
+      unixSocketPath_);
 }
 } // namespace mysql_client
 } // namespace common

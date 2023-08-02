@@ -29,11 +29,11 @@ class ConnectionKey {
       bool sp_ignore_db_name = false,
       folly::StringPiece sp_unixSocketPath = "");
 
-  bool partialEqual(const ConnectionKey& rhs) const;
+  FOLLY_NODISCARD bool partialEqual(const ConnectionKey& rhs) const noexcept;
 
-  bool operator==(const ConnectionKey& rhs) const;
+  FOLLY_NODISCARD bool operator==(const ConnectionKey& rhs) const noexcept;
 
-  bool operator!=(const ConnectionKey& rhs) const {
+  FOLLY_NODISCARD bool operator!=(const ConnectionKey& rhs) const noexcept {
     return !(*this == rhs);
   }
 
@@ -73,7 +73,7 @@ class ConnectionKey {
     return specialTag_;
   }
 
-  std::string getDisplayString(bool level2 = false) const;
+  FOLLY_NODISCARD std::string getDisplayString(bool level2 = false) const;
 
  private:
   std::string host_;

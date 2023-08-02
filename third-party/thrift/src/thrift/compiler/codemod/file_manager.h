@@ -94,6 +94,10 @@ class file_manager {
     return source_mgr_.get_text(loc) - source_mgr_.get_text(start);
   }
 
+  void set_namespace(const std::string& language, const std::string& ns);
+
+  size_t get_namespace_offset() const;
+
  private:
   // Expands backwards begin_offset and forwards end_offset for all whitespaces.
   void expand_over_whitespaces(

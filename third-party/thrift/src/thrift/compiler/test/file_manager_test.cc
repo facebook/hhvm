@@ -64,4 +64,35 @@ TEST(FileManagerTest, apply_replacements_test) {
   )"));
 }
 
+TEST(FileManagerTest, namespace_offset) {
+  auto source_mgr = source_manager();
+  auto program = dedent_and_parse_to_program(
+      source_mgr,
+      R"(
+      // include foo_thrift
+      package "test.module"
+      namespace java test.module
+      namespace cpp2 facebook.thrift.test.module;
+      struct A {
+      })");
+
+  codemod::file_manager fm(source_mgr, *program);
+
+  fm.set_namespace("hack", "test.module");
+  fm.apply_replacements();
+
+  auto file_content = read_file(program->path());
+  file_content.erase(
+      std::remove(file_content.begin(), file_content.end(), '\r'),
+      file_content.end());
+
+  EXPECT_EQ(file_content, folly::stripLeftMargin(R"(
+      // include foo_thrift
+      package "test.module"
+      namespace hack "test.module"
+      namespace java test.module
+      namespace cpp2 facebook.thrift.test.module;
+      struct A {
+      })"));
+}
 } // namespace apache::thrift::compiler

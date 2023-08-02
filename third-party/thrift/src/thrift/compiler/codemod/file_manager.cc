@@ -127,6 +127,45 @@ void file_manager::remove_all_annotations(const t_node& node) {
   replacements_.insert({begin_offset, end_offset, ""});
 }
 
+void file_manager::set_namespace(
+    const std::string& language, const std::string& ns) {
+  size_t offset = get_namespace_offset();
+  replacements_.insert(
+      {offset, offset, fmt::format("namespace {} \"{}\"\n", language, ns)});
+}
+
+/*
+ * If namespaces are provided, then the new namespace
+ * should be placed alongwith other namespaces.
+ * Otherwise the new content should be placed after includes and before
+ * definitions.
+ */
+size_t file_manager::get_namespace_offset() const {
+  size_t includes_offset = program_->includes().empty()
+      ? 0
+      : to_offset(program_->includes().back()->src_range().end) + 1;
+  if (!program_->namespaces().empty()) {
+    size_t min_offset = old_content_.length();
+    // Finds the offset of first namespace statement in the file.
+    for (const auto& [lang, _] : program_->namespaces()) {
+      auto ns_stmt = "namespace " + lang;
+      auto offset = old_content_.find(ns_stmt, includes_offset);
+      if (offset != std::string::npos && min_offset > offset) {
+        min_offset = offset;
+      }
+    }
+    if (min_offset != old_content_.length()) {
+      return min_offset;
+    }
+  }
+  if (includes_offset != 0) {
+    return includes_offset;
+  }
+  if (!program_->definitions().empty()) {
+    return to_offset(program_->definitions().front().src_range().begin);
+  }
+  return 0;
+}
 } // namespace codemod
 } // namespace compiler
 } // namespace thrift

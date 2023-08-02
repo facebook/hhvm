@@ -49,7 +49,7 @@ struct AttributeArgumentMap {
       return it->second;
     }
 
-    return m_attrArgs.insert({std::move(argKey), argsFromDB}).first->second;
+    return m_attrArgs.try_emplace(std::move(argKey), argsFromDB).first->second;
   }
 
  private:

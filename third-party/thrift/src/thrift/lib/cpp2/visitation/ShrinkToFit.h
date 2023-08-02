@@ -119,7 +119,7 @@ class shrink_to_fit_fn {
       typename ThriftMap::key_type new_k = std::move(k);
       shrink_to_fit(new_k, *thriftType.get_t_map().keyType_ref());
       shrink_to_fit(e, *thriftType.get_t_map().valueType_ref());
-      new_map.insert({std::move(new_k), std::move(e)});
+      new_map.try_emplace(std::move(new_k), std::move(e));
     }
     m = std::move(new_map);
   }

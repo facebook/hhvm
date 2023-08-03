@@ -114,6 +114,24 @@ TYPED_TEST(AnyTestFixture, ToAny) {
   EXPECT_EQ(v2, value);
 }
 
+TYPED_TEST(AnyTestFixture, MoveToSemiAny) {
+  const auto& value = tagToValue<TypeParam>;
+  AnyData any;
+
+  if constexpr (
+      !std::is_same_v<TypeParam, string_t> &&
+      !std::is_same_v<TypeParam, binary_t>) {
+    // Rely on infer_tag if TypeParam is not string_t or binary_t
+    any = AnyData::toAny(value);
+  } else {
+    any = AnyData::toAny<TypeParam>(value);
+  }
+  auto anyCopy = any;
+  auto semiAny = std::move(any).moveToSemiAny();
+  AnyData anyFromSemiAny(semiAny);
+  EXPECT_EQ(anyCopy, anyFromSemiAny);
+}
+
 bool contains(std::string_view s, std::string_view pattern) {
   return s.find(pattern) != std::string_view::npos;
 }

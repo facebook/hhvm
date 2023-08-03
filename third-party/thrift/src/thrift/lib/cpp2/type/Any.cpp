@@ -45,6 +45,14 @@ void AnyData::throwTypeMismatchException(const Type& want, const Type& actual) {
       debugStringViaEncode(actual)));
 }
 
+SemiAny AnyData::moveToSemiAny() && {
+  SemiAny semiAny;
+  semiAny.data() = std::move(*data_.data());
+  semiAny.type() = std::move(*data_.type());
+  semiAny.protocol() = std::move(*data_.protocol());
+  return semiAny;
+}
+
 } // namespace type
 } // namespace thrift
 } // namespace apache

@@ -24,6 +24,7 @@
 #include <folly/executors/CPUThreadPoolExecutor.h>
 #include <folly/logging/xlog.h>
 
+#include <thrift/lib/cpp2/async/AsyncProcessorHelper.h>
 #include <thrift/lib/cpp2/server/ConcurrencyControllerBase.h>
 #include <thrift/lib/cpp2/server/RequestPileInterface.h>
 
@@ -38,23 +39,91 @@ class TokenBucketConcurrencyController : public ConcurrencyControllerBase {
         innerExecutor_(std::make_unique<folly::CPUThreadPoolExecutor>(1)) {}
 
   void setExecutionLimitRequests(uint64_t) override {
-    XLOG_EVERY_MS(WARNING, 1000)
-        << "NaiveTokenBucketConcurrencyController does not support execution limits";
-  }
-  uint64_t getExecutionLimitRequests() const override {
-    XLOG_EVERY_MS(WARNING, 1000)
-        << "NaiveTokenBucketConcurrencyController does not support execution limits";
-    return 0;
+    // do nothing
   }
 
-  void setQpsLimit(uint64_t limit) override {
-    XLOG_EVERY_MS(INFO, 60 * 1000) << "setQpsLimit: " << limit;
-    qpsLimit_.store(limit);
-  }
+  uint64_t getExecutionLimitRequests() const override { return 0; }
+
+  void setQpsLimit(uint64_t limit) override { qpsLimit_.store(limit); }
 
   uint64_t getQpsLimit() const override { return qpsLimit_.load(); }
 
-  void onEnqueued() override;
+  void onEnqueued() override {
+    pendingDequeueOps_ += 1;
+    if (!isSlowModeEnabled()) {
+      if (consumeToken()) {
+        executor_.add([this]() { dequeueAttempt(); });
+        return;
+      }
+    }
+
+    if (enableSlowModeOnce()) {
+      innerExecutor_->add([this]() { slowMode(); });
+    }
+  }
+
+ private:
+  void dequeueAttempt() {
+    size_t maxTries{256};
+    while (pendingDequeueOps_.load() > 0) {
+      if (--maxTries == 0) {
+        // We couldn't dequeue() even though we expect queue to be non-empty
+        // Let's reschedule, as we stil have the token we consumed
+        executor_.add([this]() { dequeueAttempt(); });
+        return;
+      }
+
+      auto requestOpt = pile_.dequeue();
+      if (!requestOpt) {
+        continue;
+      }
+      pendingDequeueOps_ -= 1;
+
+      auto request = std::move(*requestOpt);
+      if (expired(request)) {
+        // if we found request the expired we don't want to count it towards the
+        // token bucket so we keep going will we dequeue a request that haven't
+        // expired yet
+        release(std::move(request));
+        continue;
+      }
+
+      execute(std::move(request));
+      return;
+    }
+    // We conumed a token, but the queue is empty by now, so return the token
+    returnToken();
+  }
+
+  void slowMode() {
+    while (isSlowModeEnabled()) {
+      blockingConsumeToken();
+      executor_.add([this]() {
+        while (auto requestOpt = pile_.dequeue()) {
+          pendingDequeueOps_ -= 1;
+          auto request = std::move(*requestOpt);
+          if (expired(request)) {
+            // if we found request the expired we don't want to count it towards
+            // the token bucket so we keep going will we dequeue a request that
+            // haven't expired yet
+            release(std::move(request));
+            continue;
+          }
+
+          execute(std::move(request));
+          return;
+        }
+
+        returnToken();
+
+        if (pendingDequeueOps_.load() == 0) {
+          clearSlowMode();
+        }
+      });
+    }
+  }
+
+ public:
   void onRequestFinished(ServerRequestData&) override {
     // do nothing
   }
@@ -134,6 +203,8 @@ class TokenBucketConcurrencyController : public ConcurrencyControllerBase {
       std::numeric_limits<uint64_t>::max()};
   folly::relaxed_atomic<uint16_t> slowMode_{0};
   std::unique_ptr<folly::CPUThreadPoolExecutor> innerExecutor_;
+
+  std::atomic<uint64_t> pendingDequeueOps_{0};
 };
 
 } // namespace apache::thrift

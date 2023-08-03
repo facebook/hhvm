@@ -23,52 +23,6 @@
 using namespace apache::thrift::detail;
 
 namespace apache::thrift {
-
-// We already acquired a token, so now we should make as much progress as
-// possible given one token. We will process and require requests from the pile
-// until we find a request that haven't expired yet. We will then process that
-// request and return. To make further progress we need to wait for another
-// token.
-void TokenBucketConcurrencyController::makeProgress() {
-  while (auto requestOpt = pile_.dequeue()) {
-    auto request = std::move(*requestOpt);
-    if (expired(request)) {
-      release(std::move(request));
-      continue;
-    }
-    execute(std::move(request));
-    return;
-  }
-  // If we got here then we couldn't find a request that hasn't expired yet, and
-  // pile is empty now. We then return the token because we haven't used it to
-  // process an (unexpired) request.
-  returnToken();
-
-  // If the got here then queue is empty. We now can disable slow mode, whether
-  // it was enabled or not.
-  clearSlowMode();
-}
-
-void TokenBucketConcurrencyController::fastPath() {
-  executor_.add([this]() { makeProgress(); });
-}
-
-void TokenBucketConcurrencyController::onEnqueued() {
-  if (consumeToken()) {
-    fastPath();
-    return;
-  }
-
-  if (enableSlowModeOnce()) {
-    innerExecutor_->add([this]() {
-      while (isSlowModeEnabled()) {
-        blockingConsumeToken();
-        fastPath();
-      }
-    });
-  }
-}
-
 /*static*/ bool TokenBucketConcurrencyController::expired(
     const ServerRequest& request) {
   return !request.request()->isOneway() &&

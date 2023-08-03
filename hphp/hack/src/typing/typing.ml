@@ -2171,10 +2171,16 @@ let key_exists env pos shape field =
 (** Add a fresh type parameter to [env] with a name starting [prefix]
     and a constraint on [ty]. *)
 let synthesize_type_param env p prefix ty =
-  let (env, name) = Env.fresh_param_name env prefix in
-  let env = Env.add_upper_bound_global env name ty in
-  let env = Env.add_lower_bound_global env name ty in
-
+  let (env, name) =
+    match get_node ty with
+    (* Don't generate another fresh generic off an existing fresh generic *)
+    | Tgeneric (n, _) when Env.is_fresh_generic_parameter n -> (env, n)
+    | _ ->
+      let (env, name) = Env.fresh_param_name env prefix in
+      let env = Env.add_upper_bound_global env name ty in
+      let env = Env.add_lower_bound_global env name ty in
+      (env, name)
+  in
   let hint = (p, Aast.Habstr (name, [])) in
   (hint, env)
 

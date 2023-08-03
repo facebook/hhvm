@@ -1,5 +1,5 @@
 class ExampleDsl
-where TInfer#1 = TInfer#2, TInfer#1 = ExampleInt
+where TInfer#1 = ExampleInt
 An example DSL for testing expression trees (ETs).
 
 Any class can be used an an expression tree visitor. It needs to implement

@@ -61,6 +61,12 @@ use relative_path::RelativePath;
 use transform::Transform;
 use vec1::Vec1;
 
+/// Provided for use in hackc as a simple collection of knobs outside of namespace env.
+#[derive(Clone, Debug, Default)]
+pub struct CodegenOpts {
+    pub textual_remove_memoize: bool,
+}
+
 /// Provided for use in hackc, where we have an `ns_env` in hand already.
 /// Expected to behave the same as `elaborate_program` when `po_codegen` is
 /// `true`.
@@ -68,6 +74,7 @@ pub fn elaborate_program_for_codegen(
     ns_env: Arc<namespace_env::Env>,
     path: &RelativePath,
     program: &mut nast::Program,
+    opts: &CodegenOpts,
 ) -> Result<(), Vec1<NamingPhaseError>> {
     assert!(ns_env.is_codegen);
     let tco = TypecheckerOptions {
@@ -81,6 +88,7 @@ pub fn elaborate_program_for_codegen(
     let mut env = make_env(&tco, path);
     elaborate_common(&env, program);
     elaborate_package_expr(&env, program);
+    elaborate_for_codegen(&env, program, opts);
     // Passes below here can emit errors
     typed_local::elaborate_program(&mut env, program, tco.po_codegen);
     let errs = env.into_errors();
@@ -433,5 +441,15 @@ fn elaborate_for_typechecking<T: Transform>(env: Env, node: &mut T) -> Vec<Namin
 fn elaborate_package_expr<T: Transform>(env: &Env, node: &mut T) {
     let mut passes = passes![passes::elab_expr_package::ElabExprPackagePass::default()];
     node.transform(env, &mut passes);
+    env.assert_no_errors();
+}
+
+fn elaborate_for_codegen<T: Transform>(env: &Env, node: &mut T, opts: &CodegenOpts) {
+    if opts.textual_remove_memoize {
+        node.transform(
+            env,
+            &mut passes::remove_memo_attr::RemoveMemoAttr::default(),
+        );
+    }
     env.assert_no_errors();
 }

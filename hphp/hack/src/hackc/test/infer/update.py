@@ -170,18 +170,44 @@ def update_test(filename, input, idx, check):
     return 1 + len(check), start
 
 
+def remove_prefix(text, prefix):
+    return text[text.startswith(prefix) and len(prefix) :]
+
+
+def remove_suffix(text, suffix):
+    return text[text.endswith(suffix) and 0 : (-len(suffix))]
+
+
+# Extract hackc flags from the RUN directive in a test file
+def extract_flags(filename, input):
+    cmd = None
+    for line in input:
+        if line.startswith("// RUN:"):
+            cmd = remove_prefix(line, "// RUN: %hackc")
+            cmd = remove_suffix(cmd, "%s | FileCheck %s").strip()
+            break
+
+    if not cmd:
+        bail(filename, 0, "RUN directive not found")
+
+    return cmd.split()
+
+
 def update_file(filename):
+    print(f"Processing {filename}")
+    with open(filename, "r") as f:
+        file = f.read().split("\n")
+    flags = extract_flags(filename, file)
+    print(f"  extracted flags: {flags}")
+
     stdout = subprocess.check_output(
         (
             HACKC,
-            "compile-infer",
+            *flags,
             filename,
         )
     ).decode("utf-8", "ignore")
     check = stdout.split("\n")
-
-    with open(filename, "r") as f:
-        file = f.read().split("\n")
 
     last_seen = 0
     idx = 0
@@ -268,7 +294,6 @@ def main():
                     args.files.append(os.path.join(root, file))
 
     for file in sorted(args.files):
-        print(f"Processing {file}")
         update_file(file)
 
 

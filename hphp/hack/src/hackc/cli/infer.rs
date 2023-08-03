@@ -47,6 +47,11 @@ pub struct Opts {
     /// instructions for unimplemented code but will rather completely skip the file.
     #[clap(long)]
     skip_unimplemented: bool,
+
+    /// Keep memoization attributes. The default is to remove them prior to the codegen as it
+    /// simplifies the analysis.
+    #[clap(long)]
+    keep_memo: bool,
 }
 
 pub fn run(mut opts: Opts) -> Result<()> {
@@ -125,7 +130,16 @@ fn build_ir<'a, 'arena>(
         source_text.clone(),
         &decl_arena,
     );
-    let unit = compile::unit_from_text(alloc, source_text, &env, decl_provider, &mut profile)?;
+    let unit = compile::unit_from_text_with_opts(
+        alloc,
+        source_text,
+        &env,
+        decl_provider,
+        &mut profile,
+        &elab::CodegenOpts {
+            textual_remove_memoize: !opts.keep_memo,
+        },
+    )?;
     let ir = bc_to_ir::bc_to_ir(&unit, path);
 
     Ok(ir)

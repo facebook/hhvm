@@ -1,4 +1,4 @@
-// RUN: %hackc compile-infer --unwrap-concurrent %s | FileCheck %s
+// RUN: %hackc compile-infer %s | FileCheck %s
 
 namespace Concurrent {
   async function genGetInt(): Awaitable<int> {

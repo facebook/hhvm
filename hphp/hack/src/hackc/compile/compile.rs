@@ -197,8 +197,14 @@ pub fn from_text<'decl>(
 ) -> Result<()> {
     let alloc = bumpalo::Bump::new();
     let path = source_text.file_path().path().to_path_buf();
-    let mut emitter = create_emitter(&native_env.flags, native_env, decl_provider, &alloc);
-    let mut unit = emit_unit_from_text(&mut emitter, &native_env.flags, source_text, profile)?;
+    let mut emitter = create_emitter(native_env, decl_provider, &alloc);
+    let mut unit = emit_unit_from_text(
+        &mut emitter,
+        &native_env.flags,
+        source_text,
+        profile,
+        &elab::CodegenOpts::default(),
+    )?;
 
     if native_env.flags.enable_ir {
         let bc_to_ir_t = Instant::now();
@@ -249,8 +255,26 @@ pub fn unit_from_text<'arena, 'decl>(
     decl_provider: Option<Arc<dyn DeclProvider<'decl> + 'decl>>,
     profile: &mut Profile,
 ) -> Result<Unit<'arena>> {
-    let mut emitter = create_emitter(&native_env.flags, native_env, decl_provider, alloc);
-    emit_unit_from_text(&mut emitter, &native_env.flags, source_text, profile)
+    unit_from_text_with_opts(
+        alloc,
+        source_text,
+        native_env,
+        decl_provider,
+        profile,
+        &elab::CodegenOpts::default(),
+    )
+}
+
+pub fn unit_from_text_with_opts<'arena, 'decl>(
+    alloc: &'arena bumpalo::Bump,
+    source_text: SourceText<'_>,
+    native_env: &NativeEnv,
+    decl_provider: Option<Arc<dyn DeclProvider<'decl> + 'decl>>,
+    profile: &mut Profile,
+    opts: &elab::CodegenOpts,
+) -> Result<Unit<'arena>> {
+    let mut emitter = create_emitter(native_env, decl_provider, alloc);
+    emit_unit_from_text(&mut emitter, &native_env.flags, source_text, profile, opts)
 }
 
 pub fn unit_to_string(
@@ -320,16 +344,8 @@ fn check_readonly_and_emit<'arena, 'decl>(
     rewrite_and_emit(emitter, namespace_env, ast, profile)
 }
 
-fn emit_unit_from_text<'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
-    flags: &EnvFlags,
-    source_text: SourceText<'_>,
-    profile: &mut Profile,
-) -> Result<Unit<'arena>> {
-    profile.log_enabled = emitter.options().log_extern_compiler_perf();
-    let type_directed = emitter.decl_provider.is_some();
-
-    let namespace_env = Arc::new(NamespaceEnv::empty(
+fn create_namespace_env(emitter: &Emitter<'_, '_>) -> NamespaceEnv {
+    NamespaceEnv::empty(
         emitter.options().hhvm.aliased_namespaces_cloned().collect(),
         true, /* is_codegen */
         emitter
@@ -337,7 +353,20 @@ fn emit_unit_from_text<'arena, 'decl>(
             .hhvm
             .parser_options
             .po_disable_xhp_element_mangling,
-    ));
+    )
+}
+
+fn emit_unit_from_text<'arena, 'decl>(
+    emitter: &mut Emitter<'arena, 'decl>,
+    flags: &EnvFlags,
+    source_text: SourceText<'_>,
+    profile: &mut Profile,
+    opts: &elab::CodegenOpts,
+) -> Result<Unit<'arena>> {
+    profile.log_enabled = emitter.options().log_extern_compiler_perf();
+    let type_directed = emitter.decl_provider.is_some();
+
+    let namespace_env = Arc::new(create_namespace_env(emitter));
     let path = source_text.file_path_rc();
 
     let parse_result = parse_file(
@@ -353,7 +382,12 @@ fn emit_unit_from_text<'arena, 'decl>(
 
     let ((unit, profile), codegen_t) = match parse_result {
         Ok(mut ast) => {
-            match elab::elaborate_program_for_codegen(Arc::clone(&namespace_env), &path, &mut ast) {
+            match elab::elaborate_program_for_codegen(
+                Arc::clone(&namespace_env),
+                &path,
+                &mut ast,
+                opts,
+            ) {
                 Ok(()) => profile_rust::time(move || {
                     (
                         check_readonly_and_emit(emitter, namespace_env, &mut ast, profile),
@@ -626,15 +660,14 @@ fn emit_fatal<'arena>(
 }
 
 fn create_emitter<'arena, 'decl>(
-    flags: &EnvFlags,
     native_env: &NativeEnv,
     decl_provider: Option<Arc<dyn DeclProvider<'decl> + 'decl>>,
     alloc: &'arena bumpalo::Bump,
 ) -> Emitter<'arena, 'decl> {
     Emitter::new(
         NativeEnv::to_options(native_env),
-        flags.is_systemlib,
-        flags.for_debugger_eval,
+        native_env.flags.is_systemlib,
+        native_env.flags.for_debugger_eval,
         alloc,
         decl_provider,
         native_env.filepath.clone(),

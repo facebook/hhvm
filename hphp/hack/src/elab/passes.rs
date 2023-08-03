@@ -31,6 +31,7 @@ pub mod elab_hkt;
 pub mod elab_shape_field_name;
 pub mod elab_user_attributes;
 pub mod guard_invalid;
+pub mod remove_memo_attr;
 pub mod validate_class_consistent_construct;
 pub mod validate_class_member;
 pub mod validate_class_methods;

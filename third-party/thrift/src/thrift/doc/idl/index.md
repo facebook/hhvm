@@ -164,7 +164,7 @@ The following tokens serve as operators and punctuation in Thrift:
 ,       ;       @       =       +       -
 ```
 
-Thrift uses an optional comma (`,`) or semicolon (`;`) as delimiters in certain constructs such as argument and field lists:
+Thrift uses an optional comma (`,`) or semicolon (`;`) as delimiters in certain constructs such as parameter and field lists:
 
 ```grammar
 delimiter ::=  ["," | ";"]
@@ -201,7 +201,7 @@ const i32 PORT = 3456;
 // for `numResults`.
 const i32 DEFAULT_NUM_RESULTS = 10;
 
-// The argument to the `search` RPC. Contains two fields - the query and
+// The parameter to the `search` RPC. Contains two fields - the query and
 // the number of results desired.
 struct PeopleSearchRequest {
   1: search_types.Query query;
@@ -499,13 +499,17 @@ error_blame  ::=  "client" | "server"
 
 Exceptions are identical to structs in all ways, except that these types should only be used as types within the `throws` clause of functions. This is not enforced at the moment.
 
-The serialized representation of exceptions is identical to that of structs.
+The serialized representation of exceptions is identical to that of structs. It is possible to serialize from an exception and deserialize into a compatible struct, and vice versa.
 
 The generated code for exceptions can be different from that of structs. For example, programming language exceptions can be used in generated code.
 
-:::note
-It is possible to serialize from an exception and deserialize into a compatible struct, and vice versa.
-:::
+Exceptions support the following qualifiers:
+
+* Fault attribution: `client` or `server`
+* Error classification: `transient`, `stateful` or `permanent`
+* Error safety: `safe` (vs. unspecified)
+
+For information how to use them, see [Errors and Exceptions](/features/exception.md).
 
 ### Enums
 
@@ -569,14 +573,17 @@ service ::=
     (function | performs)*
   "}"
 
-base_service_name ::=  maybe_qualified_id
-
 function ::=
-  [annotations]
-  [function_qualifier] return_type identifier
-    "(" (parameter [","])* ")" [throws] [";"]
+  [annotations] [function_qualifier]
+  return_clause identifier "(" (parameter [","])* ")" [throws] [";"]
 
+base_service_name  ::=  maybe_qualified_id
+interaction_name   ::=  maybe_qualified_id
 function_qualifier ::=  "oneway" | "idempotent" | "readonly"
+
+return_clause ::=
+    return_type
+  | interaction_name ["," return_type]
 
 return_type ::=
     type
@@ -600,17 +607,58 @@ interaction_name ::=  maybe_qualified_id
 
 An interface for RPC is defined in a Thrift file as a service.
 
-Each service has a set of functions. Each function has a unique name and takes a list of arguments. It can return normally with a result if the result type is not `void` or it can throw one of the listed application exceptions. In addition, the function can throw a Thrift system exception if there was some underlying problem with the RPC itself.
+Example:
 
-The types of the field specifications after `throws` must be exception types. If a functions throws one of the exceptions given in the `throws` clause, then all of the members of this exception will be serialized and sent over the wire. For other undeclared exceptions only the message will be serialized and they will appear on the client side as `TApplicationException`.
+```thrift
+struct SearchRequest {
+  1: string query;
+  2: i32 numResults;
+}
 
-The list of arguments to the function follow similar rules as Thrift struct types with the exception of qualifiers, meaning that **arguments cannot be optional**. The proper way to achieve this is to use a struct type argument, which itself then may contain an `optional` field.
+struct SearchResponse {
+  1: list<string> results;
+}
 
-Functions that use the `oneway` reserved word (oneway functions) are "fire and forget". I.e., the client sends the function parameters to the server, but does not wait or expect a result. Therefore oneway functions must use `void` as the return type and must not have a `throws` clause.
+safe exception SearchException {
+  1: string errorMessage;
+  2: i64 errorCode;
+}
+
+service Search {
+  SearchResponse search(1: SearchRequest request) throws (1: SearchException e);
+}
+```
+
+Each service has a set of functions. Each function has a name, which must be unique within the service, and takes a list of parameters. It can return normally with a result if the result type is not `void` or it can throw one of the listed application exceptions. In addition, the function can throw a Thrift system exception if there was some underlying problem with the RPC itself.
+
+The parameters in the `throws` clause must have exception types. If a functions throws one of the exceptions given in this clause, then all of the members of this exception will be serialized and sent over the wire. For other undeclared exceptions only the message will be serialized and they will appear on the client side as `TApplicationException`.
+
+Function parameters are similar to struct fields except that they don't take field qualifiers, meaning that **parameters cannot be optional**. The proper way to achieve this is to use a struct type parameter, which itself then may contain an `optional` field.
+
+Functions support the following idempotency qualifiers: `readonly` and `idempotent`. See [Errors and Exceptions](/features/exception.md) for information how to use them for automatic retries.
+
+Functions that use the `oneway` reserved word (oneway functions) are "fire and forget". It means that the client sends the function parameters to the server, but does not wait or expect a result. Therefore oneway functions must use `void` as the return type and must not have a `throws` clause.
+
+```thrift
+service Logger {
+  // Log an informational message without getting a confirmation of success.
+  oneway void logInfo(1: string message);
+}
+```
+
+:::caution
+Oneway methods may be silently dropped and are therefore discouraged for most use cases.
+:::
 
 Services may extend (inherit from) other services. The set of functions in the inherited service is included in the inheriting service. The name that refers to the inherited service after the reserved word `extends` can be an identifier that denotes another service defined earlier in the same Thrift file, or a qualified name of the form `filename.servicename` where `filename` and `servicename` are identifiers, and `servicename` denotes a service defined in the Thrift file denoted by `filename`.
 
 Service names are visible after the end of the service definition in which they have been introduced, and in other Thrift files that include this Thrift file.
+
+:::caution
+New parameters could be added to a method, but it is better to define an input struct and add members to it instead. The server cannot distinguish between missing parameters and default values, so a request object is better.
+:::
+
+#### Streaming
 
 ```
 struct Foo {
@@ -633,33 +681,12 @@ struct GetFoosRequest {
 }
 
 service Bar {
-  void ping() throws (1: BarException e),
-  Foo getFoos(1: GetFoosRequest request) throws (1: BarException e),
-  oneway void fireAndForget(),
   stream Foo getStream(1: GetFoosRequest request)
       throws (1: BarException e1) stream throws (1: FooException e2),
   i32, stream Foo getResponseAndStream(1: GetFoosRequest request)
       throws (1: BarException e1) stream throws (1: FooException e2),
 }
 ```
-
-WARNING: New arguments could be added to a method, but it is better to define an input struct and add members to it instead. The server cannot distinguish between missing arguments and default values, so a request object is better.
-
-#### Exception and RPC Keywords
-
-##### exception
-
-* Fault attribution: *server* vs. *client*
-* Error classification: *transient*, *stateful* or *permanent*
-* Error safety: *safe* (vs. unspecified)
-
-##### RPC
-
-* RPC idempotency keywords: `readonly`, `idempotent`.
-
-Please refer [Automatic Retries, RPC idempotency and Error Classification](/features/exception.md) for more information on why you should use these keywords and how these combined can enable automatic retries in SR.
-
-#### Streaming
 
 Please refer [Thrift Streaming](/fb/features/streaming/index.md) for more information on Streaming.
 

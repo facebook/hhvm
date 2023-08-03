@@ -9742,10 +9742,7 @@ struct FreeRegs {
   // chooses the color, and does not mark it as taken or modify any
   // other internal state. If the Vreg represents a spill, it will be
   // chosen from the pre-computed spill colors. Otherwise, a physical
-  // register is chosen to try to maximize satisfied hints. A physical
-  // register which is part of `physUses' will not be selected (doing
-  // so would not be valid, as this represents the physical registers
-  // used by this instruction, which must remain as they are).
+  // register is chosen to try to maximize satisfied hints.
   //
   // For the register case, the heuristic may decide to migrate a
   // (already taken) physical register to a different (free) physical
@@ -9770,7 +9767,7 @@ struct FreeRegs {
   };
 
   template <typename W>
-  Coloring choose(Vreg r, RegSet physUses, W&& moveWeight) const {
+  Coloring choose(Vreg r, W&& moveWeight) const {
     // Find best physical register for a Vreg, choosing from the set
     // of registers in "mask".
     auto const findBest = [&] (RegSet mask) -> Coloring {
@@ -9897,7 +9894,7 @@ struct FreeRegs {
                 info.penaltyIdx < state->penalties.size());
         auto const& penalties = state->penalties[info.penaltyIdx];
         return buildPhysWeights(
-          r, mask - physUses, [&] (PhysReg r) { return penalties[r]; }
+          r, mask, [&] (PhysReg r) { return penalties[r]; }
         );
       }();
 
@@ -9930,7 +9927,7 @@ struct FreeRegs {
         // Build a candidate list to move the Vreg to. We only support
         // moving to a free physical register.
         auto const moveWeights = buildPhysWeights(
-          assignedTo, (mask & regs) - physUses,
+          assignedTo, (mask & regs),
           [&] (PhysReg r) { return movePenalties[r]; }
         );
 
@@ -10386,7 +10383,6 @@ size_t color_inst(State& state,
     // will move a Vreg if it resides in the destination.
     auto const coloring = free.choose(
       r,
-      uses.physRegs(),
       [&] (Vreg from, Vreg to) -> int64_t {
         // Move weight calculation. This matches the logic below for
         // determining whether a copy is actually needed.
@@ -10867,8 +10863,7 @@ size_t color_block_initialize(
     // Choose a physical register for this Vreg. "Moving" here is
     // free, because it just results in a change to a previous
     // assignment.
-    auto const coloring =
-      free.choose(r, RegSet{}, [] (Vreg, Vreg) { return 0; });
+    auto const coloring = free.choose(r, [] (Vreg, Vreg) { return 0; });
     assert_found_color(r, coloring.color);
 
     auto const selected = color_reg(coloring.color);
@@ -10891,8 +10886,7 @@ size_t color_block_initialize(
       if (!is_colorable(info.regClass)) continue;
       assertx(is_color_none(info.color));
 
-      auto const coloring =
-        free.choose(defs[i], RegSet{}, [] (Vreg, Vreg) { return 0; });
+      auto const coloring = free.choose(defs[i], [] (Vreg, Vreg) { return 0; });
       assert_found_color(defs[i], coloring.color);
       info.color = coloring.color;
 

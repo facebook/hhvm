@@ -421,7 +421,10 @@ void ThriftRocketServerHandler::handleRequestCommon(
           std::move(debugPayload),
           createDefaultRequestContext())
           ->sendErrorWrapped(
-              std::move(tryFds.exception()), kRequestParsingErrorCode);
+              folly::make_exception_wrapper<TApplicationException>(
+                  TApplicationException::UNKNOWN,
+                  tryFds.exception().what().toStdString()),
+              kRequestParsingErrorCode);
       return;
     }
   }

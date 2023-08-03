@@ -524,6 +524,9 @@ class rust_mstch_program : public mstch_program {
              &rust_mstch_program::rust_gen_native_metadata},
         });
     register_has_option("program:default_enum_zero?", "default_enum_zero");
+    register_has_option(
+        "program:deprecated_optional_with_default_is_some?",
+        "deprecated_optional_with_default_is_some");
   }
   mstch::node rust_has_types() {
     return !program_->structs().empty() || !program_->enums().empty() ||

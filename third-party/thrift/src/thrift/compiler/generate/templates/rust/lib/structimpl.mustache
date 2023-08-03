@@ -20,7 +20,16 @@
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::{{struct:rust_name}} {
     fn default() -> Self {
-        Self {{>lib/block}}{{!
+        {{^program:deprecated_optional_with_default_is_some?}}{{!
+            }}{{#struct:fields}}{{!
+                }}{{#field:default}}{{!
+                    }}{{#field:optional?}}{{!
+                        }}::std::compile_error!("Found thrift optional with default: `{{struct:rust_name}}::{{field:rust_name}}`. Please set `deprecated_optional_with_default_is_some` flag to keep the legacy behavior. The new default value will be `None` to conform to the thrift standard"); {{!
+                    }}{{/field:optional?}}{{!
+                }}{{/field:default}}{{!
+            }}{{/struct:fields}}{{!
+        }}{{/program:deprecated_optional_with_default_is_some?}}{{!
+        }}Self {{>lib/block}}{{!
         }}{{#struct:fields}}
             {{field:rust_name}}: {{!
                 }}{{#field:default}}{{!

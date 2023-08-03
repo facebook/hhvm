@@ -4,7 +4,7 @@ php src/module.thrift
 hack src/module.thrift
 mstch_cpp2 src/module.thrift
 mstch_go src/module.thrift
-mstch_rust src/module.thrift
+mstch_rust:deprecated_optional_with_default_is_some src/module.thrift
 mstch_java src/module.thrift
 json src/module.thrift
 mstch_py3 src/module.thrift

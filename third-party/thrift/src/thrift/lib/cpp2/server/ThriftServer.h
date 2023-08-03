@@ -78,10 +78,6 @@ THRIFT_FLAG_DECLARE_bool(server_check_unimplemented_extra_interfaces);
 THRIFT_FLAG_DECLARE_bool(enable_io_queue_lag_detection);
 THRIFT_FLAG_DECLARE_bool(enforce_queue_concurrency_resource_pools);
 
-namespace quic {
-class QuicAsyncTransportServer;
-}
-
 namespace apache {
 namespace thrift {
 
@@ -90,6 +86,7 @@ class Cpp2Connection;
 class Cpp2Worker;
 class ThriftServer;
 class ThriftProcessor;
+class ThriftQuicServer;
 namespace rocket {
 class ThriftRocketServerHandler;
 }
@@ -191,9 +188,6 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   //! Listen socket
   folly::AsyncServerSocket::UniquePtr socket_;
 
-  // quic server
-  std::unique_ptr<quic::QuicAsyncTransportServer> quicServer_;
-
   // evb->worker eventbase local
   folly::EventBaseLocal<Cpp2Worker*> evbToWorker_;
 
@@ -279,7 +273,8 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
 
   bool serverRanWithDCHECK();
 
-  void startQuicServer();
+  // hook inheriting classes can use to start any additional servers
+  virtual void startAdditionalServers() {}
 
 #if FOLLY_HAS_COROUTINES
   std::unique_ptr<folly::coro::CancellableAsyncScope> asyncScope_;
@@ -293,6 +288,7 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   friend class Cpp2Connection;
   friend class Cpp2Worker;
   friend class rocket::ThriftRocketServerHandler;
+  friend class ThriftQuicServer;
 
   bool tosReflect_{false};
   uint32_t listenerTos_{0};

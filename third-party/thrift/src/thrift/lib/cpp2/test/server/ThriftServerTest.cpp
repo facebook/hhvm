@@ -70,6 +70,7 @@
 #include <thrift/lib/cpp2/server/Cpp2Worker.h>
 #include <thrift/lib/cpp2/server/ServerFlags.h>
 #include <thrift/lib/cpp2/server/StatusServerInterface.h>
+#include <thrift/lib/cpp2/server/ThriftQuicServer.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/DummyStatus.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/TestService.h>
@@ -92,7 +93,6 @@ using namespace std::literals;
 using std::string;
 
 THRIFT_FLAG_DECLARE_bool(server_rocket_upgrade_enabled);
-THRIFT_FLAG_DECLARE_bool(enable_quic);
 DECLARE_int32(thrift_cpp2_protocol_reader_string_limit);
 
 std::unique_ptr<HTTP2RoutingHandler> createHTTP2RoutingHandler(
@@ -3328,9 +3328,18 @@ static std::shared_ptr<quic::QuicClientTransport> makeQuicClient(
 }
 
 TEST(ThriftServer, RocketOverQuic) {
-  THRIFT_FLAG_SET_MOCK(enable_quic, true);
-  auto server = std::static_pointer_cast<ThriftServer>(
-      TestThriftServerFactory<TestInterface>().create());
+  // copied over from TestThriftServerFactory
+  std::shared_ptr<apache::thrift::ThriftServer> server =
+      std::make_shared<apache::thrift::ThriftQuicServer>();
+  server->setNumIOWorkerThreads(1);
+  server->setThreadManagerType(
+      apache::thrift::BaseThriftServer::ThreadManagerType::SIMPLE);
+  server->setNumCPUWorkerThreads(1);
+  server->setThreadFactory(
+      std::make_shared<apache::thrift::concurrency::PosixThreadFactory>());
+  server->setPort(0);
+  server->setInterface(std::make_unique<TestInterface>());
+
   server->setSSLPolicy(SSLPolicy::REQUIRED);
 
   auto sslConfig = std::make_shared<wangle::SSLContextConfig>();

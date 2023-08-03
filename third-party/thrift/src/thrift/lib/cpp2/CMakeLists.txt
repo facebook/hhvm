@@ -315,7 +315,6 @@ add_dependencies(
   thrifttyperep
   thrifttype
   thriftanyrep
-  mvfst::mvfst_server_async_tran
 )
 target_link_libraries(
   thriftcpp2
@@ -329,6 +328,24 @@ target_link_libraries(
     thrifttyperep
     thrifttype
     thriftanyrep
+)
+
+add_library(
+  quic_thriftcpp2
+
+  server/ThriftQuicServer.cpp
+)
+add_dependencies(
+  quic_thriftcpp2
+
+  thriftcpp2
+  mvfst::mvfst_server_async_tran
+)
+target_link_libraries(
+  quic_thriftcpp2
+
+  PUBLIC
+    thriftcpp2
     mvfst::mvfst_server_async_tran
 )
 

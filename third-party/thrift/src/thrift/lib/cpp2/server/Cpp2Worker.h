@@ -47,6 +47,7 @@ namespace thrift {
 // Forward declaration of classes
 class Cpp2Connection;
 class ThriftServer;
+class ThriftQuicServer;
 
 /**
  * Cpp2Worker drives the actual I/O for ThriftServer connections.
@@ -428,6 +429,7 @@ class Cpp2Worker : public IOWorkerContext,
 
   friend class Cpp2Connection;
   friend class ThriftServer;
+  friend class ThriftQuicServer;
   friend class RocketRoutingHandler;
   friend class TestRoutingHandler;
 };

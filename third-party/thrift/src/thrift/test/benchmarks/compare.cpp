@@ -63,45 +63,63 @@ void init() {
 }
 
 BENCHMARK(StructLess) {
+  bool b = true;
   for (int i = 1; i < N; i++) {
-    static_cast<void>(structs[i - 1] < structs[i]);
+    b ^= structs[i - 1] < structs[i];
   }
+  folly::doNotOptimizeAway(b);
 }
 BENCHMARK_RELATIVE(StructOpLess) {
+  bool b = true;
   for (int i = 1; i < N; i++) {
-    apache::thrift::op::detail::StructLessThan{}(structs[i - 1], structs[i]);
+    b ^= apache::thrift::op::detail::StructLessThan{}(
+        structs[i - 1], structs[i]);
   }
+  folly::doNotOptimizeAway(b);
 }
 BENCHMARK(UnionLess) {
+  bool b = true;
   for (int i = 1; i < N; i++) {
-    static_cast<void>(unions[i - 1] < unions[i]);
+    b ^= unions[i - 1] < unions[i];
   }
+  folly::doNotOptimizeAway(b);
 }
 BENCHMARK_RELATIVE(UnionOpLess) {
+  bool b = true;
   for (int i = 1; i < N; i++) {
-    apache::thrift::op::detail::UnionLessThan{}(unions[i - 1], unions[i]);
+    b ^= apache::thrift::op::detail::UnionLessThan{}(unions[i - 1], unions[i]);
   }
+  folly::doNotOptimizeAway(b);
 }
 
 BENCHMARK(StructEqual) {
+  bool b = true;
   for (int i = 1; i < N; i++) {
-    static_cast<void>(structs[i - 1] == structs[i]);
+    b ^= structs[i - 1] == structs[i];
   }
+  folly::doNotOptimizeAway(b);
 }
 BENCHMARK_RELATIVE(StructOpEqual) {
+  bool b = true;
   for (int i = 1; i < N; i++) {
-    apache::thrift::op::detail::StructEquality{}(structs[i - 1], structs[i]);
+    b ^= apache::thrift::op::detail::StructEquality{}(
+        structs[i - 1], structs[i]);
   }
+  folly::doNotOptimizeAway(b);
 }
 BENCHMARK(UnionEqual) {
+  bool b = true;
   for (int i = 1; i < N; i++) {
-    static_cast<void>(unions[i - 1] == unions[i]);
+    b ^= unions[i - 1] == unions[i];
   }
+  folly::doNotOptimizeAway(b);
 }
 BENCHMARK_RELATIVE(UnionOpEqual) {
+  bool b = true;
   for (int i = 1; i < N; i++) {
-    apache::thrift::op::detail::UnionEquality{}(unions[i - 1], unions[i]);
+    b ^= apache::thrift::op::detail::UnionEquality{}(unions[i - 1], unions[i]);
   }
+  folly::doNotOptimizeAway(b);
 }
 } // namespace apache::thrift::test
 

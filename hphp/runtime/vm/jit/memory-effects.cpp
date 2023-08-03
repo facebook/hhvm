@@ -92,7 +92,7 @@ AliasClass backtrace_locals(const IRInstruction& inst) {
     auto ac = AEmpty;
     for (auto fp = inst.marker().fp(); fp; ) {
       auto const [func, depth] = func_and_depth_from_fp(fp);
-      ac |= fn(func, depth);
+      ac |= fn(fp, func, depth);
       if (fp->inst()->is(BeginInlining)) {
         // Walking the marker fp chain in this manner is suspect, but here we
         // are careful to only materialize func, depth pair using it.
@@ -105,7 +105,7 @@ AliasClass backtrace_locals(const IRInstruction& inst) {
   };
 
   auto const addInspectable =
-    [&] (const Func* func, uint32_t depth) -> AliasClass {
+    [&] (SSATmp*, const Func* func, uint32_t depth) -> AliasClass {
       auto const meta = func->lookupVarId(s_86metadata.get());
       auto const productId = func->lookupVarId(s_86productAttributionData.get());
       const AliasClass coeffect = func->hasCoeffectsLocal()
@@ -123,14 +123,12 @@ AliasClass backtrace_locals(const IRInstruction& inst) {
 
   if (!RuntimeOption::EnableArgsInBacktraces) return eachFunc(addInspectable);
 
-  return eachFunc([&] (const Func* func, uint32_t depth) {
-    auto ac = AEmpty;
+  return eachFunc([&] (SSATmp* fp, const Func* func, uint32_t depth) {
+    auto ac = addInspectable(fp, func, depth);
     auto const numParams = func->numParams();
 
     if (func->hasReifiedGenerics()) {
-      // First non param local contains reified generics
-      AliasIdSet reifiedgenerics{ AliasIdSet::IdRange{numParams, numParams + 1} };
-      ac |= ALocal { depth, reifiedgenerics };
+      ac |= ALocal { depth, func->reifiedGenericsLocalId() };
     }
 
     if (func->cls() && func->cls()->hasReifiedGenerics()) {
@@ -139,10 +137,17 @@ AliasClass backtrace_locals(const IRInstruction& inst) {
       ac |= APropAny;
     }
 
-    if (!numParams) return addInspectable(func, depth) | ac;
+    if (numParams) {
+      AliasIdSet params { AliasIdSet::IdRange { 0, numParams } };
+      ac |= ALocal { depth, params };
+    }
 
-    AliasIdSet params{ AliasIdSet::IdRange{0, numParams} };
-    return addInspectable(func, depth) | ac | ALocal { depth, params };
+    // $this
+    if (func->cls() && !func->isClosureBody() && !func->isStatic()) {
+      ac |= AFContext { fp };
+    }
+
+    return ac;
   });
 }
 

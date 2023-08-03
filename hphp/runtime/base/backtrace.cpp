@@ -454,7 +454,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
         frm.localsAvailable() &&
         func->hasReifiedGenerics()) {
       // First local is always $0ReifiedGenerics which comes right after params
-      auto const generics = frm.local(func->numParams());
+      auto const generics = frm.local(func->reifiedGenericsLocalId());
       if (type(generics) != KindOfUninit) {
         assertx(tvIsVec(generics));
         auto const reified_generics = val(generics).parr;
@@ -479,7 +479,8 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
           clsname += mangleReifiedGenericsName(reified_generics);
         }
         frame.set(s_class_idx, s_class, clsname);
-        if (frm.localsAvailable() &&
+        if (RuntimeOption::EnableArgsInBacktraces &&
+            frm.localsAvailable() &&
             !frm.isInlined() &&
             !func->isStatic() &&
             btArgs.m_withThis) {

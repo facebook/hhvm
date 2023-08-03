@@ -215,7 +215,7 @@ struct BacktraceArgs {
       RuntimeOption::EvalEnableCompactBacktrace &&
       !m_skipInlined &&
       !m_withSelf &&
-      !m_withThis &&
+      (!RuntimeOption::EnableArgsInBacktraces || !m_withThis) &&
       !m_withMetadata &&
       (!RuntimeOption::EnableArgsInBacktraces || !m_withArgValues) &&
       !m_withArgNames &&

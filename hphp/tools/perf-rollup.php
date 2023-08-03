@@ -163,17 +163,17 @@ function main() {
 
   $argv = $_SERVER['argv'];
   ini_set('memory_limit', '64G');
-  if (posix_isatty(STDIN)) {
+  if (posix_isatty(HH\stdin())) {
     usage($argv[0]);
     exit(1);
   }
 
-  fprintf(STDERR, ">> Parsing samples from stdin...\n");
-  $samples = read_perf_samples(STDIN);
+  fprintf(HH\stderr(), ">> Parsing samples from stdin...\n");
+  $samples = read_perf_samples(HH\stdin());
   $groups = Map {};
   $helpers = Map {};
 
-  fprintf(STDERR, ">> Categorizing samples...\n");
+  fprintf(HH\stderr(), ">> Categorizing samples...\n");
   foreach ($samples as $stack) {
     if (starts_with($stack[0], 'PHP::')) {
       increment_key($groups, 'TC');

@@ -88,3 +88,18 @@ class ThriftPackage(unittest.TestCase):
                 }
                 """,
         )
+
+    def test_package_from_namespace(self):
+        # When no domain is present, default is used
+        self.write_and_test(
+            "foo.thrift",
+            """\
+                namespace cpp2 "thrift.annotation"
+
+                """,
+            """\
+                package "meta.com/thrift/annotation"
+
+                namespace cpp2 "thrift.annotation"
+                """,
+        )

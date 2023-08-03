@@ -33,4 +33,15 @@ TEST(PackageGeneratorTest, file_path) {
       codemod::package_name_generator::from_file_path(path),
       "meta.com/foo/bar");
 }
+
+TEST(PackageGeneratorTest, namespace) {
+  codemod::package_name_generator gen("test.foo.bar");
+  EXPECT_EQ(gen.generate("apache.org"), "apache.org/test/foo/bar");
+
+  codemod::package_name_generator gen_with_domain("facebook.foo.bar");
+  EXPECT_EQ(gen_with_domain.generate("apache.org"), "facebook.com/foo/bar");
+
+  codemod::package_name_generator gen_with_default_domain("test.foo.bar");
+  EXPECT_EQ(gen_with_default_domain.generate(), "meta.com/test/foo/bar");
+}
 } // namespace apache::thrift::compiler

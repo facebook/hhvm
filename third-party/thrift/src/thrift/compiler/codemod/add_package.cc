@@ -57,8 +57,13 @@ class add_package {
       {"cpp2", "cpp2"}, {"hack", ""}};
 
   std::string get_package() const {
-    // use file path for package name
-    return package_name_generator::from_file_path(prog_.path());
+    // If no namespaces exist, use the file path as the package.
+    if (prog_.namespaces().empty()) {
+      return package_name_generator::from_file_path(prog_.path());
+    }
+    // TODO: Support multiple namespaces.
+    return package_name_generator(prog_.namespaces().begin()->second)
+        .generate();
   }
 
   std::string get_replacement_content(const std::string& pkg) const {

@@ -543,43 +543,6 @@ class ast_builder : public parser_actions {
     return value;
   }
 
-  void add_definition(
-      source_range range,
-      std::unique_ptr<t_named> defn,
-      std::unique_ptr<attributes> attrs) {
-    set_attributes(*defn, std::move(attrs), range);
-
-    // Add to scope.
-    if (auto* tnode = dynamic_cast<t_interaction*>(defn.get())) {
-      scope_->add_interaction(program_.scope_name(*defn), tnode);
-    } else if (auto* tnode = dynamic_cast<t_service*>(defn.get())) {
-      scope_->add_service(program_.scope_name(*defn), tnode);
-    } else if (auto* tnode = dynamic_cast<t_const*>(defn.get())) {
-      scope_->add_constant(program_.scope_name(*defn), tnode);
-    } else if (auto* tnode = dynamic_cast<t_enum*>(defn.get())) {
-      scope_->add_type(program_.scope_name(*defn), tnode);
-      // Register enum value names in scope.
-      for (const auto& value : tnode->consts()) {
-        // TODO: Remove the ability to access unscoped enum values.
-        scope_->add_constant(program_.scope_name(value), &value);
-        scope_->add_constant(program_.scope_name(*defn, value), &value);
-      }
-    } else if (auto* tnode = dynamic_cast<t_type*>(defn.get())) {
-      auto* tnode_true_type = tnode->get_true_type();
-      if (tnode_true_type && tnode_true_type->is_enum()) {
-        for (const auto& value :
-             static_cast<const t_enum*>(tnode_true_type)->consts()) {
-          scope_->add_constant(program_.scope_name(*defn, value), &value);
-        }
-      }
-      scope_->add_type(program_.scope_name(*defn), tnode);
-    } else {
-      throw std::logic_error("Unsupported declaration.");
-    }
-    // Add to program.
-    program_.add_definition(std::move(defn));
-  }
-
  public:
   ast_builder(
       diagnostics_engine& diags,
@@ -688,9 +651,10 @@ class ast_builder : public parser_actions {
     };
     auto service = std::make_unique<t_service>(
         &program_, fmt::to_string(name.str), find_base_service());
-    service->set_src_range(range);
+    set_attributes(*service, std::move(attrs), range);
     service->set_functions(std::move(functions));
-    add_definition(range, std::move(service), std::move(attrs));
+    scope_->add_service(program_.scope_name(*service), service.get());
+    program_.add_definition(std::move(service));
   }
 
   void on_interaction(
@@ -700,9 +664,11 @@ class ast_builder : public parser_actions {
       t_function_list functions) override {
     auto interaction =
         std::make_unique<t_interaction>(&program_, fmt::to_string(name.str));
-    interaction->set_src_range(range);
+    set_attributes(*interaction, std::move(attrs), range);
     interaction->set_functions(std::move(functions));
-    add_definition(range, std::move(interaction), std::move(attrs));
+    scope_->add_interaction(
+        program_.scope_name(*interaction), interaction.get());
+    program_.add_definition(std::move(interaction));
   }
 
   std::unique_ptr<t_function> on_function(
@@ -805,8 +771,16 @@ class ast_builder : public parser_actions {
       const identifier& name) override {
     auto typedef_node = std::make_unique<t_typedef>(
         &program_, fmt::to_string(name.str), std::move(type));
-    typedef_node->set_src_range(range);
-    add_definition(range, std::move(typedef_node), std::move(attrs));
+    set_attributes(*typedef_node, std::move(attrs), range);
+    auto* true_type = typedef_node->get_true_type();
+    if (true_type && true_type->is_enum()) {
+      for (const auto& value :
+           static_cast<const t_enum*>(true_type)->consts()) {
+        scope_->add_constant(program_.scope_name(*typedef_node, value), &value);
+      }
+    }
+    scope_->add_type(program_.scope_name(*typedef_node), typedef_node.get());
+    program_.add_definition(std::move(typedef_node));
   }
 
   void on_struct(
@@ -816,9 +790,10 @@ class ast_builder : public parser_actions {
       t_field_list fields) override {
     auto struct_node =
         std::make_unique<t_struct>(&program_, fmt::to_string(name.str));
-    struct_node->set_src_range(range);
+    set_attributes(*struct_node, std::move(attrs), range);
     set_fields(*struct_node, std::move(fields));
-    add_definition(range, std::move(struct_node), std::move(attrs));
+    scope_->add_type(program_.scope_name(*struct_node), struct_node.get());
+    program_.add_definition(std::move(struct_node));
   }
 
   void on_union(
@@ -828,9 +803,10 @@ class ast_builder : public parser_actions {
       t_field_list fields) override {
     auto union_node =
         std::make_unique<t_union>(&program_, fmt::to_string(name.str));
-    union_node->set_src_range(range);
+    set_attributes(*union_node, std::move(attrs), range);
     set_fields(*union_node, std::move(fields));
-    add_definition(range, std::move(union_node), std::move(attrs));
+    scope_->add_type(program_.scope_name(*union_node), union_node.get());
+    program_.add_definition(std::move(union_node));
   }
 
   void on_exception(
@@ -843,12 +819,13 @@ class ast_builder : public parser_actions {
       t_field_list fields) override {
     auto exception =
         std::make_unique<t_exception>(&program_, fmt::to_string(name.str));
-    exception->set_src_range(range);
+    set_attributes(*exception, std::move(attrs), range);
     exception->set_safety(safety);
     exception->set_kind(kind);
     exception->set_blame(blame);
     set_fields(*exception, std::move(fields));
-    add_definition(range, std::move(exception), std::move(attrs));
+    scope_->add_type(program_.scope_name(*exception), exception.get());
+    program_.add_definition(std::move(exception));
   }
 
   std::unique_ptr<t_field> on_field(
@@ -892,9 +869,18 @@ class ast_builder : public parser_actions {
       t_enum_value_list values) override {
     auto enum_node =
         std::make_unique<t_enum>(&program_, fmt::to_string(name.str));
-    enum_node->set_src_range(range);
+    set_attributes(*enum_node, std::move(attrs), range);
     enum_node->set_values(std::move(values));
-    add_definition(range, std::move(enum_node), std::move(attrs));
+
+    scope_->add_type(program_.scope_name(*enum_node), enum_node.get());
+    // Register enum value names in scope.
+    for (const auto& value : enum_node->consts()) {
+      // TODO: Remove the ability to access unscoped enum values.
+      scope_->add_constant(program_.scope_name(value), &value);
+      scope_->add_constant(program_.scope_name(*enum_node, value), &value);
+    }
+
+    program_.add_definition(std::move(enum_node));
   }
 
   std::unique_ptr<t_enum_value> on_enum_value(
@@ -922,8 +908,9 @@ class ast_builder : public parser_actions {
       std::unique_ptr<t_const_value> value) override {
     auto constant = std::make_unique<t_const>(
         &program_, std::move(type), fmt::to_string(name.str), std::move(value));
-    constant->set_src_range(range);
-    add_definition(range, std::move(constant), std::move(attrs));
+    set_attributes(*constant, std::move(attrs), range);
+    scope_->add_constant(program_.scope_name(*constant), constant.get());
+    program_.add_definition(std::move(constant));
   }
 
   std::unique_ptr<t_const_value> on_const_ref(const identifier& name) override {

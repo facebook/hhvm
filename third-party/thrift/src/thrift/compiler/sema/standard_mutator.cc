@@ -265,63 +265,51 @@ void inherit_release_state(
 void normalize_return_type(
     diagnostic_context& ctx, mutator_context&, t_function& node) {
   auto& types = node.return_types();
-  for (size_t i = 0; i < types.size(); ++i) {
-    if (!types[i].resolve()) {
-      ctx.error(node, "Failed to resolve return type of `{}`.", node.name());
+  if (types.empty()) {
+    return;
+  }
+  if (!types.front().resolve()) {
+    ctx.error(node, "Failed to resolve return type of `{}`.", node.name());
+    return;
+  }
+
+  size_t response_pos = 0;
+  t_templated_type* sink_or_stream = node.sink_or_stream();
+  if (auto* interaction = dynamic_cast<const t_interaction*>(&*types.front())) {
+    // Old syntax treats a returned interaction as a response.
+    if (node.is_interaction_constructor()) {
+      assert(types.size() == 1 && !sink_or_stream);
+      node.set_response_pos(0);
       return;
     }
-
-    const auto* type = types[i]->get_true_type();
-    if (auto* interaction = dynamic_cast<const t_interaction*>(type)) {
-      if (i != 0) {
-        ctx.error(
-            "Interactions are only allowed as the leftmost return type: {}",
-            type->get_full_name());
-      }
-
-      // Old syntax treats returned interaction as response instead
-      if (node.is_interaction_constructor()) {
-        assert(types.size() == 1);
-        node.set_response_pos(i);
-        break;
-      }
-      node.set_returned_interaction_pos(i);
-      if (types.size() == 1) {
+    node.set_returned_interaction_pos(0);
+    if (types.size() == 1) {
+      if (!sink_or_stream) {
         node.set_return_type(t_base_type::t_void());
-        break;
       }
-    } else if (auto* stream = dynamic_cast<const t_stream_response*>(type)) {
-      if (i + 1 != types.size()) {
-        ctx.error(
-            "Streams are only allowed as the rightmost return type: {}",
-            type->get_full_name());
-      }
-      // TODO: move first response out of t_stream_response
-      if (const auto& ret = node.return_type()) {
-        const_cast<t_stream_response*>(stream)->set_first_response_type(ret);
-      }
-      node.set_response_pos(i);
-    } else if (auto* sink = dynamic_cast<const t_sink*>(type)) {
-      if (i + 1 != types.size()) {
-        ctx.error(
-            "Sinks are only allowed as the rightmost return type: {}",
-            type->get_full_name());
-      }
-      // TODO: move first response out of t_sink
-      if (const auto& ret = node.return_type()) {
-        const_cast<t_sink*>(sink)->set_first_response_type(ret);
-      }
-      node.set_response_pos(i);
-    } else if (
-        dynamic_cast<const t_service*>(type) ||
-        dynamic_cast<const t_exception*>(type)) {
-      ctx.error("Invalid return type: {}", type->get_full_name());
-    } else {
-      if (node.return_type()) {
-        ctx.error("Too many return types: {}", type->get_full_name());
-      }
-      node.set_response_pos(i);
+      return;
     }
+    response_pos = 1;
+  } else if (types.size() > 1) {
+    ctx.error("Too many return types");
+  }
+
+  // Check the (first) response type.
+  auto type = types[response_pos];
+  const t_type* true_type = type->get_true_type();
+  if (dynamic_cast<const t_service*>(true_type) ||
+      dynamic_cast<const t_exception*>(true_type)) {
+    ctx.error("Invalid first response type: {}", type->get_full_name());
+  }
+
+  if (!sink_or_stream) {
+    node.set_response_pos(response_pos);
+  } else if (auto* sink = dynamic_cast<t_sink*>(sink_or_stream)) {
+    // TODO: move first response out of t_sink.
+    sink->set_first_response_type(type);
+  } else if (auto* stream = dynamic_cast<t_stream_response*>(sink_or_stream)) {
+    // TODO: move first response out of t_stream_response.
+    stream->set_first_response_type(type);
   }
 }
 

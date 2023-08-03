@@ -434,7 +434,7 @@ class parser {
         break;
     }
 
-    auto return_type = parse_return_type();
+    auto ret = parse_return_type();
     auto name = parse_identifier();
     auto params = parse_param_list();
 
@@ -444,7 +444,7 @@ class parser {
         range,
         std::move(attrs),
         qual,
-        std::move(return_type),
+        std::move(ret),
         name,
         std::move(params),
         std::move(throws));
@@ -459,55 +459,55 @@ class parser {
   //   | [initial_response_type ","] (sink | stream)
   //
   // initial_response_type: type
-  std::vector<t_type_ref> parse_return_type() {
-    auto return_type = std::vector<t_type_ref>();
+  return_type parse_return_type() {
+    auto ret = return_type();
     if (token_.kind == tok::identifier) {
       // Parse a type or an interaction.
       auto range = token_.range;
       auto name = consume_token().string_value();
-      return_type.push_back(actions_.on_type(range, name, {}));
+      ret.types.push_back(actions_.on_type(range, name, {}));
       if (!try_consume_token(',')) {
-        return return_type;
+        return ret;
       }
     }
     bool is_void = false;
     switch (token_.kind) {
       case tok::kw_void:
         is_void = true;
-        return_type.push_back(t_base_type::t_void());
+        ret.types.push_back(t_base_type::t_void());
         consume_token();
         break;
       case tok::kw_sink:
-        return_type.push_back(parse_sink());
-        return return_type;
+        ret.sink_or_stream = parse_sink();
+        return ret;
       case tok::kw_stream:
-        return_type.push_back(parse_stream());
-        return return_type;
+        ret.sink_or_stream = parse_stream();
+        return ret;
       default:
-        return_type.push_back(parse_type());
+        ret.types.push_back(parse_type());
         break;
     }
     if (!try_consume_token(',')) {
-      return return_type;
+      return ret;
     }
     if (is_void) {
       report_error("cannot use 'void' as an initial response type");
     }
     switch (token_.kind) {
       case tok::kw_sink:
-        return_type.push_back(parse_sink());
+        ret.sink_or_stream = parse_sink();
         break;
       case tok::kw_stream:
-        return_type.push_back(parse_stream());
+        ret.sink_or_stream = parse_stream();
         break;
       default:
         report_expected("'sink' or 'stream' after the initial response type");
     }
-    return return_type;
+    return ret;
   }
 
   // sink: "sink" "<" type [throws], type [throws] ">"
-  t_type_ref parse_sink() {
+  std::unique_ptr<t_sink> parse_sink() {
     auto range = track_range();
     consume_token();
     expect_and_consume('<');
@@ -519,7 +519,7 @@ class parser {
   }
 
   // stream: "stream" "<" type [throws] ">"
-  t_type_ref parse_stream() {
+  std::unique_ptr<t_stream_response> parse_stream() {
     auto range = track_range();
     consume_token();
     expect_and_consume('<');

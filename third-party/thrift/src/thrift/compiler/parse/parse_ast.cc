@@ -709,12 +709,15 @@ class ast_builder : public parser_actions {
       source_range range,
       std::unique_ptr<attributes> attrs,
       t_function_qualifier qual,
-      std::vector<t_type_ref> return_type,
+      return_type ret,
       const identifier& name,
       t_field_list params,
       std::unique_ptr<t_throws> throws) override {
     auto function = std::make_unique<t_function>(
-        &program_, std::move(return_type), fmt::to_string(name.str));
+        &program_,
+        std::move(ret.types),
+        std::move(ret.sink_or_stream),
+        fmt::to_string(name.str));
     function->set_qualifier(qual);
     set_fields(function->params(), std::move(params));
     function->set_exceptions(std::move(throws));
@@ -725,22 +728,24 @@ class ast_builder : public parser_actions {
     return function;
   }
 
-  t_type_ref on_sink(
+  std::unique_ptr<t_sink> on_sink(
       source_range range,
       type_throws_spec sink_spec,
       type_throws_spec final_response_spec) override {
     auto sink = std::make_unique<t_sink>(
         std::move(sink_spec.type), std::move(final_response_spec.type));
+    sink->set_src_range(range);
     sink->set_sink_exceptions(std::move(sink_spec.throws));
     sink->set_final_response_exceptions(std::move(final_response_spec.throws));
-    return new_type_ref(range, std::move(sink), {});
+    return sink;
   }
 
-  t_type_ref on_stream(source_range range, type_throws_spec spec) override {
-    auto stream_response =
-        std::make_unique<t_stream_response>(std::move(spec.type));
-    stream_response->set_exceptions(std::move(spec.throws));
-    return new_type_ref(range, std::move(stream_response), {});
+  std::unique_ptr<t_stream_response> on_stream(
+      source_range range, type_throws_spec spec) override {
+    auto stream = std::make_unique<t_stream_response>(std::move(spec.type));
+    stream->set_src_range(range);
+    stream->set_exceptions(std::move(spec.throws));
+    return stream;
   }
 
   t_type_ref on_list_type(

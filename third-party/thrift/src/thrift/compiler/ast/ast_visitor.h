@@ -163,11 +163,6 @@ class basic_ast_visitor {
         visit_child(*list_node, args...);
       } else if (auto* map_node = ast_detail::as<t_map>(&type_inst)) {
         visit_child(*map_node, args...);
-      } else if (auto* sink_node = ast_detail::as<t_sink>(&type_inst)) {
-        visit_child(*sink_node, args...);
-      } else if (
-          auto* stream_node = ast_detail::as<t_stream_response>(&type_inst)) {
-        visit_child(*stream_node, args...);
       } else {
         std::terminate(); // Should be unreachable.
       }
@@ -189,7 +184,33 @@ class basic_ast_visitor {
   }
   FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T_(function) {
     begin_visit(function_visitors_, node, args...);
-    if (node.exceptions() != nullptr) {
+    auto* sink_or_stream = node.sink_or_stream();
+    if (!sink_or_stream) {
+      // Do nothing.
+    } else if (auto* sink = ast_detail::as<t_sink>(sink_or_stream)) {
+      visit_child(*sink, args...);
+    } else if (
+        auto* stream = ast_detail::as<t_stream_response>(sink_or_stream)) {
+      visit_child(*stream, args...);
+    }
+    if (node.exceptions()) {
+      visit_child(*node.exceptions(), args...);
+    }
+    end_visit(node, args...);
+  }
+  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T_(sink) {
+    begin_visit(sink_visitors_, node, args...);
+    if (auto throws = node.sink_exceptions()) {
+      visit_child(*throws, args...);
+    }
+    if (auto throws = node.final_response_exceptions()) {
+      visit_child(*throws, args...);
+    }
+    end_visit(node, args...);
+  }
+  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T_(stream_response) {
+    begin_visit(stream_response_visitors_, node, args...);
+    if (node.exceptions()) {
       visit_child(*node.exceptions(), args...);
     }
     end_visit(node, args...);
@@ -249,23 +270,6 @@ class basic_ast_visitor {
   }
   FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T_(map) {
     begin_visit(map_visitors_, node, args...);
-    end_visit(node, args...);
-  }
-  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T_(sink) {
-    begin_visit(sink_visitors_, node, args...);
-    if (node.sink_exceptions() != nullptr) {
-      visit_child(*node.sink_exceptions(), args...);
-    }
-    if (node.final_response_exceptions() != nullptr) {
-      visit_child(*node.final_response_exceptions(), args...);
-    }
-    end_visit(node, args...);
-  }
-  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T_(stream_response) {
-    begin_visit(stream_response_visitors_, node, args...);
-    if (node.exceptions() != nullptr) {
-      visit_child(*node.exceptions(), args...);
-    }
     end_visit(node, args...);
   }
 

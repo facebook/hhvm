@@ -532,37 +532,47 @@ TEST(CompilerTest, mixin_field_name_uniqueness) {
 }
 
 TEST(CompilerTest, annotation_positions) {
-  check_compile(
-      R"(
-      typedef set<set<i32> (annot)> T # expected-error: Annotations are not allowed in this position. Extract the type into a named typedef instead.
-      const i32 (annot) C = 42 # expected-error: Annotations are not allowed in this position. Extract the type into a named typedef instead.
-      service S {
-        i32 (annot) foo() # expected-error: Annotations are not allowed in this position. Extract the type into a named typedef instead.
-        void bar(1: i32 (annot) p) # expected-error: Annotations are not allowed in this position. Extract the type into a named typedef instead.
-      }
-)");
+  check_compile(R"(
+    typedef set<set<i32> (annot)> T # expected-error: Annotations are not allowed in this position. Extract the type into a named typedef instead.
+    const i32 (annot) C = 42 # expected-error: Annotations are not allowed in this position. Extract the type into a named typedef instead.
+    service S {
+      i32 (annot) foo() # expected-error: Annotations are not allowed in this position. Extract the type into a named typedef instead.
+      void bar(1: i32 (annot) p) # expected-error: Annotations are not allowed in this position. Extract the type into a named typedef instead.
+    }
+  )");
 }
 
 TEST(CompilerTest, duplicated_struct_names) {
-  check_compile(
-      R"(
-      struct Foo {}
-      struct Bar {}
-      struct Foo {} # expected-error: Redefinition of type `Foo`.
-)");
+  check_compile(R"(
+    struct Foo {}
+    struct Bar {}
+    struct Foo {} # expected-error: Redefinition of type `Foo`.
+  )");
 }
 
 TEST(CompilerTest, interactions) {
-  check_compile(
-      R"(
-      interaction J {}
-      interaction I {
-        performs J; # expected-error: Nested interactions are forbidden.
-        J foo(); # expected-error: Nested interactions are forbidden: foo
-      }
-      service T {
-        performs I;
-        performs I; # expected-error: Function `createI` is already defined for `T`.
-      }
-)");
+  check_compile(R"(
+    interaction J {}
+    interaction I {
+      performs J; # expected-error: Nested interactions are forbidden.
+      J foo(); # expected-error: Nested interactions are forbidden: foo
+    }
+    service T {
+      performs I;
+      performs I; # expected-error: Function `createI` is already defined for `T`.
+    }
+  )");
+}
+
+TEST(CompilerTest, interactions_as_first_response_type) {
+  check_compile(R"(
+    interaction I {}
+    interaction J {}
+
+    service S {
+      I, J foo();                 # expected-error: Invalid first response type: test.J
+      I, J, stream<i32> bar();    # expected-error: Invalid first response type: test.J
+      I, J, sink<i32, i32> baz(); # expected-error: Invalid first response type: test.J
+    }
+  )");
 }

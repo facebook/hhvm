@@ -436,43 +436,66 @@ TYPED_TEST(AstVisitorTest, Map) {
   this->program_.add_type_instantiation(std::move(map));
 }
 
-TYPED_TEST(AstVisitorTest, Sink) {
+TEST(AstVisitorTest, Sink) {
   auto sink1 =
       std::make_unique<t_sink>(t_base_type::t_i32(), t_base_type::t_i32());
+  auto sink1ptr = sink1.get();
   sink1->set_sink_exceptions(std::make_unique<t_throws>());
   auto sink2 =
       std::make_unique<t_sink>(t_base_type::t_i32(), t_base_type::t_i32());
+  auto sink2ptr = sink2.get();
   sink2->set_final_response_exceptions(std::make_unique<t_throws>());
-  EXPECT_CALL(this->mock_, visit_sink(sink1.get()));
-  EXPECT_CALL(this->mock_, visit_throws(sink1->sink_exceptions()));
-  EXPECT_CALL(this->mock_, visit_sink(sink2.get()));
-  EXPECT_CALL(this->mock_, visit_throws(sink2->final_response_exceptions()));
 
-  // Matches: type_instantiation.
-  EXPECT_CALL(this->mock_, visit_type_instantiation(sink1.get()));
-  EXPECT_CALL(this->mock_, visit_type_instantiation(sink2.get()));
-  EXPECT_CALL(this->overload_mock_, visit_sink(sink1.get()));
-  EXPECT_CALL(this->overload_mock_, visit_sink(sink2.get()));
-  this->program_.add_type_instantiation(std::move(sink1));
-  this->program_.add_type_instantiation(std::move(sink2));
+  auto program = t_program("path/to/program.thrift");
+  auto service = std::make_unique<t_service>(&program, "Service");
+  service->add_function(std::make_unique<t_function>(
+      &program, std::vector<t_type_ref>(), std::move(sink1), "f1"));
+  service->add_function(std::make_unique<t_function>(
+      &program, std::vector<t_type_ref>(), std::move(sink2), "f2"));
+  program.add_service(std::move(service));
+
+  auto visitor = ast_visitor();
+  auto responses = std::vector<const t_sink*>();
+  visitor.add_sink_visitor(
+      [&](const t_sink& node) { responses.push_back(&node); });
+  auto throws = std::vector<const t_throws*>();
+  visitor.add_throws_visitor(
+      [&](const t_throws& node) { throws.push_back(&node); });
+  visitor(program);
+
+  EXPECT_THAT(responses, ::testing::ElementsAre(sink1ptr, sink2ptr));
+  EXPECT_THAT(
+      throws,
+      ::testing::ElementsAre(
+          sink1ptr->sink_exceptions(), sink2ptr->final_response_exceptions()));
 }
 
-TYPED_TEST(AstVisitorTest, StreamResponse) {
+TEST(AstVisitorTest, StreamResponse) {
   auto stream1 = std::make_unique<t_stream_response>(t_base_type::t_i32());
+  auto stream1ptr = stream1.get();
   stream1->set_exceptions(std::make_unique<t_throws>());
   auto stream2 = std::make_unique<t_stream_response>(t_base_type::t_i32());
+  auto stream2ptr = stream2.get();
 
-  EXPECT_CALL(this->mock_, visit_stream_response(stream1.get()));
-  EXPECT_CALL(this->mock_, visit_stream_response(stream2.get()));
-  EXPECT_CALL(this->mock_, visit_throws(stream1->exceptions()));
+  auto program = t_program("path/to/program.thrift");
+  auto service = std::make_unique<t_service>(&program, "Service");
+  service->add_function(std::make_unique<t_function>(
+      &program, std::vector<t_type_ref>(), std::move(stream1), "f1"));
+  service->add_function(std::make_unique<t_function>(
+      &program, std::vector<t_type_ref>(), std::move(stream2), "f2"));
+  program.add_service(std::move(service));
 
-  // Matches: type_instantiation.
-  EXPECT_CALL(this->mock_, visit_type_instantiation(stream1.get()));
-  EXPECT_CALL(this->mock_, visit_type_instantiation(stream2.get()));
-  EXPECT_CALL(this->overload_mock_, visit_stream_response(stream1.get()));
-  EXPECT_CALL(this->overload_mock_, visit_stream_response(stream2.get()));
-  this->program_.add_type_instantiation(std::move(stream1));
-  this->program_.add_type_instantiation(std::move(stream2));
+  auto visitor = ast_visitor();
+  auto responses = std::vector<const t_stream_response*>();
+  visitor.add_stream_response_visitor(
+      [&](const t_stream_response& node) { responses.push_back(&node); });
+  auto throws = std::vector<const t_throws*>();
+  visitor.add_throws_visitor(
+      [&](const t_throws& node) { throws.push_back(&node); });
+  visitor(program);
+
+  EXPECT_THAT(responses, ::testing::ElementsAre(stream1ptr, stream2ptr));
+  EXPECT_THAT(throws, ::testing::ElementsAre(stream1ptr->exceptions()));
 }
 
 TEST(AstVisitorTest, Modifications) {

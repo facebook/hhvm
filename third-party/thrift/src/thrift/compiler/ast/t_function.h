@@ -60,18 +60,35 @@ class t_function final : public t_named {
   t_function(
       t_program* program,
       std::vector<t_type_ref> return_types,
+      std::unique_ptr<t_templated_type> sink_or_stream,
       std::string name)
       : t_named(program, std::move(name)),
         return_types_(std::move(return_types)),
+        sink_or_stream_(std::move(sink_or_stream)),
         paramlist_(std::make_unique<t_paramlist>(program)) {}
 
-  const t_type_ref& return_type() const {
+  t_type_ref return_type() const {
+    if (sink_or_stream_) {
+      return t_type_ref::from_ptr(sink_or_stream_.get());
+    }
     return response_pos_ != -1 ? return_types_[response_pos_]
                                : t_type_ref::none();
   }
   void set_return_type(t_type_ref ret) {
     response_pos_ = return_types_.size();
     return_types_.push_back(ret);
+  }
+
+  t_templated_type* sink_or_stream() { return sink_or_stream_.get(); }
+  const t_templated_type* sink_or_stream() const {
+    return sink_or_stream_.get();
+  }
+
+  bool returns_sink() const {
+    return sink_or_stream_ && sink_or_stream_->is_sink();
+  }
+  bool returns_stream() const {
+    return sink_or_stream_ && sink_or_stream_->is_streamresponse();
   }
 
   t_paramlist& params() { return *paramlist_; }
@@ -113,6 +130,7 @@ class t_function final : public t_named {
 
  private:
   std::vector<t_type_ref> return_types_;
+  std::unique_ptr<t_templated_type> sink_or_stream_;
   std::unique_ptr<t_paramlist> paramlist_;
   std::unique_ptr<t_throws> exceptions_;
   t_function_qualifier qualifier_{t_function_qualifier::unspecified};
@@ -153,8 +171,6 @@ class t_function final : public t_named {
   const t_throws* get_sink_xceptions() const;
   const t_throws* get_sink_final_response_xceptions() const;
   bool is_oneway() const { return qualifier_ == t_function_qualifier::one_way; }
-  bool returns_stream() const { return return_type()->is_streamresponse(); }
-  bool returns_sink() const { return return_type()->is_sink(); }
 };
 
 using t_function_list = node_list<t_function>;

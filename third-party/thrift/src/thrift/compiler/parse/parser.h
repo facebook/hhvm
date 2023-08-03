@@ -34,6 +34,9 @@ class diagnostics_engine;
 class lexer;
 
 class t_base_type;
+class t_sink;
+class t_stream_response;
+class t_templated_type;
 class t_throws;
 
 struct identifier {
@@ -61,6 +64,11 @@ struct attributes {
 struct type_throws_spec {
   t_type_ref type;
   std::unique_ptr<t_throws> throws;
+};
+
+struct return_type {
+  std::vector<t_type_ref> types;
+  std::unique_ptr<t_templated_type> sink_or_stream;
 };
 
 enum class sign { plus, minus };
@@ -110,16 +118,18 @@ class parser_actions {
       source_range range,
       std::unique_ptr<attributes> attrs,
       t_function_qualifier qual,
-      std::vector<t_type_ref> return_type,
+      return_type ret,
       const identifier& name,
       t_field_list params,
       std::unique_ptr<t_throws> throws) = 0;
 
-  virtual t_type_ref on_sink(
+  virtual std::unique_ptr<t_sink> on_sink(
       source_range range,
       type_throws_spec sink_spec,
       type_throws_spec final_response_spec) = 0;
-  virtual t_type_ref on_stream(source_range range, type_throws_spec spec) = 0;
+
+  virtual std::unique_ptr<t_stream_response> on_stream(
+      source_range range, type_throws_spec spec) = 0;
 
   virtual t_type_ref on_list_type(
       source_range range,

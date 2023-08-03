@@ -875,10 +875,9 @@ void validate_stream_exceptions_return_type(
     return;
   }
 
-  ctx.check(
-      dynamic_cast<const t_stream_response*>(node.return_type().get_type()),
-      "`stream throws` only valid on stream methods: {}",
-      node.name());
+  if (!node.returns_stream()) {
+    ctx.error("`stream throws` only valid on stream methods: {}", node.name());
+  }
 }
 
 void validate_interaction_nesting(
@@ -1118,6 +1117,18 @@ struct ValidateAnnotationPositions {
         err(ctx);
       }
     }
+    if (const auto* s = dynamic_cast<const t_sink*>(node.sink_or_stream())) {
+      if (owns_annotations(s->sink_type()) ||
+          owns_annotations(s->final_response_type())) {
+        err(ctx);
+      }
+    }
+    if (const auto* s =
+            dynamic_cast<const t_stream_response*>(node.sink_or_stream())) {
+      if (owns_annotations(s->elem_type())) {
+        err(ctx);
+      }
+    }
 
     for (auto& field : node.params().fields()) {
       auto type = field.type();
@@ -1149,21 +1160,11 @@ struct ValidateAnnotationPositions {
         }
         break;
       }
-      case t_type::type::t_stream: {
-        const auto& t = static_cast<const t_stream_response&>(type);
-        if (owns_annotations(t.elem_type())) {
-          err(ctx);
-        }
+      case t_type::type::t_stream:
+      case t_type::type::t_sink:
+        // This can be removed once sink and stream no longer inherit from
+        // t_templated_type.
         break;
-      }
-      case t_type::type::t_sink: {
-        const auto& t = static_cast<const t_sink&>(type);
-        if (owns_annotations(t.sink_type()) ||
-            owns_annotations(t.final_response_type())) {
-          err(ctx);
-        }
-        break;
-      }
       default:
         throw std::runtime_error("Unknown templated type");
     }

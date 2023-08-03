@@ -1256,34 +1256,6 @@ class CompilerFailureTest(unittest.TestCase):
             "[ERROR:foo.thrift:6] Oneway methods must have void return type: foo\n",
         )
 
-    def test_interaction_in_return_type(self):
-        write_file(
-            "foo.thrift",
-            textwrap.dedent(
-                """\
-                interaction I {
-                    void foo();
-                }
-
-                service S {
-                    I, I foo();
-                    I, I, stream<i32> bar();
-                    I, I, sink<i32, i32> baz();
-                }
-                """
-            ),
-        )
-
-        ret, out, err = self.run_thrift("foo.thrift")
-
-        self.assertEqual(ret, 1)
-        self.assertEqual(
-            err,
-            "[ERROR:foo.thrift:6] Interactions are only allowed as the leftmost return type: foo.I\n"
-            "[ERROR:foo.thrift:7] Interactions are only allowed as the leftmost return type: foo.I\n"
-            "[ERROR:foo.thrift:8] Interactions are only allowed as the leftmost return type: foo.I\n",
-        )
-
     # Time complexity of for_each_transitive_field should be O(1)
     def test_time_complexity_of_for_each_transitive_field(self):
         write_file(

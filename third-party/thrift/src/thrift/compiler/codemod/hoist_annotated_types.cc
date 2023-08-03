@@ -115,28 +115,10 @@ class hoist_annotated_types {
             maybe_create_typedef(t.val_type()));
         break;
       }
-      case t_type::type::t_stream: {
-        const auto& t = static_cast<const t_stream_response&>(type);
-        if (!needs_replacement(t.elem_type())) {
-          return;
-        }
-        maybe_create_typedef(t.elem_type());
-        // These are annoying to print and zbgs doesn't find any instances.
-        replacement = fmt::format("{}nocommit must be fixed by hand", "@");
+      case t_type::type::t_stream:
+      case t_type::type::t_sink:
+        // Handled in visit_function.
         break;
-      }
-      case t_type::type::t_sink: {
-        const auto& t = static_cast<const t_sink&>(type);
-        if (!needs_replacement(t.sink_type()) &&
-            !needs_replacement(t.final_response_type())) {
-          return;
-        }
-        maybe_create_typedef(t.sink_type());
-        maybe_create_typedef(t.final_response_type());
-        // These are annoying to print and zbgs doesn't find any instances.
-        replacement = fmt::format("{}nocommit must be fixed by hand", "@");
-        break;
-      }
       default:
         throw std::runtime_error("Unknown templated type");
     }
@@ -161,6 +143,31 @@ class hoist_annotated_types {
             {range.begin.offset(),
              annotations_end_offset,
              maybe_create_typedef(type)});
+      }
+    }
+
+    auto fix_by_hand = [&](const t_type& t) {
+      // These are annoying to print and zbgs doesn't find any instances.
+      auto range = t.src_range();
+      fm_.add(
+          {range.begin.offset(),
+           range.end.offset(),
+           fmt::format("{}nocommit must be fixed by hand", "@")});
+    };
+
+    if (const auto* t = dynamic_cast<const t_sink*>(f.sink_or_stream())) {
+      if (needs_replacement(t->sink_type()) ||
+          needs_replacement(t->final_response_type())) {
+        maybe_create_typedef(t->sink_type());
+        maybe_create_typedef(t->final_response_type());
+        fix_by_hand(*t);
+      }
+    }
+    if (const auto* t =
+            dynamic_cast<const t_stream_response*>(f.sink_or_stream())) {
+      if (needs_replacement(t->elem_type())) {
+        maybe_create_typedef(t->elem_type());
+        fix_by_hand(*t);
       }
     }
 

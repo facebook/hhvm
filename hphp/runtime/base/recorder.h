@@ -25,6 +25,7 @@
 #include <folly/Likely.h>
 
 #include "hphp/runtime/base/record-replay.h"
+#include "hphp/runtime/base/req-hash-map.h"
 #include "hphp/runtime/base/req-vector.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-object.h"
@@ -33,10 +34,13 @@
 
 namespace HPHP {
 
+struct c_Awaitable;
 struct c_ExternalThreadEventWaitHandle;
 
 struct Recorder {
-  void onExternalThreadEventProcess(const c_ExternalThreadEventWaitHandle* id);
+  static void onHasReceived(bool received);
+  static void onReceiveSomeUntil(c_ExternalThreadEventWaitHandle* received);
+  static void onTryReceiveSome(c_ExternalThreadEventWaitHandle* received);
   void requestExit();
   void requestInit();
   static void setEntryPoint(const String& entryPoint);
@@ -76,6 +80,9 @@ struct Recorder {
   void onNativeCallReturn(const String& ret);
   void onNativeCallThrow(std::exception_ptr exc);
   void onNativeCallWaitHandle(const Object& object);
+  void onReceived(
+    c_ExternalThreadEventWaitHandle* received, QueueCall::Method method);
+  void resolveWaitHandles();
   template<typename T> static String serialize(T value);
   Array toArray() const;
 
@@ -112,10 +119,12 @@ struct Recorder {
   }
 
   bool m_enabled{false};
-  req::vector<std::uintptr_t> m_externalThreadEventCreates;
-  req::vector<std::uintptr_t> m_externalThreadEventProcesses;
   req::vector<NativeCall> m_nativeCalls;
+  std::size_t m_nextThreadCreationOrder;
+  req::hash_map<c_Awaitable*, std::size_t> m_pendingWaitHandleToNativeCall;
+  req::vector<QueueCall> m_queueCalls;
   Array m_serverGlobal;
+  req::hash_map<const c_ExternalThreadEventWaitHandle*, std::size_t> m_threads;
 };
 
 } // namespace HPHP

@@ -16,9 +16,8 @@
 
 #include "hphp/runtime/base/replayer.h"
 
-#include <atomic>
 #include <fstream>
-#include <thread>
+#include <vector>
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-iterator.h"
@@ -52,6 +51,7 @@ namespace HPHP {
 
 Replayer::~Replayer() {
   always_assert_flog(m_nativeCalls.empty(), "{}", m_nativeCalls.size());
+  always_assert_flog(m_queueCalls.empty(), "{}", m_queueCalls.size());
 }
 
 String Replayer::file(const String& path) const {
@@ -77,9 +77,6 @@ String Replayer::init(const String& path) {
   // TODO Enable compiler ID assertion after replay completes successfully.
   // always_assert_flog(compilerId == HPHP::compilerId(), "{}", compilerId);
   m_serverGlobal = header[String{"serverGlobal"}].asCArrRef();
-  for (auto i{recording[String{"eteOrder"}].asCArrRef().begin()}; i; ++i) {
-    m_externalThreadEventOrder.emplace_back(i.second().asInt64Val());
-  }
   for (auto i{recording[String{"files"}].asCArrRef().begin()}; i; ++i) {
     m_files[i.first().asCStrRef().data()] = i.second().asCStrRef().data();
   }
@@ -97,10 +94,34 @@ String Replayer::init(const String& path) {
       call[2].asCArrRef(),
       call[3].asCStrRef(),
       call[4].asCStrRef(),
-      static_cast<std::uintptr_t>(call[5].asInt64Val()),
+      static_cast<std::uint8_t>(call[5].asInt64Val()),
+    });
+  }
+  for (auto i{recording[String{"queueCalls"}].asCArrRef().begin()}; i; ++i) {
+    const auto call{i.second().asCArrRef()};
+    m_queueCalls.push_back(QueueCall{
+      static_cast<QueueCall::Method>(call[0].asInt64Val()),
+      call[1].asCArrRef(),
     });
   }
   return header[String{"entryPoint"}].toString();
+}
+
+bool Replayer::onHasReceived() {
+  auto& replayer{get()};
+  auto call{replayer.m_queueCalls.front()};
+  replayer.m_queueCalls.pop_front();
+  always_assert(call.method == QueueCall::Method::HAS_RECEIVED);
+  always_assert(call.value.size() == 1);
+  return call.value[0].asBooleanVal();
+}
+
+c_ExternalThreadEventWaitHandle* Replayer::onReceiveSomeUntil() {
+  return get().onReceive(QueueCall::Method::RECEIVE_SOME_UNTIL);
+}
+
+c_ExternalThreadEventWaitHandle* Replayer::onTryReceiveSome() {
+  return get().onReceive(QueueCall::Method::TRY_RECEIVE_SOME);
 }
 
 void Replayer::requestInit() const {
@@ -112,18 +133,12 @@ void Replayer::setDebuggerHook(HPHP::DebuggerHook* debuggerHook) {
 }
 
 struct Replayer::ExternalThreadEvent final : public AsioExternalThreadEvent {
-  ~ExternalThreadEvent() override {
-    if (thread.joinable()) {
-      thread.join();
-    }
+  static c_ExternalThreadEventWaitHandle* create(const Object& exception) {
+    return (new ExternalThreadEvent{exception})->getWaitHandle();
   }
 
-  static Object create(const Object& exception) {
-    return create(new ExternalThreadEvent{exception});
-  }
-
-  static Object create(const TypedValue& result) {
-    return create(new ExternalThreadEvent{result});
+  static c_ExternalThreadEventWaitHandle* create(const TypedValue& result) {
+    return (new ExternalThreadEvent{result})->getWaitHandle();
   }
 
   void unserialize(TypedValue& result) override {
@@ -139,28 +154,8 @@ struct Replayer::ExternalThreadEvent final : public AsioExternalThreadEvent {
   explicit ExternalThreadEvent(const Object& exc) : exception{exc} {}
   explicit ExternalThreadEvent(const TypedValue& res) : result{res} {}
 
-  static Object create(ExternalThreadEvent* event) {
-    static std::uint64_t create{0};
-    const auto process{Replayer::get().m_externalThreadEventOrder[create++]};
-    const auto queue{AsioSession::Get()->getExternalThreadEventQueue()};
-    event->thread = std::thread{[event, process, queue] {
-      static std::atomic<std::uint64_t> nextToProcess{0};
-      while (nextToProcess != process) {
-        nextToProcess.wait(nextToProcess);
-      }
-      while (queue->getQueue() != K_CONSUMER_WAITING) {
-        std::this_thread::yield();
-      }
-      event->markAsFinished();
-      nextToProcess++;
-      nextToProcess.notify_all();
-    }};
-    return Object{event->getWaitHandle()};
-  }
-
   Object exception;
   TypedValue result;
-  std::thread thread;
 };
 
 struct Replayer::DebuggerHook final : public HPHP::DebuggerHook {
@@ -267,14 +262,18 @@ Object Replayer::makeWaitHandle(const NativeCall& call) {
   } else {
     ret = unserialize<TypedValue>(call.ret);
   }
-  const auto kind{call.waitHandle - 1};
+  const auto kind{call.wh - 1};
   switch (static_cast<c_Awaitable::Kind>(kind)) {
-    case c_Awaitable::Kind::ExternalThreadEvent:
+    case c_Awaitable::Kind::ExternalThreadEvent: {
+      c_ExternalThreadEventWaitHandle* wh;
       if (exc) {
-        return ExternalThreadEvent::create(exc);
+        wh = ExternalThreadEvent::create(exc);
       } else {
-        return ExternalThreadEvent::create(ret);
+        wh = ExternalThreadEvent::create(ret);
       }
+      m_threads[m_nextThreadCreationOrder++] = wh;
+      return Object{wh};
+    }
     case c_Awaitable::Kind::Static:
       if (exc) {
         return Object{c_StaticWaitHandle::CreateFailed(exc.detach())};
@@ -400,8 +399,7 @@ void Replayer::nativeArg(const String& recordedArg, ObjectData* arg) {
   } else {
     updateObject(object.get(), arg);
   }
-  // FIXME This is failing
-  // always_assert(object->equal(*arg));
+  always_assert(object->equal(*arg));
 }
 
 template<>
@@ -447,6 +445,19 @@ void Replayer::nativeArg(const String& recordedArg, TypedValue arg) {
 template<>
 void Replayer::nativeArg(const String& recordedArg, Variant& arg) {
   arg = unserialize<Variant>(recordedArg);
+}
+
+c_ExternalThreadEventWaitHandle* Replayer::onReceive(QueueCall::Method method) {
+  const auto call{m_queueCalls.front()};
+  m_queueCalls.pop_front();
+  always_assert(call.method == method);
+  c_ExternalThreadEventWaitHandle* received{nullptr};
+  for (std::int64_t i{call.value.size()}; i-- > 0;) {
+    auto wh{m_threads.at(call.value[i].asInt64Val())};
+    wh->setNextToProcess(received);
+    received = wh;
+  }
+  return received;
 }
 
 NativeCall Replayer::popNativeCall(std::uintptr_t id) {

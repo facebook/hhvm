@@ -19,10 +19,8 @@
 #include <cstdint>
 #include <deque>
 #include <string>
-#include <tuple>
 #include <unordered_map>
 #include <utility>
-#include <vector>
 
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/exceptions.h"
@@ -35,6 +33,7 @@
 
 namespace HPHP {
 
+struct c_ExternalThreadEventWaitHandle;
 struct DebuggerHook;
 
 struct Replayer {
@@ -42,6 +41,9 @@ struct Replayer {
   String file(const String& path) const;
   static Replayer& get();
   String init(const String& path);
+  static bool onHasReceived();
+  static c_ExternalThreadEventWaitHandle* onReceiveSomeUntil();
+  static c_ExternalThreadEventWaitHandle* onTryReceiveSome();
   void requestInit() const;
   void setDebuggerHook(DebuggerHook* debuggerHook);
 
@@ -65,8 +67,9 @@ struct Replayer {
     }
   };
 
-  static Object makeWaitHandle(const NativeCall& call);
+  Object makeWaitHandle(const NativeCall& call);
   template<typename T> static void nativeArg(const String& recordedArg, T arg);
+  c_ExternalThreadEventWaitHandle* onReceive(QueueCall::Method method);
   NativeCall popNativeCall(std::uintptr_t id);
   template<typename T> static T unserialize(const String& recordedValue);
 
@@ -76,7 +79,7 @@ struct Replayer {
     std::int64_t i{-1};
     (nativeArg<A>(call.args[++i].asCStrRef(), std::forward<A>(args)), ...);
     if constexpr (std::is_same_v<R, Object>) {
-      if (call.waitHandle) {
+      if (call.wh) {
         return makeWaitHandle(call);
       }
     }
@@ -89,11 +92,13 @@ struct Replayer {
   }
 
   HPHP::DebuggerHook* m_debuggerHook;
-  std::vector<std::int64_t> m_externalThreadEventOrder;
   std::unordered_map<std::string, std::string> m_files;
   std::deque<NativeCall> m_nativeCalls;
   std::unordered_map<std::string, std::uintptr_t> m_nativeFuncNames;
+  std::size_t m_nextThreadCreationOrder;
+  std::deque<QueueCall> m_queueCalls;
   Array m_serverGlobal;
+  std::unordered_map<std::size_t, c_ExternalThreadEventWaitHandle*> m_threads;
 };
 
 } // namespace HPHP

@@ -75,11 +75,6 @@ constexpr bool shouldRecordReplay(std::string_view name) {
 
     // FIXME: Below are temporarily not being recorded to unblock OBA.
 
-    // This is called by the IO enter/exit callbacks which are difficult to
-    // capture deterministically. While this function is non-deterministic,
-    // it appears to only be used for logging how long the IO wait takes.
-    name == "clock_gettime_ns" ||
-
     // Native functions that are causing issues with OBA
     name == "array_key_exists" ||
     name == "array_reverse" ||
@@ -157,7 +152,13 @@ struct NativeCall {
   Array args{Array::CreateVec()};
   String ret{empty_string()};
   String exc{empty_string()};
-  std::uintptr_t waitHandle{0};
+  std::uint8_t wh{0};
+};
+
+struct QueueCall {
+  enum class Method { HAS_RECEIVED, RECEIVE_SOME_UNTIL, TRY_RECEIVE_SOME };
+  Method method;
+  Array value{Array::CreateVec()};
 };
 
 } // namespace HPHP

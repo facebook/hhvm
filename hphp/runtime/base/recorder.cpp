@@ -16,10 +16,12 @@
 
 #include "hphp/runtime/base/recorder.h"
 
+#include <deque>
 #include <filesystem>
 #include <fstream>
 #include <limits>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
 
@@ -37,7 +39,9 @@
 #include "hphp/runtime/base/type-resource.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/variable-serializer.h"
+#include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_wait-handle.h"
+#include "hphp/runtime/server/transport.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/native.h"
@@ -53,17 +57,26 @@ namespace {
   static std::unordered_map<std::uintptr_t, std::string> g_nativeFuncNames;
 } // namespace
 
-void Recorder::onExternalThreadEventProcess(
-    const c_ExternalThreadEventWaitHandle* id) {
-  if (UNLIKELY(m_enabled)) {
-    m_externalThreadEventProcesses.emplace_back(
-      std::bit_cast<std::uintptr_t>(id));
+void Recorder::onHasReceived(bool received) {
+  if (auto& recorder{get()}; UNLIKELY(recorder.m_enabled)) {
+    auto& call{recorder.m_queueCalls.emplace_back()};
+    call.method = QueueCall::Method::HAS_RECEIVED;
+    call.value.append(received);
   }
+}
+
+void Recorder::onReceiveSomeUntil(c_ExternalThreadEventWaitHandle* received) {
+  get().onReceived(received, QueueCall::Method::RECEIVE_SOME_UNTIL);
+}
+
+void Recorder::onTryReceiveSome(c_ExternalThreadEventWaitHandle* received) {
+  get().onReceived(received, QueueCall::Method::TRY_RECEIVE_SOME);
 }
 
 void Recorder::requestExit() {
   if (UNLIKELY(m_enabled)) {
     try {
+      resolveWaitHandles();
       BlobEncoder encoder;
       toArray().serde(encoder);
       const auto data{encoder.take()};
@@ -80,9 +93,11 @@ void Recorder::requestExit() {
       Logger::FWarning("Error while recording: {}", current_exception_name());
     }
     m_enabled = false;
-    m_externalThreadEventCreates.clear();
-    m_externalThreadEventProcesses.clear();
     m_nativeCalls.clear();
+    m_nextThreadCreationOrder = 0;
+    m_pendingWaitHandleToNativeCall.clear();
+    m_serverGlobal.clear();
+    m_threads.clear();
   }
 }
 
@@ -259,13 +274,40 @@ void Recorder::onNativeCallThrow(std::exception_ptr exc) {
 }
 
 void Recorder::onNativeCallWaitHandle(const Object& object) {
-  object->incRefCount();
-  m_nativeCalls.back().waitHandle = std::bit_cast<std::uintptr_t>(object.get());
-  const auto kind{std::bit_cast<c_Awaitable*>(object.get())->getKind()};
-  if (kind == c_Awaitable::Kind::ExternalThreadEvent) {
-    m_externalThreadEventCreates.emplace_back(m_nativeCalls.back().waitHandle);
+  resolveWaitHandles();
+  const auto wh{std::bit_cast<c_Awaitable*>(object.get())};
+  m_nativeCalls.back().wh = static_cast<std::uint8_t>(wh->getKind()) + 1;
+  m_pendingWaitHandleToNativeCall[wh] = m_nativeCalls.size() - 1;
+  if (wh->getKind() == c_Awaitable::Kind::ExternalThreadEvent) {
+    m_threads[wh->asExternalThreadEvent()] = m_nextThreadCreationOrder++;
   }
+  wh->incRefCount();
   onNativeCallExit();
+}
+
+void Recorder::onReceived(
+    c_ExternalThreadEventWaitHandle* received, QueueCall::Method method) {
+  if (UNLIKELY(m_enabled)) {
+    auto& call{m_queueCalls.emplace_back()};
+    call.method = method;
+    for (auto wh{received}; wh != nullptr; wh = wh->getNextToProcess()) {
+      call.value.append(m_threads[wh]);
+    }
+  }
+}
+
+void Recorder::resolveWaitHandles() {
+  for (const auto [wh, i] : m_pendingWaitHandleToNativeCall) {
+    if (wh->isFinished()) {
+      if (wh->isSucceeded()) {
+        m_nativeCalls[i].ret = serialize(wh->getResult());
+      } else {
+        m_nativeCalls[i].exc = serialize(wh->getException());
+      }
+      m_pendingWaitHandleToNativeCall.erase(wh);
+      wh->decReleaseCheck();
+    }
+  }
 }
 
 Array Recorder::toArray() const {
@@ -276,34 +318,18 @@ Array Recorder::toArray() const {
     oss << std::ifstream{path}.rdbuf();
     files.set(String{path}, oss.str());
   }
-  VecInit externalThreadEventOrder{m_externalThreadEventCreates.size()};
-  for (const auto create : m_externalThreadEventCreates) {
-    auto order{std::numeric_limits<std::uint64_t>::max()};
-    for (std::uint64_t i{0}; i < m_externalThreadEventProcesses.size(); i++) {
-      if (create == m_externalThreadEventProcesses[i]) {
-        order = i;
-        break;
-      }
-    }
-    externalThreadEventOrder.append(order);
-  }
   const std::size_t numNativeCall{m_nativeCalls.size()};
   VecInit nativeCalls{numNativeCall};
   DictInit nativeFuncIds{numNativeCall};
   for (std::size_t i{0}; i < numNativeCall; i++) {
     auto [id, stdouts, args, ret, exc, wh]{m_nativeCalls.at(i)};
-    if (wh) {
-      const auto ptr{std::bit_cast<c_Awaitable*>(wh)};
-      if (ptr->isSucceeded()) {
-        ret = serialize(ptr->getResult());
-      } else if (ptr->isFailed()) {
-        exc = serialize(ptr->getException());
-      }
-      wh = static_cast<std::uint8_t>(ptr->getKind()) + 1;
-      ptr->decReleaseCheck();
-    }
     nativeCalls.append(make_vec_array(id, stdouts, args, ret, exc, wh));
     nativeFuncIds.set(String{g_nativeFuncNames[id]}, id);
+  }
+  VecInit queueCalls{m_queueCalls.size()};
+  for (const auto& call : m_queueCalls) {
+    auto [method, value]{call};
+    queueCalls.append(make_vec_array(static_cast<std::int64_t>(method), value));
   }
   return make_dict_array(
     "header", make_dict_array(
@@ -312,9 +338,9 @@ Array Recorder::toArray() const {
       "serverGlobal", m_serverGlobal
     ),
     "files", files.toArray(),
-    "eteOrder", externalThreadEventOrder.toArray(),
     "nativeCalls", nativeCalls.toArray(),
-    "nativeFuncIds", nativeFuncIds.toArray()
+    "nativeFuncIds", nativeFuncIds.toArray(),
+    "queueCalls", queueCalls.toArray()
   );
 }
 

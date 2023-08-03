@@ -16,8 +16,12 @@
 */
 
 #include "hphp/runtime/ext/asio/asio-external-thread-event-queue.h"
-#include <mutex>
 
+#include <folly/Likely.h>
+
+#include "hphp/runtime/base/recorder.h"
+#include "hphp/runtime/base/replayer.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/asio/asio-session.h"
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
 #include "hphp/system/systemlib.h"
@@ -28,6 +32,17 @@ namespace HPHP {
 AsioExternalThreadEventQueue::AsioExternalThreadEventQueue()
     : m_received(nullptr), m_queue(nullptr), m_queueMutex(),
       m_queueCondition() {
+}
+
+bool AsioExternalThreadEventQueue::hasReceived() {
+  if (UNLIKELY(RO::EvalRecordReplay)) {
+    if (RO::EvalRecordSampleRate) {
+      Recorder::onHasReceived(m_received);
+    } else if (RO::EvalReplay) {
+      return Replayer::onHasReceived();
+    }
+  }
+  return m_received;
 }
 
 /**
@@ -68,8 +83,26 @@ bool AsioExternalThreadEventQueue::abandonAllReceived(c_ExternalThreadEventWaitH
  */
 bool AsioExternalThreadEventQueue::tryReceiveSome() {
   assertx(!m_received);
+  if (UNLIKELY(RO::EvalRecordReplay && RO::EvalReplay)) {
+    return (m_received = Replayer::onTryReceiveSome());
+  }
   m_received = m_queue.exchange(nullptr);
   assertx(m_received != K_CONSUMER_WAITING);
+  if (UNLIKELY(RO::EvalRecordReplay && RO::EvalRecordSampleRate)) {
+    Recorder::onTryReceiveSome(m_received);
+  }
+  return m_received;
+}
+
+bool AsioExternalThreadEventQueue::receiveSomeUntil(
+    std::chrono::time_point<std::chrono::steady_clock> waketime) {
+  if (UNLIKELY(RO::EvalRecordReplay && RO::EvalReplay)) {
+    return (m_received = Replayer::onReceiveSomeUntil());
+  }
+  receiveSomeUntilImpl(waketime);
+  if (UNLIKELY(RO::EvalRecordReplay && RO::EvalRecordSampleRate)) {
+    Recorder::onReceiveSomeUntil(m_received);
+  }
   return m_received;
 }
 
@@ -80,7 +113,7 @@ bool AsioExternalThreadEventQueue::tryReceiveSome() {
  * Returns true if events were received; if utime is passed as zero, no timeout
  * is set and this method is guaranteed to return true.
  */
-bool AsioExternalThreadEventQueue::receiveSomeUntil(
+bool AsioExternalThreadEventQueue::receiveSomeUntilImpl(
     std::chrono::time_point<std::chrono::steady_clock> waketime) {
   assertx(!m_received);
 

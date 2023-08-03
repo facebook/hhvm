@@ -578,7 +578,6 @@ function ::=
   return_clause identifier "(" (parameter [","])* ")" [throws] [";"]
 
 base_service_name  ::=  maybe_qualified_id
-interaction_name   ::=  maybe_qualified_id
 function_qualifier ::=  "oneway" | "idempotent" | "readonly"
 
 return_clause ::=

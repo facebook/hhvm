@@ -232,25 +232,28 @@ TEST_P(EVPCipherTest, TestEncryptReusedCipherWithTagRoom) {
 TEST_P(EVPCipherTest, TestEncryptChunkedInput) {
   for (auto opts : getOptionPairs()) {
     auto cipher = getTestCipher(GetParam());
-    auto input = toIOBuf(GetParam().plaintext);
-    auto chunkedInput = chunkIOBuf(std::move(input), 3);
-    if (opts.allocOpt == Aead::AllocationOption::Deny) {
-      // No tag room
-      EXPECT_THROW(
-          callEncrypt(
-              cipher,
-              GetParam(),
-              std::move(chunkedInput),
-              opts.bufferOpt,
-              opts.allocOpt),
-          std::runtime_error);
-    } else {
-      callEncrypt(
-          cipher,
-          GetParam(),
-          std::move(chunkedInput),
-          opts.bufferOpt,
-          opts.allocOpt);
+    auto inputLength = toIOBuf(GetParam().plaintext)->computeChainDataLength();
+    for (size_t i = 2; i < inputLength; i++) {
+      auto input = toIOBuf(GetParam().plaintext);
+      auto chunkedInput = chunkIOBuf(std::move(input), i);
+      if (opts.allocOpt == Aead::AllocationOption::Deny) {
+        // No tag room
+        EXPECT_THROW(
+            callEncrypt(
+                cipher,
+                GetParam(),
+                std::move(chunkedInput),
+                opts.bufferOpt,
+                opts.allocOpt),
+            std::runtime_error);
+      } else {
+        callEncrypt(
+            cipher,
+            GetParam(),
+            std::move(chunkedInput),
+            opts.bufferOpt,
+            opts.allocOpt);
+      }
     }
   }
 }
@@ -482,27 +485,30 @@ TEST_P(EVPCipherTest, TestEncryptChunkedSharedInputWithTagRoom) {
 TEST_P(EVPCipherTest, TestEncryptChunkedAad) {
   for (auto opts : getOptionPairs()) {
     auto cipher = getTestCipher(GetParam());
-    auto aad = toIOBuf(GetParam().aad);
-    auto chunkedAad = chunkIOBuf(std::move(aad), 3);
-    if (opts.allocOpt == Aead::AllocationOption::Deny) {
-      // No tag room
-      EXPECT_THROW(
-          callEncrypt(
-              cipher,
-              GetParam(),
-              toIOBuf(GetParam().plaintext),
-              opts.bufferOpt,
-              opts.allocOpt,
-              std::move(chunkedAad)),
-          std::runtime_error);
-    } else {
-      callEncrypt(
-          cipher,
-          GetParam(),
-          toIOBuf(GetParam().plaintext),
-          opts.bufferOpt,
-          opts.allocOpt,
-          std::move(chunkedAad));
+    auto aadLength = toIOBuf(GetParam().aad)->computeChainDataLength();
+    for (size_t i = 2; i < aadLength; i++) {
+      auto aad = toIOBuf(GetParam().aad);
+      auto chunkedAad = chunkIOBuf(std::move(aad), i);
+      if (opts.allocOpt == Aead::AllocationOption::Deny) {
+        // No tag room
+        EXPECT_THROW(
+            callEncrypt(
+                cipher,
+                GetParam(),
+                toIOBuf(GetParam().plaintext),
+                opts.bufferOpt,
+                opts.allocOpt,
+                std::move(chunkedAad)),
+            std::runtime_error);
+      } else {
+        callEncrypt(
+            cipher,
+            GetParam(),
+            toIOBuf(GetParam().plaintext),
+            opts.bufferOpt,
+            opts.allocOpt,
+            std::move(chunkedAad));
+      }
     }
   }
 }
@@ -595,117 +601,52 @@ TEST_P(EVPCipherTest, TestDecryptWithChunkedInput) {
 TEST_P(EVPCipherTest, TestDecryptWithChunkedSharedInput) {
   for (auto opts : getOptionPairs()) {
     auto cipher = getTestCipher(GetParam());
-    auto output = toIOBuf(GetParam().ciphertext);
-    auto chunkedOutput = chunkIOBuf(std::move(output), 3);
-    auto lastBufLength = chunkedOutput->prev()->length();
-    if (opts.allocOpt == Aead::AllocationOption::Deny &&
-        (lastBufLength < cipher->getCipherOverhead() ||
-         opts.bufferOpt == Aead::BufferOption::RespectSharedPolicy)) {
-      EXPECT_THROW(
-          callDecrypt(
-              cipher,
-              GetParam(),
-              chunkedOutput->clone(),
-              opts.bufferOpt,
-              opts.allocOpt,
-              true),
-          std::runtime_error);
-    } else {
-      auto out = callDecrypt(
-          cipher,
-          GetParam(),
-          chunkedOutput->clone(),
-          opts.bufferOpt,
-          opts.allocOpt);
-      if (out) {
-        // for valid cases:
-        EXPECT_EQ(
-            out->computeChainDataLength(),
-            chunkedOutput->computeChainDataLength() -
-                cipher->getCipherOverhead());
-        if (opts.bufferOpt != Aead::BufferOption::RespectSharedPolicy) {
-          // In-place edit
-          EXPECT_EQ(chunkedOutput->data(), out->data());
-          EXPECT_TRUE(out->isChained());
-          EXPECT_TRUE(out->isShared());
+    auto ciphertextLength =
+        toIOBuf(GetParam().ciphertext)->computeChainDataLength();
+    for (size_t i = 2; i < ciphertextLength; i++) {
+      auto output = toIOBuf(GetParam().ciphertext);
+      auto chunkedOutput = chunkIOBuf(std::move(output), i);
+      auto lastBufLength = chunkedOutput->prev()->length();
+      if (opts.allocOpt == Aead::AllocationOption::Deny &&
+          (lastBufLength < cipher->getCipherOverhead() ||
+           opts.bufferOpt == Aead::BufferOption::RespectSharedPolicy)) {
+        EXPECT_THROW(
+            callDecrypt(
+                cipher,
+                GetParam(),
+                chunkedOutput->clone(),
+                opts.bufferOpt,
+                opts.allocOpt,
+                true),
+            std::runtime_error);
+      } else {
+        auto out = callDecrypt(
+            cipher,
+            GetParam(),
+            chunkedOutput->clone(),
+            opts.bufferOpt,
+            opts.allocOpt);
+        if (out) {
+          // for valid cases:
           EXPECT_EQ(
-              out->countChainElements(), chunkedOutput->countChainElements());
-        } else {
-          // New buffer.
-          EXPECT_NE(chunkedOutput->data(), out->data());
-          EXPECT_FALSE(out->isChained());
-          EXPECT_FALSE(out->isShared());
+              out->computeChainDataLength(),
+              chunkedOutput->computeChainDataLength() -
+                  cipher->getCipherOverhead());
+          if (opts.bufferOpt != Aead::BufferOption::RespectSharedPolicy) {
+            // In-place edit
+            EXPECT_EQ(chunkedOutput->data(), out->data());
+            EXPECT_TRUE(out->isChained());
+            EXPECT_TRUE(out->isShared());
+            EXPECT_EQ(
+                out->countChainElements(), chunkedOutput->countChainElements());
+          } else {
+            // New buffer.
+            EXPECT_NE(chunkedOutput->data(), out->data());
+            EXPECT_FALSE(out->isChained());
+            EXPECT_FALSE(out->isShared());
+          }
         }
       }
-    }
-  }
-}
-
-TEST_P(EVPCipherTest, TestDecryptWithVeryChunkedInput) {
-  for (auto opts : getOptionPairs()) {
-    auto cipher = getTestCipher(GetParam());
-    auto output = toIOBuf(GetParam().ciphertext);
-    auto chunkedOutput = chunkIOBuf(std::move(output), 30);
-    auto lastBufLength = chunkedOutput->prev()->length();
-    if (opts.allocOpt == Aead::AllocationOption::Deny &&
-        lastBufLength < cipher->getCipherOverhead()) {
-      // Basically the same as the regular chunked test, just far more likely
-      // here
-      EXPECT_THROW(
-          callDecrypt(
-              cipher,
-              GetParam(),
-              std::move(chunkedOutput),
-              opts.bufferOpt,
-              opts.allocOpt,
-              true),
-          std::runtime_error);
-    } else {
-      callDecrypt(
-          cipher,
-          GetParam(),
-          std::move(chunkedOutput),
-          opts.bufferOpt,
-          opts.allocOpt);
-    }
-  }
-}
-
-TEST_P(EVPCipherTest, TestDecryptWithFragmentedTag) {
-  // This is to explicitly test the one scenario where in-place edits require
-  // allocation
-  for (auto opts : getOptionPairs()) {
-    auto cipher = getTestCipher(GetParam());
-    auto output = toIOBuf(GetParam().ciphertext);
-    if (output->length() < cipher->getCipherOverhead()) {
-      // These are invalid cases anyway, ignore them
-      continue;
-    }
-
-    // Copy the end of the tag to a new buffer, explicitly fragmenting it.
-    size_t lastLen = cipher->getCipherOverhead() / 2;
-    ASSERT_TRUE(lastLen > 0);
-    auto tagBuf = IOBuf::create(lastLen);
-    tagBuf->append(lastLen);
-    output->trimEnd(lastLen);
-    memcpy(tagBuf->writableData(), output->tail(), lastLen);
-    output->prependChain(std::move(tagBuf));
-
-    if (opts.allocOpt == Aead::AllocationOption::Deny) {
-      // A fragmented tag explicitly requires an allocation to copy it out.
-      EXPECT_THROW(
-          callDecrypt(
-              cipher,
-              GetParam(),
-              std::move(output),
-              opts.bufferOpt,
-              opts.allocOpt,
-              true),
-          std::runtime_error);
-    } else {
-      // In all other cases this should always succeed
-      callDecrypt(
-          cipher, GetParam(), std::move(output), opts.bufferOpt, opts.allocOpt);
     }
   }
 }
@@ -714,16 +655,19 @@ TEST_P(EVPCipherTest, TestDecryptWithChunkedAad) {
   for (auto opts : getOptionPairs()) {
     // Behaviorally same as the regular decrypt test wrt variations
     auto cipher = getTestCipher(GetParam());
-    auto aad = toIOBuf(GetParam().aad);
-    auto chunkedAad = chunkIOBuf(std::move(aad), 3);
-    callDecrypt(
-        cipher,
-        GetParam(),
-        nullptr,
-        opts.bufferOpt,
-        opts.allocOpt,
-        false,
-        std::move(chunkedAad));
+    auto aadLength = toIOBuf(GetParam().aad)->computeChainDataLength();
+    for (size_t i = 2; i < aadLength; i++) {
+      auto aad = toIOBuf(GetParam().aad);
+      auto chunkedAad = chunkIOBuf(std::move(aad), i);
+      callDecrypt(
+          cipher,
+          GetParam(),
+          nullptr,
+          opts.bufferOpt,
+          opts.allocOpt,
+          false,
+          std::move(chunkedAad));
+    }
   }
 }
 

@@ -424,7 +424,9 @@ module Full = struct
 
   let ttuple ~fuel k tyl = list ~fuel "(" k tyl ")"
 
-  let tshape ~fuel ~open_mixed k to_doc shape_kind (fdm : _ TShapeMap.t) =
+  let tshape ~fuel k to_doc penv s is_open_mixed =
+    let { s_origin = _; s_unknown_value = shape_kind; s_fields = fdm } = s in
+    let open_mixed = is_open_mixed penv shape_kind in
     let (fuel, fields_doc) =
       let f_field (shape_map_key, { sft_optional; sft_ty }) ~fuel =
         let key_delim =
@@ -682,14 +684,7 @@ module Full = struct
       let (fuel, tys_doc) = ttuple ~fuel k tyl in
       let intersection_doc = Concat [text "&"; tys_doc] in
       (fuel, intersection_doc)
-    | Tshape (_, shape_kind, fdm) ->
-      tshape
-        ~fuel
-        ~open_mixed:(is_open_mixed_decl penv shape_kind)
-        k
-        to_doc
-        shape_kind
-        fdm
+    | Tshape s -> tshape ~fuel k to_doc penv s is_open_mixed_decl
 
   (* TODO (T86471586): Display capabilities that are decls for functions *)
   and fun_decl_implicit_params ~fuel _to_doc _st _penv _tparams _implicit_param
@@ -980,14 +975,7 @@ module Full = struct
     | Tintersection [] -> (fuel, text "mixed")
     | Tintersection tyl ->
       delimited_list ~fuel (Space ^^ text "&" ^^ Space) "(" k tyl ")"
-    | Tshape (_, shape_kind, fdm) ->
-      tshape
-        ~fuel
-        ~open_mixed:(is_open_mixed env shape_kind)
-        k
-        to_doc
-        shape_kind
-        fdm
+    | Tshape s -> tshape ~fuel k to_doc env s is_open_mixed
     | Taccess (root_ty, id) ->
       let (fuel, root_ty_doc) = k ~fuel root_ty in
       let access_doc = Concat [root_ty_doc; text "::"; to_doc (snd id)] in
@@ -1517,7 +1505,8 @@ module Json = struct
     | (p, Tneg (Neg_class (_, c))) -> obj @@ kind p "negation" @ name c
     | (p, Tclass ((_, cid), e, tys)) ->
       obj @@ kind p "class" @ name cid @ args tys @ refs e
-    | (p, Tshape (_, shape_kind, fl)) ->
+    | (p, Tshape { s_origin = _; s_unknown_value = shape_kind; s_fields = fl })
+      ->
       let fields_known = is_nothing shape_kind in
       obj
       @@ kind p "shape"
@@ -1829,7 +1818,13 @@ module Json = struct
               List.fold fields ~init:TShapeMap.empty ~f:(fun shape_map (k, v) ->
                   TShapeMap.add k v shape_map)
             in
-            ty (Tshape (Missing_origin, shape_kind, fields))
+            ty
+              (Tshape
+                 {
+                   s_origin = Missing_origin;
+                   s_fields = fields;
+                   s_unknown_value = shape_kind;
+                 })
         | "union" ->
           get_array "args" (json, keytrace) >>= fun (args, keytrace) ->
           aux_args args ~keytrace >>= fun tyl -> ty (Tunion tyl)

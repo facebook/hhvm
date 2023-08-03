@@ -2277,7 +2277,13 @@ and simplify_subtype_i
                       ty_sub
                       ty_super)
               tyl
-          | (_, Tshape (_, unknown_fields_type, sftl)) ->
+          | ( _,
+              Tshape
+                {
+                  s_origin = _;
+                  s_unknown_value = unknown_fields_type;
+                  s_fields = sftl;
+                } ) ->
             List.fold_left
               ~init:(env, TL.valid)
               ~f:(fun res sft ->
@@ -2526,14 +2532,26 @@ and simplify_subtype_i
             tyl_sub
             tyl_super
         | _ -> default_subtype env))
-    | (r_super, Tshape (origin_super, shape_kind_super, fdm_super)) ->
+    | ( r_super,
+        Tshape
+          {
+            s_origin = origin_super;
+            s_unknown_value = shape_kind_super;
+            s_fields = fdm_super;
+          } ) ->
       (match ety_sub with
       | ConstraintType _ -> default_subtype env
       | LoclType lty ->
         let (sub_supportdyn', env, lty) = TUtils.strip_supportdyn env lty in
         let sub_supportdyn = Option.is_some sub_supportdyn || sub_supportdyn' in
         (match deref lty with
-        | (r_sub, Tshape (origin_sub, shape_kind_sub, fdm_sub)) ->
+        | ( r_sub,
+            Tshape
+              {
+                s_origin = origin_sub;
+                s_unknown_value = shape_kind_sub;
+                s_fields = fdm_sub;
+              } ) ->
           if same_type_origin origin_super origin_sub then
             (* Fast path for shape types: if they have the same origin,
              * they are equal type. *)

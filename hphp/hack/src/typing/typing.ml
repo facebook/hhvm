@@ -5247,7 +5247,7 @@ and expr_
           env
           expected
       with
-      | (env, Some (pos, ur, _, _, Tshape (_, _, expected_fdm))) ->
+      | (env, Some (pos, ur, _, _, Tshape { s_fields = expected_fdm; _ })) ->
         List.map_env
           env
           ~f:(fun env ((k, _) as ke) ->

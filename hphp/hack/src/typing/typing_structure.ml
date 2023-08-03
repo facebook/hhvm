@@ -150,9 +150,26 @@ let rec transform_shapemap ?(nullable = false) env pos ty shape =
         | (TSFlit_str (_, "return_type"), _, (r, Tfun funty)) ->
           let (env, ty) = make_ts env funty.ft_ret.et_type in
           (env, acc_field_with_type (mk (r, Ttuple [ty])))
-        | (TSFlit_str (_, "fields"), _, (r, Tshape (_, shape_kind, fields))) ->
+        | ( TSFlit_str (_, "fields"),
+            _,
+            ( r,
+              Tshape
+                {
+                  s_origin = _;
+                  s_unknown_value = shape_kind;
+                  s_fields = fields;
+                } ) ) ->
           let (env, fields) = ShapeFieldMap.map_env make_ts env fields in
-          let ty = mk (r, Tshape (Missing_origin, shape_kind, fields)) in
+          let ty =
+            mk
+              ( r,
+                Tshape
+                  {
+                    s_origin = Missing_origin;
+                    s_unknown_value = shape_kind;
+                    s_fields = fields;
+                  } )
+          in
           let ty =
             if supportdyn then
               MakeType.supportdyn r ty

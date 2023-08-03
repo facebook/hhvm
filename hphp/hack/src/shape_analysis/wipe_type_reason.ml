@@ -43,11 +43,19 @@ let rec wipe ty =
   | Taccess (ty, pos_id) ->
     let w = wipe ty in
     wp (Taccess (w, pos_id))
-  | Tshape (_, kind, map) ->
+  | Tshape { s_origin = _; s_unknown_value = kind; s_fields = map } ->
     let map =
       TShapeMap.map (fun sft -> { sft with sft_ty = wipe sft.sft_ty }) map
     in
-    wp (Tshape (Missing_origin, kind, map))
+    (* TODO(shapes) should this reset origin? *)
+    wp
+      (Tshape
+         {
+           s_origin = Missing_origin;
+           s_unknown_value = kind;
+           (* TODO(shapes) This should likely wipe the reason of s_unknown_value *)
+           s_fields = map;
+         })
   | Tfun ft ->
     let wt_et et = { et with et_type = wipe et.et_type } in
     let wt_fp fp = { fp with fp_type = wt_et fp.fp_type } in

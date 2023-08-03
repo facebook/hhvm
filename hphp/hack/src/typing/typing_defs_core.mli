@@ -352,8 +352,11 @@ and 'phase taccess_type = 'phase ty * pos_id
 
 (* Whether all fields of this shape are known, types of each of the
  * known arms. *)
-and 'phase shape_type =
-  type_origin * 'phase ty * 'phase shape_field_type TShapeMap.t
+and 'phase shape_type = {
+  s_origin: type_origin;
+  s_unknown_value: 'phase ty;
+  s_fields: 'phase shape_field_type TShapeMap.t;
+}
 
 (* Because Tfun is currently used as both a decl and locl ty, without this,
  * the HH\Contexts\defaults alias must be stored in shared memory for a

@@ -156,18 +156,20 @@ impl<R: Reason> From<&obr::typing_defs::Ty<'_>> for Ty<R> {
             typing_defs_core::Ty_::Tprim(prim) => Tprim(*prim),
             typing_defs_core::Ty_::Tfun(ft) => Tfun(Box::new(ft.into())),
             typing_defs_core::Ty_::Ttuple(tys) => Ttuple(slice(tys)),
-            typing_defs_core::Ty_::Tshape(&typing_defs_core::ShapeType(_, kind, fields)) => {
-                Tshape(Box::new(ty::ShapeType(
-                    kind.into(),
-                    fields
-                        .iter()
-                        .map(|(name, ty)| {
-                            let (field_name_pos, name) = tshape_field_name_from_decl(name.0);
-                            (name, decl_shape_field_type(field_name_pos, ty))
-                        })
-                        .collect(),
-                )))
-            }
+            typing_defs_core::Ty_::Tshape(&typing_defs_core::ShapeType {
+                origin: _,
+                unknown_value: kind,
+                fields,
+            }) => Tshape(Box::new(ty::ShapeType(
+                kind.into(),
+                fields
+                    .iter()
+                    .map(|(name, ty)| {
+                        let (field_name_pos, name) = tshape_field_name_from_decl(name.0);
+                        (name, decl_shape_field_type(field_name_pos, ty))
+                    })
+                    .collect(),
+            ))),
             typing_defs_core::Ty_::Trefinement(&(ty, cr)) => {
                 Trefinement(Box::new(decl::TrefinementType {
                     ty: ty.into(),

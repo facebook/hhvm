@@ -194,14 +194,16 @@
            scc_name = ([36:47-53], "CSHAPE");
            scc_type =
            (Rhint ([36:9-46]),
-            (Tshape ((Rhint ([36:42-45]), Tmixed),
-               { (Typing_defs_core.TSFlit_str ([36:15-18], "a")) ->
-                 { sft_optional = false;
-                   sft_ty = (Rhint ([36:22-25]), (Tprim Tint)) };
-                 (Typing_defs_core.TSFlit_str ([36:27-30], "b")) ->
-                 { sft_optional = false;
-                   sft_ty = (Rhint ([36:34-40]), (Tprim Tstring)) } }
-               )));
+            (Tshape
+               { s_origin = Typing_defs_core.Missing_origin;
+                 s_fields =
+                 { (Typing_defs_core.TSFlit_str ([36:15-18], "a")) ->
+                   { sft_optional = false;
+                     sft_ty = (Rhint ([36:22-25]), (Tprim Tint)) };
+                   (Typing_defs_core.TSFlit_str ([36:27-30], "b")) ->
+                   { sft_optional = false;
+                     sft_ty = (Rhint ([36:34-40]), (Tprim Tstring)) } };
+                 s_unknown_value = (Rhint ([36:42-45]), Tmixed) }));
            scc_refs = [] }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];

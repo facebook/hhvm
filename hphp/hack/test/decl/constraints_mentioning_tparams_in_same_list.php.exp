@@ -120,11 +120,14 @@
             tp_constraints =
             [(Constraint_as,
               (Rhint ([15:13-29]),
-               (Tshape ((Rhint ([Pos.none]), (Tunion [])),
-                  { (Typing_defs_core.TSFlit_str ([15:19-22], "a")) ->
-                    { sft_optional = false;
-                      sft_ty = (Rhint ([15:26-28]), (Tgeneric ("Ta", []))) } }
-                  ))))
+               (Tshape
+                  { s_origin = Typing_defs_core.Missing_origin;
+                    s_fields =
+                    { (Typing_defs_core.TSFlit_str ([15:19-22], "a")) ->
+                      { sft_optional = false;
+                        sft_ty = (Rhint ([15:26-28]), (Tgeneric ("Ta", [])))
+                        } };
+                    s_unknown_value = (Rhint ([Pos.none]), (Tunion [])) })))
               ];
             tp_reified = Erased; tp_user_attributes = [] };
           { Typing_defs_core.tp_variance = Invariant;

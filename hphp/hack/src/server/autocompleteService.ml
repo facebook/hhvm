@@ -1167,7 +1167,7 @@ let autocomplete_shape_literal_in_call
                 Typing_defs_core.deref expected_ty.fp_type.et_type
               in
               (match ty_ with
-              | Tshape (_, _, fields) ->
+              | Tshape { s_fields = fields; _ } ->
                 (* This parameter is known to be a concrete shape type. *)
                 let keys = shape_string_keys fields in
                 let matching_keys =
@@ -1846,7 +1846,7 @@ let visitor
         let ty = expand_and_strip_dynamic env ty in
         begin
           match get_node ty with
-          | Tshape (_, _, fields) ->
+          | Tshape { s_fields = fields; _ } ->
             (match key with
             | Aast.Id (_, mid) ->
               autocomplete_shape_key autocomplete_context env fields (pos, mid)

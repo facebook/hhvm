@@ -29,7 +29,8 @@ let widen_for_refine_shape ~expr_pos field_name env ty =
           env
           [Log_head ("widen_for_refine_shape", [Log_type ("ty", ty)])]));
   match deref ty with
-  | (r, Tshape (_, shape_kind, fields)) -> begin
+  | (r, Tshape { s_origin = _; s_unknown_value = shape_kind; s_fields = fields })
+    -> begin
     match TShapeMap.find_opt field_name fields with
     | None ->
       let (env, element_ty) = Env.fresh_type_invariant env expr_pos in
@@ -39,9 +40,11 @@ let widen_for_refine_shape ~expr_pos field_name env ty =
           (mk
              ( r,
                Tshape
-                 ( Missing_origin,
-                   shape_kind,
-                   TShapeMap.add field_name sft fields ) )) )
+                 {
+                   s_origin = Missing_origin;
+                   s_unknown_value = shape_kind;
+                   s_fields = TShapeMap.add field_name sft fields;
+                 } )) )
     | Some _ -> ((env, None), Some ty)
   end
   | _ -> ((env, None), None)
@@ -111,7 +114,7 @@ let rec shrink_shape pos ~supportdyn field_name env shape =
   let (supportdyn2, env, stripped_shape) = TUtils.strip_supportdyn env shape in
   let supportdyn = supportdyn || supportdyn2 in
   match get_node stripped_shape with
-  | Tshape (_, shape_kind, fields) ->
+  | Tshape { s_origin = _; s_unknown_value = shape_kind; s_fields = fields } ->
     let fields =
       if is_nothing shape_kind then
         TShapeMap.remove field_name fields
@@ -127,7 +130,14 @@ let rec shrink_shape pos ~supportdyn field_name env shape =
           fields
     in
     let result =
-      mk (Reason.Rwitness pos, Tshape (Missing_origin, shape_kind, fields))
+      mk
+        ( Reason.Rwitness pos,
+          Tshape
+            {
+              s_origin = Missing_origin;
+              s_unknown_value = shape_kind;
+              s_fields = fields;
+            } )
     in
     ( (env, e1),
       if supportdyn then
@@ -185,7 +195,9 @@ let shapes_idx_not_null_with_ty_err env shape_ty (ty, p, field) =
         when String.equal n Naming_special_names.Classes.cSupportDyn ->
         let (env, ty) = refine_type env ty in
         TUtils.make_supportdyn r env ty
-      | (r, Tshape (_, shape_kind, ftm)) ->
+      | ( r,
+          Tshape { s_origin = _; s_fields = ftm; s_unknown_value = shape_kind }
+        ) ->
         let (env, field_type) =
           let sft_ty =
             match TShapeMap.find_opt field ftm with
@@ -198,7 +210,15 @@ let shapes_idx_not_null_with_ty_err env shape_ty (ty, p, field) =
           (env, { sft_optional = false; sft_ty })
         in
         let ftm = TShapeMap.add field field_type ftm in
-        (env, mk (r, Tshape (Missing_origin, shape_kind, ftm)))
+        ( env,
+          mk
+            ( r,
+              Tshape
+                {
+                  s_origin = Missing_origin;
+                  s_fields = ftm;
+                  s_unknown_value = shape_kind;
+                } ) )
       | _ ->
         (* This should be an error, but it is already raised when
            typechecking the call to Shapes::idx *)
@@ -307,7 +327,10 @@ let to_collection env pos shape_ty res return_type =
 
       inherit! Type_mapper.tvar_expanding_type_mapper
 
-      method! on_tshape env r shape_kind fdm =
+      method! on_tshape env r s =
+        let { s_origin = _; s_unknown_value = shape_kind; s_fields = fdm } =
+          s
+        in
         (* The key type is the union of the types of the known fields,
          * or arraykey if there may be unknown fields (open shape)
          *)

@@ -56,11 +56,7 @@ class type ['env] type_mapper_type =
       'env -> Reason.t -> pos_id -> exact -> locl_ty list -> 'env * locl_ty
 
     method on_tshape :
-      'env ->
-      Reason.t ->
-      locl_ty ->
-      locl_phase shape_field_type TShapeMap.t ->
-      'env * locl_ty
+      'env -> Reason.t -> locl_phase shape_type -> 'env * locl_ty
 
     method on_tvec_or_dict :
       'env -> Reason.t -> locl_ty -> locl_ty -> 'env * locl_ty
@@ -109,8 +105,18 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
 
     method on_tclass env r x e tyl = (env, mk (r, Tclass (x, e, tyl)))
 
-    method on_tshape env r shape_kind fdm =
-      (env, mk (r, Tshape (Missing_origin, shape_kind, fdm)))
+    method on_tshape
+        env r { s_origin = _; s_unknown_value = shape_kind; s_fields = fdm } =
+      ( env,
+        mk
+          ( r,
+            Tshape
+              {
+                (* TODO(shapes) Should this reset the origin? *)
+                s_origin = Missing_origin;
+                s_unknown_value = shape_kind;
+                s_fields = fdm;
+              } ) )
 
     method on_tvec_or_dict env r ty1 ty2 = (env, mk (r, Tvec_or_dict (ty1, ty2)))
 
@@ -135,7 +141,7 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
       | Tdependent (x, ty) -> this#on_tdependent env r x ty
       | Tclass (x, e, tyl) -> this#on_tclass env r x e tyl
       | Tdynamic -> this#on_tdynamic env r
-      | Tshape (_, shape_kind, fdm) -> this#on_tshape env r shape_kind fdm
+      | Tshape s -> this#on_tshape env r s
       | Tvec_or_dict (ty1, ty2) -> this#on_tvec_or_dict env r ty1 ty2
       | Tunapplied_alias name -> this#on_tunapplied_alias env r name
       | Taccess (ty, id) -> this#on_taccess env r ty id
@@ -252,9 +258,19 @@ class ['env] deep_type_mapper =
       let (env, tyl) = this#on_locl_ty_list env tyl in
       (env, mk (r, Tclass (x, e, tyl)))
 
-    method! on_tshape env r shape_kind fdm =
+    method! on_tshape
+        env r { s_origin = _; s_unknown_value = shape_kind; s_fields = fdm } =
       let (env, fdm) = ShapeFieldMap.map_env this#on_type env fdm in
-      (env, mk (r, Tshape (Missing_origin, shape_kind, fdm)))
+      ( env,
+        mk
+          ( r,
+            Tshape
+              {
+                s_origin = Missing_origin;
+                s_unknown_value = shape_kind;
+                (* TODO(shapes) this#on_type env shape_kind? *)
+                s_fields = fdm;
+              } ) )
 
     method private on_opt_type env x =
       match x with

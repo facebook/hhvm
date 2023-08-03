@@ -509,7 +509,7 @@ end = struct
              to generate an initializer. *)
           List.iter tyl ~f:(add_dep ctx env ~this)
 
-        method! on_tshape _ _ _ fdm =
+        method! on_tshape _ _ { Typing_defs.s_fields = fdm; _ } =
           Typing_defs.TShapeMap.iter
             (fun name Typing_defs.{ sft_ty; _ } ->
               (match name with

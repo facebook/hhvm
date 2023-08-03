@@ -73,17 +73,20 @@ let%test_unit "patt tysub" =
   let shp =
     Ty.(
       Tshape
-        ( Missing_origin,
-          mk_ty Tdynamic,
-          TShapeMap.of_list
-            [
-              ( TSFlit_str (pod_none, "c"),
-                { sft_optional = false; sft_ty = mk_ty Tdynamic } );
-              ( TSFlit_str (pod_none, "a"),
-                { sft_optional = false; sft_ty = mk_ty Tdynamic } );
-              ( TSFlit_str (pod_none, "b"),
-                { sft_optional = false; sft_ty = mk_ty Tdynamic } );
-            ] ))
+        {
+          s_origin = Missing_origin;
+          s_unknown_value = mk_ty Tdynamic;
+          s_fields =
+            TShapeMap.of_list
+              [
+                ( TSFlit_str (pod_none, "c"),
+                  { sft_optional = false; sft_ty = mk_ty Tdynamic } );
+                ( TSFlit_str (pod_none, "a"),
+                  { sft_optional = false; sft_ty = mk_ty Tdynamic } );
+                ( TSFlit_str (pod_none, "b"),
+                  { sft_optional = false; sft_ty = mk_ty Tdynamic } );
+              ];
+        })
   in
   let ty_locl_sub =
     Ty.Tclass ((pod_none, "\\" ^ class_name), Ty.nonexact, [mk_ty shp])
@@ -173,17 +176,20 @@ let%test_unit "patt tysub or pattern" =
   let shp =
     Ty.(
       Tshape
-        ( Missing_origin,
-          mk_ty Tdynamic,
-          TShapeMap.of_list
-            [
-              ( TSFlit_str (pod_none, "c"),
-                { sft_optional = false; sft_ty = mk_ty Tdynamic } );
-              ( TSFlit_str (pod_none, "a"),
-                { sft_optional = false; sft_ty = mk_ty Tdynamic } );
-              ( TSFlit_str (pod_none, "b"),
-                { sft_optional = false; sft_ty = mk_ty Tdynamic } );
-            ] ))
+        {
+          s_origin = Missing_origin;
+          s_unknown_value = mk_ty Tdynamic;
+          s_fields =
+            TShapeMap.of_list
+              [
+                ( TSFlit_str (pod_none, "c"),
+                  { sft_optional = false; sft_ty = mk_ty Tdynamic } );
+                ( TSFlit_str (pod_none, "a"),
+                  { sft_optional = false; sft_ty = mk_ty Tdynamic } );
+                ( TSFlit_str (pod_none, "b"),
+                  { sft_optional = false; sft_ty = mk_ty Tdynamic } );
+              ];
+        })
   in
   let ty_locl_sub =
     Ty.Tclass ((pod_none, "\\" ^ class_name), Ty.nonexact, [mk_ty shp])

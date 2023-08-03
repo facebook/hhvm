@@ -176,9 +176,16 @@ and instantiate_ subst x =
   | Tapply (x, tyl) ->
     let tyl = List.map tyl ~f:(instantiate subst) in
     Tapply (x, tyl)
-  | Tshape (_, shape_kind, fdm) ->
+  | Tshape { s_origin = _; s_unknown_value = shape_kind; s_fields = fdm } ->
     let fdm = ShapeFieldMap.map (instantiate subst) fdm in
-    Tshape (Missing_origin, shape_kind, fdm)
+    (* TODO(shapes) Should this be changing s_origin? *)
+    Tshape
+      {
+        s_origin = Missing_origin;
+        s_unknown_value = shape_kind;
+        (* TODO(shapes) s_unknown_value should likely be instantiated *)
+        s_fields = fdm;
+      }
   | Tnewtype (name, tyl, ty) ->
     let tyl = List.map tyl ~f:(instantiate subst) in
     let ty = instantiate subst ty in

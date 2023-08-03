@@ -230,7 +230,7 @@ and refresh_type renv v ty_orig =
   | (r, Ttuple l) ->
     let (renv, l, changed) = refresh_types renv v l in
     (renv, mk (r, Ttuple l), changed)
-  | (r, Tshape (_, sk, sm)) ->
+  | (r, Tshape { s_origin = _; s_unknown_value = sk; s_fields = sm }) ->
     let (renv, sm, ch) =
       TShapeMap.fold
         (fun sfn { sft_optional; sft_ty } (renv, sm, ch) ->
@@ -240,7 +240,17 @@ and refresh_type renv v ty_orig =
         sm
         (renv, TShapeMap.empty, Unchanged)
     in
-    (renv, mk (r, Tshape (Missing_origin, sk, sm)), ch)
+    ( renv,
+      mk
+        ( r,
+          Tshape
+            {
+              s_origin = Missing_origin;
+              s_unknown_value = sk;
+              (* TODO(shapes) refresh_type s_unknown_value *)
+              s_fields = sm;
+            } ),
+      ch )
   | (_, Tvar v) ->
     let renv = { renv with tvars = IMap.add v renv.on_error renv.tvars } in
     (renv, ty_orig, Unchanged)

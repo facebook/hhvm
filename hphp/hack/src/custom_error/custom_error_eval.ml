@@ -212,7 +212,7 @@ let matches_locl_ty ?(env = Env.empty) t ~scrut =
       | Match.Matched _ as m -> m
       | _ -> aux patt_snd ty ~env)
     (* -- Shapes ------------------------------------------------------------ *)
-    | (Shape patt_flds, Ty.Tshape (_, _, flds)) ->
+    | (Shape patt_flds, Ty.(Tshape { s_fields = flds; _ })) ->
       (* Split [TShapeMap.t] into three [String.Map.t]s, eliminating positional
          information *)
       let (str_flds, cconst_flds, int_flds) = split_fields flds in

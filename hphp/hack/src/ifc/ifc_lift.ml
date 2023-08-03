@@ -124,7 +124,7 @@ let rec ty ?prefix ?lump renv (t : T.locl_ty) =
   | T.Toption t ->
     let tnull = Tnull (get_policy ?prefix lump renv) in
     Tunion [tnull; ty t]
-  | T.Tshape (_, kind, fields) ->
+  | T.(Tshape { s_origin = _; s_unknown_value = kind; s_fields = fields }) ->
     let lift sft =
       {
         sft_optional = sft.T.sft_optional;

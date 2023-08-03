@@ -125,9 +125,15 @@ module Locl_Inst = struct
     | Tclass (x, exact, tyl) ->
       let tyl = List.map tyl ~f:(instantiate subst) in
       Tclass (x, exact, tyl)
-    | Tshape (_, shape_kind, fdm) ->
+    | Tshape { s_origin = _; s_unknown_value = kind; s_fields = fdm } ->
       let fdm = ShapeFieldMap.map (instantiate subst) fdm in
-      Tshape (Missing_origin, shape_kind, fdm)
+      Tshape
+        {
+          s_origin = Missing_origin;
+          s_unknown_value = kind;
+          (* TODO(shapes) instantiate s_unknown_value *)
+          s_fields = fdm;
+        }
     | Tunapplied_alias _ -> failwith "this shouldn't be here"
     | Tdependent (dep, ty) ->
       let ty = instantiate subst ty in
@@ -386,7 +392,8 @@ module Simple = struct
     | Trefinement (ty, rs) ->
       check ty;
       Class_refinement.iter check rs
-    | Tshape (_, _, map) -> TShapeMap.iter (fun _ sft -> check sft.sft_ty) map
+    | Tshape { s_fields = map; _ } ->
+      TShapeMap.iter (fun _ sft -> check sft.sft_ty) map
     | Tfun ft ->
       check_possibly_enforced_ty ~in_signature env ft.ft_ret;
       List.iter ft.ft_params ~f:(fun p ->

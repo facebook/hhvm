@@ -135,7 +135,7 @@ let widen_for_array_get ~lhs_of_null_coalesce ~expr_pos index_expr env ty =
     | _ -> ((env, None), None)
   end
   (* Whatever the lower bound, construct an open, singleton shape type. *)
-  | (r, Tshape (_, _, fdm)) -> begin
+  | (r, Tshape { s_fields = fdm; _ }) -> begin
     let (fld_opt, ty_err_opt) =
       TUtils.shape_field_name_with_ty_err env index_expr
     in
@@ -667,7 +667,7 @@ let rec array_get
                    });
           let (env, ty) = err_witness env p in
           (env, (ty, dflt_arr_res, Error (ty2, MakeType.int Reason.none))))
-      | Tshape (_, _, fdm) ->
+      | Tshape { s_fields = fdm; _ } ->
         let (_, p, _) = e2 in
         begin
           let (fld_opt, ty_err_opt) =
@@ -784,12 +784,24 @@ let rec array_get
         got_dynamic ()
       | Tnewtype (ts, [ty], bound) -> begin
         match deref bound with
-        | (r, Tshape (_, shape_kind, fields))
+        | ( r,
+            Tshape
+              { s_origin = _; s_unknown_value = shape_kind; s_fields = fields }
+          )
           when String.equal ts SN.FB.cTypeStructure ->
           let (env, fields) =
             Typing_structure.transform_shapemap env array_pos ty fields
           in
-          let ty = mk (r, Tshape (Missing_origin, shape_kind, fields)) in
+          let ty =
+            mk
+              ( r,
+                Tshape
+                  {
+                    s_origin = Missing_origin;
+                    s_unknown_value = shape_kind;
+                    s_fields = fields;
+                  } )
+          in
           let (env, (ty, err_opt_arr, err_opt_idx)) =
             array_get
               ~array_pos
@@ -1401,7 +1413,8 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
           | _ ->
             fail (Error (tkey, MakeType.int Reason.none)) Reason.URtuple_access
         end
-      | Tshape (_, shape_kind, fdm) -> begin
+      | Tshape { s_origin = _; s_unknown_value = shape_kind; s_fields = fdm } ->
+      begin
         let (fld_opt, ty_err_opt) =
           TUtils.shape_field_name_with_ty_err env key
         in
@@ -1425,7 +1438,16 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
           let fdm' =
             TShapeMap.add field { sft_optional = false; sft_ty = ty2 } fdm
           in
-          let ty = mk (r, Tshape (Missing_origin, shape_kind, fdm')) in
+          let ty =
+            mk
+              ( r,
+                Tshape
+                  {
+                    s_origin = Missing_origin;
+                    s_unknown_value = shape_kind;
+                    s_fields = fdm';
+                  } )
+          in
           (env, (ty, Ok ty, Ok tkey, Ok ty2))
       end
       | Tnewtype (cid, _, _bound) when String.equal cid SN.Classes.cSupportDyn

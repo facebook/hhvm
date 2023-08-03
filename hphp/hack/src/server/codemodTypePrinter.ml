@@ -53,7 +53,7 @@ let rec print_ty_exn ?(allow_nothing = false) ty =
       (String.concat ~sep:", " params)
       (print_ty_exn ft.ft_ret.et_type)
   | Ttuple tyl -> "(" ^ print_tyl_exn tyl ^ ")"
-  | Tshape (_, shape_kind, fdm) ->
+  | Tshape { s_origin = _; s_unknown_value = shape_kind; s_fields = fdm } ->
     let fields = List.map (TShapeMap.elements fdm) ~f:print_shape_field_exn in
     let fields =
       if is_nothing shape_kind then

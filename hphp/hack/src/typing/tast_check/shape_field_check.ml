@@ -41,12 +41,13 @@ let shapes_key_exists env shape field_name =
   let (_, _, shape) = Typing_utils.strip_supportdyn tenv shape in
   let (_, shape) = Tast_env.expand_type env shape in
   match get_node shape with
-  | Tshape (_, shape_kind, fields) ->
+  | Tshape { s_origin = _; s_unknown_value = shape_kind; s_fields = fields } ->
     (check (get_pos shape) shape_kind fields, false)
   | Toption maybe_shape ->
     let (_, shape) = Tast_env.expand_type env maybe_shape in
     (match get_node shape with
-    | Tshape (_, shape_kind, fields) ->
+    | Tshape { s_origin = _; s_unknown_value = shape_kind; s_fields = fields }
+      ->
       (check (get_pos shape) shape_kind fields, true)
     | _ -> (`Unknown, true))
   | _ -> (`Unknown, false)

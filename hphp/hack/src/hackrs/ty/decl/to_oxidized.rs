@@ -178,11 +178,11 @@ impl<'a, R: Reason> ToOxidized<'a> for Ty_<R> {
                 }
                 let shape_kind = shape_kind.to_oxidized(arena);
                 let shape_origin = typing_defs::TypeOrigin::MissingOrigin;
-                typing_defs::Ty_::Tshape(arena.alloc(typing_defs::ShapeType(
-                    shape_origin,
-                    shape_kind,
-                    TShapeMap::from(shape_fields),
-                )))
+                typing_defs::Ty_::Tshape(arena.alloc(typing_defs::ShapeType {
+                    origin: shape_origin,
+                    unknown_value: shape_kind,
+                    fields: TShapeMap::from(shape_fields),
+                }))
             }
             Ty_::Tgeneric(x) => typing_defs::Ty_::Tgeneric(x.to_oxidized(arena)),
             Ty_::Tunion(x) => typing_defs::Ty_::Tunion(x.to_oxidized(arena)),

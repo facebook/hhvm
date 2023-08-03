@@ -389,8 +389,11 @@ and 'phase refined_const_bounds = {
 (** Whether all fields of this shape are known, types of each of the
   * known arms.
   *)
-and 'phase shape_type =
-  type_origin * 'phase ty * 'phase shape_field_type TShapeMap.t
+and 'phase shape_type = {
+  s_origin: type_origin;
+  s_unknown_value: 'phase ty;
+  s_fields: 'phase shape_field_type TShapeMap.t;
+}
 
 and 'ty capability =
   | CapDefaults of Pos_or_decl.t
@@ -658,12 +661,10 @@ module Pp = struct
       Format.fprintf fmt "(@[<2>Ttuple@ ";
       pp_list pp_ty fmt a0;
       Format.fprintf fmt "@])"
-    | Tshape (_, a0, a1) ->
-      Format.fprintf fmt "(@[<2>Tshape (@,";
-      pp_ty fmt a0;
-      Format.fprintf fmt ",@ ";
-      TShapeMap.pp pp_shape_field_type fmt a1;
-      Format.fprintf fmt "@,))@]"
+    | Tshape a0 ->
+      Format.fprintf fmt "(@[<2>Tshape@ ";
+      pp_shape_type fmt a0;
+      Format.fprintf fmt "@])"
     | Tvar a0 ->
       Format.fprintf fmt "(@[<2>Tvar@ ";
       Ident.pp fmt a0;
@@ -831,6 +832,26 @@ module Pp = struct
       Format.pp_print_string fmt s;
       Format.pp_print_string fmt ")"
     | None -> Format.pp_print_string fmt "None"
+
+  and pp_shape_type : type a. Format.formatter -> a shape_type -> unit =
+   fun fmt x ->
+    Format.fprintf fmt "@[<2>{ ";
+
+    Format.fprintf fmt "@[%s =@ " "s_origin";
+    pp_type_origin fmt x.s_origin;
+    Format.fprintf fmt "@]";
+    Format.fprintf fmt ";@ ";
+
+    Format.fprintf fmt "@[%s =@ " "s_fields";
+    TShapeMap.pp pp_shape_field_type fmt x.s_fields;
+    Format.fprintf fmt "@]";
+    Format.fprintf fmt ";@ ";
+
+    Format.fprintf fmt "@[%s =@ " "s_unknown_value";
+    pp_ty fmt x.s_unknown_value;
+    Format.fprintf fmt "@]";
+
+    Format.fprintf fmt "@ }@]"
 
   and pp_fun_type : type a. Format.formatter -> a ty fun_type -> unit =
    fun fmt x ->

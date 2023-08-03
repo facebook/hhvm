@@ -38,8 +38,7 @@ let expand_ty ?var_hook ?pos env ty =
       | (p, Tnewtype (n, tyl, ty)) ->
         mk (p, Tnewtype (n, exp_tys tyl, exp_ty ty))
       | (p, Tdependent (n, ty)) -> mk (p, Tdependent (n, exp_ty ty))
-      | (p, Tshape (shape_origin, shape_kind, fields)) ->
-        mk (p, Tshape (shape_origin, shape_kind, TShapeMap.map exp_sft fields))
+      | (p, Tshape s) -> mk (p, Tshape (exp_shape_type s))
       | (p, Tvec_or_dict (ty1, ty2)) ->
         mk (p, Tvec_or_dict (exp_ty ty1, exp_ty ty2))
       | (p, Tvar v) ->
@@ -95,6 +94,18 @@ let expand_ty ?var_hook ?pos env ty =
     { et_type = exp_ty et_type; et_enforced }
   and exp_sft { sft_optional; sft_ty } =
     { sft_optional; sft_ty = exp_ty sft_ty }
+  and exp_shape_type
+      {
+        s_origin = shape_origin;
+        s_unknown_value = shape_kind;
+        s_fields = fields;
+      } =
+    {
+      s_origin = shape_origin;
+      s_unknown_value = shape_kind;
+      (* TODO(shapes) exp_ty s_unknown_value *)
+      s_fields = TShapeMap.map exp_sft fields;
+    }
   and exp_tparam t =
     {
       t with

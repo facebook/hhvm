@@ -1466,7 +1466,7 @@ and get_tyvars_i env (ty : internal_type) =
     | Tunion tyl
     | Tintersection tyl ->
       List.fold_left tyl ~init:(env, ISet.empty, ISet.empty) ~f:get_tyvars_union
-    | Tshape (_, _, m) ->
+    | Tshape { s_fields = m; _ } ->
       TShapeMap.fold
         (fun _ { sft_ty; _ } res -> get_tyvars_union res sft_ty)
         m

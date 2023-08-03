@@ -160,11 +160,7 @@ struct
     | Trefinement (root_ty, rs) ->
       let rs = Class_refinement.map ty rs in
       Trefinement (ty root_ty, rs)
-    | Tshape (_, shape_kind, fdm) ->
-      Tshape
-        ( Missing_origin,
-          shape_kind,
-          ShapeFieldMap.map_and_rekey fdm shape_field_name ty )
+    | Tshape s -> Tshape (shape_type s)
     | Tnewtype (name, tyl, bound) ->
       let tyl = List.map tyl ~f:ty in
       let bound = ty bound in
@@ -198,6 +194,16 @@ struct
       ft_params = List.map ft.ft_params ~f:fun_param;
       ft_implicit_params = fun_implicit_params ft.ft_implicit_params;
       ft_ret = possibly_enforced_ty ft.ft_ret;
+    }
+
+  and shape_type { s_origin = _; s_unknown_value = shape_kind; s_fields = fdm }
+      =
+    (* TODO(shapes) Should this be changing s_origin? *)
+    {
+      s_origin = Missing_origin;
+      s_unknown_value = shape_kind;
+      (* TODO(shapes) s_unknown_value is missing a call to ty *)
+      s_fields = ShapeFieldMap.map_and_rekey fdm shape_field_name ty;
     }
 
   and fun_elt fe =

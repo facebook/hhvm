@@ -95,9 +95,7 @@ class type ['env] type_mapper_type =
     method on_tshape :
       'env ->
       Typing_reason.t ->
-      Typing_defs.locl_ty ->
-      Typing_defs.locl_phase Typing_defs.shape_field_type
-      Typing_defs.TShapeMap.t ->
+      Typing_defs.locl_phase Typing_defs.shape_type ->
       'env * Typing_defs.locl_ty
 
     method on_tvec_or_dict :

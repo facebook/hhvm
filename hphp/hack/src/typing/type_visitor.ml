@@ -52,12 +52,7 @@ class type ['a] decl_type_visitor_type =
 
     method on_tintersection : 'a -> decl_phase Reason.t_ -> decl_ty list -> 'a
 
-    method on_tshape :
-      'a ->
-      decl_phase Reason.t_ ->
-      decl_ty ->
-      decl_phase shape_field_type TShapeMap.t ->
-      'a
+    method on_tshape : 'a -> decl_phase Reason.t_ -> decl_phase shape_type -> 'a
 
     method on_taccess :
       'a -> decl_phase Reason.t_ -> decl_phase taccess_type -> 'a
@@ -131,7 +126,8 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
     method on_tintersection acc _ tyl =
       List.fold_left tyl ~f:this#on_type ~init:acc
 
-    method on_tshape acc _ kind fdm =
+    method on_tshape
+        acc _ { s_origin = _; s_unknown_value = kind; s_fields = fdm } =
       let acc = this#on_type acc kind in
       let f _ { sft_ty; _ } acc = this#on_type acc sft_ty in
       TShapeMap.fold f fdm acc
@@ -162,7 +158,7 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
       | Ttuple tyl -> this#on_ttuple acc r tyl
       | Tunion tyl -> this#on_tunion acc r tyl
       | Tintersection tyl -> this#on_tintersection acc r tyl
-      | Tshape (_, shape_kind, fdm) -> this#on_tshape acc r shape_kind fdm
+      | Tshape s -> this#on_tshape acc r s
       | Tnewtype (name, tyl, ty) -> this#on_tnewtype acc r name tyl ty
   end
 
@@ -203,8 +199,7 @@ class type ['a] locl_type_visitor_type =
 
     method on_tvec_or_dict : 'a -> Reason.t -> locl_ty -> locl_ty -> 'a
 
-    method on_tshape :
-      'a -> Reason.t -> locl_ty -> locl_phase shape_field_type TShapeMap.t -> 'a
+    method on_tshape : 'a -> Reason.t -> locl_phase shape_type -> 'a
 
     method on_tclass : 'a -> Reason.t -> pos_id -> exact -> locl_ty list -> 'a
 
@@ -270,7 +265,8 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
     method on_tintersection acc _ tyl =
       List.fold_left tyl ~f:this#on_type ~init:acc
 
-    method on_tshape acc _ kind fdm =
+    method on_tshape
+        acc _ { s_origin = _; s_unknown_value = kind; s_fields = fdm } =
       let acc = this#on_type acc kind in
       let f _ { sft_ty; _ } acc = this#on_type acc sft_ty in
       TShapeMap.fold f fdm acc
@@ -325,7 +321,7 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
       | Ttuple tyl -> this#on_ttuple acc r tyl
       | Tunion tyl -> this#on_tunion acc r tyl
       | Tintersection tyl -> this#on_tintersection acc r tyl
-      | Tshape (_, shape_kind, fdm) -> this#on_tshape acc r shape_kind fdm
+      | Tshape s -> this#on_tshape acc r s
       | Tclass (cls, exact, tyl) -> this#on_tclass acc r cls exact tyl
       | Tvec_or_dict (ty1, ty2) -> this#on_tvec_or_dict acc r ty1 ty2
       | Tunapplied_alias n -> this#on_tunapplied_alias acc r n

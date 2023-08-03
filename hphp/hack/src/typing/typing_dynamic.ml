@@ -234,7 +234,7 @@ let rec try_push_like env ty =
              (r, Tfun { ft with ft_ret = { ft.ft_ret with et_type = ret_ty } }))
       else
         None )
-  | (r, Tshape (_, kind, fields)) ->
+  | (r, Tshape { s_origin = _; s_unknown_value = kind; s_fields = fields }) ->
     let add_like_to_shape_field changed _name { sft_optional; sft_ty } =
       let (changed, sft_ty) = make_like env changed sft_ty in
       (changed, { sft_optional; sft_ty })
@@ -244,7 +244,15 @@ let rec try_push_like env ty =
     in
     ( env,
       if changed then
-        Some (mk (r, Tshape (Missing_origin, kind, fields)))
+        Some
+          (mk
+             ( r,
+               Tshape
+                 {
+                   s_origin = Missing_origin;
+                   s_unknown_value = kind;
+                   s_fields = fields;
+                 } ))
       else
         None )
   | (r, Tnewtype (n, tyl, bound)) -> begin
@@ -300,13 +308,21 @@ let rec strip_covariant_like env ty =
       let (env, ret_ty) = strip_covariant_like env ft.ft_ret.et_type in
       ( env,
         mk (r, Tfun { ft with ft_ret = { ft.ft_ret with et_type = ret_ty } }) )
-    | (r, Tshape (_, kind, fields)) ->
+    | (r, Tshape { s_origin = _; s_unknown_value = kind; s_fields = fields }) ->
       let strip_shape_field env _name { sft_optional; sft_ty } =
         let (env, sft_ty) = strip_covariant_like env sft_ty in
         (env, { sft_optional; sft_ty })
       in
       let (env, fields) = TShapeMap.map_env strip_shape_field env fields in
-      (env, mk (r, Tshape (Missing_origin, kind, fields)))
+      ( env,
+        mk
+          ( r,
+            Tshape
+              {
+                s_origin = Missing_origin;
+                s_unknown_value = kind;
+                s_fields = fields;
+              } ) )
     | (r, Tnewtype (n, tyl, bound)) -> begin
       match Env.get_typedef env n with
       | None -> (env, ty)

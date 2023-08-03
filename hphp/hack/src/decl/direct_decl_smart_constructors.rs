@@ -2152,7 +2152,11 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                     ..*fun_type
                 }))
             }
-            Ty_::Tshape(&ShapeType(_, kind, fields)) => {
+            Ty_::Tshape(&ShapeType {
+                origin: _,
+                unknown_value: kind,
+                fields,
+            }) => {
                 let mut converted_fields = AssocListMut::with_capacity_in(fields.len(), self.arena);
                 for (&name, ty) in fields.iter() {
                     converted_fields.insert(
@@ -2164,7 +2168,11 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                     );
                 }
                 let origin = TypeOrigin::MissingOrigin;
-                Ty_::Tshape(self.alloc(ShapeType(origin, kind, converted_fields.into())))
+                Ty_::Tshape(self.alloc(ShapeType {
+                    origin,
+                    unknown_value: kind,
+                    fields: converted_fields.into(),
+                }))
             }
             Ty_::TvecOrDict(&(tk, tv)) => Ty_::TvecOrDict(self.alloc((
                 self.convert_tapply_to_tgeneric(tk),
@@ -5277,7 +5285,11 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         let origin = TypeOrigin::MissingOrigin;
         self.hint_ty(
             pos,
-            Ty_::Tshape(self.alloc(ShapeType(origin, kind, fields.into()))),
+            Ty_::Tshape(self.alloc(ShapeType {
+                origin,
+                unknown_value: kind,
+                fields: fields.into(),
+            })),
         )
     }
 

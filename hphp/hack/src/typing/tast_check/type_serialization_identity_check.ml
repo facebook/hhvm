@@ -77,13 +77,21 @@ let rec strip_ty ty =
           ft_ifc_decl = default_ifc_fun_decl;
           ft_cross_package = None;
         }
-    | Tshape (_, shape_kind, shape_fields) ->
+    | Tshape
+        { s_origin = _; s_unknown_value = shape_kind; s_fields = shape_fields }
+      ->
       let strip_field { sft_optional; sft_ty } =
         let sft_ty = strip_ty sft_ty in
         { sft_optional; sft_ty }
       in
       let shape_fields = TShapeMap.map strip_field shape_fields in
-      Tshape (Missing_origin, shape_kind, shape_fields)
+      Tshape
+        {
+          s_origin = Missing_origin;
+          s_unknown_value = shape_kind;
+          (* TODO(shapes) strip_ty s_unknown_value *)
+          s_fields = shape_fields;
+        }
     | Taccess _ -> ty
     | Tunapplied_alias _ ->
       Typing_defs.error_Tunapplied_alias_in_illegal_context ()

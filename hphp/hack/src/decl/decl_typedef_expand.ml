@@ -159,7 +159,7 @@ and expand_ visited ctx (ty : decl_ty) : decl_ty * cyclic_td_usage list =
   | Ttuple tyl ->
     let (tyl, cycles) = List.unzip @@ List.map tyl ~f:(expand_ visited ctx) in
     (mk (r, Ttuple tyl), List.concat cycles)
-  | Tshape (_, shape_kind, fdm) ->
+  | Tshape { s_origin = _; s_unknown_value = shape_kind; s_fields = fdm } ->
     let (cycles, fdm) =
       ShapeFieldMap.map_env
         (fun cycles1 ty ->
@@ -168,7 +168,17 @@ and expand_ visited ctx (ty : decl_ty) : decl_ty * cyclic_td_usage list =
         []
         fdm
     in
-    (mk (r, Tshape (Missing_origin, shape_kind, fdm)), cycles)
+    ( mk
+        ( r,
+          (* TODO(shapes) Should this be resetting the origin? *)
+          Tshape
+            {
+              s_origin = Missing_origin;
+              s_unknown_value = shape_kind;
+              (* TODO(shapes) should call expand_ on s_unknown_value *)
+              s_fields = fdm;
+            } ),
+      cycles )
   | Tvec_or_dict (ty1, ty2) ->
     let (ty1, err1) = expand_ visited ctx ty1 in
     let (ty2, err2) = expand_ visited ctx ty2 in

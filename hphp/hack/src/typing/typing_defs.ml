@@ -572,7 +572,8 @@ let rec is_denotable ty =
     List.for_all ~f:is_denotable ts
   | Tvec_or_dict (tk, tv) -> is_denotable tk && is_denotable tv
   | Taccess (ty, _) -> is_denotable ty
-  | Tshape (_, unknown_field_type, sm) ->
+  | Tshape { s_origin = _; s_unknown_value = unknown_field_type; s_fields = sm }
+    ->
     TShapeMap.for_all (fun _ { sft_ty; _ } -> is_denotable sft_ty) sm
     && unknown_field_type_is_denotable unknown_field_type
   | Tfun { ft_params; ft_ret; _ } ->
@@ -780,22 +781,7 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
       end
       | n -> n
     end
-    | ( Tshape (shape_origin1, unknown_fields_type1, fields1),
-        Tshape (shape_origin2, unknown_fields_type2, fields2) ) ->
-      if same_type_origin shape_origin1 shape_origin2 then
-        0
-      else begin
-        match ty_compare unknown_fields_type1 unknown_fields_type2 with
-        | 0 ->
-          List.compare
-            (fun (k1, v1) (k2, v2) ->
-              match TShapeField.compare k1 k2 with
-              | 0 -> shape_field_type_compare v1 v2
-              | n -> n)
-            (TShapeMap.elements fields1)
-            (TShapeMap.elements fields2)
-        | n -> n
-      end
+    | (Tshape s1, Tshape s2) -> shape_type_compare s1 s2
     | (Tvar v1, Tvar v2) -> compare v1 v2
     | (Tunapplied_alias n1, Tunapplied_alias n2) -> String.compare n1 n2
     | (Taccess (ty1, id1), Taccess (ty2, id2)) -> begin
@@ -820,6 +806,36 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
     match ty_compare ty1 ty2 with
     | 0 -> Bool.compare optional1 optional2
     | n -> n
+  and shape_type_compare : type a. a shape_type -> a shape_type -> int =
+   fun s1 s2 ->
+    let {
+      s_origin = shape_origin1;
+      s_unknown_value = unknown_fields_type1;
+      s_fields = fields1;
+    } =
+      s1
+    in
+    let {
+      s_origin = shape_origin2;
+      s_unknown_value = unknown_fields_type2;
+      s_fields = fields2;
+    } =
+      s2
+    in
+    if same_type_origin shape_origin1 shape_origin2 then
+      0
+    else begin
+      match ty_compare unknown_fields_type1 unknown_fields_type2 with
+      | 0 ->
+        List.compare
+          (fun (k1, v1) (k2, v2) ->
+            match TShapeField.compare k1 k2 with
+            | 0 -> shape_field_type_compare v1 v2
+            | n -> n)
+          (TShapeMap.elements fields1)
+          (TShapeMap.elements fields2)
+      | n -> n
+    end
   and user_attribute_param_compare p1 p2 =
     let dest_user_attribute_param p =
       match p with

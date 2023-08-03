@@ -155,7 +155,7 @@ let validator =
       let acc = List.fold_left tyl ~f:this#on_type ~init:acc in
       this#check_for_wildcards acc tyl "tuple"
 
-    method! on_tshape acc _ _ fdm =
+    method! on_tshape acc _ { s_fields = fdm; _ } =
       let tyl = TShapeMap.values fdm |> List.map ~f:(fun s -> s.sft_ty) in
       let acc = List.fold_left tyl ~init:acc ~f:this#on_type in
       this#check_for_wildcards acc tyl "shape"

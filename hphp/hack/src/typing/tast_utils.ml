@@ -157,7 +157,7 @@ let rec truthiness env ty =
       | [] -> Unknown
       | hd :: tl -> List.fold tl ~init:hd ~f:fold_truthiness
     end
-  | Tshape (_, shape_kind, fields) ->
+  | Tshape { s_origin = _; s_unknown_value = shape_kind; s_fields = fields } ->
     if is_nothing shape_kind && TShapeMap.is_empty fields then
       Always_falsy
     else

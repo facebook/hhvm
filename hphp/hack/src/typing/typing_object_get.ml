@@ -374,7 +374,7 @@ let rec this_appears_covariantly ~contra env ty =
     this_appears_covariantly ~contra env ft.ft_ret.et_type
     || List.exists ft.ft_params ~f:(fun fp ->
            this_appears_covariantly ~contra:(not contra) env fp.fp_type.et_type)
-  | Tshape (_, _, fm) ->
+  | Tshape { s_fields = fm; _ } ->
     let fields = TShapeMap.elements fm in
     List.exists fields ~f:(fun (_, f) ->
         this_appears_covariantly ~contra env f.sft_ty)

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2d458ca5379337cb980ed1c1cf70bd6d>>
+// @generated SignedSource<<5df09e7bcd3abfa6a016e00669296eb0>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -774,13 +774,16 @@ arena_deserializer::impl_deserialize_in_arena!(RefinedConstBounds<'arena>);
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(prefix = "s_")]
 #[repr(C)]
-pub struct ShapeType<'a>(
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub TypeOrigin<'a>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Ty<'a>,
+pub struct ShapeType<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub  t_shape_map::TShapeMap<'a, &'a ShapeFieldType<'a>>,
-);
+    pub origin: TypeOrigin<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub unknown_value: &'a Ty<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub fields: t_shape_map::TShapeMap<'a, &'a ShapeFieldType<'a>>,
+}
 impl<'a> TrivialDrop for ShapeType<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(ShapeType<'arena>);
 

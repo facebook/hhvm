@@ -59,8 +59,10 @@ class AEGISCipher : public Aead {
 
   static constexpr size_t kMaxIVLength = 32;
   static constexpr size_t kTagLength = 16;
-  static constexpr size_t kAEGIS28LStateSize = 32;
-  static constexpr size_t kAEGIS256StateSize = 16;
+  /* The Minimum Message Size (MMS), in bytes, that is required to perform one
+  full internal AEGIS state update. */
+  static constexpr size_t kAEGIS128LMMS = 2 * 16;
+  static constexpr size_t kAEGIS256MMS = 16;
 
   static std::unique_ptr<Aead> make128L();
   static std::unique_ptr<Aead> make256();
@@ -75,6 +77,13 @@ class AEGISCipher : public Aead {
   size_t ivLength() const override {
     return ivLength_;
   }
+
+  std::unique_ptr<folly::IOBuf> doEncrypt(
+      std::unique_ptr<folly::IOBuf>&& plaintext,
+      const folly::IOBuf* associatedData,
+      folly::ByteRange iv,
+      folly::ByteRange key,
+      Aead::AeadOptions options) const;
 
   folly::Optional<std::unique_ptr<folly::IOBuf>> doDecrypt(
       std::unique_ptr<folly::IOBuf>&& ciphertext,
@@ -139,8 +148,7 @@ class AEGISCipher : public Aead {
       DecryptFinalFn decryptFinal,
       size_t keyLength,
       size_t ivLength,
-      size_t tagLength,
-      size_t stateSize);
+      size_t mms);
 
   TrafficKey trafficKey_;
   folly::ByteRange trafficIvKey_;
@@ -152,8 +160,7 @@ class AEGISCipher : public Aead {
   // set by the ctor
   size_t keyLength_;
   size_t ivLength_;
-  size_t tagLength_;
-  int stateSize_;
+  int mms_;
 };
 } // namespace fizz
 #endif

@@ -209,8 +209,8 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   {{^struct:union?}}
   StrongRef fbthrift_data(createStructTuple({{struct:fields_size}}));
   {{#struct:fields}}
-  StrongRef __{{field:name}}(Constructor<{{field:marshal_type}}>{}.constructFrom(val.{{field:cpp_name}}()));
-  if (!__{{field:name}} || setStructField(*fbthrift_data, {{field:index}}, *__{{field:name}}) == -1) {
+  StrongRef _fbthrift__{{field:name}}(Constructor<{{field:marshal_type}}>{}.constructFrom(val.{{field:cpp_name}}()));
+  if (!_fbthrift__{{field:name}} || setStructField(*fbthrift_data, {{field:index}}, *_fbthrift__{{field:name}}) == -1) {
     {{! struct and previous fields auto-decref'd by StrongRef}}
     return nullptr;
   }

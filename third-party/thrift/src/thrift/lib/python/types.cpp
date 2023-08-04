@@ -640,6 +640,12 @@ PyObject* FOLLY_NULLABLE getThriftData(PyObject* structOrUnion) {
   }
   return _get_fbthrift_data(structOrUnion);
 }
+PyObject* FOLLY_NULLABLE getExceptionThriftData(PyObject* generatedError) {
+  if (!ensure_module_imported()) {
+    return nullptr;
+  }
+  return _get_exception_fbthrift_data(generatedError);
+}
 
 /**
  * This is a cpp version is set_struct_field in .pyx, but it saves overhead

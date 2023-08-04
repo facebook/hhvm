@@ -25,3 +25,7 @@ union SerializedUnion {
   1: string s;
   2: i32 i;
 }
+
+safe exception SerializedError {
+  1: string msg;
+}

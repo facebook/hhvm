@@ -28,3 +28,8 @@ struct DepStruct {
   1: string s;
   2: i32 i;
 }
+
+@python.MarshalCapi
+safe exception SomeError {
+  1: string msg;
+}

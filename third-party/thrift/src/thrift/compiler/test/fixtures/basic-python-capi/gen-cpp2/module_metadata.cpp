@@ -198,7 +198,7 @@ StructMetadata<::test::fixtures::basic-python-capi::PrimitiveStruct>::gen(Thrift
   module_PrimitiveStruct.name() = "module.PrimitiveStruct";
   module_PrimitiveStruct.is_union() = false;
   static const auto* const
-  module_PrimitiveStruct_fields = new std::array<EncodedThriftField, 15>{{
+  module_PrimitiveStruct_fields = new std::array<EncodedThriftField, 16>{{
     {1, "booly", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}},
     {2, "charry", false, std::make_unique<Typedef>("module.signed_byte", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
     {3, "shorty", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"name", cvString("uint16_t")}}).cv_struct_ref(), }},
@@ -214,6 +214,7 @@ StructMetadata<::test::fixtures::basic-python-capi::PrimitiveStruct>::gen(Thrift
     {19, "empty_struct", false, std::make_unique<Struct<::test::fixtures::basic-python-capi::VapidStruct>>("module.EmptyStruct"), std::vector<ThriftConstStruct>{}},
     {20, "fbstring", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"name", cvString("folly::fbstring")}}).cv_struct_ref(), }},
     {21, "managed_string_view", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"name", cvString("::apache::thrift::ManagedStringViewWithConversions")}}).cv_struct_ref(), }},
+    {22, "some_error", false, std::make_unique<Struct<::test::fixtures::basic-python-capi::SomeError>>("thrift_dep.SomeError"), std::vector<ThriftConstStruct>{}},
   }};
   for (const auto& f : *module_PrimitiveStruct_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -334,7 +335,7 @@ StructMetadata<::test::fixtures::basic-python-capi::ComposeStruct>::gen(ThriftMe
   module_ComposeStruct.name() = "module.ComposeStruct";
   module_ComposeStruct.is_union() = false;
   static const auto* const
-  module_ComposeStruct_fields = new std::array<EncodedThriftField, 9>{{
+  module_ComposeStruct_fields = new std::array<EncodedThriftField, 10>{{
     {1, "enum_", false, std::make_unique<Enum<::test::fixtures::basic-python-capi::MyEnum>>("module.MyEnum"), std::vector<ThriftConstStruct>{}},
     {2, "renamed_", false, std::make_unique<Enum<::test::fixtures::basic-python-capi::NormalDecentEnum>>("module.AnnoyingEnum"), std::vector<ThriftConstStruct>{}},
     {3, "primitive", false, std::make_unique<Struct<::test::fixtures::basic-python-capi::PrimitiveStruct>>("module.PrimitiveStruct"), std::vector<ThriftConstStruct>{}},
@@ -344,6 +345,7 @@ StructMetadata<::test::fixtures::basic-python-capi::ComposeStruct>::gen(ThriftMe
     {7, "friends", false, std::make_unique<List>(std::make_unique<Struct<::test::fixtures::basic-python-capi::DepStruct>>("thrift_dep.DepStruct")), std::vector<ThriftConstStruct>{}},
     {8, "serial_struct", false, std::make_unique<Struct<::test::fixtures::basic-python-capi::SerializedStruct>>("serialized_dep.SerializedStruct"), std::vector<ThriftConstStruct>{}},
     {9, "serial_union", false, std::make_unique<Union<::test::fixtures::basic-python-capi::SerializedUnion>>("serialized_dep.SerializedUnion"), std::vector<ThriftConstStruct>{}},
+    {10, "serial_error", false, std::make_unique<Struct<::test::fixtures::basic-python-capi::SerializedError>>("serialized_dep.SerializedError"), std::vector<ThriftConstStruct>{}},
   }};
   for (const auto& f : *module_ComposeStruct_fields) {
     ::apache::thrift::metadata::ThriftField field;

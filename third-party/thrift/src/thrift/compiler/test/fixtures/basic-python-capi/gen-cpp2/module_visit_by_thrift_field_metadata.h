@@ -140,6 +140,8 @@ struct VisitByFieldId<::test::fixtures::basic-python-capi::PrimitiveStruct> {
       return f(13, static_cast<T&&>(t).fbstring_ref());
     case 21:
       return f(14, static_cast<T&&>(t).managed_string_view_ref());
+    case 22:
+      return f(15, static_cast<T&&>(t).some_error_ref());
     default:
       throwInvalidThriftId(fieldId, "::test::fixtures::basic-python-capi::PrimitiveStruct");
     }
@@ -252,6 +254,8 @@ struct VisitByFieldId<::test::fixtures::basic-python-capi::ComposeStruct> {
       return f(7, static_cast<T&&>(t).serial_struct_ref());
     case 9:
       return f(8, static_cast<T&&>(t).serial_union_ref());
+    case 10:
+      return f(9, static_cast<T&&>(t).serial_error_ref());
     default:
       throwInvalidThriftId(fieldId, "::test::fixtures::basic-python-capi::ComposeStruct");
     }

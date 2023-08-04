@@ -814,6 +814,7 @@ PrimitiveStruct::PrimitiveStruct(const PrimitiveStruct& srcObj) :
     __fbthrift_field_empty_struct(srcObj.__fbthrift_field_empty_struct),
     __fbthrift_field_fbstring(srcObj.__fbthrift_field_fbstring),
     __fbthrift_field_managed_string_view(srcObj.__fbthrift_field_managed_string_view),
+    __fbthrift_field_some_error(srcObj.__fbthrift_field_some_error),
     __isset(srcObj.__isset) {
 }
 
@@ -851,6 +852,7 @@ PrimitiveStruct::PrimitiveStruct(FOLLY_MAYBE_UNUSED PrimitiveStruct&& other) noe
     __fbthrift_field_empty_struct(std::move(other.__fbthrift_field_empty_struct)),
     __fbthrift_field_fbstring(std::move(other.__fbthrift_field_fbstring)),
     __fbthrift_field_managed_string_view(std::move(other.__fbthrift_field_managed_string_view)),
+    __fbthrift_field_some_error(std::move(other.__fbthrift_field_some_error)),
     __isset(other.__isset) {
 }
 
@@ -870,12 +872,13 @@ PrimitiveStruct& PrimitiveStruct::operator=(FOLLY_MAYBE_UNUSED PrimitiveStruct&&
     this->__fbthrift_field_empty_struct = std::move(other.__fbthrift_field_empty_struct);
     this->__fbthrift_field_fbstring = std::move(other.__fbthrift_field_fbstring);
     this->__fbthrift_field_managed_string_view = std::move(other.__fbthrift_field_managed_string_view);
+    this->__fbthrift_field_some_error = std::move(other.__fbthrift_field_some_error);
     __isset = other.__isset;
     return *this;
 }
 
 
-PrimitiveStruct::PrimitiveStruct(apache::thrift::FragileConstructor, bool booly__arg, ::test::fixtures::basic-python-capi::signed_byte charry__arg, uint16_t shortay__arg, ::std::int32_t inty__arg, uint64_t longy__arg, float floaty__arg, ::apache::thrift::detail::boxed_value_ptr<double> dubby__arg, ::std::unique_ptr<::std::string> stringy__arg, ::std::shared_ptr<const ::std::string> bytey__arg, ::test::fixtures::basic-python-capi::IOBuf buffy__arg, ::test::fixtures::basic-python-capi::IOBufPtr pointbuffy__arg, ::test::fixtures::basic-python-capi::MyStruct patched_struct__arg, ::test::fixtures::basic-python-capi::VapidStruct empty_struct__arg, folly::fbstring fbstring__arg, ::apache::thrift::ManagedStringViewWithConversions managed_string_view__arg) :
+PrimitiveStruct::PrimitiveStruct(apache::thrift::FragileConstructor, bool booly__arg, ::test::fixtures::basic-python-capi::signed_byte charry__arg, uint16_t shortay__arg, ::std::int32_t inty__arg, uint64_t longy__arg, float floaty__arg, ::apache::thrift::detail::boxed_value_ptr<double> dubby__arg, ::std::unique_ptr<::std::string> stringy__arg, ::std::shared_ptr<const ::std::string> bytey__arg, ::test::fixtures::basic-python-capi::IOBuf buffy__arg, ::test::fixtures::basic-python-capi::IOBufPtr pointbuffy__arg, ::test::fixtures::basic-python-capi::MyStruct patched_struct__arg, ::test::fixtures::basic-python-capi::VapidStruct empty_struct__arg, folly::fbstring fbstring__arg, ::apache::thrift::ManagedStringViewWithConversions managed_string_view__arg, ::test::fixtures::basic-python-capi::SomeError some_error__arg) :
     __fbthrift_field_booly(std::move(booly__arg)),
     __fbthrift_field_charry(std::move(charry__arg)),
     __fbthrift_field_shortay(std::move(shortay__arg)),
@@ -890,7 +893,8 @@ PrimitiveStruct::PrimitiveStruct(apache::thrift::FragileConstructor, bool booly_
     __fbthrift_field_patched_struct(std::move(patched_struct__arg)),
     __fbthrift_field_empty_struct(std::move(empty_struct__arg)),
     __fbthrift_field_fbstring(std::move(fbstring__arg)),
-    __fbthrift_field_managed_string_view(std::move(managed_string_view__arg)) {
+    __fbthrift_field_managed_string_view(std::move(managed_string_view__arg)),
+    __fbthrift_field_some_error(std::move(some_error__arg)) {
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -903,6 +907,7 @@ PrimitiveStruct::PrimitiveStruct(apache::thrift::FragileConstructor, bool booly_
   __isset.set(folly::index_constant<9>(), true);
   __isset.set(folly::index_constant<10>(), true);
   __isset.set(folly::index_constant<11>(), true);
+  __isset.set(folly::index_constant<12>(), true);
 }
 
 
@@ -922,6 +927,7 @@ void PrimitiveStruct::__fbthrift_clear() {
   ::apache::thrift::clear(this->__fbthrift_field_patched_struct);
   this->__fbthrift_field_fbstring = apache::thrift::StringTraits<folly::fbstring>::fromStringLiteral("");
   this->__fbthrift_field_managed_string_view = apache::thrift::StringTraits<::apache::thrift::ManagedStringViewWithConversions>::fromStringLiteral("");
+  ::apache::thrift::clear(this->__fbthrift_field_some_error);
   __isset = {};
 }
 
@@ -979,6 +985,9 @@ bool PrimitiveStruct::operator==(FOLLY_MAYBE_UNUSED const PrimitiveStruct& rhs) 
   if (!(lhs.managed_string_view_ref() == rhs.managed_string_view_ref())) {
     return false;
   }
+  if (!(lhs.some_error_ref() == rhs.some_error_ref())) {
+    return false;
+  }
   return true;
 }
 
@@ -1002,6 +1011,14 @@ const ::test::fixtures::basic-python-capi::VapidStruct& PrimitiveStruct::get_emp
   return std::move(__fbthrift_field_empty_struct);
 }
 
+const ::test::fixtures::basic-python-capi::SomeError& PrimitiveStruct::get_some_error() const& {
+  return __fbthrift_field_some_error;
+}
+
+::test::fixtures::basic-python-capi::SomeError PrimitiveStruct::get_some_error() && {
+  return std::move(__fbthrift_field_some_error);
+}
+
 
 void swap(FOLLY_MAYBE_UNUSED PrimitiveStruct& a, FOLLY_MAYBE_UNUSED PrimitiveStruct& b) {
   using ::std::swap;
@@ -1020,6 +1037,7 @@ void swap(FOLLY_MAYBE_UNUSED PrimitiveStruct& a, FOLLY_MAYBE_UNUSED PrimitiveStr
   swap(a.__fbthrift_field_empty_struct, b.__fbthrift_field_empty_struct);
   swap(a.__fbthrift_field_fbstring, b.__fbthrift_field_fbstring);
   swap(a.__fbthrift_field_managed_string_view, b.__fbthrift_field_managed_string_view);
+  swap(a.__fbthrift_field_some_error, b.__fbthrift_field_some_error);
   swap(a.__isset, b.__isset);
 }
 
@@ -1810,6 +1828,7 @@ ComposeStruct::ComposeStruct(FOLLY_MAYBE_UNUSED ComposeStruct&& other) noexcept 
     __fbthrift_field_friends(std::move(other.__fbthrift_field_friends)),
     __fbthrift_field_serial_struct(std::move(other.__fbthrift_field_serial_struct)),
     __fbthrift_field_serial_union(std::move(other.__fbthrift_field_serial_union)),
+    __fbthrift_field_serial_error(std::move(other.__fbthrift_field_serial_error)),
     __isset(other.__isset) {
 }
 
@@ -1823,12 +1842,13 @@ ComposeStruct& ComposeStruct::operator=(FOLLY_MAYBE_UNUSED ComposeStruct&& other
     this->__fbthrift_field_friends = std::move(other.__fbthrift_field_friends);
     this->__fbthrift_field_serial_struct = std::move(other.__fbthrift_field_serial_struct);
     this->__fbthrift_field_serial_union = std::move(other.__fbthrift_field_serial_union);
+    this->__fbthrift_field_serial_error = std::move(other.__fbthrift_field_serial_error);
     __isset = other.__isset;
     return *this;
 }
 
 
-ComposeStruct::ComposeStruct(apache::thrift::FragileConstructor, ::test::fixtures::basic-python-capi::MyEnum enum___arg, ::test::fixtures::basic-python-capi::NormalDecentEnum renamed___arg, ::test::fixtures::basic-python-capi::PrimitiveStruct primitive__arg, ::std::shared_ptr<const ::test::fixtures::basic-python-capi::ListAlias> aliased__arg, ::test::fixtures::basic-python-capi::DepEnum xenum__arg, ::test::fixtures::basic-python-capi::DepStruct xstruct__arg, ::std::vector<::test::fixtures::basic-python-capi::DepStruct> friends__arg, ::test::fixtures::basic-python-capi::SerializedStruct serial_struct__arg, ::test::fixtures::basic-python-capi::SerializedUnion serial_union__arg) :
+ComposeStruct::ComposeStruct(apache::thrift::FragileConstructor, ::test::fixtures::basic-python-capi::MyEnum enum___arg, ::test::fixtures::basic-python-capi::NormalDecentEnum renamed___arg, ::test::fixtures::basic-python-capi::PrimitiveStruct primitive__arg, ::std::shared_ptr<const ::test::fixtures::basic-python-capi::ListAlias> aliased__arg, ::test::fixtures::basic-python-capi::DepEnum xenum__arg, ::test::fixtures::basic-python-capi::DepStruct xstruct__arg, ::std::vector<::test::fixtures::basic-python-capi::DepStruct> friends__arg, ::test::fixtures::basic-python-capi::SerializedStruct serial_struct__arg, ::test::fixtures::basic-python-capi::SerializedUnion serial_union__arg, ::test::fixtures::basic-python-capi::SerializedError serial_error__arg) :
     __fbthrift_field_enum_(std::move(enum___arg)),
     __fbthrift_field_renamed_(std::move(renamed___arg)),
     __fbthrift_field_primitive(std::move(primitive__arg)),
@@ -1837,7 +1857,8 @@ ComposeStruct::ComposeStruct(apache::thrift::FragileConstructor, ::test::fixture
     __fbthrift_field_xstruct(std::move(xstruct__arg)),
     __fbthrift_field_friends(std::move(friends__arg)),
     __fbthrift_field_serial_struct(std::move(serial_struct__arg)),
-    __fbthrift_field_serial_union(std::move(serial_union__arg)) {
+    __fbthrift_field_serial_union(std::move(serial_union__arg)),
+    __fbthrift_field_serial_error(std::move(serial_error__arg)) {
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -1846,6 +1867,7 @@ ComposeStruct::ComposeStruct(apache::thrift::FragileConstructor, ::test::fixture
   __isset.set(folly::index_constant<5>(), true);
   __isset.set(folly::index_constant<6>(), true);
   __isset.set(folly::index_constant<7>(), true);
+  __isset.set(folly::index_constant<8>(), true);
 }
 
 
@@ -1860,6 +1882,7 @@ void ComposeStruct::__fbthrift_clear() {
   this->__fbthrift_field_friends.clear();
   ::apache::thrift::clear(this->__fbthrift_field_serial_struct);
   ::apache::thrift::clear(this->__fbthrift_field_serial_union);
+  ::apache::thrift::clear(this->__fbthrift_field_serial_error);
   __isset = {};
 }
 
@@ -1897,6 +1920,9 @@ bool ComposeStruct::operator==(FOLLY_MAYBE_UNUSED const ComposeStruct& rhs) cons
     return false;
   }
   if (!(lhs.serial_union_ref() == rhs.serial_union_ref())) {
+    return false;
+  }
+  if (!(lhs.serial_error_ref() == rhs.serial_error_ref())) {
     return false;
   }
   return true;
@@ -1946,6 +1972,14 @@ const ::test::fixtures::basic-python-capi::SerializedUnion& ComposeStruct::get_s
   return std::move(__fbthrift_field_serial_union);
 }
 
+const ::test::fixtures::basic-python-capi::SerializedError& ComposeStruct::get_serial_error() const& {
+  return __fbthrift_field_serial_error;
+}
+
+::test::fixtures::basic-python-capi::SerializedError ComposeStruct::get_serial_error() && {
+  return std::move(__fbthrift_field_serial_error);
+}
+
 
 void swap(FOLLY_MAYBE_UNUSED ComposeStruct& a, FOLLY_MAYBE_UNUSED ComposeStruct& b) {
   using ::std::swap;
@@ -1958,6 +1992,7 @@ void swap(FOLLY_MAYBE_UNUSED ComposeStruct& a, FOLLY_MAYBE_UNUSED ComposeStruct&
   swap(a.__fbthrift_field_friends, b.__fbthrift_field_friends);
   swap(a.__fbthrift_field_serial_struct, b.__fbthrift_field_serial_struct);
   swap(a.__fbthrift_field_serial_union, b.__fbthrift_field_serial_union);
+  swap(a.__fbthrift_field_serial_error, b.__fbthrift_field_serial_error);
   swap(a.__isset, b.__isset);
 }
 

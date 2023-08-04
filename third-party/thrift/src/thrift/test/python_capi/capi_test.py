@@ -37,11 +37,16 @@ from thrift.test.python_capi.module.thrift_types import (  # @manual=:test_modul
     StringPair,
 )
 from thrift.test.python_capi.serialized_dep.thrift_types import (
+    SerializedError,
     SerializedStruct,
     SerializedUnion,
 )
 
-from thrift.test.python_capi.thrift_dep.thrift_types import DepEnum, DepStruct
+from thrift.test.python_capi.thrift_dep.thrift_types import (
+    DepEnum,
+    DepStruct,
+    SomeError,
+)
 
 
 class PythonCapiFixture(unittest.TestCase):
@@ -80,6 +85,7 @@ class PythonCapiFixture(unittest.TestCase):
             pointbuffy=IOBuf(memoryview(b"the pointiest buffer")),
             patched_struct=self.my_struct(),
             empty_struct=EmptyStruct(),
+            some_error=SomeError(msg="bad math"),
             fbstring=b"v fast string",
             managed_string_view="I'm an rpc string utility",
         )
@@ -189,6 +195,7 @@ class PythonCapiFixture(unittest.TestCase):
             friends=[self.dep_struct()] * 3,
             serial_struct=SerializedStruct(s="wefw", i=42),
             serial_union=SerializedUnion(i=47),
+            serial_error=SerializedError(msg="tldr"),
         )
 
 

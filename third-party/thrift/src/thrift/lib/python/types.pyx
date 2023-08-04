@@ -466,6 +466,9 @@ def _unpickle_struct(klass, bytes data):
 cdef api object _get_fbthrift_data(object struct_or_union):
     return (<StructOrUnion> struct_or_union)._fbthrift_data
 
+cdef api object _get_exception_fbthrift_data(object generated_error):
+    return (<GeneratedError> generated_error)._fbthrift_data
+
 cdef class Struct(StructOrUnion):
     def __cinit__(self):
         cdef StructInfo info = self._fbthrift_struct_info

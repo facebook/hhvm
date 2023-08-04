@@ -148,6 +148,7 @@ cdef class StructOrUnion:
     cdef _fbthrift_get_field_value(self, int16_t index)
 
 cdef api object _get_fbthrift_data(object struct_or_union)
+cdef api object _get_exception_fbthrift_data(object generated_error)
 
 cdef class Struct(StructOrUnion):
     cdef tuple _fbthrift_field_cache

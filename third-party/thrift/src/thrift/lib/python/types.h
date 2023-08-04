@@ -433,6 +433,12 @@ namespace capi {
  * Do not use externally; use capi interface instead.
  */
 PyObject* FOLLY_NULLABLE getThriftData(PyObject* structOrUnion);
+/**
+ * Retrieves internal _fbthrift_data from `GeneratedError`. On import failure,
+ * returns nullptr. Caller is responsible for clearing Err indicator on failure.
+ * Do not use externally; use capi interface instead.
+ */
+PyObject* FOLLY_NULLABLE getExceptionThriftData(PyObject* generatedError);
 
 /**
  * Sets index + 1 field of struct_tuple to `value` and records that is set

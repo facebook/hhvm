@@ -53,6 +53,7 @@ struct patched_struct;
 struct empty_struct;
 struct fbstring;
 struct managed_string_view;
+struct some_error;
 struct boolz;
 struct intz;
 struct stringz;
@@ -87,6 +88,7 @@ struct xstruct;
 struct friends;
 struct serial_struct;
 struct serial_union;
+struct serial_error;
 struct myEnum;
 struct myStruct;
 struct myString;
@@ -254,6 +256,10 @@ APACHE_THRIFT_DEFINE_ACCESSOR(fbstring);
 #define APACHE_THRIFT_ACCESSOR_managed_string_view
 APACHE_THRIFT_DEFINE_ACCESSOR(managed_string_view);
 #endif
+#ifndef APACHE_THRIFT_ACCESSOR_some_error
+#define APACHE_THRIFT_ACCESSOR_some_error
+APACHE_THRIFT_DEFINE_ACCESSOR(some_error);
+#endif
 #ifndef APACHE_THRIFT_ACCESSOR_boolz
 #define APACHE_THRIFT_ACCESSOR_boolz
 APACHE_THRIFT_DEFINE_ACCESSOR(boolz);
@@ -389,6 +395,10 @@ APACHE_THRIFT_DEFINE_ACCESSOR(serial_struct);
 #ifndef APACHE_THRIFT_ACCESSOR_serial_union
 #define APACHE_THRIFT_ACCESSOR_serial_union
 APACHE_THRIFT_DEFINE_ACCESSOR(serial_union);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_serial_error
+#define APACHE_THRIFT_ACCESSOR_serial_error
+APACHE_THRIFT_DEFINE_ACCESSOR(serial_error);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_myEnum
 #define APACHE_THRIFT_ACCESSOR_myEnum
@@ -2042,10 +2052,11 @@ class PrimitiveStruct final  {
     ::apache::thrift::ident::patched_struct,
     ::apache::thrift::ident::empty_struct,
     ::apache::thrift::ident::fbstring,
-    ::apache::thrift::ident::managed_string_view
+    ::apache::thrift::ident::managed_string_view,
+    ::apache::thrift::ident::some_error
   >;
 
-  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,5,7,8,9,12,13,14,15,18,19,20,21};
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,5,7,8,9,12,13,14,15,18,19,20,21,22};
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::bool_t,
     ::apache::thrift::type::byte_t,
@@ -2061,10 +2072,11 @@ class PrimitiveStruct final  {
     ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStruct>,
     ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::VapidStruct>,
     ::apache::thrift::type::cpp_type<folly::fbstring, ::apache::thrift::type::binary_t>,
-    ::apache::thrift::type::cpp_type<::apache::thrift::ManagedStringViewWithConversions, ::apache::thrift::type::string_t>
+    ::apache::thrift::type::cpp_type<::apache::thrift::ManagedStringViewWithConversions, ::apache::thrift::type::string_t>,
+    ::apache::thrift::type::exception_t<::test::fixtures::basic-python-capi::SomeError>
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 15;
+  static constexpr std::size_t __fbthrift_field_size_v = 16;
 
   template<class T>
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
@@ -2098,7 +2110,7 @@ class PrimitiveStruct final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  PrimitiveStruct(apache::thrift::FragileConstructor, bool booly__arg, ::test::fixtures::basic-python-capi::signed_byte charry__arg, uint16_t shortay__arg, ::std::int32_t inty__arg, uint64_t longy__arg, float floaty__arg, ::apache::thrift::detail::boxed_value_ptr<double> dubby__arg, ::std::unique_ptr<::std::string> stringy__arg, ::std::shared_ptr<const ::std::string> bytey__arg, ::test::fixtures::basic-python-capi::IOBuf buffy__arg, ::test::fixtures::basic-python-capi::IOBufPtr pointbuffy__arg, ::test::fixtures::basic-python-capi::MyStruct patched_struct__arg, ::test::fixtures::basic-python-capi::VapidStruct empty_struct__arg, folly::fbstring fbstring__arg, ::apache::thrift::ManagedStringViewWithConversions managed_string_view__arg);
+  PrimitiveStruct(apache::thrift::FragileConstructor, bool booly__arg, ::test::fixtures::basic-python-capi::signed_byte charry__arg, uint16_t shortay__arg, ::std::int32_t inty__arg, uint64_t longy__arg, float floaty__arg, ::apache::thrift::detail::boxed_value_ptr<double> dubby__arg, ::std::unique_ptr<::std::string> stringy__arg, ::std::shared_ptr<const ::std::string> bytey__arg, ::test::fixtures::basic-python-capi::IOBuf buffy__arg, ::test::fixtures::basic-python-capi::IOBufPtr pointbuffy__arg, ::test::fixtures::basic-python-capi::MyStruct patched_struct__arg, ::test::fixtures::basic-python-capi::VapidStruct empty_struct__arg, folly::fbstring fbstring__arg, ::apache::thrift::ManagedStringViewWithConversions managed_string_view__arg, ::test::fixtures::basic-python-capi::SomeError some_error__arg);
 
   PrimitiveStruct(PrimitiveStruct&&) noexcept;
   PrimitiveStruct(const PrimitiveStruct& src);
@@ -2140,7 +2152,9 @@ class PrimitiveStruct final  {
  private:
   ::apache::thrift::ManagedStringViewWithConversions __fbthrift_field_managed_string_view;
  private:
-  apache::thrift::detail::isset_bitset<12, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+  ::test::fixtures::basic-python-capi::SomeError __fbthrift_field_some_error;
+ private:
+  apache::thrift::detail::isset_bitset<13, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
  public:
 
@@ -2745,6 +2759,46 @@ class PrimitiveStruct final  {
     return {static_cast<T&&>(this->__fbthrift_field_managed_string_view), __isset.at(11), __isset.bit(11)};
   }
 
+  template <typename..., typename T = ::test::fixtures::basic-python-capi::SomeError>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> some_error_ref() const& {
+    return {this->__fbthrift_field_some_error, __isset.at(12), __isset.bit(12)};
+  }
+
+  template <typename..., typename T = ::test::fixtures::basic-python-capi::SomeError>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> some_error_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_some_error), __isset.at(12), __isset.bit(12)};
+  }
+
+  template <typename..., typename T = ::test::fixtures::basic-python-capi::SomeError>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> some_error_ref() & {
+    return {this->__fbthrift_field_some_error, __isset.at(12), __isset.bit(12)};
+  }
+
+  template <typename..., typename T = ::test::fixtures::basic-python-capi::SomeError>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> some_error_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_some_error), __isset.at(12), __isset.bit(12)};
+  }
+
+  template <typename..., typename T = ::test::fixtures::basic-python-capi::SomeError>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> some_error() const& {
+    return {this->__fbthrift_field_some_error, __isset.at(12), __isset.bit(12)};
+  }
+
+  template <typename..., typename T = ::test::fixtures::basic-python-capi::SomeError>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> some_error() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_some_error), __isset.at(12), __isset.bit(12)};
+  }
+
+  template <typename..., typename T = ::test::fixtures::basic-python-capi::SomeError>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> some_error() & {
+    return {this->__fbthrift_field_some_error, __isset.at(12), __isset.bit(12)};
+  }
+
+  template <typename..., typename T = ::test::fixtures::basic-python-capi::SomeError>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> some_error() && {
+    return {static_cast<T&&>(this->__fbthrift_field_some_error), __isset.at(12), __isset.bit(12)};
+  }
+
   bool get_booly() const {
     return __fbthrift_field_booly;
   }
@@ -2886,6 +2940,15 @@ class PrimitiveStruct final  {
   ::apache::thrift::ManagedStringViewWithConversions& set_managed_string_view(T_PrimitiveStruct_managed_string_view_struct_setter&& managed_string_view_) {
     managed_string_view_ref() = std::forward<T_PrimitiveStruct_managed_string_view_struct_setter>(managed_string_view_);
     return __fbthrift_field_managed_string_view;
+  }
+  const ::test::fixtures::basic-python-capi::SomeError& get_some_error() const&;
+  ::test::fixtures::basic-python-capi::SomeError get_some_error() &&;
+
+  template <typename T_PrimitiveStruct_some_error_struct_setter = ::test::fixtures::basic-python-capi::SomeError>
+  [[deprecated("Use `FOO.some_error_ref() = BAR;` instead of `FOO.set_some_error(BAR);`")]]
+  ::test::fixtures::basic-python-capi::SomeError& set_some_error(T_PrimitiveStruct_some_error_struct_setter&& some_error_) {
+    some_error_ref() = std::forward<T_PrimitiveStruct_some_error_struct_setter>(some_error_);
+    return __fbthrift_field_some_error;
   }
 
   template <class Protocol_>
@@ -4517,10 +4580,11 @@ class ComposeStruct final  {
     ::apache::thrift::ident::xstruct,
     ::apache::thrift::ident::friends,
     ::apache::thrift::ident::serial_struct,
-    ::apache::thrift::ident::serial_union
+    ::apache::thrift::ident::serial_union,
+    ::apache::thrift::ident::serial_error
   >;
 
-  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8,9};
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8,9,10};
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::enum_t<::test::fixtures::basic-python-capi::MyEnum>,
     ::apache::thrift::type::enum_t<::test::fixtures::basic-python-capi::NormalDecentEnum>,
@@ -4530,10 +4594,11 @@ class ComposeStruct final  {
     ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::DepStruct>,
     ::apache::thrift::type::list<::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::DepStruct>>,
     ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::SerializedStruct>,
-    ::apache::thrift::type::union_t<::test::fixtures::basic-python-capi::SerializedUnion>
+    ::apache::thrift::type::union_t<::test::fixtures::basic-python-capi::SerializedUnion>,
+    ::apache::thrift::type::exception_t<::test::fixtures::basic-python-capi::SerializedError>
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 9;
+  static constexpr std::size_t __fbthrift_field_size_v = 10;
 
   template<class T>
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
@@ -4567,7 +4632,7 @@ class ComposeStruct final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  ComposeStruct(apache::thrift::FragileConstructor, ::test::fixtures::basic-python-capi::MyEnum enum___arg, ::test::fixtures::basic-python-capi::NormalDecentEnum renamed___arg, ::test::fixtures::basic-python-capi::PrimitiveStruct primitive__arg, ::std::shared_ptr<const ::test::fixtures::basic-python-capi::ListAlias> aliased__arg, ::test::fixtures::basic-python-capi::DepEnum xenum__arg, ::test::fixtures::basic-python-capi::DepStruct xstruct__arg, ::std::vector<::test::fixtures::basic-python-capi::DepStruct> friends__arg, ::test::fixtures::basic-python-capi::SerializedStruct serial_struct__arg, ::test::fixtures::basic-python-capi::SerializedUnion serial_union__arg);
+  ComposeStruct(apache::thrift::FragileConstructor, ::test::fixtures::basic-python-capi::MyEnum enum___arg, ::test::fixtures::basic-python-capi::NormalDecentEnum renamed___arg, ::test::fixtures::basic-python-capi::PrimitiveStruct primitive__arg, ::std::shared_ptr<const ::test::fixtures::basic-python-capi::ListAlias> aliased__arg, ::test::fixtures::basic-python-capi::DepEnum xenum__arg, ::test::fixtures::basic-python-capi::DepStruct xstruct__arg, ::std::vector<::test::fixtures::basic-python-capi::DepStruct> friends__arg, ::test::fixtures::basic-python-capi::SerializedStruct serial_struct__arg, ::test::fixtures::basic-python-capi::SerializedUnion serial_union__arg, ::test::fixtures::basic-python-capi::SerializedError serial_error__arg);
 
   ComposeStruct(ComposeStruct&&) noexcept;
 
@@ -4595,7 +4660,9 @@ class ComposeStruct final  {
  private:
   ::test::fixtures::basic-python-capi::SerializedUnion __fbthrift_field_serial_union;
  private:
-  apache::thrift::detail::isset_bitset<8, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+  ::test::fixtures::basic-python-capi::SerializedError __fbthrift_field_serial_error;
+ private:
+  apache::thrift::detail::isset_bitset<9, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
  public:
 
@@ -4961,6 +5028,46 @@ class ComposeStruct final  {
     return {static_cast<T&&>(this->__fbthrift_field_serial_union), __isset.at(7), __isset.bit(7)};
   }
 
+  template <typename..., typename T = ::test::fixtures::basic-python-capi::SerializedError>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> serial_error_ref() const& {
+    return {this->__fbthrift_field_serial_error, __isset.at(8), __isset.bit(8)};
+  }
+
+  template <typename..., typename T = ::test::fixtures::basic-python-capi::SerializedError>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> serial_error_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_serial_error), __isset.at(8), __isset.bit(8)};
+  }
+
+  template <typename..., typename T = ::test::fixtures::basic-python-capi::SerializedError>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> serial_error_ref() & {
+    return {this->__fbthrift_field_serial_error, __isset.at(8), __isset.bit(8)};
+  }
+
+  template <typename..., typename T = ::test::fixtures::basic-python-capi::SerializedError>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> serial_error_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_serial_error), __isset.at(8), __isset.bit(8)};
+  }
+
+  template <typename..., typename T = ::test::fixtures::basic-python-capi::SerializedError>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> serial_error() const& {
+    return {this->__fbthrift_field_serial_error, __isset.at(8), __isset.bit(8)};
+  }
+
+  template <typename..., typename T = ::test::fixtures::basic-python-capi::SerializedError>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> serial_error() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_serial_error), __isset.at(8), __isset.bit(8)};
+  }
+
+  template <typename..., typename T = ::test::fixtures::basic-python-capi::SerializedError>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> serial_error() & {
+    return {this->__fbthrift_field_serial_error, __isset.at(8), __isset.bit(8)};
+  }
+
+  template <typename..., typename T = ::test::fixtures::basic-python-capi::SerializedError>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> serial_error() && {
+    return {static_cast<T&&>(this->__fbthrift_field_serial_error), __isset.at(8), __isset.bit(8)};
+  }
+
   ::test::fixtures::basic-python-capi::MyEnum get_enum_() const {
     return __fbthrift_field_enum_;
   }
@@ -5034,6 +5141,15 @@ class ComposeStruct final  {
   ::test::fixtures::basic-python-capi::SerializedUnion& set_serial_union(T_ComposeStruct_serial_union_struct_setter&& serial_union_) {
     serial_union_ref() = std::forward<T_ComposeStruct_serial_union_struct_setter>(serial_union_);
     return __fbthrift_field_serial_union;
+  }
+  const ::test::fixtures::basic-python-capi::SerializedError& get_serial_error() const&;
+  ::test::fixtures::basic-python-capi::SerializedError get_serial_error() &&;
+
+  template <typename T_ComposeStruct_serial_error_struct_setter = ::test::fixtures::basic-python-capi::SerializedError>
+  [[deprecated("Use `FOO.serial_error_ref() = BAR;` instead of `FOO.set_serial_error(BAR);`")]]
+  ::test::fixtures::basic-python-capi::SerializedError& set_serial_error(T_ComposeStruct_serial_error_struct_setter&& serial_error_) {
+    serial_error_ref() = std::forward<T_ComposeStruct_serial_error_struct_setter>(serial_error_);
+    return __fbthrift_field_serial_error;
   }
 
   template <class Protocol_>

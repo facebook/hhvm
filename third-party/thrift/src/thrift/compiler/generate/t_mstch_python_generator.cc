@@ -292,7 +292,7 @@ std::string format_marshal_type(
         "apache::thrift::python::capi::ComposedEnum<{}::{}>",
         cpp2::get_gen_namespace(*type->program()),
         cpp2::get_name(type));
-  } else if (type->is_struct()) {
+  } else if (type->is_struct() || type->is_exception()) {
     return fmt::format(
         "apache::thrift::python::capi::ComposedStruct<{}::{}>",
         cpp2::get_gen_namespace(*type->program()),

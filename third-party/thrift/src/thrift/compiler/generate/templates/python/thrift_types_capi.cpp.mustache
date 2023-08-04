@@ -62,7 +62,7 @@ Extractor<{{program:cpp_namespaces}}::{{struct:cpp_name}}>::operator()(PyObject*
   }
   {{#struct:fields?}}
   {{! getThriftData increments tuple struct refcnt}}
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(get{{#struct:exception?}}Exception{{/struct:exception?}}ThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       {{program:cpp_namespaces}}::{{struct:cpp_name}}>>{}(*fbThriftData);
   {{/struct:fields?}}
@@ -247,7 +247,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   if (!obj) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return get{{#struct:exception?}}Exception{{/struct:exception?}}ThriftData(*obj);
 }
 {{/struct:marshal_capi?}}
 

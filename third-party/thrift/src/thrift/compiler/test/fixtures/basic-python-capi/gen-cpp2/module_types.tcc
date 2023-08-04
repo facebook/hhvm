@@ -1389,6 +1389,22 @@ _readField_managed_string_view:
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
           21,
+          22,
+          apache::thrift::protocol::T_STRUCT))) {
+    goto _loop;
+  }
+_readField_some_error:
+  {
+    _readState.beforeSubobject(iprot);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::SomeError>::readWithContext(*iprot, this->__fbthrift_field_some_error, _readState);
+    _readState.afterSubobject(iprot);
+    
+  }
+ this->__isset.set(12, true);
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          22,
           0,
           apache::thrift::protocol::T_STOP))) {
     goto _loop;
@@ -1529,6 +1545,14 @@ _loop:
         goto _skip;
       }
     }
+    case 22:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRUCT))) {
+        goto _readField_some_error;
+      } else {
+        goto _skip;
+      }
+    }
     default:
     {
 _skip:
@@ -1604,6 +1628,10 @@ uint32_t PrimitiveStruct::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("managed_string_view", apache::thrift::protocol::T_STRING, 21);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::apache::thrift::ManagedStringViewWithConversions>::serializedSize<false>(*prot_, this->__fbthrift_field_managed_string_view);
   }
+  {
+    xfer += prot_->serializedFieldSize("some_error", apache::thrift::protocol::T_STRUCT, 22);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::SomeError>::serializedSize<false>(*prot_, this->__fbthrift_field_some_error);
+  }
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -1671,6 +1699,10 @@ uint32_t PrimitiveStruct::serializedSizeZC(Protocol_ const* prot_) const {
   {
     xfer += prot_->serializedFieldSize("managed_string_view", apache::thrift::protocol::T_STRING, 21);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::apache::thrift::ManagedStringViewWithConversions>::serializedSize<false>(*prot_, this->__fbthrift_field_managed_string_view);
+  }
+  {
+    xfer += prot_->serializedFieldSize("some_error", apache::thrift::protocol::T_STRUCT, 22);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::SomeError>::serializedSize<true>(*prot_, this->__fbthrift_field_some_error);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -1792,6 +1824,13 @@ uint32_t PrimitiveStruct::write(Protocol_* prot_) const {
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRING, 21, kPrevFieldId>(*prot_, "managed_string_view", previousFieldHasValue);
     previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::apache::thrift::ManagedStringViewWithConversions>::write(*prot_, this->__fbthrift_field_managed_string_view);
+    xfer += prot_->writeFieldEnd();
+  }
+  {
+    constexpr int16_t kPrevFieldId = 21;
+    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 22, kPrevFieldId>(*prot_, "some_error", previousFieldHasValue);
+    previousFieldHasValue = true;
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::SomeError>::write(*prot_, this->__fbthrift_field_some_error);
     xfer += prot_->writeFieldEnd();
   }
   xfer += prot_->writeFieldStop();
@@ -3218,6 +3257,22 @@ _readField_serial_union:
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
           9,
+          10,
+          apache::thrift::protocol::T_STRUCT))) {
+    goto _loop;
+  }
+_readField_serial_error:
+  {
+    _readState.beforeSubobject(iprot);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::SerializedError>::readWithContext(*iprot, this->__fbthrift_field_serial_error, _readState);
+    _readState.afterSubobject(iprot);
+    
+  }
+ this->__isset.set(8, true);
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          10,
           0,
           apache::thrift::protocol::T_STOP))) {
     goto _loop;
@@ -3310,6 +3365,14 @@ _loop:
         goto _skip;
       }
     }
+    case 10:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRUCT))) {
+        goto _readField_serial_error;
+      } else {
+        goto _skip;
+      }
+    }
     default:
     {
 _skip:
@@ -3366,6 +3429,10 @@ uint32_t ComposeStruct::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("serial_union", apache::thrift::protocol::T_STRUCT, 9);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::test::fixtures::basic-python-capi::SerializedUnion>::serializedSize<false>(*prot_, this->__fbthrift_field_serial_union);
   }
+  {
+    xfer += prot_->serializedFieldSize("serial_error", apache::thrift::protocol::T_STRUCT, 10);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::SerializedError>::serializedSize<false>(*prot_, this->__fbthrift_field_serial_error);
+  }
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -3414,6 +3481,10 @@ uint32_t ComposeStruct::serializedSizeZC(Protocol_ const* prot_) const {
   {
     xfer += prot_->serializedFieldSize("serial_union", apache::thrift::protocol::T_STRUCT, 9);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::test::fixtures::basic-python-capi::SerializedUnion>::serializedSize<true>(*prot_, this->__fbthrift_field_serial_union);
+  }
+  {
+    xfer += prot_->serializedFieldSize("serial_error", apache::thrift::protocol::T_STRUCT, 10);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::SerializedError>::serializedSize<true>(*prot_, this->__fbthrift_field_serial_error);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -3491,6 +3562,13 @@ uint32_t ComposeStruct::write(Protocol_* prot_) const {
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 9, kPrevFieldId>(*prot_, "serial_union", previousFieldHasValue);
     previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::test::fixtures::basic-python-capi::SerializedUnion>::write(*prot_, this->__fbthrift_field_serial_union);
+    xfer += prot_->writeFieldEnd();
+  }
+  {
+    constexpr int16_t kPrevFieldId = 9;
+    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 10, kPrevFieldId>(*prot_, "serial_error", previousFieldHasValue);
+    previousFieldHasValue = true;
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::SerializedError>::write(*prot_, this->__fbthrift_field_serial_error);
     xfer += prot_->writeFieldEnd();
   }
   xfer += prot_->writeFieldStop();

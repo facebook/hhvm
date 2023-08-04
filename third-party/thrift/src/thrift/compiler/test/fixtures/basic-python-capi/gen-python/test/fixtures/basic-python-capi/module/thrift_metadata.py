@@ -239,6 +239,8 @@ def _fbthrift_gen_metadata_struct_PrimitiveStruct(metadata_struct: _fbthrift_met
         _fbthrift_metadata.ThriftField(id=21, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE), name="managed_string_view", is_optional=False, structured_annotations=[
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Type"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="::apache::thrift::ManagedStringViewWithConversions"),  }),
         ]),
+        _fbthrift_metadata.ThriftField(id=22, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="thrift_dep.SomeError")), name="some_error", is_optional=False, structured_annotations=[
+        ]),
     ]
     struct_dict = dict(metadata_struct.structs)
     struct_dict[qualified_name] = _fbthrift_metadata.ThriftStruct(name=qualified_name, fields=fields,
@@ -263,6 +265,7 @@ def _fbthrift_gen_metadata_struct_PrimitiveStruct(metadata_struct: _fbthrift_met
     new_struct = _fbthrift_gen_metadata_struct_EmptyStruct(new_struct) # empty_struct
      # fbstring
      # managed_string_view
+    new_struct = test.fixtures.basic-python-capi.thrift_dep.thrift_metadata._fbthrift_gen_metadata_exception_SomeError(new_struct) # some_error
 
     return new_struct
 def gen_metadata_struct_PrimitiveStruct() -> _fbthrift_metadata.ThriftMetadata:
@@ -458,6 +461,8 @@ def _fbthrift_gen_metadata_struct_ComposeStruct(metadata_struct: _fbthrift_metad
         ]),
         _fbthrift_metadata.ThriftField(id=9, type=_fbthrift_metadata.ThriftType(t_union=_fbthrift_metadata.ThriftUnionType(name="serialized_dep.SerializedUnion")), name="serial_union", is_optional=False, structured_annotations=[
         ]),
+        _fbthrift_metadata.ThriftField(id=10, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="serialized_dep.SerializedError")), name="serial_error", is_optional=False, structured_annotations=[
+        ]),
     ]
     struct_dict = dict(metadata_struct.structs)
     struct_dict[qualified_name] = _fbthrift_metadata.ThriftStruct(name=qualified_name, fields=fields,
@@ -476,6 +481,7 @@ def _fbthrift_gen_metadata_struct_ComposeStruct(metadata_struct: _fbthrift_metad
     new_struct = test.fixtures.basic-python-capi.thrift_dep.thrift_metadata._fbthrift_gen_metadata_struct_DepStruct(new_struct) # friends
     new_struct = test.fixtures.basic-python-capi.serialized_dep.thrift_metadata._fbthrift_gen_metadata_struct_SerializedStruct(new_struct) # serial_struct
     new_struct = test.fixtures.basic-python-capi.serialized_dep.thrift_metadata._fbthrift_gen_metadata_struct_SerializedUnion(new_struct) # serial_union
+    new_struct = test.fixtures.basic-python-capi.serialized_dep.thrift_metadata._fbthrift_gen_metadata_exception_SerializedError(new_struct) # serial_error
 
     return new_struct
 def gen_metadata_struct_ComposeStruct() -> _fbthrift_metadata.ThriftMetadata:

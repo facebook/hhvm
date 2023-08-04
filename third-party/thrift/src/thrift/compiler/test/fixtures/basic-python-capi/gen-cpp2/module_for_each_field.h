@@ -87,6 +87,7 @@ struct ForEachField<::test::fixtures::basic-python-capi::PrimitiveStruct> {
     f(12, static_cast<T&&>(t).empty_struct_ref()...);
     f(13, static_cast<T&&>(t).fbstring_ref()...);
     f(14, static_cast<T&&>(t).managed_string_view_ref()...);
+    f(15, static_cast<T&&>(t).some_error_ref()...);
   }
 };
 
@@ -149,6 +150,7 @@ struct ForEachField<::test::fixtures::basic-python-capi::ComposeStruct> {
     f(6, static_cast<T&&>(t).friends_ref()...);
     f(7, static_cast<T&&>(t).serial_struct_ref()...);
     f(8, static_cast<T&&>(t).serial_union_ref()...);
+    f(9, static_cast<T&&>(t).serial_error_ref()...);
   }
 };
 

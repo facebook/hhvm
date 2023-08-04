@@ -113,6 +113,7 @@ struct PrimitiveStruct {
   20: binary fbstring;
   @cpp.Type{name = "::apache::thrift::ManagedStringViewWithConversions"}
   21: string managed_string_view;
+  22: thrift_dep.SomeError some_error;
 }
 
 @python.MarshalCapi
@@ -178,6 +179,7 @@ struct ComposeStruct {
   7: list<thrift_dep.DepStruct> friends;
   8: serialized_dep.SerializedStruct serial_struct;
   9: serialized_dep.SerializedUnion serial_union;
+  10: serialized_dep.SerializedError serial_error;
 } (cpp.noncopyable)
 
 @python.MarshalCapi

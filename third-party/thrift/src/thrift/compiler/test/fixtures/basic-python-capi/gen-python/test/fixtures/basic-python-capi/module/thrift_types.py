@@ -437,6 +437,14 @@ class PrimitiveStruct(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
         ),
+        (
+            22,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "some_error",  # name
+            lambda: _fbthrift_python_types.StructTypeInfo(test.fixtures.basic-python-capi.thrift_dep.thrift_types.SomeError),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
     )
 
     @staticmethod
@@ -834,6 +842,14 @@ class ComposeStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "serial_union",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(test.fixtures.basic-python-capi.serialized_dep.thrift_types.SerializedUnion),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            10,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "serial_error",  # name
+            lambda: _fbthrift_python_types.StructTypeInfo(test.fixtures.basic-python-capi.serialized_dep.thrift_types.SerializedError),  # typeinfo
             None,  # default value
             None,  # adapter info
         ),

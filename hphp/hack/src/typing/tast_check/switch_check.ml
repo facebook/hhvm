@@ -142,7 +142,13 @@ let check_enum_exhaustiveness
   Option.iter enum_err_opt ~f:(fun err ->
       Typing_error_utils.add_typing_error
         ~env:(Tast_env.tast_env_as_typing_env env)
-      @@ Typing_error.enum err)
+      @@ Typing_error.enum err);
+  Option.value_map ~default:[] enum_err_opt ~f:(function
+      | Typing_error.Primary.Enum.Enum_switch_nonexhaustive _ ->
+        [`Non_exhaustive]
+      | Typing_error.Primary.Enum.Enum_switch_redundant_default _ ->
+        [`Redundant_default]
+      | _ -> [`Other])
 
 (* Small reminder:
  * - enums are localized to `Tnewtype (name, _, _)` where name is the name of
@@ -175,13 +181,14 @@ let apply_if_enum_or_enum_class
   else
     default
 
-let rec check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved =
+let rec check_exhaustiveness_
+    env pos ty caselist enum_coming_from_unresolved ~outcomes =
   (* Right now we only do exhaustiveness checking for enums. *)
   (* This function has a built in hack where if Tunion has an enum
      inside then it tells the enum exhaustiveness checker to
      not punish for extra default *)
   let (env, ty) = Env.expand_type env ty in
-  let check kind env id =
+  let check kind env id ~outcomes =
     let dep = Typing_deps.Dep.AllMembers id in
     let decl_env = Env.get_decl_env env in
     Option.iter decl_env.Decl_env.droot ~f:(fun root ->
@@ -195,14 +202,16 @@ let rec check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved =
         dep;
 
     let tc = unsafe_opt @@ Env.get_enum env id in
-    check_enum_exhaustiveness
-      env
-      pos
-      tc
-      kind
-      caselist
-      enum_coming_from_unresolved;
-    env
+    let enum_errs =
+      check_enum_exhaustiveness
+        env
+        pos
+        tc
+        kind
+        caselist
+        enum_coming_from_unresolved
+    in
+    (enum_errs @ outcomes, env)
   in
   match get_node ty with
   | Tunion tyl ->
@@ -221,23 +230,38 @@ let rec check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved =
                     args
                 | _ -> false)
     in
-    List.fold_left tyl ~init:env ~f:(fun env ty ->
-        check_exhaustiveness_ env pos ty caselist new_enum)
+    List.fold_left tyl ~init:(outcomes, env) ~f:(fun (outcomes, env) ty ->
+        check_exhaustiveness_ env pos ty caselist new_enum ~outcomes)
   | Tintersection [arraykey; like_ty]
     when is_arraykey env arraykey && is_like_enum env like_ty ->
-    check_exhaustiveness_ env pos like_ty caselist enum_coming_from_unresolved
+    check_exhaustiveness_
+      env
+      pos
+      like_ty
+      caselist
+      enum_coming_from_unresolved
+      ~outcomes
   | Tintersection tyl ->
     fst
-    @@ Typing_utils.run_on_intersection env tyl ~f:(fun env ty ->
+    @@ Typing_utils.run_on_intersection
+         (outcomes, env)
+         tyl
+         ~f:(fun (outcomes, env) ty ->
            ( check_exhaustiveness_
                env
                pos
                ty
                caselist
-               enum_coming_from_unresolved,
+               enum_coming_from_unresolved
+               ~outcomes,
              () ))
   | Tnewtype (name, args, _) ->
-    apply_if_enum_or_enum_class env ~default:env ~f:check name args
+    apply_if_enum_or_enum_class
+      env
+      ~default:(outcomes, env)
+      ~f:(check ~outcomes)
+      name
+      args
   | Tany _
   | Tnonnull
   | Tvec_or_dict _
@@ -253,17 +277,63 @@ let rec check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved =
   | Tdynamic
   | Taccess _
   | Tneg _ ->
-    env
+    (`Skipped :: outcomes, env)
   | Tunapplied_alias _ ->
     Typing_defs.error_Tunapplied_alias_in_illegal_context ()
 
-let check_exhaustiveness env pos ty caselist =
-  let env = check_exhaustiveness_ env pos ty caselist false in
+type outcomes = {
+  non_exhaustive: int;
+  redundant_default: int;
+  skipped: int;
+  other: int;
+}
+
+let count_outcomes =
+  let f
+      ({ non_exhaustive; redundant_default; skipped; other } as outcomes :
+        outcomes) = function
+    | `Non_exhaustive -> { outcomes with non_exhaustive = non_exhaustive + 1 }
+    | `Redundant_default ->
+      { outcomes with redundant_default = redundant_default + 1 }
+    | `Skipped -> { outcomes with skipped = skipped + 1 }
+    | `Other -> { outcomes with other = other + 1 }
+  in
+  List.fold_left
+    ~f
+    ~init:{ non_exhaustive = 0; redundant_default = 0; skipped = 0; other = 0 }
+
+let outcomes_to_fields
+    ({ non_exhaustive; redundant_default; skipped; other } : outcomes) =
+  let non_exhaustive = ("non_exhaustive", Hh_json.int_ non_exhaustive) in
+  let redundant_default =
+    ("redundant_default", Hh_json.int_ redundant_default)
+  in
+  let skipped = ("skipped", Hh_json.int_ skipped) in
+  let other = ("other", Hh_json.int_ other) in
+  [non_exhaustive; redundant_default; skipped; other]
+
+let log_exhaustivity_check default_label outcomes ty_json =
+  let add_fields json ~fields =
+    match json with
+    | Hh_json.JSON_Object old -> Hh_json.JSON_Object (old @ fields)
+    | _ -> Hh_json.JSON_Object (("warning_expected_object", json) :: fields)
+  in
+  let has_default =
+    ("has_default", Option.is_some default_label |> Hh_json.bool_)
+  in
+  let fields = has_default :: (outcomes_to_fields @@ count_outcomes outcomes) in
+  ty_json
+  |> add_fields ~fields
+  |> Hh_json.json_to_string
+  |> Hh_logger.log "[hh_tco_log_exhaustivity_check] %s"
+
+let check_exhaustiveness env pos ty ((_, dfl) as caselist) =
+  let (outcomes, env) =
+    check_exhaustiveness_ env pos ty caselist false ~outcomes:[]
+  in
   let tcopt = env |> Env.get_decl_env |> Decl_env.tcopt in
   if TypecheckerOptions.tco_log_exhaustivity_check tcopt then
-    Env.ty_to_json env ty
-    |> Hh_json.json_to_string
-    |> Hh_logger.log "[hh_tco_log_exhaustivity_check] %s"
+    Env.ty_to_json env ty |> log_exhaustivity_check dfl outcomes
 
 let handler =
   object

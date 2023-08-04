@@ -25,6 +25,13 @@ struct Extractor<::test::fixtures::basic-python-capi::MyStruct>
   int typeCheck(PyObject* obj);
 };
 
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyStruct>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyStruct>> {
+  ExtractorResult<::test::fixtures::basic-python-capi::MyStruct> operator()(PyObject* obj);
+};
 
 template <>
 struct Constructor<::test::fixtures::basic-python-capi::MyStruct>
@@ -47,6 +54,13 @@ struct Extractor<::test::fixtures::basic-python-capi::MyDataItem>
   int typeCheck(PyObject* obj);
 };
 
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyDataItem>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyDataItem>> {
+  ExtractorResult<::test::fixtures::basic-python-capi::MyDataItem> operator()(PyObject* obj);
+};
 
 template <>
 struct Constructor<::test::fixtures::basic-python-capi::MyDataItem>
@@ -69,6 +83,13 @@ struct Extractor<::test::fixtures::basic-python-capi::TransitiveDoubler>
   int typeCheck(PyObject* obj);
 };
 
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::TransitiveDoubler>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::TransitiveDoubler>> {
+  ExtractorResult<::test::fixtures::basic-python-capi::TransitiveDoubler> operator()(PyObject* obj);
+};
 
 template <>
 struct Constructor<::test::fixtures::basic-python-capi::TransitiveDoubler>
@@ -91,6 +112,13 @@ struct Extractor<::test::fixtures::basic-python-capi::DoubledPair>
   int typeCheck(PyObject* obj);
 };
 
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::DoubledPair>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::DoubledPair>> {
+  ExtractorResult<::test::fixtures::basic-python-capi::DoubledPair> operator()(PyObject* obj);
+};
 
 template <>
 struct Constructor<::test::fixtures::basic-python-capi::DoubledPair>
@@ -113,6 +141,13 @@ struct Extractor<::test::fixtures::basic-python-capi::StringPair>
   int typeCheck(PyObject* obj);
 };
 
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::StringPair>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::StringPair>> {
+  ExtractorResult<::test::fixtures::basic-python-capi::StringPair> operator()(PyObject* obj);
+};
 
 template <>
 struct Constructor<::test::fixtures::basic-python-capi::StringPair>
@@ -135,6 +170,13 @@ struct Extractor<::test::fixtures::basic-python-capi::VapidStruct>
   int typeCheck(PyObject* obj);
 };
 
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::VapidStruct>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::VapidStruct>> {
+  ExtractorResult<::test::fixtures::basic-python-capi::VapidStruct> operator()(PyObject* obj);
+};
 
 template <>
 struct Constructor<::test::fixtures::basic-python-capi::VapidStruct>

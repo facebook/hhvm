@@ -95,11 +95,11 @@ Extractor<{{program:cpp_namespaces}}::{{struct:cpp_name}}>::operator()(PyObject*
 }
 
 {{#struct:marshal_capi?}}
-{{#struct:fields?}}
 ExtractorResult<{{program:cpp_namespaces}}::{{struct:cpp_name}}>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
     {{program:cpp_namespaces}}::{{struct:cpp_name}}>>::operator()(PyObject* fbThriftData) {
   {{program:cpp_namespaces}}::{{struct:cpp_name}} cpp;
+{{#struct:fields?}}
   std::optional<std::string_view> error;
   {{^struct:union?}}
   {{#struct:fields}}
@@ -128,9 +128,12 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
   if (error) {
     return folly::makeUnexpected(*error);
   }
+{{/struct:fields?}}
+{{^struct:fields?}}
+  (void)fbThriftData;
+{{/struct:fields?}}
   return cpp;
 }
-{{/struct:fields?}}
 {{/struct:marshal_capi?}}
 
 int Extractor<{{program:cpp_namespaces}}::{{struct:cpp_name}}>::typeCheck(PyObject* obj) {

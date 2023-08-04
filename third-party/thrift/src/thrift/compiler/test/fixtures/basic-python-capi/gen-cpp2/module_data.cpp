@@ -171,7 +171,7 @@ THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::test::fixtures:
 }};
 
 THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test::fixtures::basic-python-capi::PrimitiveStruct>::name = "PrimitiveStruct";
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 11> TStructDataStorage<::test::fixtures::basic-python-capi::PrimitiveStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 13> TStructDataStorage<::test::fixtures::basic-python-capi::PrimitiveStruct>::fields_names = {{
   "booly",
   "charry",
   "shorty",
@@ -183,8 +183,10 @@ THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 11> TStructDataStorage<:
   "bytey",
   "buffy",
   "pointbuffy",
+  "patched_struct",
+  "empty_struct",
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 11> TStructDataStorage<::test::fixtures::basic-python-capi::PrimitiveStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 13> TStructDataStorage<::test::fixtures::basic-python-capi::PrimitiveStruct>::fields_ids = {{
   1,
   2,
   3,
@@ -196,8 +198,10 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 11> TStructDataStorage<::test::fixt
   13,
   14,
   15,
+  18,
+  19,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 11> TStructDataStorage<::test::fixtures::basic-python-capi::PrimitiveStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 13> TStructDataStorage<::test::fixtures::basic-python-capi::PrimitiveStruct>::fields_types = {{
   TType::T_BOOL,
   TType::T_BYTE,
   TType::T_I16,
@@ -209,8 +213,10 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 11> TStructDataStorage<::te
   TType::T_STRING,
   TType::T_STRING,
   TType::T_STRING,
+  TType::T_STRUCT,
+  TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 11> TStructDataStorage<::test::fixtures::basic-python-capi::PrimitiveStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 13> TStructDataStorage<::test::fixtures::basic-python-capi::PrimitiveStruct>::storage_names = {{
   "__fbthrift_field_booly",
   "__fbthrift_field_charry",
   "__fbthrift_field_shortay",
@@ -222,8 +228,10 @@ THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 11> TStructDataStorage<:
   "__fbthrift_field_bytey",
   "__fbthrift_field_buffy",
   "__fbthrift_field_pointbuffy",
+  "__fbthrift_field_patched_struct",
+  "__fbthrift_field_empty_struct",
 }};
-THRIFT_DATA_MEMBER const std::array<int, 11> TStructDataStorage<::test::fixtures::basic-python-capi::PrimitiveStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 13> TStructDataStorage<::test::fixtures::basic-python-capi::PrimitiveStruct>::isset_indexes = {{
   0,
   1,
   2,
@@ -235,6 +243,8 @@ THRIFT_DATA_MEMBER const std::array<int, 11> TStructDataStorage<::test::fixtures
   -1,
   6,
   7,
+  8,
+  9,
 }};
 
 THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test::fixtures::basic-python-capi::ListStruct>::name = "ListStruct";
@@ -342,7 +352,7 @@ THRIFT_DATA_MEMBER const std::array<int, 7> TStructDataStorage<::test::fixtures:
 }};
 
 THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test::fixtures::basic-python-capi::MapStruct>::name = "MapStruct";
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 8> TStructDataStorage<::test::fixtures::basic-python-capi::MapStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 9> TStructDataStorage<::test::fixtures::basic-python-capi::MapStruct>::fields_names = {{
   "enumz",
   "intz",
   "binnaz",
@@ -351,8 +361,9 @@ THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 8> TStructDataStorage<::
   "map_list",
   "list_map",
   "fast_list_map",
+  "buf_map",
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 8> TStructDataStorage<::test::fixtures::basic-python-capi::MapStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 9> TStructDataStorage<::test::fixtures::basic-python-capi::MapStruct>::fields_ids = {{
   1,
   2,
   3,
@@ -361,8 +372,9 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 8> TStructDataStorage<::test::fixtu
   6,
   7,
   8,
+  9,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 8> TStructDataStorage<::test::fixtures::basic-python-capi::MapStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 9> TStructDataStorage<::test::fixtures::basic-python-capi::MapStruct>::fields_types = {{
   TType::T_MAP,
   TType::T_MAP,
   TType::T_MAP,
@@ -371,8 +383,9 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 8> TStructDataStorage<::tes
   TType::T_LIST,
   TType::T_MAP,
   TType::T_MAP,
+  TType::T_MAP,
 }};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 8> TStructDataStorage<::test::fixtures::basic-python-capi::MapStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 9> TStructDataStorage<::test::fixtures::basic-python-capi::MapStruct>::storage_names = {{
   "__fbthrift_field_enumz",
   "__fbthrift_field_intz",
   "__fbthrift_field_binnaz",
@@ -381,8 +394,9 @@ THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 8> TStructDataStorage<::
   "__fbthrift_field_map_list",
   "__fbthrift_field_list_map",
   "__fbthrift_field_fast_list_map",
+  "__fbthrift_field_buf_map",
 }};
-THRIFT_DATA_MEMBER const std::array<int, 8> TStructDataStorage<::test::fixtures::basic-python-capi::MapStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 9> TStructDataStorage<::test::fixtures::basic-python-capi::MapStruct>::isset_indexes = {{
   0,
   1,
   -1,
@@ -391,6 +405,7 @@ THRIFT_DATA_MEMBER const std::array<int, 8> TStructDataStorage<::test::fixtures:
   4,
   5,
   6,
+  7,
 }};
 
 THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test::fixtures::basic-python-capi::ComposeStruct>::name = "ComposeStruct";

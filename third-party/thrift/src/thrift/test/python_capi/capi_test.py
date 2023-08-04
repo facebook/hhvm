@@ -74,6 +74,8 @@ class PythonCapiFixture(unittest.TestCase):
             bytey=b"bippity boppity boo",
             buffy=IOBuf(memoryview(b" the buffest buffer ")),
             pointbuffy=IOBuf(memoryview(b"the pointiest buffer")),
+            patched_struct=self.my_struct(),
+            empty_struct=EmptyStruct(),
         )
 
     def primitive_unset(self) -> PrimitiveStruct:

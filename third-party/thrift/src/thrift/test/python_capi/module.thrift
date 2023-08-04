@@ -40,6 +40,7 @@ enum AnnoyingEnum {
 } (cpp.name = "NormalDecentEnum")
 
 @patch.GeneratePatch
+@python.MarshalCapi
 struct MyStruct {
   1: i64 inty;
   2: string stringy;
@@ -52,26 +53,31 @@ struct MyStruct {
 }
 
 @patch.GeneratePatch
+@python.MarshalCapi
 struct MyDataItem {
   1: string s;
 }
 
 @cpp.Adapter{name = "::thrift::test::lib::StructDoubler"}
 @scope.Transitive
+@python.MarshalCapi
 struct TransitiveDoubler {}
 
 @TransitiveDoubler
+@python.MarshalCapi
 struct DoubledPair {
   1: string s;
   2: i32 x;
 }
 
+@python.MarshalCapi
 struct StringPair {
   1: string normal;
   @cpp.Adapter{name = "::thrift::test::lib::StringDoubler"}
   2: string doubled;
 }
 
+@python.MarshalCapi
 struct EmptyStruct {} (cpp.name = "VapidStruct")
 
 typedef byte signed_byte
@@ -98,6 +104,8 @@ struct PrimitiveStruct {
   13: optional binary bytey;
   14: IOBuf buffy;
   15: IOBufPtr pointbuffy;
+  18: MyStruct patched_struct;
+  19: EmptyStruct empty_struct;
 }
 
 @python.MarshalCapi

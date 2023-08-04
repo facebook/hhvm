@@ -132,6 +132,10 @@ struct VisitByFieldId<::test::fixtures::basic-python-capi::PrimitiveStruct> {
       return f(9, static_cast<T&&>(t).buffy_ref());
     case 15:
       return f(10, static_cast<T&&>(t).pointbuffy_ref());
+    case 18:
+      return f(11, static_cast<T&&>(t).patched_struct_ref());
+    case 19:
+      return f(12, static_cast<T&&>(t).empty_struct_ref());
     default:
       throwInvalidThriftId(fieldId, "::test::fixtures::basic-python-capi::PrimitiveStruct");
     }
@@ -213,6 +217,8 @@ struct VisitByFieldId<::test::fixtures::basic-python-capi::MapStruct> {
       return f(6, static_cast<T&&>(t).list_map_ref());
     case 8:
       return f(7, static_cast<T&&>(t).fast_list_map_ref());
+    case 9:
+      return f(8, static_cast<T&&>(t).buf_map_ref());
     default:
       throwInvalidThriftId(fieldId, "::test::fixtures::basic-python-capi::MapStruct");
     }

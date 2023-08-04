@@ -80,6 +80,7 @@ StructMetadata<::test::fixtures::basic-python-capi::MyStruct>::gen(ThriftMetadat
     module_MyStruct.fields()->push_back(std::move(field));
   }
   module_MyStruct.structured_annotations()->push_back(*cvStruct("patch.GeneratePatch", {}).cv_struct_ref());
+  module_MyStruct.structured_annotations()->push_back(*cvStruct("python.MarshalCapi", {}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -105,6 +106,7 @@ StructMetadata<::test::fixtures::basic-python-capi::MyDataItem>::gen(ThriftMetad
     module_MyDataItem.fields()->push_back(std::move(field));
   }
   module_MyDataItem.structured_annotations()->push_back(*cvStruct("patch.GeneratePatch", {}).cv_struct_ref());
+  module_MyDataItem.structured_annotations()->push_back(*cvStruct("python.MarshalCapi", {}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -118,6 +120,7 @@ StructMetadata<::test::fixtures::basic-python-capi::TransitiveDoubler>::gen(Thri
   module_TransitiveDoubler.is_union() = false;
   module_TransitiveDoubler.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString("::thrift::test::lib::StructDoubler")}}).cv_struct_ref());
   module_TransitiveDoubler.structured_annotations()->push_back(*cvStruct("scope.Transitive", {}).cv_struct_ref());
+  module_TransitiveDoubler.structured_annotations()->push_back(*cvStruct("python.MarshalCapi", {}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -144,6 +147,7 @@ StructMetadata<::test::fixtures::basic-python-capi::detail::DoubledPair>::gen(Th
     module_DoubledPair.fields()->push_back(std::move(field));
   }
   module_DoubledPair.structured_annotations()->push_back(*cvStruct("module.TransitiveDoubler", {}).cv_struct_ref());
+  module_DoubledPair.structured_annotations()->push_back(*cvStruct("python.MarshalCapi", {}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -169,6 +173,7 @@ StructMetadata<::test::fixtures::basic-python-capi::StringPair>::gen(ThriftMetad
     field.structured_annotations() = f.structured_annotations;
     module_StringPair.fields()->push_back(std::move(field));
   }
+  module_StringPair.structured_annotations()->push_back(*cvStruct("python.MarshalCapi", {}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -180,6 +185,7 @@ StructMetadata<::test::fixtures::basic-python-capi::VapidStruct>::gen(ThriftMeta
   ::apache::thrift::metadata::ThriftStruct& module_EmptyStruct = res.first->second;
   module_EmptyStruct.name() = "module.EmptyStruct";
   module_EmptyStruct.is_union() = false;
+  module_EmptyStruct.structured_annotations()->push_back(*cvStruct("python.MarshalCapi", {}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -192,7 +198,7 @@ StructMetadata<::test::fixtures::basic-python-capi::PrimitiveStruct>::gen(Thrift
   module_PrimitiveStruct.name() = "module.PrimitiveStruct";
   module_PrimitiveStruct.is_union() = false;
   static const auto* const
-  module_PrimitiveStruct_fields = new std::array<EncodedThriftField, 11>{{
+  module_PrimitiveStruct_fields = new std::array<EncodedThriftField, 13>{{
     {1, "booly", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}},
     {2, "charry", false, std::make_unique<Typedef>("module.signed_byte", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
     {3, "shorty", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"name", cvString("uint16_t")}}).cv_struct_ref(), }},
@@ -204,6 +210,8 @@ StructMetadata<::test::fixtures::basic-python-capi::PrimitiveStruct>::gen(Thrift
     {13, "bytey", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Ref", {{"type", cvInteger(1)}}).cv_struct_ref(), }},
     {14, "buffy", false, std::make_unique<Typedef>("module.IOBuf", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"name", cvString("folly::IOBuf")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{}},
     {15, "pointbuffy", false, std::make_unique<Typedef>("module.IOBufPtr", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"name", cvString("std::unique_ptr<folly::IOBuf>")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{}},
+    {18, "patched_struct", false, std::make_unique<Struct<::test::fixtures::basic-python-capi::MyStruct>>("module.MyStruct"), std::vector<ThriftConstStruct>{}},
+    {19, "empty_struct", false, std::make_unique<Struct<::test::fixtures::basic-python-capi::VapidStruct>>("module.EmptyStruct"), std::vector<ThriftConstStruct>{}},
   }};
   for (const auto& f : *module_PrimitiveStruct_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -291,7 +299,7 @@ StructMetadata<::test::fixtures::basic-python-capi::MapStruct>::gen(ThriftMetada
   module_MapStruct.name() = "module.MapStruct";
   module_MapStruct.is_union() = false;
   static const auto* const
-  module_MapStruct_fields = new std::array<EncodedThriftField, 8>{{
+  module_MapStruct_fields = new std::array<EncodedThriftField, 9>{{
     {1, "enumz", false, std::make_unique<Map>(std::make_unique<Enum<::test::fixtures::basic-python-capi::MyEnum>>("module.MyEnum"), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{}},
     {2, "intz", true, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{}},
     {3, "binnaz", true, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::make_unique<Struct<::test::fixtures::basic-python-capi::PrimitiveStruct>>("module.PrimitiveStruct")), std::vector<ThriftConstStruct>{*cvStruct("thrift.Box", {}).cv_struct_ref(), }},
@@ -300,6 +308,7 @@ StructMetadata<::test::fixtures::basic-python-capi::MapStruct>::gen(ThriftMetada
     {6, "map_list", false, std::make_unique<List>(std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE))), std::vector<ThriftConstStruct>{}},
     {7, "list_map", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE))), std::vector<ThriftConstStruct>{}},
     {8, "fast_list_map", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE))), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"name", cvString("folly::F14FastMap<int, folly::fbvector<double>>")}}).cv_struct_ref(), }},
+    {9, "buf_map", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::make_unique<Typedef>("module.IOBufPtr", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"name", cvString("std::unique_ptr<folly::IOBuf>")}}).cv_struct_ref(), })), std::vector<ThriftConstStruct>{}},
   }};
   for (const auto& f : *module_MapStruct_fields) {
     ::apache::thrift::metadata::ThriftField field;

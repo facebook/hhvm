@@ -810,6 +810,8 @@ PrimitiveStruct::PrimitiveStruct(const PrimitiveStruct& srcObj) :
     __fbthrift_field_buffy(srcObj.__fbthrift_field_buffy),
     __fbthrift_field_pointbuffy(::apache::thrift::detail::st::copy_field<
           ::apache::thrift::type_class::binary>(srcObj.__fbthrift_field_pointbuffy)),
+    __fbthrift_field_patched_struct(srcObj.__fbthrift_field_patched_struct),
+    __fbthrift_field_empty_struct(srcObj.__fbthrift_field_empty_struct),
     __isset(srcObj.__isset) {
 }
 
@@ -843,6 +845,8 @@ PrimitiveStruct::PrimitiveStruct(FOLLY_MAYBE_UNUSED PrimitiveStruct&& other) noe
     __fbthrift_field_bytey(std::move(other.__fbthrift_field_bytey)),
     __fbthrift_field_buffy(std::move(other.__fbthrift_field_buffy)),
     __fbthrift_field_pointbuffy(std::move(other.__fbthrift_field_pointbuffy)),
+    __fbthrift_field_patched_struct(std::move(other.__fbthrift_field_patched_struct)),
+    __fbthrift_field_empty_struct(std::move(other.__fbthrift_field_empty_struct)),
     __isset(other.__isset) {
 }
 
@@ -858,12 +862,14 @@ PrimitiveStruct& PrimitiveStruct::operator=(FOLLY_MAYBE_UNUSED PrimitiveStruct&&
     this->__fbthrift_field_bytey = std::move(other.__fbthrift_field_bytey);
     this->__fbthrift_field_buffy = std::move(other.__fbthrift_field_buffy);
     this->__fbthrift_field_pointbuffy = std::move(other.__fbthrift_field_pointbuffy);
+    this->__fbthrift_field_patched_struct = std::move(other.__fbthrift_field_patched_struct);
+    this->__fbthrift_field_empty_struct = std::move(other.__fbthrift_field_empty_struct);
     __isset = other.__isset;
     return *this;
 }
 
 
-PrimitiveStruct::PrimitiveStruct(apache::thrift::FragileConstructor, bool booly__arg, ::test::fixtures::basic-python-capi::signed_byte charry__arg, uint16_t shortay__arg, ::std::int32_t inty__arg, uint64_t longy__arg, float floaty__arg, ::apache::thrift::detail::boxed_value_ptr<double> dubby__arg, ::std::unique_ptr<::std::string> stringy__arg, ::std::shared_ptr<const ::std::string> bytey__arg, ::test::fixtures::basic-python-capi::IOBuf buffy__arg, ::test::fixtures::basic-python-capi::IOBufPtr pointbuffy__arg) :
+PrimitiveStruct::PrimitiveStruct(apache::thrift::FragileConstructor, bool booly__arg, ::test::fixtures::basic-python-capi::signed_byte charry__arg, uint16_t shortay__arg, ::std::int32_t inty__arg, uint64_t longy__arg, float floaty__arg, ::apache::thrift::detail::boxed_value_ptr<double> dubby__arg, ::std::unique_ptr<::std::string> stringy__arg, ::std::shared_ptr<const ::std::string> bytey__arg, ::test::fixtures::basic-python-capi::IOBuf buffy__arg, ::test::fixtures::basic-python-capi::IOBufPtr pointbuffy__arg, ::test::fixtures::basic-python-capi::MyStruct patched_struct__arg, ::test::fixtures::basic-python-capi::VapidStruct empty_struct__arg) :
     __fbthrift_field_booly(std::move(booly__arg)),
     __fbthrift_field_charry(std::move(charry__arg)),
     __fbthrift_field_shortay(std::move(shortay__arg)),
@@ -874,7 +880,9 @@ PrimitiveStruct::PrimitiveStruct(apache::thrift::FragileConstructor, bool booly_
     __fbthrift_field_stringy(std::move(stringy__arg)),
     __fbthrift_field_bytey(std::move(bytey__arg)),
     __fbthrift_field_buffy(std::move(buffy__arg)),
-    __fbthrift_field_pointbuffy(std::move(pointbuffy__arg)) {
+    __fbthrift_field_pointbuffy(std::move(pointbuffy__arg)),
+    __fbthrift_field_patched_struct(std::move(patched_struct__arg)),
+    __fbthrift_field_empty_struct(std::move(empty_struct__arg)) {
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -883,6 +891,8 @@ PrimitiveStruct::PrimitiveStruct(apache::thrift::FragileConstructor, bool booly_
   __isset.set(folly::index_constant<5>(), true);
   __isset.set(folly::index_constant<6>(), true);
   __isset.set(folly::index_constant<7>(), true);
+  __isset.set(folly::index_constant<8>(), true);
+  __isset.set(folly::index_constant<9>(), true);
 }
 
 
@@ -899,6 +909,7 @@ void PrimitiveStruct::__fbthrift_clear() {
   this->__fbthrift_field_bytey.reset();
   this->__fbthrift_field_buffy = apache::thrift::StringTraits<folly::IOBuf>::fromStringLiteral("");
   this->__fbthrift_field_pointbuffy = apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::fromStringLiteral("");
+  ::apache::thrift::clear(this->__fbthrift_field_patched_struct);
   __isset = {};
 }
 
@@ -944,11 +955,33 @@ bool PrimitiveStruct::operator==(FOLLY_MAYBE_UNUSED const PrimitiveStruct& rhs) 
   if (!apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::isEqual(lhs.__fbthrift_field_pointbuffy, rhs.__fbthrift_field_pointbuffy)) {
     return false;
   }
+  if (!(lhs.patched_struct_ref() == rhs.patched_struct_ref())) {
+    return false;
+  }
+  if (!(lhs.empty_struct_ref() == rhs.empty_struct_ref())) {
+    return false;
+  }
   return true;
 }
 
 bool PrimitiveStruct::operator<(FOLLY_MAYBE_UNUSED const PrimitiveStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+const ::test::fixtures::basic-python-capi::MyStruct& PrimitiveStruct::get_patched_struct() const& {
+  return __fbthrift_field_patched_struct;
+}
+
+::test::fixtures::basic-python-capi::MyStruct PrimitiveStruct::get_patched_struct() && {
+  return std::move(__fbthrift_field_patched_struct);
+}
+
+const ::test::fixtures::basic-python-capi::VapidStruct& PrimitiveStruct::get_empty_struct() const& {
+  return __fbthrift_field_empty_struct;
+}
+
+::test::fixtures::basic-python-capi::VapidStruct PrimitiveStruct::get_empty_struct() && {
+  return std::move(__fbthrift_field_empty_struct);
 }
 
 
@@ -965,6 +998,8 @@ void swap(FOLLY_MAYBE_UNUSED PrimitiveStruct& a, FOLLY_MAYBE_UNUSED PrimitiveStr
   swap(a.__fbthrift_field_bytey, b.__fbthrift_field_bytey);
   swap(a.__fbthrift_field_buffy, b.__fbthrift_field_buffy);
   swap(a.__fbthrift_field_pointbuffy, b.__fbthrift_field_pointbuffy);
+  swap(a.__fbthrift_field_patched_struct, b.__fbthrift_field_patched_struct);
+  swap(a.__fbthrift_field_empty_struct, b.__fbthrift_field_empty_struct);
   swap(a.__isset, b.__isset);
 }
 
@@ -977,6 +1012,18 @@ template uint32_t PrimitiveStruct::write<>(apache::thrift::CompactProtocolWriter
 template uint32_t PrimitiveStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t PrimitiveStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        PrimitiveStruct,
+        ::apache::thrift::type_class::structure,
+        ::test::fixtures::basic-python-capi::MyStruct>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        PrimitiveStruct,
+        ::apache::thrift::type_class::structure,
+        ::test::fixtures::basic-python-capi::VapidStruct>,
+    "inconsistent use of json option");
 
 }}} // test::fixtures::basic-python-capi
 
@@ -1459,8 +1506,26 @@ const folly::StringPiece MapStruct::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<MapStruct>::name;
 }
 
-MapStruct::MapStruct(const MapStruct&) = default;
-MapStruct& MapStruct::operator=(const MapStruct&) = default;
+MapStruct::MapStruct(const MapStruct& srcObj) :
+    __fbthrift_field_enumz(srcObj.__fbthrift_field_enumz),
+    __fbthrift_field_intz(srcObj.__fbthrift_field_intz),
+    __fbthrift_field_binnaz(srcObj.__fbthrift_field_binnaz),
+    __fbthrift_field_encoded(srcObj.__fbthrift_field_encoded),
+    __fbthrift_field_flotz(srcObj.__fbthrift_field_flotz),
+    __fbthrift_field_map_list(srcObj.__fbthrift_field_map_list),
+    __fbthrift_field_list_map(srcObj.__fbthrift_field_list_map),
+    __fbthrift_field_fast_list_map(srcObj.__fbthrift_field_fast_list_map),
+    __fbthrift_field_buf_map(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::map<::apache::thrift::type_class::binary, ::apache::thrift::type_class::binary>>(srcObj.__fbthrift_field_buf_map)),
+    __isset(srcObj.__isset) {
+}
+
+MapStruct& MapStruct::operator=(const MapStruct& other) {
+  MapStruct tmp(other);
+  swap(*this, tmp);
+  return *this;
+}
+
 MapStruct::MapStruct() {
 }
 
@@ -1476,6 +1541,7 @@ MapStruct::MapStruct(FOLLY_MAYBE_UNUSED MapStruct&& other) noexcept :
     __fbthrift_field_map_list(std::move(other.__fbthrift_field_map_list)),
     __fbthrift_field_list_map(std::move(other.__fbthrift_field_list_map)),
     __fbthrift_field_fast_list_map(std::move(other.__fbthrift_field_fast_list_map)),
+    __fbthrift_field_buf_map(std::move(other.__fbthrift_field_buf_map)),
     __isset(other.__isset) {
 }
 
@@ -1488,12 +1554,13 @@ MapStruct& MapStruct::operator=(FOLLY_MAYBE_UNUSED MapStruct&& other) noexcept {
     this->__fbthrift_field_map_list = std::move(other.__fbthrift_field_map_list);
     this->__fbthrift_field_list_map = std::move(other.__fbthrift_field_list_map);
     this->__fbthrift_field_fast_list_map = std::move(other.__fbthrift_field_fast_list_map);
+    this->__fbthrift_field_buf_map = std::move(other.__fbthrift_field_buf_map);
     __isset = other.__isset;
     return *this;
 }
 
 
-MapStruct::MapStruct(apache::thrift::FragileConstructor, ::std::map<::test::fixtures::basic-python-capi::MyEnum, ::std::string> enumz__arg, ::std::map<::std::int32_t, ::std::string> intz__arg, ::apache::thrift::detail::boxed_value_ptr<::std::map<::std::string, ::test::fixtures::basic-python-capi::PrimitiveStruct>> binnaz__arg, std::unordered_map<::std::string, double> encoded__arg, std::unordered_map<uint64_t, float> flotz__arg, ::std::vector<::std::map<::std::int32_t, ::std::int64_t>> map_list__arg, ::std::map<::std::int32_t, ::std::vector<::std::int64_t>> list_map__arg, folly::F14FastMap<int, folly::fbvector<double>> fast_list_map__arg) :
+MapStruct::MapStruct(apache::thrift::FragileConstructor, ::std::map<::test::fixtures::basic-python-capi::MyEnum, ::std::string> enumz__arg, ::std::map<::std::int32_t, ::std::string> intz__arg, ::apache::thrift::detail::boxed_value_ptr<::std::map<::std::string, ::test::fixtures::basic-python-capi::PrimitiveStruct>> binnaz__arg, std::unordered_map<::std::string, double> encoded__arg, std::unordered_map<uint64_t, float> flotz__arg, ::std::vector<::std::map<::std::int32_t, ::std::int64_t>> map_list__arg, ::std::map<::std::int32_t, ::std::vector<::std::int64_t>> list_map__arg, folly::F14FastMap<int, folly::fbvector<double>> fast_list_map__arg, ::std::map<::std::string, ::test::fixtures::basic-python-capi::IOBufPtr> buf_map__arg) :
     __fbthrift_field_enumz(std::move(enumz__arg)),
     __fbthrift_field_intz(std::move(intz__arg)),
     __fbthrift_field_binnaz(std::move(binnaz__arg)),
@@ -1501,7 +1568,8 @@ MapStruct::MapStruct(apache::thrift::FragileConstructor, ::std::map<::test::fixt
     __fbthrift_field_flotz(std::move(flotz__arg)),
     __fbthrift_field_map_list(std::move(map_list__arg)),
     __fbthrift_field_list_map(std::move(list_map__arg)),
-    __fbthrift_field_fast_list_map(std::move(fast_list_map__arg)) {
+    __fbthrift_field_fast_list_map(std::move(fast_list_map__arg)),
+    __fbthrift_field_buf_map(std::move(buf_map__arg)) {
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -1509,6 +1577,7 @@ MapStruct::MapStruct(apache::thrift::FragileConstructor, ::std::map<::test::fixt
   __isset.set(folly::index_constant<4>(), true);
   __isset.set(folly::index_constant<5>(), true);
   __isset.set(folly::index_constant<6>(), true);
+  __isset.set(folly::index_constant<7>(), true);
 }
 
 
@@ -1522,6 +1591,7 @@ void MapStruct::__fbthrift_clear() {
   this->__fbthrift_field_map_list.clear();
   this->__fbthrift_field_list_map.clear();
   this->__fbthrift_field_fast_list_map.clear();
+  this->__fbthrift_field_buf_map.clear();
   __isset = {};
 }
 
@@ -1556,6 +1626,9 @@ bool MapStruct::operator==(FOLLY_MAYBE_UNUSED const MapStruct& rhs) const {
     return false;
   }
   if (!(lhs.fast_list_map_ref() == rhs.fast_list_map_ref())) {
+    return false;
+  }
+  if (!(lhs.buf_map_ref() == rhs.buf_map_ref())) {
     return false;
   }
   return true;
@@ -1621,6 +1694,14 @@ folly::F14FastMap<int, folly::fbvector<double>> MapStruct::get_fast_list_map() &
   return std::move(__fbthrift_field_fast_list_map);
 }
 
+const ::std::map<::std::string, ::test::fixtures::basic-python-capi::IOBufPtr>& MapStruct::get_buf_map() const& {
+  return __fbthrift_field_buf_map;
+}
+
+::std::map<::std::string, ::test::fixtures::basic-python-capi::IOBufPtr> MapStruct::get_buf_map() && {
+  return std::move(__fbthrift_field_buf_map);
+}
+
 
 void swap(FOLLY_MAYBE_UNUSED MapStruct& a, FOLLY_MAYBE_UNUSED MapStruct& b) {
   using ::std::swap;
@@ -1632,6 +1713,7 @@ void swap(FOLLY_MAYBE_UNUSED MapStruct& a, FOLLY_MAYBE_UNUSED MapStruct& b) {
   swap(a.__fbthrift_field_map_list, b.__fbthrift_field_map_list);
   swap(a.__fbthrift_field_list_map, b.__fbthrift_field_list_map);
   swap(a.__fbthrift_field_fast_list_map, b.__fbthrift_field_fast_list_map);
+  swap(a.__fbthrift_field_buf_map, b.__fbthrift_field_buf_map);
   swap(a.__isset, b.__isset);
 }
 

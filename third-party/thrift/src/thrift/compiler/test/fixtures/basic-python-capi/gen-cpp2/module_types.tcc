@@ -1329,6 +1329,38 @@ _readField_pointbuffy:
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
           15,
+          18,
+          apache::thrift::protocol::T_STRUCT))) {
+    goto _loop;
+  }
+_readField_patched_struct:
+  {
+    _readState.beforeSubobject(iprot);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::MyStruct>::readWithContext(*iprot, this->__fbthrift_field_patched_struct, _readState);
+    _readState.afterSubobject(iprot);
+    
+  }
+ this->__isset.set(8, true);
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          18,
+          19,
+          apache::thrift::protocol::T_STRUCT))) {
+    goto _loop;
+  }
+_readField_empty_struct:
+  {
+    _readState.beforeSubobject(iprot);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::VapidStruct>::readWithContext(*iprot, this->__fbthrift_field_empty_struct, _readState);
+    _readState.afterSubobject(iprot);
+    
+  }
+ this->__isset.set(9, true);
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          19,
           0,
           apache::thrift::protocol::T_STOP))) {
     goto _loop;
@@ -1437,6 +1469,22 @@ _loop:
         goto _skip;
       }
     }
+    case 18:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRUCT))) {
+        goto _readField_patched_struct;
+      } else {
+        goto _skip;
+      }
+    }
+    case 19:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRUCT))) {
+        goto _readField_empty_struct;
+      } else {
+        goto _skip;
+      }
+    }
     default:
     {
 _skip:
@@ -1496,6 +1544,14 @@ uint32_t PrimitiveStruct::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("pointbuffy", apache::thrift::protocol::T_STRING, 15);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::test::fixtures::basic-python-capi::IOBufPtr>::serializedSize<false>(*prot_, this->__fbthrift_field_pointbuffy);
   }
+  {
+    xfer += prot_->serializedFieldSize("patched_struct", apache::thrift::protocol::T_STRUCT, 18);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::MyStruct>::serializedSize<false>(*prot_, this->__fbthrift_field_patched_struct);
+  }
+  {
+    xfer += prot_->serializedFieldSize("empty_struct", apache::thrift::protocol::T_STRUCT, 19);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::VapidStruct>::serializedSize<false>(*prot_, this->__fbthrift_field_empty_struct);
+  }
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -1547,6 +1603,14 @@ uint32_t PrimitiveStruct::serializedSizeZC(Protocol_ const* prot_) const {
   {
     xfer += prot_->serializedFieldSize("pointbuffy", apache::thrift::protocol::T_STRING, 15);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::test::fixtures::basic-python-capi::IOBufPtr>::serializedSize<true>(*prot_, this->__fbthrift_field_pointbuffy);
+  }
+  {
+    xfer += prot_->serializedFieldSize("patched_struct", apache::thrift::protocol::T_STRUCT, 18);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::MyStruct>::serializedSize<true>(*prot_, this->__fbthrift_field_patched_struct);
+  }
+  {
+    xfer += prot_->serializedFieldSize("empty_struct", apache::thrift::protocol::T_STRUCT, 19);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::VapidStruct>::serializedSize<true>(*prot_, this->__fbthrift_field_empty_struct);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -1640,6 +1704,20 @@ uint32_t PrimitiveStruct::write(Protocol_* prot_) const {
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRING, 15, kPrevFieldId>(*prot_, "pointbuffy", previousFieldHasValue);
     previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::test::fixtures::basic-python-capi::IOBufPtr>::write(*prot_, this->__fbthrift_field_pointbuffy);
+    xfer += prot_->writeFieldEnd();
+  }
+  {
+    constexpr int16_t kPrevFieldId = 15;
+    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 18, kPrevFieldId>(*prot_, "patched_struct", previousFieldHasValue);
+    previousFieldHasValue = true;
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::MyStruct>::write(*prot_, this->__fbthrift_field_patched_struct);
+    xfer += prot_->writeFieldEnd();
+  }
+  {
+    constexpr int16_t kPrevFieldId = 18;
+    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 19, kPrevFieldId>(*prot_, "empty_struct", previousFieldHasValue);
+    previousFieldHasValue = true;
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::VapidStruct>::write(*prot_, this->__fbthrift_field_empty_struct);
     xfer += prot_->writeFieldEnd();
   }
   xfer += prot_->writeFieldStop();
@@ -2617,6 +2695,23 @@ _readField_fast_list_map:
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
           8,
+          9,
+          apache::thrift::protocol::T_MAP))) {
+    goto _loop;
+  }
+_readField_buf_map:
+  {
+    _readState.beforeSubobject(iprot);
+    this->__fbthrift_field_buf_map = ::std::map<::std::string, ::test::fixtures::basic-python-capi::IOBufPtr>();
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::binary, ::apache::thrift::type_class::binary>, ::std::map<::std::string, ::test::fixtures::basic-python-capi::IOBufPtr>>::readWithContext(*iprot, this->__fbthrift_field_buf_map, _readState);
+    _readState.afterSubobject(iprot);
+    
+  }
+ this->__isset.set(7, true);
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          9,
           0,
           apache::thrift::protocol::T_STOP))) {
     goto _loop;
@@ -2701,6 +2796,14 @@ _loop:
         goto _skip;
       }
     }
+    case 9:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_MAP))) {
+        goto _readField_buf_map;
+      } else {
+        goto _skip;
+      }
+    }
     default:
     {
 _skip:
@@ -2748,6 +2851,10 @@ uint32_t MapStruct::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("fast_list_map", apache::thrift::protocol::T_MAP, 8);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>>, folly::F14FastMap<int, folly::fbvector<double>>>::serializedSize<false>(*prot_, this->__fbthrift_field_fast_list_map);
   }
+  {
+    xfer += prot_->serializedFieldSize("buf_map", apache::thrift::protocol::T_MAP, 9);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::binary, ::apache::thrift::type_class::binary>, ::std::map<::std::string, ::test::fixtures::basic-python-capi::IOBufPtr>>::serializedSize<false>(*prot_, this->__fbthrift_field_buf_map);
+  }
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -2787,6 +2894,10 @@ uint32_t MapStruct::serializedSizeZC(Protocol_ const* prot_) const {
   {
     xfer += prot_->serializedFieldSize("fast_list_map", apache::thrift::protocol::T_MAP, 8);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>>, folly::F14FastMap<int, folly::fbvector<double>>>::serializedSize<false>(*prot_, this->__fbthrift_field_fast_list_map);
+  }
+  {
+    xfer += prot_->serializedFieldSize("buf_map", apache::thrift::protocol::T_MAP, 9);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::binary, ::apache::thrift::type_class::binary>, ::std::map<::std::string, ::test::fixtures::basic-python-capi::IOBufPtr>>::serializedSize<false>(*prot_, this->__fbthrift_field_buf_map);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -2855,6 +2966,13 @@ uint32_t MapStruct::write(Protocol_* prot_) const {
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_MAP, 8, kPrevFieldId>(*prot_, "fast_list_map", previousFieldHasValue);
     previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>>, folly::F14FastMap<int, folly::fbvector<double>>>::write(*prot_, this->__fbthrift_field_fast_list_map);
+    xfer += prot_->writeFieldEnd();
+  }
+  {
+    constexpr int16_t kPrevFieldId = 8;
+    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_MAP, 9, kPrevFieldId>(*prot_, "buf_map", previousFieldHasValue);
+    previousFieldHasValue = true;
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::binary, ::apache::thrift::type_class::binary>, ::std::map<::std::string, ::test::fixtures::basic-python-capi::IOBufPtr>>::write(*prot_, this->__fbthrift_field_buf_map);
     xfer += prot_->writeFieldEnd();
   }
   xfer += prot_->writeFieldStop();

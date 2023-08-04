@@ -403,6 +403,22 @@ class PrimitiveStruct(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
         ),
+        (
+            18,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "patched_struct",  # name
+            lambda: _fbthrift_python_types.StructTypeInfo(MyStruct),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            19,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "empty_struct",  # name
+            lambda: _fbthrift_python_types.StructTypeInfo(EmptyStruct),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
     )
 
     @staticmethod
@@ -688,6 +704,14 @@ class MapStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "fast_list_map",  # name
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_double)),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            9,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "buf_map",  # name
+            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_binary, _fbthrift_python_types.typeinfo_iobuf),  # typeinfo
             None,  # default value
             None,  # adapter info
         ),

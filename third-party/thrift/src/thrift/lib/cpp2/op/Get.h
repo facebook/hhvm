@@ -287,7 +287,8 @@ class InvokeByFieldId {
   template <
       typename F,
       std::enable_if_t<sizeof(F) != 0 && pos != N, bool> = false>
-  constexpr decltype(auto) operator()(FieldId id, F&& f) const {
+  FOLLY_ALWAYS_INLINE constexpr decltype(auto) operator()(
+      FieldId id, F&& f) const {
     // By default clang's maximum depth of recursive template instantiation is
     // 512. If we handle 8 cases at a time, it works with struct that has 4096
     // fields.
@@ -315,13 +316,15 @@ class InvokeByFieldId {
   template <
       typename F,
       std::enable_if_t<sizeof(F) != 0 && pos == N, bool> = false>
-  constexpr decltype(auto) operator()(FieldId, F&& f) const {
+  FOLLY_ALWAYS_INLINE constexpr decltype(auto) operator()(
+      FieldId, F&& f) const {
     // If not found, f() will be invoked.
     return std::forward<F>(f)();
   }
 
   template <typename... F>
-  constexpr decltype(auto) operator()(FieldId id, F&&... f) const {
+  FOLLY_ALWAYS_INLINE constexpr decltype(auto) operator()(
+      FieldId id, F&&... f) const {
     return operator()(id, folly::overload(std::forward<F>(f)...));
   }
 };
@@ -337,6 +340,7 @@ class InvokeByFieldId {
 ///
 /// In addition, `invoke_by_field_id<T>(id, f...)` is a syntactic sugar of
 /// `invoke_by_field_id<T>(id, folly::overload(f...))`.
+/// WARNING: inline expansion will always be applied to the call sites.
 template <typename T>
 FOLLY_INLINE_VARIABLE constexpr detail::InvokeByFieldId<T> invoke_by_field_id{};
 

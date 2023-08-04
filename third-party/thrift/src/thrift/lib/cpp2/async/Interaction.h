@@ -33,10 +33,10 @@ struct InteractionTask {
   std::shared_ptr<folly::RequestContext> context;
 
   explicit InteractionTask(
-      std::unique_ptr<concurrency::Runnable>&& task,
-      concurrency::ThreadManager::ExecutionScope scope)
-      : task(std::move(task)),
-        scope(scope),
+      std::unique_ptr<concurrency::Runnable>&& t,
+      concurrency::ThreadManager::ExecutionScope sc)
+      : task(std::move(t)),
+        scope(sc),
         context(folly::RequestContext::saveContext()) {}
 };
 

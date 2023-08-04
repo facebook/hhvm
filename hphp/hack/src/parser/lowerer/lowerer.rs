@@ -2956,12 +2956,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
         TryStatement(c) => p_try_stmt(env, pos, c, node),
         ReturnStatement(c) => p_return_stmt(env, pos, c, node),
         YieldBreakStatement(_) => {
-            if env.codegen() {
-                // TODO(T156821099): Once HHVM is deployed with this fix, remove
-                // the `env.codegen()` check so the typechecker understands it.
-                // (i.e. land D46999344).
-                env.saw_yield = true;
-            }
+            env.saw_yield = true;
             Ok(ast::Stmt::new(pos, ast::Stmt_::mk_yield_break()))
         }
         EchoStatement(c) => p_echo_stmt(env, pos, c, node),

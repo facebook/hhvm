@@ -25,6 +25,7 @@ type mode =
       dry_run: bool;
           (** only applies to [glean_only]; skips actually running the glean query *)
     }
+  | Findrefs_glean of { dry_run: bool }
 
 type options = {
   files: string list;
@@ -148,6 +149,12 @@ let parse_options () =
         Arg.Unit (set_mode (Search { glean_only = false; dry_run = false })),
         " Run the search (including new definitions) for newline-separated queries in file"
       );
+      ( "--find-refs-show-glean",
+        Arg.Unit (set_mode (Findrefs_glean { dry_run = true })),
+        " Show the glean query for newline-separated queries in file" );
+      ( "--find-refs-glean",
+        Arg.Unit (set_mode (Findrefs_glean { dry_run = false })),
+        " Show+run the glean query for newline-separated queries in file" );
       ( "--manifold-api-key",
         Arg.String (set "manifold api key" saved_state_manifold_api_key),
         " API key used to download a saved state from Manifold (optional)" );
@@ -368,7 +375,7 @@ let do_auto332
 
 (** This function takes a list of searches of the form (title, query_text, context, kind_filter).
 If [show_query_text] then it prints each search.
-It obtains and prints the Glean angle query for it, using [Glean_autocomplete_query.top_level].
+It obtains and prints the Glean angle query for it, using [Glean_autocomplete_query.make_symbols_query].
 If not [dry_run] then it runs the query against [reponame] and displays the results, plus timing information. *)
 let do_glean_symbol_searches
     ~reponame
@@ -393,7 +400,7 @@ let do_glean_symbol_searches
   List.iter searches ~f:(fun (title, query_text, context, kind_filter) ->
       if List.length searches > 1 then Printf.printf "//// %s\n" title;
       let angle =
-        Glean_autocomplete_query.top_level
+        Glean_autocomplete_query.make_symbols_query
           ~prefix:query_text
           ~context
           ~kind_filter
@@ -587,6 +594,53 @@ let handle_search ctx sienv ~glean_only ~dry_run filename =
               end_));
   ()
 
+let handle_findrefs_glean sienv ~dry_run filename =
+  (* We expect a newline-separated query file. See
+     ServerCommandTypes.Find_refs.symbol_and_action_to_string_exn
+     for documentation and examples of that format.
+
+     Another way to obtain examples is to open a hack file in the IDE, right-click > FindRefs,
+     and then examine [hh --client-logname] to find the invocation of [hh --ide-find-refs-by-symbol-name <EXAMPLE>].
+  *)
+  let queries =
+    Sys_utils.cat (Relative_path.to_absolute filename)
+    |> extract_nonblank_lines
+    |> List.map ~f:(fun query ->
+           ServerCommandTypes.Find_refs.string_to_symbol_and_action_exn query)
+  in
+  let reponame = sienv.SearchUtils.glean_reponame in
+  let handle =
+    if dry_run then
+      None
+    else
+      let () =
+        if String.is_empty reponame then failwith "--glean-reponame required"
+      in
+      let () = Folly.ensure_folly_init () in
+      Some (Glean.initialize ~reponame |> Option.value_exn)
+  in
+  List.iter queries ~f:(fun (name, action) ->
+      let query_text_for_show =
+        ServerCommandTypes.Find_refs.symbol_and_action_to_string_exn name action
+      in
+      Printf.printf "//// %s\n" query_text_for_show;
+      let angle = Glean_autocomplete_query.make_refs_query ~action in
+      Printf.printf "query:\n%s\n\n%!" angle;
+      if not dry_run then begin
+        let start_time = Unix.gettimeofday () in
+        let results =
+          Glean.query_filenames (Option.value_exn handle) ~angle ~max_results:10
+        in
+        List.iter results ~f:(fun path ->
+            Printf.printf "%s\n" (Relative_path.show path));
+        Printf.printf
+          "\n--> %s - %d results, %0.3fs\n\n%!"
+          query_text_for_show
+          (List.length results)
+          (Unix.gettimeofday () -. start_time)
+      end);
+  ()
+
 let handle_mode mode filenames ctx (sienv : SearchUtils.si_env) naming_table =
   let filename =
     match filenames with
@@ -601,6 +655,7 @@ let handle_mode mode filenames ctx (sienv : SearchUtils.si_env) naming_table =
     handle_autocomplete_glean ctx sienv naming_table ~dry_run filename
   | Autocomplete { is_manually_invoked } ->
     handle_autocomplete ctx sienv naming_table ~is_manually_invoked filename
+  | Findrefs_glean { dry_run } -> handle_findrefs_glean sienv ~dry_run filename
 
 (*****************************************************************************)
 (* Main entry point *)

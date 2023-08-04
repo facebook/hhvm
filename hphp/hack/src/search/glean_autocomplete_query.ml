@@ -6,4 +6,6 @@
  *
  *)
 
-let top_level ~prefix:_ ~context:_ ~kind_filter:_ = ""
+let make_symbols_query ~prefix:_ ~context:_ ~kind_filter:_ = ""
+
+let make_refs_query ~action:_ = ""

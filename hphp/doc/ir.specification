@@ -1589,25 +1589,14 @@ To string conversions:
   The caller frame pointer is passed as S1. This is used to keep track of the
   call chain of inlined functions for simplification and dead code elimination.
 
-| InitFrame<func>, ND, S(StkPtr) S(Int) S(Cls|Obj|Nullptr) S(Int), NF
-
-  Initializes non-native portion of the callee's frame.
-
-  Temporary opcode that combines the behavior of StFrame{Ctx,Func,Meta},
-  but works with a stack pointer rather than a well-defined frame pointer.
-
-  `func': the function being called
-  S0: stack pointer pointing to the space reserved for the callee's frame
-  S1: ActRec flags (see ActRec::m_callOffAndFlags)
-  S2: prologue context
-  S3: callee func id
-
-| EnterFrame, D(FramePtr), S(FramePtr) S(FramePtr), NF
+| EnterFrame, D(FramePtr), S(FramePtr) S(FramePtr) S(Int) S(Int), NF
 
   Initializes native portion of the callee's frame at S0, links it to the
   previous frame at S1, and defines the new frame pointer.
 
   The function being called is specified in `func'.
+  S2: ActRec flags (see ActRec::m_callOffAndFlags)
+  S3: callee func id
 
 | Call<offset,numParams,callOff,destroyLocals>,
 |   DCall,
@@ -1859,7 +1848,7 @@ To string conversions:
   to track whether the register state is clean or dirty as
   EagerSyncVMRegs is moved around by store elimination.
 
-| ReqBindJmp<target,invSPOff,irSPOff>, ND, S(StkPtr) S(FramePtr), T
+| ReqBindJmp<target,invSPOff,irSPOff>, ND, S(StkPtr) S(FramePtr) SCrossTrace, T
 
   Emit a jump to a translation starting at `target'. If it does not exist, jump
   to a service request that will translate the code and bind this jump to it.
@@ -1988,6 +1977,12 @@ To string conversions:
   Creates a temporary D representing a callee's and caller's frame pointer.
 
   May be used only at the beginning of a func entry.
+
+| DefFuncEntryArFlags, D(Int), NA, NF
+
+| DefFuncEntryCalleeId, D(Int), NA, NF
+
+| DefFuncEntryCtx, DParam(Cls|Obj), NA, NF
 
 | ConvFuncPrologueFlagsToARFlags, D(Int), S(Int), NF
 

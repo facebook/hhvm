@@ -460,18 +460,18 @@ void emitInitFuncInputs(IRGS& env, const Func* callee, uint32_t argc) {
 
 namespace {
 
-void emitSpillFrame(IRGS& env, const Func* callee,
-                    SSATmp* prologueFlags, SSATmp* prologueCtx) {
+std::tuple<SSATmp*, SSATmp*> emitPrologueExit(IRGS& env, const Func* callee,
+                                              SSATmp* prologueFlags) {
   auto const arFlags = gen(env, ConvFuncPrologueFlagsToARFlags, prologueFlags);
   auto const calleeId = cns(env, callee->getFuncId().toInt());
-
-  gen(env, InitFrame, FuncData { callee },
-      sp(env), arFlags, prologueCtx, calleeId);
   gen(env, ExitPrologue);
+  return std::make_tuple(arFlags, calleeId);
 }
 
 void emitJmpFuncBody(IRGS& env, const Func* callee, uint32_t argc,
-                     SSATmp* callerFP) {
+                     SSATmp* callerFP, SSATmp* arFlags, SSATmp* calleeId,
+                     SSATmp* ctx) {
+
   // Emit the bindjmp for the function body.
   auto const numArgs = std::min(argc, callee->numNonVariadicParams());
   gen(
@@ -484,7 +484,10 @@ void emitJmpFuncBody(IRGS& env, const Func* callee, uint32_t argc,
       false /* popFrame */
     },
     sp(env),
-    callerFP
+    callerFP,
+    arFlags,
+    calleeId,
+    ctx
   );
 }
 
@@ -514,13 +517,6 @@ void definePrologueFrameAndStack(IRGS& env, const Func* callee, uint32_t argc) {
   env.irb->exceptionStackBoundary();
 }
 
-Type prologueCtxType(const Func* func) {
-  assertx(func->isClosureBody() || func->cls());
-  if (func->isClosureBody()) return Type::ExactObj(func->implCls());
-  if (func->isStatic()) return Type::SubCls(func->cls());
-  return thisTypeFromFunc(func);
-}
-
 } // namespace
 
 void emitFuncPrologue(IRGS& env, const Func* callee, uint32_t argc,
@@ -532,14 +528,14 @@ void emitFuncPrologue(IRGS& env, const Func* callee, uint32_t argc,
   // Define register inputs before doing anything else that may clobber them.
   auto const prologueFlags = gen(env, DefFuncPrologueFlags);
   auto const prologueCtx = (callee->isClosureBody() || callee->cls())
-    ? gen(env, DefFuncPrologueCtx, prologueCtxType(callee))
+    ? gen(env, DefFuncPrologueCtx, callCtxType(callee))
     : cns(env, nullptr);
 
   emitPrologueEntry(env, callee, argc, transID);
   emitCalleeChecks(env, callee, argc, prologueFlags, prologueCtx);
   emitInitFuncInputs(env, callee, argc);
-  emitSpillFrame(env, callee, prologueFlags, prologueCtx);
-  emitJmpFuncBody(env, callee, argc, fp(env));
+  auto [arFlags, calleeId] = emitPrologueExit(env, callee, prologueFlags);
+  emitJmpFuncBody(env, callee, argc, fp(env), arFlags, calleeId, prologueCtx);
 }
 
 namespace {
@@ -686,7 +682,9 @@ void emitFuncEntry(IRGS& env) {
     assertx(!isInlining(env));
     auto const param = curSrcKey(env).numEntryArgs();
     emitInitScalarDefaultParamLocal(env, callee, param);
-    emitJmpFuncBody(env, callee, param + 1, env.funcEntryPrevFP);
+    emitJmpFuncBody(env, callee, param + 1, env.funcEntryPrevFP,
+                    env.funcEntryArFlags, env.funcEntryCalleeId,
+                    env.funcEntryCtx);
     return;
   }
 

@@ -496,6 +496,14 @@ using TypeNames::TCA;
                           checkMultiple(src(), types, names);               \
                         }                                                   \
                       }
+#define SCrossTrace   {                                                     \
+                        auto const extra = inst->extra<ReqBindJmpData>();   \
+                        if (extra->target.funcEntry() && !extra->popFrame) {\
+                          S(Int)  /* ActRec flags */                        \
+                          S(Int)  /* func id of the callee */               \
+                          S(Cls|Obj|Nullptr)  /* prologue context */        \
+                        }                                                   \
+                      }
 #define SBespokeArr   checkBespokeArr();
 #define SMonotypeVec  checkMonotypeArr(TVec);
 #define SMonotypeDict checkMonotypeArr(TDict);

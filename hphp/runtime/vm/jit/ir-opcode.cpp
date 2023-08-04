@@ -587,6 +587,9 @@ bool opcodeMayRaise(Opcode opc) {
   case DefConst:
   case DefFP:
   case DefFrameRelSP:
+  case DefFuncEntryArFlags:
+  case DefFuncEntryCalleeId:
+  case DefFuncEntryCtx:
   case DefFuncEntryFP:
   case DefFuncEntryPrevFP:
   case DefFuncPrologueCallee:
@@ -661,7 +664,6 @@ bool opcodeMayRaise(Opcode opc) {
   case IncRef:
   case IncStat:
   case InitDictElem:
-  case InitFrame:
   case InitObjMemoSlots:
   case InitObjProps:
   case InitStructElem:

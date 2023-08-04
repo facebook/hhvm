@@ -376,10 +376,6 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     cur().fixupFPValue = inst->dst();
     break;
 
-  case InitFrame:
-    /* The last opcode of prologues. Does not modify any defined frame. */
-    break;
-
   case EnterPrologue:
     cur().stublogue = true;
     break;

@@ -124,8 +124,14 @@ struct IRGS {
   /*
    * Func entry inputs:
    *  - previous (caller's) FP
+   *  - ActRec flags (callee's ActRec::m_callOffAndFlags)
+   *  - the id of the func being called
+   *  - the $this/static::class context (TCtx)
    */
   SSATmp* funcEntryPrevFP{nullptr};
+  SSATmp* funcEntryArFlags{nullptr};
+  SSATmp* funcEntryCalleeId{nullptr};
+  SSATmp* funcEntryCtx{nullptr};
 };
 
 //////////////////////////////////////////////////////////////////////

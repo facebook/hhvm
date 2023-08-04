@@ -493,6 +493,12 @@ Type outputType(const IRInstruction*, int dstId = 0);
  */
 Type thisTypeFromFunc(const Func* func);
 
+/*
+ * Return a type of $this/static::class context at the time of function call
+ * (prologue and func entry).
+ */
+Type callCtxType(const Func* func);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }

@@ -64,6 +64,8 @@ SSATmp* convertClassKey(IRGS& env, SSATmp* key) {
 }
 
 void defineFrameAndStack(IRGS& env, SBInvOffset bcSPOff) {
+  auto const func = curFunc(env);
+
   // Define FP and SP.
   if (resumeMode(env) != ResumeMode::None) {
     // - resumable frames live on the heap, so they do not have a stack position
@@ -83,14 +85,23 @@ void defineFrameAndStack(IRGS& env, SBInvOffset bcSPOff) {
     gen(env, DefFuncEntryFP);
     updateMarker(env);
     env.funcEntryPrevFP = gen(env, DefFuncEntryPrevFP);
+    env.funcEntryArFlags = gen(env, DefFuncEntryArFlags);
+    env.funcEntryCalleeId = gen(env, DefFuncEntryCalleeId);
+    env.funcEntryCtx = (func->isClosureBody() || func->cls())
+      ? gen(env, DefFuncEntryCtx, callCtxType(func))
+      : cns(env, nullptr);
 
     if (!curSrcKey(env).trivialDVFuncEntry()) {
-      gen(env, EnterFrame, fp(env), env.funcEntryPrevFP);
+      gen(env, EnterFrame, fp(env), env.funcEntryPrevFP, env.funcEntryArFlags,
+          env.funcEntryCalleeId);
       updateMarker(env);
+      if (!env.funcEntryCtx->isA(TNullptr)) {
+        gen(env, StFrameCtx, fp(env), env.funcEntryCtx);
+      }
     }
 
     assertx(bcSPOff == spOffEmpty(env));
-    auto const irSPOff = SBInvOffset { -curFunc(env)->numSlotsInFrame() };
+    auto const irSPOff = SBInvOffset { -func->numSlotsInFrame() };
     gen(env, DefFrameRelSP, DefStackData { irSPOff, bcSPOff }, fp(env));
   } else {
     // - frames of regular functions live on the stack
@@ -99,7 +110,7 @@ void defineFrameAndStack(IRGS& env, SBInvOffset bcSPOff) {
     gen(env, DefFP, DefFPData { IRSPRelOffset { 0 } });
     updateMarker(env);
 
-    auto const irSPOff = SBInvOffset { -curFunc(env)->numSlotsInFrame() };
+    auto const irSPOff = SBInvOffset { -func->numSlotsInFrame() };
     gen(env, DefFrameRelSP, DefStackData { irSPOff, bcSPOff }, fp(env));
   }
 

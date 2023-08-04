@@ -325,6 +325,7 @@ void interpOne(IRGS& env,
 
   if (!cf && isInlining(env)) {
     // Can't continue due to spilled frames.
+    assertx(!nextSrcKey(env).funcEntry());
     auto const rbjData = ReqBindJmpData {
       nextSrcKey(env),
       spOffBCFromStackBase(env),

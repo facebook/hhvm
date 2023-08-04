@@ -3729,6 +3729,7 @@ SSATmp* simplifyJmpSwitchDest(State& env, const IRInstruction* inst) {
     return gen(env, Unreachable, ASSERT_REASON);
   }
 
+  assertx(!extra.targets[indexVal].funcEntry());
   auto const newExtra = ReqBindJmpData {
     extra.targets[indexVal],
     extra.spOffBCFromStackBase,

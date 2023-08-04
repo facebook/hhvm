@@ -116,6 +116,9 @@ void storeVMRegs(Vout& v) { storeVmfp(v); storeVmsp(v); }
  * Pop frame from the VM stack to the func entry registers and unlink it.
  */
 void popFrameToFuncEntryRegs(Vout& v) {
+  v << load{Vreg(rvmfp()) + AROFF(m_thisUnsafe), r_func_entry_ctx()};
+  v << loadl{Vreg(rvmfp()) + AROFF(m_callOffAndFlags), r_func_entry_ar_flags()};
+  v << loadl{Vreg(rvmfp()) + AROFF(m_funcId), r_func_entry_callee_id()};
   v << copy{rvmfp(), rvmsp()};
   v << restoreripm{Vreg(rvmfp()) + AROFF(m_savedRip)};
   v << load{Vreg(rvmsp()) + AROFF(m_sfp), rvmfp()};
@@ -128,6 +131,10 @@ void pushFrameFromFuncEntryRegs(Vout& v) {
   v << store{rvmfp(), Vreg(rvmsp()) + AROFF(m_sfp)};
   v << copy{rvmsp(), rvmfp()};
   v << phplogue{rvmfp()};
+  v << storel{r_func_entry_callee_id(), Vreg(rvmfp()) + AROFF(m_funcId)};
+  v << storel{r_func_entry_ar_flags(),
+              Vreg(rvmfp()) + AROFF(m_callOffAndFlags)};
+  v << store{r_func_entry_ctx(), Vreg(rvmfp()) + AROFF(m_thisUnsafe)};
 }
 
 /*
@@ -727,12 +734,13 @@ TCA emitHandleServiceRequest(CodeBlock& cb, DataBlock& data, Handler handler, co
 
 template<class Handler>
 TCA emitHandleServiceRequestFE(CodeBlock& cb, DataBlock& data,
-                               Handler handler, bool pushFrame, const char* name) {
+                               Handler handler, bool pushFrame,
+                               const char* name) {
   alignCacheLine(cb);
 
   return vwrap(cb, data, [&] (Vout& v) {
     auto const numArgs = v.makeReg();
-    v << copy{rarg(0), numArgs};
+    v << copy{rarg(pushFrame ? 3 : 0), numArgs};
 
     if (pushFrame) pushFrameFromFuncEntryRegs(v);
     storeVmfp(v);
@@ -750,7 +758,7 @@ TCA emitHandleServiceRequestFE(CodeBlock& cb, DataBlock& data,
     // operating in a TC context. Both expect the callee frame in func entry
     // regs, so move it there from the VM stack.
     popFrameToFuncEntryRegs(v);
-    v << jmpr{ret, func_entry_regs()};
+    v << jmpr{ret, func_entry_regs(true /* withCtx */)};
   }, name);
 }
 
@@ -848,7 +856,7 @@ TCA emitResumeHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us,
     auto const handler = v.makeReg();
     v << copy{rret(1), handler};
     popFrameToFuncEntryRegs(v);
-    v << jmpr{handler, func_entry_regs()};
+    v << jmpr{handler, func_entry_regs(true /* withCtx */)};
   });
 
   us.interpToTCRet = vwrap(cb, data, [] (Vout& v) {
@@ -1460,11 +1468,17 @@ RegSet interp_one_cf_regs() {
 
 namespace {
 
-void emitUninitDefaultArgs(Vout& v, SrcKey sk) {
+void emitUninitDefaultArgs(Vout& v, SrcKey sk, bool withCtx) {
   auto const numEntryArgs = sk.numEntryArgs();
   auto const numParams = sk.func()->numNonVariadicParams();
   assertx(numEntryArgs <= numParams);
   if (numEntryArgs == numParams) return;
+
+  auto saveRegs = r_func_entry_ar_flags() | r_func_entry_callee_id();
+  if (withCtx) saveRegs |= r_func_entry_ctx();
+  PhysRegSaver prs{v, saveRegs};
+
+  v << saverips{};
 
   // The callee's ActRec is at rvmsp().
   v << vcall{
@@ -1473,6 +1487,28 @@ void emitUninitDefaultArgs(Vout& v, SrcKey sk) {
     v.makeTuple({}),
     Fixup::none()
   };
+
+  v << restorerips{};
+}
+
+void emitInterpReqImpl(Vout& v, SrcKey sk, SBInvOffset spOff, TCA helper) {
+  RegSet regSet;
+  if (sk.funcEntry()) {
+    auto const withCtx =
+      sk.func()->isClosureBody() || sk.func()->cls() ||
+      RuntimeOption::EvalHHIRGenerateAsserts;
+    emitUninitDefaultArgs(v, sk, withCtx);
+    sk.advance();
+    regSet = func_entry_regs(withCtx);
+  } else if (sk.resumeMode() == ResumeMode::None) {
+    auto const frameRelOff = spOff.offset + sk.func()->numSlotsInFrame();
+    v << lea{rvmfp()[-cellsToBytes(frameRelOff)], rvmsp()};
+    regSet = cross_trace_regs() | rvmsp();
+  } else {
+    regSet = cross_trace_regs_resumed();
+  }
+  v << store{v.cns(sk.pc()), rvmtl()[rds::kVmpcOff]};
+  v << jmpi{helper, regSet};
 }
 
 } // namespace
@@ -1481,34 +1517,14 @@ void emitInterpReq(Vout& v, SrcKey sk, SBInvOffset spOff) {
   auto const helper = sk.funcEntry()
     ? tc::ustubs().interpHelperFuncEntryFromTC
     : tc::ustubs().interpHelperFromTC;
-  if (sk.funcEntry()) {
-    v << saverips{};
-    emitUninitDefaultArgs(v, sk);
-    v << restorerips{};
-    sk.advance();
-  } else if (sk.resumeMode() == ResumeMode::None) {
-    auto const frameRelOff = spOff.offset + sk.func()->numSlotsInFrame();
-    v << lea{rvmfp()[-cellsToBytes(frameRelOff)], rvmsp()};
-  }
-  v << store{v.cns(sk.pc()), rvmtl()[rds::kVmpcOff]};
-  v << jmpi{helper, RegSet{rvmsp()}};
+  emitInterpReqImpl(v, sk, spOff, helper);
 }
 
 void emitInterpReqNoTranslate(Vout& v, SrcKey sk, SBInvOffset spOff) {
   auto const helper = sk.funcEntry()
     ? tc::ustubs().interpHelperNoTranslateFuncEntryFromTC
     : tc::ustubs().interpHelperNoTranslateFromTC;
-  if (sk.funcEntry()) {
-    v << saverips{};
-    emitUninitDefaultArgs(v, sk);
-    v << restorerips{};
-    sk.advance();
-  } else if (sk.resumeMode() == ResumeMode::None) {
-    auto const frameRelOff = spOff.offset + sk.func()->numSlotsInFrame();
-    v << lea{rvmfp()[-cellsToBytes(frameRelOff)], rvmsp()};
-  }
-  v << store{v.cns(sk.pc()), rvmtl()[rds::kVmpcOff]};
-  v << jmpi{helper, RegSet{rvmsp()}};
+  emitInterpReqImpl(v, sk, spOff, helper);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

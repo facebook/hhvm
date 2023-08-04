@@ -760,12 +760,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     // Function call event hook inspects parameters.
     auto const fp = inst.src(0);
     auto const callee = inst.extra<FuncData>()->func;
-    return may_load_store(
-      callee->numParams() > 0
-        ? ALocal { fp, AliasIdSet::IdRange(0, callee->numParams()) }
-        : AEmpty,
-      AEmpty
-    );
+    auto const params = callee->numParams() > 0
+      ? ALocal { fp, AliasIdSet::IdRange(0, callee->numParams()) }
+      : AEmpty;
+    return may_load_store(params | AActRec { fp }, AEmpty);
   }
 
   //////////////////////////////////////////////////////////////////////
@@ -1432,11 +1430,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_load_store(AFBasePtr, AFBasePtr);
 
   case EnterFrame:
-    return may_load_store(AFBasePtr, AFBasePtr | AFMeta { inst.dst() });
-
-  case InitFrame:
-    /* The last opcode of prologues. Does not modify any defined frame. */
-    return may_load_store(AEmpty, AEmpty);
+    return may_load_store(
+      AFBasePtr,
+      AFBasePtr | AFFunc { inst.dst() } | AFMeta { inst.dst() }
+    );
 
   case LdARFlags:
     return PureLoad { AFMeta { inst.src(0) }};
@@ -1475,6 +1472,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case BespokeIterLastPos:
   case ConvFuncPrologueFlagsToARFlags:
   case DefFrameRelSP:
+  case DefFuncEntryArFlags:
+  case DefFuncEntryCalleeId:
+  case DefFuncEntryCtx:
   case DefFuncEntryPrevFP:
   case DefFuncPrologueCallee:
   case DefFuncPrologueCtx:

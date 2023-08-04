@@ -65,13 +65,28 @@ void maybe_syncsp(Vout& v, const BCMarker& marker, Vreg sp, IRSPRelOffset off) {
   v << syncvmsp{sync_sp};
 }
 
-RegSet cross_trace_args(const BCMarker& marker) {
+RegSet cross_trace_args(const BCMarker& marker, SrcKey target) {
+  if (target.valid() && target.funcEntry()) {
+    auto const func = target.func();
+    auto const withCtx =
+      func->isClosureBody() || func->cls() ||
+      RuntimeOption::EvalHHIRGenerateAsserts;
+    return func_entry_regs(withCtx);
+  }
+
   return marker.resumeMode() != ResumeMode::None
     ? cross_trace_regs_resumed() : cross_trace_regs();
 }
 
-void popFrameToFuncEntryRegs(Vout& v) {
+void popFrameToFuncEntryRegs(Vout& v, const Func* func) {
   v << unrecordbasenativesp{};
+  if (func->isClosureBody() || func->cls()) {
+    v << load{Vreg(rvmfp()) + AROFF(m_thisUnsafe), r_func_entry_ctx()};
+  } else if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    v << copy{v.cns(ActRec::kTrashedThisSlot), r_func_entry_ctx()};
+  }
+  v << loadl{Vreg(rvmfp()) + AROFF(m_callOffAndFlags), r_func_entry_ar_flags()};
+  v << loadl{Vreg(rvmfp()) + AROFF(m_funcId), r_func_entry_callee_id()};
   v << copy{rvmfp(), rvmsp()};
   v << restoreripm{Vreg(rvmfp()) + AROFF(m_savedRip)};
   v << load{Vreg(rvmsp()) + AROFF(m_sfp), rvmfp()};
@@ -323,7 +338,7 @@ void cgJmpSwitchDest(IRLS& env, const IRInstruction* inst) {
 
   auto const t = v.makeReg();
   v << lead{table, t};
-  v << jmpm{t[idx * 8], cross_trace_args(marker)};
+  v << jmpm{t[idx * 8], cross_trace_args(marker, SrcKey{})};
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -387,25 +402,42 @@ void cgJmpSSwitchDest(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
   maybe_syncsp(v, marker, srcLoc(env, inst, 1).reg(), extra->offset);
-  v << jmpr{srcLoc(env, inst, 0).reg(), cross_trace_args(marker)};
+  v << jmpr{srcLoc(env, inst, 0).reg(), cross_trace_args(marker, SrcKey{})};
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 void cgReqBindJmp(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<ReqBindJmp>();
+  auto const target = extra->target;
   auto& v = vmain(env);
 
-  if (extra->target.funcEntry()) {
-    if (extra->popFrame) popFrameToFuncEntryRegs(v);
+  if (target.funcEntry()) {
+    if (extra->popFrame) {
+      assertx(inst->numSrcs() == 2);
+      popFrameToFuncEntryRegs(v, target.func());
+    } else {
+      assertx(inst->numSrcs() == 5);
+      auto const arFlags = srcLoc(env, inst, 2).reg();
+      auto const calleeId = srcLoc(env, inst, 3).reg();
+      auto const ctx = srcLoc(env, inst, 4).reg();
+      v << copy{arFlags, r_func_entry_ar_flags()};
+      v << copy{calleeId, r_func_entry_callee_id()};
+      if (target.func()->isClosureBody() || target.func()->cls()) {
+        v << copy{ctx, r_func_entry_ctx()};
+      } else if (RuntimeOption::EvalHHIRGenerateAsserts) {
+        v << copy{v.cns(ActRec::kTrashedThisSlot), r_func_entry_ctx()};
+      }
+    }
   } else {
+    assertx(inst->numSrcs() == 2);
     maybe_syncsp(v, inst->marker(), srcLoc(env, inst, 0).reg(), extra->irSPOff);
   }
 
   v << bindjmp{
-    extra->target,
+    target,
     extra->invSPOff,
-    cross_trace_args(inst->marker())
+    cross_trace_args(inst->marker(), target)
   };
 }
 
@@ -415,7 +447,7 @@ void cgReqRetranslate(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
   if (destSK.funcEntry()) {
-    popFrameToFuncEntryRegs(v);
+    popFrameToFuncEntryRegs(v, destSK.func());
   } else {
     maybe_syncsp(v, inst->marker(), srcLoc(env, inst, 0).reg(), extra->offset);
   }
@@ -423,7 +455,7 @@ void cgReqRetranslate(IRLS& env, const IRInstruction* inst) {
   v << fallback{
     destSK,
     inst->marker().bcSPOff(),
-    cross_trace_args(inst->marker())
+    cross_trace_args(inst->marker(), destSK)
   };
 }
 
@@ -432,9 +464,11 @@ void cgReqRetranslateOpt(IRLS& env, const IRInstruction* inst) {
   assertx(inst->marker().bcSPOff() == SBInvOffset{0});
   auto& v = vmain(env);
   v << copy{v.cns(inst->marker().sk().numEntryArgs()), rarg(0)};
+  // This jmp is not smashable, so the ABI does not need to be compatible with
+  // TC targets. This allows the stub to accept pushed frame.
   v << jmpi{
     tc::ustubs().handleRetranslateOpt,
-    leave_trace_regs() | arg_regs(1)
+    vm_regs_no_sp() | rarg(0)
   };
 }
 
@@ -443,7 +477,8 @@ void cgReqInterpBBNoTranslate(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
   if (extra->target.funcEntry()) {
-    if (extra->popFrame) popFrameToFuncEntryRegs(v);
+    assertx(extra->popFrame);
+    popFrameToFuncEntryRegs(v, extra->target.func());
   } else {
     maybe_syncsp(v, inst->marker(), srcLoc(env, inst, 0).reg(), extra->irSPOff);
   }

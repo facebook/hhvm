@@ -114,6 +114,21 @@ void cgDefFuncEntryPrevFP(IRLS& env, const IRInstruction* inst) {
   v << copy{rvmfp(), dstLoc(env, inst, 0).reg()};
 }
 
+void cgDefFuncEntryArFlags(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  v << copy{r_func_entry_ar_flags(), dstLoc(env, inst, 0).reg()};
+}
+
+void cgDefFuncEntryCalleeId(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  v << copy{r_func_entry_callee_id(), dstLoc(env, inst, 0).reg()};
+}
+
+void cgDefFuncEntryCtx(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  v << copy{r_func_entry_ctx(), dstLoc(env, inst, 0).reg()};
+}
+
 void cgStVMFP(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();
   auto& v = vmain(env);

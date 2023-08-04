@@ -276,6 +276,14 @@ Type thisTypeFromFunc(const Func* func) {
   return func->hasForeignThis() ? TObj : Type::SubObj(func->cls());
 }
 
+Type callCtxType(const Func* func) {
+  assertx(func);
+  assertx(func->isClosureBody() || func->cls());
+  if (func->isClosureBody()) return Type::ExactObj(func->implCls());
+  if (func->isStatic()) return Type::SubCls(func->cls());
+  return thisTypeFromFunc(func);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // outputType().
 

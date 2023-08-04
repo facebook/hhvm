@@ -88,6 +88,7 @@ struct SSATmp;
  *     C(type)          source must be a constant, and subtype of type
  *     CStr             same as C(StaticStr)
  *     SVar(t1,...,tn)  variadic source list, all subtypes of {t1|..|tn}
+ *     SCrossTrace      cross-trace arguments specific to the SrcKey target
  *
  * flags:
  *

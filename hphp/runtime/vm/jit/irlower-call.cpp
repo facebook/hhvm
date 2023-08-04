@@ -67,6 +67,27 @@ TRACE_SET_MOD(irlower);
 
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace {
+
+bool setCtxReg(Vout& v, const Func* callee, SSATmp* ctx, Vreg src, Vreg dst) {
+  if (ctx->isA(TObj) || ctx->isA(TCls)) {
+    assertx(!callee || callee->isClosureBody() || callee->cls());
+    v << copy{src, dst};
+    return true;
+  }
+
+  assertx(ctx->isA(TNullptr));
+  assertx(!callee || (!callee->isClosureBody() && !callee->cls()));
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    v << copy{v.cns(ActRec::kTrashedThisSlot), dst};
+    return true;
+  }
+
+  return false;
+}
+
+}
+
 void cgCall(IRLS& env, const IRInstruction* inst) {
   auto const sp = srcLoc(env, inst, 0).reg();
   auto const callee = srcLoc(env, inst, 2).reg();
@@ -116,17 +137,8 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
 
   v << copy{callee, r_func_prologue_callee()};
   v << copy{v.cns(numArgsInclUnpack), r_func_prologue_num_args()};
-
-  auto withCtx = false;
-  assertx(inst->src(3)->isA(TObj) || inst->src(3)->isA(TCls) ||
-          inst->src(3)->isA(TNullptr));
-  if (inst->src(3)->isA(TObj) || inst->src(3)->isA(TCls)) {
-    withCtx = true;
-    v << copy{ctx, r_func_prologue_ctx()};
-  } else if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    withCtx = true;
-    v << copy{v.cns(ActRec::kTrashedThisSlot), r_func_prologue_ctx()};
-  }
+  auto const withCtx =
+    setCtxReg(v, func, inst->src(3), ctx, r_func_prologue_ctx());
 
   // Make vmsp() point to the future vmfp().
   auto const ssp = v.makeReg();
@@ -200,6 +212,12 @@ void cgCallFuncEntry(IRLS& env, const IRInstruction* inst) {
 
   auto& v = vmain(env);
 
+  // Initialize func entry registers.
+  v << copy{v.cns(callee->getFuncId().toInt()), r_func_entry_callee_id()};
+  v << copy{v.cns(extra->arFlags), r_func_entry_ar_flags()};
+  auto const withCtx =
+    setCtxReg(v, callee, inst->src(2), ctx, r_func_entry_ctx());
+
   // Make vmsp() point to the future vmfp().
   auto const ssp = v.makeReg();
   v << lea{
@@ -208,28 +226,11 @@ void cgCallFuncEntry(IRLS& env, const IRInstruction* inst) {
   };
   v << syncvmsp{ssp};
 
-  // Initialize non-native portion of the callee frame.
-  v << storeli{static_cast<int32_t>(callee->getFuncId().toInt()),
-               Vreg(rvmsp()) + AROFF(m_funcId)};
-  v << storeli{safe_cast<int32_t>(extra->arFlags),
-               Vreg(rvmsp()) + AROFF(m_callOffAndFlags)};
-
-  if (callee->cls() || callee->isClosureBody()) {
-    assertx(inst->src(2)->isA(TObj) || inst->src(2)->isA(TCls));
-    v << store{ctx, Vreg(rvmsp()) + AROFF(m_thisUnsafe)};
-  } else {
-    assertx(inst->src(2)->isA(TNullptr));
-    if (RuntimeOption::EvalHHIRGenerateAsserts) {
-      emitImmStoreq(v, ActRec::kTrashedThisSlot,
-                    Vreg(rvmsp()) + AROFF(m_thisUnsafe));
-    }
-  }
-
   // Emit a smashable call that initially calls a recyclable service request
   // stub.  The stub and the eventual targets take rvmfp() as an argument,
   // pointing to the callee ActRec.
   auto const done = v.makeBlock();
-  v << callphpfe{extra->target, func_entry_regs()};
+  v << callphpfe{extra->target, func_entry_regs(withCtx)};
 
   // The callee is responsible for unwinding the whole frame, which includes
   // all inputs, ActRec and empty space reserved for inouts.

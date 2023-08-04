@@ -241,8 +241,12 @@ void prepareEntry(IRGS& env) {
    * We automatically hoist a load of the context to the beginning of every
    * region.  The reason is that it's trivially CSEable, so we might as well
    * make it available everywhere.  If nothing uses it, it'll just be DCE'd.
+   *
+   * Don't do it in function entries, as we already have SSATmp of ctx received
+   * via register. Furthermore, ldCtx is not yet operational in case of closure
+   * bodies, as they were not unpacked yet.
    */
-  ldCtx(env);
+  if (!curSrcKey(env).funcEntry()) ldCtx(env);
 }
 
 void endRegion(IRGS& env) {

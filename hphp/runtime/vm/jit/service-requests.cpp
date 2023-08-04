@@ -118,14 +118,15 @@ TCA emitStub(StubType type, SrcKey sk, SBInvOffset spOff) {
     assertx(!sk.funcEntry());
     v << copy{v.cns(sk.offset()), rarg(0)};
     v << copy{v.cns(spOff.offset), rarg(1)};
-    v << jmpi{typeToHandler(type), leave_trace_regs() | arg_regs(2)};
+    v << jmpi{typeToHandler(type), cross_trace_regs() | arg_regs(2)};
   };
 
   auto const emitFuncEntry = [&] (Vout& v) {
     assertx(sk.funcEntry());
     assertx(spOff == SBInvOffset{0});
-    v << copy{v.cns(sk.numEntryArgs()), rarg(0)};
-    v << jmpi{typeToFuncEntryHandler(type), leave_trace_regs() | arg_regs(1)};
+    v << copy{v.cns(sk.numEntryArgs()), rarg(3)};
+    v << jmpi{typeToFuncEntryHandler(type),
+              func_entry_regs(true /* withCtx */) | rarg(3)};
   };
 
   auto const start = vwrap(

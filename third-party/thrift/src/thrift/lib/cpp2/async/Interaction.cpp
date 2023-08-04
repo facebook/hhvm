@@ -36,10 +36,12 @@ void Tile::decRef(folly::EventBase& eb, InteractionReleaseEvent event) {
         DCHECK_GT(
             refCount_ + (event == InteractionReleaseEvent::STREAM_TRANSFER),
             queue.size());
-        auto& [task, scope] = queue.front();
+        auto& item = queue.front();
+        folly::RequestContextScopeGuard rctx(item.context);
         tm_->getKeepAlive(
-               std::move(scope), concurrency::ThreadManager::Source::INTERNAL)
-            ->add([task = std::move(task)]() { task->run(); });
+               std::move(item.scope),
+               concurrency::ThreadManager::Source::INTERNAL)
+            ->add([task = std::move(item.task)]() { task->run(); });
         queue.pop();
       } else {
         serial->hasActiveRequest_ = false;
@@ -115,16 +117,17 @@ void TilePromise::fulfill(
   // Inline destruction of this is possible at the setTile()
   auto continuations = std::move(continuations_);
   while (!continuations.empty()) {
-    auto& [task, scope] = continuations.front();
-    dynamic_cast<InteractionTask&>(*task).setTile({&tile, &eb});
-    if (!tile.__fbthrift_maybeEnqueue(std::move(task), scope)) {
+    auto& item = continuations.front();
+    folly::RequestContextScopeGuard rctx(item.context);
+    dynamic_cast<InteractionTask&>(*item.task).setTile({&tile, &eb});
+    if (!tile.__fbthrift_maybeEnqueue(std::move(item.task), item.scope)) {
       if (tm) {
         tm->getKeepAlive(
-              std::move(scope),
+              std::move(item.scope),
               concurrency::ThreadManager::Source::EXISTING_INTERACTION)
-            ->add([task = std::move(task)]() mutable { task->run(); });
+            ->add([task = std::move(item.task)]() mutable { task->run(); });
       } else {
-        task->run();
+        item.task->run();
       }
     }
     continuations.pop();
@@ -137,8 +140,9 @@ void TilePromise::failWith(
   factoryEx_ =
       folly::copy_to_unique_ptr(TilePromise::FactoryException{ew, exCode});
   while (!continuations.empty()) {
-    auto& [task, scope] = continuations.front();
-    dynamic_cast<InteractionTask&>(*task).failWith(ew, exCode);
+    auto& item = continuations.front();
+    folly::RequestContextScopeGuard rctx(item.context);
+    dynamic_cast<InteractionTask&>(*item.task).failWith(ew, exCode);
     continuations.pop();
   }
 }

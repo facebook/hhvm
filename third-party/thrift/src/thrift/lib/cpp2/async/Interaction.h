@@ -26,9 +26,20 @@
 namespace apache {
 namespace thrift {
 namespace detail {
-using InteractionTask = std::pair<
-    std::unique_ptr<concurrency::Runnable>,
-    concurrency::ThreadManager::ExecutionScope>;
+
+struct InteractionTask {
+  std::unique_ptr<concurrency::Runnable> task;
+  concurrency::ThreadManager::ExecutionScope scope;
+  std::shared_ptr<folly::RequestContext> context;
+
+  explicit InteractionTask(
+      std::unique_ptr<concurrency::Runnable>&& task,
+      concurrency::ThreadManager::ExecutionScope scope)
+      : task(std::move(task)),
+        scope(scope),
+        context(folly::RequestContext::saveContext()) {}
+};
+
 using InteractionTaskQueue =
     std::queue<InteractionTask, std::list<InteractionTask>>;
 } // namespace detail

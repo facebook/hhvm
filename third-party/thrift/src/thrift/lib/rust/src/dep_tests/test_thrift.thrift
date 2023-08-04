@@ -97,3 +97,12 @@ safe stateful server exception TestExceptionMsgOverride {
 safe stateful server exception TestExceptionMsgOverrideOptional {
   1: optional string message;
 } (message = 'message')
+
+const SubStruct DEFAULT_SUBSTRUCT = {};
+
+const SubStruct CUSTOM_SUBSTRUCT = {
+  "optDef": "CUSTOM_OPT_DEF",
+  "req_def": "CUSTOM_REQ_DEF",
+  "key_map": {{"num": 4, "two": 2}: 42},
+  "bin": "0123456789",
+};

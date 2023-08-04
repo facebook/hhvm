@@ -22,6 +22,7 @@
 #include <thrift/lib/cpp/util/EnumUtils.h>
 #include <thrift/lib/cpp2/protocol/DebugProtocol.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
+#include <thrift/lib/rust/src/dep_tests/gen-cpp2/test_thrift_constants.h>
 #include <thrift/lib/rust/src/dep_tests/gen-cpp2/test_thrift_types.h>
 
 namespace facebook {
@@ -155,6 +156,22 @@ TEST(JsonTest, unknownUnion) {
 
   auto t = apache::thrift::SimpleJSONSerializer::serialize<std::string>(u);
   ASSERT_EQ(t, "{}");
+}
+
+TEST(ConstsTest, consts) {
+  const auto def = test_thrift_constants::DEFAULT_SUBSTRUCT();
+  ASSERT_EQ(SubStruct(), def);
+
+  const auto custom = test_thrift_constants::CUSTOM_SUBSTRUCT();
+  SubStruct expected;
+  expected.optDef() = "CUSTOM_OPT_DEF";
+  expected.req_def() = "CUSTOM_REQ_DEF";
+  Small key;
+  key.num() = 4;
+  key.two() = 2;
+  expected.key_map() = {{key, 42}};
+  expected.bin() = "0123456789";
+  ASSERT_EQ(expected, custom);
 }
 
 } // namespace facebook

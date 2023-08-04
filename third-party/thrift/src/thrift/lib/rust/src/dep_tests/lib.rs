@@ -18,6 +18,7 @@
 mod as_exception;
 mod binary;
 mod compact;
+mod consts;
 mod exceptions;
 mod proptest;
 mod simplejson;

@@ -25,7 +25,7 @@ type si_kind =
   | SI_LocalVariable
   | SI_Keyword
   | SI_Constructor
-[@@deriving eq, show]
+[@@deriving eq, show { with_path = false }]
 
 type si_addendum = {
   sia_name: string;
@@ -47,7 +47,7 @@ type autocomplete_type =
   | Actrait_only
       (** is [SI_Trait], e.g. in autocomplete contexts like `uses |` *)
   | Ac_workspace_symbol  (** isn't [SI_Namespace]; repo-wide symbol search *)
-[@@deriving eq, show]
+[@@deriving eq, show { with_path = false }]
 
 type si_file =
   | SI_Filehash of string  (** string represent Int64 *)

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9092b1b00ad8a5cf8fa733140ba93478>>
+// @generated SignedSource<<b9427dadb5d4875fbf6a17be59d13dd6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -37,7 +37,7 @@ use crate::*;
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, show)")]
+#[rust_to_ocaml(attr = "deriving (eq, (show { with_path = false }))")]
 #[repr(u8)]
 pub enum SiKind {
     #[rust_to_ocaml(name = "SI_Class")]
@@ -124,7 +124,7 @@ pub struct SiAddendum {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, show)")]
+#[rust_to_ocaml(attr = "deriving (eq, (show { with_path = false }))")]
 #[repr(u8)]
 pub enum AutocompleteType {
     /// satisfies [valid_for_acid], e.g. in autocomplete contexts like `|` at the start of a statement

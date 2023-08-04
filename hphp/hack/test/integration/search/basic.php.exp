@@ -1,8 +1,8 @@
 query: some_lo
-  some_long_function_name:SearchTypes.SI_Function - basic.php--foo_search_3.php:8:10-32
+  some_long_function_name:SI_Function - basic.php--foo_search_3.php:8:10-32
 query: Alpha
-  alphaf:SearchTypes.SI_Function - basic.php--foo_search_4.php:3:10-15
-  Alphac:SearchTypes.SI_Class - basic.php--foo_search_4.php:2:7-12
+  alphaf:SI_Function - basic.php--foo_search_4.php:3:10-15
+  Alphac:SI_Class - basic.php--foo_search_4.php:2:7-12
 query: alpha
-  alphaf:SearchTypes.SI_Function - basic.php--foo_search_4.php:3:10-15
-  Alphac:SearchTypes.SI_Class - basic.php--foo_search_4.php:2:7-12
+  alphaf:SI_Function - basic.php--foo_search_4.php:3:10-15
+  Alphac:SI_Class - basic.php--foo_search_4.php:2:7-12

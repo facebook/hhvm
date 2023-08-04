@@ -12,7 +12,9 @@ import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 
 import apache.thrift.op.patch.thrift_metadata
 
-import thrift.test.python_capi.thrift_dep.thrift_metadata
+import test.fixtures.basic-python-capi.serialized_dep.thrift_metadata
+
+import test.fixtures.basic-python-capi.thrift_dep.thrift_metadata
 
 # TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
 # instead of re-generating thrift structs
@@ -452,6 +454,10 @@ def _fbthrift_gen_metadata_struct_ComposeStruct(metadata_struct: _fbthrift_metad
         ]),
         _fbthrift_metadata.ThriftField(id=7, type=_fbthrift_metadata.ThriftType(t_list=_fbthrift_metadata.ThriftListType(valueType=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="thrift_dep.DepStruct")))), name="friends", is_optional=False, structured_annotations=[
         ]),
+        _fbthrift_metadata.ThriftField(id=8, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="serialized_dep.SerializedStruct")), name="serial_struct", is_optional=False, structured_annotations=[
+        ]),
+        _fbthrift_metadata.ThriftField(id=9, type=_fbthrift_metadata.ThriftType(t_union=_fbthrift_metadata.ThriftUnionType(name="serialized_dep.SerializedUnion")), name="serial_union", is_optional=False, structured_annotations=[
+        ]),
     ]
     struct_dict = dict(metadata_struct.structs)
     struct_dict[qualified_name] = _fbthrift_metadata.ThriftStruct(name=qualified_name, fields=fields,
@@ -465,9 +471,11 @@ def _fbthrift_gen_metadata_struct_ComposeStruct(metadata_struct: _fbthrift_metad
     new_struct = _fbthrift_gen_metadata_enum_AnnoyingEnum(new_struct) # renamed_
     new_struct = _fbthrift_gen_metadata_struct_PrimitiveStruct(new_struct) # primitive
     new_struct = _fbthrift_gen_metadata_struct_ListStruct(new_struct) # aliased
-    new_struct = thrift.test.python_capi.thrift_dep.thrift_metadata._fbthrift_gen_metadata_enum_DepEnum(new_struct) # xenum
-    new_struct = thrift.test.python_capi.thrift_dep.thrift_metadata._fbthrift_gen_metadata_struct_DepStruct(new_struct) # xstruct
-    new_struct = thrift.test.python_capi.thrift_dep.thrift_metadata._fbthrift_gen_metadata_struct_DepStruct(new_struct) # friends
+    new_struct = test.fixtures.basic-python-capi.thrift_dep.thrift_metadata._fbthrift_gen_metadata_enum_DepEnum(new_struct) # xenum
+    new_struct = test.fixtures.basic-python-capi.thrift_dep.thrift_metadata._fbthrift_gen_metadata_struct_DepStruct(new_struct) # xstruct
+    new_struct = test.fixtures.basic-python-capi.thrift_dep.thrift_metadata._fbthrift_gen_metadata_struct_DepStruct(new_struct) # friends
+    new_struct = test.fixtures.basic-python-capi.serialized_dep.thrift_metadata._fbthrift_gen_metadata_struct_SerializedStruct(new_struct) # serial_struct
+    new_struct = test.fixtures.basic-python-capi.serialized_dep.thrift_metadata._fbthrift_gen_metadata_struct_SerializedUnion(new_struct) # serial_union
 
     return new_struct
 def gen_metadata_struct_ComposeStruct() -> _fbthrift_metadata.ThriftMetadata:

@@ -7,6 +7,7 @@
 #pragma once
 #include "thrift/lib/thrift/gen-cpp2/patch_visitation.h"
 #include "thrift/compiler/test/fixtures/basic-python-capi/src/gen-cpp2/thrift_dep_visitation.h"
+#include "thrift/compiler/test/fixtures/basic-python-capi/src/gen-cpp2/serialized_dep_visitation.h"
 #include "thrift/compiler/test/fixtures/basic-python-capi/gen-cpp2/module_for_each_field.h"
 #include "thrift/compiler/test/fixtures/basic-python-capi/gen-cpp2/module_visit_union.h"
 #include "thrift/compiler/test/fixtures/basic-python-capi/gen-cpp2/module_visit_by_thrift_field_metadata.h"

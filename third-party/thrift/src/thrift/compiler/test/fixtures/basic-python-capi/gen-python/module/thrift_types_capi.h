@@ -373,6 +373,13 @@ struct Extractor<::test::fixtures::basic-python-capi::MyStructPatch>
   int typeCheck(PyObject* obj);
 };
 
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyStructPatch>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyStructPatch>> {
+  ExtractorResult<::test::fixtures::basic-python-capi::MyStructPatch> operator()(PyObject* obj);
+};
 
 template <>
 struct Constructor<::test::fixtures::basic-python-capi::MyStructPatch>
@@ -395,6 +402,13 @@ struct Extractor<::test::fixtures::basic-python-capi::MyStructField4Patch>
   int typeCheck(PyObject* obj);
 };
 
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyStructField4Patch>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyStructField4Patch>> {
+  ExtractorResult<::test::fixtures::basic-python-capi::MyStructField4Patch> operator()(PyObject* obj);
+};
 
 template <>
 struct Constructor<::test::fixtures::basic-python-capi::MyStructField4Patch>
@@ -417,6 +431,13 @@ struct Extractor<::test::fixtures::basic-python-capi::MyStructField6Patch>
   int typeCheck(PyObject* obj);
 };
 
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyStructField6Patch>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyStructField6Patch>> {
+  ExtractorResult<::test::fixtures::basic-python-capi::MyStructField6Patch> operator()(PyObject* obj);
+};
 
 template <>
 struct Constructor<::test::fixtures::basic-python-capi::MyStructField6Patch>
@@ -439,6 +460,13 @@ struct Extractor<::test::fixtures::basic-python-capi::MyStructField7Patch>
   int typeCheck(PyObject* obj);
 };
 
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyStructField7Patch>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyStructField7Patch>> {
+  ExtractorResult<::test::fixtures::basic-python-capi::MyStructField7Patch> operator()(PyObject* obj);
+};
 
 template <>
 struct Constructor<::test::fixtures::basic-python-capi::MyStructField7Patch>
@@ -461,6 +489,13 @@ struct Extractor<::test::fixtures::basic-python-capi::MyStructField8Patch>
   int typeCheck(PyObject* obj);
 };
 
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyStructField8Patch>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyStructField8Patch>> {
+  ExtractorResult<::test::fixtures::basic-python-capi::MyStructField8Patch> operator()(PyObject* obj);
+};
 
 template <>
 struct Constructor<::test::fixtures::basic-python-capi::MyStructField8Patch>
@@ -483,6 +518,13 @@ struct Extractor<::test::fixtures::basic-python-capi::MyStructFieldPatch>
   int typeCheck(PyObject* obj);
 };
 
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyStructFieldPatch>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyStructFieldPatch>> {
+  ExtractorResult<::test::fixtures::basic-python-capi::MyStructFieldPatch> operator()(PyObject* obj);
+};
 
 template <>
 struct Constructor<::test::fixtures::basic-python-capi::MyStructFieldPatch>
@@ -505,6 +547,13 @@ struct Extractor<::test::fixtures::basic-python-capi::MyStructEnsureStruct>
   int typeCheck(PyObject* obj);
 };
 
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyStructEnsureStruct>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyStructEnsureStruct>> {
+  ExtractorResult<::test::fixtures::basic-python-capi::MyStructEnsureStruct> operator()(PyObject* obj);
+};
 
 template <>
 struct Constructor<::test::fixtures::basic-python-capi::MyStructEnsureStruct>
@@ -527,6 +576,13 @@ struct Extractor<::test::fixtures::basic-python-capi::MyDataItemPatch>
   int typeCheck(PyObject* obj);
 };
 
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyDataItemPatch>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyDataItemPatch>> {
+  ExtractorResult<::test::fixtures::basic-python-capi::MyDataItemPatch> operator()(PyObject* obj);
+};
 
 template <>
 struct Constructor<::test::fixtures::basic-python-capi::MyDataItemPatch>
@@ -549,6 +605,13 @@ struct Extractor<::test::fixtures::basic-python-capi::MyDataItemFieldPatch>
   int typeCheck(PyObject* obj);
 };
 
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyDataItemFieldPatch>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyDataItemFieldPatch>> {
+  ExtractorResult<::test::fixtures::basic-python-capi::MyDataItemFieldPatch> operator()(PyObject* obj);
+};
 
 template <>
 struct Constructor<::test::fixtures::basic-python-capi::MyDataItemFieldPatch>
@@ -571,6 +634,13 @@ struct Extractor<::test::fixtures::basic-python-capi::MyDataItemEnsureStruct>
   int typeCheck(PyObject* obj);
 };
 
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyDataItemEnsureStruct>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyDataItemEnsureStruct>> {
+  ExtractorResult<::test::fixtures::basic-python-capi::MyDataItemEnsureStruct> operator()(PyObject* obj);
+};
 
 template <>
 struct Constructor<::test::fixtures::basic-python-capi::MyDataItemEnsureStruct>

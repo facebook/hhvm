@@ -18,6 +18,7 @@ include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/python.thrift"
 include "thrift/lib/thrift/patch.thrift"
 include "thrift/compiler/test/fixtures/basic-python-capi/src/thrift_dep.thrift"
+include "thrift/compiler/test/fixtures/basic-python-capi/src/serialized_dep.thrift"
 
 cpp_include "<deque>"
 cpp_include "<unordered_map>"
@@ -175,6 +176,8 @@ struct ComposeStruct {
   5: thrift_dep.DepEnum xenum;
   6: thrift_dep.DepStruct xstruct;
   7: list<thrift_dep.DepStruct> friends;
+  8: serialized_dep.SerializedStruct serial_struct;
+  9: serialized_dep.SerializedUnion serial_union;
 } (cpp.noncopyable)
 
 @python.MarshalCapi

@@ -147,6 +147,8 @@ struct ForEachField<::test::fixtures::basic-python-capi::ComposeStruct> {
     f(4, static_cast<T&&>(t).xenum_ref()...);
     f(5, static_cast<T&&>(t).xstruct_ref()...);
     f(6, static_cast<T&&>(t).friends_ref()...);
+    f(7, static_cast<T&&>(t).serial_struct_ref()...);
+    f(8, static_cast<T&&>(t).serial_union_ref()...);
   }
 };
 

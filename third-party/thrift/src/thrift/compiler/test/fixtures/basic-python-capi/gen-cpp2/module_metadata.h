@@ -12,6 +12,7 @@
 #include "thrift/compiler/test/fixtures/basic-python-capi/gen-cpp2/module_types.h"
 #include "thrift/lib/thrift/gen-cpp2/patch_metadata.h"
 #include "thrift/compiler/test/fixtures/basic-python-capi/src/gen-cpp2/thrift_dep_metadata.h"
+#include "thrift/compiler/test/fixtures/basic-python-capi/src/gen-cpp2/serialized_dep_metadata.h"
 
 
 namespace apache {

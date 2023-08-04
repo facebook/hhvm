@@ -14,7 +14,9 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 
 import apache.thrift.op.patch.thrift_types
 
-import thrift.test.python_capi.thrift_dep.thrift_types
+import test.fixtures.basic-python-capi.serialized_dep.thrift_types
+
+import test.fixtures.basic-python-capi.thrift_dep.thrift_types
 
 
 class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
@@ -799,7 +801,7 @@ class ComposeStruct(metaclass=_fbthrift_python_types.StructMeta):
             5,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "xenum",  # name
-            lambda: _fbthrift_python_types.EnumTypeInfo(thrift.test.python_capi.thrift_dep.thrift_types.DepEnum),  # typeinfo
+            lambda: _fbthrift_python_types.EnumTypeInfo(test.fixtures.basic-python-capi.thrift_dep.thrift_types.DepEnum),  # typeinfo
             None,  # default value
             None,  # adapter info
         ),
@@ -807,7 +809,7 @@ class ComposeStruct(metaclass=_fbthrift_python_types.StructMeta):
             6,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "xstruct",  # name
-            lambda: _fbthrift_python_types.StructTypeInfo(thrift.test.python_capi.thrift_dep.thrift_types.DepStruct),  # typeinfo
+            lambda: _fbthrift_python_types.StructTypeInfo(test.fixtures.basic-python-capi.thrift_dep.thrift_types.DepStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
         ),
@@ -815,7 +817,23 @@ class ComposeStruct(metaclass=_fbthrift_python_types.StructMeta):
             7,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "friends",  # name
-            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.StructTypeInfo(thrift.test.python_capi.thrift_dep.thrift_types.DepStruct)),  # typeinfo
+            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.StructTypeInfo(test.fixtures.basic-python-capi.thrift_dep.thrift_types.DepStruct)),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            8,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "serial_struct",  # name
+            lambda: _fbthrift_python_types.StructTypeInfo(test.fixtures.basic-python-capi.serialized_dep.thrift_types.SerializedStruct),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            9,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "serial_union",  # name
+            lambda: _fbthrift_python_types.StructTypeInfo(test.fixtures.basic-python-capi.serialized_dep.thrift_types.SerializedUnion),  # typeinfo
             None,  # default value
             None,  # adapter info
         ),

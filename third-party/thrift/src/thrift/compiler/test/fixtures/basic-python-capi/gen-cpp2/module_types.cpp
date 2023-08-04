@@ -1808,6 +1808,8 @@ ComposeStruct::ComposeStruct(FOLLY_MAYBE_UNUSED ComposeStruct&& other) noexcept 
     __fbthrift_field_xenum(std::move(other.__fbthrift_field_xenum)),
     __fbthrift_field_xstruct(std::move(other.__fbthrift_field_xstruct)),
     __fbthrift_field_friends(std::move(other.__fbthrift_field_friends)),
+    __fbthrift_field_serial_struct(std::move(other.__fbthrift_field_serial_struct)),
+    __fbthrift_field_serial_union(std::move(other.__fbthrift_field_serial_union)),
     __isset(other.__isset) {
 }
 
@@ -1819,25 +1821,31 @@ ComposeStruct& ComposeStruct::operator=(FOLLY_MAYBE_UNUSED ComposeStruct&& other
     this->__fbthrift_field_xenum = std::move(other.__fbthrift_field_xenum);
     this->__fbthrift_field_xstruct = std::move(other.__fbthrift_field_xstruct);
     this->__fbthrift_field_friends = std::move(other.__fbthrift_field_friends);
+    this->__fbthrift_field_serial_struct = std::move(other.__fbthrift_field_serial_struct);
+    this->__fbthrift_field_serial_union = std::move(other.__fbthrift_field_serial_union);
     __isset = other.__isset;
     return *this;
 }
 
 
-ComposeStruct::ComposeStruct(apache::thrift::FragileConstructor, ::test::fixtures::basic-python-capi::MyEnum enum___arg, ::test::fixtures::basic-python-capi::NormalDecentEnum renamed___arg, ::test::fixtures::basic-python-capi::PrimitiveStruct primitive__arg, ::std::shared_ptr<const ::test::fixtures::basic-python-capi::ListAlias> aliased__arg, ::thrift::test::python_capi::DepEnum xenum__arg, ::thrift::test::python_capi::DepStruct xstruct__arg, ::std::vector<::thrift::test::python_capi::DepStruct> friends__arg) :
+ComposeStruct::ComposeStruct(apache::thrift::FragileConstructor, ::test::fixtures::basic-python-capi::MyEnum enum___arg, ::test::fixtures::basic-python-capi::NormalDecentEnum renamed___arg, ::test::fixtures::basic-python-capi::PrimitiveStruct primitive__arg, ::std::shared_ptr<const ::test::fixtures::basic-python-capi::ListAlias> aliased__arg, ::test::fixtures::basic-python-capi::DepEnum xenum__arg, ::test::fixtures::basic-python-capi::DepStruct xstruct__arg, ::std::vector<::test::fixtures::basic-python-capi::DepStruct> friends__arg, ::test::fixtures::basic-python-capi::SerializedStruct serial_struct__arg, ::test::fixtures::basic-python-capi::SerializedUnion serial_union__arg) :
     __fbthrift_field_enum_(std::move(enum___arg)),
     __fbthrift_field_renamed_(std::move(renamed___arg)),
     __fbthrift_field_primitive(std::move(primitive__arg)),
     __fbthrift_field_aliased(std::move(aliased__arg)),
     __fbthrift_field_xenum(std::move(xenum__arg)),
     __fbthrift_field_xstruct(std::move(xstruct__arg)),
-    __fbthrift_field_friends(std::move(friends__arg)) {
+    __fbthrift_field_friends(std::move(friends__arg)),
+    __fbthrift_field_serial_struct(std::move(serial_struct__arg)),
+    __fbthrift_field_serial_union(std::move(serial_union__arg)) {
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
   __isset.set(folly::index_constant<3>(), true);
   __isset.set(folly::index_constant<4>(), true);
   __isset.set(folly::index_constant<5>(), true);
+  __isset.set(folly::index_constant<6>(), true);
+  __isset.set(folly::index_constant<7>(), true);
 }
 
 
@@ -1847,9 +1855,11 @@ void ComposeStruct::__fbthrift_clear() {
   this->__fbthrift_field_renamed_ = ::test::fixtures::basic-python-capi::NormalDecentEnum();
   ::apache::thrift::clear(this->__fbthrift_field_primitive);
   if (this->__fbthrift_field_aliased) this->__fbthrift_field_aliased = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<const ::test::fixtures::basic-python-capi::ListAlias>>();
-  this->__fbthrift_field_xenum = ::thrift::test::python_capi::DepEnum();
+  this->__fbthrift_field_xenum = ::test::fixtures::basic-python-capi::DepEnum();
   ::apache::thrift::clear(this->__fbthrift_field_xstruct);
   this->__fbthrift_field_friends.clear();
+  ::apache::thrift::clear(this->__fbthrift_field_serial_struct);
+  ::apache::thrift::clear(this->__fbthrift_field_serial_union);
   __isset = {};
 }
 
@@ -1883,6 +1893,12 @@ bool ComposeStruct::operator==(FOLLY_MAYBE_UNUSED const ComposeStruct& rhs) cons
   if (!(lhs.friends_ref() == rhs.friends_ref())) {
     return false;
   }
+  if (!(lhs.serial_struct_ref() == rhs.serial_struct_ref())) {
+    return false;
+  }
+  if (!(lhs.serial_union_ref() == rhs.serial_union_ref())) {
+    return false;
+  }
   return true;
 }
 
@@ -1898,20 +1914,36 @@ const ::test::fixtures::basic-python-capi::PrimitiveStruct& ComposeStruct::get_p
   return std::move(__fbthrift_field_primitive);
 }
 
-const ::thrift::test::python_capi::DepStruct& ComposeStruct::get_xstruct() const& {
+const ::test::fixtures::basic-python-capi::DepStruct& ComposeStruct::get_xstruct() const& {
   return __fbthrift_field_xstruct;
 }
 
-::thrift::test::python_capi::DepStruct ComposeStruct::get_xstruct() && {
+::test::fixtures::basic-python-capi::DepStruct ComposeStruct::get_xstruct() && {
   return std::move(__fbthrift_field_xstruct);
 }
 
-const ::std::vector<::thrift::test::python_capi::DepStruct>& ComposeStruct::get_friends() const& {
+const ::std::vector<::test::fixtures::basic-python-capi::DepStruct>& ComposeStruct::get_friends() const& {
   return __fbthrift_field_friends;
 }
 
-::std::vector<::thrift::test::python_capi::DepStruct> ComposeStruct::get_friends() && {
+::std::vector<::test::fixtures::basic-python-capi::DepStruct> ComposeStruct::get_friends() && {
   return std::move(__fbthrift_field_friends);
+}
+
+const ::test::fixtures::basic-python-capi::SerializedStruct& ComposeStruct::get_serial_struct() const& {
+  return __fbthrift_field_serial_struct;
+}
+
+::test::fixtures::basic-python-capi::SerializedStruct ComposeStruct::get_serial_struct() && {
+  return std::move(__fbthrift_field_serial_struct);
+}
+
+const ::test::fixtures::basic-python-capi::SerializedUnion& ComposeStruct::get_serial_union() const& {
+  return __fbthrift_field_serial_union;
+}
+
+::test::fixtures::basic-python-capi::SerializedUnion ComposeStruct::get_serial_union() && {
+  return std::move(__fbthrift_field_serial_union);
 }
 
 
@@ -1924,6 +1956,8 @@ void swap(FOLLY_MAYBE_UNUSED ComposeStruct& a, FOLLY_MAYBE_UNUSED ComposeStruct&
   swap(a.__fbthrift_field_xenum, b.__fbthrift_field_xenum);
   swap(a.__fbthrift_field_xstruct, b.__fbthrift_field_xstruct);
   swap(a.__fbthrift_field_friends, b.__fbthrift_field_friends);
+  swap(a.__fbthrift_field_serial_struct, b.__fbthrift_field_serial_struct);
+  swap(a.__fbthrift_field_serial_union, b.__fbthrift_field_serial_union);
   swap(a.__isset, b.__isset);
 }
 
@@ -1952,13 +1986,25 @@ static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         ComposeStruct,
         ::apache::thrift::type_class::structure,
-        ::thrift::test::python_capi::DepStruct>,
+        ::test::fixtures::basic-python-capi::DepStruct>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         ComposeStruct,
         ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
-        ::std::vector<::thrift::test::python_capi::DepStruct>>,
+        ::std::vector<::test::fixtures::basic-python-capi::DepStruct>>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ComposeStruct,
+        ::apache::thrift::type_class::structure,
+        ::test::fixtures::basic-python-capi::SerializedStruct>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ComposeStruct,
+        ::apache::thrift::type_class::variant,
+        ::test::fixtures::basic-python-capi::SerializedUnion>,
     "inconsistent use of json option");
 
 }}} // test::fixtures::basic-python-capi

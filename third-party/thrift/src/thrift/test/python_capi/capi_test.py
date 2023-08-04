@@ -36,6 +36,10 @@ from thrift.test.python_capi.module.thrift_types import (  # @manual=:test_modul
     SetStruct,
     StringPair,
 )
+from thrift.test.python_capi.serialized_dep.thrift_types import (
+    SerializedStruct,
+    SerializedUnion,
+)
 
 from thrift.test.python_capi.thrift_dep.thrift_types import DepEnum, DepStruct
 
@@ -183,6 +187,8 @@ class PythonCapiFixture(unittest.TestCase):
             xenum=DepEnum.Arm2,
             xstruct=self.dep_struct(),
             friends=[self.dep_struct()] * 3,
+            serial_struct=SerializedStruct(s="wefw", i=42),
+            serial_union=SerializedUnion(i=47),
         )
 
 

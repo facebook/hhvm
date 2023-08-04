@@ -3145,7 +3145,7 @@ _readField_aliased:
   }
 _readField_xenum:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::thrift::test::python_capi::DepEnum>::readWithContext(*iprot, this->__fbthrift_field_xenum, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::basic-python-capi::DepEnum>::readWithContext(*iprot, this->__fbthrift_field_xenum, _readState);
     
   }
  this->__isset.set(3, true);
@@ -3160,7 +3160,7 @@ _readField_xenum:
 _readField_xstruct:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::thrift::test::python_capi::DepStruct>::readWithContext(*iprot, this->__fbthrift_field_xstruct, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::DepStruct>::readWithContext(*iprot, this->__fbthrift_field_xstruct, _readState);
     _readState.afterSubobject(iprot);
     
   }
@@ -3176,8 +3176,8 @@ _readField_xstruct:
 _readField_friends:
   {
     _readState.beforeSubobject(iprot);
-    this->__fbthrift_field_friends = ::std::vector<::thrift::test::python_capi::DepStruct>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::std::vector<::thrift::test::python_capi::DepStruct>>::readWithContext(*iprot, this->__fbthrift_field_friends, _readState);
+    this->__fbthrift_field_friends = ::std::vector<::test::fixtures::basic-python-capi::DepStruct>();
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::std::vector<::test::fixtures::basic-python-capi::DepStruct>>::readWithContext(*iprot, this->__fbthrift_field_friends, _readState);
     _readState.afterSubobject(iprot);
     
   }
@@ -3186,6 +3186,38 @@ _readField_friends:
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
           7,
+          8,
+          apache::thrift::protocol::T_STRUCT))) {
+    goto _loop;
+  }
+_readField_serial_struct:
+  {
+    _readState.beforeSubobject(iprot);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::SerializedStruct>::readWithContext(*iprot, this->__fbthrift_field_serial_struct, _readState);
+    _readState.afterSubobject(iprot);
+    
+  }
+ this->__isset.set(6, true);
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          8,
+          9,
+          apache::thrift::protocol::T_STRUCT))) {
+    goto _loop;
+  }
+_readField_serial_union:
+  {
+    _readState.beforeSubobject(iprot);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::test::fixtures::basic-python-capi::SerializedUnion>::readWithContext(*iprot, this->__fbthrift_field_serial_union, _readState);
+    _readState.afterSubobject(iprot);
+    
+  }
+ this->__isset.set(7, true);
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          9,
           0,
           apache::thrift::protocol::T_STOP))) {
     goto _loop;
@@ -3262,6 +3294,22 @@ _loop:
         goto _skip;
       }
     }
+    case 8:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRUCT))) {
+        goto _readField_serial_struct;
+      } else {
+        goto _skip;
+      }
+    }
+    case 9:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRUCT))) {
+        goto _readField_serial_union;
+      } else {
+        goto _skip;
+      }
+    }
     default:
     {
 _skip:
@@ -3300,15 +3348,23 @@ uint32_t ComposeStruct::serializedSize(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("xenum", apache::thrift::protocol::T_I32, 5);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::thrift::test::python_capi::DepEnum>::serializedSize<false>(*prot_, this->__fbthrift_field_xenum);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::basic-python-capi::DepEnum>::serializedSize<false>(*prot_, this->__fbthrift_field_xenum);
   }
   {
     xfer += prot_->serializedFieldSize("xstruct", apache::thrift::protocol::T_STRUCT, 6);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::thrift::test::python_capi::DepStruct>::serializedSize<false>(*prot_, this->__fbthrift_field_xstruct);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::DepStruct>::serializedSize<false>(*prot_, this->__fbthrift_field_xstruct);
   }
   {
     xfer += prot_->serializedFieldSize("friends", apache::thrift::protocol::T_LIST, 7);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::std::vector<::thrift::test::python_capi::DepStruct>>::serializedSize<false>(*prot_, this->__fbthrift_field_friends);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::std::vector<::test::fixtures::basic-python-capi::DepStruct>>::serializedSize<false>(*prot_, this->__fbthrift_field_friends);
+  }
+  {
+    xfer += prot_->serializedFieldSize("serial_struct", apache::thrift::protocol::T_STRUCT, 8);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::SerializedStruct>::serializedSize<false>(*prot_, this->__fbthrift_field_serial_struct);
+  }
+  {
+    xfer += prot_->serializedFieldSize("serial_union", apache::thrift::protocol::T_STRUCT, 9);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::test::fixtures::basic-python-capi::SerializedUnion>::serializedSize<false>(*prot_, this->__fbthrift_field_serial_union);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -3341,15 +3397,23 @@ uint32_t ComposeStruct::serializedSizeZC(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("xenum", apache::thrift::protocol::T_I32, 5);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::thrift::test::python_capi::DepEnum>::serializedSize<false>(*prot_, this->__fbthrift_field_xenum);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::basic-python-capi::DepEnum>::serializedSize<false>(*prot_, this->__fbthrift_field_xenum);
   }
   {
     xfer += prot_->serializedFieldSize("xstruct", apache::thrift::protocol::T_STRUCT, 6);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::thrift::test::python_capi::DepStruct>::serializedSize<true>(*prot_, this->__fbthrift_field_xstruct);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::DepStruct>::serializedSize<true>(*prot_, this->__fbthrift_field_xstruct);
   }
   {
     xfer += prot_->serializedFieldSize("friends", apache::thrift::protocol::T_LIST, 7);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::std::vector<::thrift::test::python_capi::DepStruct>>::serializedSize<false>(*prot_, this->__fbthrift_field_friends);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::std::vector<::test::fixtures::basic-python-capi::DepStruct>>::serializedSize<false>(*prot_, this->__fbthrift_field_friends);
+  }
+  {
+    xfer += prot_->serializedFieldSize("serial_struct", apache::thrift::protocol::T_STRUCT, 8);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::SerializedStruct>::serializedSize<true>(*prot_, this->__fbthrift_field_serial_struct);
+  }
+  {
+    xfer += prot_->serializedFieldSize("serial_union", apache::thrift::protocol::T_STRUCT, 9);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::test::fixtures::basic-python-capi::SerializedUnion>::serializedSize<true>(*prot_, this->__fbthrift_field_serial_union);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -3398,21 +3462,35 @@ uint32_t ComposeStruct::write(Protocol_* prot_) const {
     constexpr int16_t kPrevFieldId = 4;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_I32, 5, kPrevFieldId>(*prot_, "xenum", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::thrift::test::python_capi::DepEnum>::write(*prot_, this->__fbthrift_field_xenum);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::basic-python-capi::DepEnum>::write(*prot_, this->__fbthrift_field_xenum);
     xfer += prot_->writeFieldEnd();
   }
   {
     constexpr int16_t kPrevFieldId = 5;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 6, kPrevFieldId>(*prot_, "xstruct", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::thrift::test::python_capi::DepStruct>::write(*prot_, this->__fbthrift_field_xstruct);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::DepStruct>::write(*prot_, this->__fbthrift_field_xstruct);
     xfer += prot_->writeFieldEnd();
   }
   {
     constexpr int16_t kPrevFieldId = 6;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_LIST, 7, kPrevFieldId>(*prot_, "friends", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::std::vector<::thrift::test::python_capi::DepStruct>>::write(*prot_, this->__fbthrift_field_friends);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::std::vector<::test::fixtures::basic-python-capi::DepStruct>>::write(*prot_, this->__fbthrift_field_friends);
+    xfer += prot_->writeFieldEnd();
+  }
+  {
+    constexpr int16_t kPrevFieldId = 7;
+    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 8, kPrevFieldId>(*prot_, "serial_struct", previousFieldHasValue);
+    previousFieldHasValue = true;
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::SerializedStruct>::write(*prot_, this->__fbthrift_field_serial_struct);
+    xfer += prot_->writeFieldEnd();
+  }
+  {
+    constexpr int16_t kPrevFieldId = 8;
+    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 9, kPrevFieldId>(*prot_, "serial_union", previousFieldHasValue);
+    previousFieldHasValue = true;
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::test::fixtures::basic-python-capi::SerializedUnion>::write(*prot_, this->__fbthrift_field_serial_union);
     xfer += prot_->writeFieldEnd();
   }
   xfer += prot_->writeFieldStop();

@@ -248,6 +248,10 @@ struct VisitByFieldId<::test::fixtures::basic-python-capi::ComposeStruct> {
       return f(5, static_cast<T&&>(t).xstruct_ref());
     case 7:
       return f(6, static_cast<T&&>(t).friends_ref());
+    case 8:
+      return f(7, static_cast<T&&>(t).serial_struct_ref());
+    case 9:
+      return f(8, static_cast<T&&>(t).serial_union_ref());
     default:
       throwInvalidThriftId(fieldId, "::test::fixtures::basic-python-capi::ComposeStruct");
     }

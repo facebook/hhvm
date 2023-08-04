@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-include "thrift/annotation/python.thrift"
-
 package "test.dev/fixtures/basic-python-capi"
 
-enum DepEnum {
-  Arm1 = 1,
-  Arm2 = 3,
+struct SerializedStruct {
+  1: string s;
+  2: i32 i;
 }
 
-@python.MarshalCapi
-struct DepStruct {
+union SerializedUnion {
   1: string s;
   2: i32 i;
 }

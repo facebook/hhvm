@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/cpp.thrift"
+
 cpp_include "thrift/lib/py3/test/BinaryTypes.h"
 
-typedef binary (cpp2.type = "folly::IOBuf", py3.iobuf) IOBuf
-typedef binary (cpp2.type = "std::unique_ptr<folly::IOBuf>", py3.iobuf) IOBufPtr
+@cpp.Type{name = "folly::IOBuf"}
+typedef binary IOBuf
+@cpp.Type{name = "std::unique_ptr<folly::IOBuf>"}
+typedef binary IOBufPtr
 typedef binary (cpp2.type = "folly::fbstring") fbstring_type
 typedef binary (cpp2.type = "test::Buffer") Buffer
 

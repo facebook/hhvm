@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/cpp.thrift"
+
 namespace py3 thrift.python.test
 
-typedef binary (py3.iobuf) IOBuf
+@cpp.Type{name = "folly::IOBuf"}
+typedef binary IOBuf
 
 struct Foo {
   1: i32 value;

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/cpp.thrift"
+
 namespace py3 thrift.benchmark
 namespace py thrift.benchmark.struct
 namespace cpp2 thrift.benchmark.st
@@ -24,7 +26,8 @@ struct MyStruct {
   3: i64 val_i64;
   4: string val_string;
   5: binary val_binary;
-  6: binary (py3.iobuf) val_iobuf;
+  @cpp.Type{name = "folly::IOBuf"}
+  6: binary val_iobuf;
   9: list<i64> val_list;
   11: map<i32, string> val_map;
   15: set<i32> val_set;

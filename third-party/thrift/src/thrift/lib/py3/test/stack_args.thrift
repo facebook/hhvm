@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/cpp.thrift"
+
 cpp_include "folly/io/IOBuf.h"
 
-typedef binary (cpp2.type = "std::unique_ptr<folly::IOBuf>", py3.iobuf) IOBufPtr
-typedef binary (cpp2.type = "folly::IOBuf", py3.iobuf) IOBuf
+@cpp.Type{name = "std::unique_ptr<folly::IOBuf>"}
+typedef binary IOBufPtr
+@cpp.Type{name = "folly::IOBuf"}
+typedef binary IOBuf
 
 struct simple {
   1: i32 val;

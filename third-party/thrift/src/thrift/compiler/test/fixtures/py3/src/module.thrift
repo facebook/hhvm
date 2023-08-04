@@ -20,10 +20,8 @@ include "thrift/annotation/python.thrift"
 namespace cpp2 py3.simple
 
 @cpp.Type{name = "std::unique_ptr<folly::IOBuf>"}
-@python.IOBuf
 typedef binary IOBufPtr
 @cpp.Type{name = "folly::IOBuf"}
-@python.IOBuf
 typedef binary IOBuf
 
 enum AnEnum {

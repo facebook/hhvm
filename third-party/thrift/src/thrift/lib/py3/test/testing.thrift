@@ -198,7 +198,8 @@ union ComplexUnion {
 }
 
 union IOBufUnion {
-  1: binary (cpp2.type = "folly::IOBuf", py3.iobuf) buf;
+  @cpp.Type{name = "folly::IOBuf"}
+  1: binary buf;
 } (cpp.noncomparable)
 
 struct hard {
@@ -334,7 +335,8 @@ struct Complex {
   3: i64 val_i64;
   4: string val_string;
   5: binary val_binary;
-  6: binary (py3.iobuf) val_iobuf;
+  @cpp.Type{name = "folly::IOBuf"}
+  6: binary val_iobuf;
   7: Color val_enum;
   8: ComplexUnion val_union;
   9: list<i64> val_list;

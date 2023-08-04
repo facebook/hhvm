@@ -98,7 +98,7 @@ StructMetadata<::py3::simple::OptionalRefStruct>::gen(ThriftMetadata& metadata) 
   module_OptionalRefStruct.is_union() = false;
   static const auto* const
   module_OptionalRefStruct_fields = new std::array<EncodedThriftField, 1>{{
-    {1, "optional_blob", true, std::make_unique<Typedef>("module.IOBufPtr", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"name", cvString("std::unique_ptr<folly::IOBuf>")}}).cv_struct_ref(), *cvStruct("python.IOBuf", {}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{}},
+    {1, "optional_blob", true, std::make_unique<Typedef>("module.IOBufPtr", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"name", cvString("std::unique_ptr<folly::IOBuf>")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{}},
   }};
   for (const auto& f : *module_OptionalRefStruct_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -261,7 +261,7 @@ StructMetadata<::py3::simple::BinaryUnion>::gen(ThriftMetadata& metadata) {
   module_BinaryUnion.is_union() = true;
   static const auto* const
   module_BinaryUnion_fields = new std::array<EncodedThriftField, 1>{{
-    {1, "iobuf_val", false, std::make_unique<Typedef>("module.IOBuf", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"name", cvString("folly::IOBuf")}}).cv_struct_ref(), *cvStruct("python.IOBuf", {}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{}},
+    {1, "iobuf_val", false, std::make_unique<Typedef>("module.IOBuf", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"name", cvString("folly::IOBuf")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{}},
   }};
   for (const auto& f : *module_BinaryUnion_fields) {
     ::apache::thrift::metadata::ThriftField field;

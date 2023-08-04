@@ -381,6 +381,14 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
       cpp.bytey(),
       PyTuple_GET_ITEM(fbThriftData, 8 + 1),
       error);
+  Extractor<folly::IOBuf>{}.extractInto(
+      cpp.buffy(),
+      PyTuple_GET_ITEM(fbThriftData, 9 + 1),
+      error);
+  Extractor<std::unique_ptr<folly::IOBuf>>{}.extractInto(
+      cpp.pointbuffy(),
+      PyTuple_GET_ITEM(fbThriftData, 10 + 1),
+      error);
   if (error) {
     return folly::makeUnexpected(*error);
   }
@@ -420,7 +428,7 @@ PyObject* Constructor<::test::fixtures::basic-python-capi::PrimitiveStruct>::ope
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::basic-python-capi::PrimitiveStruct>>::operator()(
     FOLLY_MAYBE_UNUSED const ::test::fixtures::basic-python-capi::PrimitiveStruct& val) {
-  StrongRef fbthrift_data(createStructTuple(9));
+  StrongRef fbthrift_data(createStructTuple(11));
   StrongRef __booly(Constructor<bool>{}.constructFrom(val.booly()));
   if (!__booly || setStructField(*fbthrift_data, 0, *__booly) == -1) {
     return nullptr;
@@ -455,6 +463,14 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   }
   StrongRef __bytey(Constructor<Bytes>{}.constructFrom(val.bytey()));
   if (!__bytey || setStructField(*fbthrift_data, 8, *__bytey) == -1) {
+    return nullptr;
+  }
+  StrongRef __buffy(Constructor<folly::IOBuf>{}.constructFrom(val.buffy()));
+  if (!__buffy || setStructField(*fbthrift_data, 9, *__buffy) == -1) {
+    return nullptr;
+  }
+  StrongRef __pointbuffy(Constructor<std::unique_ptr<folly::IOBuf>>{}.constructFrom(val.pointbuffy()));
+  if (!__pointbuffy || setStructField(*fbthrift_data, 10, *__pointbuffy) == -1) {
     return nullptr;
   }
   return std::move(fbthrift_data).release();
@@ -512,6 +528,10 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
       cpp.voxels(),
       PyTuple_GET_ITEM(fbThriftData, 7 + 1),
       error);
+  Extractor<list<std::unique_ptr<folly::IOBuf>>>{}.extractInto(
+      cpp.buf_ptrs(),
+      PyTuple_GET_ITEM(fbThriftData, 8 + 1),
+      error);
   if (error) {
     return folly::makeUnexpected(*error);
   }
@@ -551,7 +571,7 @@ PyObject* Constructor<::test::fixtures::basic-python-capi::ListStruct>::operator
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::basic-python-capi::ListStruct>>::operator()(
     FOLLY_MAYBE_UNUSED const ::test::fixtures::basic-python-capi::ListStruct& val) {
-  StrongRef fbthrift_data(createStructTuple(8));
+  StrongRef fbthrift_data(createStructTuple(9));
   StrongRef __boolz(Constructor<list<bool>>{}.constructFrom(val.boolz()));
   if (!__boolz || setStructField(*fbthrift_data, 0, *__boolz) == -1) {
     return nullptr;
@@ -582,6 +602,10 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   }
   StrongRef __voxels(Constructor<list<list<list<int8_t, folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>>::value_type::value_type>, folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>>::value_type>, folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>>>>{}.constructFrom(val.voxels()));
   if (!__voxels || setStructField(*fbthrift_data, 7, *__voxels) == -1) {
+    return nullptr;
+  }
+  StrongRef __buf_ptrs(Constructor<list<std::unique_ptr<folly::IOBuf>>>{}.constructFrom(val.buf_ptrs()));
+  if (!__buf_ptrs || setStructField(*fbthrift_data, 8, *__buf_ptrs) == -1) {
     return nullptr;
   }
   return std::move(fbthrift_data).release();

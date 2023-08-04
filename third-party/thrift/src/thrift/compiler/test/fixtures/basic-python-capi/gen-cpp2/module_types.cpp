@@ -807,6 +807,9 @@ PrimitiveStruct::PrimitiveStruct(const PrimitiveStruct& srcObj) :
     __fbthrift_field_stringy(::apache::thrift::detail::st::copy_field<
           ::apache::thrift::type_class::string>(srcObj.__fbthrift_field_stringy)),
     __fbthrift_field_bytey(srcObj.__fbthrift_field_bytey),
+    __fbthrift_field_buffy(srcObj.__fbthrift_field_buffy),
+    __fbthrift_field_pointbuffy(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::binary>(srcObj.__fbthrift_field_pointbuffy)),
     __isset(srcObj.__isset) {
 }
 
@@ -838,6 +841,8 @@ PrimitiveStruct::PrimitiveStruct(FOLLY_MAYBE_UNUSED PrimitiveStruct&& other) noe
     __fbthrift_field_dubby(std::move(other.__fbthrift_field_dubby)),
     __fbthrift_field_stringy(std::move(other.__fbthrift_field_stringy)),
     __fbthrift_field_bytey(std::move(other.__fbthrift_field_bytey)),
+    __fbthrift_field_buffy(std::move(other.__fbthrift_field_buffy)),
+    __fbthrift_field_pointbuffy(std::move(other.__fbthrift_field_pointbuffy)),
     __isset(other.__isset) {
 }
 
@@ -851,12 +856,14 @@ PrimitiveStruct& PrimitiveStruct::operator=(FOLLY_MAYBE_UNUSED PrimitiveStruct&&
     this->__fbthrift_field_dubby = std::move(other.__fbthrift_field_dubby);
     this->__fbthrift_field_stringy = std::move(other.__fbthrift_field_stringy);
     this->__fbthrift_field_bytey = std::move(other.__fbthrift_field_bytey);
+    this->__fbthrift_field_buffy = std::move(other.__fbthrift_field_buffy);
+    this->__fbthrift_field_pointbuffy = std::move(other.__fbthrift_field_pointbuffy);
     __isset = other.__isset;
     return *this;
 }
 
 
-PrimitiveStruct::PrimitiveStruct(apache::thrift::FragileConstructor, bool booly__arg, ::test::fixtures::basic-python-capi::signed_byte charry__arg, uint16_t shortay__arg, ::std::int32_t inty__arg, uint64_t longy__arg, float floaty__arg, ::apache::thrift::detail::boxed_value_ptr<double> dubby__arg, ::std::unique_ptr<::std::string> stringy__arg, ::std::shared_ptr<const ::std::string> bytey__arg) :
+PrimitiveStruct::PrimitiveStruct(apache::thrift::FragileConstructor, bool booly__arg, ::test::fixtures::basic-python-capi::signed_byte charry__arg, uint16_t shortay__arg, ::std::int32_t inty__arg, uint64_t longy__arg, float floaty__arg, ::apache::thrift::detail::boxed_value_ptr<double> dubby__arg, ::std::unique_ptr<::std::string> stringy__arg, ::std::shared_ptr<const ::std::string> bytey__arg, ::test::fixtures::basic-python-capi::IOBuf buffy__arg, ::test::fixtures::basic-python-capi::IOBufPtr pointbuffy__arg) :
     __fbthrift_field_booly(std::move(booly__arg)),
     __fbthrift_field_charry(std::move(charry__arg)),
     __fbthrift_field_shortay(std::move(shortay__arg)),
@@ -865,13 +872,17 @@ PrimitiveStruct::PrimitiveStruct(apache::thrift::FragileConstructor, bool booly_
     __fbthrift_field_floaty(std::move(floaty__arg)),
     __fbthrift_field_dubby(std::move(dubby__arg)),
     __fbthrift_field_stringy(std::move(stringy__arg)),
-    __fbthrift_field_bytey(std::move(bytey__arg)) {
+    __fbthrift_field_bytey(std::move(bytey__arg)),
+    __fbthrift_field_buffy(std::move(buffy__arg)),
+    __fbthrift_field_pointbuffy(std::move(pointbuffy__arg)) {
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
   __isset.set(folly::index_constant<3>(), true);
   __isset.set(folly::index_constant<4>(), true);
   __isset.set(folly::index_constant<5>(), true);
+  __isset.set(folly::index_constant<6>(), true);
+  __isset.set(folly::index_constant<7>(), true);
 }
 
 
@@ -886,6 +897,8 @@ void PrimitiveStruct::__fbthrift_clear() {
   this->__fbthrift_field_dubby.reset();
   this->__fbthrift_field_stringy.reset();
   this->__fbthrift_field_bytey.reset();
+  this->__fbthrift_field_buffy = apache::thrift::StringTraits<folly::IOBuf>::fromStringLiteral("");
+  this->__fbthrift_field_pointbuffy = apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::fromStringLiteral("");
   __isset = {};
 }
 
@@ -925,6 +938,12 @@ bool PrimitiveStruct::operator==(FOLLY_MAYBE_UNUSED const PrimitiveStruct& rhs) 
   if ((!::apache::thrift::detail::pointer_equal(lhs.bytey_ref(), rhs.bytey_ref()))) {
     return false;
   }
+  if (!apache::thrift::StringTraits<folly::IOBuf>::isEqual(lhs.__fbthrift_field_buffy, rhs.__fbthrift_field_buffy)) {
+    return false;
+  }
+  if (!apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::isEqual(lhs.__fbthrift_field_pointbuffy, rhs.__fbthrift_field_pointbuffy)) {
+    return false;
+  }
   return true;
 }
 
@@ -944,6 +963,8 @@ void swap(FOLLY_MAYBE_UNUSED PrimitiveStruct& a, FOLLY_MAYBE_UNUSED PrimitiveStr
   swap(a.__fbthrift_field_dubby, b.__fbthrift_field_dubby);
   swap(a.__fbthrift_field_stringy, b.__fbthrift_field_stringy);
   swap(a.__fbthrift_field_bytey, b.__fbthrift_field_bytey);
+  swap(a.__fbthrift_field_buffy, b.__fbthrift_field_buffy);
+  swap(a.__fbthrift_field_pointbuffy, b.__fbthrift_field_pointbuffy);
   swap(a.__isset, b.__isset);
 }
 
@@ -1009,6 +1030,7 @@ ListStruct::ListStruct(FOLLY_MAYBE_UNUSED ListStruct&& other) noexcept :
     __fbthrift_field_matrix(std::move(other.__fbthrift_field_matrix)),
     __fbthrift_field_ucharz(std::move(other.__fbthrift_field_ucharz)),
     __fbthrift_field_voxels(std::move(other.__fbthrift_field_voxels)),
+    __fbthrift_field_buf_ptrs(std::move(other.__fbthrift_field_buf_ptrs)),
     __isset(other.__isset) {
 }
 
@@ -1021,12 +1043,13 @@ ListStruct& ListStruct::operator=(FOLLY_MAYBE_UNUSED ListStruct&& other) noexcep
     this->__fbthrift_field_matrix = std::move(other.__fbthrift_field_matrix);
     this->__fbthrift_field_ucharz = std::move(other.__fbthrift_field_ucharz);
     this->__fbthrift_field_voxels = std::move(other.__fbthrift_field_voxels);
+    this->__fbthrift_field_buf_ptrs = std::move(other.__fbthrift_field_buf_ptrs);
     __isset = other.__isset;
     return *this;
 }
 
 
-ListStruct::ListStruct(apache::thrift::FragileConstructor, ::std::vector<bool> boolz__arg, ::std::vector<::std::int64_t> intz__arg, ::apache::thrift::detail::boxed_value_ptr<::std::vector<::std::string>> stringz__arg, std::deque<::std::string> encoded__arg, std::deque<uint64_t> uidz__arg, ::std::vector<::std::vector<double>> matrix__arg, folly::small_vector<folly::small_vector<uint8_t>> ucharz__arg, folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>> voxels__arg) :
+ListStruct::ListStruct(apache::thrift::FragileConstructor, ::std::vector<bool> boolz__arg, ::std::vector<::std::int64_t> intz__arg, ::apache::thrift::detail::boxed_value_ptr<::std::vector<::std::string>> stringz__arg, std::deque<::std::string> encoded__arg, std::deque<uint64_t> uidz__arg, ::std::vector<::std::vector<double>> matrix__arg, folly::small_vector<folly::small_vector<uint8_t>> ucharz__arg, folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>> voxels__arg, ::std::vector<::test::fixtures::basic-python-capi::IOBufPtr> buf_ptrs__arg) :
     __fbthrift_field_boolz(std::move(boolz__arg)),
     __fbthrift_field_intz(std::move(intz__arg)),
     __fbthrift_field_stringz(std::move(stringz__arg)),
@@ -1034,7 +1057,8 @@ ListStruct::ListStruct(apache::thrift::FragileConstructor, ::std::vector<bool> b
     __fbthrift_field_uidz(std::move(uidz__arg)),
     __fbthrift_field_matrix(std::move(matrix__arg)),
     __fbthrift_field_ucharz(std::move(ucharz__arg)),
-    __fbthrift_field_voxels(std::move(voxels__arg)) {
+    __fbthrift_field_voxels(std::move(voxels__arg)),
+    __fbthrift_field_buf_ptrs(std::move(buf_ptrs__arg)) {
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -1042,6 +1066,7 @@ ListStruct::ListStruct(apache::thrift::FragileConstructor, ::std::vector<bool> b
   __isset.set(folly::index_constant<4>(), true);
   __isset.set(folly::index_constant<5>(), true);
   __isset.set(folly::index_constant<6>(), true);
+  __isset.set(folly::index_constant<7>(), true);
 }
 
 
@@ -1055,6 +1080,7 @@ void ListStruct::__fbthrift_clear() {
   this->__fbthrift_field_matrix.clear();
   this->__fbthrift_field_ucharz.clear();
   this->__fbthrift_field_voxels.clear();
+  this->__fbthrift_field_buf_ptrs.clear();
   __isset = {};
 }
 
@@ -1089,6 +1115,9 @@ bool ListStruct::operator==(FOLLY_MAYBE_UNUSED const ListStruct& rhs) const {
     return false;
   }
   if (!(lhs.voxels_ref() == rhs.voxels_ref())) {
+    return false;
+  }
+  if (!(lhs.buf_ptrs_ref() == rhs.buf_ptrs_ref())) {
     return false;
   }
   return true;
@@ -1154,6 +1183,14 @@ folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>> ListStruct::get_voxel
   return std::move(__fbthrift_field_voxels);
 }
 
+const ::std::vector<::test::fixtures::basic-python-capi::IOBufPtr>& ListStruct::get_buf_ptrs() const& {
+  return __fbthrift_field_buf_ptrs;
+}
+
+::std::vector<::test::fixtures::basic-python-capi::IOBufPtr> ListStruct::get_buf_ptrs() && {
+  return std::move(__fbthrift_field_buf_ptrs);
+}
+
 
 void swap(FOLLY_MAYBE_UNUSED ListStruct& a, FOLLY_MAYBE_UNUSED ListStruct& b) {
   using ::std::swap;
@@ -1165,6 +1202,7 @@ void swap(FOLLY_MAYBE_UNUSED ListStruct& a, FOLLY_MAYBE_UNUSED ListStruct& b) {
   swap(a.__fbthrift_field_matrix, b.__fbthrift_field_matrix);
   swap(a.__fbthrift_field_ucharz, b.__fbthrift_field_ucharz);
   swap(a.__fbthrift_field_voxels, b.__fbthrift_field_voxels);
+  swap(a.__fbthrift_field_buf_ptrs, b.__fbthrift_field_buf_ptrs);
   swap(a.__isset, b.__isset);
 }
 

@@ -18,6 +18,8 @@ from sys import getrefcount
 from typing import Generator
 
 import thrift.python_capi.fixture as fixture
+
+from folly.iobuf import IOBuf
 from thrift.test.python_capi.module.thrift_types import (  # @manual=:test_module-python-types
     AnnoyingEnum,
     ComposeStruct,
@@ -70,12 +72,14 @@ class PythonCapiFixture(unittest.TestCase):
             dubby=-1.0,
             stringy="€ to £ to ₹",
             bytey=b"bippity boppity boo",
+            buffy=IOBuf(memoryview(b" the buffest buffer ")),
+            pointbuffy=IOBuf(memoryview(b"the pointiest buffer")),
         )
 
     def primitive_unset(self) -> PrimitiveStruct:
         return PrimitiveStruct(
             booly=True,
-            # charry leave deliberately unset, should be 0
+            # charry left deliberately unset, should be 0
             shorty=-1,
             inty=2**31 - 1,
             longy=-(2**63),
@@ -101,6 +105,7 @@ class PythonCapiFixture(unittest.TestCase):
                 [[2, 7, 6], [9, 5, 1], [4, 3, 8]],
                 [[2, 7, 6], [9, 5, 1], [4, 3, 8]],
             ],
+            buf_ptrs=[IOBuf(memoryview(x)) for x in [b"abc", b"def", b"ghi"]],
         )
 
     def empty_lists(self) -> ListStruct:
@@ -146,6 +151,7 @@ class PythonCapiFixture(unittest.TestCase):
             map_list=[{i: i**2 for i in range(j)} for j in range(2)],
             list_map={1: [1, 2, 3, 5], 2: [4, 8, 16]},
             fast_list_map={1: [-1.0, 1.0], -1: [1.0, -1.0]},
+            buf_map={x: IOBuf(memoryview(x)) for x in [b"qergq", b"", b"wefwi"]},
         )
 
     def empty_maps(self) -> MapStruct:

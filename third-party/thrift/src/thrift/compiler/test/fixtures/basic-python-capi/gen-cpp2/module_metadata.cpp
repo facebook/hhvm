@@ -192,7 +192,7 @@ StructMetadata<::test::fixtures::basic-python-capi::PrimitiveStruct>::gen(Thrift
   module_PrimitiveStruct.name() = "module.PrimitiveStruct";
   module_PrimitiveStruct.is_union() = false;
   static const auto* const
-  module_PrimitiveStruct_fields = new std::array<EncodedThriftField, 9>{{
+  module_PrimitiveStruct_fields = new std::array<EncodedThriftField, 11>{{
     {1, "booly", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}},
     {2, "charry", false, std::make_unique<Typedef>("module.signed_byte", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
     {3, "shorty", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"name", cvString("uint16_t")}}).cv_struct_ref(), }},
@@ -202,6 +202,8 @@ StructMetadata<::test::fixtures::basic-python-capi::PrimitiveStruct>::gen(Thrift
     {9, "dubby", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{*cvStruct("thrift.Box", {}).cv_struct_ref(), }},
     {12, "stringy", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Ref", {{"type", cvInteger(0)}}).cv_struct_ref(), }},
     {13, "bytey", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Ref", {{"type", cvInteger(1)}}).cv_struct_ref(), }},
+    {14, "buffy", false, std::make_unique<Typedef>("module.IOBuf", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"name", cvString("folly::IOBuf")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{}},
+    {15, "pointbuffy", false, std::make_unique<Typedef>("module.IOBufPtr", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"name", cvString("std::unique_ptr<folly::IOBuf>")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{}},
   }};
   for (const auto& f : *module_PrimitiveStruct_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -225,7 +227,7 @@ StructMetadata<::test::fixtures::basic-python-capi::ListStruct>::gen(ThriftMetad
   module_ListStruct.name() = "module.ListStruct";
   module_ListStruct.is_union() = false;
   static const auto* const
-  module_ListStruct_fields = new std::array<EncodedThriftField, 8>{{
+  module_ListStruct_fields = new std::array<EncodedThriftField, 9>{{
     {1, "boolz", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE)), std::vector<ThriftConstStruct>{}},
     {2, "intz", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)), std::vector<ThriftConstStruct>{}},
     {3, "stringz", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{*cvStruct("thrift.Box", {}).cv_struct_ref(), }},
@@ -234,6 +236,7 @@ StructMetadata<::test::fixtures::basic-python-capi::ListStruct>::gen(ThriftMetad
     {6, "matrix", false, std::make_unique<List>(std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE))), std::vector<ThriftConstStruct>{}},
     {7, "ucharz", false, std::make_unique<List>(std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE))), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"name", cvString("folly::small_vector<folly::small_vector<uint8_t>>")}}).cv_struct_ref(), }},
     {8, "voxels", false, std::make_unique<List>(std::make_unique<List>(std::make_unique<List>(std::make_unique<Typedef>("module.signed_byte", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{})))), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"name", cvString("folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>>")}}).cv_struct_ref(), }},
+    {9, "buf_ptrs", false, std::make_unique<List>(std::make_unique<Typedef>("module.IOBufPtr", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"name", cvString("std::unique_ptr<folly::IOBuf>")}}).cv_struct_ref(), })), std::vector<ThriftConstStruct>{}},
   }};
   for (const auto& f : *module_ListStruct_fields) {
     ::apache::thrift::metadata::ThriftField field;

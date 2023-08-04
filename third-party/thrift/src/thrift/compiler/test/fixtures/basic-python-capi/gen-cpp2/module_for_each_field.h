@@ -81,6 +81,8 @@ struct ForEachField<::test::fixtures::basic-python-capi::PrimitiveStruct> {
     f(6, static_cast<T&&>(t).dubby_ref()...);
     f(7, static_cast<T&&>(t).stringy_ref()...);
     f(8, static_cast<T&&>(t).bytey_ref()...);
+    f(9, static_cast<T&&>(t).buffy_ref()...);
+    f(10, static_cast<T&&>(t).pointbuffy_ref()...);
   }
 };
 
@@ -96,6 +98,7 @@ struct ForEachField<::test::fixtures::basic-python-capi::ListStruct> {
     f(5, static_cast<T&&>(t).matrix_ref()...);
     f(6, static_cast<T&&>(t).ucharz_ref()...);
     f(7, static_cast<T&&>(t).voxels_ref()...);
+    f(8, static_cast<T&&>(t).buf_ptrs_ref()...);
   }
 };
 

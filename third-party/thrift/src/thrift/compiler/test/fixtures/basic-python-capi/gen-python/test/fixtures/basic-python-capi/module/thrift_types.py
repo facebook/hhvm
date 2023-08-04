@@ -387,6 +387,22 @@ class PrimitiveStruct(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
         ),
+        (
+            14,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "buffy",  # name
+            _fbthrift_python_types.typeinfo_iobuf,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            15,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "pointbuffy",  # name
+            _fbthrift_python_types.typeinfo_iobuf,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
     )
 
     @staticmethod
@@ -480,6 +496,14 @@ class ListStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "voxels",  # name
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_byte))),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            9,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "buf_ptrs",  # name
+            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_iobuf),  # typeinfo
             None,  # default value
             None,  # adapter info
         ),
@@ -1691,4 +1715,6 @@ _fbthrift_all_structs = [
 _fbthrift_python_types.fill_specs(*_fbthrift_all_structs)
 
 signed_byte = int
+IOBuf = _fbthrift_iobuf.IOBuf
+IOBufPtr = _fbthrift_iobuf.IOBuf
 ListAlias = ListStruct

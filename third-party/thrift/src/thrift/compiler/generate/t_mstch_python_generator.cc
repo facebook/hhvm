@@ -74,6 +74,27 @@ std::string cpp_type_override(const t_field& field) {
   return fmt::to_string(cpp2::get_type(field.get_type()->get_true_type()));
 }
 
+std::string resolve_binary_type(const t_type& type, const t_field* field) {
+  // structured annotation may occur on field or typedef
+  if (field) {
+    if (auto type_override = structured_type_override(*field)) {
+      if (is_type_iobuf(type_override->get_string())) {
+        return type_override->get_string();
+      }
+    }
+  }
+  if (auto type_override = structured_type_override(type)) {
+    if (is_type_iobuf(type_override->get_string())) {
+      return type_override->get_string();
+    }
+  }
+  std::string true_type = fmt::to_string(cpp2::get_type(type.get_true_type()));
+  if (is_type_iobuf(true_type)) {
+    return true_type;
+  }
+  return "Bytes";
+}
+
 const t_const* find_structured_adapter_annotation(const t_named& node) {
   return node.find_structured_annotation_or_null(kPythonAdapterUri);
 }
@@ -258,12 +279,13 @@ std::string format_marshal_type(
     return "float";
   } else if (type->is_double()) {
     return "double";
-  } else if (is_type_iobuf(type)) {
-    // Will support in follow-on diff
-    return "";
-  } else if (type->is_binary() /* non-IOBuf binary*/ || type->is_string()) {
-    // thrift-python internal representation uses binary regardless;
-    // i.e., unicode encoded to bytes during thrift-python struct creation
+  } else if (type->is_binary()) {
+    // field only relevant for type resolution on outer type; not used
+    // for container element type resolution
+    return resolve_binary_type(
+        *field_type, type_override.empty() ? &field : nullptr);
+  } else if (type->is_string()) {
+    // unicode's internal_data representation is binary
     return "Bytes";
   } else if (type->is_enum()) {
     return fmt::format(

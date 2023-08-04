@@ -75,6 +75,10 @@ struct StringPair {
 struct EmptyStruct {} (cpp.name = "VapidStruct")
 
 typedef byte signed_byte
+@cpp.Type{name = "folly::IOBuf"}
+typedef binary IOBuf
+@cpp.Type{name = "std::unique_ptr<folly::IOBuf>"}
+typedef binary IOBufPtr
 
 @python.MarshalCapi
 struct PrimitiveStruct {
@@ -92,6 +96,8 @@ struct PrimitiveStruct {
   12: optional string stringy;
   @cpp.Ref{type = cpp.RefType.Shared}
   13: optional binary bytey;
+  14: IOBuf buffy;
+  15: IOBufPtr pointbuffy;
 }
 
 @python.MarshalCapi
@@ -109,6 +115,7 @@ struct ListStruct {
   7: list<list<byte>> ucharz;
   @cpp.Type{name = "folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>>"}
   8: list<list<list<signed_byte>>> voxels;
+  9: list<IOBufPtr> buf_ptrs;
 } (cpp.noncopyable)
 typedef ListStruct ListAlias
 
@@ -141,6 +148,7 @@ struct MapStruct {
   7: map<i32, list<i64>> list_map;
   @cpp.Type{name = "folly::F14FastMap<int, folly::fbvector<double>>"}
   8: map<i32, list<double>> fast_list_map;
+  9: map<binary, IOBufPtr> buf_map;
 }
 
 @python.MarshalCapi

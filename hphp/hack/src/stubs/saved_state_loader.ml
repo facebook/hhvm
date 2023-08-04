@@ -115,3 +115,5 @@ end
 let get_project_name _ = ""
 
 let ignore_saved_state_version_mismatch ~ignore_hh_version = ignore_hh_version
+
+let get_query_for_root ~root:_ ~relative_root:_ _ _ = ""

@@ -244,12 +244,6 @@ let server_hung_up
 
 let client_bad_exit ~command_name:_ _ _ = ()
 
-let glean_globalrev_supplied ~globalrev:_ = ()
-
-let glean_globalrev_from_hg ~globalrev:_ ~start_time:_ = ()
-
-let glean_globalrev_error _ = ()
-
 let glean_init _ ~start_time:_ = ()
 
 let glean_init_failure _ ~stack:_ = ()

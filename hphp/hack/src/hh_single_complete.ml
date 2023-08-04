@@ -395,7 +395,7 @@ let do_glean_symbol_searches
         if String.is_empty reponame then failwith "--glean-reponame required"
       in
       let () = Folly.ensure_folly_init () in
-      Some (Glean.initialize ~reponame |> Option.value_exn)
+      Some (Glean.initialize ~reponame ~prev_init_time:None |> Option.value_exn)
   in
   List.iter searches ~f:(fun (title, query_text, context, kind_filter) ->
       if List.length searches > 1 then Printf.printf "//// %s\n" title;
@@ -617,7 +617,7 @@ let handle_findrefs_glean sienv ~dry_run filename =
         if String.is_empty reponame then failwith "--glean-reponame required"
       in
       let () = Folly.ensure_folly_init () in
-      Some (Glean.initialize ~reponame |> Option.value_exn)
+      Some (Glean.initialize ~reponame ~prev_init_time:None |> Option.value_exn)
   in
   List.iter queries ~f:(fun (name, action) ->
       let query_text_for_show =
@@ -629,7 +629,7 @@ let handle_findrefs_glean sienv ~dry_run filename =
       if not dry_run then begin
         let start_time = Unix.gettimeofday () in
         let results =
-          Glean.query_filenames (Option.value_exn handle) ~angle ~max_results:10
+          Glean.query_refs (Option.value_exn handle) ~action ~max_results:10
         in
         List.iter results ~f:(fun path ->
             Printf.printf "%s\n" (Relative_path.show path));

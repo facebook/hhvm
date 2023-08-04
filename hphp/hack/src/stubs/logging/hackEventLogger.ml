@@ -244,9 +244,29 @@ let server_hung_up
 
 let client_bad_exit ~command_name:_ _ _ = ()
 
-let glean_init _ ~start_time:_ = ()
+let glean_init ~reponame:_ ~init_time:_ ~prev_init_time:_ = ()
 
-let glean_init_failure _ ~stack:_ = ()
+let glean_init_failure ~reponame:_ ~init_time:_ ~prev_init_time:_ ~e:_ = ()
+
+let glean_query
+    ~reponame:_
+    ~mode:_
+    ~start_time:_
+    ~glean_init_time:_
+    ~count:_
+    ~query:_
+    ~query_text:_ =
+  ()
+
+let glean_query_error
+    ~reponame:_
+    ~mode:_
+    ~start_time:_
+    ~glean_init_time:_
+    ~query:_
+    ~query_text:_
+    ~e:_ =
+  ()
 
 let glean_fetch_namespaces ~count:_ ~start_time:_ = ()
 

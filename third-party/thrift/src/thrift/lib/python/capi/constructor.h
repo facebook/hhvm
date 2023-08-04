@@ -106,14 +106,18 @@ SPECIALIZE_SCALAR(float);
 SPECIALIZE_SCALAR(double);
 #undef SPECIALIZE_SCALAR
 
-#define SPECIALIZE_STR(cpp_type, py_type)                         \
+#define SPECIALIZE_STR(py_type, capi_fn)                          \
   template <>                                                     \
   struct Constructor<py_type> : public BaseConstructor<py_type> { \
-    PyObject* FOLLY_NULLABLE operator()(const cpp_type&);         \
+    template <typename StringT>                                   \
+    PyObject* FOLLY_NULLABLE operator()(const StringT& str) {     \
+      return capi_fn(str.data(), str.size());                     \
+    }                                                             \
   }
 
-SPECIALIZE_STR(std::string, Bytes);
-SPECIALIZE_STR(std::string, String);
+// use *FromStringAndSize in case not null-terminated
+SPECIALIZE_STR(Bytes, PyBytes_FromStringAndSize);
+SPECIALIZE_STR(String, PyUnicode_FromStringAndSize);
 #undef SPECIALIZE_STR
 
 /*

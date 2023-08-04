@@ -812,6 +812,8 @@ PrimitiveStruct::PrimitiveStruct(const PrimitiveStruct& srcObj) :
           ::apache::thrift::type_class::binary>(srcObj.__fbthrift_field_pointbuffy)),
     __fbthrift_field_patched_struct(srcObj.__fbthrift_field_patched_struct),
     __fbthrift_field_empty_struct(srcObj.__fbthrift_field_empty_struct),
+    __fbthrift_field_fbstring(srcObj.__fbthrift_field_fbstring),
+    __fbthrift_field_managed_string_view(srcObj.__fbthrift_field_managed_string_view),
     __isset(srcObj.__isset) {
 }
 
@@ -847,6 +849,8 @@ PrimitiveStruct::PrimitiveStruct(FOLLY_MAYBE_UNUSED PrimitiveStruct&& other) noe
     __fbthrift_field_pointbuffy(std::move(other.__fbthrift_field_pointbuffy)),
     __fbthrift_field_patched_struct(std::move(other.__fbthrift_field_patched_struct)),
     __fbthrift_field_empty_struct(std::move(other.__fbthrift_field_empty_struct)),
+    __fbthrift_field_fbstring(std::move(other.__fbthrift_field_fbstring)),
+    __fbthrift_field_managed_string_view(std::move(other.__fbthrift_field_managed_string_view)),
     __isset(other.__isset) {
 }
 
@@ -864,12 +868,14 @@ PrimitiveStruct& PrimitiveStruct::operator=(FOLLY_MAYBE_UNUSED PrimitiveStruct&&
     this->__fbthrift_field_pointbuffy = std::move(other.__fbthrift_field_pointbuffy);
     this->__fbthrift_field_patched_struct = std::move(other.__fbthrift_field_patched_struct);
     this->__fbthrift_field_empty_struct = std::move(other.__fbthrift_field_empty_struct);
+    this->__fbthrift_field_fbstring = std::move(other.__fbthrift_field_fbstring);
+    this->__fbthrift_field_managed_string_view = std::move(other.__fbthrift_field_managed_string_view);
     __isset = other.__isset;
     return *this;
 }
 
 
-PrimitiveStruct::PrimitiveStruct(apache::thrift::FragileConstructor, bool booly__arg, ::test::fixtures::basic-python-capi::signed_byte charry__arg, uint16_t shortay__arg, ::std::int32_t inty__arg, uint64_t longy__arg, float floaty__arg, ::apache::thrift::detail::boxed_value_ptr<double> dubby__arg, ::std::unique_ptr<::std::string> stringy__arg, ::std::shared_ptr<const ::std::string> bytey__arg, ::test::fixtures::basic-python-capi::IOBuf buffy__arg, ::test::fixtures::basic-python-capi::IOBufPtr pointbuffy__arg, ::test::fixtures::basic-python-capi::MyStruct patched_struct__arg, ::test::fixtures::basic-python-capi::VapidStruct empty_struct__arg) :
+PrimitiveStruct::PrimitiveStruct(apache::thrift::FragileConstructor, bool booly__arg, ::test::fixtures::basic-python-capi::signed_byte charry__arg, uint16_t shortay__arg, ::std::int32_t inty__arg, uint64_t longy__arg, float floaty__arg, ::apache::thrift::detail::boxed_value_ptr<double> dubby__arg, ::std::unique_ptr<::std::string> stringy__arg, ::std::shared_ptr<const ::std::string> bytey__arg, ::test::fixtures::basic-python-capi::IOBuf buffy__arg, ::test::fixtures::basic-python-capi::IOBufPtr pointbuffy__arg, ::test::fixtures::basic-python-capi::MyStruct patched_struct__arg, ::test::fixtures::basic-python-capi::VapidStruct empty_struct__arg, folly::fbstring fbstring__arg, ::apache::thrift::ManagedStringViewWithConversions managed_string_view__arg) :
     __fbthrift_field_booly(std::move(booly__arg)),
     __fbthrift_field_charry(std::move(charry__arg)),
     __fbthrift_field_shortay(std::move(shortay__arg)),
@@ -882,7 +888,9 @@ PrimitiveStruct::PrimitiveStruct(apache::thrift::FragileConstructor, bool booly_
     __fbthrift_field_buffy(std::move(buffy__arg)),
     __fbthrift_field_pointbuffy(std::move(pointbuffy__arg)),
     __fbthrift_field_patched_struct(std::move(patched_struct__arg)),
-    __fbthrift_field_empty_struct(std::move(empty_struct__arg)) {
+    __fbthrift_field_empty_struct(std::move(empty_struct__arg)),
+    __fbthrift_field_fbstring(std::move(fbstring__arg)),
+    __fbthrift_field_managed_string_view(std::move(managed_string_view__arg)) {
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -893,6 +901,8 @@ PrimitiveStruct::PrimitiveStruct(apache::thrift::FragileConstructor, bool booly_
   __isset.set(folly::index_constant<7>(), true);
   __isset.set(folly::index_constant<8>(), true);
   __isset.set(folly::index_constant<9>(), true);
+  __isset.set(folly::index_constant<10>(), true);
+  __isset.set(folly::index_constant<11>(), true);
 }
 
 
@@ -910,6 +920,8 @@ void PrimitiveStruct::__fbthrift_clear() {
   this->__fbthrift_field_buffy = apache::thrift::StringTraits<folly::IOBuf>::fromStringLiteral("");
   this->__fbthrift_field_pointbuffy = apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::fromStringLiteral("");
   ::apache::thrift::clear(this->__fbthrift_field_patched_struct);
+  this->__fbthrift_field_fbstring = apache::thrift::StringTraits<folly::fbstring>::fromStringLiteral("");
+  this->__fbthrift_field_managed_string_view = apache::thrift::StringTraits<::apache::thrift::ManagedStringViewWithConversions>::fromStringLiteral("");
   __isset = {};
 }
 
@@ -961,6 +973,12 @@ bool PrimitiveStruct::operator==(FOLLY_MAYBE_UNUSED const PrimitiveStruct& rhs) 
   if (!(lhs.empty_struct_ref() == rhs.empty_struct_ref())) {
     return false;
   }
+  if (!apache::thrift::StringTraits<folly::fbstring>::isEqual(lhs.__fbthrift_field_fbstring, rhs.__fbthrift_field_fbstring)) {
+    return false;
+  }
+  if (!(lhs.managed_string_view_ref() == rhs.managed_string_view_ref())) {
+    return false;
+  }
   return true;
 }
 
@@ -1000,6 +1018,8 @@ void swap(FOLLY_MAYBE_UNUSED PrimitiveStruct& a, FOLLY_MAYBE_UNUSED PrimitiveStr
   swap(a.__fbthrift_field_pointbuffy, b.__fbthrift_field_pointbuffy);
   swap(a.__fbthrift_field_patched_struct, b.__fbthrift_field_patched_struct);
   swap(a.__fbthrift_field_empty_struct, b.__fbthrift_field_empty_struct);
+  swap(a.__fbthrift_field_fbstring, b.__fbthrift_field_fbstring);
+  swap(a.__fbthrift_field_managed_string_view, b.__fbthrift_field_managed_string_view);
   swap(a.__isset, b.__isset);
 }
 

@@ -85,6 +85,8 @@ struct ForEachField<::test::fixtures::basic-python-capi::PrimitiveStruct> {
     f(10, static_cast<T&&>(t).pointbuffy_ref()...);
     f(11, static_cast<T&&>(t).patched_struct_ref()...);
     f(12, static_cast<T&&>(t).empty_struct_ref()...);
+    f(13, static_cast<T&&>(t).fbstring_ref()...);
+    f(14, static_cast<T&&>(t).managed_string_view_ref()...);
   }
 };
 

@@ -419,6 +419,22 @@ class PrimitiveStruct(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
         ),
+        (
+            20,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "fbstring",  # name
+            _fbthrift_python_types.typeinfo_binary,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            21,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "managed_string_view",  # name
+            _fbthrift_python_types.typeinfo_string,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
     )
 
     @staticmethod

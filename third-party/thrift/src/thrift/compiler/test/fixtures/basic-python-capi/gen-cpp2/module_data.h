@@ -156,7 +156,7 @@ template <> struct TStructDataStorage<::test::fixtures::basic-python-capi::Vapid
 };
 
 template <> struct TStructDataStorage<::test::fixtures::basic-python-capi::PrimitiveStruct> {
-  static constexpr const std::size_t fields_size = 13;
+  static constexpr const std::size_t fields_size = 15;
   static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;

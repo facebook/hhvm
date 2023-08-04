@@ -76,6 +76,8 @@ class PythonCapiFixture(unittest.TestCase):
             pointbuffy=IOBuf(memoryview(b"the pointiest buffer")),
             patched_struct=self.my_struct(),
             empty_struct=EmptyStruct(),
+            fbstring=b"v fast string",
+            managed_string_view="I'm an rpc string utility",
         )
 
     def primitive_unset(self) -> PrimitiveStruct:

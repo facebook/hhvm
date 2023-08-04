@@ -136,6 +136,10 @@ struct VisitByFieldId<::test::fixtures::basic-python-capi::PrimitiveStruct> {
       return f(11, static_cast<T&&>(t).patched_struct_ref());
     case 19:
       return f(12, static_cast<T&&>(t).empty_struct_ref());
+    case 20:
+      return f(13, static_cast<T&&>(t).fbstring_ref());
+    case 21:
+      return f(14, static_cast<T&&>(t).managed_string_view_ref());
     default:
       throwInvalidThriftId(fieldId, "::test::fixtures::basic-python-capi::PrimitiveStruct");
     }

@@ -15,9 +15,11 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <folly/container/F14Set.h>
+#include <folly/FBString.h>
 #include <folly/container/F14Map.h>
 #include <folly/small_vector.h>
 #include "thrift/test/python_capi/adapter.h"
+#include "thrift/lib/cpp2/util/ManagedStringView.h"
 
 namespace apache {
 namespace thrift {
@@ -48,6 +50,8 @@ struct buffy;
 struct pointbuffy;
 struct patched_struct;
 struct empty_struct;
+struct fbstring;
+struct managed_string_view;
 struct boolz;
 struct intz;
 struct stringz;
@@ -238,6 +242,14 @@ APACHE_THRIFT_DEFINE_ACCESSOR(patched_struct);
 #ifndef APACHE_THRIFT_ACCESSOR_empty_struct
 #define APACHE_THRIFT_ACCESSOR_empty_struct
 APACHE_THRIFT_DEFINE_ACCESSOR(empty_struct);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_fbstring
+#define APACHE_THRIFT_ACCESSOR_fbstring
+APACHE_THRIFT_DEFINE_ACCESSOR(fbstring);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_managed_string_view
+#define APACHE_THRIFT_ACCESSOR_managed_string_view
+APACHE_THRIFT_DEFINE_ACCESSOR(managed_string_view);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_boolz
 #define APACHE_THRIFT_ACCESSOR_boolz
@@ -2017,10 +2029,12 @@ class PrimitiveStruct final  {
     ::apache::thrift::ident::buffy,
     ::apache::thrift::ident::pointbuffy,
     ::apache::thrift::ident::patched_struct,
-    ::apache::thrift::ident::empty_struct
+    ::apache::thrift::ident::empty_struct,
+    ::apache::thrift::ident::fbstring,
+    ::apache::thrift::ident::managed_string_view
   >;
 
-  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,5,7,8,9,12,13,14,15,18,19};
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,5,7,8,9,12,13,14,15,18,19,20,21};
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::bool_t,
     ::apache::thrift::type::byte_t,
@@ -2034,10 +2048,12 @@ class PrimitiveStruct final  {
     ::apache::thrift::type::cpp_type<folly::IOBuf, ::apache::thrift::type::binary_t>,
     ::apache::thrift::type::cpp_type<std::unique_ptr<folly::IOBuf>, ::apache::thrift::type::binary_t>,
     ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStruct>,
-    ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::VapidStruct>
+    ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::VapidStruct>,
+    ::apache::thrift::type::cpp_type<folly::fbstring, ::apache::thrift::type::binary_t>,
+    ::apache::thrift::type::cpp_type<::apache::thrift::ManagedStringViewWithConversions, ::apache::thrift::type::string_t>
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 13;
+  static constexpr std::size_t __fbthrift_field_size_v = 15;
 
   template<class T>
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
@@ -2071,7 +2087,7 @@ class PrimitiveStruct final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  PrimitiveStruct(apache::thrift::FragileConstructor, bool booly__arg, ::test::fixtures::basic-python-capi::signed_byte charry__arg, uint16_t shortay__arg, ::std::int32_t inty__arg, uint64_t longy__arg, float floaty__arg, ::apache::thrift::detail::boxed_value_ptr<double> dubby__arg, ::std::unique_ptr<::std::string> stringy__arg, ::std::shared_ptr<const ::std::string> bytey__arg, ::test::fixtures::basic-python-capi::IOBuf buffy__arg, ::test::fixtures::basic-python-capi::IOBufPtr pointbuffy__arg, ::test::fixtures::basic-python-capi::MyStruct patched_struct__arg, ::test::fixtures::basic-python-capi::VapidStruct empty_struct__arg);
+  PrimitiveStruct(apache::thrift::FragileConstructor, bool booly__arg, ::test::fixtures::basic-python-capi::signed_byte charry__arg, uint16_t shortay__arg, ::std::int32_t inty__arg, uint64_t longy__arg, float floaty__arg, ::apache::thrift::detail::boxed_value_ptr<double> dubby__arg, ::std::unique_ptr<::std::string> stringy__arg, ::std::shared_ptr<const ::std::string> bytey__arg, ::test::fixtures::basic-python-capi::IOBuf buffy__arg, ::test::fixtures::basic-python-capi::IOBufPtr pointbuffy__arg, ::test::fixtures::basic-python-capi::MyStruct patched_struct__arg, ::test::fixtures::basic-python-capi::VapidStruct empty_struct__arg, folly::fbstring fbstring__arg, ::apache::thrift::ManagedStringViewWithConversions managed_string_view__arg);
 
   PrimitiveStruct(PrimitiveStruct&&) noexcept;
   PrimitiveStruct(const PrimitiveStruct& src);
@@ -2109,7 +2125,11 @@ class PrimitiveStruct final  {
  private:
   ::test::fixtures::basic-python-capi::VapidStruct __fbthrift_field_empty_struct;
  private:
-  apache::thrift::detail::isset_bitset<10, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+  folly::fbstring __fbthrift_field_fbstring;
+ private:
+  ::apache::thrift::ManagedStringViewWithConversions __fbthrift_field_managed_string_view;
+ private:
+  apache::thrift::detail::isset_bitset<12, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
  public:
 
@@ -2634,6 +2654,86 @@ class PrimitiveStruct final  {
     return {static_cast<T&&>(this->__fbthrift_field_empty_struct), __isset.at(9), __isset.bit(9)};
   }
 
+  template <typename..., typename T = folly::fbstring>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> fbstring_ref() const& {
+    return {this->__fbthrift_field_fbstring, __isset.at(10), __isset.bit(10)};
+  }
+
+  template <typename..., typename T = folly::fbstring>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> fbstring_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_fbstring), __isset.at(10), __isset.bit(10)};
+  }
+
+  template <typename..., typename T = folly::fbstring>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> fbstring_ref() & {
+    return {this->__fbthrift_field_fbstring, __isset.at(10), __isset.bit(10)};
+  }
+
+  template <typename..., typename T = folly::fbstring>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> fbstring_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_fbstring), __isset.at(10), __isset.bit(10)};
+  }
+
+  template <typename..., typename T = folly::fbstring>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> fbstring() const& {
+    return {this->__fbthrift_field_fbstring, __isset.at(10), __isset.bit(10)};
+  }
+
+  template <typename..., typename T = folly::fbstring>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> fbstring() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_fbstring), __isset.at(10), __isset.bit(10)};
+  }
+
+  template <typename..., typename T = folly::fbstring>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> fbstring() & {
+    return {this->__fbthrift_field_fbstring, __isset.at(10), __isset.bit(10)};
+  }
+
+  template <typename..., typename T = folly::fbstring>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> fbstring() && {
+    return {static_cast<T&&>(this->__fbthrift_field_fbstring), __isset.at(10), __isset.bit(10)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::ManagedStringViewWithConversions>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> managed_string_view_ref() const& {
+    return {this->__fbthrift_field_managed_string_view, __isset.at(11), __isset.bit(11)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::ManagedStringViewWithConversions>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> managed_string_view_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_managed_string_view), __isset.at(11), __isset.bit(11)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::ManagedStringViewWithConversions>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> managed_string_view_ref() & {
+    return {this->__fbthrift_field_managed_string_view, __isset.at(11), __isset.bit(11)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::ManagedStringViewWithConversions>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> managed_string_view_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_managed_string_view), __isset.at(11), __isset.bit(11)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::ManagedStringViewWithConversions>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> managed_string_view() const& {
+    return {this->__fbthrift_field_managed_string_view, __isset.at(11), __isset.bit(11)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::ManagedStringViewWithConversions>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> managed_string_view() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_managed_string_view), __isset.at(11), __isset.bit(11)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::ManagedStringViewWithConversions>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> managed_string_view() & {
+    return {this->__fbthrift_field_managed_string_view, __isset.at(11), __isset.bit(11)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::ManagedStringViewWithConversions>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> managed_string_view() && {
+    return {static_cast<T&&>(this->__fbthrift_field_managed_string_view), __isset.at(11), __isset.bit(11)};
+  }
+
   bool get_booly() const {
     return __fbthrift_field_booly;
   }
@@ -2745,6 +2845,36 @@ class PrimitiveStruct final  {
   ::test::fixtures::basic-python-capi::VapidStruct& set_empty_struct(T_PrimitiveStruct_empty_struct_struct_setter&& empty_struct_) {
     empty_struct_ref() = std::forward<T_PrimitiveStruct_empty_struct_struct_setter>(empty_struct_);
     return __fbthrift_field_empty_struct;
+  }
+
+  const folly::fbstring& get_fbstring() const& {
+    return __fbthrift_field_fbstring;
+  }
+
+  folly::fbstring get_fbstring() && {
+    return std::move(__fbthrift_field_fbstring);
+  }
+
+  template <typename T_PrimitiveStruct_fbstring_struct_setter = folly::fbstring>
+  [[deprecated("Use `FOO.fbstring_ref() = BAR;` instead of `FOO.set_fbstring(BAR);`")]]
+  folly::fbstring& set_fbstring(T_PrimitiveStruct_fbstring_struct_setter&& fbstring_) {
+    fbstring_ref() = std::forward<T_PrimitiveStruct_fbstring_struct_setter>(fbstring_);
+    return __fbthrift_field_fbstring;
+  }
+
+  const ::apache::thrift::ManagedStringViewWithConversions& get_managed_string_view() const& {
+    return __fbthrift_field_managed_string_view;
+  }
+
+  ::apache::thrift::ManagedStringViewWithConversions get_managed_string_view() && {
+    return std::move(__fbthrift_field_managed_string_view);
+  }
+
+  template <typename T_PrimitiveStruct_managed_string_view_struct_setter = ::apache::thrift::ManagedStringViewWithConversions>
+  [[deprecated("Use `FOO.managed_string_view_ref() = BAR;` instead of `FOO.set_managed_string_view(BAR);`")]]
+  ::apache::thrift::ManagedStringViewWithConversions& set_managed_string_view(T_PrimitiveStruct_managed_string_view_struct_setter&& managed_string_view_) {
+    managed_string_view_ref() = std::forward<T_PrimitiveStruct_managed_string_view_struct_setter>(managed_string_view_);
+    return __fbthrift_field_managed_string_view;
   }
 
   template <class Protocol_>

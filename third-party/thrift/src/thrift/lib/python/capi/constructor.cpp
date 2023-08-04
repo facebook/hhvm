@@ -21,18 +21,6 @@ namespace apache {
 namespace thrift {
 namespace python {
 namespace capi {
-namespace {
-
-// use *FromStringAndSize in case not null-terminated
-PyObject* PyBytes_FromCppString(const std::string& str) {
-  return PyBytes_FromStringAndSize(str.data(), str.size());
-}
-
-PyObject* PyUnicode_FromCppString(const std::string& str) {
-  return PyUnicode_FromStringAndSize(str.c_str(), str.size());
-}
-
-} // namespace
 
 // In simplest case, returning nullptr via cython signals an error, so no
 // need to check capi for error in cpp.
@@ -53,15 +41,6 @@ SPECIALIZE_CAPI(bool, PyBool_FromLong)
 SPECIALIZE_CAPI(float, PyFloat_FromDouble)
 SPECIALIZE_CAPI(double, PyFloat_FromDouble)
 #undef SPECIALIZE_CAPI
-
-#define SPECIALIZE_CAPI_STR(cpp_type, py_type, capi_fn)      \
-  PyObject* FOLLY_NULLABLE Constructor<py_type>::operator()( \
-      const cpp_type& val) {                                 \
-    return capi_fn(val);                                     \
-  }
-SPECIALIZE_CAPI_STR(std::string, Bytes, PyBytes_FromCppString)
-SPECIALIZE_CAPI_STR(std::string, String, PyUnicode_FromCppString)
-#undef SPECIALIZE_CAPI_STR
 
 PyObject* Constructor<folly::IOBuf>::operator()(const folly::IOBuf& val) {
   /* No need to check return value here because */

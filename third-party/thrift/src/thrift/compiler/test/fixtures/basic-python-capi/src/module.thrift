@@ -23,9 +23,11 @@ cpp_include "<deque>"
 cpp_include "<unordered_map>"
 cpp_include "<unordered_set>"
 cpp_include "<folly/container/F14Set.h>"
+cpp_include "<folly/FBString.h>"
 cpp_include "<folly/container/F14Map.h>"
 cpp_include "<folly/small_vector.h>"
 cpp_include "thrift/test/python_capi/adapter.h"
+cpp_include "thrift/lib/cpp2/util/ManagedStringView.h"
 
 package "test.dev/fixtures/basic-python-capi"
 
@@ -106,6 +108,10 @@ struct PrimitiveStruct {
   15: IOBufPtr pointbuffy;
   18: MyStruct patched_struct;
   19: EmptyStruct empty_struct;
+  @cpp.Type{name = "folly::fbstring"}
+  20: binary fbstring;
+  @cpp.Type{name = "::apache::thrift::ManagedStringViewWithConversions"}
+  21: string managed_string_view;
 }
 
 @python.MarshalCapi

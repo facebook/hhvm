@@ -1361,6 +1361,34 @@ _readField_empty_struct:
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
           19,
+          20,
+          apache::thrift::protocol::T_STRING))) {
+    goto _loop;
+  }
+_readField_fbstring:
+  {
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, folly::fbstring>::readWithContext(*iprot, this->__fbthrift_field_fbstring, _readState);
+    
+  }
+ this->__isset.set(10, true);
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          20,
+          21,
+          apache::thrift::protocol::T_STRING))) {
+    goto _loop;
+  }
+_readField_managed_string_view:
+  {
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::apache::thrift::ManagedStringViewWithConversions>::readWithContext(*iprot, this->__fbthrift_field_managed_string_view, _readState);
+    
+  }
+ this->__isset.set(11, true);
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          21,
           0,
           apache::thrift::protocol::T_STOP))) {
     goto _loop;
@@ -1485,6 +1513,22 @@ _loop:
         goto _skip;
       }
     }
+    case 20:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRING))) {
+        goto _readField_fbstring;
+      } else {
+        goto _skip;
+      }
+    }
+    case 21:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRING))) {
+        goto _readField_managed_string_view;
+      } else {
+        goto _skip;
+      }
+    }
     default:
     {
 _skip:
@@ -1552,6 +1596,14 @@ uint32_t PrimitiveStruct::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("empty_struct", apache::thrift::protocol::T_STRUCT, 19);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::VapidStruct>::serializedSize<false>(*prot_, this->__fbthrift_field_empty_struct);
   }
+  {
+    xfer += prot_->serializedFieldSize("fbstring", apache::thrift::protocol::T_STRING, 20);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, folly::fbstring>::serializedSize<false>(*prot_, this->__fbthrift_field_fbstring);
+  }
+  {
+    xfer += prot_->serializedFieldSize("managed_string_view", apache::thrift::protocol::T_STRING, 21);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::apache::thrift::ManagedStringViewWithConversions>::serializedSize<false>(*prot_, this->__fbthrift_field_managed_string_view);
+  }
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -1611,6 +1663,14 @@ uint32_t PrimitiveStruct::serializedSizeZC(Protocol_ const* prot_) const {
   {
     xfer += prot_->serializedFieldSize("empty_struct", apache::thrift::protocol::T_STRUCT, 19);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::VapidStruct>::serializedSize<true>(*prot_, this->__fbthrift_field_empty_struct);
+  }
+  {
+    xfer += prot_->serializedFieldSize("fbstring", apache::thrift::protocol::T_STRING, 20);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, folly::fbstring>::serializedSize<true>(*prot_, this->__fbthrift_field_fbstring);
+  }
+  {
+    xfer += prot_->serializedFieldSize("managed_string_view", apache::thrift::protocol::T_STRING, 21);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::apache::thrift::ManagedStringViewWithConversions>::serializedSize<false>(*prot_, this->__fbthrift_field_managed_string_view);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -1718,6 +1778,20 @@ uint32_t PrimitiveStruct::write(Protocol_* prot_) const {
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 19, kPrevFieldId>(*prot_, "empty_struct", previousFieldHasValue);
     previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::VapidStruct>::write(*prot_, this->__fbthrift_field_empty_struct);
+    xfer += prot_->writeFieldEnd();
+  }
+  {
+    constexpr int16_t kPrevFieldId = 19;
+    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRING, 20, kPrevFieldId>(*prot_, "fbstring", previousFieldHasValue);
+    previousFieldHasValue = true;
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, folly::fbstring>::write(*prot_, this->__fbthrift_field_fbstring);
+    xfer += prot_->writeFieldEnd();
+  }
+  {
+    constexpr int16_t kPrevFieldId = 20;
+    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRING, 21, kPrevFieldId>(*prot_, "managed_string_view", previousFieldHasValue);
+    previousFieldHasValue = true;
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::apache::thrift::ManagedStringViewWithConversions>::write(*prot_, this->__fbthrift_field_managed_string_view);
     xfer += prot_->writeFieldEnd();
   }
   xfer += prot_->writeFieldStop();

@@ -198,7 +198,7 @@ StructMetadata<::test::fixtures::basic-python-capi::PrimitiveStruct>::gen(Thrift
   module_PrimitiveStruct.name() = "module.PrimitiveStruct";
   module_PrimitiveStruct.is_union() = false;
   static const auto* const
-  module_PrimitiveStruct_fields = new std::array<EncodedThriftField, 13>{{
+  module_PrimitiveStruct_fields = new std::array<EncodedThriftField, 15>{{
     {1, "booly", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}},
     {2, "charry", false, std::make_unique<Typedef>("module.signed_byte", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
     {3, "shorty", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"name", cvString("uint16_t")}}).cv_struct_ref(), }},
@@ -212,6 +212,8 @@ StructMetadata<::test::fixtures::basic-python-capi::PrimitiveStruct>::gen(Thrift
     {15, "pointbuffy", false, std::make_unique<Typedef>("module.IOBufPtr", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"name", cvString("std::unique_ptr<folly::IOBuf>")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{}},
     {18, "patched_struct", false, std::make_unique<Struct<::test::fixtures::basic-python-capi::MyStruct>>("module.MyStruct"), std::vector<ThriftConstStruct>{}},
     {19, "empty_struct", false, std::make_unique<Struct<::test::fixtures::basic-python-capi::VapidStruct>>("module.EmptyStruct"), std::vector<ThriftConstStruct>{}},
+    {20, "fbstring", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"name", cvString("folly::fbstring")}}).cv_struct_ref(), }},
+    {21, "managed_string_view", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"name", cvString("::apache::thrift::ManagedStringViewWithConversions")}}).cv_struct_ref(), }},
   }};
   for (const auto& f : *module_PrimitiveStruct_fields) {
     ::apache::thrift::metadata::ThriftField field;

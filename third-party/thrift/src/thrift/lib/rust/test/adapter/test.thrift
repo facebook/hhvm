@@ -99,15 +99,17 @@ struct Foo {
   @rust.Adapter{name = "::adapters::IdentityAdapter<>"}
   9: string ident_field;
   10: AdaptedString typedef_str_val;
-  11: PassThroughAdaptedI64 pass_through_adapted_i64 = 42;
+  11: AdaptedString typedef_str_val_default = "Hello";
+  12: optional AdaptedString typedef_str_val_optional;
+  13: PassThroughAdaptedI64 pass_through_adapted_i64 = 42;
   @rust.Adapter{name = "::adapters::IdentityAdapter<>"}
-  12: PassThroughAdaptedI64 pass_through_adapted_and_field_i64 = 2;
-  13: list<PassThroughAdaptedI64> adapted_int_list = [1, 2, 3];
-  14: list<AdaptedString> adapted_string_list = ["hello", "world"];
-  15: list<list<list<AdaptedString>>> nested_adapted_string_list = [
+  14: PassThroughAdaptedI64 pass_through_adapted_and_field_i64 = 2;
+  15: list<PassThroughAdaptedI64> adapted_int_list = [1, 2, 3];
+  16: list<AdaptedString> adapted_string_list = ["hello", "world"];
+  17: list<list<list<AdaptedString>>> nested_adapted_string_list = [
     [["hello", "world"]],
   ];
-  16: map<
+  18: map<
     string,
     list<list<NestedPassThroughAdaptedI64>>
   > nested_adapted_int_map = {
@@ -115,17 +117,17 @@ struct Foo {
     "world": [[[7, 8, 9]]],
   };
   @rust.Adapter{name = "crate::types::AdaptedStringListIdentityAdapter"}
-  17: list<AdaptedString> field_adapted_adapted_string_list = ["zucc"];
-  18: Asset adapted_struct;
+  19: list<AdaptedString> field_adapted_adapted_string_list = ["zucc"];
+  20: Asset adapted_struct;
   @rust.Adapter{name = "crate::types::AdaptedAssetIdentityAdapter"}
-  19: Asset double_adapted_struct;
-  20: list<Asset> adapted_struct_list = [{"type_": AssetType.LAPTOP, "id": 10}];
-  21: AdaptedListNewType adapted_list_new_type = ["hi", "there"];
-  22: map<
+  21: Asset double_adapted_struct;
+  22: list<Asset> adapted_struct_list = [{"type_": AssetType.LAPTOP, "id": 10}];
+  23: AdaptedListNewType adapted_list_new_type = ["hi", "there"];
+  24: map<
     AdaptedString,
     WrappedAdaptedWrappedAdaptedBytes
   > map_with_adapted_key_val = {"what": "are those?"};
-  23: map<
+  25: map<
     WrappedAdaptedString,
     WrappedAdaptedWrappedAdaptedBytes
   > map_with_adapted_wrapped_key_val = {"marco": "polo"};

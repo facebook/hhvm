@@ -55,6 +55,11 @@ fn test_foo_default() {
         assert_eq!(default_foo.ident_field, "".to_string());
         assert_eq!(default_foo.typedef_str_val, CustomString("".to_string()));
         assert_eq!(
+            default_foo.typedef_str_val_default,
+            CustomString("Hello".to_string())
+        );
+        assert_eq!(default_foo.typedef_str_val_optional, None);
+        assert_eq!(
             default_foo.pass_through_adapted_i64,
             NonZeroI64::new(42).unwrap()
         );
@@ -146,6 +151,7 @@ fn test_foo_default() {
           "field_checked": "",
           "ident_field": "",
           "typedef_str_val": "",
+          "typedef_str_val_default": "Hello",
           "pass_through_adapted_i64": 42,
           "pass_through_adapted_and_field_i64": 2,
           "adapted_int_list": [1, 2, 3],
@@ -178,6 +184,9 @@ fn test_foo_deser() {
           "str_val_adapted": "python",
           "str_val_adapted_default": "c++",
           "str_val_adapted_optional": "golang",
+          "typedef_str_val": "Python",
+          "typedef_str_val_default": "C++",
+          "typedef_str_val_optional": "Golang",
           "validated_int_val": 42,
           "list_val": ["zzz", "hi", "there"],
           "pass_through_adapted_and_field_i64": 100
@@ -192,6 +201,12 @@ fn test_foo_deser() {
     assert_eq!(
         foo.str_val_adapted_optional,
         Some(CustomString("golang".to_string()))
+    );
+    assert_eq!(foo.typedef_str_val, CustomString("Python".to_string()));
+    assert_eq!(foo.typedef_str_val_default, CustomString("C++".to_string()));
+    assert_eq!(
+        foo.typedef_str_val_optional,
+        Some(CustomString("Golang".to_string()))
     );
     assert_eq!(foo.validated_int_val, NonZeroI64::new(42).unwrap());
     assert_eq!(
@@ -245,6 +260,8 @@ fn test_foo_ser() {
         ]),
         ident_field: "foobar".to_string(),
         typedef_str_val: CustomString("haskell".to_string()),
+        typedef_str_val_default: CustomString("ruby".to_string()),
+        typedef_str_val_optional: Some(CustomString("visualbasic".to_string())),
         pass_through_adapted_i64: NonZeroI64::new(13).unwrap(),
         pass_through_adapted_and_field_i64: NonZeroI64::new(14).unwrap(),
         adapted_int_list: vec![NonZeroI64::new(15).unwrap()],
@@ -265,6 +282,8 @@ fn test_foo_ser() {
           "field_checked": "",
           "ident_field": "foobar",
           "typedef_str_val": "haskell",
+          "typedef_str_val_default": "ruby",
+          "typedef_str_val_optional": "visualbasic",
           "pass_through_adapted_i64": 13,
           "pass_through_adapted_and_field_i64": 14,
           "adapted_int_list": [15],

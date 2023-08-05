@@ -43,7 +43,7 @@ struct base_annotation_builder {
  protected:
   // Abstract base class
   ~base_annotation_builder() = default;
-  base_annotation_builder(t_program& p, std::string name, fmt::string_view uri)
+  base_annotation_builder(t_program& p, std::string name, std::string_view uri)
       : program(p),
         // TODO(afuller): Consider upgrading to *find or* add.
         type(p.add_def(std::make_unique<t_struct>(&p, std::move(name)), uri)) {}

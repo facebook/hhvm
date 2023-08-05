@@ -46,11 +46,11 @@ namespace compiler {
 namespace cpp2 {
 namespace {
 
-bool contains(fmt::string_view s, fmt::string_view what) {
+bool contains(std::string_view s, std::string_view what) {
   return std::search(s.begin(), s.end(), what.begin(), what.end()) != s.end();
 }
 
-fmt::string_view value_or_empty(const std::string* value) {
+std::string_view value_or_empty(const std::string* value) {
   return value ? *value : std::string_view("");
 }
 
@@ -365,7 +365,7 @@ bool is_orderable(t_type const& type) {
   return is_orderable(memo, type);
 }
 
-fmt::string_view get_type(const t_type* type) {
+std::string_view get_type(const t_type* type) {
   return value_or_empty(gen::cpp::type_resolver::find_type(*type));
 }
 

@@ -20,6 +20,7 @@
 #include <map>
 #include <stack>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -90,7 +91,7 @@ bool is_orderable(const t_type& type);
  * Return the cpp.type/cpp2.type attribute or empty string if nothing set.
  */
 // TODO(afuller): Replace with type_resolver::get_type_name.
-fmt::string_view get_type(const t_type* type);
+std::string_view get_type(const t_type* type);
 
 /**
  * If the cpp_type is std::unique_ptr<folly::IOBuf> the C++ compiler implicitly

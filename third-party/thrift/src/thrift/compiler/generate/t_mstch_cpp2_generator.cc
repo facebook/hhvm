@@ -20,6 +20,7 @@
 #include <memory>
 #include <queue>
 #include <set>
+#include <string_view>
 #include <vector>
 
 #include <boost/algorithm/string/replace.hpp>
@@ -2133,7 +2134,7 @@ class cpp_mstch_enum : public mstch_enum {
         {"cpp2.deprecated_enum_unscoped", "cpp.deprecated_enum_unscoped"});
   }
 
-  fmt::string_view cpp_enum_type(const t_enum& e) {
+  std::string_view cpp_enum_type(const t_enum& e) {
     if (const auto* annot =
             e.find_structured_annotation_or_null(kCppEnumTypeUri)) {
       const auto& type = annot->get_value_from_structured_annotation("type");
@@ -2160,7 +2161,7 @@ class cpp_mstch_enum : public mstch_enum {
         !type.empty()) {
       return type;
     }
-    return fmt::string_view("");
+    return "";
   }
 };
 

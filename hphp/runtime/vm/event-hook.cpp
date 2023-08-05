@@ -500,7 +500,7 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
    * intercepted during static analysis should actually be
    * intercepted.
    */
-  if (RuntimeOption::RepoAuthoritative && !(func->attrs() & AttrInterceptable)) {
+  if (RuntimeOption::RepoAuthoritative && !func->isInterceptable()) {
       raise_error("fb_intercept2 was used on a non-interceptable function (%s) "
                   "in RepoAuthoritative mode", func->fullName()->data());
   }

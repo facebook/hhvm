@@ -166,7 +166,7 @@ bool canInlineAt(SrcKey callSK, SrcKey entry, AnnotationData* annotations) {
     return traceRefusal(callSK, callee, "function is renamable",
                         annotations);
   }
-  if (callee->attrs() & AttrInterceptable) {
+  if (callee->isInterceptable()) {
     return traceRefusal(callSK, callee, "callee is interceptable", annotations);
   }
 

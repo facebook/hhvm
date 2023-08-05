@@ -684,32 +684,16 @@ int FuncEmitter::parseNativeAttributes(Attr& attrs_) const {
   return ret;
 }
 
-Attr FuncEmitter::fix_attrs(Attr a) const {
-  if (RuntimeOption::RepoAuthoritative) return a;
-
-  a = Attr(a & ~AttrInterceptable);
-
-  if (RuntimeOption::EvalJitEnableRenameFunction) {
-    return a | AttrInterceptable;
-  }
-  return a;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Serialization/Deserialization
 
 template<class SerDe>
 void FuncEmitter::serdeMetaData(SerDe& sd) {
   // NOTE: name and a few other fields currently handled outside of this.
-  Attr a = attrs;
-
-  if (!SerDe::deserializing) {
-    a = fix_attrs(attrs);
-  }
 
   sd(line1)
     (line2)
-    (a)
+    (attrs)
     (m_bclen)
     (staticCoeffects)
     (repoReturnType)
@@ -745,8 +729,6 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
     (originalModuleName)
     (coeffectRules)
     ;
-
-  if (SerDe::deserializing) attrs = fix_attrs(a);
 }
 
 template void FuncEmitter::serdeMetaData<>(BlobDecoder&);

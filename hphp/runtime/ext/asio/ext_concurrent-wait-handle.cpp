@@ -116,6 +116,8 @@ void c_ConcurrentWaitHandle::onUnblocked(uint32_t idx) {
         try {
           detectCycle(child);
         } catch (const Object& cycle_exception) {
+          assertx(cycle_exception->instanceof(SystemLib::s_ThrowableClass));
+          throwable_recompute_backtrace_from_wh(cycle_exception.get(), this);
           markAsFailed(cycle_exception);
         }
         return;

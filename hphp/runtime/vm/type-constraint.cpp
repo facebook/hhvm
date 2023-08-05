@@ -63,7 +63,7 @@ void TypeConstraint::init() {
     assertx(getAnnotDataType(m_type) != KindOfPersistentString);
     return;
   }
-  if (m_flags & Flags::Resolved) {
+  if (m_flags & TypeConstraintFlags::Resolved) {
     TRACE(5, "TypeConstraint: this %p pre-resolved type %s, treating as %s\n",
           this, m_typeName->data(), tname(getAnnotDataType(m_type)).c_str());
   } else {
@@ -103,7 +103,7 @@ std::string TypeConstraint::displayName(const Class* context /*= nullptr*/,
   if (isSoft()) {
     name += '@';
   }
-  if ((m_flags & Flags::DisplayNullable) && isExtended()) {
+  if ((m_flags & TypeConstraintFlags::DisplayNullable) && isExtended()) {
     name += '?';
   }
 
@@ -143,7 +143,7 @@ std::string TypeConstraint::displayName(const Class* context /*= nullptr*/,
   }
   name += str;
 
-  if (extra && m_flags & Flags::Resolved) {
+  if (extra && m_flags & TypeConstraintFlags::Resolved) {
     const char* str = nullptr;
     switch (m_type) {
       case AnnotType::Nothing:  str = "nothing"; break;
@@ -1070,15 +1070,15 @@ void TypeConstraint::resolveType(AnnotType t,
   assertx(IMPLIES(t == AnnotType::Object, clsName != nullptr));
   assertx(IMPLIES(clsName != nullptr,
                   t == AnnotType::Object || enumSupportsAnnot(t)));
-  auto flags = m_flags | Flags::Resolved;
-  if (nullable) flags |= Flags::Nullable;
-  m_flags = static_cast<Flags>(flags);
+  auto flags = m_flags | TypeConstraintFlags::Resolved;
+  if (nullable) flags |= TypeConstraintFlags::Nullable;
+  m_flags = static_cast<TypeConstraintFlags>(flags);
   m_type = t;
   m_clsName = clsName;
 }
 
 void TypeConstraint::unresolve() {
-  m_flags = static_cast<Flags>(m_flags & ~Flags::Resolved);
+  m_flags = static_cast<TypeConstraintFlags>(m_flags & ~TypeConstraintFlags::Resolved);
   m_type = AnnotType::Unresolved;
   m_clsName = nullptr;
 }

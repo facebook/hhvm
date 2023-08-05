@@ -36,8 +36,6 @@ struct StringData;
 
 namespace HPHP {
 
-using Flags = TypeConstraintFlags;
-
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -65,7 +63,7 @@ struct TypeConstraint {
     init();
   }
 
-  TypeConstraint(const StringData* typeName, Flags flags)
+  TypeConstraint(const StringData* typeName, TypeConstraintFlags flags)
     : m_flags(flags)
     , m_clsName(nullptr)
     , m_typeName(typeName)
@@ -79,7 +77,7 @@ struct TypeConstraint {
     sd(m_typeName)
       (m_flags)
       ;
-    if (m_flags & Flags::Resolved) {
+    if (m_flags & TypeConstraintFlags::Resolved) {
       sd(m_type)
         (m_clsName)
         ;
@@ -99,8 +97,8 @@ struct TypeConstraint {
   void resolveType(AnnotType t, bool nullable, LowStringPtr clsName);
   void unresolve();
 
-  void addFlags(Flags flags) {
-    m_flags = static_cast<Flags>(m_flags | flags);
+  void addFlags(TypeConstraintFlags flags) {
+    m_flags = static_cast<TypeConstraintFlags>(m_flags | flags);
   }
 
   /*
@@ -124,7 +122,7 @@ struct TypeConstraint {
     return m_namedType;
   }
   const NamedType* anyNamedType() const { return m_namedType; }
-  Flags flags() const { return m_flags; }
+  TypeConstraintFlags flags() const { return m_flags; }
 
   /*
    * Access to the "meta type" for this TypeConstraint.
@@ -409,7 +407,7 @@ private:
   // alias or enum and test for a different DataType (see annotCompat()
   // for details).
   Type m_type;
-  Flags m_flags;
+  TypeConstraintFlags m_flags;
   LowStringPtr m_clsName;   // valid iff isObject() or if an enum
   LowStringPtr m_typeName;
   LowPtr<const NamedType> m_namedType;

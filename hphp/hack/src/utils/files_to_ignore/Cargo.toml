@@ -9,4 +9,4 @@ edition = "2021"
 path = "../files_to_ignore.rs"
 
 [dependencies]
-regex = "1.6.0"
+regex = "1.9.2"

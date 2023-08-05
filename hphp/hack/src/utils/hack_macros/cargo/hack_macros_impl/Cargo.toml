@@ -18,7 +18,7 @@ oxidized = { version = "0.0.0", path = "../../../../oxidized" }
 parser_core_types = { version = "0.0.0", path = "../../../../parser/cargo/core_types" }
 proc-macro2 = { version = "1.0.64", features = ["span-locations"] }
 quote = "1.0.29"
-regex = "1.6.0"
+regex = "1.9.2"
 relative_path = { version = "0.0.0", path = "../../../rust/relative_path" }
 rust_parser_errors = { version = "0.0.0", path = "../../../../parser/cargo/errors" }
 serde = { version = "1.0.176", features = ["derive", "rc"] }

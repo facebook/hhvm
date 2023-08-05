@@ -21,6 +21,6 @@ hhbc_string_utils = { version = "0.0.0", path = "../utils/cargo/hhbc_string_util
 lazy_static = "1.4"
 naming_special_names_rust = { version = "0.0.0", path = "../../naming" }
 oxidized = { version = "0.0.0", path = "../../oxidized" }
-regex = "1.6.0"
+regex = "1.9.2"
 thiserror = "1.0.43"
 write_bytes = { version = "0.0.0", path = "../../utils/write_bytes/write_bytes" }

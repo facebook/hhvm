@@ -13,5 +13,5 @@ bstr = { version = "1.4.0", features = ["serde", "std", "unicode"] }
 hex = "0.4.3"
 md-5 = "0.10"
 once_cell = "1.12"
-regex = "1.6.0"
+regex = "1.9.2"
 thiserror = "1.0.43"

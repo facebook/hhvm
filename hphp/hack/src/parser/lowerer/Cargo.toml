@@ -21,7 +21,7 @@ naming_special_names_rust = { version = "0.0.0", path = "../../naming" }
 ocaml_helper = { version = "0.0.0", path = "../../utils/ocaml_helper" }
 oxidized = { version = "0.0.0", path = "../../oxidized" }
 parser_core_types = { version = "0.0.0", path = "../cargo/core_types" }
-regex = "1.6.0"
+regex = "1.9.2"
 relative_path = { version = "0.0.0", path = "../../utils/rust/relative_path" }
 rescan_trivia = { version = "0.0.0", path = "../api/cargo/rescan_trivia" }
 stack_limit = { version = "0.0.0", path = "../../utils/stack_limit" }

@@ -12,6 +12,7 @@
  *
  *  @generated
  */
+include "thrift/annotation/cpp.thrift"
 include "mcrouter/lib/network/gen/Common.thrift"
 include "mcrouter/lib/carbon/test/gen/CarbonThriftTest.thrift"
 
@@ -23,18 +24,25 @@ namespace cpp2 carbon.test.thrift
 namespace py3 carbon.test.thrift
 
 service CarbonThriftTest extends fb303.FacebookService {
-  CustomReply_5953 customRequest(1:CustomRequest_7678 request)
-  DummyThriftReply_9518 thrift_test(1:DummyThriftRequest_7786 request)
-  ThriftTestReply_4178 test(1:ThriftTestRequest_4420 request)
-  McVersionReply_3505 mcVersion(1:McVersionRequest_1694 request)
+  CarbonThriftTest_CustomReply customRequest(1: CarbonThriftTest_CustomRequest request)
+  CarbonThriftTest_DummyThriftReply thrift_test(1: CarbonThriftTest_DummyThriftRequest request)
+  CarbonThriftTest_ThriftTestReply test(1: CarbonThriftTest_ThriftTestRequest request)
+  Common_McVersionReply mcVersion(1: Common_McVersionRequest request)
 }
 
-// The following were automatically generated and may benefit from renaming.
-typedef CarbonThriftTest.CustomReply (cpp.type = "carbon::test::CustomReply") CustomReply_5953
-typedef CarbonThriftTest.CustomRequest (cpp.type = "carbon::test::CustomRequest") CustomRequest_7678
-typedef CarbonThriftTest.DummyThriftReply (cpp.type = "carbon::test::DummyThriftReply") DummyThriftReply_9518
-typedef CarbonThriftTest.DummyThriftRequest (cpp.type = "carbon::test::DummyThriftRequest") DummyThriftRequest_7786
-typedef Common.McVersionReply (cpp.type = "facebook::memcache::McVersionReply") McVersionReply_3505
-typedef Common.McVersionRequest (cpp.type = "facebook::memcache::McVersionRequest") McVersionRequest_1694
-typedef CarbonThriftTest.ThriftTestReply (cpp.type = "carbon::test::ThriftTestReply") ThriftTestReply_4178
-typedef CarbonThriftTest.ThriftTestRequest (cpp.type = "carbon::test::ThriftTestRequest") ThriftTestRequest_4420
+@cpp.Type{name = "carbon::test::CustomReply"}
+typedef CarbonThriftTest.CustomReply CarbonThriftTest_CustomReply
+@cpp.Type{name = "carbon::test::CustomRequest"}
+typedef CarbonThriftTest.CustomRequest CarbonThriftTest_CustomRequest
+@cpp.Type{name = "carbon::test::DummyThriftReply"}
+typedef CarbonThriftTest.DummyThriftReply CarbonThriftTest_DummyThriftReply
+@cpp.Type{name = "carbon::test::DummyThriftRequest"}
+typedef CarbonThriftTest.DummyThriftRequest CarbonThriftTest_DummyThriftRequest
+@cpp.Type{name = "carbon::test::ThriftTestReply"}
+typedef CarbonThriftTest.ThriftTestReply CarbonThriftTest_ThriftTestReply
+@cpp.Type{name = "carbon::test::ThriftTestRequest"}
+typedef CarbonThriftTest.ThriftTestRequest CarbonThriftTest_ThriftTestRequest
+@cpp.Type{name = "facebook::memcache::McVersionReply"}
+typedef Common.McVersionReply Common_McVersionReply
+@cpp.Type{name = "facebook::memcache::McVersionRequest"}
+typedef Common.McVersionRequest Common_McVersionRequest

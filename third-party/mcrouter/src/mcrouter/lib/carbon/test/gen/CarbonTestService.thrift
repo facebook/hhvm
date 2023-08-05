@@ -12,6 +12,7 @@
  *
  *  @generated
  */
+include "thrift/annotation/cpp.thrift"
 include "mcrouter/lib/network/gen/Common.thrift"
 include "mcrouter/lib/carbon/test/gen/CarbonTest.thrift"
 
@@ -23,15 +24,20 @@ namespace cpp2 carbon.test.thrift
 namespace py3 carbon.test.thrift
 
 service CarbonTest extends fb303.FacebookService {
-  TestReply_472 test(1:TestRequest_3222 request) (thread = "eb")
-  TestReplyStringKey_1518 testStringKey(1:TestRequestStringKey_9666 request) (thread = "eb")
-  McVersionReply_547 mcVersion(1:McVersionRequest_3066 request) (thread = "eb")
+  CarbonTest_TestReply test(1: CarbonTest_TestRequest request) (thread = "eb")
+  CarbonTest_TestReplyStringKey testStringKey(1: CarbonTest_TestRequestStringKey request) (thread = "eb")
+  Common_McVersionReply mcVersion(1: Common_McVersionRequest request) (thread = "eb")
 }
 
-// The following were automatically generated and may benefit from renaming.
-typedef Common.McVersionReply (cpp.type = "facebook::memcache::McVersionReply") McVersionReply_547
-typedef Common.McVersionRequest (cpp.type = "facebook::memcache::McVersionRequest") McVersionRequest_3066
-typedef CarbonTest.TestReplyStringKey (cpp.type = "carbon::test::TestReplyStringKey") TestReplyStringKey_1518
-typedef CarbonTest.TestReply (cpp.type = "carbon::test::TestReply") TestReply_472
-typedef CarbonTest.TestRequestStringKey (cpp.type = "carbon::test::TestRequestStringKey") TestRequestStringKey_9666
-typedef CarbonTest.TestRequest (cpp.type = "carbon::test::TestRequest") TestRequest_3222
+@cpp.Type{name = "carbon::test::TestReply"}
+typedef CarbonTest.TestReply CarbonTest_TestReply
+@cpp.Type{name = "carbon::test::TestRequest"}
+typedef CarbonTest.TestRequest CarbonTest_TestRequest
+@cpp.Type{name = "carbon::test::TestReplyStringKey"}
+typedef CarbonTest.TestReplyStringKey CarbonTest_TestReplyStringKey
+@cpp.Type{name = "carbon::test::TestRequestStringKey"}
+typedef CarbonTest.TestRequestStringKey CarbonTest_TestRequestStringKey
+@cpp.Type{name = "facebook::memcache::McVersionReply"}
+typedef Common.McVersionReply Common_McVersionReply
+@cpp.Type{name = "facebook::memcache::McVersionRequest"}
+typedef Common.McVersionRequest Common_McVersionRequest

@@ -1,25 +1,31 @@
 use std::path::Path;
 use std::path::PathBuf;
+use std::process::Command;
 
 fn main() {
-    const ROOT_PATH: &str = "../../../../../..";
-
-    let root_path = Path::new(ROOT_PATH);
-    let hphp_path = root_path.join("hphp");
+    // Assumes the hack workspace 'fbcode/hphp/hack/src/Cargo.toml'.
+    let mut cargo_cmd = Command::new("cargo");
+    cargo_cmd.args(&["locate-project", "--workspace", "--message-format=plain"]);
+    let output = cargo_cmd.output().unwrap().stdout;
+    let hphp = Path::new(std::str::from_utf8(&output).unwrap().trim())
+        .ancestors()
+        .nth(3)
+        .unwrap();
+    let fbcode = hphp.parent().unwrap();
 
     let files = vec![
         PathBuf::from("ffi_bridge.rs"),
         PathBuf::from("ffi_bridge.cpp"),
         PathBuf::from("ffi_bridge.h"),
-        hphp_path.join("util/process-cpu.cpp"),
-        hphp_path.join("util/process-cpu.h"),
-        hphp_path.join("util/process-host.cpp"),
-        hphp_path.join("util/process-host.h"),
+        hphp.join("util/process-cpu.cpp"),
+        hphp.join("util/process-cpu.h"),
+        hphp.join("util/process-host.cpp"),
+        hphp.join("util/process-host.h"),
     ];
 
     cxx_build::bridge("ffi_bridge.rs")
         .files(files.iter().filter(is_cpp))
-        .include(&root_path)
+        .include(fbcode)
         .define("NO_HHVM", "1")
         .warnings(false)
         .cpp(true)

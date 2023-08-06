@@ -1,10 +1,16 @@
 use std::path::Path;
 use std::path::PathBuf;
+use std::process::Command;
 
 fn main() {
-    const ROOT_PATH: &str = "../../../../../..";
-
-    let root_path = Path::new(ROOT_PATH);
+    // Assume the hack workspace 'fbcode/hphp/hack/src/Cargo.toml'.
+    let mut cargo_cmd = Command::new("cargo");
+    cargo_cmd.args(&["locate-project", "--workspace", "--message-format=plain"]);
+    let output = cargo_cmd.output().unwrap().stdout;
+    let fbcode = Path::new(std::str::from_utf8(&output).unwrap().trim())
+        .ancestors()
+        .nth(4)
+        .unwrap();
 
     let files = vec![
         PathBuf::from("hhvm_hhbc_defs_ffi.rs"),
@@ -14,7 +20,7 @@ fn main() {
 
     cxx_build::bridge("hhvm_hhbc_defs_ffi.rs")
         .files(files.iter().filter(is_cpp))
-        .include(&root_path)
+        .include(fbcode)
         .cpp(true)
         .flag("-std=c++17")
         .compile("hhvm_hhbc_defs");

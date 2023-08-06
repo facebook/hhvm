@@ -93,13 +93,12 @@ class t_program : public t_named {
     return add_def(std::make_unique<T>(std::forward<Args>(args)...));
   }
 
-  // Concrete instantiation of a templated type.
-  node_list_view<t_templated_type> type_instantiations() { return type_insts_; }
-  node_list_view<const t_templated_type> type_instantiations() const {
+  // Concrete instantiation of container types.
+  node_list_view<t_container> type_instantiations() { return type_insts_; }
+  node_list_view<const t_container> type_instantiations() const {
     return type_insts_;
   }
-  t_type_ref add_type_instantiation(
-      std::unique_ptr<t_templated_type> type_inst) {
+  t_type_ref add_type_instantiation(std::unique_ptr<t_container> type_inst) {
     assert(type_inst != nullptr);
     return *type_insts_.emplace_back(std::move(type_inst));
   }
@@ -111,11 +110,11 @@ class t_program : public t_named {
 
   void add_unnamed_type(std::unique_ptr<t_type> ut) {
     assert(ut != nullptr);
-    // Should use add_type_instantiation
-    assert(dynamic_cast<t_templated_type*>(ut.get()) == nullptr);
-    // Should use add_placeholder_typedef
+    // Should use add_type_instantiation.
+    assert(dynamic_cast<t_container*>(ut.get()) == nullptr);
+    // Should use add_placeholder_typedef.
     assert(dynamic_cast<t_placeholder_typedef*>(ut.get()) == nullptr);
-    // Should use add_unnamed_typedef
+    // Should use add_unnamed_typedef.
     assert(dynamic_cast<t_typedef*>(ut.get()) == nullptr);
     nodes_.push_back(std::move(ut));
   }
@@ -277,7 +276,7 @@ class t_program : public t_named {
   // All the elements owned by this program.
   node_list<t_node> nodes_;
   node_list<t_named> definitions_;
-  node_list<t_templated_type> type_insts_;
+  node_list<t_container> type_insts_;
 
   /**
    * Components to generate code for

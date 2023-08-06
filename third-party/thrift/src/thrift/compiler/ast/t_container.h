@@ -22,7 +22,7 @@ namespace apache {
 namespace thrift {
 namespace compiler {
 
-class t_container : public t_templated_type {
+class t_container : public t_type {
  public:
   /**
    * The subset of t_type::type values that are containers.

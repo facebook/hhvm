@@ -39,8 +39,7 @@ class hoist_annotated_types {
   void run() {
     const_ast_visitor visitor;
 
-    visitor.add_type_instantiation_visitor(
-        [=](const auto& type) { visit_type(type); });
+    visitor.add_container_visitor([=](const auto& type) { visit_type(type); });
     visitor.add_function_visitor([=](const auto& f) { visit_function(f); });
     visitor.add_const_visitor([=](const auto& c) { visit_const(c); });
 
@@ -64,7 +63,7 @@ class hoist_annotated_types {
     fm_.apply_replacements();
   }
 
-  void visit_type(const t_templated_type& type) {
+  void visit_type(const t_container& type) {
     std::string replacement;
 
     switch (type.get_type_value()) {
@@ -115,12 +114,8 @@ class hoist_annotated_types {
             maybe_create_typedef(t.val_type()));
         break;
       }
-      case t_type::type::t_stream:
-      case t_type::type::t_sink:
-        // Handled in visit_function.
-        break;
       default:
-        throw std::runtime_error("Unknown templated type");
+        throw std::runtime_error("Unknown container type");
     }
     auto range = type.src_range();
     fm_.add({range.begin.offset(), range.end.offset(), replacement});
@@ -219,7 +214,7 @@ class hoist_annotated_types {
     if (ptr->annotations().empty()) {
       return false;
     }
-    if (dynamic_cast<const t_templated_type*>(ptr)) {
+    if (dynamic_cast<const t_container*>(ptr)) {
       return true;
     }
     if (dynamic_cast<const t_base_type*>(ptr)) {

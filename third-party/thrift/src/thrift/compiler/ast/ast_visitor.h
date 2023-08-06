@@ -129,13 +129,6 @@ class basic_ast_visitor {
     add_map_visitor(std::forward<V>(visitor));
   }
 
-  template <typename V>
-  void add_type_instantiation_visitor(V&& visitor) {
-    add_container_visitor(visitor);
-    add_sink_visitor(visitor);
-    add_stream_response_visitor(std::forward<V>(visitor));
-  }
-
   FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T_(program) {
     begin_visit(program_visitors_, node, args...);
     visit_children_ptrs(node.services(), args...);
@@ -259,7 +252,7 @@ class basic_ast_visitor {
     end_visit(node, args...);
   }
 
-  // Templated type instantiations.
+  // Container types.
   FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T_(set) {
     begin_visit(set_visitors_, node, args...);
     end_visit(node, args...);

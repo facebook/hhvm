@@ -274,7 +274,7 @@ void normalize_return_type(
   }
 
   size_t response_pos = 0;
-  t_templated_type* sink_or_stream = node.sink_or_stream();
+  t_type* sink_or_stream = node.sink_or_stream();
   if (auto* interaction = dynamic_cast<const t_interaction*>(&*types.front())) {
     // Old syntax treats a returned interaction as a response.
     if (node.is_interaction_constructor()) {

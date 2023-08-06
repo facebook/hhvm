@@ -18,13 +18,9 @@
 
 #include <stdint.h>
 
-#include <cstring>
-#include <map>
-#include <sstream>
 #include <stdexcept>
 #include <string>
-
-#include <boost/optional.hpp>
+#include <utility>
 
 #include <thrift/compiler/ast/t_named.h>
 
@@ -182,19 +178,12 @@ class t_type : public t_named {
   const t_program* get_program() const { return program(); }
 };
 
-// The base class for a type that is parametrized by other types.
-class t_templated_type : public t_type {
- protected:
-  using t_type::t_type;
-};
-
 /**
  * A reference to a thrift type.
  *
  * Type references are different from other references because they can be
  * annotated and unresolved.
  *
- * TODO(afuller): Make t_type_ref annotatable and remove anonymous types.
  * TODO(afuller): Make t_type_ref support an 'unresolved' state, where only the
  * ident is known, and remove placeholder typedefs.
  */

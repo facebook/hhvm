@@ -27,7 +27,7 @@ namespace apache {
 namespace thrift {
 namespace compiler {
 
-class t_stream_response : public t_templated_type {
+class t_stream_response : public t_type {
  public:
   explicit t_stream_response(t_type_ref elem_type)
       : elem_type_(std::move(elem_type)) {}

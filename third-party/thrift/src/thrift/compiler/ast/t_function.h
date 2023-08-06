@@ -60,7 +60,7 @@ class t_function final : public t_named {
   t_function(
       t_program* program,
       std::vector<t_type_ref> return_types,
-      std::unique_ptr<t_templated_type> sink_or_stream,
+      std::unique_ptr<t_type> sink_or_stream,
       std::string name)
       : t_named(program, std::move(name)),
         return_types_(std::move(return_types)),
@@ -79,10 +79,8 @@ class t_function final : public t_named {
     return_types_.push_back(ret);
   }
 
-  t_templated_type* sink_or_stream() { return sink_or_stream_.get(); }
-  const t_templated_type* sink_or_stream() const {
-    return sink_or_stream_.get();
-  }
+  t_type* sink_or_stream() { return sink_or_stream_.get(); }
+  const t_type* sink_or_stream() const { return sink_or_stream_.get(); }
 
   bool returns_sink() const {
     return sink_or_stream_ && sink_or_stream_->is_sink();
@@ -130,7 +128,7 @@ class t_function final : public t_named {
 
  private:
   std::vector<t_type_ref> return_types_;
-  std::unique_ptr<t_templated_type> sink_or_stream_;
+  std::unique_ptr<t_type> sink_or_stream_;
   std::unique_ptr<t_paramlist> paramlist_;
   std::unique_ptr<t_throws> exceptions_;
   t_function_qualifier qualifier_{t_function_qualifier::unspecified};

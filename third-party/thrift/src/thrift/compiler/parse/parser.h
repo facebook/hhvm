@@ -36,7 +36,6 @@ class lexer;
 class t_base_type;
 class t_sink;
 class t_stream_response;
-class t_templated_type;
 class t_throws;
 
 struct identifier {
@@ -68,7 +67,7 @@ struct type_throws_spec {
 
 struct return_type {
   std::vector<t_type_ref> types;
-  std::unique_ptr<t_templated_type> sink_or_stream;
+  std::unique_ptr<t_type> sink_or_stream;
 };
 
 enum class sign { plus, minus };

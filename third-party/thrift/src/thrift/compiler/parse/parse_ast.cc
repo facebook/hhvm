@@ -455,10 +455,10 @@ class ast_builder : public parser_actions {
     return *result;
   }
 
-  // Creates a reference to a newly instantiated templated type.
+  // Creates a reference to a newly instantiated container type.
   t_type_ref new_type_ref(
       source_range range,
-      std::unique_ptr<t_templated_type> node,
+      std::unique_ptr<t_container> node,
       std::unique_ptr<deprecated_annotations> annotations) {
     assert(node != nullptr);
     const t_type* type = node.get();

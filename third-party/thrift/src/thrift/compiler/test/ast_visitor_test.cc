@@ -85,7 +85,6 @@ class MockAstVisitor {
   MOCK_METHOD(void, visit_root_definition, (const t_named*));
   MOCK_METHOD(void, visit_definition, (const t_named*));
   MOCK_METHOD(void, visit_container, (const t_container*));
-  MOCK_METHOD(void, visit_type_instantiation, (const t_templated_type*));
 
   MOCK_METHOD(void, visit_program, (const t_program*));
 
@@ -93,6 +92,8 @@ class MockAstVisitor {
   MOCK_METHOD(void, visit_interaction, (const t_interaction*));
   MOCK_METHOD(void, visit_function, (const t_function*));
   MOCK_METHOD(void, visit_throws, (const t_throws*));
+  MOCK_METHOD(void, visit_sink, (const t_sink*));
+  MOCK_METHOD(void, visit_stream_response, (const t_stream_response*));
 
   MOCK_METHOD(void, visit_struct, (const t_struct*));
   MOCK_METHOD(void, visit_union, (const t_union*));
@@ -106,8 +107,6 @@ class MockAstVisitor {
   MOCK_METHOD(void, visit_set, (const t_set*));
   MOCK_METHOD(void, visit_list, (const t_list*));
   MOCK_METHOD(void, visit_map, (const t_map*));
-  MOCK_METHOD(void, visit_sink, (const t_sink*));
-  MOCK_METHOD(void, visit_stream_response, (const t_stream_response*));
 
   // Registers with all ast_visitor registration functions.
   template <typename V>
@@ -123,10 +122,6 @@ class MockAstVisitor {
         [this](const t_named& node) { visit_definition(&node); });
     visitor.add_container_visitor(
         [this](const t_container& node) { visit_container(&node); });
-    visitor.add_type_instantiation_visitor(
-        [this](const t_templated_type& node) {
-          visit_type_instantiation(&node);
-        });
 
     visitor.add_program_visitor(
         [this](const t_program& node) { visit_program(&node); });
@@ -139,6 +134,10 @@ class MockAstVisitor {
         [this](const t_function& node) { visit_function(&node); });
     visitor.add_throws_visitor(
         [this](const t_throws& node) { visit_throws(&node); });
+    visitor.add_sink_visitor([this](const t_sink& node) { visit_sink(&node); });
+    visitor.add_stream_response_visitor([this](const t_stream_response& node) {
+      visit_stream_response(&node);
+    });
 
     visitor.add_struct_visitor(
         [this](const t_struct& node) { visit_struct(&node); });
@@ -159,10 +158,6 @@ class MockAstVisitor {
     visitor.add_set_visitor([this](const t_set& node) { visit_set(&node); });
     visitor.add_list_visitor([this](const t_list& node) { visit_list(&node); });
     visitor.add_map_visitor([this](const t_map& node) { visit_map(&node); });
-    visitor.add_sink_visitor([this](const t_sink& node) { visit_sink(&node); });
-    visitor.add_stream_response_visitor([this](const t_stream_response& node) {
-      visit_stream_response(&node);
-    });
   }
 };
 
@@ -218,7 +213,6 @@ class AstVisitorTest : public test::BaseProgramTest {
     visitor_.add_root_definition_visitor(overload_visitor_);
     visitor_.add_definition_visitor(overload_visitor_);
     visitor_.add_container_visitor(overload_visitor_);
-    visitor_.add_type_instantiation_visitor(overload_visitor_);
 
     // Add baseline expectations.
     EXPECT_CALL(this->mock_, visit_program(&this->program_));
@@ -407,20 +401,16 @@ TYPED_TEST(AstVisitorTest, Typedef) {
 TYPED_TEST(AstVisitorTest, Set) {
   auto set = std::make_unique<t_set>(&t_base_type::t_i32());
   EXPECT_CALL(this->mock_, visit_set(set.get()));
-  // Matches: container, type_instantiation.
   EXPECT_CALL(this->mock_, visit_container(set.get()));
-  EXPECT_CALL(this->mock_, visit_type_instantiation(set.get()));
-  EXPECT_CALL(this->overload_mock_, visit_set(set.get())).Times(2);
+  EXPECT_CALL(this->overload_mock_, visit_set(set.get()));
   this->program_.add_type_instantiation(std::move(set));
 }
 
 TYPED_TEST(AstVisitorTest, List) {
   auto list = std::make_unique<t_list>(&t_base_type::t_i32());
   EXPECT_CALL(this->mock_, visit_list(list.get()));
-  // Matches: container, type_instantiation.
   EXPECT_CALL(this->mock_, visit_container(list.get()));
-  EXPECT_CALL(this->mock_, visit_type_instantiation(list.get()));
-  EXPECT_CALL(this->overload_mock_, visit_list(list.get())).Times(2);
+  EXPECT_CALL(this->overload_mock_, visit_list(list.get()));
   this->program_.add_type_instantiation(std::move(list));
 }
 
@@ -428,11 +418,8 @@ TYPED_TEST(AstVisitorTest, Map) {
   auto map =
       std::make_unique<t_map>(&t_base_type::t_i32(), &t_base_type::t_i32());
   EXPECT_CALL(this->mock_, visit_map(map.get()));
-
-  // Matches: container, type_instantiation.
   EXPECT_CALL(this->mock_, visit_container(map.get()));
-  EXPECT_CALL(this->mock_, visit_type_instantiation(map.get()));
-  EXPECT_CALL(this->overload_mock_, visit_map(map.get())).Times(2);
+  EXPECT_CALL(this->overload_mock_, visit_map(map.get()));
   this->program_.add_type_instantiation(std::move(map));
 }
 

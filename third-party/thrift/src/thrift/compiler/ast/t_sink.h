@@ -35,7 +35,7 @@ namespace compiler {
  * Exceptions throw during the stream or instead of the final response can also
  * be specified.
  */
-class t_sink : public t_templated_type {
+class t_sink : public t_type {
  public:
   explicit t_sink(t_type_ref sink_type, t_type_ref final_response_type)
       : sink_type_(std::move(sink_type)),

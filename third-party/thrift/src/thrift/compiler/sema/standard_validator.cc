@@ -1137,22 +1137,18 @@ struct ValidateAnnotationPositions {
       }
     }
   }
-  void operator()(diagnostic_context& ctx, const t_templated_type& type) {
+  void operator()(diagnostic_context& ctx, const t_container& type) {
     switch (type.get_type_value()) {
-      case t_type::type::t_list: {
-        const auto& t = static_cast<const t_list&>(type);
-        if (owns_annotations(t.elem_type())) {
+      case t_type::type::t_list:
+        if (owns_annotations(static_cast<const t_list&>(type).elem_type())) {
           err(ctx);
         }
         break;
-      }
-      case t_type::type::t_set: {
-        const auto& t = static_cast<const t_set&>(type);
-        if (owns_annotations(t.elem_type())) {
+      case t_type::type::t_set:
+        if (owns_annotations(static_cast<const t_set&>(type).elem_type())) {
           err(ctx);
         }
         break;
-      }
       case t_type::type::t_map: {
         const auto& t = static_cast<const t_map&>(type);
         if (owns_annotations(t.key_type()) || owns_annotations(t.val_type())) {
@@ -1160,13 +1156,8 @@ struct ValidateAnnotationPositions {
         }
         break;
       }
-      case t_type::type::t_stream:
-      case t_type::type::t_sink:
-        // This can be removed once sink and stream no longer inherit from
-        // t_templated_type.
-        break;
       default:
-        throw std::runtime_error("Unknown templated type");
+        assert(false && "Unknown container type");
     }
   }
 
@@ -1180,7 +1171,7 @@ struct ValidateAnnotationPositions {
     if (ptr->annotations().empty()) {
       return false;
     }
-    if (dynamic_cast<const t_templated_type*>(ptr)) {
+    if (dynamic_cast<const t_container*>(ptr)) {
       return true;
     }
     if (dynamic_cast<const t_base_type*>(ptr)) {
@@ -1285,10 +1276,10 @@ ast_validator standard_validator() {
   validator.add_typedef_visitor([](auto& ctx, const auto& node) {
     validate_cpp_type_annotation(ctx, node);
   });
-  validator.add_type_instantiation_visitor(ValidateAnnotationPositions{});
+  validator.add_container_visitor(ValidateAnnotationPositions());
   validator.add_enum_visitor(&validate_cpp_enum_type);
   validator.add_const_visitor(&validate_const_type_and_value);
-  validator.add_const_visitor(ValidateAnnotationPositions{});
+  validator.add_const_visitor(ValidateAnnotationPositions());
   validator.add_program_visitor(&validate_uri_uniqueness);
   validator.add_program_visitor(&validate_struct_names_uniqueness);
   return validator;

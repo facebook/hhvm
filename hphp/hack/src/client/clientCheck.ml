@@ -250,7 +250,7 @@ let main_internal
       rpc_with_retry args
       @@ Rpc.FIND_REFS (ServerCommandTypes.Find_refs.Class name)
     in
-    ClientFindRefsPrint.print results ~ide:false ~json:args.output_json;
+    ClientFindRefsPrint.print_closed_interval results ~json:args.output_json;
     Lwt.return (Exit_status.No_error, Telemetry.create ())
   | MODE_FIND_REFS name ->
     let open ServerCommandTypes.Find_refs in
@@ -262,7 +262,7 @@ let main_internal
         name
     in
     let%lwt results = rpc_with_retry args @@ Rpc.FIND_REFS action in
-    ClientFindRefsPrint.print results ~ide:false ~json:args.output_json;
+    ClientFindRefsPrint.print_closed_interval results ~json:args.output_json;
     Lwt.return (Exit_status.No_error, Telemetry.create ())
   | MODE_POPULATE_REMOTE_DECLS files ->
     let files =
@@ -279,7 +279,7 @@ let main_internal
       rpc_with_retry args
       @@ Rpc.GO_TO_IMPL (ServerCommandTypes.Find_refs.Class class_name)
     in
-    ClientFindRefsPrint.print results ~ide:false ~json:args.output_json;
+    ClientFindRefsPrint.print_closed_interval results ~json:args.output_json;
     Lwt.return (Exit_status.No_error, Telemetry.create ())
   | MODE_GO_TO_IMPL_METHOD name ->
     let action =
@@ -294,7 +294,7 @@ let main_internal
     (match action with
     | ServerCommandTypes.Find_refs.Member _ ->
       let%lwt results = rpc_with_retry args @@ Rpc.GO_TO_IMPL action in
-      ClientFindRefsPrint.print results ~ide:false ~json:args.output_json;
+      ClientFindRefsPrint.print_closed_interval results ~json:args.output_json;
       Lwt.return (Exit_status.No_error, Telemetry.create ())
     | _ ->
       Printf.eprintf "Invalid input\n";
@@ -305,7 +305,7 @@ let main_internal
     let%lwt results =
       rpc_with_retry args @@ Rpc.IDE_FIND_REFS_BY_SYMBOL (action, symbol_name)
     in
-    ClientFindRefsPrint.print results ~ide:true ~json:true;
+    ClientFindRefsPrint.print_json results ~half_open_interval:true;
     Lwt.return (Exit_status.No_error, Telemetry.create ())
   | MODE_IDE_GO_TO_IMPL_BY_SYMBOL arg ->
     let open ServerCommandTypes in
@@ -313,7 +313,7 @@ let main_internal
     let%lwt results =
       rpc_with_retry args @@ Rpc.IDE_GO_TO_IMPL_BY_SYMBOL (action, symbol_name)
     in
-    ClientFindRefsPrint.print results ~ide:true ~json:true;
+    ClientFindRefsPrint.print_json results ~half_open_interval:true;
     Lwt.return (Exit_status.No_error, Telemetry.create ())
   | MODE_DUMP_SYMBOL_INFO files ->
     let%lwt conn = connect args in
@@ -946,7 +946,7 @@ let main_internal
     let positions = parse_positions positions in
     let%lwt results = rpc_with_retry_list args @@ Rpc.DEPS_IN_BATCH positions in
     List.iter results ~f:(fun s ->
-        ClientFindRefsPrint.print s ~ide:false ~json:true);
+        ClientFindRefsPrint.print_json s ~half_open_interval:false);
     Lwt.return (Exit_status.No_error, Telemetry.create ())
 
 let rec flush_event_logger () : unit Lwt.t =

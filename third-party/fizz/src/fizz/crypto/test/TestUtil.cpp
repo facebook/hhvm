@@ -96,10 +96,10 @@ std::unique_ptr<Aead> getCipher(CipherSuite suite) {
       cipher = OpenSSLEVPCipher::makeCipher<AESOCB128>();
       break;
 #if FIZZ_BUILD_AEGIS
-    case CipherSuite::TLS_AEGIS_128L_SHA256_EXPERIMENTAL:
+    case CipherSuite::TLS_AEGIS_128L_SHA256:
       cipher = AEGISCipher::make128L();
       break;
-    case CipherSuite::TLS_AEGIS_256_SHA384_EXPERIMENTAL:
+    case CipherSuite::TLS_AEGIS_256_SHA384:
       cipher = AEGISCipher::make256();
       break;
 #endif

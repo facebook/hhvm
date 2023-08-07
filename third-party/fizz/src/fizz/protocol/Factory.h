@@ -101,10 +101,10 @@ class Factory {
       case CipherSuite::TLS_AES_128_OCB_SHA256_EXPERIMENTAL:
         return OpenSSLEVPCipher::makeCipher<AESOCB128>();
 #if FIZZ_BUILD_AEGIS
-      case CipherSuite::TLS_AEGIS_128L_SHA256_EXPERIMENTAL:
-        return AEGISCipher::make128L();
-      case CipherSuite::TLS_AEGIS_256_SHA384_EXPERIMENTAL:
+      case CipherSuite::TLS_AEGIS_256_SHA384:
         return AEGISCipher::make256();
+      case CipherSuite::TLS_AEGIS_128L_SHA256:
+        return AEGISCipher::make128L();
 #endif
       default:
         throw std::runtime_error("aead: not implemented");

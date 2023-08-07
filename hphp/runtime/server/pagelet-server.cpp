@@ -62,10 +62,39 @@ PageletTransport::PageletTransport(
     if (key.isString() && !key.toString().empty()) {
       m_requestHeaders[key.toString().data()].push_back(header.data());
     } else {
+      if (RO::EvalPageletServerHeaderCheck == 1) {
+        raise_warning(
+          "Specifying Pagelet headers using \"key: value\" syntax "
+          "is deprecated: %s",
+          header.data()
+        );
+      } else if (RO::EvalPageletServerHeaderCheck == 2) {
+        SystemLib::throwInvalidArgumentExceptionObject(folly::sformat(
+          "Specifying Pagelet headers using \"key: value\" syntax "
+          "is disabled: {}",
+          header.data()
+        ));
+      }
       int pos = header.find(": ");
       if (pos >= 0) {
         std::string name = header.substr(0, pos).data();
         std::string value = header.substr(pos + 2).data();
+
+        if (RO::EvalPageletServerHeaderCollide > 0 &&
+            headers->exists(String(name))) {
+          auto const msg = folly::sformat(
+            "Detected Pagelet header specified using both \"key: value\" "
+            "and key => \"value\" syntax: {}",
+            name
+          );
+          if (RO::EvalPageletServerHeaderCollide == 3) {
+            SystemLib::throwInvalidArgumentExceptionObject(msg);
+          }
+
+          raise_warning("%s", msg.data());
+          if (RO::EvalPageletServerHeaderCollide == 2) continue;
+        }
+
         m_requestHeaders[name].push_back(value);
       } else {
         Logger::Error("throwing away bad header: %s", header.data());

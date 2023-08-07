@@ -162,11 +162,11 @@ bool canInlineAt(SrcKey callSK, SrcKey entry, AnnotationData* annotations) {
     return traceRefusal(callSK, callee, "disabled via runtime option",
                         annotations);
   }
-  if (RuntimeOption::funcIsRenamable(callee->name())) {
-    return traceRefusal(callSK, callee, "function is renamable",
+  if (RuntimeOption::EvalJitEnableRenameFunction) {
+    return traceRefusal(callSK, callee, "rename function is enabled",
                         annotations);
   }
-  if (callee->isInterceptable()) {
+  if (callee->attrs() & AttrInterceptable) {
     return traceRefusal(callSK, callee, "callee is interceptable", annotations);
   }
 

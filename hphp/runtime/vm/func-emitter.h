@@ -228,6 +228,12 @@ public:
    */
   int parseNativeAttributes(Attr& attrs_) const;
 
+  /*
+   * Fix some attributes based on the current runtime options that may
+   * have been stored incorrectly in the repo.
+   */
+  Attr fix_attrs(Attr a) const;
+
   /////////////////////////////////////////////////////////////////////////////
   // Bytecode.
 

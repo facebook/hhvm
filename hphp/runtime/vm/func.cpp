@@ -843,7 +843,7 @@ Func* Func::lookupBuiltin(const StringData* name) {
   // NamedFunc.
   auto const ne = NamedFunc::get(name);
   auto const f = ne->getCachedFunc();
-  return (f && f->isPersistent() && f->isBuiltin()) ? f : nullptr;
+  return (f && f->isUnique() && f->isBuiltin()) ? f : nullptr;
 }
 
 Func* Func::load(const NamedFunc* ne, const StringData* name) {

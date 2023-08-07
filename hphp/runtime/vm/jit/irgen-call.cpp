@@ -1337,7 +1337,7 @@ void emitModuleBoundaryCheck(IRGS& env, SSATmp* symbol, bool func /* = true */) 
 }
 
 void emitFCallFuncD(IRGS& env, FCallArgs fca, const StringData* funcName) {
-  auto const func = lookupImmutableFunc(funcName);
+  auto const lookup = lookupImmutableFunc(funcName);
   auto const callerCtx = [&] {
     if (!fca.context) return curClass(env);
     auto const ret = lookupUniqueClass(env, fca.context, true /* trustUnit */);
@@ -1345,16 +1345,21 @@ void emitFCallFuncD(IRGS& env, FCallArgs fca, const StringData* funcName) {
     return ret;
   }();
 
-  if (func) {
-    emitModuleBoundaryCheckKnown(env, func);
-    prepareAndCallKnown(env, func, fca, nullptr, false, false);
+  if (lookup.func) {
+    // We know the function, but we have to ensure its unit is loaded. Use
+    // LdFuncCached, ignoring the result to ensure this.
+    if (lookup.needsUnitLoad) {
+      gen(env, LdFuncCached, FuncNameData { funcName, callerCtx });
+    }
+    emitModuleBoundaryCheckKnown(env, lookup.func);
+    prepareAndCallKnown(env, lookup.func, fca, nullptr, false, false);
     return;
   }
 
-  auto const cachedFunc =
+  auto const func =
     gen(env, LdFuncCached, FuncNameData { funcName, callerCtx });
-  emitModuleBoundaryCheck(env, cachedFunc);
-  prepareAndCallProfiled(env, cachedFunc, fca, nullptr, false, false);
+  emitModuleBoundaryCheck(env, func);
+  prepareAndCallProfiled(env, func, fca, nullptr, false, false);
 }
 
 void emitFCallFunc(IRGS& env, FCallArgs fca) {
@@ -1369,20 +1374,24 @@ void emitFCallFunc(IRGS& env, FCallArgs fca) {
 }
 
 void emitResolveFunc(IRGS& env, const StringData* name) {
-  auto const func = lookupImmutableFunc(name);
-  if (!func) {
+  auto const lookup = lookupImmutableFunc(name);
+  if (!lookup.func) {
     auto const func =
       gen(env, LookupFuncCached, FuncNameData { name, curClass(env) });
     emitModuleBoundaryCheck(env, func);
     push(env, func);
     return;
   }
-  emitModuleBoundaryCheckKnown(env, func);
-  push(env, cns(env, func));
+  if (lookup.needsUnitLoad) {
+    gen(env, LookupFuncCached, FuncNameData { name, curClass(env) });
+  }
+  emitModuleBoundaryCheckKnown(env, lookup.func);
+  push(env, cns(env, lookup.func));
 }
 
 void emitResolveMethCaller(IRGS& env, const StringData* name) {
-  auto const func = lookupImmutableFunc(name);
+  auto const lookup = lookupImmutableFunc(name);
+  auto func = lookup.func;
 
   // We de-duplicate meth_caller across the repo which may lead to the resolved
   // meth caller being in a different unit (and therefore unavailable at this
@@ -1416,9 +1425,13 @@ void emitResolveRFunc(IRGS& env, const StringData* name) {
   auto const tsList = popC(env);
 
   auto const funcTmp = [&] () -> SSATmp* {
-    auto const func = lookupImmutableFunc(name);
+    auto const lookup = lookupImmutableFunc(name);
+    auto const func = lookup.func;
     if (!func) {
       return gen(env, LookupFuncCached, FuncNameData { name, curClass(env) });
+    }
+    if (lookup.needsUnitLoad) {
+      gen(env, LookupFuncCached, FuncNameData { name, curClass(env) });
     }
     return cns(env, func);
   }();
@@ -2046,7 +2059,10 @@ void emitFCallClsMethodSD(IRGS& env, FCallArgs fca, const StringData* clsHint,
 Type callReturnType(const Func* callee) {
   // Don't make any assumptions about functions which can be intercepted. The
   // interception functions can return arbitrary types.
-  if (callee->isInterceptable()) return TInitCell;
+  if (RuntimeOption::EvalJitEnableRenameFunction ||
+      callee->attrs() & AttrInterceptable) {
+    return TInitCell;
+  }
 
   if (callee->isCPPBuiltin()) {
     // If the function is builtin, use the builtin's return type, then take into
@@ -2072,7 +2088,10 @@ Type callOutType(const Func* callee, uint32_t index) {
 
   // Don't make any assumptions about functions which can be intercepted. The
   // interception functions can return arbitrary types.
-  if (callee->isInterceptable()) return TInitCell;
+  if (RuntimeOption::EvalJitEnableRenameFunction ||
+      callee->attrs() & AttrInterceptable) {
+    return TInitCell;
+  }
 
   if (callee->isCPPBuiltin()) {
     uint32_t param_idx = 0;
@@ -2098,7 +2117,10 @@ Type callOutType(const Func* callee, uint32_t index) {
 Type awaitedCallReturnType(const Func* callee) {
   // Don't make any assumptions about functions which can be intercepted. The
   // interception functions can return arbitrary types.
-  if (callee->isInterceptable()) return TInitCell;
+  if (RuntimeOption::EvalJitEnableRenameFunction ||
+      callee->attrs() & AttrInterceptable) {
+    return TInitCell;
+  }
 
   return typeFromRAT(callee->repoAwaitedReturnType(), callee->cls());
 }

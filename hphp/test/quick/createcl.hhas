@@ -18,7 +18,7 @@
   RetC
 }
 
-.class A extends Closure {
+.class [unique] A extends Closure {
   .method [public] <"" N  > __invoke() isClosureBody {
     Int 1
     RetC

@@ -34,6 +34,7 @@ TRACE_SET_MOD(hhbc);
 
 void Module::prettyPrint(std::ostream& out) const {
   out << "Module " << name->data();
+  if (attrs & AttrUnique)     out << " (unique)";
   if (attrs & AttrPersistent) out << " (persistent)";
   out << std::endl;
 }

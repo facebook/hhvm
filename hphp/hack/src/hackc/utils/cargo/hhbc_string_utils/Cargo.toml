@@ -9,7 +9,6 @@ edition = "2021"
 path = "../../string_utils.rs"
 
 [dependencies]
-bstr = { version = "1.4.0", features = ["serde", "std", "unicode"] }
 escaper = { version = "0.0.0", path = "../../../../utils/escaper" }
 lazy_static = "1.4"
 libc = "0.2.139"

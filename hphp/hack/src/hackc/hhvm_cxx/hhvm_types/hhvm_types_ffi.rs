@@ -35,6 +35,7 @@ pub mod ffi {
         AttrTrait = 0x100,
         AttrNoInjection = 0x200,
         AttrInitialSatisfiesTC = 0x200,
+        AttrUnique = 0x400,
         AttrNoBadRedeclare = 0x400,
         AttrInterceptable = 0x800,
         AttrSealed = 0x800,

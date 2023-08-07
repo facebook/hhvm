@@ -2890,7 +2890,8 @@ void parse_class(AsmState& as) {
   UserAttributeMap userAttrs;
   Attr attrs = parse_attribute_list(as, AttrContext::Class, &userAttrs);
   assertx(IMPLIES(as.ue->isASystemLib(), attrs & AttrPersistent &&
-                                         attrs & AttrBuiltin));
+                                         attrs & AttrBuiltin &&
+                                         attrs & AttrUnique));
 
   std::string name;
   if (!as.in.readname(name)) {

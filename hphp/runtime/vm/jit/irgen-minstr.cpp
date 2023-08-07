@@ -155,7 +155,7 @@ getPropertyOffset(IRGS& env,
   auto const moduleName = curUnit(env)->moduleName();
 
   // We need to check that baseClass cannot change between requests.
-  if (!(baseClass->preClass()->attrs() & AttrPersistent)) {
+  if (!(baseClass->preClass()->attrs() & AttrUnique)) {
     if (!ctx) return std::nullopt;
     if (!ctx->classof(baseClass)) {
       if (baseClass->classof(ctx)) {

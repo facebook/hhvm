@@ -1,4 +1,4 @@
-.class Foo {
+.class [unique] Foo {
   .default_ctor;
 
   .property [public] x = """s:3:"heh";""";

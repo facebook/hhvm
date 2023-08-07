@@ -1277,6 +1277,7 @@ fn assemble_hhvm_attr(token_iter: &mut Lexer<'_>) -> Result<hhvm_types_ffi::ffi:
         b"support_async_eager_return" => Attr::AttrSupportsAsyncEagerReturn,
         b"sys_initial_val" => Attr::AttrSystemInitialValue,
         b"trait" => Attr::AttrTrait,
+        b"unique" => Attr::AttrUnique,
         b"unused_max_attr" => Attr::AttrUnusedMaxAttr,
         b"variadic_param" => Attr::AttrVariadicParam,
         _ => return Err(tok.error("Unknown attr")),

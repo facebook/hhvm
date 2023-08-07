@@ -8,7 +8,6 @@ use std::collections::BTreeSet;
 
 use bstr::BStr;
 use bstr::BString;
-use hhbc_string_utils as string_utils;
 pub use oxidized::parser_options::ParserOptions;
 use serde::Deserialize;
 use serde::Serialize;
@@ -65,11 +64,10 @@ impl Options {
         self.hhbc.log_extern_compiler_perf
     }
     pub fn function_is_renamable(&self, func: &BStr) -> bool {
-        let stripped_func = string_utils::strip_ns_bstr(func);
         match self.hhvm.jit_enable_rename_function {
             JitEnableRenameFunction::Enable => true,
             JitEnableRenameFunction::RestrictedEnable => {
-                self.hhvm.renamable_functions.contains(stripped_func)
+                self.hhvm.renamable_functions.contains(func)
             }
             JitEnableRenameFunction::Disable => false,
         }

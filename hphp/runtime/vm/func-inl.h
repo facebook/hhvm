@@ -743,6 +743,10 @@ inline const UserAttributeMap& Func::userAttributes() const {
   return shared()->m_userAttributes;
 }
 
+inline bool Func::isUnique() const {
+  return m_attrs & AttrUnique;
+}
+
 inline bool Func::isPersistent() const {
   return m_attrs & AttrPersistent;
 }

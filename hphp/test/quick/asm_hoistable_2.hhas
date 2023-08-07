@@ -1,11 +1,11 @@
 # Test that things can get marked AlwaysHoistable
 
 
-.class a {
+.class [unique] a {
   .default_ctor;
 }
 
-.class B extends a {
+.class [unique] B extends a {
   .default_ctor;
 
   .method [public static] print() {

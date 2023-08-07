@@ -75,6 +75,7 @@ pub fn get_attrs_for_method<'a, 'arena, 'decl>(
     attrs.set(Attr::AttrReadonlyReturn, is_readonly_return);
     attrs.set(Attr::AttrReadonlyThis, method.readonly_this);
     attrs.set(Attr::AttrStatic, method.static_);
+    attrs.set(Attr::AttrUnique, is_systemlib);
     attrs.set(Attr::AttrVariadicParam, has_variadic);
     attrs.set(Attr::AttrProvenanceSkipFrame, is_prov_skip_frame);
     attrs

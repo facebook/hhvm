@@ -678,7 +678,7 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   ret->cls         = cls;
 
   ret->attrs       = static_cast<Attr>((fe.attrs & ~AttrNoOverride & ~AttrInterceptable) |
-                                       AttrPersistent);
+                                       AttrUnique | AttrPersistent);
 
   ret->userAttributes     = fe.userAttributes;
   ret->returnUserType     = fe.retUserType;
@@ -887,7 +887,7 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
                                                       : pce.parentName();
   ret->attrs              = static_cast<Attr>(
     (pce.attrs() & ~(AttrNoOverride | AttrNoOverrideRegular)) |
-    AttrPersistent);
+    AttrUnique | AttrPersistent);
   ret->userAttributes     = pce.userAttributes();
   ret->hasReifiedGenerics = ret->userAttributes.find(s___Reified.get()) !=
                             ret->userAttributes.end();
@@ -1051,7 +1051,7 @@ std::unique_ptr<php::Constant> parse_constant(const Constant& c) {
   return std::unique_ptr<php::Constant>(new php::Constant{
     c.name,
     c.val,
-    c.attrs | AttrPersistent
+    c.attrs | AttrUnique | AttrPersistent
   });
 }
 
@@ -1062,7 +1062,7 @@ std::unique_ptr<php::Module> parse_module(const Module& m) {
       {m.line0, m.line1},
       m.docComment
     },
-    m.attrs | AttrPersistent,
+    m.attrs | AttrUnique | AttrPersistent,
     m.userAttributes,
     m.exports,
     m.imports
@@ -1091,7 +1091,7 @@ std::unique_ptr<php::TypeAlias> parse_type_alias(const TypeAliasEmitter& te) {
   return std::unique_ptr<php::TypeAlias>(new php::TypeAlias {
     php::SrcInfo { te.getLocation() },
     te.name(),
-    te.attrs() | AttrPersistent,
+    te.attrs() | AttrUnique | AttrPersistent,
     std::move(tvu),
     te.nullable(),
     te.caseType(),

@@ -342,23 +342,42 @@ const Func* lookupImmutableCtor(const Class* cls,
   return func;
 }
 
-Func* lookupImmutableFunc(const StringData* name) {
+ImmutableFuncLookup lookupImmutableFunc(const StringData* name) {
   auto const ne = NamedFunc::get(name);
   if (auto const f = ne->getCachedFunc()) {
-    if (f->isPersistent()) {
-      assertx(!RO::funcIsRenamable(name));
+    if (f->isUnique()) {
+      // We have an unique function. However, it may be interceptable, which means
+      // we can't use it directly.
+      if (f->isInterceptable()) return {nullptr, true};
 
       // In non-repo mode while the function must be available in this unit, it
       // may be de-duplication on load. This may mean that while the func is
       // available it is not immutable in the current compilation unit. The order
       // of the de-duplication can also differ between requests.
-      if (f->isMethCaller() && !RO::RepoAuthoritative) return nullptr;
+      if (f->isMethCaller() && !RO::RepoAuthoritative) return {nullptr, true};
 
-      // We load persistent symbols once and can persist them across
-      // all requests.
-      return f;
+      // We can use this function. If its persistent (which means its unit's
+      // pseudo-main is trivial), its safe to use unconditionally.
+      if (f->isPersistent()) {
+        if (RO::EvalJitEnableRenameFunction == 1 &&
+          StructuredLog::coinflip(RO::EvalJitRenameFunctionLogRate)) {
+          StructuredLogEntry entry;
+          entry.setStr("details_log", "Function is renamable and persistent");
+          entry.setStr("old_function_name", name->data());
+          StructuredLog::log("hhvm_rename_function", entry);
+        }
+        if (!RO::EvalJitEnableRenameFunction || f->isMethCaller()) {
+          return {f, false};
+        }
+      } else if (RO::EvalJitEnableRenameFunction) {
+        return {nullptr, true};
+      }
+      // Use the function, but ensure its unit is loaded.
+      return {f, true};
     }
   }
-  return nullptr;
+
+  return {nullptr, true};
 }
+
 }

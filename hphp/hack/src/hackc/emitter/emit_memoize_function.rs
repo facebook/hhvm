@@ -67,6 +67,7 @@ pub(crate) fn get_attrs_for_fun<'a, 'arena, 'decl>(
     attrs.set(Attr::AttrNoInjection, hhbc::is_no_injection(user_attrs));
     attrs.set(Attr::AttrProvenanceSkipFrame, is_prov_skip_frame);
     attrs.set(Attr::AttrReadonlyReturn, f.readonly_ret.is_some());
+    attrs.set(Attr::AttrUnique, is_persistent);
     attrs.set(Attr::AttrInternal, fd.internal);
     attrs.set(Attr::AttrVariadicParam, has_variadic);
     attrs

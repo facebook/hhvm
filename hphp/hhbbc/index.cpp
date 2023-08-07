@@ -4317,7 +4317,7 @@ void add_system_constants_to_index(IndexData& index) {
     auto pc = new php::Constant {
       cnsPair.first,
       cnsPair.second,
-      AttrPersistent
+      AttrUnique | AttrPersistent
     };
     add_symbol_to_index(index.constants, pc, "constant");
   }
@@ -14768,7 +14768,7 @@ res::Func Index::resolve_func(SString name) const {
   auto const it = m_data->funcs.find(name);
   if (it == end(m_data->funcs)) return res::Func { res::Func::Missing { name } };
   auto const func = it->second;
-  assertx(func->attrs & AttrPersistent);
+  assertx(func->attrs & AttrUnique);
   return res::Func { res::Func::Fun { func_info(*m_data, func) } };
 }
 

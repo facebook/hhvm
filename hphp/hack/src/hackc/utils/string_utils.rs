@@ -6,8 +6,6 @@
 use std::borrow::Cow;
 use std::cell::Cell;
 
-use bstr::BStr;
-use bstr::ByteSlice;
 use escaper::*;
 use lazy_static::lazy_static;
 use naming_special_names_rust::classes as ns_classes;
@@ -151,11 +149,6 @@ pub fn strip_global_ns_bslice(s: &[u8]) -> &[u8] {
 // Strip zero or more chars followed by a backslash
 pub fn strip_ns(s: &str) -> &str {
     s.rfind('\\').map_or(s, |i| &s[i + 1..])
-}
-
-// Strip zero or more chars followed by a backslash
-pub fn strip_ns_bstr(s: &BStr) -> &BStr {
-    s.rfind("\\").map_or(s, |i| &s[i + 1..])
 }
 
 // Remove \HH\ or HH\ preceding a string

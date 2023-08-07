@@ -59,8 +59,6 @@ namespace Stats {
   STAT(UnitMerge_mergeable_define) \
   STAT(UnitMerge_mergeable_persistent_define) \
   STAT(UnitMerge_mergeable_class) \
-  STAT(UnitMerge_mergeable_function) \
-  STAT(UnitMerge_mergeable_function_define) \
   STAT(UnitMerge_mergeable_typealias) \
   STAT(UnitMerge_redo_hoistable) \
   /* stub reuse stats */ \

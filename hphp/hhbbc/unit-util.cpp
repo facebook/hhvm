@@ -57,7 +57,7 @@ std::unique_ptr<php::Unit> make_native_unit() {
     auto cns = std::make_unique<php::Constant>();
     cns->name = name;
     cns->val = val;
-    cns->attrs = AttrPersistent;
+    cns->attrs = AttrUnique | AttrPersistent;
     unit->constants.emplace_back(std::move(cns));
   }
 

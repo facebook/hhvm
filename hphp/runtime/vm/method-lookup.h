@@ -146,7 +146,19 @@ const Func* lookupImmutableCtor(const Class* cls,
  * Find a function which always uniquely maps to the given name in the context
  * of the given unit. A function so returned can be used directly in the TC as
  * it will not change.
+ *
+ * This generally includes persistent functions, but can also include
+ * non-persistent functions in certain situations. Note that even if the
+ * function is immutable, the unit it is defined in may need loading. In that
+ * case, the function is safe to use, but you have to emit code to ensure the
+ * unit is loaded first.
  */
-Func* lookupImmutableFunc(const StringData* name);
+struct ImmutableFuncLookup {
+  const Func* func;
+  // Does any use of this function require a check to ensure its unit is loaded?
+  bool needsUnitLoad;
+};
+
+ImmutableFuncLookup lookupImmutableFunc(const StringData* name);
 
 }

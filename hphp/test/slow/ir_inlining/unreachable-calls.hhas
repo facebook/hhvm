@@ -1,14 +1,14 @@
-.class [final persistent] Cls1 {
+.class [unique final persistent] Cls1 {
   .default_ctor;
-  .method [public] foobaz($a, $b, $c, $d, $e) {
+  .method [public unique] foobaz($a, $b, $c, $d, $e) {
     CGetL $c
     RetC
   }
 }
 
-.class [final persistent] Cls2 {
+.class [unique final persistent] Cls2 {
   .default_ctor;
-  .method [public] foobaz($a, $b, $c, $d, $e) {
+  .method [public unique] foobaz($a, $b, $c, $d, $e) {
     CGetL $b
     RetC
   }

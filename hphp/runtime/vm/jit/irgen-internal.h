@@ -691,9 +691,28 @@ inline SSATmp* ldCtxCls(IRGS& env) {
 //////////////////////////////////////////////////////////////////////
 // Other common helpers
 
+inline bool classIsUnique(const Class* cls) {
+  return cls && cls->isUnique();
+}
+
+inline bool classIsUniqueNormalClass(const Class* cls) {
+  return classIsUnique(cls) && isNormalClass(cls);
+}
+
+inline bool classIsUniqueInterface(const Class* cls) {
+  return classIsUnique(cls) && isInterface(cls);
+}
+
 inline bool classIsPersistentOrCtxParent(IRGS& env, const Class* cls) {
   if (!cls) return false;
   if (classHasPersistentRDS(cls)) return true;
+  if (!curClass(env)) return false;
+  return curClass(env)->classof(cls);
+}
+
+inline bool classIsUniqueOrCtxParent(IRGS& env, const Class* cls) {
+  if (!cls) return false;
+  if (classIsUnique(cls)) return true;
   if (!curClass(env)) return false;
   return curClass(env)->classof(cls);
 }

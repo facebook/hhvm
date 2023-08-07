@@ -66,8 +66,8 @@ class add_package {
     if (prog_.namespaces().size() == 1) {
       // If there is only a single namespace, use that to generate the package
       // name.
-      return package_name_generator(prog_.namespaces().begin()->second)
-          .generate();
+      auto ns = prog_.namespaces().begin();
+      return package_name_generator(ns->first, ns->second).generate();
     }
 
     // If there are multiple namespaces, then find the one that works with

@@ -36,13 +36,14 @@ TEST(PackageGeneratorTest, file_path) {
 }
 
 TEST(PackageGeneratorTest, namespace) {
-  codemod::package_name_generator gen("test.foo.bar");
+  codemod::package_name_generator gen("cpp2", "test.foo.bar");
   EXPECT_EQ(gen.generate("apache.org"), "apache.org/test/foo/bar");
 
-  codemod::package_name_generator gen_with_domain("facebook.foo.bar");
+  codemod::package_name_generator gen_with_domain("cpp2", "facebook.foo.bar");
   EXPECT_EQ(gen_with_domain.generate("apache.org"), "facebook.com/foo/bar");
 
-  codemod::package_name_generator gen_with_default_domain("test.foo.bar");
+  codemod::package_name_generator gen_with_default_domain(
+      "cpp2", "test.foo.bar");
   EXPECT_EQ(gen_with_default_domain.generate(), "meta.com/test/foo/bar");
 }
 
@@ -87,5 +88,32 @@ TEST(PackageGeneratorTest, common_package) {
   // since "foo.bar.baz" is longer than "foobar", choose the longer one
   namespaces["hack"] = "apache.foobar";
   EXPECT_EQ(get_common_pkg(), "meta.com/foo/bar/baz");
+}
+
+TEST(PackageGeneratorTest, ns_with_language_identifiers) {
+  std::map<std::string, std::string> namespaces = {
+      {"cpp2", "foo.test_cpp2.baz_cpp2"}, {"hack", "baz"}};
+
+  auto get_common_pkg = [&]() {
+    return codemod::package_name_generator_util::from_namespaces(namespaces)
+        .find_common_package();
+  };
+
+  // No common package found
+  EXPECT_EQ(get_common_pkg(), "");
+
+  namespaces["python"] = "foo.python_test.baz";
+  /*
+   * After removing language identifiers,
+   * cpp2 and python namespaces respectively become,
+   * foo.test_cpp2.baz_cpp2 => foo.test.baz
+   * foo.python_test.baz => foo.test.baz
+   */
+  EXPECT_EQ(get_common_pkg(), "meta.com/foo/test/baz");
+
+  // Only language specific identifiers should be removed
+  // So for python namespace, "cpp2" should be retained.
+  namespaces["python"] = "foo.test_cpp2.baz_python_cpp2.python";
+  EXPECT_EQ(get_common_pkg(), "meta.com/foo/test_cpp2/baz_cpp2");
 }
 } // namespace apache::thrift::compiler

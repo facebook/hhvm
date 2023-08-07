@@ -22,6 +22,7 @@
 #include <boost/algorithm/string.hpp>
 #include <fmt/core.h>
 #include <fmt/format.h>
+#include <re2/re2.h>
 
 namespace apache {
 namespace thrift {
@@ -32,7 +33,9 @@ inline constexpr auto kDefaultDomain = "meta.com";
 
 class package_name_generator {
  public:
-  explicit package_name_generator(const std::string& ns) {
+  explicit package_name_generator(
+      const std::string& language, const std::string& ns)
+      : language_(language) {
     split(identifiers_, ns, boost::algorithm::is_any_of("."));
     create_path_and_domain();
   }
@@ -43,11 +46,11 @@ class package_name_generator {
     if (domain.empty()) {
       domain = default_domain.empty() ? kDefaultDomain : default_domain;
     }
-    return from_path_and_domain(get_path(), domain);
+    return from_path_and_domain(get_path(path_), domain);
   }
 
-  std::string get_path() const {
-    return fmt::to_string(fmt::join(path_.begin(), path_.end(), "/"));
+  std::string get_path(bool use_modified_path = false) const {
+    return get_path(use_modified_path ? get_modified_path() : path_);
   }
 
   std::string get_domain() const {
@@ -75,6 +78,7 @@ class package_name_generator {
   }
 
  private:
+  const std::string& language_;
   std::vector<std::string> identifiers_;
   std::vector<std::string> path_;
   std::vector<std::string> domain_;
@@ -84,6 +88,68 @@ class package_name_generator {
        {"instagram", "com"},
        {"meta", "com"},
        {"apache", "org"}};
+
+  // Regex to find respective language specific
+  // substrings in the identifier
+  static inline const std::map<std::string, std::string> kLanguageIdentifiers =
+      {
+          {"cpp", "cpp1|cpp2|cpp"},
+          {"cpp2", "cpp1|cpp2|cpp"},
+          {"java", "java2|java|swift|java_swift"},
+          {"java2", "java2|java|swift|java_swift"},
+          {"java.swift", "java2|java|java_swift"},
+          {"py", "py|py3|python|asyncio|py3_asyncio"},
+          {"py3", "py|py3|python|asyncio|py3_asyncio"},
+          {"python", "py|py3|python|asyncio|py3_asyncio"},
+          {"py.asyncio", "py|py3|python|asyncio|py3_asyncio"},
+          {"php", "php"},
+          {"hack", "hack"},
+  };
+
+  std::string replace_language_name(std::string identifier) const {
+    std::string pattern;
+    if (kLanguageIdentifiers.find(language_) == kLanguageIdentifiers.end()) {
+      pattern = language_;
+    } else {
+      pattern = kLanguageIdentifiers.at(language_);
+    }
+    // Only replace if the pattern is entire word
+    // i.e. _<pattern>_ OR <pattern>_ OR _<pattern> OR <pattern>.
+    // Doesn't match if the language name is part of other word
+    // Eg: `hack` shouldn't be replaced in "hacker_php"
+    re2::RE2 re("(_|^)(" + pattern + ")(_|$)");
+    re2::RE2::GlobalReplace(&identifier, re, "\\3");
+    if (identifier.find_first_of('_') == 0) {
+      return identifier.substr(1);
+    }
+    return identifier;
+  }
+
+  // Remove identifer or substrings specific to the language
+  std::vector<std::string> get_modified_path() const {
+    bool found_modified_path = false;
+    std::vector<std::string> modified_path;
+    for (auto& identifier : path_) {
+      auto modified_identifier = replace_language_name(identifier);
+      if (!modified_identifier.empty()) {
+        modified_path.push_back(modified_identifier);
+      }
+      if (!found_modified_path && modified_identifier != identifier) {
+        found_modified_path = true;
+      }
+    }
+    // If no modification was found return empty vector.
+    // This can happen when there are no language specific identifiers present
+    if (!found_modified_path) {
+      return {};
+    } else {
+      return modified_path;
+    }
+  }
+
+  std::string get_path(const std::vector<std::string>& path) const {
+    return fmt::to_string(fmt::join(path.begin(), path.end(), "/"));
+  }
 
   void create_path_and_domain() {
     path_ = identifiers_;
@@ -129,8 +195,8 @@ class package_name_generator_util {
       const std::map<std::string, std::string>& namespaces) {
     std::vector<package_name_generator> pkg_generators;
     pkg_generators.reserve(namespaces.size());
-    for (const auto& [_, ns] : namespaces) {
-      pkg_generators.emplace_back(ns);
+    for (const auto& [lang, ns] : namespaces) {
+      pkg_generators.emplace_back(lang, ns);
     }
     return package_name_generator_util(std::move(pkg_generators));
   }
@@ -180,7 +246,23 @@ class package_name_generator_util {
     };
 
     for (auto& generator : pkg_generators_) {
-      process_ns_path(generator.get_path(), generator.get_domain());
+      const auto& cur_domain = generator.get_domain();
+
+      /*
+       * Sometimes namespaces have language name in them,
+       * because of which common package cannot be identified.
+       *
+       * While finding the common package, also try with a modified path
+       * by removing the respective language name from the identifiers.
+       *
+       * Accounts for the use case where a language name
+       * is actually part of the namespace.
+       * That is for c++ namespace, only remove c++ related substrings.
+       * Eg: namespace cpp2 "cpp.hack.annotation" => "hack.annotation"
+       */
+      for (auto use_modified_path : {true, false}) {
+        process_ns_path(generator.get_path(use_modified_path), cur_domain);
+      }
     }
 
     if (most_freq_ns_path.empty()) {

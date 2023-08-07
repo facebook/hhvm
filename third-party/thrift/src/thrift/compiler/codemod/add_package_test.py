@@ -123,3 +123,38 @@ class ThriftPackage(unittest.TestCase):
                 namespace hack "thrift_common_ns.annotation"
                 """,
         )
+
+    def test_with_common_namespace_after_modification(self):
+        self.write_and_test(
+            "foo.thrift",
+            """\
+                namespace cpp2 "apache.thrift_cpp2.annotation"
+                namespace hack "apache.thrift_hack.annotation"
+                namespace java "org.apache.thrift"
+
+                """,
+            """\
+                package "apache.org/thrift/annotation"
+
+                namespace cpp2 "apache.thrift_cpp2.annotation"
+                namespace hack "apache.thrift_hack.annotation"
+                namespace java "org.apache.thrift"
+                """,
+        )
+
+        self.write_and_test(
+            "foo.thrift",
+            """\
+                namespace cpp2 "test_cpp_cpp"
+                namespace hack "test_hack_cpp"
+                namespace java "test_java_cpp"
+
+                """,
+            """\
+                package "meta.com/test_cpp"
+
+                namespace cpp2 "test_cpp_cpp"
+                namespace hack "test_hack_cpp"
+                namespace java "test_java_cpp"
+                """,
+        )

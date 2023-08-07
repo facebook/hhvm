@@ -422,7 +422,6 @@ let get_dependent_files ctx _workers input_set =
   (* This is performant enough to not need to go parallel for now *)
   get_deps_set ctx input_set
 
-let result_to_ide_message x =
-  Option.map x ~f:(fun (symbol_name, references) ->
-      let references = List.map references ~f:Ide_api_types.pos_to_file_range in
-      (symbol_name, references))
+let result_to_ide_message references =
+  List.map references ~f:(fun (name, pos) ->
+      (name, Ide_api_types.pos_to_file_range pos))

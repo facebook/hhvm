@@ -82,5 +82,3 @@ val go_for_localvar :
   ((string * Pos.t) list, action) Hh_prelude.result
 
 val to_absolute : server_result -> result
-
-val to_ide : string -> server_result -> ide_result

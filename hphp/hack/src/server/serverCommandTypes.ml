@@ -140,13 +140,9 @@ module Find_refs = struct
 
   type result = (string * Pos.absolute) list
 
-  type ide_result = (string * Pos.absolute list) option
-
   type server_result_or_retry = server_result Done_or_retry.t
 
   type result_or_retry = result Done_or_retry.t
-
-  type ide_result_or_retry = ide_result Done_or_retry.t
 
   let dep_member_of member : Typing_deps.Dep.Member.t list =
     let open Typing_deps.Dep.Member in
@@ -462,10 +458,10 @@ type _ t =
   | GO_TO_IMPL : Find_refs.action -> Find_refs.result_or_retry t
   | IDE_FIND_REFS_BY_SYMBOL :
       Find_refs.action * string
-      -> Find_refs.ide_result_or_retry t
+      -> Find_refs.result_or_retry t
   | IDE_GO_TO_IMPL_BY_SYMBOL :
       Find_refs.action * string
-      -> Find_refs.ide_result_or_retry t
+      -> Find_refs.result_or_retry t
   | RENAME : ServerRenameTypes.action -> Rename.result_or_retry t
   | IDE_RENAME_BY_SYMBOL :
       Find_refs.action * string * Relative_path.t SymbolDefinition.t

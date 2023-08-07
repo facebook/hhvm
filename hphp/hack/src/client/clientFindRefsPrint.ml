@@ -27,9 +27,7 @@ let print_ide_json res =
   Nuclide_rpc_message_printer.(
     find_references_response_to_json response |> print_json)
 
-let print_ide_readable res =
-  Option.iter res ~f:(fun (s, results) ->
-      Printf.printf "%s\n" s;
-      List.iter (List.rev results) ~f:(fun p ->
-          Printf.printf "%s\n" (Pos.string p));
-      print_endline (string_of_int (List.length results) ^ " total results"))
+let print_ide_readable results =
+  List.iter (List.rev results) ~f:(fun (_name, p) ->
+      Printf.printf "%s\n" (Pos.string p));
+  print_endline (string_of_int (List.length results) ^ " total results")

@@ -2107,23 +2107,18 @@ let handle_mode
         ~ctx:(Provider_utils.ctx_from_server_env env)
         ~path
     in
-    let open Option.Monad_infix in
     let open ServerCommandTypes.Done_or_retry in
-    let results =
-      Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-          ServerFindRefs.(
-            go_from_file_ctx ~ctx ~entry ~line ~column >>= fun (name, action) ->
-            go ctx action include_defs genv env
-            |> map_env ~f:(to_ide name)
-            |> snd
-            |> function
-            | Done r -> r
-            | Retry ->
-              failwith
-              @@ "should only happen with prechecked files "
-              ^ "which are not a thing in hh_single_type_check"))
-    in
-    ClientFindRefsPrint.print_ide_readable results
+    Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+        match ServerFindRefs.go_from_file_ctx ~ctx ~entry ~line ~column with
+        | None -> ()
+        | Some (name, action) ->
+          let results =
+            match ServerFindRefs.go ctx action include_defs genv env with
+            | (_env, Done r) -> ServerFindRefs.to_absolute r
+            | (_env, Retry) -> failwith "didn't expect retry"
+          in
+          Printf.printf "%s\n" name;
+          ClientFindRefsPrint.print_ide_readable results)
   | Go_to_impl (line, column) ->
     let filename = expect_single_file () in
     let naming_table = Naming_table.create files_info in
@@ -2148,22 +2143,19 @@ let handle_mode
         ~path:(Relative_path.create_detect_prefix filename)
         ~contents
     in
-    Option.Monad_infix.(
-      ServerCommandTypes.Done_or_retry.(
+    let open ServerCommandTypes.Done_or_retry in
+    begin
+      match ServerFindRefs.go_from_file_ctx ~ctx ~entry ~line ~column with
+      | None -> ()
+      | Some (name, action) ->
         let results =
-          ServerFindRefs.go_from_file_ctx ~ctx ~entry ~line ~column
-          >>= fun (name, action) ->
-          ServerGoToImpl.go ~action ~genv ~env
-          |> map_env ~f:(ServerFindRefs.to_ide name)
-          |> snd
-          |> function
-          | Done r -> r
-          | Retry ->
-            failwith
-            @@ "should only happen with prechecked files "
-            ^ "which are not a thing in hh_single_type_check"
+          match ServerGoToImpl.go ~action ~genv ~env with
+          | (_env, Done r) -> ServerFindRefs.to_absolute r
+          | (_env, Retry) -> failwith "didn't expect retry"
         in
-        ClientFindRefsPrint.print_ide_readable results))
+        Printf.printf "%s\n" name;
+        ClientFindRefsPrint.print_ide_readable results
+    end
   | Highlight_refs (line, column) ->
     let path = expect_single_file () in
     let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in

@@ -81,5 +81,4 @@ val get_dependent_files :
   Relative_path.Set.t
 
 val result_to_ide_message :
-  ('a * string Pos.pos list) option ->
-  ('a * Ide_api_types.file_range list) option
+  (string * Pos.absolute) list -> (string * Ide_api_types.file_range) list

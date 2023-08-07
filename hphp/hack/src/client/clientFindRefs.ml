@@ -19,7 +19,7 @@ let go (res : ServerCommandTypes.Find_refs.result) output_json =
   else
     ClientFindRefsPrint.print_readable res
 
-let go_ide (res : ServerCommandTypes.Find_refs.ide_result) output_json =
+let go_ide (res : ServerCommandTypes.Find_refs.result) output_json =
   if output_json then
     ClientFindRefsPrint.print_ide_json res
   else

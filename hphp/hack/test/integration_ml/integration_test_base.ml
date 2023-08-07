@@ -822,18 +822,6 @@ let assert_find_refs loop_output expected =
   let expected_as_string = list_to_string expected in
   assertEqual expected_as_string results_as_string
 
-let assert_ide_find_refs loop_output expected_name expected =
-  let results = assert_response loop_output in
-  let results_as_string =
-    match results with
-    | None -> "None"
-    | Some (name, results) ->
-      assertEqual expected_name name;
-      List.map results ~f:Pos.string |> list_to_string
-  in
-  let expected_as_string = list_to_string expected in
-  assertEqual expected_as_string results_as_string
-
 let assert_rename loop_output expected =
   let results = assert_response loop_output in
   (* We don't have any (better than JSON) human-readable format for rename results,

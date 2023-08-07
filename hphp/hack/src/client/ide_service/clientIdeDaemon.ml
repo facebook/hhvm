@@ -982,7 +982,7 @@ let handle_request
           | Some (name, action) when ServerFindRefs.is_local action ->
             let result =
               ServerFindRefs.go_for_localvar ctx action
-              >>| ServerFindRefs.to_ide name
+              >>| ServerFindRefs.to_absolute
             in
             let result =
               match result with
@@ -990,8 +990,7 @@ let handle_request
                 let lsp_uri_map =
                   begin
                     match ide_result with
-                    | None -> Lsp.UriMap.empty
-                    | Some (_str, []) ->
+                    | [] ->
                       (* If we find-refs on a localvar via right-click, is it possible that it doesn't return references?
                          It's possible some nondeterminism changed the cached TAST,
                          but assert that it's a failure for now
@@ -1004,8 +1003,9 @@ let handle_request
                       log "%s" err;
                       HackEventLogger.invariant_violation_bug err;
                       failwith err
-                    | Some (_str, positions) ->
-                      let filename = Pos.filename @@ List.hd_exn positions in
+                    | positions ->
+                      let positions = List.map positions ~f:snd in
+                      let filename = List.hd_exn positions |> Pos.filename in
                       let uri =
                         Lsp_helpers.path_to_lsp_uri
                           ~default_path:filename

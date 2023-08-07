@@ -141,22 +141,20 @@ let symbol_by_id_response_to_json = function
   | Some def -> definition_to_json def
   | None -> JSON_Null
 
-let find_references_response_to_json = function
-  | None -> JSON_Array []
-  | Some (symbol_name, references) ->
-    let entries =
-      List.map references ~f:(fun x ->
-          Ide_api_types.(
-            Hh_json.JSON_Object
-              [
-                ("name", Hh_json.JSON_String symbol_name);
-                ("filename", Hh_json.JSON_String x.range_filename);
-                ("line", Hh_json.int_ x.file_range.st.line);
-                ("char_start", Hh_json.int_ x.file_range.st.column);
-                ("char_end", Hh_json.int_ x.file_range.ed.column);
-              ]))
-    in
-    Hh_json.JSON_Array entries
+let find_references_response_to_json references =
+  let entries =
+    List.map references ~f:(fun (symbol_name, x) ->
+        Ide_api_types.(
+          Hh_json.JSON_Object
+            [
+              ("name", Hh_json.JSON_String symbol_name);
+              ("filename", Hh_json.JSON_String x.range_filename);
+              ("line", Hh_json.int_ x.file_range.st.line);
+              ("char_start", Hh_json.int_ x.file_range.st.column);
+              ("char_end", Hh_json.int_ x.file_range.ed.column);
+            ]))
+  in
+  Hh_json.JSON_Array entries
 
 let highlight_references_response_to_json l =
   JSON_Array

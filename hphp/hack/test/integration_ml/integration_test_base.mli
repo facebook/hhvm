@@ -156,12 +156,6 @@ val assert_find_refs :
   string list ->
   unit
 
-val assert_ide_find_refs :
-  ('a, ServerCommandTypes.Find_refs.ide_result_or_retry) loop_outputs ->
-  string ->
-  string list ->
-  unit
-
 val assert_rename :
   ('a, ServerCommandTypes.Rename.result_or_retry) loop_outputs -> string -> unit
 

@@ -290,9 +290,6 @@ let go_for_localvar ctx action =
 
 let to_absolute res = List.map res ~f:(fun (r, pos) -> (r, Pos.to_absolute pos))
 
-let to_ide symbol_name res =
-  Some (symbol_name, List.map ~f:snd (to_absolute res))
-
 let get_action symbol (filename, file_content, line, char) =
   let module SO = SymbolOccurrence in
   let name = symbol.SymbolOccurrence.name in

@@ -26,6 +26,8 @@ using facebook::thrift::benchmarks::StreamBenchmarkAsyncClient;
 // Server Settings
 DEFINE_string(host, "::1", "Server host");
 DEFINE_int32(port, 7777, "Server port");
+DEFINE_string(
+    unix_socket_path, "", "Unix socket to connect to, supersedes host:port");
 
 // Client Settings
 DEFINE_int32(num_clients, 0, "Number of clients to use. (Default: 1 per core)");
@@ -68,11 +70,20 @@ int main(int argc, char** argv) {
   // Initialize a client per number of threads specified
   QPSStats stats;
   std::vector<std::thread> threads;
+  std::vector<std::shared_ptr<folly::EventBase>> evbs;
   for (int i = 0; i < FLAGS_num_clients; ++i) {
-    threads.push_back(std::thread([&]() {
+    auto evb = std::make_shared<folly::EventBase>();
+    evbs.push_back(evb);
+    threads.push_back(std::thread([&, evb = std::move(evb)]() {
       // Create Thrift Async Client
-      auto evb = std::make_shared<folly::EventBase>();
-      auto addr = folly::SocketAddress(FLAGS_host, FLAGS_port);
+      folly::SocketAddress addr;
+      if (!FLAGS_unix_socket_path.empty()) {
+        LOG(INFO) << "Connecting to " << FLAGS_unix_socket_path;
+        addr.setFromPath(FLAGS_unix_socket_path);
+      } else {
+        LOG(INFO) << "Connecting [" << FLAGS_host << "]:" << FLAGS_port;
+        addr.setFromHostPort(FLAGS_host, FLAGS_port);
+      }
       auto client = newClient<StreamBenchmarkAsyncClient>(
           evb.get(), addr, FLAGS_transport);
 
@@ -101,11 +112,15 @@ int main(int argc, char** argv) {
 
       // Create the runner and execute multiple operations
       auto r = std::make_unique<Runner<StreamBenchmarkAsyncClient>>(
-          evb,
-          std::move(ops),
-          std::move(distribution),
-          FLAGS_max_outstanding_ops);
+          std::move(ops), std::move(distribution), FLAGS_max_outstanding_ops);
       r->run();
+
+      // Drain the evb before destructing the operations that might still be
+      // referenced by it.
+      SCOPE_EXIT {
+        LOG(INFO) << "Requesting thread exit";
+        r->loopUntilExit(evb.get());
+      };
 
       // Run eventbase loop for async operations
       if (!FLAGS_sync) {
@@ -130,6 +145,9 @@ int main(int argc, char** argv) {
     if (elapsedTimeSec >= FLAGS_terminate_sec) {
       break;
     }
+  }
+  for (auto& evb : evbs) {
+    evb->terminateLoopSoon();
   }
   for (auto& thr : threads) {
     thr.join();

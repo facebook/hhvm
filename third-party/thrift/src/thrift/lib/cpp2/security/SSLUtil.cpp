@@ -179,10 +179,9 @@ folly::AsyncSocketTransport::UniquePtr moveToPlaintext(FizzSocket* fizzSock) {
       if (auto oldFdSock =
               fizzSock
                   ->template getUnderlyingTransport<folly::AsyncFdSocket>()) {
-        // FIXME: Ideally, we would DFATAL if a server does NOT have an
-        // `oldFdSock` -- but I don't know how to distinguish client vs
-        // server here.  Rationale:
-        //
+        newFdSock->swapFdReadStateWith(oldFdSock);
+      } else if (
+          dynamic_cast<fizz::server::AsyncFizzServer*>(fizzSock) != nullptr) {
         // If the handshake was NOT negotiated over an `AsyncFdSocket`, then
         // the following race condition could happen:
         //  - Server closes TLS.
@@ -197,9 +196,6 @@ folly::AsyncSocketTransport::UniquePtr moveToPlaintext(FizzSocket* fizzSock) {
         //    previously received request data to the new `AsyncFdSocket`.
         //  - Rocket parses a request that expects FDs, but fails to pop
         //    them from the `AsyncFdSocket` because it never got FDs.
-        newFdSock->swapFdReadStateWith(oldFdSock);
-      } else if (
-          dynamic_cast<fizz::server::AsyncFizzServer*>(fizzSock) != nullptr) {
         LOG(DFATAL) << "For AF_UNIX, AsyncFizzServer must always be backed by "
                     << "an underlying AsyncFdSocket";
       }

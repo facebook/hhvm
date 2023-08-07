@@ -29,6 +29,9 @@
 #include <thread>
 
 DEFINE_int32(port, 7777, "Server port");
+DEFINE_string(
+    unix_socket_path, "", "Unix socket to listen on, supersedes port");
+
 DEFINE_int32(io_threads, 0, "Number of IO threads (0 means number of cores)");
 DEFINE_int32(cpu_threads, 0, "Number of CPU threads (0 means number of cores)");
 DEFINE_int32(stats_interval_sec, 1, "Seconds between stats");
@@ -73,14 +76,22 @@ int main(int argc, char** argv) {
           handler);
 
   auto server = std::make_shared<ThriftServer>();
-  server->setPort(FLAGS_port);
+  if (!FLAGS_unix_socket_path.empty()) {
+    folly::AsyncServerSocket::UniquePtr sock{new folly::AsyncServerSocket};
+    folly::SocketAddress addr;
+    addr.setFromPath(FLAGS_unix_socket_path);
+    sock->bind(addr);
+    server->useExistingSocket(std::move(sock));
+    LOG(INFO) << "Listening on " << FLAGS_unix_socket_path;
+  } else {
+    LOG(INFO) << "Listening on port " << FLAGS_port;
+    server->setPort(FLAGS_port);
+  }
   server->setNumIOWorkerThreads(FLAGS_io_threads);
   server->setNumCPUWorkerThreads(FLAGS_cpu_threads);
   server->setInterface(cpp2PFac);
 
   server->addRoutingHandler(createHTTP2RoutingHandler(server));
-
-  LOG(INFO) << "Benchmark server running on port: " << FLAGS_port;
 
   thread logger([&] {
     int32_t elapsedTimeSec = 0;

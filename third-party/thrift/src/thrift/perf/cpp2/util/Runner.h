@@ -38,18 +38,16 @@ class Runner {
   friend class LoadCallback<AsyncClient>;
 
   Runner(
-      std::shared_ptr<folly::EventBase> evb,
       std::unique_ptr<Operation<AsyncClient>> ops,
       std::unique_ptr<std::discrete_distribution<int32_t>> distribution,
       int32_t max_outstanding_ops)
-      : evb_(evb),
-        ops_(std::move(ops)),
+      : ops_(std::move(ops)),
         d_(std::move(distribution)),
         max_outstanding_ops_(max_outstanding_ops) {}
 
   void run() {
     // TODO: Implement sync calls.
-    while (ops_->outstandingOps() < max_outstanding_ops_) {
+    while (ops_->outstandingOps() < max_outstanding_ops_ && !exiting_) {
       auto op = static_cast<OP_TYPE>((*d_)(gen_));
       auto cb =
           std::make_unique<LoadCallback<AsyncClient>>(this, ops_.get(), op);
@@ -57,12 +55,21 @@ class Runner {
     }
   }
 
+  void loopUntilExit(folly::EventBase* evb) {
+    exiting_ = true;
+    while (ops_->outstandingOps()) {
+      evb->loopOnce();
+    }
+  }
+
   void finishCall() {
-    run(); // Attempt to perform more async calls
+    if (!exiting_) {
+      run(); // Attempt to perform more async calls
+    }
   }
 
  private:
-  std::shared_ptr<folly::EventBase> evb_;
+  bool exiting_{false};
   std::unique_ptr<Operation<AsyncClient>> ops_;
   std::unique_ptr<std::discrete_distribution<int32_t>> d_;
   int32_t max_outstanding_ops_;

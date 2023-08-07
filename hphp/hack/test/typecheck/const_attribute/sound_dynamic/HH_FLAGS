@@ -1,4 +1,3 @@
 --enable-sound-dynamic-type
---like-types-all
+--like-type-hints
 --const-attribute
-

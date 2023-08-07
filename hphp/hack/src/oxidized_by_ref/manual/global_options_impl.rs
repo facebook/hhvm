@@ -58,7 +58,6 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_coeffects_local: true,
     tco_strict_contexts: true,
     tco_like_casts: false,
-    tco_simple_pessimize: 0.0,
     tco_check_xhp_attribute: false,
     tco_check_redundant_generics: false,
     tco_disallow_unresolved_type_variables: false,

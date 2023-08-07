@@ -47,7 +47,7 @@ if __name__ == "__main__":
         [hh_stc_path]
         + hh_stc_arguments
         + ["--hh-log-level", "pessimise", "1"]
-        + ["--like-casts"]
+        + ["--config", "like_casts=true"]
         + ["--error-format", "plain"]
         + files
     )

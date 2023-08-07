@@ -240,7 +240,6 @@ let parse_options () =
   let disallow_byref_calls = ref (Some false) in
   let set_bool x () = x := Some true in
   let set_bool_ x () = x := true in
-  let set_float_ x f = x := f in
   let rust_elab = ref false in
   let rust_provider_backend = ref false in
   let skip_hierarchy_checks = ref false in
@@ -252,8 +251,6 @@ let parse_options () =
   let call_coeffects = ref true in
   let local_coeffects = ref true in
   let strict_contexts = ref true in
-  let like_casts = ref false in
-  let simple_pessimize = ref 0.0 in
   let symbolindex_file = ref None in
   let check_xhp_attribute = ref false in
   let check_redundant_generics = ref false in
@@ -569,20 +566,6 @@ let parse_options () =
       ( "--like-type-hints",
         Arg.Set like_type_hints,
         " Allows like types to be written in type hint positions" );
-      ( "--like-casts",
-        Arg.Set like_casts,
-        " Allows like types to be written in as expressions" );
-      ( "--simple-pessimize",
-        Arg.Set_float simple_pessimize,
-        " At coercion points, if a type is not enforceable, wrap it in like. Float argument 0.0 to 1.0 sets frequency"
-      );
-      ( "--like-types-all",
-        Arg.Unit
-          (fun () ->
-            set_bool_ like_type_hints ();
-            set_bool_ like_casts ();
-            set_float_ simple_pessimize 1.0),
-        " Enables all like types features" );
       ( "--naive-implicit-pess",
         Arg.Unit
           (fun () ->
@@ -932,8 +915,7 @@ let parse_options () =
       ~tco_strict_contexts:!strict_contexts
       ~tco_coeffects:!call_coeffects
       ~tco_coeffects_local:!local_coeffects
-      ~tco_like_casts:!like_casts
-      ~tco_simple_pessimize:!simple_pessimize
+      ~tco_like_casts:false
       ~log_levels:!log_levels
       ~po_enable_class_level_where_clauses:!enable_class_level_where_clauses
       ~po_disable_legacy_soft_typehints:!disable_legacy_soft_typehints

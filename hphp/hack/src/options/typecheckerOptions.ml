@@ -140,8 +140,6 @@ let like_type_hints t = t.GlobalOptions.tco_like_type_hints
 
 let like_casts t = t.GlobalOptions.tco_like_casts
 
-let simple_pessimize t = t.GlobalOptions.tco_simple_pessimize
-
 let check_xhp_attribute t = t.GlobalOptions.tco_check_xhp_attribute
 
 let check_redundant_generics t = t.GlobalOptions.tco_check_redundant_generics

@@ -278,7 +278,6 @@ let load_config config options =
     ?tco_coeffects:(bool_opt "call_coeffects" config)
     ?tco_coeffects_local:(bool_opt "local_coeffects" config)
     ?tco_like_casts:(bool_opt "like_casts" config)
-    ?tco_simple_pessimize:(float_opt "simple_pessimize" config)
     ?tco_check_xhp_attribute:(bool_opt "check_xhp_attribute" config)
     ?tco_check_redundant_generics:(bool_opt "check_redundant_generics" config)
     ?tco_disallow_unresolved_type_variables:

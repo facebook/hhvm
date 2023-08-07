@@ -20,9 +20,7 @@ DEFAULT_OUT_EXT = ".out"
 DEFAULT_EXP_EXT = ".exp"
 
 flags_pessimise_unsupported = [
-    "--like-casts",
     "--complex-coercion",
-    "--like-types-all",
     "--enable-higher-kinded-types",
     "--enable-class-level-where-clauses",
     "--enable-global-access-check",

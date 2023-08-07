@@ -196,6 +196,14 @@ struct RepoGlobalData {
    */
   bool ModuleLevelTraits = false;
 
+  /* This controls function renaming.
+   * 0 - Renaming not allowed
+   * 1 - All functions can be renamed
+   * 2 - Functions in RenamableFunctions config list can be renamed
+   */
+  uint32_t JitEnableRenameFunction = 0;
+  std::set<std::string> RenamableFunctions;
+
   // NB: Only use C++ types in this struct because we want to be able
   // to serde it before memory manager and family are set up.
 
@@ -215,6 +223,8 @@ struct RepoGlobalData {
       (ForbidDynamicCallsToInstMeth)
       (ForbidDynamicConstructs)
       (ForbidDynamicCallsWithAttr)
+      (JitEnableRenameFunction)
+      (RenamableFunctions)
       (LogKnownMethodsAsDynamicCalls)
       (NoticeOnBuiltinDynamicCalls)
       (Signature)

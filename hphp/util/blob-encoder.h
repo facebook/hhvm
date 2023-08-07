@@ -697,7 +697,7 @@ struct BlobDecoder {
 
   template<typename K, typename C, typename A>
   void decode(std::set<K, C, A>& set) {
-    decodeSetContainer(set);
+    decodeOrderedSetContainer(set);
   }
 
   template<typename T, typename H, typename E, typename A, typename C,
@@ -984,6 +984,17 @@ private:
     uint32_t size;
     decode(size);
     cont.reserve(size);
+    for (uint32_t i = 0; i < size; ++i) {
+      auto val = make<typename Cont::value_type>(extra...);
+      cont.emplace(std::move(val));
+    }
+  }
+
+  template<typename Cont, typename... Extra>
+  void decodeOrderedSetContainer(Cont& cont, const Extra&... extra) {
+    cont.clear();
+    uint32_t size;
+    decode(size);
     for (uint32_t i = 0; i < size; ++i) {
       auto val = make<typename Cont::value_type>(extra...);
       cont.emplace(std::move(val));

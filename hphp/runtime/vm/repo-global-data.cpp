@@ -51,6 +51,8 @@ void RepoGlobalData::load(bool loadConstantFuncs) const {
   RO::EvalActiveDeployment                         = ActiveDeployment;
   RO::EvalModuleLevelTraits                        = ModuleLevelTraits;
   RO::EvalTreatCaseTypesAsMixed                    = TreatCaseTypesAsMixed;
+  RO::EvalJitEnableRenameFunction                  = JitEnableRenameFunction;
+  RO::RenamableFunctions                           = RenamableFunctions;
 
   if (HardGenericsUB) RO::EvalEnforceGenericsUB = 2;
 
@@ -111,6 +113,7 @@ std::string show(const RepoGlobalData& gd) {
   SHOW(EmitBespokeTypeStructures);
   SHOW(ModuleLevelTraits);
   SHOW(TreatCaseTypesAsMixed);
+  SHOW(JitEnableRenameFunction);
 #undef SHOW
   folly::format(
     &out, "  SourceRootForFileBC: {}\n",

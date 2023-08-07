@@ -497,6 +497,8 @@ RepoGlobalData getGlobalData() {
   gd.ActiveDeployment = RO::EvalActiveDeployment;
   gd.ModuleLevelTraits = RO::EvalModuleLevelTraits;
   gd.TreatCaseTypesAsMixed = RO::EvalTreatCaseTypesAsMixed;
+  gd.JitEnableRenameFunction = RO::EvalJitEnableRenameFunction;
+  gd.RenamableFunctions = RO::RenamableFunctions;
 
   if (Option::ConstFoldFileBC) {
     gd.SourceRootForFileBC.emplace(RO::SourceRoot);

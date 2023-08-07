@@ -1028,7 +1028,12 @@ let handle_request
                     HackEventLogger.invariant_violation_bug err;
                     failwith err
                 in
-                ClientIdeMessage.Find_refs_success (name, None, lsp_uri_map)
+                ClientIdeMessage.Find_refs_success
+                  {
+                    full_name = name;
+                    action = None;
+                    open_file_results = lsp_uri_map;
+                  }
               | Error _action ->
                 let err =
                   Printf.sprintf "Failed to find refs for localvar %s" name
@@ -1088,7 +1093,11 @@ let handle_request
             in
             ( istate,
               ClientIdeMessage.Find_refs_success
-                (name, Some action, single_file_refs) ))
+                {
+                  full_name = name;
+                  action = Some action;
+                  open_file_results = single_file_refs;
+                } ))
     in
     Lwt.return (Initialized istate, Ok result)
   (* Autocomplete *)

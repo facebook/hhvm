@@ -2341,7 +2341,11 @@ let do_findReferences_local
     let result_telemetry = make_result_telemetry (-1) in
     Lwt.return (state, result_telemetry)
   | ClientIdeMessage.Find_refs_success
-      (_symbol_name, None, ide_calculated_positions) ->
+      {
+        full_name = _;
+        action = None;
+        open_file_results = ide_calculated_positions;
+      } ->
     let positions =
       match UriMap.values ide_calculated_positions with
       (*
@@ -2365,7 +2369,11 @@ let do_findReferences_local
     let result_telemetry = make_result_telemetry (List.length positions) in
     Lwt.return (state, result_telemetry)
   | ClientIdeMessage.Find_refs_success
-      (symbol_name, Some action, ide_calculated_positions) ->
+      {
+        full_name;
+        action = Some action;
+        open_file_results = ide_calculated_positions;
+      } ->
     (* ClientIdeMessage.Find_references only supports localvar.
        Receiving an error with a non-localvar action indicates that we attempted to
        try and find references for a non-localvar
@@ -2373,7 +2381,7 @@ let do_findReferences_local
     let shellable_type =
       Lost_env.FindRefs
         {
-          Lost_env.symbol = symbol_name;
+          Lost_env.symbol = full_name;
           find_refs_action = action;
           ide_calculated_positions;
         }

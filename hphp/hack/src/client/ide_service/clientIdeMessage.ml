@@ -36,10 +36,14 @@ type location = {
 
 type find_refs_result =
   | Invalid_symbol
-  | Find_refs_success of
-      (string
-      * ServerCommandTypes.Find_refs.action option
-      * Pos.absolute list Lsp.UriMap.t)
+  | Find_refs_success of {
+      full_name: string;  (** from [SymbolDefinition.full_name] *)
+      action: ServerCommandTypes.Find_refs.action option;
+          (** if true, then clientLsp should shell out to hh_server to collect more positions;
+      this action will specifiy what hh_server shoud look for. *)
+      open_file_results: Pos.absolute list Lsp.UriMap.t;
+          (** All references that were found in all open files in clientIdeDaemon. *)
+    }
 
 type rename_result =
   | Not_renameable_position
@@ -118,17 +122,6 @@ type _ t =
       document * location * document list
       -> go_to_impl_result t
   | Find_references : document * location * document list -> find_refs_result t
-      (** The result of Find_references is one of:
-       - Invalid_symbol, indicating find-refs on something that isn't a symbol
-       - Find_refs_success, where we return a triple of:
-          - a symbol's name from [SymbolDefinition.full_name],
-          - an optional[Find_refs.action] which describes what the symbol refers to,
-            e.g. Class of class_name, Member of member_name with a Method of method_name.
-            The presence of this value indicates that clientLsp must shell out to hh_server to collect
-            more positions.
-          - A mapping of the URI of a file to the absolute positions that ClientIDEDaemon discovered.
-            Localvar find-refs will return a single entry in this map.
-          *)
   | Rename : document * location * string * document list -> rename_result t
       (** The result of Rename is one of:
        - Not_renameable_position, indicating an attempt to rename something that isn't a valid symbol

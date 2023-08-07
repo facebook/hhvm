@@ -885,6 +885,30 @@ let protected_write_exn (filename : string) (content : string) : unit =
           Unix.ftruncate fd (String.length content))
         ~finally:(fun () -> Unix.close fd))
 
+let with_lock
+    (fd : Unix.file_descr) (lock_command : Unix.lock_command) ~(f : unit -> 'a)
+    =
+  (* helper function to set current file position to 0, then do "f",
+     then restore it to what it was before *)
+  let with_pos0 ~f =
+    let pos = Unix.lseek fd 0 Unix.SEEK_CUR in
+    let _ = Unix.lseek fd 0 Unix.SEEK_SET in
+    let result = f () in
+    let _ = Unix.lseek fd pos Unix.SEEK_SET in
+    result
+  in
+
+  Utils.try_finally
+    ~f:(fun () ->
+      (* lockf is applied starting at the file-descriptors current position.
+         We use "with_pos0" so that when we acquire or release the lock,
+         we're locking from the start of the file through to (len=0) the end. *)
+      with_pos0 ~f:(fun () -> restart_on_EINTR (Unix.lockf fd lock_command) 0);
+      f ())
+    ~finally:(fun () ->
+      with_pos0 ~f:(fun () -> restart_on_EINTR (Unix.lockf fd Unix.F_ULOCK) 0);
+      ())
+
 let redirect_stdout_and_stderr_to_file (filename : string) : unit =
   let old_stdout = Unix.dup Unix.stdout in
   let old_stderr = Unix.dup Unix.stderr in

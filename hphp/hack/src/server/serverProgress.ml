@@ -262,40 +262,12 @@ module ErrorsFile = struct
         log_message: string;
       }
 
-  (** helper function to set current file position to 0, then do "f",
-     then restore it to what it was before *)
-  let with_pos0 (fd : Unix.file_descr) ~(f : unit -> 'a) =
-    let pos = Unix.lseek fd 0 Unix.SEEK_CUR in
-    let _ = Unix.lseek fd 0 Unix.SEEK_SET in
-    let result = f () in
-    let _ = Unix.lseek fd pos Unix.SEEK_SET in
-    result
-
-  (** helper function to acquire a lock on the whole file, then do "f",
-   then release the lock *)
-  let with_lock
-      (fd : Unix.file_descr)
-      (lock_command : Unix.lock_command)
-      ~(f : unit -> 'a) =
-    Utils.try_finally
-      ~f:(fun () ->
-        (* lockf is applied starting at the file-descriptors current position.
-           We use "with_pos0" so that when we acquire or release the lock,
-           we're locking from the start of the file through to (len=0) the end. *)
-        with_pos0 fd ~f:(fun () ->
-            Sys_utils.restart_on_EINTR (Unix.lockf fd lock_command) 0);
-        f ())
-      ~finally:(fun () ->
-        with_pos0 fd ~f:(fun () ->
-            Sys_utils.restart_on_EINTR (Unix.lockf fd Unix.F_ULOCK) 0);
-        ())
-
   (** This helper acquires an exclusive lock on the file, appends the message, then releases the lock.
      It does not do any state validation - that's left to its caller. *)
   let write_message (fd : Unix.file_descr) (message : message) : unit =
     let payload = Marshal.to_bytes message [] in
     let preamble = Marshal_tools.make_preamble (Bytes.length payload) in
-    with_lock fd Unix.F_LOCK ~f:(fun () ->
+    Sys_utils.with_lock fd Unix.F_LOCK ~f:(fun () ->
         Sys_utils.write_non_intr fd preamble 0 (Bytes.length preamble);
         Sys_utils.write_non_intr fd payload 0 (Bytes.length payload))
 
@@ -304,7 +276,7 @@ module ErrorsFile = struct
         message =
       End { error; timestamp = Unix.gettimeofday (); log_message }
     in
-    with_lock fd Unix.F_RLOCK ~f:(fun () ->
+    Sys_utils.with_lock fd Unix.F_RLOCK ~f:(fun () ->
         let preamble =
           Sys_utils.read_non_intr fd Marshal_tools.expected_preamble_size
         in

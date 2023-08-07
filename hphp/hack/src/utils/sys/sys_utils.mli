@@ -322,6 +322,9 @@ then write content. Locks in unix are advisory, so this only works if reading is
 done by [protected_read_exn]. Empty content isn't supported and will fail. *)
 val protected_write_exn : string -> string -> unit
 
+(** This is a primitive API for atomic locks. It is robust against EINTR. *)
+val with_lock : Unix.file_descr -> Unix.lock_command -> f:(unit -> 'a) -> 'a
+
 (** As it says, redirects stdout and stderr to this file, which it will
 open in "w" mode. If redirection fails then stdout+stderr are left unchanged.*)
 val redirect_stdout_and_stderr_to_file : string -> unit

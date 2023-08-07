@@ -20,19 +20,16 @@ package "apache.org/thrift/reflection"
 
 namespace cpp2 reflection_indirection
 
-typedef i32 (cpp.type = 'reflection_indirection::CppFakeI32') FakeI32
-typedef i32 (
-  cpp.type = 'reflection_indirection::CppHasANumber',
-  cpp.indirection,
-) HasANumber
-typedef i32 (
-  cpp.type = 'reflection_indirection::CppHasAResult',
-  cpp.indirection,
-) HasAResult
-typedef string (
-  cpp.type = 'reflection_indirection::CppHasAPhrase',
-  cpp.indirection,
-) HasAPhrase
+include "thrift/annotation/cpp.thrift"
+
+@cpp.Type{name = "reflection_indirection::CppFakeI32"}
+typedef i32 FakeI32
+@cpp.Type{name = "reflection_indirection::CppHasANumber"}
+typedef i32 (cpp.indirection) HasANumber
+@cpp.Type{name = "reflection_indirection::CppHasAResult"}
+typedef i32 (cpp.indirection) HasAResult
+@cpp.Type{name = "reflection_indirection::CppHasAPhrase"}
+typedef string (cpp.indirection) HasAPhrase
 
 struct struct_with_indirections {
   1: i32 real;

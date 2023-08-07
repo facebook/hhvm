@@ -15,14 +15,17 @@
  */
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
 cpp_include "thrift/test/AdapterTest.h"
 
 namespace cpp2 test_cpp2.simple_cpp_reflection
 
 cpp_include "<deque>"
 
-typedef binary (cpp2.type = "folly::IOBuf") IOBuf
-typedef binary (cpp2.type = "std::unique_ptr<folly::IOBuf>") IOBufPtr
+@cpp.Type{name = "folly::IOBuf"}
+typedef binary IOBuf
+@cpp.Type{name = "std::unique_ptr<folly::IOBuf>"}
+typedef binary IOBufPtr
 
 enum enum1 {
   field0 = 0,
@@ -72,20 +75,29 @@ union union1 {
   @cpp.Ref{type = cpp.RefType.Unique}
   5: string field_string_reference;
   999: binary field_binary;
-  12: smallstruct field_smallstruct (cpp2.ref = "true");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  12: smallstruct field_smallstruct;
 }
 
 struct struct3 {
-  1: optional smallstruct opt_nested (cpp.ref = "true", cpp2.ref = "true");
-  2: smallstruct def_nested (cpp.ref = "true", cpp2.ref = "true");
-  3: required smallstruct req_nested (cpp.ref = "true", cpp2.ref = "true");
-  4: optional smallstruct box_nested1 (thrift.box);
-  5: optional smallstruct box_nested2 (thrift.box);
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional smallstruct opt_nested;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: smallstruct def_nested;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  3: required smallstruct req_nested;
+  @thrift.Box
+  4: optional smallstruct box_nested1;
+  @thrift.Box
+  5: optional smallstruct box_nested2;
 }
 
-typedef map<i32, string> (cpp2.template = "std::unordered_map") unordered_map
-typedef set<i32> (cpp2.template = "std::unordered_set") unordered_set
-typedef list<i32> (cpp2.template = "std::deque") deque
+@cpp.Type{template = "std::unordered_map"}
+typedef map<i32, string> unordered_map
+@cpp.Type{template = "std::unordered_set"}
+typedef set<i32> unordered_set
+@cpp.Type{template = "std::deque"}
+typedef list<i32> deque
 
 struct struct4 {
   1: unordered_map um_field;
@@ -110,9 +122,12 @@ struct struct5_listworkaround {
 }
 
 struct struct6 {
-  1: smallstruct def_field (cpp2.ref_type = "shared");
-  2: optional smallstruct opt_field (cpp2.ref_type = "shared");
-  3: required smallstruct req_field (cpp2.ref_type = "shared");
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: smallstruct def_field;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: optional smallstruct opt_field;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  3: required smallstruct req_field;
 }
 
 struct struct7 {
@@ -125,19 +140,27 @@ struct struct7 {
   7: nested1 field7;
   8: i64 field8;
   9: string field9;
-  10: smallstruct field10 (cpp2.ref_type = "shared");
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  10: smallstruct field10;
   11: IOBuf field11;
   12: binary field12;
-  13: optional smallstruct field13 (cpp2.ref = "true");
-  14: required smallstruct field14 (cpp2.ref = "true");
-  15: smallstruct field15 (cpp2.ref = "true");
-  16: optional map<i32, string> field16 (cpp.ref);
+  @cpp.Ref{type = cpp.RefType.Unique}
+  13: optional smallstruct field13;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  14: required smallstruct field14;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  15: smallstruct field15;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  16: optional map<i32, string> field16;
 }
 
 struct struct8 {
-  1: smallstruct def_field (cpp2.ref_type = "shared_const");
-  2: optional smallstruct opt_field (cpp2.ref_type = "shared_const");
-  3: required smallstruct req_field (cpp2.ref_type = "shared_const");
+  @cpp.Ref{type = cpp.RefType.Shared}
+  1: smallstruct def_field;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  2: optional smallstruct opt_field;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  3: required smallstruct req_field;
 }
 
 exception except1 {

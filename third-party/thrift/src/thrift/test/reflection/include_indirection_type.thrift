@@ -15,6 +15,7 @@
  */
 
 include "thrift/test/reflection/fatal_reflection_indirection.thrift"
+include "thrift/annotation/cpp.thrift"
 
 package "apache.org/thrift/reflection"
 
@@ -25,8 +26,6 @@ struct struct_with_included_indirections {
   4: fatal_reflection_indirection.HasAResult result;
 
   // XXX: string type can not be included with cpp.indirection
-  5: string (
-    cpp.type = '::reflection_indirection::CppHasAPhrase',
-    cpp.indirection,
-  ) phrase;
+  @cpp.Type{name = "::reflection_indirection::CppHasAPhrase"}
+  5: string (cpp.indirection) phrase;
 }

@@ -23,6 +23,8 @@ namespace py3 test_py.cpp_compat
 
 cpp_include "thrift/test/reflection/fatal_custom_types.h"
 
+include "thrift/annotation/cpp.thrift"
+
 enum compat_enum1 {
   field0 = 0,
   field1 = 1,
@@ -74,9 +76,8 @@ struct compat_structA {
   2: string b;
 }
 
-typedef compat_structA (
-  cpp.type = "test_cpp_reflection::custom_compat_structA",
-) my_compat_structA
+@cpp.Type{name = "test_cpp_reflection::custom_compat_structA"}
+typedef compat_structA my_compat_structA
 
 union compat_unionA {
   1: i32 i;

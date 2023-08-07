@@ -23,6 +23,10 @@ cpp_include "thrift/test/reflection/fatal_merge_types.h"
 
 namespace cpp2 apache.thrift.test
 
+include "thrift/annotation/cpp.thrift"
+
+include "thrift/annotation/thrift.thrift"
+
 struct Basic {
   1: string b;
   2: optional string b_opt;
@@ -144,8 +148,10 @@ const NestedExample kNestedExample = {
 };
 
 struct NestedRefUnique {
-  1: optional Basic a (cpp.ref_type = "unique");
-  2: optional Basic b (cpp.ref_type = "unique");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional Basic a;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: optional Basic b;
   3: string c;
   4: string d;
 }
@@ -170,8 +176,10 @@ const NestedRefUniqueExample kNestedRefUniqueExample = {
 };
 
 struct NestedRefShared {
-  1: optional Basic a (cpp.ref_type = "shared");
-  2: optional Basic b (cpp.ref_type = "shared");
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: optional Basic a;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: optional Basic b;
   3: string c;
   4: string d;
 }
@@ -196,8 +204,10 @@ const NestedRefSharedExample kNestedRefSharedExample = {
 };
 
 struct NestedRefSharedConst {
-  1: optional Basic a (cpp.ref_type = "shared_const");
-  2: optional Basic b (cpp.ref_type = "shared_const");
+  @cpp.Ref{type = cpp.RefType.Shared}
+  1: optional Basic a;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  2: optional Basic b;
   3: string c;
   4: string d;
 }
@@ -222,10 +232,14 @@ const NestedRefSharedConstExample kNestedRefSharedConstExample = {
 };
 
 struct NestedBox {
-  1: optional Basic a (thrift.box);
-  2: optional Basic b (thrift.box);
-  3: optional string c (thrift.box);
-  4: optional string d (thrift.box);
+  @thrift.Box
+  1: optional Basic a;
+  @thrift.Box
+  2: optional Basic b;
+  @thrift.Box
+  3: optional string c;
+  @thrift.Box
+  4: optional string d;
 }
 
 struct NestedBoxExample {
@@ -242,7 +256,8 @@ const NestedBoxExample kNestedBoxExample = {
   "nil": {},
 };
 
-typedef i32 (cpp.type = 'CppHasANumber', cpp.indirection) HasANumber
+@cpp.Type{name = "CppHasANumber"}
+typedef i32 (cpp.indirection) HasANumber
 
 struct Indirection {
   1: i32 real;

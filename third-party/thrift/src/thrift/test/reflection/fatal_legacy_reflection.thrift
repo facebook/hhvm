@@ -18,7 +18,12 @@ cpp_include "thrift/test/reflection/fatal_legacy_reflection_types.h"
 
 namespace cpp2 apache.thrift.test
 
-typedef i32 (cpp.type = 'CppHasANumber', cpp.indirection) HasANumber
+include "thrift/annotation/cpp.thrift"
+
+include "thrift/annotation/thrift.thrift"
+
+@cpp.Type{name = "CppHasANumber"}
+typedef i32 (cpp.indirection) HasANumber
 
 enum SampleEnum {
   kSampleEnumFoo = 0,
@@ -56,15 +61,24 @@ struct SampleStruct {
   20: list<binary> list_binary_field;
   21: string annotated_string_field (ann_key = 'ann_value');
   22: HasANumber i32_indirection_field;
-  23: SampleSubStruct struct_ref_field (cpp.ref);
-  24: SampleSubStruct struct_unique_field (cpp.ref_type = 'unique');
-  25: SampleSubStruct struct_shared_field (cpp.ref_type = 'shared');
-  26: SampleSubStruct struct_shared_const_field (cpp.ref_type = 'shared_const');
-  31: optional SampleSubStruct struct_box_field (thrift.box);
+  @cpp.Ref{type = cpp.RefType.Unique}
+  23: SampleSubStruct struct_ref_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  24: SampleSubStruct struct_unique_field;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  25: SampleSubStruct struct_shared_field;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  26: SampleSubStruct struct_shared_const_field;
+  @thrift.Box
+  31: optional SampleSubStruct struct_box_field;
 
   // integer custom types
-  27: byte (cpp.type = "std::uint8_t") ubyte_field;
-  28: i16 (cpp.type = "std::uint16_t") ui16_field;
-  29: i32 (cpp.type = "std::uint32_t") ui32_field;
-  30: i64 (cpp.type = "std::uint64_t") ui64_field;
+  @cpp.Type{name = "std::uint8_t"}
+  27: byte ubyte_field;
+  @cpp.Type{name = "std::uint16_t"}
+  28: i16 ui16_field;
+  @cpp.Type{name = "std::uint32_t"}
+  29: i32 ui32_field;
+  @cpp.Type{name = "std::uint64_t"}
+  30: i64 ui64_field;
 }

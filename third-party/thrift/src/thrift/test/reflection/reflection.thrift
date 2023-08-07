@@ -26,6 +26,7 @@ include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
 include "thrift/test/reflection/reflection_dep_B.thrift"
 include "thrift/test/reflection/reflection_dep_C.thrift"
+include "thrift/annotation/python.thrift"
 
 cpp_include "thrift/test/AdapterTest.h"
 cpp_include "thrift/test/reflection/fatal_custom_types.h"
@@ -95,7 +96,8 @@ struct structA {
   2: string b;
 }
 
-typedef structA (cpp.type = "test_cpp_reflection::custom_structA") my_structA
+@cpp.Type{name = "test_cpp_reflection::custom_structA"}
+typedef structA my_structA
 
 union unionA {
   1: i32 i;
@@ -183,14 +185,16 @@ struct struct3 {
   8: union2 fieldH;
   9: list<i32> fieldI;
   10: list<string> fieldJ;
-  11: list<string> (cpp.type = "std::deque<std::string>") fieldK;
+  @cpp.Type{name = "std::deque<std::string>"}
+  11: list<string> fieldK;
   12: list<structA> fieldL;
   13: set<i32> fieldM;
   14: set<string> fieldN;
   15: set<string> fieldO;
   16: set<structB> fieldP;
   17: map<string, structA> fieldQ;
-  18: map<string, structB> (cpp.template = 'std::unordered_map') fieldR;
+  @cpp.Type{template = "std::unordered_map"}
+  18: map<string, structB> fieldR;
   20: map<binary, binary> fieldS;
 } (thrift.uri = "facebook.com/thrift/test/reflection/reflection/struct3")
 
@@ -198,7 +202,8 @@ struct struct4 {
   1: required i32 field0;
   2: optional string field1;
   3: enum1 field2;
-  6: structA field3 (cpp2.ref = "true");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  6: structA field3;
 }
 
 struct struct5 {
@@ -281,7 +286,8 @@ enum enum_with_special_names {
   getter = 1,
   lists = 2,
   maps = 3,
-  name = 4 (py3.name = "name_"),
+  @python.Name{name = "name_"}
+  name = 4,
   name_to_value = 5,
   names = 6,
   prefix_tree = 7,
@@ -290,7 +296,8 @@ enum enum_with_special_names {
   str = 10,
   strings = 11,
   type = 12,
-  value = 13 (py3.name = "value_"),
+  @python.Name{name = "value_"}
+  value = 13,
   value_to_name = 14,
   values = 15,
   id = 16,
@@ -403,153 +410,202 @@ service service_with_special_names {
 const i32 constant_with_special_name = 42;
 
 struct hasRefUnique {
-  1: structA aStruct (cpp2.ref_type = "unique");
-  2: list<string> (cpp.template = "std::deque") aList (
-    cpp2.ref_type = "unique",
-  );
-  3: set<string> (cpp.template = "std::unordered_set") aSet (
-    cpp2.ref_type = "unique",
-  );
-  4: map<string, string> (cpp.template = "std::unordered_map") aMap (
-    cpp2.ref_type = "unique",
-  );
-  5: unionA aUnion (cpp2.ref_type = "unique");
-  6: optional structA anOptionalStruct (cpp2.ref_type = "unique");
-  7: optional list<string> (cpp.template = "std::deque") anOptionalList (
-    cpp2.ref_type = "unique",
-  );
-  8: optional set<string> (cpp.template = "std::unordered_set") anOptionalSet (
-    cpp2.ref_type = "unique",
-  );
-  9: optional map<string, string> (
-    cpp.template = "std::unordered_map",
-  ) anOptionalMap (cpp2.ref_type = "unique");
-  10: optional unionA anOptionalUnion (cpp2.ref_type = "unique");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: structA aStruct;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.Type{template = "std::deque"}
+  2: list<string> aList;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.Type{template = "std::unordered_set"}
+  3: set<string> aSet;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.Type{template = "std::unordered_map"}
+  4: map<string, string> aMap;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  5: unionA aUnion;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  6: optional structA anOptionalStruct;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.Type{template = "std::deque"}
+  7: optional list<string> anOptionalList;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.Type{template = "std::unordered_set"}
+  8: optional set<string> anOptionalSet;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.Type{template = "std::unordered_map"}
+  9: optional map<string, string> anOptionalMap;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  10: optional unionA anOptionalUnion;
 }
 
 struct hasRefUniqueSimple {
   // same as above, but no cpp.template annotations
-  1: structA aStruct (cpp2.ref_type = "unique");
-  2: list<string> aList (cpp2.ref_type = "unique");
-  3: set<string> aSet (cpp2.ref_type = "unique");
-  4: map<string, string> aMap (cpp2.ref_type = "unique");
-  5: unionA aUnion (cpp2.ref_type = "unique");
-  6: optional structA anOptionalStruct (cpp2.ref_type = "unique");
-  7: optional list<string> anOptionalList (cpp2.ref_type = "unique");
-  8: optional set<string> anOptionalSet (cpp2.ref_type = "unique");
-  9: optional map<string, string> anOptionalMap (cpp2.ref_type = "unique");
-  10: optional unionA anOptionalUnion (cpp2.ref_type = "unique");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: structA aStruct;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: list<string> aList;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  3: set<string> aSet;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  4: map<string, string> aMap;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  5: unionA aUnion;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  6: optional structA anOptionalStruct;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  7: optional list<string> anOptionalList;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  8: optional set<string> anOptionalSet;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  9: optional map<string, string> anOptionalMap;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  10: optional unionA anOptionalUnion;
 }
 
 union variantHasRefUnique {
-  1: structA aStruct (cpp2.ref_type = "unique");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: structA aStruct;
   2: i32 anInt;
 }
 
 struct hasRefShared {
-  1: structA aStruct (cpp2.ref_type = "shared");
-  2: list<string> (cpp.template = "std::deque") aList (
-    cpp2.ref_type = "shared",
-  );
-  3: set<string> (cpp.template = "std::unordered_set") aSet (
-    cpp2.ref_type = "shared",
-  );
-  4: map<string, string> (cpp.template = "std::unordered_map") aMap (
-    cpp2.ref_type = "shared",
-  );
-  5: unionA aUnion (cpp2.ref_type = "shared");
-  6: optional structA anOptionalStruct (cpp2.ref_type = "shared");
-  7: optional list<string> (cpp.template = "std::deque") anOptionalList (
-    cpp2.ref_type = "shared",
-  );
-  8: optional set<string> (cpp.template = "std::unordered_set") anOptionalSet (
-    cpp2.ref_type = "shared",
-  );
-  9: optional map<string, string> (
-    cpp.template = "std::unordered_map",
-  ) anOptionalMap (cpp2.ref_type = "shared");
-  10: optional unionA anOptionalUnion (cpp2.ref_type = "shared");
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: structA aStruct;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.Type{template = "std::deque"}
+  2: list<string> aList;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.Type{template = "std::unordered_set"}
+  3: set<string> aSet;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.Type{template = "std::unordered_map"}
+  4: map<string, string> aMap;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  5: unionA aUnion;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  6: optional structA anOptionalStruct;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.Type{template = "std::deque"}
+  7: optional list<string> anOptionalList;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.Type{template = "std::unordered_set"}
+  8: optional set<string> anOptionalSet;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.Type{template = "std::unordered_map"}
+  9: optional map<string, string> anOptionalMap;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  10: optional unionA anOptionalUnion;
 }
 
 struct hasRefSharedSimple {
   // same as above, but no cpp.template annotations
-  1: structA aStruct (cpp2.ref_type = "shared");
-  2: list<string> aList (cpp2.ref_type = "shared");
-  3: set<string> aSet (cpp2.ref_type = "shared");
-  4: map<string, string> aMap (cpp2.ref_type = "shared");
-  5: unionA aUnion (cpp2.ref_type = "shared");
-  6: optional structA anOptionalStruct (cpp2.ref_type = "shared");
-  7: optional list<string> anOptionalList (cpp2.ref_type = "shared");
-  8: optional set<string> anOptionalSet (cpp2.ref_type = "shared");
-  9: optional map<string, string> anOptionalMap (cpp2.ref_type = "shared");
-  10: optional unionA anOptionalUnion (cpp2.ref_type = "shared");
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: structA aStruct;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: list<string> aList;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  3: set<string> aSet;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  4: map<string, string> aMap;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  5: unionA aUnion;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  6: optional structA anOptionalStruct;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  7: optional list<string> anOptionalList;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  8: optional set<string> anOptionalSet;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  9: optional map<string, string> anOptionalMap;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  10: optional unionA anOptionalUnion;
 }
 
 struct hasRefSharedConst {
-  1: structA aStruct (cpp2.ref_type = "shared_const");
-  2: list<string> (cpp.template = "std::deque") aList (
-    cpp2.ref_type = "shared_const",
-  );
-  3: set<string> (cpp.template = "std::unordered_set") aSet (
-    cpp2.ref_type = "shared_const",
-  );
-  4: map<string, string> (cpp.template = "std::unordered_map") aMap (
-    cpp2.ref_type = "shared_const",
-  );
-  5: unionA aUnion (cpp2.ref_type = "shared_const");
-  6: optional structA anOptionalStruct (cpp2.ref_type = "shared_const");
-  7: optional list<string> (cpp.template = "std::deque") anOptionalList (
-    cpp2.ref_type = "shared_const",
-  );
-  8: optional set<string> (cpp.template = "std::unordered_set") anOptionalSet (
-    cpp2.ref_type = "shared_const",
-  );
-  9: optional map<string, string> (
-    cpp.template = "std::unordered_map",
-  ) anOptionalMap (cpp2.ref_type = "shared_const");
-  10: optional unionA anOptionalUnion (cpp2.ref_type = "shared_const");
+  @cpp.Ref{type = cpp.RefType.Shared}
+  1: structA aStruct;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.Type{template = "std::deque"}
+  2: list<string> aList;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.Type{template = "std::unordered_set"}
+  3: set<string> aSet;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.Type{template = "std::unordered_map"}
+  4: map<string, string> aMap;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  5: unionA aUnion;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  6: optional structA anOptionalStruct;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.Type{template = "std::deque"}
+  7: optional list<string> anOptionalList;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.Type{template = "std::unordered_set"}
+  8: optional set<string> anOptionalSet;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.Type{template = "std::unordered_map"}
+  9: optional map<string, string> anOptionalMap;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  10: optional unionA anOptionalUnion;
 }
 
 struct hasRefSharedConstSimple {
   // same as above, but no cpp.template annotations
-  1: structA aStruct (cpp2.ref_type = "shared_const");
-  2: list<string> aList (cpp2.ref_type = "shared_const");
-  3: set<string> aSet (cpp2.ref_type = "shared_const");
-  4: map<string, string> aMap (cpp2.ref_type = "shared_const");
-  5: unionA aUnion (cpp2.ref_type = "shared_const");
-  6: optional structA anOptionalStruct (cpp2.ref_type = "shared_const");
-  7: optional list<string> anOptionalList (cpp2.ref_type = "shared_const");
-  8: optional set<string> anOptionalSet (cpp2.ref_type = "shared_const");
-  9: optional map<string, string> anOptionalMap (
-    cpp2.ref_type = "shared_const",
-  );
-  10: optional unionA anOptionalUnion (cpp2.ref_type = "shared_const");
+  @cpp.Ref{type = cpp.RefType.Shared}
+  1: structA aStruct;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  2: list<string> aList;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  3: set<string> aSet;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  4: map<string, string> aMap;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  5: unionA aUnion;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  6: optional structA anOptionalStruct;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  7: optional list<string> anOptionalList;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  8: optional set<string> anOptionalSet;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  9: optional map<string, string> anOptionalMap;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  10: optional unionA anOptionalUnion;
 }
 
 struct hasBox {
-  6: optional structA anOptionalStruct (thrift.box);
-  7: optional list<string> (cpp.template = "std::deque") anOptionalList (
-    thrift.box,
-  );
-  8: optional set<string> (cpp.template = "std::unordered_set") anOptionalSet (
-    thrift.box,
-  );
-  9: optional map<string, string> (
-    cpp.template = "std::unordered_map",
-  ) anOptionalMap (thrift.box);
-  10: optional unionA anOptionalUnion (thrift.box);
+  @thrift.Box
+  6: optional structA anOptionalStruct;
+  @cpp.Type{template = "std::deque"}
+  @thrift.Box
+  7: optional list<string> anOptionalList;
+  @cpp.Type{template = "std::unordered_set"}
+  @thrift.Box
+  8: optional set<string> anOptionalSet;
+  @cpp.Type{template = "std::unordered_map"}
+  @thrift.Box
+  9: optional map<string, string> anOptionalMap;
+  @thrift.Box
+  10: optional unionA anOptionalUnion;
 }
 
 struct hasBoxSimple {
-  6: optional structA anOptionalStruct (thrift.box);
-  7: optional list<string> anOptionalList (thrift.box);
-  8: optional set<string> anOptionalSet (thrift.box);
-  9: optional map<string, string> anOptionalMap (thrift.box);
-  10: optional unionA anOptionalUnion (thrift.box);
+  @thrift.Box
+  6: optional structA anOptionalStruct;
+  @thrift.Box
+  7: optional list<string> anOptionalList;
+  @thrift.Box
+  8: optional set<string> anOptionalSet;
+  @thrift.Box
+  9: optional map<string, string> anOptionalMap;
+  @thrift.Box
+  10: optional unionA anOptionalUnion;
 }
 
 struct StructWithIOBuf {
-  1: binary (cpp.type = "std::unique_ptr<folly::IOBuf>") buf;
+  @cpp.Type{name = "std::unique_ptr<folly::IOBuf>"}
+  1: binary buf;
 }
 
 struct struct_with_renamed_field {

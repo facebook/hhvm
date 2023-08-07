@@ -44,13 +44,13 @@ namespace compiler {
 
 namespace {
 
-bool is_type_iobuf(const std::string& name) {
+bool is_type_iobuf(std::string_view name) {
   return name == "folly::IOBuf" || name == "std::unique_ptr<folly::IOBuf>";
 }
 
 bool is_type_iobuf(const t_type* type) {
   return type->has_annotation("py3.iobuf") ||
-      is_type_iobuf(fmt::to_string(cpp2::get_type(type)));
+      is_type_iobuf(cpp2::get_type(type));
 }
 
 const t_const_value* structured_type_override(
@@ -64,14 +64,14 @@ const t_const_value* structured_type_override(
   return nullptr;
 }
 
-std::string cpp_type_override(const t_field& field) {
+std::string_view cpp_type_override(const t_field& field) {
   if (auto type_override = structured_type_override(field)) {
     return type_override->get_string();
   }
   if (auto typedef_override = structured_type_override(*field.get_type())) {
     return typedef_override->get_string();
   }
-  return fmt::to_string(cpp2::get_type(field.get_type()->get_true_type()));
+  return cpp2::get_type(field.get_type()->get_true_type());
 }
 
 std::string resolve_binary_type(const t_type& type, const t_field* field) {
@@ -88,9 +88,9 @@ std::string resolve_binary_type(const t_type& type, const t_field* field) {
       return type_override->get_string();
     }
   }
-  std::string true_type = fmt::to_string(cpp2::get_type(type.get_true_type()));
+  std::string_view true_type = cpp2::get_type(type.get_true_type());
   if (is_type_iobuf(true_type)) {
-    return true_type;
+    return std::string(true_type);
   }
   return "Bytes";
 }
@@ -105,7 +105,7 @@ const t_const* find_structured_adapter_annotation(
   return t_typedef::get_first_structured_annotation_or_null(&type, uri);
 }
 
-const std::string get_annotation_property(
+std::string_view get_annotation_property(
     const t_const* annotation, const std::string& key) {
   if (annotation) {
     for (const auto& item : annotation->value()->get_map()) {
@@ -135,13 +135,12 @@ const t_const* get_transitive_annotation_of_adapter_or_null(
   return nullptr;
 }
 
-const std::string extract_module_path(const std::string& fully_qualified_name) {
-  auto tokens = split_namespace(fully_qualified_name);
-  if (tokens.size() <= 1) {
+std::string_view extract_module_path(std::string_view fully_qualified_name) {
+  size_t last_dot = fully_qualified_name.rfind(".");
+  if (last_dot == std::string_view::npos) {
     return "";
   }
-  tokens.pop_back();
-  return boost::algorithm::join(tokens, ".");
+  return fully_qualified_name.substr(0, last_dot);
 }
 
 inline std::string get_capi_include_namespace(
@@ -170,8 +169,9 @@ mstch::node adapter_node(
   }
   bool is_transitive = (transitive_adapter_annotation != nullptr);
   mstch::map node{
-      {"adapter:name", get_annotation_property(adapter_annotation, "name")},
-      {"adapter:type_hint", type_hint},
+      {"adapter:name",
+       std::string(get_annotation_property(adapter_annotation, "name"))},
+      {"adapter:type_hint", std::string(type_hint)},
       {"adapter:is_generic?", is_generic},
       {"adapter:is_transitive?", is_transitive},
   };
@@ -187,7 +187,7 @@ mstch::node adapter_node(
   return node;
 }
 
-std::string get_cpp_template(const t_field& field) {
+std::string_view get_cpp_template(const t_field& field) {
   if (auto template_override = structured_type_override(field, "template")) {
     return template_override->get_string();
   }
@@ -563,8 +563,8 @@ class python_mstch_program : public mstch_program {
   }
 
   void extract_module_and_insert_to(
-      const std::string& name, std::unordered_set<std::string>& modules) {
-    auto module_path = extract_module_path(name);
+      std::string_view name, std::unordered_set<std::string_view>& modules) {
+    std::string_view module_path = extract_module_path(name);
     if (module_path != "") {
       modules.insert(module_path);
     }
@@ -619,18 +619,18 @@ class python_mstch_program : public mstch_program {
   }
 
   mstch::node module_path_array(
-      const std::unordered_set<std::string>& modules) {
+      const std::unordered_set<std::string_view>& modules) {
     mstch::array a;
     for (const auto& m : modules) {
-      a.push_back(mstch::map{{"module_path", m}});
+      a.push_back(mstch::map{{"module_path", std::string(m)}});
     }
     return a;
   }
 
   std::unordered_map<std::string, Namespace> include_namespaces_;
   std::unordered_set<const t_type*> seen_types_;
-  std::unordered_set<std::string> adapter_modules_;
-  std::unordered_set<std::string> adapter_type_hint_modules_;
+  std::unordered_set<std::string_view> adapter_modules_;
+  std::unordered_set<std::string_view> adapter_type_hint_modules_;
 };
 
 class python_mstch_service : public mstch_service {
@@ -997,7 +997,7 @@ class python_mstch_struct : public mstch_struct {
     }
     return mstch::map{
         {"cpp_adapter:name",
-         get_annotation_property(adapter_annotation, "name")},
+         std::string(get_annotation_property(adapter_annotation, "name"))},
     };
   }
 
@@ -1258,11 +1258,12 @@ class python_mstch_const : public mstch_const {
   mstch::node has_adapter() { return adapter_annotation_ != nullptr; }
 
   mstch::node adapter_name() {
-    return get_annotation_property(adapter_annotation_, "name");
+    return std::string(get_annotation_property(adapter_annotation_, "name"));
   }
 
   mstch::node adapter_type_hint() {
-    return get_annotation_property(adapter_annotation_, "typeHint");
+    return std::string(
+        get_annotation_property(adapter_annotation_, "typeHint"));
   }
 
   mstch::node is_adapter_transitive() {

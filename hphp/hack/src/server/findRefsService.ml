@@ -25,23 +25,6 @@ type action_internal =
   | IFunction of string
   | IGConst of string
 
-let member_class_to_string (mc : member_class) : string =
-  match mc with
-  | Subclasses_of s -> "Subclasses_of " ^ s
-  | Class_set ss -> "Class_set " ^ (SSet.elements ss |> String.concat ~sep:",")
-
-let action_internal_to_string (action : action_internal) : string =
-  match action with
-  | IClass s -> "IClass " ^ s
-  | IExplicitClass s -> "IExplicitClass " ^ s
-  | IFunction s -> "IFunction " ^ s
-  | IGConst s -> "IGConst " ^ s
-  | IMember (member_class, member) ->
-    Printf.sprintf
-      "IMember(%s,%s)"
-      (member_class_to_string member_class)
-      (ServerCommandTypes.Find_refs.member_to_string member)
-
 let process_fun_id target_fun id =
   if String.equal target_fun (snd id) then
     Pos.Map.singleton (fst id) (snd id)
@@ -276,7 +259,7 @@ let find_refs
   (* The helper function 'results_from_tast' takes a tast, looks at all *)
   (* use-sites in the tast e.g. "foo(1)" is a use-site of symbol foo,   *)
   (* and returns a map from use-site-position to name of the symbol.    *)
-  let results_from_tast (_file, tast) : string Pos.Map.t =
+  let results_from_tast tast : string Pos.Map.t =
     IdentifySymbolService.all_symbols ctx tast
     |> List.filter ~f:(fun symbol ->
            if omit_declaration then
@@ -285,46 +268,41 @@ let find_refs
              true)
     |> List.fold ~init:Pos.Map.empty ~f:(fold_one_tast ctx target)
   in
-  (* [files] can legitimately refer to non-existent files, e.g.
+
+  (* Helper: [files] can legitimately refer to non-existent files, e.g.
      if they've been deleted since the depgraph was created.
      This is how we'll filter them out. *)
   let is_entry_valid entry =
     entry |> Provider_context.get_file_contents_if_present |> Option.is_some
   in
-  (* These are the tasts for all the 'fileinfo_l' passed in *)
-  let tasts_of_files : (Relative_path.t * Tast.program) list =
-    List.filter_map files ~f:(fun path ->
-        let (_ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
-        try
-          let { Tast_provider.Compute_tast.tast; _ } =
-            Tast_provider.compute_tast_unquarantined ~ctx ~entry
+
+  (* Helper: given a path, obtains its tast *)
+  let tast_of_file path =
+    let (_ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
+    try
+      let { Tast_provider.Compute_tast.tast; _ } =
+        Tast_provider.compute_tast_unquarantined ~ctx ~entry
+      in
+      Some tast.Tast_with_dynamic.under_normal_assumptions
+    with
+    | _ when not (is_entry_valid entry) -> None
+  in
+
+  let batch_results =
+    List.concat_map files ~f:(fun path ->
+        match tast_of_file path with
+        | None -> []
+        | Some tast ->
+          (* A list of all use-sites with their string-name of target *)
+          let results : string Pos.Map.t = results_from_tast tast in
+          (* We actually just want a list of string-name-of-target, use-site-position *)
+          (* Some callers e.g. LSP will simply discard the string-name-of-target.     *)
+          let results : (string * Pos.t) list =
+            Pos.Map.fold (fun p str acc -> (str, p) :: acc) results []
           in
-          Some (path, tast.Tast_with_dynamic.under_normal_assumptions)
-        with
-        | _ when not (is_entry_valid entry) -> None)
+          results)
   in
-  Hh_logger.debug "find_refs.target: %s" (action_internal_to_string target);
-  if Hh_logger.Level.passes_min_level Hh_logger.Level.Debug then
-    List.iter tasts_of_files ~f:(fun (file, tast) ->
-        let fn = Relative_path.to_absolute file in
-        let tast = Tast.show_program tast in
-        let len = String.length tast in
-        let tast = String_utils.truncate 2048 tast in
-        Hh_logger.debug "find_refs.tast: %s\nlen=%d\n%s\n\n\n\n" fn len tast);
-  (* A list of all use-sites with their string-name of target *)
-  let results : string Pos.Map.t list =
-    List.map ~f:results_from_tast tasts_of_files
-  in
-  (* Turn that list into a map from use-sites to string-name-of-target *)
-  let results : string Pos.Map.t =
-    List.fold results ~init:Pos.Map.empty ~f:Pos.Map.union
-  in
-  (* We actually just want a list of string-name-of-target, use-site-position *)
-  (* Some callers e.g. LSP will simply discard the string-name-of-target.     *)
-  let acc_results : (string * Pos.t) list =
-    Pos.Map.fold (fun p str acc -> (str, p) :: acc) results acc
-  in
-  acc_results
+  batch_results @ acc
 
 let find_refs_ctx
     ~(ctx : Provider_context.t)

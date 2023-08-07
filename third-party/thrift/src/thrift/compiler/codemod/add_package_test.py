@@ -103,3 +103,23 @@ class ThriftPackage(unittest.TestCase):
                 namespace cpp2 "thrift.annotation"
                 """,
         )
+
+    def test_with_common_namespace(self):
+
+        # When domain is present but not in the common package, correctly uses the domain present in file
+        self.write_and_test(
+            "foo.thrift",
+            """\
+                namespace java "org.test.thrift_different.annotation"
+                namespace cpp2 "org.apache.thrift_common_ns.annotation"
+                namespace hack "thrift_common_ns.annotation"
+
+                """,
+            """\
+                package "apache.org/thrift_common_ns/annotation"
+
+                namespace java "org.test.thrift_different.annotation"
+                namespace cpp2 "org.apache.thrift_common_ns.annotation"
+                namespace hack "thrift_common_ns.annotation"
+                """,
+        )

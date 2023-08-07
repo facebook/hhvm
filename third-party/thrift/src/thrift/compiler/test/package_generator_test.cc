@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <map>
 #include <gtest/gtest.h>
 
 #include <thrift/compiler/codemod/package_generator.h>
@@ -43,5 +44,48 @@ TEST(PackageGeneratorTest, namespace) {
 
   codemod::package_name_generator gen_with_default_domain("test.foo.bar");
   EXPECT_EQ(gen_with_default_domain.generate(), "meta.com/test/foo/bar");
+}
+
+TEST(PackageGeneratorTest, common_package) {
+  std::map<std::string, std::string> namespaces = {
+      {"cpp2", "foo.bar.baz"}, {"hack", "baz"}};
+
+  auto get_common_pkg = [&]() {
+    return codemod::package_name_generator_util::from_namespaces(namespaces)
+        .find_common_package();
+  };
+
+  // No common package found
+  EXPECT_EQ(get_common_pkg(), "");
+
+  // Common Package with no domain in common namespaces
+  namespaces["python"] = "foo.bar.baz";
+  EXPECT_EQ(get_common_pkg(), "meta.com/foo/bar/baz");
+
+  /*
+   * Since domain is not present in any of the common namespaces,
+   * Any available domain should be used.
+   */
+  namespaces["java"] = "org.apache.foobar";
+  EXPECT_EQ(get_common_pkg(), "apache.org/foo/bar/baz");
+
+  // Common namespace with domain
+  namespaces["cpp2"] = "facebook.foo.bar.baz";
+  EXPECT_EQ(get_common_pkg(), "facebook.com/foo/bar/baz");
+
+  /*
+   * Packages from cpp2 and python namespaces have different domains but
+   * same path.
+   * Use the common path of cpp2 and python namespaces
+   * and domain from either one of them
+   */
+  namespaces["python"] = "meta.foo.bar.baz";
+  EXPECT_EQ(get_common_pkg(), "meta.com/foo/bar/baz");
+
+  // cpp and python ns have same path => foo.bar.baz
+  // java and hack ns have same path => foobar
+  // since "foo.bar.baz" is longer than "foobar", choose the longer one
+  namespaces["hack"] = "apache.foobar";
+  EXPECT_EQ(get_common_pkg(), "meta.com/foo/bar/baz");
 }
 } // namespace apache::thrift::compiler

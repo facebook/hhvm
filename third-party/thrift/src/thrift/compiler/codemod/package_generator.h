@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <map>
 #include <string>
 
 #include <boost/algorithm/string.hpp>
@@ -108,6 +109,100 @@ class package_name_generator {
       path_.erase(path_.begin(), iter + 1);
     }
   }
+};
+
+class package_name_generator_util {
+ public:
+  explicit package_name_generator_util(
+      std::vector<package_name_generator> pkg_generators)
+      : pkg_generators_(std::move(pkg_generators)) {
+    for (const auto& generator : pkg_generators_) {
+      const auto domain = generator.get_domain();
+      if (!domain.empty()) {
+        any_domain_ = domain;
+        break;
+      }
+    }
+  }
+
+  static package_name_generator_util from_namespaces(
+      const std::map<std::string, std::string>& namespaces) {
+    std::vector<package_name_generator> pkg_generators;
+    pkg_generators.reserve(namespaces.size());
+    for (const auto& [_, ns] : namespaces) {
+      pkg_generators.emplace_back(ns);
+    }
+    return package_name_generator_util(std::move(pkg_generators));
+  }
+
+  std::string find_common_package() const {
+    struct freq_and_domain {
+      int freq;
+      std::string domain;
+    };
+    std::map<std::string, freq_and_domain> namespace_path_freq_map;
+    std::string most_freq_ns_path;
+    auto process_ns_path = [&](const std::string& cur_ns_path,
+                               const std::string& cur_ns_domain) {
+      if (cur_ns_path.empty()) {
+        return;
+      }
+
+      // Only use namespace path for identifying common package
+      // so that if 2 or more namespaces have same path
+      // and different or no domains,
+      // then we still consider them as same.
+      if (namespace_path_freq_map.find(cur_ns_path) ==
+          namespace_path_freq_map.end()) {
+        namespace_path_freq_map[cur_ns_path] = {1, cur_ns_domain};
+        return;
+      }
+      auto& [cur_ns_path_freq, cur_ns_path_domain] =
+          namespace_path_freq_map[cur_ns_path];
+      cur_ns_path_freq++;
+      // If there is a domain associated with this path,
+      // then we should use that instead of default one.
+      if (!cur_ns_domain.empty()) {
+        cur_ns_path_domain = cur_ns_domain;
+      }
+
+      auto& [max_freq, _] = namespace_path_freq_map[most_freq_ns_path];
+
+      // If the current path has the highest frequency, update it.
+      // Alternatively, if the frequency is equal to the current highest but the
+      // path is longer, prioritize the longer path as it is more likely to be
+      // unique
+      if (cur_ns_path_freq > max_freq ||
+          (cur_ns_path_freq == max_freq &&
+           cur_ns_path.length() > most_freq_ns_path.length())) {
+        most_freq_ns_path = cur_ns_path;
+      }
+    };
+
+    for (auto& generator : pkg_generators_) {
+      process_ns_path(generator.get_path(), generator.get_domain());
+    }
+
+    if (most_freq_ns_path.empty()) {
+      return "";
+    }
+
+    auto domain = namespace_path_freq_map.at(most_freq_ns_path).domain;
+    /*
+     * If the guessed package doesn't have a domain
+     * but there is domain present in one of the namespaces,
+     * then use that domain instead of the default domain
+     */
+    if (domain.empty()) {
+      domain = any_domain_;
+    }
+    return package_name_generator::from_path_and_domain(
+        most_freq_ns_path, domain);
+  }
+
+ private:
+  std::vector<package_name_generator> pkg_generators_;
+  std::string any_domain_ = kDefaultDomain;
 };
 } // namespace codemod
 } // namespace compiler

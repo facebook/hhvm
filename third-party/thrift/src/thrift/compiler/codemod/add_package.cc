@@ -25,6 +25,7 @@ using apache::thrift::compiler::source_manager;
 using apache::thrift::compiler::t_program;
 using apache::thrift::compiler::codemod::file_manager;
 using apache::thrift::compiler::codemod::package_name_generator;
+using apache::thrift::compiler::codemod::package_name_generator_util;
 
 namespace {
 
@@ -61,9 +62,18 @@ class add_package {
     if (prog_.namespaces().empty()) {
       return package_name_generator::from_file_path(prog_.path());
     }
-    // TODO: Support multiple namespaces.
-    return package_name_generator(prog_.namespaces().begin()->second)
-        .generate();
+
+    if (prog_.namespaces().size() == 1) {
+      // If there is only a single namespace, use that to generate the package
+      // name.
+      return package_name_generator(prog_.namespaces().begin()->second)
+          .generate();
+    }
+
+    // If there are multiple namespaces, then find the one that works with
+    // most namespaces.
+    return package_name_generator_util::from_namespaces(prog_.namespaces())
+        .find_common_package();
   }
 
   std::string get_replacement_content(const std::string& pkg) const {

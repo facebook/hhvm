@@ -1,4 +1,4 @@
 IFoo
-File "interface.php", line 6, characters 11-14:
-File "interface.php", line 10, characters 7-9:
+File "interface.php", line 6, characters 11-14: \IBar
+File "interface.php", line 10, characters 7-9: \Baz
 2 total results

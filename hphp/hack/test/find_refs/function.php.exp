@@ -1,10 +1,10 @@
 foo
-File "function.php", line 4, characters 3-5:
-File "function.php", line 5, characters 3-5:
-File "function.php", line 10, characters 17-19:
-File "function.php", line 12, characters 5-7:
-File "function.php", line 13, characters 5-7:
-File "function.php", line 18, characters 3-5:
-File "function.php", line 19, characters 3-5:
-File "function.php", line 3, characters 10-12:
+File "function.php", line 4, characters 3-5: foo
+File "function.php", line 5, characters 3-5: foo
+File "function.php", line 10, characters 17-19: foo
+File "function.php", line 12, characters 5-7: foo
+File "function.php", line 13, characters 5-7: foo
+File "function.php", line 18, characters 3-5: foo
+File "function.php", line 19, characters 3-5: foo
+File "function.php", line 3, characters 10-12: foo
 8 total results

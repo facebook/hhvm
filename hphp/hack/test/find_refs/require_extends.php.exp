@@ -1,4 +1,4 @@
 ReqExtendsClass::foo
-File "require_extends.php", line 14, characters 22-24:
-File "require_extends.php", line 4, characters 19-21:
+File "require_extends.php", line 14, characters 22-24: FooRequireExtends::foo
+File "require_extends.php", line 4, characters 19-21: foo
 2 total results

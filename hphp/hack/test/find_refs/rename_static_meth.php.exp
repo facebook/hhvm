@@ -1,7 +1,7 @@
 RenameStaticMethClass::static_test_method
-File "rename_static_meth.php", line 13, characters 11-28:
-File "rename_static_meth.php", line 14, characters 28-45:
-File "rename_static_meth.php", line 15, characters 11-28:
-File "rename_static_meth.php", line 16, characters 28-45:
-File "rename_static_meth.php", line 5, characters 26-43:
+File "rename_static_meth.php", line 13, characters 11-28: RenameStaticMethClass::static_test_method
+File "rename_static_meth.php", line 14, characters 28-45: RenameStaticMethClass::static_test_method
+File "rename_static_meth.php", line 15, characters 11-28: RenameStaticMethClass::static_test_method
+File "rename_static_meth.php", line 16, characters 28-45: RenameStaticMethClass::static_test_method
+File "rename_static_meth.php", line 5, characters 26-43: static_test_method
 5 total results

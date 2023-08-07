@@ -1,5 +1,5 @@
 RenameClassMethClass::instance_test_method
-File "rename_class_meth.php", line 13, characters 12-31:
-File "rename_class_meth.php", line 14, characters 47-66:
-File "rename_class_meth.php", line 5, characters 19-38:
+File "rename_class_meth.php", line 13, characters 12-31: RenameClassMethClass::instance_test_method
+File "rename_class_meth.php", line 14, characters 47-66: RenameClassMethClass::instance_test_method
+File "rename_class_meth.php", line 5, characters 19-38: instance_test_method
 3 total results

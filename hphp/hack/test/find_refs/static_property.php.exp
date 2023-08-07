@@ -1,35 +1,35 @@
 C::foo
-File "static_property.php", line 9, characters 11-14:
-File "static_property.php", line 10, characters 12-15:
-File "static_property.php", line 11, characters 8-11:
-File "static_property.php", line 12, characters 13-16:
-File "static_property.php", line 18, characters 11-14:
-File "static_property.php", line 19, characters 12-15:
-File "static_property.php", line 20, characters 8-11:
-File "static_property.php", line 21, characters 13-16:
-File "static_property.php", line 22, characters 13-16:
-File "static_property.php", line 30, characters 7-10:
-File "static_property.php", line 31, characters 7-10:
-File "static_property.php", line 32, characters 7-10:
-File "static_property.php", line 33, characters 7-10:
-File "static_property.php", line 34, characters 6-9:
-File "static_property.php", line 35, characters 6-9:
-File "static_property.php", line 44, characters 11-14:
-File "static_property.php", line 45, characters 9-12:
-File "static_property.php", line 46, characters 21-24:
-File "static_property.php", line 48, characters 11-14:
-File "static_property.php", line 49, characters 9-12:
-File "static_property.php", line 50, characters 21-24:
-File "static_property.php", line 52, characters 11-14:
-File "static_property.php", line 53, characters 9-12:
-File "static_property.php", line 54, characters 21-24:
-File "static_property.php", line 56, characters 11-14:
-File "static_property.php", line 57, characters 9-12:
-File "static_property.php", line 58, characters 21-24:
-File "static_property.php", line 60, characters 10-13:
-File "static_property.php", line 61, characters 8-11:
-File "static_property.php", line 62, characters 20-23:
-File "static_property.php", line 64, characters 10-13:
-File "static_property.php", line 65, characters 8-11:
-File "static_property.php", line 66, characters 20-23:
+File "static_property.php", line 9, characters 11-14: C::$foo
+File "static_property.php", line 10, characters 12-15: C::$foo
+File "static_property.php", line 11, characters 8-11: C::$foo
+File "static_property.php", line 12, characters 13-16: C::$foo
+File "static_property.php", line 18, characters 11-14: D::$foo
+File "static_property.php", line 19, characters 12-15: D::$foo
+File "static_property.php", line 20, characters 8-11: C::$foo
+File "static_property.php", line 21, characters 13-16: D::$foo
+File "static_property.php", line 22, characters 13-16: C::$foo
+File "static_property.php", line 30, characters 7-10: C::$foo
+File "static_property.php", line 31, characters 7-10: D::$foo
+File "static_property.php", line 32, characters 7-10: C::$foo
+File "static_property.php", line 33, characters 7-10: C::$foo
+File "static_property.php", line 34, characters 6-9: C::$foo
+File "static_property.php", line 35, characters 6-9: D::$foo
+File "static_property.php", line 44, characters 11-14: C::$foo
+File "static_property.php", line 45, characters 9-12: C::$foo
+File "static_property.php", line 46, characters 21-24: C::$foo
+File "static_property.php", line 48, characters 11-14: D::$foo
+File "static_property.php", line 49, characters 9-12: D::$foo
+File "static_property.php", line 50, characters 21-24: D::$foo
+File "static_property.php", line 52, characters 11-14: C::$foo
+File "static_property.php", line 53, characters 9-12: C::$foo
+File "static_property.php", line 54, characters 21-24: C::$foo
+File "static_property.php", line 56, characters 11-14: C::$foo
+File "static_property.php", line 57, characters 9-12: C::$foo
+File "static_property.php", line 58, characters 21-24: C::$foo
+File "static_property.php", line 60, characters 10-13: C::$foo
+File "static_property.php", line 61, characters 8-11: C::$foo
+File "static_property.php", line 62, characters 20-23: C::$foo
+File "static_property.php", line 64, characters 10-13: D::$foo
+File "static_property.php", line 65, characters 8-11: D::$foo
+File "static_property.php", line 66, characters 20-23: D::$foo
 33 total results

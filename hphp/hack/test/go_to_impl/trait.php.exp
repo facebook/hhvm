@@ -1,4 +1,4 @@
 BaseTrait
-File "trait.php", line 18, characters 7-9:
-File "trait.php", line 9, characters 7-16:
+File "trait.php", line 18, characters 7-9: \Foo
+File "trait.php", line 9, characters 7-16: \ChildTrait
 2 total results

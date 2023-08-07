@@ -1,5 +1,5 @@
 global_test_method
-File "rename_global_meth.php", line 13, characters 5-22:
-File "rename_global_meth.php", line 14, characters 12-29:
-File "rename_global_meth.php", line 3, characters 10-27:
+File "rename_global_meth.php", line 13, characters 5-22: global_test_method
+File "rename_global_meth.php", line 14, characters 12-29: global_test_method
+File "rename_global_meth.php", line 3, characters 10-27: global_test_method
 3 total results

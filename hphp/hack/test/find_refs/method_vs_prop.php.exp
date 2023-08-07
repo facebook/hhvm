@@ -1,4 +1,4 @@
 C::foo
-File "method_vs_prop.php", line 11, characters 7-9:
-File "method_vs_prop.php", line 6, characters 19-21:
+File "method_vs_prop.php", line 11, characters 7-9: C::foo
+File "method_vs_prop.php", line 6, characters 19-21: foo
 2 total results

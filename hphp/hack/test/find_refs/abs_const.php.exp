@@ -1,6 +1,6 @@
 C::FOO
-File "abs_const.php", line 6, characters 13-15:
-File "abs_const.php", line 15, characters 6-8:
-File "abs_const.php", line 11, characters 9-11:
-File "abs_const.php", line 3, characters 25-27:
+File "abs_const.php", line 6, characters 13-15: C::FOO
+File "abs_const.php", line 15, characters 6-8: D::FOO
+File "abs_const.php", line 11, characters 9-11: FOO
+File "abs_const.php", line 3, characters 25-27: FOO
 4 total results

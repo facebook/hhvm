@@ -1,4 +1,4 @@
 A::foo
-File "static_method.php", line 16, characters 26-28:
-File "static_method.php", line 10, characters 26-28:
+File "static_method.php", line 16, characters 26-28: foo
+File "static_method.php", line 10, characters 26-28: foo
 2 total results

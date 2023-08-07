@@ -315,16 +315,27 @@ HttpServer::~HttpServer() {
   stop();
 }
 
-void HttpServer::runOrExitProcess() {
-  auto startupFailure = [] (const std::string& msg) {
-    Logger::Error(msg);
-    Logger::Error("Shutting down due to failure(s) to bind in "
-                  "HttpServer::runAndExitProcess");
-    // Logger flushes itself---we don't need to run any atexit handlers
-    // (historically we've mostly just SEGV'd while trying) ...
-    _Exit(HPHP_EXIT_FAILURE);
-  };
+void HttpServer::startupFailure(const std::string& msg) {
+  Logger::Error(msg);
+  Logger::Error("Shutting down due to failure(s) to bind in "
+                "HttpServer::runAndExitProcess");
+  // Logger flushes itself---we don't need to run any atexit handlers
+  // (historically we've mostly just SEGV'd while trying) ...
+  _Exit(HPHP_EXIT_FAILURE);
+}
 
+
+void HttpServer::runAdminServerOrExitProcess() {
+  if (RuntimeOption::AdminServerPort) {
+    if (!startServer(false)) {
+      startupFailure("Unable to start admin server");
+      not_reached();
+    }
+    Logger::Info("admin server started");
+  }
+}
+
+void HttpServer::runOrExitProcess() {
   if (!RuntimeOption::InstanceId.empty()) {
     std::string msg = "Starting instance " + RuntimeOption::InstanceId;
     if (!RuntimeOption::DeploymentId.empty()) {
@@ -347,12 +358,11 @@ void HttpServer::runOrExitProcess() {
 
   StartTime = time(nullptr);
 
-  if (RuntimeOption::AdminServerPort) {
-    if (!startServer(false)) {
-      startupFailure("Unable to start admin server");
-      not_reached();
-    }
-    Logger::Info("admin server started");
+  // If we haven't already, start the admin server.
+  // We can't start the admin server early when hotswap is enabled because
+  // it might result in killing ourself instead of the old server.
+  if (RuntimeOption::StopOldServer || !RuntimeOption::TakeoverFilename.empty()) {
+    runAdminServerOrExitProcess();
   }
 
   for (unsigned int i = 0; i < m_satellites.size(); i++) {

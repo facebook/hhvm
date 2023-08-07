@@ -56,6 +56,11 @@ struct HttpServer : Synchronizable, TakeoverListener,
    * without running any atexit handlers.
    */
   void runOrExitProcess();
+  /* 
+   * A separate method to do the same thing for admin server, which can
+   * be started sooner than the other servers.
+   */
+  void runAdminServerOrExitProcess();
 
   // stop() cannot be called from a signal handler, use stopOnSignal() in that
   // case.
@@ -124,6 +129,7 @@ private:
   bool startServer(bool pageServer);
   void onServerShutdown();
   void waitForServers();
+  void startupFailure(const std::string& msg);
 
   // pid file functions
   void createPid();

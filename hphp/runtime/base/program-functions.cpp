@@ -1118,6 +1118,14 @@ static int start_server(const std::string &username) {
   // initialize the process
   HttpServer::Server = std::make_shared<HttpServer>();
 
+  // Run the admin server before warmup requests. This allows us to get
+  // data from fbagent/dynologd during warmup, which is helpful for debugging.
+  // We cannot do this if hotswap is enabled, because it might result in
+  // killing ourself instead of the old server!
+  if (!RuntimeOption::StopOldServer && RuntimeOption::TakeoverFilename.empty()) {
+    HttpServer::Server->runAdminServerOrExitProcess();
+  }
+
   if (RuntimeOption::ServerInternalWarmupThreads > 0) {
     BootStats::Block timer("concurrentWaitForEnd", true);
     InitFiniNode::WarmupConcurrentWaitForEnd();

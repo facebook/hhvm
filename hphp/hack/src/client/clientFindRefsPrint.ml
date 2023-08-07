@@ -31,3 +31,11 @@ let print_ide_readable results =
   List.iter (List.rev results) ~f:(fun (_name, p) ->
       Printf.printf "%s\n" (Pos.string p));
   print_endline (string_of_int (List.length results) ^ " total results")
+
+let print
+    (res : ServerCommandTypes.Find_refs.result) ~(ide : bool) ~(json : bool) =
+  match (json, ide) with
+  | (true, false) -> print_json res
+  | (true, true) -> print_ide_json res
+  | (false, false) -> print_readable res
+  | (false, true) -> print_ide_readable res

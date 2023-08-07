@@ -87,7 +87,7 @@ void for_each_field_id(F&& f) {
   for_each_ordinal<T>([&](auto ord) { f(get_field_id<T, decltype(ord)>{}); });
 }
 
-/// Calls the given function with with each field_id<{id}>, returing the
+/// Calls the given function with with each field_id<{id}>, returning the
 /// first 'true' result produced.
 template <typename T, typename F>
 decltype(auto) find_by_field_id(F&& f) {

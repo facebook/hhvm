@@ -144,6 +144,68 @@ where
     }
 }
 
+#[::async_trait::async_trait]
+impl<T> MyService for ::std::sync::Arc<T>
+where
+    T: MyService + Send + Sync + ?Sized,
+{
+    async fn ping(
+        &self,
+    ) -> ::std::result::Result<(), crate::services::my_service::PingExn> {
+        (**self).ping(
+        ).await
+    }
+    async fn getRandomData(
+        &self,
+    ) -> ::std::result::Result<::std::string::String, crate::services::my_service::GetRandomDataExn> {
+        (**self).getRandomData(
+        ).await
+    }
+    async fn hasDataById(
+        &self,
+        id: ::std::primitive::i64,
+    ) -> ::std::result::Result<::std::primitive::bool, crate::services::my_service::HasDataByIdExn> {
+        (**self).hasDataById(
+            id,
+        ).await
+    }
+    async fn getDataById(
+        &self,
+        id: ::std::primitive::i64,
+    ) -> ::std::result::Result<::std::string::String, crate::services::my_service::GetDataByIdExn> {
+        (**self).getDataById(
+            id,
+        ).await
+    }
+    async fn putDataById(
+        &self,
+        id: ::std::primitive::i64,
+        data: ::std::string::String,
+    ) -> ::std::result::Result<(), crate::services::my_service::PutDataByIdExn> {
+        (**self).putDataById(
+            id,
+            data,
+        ).await
+    }
+    async fn lobDataById(
+        &self,
+        id: ::std::primitive::i64,
+        data: ::std::string::String,
+    ) -> ::std::result::Result<(), crate::services::my_service::LobDataByIdExn> {
+        (**self).lobDataById(
+            id,
+            data,
+        ).await
+    }
+    async fn doNothing(
+        &self,
+    ) -> ::std::result::Result<(), crate::services::my_service::DoNothingExn> {
+        (**self).doNothing(
+        ).await
+    }
+}
+
+
 /// Processor for MyService's methods.
 #[derive(Clone, Debug)]
 pub struct MyServiceProcessor<P, H, R, RS> {
@@ -1143,6 +1205,26 @@ where
     }
 }
 
+#[::async_trait::async_trait]
+impl<T> MyServicePrioParent for ::std::sync::Arc<T>
+where
+    T: MyServicePrioParent + Send + Sync + ?Sized,
+{
+    async fn ping(
+        &self,
+    ) -> ::std::result::Result<(), crate::services::my_service_prio_parent::PingExn> {
+        (**self).ping(
+        ).await
+    }
+    async fn pong(
+        &self,
+    ) -> ::std::result::Result<(), crate::services::my_service_prio_parent::PongExn> {
+        (**self).pong(
+        ).await
+    }
+}
+
+
 /// Processor for MyServicePrioParent's methods.
 #[derive(Clone, Debug)]
 pub struct MyServicePrioParentProcessor<P, H, R, RS> {
@@ -1585,6 +1667,20 @@ where
     }
 }
 
+#[::async_trait::async_trait]
+impl<T> MyServicePrioChild for ::std::sync::Arc<T>
+where
+    T: MyServicePrioChild + Send + Sync + ?Sized,
+{
+    async fn pang(
+        &self,
+    ) -> ::std::result::Result<(), crate::services::my_service_prio_child::PangExn> {
+        (**self).pang(
+        ).await
+    }
+}
+
+
 /// Processor for MyServicePrioChild's methods.
 #[derive(Clone, Debug)]
 pub struct MyServicePrioChildProcessor<P, H, R, RS, SS> {
@@ -1944,6 +2040,23 @@ where
     }
 }
 
+#[::async_trait::async_trait]
+impl<T> BadInteraction for ::std::sync::Arc<T>
+where
+    T: BadInteraction + Send + Sync + ?Sized,
+{
+    async fn foo(
+        &self,
+    ) -> ::std::result::Result<(), crate::services::bad_interaction::FooExn> {
+        (**self).foo(
+        ).await
+    }
+    async fn on_termination(&self) {
+        (**self).on_termination().await;
+    }
+}
+
+
 /// Processor for BadInteraction's methods.
 #[derive(Clone, Debug)]
 pub struct BadInteractionProcessor<P, H, R, RS> {
@@ -2266,6 +2379,25 @@ where
         ).await
     }
 }
+
+#[::async_trait::async_trait]
+impl<T> BadService for ::std::sync::Arc<T>
+where
+    T: BadService + Send + Sync + ?Sized,
+{
+    fn createBadInteraction(
+        &self,
+    ) -> ::anyhow::Result<::std::boxed::Box<dyn BadInteraction>> {
+        (**self).createBadInteraction()
+    }
+    async fn bar(
+        &self,
+    ) -> ::std::result::Result<::std::primitive::i32, crate::services::bad_service::BarExn> {
+        (**self).bar(
+        ).await
+    }
+}
+
 
 /// Processor for BadService's methods.
 #[derive(Clone, Debug)]
@@ -2652,6 +2784,32 @@ where
         ).await
     }
 }
+
+#[::async_trait::async_trait]
+impl<T> FooBarBazService for ::std::sync::Arc<T>
+where
+    T: FooBarBazService + Send + Sync + ?Sized,
+{
+    async fn foo(
+        &self,
+    ) -> ::std::result::Result<(), crate::services::foo_bar_baz_service::FooExn> {
+        (**self).foo(
+        ).await
+    }
+    async fn bar(
+        &self,
+    ) -> ::std::result::Result<(), crate::services::foo_bar_baz_service::BarExn> {
+        (**self).bar(
+        ).await
+    }
+    async fn baz(
+        &self,
+    ) -> ::std::result::Result<(), crate::services::foo_bar_baz_service::BazExn> {
+        (**self).baz(
+        ).await
+    }
+}
+
 
 /// Processor for FooBarBazService's methods.
 #[derive(Clone, Debug)]

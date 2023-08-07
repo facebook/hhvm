@@ -227,6 +227,108 @@ where
     }
 }
 
+#[::async_trait::async_trait]
+impl<T> PubSubStreamingService for ::std::sync::Arc<T>
+where
+    T: PubSubStreamingService + Send + Sync + ?Sized,
+{
+    async fn returnstream(
+        &self,
+        i32_from: ::std::primitive::i32,
+        i32_to: ::std::primitive::i32,
+    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ReturnstreamStreamExn>>
+, crate::services::pub_sub_streaming_service::ReturnstreamExn> {
+        (**self).returnstream(
+            i32_from,
+            i32_to,
+        ).await
+    }
+    async fn streamthrows(
+        &self,
+        foo: ::std::primitive::i32,
+    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::StreamthrowsStreamExn>>
+, crate::services::pub_sub_streaming_service::StreamthrowsExn> {
+        (**self).streamthrows(
+            foo,
+        ).await
+    }
+    async fn servicethrows(
+        &self,
+        foo: ::std::primitive::i32,
+    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ServicethrowsStreamExn>>
+, crate::services::pub_sub_streaming_service::ServicethrowsExn> {
+        (**self).servicethrows(
+            foo,
+        ).await
+    }
+    async fn servicethrows2(
+        &self,
+        foo: ::std::primitive::i32,
+    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::Servicethrows2StreamExn>>
+, crate::services::pub_sub_streaming_service::Servicethrows2Exn> {
+        (**self).servicethrows2(
+            foo,
+        ).await
+    }
+    async fn boththrows(
+        &self,
+        foo: ::std::primitive::i32,
+    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::BoththrowsStreamExn>>
+, crate::services::pub_sub_streaming_service::BoththrowsExn> {
+        (**self).boththrows(
+            foo,
+        ).await
+    }
+    async fn responseandstreamstreamthrows(
+        &self,
+        foo: ::std::primitive::i32,
+    ) -> ::std::result::Result<(
+    ::std::primitive::i32,
+    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsStreamExn>>
+)
+, crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsExn> {
+        (**self).responseandstreamstreamthrows(
+            foo,
+        ).await
+    }
+    async fn responseandstreamservicethrows(
+        &self,
+        foo: ::std::primitive::i32,
+    ) -> ::std::result::Result<(
+    ::std::primitive::i32,
+    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsStreamExn>>
+)
+, crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsExn> {
+        (**self).responseandstreamservicethrows(
+            foo,
+        ).await
+    }
+    async fn responseandstreamboththrows(
+        &self,
+        foo: ::std::primitive::i32,
+    ) -> ::std::result::Result<(
+    ::std::primitive::i32,
+    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsStreamExn>>
+)
+, crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsExn> {
+        (**self).responseandstreamboththrows(
+            foo,
+        ).await
+    }
+    async fn returnstreamFast(
+        &self,
+        i32_from: ::std::primitive::i32,
+        i32_to: ::std::primitive::i32,
+    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ReturnstreamFastStreamExn>>
+, crate::services::pub_sub_streaming_service::ReturnstreamFastExn> {
+        (**self).returnstreamFast(
+            i32_from,
+            i32_to,
+        ).await
+    }
+}
+
+
 /// Processor for PubSubStreamingService's methods.
 #[derive(Clone, Debug)]
 pub struct PubSubStreamingServiceProcessor<P, H, R, RS> {

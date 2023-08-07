@@ -33,6 +33,22 @@ where
     }
 }
 
+#[::async_trait::async_trait]
+impl<T> TestService for ::std::sync::Arc<T>
+where
+    T: TestService + Send + Sync + ?Sized,
+{
+    async fn init(
+        &self,
+        int1: ::std::primitive::i64,
+    ) -> ::std::result::Result<::std::primitive::i64, crate::services::test_service::InitExn> {
+        (**self).init(
+            int1,
+        ).await
+    }
+}
+
+
 /// Processor for TestService's methods.
 #[derive(Clone, Debug)]
 pub struct TestServiceProcessor<P, H, R, RS> {

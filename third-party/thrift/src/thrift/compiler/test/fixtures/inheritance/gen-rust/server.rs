@@ -30,6 +30,20 @@ where
     }
 }
 
+#[::async_trait::async_trait]
+impl<T> MyRoot for ::std::sync::Arc<T>
+where
+    T: MyRoot + Send + Sync + ?Sized,
+{
+    async fn do_root(
+        &self,
+    ) -> ::std::result::Result<(), crate::services::my_root::DoRootExn> {
+        (**self).do_root(
+        ).await
+    }
+}
+
+
 /// Processor for MyRoot's methods.
 #[derive(Clone, Debug)]
 pub struct MyRootProcessor<P, H, R, RS> {
@@ -370,6 +384,20 @@ where
         ).await
     }
 }
+
+#[::async_trait::async_trait]
+impl<T> MyNode for ::std::sync::Arc<T>
+where
+    T: MyNode + Send + Sync + ?Sized,
+{
+    async fn do_mid(
+        &self,
+    ) -> ::std::result::Result<(), crate::services::my_node::DoMidExn> {
+        (**self).do_mid(
+        ).await
+    }
+}
+
 
 /// Processor for MyNode's methods.
 #[derive(Clone, Debug)]
@@ -724,6 +752,20 @@ where
         ).await
     }
 }
+
+#[::async_trait::async_trait]
+impl<T> MyLeaf for ::std::sync::Arc<T>
+where
+    T: MyLeaf + Send + Sync + ?Sized,
+{
+    async fn do_leaf(
+        &self,
+    ) -> ::std::result::Result<(), crate::services::my_leaf::DoLeafExn> {
+        (**self).do_leaf(
+        ).await
+    }
+}
+
 
 /// Processor for MyLeaf's methods.
 #[derive(Clone, Debug)]

@@ -30,6 +30,20 @@ where
     }
 }
 
+#[::async_trait::async_trait]
+impl<T> FooService for ::std::sync::Arc<T>
+where
+    T: FooService + Send + Sync + ?Sized,
+{
+    async fn simple_rpc(
+        &self,
+    ) -> ::std::result::Result<(), crate::services::foo_service::SimpleRpcExn> {
+        (**self).simple_rpc(
+        ).await
+    }
+}
+
+
 /// Processor for FooService's methods.
 #[derive(Clone, Debug)]
 pub struct FooServiceProcessor<P, H, R, RS> {
@@ -373,6 +387,22 @@ where
         ).await
     }
 }
+
+#[::async_trait::async_trait]
+impl<T> FB303Service for ::std::sync::Arc<T>
+where
+    T: FB303Service + Send + Sync + ?Sized,
+{
+    async fn simple_rpc(
+        &self,
+        int_parameter: ::std::primitive::i32,
+    ) -> ::std::result::Result<crate::types::ReservedKeyword, crate::services::f_b303_service::SimpleRpcExn> {
+        (**self).simple_rpc(
+            int_parameter,
+        ).await
+    }
+}
+
 
 /// Processor for FB303Service's methods.
 #[derive(Clone, Debug)]
@@ -888,6 +918,90 @@ where
         ).await
     }
 }
+
+#[::async_trait::async_trait]
+impl<T> MyService for ::std::sync::Arc<T>
+where
+    T: MyService + Send + Sync + ?Sized,
+{
+    async fn ping(
+        &self,
+    ) -> ::std::result::Result<(), crate::services::my_service::PingExn> {
+        (**self).ping(
+        ).await
+    }
+    async fn getRandomData(
+        &self,
+    ) -> ::std::result::Result<::std::string::String, crate::services::my_service::GetRandomDataExn> {
+        (**self).getRandomData(
+        ).await
+    }
+    async fn sink(
+        &self,
+        sink: ::std::primitive::i64,
+    ) -> ::std::result::Result<(), crate::services::my_service::SinkExn> {
+        (**self).sink(
+            sink,
+        ).await
+    }
+    async fn putDataById(
+        &self,
+        id: ::std::primitive::i64,
+        data: ::std::string::String,
+    ) -> ::std::result::Result<(), crate::services::my_service::PutDataByIdExn> {
+        (**self).putDataById(
+            id,
+            data,
+        ).await
+    }
+    async fn hasDataById(
+        &self,
+        id: ::std::primitive::i64,
+    ) -> ::std::result::Result<::std::primitive::bool, crate::services::my_service::HasDataByIdExn> {
+        (**self).hasDataById(
+            id,
+        ).await
+    }
+    async fn getDataById(
+        &self,
+        id: ::std::primitive::i64,
+    ) -> ::std::result::Result<::std::string::String, crate::services::my_service::GetDataByIdExn> {
+        (**self).getDataById(
+            id,
+        ).await
+    }
+    async fn deleteDataById(
+        &self,
+        id: ::std::primitive::i64,
+    ) -> ::std::result::Result<(), crate::services::my_service::DeleteDataByIdExn> {
+        (**self).deleteDataById(
+            id,
+        ).await
+    }
+    async fn lobDataById(
+        &self,
+        id: ::std::primitive::i64,
+        data: ::std::string::String,
+    ) -> ::std::result::Result<(), crate::services::my_service::LobDataByIdExn> {
+        (**self).lobDataById(
+            id,
+            data,
+        ).await
+    }
+    async fn invalid_return_for_hack(
+        &self,
+    ) -> ::std::result::Result<::std::collections::BTreeSet<::fbthrift::export::OrderedFloat<::std::primitive::f32>>, crate::services::my_service::InvalidReturnForHackExn> {
+        (**self).invalid_return_for_hack(
+        ).await
+    }
+    async fn rpc_skipped_codegen(
+        &self,
+    ) -> ::std::result::Result<(), crate::services::my_service::RpcSkippedCodegenExn> {
+        (**self).rpc_skipped_codegen(
+        ).await
+    }
+}
+
 
 /// Processor for MyService's methods.
 #[derive(Clone, Debug)]
@@ -2208,6 +2322,30 @@ where
         ).await
     }
 }
+
+#[::async_trait::async_trait]
+impl<T> DbMixedStackArguments for ::std::sync::Arc<T>
+where
+    T: DbMixedStackArguments + Send + Sync + ?Sized,
+{
+    async fn getDataByKey0(
+        &self,
+        key: ::std::string::String,
+    ) -> ::std::result::Result<::std::vec::Vec<::std::primitive::u8>, crate::services::db_mixed_stack_arguments::GetDataByKey0Exn> {
+        (**self).getDataByKey0(
+            key,
+        ).await
+    }
+    async fn getDataByKey1(
+        &self,
+        key: ::std::string::String,
+    ) -> ::std::result::Result<::std::vec::Vec<::std::primitive::u8>, crate::services::db_mixed_stack_arguments::GetDataByKey1Exn> {
+        (**self).getDataByKey1(
+            key,
+        ).await
+    }
+}
+
 
 /// Processor for DbMixedStackArguments's methods.
 #[derive(Clone, Debug)]

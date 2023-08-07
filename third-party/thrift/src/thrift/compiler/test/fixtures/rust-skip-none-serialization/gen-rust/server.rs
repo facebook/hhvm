@@ -128,6 +128,62 @@ where
     }
 }
 
+#[::async_trait::async_trait]
+impl<T> MyService for ::std::sync::Arc<T>
+where
+    T: MyService + Send + Sync + ?Sized,
+{
+    async fn ping(
+        &self,
+    ) -> ::std::result::Result<(), crate::services::my_service::PingExn> {
+        (**self).ping(
+        ).await
+    }
+    async fn getRandomData(
+        &self,
+    ) -> ::std::result::Result<::std::string::String, crate::services::my_service::GetRandomDataExn> {
+        (**self).getRandomData(
+        ).await
+    }
+    async fn hasDataById(
+        &self,
+        id: ::std::primitive::i64,
+    ) -> ::std::result::Result<::std::primitive::bool, crate::services::my_service::HasDataByIdExn> {
+        (**self).hasDataById(
+            id,
+        ).await
+    }
+    async fn getDataById(
+        &self,
+        id: ::std::primitive::i64,
+    ) -> ::std::result::Result<::std::string::String, crate::services::my_service::GetDataByIdExn> {
+        (**self).getDataById(
+            id,
+        ).await
+    }
+    async fn putDataById(
+        &self,
+        id: ::std::primitive::i64,
+        data: ::std::string::String,
+    ) -> ::std::result::Result<(), crate::services::my_service::PutDataByIdExn> {
+        (**self).putDataById(
+            id,
+            data,
+        ).await
+    }
+    async fn lobDataById(
+        &self,
+        id: ::std::primitive::i64,
+        data: ::std::string::String,
+    ) -> ::std::result::Result<(), crate::services::my_service::LobDataByIdExn> {
+        (**self).lobDataById(
+            id,
+            data,
+        ).await
+    }
+}
+
+
 /// Processor for MyService's methods.
 #[derive(Clone, Debug)]
 pub struct MyServiceProcessor<P, H, R, RS> {

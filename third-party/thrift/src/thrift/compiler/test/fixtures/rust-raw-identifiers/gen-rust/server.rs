@@ -52,6 +52,30 @@ where
     }
 }
 
+#[::async_trait::async_trait]
+impl<T> Foo for ::std::sync::Arc<T>
+where
+    T: Foo + Send + Sync + ?Sized,
+{
+    async fn r#return(
+        &self,
+        bar: crate::types::ThereAreNoPascalCaseKeywords,
+    ) -> ::std::result::Result<(), crate::services::foo::ReturnExn> {
+        (**self).r#return(
+            bar,
+        ).await
+    }
+    async fn super_(
+        &self,
+        bar: crate::types::ThereAreNoPascalCaseKeywords,
+    ) -> ::std::result::Result<(), crate::services::foo::SuperExn> {
+        (**self).super_(
+            bar,
+        ).await
+    }
+}
+
+
 /// Processor for Foo's methods.
 #[derive(Clone, Debug)]
 pub struct FooProcessor<P, H, R, RS> {

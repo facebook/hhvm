@@ -77,6 +77,39 @@ where
     }
 }
 
+#[::async_trait::async_trait]
+impl<T> C for ::std::sync::Arc<T>
+where
+    T: C + Send + Sync + ?Sized,
+{
+    async fn f(
+        &self,
+    ) -> ::std::result::Result<(), crate::services::c::FExn> {
+        (**self).f(
+        ).await
+    }
+    async fn numbers(
+        &self,
+    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::number, crate::services::c::NumbersStreamExn>>
+, crate::services::c::NumbersExn> {
+        (**self).numbers(
+        ).await
+    }
+    async fn thing(
+        &self,
+        a: ::std::primitive::i32,
+        b: ::std::string::String,
+        c: ::std::collections::BTreeSet<::std::primitive::i32>,
+    ) -> ::std::result::Result<::std::string::String, crate::services::c::ThingExn> {
+        (**self).thing(
+            a,
+            b,
+            c,
+        ).await
+    }
+}
+
+
 /// Processor for C's methods.
 #[derive(Clone, Debug)]
 pub struct CProcessor<P, H, R, RS> {

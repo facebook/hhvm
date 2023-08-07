@@ -34,6 +34,23 @@ where
     }
 }
 
+#[::async_trait::async_trait]
+impl<T> MyInteraction for ::std::sync::Arc<T>
+where
+    T: MyInteraction + Send + Sync + ?Sized,
+{
+    async fn ping(
+        &self,
+    ) -> ::std::result::Result<(), crate::services::my_interaction::PingExn> {
+        (**self).ping(
+        ).await
+    }
+    async fn on_termination(&self) {
+        (**self).on_termination().await;
+    }
+}
+
+
 /// Processor for MyInteraction's methods.
 #[derive(Clone, Debug)]
 pub struct MyInteractionProcessor<P, H, R, RS> {
@@ -570,6 +587,123 @@ where
         ).await
     }
 }
+
+#[::async_trait::async_trait]
+impl<T> MyService for ::std::sync::Arc<T>
+where
+    T: MyService + Send + Sync + ?Sized,
+{    type RequestContext = T::RequestContext;
+    async fn ping(
+        &self,
+        request_context: &Self::RequestContext,
+    ) -> ::std::result::Result<(), crate::services::my_service::PingExn> {
+        (**self).ping(
+            request_context,
+        ).await
+    }
+    async fn getRandomData(
+        &self,
+        request_context: &Self::RequestContext,
+    ) -> ::std::result::Result<::std::string::String, crate::services::my_service::GetRandomDataExn> {
+        (**self).getRandomData(
+            request_context,
+        ).await
+    }
+    async fn hasDataById(
+        &self,
+        request_context: &Self::RequestContext,
+        id: ::std::primitive::i64,
+    ) -> ::std::result::Result<::std::primitive::bool, crate::services::my_service::HasDataByIdExn> {
+        (**self).hasDataById(
+            request_context,
+            id,
+        ).await
+    }
+    async fn getDataById(
+        &self,
+        request_context: &Self::RequestContext,
+        id: ::std::primitive::i64,
+    ) -> ::std::result::Result<::std::string::String, crate::services::my_service::GetDataByIdExn> {
+        (**self).getDataById(
+            request_context,
+            id,
+        ).await
+    }
+    async fn putDataById(
+        &self,
+        request_context: &Self::RequestContext,
+        id: ::std::primitive::i64,
+        data: ::std::string::String,
+    ) -> ::std::result::Result<(), crate::services::my_service::PutDataByIdExn> {
+        (**self).putDataById(
+            request_context,
+            id,
+            data,
+        ).await
+    }
+    async fn lobDataById(
+        &self,
+        request_context: &Self::RequestContext,
+        id: ::std::primitive::i64,
+        data: ::std::string::String,
+    ) -> ::std::result::Result<(), crate::services::my_service::LobDataByIdExn> {
+        (**self).lobDataById(
+            request_context,
+            id,
+            data,
+        ).await
+    }
+    async fn streamById(
+        &self,
+        request_context: &Self::RequestContext,
+        id: ::std::primitive::i64,
+    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::MyStruct, crate::services::my_service::StreamByIdStreamExn>>
+, crate::services::my_service::StreamByIdExn> {
+        (**self).streamById(
+            request_context,
+            id,
+        ).await
+    }
+    async fn streamByIdWithException(
+        &self,
+        request_context: &Self::RequestContext,
+        id: ::std::primitive::i64,
+    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::MyStruct, crate::services::my_service::StreamByIdWithExceptionStreamExn>>
+, crate::services::my_service::StreamByIdWithExceptionExn> {
+        (**self).streamByIdWithException(
+            request_context,
+            id,
+        ).await
+    }
+    async fn streamByIdWithResponse(
+        &self,
+        request_context: &Self::RequestContext,
+        id: ::std::primitive::i64,
+    ) -> ::std::result::Result<(
+    crate::types::MyDataItem,
+    ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::MyStruct, crate::services::my_service::StreamByIdWithResponseStreamExn>>
+)
+, crate::services::my_service::StreamByIdWithResponseExn> {
+        (**self).streamByIdWithResponse(
+            request_context,
+            id,
+        ).await
+    }
+    fn createMyInteraction(
+        &self,
+    ) -> ::anyhow::Result<::std::boxed::Box<dyn MyInteraction>> {
+        (**self).createMyInteraction()
+    }
+    async fn startPingInteraction(
+        &self,
+        request_context: &Self::RequestContext,
+    ) -> ::std::result::Result<::std::boxed::Box<dyn MyInteraction>, crate::services::my_service::StartPingInteractionExn> {
+        (**self).startPingInteraction(
+            request_context,
+        ).await
+    }
+}
+
 
 /// Processor for MyService's methods.
 #[derive(Clone, Debug)]

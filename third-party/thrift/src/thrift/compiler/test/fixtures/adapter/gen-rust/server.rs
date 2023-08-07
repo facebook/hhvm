@@ -39,6 +39,26 @@ where
     }
 }
 
+#[::async_trait::async_trait]
+impl<T> Service for ::std::sync::Arc<T>
+where
+    T: Service + Send + Sync + ?Sized,
+{
+    async fn func(
+        &self,
+        arg1: crate::types::StringWithAdapter_7208,
+        arg2: ::std::string::String,
+        arg3: crate::types::Foo,
+    ) -> ::std::result::Result<crate::types::MyI32_4873, crate::services::service::FuncExn> {
+        (**self).func(
+            arg1,
+            arg2,
+            arg3,
+        ).await
+    }
+}
+
+
 /// Processor for Service's methods.
 #[derive(Clone, Debug)]
 pub struct ServiceProcessor<P, H, R, RS> {
@@ -416,6 +436,28 @@ where
         ).await
     }
 }
+
+#[::async_trait::async_trait]
+impl<T> AdapterService for ::std::sync::Arc<T>
+where
+    T: AdapterService + Send + Sync + ?Sized,
+{
+    async fn count(
+        &self,
+    ) -> ::std::result::Result<crate::types::CountingStruct, crate::services::adapter_service::CountExn> {
+        (**self).count(
+        ).await
+    }
+    async fn adaptedTypes(
+        &self,
+        arg: crate::types::HeapAllocated,
+    ) -> ::std::result::Result<crate::types::HeapAllocated, crate::services::adapter_service::AdaptedTypesExn> {
+        (**self).adaptedTypes(
+            arg,
+        ).await
+    }
+}
+
 
 /// Processor for AdapterService's methods.
 #[derive(Clone, Debug)]

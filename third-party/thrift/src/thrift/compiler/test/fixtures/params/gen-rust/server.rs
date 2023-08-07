@@ -109,6 +109,54 @@ where
     }
 }
 
+#[::async_trait::async_trait]
+impl<T> NestedContainers for ::std::sync::Arc<T>
+where
+    T: NestedContainers + Send + Sync + ?Sized,
+{
+    async fn mapList(
+        &self,
+        foo: ::std::collections::BTreeMap<::std::primitive::i32, ::std::vec::Vec<::std::primitive::i32>>,
+    ) -> ::std::result::Result<(), crate::services::nested_containers::MapListExn> {
+        (**self).mapList(
+            foo,
+        ).await
+    }
+    async fn mapSet(
+        &self,
+        foo: ::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeSet<::std::primitive::i32>>,
+    ) -> ::std::result::Result<(), crate::services::nested_containers::MapSetExn> {
+        (**self).mapSet(
+            foo,
+        ).await
+    }
+    async fn listMap(
+        &self,
+        foo: ::std::vec::Vec<::std::collections::BTreeMap<::std::primitive::i32, ::std::primitive::i32>>,
+    ) -> ::std::result::Result<(), crate::services::nested_containers::ListMapExn> {
+        (**self).listMap(
+            foo,
+        ).await
+    }
+    async fn listSet(
+        &self,
+        foo: ::std::vec::Vec<::std::collections::BTreeSet<::std::primitive::i32>>,
+    ) -> ::std::result::Result<(), crate::services::nested_containers::ListSetExn> {
+        (**self).listSet(
+            foo,
+        ).await
+    }
+    async fn turtles(
+        &self,
+        foo: ::std::vec::Vec<::std::vec::Vec<::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeSet<::std::primitive::i32>>>>>,
+    ) -> ::std::result::Result<(), crate::services::nested_containers::TurtlesExn> {
+        (**self).turtles(
+            foo,
+        ).await
+    }
+}
+
+
 /// Processor for NestedContainers's methods.
 #[derive(Clone, Debug)]
 pub struct NestedContainersProcessor<P, H, R, RS> {

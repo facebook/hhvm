@@ -52,6 +52,30 @@ where
     }
 }
 
+#[::async_trait::async_trait]
+impl<T> SomeService for ::std::sync::Arc<T>
+where
+    T: SomeService + Send + Sync + ?Sized,
+{
+    async fn bounce_map(
+        &self,
+        m: included::types::SomeMap,
+    ) -> ::std::result::Result<included::types::SomeMap, crate::services::some_service::BounceMapExn> {
+        (**self).bounce_map(
+            m,
+        ).await
+    }
+    async fn binary_keyed_map(
+        &self,
+        r: ::std::vec::Vec<::std::primitive::i64>,
+    ) -> ::std::result::Result<::std::collections::BTreeMap<crate::types::TBinary, ::std::primitive::i64>, crate::services::some_service::BinaryKeyedMapExn> {
+        (**self).binary_keyed_map(
+            r,
+        ).await
+    }
+}
+
+
 /// Processor for SomeService's methods.
 #[derive(Clone, Debug)]
 pub struct SomeServiceProcessor<P, H, R, RS> {

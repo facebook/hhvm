@@ -84,6 +84,42 @@ where
     }
 }
 
+#[::async_trait::async_trait]
+impl<T> MyInteraction for ::std::sync::Arc<T>
+where
+    T: MyInteraction + Send + Sync + ?Sized,
+{
+    async fn frobnicate(
+        &self,
+    ) -> ::std::result::Result<::std::primitive::i32, crate::services::my_interaction::FrobnicateExn> {
+        (**self).frobnicate(
+        ).await
+    }
+    async fn ping(
+        &self,
+    ) -> ::std::result::Result<(), crate::services::my_interaction::PingExn> {
+        (**self).ping(
+        ).await
+    }
+    async fn truthify(
+        &self,
+    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction::TruthifyStreamExn>>
+, crate::services::my_interaction::TruthifyExn> {
+        (**self).truthify(
+        ).await
+    }
+    async fn encode(
+        &self,
+    ) -> ::std::result::Result<, crate::services::my_interaction::EncodeExn> {
+        (**self).encode(
+        ).await
+    }
+    async fn on_termination(&self) {
+        (**self).on_termination().await;
+    }
+}
+
+
 /// Processor for MyInteraction's methods.
 #[derive(Clone, Debug)]
 pub struct MyInteractionProcessor<P, H, R, RS> {
@@ -795,6 +831,42 @@ where
     }
 }
 
+#[::async_trait::async_trait]
+impl<T> MyInteractionFast for ::std::sync::Arc<T>
+where
+    T: MyInteractionFast + Send + Sync + ?Sized,
+{
+    async fn frobnicate(
+        &self,
+    ) -> ::std::result::Result<::std::primitive::i32, crate::services::my_interaction_fast::FrobnicateExn> {
+        (**self).frobnicate(
+        ).await
+    }
+    async fn ping(
+        &self,
+    ) -> ::std::result::Result<(), crate::services::my_interaction_fast::PingExn> {
+        (**self).ping(
+        ).await
+    }
+    async fn truthify(
+        &self,
+    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction_fast::TruthifyStreamExn>>
+, crate::services::my_interaction_fast::TruthifyExn> {
+        (**self).truthify(
+        ).await
+    }
+    async fn encode(
+        &self,
+    ) -> ::std::result::Result<, crate::services::my_interaction_fast::EncodeExn> {
+        (**self).encode(
+        ).await
+    }
+    async fn on_termination(&self) {
+        (**self).on_termination().await;
+    }
+}
+
+
 /// Processor for MyInteractionFast's methods.
 #[derive(Clone, Debug)]
 pub struct MyInteractionFastProcessor<P, H, R, RS> {
@@ -1456,6 +1528,23 @@ where
     }
 }
 
+#[::async_trait::async_trait]
+impl<T> SerialInteraction for ::std::sync::Arc<T>
+where
+    T: SerialInteraction + Send + Sync + ?Sized,
+{
+    async fn frobnicate(
+        &self,
+    ) -> ::std::result::Result<(), crate::services::serial_interaction::FrobnicateExn> {
+        (**self).frobnicate(
+        ).await
+    }
+    async fn on_termination(&self) {
+        (**self).on_termination().await;
+    }
+}
+
+
 /// Processor for SerialInteraction's methods.
 #[derive(Clone, Debug)]
 pub struct SerialInteractionProcessor<P, H, R, RS> {
@@ -1857,6 +1946,59 @@ where
         ).await
     }
 }
+
+#[::async_trait::async_trait]
+impl<T> MyService for ::std::sync::Arc<T>
+where
+    T: MyService + Send + Sync + ?Sized,
+{
+    fn createMyInteraction(
+        &self,
+    ) -> ::anyhow::Result<::std::boxed::Box<dyn MyInteraction>> {
+        (**self).createMyInteraction()
+    }
+    fn createMyInteractionFast(
+        &self,
+    ) -> ::anyhow::Result<::std::boxed::Box<dyn MyInteractionFast>> {
+        (**self).createMyInteractionFast()
+    }
+    fn createSerialInteraction(
+        &self,
+    ) -> ::anyhow::Result<::std::boxed::Box<dyn SerialInteraction>> {
+        (**self).createSerialInteraction()
+    }
+    async fn foo(
+        &self,
+    ) -> ::std::result::Result<(), crate::services::my_service::FooExn> {
+        (**self).foo(
+        ).await
+    }
+    async fn interact(
+        &self,
+        arg: ::std::primitive::i32,
+    ) -> ::std::result::Result<::std::boxed::Box<dyn MyInteraction>, crate::services::my_service::InteractExn> {
+        (**self).interact(
+            arg,
+        ).await
+    }
+    async fn interactFast(
+        &self,
+    ) -> ::std::result::Result<(::std::boxed::Box<dyn MyInteractionFast>, ::std::primitive::i32), crate::services::my_service::InteractFastExn> {
+        (**self).interactFast(
+        ).await
+    }
+    async fn serialize(
+        &self,
+    ) -> ::std::result::Result<(::std::boxed::Box<dyn SerialInteraction>, (
+    ::std::primitive::i32,
+    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::my_service::SerializeStreamExn>>
+)
+), crate::services::my_service::SerializeExn> {
+        (**self).serialize(
+        ).await
+    }
+}
+
 
 /// Processor for MyService's methods.
 #[derive(Clone, Debug)]

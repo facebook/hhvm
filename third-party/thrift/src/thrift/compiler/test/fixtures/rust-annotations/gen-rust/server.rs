@@ -46,6 +46,26 @@ where
     }
 }
 
+#[::async_trait::async_trait]
+impl<T> AllMethods for ::std::sync::Arc<T>
+where
+    T: AllMethods + Send + Sync + ?Sized,
+{
+    async fn foo(
+        &self,
+    ) -> ::std::result::Result<(), crate::services::all_methods::FooExn> {
+        (**self).foo(
+        ).await
+    }
+    async fn bar(
+        &self,
+    ) -> ::std::result::Result<::std::string::String, crate::services::all_methods::BarExn> {
+        (**self).bar(
+        ).await
+    }
+}
+
+
 /// Processor for AllMethods's methods.
 #[derive(Clone, Debug)]
 pub struct AllMethodsProcessor<P, H, R, RS> {
@@ -504,6 +524,26 @@ where
     }
 }
 
+#[::async_trait::async_trait]
+impl<T> OneMethod for ::std::sync::Arc<T>
+where
+    T: OneMethod + Send + Sync + ?Sized,
+{
+    async fn foo(
+        &self,
+    ) -> ::std::result::Result<(), crate::services::one_method::FooExn> {
+        (**self).foo(
+        ).await
+    }
+    async fn bar(
+        &self,
+    ) -> ::std::result::Result<::std::string::String, crate::services::one_method::BarExn> {
+        (**self).bar(
+        ).await
+    }
+}
+
+
 /// Processor for OneMethod's methods.
 #[derive(Clone, Debug)]
 pub struct OneMethodProcessor<P, H, R, RS> {
@@ -961,6 +1001,26 @@ where
         ).await
     }
 }
+
+#[::async_trait::async_trait]
+impl<T> OneMethodOptOut for ::std::sync::Arc<T>
+where
+    T: OneMethodOptOut + Send + Sync + ?Sized,
+{
+    async fn foo(
+        &self,
+    ) -> ::std::result::Result<(), crate::services::one_method_opt_out::FooExn> {
+        (**self).foo(
+        ).await
+    }
+    async fn bar(
+        &self,
+    ) -> ::std::result::Result<::std::string::String, crate::services::one_method_opt_out::BarExn> {
+        (**self).bar(
+        ).await
+    }
+}
+
 
 /// Processor for OneMethodOptOut's methods.
 #[derive(Clone, Debug)]

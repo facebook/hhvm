@@ -33,6 +33,22 @@ where
     }
 }
 
+#[::async_trait::async_trait]
+impl<T> MyService for ::std::sync::Arc<T>
+where
+    T: MyService + Send + Sync + ?Sized,
+{
+    async fn query(
+        &self,
+        u: crate::types::MyUnion,
+    ) -> ::std::result::Result<crate::types::MyStruct, crate::services::my_service::QueryExn> {
+        (**self).query(
+            u,
+        ).await
+    }
+}
+
+
 /// Processor for MyService's methods.
 #[derive(Clone, Debug)]
 pub struct MyServiceProcessor<P, H, R, RS> {

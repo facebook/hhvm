@@ -78,6 +78,38 @@ where
     }
 }
 
+#[::async_trait::async_trait]
+impl<T> Raiser for ::std::sync::Arc<T>
+where
+    T: Raiser + Send + Sync + ?Sized,
+{
+    async fn doBland(
+        &self,
+    ) -> ::std::result::Result<(), crate::services::raiser::DoBlandExn> {
+        (**self).doBland(
+        ).await
+    }
+    async fn doRaise(
+        &self,
+    ) -> ::std::result::Result<(), crate::services::raiser::DoRaiseExn> {
+        (**self).doRaise(
+        ).await
+    }
+    async fn get200(
+        &self,
+    ) -> ::std::result::Result<::std::string::String, crate::services::raiser::Get200Exn> {
+        (**self).get200(
+        ).await
+    }
+    async fn get500(
+        &self,
+    ) -> ::std::result::Result<::std::string::String, crate::services::raiser::Get500Exn> {
+        (**self).get500(
+        ).await
+    }
+}
+
+
 /// Processor for Raiser's methods.
 #[derive(Clone, Debug)]
 pub struct RaiserProcessor<P, H, R, RS> {

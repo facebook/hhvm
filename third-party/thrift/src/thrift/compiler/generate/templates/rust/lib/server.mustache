@@ -102,6 +102,48 @@ where
 {{/service:interaction?}}
 }
 
+#[::async_trait::async_trait]
+impl<T> {{service:name}} for ::std::sync::Arc<T>
+where
+    T: {{service:name}} + Send + Sync + ?Sized,
+{{>lib/block}}
+{{#service:requestContext?}}
+    type RequestContext = T::RequestContext;{{!
+}}{{/service:requestContext?}}
+{{#service:rustFunctions}}{{^function:starts_interaction?}}
+    async fn {{function:rust_name}}(
+        &self,{{!
+        }}{{#service:requestContext?}}
+        request_context: &Self::RequestContext,{{!
+        }}{{/service:requestContext?}}{{!
+        }}{{#function:args}}
+        {{field:rust_name}}: {{#field:type}}{{>lib/type}}{{/field:type}},{{!
+        }}{{/function:args}}
+    ) -> {{>lib/server_return_type}} {
+        (**self).{{function:rust_name}}({{!
+            }}{{#service:requestContext?}}
+            request_context,{{!
+            }}{{/service:requestContext?}}{{!
+            }}{{#function:args}}
+            {{field:rust_name}},{{!
+            }}{{/function:args}}
+        ).await
+    }
+{{/function:starts_interaction?}}{{#function:starts_interaction?}}
+    fn {{function:rust_name}}(
+        &self,
+    ) -> ::anyhow::Result<::std::boxed::Box<dyn {{function:interaction_name}}>> {
+        (**self).{{function:rust_name}}()
+    }
+{{/function:starts_interaction?}}{{/service:rustFunctions}}
+{{#service:interaction?}}
+    async fn on_termination(&self) {
+        (**self).on_termination().await;
+    }
+{{/service:interaction?}}
+}
+
+
 /// Processor for {{service:name}}'s methods.
 #[derive(Clone, Debug)]
 pub struct {{service:name}}Processor<P, H, R, RS{{!

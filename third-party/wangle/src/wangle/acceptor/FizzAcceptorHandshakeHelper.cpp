@@ -17,6 +17,9 @@
 #include <fizz/record/Types.h>
 #include <fizz/server/State.h>
 #include <folly/experimental/io/AsyncIoUringSocketFactory.h>
+#if !defined(_WIN32) // No FD-passing on Windows, don't try to make it build.
+#include <folly/io/async/fdsock/AsyncFdSocket.h>
+#endif
 #include <wangle/acceptor/FizzAcceptorHandshakeHelper.h>
 #include <wangle/acceptor/SSLAcceptorHandshakeHelper.h>
 #include <wangle/ssl/ClientHelloExtStats.h>
@@ -70,8 +73,19 @@ AsyncFizzServer::UniquePtr FizzAcceptorHandshakeHelper::createFizzServer(
     asyncTransport = folly::AsyncIoUringSocketFactory::create<
         folly::AsyncTransport::UniquePtr>(std::move(sslSock));
   } else {
+#if !defined(_WIN32)
+    folly::SocketAddress addr;
+    sslSock->getPeerAddress(&addr);
+#endif
     folly::AsyncSocket::UniquePtr asyncSock(
-        new folly::AsyncSocket(std::move(sslSock)));
+#if !defined(_WIN32)
+        addr.getFamily() == AF_UNIX
+            ? new folly::AsyncFdSocket(
+                  folly::AsyncFdSocket::DoesNotMoveFdSocketState{},
+                  std::move(sslSock))
+            :
+#endif
+            new folly::AsyncSocket(std::move(sslSock)));
     asyncSock->cacheAddresses();
     asyncTransport = folly::AsyncTransport::UniquePtr(std::move(asyncSock));
   }

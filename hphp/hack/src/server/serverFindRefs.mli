@@ -10,8 +10,6 @@
 open Hh_prelude
 open ServerCommandTypes.Find_refs
 
-val to_json : result -> Hh_json.json
-
 val add_ns : String.t -> String.t
 
 val handle_prechecked_files :

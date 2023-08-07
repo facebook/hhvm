@@ -15,22 +15,6 @@ open Reordered_argument_collections
 open ServerCommandTypes.Find_refs
 open ServerCommandTypes.Done_or_retry
 
-let to_json input =
-  let entries =
-    List.map input ~f:(fun (name, pos) ->
-        let filename = Pos.filename pos in
-        let (line, start, end_) = Pos.info_pos pos in
-        Hh_json.JSON_Object
-          [
-            ("name", Hh_json.JSON_String name);
-            ("filename", Hh_json.JSON_String filename);
-            ("line", Hh_json.int_ line);
-            ("char_start", Hh_json.int_ start);
-            ("char_end", Hh_json.int_ end_);
-          ])
-  in
-  Hh_json.JSON_Array entries
-
 let add_ns name =
   if Char.equal name.[0] '\\' then
     name

@@ -79,6 +79,3 @@ val get_dependent_files :
   MultiWorker.worker list option ->
   SSet.t ->
   Relative_path.Set.t
-
-val result_to_ide_message :
-  (string * Pos.absolute) list -> (string * Ide_api_types.file_range) list

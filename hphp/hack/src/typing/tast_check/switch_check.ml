@@ -312,7 +312,7 @@ let outcomes_to_fields
   let other = ("other", Hh_json.int_ other) in
   [non_exhaustive; redundant_default; skipped; other]
 
-let log_exhaustivity_check default_label outcomes ty_json =
+let log_exhaustivity_check pos default_label outcomes ty_json =
   let add_fields json ~fields =
     match json with
     | Hh_json.JSON_Object old -> Hh_json.JSON_Object (old @ fields)
@@ -321,7 +321,10 @@ let log_exhaustivity_check default_label outcomes ty_json =
   let has_default =
     ("has_default", Option.is_some default_label |> Hh_json.bool_)
   in
-  let fields = has_default :: (outcomes_to_fields @@ count_outcomes outcomes) in
+  let switch_pos = ("switch_pos", Pos.(pos |> to_absolute |> json)) in
+  let fields =
+    has_default :: switch_pos :: (outcomes_to_fields @@ count_outcomes outcomes)
+  in
   ty_json
   |> add_fields ~fields
   |> Hh_json.json_to_string
@@ -333,7 +336,7 @@ let check_exhaustiveness env pos ty ((_, dfl) as caselist) =
   in
   let tcopt = env |> Env.get_decl_env |> Decl_env.tcopt in
   if TypecheckerOptions.tco_log_exhaustivity_check tcopt then
-    Env.ty_to_json env ty |> log_exhaustivity_check dfl outcomes
+    Env.ty_to_json env ty |> log_exhaustivity_check pos dfl outcomes
 
 let handler =
   object

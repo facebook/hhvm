@@ -160,9 +160,6 @@ folly::AsyncSocketTransport::UniquePtr moveToPlaintext(FizzSocket* fizzSock) {
     auto fd = sock->detachNetworkSocket();
     auto zcId = sock->getZeroCopyBufId();
 
-    folly::SocketAddress addr;
-    sock->getPeerAddress(&addr);
-
     // Create new socket from old, make sure not to throw
     auto populateStopTLSSocket = [&](auto stopTLSSock) -> folly::AsyncSocket* {
       stopTLSSock->setApplicationProtocol(fizzSock->getApplicationProtocol());
@@ -172,11 +169,44 @@ folly::AsyncSocketTransport::UniquePtr moveToPlaintext(FizzSocket* fizzSock) {
       }
       return stopTLSSock;
     };
+#if !defined(_WIN32) // No FD-passing on Windows, don't try to make it build.
+    folly::SocketAddress addr;
+    sock->getPeerAddress(&addr);
     if (addr.getFamily() == AF_UNIX) {
       DCHECK_EQ(0, zcId) << "Zero-copy not supported on AF_UNIX sockets";
-      plaintextTransport.reset(populateStopTLSSocket(
-          new StopTLSSocket<folly::AsyncFdSocket>(eb, fd, selfCert, peerCert)));
-    } else {
+      auto newFdSock =
+          new StopTLSSocket<folly::AsyncFdSocket>(eb, fd, selfCert, peerCert);
+      if (auto oldFdSock =
+              fizzSock
+                  ->template getUnderlyingTransport<folly::AsyncFdSocket>()) {
+        // FIXME: Ideally, we would DFATAL if a server does NOT have an
+        // `oldFdSock` -- but I don't know how to distinguish client vs
+        // server here.  Rationale:
+        //
+        // If the handshake was NOT negotiated over an `AsyncFdSocket`, then
+        // the following race condition could happen:
+        //  - Server closes TLS.
+        //  - Client succeeds at `moveToPlaintext`, sends an FD-bearing request
+        //  - Server receives the data of the FD-bearing request on the
+        //    `FizzSocket` because `moveToPlaintext` has not yet succeeded.
+        //    The FDs are lost (or leaked), because the `recvmsg` in
+        //    `AsyncSocket` does not know to read them from the received
+        //    ancillary data.
+        //  - In `ThriftFizzAcceptorHandshakeHelper::stopTLSSuccess` (more docs
+        //    there), server finished `moveToPlaintext` and moves the
+        //    previously received request data to the new `AsyncFdSocket`.
+        //  - Rocket parses a request that expects FDs, but fails to pop
+        //    them from the `AsyncFdSocket` because it never got FDs.
+        newFdSock->swapFdReadStateWith(oldFdSock);
+      } else if (
+          dynamic_cast<fizz::server::AsyncFizzServer*>(fizzSock) != nullptr) {
+        LOG(DFATAL) << "For AF_UNIX, AsyncFizzServer must always be backed by "
+                    << "an underlying AsyncFdSocket";
+      }
+      plaintextTransport.reset(populateStopTLSSocket(newFdSock));
+    } else
+#endif
+    {
       plaintextTransport.reset(
           populateStopTLSSocket(new StopTLSSocket<folly::AsyncSocket>(
               eb, fd, zcId, selfCert, peerCert)));

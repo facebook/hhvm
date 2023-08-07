@@ -305,7 +305,7 @@ let main_internal
     let%lwt results =
       rpc_with_retry args @@ Rpc.IDE_FIND_REFS_BY_SYMBOL (action, symbol_name)
     in
-    ClientFindRefsPrint.print results ~ide:true ~json:args.output_json;
+    ClientFindRefsPrint.print results ~ide:true ~json:true;
     Lwt.return (Exit_status.No_error, Telemetry.create ())
   | MODE_IDE_GO_TO_IMPL_BY_SYMBOL arg ->
     let open ServerCommandTypes in
@@ -313,7 +313,7 @@ let main_internal
     let%lwt results =
       rpc_with_retry args @@ Rpc.IDE_GO_TO_IMPL_BY_SYMBOL (action, symbol_name)
     in
-    ClientFindRefsPrint.print results ~ide:true ~json:args.output_json;
+    ClientFindRefsPrint.print results ~ide:true ~json:true;
     Lwt.return (Exit_status.No_error, Telemetry.create ())
   | MODE_DUMP_SYMBOL_INFO files ->
     let%lwt conn = connect args in

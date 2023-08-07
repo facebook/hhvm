@@ -13,3 +13,5 @@ let fetch_namespaces ~sienv:_ = []
 let search_symbols
     ~sienv_ref:_ ~query_text:_ ~max_results:_ ~context:_ ~kind_filter:_ =
   ([], SearchTypes.Complete)
+
+let find_refs ~sienv_ref:_ ~action:_ ~max_results:_ = None

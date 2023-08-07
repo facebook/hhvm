@@ -34,3 +34,13 @@ val find_matching_symbols :
   context:SearchTypes.autocomplete_type ->
   kind_filter:SearchTypes.si_kind option ->
   SearchTypes.si_item list * SearchTypes.si_complete
+
+(** Does an approximate search for find-all-refs candidates.
+If it returns None, then this functionality isn't available from this provider,
+or isn't working for some reason.
+If it returns Some, then these are best-guess candidates to check. *)
+val find_refs :
+  sienv_ref:SearchUtils.si_env ref ->
+  action:SearchTypes.Find_refs.action ->
+  max_results:int ->
+  Relative_path.t list option

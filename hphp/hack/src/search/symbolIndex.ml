@@ -189,3 +189,15 @@ let find_matching_symbols
     (* Namespaces should always appear first *)
     let results = List.append namespace_results clean_results in
     (List.take results max_results, !is_complete)
+
+let find_refs
+    ~(sienv_ref : si_env ref)
+    ~(action : SearchTypes.Find_refs.action)
+    ~(max_results : int) : Relative_path.t list option =
+  match !sienv_ref.sie_provider with
+  | NoIndex
+  | LocalIndex
+  | SqliteIndex
+  | MockIndex _ ->
+    None
+  | CustomIndex -> CustomSearchService.find_refs ~sienv_ref ~action ~max_results

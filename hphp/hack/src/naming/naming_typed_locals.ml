@@ -266,7 +266,7 @@ and check_case on_expr env (expr, block) =
   check_block on_expr env block
 
 and check_stmt_match_arm on_expr env { sma_pat = _; sma_body } =
-  check_stmt on_expr env sma_body
+  check_block on_expr env sma_body
 
 let ignorefn f x y = ignore (f x y)
 

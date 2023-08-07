@@ -3542,7 +3542,7 @@ fn p_match_stmt_arm<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::StmtMatch
         _ => return missing_syntax("match statement", node, env),
     };
     let pat = p_pat(&c.pattern, env)?;
-    let body = p_stmt(&c.body, env)?;
+    let body = p_block(true /* remove noop */, &c.body, env)?;
     Ok(ast::StmtMatchArm { pat, body })
 }
 

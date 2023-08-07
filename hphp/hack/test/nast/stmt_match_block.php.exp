@@ -22,38 +22,38 @@
                  sm_arms =
                  [{ sma_pat = (PRefinement { pr_pos = [5:5-12]; pr_id = (Some ([5:5-12], $i)); pr_hint = ([5:9-12], (Hprim Tint)) });
                     sma_body =
-                    [([5:16-32],
+                    [([5:18-34],
                       (Expr
-                         ((), [5:16-32],
+                         ((), [5:18-34],
                           (Call
-                             { func = ((), [5:16-20], (Id ([5:16-20], "echo"))); 
-                               targs = []; args = [(Pnormal, ((), [5:21-31], (String2 [((), [5:22-26], (String "int ")); ((), [5:26-28], (Lvar ([5:26-28], $i))); ((), [5:28-30], (String "\n"))])))];
+                             { func = ((), [5:18-22], (Id ([5:18-22], "echo"))); 
+                               targs = []; args = [(Pnormal, ((), [5:23-33], (String2 [((), [5:24-28], (String "int ")); ((), [5:28-30], (Lvar ([5:28-30], $i))); ((), [5:30-32], (String "\n"))])))];
                                unpacked_arg = None }))))
                       ]
                     };
                    { sma_pat = (PRefinement { pr_pos = [6:5-14]; pr_id = None; pr_hint = ([6:8-14], (Hprim Tstring)) });
                      sma_body =
-                     [([6:18-37],
+                     [([6:20-39],
                        (Expr
-                          ((), [6:18-37],
+                          ((), [6:20-39],
                            (Call
-                              { func = ((), [6:18-22], (Id ([6:18-22], "echo"))); 
+                              { func = ((), [6:20-24], (Id ([6:20-24], "echo"))); 
                                 targs = [];
-                                args = [(Pnormal, ((), [6:23-36], (String2 [((), [6:24-31], (String "string ")); ((), [6:31-33], (Lvar ([6:31-33], $v))); ((), [6:33-35], (String "\n"))])))];
+                                args = [(Pnormal, ((), [6:25-38], (String2 [((), [6:26-33], (String "string ")); ((), [6:33-35], (Lvar ([6:33-35], $v))); ((), [6:35-37], (String "\n"))])))];
                                 unpacked_arg = None }))))
                        ]
                      };
                    { sma_pat = (PVar { pv_pos = [7:5-6]; pv_id = None });
                      sma_body =
-                     [([7:10-27],
-                       (Expr ((), [7:10-27], (Call { func = ((), [7:10-14], (Id ([7:10-14], "echo"))); targs = []; args = [(Pnormal, ((), [7:15-26], (String "unknown\n")))]; unpacked_arg = None }))))
+                     [([7:12-29],
+                       (Expr ((), [7:12-29], (Call { func = ((), [7:12-16], (Id ([7:12-16], "echo"))); targs = []; args = [(Pnormal, ((), [7:17-28], (String "unknown\n")))]; unpacked_arg = None }))))
                        ]
                      };
                    { sma_pat = (PVar { pv_pos = [8:5-7]; pv_id = (Some ([8:5-7], $x)) });
                      sma_body =
-                     [([8:11-32],
+                     [([8:13-34],
                        (Expr
-                          ((), [8:11-32], (Call { func = ((), [8:11-15], (Id ([8:11-15], "echo"))); targs = []; args = [(Pnormal, ((), [8:16-31], (String "unreachable\n")))]; unpacked_arg = None }))))
+                          ((), [8:13-34], (Call { func = ((), [8:13-17], (Id ([8:13-17], "echo"))); targs = []; args = [(Pnormal, ((), [8:18-33], (String "unreachable\n")))]; unpacked_arg = None }))))
                        ]
                      }
                    ]

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<13355517614d7e246777a44851a92dd7>>
+// @generated SignedSource<<edc37d984fd8ec5d2942273f5f4672f3>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -421,7 +421,7 @@ pub struct StmtMatch<Ex, En> {
 #[repr(C)]
 pub struct StmtMatchArm<Ex, En> {
     pub pat: Pattern,
-    pub body: Stmt<Ex, En>,
+    pub body: Block<Ex, En>,
 }
 
 #[derive(

@@ -456,7 +456,7 @@ module Visitor_DEPRECATED = struct
 
       method on_stmt_match_arm : 'a -> stmt_match_arm -> 'a
 
-      method on_pat : 'a -> pattern -> 'a
+      method on_pattern : 'a -> pattern -> 'a
 
       method on_pat_var : 'a -> pat_var -> 'a
 
@@ -711,11 +711,11 @@ module Visitor_DEPRECATED = struct
         acc
 
       method on_stmt_match_arm acc { sma_pat; sma_body } =
-        let acc = this#on_pat acc sma_pat in
-        let acc = this#on_stmt acc sma_body in
+        let acc = this#on_pattern acc sma_pat in
+        let acc = this#on_block acc sma_body in
         acc
 
-      method on_pat acc =
+      method on_pattern acc =
         function
         | PVar pv -> this#on_pat_var acc pv
         | PRefinement pr -> this#on_pat_refinement acc pr

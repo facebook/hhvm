@@ -275,7 +275,7 @@ and ('ex, 'en) stmt_match = {
 
 and ('ex, 'en) stmt_match_arm = {
   sma_pat: pattern;
-  sma_body: ('ex, 'en) stmt;
+  sma_body: ('ex, 'en) block;
 }
 
 and pattern =

@@ -26,6 +26,13 @@
 namespace apache {
 namespace thrift {
 
+namespace detail {
+THRIFT_PLUGGABLE_FUNC_REGISTER(
+    void, setSockOptStopTLS, folly::AsyncSocketTransport&) {
+  return;
+}
+} // namespace detail
+
 void ThriftFizzAcceptorHandshakeHelper::start(
     folly::AsyncSSLSocket::UniquePtr sock,
     wangle::AcceptorHandshakeHelper::Callback* callback) noexcept {
@@ -86,6 +93,7 @@ void ThriftFizzAcceptorHandshakeHelper::stopTLSSuccess(
     std::unique_ptr<folly::IOBuf> endOfData) {
   auto appProto = transport_->getApplicationProtocol();
   auto plaintextTransport = moveToPlaintext(transport_.get());
+  detail::setSockOptStopTLS(*plaintextTransport);
   // The server initiates the close, which means the client will be the first
   // to successfully terminate tls and return the socket back to the caller.
   // What this means for us is we clearly don't know if our fizz transport

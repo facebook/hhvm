@@ -17,6 +17,7 @@
 #pragma once
 
 #include <fizz/server/AsyncFizzServer.h>
+#include <thrift/lib/cpp2/PluggableFunction.h>
 #include <thrift/lib/cpp2/security/AsyncStopTLS.h>
 #include <thrift/lib/cpp2/security/extensions/ThriftParametersContext.h>
 #include <thrift/lib/cpp2/security/extensions/ThriftParametersServerExtension.h>
@@ -24,6 +25,11 @@
 
 namespace apache {
 namespace thrift {
+
+namespace detail {
+THRIFT_PLUGGABLE_FUNC_DECLARE(
+    void, setSockOptStopTLS, folly::AsyncSocketTransport&);
+} // namespace detail
 
 class ThriftParametersContext;
 

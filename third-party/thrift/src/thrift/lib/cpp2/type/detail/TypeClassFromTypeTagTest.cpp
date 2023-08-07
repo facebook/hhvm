@@ -36,4 +36,7 @@ static_assert(
     std::is_same_v<
         from_type_tag_t<type::map<type::string_t, type::list<type::i32_t>>>,
         map<string, list<integral>>>);
+static_assert(std::is_same_v<
+              from_type_tag_t<type::adapted<Foo, type::bool_t>>,
+              integral>);
 } // namespace apache::thrift::type_class

@@ -103,7 +103,7 @@ struct from_type_tag<
 };
 template <class Adapter, class Tag>
 struct from_type_tag<type::adapted<Adapter, Tag>> {
-  using type = from_type_tag<Tag>;
+  using type = from_type_tag_t<Tag>;
 };
 
 } // namespace type_class

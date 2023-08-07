@@ -1178,7 +1178,7 @@ bool process(CompilerOptions &po) {
       assertx(!moduleInDeployment.contains(module));
       if (packageInfo.moduleInDeployment(module,
                                          it->second,
-                                         DeployKind::HardOrSoft)) {
+                                         DeployKind::Hard)) {
         moduleInDeployment.insert(module);
       }
     }

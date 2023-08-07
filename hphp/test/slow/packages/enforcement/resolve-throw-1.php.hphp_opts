@@ -1,1 +1,3 @@
+--inputs=__DIR__/resolve-1.inc
+--inputs=__DIR__/foo.inc
 --dir=__DIR__

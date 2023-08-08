@@ -36,9 +36,16 @@ class package_name_generator {
   explicit package_name_generator(
       const std::string& language, const std::string& ns)
       : language_(language) {
-    split(identifiers_, ns, boost::algorithm::is_any_of("."));
-    create_path_and_domain();
+    std::vector<std::string> identifiers;
+    split(identifiers, ns, boost::algorithm::is_any_of("."));
+    create_path_and_domain(std::move(identifiers));
   }
+
+  explicit package_name_generator(
+      std::vector<std::string> path, std::vector<std::string> domain = {})
+      : path_(std::move(path)), domain_(std::move(domain)) {}
+
+  const std::vector<std::string>& get_path_components() const { return path_; }
 
   std::string generate(
       const std::string& default_domain = kDefaultDomain) const {
@@ -78,8 +85,7 @@ class package_name_generator {
   }
 
  private:
-  const std::string& language_;
-  std::vector<std::string> identifiers_;
+  std::string language_;
   std::vector<std::string> path_;
   std::vector<std::string> domain_;
 
@@ -151,8 +157,8 @@ class package_name_generator {
     return fmt::to_string(fmt::join(path.begin(), path.end(), "/"));
   }
 
-  void create_path_and_domain() {
-    path_ = identifiers_;
+  void create_path_and_domain(std::vector<std::string> identifiers) {
+    path_ = identifiers;
     // Check if any potential domain name is present
     auto iter =
         std::find_if(path_.begin(), path_.end(), [&](const std::string& str) {
@@ -282,9 +288,73 @@ class package_name_generator_util {
         most_freq_ns_path, domain);
   }
 
+  std::string get_package_from_common_identifiers() const {
+    auto common_identifiers = find_matching_identifiers(
+        pkg_generators_.at(0).get_path_components(),
+        pkg_generators_.at(1).get_path_components());
+    for (size_t i = 2; i < pkg_generators_.size(); i++) {
+      common_identifiers = find_matching_identifiers(
+          common_identifiers, pkg_generators_.at(i).get_path_components());
+      // If there are no common identifiers, then return empty string
+      if (common_identifiers.empty()) {
+        return "";
+      }
+    }
+
+    // When guessing package from common identifiers,
+    // minimum path length is required.
+    if (common_identifiers.size() < 2) {
+      return "";
+    }
+
+    return package_name_generator(
+               get_ordered_common_identifiers(common_identifiers))
+        .generate(any_domain_);
+  }
+
  private:
   std::vector<package_name_generator> pkg_generators_;
   std::string any_domain_ = kDefaultDomain;
+
+  std::vector<std::string> find_matching_identifiers(
+      std::vector<std::string> ns1, std::vector<std::string> ns2) const {
+    std::vector<std::string> matches;
+
+    // `set_intersection` requires sorted lists
+    std::sort(ns1.begin(), ns1.end());
+    std::sort(ns2.begin(), ns2.end());
+
+    std::set_intersection(
+        ns1.begin(),
+        ns1.end(),
+        ns2.begin(),
+        ns2.end(),
+        std::back_inserter(matches));
+
+    return matches;
+  }
+
+  /*
+   * The sequence of identifiers as they are in the source namespace is lost
+   * while generating common identifiers. Hence we need to re-order them.
+   */
+  std::vector<std::string> get_ordered_common_identifiers(
+      const std::vector<std::string>& common_identifiers) const {
+    std::vector<std::string> ordered_identifiers;
+
+    // Common identifiers are present in all the namespaces,
+    // so use any namespace to derive the original order.
+
+    for (auto& identifier : pkg_generators_.begin()->get_path_components()) {
+      if (std::find(
+              common_identifiers.begin(),
+              common_identifiers.end(),
+              identifier) != common_identifiers.end()) {
+        ordered_identifiers.push_back(identifier);
+      }
+    }
+    return ordered_identifiers;
+  }
 };
 } // namespace codemod
 } // namespace compiler

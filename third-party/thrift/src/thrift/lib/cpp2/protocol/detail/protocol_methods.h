@@ -323,9 +323,11 @@ struct protocol_methods;
   }                                                                          \
   template <typename Protocol, typename Context>                             \
   static void readWithContext(Protocol& protocol, Type& out, Context& ctx) { \
-    folly::if_constexpr<Context::kAcceptsContext>(                           \
-        [&](auto& p) { p.read##Method##WithContext(out, ctx); },             \
-        [&](auto& p) { p.read##Method(out); })(protocol);                    \
+    if constexpr (Context::kAcceptsContext) {                                \
+      protocol.read##Method##WithContext(out, ctx);                          \
+    } else {                                                                 \
+      protocol.read##Method(out);                                            \
+    }                                                                        \
   }                                                                          \
   template <typename Protocol>                                               \
   static std::size_t write(Protocol& protocol, const Type& in) {             \
@@ -369,9 +371,11 @@ THRIFT_PROTOCOL_METHODS_REGISTER_OVERLOAD(integral, std::int64_t, I64);
   template <typename Protocol, typename Context>                             \
   static void readWithContext(Protocol& protocol, Type& out, Context& ctx) { \
     SignedType tmp;                                                          \
-    folly::if_constexpr<Context::kAcceptsContext>(                           \
-        [&](auto& p) { p.read##Method##WithContext(tmp, ctx); },             \
-        [&](auto& p) { p.read##Method(tmp); })(protocol);                    \
+    if constexpr (Context::kAcceptsContext) {                                \
+      protocol.read##Method##WithContext(tmp, ctx);                          \
+    } else {                                                                 \
+      protocol.read##Method(tmp);                                            \
+    }                                                                        \
     out = folly::to_unsigned(tmp);                                           \
   }                                                                          \
   template <typename Protocol>                                               \

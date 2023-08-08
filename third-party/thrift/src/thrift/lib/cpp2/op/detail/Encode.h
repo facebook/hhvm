@@ -341,10 +341,12 @@ struct SerializedSize<ZeroCopy, type::cpp_type<T, Tag>>
     : SerializedSize<ZeroCopy, Tag> {
   template <typename Protocol, typename U>
   uint32_t operator()(Protocol& prot, const U& m) const {
-    auto f = folly::if_constexpr<kIsStrongType<U, Tag>>(
-        [](auto& v) { return static_cast<type::native_type<Tag>>(v); },
-        folly::identity);
-    return SerializedSize<ZeroCopy, Tag>{}(prot, f(m));
+    if constexpr (kIsStrongType<U, Tag>) {
+      return SerializedSize<ZeroCopy, Tag>{}(
+          prot, static_cast<type::native_type<Tag>>(m));
+    } else {
+      return SerializedSize<ZeroCopy, Tag>{}(prot, m);
+    }
   }
 };
 
@@ -526,9 +528,11 @@ struct Encode<type::struct_t<T>> {
         (std::is_same<Protocol, SimpleJSONProtocolWriter>::value &&
          decltype(apache::thrift::detail::st::struct_private_access::
                       __fbthrift_cpp2_gen_json<T>())::value);
-    return folly::if_constexpr<useWrite>(
-        [&](const auto& s) { return s.write(&prot); },
-        [&](const auto& s) { return StructEncode<T>{}(prot, s); })(t);
+    if constexpr (useWrite) {
+      return t.write(&prot);
+    } else {
+      return StructEncode<T>{}(prot, t);
+    }
   }
 };
 
@@ -614,10 +618,11 @@ template <typename T, typename Tag>
 struct CppTypeEncode {
   template <class Protocol, class U>
   uint32_t operator()(Protocol& prot, const U& m) const {
-    auto f = folly::if_constexpr<kIsStrongType<U, Tag>>(
-        [](auto& v) { return static_cast<type::native_type<Tag>>(v); },
-        folly::identity);
-    return Encode<Tag>{}(prot, f(m));
+    if constexpr (kIsStrongType<U, Tag>) {
+      return Encode<Tag>{}(prot, static_cast<type::native_type<Tag>>(m));
+    } else {
+      return Encode<Tag>{}(prot, m);
+    }
   }
 };
 
@@ -796,13 +801,11 @@ using emplace_hint_t = decltype(FOLLY_DECLVAL(Container).emplace_hint(
     FOLLY_DECLVAL(Container).end(), FOLLY_DECLVAL(Args)...));
 template <typename Container, typename... Args>
 auto emplace_at_end(Container& container, Args&&... args) {
-  return folly::if_constexpr<
-      folly::is_detected_v<emplace_hint_t, Container&, Args&&...>>(
-      [&](auto& c) {
-        return c.emplace_hint(c.end(), std::forward<Args>(args)...);
-      },
-      [&](auto& c) { return c.emplace(std::forward<Args>(args)...).first; })(
-      container);
+  if constexpr (folly::is_detected_v<emplace_hint_t, Container&, Args&&...>) {
+    return container.emplace_hint(container.end(), std::forward<Args>(args)...);
+  } else {
+    return container.emplace(std::forward<Args>(args)...).first;
+  }
 }
 
 template <typename Tag>
@@ -993,15 +996,14 @@ struct Decode<type::map<Key, Value>> {
 template <typename T, typename Tag>
 struct Decode<type::cpp_type<T, Tag>> : Decode<Tag> {
   template <class Protocol, class U>
-  std::enable_if_t<kIsIntegral<U, Tag>> operator()(Protocol& prot, U& m) const {
-    type::native_type<Tag> i;
-    Decode<Tag>::operator()(prot, i);
-    m = static_cast<U>(i);
-  }
-  template <class Protocol, class U>
-  std::enable_if_t<!kIsIntegral<U, Tag>> operator()(
-      Protocol& prot, U& m) const {
-    Decode<Tag>::operator()(prot, m);
+  void operator()(Protocol& prot, U& m) const {
+    if constexpr (kIsIntegral<U, Tag>) {
+      type::native_type<Tag> i;
+      Decode<Tag>::operator()(prot, i);
+      m = static_cast<U>(i);
+    } else {
+      Decode<Tag>::operator()(prot, m);
+    }
   }
 };
 
@@ -1027,18 +1029,14 @@ struct Decode<type::adapted<Adapter, Tag>> {
         [&](auto...) {
           constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::
               has_inplace_toThrift<Adapter, folly::remove_cvref_t<U>>::value;
-          folly::if_constexpr<hasInplaceToThrift>(
-              [&](auto tag) {
-                using T = decltype(tag);
-                adapter_clear<Adapter, Tag, U>(m);
-                Decode<T>{}(prot, Adapter::toThrift(m));
-              },
-              [&](auto tag) {
-                using T = decltype(tag);
-                type::native_type<T> orig;
-                Decode<T>{}(prot, orig);
-                m = Adapter::fromThrift(std::move(orig));
-              })(Tag{});
+          if constexpr (hasInplaceToThrift) {
+            adapter_clear<Adapter, Tag, U>(m);
+            Decode<Tag>{}(prot, Adapter::toThrift(m));
+          } else {
+            type::native_type<Tag> orig;
+            Decode<Tag>{}(prot, orig);
+            m = Adapter::fromThrift(std::move(orig));
+          }
         })(Adapter{});
   }
 };

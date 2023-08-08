@@ -1050,7 +1050,7 @@ class t_hack_generator : public t_concat_generator {
   }
 
   bool is_client_only_function(const t_function* func) {
-    return func->returns_stream() || func->returns_sink();
+    return func->stream() || func->returns_sink();
   }
 
   std::vector<const t_service*> get_interactions(
@@ -6052,7 +6052,7 @@ void t_hack_generator::generate_service_interactions(
 void t_hack_generator::generate_php_function_helpers(
     const t_service* tservice, const t_function* tfunction) {
   const std::string& service_name = tservice->name();
-  if (tfunction->returns_stream()) {
+  if (tfunction->stream()) {
     generate_php_stream_function_helpers(tfunction, service_name);
     return;
   } else if (tfunction->returns_sink()) {
@@ -6196,7 +6196,7 @@ void t_hack_generator::generate_php_interaction_function_helpers(
     const t_service* interaction,
     const t_function* tfunction) {
   const std::string& prefix = tservice->name() + "_" + interaction->name();
-  if (tfunction->returns_stream()) {
+  if (tfunction->stream()) {
     generate_php_stream_function_helpers(tfunction, prefix);
     return;
   } else if (tfunction->returns_sink()) {
@@ -7194,7 +7194,7 @@ void t_hack_generator::_generate_service_client_child_fn(
     const t_service* tservice,
     const t_function* tfunction,
     bool legacy_arrays) {
-  if (tfunction->returns_stream()) {
+  if (tfunction->stream()) {
     _generate_service_client_stream_child_fn(
         out, tservice, tfunction, legacy_arrays);
     return;

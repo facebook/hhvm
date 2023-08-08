@@ -64,7 +64,7 @@ This is the equivalent of CythonCpp[Basic]Type, for use as part of an identifier
   }}{{/type:stream_has_first_response?}}{{!
   }}{{^type:stream_has_first_response?}}cServerStream__{{!
   }}{{/type:stream_has_first_response?}}{{!
-  }}{{#type:stream_elem_type}}{{ >types/cython_cpp_type_ident}}{{/type:stream_elem_type}}{{!
+  }}{{#function:stream_elem_type}}{{ >types/cython_cpp_type_ident}}{{/function:stream_elem_type}}{{!
 }}{{/type:streamresponse?}}{{!
 }}{{#type:void?}}cFollyUnit{{/type:void?}}{{!
 }}{{/type:hasCustomType?}}

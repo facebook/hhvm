@@ -104,9 +104,9 @@ async def {{service:name}}_{{function:name}}_coro(
         if not isinstance(result, (ServerStream, AsyncIterator)):
             result = await result
         if isinstance(result, AsyncIterator):
-            {{#type:stream_elem_type}}
+            {{#function:stream_elem_type}}
             result = ServerStream_{{> types/cython_cpp_type_ident}}._fbthrift_create(cmove(createAsyncIteratorFromPyIterator[{{ >types/cython_cpp_type}}](result, get_executor(), &getNextGenerator_{{service:name}}_{{function:name}})))
-            {{/type:stream_elem_type}}
+            {{/function:stream_elem_type}}
         {{/type:streamresponse?}}
         {{/function:return_type}}
     {{#function:exceptions}}

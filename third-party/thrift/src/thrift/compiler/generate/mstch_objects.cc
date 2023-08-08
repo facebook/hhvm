@@ -202,16 +202,6 @@ mstch::node mstch_type::get_sink_first_response_type() {
   return mstch::node();
 }
 
-mstch::node mstch_type::get_stream_elem_type() {
-  if (type_->is_streamresponse()) {
-    return context_.type_factory->make_mstch_object(
-        dynamic_cast<const t_stream_response*>(type_)->get_elem_type(),
-        context_,
-        pos_);
-  }
-  return mstch::node();
-}
-
 mstch::node mstch_type::get_stream_first_response_type() {
   if (resolved_type_->is_streamresponse()) {
     if (const auto streamresponse =
@@ -512,7 +502,7 @@ const std::vector<const t_field*>& mstch_struct::get_members_in_key_order() {
 
 mstch::node mstch_function::return_type() {
   return context_.type_factory->make_mstch_object(
-      function_->get_returntype(), context_, pos_);
+      function_->get_return_type(), context_, pos_);
 }
 
 mstch::node mstch_function::exceptions() {
@@ -537,7 +527,15 @@ mstch::node mstch_function::arg_list() {
 }
 
 mstch::node mstch_function::returns_stream() {
-  return function_->returns_stream();
+  return function_->stream() != nullptr;
+}
+
+mstch::node mstch_function::stream_elem_type() {
+  if (const t_stream_response* stream = function_->stream()) {
+    return context_.type_factory->make_mstch_object(
+        stream->get_elem_type(), context_, pos_);
+  }
+  return mstch::node();
 }
 
 mstch::node mstch_service::functions() {

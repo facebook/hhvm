@@ -251,7 +251,7 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
 
   private static final com.facebook.thrift.payload.Reader _{{function:javaName}}_READER = {{!
     }}{{#function:voidType}}Readers.voidReader(){{/function:voidType}}{{!
-    }}{{^function:voidType}}{{#function:return_type}}{{#type:stream_elem_type}}{{> TypeReader }}{{/type:stream_elem_type}}{{/function:return_type}}{{/function:voidType}};
+    }}{{^function:voidType}}{{#function:return_type}}{{#function:stream_elem_type}}{{> TypeReader }}{{/function:stream_elem_type}}{{/function:return_type}}{{/function:voidType}};
 
   {{#function:return_type}}{{#type:stream_has_first_response?}}
   private static final com.facebook.thrift.payload.Reader _{{function:javaName}}_FIRST_READER = {{!
@@ -270,7 +270,7 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
                 .setProtocol(_protocolId)
                 .build();
 
-            com.facebook.thrift.payload.ClientRequestPayload<{{#function:return_type}}{{#type:stream_elem_type}}{{> BoxedType}}{{/type:stream_elem_type}}{{/function:return_type}}> _crp =
+            com.facebook.thrift.payload.ClientRequestPayload<{{#function:return_type}}{{#function:stream_elem_type}}{{> BoxedType}}{{/function:stream_elem_type}}{{/function:return_type}}> _crp =
                 com.facebook.thrift.payload.ClientRequestPayload.create(
                     "{{service:name}}",
                     _create{{function:javaName}}Writer({{#function:args}}{{field:javaName}}{{^last?}}, {{/last?}}{{/function:args}}),
@@ -541,7 +541,7 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
 
     private final com.facebook.thrift.payload.Reader _{{function:javaName}}_READER = {{!
       }}{{#function:voidType}}Readers.voidReader(){{/function:voidType}}{{!
-      }}{{^function:voidType}}{{#function:return_type}}{{#type:stream_elem_type}}{{> TypeReader }}{{/type:stream_elem_type}}{{/function:return_type}}{{/function:voidType}};
+      }}{{^function:voidType}}{{#function:return_type}}{{#function:stream_elem_type}}{{> TypeReader }}{{/function:stream_elem_type}}{{/function:return_type}}{{/function:voidType}};
 
     {{#function:return_type}}{{#type:stream_has_first_response?}}
     private final com.facebook.thrift.payload.Reader _{{function:javaName}}_FIRST_READER = {{!
@@ -574,7 +574,7 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
           }
 
 
-          com.facebook.thrift.payload.ClientRequestPayload<{{#function:return_type}}{{#type:stream_elem_type}}{{> BoxedType}}{{/type:stream_elem_type}}{{/function:return_type}}> _crp =
+          com.facebook.thrift.payload.ClientRequestPayload<{{#function:return_type}}{{#function:stream_elem_type}}{{> BoxedType}}{{/function:stream_elem_type}}{{/function:return_type}}> _crp =
               com.facebook.thrift.payload.ClientRequestPayload.create(
                   "{{service:name}}",
                   _create{{function:javaName}}Writer({{#function:args}}{{field:javaName}}{{^last?}}, {{/last?}}{{/function:args}}),

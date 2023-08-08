@@ -39,7 +39,7 @@ typedef apache::thrift::ThriftPResultSink<
 typedef apache::thrift::ThriftPResultStream<
     apache::thrift::ThriftPresult<true<%#type:stream_first_response_type%><% > service_tcc/field_data_return%><%/type:stream_first_response_type%><%!
       %><%#function:exceptions%><% > service_tcc/field_data_throws%><%/function:exceptions%>>,
-    apache::thrift::ThriftPresult<true<%#type:stream_elem_type%><% > service_tcc/field_data_return%><%/type:stream_elem_type%><%!
+    apache::thrift::ThriftPresult<true<%#function:stream_elem_type%><% > service_tcc/field_data_return%><%/function:stream_elem_type%><%!
       %><%#function:stream_exceptions%><% > service_tcc/field_data_throws%><%/function:stream_exceptions%>>
     > <%service:parent_service_cpp_name%>_<%#service:interaction?%><%service:cpp_name%>_<%/service:interaction?%><%function:cpp_name%>_presult;
 <%/type:streamresponse?%>

@@ -24,6 +24,7 @@
 #include <thrift/compiler/ast/t_named.h>
 #include <thrift/compiler/ast/t_node.h>
 #include <thrift/compiler/ast/t_paramlist.h>
+#include <thrift/compiler/ast/t_stream.h>
 #include <thrift/compiler/ast/t_throws.h>
 #include <thrift/compiler/ast/t_type.h>
 
@@ -68,11 +69,8 @@ class t_function final : public t_named {
         paramlist_(std::make_unique<t_paramlist>(program)) {}
 
   t_type_ref return_type() const {
-    if (sink_or_stream_) {
-      return t_type_ref::from_ptr(sink_or_stream_.get());
-    }
     return response_pos_ != -1 ? return_types_[response_pos_]
-                               : t_type_ref::none();
+                               : t_type_ref::from_ptr(sink_or_stream_.get());
   }
   void set_return_type(t_type_ref ret) {
     response_pos_ = return_types_.size();
@@ -85,8 +83,8 @@ class t_function final : public t_named {
   bool returns_sink() const {
     return sink_or_stream_ && sink_or_stream_->is_sink();
   }
-  bool returns_stream() const {
-    return sink_or_stream_ && sink_or_stream_->is_streamresponse();
+  const t_stream_response* stream() const {
+    return dynamic_cast<const t_stream_response*>(sink_or_stream_.get());
   }
 
   t_paramlist& params() { return *paramlist_; }

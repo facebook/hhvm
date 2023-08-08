@@ -17,10 +17,10 @@
 %><%#type:streamresponse?%><%!
   %><%#type:stream_has_first_response?%>apache::thrift::ResponseAndClientBufferedStream<<%!
   %><%#type:stream_first_response_type%><%type:cpp_type%><%/type:stream_first_response_type%>,<%!
-  %><%#type:stream_elem_type%><%type:cpp_type%><%/type:stream_elem_type%>><%!
+  %><%#function:stream_elem_type%><%type:cpp_type%><%/function:stream_elem_type%>><%!
   %><%/type:stream_has_first_response?%><%!
   %><%^type:stream_has_first_response?%>apache::thrift::ClientBufferedStream<<%!
-  %><%#type:stream_elem_type%><%type:cpp_type%><%/type:stream_elem_type%>><%!
+  %><%#function:stream_elem_type%><%type:cpp_type%><%/function:stream_elem_type%>><%!
   %><%/type:stream_has_first_response?%><%!
 %><%/type:streamresponse?%><%!
 

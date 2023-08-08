@@ -25,7 +25,7 @@ Used to turn a thrift type into a gen_metadata call
 }}{{#type:set?}}{{#type:set_elem_type}}{{> metadata/recursive_call }}{{/type:set_elem_type}}{{/type:set?}}{{!
 }}{{#type:map?}}{{#type:key_type}}{{> metadata/recursive_call }}{{/type:key_type}} # key
     {{#type:value_type}}{{> metadata/recursive_call }}{{/type:value_type}} # val {{/type:map?}}{{!
-}}{{#type:streamresponse?}}{{#type:stream_elem_type}}{{> metadata/recursive_call }}{{/type:stream_elem_type}} # elem
+}}{{#type:streamresponse?}}{{#function:stream_elem_type}}{{> metadata/recursive_call }}{{/function:stream_elem_type}} # elem
     {{#type:stream_first_response_type}}{{> metadata/recursive_call }}{{/type:stream_first_response_type}} # response {{/type:streamresponse?}}{{!
 }}{{#type:sink?}}{{#type:sink_elem_type}}{{> metadata/recursive_call }}{{/type:sink_elem_type}} # elem
     {{#type:sink_final_response_type}}{{> metadata/recursive_call }}{{/type:sink_final_response_type}} # final response

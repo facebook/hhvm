@@ -64,7 +64,7 @@ Used to turn a type into a thrift metadata ThriftType struct
     }}{{/type:sink?}}{{!
     }}{{#type:streamresponse?}}{{!
         }}_fbthrift_metadata.ThriftType(t_stream=_fbthrift_metadata.ThriftStreamType({{!
-        }}elemType={{#type:stream_elem_type}}{{> metadata/thrift_type }}{{/type:stream_elem_type}}{{!
+        }}elemType={{#function:stream_elem_type}}{{> metadata/thrift_type }}{{/function:stream_elem_type}}{{!
         }}{{#type:stream_has_first_response?}},initialResponseType={{#type:stream_first_response_type}}{{> metadata/thrift_type }}{{/type:stream_first_response_type}}{{/type:stream_has_first_response?}})){{!
     }}{{/type:streamresponse?}}{{!
     }}{{#type:enum}}{{!

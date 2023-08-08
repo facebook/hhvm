@@ -287,20 +287,20 @@ cdef class ServerStream__{{type:flat_name}}(ServerStream):
     pass
 
 {{/program:stream_types}}
-{{#program:response_and_stream_types}}
+{{#program:response_and_stream_functions}}{{#function:return_type}}
 
 cdef class ResponseAndClientBufferedStream__{{> stream/response_class_name_suffix}}(ResponseAndClientBufferedStream):
-    cdef ClientBufferedStream__{{#type:stream_elem_type}}{{type:flat_name}}{{/type:stream_elem_type}} _stream
+    cdef ClientBufferedStream__{{#function:stream_elem_type}}{{type:flat_name}}{{/function:stream_elem_type}} _stream
     cdef {{#type:stream_first_response_type}}{{ > types/cython_python_type}}{{/type:stream_first_response_type}} _response
 
     @staticmethod
     cdef _fbthrift_create(cResponseAndClientBufferedStream[{{!
         }}{{#type:stream_first_response_type}}{{ > types/cython_cpp_type}}{{/type:stream_first_response_type}}, {{!
-        }}{{#type:stream_elem_type}}{{ > types/cython_cpp_type}}{{/type:stream_elem_type}}]& c_obj, __RpcOptions rpc_options)
+        }}{{#function:stream_elem_type}}{{ > types/cython_cpp_type}}{{/function:stream_elem_type}}]& c_obj, __RpcOptions rpc_options)
 
 
 cdef class ResponseAndServerStream__{{> stream/response_class_name_suffix}}(ResponseAndServerStream):
     pass
 
-{{/program:response_and_stream_types}}
+{{/function:return_type}}{{/program:response_and_stream_functions}}
 {{/program:has_stream?}}

@@ -2558,7 +2558,7 @@ void t_mstch_cpp2_generator::generate_inline_services(
       {"any_sinks?",
        any_service_has_any_function(std::mem_fn(&t_function::returns_sink))},
       {"any_streams?",
-       any_service_has_any_function(std::mem_fn(&t_function::returns_stream))},
+       any_service_has_any_function(std::mem_fn(&t_function::stream))},
       {"any_interactions?",
        any_service_has_any_function([](const t_function& func) {
          return func.is_interaction_constructor() ||

@@ -17,9 +17,9 @@
 }}{{#type:streamresponse?}}{{!
     }}{{#type:stream_has_first_response?}}com.facebook.thrift.model.StreamResponse<{{!
     }}{{#type:stream_first_response_type}}{{ >BoxedType}}{{/type:stream_first_response_type}},{{!
-    }}{{#type:stream_elem_type}}{{ >BoxedType}}{{/type:stream_elem_type}}>{{!
+    }}{{#function:stream_elem_type}}{{ >BoxedType}}{{/function:stream_elem_type}}>{{!
     }}{{/type:stream_has_first_response?}}{{!
     }}{{^type:stream_has_first_response?}}{{!
-    }}{{#type:stream_elem_type}}com.facebook.thrift.model.StreamResponse<Void, {{ >BoxedType}}>{{/type:stream_elem_type}}{{!
+    }}{{#function:stream_elem_type}}com.facebook.thrift.model.StreamResponse<Void, {{ >BoxedType}}>{{/function:stream_elem_type}}{{!
     }}{{/type:stream_has_first_response?}}{{!
 }}{{/type:streamresponse?}}

@@ -143,7 +143,7 @@ cdef class ServerStream_{{> types/cython_cpp_type_ident}}(ServerStream):
 {{#service:supportedFunctions}}
 {{#function:return_type}}
 {{#type:streamresponse?}}
-{{#type:stream_elem_type}}
+{{#function:stream_elem_type}}
 async def runGenerator_{{service:name}}_{{function:name}}(object generator, Promise_{{> types/cython_cpp_type_ident}}_Stream promise):
     try:
         item = await generator.asend(None)
@@ -185,7 +185,7 @@ cdef void getNextGenerator_{{service:name}}_{{function:name}}(object generator, 
             __promise
         )
     )
-{{/type:stream_elem_type}}
+{{/function:stream_elem_type}}
 {{/type:streamresponse?}}
 {{/function:return_type}}
 {{/service:supportedFunctions}}
@@ -232,7 +232,7 @@ cdef class {{service:name}}Interface(
 
     @staticmethod
     def createPublisher_{{function:name}}(callback=None):
-        {{#type:stream_elem_type}}
+        {{#function:stream_elem_type}}
         cdef unique_ptr[pair[cServerStream[{{> types/cython_cpp_type}}], {{!
         }}cServerStreamPublisher[{{> types/cython_cpp_type}}]]] streams = {{!
         }}make_unique[pair[cServerStream[{{> types/cython_cpp_type}}], {{!
@@ -241,7 +241,7 @@ cdef class {{service:name}}Interface(
 
         return (ServerStream_{{> types/cython_cpp_type_ident}}._fbthrift_create(cmove(deref(streams).first)), {{!
         }}ServerPublisher_{{> types/cython_cpp_type_ident}}._fbthrift_create(cmove(deref(streams).second)))
-        {{/type:stream_elem_type}}
+        {{/function:stream_elem_type}}
     {{/type:streamresponse?}}
     {{/function:return_type}}
 {{/service:supportedFunctions}}

@@ -688,7 +688,7 @@ class python_mstch_service : public mstch_service {
   mstch::node supported_service_functions() {
     return make_mstch_functions(
         get_supported_functions([](const t_function* func) -> bool {
-          return !func->returns_stream() && !func->returns_sink() &&
+          return !func->stream() && !func->returns_sink() &&
               !func->get_returntype()->is_service();
         }));
   }
@@ -812,7 +812,7 @@ class python_mstch_function : public mstch_function {
   }
 
   mstch::node async_only() {
-    return function_->returns_stream() || function_->returns_sink() ||
+    return function_->stream() || function_->returns_sink() ||
         function_->get_returntype()->is_service() ||
         function_->is_interaction_member() ||
         !function_->returned_interaction().empty();

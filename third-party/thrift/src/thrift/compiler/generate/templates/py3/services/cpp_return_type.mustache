@@ -21,7 +21,7 @@ Cpp type for return_type in services
     }}{{#type:stream_first_response_type}}{{ >types/cpp_value_type}}{{/type:stream_first_response_type}},{{!
   }}{{/type:stream_has_first_response?}}{{!
   }}{{^type:stream_has_first_response?}}apache::thrift::ServerStream<{{/type:stream_has_first_response?}}{{!
-  }}{{#type:stream_elem_type}}{{ >types/cpp_value_type}}{{/type:stream_elem_type}}>{{!
+  }}{{#function:stream_elem_type}}{{ >types/cpp_value_type}}{{/function:stream_elem_type}}>{{!
 }}{{/type:streamresponse?}}{{!
 }}{{^type:streamresponse?}}{{!
   }}{{^function:stack_arguments?}}{{> types/cpp_arg_type}}{{/function:stack_arguments?}}{{!

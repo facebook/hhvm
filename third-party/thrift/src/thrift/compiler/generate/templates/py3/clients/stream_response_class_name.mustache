@@ -22,5 +22,5 @@ Stream response class name.
 }}ResponseAndClientBufferedStream__{{> stream/response_class_name_suffix}}{{!
 }}{{/type:stream_has_first_response?}}{{!
 }}{{^type:stream_has_first_response?}}{{!
-}}ClientBufferedStream__{{#type:stream_elem_type}}{{type:flat_name}}{{/type:stream_elem_type}}{{!
+}}ClientBufferedStream__{{#function:stream_elem_type}}{{type:flat_name}}{{/function:stream_elem_type}}{{!
 }}{{/type:stream_has_first_response?}}

@@ -875,7 +875,7 @@ void validate_stream_exceptions_return_type(
     return;
   }
 
-  if (!node.returns_stream()) {
+  if (!node.stream()) {
     ctx.error("`stream throws` only valid on stream methods: {}", node.name());
   }
 }

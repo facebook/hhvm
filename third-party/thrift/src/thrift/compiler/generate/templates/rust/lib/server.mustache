@@ -321,7 +321,7 @@ where
                 {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn::ApplicationException(aexn)
             }
         };
-        {{^function:returns_streams?}}
+        {{^function:returns_stream?}}
 
         let env = ::fbthrift::help::serialize_result_envelope::<P, R, _>(
             "{{function:name}}",
@@ -333,8 +333,8 @@ where
         )?;
         reply_state.lock().unwrap().send_reply(env);
         Ok(())
-        {{/function:returns_streams?}}
-        {{#function:returns_streams?}}
+        {{/function:returns_stream?}}
+        {{#function:returns_stream?}}
 
         use ::futures::StreamExt as _;
 
@@ -416,7 +416,7 @@ where
 
         let _ = reply_state.lock().unwrap().send_stream_reply(response, stream, P::PROTOCOL_ID);
         Ok(())
-        {{/function:returns_streams?}}
+        {{/function:returns_stream?}}
     }{{!
     }}{{/function:starts_interaction?}}{{#function:starts_interaction?}}
 

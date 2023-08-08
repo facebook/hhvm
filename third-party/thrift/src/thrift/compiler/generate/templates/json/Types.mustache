@@ -35,9 +35,9 @@
 }{{/type:sink?}}{{!
 }}{{#type:streamresponse?}}{
   "type" : "streamresponse",
-{{#type:stream_elem_type}}
+{{#function:stream_elem_type}}
   "inner_type" : {{> Types}}{{!
-}}{{/type:stream_elem_type}}{{!
+}}{{/function:stream_elem_type}}{{!
 }}{{#type:stream_has_first_response?}},
 {{#type:stream_first_response_type}}
   "first_response_type" : {{> Types}}

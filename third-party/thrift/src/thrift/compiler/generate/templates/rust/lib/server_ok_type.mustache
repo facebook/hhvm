@@ -15,16 +15,16 @@
   limitations under the License.
 
 }}{{!
-}}{{#function:returns_streams?}}
+}}{{#function:returns_stream?}}
 {{#function:stream_has_first_response?}}
 (
     {{#function:return_type}}{{#type:stream_first_response_type}}{{>lib/type}}{{/type:stream_first_response_type}}{{/function:return_type}},
     {{/function:stream_has_first_response?}}
-    ::futures::stream::BoxStream<'static, ::std::result::Result<{{#function:return_type}}{{#type:stream_elem_type}}{{>lib/type}}{{/type:stream_elem_type}}{{/function:return_type}}, {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}StreamExn>>
+    ::futures::stream::BoxStream<'static, ::std::result::Result<{{#function:stream_elem_type}}{{>lib/type}}{{/function:stream_elem_type}}, {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}StreamExn>>
     {{#function:stream_has_first_response?}}
 )
 {{/function:stream_has_first_response?}}
-{{/function:returns_streams?}}
-{{^function:returns_streams?}}
+{{/function:returns_stream?}}
+{{^function:returns_stream?}}
 {{#function:return_type}}{{>lib/type}}{{/function:return_type}}
-{{/function:returns_streams?}}
+{{/function:returns_stream?}}

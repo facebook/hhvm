@@ -544,7 +544,7 @@ class pyi_mstch_function : public mstch_function {
     // Stream and sink functions are not supported, see
     // t_py_generator::get_functions.
     return (
-        !mstch_function::function_->returns_stream() &&
+        !mstch_function::function_->stream() &&
         !mstch_function::function_->returns_sink() &&
         !mstch_function::function_->get_returntype()->is_service());
   }

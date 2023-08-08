@@ -23,8 +23,8 @@ thrift-py3 specific container types.
 }}{{#type:streamresponse?}}{{!
 }}{{#type:stream_has_first_response?}}_typing.Tuple[{{#type:stream_first_response_type}}{{!
 }}{{> types/pep484_type}}, {{/type:stream_first_response_type}}{{/type:stream_has_first_response?}}{{!
-}}_typing.Union[_typing.Awaitable[_typing.AsyncGenerator[{{#type:stream_elem_type}}{{> types/pep484_type}}{{/type:stream_elem_type}}, None]],{{!
-}}_typing.AsyncGenerator[{{#type:stream_elem_type}}{{> types/pep484_type}}{{/type:stream_elem_type}}, None]]{{!
+}}_typing.Union[_typing.Awaitable[_typing.AsyncGenerator[{{#function:stream_elem_type}}{{> types/pep484_type}}{{/function:stream_elem_type}}, None]],{{!
+}}_typing.AsyncGenerator[{{#function:stream_elem_type}}{{> types/pep484_type}}{{/function:stream_elem_type}}, None]]{{!
 }}{{#type:stream_has_first_response?}}]{{/type:stream_has_first_response?}}{{!
 }}{{/type:streamresponse?}}{{!
 }}{{^type:streamresponse?}}{{!

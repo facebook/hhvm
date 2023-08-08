@@ -37,10 +37,10 @@ public class {{service:javaCapitalName}}RpcServerHandler {{#service:extends}} ex
   private final java.util.List<com.facebook.thrift.payload.Reader> _{{function:javaName}}Readers;
   private final com.facebook.thrift.server.generated.SingleRequestStreamResponseDelegate<{{#function:return_type}}{{> StreamReturnType}}{{/function:return_type}}> _delegate_{{function:javaName}};
   {{^function:stream_has_first_response?}}
-  private final com.facebook.thrift.server.generated.StreamResponseHandler<{{#function:return_type}}{{#type:stream_elem_type}}{{> BoxedType}}{{/type:stream_elem_type}}{{/function:return_type}}> _handler_{{function:javaName}};
+  private final com.facebook.thrift.server.generated.StreamResponseHandler<{{#function:return_type}}{{#function:stream_elem_type}}{{> BoxedType}}{{/function:stream_elem_type}}{{/function:return_type}}> _handler_{{function:javaName}};
   {{/function:stream_has_first_response?}}
   {{#function:stream_has_first_response?}}
-  private final com.facebook.thrift.server.generated.StreamWithFirstResponseHandler<{{#function:return_type}}{{#type:stream_first_response_type}}{{> BoxedType}}{{/type:stream_first_response_type}},{{#type:stream_elem_type}}{{> BoxedType}}{{/type:stream_elem_type}}{{/function:return_type}}> _handler_{{function:javaName}};
+  private final com.facebook.thrift.server.generated.StreamWithFirstResponseHandler<{{#function:return_type}}{{#type:stream_first_response_type}}{{> BoxedType}}{{/type:stream_first_response_type}},{{#function:stream_elem_type}}{{> BoxedType}}{{/function:stream_elem_type}}{{/function:return_type}}> _handler_{{function:javaName}};
   {{/function:stream_has_first_response?}}
   {{/service:streamingFunctions}}
 
@@ -131,10 +131,10 @@ public class {{service:javaCapitalName}}RpcServerHandler {{#service:extends}} ex
         {{function:unsetIsNested}}
         {{^function:voidType}}
         {{#function:return_type}}
-        {{#type:stream_elem_type}}
+        {{#function:stream_elem_type}}
         {{> Type}} _iter0 = ({{> Type}})_o;
         {{function:nestedDepth++}}{{> WriteResponseType}}{{function:nestedDepth--}}
-        {{/type:stream_elem_type}}
+        {{/function:stream_elem_type}}
         oprot.writeFieldEnd();
         {{/function:return_type}}
         {{/function:voidType}}

@@ -22,7 +22,7 @@ Cython type for return_type in services
   }}{{/type:stream_has_first_response?}}{{!
   }}{{^type:stream_has_first_response?}}cClientBufferedStream[{{!
   }}{{/type:stream_has_first_response?}}{{!
-  }}{{#type:stream_elem_type}}{{ >types/cython_cpp_type}}{{/type:stream_elem_type}}]{{!
+  }}{{#function:stream_elem_type}}{{ >types/cython_cpp_type}}{{/function:stream_elem_type}}]{{!
 }}{{/type:streamresponse?}}{{!
 }}{{^type:streamresponse?}}{{!
 }}{{> types/cython_cpp_type}}{{!

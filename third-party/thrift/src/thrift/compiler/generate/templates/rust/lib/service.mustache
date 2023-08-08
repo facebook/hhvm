@@ -28,7 +28,7 @@ pub mod {{service:snake}} {{>lib/block}}{{!
     #[derive(Clone, Debug)]
     pub enum {{function:upcamel}}StreamExn {
         #[doc(hidden)]
-        Success({{#function:return_type}}{{#type:stream_elem_type}}{{>lib/type}}{{/type:stream_elem_type}}{{/function:return_type}}),{{!
+        Success({{#function:stream_elem_type}}{{>lib/type}}{{/function:stream_elem_type}}),{{!
         }}{{#function:stream_exceptions}}
         {{field:rust_name}}({{#field:type}}{{>lib/type}}{{/field:type}}),{{!
         }}{{/function:stream_exceptions}}
@@ -136,7 +136,7 @@ pub mod {{service:snake}} {{>lib/block}}{{!
                 Self::Success(inner) => {
                     p.write_field_begin(
                         "Success",
-                        {{#function:return_type}}{{#type:stream_elem_type}}{{>lib/ttype}}{{/type:stream_elem_type}}{{/function:return_type}},
+                        {{#function:stream_elem_type}}{{>lib/ttype}}{{/function:stream_elem_type}},
                         0i16,
                     );
                     inner.write(p);
@@ -185,7 +185,7 @@ pub mod {{service:snake}} {{>lib/block}}{{!
                         p.read_field_end()?;
                         break;
                     }
-                    (({{#function:return_type}}{{#type:stream_elem_type}}{{>lib/ttype}}{{/type:stream_elem_type}}{{/function:return_type}}, 0i32), false) => {
+                    (({{#function:stream_elem_type}}{{>lib/ttype}}{{/function:stream_elem_type}}, 0i32), false) => {
                         once = true;
                         alt = {{!
                             }}{{^function:void_excluding_interaction?}}::std::option::Option::Some({{/function:void_excluding_interaction?}}{{!
@@ -579,7 +579,7 @@ pub mod {{service:snake}} {{>lib/block}}{{!
         const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
-    {{^function:returns_streams?}}
+    {{^function:returns_stream?}}
     impl<P> ::fbthrift::Serialize<P> for {{function:upcamel}}Exn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -618,9 +618,9 @@ pub mod {{service:snake}} {{>lib/block}}{{!
             p.write_struct_end();
         }
     }
-    {{/function:returns_streams?}}
+    {{/function:returns_stream?}}
 
-    {{^function:returns_streams?}}
+    {{^function:returns_stream?}}
     impl<P> ::fbthrift::Deserialize<P> for {{function:upcamel}}Exn
     where
         P: ::fbthrift::ProtocolReader,
@@ -694,7 +694,7 @@ pub mod {{service:snake}} {{>lib/block}}{{!
             }}{{/function:void_excluding_interaction?}}
         }
     }
-    {{/function:returns_streams?}}{{!
+    {{/function:returns_stream?}}{{!
     }}{{/function:starts_interaction?}}{{/service:rustFunctions}}
 }
 {{!newline}}

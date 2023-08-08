@@ -112,23 +112,13 @@ std::string get_cpp_template(const t_type& type) {
   return {};
 }
 
-const t_type* get_stream_first_response_type(const t_type& type) {
-  assert(type.is_streamresponse());
-  return dynamic_cast<const t_stream_response&>(type).get_first_response_type();
-}
-
-const t_type* get_stream_elem_type(const t_type& type) {
-  assert(type.is_streamresponse());
-  return dynamic_cast<const t_stream_response&>(type).get_elem_type();
-}
-
 bool is_hidden(const t_named& node) {
   return node.has_annotation("py3.hidden") ||
       node.find_structured_annotation_or_null(kPythonHiddenUri);
 }
 
 bool is_func_supported(bool no_stream, const t_function* func) {
-  return !is_hidden(*func) && !(no_stream && func->returns_stream()) &&
+  return !is_hidden(*func) && !(no_stream && func->stream()) &&
       !func->returns_sink() && !func->get_returntype()->is_service();
 }
 
@@ -161,8 +151,8 @@ class py3_mstch_program : public mstch_program {
              &py3_mstch_program::getMoveContainerTypes},
             {"program:has_stream?", &py3_mstch_program::hasStream},
             {"program:stream_types", &py3_mstch_program::getStreamTypes},
-            {"program:response_and_stream_types",
-             &py3_mstch_program::getResponseAndStreamTypes},
+            {"program:response_and_stream_functions",
+             &py3_mstch_program::response_and_stream_functions},
             {"program:stream_exceptions",
              &py3_mstch_program::getStreamExceptions},
             {"program:cpp_gen_path", &py3_mstch_program::getCppGenPath},
@@ -226,8 +216,8 @@ class py3_mstch_program : public mstch_program {
     return make_mstch_types(types);
   }
 
-  mstch::node getResponseAndStreamTypes() {
-    return make_mstch_types(responseAndStreamTypes_);
+  mstch::node response_and_stream_functions() {
+    return make_mstch_functions(response_and_stream_functions_);
   }
 
   mstch::node getStreamExceptions() {
@@ -314,24 +304,7 @@ class py3_mstch_program : public mstch_program {
         {{visit_type(return_type), sa}, function});
   }
 
-  void visit_type_single_service(const t_service* service) {
-    for (const auto& function : service->functions()) {
-      if (is_hidden(function)) {
-        continue;
-      }
-      for (const auto& field : function.get_paramlist()->fields()) {
-        visit_type(field.get_type());
-      }
-      for (const auto& field : function.get_stream_xceptions()->fields()) {
-        const t_type* exType = field.get_type();
-        streamExceptions_.emplace(visit_type(field.get_type()), exType);
-      }
-      for (const auto& field : function.get_xceptions()->fields()) {
-        visit_type(field.get_type());
-      }
-      addFunctionByUniqueReturnType(&function);
-    }
-  }
+  void visit_type_single_service(const t_service* service);
 
   void visit_types_for_services_and_interactions() {
     for (const auto* service : program_->services()) {
@@ -406,11 +379,13 @@ class py3_mstch_program : public mstch_program {
   std::map<std::string, Namespace> includeNamespaces_;
   std::map<std::tuple<std::string, bool>, const t_function*>
       uniqueFunctionsByReturnType_;
-  std::vector<const t_type*> responseAndStreamTypes_;
   std::map<std::string, const t_type*> streamTypes_;
   std::map<std::string, const t_type*> streamExceptions_;
   std::vector<const t_struct*> objects_;
   std::vector<const t_typedef*> typedefs_;
+
+  // Functions with a stream and an initial response.
+  std::vector<const t_function*> response_and_stream_functions_;
 };
 
 class py3_mstch_service : public mstch_service {
@@ -1075,19 +1050,7 @@ std::string py3_mstch_program::visit_type_with_typedef(
           "_" + visit_type_with_typedef(get_map_val_type(*trueType), isTypedef);
     } else if (trueType->is_binary()) {
       extra = "binary";
-    } else if (trueType->is_streamresponse()) {
-      const t_type* respType = get_stream_first_response_type(*trueType);
-      const t_type* elemType = get_stream_elem_type(*trueType);
-      if (respType) {
-        extra += "ResponseAndStream__" +
-            visit_type_with_typedef(respType, isTypedef) + "_";
-      } else {
-        extra = "Stream__";
-      }
-      const auto& elemTypeName = visit_type_with_typedef(elemType, isTypedef);
-      extra += elemTypeName;
-      streamTypes_.emplace(elemTypeName, elemType);
-    } else if (trueType->is_sink()) {
+    } else if (trueType->is_sink() || trueType->is_streamresponse()) {
       return "";
     } else {
       extra = trueType->get_name();
@@ -1114,10 +1077,6 @@ std::string py3_mstch_program::visit_type_with_typedef(
     }
     if (type->has_custom_cpp_type()) {
       customTypes_.push_back(trueType);
-    }
-    if (trueType->is_streamresponse() &&
-        get_stream_first_response_type(*trueType)) {
-      responseAndStreamTypes_.push_back(trueType);
     }
   }
   return flatName;
@@ -1207,6 +1166,46 @@ class enum_member_union_field_names_validator : virtual public validator {
     }
   }
 };
+
+void py3_mstch_program::visit_type_single_service(const t_service* service) {
+  for (const auto& function : service->functions()) {
+    if (is_hidden(function)) {
+      continue;
+    }
+
+    if (const t_stream_response* stream = function.stream()) {
+      std::string stream_name = "Stream__";
+      const t_type* resp_type = stream->get_first_response_type();
+      const t_type* elem_type = stream->get_elem_type();
+      if (resp_type) {
+        stream_name = "ResponseAndStream__" + visit_type(resp_type) + "_";
+      }
+      std::string elem_type_name = visit_type(elem_type);
+      stream_name += elem_type_name;
+      auto base_type =
+          context_.type_factory->make_mstch_object(stream, context_);
+      py3_mstch_type* type = dynamic_cast<py3_mstch_type*>(base_type.get());
+      type->set_flat_name(stream_name);
+      streamTypes_.emplace(elem_type_name, elem_type);
+      bool inserted = seenTypeNames_.insert(stream_name).second;
+      if (inserted && resp_type) {
+        response_and_stream_functions_.push_back(&function);
+      }
+    }
+
+    for (const auto& field : function.get_paramlist()->fields()) {
+      visit_type(field.get_type());
+    }
+    for (const auto& field : function.get_stream_xceptions()->fields()) {
+      const t_type* exType = field.get_type();
+      streamExceptions_.emplace(visit_type(field.get_type()), exType);
+    }
+    for (const auto& field : function.get_xceptions()->fields()) {
+      visit_type(field.get_type());
+    }
+    addFunctionByUniqueReturnType(&function);
+  }
+}
 
 class t_mstch_py3_generator : public t_mstch_generator {
  public:

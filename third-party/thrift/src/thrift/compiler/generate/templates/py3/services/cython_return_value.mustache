@@ -60,10 +60,10 @@ to the client.
 }}{{#type:streamresponse?}}{{!
   }}{{#type:stream_has_first_response?}}createResponseAndServerStream[{{!
   }}{{#type:stream_first_response_type}}{{ >types/cython_cpp_type}}{{/type:stream_first_response_type}},{{!
-  }}{{#type:stream_elem_type}}{{ >types/cython_cpp_type}}{{/type:stream_elem_type}}]({{!
+  }}{{#function:stream_elem_type}}{{ >types/cython_cpp_type}}{{/function:stream_elem_type}}]({{!
   }}{{#type:stream_first_response_type}}(<{{> types/cython_cpp_type}}?> {{> types/cython_python_to_cpp_item}}){{/type:stream_first_response_type}}, {{!
   }}{{/type:stream_has_first_response?}}{{!
-  }}cmove(deref((<ServerStream_{{#type:stream_elem_type}}{{ >types/cython_cpp_type_ident}}{{/type:stream_elem_type}}?>result).cStream)){{!
+  }}cmove(deref((<ServerStream_{{#function:stream_elem_type}}{{ >types/cython_cpp_type_ident}}{{/function:stream_elem_type}}?>result).cStream)){{!
   }}{{#type:stream_has_first_response?}}){{/type:stream_has_first_response?}}{{!
 }}{{/type:streamresponse?}}{{!
 }}{{#type:container?}}{{!

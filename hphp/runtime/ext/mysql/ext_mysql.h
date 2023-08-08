@@ -31,7 +31,7 @@
 namespace HPHP {
 
 struct mysqlExtension final : Extension {
-  mysqlExtension() : Extension("mysql", "1.0", NO_ONCALL_YET) {}
+  mysqlExtension() : Extension("mysql", "1.0", "mysql_gateway") {}
 
   // implementing IDebuggable
   virtual int debuggerSupport() override;

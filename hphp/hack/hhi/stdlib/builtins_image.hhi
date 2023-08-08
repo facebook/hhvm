@@ -301,11 +301,7 @@ function imagecreatefromstring(string $data): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function imagecreatefromwbmp(string $filename): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function imagecreatefromwebp(string $filename): HH\FIXME\MISSING_RETURN_TYPE;
-<<__PHPStdLib>>
 function imagecreatefromxbm(string $filename): HH\FIXME\MISSING_RETURN_TYPE;
-<<__PHPStdLib>>
-function imagecreatefromxpm(string $filename): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function imagecreatetruecolor(
   int $width,
@@ -612,12 +608,6 @@ function imagewbmp(
   resource $image,
   string $filename = "",
   int $foreground = -1,
-): HH\FIXME\MISSING_RETURN_TYPE;
-<<__PHPStdLib>>
-function imagewebp(
-  resource $image,
-  string $filename = "",
-  int $quality = 80,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function imagexbm(

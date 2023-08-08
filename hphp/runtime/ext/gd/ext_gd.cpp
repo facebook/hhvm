@@ -71,8 +71,6 @@
 #define IMAGE_TYPE_JPEG 2
 #define IMAGE_TYPE_PNG 4
 #define IMAGE_TYPE_WBMP 8
-#define IMAGE_TYPE_XPM 16
-#define IMAGE_TYPE_WEBP 32
 
 //#define IM_MEMORY_CHECK
 
@@ -1834,15 +1832,6 @@ Variant HHVM_FUNCTION(getimagesizefromstring, const String& imagedata,
   return false;
 }
 
-// PHP extension gd.c
-#define HAVE_GDIMAGECREATEFROMPNG 1
-
-#if HAVE_LIBTTF|HAVE_LIBFREETYPE
-#ifndef ENABLE_GD_TTF
-#define ENABLE_GD_TTF
-#endif
-#endif
-
 #define PHP_GDIMG_TYPE_GIF      1
 #define PHP_GDIMG_TYPE_PNG      2
 #define PHP_GDIMG_TYPE_JPG      3
@@ -2045,9 +2034,6 @@ static bool _php_image_convert(const String& f_org, const String& f_dest,
   int color, color_org, median;
   int x, y;
   float x_ratio, y_ratio;
-#ifdef HAVE_GD_JPG
-  // long ignore_warning;
-#endif
 
   /* Check threshold value */
   if (threshold < 0 || threshold > 8) {
@@ -2077,7 +2063,6 @@ static bool _php_image_convert(const String& f_org, const String& f_dest,
     }
     break;
 
-#ifdef HAVE_GD_JPG
   case PHP_GDIMG_TYPE_JPG:
     im_org = gdImageCreateFromJpeg(org);
     if (im_org == nullptr) {
@@ -2086,10 +2071,8 @@ static bool _php_image_convert(const String& f_org, const String& f_dest,
       return false;
     }
     break;
-#endif /* HAVE_GD_JPG */
 
 
-#ifdef HAVE_GD_PNG
   case PHP_GDIMG_TYPE_PNG:
     im_org = gdImageCreateFromPng(org);
     if (im_org == nullptr) {
@@ -2098,18 +2081,6 @@ static bool _php_image_convert(const String& f_org, const String& f_dest,
       return false;
     }
     break;
-#endif /* HAVE_GD_PNG */
-
-#ifdef HAVE_LIBVPX
-  case PHP_GDIMG_TYPE_WEBP:
-    im_org = gdImageCreateFromWebp(org);
-    if (im_org == nullptr) {
-      raise_warning("Unable to open '%s' Not a valid webp file",
-                      f_org.c_str());
-      return false;
-    }
-    break;
-#endif /* HAVE_LIBVPX */
 
   default:
     raise_warning("Format not supported");
@@ -2349,9 +2320,6 @@ static gdImagePtr _php_image_create_from(const String& filename,
                                          gdImagePtr(*ioctx_func_p)()) {
   VMRegAnchor _;
   gdImagePtr im = nullptr;
-#ifdef HAVE_GD_JPG
-  // long ignore_warning;
-#endif
 
   if (image_type == PHP_GDIMG_TYPE_GD2PART) {
     if (width < 1 || height < 1) {
@@ -2412,17 +2380,10 @@ static gdImagePtr _php_image_create_from(const String& filename,
       im = ((gdImagePtr(*)(FILE *, int, int, int, int))(func_p))
              (fp, srcX, srcY, width, height);
       break;
-#if defined(HAVE_GD_XPM) && defined(HAVE_GD_BUNDLED)
-    case PHP_GDIMG_TYPE_XPM:
-      im = gdImageCreateFromXpm(filename);
-      break;
-#endif
 
-#ifdef HAVE_GD_JPG
     case PHP_GDIMG_TYPE_JPG:
       im = gdImageCreateFromJpeg(fp);
       break;
-#endif
 
     default:
       im = ((gdImagePtr(*)(FILE*))(func_p))(fp);
@@ -2781,12 +2742,8 @@ static int php_imagefontsize(int size, int arg) {
   return (arg ? font->h : font->w);
 }
 
-#ifdef ENABLE_GD_TTF
 #define TTFTEXT_DRAW 0
 #define TTFTEXT_BBOX 1
-#endif
-
-#ifdef ENABLE_GD_TTF
 
 static Variant php_imagettftext_common(int mode, int extended,
                                        const Variant& arg1,
@@ -2857,7 +2814,6 @@ static Variant php_imagettftext_common(int mode, int extended,
   }
   stream->close();
 
-#ifdef USE_GD_IMGSTRTTF
   if (extended) {
     error = gdImageStringFTEx(im, brect, col, (char*)fontname.c_str(),
                               ptsize, angle, x, y, (char*)str.c_str(),
@@ -2867,10 +2823,6 @@ static Variant php_imagettftext_common(int mode, int extended,
     error = gdImageStringFT(im, brect, col, (char*)fontname.c_str(),
                             ptsize, angle, x, y, (char*)str.c_str());
   }
-#else /* !USE_GD_IMGSTRTTF */
-  error = gdttf(im, brect, col, fontname.c_str(),
-                ptsize, angle, x, y, str.c_str());
-#endif
 
   if (error) {
     raise_warning("%s", error);
@@ -2889,7 +2841,6 @@ static Variant php_imagettftext_common(int mode, int extended,
     brect[7]
   );
 }
-#endif  /* ENABLE_GD_TTF */
 
 const StaticString
   s_GD_Version("GD Version"),
@@ -2913,18 +2864,8 @@ Array HHVM_FUNCTION(gd_info) {
 
   ret.set(s_GD_Version, PHP_GD_VERSION_STRING);
 
-#ifdef ENABLE_GD_TTF
   ret.set(s_FreeType_Support, true);
-#if HAVE_LIBFREETYPE
   ret.set(s_FreeType_Linkage, s_with_freetype);
-#elif HAVE_LIBTTF
-  ret.set(s_FreeType_Linkage, s_with_TTF_library);
-#else
-  ret.set(s_FreeType_Linkage, s_with_unknown_library);
-#endif
-#else
-  ret.set(s_FreeType_Support, false);
-#endif
 
 #ifdef HAVE_LIBT1
   ret.set(s_T1Lib_Support, true);
@@ -2933,22 +2874,10 @@ Array HHVM_FUNCTION(gd_info) {
 #endif
   ret.set(s_GIF_Read_Support, true);
   ret.set(s_GIF_Create_Support, true);
-#ifdef HAVE_GD_JPG
   ret.set(s_JPG_Support, true);
-#else
-  ret.set(s_JPG_Support, false);
-#endif
-#ifdef HAVE_GD_PNG
   ret.set(s_PNG_Support, true);
-#else
-  ret.set(s_PNG_Support, false);
-#endif
   ret.set(s_WBMP_Support, true);
-#if defined(HAVE_GD_XPM) && defined(HAVE_GD_BUNDLED)
-  ret.set(s_XPM_Support, true);
-#else
   ret.set(s_XPM_Support, false);
-#endif
   ret.set(s_XBM_Support, true);
 #if defined(USE_GD_JISX0208) && defined(HAVE_GD_BUNDLED)
   ret.set(s_JIS_mapped_Japanese_Font_Support, true);
@@ -3472,19 +3401,9 @@ Variant HHVM_FUNCTION(imagecreate, int64_t width, int64_t height) {
 int64_t HHVM_FUNCTION(imagetypes) {
   int ret=0;
   ret = IMAGE_TYPE_GIF;
-#ifdef HAVE_GD_JPG
   ret |= IMAGE_TYPE_JPEG;
-#endif
-#ifdef HAVE_GD_PNG
   ret |= IMAGE_TYPE_PNG;
-#endif
   ret |= IMAGE_TYPE_WBMP;
-#if defined(HAVE_GD_XPM) && defined(HAVE_GD_BUNDLED)
-  ret |= IMAGE_TYPE_XPM;
-#endif
-#ifdef HAVE_LIBVPX
-  ret |= IMAGE_TYPE_WEBP;
-#endif
   return ret;
 }
 
@@ -3501,33 +3420,13 @@ Variant HHVM_FUNCTION(imagecreatefromstring, const String& data) {
   imtype = _php_image_type(sig);
   switch (imtype) {
   case PHP_GDIMG_TYPE_JPG:
-#ifdef HAVE_GD_JPG
     im = _php_image_create_from_string(data, "JPEG",
       (gdImagePtr(*)())gdImageCreateFromJpegCtx);
-#else
-    raise_warning("No JPEG support");
-    return false;
-#endif
     break;
 
   case PHP_GDIMG_TYPE_PNG:
-#ifdef HAVE_GD_PNG
     im = _php_image_create_from_string(data, "PNG",
       (gdImagePtr(*)())gdImageCreateFromPngCtx);
-#else
-    raise_warning("No PNG support");
-    return false;
-#endif
-    break;
-
-  case PHP_GDIMG_TYPE_WEBP:
-#ifdef HAVE_LIBVPX
-    im = _php_image_create_from_string(data, "WEBP",
-      (gdImagePtr(*)())gdImageCreateFromWebpCtx);
-#else
-    raise_warning("No webp support (libvpx is needed)");
-    return false;
-#endif
     break;
 
   case PHP_GDIMG_TYPE_GIF:
@@ -3569,7 +3468,6 @@ Variant HHVM_FUNCTION(imagecreatefromgif, const String& filename) {
   return Variant(req::make<Image>(im));
 }
 
-#ifdef HAVE_GD_JPG
 Variant HHVM_FUNCTION(imagecreatefromjpeg, const String& filename) {
   gdImagePtr im =
     _php_image_create_from(filename, -1, -1, -1, -1,
@@ -3581,9 +3479,7 @@ Variant HHVM_FUNCTION(imagecreatefromjpeg, const String& filename) {
   }
   return Variant(req::make<Image>(im));
 }
-#endif
 
-#ifdef HAVE_GD_PNG
 Variant HHVM_FUNCTION(imagecreatefrompng, const String& filename) {
   gdImagePtr im =
     _php_image_create_from(filename, -1, -1, -1, -1,
@@ -3595,21 +3491,6 @@ Variant HHVM_FUNCTION(imagecreatefrompng, const String& filename) {
   }
   return Variant(req::make<Image>(im));
 }
-#endif
-
-#ifdef HAVE_LIBVPX
-Variant HHVM_FUNCTION(imagecreatefromwebp, const String& filename) {
-  gdImagePtr im =
-    _php_image_create_from(filename, -1, -1, -1, -1,
-                           PHP_GDIMG_TYPE_WEBP, "WEBP",
-                           (gdImagePtr(*)())gdImageCreateFromWebp,
-                           (gdImagePtr(*)())gdImageCreateFromWebpCtx);
-  if (im == nullptr) {
-    return false;
-  }
-  return Variant(req::make<Image>(im));
-}
-#endif
 
 Variant HHVM_FUNCTION(imagecreatefromxbm, const String& filename) {
   gdImagePtr im =
@@ -3622,20 +3503,6 @@ Variant HHVM_FUNCTION(imagecreatefromxbm, const String& filename) {
   }
   return Variant(req::make<Image>(im));
 }
-
-#if defined(HAVE_GD_XPM) && defined(HAVE_GD_BUNDLED)
-Variant HHVM_FUNCTION(imagecreatefromxpm, const String& filename) {
-  gdImagePtr im =
-    _php_image_create_from(filename, -1, -1, -1, -1,
-                           PHP_GDIMG_TYPE_XPM, "XPM",
-                           (gdImagePtr(*)())gdImageCreateFromXpm,
-                           (gdImagePtr(*)())nullptr);
-  if (im == nullptr) {
-    return false;
-  }
-  return Variant(req::make<Image>(im));
-}
-#endif
 
 Variant HHVM_FUNCTION(imagecreatefromwbmp, const String& filename) {
   gdImagePtr im =
@@ -3694,7 +3561,6 @@ bool HHVM_FUNCTION(imagegif, const Resource& image,
                                (void (*)())gdImageGifCtx);
 }
 
-#ifdef HAVE_GD_PNG
 bool HHVM_FUNCTION(imagepng, const Resource& image,
     const String& filename /* = null_string */,
     int64_t quality /* = -1 */, int64_t filters /* = -1 */) {
@@ -3702,26 +3568,13 @@ bool HHVM_FUNCTION(imagepng, const Resource& image,
                                PHP_GDIMG_TYPE_PNG, "PNG",
                                (void (*)())gdImagePngCtxEx);
 }
-#endif
 
-#ifdef HAVE_LIBVPX
-bool HHVM_FUNCTION(imagewebp, const Resource& image,
-    const String& filename /* = null_string */,
-    int64_t quality /* = 80 */) {
-  return _php_image_output_ctx(image, filename, quality, -1,
-                               PHP_GDIMG_TYPE_WEBP, "WEBP",
-                               (void (*)())gdImageWebpCtx);
-}
-#endif
-
-#ifdef HAVE_GD_JPG
 bool HHVM_FUNCTION(imagejpeg, const Resource& image,
     const String& filename /* = null_string */, int64_t quality /* = -1 */) {
   return _php_image_output_ctx(image, filename, quality, -1,
                                PHP_GDIMG_TYPE_JPG, "JPEG",
                                (void (*)())gdImageJpegCtx);
 }
-#endif
 
 bool HHVM_FUNCTION(imagewbmp, const Resource& image,
     const String& filename /* = null_string */,
@@ -4133,7 +3986,6 @@ Variant HHVM_FUNCTION(imagesy, const Resource& image) {
   return gdImageSY(im);
 }
 
-#if defined(ENABLE_GD_TTF) && HAVE_LIBFREETYPE
 Variant HHVM_FUNCTION(imageftbbox, double size, double angle,
     const String& font_file, const String& text,
     const Array& extrainfo /*=[] */) {
@@ -4150,9 +4002,7 @@ Variant HHVM_FUNCTION(imagefttext,
   return php_imagettftext_common(TTFTEXT_DRAW, 1,
     image, size, angle, x, y, col, font_file, text, extrainfo);
 }
-#endif
 
-#ifdef ENABLE_GD_TTF
 Variant HHVM_FUNCTION(imagettfbbox, double size, double angle,
                      const String& fontfile, const String& text) {
   return php_imagettftext_common(TTFTEXT_BBOX, 0,
@@ -4167,7 +4017,6 @@ Variant HHVM_FUNCTION(imagettftext, const Resource& image,
                                  image, size.toDouble(), angle.toDouble(),
                                  x, y, color, fontfile, text);
 }
-#endif
 
 bool HHVM_FUNCTION(image2wbmp, const Resource& image,
                    const String& filename /* = null_string */,
@@ -8236,21 +8085,11 @@ struct GdExtension final : Extension {
     HHVM_FE(imagecreatefromgd);
     HHVM_FE(imagecreatefromgd2);
     HHVM_FE(imagecreatefromgif);
-#ifdef HAVE_GD_JPG
     HHVM_FE(imagecreatefromjpeg);
-#endif
-#ifdef HAVE_GD_PNG
     HHVM_FE(imagecreatefrompng);
-#endif
-#ifdef HAVE_LIBVPX
-    HHVM_FE(imagecreatefromwebp);
-#endif
     HHVM_FE(imagecreatefromstring);
     HHVM_FE(imagecreatefromwbmp);
     HHVM_FE(imagecreatefromxbm);
-#if defined(HAVE_GD_XPM) && defined(HAVE_GD_BUNDLED)
-    HHVM_FE(imagecreatefromxpm);
-#endif
     HHVM_FE(imagecreatetruecolor);
     HHVM_FE(imagecrop);
     HHVM_FE(imagecropauto);
@@ -8271,28 +8110,19 @@ struct GdExtension final : Extension {
     HHVM_FE(imageflip);
     HHVM_FE(imagefontheight);
     HHVM_FE(imagefontwidth);
-#if defined(ENABLE_GD_TTF) && HAVE_LIBFREETYPE
     HHVM_FE(imageftbbox);
     HHVM_FE(imagefttext);
-#endif
     HHVM_FE(imagegammacorrect);
     HHVM_FE(imagegd2);
     HHVM_FE(imagegd);
     HHVM_FE(imagegif);
     HHVM_FE(imageinterlace);
     HHVM_FE(imageistruecolor);
-#ifdef HAVE_GD_JPG
     HHVM_FE(imagejpeg);
-#endif
     HHVM_FE(imagelayereffect);
     HHVM_FE(imageline);
     HHVM_FE(imageloadfont);
-#ifdef HAVE_GD_PNG
     HHVM_FE(imagepng);
-#endif
-#ifdef HAVE_LIBVPX
-    HHVM_FE(imagewebp);
-#endif
     HHVM_FE(imagepolygon);
     HHVM_FE(imagerectangle);
     HHVM_FE(imagerotate);
@@ -8309,10 +8139,8 @@ struct GdExtension final : Extension {
     HHVM_FE(imagesx);
     HHVM_FE(imagesy);
     HHVM_FE(imagetruecolortopalette);
-#ifdef ENABLE_GD_TTF
     HHVM_FE(imagettfbbox);
     HHVM_FE(imagettftext);
-#endif
     HHVM_FE(imagetypes);
     HHVM_FE(imagewbmp);
 
@@ -8329,8 +8157,6 @@ struct GdExtension final : Extension {
     HHVM_RC_INT(IMG_JPEG, IMAGE_TYPE_JPEG);
     HHVM_RC_INT(IMG_PNG, IMAGE_TYPE_PNG);
     HHVM_RC_INT(IMG_WBMP, IMAGE_TYPE_WBMP);
-    HHVM_RC_INT(IMG_XPM, IMAGE_TYPE_XPM);
-    HHVM_RC_INT(IMG_WEBP, IMAGE_TYPE_XPM);
 
     /* special colours for gd */
     HHVM_RC_INT(IMG_COLOR_TILED, gdTiled);
@@ -8427,19 +8253,13 @@ struct GdExtension final : Extension {
     HHVM_RC_INT(IMAGETYPE_SWC, IMAGE_FILETYPE_SWC);
     HHVM_RC_INT(IMAGETYPE_JPEG2000, IMAGE_FILETYPE_JPC);
 
-#ifdef GD_VERSION_STRING
     HHVM_RC_STR(GD_VERSION, GD_VERSION_STRING);
-#endif
 
-#if defined(GD_MAJOR_VERSION) && defined(GD_MINOR_VERSION) && \
-    defined(GD_RELEASE_VERSION) && defined(GD_EXTRA_VERSION)
     HHVM_RC_INT_SAME(GD_MAJOR_VERSION);
     HHVM_RC_INT_SAME(GD_MINOR_VERSION);
     HHVM_RC_INT_SAME(GD_RELEASE_VERSION);
     HHVM_RC_STR_SAME(GD_EXTRA_VERSION);
-#endif
 
-#ifdef HAVE_GD_PNG
     HHVM_RC_INT(PNG_NO_FILTER, 0x00);
     HHVM_RC_INT(PNG_FILTER_NONE, 0x08);
     HHVM_RC_INT(PNG_FILTER_SUB, 0x10);
@@ -8447,7 +8267,6 @@ struct GdExtension final : Extension {
     HHVM_RC_INT(PNG_FILTER_AVG, 0x40);
     HHVM_RC_INT(PNG_FILTER_PAETH, 0x80);
     HHVM_RC_INT(PNG_ALL_FILTERS, 0x08 | 0x10 | 0x20 | 0x40 | 0x80);
-#endif
 
     loadSystemlib();
   }

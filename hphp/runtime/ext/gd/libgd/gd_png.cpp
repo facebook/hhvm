@@ -4,9 +4,6 @@
 #include <stdlib.h>
 #include "gd.h"
 
-/* JCE: Arrange HAVE_LIBPNG so that it can be set in gd.h */
-#ifdef HAVE_GD_PNG
-
 #include "png.h"    /* includes zlib.h and setjmp.h */
 #include "gdhelpers.h"
 
@@ -751,5 +748,3 @@ void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level, int basefilte
  bail:
   png_destroy_write_struct(&png_ptr, &info_ptr);
 }
-
-#endif /* HAVE_LIBPNG */

@@ -2256,9 +2256,6 @@
 /* #undef USE_COMBINATION_EXPLOSION_CHECK */
 
 /* */
-#define USE_GD_IMGSTRTTF 1
-
-/* */
 /* #undef USE_GD_JISX0208 */
 
 /* */

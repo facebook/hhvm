@@ -29,36 +29,9 @@ gdImageStringTTF (gdImage * im, int *brect, int fg, char *fontlist,
   return gdImageStringFT (im, brect, fg, fontlist, ptsize, angle, x, y, string);
 }
 
-#ifndef HAVE_LIBFREETYPE
-char *
-gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist,
-     double ptsize, double angle, int x, int y, char *string,
-     gdFTStringExtraPtr strex)
-{
-  return "libgd was not built with FreeType font support\n";
-}
-
-char *
-gdImageStringFT (gdImage * im, int *brect, int fg, char *fontlist,
-     double ptsize, double angle, int x, int y, char *string)
-{
-  return "libgd was not built with FreeType font support\n";
-}
-#else
-
 #include "gdcache.h"
 
-#ifdef HHVM
-# ifdef HAVE_FT2BUILD
-#  include <ft2build.h>
-# else
-#  ifdef FREETYPE_PATH_FREETYPE2
-#   include <freetype2/config/ftheader.h>
-#  else
-#   include <freetype/config/ftheader.h>
-#  endif
-# endif
-#endif // HHVM
+#include <freetype/config/ftheader.h>
 
 #include FT_FREETYPE_H
 #include FT_GLYPH_H
@@ -1168,5 +1141,3 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
   gdMutexUnlock(gdFontCacheMutex);
   return (char *) NULL;
 }
-
-#endif /* HAVE_LIBFREETYPE */

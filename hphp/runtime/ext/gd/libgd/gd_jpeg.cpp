@@ -30,7 +30,6 @@
 #include "gd.h"
 /* TBB: move this up so include files are not brought in */
 /* JCE: arrange HAVE_LIBJPEG so that it can be set in gd.h */
-#ifdef HAVE_GD_JPG
 #include "gdhelpers.h"
 #undef HAVE_STDLIB_H
 
@@ -832,5 +831,3 @@ void jpeg_gdIOCtx_dest (j_compress_ptr cinfo, gdIOCtx * outfile)
   dest->pub.term_destination = term_destination;
   dest->outfile = outfile;
 }
-
-#endif /* HAVE_JPEG */

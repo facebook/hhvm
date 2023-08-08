@@ -338,10 +338,12 @@ let unix_worker_main restore (state, controller_fd) (ic, oc) =
       | Unix.WSIGNALED x ->
         let sig_str = PrintSignal.string_of_signal x in
         Printf.printf "Worker interrupted with signal: %s\n" sig_str;
-        exit 2
+        Stdlib.flush stdout;
+        Stdlib.exit 2
       | Unix.WSTOPPED x ->
         Printf.printf "Worker stopped with signal: %d\n" x;
-        exit 3)
+        Stdlib.flush stdout;
+        Stdlib.exit 3)
   done;
   assert false
 

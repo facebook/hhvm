@@ -19,12 +19,14 @@
 #include <string>
 #include <vector>
 
+#include <thrift/compiler/ast/t_node.h>
+
 namespace apache {
 namespace thrift {
 namespace compiler {
 
 // The Thrift package that scopes IDL definitions.
-class t_package {
+class t_package : public t_node {
  public:
   t_package() = default;
   // Throws std::invalid_argument if an invalid package name is provided.

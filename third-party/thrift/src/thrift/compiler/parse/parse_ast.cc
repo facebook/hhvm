@@ -566,7 +566,9 @@ class ast_builder : public parser_actions {
       diags_.error(range.begin, "Package already specified.");
     }
     try {
-      program_.set_package(t_package(fmt::to_string(name)));
+      auto package = t_package(fmt::to_string(name));
+      package.set_src_range(range);
+      program_.set_package(std::move(package));
     } catch (const std::exception& e) {
       diags_.error(range.begin, "{}", e.what());
     }

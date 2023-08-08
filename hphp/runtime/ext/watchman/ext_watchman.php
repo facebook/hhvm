@@ -201,13 +201,3 @@ function ext_watchman_version(): int {
 }
 
 } // namespace HH
-
-
-namespace __SystemLib {
-
-/*
- * Internal use only.
- */
-<<__Native>>
-function watchman_callback_wrapper(string $sub_name): void;
-} // namespace __SystemLib

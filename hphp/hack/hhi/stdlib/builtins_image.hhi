@@ -610,12 +610,6 @@ function imagewbmp(
   int $foreground = -1,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function imagexbm(
-  resource $image,
-  string $filename = "",
-  int $foreground = -1,
-): HH\FIXME\MISSING_RETURN_TYPE;
-<<__PHPStdLib>>
 function iptcembed(
   string $iptcdata,
   string $jpeg_file_name,

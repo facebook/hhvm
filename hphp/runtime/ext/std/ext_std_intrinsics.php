@@ -85,7 +85,7 @@ function is_lazy_class(mixed $val): bool;
 <<__Native>>
 function dummy_lots_inout(inout $p1, inout $p2, inout $p3, inout $p4,
                           inout $p1, inout $p2, inout $p3, inout $p4,
-                          inout $p1, inout $p2, inout $p3, inout $p4): mixed;
+                          inout $p1, inout $p2, inout $p3, inout $p4): void;
 
 <<__Native>>
 function new_mystery_box(string $type = ''): mixed;

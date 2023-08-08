@@ -13,16 +13,6 @@ namespace {
 function curl_close(resource $ch)[leak_safe]: ?bool;
 
 /**
- * Copy a cURL handle along with all of its preferences
- *
- * @param resource $ch -
- *
- * @return resource - Returns a new cURL handle.
- */
-<<__Native>>
-function curl_copy_handle(resource $ch): mixed;
-
-/**
  * Return the last error number
  *
  * @param resource $ch -

@@ -1361,8 +1361,7 @@ Variant require(const String& file,
 
 bool function_exists(const String& function_name) {
   auto f = Func::lookup(function_name.get());
-  return (f != nullptr) &&
-         (f->arFuncPtr() != Native::unimplementedWrapper);
+  return f != nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

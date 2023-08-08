@@ -526,6 +526,8 @@ void StandardExtension::initIntrinsics() {
 
   HHVM_FALIAS(__hhvm_intrinsics\\dummy_int_upper_bound, dummy_int_upper_bound);
 
+  HHVM_FALIAS(__hhvm_intrinsics\\dummy_lots_inout, dummy_lots_inout);
+
   HHVM_FALIAS(__hhvm_intrinsics\\new_mystery_box, new_mystery_box);
   HHVM_FALIAS(__hhvm_intrinsics\\run_inline_interp, run_inline_interp);
   HHVM_FALIAS(__hhvm_intrinsics\\render_rom, render_rom);

@@ -2390,19 +2390,6 @@ void check_native(AsmState& as) {
     as.fe->isNative =
       !(as.fe->parseNativeAttributes(as.fe->attrs) & Native::AttrOpCodeImpl);
 
-    if (as.fe->isNative) {
-      auto info = as.fe->getNativeInfo();
-      if (!info) {
-        if (!as.ue->isASystemLib()) {
-          // non-builtin native functions must have a valid binding
-          as.error("No NativeFunctionInfo for function {}",
-                   as.fe->nativeFullname());
-        } else {
-          // Allow builtins to have mising NativeFunctionInfo, to support
-          // conditional compilation. Calling such a function will Fatal.
-        }
-      }
-    }
     if (as.ue->isASystemLib()) as.fe->attrs |= AttrBuiltin;
   }
 }

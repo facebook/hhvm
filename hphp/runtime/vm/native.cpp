@@ -471,25 +471,10 @@ TypedValue* methodWrapper(ActRec* ar) {
   return ar->retSlot();
 }
 
-[[noreturn]] TypedValue* unimplementedWrapper(ActRec* ar) {
-  auto func = ar->func();
-  auto cls = func->cls();
-  if (cls) {
-    raise_error("Call to unimplemented native method %s::%s()",
-                cls->name()->data(), func->name()->data());
-  }
-  raise_error("Call to unimplemented native function %s()",
-              func->name()->data());
-}
-
 void getFunctionPointers(const NativeFunctionInfo& info, int nativeAttrs,
                          ArFunction& bif, NativeFunction& nif) {
   nif = info.ptr;
-  if (!nif) {
-    bif = unimplementedWrapper;
-    return;
-  }
-
+  if (!nif) return;
   auto const isMethod = info.sig.args.size() &&
       ((info.sig.args[0] == NativeSig::Type::This) ||
        (info.sig.args[0] == NativeSig::Type::Class));

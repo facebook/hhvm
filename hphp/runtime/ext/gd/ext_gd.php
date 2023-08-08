@@ -515,17 +515,6 @@ function imagecreatefromwbmp(string $filename): mixed;
 <<__Native>>
 function imagecreatefromxbm(string $filename): mixed;
 
-/* imagecreatefromxpm() returns an image identifier representing the image
- * obtained from the given filename. TipA URL can be used as a filename with
- * this function if the fopen wrappers have been enabled. See fopen() for more
- * details on how to specify the filename. See the List of Supported
- * Protocols/Wrappers for links to information about what abilities the
- * various wrappers have, notes on their usage, and information on any
- * predefined variables they may provide.
- */
-<<__Native>>
-function imagecreatefromxpm(string $filename): mixed;
-
 /* imagecreatetruecolor() returns an image identifier representing a black
  * image of the specified size.  Depending on your PHP and GD versions this
  * function is defined or not. With PHP 4.0.6 through 4.1.x this function
@@ -941,13 +930,6 @@ function imagetypes(): int;
 function imagewbmp(resource $image,
                    string $filename = "",
                    int $foreground = -1): bool;
-
-/* Outputs or save an XBM version of the given image.
- */
-<<__Native>>
-function imagexbm(resource $image,
-                  string $filename = "",
-                  int $foreground = -1): bool;
 
 /* Embeds binary IPTC data into a JPEG image.
  */

@@ -41,6 +41,7 @@
 #include "hphp/util/blob-encoder.h"
 #include "hphp/util/file.h"
 #include "hphp/util/trace.h"
+#include <iterator>
 
 namespace HPHP {
 

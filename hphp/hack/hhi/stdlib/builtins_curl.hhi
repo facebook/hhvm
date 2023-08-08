@@ -609,8 +609,6 @@ namespace {
     HH\FIXME\MISSING_PARAM_TYPE $url = null,
   ): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
-  function curl_copy_handle(resource $ch): \HH\FIXME\MISSING_RETURN_TYPE;
-  <<__PHPStdLib>>
   function curl_version(
     int $uversion = CURLVERSION_NOW,
   ): \HH\FIXME\MISSING_RETURN_TYPE;

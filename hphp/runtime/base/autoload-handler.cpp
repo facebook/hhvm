@@ -122,8 +122,7 @@ struct FuncExistsChecker {
       }
     }
     auto f = m_ne->getCachedFunc();
-    return (f != nullptr) &&
-           (f->arFuncPtr() != Native::unimplementedWrapper);
+    return f != nullptr;
   }
 };
 

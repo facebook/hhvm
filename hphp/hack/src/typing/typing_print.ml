@@ -1405,12 +1405,14 @@ module Json = struct
     | Tunion tyl -> List.exists tyl ~f:is_dynamic
     | _ -> false
 
-  let rec from_type : env -> locl_ty -> json =
-   fun env ty ->
+  let rec from_type : env -> show_like_ty:bool -> locl_ty -> json =
+   fun env ~show_like_ty ty ->
     (* Helpers to construct fields that appear in JSON rendering of type *)
     let obj x = JSON_Object x in
     let kind p k = [("src_pos", Pos_or_decl.json p); ("kind", JSON_String k)] in
-    let args tys = [("args", JSON_Array (List.map tys ~f:(from_type env)))] in
+    let args tys =
+      [("args", JSON_Array (List.map tys ~f:(from_type env ~show_like_ty)))]
+    in
     let refs e =
       match e with
       | Exact -> []
@@ -1423,11 +1425,13 @@ module Json = struct
             obj
               [
                 ("type", JSON_String id);
-                ("equal", from_type env ty);
+                ("equal", from_type env ~show_like_ty ty);
                 is_ctx_json;
               ]
           | TRloose { tr_lower; tr_upper } ->
-            let ty_list tys = JSON_Array (List.map tys ~f:(from_type env)) in
+            let ty_list tys =
+              JSON_Array (List.map tys ~f:(from_type env ~show_like_ty))
+            in
             obj
               [
                 ("type", JSON_String id);
@@ -1438,8 +1442,8 @@ module Json = struct
         in
         [("refs", JSON_Array (List.map (SMap.bindings cr_consts) ~f:ref_const))]
     in
-    let typ ty = [("type", from_type env ty)] in
-    let result ty = [("result", from_type env ty)] in
+    let typ ty = [("type", from_type env ~show_like_ty ty)] in
+    let result ty = [("result", from_type env ~show_like_ty ty)] in
     let name x = [("name", JSON_String x)] in
     let optional x = [("optional", JSON_Bool x)] in
     let is_array x = [("is_array", JSON_Bool x)] in
@@ -1458,7 +1462,7 @@ module Json = struct
       @ typ v.sft_ty
     in
     let fields fl = [("fields", JSON_Array (List.map fl ~f:make_field))] in
-    let as_type ty = [("as", from_type env ty)] in
+    let as_type ty = [("as", from_type env ~show_like_ty ty)] in
     match (get_pos ty, get_node ty) with
     | (_, Tvar n) ->
       let (_, ty) =
@@ -1469,7 +1473,7 @@ module Json = struct
       begin
         match (get_pos ty, get_node ty) with
         | (p, Tvar _) -> obj @@ kind p "var"
-        | _ -> from_type env ty
+        | _ -> from_type env ~show_like_ty ty
       end
     | (p, Ttuple tys) -> obj @@ kind p "tuple" @ is_array false @ args tys
     | (p, Tany _) -> obj @@ kind p "any"
@@ -1480,7 +1484,7 @@ module Json = struct
     | (p, Tunapplied_alias s) -> obj @@ kind p "unapplied_alias" @ name s
     | (_, Tnewtype (s, _, ty))
       when String.equal s SN.Classes.cSupportDyn && not (show_supportdyn env) ->
-      from_type env ty
+      from_type env ~show_like_ty ty
     | (p, Tnewtype (s, _, ty))
       when Decl_provider.get_class env.decl_env.Decl_env.ctx s
            >>| Cls.enum_type
@@ -1514,19 +1518,25 @@ module Json = struct
       @ [("fields_known", JSON_Bool fields_known)]
       @ fields (TShapeMap.bindings fl)
     | (p, Tunion []) -> obj @@ kind p "nothing"
-    | (_, Tunion [ty]) -> from_type env ty
-    | (p, Tunion tyl) -> begin
-      match List.filter tyl ~f:(fun ty -> not (is_dynamic ty)) with
-      | [ty] -> from_type env ty
-      | _ -> obj @@ kind p "union" @ args tyl
-    end
+    | (_, Tunion [ty]) -> from_type env ~show_like_ty ty
+    | (p, Tunion tyl) ->
+      if show_like_ty then
+        obj @@ kind p "union" @ args tyl
+      else begin
+        match List.filter tyl ~f:(fun ty -> not (is_dynamic ty)) with
+        | [ty] -> from_type env ~show_like_ty ty
+        | _ -> obj @@ kind p "union" @ args tyl
+      end
     | (p, Tintersection []) -> obj @@ kind p "mixed"
-    | (_, Tintersection [ty]) -> from_type env ty
-    | (p, Tintersection tyl) -> begin
-      match List.find tyl ~f:is_like with
-      | None -> obj @@ kind p "intersection" @ args tyl
-      | Some ty -> from_type env ty
-    end
+    | (_, Tintersection [ty]) -> from_type env ~show_like_ty ty
+    | (p, Tintersection tyl) ->
+      if show_like_ty then
+        obj @@ kind p "intersection" @ args tyl
+      else begin
+        match List.find tyl ~f:is_like with
+        | None -> obj @@ kind p "intersection" @ args tyl
+        | Some ty -> from_type env ~show_like_ty ty
+      end
     | (p, Tfun ft) ->
       let fun_kind p = kind p "function" in
       let callconv cc =
@@ -1953,7 +1963,7 @@ module Json = struct
     aux json ~keytrace
 end
 
-let to_json = Json.from_type
+let to_json env ?(show_like_ty = false) ty = Json.from_type env ~show_like_ty ty
 
 let json_to_locl_ty = Json.to_locl_ty
 

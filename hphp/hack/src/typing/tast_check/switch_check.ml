@@ -336,7 +336,8 @@ let check_exhaustiveness env pos ty ((_, dfl) as caselist) =
   in
   let tcopt = env |> Env.get_decl_env |> Decl_env.tcopt in
   if TypecheckerOptions.tco_log_exhaustivity_check tcopt then
-    Env.ty_to_json env ty |> log_exhaustivity_check pos dfl outcomes
+    Env.ty_to_json env ~show_like_ty:true ty
+    |> log_exhaustivity_check pos dfl outcomes
 
 let handler =
   object

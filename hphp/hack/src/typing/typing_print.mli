@@ -111,7 +111,7 @@ val coeffects : env -> Typing_defs.locl_ty -> string
  *       Expression-dependent type
  *         { "kind":"expr" }
  *)
-val to_json : env -> Typing_defs.locl_ty -> Hh_json.json
+val to_json : env -> ?show_like_ty:bool -> Typing_defs.locl_ty -> Hh_json.json
 
 (* Attempt to deserialize a previously-serialized type back into a type we can
    manipulate. Note that this function accesses the global state in

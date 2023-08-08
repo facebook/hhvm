@@ -37,7 +37,8 @@ val print_ty_with_identity :
   string
 
 (** Return a JSON representation of the given type. *)
-val ty_to_json : env -> Typing_defs.locl_ty -> Hh_json.json
+val ty_to_json :
+  env -> ?show_like_ty:bool -> Typing_defs.locl_ty -> Hh_json.json
 
 (** Convert a JSON representation of a type back into a locl-phase type. *)
 val json_to_locl_ty :

@@ -650,6 +650,7 @@ let load_state
          * which is irrelevant in tests *)
         corresponding_base_revision = "-1";
         deptable_fn;
+        compressed_deptable_fn = None;
         naming_changes = [];
         prechecked_changes;
         changes;

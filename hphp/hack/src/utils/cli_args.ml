@@ -200,6 +200,11 @@ let parse_saved_state_json (json, _keytrace) =
     json >>= get_string "corresponding_base_revision"
     >>= fun (for_base_rev, _for_base_rev_keytrace) ->
     json >>= get_string "deptable" >>= fun (deptable, _deptable_keytrace) ->
+    let compressed_deptable =
+      match json >>= get_val "compressed_deptable" |> to_option with
+      | Some (Hh_json.JSON_String path) -> Some path
+      | _ -> None
+    in
     json >>= get_array "changes" >>= fun (changes, _) ->
     let naming_changes =
       match json >>= get_val "naming_changes" with
@@ -213,6 +218,7 @@ let parse_saved_state_json (json, _keytrace) =
         naming_table_path = state;
         corresponding_base_revision = for_base_rev;
         deptable_fn = deptable;
+        compressed_deptable_fn = compressed_deptable;
         prechecked_changes;
         changes;
         naming_changes;

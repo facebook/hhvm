@@ -120,30 +120,34 @@ let run_saved_state_future
     let ignore_hh_version =
       ServerArgs.ignore_hh_version genv.ServerEnv.options
     in
-    let deptable = deptable_with_filename (Path.to_string dep_table_path) in
     let use_compressed_dep_graph =
       genv.local_config.ServerLocalConfig.use_compressed_dep_graph
     in
-    if use_compressed_dep_graph then
-      let deptable_result =
-        Depgraph_decompress_ffi.decompress
-          ~compressed_dg_path:(Path.to_string compressed_dep_table_path)
-      in
-      match deptable_result with
-      | Ok decompressed_depgraph_path ->
-        let deptable = deptable_with_filename decompressed_depgraph_path in
-        Hh_logger.log "Done decompressing dep graph";
+    let deptable_fn =
+      if use_compressed_dep_graph then
+        let deptable_result =
+          Depgraph_decompress_ffi.decompress
+            ~compressed_dg_path:(Path.to_string compressed_dep_table_path)
+        in
+        match deptable_result with
+        | Ok decompressed_depgraph_path ->
+          let deptable = deptable_with_filename decompressed_depgraph_path in
+          Hh_logger.log "Done decompressing dep graph";
+          lock_and_load_deptable
+            ~base_file_name:(Path.to_string deptable_naming_table_blob_path)
+            ~deptable
+            ~ignore_hh_version;
+          decompressed_depgraph_path
+        | Error error ->
+          failwith (Printf.sprintf "Failed to decompress dep graph: %s" error)
+      else
+        let deptable = deptable_with_filename (Path.to_string dep_table_path) in
         lock_and_load_deptable
           ~base_file_name:(Path.to_string deptable_naming_table_blob_path)
           ~deptable
-          ~ignore_hh_version
-      | Error error ->
-        failwith (Printf.sprintf "Failed to decompress dep graph: %s" error)
-    else
-      lock_and_load_deptable
-        ~base_file_name:(Path.to_string deptable_naming_table_blob_path)
-        ~deptable
-        ~ignore_hh_version;
+          ~ignore_hh_version;
+        Path.to_string dep_table_path
+    in
     let naming_table_fallback_path =
       if Sys.file_exists (Path.to_string naming_sqlite_table_path) then (
         Hh_logger.log "Using sqlite naming table from hack/64 saved state";
@@ -186,8 +190,8 @@ let run_saved_state_future
       Ok
         {
           naming_table_fn = Path.to_string naming_sqlite_table_path;
-          deptable_fn = Path.to_string dep_table_path;
           naming_table_fallback_fn = naming_table_fallback_path;
+          deptable_fn;
           corresponding_rev = Hg.Hg_rev corresponding_rev;
           mergebase_rev = mergebase_global_rev;
           mergebase = Some mergebase_rev;
@@ -318,6 +322,7 @@ let use_precomputed_state_exn
     ServerArgs.naming_table_path;
     corresponding_base_revision;
     deptable_fn;
+    compressed_deptable_fn;
     changes;
     naming_changes;
     prechecked_changes;
@@ -325,13 +330,43 @@ let use_precomputed_state_exn
     info
   in
   let ignore_hh_version = ServerArgs.ignore_hh_version genv.ServerEnv.options in
-  let deptable = deptable_with_filename deptable_fn in
   CgroupProfiler.step_start_end cgroup_steps "load deptable"
   @@ fun _cgroup_step ->
-  lock_and_load_deptable
-    ~base_file_name:naming_table_path
-    ~deptable
-    ~ignore_hh_version;
+  let use_compressed_dep_graph =
+    genv.local_config.ServerLocalConfig.use_compressed_dep_graph
+  in
+  let deptable_fn =
+    if use_compressed_dep_graph && Option.is_some compressed_deptable_fn then
+      let compressed_deptable_fn = Option.value_exn compressed_deptable_fn in
+      let deptable_result =
+        Depgraph_decompress_ffi.decompress
+          ~compressed_dg_path:compressed_deptable_fn
+      in
+      match deptable_result with
+      | Ok decompressed_depgraph_path ->
+        let deptable = deptable_with_filename decompressed_depgraph_path in
+        Hh_logger.log "Done decompressing dep graph";
+        lock_and_load_deptable
+          ~base_file_name:naming_table_path
+          ~deptable
+          ~ignore_hh_version;
+        decompressed_depgraph_path
+      | Error error ->
+        failwith (Printf.sprintf "Failed to decompress dep graph: %s" error)
+    else (
+      if use_compressed_dep_graph && Option.is_none compressed_deptable_fn then (
+        Hh_logger.log
+          "Not using compressed dep graph because it's not available.";
+        HackEventLogger.tried_to_load_non_existant_compressed_dep_graph ()
+      );
+      let deptable = deptable_with_filename deptable_fn in
+      lock_and_load_deptable
+        ~base_file_name:naming_table_path
+        ~deptable
+        ~ignore_hh_version;
+      deptable_fn
+    )
+  in
   let changes = Relative_path.set_of_list changes in
   let naming_changes = Relative_path.set_of_list naming_changes in
   let prechecked_changes = Relative_path.set_of_list prechecked_changes in
@@ -367,8 +402,8 @@ let use_precomputed_state_exn
   in
   {
     naming_table_fn = naming_table_path;
-    deptable_fn;
     naming_table_fallback_fn = naming_table_fallback_path;
+    deptable_fn;
     corresponding_rev = Hg.Hg_rev corresponding_base_revision;
     mergebase_rev;
     mergebase;

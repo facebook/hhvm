@@ -496,7 +496,12 @@ void HTTP1xCodec::generateHeader(
         appendString(writeBuf, len, msg.getMethodString());
       }
       appendLiteral(writeBuf, len, " ");
-      appendString(writeBuf, len, msg.getURL());
+      if (connectRequest_ && msg.getURL().empty()) {
+        appendString(
+            writeBuf, len, msg.getHeaders().getSingleOrEmpty(HTTP_HEADER_HOST));
+      } else {
+        appendString(writeBuf, len, msg.getURL());
+      }
       if (version != HTTPMessage::kHTTPVersion09) {
         appendLiteral(writeBuf, len, " HTTP/");
         appendUint(writeBuf, len, version.first);

@@ -23,6 +23,7 @@ target_link_libraries(codectestutils PUBLIC proxygen)
 
 proxygen_add_test(TARGET CodecTests
   SOURCES
+    CrossCodecTest.cpp
     CodecUtilTests.cpp
     DefaultHTTPCodecFactoryTest.cpp
     FilterTests.cpp

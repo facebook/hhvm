@@ -273,8 +273,14 @@ fn test_need_commas_containers() -> Result<()> {
 }
 
 #[test]
-fn test_null_stuff() -> Result<()> {
-    // See the `nullStuff` test in cpp_compat_test
+fn test_null_stuff_deser() -> Result<()> {
+    // See the `nullStuffDeser` test in cpp_compat_test
+
+    // Note that the deserialization behavior with `deprecated_optional_with_default_is_some`
+    // is not consistent with `Default::default`. If optional-with-default is
+    // not present in the stream (or if it is null), then it is `None` in the
+    // resulting struct. This behavior is the same as in C++ and as in Rust
+    // without the deprecated flag, but not as in `default` or in constants.
 
     let sub = SubStruct {
         optDef: None,
@@ -282,14 +288,21 @@ fn test_null_stuff() -> Result<()> {
         ..Default::default()
     };
 
-    let input = r#"{
-        "optDef":null,
-        "req_def":"IAMREQ",
-        "bin":"MTIzNA"
-    }"#
-    .replace([' ', '\n'], "");
-    // Make sure everything is skipped properly
-    assert_eq!(sub, deserialize(input).unwrap());
+    let inputs = &[
+        r#"{                 "req_def": "IAMREQ", "bin": "MTIzNA" }"#,
+        r#"{ "optDef": null, "req_def": "IAMREQ", "bin": "MTIzNA" }"#,
+    ];
+    for input in inputs {
+        // Make sure everything is skipped properly
+        let res = deserialize(*input);
+        assert_eq!(
+            Some(&sub),
+            res.as_ref().ok(),
+            "INPUT={} RESULT={:?}",
+            input,
+            res
+        );
+    }
 
     Ok(())
 }

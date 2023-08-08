@@ -137,18 +137,22 @@ TEST(JsonTest, needCommasContainers) {
       std::exception);
 }
 
-TEST(JsonTest, nullStuff) {
+TEST(JsonTest, nullStuffDeser) {
+  // NOTE: Keep in sync with `test_null_stuff_deser` test in simplejson.rs
+
   SubStruct stru;
   stru.bin() = "1234";
 
-  SubStruct outStruct;
+  const std::string_view inputs[] = {
+      R"({                "req_def": "IAMREQ", "bin": "MTIzNA" })",
+      R"({"optDef": null, "req_def": "IAMREQ", "bin": "MTIzNA" })",
+  };
 
-  std::string input(
-      "{\"optDef\":null,"
-      "\"req_def\":\"IAMREQ\",\"bin\":\"MTIzNA\"}");
-
-  apache::thrift::SimpleJSONSerializer::deserialize(input, outStruct);
-  ASSERT_EQ(stru, outStruct);
+  for (const auto& input : inputs) {
+    SubStruct outStruct;
+    apache::thrift::SimpleJSONSerializer::deserialize(input, outStruct);
+    EXPECT_EQ(stru, outStruct) << input;
+  }
 }
 
 TEST(JsonTest, unknownUnion) {

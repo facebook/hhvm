@@ -15,6 +15,7 @@
  */
 
 #include <folly/CppAttributes.h>
+#include <thrift/lib/thrift/gen-cpp2/path_types.h>
 #include <thrift/lib/thrift/gen-cpp2/protocol_types.h>
 
 namespace apache::thrift::protocol {

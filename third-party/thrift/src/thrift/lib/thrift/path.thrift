@@ -17,12 +17,6 @@
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
 include "thrift/lib/thrift/id.thrift"
-include "thrift/lib/thrift/protocol_detail.thrift"
-include "thrift/lib/thrift/type.thrift"
-include "thrift/lib/thrift/standard.thrift"
-
-cpp_include "folly/container/F14Map.h"
-cpp_include "thrift/lib/thrift/detail/id.h"
 
 @thrift.v1alpha
 package "facebook.com/thrift/protocol"
@@ -36,31 +30,11 @@ namespace py.asyncio apache_thrift_asyncio.protocol
 namespace go thrift.lib.thrift.protocol
 namespace py thrift.lib.thrift.protocol
 
-typedef protocol_detail.Object Object (thrift.uri = "")
-typedef protocol_detail.Value Value (thrift.uri = "")
+@cpp.Adapter{
+  name = "::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::protocol::PathSegmentId>",
+}
+typedef id.ExternId PathSegmentId
 
-// Represents serialized data of unmasked fields.
-union MaskedData {
-  1: id.ValueId full;
-  // TODO(dokwon): Migrate to @thrift.Box after resolving incomplete type.
-  @cpp.Ref{type = cpp.RefType.Unique}
-  @cpp.Type{template = "folly::F14VectorMap"}
-  2: map<id.FieldId, MaskedData> fields;
-  @cpp.Ref{type = cpp.RefType.Unique}
-  @cpp.Type{template = "folly::F14VectorMap"}
-  3: map<id.ValueId, MaskedData> values;
-} (py3.hidden)
-
-struct EncodedValue {
-  1: type.BaseType wireType;
-  2: standard.ByteBuffer data;
-} (py3.hidden)
-
-// MaskedData uses ValueId to get encodedValues and map keys from the lists.
-@cpp.UseOpEncode
-struct MaskedProtocolData {
-  1: type.Protocol protocol;
-  2: MaskedData data;
-  3: list<EncodedValue> values;
-  4: list<Value> keys;
+struct Path {
+  1: list<PathSegmentId> path;
 } (py3.hidden)

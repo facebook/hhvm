@@ -169,8 +169,7 @@ mstch::node adapter_node(
   }
   bool is_transitive = (transitive_adapter_annotation != nullptr);
   mstch::map node{
-      {"adapter:name",
-       std::string(get_annotation_property(adapter_annotation, "name"))},
+      {"adapter:name", get_annotation_property(adapter_annotation, "name")},
       {"adapter:type_hint", std::string(type_hint)},
       {"adapter:is_generic?", is_generic},
       {"adapter:is_transitive?", is_transitive},
@@ -622,7 +621,7 @@ class python_mstch_program : public mstch_program {
       const std::unordered_set<std::string_view>& modules) {
     mstch::array a;
     for (const auto& m : modules) {
-      a.push_back(mstch::map{{"module_path", std::string(m)}});
+      a.push_back(mstch::map{{"module_path", m}});
     }
     return a;
   }
@@ -997,7 +996,7 @@ class python_mstch_struct : public mstch_struct {
     }
     return mstch::map{
         {"cpp_adapter:name",
-         std::string(get_annotation_property(adapter_annotation, "name"))},
+         get_annotation_property(adapter_annotation, "name")},
     };
   }
 
@@ -1258,12 +1257,11 @@ class python_mstch_const : public mstch_const {
   mstch::node has_adapter() { return adapter_annotation_ != nullptr; }
 
   mstch::node adapter_name() {
-    return std::string(get_annotation_property(adapter_annotation_, "name"));
+    return get_annotation_property(adapter_annotation_, "name");
   }
 
   mstch::node adapter_type_hint() {
-    return std::string(
-        get_annotation_property(adapter_annotation_, "typeHint"));
+    return get_annotation_property(adapter_annotation_, "typeHint");
   }
 
   mstch::node is_adapter_transitive() {

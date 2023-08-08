@@ -145,7 +145,10 @@ using node_base = boost::variant<
 
 struct node : internal::node_base<node> {
   using internal::node_base<node>::node_base;
+  /* implicit */ node(std::string_view sv)
+      : internal::node_base<node>(std::string(sv)) {}
 };
+
 using object = internal::object_t<node>;
 using lambda = internal::lambda_t<node>;
 using map = std::map<const std::string, node>;

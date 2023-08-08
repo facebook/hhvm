@@ -851,13 +851,13 @@ TEST_F(PatchTest, Map) {
 
 TEST_F(PatchTest, EnsureAndPatchObject) {
   // If field 1 doesn't exist, set it to an object that has field_2, whose
-  // value is 3
+  // value is 3.
   Value ensure;
   ensure.emplace_object()[FieldId{1}]
       .emplace_object()[FieldId{2}]
       .emplace_i32() = 3;
 
-  // Assign 5 to field 1's field 4
+  // Assign 5 to field 1's field 4.
   Value fieldPatch;
   fieldPatch.emplace_object()[FieldId{1}]
       .emplace_object()[FieldId(op::PatchOp::PatchPrior)]
@@ -870,11 +870,50 @@ TEST_F(PatchTest, EnsureAndPatchObject) {
       op::PatchOp::PatchAfter,
       fieldPatch);
 
-  // To ensure field 1, we need to read/write this field
-  Mask mask;
-  mask.includes_ref().emplace()[1] = allMask();
-  EXPECT_TRUE(checkReadWriteMask(extractMaskViewFromPatch(patchObj), mask));
-  EXPECT_TRUE(checkReadWriteMask(extractMaskFromPatch(patchObj), mask));
+  // For read, we need to read entire field.
+  // For write, we only need to write what we ensured or field patched.
+  Mask readMask, writeMask;
+  readMask.includes_ref().emplace()[1] = allMask();
+  auto& m = writeMask.includes_ref().emplace()[1];
+  m.includes_ref().ensure()[2] = allMask();
+  m.includes_ref().ensure()[4] = allMask();
+
+  EXPECT_TRUE(checkReadWriteMask(
+      extractMaskViewFromPatch(patchObj), readMask, writeMask));
+  EXPECT_TRUE(
+      checkReadWriteMask(extractMaskFromPatch(patchObj), readMask, writeMask));
+}
+
+TEST_F(PatchTest, EnsureAndPatchObject2) {
+  // If field 1 doesn't exist, set it to an object that has field_2, whose
+  // value is 3.
+  Value ensure;
+  ensure.emplace_object()[FieldId{1}]
+      .emplace_object()[FieldId{2}]
+      .emplace_i32() = 3;
+
+  // Assign empty struct to field 1.
+  Value fieldPatch;
+  fieldPatch.emplace_object()[FieldId{1}]
+      .emplace_object()[FieldId(op::PatchOp::Assign)]
+      .emplace_object();
+
+  auto patchObj = patchAddOperation(
+      makePatch(op::PatchOp::EnsureStruct, ensure),
+      op::PatchOp::PatchAfter,
+      fieldPatch);
+
+  // For read, we need to read entire field.
+  // For write, we need to write entire field since field patch assign entire
+  // field.
+  Mask readMask, writeMask;
+  readMask.includes_ref().emplace()[1] = allMask();
+  writeMask.includes_ref().emplace()[1] = allMask();
+
+  EXPECT_TRUE(checkReadWriteMask(
+      extractMaskViewFromPatch(patchObj), readMask, writeMask));
+  EXPECT_TRUE(
+      checkReadWriteMask(extractMaskFromPatch(patchObj), readMask, writeMask));
 }
 
 TEST_F(PatchTest, GeneratedMapPatch) {

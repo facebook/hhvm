@@ -531,10 +531,36 @@ void insertNextMask(
   }
 }
 
+// Ensure requires reading existing value to know whether the field is set or
+// not. We always generate allMask() read mask for it.
+void insertEnsureReadFieldsToMask(Mask& mask, const Value& ensureFields) {
+  const auto& obj = ensureFields.as_object();
+  auto getIncludesObjRef = [&](Mask& m) { return m.includes_ref(); };
+  for (const auto& [id, value] : obj) {
+    insertMask(mask, id, allMask(), getIncludesObjRef);
+  }
+}
+
+// Ensure only requires writing fields that exists in the patch. Recurse
+// EnsureStruct and put allMask() iff current mask is not allMask and the field
+// was never included in the write mask before.
+void insertEnsureWriteFieldsToMask(Mask& mask, const Value& ensureFields) {
+  const auto& obj = ensureFields.as_object();
+  for (const auto& [id, value] : obj) {
+    if (mask == allMask()) {
+      continue;
+    }
+    mask.includes_ref().ensure().emplace(id, allMask());
+    if (const auto* nestedObj = value.if_object()) {
+      insertEnsureWriteFieldsToMask((*mask.includes_ref())[id], value);
+    }
+  }
+}
+
 // If recursive, it constructs the mask from the patch object for the field.
-// If view, it uses address of Value to populate map mask. If not view, it uses
-// the appropriate integer map mask and string map mask after parsing from
-// Value.
+// If view, it uses address of Value to populate map mask. If not view, it
+// uses the appropriate integer map mask and string map mask after parsing
+// from Value.
 void insertFieldsToMask(
     ExtractedMasks& masks,
     const Value& patchFields,
@@ -548,10 +574,9 @@ void insertFieldsToMask(
   if (const auto* obj = patchFields.if_object()) {
     auto getIncludesObjRef = [&](Mask& mask) { return mask.includes_ref(); };
     for (const auto& [id, value] : *obj) {
-      // Object patch can get here only for ensure or patch* operations
-      // both require reading existing value to know if/how given operations
-      // can/should be applied. Hence always generate allMask() read mask for
-      // them.
+      // Object patch can get here only patch* operations, which require
+      // reading existing value to know if/how given operations can/should be
+      // applied. Hence always generate allMask() read mask for them.
       insertMask(masks.read, id, allMask(), getIncludesObjRef);
       insertNextMask(masks, value, id, id, recursive, view, getIncludesObjRef);
     }
@@ -616,16 +641,21 @@ ExtractedMasks extractMaskFromPatch(const protocol::Object& patch, bool view) {
     }
   }
 
-  // If EnsureStruct, add the fields/ keys to mask
-  if (auto* ensureStruct = findOp(patch, PatchOp::EnsureStruct)) {
-    insertFieldsToMask(masks, *ensureStruct, false, view);
-  }
-
   // If PatchPrior or PatchAfter, recursively constructs the mask for the
   // fields.
   for (auto op : {PatchOp::PatchPrior, PatchOp::PatchAfter}) {
     if (auto* patchFields = findOp(patch, op)) {
       insertFieldsToMask(masks, *patchFields, true, view);
+    }
+  }
+
+  // If EnsureStruct, add the fields/ keys to mask.
+  if (auto* ensureStruct = findOp(patch, PatchOp::EnsureStruct)) {
+    if (ensureStruct->if_object()) {
+      insertEnsureReadFieldsToMask(masks.read, *ensureStruct);
+      insertEnsureWriteFieldsToMask(masks.write, *ensureStruct);
+    } else {
+      insertFieldsToMask(masks, *ensureStruct, false, view);
     }
   }
 

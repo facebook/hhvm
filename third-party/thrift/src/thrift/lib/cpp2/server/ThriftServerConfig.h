@@ -817,7 +817,6 @@ class ThriftServerConfig {
 class ThriftServerInitialConfig {
  public:
   FOLLY_CONSTEVAL ThriftServerInitialConfig() = default;
-  ThriftServerInitialConfig(const ThriftServerInitialConfig& rhs) = default;
 
   // to fix oss for now we'll have this as a pair<T, bool> to mimick the
   // behavior of optional

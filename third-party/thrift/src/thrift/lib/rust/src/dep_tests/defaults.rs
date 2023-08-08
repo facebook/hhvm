@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
-#![deny(warnings)]
-mod as_exception;
-mod binary;
-mod compact;
-mod consts;
-mod defaults;
-mod exceptions;
-mod proptest;
-mod simplejson;
+#[test]
+fn test_defaults() {
+    // NOTE: Keep in sync with `defaults` test in cpp_compat_test
+
+    let sub = fbthrift_test_if::SubStruct::default();
+
+    // Note that the default value for optional with default with
+    // `deprecated_optional_with_default_is_some` flag is NOT the same
+    // as in C++
+    assert_eq!(sub.optDef.as_deref(), Some("IAMOPT"));
+
+    assert_eq!(sub.req_def, "IAMREQ");
+    assert!(sub.key_map.is_none());
+    assert!(sub.bin.is_empty());
+}

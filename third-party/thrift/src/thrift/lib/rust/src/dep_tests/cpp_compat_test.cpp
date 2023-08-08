@@ -162,7 +162,19 @@ TEST(JsonTest, unknownUnion) {
   ASSERT_EQ(t, "{}");
 }
 
+TEST(DefaultsTest, defaults) {
+  // NOTE: Keep in sync with `test_defaults` test in defaults.rs
+
+  SubStruct stru;
+  ASSERT_FALSE(stru.optDef().has_value());
+  ASSERT_EQ("IAMREQ", stru.req_def());
+  ASSERT_FALSE(stru.key_map().has_value());
+  ASSERT_TRUE(stru.bin()->empty());
+}
+
 TEST(ConstsTest, consts) {
+  // NOTE: Keep in sync with `test_consts` test in consts.rs
+
   const auto def = test_thrift_constants::DEFAULT_SUBSTRUCT();
   ASSERT_EQ(SubStruct(), def);
 

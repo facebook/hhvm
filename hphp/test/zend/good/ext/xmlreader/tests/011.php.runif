@@ -1,2 +1,1 @@
 extension xmlreader
-method XMLReader readInnerXML

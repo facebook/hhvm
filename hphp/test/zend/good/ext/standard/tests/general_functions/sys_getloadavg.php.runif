@@ -1,1 +1,1 @@
-function sys_getloadavg
+extension standard

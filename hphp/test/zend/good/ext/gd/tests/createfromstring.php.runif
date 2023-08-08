@@ -1,2 +1,1 @@
-function imagecreatefromstring
-function imagepng
+extension gd

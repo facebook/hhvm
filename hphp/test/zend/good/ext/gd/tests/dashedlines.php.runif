@@ -1,1 +1,1 @@
-function imagecreatefromstring
+extension gd

@@ -269,11 +269,7 @@ static bool HHVM_FUNCTION(readline_write_history,
 static struct ReadlineExtension final : Extension {
     ReadlineExtension() : Extension("readline", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
     void moduleInit() override {
-#ifdef USE_EDITLINE
-      HHVM_RC_STR(READLINE_LIB, "libedit");
-#else
       HHVM_RC_STR(READLINE_LIB, "readline");
-#endif
       HHVM_FE(readline);
       HHVM_FE(readline_add_history);
       HHVM_FE(readline_clear_history);

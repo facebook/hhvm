@@ -1,2 +1,2 @@
-function money_format
+extension string
 locale LC_MONETARY en_US

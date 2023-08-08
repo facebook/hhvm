@@ -1,4 +1,1 @@
 extension gd
-function imagegif
-function imagecreatefromgif
-function imagecreatefromjpeg

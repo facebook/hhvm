@@ -1,3 +1,2 @@
 extension xmlreader
 extension dom
-method XMLReader expand

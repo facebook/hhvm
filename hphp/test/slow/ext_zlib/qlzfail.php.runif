@@ -1,1 +1,1 @@
-function qlzcompress
+extension zlib-qlz

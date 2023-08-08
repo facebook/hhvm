@@ -1,5 +1,4 @@
 <?hh
 <<__EntryPoint>> function main(): void {
   if (!is_executable("/bin/cat")) die("skip");
-  if (!function_exists("proc_open")) die("skip proc_open() is not available");
 }

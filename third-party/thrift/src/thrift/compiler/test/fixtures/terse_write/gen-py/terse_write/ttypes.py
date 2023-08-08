@@ -116,7 +116,6 @@ class MyStruct:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -795,7 +794,6 @@ class MyStructWithCustomDefault:
       'field1',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -1213,7 +1211,6 @@ class StructLevelTerseStruct:
       'union_field',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -1959,7 +1956,6 @@ class FieldLevelTerseStruct:
       'union_field',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -2358,7 +2354,6 @@ class TerseStructWithCustomDefault:
       'struct_field',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -2505,7 +2500,6 @@ class AdaptedFields:
       'field3',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -2614,7 +2608,6 @@ class WrappedFields:
       'field1',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -2731,7 +2724,6 @@ class TerseException(TException):
       'msg',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):

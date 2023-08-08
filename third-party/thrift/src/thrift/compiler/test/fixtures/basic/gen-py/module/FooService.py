@@ -123,7 +123,6 @@ class simple_rpc_args:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(simple_rpc_args)
@@ -203,7 +202,6 @@ class simple_rpc_result:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(simple_rpc_result)

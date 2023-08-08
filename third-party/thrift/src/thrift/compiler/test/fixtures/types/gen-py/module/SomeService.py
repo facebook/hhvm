@@ -165,7 +165,6 @@ class bounce_map_args:
       'm',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(bounce_map_args)
@@ -281,7 +280,6 @@ class bounce_map_result:
       'success',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(bounce_map_result)
@@ -393,7 +391,6 @@ class binary_keyed_map_args:
       'r',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(binary_keyed_map_args)
@@ -509,7 +506,6 @@ class binary_keyed_map_result:
       'success',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(binary_keyed_map_result)

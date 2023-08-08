@@ -123,7 +123,6 @@ class InitialResponse:
       'content',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -230,7 +229,6 @@ class FinalResponse:
       'content',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -337,7 +335,6 @@ class SinkPayload:
       'content',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -444,7 +441,6 @@ class CompatibleWithKeywordSink:
       'sink',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -558,7 +554,6 @@ class InitialException(TException):
       'reason',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -672,7 +667,6 @@ class SinkException1(TException):
       'reason',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -786,7 +780,6 @@ class SinkException2(TException):
       'reason',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):

@@ -120,7 +120,6 @@ class ping_args:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(ping_args)
@@ -187,7 +186,6 @@ class ping_result:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(ping_result)
@@ -273,7 +271,6 @@ class echo_args:
       'input',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(echo_args)
@@ -372,7 +369,6 @@ class echo_result:
       'success',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(echo_result)

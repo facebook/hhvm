@@ -138,7 +138,6 @@ class empty_struct:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -230,7 +229,6 @@ class decorated_struct:
       'field',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -537,7 +535,6 @@ class ContainerStruct:
       'fieldA',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -642,7 +639,6 @@ class CppTypeStruct:
       'fieldA',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -734,7 +730,6 @@ class VirtualStruct:
       'MyIntField',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -841,7 +836,6 @@ class MyStructWithForwardRefEnum:
       'b',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -948,7 +942,6 @@ class TrivialNumeric:
       'b',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -1056,7 +1049,6 @@ class TrivialNestedWithDefault:
       'n',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -1179,7 +1171,6 @@ class ComplexString:
       'b',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -1287,7 +1278,6 @@ class ComplexNestedWithDefault:
       'n',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -1439,7 +1429,6 @@ class MinPadding:
       'tiny',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -1591,7 +1580,6 @@ class MinPaddingWithCustomType:
       'tiny',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -1729,7 +1717,6 @@ class MyStruct:
       'data',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -1802,7 +1789,6 @@ class MyDataItem:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -1894,7 +1880,6 @@ class Renaming:
       'foo',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -2042,7 +2027,6 @@ class AnnotatedTypes:
       'list_field',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -2151,7 +2135,6 @@ class ForwardUsageRoot:
       'ForwardUsageByRef',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -2244,7 +2227,6 @@ class ForwardUsageStruct:
       'foo',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -2337,7 +2319,6 @@ class ForwardUsageByRef:
       'foo',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -2447,7 +2428,6 @@ class IncompleteMap:
       'field',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -2520,7 +2500,6 @@ class IncompleteMapDep:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -2630,7 +2609,6 @@ class CompleteMap:
       'field',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -2703,7 +2681,6 @@ class CompleteMapDep:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -2810,7 +2787,6 @@ class IncompleteList:
       'field',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -2883,7 +2859,6 @@ class IncompleteListDep:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -2990,7 +2965,6 @@ class CompleteList:
       'field',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -3063,7 +3037,6 @@ class CompleteListDep:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -3170,7 +3143,6 @@ class AdaptedList:
       'field',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -3263,7 +3235,6 @@ class AdaptedListDep:
       'field',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -3370,7 +3341,6 @@ class DependentAdaptedList:
       'field',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -3462,7 +3432,6 @@ class DependentAdaptedListDep:
       'field',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -3686,7 +3655,6 @@ class AllocatorAware:
       'aa_shared',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -3793,7 +3761,6 @@ class AllocatorAware2:
       'box_field',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -3915,7 +3882,6 @@ class TypedefStruct:
       'UintTypedef_field',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -4007,7 +3973,6 @@ class StructWithDoubleUnderscores:
       '__field',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):

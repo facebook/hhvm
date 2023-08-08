@@ -212,7 +212,6 @@ class Internship:
       'school',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -319,7 +318,6 @@ class Range:
       'max',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -426,7 +424,6 @@ class struct1:
       'b',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -577,7 +574,6 @@ class struct2:
       'd',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -700,7 +696,6 @@ class struct3:
       'c',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -822,7 +817,6 @@ class struct4:
       'c',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):

@@ -183,7 +183,6 @@ class MyAnnotation:
       'color',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -586,7 +585,6 @@ class Foo:
       'doubleAdaptedField',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -1159,7 +1157,6 @@ class Bar:
       'adaptedStructField',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -1268,7 +1265,6 @@ class DirectlyAdapted:
       'field',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -1377,7 +1373,6 @@ class IndependentDirectlyAdapted:
       'field',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -1543,7 +1538,6 @@ class StructWithFieldAdapter:
       'opt_boxed_field',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -1703,7 +1697,6 @@ class TerseAdaptedFields:
       'set_field',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -1812,7 +1805,6 @@ class B:
       'a',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -1898,7 +1890,6 @@ class A:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -2005,7 +1996,6 @@ class Config:
       'path',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -2146,7 +2136,6 @@ class MyStruct:
       'set_string',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -2408,7 +2397,6 @@ class AdaptTestStruct:
       'binary_data',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -2988,7 +2976,6 @@ class AdaptTemplatedTestStruct:
       'doubleTypedefBool',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -3097,7 +3084,6 @@ class AdaptTemplatedNestedTestStruct:
       'adaptedStruct',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -3357,7 +3343,6 @@ class AdaptedStruct:
       'data',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -3464,7 +3449,6 @@ class DirectlyAdaptedStruct:
       'data',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -3630,7 +3614,6 @@ class StructFieldAdaptedStruct:
       'typedefOfAdapted',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -3739,7 +3722,6 @@ class CircularAdaptee:
       'field',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -3848,7 +3830,6 @@ class CircularStruct:
       'field',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -3957,7 +3938,6 @@ class ReorderedStruct:
       'reordered_dependent_adapted',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -4043,7 +4023,6 @@ class DeclaredAfterStruct:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -4150,7 +4129,6 @@ class RenamedStruct:
       'data',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -4257,7 +4235,6 @@ class SameNamespaceStruct:
       'data',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -4343,7 +4320,6 @@ class HeapAllocated:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -4452,7 +4428,6 @@ class MoveOnly:
       'ptr',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -4559,7 +4534,6 @@ class AlsoMoveOnly:
       'ptr',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -4645,7 +4619,6 @@ class ApplyAdapter:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -4731,7 +4704,6 @@ class TransitiveAdapted:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -4872,7 +4844,6 @@ class CountingStruct:
       'regularString',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -4979,7 +4950,6 @@ class Person:
       'name',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -5086,7 +5056,6 @@ class Person2:
       'name',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):

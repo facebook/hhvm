@@ -181,7 +181,6 @@ class query_args:
       'i',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(query_args)
@@ -265,7 +264,6 @@ class query_result:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(query_result)
@@ -368,7 +366,6 @@ class has_arg_docs_args:
       'i',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(has_arg_docs_args)
@@ -452,7 +449,6 @@ class has_arg_docs_result:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(has_arg_docs_result)

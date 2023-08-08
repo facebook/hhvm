@@ -166,7 +166,6 @@ class getDataByKey0_args:
       'key',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(getDataByKey0_args)
@@ -281,7 +280,6 @@ class getDataByKey0_result:
       'success',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(getDataByKey0_result)
@@ -395,7 +393,6 @@ class getDataByKey1_args:
       'key',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(getDataByKey1_args)
@@ -510,7 +507,6 @@ class getDataByKey1_result:
       'success',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(getDataByKey1_result)

@@ -135,7 +135,6 @@ class foo_args:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(foo_args)
@@ -215,7 +214,6 @@ class foo_result:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(foo_result)
@@ -295,7 +293,6 @@ class bar_args:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(bar_args)
@@ -375,7 +372,6 @@ class bar_result:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(bar_result)
@@ -455,7 +451,6 @@ class baz_args:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(baz_args)
@@ -535,7 +530,6 @@ class baz_result:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(baz_result)

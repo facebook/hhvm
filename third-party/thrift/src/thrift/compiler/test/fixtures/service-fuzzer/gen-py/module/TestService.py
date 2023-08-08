@@ -388,7 +388,6 @@ class init_args:
       'int16',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(init_args)
@@ -533,7 +532,6 @@ class init_result:
       'success',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(init_result)

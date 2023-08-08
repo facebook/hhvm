@@ -143,7 +143,6 @@ class foo_args:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(foo_args)
@@ -223,7 +222,6 @@ class foo_result:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(foo_result)
@@ -326,7 +324,6 @@ class interact_args:
       'arg',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(interact_args)
@@ -420,7 +417,6 @@ class interact_result:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(interact_result)
@@ -500,7 +496,6 @@ class interactFast_args:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(interactFast_args)
@@ -603,7 +598,6 @@ class interactFast_result:
       'success',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(interactFast_result)

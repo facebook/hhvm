@@ -163,7 +163,6 @@ class Foo:
       'field1',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -310,7 +309,6 @@ class Foo2:
       'field1',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):

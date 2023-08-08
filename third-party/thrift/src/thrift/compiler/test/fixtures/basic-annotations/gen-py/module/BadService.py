@@ -131,7 +131,6 @@ class bar_args:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(bar_args)
@@ -234,7 +233,6 @@ class bar_result:
       'success',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(bar_result)

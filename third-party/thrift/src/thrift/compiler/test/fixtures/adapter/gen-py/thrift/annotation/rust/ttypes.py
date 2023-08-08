@@ -123,7 +123,6 @@ class Adapter:
       'name',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -245,7 +244,6 @@ class Derive:
       'derives',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -352,7 +350,6 @@ class ServiceExn:
       'anyhow_to_application_exn',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):

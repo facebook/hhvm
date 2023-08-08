@@ -195,7 +195,6 @@ class func_args:
       'arg3',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(func_args)
@@ -318,7 +317,6 @@ class func_result:
       'success',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(func_result)

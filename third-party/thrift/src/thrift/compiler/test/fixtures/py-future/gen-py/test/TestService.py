@@ -140,7 +140,6 @@ class sleep_args:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(sleep_args)
@@ -207,7 +206,6 @@ class sleep_result:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(sleep_result)
@@ -293,7 +291,6 @@ class isPrime_args:
       'num',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(isPrime_args)
@@ -392,7 +389,6 @@ class isPrime_result:
       'success',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(isPrime_result)
@@ -472,7 +468,6 @@ class getResult_args:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(getResult_args)
@@ -559,7 +554,6 @@ class getResult_result:
       'success',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(getResult_result)

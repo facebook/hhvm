@@ -156,7 +156,6 @@ class MyData:
       'data2',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -282,7 +281,6 @@ class MyDataWithCustomDefault:
       'data2',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -1436,7 +1434,6 @@ class MyStruct:
       'structWithFieldCustomDefault',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -1522,7 +1519,6 @@ class LateDefStruct:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -1652,7 +1648,6 @@ class Recursive:
       'nodes',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -1761,7 +1756,6 @@ class Bar:
       'loop',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -1870,7 +1864,6 @@ class Loop:
       'bar',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -2092,7 +2085,6 @@ class MyDataPatch:
       'remove',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -2220,7 +2212,6 @@ class MyDataFieldPatch:
       'data2',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -2346,7 +2337,6 @@ class MyDataEnsureStruct:
       'data2',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -2568,7 +2558,6 @@ class MyDataWithCustomDefaultPatch:
       'remove',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -2696,7 +2685,6 @@ class MyDataWithCustomDefaultFieldPatch:
       'data2',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -2822,7 +2810,6 @@ class MyDataWithCustomDefaultEnsureStruct:
       'data2',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -3010,7 +2997,6 @@ class InnerUnionPatch:
       'patch',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -3119,7 +3105,6 @@ class InnerUnionFieldPatch:
       'innerOption',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -3307,7 +3292,6 @@ class MyUnionPatch:
       'patch',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -3454,7 +3438,6 @@ class MyUnionFieldPatch:
       'option3',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -3676,7 +3659,6 @@ class MyStructPatch:
       'remove',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -3811,7 +3793,6 @@ class MyStructField10Patch:
       'clear',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -3946,7 +3927,6 @@ class MyStructField23Patch:
       'clear',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -4160,7 +4140,6 @@ class MyStructField26Patch:
       'append',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -4368,7 +4347,6 @@ class MyStructField27Patch:
       'add',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -4700,7 +4678,6 @@ class MyStructField28Patch:
       'put',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -5010,7 +4987,6 @@ class MyStructField29Patch:
       'append',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -5444,7 +5420,6 @@ class MyStructField30Patch:
       'put',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -5782,7 +5757,6 @@ class MyStructField30Patch1:
       'put',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -6499,7 +6473,6 @@ class MyStructFieldPatch:
       'structWithFieldCustomDefault',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -7343,7 +7316,6 @@ class MyStructEnsureStruct:
       'structWithFieldCustomDefault',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -7565,7 +7537,6 @@ class LateDefStructPatch:
       'remove',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -7651,7 +7622,6 @@ class LateDefStructFieldPatch:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -7737,7 +7707,6 @@ class LateDefStructEnsureStruct:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -7959,7 +7928,6 @@ class RecursivePatch:
       'remove',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -8111,7 +8079,6 @@ class RecursiveField1Patch:
       'clear',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -8220,7 +8187,6 @@ class RecursiveFieldPatch:
       'nodes',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -8350,7 +8316,6 @@ class RecursiveEnsureStruct:
       'nodes',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -8572,7 +8537,6 @@ class BarPatch:
       'remove',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -8681,7 +8645,6 @@ class BarFieldPatch:
       'loop',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -8790,7 +8753,6 @@ class BarEnsureStruct:
       'loop',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):
@@ -8921,7 +8883,6 @@ class LoopPatch:
       'clear',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
   def _to_python(self):

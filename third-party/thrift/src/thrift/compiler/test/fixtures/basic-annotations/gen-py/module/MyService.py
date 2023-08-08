@@ -195,7 +195,6 @@ class ping_args:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(ping_args)
@@ -298,7 +297,6 @@ class ping_result:
       'myExcept',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(ping_result)
@@ -392,7 +390,6 @@ class getRandomData_args:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(getRandomData_args)
@@ -493,7 +490,6 @@ class getRandomData_result:
       'success',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(getRandomData_result)
@@ -607,7 +603,6 @@ class hasDataById_args:
       'id',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(hasDataById_args)
@@ -722,7 +717,6 @@ class hasDataById_result:
       'success',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(hasDataById_result)
@@ -836,7 +830,6 @@ class getDataById_args:
       'id',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(getDataById_args)
@@ -951,7 +944,6 @@ class getDataById_result:
       'success',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(getDataById_result)
@@ -1082,7 +1074,6 @@ class putDataById_args:
       'data',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(putDataById_args)
@@ -1179,7 +1170,6 @@ class putDataById_result:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(putDataById_result)
@@ -1297,7 +1287,6 @@ class lobDataById_args:
       'data',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(lobDataById_args)
@@ -1397,7 +1386,6 @@ class doNothing_args:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(doNothing_args)
@@ -1477,7 +1465,6 @@ class doNothing_result:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(doNothing_result)

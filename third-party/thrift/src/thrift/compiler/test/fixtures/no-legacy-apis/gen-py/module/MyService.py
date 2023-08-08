@@ -154,7 +154,6 @@ class query_args:
       'u',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(query_args)
@@ -271,7 +270,6 @@ class query_result:
       'success',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(query_result)

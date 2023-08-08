@@ -140,7 +140,6 @@ class count_args:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(count_args)
@@ -243,7 +242,6 @@ class count_result:
       'success',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(count_result)
@@ -359,7 +357,6 @@ class adaptedTypes_args:
       'arg',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(adaptedTypes_args)
@@ -476,7 +473,6 @@ class adaptedTypes_result:
       'success',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(adaptedTypes_result)

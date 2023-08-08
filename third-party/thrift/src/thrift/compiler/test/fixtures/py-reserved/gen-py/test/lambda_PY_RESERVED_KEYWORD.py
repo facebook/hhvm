@@ -158,7 +158,6 @@ class global_args:
       'raise_PY_RESERVED_KEYWORD',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(global_args)
@@ -273,7 +272,6 @@ class global_PY_RESERVED_KEYWORD_result:
       'success',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(global_PY_RESERVED_KEYWORD_result)
@@ -366,7 +364,6 @@ class import_args:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(import_args)
@@ -469,7 +466,6 @@ class import_PY_RESERVED_KEYWORD_result:
       'success',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(import_PY_RESERVED_KEYWORD_result)

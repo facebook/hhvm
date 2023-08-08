@@ -124,7 +124,6 @@ class doBland_args:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(doBland_args)
@@ -191,7 +190,6 @@ class doBland_result:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(doBland_result)
@@ -258,7 +256,6 @@ class doRaise_args:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(doRaise_args)
@@ -377,7 +374,6 @@ class doRaise_result:
       's',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(doRaise_result)
@@ -464,7 +460,6 @@ class get200_args:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(get200_args)
@@ -550,7 +545,6 @@ class get200_result:
       'success',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(get200_result)
@@ -630,7 +624,6 @@ class get500_args:
     return (
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(get500_args)
@@ -764,7 +757,6 @@ class get500_result:
       's',
     )
 
-  # Override the __hash__ function for Python3 - t10434117
   __hash__ = object.__hash__
 
 all_structs.append(get500_result)

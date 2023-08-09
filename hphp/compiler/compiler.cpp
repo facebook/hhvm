@@ -303,30 +303,30 @@ struct SymbolSets {
     add(units, path, path, "unit");
 
     for (auto const pce : ue.preclasses()) {
-      pce->setAttrs(pce->attrs() | AttrUnique | AttrPersistent);
+      pce->setAttrs(pce->attrs() | AttrPersistent);
       if (pce->attrs() & AttrEnum) add(enums, pce->name(), path, "enum");
       add(classes, pce->name(), path, "class", typeAliases);
     }
     for (auto& fe : ue.fevec()) {
       if (fe->attrs & AttrIsMethCaller) {
         if (addNoFail(funcs, fe->name, path, "function")) {
-          fe->attrs |= AttrUnique | AttrPersistent;
+          fe->attrs |= AttrPersistent;
         }
       } else {
-        fe->attrs |= AttrUnique | AttrPersistent;
+        fe->attrs |= AttrPersistent;
         add(funcs, fe->name, path, "function");
       }
     }
     for (auto& te : ue.typeAliases()) {
-      te->setAttrs(te->attrs() | AttrUnique | AttrPersistent);
+      te->setAttrs(te->attrs() | AttrPersistent);
       add(typeAliases, te->name(), path, "type alias", classes);
     }
     for (auto& c : ue.constants()) {
-      c.attrs |= AttrUnique | AttrPersistent;
+      c.attrs |= AttrPersistent;
       add(constants, c.name, path, "constant");
     }
     for (auto& m : ue.modules()) {
-      m.attrs |= AttrUnique | AttrPersistent;
+      m.attrs |= AttrPersistent;
       add(modules, m.name, path, "module");
     }
   }

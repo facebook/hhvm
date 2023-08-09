@@ -278,10 +278,6 @@ inline void Class::initRTAttributes(uint8_t a) {
   m_RTAttrs |= a;
 }
 
-inline bool Class::isUnique() const {
-  return attrs() & AttrUnique;
-}
-
 inline bool Class::isPersistent() const {
   return attrs() & AttrPersistent;
 }
@@ -733,8 +729,10 @@ inline bool isAbstract(const Class* cls) {
 }
 
 inline bool classHasPersistentRDS(const Class* cls) {
-  return cls != nullptr &&
+  auto const persistent = cls != nullptr &&
     rds::isPersistentHandle(cls->classHandle());
+  assertx(!cls || persistent == cls->isPersistent());
+  return persistent;
 }
 
 inline const StringData* classToStringHelper(const Class* cls) {
@@ -767,7 +765,7 @@ inline const Class* Class::lookupUniqueInContext(const NamedType* ne,
                                                  const Unit* unit) {
   Class* cls = ne->clsList();
   if (UNLIKELY(cls == nullptr)) return nullptr;
-  if (cls->attrs() & AttrUnique) return cls;
+  if (cls->attrs() & AttrPersistent) return cls;
   if (unit && cls->preClass()->unit() == unit) return cls;
   if (!ctx) return nullptr;
   return ctx->getClassDependency(cls->name());

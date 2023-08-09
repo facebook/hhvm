@@ -831,7 +831,7 @@ Type typeFromTV(tv_rval tv, const Class* ctx) {
     // now. If this changes, then this will need to specialize on sub object
     // types instead.
     if (!(cls->attrs() & AttrNoOverrideRegular) ||
-        (!(cls->attrs() & AttrUnique) && (!ctx || !ctx->classof(cls)))) {
+        (!(cls->attrs() & AttrPersistent) && (!ctx || !ctx->classof(cls)))) {
       return TObj;
     }
     return Type::ExactObj(cls);

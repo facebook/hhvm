@@ -99,7 +99,6 @@ void PreClass::prettyPrint(std::ostream &out) const {
       out << " (no-override-regular)";
     }
   }
-  if (m_attrs & AttrUnique)     out << " (unique)";
   if (m_attrs & AttrPersistent) out << " (persistent)";
   if (m_attrs & AttrIsConst) {
     // AttrIsConst classes will always also have AttrForbidDynamicProps set,

@@ -195,7 +195,7 @@ APCHandle::Pair APCObject::ConstructSlow(ObjectData* objectData,
       } else {
         // Private.
         auto* ctx = Class::lookup(cls.get());
-        if (ctx && ctx->attrs() & AttrUnique) {
+        if (ctx && ctx->attrs() & AttrPersistent) {
           prop->ctx = ctx;
         } else {
           prop->ctx = makeStaticString(cls.get());

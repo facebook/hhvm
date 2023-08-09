@@ -842,7 +842,6 @@ pub fn emit_class<'a, 'arena, 'decl>(
     flags.set(Attr::AttrPersistent, is_systemlib);
     flags.set(Attr::AttrSealed, is_sealed);
     flags.set(Attr::AttrTrait, is_trait);
-    flags.set(Attr::AttrUnique, is_systemlib);
     flags.set(Attr::AttrEnumClass, hhbc::has_enum_class(&attributes));
     flags.set(Attr::AttrIsFoldable, hhbc::has_foldable(&attributes));
     flags.set(

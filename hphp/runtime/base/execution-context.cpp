@@ -1399,7 +1399,7 @@ void ExecutionContext::requestInit() {
 
   *rl_num_coeffect_violations = 0;
 
-  if (RuntimeOption::EvalJitEnableRenameFunction) {
+  if (RuntimeOption::EvalJitEnableRenameFunction == 1) {
     assertx(SystemLib::s_anyNonPersistentBuiltins);
   }
 
@@ -1408,11 +1408,9 @@ void ExecutionContext::requestInit() {
    * persistent, and every systemlib unit is accordingly going to be
    * merge only.
    *
-   * However, if we have rename_function generally enabled, or if any
-   * builtin functions were specified as interceptable at
-   * repo-generation time, we'll actually need to merge systemlib on
-   * every request because some of the builtins will not be marked
-   * persistent.
+   * However, if we have builtins that are renamable, we'll actually
+   * need to merge systemlib on every request because some of the
+   * builtins will not be marked persistent.
    */
   if (UNLIKELY(SystemLib::s_anyNonPersistentBuiltins)) {
     SystemLib::mergePersistentUnits();

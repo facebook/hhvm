@@ -1,0 +1,42 @@
+vec(16) {
+  string(5) "<?hh
+"
+  string(1) "
+"
+  string(42) "function test_file($file) : vec<string> {
+"
+  string(51) "  return HH\Lib\Vec\take(original_file($file), 2);
+"
+  string(2) "}
+"
+  string(1) "
+"
+  string(17) "<<__EntryPoint>>
+"
+  string(24) "function main(): void {
+"
+  string(28) "  var_dump(file(__FILE__));
+"
+  string(1) "
+"
+  string(47) "  fb_rename_function("file", "original_file");
+"
+  string(43) "  fb_rename_function("test_file", "file");
+"
+  string(28) "  var_dump(file(__FILE__));
+"
+  string(1) "
+"
+  string(52) "  fb_rename_function("HH\Lib\Vec\map", "test_map");
+"
+  string(2) "}
+"
+}
+vec(2) {
+  string(5) "<?hh
+"
+  string(1) "
+"
+}
+
+Fatal error: fb_rename_function must be explicitly enabled for HH\Lib\Vec\map (when Eval.JitEnableRenameFunction=2 by adding it to option Eval.RenamableFunctions) in %s/systemlib_rename_function.php on line %d

@@ -182,7 +182,7 @@ void init() {
         auto const cls = Class::lookupUniqueInContext(
           item.first, nullptr, nullptr);
         if (cls) {
-          assertx(cls->attrs() & AttrUnique);
+          assertx(cls->attrs() & AttrPersistent);
           s_instanceBitsMap[item.first] = i;
           accum += item.second;
           ++i;

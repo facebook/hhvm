@@ -1284,8 +1284,7 @@ void translateClass(TranslationState& ts, const hhbc::Class& c) {
   translateUserAttributes(c.attributes, userAttrs);
   auto attrs = c.flags;
   assertx(IMPLIES(ts.isSystemLib, attrs & AttrPersistent &&
-                                  attrs & AttrBuiltin &&
-                                  attrs & AttrUnique));
+                                  attrs & AttrBuiltin));
 
   auto const parentName = maybeOrElse(c.base,
     [&](ClassName& s) { return toStaticString(s._0); },

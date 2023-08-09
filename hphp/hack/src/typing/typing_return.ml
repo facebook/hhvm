@@ -212,7 +212,8 @@ let make_return_type
         let et_enforced =
           match et_enforced with
           | Unenforced ->
-            Typing_log.log_pessimise_return env hint_pos None;
+            if not (Env.get_no_auto_likes env) then
+              Typing_log.log_pessimise_return env hint_pos None;
             (* Return type is not fully enforced according to the naive check
              * in Typing_enforceability. Let's now ask for what type it is actually
              * enforced at. If this is a subtype of the Hack type, then we can

@@ -1078,14 +1078,12 @@ let class_var_def ~is_static ~is_noautodynamic cls env cv =
         match cty.et_enforced with
         | Enforced when is_none cv.cv_xhp_attr -> cty
         | _ ->
-          if
-            TCO.everything_sdt env.genv.tcopt
-            && (not is_noautodynamic)
-            && not no_auto_likes
-          then
+          let add_like = (not is_noautodynamic) && not no_auto_likes in
+          if TCO.everything_sdt env.genv.tcopt && add_like then
             { cty with et_type = TUtils.make_like env cty.et_type }
           else (
-            Typing_log.log_pessimise_prop env (fst cv.cv_id) (snd cv.cv_id);
+            if add_like then
+              Typing_log.log_pessimise_prop env (fst cv.cv_id) (snd cv.cv_id);
             cty
           )
       in

@@ -20,11 +20,15 @@ from folly.iobuf cimport cIOBuf
 
 INT8_MIN = stdint.INT8_MIN
 INT8_MAX = stdint.INT8_MAX
+INT16_MIN = stdint.INT16_MIN
+INT16_MAX = stdint.INT16_MAX
 INT32_MIN = stdint.INT32_MIN
 INT32_MAX = stdint.INT32_MAX
-UINT32_MAX = stdint.UINT32_MAX
 INT64_MIN = stdint.INT64_MIN
 INT64_MAX = stdint.INT64_MAX
+UINT8_MAX = stdint.UINT8_MAX
+UINT16_MAX = stdint.UINT16_MAX
+UINT32_MAX = stdint.UINT32_MAX
 UINT64_MAX = stdint.UINT64_MAX
 
 
@@ -48,12 +52,23 @@ cdef extern from "thrift/lib/python/capi/test/marshal_fixture.h" namespace "apac
     cdef object __roundtrip_unicode_val_map[K](object)
     cdef object __make_unicode_val_map(object)
 
+def roundtrip_int8(object x):
+    return __roundtrip_pyobject[stdint.int8_t](x)
+
+def roundtrip_int16(object x):
+    return __roundtrip_pyobject[stdint.int16_t](x)
 
 def roundtrip_int32(object x):
     return __roundtrip_pyobject[stdint.int32_t](x)
 
 def roundtrip_int64(object x):
     return __roundtrip_pyobject[stdint.int64_t](x)
+
+def roundtrip_uint8(object x):
+    return __roundtrip_pyobject[stdint.uint8_t](x)
+
+def roundtrip_uint16(object x):
+    return __roundtrip_pyobject[stdint.uint16_t](x)
 
 def roundtrip_uint32(object x):
     return __roundtrip_pyobject[stdint.uint32_t](x)

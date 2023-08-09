@@ -157,12 +157,16 @@ struct Extractor : public BaseExtractor<T> {
     int typeCheck(PyObject* obj);                       \
   }
 
-SPECIALIZE_SCALAR(int8_t);
-SPECIALIZE_SCALAR(int16_t);
-SPECIALIZE_SCALAR(int32_t);
-SPECIALIZE_SCALAR(int64_t);
-SPECIALIZE_SCALAR(uint32_t);
-SPECIALIZE_SCALAR(uint64_t);
+SPECIALIZE_SCALAR(signed char);
+SPECIALIZE_SCALAR(signed short);
+SPECIALIZE_SCALAR(signed int);
+SPECIALIZE_SCALAR(signed long);
+SPECIALIZE_SCALAR(signed long long);
+SPECIALIZE_SCALAR(unsigned char);
+SPECIALIZE_SCALAR(unsigned short);
+SPECIALIZE_SCALAR(unsigned int);
+SPECIALIZE_SCALAR(unsigned long);
+SPECIALIZE_SCALAR(unsigned long long);
 SPECIALIZE_SCALAR(bool);
 SPECIALIZE_SCALAR(float);
 SPECIALIZE_SCALAR(double);

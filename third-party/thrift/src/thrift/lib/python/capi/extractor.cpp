@@ -96,12 +96,16 @@ ExtractorResult<R> extractFromString(PyObject* obj) {
     return 1;                                                                  \
   }
 
-SPECIALIZE_NUM(int8_t, PyLong_AsLong, PyLong_CheckExact)
-SPECIALIZE_NUM(int16_t, PyLong_AsLong, PyLong_CheckExact)
-SPECIALIZE_NUM(int32_t, PyLong_AsLong, PyLong_CheckExact)
-SPECIALIZE_NUM(int64_t, PyLong_AsLongLong, PyLong_CheckExact)
-SPECIALIZE_NUM(uint32_t, PyLong_AsUnsignedLong, PyLong_CheckExact)
-SPECIALIZE_NUM(uint64_t, PyLong_AsUnsignedLongLong, PyLong_CheckExact)
+SPECIALIZE_NUM(signed char, PyLong_AsLong, PyLong_CheckExact)
+SPECIALIZE_NUM(signed short, PyLong_AsLong, PyLong_CheckExact)
+SPECIALIZE_NUM(signed int, PyLong_AsLong, PyLong_CheckExact)
+SPECIALIZE_NUM(signed long, PyLong_AsLongLong, PyLong_CheckExact)
+SPECIALIZE_NUM(signed long long, PyLong_AsLongLong, PyLong_CheckExact)
+SPECIALIZE_NUM(unsigned char, PyLong_AsUnsignedLong, PyLong_CheckExact)
+SPECIALIZE_NUM(unsigned short, PyLong_AsUnsignedLong, PyLong_CheckExact)
+SPECIALIZE_NUM(unsigned int, PyLong_AsUnsignedLong, PyLong_CheckExact)
+SPECIALIZE_NUM(unsigned long, PyLong_AsUnsignedLongLong, PyLong_CheckExact)
+SPECIALIZE_NUM(unsigned long long, PyLong_AsUnsignedLongLong, PyLong_CheckExact)
 SPECIALIZE_NUM(float, PyFloat_AsDouble, PyFloat_CheckExact)
 SPECIALIZE_NUM(double, PyFloat_AsDouble, PyFloat_CheckExact)
 

@@ -20,14 +20,18 @@ from typing import Callable
 from folly.iobuf import IOBuf
 from thrift.python.marshal import marshal_fixture as fixture
 from thrift.python.marshal.marshal_fixture import (
+    INT16_MAX,
+    INT16_MIN,
     INT32_MAX,
     INT32_MIN,
     INT64_MAX,
     INT64_MIN,
     INT8_MAX,
     INT8_MIN,
+    UINT16_MAX,
     UINT32_MAX,
     UINT64_MAX,
+    UINT8_MAX,
 )
 
 
@@ -44,6 +48,18 @@ class MarshalFixture(unittest.TestCase):
 
 
 class TestMarshalPrimitives(MarshalFixture):
+    def test_int8(self) -> None:
+        for x in (0, -1, INT8_MIN, INT8_MAX):
+            self.assertEqual(x, fixture.roundtrip_int8(x))
+        self.assert_type_error(fixture.roundtrip_int8, None, "oops")
+        self.assert_overflow(fixture.roundtrip_int8, INT8_MIN - 1, INT8_MAX + 1)
+
+    def test_int16(self) -> None:
+        for x in (0, -1, INT16_MIN, INT16_MAX):
+            self.assertEqual(x, fixture.roundtrip_int16(x))
+        self.assert_type_error(fixture.roundtrip_int16, None, "oops")
+        self.assert_overflow(fixture.roundtrip_int16, INT16_MIN - 1, INT16_MAX + 1)
+
     def test_int32(self) -> None:
         for x in (0, -1, INT32_MIN, INT32_MAX):
             self.assertEqual(x, fixture.roundtrip_int32(x))
@@ -55,6 +71,18 @@ class TestMarshalPrimitives(MarshalFixture):
             self.assertEqual(x, fixture.roundtrip_int64(x))
         self.assert_type_error(fixture.roundtrip_int64, None, "oops")
         self.assert_overflow(fixture.roundtrip_int64, INT64_MIN - 1, INT64_MAX + 1)
+
+    def test_uint8(self) -> None:
+        for x in (0, UINT8_MAX):
+            self.assertEqual(x, fixture.roundtrip_uint8(x))
+        self.assert_type_error(fixture.roundtrip_uint8, None, "oops")
+        self.assert_overflow(fixture.roundtrip_uint8, -1, UINT8_MAX + 1)
+
+    def test_uint16(self) -> None:
+        for x in (0, UINT16_MAX):
+            self.assertEqual(x, fixture.roundtrip_uint16(x))
+        self.assert_type_error(fixture.roundtrip_uint16, None, "oops")
+        self.assert_overflow(fixture.roundtrip_uint16, -1, UINT16_MAX + 1)
 
     def test_uint32(self) -> None:
         for x in (0, UINT32_MAX):

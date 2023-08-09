@@ -31,12 +31,16 @@ namespace capi {
     return capi_fn(val);                                             \
   }
 
-SPECIALIZE_CAPI(int8_t, PyLong_FromLong)
-SPECIALIZE_CAPI(int16_t, PyLong_FromLong)
-SPECIALIZE_CAPI(int32_t, PyLong_FromLong)
-SPECIALIZE_CAPI(int64_t, PyLong_FromLongLong)
-SPECIALIZE_CAPI(uint32_t, PyLong_FromUnsignedLong)
-SPECIALIZE_CAPI(uint64_t, PyLong_FromUnsignedLongLong)
+SPECIALIZE_CAPI(signed char, PyLong_FromLong)
+SPECIALIZE_CAPI(signed short, PyLong_FromLong)
+SPECIALIZE_CAPI(signed int, PyLong_FromLong)
+SPECIALIZE_CAPI(signed long, PyLong_FromLongLong)
+SPECIALIZE_CAPI(signed long long, PyLong_FromLongLong)
+SPECIALIZE_CAPI(unsigned char, PyLong_FromUnsignedLong)
+SPECIALIZE_CAPI(unsigned short, PyLong_FromUnsignedLong)
+SPECIALIZE_CAPI(unsigned int, PyLong_FromUnsignedLong)
+SPECIALIZE_CAPI(unsigned long, PyLong_FromUnsignedLongLong)
+SPECIALIZE_CAPI(unsigned long long, PyLong_FromUnsignedLongLong)
 SPECIALIZE_CAPI(bool, PyBool_FromLong)
 SPECIALIZE_CAPI(float, PyFloat_FromDouble)
 SPECIALIZE_CAPI(double, PyFloat_FromDouble)

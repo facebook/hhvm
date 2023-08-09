@@ -9512,13 +9512,13 @@ and call
         in
         (* Given an expected function type ft, check types for the non-unpacked
          * arguments. Don't check lambda expressions if check_lambdas=false *)
-        let rec check_args check_lambdas env el paraml =
+        let rec check_args_aux check_lambdas env el paraml used_dynamic rl =
           match el with
           (* We've got an argument *)
           | ((pk, e), opt_result) :: el ->
             (* Pick up next parameter type info *)
             let (is_variadic, opt_param, paraml) = get_next_param_info paraml in
-            let (env, one_result, used_dynamic) =
+            let (env, one_result, used_dynamic') =
               match (check_lambdas, is_lambda e) with
               | (false, false)
               | (true, true) ->
@@ -9528,14 +9528,20 @@ and call
                 (env, opt_result, false)
               | (true, false) -> (env, opt_result, false)
             in
-            let (env, rl, paraml, used_dynamic') =
-              check_args check_lambdas env el paraml
-            in
-            ( env,
-              ((pk, e), one_result) :: rl,
-              paraml,
-              used_dynamic || used_dynamic' )
-          | [] -> (env, [], paraml, false)
+            check_args_aux
+              check_lambdas
+              env
+              el
+              paraml
+              (used_dynamic || used_dynamic')
+              (((pk, e), one_result) :: rl)
+          | [] -> (env, rl, paraml, used_dynamic)
+        in
+        let check_args check_lambdas env el paraml =
+          let (env, rl, paraml, used_dynamic) =
+            check_args_aux check_lambdas env el paraml false []
+          in
+          (env, List.rev rl, paraml, used_dynamic)
         in
         (* Same as above, but checks the types of the implicit arguments, which are
          * read from the context *)

@@ -66,10 +66,11 @@ end = struct
 
   let make_and_allow_coercion_opt env pos reason ty =
     let (_env, ety) = Env.expand_type env ty.et_type in
-    if is_tyvar ety then
+    match get_node ety with
+    | Tvar v when Internal_type_set.is_empty (Env.get_tyvar_upper_bounds env v)
+      ->
       None
-    else
-      Some { pos; reason; ty; coerce = None }
+    | _ -> Some { pos; reason; ty; coerce = None }
 
   let make_and_allow_coercion pos reason ty = { pos; reason; ty; coerce = None }
 

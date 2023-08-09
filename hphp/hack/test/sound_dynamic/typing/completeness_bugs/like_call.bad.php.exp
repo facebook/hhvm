@@ -1,4 +1,0 @@
-File "like_call.bad.php", line 19, characters 24-25:
-Was expecting an object but type is unknown (Typing[4297])
-  File "like_call.bad.php", line 19, characters 17-18:
-  It is unknown because the type of the lambda parameter could not be determined. Please add a type hint to the parameter

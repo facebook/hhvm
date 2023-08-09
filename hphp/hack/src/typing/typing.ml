@@ -5675,14 +5675,21 @@ and lambda ~is_anon ~closure_class_name ?expected p env f idl =
       | _ ->
         (* Missing types in parameter and result will have been replaced by fresh type variables *)
         Typing_log.increment_feature_count env FL.Lambda.fresh_tyvar_params;
-        let env =
-          Env.set_tyvar_variance env (mk (Reason.Rnone, Tfun declared_ft))
+        let declared_ty = mk (Reason.Rnone, Tfun declared_ft) in
+        let supportdyn = Env.get_support_dynamic_type env in
+        let declared_ty =
+          if supportdyn then
+            MakeType.supportdyn Reason.Rnone declared_ty
+          else
+            declared_ty
         in
+        let env = check_expected_ty "Lambda" env declared_ty expected in
+        let env = Env.set_tyvar_variance env declared_ty in
         (* TODO(jjwu): the declared_ft here is set to public,
            but is actually inferred from the surrounding context
            (don't think this matters in practice, since we check lambdas separately) *)
         check_body_under_known_params
-          ~supportdyn:false
+          ~supportdyn
           env
           ~ret_ty:declared_ft.ft_ret.et_type
           declared_ft

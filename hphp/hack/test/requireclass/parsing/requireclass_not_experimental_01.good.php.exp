@@ -1,4 +1,3 @@
-(5,3)-(5,19) Cannot use unstable feature: `require_class`
 {
   "kind":"script",
   "script_declarations":{

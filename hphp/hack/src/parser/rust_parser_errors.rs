@@ -5468,11 +5468,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             UpcastExpression(_) => {
                 self.check_can_use_feature(node, &UnstableFeatures::UpcastExpression)
             }
-            RequireClause(c) => {
-                if c.kind.is_class() {
-                    self.check_can_use_feature(node, &UnstableFeatures::RequireClass)
-                }
-            }
             OldAttributeSpecification(x) => {
                 self.old_attr_spec(node, &x.attributes);
             }

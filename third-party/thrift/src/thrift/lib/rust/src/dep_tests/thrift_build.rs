@@ -45,7 +45,7 @@ fn main() {
 
         conf.types_crate("test_deprecated_optional_with_default_is_some_if__types");
 
-        let options = "";
+        let options = "deprecated_optional_with_default_is_some";
         if !options.is_empty() {
             conf.options(options);
         }

@@ -17,17 +17,17 @@ namespace ExtensionRegistry {
 
 void registerExtension(Extension* ext);
 
-bool isLoaded(const char* name, bool enabled_only = true);
-inline bool isLoaded(const String& name, bool enabled_only = true) {
-  return isLoaded(name.data(), enabled_only);
+bool isLoaded(const char* name);
+inline bool isLoaded(const String& name) {
+  return isLoaded(name.data());
 }
 
-Extension* get(const char* name, bool enabled_only = true);
-inline Extension* get(const String& name, bool enabled_only = true) {
-  return get(name.data(), enabled_only);
+Extension* get(const char* name);
+inline Extension* get(const String& name) {
+  return get(name.data());
 }
 
-Array getLoaded(bool enabled_only = true);
+Array getLoaded();
 
 // called by RuntimeOption to initialize all configurations of extension
 void moduleLoad(const IniSetting::Map& ini, Hdf hdf);

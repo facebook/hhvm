@@ -45,8 +45,9 @@ RepoWrapper::RepoWrapper(const char* repoSchema,
   }
 
   register_process_init();
-  hphp_thread_init();
+  hphp_thread_init(true);
   g_context.getCheck();
+
   IniSetting::Map ini = IniSetting::Map::object;
   Hdf config;
   RuntimeOption::Load(ini, config);
@@ -70,6 +71,8 @@ RepoWrapper::RepoWrapper(const char* repoSchema,
 RepoWrapper::~RepoWrapper() {
   CacheType::const_iterator it;
   for (it = unitCache.begin(); it != unitCache.end(); it++) delete it->second;
+
+  hphp_thread_exit(true);
 }
 
 void RepoWrapper::addUnit(Unit* unit) {

@@ -1637,9 +1637,9 @@ static int execute_program_impl(int argc, char** argv) {
   }
 
   if (!po.show.empty()) {
-    hphp_thread_init();
+    hphp_thread_init(true);
     g_context.getCheck();
-    SCOPE_EXIT { hphp_thread_exit(); };
+    SCOPE_EXIT { hphp_thread_exit(true); };
 
     auto f = req::make<PlainFile>();
     f->open(po.show, "r");
@@ -2334,7 +2334,7 @@ static void update_constants_and_options() {
   }
 }
 
-void hphp_thread_init() {
+void hphp_thread_init(bool skipExtensions /* = false */) {
   init_current_pthread_stack_limits();
 #if USE_JEMALLOC_EXTENT_HOOKS
   arenas_thread_init();
@@ -2350,7 +2350,7 @@ void hphp_thread_init() {
   RequestInfo::s_requestInfo.getCheck()->init();
 
   HardwareCounter::s_counter.getCheck();
-  ExtensionRegistry::threadInit();
+  if (!skipExtensions) ExtensionRegistry::threadInit();
   InitFiniNode::ThreadInit();
 
   // Ensure that there's no request-allocated memory. This call must happen at
@@ -2359,12 +2359,12 @@ void hphp_thread_init() {
   hphp_memory_cleanup();
 }
 
-void hphp_thread_exit() {
+void hphp_thread_exit(bool skipExtensions /* = false */) {
   // All threads should have already exited before process exit
   assertx(!s_process_exited);
 
   InitFiniNode::ThreadFini();
-  ExtensionRegistry::threadShutdown();
+  if (!skipExtensions) ExtensionRegistry::threadShutdown();
   if (!g_context.isNull()) g_context.destroy();
   rds::threadExit();
 #if USE_JEMALLOC_EXTENT_HOOKS
@@ -2444,7 +2444,7 @@ void hphp_process_init(bool skipExtensions) {
 
   rds::processInit();
 
-  hphp_thread_init();
+  hphp_thread_init(skipExtensions);
 
   struct sigaction action = {};
   action.sa_sigaction = on_timeout;

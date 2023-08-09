@@ -111,8 +111,8 @@ bool hphp_invoke(ExecutionContext *context,
                  bool allowDynCallNoPointer = false);
 void hphp_context_exit();
 
-void hphp_thread_init();
-void hphp_thread_exit();
+void hphp_thread_init(bool skipExtensions = false);
+void hphp_thread_exit(bool skipExtensions = false);
 
 void init_current_pthread_stack_limits();
 

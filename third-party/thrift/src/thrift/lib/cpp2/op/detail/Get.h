@@ -89,10 +89,10 @@ struct GetValueOrNull {
   }
 #endif
 
-  template <typename T>
-  T* operator()(const std::unique_ptr<T>&& ptr) const = delete;
-  template <typename T>
-  T* operator()(const std::unique_ptr<T>& ptr) const {
+  template <typename T, typename Deleter>
+  T* operator()(const std::unique_ptr<T, Deleter>&& ptr) const = delete;
+  template <typename T, typename Deleter>
+  T* operator()(const std::unique_ptr<T, Deleter>& ptr) const {
     return ptr ? ptr.get() : nullptr;
   }
   template <typename T>

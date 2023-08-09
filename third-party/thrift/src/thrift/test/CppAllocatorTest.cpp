@@ -16,12 +16,13 @@
 
 #include <thrift/test/CppAllocatorTest.h>
 
+#include <thrift/lib/cpp2/op/Get.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/test/gen-cpp2/CppAllocatorTest_types.h>
 
 #include <folly/portability/GTest.h>
 
-using namespace apache::thrift::test;
+namespace apache::thrift::test {
 
 static const char* kTooLong =
     "This is too long for the small string optimization";
@@ -565,6 +566,8 @@ TEST(CppAllocatorTest, AlwaysThrowAllocatorCppRefCount) {
   CountingCppRefParent parent(alloc);
   // check propagation of allocator for containers with shared_ptr
   EXPECT_ALLOC(alloc, parent.allocVector_ref()->emplace_back(1));
+  op::getValueOrNull(op::get<ident::uniqueChild>(parent))->value1() = 10;
+  EXPECT_EQ(parent.uniqueChild()->value1(), 10);
 }
 
 TEST(CppAllocatorTest, CopyConstructorPropagatesAllocator) {
@@ -594,3 +597,5 @@ TEST(CppAllocatorTest, DefaultConstructor1allocator) {
   EXPECT_EQ(alloc, ScopedCountingAlloc<>(child.aa_list()->get_allocator()));
   EXPECT_EQ(alloc, ScopedCountingAlloc<>(child.aa_string()->get_allocator()));
 }
+
+} // namespace apache::thrift::test

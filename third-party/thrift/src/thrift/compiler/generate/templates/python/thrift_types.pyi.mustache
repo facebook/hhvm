@@ -76,7 +76,7 @@ class {{> structs/unadapted_name}}({{!
     def __call__(
         self,{{#struct:fields?}} *{{/struct:fields?}}{{#struct:fields_ordered_by_id}},
         {{field:py_name}}: _typing.Optional[{{> fields/adapted_type}}]=...{{/struct:fields_ordered_by_id}}
-    ) -> {{> structs/unadapted_name}}: ...
+    ) -> _typing.Self: ...
     {{/struct:plain?}}
     {{#struct:union?}}
 
@@ -98,7 +98,7 @@ class {{> structs/unadapted_name}}({{!
         }}{{/struct:fields_ordered_by_id}}]]]: ...
     {{/struct:union?}}
     {{#struct:legacy_api?}}
-    def _to_python(self) -> {{> structs/unadapted_name}}: ...
+    def _to_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "{{program:module_path}}.types.{{> structs/unadapted_name}}": ...  # type: ignore
     def _to_py_deprecated(self) -> "{{program:py_deprecated_module_path}}.ttypes.{{> structs/unadapted_name}}": ...  # type: ignore
     {{/struct:legacy_api?}}

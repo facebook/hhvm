@@ -470,6 +470,9 @@ void serializeBespokeLayouts(ProfDataSerializer& ser) {
     if (!layout.isConcrete() || !ArrayLayout(&layout).is_struct()) return;
     layouts.push_back(StructLayout::As(&layout));
   });
+  // TopStructLayout is not concrete and is not serialized.
+  assertx(layouts.size() == 0 ||
+          layouts.size() == bespoke::numStructLayoutsCreated() - 1);
   write_raw(ser, layouts.size());
   write_raw(ser, StructLayout::maxColoredFields());
   for (auto const layout : layouts) {

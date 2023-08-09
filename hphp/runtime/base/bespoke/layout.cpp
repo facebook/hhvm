@@ -48,6 +48,7 @@ auto constexpr kMaxNumLayouts = (1 << 16) - 1;
 
 std::atomic<size_t> s_topoIndex;
 std::array<Layout*, kMaxNumLayouts> s_layoutTable;
+size_t s_numStructLayouts; // For logging.
 std::atomic<bool> s_hierarchyFinal = false;
 std::mutex s_layoutCreationMutex;
 
@@ -246,15 +247,18 @@ void Layout::ClearHierarchy() {
   for (size_t i = 0; i < kMaxNumLayouts; i++) {
     if (i != kBespokeTopIndex.raw) s_layoutTable[i] = nullptr;
   }
+  s_numStructLayouts = 0;
 }
 
 void Layout::FinalizeHierarchy() {
   assertx(allowBespokeArrayLikes());
   assertx(!s_hierarchyFinal.load(std::memory_order_acquire));
+  s_numStructLayouts = 0;
   std::vector<Layout*> allLayouts;
   for (size_t i = 0; i < kMaxNumLayouts; i++) {
     auto const layout = s_layoutTable[i];
     if (!layout) continue;
+    if (ArrayLayout(layout).is_struct()) s_numStructLayouts++;
     allLayouts.push_back(layout);
     assertx(layout->checkInvariants());
     for (auto const pIdx : layout->m_parents) {
@@ -687,6 +691,11 @@ void eachLayout(std::function<void(Layout& layout)> fn) {
 Layout** layoutsForJIT() {
   assertx(s_hierarchyFinal.load(std::memory_order_acquire));
   return s_layoutTable.data();
+}
+
+size_t numStructLayouts() {
+  if (!s_hierarchyFinal.load(std::memory_order_acquire)) return 0;
+  return s_numStructLayouts;
 }
 
 //////////////////////////////////////////////////////////////////////////////

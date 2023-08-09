@@ -34,8 +34,7 @@ namespace HPHP::bespoke {
 
 namespace {
 
-static constexpr size_t kMaxNumStructLayouts = 1 << 14;
-size_t s_numStructLayouts = 0;
+size_t s_numStructLayoutsCreated = 0;
 
 struct FieldVectorHash {
   size_t operator()(const StructLayout::FieldVector& fv) const {
@@ -81,10 +80,14 @@ constexpr uint16_t indexRaw(uint16_t idx) {
   return static_cast<uint16_t>(res);
 }
 
-constexpr size_t colorTableLen = indexRaw(kMaxNumStructLayouts);
 StructLayout::PerfectHashTable* s_hashTableSet = nullptr;
 size_t s_maxColoredFields = 1;
 
+}
+
+size_t numStructLayoutsCreated() {
+  assertx(Layout::HierarchyFinalized());
+  return s_numStructLayoutsCreated;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -193,16 +196,18 @@ const StructLayout* StructLayout::GetLayout(
   auto const it = s_fieldVectorToIdx.find(fv);
   if (it != s_fieldVectorToIdx.end()) return As(FromIndex(it->second));
 
-  if (s_numStructLayouts == kMaxNumStructLayouts) return nullptr;
+  if (s_numStructLayoutsCreated == RO::EvalBespokeMaxNumStructLayouts) {
+    return nullptr;
+  }
 
   // We only construct this layout if it has at least one child, in order
   // to satisfy invariants in FinalizeHierarchy().
-  if (s_numStructLayouts == 0) {
+  if (s_numStructLayoutsCreated == 0) {
     new TopStructLayout();
-    s_numStructLayouts++;
+    s_numStructLayoutsCreated++;
   }
 
-  auto const index = Index(safe_cast<uint16_t>(s_numStructLayouts++));
+  auto const index = Index(safe_cast<uint16_t>(s_numStructLayoutsCreated++));
   auto const bytes = sizeof(StructLayout) + sizeof(Field) * (fv.size() - 1);
   auto const result = new (malloc(bytes)) StructLayout(index, fv);
   s_fieldVectorToIdx.emplace(fv, index);
@@ -960,6 +965,9 @@ TopStructLayout::TopStructLayout()
                    {AbstractLayout::GetBespokeTopIndex()}, structDictVtable())
 {
   assertx(!s_hashTableSet);
+  // There are 14 bits available for StructDict indices. See layout.h.
+  assertx(RO::EvalBespokeMaxNumStructLayouts <= 1 << 14);
+  auto colorTableLen = indexRaw(RO::EvalBespokeMaxNumStructLayouts);
   s_hashTableSet = (StructLayout::PerfectHashTable*) vm_malloc(
       sizeof(StructLayout::PerfectHashTable) * colorTableLen);
 }

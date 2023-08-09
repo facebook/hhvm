@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/server/memory-stats.h"
 
+#include "hphp/runtime/base/bespoke/layout.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/util/process.h"
@@ -101,6 +102,8 @@ ServiceData::CounterCallback s_counters(
       MemoryStats::TotalSize(AllocKind::StaticString);
     counters["mem.static-array-size"] =
       MemoryStats::TotalSize(AllocKind::StaticArray);
+
+    counters["mem.struct-layout-count"] = bespoke::numStructLayouts();
 
     counters["mem.huge-tlb-pages-kb"] =
       ProcStatus::HugetlbPagesKb.load(std::memory_order_relaxed);

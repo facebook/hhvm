@@ -296,4 +296,8 @@ struct TopStructLayout : public AbstractLayout {
   Type iterPosType(Type pos, bool isKey) const override;
   Type getTypeBound(Type slot) const override;
 };
+
+// This returns a valid number after FinalizeHierarchy
+// in non-jumpstart consumers only.
+size_t numStructLayoutsCreated();
 }

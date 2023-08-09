@@ -492,4 +492,7 @@ void eachLayout(std::function<void(Layout& layout)> fn);
 // Array of all layout pointers. Useful for accessing from the TC.
 Layout** layoutsForJIT();
 
+// For logging.
+size_t numStructLayouts();
+
 }

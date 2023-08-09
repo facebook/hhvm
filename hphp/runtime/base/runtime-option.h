@@ -1222,9 +1222,11 @@ struct RuntimeOption {
   F(uint64_t, BespokeEscalationSampleRate, 0)                           \
   F(uint64_t, EmitLoggingArraySampleRate, 17)                           \
   F(string, ExportLoggingArrayDataPath, "")                             \
-  /* Should we use structs? If so, how big can they get? Due to how we  \
-   * represent structs, we can't make any with more than 255 keys. */   \
+  /* Should we use structs?                                             \
+   * If so, how many layouts and how big can they get?                  \
+   */                                                                   \
   F(bool, EmitBespokeStructDicts, true)                                 \
+  F(uint16_t, BespokeMaxNumStructLayouts, 1 << 14)                      \
   /* Do not use! Use StructLayout::maxNumKeys instead */                \
   F(uint16_t, BespokeStructDictMaxNumKeys, 2048)                        \
   F(double, BespokeStructDictKeyCoverageThreshold, 95.0)                \

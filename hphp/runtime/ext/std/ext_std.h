@@ -39,7 +39,6 @@ struct StandardExtension final : Extension {
     initFunction();
     initMisc();
     initFile();
-    initIntrinsics();
     initMath();
     initProcess();
   }
@@ -84,7 +83,6 @@ struct StandardExtension final : Extension {
   void initFunction();
   void initMisc();
   void initFile();
-  void initIntrinsics();
   void initMath();
   void initProcess();
 

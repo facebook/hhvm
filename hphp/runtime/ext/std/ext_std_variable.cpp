@@ -545,13 +545,6 @@ String serialize_keep_dvarrays(const Variant& value) {
   return serialize_impl(value, opts, false);
 }
 
-String HHVM_FUNCTION(hhvm_intrinsics_serialize_keep_dvarrays,
-                     const Variant& value) {
-  SerializeOptions opts;
-  opts.keepDVArrays = true;
-  return serialize_impl(value, opts, false);
-}
-
 Variant HHVM_FUNCTION(unserialize, const String& str,
                                    const Array& options) {
   return unserialize_from_string(
@@ -689,11 +682,6 @@ void StandardExtension::initVariable() {
   HHVM_FALIAS(HH\\is_late_init_prop_init, HH_is_late_init_prop_init);
   HHVM_FALIAS(HH\\is_late_init_sprop_init, HH_is_late_init_sprop_init);
   HHVM_FALIAS(HH\\global_key_exists, HH_global_key_exists);
-
-  if (RuntimeOption::EnableIntrinsicsExtension) {
-    HHVM_FALIAS(__hhvm_intrinsics\\serialize_keep_dvarrays,
-                hhvm_intrinsics_serialize_keep_dvarrays);
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

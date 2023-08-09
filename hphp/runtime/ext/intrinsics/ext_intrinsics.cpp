@@ -201,6 +201,10 @@ Variant HHVM_FUNCTION(deserialize_with_format, const String& str,
   return vu.unserialize();
 }
 
+String HHVM_FUNCTION(serialize_keep_dvarrays, const Variant& value) {
+  return serialize_keep_dvarrays(value);
+}
+
 namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -495,76 +499,85 @@ int64_t HHVM_METHOD(ExtensibleNewableClassWithNativeData, getDumyValue) {
 
 }
 
-void StandardExtension::initIntrinsics() {
-  if (!RuntimeOption::EnableIntrinsicsExtension) return;
+static struct IntrinsicsExtension final : Extension {
+  IntrinsicsExtension() : Extension("intrinsics", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
 
-  HHVM_FALIAS(__hhvm_intrinsics\\builtin_io, builtin_io);
-  HHVM_FALIAS(__hhvm_intrinsics\\builtin_io_no_fca, builtin_io);
-  HHVM_FALIAS(__hhvm_intrinsics\\builtin_io_foldable, builtin_io_foldable);
+  bool moduleEnabled() const override {
+    return RuntimeOption::EnableIntrinsicsExtension;
+  }
 
-  HHVM_FALIAS(__hhvm_intrinsics\\trigger_oom, trigger_oom);
-  HHVM_FALIAS(__hhvm_intrinsics\\trigger_break, trigger_break);
-  HHVM_FALIAS(__hhvm_intrinsics\\trigger_crash, trigger_crash);
-  HHVM_FALIAS(__hhvm_intrinsics\\launder_value, launder_value);
-  HHVM_FALIAS(__hhvm_intrinsics\\launder_value_inout, launder_value_inout);
+  void moduleInit() override {
+    HHVM_FALIAS(__hhvm_intrinsics\\builtin_io, builtin_io);
+    HHVM_FALIAS(__hhvm_intrinsics\\builtin_io_no_fca, builtin_io);
+    HHVM_FALIAS(__hhvm_intrinsics\\builtin_io_foldable, builtin_io_foldable);
 
-  HHVM_FALIAS(__hhvm_intrinsics\\memory_manager_stats, memory_manager_stats);
+    HHVM_FALIAS(__hhvm_intrinsics\\trigger_oom, trigger_oom);
+    HHVM_FALIAS(__hhvm_intrinsics\\trigger_break, trigger_break);
+    HHVM_FALIAS(__hhvm_intrinsics\\trigger_crash, trigger_crash);
+    HHVM_FALIAS(__hhvm_intrinsics\\launder_value, launder_value);
+    HHVM_FALIAS(__hhvm_intrinsics\\launder_value_inout, launder_value_inout);
 
-  HHVM_FALIAS(__hhvm_intrinsics\\dummy_varray_builtin, dummy_varray_builtin);
-  HHVM_FALIAS(__hhvm_intrinsics\\dummy_darray_builtin, dummy_darray_builtin);
-  HHVM_FALIAS(__hhvm_intrinsics\\dummy_kindofdarray_builtin, dummy_kindofdarray_builtin);
-  HHVM_FALIAS(__hhvm_intrinsics\\dummy_kindofvarray_builtin, dummy_kindofvarray_builtin);
-  HHVM_FALIAS(__hhvm_intrinsics\\dummy_varr_or_darr_builtin,
-              dummy_varr_or_darr_builtin);
-  HHVM_FALIAS(__hhvm_intrinsics\\dummy_arraylike_builtin,
-              dummy_arraylike_builtin);
-  HHVM_FALIAS(__hhvm_intrinsics\\dummy_dict_builtin, dummy_dict_builtin);
+    HHVM_FALIAS(__hhvm_intrinsics\\memory_manager_stats, memory_manager_stats);
 
-  HHVM_FALIAS(__hhvm_intrinsics\\dummy_array_await, dummy_array_await);
-  HHVM_FALIAS(__hhvm_intrinsics\\dummy_darray_await, dummy_darray_await);
-  HHVM_FALIAS(__hhvm_intrinsics\\dummy_dict_await, dummy_dict_await);
+    HHVM_FALIAS(__hhvm_intrinsics\\dummy_varray_builtin, dummy_varray_builtin);
+    HHVM_FALIAS(__hhvm_intrinsics\\dummy_darray_builtin, dummy_darray_builtin);
+    HHVM_FALIAS(__hhvm_intrinsics\\dummy_kindofdarray_builtin, dummy_kindofdarray_builtin);
+    HHVM_FALIAS(__hhvm_intrinsics\\dummy_kindofvarray_builtin, dummy_kindofvarray_builtin);
+    HHVM_FALIAS(__hhvm_intrinsics\\dummy_varr_or_darr_builtin,
+                dummy_varr_or_darr_builtin);
+    HHVM_FALIAS(__hhvm_intrinsics\\dummy_arraylike_builtin,
+                dummy_arraylike_builtin);
+    HHVM_FALIAS(__hhvm_intrinsics\\dummy_dict_builtin, dummy_dict_builtin);
 
-  HHVM_FALIAS(__hhvm_intrinsics\\dummy_int_upper_bound, dummy_int_upper_bound);
+    HHVM_FALIAS(__hhvm_intrinsics\\dummy_array_await, dummy_array_await);
+    HHVM_FALIAS(__hhvm_intrinsics\\dummy_darray_await, dummy_darray_await);
+    HHVM_FALIAS(__hhvm_intrinsics\\dummy_dict_await, dummy_dict_await);
 
-  HHVM_FALIAS(__hhvm_intrinsics\\dummy_lots_inout, dummy_lots_inout);
+    HHVM_FALIAS(__hhvm_intrinsics\\dummy_int_upper_bound, dummy_int_upper_bound);
 
-  HHVM_FALIAS(__hhvm_intrinsics\\new_mystery_box, new_mystery_box);
-  HHVM_FALIAS(__hhvm_intrinsics\\run_inline_interp, run_inline_interp);
-  HHVM_FALIAS(__hhvm_intrinsics\\render_rom, render_rom);
+    HHVM_FALIAS(__hhvm_intrinsics\\dummy_lots_inout, dummy_lots_inout);
 
-  HHVM_FALIAS(__hhvm_intrinsics\\serialize_with_format, serialize_with_format);
-  HHVM_FALIAS(__hhvm_intrinsics\\deserialize_with_format,
-              deserialize_with_format);
+    HHVM_FALIAS(__hhvm_intrinsics\\new_mystery_box, new_mystery_box);
+    HHVM_FALIAS(__hhvm_intrinsics\\run_inline_interp, run_inline_interp);
+    HHVM_FALIAS(__hhvm_intrinsics\\render_rom, render_rom);
 
-  HHVM_FALIAS(__hhvm_intrinsics\\rqtrace_create_event, rqtrace_create_event);
-  HHVM_FALIAS(__hhvm_intrinsics\\rqtrace_create_scope, rqtrace_create_scope);
-  HHVM_FALIAS(__hhvm_intrinsics\\rqtrace_create_scoped_events,
-              rqtrace_create_scoped_events);
+    HHVM_FALIAS(__hhvm_intrinsics\\serialize_with_format, serialize_with_format);
+    HHVM_FALIAS(__hhvm_intrinsics\\deserialize_with_format,
+                deserialize_with_format);
+    HHVM_FALIAS(__hhvm_intrinsics\\serialize_keep_dvarrays,
+                serialize_keep_dvarrays);
 
-  HHVM_FALIAS(__hhvm_intrinsics\\hhbbc_fail_verification,
-              hhbbc_fail_verification);
+    HHVM_FALIAS(__hhvm_intrinsics\\rqtrace_create_event, rqtrace_create_event);
+    HHVM_FALIAS(__hhvm_intrinsics\\rqtrace_create_scope, rqtrace_create_scope);
+    HHVM_FALIAS(__hhvm_intrinsics\\rqtrace_create_scoped_events,
+                rqtrace_create_scoped_events);
 
-  HHVM_FALIAS(__hhvm_intrinsics\\create_class_pointer, create_class_pointer);
-  HHVM_FALIAS(__hhvm_intrinsics\\create_clsmeth_pointer,
-              create_clsmeth_pointer);
-  HHVM_FALIAS(__hhvm_intrinsics\\is_lazy_class, is_lazy_class);
+    HHVM_FALIAS(__hhvm_intrinsics\\hhbbc_fail_verification,
+                hhbbc_fail_verification);
 
-  HHVM_FALIAS(__hhvm_intrinsics\\is_unit_loaded, is_unit_loaded);
-  HHVM_FALIAS(__hhvm_intrinsics\\drain_unit_prefetcher, drain_unit_prefetcher);
+    HHVM_FALIAS(__hhvm_intrinsics\\create_class_pointer, create_class_pointer);
+    HHVM_FALIAS(__hhvm_intrinsics\\create_clsmeth_pointer,
+                create_clsmeth_pointer);
+    HHVM_FALIAS(__hhvm_intrinsics\\is_lazy_class, is_lazy_class);
 
-  HHVM_FALIAS(__hhvm_intrinsics\\debug_get_bytecode, debug_get_bytecode);
-  HHVM_FALIAS(__hhvm_intrinsics\\debug_file_deps, debug_file_deps);
+    HHVM_FALIAS(__hhvm_intrinsics\\is_unit_loaded, is_unit_loaded);
+    HHVM_FALIAS(__hhvm_intrinsics\\drain_unit_prefetcher, drain_unit_prefetcher);
 
-  HHVM_FALIAS(__hhvm_intrinsics\\is_module_in_deployment, is_module_in_deployment);
+    HHVM_FALIAS(__hhvm_intrinsics\\debug_get_bytecode, debug_get_bytecode);
+    HHVM_FALIAS(__hhvm_intrinsics\\debug_file_deps, debug_file_deps);
 
-  HHVM_NAMED_ME(__hhvm_intrinsics\\ExtensibleNewableClassWithNativeData,
-                setDummyValue,
-                HHVM_MN(ExtensibleNewableClassWithNativeData, setDummyValue));
-  HHVM_NAMED_ME(__hhvm_intrinsics\\ExtensibleNewableClassWithNativeData,
-                getDumyValue,
-                HHVM_MN(ExtensibleNewableClassWithNativeData,getDumyValue));
-  Native::registerNativeDataInfo<DummyNativeData>(s_DummyNativeData.get());
-}
+    HHVM_FALIAS(__hhvm_intrinsics\\is_module_in_deployment, is_module_in_deployment);
+
+    HHVM_NAMED_ME(__hhvm_intrinsics\\ExtensibleNewableClassWithNativeData,
+                  setDummyValue,
+                  HHVM_MN(ExtensibleNewableClassWithNativeData, setDummyValue));
+    HHVM_NAMED_ME(__hhvm_intrinsics\\ExtensibleNewableClassWithNativeData,
+                  getDumyValue,
+                  HHVM_MN(ExtensibleNewableClassWithNativeData,getDumyValue));
+
+    Native::registerNativeDataInfo<DummyNativeData>(s_DummyNativeData.get());
+  }
+} s_intrinsics_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 

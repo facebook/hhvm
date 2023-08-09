@@ -338,8 +338,8 @@ class HTTPHeaders {
    * The initial capacity of the three vectors, reserved right after
    * construction.
    */
-  static const size_t kInitialVectorReserve = 16;
-  static const size_t kRecSize =
+  static constexpr size_t kInitialVectorReserve = 16;
+  static constexpr size_t kRecSize =
       (sizeof(char) + sizeof(std::string*) + sizeof(std::string));
 
   /**
@@ -359,13 +359,13 @@ class HTTPHeaders {
       return;
     }
 
-    double targetCapacity = folly::to_floating_point(capacity_);
-    while (targetCapacity < static_cast<double>(minCapacity)) {
-      if (targetCapacity == 0) {
-        targetCapacity = kInitialVectorReserve;
-      } else {
-        targetCapacity = targetCapacity * 3 / 2;
-      }
+    static_assert(kInitialVectorReserve >= 1,
+                  "This loop depends on a strictly-positive "
+                  "kInitialVectorReserve to terminate");
+    size_t targetCapacity = std::max(capacity_, kInitialVectorReserve);
+    while (targetCapacity < minCapacity) {
+      // targetCapacity will never be zero, so it will always grow here.
+      targetCapacity += targetCapacity / 2;
     }
     resize(targetCapacity);
   }

@@ -51,7 +51,6 @@ namespace {
         "HH\\Lib\\_Private\\Native\\random_int",
         HH_random_int
       );
-      loadSystemlib();
     }
 
     void requestInit() override {

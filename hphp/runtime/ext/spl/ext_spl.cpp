@@ -208,8 +208,6 @@ struct SPLExtension final : Extension {
     HHVM_FE(class_implements);
     HHVM_FE(class_parents);
     HHVM_FE(class_uses);
-
-    loadSystemlib();
   }
 } s_SPL_extension;
 

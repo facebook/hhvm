@@ -197,8 +197,6 @@ void IntlExtension::initUcsDet() {
       Native::NDIFlags::NO_SWEEP
   );
   Native::registerNativeDataInfo<EncodingMatch>(s_EncodingMatch.get());
-
-  loadSystemlib("icu_ucsdet");
 }
 
 //////////////////////////////////////////////////////////////////////////////

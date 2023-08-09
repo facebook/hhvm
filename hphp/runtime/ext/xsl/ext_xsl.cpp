@@ -741,8 +741,6 @@ struct XSLExtension final : Extension {
 
       Native::
         registerNativeDataInfo<XSLTProcessorData>(s_XSLTProcessorData.get());
-
-      loadSystemlib();
     }
 } s_xsl_extension;
 

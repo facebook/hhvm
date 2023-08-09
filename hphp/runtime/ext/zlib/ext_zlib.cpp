@@ -679,8 +679,6 @@ struct ZlibExtension final : Extension {
 
     Native::registerNativeDataInfo<ChunkedGunzipper>(
       s_SystemLib_ChunkedGunzipper.get());
-
-    loadSystemlib();
   }
 } s_zlib_extension;
 ///////////////////////////////////////////////////////////////////////////////

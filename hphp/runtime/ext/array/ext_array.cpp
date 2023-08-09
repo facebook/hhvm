@@ -3163,8 +3163,6 @@ struct ArrayExtension final : Extension {
     HHVM_FALIAS(HH\\array_key_cast, HH_array_key_cast);
     HHVM_FALIAS(__SystemLib\\merge_xhp_attr_declarations,
                 merge_xhp_attr_declarations);
-
-    loadSystemlib();
   }
 } s_array_extension;
 

@@ -139,9 +139,9 @@ void CollectionsExtension::initPair() {
   HHVM_NAMED_ME(HH\\Pair, toImmSet,       materialize<c_ImmSet>);
 
   Native::registerNativePropHandler<CollectionPropHandler>(c_Pair::s_clsName);
+}
 
-  loadSystemlib("collections-pair");
-
+void CollectionsExtension::finishPair() {
   finishClass<c_Pair>();
 }
 

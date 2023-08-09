@@ -1816,8 +1816,6 @@ static struct pgsqlExtension : Extension {
     HHVM_RC_INT(PGSQL_CONV_IGNORE_DEFAULT, 1);
     HHVM_RC_INT(PGSQL_CONV_FORCE_NULL, 2);
     HHVM_RC_INT(PGSQL_CONV_IGNORE_NOT_NULL, 4);
-
-    loadSystemlib();
   }
 } s_pgsql_extension;
 }

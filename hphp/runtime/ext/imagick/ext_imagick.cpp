@@ -327,7 +327,6 @@ void ImagickExtension::moduleInit() {
   loadImagickDrawClass();
   loadImagickPixelClass();
   loadImagickPixelIteratorClass();
-  loadSystemlib();
   MagickWandGenesis();
 }
 

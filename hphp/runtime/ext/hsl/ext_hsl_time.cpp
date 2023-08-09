@@ -37,7 +37,6 @@ namespace {
         "HH\\Lib\\_Private\\Native\\request_time_ns",
         HH_request_time_ns
       );
-      loadSystemlib();
     }
 
     void requestInit() override {

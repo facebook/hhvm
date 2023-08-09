@@ -171,7 +171,6 @@ struct FribidiExtension final : Extension {
     HHVM_FE(fribidi_log2vis);
     HHVM_FE(fribidi_charset_info);
     HHVM_FE(fribidi_get_charsets);
-    loadSystemlib();
   }
 } s_fribidi_extension;
 

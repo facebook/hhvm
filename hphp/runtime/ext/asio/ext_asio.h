@@ -27,6 +27,8 @@ struct AsioExtension final : Extension {
   void moduleInit() override;
   void requestInit() override;
   void loadDecls() override;
+  std::vector<std::string> hackFiles() const override;
+  void modulePostLoadEmitters() override;
 
 private:
   void initFunctions();

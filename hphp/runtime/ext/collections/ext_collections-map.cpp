@@ -444,9 +444,9 @@ void CollectionsExtension::initMap() {
 
   Native::registerNativePropHandler<CollectionPropHandler>(c_Map::s_clsName);
   Native::registerNativePropHandler<CollectionPropHandler>(c_ImmMap::s_clsName);
+}
 
-  loadSystemlib("collections-map");
-
+void CollectionsExtension::finishMap() {
   finishClass<c_Map>();
   finishClass<c_ImmMap>();
 }

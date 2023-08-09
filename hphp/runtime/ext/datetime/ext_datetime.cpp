@@ -1055,8 +1055,10 @@ static struct DateTimeExtension final : Extension {
                 static_cast<int64_t>(DateTime::SunInfoFormat::ReturnString));
     HHVM_RC_INT(SUNFUNCS_RET_TIMESTAMP,
                 static_cast<int64_t>(DateTime::SunInfoFormat::ReturnTimeStamp));
+  }
 
-    loadSystemlib("datetime");
+  std::vector<std::string> hackFiles() const override {
+    return {"datetime"};
   }
 
   void threadInit() override {

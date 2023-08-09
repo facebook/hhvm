@@ -1186,8 +1186,6 @@ void StandardExtension::initOptions() {
 #ifdef CLOCK_THREAD_CPUTIME_ID
   HHVM_RC_INT_SAME(CLOCK_THREAD_CPUTIME_ID);
 #endif
-
-  loadSystemlib("std_options");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

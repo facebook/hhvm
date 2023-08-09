@@ -369,8 +369,10 @@ static struct ThriftExtension final : Extension {
     HHVM_ME(TClientSink, sendPayloadOrSinkComplete);
     HHVM_ME(TClientSink, genCreditsOrFinalResponse);
     HHVM_ME(TClientSink, sendClientException);
+  }
 
-    loadSystemlib("thrift");
+  std::vector<std::string> hackFiles() const override {
+    return {"thrift"};
   }
 } s_thrift_extension;
 

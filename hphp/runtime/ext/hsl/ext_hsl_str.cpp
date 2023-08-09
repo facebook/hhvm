@@ -499,8 +499,6 @@ struct HSLStrExtension final : Extension {
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\replace_every_ci_l, replace_every_ci_l);
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\replace_every_nonrecursive_l, replace_every_nonrecursive_l);
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\replace_every_nonrecursive_ci_l, replace_every_nonrecursive_ci_l);
-
-    loadSystemlib();
   }
 } s_hsl_str_extension;
 

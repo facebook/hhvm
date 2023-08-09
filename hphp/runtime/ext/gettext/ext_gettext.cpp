@@ -178,7 +178,6 @@ void GettextExtension::moduleInit() {
 #if HAVE_BIND_TEXTDOMAIN_CODESET
   HHVM_FE(bind_textdomain_codeset);
 #endif
-  loadSystemlib();
 }
 
 void GettextExtension::moduleInfo(Array &info) {

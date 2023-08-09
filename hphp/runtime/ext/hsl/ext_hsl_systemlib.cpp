@@ -29,10 +29,11 @@ namespace {
       Config::Bind(s_enabled, ini, hdf, "Eval.HSLSystemlibEnabled", true);
     }
 
-    void moduleInit() override {
+    std::vector<std::string> hackFiles() const override {
       if (s_enabled) {
-        loadSystemlib();
+        return {"hsl_systemlib"};
       }
+      return {};
     }
 
     const DependencySet getDeps() const override {

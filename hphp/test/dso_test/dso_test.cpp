@@ -39,8 +39,6 @@ struct TestExtension : Extension {
     HHVM_FE(dso_test_double);
     HHVM_FE(dso_test_bool);
     HHVM_FE(dso_test_null);
-
-    loadSystemlib();
   }
 
   void requestInit() override {

@@ -694,8 +694,6 @@ void StandardExtension::initVariable() {
     HHVM_FALIAS(__hhvm_intrinsics\\serialize_keep_dvarrays,
                 hhvm_intrinsics_serialize_keep_dvarrays);
   }
-
-  loadSystemlib("std_variable");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -425,8 +425,6 @@ void IntlExtension::initTimeZone() {
 #endif // ICU 4.9
 
   Native::registerNativeDataInfo<IntlTimeZone>(s_IntlTimeZone.get());
-
-  loadSystemlib("icu_timezone");
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -1631,8 +1631,6 @@ struct CurlExtension final : Extension {
     HHVM_FE(curl_share_init);
     HHVM_FE(curl_share_setopt);
     HHVM_FE(curl_share_close);
-
-    loadSystemlib();
   }
 } s_curl_extension;
 

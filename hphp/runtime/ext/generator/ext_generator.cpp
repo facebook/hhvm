@@ -188,7 +188,6 @@ struct GeneratorExtension final : Extension {
     Native::registerNativeDataInfo<Generator>(
       Generator::s_className.get(),
       Native::NDIFlags::NO_SWEEP | Native::NDIFlags::CTOR_THROWS);
-    loadSystemlib();
   }
 };
 

@@ -522,8 +522,6 @@ void StandardExtension::initMisc() {
     HHVM_RC_INT(CONNECTION_NORMAL,  k_CONNECTION_NORMAL);
     HHVM_RC_INT(CONNECTION_ABORTED, k_CONNECTION_ABORTED);
     HHVM_RC_INT(CONNECTION_TIMEOUT, k_CONNECTION_TIMEOUT);
-
-    loadSystemlib("std_misc");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

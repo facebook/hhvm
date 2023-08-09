@@ -95,7 +95,6 @@ namespace {
         HH\\Lib\\_Private\\_IO\\request_read,
         HH_io_request_read
       );
-      loadSystemlib();
     }
 
     void requestInit() {

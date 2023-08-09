@@ -162,6 +162,31 @@ struct IntlExtension final : Extension {
     initTransliterator();
   }
 
+  std::vector<std::string> hackFiles() const override {
+    return {
+      "icu",
+      "icu_locale",
+      "icu_num_fmt",
+      "icu_timezone",
+      "icu_iterator",
+      "icu_date_fmt",
+      "icu_date_pattern_gen",
+      "icu_calendar",
+      "icu_grapheme",
+      "icu_break_iterator",
+      "icu_uchar",
+      "icu_uconverter",
+      "icu_ucsdet",
+      "icu_uspoof",
+      "icu_misc",
+      "icu_collator",
+      "icu_msg_fmt",
+      "icu_normalizer",
+      "icu_rsrc_bundle",
+      "icu_transliterator",
+    };
+  }
+
   void threadInit() override {
     bindIniSettings();
   }

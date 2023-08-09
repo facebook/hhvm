@@ -376,8 +376,6 @@ void IntlExtension::initDatePatternGenerator() {
 
   auto gen = s_IntlDatePatternGenerator.get();
   Native::registerNativeDataInfo<IntlDatePatternGenerator>(gen);
-
-  loadSystemlib("icu_date_pattern_gen");
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -44,6 +44,25 @@ struct StandardExtension final : Extension {
     initProcess();
   }
 
+  std::vector<std::string> hackFiles() const override {
+    return {
+      "std_errorfunc",
+      "std_classobj",
+      "std_network",
+      "std_options",
+      "std_gc",
+      "std_output",
+      "std_string",
+      "std_variable",
+      "std_function",
+      "std_misc",
+      "std_file",
+      "std_intrinsics",
+      "std_math",
+      "std_process",
+    };
+  }
+
   void threadInit() override {
     threadInitMisc();
   }

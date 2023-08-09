@@ -820,7 +820,6 @@ void apcExtension::moduleInit() {
   HHVM_FE(apc_size);
   HHVM_FE(apc_extend_ttl);
   HHVM_FE(apc_cache_info);
-  loadSystemlib();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

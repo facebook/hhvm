@@ -201,8 +201,6 @@ static struct IntervalTimerExtension final : Extension {
     Native::registerNativeDataInfo<IntervalTimer>(
       IntervalTimer::c_ClassName.get(),
       Native::NDIFlags::NO_SWEEP);
-
-    loadSystemlib();
   }
 } s_intervaltimer_extension;
 

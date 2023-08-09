@@ -2766,8 +2766,6 @@ struct StringExtension final : Extension {
     HHVM_FALIAS(HH\\str_number_coercible, HH_str_number_coercible);
     HHVM_FALIAS(HH\\str_to_numeric, HH_str_to_numeric);
     HHVM_FALIAS(HH\\str_bitwise_xor, HH_str_bitwise_xor);
-
-    loadSystemlib();
   }
 } s_string_extension;
 

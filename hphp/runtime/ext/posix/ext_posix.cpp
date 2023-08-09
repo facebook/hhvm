@@ -564,8 +564,6 @@ void POSIXExtension::moduleInit() {
   HHVM_FE(posix_times);
   HHVM_FE(posix_ttyname);
   HHVM_FE(posix_uname);
-
-  loadSystemlib();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

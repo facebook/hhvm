@@ -23,10 +23,6 @@ static class HHClientExtension final : Extension {
  public:
   HHClientExtension(): Extension("hh_client", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) { }
 
-  void moduleInit() override {
-    loadSystemlib();
-  }
-
   const DependencySet getDeps() const override {
     return DependencySet({"enum"});
   }

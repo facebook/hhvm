@@ -3461,8 +3461,6 @@ struct opensslExtension final : Extension {
     HHVM_FE(openssl_get_cipher_methods);
     HHVM_FE(openssl_get_curve_names);
     HHVM_FE(openssl_get_md_methods);
-
-    loadSystemlib();
   }
 } s_openssl_extension;
 

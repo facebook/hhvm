@@ -360,8 +360,6 @@ struct JsonExtension final : Extension {
     HHVM_FE(json_encode_pure);
     HHVM_FE(json_decode);
     HHVM_FE(json_decode_with_error);
-
-    loadSystemlib();
   }
 
   void requestInit() override {

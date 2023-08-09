@@ -1020,8 +1020,6 @@ void StandardExtension::initProcess() {
 #endif
   HHVM_FE(escapeshellarg);
   HHVM_FE(escapeshellcmd);
-
-  loadSystemlib("std_process");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

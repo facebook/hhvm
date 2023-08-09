@@ -556,8 +556,6 @@ void IntlExtension::initUConverter() {
   HHVM_RCC_INT(UConverter, IMAP_MAILBOX, UCNV_IMAP_MAILBOX);
 
   Native::registerNativeDataInfo<IntlUConverter>(s_UConverter.get());
-
-  loadSystemlib("icu_uconverter");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

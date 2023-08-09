@@ -52,7 +52,6 @@ void StandardExtension::initGc() {
   HHVM_FE(gc_collect_cycles);
   HHVM_FE(gc_mem_caches);
   HHVM_FE(gc_check_heap);
-  loadSystemlib("std_gc");
 }
 
 }

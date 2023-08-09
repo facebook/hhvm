@@ -201,7 +201,6 @@ struct MailExtension final : Extension {
   void moduleInit() override {
     HHVM_FE(mail);
     HHVM_FE(ezmlm_hash);
-    loadSystemlib();
   }
 } s_mail_extension;
 

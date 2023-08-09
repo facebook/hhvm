@@ -843,8 +843,6 @@ void SysvmsgExtension::moduleInit() {
   HHVM_FE(msg_remove_queue);
   HHVM_FE(msg_set_queue);
   HHVM_FE(msg_stat_queue);
-
-  loadSystemlib();
 }
 
 void SysvsemExtension::moduleInit() {
@@ -852,8 +850,6 @@ void SysvsemExtension::moduleInit() {
   HHVM_FE(sem_get);
   HHVM_FE(sem_release);
   HHVM_FE(sem_remove);
-
-  loadSystemlib();
 }
 
 void SysvshmExtension::moduleInit() {
@@ -864,8 +860,6 @@ void SysvshmExtension::moduleInit() {
   HHVM_FE(shm_has_var);
   HHVM_FE(shm_put_var);
   HHVM_FE(shm_remove_var);
-
-  loadSystemlib();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

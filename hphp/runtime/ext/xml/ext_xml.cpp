@@ -1033,8 +1033,6 @@ void XMLExtension::moduleInit() {
   HHVM_RC_INT(XML_OPTION_SKIP_WHITE,      PHP_XML_OPTION_SKIP_WHITE);
 
   HHVM_RC_STR(XML_SAX_IMPL, "expat");
-
-  loadSystemlib();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

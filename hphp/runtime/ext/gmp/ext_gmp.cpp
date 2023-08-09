@@ -1457,8 +1457,6 @@ struct GMPExtension final : Extension {
     HHVM_ME(GMP, serialize);
     HHVM_ME(GMP, unserialize);
     HHVM_ME(GMP, __debugInfo);
-
-    loadSystemlib();
   }
 } s_gmp_extension;
 

@@ -436,8 +436,6 @@ void StandardExtension::initErrorFunc() {
   HHVM_RC_INT(E_ALL, (int)ErrorMode::PHP_ALL | (int)ErrorMode::STRICT);
 
   HHVM_RC_INT(E_HHVM_FATAL_ERROR, (int)ErrorMode::FATAL_ERROR);
-
-  loadSystemlib("std_errorfunc");
 }
 
 }

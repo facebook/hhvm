@@ -1377,9 +1377,6 @@ struct MemcachedExtension final : Extension {
                  MEMCACHED_SERVER_TEMPORARILY_DISABLED);
     HHVM_RCC_INT(Memcached, LIBMEMCACHED_VERSION_HEX, LIBMEMCACHED_VERSION_HEX);
     HHVM_RCC_BOOL(Memcached, GET_ERROR_RETURN_VALUE, false);
-
-
-    loadSystemlib();
   }
 } s_memcached_extension;
 

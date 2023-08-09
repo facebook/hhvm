@@ -27,6 +27,7 @@
 #include <set>
 #include <string>
 #include <string_view>
+#include <vector>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -60,14 +61,14 @@ struct Extension : IDebuggable {
   static bool IsSystemlibPath(const std::string& path);
 
   // Look for "ext.{namehash}" in the binary and compile/merge it
-  void loadSystemlib() { loadSystemlib(m_name); }
+private:
   void loadSystemlib(const std::string& name);
 
+public:
   // Compile and merge an systemlib fragment
   static void CompileSystemlib(const std::string &slib,
                                const std::string &name,
                                const Native::FuncTable& nativeFuncs);
-public:
   explicit Extension(const char name[],
                      const char version[],
                      const char oncall[]);
@@ -88,6 +89,12 @@ public:
   virtual void threadShutdown();
   virtual void requestInit();
   virtual void requestShutdown();
+
+  virtual std::vector<std::string> hackFiles() const;
+
+  void loadEmitters();
+
+  virtual void modulePostLoadEmitters();
 
   // Override this function when your extension calls anything other than:
   //

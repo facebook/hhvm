@@ -2156,7 +2156,6 @@ void LdapExtension::moduleInit() {
   HHVM_RC_INT_SAME(LDAP_OPT_DEBUG_LEVEL);
 #endif
 
-  loadSystemlib();
   LDAP* link = nullptr;
   if (ldap_create(&link) == LDAP_SUCCESS) {
     ldap_unbind(link);

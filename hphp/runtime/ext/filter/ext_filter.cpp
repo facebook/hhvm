@@ -364,8 +364,6 @@ void FilterExtension::moduleInit() {
   HHVM_FE(filter_list);
   HHVM_FE(filter_id);
   HHVM_FE(filter_var);
-
-  loadSystemlib();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

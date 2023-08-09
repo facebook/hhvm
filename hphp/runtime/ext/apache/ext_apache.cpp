@@ -154,8 +154,6 @@ void ApacheExtension::moduleInit() {
   HHVM_FE(apache_get_config);
   HHVM_FALIAS(HH\\get_headers_secure, get_headers_secure);
   HHVM_FALIAS(HH\\get_proxygen_headers, get_proxygen_headers);
-
-  loadSystemlib();
 }
 
 static ApacheExtension s_apache_extension;

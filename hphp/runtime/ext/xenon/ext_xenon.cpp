@@ -338,7 +338,6 @@ struct xenonExtension final : Extension {
                 xenon_get_and_clear_missed_sample_count);
     HHVM_FALIAS(HH\\xenon_get_is_profiled_request,
                 xenon_get_is_profiled_request);
-    loadSystemlib();
   }
 
   void requestInit() override {

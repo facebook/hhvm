@@ -937,8 +937,6 @@ void StreamExtension::moduleInit() {
   HHVM_FE(stream_socket_recvfrom);
   HHVM_FE(stream_socket_sendto);
   HHVM_FE(stream_socket_shutdown);
-
-  loadSystemlib();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

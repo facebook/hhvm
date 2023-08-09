@@ -3437,8 +3437,6 @@ static struct PDOExtension final : Extension {
       s_PDO.get(), Native::NDIFlags::NO_SWEEP);
     Native::registerNativeDataInfo<PDOStatementData>(
       s_PDOStatement.get(), Native::NDIFlags::NO_SWEEP);
-
-    loadSystemlib();
   }
 } s_pdo_extension;
 

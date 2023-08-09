@@ -447,8 +447,6 @@ void HashExtension::moduleInit() {
   HHVM_FE(hphp_murmurhash);
 
   HHVM_RC_INT(HASH_HMAC, k_HASH_HMAC);
-
-  loadSystemlib();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

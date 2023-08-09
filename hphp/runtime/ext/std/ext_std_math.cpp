@@ -428,8 +428,6 @@ void StandardExtension::initMath() {
   HHVM_FE(mt_rand);
   HHVM_FE(lcg_value);
   HHVM_FE(intdiv);
-
-  loadSystemlib("std_math");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

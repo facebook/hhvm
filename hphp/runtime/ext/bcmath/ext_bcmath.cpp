@@ -272,7 +272,6 @@ struct bcmathExtension final : Extension {
     HHVM_FE(bcpow);
     HHVM_FE(bcpowmod);
     HHVM_FE(bcsqrt);
-    loadSystemlib();
   }
 
   void threadInit() override {

@@ -693,8 +693,6 @@ static struct XMLReaderExtension final : Extension {
 
     Native::registerNativeDataInfo<XMLReader>(s_XMLReader.get());
     Native::registerNativePropHandler<XMLReaderPropHandler>(s_XMLReader);
-
-    loadSystemlib();
   }
 } s_xml_reader_extension;
 

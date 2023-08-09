@@ -835,8 +835,6 @@ void mysqlExtension::moduleInit() {
   // HHVM_RC_INT(MYSQL_CLIENT_CR_COMPRESSION_WRONGLY_CONFIGURED, CR_COMPRESSION_WRONGLY_CONFIGURED)
   // Added in MySQL 8.0.20
   // HHVM_RC_INT(MYSQL_CLIENT_CR_KERBEROS_USER_NOT_FOUND, CR_KERBEROS_USER_NOT_FOUND)
-
-  loadSystemlib();
 }
 
 mysqlExtension s_mysql_extension;

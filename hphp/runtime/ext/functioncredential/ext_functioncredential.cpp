@@ -82,8 +82,6 @@ struct FunctionCredentialExtension final : Extension {
 
     Native::registerNativeDataInfo<FunctionCredential>(
         s_FunctionCredential.get());
-
-    loadSystemlib();
   }
 } s_functioncredential_extension;
 } // namespace

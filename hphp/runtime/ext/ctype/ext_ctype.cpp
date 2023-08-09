@@ -114,8 +114,6 @@ struct CtypeExtension final : Extension {
     HHVM_FE(ctype_space);
     HHVM_FE(ctype_upper);
     HHVM_FE(ctype_xdigit);
-
-    loadSystemlib();
   }
 } s_ctype_extension;
 

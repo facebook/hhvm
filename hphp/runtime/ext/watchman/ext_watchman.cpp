@@ -959,16 +959,12 @@ struct WatchmanExtension final : Extension {
 
   // (INIT entry-point) no need for a lock
   void moduleInit() override {
-    if (m_enabled) {
-      HHVM_FALIAS(HH\\watchman_run, HH_watchman_run);
-      HHVM_FALIAS(HH\\watchman_query, HH_watchman_query);
-      HHVM_FALIAS(HH\\watchman_subscribe, HH_watchman_subscribe);
-      HHVM_FALIAS(HH\\watchman_check_sub, HH_watchman_check_sub);
-      HHVM_FALIAS(HH\\watchman_sync_sub, HH_watchman_sync_sub);
-      HHVM_FALIAS(HH\\watchman_unsubscribe, HH_watchman_unsubscribe);
-
-      loadSystemlib();
-    }
+    HHVM_FALIAS(HH\\watchman_run, HH_watchman_run);
+    HHVM_FALIAS(HH\\watchman_query, HH_watchman_query);
+    HHVM_FALIAS(HH\\watchman_subscribe, HH_watchman_subscribe);
+    HHVM_FALIAS(HH\\watchman_check_sub, HH_watchman_check_sub);
+    HHVM_FALIAS(HH\\watchman_sync_sub, HH_watchman_sync_sub);
+    HHVM_FALIAS(HH\\watchman_unsubscribe, HH_watchman_unsubscribe);
   }
 
   // (INIT entry-point) this needs more fine grained control over locking as

@@ -87,6 +87,9 @@ static struct ProcessExtension final : Extension {
   void loadDecls() override {
     loadDeclsFrom("process");
   }
+  std::vector<std::string> hackFiles() const override {
+    return {"process"};
+  }
   void moduleInit() override;
 } s_process_extension;
 
@@ -585,8 +588,6 @@ void ProcessExtension::moduleInit() {
 
   HHVM_RC_INT_SAME(SIGPWR);
   HHVM_RC_INT_SAME(SIGSTKFLT);
-
-  loadSystemlib("process");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

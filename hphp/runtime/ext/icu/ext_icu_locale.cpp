@@ -745,8 +745,6 @@ void IntlExtension::initLocale() {
   HHVM_RCC_INT(Locale, VALID_LOCALE, ULOC_VALID_LOCALE);
 
   HHVM_RC_INT(INTL_MAX_LOCALE_LEN, MAX_LOCALE_LEN);
-
-  loadSystemlib("icu_locale");
 }
 
 //////////////////////////////////////////////////////////////////////////////

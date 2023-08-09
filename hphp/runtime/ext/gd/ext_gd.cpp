@@ -8035,8 +8035,6 @@ struct ExifExtension final : Extension {
     HHVM_FE(exif_read_data);
     HHVM_FE(exif_tagname);
     HHVM_FE(exif_thumbnail);
-
-    loadSystemlib();
   }
 } s_exif_extension;
 
@@ -8267,8 +8265,6 @@ struct GdExtension final : Extension {
     HHVM_RC_INT(PNG_FILTER_AVG, 0x40);
     HHVM_RC_INT(PNG_FILTER_PAETH, 0x80);
     HHVM_RC_INT(PNG_ALL_FILTERS, 0x08 | 0x10 | 0x20 | 0x40 | 0x80);
-
-    loadSystemlib();
   }
 } s_gd_extension;
 

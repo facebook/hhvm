@@ -425,8 +425,6 @@ void IntlExtension::initBreakIterator() {
   HHVM_RCC_INT(IntlBreakIterator, SENTENCE_SEP_LIMIT, UBRK_SENTENCE_SEP_LIMIT);
 
   Native::registerNativeDataInfo<IntlBreakIterator>(s_IntlBreakIterator.get());
-
-  loadSystemlib("icu_break_iterator");
 }
 
 //////////////////////////////////////////////////////////////////////////////

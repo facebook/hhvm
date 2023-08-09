@@ -1563,8 +1563,6 @@ static struct HHExtension final : Extension {
     X(reflection_class_is_final);
     X(reflection_class_is_interface);
 #undef X
-
-    loadSystemlib();
   }
 } s_hh_extension;
 

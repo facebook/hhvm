@@ -454,7 +454,6 @@ void IntlExtension::initUChar() {
   ICS_ME(getCombiningClass);
   ICS_ME(charDigitValue);
 #undef ICS_ME
-  loadSystemlib("icu_uchar");
 }
 
 /////////////////////////////////////////////////////////////////////////////

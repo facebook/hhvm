@@ -350,8 +350,6 @@ static struct HHImplicitContext final : Extension {
     X(SOFT_INACCESSIBLE, SoftInaccessible)
     X(SOFT_SET, SoftSet)
 #undef X
-
-    loadSystemlib();
   }
 } s_hh_implicit_context;
 

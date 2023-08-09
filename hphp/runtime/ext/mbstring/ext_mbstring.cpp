@@ -4601,8 +4601,6 @@ static struct mbstringExtension final : Extension {
     HHVM_FE(mb_substitute_character);
     HHVM_FE(mb_substr_count);
     HHVM_FE(mb_substr);
-
-    loadSystemlib();
   }
 } s_mbstring_extension;
 

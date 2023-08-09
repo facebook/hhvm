@@ -237,6 +237,7 @@ void moduleInit() {
   for (auto& ext : s_ordered) {
     assertx(ext->nativeFuncs().empty());
     ext->moduleInit();
+    ext->loadEmitters();
   }
   s_initialized = true;
 }

@@ -3246,8 +3246,6 @@ static struct SoapExtension final : Extension {
 
     HHVM_RC_STR_SAME(XSD_NAMESPACE);
     HHVM_RC_STR_SAME(XSD_1999_NAMESPACE);
-
-    loadSystemlib();
   }
 } s_soap_extension;
 

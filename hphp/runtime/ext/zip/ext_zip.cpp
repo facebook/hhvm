@@ -1558,8 +1558,6 @@ struct zipExtension final : Extension {
       delete wrapper;
       raise_warning("Couldn't register Zip wrapper");
     }
-
-    loadSystemlib();
   }
 } s_zip_extension;
 

@@ -121,8 +121,6 @@ struct WeakRefExtension final : Extension {
 
     Native::registerNativeDataInfo<WeakRefDataHandle>(
       s_WeakRefDataHandle.get());
-
-    loadSystemlib();
   }
 } s_weakref_extension;
 

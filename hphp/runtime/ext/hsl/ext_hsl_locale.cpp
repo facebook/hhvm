@@ -215,8 +215,6 @@ struct LocaleExtension final : Extension {
     LC_(IDENTIFICATION);
 #endif
 #undef LC_
-
-    loadSystemlib();
   }
 } s_locale_extension;
 

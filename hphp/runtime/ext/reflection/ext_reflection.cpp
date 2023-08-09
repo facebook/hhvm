@@ -2462,11 +2462,15 @@ struct ReflectionExtension final : Extension {
 
     Native::registerNativePropHandler
       <reflection_extension_PropHandler>(s_reflectionextension);
+  }
 
-    loadSystemlib();
-    loadSystemlib("reflection-classes");
-    loadSystemlib("reflection-internals-functions");
-    loadSystemlib("reflection_hni");
+  std::vector<std::string> hackFiles() const {
+    return {
+      "reflection",
+      "reflection-classes",
+      "reflection-internals-functions",
+      "reflection_hni"
+    };
   }
 } s_reflection_extension;
 

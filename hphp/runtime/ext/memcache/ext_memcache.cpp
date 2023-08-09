@@ -801,8 +801,6 @@ struct MemcacheExtension final : Extension {
       HHVM_ME(Memcache, addserver);
 
       Native::registerNativeDataInfo<MemcacheData>(s_MemcacheData.get());
-
-      loadSystemlib();
     }
 } s_memcache_extension;;
 

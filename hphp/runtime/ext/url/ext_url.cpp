@@ -336,8 +336,6 @@ struct StandardURLExtension final : Extension {
     HHVM_FE(rawurlencode);
     HHVM_FE(urldecode);
     HHVM_FE(urlencode);
-
-    loadSystemlib();
   }
 } s_standardurl_extension;
 

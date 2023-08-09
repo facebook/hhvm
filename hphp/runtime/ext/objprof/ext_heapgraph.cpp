@@ -609,8 +609,6 @@ struct heapgraphExtension final : Extension {
     HHVM_FALIAS(HH\\heapgraph_node_in_edges, heapgraph_node_in_edges);
     HHVM_FALIAS(HH\\heapgraph_dfs_nodes, heapgraph_dfs_nodes);
     HHVM_FALIAS(HH\\heapgraph_dfs_edges, heapgraph_dfs_edges);
-
-    loadSystemlib();
   }
 } s_heapgraph_extension;
 

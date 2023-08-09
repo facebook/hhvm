@@ -37,8 +37,6 @@ static struct ThreadExtension final : Extension {
   void moduleInit() override {
     HHVM_FE(hphp_get_thread_id);
     HHVM_FE(hphp_gettid);
-
-    loadSystemlib();
   }
 } s_thread_extension;
 

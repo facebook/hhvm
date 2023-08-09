@@ -357,8 +357,6 @@ void IntlExtension::initCollator() {
   HHVM_RCC_INT(Collator, DEFAULT_VALUE, UCOL_DEFAULT);
 
   Native::registerNativeDataInfo<Collator>(s_Collator.get());
-
-  loadSystemlib("icu_collator");
 }
 
 //////////////////////////////////////////////////////////////////////////////

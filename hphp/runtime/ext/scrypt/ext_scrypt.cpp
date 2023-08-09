@@ -78,7 +78,6 @@ struct ScryptExtension : Extension {
     ScryptExtension(): Extension("scrypt", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
     void moduleInit() override {
       HHVM_FE(scrypt_enc);
-      loadSystemlib();
     }
 } s_scrypt_extension;
 

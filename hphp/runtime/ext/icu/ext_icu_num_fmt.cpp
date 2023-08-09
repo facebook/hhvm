@@ -589,8 +589,6 @@ void IntlExtension::initNumberFormatter() {
   HHVM_RCC_INT(NumberFormatter, TYPE_CURRENCY, k_UNUM_TYPE_CURRENCY);
 
   Native::registerNativeDataInfo<NumberFormatter>(s_NumberFormatter.get());
-
-  loadSystemlib("icu_num_fmt");
 }
 
 //////////////////////////////////////////////////////////////////////////////

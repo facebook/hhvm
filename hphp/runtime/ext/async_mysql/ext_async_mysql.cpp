@@ -2469,12 +2469,16 @@ static struct AsyncMysqlExtension final : Extension {
     HHVM_NAMED_ME(HH\\Lib\\SQL\\Query,
         toUnescapedString__FOR_DEBUGGING_ONLY__UNSAFE,
         HHLibSQLQuery__toUnescapedString__FOR_DEBUGGING_ONLY__UNSAFE);
-
-
-    loadSystemlib("mysqlrow");
-    loadSystemlib("async_mysql_exceptions");
-    loadSystemlib();
   }
+
+  std::vector<std::string> hackFiles() const override {
+    return {
+      "mysqlrow",
+      "async_mysql_exceptions",
+      "async_mysql",
+    };
+  }
+
   void moduleLoad(const IniSetting::Map& ini, Hdf config) override {
     Config::Bind(
         HdfAsyncMysqlClientPoolSize,

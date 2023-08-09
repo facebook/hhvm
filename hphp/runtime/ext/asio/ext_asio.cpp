@@ -176,9 +176,13 @@ void AsioExtension::moduleInit() {
   initRescheduleWaitHandle();
   initExternalThreadEventWaitHandle();
   initStaticWaitHandle();
+}
 
-  loadSystemlib();
+std::vector<std::string> AsioExtension::hackFiles() const {
+  return {"async-generator", "asio"};
+}
 
+void AsioExtension::modulePostLoadEmitters() {
   finishClasses();
 }
 

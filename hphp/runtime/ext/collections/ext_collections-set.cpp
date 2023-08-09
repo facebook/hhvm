@@ -629,9 +629,9 @@ void CollectionsExtension::initSet() {
 
   Native::registerNativePropHandler<CollectionPropHandler>(c_Set::s_clsName);
   Native::registerNativePropHandler<CollectionPropHandler>(c_ImmSet::s_clsName);
+}
 
-  loadSystemlib("collections-set");
-
+void CollectionsExtension::finishSet() {
   finishClass<c_Set>();
   finishClass<c_ImmSet>();
 }

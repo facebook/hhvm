@@ -82,11 +82,31 @@ struct CollectionsExtension : Extension {
     loadDeclsFrom("collections-vector");
   }
 
+  std::vector<std::string> hackFiles() const override {
+    return {
+      "collections-pair",
+      "collections-vector",
+      "collections-map",
+      "collections-set",
+    };
+  }
+
+  void modulePostLoadEmitters() override {
+    finishPair();
+    finishVector();
+    finishMap();
+    finishSet();
+  }
+
  private:
   void initPair();
+  void finishPair();
   void initVector();
+  void finishVector();
   void initMap();
+  void finishMap();
   void initSet();
+  void finishSet();
 
   template<class T>
   void finishClass() {

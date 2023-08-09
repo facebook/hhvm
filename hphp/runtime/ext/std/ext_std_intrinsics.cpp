@@ -564,8 +564,6 @@ void StandardExtension::initIntrinsics() {
                 getDumyValue,
                 HHVM_MN(ExtensibleNewableClassWithNativeData,getDumyValue));
   Native::registerNativeDataInfo<DummyNativeData>(s_DummyNativeData.get());
-
-  loadSystemlib("std_intrinsics");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

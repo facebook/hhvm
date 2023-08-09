@@ -849,8 +849,6 @@ void FactsExtension::moduleInit() {
       HH\\Facts\\file_attribute_parameters,
       HHVM_FN(facts_file_attribute_parameters));
 
-  loadSystemlib();
-
   if (RuntimeOption::AutoloadDBPath.empty()) {
     XLOG(ERR) << "Autoload.DB.Path was empty, not enabling native autoloader.";
     return;

@@ -627,8 +627,6 @@ void StandardExtension::initNetwork() {
   HHVM_RC_INT_SAME(LOG_LOCAL6);
   HHVM_RC_INT_SAME(LOG_LOCAL7);
 #endif
-
-  loadSystemlib("std_network");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

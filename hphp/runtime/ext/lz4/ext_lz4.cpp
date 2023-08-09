@@ -105,7 +105,6 @@ static struct LZ4Extension final : Extension {
   void moduleInit() override {
     HHVM_FE(lz4_compress);
     HHVM_FE(lz4_uncompress);
-    loadSystemlib();
   }
 } s_lz4_extension;
 

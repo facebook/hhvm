@@ -540,8 +540,6 @@ void StandardExtension::initClassobj() {
   HHVM_FALIAS(HH\\meth_caller_get_class, HH_meth_caller_get_class);
   HHVM_FALIAS(HH\\meth_caller_get_method, HH_meth_caller_get_method);
   HHVM_FALIAS(HH\\class_get_class_name, HH_class_get_class_name);
-
-  loadSystemlib("std_classobj");
 }
 
 

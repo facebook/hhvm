@@ -1885,8 +1885,6 @@ static struct SimpleXMLExtension : Extension {
     Native::registerNativeDataInfo<SimpleXMLIterator>(
       s_SimpleXMLIterator.get(), 0, Class::CallToImpl
     );
-
-    loadSystemlib();
   }
 } s_simplexml_extension;
 

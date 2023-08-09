@@ -177,7 +177,6 @@ struct enumExtension final : Extension {
     X(create_opaque_value_internal);
     X(unwrap_opaque_value);
 #undef X
-    loadSystemlib();
   }
 } s_enum_extension;
 

@@ -108,12 +108,12 @@ void Extension::loadSystemlib(const std::string& name) {
 void Extension::moduleLoad(const IniSetting::Map& /*ini*/, Hdf /*hdf*/)
 {}
 
+void Extension::moduleInit()
+{}
+
 void Extension::moduleInfo(Array &info) {
   info.set(String(m_name), true);
 }
-
-void Extension::moduleInit()
-{}
 
 void Extension::cliClientInit()
 {}
@@ -151,6 +151,20 @@ void Extension::registerExtensionFunction(const String& name) {
 const std::vector<StringData*>& Extension::getExtensionFunctions() const {
   return m_functions;
 }
+
+std::vector<std::string> Extension::hackFiles() const {
+  return {toLower(m_name)};
+}
+
+void Extension::loadEmitters() {
+  for (auto const& name : hackFiles()) {
+    loadSystemlib(name);
+  }
+
+  modulePostLoadEmitters();
+}
+
+void Extension::modulePostLoadEmitters() {}
 
 void Extension::loadDecls() {
   // Look for "ext.{namehash}" in the binary and grab its decls

@@ -396,7 +396,6 @@ struct MailparseExtension final : Extension {
     HHVM_FE(mailparse_stream_encode);
     HHVM_FE(mailparse_uudecode_all);
     HHVM_FE(mailparse_determine_best_xfer_encoding);
-    loadSystemlib();
   }
 } s_mailparse_extension;
 

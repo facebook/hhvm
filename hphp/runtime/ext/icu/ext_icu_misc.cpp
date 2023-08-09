@@ -210,8 +210,6 @@ void IntlExtension::initMisc() {
   UHHVM_RC_INT_SAME(IDNA_ERROR_CONTEXTO_DIGITS);
 #endif
 #undef UHHVM_RC_INT_SAME
-
-  loadSystemlib("icu_misc");
 }
 
 /////////////////////////////////////////////////////////////////////////////

@@ -1735,8 +1735,6 @@ static struct imapExtension final : Extension {
     HHVM_FE(imap_undelete);
     HHVM_FE(imap_unsubscribe);
     HHVM_FE(imap_utf8);
-
-    loadSystemlib();
   }
 
 } s_imap_extension;

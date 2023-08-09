@@ -2442,8 +2442,6 @@ struct SodiumExtension final : Extension {
     HHVM_FE(sodium_crypto_core_ed25519_scalar_add);
     HHVM_FE(sodium_crypto_scalarmult_ed25519_base);
     HHVM_FE(sodium_crypto_scalarmult_ed25519_base_noclamp);
-
-    loadSystemlib();
   }
 } s_sodium_extension;
 

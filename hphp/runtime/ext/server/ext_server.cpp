@@ -240,8 +240,6 @@ void ServerExtension::moduleInit() {
   HHVM_FALIAS(HH\\server_health_level, server_health_level);
   HHVM_FALIAS(HH\\server_uptime, server_uptime);
   HHVM_FALIAS(HH\\server_process_start_time, server_process_start_time);
-
-  loadSystemlib();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

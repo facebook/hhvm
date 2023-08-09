@@ -171,8 +171,6 @@ void IntlExtension::initTransliterator() {
   HHVM_RCC_INT(Transliterator, REVERSE, UTRANS_REVERSE);
 
   Native::registerNativeDataInfo<Transliterator>(s_Transliterator.get());
-
-  loadSystemlib("icu_transliterator");
 }
 
 //////////////////////////////////////////////////////////////////////////////

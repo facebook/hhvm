@@ -277,7 +277,6 @@ static struct ReadlineExtension final : Extension {
       HHVM_FE(readline_info);
       HHVM_FE(readline_read_history);
       HHVM_FE(readline_write_history);
-      loadSystemlib();
     }
 
     void requestShutdown() override {

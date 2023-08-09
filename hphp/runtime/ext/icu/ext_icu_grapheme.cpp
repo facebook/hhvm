@@ -492,8 +492,6 @@ void IntlExtension::initGrapheme() {
   HHVM_FE(grapheme_strrpos);
   HHVM_FE(grapheme_strstr);
   HHVM_FE(grapheme_substr);
-
-  loadSystemlib("icu_grapheme");
 }
 
 /////////////////////////////////////////////////////////////////////////////

@@ -259,7 +259,6 @@ struct fileinfoExtension final : Extension {
     HHVM_FE(finfo_set_flags);
     HHVM_FE(finfo_close);
     HHVM_FE(mime_content_type);
-    loadSystemlib();
   }
 } s_fileinfo_extension;
 

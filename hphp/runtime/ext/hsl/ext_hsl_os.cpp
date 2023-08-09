@@ -1304,8 +1304,6 @@ struct OSExtension final : Extension {
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\setsockopt_int, HSL_os_setsockopt_int);
 
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\fork_and_execve, HSL_os_fork_and_execve);
-
-    loadSystemlib();
   }
 
   void requestShutdown() override {

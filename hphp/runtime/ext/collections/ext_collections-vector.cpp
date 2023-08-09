@@ -501,9 +501,9 @@ void CollectionsExtension::initVector() {
 
   Native::registerNativePropHandler<CollectionPropHandler>(c_Vector::s_clsName);
   Native::registerNativePropHandler<CollectionPropHandler>(c_ImmVector::s_clsName);
+}
 
-  loadSystemlib("collections-vector");
-
+void CollectionsExtension::finishVector() {
   finishClass<c_Vector>();
   finishClass<c_ImmVector>();
 }

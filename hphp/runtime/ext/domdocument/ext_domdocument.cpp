@@ -6071,8 +6071,6 @@ struct DOMDocumentExtension final : Extension {
     HHVM_RC_INT_SAME(XML_ATTRIBUTE_NMTOKENS);
     HHVM_RC_INT_SAME(XML_ATTRIBUTE_ENUMERATION);
     HHVM_RC_INT_SAME(XML_ATTRIBUTE_NOTATION);
-
-    loadSystemlib();
   }
 } s_domdocument_extension;
 

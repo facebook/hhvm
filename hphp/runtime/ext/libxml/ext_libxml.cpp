@@ -799,8 +799,6 @@ struct LibXMLExtension final : Extension {
       HHVM_FE(libxml_disable_entity_loader);
       HHVM_FE(libxml_set_streams_context);
 
-      loadSystemlib();
-
       // Set up callbacks to support stream wrappers for reading and writing
       // xml files and loading external entities.
       xmlParserInputBufferCreateFilenameDefault(libxml_create_input_buffer);

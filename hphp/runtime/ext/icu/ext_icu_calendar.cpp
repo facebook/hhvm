@@ -864,8 +864,6 @@ void IntlExtension::initCalendar() {
   HHVM_ME(IntlGregorianCalendar, setGregorianChange);
 
   Native::registerNativeDataInfo<IntlCalendar>(s_IntlCalendar.get());
-
-  loadSystemlib("icu_calendar");
 }
 
 /////////////////////////////////////////////////////////////////////////////

@@ -169,8 +169,6 @@ void StandardExtension::initFunction() {
   HHVM_FE(register_postsend_function);
   HHVM_FE(register_shutdown_function);
   HHVM_FALIAS(HH\\fun_get_function, HH_fun_get_function);
-
-  loadSystemlib("std_function");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

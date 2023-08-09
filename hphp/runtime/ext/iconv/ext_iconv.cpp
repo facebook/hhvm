@@ -2001,8 +2001,6 @@ struct iconvExtension final : Extension {
     HHVM_FE(iconv_substr);
     HHVM_FE(iconv);
     HHVM_FE(ob_iconv_handler);
-
-    loadSystemlib();
   }
 
 } s_iconv_extension;

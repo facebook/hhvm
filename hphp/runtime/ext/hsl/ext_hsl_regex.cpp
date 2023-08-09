@@ -116,7 +116,6 @@ namespace {
         HH\\Lib\\_Private\\_Regex\\replace,
         HH_regex_replace
       );
-      loadSystemlib();
     }
   } s_regex_extension;
 

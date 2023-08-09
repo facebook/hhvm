@@ -262,8 +262,6 @@ struct ShmopExtension final : Extension {
     HHVM_FE(shmop_read);
     HHVM_FE(shmop_size);
     HHVM_FE(shmop_write);
-
-    loadSystemlib();
   }
 
 } s_shmop_extension;

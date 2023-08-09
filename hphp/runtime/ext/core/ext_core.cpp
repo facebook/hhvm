@@ -66,8 +66,6 @@ void CoreExtension::moduleInit() {
 
   HHVM_ME(DirectoryIterator, hh_readdir);
   HHVM_ME(GlobIterator, count);
-
-  loadSystemlib();
 }
 
 CoreExtension s_core_extension;

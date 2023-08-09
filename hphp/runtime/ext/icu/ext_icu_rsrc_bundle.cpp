@@ -255,8 +255,6 @@ void IntlExtension::initResourceBundle() {
   HHVM_ME(ResourceBundle, valid);
 
   Native::registerNativeDataInfo<ResourceBundle>(s_ResourceBundle.get());
-
-  loadSystemlib("icu_rsrc_bundle");
 }
 
 //////////////////////////////////////////////////////////////////////////////

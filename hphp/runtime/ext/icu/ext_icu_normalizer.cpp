@@ -127,8 +127,6 @@ void IntlExtension::initNormalizer() {
   HHVM_RCC_INT(Normalizer, NFC, UNORM_NFC);
   HHVM_RCC_INT(Normalizer, FORM_KC, UNORM_NFKC);
   HHVM_RCC_INT(Normalizer, NFKC, UNORM_NFKC);
-
-  loadSystemlib("icu_normalizer");
 }
 
 //////////////////////////////////////////////////////////////////////////////

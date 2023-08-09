@@ -363,8 +363,6 @@ void IntlExtension::initICU() {
   HHVM_RC_INT_SAME(UREGEX_MULTILINE);
   HHVM_RC_INT_SAME(UREGEX_UWORD);
   HHVM_RC_INT(UREGEX_OFFSET_CAPTURE, k_UREGEX_OFFSET_CAPTURE);
-
-  loadSystemlib("icu");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

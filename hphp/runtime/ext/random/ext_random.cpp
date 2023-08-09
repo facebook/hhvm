@@ -97,7 +97,6 @@ static struct RandomExtension final : Extension {
   void moduleInit() override {
     HHVM_FE(random_bytes);
     HHVM_FE(random_int);
-    loadSystemlib();
   }
 } s_random_extension;
 

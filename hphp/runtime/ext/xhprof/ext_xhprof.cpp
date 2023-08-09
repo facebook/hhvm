@@ -47,8 +47,6 @@ struct XHProfExtension : Extension {
     HHVM_RC_INT(SETPROFILE_FLAGS_FILE_LINE, EventHook::ProfileFileLine);
 
     HHVM_FE(fb_setprofile);
-
-    loadSystemlib();
   }
 } s_xhprof_extension;
 

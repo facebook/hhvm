@@ -150,7 +150,6 @@ struct DebuggerExtension final : Extension {
     HHVM_FE(hphp_debug_break);
     HHVM_FE(hphp_debugger_set_option);
     HHVM_FE(hphp_debugger_get_option);
-    loadSystemlib();
   }
 } s_debugger_extension;
 

@@ -567,8 +567,6 @@ struct MCRouterExtension : Extension {
           compatibility::carbonResultToString(static_cast<carbon::Result>(i))),
         i);
     }
-
-    loadSystemlib();
   }
 } s_mcrouter_extension;
 

@@ -960,8 +960,6 @@ struct XMLWriterExtension final : Extension {
       HHVM_FE(xmlwriter_output_memory);
 
       Native::registerNativeDataInfo<XMLWriterData>(s_XMLWriterData.get());
-
-      loadSystemlib();
     }
 } s_xmlwriter_extension;
 

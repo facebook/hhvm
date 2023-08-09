@@ -48,7 +48,6 @@ static struct SnappyExtension final : Extension {
     HHVM_FE(snappy_uncompress);
     HHVM_FALIAS(sncompress, snappy_compress);
     HHVM_FALIAS(snuncompress, snappy_uncompress);
-    loadSystemlib();
   }
 } s_snappy_extension;
 

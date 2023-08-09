@@ -1477,8 +1477,6 @@ struct FBExtension : Extension {
     HHVM_FE(fb_check_user_func_async);
     HHVM_FE(fb_end_user_func_async);
     HHVM_FE(fb_gen_user_func_array);
-
-    loadSystemlib();
   }
 } s_fb_extension;
 

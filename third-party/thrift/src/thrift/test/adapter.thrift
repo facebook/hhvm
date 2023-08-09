@@ -86,6 +86,9 @@ struct MyStruct {
   1: i64 field1;
 }
 
+@cpp.Type{template = "std::unordered_set"}
+typedef set<string> UnorderedStrings
+
 struct ComparisonTestStruct {
   @cpp.Adapter{name = "::apache::thrift::test::NonComparableWrapperAdapter"}
   1: MyStruct non_comparable_adapted_type;
@@ -98,6 +101,9 @@ struct ComparisonTestStruct {
   @cpp.Adapter{name = "::apache::thrift::test::NonComparableWrapperAdapter"}
   @thrift.InternBox
   3: MyStruct intern_box_non_comparable_adapted_type;
+
+  @cpp.Adapter{name = "::apache::thrift::test::NonComparableWrapperAdapter"}
+  4: UnorderedStrings non_comparable_adapted_unordered_strings;
 }
 
 union AdaptedUnion {

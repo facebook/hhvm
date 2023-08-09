@@ -27,7 +27,6 @@
 #include <folly/functional/Invoke.h>
 #include <folly/io/IOBuf.h>
 #include <folly/lang/Ordering.h>
-#include <thrift/lib/cpp2/Adapt.h>
 #include <thrift/lib/cpp2/op/Get.h>
 #include <thrift/lib/cpp2/op/Hash.h>
 #include <thrift/lib/cpp2/protocol/Protocol.h>
@@ -530,7 +529,15 @@ struct EqualTo<type::adapted<Adapter, Tag>> {
   static_assert(type::is_concrete_v<adapted_tag>, "");
   template <typename T>
   constexpr bool operator()(const T& lhs, const T& rhs) const {
-    return ::apache::thrift::adapt_detail::equal<Adapter>(lhs, rhs);
+    auto useAdapter =
+        [](auto adapter) -> folly::void_t<decltype(adapter.equal(lhs, rhs))> {};
+    if constexpr (folly::is_invocable_v<decltype(useAdapter), Adapter>) {
+      return Adapter::equal(lhs, rhs);
+    }
+    if constexpr (folly::is_invocable_v<std::equal_to<>, const T&, const T&>) {
+      return lhs == rhs;
+    }
+    return EqualTo<Tag>{}(Adapter::toThrift(lhs), Adapter::toThrift(rhs));
   }
 };
 template <typename Adapter, typename Tag>
@@ -539,7 +546,15 @@ struct LessThan<type::adapted<Adapter, Tag>> {
   static_assert(type::is_concrete_v<adapted_tag>, "");
   template <typename T>
   constexpr bool operator()(const T& lhs, const T& rhs) const {
-    return ::apache::thrift::adapt_detail::less<Adapter>(lhs, rhs);
+    auto useAdapter =
+        [](auto adapter) -> folly::void_t<decltype(adapter.less(lhs, rhs))> {};
+    if constexpr (folly::is_invocable_v<decltype(useAdapter), Adapter>) {
+      return Adapter::less(lhs, rhs);
+    }
+    if constexpr (folly::is_invocable_v<std::less<>, const T&, const T&>) {
+      return lhs < rhs;
+    }
+    return LessThan<Tag>{}(Adapter::toThrift(lhs), Adapter::toThrift(rhs));
   }
 };
 

@@ -891,6 +891,7 @@ TEST(AdaptTest, ComparisonTestStruct) {
 
   obj.non_comparable_adapted_type() = {s};
   obj.intern_box_non_comparable_adapted_type() = {s};
+  obj.non_comparable_adapted_unordered_strings() = {{{"foo"}}};
 
   auto serialized = CompactSerializer::serialize<std::string>(obj);
   auto obj2 = basic::ComparisonTestStruct();

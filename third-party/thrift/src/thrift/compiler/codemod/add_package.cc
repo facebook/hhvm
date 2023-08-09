@@ -77,7 +77,16 @@ class add_package {
     if (!pkg.empty()) {
       return pkg;
     }
-    return gen.get_package_from_common_identifiers();
+    pkg = gen.get_package_from_common_identifiers();
+
+    if (!pkg.empty()) {
+      return pkg;
+    }
+
+    // If there are no common identifiers,
+    // then prioritize the longest package as it is more likely to be
+    // unique
+    return gen.get_longest_package();
   }
 
   std::string get_replacement_content(const std::string& pkg) const {

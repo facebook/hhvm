@@ -176,3 +176,23 @@ class ThriftPackage(unittest.TestCase):
                 namespace java "org.apache.cpp2.thrift.annotation"
                 """,
         )
+
+    def test_with_longest_pkg(self):
+
+        # When minimum length is not met, use the longest path.
+        self.write_and_test(
+            "foo.thrift",
+            """\
+                namespace hack "meta.annotation"
+                namespace java "org.apache.thrift.annotation"
+                namespace cpp2 "meta.thrift_test.cpp2.annotation"
+
+                """,
+            """\
+                package "meta.com/thrift_test/cpp2/annotation"
+
+                namespace hack "meta.annotation"
+                namespace java "org.apache.thrift.annotation"
+                namespace cpp2 "meta.thrift_test.cpp2.annotation"
+                """,
+        )

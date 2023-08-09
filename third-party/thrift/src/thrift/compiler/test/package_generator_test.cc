@@ -140,4 +140,25 @@ TEST(PackageGeneratorTest, common_identifiers) {
   // domain
   EXPECT_EQ(get_pkg_from_common_identifiers(), "apache.org/xyz/foo");
 }
+
+TEST(PackageGeneratorTest, longest_package) {
+  std::map<std::string, std::string> namespaces = {
+      {"cpp2", "apache.abcdef.ghij"}, {"hack", "xyz.abc.foo"}, {"py3", "foo"}};
+
+  auto get_longest_pkg = [&]() {
+    return codemod::package_name_generator_util::from_namespaces(namespaces)
+        .get_longest_package();
+  };
+
+  // Since domain is present in one of the namespaces,
+  // the domain from that namespace is used for generating the package.
+  // Package from cpp2 namespace is the longest one.
+  EXPECT_EQ(get_longest_pkg(), "apache.org/abcdef/ghij");
+
+  // Since py3 namespaces has a domain, that domain will be used for generating
+  // the package from py3 namespace.
+  // "facebook.com/abcdef.ghi" (len = 23) > "apache.org/abcdef/ghij" (len = 22)
+  namespaces["py3"] = "facebook.abcdef.ghi";
+  EXPECT_EQ(get_longest_pkg(), "facebook.com/abcdef/ghi");
+}
 } // namespace apache::thrift::compiler

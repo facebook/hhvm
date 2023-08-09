@@ -312,6 +312,17 @@ class package_name_generator_util {
         .generate(any_domain_);
   }
 
+  std::string get_longest_package() {
+    std::string longest_package;
+    for (auto& generator : pkg_generators_) {
+      auto pkg = generator.generate(any_domain_);
+      if (pkg.length() > longest_package.length()) {
+        longest_package = pkg;
+      }
+    }
+    return longest_package;
+  }
+
  private:
   std::vector<package_name_generator> pkg_generators_;
   std::string any_domain_ = kDefaultDomain;

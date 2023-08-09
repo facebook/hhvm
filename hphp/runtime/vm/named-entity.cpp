@@ -35,6 +35,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+static auto ne_counter = ServiceData::createCounter("admin.named-entities");
+
 rds::Handle NamedFunc::getFuncHandle(const StringData* name) const {
   auto const mode =
     RO::RepoAuthoritative ? rds::Mode::Persistent : rds::Mode::Normal;
@@ -158,6 +160,7 @@ T* insertNamedEntity(const StringData* str, typename T::Map* map) {
     str = makeStaticString(str);
   }
   auto res = map->insert(str, T());
+  ne_counter->increment();
   static std::atomic<bool> signaled{false};
   checkAHMSubMaps(*map, "named entity table", signaled);
 

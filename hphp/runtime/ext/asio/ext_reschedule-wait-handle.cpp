@@ -30,6 +30,8 @@ namespace {
   StaticString s_reschedule("<reschedule>");
 }
 
+WAITHANDLE_CLASSOF_IMPL(RescheduleWaitHandle)
+
 Object HHVM_STATIC_METHOD(RescheduleWaitHandle, create,
                           int64_t queue, int64_t priority) {
   if (UNLIKELY(

@@ -49,11 +49,8 @@ struct NumberFormatter : IntlError {
   }
 
   static Object newInstance() {
-    if (!c_NumberFormatter) {
-      c_NumberFormatter = Class::lookup(s_NumberFormatter.get());
-      assertx(c_NumberFormatter);
-    }
-    return Object{c_NumberFormatter};
+    return Object{ SystemLib::classLoad(s_NumberFormatter.get(),
+                                        c_NumberFormatter) };
   }
   static NumberFormatter* Get(ObjectData* obj) {
     return GetData<NumberFormatter>(obj, s_NumberFormatter);

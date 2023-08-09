@@ -17,7 +17,10 @@ namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 
 Class* c_Map::s_cls;
+StaticString c_Map::s_clsName("HH\\Map");
+
 Class* c_ImmMap::s_cls;
+StaticString c_ImmMap::s_clsName("HH\\ImmMap");
 
 /////////////////////////////////////////////////////////////////////////////
 // BaseMap
@@ -360,8 +363,6 @@ namespace collections {
 /////////////////////////////////////////////////////////////////////////////
 
 const StaticString
-  s_HH_Map("HH\\Map"),
-  s_HH_ImmMap("HH\\ImmMap"),
   s_MapIterator("MapIterator");
 
 /////////////////////////////////////////////////////////////////////////////
@@ -441,17 +442,12 @@ void CollectionsExtension::initMap() {
 
   HHVM_NAMED_ME(HH\\Map, toImmMap,      &c_Map::getImmutableCopy);
 
-  Native::registerNativePropHandler<CollectionPropHandler>(s_HH_Map);
-  Native::registerNativePropHandler<CollectionPropHandler>(s_HH_ImmMap);
+  Native::registerNativePropHandler<CollectionPropHandler>(c_Map::s_clsName);
+  Native::registerNativePropHandler<CollectionPropHandler>(c_ImmMap::s_clsName);
 
   loadSystemlib("collections-map");
 
-  c_Map::s_cls = Class::lookup(s_HH_Map.get());
-  assertx(c_Map::s_cls);
   finishClass<c_Map>();
-
-  c_ImmMap::s_cls = Class::lookup(s_HH_ImmMap.get());
-  assertx(c_ImmMap::s_cls);
   finishClass<c_ImmMap>();
 }
 

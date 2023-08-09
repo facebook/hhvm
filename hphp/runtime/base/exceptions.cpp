@@ -207,14 +207,14 @@ void raise_parse_error(const StringData* filename,
 
 namespace {
   DEBUG_ONLY bool is_throwable(const ObjectData* throwable) {
-    auto const erCls = SystemLib::s_ErrorClass;
-    auto const exCls = SystemLib::s_ExceptionClass;
+    auto const erCls = SystemLib::getErrorClass();
+    auto const exCls = SystemLib::getExceptionClass();
     return throwable->instanceof(erCls) || throwable->instanceof(exCls);
   }
 
   DEBUG_ONLY bool throwable_has_expected_props() {
-    auto const erCls = SystemLib::s_ErrorClass;
-    auto const exCls = SystemLib::s_ExceptionClass;
+    auto const erCls = SystemLib::getErrorClass();
+    auto const exCls = SystemLib::getExceptionClass();
     if (erCls->lookupDeclProp(s_file.get()) != s_fileSlot ||
         exCls->lookupDeclProp(s_file.get()) != s_fileSlot ||
         erCls->lookupDeclProp(s_line.get()) != s_lineSlot ||
@@ -235,7 +235,7 @@ namespace {
   }
 
   int64_t exception_get_trace_options() {
-    auto const exCls = SystemLib::s_ExceptionClass;
+    auto const exCls = SystemLib::getExceptionClass();
     assertx(exCls->lookupSProp(s_traceOpts.get()) == s_traceOptsSlot);
     assertx(exCls->needInitialization());
 
@@ -356,7 +356,7 @@ void throwable_mark_array(const ObjectData* throwable, Array& props) {
 
 String throwable_to_string(ObjectData* throwable) {
   auto const cls = throwable->getVMClass();
-  if (cls->classof(SystemLib::s_ThrowableClass)) {
+  if (cls->classof(SystemLib::getThrowableClass())) {
     try {
       auto result = ObjectData::InvokeSimple(throwable, s___toString,
                                              RuntimeCoeffects::fixme());

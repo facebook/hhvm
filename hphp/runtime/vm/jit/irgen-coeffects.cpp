@@ -316,14 +316,14 @@ SSATmp* emitFunParam(IRGS& env, const Func* f, uint32_t numArgsInclUnpack,
               auto const obj = gen(env, CheckType, TObj, taken, tv);
               auto const cls = gen(env, LdObjClass, obj);
               auto const success =
-                gen(env, EqCls, cls, cns(env, SystemLib::s_MethCallerHelperClass));
+                gen(env, EqCls, cls, cns(env, SystemLib::getMethCallerHelperClass()));
               gen(env, JmpZero, taken, success);
               return cls;
             },
             [&] (SSATmp* cls) {
               auto const obj = gen(env, AssertType, TObj, tv);
               auto const getClsOrMethod = [&](bool is_cls) {
-                auto const cls = SystemLib::s_MethCallerHelperClass;
+                auto const cls = SystemLib::getMethCallerHelperClass();
                 auto const slot = is_cls ? Slot{0} : Slot{1};
                 auto const prop = ldPropAddr(env, obj, nullptr, cls, slot, TStr);
                 auto const ret = gen(env, LdMem, TStr, prop);

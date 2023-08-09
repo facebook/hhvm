@@ -31,15 +31,13 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////////////
 // PHP Exceptions and Classes
-HPHP::Class* ImagickException::cls = nullptr;
-HPHP::Class* ImagickDrawException::cls = nullptr;
-HPHP::Class* ImagickPixelException::cls = nullptr;
-HPHP::Class* ImagickPixelIteratorException::cls = nullptr;
+#define IMAGICK_IMPL_CLASS(CLS) \
+  HPHP::Class* CLS::s_cls = nullptr; \
+  HPHP::StaticString CLS::s_clsName(#CLS);
 
-HPHP::Class* Imagick::cls = nullptr;
-HPHP::Class* ImagickDraw::cls = nullptr;
-HPHP::Class* ImagickPixel::cls = nullptr;
-HPHP::Class* ImagickPixelIterator::cls = nullptr;
+IMAGE_MAGIC_CLASSES(IMAGICK_IMPL_CLASS)
+
+#undef IMAGICK_IMPL_CLASS
 
 //////////////////////////////////////////////////////////////////////////////
 // IO

@@ -60,11 +60,7 @@ struct EncodingMatch : IntlError {
                             const std::shared_ptr<UCharsetDetector>& det,
                             const String& text,
                             const String& declaredEncoding) {
-    if (UNLIKELY(!c_EncodingMatch)) {
-      c_EncodingMatch = Class::lookup(s_EncodingMatch.get());
-      assertx(c_EncodingMatch);
-    }
-    Object ret{c_EncodingMatch};
+    Object ret{SystemLib::classLoad(s_EncodingMatch.get(), c_EncodingMatch)};
     auto const data = Native::data<EncodingMatch>(ret);
     data->m_match = const_cast<UCharsetMatch*>(match);
     data->m_encodingDetector = det;

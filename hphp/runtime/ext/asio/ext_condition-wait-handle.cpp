@@ -48,6 +48,8 @@ namespace {
   }
 }
 
+WAITHANDLE_CLASSOF_IMPL(ConditionWaitHandle)
+
 void HHVM_STATIC_METHOD(ConditionWaitHandle, setOnCreateCallback,
                         const Variant& callback) {
   AsioSession::Get()->setOnConditionCreate(callback);
@@ -89,7 +91,7 @@ void HHVM_METHOD(ConditionWaitHandle, succeed, const Variant& result) {
 }
 
 void HHVM_METHOD(ConditionWaitHandle, fail, const Object& exception) {
-  if (!exception->instanceof(SystemLib::s_ThrowableClass)) {
+  if (!exception->instanceof(SystemLib::getThrowableClass())) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Expected exception to be an instance of Throwable");
   }

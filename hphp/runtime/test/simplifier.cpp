@@ -165,7 +165,7 @@ TEST(Simplifier, Count) {
 TEST(Simplifier, LdObjClass) {
   IRUnit unit{test_context};
   auto const dummy = BCContext { BCMarker::Dummy(), 0 };
-  auto const cls = SystemLib::s_HH_IteratorClass;
+  auto const cls = SystemLib::getHH_IteratorClass();
 
   // LdObjClass t1:Obj<=C doesn't simplify
   {
@@ -203,7 +203,7 @@ TEST(Simplifier, LdObjInvoke) {
   // LdObjInvoke t1:Cls(C), where C is persistent but has no __invoke
   // simplifies to nullptr.
   {
-    auto type = Type::cns(SystemLib::s_HH_IteratorClass);
+    auto type = Type::cns(SystemLib::getHH_IteratorClass());
     auto cls = unit.gen(Conjure, dummy, type);
     auto load = unit.gen(LdObjInvoke, dummy, cls->dst());
     auto result = simplify(unit, load);

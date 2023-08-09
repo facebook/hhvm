@@ -96,7 +96,7 @@ extern Func* s_nullFunc;
 extern Func* s_nullCtor;
 
 #define DECLARE_SYSTEMLIB_CLASS(cls, prefix, ...)       \
-extern Class* s_ ## prefix ## cls ## Class;
+Class* get ## prefix ## cls ## Class();
   SYSTEMLIB_CLASSES(DECLARE_SYSTEMLIB_CLASS)
 #undef DECLARE_SYSTEMLIB_CLASS
 
@@ -184,6 +184,9 @@ void setupNullCtor(Class* cls);
  * Return a fresh 86reifiedinit method.
  */
 Func* getNull86reifiedinit(Class* cls);
+
+Func* funcLoad(const StringData* name, Func* cache);
+Class* classLoad(const StringData* name, Class* cache);
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -68,6 +68,8 @@ SrcKey getAsyncFrame(AsyncFrameId id) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+WAITHANDLE_CLASSOF_IMPL(AsyncFunctionWaitHandle)
+
 bool c_AsyncFunctionWaitHandle::hasTailFrames() const {
   return tailFrame(kNumTailFrames - 1) != kInvalidAsyncFrameId;
 }
@@ -219,7 +221,7 @@ void c_AsyncFunctionWaitHandle::ret(TypedValue& result) {
 void c_AsyncFunctionWaitHandle::fail(ObjectData* exception) {
   assertx(isRunning());
   assertx(exception);
-  assertx(exception->instanceof(SystemLib::s_ThrowableClass));
+  assertx(exception->instanceof(SystemLib::getThrowableClass()));
 
   AsioSession* session = AsioSession::Get();
   if (UNLIKELY(session->hasOnResumableFail())) {

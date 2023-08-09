@@ -41,11 +41,7 @@ namespace HPHP {
 
 #define IMPLEMENT_GET_CLASS(cls)                                               \
   Class* cls::getClass() {                                                     \
-    if (s_class == nullptr) {                                                  \
-      s_class = Class::lookup(s_className.get());                          \
-      assertx(s_class);                                                        \
-    }                                                                          \
-    return s_class;                                                            \
+    return SystemLib::classLoad(s_className.get(), s_class);                   \
   }                                                                            \
 
 typedef am::ClientPool<am::AsyncMysqlClient, am::AsyncMysqlClientFactory>
@@ -100,7 +96,8 @@ am::QueryArgument queryarg_from_variant(const Variant& arg) {
   if (arg.isObject()) {
     const Object& obj = arg.asCObjRef();
 
-    if (obj->getVMClass() == s_queryClass) {
+    auto queryCls = SystemLib::classLoad(s_queryClassName.get(), s_queryClass);
+    if (obj->getVMClass() == queryCls) {
       const auto format =
         val(obj->propRvalAtOffset(s_query_format_idx).tv()).pstr;
       const auto args = val(obj->propRvalAtOffset(s_query_args_idx).tv()).parr;
@@ -2477,8 +2474,6 @@ static struct AsyncMysqlExtension final : Extension {
     loadSystemlib("mysqlrow");
     loadSystemlib("async_mysql_exceptions");
     loadSystemlib();
-
-    s_queryClass = Class::lookup(s_queryClassName.get());
   }
   void moduleLoad(const IniSetting::Map& ini, Hdf config) override {
     Config::Bind(

@@ -634,9 +634,11 @@ String HHVM_FUNCTION(type_structure_classname,
 
 [[noreturn]]
 void Reflection::ThrowReflectionExceptionObject(const Variant& message) {
-  Object inst{s_ReflectionExceptionClass};
+  auto cls = SystemLib::classLoad(s_reflectionexception.get(),
+                                  s_ReflectionExceptionClass);
+  Object inst { cls };
   tvDecRefGen(
-    g_context->invokeFunc(s_ReflectionExceptionClass->getCtor(),
+    g_context->invokeFunc(cls->getCtor(),
                           make_vec_array(message),
                           inst.get())
   );
@@ -1835,10 +1837,10 @@ void ReflectionClassHandle::wakeup(const Variant& content, ObjectData* obj) {
 }
 
 static Variant reflection_extension_name_get(const Object& this_) {
-  assertx(Reflection::s_ReflectionExtensionClass);
+  auto cls = SystemLib::classLoad(s_reflectionextension.get(),
+                                  Reflection::s_ReflectionExtensionClass);
   auto const name = this_->getProp(
-    MemberLookupContext(Reflection::s_ReflectionExtensionClass,
-                        Reflection::s_ReflectionExtensionClass->moduleName()),
+    MemberLookupContext(cls, cls->moduleName()),
     s___name.get()
   );
   return tvCastToString(name.tv());
@@ -2465,13 +2467,6 @@ struct ReflectionExtension final : Extension {
     loadSystemlib("reflection-classes");
     loadSystemlib("reflection-internals-functions");
     loadSystemlib("reflection_hni");
-
-    Reflection::s_ReflectionExceptionClass =
-      Class::lookup(s_reflectionexception.get());
-    assertx(Reflection::s_ReflectionExceptionClass);
-    Reflection::s_ReflectionExtensionClass =
-      Class::lookup(s_reflectionextension.get());
-    assertx(Reflection::s_ReflectionExtensionClass);
   }
 } s_reflection_extension;
 

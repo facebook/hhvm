@@ -29,6 +29,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+WAITHANDLE_CLASSOF_IMPL(ResumableWaitHandle)
+
 void HHVM_STATIC_METHOD(ResumableWaitHandle, setOnCreateCallback,
                         const Variant& callback) {
   AsioSession::Get()->setOnResumableCreate(callback);

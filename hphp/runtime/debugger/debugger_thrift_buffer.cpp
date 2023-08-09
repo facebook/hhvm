@@ -82,11 +82,11 @@ static inline int unserializeImpl(const String& sdata, Variant& data) {
   } catch (const Object& o) {
     // Get the message property from the Exception if we can. Otherwise, use
     // the class name.
-    assertx(o->instanceof(SystemLib::s_ExceptionClass));
+    assertx(o->instanceof(SystemLib::getExceptionClass()));
 
     auto const info = o->getProp(
-      MemberLookupContext(SystemLib::s_ExceptionClass,
-                          SystemLib::s_ExceptionClass->moduleName()),
+      MemberLookupContext(SystemLib::getExceptionClass(),
+                          SystemLib::getExceptionClass()->moduleName()),
       s_message.get());
     if (info) {
       if (isStringType(info.type())) {

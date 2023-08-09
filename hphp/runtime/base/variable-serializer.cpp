@@ -669,7 +669,7 @@ const StaticString
 void VariableSerializer::write(const Object& v) {
   if (!v.isNull() && m_type == Type::JSON) {
     if (RO::EvalForbidMethCallerHelperSerialize &&
-        v.get()->getVMClass() == SystemLib::s_MethCallerHelperClass) {
+        v.get()->getVMClass() == SystemLib::getMethCallerHelperClass()) {
       if (RO::EvalForbidMethCallerHelperSerialize == 1) {
         raise_warning("Serializing MethCallerHelper");
       } else {
@@ -2098,7 +2098,7 @@ Array VariableSerializer::getSerializeProps(const ObjectData* obj) const {
   if (!debuginfo) {
     // When ArrayIterator is cast to an array, it returns its array object,
     // however when it's being var_dump'd or print_r'd, it shows its properties
-    if (UNLIKELY(obj->instanceof(SystemLib::s_ArrayIteratorClass))) {
+    if (UNLIKELY(obj->instanceof(SystemLib::getArrayIteratorClass()))) {
       auto ret = Array::CreateDict();
       obj->o_getArray(ret, false, true);
       return ret;
@@ -2147,7 +2147,7 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
   if (RO::EvalForbidMethCallerHelperSerialize &&
       (type == Type::Serialize || type == Type::Internal ||
        type == Type::DebuggerSerialize || type == Type::JSON) &&
-      obj->getVMClass() == SystemLib::s_MethCallerHelperClass) {
+      obj->getVMClass() == SystemLib::getMethCallerHelperClass()) {
     if (RO::EvalForbidMethCallerHelperSerialize == 1) {
       raise_warning("Serializing MethCallerHelper");
     } else {
@@ -2166,7 +2166,7 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
   if (LIKELY(type == VariableSerializer::Type::Serialize ||
              type == VariableSerializer::Type::Internal ||
              type == VariableSerializer::Type::APCSerialize)) {
-    if (obj->instanceof(SystemLib::s_SerializableClass)) {
+    if (obj->instanceof(SystemLib::getSerializableClass())) {
       assertx(!obj->isCollection());
       ret =
         const_cast<ObjectData*>(obj)->o_invoke_few_args(s_serialize, RuntimeCoeffects::fixme(), 0);
@@ -2194,7 +2194,7 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
       return;
     }
     if (type == VariableSerializer::Type::APCSerialize) {
-      if (cls == SystemLib::s_MethCallerHelperClass) {
+      if (cls == SystemLib::getMethCallerHelperClass()) {
         if (RO::EvalForbidMethCallerAPCSerialize == 1) {
           raise_warning("Storing meth_caller in APC");
         } else if (RO::EvalForbidMethCallerAPCSerialize > 1) {
@@ -2202,7 +2202,7 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
             VarNR{s_invalidMethCallerAPC.get()}
           );
         }
-      } else if (cls == SystemLib::s_DynMethCallerHelperClass) {
+      } else if (cls == SystemLib::getDynMethCallerHelperClass()) {
         SystemLib::throwInvalidOperationExceptionObject(
           VarNR{s_invalidMethCallerAPC.get()}
         );
@@ -2331,11 +2331,11 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
             properties.set(s_PHP_DebugDisplay, *val.asTypedValue());
           }
         } catch (const Object &e) {
-          assertx(e->instanceof(SystemLib::s_ErrorClass) ||
-                  e->instanceof(SystemLib::s_ExceptionClass));
+          assertx(e->instanceof(SystemLib::getErrorClass()) ||
+                  e->instanceof(SystemLib::getExceptionClass()));
           assertx(
-            SystemLib::s_ErrorClass->lookupDeclProp(s_message.get()) == 0 &&
-            SystemLib::s_ExceptionClass->lookupDeclProp(s_message.get()) == 0
+            SystemLib::getErrorClass()->lookupDeclProp(s_message.get()) == 0 &&
+            SystemLib::getExceptionClass()->lookupDeclProp(s_message.get()) == 0
           );
           auto const message_rval = e->propRvalAtOffset(Slot{0});
           if (isStringType(message_rval.type())) {

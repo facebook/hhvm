@@ -13,7 +13,6 @@ namespace HPHP { namespace collections {
 /////////////////////////////////////////////////////////////////////////////
 
 const StaticString
-  s_HH_Pair("HH\\Pair"),
   s_PairIterator("PairIterator");
 
 /////////////////////////////////////////////////////////////////////////////
@@ -44,6 +43,7 @@ static void HHVM_METHOD(PairIterator, rewind) {
 }
 
 Class* c_Pair::s_cls;
+StaticString c_Pair::s_clsName("HH\\Pair");
 
 c_Pair::~c_Pair() {
   tvDecRefGen(&elm0);
@@ -138,12 +138,9 @@ void CollectionsExtension::initPair() {
   HHVM_NAMED_ME(HH\\Pair, toSet,          materialize<c_Set>);
   HHVM_NAMED_ME(HH\\Pair, toImmSet,       materialize<c_ImmSet>);
 
-  Native::registerNativePropHandler<CollectionPropHandler>(s_HH_Pair);
+  Native::registerNativePropHandler<CollectionPropHandler>(c_Pair::s_clsName);
 
   loadSystemlib("collections-pair");
-
-  c_Pair::s_cls = Class::lookup(s_HH_Pair.get());
-  assertx(c_Pair::s_cls);
 
   finishClass<c_Pair>();
 }

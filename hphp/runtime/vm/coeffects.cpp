@@ -269,10 +269,10 @@ RuntimeCoeffects getFunParamHelper(const TypedValue* tv, uint32_t paramIdx) {
       }
       return c_Closure::fromObject(obj)->getCoeffects();
     }
-    if (cls == SystemLib::s_MethCallerHelperClass) {
+    if (cls == SystemLib::getMethCallerHelperClass()) {
       return handleFunc(getFuncFromMethCallerHelperClass(obj));
     }
-    if (cls == SystemLib::s_DynMethCallerHelperClass) {
+    if (cls == SystemLib::getDynMethCallerHelperClass()) {
       return handleFunc(getFuncFromDynMethCallerHelperClass(obj));
     }
     return error();

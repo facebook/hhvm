@@ -306,7 +306,7 @@ Object ObjectData::iterableObject(bool& isIterable,
   }
   Object obj(this);
   CoeffectsAutoGuard _;
-  while (obj->instanceof(SystemLib::s_IteratorAggregateClass)) {
+  while (obj->instanceof(SystemLib::getIteratorAggregateClass())) {
     auto iterator =
       obj->o_invoke_few_args(s_getIterator, RuntimeCoeffects::automatic(), 0);
     if (!iterator.isObject()) break;
@@ -585,7 +585,7 @@ Array ObjectData::toArray(bool pubOnly /* = false */,
       raise_notice("SimpleXMLElement to array cast");
     }
     return SimpleXMLElement_darrayCast(this);
-  } else if (UNLIKELY(instanceof(SystemLib::s_ArrayIteratorClass))) {
+  } else if (UNLIKELY(instanceof(SystemLib::getArrayIteratorClass()))) {
     SystemLib::throwInvalidOperationExceptionObject(
       "ArrayIterator to array cast"
     );
@@ -850,8 +850,8 @@ bool ObjectData::equal(const ObjectData& other) const {
   if (isCollection()) {
     return collections::equals(this, &other);
   }
-  if (UNLIKELY(instanceof(SystemLib::s_DateTimeInterfaceClass) &&
-               other.instanceof(SystemLib::s_DateTimeInterfaceClass))) {
+  if (UNLIKELY(instanceof(SystemLib::getDateTimeInterfaceClass()) &&
+               other.instanceof(SystemLib::getDateTimeInterfaceClass()))) {
     return DateTimeData::compare(this, &other) == 0;
   }
   if (getVMClass() != other.getVMClass()) return false;
@@ -937,8 +937,8 @@ int64_t ObjectData::compare(const ObjectData& other) const {
     throw_collection_compare_exception();
   }
   if (this == &other) return 0;
-  if (UNLIKELY(instanceof(SystemLib::s_DateTimeInterfaceClass) &&
-               other.instanceof(SystemLib::s_DateTimeInterfaceClass))) {
+  if (UNLIKELY(instanceof(SystemLib::getDateTimeInterfaceClass()) &&
+               other.instanceof(SystemLib::getDateTimeInterfaceClass()))) {
     return DateTimeData::compare(this, &other);
   }
   if (getVMClass() != other.getVMClass()) {
@@ -1110,7 +1110,7 @@ ObjectData::~ObjectData() {
 
 Object ObjectData::FromArray(ArrayData* properties) {
   auto const props = properties->toDict(true);
-  Object retval{SystemLib::s_stdClassClass};
+  Object retval{SystemLib::getstdClassClass()};
   retval->setAttribute(HasDynPropArr);
   g_context->dynPropTable.emplace(retval.get(), props);
   if (props != properties) decRefArr(props);
@@ -1647,8 +1647,8 @@ void ObjectData::throwUndefPropException(const StringData* key) const {
 }
 
 void ObjectData::raiseCreateDynamicProp(const StringData* key) const {
-  if (m_cls == SystemLib::s_stdClassClass ||
-      m_cls == SystemLib::s___PHP_Incomplete_ClassClass) {
+  if (m_cls == SystemLib::getstdClassClass() ||
+      m_cls == SystemLib::get__PHP_Incomplete_ClassClass()) {
     // these classes (but not classes derived from them) don't get notices
     return;
   }
@@ -1662,8 +1662,8 @@ void ObjectData::raiseCreateDynamicProp(const StringData* key) const {
 }
 
 void ObjectData::raiseReadDynamicProp(const StringData* key) const {
-  if (m_cls == SystemLib::s_stdClassClass ||
-      m_cls == SystemLib::s___PHP_Incomplete_ClassClass) {
+  if (m_cls == SystemLib::getstdClassClass() ||
+      m_cls == SystemLib::get__PHP_Incomplete_ClassClass()) {
     // these classes (but not classes derived from them) don't get notices
     return;
   }

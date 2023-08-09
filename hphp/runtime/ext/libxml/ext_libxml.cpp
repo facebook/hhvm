@@ -126,7 +126,7 @@ inline bool forgetStream(void* userData) {
 
 }
 
-static Class* s_LibXMLError_class;
+static Class* s_LibXMLError_class = nullptr;
 
 const StaticString
   s_LibXMLError("LibXMLError"),
@@ -136,6 +136,10 @@ const StaticString
   s_message("message"),
   s_file("file"),
   s_line("line");
+
+Class* getLibXMLError() {
+  return SystemLib::classLoad(s_LibXMLError.get(), s_LibXMLError_class);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -642,7 +646,7 @@ static void libxml_error_handler(void* /*userData*/, xmlErrorPtr error) {
 }
 
 static Object create_libxmlerror(xmlError &error) {
-  Object ret{s_LibXMLError_class};
+  Object ret{ getLibXMLError() };
   // Setting only public properties
   ret->setProp(nullctx, s_level.get(), make_tv<KindOfInt64>(error.level));
   ret->setProp(nullctx, s_code.get(), make_tv<KindOfInt64>(error.code));
@@ -796,8 +800,6 @@ struct LibXMLExtension final : Extension {
       HHVM_FE(libxml_set_streams_context);
 
       loadSystemlib();
-
-      s_LibXMLError_class = Class::lookup(s_LibXMLError.get());
 
       // Set up callbacks to support stream wrappers for reading and writing
       // xml files and loading external entities.

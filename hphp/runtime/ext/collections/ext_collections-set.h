@@ -364,9 +364,8 @@ struct SetIterator {
   ~SetIterator() {}
 
   static Object newInstance() {
-    static Class* cls = Class::lookup(s_SetIterator.get());
-    assertx(cls);
-    return Object{cls};
+    static Class* cls = nullptr;
+    return Object{SystemLib::classLoad(s_SetIterator.get(), cls)};
   }
 
   void setSet(BaseSet* mp) {

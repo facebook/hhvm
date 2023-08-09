@@ -487,9 +487,8 @@ struct VectorIterator {
   ~VectorIterator() {}
 
   static Object newInstance() {
-    static Class* cls = Class::lookup(s_VectorIterator.get());
-    assertx(cls);
-    return Object{cls};
+    static Class* cls = nullptr;
+    return Object{SystemLib::classLoad(s_VectorIterator.get(), cls)};
   }
 
   void setVector(BaseVector* vec) {

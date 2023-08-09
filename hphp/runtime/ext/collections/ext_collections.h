@@ -13,16 +13,12 @@ ArrayIter getArrayIterHelper(const Variant& v, size_t& sz);
 namespace collections {
 /////////////////////////////////////////////////////////////////////////////
 
-extern const StaticString
-  s_HH_Pair, s_HH_Vector, s_HH_ImmVector,
-  s_HH_Map, s_HH_ImmMap, s_HH_Set, s_HH_ImmSet;
-
 #define DECLARE_COLLECTIONS_CLASS_NOCTOR(name)              \
   static Class* s_cls;                                      \
+  static StaticString s_clsName;                            \
                                                             \
   static Class* classof() {                                 \
-    assertx(s_cls);                                         \
-    return s_cls;                                           \
+    return SystemLib::classLoad(s_clsName.get(), s_cls);    \
   }                                                         \
                                                             \
   static void instanceDtor(ObjectData* obj, const Class*) { \

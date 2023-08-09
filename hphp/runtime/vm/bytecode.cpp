@@ -2154,7 +2154,7 @@ OPTBLD_INLINE JitResumeAddr iopEnter(PC& pc, PC targetpc) {
 OPTBLD_INLINE void iopThrow(PC&) {
   TypedValue* c1 = vmStack().topC();
   if (c1->m_type != KindOfObject ||
-      !c1->m_data.pobj->instanceof(SystemLib::s_ThrowableClass)) {
+      !c1->m_data.pobj->instanceof(SystemLib::getThrowableClass())) {
     raise_error("Exceptions must implement the Throwable interface.");
   }
   auto obj = Object::attach(c1->m_data.pobj);
@@ -4531,9 +4531,9 @@ OPTBLD_INLINE void iopChainFaults() {
   auto const current = *vmStack().indC(1);
   auto const prev = *vmStack().indC(0);
   if (!isObjectType(current.m_type) ||
-      !current.m_data.pobj->instanceof(SystemLib::s_ThrowableClass) ||
+      !current.m_data.pobj->instanceof(SystemLib::getThrowableClass()) ||
       !isObjectType(prev.m_type) ||
-      !prev.m_data.pobj->instanceof(SystemLib::s_ThrowableClass)) {
+      !prev.m_data.pobj->instanceof(SystemLib::getThrowableClass())) {
     raise_error(
       "Inputs to ChainFault must be objects that implement Throwable"
     );

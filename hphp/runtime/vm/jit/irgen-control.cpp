@@ -292,8 +292,8 @@ void emitThrow(IRGS& env) {
   auto const offset = findCatchHandler(curFunc(env), bcOff(env));
   auto const srcTy = topC(env)->type();
   auto const maybeThrowable =
-    srcTy.maybe(Type::SubObj(SystemLib::s_ExceptionClass)) ||
-    srcTy.maybe(Type::SubObj(SystemLib::s_ErrorClass));
+    srcTy.maybe(Type::SubObj(SystemLib::getExceptionClass())) ||
+    srcTy.maybe(Type::SubObj(SystemLib::getErrorClass()));
 
   if (!stackEmpty || !maybeThrowable || !(srcTy <= TObj)) return interpOne(env);
 
@@ -312,16 +312,16 @@ void emitThrow(IRGS& env) {
     gen(env, EnterTCUnwind, etcData, exn);
   };
 
-  if (srcTy <= Type::SubObj(SystemLib::s_ThrowableClass)) return handleThrow();
+  if (srcTy <= Type::SubObj(SystemLib::getThrowableClass())) return handleThrow();
 
   ifThenElse(env,
     [&] (Block* taken) {
       assertx(srcTy <= TObj);
       auto const srcClass = gen(env, LdObjClass, topC(env));
-      auto const ecdExc = ExtendsClassData { SystemLib::s_ExceptionClass };
+      auto const ecdExc = ExtendsClassData { SystemLib::getExceptionClass() };
       auto const isException = gen(env, ExtendsClass, ecdExc, srcClass);
       gen(env, JmpNZero, taken, isException);
-      auto const ecdErr = ExtendsClassData { SystemLib::s_ErrorClass };
+      auto const ecdErr = ExtendsClassData { SystemLib::getErrorClass() };
       auto const isError = gen(env, ExtendsClass, ecdErr, srcClass);
       gen(env, JmpNZero, taken, isError);
     },

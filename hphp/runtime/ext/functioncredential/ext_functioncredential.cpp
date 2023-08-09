@@ -48,10 +48,8 @@ const FunctionCredential* FunctionCredential::fromObject(
 
 // static
 Class* FunctionCredential::classof() {
-  static Class* cls_FunctionCredential =
-      Class::lookup(s_FunctionCredential.get());
-  assertx(cls_FunctionCredential);
-  return cls_FunctionCredential;
+  static Class* cls = nullptr;
+  return SystemLib::classLoad(s_FunctionCredential.get(), cls);
 }
 
 static TypedValue HHVM_METHOD(FunctionCredential, getClassName) {

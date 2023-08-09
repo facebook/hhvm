@@ -60,46 +60,42 @@ struct ImagickExtension final : Extension {
 
 //////////////////////////////////////////////////////////////////////////////
 // PHP Exceptions and Classes
+#define IMAGE_MAGIC_CLASSES(X) \
+  X(ImagickException) \
+  X(ImagickDrawException) \
+  X(ImagickPixelException) \
+  X(ImagickPixelIteratorException) \
+  X(Imagick) \
+  X(ImagickDraw) \
+  X(ImagickPixel) \
+  X(ImagickPixelIterator)
+
 #define IMAGICK_DEFINE_CLASS(CLS) \
   class CLS { \
    public: \
     static Object allocObject() { \
-      if (cls == nullptr) { \
-        initClass(); \
-      } \
-      return Object{cls};                       \
+      return Object{ getClass() }; \
+    } \
+    \
+    static Class* getClass() { \
+      return SystemLib::classLoad(s_clsName.get(), s_cls); \
     } \
     \
     static Object allocObject(const Variant& arg) { \
       Object ret = allocObject(); \
       tvDecRefGen(\
-        g_context->invokeFunc(cls->getCtor(), make_vec_array(arg), \
+        g_context->invokeFunc(getClass()->getCtor(), make_vec_array(arg), \
                               ret.get()) \
       );\
       return ret; \
     } \
     \
    private: \
-    static void initClass() {                                   \
-      cls = Class::lookup(                                  \
-        req::ptr<StringData>::attach(                           \
-          StringData::Make(#CLS)                                \
-        ).get()                                                 \
-      );                                                        \
-    }                                                           \
-                                                                \
-    static HPHP::Class* cls; \
+    static HPHP::Class* s_cls;                                  \
+    static HPHP::StaticString s_clsName;                        \
   };
 
-IMAGICK_DEFINE_CLASS(ImagickException)
-IMAGICK_DEFINE_CLASS(ImagickDrawException)
-IMAGICK_DEFINE_CLASS(ImagickPixelException)
-IMAGICK_DEFINE_CLASS(ImagickPixelIteratorException)
-
-IMAGICK_DEFINE_CLASS(Imagick)
-IMAGICK_DEFINE_CLASS(ImagickDraw)
-IMAGICK_DEFINE_CLASS(ImagickPixel)
-IMAGICK_DEFINE_CLASS(ImagickPixelIterator)
+IMAGE_MAGIC_CLASSES(IMAGICK_DEFINE_CLASS)
 
 #undef IMAGICK_DEFINE_CLASS
 

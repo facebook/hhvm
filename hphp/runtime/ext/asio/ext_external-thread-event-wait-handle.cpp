@@ -33,6 +33,8 @@ namespace {
   StaticString s_externalThreadEvent("<external-thread-event>");
 }
 
+WAITHANDLE_CLASSOF_IMPL(ExternalThreadEventWaitHandle)
+
 void HHVM_STATIC_METHOD(ExternalThreadEventWaitHandle, setOnCreateCallback,
                         const Variant& callback) {
   AsioSession::Get()->setOnExternalThreadEventCreate(callback);
@@ -198,7 +200,7 @@ void c_ExternalThreadEventWaitHandle::process() {
       throw exception;
     }
   } catch (const Object& exception) {
-    assertx(exception->instanceof(SystemLib::s_ThrowableClass));
+    assertx(exception->instanceof(SystemLib::getThrowableClass()));
     throwable_recompute_backtrace_from_wh(exception.get(), this);
     auto parentChain = getParentChain();
     setState(STATE_FAILED);

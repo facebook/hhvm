@@ -173,9 +173,8 @@ struct PairIterator {
   ~PairIterator() {}
 
   static Object newInstance() {
-    static Class* cls = Class::lookup(s_PairIterator.get());
-    assertx(cls);
-    return Object{cls};
+    static Class* cls = nullptr;
+    return Object{ SystemLib::classLoad(s_PairIterator.get(), cls) };
   }
 
   void setPair(c_Pair* pr) {

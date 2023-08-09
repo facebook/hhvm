@@ -895,7 +895,7 @@ bool CurlResource::setPostFieldsOption(const Variant& value) {
     String key = iter.first().toString();
     Variant var_val = iter.second();
     if (UNLIKELY(var_val.isObject()
-        && var_val.toObject()->instanceof(SystemLib::s_CURLFileClass))) {
+        && var_val.toObject()->instanceof(SystemLib::getCURLFileClass()))) {
       Object val = var_val.toObject();
 
       String name = val->o_get(s_name).toString();

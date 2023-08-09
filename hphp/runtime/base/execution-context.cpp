@@ -968,7 +968,7 @@ bool ExecutionContext::onUnhandledException(Object e) {
     Logger::Error("\nFatal error: Uncaught %s", err.data());
   }
 
-  if (e.instanceof(SystemLib::s_ThrowableClass)) {
+  if (e.instanceof(SystemLib::getThrowableClass())) {
     // user thrown exception
     if (!m_userExceptionHandlers.empty()) {
       if (!same(vm_call_user_func
@@ -1426,7 +1426,7 @@ void ExecutionContext::requestInit() {
 #ifndef NDEBUG
   Class* cls = NamedType::get(s_stdClass.get())->clsList();
   assertx(cls);
-  assertx(cls == SystemLib::s_stdClassClass);
+  assertx(cls == SystemLib::getstdClassClass());
 #endif
 
   if (Logger::UseRequestLog) Logger::SetThreadHook(&m_logger_hook);
@@ -1767,7 +1767,7 @@ void ExecutionContext::resumeAsyncFuncThrow(Resumable* resumable,
                                             ObjectData* freeObj,
                                             ObjectData* exception) {
   assertx(exception);
-  assertx(exception->instanceof(SystemLib::s_ThrowableClass));
+  assertx(exception->instanceof(SystemLib::getThrowableClass()));
   assertx(regState() == VMRegState::CLEAN);
   SCOPE_EXIT { assertx(regState() == VMRegState::CLEAN); };
 

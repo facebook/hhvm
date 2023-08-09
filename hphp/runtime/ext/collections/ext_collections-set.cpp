@@ -14,7 +14,10 @@ namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 
 Class* c_Set::s_cls;
+StaticString c_Set::s_clsName("HH\\Set");
+
 Class* c_ImmSet::s_cls;
+StaticString c_ImmSet::s_clsName("HH\\ImmSet");
 
 /////////////////////////////////////////////////////////////////////////////
 // BaseSet
@@ -532,8 +535,6 @@ namespace collections {
 /////////////////////////////////////////////////////////////////////////////
 
 const StaticString
-  s_HH_Set("HH\\Set"),
-  s_HH_ImmSet("HH\\ImmSet"),
   s_SetIterator("SetIterator");
 
 /////////////////////////////////////////////////////////////////////////////
@@ -626,17 +627,12 @@ void CollectionsExtension::initSet() {
   HHVM_NAMED_ME(HH\\Set, reserve,  &c_Set::php_reserve);
   HHVM_NAMED_ME(HH\\Set, toImmSet, &c_Set::getImmutableCopy);
 
-  Native::registerNativePropHandler<CollectionPropHandler>(s_HH_Set);
-  Native::registerNativePropHandler<CollectionPropHandler>(s_HH_ImmSet);
+  Native::registerNativePropHandler<CollectionPropHandler>(c_Set::s_clsName);
+  Native::registerNativePropHandler<CollectionPropHandler>(c_ImmSet::s_clsName);
 
   loadSystemlib("collections-set");
 
-  c_Set::s_cls = Class::lookup(s_HH_Set.get());
-  assertx(c_Set::s_cls);
   finishClass<c_Set>();
-
-  c_ImmSet::s_cls = Class::lookup(s_HH_ImmSet.get());
-  assertx(c_ImmSet::s_cls);
   finishClass<c_ImmSet>();
 }
 

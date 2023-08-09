@@ -31,6 +31,8 @@ namespace {
   StaticString s_sleep("<sleep>");
 }
 
+WAITHANDLE_CLASSOF_IMPL(SleepWaitHandle)
+
 void HHVM_STATIC_METHOD(SleepWaitHandle, setOnCreateCallback,
                         const Variant& callback) {
   AsioSession::Get()->setOnSleepCreate(callback);

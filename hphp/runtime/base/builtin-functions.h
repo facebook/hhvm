@@ -125,11 +125,11 @@ inline bool is_object(const TypedValue* c) {
   if (!tvIsObject(c)) return false;
   auto const cls = val(c).pobj->getVMClass();
   if (RO::EvalNoticeOnMethCallerHelperIsObject) {
-    if (cls == SystemLib::s_MethCallerHelperClass) {
+    if (cls == SystemLib::getMethCallerHelperClass()) {
       raise_notice("is_object() called on MethCaller");
     }
   }
-  return cls != SystemLib::s___PHP_Incomplete_ClassClass;
+  return cls != SystemLib::get__PHP_Incomplete_ClassClass();
 }
 
 inline bool is_clsmeth(const TypedValue* c) {

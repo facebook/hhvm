@@ -104,6 +104,7 @@ struct InteractionId {
     return Object{PhpClass()};
   }
 
+  static Class* s_cls;
   static Class* PhpClass();
 
   ~InteractionId() {
@@ -150,11 +151,7 @@ struct RpcOptions {
   void close(bool /*sweeping*/ = false) {}
 
   static Class* PhpClass() {
-    if (!c_RpcOptions) {
-      c_RpcOptions = Class::lookup(s_RpcOptions.get());
-      assert(c_RpcOptions);
-    }
-    return c_RpcOptions;
+    return SystemLib::classLoad(s_RpcOptions.get(), c_RpcOptions);
   }
 
   static Object newInstance() {
@@ -309,11 +306,8 @@ struct TClientBufferedStream {
   }
 
   static Class* PhpClass() {
-    if (!c_TClientBufferedStream) {
-      c_TClientBufferedStream = Class::lookup(s_TClientBufferedStream.get());
-      assert(c_TClientBufferedStream);
-    }
-    return c_TClientBufferedStream;
+    return SystemLib::classLoad(s_TClientBufferedStream.get(),
+                                c_TClientBufferedStream);
   }
 
   static Object newInstance() {
@@ -383,11 +377,7 @@ struct TClientSink {
   }
 
   static Class* PhpClass() {
-    if (!c_TClientSink) {
-      c_TClientSink = Class::lookup(s_TClientSink.get());
-      assert(c_TClientSink);
-    }
-    return c_TClientSink;
+    return SystemLib::classLoad(s_TClientSink.get(), c_TClientSink);
   }
 
   static Object newInstance() {

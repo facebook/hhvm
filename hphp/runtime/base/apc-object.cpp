@@ -63,7 +63,7 @@ APCObject::APCObject(ClassOrName cls, uint32_t propCount)
 APCHandle::Pair APCObject::Construct(ObjectData* objectData, bool pure) {
   // This function assumes the object and object/array down the tree have no
   // internal references and do not implement the serializable interface.
-  assertx(!objectData->instanceof(SystemLib::s_SerializableClass));
+  assertx(!objectData->instanceof(SystemLib::getSerializableClass()));
 
   auto cls = objectData->getVMClass();
   auto clsOrName = make_class(cls);

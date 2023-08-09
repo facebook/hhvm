@@ -52,8 +52,8 @@ const StaticString
   s_ICStateSoftInaccessible("SOFT_INACCESSIBLE");
 
 Object create_new_IC() {
-  assertx(s_ImplicitContextDataClass);
-  auto obj = Object{s_ImplicitContextDataClass};
+  auto obj = Object{ SystemLib::classLoad(s_ImplicitContextDataClassName.get(),
+                                          s_ImplicitContextDataClass) };
   // PURPOSEFULLY LEAK MEMORY: When the data is stored/restored during the
   // suspend/resume routine, we should properly refcount the data but that is
   // expensive. Leak and let the GC take care of it.
@@ -352,10 +352,6 @@ static struct HHImplicitContext final : Extension {
 #undef X
 
     loadSystemlib();
-
-    s_ImplicitContextDataClass =
-      Class::lookup(s_ImplicitContextDataClassName.get());
-    assertx(s_ImplicitContextDataClass);
   }
 } s_hh_implicit_context;
 

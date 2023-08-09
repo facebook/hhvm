@@ -1832,7 +1832,7 @@ static bool do_fetch(sp_PDOStatement stmt,
 
     ret = stmt->fetch.into;
     if (ret.isObject() &&
-        ret.getObjectData()->instanceof(SystemLib::s_stdClassClass)) {
+        ret.getObjectData()->instanceof(SystemLib::getstdClassClass())) {
       how = PDO_FETCH_OBJ;
     }
     break;

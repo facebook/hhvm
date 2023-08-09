@@ -329,9 +329,8 @@ struct MapIterator {
   ~MapIterator() {}
 
   static Object newInstance() {
-    static Class* cls = Class::lookup(s_MapIterator.get());
-    assertx(cls);
-    return Object{cls};
+    static Class* cls = nullptr;
+    return Object{SystemLib::classLoad(s_MapIterator.get(), cls)};
   }
 
   void setMap(BaseMap* mp) {

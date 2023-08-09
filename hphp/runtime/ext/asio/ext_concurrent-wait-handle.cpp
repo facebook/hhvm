@@ -29,6 +29,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+WAITHANDLE_CLASSOF_IMPL(ConcurrentWaitHandle)
+
 req::ptr<c_ConcurrentWaitHandle> c_ConcurrentWaitHandle::Alloc(int32_t cnt) {
   auto size = c_ConcurrentWaitHandle::heapSize(cnt);
   auto mem = tl_heap->objMalloc(size);
@@ -116,7 +118,7 @@ void c_ConcurrentWaitHandle::onUnblocked(uint32_t idx) {
         try {
           detectCycle(child);
         } catch (const Object& cycle_exception) {
-          assertx(cycle_exception->instanceof(SystemLib::s_ThrowableClass));
+          assertx(cycle_exception->instanceof(SystemLib::getThrowableClass()));
           throwable_recompute_backtrace_from_wh(cycle_exception.get(), this);
           markAsFailed(cycle_exception);
         }

@@ -35,6 +35,10 @@ namespace HPHP {
 Class* AsyncGenerator::s_class = nullptr;
 const StaticString AsyncGenerator::s_className("HH\\AsyncGenerator");
 
+Class* AsyncGenerator::getClass() {
+  return SystemLib::classLoad(s_className.get(), s_class);
+}
+
 AsyncGenerator::~AsyncGenerator() {
   if (LIKELY(getState() == State::Done)) {
     return;
@@ -56,7 +60,7 @@ AsyncGenerator::Create(const ActRec* fp, size_t numSlots,
   assertx(fp->func()->isAsyncGenerator());
   const size_t frameSz = Resumable::getFrameSize(numSlots);
   const size_t genSz = genSize(sizeof(AsyncGenerator), frameSz);
-  auto const obj = BaseGenerator::Alloc<AsyncGenerator>(s_class, genSz);
+  auto const obj = BaseGenerator::Alloc<AsyncGenerator>(getClass(), genSz);
   auto const genData = new (Native::data<AsyncGenerator>(obj)) AsyncGenerator();
   genData->resumable()->initialize<false>(fp,
                                           resumeAddr,
@@ -138,9 +142,6 @@ void AsioExtension::initAsyncGenerator() {
       Native::NDIFlags::CTOR_THROWS
   );
   loadSystemlib("async-generator");
-  AsyncGenerator::s_class =
-    Class::lookup(AsyncGenerator::s_className.get());
-  assertx(AsyncGenerator::s_class);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

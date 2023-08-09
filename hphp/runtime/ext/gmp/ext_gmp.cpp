@@ -22,7 +22,7 @@
 
 namespace HPHP {
 
-HPHP::Class* GMP::cls = nullptr;
+HPHP::Class* GMP::s_cls = nullptr;
 
 ///////////////////////////////////////////////////////////////////////////////
 // helpers

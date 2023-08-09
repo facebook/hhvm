@@ -69,11 +69,7 @@ RDS_LOCAL(DateGlobals, s_date_globals);
 
 #define IMPLEMENT_GET_CLASS(cls)                                               \
   Class* cls::getClass() {                                                     \
-    if (s_class == nullptr) {                                                  \
-      s_class = Class::lookup(s_className.get());                          \
-      assertx(s_class);                                                        \
-    }                                                                          \
-    return s_class;                                                            \
+    return SystemLib::classLoad(s_className.get(), s_class);                   \
   }                                                                            \
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -371,7 +367,7 @@ int64_t DateTimeData::getTimestamp(const Object& obj) {
   if (LIKELY(obj.instanceof(getClass()))) {
     return getDateTimeData(obj)->getTimestamp();
   }
-  assertx(obj->instanceof(SystemLib::s_DateTimeInterfaceClass));
+  assertx(obj->instanceof(SystemLib::getDateTimeInterfaceClass()));
   Variant result = obj->o_invoke(s_getTimestamp, Array::CreateVec());
   return result.toInt64();
 }
@@ -415,11 +411,11 @@ req::ptr<DateTime> DateTimeData::unwrap(const Object& datetime) {
     DateTimeData* data = Native::data<DateTimeData>(datetime);
     return data->m_dt;
   }
-  if (datetime->instanceof(SystemLib::s_DateTimeImmutableClass)) {
+  if (datetime->instanceof(SystemLib::getDateTimeImmutableClass())) {
     auto rval = datetime->getProp(
       MemberLookupContext(
-        SystemLib::s_DateTimeImmutableClass,
-        SystemLib::s_DateTimeImmutableClass->moduleName()),
+        SystemLib::getDateTimeImmutableClass(),
+        SystemLib::getDateTimeImmutableClass()->moduleName()),
       s_data.get()
     );
     assertx(rval.is_set() && type(rval) == KindOfObject);

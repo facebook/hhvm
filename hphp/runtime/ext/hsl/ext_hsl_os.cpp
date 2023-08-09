@@ -324,8 +324,8 @@ struct HSLFileDescriptor {
 
   template<class ...Args>
   static Object newInstance(Args&&... args) {
-    assertx(s_FileDescriptorClass);
-    Object obj { s_FileDescriptorClass };
+    Object obj { SystemLib::classLoad(s_FQHSLFileDescriptor.get(),
+                                      s_FileDescriptorClass) };
 
     auto* data = Native::data<HSLFileDescriptor>(obj);
     new (data) HSLFileDescriptor(args...);
@@ -1306,8 +1306,6 @@ struct OSExtension final : Extension {
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\fork_and_execve, HSL_os_fork_and_execve);
 
     loadSystemlib();
-    s_FileDescriptorClass = Class::lookup(s_FQHSLFileDescriptor.get());
-    assertx(s_FileDescriptorClass);
   }
 
   void requestShutdown() override {

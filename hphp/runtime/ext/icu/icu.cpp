@@ -306,7 +306,7 @@ double VariantToMilliseconds(const Variant& arg) {
     return U_MILLIS_PER_SECOND * arg.toDouble();
   }
   if (arg.isObject() &&
-      arg.toObject()->instanceof(SystemLib::s_DateTimeInterfaceClass)) {
+      arg.toObject()->instanceof(SystemLib::getDateTimeInterfaceClass())) {
     return U_MILLIS_PER_SECOND *
            (double) DateTimeData::getTimestamp(arg.toObject());
   }

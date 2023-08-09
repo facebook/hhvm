@@ -37,6 +37,10 @@ const StaticString
 
 Class* s_HSLLocaleClass = nullptr;
 
+Class* getHSLLocale() {
+  return SystemLib::classLoad(s_FQHSLLocale.get(), s_HSLLocaleClass);
+}
+
 } // namespace
 
 HSLLocale::HSLLocale(std::shared_ptr<Locale> loc): m_locale(loc) {
@@ -59,8 +63,7 @@ void HSLLocale::sweep() {
 }
 
 Object HSLLocale::newInstance(std::shared_ptr<Locale> loc) {
-  assertx(s_HSLLocaleClass);
-  Object obj { s_HSLLocaleClass };
+  Object obj { getHSLLocale() };
   auto* data = Native::data<HSLLocale>(obj);
   new (data) HSLLocale(loc);
   return obj;
@@ -214,8 +217,6 @@ struct LocaleExtension final : Extension {
 #undef LC_
 
     loadSystemlib();
-    s_HSLLocaleClass = Class::lookup(s_FQHSLLocale.get());
-    assertx(s_HSLLocaleClass);
   }
 } s_locale_extension;
 

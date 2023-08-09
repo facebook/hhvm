@@ -48,7 +48,7 @@ icu::TimeZone* IntlTimeZone::ParseArg(const Variant& arg,
   } else if (arg.isObject()) {
     auto objarg = arg.toObject();
     auto cls = objarg->getVMClass();
-    auto IntlTimeZone_Class = Class::lookup(s_IntlTimeZone.get());
+    auto IntlTimeZone_Class = IntlTimeZone::getClass();
     if (IntlTimeZone_Class &&
         ((cls == IntlTimeZone_Class) || cls->classof(IntlTimeZone_Class))) {
       return IntlTimeZone::Get(objarg.get())->timezone()->clone();

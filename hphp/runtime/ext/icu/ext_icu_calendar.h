@@ -45,11 +45,7 @@ struct IntlCalendar : IntlError {
   }
 
   static Object newInstance(icu::Calendar *cal) {
-    if (!c_IntlCalendar) {
-      c_IntlCalendar = Class::lookup(s_IntlCalendar.get());
-      assertx(c_IntlCalendar);
-    }
-    Object ret{c_IntlCalendar};
+    Object ret{ SystemLib::classLoad(s_IntlCalendar.get(), c_IntlCalendar) };
     if (cal) {
       Native::data<IntlCalendar>(ret)->setCalendar(cal);
     }

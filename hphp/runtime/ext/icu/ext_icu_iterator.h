@@ -48,11 +48,7 @@ struct IntlIterator : IntlError {
   }
 
   static Object newInstance(icu::StringEnumeration *se = nullptr) {
-    if (!c_IntlIterator) {
-      c_IntlIterator = Class::lookup(s_IntlIterator.get());
-      assertx(c_IntlIterator);
-    }
-    Object obj{c_IntlIterator};
+    Object obj{ SystemLib::classLoad(s_IntlIterator.get(), c_IntlIterator) };
     if (se) {
       Native::data<IntlIterator>(obj)->setEnumeration(se);
     }

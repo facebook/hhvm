@@ -37,6 +37,8 @@ namespace {
   const StaticString s_asyncGenerator("<async-generator>");
 }
 
+WAITHANDLE_CLASSOF_IMPL(AsyncGeneratorWaitHandle)
+
 c_AsyncGeneratorWaitHandle::~c_AsyncGeneratorWaitHandle() {
   if (LIKELY(isFinished())) return;
   assertx(!isRunning());

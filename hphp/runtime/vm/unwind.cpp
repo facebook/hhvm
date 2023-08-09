@@ -240,14 +240,14 @@ const StaticString s_previous("previous");
 const Slot s_previousIdx{6};
 
 DEBUG_ONLY bool is_throwable(ObjectData* throwable) {
-  auto const erCls = SystemLib::s_ErrorClass;
-  auto const exCls = SystemLib::s_ExceptionClass;
+  auto const erCls = SystemLib::getErrorClass();
+  auto const exCls = SystemLib::getExceptionClass();
   return throwable->instanceof(erCls) || throwable->instanceof(exCls);
 }
 
 DEBUG_ONLY bool throwable_has_expected_props() {
-  auto const erCls = SystemLib::s_ErrorClass;
-  auto const exCls = SystemLib::s_ExceptionClass;
+  auto const erCls = SystemLib::getErrorClass();
+  auto const exCls = SystemLib::getExceptionClass();
   if (erCls->lookupDeclProp(s_previous.get()) != s_previousIdx ||
       exCls->lookupDeclProp(s_previous.get()) != s_previousIdx) {
     return false;
@@ -259,7 +259,7 @@ DEBUG_ONLY bool throwable_has_expected_props() {
   auto const isException = [&](const TypeConstraint& tc) {
     if (!tc.isUnresolved() && !tc.isObject()) return false;
     auto const cls = Class::lookup(tc.anyNamedType());
-    return cls && cls == SystemLib::s_ThrowableClass;
+    return cls && cls == SystemLib::getThrowableClass();
   };
 
   return
@@ -299,7 +299,7 @@ void chainFaultObjects(ObjectData* top, ObjectData* prev) {
       assertx(foundLval.type() != KindOfUninit);
       head = foundLval.val().pobj;
     } while (foundLval.type() == KindOfObject &&
-             foundLval.val().pobj->instanceof(SystemLib::s_ThrowableClass));
+             foundLval.val().pobj->instanceof(SystemLib::getThrowableClass()));
     return foundLval;
   };
 

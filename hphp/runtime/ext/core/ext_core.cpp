@@ -24,11 +24,6 @@
 
 namespace HPHP {
 
-#define SYSTEM_CLASS_STRING(cls, prefix, namespace)     \
-  const StaticString s_##prefix##cls(#namespace #cls);
-SYSTEMLIB_CLASSES(SYSTEM_CLASS_STRING)
-#undef SYSTEM_CLASS_STRING
-
 ///////////////////////////////////////////////////////////////////////////////
 
 const StaticString
@@ -39,10 +34,9 @@ template <class T>
 static req::ptr<T> getDir(const Object& dir_iter) {
   static_assert(std::is_base_of<Directory, T>::value,
                 "Only cast to directories");
-  assertx(SystemLib::s_DirectoryIteratorClass);
+  auto cls = SystemLib::getDirectoryIteratorClass();
   auto const dir = dir_iter->getProp(
-    MemberLookupContext(SystemLib::s_DirectoryIteratorClass,
-                        SystemLib::s_DirectoryIteratorClass->moduleName()),
+    MemberLookupContext(cls, cls->moduleName()),
     s_dir.get());
   assertx(dir.is_set());
   assertx(dir.type() == KindOfResource);
@@ -54,10 +48,9 @@ static Variant HHVM_METHOD(DirectoryIterator, hh_readdir) {
 
   if (auto array_dir = dyn_cast<ArrayDirectory>(dir)) {
     auto const path = array_dir->path();
-    assertx(SystemLib::s_DirectoryIteratorClass);
+    auto cls = SystemLib::getDirectoryIteratorClass();
     this_->setProp(
-      MemberLookupContext(SystemLib::s_DirectoryIteratorClass,
-                          SystemLib::s_DirectoryIteratorClass->moduleName()),
+      MemberLookupContext(cls, cls->moduleName()),
       s_dirName.get(), path.asTypedValue());
   }
 
@@ -75,22 +68,6 @@ void CoreExtension::moduleInit() {
   HHVM_ME(GlobIterator, count);
 
   loadSystemlib();
-
-  SystemLib::s_nullFunc =
-    Func::lookup(makeStaticString("__SystemLib\\__86null"));
-
-#define INIT_SYSTEMLIB_CLASS_FIELD(cls, prefix, ...)               \
-  {                                                                \
-    Class *cls = NamedType::get(s_##prefix##cls.get())->clsList(); \
-    assert(cls);                                                   \
-    SystemLib::s_##prefix##cls ##Class = cls;                      \
-  }
-
-  // Stash a pointer to the VM Classes for stdClass, Exception,
-  // pinitSentinel and resource
-  SYSTEMLIB_CLASSES(INIT_SYSTEMLIB_CLASS_FIELD)
-
-#undef INIT_SYSTEMLIB_CLASS_FIELD
 }
 
 CoreExtension s_core_extension;

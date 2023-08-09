@@ -1767,13 +1767,13 @@ SSATmp* optimizedCallIsObject(IRGS& env, SSATmp* src) {
     auto const cls = src->type().clsSpec().cls();
     if (!env.irb->constrainValue(src, GuardConstraint(cls).setWeak())) {
       if (RO::EvalNoticeOnMethCallerHelperIsObject) {
-        if (cls == SystemLib::s_MethCallerHelperClass) {
+        if (cls == SystemLib::getMethCallerHelperClass()) {
           notice(s_isObjectMethCaller.get());
         }
       }
       // If we know the class without having to specialize a guard
       // any further, use it.
-      return cns(env, cls != SystemLib::s___PHP_Incomplete_ClassClass);
+      return cns(env, cls != SystemLib::get__PHP_Incomplete_ClassClass());
     }
   }
 
@@ -1785,7 +1785,7 @@ SSATmp* optimizedCallIsObject(IRGS& env, SSATmp* src) {
     auto cls = gen(env, LdObjClass, obj);
 
     if (RO::EvalNoticeOnMethCallerHelperIsObject) {
-      auto const c = SystemLib::s_MethCallerHelperClass;
+      auto const c = SystemLib::getMethCallerHelperClass();
       ifThen(
         env,
         [&] (Block* taken) {
@@ -1795,7 +1795,7 @@ SSATmp* optimizedCallIsObject(IRGS& env, SSATmp* src) {
       );
     }
 
-    auto testCls = SystemLib::s___PHP_Incomplete_ClassClass;
+    auto testCls = SystemLib::get__PHP_Incomplete_ClassClass();
     auto eq = gen(env, EqCls, cls, cns(env, testCls));
     return gen(env, XorBool, eq, cns(env, true));
   };

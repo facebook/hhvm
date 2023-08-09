@@ -31,6 +31,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+WAITHANDLE_CLASSOF_IMPL(AwaitAllWaitHandle)
+
 req::ptr<c_AwaitAllWaitHandle> c_AwaitAllWaitHandle::Alloc(int32_t cnt) {
   auto size = c_AwaitAllWaitHandle::heapSize(cnt);
   auto mem = tl_heap->objMalloc(size);
@@ -164,7 +166,7 @@ void c_AwaitAllWaitHandle::onUnblocked(uint32_t idx) {
         try {
           detectCycle(child);
         } catch (const Object& cycle_exception) {
-          assertx(cycle_exception->instanceof(SystemLib::s_ThrowableClass));
+          assertx(cycle_exception->instanceof(SystemLib::getThrowableClass()));
           throwable_recompute_backtrace_from_wh(cycle_exception.get(), this);
           markAsFailed(cycle_exception);
         }

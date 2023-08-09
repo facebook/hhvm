@@ -22,12 +22,8 @@ struct IntlDatePatternGenerator : IntlError {
   static Object newInstance(
     std::unique_ptr<icu::DateTimePatternGenerator> generator
   ) {
-    if (!c_IntlDatePatternGenerator) {
-      c_IntlDatePatternGenerator =
-        Class::lookup(s_IntlDatePatternGenerator.get());
-      assertx(c_IntlDatePatternGenerator);
-    }
-    Object ret{c_IntlDatePatternGenerator};
+    Object ret{ SystemLib::classLoad(s_IntlDatePatternGenerator.get(),
+                                     c_IntlDatePatternGenerator) };
     if (generator) {
       Native::data<IntlDatePatternGenerator>(ret)
         ->setGenerator(std::move(generator));

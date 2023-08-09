@@ -62,10 +62,15 @@ struct c_RescheduleWaitHandle;
 struct c_SleepWaitHandle;
 struct c_ExternalThreadEventWaitHandle;
 
+#define WAITHANDLE_CLASSOF_IMPL(cn) \
+  Class* c_##cn::s_cls; \
+  StaticString c_##cn::s_clsName("HH\\" #cn);
+
 #define WAITHANDLE_CLASSOF(cn) \
+  static Class* s_cls; \
+  static StaticString s_clsName; \
   static Class* classof() { \
-    static Class* cls = Class::lookup(makeStaticString("HH\\" #cn)); \
-    return cls; \
+    return SystemLib::classLoad(s_clsName.get(), s_cls); \
   }
 
 #define WAITHANDLE_DTOR(cn) \

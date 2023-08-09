@@ -107,27 +107,24 @@ private:
 
 struct GMP {
 private:
-  static void initClass() {
-    cls = Class::lookup(s_GMP_GMP.get());
+  static Class* getClass() {
+    return SystemLib::classLoad(s_GMP_GMP.get(), s_cls);
   }
 
 public:
   static Object allocObject() {
-    if (UNLIKELY(cls == nullptr)) {
-      initClass();
-    }
-    return Object{cls};
+    return Object{ getClass() };
   }
 
   static Object allocObject(const Variant& arg) {
     Object ret = allocObject();
     tvDecRefGen(
-      g_context->invokeFunc(cls->getCtor(), make_vec_array(arg), ret.get())
+      g_context->invokeFunc(getClass()->getCtor(), make_vec_array(arg), ret.get())
     );
     return ret;
   }
 
-  static HPHP::Class* cls;
+  static HPHP::Class* s_cls;
 };
 
 } /* namespace HPHP */

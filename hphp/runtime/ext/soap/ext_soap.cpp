@@ -50,11 +50,7 @@ const StaticString s___dorequest("__dorequest");
 
 #define IMPLEMENT_GET_CLASS(cls)                                               \
 Class* cls::getClass() {                                                       \
-  if (s_class == nullptr) {                                                    \
-    s_class = Class::lookup(s_className.get());                            \
-    assertx(s_class);                                                          \
-  }                                                                            \
-  return s_class;                                                              \
+  return SystemLib::classLoad(s_className.get(), s_class);                     \
 }                                                                              \
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1242,7 +1238,7 @@ static xmlDocPtr serialize_response_call(
   xmlDocSetRootElement(doc, envelope);
 
   if (ret.isObject() &&
-      ret.toObject()->instanceof(SystemLib::s_SoapFaultClass)) {
+      ret.toObject()->instanceof(SystemLib::getSoapFaultClass())) {
     ObjectData* obj = ret.getObjectData();
 
     char *detail_name;
@@ -1880,7 +1876,7 @@ bool HHVM_FUNCTION(use_soap_error_handler,
 bool HHVM_FUNCTION(is_soap_fault,
                    const Variant& fault) {
   return fault.isObject() &&
-    fault.getObjectData()->instanceof(SystemLib::s_SoapFaultClass);
+    fault.getObjectData()->instanceof(SystemLib::getSoapFaultClass());
 }
 
 int64_t HHVM_FUNCTION(_soap_active_version) {
@@ -2120,7 +2116,7 @@ Variant HHVM_METHOD(SoapServer, getfunctions) {
   }
 
   assertx(class_name.get());
-  Class* cls = Class::lookup(class_name.get());
+  Class* cls = Class::load(class_name.get());
   assertx(cls);
   auto ret = DictInit(cls->numMethods()).toArray();
   Class::getMethodNames(cls, nullptr, ret);
@@ -2289,7 +2285,7 @@ void HHVM_METHOD(SoapServer, handle,
         return;
       }
       if (h->retval.isObject() &&
-          h->retval.getObjectData()->instanceof(SystemLib::s_SoapFaultClass)) {
+          h->retval.getObjectData()->instanceof(SystemLib::getSoapFaultClass())) {
         send_soap_server_fault(function, h->retval, h);
         return;
       }
@@ -2314,7 +2310,7 @@ void HHVM_METHOD(SoapServer, handle,
       return;
     }
     if (retval.isObject() &&
-        retval.toObject()->instanceof(SystemLib::s_SoapFaultClass)) {
+        retval.toObject()->instanceof(SystemLib::getSoapFaultClass())) {
       send_soap_server_fault(function, retval, nullptr);
       return;
     }
@@ -2336,7 +2332,7 @@ void HHVM_METHOD(SoapServer, handle,
                                          data->m_soap_headers,
                                          soap_version);
   } catch (Object& e) {
-    if (e->instanceof(SystemLib::s_SoapFaultClass)) {
+    if (e->instanceof(SystemLib::getSoapFaultClass())) {
       send_soap_server_fault(function, e, nullptr);
       return;
     }

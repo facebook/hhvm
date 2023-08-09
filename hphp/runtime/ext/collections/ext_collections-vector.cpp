@@ -18,8 +18,6 @@ namespace HPHP { namespace collections {
 /////////////////////////////////////////////////////////////////////////////
 
 const StaticString
-  s_HH_Vector("HH\\Vector"),
-  s_HH_ImmVector("HH\\ImmVector"),
   s_VectorIterator("VectorIterator");
 
 /////////////////////////////////////////////////////////////////////////////
@@ -281,6 +279,7 @@ Object BaseVector::getIterator() {
 // c_Vector
 
 Class* c_Vector::s_cls;
+StaticString c_Vector::s_clsName("HH\\Vector");
 
 void c_Vector::clear() {
   dropImmCopy();
@@ -457,6 +456,7 @@ void c_Vector::OffsetUnset(ObjectData* /*obj*/, const TypedValue* /*key*/) {
 // c_ImmVector
 
 Class* c_ImmVector::s_cls;
+StaticString c_ImmVector::s_clsName("HH\\ImmVector");
 
 c_ImmVector* c_ImmVector::Clone(ObjectData* obj) {
   return BaseVector::Clone<c_ImmVector>(obj);
@@ -499,17 +499,12 @@ void CollectionsExtension::initVector() {
   HHVM_NAMED_ME(HH\\Vector, removeKeyNative,  &c_Vector::php_removeKey);
   HHVM_NAMED_ME(HH\\Vector, clearNative,      &c_Vector::clear);
 
-  Native::registerNativePropHandler<CollectionPropHandler>(s_HH_Vector);
-  Native::registerNativePropHandler<CollectionPropHandler>(s_HH_ImmVector);
+  Native::registerNativePropHandler<CollectionPropHandler>(c_Vector::s_clsName);
+  Native::registerNativePropHandler<CollectionPropHandler>(c_ImmVector::s_clsName);
 
   loadSystemlib("collections-vector");
 
-  c_Vector::s_cls = Class::lookup(s_HH_Vector.get());
-  assertx(c_Vector::s_cls);
   finishClass<c_Vector>();
-
-  c_ImmVector::s_cls = Class::lookup(s_HH_ImmVector.get());
-  assertx(c_ImmVector::s_cls);
   finishClass<c_ImmVector>();
 }
 

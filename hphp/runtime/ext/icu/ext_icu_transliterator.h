@@ -29,11 +29,7 @@ struct Transliterator : IntlError {
   }
 
   static Object newInstance(icu::Transliterator* trans) {
-    if (!c_Transliterator) {
-      c_Transliterator = Class::lookup(s_Transliterator.get());
-      assertx(c_Transliterator);
-    }
-    Object obj{c_Transliterator};
+    Object obj{SystemLib::classLoad(s_Transliterator.get(), c_Transliterator)};
     auto data = Native::data<Transliterator>(obj);
     data->setTransliterator(trans);
     return obj;

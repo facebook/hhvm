@@ -51,11 +51,8 @@ struct IntlDateFormatter : IntlError {
   }
 
   static Object newInstance() {
-    if (!c_IntlDateFormatter) {
-      c_IntlDateFormatter = Class::lookup(s_IntlDateFormatter.get());
-      assertx(c_IntlDateFormatter);
-    }
-    return Object{c_IntlDateFormatter};
+    return Object{ SystemLib::classLoad(s_IntlDateFormatter.get(),
+                                        c_IntlDateFormatter) };
   }
   static IntlDateFormatter* Get(ObjectData* obj) {
     return GetData<IntlDateFormatter>(obj, s_IntlDateFormatter);

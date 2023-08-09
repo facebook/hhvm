@@ -593,7 +593,7 @@ static int fb_compact_serialize_variant(
     case KindOfObject:
       if (RO::EvalForbidMethCallerHelperSerialize &&
           var.asCObjRef().get()->getVMClass() ==
-            SystemLib::s_MethCallerHelperClass) {
+            SystemLib::getMethCallerHelperClass()) {
         if (RO::EvalForbidMethCallerHelperSerialize == 1) {
           fb_compact_serialize_code(sb, FB_CS_NULL);
           raise_warning("Serializing MethCallerHelper");

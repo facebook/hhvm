@@ -100,14 +100,11 @@ static void mcr_throwException(const std::string& message,
                                mc_op_t op = mc_op_unknown,
                                carbon::Result result = compatibility::mc_res_unknown,
                                const std::string& key = "") {
-  if (!c_MCRouterException) {
-    c_MCRouterException = Class::lookup(s_MCRouterException.get());
-    assertx(c_MCRouterException);
-  }
-
-  Object obj{c_MCRouterException};
+  auto cls = SystemLib::classLoad(s_MCRouterException.get(),
+                                  c_MCRouterException);
+  Object obj{ cls };
   tvDecRefGen(
-    g_context->invokeFunc(c_MCRouterException->getCtor(),
+    g_context->invokeFunc(cls->getCtor(),
       make_vec_array(message, (int64_t)op, (int64_t)result, key),
       obj.get())
   );
@@ -119,11 +116,6 @@ static Class* c_MCRouterOptionException = nullptr;
 [[noreturn]]
 static void mcr_throwOptionException(
   const std::vector<mc::McrouterOptionError>& errors) {
-  if (!c_MCRouterOptionException) {
-    c_MCRouterOptionException =
-      Class::lookup(s_MCRouterOptionException.get());
-    assertx(c_MCRouterOptionException);
-  }
 
   VecInit errorArray(errors.size());
   for (auto err : errors) {
@@ -135,10 +127,12 @@ static void mcr_throwOptionException(
     errorArray.append(e);
   }
 
-  Object obj{c_MCRouterOptionException};
+  auto cls = SystemLib::classLoad(s_MCRouterOptionException.get(),
+                                  c_MCRouterOptionException);
+  Object obj{ cls };
   tvDecRefGen(
     g_context->invokeFunc(
-      c_MCRouterOptionException->getCtor(),
+      cls->getCtor(),
       make_vec_array(errorArray.toArray()),
       obj.get()
     )

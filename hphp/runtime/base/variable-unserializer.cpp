@@ -1032,7 +1032,7 @@ void VariableUnserializer::unserializeVariant(
         }
       } else {
         warnOrThrowUnknownClass(clsName);
-        obj = Object{SystemLib::s___PHP_Incomplete_ClassClass};
+        obj = Object{SystemLib::get__PHP_Incomplete_ClassClass()};
         obj->setProp(nullctx, s_PHP_Incomplete_Class_Name.get(),
                      clsName.asTypedValue());
       }
@@ -1203,7 +1203,7 @@ void VariableUnserializer::unserializeVariant(
         return ret;
       }();
 
-      if (!obj->instanceof(SystemLib::s_SerializableClass)) {
+      if (!obj->instanceof(SystemLib::getSerializableClass())) {
         raise_warning("Class %s has no unserializer",
                       obj->getClassName().data());
       } else {

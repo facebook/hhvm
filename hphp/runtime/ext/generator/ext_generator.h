@@ -167,10 +167,7 @@ struct Generator final : BaseGenerator {
 
   static ObjectData* Create(const ActRec* fp, size_t numSlots,
                             jit::TCA resumeAddr, Offset suspendOffset);
-  static Class* getClass() {
-    assertx(s_class);
-    return s_class;
-  }
+  static Class* getClass();
   static constexpr ptrdiff_t objectOff() {
     return -(Native::dataOffset<Generator>());
   }

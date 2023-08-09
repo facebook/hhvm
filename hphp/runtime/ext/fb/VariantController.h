@@ -96,7 +96,7 @@ struct VariantControllerImpl {
       case KindOfObject:
         if (RO::EvalForbidMethCallerHelperSerialize &&
             obj.asCObjRef().get()->getVMClass() ==
-              SystemLib::s_MethCallerHelperClass) {
+              SystemLib::getMethCallerHelperClass()) {
           if (RO::EvalForbidMethCallerHelperSerialize == 1) {
             raise_warning("Serializing MethCallerHelper");
           } else {

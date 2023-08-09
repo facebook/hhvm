@@ -57,7 +57,7 @@ void CoeffectFunParamProfile::update(const TypedValue* tv) {
     if (cls->isClosureClass()) {
       m_closure++;
     } else if (!RO::EvalEmitMethCallerFuncPointers &&
-               cls == SystemLib::s_MethCallerHelperClass) {
+               cls == SystemLib::getMethCallerHelperClass()) {
       m_methcaller++;
     }
   } else if (tvIsFunc(tv)) {

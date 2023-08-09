@@ -38,11 +38,7 @@ const StaticString
 static Class* UConverterClass = nullptr;
 
 static Class* getClass() {
-  if (!UConverterClass) {
-    UConverterClass = Class::lookup(s_UConverter.get());
-    assertx(UConverterClass);
-  }
-  return UConverterClass;
+  return SystemLib::classLoad(s_UConverter.get(), UConverterClass);
 }
 
 

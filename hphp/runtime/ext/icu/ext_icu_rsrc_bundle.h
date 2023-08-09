@@ -30,11 +30,7 @@ struct ResourceBundle : IntlError {
   }
 
   static Object newInstance(icu::ResourceBundle* bundle) {
-    if (!c_ResourceBundle) {
-      c_ResourceBundle = Class::lookup(s_ResourceBundle.get());
-      assertx(c_ResourceBundle);
-    }
-    Object obj{c_ResourceBundle};
+    Object obj{SystemLib::classLoad(s_ResourceBundle.get(), c_ResourceBundle)};
     auto data = Native::data<ResourceBundle>(obj);
     data->setResource(bundle);
     return obj;

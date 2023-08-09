@@ -55,13 +55,13 @@ void initProps(IRGS& env, const Class* cls) {
 }
 
 void initThrowable(IRGS& env, const Class* cls, SSATmp* throwable) {
-  assertx(cls->classof(SystemLib::s_ErrorClass) ||
-          cls->classof(SystemLib::s_ExceptionClass));
+  assertx(cls->classof(SystemLib::getErrorClass()) ||
+          cls->classof(SystemLib::getExceptionClass()));
   assertx(throwable->type() <= TObj);
 
   // Root of the class hierarchy.
-  auto const rootCls = cls->classof(SystemLib::s_ExceptionClass)
-    ? SystemLib::s_ExceptionClass : SystemLib::s_ErrorClass;
+  auto const rootCls = cls->classof(SystemLib::getExceptionClass())
+    ? SystemLib::getExceptionClass() : SystemLib::getErrorClass();
 
   auto const propAddr = [&] (Slot slot) {
     return gen(
@@ -76,7 +76,7 @@ void initThrowable(IRGS& env, const Class* cls, SSATmp* throwable) {
   // Load Exception::$traceOpts
   auto const lookup = ldClsPropAddrKnown(
     env,
-    SystemLib::s_ExceptionClass,
+    SystemLib::getExceptionClass(),
     s_traceOpts.get(),
     false,
     false,

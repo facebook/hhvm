@@ -134,7 +134,7 @@ inline void DataWalker::objectFeature(ObjectData* pobj,
                                       DataFeature& features) const {
   if (pobj->isCollection()) return;
   if (m_feature == LookupFeature::DetectSerializable &&
-      pobj->instanceof(SystemLib::s_SerializableClass)) {
+      pobj->instanceof(SystemLib::getSerializableClass())) {
     features.hasSerializable = true;
   }
 }

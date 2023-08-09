@@ -36,12 +36,12 @@ struct IntlTimeZone : IntlError {
     setTimeZone(nullptr);
   }
 
+  static Class* getClass() {
+    return SystemLib::classLoad(s_IntlTimeZone.get(), c_IntlTimeZone);
+  }
+
   static Object newInstance(icu::TimeZone *tz = nullptr, bool owned = true) {
-    if (!c_IntlTimeZone) {
-      c_IntlTimeZone = Class::lookup(s_IntlTimeZone.get());
-      assertx(c_IntlTimeZone);
-    }
-    Object obj{c_IntlTimeZone};
+    Object obj{ getClass() };
     if (tz) {
       Native::data<IntlTimeZone>(obj)->setTimeZone(tz, owned);
     }

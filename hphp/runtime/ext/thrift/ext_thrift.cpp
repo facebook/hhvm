@@ -26,10 +26,9 @@ const int64_t k_THRIFT_MARK_LEGACY_ARRAYS = 1LL << 0;
 
 const StaticString s_InteractionId("InteractionId");
 
+Class* InteractionId::s_cls = nullptr;
 Class* InteractionId::PhpClass() {
-  Class* c_InteractionId = Class::lookup(s_InteractionId.get());
-  assert(c_InteractionId);
-  return c_InteractionId;
+  return SystemLib::classLoad(s_InteractionId.get(), s_cls);
 }
 
 Class* RpcOptions::c_RpcOptions = nullptr;

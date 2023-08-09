@@ -45,7 +45,7 @@ fn main() {
 
         conf.types_crate("fbthrift_test_if__types");
 
-        let options = "serde";
+        let options = "deprecated_optional_with_default_is_some,serde";
         if !options.is_empty() {
             conf.options(options);
         }

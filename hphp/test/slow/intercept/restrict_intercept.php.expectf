@@ -1,0 +1,4 @@
+string(3) "foo"
+string(3) "bar"
+
+Fatal error: fb_intercept2 was used on a non-interceptable function (foo1). It appears in the NonInterceptableFunctions blocklist. in %s/restrict_intercept.php on line %d

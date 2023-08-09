@@ -901,6 +901,7 @@ hphp_string_imap<std::string> RuntimeOption::PhpFileExtensions;
 std::set<std::string> RuntimeOption::ForbiddenFileExtensions;
 std::vector<std::shared_ptr<FilesMatch>> RuntimeOption::FilesMatches;
 std::set<std::string> RuntimeOption::RenamableFunctions;
+std::set<std::string> RuntimeOption::NonInterceptableFunctions;
 
 bool RuntimeOption::WhitelistExec = false;
 bool RuntimeOption::WhitelistExecWarningOnly = false;
@@ -2534,6 +2535,7 @@ void RuntimeOption::Load(
     Config::Bind(LockCodeMemory, ini, config, "Server.LockCodeMemory", false);
     Config::Bind(MaxArrayChain, ini, config, "Server.MaxArrayChain", INT_MAX);
     Config::Bind(RenamableFunctions, ini, config, "Eval.RenamableFunctions");
+    Config::Bind(NonInterceptableFunctions, ini, config, "Eval.NonInterceptableFunctions");
     if (MaxArrayChain != INT_MAX) {
       // VanillaDict needs a higher threshold to avoid false-positives.
       // (and we always use VanillaDict)

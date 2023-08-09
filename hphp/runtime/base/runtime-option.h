@@ -614,6 +614,7 @@ struct RuntimeOption {
   static std::set<std::string> StaticFileGenerators;
   static std::vector<std::shared_ptr<FilesMatch>> FilesMatches;
   static std::set<std::string> RenamableFunctions;
+  static std::set<std::string> NonInterceptableFunctions;
 
   static bool WhitelistExec;
   static bool WhitelistExecWarningOnly;

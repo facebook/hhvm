@@ -34,6 +34,7 @@ impl Default for CompilerFlags {
 pub struct Hhvm {
     pub include_roots: BTreeMap<BString, BString>,
     pub renamable_functions: BTreeSet<BString>,
+    pub non_interceptable_functions: BTreeSet<BString>,
     pub parser_options: ParserOptions,
     pub jit_enable_rename_function: JitEnableRenameFunction,
 }
@@ -73,6 +74,13 @@ impl Options {
             }
             JitEnableRenameFunction::Disable => false,
         }
+    }
+    pub fn function_is_interceptable(&self, func: &BStr) -> bool {
+        let stripped_func = string_utils::strip_ns_bstr(func);
+        !self
+            .hhvm
+            .non_interceptable_functions
+            .contains(stripped_func)
     }
 }
 

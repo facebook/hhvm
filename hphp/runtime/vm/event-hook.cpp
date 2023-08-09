@@ -495,16 +495,6 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
     frame_free_locals_inl_no_hook(ar, ar->func()->numFuncEntryInputs());
   };
 
-  /*
-   * In production mode, only functions that we have assumed can be
-   * intercepted during static analysis should actually be
-   * intercepted.
-   */
-  if (RuntimeOption::RepoAuthoritative && !func->isInterceptable()) {
-      raise_error("fb_intercept2 was used on a non-interceptable function (%s) "
-                  "in RepoAuthoritative mode", func->fullName()->data());
-  }
-
   PC savePc = vmpc();
 
   auto done = true;

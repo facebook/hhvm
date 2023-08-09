@@ -285,6 +285,7 @@ RepoGlobalData get_global_data() {
   gd.TreatCaseTypesAsMixed = RO::EvalTreatCaseTypesAsMixed;
   gd.RenamableFunctions = RO::RenamableFunctions;
   gd.JitEnableRenameFunction = RO::EvalJitEnableRenameFunction;
+  gd.NonInterceptableFunctions = RO::NonInterceptableFunctions;
 
   for (auto const& elm : RuntimeOption::ConstantFunctions) {
     auto const s = internal_serialize(tvAsCVarRef(elm.second));

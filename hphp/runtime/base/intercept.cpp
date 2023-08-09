@@ -88,6 +88,24 @@ bool register_intercept(const String& name, const Variant& callback) {
     return true;
   }
 
+  /*
+   * In production mode, only functions that we have assumed can be
+   * intercepted during static analysis should actually be
+   * intercepted. Otherwise, we refer to the NonInterceptableFunctions
+   * blocklist in the config.
+   */
+  if (!(interceptedFunc->attrs() & AttrInterceptable)) {
+    if (RO::RepoAuthoritative) {
+      raise_error("fb_intercept2 was used on a non-interceptable function (%s) "
+                  "in RepoAuthoritative mode", interceptedFunc->fullName()->data());
+    } else {
+      raise_error("fb_intercept2 was used on a non-interceptable function (%s). "
+                  "It appears in the NonInterceptableFunctions blocklist.",
+                  interceptedFunc->fullName()->data());
+    }
+  }
+
+
   if (!callback.toBoolean()) {
     if (!s_intercept_data->empty()) {
       auto& handlers = s_intercept_data->intercept_handlers();

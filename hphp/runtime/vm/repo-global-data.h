@@ -203,6 +203,7 @@ struct RepoGlobalData {
    */
   uint32_t JitEnableRenameFunction = 0;
   std::set<std::string> RenamableFunctions;
+  std::set<std::string> NonInterceptableFunctions;
 
   // NB: Only use C++ types in this struct because we want to be able
   // to serde it before memory manager and family are set up.
@@ -225,6 +226,7 @@ struct RepoGlobalData {
       (ForbidDynamicCallsWithAttr)
       (JitEnableRenameFunction)
       (RenamableFunctions)
+      (NonInterceptableFunctions)
       (LogKnownMethodsAsDynamicCalls)
       (NoticeOnBuiltinDynamicCalls)
       (Signature)

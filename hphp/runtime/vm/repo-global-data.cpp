@@ -53,6 +53,7 @@ void RepoGlobalData::load(bool loadConstantFuncs) const {
   RO::EvalTreatCaseTypesAsMixed                    = TreatCaseTypesAsMixed;
   RO::EvalJitEnableRenameFunction                  = JitEnableRenameFunction;
   RO::RenamableFunctions                           = RenamableFunctions;
+  RO::NonInterceptableFunctions                    = NonInterceptableFunctions;
 
   if (HardGenericsUB) RO::EvalEnforceGenericsUB = 2;
 

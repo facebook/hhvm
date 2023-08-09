@@ -225,6 +225,10 @@ CompilerResult hackc_compile(
     }
   }
 
+  for (auto& f : RO::NonInterceptableFunctions) {
+    native_env.non_interceptable_functions.emplace_back(rust::String{f});
+  }
+
   auto const fromHackCUnit = [&]() -> CompilerResult {
     rust::Box<hackc::UnitWrapper> unit_wrapped = [&] {
       tracing::Block _{

@@ -232,6 +232,7 @@ impl Opts {
             hhvm: Hhvm {
                 include_roots: Default::default(),
                 renamable_functions: Default::default(),
+                non_interceptable_functions: Default::default(),
                 parser_options,
                 jit_enable_rename_function: hhvm_config::jit_enable_rename_function(&hhvm_config)?,
             },

@@ -499,6 +499,7 @@ RepoGlobalData getGlobalData() {
   gd.TreatCaseTypesAsMixed = RO::EvalTreatCaseTypesAsMixed;
   gd.JitEnableRenameFunction = RO::EvalJitEnableRenameFunction;
   gd.RenamableFunctions = RO::RenamableFunctions;
+  gd.NonInterceptableFunctions = RO::NonInterceptableFunctions;
 
   if (Option::ConstFoldFileBC) {
     gd.SourceRootForFileBC.emplace(RO::SourceRoot);

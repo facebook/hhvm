@@ -56,9 +56,12 @@ pub(crate) fn get_attrs_for_fun<'a, 'arena, 'decl>(
         && !emitter
             .options()
             .function_is_renamable(fd.name.1.as_bytes().as_bstr());
+    let is_interceptable = emitter
+        .options()
+        .function_is_interceptable(fd.name.1.as_bytes().as_bstr());
 
     let mut attrs = Attr::AttrNone;
-    attrs.add(Attr::AttrInterceptable);
+    attrs.set(Attr::AttrInterceptable, is_interceptable);
     attrs.set(Attr::AttrPersistent, is_persistent);
     attrs.set(Attr::AttrBuiltin, is_meth_caller | is_systemlib);
     attrs.set(Attr::AttrDynamicallyCallable, is_dyn_call);

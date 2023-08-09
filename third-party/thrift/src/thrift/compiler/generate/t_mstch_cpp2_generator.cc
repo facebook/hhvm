@@ -2556,7 +2556,7 @@ void t_mstch_cpp2_generator::generate_inline_services(
   mstch::map context = {
       {"program", cached_program(get_program())},
       {"any_sinks?",
-       any_service_has_any_function(std::mem_fn(&t_function::returns_sink))},
+       any_service_has_any_function(std::mem_fn(&t_function::sink))},
       {"any_streams?",
        any_service_has_any_function(std::mem_fn(&t_function::stream))},
       {"any_interactions?",

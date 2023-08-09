@@ -151,9 +151,9 @@ class hoist_annotated_types {
     };
 
     if (const auto* t = dynamic_cast<const t_sink*>(f.sink_or_stream())) {
-      if (needs_replacement(t->sink_type()) ||
+      if (needs_replacement(t->elem_type()) ||
           needs_replacement(t->final_response_type())) {
-        maybe_create_typedef(t->sink_type());
+        maybe_create_typedef(t->elem_type());
         maybe_create_typedef(t->final_response_type());
         fix_by_hand(*t);
       }

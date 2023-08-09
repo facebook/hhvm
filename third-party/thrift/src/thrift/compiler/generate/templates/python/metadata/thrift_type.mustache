@@ -58,7 +58,7 @@ Used to turn a type into a thrift metadata ThriftType struct
     }}{{/type:map?}}{{!
     }}{{#type:sink?}}{{!
         }}_fbthrift_metadata.ThriftType(t_sink=_fbthrift_metadata.ThriftSinkType({{!
-        }}elemType={{#type:sink_elem_type}}{{> metadata/thrift_type }}{{/type:sink_elem_type}},{{!
+        }}elemType={{#function:sink_elem_type}}{{> metadata/thrift_type }}{{/function:sink_elem_type}},{{!
         }}finalResponseType={{#type:sink_final_response_type}}{{> metadata/thrift_type }}{{/type:sink_final_response_type}}{{!
         }}{{#type:sink_has_first_response?}},initialResponseType={{#type:sink_first_response_type}}{{> metadata/thrift_type }}{{/type:sink_first_response_type}}{{/type:sink_has_first_response?}})){{!
     }}{{/type:sink?}}{{!

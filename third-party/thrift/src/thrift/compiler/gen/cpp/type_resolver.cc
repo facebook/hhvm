@@ -427,12 +427,12 @@ std::string type_resolver::gen_sink_type(
     return detail::gen_template_type(
         "::apache::thrift::ResponseAndSinkConsumer",
         {resolve(resolve_fn, *node.get_first_response_type()),
-         resolve(resolve_fn, *node.get_sink_type()),
+         resolve(resolve_fn, *node.get_elem_type()),
          resolve(resolve_fn, *node.get_final_response_type())});
   }
   return detail::gen_template_type(
       "::apache::thrift::SinkConsumer",
-      {resolve(resolve_fn, *node.get_sink_type()),
+      {resolve(resolve_fn, *node.get_elem_type()),
        resolve(resolve_fn, *node.get_final_response_type())});
 }
 

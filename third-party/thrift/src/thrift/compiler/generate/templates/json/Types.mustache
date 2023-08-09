@@ -21,9 +21,9 @@
 }{{/type:enum?}}{{!
 }}{{#type:sink?}}{
   "type" : "sink",
-{{#type:sink_elem_type}}
+{{#function:sink_elem_type}}
   "inner_type" : {{> Types}},
-{{/type:sink_elem_type}}
+{{/function:sink_elem_type}}
 {{#type:sink_has_first_response?}}
 {{#type:sink_first_response_type}}
   "first_response_type" : {{> Types}},

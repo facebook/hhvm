@@ -297,8 +297,7 @@ std::string make_unique_name(
 }
 
 bool is_func_go_supported(const t_function* func) {
-  return !func->stream() && !func->returns_sink() &&
-      !func->return_type()->is_service() &&
+  return !func->sink_or_stream() && !func->return_type()->is_service() &&
       func->returned_interaction().empty();
   ;
 }

@@ -24,6 +24,7 @@
 #include <thrift/compiler/ast/t_named.h>
 #include <thrift/compiler/ast/t_node.h>
 #include <thrift/compiler/ast/t_paramlist.h>
+#include <thrift/compiler/ast/t_sink.h>
 #include <thrift/compiler/ast/t_stream.h>
 #include <thrift/compiler/ast/t_throws.h>
 #include <thrift/compiler/ast/t_type.h>
@@ -80,8 +81,8 @@ class t_function final : public t_named {
   t_type* sink_or_stream() { return sink_or_stream_.get(); }
   const t_type* sink_or_stream() const { return sink_or_stream_.get(); }
 
-  bool returns_sink() const {
-    return sink_or_stream_ && sink_or_stream_->is_sink();
+  const t_sink* sink() const {
+    return dynamic_cast<const t_sink*>(sink_or_stream_.get());
   }
   const t_stream_response* stream() const {
     return dynamic_cast<const t_stream_response*>(sink_or_stream_.get());

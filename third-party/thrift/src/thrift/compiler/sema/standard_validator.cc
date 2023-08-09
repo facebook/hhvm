@@ -1118,7 +1118,7 @@ struct ValidateAnnotationPositions {
       }
     }
     if (const auto* s = dynamic_cast<const t_sink*>(node.sink_or_stream())) {
-      if (owns_annotations(s->sink_type()) ||
+      if (owns_annotations(s->elem_type()) ||
           owns_annotations(s->final_response_type())) {
         err(ctx);
       }

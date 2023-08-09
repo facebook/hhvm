@@ -29,13 +29,13 @@
     %><%#type:sink_has_first_response?%><%!
       %>apache::thrift::ResponseAndClientSink<<%!
       %><%#type:sink_first_response_type%><%type:cpp_type%><%/type:sink_first_response_type%>, <%!
-      %><%#type:sink_elem_type%><%type:cpp_type%><%/type:sink_elem_type%>, <%!
+      %><%#function:sink_elem_type%><%type:cpp_type%><%/function:sink_elem_type%>, <%!
       %><%#type:sink_final_response_type%><%type:cpp_type%><%/type:sink_final_response_type%>><%!
     %><%/type:sink_has_first_response?%><%!
 
     %><%^type:sink_has_first_response?%><%!
       %>apache::thrift::ClientSink<<%!
-      %><%#type:sink_elem_type%><%type:cpp_type%><%/type:sink_elem_type%>, <%!
+      %><%#function:sink_elem_type%><%type:cpp_type%><%/function:sink_elem_type%>, <%!
       %><%#type:sink_final_response_type%><%type:cpp_type%><%/type:sink_final_response_type%>><%!
     %><%/type:sink_has_first_response?%><%!
   %><%/type:sink?%><%!

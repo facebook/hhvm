@@ -647,8 +647,8 @@ class mstch_java_service : public mstch_service {
   mstch::node get_request_response_functions() {
     std::vector<t_function*> funcs;
     for (auto func : service_->get_functions()) {
-      if (!func->stream() && !func->returns_sink() &&
-          !func->get_returntype()->is_service() && !func->is_oneway()) {
+      if (!func->sink_or_stream() && !func->get_returntype()->is_service() &&
+          !func->is_oneway()) {
         funcs.push_back(func);
       }
     }
@@ -657,8 +657,7 @@ class mstch_java_service : public mstch_service {
   mstch::node get_single_request_functions() {
     std::vector<t_function*> funcs;
     for (auto func : service_->get_functions()) {
-      if (!func->stream() && !func->returns_sink() &&
-          !func->get_returntype()->is_service()) {
+      if (!func->sink_or_stream() && !func->get_returntype()->is_service()) {
         funcs.push_back(func);
       }
     }
@@ -678,7 +677,7 @@ class mstch_java_service : public mstch_service {
   mstch::node get_sink_functions() {
     std::vector<t_function*> funcs;
     for (auto func : service_->get_functions()) {
-      if (func->returns_sink()) {
+      if (func->sink()) {
         funcs.push_back(func);
       }
     }

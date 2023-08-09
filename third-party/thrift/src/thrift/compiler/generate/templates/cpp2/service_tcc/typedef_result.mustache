@@ -27,7 +27,7 @@ typedef apache::thrift::ThriftPresult<true<% > service_tcc/field_data_return%><%
 typedef apache::thrift::ThriftPResultSink<
     apache::thrift::ThriftPresult<true<%#type:sink_first_response_type%><% > service_tcc/field_data_return%><%/type:sink_first_response_type%><%!
       %><%#function:exceptions%><% > service_tcc/field_data_throws%><%/function:exceptions%>>,
-    apache::thrift::ThriftPresult<true<%#type:sink_elem_type%><% > service_tcc/field_data_return%><%/type:sink_elem_type%><%!
+    apache::thrift::ThriftPresult<true<%#function:sink_elem_type%><% > service_tcc/field_data_return%><%/function:sink_elem_type%><%!
       %><%#function:sink_exceptions%><% > service_tcc/field_data_throws%><%/function:sink_exceptions%>>,
     apache::thrift::ThriftPresult<true<%#type:sink_final_response_type%><% > service_tcc/field_data_return%><%/type:sink_final_response_type%><%!
       %><%#function:sink_final_response_exceptions%><% > service_tcc/field_data_throws%><%/function:sink_final_response_exceptions%>>

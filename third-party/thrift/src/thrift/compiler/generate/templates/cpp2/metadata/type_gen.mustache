@@ -43,5 +43,5 @@
 %><%#type:streamresponse?%><%!
 %>std::make_unique<Stream>(<%#function:stream_elem_type%><% > metadata/type_gen%><%/function:stream_elem_type%><%#type:streamFirstResponse?%>, <%#type:stream_first_response_type%><% > metadata/type_gen%><%/type:stream_first_response_type%><%/type:streamFirstResponse?%>)<%!
 %><%/type:streamresponse?%><%!
-%><%#type:sink?%>std::make_unique<Sink>(<%#type:sink_elem_type%><% > metadata/type_gen%><%/type:sink_elem_type%>, <%#type:sink_final_response_type%><% > metadata/type_gen%><%/type:sink_final_response_type%><%#type:sink_has_first_response?%>, <%#type:sink_first_response_type%><% > metadata/type_gen%><%/type:sink_first_response_type%><%/type:sink_has_first_response?%>)<%/type:sink?%><%!
+%><%#type:sink?%>std::make_unique<Sink>(<%#function:sink_elem_type%><% > metadata/type_gen%><%/function:sink_elem_type%>, <%#type:sink_final_response_type%><% > metadata/type_gen%><%/type:sink_final_response_type%><%#type:sink_has_first_response?%>, <%#type:sink_first_response_type%><% > metadata/type_gen%><%/type:sink_first_response_type%><%/type:sink_has_first_response?%>)<%/type:sink?%><%!
 %><%/type:base?%><%/type:typedef?%>

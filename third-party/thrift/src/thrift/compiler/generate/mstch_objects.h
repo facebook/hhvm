@@ -556,7 +556,7 @@ class mstch_service : public mstch_base {
   mstch::node has_sinks() {
     auto& funcs = get_functions();
     return std::any_of(funcs.cbegin(), funcs.cend(), [](const auto& func) {
-      return func->returns_sink();
+      return func->sink() != nullptr;
     });
   }
 
@@ -630,6 +630,7 @@ class mstch_function : public mstch_base {
 
             // Sink methods:
             {"function:returns_sink?", &mstch_function::returns_sink},
+            {"function:sink_elem_type", &mstch_function::sink_elem_type},
             {"function:sink_exceptions?", &mstch_function::has_sink_exceptions},
             {"function:sink_exceptions", &mstch_function::sink_exceptions},
             {"function:sink_final_response_exceptions?",
@@ -704,7 +705,8 @@ class mstch_function : public mstch_base {
         !function_->returned_interaction();
   }
 
-  mstch::node returns_sink() { return function_->returns_sink(); }
+  mstch::node returns_sink() { return function_->sink() != nullptr; }
+  mstch::node sink_elem_type();
   mstch::node has_sink_exceptions() {
     return function_->get_sink_xceptions()->has_fields();
   }
@@ -774,7 +776,6 @@ class mstch_type : public mstch_base {
             {"type:enum", &mstch_type::get_enum},
             {"type:list_elem_type", &mstch_type::get_list_type},
             {"type:set_elem_type", &mstch_type::get_set_type},
-            {"type:sink_elem_type", &mstch_type::get_sink_elem_type},
             {"type:sink_final_response_type",
              &mstch_type::get_sink_final_reponse_type},
             {"type:sink_first_response_type",
@@ -847,7 +848,6 @@ class mstch_type : public mstch_base {
   mstch::node get_typedef_type();
   mstch::node get_typedef();
   mstch::node get_sink_first_response_type();
-  mstch::node get_sink_elem_type();
   mstch::node get_sink_final_reponse_type();
   mstch::node get_stream_first_response_type();
   mstch::node is_interaction() { return type_->is_service(); }

@@ -20,8 +20,6 @@
 #include <string>
 #include <utility>
 
-#include <boost/optional.hpp>
-
 #include <thrift/compiler/ast/t_throws.h>
 #include <thrift/compiler/ast/t_type.h>
 
@@ -37,11 +35,11 @@ namespace compiler {
  */
 class t_sink : public t_type {
  public:
-  explicit t_sink(t_type_ref sink_type, t_type_ref final_response_type)
-      : sink_type_(std::move(sink_type)),
+  explicit t_sink(t_type_ref elem_type, t_type_ref final_response_type)
+      : elem_type_(std::move(elem_type)),
         final_response_type_(std::move(final_response_type)) {}
 
-  const t_type_ref& sink_type() const { return sink_type_; }
+  const t_type_ref& elem_type() const { return elem_type_; }
   const t_type_ref& final_response_type() const { return final_response_type_; }
 
   // Returns nullptr when throws clause is absent.
@@ -71,7 +69,7 @@ class t_sink : public t_type {
   const t_type_ref& first_response_type() const { return first_response_type_; }
 
   std::string get_full_name() const override {
-    std::string result = "sink<" + sink_type_->get_full_name() + ", " +
+    std::string result = "sink<" + elem_type_->get_full_name() + ", " +
         final_response_type_->get_full_name() + ">";
     if (!first_response_type_.empty()) {
       result += ", " + first_response_type_->get_full_name();
@@ -80,7 +78,7 @@ class t_sink : public t_type {
   }
 
  private:
-  t_type_ref sink_type_;
+  t_type_ref elem_type_;
   std::unique_ptr<t_throws> sink_exceptions_;
   t_type_ref final_response_type_;
   std::unique_ptr<t_throws> final_response_exceptions_;
@@ -91,12 +89,12 @@ class t_sink : public t_type {
   // backwards compatibility.
 
   explicit t_sink(
-      const t_type* sink_type,
+      const t_type* elem_type,
       std::unique_ptr<t_throws> sink_exceptions,
       const t_type* final_response_type,
       std::unique_ptr<t_throws> final_response_exceptions)
       : t_sink(
-            t_type_ref::from_req_ptr(sink_type),
+            t_type_ref::from_req_ptr(elem_type),
             t_type_ref::from_req_ptr(final_response_type)) {
     set_sink_exceptions(std::move(sink_exceptions));
     set_final_response_exceptions(std::move(final_response_exceptions));
@@ -111,7 +109,7 @@ class t_sink : public t_type {
     return final_response_exceptions_.get();
   }
   t_throws* get_sink_xceptions() const { return sink_exceptions_.get(); }
-  const t_type* get_sink_type() const { return sink_type().get_type(); }
+  const t_type* get_elem_type() const { return elem_type().get_type(); }
   const t_type* get_first_response_type() const {
     return first_response_type_.get_type();
   }

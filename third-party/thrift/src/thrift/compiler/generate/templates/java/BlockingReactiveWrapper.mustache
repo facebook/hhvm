@@ -90,7 +90,7 @@ public class {{service:javaCapitalName}}BlockingReactiveWrapper {{#service:exten
     {{/service:streamingFunctions}}
     {{#service:sinkFunctions}}
     @java.lang.Override
-    public {{#function:return_type}}{{> SinkReturnType}}{{/function:return_type}} {{function:javaName}}({{#function:args}}final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}}, {{/function:args}} org.reactivestreams.Publisher<{{#function:return_type}}{{#type:sink_elem_type}}{{ >BoxedType}}{{/type:sink_elem_type}}{{/function:return_type}}> payloads) {
+    public {{#function:return_type}}{{> SinkReturnType}}{{/function:return_type}} {{function:javaName}}({{#function:args}}final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}}, {{/function:args}} org.reactivestreams.Publisher<{{#function:return_type}}{{#function:sink_elem_type}}{{ >BoxedType}}{{/function:sink_elem_type}}{{/function:return_type}}> payloads) {
         throw new UnsupportedOperationException();
     }
 

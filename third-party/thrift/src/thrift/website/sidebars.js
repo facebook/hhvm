@@ -254,7 +254,8 @@ module.exports = {
             id: "fb/languages/java/index",
           },
           items: [
-            'fb/languages/java/hyperthrift'
+            'fb/languages/java/generatedfiles',
+            'fb/languages/java/hyperthrift',
           ]
         },
         {

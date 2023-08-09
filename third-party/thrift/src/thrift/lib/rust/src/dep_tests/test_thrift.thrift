@@ -23,7 +23,7 @@ struct Small {
 
 struct SubStruct {
   // @lint-ignore THRIFTCHECKS
-  1: optional string optDef = "IAMOPT";
+  1: optional string optDef = "IAMUSELESSOPTWITHDEF";
   2: required string req_def = "IAMREQ";
   // @lint-ignore THRIFTCHECKS
   3: optional map<Small, i32> key_map;

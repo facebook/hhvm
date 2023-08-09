@@ -20,22 +20,25 @@
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::{{struct:rust_name}} {
     fn default() -> Self {
-        {{^program:deprecated_optional_with_default_is_some?}}{{!
-            }}{{#struct:fields}}{{!
-                }}{{#field:default}}{{!
-                    }}{{#field:optional?}}{{!
-                        }}::std::compile_error!("Found thrift optional with default: `{{struct:rust_name}}::{{field:rust_name}}`. Please set `deprecated_optional_with_default_is_some` flag to keep the legacy behavior. The new default value will be `None` to conform to the thrift standard"); {{!
-                    }}{{/field:optional?}}{{!
-                }}{{/field:default}}{{!
-            }}{{/struct:fields}}{{!
-        }}{{/program:deprecated_optional_with_default_is_some?}}{{!
-        }}Self {{>lib/block}}{{!
+        Self {{>lib/block}}{{!
         }}{{#struct:fields}}
             {{field:rust_name}}: {{!
                 }}{{#field:default}}{{!
-                    }}{{#field:has_adapter?}}{{>lib/adapter/qualified}}::from_thrift_default::<{{struct:rust_name}}>({{/field:has_adapter?}}{{!
-                    }}{{>lib/fieldvalue}}{{!
-                    }}{{#field:has_adapter?}}, {{field:key}}){{/field:has_adapter?}}{{!
+                    }}{{#field:optional?}}{{!
+                        }}{{#program:deprecated_optional_with_default_is_some?}}{{!
+                            }}{{#field:has_adapter?}}{{>lib/adapter/qualified}}::from_thrift_default::<{{struct:rust_name}}>({{/field:has_adapter?}}{{!
+                            }}{{>lib/fieldvalue}}{{!
+                            }}{{#field:has_adapter?}}, {{field:key}}){{/field:has_adapter?}}{{!
+                        }}{{/program:deprecated_optional_with_default_is_some?}}{{!
+                        }}{{^program:deprecated_optional_with_default_is_some?}}{{!
+                            }}::std::option::Option::None{{!
+                        }}{{/program:deprecated_optional_with_default_is_some?}}{{!
+                    }}{{/field:optional?}}{{!
+                    }}{{^field:optional?}}{{!
+                        }}{{#field:has_adapter?}}{{>lib/adapter/qualified}}::from_thrift_default::<{{struct:rust_name}}>({{/field:has_adapter?}}{{!
+                        }}{{>lib/fieldvalue}}{{!
+                        }}{{#field:has_adapter?}}, {{field:key}}){{/field:has_adapter?}}{{!
+                    }}{{/field:optional?}}{{!
                 }}{{/field:default}}{{!
                 }}{{^field:default}}{{!
                     }}{{#field:optional?}}{{!

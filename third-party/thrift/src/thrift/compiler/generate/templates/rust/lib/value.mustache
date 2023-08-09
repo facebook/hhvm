@@ -115,8 +115,27 @@
                     }}{{/struct:has_adapter?}}{{!
                 }}{{/type:struct}}{{/value:type}}{{!
             }}>({{/field:has_adapter?}}{{!
-            }}{{#field:value}}{{>lib/fieldvalue}}{{/field:value}}{{!
-            }}{{^field:value}}::std::default::Default::default(){{/field:value}}{{!
+            }}{{#field:explicit_value}}{{!
+                }}{{>lib/fieldvalue}}{{!
+            }}{{/field:explicit_value}}{{!
+            }}{{^field:explicit_value}}{{!
+                }}{{#field:default}}{{!
+                    }}{{#field:optional?}}{{!
+                        }}{{#program:deprecated_optional_with_default_is_some?}}{{!
+                            }}{{>lib/fieldvalue}}{{!
+                        }}{{/program:deprecated_optional_with_default_is_some?}}{{!
+                        }}{{^program:deprecated_optional_with_default_is_some?}}{{!
+                            }}::std::option::Option::None{{!
+                        }}{{/program:deprecated_optional_with_default_is_some?}}{{!
+                    }}{{/field:optional?}}{{!
+                    }}{{^field:optional?}}{{!
+                        }}{{>lib/fieldvalue}}{{!
+                    }}{{/field:optional?}}{{!
+                }}{{/field:default}}{{!
+                }}{{^field:default}}{{!
+                    }}::std::default::Default::default(){{!
+                }}{{/field:default}}{{!
+            }}{{/field:explicit_value}}{{!
             }}{{#field:has_adapter?}}, {{field:key}}){{/field:has_adapter?}}{{!
             }},{{!
         }}{{/value:structFields}}{{!

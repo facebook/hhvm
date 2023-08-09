@@ -309,7 +309,7 @@ impl ::std::default::Default for self::Vehicle {
             licensePlate: ::std::option::Option::None,
             description: ::std::option::Option::None,
             name: ::std::option::Option::None,
-            hasAC: ::std::option::Option::Some(false),
+            hasAC: ::std::option::Option::None,
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         }
     }

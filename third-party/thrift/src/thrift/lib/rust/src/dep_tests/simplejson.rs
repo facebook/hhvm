@@ -43,9 +43,9 @@ fn test_large_roundtrip() -> Result<()> {
     m.insert("m2".to_string(), 2);
 
     let sub = SubStruct {
+        optDef: Some("IAMOPT".to_owned()),
         ..Default::default()
     };
-
     let u = Un::un1(UnOne {
         one: 1,
         ..Default::default()
@@ -83,9 +83,6 @@ fn test_large_roundtrip() -> Result<()> {
     // serialize it and assert that it serializes correctly
     let s = String::from_utf8(serialize(&r).to_vec()).unwrap();
 
-    // Note that default optionals are there
-    // but non-default optionals are not there
-    // That is an artifact on how the serialize trait works
     let expected_string = r#"{
         "foo":"foo",
         "m":{"m1":1,"m2":2},
@@ -276,14 +273,7 @@ fn test_need_commas_containers() -> Result<()> {
 fn test_null_stuff_deser() -> Result<()> {
     // See the `nullStuffDeser` test in cpp_compat_test
 
-    // Note that the deserialization behavior with `deprecated_optional_with_default_is_some`
-    // is not consistent with `Default::default`. If optional-with-default is
-    // not present in the stream (or if it is null), then it is `None` in the
-    // resulting struct. This behavior is the same as in C++ and as in Rust
-    // without the deprecated flag, but not as in `default` or in constants.
-
     let sub = SubStruct {
-        optDef: None,
         bin: "1234".as_bytes().to_vec(),
         ..Default::default()
     };
@@ -308,15 +298,43 @@ fn test_null_stuff_deser() -> Result<()> {
 }
 
 #[test]
+fn test_deprecated_null_stuff_deser() -> Result<()> {
+    // No C++ equivalent here. This is incompatible legacy behavior available as opt-in.
+
+    // Note that the deserialization behavior with `deprecated_optional_with_default_is_some`
+    // is not consistent with `Default::default`. If optional-with-default is
+    // not present in the stream (or if it is null), then it is `None` in the
+    // resulting struct. This behavior is the same as in C++ and as in Rust
+    // without the deprecated flag, but not as in `default` or in constants.
+
+    let sub = test_deprecated_optional_with_default_is_some_if::Struct {
+        optDef: None,
+        ..Default::default()
+    };
+
+    let inputs = &["{}", r#"{"optDef": null}"#];
+    for input in inputs {
+        // Make sure everything is skipped properly
+        let res = deserialize(*input);
+        assert_eq!(
+            Some(&sub),
+            res.as_ref().ok(),
+            "INPUT={} RESULT={:?}",
+            input,
+            res
+        );
+    }
+
+    Ok(())
+}
+
+#[test]
 fn infinite_spaces() -> Result<()> {
     let mut m = BTreeMap::new();
     m.insert("m1".to_string(), 1);
     m.insert("m2".to_string(), 2);
 
-    let sub = SubStruct {
-        ..Default::default()
-    };
-
+    let sub = SubStruct::default();
     let u = Un::un1(UnOne {
         one: 1,
         ..Default::default()
@@ -354,7 +372,7 @@ fn infinite_spaces() -> Result<()> {
          "foo"  :  "foo" ,
           "m" : { "m1" :  1   , "m2" : 2 }  ,
         "bar":" test ",
-        "s":{"optDef":  "IAMOPT"  ,"req_def":  "IAMREQ","bin": ""  },
+        "s":{  "req_def":  "IAMREQ","bin": ""  },
         "l":[{"num":1,"two":2},{"num"  :2 ," two" : 3 } ],
         "u":{"un1":{"one":  1  } },
         "e":  2  ,

@@ -14,23 +14,13 @@
  * limitations under the License.
  */
 
-#[test]
-fn test_defaults() {
-    // NOTE: Keep in sync with `defaults` test in cpp_compat_test
+namespace cpp2 facebook
 
-    let sub = fbthrift_test_if::SubStruct::default();
-
-    assert!(sub.optDef.is_none());
-    assert_eq!(sub.req_def, "IAMREQ");
-    assert!(sub.key_map.is_none());
-    assert!(sub.bin.is_empty());
+struct Struct {
+  // @lint-ignore THRIFTCHECKS
+  1: optional string optDef = "IAMOPTWITHDEF";
 }
 
-#[test]
-fn test_deprecated_defaults() {
-    // No C++ equivalent here. This is incompatible legacy behavior available as opt-in.
+const Struct DEFAULT_STRUCT = {};
 
-    let sub = test_deprecated_optional_with_default_is_some_if::Struct::default();
-
-    assert_eq!(sub.optDef.as_deref(), Some("IAMOPTWITHDEF"));
-}
+const Struct CUSTOM_STRUCT = {"optDef": "CUSTOM_OPT_DEF"};

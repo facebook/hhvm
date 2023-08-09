@@ -45,3 +45,23 @@ fn test_consts() {
         *fbthrift_test_if::CUSTOM_SUBSTRUCT
     );
 }
+
+#[test]
+fn test_deprecated_consts() {
+    // No C++ equivalent here. This is incompatible legacy behavior available as opt-in.
+
+    // even in the legacy mode, constants and defaults work consistently
+    assert_eq!(
+        test_deprecated_optional_with_default_is_some_if::Struct::default(),
+        *test_deprecated_optional_with_default_is_some_if::DEFAULT_STRUCT
+    );
+
+    // even in the legacy mode, constants that overrides optionals-with-defaults work fine
+    assert_eq!(
+        test_deprecated_optional_with_default_is_some_if::Struct {
+            optDef: Some("CUSTOM_OPT_DEF".to_owned()),
+            ..Default::default()
+        },
+        *test_deprecated_optional_with_default_is_some_if::CUSTOM_STRUCT
+    );
+}

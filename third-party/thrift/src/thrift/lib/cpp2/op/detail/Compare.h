@@ -67,11 +67,17 @@ inline constexpr bool is_gteq(folly::ordering cmp) noexcept {
 
 // The 'equal to' operator.
 //
-// Delegates to std::equal_to, by default.
+// Delegates to operator==, by default.
 template <typename LTag = void, typename RTag = LTag, typename = void>
-struct EqualTo : std::equal_to<type::native_type<LTag>> {
+struct EqualTo {
   static_assert(type::is_concrete_v<LTag>, "");
   static_assert(type::is_concrete_v<RTag>, "");
+
+  bool operator()(
+      const type::native_type<LTag>& lhs,
+      const type::native_type<RTag>& rhs) const {
+    return lhs == rhs;
+  }
 };
 template <>
 struct EqualTo<type::void_t> {

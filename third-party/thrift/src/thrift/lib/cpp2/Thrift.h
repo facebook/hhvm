@@ -31,6 +31,8 @@
 #include <memory>
 #include <type_traits>
 
+static_assert(FOLLY_CPLUSPLUS >= 201703L, "__cplusplus >= 201703L");
+
 namespace apache {
 namespace thrift {
 

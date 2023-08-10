@@ -90,6 +90,9 @@ struct PackageInfo {
   bool moduleInDeployment(const StringData* module,
                           const Deployment& deployment,
                           DeployKind deployKind) const;
+  bool moduleInDeployment(const std::string& module,
+                          const Deployment& deployment,
+                          DeployKind deployKind) const;
 
   bool moduleInASoftPackage(const StringData* module) const;
 
@@ -109,9 +112,9 @@ private:
   std::string findPackageInRange(const std::string& moduleName,
                                  size_t start, size_t end) const;
 
-  std::string getPackageForModule(const StringData* module) const;
+  std::string getPackageForModule(const std::string& module) const;
 
-  bool moduleInPackages(const StringData* module,
+  bool moduleInPackages(const std::string& module,
                         const PackageSet& packageSet) const;
 
 public:

@@ -97,6 +97,15 @@ struct Module {
    * Are module warnings enabled for this func?
    */
   static bool warningsEnabled(const Func* f);
+
+  /*
+   * Name of the default module.
+   */
+  static constexpr const char* DEFAULT = "default";
+
+  static bool isDefault(const StringData* name) {
+    return name && name->slice() == DEFAULT;
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

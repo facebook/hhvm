@@ -11,6 +11,7 @@ use std::sync::Arc;
 
 use aast_parser::rust_aast_parser_types::Env;
 use aast_parser::Error as AastError;
+use naming_special_names_rust::modules as special_modules;
 use once_cell::sync::OnceCell;
 use oxidized::ast;
 use oxidized::ast::Def;
@@ -116,8 +117,15 @@ fn parse_stmts(src: &str, internal_offset: usize, span: Span) -> Result<Vec<ast:
 
     // Expect a single Def::Class.
     if program.0.len() != 1 {
-        panic!("Expected a single Def");
-    }
+        match program.0.first() {
+            Some(Def::SetModule(module)) if module.1 == special_modules::DEFAULT => {
+                // if the program did not specify a module, the default module would
+                // have been automatically inserted here and can be safely ignored
+                ()
+            }
+            _ => panic!("Expected a single Def"),
+        }
+    };
     let def = program.0.pop().unwrap();
     let cls = match def {
         Def::Class(cls) => cls,

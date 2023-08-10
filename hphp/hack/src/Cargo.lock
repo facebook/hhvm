@@ -2176,6 +2176,7 @@ version = "0.0.0"
 dependencies = [
  "aast_parser",
  "macro_test_util",
+ "naming_special_names_rust",
  "once_cell",
  "oxidized",
  "parser_core_types",
@@ -4406,6 +4407,7 @@ dependencies = [
  "error",
  "hack_macros",
  "hhbc",
+ "naming_special_names_rust",
  "oxidized",
  "relative_path",
  "rewrite_xml",

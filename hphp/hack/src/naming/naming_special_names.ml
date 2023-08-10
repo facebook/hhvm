@@ -1264,6 +1264,10 @@ module Readonly = struct
   let as_mut = prefix ^ "as_mut"
 end
 
+module Modules = struct
+  let default = "default"
+end
+
 module Capabilities = struct
   let defaults = Coeffects.contexts ^ "\\defaults"
 

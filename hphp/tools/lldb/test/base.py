@@ -5,7 +5,9 @@ import pathlib
 import sys
 import subprocess
 import typing
+import unittest
 from libfb.py.testutil import BaseFacebookTestCase
+from __manifest__ import fbmake as build_info
 
 # For lldb, until there's a buck-visible library we can use.
 # Its path on TW containers starts at /host-mounts.
@@ -26,6 +28,7 @@ hhvm_types_path = pathlib.Path(__file__).parent.parent / "hhvm_types_for_lldb_te
 hhvm_test_path = os.environ["HHVM_TEST_DIR"]
 scripts_path = os.environ["HHVM_LLDB_SCRIPTS"]
 
+@unittest.skipIf(build_info["build_mode"].startswith("opt"), "Need non-opt build for debugging")
 class LLDBTestBase(BaseFacebookTestCase):
     def setUp(self):
         """ Set up a debugger for each test case instance """

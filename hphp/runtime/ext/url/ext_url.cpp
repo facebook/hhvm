@@ -199,7 +199,7 @@ static void url_encode_array(StringBuffer &ret, const Variant& varr,
   }
 }
 
-const StaticString s_arg_separator_output("arg_separator.output");
+const StaticString s_arg_separator_output("&");
 
 Variant HHVM_FUNCTION(http_build_query, const Variant& formdata,
                            const Variant& numeric_prefix /* = null_string */,
@@ -212,7 +212,7 @@ Variant HHVM_FUNCTION(http_build_query, const Variant& formdata,
 
   String arg_sep;
   if (arg_separator.empty()) {
-    arg_sep = HHVM_FN(ini_get)(s_arg_separator_output).toString();
+    arg_sep = s_arg_separator_output;
   } else {
     arg_sep = arg_separator;
   }

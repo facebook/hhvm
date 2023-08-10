@@ -7,16 +7,7 @@ dict(3) {
   ["access"]=>
   int(4)
 }
-dict(3) {
-  ["global_value"]=>
-  string(1) "&"
-  ["local_value"]=>
-  string(1) "&"
-  ["access"]=>
-  int(7)
-}
 string(1) "1"
-string(1) "&"
 dict(3) {
   ["hhvm.pcre.jit"]=>
   dict(3) {
@@ -61,4 +52,4 @@ dict(2) {
   bool(false)
 }
 
-Warning: Unable to find extension 'THIS_EXTENSION_SHOULD_NOT_EXIST' in %s/test/slow/ext_options/ini_get_all.php on line 28
+Warning: Unable to find extension 'THIS_EXTENSION_SHOULD_NOT_EXIST' in %s/test/slow/ext_options/ini_get_all.php on line %d

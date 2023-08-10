@@ -63,9 +63,8 @@ function get_meta_tags(string $filename,
  *                                 and this parameter is provided, it will be
  *                                 prepended to the numeric index for elements
  *                                 in the base array only.
- * @param string $arg_separator  - arg_separator.output is used to separate
- *                                 arguments, unless this parameter is
- *                                 specified, and is then used.
+ * @param string $arg_separator  - & is used to separate arguments, unless this
+ *                                 parameter is specified, and is then used.
  * @param int $nec_type          - By default, PHP_QUERY_RFC1738. If enc_type is
                                    PHP_QUERY_RFC1738, then encoding is performed
                                    per RFC 1738 and the

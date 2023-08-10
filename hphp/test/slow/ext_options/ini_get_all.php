@@ -6,11 +6,9 @@ function main_ini_get_all() :mixed{
 $all_detailed = ini_get_all();
 var_dump($all_detailed['hphp.compiler_version']['access']);
 var_dump($all_detailed['allow_url_fopen']);
-var_dump($all_detailed['arg_separator.output']);
 
 $all_short = ini_get_all('', false);
 var_dump($all_short['allow_url_fopen']);
-var_dump($all_short['arg_separator.output']);
 
 $pcre = ini_get_all('pcre');
 ksort(inout $pcre);

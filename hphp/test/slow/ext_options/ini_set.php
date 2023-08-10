@@ -4,9 +4,6 @@
 // PHP_INI_ALL
 <<__EntryPoint>>
 function main_ini_set() :mixed{
-var_dump(ini_set('arg_separator.output', 'foo'));
-var_dump(ini_get('arg_separator.output'));
-
 // PHP_INI_NONE
 var_dump(ini_set('hphp.compiler_id', 'foo'));
 var_dump(ini_get('hphp.compiler_id'));

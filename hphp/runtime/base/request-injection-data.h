@@ -384,8 +384,6 @@ private:
   /* Things corresponding to user settable INI settings. */
 
   std::string m_maxMemory;
-  std::string m_argSeparatorOutput;
-  std::string m_argSeparatorInput;
   std::string m_defaultCharset;
   std::string m_defaultMimeType;
   std::string m_brotliEnabled;

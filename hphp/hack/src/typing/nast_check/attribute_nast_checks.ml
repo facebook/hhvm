@@ -146,7 +146,7 @@ let handler =
         List.find_opt (fun p -> p.param_is_variadic) f.f_params
       in
       (* Ban arguments on functions with the __EntryPoint attribute. *)
-      if has_attribute "__EntryPoint" f.f_user_attributes then begin
+      if has_attribute SN.UserAttributes.uaEntryPoint f.f_user_attributes then begin
         (match f.f_params with
         | [] -> ()
         | param :: _ ->
@@ -198,7 +198,9 @@ let handler =
 
     method! at_fun_def _env fd =
       (* Ban arguments on functions with the __EntryPoint attribute. *)
-      if has_attribute "__EntryPoint" fd.fd_fun.f_user_attributes then begin
+      if
+        has_attribute SN.UserAttributes.uaEntryPoint fd.fd_fun.f_user_attributes
+      then begin
         match fd.fd_tparams with
         | [] -> ()
         | tparam :: _ ->

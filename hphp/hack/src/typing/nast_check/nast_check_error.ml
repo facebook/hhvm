@@ -7,6 +7,7 @@
  *)
 open Hh_prelude
 module Error_code = Error_codes.NastCheck
+module SN = Naming_special_names
 
 type verb =
   | Vreq_implement
@@ -444,13 +445,19 @@ let illegal_function_name pos name =
 let entrypoint_arguments pos =
   User_error.make
     Error_code.(to_enum EntryPointArguments)
-    (pos, "`__EntryPoint` functions cannot take arguments.")
+    ( pos,
+      sprintf
+        "`%s` functions cannot take arguments."
+        SN.UserAttributes.uaEntryPoint )
     []
 
 let entrypoint_generics pos =
   User_error.make
     Error_code.(to_enum EntryPointGenerics)
-    (pos, "`__EntryPoint` functions cannot have generic parameters.")
+    ( pos,
+      sprintf
+        "`%s` functions cannot have generic parameters."
+        SN.UserAttributes.uaEntryPoint )
     []
 
 let variadic_memoize pos =

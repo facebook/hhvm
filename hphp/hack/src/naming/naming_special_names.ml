@@ -424,7 +424,9 @@ module UserAttributes = struct
               autocomplete = true;
               doc =
                 "Execution of the program will start here."
-                ^ " This only applies in the first file executed, `__EntryPoint` in required or autoloaded files has no effect.";
+                ^ Printf.sprintf
+                    " This only applies in the first file executed, `%s` in required or autoloaded files has no effect."
+                    uaEntryPoint;
             } );
           ( uaMemoize,
             {

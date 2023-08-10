@@ -34,7 +34,6 @@ package "facebook.com/thrift/type"
 namespace cpp2 apache.thrift.type
 namespace py3 apache.thrift.type
 namespace php apache_thrift_type_rep
-namespace java com.facebook.thrift.type
 namespace java.swift com.facebook.thrift.type_swift
 namespace js apache.thrift.type
 namespace py.asyncio apache_thrift_asyncio.type_rep

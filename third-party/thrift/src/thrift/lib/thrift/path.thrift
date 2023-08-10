@@ -15,6 +15,7 @@
  */
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/python.thrift"
 include "thrift/annotation/thrift.thrift"
 include "thrift/lib/thrift/id.thrift"
 
@@ -24,7 +25,6 @@ package "facebook.com/thrift/protocol"
 namespace cpp2 apache.thrift.protocol
 namespace py3 apache.thrift.protocol
 namespace php apache_thrift_protocol
-namespace java com.facebook.thrift.protocol
 namespace java.swift com.facebook.thrift.protocol_swift
 namespace py.asyncio apache_thrift_asyncio.protocol
 namespace go thrift.lib.thrift.protocol
@@ -35,6 +35,7 @@ namespace py thrift.lib.thrift.protocol
 }
 typedef id.ExternId PathSegmentId
 
+@python.Hidden
 struct Path {
   1: list<PathSegmentId> path;
-} (py3.hidden)
+}

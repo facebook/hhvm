@@ -30,7 +30,6 @@ package "facebook.com/thrift/protocol/detail"
 namespace cpp2 apache.thrift.protocol.detail
 namespace py3 apache.thrift.protocol.detail
 namespace php apache_thrift_protocol.detail
-namespace java com.facebook.thrift.protocol.detail
 namespace java.swift com.facebook.thrift.protocol_detail_swift
 namespace py.asyncio apache_thrift_asyncio.protocol_detail
 namespace go thrift.lib.thrift.protocol_detail

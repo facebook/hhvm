@@ -73,6 +73,19 @@ class MethodMetadata {
           thriftServiceUriOrName(std::move(uriOrName)),
           interactionPosition(position),
           interactionName(std::move(interaction)) {}
+
+    FOLLY_COLD
+    Data(
+        const char* name,
+        FunctionQualifier qualifier,
+        const char* uriOrName = "",
+        InteractionMethodPosition position = InteractionMethodPosition::None,
+        const char* interaction = "") noexcept
+        : methodName(name),
+          functionQualifier(qualifier),
+          thriftServiceUriOrName(uriOrName),
+          interactionPosition(position),
+          interactionName(interaction) {}
     std::string methodName;
     FunctionQualifier functionQualifier;
     std::string thriftServiceUriOrName;

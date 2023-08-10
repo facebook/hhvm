@@ -245,11 +245,13 @@ class Sink : public MetadataTypeInterface {
 ThriftConstValue cvBool(bool value);
 ThriftConstValue cvInteger(int64_t value);
 ThriftConstValue cvDouble(double value);
-ThriftConstValue cvString(std::string&& value);
+ThriftConstValue cvString(const char* value);
+
 ThriftConstValue cvMap(std::vector<ThriftConstValuePair>&& value);
 ThriftConstValue cvList(std::vector<ThriftConstValue>&& value);
 ThriftConstValue cvStruct(
-    std::string&& name, std::map<std::string, ThriftConstValue>&& fields);
+    const char* name, std::map<std::string, ThriftConstValue>&& fields);
+
 ThriftConstValuePair cvPair(ThriftConstValue&& key, ThriftConstValue&& value);
 
 } // namespace md

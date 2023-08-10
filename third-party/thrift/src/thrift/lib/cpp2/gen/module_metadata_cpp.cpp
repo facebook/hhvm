@@ -39,9 +39,9 @@ ThriftConstValue cvDouble(double value) {
   return ret;
 }
 
-ThriftConstValue cvString(std::string&& value) {
+ThriftConstValue cvString(const char* value) {
   ThriftConstValue ret;
-  ret.cv_string_ref() = std::move(value);
+  ret.cv_string_ref() = value;
   return ret;
 }
 
@@ -58,10 +58,10 @@ ThriftConstValue cvList(std::vector<ThriftConstValue>&& value) {
 }
 
 ThriftConstValue cvStruct(
-    std::string&& name, std::map<std::string, ThriftConstValue>&& fields) {
+    const char* name, std::map<std::string, ThriftConstValue>&& fields) {
   ThriftConstValue ret;
   ThriftConstStruct s;
-  s.type_ref()->name_ref() = std::move(name);
+  s.type_ref()->name_ref() = name;
   s.fields_ref() = std::move(fields);
   ret.cv_struct_ref() = std::move(s);
   return ret;

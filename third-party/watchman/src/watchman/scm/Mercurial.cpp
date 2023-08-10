@@ -247,7 +247,9 @@ time_point<system_clock> Mercurial::convertCommitDate(const char* commitDate) {
     throw std::runtime_error(fmt::format(
         "failed to parse date value `{}` into a double", commitDate));
   }
-  return system_clock::from_time_t(date);
+  // TODO: maybe do some bounds checking on the double we get from
+  // hg.
+  return system_clock::from_time_t(static_cast<time_t>(date));
 }
 
 std::vector<w_string> Mercurial::getCommitsPriorToAndIncluding(

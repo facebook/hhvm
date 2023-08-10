@@ -177,7 +177,9 @@ std::chrono::time_point<std::chrono::system_clock> Git::getCommitDate(
     throw std::runtime_error(fmt::format(
         "failed to parse date value `{}` into a double", result.output));
   }
-  return system_clock::from_time_t(timestamp);
+  // TODO: maybe do some bounds checking on the double we get from
+  // git.
+  return system_clock::from_time_t(static_cast<time_t>(timestamp));
 }
 
 std::vector<w_string> Git::getCommitsPriorToAndIncluding(

@@ -37,6 +37,14 @@ consistently_bucketize(const std::vector<SString>& items, size_t bucketSize) {
   assertx(bucketSize > 0);
   auto const numBuckets = (items.size() + bucketSize - 1) / bucketSize;
 
+  // If bucketSize is 1, we don't need to consistently hash to
+  // achieve consistency.
+  if (bucketSize == 1) {
+    return from(items)
+      | map([] (SString s) { return singleton_vec(s); })
+      | as<std::vector>();
+  }
+
   // Consistently hash the strings into their buckets indices.
   auto const indices = parallel::map(
     items,

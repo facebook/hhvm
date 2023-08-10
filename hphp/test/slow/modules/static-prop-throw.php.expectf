@@ -1,9 +1,9 @@
 int(4)
-Accessing internal static property Foo::$y in module foo from outside of a module is not allowed @ %s:11
-Accessing internal static property Foo::$y in module foo from outside of a module is not allowed @ %s:17
-Accessing internal static property Foo::$y in module foo from outside of a module is not allowed @ %s:22
-Accessing internal static property Foo::$y in module foo from outside of a module is not allowed @ %s:28
-Accessing internal static property Foo::$sv in module foo from outside of a module is not allowed @ %s:34
-Accessing internal static property Foo::$sv in module foo from outside of a module is not allowed @ %s:39
-Accessing internal static property Foo::$sv in module foo from outside of a module is not allowed @ %s:45
-Accessing internal static property Foo::$sv in module foo from outside of a module is not allowed @ %s:50
+Accessing internal static property Foo::$y in module foo from the default module is not allowed @ %s:11
+Accessing internal static property Foo::$y in module foo from the default module is not allowed @ %s:17
+Accessing internal static property Foo::$y in module foo from the default module is not allowed @ %s:22
+Accessing internal static property Foo::$y in module foo from the default module is not allowed @ %s:28
+Accessing internal static property Foo::$sv in module foo from the default module is not allowed @ %s:34
+Accessing internal static property Foo::$sv in module foo from the default module is not allowed @ %s:39
+Accessing internal static property Foo::$sv in module foo from the default module is not allowed @ %s:45
+Accessing internal static property Foo::$sv in module foo from the default module is not allowed @ %s:50

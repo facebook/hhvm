@@ -443,7 +443,7 @@ void moduleBoundaryViolationImpl(
     symbol,
     symbolModule,
     Module::isDefault(fromModule)
-      ? "outside of a module"
+      ? "the default module"
       : folly::sformat("module {}", fromModule)
   );
   if (!soft) SystemLib::throwModuleBoundaryViolationExceptionObject(errMsg);

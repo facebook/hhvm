@@ -2843,22 +2843,12 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
   if (!warmupOnly) {
     try {
       ServerStatsHelper ssh("invoke");
-      if (!RuntimeOption::AutoPrependFile.empty() &&
-          RuntimeOption::AutoPrependFile.compare("none") ) {
-        require(RuntimeOption::AutoPrependFile, false,
-                context->getCwd().data(), true);
-      }
       if (func) {
         auto const ret = invoke(cmd, funcParams, allowDynCallNoPointer);
         if (funcRet) *funcRet = ret;
       } else {
         if (isServer) hphp_chdir_file(cmd);
         include_impl_invoke(cmd.c_str(), once, "", true);
-      }
-      if (!RuntimeOption::AutoAppendFile.empty() &&
-          RuntimeOption::AutoAppendFile.compare("none")) {
-        require(RuntimeOption::AutoAppendFile, false,
-                context->getCwd().data(), true);
       }
     } catch (...) {
       handle_invoke_exception(ret, context, errorMsg, error, richErrorMsg);

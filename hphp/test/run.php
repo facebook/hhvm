@@ -405,7 +405,6 @@ function get_options(
     '*jit-serialize:' => '',
     '*hhvm-binary-path:' => 'b:',
     '*working-dir:' => 'w:',
-    '*vendor:' => '',
     'record-failures:' => '',
     '*ignore-oids' => '',
     'jitsample:' => '',
@@ -805,17 +804,6 @@ function mode_cmd(Options $options): vec<string> {
   }
 }
 
-function extra_args(Options $options): string {
-  $args = $options->args ?? '';
-
-  if ($options->vendor is nonnull) {
-    $args .= ' -d auto_prepend_file=';
-    $args .= escapeshellarg($options->vendor.'/hh_autoload.php');
-  }
-
-  return $args;
-}
-
 function extra_compiler_args(Options $options): string {
   return $options->compiler_args ?? '';
 }
@@ -859,7 +847,7 @@ function hhvm_cmd_impl(
 
       '-vDebug.CoreDumpReportDirectory='.Status::getWorkingDir(),
 
-      extra_args($options),
+      $options->args ?? '',
     ];
 
     if ($autoload_db_prefix is nonnull) {
@@ -1096,7 +1084,7 @@ function hhvm_cmd(
 function hphp_cmd(Options $options, string $test): string {
   // Transform extra_args like "-vName=Value" into "-vRuntime.Name=Value".
   $extra_args =
-    preg_replace("/(^-v|\s+-v)\s*/", "$1Runtime.", extra_args($options));
+    preg_replace("/(^-v|\s+-v)\s*/", "$1Runtime.", $options->args ?? '');
 
   $compiler_args = extra_compiler_args($options);
 

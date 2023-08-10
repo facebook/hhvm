@@ -602,8 +602,6 @@ struct RuntimeOption {
 
   static std::string RequestInitFunction;
   static std::string RequestInitDocument;
-  static std::string AutoPrependFile;
-  static std::string AutoAppendFile;
 
   static bool SafeFileAccess;
   static std::vector<std::string> AllowedDirectories;

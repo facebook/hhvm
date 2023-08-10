@@ -890,8 +890,6 @@ bool RuntimeOption::Utf8izeReplace = true;
 
 std::string RuntimeOption::RequestInitFunction;
 std::string RuntimeOption::RequestInitDocument;
-std::string RuntimeOption::AutoPrependFile;
-std::string RuntimeOption::AutoAppendFile;
 
 bool RuntimeOption::SafeFileAccess = false;
 std::vector<std::string> RuntimeOption::AllowedDirectories;
@@ -2871,10 +2869,6 @@ void RuntimeOption::Load(
   // Language and Misc Configuration Options
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ONLY, "expose_php",
                    &RuntimeOption::ExposeHPHP);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
-                   "auto_prepend_file", &RuntimeOption::AutoPrependFile);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
-                   "auto_append_file", &RuntimeOption::AutoAppendFile);
 
   // Data Handling
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,

@@ -298,12 +298,6 @@ struct RequestInjectionData {
   int64_t getMemoryLimitNumeric() const;
   void setMemoryLimit(folly::StringPiece);
 
-  const std::string& getVariablesOrder() const;
-  void setVariablesOrder(const std::string&);
-
-  const std::string& getRequestOrder() const;
-  void setRequestOrder(const std::string&);
-
   int64_t getSocketDefaultTimeout() const;
 
   const std::string& getUserAgent() const;
@@ -392,8 +386,6 @@ private:
   std::string m_maxMemory;
   std::string m_argSeparatorOutput;
   std::string m_argSeparatorInput;
-  std::string m_variablesOrder;
-  std::string m_requestOrder;
   std::string m_defaultCharset;
   std::string m_defaultMimeType;
   std::string m_brotliEnabled;

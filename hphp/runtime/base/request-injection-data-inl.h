@@ -184,22 +184,6 @@ inline int64_t RequestInjectionData::getMemoryLimitNumeric() const {
   return m_maxMemoryNumeric;
 }
 
-inline const std::string& RequestInjectionData::getVariablesOrder() const {
-  return m_variablesOrder;
-}
-
-inline void RequestInjectionData::setVariablesOrder(const std::string& order) {
-  m_variablesOrder = order;
-}
-
-inline const std::string& RequestInjectionData::getRequestOrder() const {
-  return m_requestOrder;
-}
-
-inline void RequestInjectionData::setRequestOrder(const std::string& order) {
-  m_requestOrder = order;
-}
-
 inline int64_t RequestInjectionData::getSocketDefaultTimeout() const {
   return m_socketDefaultTimeout;
 }

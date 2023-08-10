@@ -4158,8 +4158,7 @@ function runner_precheck(): void {
   $server = HH\global_get('_SERVER');
   $env = HH\global_get('_ENV');
   if (!((bool)$server ?? false) || !((bool)$env ?? false)) {
-    echo "Warning: \$_SERVER/\$_ENV variables not available, please check \n" .
-         "your ini setting: variables_order, it should have both 'E' and 'S'\n";
+    error("\$_SERVER/\$_ENV variables not available");
   }
 }
 

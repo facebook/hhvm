@@ -686,10 +686,8 @@ init_command_line_globals(
   const std::map<std::string, std::string>& serverVariables,
   const std::map<std::string, std::string>& envVariables
 ) {
-  auto& variablesOrder = RID().getVariablesOrder();
-
-  if (variablesOrder.find('e') != std::string::npos ||
-      variablesOrder.find('E') != std::string::npos) {
+  // Env
+  {
     auto envArr = Array::CreateDict();
     process_env_variables(envArr, envp, envVariables);
     envArr.set(s_HPHP, 1);
@@ -710,8 +708,8 @@ init_command_line_globals(
 
   process_cmd_arguments(argc, argv);
 
-  if (variablesOrder.find('s') != std::string::npos ||
-      variablesOrder.find('S') != std::string::npos) {
+  // Server
+  {
     auto serverArr = Array::CreateDict();
     process_env_variables(serverArr, envp, envVariables);
     time_t now;

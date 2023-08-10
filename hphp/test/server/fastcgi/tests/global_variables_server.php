@@ -9,12 +9,6 @@ $requests = varray[
     darray['CONTENT_TYPE' => 'multipart/form-data; boundary=dumy']],
   varray['-dalways_populate_raw_post_data=1', darray[]],
   varray['', darray[]],
-  varray['-dvariables_order=NONE -drequest_order=', darray[]],
-  varray['-dvariables_order=E -drequest_order=GPC', darray[]],
-  varray['-dvariables_order=CGP -drequest_order=GP', darray[]],
-  varray['-dvariables_order=GC -drequest_order=CG', darray[]],
-  varray['-dvariables_order=GC -drequest_order=GC', darray[]],
-  varray['-dvariables_order=GC -drequest_order=P', darray[]],
 ];
 
 foreach($requests as $request) {

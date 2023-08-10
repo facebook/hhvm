@@ -254,89 +254,39 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
     }
   };
 
-  auto variablesOrder = RequestInfo::s_requestInfo.getNoCheck()
-    ->m_reqInjectionData.getVariablesOrder();
+  // Env
+  PrepareEnv(ENVarr, transport);
 
-  auto requestOrder = RequestInfo::s_requestInfo.getNoCheck()
-    ->m_reqInjectionData.getRequestOrder();
-
-  if (requestOrder.empty()) {
-    requestOrder = variablesOrder;
+  // Get
+  if (!r.queryString().empty()) {
+    PrepareGetVariable(GETarr, r);
   }
 
-  bool postPopulated = false;
+  // Post
+  PreparePostVariables(POSTarr, HTTP_RAW_POST_DATA,
+                        FILESarr, transport, r);
 
-  for (char& c : variablesOrder) {
-    switch(c) {
-      case 'e':
-      case 'E':
-        PrepareEnv(ENVarr, transport);
-        break;
-      case 'g':
-      case 'G':
-        if (!r.queryString().empty()) {
-          PrepareGetVariable(GETarr, r);
-        }
-        break;
-      case 'p':
-      case 'P':
-        postPopulated = true;
-        PreparePostVariables(POSTarr, HTTP_RAW_POST_DATA,
-                             FILESarr, transport, r);
-        break;
-      case 'c':
-      case 'C':
-        PrepareCookieVariable(COOKIEarr, transport);
-        break;
-      case 's':
-      case 'S':
-        StartRequest(SERVERarr);
-        PrepareServerVariable(SERVERarr,
-            transport,
-            r,
-            sri,
-            vhost);
-        break;
-    }
-  }
+  // Cookie
+  PrepareCookieVariable(COOKIEarr, transport);
 
-  if (!postPopulated && shouldSetHttpRawPostData) {
-    // Always try to populate $HTTP_RAW_POST_DATA if not populated
-    auto dummyPost = empty_dict_array();
-    auto dummyFiles = empty_dict_array();
-    PreparePostVariables(dummyPost, HTTP_RAW_POST_DATA,
-                         dummyFiles, transport, r);
-  }
+  // Server
+  StartRequest(SERVERarr);
+  PrepareServerVariable(SERVERarr, transport, r, sri, vhost);
 
+  // Request
   PrepareRequestVariables(REQUESTarr,
                           GETarr,
                           POSTarr,
-                          COOKIEarr,
-                          requestOrder);
+                          COOKIEarr);
 }
 
 void HttpProtocol::PrepareRequestVariables(Array& request,
                                            const Array& get,
                                            const Array& post,
-                                           const Array& cookie,
-                                           const std::string& requestOrder) {
-  for (const char& c : requestOrder) {
-    switch(c) {
-      case 'g':
-      case 'G':
-        CopyParams(request, get);
-        break;
-      case 'p':
-      case 'P':
-        CopyParams(request, post);
-        break;
-      case 'c':
-      case 'C':
-        CopyParams(request, cookie);
-        break;
-    }
-  }
-
+                                           const Array& cookie) {
+  CopyParams(request, get);
+  CopyParams(request, post);
+  CopyParams(request, cookie);
 }
 
 void HttpProtocol::PrepareGetVariable(Array& get,

@@ -213,12 +213,6 @@ void RequestInjectionData::threadInit() {
                    "arg_separator.input", "&",
                    &m_argSeparatorInput);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
-                   "variables_order", "EGPCS",
-                   &m_variablesOrder);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
-                   "request_order", "",
-                   &m_requestOrder);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "default_charset", RuntimeOption::DefaultCharsetName.c_str(),
                    &m_defaultCharset);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,

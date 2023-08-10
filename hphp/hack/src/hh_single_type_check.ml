@@ -2118,9 +2118,7 @@ let handle_mode
             | (_env, Retry) -> failwith "didn't expect retry"
           in
           Printf.printf "%s\n" name;
-          ClientFindRefsPrint.print_closed_interval
-            (List.rev results)
-            ~json:false)
+          FindRefsWireFormat.CliHumanReadable.print_results (List.rev results))
   | Go_to_impl (line, column) ->
     let filename = expect_single_file () in
     let naming_table = Naming_table.create files_info in
@@ -2156,7 +2154,7 @@ let handle_mode
           | (_env, Retry) -> failwith "didn't expect retry"
         in
         Printf.printf "%s\n" name;
-        ClientFindRefsPrint.print_closed_interval (List.rev results) ~json:false
+        FindRefsWireFormat.CliHumanReadable.print_results (List.rev results)
     end
   | Highlight_refs (line, column) ->
     let path = expect_single_file () in

@@ -90,6 +90,15 @@ let search_member
     ~(include_defs : bool)
     (genv : genv)
     (env : env) : env * (string * Pos.t) list t =
+  let dep_member_of member =
+    let open Typing_deps.Dep.Member in
+    match member with
+    | Method n -> [method_ n; smethod n]
+    | Property n -> [prop n; sprop n]
+    | Class_const n -> [const n]
+    | Typeconst n -> [const n]
+  in
+
   let class_name = add_ns class_name in
   let origin_class_name =
     FindRefsService.get_origin_class_name ctx class_name member

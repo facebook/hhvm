@@ -6,11 +6,9 @@
    \
    clientLogCommand
    clientGetDefinition
-   clientHighlightRefs
-   clientFindRefsPrint))
+   clientHighlightRefs))
  (libraries
   connection_tracker
-  client_find_refs_print
   client_get_definition
   client_highlight_refs
   client_ide_service
@@ -60,13 +58,5 @@
  (wrapped false)
  (modules clientHighlightRefs)
  (libraries pos nuclide_rpc_message_printer server sys_utils)
- (preprocess
-  (pps lwt_ppx ppx_deriving.std)))
-
-(library
- (name client_find_refs_print)
- (wrapped false)
- (modules clientFindRefsPrint)
- (libraries nuclide_rpc_message_printer pos server_find_refs sys_utils)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))

@@ -208,15 +208,17 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     Done_or_retry.(
       ServerGoToImpl.go ~action:go_to_impl_action ~genv ~env
       |> map_env ~f:ServerFindRefs.to_absolute)
-  | IDE_FIND_REFS_BY_SYMBOL (find_refs_action, _name) ->
+  | IDE_FIND_REFS_BY_SYMBOL
+      { FindRefsWireFormat.CliArgs.symbol_name = _; action } ->
     let ctx = Provider_utils.ctx_from_server_env env in
     Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
         let open Done_or_retry in
         let include_defs = false in
         map_env
           ~f:ServerFindRefs.to_absolute
-          (ServerFindRefs.go ctx find_refs_action include_defs genv env))
-  | IDE_GO_TO_IMPL_BY_SYMBOL (action, _name) ->
+          (ServerFindRefs.go ctx action include_defs genv env))
+  | IDE_GO_TO_IMPL_BY_SYMBOL
+      { FindRefsWireFormat.CliArgs.symbol_name = _; action } ->
     let ctx = Provider_utils.ctx_from_server_env env in
     Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
         let open Done_or_retry in

@@ -190,14 +190,6 @@ let make_result_telemetry
     (count : int) : result_telemetry =
   { result_count = count; result_extra_data; log_immediately }
 
-(* --ide-find-refs returns a list of positions, this is a mapping of the response *)
-type ide_shell_out_pos = {
-  filename: string;
-  line: int;
-  char_start: int;
-  char_end: int;
-}
-
 (* --ide-rename-by-symbol returns a list of patches *)
 type ide_refactor_patch = {
   filename: string;
@@ -857,8 +849,9 @@ let rename_params_to_document_position (params : Lsp.Rename.params) :
       position = params.position;
     }
 
-let ide_shell_out_pos_to_lsp_location (pos : ide_shell_out_pos) : Lsp.Location.t
-    =
+let ide_shell_out_pos_to_lsp_location
+    (pos : FindRefsWireFormat.half_open_one_based) : Lsp.Location.t =
+  let open FindRefsWireFormat in
   Lsp.Location.
     {
       uri = path_to_lsp_uri pos.filename ~default_path:pos.filename;
@@ -1051,31 +1044,8 @@ let get_document_location
 If the output is malformed, raises an exception. *)
 let shellout_locations_to_lsp_locations_exn (stdout : string) :
     Lsp.Location.t list =
-  let json = Yojson.Safe.from_string stdout in
-  match json with
-  | `List positions ->
-    let lsp_locations =
-      List.map positions ~f:(fun pos ->
-          let open Yojson.Basic.Util in
-          let pos_json = Yojson.Safe.to_basic pos in
-          let filename = pos_json |> member "filename" |> to_string in
-          let line = pos_json |> member "line" |> to_int in
-          let char_start = pos_json |> member "char_start" |> to_int in
-          let char_end = pos_json |> member "char_end" |> to_int in
-          let pos = { filename; line; char_start; char_end } in
-          ide_shell_out_pos_to_lsp_location pos)
-    in
-    lsp_locations
-  | `Int _
-  | `Tuple _
-  | `Bool _
-  | `Intlit _
-  | `Null
-  | `Variant _
-  | `Assoc _
-  | `Float _
-  | `String _ ->
-    failwith ("Expected list, got json like " ^ stdout)
+  FindRefsWireFormat.IdeShellout.from_string_exn stdout
+  |> List.map ~f:ide_shell_out_pos_to_lsp_location
 
 (** Parses output of "hh --ide-rename-by-symbol".
 If the output is malformed, raises an exception. *)
@@ -1114,7 +1084,7 @@ let shellout_patch_list_to_lsp_edits_exn (stdout : string) : Lsp.WorkspaceEdit.t
     let patch_to_workspace_edit_change patch =
       let ide_shell_out_pos =
         {
-          filename = patch.filename;
+          FindRefsWireFormat.filename = patch.filename;
           char_start = patch.char_start;
           char_end = patch.char_end + 1;
           (* This end is inclusive for range replacement *)
@@ -1638,7 +1608,6 @@ let kickoff_shell_out_and_maybe_cancel
   in
   match state with
   | Lost_server ({ Lost_env.current_hh_shell; _ } as lenv) ->
-    let open ServerCommandTypes in
     (* Cancel any existing shell-out, if there is one. *)
     Option.iter
       current_hh_shell
@@ -1690,7 +1659,11 @@ let kickoff_shell_out_and_maybe_cancel
         match shellable_type with
         | FindRefs { symbol; find_refs_action; _ } ->
           let symbol_action_arg =
-            Find_refs.symbol_and_action_to_string_exn symbol find_refs_action
+            FindRefsWireFormat.CliArgs.to_string
+              {
+                FindRefsWireFormat.CliArgs.symbol_name = symbol;
+                action = find_refs_action;
+              }
           in
           let cmd =
             compose_shellout_cmd
@@ -1701,7 +1674,11 @@ let kickoff_shell_out_and_maybe_cancel
           cmd
         | GoToImpl { symbol; find_refs_action; _ } ->
           let symbol_action_arg =
-            Find_refs.symbol_and_action_to_string_exn symbol find_refs_action
+            FindRefsWireFormat.CliArgs.to_string
+              {
+                FindRefsWireFormat.CliArgs.symbol_name = symbol;
+                action = find_refs_action;
+              }
           in
           let cmd =
             compose_shellout_cmd

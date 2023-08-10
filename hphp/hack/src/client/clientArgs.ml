@@ -418,11 +418,19 @@ let parse_check_args cmd ~from_default =
         Arg.String (fun x -> set_mode (MODE_GO_TO_IMPL_METHOD x)),
         " (mode) goes to implementation of the provided method name" );
       ( "--ide-find-refs-by-symbol",
-        Arg.String (fun x -> set_mode (MODE_IDE_FIND_REFS_BY_SYMBOL x)),
+        Arg.String
+          (fun x ->
+            set_mode
+              (MODE_IDE_FIND_REFS_BY_SYMBOL
+                 (FindRefsWireFormat.CliArgs.from_string_exn x))),
         "(mode) similar to IDE_FIND_REFS, but takes a symbol name rather than position"
       );
       ( "--ide-go-to-impl-by-symbol",
-        Arg.String (fun x -> set_mode (MODE_IDE_GO_TO_IMPL_BY_SYMBOL x)),
+        Arg.String
+          (fun x ->
+            set_mode
+              (MODE_IDE_GO_TO_IMPL_BY_SYMBOL
+                 (FindRefsWireFormat.CliArgs.from_string_exn x))),
         "(mode) similar to IDE_GO_TO_IMPL, but takes a symbol name rather than position"
       );
       ( "--ide-get-definition",

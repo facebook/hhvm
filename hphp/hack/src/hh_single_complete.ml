@@ -603,10 +603,7 @@ let handle_findrefs_glean sienv ~dry_run filename =
      and then examine [hh --client-logname] to find the invocation of [hh --ide-find-refs-by-symbol-name <EXAMPLE>].
   *)
   let queries =
-    Sys_utils.cat (Relative_path.to_absolute filename)
-    |> extract_nonblank_lines
-    |> List.map ~f:(fun query ->
-           ServerCommandTypes.Find_refs.string_to_symbol_and_action_exn query)
+    Sys_utils.cat (Relative_path.to_absolute filename) |> extract_nonblank_lines
   in
   let reponame = sienv.SearchUtils.glean_reponame in
   let handle =
@@ -619,11 +616,11 @@ let handle_findrefs_glean sienv ~dry_run filename =
       let () = Folly.ensure_folly_init () in
       Some (Glean.initialize ~reponame ~prev_init_time:None |> Option.value_exn)
   in
-  List.iter queries ~f:(fun (name, action) ->
-      let query_text_for_show =
-        ServerCommandTypes.Find_refs.symbol_and_action_to_string_exn name action
+  List.iter queries ~f:(fun query ->
+      let { FindRefsWireFormat.CliArgs.symbol_name = _; action } =
+        FindRefsWireFormat.CliArgs.from_string_exn query
       in
-      Printf.printf "//// %s\n" query_text_for_show;
+      Printf.printf "//// %s\n" query;
       let angle = Glean_autocomplete_query.make_refs_query ~action in
       Printf.printf "query:\n%s\n\n%!" angle;
       if not dry_run then begin
@@ -635,7 +632,7 @@ let handle_findrefs_glean sienv ~dry_run filename =
             Printf.printf "%s\n" (Relative_path.show path));
         Printf.printf
           "\n--> %s - %d results, %0.3fs\n\n%!"
-          query_text_for_show
+          query
           (List.length results)
           (Unix.gettimeofday () -. start_time)
       end);

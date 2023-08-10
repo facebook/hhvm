@@ -143,87 +143,6 @@ module Find_refs = struct
   type server_result_or_retry = server_result Done_or_retry.t
 
   type result_or_retry = result Done_or_retry.t
-
-  let dep_member_of member : Typing_deps.Dep.Member.t list =
-    let open Typing_deps.Dep.Member in
-    match member with
-    | Method n -> [method_ n; smethod n]
-    | Property n -> [prop n; sprop n]
-    | Class_const n -> [const n]
-    | Typeconst n -> [const n]
-
-  let member_to_string member =
-    match member with
-    | Method s -> "Method " ^ s
-    | Property s -> "Property " ^ s
-    | Class_const s -> "Class_consts " ^ s
-    | Typeconst s -> "Typeconst " ^ s
-
-  (**
-   * Output strings in the form of
-   * SYMBOL_NAME|COMMA_SEPARATED_ACTION_STRING
-   * For example,
-   * HackTypecheckerQueryBase::getWWWDir|Member,\HackTypecheckerQueryBase,Method,getWWWDir
-   * Must be manually kept in sync with string_to_symbol_and_action_exn.
-  *)
-  let symbol_and_action_to_string_exn symbol_name action =
-    let action_serialized =
-      match action with
-      | Class str -> Printf.sprintf "Class,%s" str
-      | ExplicitClass str -> Printf.sprintf "ExplicitClass,%s" str
-      | Function str -> Printf.sprintf "Function,%s" str
-      | GConst str -> Printf.sprintf "GConst,%s" str
-      | Member (str, Method s) ->
-        Printf.sprintf "Member,%s,%s,%s" str "Method" s
-      | Member (str, Property s) ->
-        Printf.sprintf "Member,%s,%s,%s" str "Property" s
-      | Member (str, Class_const s) ->
-        Printf.sprintf "Member,%s,%s,%s" str "Class_const" s
-      | Member (str, Typeconst s) ->
-        Printf.sprintf "Member,%s,%s,%s" str "Typeconst" s
-      | LocalVar _ ->
-        Printf.eprintf "Invalid action\n";
-        raise Exit_status.(Exit_with Input_error)
-    in
-    Printf.sprintf "%s|%s" symbol_name action_serialized
-
-  (**
-   * Expects input strings in the form of
-   * SYMBOL_NAME|COMMA_SEPARATED_ACTION_STRING
-   * For example,
-   * HackTypecheckerQueryBase::getWWWDir|Member,\HackTypecheckerQueryBase,Method,getWWWDir
-   * The implementation explicitly is tied to whatever is generated from symbol_and_action_to_string_exn
-   * and should be kept in sync manually by anybody editing.
-  *)
-  let string_to_symbol_and_action_exn arg =
-    let pair = Str.split (Str.regexp "|") arg in
-    let (symbol_name, action_arg) =
-      match pair with
-      | [symbol_name; action_arg] -> (symbol_name, action_arg)
-      | _ ->
-        Printf.eprintf "Invalid input\n";
-        raise Exit_status.(Exit_with Input_error)
-    in
-    let action =
-      (* Explicitly ignoring localvar support *)
-      match Str.split (Str.regexp ",") action_arg with
-      | ["Class"; str] -> Class str
-      | ["ExplicitClass"; str] -> ExplicitClass str
-      | ["Function"; str] -> Function str
-      | ["GConst"; str] -> GConst str
-      | ["Member"; str; "Method"; member_name] ->
-        Member (str, Method member_name)
-      | ["Member"; str; "Property"; member_name] ->
-        Member (str, Property member_name)
-      | ["Member"; str; "Class_const"; member_name] ->
-        Member (str, Class_const member_name)
-      | ["Member"; str; "Typeconst"; member_name] ->
-        Member (str, Typeconst member_name)
-      | _ ->
-        Printf.eprintf "Invalid input for action, got %s\n" action_arg;
-        raise Exit_status.(Exit_with Input_error)
-    in
-    (symbol_name, action)
 end
 
 module Rename = struct
@@ -243,7 +162,8 @@ module Rename = struct
       (action : Find_refs.action)
       (symbol_def : Relative_path.t SymbolDefinition.t) : string =
     let symbol_and_action =
-      Find_refs.symbol_and_action_to_string_exn new_name action
+      FindRefsWireFormat.CliArgs.to_string
+        { FindRefsWireFormat.CliArgs.symbol_name = new_name; action }
     in
     let marshalled_def = Marshal.to_string symbol_def [] in
     let encoded = Base64.encode_exn marshalled_def in
@@ -266,7 +186,9 @@ module Rename = struct
         raise Exit_status.(Exit_with Input_error)
     in
     let str = Printf.sprintf "%s|%s" symbol_name action_arg in
-    let (new_name, action) = Find_refs.string_to_symbol_and_action_exn str in
+    let { FindRefsWireFormat.CliArgs.symbol_name = new_name; action } =
+      FindRefsWireFormat.CliArgs.from_string_exn str
+    in
     let decoded_str = Base64.decode_exn marshalled_def in
     let symbol_definition : Relative_path.t SymbolDefinition.t =
       Marshal.from_string decoded_str 0
@@ -457,10 +379,10 @@ type _ t =
   | FIND_REFS : Find_refs.action -> Find_refs.result_or_retry t
   | GO_TO_IMPL : Find_refs.action -> Find_refs.result_or_retry t
   | IDE_FIND_REFS_BY_SYMBOL :
-      Find_refs.action * string
+      FindRefsWireFormat.CliArgs.t
       -> Find_refs.result_or_retry t
   | IDE_GO_TO_IMPL_BY_SYMBOL :
-      Find_refs.action * string
+      FindRefsWireFormat.CliArgs.t
       -> Find_refs.result_or_retry t
   | RENAME : ServerRenameTypes.action -> Rename.result_or_retry t
   | IDE_RENAME_BY_SYMBOL :

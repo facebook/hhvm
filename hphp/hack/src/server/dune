@@ -248,6 +248,7 @@
  (modules
   autocompleteTypes
   docblockService
+  findRefsWireFormat
   hoverService
   inferAtPosService
   inferErrorAtPosService

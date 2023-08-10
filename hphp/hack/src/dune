@@ -14,7 +14,6 @@
   camlp-streams
   ifc
   ifc_lib
-  client_find_refs_print
   client_get_definition
   client_highlight_refs
   code_actions_cli_lib

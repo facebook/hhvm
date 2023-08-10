@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{#type:streamresponse?}}{{!
+}}{{#function:stream?}}{{!
     }}{{#type:stream_has_first_response?}}com.facebook.thrift.model.StreamResponse<{{!
     }}{{#type:stream_first_response_type}}{{ >BoxedType}}{{/type:stream_first_response_type}},{{!
     }}{{#function:stream_elem_type}}{{ >BoxedType}}{{/function:stream_elem_type}}>{{!
@@ -22,4 +22,4 @@
     }}{{^type:stream_has_first_response?}}{{!
     }}{{#function:stream_elem_type}}com.facebook.thrift.model.StreamResponse<Void, {{ >BoxedType}}>{{/function:stream_elem_type}}{{!
     }}{{/type:stream_has_first_response?}}{{!
-}}{{/type:streamresponse?}}
+}}{{/function:stream?}}

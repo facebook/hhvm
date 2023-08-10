@@ -48,8 +48,4 @@ thrift-python specific container types.
 }}{{#type:enum}}{{!
   }}{{#type:need_module_path?}}{{type:module_path}}.{{/type:need_module_path?}}{{!
   }}{{enum:name}}{{!
-}}{{/type:enum}}{{!
-}}{{#type:streamresponse?}}{{#type:stream_has_first_response?}}{{#type:stream_first_response_type}}{{!
-  }}{{> types/pep484_type}}, {{/type:stream_first_response_type}}{{/type:stream_has_first_response?}}{{!
-  }}_typing.AsyncGenerator[{{#function:stream_elem_type}}{{> types/pep484_type}}{{/function:stream_elem_type}}, None]{{!
-}}{{/type:streamresponse?}}
+}}{{/type:enum}}

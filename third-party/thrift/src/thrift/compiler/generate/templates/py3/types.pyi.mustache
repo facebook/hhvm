@@ -177,7 +177,7 @@ class ClientBufferedStream__{{type:flat_name}}(thrift.py3.stream.ClientBufferedS
 class ServerStream__{{type:flat_name}}(thrift.py3.stream.ServerStream[{{ > types/pep484_type}}]):
     pass
 
-class ServerPublisher_{{> types/cython_cpp_type_ident}}(thrift.py3.stream.ServerPublisher):
+class ServerPublisher_{{> types/cython_cpp_return_type_ident}}(thrift.py3.stream.ServerPublisher):
     def complete(self) -> None: ...
     def send(self, item: {{> types/cython_python_type}}) -> None: ...
 

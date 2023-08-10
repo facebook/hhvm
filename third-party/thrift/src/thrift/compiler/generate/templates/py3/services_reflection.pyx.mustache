@@ -66,10 +66,10 @@ cdef __InterfaceSpec get_reflection__{{service:name}}(bint for_clients):
             ),
             result={{#function:return_type}}{{!
                 }}{{#type:void?}}None{{/type:void?}}{{!
-                }}{{#type:streamresponse?}}{{!
+                }}{{#function:stream?}}{{!
                     }}{{> clients/stream_response_class_name}} if for_clients else {{!
                     }}{{> services/stream_response_class_name}}{{!
-                }}{{/type:streamresponse?}}{{!
+                }}{{/function:stream?}}{{!
                 }}{{^type:void?}}{{> types/python_type}}{{/type:void?}}{{!
                 }}{{/function:return_type}},
             result_kind={{#function:return_type}}{{> types/thrift_number_type}}{{/function:return_type}},

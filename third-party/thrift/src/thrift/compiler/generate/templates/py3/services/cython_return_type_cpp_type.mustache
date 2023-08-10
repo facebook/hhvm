@@ -16,15 +16,15 @@
 
 }}{{!
 Cython type for return_type in services
-}}{{#type:streamresponse?}}{{!
+}}{{#function:stream?}}{{!
   }}{{#type:stream_has_first_response?}}cResponseAndServerStream[{{!
   }}{{#type:stream_first_response_type}}{{ >types/cython_cpp_type}}{{/type:stream_first_response_type}},{{!
   }}{{/type:stream_has_first_response?}}{{!
   }}{{^type:stream_has_first_response?}}cServerStream[{{!
   }}{{/type:stream_has_first_response?}}{{!
   }}{{#function:stream_elem_type}}{{ >types/cython_cpp_type}}{{/function:stream_elem_type}}]{{!
-}}{{/type:streamresponse?}}{{!
-}}{{^type:streamresponse?}}{{!
+}}{{/function:stream?}}{{!
+}}{{^function:stream?}}{{!
 }}{{^function:stack_arguments?}}{{> services/cython_field_type}}{{/function:stack_arguments?}}{{!
 }}{{#function:stack_arguments?}}{{> types/cython_cpp_type}}{{/function:stack_arguments?}}{{!
-}}{{/type:streamresponse?}}
+}}{{/function:stream?}}

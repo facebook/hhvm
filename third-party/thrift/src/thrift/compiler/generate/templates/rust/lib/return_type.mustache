@@ -14,12 +14,20 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
+  ====
+  If we ever add a type here which may not have a Send or Sync impl, the
+  unsafe impls in structimpl.mustache need to be revisited.
+  ====
+}}{{>lib/type}}{{!
 }}{{#function:stream?}}{{!
-    }}{{#type:stream_has_first_response?}}com.facebook.thrift.model.StreamResponse<{{!
-    }}{{#type:stream_first_response_type}}{{ >BoxedType}}{{/type:stream_first_response_type}},{{!
-    }}{{#function:stream_elem_type}}{{ >BoxedType}}{{/function:stream_elem_type}}>{{!
+    }}{{#type:stream_has_first_response?}}{{!
+        }}({{#type:stream_first_response_type}}{{>lib/type}}{{/type:stream_first_response_type}}, {{!
     }}{{/type:stream_has_first_response?}}{{!
-    }}{{^type:stream_has_first_response?}}{{!
-    }}{{#function:stream_elem_type}}{{ >BoxedType}}{{/function:stream_elem_type}}{{!
+    }}::futures::stream::BoxStream<'static, ::std::result::Result<{{!
+        }}{{#function:stream_elem_type}}{{>lib/type}}{{/function:stream_elem_type}}, {{!
+        }}{{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}StreamError{{!
+    }}>>{{!
+    }}{{#type:stream_has_first_response?}}{{!
+        }}){{!
     }}{{/type:stream_has_first_response?}}{{!
 }}{{/function:stream?}}

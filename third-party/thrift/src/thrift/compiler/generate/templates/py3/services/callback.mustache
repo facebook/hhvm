@@ -90,13 +90,13 @@ async def {{service:name}}_{{function:name}}_coro(
     {{field:py_name}}{{/function:args}}
 ):
     try:
-        result = {{#function:return_type}}{{^type:streamresponse?}}await {{/type:streamresponse?}}{{/function:return_type}}self.{{function:name}}({{#function:args}}
+        result = {{#function:return_type}}{{^function:stream?}}await {{/function:stream?}}{{/function:return_type}}self.{{function:name}}({{#function:args}}
                     {{field:py_name}}{{^last?}},{{/last?}}{{/function:args}})
         {{#function:return_type}}
         {{#type:container?}}
         result = {{> types/cython_python_type}}(result)
         {{/type:container?}}
-        {{#type:streamresponse?}}
+        {{#function:stream?}}
         {{#type:stream_has_first_response?}}
         result = await result
         item, result = result
@@ -107,7 +107,7 @@ async def {{service:name}}_{{function:name}}_coro(
             {{#function:stream_elem_type}}
             result = ServerStream_{{> types/cython_cpp_type_ident}}._fbthrift_create(cmove(createAsyncIteratorFromPyIterator[{{ >types/cython_cpp_type}}](result, get_executor(), &getNextGenerator_{{service:name}}_{{function:name}})))
             {{/function:stream_elem_type}}
-        {{/type:streamresponse?}}
+        {{/function:stream?}}
         {{/function:return_type}}
     {{#function:exceptions}}
     {{#field:type}}

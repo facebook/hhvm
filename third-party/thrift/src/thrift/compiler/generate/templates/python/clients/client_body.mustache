@@ -77,8 +77,8 @@ class Async({{#service:extends}}{{!
         rpc_options: _typing.Optional[RpcOptions] = None,
     ) -> {{#function:return_type}}{{!
         }}{{#function:returns_tuple?}}_typing.Tuple[{{/function:returns_tuple?}}{{!
-        }}{{#function:creates_interaction?}}{{service:name}}_{{function:created_interaction}}.Async{{^type:void?}}, {{> types/pep484_type}}{{/type:void?}}{{/function:creates_interaction?}}{{!
-        }}{{^function:creates_interaction?}}{{> types/pep484_type}}{{/function:creates_interaction?}}{{!
+        }}{{#function:creates_interaction?}}{{service:name}}_{{function:created_interaction}}.Async{{^type:void?}}, {{> types/pep484_return_type}}{{/type:void?}}{{/function:creates_interaction?}}{{!
+        }}{{^function:creates_interaction?}}{{> types/pep484_return_type}}{{/function:creates_interaction?}}{{!
         }}{{#function:returns_tuple?}}]{{/function:returns_tuple?}}{{!
     }}{{/function:return_type}}:
         {{#function:creates_interaction?}}
@@ -112,7 +112,7 @@ class Async({{#service:extends}}{{!
         # shortcut to success path for non-void returns
         if _fbthrift_resp.success is not None:
             return {{#function:creates_interaction?}}_fbthrift_interaction, {{/function:creates_interaction?}}{{!
-          }}_fbthrift_resp.success{{#type:streamresponse?}}, _fbthrift_stream{{/type:streamresponse?}}
+          }}_fbthrift_resp.success{{#function:stream?}}, _fbthrift_stream{{/function:stream?}}
         {{/function:early_client_return?}}
         {{#function:exceptions}}
         if _fbthrift_resp.{{field:py_name}} is not None:
@@ -122,7 +122,7 @@ class Async({{#service:extends}}{{!
         {{^function:void?}}
         return {{#function:creates_interaction?}}_fbthrift_interaction{{/function:creates_interaction?}}{{!
           }}{{#function:returns_tuple?}}, {{/function:returns_tuple?}}{{!
-          }}{{#type:streamresponse?}}_fbthrift_stream{{/type:streamresponse?}}
+          }}{{#function:stream?}}_fbthrift_stream{{/function:stream?}}
         {{/function:void?}}
         {{/function:early_client_return?}}
         {{#type:with_regular_response?}}
@@ -173,7 +173,7 @@ class Sync({{#service:extends}}{{!
         {{field:py_name}}: {{#field:type}}{{> types/pep484_type}}{{/field:type}}{{/function:args}},
         *,
         rpc_options: _typing.Optional[RpcOptions] = None,
-    ) -> {{#function:return_type}}{{> types/pep484_type}}{{/function:return_type}}:
+    ) -> {{#function:return_type}}{{> types/pep484_return_type}}{{/function:return_type}}:
         _fbthrift_resp = self._send_request(
             "{{service:name}}",
             "{{function:name}}",

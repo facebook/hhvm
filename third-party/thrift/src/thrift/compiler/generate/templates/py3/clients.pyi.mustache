@@ -54,8 +54,8 @@ class {{service:name}}({{#service:extends}}{{#service:externalProgram?}}{{!
         {{field:py_name}}: {{#field:type}}{{> types/pep484_type}}{{/field:type}}{{/function:args}},
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> {{#function:return_type}}{{!
-        }}{{#type:streamresponse?}}{{> clients/stream_response_class_name}}{{/type:streamresponse?}}{{!
-        }}{{^type:streamresponse?}}{{> types/pep484_type}}{{/type:streamresponse?}}{{!
+        }}{{#function:stream?}}{{> clients/stream_response_class_name}}{{/function:stream?}}{{!
+        }}{{^function:stream?}}{{> types/pep484_type}}{{/function:stream?}}{{!
         }}{{/function:return_type}}: ...
 
 {{/service:supportedFunctions}}
@@ -83,8 +83,8 @@ class {{service:parent_service_name}}_{{service:name}}({{#service:extends}}{{#se
         {{field:py_name}}: {{#field:type}}{{> types/pep484_type}}{{/field:type}}{{/function:args}},
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> {{#function:return_type}}{{!
-        }}{{#type:streamresponse?}}{{> clients/stream_response_class_name}}{{/type:streamresponse?}}{{!
-        }}{{^type:streamresponse?}}{{> types/pep484_type}}{{/type:streamresponse?}}{{!
+        }}{{#function:stream?}}{{> clients/stream_response_class_name}}{{/function:stream?}}{{!
+        }}{{^function:stream?}}{{> types/pep484_type}}{{/function:stream?}}{{!
         }}{{/function:return_type}}: ...
 
 {{/service:supportedFunctions}}

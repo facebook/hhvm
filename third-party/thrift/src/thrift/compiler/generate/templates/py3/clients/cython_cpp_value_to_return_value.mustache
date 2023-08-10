@@ -41,12 +41,12 @@ to a python type.
 }}{{#type:struct}}{{> types/cython_python_type}}._fbthrift_create({{!
   }}make_shared[{{> types/cython_cpp_type}}]({{!
   }}cmove(result.value()))){{/type:struct}}{{!
-}}{{#type:streamresponse?}}{{!
-  }}{{> clients/stream_response_class_name}}._fbthrift_create(result.value(), options){{!
-}}{{/type:streamresponse?}}{{!
 }}{{#type:container?}}{{> types/cython_python_type}}._fbthrift_create({{!
   }}make_shared[{{> types/cython_cpp_type}}]({{!
   }}cmove(result.value()))){{/type:container?}}{{!
 }}{{#type:void?}}None{{/type:void?}}{{!
 }}{{#type:enum}}{{> types/cython_python_type}}(<int> result.value()){{/type:enum}}{{!
-}}{{/type:hasCustomTypeBehavior?}}
+}}{{/type:hasCustomTypeBehavior?}}{{!
+}}{{#function:stream?}}{{!
+  }}{{> clients/stream_response_class_name}}._fbthrift_create(result.value(), options){{!
+}}{{/function:stream?}}

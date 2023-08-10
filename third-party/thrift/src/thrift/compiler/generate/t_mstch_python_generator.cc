@@ -754,8 +754,6 @@ class python_mstch_function : public mstch_function {
              &python_mstch_function::early_client_return},
             {"function:regular_response_type",
              &python_mstch_function::regular_response_type},
-            {"function:return_stream_elem_type",
-             &python_mstch_function::return_stream_elem_type},
             {"function:async_only?", &python_mstch_function::async_only},
         });
   }
@@ -795,20 +793,6 @@ class python_mstch_function : public mstch_function {
                                              : &t_base_type::t_void();
     }
     return context_.type_factory->make_mstch_object(rettype, context_, pos_);
-  }
-
-  mstch::node return_stream_elem_type() {
-    if (function_->is_oneway()) {
-      return {};
-    }
-    const t_type* rettype = function_->return_type()->get_true_type();
-    if (!rettype->is_streamresponse()) {
-      return {};
-    }
-    return context_.type_factory->make_mstch_object(
-        dynamic_cast<const t_stream_response*>(rettype)->get_elem_type(),
-        context_,
-        pos_);
   }
 
   mstch::node async_only() {

@@ -14,10 +14,8 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{!
-
-Included from Promises.mustache and Callbacks.mustache. Defines the Promise
-class name for a return type.
-
-}}{{!
-}}Promise{{#function:stack_arguments?}}__sa{{/function:stack_arguments?}}_{{> types/cython_cpp_return_type_ident}}
+}}{{> types/pep484_type}}{{!
+}}{{#function:stream?}}{{#type:stream_has_first_response?}}{{#type:stream_first_response_type}}{{!
+  }}{{> types/pep484_type}}, {{/type:stream_first_response_type}}{{/type:stream_has_first_response?}}{{!
+  }}_typing.AsyncGenerator[{{#function:stream_elem_type}}{{> types/pep484_type}}{{/function:stream_elem_type}}, None]{{!
+}}{{/function:stream?}}

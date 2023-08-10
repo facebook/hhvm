@@ -50,21 +50,6 @@
 }}{{#type:list?}}{{!
     }}::std::vec::Vec<{{#type:list_elem_type}}{{>lib/type}}{{/type:list_elem_type}}>{{!
 }}{{/type:list?}}{{!
-}}{{#type:stream?}}{{!
-    }}compile_error!("Thrift streaming in Rust is not implemented"){{!
-}}{{/type:stream?}}{{!
-}}{{#type:streamresponse?}}{{!
-    }}{{#type:stream_has_first_response?}}{{!
-        }}({{#type:stream_first_response_type}}{{>lib/type}}{{/type:stream_first_response_type}}, {{!
-    }}{{/type:stream_has_first_response?}}{{!
-    }}::futures::stream::BoxStream<'static, ::std::result::Result<{{!
-        }}{{#function:stream_elem_type}}{{>lib/type}}{{/function:stream_elem_type}}, {{!
-        }}{{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}StreamError{{!
-    }}>>{{!
-    }}{{#type:stream_has_first_response?}}{{!
-        }}){{!
-    }}{{/type:stream_has_first_response?}}{{!
-}}{{/type:streamresponse?}}{{!
 }}{{#type:set?}}{{!
     }}{{#type:rust}}::{{type:rust}}{{/type:rust}}{{!
     }}{{^type:rust}}::std::collections::BTreeSet{{/type:rust}}{{!

@@ -142,7 +142,7 @@ cdef class ServerStream_{{> types/cython_cpp_type_ident}}(ServerStream):
 {{#program:services}}
 {{#service:supportedFunctions}}
 {{#function:return_type}}
-{{#type:streamresponse?}}
+{{#function:stream?}}
 {{#function:stream_elem_type}}
 async def runGenerator_{{service:name}}_{{function:name}}(object generator, Promise_{{> types/cython_cpp_type_ident}}_Stream promise):
     try:
@@ -186,7 +186,7 @@ cdef void getNextGenerator_{{service:name}}_{{function:name}}(object generator, 
         )
     )
 {{/function:stream_elem_type}}
-{{/type:streamresponse?}}
+{{/function:stream?}}
 {{/function:return_type}}
 {{/service:supportedFunctions}}
 {{/program:services}}
@@ -228,7 +228,7 @@ cdef class {{service:name}}Interface(
             {{field:py_name}}{{/function:args}}):
         raise NotImplementedError("async def {{function:name}} is not implemented")
     {{#function:return_type}}
-    {{#type:streamresponse?}}
+    {{#function:stream?}}
 
     @staticmethod
     def createPublisher_{{function:name}}(callback=None):
@@ -242,7 +242,7 @@ cdef class {{service:name}}Interface(
         return (ServerStream_{{> types/cython_cpp_type_ident}}._fbthrift_create(cmove(deref(streams).first)), {{!
         }}ServerPublisher_{{> types/cython_cpp_type_ident}}._fbthrift_create(cmove(deref(streams).second)))
         {{/function:stream_elem_type}}
-    {{/type:streamresponse?}}
+    {{/function:stream?}}
     {{/function:return_type}}
 {{/service:supportedFunctions}}
 

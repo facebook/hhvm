@@ -66,7 +66,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result(metaclass=_fbthrift_py
 
 class _fbthrift_{{service:name}}_{{function:name}}_result_stream(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
-        {{#function:return_stream_elem_type}}
+        {{#function:stream_elem_type}}
         (
             0,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
@@ -75,7 +75,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_stream(metaclass=_fbth
             None,  # default value
             {{> fields/adapter_info }},  # adapter info
         ),
-        {{/function:return_stream_elem_type}}
+        {{/function:stream_elem_type}}
         {{#function:stream_exceptions}}
         (
             {{field:key}},  # id

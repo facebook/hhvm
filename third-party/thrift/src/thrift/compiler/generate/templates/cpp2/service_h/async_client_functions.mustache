@@ -38,13 +38,13 @@
   <%^service:reduced_client?%><%^function:creates_interaction?%>virtual <%/function:creates_interaction?%><%/service:reduced_client?%>void sync_<%function:cpp_name%>(apache::thrift::RpcOptions& rpcOptions, <%type:cpp_type%>& _return<%function:comma%><% > service_common/function_param_list_client%>);
 <%/function:sync_returns_by_outparam?%>
 
-<%^service:reduced_client?%><%^function:creates_interaction?%><%^type:streamresponse?%>
+<%^service:reduced_client?%><%^function:creates_interaction?%><%^function:stream?%>
   virtual folly::Future<<% > types/return_type_client_lift_unit%>> future_<%function:cpp_name%>(<% > service_common/function_param_list_client%>);
-<%/type:streamresponse?%><%/function:creates_interaction?%><%/service:reduced_client?%>
+<%/function:stream?%><%/function:creates_interaction?%><%/service:reduced_client?%>
   <%^service:reduced_client?%><%^function:creates_interaction?%>virtual <%/function:creates_interaction?%><%/service:reduced_client?%>folly::SemiFuture<<% > types/return_type_client_lift_unit%>> semifuture_<%function:cpp_name%>(<% > service_common/function_param_list_client%>);
-<%^service:reduced_client?%><%^function:creates_interaction?%><%^type:streamresponse?%>
+<%^service:reduced_client?%><%^function:creates_interaction?%><%^function:stream?%>
   virtual folly::Future<<% > types/return_type_client_lift_unit%>> future_<%function:cpp_name%>(apache::thrift::RpcOptions& rpcOptions<%function:comma%><% > service_common/function_param_list_client%>);
-<%/type:streamresponse?%><%/function:creates_interaction?%><%/service:reduced_client?%>
+<%/function:stream?%><%/function:creates_interaction?%><%/service:reduced_client?%>
   <%^service:reduced_client?%><%^function:creates_interaction?%>virtual <%/function:creates_interaction?%><%/service:reduced_client?%>folly::SemiFuture<<% > types/return_type_client_lift_unit%>> semifuture_<%function:cpp_name%>(apache::thrift::RpcOptions& rpcOptions<%function:comma%><% > service_common/function_param_list_client%>);
 <%#function:creates_interaction?%>
   std::pair<
@@ -54,9 +54,9 @@
 <%/function:creates_interaction?%>
 <%^function:oneway?%>
 <%^service:reduced_client?%><%^function:creates_interaction?%>
-<%^type:streamresponse?%>
+<%^function:stream?%>
   virtual folly::Future<std::pair<<% > types/return_type_client_lift_unit%>, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_<%function:cpp_name%>(apache::thrift::RpcOptions& rpcOptions<%function:comma%><% > service_common/function_param_list_client%>);
-<%/type:streamresponse?%>
+<%/function:stream?%>
   virtual folly::SemiFuture<std::pair<<% > types/return_type_client_lift_unit%>, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_<%function:cpp_name%>(apache::thrift::RpcOptions& rpcOptions<%function:comma%><% > service_common/function_param_list_client%>);
 <%#type:sync_methods_return_try?%>
   FOLLY_NODISCARD [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<<% > types/return_type_client%>>> sync_complete_<%function:cpp_name%>(
@@ -171,9 +171,9 @@
 #endif // FOLLY_HAS_COROUTINES
 
 <%^service:reduced_client?%><%^function:creates_interaction?%>
-<%^type:streamresponse?%>
+<%^function:stream?%>
   virtual void <%function:cpp_name%>(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback<%#function:creates_interaction?%>, const apache::thrift::InteractionHandle& handle<%/function:creates_interaction?%><%function:comma%><% > service_common/function_param_list_client%>);
-<%/type:streamresponse?%>
+<%/function:stream?%>
 
 <%/function:creates_interaction?%><%/service:reduced_client?%>
 <%/function:sink?%><%#function:sink?%>

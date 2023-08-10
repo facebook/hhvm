@@ -224,7 +224,7 @@ pub mod r#impl {{>lib/block}}{{!
                     }}{{^last?}}, {{/last?}}{{!
                     }}{{/function:args}}{{!
                 }}) -> ::std::result::Result<
-                    {{#function:return_type}}{{>lib/type}}{{/function:return_type}},
+                    {{#function:return_type}}{{>lib/return_type}}{{/function:return_type}},
                     {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Error,
                 > + ::std::marker::Send + ::std::marker::Sync + 'mock,
             >>,
@@ -249,7 +249,7 @@ pub mod r#impl {{>lib/block}}{{!
 
             pub fn ret({{!
                 }}&self, {{!
-                }}{{#function:stream?}}_{{/function:stream?}}value: {{#function:return_type}}{{>lib/type}}{{/function:return_type}}{{!
+                }}{{#function:stream?}}_{{/function:stream?}}value: {{#function:return_type}}{{>lib/return_type}}{{/function:return_type}}{{!
             }}) {
                 {{#function:stream?}}
                 unimplemented!("Mocking streams is not yet implemented, as value isn't cloneable")
@@ -268,7 +268,7 @@ pub mod r#impl {{>lib/block}}{{!
                 }}{{#field:type}}{{>lib/type}}{{/field:type}}{{!
                 }}{{^last?}}, {{/last?}}{{!
                 }}{{/function:args}}{{!
-            }}) -> {{#function:return_type}}{{>lib/type}}{{/function:return_type}}{{!
+            }}) -> {{#function:return_type}}{{>lib/return_type}}{{/function:return_type}}{{!
                 }} + ::std::marker::Send + ::std::marker::Sync + 'mock) {{!
             }}{
                 let mut closure = self.closure.lock().unwrap();
@@ -291,7 +291,7 @@ pub mod r#impl {{>lib/block}}{{!
                 }}{{^last?}}, {{/last?}}{{!
                 }}{{/function:args}}{{!
             }}) -> ::std::result::Result<{{!
-                    }}{{#function:return_type}}{{>lib/type}}{{/function:return_type}}, {{!
+                    }}{{#function:return_type}}{{>lib/return_type}}{{/function:return_type}}, {{!
                     }}{{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Error>{{!
                 }} + ::std::marker::Send + ::std::marker::Sync + 'mock) {{!
             }}{

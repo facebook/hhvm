@@ -53,18 +53,18 @@ class {{service:name}}Interface(
     {{#service:supportedFunctions}}
 
     {{#function:return_type}}
-    {{#type:streamresponse?}}
+    {{#function:stream?}}
     @staticmethod
     def createPublisher_{{function:name}}(callback=None) -> _typing.Tuple[
         _typing.AsyncGenerator[{{#function:stream_elem_type}}{{> types/pep484_type}}{{/function:stream_elem_type}}, None],
         _{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_types.{{#function:stream_elem_type}}ServerPublisher_{{> types/cython_cpp_type_ident}}{{/function:stream_elem_type}}
     ]: ...
 
-    {{/type:streamresponse?}}
+    {{/function:stream?}}
     {{/function:return_type}}
 
     @abstractmethod
-    {{#function:return_type}}{{^type:streamresponse?}}async {{/type:streamresponse?}}{{#type:stream_has_first_response?}}async {{/type:stream_has_first_response?}}{{/function:return_type}}def {{function:name}}(
+    {{#function:return_type}}{{^function:stream?}}async {{/function:stream?}}{{#type:stream_has_first_response?}}async {{/type:stream_has_first_response?}}{{/function:return_type}}def {{function:name}}(
         self{{#function:args}},
         {{field:py_name}}: {{#field:type}}{{> types/pep484_type}}{{/field:type}}{{/function:args}}
     ) -> {{#function:return_type}}{{> services/return_type_pep484_type}}{{/function:return_type}}: ...

@@ -28,7 +28,7 @@ executing.
 {{#program:stream_types}}
 
 @cython.auto_pickle(False)
-cdef class Promise_{{> types/cython_cpp_type_ident}}_Stream:
+cdef class Promise_{{> types/cython_cpp_return_type_ident}}_Stream:
     cdef cFollyPromise[optional[{{!
             }}{{> types/cython_cpp_type}}{{!
         }}]] cPromise
@@ -37,8 +37,8 @@ cdef class Promise_{{> types/cython_cpp_type_ident}}_Stream:
     cdef _fbthrift_create(cFollyPromise[optional[{{{!
             }}{{> types/cython_cpp_type}}{{!
         }}]] cPromise):
-        cdef Promise_{{> types/cython_cpp_type_ident}}_Stream inst = Promise_{{> types/cython_cpp_type_ident}}_Stream.__new__({{!
-        }}Promise_{{> types/cython_cpp_type_ident}}_Stream)
+        cdef Promise_{{> types/cython_cpp_return_type_ident}}_Stream inst = Promise_{{> types/cython_cpp_return_type_ident}}_Stream.__new__({{!
+        }}Promise_{{> types/cython_cpp_return_type_ident}}_Stream)
         inst.cPromise = cmove(cPromise)
         return inst
 {{/program:stream_types}}

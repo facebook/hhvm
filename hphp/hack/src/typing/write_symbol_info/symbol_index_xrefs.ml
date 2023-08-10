@@ -83,6 +83,7 @@ let process_calls ctx path tast map_pos_decl progress =
   let visitor =
     Tast_visitor.iter_with [call_handler ~path progress_ref map_pos_decl]
   in
+  let tast = List.map ~f:fst tast in
   visitor#go ctx tast;
   !progress_ref
 
@@ -153,7 +154,7 @@ let process_member_xref
       (* This includes references to built-in enum methods *)
       | _ -> (xrefs, prog))
     | `Class cls ->
-      let con_kind = Predicate.get_parent_kind cls in
+      let con_kind = Predicate.get_parent_kind cls.Aast.c_kind in
       let (con_type, decl_pred) = Predicate.parent_decl_predicate con_kind in
       let (con_decl_id, prog) =
         Add_fact.container_decl decl_pred con_name prog
@@ -190,7 +191,8 @@ let process_attribute_xref ctx File_info.{ occ; def } opt_info (xrefs, prog) =
         con_name_with_ns
         con_name;
       None
-    | `Class cls -> Some Predicate.(parent_decl_predicate (get_parent_kind cls))
+    | `Class cls ->
+      Some Predicate.(parent_decl_predicate (get_parent_kind cls.Aast.c_kind))
   in
   (* Process <<__Override>>, for which we write a MethodOverrides fact
      instead of a cross-reference *)

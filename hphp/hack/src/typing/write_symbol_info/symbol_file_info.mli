@@ -15,6 +15,21 @@ type symbol = private {
   def: Sym_def.t option;
 }
 
+type container = {
+  name: string;
+  kind: Ast_defs.classish_kind;
+}
+
+type member = { name: string }
+
+type member_cluster = {
+  container: container;
+  methods: member list;
+  properties: member list;
+  class_constants: member list;
+  type_constants: member list;
+}
+
 (** [fanout] flag is used in incremental mode. It identifies files which are
     unchanged compared to the base db. Such files don't need to be re-indexed
    if an identical [sym_hash] exists on the base db. [sym_hash] captures the
@@ -23,7 +38,7 @@ type t = private {
   (* path to be used in the glean index *)
   path: string;
   cst: Full_fidelity_positioned_syntax.t;
-  tast: Tast.program;
+  tast: (Tast.def * member_cluster list) list;
   source_text: Full_fidelity_source_text.t;
   symbols: symbol list;
   sym_hash: Md5.t option;

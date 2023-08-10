@@ -30,6 +30,16 @@ val parent_decls :
   Fact_acc.t ->
   Hh_json.json list * Fact_acc.t
 
+val member_cluster :
+  members:Hh_json.json list -> Fact_acc.t -> Fact_id.t * Fact_acc.t
+
+val inherited_members :
+  container_type:string ->
+  container_id:Fact_id.t ->
+  member_clusters:Fact_id.t list ->
+  Fact_acc.t ->
+  Fact_id.t * Fact_acc.t
+
 val container_defn :
   Provider_context.t ->
   Full_fidelity_source_text.t ->

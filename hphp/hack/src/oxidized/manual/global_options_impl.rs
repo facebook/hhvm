@@ -97,6 +97,7 @@ impl Default for GlobalOptions {
             po_disable_xhp_children_declarations: false, // true in ocaml
             po_keep_user_attributes: false,
             glean_reponame: String::new(), // "www.autocomplete" in ocaml
+            symbol_write_index_inherited_members: true,
             symbol_write_ownership: false,
             symbol_write_root_path: String::new(), // "www" in ocaml
             symbol_write_hhi_path: String::new(),  // "hhi" in ocaml

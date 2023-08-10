@@ -24,6 +24,8 @@ let index_paths t = t.GlobalOptions.symbol_write_index_paths
 
 let include_hhi t = t.GlobalOptions.symbol_write_include_hhi
 
+let inherited_members t = t.GlobalOptions.symbol_write_index_inherited_members
+
 let ownership t = t.GlobalOptions.symbol_write_ownership
 
 let sym_hash_in t = t.GlobalOptions.symbol_write_sym_hash_in

@@ -28,8 +28,10 @@ type hack =
   | FunctionDefinition
   | GlobalConstDeclaration
   | GlobalConstDefinition
+  | InheritedMembers
   | InterfaceDeclaration
   | InterfaceDefinition
+  | MemberCluster
   | MethodDeclaration
   | MethodDefinition
   | MethodOccurrence
@@ -85,8 +87,10 @@ let hack_to_string = function
   | FunctionDefinition -> "FunctionDefinition"
   | GlobalConstDeclaration -> "GlobalConstDeclaration"
   | GlobalConstDefinition -> "GlobalConstDefinition"
+  | InheritedMembers -> "InheritedMembers"
   | InterfaceDeclaration -> "InterfaceDeclaration"
   | InterfaceDefinition -> "InterfaceDefinition"
+  | MemberCluster -> "MemberCluster"
   | MethodDeclaration -> "MethodDeclaration"
   | MethodDefinition -> "MethodDefinition"
   | MethodOccurrence -> "MethodOccurrence"
@@ -131,6 +135,8 @@ let ordered_all =
     Hack DeclarationSpan;
     Hack DeclarationLocation;
     Hack DeclarationComment;
+    Hack MemberCluster;
+    Hack InheritedMembers;
     Hack GlobalConstDefinition;
     Hack TypedefDefinition;
     Hack ModuleDefinition;
@@ -175,8 +181,7 @@ let parent_decl_predicate parent_container_type =
   | InterfaceContainer -> ("interface_", Hack InterfaceDeclaration)
   | TraitContainer -> ("trait", Hack TraitDeclaration)
 
-let get_parent_kind clss =
-  match clss.Aast.c_kind with
+let get_parent_kind = function
   | Ast_defs.Cenum_class _ ->
     raise (Failure "Unexpected enum class as parent container kind")
   | Ast_defs.Cenum -> raise (Failure "Unexpected enum as parent container kind")

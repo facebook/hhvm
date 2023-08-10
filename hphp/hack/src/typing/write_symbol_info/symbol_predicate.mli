@@ -24,8 +24,10 @@ type hack =
   | FunctionDefinition
   | GlobalConstDeclaration
   | GlobalConstDefinition
+  | InheritedMembers
   | InterfaceDeclaration
   | InterfaceDefinition
+  | MemberCluster
   | MethodDeclaration
   | MethodDefinition
   | MethodOccurrence
@@ -66,7 +68,7 @@ type parent_container_type =
 
 val parent_decl_predicate : parent_container_type -> string * t
 
-val get_parent_kind : ('a, 'b) Aast.class_ -> parent_container_type
+val get_parent_kind : Ast_defs.classish_kind -> parent_container_type
 
 module Fact_acc : sig
   (* fact accumulator. This is used to maintain state through indexing

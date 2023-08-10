@@ -58,6 +58,22 @@ let module_field module_ internal progress =
     ( [("module_", Build_json.build_module_membership_nested decl_id ~internal)],
       progress )
 
+let member_cluster ~members prog =
+  let json = JSON_Object [("members", JSON_Array members)] in
+  Fact_acc.add_fact Predicate.(Hack MemberCluster) json prog
+
+let inherited_members ~container_type ~container_id ~member_clusters prog =
+  let json =
+    JSON_Object
+      [
+        ( "container",
+          Build_json.build_container_json_ref container_type container_id );
+        ( "inheritedMembers",
+          JSON_Array (List.map ~f:Build_json.build_id_json member_clusters) );
+      ]
+  in
+  Fact_acc.add_fact Predicate.(Hack InheritedMembers) json prog
+
 let container_defn ctx source_text clss decl_id member_decls prog =
   let prog = namespace_decl_opt clss.c_namespace prog in
   let tparams =
@@ -103,7 +119,7 @@ let container_defn ctx source_text clss decl_id member_decls prog =
       prog
   in
   let (defn_pred, json_fields, prog) =
-    match Predicate.get_parent_kind clss with
+    match Predicate.get_parent_kind clss.c_kind with
     | Predicate.InterfaceContainer ->
       let (extends, prog) =
         parent_decls

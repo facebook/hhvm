@@ -54,11 +54,66 @@ let process_decl_loc
   let prog = process_loc_span path pos span ref_json prog in
   (decl_id, prog)
 
-let process_container_decl ctx path source_text con (xrefs, all_decls, progress)
-    =
+let process_member
+    add_member_decl
+    build_decl_ref
+    ~container_type
+    ~container_id
+    (member_ids, prog)
+    File_info.{ name } =
+  let (member_id, prog) =
+    add_member_decl container_type container_id name prog
+  in
+  (build_decl_ref member_id :: member_ids, prog)
+
+let process_member_cluster mc prog =
+  let (container_type, container_id, prog) =
+    let (con_type, decl_pred) =
+      Predicate.get_parent_kind mc.File_info.container.File_info.kind
+      |> Predicate.parent_decl_predicate
+    in
+    let (con_decl_id, prog) =
+      Add_fact.container_decl
+        decl_pred
+        mc.File_info.container.File_info.name
+        prog
+    in
+    (con_type, con_decl_id, prog)
+  in
+  let process add_member_decl build_decl_ref members acc =
+    List.fold
+      members
+      ~init:acc
+      ~f:
+        (process_member
+           add_member_decl
+           build_decl_ref
+           ~container_type
+           ~container_id)
+  in
+  ([], prog)
+  |> process
+       Add_fact.method_decl
+       Build.build_method_decl_json_ref
+       mc.File_info.methods
+  |> process
+       Add_fact.property_decl
+       Build.build_property_decl_json_ref
+       mc.File_info.properties
+  |> process
+       Add_fact.type_const_decl
+       Build.build_type_const_decl_json_ref
+       mc.File_info.type_constants
+  |> process
+       Add_fact.class_const_decl
+       Build.build_class_const_decl_json_ref
+       mc.File_info.class_constants
+
+let process_container_decl
+    ctx path source_text con member_clusters (xrefs, all_decls, progress) =
   let (con_pos, con_name) = con.c_name in
   let (con_type, decl_pred) =
-    Predicate.parent_decl_predicate (Predicate.get_parent_kind con)
+    Predicate.parent_decl_predicate (Predicate.get_parent_kind con.c_kind)
   in
   let (con_decl_id, prog) =
     Add_fact.container_decl decl_pred con_name progress
@@ -140,6 +195,25 @@ let process_container_decl ctx path source_text con (xrefs, all_decls, progress)
   in
   let members =
     type_const_decls @ class_const_decls @ prop_decls @ method_decls
+  in
+  let (prog, inherited_member_clusters) =
+    List.fold_map member_clusters ~init:prog ~f:(fun prog mc ->
+        let (members, prog) = process_member_cluster mc prog in
+        let (mc, prog) = Add_fact.member_cluster ~members prog in
+        (prog, mc))
+  in
+  let prog =
+    if not @@ List.is_empty inherited_member_clusters then
+      let (_id, prog) =
+        Add_fact.inherited_members
+          ~container_type:con_type
+          ~container_id:con_decl_id
+          ~member_clusters:inherited_member_clusters
+          prog
+      in
+      prog
+    else
+      prog
   in
   let (_, prog) =
     Add_fact.container_defn ctx source_text con con_decl_id members prog
@@ -306,11 +380,11 @@ let process_mod_xref prog xrefs (pos, id) =
   (XRefs.add xrefs target_id pos XRefs.{ target; receiver_type = None }, prog)
 
 let process_tast_decls ctx ~path tast source_text (decls, prog) =
-  List.fold tast ~init:(XRefs.empty, decls, prog) ~f:(fun acc def ->
+  List.fold tast ~init:(XRefs.empty, decls, prog) ~f:(fun acc (def, im) ->
       match def with
       | Class en when Util.is_enum_or_enum_class en.c_kind ->
         process_enum_decl ctx path source_text en acc
-      | Class cd -> process_container_decl ctx path source_text cd acc
+      | Class cd -> process_container_decl ctx path source_text cd im acc
       | Constant gd -> process_gconst_decl ctx path source_text gd acc
       | Fun fd -> process_func_decl ctx path source_text fd acc
       | Typedef td -> process_typedef_decl ctx path source_text td acc

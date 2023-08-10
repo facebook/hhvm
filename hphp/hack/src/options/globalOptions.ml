@@ -119,6 +119,7 @@ type t = {
   po_parser_errors_only: bool;
   tco_check_attribute_locations: bool;
   glean_reponame: string;
+  symbol_write_index_inherited_members: bool;
   symbol_write_ownership: bool;
   symbol_write_root_path: string;
   symbol_write_hhi_path: string;
@@ -246,6 +247,7 @@ let default =
     po_parser_errors_only = false;
     tco_check_attribute_locations = true;
     glean_reponame = "www.autocomplete";
+    symbol_write_index_inherited_members = true;
     symbol_write_ownership = false;
     symbol_write_root_path = "www";
     symbol_write_hhi_path = "hhi";
@@ -370,6 +372,7 @@ let set
     ?po_parser_errors_only
     ?tco_check_attribute_locations
     ?glean_reponame
+    ?symbol_write_index_inherited_members
     ?symbol_write_ownership
     ?symbol_write_root_path
     ?symbol_write_hhi_path
@@ -586,6 +589,10 @@ let set
         tco_check_attribute_locations
         options.tco_check_attribute_locations;
     glean_reponame = setting glean_reponame options.glean_reponame;
+    symbol_write_index_inherited_members =
+      setting
+        symbol_write_index_inherited_members
+        options.symbol_write_index_inherited_members;
     symbol_write_ownership =
       setting symbol_write_ownership options.symbol_write_ownership;
     symbol_write_root_path =

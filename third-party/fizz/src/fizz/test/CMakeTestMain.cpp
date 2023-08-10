@@ -20,6 +20,6 @@ int main(int argc, char** argv) __attribute__((__weak__));
 
 int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
-  folly::init(&argc, &argv);
+  folly::Init follyInit(&argc, &argv);
   return RUN_ALL_TESTS();
 }

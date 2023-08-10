@@ -44,13 +44,13 @@ void <% > service_common/client_class_name%>::sync_<%function:cpp_name%>(apache:
 <%/function:oneway?%>
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = <%function:cpp_name%>Ctx(&rpcOptions);
-<%^function:returns_stream?%>
+<%^function:stream?%>
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
-<%/function:returns_stream?%><%#function:returns_stream?%>
+<%/function:stream?%><%#function:stream?%>
   auto wrappedCallback = apache::thrift::createStreamClientCallback(
     apache::thrift::RequestClientCallback::Ptr(&callback),
     rpcOptions.getBufferOptions());
-<%/function:returns_stream?%>
+<%/function:stream?%>
 <%#function:creates_interaction?%>
   <%function:created_interaction%> handle(channel_, "<%function:created_interaction%>");
 <%/function:creates_interaction?%>
@@ -102,7 +102,7 @@ void <% > service_common/client_class_name%>::sync_<%function:cpp_name%>(apache:
 }
 
 <%#type:sync_methods_return_try?%><%^function:oneway?%>
-<%^function:returns_sink?%>
+<%^function:sink?%>
 folly::Try<apache::thrift::RpcResponseComplete<<% > types/return_type_client%>>>
 <% > service_common/client_class_name%>::sync_complete_<%function:cpp_name%>(
     apache::thrift::RpcOptions&& rpcOptions<%function:comma%> <% > service_common/function_param_list_client%>) {
@@ -111,13 +111,13 @@ folly::Try<apache::thrift::RpcResponseComplete<<% > types/return_type_client%>>>
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
   const auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
   auto* const evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
-<%^function:returns_stream?%>
+<%^function:stream?%>
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
-<%/function:returns_stream?%><%#function:returns_stream?%>
+<%/function:stream?%><%#function:stream?%>
   auto wrappedCallback = apache::thrift::createStreamClientCallback(
     apache::thrift::RequestClientCallback::Ptr(&callback),
     rpcOptions.getBufferOptions());
-<%/function:returns_stream?%>
+<%/function:stream?%>
   callback.waitUntilDone(
     evb,
     [&] {
@@ -159,5 +159,5 @@ folly::Try<apache::thrift::RpcResponseComplete<<% > types/return_type_client%>>>
   }
   return tryResponse;
 }
-<%/function:returns_sink?%>
+<%/function:sink?%>
 <%/function:oneway?%><%/type:sync_methods_return_try?%>

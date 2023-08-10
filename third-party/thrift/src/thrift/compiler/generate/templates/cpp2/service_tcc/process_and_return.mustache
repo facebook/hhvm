@@ -134,18 +134,18 @@ template <class ProtocolIn_, class ProtocolOut_>
 apache::thrift::SerializedResponse <%service:parent_service_cpp_name%>AsyncProcessor::return_<%#service:interaction?%><%service:cpp_name%>_<%/service:interaction?%><%function:cpp_name%>(apache::thrift::ContextStack* ctx) {
 <%/type:void?%>
 <%^type:void?%>
-    <%^type:streamresponse?%><%^type:sink?%>
+    <%^function:stream?%><%^function:sink?%>
 apache::thrift::SerializedResponse <%service:parent_service_cpp_name%>AsyncProcessor::return_<%#service:interaction?%><%service:cpp_name%>_<%/service:interaction?%><%function:cpp_name%>(apache::thrift::ContextStack* ctx, <%type:cpp_type%> const& _return) {
-    <%/type:sink?%><%/type:streamresponse?%>
-    <%#type:streamresponse?%>
+    <%/function:sink?%><%/function:stream?%>
+    <%#function:stream?%>
 apache::thrift::ResponseAndServerStreamFactory <%service:parent_service_cpp_name%>AsyncProcessor::return_<%#service:interaction?%><%service:cpp_name%>_<%/service:interaction?%><%function:cpp_name%>(apache::thrift::ContextStack* ctx, folly::Executor::KeepAlive<> executor, <%type:cpp_type%>&& _return) {
-    <%/type:streamresponse?%>
-    <%#type:sink?%>
+    <%/function:stream?%>
+    <%#function:sink?%>
 std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsumerImpl> <%service:parent_service_cpp_name%>AsyncProcessor::return_<%#service:interaction?%><%service:cpp_name%>_<%/service:interaction?%><%function:cpp_name%>(apache::thrift::ContextStack* ctx, <%type:cpp_type%>&& _return, folly::Executor::KeepAlive<> executor) {
-    <%/type:sink?%>
+    <%/function:sink?%>
 <%/type:void?%>
   ProtocolOut_ prot;
-<%#function:returns_stream?%>
+<%#function:stream?%>
   <% > common/namespace_cpp2%><%service:parent_service_cpp_name%>_<%#service:interaction?%><%service:cpp_name%>_<%/service:interaction?%><%function:cpp_name%>_presult::FieldsType result;
   using StreamPResultType = <% > common/namespace_cpp2%><%service:parent_service_cpp_name%>_<%#service:interaction?%><%service:cpp_name%>_<%/service:interaction?%><%function:cpp_name%>_presult::StreamPResultType;
       <%#type:stream_has_first_response?%>
@@ -177,8 +177,8 @@ std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsum
       <%/function:stream_exceptions?%>
   auto encodedStream = apache::thrift::detail::ap::encode_server_stream<ProtocolOut_, StreamPResultType, ExMapType>(std::move(returnStream), std::move(executor));
   return {serializeResponse("<% > common/function_name%>", &prot, ctx, result), std::move(encodedStream)};
-<%/function:returns_stream?%>
-<%#function:returns_sink?%>
+<%/function:stream?%>
+<%#function:sink?%>
   <% > common/namespace_cpp2%><%service:parent_service_cpp_name%>_<%#service:interaction?%><%service:cpp_name%>_<%/service:interaction?%><%function:cpp_name%>_presult::FieldsType result;
   using SinkPResultType = <% > common/namespace_cpp2%><%service:parent_service_cpp_name%>_<%#service:interaction?%><%service:cpp_name%>_<%/service:interaction?%><%function:cpp_name%>_presult::SinkPResultType;
   using FinalResponsePResultType = <% > common/namespace_cpp2%><%service:parent_service_cpp_name%>_<%#service:interaction?%><%service:cpp_name%>_<%/service:interaction?%><%function:cpp_name%>_presult::FinalResponsePResultType;
@@ -221,15 +221,15 @@ std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsum
       std::move(executor));
 
   return {serializeResponse("<% > common/function_name%>", &prot, ctx, result), std::move(sinkConsumerImpl)};
-<%/function:returns_sink?%>
-<%^function:returns_stream?%><%^function:returns_sink?%>
+<%/function:sink?%>
+<%^function:stream?%><%^function:sink?%>
   <% > common/namespace_cpp2%><%service:parent_service_cpp_name%>_<%#service:interaction?%><%service:cpp_name%>_<%/service:interaction?%><%function:cpp_name%>_presult result;
 <%^type:void?%>
   result.get<0>().value = const_cast<<%type:cpp_type%>*>(&_return);
   result.setIsSet(0, true);
 <%/type:void?%>
   return serializeResponse("<% > common/function_name%>", &prot, ctx, result);
-<%/function:returns_sink?%><%/function:returns_stream?%>
+<%/function:sink?%><%/function:stream?%>
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
@@ -252,11 +252,11 @@ void <%service:parent_service_cpp_name%>AsyncProcessor::throw_wrapped_<%#service
     result.setIsSet(<%field:index%>, true);
 <%/type:void?%>
 <%^type:void?%>
-  <%^function:returns_stream?%><%^function:returns_sink?%>
+  <%^function:stream?%><%^function:sink?%>
     result.get<<%field:index_plus_one%>>().ref() = e;
     result.setIsSet(<%field:index_plus_one%>, true);
-  <%/function:returns_sink?%><%/function:returns_stream?%>
-  <%#function:returns_stream?%>
+  <%/function:sink?%><%/function:stream?%>
+  <%#function:stream?%>
   <%#type:stream_has_first_response?%>
     result.fields.get<<%field:index_plus_one%>>().ref() = e;
     result.fields.setIsSet(<%field:index_plus_one%>, true);
@@ -265,8 +265,8 @@ void <%service:parent_service_cpp_name%>AsyncProcessor::throw_wrapped_<%#service
     result.fields.get<<%field:index%>>().ref() = e;
     result.fields.setIsSet(<%field:index%>, true);
   <%/type:stream_has_first_response?%>
-  <%/function:returns_stream?%>
-  <%#function:returns_sink?%>
+  <%/function:stream?%>
+  <%#function:sink?%>
   <%#type:sink_has_first_response?%>
     result.fields.get<<%field:index_plus_one%>>().ref() = e;
     result.fields.setIsSet(<%field:index_plus_one%>, true);
@@ -275,7 +275,7 @@ void <%service:parent_service_cpp_name%>AsyncProcessor::throw_wrapped_<%#service
     result.fields.get<<%field:index%>>().ref() = e;
     result.fields.setIsSet(<%field:index%>, true);
   <%/type:sink_has_first_response?%>
-  <%/function:returns_sink?%>
+  <%/function:sink?%>
 <%/type:void?%>
   }
   )) {} else
@@ -287,27 +287,27 @@ void <%service:parent_service_cpp_name%>AsyncProcessor::throw_wrapped_<%#service
   }
 <%#function:exceptions?%>
   ProtocolOut_ prot;
-  <%^function:returns_stream?%><%^function:returns_sink?%>
+  <%^function:stream?%><%^function:sink?%>
   auto response = serializeResponse("<% > common/function_name%>", &prot, ctx, result);
   auto payload = std::move(response).extractPayload(
       req->includeEnvelope(), prot.protocolType(), protoSeqId, apache::thrift::MessageType::T_REPLY, "<% > common/function_name%>");
   payload.transform(reqCtx->getHeader()->getWriteTransforms());
   return req->sendReply(std::move(payload));
-  <%/function:returns_sink?%><%/function:returns_stream?%>
-  <%#function:returns_stream?%>
+  <%/function:sink?%><%/function:stream?%>
+  <%#function:stream?%>
   auto response = serializeResponse("<% > common/function_name%>", &prot, ctx, result.fields);
   auto payload = std::move(response).extractPayload(
       req->includeEnvelope(), prot.protocolType(), protoSeqId, apache::thrift::MessageType::T_REPLY, "<% > common/function_name%>");
   payload.transform(reqCtx->getHeader()->getWriteTransforms());
   req->sendStreamReply(std::move(payload), apache::thrift::detail::ServerStreamFactory{nullptr});
-  <%/function:returns_stream?%>
-  <%#function:returns_sink?%>
+  <%/function:stream?%>
+  <%#function:sink?%>
   auto response = serializeResponse("<% > common/function_name%>", &prot, ctx, result.fields);
   auto payload = std::move(response).extractPayload(
       req->includeEnvelope(), prot.protocolType(), protoSeqId, apache::thrift::MessageType::T_REPLY, "<% > common/function_name%>");
   payload.transform(reqCtx->getHeader()->getWriteTransforms());
   req->sendSinkReply(std::move(payload), apache::thrift::detail::SinkConsumerImpl{});
-  <%/function:returns_sink?%>
+  <%/function:sink?%>
 <%/function:exceptions?%>
 }
 

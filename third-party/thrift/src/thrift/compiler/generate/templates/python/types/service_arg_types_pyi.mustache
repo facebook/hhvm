@@ -61,7 +61,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result(_fbthrift_python_types
             {{/function:exceptions}}
         ]]]: ...
 {{/function:oneway?}}
-{{#function:returns_stream?}}
+{{#function:stream?}}
 
 
 class _fbthrift_{{service:name}}_{{function:name}}_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[{{#function:return_stream_elem_type}}{{ >types/pep484_type }}{{/function:return_stream_elem_type}}]):
@@ -84,5 +84,5 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_stream(_fbthrift_pytho
             {{#field:type}}{{> types/pep484_type}}{{/field:type}},
             {{/function:stream_exceptions}}
         ]]]: ...
-{{/function:returns_stream?}}
+{{/function:stream?}}
 {{/service:supported_functions}}

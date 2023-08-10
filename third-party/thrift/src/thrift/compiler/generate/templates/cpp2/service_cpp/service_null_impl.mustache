@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><%#service:functions%><%#function:return_type%><%^function:starts_interaction?%><%^function:creates_interaction?%><%^function:eb%><%^function:returns_stream?%>
+%><%#service:functions%><%#function:return_type%><%^function:starts_interaction?%><%^function:creates_interaction?%><%^function:eb%><%^function:stream?%>
 <% > service_common/sync_function_return_type_server%> <%service:cpp_name%>SvNull::<%function:cpp_name%>(<% > service_common/sync_function_return_param_server%><% > service_common/function_param_list_server_commented_out%>) {<%!
 %><%#type:resolves_to_complex_return?%>}<%/type:resolves_to_complex_return?%>
 <%^type:resolves_to_complex_return?%>
@@ -24,16 +24,16 @@
 <%#type:enum?%>
   return (<%type:cpp_type%>)0;
 <%/type:enum?%>
-<%#type:streamresponse?%>
+<%#function:stream?%>
   return {};
-<%/type:streamresponse?%>
-<%#type:sink?%>
+<%/function:stream?%>
+<%#function:sink?%>
   return {};
-<%/type:sink?%>
-<%^type:void?%><%^type:enum?%><%^type:streamresponse?%><%^type:sink?%>
+<%/function:sink?%>
+<%^type:void?%><%^type:enum?%><%^function:stream?%><%^function:sink?%>
   return 0;
-<%/type:sink?%><%/type:streamresponse?%><%/type:enum?%><%/type:void?%>
+<%/function:sink?%><%/function:stream?%><%/type:enum?%><%/type:void?%>
 }
 <%/type:resolves_to_complex_return?%>
 
-<%/function:returns_stream?%><%/function:eb%><%/function:creates_interaction?%><%/function:starts_interaction?%><%/function:return_type%><%/service:functions%>
+<%/function:stream?%><%/function:eb%><%/function:creates_interaction?%><%/function:starts_interaction?%><%/function:return_type%><%/service:functions%>

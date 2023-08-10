@@ -23,7 +23,7 @@ pub mod {{service:snake}} {{>lib/block}}{{!
     }}{{#service:docs?}}
     #![doc = {{service:docs}}]
     {{/service:docs?}}{{!
-    }}{{#service:rustFunctions}}{{^function:starts_interaction?}}{{#function:returns_stream?}}
+    }}{{#service:rustFunctions}}{{^function:starts_interaction?}}{{#function:stream?}}
 
     #[derive(Clone, Debug)]
     pub enum {{function:upcamel}}StreamExn {
@@ -462,11 +462,11 @@ pub mod {{service:snake}} {{>lib/block}}{{!
             }}{{/function:stream_has_first_response?}}
         }
     }
-    {{/function:returns_stream?}}
+    {{/function:stream?}}
 
-    {{^function:returns_stream?}}
+    {{^function:stream?}}
     #[derive(Clone, Debug)]
-    {{/function:returns_stream?}}
+    {{/function:stream?}}
     pub enum {{function:upcamel}}Exn {
         #[doc(hidden)]
         Success({{>lib/server_ok_type}}),{{!
@@ -579,7 +579,7 @@ pub mod {{service:snake}} {{>lib/block}}{{!
         const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
     }
 
-    {{^function:returns_stream?}}
+    {{^function:stream?}}
     impl<P> ::fbthrift::Serialize<P> for {{function:upcamel}}Exn
     where
         P: ::fbthrift::ProtocolWriter,
@@ -618,9 +618,9 @@ pub mod {{service:snake}} {{>lib/block}}{{!
             p.write_struct_end();
         }
     }
-    {{/function:returns_stream?}}
+    {{/function:stream?}}
 
-    {{^function:returns_stream?}}
+    {{^function:stream?}}
     impl<P> ::fbthrift::Deserialize<P> for {{function:upcamel}}Exn
     where
         P: ::fbthrift::ProtocolReader,
@@ -694,7 +694,7 @@ pub mod {{service:snake}} {{>lib/block}}{{!
             }}{{/function:void_excluding_interaction?}}
         }
     }
-    {{/function:returns_stream?}}{{!
+    {{/function:stream?}}{{!
     }}{{/function:starts_interaction?}}{{/service:rustFunctions}}
 }
 {{!newline}}

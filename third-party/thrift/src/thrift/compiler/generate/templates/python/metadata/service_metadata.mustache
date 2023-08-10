@@ -5,7 +5,7 @@ if qualified_name in metadata_struct.services:
 
 functions = [
     {{#service:functions}}{{^function:starts_interaction?}}
-    _fbthrift_metadata.ThriftFunction(name="{{function:name}}", return_type={{#function:return_type}}{{> metadata/thrift_type }}{{/function:return_type}}, arguments=[
+    _fbthrift_metadata.ThriftFunction(name="{{function:name}}", return_type={{> metadata/return_type }}, arguments=[
         {{#function:args}}
         _fbthrift_metadata.ThriftField(id={{field:key}}, type={{#field:type}}{{> metadata/thrift_type }}{{/field:type}}, name="{{field:name}}", is_optional=False, structured_annotations=[
             {{#field:structured_annotations}}
@@ -57,7 +57,15 @@ new_struct = {{#service:external_program?}}{{service:module_path}}.thrift_metada
 {{#field:type}}{{> metadata/recursive_call }} # {{field:name}}{{/field:type}}
 {{/function:exceptions}}
 
-{{#function:return_type}}{{> metadata/recursive_call }} # return value{{/function:return_type}}
+{{#function:return_type}}
+{{> metadata/recursive_call }}{{!
+}}{{#function:stream?}}{{#function:stream_elem_type}}{{> metadata/recursive_call }}{{/function:stream_elem_type}} # elem
+{{#type:stream_first_response_type}}{{> metadata/recursive_call }}{{/type:stream_first_response_type}} # response {{/function:stream?}}{{!
+}}{{#function:sink?}}{{#function:sink_elem_type}}{{> metadata/recursive_call }}{{/function:sink_elem_type}} # elem
+{{#type:sink_final_response_type}}{{> metadata/recursive_call }}{{/type:sink_final_response_type}} # final response
+{{#type:sink_first_response_type}}{{> metadata/recursive_call }}{{/type:sink_first_response_type}} # first response {{/function:sink?}}{{!
+}} # return value
+{{/function:return_type}}
 
 {{/function:starts_interaction?}}{{/service:functions}}
 

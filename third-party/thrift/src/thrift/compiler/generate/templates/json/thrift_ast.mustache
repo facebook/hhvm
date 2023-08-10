@@ -27,7 +27,7 @@
     {{#program:typedefs}}
       "{{typedef:name}}": {
         "name": "{{typedef:name}}",
-        "type": {{#typedef:type}}{{> Types}}{{/typedef:type}},
+        "type": {{#typedef:type}}{{> type}}{{/typedef:type}},
         "is_exception": {{typedef:exception?}},
         "lineno": {{typedef:lineno}}
       }{{^last?}},{{/last?}}

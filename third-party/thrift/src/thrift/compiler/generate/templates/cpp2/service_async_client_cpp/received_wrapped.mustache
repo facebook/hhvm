@@ -28,7 +28,7 @@ folly::exception_wrapper <% > service_common/client_class_name%>::recv_wrapped_<
   }
 
   using result = <% > common/namespace_cpp2%><%service:parent_service_cpp_name%>_<%#service:interaction?%><%service:cpp_name%>_<%/service:interaction?%><%function:cpp_name%>_presult;
-  <%#type:sink?%>
+  <%#function:sink?%>
   <%^function:sink_exceptions?%>
   using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
   <%/function:sink_exceptions?%>
@@ -47,31 +47,31 @@ folly::exception_wrapper <% > service_common/client_class_name%>::recv_wrapped_<
     }
   };
   <%/function:sink_exceptions?%>
-  <%/type:sink?%>
+  <%/function:sink?%>
   switch (state.protocolId()) {
     case apache::thrift::protocol::T_BINARY_PROTOCOL:
     {
       apache::thrift::BinaryProtocolReader reader;
-      <%#type:sink?%>
+      <%#function:sink?%>
       return apache::thrift::detail::ac::recv_wrapped<result, ExMapType, apache::thrift::BinaryProtocolWriter>(
           &reader, state<%^type:void?%>, state.extractSink(), _return<%/type:void?%>);
-      <%/type:sink?%>
-      <%^type:sink?%>
+      <%/function:sink?%>
+      <%^function:sink?%>
       return apache::thrift::detail::ac::recv_wrapped<result>(
           &reader, state<%^type:void?%>, _return<%/type:void?%>);
-      <%/type:sink?%>
+      <%/function:sink?%>
     }
     case apache::thrift::protocol::T_COMPACT_PROTOCOL:
     {
       apache::thrift::CompactProtocolReader reader;
-      <%#type:sink?%>
+      <%#function:sink?%>
       return apache::thrift::detail::ac::recv_wrapped<result, ExMapType, apache::thrift::CompactProtocolWriter>(
           &reader, state<%^type:void?%>, state.extractSink(), _return<%/type:void?%>);
-      <%/type:sink?%>
-      <%^type:sink?%>
+      <%/function:sink?%>
+      <%^function:sink?%>
       return apache::thrift::detail::ac::recv_wrapped<result>(
           &reader, state<%^type:void?%>, _return<%/type:void?%>);
-      <%/type:sink?%>
+      <%/function:sink?%>
     }
     default:
     {

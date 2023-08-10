@@ -61,7 +61,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result(metaclass=_fbthrift_py
         {{/function:exceptions}}
     )
 {{/function:oneway?}}
-{{#function:returns_stream?}}
+{{#function:stream?}}
 
 
 class _fbthrift_{{service:name}}_{{function:name}}_result_stream(metaclass=_fbthrift_python_types.StructMeta):
@@ -87,5 +87,5 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_stream(metaclass=_fbth
         ),
         {{/function:stream_exceptions}}
     )
-{{/function:returns_stream?}}
+{{/function:stream?}}
 {{/service:supported_functions}}

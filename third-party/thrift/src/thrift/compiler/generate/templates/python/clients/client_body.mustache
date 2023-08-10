@@ -104,9 +104,9 @@ class Async({{#service:extends}}{{!
                 }}{{^service:thrift_uri}}"{{service:name}}"{{/service:thrift_uri}},
             rpc_options=rpc_options,
         )
-        {{#function:returns_stream?}}
+        {{#function:stream?}}
         _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
-        {{/function:returns_stream?}}
+        {{/function:stream?}}
         {{#function:return_type}}
         {{#function:early_client_return?}}
         # shortcut to success path for non-void returns

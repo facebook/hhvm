@@ -15,7 +15,7 @@
   limitations under the License.
 
 %>
-<%^function:returns_sink?%><%^service:reduced_client?%><%^function:creates_interaction?%>
+<%^function:sink?%><%^service:reduced_client?%><%^function:creates_interaction?%>
 void <% > service_common/client_class_name%>::<%function:cpp_name%>(std::unique_ptr<apache::thrift::RequestCallback> callback<%function:comma%><% > service_common/function_param_list_client%>) {
   ::apache::thrift::RpcOptions rpcOptions;
   <%function:cpp_name%>(rpcOptions, std::move(callback)<%function:comma%><% > service_common/param_list%>);
@@ -34,17 +34,17 @@ void <% > service_common/client_class_name%>::<%function:cpp_name%>(apache::thri
   if (callback) {
     callbackContext.ctx = std::move(ctx);
   }
-<%^function:returns_stream?%>
+<%^function:stream?%>
   auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext));
-<%/function:returns_stream?%><%#function:returns_stream?%>
+<%/function:stream?%><%#function:stream?%>
   auto wrappedCallback = apache::thrift::createStreamClientCallback(
     apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext)),
     rpcOptions.getBufferOptions());
-<%/function:returns_stream?%>
+<%/function:stream?%>
   <%function:cpp_name%>Impl(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback)<%#function:creates_interaction?%>, handle<%/function:creates_interaction?%><%function:comma%><% > service_common/param_list%>);
 }
 
-<%/function:returns_sink?%>
+<%/function:sink?%>
 void <% > service_common/client_class_name%>::<%function:cpp_name%>Impl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, <% > types/callback_type%> callback<%#function:creates_interaction?%>, const apache::thrift::InteractionHandle& handle<%/function:creates_interaction?%><%function:comma%><% > service_common/function_param_list_client%>, bool stealRpcOptions) {
   switch (apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId()) {
     case apache::thrift::protocol::T_BINARY_PROTOCOL:

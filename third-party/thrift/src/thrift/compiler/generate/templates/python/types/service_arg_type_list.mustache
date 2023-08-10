@@ -21,7 +21,7 @@ A list of the argument and result types for functions on thrift services (and in
 {{^function:oneway?}}
 _fbthrift_{{service:name}}_{{function:name}}_result,
 {{/function:oneway?}}
-{{#function:returns_stream?}}
+{{#function:stream?}}
 _fbthrift_{{service:name}}_{{function:name}}_result_stream,
-{{/function:returns_stream?}}
+{{/function:stream?}}
 {{/service:supported_functions}}

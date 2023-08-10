@@ -76,10 +76,10 @@ where
         use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
-        {{#function:returns_stream?}}
+        {{#function:stream?}}
         use ::futures::StreamExt as _;
         use ::fbthrift::Deserialize as _;
-        {{/function:returns_stream?}}
+        {{/function:stream?}}
 
         const_cstr! {
             SERVICE_NAME = "{{service:parent_service_name}}";
@@ -112,18 +112,18 @@ where
             ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
         };
 
-        {{#function:returns_stream?}}
+        {{#function:stream?}}
         let call_stream = transport
             .call_stream(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
             .instrument(::tracing::trace_span!("call_stream", method = "{{service:name}}.{{function:name}}"));
-        {{/function:returns_stream?}}{{^function:returns_stream?}}
+        {{/function:stream?}}{{^function:stream?}}
         let call = transport
             .call(SERVICE_NAME.as_cstr(), SERVICE_METHOD_NAME.as_cstr(), request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "{{service:name}}.{{function:name}}"));
-        {{/function:returns_stream?}}
+        {{/function:stream?}}
 
         async move {
-            {{#function:returns_stream?}}{{!
+            {{#function:stream?}}{{!
 
             ******************************
             ******* STREAMING BODY *******
@@ -177,7 +177,7 @@ where
                 ::std::convert::From::from(res);
             let res = initial.map(move |_| new_stream);
             {{/function:stream_has_first_response?}}{{!
-            }}{{/function:returns_stream?}}{{^function:returns_stream?}}{{!
+            }}{{/function:stream?}}{{^function:stream?}}{{!
 
             ******************************
             **** SINGLE RESPONSE BODY ****
@@ -195,7 +195,7 @@ where
                 ::std::result::Result::Err(aexn) =>
                     ::std::result::Result::Err({{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Error::ApplicationException(aexn))
             };
-            {{/function:returns_stream?}}
+            {{/function:stream?}}
             {{#function:return_type}}{{#function:creates_interaction?}}{{!
 
             ***********************************

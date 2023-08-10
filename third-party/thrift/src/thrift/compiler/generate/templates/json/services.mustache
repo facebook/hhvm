@@ -24,7 +24,7 @@
           {{#function:args}}
           "{{field:name}}": {
             "name" : "{{field:name}}",
-            "type" : {{#field:type}}{{> Types}}{{/field:type}},
+            "type" : {{#field:type}}{{> type}}{{/field:type}},
             {{#field:value}}
             "default_value" : {{> const_value}},
             {{/field:value}}
@@ -58,7 +58,7 @@
           {{#function:exceptions}}
           "{{field:name}}" : {
             "name": "{{field:name}}",
-            "type" : {{#field:type}}{{> Types}}{{/field:type}},
+            "type" : {{#field:type}}{{> type}}{{/field:type}},
             "id" : {{field:key}}{{!
             }}{{#field:structured_annotations?}},
             "structured_annotations": {
@@ -70,7 +70,7 @@
           {{/function:exceptions}}
         },
         {{/function:exceptions?}}
-        "returnType" : {{#function:return_type}}{{> Types}}{{/function:return_type}},
+        "returnType" : {{> return_type}},
         "lineno" : {{function:lineno}}{{!
         }}{{#function:structured_annotations?}},
         "structured_annotations": {

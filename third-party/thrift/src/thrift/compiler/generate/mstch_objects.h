@@ -629,7 +629,7 @@ class mstch_function : public mstch_base {
             {"function:void?", &mstch_function::is_void},
 
             // Sink methods:
-            {"function:returns_sink?", &mstch_function::returns_sink},
+            {"function:sink?", &mstch_function::has_sink},
             {"function:sink_elem_type", &mstch_function::sink_elem_type},
             {"function:sink_exceptions?", &mstch_function::has_sink_exceptions},
             {"function:sink_exceptions", &mstch_function::sink_exceptions},
@@ -639,7 +639,7 @@ class mstch_function : public mstch_base {
              &mstch_function::sink_final_response_exceptions},
 
             // Stream methods:
-            {"function:returns_stream?", &mstch_function::returns_stream},
+            {"function:stream?", &mstch_function::has_stream},
             {"function:stream_has_first_response?",
              &mstch_function::stream_has_first_response},
             {"function:stream_elem_type", &mstch_function::stream_elem_type},
@@ -705,7 +705,7 @@ class mstch_function : public mstch_base {
         !function_->returned_interaction();
   }
 
-  mstch::node returns_sink() { return function_->sink() != nullptr; }
+  mstch::node has_sink() { return function_->sink() != nullptr; }
   mstch::node sink_elem_type();
   mstch::node has_sink_exceptions() {
     return function_->get_sink_xceptions()->has_fields();
@@ -716,7 +716,7 @@ class mstch_function : public mstch_base {
     return function_->get_sink_final_response_xceptions()->has_fields();
   }
 
-  mstch::node returns_stream();
+  mstch::node has_stream() { return function_->stream() != nullptr; }
   mstch::node stream_elem_type();
   mstch::node stream_has_first_response() {
     const t_stream_response* stream = function_->stream();
@@ -758,10 +758,8 @@ class mstch_type : public mstch_base {
             {"type:struct?", &mstch_type::is_struct},
             {"type:union?", &mstch_type::is_union},
             {"type:enum?", &mstch_type::is_enum},
-            {"type:sink?", &mstch_type::is_sink},
             {"type:sink_has_first_response?",
              &mstch_type::sink_has_first_response},
-            {"type:stream_or_sink?", &mstch_type::is_stream_or_sink},
             {"type:streamresponse?", &mstch_type::is_streamresponse},
             {"type:stream_has_first_response?",
              &mstch_type::stream_has_first_response},
@@ -818,9 +816,6 @@ class mstch_type : public mstch_base {
   mstch::node sink_has_first_response() {
     return resolved_type_->is_sink() &&
         dynamic_cast<const t_sink*>(resolved_type_)->sink_has_first_response();
-  }
-  mstch::node is_stream_or_sink() {
-    return resolved_type_->is_streamresponse() || resolved_type_->is_sink();
   }
   mstch::node is_streamresponse() {
     return resolved_type_->is_streamresponse();

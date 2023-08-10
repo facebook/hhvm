@@ -16,7 +16,7 @@
 
 %>
 #if FOLLY_HAS_COROUTINES
-<%#function:returns_sink?%>
+<%#function:sink?%>
 folly::coro::Task<<% > types/return_type_client%>> <% > service_common/client_class_name%>::co_<%function:cpp_name%>(<% > service_common/function_param_list_client%>) {
   ::apache::thrift::RpcOptions rpcOptions;
   co_return co_await co_<%function:cpp_name%>(rpcOptions<%function:comma%><% > service_common/param_list%>);
@@ -60,7 +60,7 @@ folly::coro::Task<<% > types/return_type_client%>> <% > service_common/client_cl
   );
 <%/function:creates_interaction?%>
 }
-<%/function:returns_sink?%><%!
+<%/function:sink?%><%!
 Other coroutine functions are inline templates to prevent binary size regression
 %>
 #endif // FOLLY_HAS_COROUTINES

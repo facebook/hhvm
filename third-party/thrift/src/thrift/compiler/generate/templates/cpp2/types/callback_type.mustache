@@ -14,14 +14,14 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><%#function:return_type%><%#type:sink?%><%!
+%><%#function:return_type%><%#function:sink?%><%!
 %>apache::thrift::SinkClientCallback*<%!
-%><%/type:sink?%><%!
+%><%/function:sink?%><%!
 
-%><%#type:streamresponse?%><%!
+%><%#function:stream?%><%!
 %>apache::thrift::StreamClientCallback*<%!
-%><%/type:streamresponse?%><%!
+%><%/function:stream?%><%!
 
-%><%^type:sink?%><%^type:streamresponse?%><%!
+%><%^function:sink?%><%^function:stream?%><%!
 %>apache::thrift::RequestClientCallback::Ptr<%!
-%><%/type:streamresponse?%><%/type:sink?%><%/function:return_type%>
+%><%/function:stream?%><%/function:sink?%><%/function:return_type%>

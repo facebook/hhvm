@@ -56,17 +56,6 @@ Used to turn a type into a thrift metadata ThriftType struct
         }}keyType={{#type:key_type}}{{> metadata/thrift_type }}{{/type:key_type}},{{!
         }}valueType={{#type:value_type}}{{> metadata/thrift_type }}{{/type:value_type}})){{!
     }}{{/type:map?}}{{!
-    }}{{#type:sink?}}{{!
-        }}_fbthrift_metadata.ThriftType(t_sink=_fbthrift_metadata.ThriftSinkType({{!
-        }}elemType={{#function:sink_elem_type}}{{> metadata/thrift_type }}{{/function:sink_elem_type}},{{!
-        }}finalResponseType={{#type:sink_final_response_type}}{{> metadata/thrift_type }}{{/type:sink_final_response_type}}{{!
-        }}{{#type:sink_has_first_response?}},initialResponseType={{#type:sink_first_response_type}}{{> metadata/thrift_type }}{{/type:sink_first_response_type}}{{/type:sink_has_first_response?}})){{!
-    }}{{/type:sink?}}{{!
-    }}{{#type:streamresponse?}}{{!
-        }}_fbthrift_metadata.ThriftType(t_stream=_fbthrift_metadata.ThriftStreamType({{!
-        }}elemType={{#function:stream_elem_type}}{{> metadata/thrift_type }}{{/function:stream_elem_type}}{{!
-        }}{{#type:stream_has_first_response?}},initialResponseType={{#type:stream_first_response_type}}{{> metadata/thrift_type }}{{/type:stream_first_response_type}}{{/type:stream_has_first_response?}})){{!
-    }}{{/type:streamresponse?}}{{!
     }}{{#type:enum}}{{!
     }}_fbthrift_metadata.ThriftType(t_enum=_fbthrift_metadata.ThriftEnumType({{!
     }}name="{{type:program_name}}.{{enum:name}}")){{

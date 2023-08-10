@@ -141,7 +141,7 @@ void ServiceMetadata<::<% > service_common/service_class_name%>>::gen_<%function
   ::apache::thrift::metadata::ThriftFunction func;
   func.name() = "<%function:name%>";
 <%#function:return_type%>
-  auto func_ret_type = <% > metadata/type_gen%>;
+  auto func_ret_type = <% > metadata/return_type_gen%>;
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
 <%/function:return_type%>
 <%#function:args%>

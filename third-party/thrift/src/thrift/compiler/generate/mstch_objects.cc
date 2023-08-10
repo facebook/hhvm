@@ -522,10 +522,6 @@ mstch::node mstch_function::sink_final_response_exceptions() {
       function_->get_sink_final_response_xceptions()->get_members());
 }
 
-mstch::node mstch_function::returns_stream() {
-  return function_->stream() != nullptr;
-}
-
 mstch::node mstch_function::stream_elem_type() {
   if (const t_stream_response* stream = function_->stream()) {
     return context_.type_factory->make_mstch_object(

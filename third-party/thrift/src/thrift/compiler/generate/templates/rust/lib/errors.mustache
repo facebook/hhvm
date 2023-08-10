@@ -148,10 +148,10 @@ pub mod {{service:snake}} {
         fn from(e: {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn) -> Self {
             match e {
                 {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn::Success(res) => {
-                    {{^function:returns_stream?}}
+                    {{^function:stream?}}
                     ::std::result::Result::Ok(res)
-                    {{/function:returns_stream?}}
-                    {{#function:returns_stream?}}
+                    {{/function:stream?}}
+                    {{#function:stream?}}
                     use ::futures::stream::StreamExt;
                     {{#function:stream_has_first_response?}}
                     let (resp, stream) = res;
@@ -167,7 +167,7 @@ pub mod {{service:snake}} {
                         ::std::result::Result::Err(exn) => exn.into(),
                     }).boxed())
                     {{/function:stream_has_first_response?}}
-                    {{/function:returns_stream?}}
+                    {{/function:stream?}}
                 }
                 {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn::ApplicationException(aexn) =>
                     ::std::result::Result::Err({{function:upcamel}}Error::ApplicationException(aexn)),
@@ -179,7 +179,7 @@ pub mod {{service:snake}} {
         }
     }
 
-    {{#function:returns_stream?}}
+    {{#function:stream?}}
     impl ::std::convert::From<{{program:crate}}::services::{{service:snake}}::{{function:upcamel}}ResponseExn> for
         ::std::result::Result<{{!
         }}{{#function:stream_has_first_response?}}{{>lib/function_stream_first_response_type}}{{/function:stream_has_first_response?}}{{!
@@ -307,7 +307,7 @@ pub mod {{service:snake}} {
         }
     }
 
-    {{/function:returns_stream?}}
+    {{/function:stream?}}
     {{/function:starts_interaction?}}
     {{/service:rustFunctions}}
 }

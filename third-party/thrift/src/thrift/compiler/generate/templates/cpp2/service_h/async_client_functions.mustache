@@ -19,15 +19,15 @@
 <%#function:starts_interaction?%>
   <%type:name%> <%function:cpp_name%>();
 <%/function:starts_interaction?%><%^function:starts_interaction?%>
-<%^function:returns_sink?%>
+<%^function:sink?%>
 <%^service:reduced_client?%><%^function:creates_interaction?%>
   virtual void <%function:cpp_name%>(std::unique_ptr<apache::thrift::RequestCallback> callback<%function:comma%><% > service_common/function_param_list_client%>);
   virtual<%/function:creates_interaction?%><%/service:reduced_client?%> void <%function:cpp_name%>(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback<%#function:creates_interaction?%>, const apache::thrift::InteractionHandle& handle<%/function:creates_interaction?%><%function:comma%><% > service_common/function_param_list_client%>);
-<%/function:returns_sink?%>
+<%/function:sink?%>
  protected:
   void <%function:cpp_name%>Impl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, <% > types/callback_type%> callback<%#function:creates_interaction?%>, const apache::thrift::InteractionHandle& handle<%/function:creates_interaction?%><%function:comma%><% > service_common/function_param_list_client%>, bool stealRpcOptions = false);
  public:
-<%^function:returns_sink?%>
+<%^function:sink?%>
 
 <%^function:sync_returns_by_outparam?%>
   <%^service:reduced_client?%><%^function:creates_interaction?%>virtual <%/function:creates_interaction?%><%/service:reduced_client?%><% > types/return_type_client%> sync_<%function:cpp_name%>(<% > service_common/function_param_list_client%>);
@@ -105,13 +105,13 @@
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<<%#function:oneway?%>true<%/function:oneway?%><%^function:oneway?%>false<%/function:oneway?%>>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
-  <%^function:returns_stream?%>
+  <%^function:stream?%>
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
-  <%/function:returns_stream?%><%#function:returns_stream?%>
+  <%/function:stream?%><%#function:stream?%>
     auto wrappedCallback = apache::thrift::createStreamClientCallback(
         apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback),
       hasRpcOptions ? rpcOptions->getBufferOptions() : defaultRpcOptions->getBufferOptions());
-  <%/function:returns_stream?%>
+  <%/function:stream?%>
   <%#function:creates_interaction?%>
     <%function:created_interaction%> handle(channel_, "<%function:created_interaction%>");
   <%/function:creates_interaction?%>
@@ -176,12 +176,12 @@
 <%/type:streamresponse?%>
 
 <%/function:creates_interaction?%><%/service:reduced_client?%>
-<%/function:returns_sink?%><%#function:returns_sink?%>
+<%/function:sink?%><%#function:sink?%>
 #if FOLLY_HAS_COROUTINES
   folly::coro::Task<<% > types/return_type_client%>> co_<%function:cpp_name%>(<% > service_common/function_param_list_client%>);
   folly::coro::Task<<% > types/return_type_client%>> co_<%function:cpp_name%>(apache::thrift::RpcOptions& rpcOptions<%function:comma%><% > service_common/function_param_list_client%>);
 #endif // FOLLY_HAS_COROUTINES
-<%/function:returns_sink?%>
+<%/function:sink?%>
 
 <%#type:void?%>
 <%^function:oneway?%>

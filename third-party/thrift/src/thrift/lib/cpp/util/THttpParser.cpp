@@ -17,7 +17,6 @@
 #include <thrift/lib/cpp/util/THttpParser.h>
 
 #include <thrift/lib/cpp/transport/TTransportException.h>
-#include <thrift/lib/cpp2/Flags.h>
 
 #include <fmt/core.h>
 #include <folly/Conv.h>
@@ -27,8 +26,6 @@
 #include <cassert>
 #include <cstdlib>
 #include <sstream>
-
-THRIFT_FLAG_DEFINE_bool(disable_newlines_in_http_headers, false);
 
 namespace apache {
 namespace thrift {
@@ -429,14 +426,12 @@ void THttpClientParser::appendHeadersToQueue(
     folly::IOBufQueue& queue,
     const folly::F14NodeMap<std::string, std::string>& headersToAppend) {
   for (const auto& headerToAppend : headersToAppend) {
-    if (THRIFT_FLAG(disable_newlines_in_http_headers)) {
-      if (headerToAppend.first.find(CRLF) != std::string::npos ||
-          headerToAppend.second.find(CRLF) != std::string::npos) {
-        throw TTransportException(fmt::format(
-            "HTTP Headers cannot contain \\r\\n. Header: {}:{}",
-            folly::cEscape<std::string>(headerToAppend.first),
-            folly::cEscape<std::string>(headerToAppend.second)));
-      }
+    if (headerToAppend.first.find(CRLF) != std::string::npos ||
+        headerToAppend.second.find(CRLF) != std::string::npos) {
+      throw TTransportException(fmt::format(
+          "HTTP Headers cannot contain \\r\\n. Header: {}:{}",
+          folly::cEscape<std::string>(headerToAppend.first),
+          folly::cEscape<std::string>(headerToAppend.second)));
     }
     queue.append(headerToAppend.first);
     queue.append(": ");

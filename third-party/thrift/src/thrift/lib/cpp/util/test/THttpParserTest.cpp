@@ -19,7 +19,6 @@
 
 #include <fmt/core.h>
 
-#include <folly/Singleton.h>
 #include <folly/String.h>
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
@@ -44,7 +43,6 @@ void write(apache::thrift::util::THttpParser& parser, folly::StringPiece text) {
 } // namespace
 
 TEST_F(THttpClientParserTest, too_many_headers) {
-  folly::SingletonVault::singleton()->registrationComplete();
   apache::thrift::util::THttpClientParser parser;
   HeaderMap header;
   for (int i = 0; i < 100; i++) {

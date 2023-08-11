@@ -20,6 +20,7 @@ include "thrift/annotation/python.thrift"
 cpp_include "<deque>"
 cpp_include "folly/container/F14Map.h"
 cpp_include "folly/FBString.h"
+cpp_include "folly/io/IOBuf.h"
 
 package "facebook.com/testing"
 
@@ -407,12 +408,17 @@ struct ListNode {
   2: optional ListNode next;
 }
 
-@python.IOBuf{}
+@cpp.Type{name = "folly::IOBuf"}
 typedef binary IOBuf
 
+/**
+ * amusingly, this annotation excludes this struct in thrift-py3
+ * leaving it included in thrift-python
+ */
+@python.Hidden
 struct IOBufListStruct {
   1: list<IOBuf> iobufs;
-}
+} (cpp.noncomparable)
 
 service ClientMetadataTestingService {
   string getAgent();

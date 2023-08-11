@@ -49,8 +49,7 @@ bool is_type_iobuf(std::string_view name) {
 }
 
 bool is_type_iobuf(const t_type* type) {
-  return type->has_annotation("py3.iobuf") ||
-      is_type_iobuf(cpp2::get_type(type));
+  return is_type_iobuf(cpp2::get_type(type));
 }
 
 const t_const_value* structured_type_override(
@@ -876,7 +875,6 @@ class python_mstch_type : public mstch_type {
 
   mstch::node is_integer() { return type_->is_any_int() || type_->is_byte(); }
 
-  // Supporting legacy py3 cpp.type iobuf declaration here
   mstch::node is_iobuf() { return is_type_iobuf(type_); }
 
   mstch::node adapter() {

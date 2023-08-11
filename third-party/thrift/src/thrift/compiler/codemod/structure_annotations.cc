@@ -62,13 +62,6 @@ class structure_annotations {
             fm_.add_include("thrift/annotation/cpp.thrift");
           }
         }
-
-        // python
-        if (name == "py3.iobuf") {
-          to_remove.emplace_back(name, data);
-          to_add.insert("@python.IOBuf");
-          fm_.add_include("thrift/annotation/python.thrift");
-        }
       }
 
       if (!to_remove.empty() &&

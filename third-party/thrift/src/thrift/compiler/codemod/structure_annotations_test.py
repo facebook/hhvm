@@ -219,7 +219,7 @@ struct G {} (
             textwrap.dedent(
                 """\
                 enum E {} (py3.flags)
-                typedef binary (py3.iobuf) T (py3.hidden, py3.name = "U")
+                typedef binary T (py3.hidden, py3.name = "U")
 
                 """
             ),
@@ -237,9 +237,8 @@ struct G {} (
                 @python.Flags
                 enum E {}
                 @python.Hidden
-                @python.IOBuf
                 @python.Name{name = "U"}
-                typedef binary  T
+                typedef binary T
                 """
             ),
         )

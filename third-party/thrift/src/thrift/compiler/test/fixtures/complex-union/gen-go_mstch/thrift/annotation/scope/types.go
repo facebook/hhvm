@@ -1490,3 +1490,28 @@ func (x *Definition) Read(p thrift.Protocol) error {
     return nil
 }
 
+
+// RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
+func RegisterTypes(registry interface {
+	  RegisterType(name string, obj any)
+}) {
+    registry.RegisterType("facebook.com/thrift/annotation/Transitive", &Transitive{})
+    registry.RegisterType("facebook.com/thrift/annotation/Schema", &Schema{})
+    registry.RegisterType("facebook.com/thrift/annotation/Program", &Program{})
+    registry.RegisterType("facebook.com/thrift/annotation/Struct", &Struct{})
+    registry.RegisterType("facebook.com/thrift/annotation/Union", &Union{})
+    registry.RegisterType("facebook.com/thrift/annotation/Exception", &Exception{})
+    registry.RegisterType("facebook.com/thrift/annotation/Field", &Field{})
+    registry.RegisterType("facebook.com/thrift/annotation/Typedef", &Typedef{})
+    registry.RegisterType("facebook.com/thrift/annotation/Service", &Service{})
+    registry.RegisterType("facebook.com/thrift/annotation/Interaction", &Interaction{})
+    registry.RegisterType("facebook.com/thrift/annotation/Function", &Function{})
+    registry.RegisterType("facebook.com/thrift/annotation/EnumValue", &EnumValue{})
+    registry.RegisterType("facebook.com/thrift/annotation/Const", &Const{})
+    registry.RegisterType("facebook.com/thrift/annotation/Enum", &Enum{})
+    registry.RegisterType("facebook.com/thrift/annotation/Structured", &Structured{})
+    registry.RegisterType("facebook.com/thrift/annotation/Interface", &Interface{})
+    registry.RegisterType("facebook.com/thrift/annotation/RootDefinition", &RootDefinition{})
+    registry.RegisterType("facebook.com/thrift/annotation/Definition", &Definition{})
+
+}

@@ -2435,3 +2435,34 @@ func (x *InternBox) Read(p thrift.Protocol) error {
     return nil
 }
 
+
+// RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
+func RegisterTypes(registry interface {
+	  RegisterType(name string, obj any)
+}) {
+    registry.RegisterType("facebook.com/thrift/annotation/Beta", &Beta{})
+    registry.RegisterType("facebook.com/thrift/annotation/Experimental", &Experimental{})
+    registry.RegisterType("facebook.com/thrift/annotation/Testing", &Testing{})
+    registry.RegisterType("facebook.com/thrift/annotation/Deprecated", &Deprecated{})
+    registry.RegisterType("facebook.com/thrift/annotation/ReserveIds", &ReserveIds{})
+    registry.RegisterType("facebook.com/thrift/annotation/RequiresBackwardCompatibility", &RequiresBackwardCompatibility{})
+    registry.RegisterType("facebook.com/thrift/annotation/NoTesting", &NoTesting{})
+    registry.RegisterType("facebook.com/thrift/annotation/NoExperimental", &NoExperimental{})
+    registry.RegisterType("facebook.com/thrift/annotation/NoBeta", &NoBeta{})
+    registry.RegisterType("facebook.com/thrift/annotation/Released", &Released{})
+    registry.RegisterType("facebook.com/thrift/annotation/NoLegacy", &NoLegacy{})
+    registry.RegisterType("facebook.com/thrift/annotation/NoDeprecated", &NoDeprecated{})
+    registry.RegisterType("facebook.com/thrift/annotation/TerseWrite", &TerseWrite{})
+    registry.RegisterType("facebook.com/thrift/annotation/Box", &Box{})
+    registry.RegisterType("facebook.com/thrift/annotation/Mixin", &Mixin{})
+    registry.RegisterType("facebook.com/thrift/annotation/SerializeInFieldIdOrder", &SerializeInFieldIdOrder{})
+    registry.RegisterType("facebook.com/thrift/annotation/BitmaskEnum", &BitmaskEnum{})
+    registry.RegisterType("facebook.com/thrift/annotation/v1", &V1{})
+    registry.RegisterType("facebook.com/thrift/annotation/v1beta", &V1beta{})
+    registry.RegisterType("facebook.com/thrift/annotation/v1alpha", &V1alpha{})
+    registry.RegisterType("facebook.com/thrift/annotation/v1test", &V1test{})
+    registry.RegisterType("facebook.com/thrift/annotation/ExceptionMessage", &ExceptionMessage{})
+    registry.RegisterType("facebook.com/thrift/annotation/GenerateRuntimeSchema", &GenerateRuntimeSchema{})
+    registry.RegisterType("facebook.com/thrift/annotation/InternBox", &InternBox{})
+
+}

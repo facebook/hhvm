@@ -525,3 +525,13 @@ func (x *MyUnion) Read(p thrift.Protocol) error {
     return nil
 }
 
+
+// RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
+func RegisterTypes(registry interface {
+	  RegisterType(name string, obj any)
+}) {
+    registry.RegisterType("test.dev/fixtures/no-legacy-apis/MyStruct", &MyStruct{})
+    registry.RegisterType("test.dev/fixtures/no-legacy-apis/MyUnion", &MyUnion{})
+
+    registry.RegisterType("test.dev/fixtures/no-legacy-apis/MyEnum", MyEnum(0))
+}

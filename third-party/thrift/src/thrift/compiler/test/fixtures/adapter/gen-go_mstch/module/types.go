@@ -10350,3 +10350,45 @@ func (x *Person2) Read(p thrift.Protocol) error {
     return nil
 }
 
+
+// RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
+func RegisterTypes(registry interface {
+	  RegisterType(name string, obj any)
+}) {
+    registry.RegisterType("facebook.com/thrift/test/MyAnnotation", &MyAnnotation{})
+    registry.RegisterType("facebook.com/thrift/compiler/test/fixtures/adapter/src/module/Foo", &Foo{})
+    registry.RegisterType("facebook.com/thrift/test/Baz", &Baz{})
+    registry.RegisterType("facebook.com/thrift/test/Bar", &Bar{})
+    registry.RegisterType("facebook.com/thrift/test/DirectlyAdapted", &DirectlyAdapted{})
+    registry.RegisterType("facebook.com/thrift/test/IndependentDirectlyAdapted", &IndependentDirectlyAdapted{})
+    registry.RegisterType("facebook.com/thrift/test/StructWithFieldAdapter", &StructWithFieldAdapter{})
+    registry.RegisterType("facebook.com/thrift/test/TerseAdaptedFields", &TerseAdaptedFields{})
+    registry.RegisterType("facebook.com/thrift/test/B", &B{})
+    registry.RegisterType("facebook.com/thrift/test/A", &A{})
+    registry.RegisterType("facebook.com/thrift/test/Config", &Config{})
+    registry.RegisterType("facebook.com/thrift/test/MyStruct", &MyStruct{})
+    registry.RegisterType("facebook.com/thrift/test/AdaptTestStruct", &AdaptTestStruct{})
+    registry.RegisterType("facebook.com/thrift/test/AdaptTemplatedTestStruct", &AdaptTemplatedTestStruct{})
+    registry.RegisterType("facebook.com/thrift/test/AdaptTemplatedNestedTestStruct", &AdaptTemplatedNestedTestStruct{})
+    registry.RegisterType("facebook.com/thrift/test/AdaptTestUnion", &AdaptTestUnion{})
+    registry.RegisterType("facebook.com/thrift/test/AdaptedStruct", &AdaptedStruct{})
+    registry.RegisterType("facebook.com/thrift/test/DirectlyAdaptedStruct", &DirectlyAdaptedStruct{})
+    registry.RegisterType("facebook.com/thrift/test/StructFieldAdaptedStruct", &StructFieldAdaptedStruct{})
+    registry.RegisterType("facebook.com/thrift/test/CircularAdaptee", &CircularAdaptee{})
+    registry.RegisterType("facebook.com/thrift/test/CircularStruct", &CircularStruct{})
+    registry.RegisterType("facebook.com/thrift/test/ReorderedStruct", &ReorderedStruct{})
+    registry.RegisterType("facebook.com/thrift/test/DeclaredAfterStruct", &DeclaredAfterStruct{})
+    registry.RegisterType("facebook.com/thrift/test/RenamedStruct", &RenamedStruct{})
+    registry.RegisterType("facebook.com/thrift/test/SameNamespaceStruct", &SameNamespaceStruct{})
+    registry.RegisterType("facebook.com/thrift/test/HeapAllocated", &HeapAllocated{})
+    registry.RegisterType("facebook.com/thrift/test/MoveOnly", &MoveOnly{})
+    registry.RegisterType("facebook.com/thrift/test/AlsoMoveOnly", &AlsoMoveOnly{})
+    registry.RegisterType("facebook.com/thrift/test/ApplyAdapter", &ApplyAdapter{})
+    registry.RegisterType("facebook.com/thrift/test/TransitiveAdapted", &TransitiveAdapted{})
+    registry.RegisterType("facebook.com/thrift/test/CountingStruct", &CountingStruct{})
+    registry.RegisterType("facebook.com/thrift/test/Person", &Person{})
+    registry.RegisterType("facebook.com/thrift/test/Person2", &Person2{})
+
+    registry.RegisterType("facebook.com/thrift/test/Color", Color(0))
+    registry.RegisterType("facebook.com/thrift/test/ThriftAdaptedEnum", ThriftAdaptedEnum(0))
+}

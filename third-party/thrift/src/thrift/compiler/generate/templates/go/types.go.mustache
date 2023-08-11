@@ -55,3 +55,7 @@ var _ = thrift.ZERO
 
 {{/program:structs}}
 {{/program:structs?}}
+
+{{#program:structs?}}
+{{> common/registry}}
+{{/program:structs?}}

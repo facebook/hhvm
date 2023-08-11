@@ -74,3 +74,4 @@ func EnumPtr(v Enum) *Enum {
     return &v
 }
 
+

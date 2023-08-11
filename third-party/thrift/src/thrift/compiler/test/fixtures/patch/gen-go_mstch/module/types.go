@@ -21388,3 +21388,52 @@ func (x *LoopPatch) Read(p thrift.Protocol) error {
     return nil
 }
 
+
+// RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
+func RegisterTypes(registry interface {
+	  RegisterType(name string, obj any)
+}) {
+    registry.RegisterType("test.dev/fixtures/patch/MyData", &MyData{})
+    registry.RegisterType("test.dev/fixtures/patch/MyDataWithCustomDefault", &MyDataWithCustomDefault{})
+    registry.RegisterType("test.dev/fixtures/patch/InnerUnion", &InnerUnion{})
+    registry.RegisterType("test.dev/fixtures/patch/MyUnion", &MyUnion{})
+    registry.RegisterType("test.dev/fixtures/patch/MyStruct", &MyStruct{})
+    registry.RegisterType("test.dev/fixtures/patch/LateDefStruct", &LateDefStruct{})
+    registry.RegisterType("test.dev/fixtures/patch/Recursive", &Recursive{})
+    registry.RegisterType("test.dev/fixtures/patch/Bar", &Bar{})
+    registry.RegisterType("test.dev/fixtures/patch/Loop", &Loop{})
+    registry.RegisterType("test.dev/fixtures/patch/MyDataPatch", &MyDataPatch{})
+    registry.RegisterType("test.dev/fixtures/patch/MyDataFieldPatch", &MyDataFieldPatch{})
+    registry.RegisterType("test.dev/fixtures/patch/MyDataEnsureStruct", &MyDataEnsureStruct{})
+    registry.RegisterType("test.dev/fixtures/patch/MyDataWithCustomDefaultPatch", &MyDataWithCustomDefaultPatch{})
+    registry.RegisterType("test.dev/fixtures/patch/MyDataWithCustomDefaultFieldPatch", &MyDataWithCustomDefaultFieldPatch{})
+    registry.RegisterType("test.dev/fixtures/patch/MyDataWithCustomDefaultEnsureStruct", &MyDataWithCustomDefaultEnsureStruct{})
+    registry.RegisterType("test.dev/fixtures/patch/InnerUnionPatch", &InnerUnionPatch{})
+    registry.RegisterType("test.dev/fixtures/patch/InnerUnionFieldPatch", &InnerUnionFieldPatch{})
+    registry.RegisterType("test.dev/fixtures/patch/MyUnionPatch", &MyUnionPatch{})
+    registry.RegisterType("test.dev/fixtures/patch/MyUnionFieldPatch", &MyUnionFieldPatch{})
+    registry.RegisterType("test.dev/fixtures/patch/MyStructPatch", &MyStructPatch{})
+    registry.RegisterType("test.dev/fixtures/patch/MyStructField10Patch", &MyStructField10Patch{})
+    registry.RegisterType("test.dev/fixtures/patch/MyStructField23Patch", &MyStructField23Patch{})
+    registry.RegisterType("test.dev/fixtures/patch/MyStructField26Patch", &MyStructField26Patch{})
+    registry.RegisterType("test.dev/fixtures/patch/MyStructField27Patch", &MyStructField27Patch{})
+    registry.RegisterType("test.dev/fixtures/patch/MyStructField28Patch", &MyStructField28Patch{})
+    registry.RegisterType("test.dev/fixtures/patch/MyStructField29Patch", &MyStructField29Patch{})
+    registry.RegisterType("test.dev/fixtures/patch/MyStructField30Patch", &MyStructField30Patch{})
+    registry.RegisterType("test.dev/fixtures/patch/MyStructField30Patch1", &MyStructField30Patch1{})
+    registry.RegisterType("test.dev/fixtures/patch/MyStructFieldPatch", &MyStructFieldPatch{})
+    registry.RegisterType("test.dev/fixtures/patch/MyStructEnsureStruct", &MyStructEnsureStruct{})
+    registry.RegisterType("test.dev/fixtures/patch/LateDefStructPatch", &LateDefStructPatch{})
+    registry.RegisterType("test.dev/fixtures/patch/LateDefStructFieldPatch", &LateDefStructFieldPatch{})
+    registry.RegisterType("test.dev/fixtures/patch/LateDefStructEnsureStruct", &LateDefStructEnsureStruct{})
+    registry.RegisterType("test.dev/fixtures/patch/RecursivePatch", &RecursivePatch{})
+    registry.RegisterType("test.dev/fixtures/patch/RecursiveField1Patch", &RecursiveField1Patch{})
+    registry.RegisterType("test.dev/fixtures/patch/RecursiveFieldPatch", &RecursiveFieldPatch{})
+    registry.RegisterType("test.dev/fixtures/patch/RecursiveEnsureStruct", &RecursiveEnsureStruct{})
+    registry.RegisterType("test.dev/fixtures/patch/BarPatch", &BarPatch{})
+    registry.RegisterType("test.dev/fixtures/patch/BarFieldPatch", &BarFieldPatch{})
+    registry.RegisterType("test.dev/fixtures/patch/BarEnsureStruct", &BarEnsureStruct{})
+    registry.RegisterType("test.dev/fixtures/patch/LoopPatch", &LoopPatch{})
+
+    registry.RegisterType("test.dev/fixtures/patch/MyEnum", MyEnum(0))
+}

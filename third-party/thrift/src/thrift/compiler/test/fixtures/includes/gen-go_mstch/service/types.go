@@ -72,3 +72,4 @@ if err != nil {
   }()
   return decodeResult, decodeErr
 }
+

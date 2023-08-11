@@ -1565,3 +1565,20 @@ func (x *ModuleInternal) Read(p thrift.Protocol) error {
     return nil
 }
 
+
+// RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
+func RegisterTypes(registry interface {
+	  RegisterType(name string, obj any)
+}) {
+    registry.RegisterType("facebook.com/thrift/annotation/hack/FieldWrapper", &FieldWrapper{})
+    registry.RegisterType("facebook.com/thrift/annotation/hack/Wrapper", &Wrapper{})
+    registry.RegisterType("facebook.com/thrift/annotation/hack/Adapter", &Adapter{})
+    registry.RegisterType("facebook.com/thrift/annotation/hack/SkipCodegen", &SkipCodegen{})
+    registry.RegisterType("facebook.com/thrift/annotation/hack/Name", &Name{})
+    registry.RegisterType("facebook.com/thrift/annotation/hack/UnionEnumAttributes", &UnionEnumAttributes{})
+    registry.RegisterType("facebook.com/thrift/annotation/hack/StructTrait", &StructTrait{})
+    registry.RegisterType("facebook.com/thrift/annotation/hack/Attributes", &Attributes{})
+    registry.RegisterType("facebook.com/thrift/annotation/hack/StructAsTrait", &StructAsTrait{})
+    registry.RegisterType("facebook.com/thrift/annotation/hack/ModuleInternal", &ModuleInternal{})
+
+}

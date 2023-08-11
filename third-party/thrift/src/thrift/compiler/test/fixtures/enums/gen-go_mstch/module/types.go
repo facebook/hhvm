@@ -1175,3 +1175,19 @@ func (x *MyStruct) Read(p thrift.Protocol) error {
     return nil
 }
 
+
+// RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
+func RegisterTypes(registry interface {
+	  RegisterType(name string, obj any)
+}) {
+    registry.RegisterType("test.dev/fixtures/enums/SomeStruct", &SomeStruct{})
+    registry.RegisterType("test.dev/fixtures/enums/MyStruct", &MyStruct{})
+
+    registry.RegisterType("test.dev/fixtures/enums/Metasyntactic", Metasyntactic(0))
+    registry.RegisterType("test.dev/fixtures/enums/MyEnum1", MyEnum1(0))
+    registry.RegisterType("test.dev/fixtures/enums/MyEnum2", MyEnum2(0))
+    registry.RegisterType("test.dev/fixtures/enums/MyEnum3", MyEnum3(0))
+    registry.RegisterType("test.dev/fixtures/enums/MyEnum4", MyEnum4(0))
+    registry.RegisterType("test.dev/fixtures/enums/MyBitmaskEnum1", MyBitmaskEnum1(0))
+    registry.RegisterType("test.dev/fixtures/enums/MyBitmaskEnum2", MyBitmaskEnum2(0))
+}

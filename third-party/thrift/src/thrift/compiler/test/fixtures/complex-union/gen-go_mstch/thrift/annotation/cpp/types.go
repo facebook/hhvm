@@ -2143,3 +2143,27 @@ func (x *Frozen2RequiresCompleteContainerParams) Read(p thrift.Protocol) error {
     return nil
 }
 
+
+// RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
+func RegisterTypes(registry interface {
+	  RegisterType(name string, obj any)
+}) {
+    registry.RegisterType("facebook.com/thrift/annotation/cpp/Type", &Type{})
+    registry.RegisterType("facebook.com/thrift/annotation/cpp/Ref", &Ref{})
+    registry.RegisterType("facebook.com/thrift/annotation/cpp/Lazy", &Lazy{})
+    registry.RegisterType("facebook.com/thrift/annotation/cpp/DisableLazyChecksum", &DisableLazyChecksum{})
+    registry.RegisterType("facebook.com/thrift/annotation/cpp/Adapter", &Adapter{})
+    registry.RegisterType("facebook.com/thrift/annotation/cpp/PackIsset", &PackIsset{})
+    registry.RegisterType("facebook.com/thrift/annotation/cpp/MinimizePadding", &MinimizePadding{})
+    registry.RegisterType("facebook.com/thrift/annotation/cpp/TriviallyRelocatable", &TriviallyRelocatable{})
+    registry.RegisterType("facebook.com/thrift/annotation/cpp/ScopedEnumAsUnionType", &ScopedEnumAsUnionType{})
+    registry.RegisterType("facebook.com/thrift/annotation/cpp/StrongType", &StrongType{})
+    registry.RegisterType("facebook.com/thrift/annotation/cpp/FieldInterceptor", &FieldInterceptor{})
+    registry.RegisterType("facebook.com/thrift/annotation/cpp/UseOpEncode", &UseOpEncode{})
+    registry.RegisterType("facebook.com/thrift/annotation/cpp/EnumType", &EnumType{})
+    registry.RegisterType("facebook.com/thrift/annotation/cpp/Frozen2Exclude", &Frozen2Exclude{})
+    registry.RegisterType("facebook.com/thrift/annotation/cpp/Frozen2RequiresCompleteContainerParams", &Frozen2RequiresCompleteContainerParams{})
+
+    registry.RegisterType("facebook.com/thrift/annotation/cpp/RefType", RefType(0))
+    registry.RegisterType("facebook.com/thrift/annotation/cpp/EnumUnderlyingType", EnumUnderlyingType(0))
+}

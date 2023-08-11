@@ -2960,3 +2960,22 @@ func (x *BinaryPatch) Read(p thrift.Protocol) error {
     return nil
 }
 
+
+// RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
+func RegisterTypes(registry interface {
+	  RegisterType(name string, obj any)
+}) {
+    registry.RegisterType("facebook.com/thrift/op/GeneratePatch", &GeneratePatch{})
+    registry.RegisterType("facebook.com/thrift/op/AssignOnlyPatch", &AssignOnlyPatch{})
+    registry.RegisterType("facebook.com/thrift/op/BoolPatch", &BoolPatch{})
+    registry.RegisterType("facebook.com/thrift/op/BytePatch", &BytePatch{})
+    registry.RegisterType("facebook.com/thrift/op/I16Patch", &I16Patch{})
+    registry.RegisterType("facebook.com/thrift/op/I32Patch", &I32Patch{})
+    registry.RegisterType("facebook.com/thrift/op/I64Patch", &I64Patch{})
+    registry.RegisterType("facebook.com/thrift/op/FloatPatch", &FloatPatch{})
+    registry.RegisterType("facebook.com/thrift/op/DoublePatch", &DoublePatch{})
+    registry.RegisterType("facebook.com/thrift/op/StringPatch", &StringPatch{})
+    registry.RegisterType("facebook.com/thrift/op/BinaryPatch", &BinaryPatch{})
+
+    registry.RegisterType("facebook.com/thrift/op/PatchOp", PatchOp(0))
+}

@@ -1976,3 +1976,14 @@ func (x *TypeName) Read(p thrift.Protocol) error {
     return nil
 }
 
+
+// RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
+func RegisterTypes(registry interface {
+	  RegisterType(name string, obj any)
+}) {
+    registry.RegisterType("facebook.com/thrift/type/TypeUri", &TypeUri{})
+    registry.RegisterType("facebook.com/thrift/type/TypeName", &TypeName{})
+
+    registry.RegisterType("facebook.com/thrift/type/Void", Void(0))
+    registry.RegisterType("facebook.com/thrift/type/StandardProtocol", StandardProtocol(0))
+}

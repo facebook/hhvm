@@ -7964,3 +7964,48 @@ func (x *StructWithDoubleUnderscores) Read(p thrift.Protocol) error {
     return nil
 }
 
+
+// RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
+func RegisterTypes(registry interface {
+	  RegisterType(name string, obj any)
+}) {
+    registry.RegisterType("apache.org/thrift/fixtures/types/empty_struct", &EmptyStruct{})
+    registry.RegisterType("apache.org/thrift/fixtures/types/decorated_struct", &DecoratedStruct{})
+    registry.RegisterType("apache.org/thrift/fixtures/types/ContainerStruct", &ContainerStruct{})
+    registry.RegisterType("apache.org/thrift/fixtures/types/CppTypeStruct", &CppTypeStruct{})
+    registry.RegisterType("apache.org/thrift/fixtures/types/VirtualStruct", &VirtualStruct{})
+    registry.RegisterType("apache.org/thrift/fixtures/types/MyStructWithForwardRefEnum", &MyStructWithForwardRefEnum{})
+    registry.RegisterType("apache.org/thrift/fixtures/types/TrivialNumeric", &TrivialNumeric{})
+    registry.RegisterType("apache.org/thrift/fixtures/types/TrivialNestedWithDefault", &TrivialNestedWithDefault{})
+    registry.RegisterType("apache.org/thrift/fixtures/types/ComplexString", &ComplexString{})
+    registry.RegisterType("apache.org/thrift/fixtures/types/ComplexNestedWithDefault", &ComplexNestedWithDefault{})
+    registry.RegisterType("apache.org/thrift/fixtures/types/MinPadding", &MinPadding{})
+    registry.RegisterType("apache.org/thrift/fixtures/types/MinPaddingWithCustomType", &MinPaddingWithCustomType{})
+    registry.RegisterType("apache.org/thrift/fixtures/types/MyStruct", &MyStruct{})
+    registry.RegisterType("apache.org/thrift/fixtures/types/MyDataItem", &MyDataItem{})
+    registry.RegisterType("apache.org/thrift/fixtures/types/Renaming", &Renaming{})
+    registry.RegisterType("apache.org/thrift/fixtures/types/AnnotatedTypes", &AnnotatedTypes{})
+    registry.RegisterType("apache.org/thrift/fixtures/types/ForwardUsageRoot", &ForwardUsageRoot{})
+    registry.RegisterType("apache.org/thrift/fixtures/types/ForwardUsageStruct", &ForwardUsageStruct{})
+    registry.RegisterType("apache.org/thrift/fixtures/types/ForwardUsageByRef", &ForwardUsageByRef{})
+    registry.RegisterType("apache.org/thrift/fixtures/types/IncompleteMap", &IncompleteMap{})
+    registry.RegisterType("apache.org/thrift/fixtures/types/IncompleteMapDep", &IncompleteMapDep{})
+    registry.RegisterType("apache.org/thrift/fixtures/types/CompleteMap", &CompleteMap{})
+    registry.RegisterType("apache.org/thrift/fixtures/types/CompleteMapDep", &CompleteMapDep{})
+    registry.RegisterType("apache.org/thrift/fixtures/types/IncompleteList", &IncompleteList{})
+    registry.RegisterType("apache.org/thrift/fixtures/types/IncompleteListDep", &IncompleteListDep{})
+    registry.RegisterType("apache.org/thrift/fixtures/types/CompleteList", &CompleteList{})
+    registry.RegisterType("apache.org/thrift/fixtures/types/CompleteListDep", &CompleteListDep{})
+    registry.RegisterType("apache.org/thrift/fixtures/types/AdaptedList", &AdaptedList{})
+    registry.RegisterType("apache.org/thrift/fixtures/types/AdaptedListDep", &AdaptedListDep{})
+    registry.RegisterType("apache.org/thrift/fixtures/types/DependentAdaptedList", &DependentAdaptedList{})
+    registry.RegisterType("apache.org/thrift/fixtures/types/DependentAdaptedListDep", &DependentAdaptedListDep{})
+    registry.RegisterType("apache.org/thrift/fixtures/types/AllocatorAware", &AllocatorAware{})
+    registry.RegisterType("apache.org/thrift/fixtures/types/AllocatorAware2", &AllocatorAware2{})
+    registry.RegisterType("apache.org/thrift/fixtures/types/TypedefStruct", &TypedefStruct{})
+    registry.RegisterType("apache.org/thrift/fixtures/types/StructWithDoubleUnderscores", &StructWithDoubleUnderscores{})
+
+    registry.RegisterType("apache.org/thrift/fixtures/types/has_bitwise_ops", HasBitwiseOps(0))
+    registry.RegisterType("apache.org/thrift/fixtures/types/is_unscoped", IsUnscoped(0))
+    registry.RegisterType("apache.org/thrift/fixtures/types/MyForwardRefEnum", MyForwardRefEnum(0))
+}

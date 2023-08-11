@@ -1639,3 +1639,17 @@ func (x *UnionToBeRenamed) Read(p thrift.Protocol) error {
     return nil
 }
 
+
+// RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
+func RegisterTypes(registry interface {
+	  RegisterType(name string, obj any)
+}) {
+    registry.RegisterType("test.dev/fixtures/basic/MyStruct", &MyStruct{})
+    registry.RegisterType("test.dev/fixtures/basic/MyDataItem", &MyDataItem{})
+    registry.RegisterType("test.dev/fixtures/basic/MyUnion", &MyUnion{})
+    registry.RegisterType("test.dev/fixtures/basic/ReservedKeyword", &ReservedKeyword{})
+    registry.RegisterType("test.dev/fixtures/basic/UnionToBeRenamed", &UnionToBeRenamed{})
+
+    registry.RegisterType("test.dev/fixtures/basic/MyEnum", MyEnum(0))
+    registry.RegisterType("test.dev/fixtures/basic/HackEnum", HackEnum(0))
+}

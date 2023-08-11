@@ -6653,3 +6653,20 @@ func (x *TerseException) Read(p thrift.Protocol) error {
     return nil
 }
 
+
+// RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
+func RegisterTypes(registry interface {
+	  RegisterType(name string, obj any)
+}) {
+    registry.RegisterType("facebook.com/thrift/test/terse_write/MyStruct", &MyStruct{})
+    registry.RegisterType("facebook.com/thrift/test/terse_write/MyUnion", &MyUnion{})
+    registry.RegisterType("facebook.com/thrift/test/terse_write/MyStructWithCustomDefault", &MyStructWithCustomDefault{})
+    registry.RegisterType("facebook.com/thrift/test/terse_write/StructLevelTerseStruct", &StructLevelTerseStruct{})
+    registry.RegisterType("facebook.com/thrift/test/terse_write/FieldLevelTerseStruct", &FieldLevelTerseStruct{})
+    registry.RegisterType("facebook.com/thrift/test/terse_write/TerseStructWithCustomDefault", &TerseStructWithCustomDefault{})
+    registry.RegisterType("facebook.com/thrift/test/terse_write/AdaptedFields", &AdaptedFields{})
+    registry.RegisterType("facebook.com/thrift/test/terse_write/WrappedFields", &WrappedFields{})
+    registry.RegisterType("facebook.com/thrift/test/terse_write/TerseException", &TerseException{})
+
+    registry.RegisterType("facebook.com/thrift/test/terse_write/MyEnum", MyEnum(0))
+}

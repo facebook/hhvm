@@ -683,3 +683,16 @@ func (x *MarshalCapi) Read(p thrift.Protocol) error {
     return nil
 }
 
+
+// RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
+func RegisterTypes(registry interface {
+	  RegisterType(name string, obj any)
+}) {
+    registry.RegisterType("facebook.com/thrift/annotation/python/Hidden", &Hidden{})
+    registry.RegisterType("facebook.com/thrift/annotation/python/Flags", &Flags{})
+    registry.RegisterType("facebook.com/thrift/annotation/python/Name", &Name{})
+    registry.RegisterType("facebook.com/thrift/annotation/python/IOBuf", &IOBuf{})
+    registry.RegisterType("facebook.com/thrift/annotation/python/Adapter", &Adapter{})
+    registry.RegisterType("facebook.com/thrift/annotation/python/MarshalCapi", &MarshalCapi{})
+
+}

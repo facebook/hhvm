@@ -599,10 +599,12 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
         [observer = std::move(contextObserver),
          tlsRevocationObserver = enableTLSCertRevocation(),
          tlsRevocationEnforcementObserver = enforceTLSCertRevocation(),
-         hybridKexObserver = enableHybridKex()]() {
+         hybridKexObserver = enableHybridKex(),
+         aegisObserver = enableAegis()]() {
           (void)**tlsRevocationObserver;
           (void)**tlsRevocationEnforcementObserver;
           (void)**hybridKexObserver;
+          (void)**aegisObserver;
           auto context = **observer;
           context.isDefault = true;
           context.alpnAllowMismatch = false;
@@ -1108,6 +1110,8 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   }
 
   static folly::observer::Observer<bool> enableHybridKex();
+
+  static folly::observer::Observer<bool> enableAegis();
 
   /**
    * For each request debug stub, a snapshot information can be constructed to

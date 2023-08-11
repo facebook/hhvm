@@ -14,10 +14,10 @@ namespace python {
 ::apache::thrift::metadata::ThriftMetadata python_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata_ref();
+  ::apache::thrift::detail::md::StructMetadata<Py3Hidden>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Hidden>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Flags>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Name>::gen(metadata);
-  ::apache::thrift::detail::md::StructMetadata<IOBuf>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Adapter>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<MarshalCapi>::gen(metadata);
   return metadata;

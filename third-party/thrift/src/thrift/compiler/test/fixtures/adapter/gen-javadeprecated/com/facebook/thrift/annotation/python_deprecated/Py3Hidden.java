@@ -24,8 +24,8 @@ import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
 @SuppressWarnings({ "unused", "serial" })
-public class IOBuf implements TBase, java.io.Serializable, Cloneable, Comparable<IOBuf> {
-  private static final TStruct STRUCT_DESC = new TStruct("IOBuf");
+public class Py3Hidden implements TBase, java.io.Serializable, Cloneable, Comparable<Py3Hidden> {
+  private static final TStruct STRUCT_DESC = new TStruct("Py3Hidden");
 
   public static final Map<Integer, FieldMetaData> metaDataMap;
 
@@ -35,10 +35,10 @@ public class IOBuf implements TBase, java.io.Serializable, Cloneable, Comparable
   }
 
   static {
-    FieldMetaData.addStructMetaDataMap(IOBuf.class, metaDataMap);
+    FieldMetaData.addStructMetaDataMap(Py3Hidden.class, metaDataMap);
   }
 
-  public IOBuf() {
+  public Py3Hidden() {
   }
 
   public static class Builder {
@@ -46,8 +46,8 @@ public class IOBuf implements TBase, java.io.Serializable, Cloneable, Comparable
     public Builder() {
     }
 
-    public IOBuf build() {
-      IOBuf result = new IOBuf();
+    public Py3Hidden build() {
+      Py3Hidden result = new Py3Hidden();
       return result;
     }
   }
@@ -59,11 +59,11 @@ public class IOBuf implements TBase, java.io.Serializable, Cloneable, Comparable
   /**
    * Performs a deep copy on <i>other</i>.
    */
-  public IOBuf(IOBuf other) {
+  public Py3Hidden(Py3Hidden other) {
   }
 
-  public IOBuf deepCopy() {
-    return new IOBuf(this);
+  public Py3Hidden deepCopy() {
+    return new Py3Hidden(this);
   }
 
   public void setFieldValue(int fieldID, Object __value) {
@@ -86,9 +86,9 @@ public class IOBuf implements TBase, java.io.Serializable, Cloneable, Comparable
       return false;
     if (this == _that)
       return true;
-    if (!(_that instanceof IOBuf))
+    if (!(_that instanceof Py3Hidden))
       return false;
-    IOBuf that = (IOBuf)_that;
+    Py3Hidden that = (Py3Hidden)_that;
 
     return true;
   }
@@ -99,7 +99,7 @@ public class IOBuf implements TBase, java.io.Serializable, Cloneable, Comparable
   }
 
   @Override
-  public int compareTo(IOBuf other) {
+  public int compareTo(Py3Hidden other) {
     if (other == null) {
       // See java.lang.Comparable docs
       throw new NullPointerException();
@@ -155,7 +155,7 @@ public class IOBuf implements TBase, java.io.Serializable, Cloneable, Comparable
     String indentStr = prettyPrint ? TBaseHelper.getIndentedString(indent) : "";
     String newLine = prettyPrint ? "\n" : "";
     String space = prettyPrint ? " " : "";
-    StringBuilder sb = new StringBuilder("IOBuf");
+    StringBuilder sb = new StringBuilder("Py3Hidden");
     sb.append(space);
     sb.append("(");
     sb.append(newLine);

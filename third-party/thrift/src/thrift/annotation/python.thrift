@@ -15,6 +15,7 @@
  */
 
 include "thrift/annotation/scope.thrift"
+include "thrift/annotation/thrift.thrift"
 
 package "facebook.com/thrift/annotation/python"
 
@@ -23,7 +24,13 @@ namespace py.asyncio facebook_thrift_asyncio.annotation.python
 namespace go thrift.annotation.python
 namespace py thrift.annotation.python
 
+// Hides in thrift-py3 only, not in thrift-python
 @scope.Definition
+struct Py3Hidden {}
+
+// Deprecated, equivalent to Py3Hidden
+@scope.Definition
+@thrift.Deprecated{message = "Use Py3Hidden instead"}
 struct Hidden {}
 
 @scope.Enum
@@ -33,10 +40,6 @@ struct Flags {}
 struct Name {
   1: string name;
 }
-
-@scope.Typedef
-@scope.Field
-struct IOBuf {}
 
 // An annotation that applies a Python adapter to typedef or field, or directly on struct.
 //

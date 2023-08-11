@@ -195,7 +195,7 @@ class structure_annotations {
       // python
       if (name == "py3.hidden") {
         to_remove.emplace_back(name, data);
-        to_add.insert("@python.Hidden");
+        to_add.insert("@python.Py3Hidden");
         fm_.add_include("thrift/annotation/python.thrift");
       }
       if (name == "py3.name") {

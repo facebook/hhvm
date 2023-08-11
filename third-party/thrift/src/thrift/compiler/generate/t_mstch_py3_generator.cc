@@ -114,7 +114,8 @@ std::string get_cpp_template(const t_type& type) {
 
 bool is_hidden(const t_named& node) {
   return node.has_annotation("py3.hidden") ||
-      node.find_structured_annotation_or_null(kPythonHiddenUri);
+      node.find_structured_annotation_or_null(kPythonHiddenUri) ||
+      node.find_structured_annotation_or_null(kPythonPy3HiddenUri);
 }
 
 bool is_func_supported(bool no_stream, const t_function* func) {
@@ -126,7 +127,8 @@ bool is_hidden(const t_type& node) {
   return node.generated() ||
       gen::cpp::type_resolver::is_directly_adapted(node) ||
       node.has_annotation("py3.hidden") ||
-      node.find_structured_annotation_or_null(kPythonHiddenUri);
+      node.find_structured_annotation_or_null(kPythonHiddenUri) ||
+      node.find_structured_annotation_or_null(kPythonPy3HiddenUri);
 }
 
 class py3_mstch_program : public mstch_program {
@@ -773,7 +775,9 @@ class py3_mstch_struct : public mstch_struct {
             py3_fields_.end(),
             [this](const t_field* field) {
               bool hidden = field->has_annotation("py3.hidden") ||
-                  field->find_structured_annotation_or_null(kPythonHiddenUri);
+                  field->find_structured_annotation_or_null(kPythonHiddenUri) ||
+                  field->find_structured_annotation_or_null(
+                      kPythonPy3HiddenUri);
               this->hidden_fields |= hidden;
               return hidden;
             }),

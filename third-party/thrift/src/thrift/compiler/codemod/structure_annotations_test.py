@@ -236,8 +236,8 @@ struct G {} (
 
                 @python.Flags
                 enum E {}
-                @python.Hidden
                 @python.Name{name = "U"}
+                @python.Py3Hidden
                 typedef binary T
                 """
             ),

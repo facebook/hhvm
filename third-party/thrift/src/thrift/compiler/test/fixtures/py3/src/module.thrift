@@ -67,22 +67,22 @@ struct SimpleStruct {
   6: double real;
   7: float smaller_real;
   // The next field should not show up anywhere in the generated code.
-  @python.Hidden{}
+  @python.Py3Hidden{}
   8: i16 hidden_field;
 }
 
 @cpp.Adapter{name = "Adapter"}
 typedef SimpleStruct AdaptedTypeDef
-@python.Hidden
+@python.Py3Hidden
 typedef SimpleStruct HiddenTypeDef
 
 struct HiddenTypeFieldsStruct {
-  @python.Hidden
+  @python.Py3Hidden
   1: AdaptedTypeDef field1;
-  @python.Hidden
+  @python.Py3Hidden
   2: list<AdaptedTypeDef> field2;
   @cpp.Type{template = "::std::unordered_map"}
-  @python.Hidden
+  @python.Py3Hidden
   3: map<i32, AdaptedTypeDef> field3;
 }
 
@@ -91,7 +91,7 @@ union AdaptedUnion {
   1: i16 best;
 }
 
-@python.Hidden
+@python.Py3Hidden
 safe exception HiddenException {
   1: i16 test;
 }
@@ -206,7 +206,7 @@ service SimpleService {
   set<binary> contain_binary(1: list<binary> binaries);
   list<AnEnum> contain_enum(1: list<AnEnum> the_enum);
   BinaryUnionStruct get_binary_union_struct(1: BinaryUnion u);
-  @python.Hidden
+  @python.Py3Hidden
   SimpleStruct get_struct_hidden();
 }
 

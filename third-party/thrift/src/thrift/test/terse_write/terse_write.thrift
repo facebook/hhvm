@@ -109,13 +109,13 @@ struct FieldLevelTerseStruct {
 // TODO(dokwon): Add support to py3 terse write with cpp.ref.
 @thrift.TerseWrite
 struct CppRefTerseStruct {
-  @python.Hidden
+  @python.Py3Hidden
   @cpp.Ref{type = cpp.RefType.Unique}
   1: i32 unique_int_field;
-  @python.Hidden
+  @python.Py3Hidden
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   2: i32 shared_int_field;
-  @python.Hidden
+  @python.Py3Hidden
   @cpp.Ref{type = cpp.RefType.Shared}
   3: i32 shared_const_int_field;
   @thrift.InternBox
@@ -179,18 +179,18 @@ typedef list<i32> AdaptedList
 
 @thrift.TerseWrite
 struct AdaptedFields {
-  @python.Hidden
+  @python.Py3Hidden
   1: AdaptedInteger field1;
-  @python.Hidden
+  @python.Py3Hidden
   @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
   2: i32 field2;
-  @python.Hidden
+  @python.Py3Hidden
   @cpp.Adapter{name = "::apache::thrift::test::AdapterWithContext"}
   3: i32 field3;
-  @python.Hidden
+  @python.Py3Hidden
   @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
   4: AdaptedInteger field4;
-  @python.Hidden
+  @python.Py3Hidden
   @cpp.Adapter{name = "::apache::thrift::test::AdapterWithContext"}
   5: AdaptedInteger field5;
   6: string meta;
@@ -198,18 +198,18 @@ struct AdaptedFields {
 
 @thrift.TerseWrite
 struct AdaptedStringFields {
-  @python.Hidden
+  @python.Py3Hidden
   1: AdaptedString field1;
-  @python.Hidden
+  @python.Py3Hidden
   @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
   2: string field2;
-  @python.Hidden
+  @python.Py3Hidden
   @cpp.Adapter{name = "::apache::thrift::test::AdapterWithContext"}
   3: string field3;
-  @python.Hidden
+  @python.Py3Hidden
   @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
   4: AdaptedString field4;
-  @python.Hidden
+  @python.Py3Hidden
   @cpp.Adapter{name = "::apache::thrift::test::AdapterWithContext"}
   5: AdaptedString field5;
   6: string meta;
@@ -217,18 +217,18 @@ struct AdaptedStringFields {
 
 @thrift.TerseWrite
 struct AdaptedListFields {
-  @python.Hidden
+  @python.Py3Hidden
   1: AdaptedList field1;
-  @python.Hidden
+  @python.Py3Hidden
   @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
   2: list<i32> field2;
-  @python.Hidden
+  @python.Py3Hidden
   @cpp.Adapter{name = "::apache::thrift::test::AdapterWithContext"}
   3: list<i32> field3;
-  @python.Hidden
+  @python.Py3Hidden
   @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
   4: AdaptedList field4;
-  @python.Hidden
+  @python.Py3Hidden
   @cpp.Adapter{name = "::apache::thrift::test::AdapterWithContext"}
   5: AdaptedList field5;
   6: string meta;
@@ -281,7 +281,7 @@ struct TerseStructs3 {
 struct TerseInternBoxedStructWithCustomDefault {
   @thrift.InternBox
   1: MyStructWithCustomDefault intern_boxed_field_with_custom_default;
-  @python.Hidden
+  @python.Py3Hidden
   @thrift.InternBox
   2: MyStructWithCustomDefaultAdapted intern_boxed_field_with_custom_default_adapted;
 }

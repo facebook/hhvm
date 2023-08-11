@@ -15,6 +15,88 @@ var _ = fmt.Printf
 var _ = thrift.ZERO
 
 
+type Py3Hidden struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &Py3Hidden{}
+
+func NewPy3Hidden() *Py3Hidden {
+    return (&Py3Hidden{})
+}
+
+func (x *Py3Hidden) String() string {
+    type Py3HiddenAlias Py3Hidden
+    valueAlias := (*Py3HiddenAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
+}
+
+
+// Deprecated: Use Py3Hidden.Set* methods instead or set the fields directly.
+type Py3HiddenBuilder struct {
+    obj *Py3Hidden
+}
+
+func NewPy3HiddenBuilder() *Py3HiddenBuilder {
+    return &Py3HiddenBuilder{
+        obj: NewPy3Hidden(),
+    }
+}
+
+func (x *Py3HiddenBuilder) Emit() *Py3Hidden {
+    var objCopy Py3Hidden = *x.obj
+    return &objCopy
+}
+
+func (x *Py3Hidden) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("Py3Hidden"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *Py3Hidden) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, typ, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if typ == thrift.STOP {
+            break;
+        }
+
+        switch id {
+        default:
+            if err := p.Skip(typ); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+
 type Hidden struct {
 }
 // Compile time interface enforcer
@@ -320,88 +402,6 @@ func (x *Name) Read(p thrift.Protocol) error {
 }
 
 
-type IOBuf struct {
-}
-// Compile time interface enforcer
-var _ thrift.Struct = &IOBuf{}
-
-func NewIOBuf() *IOBuf {
-    return (&IOBuf{})
-}
-
-func (x *IOBuf) String() string {
-    type IOBufAlias IOBuf
-    valueAlias := (*IOBufAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
-
-
-// Deprecated: Use IOBuf.Set* methods instead or set the fields directly.
-type IOBufBuilder struct {
-    obj *IOBuf
-}
-
-func NewIOBufBuilder() *IOBufBuilder {
-    return &IOBufBuilder{
-        obj: NewIOBuf(),
-    }
-}
-
-func (x *IOBufBuilder) Emit() *IOBuf {
-    var objCopy IOBuf = *x.obj
-    return &objCopy
-}
-
-func (x *IOBuf) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("IOBuf"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
-    }
-
-    if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
-    }
-
-    if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *IOBuf) Read(p thrift.Protocol) error {
-    if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
-    }
-
-    for {
-        _, typ, id, err := p.ReadFieldBegin()
-        if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
-        }
-
-        if typ == thrift.STOP {
-            break;
-        }
-
-        switch id {
-        default:
-            if err := p.Skip(typ); err != nil {
-                return err
-            }
-        }
-
-        if err := p.ReadFieldEnd(); err != nil {
-            return err
-        }
-    }
-
-    if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
-    }
-
-    return nil
-}
-
-
 type Adapter struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
     TypeHint string `thrift:"typeHint,2" json:"typeHint" db:"typeHint"`
@@ -688,10 +688,10 @@ func (x *MarshalCapi) Read(p thrift.Protocol) error {
 func RegisterTypes(registry interface {
 	  RegisterType(name string, obj any)
 }) {
+    registry.RegisterType("facebook.com/thrift/annotation/python/Py3Hidden", &Py3Hidden{})
     registry.RegisterType("facebook.com/thrift/annotation/python/Hidden", &Hidden{})
     registry.RegisterType("facebook.com/thrift/annotation/python/Flags", &Flags{})
     registry.RegisterType("facebook.com/thrift/annotation/python/Name", &Name{})
-    registry.RegisterType("facebook.com/thrift/annotation/python/IOBuf", &IOBuf{})
     registry.RegisterType("facebook.com/thrift/annotation/python/Adapter", &Adapter{})
     registry.RegisterType("facebook.com/thrift/annotation/python/MarshalCapi", &MarshalCapi{})
 

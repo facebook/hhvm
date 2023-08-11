@@ -155,7 +155,7 @@ struct easy {
   1: i32 val;
   2: I32List val_list;
   4: Integers an_int;
-  @python.Hidden{}
+  @python.Py3Hidden{}
   5: i64 py3_hidden;
 } (anno1 = "foo", bar)
 
@@ -411,11 +411,7 @@ struct ListNode {
 @cpp.Type{name = "folly::IOBuf"}
 typedef binary IOBuf
 
-/**
- * amusingly, this annotation excludes this struct in thrift-py3
- * leaving it included in thrift-python
- */
-@python.Hidden
+@python.Py3Hidden
 struct IOBufListStruct {
   1: list<IOBuf> iobufs;
 } (cpp.noncomparable)

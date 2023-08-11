@@ -4795,6 +4795,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         if !self.inside_no_auto_dynamic_class {
             let this = Rc::make_mut(&mut self.state);
             this.under_no_auto_dynamic = false;
+            this.under_no_auto_likes = false;
         }
         if is_constructor {
             Node::Constructor(self.alloc(ConstructorNode { method, properties }))

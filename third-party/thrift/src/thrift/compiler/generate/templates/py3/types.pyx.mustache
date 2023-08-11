@@ -880,16 +880,16 @@ cdef class ResponseAndClientBufferedStream__{{> stream/response_class_name_suffi
 
     @staticmethod
     cdef _fbthrift_create(cResponseAndClientBufferedStream[{{!
-            }}{{#type:stream_first_response_type}}{{ > types/cython_cpp_type}}{{/type:stream_first_response_type}}, {{!
+            }}{{#function:stream_first_response_type}}{{ > types/cython_cpp_type}}{{/function:stream_first_response_type}}, {{!
             }}{{#function:stream_elem_type}}{{ > types/cython_cpp_type}}{{/function:stream_elem_type}}]& c_obj, __RpcOptions rpc_options):
         __fbthrift_inst = ResponseAndClientBufferedStream__{{> stream/response_class_name_suffix}}()
         __fbthrift_inst._stream = ClientBufferedStream__{{#function:stream_elem_type}}{{type:flat_name}}{{/function:stream_elem_type}}._fbthrift_create(
             c_obj.stream, rpc_options,
         )
-{{#type:stream_first_response_type}}
+{{#function:stream_first_response_type}}
         cdef {{> types/cython_cpp_type}} _value = c_obj.response
         __fbthrift_inst._response = {{> stream/cython_cpp_value_to_python_value}}
-{{/type:stream_first_response_type}}
+{{/function:stream_first_response_type}}
         return __fbthrift_inst
 
     def __iter__(self):

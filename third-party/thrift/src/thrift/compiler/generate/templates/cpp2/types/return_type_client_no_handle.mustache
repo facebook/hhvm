@@ -15,29 +15,29 @@
   limitations under the License.
 
 %><%#function:stream?%><%!
-  %><%#type:stream_has_first_response?%>apache::thrift::ResponseAndClientBufferedStream<<%!
-  %><%#type:stream_first_response_type%><%type:cpp_type%><%/type:stream_first_response_type%>,<%!
+  %><%#function:stream_has_first_response?%>apache::thrift::ResponseAndClientBufferedStream<<%!
+  %><%#function:stream_first_response_type%><%type:cpp_type%><%/function:stream_first_response_type%>,<%!
   %><%#function:stream_elem_type%><%type:cpp_type%><%/function:stream_elem_type%>><%!
-  %><%/type:stream_has_first_response?%><%!
-  %><%^type:stream_has_first_response?%>apache::thrift::ClientBufferedStream<<%!
+  %><%/function:stream_has_first_response?%><%!
+  %><%^function:stream_has_first_response?%>apache::thrift::ClientBufferedStream<<%!
   %><%#function:stream_elem_type%><%type:cpp_type%><%/function:stream_elem_type%>><%!
-  %><%/type:stream_has_first_response?%><%!
+  %><%/function:stream_has_first_response?%><%!
 %><%/function:stream?%><%!
 
 %><%^function:stream?%><%!
   %><%#function:sink?%><%!
-    %><%#type:sink_has_first_response?%><%!
+    %><%#function:sink_has_first_response?%><%!
       %>apache::thrift::ResponseAndClientSink<<%!
-      %><%#type:sink_first_response_type%><%type:cpp_type%><%/type:sink_first_response_type%>, <%!
+      %><%#function:sink_first_response_type%><%type:cpp_type%><%/function:sink_first_response_type%>, <%!
       %><%#function:sink_elem_type%><%type:cpp_type%><%/function:sink_elem_type%>, <%!
-      %><%#type:sink_final_response_type%><%type:cpp_type%><%/type:sink_final_response_type%>><%!
-    %><%/type:sink_has_first_response?%><%!
+      %><%#function:sink_final_response_type%><%type:cpp_type%><%/function:sink_final_response_type%>><%!
+    %><%/function:sink_has_first_response?%><%!
 
-    %><%^type:sink_has_first_response?%><%!
+    %><%^function:sink_has_first_response?%><%!
       %>apache::thrift::ClientSink<<%!
       %><%#function:sink_elem_type%><%type:cpp_type%><%/function:sink_elem_type%>, <%!
-      %><%#type:sink_final_response_type%><%type:cpp_type%><%/type:sink_final_response_type%>><%!
-    %><%/type:sink_has_first_response?%><%!
+      %><%#function:sink_final_response_type%><%type:cpp_type%><%/function:sink_final_response_type%>><%!
+    %><%/function:sink_has_first_response?%><%!
   %><%/function:sink?%><%!
   %><%^function:sink?%><%!
     %><%type:cpp_type%><%!

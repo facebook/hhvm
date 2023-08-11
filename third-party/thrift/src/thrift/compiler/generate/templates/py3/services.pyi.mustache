@@ -64,7 +64,7 @@ class {{service:name}}Interface(
     {{/function:return_type}}
 
     @abstractmethod
-    {{#function:return_type}}{{^function:stream?}}async {{/function:stream?}}{{#type:stream_has_first_response?}}async {{/type:stream_has_first_response?}}{{/function:return_type}}def {{function:name}}(
+    {{#function:return_type}}{{^function:stream?}}async {{/function:stream?}}{{#function:stream_has_first_response?}}async {{/function:stream_has_first_response?}}{{/function:return_type}}def {{function:name}}(
         self{{#function:args}},
         {{field:py_name}}: {{#field:type}}{{> types/pep484_type}}{{/field:type}}{{/function:args}}
     ) -> {{#function:return_type}}{{> services/return_type_pep484_type}}{{/function:return_type}}: ...

@@ -40,7 +40,7 @@ public class {{service:javaCapitalName}}RpcServerHandler {{#service:extends}} ex
   private final com.facebook.thrift.server.generated.StreamResponseHandler<{{#function:return_type}}{{#function:stream_elem_type}}{{> BoxedType}}{{/function:stream_elem_type}}{{/function:return_type}}> _handler_{{function:javaName}};
   {{/function:stream_has_first_response?}}
   {{#function:stream_has_first_response?}}
-  private final com.facebook.thrift.server.generated.StreamWithFirstResponseHandler<{{#function:return_type}}{{#type:stream_first_response_type}}{{> BoxedType}}{{/type:stream_first_response_type}},{{#function:stream_elem_type}}{{> BoxedType}}{{/function:stream_elem_type}}{{/function:return_type}}> _handler_{{function:javaName}};
+  private final com.facebook.thrift.server.generated.StreamWithFirstResponseHandler<{{#function:return_type}}{{#function:stream_first_response_type}}{{> BoxedType}}{{/function:stream_first_response_type}},{{#function:stream_elem_type}}{{> BoxedType}}{{/function:stream_elem_type}}{{/function:return_type}}> _handler_{{function:javaName}};
   {{/function:stream_has_first_response?}}
   {{/service:streamingFunctions}}
 
@@ -159,10 +159,10 @@ public class {{service:javaCapitalName}}RpcServerHandler {{#service:extends}} ex
         {{function:unsetIsNested}}
         {{^function:voidType}}
         {{#function:return_type}}
-        {{#type:stream_first_response_type}}
+        {{#function:stream_first_response_type}}
         {{> Type}} _iter0 = ({{> Type}})_o;
         {{function:nestedDepth++}}{{> WriteResponseType}}{{function:nestedDepth--}}
-        {{/type:stream_first_response_type}}
+        {{/function:stream_first_response_type}}
         oprot.writeFieldEnd();
         {{/function:return_type}}
         {{/function:voidType}}

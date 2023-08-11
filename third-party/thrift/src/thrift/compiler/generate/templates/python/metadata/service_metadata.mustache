@@ -60,10 +60,10 @@ new_struct = {{#service:external_program?}}{{service:module_path}}.thrift_metada
 {{#function:return_type}}
 {{> metadata/recursive_call }}{{!
 }}{{#function:stream?}}{{#function:stream_elem_type}}{{> metadata/recursive_call }}{{/function:stream_elem_type}} # elem
-{{#type:stream_first_response_type}}{{> metadata/recursive_call }}{{/type:stream_first_response_type}} # response {{/function:stream?}}{{!
+{{#function:stream_first_response_type}}{{> metadata/recursive_call }}{{/function:stream_first_response_type}} # response {{/function:stream?}}{{!
 }}{{#function:sink?}}{{#function:sink_elem_type}}{{> metadata/recursive_call }}{{/function:sink_elem_type}} # elem
-{{#type:sink_final_response_type}}{{> metadata/recursive_call }}{{/type:sink_final_response_type}} # final response
-{{#type:sink_first_response_type}}{{> metadata/recursive_call }}{{/type:sink_first_response_type}} # first response {{/function:sink?}}{{!
+{{#function:sink_final_response_type}}{{> metadata/recursive_call }}{{/function:sink_final_response_type}} # final response
+{{#function:sink_first_response_type}}{{> metadata/recursive_call }}{{/function:sink_first_response_type}} # first response {{/function:sink?}}{{!
 }} # return value
 {{/function:return_type}}
 

@@ -148,14 +148,14 @@ std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsum
 <%#function:stream?%>
   <% > common/namespace_cpp2%><%service:parent_service_cpp_name%>_<%#service:interaction?%><%service:cpp_name%>_<%/service:interaction?%><%function:cpp_name%>_presult::FieldsType result;
   using StreamPResultType = <% > common/namespace_cpp2%><%service:parent_service_cpp_name%>_<%#service:interaction?%><%service:cpp_name%>_<%/service:interaction?%><%function:cpp_name%>_presult::StreamPResultType;
-      <%#type:stream_has_first_response?%>
+      <%#function:stream_has_first_response?%>
   result.get<0>().value = const_cast<<%type:cpp_type%>::ResponseType*>(&_return.response);
   result.setIsSet(0, true);
   auto& returnStream = _return.stream;
-      <%/type:stream_has_first_response?%>
-      <%^type:stream_has_first_response?%>
+      <%/function:stream_has_first_response?%>
+      <%^function:stream_has_first_response?%>
   auto& returnStream = _return;
-      <%/type:stream_has_first_response?%>
+      <%/function:stream_has_first_response?%>
 
       <%^function:stream_exceptions?%>
       using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
@@ -182,10 +182,10 @@ std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsum
   <% > common/namespace_cpp2%><%service:parent_service_cpp_name%>_<%#service:interaction?%><%service:cpp_name%>_<%/service:interaction?%><%function:cpp_name%>_presult::FieldsType result;
   using SinkPResultType = <% > common/namespace_cpp2%><%service:parent_service_cpp_name%>_<%#service:interaction?%><%service:cpp_name%>_<%/service:interaction?%><%function:cpp_name%>_presult::SinkPResultType;
   using FinalResponsePResultType = <% > common/namespace_cpp2%><%service:parent_service_cpp_name%>_<%#service:interaction?%><%service:cpp_name%>_<%/service:interaction?%><%function:cpp_name%>_presult::FinalResponsePResultType;
-  <%#type:sink_has_first_response?%>
+  <%#function:sink_has_first_response?%>
   result.get<0>().value = &_return.response;
   result.setIsSet(0, true);
-  <%/type:sink_has_first_response?%>
+  <%/function:sink_has_first_response?%>
 
   <%^function:sink_final_response_exceptions?%>
   using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
@@ -212,12 +212,12 @@ std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsum
       SinkPResultType,
       FinalResponsePResultType,
       ExMapType>(
-  <%#type:sink_has_first_response?%>
+  <%#function:sink_has_first_response?%>
       std::move(_return.sinkConsumer),
-  <%/type:sink_has_first_response?%>
-  <%^type:sink_has_first_response?%>
+  <%/function:sink_has_first_response?%>
+  <%^function:sink_has_first_response?%>
       std::move(_return),
-  <%/type:sink_has_first_response?%>
+  <%/function:sink_has_first_response?%>
       std::move(executor));
 
   return {serializeResponse("<% > common/function_name%>", &prot, ctx, result), std::move(sinkConsumerImpl)};
@@ -257,24 +257,24 @@ void <%service:parent_service_cpp_name%>AsyncProcessor::throw_wrapped_<%#service
     result.setIsSet(<%field:index_plus_one%>, true);
   <%/function:sink?%><%/function:stream?%>
   <%#function:stream?%>
-  <%#type:stream_has_first_response?%>
+  <%#function:stream_has_first_response?%>
     result.fields.get<<%field:index_plus_one%>>().ref() = e;
     result.fields.setIsSet(<%field:index_plus_one%>, true);
-  <%/type:stream_has_first_response?%>
-  <%^type:stream_has_first_response?%>
+  <%/function:stream_has_first_response?%>
+  <%^function:stream_has_first_response?%>
     result.fields.get<<%field:index%>>().ref() = e;
     result.fields.setIsSet(<%field:index%>, true);
-  <%/type:stream_has_first_response?%>
+  <%/function:stream_has_first_response?%>
   <%/function:stream?%>
   <%#function:sink?%>
-  <%#type:sink_has_first_response?%>
+  <%#function:sink_has_first_response?%>
     result.fields.get<<%field:index_plus_one%>>().ref() = e;
     result.fields.setIsSet(<%field:index_plus_one%>, true);
-  <%/type:sink_has_first_response?%>
-  <%^type:sink_has_first_response?%>
+  <%/function:sink_has_first_response?%>
+  <%^function:sink_has_first_response?%>
     result.fields.get<<%field:index%>>().ref() = e;
     result.fields.setIsSet(<%field:index%>, true);
-  <%/type:sink_has_first_response?%>
+  <%/function:sink_has_first_response?%>
   <%/function:sink?%>
 <%/type:void?%>
   }

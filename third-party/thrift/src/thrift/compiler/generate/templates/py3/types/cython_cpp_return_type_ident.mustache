@@ -16,10 +16,10 @@
 
 }}{{> types/cython_cpp_type_ident}}{{!
 }}{{#function:stream?}}{{!
-  }}{{#type:stream_has_first_response?}}cResponseAndServerStream__{{!
-  }}{{#type:stream_first_response_type}}{{ >types/cython_cpp_type_ident}}{{/type:stream_first_response_type}}_{{!
-  }}{{/type:stream_has_first_response?}}{{!
-  }}{{^type:stream_has_first_response?}}cServerStream__{{!
-  }}{{/type:stream_has_first_response?}}{{!
+  }}{{#function:stream_has_first_response?}}cResponseAndServerStream__{{!
+  }}{{#function:stream_first_response_type}}{{ >types/cython_cpp_type_ident}}{{/function:stream_first_response_type}}_{{!
+  }}{{/function:stream_has_first_response?}}{{!
+  }}{{^function:stream_has_first_response?}}cServerStream__{{!
+  }}{{/function:stream_has_first_response?}}{{!
   }}{{#function:stream_elem_type}}{{ >types/cython_cpp_type_ident}}{{/function:stream_elem_type}}{{!
 }}{{/function:stream?}}

@@ -97,10 +97,10 @@ async def {{service:name}}_{{function:name}}_coro(
         result = {{> types/cython_python_type}}(result)
         {{/type:container?}}
         {{#function:stream?}}
-        {{#type:stream_has_first_response?}}
+        {{#function:stream_has_first_response?}}
         result = await result
         item, result = result
-        {{/type:stream_has_first_response?}}
+        {{/function:stream_has_first_response?}}
         if not isinstance(result, (ServerStream, AsyncIterator)):
             result = await result
         if isinstance(result, AsyncIterator):

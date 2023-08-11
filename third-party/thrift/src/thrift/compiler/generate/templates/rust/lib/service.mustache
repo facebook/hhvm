@@ -238,7 +238,7 @@ pub mod {{service:snake}} {{>lib/block}}{{!
     pub enum {{function:upcamel}}ResponseExn {
         #[doc(hidden)]
         {{#function:stream_has_first_response?}}
-        Success({{#function:return_type}}{{#type:stream_first_response_type}}{{>lib/type}}{{/type:stream_first_response_type}}{{/function:return_type}}),
+        Success({{#function:return_type}}{{#function:stream_first_response_type}}{{>lib/type}}{{/function:stream_first_response_type}}{{/function:return_type}}),
         {{/function:stream_has_first_response?}}
         {{^function:stream_has_first_response?}}
         Success(()),
@@ -357,7 +357,7 @@ pub mod {{service:snake}} {{>lib/block}}{{!
                     p.write_field_begin(
                         "Success",
                         {{#function:stream_has_first_response?}}
-                        {{#function:return_type}}{{#type:stream_first_response_type}}{{>lib/ttype}}{{/type:stream_first_response_type}}{{/function:return_type}},
+                        {{#function:return_type}}{{#function:stream_first_response_type}}{{>lib/ttype}}{{/function:stream_first_response_type}}{{/function:return_type}},
                         {{/function:stream_has_first_response?}}
                         {{^function:stream_has_first_response?}}
                         ::fbthrift::TType::Void,
@@ -413,7 +413,7 @@ pub mod {{service:snake}} {{>lib/block}}{{!
                         break;
                     }
                     (({{^function:stream_has_first_response?}}::fbthrift::TType::Void{{/function:stream_has_first_response?}}{{!
-                      }}{{#function:stream_has_first_response?}}{{#function:return_type}}{{#type:stream_first_response_type}}{{>lib/ttype}}{{/type:stream_first_response_type}}{{/function:return_type}}{{/function:stream_has_first_response?}}{{!
+                      }}{{#function:stream_has_first_response?}}{{#function:return_type}}{{#function:stream_first_response_type}}{{>lib/ttype}}{{/function:stream_first_response_type}}{{/function:return_type}}{{/function:stream_has_first_response?}}{{!
                       }}, 0i32), false) => {
                         once = true;
                         alt = {{!

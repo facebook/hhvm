@@ -25,11 +25,11 @@ typedef apache::thrift::ThriftPresult<true<% > service_tcc/field_data_return%><%
 
 %><%#function:sink?%>
 typedef apache::thrift::ThriftPResultSink<
-    apache::thrift::ThriftPresult<true<%#type:sink_first_response_type%><% > service_tcc/field_data_return%><%/type:sink_first_response_type%><%!
+    apache::thrift::ThriftPresult<true<%#function:sink_first_response_type%><% > service_tcc/field_data_return%><%/function:sink_first_response_type%><%!
       %><%#function:exceptions%><% > service_tcc/field_data_throws%><%/function:exceptions%>>,
     apache::thrift::ThriftPresult<true<%#function:sink_elem_type%><% > service_tcc/field_data_return%><%/function:sink_elem_type%><%!
       %><%#function:sink_exceptions%><% > service_tcc/field_data_throws%><%/function:sink_exceptions%>>,
-    apache::thrift::ThriftPresult<true<%#type:sink_final_response_type%><% > service_tcc/field_data_return%><%/type:sink_final_response_type%><%!
+    apache::thrift::ThriftPresult<true<%#function:sink_final_response_type%><% > service_tcc/field_data_return%><%/function:sink_final_response_type%><%!
       %><%#function:sink_final_response_exceptions%><% > service_tcc/field_data_throws%><%/function:sink_final_response_exceptions%>>
     > <%service:parent_service_cpp_name%>_<%#service:interaction?%><%service:cpp_name%>_<%/service:interaction?%><%function:cpp_name%>_presult;
 <%/function:sink?%>
@@ -37,7 +37,7 @@ typedef apache::thrift::ThriftPResultSink<
 
 %><%#function:stream?%>
 typedef apache::thrift::ThriftPResultStream<
-    apache::thrift::ThriftPresult<true<%#type:stream_first_response_type%><% > service_tcc/field_data_return%><%/type:stream_first_response_type%><%!
+    apache::thrift::ThriftPresult<true<%#function:stream_first_response_type%><% > service_tcc/field_data_return%><%/function:stream_first_response_type%><%!
       %><%#function:exceptions%><% > service_tcc/field_data_throws%><%/function:exceptions%>>,
     apache::thrift::ThriftPresult<true<%#function:stream_elem_type%><% > service_tcc/field_data_return%><%/function:stream_elem_type%><%!
       %><%#function:stream_exceptions%><% > service_tcc/field_data_throws%><%/function:stream_exceptions%>>

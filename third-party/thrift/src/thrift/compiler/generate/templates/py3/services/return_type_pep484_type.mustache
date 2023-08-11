@@ -21,11 +21,11 @@ This is to override types/pep484_type for stream return types.
 This is useful for typing call paterns since it allows python container types OR
 thrift-py3 specific container types.
 }}{{#function:stream?}}{{!
-}}{{#type:stream_has_first_response?}}_typing.Tuple[{{#type:stream_first_response_type}}{{!
-}}{{> types/pep484_type}}, {{/type:stream_first_response_type}}{{/type:stream_has_first_response?}}{{!
+}}{{#function:stream_has_first_response?}}_typing.Tuple[{{#function:stream_first_response_type}}{{!
+}}{{> types/pep484_type}}, {{/function:stream_first_response_type}}{{/function:stream_has_first_response?}}{{!
 }}_typing.Union[_typing.Awaitable[_typing.AsyncGenerator[{{#function:stream_elem_type}}{{> types/pep484_type}}{{/function:stream_elem_type}}, None]],{{!
 }}_typing.AsyncGenerator[{{#function:stream_elem_type}}{{> types/pep484_type}}{{/function:stream_elem_type}}, None]]{{!
-}}{{#type:stream_has_first_response?}}]{{/type:stream_has_first_response?}}{{!
+}}{{#function:stream_has_first_response?}}]{{/function:stream_has_first_response?}}{{!
 }}{{/function:stream?}}{{!
 }}{{^function:stream?}}{{!
   }}{{> types/pep484_type}}{{!

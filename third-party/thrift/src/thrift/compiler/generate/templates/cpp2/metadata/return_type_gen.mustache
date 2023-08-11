@@ -15,7 +15,7 @@
   limitations under the License.
 
 %><% > metadata/type_gen %><%!
-%><%#function:sink?%>std::make_unique<Sink>(<%#function:sink_elem_type%><% > metadata/type_gen%><%/function:sink_elem_type%>, <%#type:sink_final_response_type%><% > metadata/type_gen%><%/type:sink_final_response_type%><%#type:sink_has_first_response?%>, <%#type:sink_first_response_type%><% > metadata/type_gen%><%/type:sink_first_response_type%><%/type:sink_has_first_response?%>)<%/function:sink?%><%!
+%><%#function:sink?%>std::make_unique<Sink>(<%#function:sink_elem_type%><% > metadata/type_gen%><%/function:sink_elem_type%>, <%#function:sink_final_response_type%><% > metadata/type_gen%><%/function:sink_final_response_type%><%#function:sink_has_first_response?%>, <%#function:sink_first_response_type%><% > metadata/type_gen%><%/function:sink_first_response_type%><%/function:sink_has_first_response?%>)<%/function:sink?%><%!
 %><%#function:stream?%><%!
-%>std::make_unique<Stream>(<%#function:stream_elem_type%><% > metadata/type_gen%><%/function:stream_elem_type%><%#type:streamFirstResponse?%>, <%#type:stream_first_response_type%><% > metadata/type_gen%><%/type:stream_first_response_type%><%/type:streamFirstResponse?%>)<%!
+%>std::make_unique<Stream>(<%#function:stream_elem_type%><% > metadata/type_gen%><%/function:stream_elem_type%><%#type:streamFirstResponse?%>, <%#function:stream_first_response_type%><% > metadata/type_gen%><%/function:stream_first_response_type%><%/type:streamFirstResponse?%>)<%!
 %><%/function:stream?%>

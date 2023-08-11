@@ -253,11 +253,11 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
     }}{{#function:voidType}}Readers.voidReader(){{/function:voidType}}{{!
     }}{{^function:voidType}}{{#function:return_type}}{{#function:stream_elem_type}}{{> TypeReader }}{{/function:stream_elem_type}}{{/function:return_type}}{{/function:voidType}};
 
-  {{#function:return_type}}{{#type:stream_has_first_response?}}
+  {{#function:return_type}}{{#function:stream_has_first_response?}}
   private static final com.facebook.thrift.payload.Reader _{{function:javaName}}_FIRST_READER = {{!
     }}{{#function:voidType}}Readers.voidReader(){{/function:voidType}}{{!
-    }}{{^function:voidType}}{{#function:return_type}}{{#type:stream_first_response_type}}{{> TypeReader }}{{/type:stream_first_response_type}}{{/function:return_type}}{{/function:voidType}};
-  {{/type:stream_has_first_response?}}{{/function:return_type}}
+    }}{{^function:voidType}}{{#function:return_type}}{{#function:stream_first_response_type}}{{> TypeReader }}{{/function:stream_first_response_type}}{{/function:return_type}}{{/function:voidType}};
+  {{/function:stream_has_first_response?}}{{/function:return_type}}
 
   @java.lang.Override
   public reactor.core.publisher.Flux<com.facebook.thrift.client.ResponseWrapper<{{#function:return_type}}{{> StreamReturnType}}{{/function:return_type}}>> {{function:javaName}}Wrapper({{#function:args}}final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}}, {{/function:args}} final com.facebook.thrift.client.RpcOptions rpcOptions) {
@@ -274,8 +274,8 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
                 com.facebook.thrift.payload.ClientRequestPayload.create(
                     "{{service:name}}",
                     _create{{function:javaName}}Writer({{#function:args}}{{field:javaName}}{{^last?}}, {{/last?}}{{/function:args}}),
-                    _{{function:javaName}}_READER,{{#function:return_type}}{{#type:stream_has_first_response?}}
-                    _{{function:javaName}}_FIRST_READER,{{/type:stream_has_first_response?}}{{/function:return_type}}
+                    _{{function:javaName}}_READER,{{#function:return_type}}{{#function:stream_has_first_response?}}
+                    _{{function:javaName}}_FIRST_READER,{{/function:stream_has_first_response?}}{{/function:return_type}}
                     _{{function:javaName}}_EXCEPTION_READERS,
                     _{{function:javaName}}_STREAM_EXCEPTION_READERS,
                     _metadata,
@@ -283,9 +283,9 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
 
             return _rpc
                 .singleRequestStreamingResponse(_crp, rpcOptions)
-                .doOnNext(_p -> {if(_p.getException() != null) throw reactor.core.Exceptions.propagate(_p.getException());}){{#function:return_type}}{{^type:stream_has_first_response?}}
-                .filter((_p) -> ((com.facebook.thrift.model.StreamResponse)_p.getData()).isSetData()){{/type:stream_has_first_response?}}{{/function:return_type}}
-                .map(_p -> ResponseWrapper.create((({{#function:return_type}}{{> StreamResponseGeneric}}{{/function:return_type}})_p.getData()){{#function:return_type}}{{^type:stream_has_first_response?}}.getData(){{/type:stream_has_first_response?}}{{/function:return_type}}, _p.getHeaders(), _p.getBinaryHeaders()));
+                .doOnNext(_p -> {if(_p.getException() != null) throw reactor.core.Exceptions.propagate(_p.getException());}){{#function:return_type}}{{^function:stream_has_first_response?}}
+                .filter((_p) -> ((com.facebook.thrift.model.StreamResponse)_p.getData()).isSetData()){{/function:stream_has_first_response?}}{{/function:return_type}}
+                .map(_p -> ResponseWrapper.create((({{#function:return_type}}{{> StreamResponseGeneric}}{{/function:return_type}})_p.getData()){{#function:return_type}}{{^function:stream_has_first_response?}}.getData(){{/function:stream_has_first_response?}}{{/function:return_type}}, _p.getHeaders(), _p.getBinaryHeaders()));
       });
   }
 
@@ -347,13 +347,13 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
 
   private static final com.facebook.thrift.payload.Reader _{{function:javaName}}_READER = {{!
     }}{{#function:voidType}}Readers.voidReader(){{/function:voidType}}{{!
-    }}{{^function:voidType}}{{#function:return_type}}{{#type:sink_final_response_type}}{{> TypeReader }}{{/type:sink_final_response_type}}{{/function:return_type}}{{/function:voidType}};
+    }}{{^function:voidType}}{{#function:return_type}}{{#function:sink_final_response_type}}{{> TypeReader }}{{/function:sink_final_response_type}}{{/function:return_type}}{{/function:voidType}};
 
-  {{#function:return_type}}{{#type:sink_has_first_response?}}
+  {{#function:return_type}}{{#function:sink_has_first_response?}}
   private static final com.facebook.thrift.payload.Reader _{{function:javaName}}_FIRST_READER = {{!
     }}{{#function:voidType}}Readers.voidReader(){{/function:voidType}}{{!
-    }}{{^function:voidType}}{{#function:return_type}}{{#type:sink_first_response_type}}{{> TypeReader }}{{/type:sink_first_response_type}}{{/function:return_type}}{{/function:voidType}};
-  {{/type:sink_has_first_response?}}{{/function:return_type}}
+    }}{{^function:voidType}}{{#function:return_type}}{{#function:sink_first_response_type}}{{> TypeReader }}{{/function:sink_first_response_type}}{{/function:return_type}}{{/function:voidType}};
+  {{/function:sink_has_first_response?}}{{/function:return_type}}
 
   @java.lang.Override
   public {{#function:return_type}}{{> SinkWrapperReturnType}}{{/function:return_type}} {{function:javaName}}Wrapper({{#function:args}}final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}}, {{/function:args}} org.reactivestreams.Publisher<{{#function:return_type}}{{#function:sink_elem_type}}{{ >BoxedType}}{{/function:sink_elem_type}}{{/function:return_type}}> payloads, com.facebook.thrift.client.RpcOptions rpcOptions) {
@@ -366,24 +366,24 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
                 .setProtocol(_protocolId)
                 .build();
 
-            com.facebook.thrift.payload.ClientRequestPayload<{{#function:return_type}}{{#type:sink_final_response_type}}{{> BoxedType}}{{/type:sink_final_response_type}}{{/function:return_type}}> _crp =
+            com.facebook.thrift.payload.ClientRequestPayload<{{#function:return_type}}{{#function:sink_final_response_type}}{{> BoxedType}}{{/function:sink_final_response_type}}{{/function:return_type}}> _crp =
                 com.facebook.thrift.payload.ClientRequestPayload.create(
                     "{{service:name}}",
                     _create{{function:javaName}}Writer({{#function:args}}{{field:javaName}}{{^last?}}, {{/last?}}{{/function:args}}),
-                    _{{function:javaName}}_READER,{{#function:return_type}}{{#type:sink_has_first_response?}}
-                    _{{function:javaName}}_FIRST_READER,{{/type:sink_has_first_response?}}{{/function:return_type}}
+                    _{{function:javaName}}_READER,{{#function:return_type}}{{#function:sink_has_first_response?}}
+                    _{{function:javaName}}_FIRST_READER,{{/function:sink_has_first_response?}}{{/function:return_type}}
                     _{{function:javaName}}_EXCEPTION_READERS,
                     _{{function:javaName}}_STREAM_EXCEPTION_READERS,
                     _metadata,
                     java.util.Collections.emptyMap());
 
-            reactor.core.publisher.Flux<com.facebook.thrift.payload.ClientRequestPayload<{{#function:return_type}}{{#type:sink_final_response_type}}{{> BoxedType}}{{/type:sink_final_response_type}}{{/function:return_type}}>> _sink =
+            reactor.core.publisher.Flux<com.facebook.thrift.payload.ClientRequestPayload<{{#function:return_type}}{{#function:sink_final_response_type}}{{> BoxedType}}{{/function:sink_final_response_type}}{{/function:return_type}}>> _sink =
               reactor.core.publisher.Mono.just(_crp).concatWith(reactor.core.publisher.Flux.from(payloads)
                 .map(_p -> com.facebook.thrift.payload.ClientRequestPayload.create(
                     "{{service:name}}",
                     _create{{function:javaName}}SinkWriter(_p),
-                    _{{function:javaName}}_READER,{{#function:return_type}}{{#type:sink_has_first_response?}}
-                    _{{function:javaName}}_FIRST_READER,{{/type:sink_has_first_response?}}{{/function:return_type}}
+                    _{{function:javaName}}_READER,{{#function:return_type}}{{#function:sink_has_first_response?}}
+                    _{{function:javaName}}_FIRST_READER,{{/function:sink_has_first_response?}}{{/function:return_type}}
                     _{{function:javaName}}_EXCEPTION_READERS,
                     _{{function:javaName}}_STREAM_EXCEPTION_READERS,
                     _metadata,
@@ -391,10 +391,10 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
 
             return _rpc
                 .streamingRequestStreamingResponse(_sink, rpcOptions)
-                .doOnNext(_p -> {if(_p.getException() != null) throw reactor.core.Exceptions.propagate(_p.getException());}){{#function:return_type}}{{^type:sink_has_first_response?}}
-                .filter((_p) -> ((com.facebook.thrift.model.StreamResponse)_p.getData()).isSetData()){{/type:sink_has_first_response?}}{{/function:return_type}}
-                .map(_p -> ResponseWrapper.create((({{#function:return_type}}{{> SinkResponseGeneric}}{{/function:return_type}})_p.getData()){{#function:return_type}}{{^type:sink_has_first_response?}}.getData(){{/type:sink_has_first_response?}}{{/function:return_type}}, _p.getHeaders(), _p.getBinaryHeaders()));
-      }){{#function:return_type}}{{^type:sink_has_first_response?}}.single(){{/type:sink_has_first_response?}}{{/function:return_type}};
+                .doOnNext(_p -> {if(_p.getException() != null) throw reactor.core.Exceptions.propagate(_p.getException());}){{#function:return_type}}{{^function:sink_has_first_response?}}
+                .filter((_p) -> ((com.facebook.thrift.model.StreamResponse)_p.getData()).isSetData()){{/function:sink_has_first_response?}}{{/function:return_type}}
+                .map(_p -> ResponseWrapper.create((({{#function:return_type}}{{> SinkResponseGeneric}}{{/function:return_type}})_p.getData()){{#function:return_type}}{{^function:sink_has_first_response?}}.getData(){{/function:sink_has_first_response?}}{{/function:return_type}}, _p.getHeaders(), _p.getBinaryHeaders()));
+      }){{#function:return_type}}{{^function:sink_has_first_response?}}.single(){{/function:sink_has_first_response?}}{{/function:return_type}};
   }
 
   @java.lang.Override
@@ -543,11 +543,11 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
       }}{{#function:voidType}}Readers.voidReader(){{/function:voidType}}{{!
       }}{{^function:voidType}}{{#function:return_type}}{{#function:stream_elem_type}}{{> TypeReader }}{{/function:stream_elem_type}}{{/function:return_type}}{{/function:voidType}};
 
-    {{#function:return_type}}{{#type:stream_has_first_response?}}
+    {{#function:return_type}}{{#function:stream_has_first_response?}}
     private final com.facebook.thrift.payload.Reader _{{function:javaName}}_FIRST_READER = {{!
       }}{{#function:voidType}}Readers.voidReader(){{/function:voidType}}{{!
-      }}{{^function:voidType}}{{#function:return_type}}{{#type:stream_first_response_type}}{{> TypeReader }}{{/type:stream_first_response_type}}{{/function:return_type}}{{/function:voidType}};
-    {{/type:stream_has_first_response?}}{{/function:return_type}}
+      }}{{^function:voidType}}{{#function:return_type}}{{#function:stream_first_response_type}}{{> TypeReader }}{{/function:stream_first_response_type}}{{/function:return_type}}{{/function:voidType}};
+    {{/function:stream_has_first_response?}}{{/function:return_type}}
 
     @java.lang.Override
     public reactor.core.publisher.Flux<com.facebook.thrift.client.ResponseWrapper<{{#function:return_type}}{{> StreamReturnType}}{{/function:return_type}}>> {{function:javaName}}Wrapper({{#function:args}}final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}}, {{/function:args}} final com.facebook.thrift.client.RpcOptions rpcOptions) {
@@ -578,8 +578,8 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
               com.facebook.thrift.payload.ClientRequestPayload.create(
                   "{{service:name}}",
                   _create{{function:javaName}}Writer({{#function:args}}{{field:javaName}}{{^last?}}, {{/last?}}{{/function:args}}),
-                  _{{function:javaName}}_READER,{{#function:return_type}}{{#type:stream_has_first_response?}}
-                  _{{function:javaName}}_FIRST_READER,{{/type:stream_has_first_response?}}{{/function:return_type}}
+                  _{{function:javaName}}_READER,{{#function:return_type}}{{#function:stream_has_first_response?}}
+                  _{{function:javaName}}_FIRST_READER,{{/function:stream_has_first_response?}}{{/function:return_type}}
                   _{{function:javaName}}_EXCEPTION_READERS_INT,
                   _{{function:javaName}}_STREAM_EXCEPTION_READERS_INT,
                   _metadataBuilder.build(),
@@ -588,9 +588,9 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
           return _rpc
               .singleRequestStreamingResponse(_crp, rpcOptions)
               .transform(com.facebook.thrift.util.FluxPublishingTransformer.getInstance())
-              .doOnNext(_p -> {if(_p.getException() != null) throw reactor.core.Exceptions.propagate(_p.getException());}){{#function:return_type}}{{^type:stream_has_first_response?}}
-              .filter((_p) -> ((com.facebook.thrift.model.StreamResponse)_p.getData()).isSetData()){{/type:stream_has_first_response?}}{{/function:return_type}}
-              .map(_p -> ResponseWrapper.create((({{#function:return_type}}{{> StreamResponseGeneric}}{{/function:return_type}})_p.getData()){{#function:return_type}}{{^type:stream_has_first_response?}}.getData(){{/type:stream_has_first_response?}}{{/function:return_type}}, _p.getHeaders(), _p.getBinaryHeaders()));
+              .doOnNext(_p -> {if(_p.getException() != null) throw reactor.core.Exceptions.propagate(_p.getException());}){{#function:return_type}}{{^function:stream_has_first_response?}}
+              .filter((_p) -> ((com.facebook.thrift.model.StreamResponse)_p.getData()).isSetData()){{/function:stream_has_first_response?}}{{/function:return_type}}
+              .map(_p -> ResponseWrapper.create((({{#function:return_type}}{{> StreamResponseGeneric}}{{/function:return_type}})_p.getData()){{#function:return_type}}{{^function:stream_has_first_response?}}.getData(){{/function:stream_has_first_response?}}{{/function:return_type}}, _p.getHeaders(), _p.getBinaryHeaders()));
         });
     }
 

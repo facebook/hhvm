@@ -183,13 +183,13 @@ class ServerPublisher_{{> types/cython_cpp_return_type_ident}}(thrift.py3.stream
 
 {{/program:stream_types}}
 {{#program:response_and_stream_functions}}{{#function:return_type}}{{!
-}}class ResponseAndClientBufferedStream__{{> stream/response_class_name_suffix}}(thrift.py3.stream.ResponseAndClientBufferedStream[{{#type:stream_first_response_type}}{{> types/pep484_type}}{{/type:stream_first_response_type}}, {{#function:stream_elem_type}}{{> types/pep484_type}}{{/function:stream_elem_type}}]):
+}}class ResponseAndClientBufferedStream__{{> stream/response_class_name_suffix}}(thrift.py3.stream.ResponseAndClientBufferedStream[{{#function:stream_first_response_type}}{{> types/pep484_type}}{{/function:stream_first_response_type}}, {{#function:stream_elem_type}}{{> types/pep484_type}}{{/function:stream_elem_type}}]):
     def __iter__(self) -> _typing.Tuple[
-        {{#type:stream_first_response_type}}{{> types/pep484_type}}{{/type:stream_first_response_type}},
+        {{#function:stream_first_response_type}}{{> types/pep484_type}}{{/function:stream_first_response_type}},
         {{#function:stream_elem_type}}ClientBufferedStream__{{type:flat_name}}{{/function:stream_elem_type}},
     ]: ...
 
-class ResponseAndServerStream__{{> stream/response_class_name_suffix}}(thrift.py3.stream.ResponseAndServerStream[{{#type:stream_first_response_type}}{{> types/pep484_type}}{{/type:stream_first_response_type}}, {{#function:stream_elem_type}}{{> types/pep484_type}}{{/function:stream_elem_type}}]):
+class ResponseAndServerStream__{{> stream/response_class_name_suffix}}(thrift.py3.stream.ResponseAndServerStream[{{#function:stream_first_response_type}}{{> types/pep484_type}}{{/function:stream_first_response_type}}, {{#function:stream_elem_type}}{{> types/pep484_type}}{{/function:stream_elem_type}}]):
     pass
 
 {{/function:return_type}}{{/program:response_and_stream_functions}}

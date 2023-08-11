@@ -17,10 +17,10 @@
 }}{{!
 The C++ type of return_type for stream types.
 }}{{#function:stream?}}{{!
-  }}{{#type:stream_has_first_response?}}apache::thrift::ResponseAndClientBufferedStream<{{!
-    }}{{#type:stream_first_response_type}}{{ >types/cpp_value_type}}{{/type:stream_first_response_type}},{{!
-  }}{{/type:stream_has_first_response?}}{{!
-  }}{{^type:stream_has_first_response?}}apache::thrift::ClientBufferedStream<{{/type:stream_has_first_response?}}{{!
+  }}{{#function:stream_has_first_response?}}apache::thrift::ResponseAndClientBufferedStream<{{!
+    }}{{#function:stream_first_response_type}}{{ >types/cpp_value_type}}{{/function:stream_first_response_type}},{{!
+  }}{{/function:stream_has_first_response?}}{{!
+  }}{{^function:stream_has_first_response?}}apache::thrift::ClientBufferedStream<{{/function:stream_has_first_response?}}{{!
   }}{{#function:stream_elem_type}}{{ >types/cpp_value_type}}{{/function:stream_elem_type}}>{{!
 }}{{/function:stream?}}{{!
 }}{{^function:stream?}}{{ >types/cpp_value_type}}{{/function:stream?}}

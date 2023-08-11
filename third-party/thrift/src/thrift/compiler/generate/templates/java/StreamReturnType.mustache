@@ -15,11 +15,11 @@
   limitations under the License.
 
 }}{{#function:stream?}}{{!
-    }}{{#type:stream_has_first_response?}}com.facebook.thrift.model.StreamResponse<{{!
-    }}{{#type:stream_first_response_type}}{{ >BoxedType}}{{/type:stream_first_response_type}},{{!
+    }}{{#function:stream_has_first_response?}}com.facebook.thrift.model.StreamResponse<{{!
+    }}{{#function:stream_first_response_type}}{{ >BoxedType}}{{/function:stream_first_response_type}},{{!
     }}{{#function:stream_elem_type}}{{ >BoxedType}}{{/function:stream_elem_type}}>{{!
-    }}{{/type:stream_has_first_response?}}{{!
-    }}{{^type:stream_has_first_response?}}{{!
+    }}{{/function:stream_has_first_response?}}{{!
+    }}{{^function:stream_has_first_response?}}{{!
     }}{{#function:stream_elem_type}}{{ >BoxedType}}{{/function:stream_elem_type}}{{!
-    }}{{/type:stream_has_first_response?}}{{!
+    }}{{/function:stream_has_first_response?}}{{!
 }}{{/function:stream?}}

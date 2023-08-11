@@ -58,13 +58,13 @@ to the client.
   }}{{^function:stack_arguments?}}){{/function:stack_arguments?}}{{!
 }}{{/type:struct}}{{!
 }}{{#function:stream?}}{{!
-  }}{{#type:stream_has_first_response?}}createResponseAndServerStream[{{!
-  }}{{#type:stream_first_response_type}}{{ >types/cython_cpp_type}}{{/type:stream_first_response_type}},{{!
+  }}{{#function:stream_has_first_response?}}createResponseAndServerStream[{{!
+  }}{{#function:stream_first_response_type}}{{ >types/cython_cpp_type}}{{/function:stream_first_response_type}},{{!
   }}{{#function:stream_elem_type}}{{ >types/cython_cpp_type}}{{/function:stream_elem_type}}]({{!
-  }}{{#type:stream_first_response_type}}(<{{> types/cython_cpp_type}}?> {{> types/cython_python_to_cpp_item}}){{/type:stream_first_response_type}}, {{!
-  }}{{/type:stream_has_first_response?}}{{!
+  }}{{#function:stream_first_response_type}}(<{{> types/cython_cpp_type}}?> {{> types/cython_python_to_cpp_item}}){{/function:stream_first_response_type}}, {{!
+  }}{{/function:stream_has_first_response?}}{{!
   }}cmove(deref((<ServerStream_{{#function:stream_elem_type}}{{ >types/cython_cpp_type_ident }}{{/function:stream_elem_type}}?>result).cStream)){{!
-  }}{{#type:stream_has_first_response?}}){{/type:stream_has_first_response?}}{{!
+  }}{{#function:stream_has_first_response?}}){{/function:stream_has_first_response?}}{{!
 }}{{/function:stream?}}{{!
 }}{{#type:container?}}{{!
   }}{{^function:stack_arguments?}}make_unique[{{> types/cython_cpp_type}}]({{/function:stack_arguments?}}{{!

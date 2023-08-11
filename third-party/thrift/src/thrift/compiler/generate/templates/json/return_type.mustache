@@ -6,25 +6,25 @@
 {{#function:sink_elem_type}}
   "inner_type" : {{> type}},
 {{/function:sink_elem_type}}
-{{#type:sink_has_first_response?}}
-{{#type:sink_first_response_type}}
+{{#function:sink_has_first_response?}}
+{{#function:sink_first_response_type}}
   "first_response_type" : {{> type}},
-{{/type:sink_first_response_type}}
-{{/type:sink_has_first_response?}}
-{{#type:sink_final_response_type}}
+{{/function:sink_first_response_type}}
+{{/function:sink_has_first_response?}}
+{{#function:sink_final_response_type}}
   "final_response_type" : {{> type}}
-{{/type:sink_final_response_type}}
+{{/function:sink_final_response_type}}
 }{{/function:sink?}}{{!
 }}{{#function:stream?}}{
   "type" : "streamresponse",
 {{#function:stream_elem_type}}
   "inner_type" : {{> type}}{{!
 }}{{/function:stream_elem_type}}{{!
-}}{{#type:stream_has_first_response?}},
-{{#type:stream_first_response_type}}
+}}{{#function:stream_has_first_response?}},
+{{#function:stream_first_response_type}}
   "first_response_type" : {{> type}}
-{{/type:stream_first_response_type}}
-{{/type:stream_has_first_response?}}
+{{/function:stream_first_response_type}}
+{{/function:stream_has_first_response?}}
 }{{/function:stream?}}{{!
 }}{{#type:service?}}{
   "type" : "service",

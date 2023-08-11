@@ -45,8 +45,8 @@ def sizeof(container: lldb.SBValue) -> lldb.SBValue:
     t = utils.template_type(utils.rawtype(container.type))
 
     if t == "std::vector" or t == "HPHP::req::vector":
-        impl = utils.get(container, "_M_impl")
-        return utils.get(impl, "_M_finish") - utils.get(impl, "_M_start")
+        # It's a synthetic child provider, so we can just use this property
+        return container.num_children
     elif t == "std::priority_queue":
         return sizeof(utils.get(container, "c"))
     elif t == 'std::unordered_map' or t == 'HPHP::hphp_hash_map':

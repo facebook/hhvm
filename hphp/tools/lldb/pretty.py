@@ -111,7 +111,10 @@ def pp_TypedValue(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]
 # Pointers
 
 def pretty_ptr(val: lldb.SBValue) -> typing.Optional[str]:
+    utils.debug_print(f"pretty_ptr(val=0x{val.unsigned:x})")
+
     ptr = utils.rawptr(val)
+
     if utils.is_nullptr(ptr):
         return None
 

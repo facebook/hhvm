@@ -322,6 +322,8 @@ def rawptr(val: lldb.SBValue) -> typing.Optional[lldb.SBValue]:
         Returns:
             The stripped pointer, or None if it's not yet supported
     """
+    #debug_print(f"rawptr(val=0x{val.unsigned:x})")
+
     if val.type.IsPointerType():
         return val
     elif val.type.IsReferenceType():
@@ -403,7 +405,7 @@ def deref(val: lldb.SBValue) -> lldb.SBValue:
         pointer wrappers (as well as const/volatile qualifiers).
 
         Arguments:
-            val: The value to derefence
+            val: The value to dererefence
 
         Returns:
             The fully dereferenced value.
@@ -474,6 +476,7 @@ def nameof(val: lldb.SBValue) -> typing.Optional[str]:
         A Python string, if there is name associated with the object; otherwise None
     """
     val = deref(val)
+    debug_print(f"nameof(val=0x{val.load_addr:x} (type={val.type.name}))")
     try:
        t = val.type.name
     except Exception:

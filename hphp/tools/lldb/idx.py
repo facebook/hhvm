@@ -40,7 +40,7 @@ def atomic_low_ptr_vector_at(av: lldb.SBValue, idx: int, hasher=None) -> typing.
     Returns:
         av[ix] if valid, otherwise None
     """
-    utils.debug_print("atomic_low_ptr_vector_at()")
+    utils.debug_print(f"atomic_low_ptr_vector_at(av=0x{av.unsigned:x}, idx={idx})")
 
     if hasher:
         # TODO implement

@@ -8,10 +8,12 @@ try:
     # LLDB needs to load this outside of the usual Buck mechanism
     import idx
     import lookup
+    import sizeof
     import utils
 except ModuleNotFoundError:
     import hhvm_lldb.idx as idx
     import hhvm_lldb.lookup as lookup
+    import hhvm_lldb.sizeof as sizeof
     import hhvm_lldb.utils as utils
 
 
@@ -131,7 +133,7 @@ def create_php(
     Args:
         idx: Index of the current frame
         ar: The activation record (lldb.SBValue[HPHP::ActRec])
-        rip: The instruction pointer
+        rip: The instruction pointer (lldb.SBValue[uintptr_t])
         pc: The PC
 
     Returns:
@@ -175,9 +177,8 @@ def create_php(
 
     # Pull the PC from Func::base() and ar->m_callOff if necessary.
     if pc is None:
-        m_bc = utils.get(shared, "m_bc")
-        bc = utils.rawptr(m_bc)
-        pc = bc.unsigned + (utils.get(ar, "m_callOffAndFlags").unsigned >> 2)
+        bc = utils.rawptr(utils.get(shared, "m_bc"))
+        pc = bc.unsigned + (utils.get(ar, "m_callOffAndFlags").unsigned >> utils.Enum("HPHP::ActRec::Flags", "CallOffsetStart", ar.target).unsigned)
 
     frame.file = php_filename(func, ar.target)
     frame.line = php_line_number(func, pc)
@@ -235,19 +236,23 @@ def php_line_number(func: lldb.SBValue, pc: int) -> typing.Optional[int]:
     """ Get the line number in the php file associated with the given function and pc
 
     Uses the shared lineMap if the pc is present.
+    See Func::getLineNumber()
 
     Args:
-        func: A HPHP::Func* wrapped in an SBValue
+        func: An HPHP::Func* wrapped in an SBValue
         pc: The PC
 
     Returns:
         line: The line number, if found successfully
     """
+    utils.debug_print(f"php_line_number(func=0x{func.unsigned:x}, pc=0x{pc:x})")
+
     shared = utils.rawptr(utils.get(func, "m_shared"))
     line_map = utils.get(shared, "m_lineMap", "val")
 
     if line_map.unsigned != 0:
         # TODO test this code path
+        utils.debug_printf(f"php_line_number: line_map=0x{line_map.unsigned:x}")
         i = 0
         while True:
             r = idx.compact_vector_at(line_map, i)
@@ -261,19 +266,51 @@ def php_line_number(func: lldb.SBValue, pc: int) -> typing.Optional[int]:
     return php_line_number_from_repo(func, pc)
 
 
-def php_line_number_from_repo(func, pc):
+def php_line_number_from_repo(func: lldb.SBValue, pc: int) -> typing.Optional[int]:
     """ Get the line number in the php file associated with the given function and pc
 
     Uses the repo.
 
+    See source-location.cpp:getLineInfo().
+
     Args:
-        func: gdb.Value[HPHP::Func*].
-        pc: gdb.Value[HPHP::CompactTaggedPtr<T, uint8_t>::Opaque].
+        func: An HPHP::Func* wrapped in an SBValue
+        pc: The PC
 
     Returns:
-        line: Option[int].
+        line: The line number, if found successfully
     """
-    # TODO implement
+    utils.debug_print(f"php_line_number_from_repo(func=0x{func.unsigned:x}, pc=0x{pc:x})")
+
+    shared = utils.rawptr(utils.get(func, "m_shared"))
+    line_table = utils.get(shared, "m_lineTable", "val")
+    if utils.TokenOrPtr.is_ptr(line_table):
+        line_table_type = utils.Type("HPHP::LineTable", func.target).GetPointerType()
+        line_table = utils.TokenOrPtr.get_ptr(line_table).Cast(line_table_type)
+    else:
+        rauth = utils.Global("HPHP::RuntimeOption::RepoAuthoritative", func.target)
+        assert rauth.unsigned != 0, "php_line_number_from_repo: expected to be in repo authoritative mode"
+        # TODO emulate FuncEmitter::loadLineTableFromRepo(m_unit->sn(), table.token())
+        return None
+
+    entry = utils.rawptr(utils.get(shared, "m_bc")).unsigned
+    offset = pc - entry
+
+    for i in range(sizeof.sizeof(line_table)):
+        line_entry = idx.at(line_table, i)
+
+        if line_entry is None:
+            break
+
+        past_offset = utils.get(line_entry, "m_pastOffset")
+        line = utils.get(line_entry, "m_val")
+
+        if offset < past_offset.signed:
+            if line.signed > 0:
+                return line.signed
+            else:
+                return None
+
     return None
 
 

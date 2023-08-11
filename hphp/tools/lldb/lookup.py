@@ -16,7 +16,7 @@ except ModuleNotFoundError:
 
 
 def lookup_func(func_id: lldb.SBValue) -> typing.Optional[lldb.SBValue]:
-    """ Find the function corresponding to a given FuncI
+    """ Find the function corresponding to a given FuncID
 
     Args:
         func_id: A HPHP::FuncId wrapped in an lldb.SBValue
@@ -39,12 +39,12 @@ def lookup_func(func_id: lldb.SBValue) -> typing.Optional[lldb.SBValue]:
 
     if func_vec:
         # Non-LowPtr
-        utils.debug_print(f"lookup_func({func_id.signed}): identified as non-lowptr")
+        utils.debug_print(f"lookup_func(func_id={func_id.signed}): identified we're in non-lowptr mode")
         func_id_val = utils.get(func_id, "m_id").unsigned
         result = idx.atomic_low_ptr_vector_at(func_vec, func_id_val)
     else:
         # LowPtr
-        utils.debug_print(f"lookup_func({func_id.signed}): identified as lowptr")
+        utils.debug_print(f"lookup_func(func_id={func_id.signed}): identified we're in lowptr mode")
         result = utils.rawptr(utils.get(func_id, 'm_id'))
 
     func_ptr = result.Cast(utils.Type('HPHP::Func', target).GetPointerType())

@@ -210,9 +210,10 @@ inline const RepoOptions* ExecutionContext::getRepoOptionsForRequest() const {
 
 inline const PackageInfo& ExecutionContext::getPackageInfo() const {
   if (RO::RepoAuthoritative) return RepoFile::packageInfo();
-  auto const opts = getRepoOptionsForRequest();
-  assertx(opts);
-  return opts->packageInfo();
+  if (auto const opts = getRepoOptionsForRequest()) {
+    return opts->packageInfo();
+  }
+  raise_error("Unable to retrieve package information");
 }
 
 inline const Func* ExecutionContext::getPrevFunc(const ActRec* fp) {

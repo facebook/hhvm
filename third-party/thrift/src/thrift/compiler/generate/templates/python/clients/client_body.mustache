@@ -125,12 +125,12 @@ class Async({{#service:extends}}{{!
           }}{{#function:stream?}}_fbthrift_stream{{/function:stream?}}
         {{/function:void?}}
         {{/function:early_client_return?}}
-        {{#type:with_regular_response?}}
+        {{#function:with_regular_response?}}
         raise _fbthrift_python_exceptions.ApplicationError(
             _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
             "Empty Response",
         )
-        {{/type:with_regular_response?}}
+        {{/function:with_regular_response?}}
         {{/function:return_type}}
     {{/service:supported_functions}}
 

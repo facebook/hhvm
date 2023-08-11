@@ -485,7 +485,14 @@ class python_mstch_program : public mstch_program {
       for (const auto& field : function.get_stream_xceptions()->fields()) {
         visit_type(field.get_type());
       }
-      visit_type(function.get_returntype());
+      if (const t_stream_response* stream = function.stream()) {
+        if (const t_type* resp_type = stream->get_first_response_type()) {
+          visit_type(resp_type);
+        }
+        visit_type(stream->get_elem_type());
+      } else {
+        visit_type(function.get_return_type());
+      }
     }
   }
 
@@ -603,16 +610,6 @@ class python_mstch_program : public mstch_program {
           dynamic_cast<const t_map&>(*true_type).get_key_type(), is_typedef);
       visit_type_with_typedef(
           dynamic_cast<const t_map&>(*true_type).get_val_type(), is_typedef);
-    } else if (true_type->is_streamresponse()) {
-      const t_type* resp_type =
-          dynamic_cast<const t_stream_response&>(*true_type)
-              .get_first_response_type();
-      const t_type* elem_type =
-          dynamic_cast<const t_stream_response&>(*true_type).get_elem_type();
-      if (resp_type) {
-        visit_type_with_typedef(resp_type, is_typedef);
-      }
-      visit_type_with_typedef(elem_type, is_typedef);
     }
   }
 
@@ -753,6 +750,8 @@ class python_mstch_function : public mstch_function {
              &python_mstch_function::early_client_return},
             {"function:regular_response_type",
              &python_mstch_function::regular_response_type},
+            {"function:with_regular_response?",
+             &python_mstch_function::with_regular_response},
             {"function:async_only?", &python_mstch_function::async_only},
         });
   }
@@ -786,12 +785,18 @@ class python_mstch_function : public mstch_function {
       return {};
     }
     const t_type* rettype = function_->return_type()->get_true_type();
-    if (rettype->is_streamresponse()) {
-      auto stream = dynamic_cast<const t_stream_response*>(rettype);
+    if (const t_stream_response* stream = function_->stream()) {
       rettype = stream->has_first_response() ? stream->get_first_response_type()
                                              : &t_base_type::t_void();
     }
     return context_.type_factory->make_mstch_object(rettype, context_, pos_);
+  }
+
+  mstch::node with_regular_response() {
+    if (auto stream = function_->stream()) {
+      return !stream->first_response_type().empty();
+    }
+    return !function_->get_returntype()->is_void();
   }
 
   mstch::node async_only() {
@@ -829,8 +834,6 @@ class python_mstch_type : public mstch_type {
             {"type:integer?", &python_mstch_type::is_integer},
             {"type:iobuf?", &python_mstch_type::is_iobuf},
             {"type:has_adapter?", &python_mstch_type::adapter},
-            {"type:with_regular_response?",
-             &python_mstch_type::with_regular_response},
         });
   }
 
@@ -880,14 +883,6 @@ class python_mstch_type : public mstch_type {
   mstch::node adapter() {
     return adapter_node(
         adapter_annotation_, transitive_adapter_annotation_, context_, pos_);
-  }
-
-  mstch::node with_regular_response() {
-    if (!resolved_type_->is_streamresponse()) {
-      return !resolved_type_->is_void();
-    }
-    auto stream = dynamic_cast<const t_stream_response*>(resolved_type_);
-    return stream && !stream->first_response_type().empty();
   }
 
  protected:

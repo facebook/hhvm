@@ -461,7 +461,7 @@ std::unique_ptr<t_const_value> schematizer::gen_full_schema(
   for (const auto& func : node.functions()) {
     for (const auto& ret : func.return_types()) {
       // TODO: Handle sink, stream, interactions
-      if (!ret->is_sink() && !ret->is_streamresponse() && !ret->is_service()) {
+      if (!func.sink_or_stream() && !ret->is_service()) {
         schematize_recursively(
             this, node.program(), dfns_schema.get(), *ret->get_true_type());
       }
@@ -519,7 +519,7 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
     return_types_schema->set_list();
     for (const auto& ret : func.return_types()) {
       // TODO: Handle sink, stream, interactions
-      if (!ret->is_sink() && !ret->is_streamresponse() && !ret->is_service()) {
+      if (!func.sink_or_stream() && !ret->is_service()) {
         auto return_type_schema = val();
         return_type_schema->set_map();
         return_type_schema->add_map(

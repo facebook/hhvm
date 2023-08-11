@@ -255,6 +255,7 @@ module.exports = {
           },
           items: [
             'fb/languages/java/generatedfiles',
+            'fb/languages/java/serde',
             'fb/languages/java/hyperthrift',
           ]
         },

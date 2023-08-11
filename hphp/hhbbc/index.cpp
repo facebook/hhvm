@@ -1158,6 +1158,14 @@ struct ClassInfo {
   hphp_vector_map<SString, ConstIndex> clsConstants;
 
   /*
+   * Inferred class constant types for the constants declared on this
+   * class. The order mirrors the order in the php::Class constants
+   * vector. If the vector is smaller than a constant's index, that
+   * constant's type is implicitly TInitCell.
+   */
+  CompactVector<ClsConstInfo> clsConstTypes;
+
+  /*
    * A vector of the used traits, in class order, mirroring the
    * php::Class usedTraitNames vector.
    */
@@ -4049,21 +4057,18 @@ struct Index::IndexData {
 
   struct ClsConstTypesHasher {
     bool operator()(const std::pair<const php::Class*, SString>& k) const {
-      return hash_int64_pair(uintptr_t(k.first), k.second->hash());
+      return folly::hash::hash_combine(
+        pointer_hash<php::Class>{}(k.first),
+        pointer_hash<StringData>{}(k.second)
+      );
     }
   };
   struct ClsConstTypesEquals {
     bool operator()(const std::pair<const php::Class*, SString>& a,
                     const std::pair<const php::Class*, SString>& b) const {
-      return a.first == b.first && a.second->same(b.second);
+      return a.first == b.first && a.second == b.second;
     }
   };
-  folly_concurrent_hash_map_simd<
-    std::pair<const php::Class*, SString>,
-    ClsConstInfo,
-    ClsConstTypesHasher,
-    ClsConstTypesEquals
-  > clsConstTypes;
 
   // Cache for lookup_class_constant
   folly_concurrent_hash_map_simd<
@@ -14928,6 +14933,8 @@ ClsConstLookupResult Index::lookup_class_constant(Context ctx,
     if (cns.kind != ConstModifiers::Kind::Value) return notFound();
     if (!cns.val.has_value()) return notFound();
 
+    auto const cnsIdx = it->second.idx;
+
     // Determine the constant's value and return it
     auto const r = [&] {
       if (cns.val->m_type == KindOfUninit) {
@@ -14943,10 +14950,13 @@ ClsConstLookupResult Index::lookup_class_constant(Context ctx,
         }
 
         ITRACE(4, "(dynamic)\n");
-        auto const it =
-          m_data->clsConstTypes.find(std::make_pair(cnsCls, cns.name));
-        auto const type =
-          (it == m_data->clsConstTypes.end()) ? TInitCell : it->second.type;
+        auto const type = [&] {
+          auto const cnsClsCi = folly::get_default(m_data->classInfo, cnsCls->name);
+          if (!cnsClsCi || cnsIdx >= cnsClsCi->clsConstTypes.size()) {
+            return TInitCell;
+          }
+          return cnsClsCi->clsConstTypes[cnsIdx].type;
+        }();
         return R{ type, TriBool::Yes, true };
       }
 
@@ -15008,20 +15018,18 @@ std::vector<std::pair<SString, ClsConstInfo>>
 Index::lookup_class_constants(const php::Class& cls) const {
   std::vector<std::pair<SString, ClsConstInfo>> out;
   out.reserve(cls.constants.size());
-  for (auto const& cns : cls.constants) {
+
+  auto const cinfo = folly::get_default(m_data->classInfo, cls.name);
+  for (size_t i = 0, size = cls.constants.size(); i < size; ++i) {
+    auto const& cns = cls.constants[i];
     if (cns.kind != ConstModifiers::Kind::Value) continue;
     if (!cns.val) continue;
     if (cns.val->m_type != KindOfUninit) {
       out.emplace_back(cns.name, ClsConstInfo{ from_cell(*cns.val), 0 });
+    } else if (cinfo && i < cinfo->clsConstTypes.size()) {
+      out.emplace_back(cns.name, cinfo->clsConstTypes[i]);
     } else {
-      out.emplace_back(
-        cns.name,
-        folly::get_default(
-          m_data->clsConstTypes,
-          std::make_pair(&cls, cns.name),
-          ClsConstInfo{ TInitCell, 0 }
-        )
-      );
+      out.emplace_back(cns.name, ClsConstInfo{ TInitCell, 0 });
     }
   }
   return out;
@@ -15788,16 +15796,14 @@ void Index::refine_class_constants(const Context& ctx,
   if (resolved.empty()) return;
 
   auto changed = false;
-  auto& constants = ctx.func->cls->constants;
+  auto const cls = ctx.func->cls;
+  assertx(cls);
+  auto& constants = cls->constants;
 
-  for (auto const& c : resolved) {
+  for (auto& c : resolved) {
     assertx(c.first < constants.size());
     auto& cnst = constants[c.first];
     assertx(cnst.kind == ConstModifiers::Kind::Value);
-
-    auto const key = std::make_pair(ctx.func->cls, cnst.name);
-
-    auto& types = m_data->clsConstTypes;
 
     always_assert(cnst.val && type(*cnst.val) == KindOfUninit);
     if (auto const val = tv(c.second.type)) {
@@ -15806,17 +15812,19 @@ void Index::refine_class_constants(const Context& ctx,
       // Deleting from the types map is too expensive, so just leave
       // any entry. We won't look at it if val is set.
       changed = true;
-    } else {
-      auto const old = [&] {
-        auto const it = types.find(key);
-        return (it == types.end())
-          ? ClsConstInfo{ TInitCell, 0 }
-          : it->second;
+    } else if (auto const cinfo =
+               folly::get_default(m_data->classInfo, cls->name)) {
+      auto& old = [&] () -> ClsConstInfo& {
+        if (c.first >= cinfo->clsConstTypes.size()) {
+          auto const newSize = std::max(c.first+1, resolved.back().first+1);
+          cinfo->clsConstTypes.resize(newSize, ClsConstInfo { TInitCell, 0 });
+        }
+        return cinfo->clsConstTypes[c.first];
       }();
 
       if (c.second.type.strictlyMoreRefined(old.type)) {
         always_assert(c.second.refinements > old.refinements);
-        types.insert_or_assign(key, std::move(c.second));
+        old = std::move(c.second);
         changed = true;
       } else {
         always_assert_flog(
@@ -16340,7 +16348,6 @@ void Index::cleanup_post_emit() {
   CLEAR_PARALLEL(m_data->funcFamilies);
   CLEAR_PARALLEL(m_data->funcFamilyStaticInfos);
 
-  CLEAR_PARALLEL(m_data->clsConstTypes);
   CLEAR_PARALLEL(m_data->clsConstLookupCache);
 
   CLEAR_PARALLEL(m_data->foldableReturnTypeMap);

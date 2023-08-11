@@ -7,7 +7,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
 
 RUN apt-get -y update
-RUN apt-get -y install python3 gcc g++ libssl-dev curl
+RUN apt-get -y install python3 gcc g++ libssl-dev curl sudo
 
 # Ubuntu 18.04 has an older version of Git, which causes actions/checkout@v3
 # to check out the repository with REST, breaking version number generation.

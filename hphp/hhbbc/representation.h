@@ -720,6 +720,7 @@ struct Unit {
   UserAttributeMap metaData;
   UserAttributeMap fileAttributes;
   LSString moduleName;
+  LSString extName;
   PackageInfo packageInfo;
 
   template <typename SerDe> void serde(SerDe& sd);

@@ -292,9 +292,7 @@ Variant HHVM_FUNCTION(stream_resolve_include_path, const String& filename,
   }
 
   struct stat s;
-  String ret = resolveVmInclude(filename.get(), "", &s,
-                                Native::s_noNativeFuncs,
-                                /*allow_dir*/true);
+  String ret = resolveVmInclude(filename.get(), "", &s, /*allow_dir*/true);
   if (ret.isNull()) {
     return false;
   }

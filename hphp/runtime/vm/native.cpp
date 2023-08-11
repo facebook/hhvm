@@ -29,7 +29,6 @@ namespace HPHP::Native {
 
 //////////////////////////////////////////////////////////////////////////////
 
-const FuncTable s_noNativeFuncs; // always empty
 ConstantMap s_constant_map;
 ClassConstantMapMap s_class_constant_map;
 

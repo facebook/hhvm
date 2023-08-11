@@ -33,6 +33,7 @@ namespace HPHP {
 struct ArrayData;
 struct BlobDecoder;
 struct BlobEncoder;
+struct Extension;
 struct PackageInfo;
 struct RepoAutoloadMapBuilder;
 struct RepoFileIndex;
@@ -204,7 +205,6 @@ struct RepoFile {
   static std::unique_ptr<UnitEmitter>
   loadUnitEmitter(const StringData* path,
                   const RepoUnitInfo* info,
-                  const Native::FuncTable& nativeFuncs,
                   bool lazy);
 
   // Given an unit's SN, and a token for that unit, return the amount

@@ -32,6 +32,7 @@ struct UnitEmitter;
 struct FuncEmitter;
 struct RepoAuthType;
 struct SHA1;
+struct Extension;
 
 namespace Native {
 struct FuncTable;
@@ -51,7 +52,7 @@ std::unique_ptr<UnitEmitter> assemble_string(
   int codeLen,
   const char* filename,
   const SHA1&,
-  const Native::FuncTable&,
+  const Extension*,
   const PackageInfo&,
   bool swallowErrors = true
 );

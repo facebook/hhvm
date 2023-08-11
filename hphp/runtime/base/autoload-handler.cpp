@@ -228,7 +228,7 @@ AutoloadHandler::loadFromMapImpl(const String& clsName,
     bool initial;
     auto const eagerSync = RO::EvalAutoloadEagerSyncUnitCache && m_map;
     auto const unit = lookupUnit(fileRes->path.get(), fileRes->info, "",
-                                 &initial, Native::s_noNativeFuncs,
+                                 &initial, nullptr,
                                  RuntimeOption::TrustAutoloaderPath,
                                  false /* forPrefetch */,
                                  eagerSync /* forAutoload */);

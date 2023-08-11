@@ -72,20 +72,20 @@ struct FuncTable;
  * fatal errors.
  */
 Unit* lookupUnit(const StringData* path, const char* currentDir,
-                 bool* initial_opt, const Native::FuncTable&,
+                 bool* initial_opt, const Extension* extension,
                  bool alreadyRealpath, bool forPrefetch = false,
                  bool forAutoload = false);
 
 Unit* lookupUnit(const StringData* path, const RepoUnitInfo* info,
                  const char* currentDir, bool* initial_opt,
-                 const Native::FuncTable&, bool alreadyRealpath,
+                 const Extension* extension, bool alreadyRealpath,
                  bool forPrefetch = false, bool forAutoload = false);
 
 /*
  * As above, but for system units. Only appropriate in
  * RepoAuthoritative mode, as we do not cache system units otherwise.
  */
-Unit* lookupSyslibUnit(StringData* path, const Native::FuncTable&);
+Unit* lookupSyslibUnit(StringData* path);
 
 /*
  * Mangle a file's sha1sum with runtime options that affect the Unit output.
@@ -169,7 +169,6 @@ std::vector<Unit*> loadedUnitsRepoAuth();
 String resolveVmInclude(const StringData* path,
                         const char* currentDir,
                         struct stat* s,  // out
-                        const Native::FuncTable&,
                         bool allow_dir = false);
 
 /*

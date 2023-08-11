@@ -40,6 +40,8 @@
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/tv-comparisons.h"
 
+#include "hphp/runtime/ext/extension-registry.h"
+
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/native.h"
@@ -1271,13 +1273,20 @@ std::unique_ptr<UnitEmitter> emit_unit(Index& index, php::Unit& unit) {
   static std::atomic<uint64_t> nextUnitId{0};
   auto unitSn = nextUnitId++;
 
+  auto extension = [&]() -> Extension* {
+    if (!unit.extName->empty()) {
+      return ExtensionRegistry::get(unit.extName->data());
+    }
+    return nullptr;
+  }();
+
   auto ue = std::make_unique<UnitEmitter>(SHA1 { unitSn },
                                           SHA1{},
-                                          Native::s_noNativeFuncs,
                                           unit.packageInfo);
   FTRACE(1, "  unit {}\n", unit.filename->data());
   ue->m_sn = unitSn;
   ue->m_filepath = unit.filename;
+  ue->m_extension = extension;
   ue->m_metaData = unit.metaData;
   ue->m_fileAttributes = unit.fileAttributes;
   ue->m_moduleName = unit.moduleName;

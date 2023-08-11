@@ -544,10 +544,6 @@ const char* checkTypeFunc(const NativeSig& sig,
                           const TypeConstraint& retType,
                           const FuncEmitter* func);
 
-// A permanently empty table, used in contexts were no native bindings
-// are possible (most ordinary code).
-extern const FuncTable s_noNativeFuncs;
-
 String fullName(const StringData* fname, const StringData* cname,
                 bool isStatic);
 

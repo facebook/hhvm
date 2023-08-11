@@ -1102,7 +1102,7 @@ static String HHVM_METHOD(ReflectionFile, __init, const String& name) {
     File::TranslatePath(name).get(),
     "",
     nullptr,
-    Native::s_noNativeFuncs,
+    nullptr,
     false
   );
 

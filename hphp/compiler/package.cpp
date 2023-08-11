@@ -216,7 +216,7 @@ createSymlinkWrapper(const std::string& fileName,
     content.size(),
     fileName.c_str(),
     SHA1{string_sha1(content)},
-    Native::s_noNativeFuncs,
+    nullptr,
     origUE->m_packageInfo,
     false
   );
@@ -345,7 +345,7 @@ Package::parseRun(const std::string& content,
         content.size(),
         fileName.c_str(),
         SHA1{string_sha1(content)},
-        Native::s_noNativeFuncs,
+        nullptr,
         repoOptions.packageInfo()
       );
       if (meta.m_targetPath) {
@@ -377,7 +377,7 @@ Package::parseRun(const std::string& content,
         content,
         fileName.c_str(),
         mangled_sha1,
-        Native::s_noNativeFuncs,
+        nullptr,
         /* isSystemLib */ false,
         /* forDebuggerEval */ false,
         repoOptions,

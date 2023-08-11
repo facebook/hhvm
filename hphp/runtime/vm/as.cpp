@@ -3375,7 +3375,7 @@ std::unique_ptr<UnitEmitter> assemble_string(
   int codeLen,
   const char* filename,
   const SHA1& sha1,
-  const Native::FuncTable& nativeFuncs,
+  const Extension* extension,
   const PackageInfo& packageInfo,
   bool swallowErrors
 ) {
@@ -3389,9 +3389,10 @@ std::unique_ptr<UnitEmitter> assemble_string(
   };
 
   auto const bcSha1 = SHA1{string_sha1(folly::StringPiece(code, codeLen))};
-  auto ue = std::make_unique<UnitEmitter>(sha1, bcSha1, nativeFuncs, packageInfo);
+  auto ue = std::make_unique<UnitEmitter>(sha1, bcSha1, packageInfo);
   StringData* sd = makeStaticString(filename);
   ue->m_filepath = sd;
+  ue->m_extension = extension;
 
   FTRACE(
     4,

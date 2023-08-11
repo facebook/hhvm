@@ -216,8 +216,7 @@ struct UnitPreloader : JobQueueWorker<StringData*, void*> {
     hphp_session_exit();
   }
   virtual void doJob(StringData* path) override {
-    auto& nativeFuncs = Native::s_noNativeFuncs;
-    DEBUG_ONLY auto unit = lookupUnit(path, "", nullptr, nativeFuncs, false);
+    DEBUG_ONLY auto unit = lookupUnit(path, "", nullptr, nullptr, false);
     FTRACE(2, "Preloaded unit with path {}\n", path->data());
     assertx(unit->origFilepath() == path);  // both static
   }
@@ -1446,11 +1445,10 @@ Unit* read_unit(ProfDataDeserializer& ser) {
     [&] () -> Unit* {
       auto const filepath = read_string(ser);
       ITRACE(2, "Unit: {}\n", filepath);
-      auto& nativeFuncs = Native::s_noNativeFuncs;
       if (filepath->data()[0] == '/' && filepath->data()[1] == ':') {
-        return lookupSyslibUnit(filepath, nativeFuncs);
+        return lookupSyslibUnit(filepath);
       }
-      return lookupUnit(filepath, "", nullptr, nativeFuncs, false);
+      return lookupUnit(filepath, "", nullptr, nullptr, false);
     }
   );
 }

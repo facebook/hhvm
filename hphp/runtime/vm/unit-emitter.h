@@ -46,6 +46,7 @@ struct FuncEmitter;
 struct PreClassEmitter;
 struct StringData;
 struct TypeAliasEmitter;
+struct Extension;
 
 namespace Native {
 struct FuncTable;
@@ -69,7 +70,6 @@ struct UnitEmitter {
 
   explicit UnitEmitter(const SHA1& sha1,
                        const SHA1& bcSha1,
-                       const Native::FuncTable&,
                        const PackageInfo&);
   UnitEmitter(UnitEmitter&&) = delete;
   ~UnitEmitter();
@@ -296,9 +296,9 @@ public:
   SymbolRefs m_symbol_refs;
 
   /*
-   * name=>NativeFuncInfo for native funcs in this unit
+   * Extension this unit is part of. Can be used to get the native func impl
    */
-  const Native::FuncTable& m_nativeFuncs;
+  const Extension* m_extension{nullptr};
 
   Location::Range m_fatalLoc;
   FatalOp m_fatalOp;

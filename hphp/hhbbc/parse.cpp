@@ -1114,6 +1114,13 @@ ParsedUnit parse_unit(const UnitEmitter& ue) {
   ret.unit->moduleName     = ue.m_moduleName;
   ret.unit->packageInfo    = ue.m_packageInfo;
 
+  ret.unit->extName        = [&]{
+    if (ue.m_extension) {
+      return makeStaticString(ue.m_extension->getName());
+    }
+    return staticEmptyString();
+  }();
+
   if (RO::EvalAbortBuildOnVerifyError && !ue.check(false)) {
     // Record a FatalInfo without a location. This represents a
     // verifier failure.

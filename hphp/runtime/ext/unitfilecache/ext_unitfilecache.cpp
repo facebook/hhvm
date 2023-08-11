@@ -88,8 +88,7 @@ std::unique_ptr<UnitEmitter> cache_hook(
   const SHA1& sha1,
   folly::StringPiece::size_type codeLen,
   HhvmDeclProvider* provider,
-  const std::function<std::unique_ptr<UnitEmitter>(bool)>& compile,
-  const Native::FuncTable& nativeFuncs
+  const std::function<std::unique_ptr<UnitEmitter>(bool)>& compile
 ) {
   assertx(s_state);
 
@@ -113,7 +112,7 @@ std::unique_ptr<UnitEmitter> cache_hook(
       query.getBlob(0, blob, blobSize);
 
       auto const packageInfo = RepoOptions::forFile(filename).packageInfo();
-      auto ue = std::make_unique<UnitEmitter>(sha1, SHA1{}, nativeFuncs, packageInfo);
+      auto ue = std::make_unique<UnitEmitter>(sha1, SHA1{}, packageInfo);
       BlobDecoder decoder{blob, blobSize};
       ue->m_filepath = makeStaticString(filename);
       ue->serde(decoder, false);

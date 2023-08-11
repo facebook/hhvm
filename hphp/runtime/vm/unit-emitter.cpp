@@ -30,6 +30,8 @@
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 
+#include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/ext/extension-registry.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 
 #include "hphp/runtime/vm/disas.h"
@@ -72,10 +74,8 @@ TRACE_SET_MOD(hhbc);
 
 UnitEmitter::UnitEmitter(const SHA1& sha1,
                          const SHA1& bcSha1,
-                         const Native::FuncTable& nativeFuncs,
                          const PackageInfo& packageInfo)
-  : m_nativeFuncs(nativeFuncs)
-  , m_packageInfo(packageInfo)
+  : m_packageInfo(packageInfo)
   , m_sha1(sha1)
   , m_bcSha1(bcSha1)
   , m_nextFuncSn(0)
@@ -573,6 +573,7 @@ Id UnitEmitter::getEntryPointId() const {
 
 void UnitEmitter::finish() {
   calculateEntryPointId();
+  assertx(isASystemLib() == (m_extension != nullptr));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -870,6 +871,26 @@ void UnitEmitter::serde(SerDe& sd, bool lazy) {
         (m_ICE)
         (m_missingSyms)
         (m_errorSyms);
+
+      if constexpr (SerDe::deserializing) {
+        std::string ext_name;
+        sd(ext_name);
+        m_extension = [&]() -> Extension* {
+          if (!ext_name.empty()) {
+            return ExtensionRegistry::get(ext_name);
+          }
+          return nullptr;
+        }();
+      } else {
+        const std::string ext_name = [&]{
+          if (m_extension) {
+            return std::string(m_extension->getName());
+          }
+          return std::string("");
+        }();
+        sd(ext_name);
+      }
+
       if (m_fatalUnit) {
         sd(m_fatalLoc)
           (m_fatalOp)
@@ -1098,7 +1119,7 @@ template void UnitEmitter::serde<>(BlobEncoder&, bool);
 std::unique_ptr<UnitEmitter>
 createFatalUnit(const StringData* filename, const SHA1& sha1, FatalOp op,
                 std::string err, Location::Range loc) {
-  auto ue = std::make_unique<UnitEmitter>(sha1, SHA1{}, Native::s_noNativeFuncs,
+  auto ue = std::make_unique<UnitEmitter>(sha1, SHA1{},
                                           RepoOptions::defaults().packageInfo());
   ue->m_filepath = filename;
 

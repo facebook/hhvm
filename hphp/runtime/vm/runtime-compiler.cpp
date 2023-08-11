@@ -44,7 +44,7 @@ namespace {
 
 std::unique_ptr<UnitEmitter> parse(LazyUnitContentsLoader& loader,
                                    const char* filename,
-                                   const Native::FuncTable& nativeFuncs,
+                                   const Extension* extension,
                                    AutoloadMap* map,
                                    Unit** releaseUnit,
                                    bool isSystemLib,
@@ -91,7 +91,7 @@ std::unique_ptr<UnitEmitter> parse(LazyUnitContentsLoader& loader,
       contents.size(),
       filename,
       loader.sha1(),
-      nativeFuncs,
+      extension,
       RepoOptions::forFile(filename).packageInfo()
     );
   }
@@ -102,7 +102,7 @@ std::unique_ptr<UnitEmitter> parse(LazyUnitContentsLoader& loader,
     auto uc = UnitCompiler::create(
       loader,
       filename,
-      nativeFuncs,
+      extension,
       map,
       isSystemLib,
       forDebuggerEval
@@ -134,14 +134,14 @@ std::unique_ptr<UnitEmitter> parse(LazyUnitContentsLoader& loader,
 
 Unit* compile_file(LazyUnitContentsLoader& loader,
                    const char* filename,
-                   const Native::FuncTable& nativeFuncs,
+                   const Extension* extension,
                    AutoloadMap* map,
                    Unit** releaseUnit) {
   assertx(!filename || filename[0] != '/' || filename[1] != ':');
   return parse(
     loader,
     filename,
-    nativeFuncs,
+    extension,
     map,
     releaseUnit,
     false,
@@ -152,7 +152,7 @@ Unit* compile_file(LazyUnitContentsLoader& loader,
 Unit* compile_string(const char* s,
                      size_t sz,
                      const char* fname,
-                     const Native::FuncTable& nativeFuncs,
+                     const Extension* extension,
                      AutoloadMap* map,
                      const RepoOptions& options,
                      bool isSystemLib,
@@ -168,7 +168,7 @@ Unit* compile_string(const char* s,
   return parse(
     loader,
     fname,
-    nativeFuncs,
+    extension,
     map,
     nullptr,
     isSystemLib,
@@ -177,10 +177,10 @@ Unit* compile_string(const char* s,
 }
 
 Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname,
-                               const Native::FuncTable& nativeFuncs) {
+                               const Extension* extension) {
   assertx(fname && fname[0] == '/' && fname[1] == ':');
   if (RuntimeOption::RepoAuthoritative) {
-    if (auto u = lookupSyslibUnit(makeStaticString(fname), nativeFuncs)) {
+    if (auto u = lookupSyslibUnit(makeStaticString(fname))) {
       return u;
     }
   }
@@ -204,7 +204,7 @@ Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname,
   auto ue = parse(
     loader,
     fname,
-    nativeFuncs,
+    extension,
     RuntimeOption::EvalEnableDecl ? &empty_map : nullptr,
     nullptr,
     true,
@@ -232,7 +232,7 @@ Unit* compile_debugger_string(
     s,
     sz,
     nullptr,
-    Native::s_noNativeFuncs,
+    nullptr,
     map,
     options,
     false,

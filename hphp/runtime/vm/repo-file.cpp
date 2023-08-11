@@ -486,7 +486,6 @@ const PackageInfo& RepoFile::packageInfo() {
 std::unique_ptr<UnitEmitter>
 RepoFile::loadUnitEmitter(const StringData* path,
                           const RepoUnitInfo* info,
-                          const Native::FuncTable& nativeFuncs,
                           bool lazy) {
   assertx(s_repoFileData);
   assertx(s_repoFileData->loadedGlobalTables.load());
@@ -505,8 +504,7 @@ RepoFile::loadUnitEmitter(const StringData* path,
     info->emitterLocation.size
   );
 
-  auto ue = std::make_unique<UnitEmitter>(SHA1{ (uint64_t)info->unitSn },
-                                          SHA1{}, nativeFuncs,
+  auto ue = std::make_unique<UnitEmitter>(SHA1{ (uint64_t)info->unitSn }, SHA1{},
                                           RepoOptions::defaults().packageInfo());
   ue->m_filepath = info->path;
   ue->m_sn = info->unitSn;

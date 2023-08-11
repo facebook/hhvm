@@ -143,8 +143,7 @@ using RepoUnitCache = RankedCHM<
 RepoUnitCache s_repoUnitCache;
 
 CachedUnit lookupUnitRepoAuth(const StringData* path,
-                              const RepoUnitInfo* info,
-                              const Native::FuncTable& nativeFuncs) {
+                              const RepoUnitInfo* info) {
   assertx(!info || info->path == path);
   tracing::BlockNoTrace _{"lookup-unit-repo-auth"};
 
@@ -195,7 +194,7 @@ CachedUnit lookupUnitRepoAuth(const StringData* path,
     /*
      * We got the lock, so we're responsible for updating the entry.
      */
-    auto ue = RepoFile::loadUnitEmitter(path, info, nativeFuncs, true);
+    auto ue = RepoFile::loadUnitEmitter(path, info, true);
     if (ue) {
       auto unit = create(std::move(ue));
       cu.rdsBitId = rds::allocBit();
@@ -734,7 +733,7 @@ CachedFilePtr createUnitFromFile(const StringData* const path,
                                  Stream::Wrapper* wrapper,
                                  Unit** releaseUnit,
                                  OptLog& ent,
-                                 const Native::FuncTable& nativeFuncs,
+                                 const Extension* extension,
                                  AutoloadMap* map,
                                  const RepoOptions& options,
                                  FileLoadFlags& flags,
@@ -788,7 +787,7 @@ CachedFilePtr createUnitFromFile(const StringData* const path,
       rqtrace::EventGuard trace{"COMPILE_UNIT"};
       trace.annotate("file_size", folly::to<std::string>(loader.fileLength()));
       flags = FileLoadFlags::kCompiled;
-      return compile_file(loader, path->data(), nativeFuncs, map, releaseUnit);
+      return compile_file(loader, path->data(), extension, map, releaseUnit);
     };
 
     // If orig is provided, check if the given Unit has the same bcSha1
@@ -1163,7 +1162,7 @@ CachedUnit loadUnitNonRepoAuth(const StringData* rpath,
                                Stream::Wrapper* wrapper,
                                const struct stat& statInfo,
                                OptLog& ent,
-                               const Native::FuncTable& nativeFuncs,
+                               const Extension* extension,
                                const RepoOptions& options,
                                FileLoadFlags& flags,
                                bool forPrefetch) {
@@ -1229,7 +1228,7 @@ CachedUnit loadUnitNonRepoAuth(const StringData* rpath,
       ? cachedUnit.copy()
       : CachedFilePtr{};
     return createUnitFromFile(rpath, wrapper, &releaseUnit, ent,
-                              nativeFuncs, map, options, flags,
+                              extension, map, options, flags,
                               statInfo, std::move(orig), forPrefetch,
                               changeRes);
   }();
@@ -1265,7 +1264,7 @@ CachedUnit loadUnitNonRepoAuth(const StringData* rpath,
 CachedUnit lookupUnitNonRepoAuth(const StringData* requestedPath,
                                  struct stat& statInfo,
                                  OptLog& ent,
-                                 const Native::FuncTable& nativeFuncs,
+                                 const Extension* extension,
                                  FileLoadFlags& flags,
                                  bool alreadyRealpath,
                                  bool forPrefetch,
@@ -1331,7 +1330,7 @@ CachedUnit lookupUnitNonRepoAuth(const StringData* requestedPath,
     // Not in the cache, attempt to load it
     return loadUnitNonRepoAuth(
       rpath, *cache, wrapper, statInfo,
-      ent, nativeFuncs,
+      ent, extension,
       options, flags, forPrefetch
     );
   }();
@@ -1387,19 +1386,18 @@ CachedUnit lookupUnitNonRepoAuth(const StringData* requestedPath,
 struct ResolveIncludeContext {
   struct stat* s; // stat for the file
   bool allow_dir; // return true for dirs?
-  const Native::FuncTable& nativeFuncs;
   String path;    // translated path of the file
 };
 
 bool findFile(const StringData* path, struct stat* s, bool allow_dir,
-              Stream::Wrapper* w, const Native::FuncTable& nativeFuncs) {
+              Stream::Wrapper* w) {
   // We rely on this side-effect in RepoAuthoritative mode right now, since the
   // stat information is an output-param of resolveVmInclude, but we aren't
   // really going to call stat.
   s->st_mode = 0;
 
   if (RuntimeOption::RepoAuthoritative) {
-    return lookupUnitRepoAuth(path, nullptr, nativeFuncs).unit != nullptr;
+    return lookupUnitRepoAuth(path, nullptr).unit != nullptr;
   }
 
   if (statSyscall(path->data(), s) == 0) {
@@ -1429,7 +1427,7 @@ bool findFileWrapper(const String& file, void* ctx) {
   String translatedPath = File::TranslatePathKeepRelative(file);
   if (!FileUtil::isAbsolutePath(file.toCppString())) {
     if (findFile(translatedPath.get(), context->s, context->allow_dir,
-                 wrapper, context->nativeFuncs)) {
+                 wrapper)) {
       context->path = translatedPath;
       return true;
     }
@@ -1437,7 +1435,7 @@ bool findFileWrapper(const String& file, void* ctx) {
   }
   if (RuntimeOption::SandboxMode || !RuntimeOption::AlwaysUseRelativePath) {
     if (findFile(translatedPath.get(), context->s, context->allow_dir,
-                 wrapper, context->nativeFuncs)) {
+                 wrapper)) {
       context->path = translatedPath;
       return true;
     }
@@ -1452,7 +1450,7 @@ bool findFileWrapper(const String& file, void* ctx) {
   }
   String rel_path(FileUtil::relativePath(server_root, translatedPath.data()));
   if (findFile(rel_path.get(), context->s, context->allow_dir,
-               wrapper, context->nativeFuncs)) {
+               wrapper)) {
     context->path = rel_path;
     return true;
   }
@@ -1603,24 +1601,23 @@ void invalidateUnit(StringData* path) {
 String resolveVmInclude(const StringData* path,
                         const char* currentDir,
                         struct stat* s,
-                        const Native::FuncTable& nativeFuncs,
                         bool allow_dir /* = false */) {
-  ResolveIncludeContext ctx{s, allow_dir, nativeFuncs};
+  ResolveIncludeContext ctx{s, allow_dir};
   resolve_include(StrNR{path}, currentDir, findFileWrapper, &ctx);
   // If resolve_include() could not find the file, return NULL
   return ctx.path;
 }
 
 Unit* lookupUnit(const StringData* path, const char* currentDir,
-                 bool* initial_opt, const Native::FuncTable& nativeFuncs,
+                 bool* initial_opt, const Extension* extension,
                  bool alreadyRealpath, bool forPrefetch, bool forAutoload) {
-  return lookupUnit(path, nullptr, currentDir, initial_opt, nativeFuncs,
+  return lookupUnit(path, nullptr, currentDir, initial_opt, extension,
                     alreadyRealpath, forPrefetch, forAutoload);
 }
 
 Unit* lookupUnit(const StringData* path, const RepoUnitInfo* info,
                  const char* currentDir, bool* initial_opt,
-                 const Native::FuncTable& nativeFuncs, bool alreadyRealpath,
+                 const Extension* extension, bool alreadyRealpath,
                  bool forPrefetch, bool forAutoload) {
   bool init;
   bool& initial = initial_opt ? *initial_opt : init;
@@ -1659,7 +1656,7 @@ Unit* lookupUnit(const StringData* path, const RepoUnitInfo* info,
   } else if (forAutoload) {
     spath = makeStaticString(path);
   } else {
-    spath = resolveVmInclude(path, currentDir, &s, nativeFuncs);
+    spath = resolveVmInclude(path, currentDir, &s);
     if (spath.isNull()) return nullptr;
   }
 
@@ -1689,9 +1686,8 @@ Unit* lookupUnit(const StringData* path, const RepoUnitInfo* info,
 
   // This file hasn't been included yet, so we need to parse the file
   auto const cunit = RuntimeOption::RepoAuthoritative
-    ? lookupUnitRepoAuth(spath.get(), info, nativeFuncs)
-    : lookupUnitNonRepoAuth(spath.get(), s, ent,
-                            nativeFuncs, flags,
+    ? lookupUnitRepoAuth(spath.get(), info)
+    : lookupUnitNonRepoAuth(spath.get(), s, ent, extension, flags,
                             alreadyRealpath, forPrefetch, forAutoload);
 
   if (cunit.unit && initial_opt) {
@@ -1722,9 +1718,9 @@ Unit* lookupUnit(const StringData* path, const RepoUnitInfo* info,
   return cunit.unit;
 }
 
-Unit* lookupSyslibUnit(StringData* path, const Native::FuncTable& nativeFuncs) {
+Unit* lookupSyslibUnit(StringData* path) {
   assertx(RuntimeOption::RepoAuthoritative);
-  return lookupUnitRepoAuth(path, nullptr, nativeFuncs).unit;
+  return lookupUnitRepoAuth(path, nullptr).unit;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1794,8 +1790,7 @@ void prefetchUnit(StringData* requestedPath,
     auto const spath = resolveVmInclude(
       requestedPath,
       "",
-      fileStat.get_pointer(),
-      Native::s_noNativeFuncs
+      fileStat.get_pointer()
     );
     // File doesn't exist. Nothing to do.
     if (spath.isNull()) return;
@@ -1873,8 +1868,7 @@ void prefetchUnit(StringData* requestedPath,
         auto const spath = resolveVmInclude(
           path,
           "",
-          fileStat.get_pointer(),
-          Native::s_noNativeFuncs
+          fileStat.get_pointer()
         );
         // File doesn't exist. Nothing to do.
         if (spath.isNull()) return;
@@ -1936,7 +1930,7 @@ void prefetchUnit(StringData* requestedPath,
         FileLoadFlags flags;
         OptLog optLog;
         return createUnitFromFile(rpath, nullptr, &releaseUnit, optLog,
-                                  Native::s_noNativeFuncs,
+                                  nullptr,
                                   map.get(),
                                   options, flags, *fileStat, std::move(orig),
                                   true, changeRes);
@@ -2100,7 +2094,7 @@ void unitCacheSyncRepo(AutoloadMap* map,
           FileLoadFlags flags;
           OptLog optLog;
           return createUnitFromFile(rpath, nullptr, &releaseUnit, optLog,
-                                    Native::s_noNativeFuncs,
+                                    nullptr,
                                     map.get(),
                                     *options, flags, fileStat, std::move(orig),
                                     true, changeRes);
@@ -2185,7 +2179,7 @@ Unit* compileEvalString(const StringData* code, const char* evalFilename) {
       scode->data(),
       scode->size(),
       evalFilename,
-      Native::s_noNativeFuncs,
+      nullptr,
       map,
       g_context->getRepoOptionsForCurrentFrame()
     );

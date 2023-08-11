@@ -20,6 +20,7 @@
 namespace HPHP {
 
 struct AutoloadMap;
+struct Extension;
 struct Unit;
 struct SHA1;
 struct RepoOptions;
@@ -33,7 +34,7 @@ struct FuncTable;
 // to race-conditions while compiling
 Unit* compile_file(LazyUnitContentsLoader& loader,
                    const char* filename,
-                   const Native::FuncTable& nativeFuncs,
+                   const Extension* extension,
                    AutoloadMap*,
                    Unit** releaseUnit = nullptr);
 
@@ -44,7 +45,7 @@ Unit* compile_file(LazyUnitContentsLoader& loader,
 // enter a statement and we wish to eval it and display the resulting value,
 // if any.
 Unit* compile_string(const char* s, size_t sz, const char* fname,
-                     const Native::FuncTable& nativeFuncs,
+                     const Extension* extension,
                      AutoloadMap*,
                      const RepoOptions&,
                      bool isSystemLib = false,
@@ -53,6 +54,6 @@ Unit* compile_string(const char* s, size_t sz, const char* fname,
 Unit* compile_debugger_string(const char* s, size_t sz, const RepoOptions&);
 
 Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname,
-                               const Native::FuncTable& nativeFuncs);
+                               const Extension* extension);
 
 }

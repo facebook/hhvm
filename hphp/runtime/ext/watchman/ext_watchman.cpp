@@ -413,7 +413,7 @@ struct ActiveSubscription {
         String(m_callbackFile.c_str()).get(),
         "",
         &initial,
-        Native::s_noNativeFuncs,
+        nullptr,
         false);
       if (!unit) {
         throw std::runtime_error(

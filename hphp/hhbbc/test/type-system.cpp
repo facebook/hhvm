@@ -650,7 +650,7 @@ Index make_index() {
     hhas.c_str(), hhas.size(),
     "ignore.php",
     SHA1("1234543212345432123454321234543212345432"),
-    Native::s_noNativeFuncs,
+    nullptr,
     RepoOptions::defaults().packageInfo()
   )};
 

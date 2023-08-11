@@ -1538,13 +1538,14 @@ std::unique_ptr<UnitEmitter> unitEmitterFromHackCUnit(
   const char* filename,
 	const SHA1& sha1,
 	const SHA1& bcSha1,
-  const Native::FuncTable& nativeFuncs,
+  const Extension* extension,
   bool swallowErrors,
   const PackageInfo& packageInfo
 ) {
-  auto ue = std::make_unique<UnitEmitter>(sha1, bcSha1, nativeFuncs, packageInfo);
+  auto ue = std::make_unique<UnitEmitter>(sha1, bcSha1, packageInfo);
   StringData* sd = makeStaticString(filename);
   ue->m_filepath = sd;
+  ue->m_extension = extension;
   bool isSystemLib = FileUtil::isSystemName(sd->slice());
 
   try {

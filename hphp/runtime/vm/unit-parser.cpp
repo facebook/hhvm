@@ -86,13 +86,13 @@ CompilerResult unitEmitterFromHackCUnitHandleErrors(const hackc::hhbc::Unit& uni
                                                     const char* filename,
 	                                                  const SHA1& sha1,
 	                                                  const SHA1& bcSha1,
-                                                    const Native::FuncTable& nativeFuncs,
+                                                    const Extension* extension,
                                                     bool& internal_error,
                                                     CompileAbortMode mode,
                                                     const PackageInfo& packageInfo) {
   try {
     return unitEmitterFromHackCUnit(unit, filename, sha1, bcSha1,
-                                    nativeFuncs, false, packageInfo);
+                                    extension, false, packageInfo);
   } catch (const FatalErrorException&) {
     throw;
   } catch (const TranslationFatal& ex) {
@@ -108,7 +108,7 @@ CompilerResult assemble_string_handle_errors(folly::StringPiece code,
                                              const std::string& hhas,
                                              const char* filename,
                                              const SHA1& sha1,
-                                             const Native::FuncTable& nativeFuncs,
+                                             const Extension* extension,
                                              bool& internal_error,
                                              CompileAbortMode mode,
                                              const PackageInfo& packageInfo) {
@@ -117,7 +117,7 @@ CompilerResult assemble_string_handle_errors(folly::StringPiece code,
                            hhas.length(),
                            filename,
                            sha1,
-                           nativeFuncs,
+                           extension,
                            packageInfo,
                            false);  /* swallow errors */
   } catch (const FatalErrorException&) {
@@ -173,7 +173,7 @@ CompilerResult hackc_compile(
   folly::StringPiece code,
   const char* filename,
   const SHA1& sha1,
-  const Native::FuncTable& nativeFuncs,
+  const Extension* extension,
   bool isSystemLib,
   bool forDebuggerEval,
   bool& internal_error,
@@ -248,7 +248,7 @@ CompilerResult hackc_compile(
     auto const bcSha1 = SHA1(hash_unit(*unit_wrapped));
     const hackc::hhbc::Unit* unit = hackCUnitRaw(unit_wrapped);
     auto hackCResult = unitEmitterFromHackCUnitHandleErrors(
-      *unit, filename, sha1, bcSha1, nativeFuncs,
+      *unit, filename, sha1, bcSha1, extension,
       internal_error, mode, options.packageInfo()
     );
     return hackCResult;
@@ -277,7 +277,7 @@ CompilerResult hackc_compile(
                                             hhas,
                                             filename,
                                             sha1,
-                                            nativeFuncs,
+                                            extension,
                                             internal_error,
                                             mode,
                                             options.packageInfo());
@@ -329,7 +329,7 @@ struct HackcUnitCompiler final : UnitCompiler {
 struct CacheUnitCompiler final : UnitCompiler {
   CacheUnitCompiler(LazyUnitContentsLoader& loader,
                     const char* filename,
-                    const Native::FuncTable& nativeFuncs,
+                    const Extension* extension,
                     AutoloadMap* map,
                     bool isSystemLib,
                     bool forDebuggerEval,
@@ -337,7 +337,7 @@ struct CacheUnitCompiler final : UnitCompiler {
     : UnitCompiler{
         loader,
         filename,
-        nativeFuncs,
+        extension,
         map,
         isSystemLib,
         forDebuggerEval
@@ -418,16 +418,16 @@ FfpResult ffp_parse_file(
 std::unique_ptr<UnitCompiler>
 UnitCompiler::create(LazyUnitContentsLoader& loader,
                      const char* filename,
-                     const Native::FuncTable& nativeFuncs,
+                     const Extension* extension,
                      AutoloadMap* map,
                      bool isSystemLib,
                      bool forDebuggerEval) {
-  auto make = [&loader, &nativeFuncs, filename, isSystemLib, forDebuggerEval,
+  auto make = [&loader, extension, filename, isSystemLib, forDebuggerEval,
                map] {
     return std::make_unique<HackcUnitCompiler>(
       loader,
       filename,
-      nativeFuncs,
+      extension,
       map,
       isSystemLib,
       forDebuggerEval
@@ -438,7 +438,7 @@ UnitCompiler::create(LazyUnitContentsLoader& loader,
     return std::make_unique<CacheUnitCompiler>(
       loader,
       filename,
-      nativeFuncs,
+      extension,
       map,
       isSystemLib,
       false,
@@ -464,7 +464,7 @@ std::unique_ptr<UnitEmitter> compile_unit(
   folly::StringPiece code,
   const char* filename,
   const SHA1& sha1,
-  const Native::FuncTable& nativeFuncs,
+  const Extension* extension,
   bool isSystemLib,
   bool forDebuggerEval,
   const RepoOptionsFlags& options,
@@ -472,7 +472,7 @@ std::unique_ptr<UnitEmitter> compile_unit(
   hackc::DeclProvider* provider
 ) {
   bool ice = false;
-  auto res = hackc_compile(code, filename, sha1, nativeFuncs, isSystemLib,
+  auto res = hackc_compile(code, filename, sha1, extension, isSystemLib,
       forDebuggerEval, ice, options, mode, provider);
   auto unitEmitter = match<std::unique_ptr<UnitEmitter>>(res,
     [&] (std::unique_ptr<UnitEmitter>& ue) {
@@ -511,7 +511,7 @@ std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile(
   auto unitEmitter = compile_unit(m_loader.contents().data(),
                                   m_filename,
                                   m_loader.sha1(),
-                                  m_nativeFuncs,
+                                  m_extension,
                                   m_isSystemLib,
                                   m_forDebuggerEval,
                                   m_loader.options(),
@@ -540,8 +540,7 @@ CacheUnitCompiler::compile(bool& cacheHit,
         provider,
         wantsICE ? mode : CompileAbortMode::AllErrorsNull
       );
-    },
-    m_nativeFuncs
+    }
   );
 }
 

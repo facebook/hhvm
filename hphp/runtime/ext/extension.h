@@ -68,7 +68,7 @@ public:
   // Compile and merge an systemlib fragment
   static void CompileSystemlib(const std::string &slib,
                                const std::string &name,
-                               const Native::FuncTable& nativeFuncs);
+                               const Extension* extension);
   explicit Extension(const char name[],
                      const char version[],
                      const char oncall[]);
@@ -142,6 +142,10 @@ public:
   void registerExtensionFunction(const String& name);
 
   Native::FuncTable& nativeFuncs() {
+    return m_nativeFuncs;
+  }
+
+  const Native::FuncTable& nativeFuncs() const {
     return m_nativeFuncs;
   }
 

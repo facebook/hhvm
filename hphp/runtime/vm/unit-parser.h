@@ -87,13 +87,13 @@ struct CompilerAbort : public std::runtime_error {
 struct UnitCompiler {
   UnitCompiler(LazyUnitContentsLoader& loader,
                const char* filename,
-               const Native::FuncTable& nativeFuncs,
+               const Extension* extension,
                AutoloadMap* map,
                bool isSystemLib,
                bool forDebuggerEval)
     : m_loader{loader}
     , m_filename{filename}
-    , m_nativeFuncs{nativeFuncs}
+    , m_extension{extension}
     , m_map{map}
     , m_isSystemLib{isSystemLib}
     , m_forDebuggerEval{forDebuggerEval}
@@ -103,7 +103,7 @@ struct UnitCompiler {
   static std::unique_ptr<UnitCompiler> create(
     LazyUnitContentsLoader& loader,
     const char* filename,
-    const Native::FuncTable& nativeFuncs,
+    const Extension* extension,
     AutoloadMap* map,
     bool isSystemLib,
     bool forDebuggerEval
@@ -123,7 +123,7 @@ struct UnitCompiler {
  protected:
   LazyUnitContentsLoader& m_loader;
   const char* m_filename;
-  const Native::FuncTable& m_nativeFuncs;
+  const Extension* m_extension;
   AutoloadMap* m_map;
   bool m_isSystemLib;
   bool m_forDebuggerEval;
@@ -137,8 +137,7 @@ using UnitEmitterCacheHook =
     HhvmDeclProvider* provider,
     // First parameter is whether ICE UEs are allowed. If not, a
     // nullptr will be returned for ICE UEs instead.
-    const std::function<std::unique_ptr<UnitEmitter>(bool)>&,
-    const Native::FuncTable&
+    const std::function<std::unique_ptr<UnitEmitter>(bool)>&
   );
 extern UnitEmitterCacheHook g_unit_emitter_cache_hook;
 
@@ -147,7 +146,7 @@ std::unique_ptr<UnitEmitter> compile_unit(
   folly::StringPiece code,
   const char* filename,
   const SHA1& sha1,
-  const Native::FuncTable& nativeFuncs,
+  const Extension* extension,
   bool isSystemLib,
   bool forDebuggerEval,
   const RepoOptionsFlags& options,

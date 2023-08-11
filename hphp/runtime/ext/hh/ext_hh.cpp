@@ -145,7 +145,7 @@ Array HHVM_FUNCTION(autoload_path_to_type_aliases, const String& path) {
 
 bool HHVM_FUNCTION(could_include, const String& file) {
   return lookupUnit(file.get(), "", nullptr /* initial_opt */,
-                    Native::s_noNativeFuncs, false) != nullptr;
+                    nullptr, false) != nullptr;
 }
 
 namespace {
@@ -796,7 +796,7 @@ void HHVM_FUNCTION(prefetch_units, const Array& paths, bool hint) {
           File::TranslatePath(String{v.m_data.pstr}).get(),
           "",
           nullptr,
-          Native::s_noNativeFuncs,
+          nullptr,
           false,
           true
         );
@@ -999,7 +999,7 @@ Unit* loadUnit(StringData* path) {
     File::TranslatePath(String{path}).get(),
     "",
     nullptr,
-    Native::s_noNativeFuncs,
+    nullptr,
     false
   );
   if (!unit) {
@@ -1384,8 +1384,7 @@ bool HHVM_FUNCTION(reflection_class_is_interface, TypedValue cls) {
 }
 
 TypedValue HHVM_FUNCTION(get_executable_lines, StringArg path) {
-  auto const file = lookupUnit(path.get(), "", nullptr, Native::s_noNativeFuncs,
-                               false);
+  auto const file = lookupUnit(path.get(), "", nullptr, nullptr, false);
   if (!file) {
     SystemLib::throwInvalidArgumentExceptionObject(
       folly::sformat("Unable to find file {}", path.get()->data())

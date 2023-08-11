@@ -20,6 +20,8 @@
 
 #include "hphp/runtime/base/file-util.h"
 
+#include "hphp/runtime/ext/extension.h"
+
 #include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/native.h"
 
@@ -104,10 +106,8 @@ void UnitEmitterSerdeWrapper::serde(SerDe& sd) {
       sd(sha1);
       sd(filepath);
 
-      // Systemlib units are not currently deserialized from extern workers
-      // so we never need to supply a native func table here.
       auto ue = std::make_unique<UnitEmitter>(
-        sha1, SHA1{}, Native::s_noNativeFuncs, RepoOptions::defaults().packageInfo()
+        sha1, SHA1{}, RepoOptions::defaults().packageInfo()
       );
       ue->m_filepath = makeStaticString(filepath);
       ue->serde(sd, false);

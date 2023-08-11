@@ -53,14 +53,13 @@ bool Extension::IsSystemlibPath(const std::string& name) {
 
 void Extension::CompileSystemlib(const std::string &slib,
                                  const std::string &name,
-                                 const Native::FuncTable& nativeFuncs) {
+                                 const Extension* extension) {
   // TODO (t3443556) Bytecode repo compilation expects that any errors
   // encountered during systemlib compilation have valid filename pointers
   // which won't be the case for now unless these pointers are long-lived.
   auto const moduleName = makeStaticString("/:" + name);
   auto const unit = compile_systemlib_string(slib.c_str(), slib.size(),
-                                             moduleName->data(),
-                                             nativeFuncs);
+                                             moduleName->data(), extension);
   always_assert_flog(unit, "No unit created for systemlib `{}'", moduleName);
 
   if (auto const info = unit->getFatalInfo()) {
@@ -101,7 +100,7 @@ void Extension::loadSystemlib(const std::string& name) {
   auto const slib = get_section(name, m_dsoName);
   if (!slib.empty()) {
     std::string phpname = s_systemlibPhpName + name;
-    CompileSystemlib(slib, phpname, m_nativeFuncs);
+    CompileSystemlib(slib, phpname, this);
   }
 }
 

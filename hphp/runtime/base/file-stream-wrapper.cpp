@@ -73,8 +73,7 @@ FileStreamWrapper::open(const String& filename, const String& mode, int options,
 
   if (options & File::USE_INCLUDE_PATH) {
     struct stat s;
-    String resolved_fname = resolveVmInclude(fname.get(), "", &s,
-                                             Native::s_noNativeFuncs);
+    String resolved_fname = resolveVmInclude(fname.get(), "", &s);
     if (!resolved_fname.isNull()) {
       fname = resolved_fname;
     }

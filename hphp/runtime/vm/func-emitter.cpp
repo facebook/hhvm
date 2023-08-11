@@ -499,8 +499,9 @@ String FuncEmitter::nativeFullname() const {
 }
 
 Native::NativeFunctionInfo FuncEmitter::getNativeInfo() const {
+  assertx(m_ue.m_extension);
   return Native::getNativeFunction(
-      m_ue.m_nativeFuncs,
+      m_ue.m_extension->nativeFuncs(),
       name,
       m_pce ? m_pce->name() : nullptr,
       (attrs & AttrStatic)

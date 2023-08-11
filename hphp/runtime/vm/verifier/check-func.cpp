@@ -26,8 +26,11 @@
 #include "hphp/runtime/base/type-structure-helpers.h"
 #include "hphp/runtime/base/vanilla-dict.h"
 
+#include "hphp/runtime/ext/extension.h"
+
 #include "hphp/runtime/vm/coeffects.h"
 #include "hphp/runtime/vm/native.h"
+#include "hphp/runtime/vm/native-func-table.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
 
 #include <folly/Range.h>
@@ -175,7 +178,7 @@ bool checkNativeFunc(const FuncEmitter* func, ErrorMode mode) {
   auto const funcname = func->name;
   auto const pc = func->pce();
   auto const clsname = pc ? pc->name() : nullptr;
-  auto const& info = Native::getNativeFunction(func->ue().m_nativeFuncs,
+  auto const& info = Native::getNativeFunction(func->ue().m_extension->nativeFuncs(),
                                                funcname, clsname,
                                                func->attrs & AttrStatic);
 

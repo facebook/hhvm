@@ -2095,6 +2095,7 @@ and simplify_subtype_i
             simplify_subtype_variance_for_non_injective
               ~subtype_env
               ~sub_supportdyn
+              ~super_like
               name_sub
               None
               variance_reifiedl
@@ -3993,7 +3994,13 @@ and simplify_subtype_variance_for_injective_loop
         in
         env
         |> simplify_subtype ~sub_supportdyn child (liken ~super_like env super')
-        &&& simplify_subtype ~sub_supportdyn super' child
+        &&& simplify_subtype
+              ~sub_supportdyn
+              super'
+              (if is_tyvar super' then
+                child
+              else
+                liken ~super_like env child)
     end
     &&& simplify_subtype_variance_for_injective
           cid
@@ -4011,7 +4018,7 @@ and simplify_subtype_variance_for_injective_loop
 and simplify_subtype_variance_for_non_injective
     ~(subtype_env : subtype_env)
     ~sub_supportdyn
-    ?super_like
+    ~super_like
     (cid : string)
     class_sub
     (variance_reifiedl : (Ast_defs.variance * Aast.reify_kind) list)
@@ -4024,7 +4031,7 @@ and simplify_subtype_variance_for_non_injective
     simplify_subtype_variance_for_injective
       ~subtype_env
       ~sub_supportdyn
-      ?super_like
+      ~super_like
       cid
       class_sub
       variance_reifiedl

@@ -171,8 +171,9 @@ class py3_mstch_program : public mstch_program {
     visit_types_for_typedefs();
     visit_types_for_mixin_fields();
 
-    for (const auto* func : lifecycleFunctions()) {
-      addFunctionByUniqueReturnType(func);
+    for (const t_function* func : lifecycleFunctions()) {
+      add_function_by_unique_return_type(
+          func, visit_type(func->get_return_type()));
     }
   }
 
@@ -299,11 +300,11 @@ class py3_mstch_program : public mstch_program {
     }
   }
 
-  void addFunctionByUniqueReturnType(const t_function* function) {
-    const t_type* return_type = function->get_return_type();
+  void add_function_by_unique_return_type(
+      const t_function* function, std::string return_type_name) {
     auto sa = cpp2::is_stack_arguments(context_.options, *function);
     uniqueFunctionsByReturnType_.insert(
-        {{function->sink() ? "" : visit_type(return_type), sa}, function});
+        {{std::move(return_type_name), sa}, function});
   }
 
   void visit_type_single_service(const t_service* service);
@@ -1054,8 +1055,6 @@ std::string py3_mstch_program::visit_type_with_typedef(
           "_" + visit_type_with_typedef(get_map_val_type(*trueType), isTypedef);
     } else if (trueType->is_binary()) {
       extra = "binary";
-    } else if (trueType->is_streamresponse()) {
-      return "";
     } else {
       extra = trueType->get_name();
     }
@@ -1177,26 +1176,6 @@ void py3_mstch_program::visit_type_single_service(const t_service* service) {
       continue;
     }
 
-    if (const t_stream_response* stream = function.stream()) {
-      std::string stream_name = "Stream__";
-      const t_type* resp_type = stream->get_first_response_type();
-      const t_type* elem_type = stream->get_elem_type();
-      if (resp_type) {
-        stream_name = "ResponseAndStream__" + visit_type(resp_type) + "_";
-      }
-      std::string elem_type_name = visit_type(elem_type);
-      stream_name += elem_type_name;
-      auto base_type =
-          context_.type_factory->make_mstch_object(stream, context_);
-      py3_mstch_type* type = dynamic_cast<py3_mstch_type*>(base_type.get());
-      type->set_flat_name(stream_name);
-      streamTypes_.emplace(elem_type_name, elem_type);
-      bool inserted = seenTypeNames_.insert(stream_name).second;
-      if (inserted && resp_type) {
-        response_and_stream_functions_.push_back(&function);
-      }
-    }
-
     for (const auto& field : function.get_paramlist()->fields()) {
       visit_type(field.get_type());
     }
@@ -1207,7 +1186,30 @@ void py3_mstch_program::visit_type_single_service(const t_service* service) {
     for (const auto& field : function.get_xceptions()->fields()) {
       visit_type(field.get_type());
     }
-    addFunctionByUniqueReturnType(&function);
+
+    std::string return_type_name;
+    if (const t_stream_response* stream = function.stream()) {
+      return_type_name = "Stream__";
+      const t_type* resp_type = stream->get_first_response_type();
+      const t_type* elem_type = stream->get_elem_type();
+      if (resp_type) {
+        return_type_name = "ResponseAndStream__" + visit_type(resp_type) + "_";
+      }
+      std::string elem_type_name = visit_type(elem_type);
+      return_type_name += elem_type_name;
+      auto base_type =
+          context_.type_factory->make_mstch_object(stream, context_);
+      py3_mstch_type* type = dynamic_cast<py3_mstch_type*>(base_type.get());
+      type->set_flat_name(return_type_name);
+      streamTypes_.emplace(elem_type_name, elem_type);
+      bool inserted = seenTypeNames_.insert(return_type_name).second;
+      if (inserted && resp_type) {
+        response_and_stream_functions_.push_back(&function);
+      }
+    } else if (!function.sink()) {
+      return_type_name = visit_type(function.get_return_type());
+    }
+    add_function_by_unique_return_type(&function, std::move(return_type_name));
   }
 }
 

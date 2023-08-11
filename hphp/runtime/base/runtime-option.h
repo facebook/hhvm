@@ -1392,6 +1392,7 @@ struct RuntimeOption {
    * Enforce deployment boundaries.                                     \
    */                                                                   \
   F(bool, EnforceDeployment, false)                                     \
+  F(uint32_t, DeploymentViolationWarningSampleRate, 1)                  \
   /*                                                                    \
    * Controls behavior on reflection to default value expressions       \
    * that throw during evaluation                                       \

@@ -520,7 +520,10 @@ void raiseDeploymentBoundaryViolation(const Func* callee) {
     "Calling {} outside the active deployment is not allowed",
     calleeName);
   if (!soft) SystemLib::throwDeploymentBoundaryViolationExceptionObject(errMsg);
-  raise_warning(errMsg);
+  if (auto const rate = RO::EvalDeploymentViolationWarningSampleRate) {
+    if (folly::Random::rand32(rate) != 0) return;
+    raise_warning(errMsg);
+  }
 }
 
 void raiseDeploymentBoundaryViolation(const Class* cls) {
@@ -535,7 +538,10 @@ void raiseDeploymentBoundaryViolation(const Class* cls) {
     symbolType,
     clsName);
   if (!soft) SystemLib::throwDeploymentBoundaryViolationExceptionObject(errMsg);
-  raise_warning(errMsg);
+  if (auto const rate = RO::EvalDeploymentViolationWarningSampleRate) {
+    if (folly::Random::rand32(rate) != 0) return;
+    raise_warning(errMsg);
+  }
 }
 
 void raiseImplicitContextStateInvalid(const Func* func,

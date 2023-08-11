@@ -41,7 +41,7 @@ struct AlignImpl {
   static DECLARE_ALIGN_TABLE(s_table);
 
   static void pad(CodeBlock& cb, AlignContext context, size_t bytes) {
-    NEW_X64_ASM(a, cb);
+    X64Assembler a(cb);
 
     switch (context) {
       case AlignContext::Live:

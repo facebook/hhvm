@@ -15,11 +15,11 @@
 */
 #pragma once
 
-#ifdef HAVE_LIBXED
+#if defined(__x86_64__)
 extern "C" {
 #include <xed-interface.h>
 }
-#endif // HAVE_LIBXED
+#endif // __x86_64__
 
 #include <ostream>
 
@@ -88,9 +88,9 @@ struct Disasm {
 
   static void ExcludedAddressRange(void* low, size_t len);
  private:
-#ifdef HAVE_LIBXED
+#if defined(__x86_64__)
   xed_state_t m_xedState;
-#endif // HAVE_LIBXED
+#endif // __x86_64__
   const Options m_opts;
 };
 

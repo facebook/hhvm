@@ -1301,11 +1301,6 @@ void emitX64(Vunit& unit, Vtext& text, CGMeta& fixups,
              AsmInfo* asmInfo) {
   tracing::Block _{"emit-X64", [&] { return traceProps(unit); }};
 
-#ifdef HAVE_LIBXED
-  if (RuntimeOption::EvalUseXedAssembler) {
-    return vasm_emit<Vgen<XedAssembler>>(unit, text, fixups, asmInfo);
-  }
-#endif
   vasm_emit<Vgen<X64Assembler>>(unit, text, fixups, asmInfo);
 }
 

@@ -28,7 +28,7 @@
 #include "hphp/tools/tc-print/printir-annotation.h"
 
 extern "C" {
-#if defined(HAVE_LIBXED)
+#if defined(__x86_64__)
 #include <xed-interface.h>
 #endif
 }
@@ -195,7 +195,7 @@ struct OfflineCode {
     TCA tcRegionBases[TCRCount] = {
       _aBase, _coldBase, _frozenBase
     };
-#if defined(HAVE_LIBXED)
+#if defined(__x86_64__)
     xedInit();
 #endif
     openFiles(tcRegionBases);
@@ -244,7 +244,7 @@ private:
 
   std::string       dumpDir;
   TCRegionRec       tcRegions[TCRCount];
-#if defined(HAVE_LIBXED)
+#if defined(__x86_64__)
   xed_state_t       xed_state;
   xed_syntax_enum_t xed_syntax;
 #endif

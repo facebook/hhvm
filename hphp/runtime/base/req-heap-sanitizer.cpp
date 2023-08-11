@@ -24,6 +24,12 @@
 #include "hphp/util/asm-x64.h"
 #endif
 
+extern "C" {
+#if defined(__x86_64__)
+#include <xed-interface.h>
+#endif
+}
+
 #include <folly/portability/SysMman.h>
 
 namespace HPHP {
@@ -65,9 +71,8 @@ void HeapObjectSanitizer::free(void* ptr) {
   }
 }
 
-
 uint8_t* HeapObjectSanitizer::find_next_inst(uint8_t* ip) {
-#ifdef HAVE_LIBXED
+#if defined(__x86_64__)
   xed_machine_mode_enum_t mmode = XED_MACHINE_MODE_LONG_64;
   xed_address_width_enum_t stack_addr_width = XED_ADDRESS_WIDTH_64b;
   xed_decoded_inst_t xedd{};

@@ -4,7 +4,6 @@ if(IS_X64)
     if (LibXed_FOUND)
       include_directories(${LibXed_INCLUDE_DIR})
     endif()
-    add_definitions("-DHAVE_LIBXED")
     add_executable(tc-print "mappers.cpp" "offline-trans-data.cpp"
                             "offline-code.cpp"
                             "offline-x86-code.cpp"  "perf-events.cpp"

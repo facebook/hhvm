@@ -1185,10 +1185,11 @@ bool process(CompilerOptions &po) {
     }
     // Check for the default module separately since there is no module
     // declaration for the default module.
-    if (packageInfo.moduleInDeployment(Module::DEFAULT,
+    static auto const defaultModule = makeStaticString(Module::DEFAULT);
+    if (packageInfo.moduleInDeployment(defaultModule,
                                        it->second,
                                        DeployKind::HardOrSoft)) {
-      moduleInDeployment.insert(makeStaticString(Module::DEFAULT));
+      moduleInDeployment.insert(defaultModule);
     }
   }
 

@@ -112,9 +112,9 @@ private:
   std::string findPackageInRange(const std::string& moduleName,
                                  size_t start, size_t end) const;
 
-  std::string getPackageForModule(const std::string& module) const;
+  std::string getPackageForModule(const StringData* module) const;
 
-  bool moduleInPackages(const std::string& module,
+  bool moduleInPackages(const StringData* module,
                         const PackageSet& packageSet) const;
 
 public:

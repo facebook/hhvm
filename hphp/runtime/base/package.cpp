@@ -216,11 +216,13 @@ std::string PackageInfo::findPackageInRange(const std::string& moduleName,
   return findPackageInRange(moduleName, start, mid);
 }
 
-std::string PackageInfo::getPackageForModule(const std::string& module) const {
-  return findPackageInRange(module, 0, m_globToPackage.size());
+std::string PackageInfo::getPackageForModule(const StringData* module) const {
+  assertx(module && !module->empty());
+  auto const moduleName = module->toCppString();
+  return findPackageInRange(moduleName, 0, m_globToPackage.size());
 }
 
-bool PackageInfo::moduleInPackages(const std::string& module,
+bool PackageInfo::moduleInPackages(const StringData* module,
                                    const PackageSet& packageSet) const {
   auto const packageForModule = getPackageForModule(module);
   for (auto const& package : packageSet) {
@@ -231,9 +233,10 @@ bool PackageInfo::moduleInPackages(const std::string& module,
   return false;
 }
 
-bool PackageInfo::moduleInDeployment(const std::string& module,
+bool PackageInfo::moduleInDeployment(const StringData* module,
                                      const Deployment& deployment,
                                      DeployKind deployKind) const {
+  assertx(module && !module->empty());
   if (deployKind == DeployKind::Hard) {
     return moduleInPackages(module, deployment.m_packages);
   }
@@ -242,13 +245,6 @@ bool PackageInfo::moduleInDeployment(const std::string& module,
   }
   return moduleInPackages(module, deployment.m_packages) ||
          moduleInPackages(module, deployment.m_soft_packages);
-}
-
-bool PackageInfo::moduleInDeployment(const StringData* module,
-                                     const Deployment& deployment,
-                                     DeployKind deployKind) const {
-  assertx(module && !module->empty());
-  return moduleInDeployment(module->toCppString(), deployment, deployKind);
 }
 
 bool PackageInfo::moduleInASoftPackage(const StringData* module) const {

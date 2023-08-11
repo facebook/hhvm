@@ -125,7 +125,7 @@ using get_field_tag = typename std::conditional_t<
     void,
     type::field<
         get_type_tag<T, Id>,
-        FieldContext<T, folly::to_underlying(get_field_id<T, Id>::value)>>>;
+        FieldContext<T, folly::to_underlying(get_field_id_v<T, Id>)>>>;
 
 template <typename T, typename Id>
 using get_native_type = type::native_type<get_field_tag<T, Id>>;

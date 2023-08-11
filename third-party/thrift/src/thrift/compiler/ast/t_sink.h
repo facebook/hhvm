@@ -117,7 +117,6 @@ class t_sink : public t_type {
     return final_response_type().get_type();
   }
 
-  bool is_sink() const override { return true; }
   type get_type_value() const override { return type::t_sink; }
 };
 

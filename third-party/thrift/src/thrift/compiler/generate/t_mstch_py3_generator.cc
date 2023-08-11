@@ -298,10 +298,10 @@ class py3_mstch_program : public mstch_program {
   }
 
   void addFunctionByUniqueReturnType(const t_function* function) {
-    const t_type* return_type = function->get_returntype();
+    const t_type* return_type = function->get_return_type();
     auto sa = cpp2::is_stack_arguments(context_.options, *function);
     uniqueFunctionsByReturnType_.insert(
-        {{visit_type(return_type), sa}, function});
+        {{function->sink() ? "" : visit_type(return_type), sa}, function});
   }
 
   void visit_type_single_service(const t_service* service);
@@ -1050,7 +1050,7 @@ std::string py3_mstch_program::visit_type_with_typedef(
           "_" + visit_type_with_typedef(get_map_val_type(*trueType), isTypedef);
     } else if (trueType->is_binary()) {
       extra = "binary";
-    } else if (trueType->is_sink() || trueType->is_streamresponse()) {
+    } else if (trueType->is_streamresponse()) {
       return "";
     } else {
       extra = trueType->get_name();

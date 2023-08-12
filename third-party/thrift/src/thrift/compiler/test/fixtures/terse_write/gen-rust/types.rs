@@ -1741,7 +1741,7 @@ where
         p.read_struct_end()?;
         ::std::result::Result::Ok(Self {
             bool_field: field_bool_field.unwrap_or(true),
-            byte_field: field_byte_field.unwrap_or_else(|| 1),
+            byte_field: field_byte_field.unwrap_or(1),
             short_field: field_short_field.unwrap_or(2),
             int_field: field_int_field.unwrap_or(3),
             long_field: field_long_field.unwrap_or(4),

@@ -3620,7 +3620,7 @@ where
             adaptedSet: field_adaptedSet.unwrap_or_default(),
             adaptedMap: field_adaptedMap.unwrap_or_default(),
             adaptedBoolDefault: field_adaptedBoolDefault.unwrap_or(true),
-            adaptedByteDefault: field_adaptedByteDefault.unwrap_or_else(|| 1),
+            adaptedByteDefault: field_adaptedByteDefault.unwrap_or(1),
             adaptedShortDefault: field_adaptedShortDefault.unwrap_or(2),
             adaptedIntegerDefault: field_adaptedIntegerDefault.unwrap_or(3),
             adaptedLongDefault: field_adaptedLongDefault.unwrap_or(4),

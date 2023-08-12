@@ -1585,7 +1585,8 @@ class mstch_rust_value : public mstch_base {
   mstch::node indent() { return std::string(4 * depth_, ' '); }
   mstch::node simple_literal() {
     // Primitives have simple literals
-    if (type_->is_bool() || type_->is_any_int() || type_->is_floating_point()) {
+    if (type_->is_bool() || type_->is_byte() || type_->is_any_int() ||
+        type_->is_floating_point()) {
       return true;
     }
     // Enum variants as well

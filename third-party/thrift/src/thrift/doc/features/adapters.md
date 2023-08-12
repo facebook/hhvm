@@ -412,7 +412,7 @@ assert foo.dt.timestamp() == 0
 ```
 Please check thrift-python wiki page for more detail: https://www.internalfb.com/intern/wiki/Thrift-Python/User_Guide/Advanced_Usage/Adapter/.
 
-## Java
+## Java {#java}
 
 ### Type Adapter
 

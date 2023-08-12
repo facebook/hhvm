@@ -1,6 +1,6 @@
 <%={{ }}=%>
 {{#function:return_type}}{{!
-}}{{> type}}{{!
+}}{{^function:sink?}}{{> type}}{{/function:sink?}}{{!
 }}{{#function:sink?}}{
   "type" : "sink",
 {{#function:sink_elem_type}}

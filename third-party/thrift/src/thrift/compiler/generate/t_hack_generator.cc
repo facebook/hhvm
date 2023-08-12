@@ -2357,57 +2357,6 @@ std::unique_ptr<t_const_value> t_hack_generator::type_to_tmeta(
     tmeta_ThriftType->add_map(
         std::make_unique<t_const_value>("t_typedef"),
         std::move(ttypedef_tmeta));
-  } else if (const auto* tsink = dynamic_cast<const t_sink*>(type)) {
-    auto tsink_tmeta = std::make_unique<t_const_value>();
-    tsink_tmeta->set_map();
-    tsink_tmeta->add_map(
-        std::make_unique<t_const_value>("elemType"),
-        type_to_tmeta(tsink->get_elem_type()));
-    tsink_tmeta->add_map(
-        std::make_unique<t_const_value>("finalResponseType"),
-        type_to_tmeta(tsink->get_final_response_type()));
-    if (tsink->sink_has_first_response()) {
-      tsink_tmeta->add_map(
-          std::make_unique<t_const_value>("initialResponseType"),
-          type_to_tmeta(tsink->get_first_response_type()));
-    } else {
-      auto first_response_type = std::make_unique<t_const_value>();
-      first_response_type->set_map();
-      first_response_type->add_map(
-          std::make_unique<t_const_value>("t_primitive"),
-          std::make_unique<t_const_value>(
-              ThriftPrimitiveType::THRIFT_VOID_TYPE));
-      tsink_tmeta->add_map(
-          std::make_unique<t_const_value>("initialResponseType"),
-          std::move(first_response_type));
-    }
-    tmeta_ThriftType->add_map(
-        std::make_unique<t_const_value>("t_sink"), std::move(tsink_tmeta));
-  } else if (
-      const auto* tstream = dynamic_cast<const t_stream_response*>(type)) {
-    auto tstream_tmeta = std::make_unique<t_const_value>();
-    tstream_tmeta->set_map();
-    tstream_tmeta->add_map(
-        std::make_unique<t_const_value>("elemType"),
-        type_to_tmeta(tstream->get_elem_type()));
-    if (tstream->has_first_response()) {
-      tstream_tmeta->add_map(
-          std::make_unique<t_const_value>("initialResponseType"),
-          type_to_tmeta(tstream->get_first_response_type()));
-    } else {
-      auto first_response_type = std::make_unique<t_const_value>();
-      first_response_type->set_map();
-      first_response_type->add_map(
-          std::make_unique<t_const_value>("t_primitive"),
-          std::make_unique<t_const_value>(
-              ThriftPrimitiveType::THRIFT_VOID_TYPE));
-      tstream_tmeta->add_map(
-          std::make_unique<t_const_value>("initialResponseType"),
-          std::move(first_response_type));
-    }
-
-    tmeta_ThriftType->add_map(
-        std::make_unique<t_const_value>("t_stream"), std::move(tstream_tmeta));
   } else {
     // Unsupported type
   }
@@ -2451,9 +2400,65 @@ std::unique_ptr<t_const_value> t_hack_generator::function_to_tmeta(
       std::make_unique<t_const_value>("name"),
       std::make_unique<t_const_value>(find_hack_name(function)));
 
+  auto return_tmeta = std::unique_ptr<t_const_value>();
+  if (const auto* sink = function->sink()) {
+    auto sink_tmeta = std::make_unique<t_const_value>();
+    sink_tmeta->set_map();
+    sink_tmeta->add_map(
+        std::make_unique<t_const_value>("elemType"),
+        type_to_tmeta(sink->get_elem_type()));
+    sink_tmeta->add_map(
+        std::make_unique<t_const_value>("finalResponseType"),
+        type_to_tmeta(sink->get_final_response_type()));
+    if (sink->sink_has_first_response()) {
+      sink_tmeta->add_map(
+          std::make_unique<t_const_value>("initialResponseType"),
+          type_to_tmeta(sink->get_first_response_type()));
+    } else {
+      auto first_response_type = std::make_unique<t_const_value>();
+      first_response_type->set_map();
+      first_response_type->add_map(
+          std::make_unique<t_const_value>("t_primitive"),
+          std::make_unique<t_const_value>(
+              ThriftPrimitiveType::THRIFT_VOID_TYPE));
+      sink_tmeta->add_map(
+          std::make_unique<t_const_value>("initialResponseType"),
+          std::move(first_response_type));
+    }
+    return_tmeta = std::make_unique<t_const_value>();
+    return_tmeta->set_map();
+    return_tmeta->add_map(
+        std::make_unique<t_const_value>("t_sink"), std::move(sink_tmeta));
+  } else if (const t_stream_response* stream = function->stream()) {
+    auto stream_tmeta = std::make_unique<t_const_value>();
+    stream_tmeta->set_map();
+    stream_tmeta->add_map(
+        std::make_unique<t_const_value>("elemType"),
+        type_to_tmeta(stream->get_elem_type()));
+    if (stream->has_first_response()) {
+      stream_tmeta->add_map(
+          std::make_unique<t_const_value>("initialResponseType"),
+          type_to_tmeta(stream->get_first_response_type()));
+    } else {
+      auto first_response_type = std::make_unique<t_const_value>();
+      first_response_type->set_map();
+      first_response_type->add_map(
+          std::make_unique<t_const_value>("t_primitive"),
+          std::make_unique<t_const_value>(
+              ThriftPrimitiveType::THRIFT_VOID_TYPE));
+      stream_tmeta->add_map(
+          std::make_unique<t_const_value>("initialResponseType"),
+          std::move(first_response_type));
+    }
+    return_tmeta = std::make_unique<t_const_value>();
+    return_tmeta->set_map();
+    return_tmeta->add_map(
+        std::make_unique<t_const_value>("t_stream"), std::move(stream_tmeta));
+  } else {
+    return_tmeta = type_to_tmeta(function->get_returntype());
+  }
   tmeta_ThriftFunction->add_map(
-      std::make_unique<t_const_value>("return_type"),
-      type_to_tmeta(function->get_returntype()));
+      std::make_unique<t_const_value>("return_type"), std::move(return_tmeta));
 
   if (function->get_paramlist()->has_fields()) {
     auto arguments = std::make_unique<t_const_value>();
@@ -4798,8 +4803,8 @@ std::string t_hack_generator::render_service_metadata_response(
   std::vector<const t_exception*> exceptions;
   std::vector<const t_service*> services;
 
-  std::queue<const t_type*> queue;
-  std::set<const t_type*> visited;
+  std::queue<const t_node*> queue;
+  std::set<const t_node*> visited;
 
   queue.push(service);
 
@@ -4812,19 +4817,21 @@ std::string t_hack_generator::render_service_metadata_response(
     }
     visited.emplace(next);
 
-    auto type = next->get_true_type();
+    if (const t_type* type = dynamic_cast<const t_type*>(next)) {
+      next = type->get_true_type();
+    }
 
-    if (const auto* tlist = dynamic_cast<const t_list*>(type)) {
+    if (const auto* tlist = dynamic_cast<const t_list*>(next)) {
       queue.push(tlist->get_elem_type());
-    } else if (const auto* tset = dynamic_cast<const t_set*>(type)) {
+    } else if (const auto* tset = dynamic_cast<const t_set*>(next)) {
       queue.push(tset->get_elem_type());
-    } else if (const auto* tmap = dynamic_cast<const t_map*>(type)) {
+    } else if (const auto* tmap = dynamic_cast<const t_map*>(next)) {
       queue.push(tmap->get_key_type());
       queue.push(tmap->get_val_type());
     } else if (
-        const auto* tinteraction = dynamic_cast<const t_interaction*>(type)) {
+        const auto* tinteraction = dynamic_cast<const t_interaction*>(next)) {
       continue;
-    } else if (const auto* tservice = dynamic_cast<const t_service*>(type)) {
+    } else if (const auto* tservice = dynamic_cast<const t_service*>(next)) {
       if (tservice != service) {
         services.push_back(tservice);
       }
@@ -4834,35 +4841,39 @@ std::string t_hack_generator::render_service_metadata_response(
         if (skip_codegen(&function)) {
           continue;
         }
-        queue.push(function.get_returntype());
+        if (const t_node* sink_or_stream = function.sink_or_stream()) {
+          queue.push(sink_or_stream);
+        } else {
+          queue.push(function.get_returntype());
+        }
         queue.push(&function.params());
         queue.push(function.exceptions());
       }
-    } else if (const auto* tenum = dynamic_cast<const t_enum*>(type)) {
+    } else if (const auto* tenum = dynamic_cast<const t_enum*>(next)) {
       enums.push_back(tenum);
-    } else if (const auto* tstruct = dynamic_cast<const t_struct*>(type)) {
+    } else if (const auto* tstruct = dynamic_cast<const t_struct*>(next)) {
       for (const auto& field : tstruct->fields()) {
         queue.push(field.get_type());
       }
 
-      if (!type->program() || type->is_paramlist()) {
+      if (!tstruct->program() || tstruct->is_paramlist()) {
         continue;
       }
 
-      if (type->is_exception()) {
-        auto exception = static_cast<const t_exception*>(type);
+      if (tstruct->is_exception()) {
+        auto exception = static_cast<const t_exception*>(tstruct);
         exceptions.push_back(exception);
       } else {
         structs.push_back(tstruct);
       }
-    } else if (const auto* ttypedef = dynamic_cast<const t_typedef*>(type)) {
+    } else if (const auto* ttypedef = dynamic_cast<const t_typedef*>(next)) {
       queue.push(ttypedef->get_type());
-    } else if (const auto* tsink = dynamic_cast<const t_sink*>(type)) {
+    } else if (const auto* tsink = dynamic_cast<const t_sink*>(next)) {
       queue.push(tsink->get_elem_type());
       queue.push(tsink->get_first_response_type());
       queue.push(tsink->get_final_response_type());
     } else if (
-        const auto* tstream = dynamic_cast<const t_stream_response*>(type)) {
+        const auto* tstream = dynamic_cast<const t_stream_response*>(next)) {
       queue.push(tstream->get_elem_type());
       queue.push(tstream->get_first_response_type());
     } else {
@@ -6131,25 +6142,24 @@ void t_hack_generator::generate_php_function_args_helpers(
  */
 void t_hack_generator::generate_php_stream_function_helpers(
     const t_function* tfunction, const std::string& prefix) {
-  const auto* tstream =
-      dynamic_cast<const t_stream_response*>(tfunction->get_returntype());
+  const t_stream_response* stream = tfunction->stream();
   generate_php_function_args_helpers(tfunction, prefix);
 
   generate_php_function_result_helpers(
       tfunction,
-      tstream->get_elem_type(),
-      tstream->exceptions(),
+      stream->get_elem_type(),
+      stream->exceptions(),
       prefix,
       "_StreamResponse",
       false);
 
   generate_php_function_result_helpers(
       tfunction,
-      tstream->get_first_response_type(),
+      stream->get_first_response_type(),
       tfunction->exceptions(),
       prefix,
       "_FirstResponse",
-      !tstream->has_first_response());
+      !stream->has_first_response());
 }
 
 /**
@@ -6161,19 +6171,19 @@ void t_hack_generator::generate_php_sink_function_helpers(
     const t_function* tfunction, const std::string& prefix) {
   generate_php_function_args_helpers(tfunction, prefix);
 
-  const auto* tsink = dynamic_cast<const t_sink*>(tfunction->get_returntype());
+  const t_sink* sink = tfunction->sink();
 
   generate_php_function_result_helpers(
       tfunction,
-      tsink->get_first_response_type(),
+      sink->get_first_response_type(),
       tfunction->exceptions(),
       prefix,
       "_FirstResponse",
-      !tsink->sink_has_first_response());
+      !sink->sink_has_first_response());
 
   generate_php_function_result_helpers(
       tfunction,
-      tsink->get_elem_type(),
+      sink->get_elem_type(),
       tfunction->get_sink_xceptions(),
       prefix,
       "_SinkPayload",
@@ -6181,7 +6191,7 @@ void t_hack_generator::generate_php_sink_function_helpers(
 
   generate_php_function_result_helpers(
       tfunction,
-      tsink->get_final_response_type(),
+      sink->get_final_response_type(),
       tfunction->get_sink_final_response_xceptions(),
       prefix,
       "_FinalResponse",
@@ -6269,30 +6279,27 @@ void t_hack_generator::generate_php_docstring(
   if (tfunction->qualifier() == t_function_qualifier::one_way) {
     out << "oneway ";
   }
-  if (const auto* tstream =
-          dynamic_cast<const t_stream_response*>(tfunction->get_returntype())) {
-    if (tstream->has_first_response()) {
-      out << thrift_type_name(tstream->get_first_response_type()) << ", ";
+  if (const t_stream_response* stream = tfunction->stream()) {
+    if (stream->has_first_response()) {
+      out << thrift_type_name(stream->get_first_response_type()) << ", ";
     } else {
       out << "void, ";
     }
-    out << "stream<" << thrift_type_name(tstream->get_elem_type());
-    generate_php_docstring_stream_exceptions(out, tstream->exceptions());
+    out << "stream<" << thrift_type_name(stream->get_elem_type());
+    generate_php_docstring_stream_exceptions(out, stream->exceptions());
     out << ">\n";
-  } else if (
-      const auto* tsink =
-          dynamic_cast<const t_sink*>(tfunction->get_returntype())) {
-    if (tsink->sink_has_first_response()) {
-      out << thrift_type_name(tsink->get_first_response_type()) << ", ";
+  } else if (const t_sink* sink = tfunction->sink()) {
+    if (sink->sink_has_first_response()) {
+      out << thrift_type_name(sink->get_first_response_type()) << ", ";
     } else {
       out << "void, ";
     }
-    out << "sink<" << thrift_type_name(tsink->get_elem_type());
-    generate_php_docstring_stream_exceptions(out, tsink->sink_exceptions());
+    out << "sink<" << thrift_type_name(sink->get_elem_type());
+    generate_php_docstring_stream_exceptions(out, sink->sink_exceptions());
 
-    out << ", " << thrift_type_name(tsink->get_final_response_type());
+    out << ", " << thrift_type_name(sink->get_final_response_type());
     generate_php_docstring_stream_exceptions(
-        out, tsink->final_response_exceptions());
+        out, sink->final_response_exceptions());
     out << ">\n";
   } else {
     out << thrift_type_name(tfunction->get_returntype()) << "\n";
@@ -6817,13 +6824,10 @@ void t_hack_generator::generate_service_interface(
     // Finally, the function declaration.
     std::string return_typehint;
 
-    if (const auto* tstream = dynamic_cast<const t_stream_response*>(
-            function->get_returntype())) {
-      return_typehint = get_stream_function_return_typehint(tstream);
-    } else if (
-        const auto* tsink =
-            dynamic_cast<const t_sink*>(function->get_returntype())) {
-      return_typehint = get_sink_function_return_typehint(tsink);
+    if (const t_stream_response* stream = function->stream()) {
+      return_typehint = get_stream_function_return_typehint(stream);
+    } else if (const t_sink* sink = function->sink()) {
+      return_typehint = get_sink_function_return_typehint(sink);
     } else {
       return_typehint = type_to_typehint(function->get_returntype());
     }
@@ -7279,8 +7283,8 @@ void t_hack_generator::_generate_service_client_stream_child_fn(
       tfunction->name() + (legacy_arrays ? "__LEGACY_ARRAYS" : "");
   const std::string& tservice_name =
       (tservice->is_interaction() ? service_name_ : tservice->name());
-  std::string return_typehint = get_stream_function_return_typehint(
-      dynamic_cast<const t_stream_response*>(tfunction->get_returntype()));
+  std::string return_typehint =
+      get_stream_function_return_typehint(tfunction->stream());
 
   generate_php_docstring(out, tfunction);
   indent(out) << "public async function " << funname << "("
@@ -7313,8 +7317,6 @@ void t_hack_generator::_generate_service_client_stream_child_fn(
               << "\", $args);\n";
   _generate_current_seq_id(out, tservice, tfunction);
 
-  const auto* tstream =
-      dynamic_cast<const t_stream_response*>(tfunction->get_returntype());
   std::string first_response_type = generate_function_helper_name(
       tservice, tfunction, PhpFunctionNameSuffix::FIRST_RESPONSE);
   std::string stream_response_type = generate_function_helper_name(
@@ -7323,7 +7325,7 @@ void t_hack_generator::_generate_service_client_stream_child_fn(
       << first_response_type << "::class, " << stream_response_type
       << "::class, "
       << "\"" << tfunction->name() << "\", "
-      << (!tstream->has_first_response() ? "true" : "false")
+      << (!tfunction->stream()->has_first_response() ? "true" : "false")
       << ", $currentseqid, $rpc_options";
   if (legacy_arrays) {
     out << ", shape('read_options' => \\THRIFT_MARK_LEGACY_ARRAYS)";
@@ -7343,8 +7345,8 @@ void t_hack_generator::_generate_service_client_sink_child_fn(
   const std::string& tservice_name =
       (tservice->is_interaction() ? service_name_ : tservice->name());
 
-  const auto* tsink = dynamic_cast<const t_sink*>(tfunction->get_returntype());
-  std::string return_typehint = get_sink_function_return_typehint(tsink);
+  const auto* sink = tfunction->sink();
+  std::string return_typehint = get_sink_function_return_typehint(sink);
 
   generate_php_docstring(out, tfunction);
   indent(out) << "public async function " << funname << "("
@@ -7386,7 +7388,7 @@ void t_hack_generator::_generate_service_client_sink_child_fn(
       << first_response_type << "::class, " << sink_payload_type << "::class, "
       << final_response_type << "::class, "
       << "\"" << tfunction->name() << "\", "
-      << (!tsink->sink_has_first_response() ? "true" : "false")
+      << (!sink->sink_has_first_response() ? "true" : "false")
       << ", $currentseqid, $rpc_options";
   if (legacy_arrays) {
     out << ", shape('read_options' => \\THRIFT_MARK_LEGACY_ARRAYS)";

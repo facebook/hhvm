@@ -139,11 +139,7 @@ folly::SemiFuture<folly::Unit> apache::thrift::Client<::cpp2::MyNode>::semifutur
 }
 
 folly::Future<folly::Unit> apache::thrift::Client<::cpp2::MyNode>::future_do_mid(apache::thrift::RpcOptions& rpcOptions) {
-  folly::Promise<folly::Unit> promise;
-  auto future = promise.getFuture();
-  auto callback = std::make_unique<apache::thrift::FutureCallback<folly::Unit>>(std::move(promise), recv_wrapped_do_mid, channel_);
-  do_mid(rpcOptions, std::move(callback));
-  return future;
+  return semifuture_do_mid(rpcOptions).toUnsafeFuture();
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::Client<::cpp2::MyNode>::semifuture_do_mid(apache::thrift::RpcOptions& rpcOptions) {
@@ -154,11 +150,7 @@ folly::SemiFuture<folly::Unit> apache::thrift::Client<::cpp2::MyNode>::semifutur
 }
 
 folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::cpp2::MyNode>::header_future_do_mid(apache::thrift::RpcOptions& rpcOptions) {
-  folly::Promise<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> promise;
-  auto future = promise.getFuture();
-  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<folly::Unit>>(std::move(promise), recv_wrapped_do_mid, channel_);
-  do_mid(rpcOptions, std::move(callback));
-  return future;
+  return header_semifuture_do_mid(rpcOptions).toUnsafeFuture();
 }
 
 folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::cpp2::MyNode>::header_semifuture_do_mid(apache::thrift::RpcOptions& rpcOptions) {

@@ -140,11 +140,7 @@ folly::SemiFuture<::std::int64_t> apache::thrift::Client<::test::namespace_from_
 }
 
 folly::Future<::std::int64_t> apache::thrift::Client<::test::namespace_from_package::module::TestService>::future_init(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_int1) {
-  folly::Promise<::std::int64_t> promise;
-  auto future = promise.getFuture();
-  auto callback = std::make_unique<apache::thrift::FutureCallback<::std::int64_t>>(std::move(promise), recv_wrapped_init, channel_);
-  init(rpcOptions, std::move(callback), p_int1);
-  return future;
+  return semifuture_init(rpcOptions, p_int1).toUnsafeFuture();
 }
 
 folly::SemiFuture<::std::int64_t> apache::thrift::Client<::test::namespace_from_package::module::TestService>::semifuture_init(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_int1) {
@@ -155,11 +151,7 @@ folly::SemiFuture<::std::int64_t> apache::thrift::Client<::test::namespace_from_
 }
 
 folly::Future<std::pair<::std::int64_t, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::test::namespace_from_package::module::TestService>::header_future_init(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_int1) {
-  folly::Promise<std::pair<::std::int64_t, std::unique_ptr<apache::thrift::transport::THeader>>> promise;
-  auto future = promise.getFuture();
-  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::std::int64_t>>(std::move(promise), recv_wrapped_init, channel_);
-  init(rpcOptions, std::move(callback), p_int1);
-  return future;
+  return header_semifuture_init(rpcOptions, p_int1).toUnsafeFuture();
 }
 
 folly::SemiFuture<std::pair<::std::int64_t, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::test::namespace_from_package::module::TestService>::header_semifuture_init(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_int1) {

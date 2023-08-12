@@ -140,11 +140,7 @@ folly::SemiFuture<::test::fixtures::basic::ReservedKeyword> apache::thrift::Clie
 }
 
 folly::Future<::test::fixtures::basic::ReservedKeyword> apache::thrift::Client<::test::fixtures::basic::FB303Service>::future_simple_rpc(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_int_parameter) {
-  folly::Promise<::test::fixtures::basic::ReservedKeyword> promise;
-  auto future = promise.getFuture();
-  auto callback = std::make_unique<apache::thrift::FutureCallback<::test::fixtures::basic::ReservedKeyword>>(std::move(promise), recv_wrapped_simple_rpc, channel_);
-  simple_rpc(rpcOptions, std::move(callback), p_int_parameter);
-  return future;
+  return semifuture_simple_rpc(rpcOptions, p_int_parameter).toUnsafeFuture();
 }
 
 folly::SemiFuture<::test::fixtures::basic::ReservedKeyword> apache::thrift::Client<::test::fixtures::basic::FB303Service>::semifuture_simple_rpc(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_int_parameter) {
@@ -155,11 +151,7 @@ folly::SemiFuture<::test::fixtures::basic::ReservedKeyword> apache::thrift::Clie
 }
 
 folly::Future<std::pair<::test::fixtures::basic::ReservedKeyword, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::test::fixtures::basic::FB303Service>::header_future_simple_rpc(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_int_parameter) {
-  folly::Promise<std::pair<::test::fixtures::basic::ReservedKeyword, std::unique_ptr<apache::thrift::transport::THeader>>> promise;
-  auto future = promise.getFuture();
-  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::test::fixtures::basic::ReservedKeyword>>(std::move(promise), recv_wrapped_simple_rpc, channel_);
-  simple_rpc(rpcOptions, std::move(callback), p_int_parameter);
-  return future;
+  return header_semifuture_simple_rpc(rpcOptions, p_int_parameter).toUnsafeFuture();
 }
 
 folly::SemiFuture<std::pair<::test::fixtures::basic::ReservedKeyword, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::test::fixtures::basic::FB303Service>::header_semifuture_simple_rpc(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_int_parameter) {

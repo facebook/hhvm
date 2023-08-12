@@ -139,11 +139,7 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::py3::simple::Rederive
 }
 
 folly::Future<::std::int32_t> apache::thrift::Client<::py3::simple::RederivedService>::future_get_seven(apache::thrift::RpcOptions& rpcOptions) {
-  folly::Promise<::std::int32_t> promise;
-  auto future = promise.getFuture();
-  auto callback = std::make_unique<apache::thrift::FutureCallback<::std::int32_t>>(std::move(promise), recv_wrapped_get_seven, channel_);
-  get_seven(rpcOptions, std::move(callback));
-  return future;
+  return semifuture_get_seven(rpcOptions).toUnsafeFuture();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::Client<::py3::simple::RederivedService>::semifuture_get_seven(apache::thrift::RpcOptions& rpcOptions) {
@@ -154,11 +150,7 @@ folly::SemiFuture<::std::int32_t> apache::thrift::Client<::py3::simple::Rederive
 }
 
 folly::Future<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::RederivedService>::header_future_get_seven(apache::thrift::RpcOptions& rpcOptions) {
-  folly::Promise<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> promise;
-  auto future = promise.getFuture();
-  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::std::int32_t>>(std::move(promise), recv_wrapped_get_seven, channel_);
-  get_seven(rpcOptions, std::move(callback));
-  return future;
+  return header_semifuture_get_seven(rpcOptions).toUnsafeFuture();
 }
 
 folly::SemiFuture<std::pair<::std::int32_t, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::py3::simple::RederivedService>::header_semifuture_get_seven(apache::thrift::RpcOptions& rpcOptions) {

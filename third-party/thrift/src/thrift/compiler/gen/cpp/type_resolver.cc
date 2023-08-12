@@ -96,6 +96,45 @@ const std::string& type_resolver::get_native_type(const t_const& cnst) {
   return get_native_type(type);
 }
 
+const std::string& type_resolver::get_return_type(const t_function& fun) {
+  // Most functions don't have sinks or streams so handle the common case first.
+  if (!fun.sink_or_stream()) {
+    const t_type* return_type = fun.get_return_type();
+    return detail::get_or_gen(
+        type_cache_, return_type, [=]() { return gen_type(*return_type); });
+  }
+
+  type_resolve_fn resolve_fn = &type_resolver::get_native_type;
+  if (const t_sink* sink = fun.sink()) {
+    return detail::get_or_gen(type_cache_, sink, [=]() {
+      if (!sink->first_response_type().empty()) {
+        return detail::gen_template_type(
+            "::apache::thrift::ResponseAndSinkConsumer",
+            {resolve(resolve_fn, *sink->get_first_response_type()),
+             resolve(resolve_fn, *sink->get_elem_type()),
+             resolve(resolve_fn, *sink->get_final_response_type())});
+      }
+      return detail::gen_template_type(
+          "::apache::thrift::SinkConsumer",
+          {resolve(resolve_fn, *sink->get_elem_type()),
+           resolve(resolve_fn, *sink->get_final_response_type())});
+    });
+  }
+
+  const t_stream_response* stream = fun.stream();
+  return detail::get_or_gen(type_cache_, stream, [=]() {
+    if (!stream->first_response_type().empty()) {
+      return detail::gen_template_type(
+          "::apache::thrift::ResponseAndServerStream",
+          {resolve(resolve_fn, *stream->get_first_response_type()),
+           resolve(resolve_fn, *stream->get_elem_type())});
+    }
+    return detail::gen_template_type(
+        "::apache::thrift::ServerStream",
+        {resolve(resolve_fn, *stream->get_elem_type())});
+  });
+}
+
 const std::string& type_resolver::get_underlying_type_name(const t_type& node) {
   if (auto* annotation = find_nontransitive_adapter(node)) {
     if (auto* adapted_type =
@@ -366,14 +405,6 @@ std::string type_resolver::gen_standard_type(
     return gen_container_type(*tcontainer, resolve_fn);
   }
 
-  // Streaming types have special handling.
-  if (const auto* tstream_res = dynamic_cast<const t_stream_response*>(&node)) {
-    return gen_stream_resp_type(*tstream_res, resolve_fn);
-  }
-  if (const auto* tsink = dynamic_cast<const t_sink*>(&node)) {
-    return gen_sink_type(*tsink, resolve_fn);
-  }
-
   // For everything else, just use namespaced name.
   return namespaces_.get_namespaced_name(node);
 }
@@ -406,34 +437,6 @@ std::string type_resolver::gen_container_type(
   throw std::runtime_error(
       "unknown container type: " +
       std::to_string(static_cast<int>(node.container_type())));
-}
-
-std::string type_resolver::gen_stream_resp_type(
-    const t_stream_response& node, type_resolve_fn resolve_fn) {
-  if (!node.first_response_type().empty()) {
-    return detail::gen_template_type(
-        "::apache::thrift::ResponseAndServerStream",
-        {resolve(resolve_fn, *node.get_first_response_type()),
-         resolve(resolve_fn, *node.get_elem_type())});
-  }
-  return detail::gen_template_type(
-      "::apache::thrift::ServerStream",
-      {resolve(resolve_fn, *node.get_elem_type())});
-}
-
-std::string type_resolver::gen_sink_type(
-    const t_sink& node, type_resolve_fn resolve_fn) {
-  if (!node.first_response_type().empty()) {
-    return detail::gen_template_type(
-        "::apache::thrift::ResponseAndSinkConsumer",
-        {resolve(resolve_fn, *node.get_first_response_type()),
-         resolve(resolve_fn, *node.get_elem_type()),
-         resolve(resolve_fn, *node.get_final_response_type())});
-  }
-  return detail::gen_template_type(
-      "::apache::thrift::SinkConsumer",
-      {resolve(resolve_fn, *node.get_elem_type()),
-       resolve(resolve_fn, *node.get_final_response_type())});
 }
 
 std::string type_resolver::gen_adapted_type(

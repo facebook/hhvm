@@ -25,7 +25,7 @@
 <%/function:void?%>
 <%/function:sync_returns_by_outparam?%>
 <%#function:sync_returns_by_outparam?%>
-void <% > service_common/client_class_name%>::sync_<%function:cpp_name%>(<%type:cpp_type%>& _return<%function:comma%><% > service_common/function_param_list_client%>) {
+void <% > service_common/client_class_name%>::sync_<%function:cpp_name%>(<%function:cpp_return_type%>& _return<%function:comma%><% > service_common/function_param_list_client%>) {
   ::apache::thrift::RpcOptions rpcOptions;
   sync_<%function:cpp_name%>(rpcOptions, _return<%function:comma%><% > service_common/param_list%>);
 <%/function:sync_returns_by_outparam?%>
@@ -35,7 +35,7 @@ void <% > service_common/client_class_name%>::sync_<%function:cpp_name%>(<%type:
 <% > types/return_type_client%> <% > service_common/client_class_name%>::sync_<%function:cpp_name%>(apache::thrift::RpcOptions& rpcOptions<%function:comma%><% > service_common/function_param_list_client%>) {
 <%/function:sync_returns_by_outparam?%>
 <%#function:sync_returns_by_outparam?%>
-void <% > service_common/client_class_name%>::sync_<%function:cpp_name%>(apache::thrift::RpcOptions& rpcOptions, <%type:cpp_type%>& _return<%function:comma%><% > service_common/function_param_list_client%>) {
+void <% > service_common/client_class_name%>::sync_<%function:cpp_name%>(apache::thrift::RpcOptions& rpcOptions, <%function:cpp_return_type%>& _return<%function:comma%><% > service_common/function_param_list_client%>) {
 <%/function:sync_returns_by_outparam?%>
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<<%#function:oneway?%>true<%/function:oneway?%><%^function:oneway?%>false<%/function:oneway?%>> callback(&returnState);

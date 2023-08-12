@@ -25,7 +25,7 @@
 }
 <%/type:resolves_to_complex_return?%>
 <%#type:resolves_to_complex_return?%>
-void <% > service_common/client_class_name%>::recv_instance_<%function:cpp_name%>(<%type:cpp_type%>& _return, ::apache::thrift::ClientReceiveState& state) {
+void <% > service_common/client_class_name%>::recv_instance_<%function:cpp_name%>(<%function:cpp_return_type%>& _return, ::apache::thrift::ClientReceiveState& state) {
   return recv_<%function:cpp_name%>(_return, state);
 }
 <%/type:resolves_to_complex_return?%>

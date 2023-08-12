@@ -61,26 +61,30 @@ namespace compiler {
 namespace gen {
 namespace cpp {
 
-// A class that resolves c++ type names from thrift types and caches the
+// A class that resolves C++ type names from Thrift types and caches the
 // results.
 class type_resolver {
  public:
-  // Returns c++ type name for the given thrift type.
+  // Returns C++ type name for the given Thrift type.
   const std::string& get_native_type(const t_type& node) {
     return detail::get_or_gen(
         type_cache_, &node, [&]() { return gen_type(node); });
   }
   const std::string& get_native_type(const t_typedef& node);
-  // Returns c++ type name for the given thrift field.
+  // Returns C++ type name for the given Thrift field.
   const std::string& get_native_type(
       const t_field& field, const t_structured& parent);
 
   const std::string& get_native_type(const t_const& cnst);
 
+  // Generates the C++ return type name for a function. It takes into account
+  // not just the Thrift function return type but also sink and stream if any.
+  const std::string& get_return_type(const t_function& fun);
+
   const std::string& get_underlying_type_name(const t_type& node);
   const std::string& get_underlying_type_name(const t_typedef& node);
 
-  // Returns the c++ type that the runtime knows how to handle.
+  // Returns the C++ type that the runtime knows how to handle.
   const std::string& get_standard_type(const t_type& node) {
     return detail::get_or_gen(
         standard_type_cache_, &node, [&]() { return gen_standard_type(node); });
@@ -197,9 +201,6 @@ class type_resolver {
       const std::string& native_type, reference_type& ref_type, const t_field&);
   std::string gen_container_type(
       const t_container& node, type_resolve_fn resolve_fn);
-  std::string gen_sink_type(const t_sink& node, type_resolve_fn resolve_fn);
-  std::string gen_stream_resp_type(
-      const t_stream_response& node, type_resolve_fn resolve_fn);
   static std::string gen_adapted_type(
       const std::string* adapter, const std::string& standard_type);
   static std::string gen_adapted_type(

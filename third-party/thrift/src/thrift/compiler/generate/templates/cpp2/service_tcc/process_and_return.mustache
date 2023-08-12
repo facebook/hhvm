@@ -135,13 +135,13 @@ apache::thrift::SerializedResponse <%service:parent_service_cpp_name%>AsyncProce
 <%/type:void?%>
 <%^type:void?%>
     <%^function:stream?%><%^function:sink?%>
-apache::thrift::SerializedResponse <%service:parent_service_cpp_name%>AsyncProcessor::return_<%#service:interaction?%><%service:cpp_name%>_<%/service:interaction?%><%function:cpp_name%>(apache::thrift::ContextStack* ctx, <%type:cpp_type%> const& _return) {
+apache::thrift::SerializedResponse <%service:parent_service_cpp_name%>AsyncProcessor::return_<%#service:interaction?%><%service:cpp_name%>_<%/service:interaction?%><%function:cpp_name%>(apache::thrift::ContextStack* ctx, <%function:cpp_return_type%> const& _return) {
     <%/function:sink?%><%/function:stream?%>
     <%#function:stream?%>
-apache::thrift::ResponseAndServerStreamFactory <%service:parent_service_cpp_name%>AsyncProcessor::return_<%#service:interaction?%><%service:cpp_name%>_<%/service:interaction?%><%function:cpp_name%>(apache::thrift::ContextStack* ctx, folly::Executor::KeepAlive<> executor, <%type:cpp_type%>&& _return) {
+apache::thrift::ResponseAndServerStreamFactory <%service:parent_service_cpp_name%>AsyncProcessor::return_<%#service:interaction?%><%service:cpp_name%>_<%/service:interaction?%><%function:cpp_name%>(apache::thrift::ContextStack* ctx, folly::Executor::KeepAlive<> executor, <%function:cpp_return_type%>&& _return) {
     <%/function:stream?%>
     <%#function:sink?%>
-std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsumerImpl> <%service:parent_service_cpp_name%>AsyncProcessor::return_<%#service:interaction?%><%service:cpp_name%>_<%/service:interaction?%><%function:cpp_name%>(apache::thrift::ContextStack* ctx, <%type:cpp_type%>&& _return, folly::Executor::KeepAlive<> executor) {
+std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsumerImpl> <%service:parent_service_cpp_name%>AsyncProcessor::return_<%#service:interaction?%><%service:cpp_name%>_<%/service:interaction?%><%function:cpp_name%>(apache::thrift::ContextStack* ctx, <%function:cpp_return_type%>&& _return, folly::Executor::KeepAlive<> executor) {
     <%/function:sink?%>
 <%/type:void?%>
   ProtocolOut_ prot;
@@ -149,7 +149,7 @@ std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsum
   <% > common/namespace_cpp2%><%service:parent_service_cpp_name%>_<%#service:interaction?%><%service:cpp_name%>_<%/service:interaction?%><%function:cpp_name%>_presult::FieldsType result;
   using StreamPResultType = <% > common/namespace_cpp2%><%service:parent_service_cpp_name%>_<%#service:interaction?%><%service:cpp_name%>_<%/service:interaction?%><%function:cpp_name%>_presult::StreamPResultType;
       <%#function:stream_has_first_response?%>
-  result.get<0>().value = const_cast<<%type:cpp_type%>::ResponseType*>(&_return.response);
+  result.get<0>().value = const_cast<<%function:cpp_return_type%>::ResponseType*>(&_return.response);
   result.setIsSet(0, true);
   auto& returnStream = _return.stream;
       <%/function:stream_has_first_response?%>
@@ -225,7 +225,7 @@ std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsum
 <%^function:stream?%><%^function:sink?%>
   <% > common/namespace_cpp2%><%service:parent_service_cpp_name%>_<%#service:interaction?%><%service:cpp_name%>_<%/service:interaction?%><%function:cpp_name%>_presult result;
 <%^type:void?%>
-  result.get<0>().value = const_cast<<%type:cpp_type%>*>(&_return);
+  result.get<0>().value = const_cast<<%function:cpp_return_type%>*>(&_return);
   result.setIsSet(0, true);
 <%/type:void?%>
   return serializeResponse("<% > common/function_name%>", &prot, ctx, result);

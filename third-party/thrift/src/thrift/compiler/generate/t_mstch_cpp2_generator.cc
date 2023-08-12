@@ -813,14 +813,16 @@ class cpp_mstch_function : public mstch_function {
   cpp_mstch_function(
       const t_function* function,
       mstch_context& ctx,
-      mstch_element_position pos)
-      : mstch_function(function, ctx, pos) {
+      mstch_element_position pos,
+      std::shared_ptr<cpp2_generator_context> cpp_ctx)
+      : mstch_function(function, ctx, pos), cpp_context_(std::move(cpp_ctx)) {
     register_methods(
         this,
         {
             {"function:coroutine?", &cpp_mstch_function::coroutine},
             {"function:eb", &cpp_mstch_function::event_based},
             {"function:cpp_name", &cpp_mstch_function::cpp_name},
+            {"function:cpp_return_type", &cpp_mstch_function::cpp_return_type},
             {"function:stack_arguments?", &cpp_mstch_function::stack_arguments},
             {"function:created_interaction",
              &cpp_mstch_function::created_interaction},
@@ -846,6 +848,9 @@ class cpp_mstch_function : public mstch_function {
     return function_->get_annotation("thread") == "eb";
   }
   mstch::node cpp_name() { return cpp2::get_name(function_); }
+  mstch::node cpp_return_type() {
+    return cpp_context_->resolver().get_return_type(*function_);
+  }
   mstch::node stack_arguments() {
     return cpp2::is_stack_arguments(context_.options, *function_);
   }
@@ -857,6 +862,9 @@ class cpp_mstch_function : public mstch_function {
                function_->return_type().deref().get_true_type()) &&
         !function_->returned_interaction();
   }
+
+ private:
+  std::shared_ptr<cpp2_generator_context> cpp_context_;
 };
 
 bool needs_op_encode(const t_type& type);
@@ -2354,7 +2362,7 @@ void t_mstch_cpp2_generator::set_mstch_factories() {
   mstch_context_.add<cpp_mstch_program>();
   mstch_context_.add<cpp_mstch_service>();
   mstch_context_.add<cpp_mstch_interaction>();
-  mstch_context_.add<cpp_mstch_function>();
+  mstch_context_.add<cpp_mstch_function>(cpp_context_);
   mstch_context_.add<cpp_mstch_type>(cpp_context_);
   mstch_context_.add<cpp_mstch_typedef>(cpp_context_);
   mstch_context_.add<cpp_mstch_struct>(cpp_context_);

@@ -25,7 +25,7 @@
 <%/type:void?%>
 <%/function:sync_returns_by_outparam?%>
 <%#function:sync_returns_by_outparam?%>
-void <% > service_common/client_class_name%>::recv_<%function:cpp_name%>(<%type:cpp_type%>& _return, ::apache::thrift::ClientReceiveState& state) {
+void <% > service_common/client_class_name%>::recv_<%function:cpp_name%>(<%function:cpp_return_type%>& _return, ::apache::thrift::ClientReceiveState& state) {
   auto ew = recv_wrapped_<%function:cpp_name%>(_return, state);
 <%/function:sync_returns_by_outparam?%>
   if (ew) {

@@ -34,8 +34,8 @@
   <%^service:reduced_client?%><%^function:creates_interaction?%>virtual <%/function:creates_interaction?%><%/service:reduced_client?%><% > types/return_type_client%> sync_<%function:cpp_name%>(apache::thrift::RpcOptions& rpcOptions<%function:comma%><% > service_common/function_param_list_client%>);
 <%/function:sync_returns_by_outparam?%>
 <%#function:sync_returns_by_outparam?%>
-  <%^service:reduced_client?%><%^function:creates_interaction?%>virtual <%/function:creates_interaction?%><%/service:reduced_client?%>void sync_<%function:cpp_name%>(<%type:cpp_type%>& _return<%function:comma%><% > service_common/function_param_list_client%>);
-  <%^service:reduced_client?%><%^function:creates_interaction?%>virtual <%/function:creates_interaction?%><%/service:reduced_client?%>void sync_<%function:cpp_name%>(apache::thrift::RpcOptions& rpcOptions, <%type:cpp_type%>& _return<%function:comma%><% > service_common/function_param_list_client%>);
+  <%^service:reduced_client?%><%^function:creates_interaction?%>virtual <%/function:creates_interaction?%><%/service:reduced_client?%>void sync_<%function:cpp_name%>(<%function:cpp_return_type%>& _return<%function:comma%><% > service_common/function_param_list_client%>);
+  <%^service:reduced_client?%><%^function:creates_interaction?%>virtual <%/function:creates_interaction?%><%/service:reduced_client?%>void sync_<%function:cpp_name%>(apache::thrift::RpcOptions& rpcOptions, <%function:cpp_return_type%>& _return<%function:comma%><% > service_common/function_param_list_client%>);
 <%/function:sync_returns_by_outparam?%>
 
 <%^service:reduced_client?%><%^function:creates_interaction?%><%^function:stream?%>

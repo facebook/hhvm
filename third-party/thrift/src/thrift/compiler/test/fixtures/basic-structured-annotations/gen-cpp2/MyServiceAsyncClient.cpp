@@ -157,7 +157,11 @@ folly::SemiFuture<::test::fixtures::basic-structured-annotations::annotated_inli
 }
 
 folly::Future<::test::fixtures::basic-structured-annotations::annotated_inline_string> apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::future_first(apache::thrift::RpcOptions& rpcOptions) {
-  return semifuture_first(rpcOptions).toUnsafeFuture();
+  folly::Promise<::test::fixtures::basic-structured-annotations::annotated_inline_string> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::FutureCallback<::test::fixtures::basic-structured-annotations::annotated_inline_string>>(std::move(promise), recv_wrapped_first, channel_);
+  first(rpcOptions, std::move(callback));
+  return future;
 }
 
 folly::SemiFuture<::test::fixtures::basic-structured-annotations::annotated_inline_string> apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::semifuture_first(apache::thrift::RpcOptions& rpcOptions) {
@@ -168,7 +172,11 @@ folly::SemiFuture<::test::fixtures::basic-structured-annotations::annotated_inli
 }
 
 folly::Future<std::pair<::test::fixtures::basic-structured-annotations::annotated_inline_string, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::header_future_first(apache::thrift::RpcOptions& rpcOptions) {
-  return header_semifuture_first(rpcOptions).toUnsafeFuture();
+  folly::Promise<std::pair<::test::fixtures::basic-structured-annotations::annotated_inline_string, std::unique_ptr<apache::thrift::transport::THeader>>> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::test::fixtures::basic-structured-annotations::annotated_inline_string>>(std::move(promise), recv_wrapped_first, channel_);
+  first(rpcOptions, std::move(callback));
+  return future;
 }
 
 folly::SemiFuture<std::pair<::test::fixtures::basic-structured-annotations::annotated_inline_string, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::header_semifuture_first(apache::thrift::RpcOptions& rpcOptions) {
@@ -337,7 +345,11 @@ folly::SemiFuture<bool> apache::thrift::Client<::test::fixtures::basic-structure
 }
 
 folly::Future<bool> apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::future_second(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_count) {
-  return semifuture_second(rpcOptions, p_count).toUnsafeFuture();
+  folly::Promise<bool> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::FutureCallback<bool>>(std::move(promise), recv_wrapped_second, channel_);
+  second(rpcOptions, std::move(callback), p_count);
+  return future;
 }
 
 folly::SemiFuture<bool> apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::semifuture_second(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_count) {
@@ -348,7 +360,11 @@ folly::SemiFuture<bool> apache::thrift::Client<::test::fixtures::basic-structure
 }
 
 folly::Future<std::pair<bool, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::header_future_second(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_count) {
-  return header_semifuture_second(rpcOptions, p_count).toUnsafeFuture();
+  folly::Promise<std::pair<bool, std::unique_ptr<apache::thrift::transport::THeader>>> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<bool>>(std::move(promise), recv_wrapped_second, channel_);
+  second(rpcOptions, std::move(callback), p_count);
+  return future;
 }
 
 folly::SemiFuture<std::pair<bool, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::test::fixtures::basic-structured-annotations::MyService>::header_semifuture_second(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_count) {

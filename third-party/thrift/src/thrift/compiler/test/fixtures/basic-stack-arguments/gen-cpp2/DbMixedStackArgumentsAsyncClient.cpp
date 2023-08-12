@@ -203,7 +203,11 @@ folly::SemiFuture<::std::string> apache::thrift::Client<::cpp2::DbMixedStackArgu
 }
 
 folly::Future<::std::string> apache::thrift::Client<::cpp2::DbMixedStackArguments>::future_getDataByKey0(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_key) {
-  return semifuture_getDataByKey0(rpcOptions, p_key).toUnsafeFuture();
+  folly::Promise<::std::string> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::FutureCallback<::std::string>>(std::move(promise), recv_wrapped_getDataByKey0, channel_);
+  getDataByKey0(rpcOptions, std::move(callback), p_key);
+  return future;
 }
 
 folly::SemiFuture<::std::string> apache::thrift::Client<::cpp2::DbMixedStackArguments>::semifuture_getDataByKey0(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_key) {
@@ -214,7 +218,11 @@ folly::SemiFuture<::std::string> apache::thrift::Client<::cpp2::DbMixedStackArgu
 }
 
 folly::Future<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::cpp2::DbMixedStackArguments>::header_future_getDataByKey0(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_key) {
-  return header_semifuture_getDataByKey0(rpcOptions, p_key).toUnsafeFuture();
+  folly::Promise<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::std::string>>(std::move(promise), recv_wrapped_getDataByKey0, channel_);
+  getDataByKey0(rpcOptions, std::move(callback), p_key);
+  return future;
 }
 
 folly::SemiFuture<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::cpp2::DbMixedStackArguments>::header_semifuture_getDataByKey0(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_key) {
@@ -428,7 +436,11 @@ folly::SemiFuture<::std::string> apache::thrift::Client<::cpp2::DbMixedStackArgu
 }
 
 folly::Future<::std::string> apache::thrift::Client<::cpp2::DbMixedStackArguments>::future_getDataByKey1(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_key) {
-  return semifuture_getDataByKey1(rpcOptions, p_key).toUnsafeFuture();
+  folly::Promise<::std::string> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::FutureCallback<::std::string>>(std::move(promise), recv_wrapped_getDataByKey1, channel_);
+  getDataByKey1(rpcOptions, std::move(callback), p_key);
+  return future;
 }
 
 folly::SemiFuture<::std::string> apache::thrift::Client<::cpp2::DbMixedStackArguments>::semifuture_getDataByKey1(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_key) {
@@ -439,7 +451,11 @@ folly::SemiFuture<::std::string> apache::thrift::Client<::cpp2::DbMixedStackArgu
 }
 
 folly::Future<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::cpp2::DbMixedStackArguments>::header_future_getDataByKey1(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_key) {
-  return header_semifuture_getDataByKey1(rpcOptions, p_key).toUnsafeFuture();
+  folly::Promise<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::std::string>>(std::move(promise), recv_wrapped_getDataByKey1, channel_);
+  getDataByKey1(rpcOptions, std::move(callback), p_key);
+  return future;
 }
 
 folly::SemiFuture<std::pair<::std::string, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::cpp2::DbMixedStackArguments>::header_semifuture_getDataByKey1(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_key) {

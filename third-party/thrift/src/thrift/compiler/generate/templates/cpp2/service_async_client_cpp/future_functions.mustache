@@ -32,7 +32,16 @@ folly::SemiFuture<<% > types/return_type_client_lift_unit%>> <% > service_common
 
 <%^function:stream?%>
 folly::Future<<% > types/return_type_client_lift_unit%>> <% > service_common/client_class_name%>::future_<%function:cpp_name%>(apache::thrift::RpcOptions& rpcOptions<%function:comma%><% > service_common/function_param_list_client%>) {
-  return semifuture_<%function:cpp_name%>(rpcOptions<%function:comma%><% > service_common/param_list%>).toUnsafeFuture();
+  folly::Promise<<% > types/return_type_client_lift_unit%>> promise;
+  auto future = promise.getFuture();
+<%#function:oneway?%>
+  auto callback = std::make_unique<apache::thrift::OneWayFutureCallback>(std::move(promise), channel_);
+<%/function:oneway?%>
+<%^function:oneway?%>
+  auto callback = std::make_unique<apache::thrift::FutureCallback<<% > types/return_type_client_lift_unit%>>>(std::move(promise), recv_wrapped_<%function:cpp_name%>, channel_);
+<%/function:oneway?%>
+  <%function:cpp_name%>(rpcOptions, std::move(callback)<%function:comma%><% > service_common/param_list%>);
+  return future;
 }
 <%/function:stream?%>
 <%/function:creates_interaction?%><%/service:reduced_client?%>
@@ -80,7 +89,11 @@ std::pair<
 <%^function:oneway?%><%^service:reduced_client?%><%^function:creates_interaction?%>
 <%^function:stream?%>
 folly::Future<std::pair<<% > types/return_type_client_lift_unit%>, std::unique_ptr<apache::thrift::transport::THeader>>> <% > service_common/client_class_name%>::header_future_<%function:cpp_name%>(apache::thrift::RpcOptions& rpcOptions<%function:comma%><% > service_common/function_param_list_client%>) {
-  return header_semifuture_<%function:cpp_name%>(rpcOptions<%function:comma%><% > service_common/param_list%>).toUnsafeFuture();
+  folly::Promise<std::pair<<% > types/return_type_client_lift_unit%>, std::unique_ptr<apache::thrift::transport::THeader>>> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<<% > types/return_type_client_lift_unit%>>>(std::move(promise), recv_wrapped_<%function:cpp_name%>, channel_);
+  <%function:cpp_name%>(rpcOptions, std::move(callback)<%function:comma%><% > service_common/param_list%>);
+  return future;
 }
 <%/function:stream?%>
 

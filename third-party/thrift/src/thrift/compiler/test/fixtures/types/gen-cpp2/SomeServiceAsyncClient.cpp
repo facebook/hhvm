@@ -158,7 +158,11 @@ folly::SemiFuture<::apache::thrift::fixtures::types::SomeMap> apache::thrift::Cl
 }
 
 folly::Future<::apache::thrift::fixtures::types::SomeMap> apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::future_bounce_map(apache::thrift::RpcOptions& rpcOptions, const ::apache::thrift::fixtures::types::SomeMap& p_m) {
-  return semifuture_bounce_map(rpcOptions, p_m).toUnsafeFuture();
+  folly::Promise<::apache::thrift::fixtures::types::SomeMap> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::FutureCallback<::apache::thrift::fixtures::types::SomeMap>>(std::move(promise), recv_wrapped_bounce_map, channel_);
+  bounce_map(rpcOptions, std::move(callback), p_m);
+  return future;
 }
 
 folly::SemiFuture<::apache::thrift::fixtures::types::SomeMap> apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::semifuture_bounce_map(apache::thrift::RpcOptions& rpcOptions, const ::apache::thrift::fixtures::types::SomeMap& p_m) {
@@ -169,7 +173,11 @@ folly::SemiFuture<::apache::thrift::fixtures::types::SomeMap> apache::thrift::Cl
 }
 
 folly::Future<std::pair<::apache::thrift::fixtures::types::SomeMap, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::header_future_bounce_map(apache::thrift::RpcOptions& rpcOptions, const ::apache::thrift::fixtures::types::SomeMap& p_m) {
-  return header_semifuture_bounce_map(rpcOptions, p_m).toUnsafeFuture();
+  folly::Promise<std::pair<::apache::thrift::fixtures::types::SomeMap, std::unique_ptr<apache::thrift::transport::THeader>>> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::apache::thrift::fixtures::types::SomeMap>>(std::move(promise), recv_wrapped_bounce_map, channel_);
+  bounce_map(rpcOptions, std::move(callback), p_m);
+  return future;
 }
 
 folly::SemiFuture<std::pair<::apache::thrift::fixtures::types::SomeMap, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::header_semifuture_bounce_map(apache::thrift::RpcOptions& rpcOptions, const ::apache::thrift::fixtures::types::SomeMap& p_m) {
@@ -338,7 +346,11 @@ folly::SemiFuture<::std::map<::apache::thrift::fixtures::types::TBinary, ::std::
 }
 
 folly::Future<::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t>> apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::future_binary_keyed_map(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::int64_t>& p_r) {
-  return semifuture_binary_keyed_map(rpcOptions, p_r).toUnsafeFuture();
+  folly::Promise<::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t>> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::FutureCallback<::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t>>>(std::move(promise), recv_wrapped_binary_keyed_map, channel_);
+  binary_keyed_map(rpcOptions, std::move(callback), p_r);
+  return future;
 }
 
 folly::SemiFuture<::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t>> apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::semifuture_binary_keyed_map(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::int64_t>& p_r) {
@@ -349,7 +361,11 @@ folly::SemiFuture<::std::map<::apache::thrift::fixtures::types::TBinary, ::std::
 }
 
 folly::Future<std::pair<::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t>, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::header_future_binary_keyed_map(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::int64_t>& p_r) {
-  return header_semifuture_binary_keyed_map(rpcOptions, p_r).toUnsafeFuture();
+  folly::Promise<std::pair<::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t>, std::unique_ptr<apache::thrift::transport::THeader>>> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t>>>(std::move(promise), recv_wrapped_binary_keyed_map, channel_);
+  binary_keyed_map(rpcOptions, std::move(callback), p_r);
+  return future;
 }
 
 folly::SemiFuture<std::pair<::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t>, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::header_semifuture_binary_keyed_map(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::std::int64_t>& p_r) {

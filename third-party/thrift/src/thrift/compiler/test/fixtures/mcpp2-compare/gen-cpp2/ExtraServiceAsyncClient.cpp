@@ -282,7 +282,11 @@ folly::SemiFuture<bool> apache::thrift::Client<::extra::svc::ExtraService>::semi
 }
 
 folly::Future<bool> apache::thrift::Client<::extra::svc::ExtraService>::future_simple_function(apache::thrift::RpcOptions& rpcOptions) {
-  return semifuture_simple_function(rpcOptions).toUnsafeFuture();
+  folly::Promise<bool> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::FutureCallback<bool>>(std::move(promise), recv_wrapped_simple_function, channel_);
+  simple_function(rpcOptions, std::move(callback));
+  return future;
 }
 
 folly::SemiFuture<bool> apache::thrift::Client<::extra::svc::ExtraService>::semifuture_simple_function(apache::thrift::RpcOptions& rpcOptions) {
@@ -293,7 +297,11 @@ folly::SemiFuture<bool> apache::thrift::Client<::extra::svc::ExtraService>::semi
 }
 
 folly::Future<std::pair<bool, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::extra::svc::ExtraService>::header_future_simple_function(apache::thrift::RpcOptions& rpcOptions) {
-  return header_semifuture_simple_function(rpcOptions).toUnsafeFuture();
+  folly::Promise<std::pair<bool, std::unique_ptr<apache::thrift::transport::THeader>>> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<bool>>(std::move(promise), recv_wrapped_simple_function, channel_);
+  simple_function(rpcOptions, std::move(callback));
+  return future;
 }
 
 folly::SemiFuture<std::pair<bool, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::extra::svc::ExtraService>::header_semifuture_simple_function(apache::thrift::RpcOptions& rpcOptions) {
@@ -464,7 +472,11 @@ folly::SemiFuture<folly::Unit> apache::thrift::Client<::extra::svc::ExtraService
 }
 
 folly::Future<folly::Unit> apache::thrift::Client<::extra::svc::ExtraService>::future_throws_function(apache::thrift::RpcOptions& rpcOptions) {
-  return semifuture_throws_function(rpcOptions).toUnsafeFuture();
+  folly::Promise<folly::Unit> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::FutureCallback<folly::Unit>>(std::move(promise), recv_wrapped_throws_function, channel_);
+  throws_function(rpcOptions, std::move(callback));
+  return future;
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::Client<::extra::svc::ExtraService>::semifuture_throws_function(apache::thrift::RpcOptions& rpcOptions) {
@@ -475,7 +487,11 @@ folly::SemiFuture<folly::Unit> apache::thrift::Client<::extra::svc::ExtraService
 }
 
 folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::extra::svc::ExtraService>::header_future_throws_function(apache::thrift::RpcOptions& rpcOptions) {
-  return header_semifuture_throws_function(rpcOptions).toUnsafeFuture();
+  folly::Promise<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<folly::Unit>>(std::move(promise), recv_wrapped_throws_function, channel_);
+  throws_function(rpcOptions, std::move(callback));
+  return future;
 }
 
 folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::extra::svc::ExtraService>::header_semifuture_throws_function(apache::thrift::RpcOptions& rpcOptions) {
@@ -644,7 +660,11 @@ folly::SemiFuture<bool> apache::thrift::Client<::extra::svc::ExtraService>::semi
 }
 
 folly::Future<bool> apache::thrift::Client<::extra::svc::ExtraService>::future_throws_function2(apache::thrift::RpcOptions& rpcOptions, bool p_param1) {
-  return semifuture_throws_function2(rpcOptions, p_param1).toUnsafeFuture();
+  folly::Promise<bool> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::FutureCallback<bool>>(std::move(promise), recv_wrapped_throws_function2, channel_);
+  throws_function2(rpcOptions, std::move(callback), p_param1);
+  return future;
 }
 
 folly::SemiFuture<bool> apache::thrift::Client<::extra::svc::ExtraService>::semifuture_throws_function2(apache::thrift::RpcOptions& rpcOptions, bool p_param1) {
@@ -655,7 +675,11 @@ folly::SemiFuture<bool> apache::thrift::Client<::extra::svc::ExtraService>::semi
 }
 
 folly::Future<std::pair<bool, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::extra::svc::ExtraService>::header_future_throws_function2(apache::thrift::RpcOptions& rpcOptions, bool p_param1) {
-  return header_semifuture_throws_function2(rpcOptions, p_param1).toUnsafeFuture();
+  folly::Promise<std::pair<bool, std::unique_ptr<apache::thrift::transport::THeader>>> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<bool>>(std::move(promise), recv_wrapped_throws_function2, channel_);
+  throws_function2(rpcOptions, std::move(callback), p_param1);
+  return future;
 }
 
 folly::SemiFuture<std::pair<bool, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::extra::svc::ExtraService>::header_semifuture_throws_function2(apache::thrift::RpcOptions& rpcOptions, bool p_param1) {
@@ -826,7 +850,11 @@ folly::SemiFuture<::std::map<::std::int32_t, ::std::string>> apache::thrift::Cli
 }
 
 folly::Future<::std::map<::std::int32_t, ::std::string>> apache::thrift::Client<::extra::svc::ExtraService>::future_throws_function3(apache::thrift::RpcOptions& rpcOptions, bool p_param1, const ::std::string& p_param2) {
-  return semifuture_throws_function3(rpcOptions, p_param1, p_param2).toUnsafeFuture();
+  folly::Promise<::std::map<::std::int32_t, ::std::string>> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::FutureCallback<::std::map<::std::int32_t, ::std::string>>>(std::move(promise), recv_wrapped_throws_function3, channel_);
+  throws_function3(rpcOptions, std::move(callback), p_param1, p_param2);
+  return future;
 }
 
 folly::SemiFuture<::std::map<::std::int32_t, ::std::string>> apache::thrift::Client<::extra::svc::ExtraService>::semifuture_throws_function3(apache::thrift::RpcOptions& rpcOptions, bool p_param1, const ::std::string& p_param2) {
@@ -837,7 +865,11 @@ folly::SemiFuture<::std::map<::std::int32_t, ::std::string>> apache::thrift::Cli
 }
 
 folly::Future<std::pair<::std::map<::std::int32_t, ::std::string>, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::extra::svc::ExtraService>::header_future_throws_function3(apache::thrift::RpcOptions& rpcOptions, bool p_param1, const ::std::string& p_param2) {
-  return header_semifuture_throws_function3(rpcOptions, p_param1, p_param2).toUnsafeFuture();
+  folly::Promise<std::pair<::std::map<::std::int32_t, ::std::string>, std::unique_ptr<apache::thrift::transport::THeader>>> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::std::map<::std::int32_t, ::std::string>>>(std::move(promise), recv_wrapped_throws_function3, channel_);
+  throws_function3(rpcOptions, std::move(callback), p_param1, p_param2);
+  return future;
 }
 
 folly::SemiFuture<std::pair<::std::map<::std::int32_t, ::std::string>, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::extra::svc::ExtraService>::header_semifuture_throws_function3(apache::thrift::RpcOptions& rpcOptions, bool p_param1, const ::std::string& p_param2) {
@@ -996,7 +1028,11 @@ folly::SemiFuture<folly::Unit> apache::thrift::Client<::extra::svc::ExtraService
 }
 
 folly::Future<folly::Unit> apache::thrift::Client<::extra::svc::ExtraService>::future_oneway_void_ret(apache::thrift::RpcOptions& rpcOptions) {
-  return semifuture_oneway_void_ret(rpcOptions).toUnsafeFuture();
+  folly::Promise<folly::Unit> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::OneWayFutureCallback>(std::move(promise), channel_);
+  oneway_void_ret(rpcOptions, std::move(callback));
+  return future;
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::Client<::extra::svc::ExtraService>::semifuture_oneway_void_ret(apache::thrift::RpcOptions& rpcOptions) {
@@ -1112,7 +1148,11 @@ folly::SemiFuture<folly::Unit> apache::thrift::Client<::extra::svc::ExtraService
 }
 
 folly::Future<folly::Unit> apache::thrift::Client<::extra::svc::ExtraService>::future_oneway_void_ret_i32_i32_i32_i32_i32_param(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5) {
-  return semifuture_oneway_void_ret_i32_i32_i32_i32_i32_param(rpcOptions, p_param1, p_param2, p_param3, p_param4, p_param5).toUnsafeFuture();
+  folly::Promise<folly::Unit> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::OneWayFutureCallback>(std::move(promise), channel_);
+  oneway_void_ret_i32_i32_i32_i32_i32_param(rpcOptions, std::move(callback), p_param1, p_param2, p_param3, p_param4, p_param5);
+  return future;
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::Client<::extra::svc::ExtraService>::semifuture_oneway_void_ret_i32_i32_i32_i32_i32_param(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5) {
@@ -1228,7 +1268,11 @@ folly::SemiFuture<folly::Unit> apache::thrift::Client<::extra::svc::ExtraService
 }
 
 folly::Future<folly::Unit> apache::thrift::Client<::extra::svc::ExtraService>::future_oneway_void_ret_map_setlist_param(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int64_t>& p_param1, const ::std::set<::std::vector<::std::string>>& p_param2) {
-  return semifuture_oneway_void_ret_map_setlist_param(rpcOptions, p_param1, p_param2).toUnsafeFuture();
+  folly::Promise<folly::Unit> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::OneWayFutureCallback>(std::move(promise), channel_);
+  oneway_void_ret_map_setlist_param(rpcOptions, std::move(callback), p_param1, p_param2);
+  return future;
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::Client<::extra::svc::ExtraService>::semifuture_oneway_void_ret_map_setlist_param(apache::thrift::RpcOptions& rpcOptions, const ::std::map<::std::string, ::std::int64_t>& p_param1, const ::std::set<::std::vector<::std::string>>& p_param2) {
@@ -1344,7 +1388,11 @@ folly::SemiFuture<folly::Unit> apache::thrift::Client<::extra::svc::ExtraService
 }
 
 folly::Future<folly::Unit> apache::thrift::Client<::extra::svc::ExtraService>::future_oneway_void_ret_struct_param(apache::thrift::RpcOptions& rpcOptions, const ::some::valid::ns::MyStruct& p_param1) {
-  return semifuture_oneway_void_ret_struct_param(rpcOptions, p_param1).toUnsafeFuture();
+  folly::Promise<folly::Unit> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::OneWayFutureCallback>(std::move(promise), channel_);
+  oneway_void_ret_struct_param(rpcOptions, std::move(callback), p_param1);
+  return future;
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::Client<::extra::svc::ExtraService>::semifuture_oneway_void_ret_struct_param(apache::thrift::RpcOptions& rpcOptions, const ::some::valid::ns::MyStruct& p_param1) {
@@ -1460,7 +1508,11 @@ folly::SemiFuture<folly::Unit> apache::thrift::Client<::extra::svc::ExtraService
 }
 
 folly::Future<folly::Unit> apache::thrift::Client<::extra::svc::ExtraService>::future_oneway_void_ret_listunion_param(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1) {
-  return semifuture_oneway_void_ret_listunion_param(rpcOptions, p_param1).toUnsafeFuture();
+  folly::Promise<folly::Unit> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::OneWayFutureCallback>(std::move(promise), channel_);
+  oneway_void_ret_listunion_param(rpcOptions, std::move(callback), p_param1);
+  return future;
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::Client<::extra::svc::ExtraService>::semifuture_oneway_void_ret_listunion_param(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1) {

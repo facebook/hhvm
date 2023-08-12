@@ -142,7 +142,11 @@ folly::SemiFuture<::facebook::thrift::test::MyI32_4873> apache::thrift::Client<:
 }
 
 folly::Future<::facebook::thrift::test::MyI32_4873> apache::thrift::Client<::facebook::thrift::test::Service>::future_func(apache::thrift::RpcOptions& rpcOptions, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::std::string& p_arg2, const ::facebook::thrift::test::Foo& p_arg3) {
-  return semifuture_func(rpcOptions, p_arg1, p_arg2, p_arg3).toUnsafeFuture();
+  folly::Promise<::facebook::thrift::test::MyI32_4873> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::FutureCallback<::facebook::thrift::test::MyI32_4873>>(std::move(promise), recv_wrapped_func, channel_);
+  func(rpcOptions, std::move(callback), p_arg1, p_arg2, p_arg3);
+  return future;
 }
 
 folly::SemiFuture<::facebook::thrift::test::MyI32_4873> apache::thrift::Client<::facebook::thrift::test::Service>::semifuture_func(apache::thrift::RpcOptions& rpcOptions, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::std::string& p_arg2, const ::facebook::thrift::test::Foo& p_arg3) {
@@ -153,7 +157,11 @@ folly::SemiFuture<::facebook::thrift::test::MyI32_4873> apache::thrift::Client<:
 }
 
 folly::Future<std::pair<::facebook::thrift::test::MyI32_4873, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::facebook::thrift::test::Service>::header_future_func(apache::thrift::RpcOptions& rpcOptions, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::std::string& p_arg2, const ::facebook::thrift::test::Foo& p_arg3) {
-  return header_semifuture_func(rpcOptions, p_arg1, p_arg2, p_arg3).toUnsafeFuture();
+  folly::Promise<std::pair<::facebook::thrift::test::MyI32_4873, std::unique_ptr<apache::thrift::transport::THeader>>> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<::facebook::thrift::test::MyI32_4873>>(std::move(promise), recv_wrapped_func, channel_);
+  func(rpcOptions, std::move(callback), p_arg1, p_arg2, p_arg3);
+  return future;
 }
 
 folly::SemiFuture<std::pair<::facebook::thrift::test::MyI32_4873, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::facebook::thrift::test::Service>::header_semifuture_func(apache::thrift::RpcOptions& rpcOptions, const ::facebook::thrift::test::StringWithAdapter_7208& p_arg1, const ::std::string& p_arg2, const ::facebook::thrift::test::Foo& p_arg3) {

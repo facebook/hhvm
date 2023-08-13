@@ -200,11 +200,7 @@ bool YourUnion::__fbthrift_is_empty() const {
 }
 
 bool YourUnion::operator==(const YourUnion& rhs) const {
-  if (getType() != rhs.getType()) { return false; }
-  switch(getType()) {
-    default:
-      return true;
-  }
+  return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
 bool YourUnion::operator<(FOLLY_MAYBE_UNUSED const YourUnion& rhs) const {

@@ -1926,23 +1926,7 @@ bool MyUnion::__fbthrift_is_empty() const {
 }
 
 bool MyUnion::operator==(const MyUnion& rhs) const {
-  if (getType() != rhs.getType()) { return false; }
-  switch(getType()) {
-    case Type::myEnum:
-      return value_.myEnum == rhs.value_.myEnum;
-    case Type::myStruct:
-      return value_.myStruct == rhs.value_.myStruct;
-    case Type::myDataItem:
-      return value_.myDataItem == rhs.value_.myDataItem;
-    case Type::complexNestedStruct:
-      return value_.complexNestedStruct == rhs.value_.complexNestedStruct;
-    case Type::longValue:
-      return value_.longValue == rhs.value_.longValue;
-    case Type::intValue:
-      return value_.intValue == rhs.value_.intValue;
-    default:
-      return true;
-  }
+  return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
 bool MyUnion::operator<(FOLLY_MAYBE_UNUSED const MyUnion& rhs) const {
@@ -2079,19 +2063,7 @@ bool MyUnionFloatFieldThrowExp::__fbthrift_is_empty() const {
 }
 
 bool MyUnionFloatFieldThrowExp::operator==(const MyUnionFloatFieldThrowExp& rhs) const {
-  if (getType() != rhs.getType()) { return false; }
-  switch(getType()) {
-    case Type::myEnum:
-      return value_.myEnum == rhs.value_.myEnum;
-    case Type::setFloat:
-      return value_.setFloat == rhs.value_.setFloat;
-    case Type::myDataItem:
-      return value_.myDataItem == rhs.value_.myDataItem;
-    case Type::complexNestedStruct:
-      return value_.complexNestedStruct == rhs.value_.complexNestedStruct;
-    default:
-      return true;
-  }
+  return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
 bool MyUnionFloatFieldThrowExp::operator<(FOLLY_MAYBE_UNUSED const MyUnionFloatFieldThrowExp& rhs) const {

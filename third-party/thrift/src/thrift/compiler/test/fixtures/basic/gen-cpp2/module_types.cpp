@@ -408,19 +408,7 @@ bool MyUnion::__fbthrift_is_empty() const {
 }
 
 bool MyUnion::operator==(const MyUnion& rhs) const {
-  if (getType() != rhs.getType()) { return false; }
-  switch(getType()) {
-    case Type::myEnum:
-      return value_.myEnum == rhs.value_.myEnum;
-    case Type::myStruct:
-      return value_.myStruct == rhs.value_.myStruct;
-    case Type::myDataItem:
-      return value_.myDataItem == rhs.value_.myDataItem;
-    case Type::floatSet:
-      return value_.floatSet == rhs.value_.floatSet;
-    default:
-      return true;
-  }
+  return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
 bool MyUnion::operator<(FOLLY_MAYBE_UNUSED const MyUnion& rhs) const {
@@ -613,13 +601,7 @@ bool UnionToBeRenamed::__fbthrift_is_empty() const {
 }
 
 bool UnionToBeRenamed::operator==(const UnionToBeRenamed& rhs) const {
-  if (getType() != rhs.getType()) { return false; }
-  switch(getType()) {
-    case Type::reserved_field:
-      return value_.reserved_field == rhs.value_.reserved_field;
-    default:
-      return true;
-  }
+  return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
 bool UnionToBeRenamed::operator<(FOLLY_MAYBE_UNUSED const UnionToBeRenamed& rhs) const {

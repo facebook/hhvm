@@ -935,15 +935,7 @@ bool union1::__fbthrift_is_empty() const {
 }
 
 bool union1::operator==(const union1& rhs) const {
-  if (getType() != rhs.getType()) { return false; }
-  switch(getType()) {
-    case Type::i:
-      return value_.i == rhs.value_.i;
-    case Type::d:
-      return value_.d == rhs.value_.d;
-    default:
-      return true;
-  }
+  return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
 bool union1::operator<(FOLLY_MAYBE_UNUSED const union1& rhs) const {
@@ -1054,19 +1046,7 @@ bool union2::__fbthrift_is_empty() const {
 }
 
 bool union2::operator==(const union2& rhs) const {
-  if (getType() != rhs.getType()) { return false; }
-  switch(getType()) {
-    case Type::i:
-      return value_.i == rhs.value_.i;
-    case Type::d:
-      return value_.d == rhs.value_.d;
-    case Type::s:
-      return value_.s == rhs.value_.s;
-    case Type::u:
-      return value_.u == rhs.value_.u;
-    default:
-      return true;
-  }
+  return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
 bool union2::operator<(FOLLY_MAYBE_UNUSED const union2& rhs) const {

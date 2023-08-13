@@ -93,23 +93,7 @@ bool ComplexUnion::__fbthrift_is_empty() const {
 }
 
 bool ComplexUnion::operator==(const ComplexUnion& rhs) const {
-  if (getType() != rhs.getType()) { return false; }
-  switch(getType()) {
-    case Type::intValue:
-      return value_.intValue == rhs.value_.intValue;
-    case Type::stringValue:
-      return value_.stringValue == rhs.value_.stringValue;
-    case Type::intListValue:
-      return value_.intListValue == rhs.value_.intListValue;
-    case Type::stringListValue:
-      return value_.stringListValue == rhs.value_.stringListValue;
-    case Type::typedefValue:
-      return value_.typedefValue == rhs.value_.typedefValue;
-    case Type::stringRef:
-      return *value_.stringRef == *rhs.value_.stringRef;
-    default:
-      return true;
-  }
+  return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
 bool ComplexUnion::operator<(FOLLY_MAYBE_UNUSED const ComplexUnion& rhs) const {
@@ -222,15 +206,7 @@ bool ListUnion::__fbthrift_is_empty() const {
 }
 
 bool ListUnion::operator==(const ListUnion& rhs) const {
-  if (getType() != rhs.getType()) { return false; }
-  switch(getType()) {
-    case Type::intListValue:
-      return value_.intListValue == rhs.value_.intListValue;
-    case Type::stringListValue:
-      return value_.stringListValue == rhs.value_.stringListValue;
-    default:
-      return true;
-  }
+  return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
 bool ListUnion::operator<(FOLLY_MAYBE_UNUSED const ListUnion& rhs) const {
@@ -335,17 +311,7 @@ bool DataUnion::__fbthrift_is_empty() const {
 }
 
 bool DataUnion::operator==(const DataUnion& rhs) const {
-  if (getType() != rhs.getType()) { return false; }
-  switch(getType()) {
-    case Type::binaryData:
-      return apache::thrift::StringTraits<std::string>::isEqual(
-          value_.binaryData,
-          rhs.value_.binaryData);
-    case Type::stringData:
-      return value_.stringData == rhs.value_.stringData;
-    default:
-      return true;
-  }
+  return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
 bool DataUnion::operator<(FOLLY_MAYBE_UNUSED const DataUnion& rhs) const {
@@ -589,15 +555,7 @@ bool ValUnion::__fbthrift_is_empty() const {
 }
 
 bool ValUnion::operator==(const ValUnion& rhs) const {
-  if (getType() != rhs.getType()) { return false; }
-  switch(getType()) {
-    case Type::v1:
-      return value_.v1 == rhs.value_.v1;
-    case Type::v2:
-      return value_.v2 == rhs.value_.v2;
-    default:
-      return true;
-  }
+  return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
 bool ValUnion::operator<(FOLLY_MAYBE_UNUSED const ValUnion& rhs) const {
@@ -714,15 +672,7 @@ bool VirtualComplexUnion::__fbthrift_is_empty() const {
 }
 
 bool VirtualComplexUnion::operator==(const VirtualComplexUnion& rhs) const {
-  if (getType() != rhs.getType()) { return false; }
-  switch(getType()) {
-    case Type::thingOne:
-      return value_.thingOne == rhs.value_.thingOne;
-    case Type::thingTwo:
-      return value_.thingTwo == rhs.value_.thingTwo;
-    default:
-      return true;
-  }
+  return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
 bool VirtualComplexUnion::operator<(FOLLY_MAYBE_UNUSED const VirtualComplexUnion& rhs) const {
@@ -910,13 +860,7 @@ bool NonCopyableUnion::__fbthrift_is_empty() const {
 }
 
 bool NonCopyableUnion::operator==(const NonCopyableUnion& rhs) const {
-  if (getType() != rhs.getType()) { return false; }
-  switch(getType()) {
-    case Type::s:
-      return value_.s == rhs.value_.s;
-    default:
-      return true;
-  }
+  return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
 bool NonCopyableUnion::operator<(FOLLY_MAYBE_UNUSED const NonCopyableUnion& rhs) const {

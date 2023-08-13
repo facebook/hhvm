@@ -78,14 +78,7 @@ bool RefUnion::__fbthrift_is_empty() const {
 }
 
 bool RefUnion::operator==(const RefUnion& rhs) const {
-  if (getType() != rhs.getType()) { return false; }
-  switch(getType()) {
-    case Type::field1:
-      return ::apache::thrift::adapt_detail::equal<::my::Adapter1, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::string, RefUnion>>(
-*value_.field1, *rhs.value_.field1);
-    default:
-      return true;
-  }
+  return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
 bool RefUnion::operator<(FOLLY_MAYBE_UNUSED const RefUnion& rhs) const {

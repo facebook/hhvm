@@ -186,15 +186,7 @@ bool U::__fbthrift_is_empty() const {
 }
 
 bool U::operator==(const U& rhs) const {
-  if (getType() != rhs.getType()) { return false; }
-  switch(getType()) {
-    case Type::i:
-      return value_.i == rhs.value_.i;
-    case Type::s:
-      return value_.s == rhs.value_.s;
-    default:
-      return true;
-  }
+  return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
 bool U::operator<(FOLLY_MAYBE_UNUSED const U& rhs) const {

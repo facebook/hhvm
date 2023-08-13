@@ -511,26 +511,7 @@ bool Baz::__fbthrift_is_empty() const {
 }
 
 bool Baz::operator==(const Baz& rhs) const {
-  if (getType() != rhs.getType()) { return false; }
-  switch(getType()) {
-    case Type::intField:
-      return ::apache::thrift::adapt_detail::equal<::my::Adapter1, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, Baz>>(
-value_.intField, rhs.value_.intField);
-    case Type::setField:
-      return ::apache::thrift::adapt_detail::equal<::my::Adapter2, ::facebook::thrift::test::SetWithAdapter>(
-value_.setField, rhs.value_.setField);
-    case Type::mapField:
-      return ::apache::thrift::adapt_detail::equal<::my::Adapter3, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter_2312>, Baz>>(
-value_.mapField, rhs.value_.mapField);
-    case Type::binaryField:
-      return ::apache::thrift::adapt_detail::equal<::my::Adapter1, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 8, ::std::string, Baz>>(
-value_.binaryField, rhs.value_.binaryField);
-    case Type::longField:
-      return ::apache::thrift::adapt_detail::equal<::my::Adapter1, ::facebook::thrift::test::MyI64>(
-value_.longField, rhs.value_.longField);
-    default:
-      return true;
-  }
+  return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
 bool Baz::operator<(FOLLY_MAYBE_UNUSED const Baz& rhs) const {
@@ -2559,17 +2540,7 @@ bool ThriftAdaptTestUnion::__fbthrift_is_empty() const {
 }
 
 bool ThriftAdaptTestUnion::operator==(const ThriftAdaptTestUnion& rhs) const {
-  if (getType() != rhs.getType()) { return false; }
-  switch(getType()) {
-    case Type::delay:
-      return ::apache::thrift::adapt_detail::equal<::apache::thrift::test::AdaptTestMsAdapter, ::facebook::thrift::test::DurationMs>(
-value_.delay, rhs.value_.delay);
-    case Type::custom:
-      return ::apache::thrift::adapt_detail::equal<::apache::thrift::test::CustomProtocolAdapter, ::facebook::thrift::test::CustomProtocolType>(
-value_.custom, rhs.value_.custom);
-    default:
-      return true;
-  }
+  return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
 bool ThriftAdaptTestUnion::operator<(FOLLY_MAYBE_UNUSED const ThriftAdaptTestUnion& rhs) const {

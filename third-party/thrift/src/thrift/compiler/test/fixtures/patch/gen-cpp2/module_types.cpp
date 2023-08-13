@@ -326,15 +326,7 @@ bool InnerUnion::__fbthrift_is_empty() const {
 }
 
 bool InnerUnion::operator==(const InnerUnion& rhs) const {
-  if (getType() != rhs.getType()) { return false; }
-  switch(getType()) {
-    case Type::innerOption:
-      return apache::thrift::StringTraits<std::string>::isEqual(
-          value_.innerOption,
-          rhs.value_.innerOption);
-    default:
-      return true;
-  }
+  return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
 bool InnerUnion::operator<(FOLLY_MAYBE_UNUSED const InnerUnion& rhs) const {
@@ -435,17 +427,7 @@ bool MyUnion::__fbthrift_is_empty() const {
 }
 
 bool MyUnion::operator==(const MyUnion& rhs) const {
-  if (getType() != rhs.getType()) { return false; }
-  switch(getType()) {
-    case Type::option1:
-      return value_.option1 == rhs.value_.option1;
-    case Type::option2:
-      return value_.option2 == rhs.value_.option2;
-    case Type::option3:
-      return value_.option3 == rhs.value_.option3;
-    default:
-      return true;
-  }
+  return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
 bool MyUnion::operator<(FOLLY_MAYBE_UNUSED const MyUnion& rhs) const {

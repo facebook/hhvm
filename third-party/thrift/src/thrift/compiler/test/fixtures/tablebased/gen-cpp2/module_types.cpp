@@ -628,15 +628,7 @@ bool ExampleUnion::__fbthrift_is_empty() const {
 }
 
 bool ExampleUnion::operator==(const ExampleUnion& rhs) const {
-  if (getType() != rhs.getType()) { return false; }
-  switch(getType()) {
-    case Type::fieldA:
-      return value_.fieldA == rhs.value_.fieldA;
-    case Type::fieldB:
-      return value_.fieldB == rhs.value_.fieldB;
-    default:
-      return true;
-  }
+  return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
 void swap(ExampleUnion& a, ExampleUnion& b) {

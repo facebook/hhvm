@@ -933,15 +933,7 @@ bool MyUnion::__fbthrift_is_empty() const {
 }
 
 bool MyUnion::operator==(const MyUnion& rhs) const {
-  if (getType() != rhs.getType()) { return false; }
-  switch(getType()) {
-    case Type::first:
-      return value_.first == rhs.value_.first;
-    case Type::second:
-      return value_.second == rhs.value_.second;
-    default:
-      return true;
-  }
+  return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
 bool MyUnion::operator<(FOLLY_MAYBE_UNUSED const MyUnion& rhs) const {

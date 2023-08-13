@@ -119,15 +119,7 @@ bool MyUnion::__fbthrift_is_empty() const {
 }
 
 bool MyUnion::operator==(const MyUnion& rhs) const {
-  if (getType() != rhs.getType()) { return false; }
-  switch(getType()) {
-    case Type::anInteger:
-      return *value_.anInteger == *rhs.value_.anInteger;
-    case Type::aString:
-      return *value_.aString == *rhs.value_.aString;
-    default:
-      return true;
-  }
+  return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
 bool MyUnion::operator<(FOLLY_MAYBE_UNUSED const MyUnion& rhs) const {
@@ -229,13 +221,7 @@ bool NonTriviallyDestructibleUnion::__fbthrift_is_empty() const {
 }
 
 bool NonTriviallyDestructibleUnion::operator==(const NonTriviallyDestructibleUnion& rhs) const {
-  if (getType() != rhs.getType()) { return false; }
-  switch(getType()) {
-    case Type::int_field:
-      return *value_.int_field == *rhs.value_.int_field;
-    default:
-      return true;
-  }
+  return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
 bool NonTriviallyDestructibleUnion::operator<(FOLLY_MAYBE_UNUSED const NonTriviallyDestructibleUnion& rhs) const {

@@ -2129,23 +2129,7 @@ bool Shallot::__fbthrift_is_empty() const {
 }
 
 bool Shallot::operator==(const Shallot& rhs) const {
-  if (getType() != rhs.getType()) { return false; }
-  switch(getType()) {
-    case Type::myEnum:
-      return value_.myEnum == rhs.value_.myEnum;
-    case Type::myStruct:
-      return value_.myStruct == rhs.value_.myStruct;
-    case Type::myString:
-      return value_.myString == rhs.value_.myString;
-    case Type::intSet:
-      return value_.intSet == rhs.value_.intSet;
-    case Type::doubleList:
-      return value_.doubleList == rhs.value_.doubleList;
-    case Type::strMap:
-      return value_.strMap == rhs.value_.strMap;
-    default:
-      return true;
-  }
+  return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
 bool Shallot::operator<(FOLLY_MAYBE_UNUSED const Shallot& rhs) const {

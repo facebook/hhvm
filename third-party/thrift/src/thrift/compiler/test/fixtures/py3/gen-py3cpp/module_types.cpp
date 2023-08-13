@@ -692,13 +692,7 @@ bool AdaptedUnion::__fbthrift_is_empty() const {
 }
 
 bool AdaptedUnion::operator==(const AdaptedUnion& rhs) const {
-  if (getType() != rhs.getType()) { return false; }
-  switch(getType()) {
-    case Type::best:
-      return value_.best == rhs.value_.best;
-    default:
-      return true;
-  }
+  return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
 bool AdaptedUnion::operator<(FOLLY_MAYBE_UNUSED const AdaptedUnion& rhs) const {

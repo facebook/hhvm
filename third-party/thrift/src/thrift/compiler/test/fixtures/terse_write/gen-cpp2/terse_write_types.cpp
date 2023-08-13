@@ -216,41 +216,7 @@ bool MyUnion::__fbthrift_is_empty() const {
 }
 
 bool MyUnion::operator==(const MyUnion& rhs) const {
-  if (getType() != rhs.getType()) { return false; }
-  switch(getType()) {
-    case Type::bool_field:
-      return value_.bool_field == rhs.value_.bool_field;
-    case Type::byte_field:
-      return value_.byte_field == rhs.value_.byte_field;
-    case Type::short_field:
-      return value_.short_field == rhs.value_.short_field;
-    case Type::int_field:
-      return value_.int_field == rhs.value_.int_field;
-    case Type::long_field:
-      return value_.long_field == rhs.value_.long_field;
-    case Type::float_field:
-      return value_.float_field == rhs.value_.float_field;
-    case Type::double_field:
-      return value_.double_field == rhs.value_.double_field;
-    case Type::string_field:
-      return value_.string_field == rhs.value_.string_field;
-    case Type::binary_field:
-      return apache::thrift::StringTraits<std::string>::isEqual(
-          value_.binary_field,
-          rhs.value_.binary_field);
-    case Type::enum_field:
-      return value_.enum_field == rhs.value_.enum_field;
-    case Type::list_field:
-      return value_.list_field == rhs.value_.list_field;
-    case Type::set_field:
-      return value_.set_field == rhs.value_.set_field;
-    case Type::map_field:
-      return value_.map_field == rhs.value_.map_field;
-    case Type::struct_field:
-      return value_.struct_field == rhs.value_.struct_field;
-    default:
-      return true;
-  }
+  return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
 bool MyUnion::operator<(FOLLY_MAYBE_UNUSED const MyUnion& rhs) const {

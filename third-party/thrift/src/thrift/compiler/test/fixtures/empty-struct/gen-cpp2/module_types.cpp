@@ -148,11 +148,7 @@ bool Nada::__fbthrift_is_empty() const {
 }
 
 bool Nada::operator==(const Nada& rhs) const {
-  if (getType() != rhs.getType()) { return false; }
-  switch(getType()) {
-    default:
-      return true;
-  }
+  return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
 }
 
 bool Nada::operator<(FOLLY_MAYBE_UNUSED const Nada& rhs) const {

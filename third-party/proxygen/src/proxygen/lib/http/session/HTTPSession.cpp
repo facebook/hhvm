@@ -2213,6 +2213,19 @@ void HTTPSession::runLoopCallback() noexcept {
   });
   VLOG(5) << *this << " in loop callback";
 
+  if (isDownstream() && !txnEgressQueue_.empty()) {
+    const auto event =
+        HTTPSessionObserverInterface::PreWriteEvent::Builder()
+            .setPendingEgressBytes(getPendingWriteSize())
+            .setTimestamp(HTTPSessionObserverInterface::Clock::now())
+            .build();
+    sessionObserverContainer_
+        .invokeInterfaceMethod<HTTPSessionObserverInterface::Events::preWrite>(
+            [&event](auto observer, auto observed) {
+              observer->preWrite(observed, event);
+            });
+  }
+
   for (uint32_t i = 0; i < kMaxWritesPerLoop; ++i) {
     bodyBytesPerWriteBuf_ = 0;
     bool cork = true;

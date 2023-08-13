@@ -4478,3 +4478,46 @@ TEST_F(HTTP2DownstreamSessionTest, Observer_RequestStarted) {
 
   expectDetachSession();
 }
+
+TEST_F(HTTP2DownstreamSessionTest, Observer_PreWrite) {
+
+  // Add an observer NOT subscribed to the PreWrite event
+  auto observerUnsubscribed =
+      addMockSessionObserver(MockSessionObserver::EventSetBuilder().build());
+  httpSession_->addObserver(observerUnsubscribed.get());
+
+  // Add an observer subscribed to this event
+  auto observerSubscribed = addMockSessionObserver(
+      MockSessionObserver::EventSetBuilder()
+          .enable(HTTPSessionObserverInterface::Events::preWrite)
+          .build());
+  httpSession_->addObserver(observerSubscribed.get());
+
+  EXPECT_CALL(*observerUnsubscribed, preWrite(_, _)).Times(0);
+
+  // Subscribed observer expects to receive PreWrite callback
+  // Check if transactions are about to write a threshold amount of bytes
+  EXPECT_CALL(*observerSubscribed, preWrite(_, _))
+      .WillOnce(
+          Invoke([](HTTPSessionObserverAccessor*,
+                    const proxygen::HTTPSessionObserverInterface::PreWriteEvent&
+                        event) { EXPECT_EQ(event.pendingEgressBytes, 100); }));
+
+  auto handler = addSimpleStrictHandler();
+  handler->expectHeaders();
+  handler->expectEOM([&handler]() {
+    handler->sendReplyWithBody(200 /* status code */,
+                               100 /* content size */,
+                               true /* keepalive */,
+                               true /* sendEOM */,
+                               false /*trailers*/);
+  });
+  handler->expectDetachTransaction();
+  HTTPSession::DestructorGuard g(httpSession_);
+  HTTPMessage req = getGetRequest();
+  sendRequest(req);
+
+  flushRequestsAndLoop(true, milliseconds(0));
+
+  expectDetachSession();
+}

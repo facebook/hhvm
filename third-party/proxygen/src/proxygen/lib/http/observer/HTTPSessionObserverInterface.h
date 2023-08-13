@@ -7,7 +7,8 @@
  */
 
 #pragma once
-
+#include <chrono>
+#include <cstdint>
 #include <glog/logging.h>
 #include <proxygen/lib/http/HTTPHeaders.h>
 #include <utility>
@@ -42,7 +43,9 @@ class HTTPSessionObserverAccessor {
  */
 class HTTPSessionObserverInterface {
  public:
-  enum class Events { requestStarted = 1 };
+  enum class Events { requestStarted = 1, preWrite = 2 };
+  using Clock = std::chrono::steady_clock;
+  using TimePoint = std::chrono::time_point<Clock>;
 
   virtual ~HTTPSessionObserverInterface() = default;
 
@@ -74,6 +77,37 @@ class HTTPSessionObserverInterface {
     explicit RequestStartedEvent(const BuilderFields& builderFields);
   };
 
+  struct PreWriteEvent {
+    const uint64_t pendingEgressBytes;
+    const TimePoint timestamp;
+
+    // Do not support copy or move given that requestHeaders is a ref.
+    PreWriteEvent(PreWriteEvent&&) = delete;
+    PreWriteEvent& operator=(const PreWriteEvent&) = delete;
+    PreWriteEvent& operator=(PreWriteEvent&& rhs) = delete;
+    PreWriteEvent(const PreWriteEvent&) = delete;
+
+    struct BuilderFields {
+      folly::Optional<std::reference_wrapper<const uint64_t>>
+          maybePendingEgressBytesRef;
+      folly::Optional<std::reference_wrapper<const TimePoint>>
+          maybeTimestampRef;
+
+      explicit BuilderFields() = default;
+    };
+
+    struct Builder : public BuilderFields {
+      Builder&& setPendingEgressBytes(const uint64_t& pendingEgressBytes);
+      Builder&& setTimestamp(const TimePoint& timestamp);
+
+      PreWriteEvent build() &&;
+      explicit Builder() = default;
+    };
+
+    // Use builder to construct.
+    explicit PreWriteEvent(BuilderFields& builderFields);
+  };
+
   /**
    * Events.
    */
@@ -86,6 +120,17 @@ class HTTPSessionObserverInterface {
    */
   virtual void requestStarted(HTTPSessionObserverAccessor* /* session */,
                               const RequestStartedEvent& /* event */) noexcept {
+  }
+
+  /**
+   * preWrite() is invoked just before transactions are about to write to
+   * transport.
+   *
+   * @param session  Http session.
+   * @param event    PreWriteEvent with details.
+   */
+  virtual void preWrite(HTTPSessionObserverAccessor* /* session */,
+                        const PreWriteEvent& /* event */) noexcept {
   }
 };
 

@@ -600,6 +600,10 @@ class HTTPSessionBase : public wangle::ManagedConnection {
     return pendingWriteSize_ + pendingWriteSizeDelta_ > 0;
   }
 
+  uint64_t getPendingWriteSize() const {
+    return pendingWriteSize_;
+  }
+
   /**
    * Install a direct response handler for the transaction based on the
    * error.

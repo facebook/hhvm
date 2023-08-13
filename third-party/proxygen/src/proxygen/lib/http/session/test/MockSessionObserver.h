@@ -30,6 +30,10 @@ class MockSessionObserver
               requestStarted,
               (HTTPSessionObserverAccessor*, const RequestStartedEvent&),
               (noexcept));
+  MOCK_METHOD(void,
+              preWrite,
+              (HTTPSessionObserverAccessor*, const PreWriteEvent&),
+              (noexcept));
   ~MockSessionObserver() override = default;
 };
 } // namespace proxygen

@@ -213,7 +213,7 @@ func (p *HTTPClient) Flush() error {
 	if err != nil {
 		return NewTransportExceptionFromError(err)
 	}
-	p.header.Add("Content-Type", "application/x-thrift")
+	p.header.Set("Content-Type", "application/x-thrift")
 	req.Header = p.header
 	response, err := p.client.Do(req)
 	if err != nil {

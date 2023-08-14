@@ -27,12 +27,14 @@
 
 #include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/async/RpcOptions.h>
+#include <thrift/lib/cpp2/transport/rocket/framing/parser/AllocatingParserStrategy.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/parser/FrameLengthParserStrategy.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/parser/ParserStrategy.h>
 
 THRIFT_FLAG_DECLARE_bool(rocket_parser_dont_hold_buffer_enabled);
 THRIFT_FLAG_DECLARE_bool(rocket_parser_hybrid_buffer_enabled);
 THRIFT_FLAG_DECLARE_bool(rocket_strategy_parser);
+THRIFT_FLAG_DECLARE_bool(rocket_allocating_strategy_parser);
 
 namespace apache {
 namespace thrift {
@@ -41,6 +43,9 @@ namespace rocket {
 template <class T>
 class Parser final : public folly::AsyncTransport::ReadCallback,
                      public folly::HHWheelTimer::Callback {
+  template <class Owner>
+  using StandardAllocatingParserStrategy = AllocatingParserStrategy<Owner>;
+
  public:
   explicit Parser(T& owner)
       : newBufferLogicEnabled_(
@@ -52,10 +57,17 @@ class Parser final : public folly::AsyncTransport::ReadCallback,
         readBuffer_(
             folly::IOBuf::CreateOp(),
             hybridBufferLogicEnabled_ ? kStaticBufferSize : bufferSize_),
-        useStrategyParser_(THRIFT_FLAG(rocket_strategy_parser)) {
+        useStrategyParser_(THRIFT_FLAG(rocket_strategy_parser)),
+        useAllocatingStrategyParser_(
+            THRIFT_FLAG(rocket_allocating_strategy_parser)) {
     if (useStrategyParser_) {
       frameLengthParser_ =
           std::make_unique<ParserStrategy<T, FrameLengthParserStrategy>>(
+              owner_);
+    }
+    if (useAllocatingStrategyParser_) {
+      allocatingParser_ =
+          std::make_unique<ParserStrategy<T, StandardAllocatingParserStrategy>>(
               owner_);
     }
   }
@@ -75,7 +87,12 @@ class Parser final : public folly::AsyncTransport::ReadCallback,
   FOLLY_NOINLINE void readBufferAvailable(
       std::unique_ptr<folly::IOBuf> /*readBuf*/) noexcept override;
 
-  bool isBufferMovable() noexcept override { return true; }
+  bool isBufferMovable() noexcept override {
+    if (useAllocatingStrategyParser_) {
+      return false;
+    }
+    return true;
+  }
 
   // TODO: This should be removed once the new buffer logic controlled by
   // THRIFT_FLAG(rocket_parser_dont_hold_buffer_enabled) is stable.
@@ -167,6 +184,10 @@ class Parser final : public folly::AsyncTransport::ReadCallback,
   bool useStrategyParser_{false};
   std::unique_ptr<ParserStrategy<T, FrameLengthParserStrategy>>
       frameLengthParser_;
+
+  bool useAllocatingStrategyParser_{false};
+  std::unique_ptr<ParserStrategy<T, StandardAllocatingParserStrategy>>
+      allocatingParser_;
 };
 
 } // namespace rocket

@@ -46,6 +46,11 @@ size_t readFrameOrMetadataSize(folly::io::Cursor& cursor) {
   std::array<uint8_t, 3> bytes;
   cursor.pull(bytes.data(), bytes.size());
 
+  return readFrameOrMetadataSize(bytes);
+}
+
+// Rsocket frame is 24-bits (3 bytes)
+size_t readFrameOrMetadataSize(std::array<uint8_t, 3> bytes) {
   return (static_cast<size_t>(bytes[0]) << 16) |
       (static_cast<size_t>(bytes[1]) << 8) | static_cast<size_t>(bytes[2]);
 }

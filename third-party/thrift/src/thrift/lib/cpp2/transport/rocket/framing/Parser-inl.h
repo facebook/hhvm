@@ -34,6 +34,7 @@
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Serializer.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Util.h>
+#include <thrift/lib/cpp2/transport/rocket/framing/parser/AllocatingParserStrategy.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/parser/FrameLengthParserStrategy.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/parser/ParserStrategy.h>
 
@@ -439,6 +440,8 @@ void Parser<T>::getReadBuffer(void** bufout, size_t* lenout) {
   blockResize_ = true;
   if (useStrategyParser_) {
     frameLengthParser_->getReadBuffer(bufout, lenout);
+  } else if (useAllocatingStrategyParser_) {
+    allocatingParser_->getReadBuffer(bufout, lenout);
   } else if (newBufferLogicEnabled_) {
     getReadBufferNew(bufout, lenout);
   } else if (hybridBufferLogicEnabled_) {
@@ -455,6 +458,8 @@ void Parser<T>::readDataAvailable(size_t nbytes) noexcept {
   try {
     if (useStrategyParser_) {
       frameLengthParser_->readDataAvailable(nbytes);
+    } else if (useAllocatingStrategyParser_) {
+      allocatingParser_->readDataAvailable(nbytes);
     } else if (newBufferLogicEnabled_) {
       readDataAvailableNew(nbytes);
     } else if (hybridBufferLogicEnabled_) {
@@ -507,6 +512,9 @@ void Parser<T>::readBufferAvailable(
   try {
     if (useStrategyParser_) {
       frameLengthParser_->readBufferAvailable(std::move(buf));
+    } else if (useAllocatingStrategyParser_) {
+      // Will throw not implemented runtime exception
+      allocatingParser_->readBufferAvailable(std::move(buf));
     } else {
       readBufQueue_.append(std::move(buf));
       while (!readBufQueue_.empty()) {

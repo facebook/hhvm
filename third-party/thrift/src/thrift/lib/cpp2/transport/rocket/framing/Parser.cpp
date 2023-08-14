@@ -29,3 +29,6 @@ THRIFT_FLAG_DEFINE_bool(rocket_parser_hybrid_buffer_enabled, false);
 
 // Add a flag to enable strategy based parser. Default strategy right now uses.
 THRIFT_FLAG_DEFINE_bool(rocket_strategy_parser, false);
+
+// Add a flag to enable allocating strategy based parser.
+THRIFT_FLAG_DEFINE_bool(rocket_allocating_strategy_parser, false);

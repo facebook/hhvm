@@ -41,6 +41,8 @@ StreamId readStreamId(folly::io::Cursor& cursor);
 
 size_t readFrameOrMetadataSize(folly::io::Cursor& cursor);
 
+size_t readFrameOrMetadataSize(std::array<uint8_t, 3> bytes);
+
 std::pair<uint8_t, Flags> readFrameTypeAndFlagsUnsafe(
     folly::io::Cursor& cursor);
 

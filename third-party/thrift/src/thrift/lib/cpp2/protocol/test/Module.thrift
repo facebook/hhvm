@@ -150,3 +150,14 @@ union UnionIntegers {
   1: i16 myI16;
   2: i32 myI32;
 }
+
+@cpp.Type{name = "folly::IOBuf"}
+typedef binary IOBuf
+
+// We need (cpp.noncomparable) since the codegen version of comparison operators
+// won't work
+struct ListIOBuf {
+  1: list<IOBuf> field;
+  @cpp.Type{template = "folly::F14FastMap"}
+  2: map<string, IOBuf> field_2;
+} (cpp.noncomparable)

@@ -299,5 +299,46 @@ TEST(CompareTest, Union) {
   EXPECT_TRUE(equalTo(u1, u2));
 }
 
+TEST(CompareTest, ListIOBufCompare) {
+  detail::StructEquality equalTo;
+  detail::StructLessThan lessThan;
+
+  test::ListIOBuf lhs, rhs;
+  EXPECT_FALSE(lessThan(lhs, rhs));
+  EXPECT_TRUE(equalTo(lhs, rhs));
+
+  lhs.field()->push_back(*folly::IOBuf::copyBuffer("a", 1));
+  rhs.field()->push_back(*folly::IOBuf::copyBuffer("b", 1));
+  EXPECT_TRUE(lessThan(lhs, rhs));
+  EXPECT_FALSE(equalTo(lhs, rhs));
+
+  lhs.field()->insert(lhs.field()->begin(), *folly::IOBuf::copyBuffer("b", 1));
+  rhs.field()->push_back(*folly::IOBuf::copyBuffer("a", 1));
+  EXPECT_FALSE(lessThan(lhs, rhs));
+  EXPECT_TRUE(equalTo(lhs, rhs));
+}
+
+TEST(CompareTest, MapIOBufCompare) {
+  detail::StructEquality equalTo;
+  detail::StructLessThan lessThan;
+
+  test::ListIOBuf lhs, rhs;
+  EXPECT_FALSE(lessThan(lhs, rhs));
+  EXPECT_TRUE(equalTo(lhs, rhs));
+
+  lhs.field_2()["10"];
+  rhs.field_2()["10"] = *folly::IOBuf::copyBuffer("a", 1);
+  EXPECT_TRUE(lessThan(lhs, rhs));
+  EXPECT_FALSE(equalTo(lhs, rhs));
+
+  lhs.field_2()["10"] = *folly::IOBuf::copyBuffer("a", 1);
+  EXPECT_FALSE(lessThan(lhs, rhs));
+  EXPECT_TRUE(equalTo(lhs, rhs));
+
+  rhs.field_2()["11"];
+  EXPECT_TRUE(lessThan(lhs, rhs));
+  EXPECT_FALSE(equalTo(lhs, rhs));
+}
+
 } // namespace
 } // namespace apache::thrift::op

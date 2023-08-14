@@ -386,6 +386,31 @@ struct LessThan<
           std::less<>,
           ListLessThan<T, E>> {};
 
+template <typename VTag>
+struct LessThan<type::list<VTag>, type::list<VTag>> {
+  // Ideally this should be a non-template function. But there are cases like
+  //
+  //   @cpp.Type={name="fbvector<fbvector<double>>"}
+  //   typedef list<list<double>> doubleListList
+  //
+  // In which case we use `fbvector<double>` with tag `list<double_t>` type
+  // Ideally it should be migrated to the following code
+  //
+  //   @cpp.Type={template="fbvector"}
+  //   typedef list<double> doubleList
+  //   @cpp.Type={template="fbvector"}
+  //   typedef list<doubleList> doubleListList
+  //
+  // TODO: Migrate all the cases above and make this function non-template.
+  template <typename T = type::native_type<type::list<VTag>>>
+  bool operator()(const T& lhs, const T& rhs) const {
+    // `std::vector::operator<` has the same implementation as this funcion.
+    // https://github.com/gcc-mirror/gcc/blob/6cb2f2c7f36c999590a949f663d6057cbc67271f/libstdc%2B%2B-v3/include/bits/stl_vector.h#L2077-L2081
+    return std::lexicographical_compare(
+        lhs.begin(), lhs.end(), rhs.begin(), rhs.end(), LessThan<VTag>{});
+  }
+};
+
 template <typename T, typename E>
 struct LessThan<
     type::cpp_type<T, type::set<E>>,
@@ -425,6 +450,18 @@ struct IdenticalTo<type::list<VTag>> : ListIdenticalTo<VTag> {};
 template <typename T, typename VTag>
 struct IdenticalTo<type::cpp_type<T, type::list<VTag>>>
     : ListIdenticalTo<VTag, type::cpp_type<T, type::list<VTag>>> {};
+
+template <typename VTag>
+struct EqualTo<type::list<VTag>> {
+  // TODO: Similar to LessThan version, this should be a non-template function.
+  template <typename T = type::native_type<type::list<VTag>>>
+  bool operator()(const T& lhs, const T& rhs) const {
+    // `std::vector::operator==` has the same implementation as this funcion.
+    // https://github.com/gcc-mirror/gcc/blob/6cb2f2c7f36c999590a949f663d6057cbc67271f/libstdc%2B%2B-v3/include/bits/stl_vector.h#L2037-L2042
+    return lhs.size() == rhs.size() &&
+        std::equal(lhs.begin(), lhs.end(), rhs.begin(), EqualTo<VTag>{});
+  }
+};
 
 // Identical for sets.
 template <
@@ -478,9 +515,11 @@ struct IdenticalTo<type::cpp_type<T, type::set<KTag>>>
 template <
     typename KTag,
     typename VTag,
+    template <class...>
+    typename Equality,
     typename Tag = type::map<KTag, VTag>,
     typename T = type::native_type<Tag>>
-struct MapIdenticalTo {
+struct MapEquality {
   bool operator()(const T& lhs, const T& rhs) const {
     if (lhs.size() != rhs.size()) {
       return false;
@@ -510,19 +549,42 @@ struct MapIdenticalTo {
   template <typename E, typename R>
   static bool inRange(const E& entry, const R& range) {
     for (auto itr = range.first; itr != range.second; ++itr) {
-      if (IdenticalTo<KTag>()(itr->second->first, entry.first)) {
+      if (Equality<KTag>()(itr->second->first, entry.first)) {
         // Found the right key! The values must match.
-        return IdenticalTo<VTag>()(itr->second->second, entry.second);
+        return Equality<VTag>()(itr->second->second, entry.second);
       }
     }
     return false;
   }
 };
 template <typename KTag, typename VTag>
-struct IdenticalTo<type::map<KTag, VTag>> : MapIdenticalTo<KTag, VTag> {};
+struct IdenticalTo<type::map<KTag, VTag>>
+    : MapEquality<KTag, VTag, IdenticalTo> {};
 template <typename T, typename KTag, typename VTag>
 struct IdenticalTo<type::cpp_type<T, type::map<KTag, VTag>>>
-    : MapIdenticalTo<KTag, VTag, type::cpp_type<T, type::map<KTag, VTag>>> {};
+    : MapEquality<
+          KTag,
+          VTag,
+          IdenticalTo,
+          type::cpp_type<T, type::map<KTag, VTag>>> {};
+
+template <typename T, typename KTag, typename VTag>
+struct EqualTo<type::cpp_type<T, type::map<KTag, VTag>>>
+    : std::conditional_t<
+          folly::is_invocable_v<
+              std::equal_to<>,
+              const type::native_type<KTag>&,
+              const type::native_type<KTag>&> &&
+              folly::is_invocable_v<
+                  std::equal_to<>,
+                  const type::native_type<VTag>&,
+                  const type::native_type<VTag>&>,
+          std::equal_to<>,
+          MapEquality<
+              KTag,
+              VTag,
+              EqualTo,
+              type::cpp_type<T, type::map<KTag, VTag>>>> {};
 
 // TODO(dokwon): Support field_ref types.
 template <typename Tag, typename Context>

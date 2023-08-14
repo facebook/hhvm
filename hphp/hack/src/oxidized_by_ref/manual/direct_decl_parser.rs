@@ -45,6 +45,18 @@ pub struct ParsedFile<'a> {
     pub has_first_pass_parse_errors: bool,
 }
 
+impl<'a> IntoIterator for ParsedFile<'a> {
+    type Item = (&'a str, shallow_decl_defs::Decl<'a>);
+    type IntoIter = std::iter::Rev<std::vec::IntoIter<Self::Item>>;
+
+    /// This iterates the decls in forward lexical order
+    /// (Use into_iter().rev() if you want reverse order)
+    fn into_iter(self) -> Self::IntoIter {
+        // Note that our `self.decls` are stored in reverse order, so we have to reverse now.
+        self.decls.into_iter().collect::<Vec<_>>().into_iter().rev()
+    }
+}
+
 /// This is a store of decls. It allows iteration of decls in forward lexical order,
 /// and you can .rev() to iterate in reverse lexical order.
 /// By construction, you can safely trust that whoever constructed this object has explicitly

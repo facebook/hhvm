@@ -26,13 +26,9 @@ Generated Cpp2 <-> Python converters for Thrift types
 #include <{{program:includePrefix}}gen-python/{{program:name}}/thrift_types_api.h>
 #include <{{program:includePrefix}}gen-python/{{program:name}}/thrift_types_capi.h>
 
-{{#program:marshal_capi?}}
-{{#program:include_namespaces}}
-{{#has_types?}}
+{{#program:capi_includes}}
 #include "{{include_prefix}}"
-{{/has_types?}}
-{{/program:include_namespaces}}
-{{/program:marshal_capi?}}
+{{/program:capi_includes}}
 
 namespace apache {
 namespace thrift {

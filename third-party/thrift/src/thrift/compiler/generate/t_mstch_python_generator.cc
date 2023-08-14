@@ -142,12 +142,10 @@ std::string_view extract_module_path(std::string_view fully_qualified_name) {
   return fully_qualified_name.substr(0, last_dot);
 }
 
-inline std::string get_capi_include_namespace(
-    const t_program* prog, mstch_context& ctx) {
-  std::shared_ptr<mstch_base> mstch_prog = make_mstch_program_cached(prog, ctx);
+inline std::string get_capi_include_namespace(const t_program* prog) {
   return fmt::format(
       "{}gen-python/{}/thrift_types_capi.h",
-      boost::get<std::string>(mstch_prog->at("program:includePrefix")),
+      prog->include_prefix(),
       prog->name());
 }
 
@@ -329,6 +327,7 @@ class python_mstch_program : public mstch_program {
             {"program:is_types_file?", &python_mstch_program::is_types_file},
             {"program:include_namespaces",
              &python_mstch_program::include_namespaces},
+            {"program:capi_includes", &python_mstch_program::capi_includes},
             {"program:cpp_namespaces",
              &python_mstch_program::get_cpp2_namespace},
             {"program:base_library_package",
@@ -341,6 +340,10 @@ class python_mstch_program : public mstch_program {
         });
     register_has_option("program:import_static?", "import_static");
     gather_included_program_namespaces();
+    has_marshal_types_ = check_has_marshal_types();
+    if (has_marshal_types_) {
+      gather_capi_includes();
+    }
     visit_types_for_services_and_interactions();
     visit_types_for_objects();
     visit_types_for_constants();
@@ -364,9 +367,24 @@ class python_mstch_program : public mstch_program {
     for (const auto& it : namespaces) {
       a.push_back(mstch::map{
           {"included_module_path", it->ns},
-          {"include_prefix", it->include_prefix},
           {"has_services?", it->has_services},
           {"has_types?", it->has_types}});
+    }
+    return a;
+  }
+
+  mstch::node capi_includes() {
+    std::vector<const CapiInclude*> namespaces;
+    for (const auto& it : capi_includes_) {
+      namespaces.push_back(&it.second);
+    }
+    std::sort(
+        namespaces.begin(), namespaces.end(), [](const auto* m, const auto* n) {
+          return m->include_prefix < n->include_prefix;
+        });
+    mstch::array a;
+    for (const auto& it : namespaces) {
+      a.push_back(mstch::map{{"include_prefix", it->include_prefix}});
     }
     return a;
   }
@@ -381,19 +399,7 @@ class python_mstch_program : public mstch_program {
         program_->exceptions().size() > 0 || program_->enums().size() > 0;
   }
 
-  mstch::node has_marshal_types() {
-    for (const t_struct* s : program_->structs()) {
-      if (marshal_capi_override_annotation(*s)) {
-        return true;
-      }
-    }
-    for (const t_struct* e : program_->exceptions()) {
-      if (marshal_capi_override_annotation(*e)) {
-        return true;
-      }
-    }
-    return false;
-  }
+  mstch::node has_marshal_types() { return has_marshal_types_; }
 
   mstch::node capi_module_prefix() {
     std::string prefix = get_py3_namespace_with_name_and_prefix(
@@ -434,9 +440,12 @@ class python_mstch_program : public mstch_program {
  protected:
   struct Namespace {
     std::string ns;
-    std::string include_prefix;
     bool has_services;
     bool has_types;
+  };
+
+  struct CapiInclude {
+    std::string include_prefix;
   };
 
   void gather_included_program_namespaces() {
@@ -450,9 +459,38 @@ class python_mstch_program : public mstch_program {
       include_namespaces_[included_program->path()] = Namespace{
           get_py3_namespace_with_name_and_prefix(
               included_program, get_option("root_module_prefix")),
-          get_capi_include_namespace(included_program, context_),
           !included_program->services().empty(),
           has_types,
+      };
+    }
+  }
+
+  bool check_has_marshal_types() {
+    for (const t_struct* s : program_->structs()) {
+      if (marshal_capi_override_annotation(*s)) {
+        has_marshal_types_ = true;
+        return true;
+      }
+    }
+    for (const t_struct* e : program_->exceptions()) {
+      if (marshal_capi_override_annotation(*e)) {
+        has_marshal_types_ = true;
+        return true;
+      }
+    }
+    return false;
+  }
+
+  void gather_capi_includes() {
+    for (const t_program* included_program :
+         program_->get_includes_for_codegen()) {
+      if (included_program->objects().empty() &&
+          included_program->enums().empty() &&
+          included_program->typedefs().empty()) {
+        continue;
+      }
+      capi_includes_[included_program->path()] = CapiInclude{
+          get_capi_include_namespace(included_program),
       };
     }
   }
@@ -467,10 +505,14 @@ class python_mstch_program : public mstch_program {
       auto ns = Namespace();
       ns.ns = get_py3_namespace_with_name_and_prefix(
           prog, get_option("root_module_prefix"));
-      ns.include_prefix = get_capi_include_namespace(prog, context_);
       ns.has_services = false;
       ns.has_types = true;
       include_namespaces_[path] = std::move(ns);
+
+      if (has_marshal_types_) {
+        capi_includes_[prog->path()] =
+            CapiInclude{get_capi_include_namespace(prog)};
+      }
     }
   }
 
@@ -623,9 +665,11 @@ class python_mstch_program : public mstch_program {
   }
 
   std::unordered_map<std::string, Namespace> include_namespaces_;
+  std::unordered_map<std::string_view, CapiInclude> capi_includes_;
   std::unordered_set<const t_type*> seen_types_;
   std::unordered_set<std::string_view> adapter_modules_;
   std::unordered_set<std::string_view> adapter_type_hint_modules_;
+  bool has_marshal_types_ = false;
 };
 
 class python_mstch_service : public mstch_service {

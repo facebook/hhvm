@@ -14,9 +14,9 @@
 #include <thrift/compiler/test/fixtures/basic-python-capi/src/gen-python/module/thrift_types_api.h>
 #include <thrift/compiler/test/fixtures/basic-python-capi/src/gen-python/module/thrift_types_capi.h>
 
-#include "thrift/lib/thrift/gen-python/patch/thrift_types_capi.h"
 #include "thrift/compiler/test/fixtures/basic-python-capi/src/gen-python/serialized_dep/thrift_types_capi.h"
 #include "thrift/compiler/test/fixtures/basic-python-capi/src/gen-python/thrift_dep/thrift_types_capi.h"
+#include "thrift/lib/thrift/gen-python/patch/thrift_types_capi.h"
 
 namespace apache {
 namespace thrift {

@@ -1,9 +1,9 @@
 Errors:
   [4:8-13] A `where` type constraint is violated here
-  [108:21-26] This is the method with `where` type constraints
-  [108:52-60] Expected `arraykey`
+  [114:21-26] This is the method with `where` type constraints
+  [114:52-60] Expected `arraykey`
   [3:44-51] But got `?string`
-  [108:46-48]   via this generic `Tv`
+  [114:46-48]   via this generic `Tv`
 [(Fun
     { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -25,11 +25,11 @@ Errors:
         { fb_ast =
           [([4:3-16],
             (Expr
-               ((~Set<?string>), [4:3-15],
+               ((Set<?string>), [4:3-15],
                 (Call
                    { func =
-                     (((function()[]: ~Set<?string>)), [4:3-13],
-                      (Obj_get (((Vector<?string>), [4:3-6], (Lvar ([4:3-6], $xs))), (((function()[]: ~Set<?string>)), [4:8-13], (Id ([4:8-13], "toSet"))), OG_nullthrows, Is_method)));
+                     (((function()[]: Set<?string>)), [4:3-13],
+                      (Obj_get (((Vector<?string>), [4:3-6], (Lvar ([4:3-6], $xs))), (((function()[]: Set<?string>)), [4:8-13], (Id ([4:8-13], "toSet"))), OG_nullthrows, Is_method)));
                      targs = []; args = []; unpacked_arg = None }))))
             ]
           };

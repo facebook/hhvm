@@ -67,6 +67,7 @@ namespace HH {
      *
      * @return - An `array` with the integer keys from the current `Vector`.
      */
+    <<__NoAutoLikes>>
     public readonly function toKeysArray()[]: varray<int>;
 
     /**
@@ -74,6 +75,7 @@ namespace HH {
      *
      * @return - A `Vector` that is a copy of the current `Vector`.
      */
+    <<__NoAutoLikes>>
     public function toVector()[]: Vector<Tv>;
 
     /**
@@ -81,6 +83,7 @@ namespace HH {
      *
      * @return - A `Vector` that is an immutable copy of the current `Vector`.
      */
+    <<__NoAutoLikes>>
     public function toImmVector()[]: ImmVector<Tv>;
 
     /**
@@ -89,6 +92,7 @@ namespace HH {
      * @return - A `Map` that has the integer keys and associated values of the
      *           current `Vector`.
      */
+    <<__NoAutoLikes>>
     public function toMap()[]: Map<int, Tv>;
 
     /**
@@ -98,6 +102,7 @@ namespace HH {
      * @return - An `ImmMap` that has the integer keys and associated values
      *           of the current `Vector`.
      */
+    <<__NoAutoLikes>>
     public function toImmMap()[]: ImmMap<int, Tv>;
 
     /**
@@ -105,6 +110,7 @@ namespace HH {
      *
      * @return - A `Set` containing the unique values of the current `Vector`.
      */
+    <<__NoAutoLikes>>
     public function toSet()[]: Set<Tv> where Tv as arraykey;
 
     /**
@@ -113,6 +119,7 @@ namespace HH {
      *
      * @return - An `ImmSet` containing the unique values of the current `Vector`.
      */
+    <<__NoAutoLikes>>
     public function toImmSet()[]: ImmSet<Tv> where Tv as arraykey;
 
     /**
@@ -122,6 +129,7 @@ namespace HH {
      *
      * @return - An `ImmVector` copy of the current `Vector`.
      */
+    <<__NoAutoLikes>>
     public function immutable()[]: ImmVector<Tv>;
 
     /**
@@ -147,6 +155,7 @@ namespace HH {
      *
      * @return - A `Vector` containing the values of the current `Vector`.
      */
+    <<__NoAutoLikes>>
     public function values()[]: Vector<Tv>;
 
     /**
@@ -154,6 +163,7 @@ namespace HH {
      *
      * @return - A `Vector` containing the integer keys of the current `Vector`.
      */
+    <<__NoAutoLikes>>
     public readonly function keys()[]: Vector<int>;
 
     /**
@@ -497,6 +507,7 @@ namespace HH {
      *
      * @return - Returns itself.
      */
+    <<__NoAutoLikes>>
     public function clear()[write_props]: Vector<Tv>;
 
     /**
@@ -559,6 +570,7 @@ namespace HH {
      *
      * @return - Returns itself.
      */
+    <<__NoAutoLikes>>
     public function addAllKeysOf(
       ?KeyedContainer<Tv, mixed> $container,
     )[write_props]: Vector<Tv> where Tv as arraykey;
@@ -693,7 +705,7 @@ namespace HH {
      *
      * @return - A `Vector` with the values from the provided `array`.
      */
-    <<__Deprecated('Use `new Vector($arr)` instead.')>>
+    <<__Deprecated('Use `new Vector($arr)` instead.'), __NoAutoLikes>>
     public static function fromArray(darray<arraykey, Tv> $arr): Vector<Tv>;
 
     /**
@@ -710,6 +722,7 @@ namespace HH {
      * @return - A `Vector` with the values from the `Traversable`; or an empty
      *           `Vector` if the `Traversable` is `null`.
      */
+    <<__NoAutoLikes>>
     public static function fromItems(?Traversable<Tv> $items)[]: Vector<Tv>;
 
     /**
@@ -723,6 +736,7 @@ namespace HH {
      *
      * @return - A `Vector` built from the keys of the specified container.
      */
+    <<__NoAutoLikes>>
     public static function fromKeysOf<Tk as arraykey>(
       ?KeyedContainer<Tk, mixed> $container,
     )[]: Vector<Tk>;

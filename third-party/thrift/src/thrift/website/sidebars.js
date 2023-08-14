@@ -254,9 +254,12 @@ module.exports = {
             id: "fb/languages/java/index",
           },
           items: [
+            'fb/languages/java/exec',
             'fb/languages/java/generatedfiles',
-            'fb/languages/java/serde',
             'fb/languages/java/hyperthrift',
+            'fb/languages/java/netty4_background',
+            'fb/languages/java/netty4',
+            'fb/languages/java/serde',
           ]
         },
         {

@@ -36,6 +36,7 @@ import {{program:module_path}}.thrift_types as __thrift_types
 cdef api int can_extract__{{program:capi_module_prefix}}__{{struct:name}}(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.{{struct:name}}) else 0
 
+{{^struct:marshal_capi?}}
 cdef api __cIOBuf* extract__{{program:capi_module_prefix}}__{{struct:name}}(object __obj) except NULL:
     cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
     return __buf._ours.release()
@@ -46,6 +47,7 @@ cdef api object construct__{{program:capi_module_prefix}}__{{struct:name}}(__uni
         __IOBuf_from_unique_ptr(__move(__s)),
         protocol=__Protocol.BINARY
     )
+{{/struct:marshal_capi?}}
 
 cdef api object init__{{program:capi_module_prefix}}__{{struct:name}}(object data):
     return __thrift_types.{{struct:name}}._fbthrift_create(data)

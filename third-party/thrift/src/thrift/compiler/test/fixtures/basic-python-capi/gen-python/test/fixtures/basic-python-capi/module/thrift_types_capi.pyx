@@ -22,16 +22,6 @@ import test.fixtures.basic-python-capi.module.thrift_types as __thrift_types
 cdef api int can_extract__test__fixtures__basic_python_capi__module__MyStruct(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyStruct) else 0
 
-cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__MyStruct(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__test__fixtures__basic_python_capi__module__MyStruct(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.MyStruct,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__test__fixtures__basic_python_capi__module__MyStruct(object data):
     return __thrift_types.MyStruct._fbthrift_create(data)
@@ -39,16 +29,6 @@ cdef api object init__test__fixtures__basic_python_capi__module__MyStruct(object
 cdef api int can_extract__test__fixtures__basic_python_capi__module__MyDataItem(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyDataItem) else 0
 
-cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__MyDataItem(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__test__fixtures__basic_python_capi__module__MyDataItem(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.MyDataItem,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__test__fixtures__basic_python_capi__module__MyDataItem(object data):
     return __thrift_types.MyDataItem._fbthrift_create(data)
@@ -56,16 +36,6 @@ cdef api object init__test__fixtures__basic_python_capi__module__MyDataItem(obje
 cdef api int can_extract__test__fixtures__basic_python_capi__module__TransitiveDoubler(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.TransitiveDoubler) else 0
 
-cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__TransitiveDoubler(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__test__fixtures__basic_python_capi__module__TransitiveDoubler(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.TransitiveDoubler,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__test__fixtures__basic_python_capi__module__TransitiveDoubler(object data):
     return __thrift_types.TransitiveDoubler._fbthrift_create(data)
@@ -73,16 +43,6 @@ cdef api object init__test__fixtures__basic_python_capi__module__TransitiveDoubl
 cdef api int can_extract__test__fixtures__basic_python_capi__module__DoubledPair(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.DoubledPair) else 0
 
-cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__DoubledPair(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__test__fixtures__basic_python_capi__module__DoubledPair(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.DoubledPair,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__test__fixtures__basic_python_capi__module__DoubledPair(object data):
     return __thrift_types.DoubledPair._fbthrift_create(data)
@@ -90,16 +50,6 @@ cdef api object init__test__fixtures__basic_python_capi__module__DoubledPair(obj
 cdef api int can_extract__test__fixtures__basic_python_capi__module__StringPair(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.StringPair) else 0
 
-cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__StringPair(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__test__fixtures__basic_python_capi__module__StringPair(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.StringPair,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__test__fixtures__basic_python_capi__module__StringPair(object data):
     return __thrift_types.StringPair._fbthrift_create(data)
@@ -107,16 +57,6 @@ cdef api object init__test__fixtures__basic_python_capi__module__StringPair(obje
 cdef api int can_extract__test__fixtures__basic_python_capi__module__EmptyStruct(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.EmptyStruct) else 0
 
-cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__EmptyStruct(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__test__fixtures__basic_python_capi__module__EmptyStruct(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.EmptyStruct,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__test__fixtures__basic_python_capi__module__EmptyStruct(object data):
     return __thrift_types.EmptyStruct._fbthrift_create(data)
@@ -124,16 +64,6 @@ cdef api object init__test__fixtures__basic_python_capi__module__EmptyStruct(obj
 cdef api int can_extract__test__fixtures__basic_python_capi__module__PrimitiveStruct(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.PrimitiveStruct) else 0
 
-cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__PrimitiveStruct(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__test__fixtures__basic_python_capi__module__PrimitiveStruct(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.PrimitiveStruct,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__test__fixtures__basic_python_capi__module__PrimitiveStruct(object data):
     return __thrift_types.PrimitiveStruct._fbthrift_create(data)
@@ -141,16 +71,6 @@ cdef api object init__test__fixtures__basic_python_capi__module__PrimitiveStruct
 cdef api int can_extract__test__fixtures__basic_python_capi__module__ListStruct(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.ListStruct) else 0
 
-cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__ListStruct(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__test__fixtures__basic_python_capi__module__ListStruct(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.ListStruct,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__test__fixtures__basic_python_capi__module__ListStruct(object data):
     return __thrift_types.ListStruct._fbthrift_create(data)
@@ -158,16 +78,6 @@ cdef api object init__test__fixtures__basic_python_capi__module__ListStruct(obje
 cdef api int can_extract__test__fixtures__basic_python_capi__module__SetStruct(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.SetStruct) else 0
 
-cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__SetStruct(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__test__fixtures__basic_python_capi__module__SetStruct(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.SetStruct,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__test__fixtures__basic_python_capi__module__SetStruct(object data):
     return __thrift_types.SetStruct._fbthrift_create(data)
@@ -175,16 +85,6 @@ cdef api object init__test__fixtures__basic_python_capi__module__SetStruct(objec
 cdef api int can_extract__test__fixtures__basic_python_capi__module__MapStruct(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MapStruct) else 0
 
-cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__MapStruct(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__test__fixtures__basic_python_capi__module__MapStruct(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.MapStruct,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__test__fixtures__basic_python_capi__module__MapStruct(object data):
     return __thrift_types.MapStruct._fbthrift_create(data)
@@ -192,16 +92,6 @@ cdef api object init__test__fixtures__basic_python_capi__module__MapStruct(objec
 cdef api int can_extract__test__fixtures__basic_python_capi__module__ComposeStruct(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.ComposeStruct) else 0
 
-cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__ComposeStruct(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__test__fixtures__basic_python_capi__module__ComposeStruct(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.ComposeStruct,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__test__fixtures__basic_python_capi__module__ComposeStruct(object data):
     return __thrift_types.ComposeStruct._fbthrift_create(data)
@@ -209,16 +99,6 @@ cdef api object init__test__fixtures__basic_python_capi__module__ComposeStruct(o
 cdef api int can_extract__test__fixtures__basic_python_capi__module__Onion(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.Onion) else 0
 
-cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__Onion(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__test__fixtures__basic_python_capi__module__Onion(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.Onion,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__test__fixtures__basic_python_capi__module__Onion(object data):
     return __thrift_types.Onion._fbthrift_create(data)

@@ -15,97 +15,61 @@ from folly.iobuf cimport cIOBuf as __cIOBuf
 
 cdef api int can_extract__test__fixtures__basic_python_capi__module__MyStruct(object) except -1
 
-cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__MyStruct(object) except NULL
-
-cdef api object construct__test__fixtures__basic_python_capi__module__MyStruct(__unique_ptr[__cIOBuf])
 
 cdef api object init__test__fixtures__basic_python_capi__module__MyStruct(object data)
 
 cdef api int can_extract__test__fixtures__basic_python_capi__module__MyDataItem(object) except -1
 
-cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__MyDataItem(object) except NULL
-
-cdef api object construct__test__fixtures__basic_python_capi__module__MyDataItem(__unique_ptr[__cIOBuf])
 
 cdef api object init__test__fixtures__basic_python_capi__module__MyDataItem(object data)
 
 cdef api int can_extract__test__fixtures__basic_python_capi__module__TransitiveDoubler(object) except -1
 
-cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__TransitiveDoubler(object) except NULL
-
-cdef api object construct__test__fixtures__basic_python_capi__module__TransitiveDoubler(__unique_ptr[__cIOBuf])
 
 cdef api object init__test__fixtures__basic_python_capi__module__TransitiveDoubler(object data)
 
 cdef api int can_extract__test__fixtures__basic_python_capi__module__DoubledPair(object) except -1
 
-cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__DoubledPair(object) except NULL
-
-cdef api object construct__test__fixtures__basic_python_capi__module__DoubledPair(__unique_ptr[__cIOBuf])
 
 cdef api object init__test__fixtures__basic_python_capi__module__DoubledPair(object data)
 
 cdef api int can_extract__test__fixtures__basic_python_capi__module__StringPair(object) except -1
 
-cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__StringPair(object) except NULL
-
-cdef api object construct__test__fixtures__basic_python_capi__module__StringPair(__unique_ptr[__cIOBuf])
 
 cdef api object init__test__fixtures__basic_python_capi__module__StringPair(object data)
 
 cdef api int can_extract__test__fixtures__basic_python_capi__module__EmptyStruct(object) except -1
 
-cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__EmptyStruct(object) except NULL
-
-cdef api object construct__test__fixtures__basic_python_capi__module__EmptyStruct(__unique_ptr[__cIOBuf])
 
 cdef api object init__test__fixtures__basic_python_capi__module__EmptyStruct(object data)
 
 cdef api int can_extract__test__fixtures__basic_python_capi__module__PrimitiveStruct(object) except -1
 
-cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__PrimitiveStruct(object) except NULL
-
-cdef api object construct__test__fixtures__basic_python_capi__module__PrimitiveStruct(__unique_ptr[__cIOBuf])
 
 cdef api object init__test__fixtures__basic_python_capi__module__PrimitiveStruct(object data)
 
 cdef api int can_extract__test__fixtures__basic_python_capi__module__ListStruct(object) except -1
 
-cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__ListStruct(object) except NULL
-
-cdef api object construct__test__fixtures__basic_python_capi__module__ListStruct(__unique_ptr[__cIOBuf])
 
 cdef api object init__test__fixtures__basic_python_capi__module__ListStruct(object data)
 
 cdef api int can_extract__test__fixtures__basic_python_capi__module__SetStruct(object) except -1
 
-cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__SetStruct(object) except NULL
-
-cdef api object construct__test__fixtures__basic_python_capi__module__SetStruct(__unique_ptr[__cIOBuf])
 
 cdef api object init__test__fixtures__basic_python_capi__module__SetStruct(object data)
 
 cdef api int can_extract__test__fixtures__basic_python_capi__module__MapStruct(object) except -1
 
-cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__MapStruct(object) except NULL
-
-cdef api object construct__test__fixtures__basic_python_capi__module__MapStruct(__unique_ptr[__cIOBuf])
 
 cdef api object init__test__fixtures__basic_python_capi__module__MapStruct(object data)
 
 cdef api int can_extract__test__fixtures__basic_python_capi__module__ComposeStruct(object) except -1
 
-cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__ComposeStruct(object) except NULL
-
-cdef api object construct__test__fixtures__basic_python_capi__module__ComposeStruct(__unique_ptr[__cIOBuf])
 
 cdef api object init__test__fixtures__basic_python_capi__module__ComposeStruct(object data)
 
 cdef api int can_extract__test__fixtures__basic_python_capi__module__Onion(object) except -1
 
-cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__Onion(object) except NULL
-
-cdef api object construct__test__fixtures__basic_python_capi__module__Onion(__unique_ptr[__cIOBuf])
 
 cdef api object init__test__fixtures__basic_python_capi__module__Onion(object data)
 

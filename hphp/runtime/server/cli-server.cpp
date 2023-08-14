@@ -961,7 +961,11 @@ void runInContext(CLIContext&& ctx,
 
     try {
       cli_write(data->client, "exit", ret);
-      Logger::FInfo("Completed command with return code {}", ret);
+      if (!xbox) {
+        Logger::FInfo("Completed command with return code {}", ret);
+      } else {
+        Logger::FVerbose("CLI Proxied XBox request exiting ({})", ret);
+      }
     } catch (const Exception& ex) {
       Logger::Warning("Could not send exit code %i to CLI socket: %s\n",
                       ret, ex.what());
@@ -2153,7 +2157,7 @@ void cli_invoke(
   CLIContext&& ctx,
   std::function<void(const std::string&)>&& invoke
 ) {
-  Logger::FInfo("Starting CLI Proxied XBox request...");
+  Logger::Verbose("Starting CLI Proxied XBox request...");
   UNUSED auto const client = ctx.client();
   FTRACE(2, "{}({}): starting...\n", __func__, client);
   try {

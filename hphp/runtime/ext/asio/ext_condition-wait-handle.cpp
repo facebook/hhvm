@@ -163,6 +163,9 @@ void AsioExtension::initConditionWaitHandle() {
                      ConditionWaitHandle, setOnCreateCallback);
   HHVM_MALIAS(HH\\ConditionWaitHandle, succeed, ConditionWaitHandle, succeed);
   HHVM_MALIAS(HH\\ConditionWaitHandle, fail, ConditionWaitHandle, fail);
+
+  Native::registerClassExtraDataHandler(
+    c_ConditionWaitHandle::s_clsName, finish_class<c_ConditionWaitHandle>);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

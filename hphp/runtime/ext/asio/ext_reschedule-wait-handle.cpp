@@ -123,6 +123,9 @@ void AsioExtension::initRescheduleWaitHandle() {
                AsioContext::QUEUE_DEFAULT);
   HHVM_RCC_INT(HH_RescheduleWaitHandle, QUEUE_NO_PENDING_IO,
                AsioContext::QUEUE_NO_PENDING_IO);
+
+  Native::registerClassExtraDataHandler(
+    c_RescheduleWaitHandle::s_clsName, finish_class<c_RescheduleWaitHandle>);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

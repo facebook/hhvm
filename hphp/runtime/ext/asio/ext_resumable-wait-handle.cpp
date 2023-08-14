@@ -80,6 +80,9 @@ void AsioExtension::initResumableWaitHandle() {
   RWH_SME(setOnSuccessCallback);
   RWH_SME(setOnFailCallback);
 #undef RWH_SME
+
+  Native::registerClassExtraDataHandler(
+    c_ResumableWaitHandle::s_clsName, finish_class<c_ResumableWaitHandle>);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

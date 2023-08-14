@@ -501,11 +501,9 @@ void CollectionsExtension::initVector() {
 
   Native::registerNativePropHandler<CollectionPropHandler>(c_Vector::s_clsName);
   Native::registerNativePropHandler<CollectionPropHandler>(c_ImmVector::s_clsName);
-}
 
-void CollectionsExtension::finishVector() {
-  finishClass<c_Vector>();
-  finishClass<c_ImmVector>();
+  Native::registerClassExtraDataHandler(c_Vector::s_clsName, finish_class<c_Vector>);
+  Native::registerClassExtraDataHandler(c_ImmVector::s_clsName, finish_class<c_ImmVector>);
 }
 
 /////////////////////////////////////////////////////////////////////////////

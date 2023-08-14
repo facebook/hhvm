@@ -444,11 +444,9 @@ void CollectionsExtension::initMap() {
 
   Native::registerNativePropHandler<CollectionPropHandler>(c_Map::s_clsName);
   Native::registerNativePropHandler<CollectionPropHandler>(c_ImmMap::s_clsName);
-}
 
-void CollectionsExtension::finishMap() {
-  finishClass<c_Map>();
-  finishClass<c_ImmMap>();
+  Native::registerClassExtraDataHandler(c_Map::s_clsName, finish_class<c_Map>);
+  Native::registerClassExtraDataHandler(c_ImmMap::s_clsName, finish_class<c_ImmMap>);
 }
 
 /////////////////////////////////////////////////////////////////////////////

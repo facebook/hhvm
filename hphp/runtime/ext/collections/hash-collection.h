@@ -14,15 +14,15 @@ ALWAYS_INLINE VanillaDict* CreateDictAsMixed() {
 }
 
 // Common base class for BaseMap/BaseSet collections
-struct HashCollection : ObjectData {
+struct HashCollection : c_Collection {
   explicit HashCollection(Class* cls, HeaderKind kind)
-    : ObjectData(cls, NoInit{}, ObjectData::NoAttrs, kind)
+    : c_Collection(cls, kind)
     , m_unusedAndSize(0)
   {
     setArrayData(CreateDictAsMixed());
   }
   explicit HashCollection(Class* cls, HeaderKind kind, ArrayData* arr)
-    : ObjectData(cls, NoInit{}, ObjectData::NoAttrs, kind)
+    : c_Collection(cls, kind)
     , m_unusedAndSize(arr->m_size)
   {
     setArrayData(VanillaDict::as(arr));

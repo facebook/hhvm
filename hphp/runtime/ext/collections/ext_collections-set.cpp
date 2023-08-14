@@ -8,6 +8,7 @@
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/collections/hash-collection.h"
+#include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 namespace HPHP {
@@ -629,11 +630,9 @@ void CollectionsExtension::initSet() {
 
   Native::registerNativePropHandler<CollectionPropHandler>(c_Set::s_clsName);
   Native::registerNativePropHandler<CollectionPropHandler>(c_ImmSet::s_clsName);
-}
 
-void CollectionsExtension::finishSet() {
-  finishClass<c_Set>();
-  finishClass<c_ImmSet>();
+  Native::registerClassExtraDataHandler(c_Set::s_clsName, finish_class<c_Set>);
+  Native::registerClassExtraDataHandler(c_ImmSet::s_clsName, finish_class<c_ImmSet>);
 }
 
 /////////////////////////////////////////////////////////////////////////////

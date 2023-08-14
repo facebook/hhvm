@@ -639,5 +639,11 @@ const ConstantMap* getClassConstants(const StringData* clsName) {
   return &clsit->second;
 }
 
+typedef void (*FinishFunc)(Class* cls);
+
+void registerClassExtraDataHandler(const String& clsName, FinishFunc fn);
+
+FinishFunc getClassExtraDataHandler(const StringData* clsName);
+
 //////////////////////////////////////////////////////////////////////////////
 }} // namespace HPHP::Native

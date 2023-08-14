@@ -159,11 +159,7 @@ void Extension::loadEmitters() {
   for (auto const& name : hackFiles()) {
     loadSystemlib(name);
   }
-
-  modulePostLoadEmitters();
 }
-
-void Extension::modulePostLoadEmitters() {}
 
 void Extension::loadDecls() {
   // Look for "ext.{namehash}" in the binary and grab its decls

@@ -16,7 +16,7 @@ void deepCopy(tv_lval);
 struct PairIterator;
 }
 
-struct c_Pair : ObjectData {
+struct c_Pair : c_Collection {
   DECLARE_COLLECTIONS_CLASS_NOCTOR(Pair);
 
   static ObjectData* instanceCtor(Class* /*cls*/) {
@@ -27,8 +27,7 @@ struct c_Pair : ObjectData {
 
   c_Pair() = delete;
   explicit c_Pair(const TypedValue& e0, const TypedValue& e1)
-    : ObjectData(c_Pair::classof(), NoInit{}, ObjectData::NoAttrs,
-                 HeaderKind::Pair)
+    : c_Collection(c_Pair::classof(), HeaderKind::Pair)
     , m_size(2)
   {
     tvDup(e0, elm0);
@@ -36,8 +35,7 @@ struct c_Pair : ObjectData {
   }
   enum class NoIncRef {};
   explicit c_Pair(const TypedValue& e0, const TypedValue& e1, NoIncRef)
-    : ObjectData(c_Pair::classof(), NoInit{}, ObjectData::NoAttrs,
-                 HeaderKind::Pair)
+    : c_Collection(c_Pair::classof(), HeaderKind::Pair)
     , m_size(2)
   {
     tvCopy(e0, elm0);

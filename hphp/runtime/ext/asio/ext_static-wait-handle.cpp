@@ -81,6 +81,9 @@ void AsioExtension::initStaticWaitHandle() {
     rds::Mode::Normal, rds::LinkID{"StaticTrueWH"});
   c_StaticWaitHandle::FalseHandle.bind(
     rds::Mode::Normal, rds::LinkID{"StaticFalseWH"});
+
+  Native::registerClassExtraDataHandler(
+    c_StaticWaitHandle::s_clsName, finish_class<c_StaticWaitHandle>);
 }
 
 void AsioExtension::requestInitSingletons() {

@@ -853,4 +853,25 @@ std::string NativeSig::toString(const char* classname,
 }
 
 //////////////////////////////////////////////////////////////////////////////
+
+using ClassExtraDataHandlerMap = std::unordered_map
+  <const StringData*, FinishFunc>;
+
+static ClassExtraDataHandlerMap s_classExtraDataHandlerMap;
+
+void registerClassExtraDataHandler(const String& clsName, FinishFunc fn) {
+  assertx(s_classExtraDataHandlerMap.find(clsName.get()) ==
+    s_classExtraDataHandlerMap.end());
+  s_classExtraDataHandlerMap[clsName.get()] = fn;
+}
+
+FinishFunc getClassExtraDataHandler(const StringData* clsName) {
+  auto it = s_classExtraDataHandlerMap.find(clsName);
+  if (it == s_classExtraDataHandlerMap.end()) {
+    return nullptr;
+  }
+  return it->second;
+}
+
+//////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP::Native

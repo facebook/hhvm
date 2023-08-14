@@ -25,23 +25,23 @@ struct VectorIterator;
 //// class BaseVector: encapsulates functionality that is common to both
 //// c_Vector and c_ImmVector. It doesn't map to any PHP-land class.
 
-struct BaseVector : ObjectData {
+struct BaseVector : c_Collection {
 protected:
   // Make sure this one is inlined all the way
   explicit BaseVector(Class* cls, HeaderKind kind)
-    : ObjectData(cls, NoInit{}, ObjectData::NoAttrs, kind)
+    : c_Collection(cls, kind)
     , m_unusedAndSize(0)
   {
     setArrayData(ArrayData::CreateVec());
   }
   explicit BaseVector(Class* cls, HeaderKind kind, ArrayData* arr)
-    : ObjectData(cls, NoInit{}, ObjectData::NoAttrs, kind)
+    : c_Collection(cls, kind)
     , m_unusedAndSize(arr->m_size)
   {
     setArrayData(arr);
   }
   explicit BaseVector(Class* cls, HeaderKind kind, uint32_t cap)
-    : ObjectData(cls, NoInit{}, ObjectData::NoAttrs, kind)
+    : c_Collection(cls, kind)
     , m_unusedAndSize(0)
   {
     setArrayData(VanillaVec::MakeReserveVec(cap));

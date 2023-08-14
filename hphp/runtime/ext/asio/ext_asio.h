@@ -27,7 +27,6 @@ struct AsioExtension final : Extension {
   void moduleInit() override;
   void requestInit() override;
   std::vector<std::string> hackFiles() const override;
-  void modulePostLoadEmitters() override;
 
 private:
   void initFunctions();
@@ -42,9 +41,10 @@ private:
   void initRescheduleWaitHandle();
   void initExternalThreadEventWaitHandle();
   void initStaticWaitHandle();
+  void initAsyncFunctionWaitHandle();
+  void initAsyncGeneratorWaitHandle();
   void requestInitSingletons();
 
-  void finishClasses();
 };
 
 Object HHVM_FUNCTION(asio_get_running);

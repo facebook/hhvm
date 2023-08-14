@@ -3,6 +3,7 @@
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/header-kind.h"
 #include "hphp/system/systemlib.h"
+#include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/native-prop-handler.h"
 
 namespace HPHP {
@@ -10,8 +11,15 @@ namespace HPHP {
 
 ArrayIter getArrayIterHelper(const Variant& v, size_t& sz);
 
+struct c_Collection : ObjectData {
+  explicit c_Collection(Class* cls, HeaderKind kind) noexcept :
+    ObjectData(cls, NoInit{}, ObjectData::NoAttrs, kind) {}
+};
+
 namespace collections {
+
 /////////////////////////////////////////////////////////////////////////////
+
 
 #define DECLARE_COLLECTIONS_CLASS_NOCTOR(name)              \
   static Class* s_cls;                                      \
@@ -84,41 +92,11 @@ struct CollectionsExtension : Extension {
     };
   }
 
-  void modulePostLoadEmitters() override {
-    finishPair();
-    finishVector();
-    finishMap();
-    finishSet();
-  }
-
  private:
   void initPair();
-  void finishPair();
   void initVector();
-  void finishVector();
   void initMap();
-  void finishMap();
   void initSet();
-  void finishSet();
-
-  template<class T>
-  void finishClass() {
-    auto const cls = const_cast<Class*>(T::classof());
-    assertx(cls);
-    assertx(cls->isCollectionClass());
-    assertx(cls->attrs() & AttrFinal);
-    assertx(!cls->getNativeDataInfo());
-    assertx(!cls->instanceCtor<false>());
-    assertx(!cls->instanceCtor<true>());
-    assertx(!cls->instanceDtor());
-    assertx(!cls->hasMemoSlots());
-    cls->allocExtraData();
-    cls->m_extra.raw()->m_instanceCtor = T::instanceCtor;
-    cls->m_extra.raw()->m_instanceCtorUnlocked = T::instanceCtor;
-    cls->m_extra.raw()->m_instanceDtor = T::instanceDtor;
-    cls->m_releaseFunc = T::instanceDtor;
-    cls->initRTAttributes(Class::CallToImpl);
-  }
 };
 
 const StaticString s_isset{"isset"};
@@ -135,4 +113,25 @@ struct CollectionPropHandler: Native::BasePropHandler {
 };
 
 /////////////////////////////////////////////////////////////////////////////
-}}
+}
+
+template<class T> typename
+  std::enable_if<std::is_base_of<c_Collection, T>::value, void>::type
+finish_class(Class* cls) {
+  assertx(cls);
+  assertx(cls->isCollectionClass());
+  assertx(cls->attrs() & AttrFinal);
+  assertx(!cls->getNativeDataInfo());
+  assertx(!cls->instanceCtor<false>());
+  assertx(!cls->instanceCtor<true>());
+  assertx(!cls->instanceDtor());
+  assertx(!cls->hasMemoSlots());
+  cls->allocExtraData();
+  cls->m_extra.raw()->m_instanceCtor = T::instanceCtor;
+  cls->m_extra.raw()->m_instanceCtorUnlocked = T::instanceCtor;
+  cls->m_extra.raw()->m_instanceDtor = T::instanceDtor;
+  cls->m_releaseFunc = T::instanceDtor;
+  cls->initRTAttributes(Class::CallToImpl);
+}
+
+}

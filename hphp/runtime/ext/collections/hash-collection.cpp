@@ -11,7 +11,7 @@ namespace HPHP {
 // HashCollection
 
 HashCollection::HashCollection(Class* cls, HeaderKind kind, uint32_t cap)
-  : ObjectData(cls, NoInit{}, ObjectData::NoAttrs, kind)
+  : c_Collection(cls, kind)
   , m_unusedAndSize(0)
 {
   setArrayData(cap > 0

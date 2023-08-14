@@ -94,8 +94,6 @@ public:
 
   void loadEmitters();
 
-  virtual void modulePostLoadEmitters();
-
   // Override this function when your extension calls anything other than:
   //
   //  loadSystemlib();

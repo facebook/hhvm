@@ -171,6 +171,9 @@ void AsioExtension::initConcurrentWaitHandle() {
   HHVM_STATIC_MALIAS(HH\\ConcurrentWaitHandle, meth, ConcurrentWaitHandle, meth)
   CCWH_SME(setOnCreateCallback);
 #undef CCWH_SME
+
+  Native::registerClassExtraDataHandler(
+    c_ConcurrentWaitHandle::s_clsName, finish_class<c_ConcurrentWaitHandle>);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

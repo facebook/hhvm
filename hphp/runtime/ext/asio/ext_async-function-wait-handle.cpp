@@ -22,6 +22,7 @@
 #include "hphp/runtime/ext/asio/asio-context.h"
 #include "hphp/runtime/ext/asio/asio-context-enter.h"
 #include "hphp/runtime/ext/asio/asio-session.h"
+#include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/act-rec-defs.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -364,6 +365,12 @@ Offset c_AsyncFunctionWaitHandle::getNextExecutionOffset() {
   assertx(!isFinished());
   always_assert(!isRunning());
   return resumable()->resumeFromAwaitOffset();
+}
+
+void AsioExtension::initAsyncFunctionWaitHandle() {
+  Native::registerClassExtraDataHandler(
+    c_AsyncFunctionWaitHandle::s_clsName,
+    finish_class<c_AsyncFunctionWaitHandle>);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

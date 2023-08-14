@@ -8,6 +8,7 @@
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-type.h"
+#include "hphp/runtime/vm/native.h"
 
 namespace HPHP { namespace collections {
 /////////////////////////////////////////////////////////////////////////////
@@ -139,10 +140,8 @@ void CollectionsExtension::initPair() {
   HHVM_NAMED_ME(HH\\Pair, toImmSet,       materialize<c_ImmSet>);
 
   Native::registerNativePropHandler<CollectionPropHandler>(c_Pair::s_clsName);
-}
 
-void CollectionsExtension::finishPair() {
-  finishClass<c_Pair>();
+  Native::registerClassExtraDataHandler(c_Pair::s_clsName, finish_class<c_Pair>);
 }
 
 /////////////////////////////////////////////////////////////////////////////

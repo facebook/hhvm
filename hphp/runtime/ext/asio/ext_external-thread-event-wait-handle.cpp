@@ -286,6 +286,10 @@ void AsioExtension::initExternalThreadEventWaitHandle() {
   ETEWH_SME(setOnSuccessCallback);
   ETEWH_SME(setOnFailCallback);
 #undef ETEWH_SME
+
+  Native::registerClassExtraDataHandler(
+    c_ExternalThreadEventWaitHandle::s_clsName,
+    finish_class<c_ExternalThreadEventWaitHandle>);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

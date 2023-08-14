@@ -72,6 +72,7 @@ struct Func;
 struct RuntimeCoeffects;
 struct StringData;
 struct c_Awaitable;
+struct c_Collection;
 
 struct MemberLookupContext {
   MemberLookupContext(const Class*, const Func*);
@@ -1808,11 +1809,14 @@ private:
   // Friendship.
 
 private:
+
   template<class T> friend typename
     std::enable_if<std::is_base_of<c_Awaitable, T>::value, void>::type
-  finish_class();
+  finish_class(Class* cls);
 
-  friend struct collections::CollectionsExtension;
+  template<class T> friend typename
+    std::enable_if<std::is_base_of<c_Collection, T>::value, void>::type
+  finish_class(Class* cls);
 
   friend struct StandardExtension;
 

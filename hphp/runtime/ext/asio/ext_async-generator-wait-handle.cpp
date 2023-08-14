@@ -22,6 +22,7 @@
 #include "hphp/runtime/ext/asio/asio-context.h"
 #include "hphp/runtime/ext/asio/asio-context-enter.h"
 #include "hphp/runtime/ext/asio/asio-session.h"
+#include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/ext_async-generator.h"
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/act-rec-defs.h"
@@ -240,6 +241,12 @@ void c_AsyncGeneratorWaitHandle::exitContext(context_idx_t ctx_idx) {
     default:
       assertx(false);
   }
+}
+
+void AsioExtension::initAsyncGeneratorWaitHandle() {
+  Native::registerClassExtraDataHandler(
+    c_AsyncGeneratorWaitHandle::s_clsName,
+    finish_class<c_AsyncGeneratorWaitHandle>);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

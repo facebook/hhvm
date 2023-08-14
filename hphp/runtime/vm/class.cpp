@@ -2119,6 +2119,11 @@ Class::Class(PreClass* preClass, Class* parent,
   // Calculates the base pointer offset and
   // the MemoryManager index of the class size.
   setReleaseData();
+
+  auto handler = Native::getClassExtraDataHandler(name());
+  if (handler) {
+    handler(this);
+  }
 }
 
 void Class::methodOverrideCheck(const Func* parentMethod, const Func* method) {

@@ -221,6 +221,9 @@ void AsioExtension::initAwaitAllWaitHandle() {
   AAWH_SME(fromDict);
   AAWH_SME(setOnCreateCallback);
 #undef AAWH_SME
+
+  Native::registerClassExtraDataHandler(
+    c_AwaitAllWaitHandle::s_clsName, finish_class<c_AwaitAllWaitHandle>);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

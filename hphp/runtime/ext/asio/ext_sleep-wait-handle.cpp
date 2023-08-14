@@ -173,6 +173,9 @@ void AsioExtension::initSleepWaitHandle() {
   SWH_SME(setOnCreateCallback);
   SWH_SME(setOnSuccessCallback);
 #undef SWH_SWE
+
+  Native::registerClassExtraDataHandler(
+    c_SleepWaitHandle::s_clsName, finish_class<c_SleepWaitHandle>);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

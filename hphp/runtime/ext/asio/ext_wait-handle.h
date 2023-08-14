@@ -233,6 +233,49 @@ T* wait_handle(TypedValue cell) {
   return wait_handle<T>(c_Awaitable::fromTVAssert(cell));
 }
 
+ObjectData* asioInstanceCtor(Class*);
+
+// Asio's memory layout relies on the following invariants:
+//   * Inextensible: private final (do-nothing) constructor in base class
+//   * No declared properties
+// This guarantees that there will be no overlap between internal asio state
+// and declared property slots, and that instance methods can only be called
+// on the official, systemlib base classes.
+template<class T> typename
+  std::enable_if<std::is_base_of<c_Awaitable, T>::value, void>::type
+finish_class(Class* cls) {
+  assertx(cls);
+  assertx(cls->numDeclProperties() == 0);
+  assertx(cls->numStaticProperties() == 0);
+  assertx(!cls->hasMemoSlots());
+
+  DEBUG_ONLY auto const ctor = cls->getCtor();
+  assertx(ctor->attrs() & AttrPrivate);
+
+  cls->allocExtraData();
+  assertx(!cls->getNativeDataInfo());
+
+  if (cls->name()->same(c_Awaitable::s_clsName.get())) {
+    assertx(!cls->instanceCtor<false>());
+    assertx(!cls->instanceCtor<true>());
+    assertx(!cls->instanceDtor());
+  } else {
+    DEBUG_ONLY auto const wh = c_Awaitable::classof();
+    assertx(wh);
+    assertx(cls->classofNonIFace(wh));
+    assertx(ctor == wh->getCtor());
+
+    assertx(cls->parent()->instanceCtor<false>() == cls->instanceCtor<false>());
+    assertx(cls->parent()->instanceCtor<true>() == cls->instanceCtor<true>());
+    assertx(cls->parent()->instanceDtor() == cls->instanceDtor());
+  }
+
+  cls->m_extra.raw()->m_instanceCtor = asioInstanceCtor;
+  cls->m_extra.raw()->m_instanceCtorUnlocked = asioInstanceCtor;
+  cls->m_extra.raw()->m_instanceDtor = T::instanceDtor;
+  cls->m_releaseFunc = T::instanceDtor;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

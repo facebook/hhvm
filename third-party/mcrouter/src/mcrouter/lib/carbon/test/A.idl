@@ -1,0 +1,31 @@
+# Copyright (c) Meta Platforms, Inc. and affiliates.
+#
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
+namespace carbon::test::A;
+thrift_namespace carbon.test.A.thrift;
+
+import "mcrouter/lib/network/Common.idl"
+import "mcrouter/lib/carbon/test/B.idl"
+include "graphene/ticket/if/gen-cpp2/ticket_rep_types.h"
+cpp2_include "mcrouter/lib/carbon/test/gen/BMessages.h"
+
+request TestARequest {
+  id: 3;
+  name: "testA";
+  reply: TestAReply;
+
+  1: carbon::Keys<folly::IOBuf> key;
+  2: bool dummy2;
+  3: optional B::TRep ticket;
+};
+
+reply TestAReply {
+  1: Result result;
+  2: int32_t valInt32;
+};
+
+service {
+  enable_shutdown: true;
+};

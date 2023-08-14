@@ -94,6 +94,7 @@ struct LightProcess {
    * processes will delegate to a light process pool run by the client.
    */
   static int createDelegate();
+  static int cloneDelegate();
 
   static std::unique_ptr<LightProcess> setThreadLocalAfdtOverride(int fd);
   static std::unique_ptr<LightProcess> setThreadLocalAfdtOverride(

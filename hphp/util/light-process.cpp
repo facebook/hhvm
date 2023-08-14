@@ -501,6 +501,18 @@ void do_change_user(int afdt_fd) {
   }
 }
 
+
+void do_clone_delegate(int afdt_fd) {
+  auto const d = LightProcess::createDelegate();
+  if (d < 0) {
+    lwp_write(afdt_fd, "error");
+    return;
+  }
+  lwp_write(afdt_fd, "success");
+  send_fd(afdt_fd, d);
+  close(d);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // light-weight process
 
@@ -689,6 +701,8 @@ void LightProcess::runShadow(int afdt_fd) {
           do_waitpid(afdt_fd);
         } else if (buf == "change_user") {
           do_change_user(afdt_fd);
+        } else if (buf == "clone_delegate") {
+          do_clone_delegate(afdt_fd);
         } else if (buf[0]) {
           Logger::Info("LightProcess got invalid command: %.20s", buf.c_str());
         }
@@ -1032,6 +1046,18 @@ std::unique_ptr<LightProcess> LightProcess::setThreadLocalAfdtOverride(int fd) {
   tl_proc = new LightProcess;
   tl_proc->m_afdt_fd = fd;
   return ret;
+}
+
+int LightProcess::cloneDelegate() {
+  return runLight("clone_delegate", [&] (LightProcess* proc) {
+    auto const afdt_fd = proc->m_afdt_fd;
+    lwp_write(afdt_fd, "clone_delegate");
+
+    std::string buf;
+    lwp_read(afdt_fd, buf);
+    if (buf == "error") return -1;
+    return recv_fd(afdt_fd);
+  }, -1);
 }
 
 int LightProcess::createDelegate() {

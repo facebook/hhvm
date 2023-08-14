@@ -1693,21 +1693,13 @@ Optional<int> cli_process_command_loop(int fd, bool ignore_bg, bool isclone) {
         Logger::FError("socketpair() failed: {}", folly::errnoStr(errno));
         exit(-1);
       }
-      auto const delegate = LightProcess::createDelegate();
-      if (delegate == -1) {
-        Logger::FError("LightProcess::createDelegate() failed: {}",
-                       folly::errnoStr(errno));
-        exit(-1);
-      }
 
       FTRACE(2, "{}({}): clone(): {} (local) <-> {} (remote)\n", __func__,
              fd, socks[0], socks[1]);
 
       cli_write_fd(fd, socks[1]);
-      cli_write_fd(fd, delegate);
 
       close(socks[1]);
-      close(delegate);
       s_xbox_dispatcher->enqueue(socks[0]);
       continue;
     }
@@ -1898,7 +1890,9 @@ CLIContext CLIContext::initFromParent(const CLIContext& other) {
 
   cli_write(old_client, "clone");
   data.client = cli_read_fd(old_client);
-  data.lwp_afdt = cli_read_fd(old_client);
+  data.lwp_afdt = LightProcess::cloneDelegate();
+
+  if (data.lwp_afdt < 0) throw Exception("Error creating delegate");
 
   data.in = fdopen(dup(fileno(other.m_data.in)), "r");
   data.out = fdopen(dup(fileno(other.m_data.out)), "w");

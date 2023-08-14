@@ -115,29 +115,6 @@ inline String u8(const icu::UnicodeString& u16, UErrorCode& error) {
 struct IntlExtension final : Extension {
   IntlExtension() : Extension("intl", "1.1.0", NO_ONCALL_YET) {}
 
-  void loadDecls() override {
-    loadDeclsFrom("icu");
-    loadDeclsFrom("icu_break_iterator");
-    loadDeclsFrom("icu_calendar");
-    loadDeclsFrom("icu_collator");
-    loadDeclsFrom("icu_date_fmt");
-    loadDeclsFrom("icu_date_pattern_gen");
-    loadDeclsFrom("icu_grapheme");
-    loadDeclsFrom("icu_iterator");
-    loadDeclsFrom("icu_locale");
-    loadDeclsFrom("icu_misc");
-    loadDeclsFrom("icu_msg_fmt");
-    loadDeclsFrom("icu_normalizer");
-    loadDeclsFrom("icu_num_fmt");
-    loadDeclsFrom("icu_rsrc_bundle");
-    loadDeclsFrom("icu_timezone");
-    loadDeclsFrom("icu_transliterator");
-    loadDeclsFrom("icu_uchar");
-    loadDeclsFrom("icu_uconverter");
-    loadDeclsFrom("icu_ucsdet");
-    loadDeclsFrom("icu_uspoof");
-  }
-
   void moduleInit() override {
     bindConstants();
     initICU(); // HHVM-specific ICU functions

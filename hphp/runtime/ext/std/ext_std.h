@@ -9,23 +9,6 @@ namespace HPHP {
 struct StandardExtension final : Extension {
   StandardExtension() : Extension("standard", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
 
-  void loadDecls() override {
-    loadDeclsFrom("std_classobj");
-    loadDeclsFrom("std_errorfunc");
-    loadDeclsFrom("std_file");
-    loadDeclsFrom("std_function");
-    loadDeclsFrom("std_gc");
-    loadDeclsFrom("std_intrinsics");
-    loadDeclsFrom("std_math");
-    loadDeclsFrom("std_misc");
-    loadDeclsFrom("std_network");
-    loadDeclsFrom("std_options");
-    loadDeclsFrom("std_output");
-    loadDeclsFrom("std_process");
-    loadDeclsFrom("std_string");
-    loadDeclsFrom("std_variable");
-  }
-
   void moduleInit() override {
     initStandard();
     initErrorFunc();

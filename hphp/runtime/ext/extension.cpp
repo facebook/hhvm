@@ -167,7 +167,9 @@ void Extension::modulePostLoadEmitters() {}
 
 void Extension::loadDecls() {
   // Look for "ext.{namehash}" in the binary and grab its decls
-  loadDeclsFrom(m_name);
+  for (auto const& name : hackFiles()) {
+    loadDeclsFrom(name);
+  }
 }
 
 void Extension::loadDeclsFrom(std::string_view name) {

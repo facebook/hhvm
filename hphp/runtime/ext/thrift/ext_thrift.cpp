@@ -329,9 +329,6 @@ String HHVM_METHOD(RpcOptions, __toString) {
 
 static struct ThriftExtension final : Extension {
   ThriftExtension() : Extension("thrift_protocol", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
-  void loadDecls() override {
-    loadDeclsFrom("thrift");
-  }
   void moduleInit() override {
     HHVM_RC_INT(THRIFT_MARK_LEGACY_ARRAYS, k_THRIFT_MARK_LEGACY_ARRAYS);
 

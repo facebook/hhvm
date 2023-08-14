@@ -2308,12 +2308,6 @@ static String HHVM_METHOD(ReflectionTypeAlias, getFileName) {
 ///////////////////////////////////////////////////////////////////////////////
 struct ReflectionExtension final : Extension {
   ReflectionExtension() : Extension("reflection", "$Id$", NO_ONCALL_YET) { }
-  void loadDecls() override {
-    loadDeclsFrom("reflection");
-    loadDeclsFrom("reflection-classes");
-    loadDeclsFrom("reflection-internals-functions");
-    loadDeclsFrom("reflection_hni");
-  }
   void moduleInit() override {
     HHVM_FE(hphp_create_object);
     HHVM_FE(hphp_create_object_without_constructor);

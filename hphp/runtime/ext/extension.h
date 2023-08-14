@@ -107,13 +107,16 @@ public:
   // - ext_collections*, which calls `loadSystemlib` for each collection kind
   // - ext_datetime, which happens to use a different name for the extension
   //   versus the binary section
-  virtual void loadDecls();
+  void loadDecls();
   // Load the source contained in the binary section corresponding to [name],
   // parse it's decls, then store them in `s_builtin_symbols`. This is generally
   // going to be given the same string as whatever `loadSystemlib` takes, and
   // by default will be passed *just* the extension name.
+
+private:
   void loadDeclsFrom(std::string_view name);
 
+public:
   // override this to control extension_loaded() return value
   virtual bool moduleEnabled() const;
 

@@ -84,9 +84,6 @@ static char** build_envp(const Array& envs, req::vector<String> &senvs) {
 
 static struct ProcessExtension final : Extension {
   ProcessExtension() : Extension("pcntl", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
-  void loadDecls() override {
-    loadDeclsFrom("process");
-  }
   std::vector<std::string> hackFiles() const override {
     return {"process"};
   }

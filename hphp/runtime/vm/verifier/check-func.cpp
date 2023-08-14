@@ -175,6 +175,10 @@ struct FuncChecker {
 const StaticString s_invoke("__invoke");
 
 bool checkNativeFunc(const FuncEmitter* func, ErrorMode mode) {
+  if (!RuntimeOption::EvalVerifySystemLibHasNativeImpl) {
+    return true;
+  }
+
   auto const funcname = func->name;
   auto const pc = func->pce();
   auto const clsname = pc ? pc->name() : nullptr;
@@ -182,7 +186,15 @@ bool checkNativeFunc(const FuncEmitter* func, ErrorMode mode) {
                                                funcname, clsname,
                                                func->attrs & AttrStatic);
 
-  if (!info.ptr) return true;
+  if (!info.ptr) {
+    verify_error(&func->ue(), func, mode == kThrow,
+      "<<__Native>> function %s%s%s is missing native impl.\n",
+      clsname ? clsname->data() : "",
+      clsname ? "::" : "",
+      funcname->data()
+    );
+    return false;
+  }
 
   if (func->isAsync) {
     verify_error(&func->ue(), func, mode == kThrow,

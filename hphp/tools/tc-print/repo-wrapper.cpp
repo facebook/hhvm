@@ -61,6 +61,7 @@ RepoWrapper::RepoWrapper(const char* repoSchema,
   RuntimeOption::SandboxMode = true; // So we get Unit::m_funcTable
   RuntimeOption::RepoAuthoritative = true;
   RuntimeOption::EvalLowStaticArrays = false; // save some low mem
+  RuntimeOption::EvalVerifySystemLibHasNativeImpl = false;
 
   if (hasRepo) {
     RepoFile::loadGlobalTables();

@@ -1148,6 +1148,7 @@ struct RuntimeOption {
   F(bool, FatalOnVerifyError,          !RepoAuthoritative)              \
   F(bool, AbortBuildOnVerifyError,     true)                            \
   F(bool, AbortBuildOnCompilerError,   true)                            \
+  F(bool, VerifySystemLibHasNativeImpl, true)                           \
   F(uint32_t, StaticContentsLogRate,   100)                             \
   F(uint32_t, LogUnitLoadRate,         0)                               \
   F(uint32_t, MaxDeferredErrors,       50)                              \

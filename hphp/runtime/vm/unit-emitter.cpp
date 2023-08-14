@@ -573,7 +573,7 @@ Id UnitEmitter::getEntryPointId() const {
 
 void UnitEmitter::finish() {
   calculateEntryPointId();
-  assertx(isASystemLib() == (m_extension != nullptr));
+  assertx(m_fatalUnit || (isASystemLib() == (m_extension != nullptr)));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

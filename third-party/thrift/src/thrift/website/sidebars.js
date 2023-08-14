@@ -257,6 +257,7 @@ module.exports = {
             'fb/languages/java/exec',
             'fb/languages/java/generatedfiles',
             'fb/languages/java/hyperthrift',
+            'fb/languages/java/interface',
             'fb/languages/java/netty4_background',
             'fb/languages/java/netty4',
             'fb/languages/java/serde',

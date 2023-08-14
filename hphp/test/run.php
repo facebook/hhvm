@@ -2359,79 +2359,6 @@ function runif_extension_matches(
   );
 }
 
-function runif_function_matches(
-  Options $options,
-  string $test,
-  vec<string> $words,
-): RunifResult {
-  if (count($words) !== 1) {
-    return shape('valid' => false, 'error' => "malformed 'function' match");
-  }
-  if (runif_test_for_feature($options, $test, "function_exists('{$words[0]}')")) {
-    return shape('valid' => true, 'match' => true);
-  }
-  return shape(
-    'valid' => true,
-    'match' => false,
-    'skip_reason' => 'skip-runif-function-' . $words[0]
-  );
-}
-
-function runif_class_matches(
-  Options $options,
-  string $test,
-  vec<string> $words,
-): RunifResult {
-  if (count($words) !== 1) {
-    return shape('valid' => false, 'error' => "malformed 'class' match");
-  }
-  if (runif_test_for_feature($options, $test, "class_exists('{$words[0]}')")) {
-    return shape('valid' => true, 'match' => true);
-  }
-  return shape(
-    'valid' => true,
-    'match' => false,
-    'skip_reason' => 'skip-runif-class-' . $words[0]
-  );
-}
-
-function runif_method_matches(
-  Options $options,
-  string $test,
-  vec<string> $words,
-): RunifResult {
-  if (count($words) !== 2) {
-    return shape('valid' => false, 'error' => "malformed 'method' match");
-  }
-  if (runif_test_for_feature($options, $test,
-                             "method_exists('{$words[0]}', '{$words[1]}')")) {
-    return shape('valid' => true, 'match' => true);
-  }
-  return shape(
-    'valid' => true,
-    'match' => false,
-    'skip_reason' => 'skip-runif-method-' . $words[0] . '-' . $words[1],
-  );
-}
-
-function runif_const_matches(
-  Options $options,
-  string $test,
-  vec<string> $words,
-): RunifResult {
-  if (count($words) !== 1) {
-    return shape('valid' => false, 'error' => "malformed 'const' match");
-  }
-  if (runif_test_for_feature($options, $test, "defined('{$words[0]}')")) {
-    return shape('valid' => true, 'match' => true);
-  }
-  return shape(
-    'valid' => true,
-    'match' => false,
-    'skip_reason' => 'skip-runif-const-' . $words[0]
-  );
-}
-
 function runif_locale_matches(
   Options $options,
   string $test,
@@ -2502,18 +2429,6 @@ function runif_should_skip_test(
         break;
       case 'extension':
         $result = runif_extension_matches($options, $test, $words);
-        break;
-      case 'function':
-        $result = runif_function_matches($options, $test, $words);
-        break;
-      case 'class':
-        $result = runif_class_matches($options, $test, $words);
-        break;
-      case 'method':
-        $result = runif_method_matches($options, $test, $words);
-        break;
-      case 'const':
-        $result = runif_const_matches($options, $test, $words);
         break;
       case 'locale':
         $result = runif_locale_matches($options, $test, $words);

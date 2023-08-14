@@ -125,8 +125,7 @@ void hphp_memory_cleanup();
 void hphp_session_exit(Transport* transport = nullptr);
 void hphp_process_exit() noexcept;
 bool is_hphp_session_initialized();
-std::string get_systemlib(const std::string &section = "ext.core",
-                          const std::string &filename = "");
+std::string get_systemlib(const std::string &section);
 
 // Helper function for stats tracking with exceptions.
 void bump_counter_and_rethrow(bool isPsp);

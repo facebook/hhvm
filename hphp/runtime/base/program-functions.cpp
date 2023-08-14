@@ -2261,9 +2261,8 @@ String canonicalize_path(const String& p, const char* root, int rootLen) {
 // Additionally, when retrieving the main systemlib
 // from the current executable, honor the
 // HHVM_SYSTEMLIB environment variable as an override.
-std::string get_systemlib(const std::string &section /*= "systemlib" */,
-                          const std::string &filename /*= "" */) {
-  if (filename.empty() && section == "systemlib") {
+std::string get_systemlib(const std::string &section) {
+  if (section == "systemlib") {
     if (auto const file = getenv("HHVM_SYSTEMLIB")) {
       std::ifstream ifs(file);
       if (ifs.good()) {
@@ -2274,7 +2273,7 @@ std::string get_systemlib(const std::string &section /*= "systemlib" */,
   }
 
   embedded_data desc;
-  if (!get_embedded_data(section.c_str(), &desc, filename)) return "";
+  if (!get_embedded_data(section.c_str(), &desc)) return "";
   return read_embedded_data(desc);
 }
 

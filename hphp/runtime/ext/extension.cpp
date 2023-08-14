@@ -75,19 +75,18 @@ void Extension::CompileSystemlib(const std::string &slib,
 }
 
 namespace {
-  std::string get_section(
-    std::string_view name,
-    const std::string& dsoName
-  ) {
-    assertx(!name.empty());
-    std::string section("ext.");
-    if (name.length() > 12) {
-      section += HHVM_FN(md5)(std::string(name), false).substr(0, 12).data();
-    } else {
-      section += name;
-    }
-    return get_systemlib(section, dsoName);
+
+std::string get_section(std::string_view name) {
+  assertx(!name.empty());
+  std::string section("ext.");
+  if (name.length() > 12) {
+    section += HHVM_FN(md5)(std::string(name), false).substr(0, 12).data();
+  } else {
+    section += name;
   }
+  return get_systemlib(section);
+}
+
 }
 
 /**
@@ -97,7 +96,7 @@ namespace {
  * If {name} is not passed, then {m_name} is assumed.
  */
 void Extension::loadSystemlib(const std::string& name) {
-  auto const slib = get_section(name, m_dsoName);
+  auto const slib = get_section(name);
   if (!slib.empty()) {
     std::string phpname = s_systemlibPhpName + name;
     CompileSystemlib(slib, phpname, this);
@@ -169,7 +168,7 @@ void Extension::loadDecls() {
 }
 
 void Extension::loadDeclsFrom(std::string_view name) {
-  auto const slib = get_section(name, m_dsoName);
+  auto const slib = get_section(name);
   // We *really* ought to assert that `slib` is non-empty here, but there are
   // some extensions that don't have any source code, such as the ones created by
   // `IMPLEMENT_DEFAULT_EXTENSION_VERSION`

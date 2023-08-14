@@ -996,15 +996,6 @@ bool RuntimeOption::EnableClassLevelWhereClauses = false;
 std::string RuntimeOption::WatchmanRootSocket;
 std::string RuntimeOption::WatchmanDefaultSocket;
 
-#ifdef HHVM_DYNAMIC_EXTENSION_DIR
-std::string RuntimeOption::ExtensionDir = HHVM_DYNAMIC_EXTENSION_DIR;
-#else
-std::string RuntimeOption::ExtensionDir = "";
-#endif
-
-std::vector<std::string> RuntimeOption::Extensions;
-std::vector<std::string> RuntimeOption::DynamicExtensions;
-std::string RuntimeOption::DynamicExtensionPath = ".";
 int RuntimeOption::CheckCLIClientCommands = 0;
 
 HackStrictOption
@@ -2963,16 +2954,6 @@ void RuntimeOption::Load(
       return s_hhvm_build_type.c_str();
     }
   ));
-
-  // Extensions
-  Config::Bind(RuntimeOption::ExtensionDir, ini, config, "extension_dir",
-               RuntimeOption::ExtensionDir, false);
-  Config::Bind(RuntimeOption::DynamicExtensionPath, ini,
-               config, "DynamicExtensionPath",
-               RuntimeOption::DynamicExtensionPath);
-  Config::Bind(RuntimeOption::Extensions, ini, config, "extensions");
-  Config::Bind(RuntimeOption::DynamicExtensions, ini,
-               config, "DynamicExtensions");
 
   ExtensionRegistry::moduleLoad(ini, config);
   initialize_apc();

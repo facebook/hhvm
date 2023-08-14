@@ -67,13 +67,6 @@ int emulate_zend(int argc, char** argv) {
       cnt++;
       continue;
     }
-    if (strcmp(argv[cnt], "-z") == 0) {
-      std::string arg = "-vDynamicExtensions.0=";
-      arg.append(argv[cnt+1]);
-      newargv.push_back(arg.c_str());
-      cnt += 2;
-      continue;
-    }
     if (strcmp(argv[cnt], "-l") == 0 || strcmp(argv[cnt], "--lint") == 0) {
       cnt++;
       lint = true;

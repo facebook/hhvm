@@ -69,9 +69,8 @@ std::string insertBuildId(std::string path, const std::string& buildId) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool get_embedded_data(const char* section, embedded_data* desc,
-                       const std::string& filename /*= "" */) {
-  auto const fname = filename.empty() ? current_executable_path() : filename;
+bool get_embedded_data(const char* section, embedded_data* desc) {
+  auto const fname = current_executable_path();
 
   folly::symbolizer::ElfFile file;
   if (file.openNoThrow(fname.c_str()) != 0) return false;

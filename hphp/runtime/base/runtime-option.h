@@ -757,11 +757,6 @@ struct RuntimeOption {
 
   static const uint32_t kPCREInitialTableSize = 96 * 1024;
 
-  static std::string ExtensionDir;
-  static std::vector<std::string> Extensions;
-  static std::string DynamicExtensionPath;
-  static std::vector<std::string> DynamicExtensions;
-
   static std::vector<std::string> TzdataSearchPaths;
 
 #define EVALFLAGS()                                                     \

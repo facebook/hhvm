@@ -130,10 +130,6 @@ public:
 
   virtual const DependencySet getDeps() const;
 
-  void setDSOName(const std::string &name) {
-    m_dsoName = name;
-  }
-
   void registerNativeFunc(const StringData* name,
                           const Native::NativeFunctionInfo&);
 
@@ -154,7 +150,6 @@ private:
   const char* m_name;
   const char* m_version;
   const char* m_oncall;
-  std::string m_dsoName;
   std::vector<StringData*> m_functions;
   Native::FuncTable m_nativeFuncs;
 };

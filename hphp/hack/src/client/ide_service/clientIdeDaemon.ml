@@ -1004,8 +1004,9 @@ let handle_request
                       HackEventLogger.invariant_violation_bug err;
                       failwith err
                     | positions ->
-                      let positions = List.map positions ~f:snd in
-                      let filename = List.hd_exn positions |> Pos.filename in
+                      let filename =
+                        List.hd_exn positions |> snd |> Pos.filename
+                      in
                       let uri =
                         Lsp_helpers.path_to_lsp_uri
                           ~default_path:filename
@@ -1077,7 +1078,6 @@ let handle_request
                       ~name
                       ~naming_table:istate.naming_table
                     |> ServerFindRefs.to_absolute
-                    |> List.map ~f:snd
                   in
                   let urikey =
                     Lsp_helpers.path_to_lsp_uri

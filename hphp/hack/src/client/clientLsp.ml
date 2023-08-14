@@ -2337,7 +2337,8 @@ let do_findReferences_local
         params.FindReferences.loc.TextDocumentPositionParams.textDocument
     in
     let positions =
-      List.map positions ~f:(hack_pos_to_lsp_location ~default_path:filename)
+      List.map positions ~f:(fun (_name, pos) ->
+          hack_pos_to_lsp_location ~default_path:filename pos)
     in
     respond_jsonrpc
       ~powered_by:Serverless_ide
@@ -2346,15 +2347,11 @@ let do_findReferences_local
     let result_telemetry = make_result_telemetry (List.length positions) in
     Lwt.return (state, result_telemetry)
   | ClientIdeMessage.Find_refs_success
-      {
-        full_name;
-        action = Some action;
-        open_file_results = ide_calculated_positions;
-      } ->
-    (* ClientIdeMessage.Find_references only supports localvar.
-       Receiving an error with a non-localvar action indicates that we attempted to
-       try and find references for a non-localvar
-    *)
+      { full_name; action = Some action; open_file_results } ->
+    (* The [open_file_results] included the SymbolOccurrence text for each ref. We won't need that... *)
+    let ide_calculated_positions =
+      UriMap.map (List.map ~f:snd) open_file_results
+    in
     let shellable_type =
       Lost_env.FindRefs
         {

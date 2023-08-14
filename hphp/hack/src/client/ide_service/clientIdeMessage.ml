@@ -40,8 +40,8 @@ type find_refs_result =
       full_name: string;  (** from [SymbolDefinition.full_name] *)
       action: ServerCommandTypes.Find_refs.action option;
           (** if true, then clientLsp should shell out to hh_server to collect more positions;
-      this action will specifiy what hh_server shoud look for. *)
-      open_file_results: Pos.absolute list Lsp.UriMap.t;
+          this action will specifiy what hh_server shoud look for. *)
+      open_file_results: (string * Pos.absolute) list Lsp.UriMap.t;
           (** All references that were found in all open files in clientIdeDaemon. *)
     }
 

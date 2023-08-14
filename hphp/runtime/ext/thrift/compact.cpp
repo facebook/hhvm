@@ -61,8 +61,13 @@ const StaticString SKIP_CHECKS_ATTR("ThriftDeprecatedSkipSerializerChecks");
 
 // Assumes that at least 10 bytes available in the input buffer
 static int64_t readVarintFast(const char **ptr) {
-  uint8_t byte = *((*ptr)++);
-  uint64_t result = (uint64_t)(byte & 0x7f);
+  uint8_t byte;
+  uint64_t result;
+
+#ifndef __AVX2__
+
+  byte = *((*ptr)++);
+  result = (uint64_t)(byte & 0x7f);
   if ((byte & 0x80) == 0) goto ret;
   // Byte 2
   byte = *((*ptr)++);
@@ -76,6 +81,33 @@ static int64_t readVarintFast(const char **ptr) {
   byte = *((*ptr)++);
   result = result | (uint64_t)(byte & 0x7f) << 21;
   if ((byte & 0x80) == 0) goto ret;
+
+#else
+
+  // Optimization for single byte values
+  if (!(**ptr & 0x80)) {
+    return static_cast<int64_t>(*((*ptr)++));
+  }
+  uint64_t v;
+  memcpy(&v, *ptr, sizeof(uint64_t));
+  const size_t l = _tzcnt_u64(~v & 0x8080808080808080ULL) / 8;
+  if (l == 1) {
+    *ptr += 2;
+    return static_cast<int64_t>(_pext_u64(v, 0x7f7fULL));
+  }
+  if (l == 2) {
+    *ptr += 3;
+    return static_cast<int64_t>(_pext_u64(v, 0x7f7f7fULL));
+  }
+  if (l == 3) {
+    *ptr += 4;
+    return static_cast<int64_t>(_pext_u64(v, 0x7f7f7f7fULL));
+  }
+  *ptr += 4;
+  result = _pext_u64(v, 0x7f7f7f7fULL);
+
+#endif // __AVX2__
+
   // Byte 5
   byte = *((*ptr)++);
   result = result | (uint64_t)(byte & 0x7f) << 28;

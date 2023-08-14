@@ -51,14 +51,14 @@ pub type Attributes = BTreeMap<String, Vec<serde_json::Value>>;
 pub type Methods = BTreeMap<String, MethodFacts>;
 pub type TypeFactsByName = BTreeMap<String, TypeFacts>;
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct MethodFacts {
     #[serde(default, skip_serializing_if = "Attributes::is_empty")]
     pub attributes: Attributes,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize, Default)]
+#[derive(Debug, PartialEq, Serialize, Deserialize, Default, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct TypeFacts {
     #[serde(default, skip_serializing_if = "StringSet::is_empty")]
@@ -85,13 +85,13 @@ pub struct TypeFacts {
     pub methods: Methods,
 }
 // Currently module facts are empty, but added for backward compatibility
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct ModuleFacts {}
 
 pub type ModuleFactsByName = BTreeMap<String, ModuleFacts>;
 
-#[derive(Default, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Default, Debug, PartialEq, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Facts {
     #[serde(

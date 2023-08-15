@@ -721,12 +721,17 @@ class mstch_function : public mstch_base {
   mstch::node sink_first_response_type();
   mstch::node sink_elem_type();
   mstch::node has_sink_exceptions() {
-    return function_->get_sink_xceptions()->has_fields();
+    const t_sink* sink = function_->sink();
+    const t_throws* exceptions = sink ? sink->sink_exceptions() : nullptr;
+    return exceptions && exceptions->has_fields();
   }
   mstch::node sink_exceptions();
   mstch::node sink_final_reponse_type();
   mstch::node has_sink_final_response_exceptions() {
-    return function_->get_sink_final_response_xceptions()->has_fields();
+    const t_sink* sink = function_->sink();
+    const t_throws* exceptions =
+        sink ? sink->final_response_exceptions() : nullptr;
+    return exceptions && exceptions->has_fields();
   }
   mstch::node sink_final_response_exceptions();
 
@@ -738,7 +743,9 @@ class mstch_function : public mstch_base {
   }
   mstch::node stream_first_response_type();
   mstch::node has_stream_exceptions() {
-    return function_->get_stream_xceptions()->has_fields();
+    const t_stream_response* stream = function_->stream();
+    const t_throws* exceptions = stream ? stream->exceptions() : nullptr;
+    return exceptions && exceptions->has_fields();
   }
   mstch::node stream_exceptions();
 
@@ -746,6 +753,11 @@ class mstch_function : public mstch_base {
   const t_function* function_;
 
   bool has_args_() { return function_->get_paramlist()->has_fields(); }
+
+  mstch::node make_exceptions(const t_throws* exceptions) {
+    return exceptions ? make_mstch_fields(exceptions->get_members())
+                      : mstch::node();
+  }
 };
 
 class mstch_type : public mstch_base {

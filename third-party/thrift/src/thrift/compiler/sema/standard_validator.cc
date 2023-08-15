@@ -869,17 +869,6 @@ void validate_oneway_function(diagnostic_context& ctx, const t_function& node) {
       node.name());
 }
 
-void validate_stream_exceptions_return_type(
-    diagnostic_context& ctx, const t_function& node) {
-  if (t_throws::is_null_or_empty(node.get_stream_xceptions())) {
-    return;
-  }
-
-  if (!node.stream()) {
-    ctx.error("`stream throws` only valid on stream methods: {}", node.name());
-  }
-}
-
 void validate_interaction_nesting(
     diagnostic_context& ctx, const t_interaction& node) {
   for (auto* func : node.get_functions()) {
@@ -1226,7 +1215,6 @@ ast_validator standard_validator() {
   validator.add_throws_visitor(&validate_throws_exceptions);
   validator.add_function_visitor(&validate_oneway_function);
   validator.add_function_visitor(&validate_function_return_type);
-  validator.add_function_visitor(&validate_stream_exceptions_return_type);
   validator.add_function_visitor(&validate_function_priority_annotation);
   validator.add_function_visitor(ValidateAnnotationPositions{});
 

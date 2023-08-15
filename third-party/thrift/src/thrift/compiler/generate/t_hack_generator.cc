@@ -6184,7 +6184,7 @@ void t_hack_generator::generate_php_sink_function_helpers(
   generate_php_function_result_helpers(
       tfunction,
       sink->get_elem_type(),
-      tfunction->get_sink_xceptions(),
+      sink->sink_exceptions(),
       prefix,
       "_SinkPayload",
       /* is_void */ false);
@@ -6192,7 +6192,7 @@ void t_hack_generator::generate_php_sink_function_helpers(
   generate_php_function_result_helpers(
       tfunction,
       sink->get_final_response_type(),
-      tfunction->get_sink_final_response_xceptions(),
+      sink->final_response_exceptions(),
       prefix,
       "_FinalResponse",
       /* is_void */ false);

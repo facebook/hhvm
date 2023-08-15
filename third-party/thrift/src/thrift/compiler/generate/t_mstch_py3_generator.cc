@@ -1179,9 +1179,12 @@ void py3_mstch_program::visit_type_single_service(const t_service* service) {
     for (const auto& field : function.get_paramlist()->fields()) {
       visit_type(field.get_type());
     }
-    for (const auto& field : function.get_stream_xceptions()->fields()) {
-      const t_type* exType = field.get_type();
-      streamExceptions_.emplace(visit_type(field.get_type()), exType);
+    const t_stream_response* stream = function.stream();
+    if (const t_throws* exceptions = stream ? stream->exceptions() : nullptr) {
+      for (const t_field& field : exceptions->fields()) {
+        const t_type* exType = field.get_type();
+        streamExceptions_.emplace(visit_type(field.get_type()), exType);
+      }
     }
     for (const auto& field : function.get_xceptions()->fields()) {
       visit_type(field.get_type());

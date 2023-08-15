@@ -69,6 +69,8 @@ class t_function final : public t_named {
         sink_or_stream_(std::move(sink_or_stream)),
         paramlist_(std::make_unique<t_paramlist>(program)) {}
 
+  const t_type* get_return_type() const { return return_type().get_type(); }
+
   t_type_ref return_type() const {
     return response_pos_ != -1 ? return_types_[response_pos_]
                                : t_type_ref::from_ptr(sink_or_stream_.get());
@@ -159,14 +161,10 @@ class t_function final : public t_named {
       t_function_qualifier qualifier = {});
 
   t_paramlist* get_paramlist() const { return paramlist_.get(); }
-  const t_type* get_return_type() const { return return_type().get_type(); }
   const t_type* get_returntype() const { return return_type().get_type(); }
   const t_throws* get_xceptions() const {
     return t_throws::or_empty(exceptions());
   }
-  const t_throws* get_stream_xceptions() const;
-  const t_throws* get_sink_xceptions() const;
-  const t_throws* get_sink_final_response_xceptions() const;
   bool is_oneway() const { return qualifier_ == t_function_qualifier::one_way; }
 };
 

@@ -490,7 +490,8 @@ mstch::node mstch_function::sink_elem_type() {
 }
 
 mstch::node mstch_function::sink_exceptions() {
-  return make_mstch_fields(function_->get_sink_xceptions()->get_members());
+  const t_sink* sink = function_->sink();
+  return sink ? make_exceptions(sink->sink_exceptions()) : mstch::node();
 }
 
 mstch::node mstch_function::sink_final_reponse_type() {
@@ -501,8 +502,9 @@ mstch::node mstch_function::sink_final_reponse_type() {
 }
 
 mstch::node mstch_function::sink_final_response_exceptions() {
-  return make_mstch_fields(
-      function_->get_sink_final_response_xceptions()->get_members());
+  const t_sink* sink = function_->sink();
+  return sink ? make_exceptions(sink->final_response_exceptions())
+              : mstch::node();
 }
 
 mstch::node mstch_function::stream_elem_type() {
@@ -523,7 +525,8 @@ mstch::node mstch_function::stream_first_response_type() {
 }
 
 mstch::node mstch_function::stream_exceptions() {
-  return make_mstch_fields(function_->get_stream_xceptions()->get_members());
+  const t_stream_response* stream = function_->stream();
+  return stream ? make_exceptions(stream->exceptions()) : mstch::node();
 }
 
 mstch::node mstch_service::functions() {

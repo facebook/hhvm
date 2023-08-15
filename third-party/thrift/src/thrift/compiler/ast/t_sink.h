@@ -105,10 +105,6 @@ class t_sink : public t_type {
   }
 
   bool sink_has_first_response() const { return !first_response_type_.empty(); }
-  t_throws* get_final_response_xceptions() const {
-    return final_response_exceptions_.get();
-  }
-  t_throws* get_sink_xceptions() const { return sink_exceptions_.get(); }
   const t_type* get_elem_type() const { return elem_type().get_type(); }
   const t_type* get_first_response_type() const {
     return first_response_type_.get_type();

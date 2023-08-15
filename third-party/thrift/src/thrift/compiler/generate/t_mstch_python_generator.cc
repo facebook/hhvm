@@ -524,10 +524,12 @@ class python_mstch_program : public mstch_program {
       for (const auto& field : function.get_xceptions()->fields()) {
         visit_type(field.get_type());
       }
-      for (const auto& field : function.get_stream_xceptions()->fields()) {
-        visit_type(field.get_type());
-      }
       if (const t_stream_response* stream = function.stream()) {
+        if (const t_throws* exceptions = stream->exceptions()) {
+          for (const auto& field : exceptions->fields()) {
+            visit_type(field.get_type());
+          }
+        }
         if (const t_type* resp_type = stream->get_first_response_type()) {
           visit_type(resp_type);
         }

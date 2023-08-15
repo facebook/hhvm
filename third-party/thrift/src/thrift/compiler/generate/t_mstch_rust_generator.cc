@@ -934,23 +934,26 @@ class rust_mstch_function : public mstch_function {
     return rust_make_unique_exceptions(function_->get_xceptions());
   }
   mstch::node rust_unique_stream_exceptions() {
-    return rust_make_unique_exceptions(function_->get_stream_xceptions());
+    const t_stream_response* stream = function_->stream();
+    return rust_make_unique_exceptions(stream ? stream->exceptions() : nullptr);
   }
-  mstch::node rust_make_unique_exceptions(const t_struct* a) {
+  mstch::node rust_make_unique_exceptions(const t_struct* s) {
     // When generating From<> impls for an error type, we must not generate one
     // where more than one variant contains the same type of exception. Find
     // only those exceptions that map uniquely to a variant.
 
-    const auto& exceptions = a->fields();
-    std::map<const t_type*, unsigned> type_count;
-    for (const auto& x : exceptions) {
-      type_count[x.get_type()] += 1;
-    }
-
     std::vector<const t_field*> unique_exceptions;
-    for (const auto& x : exceptions) {
-      if (type_count.at(x.get_type()) == 1) {
-        unique_exceptions.emplace_back(&x);
+    if (s) {
+      const auto& exceptions = s->fields();
+      std::map<const t_type*, unsigned> type_count;
+      for (const auto& x : exceptions) {
+        type_count[x.get_type()] += 1;
+      }
+
+      for (const auto& x : exceptions) {
+        if (type_count.at(x.get_type()) == 1) {
+          unique_exceptions.emplace_back(&x);
+        }
       }
     }
 

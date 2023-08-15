@@ -37,26 +37,6 @@ t_function::t_function(
   set_return_type(return_type);
 }
 
-const t_throws* t_function::get_stream_xceptions() const {
-  if (const auto* stream =
-          dynamic_cast<const t_stream_response*>(sink_or_stream_.get())) {
-    return t_throws::or_empty(stream->exceptions());
-  }
-  return t_throws::no_exceptions();
-}
-const t_throws* t_function::get_sink_xceptions() const {
-  if (const auto* sink = dynamic_cast<const t_sink*>(sink_or_stream_.get())) {
-    return t_throws::or_empty(sink->sink_exceptions());
-  }
-  return t_throws::no_exceptions();
-}
-const t_throws* t_function::get_sink_final_response_xceptions() const {
-  if (const auto* sink = dynamic_cast<const t_sink*>(sink_or_stream_.get())) {
-    return t_throws::or_empty(sink->final_response_exceptions());
-  }
-  return t_throws::no_exceptions();
-}
-
 } // namespace compiler
 } // namespace thrift
 } // namespace apache

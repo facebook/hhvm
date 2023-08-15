@@ -15,6 +15,7 @@
 
 import argparse
 import asyncio
+import multiprocessing
 import os
 import re
 import shlex
@@ -127,17 +128,27 @@ fixture_names = (
 
 has_errors = False
 
+# Semaphore to limit the number of concurrent fixture builds.
+# Otherwise, a swarm of compiler processes results in too much
+# CPU contention, consistenly killing people's devservers.
+sem = asyncio.Semaphore(value=multiprocessing.cpu_count())
+
 
 async def run_subprocess(cmd, *, cwd):
-    p = await asyncio.create_subprocess_exec(
-        *cmd, cwd=cwd, close_fds=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-    )
-    out, err = await p.communicate()
-    sys.stdout.write(out.decode(sys.stdout.encoding))
-    if p.returncode != 0:
-        global has_errors
-        has_errors = True
-        sys.stderr.write(err.decode(sys.stderr.encoding))
+    async with sem:
+        p = await asyncio.create_subprocess_exec(
+            *cmd,
+            cwd=cwd,
+            close_fds=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+        out, err = await p.communicate()
+        sys.stdout.write(out.decode(sys.stdout.encoding))
+        if p.returncode != 0:
+            global has_errors
+            has_errors = True
+            sys.stderr.write(err.decode(sys.stderr.encoding))
 
 
 async def main():

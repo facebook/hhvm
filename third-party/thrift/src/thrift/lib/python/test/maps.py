@@ -69,9 +69,7 @@ class MapTests(unittest.TestCase):
     def test_get(self) -> None:
         x = StrStrMap({"test": "value"})
         self.assertEqual(x.get("test"), "value")
-        # pyre-ignore[6]: purposely use a wrong type to test behavior of .get()
         self.assertIs(x.get(5), None)
-        # pyre-ignore[6]: purposely use a wrong type to test behavior of .get()
         self.assertIs(x.get(x), None)
 
     def test_contains(self) -> None:

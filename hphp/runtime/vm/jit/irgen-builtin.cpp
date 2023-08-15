@@ -313,6 +313,23 @@ SSATmp* opt_hphp_debug_caller_info(IRGS& env, const ParamPrep& params) {
   return cns(env, bad);
 }
 
+SSATmp* opt_hphp_debug_caller_identifier(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 0) return nullptr;
+
+  String result = empty_string();
+  auto skipped = false;
+  auto found = false;
+
+  for (auto i = env.inlineState.depth; i > 0; i--) {
+    auto const sk = env.inlineState.bcStateStack[i - 1];
+    found = hphp_debug_caller_identifier_impl(result, skipped, sk.func());
+    if (found) break;
+  }
+
+  if (!found) return nullptr;
+  return cns(env, makeStaticString(result));
+}
+
 SSATmp* opt_ini_get(IRGS& env, const ParamPrep& params) {
   if (params.size() != 1) return nullptr;
 
@@ -1285,6 +1302,7 @@ const hphp_fast_string_imap<OptEmitFn> s_opt_emit_fns{
   {"HH\\meth_caller_get_method", opt_meth_caller_get_method},
   {"HH\\ImplicitContext\\_Private\\get_implicit_context_memo_key",
      opt_get_implicit_context_memo_key},
+  {"hphp_debug_caller_identifier", opt_hphp_debug_caller_identifier},
 };
 
 // This second whitelist, a subset of the first, records which parameter

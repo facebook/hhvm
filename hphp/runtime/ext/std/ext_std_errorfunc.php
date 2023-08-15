@@ -252,6 +252,16 @@ function hphp_clear_unflushed(): void;
 <<__Native, __EagerVMSync>>
 function hphp_debug_caller_info()[leak_safe]: darray<string, mixed>;
 
+/**
+ * Retrieves the full function name of the caller that invoked the current
+ * function or method.
+ *
+ * @return array - Returns either 'function' or 'class::method' of the callsite
+ *     that invoked the current function or method.
+ */
+<<__Native, __EagerVMSync>>
+function hphp_debug_caller_identifier()[leak_safe]: string;
+
 <<__Native("NoInjection")>>
 function hphp_debug_backtrace_hash(int $options = 0)[leak_safe]: int;
 

@@ -34,6 +34,9 @@ extern const int64_t k_DEBUG_BACKTRACE_HASH_CONSIDER_METADATA;
 bool hphp_debug_caller_info_impl(
     Array& result, bool& skipped, const Func* func, Offset offset);
 
+bool hphp_debug_caller_identifier_impl(
+    String& result, bool& skipped, const Func* func);
+
 Array HHVM_FUNCTION(debug_backtrace,
                     int64_t options = k_DEBUG_BACKTRACE_PROVIDE_OBJECT,
                     int64_t limit = 0);

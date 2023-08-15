@@ -142,6 +142,40 @@ Array HHVM_FUNCTION(hphp_debug_caller_info) {
   return result;
 }
 
+
+bool hphp_debug_caller_identifier_impl(
+    String& result, bool& skipped, const Func* func) {
+  if (!skipped && func->isSkipFrame()) return false;
+  if (!skipped) {
+    skipped = true;
+    return false;
+  }
+
+  if (func->name()->isame(s_call_user_func.get())) return false;
+  if (func->name()->isame(s_call_user_func_array.get())) return false;
+
+  result = func->fullNameWithClosureName();
+  return true;
+}
+
+/**
+ * hphp_debug_caller_identifier - returns the full function name of
+ * the "caller"
+ *
+ * For clarity, we refer to the function that called
+ * hphp_debug_caller_identifier() as the "callee", and we refer to the
+ * function that called the callee as the "caller".
+ */
+String HHVM_FUNCTION(hphp_debug_caller_identifier) {
+  String result = empty_string();
+  bool skipped = false;
+  walkStack([&] (const BTFrame& frm) {
+    return hphp_debug_caller_identifier_impl(
+        result, skipped, frm.func());
+  });
+  return result;
+}
+
 int64_t HHVM_FUNCTION(hphp_debug_backtrace_hash, int64_t options /* = 0 */) {
   return createBacktraceHash(
     options & k_DEBUG_BACKTRACE_HASH_CONSIDER_METADATA
@@ -396,6 +430,7 @@ Array HHVM_FUNCTION(HH_deferred_errors) {
 void StandardExtension::initErrorFunc() {
   HHVM_FE(debug_backtrace);
   HHVM_FE(hphp_debug_caller_info);
+  HHVM_FE(hphp_debug_caller_identifier);
   HHVM_FE(hphp_debug_backtrace_hash);
   HHVM_FE(debug_print_backtrace);
   HHVM_FE(error_get_last);

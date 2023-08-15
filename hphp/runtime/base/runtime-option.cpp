@@ -901,10 +901,6 @@ std::vector<std::shared_ptr<FilesMatch>> RuntimeOption::FilesMatches;
 std::set<std::string> RuntimeOption::RenamableFunctions;
 std::set<std::string> RuntimeOption::NonInterceptableFunctions;
 
-bool RuntimeOption::WhitelistExec = false;
-bool RuntimeOption::WhitelistExecWarningOnly = false;
-std::vector<std::string> RuntimeOption::AllowedExecCmds;
-
 bool RuntimeOption::UnserializationWhitelistCheck = false;
 bool RuntimeOption::UnserializationWhitelistCheckWarningOnly = true;
 int64_t RuntimeOption::UnserializationBigMapThreshold = 1 << 16;
@@ -2508,10 +2504,6 @@ void RuntimeOption::Load(
                  "Server.RequestInitDocument");
     Config::Bind(SafeFileAccess, ini, config, "Server.SafeFileAccess");
     Config::Bind(AllowedDirectories, ini, config, "Server.AllowedDirectories");
-    Config::Bind(WhitelistExec, ini, config, "Server.WhitelistExec");
-    Config::Bind(WhitelistExecWarningOnly, ini, config,
-                 "Server.WhitelistExecWarningOnly");
-    Config::Bind(AllowedExecCmds, ini, config, "Server.AllowedExecCmds");
     Config::Bind(UnserializationWhitelistCheck, ini, config,
                  "Server.UnserializationWhitelistCheck", false);
     Config::Bind(UnserializationWhitelistCheckWarningOnly, ini, config,

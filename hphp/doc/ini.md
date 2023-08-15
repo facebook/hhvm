@@ -12,9 +12,6 @@ Here is the typical format of an ini file (values not necessarily realistic):
 ```
 hhvm.hot_func_count = 11
 hhvm.stats.slot_duration = 11
-hhvm.server.allowed_exec_cmds[] = "ls"
-hhvm.server.allowed_exec_cmds[]= "cp"
-hhvm.server.allowed_exec_cmds[]= "rm"
 hhvm.env_variables["MYBOOL"] = true
 hhvm.env_variables["MYINT"] = 5
 hhvm.env_variables["MYSTR"] = "Custom String"

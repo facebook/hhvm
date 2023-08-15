@@ -614,10 +614,6 @@ struct RuntimeOption {
   static std::set<std::string> RenamableFunctions;
   static std::set<std::string> NonInterceptableFunctions;
 
-  static bool WhitelistExec;
-  static bool WhitelistExecWarningOnly;
-  static std::vector<std::string> AllowedExecCmds;
-
   static bool UnserializationWhitelistCheck;
   static bool UnserializationWhitelistCheckWarningOnly;
   static int64_t UnserializationBigMapThreshold;

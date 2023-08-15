@@ -933,7 +933,7 @@ InitFiniNode s_logSettings(logSettings, InitFiniNode::When::ProcessInit);
 
 struct IniCallbackData {
   const Extension* extension{nullptr};
-  IniSetting::Mode mode{IniSetting::PHP_INI_NONE};
+  IniSetting::Mode mode{IniSetting::Mode::Request};
   IniSetting::OptionData callbacks{nullptr};
 };
 
@@ -1004,18 +1004,7 @@ void IniSetting::Bind(
 ) {
   assertx(!name.empty());
 
-  /*
-   * WATCH OUT: unlike php5, a Mode is not necessarily a bit mask.
-   * PHP_INI_ALL is NOT encoded as the union:
-   *   PHP_INI_USER|PHP_INI_PERDIR|PHP_INI_SYSTEM
-   *
-   * Note that Mode value PHP_INI_SET_USER and PHP_INI_SET_EVERY are bit
-   * sets; "SET" in this use means "bitset", and not "assignment".
-   */
-  bool is_thread_local =
-    (mode == PHP_INI_USER) ||
-    (mode == PHP_INI_PERDIR) ||
-    (mode == PHP_INI_ALL);
+  bool is_thread_local = canSet(mode, Mode::Request);
   assertx(is_thread_local || !ExtensionRegistry::modulesInitialised() ||
          !s_system_settings_are_set);
 
@@ -1127,7 +1116,7 @@ std::string IniSetting::Get(const String& name) {
 static bool ini_set(const String& name, const Variant& value,
                     IniSetting::Mode mode) {
   auto cb = get_callback(name);
-  if (!cb || !(cb->mode & mode)) {
+  if (!cb || !IniSetting::canSet(cb->mode, mode)) {
     return false;
   }
   return doSet(cb->callbacks, value);
@@ -1156,7 +1145,7 @@ bool IniSetting::SetSystem(const String& name, const Variant& value) {
   Variant eval_scalar_variant = value;
   eval_scalar_variant.setEvalScalar();
   s_system_settings.settings[name.toCppString()] = eval_scalar_variant;
-  return ini_set(name, value, PHP_INI_SET_EVERY);
+  return ini_set(name, value, Mode::Config);
 }
 
 bool IniSetting::GetSystem(const String& name, Variant& value) {
@@ -1177,7 +1166,7 @@ bool IniSetting::SetUser(const String& name, const Variant& value) {
       defaults[name.toCppString()] = def;
     }
   }
-  return ini_set(name, value, PHP_INI_SET_USER);
+  return ini_set(name, value, Mode::Request);
 }
 
 void IniSetting::RestoreUser(const String& name) {
@@ -1185,7 +1174,7 @@ void IniSetting::RestoreUser(const String& name) {
     auto& defaults = s_saved_defaults->settings.value();
     auto it = defaults.find(name.toCppString());
     if (it != defaults.end() &&
-        ini_set(name, it->second, PHP_INI_SET_USER)) {
+        ini_set(name, it->second, Mode::Request)) {
       defaults.erase(it);
     }
   }
@@ -1196,26 +1185,31 @@ bool IniSetting::ResetSystemDefault(const std::string& name) {
   if (it == s_system_settings.settings.end()) {
     return false;
   }
-  return ini_set(name, it->second, PHP_INI_SET_EVERY);
+  return ini_set(name, it->second, Mode::Config);
 }
 
 void IniSetting::ResetSavedDefaults() {
   if (!s_saved_defaults->empty()) {
     for (auto& item : s_saved_defaults->settings.value()) {
-      ini_set(item.first, item.second, PHP_INI_SET_USER);
+      ini_set(item.first, item.second, Mode::Request);
     }
   }
   // destroy the local settings hashtable even if it's empty
   s_saved_defaults->clear();
 }
 
-bool IniSetting::GetMode(const String& name, Mode& mode) {
+bool IniSetting::canSet(Mode settingMode, Mode checkMode) {
+  assertx(checkMode != Mode::Constant);
+  if (settingMode == Mode::Constant) return false;
+  return settingMode <= checkMode;
+}
+
+Optional<IniSetting::Mode> IniSetting::GetMode(const String& name) {
   auto cb = get_callback(name);
   if (!cb) {
-    return false;
+    return {};
   }
-  mode = cb->mode;
-  return true;
+  return {cb->mode};
 }
 
 void IniSetting::Log(StructuredLogEntry& ent,
@@ -1293,16 +1287,7 @@ Array IniSetting::GetAll(const String& ext_name, bool details) {
       Array item = Array::CreateDict();
       item.set(s_global_value, value);
       item.set(s_local_value, value);
-      if (iter.second.mode == PHP_INI_ALL) {
-        item.set(
-          s_access,
-          Variant(PHP_INI_USER | PHP_INI_SYSTEM | PHP_INI_PERDIR)
-        );
-      } else if (iter.second.mode == PHP_INI_ONLY) {
-        item.set(s_access, Variant(PHP_INI_SYSTEM));
-      } else {
-        item.set(s_access, Variant(iter.second.mode));
-      }
+      item.set(s_access, Variant(int64_t(iter.second.mode)));
       r.set(String(iter.first), item);
     } else {
       r.set(String(iter.first), value);

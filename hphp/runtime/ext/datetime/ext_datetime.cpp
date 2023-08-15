@@ -1059,7 +1059,7 @@ static struct DateTimeExtension final : Extension {
 
   void threadInit() override {
     IniSetting::Bind(
-      this, IniSetting::PHP_INI_ALL,
+      this, IniSetting::Mode::Request,
       "date.timezone",
       "",
       IniSetting::SetAndGet<std::string>(
@@ -1067,22 +1067,22 @@ static struct DateTimeExtension final : Extension {
       )
     );
     IniSetting::Bind(
-      this, IniSetting::PHP_INI_ALL,
+      this, IniSetting::Mode::Request,
       "date.default_latitude", "31.7667",
       &s_date_globals->default_latitude
     );
     IniSetting::Bind(
-      this, IniSetting::PHP_INI_ALL,
+      this, IniSetting::Mode::Request,
       "date.default_longitude", "35.2333",
       &s_date_globals->default_longitude
     );
     IniSetting::Bind(
-      this, IniSetting::PHP_INI_ALL,
+      this, IniSetting::Mode::Request,
       "date.sunset_zenith", "90.583333",
       &s_date_globals->sunset_zenith
     );
     IniSetting::Bind(
-      this, IniSetting::PHP_INI_ALL,
+      this, IniSetting::Mode::Request,
       "date.sunrise_zenith", "90.583333",
       &s_date_globals->sunrise_zenith
     );

@@ -70,14 +70,14 @@ and stderr file-descriptors, a file-descriptor to communicate with the client's
 light process pool, the command line arguments, and a JSON blob of INI settings.
 
 The setup performed in doJob resembles normal command line execution. Notably,
-however, the PHP_INI_USER options are read from the client as a JSON string and
-used to override the server defaults, the STD[IN,OUT,ERR] constants are defined
-the ExecutionContext is instructed to write to the client's stdout, and the
-LightProcess abstraction is given an override socket to allow the client to
-spawn child processes via its own light process pool (so that commands executed
-by proc_open and friends have the correct uid/gid). Additionally the cwd is set
-to the client's cwd, the is_cli_server_mode() function returns true, and safe
-directory access is disabled.
+however, the IniSetting::Mode::Request options are read from the client as a
+JSON string and used to override the server defaults, the STD[IN,OUT,ERR]
+constants are defined the ExecutionContext is instructed to write to the
+client's stdout, and the LightProcess abstraction is given an override socket to
+allow the client to spawn child processes via its own light process pool (so
+that commands executed by proc_open and friends have the correct uid/gid).
+Additionally the cwd is set to the client's cwd, the is_cli_server_mode()
+function returns true, and safe directory access is disabled.
 
 Lastly, a special file wrapper, CLIWrapper, is set to handle all local file
 system operations.
@@ -669,7 +669,7 @@ void load_ini_settings(const folly::dynamic& ini) {
 
     auto const nameStr = name.asString();
     auto value = opt["local_value"];
-    if ((opt["access"].asInt() & IniSetting::PHP_INI_USER) == 0) {
+    if (!IniSetting::canSet(opt["access"].asInt(), IniSetting::Mode::Request)) {
       FTRACE(5, "init_ini_settings: skipping INI setting {}\n", nameStr);
       continue;
     }
@@ -682,7 +682,7 @@ void load_ini_settings(const folly::dynamic& ini) {
     if (value.isBool())   res = IniSetting::SetUser(nameStr, value.asBool());
     if (value.isDouble()) res = IniSetting::SetUser(nameStr, value.asDouble());
     if (!res) {
-      FTRACE(5, "init_ini_settings: unable to set PHP_INI_USER setting: {} "
+      FTRACE(5, "init_ini_settings: unable to set Mode::Request setting: {} "
              "(access = {})\n", nameStr, opt["access"].asInt());
       Logger::Warning("CLI server received an invalid INI setting: %s "
                       "(access = %" PRId64 ")",

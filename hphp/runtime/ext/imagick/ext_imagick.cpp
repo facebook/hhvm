@@ -335,10 +335,10 @@ void ImagickExtension::moduleShutdown() {
 }
 
 void ImagickExtension::threadInit() {
-  IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
+  IniSetting::Bind(this, IniSetting::Mode::Request,
                    "imagick.locale_fix", "0",
                    &s_ini_setting->m_locale_fix);
-  IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
+  IniSetting::Bind(this, IniSetting::Mode::Request,
                    "imagick.progress_monitor", "0",
                    &s_ini_setting->m_progress_monitor);
 }

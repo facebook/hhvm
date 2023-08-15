@@ -4537,7 +4537,7 @@ static struct mbstringExtension final : Extension {
   mbstringExtension() : Extension("mbstring", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
 
   void moduleInit() override {
-    IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
+    IniSetting::Bind(this, IniSetting::Mode::Request,
                      "mbstring.substitute_character",
                      &MBSTRG(current_filter_illegal_mode));
 

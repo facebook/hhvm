@@ -122,7 +122,7 @@ MemoryManager::MemoryManager() {
   resetGC(); // so each thread has unique req_num at startup
   m_bypassSlabAlloc = RuntimeOption::DisableSmallAllocator;
   m_req_start_micros = HPHP::Timer::GetThreadCPUTimeNanos() / 1000;
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL, "zend.enable_gc",
+  IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request, "zend.enable_gc",
                    &m_gc_enabled);
 }
 

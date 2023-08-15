@@ -1,22 +1,20 @@
 <?hh
 
 
-// PHP_INI_ALL
 <<__EntryPoint>>
 function main_ini_set() :mixed{
-// PHP_INI_NONE
+// Constant
 var_dump(ini_set('hphp.compiler_id', 'foo'));
 var_dump(ini_get('hphp.compiler_id'));
 
-// PHP_INI_SYSTEM
+// Config
 var_dump(ini_set('file_uploads', '0'));
 var_dump(ini_get('file_uploads'));
 
-// PHP_INI_ONLY
 var_dump(ini_set('expose_php', '0'));
 var_dump(ini_get('expose_php'));
 
-// PHP_INI_PERDIR
+// Request
 var_dump(ini_set('always_populate_raw_post_data', '1'));
 var_dump(ini_get('always_populate_raw_post_data'));
 

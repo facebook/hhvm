@@ -173,19 +173,10 @@ public:
     void onConstant(std::string& result, const std::string& name) override;
   };
 
-  enum Mode {
-    PHP_INI_NONE   = 0,
-    // These 3 match zend
-    PHP_INI_USER   = (1u << 0),
-    PHP_INI_PERDIR = (1u << 1),
-    PHP_INI_SYSTEM = (1u << 2),
-
-    PHP_INI_ONLY   = (1u << 3),
-    PHP_INI_ALL    = (1u << 4),
-
-    PHP_INI_SET_USER   = PHP_INI_USER | PHP_INI_ALL,
-    PHP_INI_SET_EVERY  = PHP_INI_ONLY | PHP_INI_SYSTEM | PHP_INI_PERDIR |
-                         PHP_INI_SET_USER,
+  enum class Mode {
+    Request,  // A value that can be set per request
+    Config,   // A value that can be set through configuration
+    Constant, // A constant value decided at compile time. Can not be set
   };
 
 public:
@@ -209,6 +200,10 @@ public:
   static void Log(StructuredLogEntry& ent, const hphp_fast_string_set& toLog,
                   const hphp_fast_string_set& toExclude);
 
+  static bool canSet(int64_t settingMode, Mode checkMode) {
+    return canSet(static_cast<Mode>(settingMode), checkMode);
+  }
+  static bool canSet(Mode settingMode, Mode checkMode);
   /**
    * Change an INI setting as if it was in the php.ini file
    */
@@ -238,7 +233,7 @@ public:
   /**
    * Get the mode for a setting
    */
-  static bool GetMode(const String& name, Mode& mode);
+  static Optional<Mode> GetMode(const String& name);
 
 #define INI_COMMA ,
 #define INI_TYPES(X) \
@@ -300,9 +295,9 @@ public:
    * The heavy lifting of creating ini settings. First of all, if you don't
    * have to use this method, please don't. Instead use the simpler:
    *
-   *   IniSetting::Bind(this, PHP_INI_SYSTEM, "my.ini", &some_global_var);
+   *   IniSetting::Bind(this, IniSetting::Mode::Config, "my.ini", &some_global_var);
    *     or
-   *   IniSetting::Bind(this, PHP_INI_ALL, "my.ini", &some_thread_local_var);
+   *   IniSetting::Bind(this, IniSetting::Mode::Request, "my.ini", &some_thread_local_var);
    *
    * If you have to do something special before your variable is set or gotten
    * then you can use this function to add callbacks. Both callbacks are

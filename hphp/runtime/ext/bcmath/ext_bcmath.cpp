@@ -275,7 +275,7 @@ struct bcmathExtension final : Extension {
   }
 
   void threadInit() override {
-    IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
+    IniSetting::Bind(this, IniSetting::Mode::Request,
                      "bcmath.scale", "0",
                      s_initial_precision.get());
   }

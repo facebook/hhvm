@@ -37,7 +37,7 @@
  * This server is still experimental and in particular there is very limited
  * transfer of configuration settings from the client. As a result scripts
  * executed via this module will be running with settings largely defined by
- * the server process. Currently PHP_INI_USER, PHP_INI_ALL, ServerVariables,
+ * the server process. Currently IniSetting::Mode::Request, ServerVariables,
  * EnvVariables, and the remote environment are transferred.
  *
  * Access to the CLI server can be controlled by the runtime options

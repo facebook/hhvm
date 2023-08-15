@@ -1227,7 +1227,7 @@ struct MemcachedExtension final : Extension {
     *s_memcached_globals = new MEMCACHEDGlobals;
     assertx(*s_memcached_globals);
 
-    IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
+    IniSetting::Bind(this, IniSetting::Mode::Request,
                      "memcached.sess_prefix", &MEMCACHEDG(sess_prefix));
   }
 

@@ -183,19 +183,19 @@ void RequestInjectionData::threadInit() {
     );
     auto setAndGet = RuntimeOption::TimeoutsUseWallTime
       ? setAndGetWall : setAndGetCPU;
-    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+    IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
                      "max_execution_time", setAndGet);
-    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+    IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
                      "maximum_execution_time", setAndGet);
-    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+    IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
                      "hhvm.max_wall_time", setAndGetWall);
-    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+    IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
                      "hhvm.max_cpu_time", setAndGetCPU);
   }
 
   // Resource Limits
   std::string mem_def = std::to_string(RuntimeOption::RequestMemoryMaxBytes);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL, "memory_limit",
+  IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request, "memory_limit",
                    mem_def.c_str(),
                    IniSetting::SetAndGet<std::string>(
                      [this](const std::string& value) {
@@ -206,15 +206,15 @@ void RequestInjectionData::threadInit() {
                      &m_maxMemory));
 
   // Data Handling
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+  IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
                    "default_charset", RuntimeOption::DefaultCharsetName.c_str(),
                    &m_defaultCharset);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+  IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
                    "default_mimetype", "text/html",
                    &m_defaultMimeType);
 
   // Paths and Directories
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+  IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
                    "include_path", getDefaultIncludePath().c_str(),
                    IniSetting::SetAndGet<std::string>(
                      [this](const std::string& value) {
@@ -258,7 +258,7 @@ void RequestInjectionData::threadInit() {
                    ));
 
   // Paths and Directories
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+  IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
                    "open_basedir",
                    IniSetting::SetAndGet<std::string>(
                      [this](const std::string& value) {
@@ -280,14 +280,14 @@ void RequestInjectionData::threadInit() {
                    ));
 
   // Errors and Logging Configuration Options
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+  IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
                    "error_reporting",
                    std::to_string(RuntimeOption::RuntimeErrorReportingLevel)
                     .c_str(),
                    &m_errorReportingLevel);
   IniSetting::Bind(
     IniSetting::CORE,
-    IniSetting::PHP_INI_ALL,
+    IniSetting::Mode::Request,
     "html_errors",
     IniSetting::SetAndGet<bool>(
       [&] (const bool& on) {
@@ -299,7 +299,7 @@ void RequestInjectionData::threadInit() {
     )
   );
 
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+  IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
                    "log_errors",
                    IniSetting::SetAndGet<bool>(
                      [this](const bool& on) {
@@ -317,7 +317,7 @@ void RequestInjectionData::threadInit() {
                      nullptr,
                      &m_logErrors
                    ));
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+  IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
                    "error_log",
                    IniSetting::SetAndGet<std::string>(
                      [this](const std::string& value) {
@@ -331,9 +331,9 @@ void RequestInjectionData::threadInit() {
                    ));
 
   // Filesystem and Streams Configuration Options
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+  IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
                    "user_agent", "", &m_userAgent);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+  IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
                    "default_socket_timeout",
                    std::to_string(RuntimeOption::SocketDefaultTimeout).c_str(),
                    &m_socketDefaultTimeout);
@@ -343,45 +343,45 @@ void RequestInjectionData::threadInit() {
   // represents the output buffer size. Also need to add a
   // zlib.output_handler ini setting as well.
   // http://php.net/zlib.configuration.php
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+  IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
                    "zlib.output_compression", &m_gzipCompression);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+  IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
                    "zlib.output_compression_level", &m_gzipCompressionLevel);
 
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+  IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
                    "brotli.chunked_compression", &m_brotliChunkedEnabled);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+  IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
                    "brotli.compression", &m_brotliEnabled);
   IniSetting::Bind(
       IniSetting::CORE,
-      IniSetting::PHP_INI_ALL,
+      IniSetting::Mode::Request,
       "brotli.compression_quality",
       std::to_string(RuntimeOption::BrotliCompressionQuality).c_str(),
       &m_brotliQuality);
   IniSetting::Bind(
       IniSetting::CORE,
-      IniSetting::PHP_INI_ALL,
+      IniSetting::Mode::Request,
       "brotli.compression_lgwin",
       std::to_string(RuntimeOption::BrotliCompressionLgWindowSize).c_str(),
       &m_brotliLgWindowSize);
 
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+  IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
                    "zstd.compression", &m_zstdEnabled);
   IniSetting::Bind(
       IniSetting::CORE,
-      IniSetting::PHP_INI_ALL,
+      IniSetting::Mode::Request,
       "zstd.compression_level",
       std::to_string(RuntimeOption::ZstdCompressionLevel).c_str(),
       &m_zstdLevel);
   IniSetting::Bind(
       IniSetting::CORE,
-      IniSetting::PHP_INI_ALL,
+      IniSetting::Mode::Request,
       "zstd.checksum_rate",
       std::to_string(RuntimeOption::ZstdChecksumRate).c_str(),
       &m_zstdChecksumRate);
   IniSetting::Bind(
       IniSetting::CORE,
-      IniSetting::PHP_INI_ALL,
+      IniSetting::Mode::Request,
       "zstd.window_log",
       std::to_string(RuntimeOption::ZstdWindowLog).c_str(),
       &m_zstdWindowLog);

@@ -115,10 +115,10 @@ void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
 
   Config::Bind(SizedSampleBytes, ini, config, "Server.APC.SizedSampleBytes", 0);
 
-  IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM, "apc.enabled", &Enable);
-  IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM, "apc.stat",
+  IniSetting::Bind(this, IniSetting::Mode::Config, "apc.enabled", &Enable);
+  IniSetting::Bind(this, IniSetting::Mode::Config, "apc.stat",
                    RuntimeOption::RepoAuthoritative ? "0" : "1", &Stat);
-  IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM, "apc.enable_cli",
+  IniSetting::Bind(this, IniSetting::Mode::Config, "apc.enable_cli",
                    &EnableCLI);
 }
 

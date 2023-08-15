@@ -129,7 +129,7 @@ String HHVM_FUNCTION(execution_context) {
 
 void StandardExtension::threadInitMisc() {
     IniSetting::Bind(
-      this, IniSetting::PHP_INI_ALL,
+      this, IniSetting::Mode::Request,
       "display_errors", "stderr",
       IniSetting::SetAndGet<std::string>(
         [](const std::string& value) {
@@ -492,12 +492,9 @@ void StandardExtension::initMisc() {
     HHVM_RC_BOOL(PHP_DEBUG, false);
 #endif
 
-    HHVM_RC_INT(INI_SYSTEM, IniSetting::PHP_INI_SYSTEM);
-    HHVM_RC_INT(INI_PERDIR, IniSetting::PHP_INI_PERDIR);
-    HHVM_RC_INT(INI_USER,   IniSetting::PHP_INI_USER);
-    HHVM_RC_INT(INI_ALL,    IniSetting::PHP_INI_SYSTEM |
-                            IniSetting::PHP_INI_PERDIR |
-                            IniSetting::PHP_INI_USER);
+    HHVM_RC_INT(INI_CONSTANT, int64_t(IniSetting::Mode::Constant));
+    HHVM_RC_INT(INI_CONFIG,   int64_t(IniSetting::Mode::Config));
+    HHVM_RC_INT(INI_REQUEST,  int64_t(IniSetting::Mode::Request));
 
     HHVM_RC_STR(PHP_OS, HHVM_FN(php_uname)("s").toString());
 

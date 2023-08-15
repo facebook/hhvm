@@ -331,14 +331,12 @@ SSATmp* opt_ini_get(IRGS& env, const ParamPrep& params) {
   // TC, but for non-system settings, we can optimize them as a load from the
   // known static address or thread-local address of where the setting lives.
   auto const settingName = params[0].value->strVal()->toCppString();
-  IniSetting::Mode mode = IniSetting::PHP_INI_NONE;
-  if (!IniSetting::GetMode(settingName, mode)) {
+  auto mode = IniSetting::GetMode(settingName);
+  if (!mode) {
     return nullptr;
   }
-  if (mode & ~IniSetting::PHP_INI_SYSTEM) {
-    return nullptr;
-  }
-  if (mode == IniSetting::PHP_INI_ALL) {  /* PHP_INI_ALL has a weird encoding */
+  // If the request can change the value we can't optimize it
+  if (IniSetting::canSet(*mode, IniSetting::Mode::Request)) {
     return nullptr;
   }
 

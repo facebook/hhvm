@@ -762,14 +762,14 @@ struct MemcacheExtension final : Extension {
     void threadInit() override {
       *s_memcache_globals = new MEMCACHEGlobals;
       assertx(*s_memcache_globals);
-      IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
+      IniSetting::Bind(this, IniSetting::Mode::Request,
                        "memcache.hash_strategy", "standard",
                        IniSetting::SetAndGet<std::string>(
                          ini_on_update_hash_strategy,
                          nullptr,
                          &MEMCACHEG(hash_strategy)
                        ));
-      IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
+      IniSetting::Bind(this, IniSetting::Mode::Request,
                        "memcache.hash_function", "crc32",
                        IniSetting::SetAndGet<std::string>(
                          ini_on_update_hash_function,

@@ -75,7 +75,7 @@ static RDS_LOCAL(std::string, s_defaultLocale);
 
 void IntlExtension::bindIniSettings() {
   s_defaultLocale.getCheck();
-  IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
+  IniSetting::Bind(this, IniSetting::Mode::Request,
                    "intl.default_locale", "",
                    s_defaultLocale.get()
                  );

@@ -3282,7 +3282,7 @@ static struct PDOExtension final : Extension {
   std::string mysql_default_socket;
 
   void moduleLoad(const IniSetting::Map& /*ini*/, Hdf /*config*/) override {
-    IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM,
+    IniSetting::Bind(this, IniSetting::Mode::Config,
                      "pdo_mysql.default_socket", nullptr,
                      &mysql_default_socket);
   }

@@ -2357,7 +2357,7 @@ void DebuggerClient::loadConfig() {
   }
 
 #define BIND(name, ...) \
-        IniSetting::Bind(&s_debugger_extension, IniSetting::PHP_INI_SYSTEM, \
+        IniSetting::Bind(&s_debugger_extension, IniSetting::Mode::Config, \
                          "hhvm." #name, __VA_ARGS__)
 
   m_neverSaveConfigOverride = true; // Prevent saving config while reading it

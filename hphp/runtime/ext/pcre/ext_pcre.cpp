@@ -440,17 +440,20 @@ struct PcreExtension final : Extension {
     HHVM_FE(sql_regcase);
 
     pcre_config(PCRE_CONFIG_JIT, &s_pcre_has_jit);
-    IniSetting::Bind(this, IniSetting::PHP_INI_ONLY,
+    IniSetting::Bind(this, IniSetting::Mode::Constant,
                      "hhvm.pcre.jit",
-                     &s_pcre_has_jit);
+                     IniSetting::SetAndGet<int>(
+                       [](const int& /*value*/) { return false; },
+                       nullptr,
+                       &s_pcre_has_jit));
   }
 
   void threadInit() override {
-    IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
+    IniSetting::Bind(this, IniSetting::Mode::Request,
                      "pcre.backtrack_limit",
                      std::to_string(RuntimeOption::PregBacktrackLimit).c_str(),
                      &tl_pcre_globals->preg_backtrack_limit);
-    IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
+    IniSetting::Bind(this, IniSetting::Mode::Request,
                      "pcre.recursion_limit",
                      std::to_string(RuntimeOption::PregRecursionLimit).c_str(),
                      &tl_pcre_globals->preg_recursion_limit);

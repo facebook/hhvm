@@ -4479,6 +4479,56 @@ TEST_F(HTTP2DownstreamSessionTest, Observer_RequestStarted) {
   expectDetachSession();
 }
 
+TEST_F(HTTP2DownstreamSessionTest, Observer_SendPingByObserver) {
+
+  // Add an observer subscribed to this event
+  auto observerSubscribed = addMockSessionObserver(
+      MockSessionObserver::EventSetBuilder()
+          .enable(HTTPSessionObserverInterface::Events::preWrite)
+          .build());
+  httpSession_->addObserver(observerSubscribed.get());
+
+  // Subscribed observer expects to receive PreWrite callback
+  // Check if transactions are about to write a threshold amount of bytes
+  auto pingData = std::chrono::duration_cast<std::chrono::milliseconds>(
+                      std::chrono::steady_clock::now().time_since_epoch())
+                      .count();
+  EXPECT_CALL(*observerSubscribed, preWrite(_, _))
+      .WillOnce(Invoke(
+          [&pingData](
+              HTTPSessionObserverAccessor* sessionObserverAccessor_,
+              const proxygen::HTTPSessionObserverInterface::PreWriteEvent&
+                  event) {
+            EXPECT_EQ(event.pendingEgressBytes, 100);
+            EXPECT_THAT(sessionObserverAccessor_, NotNull());
+            sessionObserverAccessor_->sendPing(pingData);
+          }));
+
+  auto handler = addSimpleStrictHandler();
+  handler->expectHeaders();
+  handler->expectEOM([&handler]() {
+    handler->sendReplyWithBody(200 /* status code */,
+                               100 /* content size */,
+                               true /* keepalive */,
+                               true /* sendEOM */,
+                               false /*trailers*/);
+  });
+  handler->expectDetachTransaction();
+  HTTPSession::DestructorGuard g(httpSession_);
+  HTTPMessage req = getGetRequest();
+  sendRequest(req);
+
+  flushRequestsAndLoop(true, milliseconds(0));
+
+  expectDetachSession();
+  NiceMock<MockHTTPCodecCallback> callbacks;
+  clientCodec_->setCallback(&callbacks);
+
+  InSequence enforceOrder;
+  EXPECT_CALL(callbacks, onPingRequest(pingData));
+  parseOutput(*clientCodec_);
+}
+
 TEST_F(HTTP2DownstreamSessionTest, Observer_PreWrite) {
 
   // Add an observer NOT subscribed to the PreWrite event

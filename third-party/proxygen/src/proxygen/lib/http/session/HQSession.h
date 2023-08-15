@@ -348,6 +348,11 @@ class HQSession
     return 0;
   }
 
+  size_t sendPing(uint64_t data) override {
+    sock_->sendPing(std::chrono::milliseconds(data));
+    return 0;
+  }
+
   /**
    * Sends a knob frame on the session.
    */
@@ -1908,6 +1913,13 @@ class HQSession
       (void)sessionBasePtr_; // silence unused variable warnings
     }
     ~ObserverAccessor() override = default;
+
+    size_t sendPing(uint64_t data) override {
+      if (sessionBasePtr_) {
+        return sessionBasePtr_->sendPing(data);
+      }
+      return 0;
+    }
 
    private:
     HTTPSessionBase* sessionBasePtr_{nullptr};

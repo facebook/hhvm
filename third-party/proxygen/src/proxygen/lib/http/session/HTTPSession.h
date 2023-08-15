@@ -922,7 +922,7 @@ class HTTPSession
 
   void scheduleResetDirectErrorHandling();
 
-  size_t sendPing(uint64_t data);
+  size_t sendPing(uint64_t data) override;
 
   // private members
 
@@ -1127,6 +1127,13 @@ class HTTPSession
       (void)sessionBasePtr_; // silence unused variable warnings
     }
     ~ObserverAccessor() override = default;
+
+    size_t sendPing(uint64_t data) override {
+      if (sessionBasePtr_) {
+        return sessionBasePtr_->sendPing(data);
+      }
+      return 0;
+    }
 
    private:
     HTTPSessionBase* sessionBasePtr_{nullptr};

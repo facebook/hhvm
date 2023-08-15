@@ -328,6 +328,8 @@ class HTTPSessionBase : public wangle::ManagedConnection {
    */
   virtual size_t sendPing() = 0;
 
+  virtual size_t sendPing(uint64_t data) = 0;
+
   /**
    * Sends a priority message on this session.  If the underlying protocol
    * doesn't support priority, this is a no-op.  A new stream identifier will

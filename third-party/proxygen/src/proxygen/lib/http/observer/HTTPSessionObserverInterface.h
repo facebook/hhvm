@@ -35,6 +35,7 @@ namespace proxygen {
  */
 class HTTPSessionObserverAccessor {
  public:
+  virtual std::size_t sendPing(uint64_t data) = 0;
   virtual ~HTTPSessionObserverAccessor() = default;
 };
 

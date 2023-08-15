@@ -34,6 +34,11 @@ struct from_type_tag;
 template <class... T>
 using from_type_tag_t = typename from_type_tag<T...>::type;
 
+template <class T>
+struct from_type_tag<type::exception_t<T>> {
+  using type = structure;
+};
+
 template <>
 struct from_type_tag<type::bool_t> {
   using type = integral;

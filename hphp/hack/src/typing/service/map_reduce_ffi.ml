@@ -7,6 +7,6 @@
  *)
 
 (** Auxiliary type used for communicating map-reduce data across FFI boundaries. *)
-type t = { tast_hashes: Tast_hashes.t option }
+type t = { tast_hashes: Tast_hashes.t option } [@@deriving yojson_of]
 
 let empty = { tast_hashes = None }

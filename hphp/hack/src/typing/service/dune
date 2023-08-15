@@ -9,14 +9,23 @@
  (preprocess (pps ppx_yojson_conv)))
 
 (library
+ (name map_reduce_ffi)
+ (wrapped false)
+ (modules
+   map_reduce_ffi)
+ (libraries
+  tast_hashes)
+ (preprocess (pps ppx_yojson_conv)))
+
+(library
  (name map_reduce)
  (wrapped false)
  (modules
-   map_reduce_ffi
    map_reduce)
  (libraries
   provider_context
   collections
+  map_reduce_ffi
   relative_path
   tast_hashes
   typing_ast)

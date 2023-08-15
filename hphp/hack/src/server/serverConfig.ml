@@ -391,6 +391,7 @@ let load_config config options =
     ?po_disallow_static_constants_in_default_func_args:
       (bool_opt "disallow_static_constants_in_default_func_args" config)
     ?tco_log_exhaustivity_check:(bool_opt "log_exhaustivity_check" config)
+    ?dump_tast_hashes:(bool_opt "dump_tast_hashes" config)
     options
 
 let load ~silent options : t * ServerLocalConfig.t =

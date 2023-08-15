@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<654a113ca5f7f6e30ef367291735cffb>>
+// @generated SignedSource<<d4d4ee1807d3ae86e7917f8c89581921>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -34,6 +34,7 @@ use crate::*;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving yojson_of")]
 #[repr(C)]
 pub struct MapReduceFfi {
     pub tast_hashes: Option<tast_hashes::TastHashes>,

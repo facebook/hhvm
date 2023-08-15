@@ -70,6 +70,7 @@ type mode =
   | CountImpreciseTypes
   | SDT_analysis of string
   | Get_type_hierarchy
+  | Map_reduce_mode
 
 type options = {
   files: string list;
@@ -820,6 +821,9 @@ let parse_options () =
       ( "--get-type-hierarchy-at-caret",
         Arg.Unit (set_mode Get_type_hierarchy),
         " Produce type hierarchy at caret location" );
+      ( "--map-reduce",
+        Arg.Unit (set_mode Map_reduce_mode),
+        " Run the map reducers and print the result" );
     ]
   in
 
@@ -1407,6 +1411,17 @@ let test_decl_compare ctx filenames builtins files_contents files_info =
     List.iter2_exn classes1 classes2 ~f:(compare_classes deps_mode);
     ()
 
+let compute_nasts ctx files_info interesting_files =
+  let nasts = create_nasts ctx files_info in
+  (* Interesting files are usually the non hhi ones. *)
+  let filter_non_interesting nasts =
+    Relative_path.Map.merge nasts interesting_files ~f:(fun _k nast x ->
+        match (nast, x) with
+        | (Some nast, Some _) -> Some nast
+        | _ -> None)
+  in
+  filter_non_interesting nasts
+
 (* Returns a list of Tast defs, along with associated type environments. *)
 let compute_tasts ?(drop_fixmed = true) ctx files_info interesting_files :
     Errors.t * Tast.program Relative_path.Map.t =
@@ -1416,15 +1431,7 @@ let compute_tasts ?(drop_fixmed = true) ctx files_info interesting_files :
     | _ -> None
   in
   Errors.do_ ~drop_fixmed (fun () ->
-      let nasts = create_nasts ctx files_info in
-      (* Interesting files are usually the non hhi ones. *)
-      let filter_non_interesting nasts =
-        Relative_path.Map.merge nasts interesting_files ~f:(fun _k nast x ->
-            match (nast, x) with
-            | (Some nast, Some _) -> Some nast
-            | _ -> None)
-      in
-      let nasts = filter_non_interesting nasts in
+      let nasts = compute_nasts ctx files_info interesting_files in
       let tasts =
         Relative_path.Map.map nasts ~f:(fun nast ->
             let tast =
@@ -1439,6 +1446,24 @@ let compute_tasts ?(drop_fixmed = true) ctx files_info interesting_files :
               tast.Tast_with_dynamic.under_normal_assumptions)
       in
       tasts)
+
+let compute_tasts_by_name ?(drop_fixmed = true) ctx files_info interesting_files
+    : Errors.t * Tast.by_names Relative_path.Map.t =
+  let (nast_errors, nasts) =
+    Errors.do_ ~drop_fixmed (fun () ->
+        compute_nasts ctx files_info interesting_files)
+  in
+  let errors_and_tasts =
+    Relative_path.Map.mapi nasts ~f:(fun fn full_ast ->
+        Typing_check_job.calc_errors_and_tast ctx ~drop_fixmed fn ~full_ast)
+  in
+  let tasts = Relative_path.Map.map ~f:snd errors_and_tasts in
+  let tast_errors =
+    Relative_path.Map.values errors_and_tasts |> List.map ~f:fst
+  in
+
+  ( List.fold (nast_errors :: tast_errors) ~init:Errors.empty ~f:Errors.merge,
+    tasts )
 
 (* Given source code containing a caret marker (e.g. "^ hover-at-caret"), return
    the line and column of the position indicated. *)
@@ -2428,6 +2453,18 @@ let handle_mode
     in
     let json = ServerTypeHierarchy.json_of_results ~results in
     Printf.printf "%s" (Hh_json.json_to_string ~pretty:true json)
+  | Map_reduce_mode ->
+    let (errors, tasts) = compute_tasts_by_name ctx files_info files_contents in
+    print_errors_if_present (parse_errors @ Errors.get_sorted_error_list errors);
+    let mapped =
+      Relative_path.Map.elements tasts
+      |> List.map ~f:(fun (fn, tasts) -> Map_reduce.map ctx fn tasts)
+    in
+    let reduced =
+      List.fold mapped ~init:Map_reduce.empty ~f:Map_reduce.reduce
+    in
+    let json = Map_reduce_ffi.yojson_of_t (Map_reduce.to_ffi reduced) in
+    Yojson.Safe.pretty_to_channel Caml.stdout json
 
 (*****************************************************************************)
 (* Main entry point *)

@@ -142,13 +142,7 @@ let check_enum_exhaustiveness
   Option.iter enum_err_opt ~f:(fun err ->
       Typing_error_utils.add_typing_error
         ~env:(Tast_env.tast_env_as_typing_env env)
-      @@ Typing_error.enum err);
-  Option.value_map ~default:[] enum_err_opt ~f:(function
-      | Typing_error.Primary.Enum.Enum_switch_nonexhaustive _ ->
-        [`Non_exhaustive]
-      | Typing_error.Primary.Enum.Enum_switch_redundant_default _ ->
-        [`Redundant_default]
-      | _ -> [`Other])
+      @@ Typing_error.enum err)
 
 (* Small reminder:
  * - enums are localized to `Tnewtype (name, _, _)` where name is the name of
@@ -202,16 +196,14 @@ let rec check_exhaustiveness_
         dep;
 
     let tc = unsafe_opt @@ Env.get_enum env id in
-    let enum_errs =
-      check_enum_exhaustiveness
-        env
-        pos
-        tc
-        kind
-        caselist
-        enum_coming_from_unresolved
-    in
-    (enum_errs @ outcomes, env)
+    check_enum_exhaustiveness
+      env
+      pos
+      tc
+      kind
+      caselist
+      enum_coming_from_unresolved;
+    (`Enum_checked :: outcomes, env)
   in
   match get_node ty with
   | Tunion tyl ->
@@ -274,45 +266,64 @@ let rec check_exhaustiveness_
   | Tdependent _
   | Ttuple _
   | Tshape _
-  | Tdynamic
   | Taccess _
-  | Tneg _ ->
-    (`Skipped :: outcomes, env)
+  | Tneg _
+  | Tdynamic ->
+    if Option.is_none (snd caselist) then
+      (`Silently_ends ty :: outcomes, env)
+    else
+      (`Dyn_with_default :: outcomes, env)
   | Tunapplied_alias _ ->
     Typing_defs.error_Tunapplied_alias_in_illegal_context ()
 
 type outcomes = {
-  non_exhaustive: int;
-  redundant_default: int;
-  skipped: int;
-  other: int;
+  silently_ends: Tast.ty list;
+  dyn_with_default: int;
+  enum_checked: int;
 }
 
 let count_outcomes =
   let f
-      ({ non_exhaustive; redundant_default; skipped; other } as outcomes :
-        outcomes) = function
-    | `Non_exhaustive -> { outcomes with non_exhaustive = non_exhaustive + 1 }
-    | `Redundant_default ->
-      { outcomes with redundant_default = redundant_default + 1 }
-    | `Skipped -> { outcomes with skipped = skipped + 1 }
-    | `Other -> { outcomes with other = other + 1 }
+      ({ silently_ends; dyn_with_default; enum_checked } as outcomes : outcomes)
+      = function
+    | `Silently_ends ty -> { outcomes with silently_ends = ty :: silently_ends }
+    | `Dyn_with_default ->
+      { outcomes with dyn_with_default = dyn_with_default + 1 }
+    | `Enum_checked -> { outcomes with enum_checked = enum_checked + 1 }
   in
   List.fold_left
     ~f
-    ~init:{ non_exhaustive = 0; redundant_default = 0; skipped = 0; other = 0 }
+    ~init:{ silently_ends = []; dyn_with_default = 0; enum_checked = 0 }
+
+let rec get_kind_and_args json =
+  let open Option.Let_syntax in
+  let* kind = Hh_json.get_field_opt (Hh_json.Access.get_string "kind") json in
+  match kind with
+  | "primitive" ->
+    let* name = Hh_json.get_field_opt (Hh_json.Access.get_string "name") json in
+    Some ("prim_" ^ name)
+  | "nullable" ->
+    let* args = Hh_json.get_field_opt (Hh_json.Access.get_array "args") json in
+    let* hd = List.hd args in
+    let* recurse = get_kind_and_args hd in
+    Some ("nullable_" ^ recurse)
+  | _ -> Some kind
+
+let to_json_array env silently_ends =
+  silently_ends
+  |> List.filter_map ~f:(fun ty ->
+         ty |> Env.ty_to_json env ~show_like_ty:true |> get_kind_and_args)
+  |> List.dedup_and_sort ~compare:String.compare
+  |> Hh_json.array_ Hh_json.string_
 
 let outcomes_to_fields
-    ({ non_exhaustive; redundant_default; skipped; other } : outcomes) =
-  let non_exhaustive = ("non_exhaustive", Hh_json.int_ non_exhaustive) in
-  let redundant_default =
-    ("redundant_default", Hh_json.int_ redundant_default)
-  in
-  let skipped = ("skipped", Hh_json.int_ skipped) in
-  let other = ("other", Hh_json.int_ other) in
-  [non_exhaustive; redundant_default; skipped; other]
+    env ({ silently_ends; dyn_with_default; enum_checked } : outcomes) =
+  let silently_ends = ("silently_ends", to_json_array env silently_ends) in
+  let dyn_with_default = ("dyn_with_default", Hh_json.int_ dyn_with_default) in
+  let enum_checked = ("enum_checked", Hh_json.int_ enum_checked) in
+  [silently_ends; dyn_with_default; enum_checked]
 
-let log_exhaustivity_check pos default_label outcomes ty_json =
+let log_exhaustivity_check env pos default_label outcomes ty_json =
   let add_fields json ~fields =
     match json with
     | Hh_json.JSON_Object old -> Hh_json.JSON_Object (old @ fields)
@@ -323,7 +334,9 @@ let log_exhaustivity_check pos default_label outcomes ty_json =
   in
   let switch_pos = ("switch_pos", Pos.(pos |> to_absolute |> json)) in
   let fields =
-    has_default :: switch_pos :: (outcomes_to_fields @@ count_outcomes outcomes)
+    has_default
+    :: switch_pos
+    :: (outcomes_to_fields env @@ count_outcomes outcomes)
   in
   ty_json
   |> add_fields ~fields
@@ -337,7 +350,7 @@ let check_exhaustiveness env pos ty ((_, dfl) as caselist) =
   let tcopt = env |> Env.get_decl_env |> Decl_env.tcopt in
   if TypecheckerOptions.tco_log_exhaustivity_check tcopt then
     Env.ty_to_json env ~show_like_ty:true ty
-    |> log_exhaustivity_check pos dfl outcomes
+    |> log_exhaustivity_check env pos dfl outcomes
 
 let handler =
   object

@@ -1234,7 +1234,6 @@ void HTTPSession::onPingRequest(uint64_t data) {
     byteEventTracker_->addPingByteEvent(
         pingSize, timestamp, bytesScheduledBeforePing);
   }
-
   scheduleWrite();
 }
 
@@ -1246,6 +1245,17 @@ void HTTPSession::onPingReply(uint64_t data) {
   if (infoCallback_) {
     infoCallback_->onPingReplyReceived();
   }
+
+  const auto pingReplyEvent =
+      HTTPSessionObserverInterface::PingReplyEvent::Builder()
+          .setId(data)
+          .setTimestamp(HTTPSessionObserverInterface::Clock::now())
+          .build();
+  sessionObserverContainer_
+      .invokeInterfaceMethod<HTTPSessionObserverInterface::Events::pingReply>(
+          [&](auto observer, auto observed) {
+            observer->pingReply(observed, pingReplyEvent);
+          });
 }
 
 void HTTPSession::onWindowUpdate(HTTPCodec::StreamID streamID,

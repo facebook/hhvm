@@ -44,9 +44,9 @@ class HTTPSessionObserverAccessor {
  */
 class HTTPSessionObserverInterface {
  public:
-  enum class Events { requestStarted = 1, preWrite = 2 };
   using Clock = std::chrono::steady_clock;
   using TimePoint = std::chrono::time_point<Clock>;
+  enum class Events { requestStarted = 1, preWrite = 2, pingReply = 3 };
 
   virtual ~HTTPSessionObserverInterface() = default;
 
@@ -109,6 +109,32 @@ class HTTPSessionObserverInterface {
     explicit PreWriteEvent(BuilderFields& builderFields);
   };
 
+  struct PingReplyEvent {
+    const uint64_t id;
+    const TimePoint timestamp;
+    // Do not support copy or move given that requestHeaders is a ref.
+    PingReplyEvent(PingReplyEvent&&) = delete;
+    PingReplyEvent& operator=(const PingReplyEvent&) = delete;
+    PingReplyEvent& operator=(PingReplyEvent&& rhs) = delete;
+    PingReplyEvent(const PingReplyEvent&) = delete;
+
+    struct BuilderFields {
+      folly::Optional<std::reference_wrapper<const uint64_t>> maybeId;
+      folly::Optional<std::reference_wrapper<const TimePoint>> maybeTimestamp;
+      explicit BuilderFields() = default;
+    };
+
+    struct Builder : public BuilderFields {
+      Builder&& setId(const uint64_t& Id);
+      Builder&& setTimestamp(const TimePoint& Timestamp);
+      PingReplyEvent build() &&;
+      explicit Builder() = default;
+    };
+
+    // Use builder to construct.
+    explicit PingReplyEvent(BuilderFields& builderFields);
+  };
+
   /**
    * Events.
    */
@@ -132,6 +158,10 @@ class HTTPSessionObserverInterface {
    */
   virtual void preWrite(HTTPSessionObserverAccessor* /* session */,
                         const PreWriteEvent& /* event */) noexcept {
+  }
+
+  virtual void pingReply(HTTPSessionObserverAccessor* /* session */,
+                         const PingReplyEvent& /* event */) noexcept {
   }
 };
 

@@ -4519,14 +4519,43 @@ TEST_F(HTTP2DownstreamSessionTest, Observer_SendPingByObserver) {
   sendRequest(req);
 
   flushRequestsAndLoop(true, milliseconds(0));
-
   expectDetachSession();
   NiceMock<MockHTTPCodecCallback> callbacks;
   clientCodec_->setCallback(&callbacks);
 
   InSequence enforceOrder;
   EXPECT_CALL(callbacks, onPingRequest(pingData));
+
   parseOutput(*clientCodec_);
+}
+
+TEST_F(HTTP2DownstreamSessionTest, Observer_PingReply) {
+
+  // Add an observer subscribed to this event
+  auto observerSubscribed = addMockSessionObserver(
+      MockSessionObserver::EventSetBuilder()
+          .enable(HTTPSessionObserverInterface::Events::pingReply)
+          .build());
+  httpSession_->addObserver(observerSubscribed.get());
+  uint64_t pingId = 0;
+  EXPECT_CALL(callbacks_, onPingRequest(_)).WillOnce(SaveArg<0>(&pingId));
+  httpSession_->sendPing();
+  eventBase_.loopOnce();
+  EXPECT_CALL(*observerSubscribed, pingReply(_, _))
+      .WillOnce(Invoke(
+          [&pingId](
+              HTTPSessionObserverAccessor* sessionObserverAccessor_,
+              const proxygen::HTTPSessionObserverInterface::PingReplyEvent&
+                  event) {
+            EXPECT_EQ(event.id, pingId);
+            EXPECT_THAT(sessionObserverAccessor_, NotNull());
+          }));
+  parseOutput(*clientCodec_);
+  clientCodec_->generatePingReply(requests_, pingId);
+  flushRequestsAndLoopN(1);
+  httpSession_->closeWhenIdle();
+  expectDetachSession();
+  flushRequestsAndLoopN(1);
 }
 
 TEST_F(HTTP2DownstreamSessionTest, Observer_PreWrite) {

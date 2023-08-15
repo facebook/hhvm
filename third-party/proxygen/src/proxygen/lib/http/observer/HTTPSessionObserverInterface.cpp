@@ -55,4 +55,28 @@ HTTPSessionObserverInterface::PreWriteEvent::PreWriteEvent(
           builderFields.maybePendingEgressBytesRef.get_pointer())) {
 }
 
+HTTPSessionObserverInterface::PingReplyEvent::Builder&&
+HTTPSessionObserverInterface::PingReplyEvent::Builder::setId(
+    const uint64_t& IdIn) {
+  maybeId = IdIn;
+  return std::move(*this);
+}
+HTTPSessionObserverInterface::PingReplyEvent::Builder&&
+HTTPSessionObserverInterface::PingReplyEvent::Builder::setTimestamp(
+    const TimePoint& timestampIn) {
+  maybeTimestamp = timestampIn;
+  return std::move(*this);
+}
+
+HTTPSessionObserverInterface::PingReplyEvent
+HTTPSessionObserverInterface::PingReplyEvent::Builder::build() && {
+  return PingReplyEvent(*this);
+}
+
+HTTPSessionObserverInterface::PingReplyEvent::PingReplyEvent(
+    PingReplyEvent::BuilderFields& builderFields)
+    : id(*CHECK_NOTNULL(builderFields.maybeId.get_pointer())),
+      timestamp(*CHECK_NOTNULL(builderFields.maybeTimestamp.get_pointer())) {
+}
+
 } // namespace proxygen

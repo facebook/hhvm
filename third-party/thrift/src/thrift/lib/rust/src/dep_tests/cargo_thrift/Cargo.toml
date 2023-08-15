@@ -20,7 +20,6 @@ const-cstr = "0.3.0"
 fbthrift = { path = "../../.." }
 fbthrift_test_if__types = { package = "fbthrift_test_if_types", path = "types" }
 futures = { version = "0.3.28", features = ["async-await", "compat"] }
-once_cell = "1.12"
 ref-cast = "1.0.18"
 thiserror = "1.0.43"
 tracing = "0.1.35"

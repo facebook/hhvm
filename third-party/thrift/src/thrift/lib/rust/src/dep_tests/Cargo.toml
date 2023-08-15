@@ -23,7 +23,6 @@ codegen_includer_proc_macro = { path = "../../../../../common/rust/shed/codegen_
 const-cstr = "0.3.0"
 fbthrift = { path = "../.." }
 futures = { version = "0.3.28", features = ["async-await", "compat"] }
-once_cell = "1.12"
 ref-cast = "1.0.18"
 test_deprecated_optional_with_default_is_some_if__types = { package = "test_deprecated_optional_with_default_is_some_if_types", path = "types" }
 thiserror = "1.0.43"

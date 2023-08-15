@@ -31,6 +31,7 @@
 {{#program:serde?}}
 {{! Work around https://github.com/rust-lang/rust/issues/46991 }}
 extern crate serde;
+
 {{/program:serde?}}{{!
 
 }}{{#program:types_include_srcs}}
@@ -38,6 +39,10 @@ include!("{{program:include_src}}");
 {{/program:types_include_srcs}}{{!
 
 }}
+{{#program:constants?}}
+pub mod consts;
+
+{{/program:constants?}}
 {{! Allows lib/type.mustache to use `crate::types::Type` regardless of which crate it's called from }}
 #[allow(unused_imports)]
 pub(crate) use {{program:crate}} as types;

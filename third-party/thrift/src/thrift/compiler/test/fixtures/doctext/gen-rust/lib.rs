@@ -8,9 +8,8 @@ pub use self::consts::*;
 pub use self::errors::*;
 pub use self::types::*;
 
-pub mod consts;
-
 pub use :: as types;
+pub use ::::consts as consts;
 
 #[doc(hidden)]
 pub mod dependencies;

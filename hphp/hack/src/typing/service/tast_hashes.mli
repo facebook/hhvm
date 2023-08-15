@@ -26,3 +26,10 @@ val is_enabled : TypecheckerOptions.t -> bool
 val map : Relative_path.t -> Tast.by_names -> t
 
 val reduce : t -> t -> t
+
+val finalize :
+  progress:(string -> unit) ->
+  init_id:string ->
+  recheck_id:string option ->
+  t ->
+  unit

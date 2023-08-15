@@ -16,6 +16,13 @@ module type MapReducer = sig
   val map : Relative_path.t -> Tast.by_names -> t
 
   val reduce : t -> t -> t
+
+  val finalize :
+    progress:(string -> unit) ->
+    init_id:string ->
+    recheck_id:string option ->
+    t ->
+    unit
 end
 
 [@@@warning "-32"] (* for ppxs *)
@@ -124,3 +131,33 @@ let reduce xs ys =
   (* This is lightning fast when we don't have any map-reducers enabled which
      is the common case. *)
   MRMap.union ~combine xs ys
+
+let finalize ~progress ~init_id ~recheck_id xs =
+  let do_ _key x =
+    match x with
+    | MapReducerResult (typed_x, x_value) ->
+      let (module MR) = implementation_for typed_x in
+      MR.finalize ~progress ~init_id ~recheck_id x_value
+  in
+  MRMap.iter do_ xs
+
+let to_ffi xs =
+  let f _key v _s =
+    let open Map_reduce_ffi in
+    match v with
+    | MapReducerResult (TypeForTastHashes, tast_hashes) ->
+      { tast_hashes = Some tast_hashes }
+  in
+  MRMap.fold f xs Map_reduce_ffi.empty
+
+let of_ffi s =
+  let Map_reduce_ffi.{ tast_hashes } = s in
+  let elems =
+    List.filter_map
+      ~f:Fn.id
+      [
+        Option.map tast_hashes ~f:(fun tast_hashes ->
+            (TastHashes, MapReducerResult (TypeForTastHashes, tast_hashes)));
+      ]
+  in
+  MRMap.of_list elems

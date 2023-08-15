@@ -106,7 +106,7 @@ JOB-OUTPUT: process_files will merge what it discovered into the typing_result o
 ACCUMULATE: we start with all fields empty, and then merge in the output of each job as it's done. *)
 type typing_result = {
   errors: Errors.t;
-  tast_hashes: Tast_hashes.t;
+  map_reduce_data: Map_reduce.t;
   dep_edges: Typing_deps.dep_edges;
   profiling_info: Telemetry.t;
       (** Instrumentation about how the workers behaved, e.g. how many decls were
@@ -117,7 +117,7 @@ type typing_result = {
 let make_typing_result () =
   {
     errors = Errors.empty;
-    tast_hashes = Tast_hashes.empty;
+    map_reduce_data = Map_reduce.empty;
     dep_edges = Typing_deps.dep_edges_make ();
     profiling_info = Telemetry.create ();
   }
@@ -127,10 +127,10 @@ let accumulate_job_output
     typing_result =
   {
     errors = Errors.merge produced_by_job.errors accumulated_so_far.errors;
-    tast_hashes =
-      Tast_hashes.union
-        produced_by_job.tast_hashes
-        accumulated_so_far.tast_hashes;
+    map_reduce_data =
+      Map_reduce.reduce
+        produced_by_job.map_reduce_data
+        accumulated_so_far.map_reduce_data;
     dep_edges =
       Typing_deps.merge_dep_edges
         produced_by_job.dep_edges

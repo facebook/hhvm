@@ -82,6 +82,7 @@ patt_error::Callback
 patt_error::ReasonsCallback
 file_info::Mode
 file_info::NameType
+map_reduce_ffi::MapReducer
 naming_types::KindOfType
 naming_types::NameKind
 saved_state_rollouts::Flag

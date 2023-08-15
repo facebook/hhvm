@@ -23,6 +23,14 @@ module type MapReducer = sig
 
   (** Reduce two intermediate data elements. *)
   val reduce : t -> t -> t
+
+  (** Consume the final result of the full map-reduce analysis. *)
+  val finalize :
+    progress:(string -> unit) ->
+    init_id:string ->
+    recheck_id:string option ->
+    t ->
+    unit
 end
 
 (** The result of an analysis. *)
@@ -36,3 +44,17 @@ val map : Provider_context.t -> Relative_path.t -> Tast.by_names -> t
 
 (** Reduce two analysis into one. *)
 val reduce : t -> t -> t
+
+(** Consume the final result of the full map-reduce analysis. *)
+val finalize :
+  progress:(string -> unit) ->
+  init_id:string ->
+  recheck_id:string option ->
+  t ->
+  unit
+
+(** Convert the results of an anlysis to an FFI friendly data structure *)
+val to_ffi : t -> Map_reduce_ffi.t
+
+(** Read in the results of an analysis from an FFI friendly data structure *)
+val of_ffi : Map_reduce_ffi.t -> t

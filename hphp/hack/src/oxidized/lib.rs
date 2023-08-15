@@ -79,6 +79,7 @@ pub use gen::error_message;
 pub use gen::errors;
 pub use gen::full_fidelity_parser_env;
 pub use gen::global_options;
+pub use gen::map_reduce_ffi;
 pub use gen::message;
 pub use gen::name_context;
 pub use gen::namespace_env;

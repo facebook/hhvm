@@ -9,6 +9,20 @@
  (preprocess (pps ppx_yojson_conv)))
 
 (library
+ (name map_reduce)
+ (wrapped false)
+ (modules
+   map_reduce_ffi
+   map_reduce)
+ (libraries
+  provider_context
+  collections
+  relative_path
+  tast_hashes
+  typing_ast)
+ (preprocess (pps ppx_deriving.std)))
+
+(library
  (name typing_service_types)
  (wrapped false)
  (modules
@@ -18,8 +32,8 @@
   core_kernel
   errors
   hg
+  map_reduce
   relative_path
-  tast_hashes
   typechecker_options
   typing_deps)
  (preprocess

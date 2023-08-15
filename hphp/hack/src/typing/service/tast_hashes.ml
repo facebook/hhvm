@@ -75,3 +75,21 @@ let reduce xs ys =
     ~combine:(fun _key x y -> Some (union_by_names x y))
     xs
     ys
+
+let finalize ~progress ~init_id ~recheck_id tast_hashes =
+  progress "Converting TAST hashes to JSON";
+  let tast_hashes_json = yojson_of_t tast_hashes in
+  progress "Writing TAST hashes to disk";
+  let tast_dir =
+    Tmp.make_dir_in_tmp ~description_what_for:"tast_hashes" ~root:None
+  in
+  let tast_hashes_file =
+    Filename.concat
+      tast_dir
+      (Printf.sprintf
+         "initId%s_recheckId%s.json"
+         init_id
+         (Option.value recheck_id ~default:"None"))
+  in
+  Out_channel.with_file tast_hashes_file ~f:(fun out ->
+      Yojson.Safe.pretty_to_channel out tast_hashes_json)

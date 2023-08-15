@@ -127,7 +127,7 @@ let should_enable_deferring (file : check_file_workitem) =
 
 type process_file_results = {
   file_errors: Errors.t;
-  file_tast_hashes: Tast_hashes.by_names option;
+  file_map_reduce_data: Map_reduce.t;
   deferred_decls: Deferred_decl.deferment list;
 }
 
@@ -152,7 +152,11 @@ let process_file
   let fn = file.path in
   let (file_errors, ast) = Ast_provider.get_ast_with_error ~full:true ctx fn in
   if not (Errors.is_empty file_errors) then
-    { file_errors; deferred_decls = []; file_tast_hashes = None }
+    {
+      file_errors;
+      deferred_decls = [];
+      file_map_reduce_data = Map_reduce.empty;
+    }
   else
     let opts = Provider_context.get_tcopt ctx in
     let ctx = Provider_context.map_tcopt ctx ~f:(fun _tcopt -> opts) in
@@ -189,14 +193,7 @@ let process_file
         {
           file_errors;
           deferred_decls = [];
-          file_tast_hashes =
-            (if
-             Provider_context.get_tcopt ctx
-             |> TypecheckerOptions.dump_tast_hashes
-            then
-              Some (Tast_hashes.hash_tasts tasts)
-            else
-              None);
+          file_map_reduce_data = Map_reduce.map ctx fn tasts;
         }
       | Error () ->
         let deferred_decls =
@@ -207,7 +204,11 @@ let process_file
                  Naming_provider.get_class_path ctx class_name >>| fun fn ->
                  (fn, class_name))
         in
-        { file_errors = Errors.empty; deferred_decls; file_tast_hashes = None }
+        {
+          file_errors = Errors.empty;
+          deferred_decls;
+          file_map_reduce_data = Map_reduce.empty;
+        }
     with
     | WorkerCancel.Worker_should_exit as exn ->
       (* Cancellation requests must be re-raised *)
@@ -284,7 +285,7 @@ external hh_malloc_trim : unit -> unit = "hh_malloc_trim"
 
 type workitem_accumulator = {
   errors: Errors.t;
-  tast_hashes: Tast_hashes.t;
+  map_reduce_data: Map_reduce.t;
   tally: ProcessFilesTally.t;
   stats: HackEventLogger.ProfileTypeCheck.stats;
 }
@@ -297,7 +298,7 @@ let process_one_workitem
     ~longlived_workers
     ~error_count_at_start_of_batch
     (fn : workitem)
-    ({ errors; tast_hashes; tally; stats } : workitem_accumulator) :
+    ({ errors; map_reduce_data; tally; stats } : workitem_accumulator) :
     TypingProgress.progress_outcome * workitem_accumulator =
   let decl_cap_mb =
     if check_info.use_max_typechecker_worker_memory_for_decl_deferral then
@@ -315,7 +316,7 @@ let process_one_workitem
         decl,
         mid_stats,
         file_errors,
-        tast_hashes,
+        map_reduce_data,
         deferred_workitems,
         tally ) =
     match fn with
@@ -327,11 +328,11 @@ let process_one_workitem
         check_info.log_errors
         && error_count_at_start_of_batch + Errors.count errors < 5
       in
-      let { file_errors; file_tast_hashes; deferred_decls } =
+      let { file_errors; file_map_reduce_data; deferred_decls } =
         process_file ctx file ~decl_cap_mb ~log_errors
       in
-      let tast_hashes =
-        Tast_hashes.add tast_hashes ~key:file.path ~data:file_tast_hashes
+      let map_reduce_data =
+        Map_reduce.reduce map_reduce_data file_map_reduce_data
       in
       let mid_stats =
         if type_check_twice then
@@ -352,7 +353,7 @@ let process_one_workitem
           List.map deferred_decls ~f:(fun fn -> Declare fn)
           @ [Check { file with was_already_deferred = true }]
       in
-      (Some file, None, mid_stats, file_errors, tast_hashes, deferred, tally)
+      (Some file, None, mid_stats, file_errors, map_reduce_data, deferred, tally)
     | Declare (_path, class_name) ->
       let (_ : Decl_provider.class_decl option) =
         Decl_provider.get_class ctx class_name
@@ -361,7 +362,7 @@ let process_one_workitem
         Some class_name,
         None,
         Errors.empty,
-        tast_hashes,
+        map_reduce_data,
         [],
         ProcessFilesTally.incr_decls tally )
   in
@@ -412,11 +413,11 @@ let process_one_workitem
     ~workitem_end_second_stats;
 
   ( { TypingProgress.deferred_workitems; continue = workitem_ends_under_cap },
-    { errors; tast_hashes; tally; stats = final_stats } )
+    { errors; map_reduce_data; tally; stats = final_stats } )
 
 let process_workitems
     (ctx : Provider_context.t)
-    ({ errors; tast_hashes; dep_edges; profiling_info } : typing_result)
+    ({ errors; map_reduce_data; dep_edges; profiling_info } : typing_result)
     (progress : TypingProgress.t)
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
@@ -445,11 +446,11 @@ let process_workitems
   Ast_provider.local_changes_push_sharedmem_stack ();
 
   (* Process as many files as we can, and merge in their errors *)
-  let (progress, { errors; tast_hashes; tally = _; stats = _ }) =
+  let (progress, { errors; map_reduce_data; tally = _; stats = _ }) =
     let init =
       {
         errors;
-        tast_hashes;
+        map_reduce_data;
         tally = ProcessFilesTally.empty;
         stats =
           get_stats ~include_slightly_costly_stats:true ProcessFilesTally.empty;
@@ -489,7 +490,7 @@ let process_workitems
   TypingLogger.flush_buffers ();
   Ast_provider.local_changes_pop_sharedmem_stack ();
   File_provider.local_changes_pop_sharedmem_stack ();
-  ({ errors; tast_hashes; dep_edges; profiling_info }, progress)
+  ({ errors; map_reduce_data; dep_edges; profiling_info }, progress)
 
 let load_and_process_workitems
     (ctx : Provider_context.t)
@@ -733,7 +734,7 @@ let rec drain_events (done_count, total_count, handle, check_info) =
   | Error error -> Error error
 
 type 'env distc_outcome =
-  | Success of Errors.t * Tast_hashes.t * Typing_deps.dep_edges * 'env
+  | Success of Errors.t * Map_reduce.t * Typing_deps.dep_edges * 'env
   | DistCError of log_message
   | Cancel of 'env * MultiThreadedCall.cancel_reason
 
@@ -768,12 +769,12 @@ let rec event_loop
     | None ->
       ServerProgress.write "hh_distc done";
       (match Hh_distc_ffi.join handle with
-      | Ok (errors, tast_hashes) ->
+      | Ok (errors, map_reduce_data) ->
         (* TODO: Clear in memory deps. Doesn't effect correctness but can cause larger fanouts *)
         Typing_deps.replace (Typing_deps_mode.InMemoryMode (Some hhdg_path));
         Success
           ( errors,
-            tast_hashes,
+            Map_reduce.of_ffi map_reduce_data,
             Typing_deps.dep_edges_make (),
             interrupt.MultiThreadedCall.env )
       | Error error -> DistCError error)
@@ -1057,24 +1058,6 @@ type result = {
   diagnostic_pusher: Diagnostic_pusher.t option * seconds_since_epoch option;
 }
 
-let write_tast_hashes_to_disk ~(check_info : check_info) tast_hashes =
-  ServerProgress.write "Converting TAST hashes to JSON";
-  let tast_hashes_json = Tast_hashes.yojson_of_t tast_hashes in
-  ServerProgress.write "Writing TAST hashes to disk";
-  let tast_dir =
-    Tmp.make_dir_in_tmp ~description_what_for:"tast_hashes" ~root:None
-  in
-  let tast_hashes_file =
-    Filename.concat
-      tast_dir
-      (Printf.sprintf
-         "initId%s_recheckId%s.json"
-         check_info.init_id
-         (Option.value check_info.recheck_id ~default:"None"))
-  in
-  Out_channel.with_file tast_hashes_file ~f:(fun out ->
-      Yojson.Safe.pretty_to_channel out tast_hashes_json)
-
 let go_with_interrupt
     ?(diagnostic_pusher : Diagnostic_pusher.t option)
     (ctx : Provider_context.t)
@@ -1159,9 +1142,9 @@ let go_with_interrupt
         (* distc doesn't yet give any profiling_info about how its workers fared *)
         let profiling_info = Telemetry.create () in
         match process_with_hh_distc ~root ~interrupt ~check_info ~tcopt with
-        | Success (errors, tast_hashes, dep_edges, env) ->
+        | Success (errors, map_reduce_data, dep_edges, env) ->
           Some
-            ( { errors; tast_hashes; dep_edges; profiling_info },
+            ( { errors; map_reduce_data; dep_edges; profiling_info },
               telemetry,
               env,
               None,
@@ -1171,7 +1154,7 @@ let go_with_interrupt
           Some
             ( {
                 errors = Errors.empty;
-                tast_hashes = Tast_hashes.empty;
+                map_reduce_data = Map_reduce.empty;
                 dep_edges = Typing_deps.dep_edges_make ();
                 profiling_info;
               },
@@ -1208,10 +1191,13 @@ let go_with_interrupt
         ~check_info
         ~typecheck_info
   in
-  let { errors; tast_hashes; dep_edges; profiling_info } = typing_result in
+  let { errors; map_reduce_data; dep_edges; profiling_info } = typing_result in
   Typing_deps.register_discovered_dep_edges dep_edges;
-  if TypecheckerOptions.dump_tast_hashes tcopt then
-    write_tast_hashes_to_disk ~check_info tast_hashes;
+  Map_reduce.finalize
+    ~progress:(fun s -> ServerProgress.write "%s" s)
+    ~init_id:check_info.init_id
+    ~recheck_id:check_info.recheck_id
+    map_reduce_data;
 
   let telemetry =
     telemetry |> Telemetry.object_ ~key:"profiling_info" ~value:profiling_info

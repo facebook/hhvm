@@ -48,7 +48,7 @@ class UtilsGivenTargetTestCase(base.TestHHVMBinary):
         self.assertEqual(raw.name, "void (*)(HPHP::ObjectData *)")
 
     def test_template_type(self):
-        ty = utils.Type("HPHP::VMFixedVector<ObjectProps::quick_index>", self.target)
+        ty = utils.Type("HPHP::VMFixedVector<HPHP::Func::ParamInfo>", self.target)
         self.assertTrue(ty.IsTypedefType())
         template = utils.template_type(ty)
         self.assertEqual(template, "HPHP::FixedVector")

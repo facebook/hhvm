@@ -20,3 +20,9 @@ val empty : t
 val union : t -> t -> t
 
 val add : t -> key:Relative_path.t -> data:by_names option -> t
+
+val is_enabled : TypecheckerOptions.t -> bool
+
+val map : Relative_path.t -> Tast.by_names -> t
+
+val reduce : t -> t -> t

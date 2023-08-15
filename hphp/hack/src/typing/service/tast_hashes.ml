@@ -34,6 +34,15 @@ let hash_tasts
     module_tast_hashes = SMap.map Tast.hash_def module_tasts;
   }
 
+let union_by_names x y =
+  {
+    fun_tast_hashes = SMap.union x.fun_tast_hashes y.fun_tast_hashes;
+    class_tast_hashes = SMap.union x.class_tast_hashes y.class_tast_hashes;
+    typedef_tast_hashes = SMap.union x.typedef_tast_hashes y.typedef_tast_hashes;
+    gconst_tast_hashes = SMap.union x.gconst_tast_hashes y.gconst_tast_hashes;
+    module_tast_hashes = SMap.union x.module_tast_hashes y.module_tast_hashes;
+  }
+
 let error_while_hashing
     { Tast.fun_tasts; class_tasts; typedef_tasts; gconst_tasts; module_tasts } :
     by_names =
@@ -54,3 +63,15 @@ let add m ~key ~data =
   match data with
   | None -> m
   | Some data -> Relative_path.Map.add m ~key ~data
+
+let is_enabled tcopt = TypecheckerOptions.dump_tast_hashes tcopt
+
+let map path tasts =
+  let data = hash_tasts tasts in
+  add empty ~key:path ~data:(Some data)
+
+let reduce xs ys =
+  Relative_path.Map.union
+    ~combine:(fun _key x y -> Some (union_by_names x y))
+    xs
+    ys

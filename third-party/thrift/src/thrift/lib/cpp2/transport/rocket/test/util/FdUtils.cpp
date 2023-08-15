@@ -58,8 +58,7 @@ void InterceptedAsyncFdSocket::writeChainWithFds(
 
   // Deconstruct `inFds` and reconstruct a copy as `fds`. This is required to
   // make assertions against `sendFds`, which is inaccessible in `SocketFds`.
-  const auto fdSeqNum = inFds.getFdSocketSeqNum();
-  auto sendFds = inFds.releaseToSend();
+  auto [sendFds, fdSeqNum] = *inFds.releaseToSendAndSeqNum();
   folly::SocketFds fds{sendFds};
   fds.setFdSocketSeqNumOnce(fdSeqNum);
 

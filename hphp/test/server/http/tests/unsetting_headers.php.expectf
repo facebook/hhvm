@@ -1,0 +1,52 @@
+Requesting 'test_unsetting_headers.php'
+string(%d) "dict(4) {
+  ["accept"]=>
+  vec(1) {
+    string(3) "*/*"
+  }
+  ["host"]=>
+  vec(1) {
+    string(%d) "%s"
+  }
+  ["myheader"]=>
+  vec(1) {
+    string(2) "42"
+  }
+  ["user-agent"]=>
+  vec(1) {
+    string(%d) "%s"
+  }
+}
+dict(4) {
+  ["HTTP_ACCEPT"]=>
+  string(3) "*/*"
+  ["HTTP_HOST"]=>
+  string(%d) "%s"
+  ["HTTP_MYHEADER"]=>
+  string(2) "42"
+  ["HTTP_USER_AGENT"]=>
+  string(%d) "%s"
+}"
+Requesting 'test_unsetting_headers.php'
+string(%d) "dict(4) {
+  ["accept"]=>
+  vec(1) {
+    string(3) "*/*"
+  }
+  ["host"]=>
+  vec(1) {
+    string(%d) "%s"
+  }
+  ["myheader"]=>
+  vec(1) {
+    string(2) "42"
+  }
+  ["user-agent"]=>
+  vec(1) {
+    string(%d) "%s"
+  }
+}
+dict(1) {
+  ["HTTP_HOST"]=>
+  string(%d) "%s"
+}"

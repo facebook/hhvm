@@ -1533,6 +1533,8 @@ struct RuntimeOption {
      2 - raise a warning, prefer the "key => value" field
      3 - throw an exception */                                          \
   F(uint64_t, PageletServerHeaderCollide, 0)                            \
+  /* Whether we should dump the request headers into $_SERVER */        \
+  F(bool, SetHeadersInServerSuperGlobal, true)                          \
   /* */
 
 private:

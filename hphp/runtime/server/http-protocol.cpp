@@ -701,12 +701,14 @@ void HttpProtocol::PrepareServerVariable(Array& server,
   std::string contentType = transport->getHeader("Content-Type");
   std::string contentLength = transport->getHeader("Content-Length");
 
-  // HTTP_ headers -- we don't exclude headers we handle elsewhere (e.g.,
-  // Content-Type, Authorization), since the CGI "spec" merely says the server
-  // "may" exclude them; this is not what APE does, but it's harmless.
-  auto const& headers = transport->getHeaders();
-  // Do this first so other methods can overwrite them
-  CopyHeaderVariables(server, headers);
+  if (RuntimeOption::EvalSetHeadersInServerSuperGlobal) {
+    // HTTP_ headers -- we don't exclude headers we handle elsewhere (e.g.,
+    // Content-Type, Authorization), since the CGI "spec" merely says the server
+    // "may" exclude them; this is not what APE does, but it's harmless.
+    auto const& headers = transport->getHeaders();
+    // Do this first so other methods can overwrite them
+    CopyHeaderVariables(server, headers);
+  }
   CopyServerInfo(server, transport, vhost);
   // Do this last so it can overwrite all the previous settings
   CopyTransportParams(server, transport);

@@ -169,6 +169,7 @@ let parse_options () =
       ~allowed_fixme_codes_strict:
         (Option.value !allowed_fixme_codes_strict ~default:ISet.empty)
       ~po_disable_hh_ignore_error:!disable_hh_ignore_error
+      ~po_keep_user_attributes:true
       ~tco_check_xhp_attribute:!check_xhp_attribute
       ~po_disable_xhp_element_mangling:!disable_xhp_element_mangling
       ~po_disable_xhp_children_declarations:!disable_xhp_children_declarations

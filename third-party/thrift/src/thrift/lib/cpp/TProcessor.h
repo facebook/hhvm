@@ -36,7 +36,7 @@ namespace thrift {
  */
 class TProcessor : public TProcessorBase {
  public:
-  virtual ~TProcessor() {}
+  virtual ~TProcessor() override {}
 
   virtual bool process(
       std::shared_ptr<protocol::TProtocol> in,

@@ -43,6 +43,9 @@ class PreprocessingAsyncProcessorWrapper : public AsyncProcessor {
   explicit PreprocessingAsyncProcessorWrapper(
       std::unique_ptr<AsyncProcessor> innerProcessor);
 
+  void addEventHandler(
+      const std::shared_ptr<TProcessorEventHandler>& handler) override final;
+
   AsyncProcessor* inner() const noexcept;
 
   void processSerializedCompressedRequestWithMetadata(

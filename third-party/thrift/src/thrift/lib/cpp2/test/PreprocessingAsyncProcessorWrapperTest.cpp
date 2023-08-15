@@ -17,6 +17,7 @@
 #include <type_traits>
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
+#include <thrift/lib/cpp/TProcessorEventHandler.h>
 #include <thrift/lib/cpp2/async/PreprocessingAsyncProcessorWrapper.h>
 
 namespace apache::thrift::test {
@@ -92,12 +93,17 @@ class TestPreprocessingAsyncProcessorWrapper
   }
 };
 
+class DummyEventHandler : public apache::thrift::TProcessorEventHandler {
+ public:
+  DummyEventHandler() {}
+};
+
 TEST(PreprocessingAsyncProcessorWrapperTest, getInnerTest) {
-  TestPreprocessingAsyncProcessorWrapper nestedProcessor(
+  TestPreprocessingAsyncProcessorWrapper preprocessingAp(
       std::make_unique<MockAsyncProcessor>());
-  EXPECT_TRUE(nestedProcessor.inner());
-  TestPreprocessingAsyncProcessorWrapper emptyNestedProcessor(nullptr);
-  EXPECT_FALSE(emptyNestedProcessor.inner());
+  EXPECT_TRUE(preprocessingAp.inner());
+  TestPreprocessingAsyncProcessorWrapper emptypreprocessingAp(nullptr);
+  EXPECT_FALSE(emptypreprocessingAp.inner());
 }
 
 MATCHER(CanBeUpCastedToTestChannelRequest, "") {
@@ -113,10 +119,10 @@ TEST(PreprocessingAsyncProcessorWrapperTest, innerProcessorInvokeTest) {
           CanBeUpCastedToTestChannelRequest(), _, _, _, _, _, _))
       .Times(1);
   EXPECT_CALL(*mockAsyncProcessor, executeRequest).Times(1);
-  auto nestedProcessor =
+  auto preprocessingAp =
       std::make_unique<TestPreprocessingAsyncProcessorWrapper>(
           std::move(mockAsyncProcessor));
-  nestedProcessor->processSerializedCompressedRequestWithMetadata(
+  preprocessingAp->processSerializedCompressedRequestWithMetadata(
       nullptr,
       SerializedCompressedRequest(nullptr),
       AsyncProcessorFactory::MethodMetadata{},
@@ -124,7 +130,24 @@ TEST(PreprocessingAsyncProcessorWrapperTest, innerProcessorInvokeTest) {
       nullptr,
       nullptr,
       nullptr);
-  nestedProcessor->executeRequest(
+  preprocessingAp->executeRequest(
       ServerRequest{}, AsyncProcessorFactory::MethodMetadata{});
+}
+
+TEST(PreprocessingAsyncProcessorWrapperTest, addEventHandlerTest) {
+  auto mockAsyncProcessor = std::make_unique<MockAsyncProcessor>();
+  auto preprocessingAp =
+      std::make_unique<TestPreprocessingAsyncProcessorWrapper>(
+          std::move(mockAsyncProcessor));
+  auto dummyEventHandler = std::make_shared<DummyEventHandler>();
+  /* Ensure we're are installing handlers in the outter async processor */
+  ASSERT_EQ(preprocessingAp->getEventHandlers().size(), 0);
+
+  /* Ensure we're properly nesting the event handler in the inner processor */
+  preprocessingAp->addEventHandler(dummyEventHandler);
+  ASSERT_EQ(preprocessingAp->getEventHandlers().size(), 0);
+  ASSERT_EQ(preprocessingAp->inner()->getEventHandlers().size(), 1);
+  EXPECT_EQ(
+      preprocessingAp->inner()->getEventHandlers().front(), dummyEventHandler);
 }
 } // namespace apache::thrift::test

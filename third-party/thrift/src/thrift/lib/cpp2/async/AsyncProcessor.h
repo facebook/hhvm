@@ -324,7 +324,7 @@ using SelectPoolResult = std::variant<
  */
 class AsyncProcessor : public TProcessorBase {
  public:
-  virtual ~AsyncProcessor() = default;
+  ~AsyncProcessor() override = default;
 
   // Return the name of the service provided by this AsyncProcessor
   virtual const char* getServiceName();

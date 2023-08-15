@@ -22,6 +22,13 @@ PreprocessingAsyncProcessorWrapper::PreprocessingAsyncProcessorWrapper(
     std::unique_ptr<AsyncProcessor> innerProcessor)
     : innerProcessor_(std::move(innerProcessor)) {}
 
+void PreprocessingAsyncProcessorWrapper::addEventHandler(
+    const std::shared_ptr<TProcessorEventHandler>& handler) {
+  auto* innerProcessor = inner();
+  CHECK(innerProcessor != nullptr);
+  innerProcessor->addEventHandler(handler);
+}
+
 AsyncProcessor* PreprocessingAsyncProcessorWrapper::inner() const noexcept {
   return innerProcessor_.get();
 }

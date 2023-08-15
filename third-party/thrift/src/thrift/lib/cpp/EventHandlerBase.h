@@ -31,7 +31,8 @@ namespace thrift {
 
 class EventHandlerBase {
  public:
-  void addEventHandler(const std::shared_ptr<TProcessorEventHandler>& handler);
+  virtual void addEventHandler(
+      const std::shared_ptr<TProcessorEventHandler>& handler);
   void addNotNullEventHandler(
       const folly::not_null_shared_ptr<TProcessorEventHandler>& handler);
 
@@ -49,7 +50,7 @@ class EventHandlerBase {
   }
 
  protected:
-  ~EventHandlerBase() = default;
+  virtual ~EventHandlerBase() = default;
 
   std::shared_ptr<std::vector<std::shared_ptr<TProcessorEventHandler>>>
       handlers_;
@@ -82,7 +83,7 @@ class TProcessorBase : public EventHandlerBase {
       std::shared_ptr<TProcessorEventHandlerFactory> factory);
 
  protected:
-  ~TProcessorBase() = default;
+  ~TProcessorBase() override = default;
 
  private:
   static folly::SharedMutex& getRWMutex();
@@ -113,7 +114,7 @@ class TClientBase : public EventHandlerBase {
 
  public:
   TClientBase();
-  virtual ~TClientBase() = default;
+  ~TClientBase() override = default;
 
   static void addClientEventHandler(
       std::shared_ptr<TProcessorEventHandler> handler);

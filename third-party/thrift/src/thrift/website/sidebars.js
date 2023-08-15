@@ -389,6 +389,7 @@ module.exports = {
       items: [
         'fb/testing/loadgen',
         'fb/testing/stress-test-framework',
+        'fb/testing/transport-benchmarks',
       ]
     },
     {

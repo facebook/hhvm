@@ -718,10 +718,13 @@ let get_module_path (ctx : Provider_context.t) (name : string) :
   get_module_pos ctx name |> Option.map ~f:FileInfo.get_pos_filename
 
 let module_exists (ctx : Provider_context.t) (name : string) : bool =
-  match Provider_context.get_backend ctx with
-  | Provider_backend.Decl_service { decl; _ } ->
-    Decl_service_client.rpc_get_module decl name |> Option.is_some
-  | _ -> get_module_pos ctx name |> Option.is_some
+  if String.equal name Naming_special_names.Modules.default then
+    true
+  else
+    match Provider_context.get_backend ctx with
+    | Provider_backend.Decl_service { decl; _ } ->
+      Decl_service_client.rpc_get_module decl name |> Option.is_some
+    | _ -> get_module_pos ctx name |> Option.is_some
 
 let add_module backend name pos =
   match backend with

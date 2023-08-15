@@ -157,47 +157,7 @@ bool containerStruct2::__fbthrift_is_empty() const {
 }
 
 bool containerStruct2::operator==(FOLLY_MAYBE_UNUSED const containerStruct2& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.fieldA_ref() == rhs.fieldA_ref())) {
-    return false;
-  }
-  if (!(lhs.req_fieldA_ref() == rhs.req_fieldA_ref())) {
-    return false;
-  }
-  if (!(lhs.opt_fieldA_ref() == rhs.opt_fieldA_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldB_ref() == rhs.fieldB_ref())) {
-    return false;
-  }
-  if (!(lhs.req_fieldB_ref() == rhs.req_fieldB_ref())) {
-    return false;
-  }
-  if (!(lhs.opt_fieldB_ref() == rhs.opt_fieldB_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldC_ref() == rhs.fieldC_ref())) {
-    return false;
-  }
-  if (!(lhs.req_fieldC_ref() == rhs.req_fieldC_ref())) {
-    return false;
-  }
-  if (!(lhs.opt_fieldC_ref() == rhs.opt_fieldC_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldD_ref() == rhs.fieldD_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldE_ref() == rhs.fieldE_ref())) {
-    return false;
-  }
-  if (!(lhs.req_fieldE_ref() == rhs.req_fieldE_ref())) {
-    return false;
-  }
-  if (!(lhs.opt_fieldE_ref() == rhs.opt_fieldE_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool containerStruct2::operator<(FOLLY_MAYBE_UNUSED const containerStruct2& rhs) const {

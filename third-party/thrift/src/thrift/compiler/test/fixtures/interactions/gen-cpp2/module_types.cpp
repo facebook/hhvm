@@ -83,11 +83,7 @@ bool CustomException::__fbthrift_is_empty() const {
 }
 
 bool CustomException::operator==(FOLLY_MAYBE_UNUSED const CustomException& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.message_ref() == rhs.message_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool CustomException::operator<(FOLLY_MAYBE_UNUSED const CustomException& rhs) const {

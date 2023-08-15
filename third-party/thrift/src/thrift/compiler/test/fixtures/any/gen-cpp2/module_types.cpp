@@ -118,11 +118,7 @@ bool MyStruct::__fbthrift_is_empty() const {
 }
 
 bool MyStruct::operator==(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.myString_ref() == rhs.myString_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool MyStruct::operator<(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
@@ -318,11 +314,7 @@ bool MyException::__fbthrift_is_empty() const {
 }
 
 bool MyException::operator==(FOLLY_MAYBE_UNUSED const MyException& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.myString_ref() == rhs.myString_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool MyException::operator<(FOLLY_MAYBE_UNUSED const MyException& rhs) const {

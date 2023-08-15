@@ -162,23 +162,7 @@ bool Internship::__fbthrift_is_empty() const {
 }
 
 bool Internship::operator==(FOLLY_MAYBE_UNUSED const Internship& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.weeks_ref() == rhs.weeks_ref())) {
-    return false;
-  }
-  if (!(lhs.title_ref() == rhs.title_ref())) {
-    return false;
-  }
-  if (!(lhs.employer_ref() == rhs.employer_ref())) {
-    return false;
-  }
-  if (!(lhs.compensation_ref() == rhs.compensation_ref())) {
-    return false;
-  }
-  if (!(lhs.school_ref() == rhs.school_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool Internship::operator<(FOLLY_MAYBE_UNUSED const Internship& rhs) const {
@@ -276,14 +260,7 @@ bool Range::__fbthrift_is_empty() const {
 }
 
 bool Range::operator==(FOLLY_MAYBE_UNUSED const Range& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.min_ref() == rhs.min_ref())) {
-    return false;
-  }
-  if (!(lhs.max_ref() == rhs.max_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool Range::operator<(FOLLY_MAYBE_UNUSED const Range& rhs) const {
@@ -394,14 +371,7 @@ bool struct1::__fbthrift_is_empty() const {
 }
 
 bool struct1::operator==(FOLLY_MAYBE_UNUSED const struct1& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.a_ref() == rhs.a_ref())) {
-    return false;
-  }
-  if (!(lhs.b_ref() == rhs.b_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool struct1::operator<(FOLLY_MAYBE_UNUSED const struct1& rhs) const {
@@ -522,20 +492,7 @@ bool struct2::__fbthrift_is_empty() const {
 }
 
 bool struct2::operator==(FOLLY_MAYBE_UNUSED const struct2& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.a_ref() == rhs.a_ref())) {
-    return false;
-  }
-  if (!(lhs.b_ref() == rhs.b_ref())) {
-    return false;
-  }
-  if (!(lhs.c_ref() == rhs.c_ref())) {
-    return false;
-  }
-  if (!(lhs.d_ref() == rhs.d_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool struct2::operator<(FOLLY_MAYBE_UNUSED const struct2& rhs) const {
@@ -681,17 +638,7 @@ bool struct3::__fbthrift_is_empty() const {
 }
 
 bool struct3::operator==(FOLLY_MAYBE_UNUSED const struct3& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.a_ref() == rhs.a_ref())) {
-    return false;
-  }
-  if (!(lhs.b_ref() == rhs.b_ref())) {
-    return false;
-  }
-  if (!(lhs.c_ref() == rhs.c_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool struct3::operator<(FOLLY_MAYBE_UNUSED const struct3& rhs) const {
@@ -818,17 +765,7 @@ bool struct4::__fbthrift_is_empty() const {
 }
 
 bool struct4::operator==(FOLLY_MAYBE_UNUSED const struct4& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.a_ref() == rhs.a_ref())) {
-    return false;
-  }
-  if (!(lhs.b_ref() == rhs.b_ref())) {
-    return false;
-  }
-  if (!(lhs.c_ref() == rhs.c_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool struct4::operator<(FOLLY_MAYBE_UNUSED const struct4& rhs) const {

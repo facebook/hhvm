@@ -141,11 +141,7 @@ bool SimpleException::__fbthrift_is_empty() const {
 }
 
 bool SimpleException::operator==(FOLLY_MAYBE_UNUSED const SimpleException& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.err_code_ref() == rhs.err_code_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool SimpleException::operator<(FOLLY_MAYBE_UNUSED const SimpleException& rhs) const {
@@ -256,11 +252,7 @@ bool OptionalRefStruct::__fbthrift_is_empty() const {
 }
 
 bool OptionalRefStruct::operator==(FOLLY_MAYBE_UNUSED const OptionalRefStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (lhs.optional_blob_ref().has_value() != rhs.optional_blob_ref().has_value() || (lhs.optional_blob_ref().has_value() && !apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::isEqual(lhs.__fbthrift_field_optional_blob, rhs.__fbthrift_field_optional_blob))) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool OptionalRefStruct::operator<(FOLLY_MAYBE_UNUSED const OptionalRefStruct& rhs) const {
@@ -390,32 +382,7 @@ bool SimpleStruct::__fbthrift_is_empty() const {
 }
 
 bool SimpleStruct::operator==(FOLLY_MAYBE_UNUSED const SimpleStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.is_on_ref() == rhs.is_on_ref())) {
-    return false;
-  }
-  if (!(lhs.tiny_int_ref() == rhs.tiny_int_ref())) {
-    return false;
-  }
-  if (!(lhs.small_int_ref() == rhs.small_int_ref())) {
-    return false;
-  }
-  if (!(lhs.nice_sized_int_ref() == rhs.nice_sized_int_ref())) {
-    return false;
-  }
-  if (!(lhs.big_int_ref() == rhs.big_int_ref())) {
-    return false;
-  }
-  if (!(lhs.real_ref() == rhs.real_ref())) {
-    return false;
-  }
-  if (!(lhs.smaller_real_ref() == rhs.smaller_real_ref())) {
-    return false;
-  }
-  if (!(lhs.hidden_field_ref() == rhs.hidden_field_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool SimpleStruct::operator<(FOLLY_MAYBE_UNUSED const SimpleStruct& rhs) const {
@@ -569,17 +536,7 @@ bool HiddenTypeFieldsStruct::__fbthrift_is_empty() const {
 }
 
 bool HiddenTypeFieldsStruct::operator==(FOLLY_MAYBE_UNUSED const HiddenTypeFieldsStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (::apache::thrift::adapt_detail::not_equal<Adapter>(lhs.__fbthrift_field_field1, rhs.__fbthrift_field_field1)) {
-    return false;
-  }
-  if (!(lhs.field2_ref() == rhs.field2_ref())) {
-    return false;
-  }
-  if (!(lhs.field3_ref() == rhs.field3_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 const ::std::vector<::py3::simple::AdaptedTypeDef>& HiddenTypeFieldsStruct::get_field2() const& {
@@ -799,11 +756,7 @@ bool HiddenException::__fbthrift_is_empty() const {
 }
 
 bool HiddenException::operator==(FOLLY_MAYBE_UNUSED const HiddenException& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.test_ref() == rhs.test_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool HiddenException::operator<(FOLLY_MAYBE_UNUSED const HiddenException& rhs) const {
@@ -946,35 +899,7 @@ bool ComplexStruct::__fbthrift_is_empty() const {
 }
 
 bool ComplexStruct::operator==(FOLLY_MAYBE_UNUSED const ComplexStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.structOne_ref() == rhs.structOne_ref())) {
-    return false;
-  }
-  if (!(lhs.structTwo_ref() == rhs.structTwo_ref())) {
-    return false;
-  }
-  if (!(lhs.an_integer_ref() == rhs.an_integer_ref())) {
-    return false;
-  }
-  if (!(lhs.name_ref() == rhs.name_ref())) {
-    return false;
-  }
-  if (!(lhs.an_enum_ref() == rhs.an_enum_ref())) {
-    return false;
-  }
-  if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.__fbthrift_field_some_bytes, rhs.__fbthrift_field_some_bytes)) {
-    return false;
-  }
-  if (!(lhs.from_ref() == rhs.from_ref())) {
-    return false;
-  }
-  if (!(lhs.cdef_ref() == rhs.cdef_ref())) {
-    return false;
-  }
-  if (!apache::thrift::StringTraits<foo::Bar>::isEqual(lhs.__fbthrift_field_bytes_with_cpp_type, rhs.__fbthrift_field_bytes_with_cpp_type)) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool ComplexStruct::operator<(FOLLY_MAYBE_UNUSED const ComplexStruct& rhs) const {

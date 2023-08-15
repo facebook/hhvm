@@ -179,23 +179,7 @@ bool TrivialTypesStruct::__fbthrift_is_empty() const {
 }
 
 bool TrivialTypesStruct::operator==(FOLLY_MAYBE_UNUSED const TrivialTypesStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.fieldA_ref() == rhs.fieldA_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldB_ref() == rhs.fieldB_ref())) {
-    return false;
-  }
-  if (lhs.fieldC_ref().has_value() != rhs.fieldC_ref().has_value() || (lhs.fieldC_ref().has_value() && !apache::thrift::StringTraits<std::string>::isEqual(lhs.__fbthrift_field_fieldC, rhs.__fbthrift_field_fieldC))) {
-    return false;
-  }
-  if (lhs.fieldD_ref().has_value() != rhs.fieldD_ref().has_value() || (lhs.fieldD_ref().has_value() && !apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::isEqual(lhs.__fbthrift_field_fieldD, rhs.__fbthrift_field_fieldD))) {
-    return false;
-  }
-  if (!(lhs.fieldE_ref() == rhs.fieldE_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool TrivialTypesStruct::operator<(FOLLY_MAYBE_UNUSED const TrivialTypesStruct& rhs) const {
@@ -379,32 +363,7 @@ bool ContainerStruct::__fbthrift_is_empty() const {
 }
 
 bool ContainerStruct::operator==(FOLLY_MAYBE_UNUSED const ContainerStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.fieldA_ref() == rhs.fieldA_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldB_ref() == rhs.fieldB_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldC_ref() == rhs.fieldC_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldD_ref() == rhs.fieldD_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldE_ref() == rhs.fieldE_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldF_ref() == rhs.fieldF_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldG_ref() == rhs.fieldG_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldH_ref() == rhs.fieldH_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 const ::std::vector<::std::int32_t>& ContainerStruct::get_fieldA() const& {

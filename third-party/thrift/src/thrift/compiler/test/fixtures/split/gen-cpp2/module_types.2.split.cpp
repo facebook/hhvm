@@ -117,29 +117,7 @@ bool MyStruct::__fbthrift_is_empty() const {
 }
 
 bool MyStruct::operator==(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.MyIntField_ref() == rhs.MyIntField_ref())) {
-    return false;
-  }
-  if (!(lhs.MyStringField_ref() == rhs.MyStringField_ref())) {
-    return false;
-  }
-  if (!(lhs.MyDataField_ref() == rhs.MyDataField_ref())) {
-    return false;
-  }
-  if (!(lhs.myEnum_ref() == rhs.myEnum_ref())) {
-    return false;
-  }
-  if (!(lhs.oneway_ref() == rhs.oneway_ref())) {
-    return false;
-  }
-  if (!(lhs.readonly_ref() == rhs.readonly_ref())) {
-    return false;
-  }
-  if (!(lhs.idempotent_ref() == rhs.idempotent_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool MyStruct::operator<(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {

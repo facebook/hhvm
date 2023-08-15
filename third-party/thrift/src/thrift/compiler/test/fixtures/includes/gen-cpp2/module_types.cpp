@@ -87,17 +87,7 @@ bool MyStruct::__fbthrift_is_empty() const {
 }
 
 bool MyStruct::operator==(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.MyIncludedField_ref() == rhs.MyIncludedField_ref())) {
-    return false;
-  }
-  if (!(lhs.MyOtherIncludedField_ref() == rhs.MyOtherIncludedField_ref())) {
-    return false;
-  }
-  if (!(lhs.MyIncludedInt_ref() == rhs.MyIncludedInt_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool MyStruct::operator<(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {

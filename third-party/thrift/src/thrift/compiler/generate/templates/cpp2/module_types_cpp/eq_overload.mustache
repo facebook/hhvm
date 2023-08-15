@@ -16,15 +16,5 @@
 
 %>
 bool <%struct:cpp_underlying_name%>::operator==(FOLLY_MAYBE_UNUSED const <%struct:cpp_underlying_name%>& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-<%#struct:fields%><%#field:type%>
-<%#field:lazy?%>
-  lhs.<%field:cpp_name%>_ref();
-  rhs.<%field:cpp_name%>_ref();
-<%/field:lazy?%>
-  if (<% > field/neq%>) {
-    return false;
-  }
-<%/field:type%><%/struct:fields%>
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }

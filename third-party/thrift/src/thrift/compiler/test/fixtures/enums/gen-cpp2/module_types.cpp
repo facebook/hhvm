@@ -238,20 +238,7 @@ bool SomeStruct::__fbthrift_is_empty() const {
 }
 
 bool SomeStruct::operator==(FOLLY_MAYBE_UNUSED const SomeStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.reasonable_ref() == rhs.reasonable_ref())) {
-    return false;
-  }
-  if (!(lhs.fine_ref() == rhs.fine_ref())) {
-    return false;
-  }
-  if (!(lhs.questionable_ref() == rhs.questionable_ref())) {
-    return false;
-  }
-  if (!(lhs.tags_ref() == rhs.tags_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool SomeStruct::operator<(FOLLY_MAYBE_UNUSED const SomeStruct& rhs) const {
@@ -353,20 +340,7 @@ bool MyStruct::__fbthrift_is_empty() const {
 }
 
 bool MyStruct::operator==(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.me2_3_ref() == rhs.me2_3_ref())) {
-    return false;
-  }
-  if (!(lhs.me3_n3_ref() == rhs.me3_n3_ref())) {
-    return false;
-  }
-  if (!(lhs.me1_t1_ref() == rhs.me1_t1_ref())) {
-    return false;
-  }
-  if (!(lhs.me1_t2_ref() == rhs.me1_t2_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool MyStruct::operator<(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {

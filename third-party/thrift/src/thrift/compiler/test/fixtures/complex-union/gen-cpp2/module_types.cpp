@@ -430,17 +430,7 @@ bool Val::__fbthrift_is_empty() const {
 }
 
 bool Val::operator==(FOLLY_MAYBE_UNUSED const Val& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.strVal_ref() == rhs.strVal_ref())) {
-    return false;
-  }
-  if (!(lhs.intVal_ref() == rhs.intVal_ref())) {
-    return false;
-  }
-  if (!(lhs.typedefValue_ref() == rhs.typedefValue_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool Val::operator<(FOLLY_MAYBE_UNUSED const Val& rhs) const {
@@ -760,11 +750,7 @@ bool NonCopyableStruct::__fbthrift_is_empty() const {
 }
 
 bool NonCopyableStruct::operator==(FOLLY_MAYBE_UNUSED const NonCopyableStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.num_ref() == rhs.num_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool NonCopyableStruct::operator<(FOLLY_MAYBE_UNUSED const NonCopyableStruct& rhs) const {

@@ -68,11 +68,7 @@ bool Foo::__fbthrift_is_empty() const {
 }
 
 bool Foo::operator==(FOLLY_MAYBE_UNUSED const Foo& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.MyInt_ref() == rhs.MyInt_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool Foo::operator<(FOLLY_MAYBE_UNUSED const Foo& rhs) const {

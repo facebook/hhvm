@@ -389,7 +389,17 @@ module.exports = {
       items: [
         'fb/testing/loadgen',
         'fb/testing/stress-test-framework',
-        'fb/testing/transport-benchmarks',
+        {
+          type: 'category',
+          label: 'Transport Benchmarks',
+          link: {
+            type: 'doc',
+            id: 'fb/testing/transport-benchmarks/index',
+          },
+          items: [
+            'fb/testing/transport-benchmarks/adhoc-tests',
+          ]
+        },
       ]
     },
     {

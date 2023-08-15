@@ -109,10 +109,14 @@ def Type(name: str, target: lldb.SBTarget) -> lldb.SBType:
     Returns:
         An SBType wrapping the HHVM type
     """
-    # T133615659: It appears that sometimes FindFirstType(name) returns an empty type,
-    # even though FindTypes(name).GetTypesAtIndex(0) returns the type we want.
-    ty = target.FindFirstType(name)
+    # T133615659: Using FindTypes(name).GetTypesAtIndex(0) because
+    # it appears that sometimes FindFirstType(name) returns an empty type.
+    ty = target.modules[0].FindTypes(name).GetTypeAtIndex(0)
     if not ty.IsValid():
+        # If we can't find it in the first module (assuming it's the HHVM executable),
+        # let's try it on the target, which might take longer but handles cases where
+        # the type we want is in a different module. Looking in the first module first
+        # let's us prioritize types defined in it.
         ty = target.FindTypes(name).GetTypeAtIndex(0)
     assert ty.IsValid(), f"couldn't find type '{name}'"
     return ty
@@ -131,10 +135,13 @@ def Global(name: str, target: lldb.SBTarget) -> lldb.SBValue:
     Returns:
         SBValue wrapping the global variable
     """
-    g = target.FindFirstGlobalVariable(name)
+    # Search in hhvm module first to try and speed things up.
+    g = target.modules[0].FindFirstGlobalVariable(target, name)
     if g.GetError().Fail():
-        debug_print(f"couldn't find global variable '{name}'; attempting to find it by evaluating it")
-        return Value(name, target)
+        g = target.FindFirstGlobalVariable(name)
+        if g.GetError().Fail():
+            debug_print(f"couldn't find global variable '{name}'; attempting to find it by evaluating it")
+            return Value(name, target)
     return g
 
 

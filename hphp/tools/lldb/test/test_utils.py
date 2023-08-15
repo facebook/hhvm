@@ -8,7 +8,7 @@ import hhvm_lldb.utils as utils
 
 class UtilsGivenTargetTestCase(base.TestHHVMBinary):
     def setUp(self):
-        super().setUp() # No Hack file needed; just load HHVM target
+        super().setUp(launch_process=False) # No Hack file needed; just load HHVM target
 
     def test_Type(self):
         # Make sure some base HPHP types can be found by the debugger
@@ -16,7 +16,7 @@ class UtilsGivenTargetTestCase(base.TestHHVMBinary):
             "HPHP::ActRec",
             "HPHP::ArrayData",
             "HPHP::AsioBlockable",
-            #"HPHP::Class",  # "LLDB currently crashes when looking up HPHP::Class type"
+            "HPHP::Class",
             "HPHP::DataType",
             "HPHP::Func",
             "HPHP::FuncId",

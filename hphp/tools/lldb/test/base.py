@@ -39,18 +39,22 @@ class LLDBTestBase(BaseFacebookTestCase):
         target = debugger.CreateTarget(self.getTargetPath())
         assert target.IsValid(), "Unable to create target"
 
-        error = lldb.SBError()
-        process = target.Launch(
-            debugger.GetListener(),
-            self.getArgs(),
-            None, None, None, None, os.getcwd(), 0, True, error)
-        assert process.IsValid() and error.Success(), f"Unable to launch process ({get_lldb_object_description(error)})"
-        assert process.GetState() == lldb.eStateStopped, "Process is not in Stopped state"
+        if self.launchProcess():
+            error = lldb.SBError()
+            process = target.Launch(
+                debugger.GetListener(),
+                self.getArgs(),
+                None, None, None, None, os.getcwd(), 0, True, error)
+            assert process.IsValid() and error.Success(), f"Unable to launch process ({get_lldb_object_description(error)})"
+            assert process.GetState() == lldb.eStateStopped, "Process is not in Stopped state"
 
         (status, output) = run_lldb_command(debugger, f"command script import {scripts_path}/hhvm.py")
         assert status == 0, output  # output will be the error message
 
         self.debugger = debugger
+
+    def launchProcess(self) -> bool:
+        return True
 
     @typing.abstractmethod
     def getTargetPath(self) -> str:
@@ -72,7 +76,9 @@ class LLDBTestBase(BaseFacebookTestCase):
     @property
     def process(self) -> lldb.SBProcess:
         """ Get the process associated wih the debugger's target """
-        return self.target.GetProcess()
+        process = self.target.GetProcess()
+        assert process.IsValid(), f"Invalid process; self.launchProcess() returns '{self.launchProcess()}'"
+        return process
 
     @property
     def thread(self) -> lldb.SBThread:
@@ -109,11 +115,15 @@ class LLDBTestBase(BaseFacebookTestCase):
         assert self.process.GetSelectedThread().GetStopReason() == lldb.eStopReasonBreakpoint, f"Unable to reach breakpoint at {breakpoint}"
 
 class TestHHVMBinary(LLDBTestBase):
-    def setUp(self, test_file=None, interp=False, allow_hhas=False):
+    def setUp(self, launch_process=True, test_file=None, interp=False, allow_hhas=False):
+        self.launch_process = launch_process
         self.test_file = test_file
         self.interp = interp
         self.allow_hhas = allow_hhas
         super().setUp()
+
+    def launchProcess(self) -> bool:
+        return self.launch_process
 
     def getTargetPath(self) -> str:
         return hhvm_path.as_posix()

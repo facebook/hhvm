@@ -20,6 +20,11 @@ module IdeShellout : sig
   val from_string_exn : string -> half_open_one_based list
 end
 
+(** Used by hh_server's findRefsService to write to a streaming file, read by clientLsp *)
+module Ide_stream : sig
+  val append : Unix.file_descr -> (string * Pos.absolute) list -> unit
+end
+
 (** Used "hh --find-refs --json" and read by HackAst and other tools *)
 module HackAst : sig
   val to_string : (string * Pos.absolute) list -> string

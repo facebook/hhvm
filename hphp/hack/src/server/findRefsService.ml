@@ -257,8 +257,6 @@ let find_refs
     (files : Relative_path.t list)
     ~(omit_declaration : bool)
     ~(stream_file : Path.t option) : (string * Pos.t) list =
-  (* TODO(ljw): implement! *)
-  let _ = stream_file in
   (* The helper function 'results_from_tast' takes a tast, looks at all *)
   (* use-sites in the tast e.g. "foo(1)" is a use-site of symbol foo,   *)
   (* and returns a map from use-site-position to name of the symbol.    *)
@@ -291,21 +289,29 @@ let find_refs
     | _ when not (is_entry_valid entry) -> None
   in
 
-  let batch_results =
-    List.concat_map files ~f:(fun path ->
-        match tast_of_file path with
-        | None -> []
-        | Some tast ->
-          (* A list of all use-sites with their string-name of target *)
-          let results : string Pos.Map.t = results_from_tast tast in
-          (* We actually just want a list of string-name-of-target, use-site-position *)
-          (* Some callers e.g. LSP will simply discard the string-name-of-target.     *)
-          let results : (string * Pos.t) list =
-            Pos.Map.fold (fun p str acc -> (str, p) :: acc) results []
-          in
-          results)
+  let stream_fd =
+    Option.map stream_file ~f:(fun file ->
+        Unix.openfile (Path.to_string file) [Unix.O_WRONLY; Unix.O_APPEND] 0o666)
   in
-  batch_results @ acc
+  Utils.try_finally
+    ~finally:(fun () -> Option.iter stream_fd ~f:Unix.close)
+    ~f:(fun () ->
+      let batch_results =
+        List.concat_map files ~f:(fun path ->
+            match tast_of_file path with
+            | None -> []
+            | Some tast ->
+              let results : string Pos.Map.t = results_from_tast tast in
+              let results : (string * Pos.t) list =
+                Pos.Map.fold (fun p str acc -> (str, p) :: acc) results []
+              in
+              Option.iter stream_fd ~f:(fun fd ->
+                  results
+                  |> List.map ~f:(fun (r, p) -> (r, Pos.to_absolute p))
+                  |> FindRefsWireFormat.Ide_stream.append fd);
+              results)
+      in
+      batch_results @ acc)
 
 let find_refs_ctx
     ~(ctx : Provider_context.t)

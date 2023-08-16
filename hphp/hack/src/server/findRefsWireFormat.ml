@@ -66,6 +66,28 @@ module IdeShellout = struct
     List.map entries ~f:half_open_one_based_json_to_pos_exn
 end
 
+(** Used by hh_server's findRefsService to write to a streaming file, read by clientLsp *)
+module Ide_stream = struct
+  let append (fd : Unix.file_descr) (results : (string * Pos.absolute) list) :
+      unit =
+    let bytes =
+      List.map results ~f:(fun (name, pos) ->
+          Printf.sprintf
+            "%s\n"
+            (pos_to_one_based_json
+               (name, pos)
+               ~half_open_interval:true
+               ~timestamp:(Unix.gettimeofday ())
+            |> Hh_json.json_to_string))
+      |> String.concat ~sep:""
+      |> Bytes.of_string
+    in
+    Sys_utils.with_lock fd Unix.F_LOCK ~f:(fun () ->
+        let (_ : int) = Unix.lseek fd 0 Unix.SEEK_END in
+        Sys_utils.write_non_intr fd bytes 0 (Bytes.length bytes);
+        Unix.fsync fd)
+end
+
 (** Used "hh --find-refs --json" and read by HackAst and other tools *)
 module HackAst = struct
   let to_string results =

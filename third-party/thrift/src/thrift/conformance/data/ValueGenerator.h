@@ -31,27 +31,6 @@
 
 namespace apache::thrift::conformance::data {
 
-// Returns the conformance test tag for definintion spec page, for the given
-// Thrift type.
-template <typename Tag>
-constexpr const char* getSpecDefinitionTag() {
-  if constexpr (type::is_a_v<Tag, type::string_t>) {
-    return "spec/definition/data#utf-8-string";
-  } else if constexpr (type::is_a_v<Tag, type::enum_c>) {
-    return "spec/definition/data#enum";
-  } else if constexpr (type::is_a_v<Tag, type::floating_point_c>) {
-    return "spec/definition/data#floating-point";
-  } else if constexpr (type::is_a_v<Tag, type::primitive_c>) {
-    return "spec/definition/data#primitive-types";
-  } else if constexpr (type::is_a_v<Tag, type::container_c>) {
-    return "spec/definition/data#container-types";
-  } else if constexpr (type::is_a_v<Tag, type::structured_c>) {
-    return "spec/definition/data#structured-types";
-  } else {
-    return "spec/definition/data";
-  }
-}
-
 // A value with an associated name.
 template <typename T>
 struct NamedValue {

@@ -44,7 +44,7 @@ Test createRoundTripTest(
   const std::string& typeName = getTestTypeName<ElementTag>();
   Test test;
   test.name() = protocol.name();
-  test.tags()->emplace(getSpecDefinitionTag<ElementTag>());
+  test.tags()->emplace("idl/");
   for (const auto& value : ValueGenerator<ElementTag>::getInterestingValues()) {
     RoundTripTestCase roundTrip;
     // asValueStruct doesn't work with adapted values

@@ -11,7 +11,7 @@
 #include <fizz/extensions/delegatedcred/DelegatedCredentialCertManager.h>
 #include <fizz/extensions/delegatedcred/SelfDelegatedCredential.h>
 #ifdef FIZZ_TOOL_ENABLE_BROTLI
-#include <fizz/protocol/BrotliCertificateCompressor.h>
+#include <fizz/compression/BrotliCertificateCompressor.h>
 #endif
 #include <fizz/protocol/DefaultCertificateVerifier.h>
 #include <fizz/protocol/ZlibCertificateCompressor.h>

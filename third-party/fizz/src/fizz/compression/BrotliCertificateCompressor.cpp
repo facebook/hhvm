@@ -7,7 +7,7 @@
  */
 
 #include <brotli/encode.h>
-#include <fizz/protocol/BrotliCertificateCompressor.h>
+#include <fizz/compression/BrotliCertificateCompressor.h>
 
 using namespace folly;
 

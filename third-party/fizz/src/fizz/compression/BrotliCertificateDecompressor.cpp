@@ -6,7 +6,7 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-#include <fizz/protocol/BrotliCertificateDecompressor.h>
+#include <fizz/compression/BrotliCertificateDecompressor.h>
 
 #include <brotli/decode.h>
 

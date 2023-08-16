@@ -103,6 +103,7 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/generated/fizz/fizz-config.h DESTINATI
 
 set(FIZZ_HEADER_DIRS
   client
+  compression
   crypto
   crypto/aead
   crypto/exchange
@@ -126,6 +127,7 @@ set(FIZZ_HEADER_DIRS
 
 set(FIZZ_TEST_HEADER_DIRS
   client/test
+  compression/test
   crypto/aead/test
   crypto/exchange/test
   crypto/test

@@ -8,8 +8,8 @@
 
 #pragma once
 
+#include <fizz/compression/CertificateCompressor.h>
 #include <fizz/crypto/signature/Signature.h>
-#include <fizz/protocol/CertificateCompressor.h>
 #include <fizz/record/Types.h>
 #include <folly/io/async/AsyncTransportCertificate.h>
 #include <folly/io/async/ssl/OpenSSLTransportCertificate.h>

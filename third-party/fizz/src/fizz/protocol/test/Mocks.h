@@ -13,7 +13,6 @@
 #include <fizz/crypto/test/Mocks.h>
 #include <fizz/protocol/AsyncFizzBase.h>
 #include <fizz/protocol/Certificate.h>
-#include <fizz/protocol/CertificateCompressor.h>
 #include <fizz/protocol/CertificateVerifier.h>
 #include <fizz/protocol/HandshakeContext.h>
 #include <fizz/protocol/KeyScheduler.h>
@@ -325,28 +324,6 @@ class MockAsyncKexFactory : public OpenSSLFactory {
       makeKeyExchange,
       (NamedGroup group, Factory::KeyExchangeMode mode),
       (const));
-};
-
-class MockCertificateDecompressor : public CertificateDecompressor {
- public:
-  MOCK_METHOD(CertificateCompressionAlgorithm, getAlgorithm, (), (const));
-  MOCK_METHOD(CertificateMsg, decompress, (const CompressedCertificate&));
-  void setDefaults() {
-    ON_CALL(*this, getAlgorithm()).WillByDefault(InvokeWithoutArgs([]() {
-      return CertificateCompressionAlgorithm::zlib;
-    }));
-  }
-};
-
-class MockCertificateCompressor : public CertificateCompressor {
- public:
-  MOCK_METHOD(CertificateCompressionAlgorithm, getAlgorithm, (), (const));
-  MOCK_METHOD(CompressedCertificate, compress, (const CertificateMsg&));
-  void setDefaults() {
-    ON_CALL(*this, getAlgorithm()).WillByDefault(InvokeWithoutArgs([]() {
-      return CertificateCompressionAlgorithm::zlib;
-    }));
-  }
 };
 
 class MockAsyncFizzBase : public AsyncFizzBase {

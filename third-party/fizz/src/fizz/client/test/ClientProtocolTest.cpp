@@ -13,6 +13,7 @@
 #include <fizz/client/FizzClientContext.h>
 #include <fizz/client/test/Mocks.h>
 #include <fizz/client/test/Utilities.h>
+#include <fizz/compression/test/Mocks.h>
 #include <fizz/crypto/hpke/Utils.h>
 #include <fizz/crypto/hpke/test/Mocks.h>
 #include <fizz/protocol/clock/test/Mocks.h>

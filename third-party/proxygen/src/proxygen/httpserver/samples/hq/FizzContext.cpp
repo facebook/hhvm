@@ -9,7 +9,7 @@
 #include <proxygen/httpserver/samples/hq/FizzContext.h>
 
 #include <fizz/compression/ZlibCertificateDecompressor.h>
-#include <fizz/protocol/ZstdCertificateDecompressor.h>
+#include <fizz/compression/ZstdCertificateDecompressor.h>
 #include <fizz/server/AeadTicketCipher.h>
 #include <fizz/server/CertManager.h>
 #include <fizz/server/TicketCodec.h>

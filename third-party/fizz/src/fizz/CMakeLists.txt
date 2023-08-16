@@ -179,6 +179,8 @@ set(FIZZ_SOURCES
   compression/CertDecompressionManager.cpp
   compression/ZlibCertificateCompressor.cpp
   compression/ZlibCertificateDecompressor.cpp
+  compression/ZstdCertificateCompressor.cpp
+  compression/ZstdCertificateDecompressor.cpp
   crypto/Utils.cpp
   crypto/exchange/X25519.cpp
   crypto/aead/OpenSSLEVPCipher.cpp
@@ -218,8 +220,6 @@ set(FIZZ_SOURCES
   protocol/KeyScheduler.cpp
   protocol/Certificate.cpp
   protocol/Params.cpp
-  protocol/ZstdCertificateCompressor.cpp
-  protocol/ZstdCertificateDecompressor.cpp
   protocol/clock/SystemClock.cpp
   protocol/ech/Decrypter.cpp
   protocol/ech/Encryption.cpp

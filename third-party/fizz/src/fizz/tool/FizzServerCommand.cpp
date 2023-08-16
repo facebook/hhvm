@@ -16,7 +16,7 @@
 #include <fizz/compression/ZlibCertificateCompressor.h>
 #include <fizz/protocol/DefaultCertificateVerifier.h>
 #ifdef FIZZ_TOOL_ENABLE_ZSTD
-#include <fizz/protocol/ZstdCertificateCompressor.h>
+#include <fizz/compression/ZstdCertificateCompressor.h>
 #endif
 #include <fizz/protocol/test/Utilities.h>
 #include <fizz/server/AsyncFizzServer.h>

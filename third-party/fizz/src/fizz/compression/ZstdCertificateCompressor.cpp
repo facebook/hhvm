@@ -6,7 +6,7 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-#include <fizz/protocol/ZstdCertificateCompressor.h>
+#include <fizz/compression/ZstdCertificateCompressor.h>
 #include <zstd.h>
 
 using namespace folly;

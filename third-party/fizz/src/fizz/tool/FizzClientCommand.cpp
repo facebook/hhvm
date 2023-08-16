@@ -15,7 +15,7 @@
 #endif
 #include <fizz/compression/ZlibCertificateDecompressor.h>
 #ifdef FIZZ_TOOL_ENABLE_ZSTD
-#include <fizz/protocol/ZstdCertificateDecompressor.h>
+#include <fizz/compression/ZstdCertificateDecompressor.h>
 #endif
 #include <fizz/client/PskSerializationUtils.h>
 #ifdef FIZZ_TOOL_ENABLE_OQS

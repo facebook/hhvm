@@ -8,9 +8,9 @@
 
 #include <folly/portability/GTest.h>
 
+#include <fizz/compression/ZstdCertificateCompressor.h>
+#include <fizz/compression/ZstdCertificateDecompressor.h>
 #include <fizz/crypto/Utils.h>
-#include <fizz/protocol/ZstdCertificateCompressor.h>
-#include <fizz/protocol/ZstdCertificateDecompressor.h>
 #include <fizz/protocol/test/Matchers.h>
 #include <fizz/protocol/test/Utilities.h>
 #include <fizz/record/Extensions.h>

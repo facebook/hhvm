@@ -59,7 +59,8 @@ bool Empty::__fbthrift_is_empty() const {
 }
 
 bool Empty::operator==(FOLLY_MAYBE_UNUSED const Empty& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  return true;
 }
 
 bool Empty::operator<(FOLLY_MAYBE_UNUSED const Empty& rhs) const {

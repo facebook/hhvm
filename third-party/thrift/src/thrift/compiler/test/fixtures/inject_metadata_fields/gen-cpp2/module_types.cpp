@@ -83,7 +83,11 @@ bool Fields::__fbthrift_is_empty() const {
 }
 
 bool Fields::operator==(FOLLY_MAYBE_UNUSED const Fields& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.injected_field_ref() == rhs.injected_field_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool Fields::operator<(FOLLY_MAYBE_UNUSED const Fields& rhs) const {
@@ -184,7 +188,11 @@ bool FieldsInjectedToEmptyStruct::__fbthrift_is_empty() const {
 }
 
 bool FieldsInjectedToEmptyStruct::operator==(FOLLY_MAYBE_UNUSED const FieldsInjectedToEmptyStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.injected_field_ref() == rhs.injected_field_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool FieldsInjectedToEmptyStruct::operator<(FOLLY_MAYBE_UNUSED const FieldsInjectedToEmptyStruct& rhs) const {
@@ -290,7 +298,14 @@ bool FieldsInjectedToStruct::__fbthrift_is_empty() const {
 }
 
 bool FieldsInjectedToStruct::operator==(FOLLY_MAYBE_UNUSED const FieldsInjectedToStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.string_field_ref() == rhs.string_field_ref())) {
+    return false;
+  }
+  if (!(lhs.injected_field_ref() == rhs.injected_field_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool FieldsInjectedToStruct::operator<(FOLLY_MAYBE_UNUSED const FieldsInjectedToStruct& rhs) const {
@@ -408,7 +423,20 @@ bool FieldsInjectedWithIncludedStruct::__fbthrift_is_empty() const {
 }
 
 bool FieldsInjectedWithIncludedStruct::operator==(FOLLY_MAYBE_UNUSED const FieldsInjectedWithIncludedStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.string_field_ref() == rhs.string_field_ref())) {
+    return false;
+  }
+  if (!(lhs.injected_field_ref() == rhs.injected_field_ref())) {
+    return false;
+  }
+  if ((!::apache::thrift::detail::pointer_equal(lhs.injected_structured_annotation_field_ref(), rhs.injected_structured_annotation_field_ref()))) {
+    return false;
+  }
+  if ((!::apache::thrift::detail::pointer_equal(lhs.injected_unstructured_annotation_field_ref(), rhs.injected_unstructured_annotation_field_ref()))) {
+    return false;
+  }
+  return true;
 }
 
 bool FieldsInjectedWithIncludedStruct::operator<(FOLLY_MAYBE_UNUSED const FieldsInjectedWithIncludedStruct& rhs) const {

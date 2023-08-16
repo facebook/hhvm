@@ -83,7 +83,11 @@ bool A::__fbthrift_is_empty() const {
 }
 
 bool A::operator==(FOLLY_MAYBE_UNUSED const A& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.useless_field_ref() == rhs.useless_field_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool A::operator<(FOLLY_MAYBE_UNUSED const A& rhs) const {
@@ -289,7 +293,11 @@ bool Bang::__fbthrift_is_empty() const {
 }
 
 bool Bang::operator==(FOLLY_MAYBE_UNUSED const Bang& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.message_ref() == rhs.message_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool Bang::operator<(FOLLY_MAYBE_UNUSED const Bang& rhs) const {

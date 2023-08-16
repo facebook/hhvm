@@ -124,7 +124,14 @@ bool MyStruct::__fbthrift_is_empty() const {
 }
 
 bool MyStruct::operator==(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.myEnum_ref() == rhs.myEnum_ref())) {
+    return false;
+  }
+  if (!(lhs.myBigEnum_ref() == rhs.myBigEnum_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool MyStruct::operator<(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {

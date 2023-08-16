@@ -110,7 +110,26 @@ bool InterceptedFields::__fbthrift_is_empty() const {
 }
 
 bool InterceptedFields::operator==(FOLLY_MAYBE_UNUSED const InterceptedFields& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.access_field_ref() == rhs.access_field_ref())) {
+    return false;
+  }
+  if ((!::apache::thrift::detail::pointer_equal(lhs.access_shared_field_ref(), rhs.access_shared_field_ref()))) {
+    return false;
+  }
+  if ((!::apache::thrift::detail::pointer_equal(lhs.access_optional_shared_field_ref(), rhs.access_optional_shared_field_ref()))) {
+    return false;
+  }
+  if ((!::apache::thrift::detail::pointer_equal(lhs.access_shared_const_field_ref(), rhs.access_shared_const_field_ref()))) {
+    return false;
+  }
+  if ((!::apache::thrift::detail::pointer_equal(lhs.access_optional_shared_const_field_ref(), rhs.access_optional_shared_const_field_ref()))) {
+    return false;
+  }
+  if ((!::apache::thrift::detail::pointer_equal(lhs.access_optional_boxed_field_ref(), rhs.access_optional_boxed_field_ref()))) {
+    return false;
+  }
+  return true;
 }
 
 bool InterceptedFields::operator<(FOLLY_MAYBE_UNUSED const InterceptedFields& rhs) const {

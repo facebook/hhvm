@@ -104,7 +104,20 @@ bool Default::__fbthrift_is_empty() const {
 }
 
 bool Default::operator==(FOLLY_MAYBE_UNUSED const Default& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.field1_ref() == rhs.field1_ref())) {
+    return false;
+  }
+  if (!(lhs.field2_ref() == rhs.field2_ref())) {
+    return false;
+  }
+  if (!(lhs.field3_ref() == rhs.field3_ref())) {
+    return false;
+  }
+  if (!(lhs.field4_ref() == rhs.field4_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool Default::operator<(FOLLY_MAYBE_UNUSED const Default& rhs) const {
@@ -238,7 +251,20 @@ bool NonAtomic::__fbthrift_is_empty() const {
 }
 
 bool NonAtomic::operator==(FOLLY_MAYBE_UNUSED const NonAtomic& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.field1_ref() == rhs.field1_ref())) {
+    return false;
+  }
+  if (!(lhs.field2_ref() == rhs.field2_ref())) {
+    return false;
+  }
+  if (!(lhs.field3_ref() == rhs.field3_ref())) {
+    return false;
+  }
+  if (!(lhs.field4_ref() == rhs.field4_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool NonAtomic::operator<(FOLLY_MAYBE_UNUSED const NonAtomic& rhs) const {
@@ -372,7 +398,20 @@ bool Atomic::__fbthrift_is_empty() const {
 }
 
 bool Atomic::operator==(FOLLY_MAYBE_UNUSED const Atomic& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.field1_ref() == rhs.field1_ref())) {
+    return false;
+  }
+  if (!(lhs.field2_ref() == rhs.field2_ref())) {
+    return false;
+  }
+  if (!(lhs.field3_ref() == rhs.field3_ref())) {
+    return false;
+  }
+  if (!(lhs.field4_ref() == rhs.field4_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool Atomic::operator<(FOLLY_MAYBE_UNUSED const Atomic& rhs) const {
@@ -506,7 +545,20 @@ bool AtomicFoo::__fbthrift_is_empty() const {
 }
 
 bool AtomicFoo::operator==(FOLLY_MAYBE_UNUSED const AtomicFoo& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.field1_ref() == rhs.field1_ref())) {
+    return false;
+  }
+  if (!(lhs.field2_ref() == rhs.field2_ref())) {
+    return false;
+  }
+  if (!(lhs.field3_ref() == rhs.field3_ref())) {
+    return false;
+  }
+  if (!(lhs.field4_ref() == rhs.field4_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool AtomicFoo::operator<(FOLLY_MAYBE_UNUSED const AtomicFoo& rhs) const {

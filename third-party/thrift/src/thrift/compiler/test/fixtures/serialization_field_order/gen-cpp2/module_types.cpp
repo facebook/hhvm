@@ -70,7 +70,17 @@ bool Foo::__fbthrift_is_empty() const {
 }
 
 bool Foo::operator==(FOLLY_MAYBE_UNUSED const Foo& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.field1_ref() == rhs.field1_ref())) {
+    return false;
+  }
+  if (!(lhs.field2_ref() == rhs.field2_ref())) {
+    return false;
+  }
+  if (!(lhs.field3_ref() == rhs.field3_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool Foo::operator<(FOLLY_MAYBE_UNUSED const Foo& rhs) const {
@@ -166,7 +176,17 @@ bool Foo2::__fbthrift_is_empty() const {
 }
 
 bool Foo2::operator==(FOLLY_MAYBE_UNUSED const Foo2& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.field1_ref() == rhs.field1_ref())) {
+    return false;
+  }
+  if (!(lhs.field2_ref() == rhs.field2_ref())) {
+    return false;
+  }
+  if (!(lhs.field3_ref() == rhs.field3_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool Foo2::operator<(FOLLY_MAYBE_UNUSED const Foo2& rhs) const {

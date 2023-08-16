@@ -78,7 +78,8 @@ bool MyDataItem::__fbthrift_is_empty() const {
 }
 
 bool MyDataItem::operator==(FOLLY_MAYBE_UNUSED const MyDataItem& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  return true;
 }
 
 bool MyDataItem::operator<(FOLLY_MAYBE_UNUSED const MyDataItem& rhs) const {

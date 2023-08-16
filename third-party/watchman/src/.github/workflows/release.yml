@@ -25,27 +25,6 @@ jobs:
         with:
           tag_name: "${{ github.ref }}"
           release_name: "${{ github.ref }}"
-  docker-ubuntu-18:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: "${{ github.repository_owner }}"
-          password: "${{ secrets.GITHUB_TOKEN }}"
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v3
-        with:
-          context: "."
-          build-args: UBUNTU_VERSION=18.04
-          file: watchman/build/package/ubuntu-env/Dockerfile
-          push: true
-          tags: "${{ format('ghcr.io/{0}/watchman-build-env-ubuntu-18:latest', github.repository) }}"
   docker-ubuntu-20:
     runs-on: ubuntu-latest
     steps:
@@ -109,37 +88,6 @@ jobs:
           file: watchman/build/package/fedora-env/Dockerfile
           push: true
           tags: "${{ format('ghcr.io/{0}/watchman-build-env-fedora-36:latest', github.repository) }}"
-  clone-build-package-ubuntu-18:
-    needs:
-      - prepare
-      - docker-ubuntu-18
-    runs-on: ubuntu-latest
-    container:
-      image: "${{ format('ghcr.io/{0}/watchman-build-env-ubuntu-18:latest', github.repository) }}"
-    steps:
-      - name: Fix HOME
-        run: echo HOME=/root >> $GITHUB_ENV
-      - name: Checkout code
-        uses: actions/checkout@v3
-      - name: Install system dependencies
-        run: "./install-system-packages.sh"
-      - name: Fix dubious ownership
-        run: git config --global --add safe.directory /__w/watchman/watchman
-      - name: Build Watchman binaries
-        run: "./autogen.sh"
-      - name: Make .deb
-        env:
-          UBUNTU_VERSION: "18.04"
-        run: "./watchman/build/package/make-deb.sh"
-      - name: Upload .deb
-        env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: "${{ needs.prepare.outputs.upload_url }}"
-          asset_path: /_debs/watchman.deb
-          asset_name: "watchman_ubuntu18.04_${{ needs.prepare.outputs.release }}.deb"
-          asset_content_type: application/x-deb
   clone-build-package-ubuntu-20:
     needs:
       - prepare

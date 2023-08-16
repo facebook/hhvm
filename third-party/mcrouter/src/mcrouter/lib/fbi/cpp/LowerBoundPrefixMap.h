@@ -8,6 +8,7 @@
 #pragma once
 
 #include <folly/CPortability.h>
+#include <folly/container/Iterator.h>
 #include <folly/lang/Bits.h>
 #include <folly/sorted_vector_types.h>
 
@@ -15,9 +16,11 @@
 #include <compare>
 #include <iosfwd>
 #include <limits>
+#include <optional>
 #include <span>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 namespace facebook::memcache {
@@ -106,6 +109,61 @@ struct LowerBoundPrefixMapCommon {
   }
 };
 
+template <typename Storage>
+class LowerBoundPrefixMapReference {
+ public:
+  using size_type = typename Storage::size_type;
+
+  LowerBoundPrefixMapReference(Storage* storage, size_type idx)
+      : storage_(storage), idx_(idx) {}
+
+  [[nodiscard]] std::string_view key() const {
+    return storage_->searchLogic_.str(idx_);
+  }
+
+  [[nodiscard]] auto& value() const {
+    return storage_->values_[idx_];
+  }
+
+  std::optional<LowerBoundPrefixMapReference> previousPrefix() const {
+    std::uint32_t prev = storage_->searchLogic_.previousPrefix_[idx_];
+    if (prev != 0) {
+      return LowerBoundPrefixMapReference{storage_, prev - 1};
+    } else {
+      return std::nullopt;
+    }
+  }
+
+ private:
+  Storage* storage_;
+  size_type idx_;
+};
+
+// This class exists because `folly::index_iterator` needs `operator[](index)`
+// but `operator[]` for a `map` has different semantics.
+template <typename T>
+struct LowerBoundMapStorage {
+  using value_type = std::pair<std::string_view, T&>;
+  using size_type = std::uint32_t;
+
+  [[nodiscard]] LowerBoundPrefixMapReference<LowerBoundMapStorage> operator[](
+      size_type i) {
+    return {this, i};
+  }
+
+  [[nodiscard]] LowerBoundPrefixMapReference<const LowerBoundMapStorage>
+  operator[](size_type i) const {
+    return {this, i};
+  }
+
+  [[nodiscard]] size_type size() const {
+    return static_cast<size_type>(values_.size());
+  }
+
+  LowerBoundPrefixMapCommon searchLogic_;
+  std::vector<T> values_;
+};
+
 } // namespace detail
 
 /*
@@ -131,7 +189,38 @@ struct LowerBoundPrefixMapCommon {
  */
 template <typename T>
 class LowerBoundPrefixMap {
+  using storage_type = detail::LowerBoundMapStorage<T>;
+
  public:
+  // types
+  using value_type = std::pair<std::string_view, T>;
+
+  // reference/const_reference:
+  //   objects you get when dereferencing an iterator to LowerBoundPrefixMap
+  //   that is used to access a record for the element.
+  // Has methods:
+  //   key()   -> std::string_view - prefix for the current element.
+  //   value() -> T&/const T& - a reference to the current value
+  //   previousPrefix() -> optional reference to element that has the longest
+  //                       prefix fully included in key().
+  //                       nullopt  <- ["a"] <- ["abc"] <- ["abcaa"].
+
+  using reference = detail::LowerBoundPrefixMapReference<storage_type>;
+  using const_reference =
+      detail::LowerBoundPrefixMapReference<const storage_type>;
+
+  using size_type = typename storage_type::size_type;
+  using iterator = folly::index_iterator<storage_type>;
+  using const_iterator = folly::index_iterator<const storage_type>;
+  using reverse_iterator = std::reverse_iterator<iterator>;
+  using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+
+  // construction
+  LowerBoundPrefixMap() = default;
+
+  explicit LowerBoundPrefixMap(
+      std::vector<std::pair<std::string, T>> prefix2value);
+
   class Builder {
    public:
     void reserve(std::size_t n) {
@@ -150,19 +239,48 @@ class LowerBoundPrefixMap {
     std::vector<std::pair<std::string, T>> prefix2value_;
   };
 
-  LowerBoundPrefixMap() = default;
+  // access
 
-  explicit LowerBoundPrefixMap(
-      std::vector<std::pair<std::string, T>> prefix2value);
+  [[nodiscard]] size_type size() const {
+    return storage_.size();
+  }
 
-  const T* findPrefix(std::string_view query) const noexcept {
-    std::uint32_t pos = searchLogic_.findPrefix(query);
-    return pos == 0 ? nullptr : &values_[pos - 1];
+  [[nodiscard]] bool empty() const {
+    return size() == 0U;
+  }
+
+  // clang-format off
+  [[nodiscard]] auto begin()          -> iterator               { return {storage_, 0};                    }
+  [[nodiscard]] auto begin()   const  -> const_iterator         { return cbegin();                         }
+  [[nodiscard]] auto cbegin()  const  -> const_iterator         { return {storage_, 0};                    }
+
+  [[nodiscard]] auto end()            -> iterator               { return {storage_, size()};               }
+  [[nodiscard]] auto end()     const  -> const_iterator         { return cend();                           }
+  [[nodiscard]] auto cend()    const  -> const_iterator         { return {storage_, size()};               }
+
+  [[nodiscard]] auto rbegin()         -> reverse_iterator       { return reverse_iterator{end()};          }
+  [[nodiscard]] auto rbegin()  const  -> const_reverse_iterator { return crbegin();                        }
+  [[nodiscard]] auto crbegin() const  -> const_reverse_iterator { return const_reverse_iterator{cend()};   }
+
+  [[nodiscard]] auto rend()           -> reverse_iterator       { return reverse_iterator{begin()};        }
+  [[nodiscard]] auto rend()    const  -> const_reverse_iterator { return crend();                          }
+  [[nodiscard]] auto crend()   const  -> const_reverse_iterator { return const_reverse_iterator{cbegin()}; }
+  // clang-format on
+
+  // access
+  [[nodiscard]] iterator findPrefix(std::string_view query) noexcept {
+    std::uint32_t pos = storage_.searchLogic_.findPrefix(query);
+    return pos == 0 ? end() : begin() + (pos - 1);
+  }
+
+  [[nodiscard]] const_iterator findPrefix(
+      std::string_view query) const noexcept {
+    std::uint32_t pos = storage_.searchLogic_.findPrefix(query);
+    return pos == 0 ? cend() : begin() + (pos - 1);
   }
 
  private:
-  detail::LowerBoundPrefixMapCommon searchLogic_;
-  std::vector<T> values_;
+  storage_type storage_;
 };
 
 template <typename T>
@@ -184,14 +302,14 @@ LowerBoundPrefixMap<T>::LowerBoundPrefixMap(
 
   std::vector<std::string_view> sortedPrefixes;
   sortedPrefixes.reserve(sortedUnique.size());
-  values_.reserve(sortedUnique.size());
+  storage_.values_.reserve(sortedUnique.size());
 
   for (auto& [prefix, value] : sortedUnique) {
     sortedPrefixes.emplace_back(prefix);
-    values_.emplace_back(std::move(value));
+    storage_.values_.emplace_back(std::move(value));
   }
 
-  searchLogic_ = detail::LowerBoundPrefixMapCommon(sortedPrefixes);
+  storage_.searchLogic_ = detail::LowerBoundPrefixMapCommon(sortedPrefixes);
 }
 
 } // namespace facebook::memcache

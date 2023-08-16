@@ -367,10 +367,6 @@ class HTTPSessionBase : public wangle::ManagedConnection {
     return latestIdleDuration_;
   }
 
-  void setPrioritySampled(bool sampled) {
-    prioritySample_ = sampled;
-  }
-
   // public HTTPTransaction::Transport overrides
   virtual const folly::SocketAddress& getLocalAddress() const noexcept {
     return localAddr_;
@@ -637,10 +633,6 @@ class HTTPSessionBase : public wangle::ManagedConnection {
     ++transactionSeqNo_;
   }
 
-  bool isPrioritySampled() const {
-    return prioritySample_;
-  }
-
   void onNewOutgoingStream(uint32_t outgoingStreams) {
     if (outgoingStreams > historicalMaxOutgoingStreams_) {
       historicalMaxOutgoingStreams_ = outgoingStreams;
@@ -829,7 +821,6 @@ class HTTPSessionBase : public wangle::ManagedConnection {
    */
   uint32_t pendingReadSize_{0};
 
-  bool prioritySample_ : 1;
   bool h2PrioritiesEnabled_ : 1;
 
   /**

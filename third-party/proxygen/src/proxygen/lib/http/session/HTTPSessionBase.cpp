@@ -40,7 +40,6 @@ HTTPSessionBase::HTTPSessionBase(const SocketAddress& localAddr,
       localAddr_(localAddr),
       peerAddr_(peerAddr),
       controller_(controller),
-      prioritySample_(false),
       h2PrioritiesEnabled_(true),
       exHeadersEnabled_(false) {
 

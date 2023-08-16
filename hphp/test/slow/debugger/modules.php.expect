@@ -2,44 +2,44 @@ Program hphp/test/slow/debugger/modules.php loaded. Type '[r]un' or '[c]ontinue'
 include "hphp/test/slow/debugger/modules.php.inc";
 include "hphp/test/slow/debugger/modules.php.inc2";
 =new Foo();
-Hit a php exception : exception 'ModuleBoundaryViolationException' with message 'Accessing internal class Foo in module foo from the default module is not allowed' in :1
+Hit a php exception : exception 'ModuleBoundaryViolationException' with message 'Accessing internal class Foo in module foo from outside of a module is not allowed' in :1
 Stack trace:
 #0 (1): include()
 #1 (): include()
 #2 {main}
 =fooFun();
-Hit a php exception : exception 'ModuleBoundaryViolationException' with message 'Accessing internal function fooFun in module foo from the default module is not allowed' in :1
+Hit a php exception : exception 'ModuleBoundaryViolationException' with message 'Accessing internal function fooFun in module foo from outside of a module is not allowed' in :1
 Stack trace:
 #0 (1): include()
 #1 (): include()
 #2 {main}
 $x = new Foo();
-Hit a php exception : exception 'ModuleBoundaryViolationException' with message 'Accessing internal class Foo in module foo from the default module is not allowed' in :1
+Hit a php exception : exception 'ModuleBoundaryViolationException' with message 'Accessing internal class Foo in module foo from outside of a module is not allowed' in :1
 Stack trace:
 #0 (1): include()
 #1 (): include()
 #2 {main}
 $x = getFoo();
 =$x->foo();
-Hit a php exception : exception 'ModuleBoundaryViolationException' with message 'Accessing internal method Foo::foo in module foo from the default module is not allowed' in :1
+Hit a php exception : exception 'ModuleBoundaryViolationException' with message 'Accessing internal method Foo::foo in module foo from outside of a module is not allowed' in :1
 Stack trace:
 #0 (1): include()
 #1 (): include()
 #2 {main}
 =$x->fooProp;
-Hit a php exception : exception 'ModuleBoundaryViolationException' with message 'Accessing internal property Foo::$fooProp in module foo from the default module is not allowed' in :1
+Hit a php exception : exception 'ModuleBoundaryViolationException' with message 'Accessing internal property Foo::$fooProp in module foo from outside of a module is not allowed' in :1
 Stack trace:
 #0 (1): include()
 #1 (): include()
 #2 {main}
 =$x::$fooStaticProp;
-Hit a php exception : exception 'ModuleBoundaryViolationException' with message 'Accessing internal static property Foo::$fooStaticProp in module foo from the default module is not allowed' in :1
+Hit a php exception : exception 'ModuleBoundaryViolationException' with message 'Accessing internal static property Foo::$fooStaticProp in module foo from outside of a module is not allowed' in :1
 Stack trace:
 #0 (1): include()
 #1 (): include()
 #2 {main}
 =Foo::$fooStaticProp;
-Hit a php exception : exception 'ModuleBoundaryViolationException' with message 'Accessing internal class Foo in module foo from the default module is not allowed' in :1
+Hit a php exception : exception 'ModuleBoundaryViolationException' with message 'Accessing internal class Foo in module foo from outside of a module is not allowed' in :1
 Stack trace:
 #0 (1): include()
 #1 (): include()
@@ -53,7 +53,7 @@ Stack trace:
 =$cls="Foo";
 "Foo"
 =$cls::fooStatic();
-Hit a php exception : exception 'ModuleBoundaryViolationException' with message 'Accessing internal class Foo in module foo from the default module is not allowed' in :1
+Hit a php exception : exception 'ModuleBoundaryViolationException' with message 'Accessing internal class Foo in module foo from outside of a module is not allowed' in :1
 Stack trace:
 #0 (1): include()
 #1 (): include()

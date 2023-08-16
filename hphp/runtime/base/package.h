@@ -90,9 +90,6 @@ struct PackageInfo {
   bool moduleInDeployment(const StringData* module,
                           const Deployment& deployment,
                           DeployKind deployKind) const;
-  bool moduleInDeployment(const std::string& module,
-                          const Deployment& deployment,
-                          DeployKind deployKind) const;
 
   bool moduleInASoftPackage(const StringData* module) const;
 

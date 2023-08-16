@@ -4,7 +4,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use naming_special_names_rust::modules as special_modules;
 use oxidized::aast;
 use oxidized::pos::Pos;
 use parser_core_types::syntax_error;
@@ -36,27 +35,24 @@ impl Checker {
 */
 fn check_module_declaration_first(checker: &mut Checker, program: &aast::Program<(), ()>) {
     let mut past_first_def = false;
-    let mut module_membership = None;
+    let mut past_module_membership = false;
     for def in program {
         match def {
             aast::Def::Stmt(_) /* Stmt is only used for Markup */
             | aast::Def::FileAttributes(_)
             => {}
             aast::Def::SetModule(m) => {
-                let oxidized::ast::Id(pos, name) = &**m;
                 if past_first_def {
+                    let oxidized::ast::Id(pos, name) = &**m;
                     checker.add_error(pos, syntax_error::module_first_in_file(name));
                 }
                 past_first_def = true;
-                module_membership = Some(name)
+                past_module_membership = true
             }
-            // We only allow module declarations within the default module
+            // We do not allow module declarations within a module
             aast::Def::Module(m) => {
-                match module_membership {
-                    Some(membership) if membership != special_modules::DEFAULT => {
-                        checker.add_error(&m.name.0, syntax_error::module_declaration_in_module);
-                    }
-                    _ => {}
+                if past_module_membership {
+                    checker.add_error(&m.name.0, syntax_error::module_declaration_in_module);
                 }
                 past_first_def = true;
             }

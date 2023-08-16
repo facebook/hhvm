@@ -3,14 +3,8 @@
 [packages.foo]
 uses = ["a"]
 
-[packages.bar]
-uses = ["b"]
-
-[packages.default]
-uses = ["*"]
-
 [deployments]
 
 [deployments.one]
-packages = ["foo", "default"]
+packages = ["foo"]
 soft_packages=[]

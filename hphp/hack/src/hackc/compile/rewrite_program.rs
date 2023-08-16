@@ -13,7 +13,6 @@ use error::Result;
 use hack_macros::hack_expr;
 use hack_macros::hack_stmt;
 use hhbc::decl_vars;
-use naming_special_names_rust::modules as special_modules;
 use oxidized::ast;
 use oxidized::ast::Def;
 use oxidized::ast::Expr;
@@ -173,17 +172,7 @@ fn extract_debugger_main(
         .filter_map(|x| x.as_stmt_into())
         .collect::<Vec<_>>();
 
-    let is_empty = |defs: &[Def]| {
-        defs.iter()
-            .filter(|def| match def {
-                // Ignore the default module that was artificially inserted in the lowerer
-                Def::SetModule(box Id(_, md)) if md == special_modules::DEFAULT => false,
-                _ => true,
-            })
-            .count()
-            == 0
-    };
-    if is_empty(&defs) && stmts.len() == 2 && stmts[0].1.is_markup() && stmts[1].1.is_expr() {
+    if defs.is_empty() && stmts.len() == 2 && stmts[0].1.is_markup() && stmts[1].1.is_expr() {
         let Stmt(p, s) = stmts.pop().unwrap();
         let e = s.as_expr_into().unwrap();
         stmts.push(hack_stmt!(pos = p, "#{lvar(clone(return_val))} = #e;"));

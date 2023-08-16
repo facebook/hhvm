@@ -26,7 +26,6 @@ use lint_rust::LintError;
 use naming_special_names_rust as sn;
 use naming_special_names_rust::classes as special_classes;
 use naming_special_names_rust::literal;
-use naming_special_names_rust::modules as special_modules;
 use naming_special_names_rust::special_functions;
 use naming_special_names_rust::special_idents;
 use naming_special_names_rust::typehints as special_typehints;
@@ -44,7 +43,6 @@ use oxidized::aast_visitor::Visitor;
 use oxidized::ast;
 use oxidized::ast::Expr;
 use oxidized::ast::Expr_;
-use oxidized::ast_defs::Id;
 use oxidized::errors::Error as HHError;
 use oxidized::errors::Naming;
 use oxidized::errors::NastCheck;
@@ -189,7 +187,6 @@ pub struct Env<'a> {
     /// Hotfix until we can properly set up saved states to surface parse errors during
     /// typechecking properly.
     pub show_all_errors: bool,
-    is_systemlib: bool,
     file_mode: file_info::Mode,
     pub top_level_statements: bool, /* Whether we are (still) considering TLSs*/
 
@@ -215,7 +212,6 @@ impl<'a> Env<'a> {
         codegen: bool,
         quick_mode: bool,
         show_all_errors: bool,
-        is_systemlib: bool,
         mode: file_info::Mode,
         indexed_source_text: &'a IndexedSourceText<'a>,
         parser_options: &'a GlobalOptions,
@@ -227,7 +223,6 @@ impl<'a> Env<'a> {
             codegen,
             quick_mode,
             show_all_errors,
-            is_systemlib,
             file_mode: mode,
             top_level_statements: true,
             saw_yield: false,
@@ -6456,37 +6451,6 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
     }
 }
 
-fn insert_default_module_if_missing_module_membership(program: &mut Vec<ast::Def>) {
-    use aast::Def;
-    use aast::Stmt;
-    use aast::Stmt_::Markup;
-    let mut has_module = false;
-    let mut insert_pos = None;
-    for (idx, def) in program.iter().enumerate() {
-        match def {
-            Def::Stmt(box Stmt(_, Markup(_))) => {
-                insert_pos = Some(idx + 1);
-            }
-            Def::SetModule(_) => {
-                has_module = true;
-                break;
-            }
-            Def::NamespaceUse(_) | Def::FileAttributes(_) => continue,
-            _ => {
-                // we disallow module membership past these defs so
-                // stop the search here
-                break;
-            }
-        }
-    }
-    if !has_module {
-        program.insert(
-            insert_pos.unwrap_or_default(),
-            Def::mk_set_module(Id(Pos::NONE, String::from(special_modules::DEFAULT))),
-        );
-    }
-}
-
 fn post_process<'a>(env: &mut Env<'a>, program: Vec<ast::Def>, acc: &mut Vec<ast::Def>) {
     use aast::Def;
     use aast::Def::*;
@@ -6563,9 +6527,6 @@ fn p_program<'a>(node: S<'a>, env: &mut Env<'a>) -> ast::Program {
     }
     let mut program = vec![];
     post_process(env, acc, &mut program);
-    if !env.is_systemlib && env.codegen() {
-        insert_default_module_if_missing_module_membership(&mut program);
-    }
     ast::Program(program)
 }
 

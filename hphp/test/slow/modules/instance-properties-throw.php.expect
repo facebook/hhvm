@@ -1,2 +1,2 @@
 int(4)
-Accessing internal property Foo::$x in module foo from the default module is not allowed
+Accessing internal property Foo::$x in module foo from outside of a module is not allowed

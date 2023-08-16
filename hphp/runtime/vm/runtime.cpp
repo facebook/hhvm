@@ -432,7 +432,6 @@ void moduleBoundaryViolationImpl(
 ) {
   // Internal symbols must always have a module
   assertx(symbolModule != nullptr);
-  assertx(fromModule != nullptr);
   assertx(symbolModule != fromModule);
   assertx(!symbol.empty());
   // Don't throw error in debugger when bypassCheck is on
@@ -442,9 +441,9 @@ void moduleBoundaryViolationImpl(
     soft ? "soft " : "",
     symbol,
     symbolModule,
-    Module::isDefault(fromModule)
-      ? "the default module"
-      : folly::sformat("module {}", fromModule)
+    fromModule
+      ? folly::sformat("module {}", fromModule)
+      : "outside of a module"
   );
   if (!soft) SystemLib::throwModuleBoundaryViolationExceptionObject(errMsg);
   raise_warning(errMsg);

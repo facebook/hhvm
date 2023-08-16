@@ -757,20 +757,9 @@ func (p *CompactProtocol) readVarint32() (int32, error) {
 // Read an i64 from the wire as a proper varint. The MSB of each byte is set
 // if there is another byte to follow. This can read up to 10 bytes.
 func (p *CompactProtocol) readVarint64() (int64, error) {
-	shift := uint(0)
-	result := int64(0)
-	for {
-		b, err := p.readByteDirect()
-		if err != nil {
-			return 0, err
-		}
-		result |= int64(b&0x7f) << shift
-		if (b & 0x80) != 0x80 {
-			break
-		}
-		shift += 7
-	}
-	return result, nil
+	ux, err := binary.ReadUvarint(p.trans)
+	x := int64(ux) // ok to continue in presence of error
+	return x, err
 }
 
 // Read a byte, unlike ReadByte that reads Thrift-byte that is i8.

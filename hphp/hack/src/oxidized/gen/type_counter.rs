@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2256b64f92ee5f8459aa5ef0e8fa07d3>>
+// @generated SignedSource<<ab6b6d2cb8c6f5937164b90ee6438ad7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -87,6 +87,7 @@ pub enum LoggedType {
     Mixed,
     SupportdynOfMixed,
     Dynamic,
+    Tany,
 }
 impl TrivialDrop for LoggedType {}
 arena_deserializer::impl_deserialize_in_arena!(LoggedType);
@@ -177,6 +178,7 @@ pub struct Summary {
     pub mixed: isize,
     pub supportdyn_of_mixed: isize,
     pub dynamic: isize,
+    pub tany: isize,
 }
 
 #[rust_to_ocaml(attr = "deriving yojson_of")]

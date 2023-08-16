@@ -5,7 +5,8 @@
       "num_non_like_types": 15,
       "num_mixed": 0,
       "num_supportdyn_of_mixed": 0,
-      "num_dynamic": 0
+      "num_dynamic": 0,
+      "num_tany": 0
     }
   }
 }

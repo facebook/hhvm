@@ -19,6 +19,7 @@ type logged_type =
   | Mixed
   | SupportdynOfMixed
   | Dynamic
+  | Tany
 [@@deriving ord]
 
 type category =
@@ -47,6 +48,7 @@ type summary = {
   num_mixed: int;
   num_supportdyn_of_mixed: int;
   num_dynamic: int;
+  num_tany: int;
 }
 [@@deriving yojson_of]
 

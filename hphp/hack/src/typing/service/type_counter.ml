@@ -28,6 +28,7 @@ type logged_type =
   | Mixed
   | SupportdynOfMixed
   | Dynamic
+  | Tany
 [@@deriving ord, yojson_of]
 
 type category =
@@ -53,6 +54,8 @@ let is_like_type env ty =
   let is_sub_type = Tast_env.is_sub_type env in
   is_sub_type dynamic ty
   && not (is_sub_type mixed ty || is_sub_type supportdyn_of_mixed ty)
+
+let is_tany = Typing_defs.is_any
 
 let locl_ty_of_hint (ty, _) = ty
 
@@ -118,6 +121,12 @@ end = struct
     |> begin
          if is_exactly env ty dynamic then
            inc Dynamic
+         else
+           Fn.id
+       end
+    |> begin
+         if is_tany ty then
+           inc Tany
          else
            Fn.id
        end
@@ -286,6 +295,7 @@ type summary = {
   num_mixed: int;
   num_supportdyn_of_mixed: int;
   num_dynamic: int;
+  num_tany: int;
 }
 [@@deriving yojson_of]
 
@@ -298,6 +308,7 @@ let empty_summary =
     num_mixed = 0;
     num_supportdyn_of_mixed = 0;
     num_dynamic = 0;
+    num_tany = 0;
   }
 
 let summary_of_count (cnt : count) =
@@ -308,6 +319,7 @@ let summary_of_count (cnt : count) =
   | Mixed -> { empty_summary with num_mixed = value }
   | SupportdynOfMixed -> { empty_summary with num_supportdyn_of_mixed = value }
   | Dynamic -> { empty_summary with num_dynamic = value }
+  | Tany -> { empty_summary with num_tany = value }
 
 let plus_summary s t =
   let {
@@ -316,6 +328,7 @@ let plus_summary s t =
     num_mixed;
     num_supportdyn_of_mixed;
     num_dynamic;
+    num_tany;
   } =
     s
   in
@@ -326,6 +339,7 @@ let plus_summary s t =
     num_supportdyn_of_mixed =
       num_supportdyn_of_mixed + t.num_supportdyn_of_mixed;
     num_dynamic = num_dynamic + t.num_dynamic;
+    num_tany = num_tany + t.num_tany;
   }
 
 let summary_of_counts (cnts : count list) =

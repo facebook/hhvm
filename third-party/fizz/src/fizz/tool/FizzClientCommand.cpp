@@ -13,7 +13,7 @@
 #ifdef FIZZ_TOOL_ENABLE_BROTLI
 #include <fizz/compression/BrotliCertificateDecompressor.h>
 #endif
-#include <fizz/protocol/ZlibCertificateDecompressor.h>
+#include <fizz/compression/ZlibCertificateDecompressor.h>
 #ifdef FIZZ_TOOL_ENABLE_ZSTD
 #include <fizz/protocol/ZstdCertificateDecompressor.h>
 #endif

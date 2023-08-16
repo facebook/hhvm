@@ -177,6 +177,8 @@ endif()
 
 set(FIZZ_SOURCES
   compression/CertDecompressionManager.cpp
+  compression/ZlibCertificateCompressor.cpp
+  compression/ZlibCertificateDecompressor.cpp
   crypto/Utils.cpp
   crypto/exchange/X25519.cpp
   crypto/aead/OpenSSLEVPCipher.cpp
@@ -216,8 +218,6 @@ set(FIZZ_SOURCES
   protocol/KeyScheduler.cpp
   protocol/Certificate.cpp
   protocol/Params.cpp
-  protocol/ZlibCertificateCompressor.cpp
-  protocol/ZlibCertificateDecompressor.cpp
   protocol/ZstdCertificateCompressor.cpp
   protocol/ZstdCertificateDecompressor.cpp
   protocol/clock/SystemClock.cpp
@@ -426,6 +426,7 @@ if(BUILD_TESTS)
   add_gtest(client/test/ClientProtocolTest.cpp ClientProtocolTest)
   add_gtest(client/test/FizzClientTest.cpp FizzClientTest)
   add_gtest(compression/test/CertDecompressionManagerTest.cpp CertDecompressionManagerTest)
+  add_gtest(compression/test/ZlibCertificateCompressorTest.cpp ZlibCertificateCompressorTest)
   add_gtest(crypto/aead/test/EVPCipherTest.cpp EVPCipherTest)
   add_gtest(crypto/aead/test/IOBufUtilTest.cpp IOBufUtilTest)
   add_gtest(crypto/exchange/test/X25519KeyExchangeTest.cpp X25519KeyExchangeTest)
@@ -464,7 +465,6 @@ if(BUILD_TESTS)
   add_gtest(protocol/test/DefaultCertificateVerifierTest.cpp DefaultCertificateVerifierTest)
   add_gtest(protocol/test/HandshakeContextTest.cpp HandshakeContextTest)
   add_gtest(protocol/test/ExporterTest.cpp ExporterTest)
-  add_gtest(protocol/test/ZlibCertificateCompressorTest.cpp ZlibCertificateCompressorTest)
   add_gtest(record/test/ExtensionsTest.cpp ExtensionsTest)
   add_gtest(record/test/EncryptedRecordTest.cpp EncryptedRecordTest)
   add_gtest(record/test/TypesTest.cpp TypesTest)

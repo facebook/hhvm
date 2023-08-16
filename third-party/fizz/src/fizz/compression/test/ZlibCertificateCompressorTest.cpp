@@ -8,8 +8,8 @@
 
 #include <folly/portability/GTest.h>
 
-#include <fizz/protocol/ZlibCertificateCompressor.h>
-#include <fizz/protocol/ZlibCertificateDecompressor.h>
+#include <fizz/compression/ZlibCertificateCompressor.h>
+#include <fizz/compression/ZlibCertificateDecompressor.h>
 #include <fizz/protocol/test/Matchers.h>
 #include <fizz/protocol/test/Utilities.h>
 #include <fizz/record/Extensions.h>

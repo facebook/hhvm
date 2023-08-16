@@ -40,10 +40,17 @@ class FlagsBackendDummy : public apache::thrift::detail::FlagsBackend {
           return folly::get_optional(*oss_defaults, name);
         });
   }
+
   folly::observer::Observer<folly::Optional<int64_t>> getFlagObserverInt64(
       folly::StringPiece) override {
     return folly::observer::makeObserver(
         []() -> folly::Optional<int64_t> { return folly::none; });
+  }
+
+  folly::observer::Observer<folly::Optional<std::string>> getFlagObserverString(
+      folly::StringPiece) override {
+    return folly::observer::makeObserver(
+        []() -> folly::Optional<std::string> { return folly::none; });
   }
 };
 } // namespace

@@ -16,6 +16,10 @@
 
 #pragma once
 
+#include <cstdint>
+#include <string>
+#include <type_traits>
+
 #include <folly/CPortability.h>
 #include <folly/Indestructible.h>
 #include <folly/Optional.h>
@@ -35,8 +39,12 @@ class FlagsBackend {
 
   virtual folly::observer::Observer<folly::Optional<bool>> getFlagObserverBool(
       folly::StringPiece name) = 0;
+
   virtual folly::observer::Observer<folly::Optional<int64_t>>
   getFlagObserverInt64(folly::StringPiece name) = 0;
+
+  virtual folly::observer::Observer<folly::Optional<std::string>>
+  getFlagObserverString(folly::StringPiece name) = 0;
 };
 
 THRIFT_PLUGGABLE_FUNC_DECLARE(
@@ -60,17 +68,21 @@ getFlagObserver<int64_t>(folly::StringPiece name) {
   return getFlagsBackend().getFlagObserverInt64(name);
 }
 
+template <>
+inline folly::observer::Observer<folly::Optional<std::string>>
+getFlagObserver<std::string>(folly::StringPiece name) {
+  return getFlagsBackend().getFlagObserverString(name);
+}
+
 template <typename T>
 class FlagWrapper {
  public:
   FlagWrapper(folly::StringPiece name, T defaultValue)
-      : name_(name), defaultValue_(defaultValue) {}
+      : name_(name), defaultValue_(std::move(defaultValue)) {}
 
-  T get() { return *ensureInit(); }
+  T get() { return get(ensureInit()); }
 
-  folly::observer::Observer<T> observe() {
-    return ensureInit().getUnderlyingObserver();
-  }
+  folly::observer::Observer<T> observe() { return observe(ensureInit()); }
 
   // Methods to set mock value for Flags.
   void setMockValue(T value) {
@@ -84,7 +96,33 @@ class FlagWrapper {
   }
 
  private:
-  folly::observer::ReadMostlyAtomicObserver<T>& ensureInit() {
+  template <typename U>
+  using ReadOptimizedObserver = std::conditional_t<
+      std::is_trivially_copyable_v<U>,
+      folly::observer::ReadMostlyAtomicObserver<U>,
+      folly::observer::Observer<U>>;
+
+  template <typename U>
+  static U get(folly::observer::ReadMostlyAtomicObserver<U>& observer) {
+    return *observer;
+  }
+  template <typename U>
+  static U get(folly::observer::Observer<U>& observer) {
+    return **observer;
+  }
+
+  template <typename U>
+  static folly::observer::Observer<U> observe(
+      folly::observer::ReadMostlyAtomicObserver<U>& observer) {
+    return observer.getUnderlyingObserver();
+  }
+  template <typename U>
+  static folly::observer::Observer<U> observe(
+      folly::observer::Observer<U>& observer) {
+    return observer;
+  }
+
+  ReadOptimizedObserver<T>& ensureInit() {
     return observer_.try_emplace_with([this] {
       return folly::observer::makeValueObserver(
           [overrideObserver = getFlagObserver<T>(name_),
@@ -103,7 +141,7 @@ class FlagWrapper {
     });
   }
 
-  folly::DelayedInit<folly::observer::ReadMostlyAtomicObserver<T>> observer_;
+  folly::DelayedInit<ReadOptimizedObserver<T>> observer_;
   folly::StringPiece name_;
   const T defaultValue_;
   folly::observer::SimpleObservable<folly::Optional<T>> mockObservable_{
@@ -131,9 +169,15 @@ class FlagWrapper {
 #define THRIFT_FLAG_DEFINE_bool(_name, _default) \
   THRIFT_FLAG_DEFINE(_name, bool, _default)
 
+#define THRIFT_FLAG_DEFINE_string(_name, _default) \
+  THRIFT_FLAG_DEFINE(_name, ::std::string, _default)
+
 #define THRIFT_FLAG_DECLARE_int64(_name) THRIFT_FLAG_DECLARE(_name, int64_t)
 
 #define THRIFT_FLAG_DECLARE_bool(_name) THRIFT_FLAG_DECLARE(_name, bool)
+
+#define THRIFT_FLAG_DECLARE_string(_name) \
+  THRIFT_FLAG_DECLARE(_name, ::std::string)
 
 #define THRIFT_FLAG(_name) THRIFT_FLAG_WRAPPER__##_name().get()
 

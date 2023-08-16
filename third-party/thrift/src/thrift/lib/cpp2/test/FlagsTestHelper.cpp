@@ -18,3 +18,4 @@
 
 THRIFT_FLAG_DEFINE_bool(test_flag_bool_external, true);
 THRIFT_FLAG_DEFINE_int64(test_flag_int_external, 42);
+THRIFT_FLAG_DEFINE_string(test_flag_string_external, "foo");

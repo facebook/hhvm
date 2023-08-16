@@ -27,8 +27,10 @@
 
 THRIFT_FLAG_DEFINE_bool(test_flag_bool, true);
 THRIFT_FLAG_DEFINE_int64(test_flag_int, 42);
+THRIFT_FLAG_DEFINE_string(test_flag_string, "foo");
 THRIFT_FLAG_DECLARE_bool(test_flag_bool_external);
 THRIFT_FLAG_DECLARE_int64(test_flag_int_external);
+THRIFT_FLAG_DECLARE_string(test_flag_string_external);
 
 class TestFlagsBackend : public apache::thrift::detail::FlagsBackend {
  public:
@@ -42,38 +44,46 @@ class TestFlagsBackend : public apache::thrift::detail::FlagsBackend {
     return getFlagObservableInt64(name).getObserver();
   }
 
+  folly::observer::Observer<folly::Optional<std::string>> getFlagObserverString(
+      folly::StringPiece name) override {
+    return getFlagObservableString(name).getObserver();
+  }
+
   folly::observer::SimpleObservable<folly::Optional<bool>>&
   getFlagObservableBool(folly::StringPiece name) {
-    if (auto observablePtr = folly::get_ptr(boolObservables_, name.str())) {
-      return **observablePtr;
-    }
-    return *(
-        boolObservables_[name.str()] = std::make_unique<
-            folly::observer::SimpleObservable<folly::Optional<bool>>>(
-            folly::Optional<bool>{}));
+    return getFlagObservable<bool>(boolObservables_, name);
   }
 
   folly::observer::SimpleObservable<folly::Optional<int64_t>>&
   getFlagObservableInt64(folly::StringPiece name) {
-    if (auto observablePtr = folly::get_ptr(int64Observables_, name.str())) {
-      return **observablePtr;
-    }
-    return *(
-        int64Observables_[name.str()] = std::make_unique<
-            folly::observer::SimpleObservable<folly::Optional<int64_t>>>(
-            folly::Optional<int64_t>{}));
+    return getFlagObservable<int64_t>(int64Observables_, name);
+  }
+
+  folly::observer::SimpleObservable<folly::Optional<std::string>>&
+  getFlagObservableString(folly::StringPiece name) {
+    return getFlagObservable<std::string>(stringObservables_, name);
   }
 
  private:
-  std::unordered_map<
+  template <typename T>
+  using ObservablesMap = std::unordered_map<
       std::string,
-      std::unique_ptr<folly::observer::SimpleObservable<folly::Optional<bool>>>>
-      boolObservables_;
-  std::unordered_map<
-      std::string,
-      std::unique_ptr<
-          folly::observer::SimpleObservable<folly::Optional<int64_t>>>>
-      int64Observables_;
+      std::unique_ptr<folly::observer::SimpleObservable<folly::Optional<T>>>>;
+  ObservablesMap<bool> boolObservables_;
+  ObservablesMap<int64_t> int64Observables_;
+  ObservablesMap<std::string> stringObservables_;
+
+  template <typename T>
+  static folly::observer::SimpleObservable<folly::Optional<T>>&
+  getFlagObservable(ObservablesMap<T>& observables, folly::StringPiece name) {
+    if (auto observablePtr = folly::get_ptr(observables, name.str())) {
+      return **observablePtr;
+    }
+    return *(
+        observables[name.str()] = std::make_unique<
+            folly::observer::SimpleObservable<folly::Optional<T>>>(
+            folly::Optional<T>{}));
+  }
 };
 
 namespace {
@@ -98,47 +108,66 @@ THRIFT_PLUGGABLE_FUNC_SET(
 TEST(Flags, Get) {
   EXPECT_EQ(true, THRIFT_FLAG(test_flag_bool));
   EXPECT_EQ(42, THRIFT_FLAG(test_flag_int));
+  EXPECT_EQ("foo", THRIFT_FLAG(test_flag_string));
   EXPECT_EQ(true, THRIFT_FLAG(test_flag_bool_external));
   EXPECT_EQ(42, THRIFT_FLAG(test_flag_int_external));
+  EXPECT_EQ("foo", THRIFT_FLAG(test_flag_string_external));
 
   testBackendPtr->getFlagObservableBool("test_flag_bool").setValue(false);
   testBackendPtr->getFlagObservableInt64("test_flag_int").setValue(41);
+  testBackendPtr->getFlagObservableString("test_flag_string")
+      .setValue(std::string{"bar"});
   testBackendPtr->getFlagObservableBool("test_flag_bool_external")
       .setValue(false);
   testBackendPtr->getFlagObservableInt64("test_flag_int_external").setValue(41);
+  testBackendPtr->getFlagObservableString("test_flag_string_external")
+      .setValue(std::string{"bar"});
 
   folly::observer_detail::ObserverManager::waitForAllUpdates();
 
   EXPECT_EQ(false, THRIFT_FLAG(test_flag_bool));
   EXPECT_EQ(41, THRIFT_FLAG(test_flag_int));
+  EXPECT_EQ("bar", THRIFT_FLAG(test_flag_string));
   EXPECT_EQ(false, THRIFT_FLAG(test_flag_bool_external));
   EXPECT_EQ(41, THRIFT_FLAG(test_flag_int_external));
+  EXPECT_EQ("bar", THRIFT_FLAG(test_flag_string_external));
 }
 
 TEST(Flags, Observe) {
   auto test_flag_bool_observer = THRIFT_FLAG_OBSERVE(test_flag_bool);
   auto test_flag_int_observer = THRIFT_FLAG_OBSERVE(test_flag_int);
+  auto test_flag_string_observer = THRIFT_FLAG_OBSERVE(test_flag_string);
   auto test_flag_bool_external_observer =
       THRIFT_FLAG_OBSERVE(test_flag_bool_external);
   auto test_flag_int_extenal_observer =
       THRIFT_FLAG_OBSERVE(test_flag_int_external);
+  auto test_flag_string_external_observer =
+      THRIFT_FLAG_OBSERVE(test_flag_string_external);
   EXPECT_EQ(true, **test_flag_bool_observer);
   EXPECT_EQ(42, **test_flag_int_observer);
+  EXPECT_EQ("foo", **test_flag_string_observer);
   EXPECT_EQ(true, **test_flag_bool_external_observer);
   EXPECT_EQ(42, **test_flag_int_extenal_observer);
+  EXPECT_EQ("foo", **test_flag_string_external_observer);
 
   testBackendPtr->getFlagObservableBool("test_flag_bool").setValue(false);
   testBackendPtr->getFlagObservableInt64("test_flag_int").setValue(41);
+  testBackendPtr->getFlagObservableString("test_flag_string")
+      .setValue(std::string{"bar"});
   testBackendPtr->getFlagObservableBool("test_flag_bool_external")
       .setValue(false);
   testBackendPtr->getFlagObservableInt64("test_flag_int_external").setValue(41);
+  testBackendPtr->getFlagObservableString("test_flag_string_external")
+      .setValue(std::string{"bar"});
 
   folly::observer_detail::ObserverManager::waitForAllUpdates();
 
   EXPECT_EQ(false, **test_flag_bool_observer);
   EXPECT_EQ(41, **test_flag_int_observer);
+  EXPECT_EQ("bar", **test_flag_string_observer);
   EXPECT_EQ(false, **test_flag_bool_external_observer);
   EXPECT_EQ(41, **test_flag_int_extenal_observer);
+  EXPECT_EQ("bar", **test_flag_string_external_observer);
 }
 
 TEST(Flags, NoBackend) {
@@ -146,102 +175,137 @@ TEST(Flags, NoBackend) {
 
   EXPECT_EQ(true, THRIFT_FLAG(test_flag_bool));
   EXPECT_EQ(42, THRIFT_FLAG(test_flag_int));
+  EXPECT_EQ("foo", THRIFT_FLAG(test_flag_string));
   EXPECT_EQ(true, THRIFT_FLAG(test_flag_bool_external));
   EXPECT_EQ(42, THRIFT_FLAG(test_flag_int_external));
+  EXPECT_EQ("foo", THRIFT_FLAG(test_flag_string_external));
 }
 
 TEST(Flags, MockGet) {
   EXPECT_EQ(true, THRIFT_FLAG(test_flag_bool));
   EXPECT_EQ(42, THRIFT_FLAG(test_flag_int));
+  EXPECT_EQ("foo", THRIFT_FLAG(test_flag_string));
   EXPECT_EQ(true, THRIFT_FLAG(test_flag_bool_external));
   EXPECT_EQ(42, THRIFT_FLAG(test_flag_int_external));
+  EXPECT_EQ("foo", THRIFT_FLAG(test_flag_string_external));
 
   THRIFT_FLAG_SET_MOCK(test_flag_bool, false);
   THRIFT_FLAG_SET_MOCK(test_flag_int, 41);
+  THRIFT_FLAG_SET_MOCK(test_flag_string, std::string{"bar"});
   THRIFT_FLAG_SET_MOCK(test_flag_bool_external, false);
   THRIFT_FLAG_SET_MOCK(test_flag_int_external, 41);
+  THRIFT_FLAG_SET_MOCK(test_flag_string_external, std::string{"bar"});
 
   folly::observer_detail::ObserverManager::waitForAllUpdates();
 
   EXPECT_EQ(false, THRIFT_FLAG(test_flag_bool));
   EXPECT_EQ(41, THRIFT_FLAG(test_flag_int));
+  EXPECT_EQ("bar", THRIFT_FLAG(test_flag_string));
   EXPECT_EQ(false, THRIFT_FLAG(test_flag_bool_external));
   EXPECT_EQ(41, THRIFT_FLAG(test_flag_int_external));
+  EXPECT_EQ("bar", THRIFT_FLAG(test_flag_string_external));
 
   THRIFT_FLAG_SET_MOCK(test_flag_bool, true);
   THRIFT_FLAG_SET_MOCK(test_flag_int, 9);
+  THRIFT_FLAG_SET_MOCK(test_flag_string, std::string{"baz"});
   THRIFT_FLAG_SET_MOCK(test_flag_bool_external, true);
   THRIFT_FLAG_SET_MOCK(test_flag_int_external, 61);
+  THRIFT_FLAG_SET_MOCK(test_flag_string_external, std::string{"baz"});
 
   folly::observer_detail::ObserverManager::waitForAllUpdates();
 
   EXPECT_EQ(true, THRIFT_FLAG(test_flag_bool));
   EXPECT_EQ(9, THRIFT_FLAG(test_flag_int));
+  EXPECT_EQ("baz", THRIFT_FLAG(test_flag_string));
   EXPECT_EQ(true, THRIFT_FLAG(test_flag_bool_external));
   EXPECT_EQ(61, THRIFT_FLAG(test_flag_int_external));
+  EXPECT_EQ("baz", THRIFT_FLAG(test_flag_string_external));
 }
 
 TEST(Flags, MockObserve) {
   EXPECT_EQ(true, THRIFT_FLAG(test_flag_bool));
   EXPECT_EQ(42, THRIFT_FLAG(test_flag_int));
+  EXPECT_EQ("foo", THRIFT_FLAG(test_flag_string));
   EXPECT_EQ(true, THRIFT_FLAG(test_flag_bool_external));
   EXPECT_EQ(42, THRIFT_FLAG(test_flag_int_external));
+  EXPECT_EQ("foo", THRIFT_FLAG(test_flag_string_external));
 
   auto test_flag_bool_observer = THRIFT_FLAG_OBSERVE(test_flag_bool);
   auto test_flag_int_observer = THRIFT_FLAG_OBSERVE(test_flag_int);
+  auto test_flag_string_observer = THRIFT_FLAG_OBSERVE(test_flag_string);
   auto test_flag_bool_external_observer =
       THRIFT_FLAG_OBSERVE(test_flag_bool_external);
   auto test_flag_int_extenal_observer =
       THRIFT_FLAG_OBSERVE(test_flag_int_external);
+  auto test_flag_string_external_observer =
+      THRIFT_FLAG_OBSERVE(test_flag_string_external);
 
   THRIFT_FLAG_SET_MOCK(test_flag_bool, false);
   THRIFT_FLAG_SET_MOCK(test_flag_int, 41);
+  THRIFT_FLAG_SET_MOCK(test_flag_string, std::string{"bar"});
   THRIFT_FLAG_SET_MOCK(test_flag_bool_external, false);
   THRIFT_FLAG_SET_MOCK(test_flag_int_external, 41);
+  THRIFT_FLAG_SET_MOCK(test_flag_string_external, std::string{"bar"});
 
   folly::observer_detail::ObserverManager::waitForAllUpdates();
 
   EXPECT_EQ(false, **test_flag_bool_observer);
   EXPECT_EQ(41, **test_flag_int_observer);
+  EXPECT_EQ("bar", **test_flag_string_observer);
   EXPECT_EQ(false, **test_flag_bool_external_observer);
   EXPECT_EQ(41, **test_flag_int_extenal_observer);
+  EXPECT_EQ("bar", **test_flag_string_external_observer);
 
   THRIFT_FLAG_SET_MOCK(test_flag_bool, true);
   THRIFT_FLAG_SET_MOCK(test_flag_int, 9);
+  THRIFT_FLAG_SET_MOCK(test_flag_string, std::string{"baz"});
   THRIFT_FLAG_SET_MOCK(test_flag_bool_external, true);
   THRIFT_FLAG_SET_MOCK(test_flag_int_external, 61);
+  THRIFT_FLAG_SET_MOCK(test_flag_string_external, std::string{"baz"});
 
   folly::observer_detail::ObserverManager::waitForAllUpdates();
 
   EXPECT_EQ(true, **test_flag_bool_observer);
   EXPECT_EQ(9, **test_flag_int_observer);
+  EXPECT_EQ("baz", **test_flag_string_observer);
   EXPECT_EQ(true, **test_flag_bool_external_observer);
   EXPECT_EQ(61, **test_flag_int_extenal_observer);
+  EXPECT_EQ("baz", **test_flag_string_external_observer);
 }
 
 TEST(Flags, MockValuePreferred) {
   EXPECT_EQ(true, THRIFT_FLAG(test_flag_bool));
   EXPECT_EQ(42, THRIFT_FLAG(test_flag_int));
+  EXPECT_EQ("foo", THRIFT_FLAG(test_flag_string));
   EXPECT_EQ(true, THRIFT_FLAG(test_flag_bool_external));
   EXPECT_EQ(42, THRIFT_FLAG(test_flag_int_external));
+  EXPECT_EQ("foo", THRIFT_FLAG(test_flag_string_external));
 
   THRIFT_FLAG_SET_MOCK(test_flag_bool, true);
   THRIFT_FLAG_SET_MOCK(test_flag_int, 73);
+  THRIFT_FLAG_SET_MOCK(test_flag_string, std::string{"mock"});
   THRIFT_FLAG_SET_MOCK(test_flag_bool_external, true);
   THRIFT_FLAG_SET_MOCK(test_flag_int_external, 49);
+  THRIFT_FLAG_SET_MOCK(test_flag_string_external, std::string{"mock"});
 
   folly::observer_detail::ObserverManager::waitForAllUpdates();
 
   testBackendPtr->getFlagObservableBool("test_flag_bool").setValue(false);
   testBackendPtr->getFlagObservableInt64("test_flag_int").setValue(41);
+  testBackendPtr->getFlagObservableString("test_flag_string")
+      .setValue(std::string{"bar"});
   testBackendPtr->getFlagObservableBool("test_flag_bool_external")
       .setValue(false);
   testBackendPtr->getFlagObservableInt64("test_flag_int_external").setValue(41);
+  testBackendPtr->getFlagObservableString("test_flag_string_external")
+      .setValue(std::string{"bar"});
 
   folly::observer_detail::ObserverManager::waitForAllUpdates();
 
   EXPECT_EQ(true, THRIFT_FLAG(test_flag_bool));
   EXPECT_EQ(73, THRIFT_FLAG(test_flag_int));
+  EXPECT_EQ("mock", THRIFT_FLAG(test_flag_string));
   EXPECT_EQ(true, THRIFT_FLAG(test_flag_bool_external));
   EXPECT_EQ(49, THRIFT_FLAG(test_flag_int_external));
+  EXPECT_EQ("mock", THRIFT_FLAG(test_flag_string_external));
 }

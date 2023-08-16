@@ -152,6 +152,8 @@ class py3_mstch_program : public mstch_program {
             {"program:moveContainerTypes",
              &py3_mstch_program::getMoveContainerTypes},
             {"program:has_stream?", &py3_mstch_program::hasStream},
+            {"program:python_capi_converter?",
+             &py3_mstch_program::capi_converter},
             {"program:stream_types", &py3_mstch_program::getStreamTypes},
             {"program:response_and_stream_functions",
              &py3_mstch_program::response_and_stream_functions},
@@ -263,6 +265,8 @@ class py3_mstch_program : public mstch_program {
   mstch::node hasStream() {
     return !has_option("no_stream") && !streamTypes_.empty();
   }
+
+  mstch::node capi_converter() { return has_option("python_capi_converter"); }
 
   mstch::node py_deprecated_module_path() {
     std::string module_path = program_->get_namespace("py");

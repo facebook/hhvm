@@ -59,6 +59,7 @@ from thrift.py3.types cimport (
     map_iter as __map_iter,
     map_contains as __map_contains,
     map_getitem as __map_getitem,
+    py3_to_python as __py3_to_python,
     reference_shared_ptr as __reference_shared_ptr,
     get_field_name_by_index as __get_field_name_by_index,
     reset_field as __reset_field,
@@ -451,6 +452,10 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
         return needed
 
     def _to_python(self):
+    {{#program:python_capi_converter?}}
+        return __py3_to_python[c{{struct:name}}](self._cpp_obj)
+    {{/program:python_capi_converter?}}
+    {{^program:python_capi_converter?}}
         import importlib
         import thrift.python.converter
         {{!TODO: accommodate root_module_prefix}}
@@ -458,6 +463,7 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
             "{{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_types"
         )
         return thrift.python.converter.to_python_struct(python_types.{{struct:name}}, self)
+    {{/program:python_capi_converter?}}
 
     def _to_py3(self):
         return self

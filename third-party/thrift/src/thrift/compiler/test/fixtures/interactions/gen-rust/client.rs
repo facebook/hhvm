@@ -201,7 +201,7 @@ where
     fn _encode_impl(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<, crate::errors::my_interaction::EncodeError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::EncodeError>> {
         use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
@@ -260,7 +260,7 @@ pub trait MyInteraction: ::std::marker::Send {
 
     fn encode(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<, crate::errors::my_interaction::EncodeError>>;
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::EncodeError>>;
 }
 
 pub trait MyInteractionExt<T>: MyInteraction
@@ -282,7 +282,7 @@ where
     fn encode_with_rpc_opts(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<, crate::errors::my_interaction::EncodeError>>;
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::EncodeError>>;
 
     fn transport(&self) -> &T;
 }
@@ -378,7 +378,7 @@ where
     }
     fn encode(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<, crate::errors::my_interaction::EncodeError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::EncodeError>> {
         let rpc_options = T::RpcOptions::default();
         self._encode_impl(
             rpc_options,
@@ -422,7 +422,7 @@ where
     fn encode_with_rpc_opts(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<, crate::errors::my_interaction::EncodeError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::EncodeError>> {
         self._encode_impl(
             rpc_options,
         )
@@ -458,7 +458,7 @@ where
     }
     fn encode(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<, crate::errors::my_interaction::EncodeError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::EncodeError>> {
         self.as_ref().encode(
         )
     }
@@ -498,7 +498,7 @@ where
     fn encode_with_rpc_opts(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<, crate::errors::my_interaction::EncodeError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction::EncodeError>> {
         <Self as ::std::convert::AsRef<dyn MyInteractionExt<T>>>::as_ref(self).encode_with_rpc_opts(
             rpc_options,
         )
@@ -806,7 +806,7 @@ where
     fn _encode_impl(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<, crate::errors::my_interaction_fast::EncodeError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::EncodeError>> {
         use ::const_cstr::const_cstr;
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
@@ -865,7 +865,7 @@ pub trait MyInteractionFast: ::std::marker::Send {
 
     fn encode(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<, crate::errors::my_interaction_fast::EncodeError>>;
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::EncodeError>>;
 }
 
 pub trait MyInteractionFastExt<T>: MyInteractionFast
@@ -887,7 +887,7 @@ where
     fn encode_with_rpc_opts(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<, crate::errors::my_interaction_fast::EncodeError>>;
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::EncodeError>>;
 
     fn transport(&self) -> &T;
 }
@@ -983,7 +983,7 @@ where
     }
     fn encode(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<, crate::errors::my_interaction_fast::EncodeError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::EncodeError>> {
         let rpc_options = T::RpcOptions::default();
         self._encode_impl(
             rpc_options,
@@ -1027,7 +1027,7 @@ where
     fn encode_with_rpc_opts(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<, crate::errors::my_interaction_fast::EncodeError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::EncodeError>> {
         self._encode_impl(
             rpc_options,
         )
@@ -1063,7 +1063,7 @@ where
     }
     fn encode(
         &self,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<, crate::errors::my_interaction_fast::EncodeError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::EncodeError>> {
         self.as_ref().encode(
         )
     }
@@ -1103,7 +1103,7 @@ where
     fn encode_with_rpc_opts(
         &self,
         rpc_options: T::RpcOptions,
-    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<, crate::errors::my_interaction_fast::EncodeError>> {
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), crate::errors::my_interaction_fast::EncodeError>> {
         <Self as ::std::convert::AsRef<dyn MyInteractionFastExt<T>>>::as_ref(self).encode_with_rpc_opts(
             rpc_options,
         )

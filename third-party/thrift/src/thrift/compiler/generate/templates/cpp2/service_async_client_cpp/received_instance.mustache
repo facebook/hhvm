@@ -16,12 +16,12 @@
 
 %><%^type:resolves_to_complex_return?%>
 <% > types/return_type_client%> <% > service_common/client_class_name%>::recv_instance_<%function:cpp_name%>(::apache::thrift::ClientReceiveState& state) {
-<%#type:void?%>
+<%#function:cpp_void?%>
   recv_<%function:cpp_name%>(state);
-<%/type:void?%>
-<%^type:void?%>
+<%/function:cpp_void?%>
+<%^function:cpp_void?%>
   return recv_<%function:cpp_name%>(state);
-<%/type:void?%>
+<%/function:cpp_void?%>
 }
 <%/type:resolves_to_complex_return?%>
 <%#type:resolves_to_complex_return?%>
@@ -30,13 +30,13 @@ void <% > service_common/client_class_name%>::recv_instance_<%function:cpp_name%
 }
 <%/type:resolves_to_complex_return?%>
 
-<%#type:void?%>
+<%#function:cpp_void?%>
 folly::exception_wrapper <% > service_common/client_class_name%>::recv_instance_wrapped_<%function:cpp_name%>(::apache::thrift::ClientReceiveState& state) {
   return recv_wrapped_<%function:cpp_name%>(state);
 }
-<%/type:void?%>
-<%^type:void?%>
+<%/function:cpp_void?%>
+<%^function:cpp_void?%>
 folly::exception_wrapper <% > service_common/client_class_name%>::recv_instance_wrapped_<%function:cpp_name%>(<% > types/return_type_client%>& _return, ::apache::thrift::ClientReceiveState& state) {
   return recv_wrapped_<%function:cpp_name%>(_return, state);
 }
-<%/type:void?%>
+<%/function:cpp_void?%>

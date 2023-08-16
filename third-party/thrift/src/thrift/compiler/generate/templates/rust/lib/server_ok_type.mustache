@@ -25,6 +25,6 @@
 )
 {{/function:stream_has_first_response?}}
 {{/function:stream?}}
-{{^function:stream?}}
+{{^function:stream?}}{{^function:sink?}}
 {{#function:return_type}}{{>lib/return_type}}{{/function:return_type}}
-{{/function:stream?}}
+{{/function:sink?}}{{/function:stream?}}

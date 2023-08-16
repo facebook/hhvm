@@ -823,6 +823,7 @@ class cpp_mstch_function : public mstch_function {
             {"function:eb", &cpp_mstch_function::event_based},
             {"function:cpp_name", &cpp_mstch_function::cpp_name},
             {"function:cpp_return_type", &cpp_mstch_function::cpp_return_type},
+            {"function:cpp_void?", &cpp_mstch_function::is_cpp_void},
             {"function:stack_arguments?", &cpp_mstch_function::stack_arguments},
             {"function:created_interaction",
              &cpp_mstch_function::created_interaction},
@@ -850,6 +851,11 @@ class cpp_mstch_function : public mstch_function {
   mstch::node cpp_name() { return cpp2::get_name(function_); }
   mstch::node cpp_return_type() {
     return cpp_context_->resolver().get_return_type(*function_);
+  }
+  // Specifies if the generated C++ function is void.
+  mstch::node is_cpp_void() {
+    return function_->get_return_type()->is_void() &&
+        !function_->sink_or_stream();
   }
   mstch::node stack_arguments() {
     return cpp2::is_stack_arguments(context_.options, *function_);

@@ -190,7 +190,7 @@ pub mod my_interaction {
     pub type EncodeError = ::fbthrift::NonthrowingFunctionError;
 
     impl ::std::convert::From<crate::services::my_interaction::EncodeExn> for
-        ::std::result::Result<, EncodeError>
+        ::std::result::Result<(), EncodeError>
     {
         fn from(e: crate::services::my_interaction::EncodeExn) -> Self {
             match e {
@@ -292,7 +292,7 @@ pub mod my_interaction_fast {
     pub type EncodeError = ::fbthrift::NonthrowingFunctionError;
 
     impl ::std::convert::From<crate::services::my_interaction_fast::EncodeExn> for
-        ::std::result::Result<, EncodeError>
+        ::std::result::Result<(), EncodeError>
     {
         fn from(e: crate::services::my_interaction_fast::EncodeExn) -> Self {
             match e {

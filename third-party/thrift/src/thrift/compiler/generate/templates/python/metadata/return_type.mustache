@@ -16,7 +16,7 @@
 
 }}
 {{#function:return_type}}
-{{ > metadata/thrift_type }}{{!
+{{^function:sink?}}{{ > metadata/thrift_type }}{{/function:sink?}}{{!
 }}{{#function:sink?}}{{!
     }}_fbthrift_metadata.ThriftType(t_sink=_fbthrift_metadata.ThriftSinkType({{!
     }}elemType={{#function:sink_elem_type}}{{> metadata/thrift_type }}{{/function:sink_elem_type}},{{!

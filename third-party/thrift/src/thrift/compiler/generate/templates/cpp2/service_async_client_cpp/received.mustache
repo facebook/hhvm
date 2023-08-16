@@ -16,13 +16,13 @@
 
 %><%^function:sync_returns_by_outparam?%>
 <% > types/return_type_client_no_handle%> <% > service_common/client_class_name%>::recv_<%function:cpp_name%>(::apache::thrift::ClientReceiveState& state) {
-<%#type:void?%>
+<%#function:cpp_void?%>
   auto ew = recv_wrapped_<%function:cpp_name%>(state);
-<%/type:void?%>
-<%^type:void?%>
+<%/function:cpp_void?%>
+<%^function:cpp_void?%>
   <% > types/return_type_client_no_handle%> _return;
   auto ew = recv_wrapped_<%function:cpp_name%>(_return, state);
-<%/type:void?%>
+<%/function:cpp_void?%>
 <%/function:sync_returns_by_outparam?%>
 <%#function:sync_returns_by_outparam?%>
 void <% > service_common/client_class_name%>::recv_<%function:cpp_name%>(<%function:cpp_return_type%>& _return, ::apache::thrift::ClientReceiveState& state) {
@@ -32,8 +32,8 @@ void <% > service_common/client_class_name%>::recv_<%function:cpp_name%>(<%funct
     ew.throw_exception();
   }
 <%^function:sync_returns_by_outparam?%>
-<%^type:void?%>
+<%^function:cpp_void?%>
   return _return;
-<%/type:void?%>
+<%/function:cpp_void?%>
 <%/function:sync_returns_by_outparam?%>
 }

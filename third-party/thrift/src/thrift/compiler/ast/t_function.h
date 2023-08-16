@@ -21,6 +21,7 @@
 #include <vector>
 
 #include <thrift/compiler/ast/node_list.h>
+#include <thrift/compiler/ast/t_base_type.h>
 #include <thrift/compiler/ast/t_named.h>
 #include <thrift/compiler/ast/t_node.h>
 #include <thrift/compiler/ast/t_paramlist.h>
@@ -72,8 +73,11 @@ class t_function final : public t_named {
   const t_type* get_return_type() const { return return_type().get_type(); }
 
   t_type_ref return_type() const {
-    return response_pos_ != -1 ? return_types_[response_pos_]
-                               : t_type_ref::from_ptr(sink_or_stream_.get());
+    if (response_pos_ != -1) {
+      return return_types_[response_pos_];
+    }
+    return t_type_ref::from_ptr(
+        stream() ? sink_or_stream_.get() : &t_base_type::t_void());
   }
   void set_return_type(t_type_ref ret) {
     response_pos_ = return_types_.size();

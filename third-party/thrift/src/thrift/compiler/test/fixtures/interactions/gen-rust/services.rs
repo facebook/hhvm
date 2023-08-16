@@ -676,7 +676,7 @@ pub mod my_interaction {
                 Self::Success(inner) => {
                     p.write_field_begin(
                         "Success",
-                        ::fbthrift::TType::,
+                        ::fbthrift::TType::Void,
                         0i16,
                     );
                     inner.write(p);
@@ -695,7 +695,7 @@ pub mod my_interaction {
     {
         fn read(p: &mut P) -> ::anyhow::Result<Self> {
             static RETURNS: &[::fbthrift::Field] = &[
-                ::fbthrift::Field::new("Success", ::fbthrift::TType::, 0),
+                ::fbthrift::Field::new("Success", ::fbthrift::TType::Void, 0),
             ];
             let _ = p.read_struct_begin(|_| ())?;
             let mut once = false;
@@ -707,7 +707,7 @@ pub mod my_interaction {
                         p.read_field_end()?;
                         break;
                     }
-                    ((::fbthrift::TType::, 0i32), false) => {
+                    ((::fbthrift::TType::Void, 0i32), false) => {
                         once = true;
                         alt = ::std::option::Option::Some(Self::Success(::fbthrift::Deserialize::read(p)?));
                     }
@@ -1383,7 +1383,7 @@ pub mod my_interaction_fast {
                 Self::Success(inner) => {
                     p.write_field_begin(
                         "Success",
-                        ::fbthrift::TType::,
+                        ::fbthrift::TType::Void,
                         0i16,
                     );
                     inner.write(p);
@@ -1402,7 +1402,7 @@ pub mod my_interaction_fast {
     {
         fn read(p: &mut P) -> ::anyhow::Result<Self> {
             static RETURNS: &[::fbthrift::Field] = &[
-                ::fbthrift::Field::new("Success", ::fbthrift::TType::, 0),
+                ::fbthrift::Field::new("Success", ::fbthrift::TType::Void, 0),
             ];
             let _ = p.read_struct_begin(|_| ())?;
             let mut once = false;
@@ -1414,7 +1414,7 @@ pub mod my_interaction_fast {
                         p.read_field_end()?;
                         break;
                     }
-                    ((::fbthrift::TType::, 0i32), false) => {
+                    ((::fbthrift::TType::Void, 0i32), false) => {
                         once = true;
                         alt = ::std::option::Option::Some(Self::Success(::fbthrift::Deserialize::read(p)?));
                     }

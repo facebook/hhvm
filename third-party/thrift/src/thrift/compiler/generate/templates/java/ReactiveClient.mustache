@@ -180,8 +180,8 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
   }
 
   private static final com.facebook.thrift.payload.Reader _{{function:javaName}}_READER = {{!
-    }}{{#function:voidType}}Readers.voidReader(){{/function:voidType}}{{!
-    }}{{^function:voidType}}{{#function:return_type}}{{> TypeReader }}{{/function:return_type}}{{/function:voidType}};
+    }}{{#function:void?}}Readers.voidReader(){{/function:void?}}{{!
+    }}{{^function:void?}}{{#function:return_type}}{{> TypeReader }}{{/function:return_type}}{{/function:void?}};
 
   @java.lang.Override
   public reactor.core.publisher.Mono<com.facebook.thrift.client.ResponseWrapper<{{#function:return_type}}{{> BoxedType}}{{/function:return_type}}>> {{function:javaName}}Wrapper({{#function:args}}final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}}, {{/function:args}} final com.facebook.thrift.client.RpcOptions rpcOptions) {
@@ -250,13 +250,13 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
   }
 
   private static final com.facebook.thrift.payload.Reader _{{function:javaName}}_READER = {{!
-    }}{{#function:voidType}}Readers.voidReader(){{/function:voidType}}{{!
-    }}{{^function:voidType}}{{#function:return_type}}{{#function:stream_elem_type}}{{> TypeReader }}{{/function:stream_elem_type}}{{/function:return_type}}{{/function:voidType}};
+    }}{{#function:void?}}Readers.voidReader(){{/function:void?}}{{!
+    }}{{^function:void?}}{{#function:return_type}}{{#function:stream_elem_type}}{{> TypeReader }}{{/function:stream_elem_type}}{{/function:return_type}}{{/function:void?}};
 
   {{#function:return_type}}{{#function:stream_has_first_response?}}
   private static final com.facebook.thrift.payload.Reader _{{function:javaName}}_FIRST_READER = {{!
-    }}{{#function:voidType}}Readers.voidReader(){{/function:voidType}}{{!
-    }}{{^function:voidType}}{{#function:return_type}}{{#function:stream_first_response_type}}{{> TypeReader }}{{/function:stream_first_response_type}}{{/function:return_type}}{{/function:voidType}};
+    }}{{#function:void?}}Readers.voidReader(){{/function:void?}}{{!
+    }}{{^function:void?}}{{#function:return_type}}{{#function:stream_first_response_type}}{{> TypeReader }}{{/function:stream_first_response_type}}{{/function:return_type}}{{/function:void?}};
   {{/function:stream_has_first_response?}}{{/function:return_type}}
 
   @java.lang.Override
@@ -346,13 +346,13 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
   }
 
   private static final com.facebook.thrift.payload.Reader _{{function:javaName}}_READER = {{!
-    }}{{#function:voidType}}Readers.voidReader(){{/function:voidType}}{{!
-    }}{{^function:voidType}}{{#function:return_type}}{{#function:sink_final_response_type}}{{> TypeReader }}{{/function:sink_final_response_type}}{{/function:return_type}}{{/function:voidType}};
+    }}{{#function:void?}}Readers.voidReader(){{/function:void?}}{{!
+    }}{{^function:void?}}{{#function:return_type}}{{#function:sink_final_response_type}}{{> TypeReader }}{{/function:sink_final_response_type}}{{/function:return_type}}{{/function:void?}};
 
   {{#function:return_type}}{{#function:sink_has_first_response?}}
   private static final com.facebook.thrift.payload.Reader _{{function:javaName}}_FIRST_READER = {{!
-    }}{{#function:voidType}}Readers.voidReader(){{/function:voidType}}{{!
-    }}{{^function:voidType}}{{#function:return_type}}{{#function:sink_first_response_type}}{{> TypeReader }}{{/function:sink_first_response_type}}{{/function:return_type}}{{/function:voidType}};
+    }}{{#function:void?}}Readers.voidReader(){{/function:void?}}{{!
+    }}{{^function:void?}}{{#function:return_type}}{{#function:sink_first_response_type}}{{> TypeReader }}{{/function:sink_first_response_type}}{{/function:return_type}}{{/function:void?}};
   {{/function:sink_has_first_response?}}{{/function:return_type}}
 
   @java.lang.Override
@@ -453,8 +453,8 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
     }
 
     private final com.facebook.thrift.payload.Reader _{{function:javaName}}_READER = {{!
-      }}{{#function:voidType}}Readers.voidReader(){{/function:voidType}}{{!
-      }}{{^function:voidType}}{{#function:return_type}}{{> TypeReader }}{{/function:return_type}}{{/function:voidType}};
+      }}{{#function:void?}}Readers.voidReader(){{/function:void?}}{{!
+      }}{{^function:void?}}{{#function:return_type}}{{> TypeReader }}{{/function:return_type}}{{/function:void?}};
 
     public reactor.core.publisher.Mono<{{#function:return_type}}{{> BoxedType}}{{/function:return_type}}> {{function:javaName}}({{#function:args}}
     final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}}{{^last?}},{{/last?}}{{/function:args}}) {
@@ -540,13 +540,13 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
     }
 
     private final com.facebook.thrift.payload.Reader _{{function:javaName}}_READER = {{!
-      }}{{#function:voidType}}Readers.voidReader(){{/function:voidType}}{{!
-      }}{{^function:voidType}}{{#function:return_type}}{{#function:stream_elem_type}}{{> TypeReader }}{{/function:stream_elem_type}}{{/function:return_type}}{{/function:voidType}};
+      }}{{#function:void?}}Readers.voidReader(){{/function:void?}}{{!
+      }}{{^function:void?}}{{#function:return_type}}{{#function:stream_elem_type}}{{> TypeReader }}{{/function:stream_elem_type}}{{/function:return_type}}{{/function:void?}};
 
     {{#function:return_type}}{{#function:stream_has_first_response?}}
     private final com.facebook.thrift.payload.Reader _{{function:javaName}}_FIRST_READER = {{!
-      }}{{#function:voidType}}Readers.voidReader(){{/function:voidType}}{{!
-      }}{{^function:voidType}}{{#function:return_type}}{{#function:stream_first_response_type}}{{> TypeReader }}{{/function:stream_first_response_type}}{{/function:return_type}}{{/function:voidType}};
+      }}{{#function:void?}}Readers.voidReader(){{/function:void?}}{{!
+      }}{{^function:void?}}{{#function:return_type}}{{#function:stream_first_response_type}}{{> TypeReader }}{{/function:stream_first_response_type}}{{/function:return_type}}{{/function:void?}};
     {{/function:stream_has_first_response?}}{{/function:return_type}}
 
     @java.lang.Override

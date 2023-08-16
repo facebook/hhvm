@@ -183,7 +183,7 @@
 #endif // FOLLY_HAS_COROUTINES
 <%/function:sink?%>
 
-<%#type:void?%>
+<%#function:cpp_void?%>
 <%^function:oneway?%>
   static folly::exception_wrapper recv_wrapped_<%function:cpp_name%>(::apache::thrift::ClientReceiveState& state);
   static void recv_<%function:cpp_name%>(::apache::thrift::ClientReceiveState& state);
@@ -193,8 +193,8 @@
   virtual folly::exception_wrapper recv_instance_wrapped_<%function:cpp_name%>(::apache::thrift::ClientReceiveState& state);
 <%/function:creates_interaction?%><%/service:reduced_client?%>
 <%/function:oneway?%>
-<%/type:void?%>
-<%^type:void?%>
+<%/function:cpp_void?%>
+<%^function:cpp_void?%>
   static folly::exception_wrapper recv_wrapped_<%function:cpp_name%>(<% > types/return_type_client_no_handle%>& _return, ::apache::thrift::ClientReceiveState& state);
 <%^function:sync_returns_by_outparam?%>
   static <% > types/return_type_client_no_handle%> recv_<%function:cpp_name%>(::apache::thrift::ClientReceiveState& state);
@@ -212,7 +212,7 @@
 <%^service:reduced_client?%><%^function:creates_interaction?%>
   virtual folly::exception_wrapper recv_instance_wrapped_<%function:cpp_name%>(<% > types/return_type_client_no_handle%>& _return, ::apache::thrift::ClientReceiveState& state);
 <%/function:creates_interaction?%><%/service:reduced_client?%>
-<%/type:void?%>
+<%/function:cpp_void?%>
  private:
   template <typename Protocol_, typename RpcOptions>
   void <%function:cpp_name%>T(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, <% > types/callback_type%> callback<%#function:creates_interaction?%>, const apache::thrift::InteractionHandle& handle<%/function:creates_interaction?%><%function:comma%><% > service_common/function_param_list_client%>);

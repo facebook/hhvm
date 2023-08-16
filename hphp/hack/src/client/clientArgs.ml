@@ -425,6 +425,21 @@ let parse_check_args cmd ~from_default =
                  (FindRefsWireFormat.CliArgs.from_string_exn x))),
         "(mode) similar to IDE_FIND_REFS, but takes a symbol name rather than position"
       );
+      ( "--ide-find-refs-by-symbol3",
+        (let action = ref "" in
+         let stream_file = ref "-" in
+         Arg.Tuple
+           [
+             Arg.String (fun s -> action := s);
+             Arg.String (fun s -> stream_file := s);
+             Arg.String
+               (fun hints ->
+                 set_mode
+                   (MODE_IDE_FIND_REFS_BY_SYMBOL
+                      (FindRefsWireFormat.CliArgs.from_string_triple_exn
+                         (!action, !stream_file, hints))));
+           ]),
+        "(mode) similar to FIND_REFS, but takes [action stream_file hints]" );
       ( "--ide-go-to-impl-by-symbol",
         Arg.String
           (fun x ->

@@ -91,6 +91,8 @@ module CliArgs = struct
   type t = {
     symbol_name: string;
     action: SearchTypes.Find_refs.action;
+    stream_file: Path.t option;
+    hint_suffixes: string list;
   }
 
   (**
@@ -100,7 +102,7 @@ module CliArgs = struct
    * HackTypecheckerQueryBase::getWWWDir|Member,\HackTypecheckerQueryBase,Method,getWWWDir
    * Must be manually kept in sync with string_to_symbol_and_action_exn.
   *)
-  let to_string { symbol_name; action } : string =
+  let to_string { symbol_name; action; _ } : string =
     let action_serialized =
       match action with
       | Class str -> Printf.sprintf "Class,%s" str
@@ -157,5 +159,28 @@ module CliArgs = struct
         Printf.eprintf "Invalid input for action, got %s\n" action_arg;
         raise Exit_status.(Exit_with Input_error)
     in
-    { symbol_name; action }
+    { symbol_name; action; stream_file = None; hint_suffixes = [] }
+
+  let to_string_triple { symbol_name; action; stream_file; hint_suffixes } :
+      string * string * string =
+    let action =
+      to_string { symbol_name; action; stream_file; hint_suffixes }
+    in
+    let stream_file =
+      Option.value_map stream_file ~default:"-" ~f:Path.to_string
+    in
+    let hint_suffixes = hint_suffixes |> String.concat ~sep:"|" in
+    (action, stream_file, hint_suffixes)
+
+  let from_string_triple_exn
+      ((action, stream_file, hints) : string * string * string) : t =
+    let { symbol_name; action; _ } = from_string_exn action in
+    let stream_file =
+      if String.equal stream_file "-" then
+        None
+      else
+        Some (Path.make stream_file)
+    in
+    let hint_suffixes = String.split_on_chars hints ~on:['|'] in
+    { symbol_name; action; stream_file; hint_suffixes }
 end

@@ -163,7 +163,12 @@ module Rename = struct
       (symbol_def : Relative_path.t SymbolDefinition.t) : string =
     let symbol_and_action =
       FindRefsWireFormat.CliArgs.to_string
-        { FindRefsWireFormat.CliArgs.symbol_name = new_name; action }
+        {
+          FindRefsWireFormat.CliArgs.symbol_name = new_name;
+          action;
+          stream_file = None;
+          hint_suffixes = [];
+        }
     in
     let marshalled_def = Marshal.to_string symbol_def [] in
     let encoded = Base64.encode_exn marshalled_def in
@@ -186,7 +191,7 @@ module Rename = struct
         raise Exit_status.(Exit_with Input_error)
     in
     let str = Printf.sprintf "%s|%s" symbol_name action_arg in
-    let { FindRefsWireFormat.CliArgs.symbol_name = new_name; action } =
+    let { FindRefsWireFormat.CliArgs.symbol_name = new_name; action; _ } =
       FindRefsWireFormat.CliArgs.from_string_exn str
     in
     let decoded_str = Base64.decode_exn marshalled_def in

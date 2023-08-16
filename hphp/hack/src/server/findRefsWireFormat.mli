@@ -36,9 +36,15 @@ module CliArgs : sig
   type t = {
     symbol_name: string;
     action: SearchTypes.Find_refs.action;
+    stream_file: Path.t option;
+    hint_suffixes: string list;
   }
 
   val to_string : t -> string
 
   val from_string_exn : string -> t
+
+  val to_string_triple : t -> string * string * string
+
+  val from_string_triple_exn : string * string * string -> t
 end

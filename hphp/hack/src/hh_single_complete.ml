@@ -617,7 +617,7 @@ let handle_findrefs_glean sienv ~dry_run filename =
       Some (Glean.initialize ~reponame ~prev_init_time:None |> Option.value_exn)
   in
   List.iter queries ~f:(fun query ->
-      let { FindRefsWireFormat.CliArgs.symbol_name = _; action } =
+      let { FindRefsWireFormat.CliArgs.action; _ } =
         FindRefsWireFormat.CliArgs.from_string_exn query
       in
       Printf.printf "//// %s\n" query;

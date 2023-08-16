@@ -1663,6 +1663,8 @@ let kickoff_shell_out_and_maybe_cancel
               {
                 FindRefsWireFormat.CliArgs.symbol_name = symbol;
                 action = find_refs_action;
+                stream_file = None;
+                hint_suffixes = [];
               }
           in
           let cmd =
@@ -1678,6 +1680,8 @@ let kickoff_shell_out_and_maybe_cancel
               {
                 FindRefsWireFormat.CliArgs.symbol_name = symbol;
                 action = find_refs_action;
+                stream_file = None;
+                hint_suffixes = [];
               }
           in
           let cmd =

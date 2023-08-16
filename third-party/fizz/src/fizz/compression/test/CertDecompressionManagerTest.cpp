@@ -8,8 +8,8 @@
 
 #include <folly/portability/GTest.h>
 
+#include <fizz/compression/CertDecompressionManager.h>
 #include <fizz/compression/test/Mocks.h>
-#include <fizz/protocol/CertDecompressionManager.h>
 
 namespace fizz {
 namespace test {

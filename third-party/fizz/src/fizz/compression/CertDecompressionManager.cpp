@@ -6,7 +6,7 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-#include <fizz/protocol/CertDecompressionManager.h>
+#include <fizz/compression/CertDecompressionManager.h>
 
 namespace fizz {
 

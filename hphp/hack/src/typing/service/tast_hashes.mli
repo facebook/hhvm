@@ -23,7 +23,7 @@ val add : t -> key:Relative_path.t -> data:by_names option -> t
 
 val is_enabled : TypecheckerOptions.t -> bool
 
-val map : Relative_path.t -> Tast.by_names -> t
+val map : Provider_context.t -> Relative_path.t -> Tast.by_names -> t
 
 val reduce : t -> t -> t
 

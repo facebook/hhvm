@@ -1,5 +1,0 @@
-[Like_type_logger] {
-  "pos":"function_decl.php:3",
-  "categories":{"Expression":{"NonLike":1},"Parameter":{"NonLike":2},"Return":{"Like":1}}
-}
-No errors

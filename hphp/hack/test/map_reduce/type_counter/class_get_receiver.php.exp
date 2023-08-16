@@ -1,0 +1,8 @@
+{
+  "type_counter": {
+    "class_get_receiver.php": {
+      "num_like_types": 7,
+      "num_non_like_types": 14
+    }
+  }
+}

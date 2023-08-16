@@ -48,6 +48,7 @@ let module_blacklist =
     "core_kernel";
     "common";
     "hh_core";
+    "hh_json";
     "hh_prelude";
     "naming_special_names";
     "pp_type";

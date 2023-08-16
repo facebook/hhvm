@@ -1,9 +1,0 @@
-[Like_type_logger] {
-  "pos":"class_decl.php:3",
-  "categories":{
-    "Expression":{"NonLike":6},
-    "Property":{"Like":2,"NonLike":1},
-    "Return":{"Like":3}
-  }
-}
-No errors

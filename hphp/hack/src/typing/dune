@@ -486,7 +486,9 @@
   diagnostic_pusher
   errors
   typing_error
+  typing_service_types
   file_info
+  map_reduce
   nast
   gc_utils
   global_options

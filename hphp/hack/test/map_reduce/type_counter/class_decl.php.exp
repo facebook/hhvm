@@ -1,0 +1,5 @@
+{
+  "type_counter": {
+    "class_decl.php": { "num_like_types": 5, "num_non_like_types": 7 }
+  }
+}

@@ -105,6 +105,7 @@ pub use gen::shallow_decl_defs;
 pub use gen::tast;
 pub use gen::tast_hashes;
 pub use gen::tast_with_dynamic;
+pub use gen::type_counter;
 pub use gen::type_parameter_env;
 pub use gen::typechecker_options;
 pub use gen::typing_defs;

@@ -66,7 +66,7 @@ let add m ~key ~data =
 
 let is_enabled tcopt = TypecheckerOptions.dump_tast_hashes tcopt
 
-let map path tasts =
+let map _ctx path tasts =
   let data = hash_tasts tasts in
   add empty ~key:path ~data:(Some data)
 

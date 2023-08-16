@@ -1,0 +1,5 @@
+{
+  "type_counter": {
+    "function_decl.php": { "num_like_types": 1, "num_non_like_types": 3 }
+  }
+}

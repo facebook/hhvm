@@ -1,0 +1,5 @@
+{
+  "type_counter": {
+    "obj_get_receiver.php": { "num_like_types": 8, "num_non_like_types": 16 }
+  }
+}

@@ -13,7 +13,7 @@ module type MapReducer = sig
 
   val is_enabled : TypecheckerOptions.t -> bool
 
-  val map : Relative_path.t -> Tast.by_names -> t
+  val map : Provider_context.t -> Relative_path.t -> Tast.by_names -> t
 
   val reduce : t -> t -> t
 
@@ -30,12 +30,17 @@ end
 (* An enumeration of all supported map reducers.
    If you want to add a map-reducer, add a variant here and let the compiler
    guide you. *)
-type map_reducer = TastHashes [@@deriving eq, ord, show, enum]
+type map_reducer =
+  | TastHashes
+  | TypeCounter
+[@@deriving eq, ord, show, enum]
 
 [@@@warning "+32"]
 
 (** Link each map-reducer to the type of its data. *)
-type _ map_reducer_type = TypeForTastHashes : Tast_hashes.t map_reducer_type
+type _ map_reducer_type =
+  | TypeForTastHashes : Tast_hashes.t map_reducer_type
+  | TypeForTypeCounter : Type_counter.t map_reducer_type
 
 (** Existential wrapper around the type for a map-reducer. *)
 type any_map_reducer_type =
@@ -46,6 +51,7 @@ type any_map_reducer_type =
 Needs an entry when adding a map-reducer. *)
 let type_for : map_reducer -> any_map_reducer_type = function
   | TastHashes -> TypeForAny TypeForTastHashes
+  | TypeCounter -> TypeForAny TypeForTypeCounter
 
 (** A mapping from a map-reducer type to a compatible implementation operating
 on data for that type.
@@ -55,6 +61,7 @@ let implementation_for (type t) (mr : t map_reducer_type) :
     (module MapReducer with type t = t) =
   match mr with
   | TypeForTastHashes -> (module Tast_hashes)
+  | TypeForTypeCounter -> (module Type_counter)
 
 module MRMap = WrappedMap.Make (struct
   type t = map_reducer
@@ -78,6 +85,9 @@ let refine_map_reducer_result
     (yv : b) : (a * a) option =
   match (x, y) with
   | (TypeForTastHashes, TypeForTastHashes) -> Some (xv, yv)
+  | (TypeForTastHashes, _) -> None
+  | (TypeForTypeCounter, TypeForTypeCounter) -> Some (xv, yv)
+  | (TypeForTypeCounter, _) -> None
 
 let all_of_map_reducer : map_reducer list =
   List.init
@@ -108,7 +118,7 @@ let map ctx path tasts =
           match type_for mr with
           | TypeForAny typed_mr ->
             let (module MR) = implementation_for typed_mr in
-            Some (mr, MapReducerResult (typed_mr, MR.map path tasts))
+            Some (mr, MapReducerResult (typed_mr, MR.map ctx path tasts))
         else
           None)
   in
@@ -142,22 +152,26 @@ let finalize ~progress ~init_id ~recheck_id xs =
   MRMap.iter do_ xs
 
 let to_ffi xs =
-  let f _key v _s =
+  let f _key v s =
     let open Map_reduce_ffi in
     match v with
     | MapReducerResult (TypeForTastHashes, tast_hashes) ->
-      { tast_hashes = Some tast_hashes }
+      { s with tast_hashes = Some tast_hashes }
+    | MapReducerResult (TypeForTypeCounter, type_counter) ->
+      { s with type_counter = Some type_counter }
   in
   MRMap.fold f xs Map_reduce_ffi.empty
 
 let of_ffi s =
-  let Map_reduce_ffi.{ tast_hashes } = s in
+  let Map_reduce_ffi.{ tast_hashes; type_counter } = s in
   let elems =
     List.filter_map
       ~f:Fn.id
       [
         Option.map tast_hashes ~f:(fun tast_hashes ->
             (TastHashes, MapReducerResult (TypeForTastHashes, tast_hashes)));
+        Option.map type_counter ~f:(fun type_counter ->
+            (TypeCounter, MapReducerResult (TypeForTypeCounter, type_counter)));
       ]
   in
   MRMap.of_list elems

@@ -283,25 +283,49 @@ let count ctx program =
 type summary = {
   num_like_types: int;
   num_non_like_types: int;
+  num_mixed: int;
+  num_supportdyn_of_mixed: int;
+  num_dynamic: int;
 }
 [@@deriving yojson_of]
 
 type t = summary Relative_path.Map.t [@@deriving yojson_of]
 
-let empty_summary = { num_like_types = 0; num_non_like_types = 0 }
+let empty_summary =
+  {
+    num_like_types = 0;
+    num_non_like_types = 0;
+    num_mixed = 0;
+    num_supportdyn_of_mixed = 0;
+    num_dynamic = 0;
+  }
 
 let summary_of_count (cnt : count) =
   let { counted_type; value; entity_pos = _; category = _ } = cnt in
   match counted_type with
-  | Like -> { num_like_types = value; num_non_like_types = 0 }
-  | NonLike -> { num_like_types = 0; num_non_like_types = value }
-  | _ -> empty_summary
+  | Like -> { empty_summary with num_like_types = value }
+  | NonLike -> { empty_summary with num_non_like_types = value }
+  | Mixed -> { empty_summary with num_mixed = value }
+  | SupportdynOfMixed -> { empty_summary with num_supportdyn_of_mixed = value }
+  | Dynamic -> { empty_summary with num_dynamic = value }
 
 let plus_summary s t =
-  let { num_like_types; num_non_like_types } = s in
+  let {
+    num_like_types;
+    num_non_like_types;
+    num_mixed;
+    num_supportdyn_of_mixed;
+    num_dynamic;
+  } =
+    s
+  in
   {
     num_like_types = num_like_types + t.num_like_types;
     num_non_like_types = num_non_like_types + t.num_non_like_types;
+    num_mixed = num_mixed + t.num_mixed;
+    num_supportdyn_of_mixed =
+      num_supportdyn_of_mixed + t.num_supportdyn_of_mixed;
+    num_dynamic = num_dynamic + t.num_dynamic;
   }
 
 let summary_of_counts (cnts : count list) =

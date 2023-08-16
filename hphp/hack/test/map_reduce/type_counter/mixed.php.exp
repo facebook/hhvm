@@ -1,5 +1,11 @@
 {
   "type_counter": {
-    "mixed.php": { "num_like_types": 0, "num_non_like_types": 3 }
+    "mixed.php": {
+      "num_like_types": 0,
+      "num_non_like_types": 3,
+      "num_mixed": 0,
+      "num_supportdyn_of_mixed": 3,
+      "num_dynamic": 0
+    }
   }
 }

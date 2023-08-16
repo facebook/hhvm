@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<eb237696696712d692f5127927565d15>>
+// @generated SignedSource<<2256b64f92ee5f8459aa5ef0e8fa07d3>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -174,6 +174,9 @@ pub struct Count {
 pub struct Summary {
     pub like_types: isize,
     pub non_like_types: isize,
+    pub mixed: isize,
+    pub supportdyn_of_mixed: isize,
+    pub dynamic: isize,
 }
 
 #[rust_to_ocaml(attr = "deriving yojson_of")]

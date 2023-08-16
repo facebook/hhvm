@@ -44,6 +44,9 @@ type count = {
 type summary = {
   num_like_types: int;
   num_non_like_types: int;
+  num_mixed: int;
+  num_supportdyn_of_mixed: int;
+  num_dynamic: int;
 }
 [@@deriving yojson_of]
 

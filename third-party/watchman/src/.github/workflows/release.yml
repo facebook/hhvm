@@ -88,6 +88,48 @@ jobs:
           file: watchman/build/package/fedora-env/Dockerfile
           push: true
           tags: "${{ format('ghcr.io/{0}/watchman-build-env-fedora-36:latest', github.repository) }}"
+  docker-fedora-37:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: "${{ github.repository_owner }}"
+          password: "${{ secrets.GITHUB_TOKEN }}"
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: "."
+          build-args: FEDORA_VERSION=37
+          file: watchman/build/package/fedora-env/Dockerfile
+          push: true
+          tags: "${{ format('ghcr.io/{0}/watchman-build-env-fedora-37:latest', github.repository) }}"
+  docker-fedora-38:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: "${{ github.repository_owner }}"
+          password: "${{ secrets.GITHUB_TOKEN }}"
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: "."
+          build-args: FEDORA_VERSION=38
+          file: watchman/build/package/fedora-env/Dockerfile
+          push: true
+          tags: "${{ format('ghcr.io/{0}/watchman-build-env-fedora-38:latest', github.repository) }}"
   clone-build-package-ubuntu-20:
     needs:
       - prepare
@@ -172,6 +214,70 @@ jobs:
         id: make_rpm
         env:
           FEDORA_VERSION: "36"
+        run: "./watchman/build/package/make-rpm.sh"
+      - name: Upload .rpm
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: "${{ needs.prepare.outputs.upload_url }}"
+          asset_path: "${{ steps.make_rpm.outputs.rpm_path }}"
+          asset_name: "${{ steps.make_rpm.outputs.rpm_name }}"
+          asset_content_type: application/x-rpm
+  clone-build-package-fedora-37:
+    needs:
+      - prepare
+      - docker-fedora-37
+    runs-on: ubuntu-latest
+    container:
+      image: "${{ format('ghcr.io/{0}/watchman-build-env-fedora-37:latest', github.repository) }}"
+    steps:
+      - name: Fix HOME
+        run: echo HOME=/root >> $GITHUB_ENV
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Install system dependencies
+        run: "./install-system-packages.sh"
+      - name: Fix dubious ownership
+        run: git config --global --add safe.directory /__w/watchman/watchman
+      - name: Build Watchman binaries
+        run: "./autogen.sh"
+      - name: Make .rpm
+        id: make_rpm
+        env:
+          FEDORA_VERSION: "37"
+        run: "./watchman/build/package/make-rpm.sh"
+      - name: Upload .rpm
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: "${{ needs.prepare.outputs.upload_url }}"
+          asset_path: "${{ steps.make_rpm.outputs.rpm_path }}"
+          asset_name: "${{ steps.make_rpm.outputs.rpm_name }}"
+          asset_content_type: application/x-rpm
+  clone-build-package-fedora-38:
+    needs:
+      - prepare
+      - docker-fedora-38
+    runs-on: ubuntu-latest
+    container:
+      image: "${{ format('ghcr.io/{0}/watchman-build-env-fedora-38:latest', github.repository) }}"
+    steps:
+      - name: Fix HOME
+        run: echo HOME=/root >> $GITHUB_ENV
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Install system dependencies
+        run: "./install-system-packages.sh"
+      - name: Fix dubious ownership
+        run: git config --global --add safe.directory /__w/watchman/watchman
+      - name: Build Watchman binaries
+        run: "./autogen.sh"
+      - name: Make .rpm
+        id: make_rpm
+        env:
+          FEDORA_VERSION: "38"
         run: "./watchman/build/package/make-rpm.sh"
       - name: Upload .rpm
         env:

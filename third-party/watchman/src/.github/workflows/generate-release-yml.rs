@@ -38,7 +38,7 @@ fn parse_pattern(pattern: &String) -> Option<(Pattern, Vec<&'static str>)> {
     } else if pattern.contains("%FEDORA_STABLE_VERSION%") {
         Some((
             Box::new(move |p: &str, s: &str| p.replace("%FEDORA_STABLE_VERSION%", s)),
-            vec!["36"],
+            vec!["36", "37", "38"],
         ))
     } else {
         None

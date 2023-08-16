@@ -97,7 +97,7 @@ class H3DatagramAsyncSocket
 
   ssize_t writeGSO(const folly::SocketAddress& /*address*/,
                    const std::unique_ptr<folly::IOBuf>& /*buf*/,
-                   int /*gso*/) override {
+                   folly::AsyncUDPSocket::WriteOptions /*options*/) override {
     return -1;
   }
 
@@ -110,14 +110,14 @@ class H3DatagramAsyncSocket
   int writemGSO(folly::Range<folly::SocketAddress const*> /*addrs*/,
                 const std::unique_ptr<folly::IOBuf>* /*bufs*/,
                 size_t /*count*/,
-                const int* /*gso*/) override {
+                const WriteOptions* /*options*/) override {
     return -1;
   }
 
   ssize_t writev(const folly::SocketAddress& /*address*/,
                  const struct iovec* /*vec*/,
                  size_t /*iovec_len*/,
-                 int /*gso*/) override {
+                 folly::AsyncUDPSocket::WriteOptions /*options*/) override {
     return -1;
   }
 

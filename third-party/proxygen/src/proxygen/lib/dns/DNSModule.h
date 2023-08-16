@@ -82,7 +82,7 @@ class DNSModule {
     staleCacheSizeMultiplier_ = multiplier;
   }
 
- private:
+ protected:
   uint16_t dnsPort_{53};
   std::list<folly::SocketAddress> dnsServers_;
   size_t cacheMaxSize_{4096};

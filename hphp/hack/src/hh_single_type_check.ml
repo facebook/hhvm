@@ -2138,7 +2138,16 @@ let handle_mode
         | None -> ()
         | Some (name, action) ->
           let results =
-            match ServerFindRefs.go ctx action include_defs genv env with
+            match
+              ServerFindRefs.go
+                ctx
+                action
+                include_defs
+                ~stream_file:None
+                ~hints:[]
+                genv
+                env
+            with
             | (_env, Done r) -> ServerFindRefs.to_absolute r
             | (_env, Retry) -> failwith "didn't expect retry"
           in

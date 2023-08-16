@@ -12,7 +12,7 @@ let references
   match ServerFindRefs.go_from_file_ctx ~ctx ~entry ~line ~column with
   | None -> ServerCommandTypes.Done_or_retry.Done []
   | Some (_, action) ->
-    ServerFindRefs.(go ctx action false genv env)
+    ServerFindRefs.(go ctx action false ~stream_file:None ~hints:[] genv env)
     |> ServerCommandTypes.Done_or_retry.map_env ~f:ServerFindRefs.to_absolute
     |> snd
 

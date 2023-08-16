@@ -23,7 +23,13 @@ let add_ns name =
 
 let strip_ns results = List.map results ~f:(fun (s, p) -> (Utils.strip_ns s, p))
 
-let search ctx target include_defs files genv =
+let search ctx target include_defs ~hints ~files ~stream_file genv =
+  let hints_set = Relative_path.Set.of_list hints in
+  let files =
+    List.filter files ~f:(fun file ->
+        not (Relative_path.Set.mem hints_set file))
+  in
+  let files = hints @ files in
   if Hh_logger.Level.passes_min_level Hh_logger.Level.Debug then
     List.iter files ~f:(fun file ->
         Hh_logger.debug
@@ -31,7 +37,13 @@ let search ctx target include_defs files genv =
           (Relative_path.to_absolute file));
   (* Get all the references to the provided target in the files *)
   let res =
-    FindRefsService.find_references ctx genv.workers target include_defs files
+    FindRefsService.find_references
+      ctx
+      genv.workers
+      target
+      include_defs
+      files
+      ~stream_file
   in
   strip_ns res
 
@@ -64,7 +76,8 @@ let handle_prechecked_files genv env dep f =
     let () = Hh_logger.debug "ServerFindRefs.handle_prechecked_files: Retry" in
     (env, Retry)
 
-let search_function ctx function_name include_defs genv env =
+let search_function ctx function_name include_defs ~stream_file ~hints genv env
+    =
   let function_name = add_ns function_name in
   Hh_logger.debug "ServerFindRefs.search_function: %s" function_name;
   handle_prechecked_files genv env Typing_deps.(Dep.(make (Fun function_name)))
@@ -76,7 +89,14 @@ let search_function ctx function_name include_defs genv env =
       function_name
     |> Relative_path.Set.elements
   in
-  search ctx (FindRefsService.IFunction function_name) include_defs files genv
+  search
+    ctx
+    (FindRefsService.IFunction function_name)
+    include_defs
+    ~hints
+    ~files
+    ~stream_file
+    genv
 
 let search_single_file_for_function ctx function_name filename =
   let function_name = add_ns function_name in
@@ -88,6 +108,8 @@ let search_member
     (class_name : string)
     (member : member)
     ~(include_defs : bool)
+    ~(stream_file : Path.t option)
+    ~(hints : Relative_path.t list)
     (genv : genv)
     (env : env) : env * (string * Pos.t) list t =
   let dep_member_of member =
@@ -131,7 +153,7 @@ let search_member
     FindRefsService.IMember
       (FindRefsService.Class_set class_and_descendants, member)
   in
-  search ctx target include_defs files genv
+  search ctx target include_defs ~hints ~files ~stream_file genv
 
 let search_single_file_for_member
     ctx
@@ -160,7 +182,7 @@ let search_single_file_for_member
   in
   search_single_file ctx target filename
 
-let search_gconst ctx cst_name include_defs genv env =
+let search_gconst ctx cst_name include_defs ~stream_file ~hints genv env =
   let cst_name = add_ns cst_name in
   handle_prechecked_files genv env Typing_deps.(Dep.(make (GConst cst_name)))
   @@ fun () ->
@@ -171,13 +193,28 @@ let search_gconst ctx cst_name include_defs genv env =
       cst_name
     |> Relative_path.Set.elements
   in
-  search ctx (FindRefsService.IGConst cst_name) include_defs files genv
+  search
+    ctx
+    (FindRefsService.IGConst cst_name)
+    include_defs
+    ~hints
+    ~files
+    ~stream_file
+    genv
 
 let search_single_file_for_gconst ctx cst_name filename =
   let cst_name = add_ns cst_name in
   search_single_file ctx (FindRefsService.IGConst cst_name) filename
 
-let search_class ctx class_name include_defs include_all_ci_types genv env =
+let search_class
+    ctx
+    class_name
+    include_defs
+    include_all_ci_types
+    ~stream_file
+    ~hints
+    genv
+    env =
   let class_name = add_ns class_name in
   let target =
     if include_all_ci_types then
@@ -194,7 +231,7 @@ let search_class ctx class_name include_defs include_all_ci_types genv env =
       (SSet.singleton class_name)
     |> Relative_path.Set.elements
   in
-  search ctx target include_defs files genv
+  search ctx target include_defs ~hints ~files ~stream_file genv
 
 let search_single_file_for_class ctx class_name filename include_all_ci_types =
   let class_name = add_ns class_name in
@@ -219,19 +256,44 @@ let is_local = function
   | LocalVar _ -> true
   | _ -> false
 
-let go ctx action include_defs genv env =
+let go ctx action include_defs ~stream_file ~hints genv env =
   match action with
   | Member (class_name, member) ->
-    search_member ctx class_name member ~include_defs genv env
+    search_member
+      ctx
+      class_name
+      member
+      ~include_defs
+      ~stream_file
+      ~hints
+      genv
+      env
   | Function function_name ->
-    search_function ctx function_name include_defs genv env
+    search_function ctx function_name include_defs ~stream_file ~hints genv env
   | Class class_name ->
     let include_all_ci_types = true in
-    search_class ctx class_name include_defs include_all_ci_types genv env
+    search_class
+      ctx
+      class_name
+      include_defs
+      include_all_ci_types
+      ~stream_file
+      ~hints
+      genv
+      env
   | ExplicitClass class_name ->
     let include_all_ci_types = false in
-    search_class ctx class_name include_defs include_all_ci_types genv env
-  | GConst cst_name -> search_gconst ctx cst_name include_defs genv env
+    search_class
+      ctx
+      class_name
+      include_defs
+      include_all_ci_types
+      ~stream_file
+      ~hints
+      genv
+      env
+  | GConst cst_name ->
+    search_gconst ctx cst_name include_defs ~stream_file ~hints genv env
   | LocalVar { filename; file_content; line; char } ->
     let (ctx, entry) =
       Provider_context.add_or_overwrite_entry_contents

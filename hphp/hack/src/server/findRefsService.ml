@@ -255,7 +255,10 @@ let find_refs
     (target : action_internal)
     (acc : (string * Pos.t) list)
     (files : Relative_path.t list)
-    ~(omit_declaration : bool) : (string * Pos.t) list =
+    ~(omit_declaration : bool)
+    ~(stream_file : Path.t option) : (string * Pos.t) list =
+  (* TODO(ljw): implement! *)
+  let _ = stream_file in
   (* The helper function 'results_from_tast' takes a tast, looks at all *)
   (* use-sites in the tast e.g. "foo(1)" is a use-site of symbol foo,   *)
   (* and returns a map from use-site-position to name of the symbol.    *)
@@ -316,10 +319,16 @@ let find_refs_ctx
   in
   Pos.Map.fold (fun p str acc -> (str, p) :: acc) results []
 
-let parallel_find_refs workers files target ctx ~(omit_declaration : bool) =
+let parallel_find_refs
+    workers
+    files
+    target
+    ctx
+    ~(omit_declaration : bool)
+    ~(stream_file : Path.t option) =
   MultiWorker.call
     workers
-    ~job:(find_refs ctx target ~omit_declaration)
+    ~job:(find_refs ctx target ~omit_declaration ~stream_file)
     ~neutral:[]
     ~merge:List.rev_append
     ~next:(MultiWorker.next workers files)
@@ -382,14 +391,20 @@ let get_definitions ctx action =
        later time *)
     []
 
-let find_references ctx workers target include_defs files =
+let find_references ctx workers target include_defs files ~stream_file =
   let len = List.length files in
   Hh_logger.debug "find_references: %d files" len;
   let results =
     if len < 10 then
-      find_refs ctx target [] files ~omit_declaration:true
+      find_refs ctx target [] files ~omit_declaration:true ~stream_file
     else
-      parallel_find_refs workers files target ctx ~omit_declaration:true
+      parallel_find_refs
+        workers
+        files
+        target
+        ctx
+        ~omit_declaration:true
+        ~stream_file
   in
   let () =
     Hh_logger.debug "find_references: %d results" (List.length results)
@@ -402,7 +417,9 @@ let find_references ctx workers target include_defs files =
     results
 
 let find_references_single_file ctx target file =
-  let results = find_refs ctx target [] [file] ~omit_declaration:false in
+  let results =
+    find_refs ctx target [] [file] ~omit_declaration:false ~stream_file:None
+  in
   let () =
     Hh_logger.debug
       "find_references_single_file: %d results"

@@ -30,6 +30,8 @@ val go :
   Provider_context.t ->
   action ->
   bool ->
+  stream_file:Path.t option ->
+  hints:Relative_path.t list ->
   ServerEnv.genv ->
   ServerEnv.env ->
   ServerEnv.env * server_result_or_retry

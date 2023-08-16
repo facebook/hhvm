@@ -466,7 +466,14 @@ let go
       (Types.LocalVar { filename; file_content; line; char }, new_name)
   in
   let include_defs = true in
-  ServerFindRefs.go ctx find_refs_action include_defs genv env
+  ServerFindRefs.go
+    ctx
+    find_refs_action
+    include_defs
+    ~stream_file:None
+    ~hints:[]
+    genv
+    env
   |> ServerCommandTypes.Done_or_retry.map_env ~f:(fun refs ->
          let changes =
            let fold_to_positions_and_patches (positions, patches) (_, pos) =
@@ -627,7 +634,14 @@ let go_for_single_file
 let go_ide_with_find_refs_action
     ctx ~find_refs_action ~new_name ~symbol_definition genv env =
   let include_defs = true in
-  ServerFindRefs.go ctx find_refs_action include_defs genv env
+  ServerFindRefs.go
+    ctx
+    find_refs_action
+    include_defs
+    ~stream_file:None
+    ~hints:[]
+    genv
+    env
   |> ServerCommandTypes.Done_or_retry.map_env ~f:(fun refs ->
          let changes =
            List.fold_left

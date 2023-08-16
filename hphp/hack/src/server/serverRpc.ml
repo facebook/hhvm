@@ -202,21 +202,43 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         let open Done_or_retry in
         let include_defs = false in
         ServerFindRefs.(
-          go ctx find_refs_action include_defs genv env
+          go
+            ctx
+            find_refs_action
+            include_defs
+            ~stream_file:None
+            ~hints:[]
+            genv
+            env
           |> map_env ~f:to_absolute))
   | GO_TO_IMPL go_to_impl_action ->
     Done_or_retry.(
       ServerGoToImpl.go ~action:go_to_impl_action ~genv ~env
       |> map_env ~f:ServerFindRefs.to_absolute)
   | IDE_FIND_REFS_BY_SYMBOL
-      { FindRefsWireFormat.CliArgs.symbol_name = _; action; _ } ->
+      {
+        FindRefsWireFormat.CliArgs.symbol_name = _;
+        action;
+        stream_file;
+        hint_suffixes;
+      } ->
+    let hints =
+      List.map hint_suffixes ~f:(fun suffix -> Relative_path.from_root ~suffix)
+    in
     let ctx = Provider_utils.ctx_from_server_env env in
     Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
         let open Done_or_retry in
         let include_defs = false in
         map_env
           ~f:ServerFindRefs.to_absolute
-          (ServerFindRefs.go ctx action include_defs genv env))
+          (ServerFindRefs.go
+             ctx
+             action
+             include_defs
+             ~stream_file
+             ~hints
+             genv
+             env))
   | IDE_GO_TO_IMPL_BY_SYMBOL
       { FindRefsWireFormat.CliArgs.symbol_name = _; action; _ } ->
     let ctx = Provider_utils.ctx_from_server_env env in

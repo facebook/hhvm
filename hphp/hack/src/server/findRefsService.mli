@@ -35,6 +35,7 @@ val find_references :
   action_internal ->
   bool ->
   Relative_path.t list ->
+  stream_file:Path.t option ->
   (string * Pos.t) list
 
 val find_references_single_file :

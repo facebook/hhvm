@@ -41,6 +41,8 @@ type find_refs_result =
       action: ServerCommandTypes.Find_refs.action option;
           (** if true, then clientLsp should shell out to hh_server to collect more positions;
           this action will specifiy what hh_server shoud look for. *)
+      hint_suffixes: string list;
+          (** in case of a shell-out, we will suggest hh_server to look in these root-relative paths first. *)
       open_file_results: (string * Pos.absolute) list Lsp.UriMap.t;
           (** All references that were found in all open files in clientIdeDaemon. *)
     }

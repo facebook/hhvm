@@ -916,9 +916,14 @@ let print_documentSymbol (r : DocumentSymbol.result) : json =
 (************************************************************************)
 
 let parse_findReferences (params : json option) : FindReferences.params =
+  let partialResultToken =
+    Jget.string_opt params "partialResultToken"
+    |> Option.map ~f:(fun t -> PartialResultToken t)
+  in
   let context = Jget.obj_opt params "context" in
   {
     FindReferences.loc = parse_textDocumentPositionParams params;
+    partialResultToken;
     context =
       {
         FindReferences.includeDeclaration =
@@ -927,6 +932,10 @@ let parse_findReferences (params : json option) : FindReferences.params =
           Jget.bool_d context "includeIndirectReferences" ~default:false;
       };
   }
+
+let print_findReferencesPartialResult (Lsp.PartialResultToken token) refs =
+  Hh_json.JSON_Object
+    [("token", Hh_json.string_ token); ("value", print_locations refs)]
 
 (************************************************************************)
 
@@ -1452,6 +1461,7 @@ let get_uri_opt (m : lsp_message) : Lsp.documentUri option =
   | NotificationMessage (ShowMessageNotification _)
   | NotificationMessage (ConnectionStatusNotificationFB _)
   | NotificationMessage InitializedNotification
+  | NotificationMessage (FindReferencesPartialResultNotification _)
   | NotificationMessage (SetTraceNotification _)
   | NotificationMessage LogTraceNotification
   | NotificationMessage (UnknownNotification _)
@@ -1547,6 +1557,7 @@ let notification_name_to_string (notification : lsp_notification) : string =
   | ShowMessageNotification _ -> "window/showMessage"
   | ConnectionStatusNotificationFB _ -> "telemetry/connectionStatus"
   | InitializedNotification -> "initialized"
+  | FindReferencesPartialResultNotification _ -> "$/progress"
   | SetTraceNotification _ -> "$/setTraceNotification"
   | LogTraceNotification -> "$/logTraceNotification"
   | UnknownNotification (method_, _params) -> method_
@@ -1840,6 +1851,8 @@ let print_lsp_notification (notification : lsp_notification) : json =
     | CancelRequestNotification r -> print_cancelRequest r
     | SetTraceNotification r -> print_setTraceNotification r
     | PublishDiagnosticsNotification r -> print_diagnostics r
+    | FindReferencesPartialResultNotification (token, r) ->
+      print_findReferencesPartialResult token r
     | TelemetryNotification (r, extras) -> print_telemetryNotification r extras
     | LogMessageNotification r ->
       print_logMessage r.LogMessage.type_ r.LogMessage.message

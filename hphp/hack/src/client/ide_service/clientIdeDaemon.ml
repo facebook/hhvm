@@ -1033,6 +1033,7 @@ let handle_request
                   {
                     full_name = name;
                     action = None;
+                    hint_suffixes = [];
                     open_file_results = lsp_uri_map;
                   }
               | Error _action ->
@@ -1091,11 +1092,24 @@ let handle_request
                 document_list
                 ~init:(istate, Lsp.UriMap.empty)
             in
-            ( istate,
+            let sienv_ref = ref istate.sienv in
+            let hints =
+              SymbolIndex.find_refs ~sienv_ref ~action ~max_results:100
+            in
+            let hint_suffixes =
+              Option.value_map hints ~default:[] ~f:(fun hints ->
+                  List.filter_map hints ~f:(fun path ->
+                      if Relative_path.is_root (Relative_path.prefix path) then
+                        Some (Relative_path.suffix path)
+                      else
+                        None))
+            in
+            ( { istate with sienv = !sienv_ref },
               ClientIdeMessage.Find_refs_success
                 {
                   full_name = name;
                   action = Some action;
+                  hint_suffixes;
                   open_file_results = single_file_refs;
                 } ))
     in

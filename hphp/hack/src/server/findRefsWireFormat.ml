@@ -86,6 +86,24 @@ module Ide_stream = struct
         let (_ : int) = Unix.lseek fd 0 Unix.SEEK_END in
         Sys_utils.write_non_intr fd bytes 0 (Bytes.length bytes);
         Unix.fsync fd)
+
+  let read (fd : Unix.file_descr) ~(pos : int) : half_open_one_based list * int
+      =
+    Sys_utils.with_lock fd Unix.F_RLOCK ~f:(fun () ->
+        let end_pos = Unix.lseek fd 0 Unix.SEEK_END in
+        if pos = end_pos then
+          ([], pos)
+        else
+          let (_ : int) = Unix.lseek fd pos Unix.SEEK_SET in
+          let bytes =
+            Sys_utils.read_non_intr fd (end_pos - pos) |> Option.value_exn
+          in
+          let jsons =
+            Bytes.to_string bytes
+            |> String_utils.split_on_newlines
+            |> List.map ~f:Hh_json.json_of_string
+          in
+          (List.map jsons ~f:half_open_one_based_json_to_pos_exn, end_pos))
 end
 
 (** Used "hh --find-refs --json" and read by HackAst and other tools *)

@@ -44,6 +44,8 @@ type lsp_id =
   | NumberId of int
   | StringId of string
 
+type partial_result_token = PartialResultToken of string
+
 (** Note: this datatype provides no invariants that the string is well-formed. *)
 type documentUri = DocumentUri of string [@@deriving eq]
 
@@ -967,6 +969,7 @@ module FindReferences : sig
     loc: TextDocumentPositionParams.t;
         (** wire: loc's members are part of referenceParams *)
     context: referenceContext;
+    partialResultToken: partial_result_token option;
   }
 
   and referenceContext = {
@@ -1333,6 +1336,8 @@ type lsp_notification =
   | ShowMessageNotification of ShowMessage.params
   | ConnectionStatusNotificationFB of ConnectionStatusFB.params
   | InitializedNotification
+  | FindReferencesPartialResultNotification of
+      partial_result_token * FindReferences.result
   | SetTraceNotification of SetTraceNotification.params
   | LogTraceNotification (* $/logTraceNotification *)
   | UnknownNotification of string * Hh_json.json option

@@ -11,6 +11,8 @@ type lsp_id =
   | NumberId of int
   | StringId of string
 
+type partial_result_token = PartialResultToken of string
+
 type documentUri = DocumentUri of string [@@deriving eq]
 
 let uri_of_string (s : string) : documentUri = DocumentUri s
@@ -749,6 +751,7 @@ module FindReferences = struct
   and referenceParams = {
     loc: TextDocumentPositionParams.t;
     context: referenceContext;
+    partialResultToken: partial_result_token option;
   }
 
   and referenceContext = {
@@ -1117,6 +1120,8 @@ type lsp_notification =
   | ShowMessageNotification of ShowMessage.params
   | ConnectionStatusNotificationFB of ConnectionStatusFB.params
   | InitializedNotification
+  | FindReferencesPartialResultNotification of
+      partial_result_token * FindReferences.result
   | SetTraceNotification of SetTraceNotification.params
   | LogTraceNotification
   | UnknownNotification of string * Hh_json.json option

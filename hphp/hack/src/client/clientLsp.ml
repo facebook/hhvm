@@ -131,10 +131,21 @@ module Lost_env = struct
   }
   [@@warning "-69"]
 
+  and stream_file = {
+    file: Path.t;
+    q: FindRefsWireFormat.half_open_one_based list Lwt_stream.t;
+    partial_result_token: Lsp.partial_result_token;
+  }
+
   and shellout_standard_response = {
     symbol: string;
     find_refs_action: ServerCommandTypes.Find_refs.action;
     ide_calculated_positions: Pos.absolute list UriMap.t;
+        (** These are results calculated by clientIdeDaemon from its open files, one entry for each open file *)
+    stream_file: stream_file option;
+        (** If we want streaming results out of a shellout, go here *)
+    hint_suffixes: string list;
+        (** We got this list of hints from clientIdeDaemon, and pass it on to our shellout *)
   }
 
   and shellable_type =
@@ -314,6 +325,12 @@ type event =
       or [Some Error _] that either the typecheck completed or hh_server failed.
       The [None] case never arises; it represents a logic bug, an unexpected close
       of the underlying [Lwt_stream.t]. All handled in [handle_errors_file_item]. *)
+  | Refs_file of FindRefsWireFormat.half_open_one_based list option
+      (** If the editor sent a find-refs-request with a partialResultsToken, then
+      we create a partial-results file and "tail -f" it until the shell-out to "hh --ide-find-refs-by-symbol3"
+      has finished. This event signals with [Some] that new refs have been appended to the file.
+      The [None] case never arises; it represents a logic bug, an unexpected close
+      of the underlying [Lwt_stream.t]. *)
   | Shell_out_complete of
       ((Lwt_utils.Process_success.t, Lwt_utils.Process_failure.t) result
       * Lost_env.triggering_request
@@ -343,6 +360,9 @@ let event_to_string (event : event) : string =
       "Daemon_notification(%s)"
       (ClientIdeMessage.notification_to_string n)
   | Tick -> "Tick"
+  | Refs_file None -> "Refs_file(anomalous end-of-stream)"
+  | Refs_file (Some refs) ->
+    Printf.sprintf "Refs_file(%d refs)" (List.length refs)
   | Errors_file None -> "Errors_file(anomalous end-of-stream)"
   | Errors_file (Some (Ok (ServerProgress.Telemetry _))) ->
     "Errors_file: telemetry"
@@ -367,6 +387,7 @@ let is_tick (event : event) : bool =
   match event with
   | Tick -> true
   | Errors_file _
+  | Refs_file _
   | Shell_out_complete _
   | Client_message _
   | Daemon_notification _ ->
@@ -631,10 +652,13 @@ clientIdeDaemon, or whether neither is ready within 1s. *)
 let get_client_message_source
     (client : Jsonrpc.t option)
     (ide_service : ClientIdeService.t ref)
-    (q_opt : ServerProgress.ErrorsRead.read_result Lwt_stream.t option) :
+    (q_opt : ServerProgress.ErrorsRead.read_result Lwt_stream.t option)
+    (refs_q_opt :
+      FindRefsWireFormat.half_open_one_based list Lwt_stream.t option) :
     [ `From_client
     | `From_ide_service of event
     | `From_q of ServerProgress.ErrorsRead.read_result option
+    | `From_refs_q of FindRefsWireFormat.half_open_one_based list option
     | `No_source
     ]
     Lwt.t =
@@ -652,7 +676,9 @@ let get_client_message_source
             Lwt.return (`From_ide_service notification));
          ]
         @ Option.value_map q_opt ~default:[] ~f:(fun q ->
-              [Lwt_stream.get q |> Lwt.map (fun item -> `From_q item)]))
+              [Lwt_stream.get q |> Lwt.map (fun item -> `From_q item)])
+        @ Option.value_map refs_q_opt ~default:[] ~f:(fun q ->
+              [Lwt_stream.get q |> Lwt.map (fun item -> `From_refs_q item)]))
     in
     Lwt.return message_source
 
@@ -725,8 +751,24 @@ let get_next_event
       | (TailingErrors { q; _ }, Lost_server _) -> Some q
       | _ -> None
     in
+    let refs_q_opt =
+      match !state with
+      | Lost_server
+          Lost_env.
+            {
+              current_hh_shell =
+                Some
+                  {
+                    shellable_type = FindRefs { stream_file = Some { q; _ }; _ };
+                    _;
+                  };
+              _;
+            } ->
+        Some q
+      | _ -> None
+    in
     let%lwt message_source =
-      get_client_message_source client ide_service q_opt
+      get_client_message_source client ide_service q_opt refs_q_opt
     in
     (match message_source with
     | `From_client ->
@@ -734,6 +776,7 @@ let get_next_event
       Lwt.return message
     | `From_ide_service message -> Lwt.return message
     | `From_q message -> Lwt.return (Errors_file message)
+    | `From_refs_q message -> Lwt.return (Refs_file message)
     | `No_source -> Lwt.return Tick)
 
 type powered_by =
@@ -1468,6 +1511,39 @@ let ide_rpc
   | Ok result -> Lwt.return result
   | Error error_data -> raise (Daemon_nonfatal_exception error_data)
 
+(** This sets up a background watcher which polls the file for size changes due
+to it being appended to; each sie change, it writes to a stream everything that
+has been appended since last append. The background watcher will terminate
+and the stream be closed once the file has been unlinked. *)
+let watch_refs_stream_file
+    (file : Path.t)
+    ~(open_file_results : (string * Pos.absolute) list Lsp.UriMap.t) :
+    FindRefsWireFormat.half_open_one_based list Lwt_stream.t =
+  let (q, add) = Lwt_stream.create () in
+  let fd = Unix.openfile (Path.to_string file) [Unix.O_RDONLY] 0o666 in
+  let rec watch file_pos =
+    match (Unix.fstat fd).Unix.st_size with
+    | size when file_pos = size && Path.file_exists file ->
+      let%lwt () = Lwt_unix.sleep 0.2 in
+      watch file_pos
+    | size when file_pos = size ->
+      add None;
+      Lwt.return_unit
+    | _ ->
+      let (results, file_pos) =
+        FindRefsWireFormat.Ide_stream.read fd ~pos:file_pos
+      in
+      let results =
+        List.filter results ~f:(fun { FindRefsWireFormat.filename; _ } ->
+            let uri = path_to_lsp_uri filename ~default_path:filename in
+            not (UriMap.mem uri open_file_results))
+      in
+      if List.length results > 0 then add (Some results);
+      watch file_pos
+  in
+  let (_watcher_future : unit Lwt.t) = watch 0 in
+  q
+
 (** Historical quirk: we log kind and method-name a bit idiosyncratically... *)
 let get_message_kind_and_method_for_logging (message : lsp_message) :
     string * string =
@@ -1513,7 +1589,8 @@ let log_response_if_necessary
       Some (metadata, start_time_local_handle, RequestMessage (id, request))
     | Tick
     | Daemon_notification _
-    | Errors_file _ ->
+    | Errors_file _
+    | Refs_file _ ->
       None
   in
   match to_log with
@@ -1592,19 +1669,18 @@ let kickoff_shell_out_and_maybe_cancel
     ~(triggering_request : Lost_env.triggering_request) :
     (state * result_telemetry) Lwt.t =
   let%lwt () = terminate_if_version_changed_since_start_of_lsp () in
-  let compose_shellout_cmd
-      ~(from : string) (server_cmd : string) (cmd_arg : string) : string array =
-    let from = Printf.sprintf "clientLsp:%s" from in
-    [|
-      "--from";
-      from;
-      server_cmd;
-      cmd_arg;
-      "--json";
-      "--autostart-server";
-      "false";
-      get_root_exn () |> Path.to_string;
-    |]
+  let compose_shellout_cmd ~(from : string) (args : string list) : string array
+      =
+    args
+    @ [
+        "--from";
+        Printf.sprintf "clientLsp:%s" from;
+        "--json";
+        "--autostart-server";
+        "false";
+        get_root_exn () |> Path.to_string;
+      ]
+    |> Array.of_list
   in
   match state with
   | Lost_server ({ Lost_env.current_hh_shell; _ } as lenv) ->
@@ -1657,21 +1733,28 @@ let kickoff_shell_out_and_maybe_cancel
       begin
         let open Lost_env in
         match shellable_type with
-        | FindRefs { symbol; find_refs_action; _ } ->
-          let symbol_action_arg =
-            FindRefsWireFormat.CliArgs.to_string
+        | FindRefs
+            {
+              symbol;
+              find_refs_action;
+              hint_suffixes;
+              stream_file;
+              ide_calculated_positions = _;
+            } ->
+          let (action, stream_file, hints) =
+            FindRefsWireFormat.CliArgs.to_string_triple
               {
                 FindRefsWireFormat.CliArgs.symbol_name = symbol;
                 action = find_refs_action;
-                stream_file = None;
-                hint_suffixes = [];
+                stream_file =
+                  Option.map stream_file ~f:(fun sf -> sf.Lost_env.file);
+                hint_suffixes;
               }
           in
           let cmd =
             compose_shellout_cmd
               ~from:"find-refs-by-symbol"
-              "--ide-find-refs-by-symbol"
-              symbol_action_arg
+              ["--ide-find-refs-by-symbol3"; action; stream_file; hints]
           in
           cmd
         | GoToImpl { symbol; find_refs_action; _ } ->
@@ -1687,8 +1770,7 @@ let kickoff_shell_out_and_maybe_cancel
           let cmd =
             compose_shellout_cmd
               ~from:"go-to-impl-by-symbol"
-              "--ide-go-to-impl-by-symbol"
-              symbol_action_arg
+              ["--ide-go-to-impl-by-symbol"; symbol_action_arg]
           in
           cmd
         | Rename { symbol_definition; find_refs_action; new_name; _ } ->
@@ -1701,8 +1783,7 @@ let kickoff_shell_out_and_maybe_cancel
           let cmd =
             compose_shellout_cmd
               ~from:"rename"
-              "--ide-rename-by-symbol"
-              name_action_definition_string
+              ["--ide-rename-by-symbol"; name_action_definition_string]
           in
           cmd
       end
@@ -2325,6 +2406,7 @@ let do_findReferences_local
       {
         full_name = _;
         action = None;
+        hint_suffixes = _;
         open_file_results = ide_calculated_positions;
       } ->
     let positions =
@@ -2351,7 +2433,28 @@ let do_findReferences_local
     let result_telemetry = make_result_telemetry (List.length positions) in
     Lwt.return (state, result_telemetry)
   | ClientIdeMessage.Find_refs_success
-      { full_name; action = Some action; open_file_results } ->
+      { full_name; action = Some action; hint_suffixes; open_file_results } ->
+    let stream_file =
+      Option.map
+        params.FindReferences.partialResultToken
+        ~f:(fun partial_result_token ->
+          let file =
+            Caml.Filename.temp_file
+              ~temp_dir:(get_root_exn () |> Path.to_string)
+              "find_refs_stream"
+              ".jsonl"
+          in
+          (* We want the [ide_calculated_positions] at the start of the streaming file so they
+             will get displayed first. *)
+          let fd = Unix.openfile file [Unix.O_WRONLY; Unix.O_APPEND] 0o666 in
+          FindRefsWireFormat.Ide_stream.append
+            fd
+            (open_file_results |> UriMap.values |> List.concat);
+          Unix.close fd;
+          let file = Path.make file in
+          let q = watch_refs_stream_file file ~open_file_results in
+          Lost_env.{ file; partial_result_token; q })
+    in
     (* The [open_file_results] included the SymbolOccurrence text for each ref. We won't need that... *)
     let ide_calculated_positions =
       UriMap.map (List.map ~f:snd) open_file_results
@@ -2361,6 +2464,8 @@ let do_findReferences_local
         {
           Lost_env.symbol = full_name;
           find_refs_action = action;
+          stream_file;
+          hint_suffixes;
           ide_calculated_positions;
         }
     in
@@ -2381,7 +2486,7 @@ let do_findReferences_local
     Lwt.return (state, result_telemetry)
 
 (** This is called when a shell-out to "hh --ide-find-refs-by-symbol" completes successfully *)
-let do_findReferences2 ~ide_calculated_positions ~hh_locations :
+let do_findReferences2 ~ide_calculated_positions ~hh_locations ~stream_file :
     Lsp.lsp_result * int =
   (* lsp_locations return a file for each position. To support unsaved, edited files
      let's discard locations for files that we previously fetched from ClientIDEDaemon.
@@ -2410,7 +2515,14 @@ let do_findReferences2 ~ide_calculated_positions ~hh_locations :
     |> List.concat
   in
   let all_locations = List.rev_append ide_locations hh_locations in
-  (FindReferencesResult all_locations, List.length all_locations)
+  (* LSP spec explains: "If a server reports partial result via a corresponding $/progress, the whole result
+     must be reported using n $/progress notifications. The final response has to be empty in terms of result values."
+     Thus, if we were using a streaming file and partial results, we'll give an empty response now. *)
+  match stream_file with
+  | Some { Lost_env.file; _ } ->
+    Unix.unlink (Path.to_string file);
+    (FindReferencesResult [], List.length all_locations)
+  | None -> (FindReferencesResult all_locations, List.length all_locations)
 
 let do_goToImplementation_local
     (state : state)
@@ -2442,7 +2554,14 @@ let do_goToImplementation_local
       (symbol, find_refs_action, ide_calculated_positions) ->
     let open Lost_env in
     let shellable_type =
-      GoToImpl { symbol; find_refs_action; ide_calculated_positions }
+      GoToImpl
+        {
+          symbol;
+          find_refs_action;
+          stream_file = None;
+          hint_suffixes = [];
+          ide_calculated_positions;
+        }
     in
     let start_time_local_handle = Unix.gettimeofday () in
     let%lwt (state, result_telemetry) =
@@ -3402,6 +3521,45 @@ let try_open_errors_file ~(state : state ref) : unit Lwt.t =
     latest_hh_server_errors := errors_conn;
     Lwt.return_unit
 
+let handle_refs_file_items
+    ~(state : state ref)
+    (items : FindRefsWireFormat.half_open_one_based list option) :
+    result_telemetry option =
+  match (items, !state) with
+  | ( Some refs,
+      Lost_server
+        Lost_env.
+          {
+            current_hh_shell =
+              Some
+                {
+                  shellable_type =
+                    FindRefs
+                      { stream_file = Some { partial_result_token; _ }; _ };
+                  _;
+                };
+            _;
+          } ) ->
+    let notification =
+      FindReferencesPartialResultNotification
+        ( partial_result_token,
+          List.map refs ~f:ide_shell_out_pos_to_lsp_location )
+    in
+    notification |> print_lsp_notification |> to_stdout;
+    None
+  | (None, _) ->
+    (* This signals that the stream has been closed. The function [watch_refs_stream_file] only closes
+       the stream when the stream-file has been unlinked. We only unlink the file in [handle_shell_out_complete],
+       which also updates [state] to no longer be watching this file. Therefore, we should never encounter
+       a closed stream. *)
+    log "Refs-file: unexpected end of stream";
+    HackEventLogger.invariant_violation_bug "refs-file unexpected end of stream";
+    None
+  | (Some _, _) ->
+    log "Refs-file: unexpected items when stream isn't open";
+    HackEventLogger.invariant_violation_bug "refs-file unexpected items";
+    None
+
 (** This function handles the success/failure of a shell-out.
 It is guaranteed to produce an LSP response for [shellable_type]. *)
 let handle_shell_out_complete
@@ -3479,9 +3637,12 @@ let handle_shell_out_complete
         let (lsp_result, result_count) =
           let open Lost_env in
           match shellable_type with
-          | FindRefs { ide_calculated_positions; _ } ->
+          | FindRefs { ide_calculated_positions; stream_file; _ } ->
             let hh_locations = shellout_locations_to_lsp_locations_exn stdout in
-            do_findReferences2 ~ide_calculated_positions ~hh_locations
+            do_findReferences2
+              ~ide_calculated_positions
+              ~hh_locations
+              ~stream_file
           | GoToImpl { ide_calculated_positions; _ } ->
             let hh_locations = shellout_locations_to_lsp_locations_exn stdout in
             do_goToImplementation2 ~ide_calculated_positions ~hh_locations
@@ -4609,6 +4770,7 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
             ~ref_unblocked_time
         | Errors_file result ->
           handle_errors_file_item ~state ~ide_service result
+        | Refs_file result -> Lwt.return (handle_refs_file_items ~state result)
         | Shell_out_complete (result, triggering_request, shellable_type) ->
           Lwt.return
             (handle_shell_out_complete result triggering_request shellable_type)

@@ -35,7 +35,7 @@ namespace py thrift.lib.thrift.protocol
 }
 typedef id.ExternId PathSegmentId
 
-@python.Hidden
+@python.Py3Hidden
 struct Path {
   1: list<PathSegmentId> path;
 }

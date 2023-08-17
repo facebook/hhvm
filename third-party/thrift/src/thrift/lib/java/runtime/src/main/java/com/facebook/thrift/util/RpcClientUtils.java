@@ -101,20 +101,30 @@ public final class RpcClientUtils {
       if (group instanceof EpollEventLoopGroup) {
         return EpollDomainSocketChannel.class;
       } else if (getOS() == PlatformUtils.OS.LINUX) {
+        Throwable unavailabilityCause = Epoll.unavailabilityCause();
+        String errorMsg =
+            unavailabilityCause == null
+                ? "unavailabilityCause is null"
+                : unavailabilityCause.getMessage();
         throw new UnsupportedOperationException(
             String.format(
-                "Unsupported combination of EventLoopGroup-{%s} & SocketAddress-{%s}. Likely due to system support for Epoll unavailable.",
-                group.getClass(), socketAddress.getClass()),
-            Epoll.unavailabilityCause());
+                "Unsupported combination of EventLoopGroup-{%s} & SocketAddress-{%s}. Likely due to system support for Epoll unavailable due to {%s}",
+                group.getClass(), socketAddress.getClass(), errorMsg),
+            unavailabilityCause);
       }
       if (group instanceof KQueueEventLoopGroup) {
         return KQueueDomainSocketChannel.class;
       } else if (getOS() == PlatformUtils.OS.MAC) {
+        Throwable unavailabilityCause = KQueue.unavailabilityCause();
+        String errorMsg =
+            unavailabilityCause == null
+                ? "unavailabilityCause is null"
+                : unavailabilityCause.getMessage();
         throw new UnsupportedOperationException(
             String.format(
-                "Unsupported combination of EventLoopGroup-{%s} & SocketAddress-{%s}. Likely due to system support for Kqueue unavailable.",
-                group.getClass(), socketAddress.getClass()),
-            KQueue.unavailabilityCause());
+                "Unsupported combination of EventLoopGroup-{%s} & SocketAddress-{%s}. Likely due to system support for Kqueue unavailable due to {%s}.",
+                group.getClass(), socketAddress.getClass(), errorMsg),
+            unavailabilityCause);
       }
     }
     throw new UnsupportedOperationException(

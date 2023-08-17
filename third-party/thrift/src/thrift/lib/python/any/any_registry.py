@@ -126,6 +126,8 @@ class AnyRegistry:
         ] = {alg: {} for alg in UniversalHashAlgorithm}
 
     def register_type(self, cls: ClassWithUri) -> bool:
+        if cls in (bool, int, float, str, bytes, IOBuf):
+            return False
         uri = cls.__get_thrift_uri__()
         if (not uri) or (uri in self._uri_to_cls):
             return False

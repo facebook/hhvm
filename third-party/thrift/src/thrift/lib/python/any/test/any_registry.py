@@ -68,6 +68,13 @@ class AnyRegistryTest(unittest.TestCase):
         registry = AnyRegistry()
         self.assertTrue(registry.register_type(thrift_types.struct_empty))
         self.assertFalse(registry.register_type(thrift_types.struct_empty))
+        self.assertFalse(registry.register_type(bool))  # pyre-ignore
+
+        class MyPreciousClass:
+            pass
+
+        with self.assertRaises(AttributeError):
+            registry.register_type(MyPreciousClass)  # pyre-ignore
 
     def test_register_module(self) -> None:
         registry = AnyRegistry()

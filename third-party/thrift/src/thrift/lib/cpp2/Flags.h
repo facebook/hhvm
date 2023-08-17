@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <string>
+#include <string_view>
 #include <type_traits>
 
 #include <folly/CPortability.h>
@@ -38,13 +39,13 @@ class FlagsBackend {
   virtual ~FlagsBackend() = default;
 
   virtual folly::observer::Observer<folly::Optional<bool>> getFlagObserverBool(
-      folly::StringPiece name) = 0;
+      std::string_view name) = 0;
 
   virtual folly::observer::Observer<folly::Optional<int64_t>>
-  getFlagObserverInt64(folly::StringPiece name) = 0;
+  getFlagObserverInt64(std::string_view name) = 0;
 
   virtual folly::observer::Observer<folly::Optional<std::string>>
-  getFlagObserverString(folly::StringPiece name) = 0;
+  getFlagObserverString(std::string_view name) = 0;
 };
 
 THRIFT_PLUGGABLE_FUNC_DECLARE(
@@ -54,30 +55,30 @@ FlagsBackend& getFlagsBackend();
 
 template <typename T>
 folly::observer::Observer<folly::Optional<T>> getFlagObserver(
-    folly::StringPiece name);
+    std::string_view name);
 
 template <>
 inline folly::observer::Observer<folly::Optional<bool>> getFlagObserver<bool>(
-    folly::StringPiece name) {
+    std::string_view name) {
   return getFlagsBackend().getFlagObserverBool(name);
 }
 
 template <>
 inline folly::observer::Observer<folly::Optional<int64_t>>
-getFlagObserver<int64_t>(folly::StringPiece name) {
+getFlagObserver<int64_t>(std::string_view name) {
   return getFlagsBackend().getFlagObserverInt64(name);
 }
 
 template <>
 inline folly::observer::Observer<folly::Optional<std::string>>
-getFlagObserver<std::string>(folly::StringPiece name) {
+getFlagObserver<std::string>(std::string_view name) {
   return getFlagsBackend().getFlagObserverString(name);
 }
 
 template <typename T>
 class FlagWrapper {
  public:
-  FlagWrapper(folly::StringPiece name, T defaultValue)
+  FlagWrapper(std::string_view name, T defaultValue)
       : name_(name), defaultValue_(std::move(defaultValue)) {}
 
   T get() { return get(ensureInit()); }
@@ -142,7 +143,7 @@ class FlagWrapper {
   }
 
   folly::DelayedInit<ReadOptimizedObserver<T>> observer_;
-  folly::StringPiece name_;
+  std::string_view name_;
   const T defaultValue_;
   folly::observer::SimpleObservable<folly::Optional<T>> mockObservable_{
       folly::none};
@@ -152,7 +153,7 @@ class FlagWrapper {
 
 #define THRIFT_FLAG_DEFINE(_name, _type, _default)                             \
   apache::thrift::detail::FlagWrapper<_type>& THRIFT_FLAG_WRAPPER__##_name() { \
-    static constexpr folly::StringPiece flagName = #_name;                     \
+    static constexpr std::string_view flagName = #_name;                       \
     static folly::Indestructible<apache::thrift::detail::FlagWrapper<_type>>   \
         flagWrapper(flagName, _default);                                       \
     return *flagWrapper;                                                       \

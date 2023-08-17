@@ -28,7 +28,7 @@ namespace {
 class FlagsBackendDummy : public apache::thrift::detail::FlagsBackend {
  public:
   folly::observer::Observer<folly::Optional<bool>> getFlagObserverBool(
-      folly::StringPiece name) override {
+      std::string_view name) override {
     static const folly::Indestructible<std::map<std::string, bool>>
         oss_defaults = std::map<std::string, bool>{
             {"server_rocket_upgrade_enabled", false},
@@ -42,13 +42,13 @@ class FlagsBackendDummy : public apache::thrift::detail::FlagsBackend {
   }
 
   folly::observer::Observer<folly::Optional<int64_t>> getFlagObserverInt64(
-      folly::StringPiece) override {
+      std::string_view) override {
     return folly::observer::makeObserver(
         []() -> folly::Optional<int64_t> { return folly::none; });
   }
 
   folly::observer::Observer<folly::Optional<std::string>> getFlagObserverString(
-      folly::StringPiece) override {
+      std::string_view) override {
     return folly::observer::makeObserver(
         []() -> folly::Optional<std::string> { return folly::none; });
   }

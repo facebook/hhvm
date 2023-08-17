@@ -35,32 +35,32 @@ THRIFT_FLAG_DECLARE_string(test_flag_string_external);
 class TestFlagsBackend : public apache::thrift::detail::FlagsBackend {
  public:
   folly::observer::Observer<folly::Optional<bool>> getFlagObserverBool(
-      folly::StringPiece name) override {
+      std::string_view name) override {
     return getFlagObservableBool(name).getObserver();
   }
 
   folly::observer::Observer<folly::Optional<int64_t>> getFlagObserverInt64(
-      folly::StringPiece name) override {
+      std::string_view name) override {
     return getFlagObservableInt64(name).getObserver();
   }
 
   folly::observer::Observer<folly::Optional<std::string>> getFlagObserverString(
-      folly::StringPiece name) override {
+      std::string_view name) override {
     return getFlagObservableString(name).getObserver();
   }
 
   folly::observer::SimpleObservable<folly::Optional<bool>>&
-  getFlagObservableBool(folly::StringPiece name) {
+  getFlagObservableBool(std::string_view name) {
     return getFlagObservable<bool>(boolObservables_, name);
   }
 
   folly::observer::SimpleObservable<folly::Optional<int64_t>>&
-  getFlagObservableInt64(folly::StringPiece name) {
+  getFlagObservableInt64(std::string_view name) {
     return getFlagObservable<int64_t>(int64Observables_, name);
   }
 
   folly::observer::SimpleObservable<folly::Optional<std::string>>&
-  getFlagObservableString(folly::StringPiece name) {
+  getFlagObservableString(std::string_view name) {
     return getFlagObservable<std::string>(stringObservables_, name);
   }
 
@@ -75,12 +75,13 @@ class TestFlagsBackend : public apache::thrift::detail::FlagsBackend {
 
   template <typename T>
   static folly::observer::SimpleObservable<folly::Optional<T>>&
-  getFlagObservable(ObservablesMap<T>& observables, folly::StringPiece name) {
-    if (auto observablePtr = folly::get_ptr(observables, name.str())) {
+  getFlagObservable(ObservablesMap<T>& observables, std::string_view name) {
+    auto nameStr = std::string{name};
+    if (auto observablePtr = folly::get_ptr(observables, nameStr)) {
       return **observablePtr;
     }
     return *(
-        observables[name.str()] = std::make_unique<
+        observables[nameStr] = std::make_unique<
             folly::observer::SimpleObservable<folly::Optional<T>>>(
             folly::Optional<T>{}));
   }

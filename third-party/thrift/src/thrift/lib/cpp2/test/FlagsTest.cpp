@@ -34,32 +34,32 @@ THRIFT_FLAG_DECLARE_string(test_flag_string_external);
 
 class TestFlagsBackend : public apache::thrift::detail::FlagsBackend {
  public:
-  folly::observer::Observer<folly::Optional<bool>> getFlagObserverBool(
+  folly::observer::Observer<std::optional<bool>> getFlagObserverBool(
       std::string_view name) override {
     return getFlagObservableBool(name).getObserver();
   }
 
-  folly::observer::Observer<folly::Optional<int64_t>> getFlagObserverInt64(
+  folly::observer::Observer<std::optional<int64_t>> getFlagObserverInt64(
       std::string_view name) override {
     return getFlagObservableInt64(name).getObserver();
   }
 
-  folly::observer::Observer<folly::Optional<std::string>> getFlagObserverString(
+  folly::observer::Observer<std::optional<std::string>> getFlagObserverString(
       std::string_view name) override {
     return getFlagObservableString(name).getObserver();
   }
 
-  folly::observer::SimpleObservable<folly::Optional<bool>>&
-  getFlagObservableBool(std::string_view name) {
+  folly::observer::SimpleObservable<std::optional<bool>>& getFlagObservableBool(
+      std::string_view name) {
     return getFlagObservable<bool>(boolObservables_, name);
   }
 
-  folly::observer::SimpleObservable<folly::Optional<int64_t>>&
+  folly::observer::SimpleObservable<std::optional<int64_t>>&
   getFlagObservableInt64(std::string_view name) {
     return getFlagObservable<int64_t>(int64Observables_, name);
   }
 
-  folly::observer::SimpleObservable<folly::Optional<std::string>>&
+  folly::observer::SimpleObservable<std::optional<std::string>>&
   getFlagObservableString(std::string_view name) {
     return getFlagObservable<std::string>(stringObservables_, name);
   }
@@ -68,22 +68,22 @@ class TestFlagsBackend : public apache::thrift::detail::FlagsBackend {
   template <typename T>
   using ObservablesMap = std::unordered_map<
       std::string,
-      std::unique_ptr<folly::observer::SimpleObservable<folly::Optional<T>>>>;
+      std::unique_ptr<folly::observer::SimpleObservable<std::optional<T>>>>;
   ObservablesMap<bool> boolObservables_;
   ObservablesMap<int64_t> int64Observables_;
   ObservablesMap<std::string> stringObservables_;
 
   template <typename T>
-  static folly::observer::SimpleObservable<folly::Optional<T>>&
-  getFlagObservable(ObservablesMap<T>& observables, std::string_view name) {
+  static folly::observer::SimpleObservable<std::optional<T>>& getFlagObservable(
+      ObservablesMap<T>& observables, std::string_view name) {
     auto nameStr = std::string{name};
     if (auto observablePtr = folly::get_ptr(observables, nameStr)) {
       return **observablePtr;
     }
     return *(
         observables[nameStr] = std::make_unique<
-            folly::observer::SimpleObservable<folly::Optional<T>>>(
-            folly::Optional<T>{}));
+            folly::observer::SimpleObservable<std::optional<T>>>(
+            std::optional<T>{}));
   }
 };
 

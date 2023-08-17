@@ -17,13 +17,13 @@
 #pragma once
 
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <type_traits>
 
 #include <folly/CPortability.h>
 #include <folly/Indestructible.h>
-#include <folly/Optional.h>
 #include <folly/experimental/observer/Observer.h>
 #include <folly/experimental/observer/SimpleObservable.h>
 #include <folly/synchronization/DelayedInit.h>
@@ -38,13 +38,13 @@ class FlagsBackend {
  public:
   virtual ~FlagsBackend() = default;
 
-  virtual folly::observer::Observer<folly::Optional<bool>> getFlagObserverBool(
+  virtual folly::observer::Observer<std::optional<bool>> getFlagObserverBool(
       std::string_view name) = 0;
 
-  virtual folly::observer::Observer<folly::Optional<int64_t>>
+  virtual folly::observer::Observer<std::optional<int64_t>>
   getFlagObserverInt64(std::string_view name) = 0;
 
-  virtual folly::observer::Observer<folly::Optional<std::string>>
+  virtual folly::observer::Observer<std::optional<std::string>>
   getFlagObserverString(std::string_view name) = 0;
 };
 
@@ -54,23 +54,23 @@ THRIFT_PLUGGABLE_FUNC_DECLARE(
 FlagsBackend& getFlagsBackend();
 
 template <typename T>
-folly::observer::Observer<folly::Optional<T>> getFlagObserver(
+folly::observer::Observer<std::optional<T>> getFlagObserver(
     std::string_view name);
 
 template <>
-inline folly::observer::Observer<folly::Optional<bool>> getFlagObserver<bool>(
+inline folly::observer::Observer<std::optional<bool>> getFlagObserver<bool>(
     std::string_view name) {
   return getFlagsBackend().getFlagObserverBool(name);
 }
 
 template <>
-inline folly::observer::Observer<folly::Optional<int64_t>>
+inline folly::observer::Observer<std::optional<int64_t>>
 getFlagObserver<int64_t>(std::string_view name) {
   return getFlagsBackend().getFlagObserverInt64(name);
 }
 
 template <>
-inline folly::observer::Observer<folly::Optional<std::string>>
+inline folly::observer::Observer<std::optional<std::string>>
 getFlagObserver<std::string>(std::string_view name) {
   return getFlagsBackend().getFlagObserverString(name);
 }
@@ -92,7 +92,7 @@ class FlagWrapper {
   }
 
   void unmock() {
-    mockObservable_.setValue(folly::none);
+    mockObservable_.setValue(std::nullopt);
     folly::observer_detail::ObserverManager::waitForAllUpdates();
   }
 
@@ -145,8 +145,8 @@ class FlagWrapper {
   folly::DelayedInit<ReadOptimizedObserver<T>> observer_;
   std::string_view name_;
   const T defaultValue_;
-  folly::observer::SimpleObservable<folly::Optional<T>> mockObservable_{
-      folly::none};
+  folly::observer::SimpleObservable<std::optional<T>> mockObservable_{
+      std::nullopt};
 };
 
 } // namespace detail

@@ -27,7 +27,7 @@ namespace {
 
 class FlagsBackendDummy : public apache::thrift::detail::FlagsBackend {
  public:
-  folly::observer::Observer<folly::Optional<bool>> getFlagObserverBool(
+  folly::observer::Observer<std::optional<bool>> getFlagObserverBool(
       std::string_view name) override {
     static const folly::Indestructible<std::map<std::string, bool>>
         oss_defaults = std::map<std::string, bool>{
@@ -36,21 +36,21 @@ class FlagsBackendDummy : public apache::thrift::detail::FlagsBackend {
             {"server_header_reject_unframed", false},
             {"server_header_reject_all", false}};
     return folly::observer::makeObserver(
-        [name = std::string(name)]() -> folly::Optional<bool> {
-          return folly::get_optional(*oss_defaults, name);
+        [name = std::string(name)]() -> std::optional<bool> {
+          return folly::get_optional<std::optional>(*oss_defaults, name);
         });
   }
 
-  folly::observer::Observer<folly::Optional<int64_t>> getFlagObserverInt64(
+  folly::observer::Observer<std::optional<int64_t>> getFlagObserverInt64(
       std::string_view) override {
     return folly::observer::makeObserver(
-        []() -> folly::Optional<int64_t> { return folly::none; });
+        []() -> std::optional<int64_t> { return std::nullopt; });
   }
 
-  folly::observer::Observer<folly::Optional<std::string>> getFlagObserverString(
+  folly::observer::Observer<std::optional<std::string>> getFlagObserverString(
       std::string_view) override {
     return folly::observer::makeObserver(
-        []() -> folly::Optional<std::string> { return folly::none; });
+        []() -> std::optional<std::string> { return std::nullopt; });
   }
 };
 } // namespace

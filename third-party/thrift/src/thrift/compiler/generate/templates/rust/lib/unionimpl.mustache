@@ -106,6 +106,17 @@ where
     }
 }
 
+impl {{struct:rust_name}} {
+    /// Return current union variant name as a tuple of (Rust name, original name).
+    pub fn variant_name(&self) -> Option<(&'static str, &'static str)> {
+        match self {
+            {{#struct:fields}}
+            Self::{{field:rust_name}}(_) => Some(("{{field:rust_name}}", "{{field:name}}")),
+            {{/struct:fields}}
+            Self::UnknownField(_) => None,
+        }
+    }
+}
 {{#program:rust_gen_native_metadata?}}
 {{>lib/metadata/struct}}
 {{/program:rust_gen_native_metadata?}}

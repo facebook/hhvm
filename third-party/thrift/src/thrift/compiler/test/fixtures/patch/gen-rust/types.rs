@@ -1107,6 +1107,15 @@ where
     }
 }
 
+impl InnerUnion {
+    /// Return current union variant name as a tuple of (Rust name, original name).
+    pub fn variant_name(&self) -> Option<(&'static str, &'static str)> {
+        match self {
+            Self::innerOption(_) => Some(("innerOption", "innerOption")),
+            Self::UnknownField(_) => None,
+        }
+    }
+}
 
 impl ::fbthrift::metadata::ThriftAnnotations for InnerUnion {
     fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
@@ -1220,6 +1229,17 @@ where
     }
 }
 
+impl MyUnion {
+    /// Return current union variant name as a tuple of (Rust name, original name).
+    pub fn variant_name(&self) -> Option<(&'static str, &'static str)> {
+        match self {
+            Self::option1(_) => Some(("option1", "option1")),
+            Self::option2(_) => Some(("option2", "option2")),
+            Self::option3(_) => Some(("option3", "option3")),
+            Self::UnknownField(_) => None,
+        }
+    }
+}
 
 impl ::fbthrift::metadata::ThriftAnnotations for MyUnion {
     fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {

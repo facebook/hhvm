@@ -1456,6 +1456,19 @@ where
     }
 }
 
+impl Baz {
+    /// Return current union variant name as a tuple of (Rust name, original name).
+    pub fn variant_name(&self) -> Option<(&'static str, &'static str)> {
+        match self {
+            Self::intField(_) => Some(("intField", "intField")),
+            Self::setField(_) => Some(("setField", "setField")),
+            Self::mapField(_) => Some(("mapField", "mapField")),
+            Self::binaryField(_) => Some(("binaryField", "binaryField")),
+            Self::longField(_) => Some(("longField", "longField")),
+            Self::UnknownField(_) => None,
+        }
+    }
+}
 
 impl ::fbthrift::metadata::ThriftAnnotations for Baz {
     fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
@@ -4031,6 +4044,16 @@ where
     }
 }
 
+impl AdaptTestUnion {
+    /// Return current union variant name as a tuple of (Rust name, original name).
+    pub fn variant_name(&self) -> Option<(&'static str, &'static str)> {
+        match self {
+            Self::delay(_) => Some(("delay", "delay")),
+            Self::custom(_) => Some(("custom", "custom")),
+            Self::UnknownField(_) => None,
+        }
+    }
+}
 
 impl ::fbthrift::metadata::ThriftAnnotations for AdaptTestUnion {
     fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {

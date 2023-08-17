@@ -689,6 +689,18 @@ where
     }
 }
 
+impl MyUnion {
+    /// Return current union variant name as a tuple of (Rust name, original name).
+    pub fn variant_name(&self) -> Option<(&'static str, &'static str)> {
+        match self {
+            Self::myEnum(_) => Some(("myEnum", "myEnum")),
+            Self::myStruct(_) => Some(("myStruct", "myStruct")),
+            Self::myDataItem(_) => Some(("myDataItem", "myDataItem")),
+            Self::floatSet(_) => Some(("floatSet", "floatSet")),
+            Self::UnknownField(_) => None,
+        }
+    }
+}
 
 impl ::fbthrift::metadata::ThriftAnnotations for MyUnion {
     fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
@@ -919,6 +931,15 @@ where
     }
 }
 
+impl UnionToBeRenamed {
+    /// Return current union variant name as a tuple of (Rust name, original name).
+    pub fn variant_name(&self) -> Option<(&'static str, &'static str)> {
+        match self {
+            Self::reserved_field(_) => Some(("reserved_field", "reserved_field")),
+            Self::UnknownField(_) => None,
+        }
+    }
+}
 
 impl ::fbthrift::metadata::ThriftAnnotations for UnionToBeRenamed {
     fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {

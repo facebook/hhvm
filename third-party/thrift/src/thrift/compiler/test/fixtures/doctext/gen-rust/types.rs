@@ -364,6 +364,16 @@ where
     }
 }
 
+impl U {
+    /// Return current union variant name as a tuple of (Rust name, original name).
+    pub fn variant_name(&self) -> Option<(&'static str, &'static str)> {
+        match self {
+            Self::i(_) => Some(("i", "i")),
+            Self::s(_) => Some(("s", "s")),
+            Self::UnknownField(_) => None,
+        }
+    }
+}
 
 impl ::fbthrift::metadata::ThriftAnnotations for U {
     fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {

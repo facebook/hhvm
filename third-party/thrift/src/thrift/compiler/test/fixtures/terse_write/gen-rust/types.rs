@@ -594,6 +594,28 @@ where
     }
 }
 
+impl MyUnion {
+    /// Return current union variant name as a tuple of (Rust name, original name).
+    pub fn variant_name(&self) -> Option<(&'static str, &'static str)> {
+        match self {
+            Self::bool_field(_) => Some(("bool_field", "bool_field")),
+            Self::byte_field(_) => Some(("byte_field", "byte_field")),
+            Self::short_field(_) => Some(("short_field", "short_field")),
+            Self::int_field(_) => Some(("int_field", "int_field")),
+            Self::long_field(_) => Some(("long_field", "long_field")),
+            Self::float_field(_) => Some(("float_field", "float_field")),
+            Self::double_field(_) => Some(("double_field", "double_field")),
+            Self::string_field(_) => Some(("string_field", "string_field")),
+            Self::binary_field(_) => Some(("binary_field", "binary_field")),
+            Self::enum_field(_) => Some(("enum_field", "enum_field")),
+            Self::list_field(_) => Some(("list_field", "list_field")),
+            Self::set_field(_) => Some(("set_field", "set_field")),
+            Self::map_field(_) => Some(("map_field", "map_field")),
+            Self::struct_field(_) => Some(("struct_field", "struct_field")),
+            Self::UnknownField(_) => None,
+        }
+    }
+}
 
 impl ::fbthrift::metadata::ThriftAnnotations for MyUnion {
     fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {

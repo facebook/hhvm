@@ -192,6 +192,20 @@ where
     }
 }
 
+impl ComplexUnion {
+    /// Return current union variant name as a tuple of (Rust name, original name).
+    pub fn variant_name(&self) -> Option<(&'static str, &'static str)> {
+        match self {
+            Self::intValue(_) => Some(("intValue", "intValue")),
+            Self::stringValue(_) => Some(("stringValue", "stringValue")),
+            Self::intListValue(_) => Some(("intListValue", "intListValue")),
+            Self::stringListValue(_) => Some(("stringListValue", "stringListValue")),
+            Self::typedefValue(_) => Some(("typedefValue", "typedefValue")),
+            Self::stringRef(_) => Some(("stringRef", "stringRef")),
+            Self::UnknownField(_) => None,
+        }
+    }
+}
 
 impl ::fbthrift::metadata::ThriftAnnotations for ComplexUnion {
     fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
@@ -309,6 +323,16 @@ where
     }
 }
 
+impl ListUnion {
+    /// Return current union variant name as a tuple of (Rust name, original name).
+    pub fn variant_name(&self) -> Option<(&'static str, &'static str)> {
+        match self {
+            Self::intListValue(_) => Some(("intListValue", "intListValue")),
+            Self::stringListValue(_) => Some(("stringListValue", "stringListValue")),
+            Self::UnknownField(_) => None,
+        }
+    }
+}
 
 impl ::fbthrift::metadata::ThriftAnnotations for ListUnion {
     fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
@@ -408,6 +432,16 @@ where
     }
 }
 
+impl DataUnion {
+    /// Return current union variant name as a tuple of (Rust name, original name).
+    pub fn variant_name(&self) -> Option<(&'static str, &'static str)> {
+        match self {
+            Self::binaryData(_) => Some(("binaryData", "binaryData")),
+            Self::stringData(_) => Some(("stringData", "stringData")),
+            Self::UnknownField(_) => None,
+        }
+    }
+}
 
 impl ::fbthrift::metadata::ThriftAnnotations for DataUnion {
     fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
@@ -622,6 +656,16 @@ where
     }
 }
 
+impl ValUnion {
+    /// Return current union variant name as a tuple of (Rust name, original name).
+    pub fn variant_name(&self) -> Option<(&'static str, &'static str)> {
+        match self {
+            Self::v1(_) => Some(("v1", "v1")),
+            Self::v2(_) => Some(("v2", "v2")),
+            Self::UnknownField(_) => None,
+        }
+    }
+}
 
 impl ::fbthrift::metadata::ThriftAnnotations for ValUnion {
     fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
@@ -721,6 +765,16 @@ where
     }
 }
 
+impl VirtualComplexUnion {
+    /// Return current union variant name as a tuple of (Rust name, original name).
+    pub fn variant_name(&self) -> Option<(&'static str, &'static str)> {
+        match self {
+            Self::thingOne(_) => Some(("thingOne", "thingOne")),
+            Self::thingTwo(_) => Some(("thingTwo", "thingTwo")),
+            Self::UnknownField(_) => None,
+        }
+    }
+}
 
 impl ::fbthrift::metadata::ThriftAnnotations for VirtualComplexUnion {
     fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
@@ -903,6 +957,15 @@ where
     }
 }
 
+impl NonCopyableUnion {
+    /// Return current union variant name as a tuple of (Rust name, original name).
+    pub fn variant_name(&self) -> Option<(&'static str, &'static str)> {
+        match self {
+            Self::s(_) => Some(("s", "s")),
+            Self::UnknownField(_) => None,
+        }
+    }
+}
 
 impl ::fbthrift::metadata::ThriftAnnotations for NonCopyableUnion {
     fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {

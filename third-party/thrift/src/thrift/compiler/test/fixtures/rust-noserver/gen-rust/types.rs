@@ -441,6 +441,17 @@ where
     }
 }
 
+impl MyUnion {
+    /// Return current union variant name as a tuple of (Rust name, original name).
+    pub fn variant_name(&self) -> Option<(&'static str, &'static str)> {
+        match self {
+            Self::myEnum(_) => Some(("myEnum", "myEnum")),
+            Self::myStruct(_) => Some(("myStruct", "myStruct")),
+            Self::myDataItem(_) => Some(("myDataItem", "myDataItem")),
+            Self::UnknownField(_) => None,
+        }
+    }
+}
 
 impl ::fbthrift::metadata::ThriftAnnotations for MyUnion {
     fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {

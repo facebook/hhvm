@@ -547,6 +547,12 @@ void MacroAssembler::LoadStoreMacro(const CPURegister& rt,
     Register temp = AppropriateTempFor(addr.base());
     Mov(temp, addr.offset());
     LoadStore(rt, MemOperand(addr.base(), temp), op);
+  } else if (addr.IsRegisterOffset()
+             && addr.shift_amount() != 0
+             && addr.shift_amount() != static_cast<unsigned>(CalcLSDataSize(op))) {
+    Register temp = AppropriateTempFor(addr.regoffset());
+    EmitShift(temp, addr.regoffset(), addr.shift(), addr.shift_amount());
+    LoadStore(rt, MemOperand(addr.base(), temp), op);
   } else if (addr.IsPostIndex() && !IsImmLSUnscaled(offset)) {
     // Post-index beyond unscaled addressing range.
     LoadStore(rt, MemOperand(addr.base()), op);

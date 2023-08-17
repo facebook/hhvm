@@ -30,7 +30,6 @@ from thrift.py3.types cimport (
     map_iter as __map_iter,
     map_contains as __map_contains,
     map_getitem as __map_getitem,
-    py3_to_python as __py3_to_python,
     reference_shared_ptr as __reference_shared_ptr,
     get_field_name_by_index as __get_field_name_by_index,
     reset_field as __reset_field,
@@ -159,6 +158,7 @@ cdef class InitialResponse(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cInitialResponse](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -273,6 +273,7 @@ cdef class FinalResponse(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cFinalResponse](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -389,6 +390,7 @@ cdef class SinkPayload(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cSinkPayload](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -504,6 +506,7 @@ cdef class CompatibleWithKeywordSink(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cCompatibleWithKeywordSink](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -609,6 +612,7 @@ cdef class InitialException(thrift.py3.exceptions.GeneratedError):
         with nogil:
             needed = serializer.cdeserialize[cInitialException](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -716,6 +720,7 @@ cdef class SinkException1(thrift.py3.exceptions.GeneratedError):
             needed = serializer.cdeserialize[cSinkException1](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -821,6 +826,7 @@ cdef class SinkException2(thrift.py3.exceptions.GeneratedError):
         with nogil:
             needed = serializer.cdeserialize[cSinkException2](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib

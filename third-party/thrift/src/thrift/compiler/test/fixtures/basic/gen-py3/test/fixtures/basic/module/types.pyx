@@ -30,7 +30,6 @@ from thrift.py3.types cimport (
     map_iter as __map_iter,
     map_contains as __map_contains,
     map_getitem as __map_getitem,
-    py3_to_python as __py3_to_python,
     reference_shared_ptr as __reference_shared_ptr,
     get_field_name_by_index as __get_field_name_by_index,
     reset_field as __reset_field,
@@ -415,6 +414,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cMyStruct](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -513,6 +513,7 @@ cdef class MyDataItem(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cMyDataItem](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -700,6 +701,7 @@ cdef class MyUnion(thrift.py3.types.Union):
         self._load_cache()
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -814,6 +816,7 @@ cdef class ReservedKeyword(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cReservedKeyword](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -956,6 +959,7 @@ cdef class UnionToBeRenamed(thrift.py3.types.Union):
         # force a cache reload since the underlying data's changed
         self._load_cache()
         return needed
+
 
     def _to_python(self):
         import importlib

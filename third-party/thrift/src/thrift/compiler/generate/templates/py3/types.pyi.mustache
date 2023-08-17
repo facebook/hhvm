@@ -115,6 +115,10 @@ class {{struct:name}}({{> types/python_struct_class}}, _typing.Hashable):
     def type(self) -> "{{struct:name}}.Type": ...
     {{/struct:union?}}
 
+    {{#program:python_capi_converter?}}
+    @staticmethod
+    def from_python(obj: "{{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_types.{{struct:name}}") -> _typing.Self: ...   # type: ignore
+    {{/program:python_capi_converter?}}
     {{!TODO: accommodate root_module_prefix}}
     def _to_python(self) -> "{{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_types.{{struct:name}}": ...   # type: ignore
     def _to_py3(self) -> {{struct:name}}: ...

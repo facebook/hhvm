@@ -59,7 +59,10 @@ from thrift.py3.types cimport (
     map_iter as __map_iter,
     map_contains as __map_contains,
     map_getitem as __map_getitem,
+    {{#program:python_capi_converter?}}
     py3_to_python as __py3_to_python,
+    python_to_py3 as __python_to_py3,
+    {{/program:python_capi_converter?}}
     reference_shared_ptr as __reference_shared_ptr,
     get_field_name_by_index as __get_field_name_by_index,
     reset_field as __reset_field,
@@ -450,6 +453,13 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
         self._load_cache()
         {{/struct:union?}}
         return needed
+
+    {{#program:python_capi_converter?}}
+    @staticmethod
+    def from_python(object obj):
+        cdef shared_ptr[c{{struct:name}}] cpp_obj = __python_to_py3[c{{struct:name}}](obj)
+        return {{struct:name}}._fbthrift_create(cmove(cpp_obj))
+    {{/program:python_capi_converter?}}
 
     def _to_python(self):
     {{#program:python_capi_converter?}}

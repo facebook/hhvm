@@ -30,7 +30,6 @@ from thrift.py3.types cimport (
     map_iter as __map_iter,
     map_contains as __map_contains,
     map_getitem as __map_getitem,
-    py3_to_python as __py3_to_python,
     reference_shared_ptr as __reference_shared_ptr,
     get_field_name_by_index as __get_field_name_by_index,
     reset_field as __reset_field,
@@ -153,6 +152,7 @@ cdef class Fiery(thrift.py3.exceptions.GeneratedError):
             needed = serializer.cdeserialize[cFiery](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -263,6 +263,7 @@ cdef class Serious(thrift.py3.exceptions.GeneratedError):
         with nogil:
             needed = serializer.cdeserialize[cSerious](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -382,6 +383,7 @@ cdef class ComplexFieldNames(thrift.py3.exceptions.GeneratedError):
             needed = serializer.cdeserialize[cComplexFieldNames](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -499,6 +501,7 @@ cdef class CustomFieldNames(thrift.py3.exceptions.GeneratedError):
         with nogil:
             needed = serializer.cdeserialize[cCustomFieldNames](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -618,6 +621,7 @@ cdef class ExceptionWithPrimitiveField(thrift.py3.exceptions.GeneratedError):
             needed = serializer.cdeserialize[cExceptionWithPrimitiveField](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -733,6 +737,7 @@ cdef class ExceptionWithStructuredAnnotation(thrift.py3.exceptions.GeneratedErro
             needed = serializer.cdeserialize[cExceptionWithStructuredAnnotation](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -829,6 +834,7 @@ cdef class Banal(thrift.py3.exceptions.GeneratedError):
         with nogil:
             needed = serializer.cdeserialize[cBanal](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib

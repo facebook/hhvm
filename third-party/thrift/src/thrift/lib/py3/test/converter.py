@@ -188,8 +188,8 @@ class PyDeprecatedToPy3ConverterTest(unittest.TestCase):
 
 
 class PythonToPy3ConverterTest(unittest.TestCase):
-    def test_simple(self) -> None:
-        simple = python_types.Simple(
+    def make_simple_python(self) -> python_types.Simple:
+        return python_types.Simple(
             intField=42,
             strField="simple",
             intList=[1, 2, 3],
@@ -197,7 +197,9 @@ class PythonToPy3ConverterTest(unittest.TestCase):
             strToIntMap={"one": 1, "two": 2},
             color=python_types.Color.GREEN,
             name_="myname",
-        )._to_py3()
+        )
+
+    def assert_simple(self, simple: py3_types.Simple) -> None:
         self.assertEqual(simple.intField, 42)
         self.assertEqual(simple.strField, "simple")
         self.assertEqual(simple.intList, [1, 2, 3])
@@ -208,17 +210,15 @@ class PythonToPy3ConverterTest(unittest.TestCase):
         self.assertIsInstance(simple.empty, BadEnum)
         self.assertEqual(int(simple.empty), 0)
 
-    def test_nested(self) -> None:
-        nested = python_types.Nested(
-            simpleField=python_types.Simple(
-                intField=42,
-                strField="simple",
-                intList=[1, 2, 3],
-                strSet={"hello", "world"},
-                strToIntMap={"one": 1, "two": 2},
-                color=python_types.Color.NONE,
-                name_="myname",
-            ),
+    def test_simple(self) -> None:
+        self.assert_simple(self.make_simple_python()._to_py3())
+
+    def test_simple_capi(self) -> None:
+        self.assert_simple(py3_types.Simple.from_python(self.make_simple_python()))
+
+    def make_nested_python(self) -> python_types.Nested:
+        return python_types.Nested(
+            simpleField=self.make_simple_python(),
             simpleList=[
                 python_types.Simple(
                     intField=200,
@@ -250,7 +250,10 @@ class PythonToPy3ConverterTest(unittest.TestCase):
                     name_="myname",
                 )
             },
-        )._to_py3()
+        )
+
+    def test_nested(self) -> None:
+        nested = self.make_nested_python()._to_py3()
         self.assertEqual(nested.simpleField.intField, 42)
         self.assertEqual(nested.simpleList[0].intList, [4, 5, 6])
         self.assertEqual(nested.simpleList[1].strSet, {"carry", "on"})
@@ -258,8 +261,19 @@ class PythonToPy3ConverterTest(unittest.TestCase):
             nested.colorToSimpleMap[py3_types.Color.BLUE].color, py3_types.Color.BLUE
         )
 
+    def test_nested_capi(self) -> None:
+        self.assertEqual(
+            self.make_nested_python()._to_py3(),
+            py3_types.Nested.from_python(self.make_nested_python()),
+        )
+
     def test_simple_union(self) -> None:
         simple_union = python_types.Union(intField=42)._to_py3()
+        self.assertEqual(simple_union.type, py3_types.Union.Type.intField)
+        self.assertEqual(simple_union.value, 42)
+
+    def test_simple_union_capi(self) -> None:
+        simple_union = py3_types.Union.from_python(python_types.Union(intField=42))
         self.assertEqual(simple_union.type, py3_types.Union.Type.intField)
         self.assertEqual(simple_union.value, 42)
 
@@ -268,22 +282,36 @@ class PythonToPy3ConverterTest(unittest.TestCase):
         self.assertEqual(simple_union.type, py3_types.Union.Type.name_)
         self.assertEqual(simple_union.value, "myname")
 
+    def test_union_with_py3_name_annotation_capi(self) -> None:
+        simple_union = py3_types.Union.from_python(python_types.Union(name_="myname"))
+        self.assertEqual(simple_union.type, py3_types.Union.Type.name_)
+        self.assertEqual(simple_union.value, "myname")
+
     def test_union_with_containers(self) -> None:
         union_with_list = python_types.Union(intList=[1, 2, 3])._to_py3()
         self.assertEqual(union_with_list.type, py3_types.Union.Type.intList)
         self.assertEqual(union_with_list.value, [1, 2, 3])
 
+    def test_union_with_containers_capi(self) -> None:
+        union_with_list = py3_types.Union.from_python(
+            python_types.Union(intList=[1, 2, 3])
+        )
+        self.assertEqual(union_with_list.type, py3_types.Union.Type.intList)
+        self.assertEqual(union_with_list.value, [1, 2, 3])
+
     def test_complex_union(self) -> None:
         complex_union = python_types.Union(
-            simple_=python_types.Simple(
-                intField=42,
-                strField="simple",
-                intList=[1, 2, 3],
-                strSet={"hello", "world"},
-                strToIntMap={"one": 1, "two": 2},
-                color=python_types.Color.NONE,
-            )
+            simple_=self.make_simple_python(),
         )._to_py3()
+        self.assertEqual(complex_union.type, py3_types.Union.Type.simple_)
+        self.assertEqual(complex_union.simple_.intField, 42)
+
+    def test_complex_union_capi(self) -> None:
+        complex_union = py3_types.Union.from_python(
+            python_types.Union(
+                simple_=self.make_simple_python(),
+            )
+        )
         self.assertEqual(complex_union.type, py3_types.Union.Type.simple_)
         self.assertEqual(complex_union.simple_.intField, 42)
 

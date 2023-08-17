@@ -30,7 +30,6 @@ from thrift.py3.types cimport (
     map_iter as __map_iter,
     map_contains as __map_contains,
     map_getitem as __map_getitem,
-    py3_to_python as __py3_to_python,
     reference_shared_ptr as __reference_shared_ptr,
     get_field_name_by_index as __get_field_name_by_index,
     reset_field as __reset_field,
@@ -388,6 +387,7 @@ cdef class MyUnion(thrift.py3.types.Union):
         self._load_cache()
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -532,6 +532,7 @@ cdef class NonTriviallyDestructibleUnion(thrift.py3.types.Union):
         # force a cache reload since the underlying data's changed
         self._load_cache()
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -747,6 +748,7 @@ cdef class MyField(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cMyField](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -889,6 +891,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cMyStruct](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -1030,6 +1033,7 @@ cdef class StructWithUnion(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cStructWithUnion](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -1148,6 +1152,7 @@ cdef class RecursiveStruct(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cRecursiveStruct](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -1327,6 +1332,7 @@ cdef class StructWithContainers(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cStructWithContainers](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -1469,6 +1475,7 @@ cdef class StructWithSharedConst(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cStructWithSharedConst](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -1567,6 +1574,7 @@ cdef class Empty(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cEmpty](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -1709,6 +1717,7 @@ cdef class StructWithRef(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cStructWithRef](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -1853,6 +1862,7 @@ cdef class StructWithBox(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cStructWithBox](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -1981,6 +1991,7 @@ cdef class StructWithInternBox(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cStructWithInternBox](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -2106,6 +2117,7 @@ cdef class StructWithTerseInternBox(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cStructWithTerseInternBox](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -2235,6 +2247,7 @@ cdef class AdaptedStructWithInternBox(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cAdaptedStructWithInternBox](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -2360,6 +2373,7 @@ cdef class AdaptedStructWithTerseInternBox(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cAdaptedStructWithTerseInternBox](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -2503,6 +2517,7 @@ cdef class StructWithRefTypeUnique(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cStructWithRefTypeUnique](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -2644,6 +2659,7 @@ cdef class StructWithRefTypeShared(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cStructWithRefTypeShared](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -2787,6 +2803,7 @@ cdef class StructWithRefTypeSharedConst(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cStructWithRefTypeSharedConst](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -2904,6 +2921,7 @@ cdef class StructWithRefAndAnnotCppNoexceptMoveCtor(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cStructWithRefAndAnnotCppNoexceptMoveCtor](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -3070,6 +3088,7 @@ cdef class StructWithString(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cStructWithString](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib

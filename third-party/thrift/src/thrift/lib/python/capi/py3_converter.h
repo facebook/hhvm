@@ -19,6 +19,7 @@
 #include <memory>
 
 #include <thrift/lib/python/capi/constructor.h>
+#include <thrift/lib/python/capi/extractor.h>
 
 namespace apache {
 namespace thrift {
@@ -29,6 +30,18 @@ template <typename CppThrift>
 PyObject* py3_to_python(std::shared_ptr<CppThrift> cppThrift) {
   if (cppThrift) {
     return Constructor<CppThrift>{}(*cppThrift);
+  }
+  return nullptr;
+}
+
+template <typename CppThrift>
+std::shared_ptr<CppThrift> python_to_py3(PyObject* obj) {
+  auto extracted = Extractor<CppThrift>{}(obj);
+  if (extracted.hasValue()) {
+    return std::make_shared<CppThrift>(std::move(*extracted));
+  }
+  if (!PyErr_Occurred()) {
+    PyErr_SetString(PyExc_RuntimeError, extracted.error().data());
   }
   return nullptr;
 }

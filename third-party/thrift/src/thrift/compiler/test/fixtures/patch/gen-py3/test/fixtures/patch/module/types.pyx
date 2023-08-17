@@ -30,7 +30,6 @@ from thrift.py3.types cimport (
     map_iter as __map_iter,
     map_contains as __map_contains,
     map_getitem as __map_getitem,
-    py3_to_python as __py3_to_python,
     reference_shared_ptr as __reference_shared_ptr,
     get_field_name_by_index as __get_field_name_by_index,
     reset_field as __reset_field,
@@ -293,6 +292,7 @@ cdef class MyData(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cMyData](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -414,6 +414,7 @@ cdef class MyDataWithCustomDefault(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cMyDataWithCustomDefault](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -546,6 +547,7 @@ cdef class InnerUnion(thrift.py3.types.Union):
         # force a cache reload since the underlying data's changed
         self._load_cache()
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -724,6 +726,7 @@ cdef class MyUnion(thrift.py3.types.Union):
         # force a cache reload since the underlying data's changed
         self._load_cache()
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -1172,6 +1175,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cMyStruct](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -1270,6 +1274,7 @@ cdef class LateDefStruct(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cLateDefStruct](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -1386,6 +1391,7 @@ cdef class Recursive(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cRecursive](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -1505,6 +1511,7 @@ cdef class Bar(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cBar](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -1620,6 +1627,7 @@ cdef class Loop(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cLoop](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib

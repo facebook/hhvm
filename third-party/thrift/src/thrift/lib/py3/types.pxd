@@ -280,3 +280,4 @@ cdef extern from "thrift/lib/cpp2/FieldRef.h" namespace "apache::thrift" nogil:
 # Use python-types-capi to serialize of marshal _cpp_obj to thrift-python
 cdef extern from "thrift/lib/python/capi/py3_converter.h" namespace "apache::thrift::python::capi":
     cdef object py3_to_python[T](shared_ptr[T] cppThrift)
+    cdef shared_ptr[T] python_to_py3[T](object obj) except *

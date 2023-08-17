@@ -30,7 +30,6 @@ from thrift.py3.types cimport (
     map_iter as __map_iter,
     map_contains as __map_contains,
     map_getitem as __map_getitem,
-    py3_to_python as __py3_to_python,
     reference_shared_ptr as __reference_shared_ptr,
     get_field_name_by_index as __get_field_name_by_index,
     reset_field as __reset_field,
@@ -483,6 +482,7 @@ cdef class ComplexUnion(thrift.py3.types.Union):
         self._load_cache()
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -632,6 +632,7 @@ cdef class ListUnion(thrift.py3.types.Union):
         # force a cache reload since the underlying data's changed
         self._load_cache()
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -783,6 +784,7 @@ cdef class DataUnion(thrift.py3.types.Union):
         self._load_cache()
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -917,6 +919,7 @@ cdef class Val(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cVal](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -1068,6 +1071,7 @@ cdef class ValUnion(thrift.py3.types.Union):
         self._load_cache()
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -1218,6 +1222,7 @@ cdef class VirtualComplexUnion(thrift.py3.types.Union):
         self._load_cache()
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -1319,6 +1324,7 @@ cdef class NonCopyableStruct(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cNonCopyableStruct](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -1448,6 +1454,7 @@ cdef class NonCopyableUnion(thrift.py3.types.Union):
         # force a cache reload since the underlying data's changed
         self._load_cache()
         return needed
+
 
     def _to_python(self):
         import importlib

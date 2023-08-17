@@ -30,7 +30,6 @@ from thrift.py3.types cimport (
     map_iter as __map_iter,
     map_contains as __map_contains,
     map_getitem as __map_getitem,
-    py3_to_python as __py3_to_python,
     reference_shared_ptr as __reference_shared_ptr,
     get_field_name_by_index as __get_field_name_by_index,
     reset_field as __reset_field,
@@ -310,6 +309,7 @@ cdef class empty_struct(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cempty_struct](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -424,6 +424,7 @@ cdef class decorated_struct(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cdecorated_struct](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -619,6 +620,7 @@ cdef class ContainerStruct(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cContainerStruct](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -736,6 +738,7 @@ cdef class CppTypeStruct(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cCppTypeStruct](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -850,6 +853,7 @@ cdef class VirtualStruct(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cVirtualStruct](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -979,6 +983,7 @@ cdef class MyStructWithForwardRefEnum(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cMyStructWithForwardRefEnum](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -1102,6 +1107,7 @@ cdef class TrivialNumeric(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cTrivialNumeric](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -1229,6 +1235,7 @@ cdef class TrivialNestedWithDefault(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cTrivialNestedWithDefault](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -1355,6 +1362,7 @@ cdef class ComplexString(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cComplexString](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -1480,6 +1488,7 @@ cdef class ComplexNestedWithDefault(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cComplexNestedWithDefault](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -1632,6 +1641,7 @@ cdef class MinPadding(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cMinPadding](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -1778,6 +1788,7 @@ cdef class MinPaddingWithCustomType(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cMinPaddingWithCustomType](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -1917,6 +1928,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cMyStruct](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -2010,6 +2022,7 @@ cdef class MyDataItem(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cMyDataItem](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -2125,6 +2138,7 @@ cdef class Renaming(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cRenaming](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -2251,6 +2265,7 @@ cdef class AnnotatedTypes(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cAnnotatedTypes](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -2383,6 +2398,7 @@ cdef class ForwardUsageRoot(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cForwardUsageRoot](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -2501,6 +2517,7 @@ cdef class ForwardUsageStruct(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cForwardUsageStruct](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -2618,6 +2635,7 @@ cdef class ForwardUsageByRef(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cForwardUsageByRef](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -2738,6 +2756,7 @@ cdef class IncompleteMap(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cIncompleteMap](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -2836,6 +2855,7 @@ cdef class IncompleteMapDep(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cIncompleteMapDep](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -2956,6 +2976,7 @@ cdef class CompleteMap(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cCompleteMap](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -3054,6 +3075,7 @@ cdef class CompleteMapDep(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cCompleteMapDep](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -3174,6 +3196,7 @@ cdef class IncompleteList(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cIncompleteList](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -3272,6 +3295,7 @@ cdef class IncompleteListDep(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cIncompleteListDep](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -3392,6 +3416,7 @@ cdef class CompleteList(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cCompleteList](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -3490,6 +3515,7 @@ cdef class CompleteListDep(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cCompleteListDep](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -3610,6 +3636,7 @@ cdef class AdaptedList(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cAdaptedList](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -3728,6 +3755,7 @@ cdef class DependentAdaptedList(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cDependentAdaptedList](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -3910,6 +3938,7 @@ cdef class AllocatorAware(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cAllocatorAware](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -4035,6 +4064,7 @@ cdef class AllocatorAware2(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cAllocatorAware2](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -4169,6 +4199,7 @@ cdef class TypedefStruct(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cTypedefStruct](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -4283,6 +4314,7 @@ cdef class StructWithDoubleUnderscores(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cStructWithDoubleUnderscores](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib

@@ -30,7 +30,6 @@ from thrift.py3.types cimport (
     map_iter as __map_iter,
     map_contains as __map_contains,
     map_getitem as __map_getitem,
-    py3_to_python as __py3_to_python,
     reference_shared_ptr as __reference_shared_ptr,
     get_field_name_by_index as __get_field_name_by_index,
     reset_field as __reset_field,
@@ -467,6 +466,7 @@ cdef class Empty(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cEmpty](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -584,6 +584,7 @@ cdef class ASimpleStruct(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cASimpleStruct](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -698,6 +699,7 @@ cdef class ASimpleStructNoexcept(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cASimpleStructNoexcept](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -912,6 +914,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cMyStruct](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -1071,6 +1074,7 @@ cdef class SimpleUnion(thrift.py3.types.Union):
         # force a cache reload since the underlying data's changed
         self._load_cache()
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -1750,6 +1754,7 @@ cdef class ComplexUnion(thrift.py3.types.Union):
         self._load_cache()
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -2027,6 +2032,7 @@ cdef class AnException(thrift.py3.exceptions.GeneratedError):
             needed = serializer.cdeserialize[cAnException](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -2150,6 +2156,7 @@ cdef class AnotherException(thrift.py3.exceptions.GeneratedError):
         with nogil:
             needed = serializer.cdeserialize[cAnotherException](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -2738,6 +2745,7 @@ cdef class containerStruct(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[ccontainerStruct](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -2886,6 +2894,7 @@ cdef class MyIncludedStruct(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cMyIncludedStruct](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -3440,6 +3449,7 @@ cdef class AnnotatedStruct(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cAnnotatedStruct](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -3568,6 +3578,7 @@ cdef class ComplexContainerStruct(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cComplexContainerStruct](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -3691,6 +3702,7 @@ cdef class FloatStruct(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cFloatStruct](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -3872,6 +3884,7 @@ cdef class FloatUnion(thrift.py3.types.Union):
         self._load_cache()
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -3986,6 +3999,7 @@ cdef class AllRequiredNoExceptMoveCtrStruct(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cAllRequiredNoExceptMoveCtrStruct](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib

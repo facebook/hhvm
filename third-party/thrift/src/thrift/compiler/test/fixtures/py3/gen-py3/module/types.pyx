@@ -30,7 +30,6 @@ from thrift.py3.types cimport (
     map_iter as __map_iter,
     map_contains as __map_contains,
     map_getitem as __map_getitem,
-    py3_to_python as __py3_to_python,
     reference_shared_ptr as __reference_shared_ptr,
     get_field_name_by_index as __get_field_name_by_index,
     reset_field as __reset_field,
@@ -352,6 +351,7 @@ cdef class SimpleException(thrift.py3.exceptions.GeneratedError):
             needed = serializer.cdeserialize[cSimpleException](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -472,6 +472,7 @@ cdef class OptionalRefStruct(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cOptionalRefStruct](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -652,6 +653,7 @@ cdef class SimpleStruct(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cSimpleStruct](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -755,6 +757,7 @@ cdef class HiddenTypeFieldsStruct(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cHiddenTypeFieldsStruct](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -949,6 +952,7 @@ cdef class ComplexStruct(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cComplexStruct](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -1076,6 +1080,7 @@ cdef class BinaryUnion(thrift.py3.types.Union):
         self._load_cache()
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -1187,6 +1192,7 @@ cdef class BinaryUnionStruct(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cBinaryUnionStruct](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib

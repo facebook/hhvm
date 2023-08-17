@@ -30,7 +30,6 @@ from thrift.py3.types cimport (
     map_iter as __map_iter,
     map_contains as __map_contains,
     map_getitem as __map_getitem,
-    py3_to_python as __py3_to_python,
     reference_shared_ptr as __reference_shared_ptr,
     get_field_name_by_index as __get_field_name_by_index,
     reset_field as __reset_field,
@@ -436,6 +435,7 @@ cdef class Internship(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cInternship](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -560,6 +560,7 @@ cdef class Range(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cRange](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -683,6 +684,7 @@ cdef class struct1(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cstruct1](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -830,6 +832,7 @@ cdef class struct2(thrift.py3.types.Struct):
             needed = serializer.cdeserialize[cstruct2](buf, self._cpp_obj.get(), proto)
         return needed
 
+
     def _to_python(self):
         import importlib
         import thrift.python.converter
@@ -964,6 +967,7 @@ cdef class struct3(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cstruct3](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -1101,6 +1105,7 @@ cdef class struct4(thrift.py3.types.Struct):
         with nogil:
             needed = serializer.cdeserialize[cstruct4](buf, self._cpp_obj.get(), proto)
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -1275,6 +1280,7 @@ cdef class union1(thrift.py3.types.Union):
         # force a cache reload since the underlying data's changed
         self._load_cache()
         return needed
+
 
     def _to_python(self):
         import importlib
@@ -1485,6 +1491,7 @@ cdef class union2(thrift.py3.types.Union):
         # force a cache reload since the underlying data's changed
         self._load_cache()
         return needed
+
 
     def _to_python(self):
         import importlib

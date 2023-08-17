@@ -21,6 +21,7 @@ import click
 import convertible.thrift_types as python_types  # noqa: F401
 import convertible.types as py3_types  # noqa: F401
 from tabulate import tabulate
+from thrift.py3.converter import to_py3_struct  # noqa: F401
 from thrift.python.converter import to_python_struct  # noqa: F401
 
 cost_in_ms = defaultdict(list)
@@ -29,16 +30,22 @@ cost_in_ms = defaultdict(list)
 @click.pass_context
 def benchmark(ctx, klass_name: str, setup: str, qualifier: str = "") -> None:
     title = f"{klass_name} {qualifier}" if qualifier else klass_name
-    ctrl_stmt = f"to_python_struct(python_types.{klass_name}, PY3)"
-    test_stmt = "PY3._to_python()"
-    for stmt in (ctrl_stmt, test_stmt):
+    to_ctrl = f"to_python_struct(python_types.{klass_name}, PY3)"
+    to_test = "PY3._to_python()"
+    from_ctrl = f"to_py3_struct(py3_types.{klass_name}, PYTHON)"
+    from_test = f"py3_types.{klass_name}.from_python(PYTHON)"
+
+    setup_full = "\n".join([setup, "PYTHON=PY3._to_python()"])
+
+    for stmt in (to_ctrl, to_test, from_ctrl, from_test):
         timer = timeit.Timer(
             stmt=stmt,
-            setup=setup,
+            setup=setup_full,
             globals={
                 "python_types": python_types,
                 "py3_types": py3_types,
                 "to_python_struct": to_python_struct,
+                "to_py3_struct": to_py3_struct,
             },
         )
         costs = []
@@ -83,7 +90,13 @@ def main(repeat: int) -> None:
         setup="PY3=py3_types.Union(intField=42)",
     )
 
-    headers = ["thrift-py3 to thrift-python", "reflection", "capi"]
+    headers = [
+        "thrift type",
+        "to_python_struct",
+        "capi Constructor",
+        "to_py3_struct",
+        "capi Extractor",
+    ]
     table = [
         ([name] + [f"{cost:.3f} ms" for cost in costs])
         for (name, costs) in cost_in_ms.items()

@@ -96,11 +96,39 @@ class ThriftPackage(unittest.TestCase):
             """\
                 namespace cpp2 "thrift.annotation"
 
+                include "bar.thrift"
+                struct foo {}
+
+                """,
+            """\
+                package "meta.com/thrift/annotation"
+
+                namespace hack ""
+                namespace cpp2 "thrift.annotation"
+
+                include "bar.thrift"
+                struct foo {}
+                """,
+        )
+
+        self.write_and_test(
+            "foo.thrift",
+            """\
+                namespace cpp2 "thrift.annotation"
+                namespace php "thrift.annotation"
+
+                include "bar.thrift"
+                struct foo {}
+
                 """,
             """\
                 package "meta.com/thrift/annotation"
 
                 namespace cpp2 "thrift.annotation"
+                namespace php "thrift.annotation"
+
+                include "bar.thrift"
+                struct foo {}
                 """,
         )
 

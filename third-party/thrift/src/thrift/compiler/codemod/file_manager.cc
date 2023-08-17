@@ -141,15 +141,12 @@ void file_manager::set_namespace(
  * definitions.
  */
 size_t file_manager::get_namespace_offset() const {
-  size_t includes_offset = program_->includes().empty()
-      ? 0
-      : to_offset(program_->includes().back()->src_range().end) + 1;
   if (!program_->namespaces().empty()) {
     size_t min_offset = old_content_.length();
     // Finds the offset of first namespace statement in the file.
     for (const auto& [lang, _] : program_->namespaces()) {
       auto ns_stmt = "namespace " + lang;
-      auto offset = old_content_.find(ns_stmt, includes_offset);
+      auto offset = old_content_.find(ns_stmt, 0);
       if (offset != std::string::npos && min_offset > offset) {
         min_offset = offset;
       }
@@ -158,8 +155,8 @@ size_t file_manager::get_namespace_offset() const {
       return min_offset;
     }
   }
-  if (includes_offset != 0) {
-    return includes_offset;
+  if (!program_->includes().empty()) {
+    return to_offset(program_->includes().back()->src_range().end) + 1;
   }
   if (!program_->definitions().empty()) {
     return to_offset(program_->definitions().front().src_range().begin);

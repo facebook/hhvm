@@ -54,8 +54,6 @@ class add_package {
  private:
   file_manager fm_;
   const t_program& prog_;
-  static inline const std::map<std::string, std::string> default_namespaces_ = {
-      {"cpp2", "cpp2"}, {"hack", ""}};
 
   std::string get_package() const {
     // If no namespaces exist, use the file path as the package.
@@ -104,11 +102,17 @@ class add_package {
      * If there are no definitions, then this can be skipped.
      */
     if (!prog_.definitions().empty()) {
-      for (auto ns : default_namespaces_) {
-        if (prog_.namespaces().find(ns.first) == prog_.namespaces().end()) {
-          content += fmt::format("namespace {} \"{}\"\n", ns.first, ns.second);
-        }
+      auto has_ns = [&](std::string lang) {
+        return prog_.namespaces().find(lang) != prog_.namespaces().end();
+      };
+
+      if (!has_ns("cpp2")) {
+        content += "namespace cpp2 \"cpp2\"\n";
       }
+      if (!has_ns("hack") && !has_ns("php")) {
+        content += "namespace hack \"\"\n";
+      }
+
       if (prog_.namespaces().empty()) {
         content += "\n";
       }

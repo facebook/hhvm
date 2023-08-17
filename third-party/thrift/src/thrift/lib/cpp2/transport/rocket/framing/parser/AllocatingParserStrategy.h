@@ -53,14 +53,12 @@ class AllocatingParserStrategy {
 
   void getReadBuffer(void** bufReturn, size_t* lenReturn) {
     if (!buffer_) {
-      buffer_ =
-          Traits::allocate(allocator_, kBytesForBufferLen + minBufferSize_);
-      currentBufferSize_ = minBufferSize_ + kBytesForBufferLen;
-      writeCurrentBufferSize();
+      buffer_ = Traits::allocate(allocator_, minBufferSize_);
+      currentBufferSize_ = minBufferSize_;
     }
 
-    *bufReturn = buffer_ + kBytesForBufferLen + size_;
-    *lenReturn = currentBufferSize_ - kBytesForBufferLen - size_;
+    *bufReturn = buffer_ + size_;
+    *lenReturn = currentBufferSize_ - size_;
   }
 
   // At the end of each readDataAvailable(...) call. All completed frames are
@@ -70,7 +68,7 @@ class AllocatingParserStrategy {
 
     while (size_ >= Serializer::kBytesForFrameOrMetadataLength) {
       if (!frameLength_) {
-        frameLength_ = computeFrameLength(kBytesForBufferLen);
+        frameLength_ = computeFrameLength(0);
         frameLengthAndFieldSize_ =
             frameLength_ + Serializer::kBytesForFrameOrMetadataLength;
         tryResize();
@@ -99,15 +97,11 @@ class AllocatingParserStrategy {
 
   // Functions for testing
   size_t getMinBufferSize() const { return minBufferSize_; }
-  size_t getUsableBufferSize() const {
-    return currentBufferSize_ - kBytesForBufferLen;
-  }
+  size_t getCurrentBufferSize() const { return currentBufferSize_; }
   size_t getFrameLength() const { return frameLength_; }
   size_t getSize() const { return size_; }
 
  private:
-  static constexpr size_t kBytesForBufferLen = sizeof(size_t);
-
   T& owner_;
   FOLLY_ATTR_NO_UNIQUE_ADDRESS Allocator allocator_;
 
@@ -155,27 +149,17 @@ class AllocatingParserStrategy {
     if (UNLIKELY(!owner_.incMemoryUsage(frameLengthAndFieldSize_))) {
       return;
     }
-    if (currentBufferSize_ - kBytesForBufferLen < frameLengthAndFieldSize_) {
-      size_t newBufferSize = frameLengthAndFieldSize_ + kBytesForBufferLen;
-      ElemType* buffer = Traits::allocate(allocator_, newBufferSize);
-      std::uninitialized_copy(
-          buffer_ + kBytesForBufferLen,
-          buffer_ + currentBufferSize_,
-          buffer + kBytesForBufferLen);
+    if (currentBufferSize_ < frameLengthAndFieldSize_) {
+      ElemType* buffer = Traits::allocate(allocator_, frameLengthAndFieldSize_);
+      std::uninitialized_copy(buffer_, buffer_ + currentBufferSize_, buffer);
       Traits::deallocate(allocator_, buffer_, currentBufferSize_);
-      currentBufferSize_ = newBufferSize;
+      currentBufferSize_ = frameLengthAndFieldSize_;
       buffer_ = buffer;
-      writeCurrentBufferSize();
     }
-  }
-
-  void writeCurrentBufferSize() {
-    std::memcpy(buffer_, &currentBufferSize_, sizeof(currentBufferSize_));
   }
 
   void handleExcessBytesAndCreateNewBuffer(ParsingState& state) {
     size_t excessByteSize = size_ - frameLengthAndFieldSize_;
-
     size_t nextFrameLength = 0;
     size_t nextFrameLengthAndFieldSize = 0;
 
@@ -183,8 +167,7 @@ class AllocatingParserStrategy {
     // allocate a new buffer big enough to hold the new frame. copy
     // excessBytes into the new frame and handle current frame to owner_
     if (excessByteSize >= Serializer::kBytesForFrameOrMetadataLength) {
-      nextFrameLength =
-          computeFrameLength(frameLengthAndFieldSize_ + kBytesForBufferLen);
+      nextFrameLength = computeFrameLength(frameLengthAndFieldSize_);
       nextFrameLengthAndFieldSize =
           nextFrameLength + Serializer::kBytesForFrameOrMetadataLength;
       if (UNLIKELY(!owner_.incMemoryUsage(nextFrameLengthAndFieldSize))) {
@@ -192,17 +175,12 @@ class AllocatingParserStrategy {
       }
     }
     size_t newBufferSize =
-        std::max(
-            {excessByteSize, minBufferSize_, nextFrameLengthAndFieldSize}) +
-        kBytesForBufferLen;
+        std::max({excessByteSize, minBufferSize_, nextFrameLengthAndFieldSize});
     ElemType* buffer = Traits::allocate(allocator_, newBufferSize);
     if (excessByteSize > 0) {
       std::uninitialized_copy(
-          buffer_ + frameLengthAndFieldSize_ + kBytesForBufferLen,
-          buffer_ + size_ + kBytesForBufferLen,
-          buffer + kBytesForBufferLen);
+          buffer_ + frameLengthAndFieldSize_, buffer_ + size_, buffer);
     }
-
     state.newBuf_ = buffer;
     state.excessByteSize_ = excessByteSize;
     state.frameLen_ = nextFrameLength;
@@ -211,16 +189,16 @@ class AllocatingParserStrategy {
   }
 
   void handleFrame() {
-    size_t trimEnd =
-        currentBufferSize_ - frameLengthAndFieldSize_ - kBytesForBufferLen;
-
+    size_t trimEnd = currentBufferSize_ - frameLengthAndFieldSize_;
+    // TODO: figure out how to avoid allocation here.
+    auto* allocAndSize =
+        new std::pair<Allocator&, size_t>(allocator_, currentBufferSize_);
     auto frame = folly::IOBuf::takeOwnership(
         buffer_,
         currentBufferSize_,
         &deallocate,
-        folly::bit_cast<void*>(&allocator_));
-    frame->trimStart(
-        Serializer::kBytesForFrameOrMetadataLength + kBytesForBufferLen);
+        folly::bit_cast<void*>(allocAndSize));
+    frame->trimStart(Serializer::kBytesForFrameOrMetadataLength);
     frame->trimEnd(trimEnd);
     owner_.handleFrame(std::move(frame));
     owner_.decMemoryUsage(frameLengthAndFieldSize_);
@@ -232,21 +210,14 @@ class AllocatingParserStrategy {
     frameLength_ = state.frameLen_;
     frameLengthAndFieldSize_ = state.frameLenAndFieldSize_;
     buffer_ = state.newBuf_;
-    writeCurrentBufferSize();
   }
 
   static void deallocate(void* buf, void* userData) {
     auto* bufferPtr = static_cast<ElemType*>(buf);
-    size_t size = readBufferSize(bufferPtr);
-    auto* allocatorPtr = static_cast<Allocator*>(userData);
-
-    Traits::deallocate(*allocatorPtr, bufferPtr, size);
-  }
-
-  FOLLY_ALWAYS_INLINE static size_t readBufferSize(ElemType* buf) {
-    size_t result;
-    std::memcpy(&result, buf, sizeof(result));
-    return result;
+    auto* allocAndSize =
+        folly::bit_cast<std::pair<Allocator&, size_t>*>(userData);
+    Traits::deallocate(allocAndSize->first, bufferPtr, allocAndSize->second);
+    delete allocAndSize;
   }
 };
 

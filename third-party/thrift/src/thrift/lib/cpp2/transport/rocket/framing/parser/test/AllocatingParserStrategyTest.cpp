@@ -47,7 +47,7 @@ TEST(AllocatingParserStrategyTest, testAppendFrame) {
   size_t lenReturn;
   parser.getReadBuffer(&buf, &lenReturn);
   EXPECT_EQ(lenReturn, parser.getMinBufferSize());
-  EXPECT_EQ(parser.getUsableBufferSize(), parser.getMinBufferSize());
+  EXPECT_EQ(parser.getCurrentBufferSize(), parser.getMinBufferSize());
 
   size_t testFrameLength = 20;
 
@@ -58,7 +58,7 @@ TEST(AllocatingParserStrategyTest, testAppendFrame) {
   EXPECT_EQ(parser.getSize(), Serializer::kBytesForFrameOrMetadataLength);
   EXPECT_EQ(parser.getFrameLength(), testFrameLength);
   EXPECT_EQ(
-      parser.getUsableBufferSize(),
+      parser.getCurrentBufferSize(),
       testFrameLength + Serializer::kBytesForFrameOrMetadataLength);
   EXPECT_EQ(
       owner.memoryCounter_,
@@ -270,7 +270,7 @@ TEST(AllocatingParserStrategyTest, testSmallFrame) {
   size_t lenReturn;
   parser.getReadBuffer(&buf, &lenReturn);
   EXPECT_EQ(lenReturn, parser.getMinBufferSize());
-  EXPECT_EQ(parser.getUsableBufferSize(), parser.getMinBufferSize());
+  EXPECT_EQ(parser.getCurrentBufferSize(), parser.getMinBufferSize());
 
   size_t testFrameLength = 12;
 
@@ -280,7 +280,7 @@ TEST(AllocatingParserStrategyTest, testSmallFrame) {
 
   EXPECT_EQ(parser.getSize(), Serializer::kBytesForFrameOrMetadataLength);
   EXPECT_EQ(parser.getFrameLength(), testFrameLength);
-  EXPECT_EQ(parser.getUsableBufferSize(), parser.getMinBufferSize());
+  EXPECT_EQ(parser.getCurrentBufferSize(), parser.getMinBufferSize());
   EXPECT_EQ(
       owner.memoryCounter_,
       testFrameLength + Serializer::kBytesForFrameOrMetadataLength);
@@ -325,7 +325,7 @@ TEST(AllocatingParserStrategyTest, testTinyFrame) {
   size_t lenReturn;
   parser.getReadBuffer(&buf, &lenReturn);
   EXPECT_EQ(lenReturn, parser.getMinBufferSize());
-  EXPECT_EQ(parser.getUsableBufferSize(), parser.getMinBufferSize());
+  EXPECT_EQ(parser.getCurrentBufferSize(), parser.getMinBufferSize());
 
   size_t testFrameLength = 8;
 
@@ -335,7 +335,7 @@ TEST(AllocatingParserStrategyTest, testTinyFrame) {
 
   EXPECT_EQ(parser.getSize(), Serializer::kBytesForFrameOrMetadataLength);
   EXPECT_EQ(parser.getFrameLength(), testFrameLength);
-  EXPECT_EQ(parser.getUsableBufferSize(), parser.getMinBufferSize());
+  EXPECT_EQ(parser.getCurrentBufferSize(), parser.getMinBufferSize());
   EXPECT_EQ(owner.memoryCounter_, testFrameLength + 3);
   EXPECT_EQ(owner.frames_.size(), 0);
 
@@ -369,7 +369,7 @@ TEST(AllocatingParserStrategyTest, testTinyFrame) {
   EXPECT_EQ(parser.getSize(), Serializer::kBytesForFrameOrMetadataLength);
   EXPECT_EQ(parser.getFrameLength(), newTestFrameLength);
   EXPECT_EQ(
-      parser.getUsableBufferSize(),
+      parser.getCurrentBufferSize(),
       newTestFrameLength + Serializer::kBytesForFrameOrMetadataLength);
   EXPECT_EQ(
       owner.memoryCounter_,
@@ -400,7 +400,7 @@ TEST(AllocatingParserStrategyTest, testManyTinyFrame) {
   size_t lenReturn;
   parser.getReadBuffer(&buf, &lenReturn);
   EXPECT_EQ(lenReturn, parser.getMinBufferSize());
-  EXPECT_EQ(parser.getUsableBufferSize(), parser.getMinBufferSize());
+  EXPECT_EQ(parser.getCurrentBufferSize(), parser.getMinBufferSize());
 
   size_t testFrameLen1 = 7;
   size_t testFrameLen2 = 19;
@@ -425,8 +425,11 @@ TEST(AllocatingParserStrategyTest, testManyTinyFrame) {
       &static_cast<uint8_t*>(buf)[bytesWritten], lenReturn);
   serializer3.writeFrameOrMetadataSize(testFrameLen3);
   bytesWritten += Serializer::kBytesForFrameOrMetadataLength;
-
+  for (size_t i = 0; i < bytesWritten; ++i) {
+    LOG(WARNING) << (int)static_cast<uint8_t*>(buf)[i];
+  }
   std::string t3(testFrameLen3, 'd');
+  LOG(WARNING) << "bytesWritten: " << bytesWritten;
   memcpy(&static_cast<uint8_t*>(buf)[bytesWritten], t3.data(), testFrameLen3);
   bytesWritten += testFrameLen3;
 
@@ -454,7 +457,7 @@ TEST(AllocatingParserStrategyTest, testManyTinyFrameWithIncompleteFrame) {
   size_t lenReturn;
   parser.getReadBuffer(&buf, &lenReturn);
   EXPECT_EQ(lenReturn, parser.getMinBufferSize());
-  EXPECT_EQ(parser.getUsableBufferSize(), parser.getMinBufferSize());
+  EXPECT_EQ(parser.getCurrentBufferSize(), parser.getMinBufferSize());
 
   size_t testFrameLen1 = 7;
   size_t testFrameLen2 = 19;

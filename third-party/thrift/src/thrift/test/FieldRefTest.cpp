@@ -859,8 +859,6 @@ TEST(optional_field_ref_test, alias) {
   EXPECT_FALSE(ref.has_value());
 }
 
-#ifdef THRIFT_HAS_OPTIONAL
-
 TYPED_TEST(optional_field_ref_typed_test, copy_from_optional) {
   auto s = typename TestFixture::Struct();
   s.opt_name() = "foo";
@@ -896,7 +894,6 @@ TYPED_TEST(optional_field_ref_typed_test, to_optional) {
   EXPECT_TRUE(opt);
   EXPECT_EQ(*opt, "foo");
 }
-#endif
 
 TYPED_TEST(optional_field_ref_typed_test, rvalue_ref_method) {
   typename TestFixture::Struct s;

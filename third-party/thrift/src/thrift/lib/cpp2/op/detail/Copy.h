@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <optional>
+
 #include <thrift/lib/cpp2/FieldRef.h>
 #include <thrift/lib/cpp2/op/detail/Create.h>
 #include <thrift/lib/cpp2/type/Tag.h>
@@ -68,13 +70,11 @@ struct Copy {
     copy_field_ref<Src, Dst&>(src_ref, dst_ref);
   }
 
-#ifdef THRIFT_HAS_OPTIONAL
   template <typename T>
   void operator()(
       const std::optional<T>& src_opt, std::optional<T>& dst_opt) const {
     dst_opt = src_opt;
   }
-#endif
 
   // Copy on unique pointer constructs a new ptr if src is not nullptr.
   // Copy on shared pointer just shares the same ptr.

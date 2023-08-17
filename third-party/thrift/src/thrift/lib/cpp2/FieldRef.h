@@ -16,21 +16,12 @@
 
 #pragma once
 
-#include <initializer_list>
-#include <memory>
-#include <type_traits>
-
-#if (!defined(_MSC_VER) && __has_include(<optional>)) ||        \
-    (defined(_MSC_VER) && (__cplusplus >= 201703L || _MSVC_LANG >= 201703L))
-#include <optional>
-// Technically it should be 201606 but std::optional is present with 201603.
-#if __cpp_lib_optional >= 201603 || _LIBCPP_STD_VER > 14
-#define THRIFT_HAS_OPTIONAL
-#endif
-#endif
-
 #include <assert.h>
 #include <limits.h>
+#include <initializer_list>
+#include <memory>
+#include <optional>
+#include <type_traits>
 #include <folly/CPortability.h>
 #include <folly/CppAttributes.h>
 #include <folly/Function.h>
@@ -583,7 +574,6 @@ class optional_field_ref {
     bitref_ = other.has_value();
   }
 
-#ifdef THRIFT_HAS_OPTIONAL
   template <typename U>
   FOLLY_ERASE void from_optional(const std::optional<U>& other) noexcept(
       std::is_nothrow_assignable<value_type&, const U&>::value) {
@@ -617,7 +607,6 @@ class optional_field_ref {
     using type = std::optional<std::remove_const_t<value_type>>;
     return bitref_ ? type(value_) : type();
   }
-#endif
 
   FOLLY_ERASE bool has_value() const noexcept { return bool(bitref_); }
 
@@ -806,7 +795,6 @@ bool operator>=(const U& a, optional_field_ref<T> b) {
   return b <= a;
 }
 
-#ifdef THRIFT_HAS_OPTIONAL
 template <class T>
 bool operator==(const optional_field_ref<T>& a, std::nullopt_t) {
   return !a.has_value();
@@ -823,7 +811,6 @@ template <class T>
 bool operator!=(std::nullopt_t, const optional_field_ref<T>& a) {
   return a.has_value();
 }
-#endif
 
 namespace detail {
 
@@ -914,7 +901,6 @@ class optional_boxed_field_ref {
     value_ = static_cast<std::remove_reference_t<U>&&>(other.value_);
   }
 
-#ifdef THRIFT_HAS_OPTIONAL
   template <typename U>
   FOLLY_ERASE void from_optional(const std::optional<U>& other) {
     // Use if instead of a shorter ternary expression to prevent a potential
@@ -944,7 +930,6 @@ class optional_boxed_field_ref {
     using type = std::optional<std::remove_const_t<value_type>>;
     return has_value() ? type(*value_) : type();
   }
-#endif
 
   FOLLY_ERASE bool has_value() const noexcept {
     return static_cast<bool>(value_);
@@ -1133,7 +1118,6 @@ bool operator>=(const U& a, optional_boxed_field_ref<T> b) {
   return b <= a;
 }
 
-#ifdef THRIFT_HAS_OPTIONAL
 template <class T>
 bool operator==(const optional_boxed_field_ref<T>& a, std::nullopt_t) {
   return !a.has_value();
@@ -1150,7 +1134,6 @@ template <class T>
 bool operator!=(std::nullopt_t, const optional_boxed_field_ref<T>& a) {
   return a.has_value();
 }
-#endif
 
 // A reference to a 'Fill' intern boxed field.
 //

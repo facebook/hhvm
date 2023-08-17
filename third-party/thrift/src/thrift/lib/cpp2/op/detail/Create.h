@@ -17,6 +17,7 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <type_traits>
 
 #include <thrift/lib/cpp/Field.h>
@@ -39,14 +40,12 @@ template <typename T>
 struct is_optional_type<optional_field_ref<T>> : std::true_type {};
 template <typename T>
 struct is_optional_type<optional_boxed_field_ref<T>> : std::true_type {};
-#ifdef THRIFT_HAS_OPTIONAL
 template <typename T>
 struct is_optional_type<std::optional<T>> {
   // FIXME: We added static_assert to check whether this specialization is
   // actually used somewhere. If it's not used anywhere, we should remove it.
   static_assert(sizeof(T) < 0, "");
 };
-#endif
 
 template <typename U, typename R = void>
 using if_opt_type =

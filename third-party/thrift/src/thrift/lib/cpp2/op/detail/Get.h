@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <optional>
+
 #include <thrift/lib/cpp2/FieldRef.h>
 #include <thrift/lib/cpp2/Thrift.h>
 #include <thrift/lib/cpp2/type/Tag.h>
@@ -78,7 +80,6 @@ struct GetValueOrNull {
     return &field_ref.value();
   }
 
-#ifdef THRIFT_HAS_OPTIONAL
   template <typename T>
   T* operator()(std::optional<T>& opt) const {
     return bool(opt) ? &opt.value() : nullptr;
@@ -87,7 +88,6 @@ struct GetValueOrNull {
   const T* operator()(const std::optional<T>& opt) const {
     return bool(opt) ? &opt.value() : nullptr;
   }
-#endif
 
   template <typename T, typename Deleter>
   T* operator()(const std::unique_ptr<T, Deleter>&& ptr) const = delete;

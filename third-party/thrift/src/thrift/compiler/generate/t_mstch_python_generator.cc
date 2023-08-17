@@ -466,15 +466,17 @@ class python_mstch_program : public mstch_program {
   }
 
   bool check_has_marshal_types() {
+    if (has_option("marshal_python_capi") &&
+        (!program_->structs().empty() || !program_->exceptions().empty())) {
+      return true;
+    }
     for (const t_struct* s : program_->structs()) {
       if (marshal_capi_override_annotation(*s)) {
-        has_marshal_types_ = true;
         return true;
       }
     }
     for (const t_struct* e : program_->exceptions()) {
       if (marshal_capi_override_annotation(*e)) {
-        has_marshal_types_ = true;
         return true;
       }
     }
@@ -1003,8 +1005,10 @@ class python_mstch_struct : public mstch_struct {
   mstch::node exception_message() { return struct_->get_annotation("message"); }
 
   mstch::node marshal_capi() {
-    return marshal_capi_override_annotation(*struct_) ||
-        struct_->fields().size() == 0;
+    return !struct_->generated() &&
+        (has_option("marshal_python_capi") ||
+         marshal_capi_override_annotation(*struct_) ||
+         struct_->fields().size() == 0);
   }
 
   mstch::node adapter() {

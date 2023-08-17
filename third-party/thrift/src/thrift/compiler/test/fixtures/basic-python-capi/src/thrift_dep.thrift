@@ -23,7 +23,6 @@ enum DepEnum {
   Arm2 = 3,
 }
 
-@python.MarshalCapi
 struct DepStruct {
   1: string s;
   2: i32 i;

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-include "thrift/annotation/python.thrift"
-
 package "thrift.org/test/python_capi"
 
 enum DepEnum {
@@ -23,13 +21,11 @@ enum DepEnum {
   Arm2 = 3,
 }
 
-@python.MarshalCapi
 struct DepStruct {
   1: string s;
   2: i32 i;
 }
 
-@python.MarshalCapi
 safe exception SomeError {
   1: string msg;
 }

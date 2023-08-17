@@ -15,7 +15,6 @@
  */
 
 include "thrift/annotation/scope.thrift"
-include "thrift/annotation/thrift.thrift"
 
 package "facebook.com/thrift/annotation/python"
 
@@ -27,11 +26,6 @@ namespace py thrift.annotation.python
 // Hides in thrift-py3 only, not in thrift-python
 @scope.Definition
 struct Py3Hidden {}
-
-// Deprecated, equivalent to Py3Hidden
-@scope.Definition
-@thrift.Deprecated{message = "Use Py3Hidden instead"}
-struct Hidden {}
 
 @scope.Enum
 struct Flags {}

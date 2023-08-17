@@ -27,13 +27,6 @@ inline void reset_field<::facebook::thrift::annotation::python::Py3Hidden>(
 }
 
 template<>
-inline void reset_field<::facebook::thrift::annotation::python::Hidden>(
-    ::facebook::thrift::annotation::python::Hidden& obj, uint16_t index) {
-  switch (index) {
-  }
-}
-
-template<>
 inline void reset_field<::facebook::thrift::annotation::python::Flags>(
     ::facebook::thrift::annotation::python::Flags& obj, uint16_t index) {
   switch (index) {
@@ -73,16 +66,6 @@ inline void reset_field<::facebook::thrift::annotation::python::MarshalCapi>(
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::python::Py3Hidden>::namesmap() {
-  static const folly::Indestructible<NamesMap> map {
-    {
-    }
-  };
-  return *map;
-}
-
-template<>
-inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
-    ::facebook::thrift::annotation::python::Hidden>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

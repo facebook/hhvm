@@ -97,88 +97,6 @@ func (x *Py3Hidden) Read(p thrift.Protocol) error {
 }
 
 
-type Hidden struct {
-}
-// Compile time interface enforcer
-var _ thrift.Struct = &Hidden{}
-
-func NewHidden() *Hidden {
-    return (&Hidden{})
-}
-
-func (x *Hidden) String() string {
-    type HiddenAlias Hidden
-    valueAlias := (*HiddenAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
-
-
-// Deprecated: Use Hidden.Set* methods instead or set the fields directly.
-type HiddenBuilder struct {
-    obj *Hidden
-}
-
-func NewHiddenBuilder() *HiddenBuilder {
-    return &HiddenBuilder{
-        obj: NewHidden(),
-    }
-}
-
-func (x *HiddenBuilder) Emit() *Hidden {
-    var objCopy Hidden = *x.obj
-    return &objCopy
-}
-
-func (x *Hidden) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("Hidden"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
-    }
-
-    if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
-    }
-
-    if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *Hidden) Read(p thrift.Protocol) error {
-    if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
-    }
-
-    for {
-        _, typ, id, err := p.ReadFieldBegin()
-        if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
-        }
-
-        if typ == thrift.STOP {
-            break;
-        }
-
-        switch id {
-        default:
-            if err := p.Skip(typ); err != nil {
-                return err
-            }
-        }
-
-        if err := p.ReadFieldEnd(); err != nil {
-            return err
-        }
-    }
-
-    if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
-    }
-
-    return nil
-}
-
-
 type Flags struct {
 }
 // Compile time interface enforcer
@@ -689,7 +607,6 @@ func RegisterTypes(registry interface {
 	  RegisterType(name string, obj any)
 }) {
     registry.RegisterType("facebook.com/thrift/annotation/python/Py3Hidden", &Py3Hidden{})
-    registry.RegisterType("facebook.com/thrift/annotation/python/Hidden", &Hidden{})
     registry.RegisterType("facebook.com/thrift/annotation/python/Flags", &Flags{})
     registry.RegisterType("facebook.com/thrift/annotation/python/Name", &Name{})
     registry.RegisterType("facebook.com/thrift/annotation/python/Adapter", &Adapter{})

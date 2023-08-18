@@ -39,12 +39,16 @@ pub struct Opts {
     #[clap(long)]
     no_builtins: bool,
 
-    /// Attempt to keep going instead of panicking on unimplemented code.
+    /// (DEPRECATED) Attempt to keep going instead of panicking on unimplemented code. This is the
+    /// default now and can be reversed via `no_keep_going` flag.
     #[clap(long)]
     keep_going: bool,
 
-    /// Skip files that can't be fully translated. Unlike `--keep-going` it won't emit dummy
-    /// instructions for unimplemented code but will rather completely skip the file.
+    /// Panic on unimplemented code instead of generating stub instructions.
+    #[clap(long)]
+    fail_fast: bool,
+
+    /// Skip files that contain unimplemented code that can't be fully translated.
     #[clap(long)]
     skip_unimplemented: bool,
 
@@ -55,7 +59,7 @@ pub struct Opts {
 }
 
 pub fn run(mut opts: Opts) -> Result<()> {
-    textual::KEEP_GOING.store(opts.keep_going, std::sync::atomic::Ordering::Release);
+    textual::KEEP_GOING.store(!opts.fail_fast, std::sync::atomic::Ordering::Release);
     // Always unwrap concurrent blocks for infer use-cases. We can make it configurable later on if
     // needed.
     opts.single_file_opts.unwrap_concurrent = true;
@@ -69,7 +73,7 @@ pub fn run(mut opts: Opts) -> Result<()> {
 
     writeln!(writer.lock(), "// TEXTUAL UNIT COUNT {}", files.len())?;
 
-    if opts.keep_going || opts.skip_unimplemented {
+    if !opts.fail_fast || opts.skip_unimplemented {
         files
             .into_par_iter()
             .for_each(|path| match process_single_file(&path, &opts, &writer) {
@@ -106,7 +110,7 @@ fn convert_single_file(path: &Path, opts: &Opts) -> Result<Vec<u8>> {
         })
     };
 
-    if opts.keep_going || opts.skip_unimplemented {
+    if !opts.fail_fast || opts.skip_unimplemented {
         with_catch_panics(action)
     } else {
         action()

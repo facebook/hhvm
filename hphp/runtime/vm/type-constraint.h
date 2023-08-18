@@ -213,8 +213,18 @@ struct TypeConstraint {
 
   AnnotType type()  const { return m_type; }
 
-  bool validForProp() const {
-    return !isCallable() && !isNothing() && !isNoReturn();
+  bool validForProp() const { return propSupportsAnnot(m_type); }
+
+  void validForPropResolved(const Class* declCls,
+                            const StringData* propName) const {
+    assertx(validForProp());
+    if (!isUnresolved()) return;
+    auto const r = resolvedWithAutoload();
+    auto const b = std::all_of(
+      std::begin(r), std::end(r),
+      [] (const TypeConstraint& tc) { return tc.validForProp(); }
+    );
+    if (!b) validForPropFail(declCls, propName);
   }
 
   bool validForEnumBase() const {
@@ -366,7 +376,6 @@ struct TypeConstraint {
    */
   MaybeDataType asSystemlibType() const;
 
-
 private:
   void init();
 
@@ -399,6 +408,8 @@ private:
                   int id) const;
 
   bool checkStringCompatible() const;
+
+  void validForPropFail(const Class*, const StringData*) const;
 
 private:
   // m_type represents the type to check on.  We don't know whether a

@@ -1396,6 +1396,11 @@ To string conversions:
   property in the parent, has a declared type equivalent to the parent
   declaration.
 
+| PropTypeValid, ND, C(Cls), NF
+
+  Check that all properties on S0 carries a type which is valid for a
+  property. This is used when any types requires runtime resolution.
+
 | DebugBacktrace, D(Vec), S(Int), PRc
 
   Obtain stack trace by calling the debug_backtrace() method.

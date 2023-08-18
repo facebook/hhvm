@@ -8378,7 +8378,10 @@ private:
   // in case it needs to be fixed up later.
   static void update_type_constraint(const LocalIndex& index,
                                      TypeConstraint& tc,
+                                     bool isProp,
                                      ISStringSet* uses) {
+    always_assert(IMPLIES(isProp, tc.validForProp()));
+
     if (!tc.isUnresolved()) {
       // Any TC already resolved is assumed to be correct.
       if (uses && tc.clsName()) uses->emplace(tc.clsName());
@@ -8397,6 +8400,7 @@ private:
       auto const tm_type = tm->typeAndValueUnion[0].type;
       // Whatever it's an alias of isn't valid, so leave unresolved.
       if (tm_type == AnnotType::Unresolved) return;
+      if (isProp && !propSupportsAnnot(tm_type)) return;
       auto const value = [&] () -> SString {
         // Store the first enum encountered during resolution. This
         // lets us fixup the type later if needed.
@@ -8413,6 +8417,7 @@ private:
         tm->nullable,
         value
       );
+      assertx(IMPLIES(isProp, tc.validForProp()));
       if (uses && value) uses->emplace(value);
       return;
     }
@@ -8429,23 +8434,23 @@ private:
                                       php::Func& func,
                                       ISStringSet* uses) {
     for (auto& p : func.params) {
-      update_type_constraint(index, p.typeConstraint, uses);
-      for (auto& ub : p.upperBounds.m_constraints) update_type_constraint(index, ub, uses);
+      update_type_constraint(index, p.typeConstraint, false, uses);
+      for (auto& ub : p.upperBounds.m_constraints) update_type_constraint(index, ub, false, uses);
     }
-    update_type_constraint(index, func.retTypeConstraint, uses);
-    for (auto& ub : func.returnUBs.m_constraints) update_type_constraint(index, ub, uses);
+    update_type_constraint(index, func.retTypeConstraint, false, uses);
+    for (auto& ub : func.returnUBs.m_constraints) update_type_constraint(index, ub, false, uses);
   }
 
   static void update_type_constraints(const LocalIndex& index,
                                       php::Class& cls,
                                       ISStringSet* uses) {
     if (cls.attrs & AttrEnum) {
-      update_type_constraint(index, cls.enumBaseTy, uses);
+      update_type_constraint(index, cls.enumBaseTy, false, uses);
     }
     for (auto& meth : cls.methods) update_type_constraints(index, *meth, uses);
     for (auto& prop : cls.properties) {
-      update_type_constraint(index, prop.typeConstraint, uses);
-      for (auto& ub : prop.ubs.m_constraints) update_type_constraint(index, ub, uses);
+      update_type_constraint(index, prop.typeConstraint, true, uses);
+      for (auto& ub : prop.ubs.m_constraints) update_type_constraint(index, ub, true, uses);
     }
   }
 
@@ -8573,6 +8578,14 @@ private:
       auto const initialSatisfies = [&] {
         if (isClosure) return true;
         if (is_used_trait(cls)) return false;
+
+        // Any property with an unresolved type-constraint here might
+        // fatal when we initialize the class.
+        if (prop.typeConstraint.isUnresolved()) return false;
+        for (auto const& ub : prop.ubs.m_constraints) {
+          if (ub.isUnresolved()) return false;
+        }
+
         if (prop.attrs & (AttrSystemInitialValue | AttrLateInit)) return true;
 
         auto const initial = from_cell(prop.val);
@@ -8636,7 +8649,7 @@ private:
           // This property's type-constraint might not have been
           // resolved (if the parent is not on the output list for
           // this job), so do so here.
-          update_type_constraint(index, parentProp->typeConstraint, nullptr);
+          update_type_constraint(index, parentProp->typeConstraint, true, nullptr);
 
           // This check is safe, but conservative. It might miss a few
           // rare cases, but it's sufficient and doesn't require class
@@ -8650,7 +8663,7 @@ private:
           for (auto ub : prop.ubs.m_constraints) {
             applyFlagsToUB(ub, prop.typeConstraint);
             for (auto pub : parentProp->ubs.m_constraints) {
-              update_type_constraint(index, pub, nullptr);
+              update_type_constraint(index, pub, true, nullptr);
               applyFlagsToUB(pub, parentProp->typeConstraint);
               if (ub.maybeInequivalentForProp(pub)) return false;
             }
@@ -16109,8 +16122,16 @@ void Index::update_prop_initial_values(const Context& ctx,
     assertx(idx < props.size());
     auto& prop = props[idx];
 
+    auto const allResolved = [&] {
+      if (prop.typeConstraint.isUnresolved()) return false;
+      for (auto const& ub : prop.ubs.m_constraints) {
+        if (ub.isUnresolved()) return false;
+      }
+      return true;
+    };
+
     if (info.satisfies) {
-      if (!(prop.attrs & AttrInitialSatisfiesTC)) {
+      if (!(prop.attrs & AttrInitialSatisfiesTC) && allResolved()) {
         attribute_setter(prop.attrs, true, AttrInitialSatisfiesTC);
         changed = true;
       }

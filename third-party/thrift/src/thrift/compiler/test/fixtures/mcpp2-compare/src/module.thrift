@@ -55,7 +55,7 @@ const list<MyEnumA> AConstList = [1, 2, 3];
 
 const i32 AnIntegerEnum2 = MyEnumA.fieldB;
 
-const list<i32> AnIntegerEnum2 = [MyEnumA.fieldB, MyEnumA.fieldA];
+const list<i32> ListOfIntsFromEnums = [MyEnumA.fieldB, MyEnumA.fieldA];
 
 @cpp.EnumType{type = cpp.EnumUnderlyingType.U32}
 enum AnnotatedEnum {

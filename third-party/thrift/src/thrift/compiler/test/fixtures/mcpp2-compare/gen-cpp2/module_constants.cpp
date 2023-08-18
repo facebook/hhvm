@@ -102,7 +102,7 @@ constexpr char const * const module_constants::aString_;
 constexpr ::std::int32_t const module_constants::AnIntegerEnum2_;
 #endif
 
-::std::vector<::std::int32_t> const& module_constants::AnIntegerEnum2() {
+::std::vector<::std::int32_t> const& module_constants::ListOfIntsFromEnums() {
   static folly::Indestructible<::std::vector<::std::int32_t>> const instance{std::initializer_list<::std::int32_t>{static_cast<::std::int32_t>(2),
   static_cast<::std::int32_t>(1)}};
   return *instance;

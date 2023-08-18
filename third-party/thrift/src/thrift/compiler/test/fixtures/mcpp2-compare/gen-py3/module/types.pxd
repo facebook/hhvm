@@ -1633,6 +1633,6 @@ cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/src/gen-cpp2/modul
     cdef vector[cmap[string,cint32_t]] cstates "::some::valid::ns::module_constants::states"()
     cdef vector[cMyEnumA] cAConstList "::some::valid::ns::module_constants::AConstList"()
     cdef cint32_t cAnIntegerEnum2 "::some::valid::ns::module_constants::AnIntegerEnum2"
-    cdef vector[cint32_t] cAnIntegerEnum2 "::some::valid::ns::module_constants::AnIntegerEnum2"()
+    cdef vector[cint32_t] cListOfIntsFromEnums "::some::valid::ns::module_constants::ListOfIntsFromEnums"()
     cdef cMyEnumA cconstEnumA "::some::valid::ns::module_constants::constEnumA"()
     cdef cMyEnumA cconstEnumB "::some::valid::ns::module_constants::constEnumB"()

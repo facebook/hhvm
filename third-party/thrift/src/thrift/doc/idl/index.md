@@ -376,7 +376,7 @@ type_definition ::=
 interface_definition ::=  service | interaction
 ```
 
-Definitions appear at the top level of a Thrift file. A common property of all definitions is that they introduce a name (an identifier) that can be used to denote the entity such as type.
+Definitions appear at the top level of a Thrift file. A common property of all definitions is that they introduce a name (an identifier) that can be used to denote an entity such as a type. Definition names must be unique within a file.
 
 The name introduced by definitions can be used anywhere in the Thrift file (either before or after the location of the definition), and in other Thrift files that include this Thrift file.
 

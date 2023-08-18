@@ -91,6 +91,9 @@ void HQConnector::connect(
 
   session_->setSocket(quicClient);
   session_->setConnectCallback(this);
+  if (h3Settings_) {
+    session_->setEgressSettings(*h3Settings_);
+  }
   session_->startNow();
 
   VLOG(4) << "connecting to " << connectAddr.describe();

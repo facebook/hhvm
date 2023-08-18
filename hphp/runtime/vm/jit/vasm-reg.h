@@ -1274,6 +1274,7 @@ struct Vptr {
   void validate() {
     assertx((scale == 0x1 || scale == 0x2 || scale == 0x4 || scale == 0x8) &&
            "Invalid index register scaling (must be 1,2,4 or 8).");
+    assertx(IMPLIES(!index.isValid(), scale == 0x1));
   }
 
   Vreg64 base;      // optional, for baseless mode

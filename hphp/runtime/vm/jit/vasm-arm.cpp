@@ -1415,8 +1415,16 @@ void lowerVptr(Vptr& p, Vout& v) {
                   (((p.disp != 0)     & 0x1) << 2));
   switch (mode) {
     case BASE:
+      // ldr/str allow [base], nothing to lower.
+      break;
+
     case BASE | INDEX:
-      // ldr/str allow [base] and [base, index], nothing to lower.
+      if (p.scale != 1 && p.scale != uint8_t(p.width)) {
+        auto t = v.makeReg();
+        v << shlqi{Log2(p.scale), p.index, t, v.makeReg()};
+        p.index = t;
+        p.scale = 1;
+      }
       break;
 
     case INDEX:

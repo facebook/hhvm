@@ -24,12 +24,10 @@ from apache.thrift.type.standard.thrift_types import StandardProtocol, TypeName
 from apache.thrift.type.type.thrift_types import Protocol
 from folly.iobuf import IOBuf
 from thrift.python.any.any_registry import AnyRegistry
+from thrift.python.any.typestub import PrimitiveType, SerializableType
 
 # @manual=//thrift/test/testset:testset-python-types
 from thrift.test.testset import thrift_types
-
-if typing.TYPE_CHECKING:
-    from thrift.python.any.serializer import PrimitiveType, SerializableType
 
 
 TEST_STRUCT = thrift_types.struct_map_string_i32(

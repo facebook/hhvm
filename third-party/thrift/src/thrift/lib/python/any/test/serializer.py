@@ -33,18 +33,10 @@ from thrift.python.any.serializer import (
     serialize_primitive,
     serialize_set,
 )
+from thrift.python.any.typestub import PrimitiveType, SerializableType, TKey, TValue
 
 # @manual=//thrift/test/testset:testset-python-types
 from thrift.test.testset import thrift_types
-
-
-if typing.TYPE_CHECKING:
-    from thrift.python.any.serializer import (
-        PrimitiveType,
-        SerializableType,
-        TKey,
-        TValue,
-    )
 
 
 class SerializerTests(unittest.TestCase):

@@ -17,12 +17,19 @@ import typing
 from apache.thrift.type.type.thrift_types import Type
 
 from folly.iobuf import IOBuf
+
+from thrift.python.any.typestub import (
+    PrimitiveType,
+    SerializableType,
+    StructOrUnionOrException,
+    TKey,
+    TPrimitive,
+    TSerializable,
+    TValue,
+)
 from thrift.python.exceptions import GeneratedError
 from thrift.python.serializer import Protocol
 from thrift.python.types import Enum, StructOrUnion
-
-PrimitiveType = typing.Union[bool, int, float, str, bytes, IOBuf, Enum]
-TPrimitive = typing.TypeVar("TPrimitive", bound=PrimitiveType)
 
 def serialize_primitive(
     obj: TPrimitive,
@@ -35,13 +42,6 @@ def deserialize_primitive(
     protocol: Protocol = ...,
     thrift_type: typing.Optional[Type] = ...,
 ) -> TPrimitive: ...
-
-StructOrUnionOrException = typing.Union[GeneratedError, StructOrUnion]
-SerializableType = typing.Union[StructOrUnionOrException, PrimitiveType]
-TSerializable = typing.TypeVar("TSerializable", bound=SerializableType)
-TKey = typing.TypeVar("TKey", bound=SerializableType)
-TValue = typing.TypeVar("TValue", bound=SerializableType)
-
 def serialize_list(
     obj: typing.Sequence[SerializableType],
     protocol: Protocol = ...,

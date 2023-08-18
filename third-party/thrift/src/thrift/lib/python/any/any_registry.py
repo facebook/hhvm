@@ -51,24 +51,17 @@ from thrift.python.types import Enum, StructOrUnion, Union
 _ELEM_TYPE_FOR_EMPTY_CONTAINERS = Type(name=TypeName(boolType=Void.Unused))
 
 
-if typing.TYPE_CHECKING:
-    from thrift.python.any.serializer import (
-        PrimitiveType,
-        SerializableType,
-        StructOrUnionOrException,
-        TKey,
-        TSerializable,
-        TValue,
-    )
-
-    SerializableTypeOrContainers = typing.Union[
-        SerializableType,
-        typing.Sequence[TSerializable],
-        typing.AbstractSet[TSerializable],
-        typing.Mapping[TKey, TValue],
-    ]
-    ObjWithUri = typing.Union[StructOrUnionOrException, Enum]
-    ClassWithUri = typing.Type[ObjWithUri]
+from thrift.python.any.typestub import (
+    ClassWithUri,
+    ObjWithUri,
+    PrimitiveType,
+    SerializableType,
+    SerializableTypeOrContainers,
+    StructOrUnionOrException,
+    TKey,
+    TSerializable,
+    TValue,
+)
 
 
 def _standard_protocol_to_serializer_protocol(

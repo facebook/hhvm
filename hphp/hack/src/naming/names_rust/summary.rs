@@ -15,6 +15,8 @@ use relative_path::RelativePath;
 use serde::Deserialize;
 use serde::Serialize;
 
+type FileDigest = String;
+
 /// Similar to `oxidized::file_info::FileInfo`, but containing only the
 /// information which is necessary to populate the naming table (i.e., omitting
 /// positions). Includes hashes of individual decls.
@@ -23,6 +25,7 @@ pub struct FileSummary {
     pub mode: Option<file_info::Mode>,
     pub file_decls_hash: FileDeclsHash,
     pub decls: Vec<DeclSummary>,
+    pub file_digest: Option<FileDigest>,
 }
 
 impl FileSummary {
@@ -38,6 +41,7 @@ impl FileSummary {
                     hash,
                 })
                 .collect(),
+            file_digest: None,
         }
     }
 

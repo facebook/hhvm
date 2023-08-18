@@ -111,6 +111,7 @@ impl Names {
             "
             CREATE TABLE IF NOT EXISTS NAMING_FILE_INFO (
                 FILE_INFO_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                FILE_DIGEST TEXT,
                 PATH_PREFIX_TYPE INTEGER NOT NULL,
                 PATH_SUFFIX TEXT NOT NULL,
                 TYPE_CHECKER_MODE INTEGER,
@@ -651,10 +652,15 @@ impl Names {
         let suffix = path_rel.path().to_str().unwrap();
         let type_checker_mode = crate::datatypes::convert::mode_to_i64(file_summary.mode);
         let file_decls_hash = file_summary.file_decls_hash;
+        let file_digest = match &file_summary.file_digest {
+            Some(digest) => digest,
+            None => "",
+        };
 
         self.conn
             .prepare_cached(
                 "INSERT INTO NAMING_FILE_INFO(
+                FILE_DIGEST,
                 PATH_PREFIX_TYPE,
                 PATH_SUFFIX,
                 TYPE_CHECKER_MODE,
@@ -665,9 +671,10 @@ impl Names {
                 TYPEDEFS,
                 MODULES
             )
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9);",
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10);",
             )?
             .execute(params![
+                file_digest,
                 prefix_type,
                 suffix,
                 type_checker_mode,
@@ -679,6 +686,7 @@ impl Names {
                 Self::join_with_pipe(file_summary.modules()),
             ])?;
         let file_info_id = crate::FileInfoId::last_insert_rowid(&self.conn);
+
         Ok(file_info_id)
     }
 

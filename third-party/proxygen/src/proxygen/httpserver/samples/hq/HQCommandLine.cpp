@@ -211,13 +211,14 @@ void initializeTransportSettings(HQToolParams& hqUberParams) {
                                proxygen::kHQCurrentDraft};
   }
 
-  hqParams.transportSettings.advertisedInitialConnectionWindowSize =
+  hqParams.transportSettings.advertisedInitialConnectionFlowControlWindow =
       FLAGS_conn_flow_control;
-  hqParams.transportSettings.advertisedInitialBidiLocalStreamWindowSize =
+  hqParams.transportSettings.advertisedInitialBidiLocalStreamFlowControlWindow =
       FLAGS_stream_flow_control;
-  hqParams.transportSettings.advertisedInitialBidiRemoteStreamWindowSize =
+  hqParams.transportSettings
+      .advertisedInitialBidiRemoteStreamFlowControlWindow =
       FLAGS_stream_flow_control;
-  hqParams.transportSettings.advertisedInitialUniStreamWindowSize =
+  hqParams.transportSettings.advertisedInitialUniStreamFlowControlWindow =
       FLAGS_stream_flow_control;
   hqParams.congestionControlName = FLAGS_congestion;
   hqParams.congestionControl =

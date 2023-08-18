@@ -138,8 +138,8 @@ folly::AsyncTransport::UniquePtr createSocketWithIOUring(
 folly::AsyncTransport::UniquePtr createQuicSocket(
     folly::EventBase* evb, const ClientConnectionConfig& cfg) {
   static quic::TransportSettings ts{
-      .advertisedInitialConnectionWindowSize = 60 * 1024 * 1024,
-      .advertisedInitialBidiLocalStreamWindowSize = 60 * 1024 * 1024,
+      .advertisedInitialConnectionFlowControlWindow = 60 * 1024 * 1024,
+      .advertisedInitialBidiLocalStreamFlowControlWindow = 60 * 1024 * 1024,
       .numGROBuffers_ = quic::kMaxNumGROBuffers,
       .connectUDP = true,
       .pacingEnabled = true,

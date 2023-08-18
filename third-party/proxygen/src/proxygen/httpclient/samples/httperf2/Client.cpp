@@ -189,16 +189,16 @@ static quic::TransportSettings createTransportSettings() {
   transportSettings.maxRecvPacketSize = FLAGS_max_receive_packet_size;
   transportSettings.canIgnorePathMTU = FLAGS_can_ignore_pmtu;
   if (FLAGS_conn_flow_control != 0) {
-    transportSettings.advertisedInitialConnectionWindowSize =
+    transportSettings.advertisedInitialConnectionFlowControlWindow =
         FLAGS_conn_flow_control;
   }
   // TODO FLAGS_stream_*
   if (FLAGS_stream_flow_control != 0) {
-    transportSettings.advertisedInitialBidiLocalStreamWindowSize =
+    transportSettings.advertisedInitialBidiLocalStreamFlowControlWindow =
         FLAGS_stream_flow_control;
-    transportSettings.advertisedInitialBidiRemoteStreamWindowSize =
+    transportSettings.advertisedInitialBidiRemoteStreamFlowControlWindow =
         FLAGS_stream_flow_control;
-    transportSettings.advertisedInitialUniStreamWindowSize =
+    transportSettings.advertisedInitialUniStreamFlowControlWindow =
         FLAGS_stream_flow_control;
   }
 

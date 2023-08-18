@@ -23,8 +23,8 @@ namespace {
 const quic::TransportSettings& getQuicTransportSettings() {
   static quic::TransportSettings ts = ([]() {
     quic::TransportSettings ts_;
-    ts_.advertisedInitialConnectionWindowSize = 60 * 1024 * 1024;
-    ts_.advertisedInitialBidiLocalStreamWindowSize = 60 * 1024 * 1024;
+    ts_.advertisedInitialConnectionFlowControlWindow = 60 * 1024 * 1024;
+    ts_.advertisedInitialBidiLocalStreamFlowControlWindow = 60 * 1024 * 1024;
     ts_.advertisedInitialMaxStreamsBidi = 1;
     ts_.advertisedInitialMaxStreamsUni = 0;
     ts_.numGROBuffers_ = quic::kMaxNumGROBuffers;

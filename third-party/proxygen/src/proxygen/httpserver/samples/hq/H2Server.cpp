@@ -44,11 +44,13 @@ std::unique_ptr<proxygen::HTTPServerOptions> H2Server::createServerOptions(
   serverOptions->enableContentCompression =
       params.httpServerEnableContentCompression;
   serverOptions->initialReceiveWindow =
-      params.transportSettings.advertisedInitialBidiLocalStreamWindowSize;
+      params.transportSettings
+          .advertisedInitialBidiLocalStreamFlowControlWindow;
   serverOptions->receiveStreamWindowSize =
-      params.transportSettings.advertisedInitialBidiLocalStreamWindowSize;
+      params.transportSettings
+          .advertisedInitialBidiLocalStreamFlowControlWindow;
   serverOptions->receiveSessionWindowSize =
-      params.transportSettings.advertisedInitialConnectionWindowSize;
+      params.transportSettings.advertisedInitialConnectionFlowControlWindow;
   serverOptions->handlerFactories =
       proxygen::RequestHandlerChain()
           .addThen<SampleHandlerFactory>(

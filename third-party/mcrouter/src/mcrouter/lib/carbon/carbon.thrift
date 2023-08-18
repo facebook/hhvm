@@ -10,12 +10,10 @@ namespace py3 carbon.thrift
 
 cpp_include "<mcrouter/lib/carbon/Keys.h>"
 
-typedef binary (
-  cpp.type = "carbon::Keys<folly::IOBuf>",
-  cpp.indirection,
-) IOBufKey
+include "thrift/annotation/cpp.thrift"
 
-typedef binary (
-  cpp.type = "carbon::Keys<std::string>",
-  cpp.indirection,
-) StringKey
+@cpp.Type{name = "carbon::Keys<folly::IOBuf>"}
+typedef binary (cpp.indirection) IOBufKey
+
+@cpp.Type{name = "carbon::Keys<std::string>"}
+typedef binary (cpp.indirection) StringKey

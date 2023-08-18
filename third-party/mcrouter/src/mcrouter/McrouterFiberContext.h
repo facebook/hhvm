@@ -93,6 +93,23 @@ class fiber_local {
     std::shared_ptr<AxonContext> axonCtx{nullptr};
   };
 
+  static auto makeGuardHelperBase(McrouterFiberContext&& tmp) {
+    return folly::makeGuard([tmp]() mutable {
+      folly::fibers::local<McrouterFiberContext>() = std::move(tmp);
+    });
+  }
+
+  static auto makeGuardHelperCopy() {
+    auto tmp = folly::fibers::local<McrouterFiberContext>();
+    return makeGuardHelperBase(std::move(tmp));
+  }
+
+  static auto makeGuardHelperReset() {
+    auto tmp = std::move(folly::fibers::local<McrouterFiberContext>());
+    folly::fibers::local<McrouterFiberContext>() = McrouterFiberContext();
+    return makeGuardHelperBase(std::move(tmp));
+  }
+
  public:
   using ContextTypeTag = folly::fibers::LocalType<McrouterFiberContext>;
 
@@ -101,11 +118,7 @@ class fiber_local {
    */
   template <class F>
   static typename std::result_of<F()>::type runWithoutLocals(F&& f) {
-    auto tmp = std::move(folly::fibers::local<McrouterFiberContext>());
-    folly::fibers::local<McrouterFiberContext>() = McrouterFiberContext();
-    auto guard = folly::makeGuard([&tmp]() mutable {
-      folly::fibers::local<McrouterFiberContext>() = std::move(tmp);
-    });
+    auto guard = makeGuardHelperReset();
 
     return f();
   }
@@ -115,10 +128,7 @@ class fiber_local {
    */
   template <class F>
   static typename std::result_of<F()>::type runWithLocals(F&& f) {
-    auto tmp = folly::fibers::local<McrouterFiberContext>();
-    auto guard = folly::makeGuard([&tmp]() mutable {
-      folly::fibers::local<McrouterFiberContext>() = std::move(tmp);
-    });
+    auto guard = makeGuardHelperCopy();
 
     return f();
   }

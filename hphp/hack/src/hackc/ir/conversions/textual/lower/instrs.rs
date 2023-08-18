@@ -715,6 +715,10 @@ impl TransformInstr for LowerInstrs<'_> {
                 let lid = LocalId::Named(lid);
                 Instr::Hhbc(Hhbc::CGetL(lid, loc))
             }
+            Instr::Hhbc(Hhbc::Silence(..)) => {
+                // Silence sets hhvm error reporting level, no-op here
+                Instr::tombstone()
+            }
             Instr::Hhbc(Hhbc::VerifyOutType(vid, lid, loc)) => {
                 self.verify_out_type(builder, vid, lid, loc)
             }

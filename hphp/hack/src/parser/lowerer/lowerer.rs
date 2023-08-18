@@ -2768,6 +2768,8 @@ fn handle_loop_body<'a>(pos: Pos, node: S<'a>, env: &mut Env<'a>) -> Result<ast:
 
 fn is_simple_assignment_await_expression<'a>(node: S<'a>) -> bool {
     match &node.children {
+        ParenthesizedExpression(c) => is_simple_assignment_await_expression(&c.expression),
+        BracedExpression(c) => is_simple_assignment_await_expression(&c.expression),
         BinaryExpression(c) => {
             token_kind(&c.operator) == Some(TK::Equal)
                 && is_simple_await_expression(&c.right_operand)
@@ -2778,6 +2780,8 @@ fn is_simple_assignment_await_expression<'a>(node: S<'a>) -> bool {
 
 fn is_simple_await_expression<'a>(node: S<'a>) -> bool {
     match &node.children {
+        ParenthesizedExpression(c) => is_simple_await_expression(&c.expression),
+        BracedExpression(c) => is_simple_await_expression(&c.expression),
         PrefixUnaryExpression(c) => token_kind(&c.operator) == Some(TK::Await),
         _ => false,
     }

@@ -150,6 +150,8 @@ folly::AsyncSocketTransport::UniquePtr moveToPlaintext(FizzSocket* fizzSock) {
     if (io) {
       io->setReadCB(nullptr);
       io->setApplicationProtocol(fizzSock->getApplicationProtocol());
+      io->setSelfCertificate(selfCert);
+      io->setPeerCertificate(peerCert);
       plaintextTransport = std::move(io);
     }
   }

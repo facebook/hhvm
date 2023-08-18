@@ -248,6 +248,10 @@ HTTPSession::~HTTPSession() {
     flowControlTimeout_.cancelTimeout();
   }
 
+  if (pingProber_ && pingProber_->isScheduled()) {
+    pingProber_->cancelProbes();
+  }
+
   runDestroyCallbacks();
 }
 

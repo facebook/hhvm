@@ -8,6 +8,8 @@
  *
  */
 
+namespace {
+
 const int DNS_A;
 const int DNS_A6;
 const int DNS_AAAA;
@@ -213,3 +215,14 @@ function openlog(
 function closelog(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function syslog(int $priority, string $message): bool;
+
+}
+
+namespace HH {
+
+<<__PHPStdLib>>
+function parse_cookies(
+  string $header_value,
+)[]: dict<arraykey, mixed>;
+
+}

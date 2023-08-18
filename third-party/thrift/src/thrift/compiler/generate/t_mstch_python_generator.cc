@@ -52,46 +52,59 @@ bool is_type_iobuf(const t_type* type) {
   return is_type_iobuf(cpp2::get_type(type));
 }
 
-const t_const_value* structured_type_override(
-    const t_named& node, const char* key = "name") {
-  if (auto annotation = node.find_structured_annotation_or_null(kCppTypeUri)) {
-    if (auto type_name =
-            annotation->get_value_from_structured_annotation_or_null(key)) {
-      return type_name;
-    }
+// t_node must be t_type or t_field
+const t_const* find_structured_annotation(const t_node& node, const char* uri) {
+  if (auto field = dynamic_cast<const t_field*>(&node)) {
+    const t_const* annotation = field->find_structured_annotation_or_null(uri);
+    return annotation ? annotation
+                      : t_typedef::get_first_structured_annotation_or_null(
+                            field->get_type(), uri);
+  } else if (auto type = dynamic_cast<const t_type*>(&node)) {
+    return t_typedef::get_first_structured_annotation_or_null(type, uri);
   }
   return nullptr;
 }
 
-std::string_view cpp_type_override(const t_field& field) {
-  if (auto type_override = structured_type_override(field)) {
-    return type_override->get_string();
+const t_const_value* structured_type_override(
+    const t_node& node, const char* key = "name") {
+  if (auto annotation = find_structured_annotation(node, kCppTypeUri)) {
+    return annotation->get_value_from_structured_annotation_or_null(key);
   }
-  if (auto typedef_override = structured_type_override(*field.get_type())) {
-    return typedef_override->get_string();
-  }
-  return cpp2::get_type(field.get_type()->get_true_type());
+  return nullptr;
 }
 
-std::string resolve_binary_type(const t_type& type, const t_field* field) {
-  // structured annotation may occur on field or typedef
-  if (field) {
-    if (auto type_override = structured_type_override(*field)) {
-      if (is_type_iobuf(type_override->get_string())) {
-        return type_override->get_string();
-      }
+const t_type* type_of_node(const t_node& node) {
+  if (auto* field = dynamic_cast<const t_field*>(&node)) {
+    return field->get_type();
+  } else if (auto* type = dynamic_cast<const t_type*>(&node)) {
+    return type;
+  }
+  return nullptr;
+}
+
+std::string_view cpp_type_override(const t_node& node) {
+  if (auto typedef_override = structured_type_override(node)) {
+    return typedef_override->get_string();
+  }
+  if (auto type = type_of_node(node)) {
+    // finds unstructured annotation type, if present
+    return cpp2::get_type(type->get_true_type());
+  }
+  return "";
+}
+
+std::string_view get_cpp_template(const t_node& node) {
+  if (auto template_override = structured_type_override(node, "template")) {
+    return template_override->get_string();
+  }
+  if (auto type = type_of_node(node)) {
+    // finds unstructured annotation template, if present
+    if (const auto* _template = type->get_true_type()->find_annotation_or_null(
+            {"cpp.template", "cpp2.template"})) {
+      return *_template;
     }
   }
-  if (auto type_override = structured_type_override(type)) {
-    if (is_type_iobuf(type_override->get_string())) {
-      return type_override->get_string();
-    }
-  }
-  std::string_view true_type = cpp2::get_type(type.get_true_type());
-  if (is_type_iobuf(true_type)) {
-    return std::string(true_type);
-  }
-  return "Bytes";
+  return "";
 }
 
 const t_const* find_structured_adapter_annotation(const t_named& node) {
@@ -183,39 +196,29 @@ mstch::node adapter_node(
   return node;
 }
 
-std::string_view get_cpp_template(const t_field& field) {
-  if (auto template_override = structured_type_override(field, "template")) {
-    return template_override->get_string();
-  }
-  if (const auto* val =
-          field.get_type()->get_true_type()->find_annotation_or_null(
-              {"cpp.template", "cpp2.template"})) {
-    return *val;
-  }
-  return "";
-}
-
+// Formats a field's type, or a sub-type
+// of a compound type (e.g., a container)
+// Hence, assumes t_node is a t_field or t_type
 std::string format_marshal_type(
-    const t_type* field_type,
-    const t_field& field,
-    std::string type_override = "");
+    const t_node& node, std::string_view type_override = "");
 
+// Assumes t_node is a t_field or t_type
 std::string format_unary_type(
-    const t_field& field,
+    const t_node& node,
     const t_type* elem_type,
     const char* container,
-    std::string type_override) {
+    std::string_view type_override) {
   if (type_override.empty()) {
-    type_override = cpp_type_override(field);
+    type_override = cpp_type_override(node);
   }
   if (!type_override.empty()) {
     std::string elem_thrift_type = format_marshal_type(
-        elem_type, field, fmt::format("{}::value_type", type_override));
+        *elem_type, fmt::format("{}::value_type", type_override));
     return fmt::format(
         "{}<{}, {}>", container, elem_thrift_type, type_override);
   }
-  auto template_override = get_cpp_template(field);
-  std::string elem_thrift_type = format_marshal_type(elem_type, field);
+  auto template_override = get_cpp_template(node);
+  std::string elem_thrift_type = format_marshal_type(*elem_type);
   if (!template_override.empty()) {
     return fmt::format(
         "{}<{}, {}<native_t<{}>>>",
@@ -227,25 +230,26 @@ std::string format_unary_type(
   return fmt::format("{}<{}>", container, elem_thrift_type);
 }
 
+// Assumes t_node is a t_field or t_type
 std::string format_map_type(
-    const t_field& field,
+    const t_node& node,
     const t_type* key_type,
     const t_type* val_type,
-    std::string type_override) {
+    std::string_view type_override) {
   if (type_override.empty()) {
-    type_override = cpp_type_override(field);
+    type_override = cpp_type_override(node);
   }
   if (!type_override.empty()) {
     std::string key_thrift_type = format_marshal_type(
-        key_type, field, fmt::format("{}::key_type", type_override));
+        *key_type, fmt::format("{}::key_type", type_override));
     std::string val_thrift_type = format_marshal_type(
-        val_type, field, fmt::format("{}::mapped_type", type_override));
+        *val_type, fmt::format("{}::mapped_type", type_override));
     return fmt::format(
         "map<{}, {}, {}>", key_thrift_type, val_thrift_type, type_override);
   }
-  auto template_override = get_cpp_template(field);
-  std::string key_thrift_type = format_marshal_type(key_type, field);
-  std::string val_thrift_type = format_marshal_type(val_type, field);
+  auto template_override = get_cpp_template(node);
+  std::string key_thrift_type = format_marshal_type(*key_type);
+  std::string val_thrift_type = format_marshal_type(*val_type);
   if (!template_override.empty()) {
     return fmt::format(
         "map<{}, {}, {}<native_t<{}>, native_t<{}>>>",
@@ -258,52 +262,56 @@ std::string format_map_type(
   return fmt::format("map<{}, {}>", key_thrift_type, val_thrift_type);
 }
 
+// Assumes t_node is a t_field or t_type
 std::string format_marshal_type(
-    const t_type* field_type, const t_field& field, std::string type_override) {
-  const t_type* type = field_type->get_true_type();
-  if (type->is_bool()) {
-    return "bool";
-  } else if (type->is_byte()) {
-    return "int8_t";
-  } else if (type->is_i16()) {
-    return "int16_t";
-  } else if (type->is_i32()) {
-    return "int32_t";
-  } else if (type->is_i64()) {
-    return "int64_t";
-  } else if (type->is_float()) {
-    return "float";
-  } else if (type->is_double()) {
-    return "double";
-  } else if (type->is_binary()) {
-    // field only relevant for type resolution on outer type; not used
-    // for container element type resolution
-    return resolve_binary_type(
-        *field_type, type_override.empty() ? &field : nullptr);
-  } else if (type->is_string()) {
+    const t_node& node, std::string_view type_override) {
+  const t_type* maybe_typedef = type_of_node(node);
+  const t_type* true_type = maybe_typedef->get_true_type();
+  std::string_view t_override = cpp_type_override(node);
+  auto override_or = [&](const char* default_) {
+    return t_override.empty() ? std::string(default_) : std::string(t_override);
+  };
+  if (true_type->is_bool()) {
+    return override_or("bool");
+  } else if (true_type->is_byte()) {
+    return override_or("int8_t");
+  } else if (true_type->is_i16()) {
+    return override_or("int16_t");
+  } else if (true_type->is_i32()) {
+    return override_or("int32_t");
+  } else if (true_type->is_i64()) {
+    return override_or("int64_t");
+  } else if (true_type->is_float()) {
+    return override_or("float");
+  } else if (true_type->is_double()) {
+    return override_or("double");
+  } else if (true_type->is_binary() && is_type_iobuf(t_override)) {
+    return override_or("Bytes");
+  } else if (true_type->is_string_or_binary()) {
     // unicode's internal_data representation is binary
     return "Bytes";
-  } else if (type->is_enum()) {
+  } else if (true_type->is_enum()) {
     return fmt::format(
-        "apache::thrift::python::capi::ComposedEnum<{}::{}>",
-        cpp2::get_gen_namespace(*type->program()),
-        cpp2::get_name(type));
-  } else if (type->is_struct() || type->is_exception()) {
+        "::apache::thrift::python::capi::ComposedEnum<{}::{}>",
+        cpp2::get_gen_namespace(*true_type->program()),
+        cpp2::get_name(true_type));
+  } else if (true_type->is_struct() || true_type->is_exception()) {
     return fmt::format(
-        "apache::thrift::python::capi::ComposedStruct<{}::{}>",
-        cpp2::get_gen_namespace(*type->program()),
-        cpp2::get_name(type));
-  } else if (type->is_list()) {
-    const auto* elem_type = dynamic_cast<const t_list*>(type)->get_elem_type();
-    return format_unary_type(
-        field, elem_type, "list", std::move(type_override));
-  } else if (type->is_set()) {
-    const auto* elem_type = dynamic_cast<const t_set*>(type)->get_elem_type();
-    return format_unary_type(field, elem_type, "set", std::move(type_override));
-  } else if (type->is_map()) {
-    const auto* key_type = dynamic_cast<const t_map*>(type)->get_key_type();
-    const auto* val_type = dynamic_cast<const t_map*>(type)->get_val_type();
-    return format_map_type(field, key_type, val_type, std::move(type_override));
+        "::apache::thrift::python::capi::ComposedStruct<{}::{}>",
+        cpp2::get_gen_namespace(*true_type->program()),
+        cpp2::get_name(true_type));
+  } else if (true_type->is_list()) {
+    const auto* elem_type =
+        dynamic_cast<const t_list*>(true_type)->get_elem_type();
+    return format_unary_type(node, elem_type, "list", type_override);
+  } else if (true_type->is_set()) {
+    const auto* elem_type =
+        dynamic_cast<const t_set*>(true_type)->get_elem_type();
+    return format_unary_type(node, elem_type, "set", type_override);
+  } else if (true_type->is_map()) {
+    const auto* map = dynamic_cast<const t_map*>(true_type);
+    return format_map_type(
+        node, map->get_key_type(), map->get_val_type(), type_override);
   }
   // if not supported, empty string to cause compile error
   return "";
@@ -1008,7 +1016,7 @@ class python_mstch_struct : public mstch_struct {
     return !struct_->generated() &&
         (has_option("marshal_python_capi") ||
          marshal_capi_override_annotation(*struct_) ||
-         struct_->fields().size() == 0);
+         struct_->fields().empty());
   }
 
   mstch::node adapter() {
@@ -1114,9 +1122,7 @@ class python_mstch_field : public mstch_field {
         adapter_annotation_, transitive_adapter_annotation_, context_, pos_);
   }
 
-  mstch::node marshal_type() {
-    return format_marshal_type(field_->get_type(), *field_);
-  }
+  mstch::node marshal_type() { return format_marshal_type(*field_); }
 
  private:
   const std::string py_name_;

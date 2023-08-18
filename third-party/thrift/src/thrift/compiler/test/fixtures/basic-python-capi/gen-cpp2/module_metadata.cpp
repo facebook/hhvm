@@ -302,7 +302,7 @@ StructMetadata<::test::fixtures::basic-python-capi::MapStruct>::gen(ThriftMetada
   module_MapStruct.name() = "module.MapStruct";
   module_MapStruct.is_union() = false;
   static const auto* const
-  module_MapStruct_fields = new std::array<EncodedThriftField, 9>{{
+  module_MapStruct_fields = new std::array<EncodedThriftField, 10>{{
     {1, "enumz", false, std::make_unique<Map>(std::make_unique<Enum<::test::fixtures::basic-python-capi::MyEnum>>("module.MyEnum"), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{}},
     {2, "intz", true, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{}},
     {3, "binnaz", true, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::make_unique<Struct<::test::fixtures::basic-python-capi::PrimitiveStruct>>("module.PrimitiveStruct")), std::vector<ThriftConstStruct>{*cvStruct("thrift.Box", {}).cv_struct_ref(), }},
@@ -312,6 +312,7 @@ StructMetadata<::test::fixtures::basic-python-capi::MapStruct>::gen(ThriftMetada
     {7, "list_map", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE))), std::vector<ThriftConstStruct>{}},
     {8, "fast_list_map", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE))), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"name", cvString("folly::F14FastMap<int, folly::fbvector<double>>")}}).cv_struct_ref(), }},
     {9, "buf_map", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::make_unique<Typedef>("module.IOBufPtr", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"name", cvString("std::unique_ptr<folly::IOBuf>")}}).cv_struct_ref(), })), std::vector<ThriftConstStruct>{}},
+    {10, "unsigned_list_map", false, std::make_unique<Map>(std::make_unique<Typedef>("module.ui64", std::make_unique<Typedef>("module.uint64", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"name", cvString("uint64_t")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{}), std::make_unique<List>(std::make_unique<Typedef>("module.ui64", std::make_unique<Typedef>("module.uint64", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"name", cvString("uint64_t")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{}))), std::vector<ThriftConstStruct>{}},
   }};
   for (const auto& f : *module_MapStruct_fields) {
     ::apache::thrift::metadata::ThriftField field;

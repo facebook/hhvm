@@ -2825,6 +2825,23 @@ _readField_buf_map:
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
           9,
+          10,
+          apache::thrift::protocol::T_MAP))) {
+    goto _loop;
+  }
+_readField_unsigned_list_map:
+  {
+    _readState.beforeSubobject(iprot);
+    this->__fbthrift_field_unsigned_list_map = ::std::map<::test::fixtures::basic-python-capi::ui64, ::std::vector<::test::fixtures::basic-python-capi::ui64>>();
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::list<::apache::thrift::type_class::integral>>, ::std::map<::test::fixtures::basic-python-capi::ui64, ::std::vector<::test::fixtures::basic-python-capi::ui64>>>::readWithContext(*iprot, this->__fbthrift_field_unsigned_list_map, _readState);
+    _readState.afterSubobject(iprot);
+    
+  }
+ this->__isset.set(8, true);
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          10,
           0,
           apache::thrift::protocol::T_STOP))) {
     goto _loop;
@@ -2917,6 +2934,14 @@ _loop:
         goto _skip;
       }
     }
+    case 10:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_MAP))) {
+        goto _readField_unsigned_list_map;
+      } else {
+        goto _skip;
+      }
+    }
     default:
     {
 _skip:
@@ -2968,6 +2993,10 @@ uint32_t MapStruct::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("buf_map", apache::thrift::protocol::T_MAP, 9);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::binary, ::apache::thrift::type_class::binary>, ::std::map<::std::string, ::test::fixtures::basic-python-capi::IOBufPtr>>::serializedSize<false>(*prot_, this->__fbthrift_field_buf_map);
   }
+  {
+    xfer += prot_->serializedFieldSize("unsigned_list_map", apache::thrift::protocol::T_MAP, 10);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::list<::apache::thrift::type_class::integral>>, ::std::map<::test::fixtures::basic-python-capi::ui64, ::std::vector<::test::fixtures::basic-python-capi::ui64>>>::serializedSize<false>(*prot_, this->__fbthrift_field_unsigned_list_map);
+  }
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -3011,6 +3040,10 @@ uint32_t MapStruct::serializedSizeZC(Protocol_ const* prot_) const {
   {
     xfer += prot_->serializedFieldSize("buf_map", apache::thrift::protocol::T_MAP, 9);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::binary, ::apache::thrift::type_class::binary>, ::std::map<::std::string, ::test::fixtures::basic-python-capi::IOBufPtr>>::serializedSize<false>(*prot_, this->__fbthrift_field_buf_map);
+  }
+  {
+    xfer += prot_->serializedFieldSize("unsigned_list_map", apache::thrift::protocol::T_MAP, 10);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::list<::apache::thrift::type_class::integral>>, ::std::map<::test::fixtures::basic-python-capi::ui64, ::std::vector<::test::fixtures::basic-python-capi::ui64>>>::serializedSize<false>(*prot_, this->__fbthrift_field_unsigned_list_map);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -3086,6 +3119,13 @@ uint32_t MapStruct::write(Protocol_* prot_) const {
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_MAP, 9, kPrevFieldId>(*prot_, "buf_map", previousFieldHasValue);
     previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::binary, ::apache::thrift::type_class::binary>, ::std::map<::std::string, ::test::fixtures::basic-python-capi::IOBufPtr>>::write(*prot_, this->__fbthrift_field_buf_map);
+    xfer += prot_->writeFieldEnd();
+  }
+  {
+    constexpr int16_t kPrevFieldId = 9;
+    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_MAP, 10, kPrevFieldId>(*prot_, "unsigned_list_map", previousFieldHasValue);
+    previousFieldHasValue = true;
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::list<::apache::thrift::type_class::integral>>, ::std::map<::test::fixtures::basic-python-capi::ui64, ::std::vector<::test::fixtures::basic-python-capi::ui64>>>::write(*prot_, this->__fbthrift_field_unsigned_list_map);
     xfer += prot_->writeFieldEnd();
   }
   xfer += prot_->writeFieldStop();

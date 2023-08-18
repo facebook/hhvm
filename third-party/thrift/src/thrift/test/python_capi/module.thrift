@@ -32,6 +32,10 @@ cpp_include "thrift/lib/cpp2/util/ManagedStringView.h"
 
 package "thrift.org/test/python_capi"
 
+@cpp.Type{name = "uint64_t"}
+typedef i64 uint64
+typedef uint64 ui64
+
 enum MyEnum {
   MyValue1 = 0,
   MyValue2 = 1,
@@ -165,6 +169,7 @@ struct MapStruct {
   @cpp.Type{name = "folly::F14FastMap<int, folly::fbvector<double>>"}
   8: map<i32, list<double>> fast_list_map;
   9: map<binary, IOBufPtr> buf_map;
+  10: map<ui64, list<ui64>> unsigned_list_map;
 }
 
 @python.MarshalCapi

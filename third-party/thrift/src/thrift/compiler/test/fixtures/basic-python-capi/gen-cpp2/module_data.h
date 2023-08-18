@@ -204,7 +204,7 @@ template <> struct TStructDataStorage<::test::fixtures::basic-python-capi::SetSt
 };
 
 template <> struct TStructDataStorage<::test::fixtures::basic-python-capi::MapStruct> {
-  static constexpr const std::size_t fields_size = 9;
+  static constexpr const std::size_t fields_size = 10;
   static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;

@@ -741,6 +741,14 @@ class MapStruct(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
         ),
+        (
+            10,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "unsigned_list_map",  # name
+            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_i64, _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i64)),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
     )
 
     @staticmethod
@@ -1788,6 +1796,8 @@ _fbthrift_all_structs = [
 ]
 _fbthrift_python_types.fill_specs(*_fbthrift_all_structs)
 
+uint64 = int
+ui64 = int
 signed_byte = int
 IOBuf = _fbthrift_iobuf.IOBuf
 IOBufPtr = _fbthrift_iobuf.IOBuf

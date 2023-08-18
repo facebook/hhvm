@@ -74,9 +74,9 @@ class PythonCapiFixture(unittest.TestCase):
         return PrimitiveStruct(
             booly=True,
             charry=-9,
-            shorty=-1,
+            shorty=2**15 - 1,
             inty=2**31 - 1,
-            longy=-(2**63),
+            longy=2**63 - 1,
             floaty=-1.0,
             dubby=-1.0,
             stringy="€ to £ to ₹",
@@ -94,9 +94,9 @@ class PythonCapiFixture(unittest.TestCase):
         return PrimitiveStruct(
             booly=True,
             # charry left deliberately unset, should be 0
-            shorty=-1,
+            shorty=0,
             inty=2**31 - 1,
-            longy=-(2**63),
+            longy=2**63 - 1,
             # leave optional `floaty` `dubby`, `stringy`, `bytey` unset
         )
 
@@ -163,9 +163,10 @@ class PythonCapiFixture(unittest.TestCase):
             encoded={"wdf": 3.1, "wef": 2.9},
             flotz={i: float(i) for i in range(5)},
             map_list=[{i: i**2 for i in range(j)} for j in range(2)],
-            list_map={1: [1, 2, 3, 5], 2: [4, 8, 16]},
+            list_map={-1: [1, -2, 3, -5], 2: [4, -8, 16]},
             fast_list_map={1: [-1.0, 1.0], -1: [1.0, -1.0]},
             buf_map={x: IOBuf(memoryview(x)) for x in [b"qergq", b"", b"wefwi"]},
+            unsigned_list_map={1: [1, 2, 3, 5], 2: [4, 8, 16]},
         )
 
     def empty_maps(self) -> MapStruct:
@@ -244,6 +245,22 @@ class PythonCapiRoundtrip(PythonCapiFixture):
             fixture.roundtrip_MyUnion(MyEnum.MyValue1)
         with self.assertRaises(AttributeError):
             fixture.roundtrip_MyEnum(self.my_struct())
+
+    def test_roundtrip_OverflowError(self) -> None:
+        ## Failures on extraction to cpp
+        negative_msg = "can't convert negative"
+        with self.assertRaisesRegex(OverflowError, negative_msg):
+            fixture.roundtrip_PrimitiveStruct(PrimitiveStruct(shorty=-1))
+        with self.assertRaisesRegex(OverflowError, negative_msg):
+            fixture.roundtrip_PrimitiveStruct(PrimitiveStruct(longy=-1))
+        with self.assertRaisesRegex(OverflowError, negative_msg):
+            fixture.roundtrip_MapStruct(MapStruct(unsigned_list_map={1: [1, -1]}))
+        with self.assertRaisesRegex(OverflowError, negative_msg):
+            fixture.roundtrip_MapStruct(MapStruct(unsigned_list_map={-1: [1, 3]}))
+
+        ## Failure on creation of thrift-python object (existing behavior)
+        with self.assertRaises(OverflowError):
+            fixture.roundtrip_PrimitiveStruct(PrimitiveStruct(shorty=2**15))
 
     def test_roundtrip_marshal_PrimitiveStruct(self) -> None:
         self.assertEqual(

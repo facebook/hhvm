@@ -225,6 +225,8 @@ struct VisitByFieldId<::test::fixtures::basic-python-capi::MapStruct> {
       return f(7, static_cast<T&&>(t).fast_list_map_ref());
     case 9:
       return f(8, static_cast<T&&>(t).buf_map_ref());
+    case 10:
+      return f(9, static_cast<T&&>(t).unsigned_list_map_ref());
     default:
       throwInvalidThriftId(fieldId, "::test::fixtures::basic-python-capi::MapStruct");
     }

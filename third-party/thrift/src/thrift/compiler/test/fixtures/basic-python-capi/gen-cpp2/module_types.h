@@ -79,6 +79,7 @@ struct map_list;
 struct list_map;
 struct fast_list_map;
 struct buf_map;
+struct unsigned_list_map;
 struct enum_;
 struct renamed_;
 struct primitive;
@@ -359,6 +360,10 @@ APACHE_THRIFT_DEFINE_ACCESSOR(fast_list_map);
 #ifndef APACHE_THRIFT_ACCESSOR_buf_map
 #define APACHE_THRIFT_ACCESSOR_buf_map
 APACHE_THRIFT_DEFINE_ACCESSOR(buf_map);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_unsigned_list_map
+#define APACHE_THRIFT_ACCESSOR_unsigned_list_map
+APACHE_THRIFT_DEFINE_ACCESSOR(unsigned_list_map);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_enum_
 #define APACHE_THRIFT_ACCESSOR_enum_
@@ -741,6 +746,8 @@ using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
+typedef uint64_t uint64;
+typedef ::test::fixtures::basic-python-capi::uint64 ui64;
 typedef ::std::int8_t signed_byte;
 typedef folly::IOBuf IOBuf;
 typedef std::unique_ptr<folly::IOBuf> IOBufPtr;
@@ -4016,10 +4023,11 @@ class MapStruct final  {
     ::apache::thrift::ident::map_list,
     ::apache::thrift::ident::list_map,
     ::apache::thrift::ident::fast_list_map,
-    ::apache::thrift::ident::buf_map
+    ::apache::thrift::ident::buf_map,
+    ::apache::thrift::ident::unsigned_list_map
   >;
 
-  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8,9};
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8,9,10};
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::map<::apache::thrift::type::enum_t<::test::fixtures::basic-python-capi::MyEnum>, ::apache::thrift::type::string_t>,
     ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::string_t>,
@@ -4029,10 +4037,11 @@ class MapStruct final  {
     ::apache::thrift::type::list<::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::i64_t>>,
     ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::list<::apache::thrift::type::i64_t>>,
     ::apache::thrift::type::cpp_type<folly::F14FastMap<int, folly::fbvector<double>>, ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::list<::apache::thrift::type::double_t>>>,
-    ::apache::thrift::type::map<::apache::thrift::type::binary_t, ::apache::thrift::type::cpp_type<std::unique_ptr<folly::IOBuf>, ::apache::thrift::type::binary_t>>
+    ::apache::thrift::type::map<::apache::thrift::type::binary_t, ::apache::thrift::type::cpp_type<std::unique_ptr<folly::IOBuf>, ::apache::thrift::type::binary_t>>,
+    ::apache::thrift::type::map<::apache::thrift::type::cpp_type<uint64_t, ::apache::thrift::type::i64_t>, ::apache::thrift::type::list<::apache::thrift::type::cpp_type<uint64_t, ::apache::thrift::type::i64_t>>>
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 9;
+  static constexpr std::size_t __fbthrift_field_size_v = 10;
 
   template<class T>
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
@@ -4066,7 +4075,7 @@ class MapStruct final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  MapStruct(apache::thrift::FragileConstructor, ::std::map<::test::fixtures::basic-python-capi::MyEnum, ::std::string> enumz__arg, ::std::map<::std::int32_t, ::std::string> intz__arg, ::apache::thrift::detail::boxed_value_ptr<::std::map<::std::string, ::test::fixtures::basic-python-capi::PrimitiveStruct>> binnaz__arg, std::unordered_map<::std::string, double> encoded__arg, std::unordered_map<uint64_t, float> flotz__arg, ::std::vector<::std::map<::std::int32_t, ::std::int64_t>> map_list__arg, ::std::map<::std::int32_t, ::std::vector<::std::int64_t>> list_map__arg, folly::F14FastMap<int, folly::fbvector<double>> fast_list_map__arg, ::std::map<::std::string, ::test::fixtures::basic-python-capi::IOBufPtr> buf_map__arg);
+  MapStruct(apache::thrift::FragileConstructor, ::std::map<::test::fixtures::basic-python-capi::MyEnum, ::std::string> enumz__arg, ::std::map<::std::int32_t, ::std::string> intz__arg, ::apache::thrift::detail::boxed_value_ptr<::std::map<::std::string, ::test::fixtures::basic-python-capi::PrimitiveStruct>> binnaz__arg, std::unordered_map<::std::string, double> encoded__arg, std::unordered_map<uint64_t, float> flotz__arg, ::std::vector<::std::map<::std::int32_t, ::std::int64_t>> map_list__arg, ::std::map<::std::int32_t, ::std::vector<::std::int64_t>> list_map__arg, folly::F14FastMap<int, folly::fbvector<double>> fast_list_map__arg, ::std::map<::std::string, ::test::fixtures::basic-python-capi::IOBufPtr> buf_map__arg, ::std::map<::test::fixtures::basic-python-capi::ui64, ::std::vector<::test::fixtures::basic-python-capi::ui64>> unsigned_list_map__arg);
 
   MapStruct(MapStruct&&) noexcept;
   MapStruct(const MapStruct& src);
@@ -4096,7 +4105,9 @@ class MapStruct final  {
  private:
   ::std::map<::std::string, ::test::fixtures::basic-python-capi::IOBufPtr> __fbthrift_field_buf_map;
  private:
-  apache::thrift::detail::isset_bitset<8, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+  ::std::map<::test::fixtures::basic-python-capi::ui64, ::std::vector<::test::fixtures::basic-python-capi::ui64>> __fbthrift_field_unsigned_list_map;
+ private:
+  apache::thrift::detail::isset_bitset<9, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
  public:
 
@@ -4462,6 +4473,46 @@ class MapStruct final  {
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> buf_map() && {
     return {static_cast<T&&>(this->__fbthrift_field_buf_map), __isset.at(7), __isset.bit(7)};
   }
+
+  template <typename..., typename T = ::std::map<::test::fixtures::basic-python-capi::ui64, ::std::vector<::test::fixtures::basic-python-capi::ui64>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> unsigned_list_map_ref() const& {
+    return {this->__fbthrift_field_unsigned_list_map, __isset.at(8), __isset.bit(8)};
+  }
+
+  template <typename..., typename T = ::std::map<::test::fixtures::basic-python-capi::ui64, ::std::vector<::test::fixtures::basic-python-capi::ui64>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> unsigned_list_map_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_unsigned_list_map), __isset.at(8), __isset.bit(8)};
+  }
+
+  template <typename..., typename T = ::std::map<::test::fixtures::basic-python-capi::ui64, ::std::vector<::test::fixtures::basic-python-capi::ui64>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> unsigned_list_map_ref() & {
+    return {this->__fbthrift_field_unsigned_list_map, __isset.at(8), __isset.bit(8)};
+  }
+
+  template <typename..., typename T = ::std::map<::test::fixtures::basic-python-capi::ui64, ::std::vector<::test::fixtures::basic-python-capi::ui64>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> unsigned_list_map_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_unsigned_list_map), __isset.at(8), __isset.bit(8)};
+  }
+
+  template <typename..., typename T = ::std::map<::test::fixtures::basic-python-capi::ui64, ::std::vector<::test::fixtures::basic-python-capi::ui64>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> unsigned_list_map() const& {
+    return {this->__fbthrift_field_unsigned_list_map, __isset.at(8), __isset.bit(8)};
+  }
+
+  template <typename..., typename T = ::std::map<::test::fixtures::basic-python-capi::ui64, ::std::vector<::test::fixtures::basic-python-capi::ui64>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> unsigned_list_map() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_unsigned_list_map), __isset.at(8), __isset.bit(8)};
+  }
+
+  template <typename..., typename T = ::std::map<::test::fixtures::basic-python-capi::ui64, ::std::vector<::test::fixtures::basic-python-capi::ui64>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> unsigned_list_map() & {
+    return {this->__fbthrift_field_unsigned_list_map, __isset.at(8), __isset.bit(8)};
+  }
+
+  template <typename..., typename T = ::std::map<::test::fixtures::basic-python-capi::ui64, ::std::vector<::test::fixtures::basic-python-capi::ui64>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> unsigned_list_map() && {
+    return {static_cast<T&&>(this->__fbthrift_field_unsigned_list_map), __isset.at(8), __isset.bit(8)};
+  }
   const ::std::map<::test::fixtures::basic-python-capi::MyEnum, ::std::string>& get_enumz() const&;
   ::std::map<::test::fixtures::basic-python-capi::MyEnum, ::std::string> get_enumz() &&;
 
@@ -4534,6 +4585,15 @@ class MapStruct final  {
   ::std::map<::std::string, ::test::fixtures::basic-python-capi::IOBufPtr>& set_buf_map(T_MapStruct_buf_map_struct_setter&& buf_map_) {
     buf_map_ref() = std::forward<T_MapStruct_buf_map_struct_setter>(buf_map_);
     return __fbthrift_field_buf_map;
+  }
+  const ::std::map<::test::fixtures::basic-python-capi::ui64, ::std::vector<::test::fixtures::basic-python-capi::ui64>>& get_unsigned_list_map() const&;
+  ::std::map<::test::fixtures::basic-python-capi::ui64, ::std::vector<::test::fixtures::basic-python-capi::ui64>> get_unsigned_list_map() &&;
+
+  template <typename T_MapStruct_unsigned_list_map_struct_setter = ::std::map<::test::fixtures::basic-python-capi::ui64, ::std::vector<::test::fixtures::basic-python-capi::ui64>>>
+  [[deprecated("Use `FOO.unsigned_list_map_ref() = BAR;` instead of `FOO.set_unsigned_list_map(BAR);`")]]
+  ::std::map<::test::fixtures::basic-python-capi::ui64, ::std::vector<::test::fixtures::basic-python-capi::ui64>>& set_unsigned_list_map(T_MapStruct_unsigned_list_map_struct_setter&& unsigned_list_map_) {
+    unsigned_list_map_ref() = std::forward<T_MapStruct_unsigned_list_map_struct_setter>(unsigned_list_map_);
+    return __fbthrift_field_unsigned_list_map;
   }
 
   template <class Protocol_>

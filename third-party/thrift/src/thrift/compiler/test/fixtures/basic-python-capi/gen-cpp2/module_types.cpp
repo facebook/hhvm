@@ -1555,6 +1555,7 @@ MapStruct::MapStruct(const MapStruct& srcObj) :
     __fbthrift_field_fast_list_map(srcObj.__fbthrift_field_fast_list_map),
     __fbthrift_field_buf_map(::apache::thrift::detail::st::copy_field<
           ::apache::thrift::type_class::map<::apache::thrift::type_class::binary, ::apache::thrift::type_class::binary>>(srcObj.__fbthrift_field_buf_map)),
+    __fbthrift_field_unsigned_list_map(srcObj.__fbthrift_field_unsigned_list_map),
     __isset(srcObj.__isset) {
 }
 
@@ -1580,6 +1581,7 @@ MapStruct::MapStruct(FOLLY_MAYBE_UNUSED MapStruct&& other) noexcept :
     __fbthrift_field_list_map(std::move(other.__fbthrift_field_list_map)),
     __fbthrift_field_fast_list_map(std::move(other.__fbthrift_field_fast_list_map)),
     __fbthrift_field_buf_map(std::move(other.__fbthrift_field_buf_map)),
+    __fbthrift_field_unsigned_list_map(std::move(other.__fbthrift_field_unsigned_list_map)),
     __isset(other.__isset) {
 }
 
@@ -1593,12 +1595,13 @@ MapStruct& MapStruct::operator=(FOLLY_MAYBE_UNUSED MapStruct&& other) noexcept {
     this->__fbthrift_field_list_map = std::move(other.__fbthrift_field_list_map);
     this->__fbthrift_field_fast_list_map = std::move(other.__fbthrift_field_fast_list_map);
     this->__fbthrift_field_buf_map = std::move(other.__fbthrift_field_buf_map);
+    this->__fbthrift_field_unsigned_list_map = std::move(other.__fbthrift_field_unsigned_list_map);
     __isset = other.__isset;
     return *this;
 }
 
 
-MapStruct::MapStruct(apache::thrift::FragileConstructor, ::std::map<::test::fixtures::basic-python-capi::MyEnum, ::std::string> enumz__arg, ::std::map<::std::int32_t, ::std::string> intz__arg, ::apache::thrift::detail::boxed_value_ptr<::std::map<::std::string, ::test::fixtures::basic-python-capi::PrimitiveStruct>> binnaz__arg, std::unordered_map<::std::string, double> encoded__arg, std::unordered_map<uint64_t, float> flotz__arg, ::std::vector<::std::map<::std::int32_t, ::std::int64_t>> map_list__arg, ::std::map<::std::int32_t, ::std::vector<::std::int64_t>> list_map__arg, folly::F14FastMap<int, folly::fbvector<double>> fast_list_map__arg, ::std::map<::std::string, ::test::fixtures::basic-python-capi::IOBufPtr> buf_map__arg) :
+MapStruct::MapStruct(apache::thrift::FragileConstructor, ::std::map<::test::fixtures::basic-python-capi::MyEnum, ::std::string> enumz__arg, ::std::map<::std::int32_t, ::std::string> intz__arg, ::apache::thrift::detail::boxed_value_ptr<::std::map<::std::string, ::test::fixtures::basic-python-capi::PrimitiveStruct>> binnaz__arg, std::unordered_map<::std::string, double> encoded__arg, std::unordered_map<uint64_t, float> flotz__arg, ::std::vector<::std::map<::std::int32_t, ::std::int64_t>> map_list__arg, ::std::map<::std::int32_t, ::std::vector<::std::int64_t>> list_map__arg, folly::F14FastMap<int, folly::fbvector<double>> fast_list_map__arg, ::std::map<::std::string, ::test::fixtures::basic-python-capi::IOBufPtr> buf_map__arg, ::std::map<::test::fixtures::basic-python-capi::ui64, ::std::vector<::test::fixtures::basic-python-capi::ui64>> unsigned_list_map__arg) :
     __fbthrift_field_enumz(std::move(enumz__arg)),
     __fbthrift_field_intz(std::move(intz__arg)),
     __fbthrift_field_binnaz(std::move(binnaz__arg)),
@@ -1607,7 +1610,8 @@ MapStruct::MapStruct(apache::thrift::FragileConstructor, ::std::map<::test::fixt
     __fbthrift_field_map_list(std::move(map_list__arg)),
     __fbthrift_field_list_map(std::move(list_map__arg)),
     __fbthrift_field_fast_list_map(std::move(fast_list_map__arg)),
-    __fbthrift_field_buf_map(std::move(buf_map__arg)) {
+    __fbthrift_field_buf_map(std::move(buf_map__arg)),
+    __fbthrift_field_unsigned_list_map(std::move(unsigned_list_map__arg)) {
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -1616,6 +1620,7 @@ MapStruct::MapStruct(apache::thrift::FragileConstructor, ::std::map<::test::fixt
   __isset.set(folly::index_constant<5>(), true);
   __isset.set(folly::index_constant<6>(), true);
   __isset.set(folly::index_constant<7>(), true);
+  __isset.set(folly::index_constant<8>(), true);
 }
 
 
@@ -1630,6 +1635,7 @@ void MapStruct::__fbthrift_clear() {
   this->__fbthrift_field_list_map.clear();
   this->__fbthrift_field_fast_list_map.clear();
   this->__fbthrift_field_buf_map.clear();
+  this->__fbthrift_field_unsigned_list_map.clear();
   __isset = {};
 }
 
@@ -1667,6 +1673,9 @@ bool MapStruct::operator==(FOLLY_MAYBE_UNUSED const MapStruct& rhs) const {
     return false;
   }
   if (!(lhs.buf_map_ref() == rhs.buf_map_ref())) {
+    return false;
+  }
+  if (!(lhs.unsigned_list_map_ref() == rhs.unsigned_list_map_ref())) {
     return false;
   }
   return true;
@@ -1740,6 +1749,14 @@ const ::std::map<::std::string, ::test::fixtures::basic-python-capi::IOBufPtr>& 
   return std::move(__fbthrift_field_buf_map);
 }
 
+const ::std::map<::test::fixtures::basic-python-capi::ui64, ::std::vector<::test::fixtures::basic-python-capi::ui64>>& MapStruct::get_unsigned_list_map() const& {
+  return __fbthrift_field_unsigned_list_map;
+}
+
+::std::map<::test::fixtures::basic-python-capi::ui64, ::std::vector<::test::fixtures::basic-python-capi::ui64>> MapStruct::get_unsigned_list_map() && {
+  return std::move(__fbthrift_field_unsigned_list_map);
+}
+
 
 void swap(FOLLY_MAYBE_UNUSED MapStruct& a, FOLLY_MAYBE_UNUSED MapStruct& b) {
   using ::std::swap;
@@ -1752,6 +1769,7 @@ void swap(FOLLY_MAYBE_UNUSED MapStruct& a, FOLLY_MAYBE_UNUSED MapStruct& b) {
   swap(a.__fbthrift_field_list_map, b.__fbthrift_field_list_map);
   swap(a.__fbthrift_field_fast_list_map, b.__fbthrift_field_fast_list_map);
   swap(a.__fbthrift_field_buf_map, b.__fbthrift_field_buf_map);
+  swap(a.__fbthrift_field_unsigned_list_map, b.__fbthrift_field_unsigned_list_map);
   swap(a.__isset, b.__isset);
 }
 

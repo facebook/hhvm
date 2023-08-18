@@ -402,6 +402,8 @@ def _fbthrift_gen_metadata_struct_MapStruct(metadata_struct: _fbthrift_metadata.
         ]),
         _fbthrift_metadata.ThriftField(id=9, type=_fbthrift_metadata.ThriftType(t_map=_fbthrift_metadata.ThriftMapType(keyType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_BINARY_TYPE),valueType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_BINARY_TYPE))), name="buf_map", is_optional=False, structured_annotations=[
         ]),
+        _fbthrift_metadata.ThriftField(id=10, type=_fbthrift_metadata.ThriftType(t_map=_fbthrift_metadata.ThriftMapType(keyType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I64_TYPE),valueType=_fbthrift_metadata.ThriftType(t_list=_fbthrift_metadata.ThriftListType(valueType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I64_TYPE))))), name="unsigned_list_map", is_optional=False, structured_annotations=[
+        ]),
     ]
     struct_dict = dict(metadata_struct.structs)
     struct_dict[qualified_name] = _fbthrift_metadata.ThriftStruct(name=qualified_name, fields=fields,
@@ -429,6 +431,8 @@ def _fbthrift_gen_metadata_struct_MapStruct(metadata_struct: _fbthrift_metadata.
      # val  # fast_list_map
      # key
      # val  # buf_map
+     # key
+     # val  # unsigned_list_map
 
     return new_struct
 def gen_metadata_struct_MapStruct() -> _fbthrift_metadata.ThriftMetadata:

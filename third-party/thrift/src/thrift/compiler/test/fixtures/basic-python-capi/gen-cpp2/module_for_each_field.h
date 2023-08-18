@@ -134,6 +134,7 @@ struct ForEachField<::test::fixtures::basic-python-capi::MapStruct> {
     f(6, static_cast<T&&>(t).list_map_ref()...);
     f(7, static_cast<T&&>(t).fast_list_map_ref()...);
     f(8, static_cast<T&&>(t).buf_map_ref()...);
+    f(9, static_cast<T&&>(t).unsigned_list_map_ref()...);
   }
 };
 

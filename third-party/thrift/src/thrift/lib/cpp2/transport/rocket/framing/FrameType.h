@@ -48,7 +48,7 @@ enum class ExtFrameType : uint32_t {
   // HEADERS_PUSH = 0xFB0,
   ALIGNED_PAGE = 0xFB1,
   // INTERACTION_TERMINATE = 0xFB2,
-  CUSTOM_ALLOC = 0xFB3,
+  // CUSTOM_ALLOC = 0xFB3,
 };
 
 } // namespace rocket

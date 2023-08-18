@@ -129,12 +129,6 @@ class Parser final : public folly::AsyncTransport::ReadCallback,
   static constexpr size_t kMaxBufferSize{4096};
 
  private:
-  bool customAlloc(folly::IOBuf& buffer, size_t startOffset, size_t frameSize);
-  bool customAlloc(
-      folly::IOBufQueue& bufQueue, size_t startOffset, size_t frameSize);
-  std::unique_ptr<folly::IOBuf> getCustomAllocBuf(
-      size_t numBytes, size_t startOffset, size_t trimLength);
-
   // "old" logic: maintain read buffer in Parser and resize as necessary, hand
   // out frames as IOBufs pointing to the buffer
   // TODO: remove once hybrid logic is stable

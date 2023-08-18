@@ -89,7 +89,6 @@ ExtFrameType readExtFrameType(folly::io::Cursor& cursor) {
   const auto extFrameType = cursor.readBE<uint32_t>();
   switch (static_cast<ExtFrameType>(extFrameType)) {
     case ExtFrameType::ALIGNED_PAGE:
-    case ExtFrameType::CUSTOM_ALLOC:
       return static_cast<ExtFrameType>(extFrameType);
     default:
       return ExtFrameType::UNKNOWN;

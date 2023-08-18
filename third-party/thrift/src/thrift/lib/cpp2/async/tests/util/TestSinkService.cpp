@@ -211,25 +211,6 @@ apache::thrift::SinkConsumer<IOBuf, int32_t> TestSinkService::alignment(
   };
 }
 
-apache::thrift::SinkConsumer<IOBuf, bool> TestSinkService::custom(
-    std::unique_ptr<std::string> expected) {
-  return apache::thrift::SinkConsumer<IOBuf, bool>{
-      [expected = std::move(expected), this](
-          folly::coro::AsyncGenerator<IOBuf&&> gen) -> folly::coro::Task<bool> {
-        bool res = false;
-        while (auto buf = co_await gen.next()) {
-          if (buf->countChainElements() == 1) {
-            res = findAndRemoveBuf(buf->buffer());
-          }
-
-          EXPECT_EQ(*expected, folly::StringPiece(buf->coalesce()));
-        }
-        co_return res;
-      },
-      10 /* buffer size */
-  };
-}
-
 apache::thrift::SinkConsumer<int32_t, bool> TestSinkService::rangeCancelAt(
     int32_t from, int32_t to, int32_t cancelAt) {
   return apache::thrift::SinkConsumer<int32_t, bool>{
@@ -286,24 +267,5 @@ TestSinkService::rangeSlowFinalResponse(int32_t from, int32_t to) {
       10 /* buffer size */
   };
 }
-
-void TestSinkService::addBuf(const void* buf) {
-  bufs_.withWLock([buf](auto& bufs) { bufs.insert(buf); });
-}
-
-bool TestSinkService::findAndRemoveBuf(const void* buf) {
-  return bufs_.withWLock([buf](auto& bufs) {
-    auto iter = bufs.find(buf);
-
-    if (iter != bufs.end()) {
-      bufs.erase(iter);
-
-      return true;
-    }
-
-    return false;
-  });
-}
-
 } // namespace testservice
 } // namespace testutil

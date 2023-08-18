@@ -52,7 +52,6 @@ class RpcOptions {
   enum class MemAllocType : uint8_t {
     ALLOC_DEFAULT = 0,
     ALLOC_PAGE_ALIGN = 1,
-    ALLOC_CUSTOM = 2
   };
 
   /**

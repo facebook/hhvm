@@ -76,7 +76,6 @@ RocketServerConnection::RocketServerConnection(
       egressBufferRecoverySize_(
           cfg.egressBufferBackpressureThreshold *
           cfg.egressBufferBackpressureRecoveryFactor),
-      allocIOBufFnPtr_(cfg.allocIOBufFnPtr),
       writeBatcher_(
           *this,
           cfg.writeBatchingInterval,
@@ -112,14 +111,6 @@ RocketServerConnection::RocketServerConnection(
       }
     }
   }
-}
-
-std::unique_ptr<folly::IOBuf> RocketServerConnection::customAlloc(size_t size) {
-  if (allocIOBufFnPtr_ && *allocIOBufFnPtr_) {
-    return (*allocIOBufFnPtr_)(size);
-  }
-
-  return nullptr;
 }
 
 RocketStreamClientCallback* FOLLY_NULLABLE
@@ -709,8 +700,7 @@ void RocketServerConnection::handleSinkFrame(
     case FrameType::EXT: {
       ExtFrame extFrame(streamId, flags, cursor, std::move(frame));
       auto extFrameType = extFrame.extFrameType();
-      if (extFrameType == ExtFrameType::ALIGNED_PAGE ||
-          extFrameType == ExtFrameType::CUSTOM_ALLOC) {
+      if (extFrameType == ExtFrameType::ALIGNED_PAGE) {
         PayloadFrame payloadFrame(
             streamId, std::move(extFrame.payload()), flags);
         handleSinkPayload(std::move(payloadFrame));

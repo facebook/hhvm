@@ -171,11 +171,6 @@ bool RocketSinkServerCallback::onSinkNext(StreamPayload&& payload) {
           streamId_, std::move(payload).payload, rocket::Flags().next(true));
       break;
     }
-    case RpcOptions::MemAllocType::ALLOC_CUSTOM: {
-      client_.sendExtCustomAlloc(
-          streamId_, std::move(payload).payload, rocket::Flags().next(true));
-      break;
-    }
   }
   return true;
 }

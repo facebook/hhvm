@@ -114,8 +114,6 @@ inline ThriftServerConfig& getThriftServerConfig(BaseThriftServer&);
 class BaseThriftServer : public apache::thrift::concurrency::Runnable,
                          public apache::thrift::server::ServerConfigs {
  public:
-  using AllocIOBufFn = std::unique_ptr<folly::IOBuf>(size_t);
-
   struct FailureInjection {
     FailureInjection()
         : errorFraction(0), dropFraction(0), disconnectFraction(0) {}
@@ -429,19 +427,12 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
 
   ClientIdentityHook clientIdentityHook_;
 
-  folly::Function<AllocIOBufFn> allocIOBufFn_;
-
   BaseThriftServer();
 
   explicit BaseThriftServer(const ThriftServerInitialConfig& initialConfig);
   ~BaseThriftServer() override {}
 
  public:
-  folly::Function<AllocIOBufFn>& getAllocIOBufFn() { return allocIOBufFn_; }
-  void setAllocIOBufFn(folly::Function<AllocIOBufFn>&& fn) {
-    allocIOBufFn_ = std::move(fn);
-  }
-
   std::shared_ptr<server::TServerEventHandler> getEventHandler() const {
     return eventHandler_;
   }

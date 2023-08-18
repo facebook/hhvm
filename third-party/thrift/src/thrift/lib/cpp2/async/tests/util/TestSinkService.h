@@ -57,9 +57,6 @@ class TestSinkService : public apache::thrift::ServiceHandler<TestSinkService> {
   apache::thrift::SinkConsumer<folly::IOBuf, int32_t> alignment(
       std::unique_ptr<std::string> expected) override;
 
-  apache::thrift::SinkConsumer<folly::IOBuf, bool> custom(
-      std::unique_ptr<std::string> expected) override;
-
   apache::thrift::SinkConsumer<int32_t, bool> rangeCancelAt(
       int32_t from, int32_t to, int32_t cancelAt) override;
 
@@ -68,18 +65,8 @@ class TestSinkService : public apache::thrift::ServiceHandler<TestSinkService> {
 
   void purge() override;
 
-  // adds a buffer to the internal set
-  void addBuf(const void* buf);
-
-  // finds a buffer in the internal set
-  // if found, the buffer is removed and the methof returns true
-  // The return is false otherwise
-  bool findAndRemoveBuf(const void* buf);
-
  private:
   std::atomic<int> activeSinks_{0};
-
-  folly::Synchronized<std::set<const void*>> bufs_;
 };
 
 } // namespace testservice

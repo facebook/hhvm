@@ -74,8 +74,6 @@ class RocketServerConnection final
   struct Config {
     Config() {}
 
-    using AllocIOBufFn = std::unique_ptr<folly::IOBuf>(size_t);
-
     std::chrono::milliseconds socketWriteTimeout{
         std::chrono::milliseconds::zero()};
     std::chrono::milliseconds streamStarvationTimeout{std::chrono::seconds{60}};
@@ -85,7 +83,6 @@ class RocketServerConnection final
     size_t writeBatchingByteSize{0};
     size_t egressBufferBackpressureThreshold{0};
     double egressBufferBackpressureRecoveryFactor{0.0};
-    folly::Function<AllocIOBufFn>* allocIOBufFnPtr{nullptr};
     const folly::SocketOptionMap* socketOptions{nullptr};
   };
 
@@ -95,8 +92,6 @@ class RocketServerConnection final
       MemoryTracker& ingressMemoryTracker,
       MemoryTracker& egressMemoryTracker,
       const Config& cfg = {});
-
-  std::unique_ptr<folly::IOBuf> customAlloc(size_t size);
 
   void send(
       std::unique_ptr<folly::IOBuf> data,
@@ -390,7 +385,6 @@ class RocketServerConnection final
   const size_t egressBufferBackpressureThreshold_;
   const size_t egressBufferRecoverySize_;
   bool streamsPaused_{false};
-  folly::Function<Config::AllocIOBufFn>* allocIOBufFnPtr_{nullptr};
 
   using FdsAndOffsets = std::vector<std::pair<folly::SocketFds, size_t>>;
 

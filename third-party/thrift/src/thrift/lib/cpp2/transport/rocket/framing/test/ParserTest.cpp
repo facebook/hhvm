@@ -34,8 +34,6 @@ class FakeOwner : public folly::DelayedDestruction {
       folly::HHWheelTimer::Callback*, const std::chrono::milliseconds&) {}
   bool incMemoryUsage(uint32_t) { return true; }
   void decMemoryUsage(uint32_t) {}
-
-  std::unique_ptr<folly::IOBuf> customAlloc(size_t) { return nullptr; }
 };
 
 // TODO: This should be removed once the new buffer logic controlled by

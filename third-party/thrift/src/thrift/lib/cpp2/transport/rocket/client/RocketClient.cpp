@@ -129,10 +129,6 @@ RocketClient::~RocketClient() {
   DCHECK(streams_.empty());
 }
 
-std::unique_ptr<folly::IOBuf> RocketClient::customAlloc(size_t) {
-  return nullptr;
-}
-
 RocketClient::Ptr RocketClient::create(
     folly::EventBase& evb,
     folly::AsyncTransport::UniquePtr socket,
@@ -1123,25 +1119,6 @@ void RocketClient::sendExtAlignedPage(
           Payload::makeFromData(std::move(payload)),
           flags.ignore(true),
           ExtFrameType::ALIGNED_PAGE),
-      std::move(onError));
-}
-
-void RocketClient::sendExtCustomAlloc(
-    StreamId streamId, std::unique_ptr<folly::IOBuf> payload, Flags flags) {
-  auto g = makeRequestCountGuard(RequestType::INTERNAL);
-  auto onError = [dg = DestructorGuard(this), this, g = std::move(g)](
-                     transport::TTransportException ex) {
-    FB_LOG_EVERY_MS(ERROR, 1000)
-        << "sendExtCustomAlloc failed, closing now: " << ex.what();
-    close(std::move(ex));
-  };
-
-  std::ignore = sendFrame(
-      ExtFrame(
-          streamId,
-          Payload::makeFromData(std::move(payload)),
-          flags.ignore(true),
-          ExtFrameType::CUSTOM_ALLOC),
       std::move(onError));
 }
 

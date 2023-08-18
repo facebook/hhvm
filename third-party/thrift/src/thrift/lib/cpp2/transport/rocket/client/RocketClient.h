@@ -76,7 +76,6 @@ class RocketClient : public virtual folly::DelayedDestruction,
 
   void handleFrame(std::unique_ptr<folly::IOBuf> frame);
 
-  std::unique_ptr<folly::IOBuf> customAlloc(size_t size);
   using Ptr =
       std::unique_ptr<RocketClient, folly::DelayedDestruction::Destructor>;
   static Ptr create(
@@ -135,8 +134,6 @@ class RocketClient : public virtual folly::DelayedDestruction,
   void sendError(StreamId streamId, RocketException&& rex);
   void sendComplete(StreamId streamId, bool closeStream);
   void sendExtAlignedPage(
-      StreamId streamId, std::unique_ptr<folly::IOBuf> payload, Flags flags);
-  void sendExtCustomAlloc(
       StreamId streamId, std::unique_ptr<folly::IOBuf> payload, Flags flags);
   FOLLY_NODISCARD bool sendHeadersPush(
       StreamId streamId, HeadersPayload&& payload);

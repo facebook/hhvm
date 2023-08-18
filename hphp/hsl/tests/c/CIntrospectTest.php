@@ -118,6 +118,41 @@ final class CIntrospectTest extends HackTest {
         varray[4],
         false,
       ),
+      tuple(
+        Set {1, 2, 3, 4, 5},
+        3,
+        true,
+      ),
+      tuple(
+        Set {1, 2, '3', 4, 5},
+        3,
+        false,
+      ),
+      tuple(
+        Set {0, ''},
+        null,
+        false,
+      ),
+      tuple(
+        Set {1, 2, 3},
+        new stdClass(),
+        false,
+      ),
+      tuple(
+        Set {1, 2, 3},
+        1.23,
+        false,
+      ),
+      tuple(
+        ImmSet {1, 2, 3, 4, 5},
+        3,
+        true,
+      ),
+      tuple(
+        ImmSet {1, 2, '3', 4, 5},
+        3,
+        false,
+      ),
     ];
   }
 

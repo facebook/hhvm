@@ -57,95 +57,39 @@ class C {
   // CHECK:   n2 = $builtins.hack_get_static_class(n0)
   // CHECK:   n3 = n2.?.__factory()
   // CHECK:   store &$2 <- n3: *HackMixed
-  // CHECK:   n4 = $builtins.hhbc_class_has_reified_generics(n1)
-  // CHECK:   jmp b2, b3
-  // CHECK:   .handlers b17
+  // CHECK:   jmp b2
+  // CHECK:   .handlers b8
   // CHECK: #b2:
-  // CHECK:   prune ! $builtins.hack_is_true(n4)
-  // CHECK:   jmp b7
+  // CHECK:   jmp b3
   // CHECK: #b3:
-  // CHECK:   prune $builtins.hack_is_true(n4)
-  // CHECK:   n5: *HackMixed = load &$0
-  // CHECK:   n6 = $builtins.hhbc_get_cls_rg_prop(n5)
-  // CHECK:   store &$1 <- n6: *HackMixed
-  // CHECK:   n7 = $builtins.hhbc_is_type_null(n6)
-  // CHECK:   jmp b4, b5
-  // CHECK:   .handlers b17
+  // CHECK:   n4: *HackMixed = load &$0
+  // CHECK:   jmp b4
+  // CHECK:   .handlers b8
   // CHECK: #b4:
-  // CHECK:   prune $builtins.hack_is_true(n7)
-  // CHECK:   jmp b7
+  // CHECK:   jmp b5
   // CHECK: #b5:
-  // CHECK:   prune ! $builtins.hack_is_true(n7)
-  // CHECK:   n8: *HackMixed = load &$1
-  // CHECK:   n9 = $root.count(null, n8)
-  // CHECK:   n10 = $builtins.hhbc_cmp_eq(n9, $builtins.hack_int(0))
-  // CHECK:   jmp b6, b10
-  // CHECK:   .handlers b17
+  // CHECK:   n5: *HackMixed = load &$0
+  // CHECK:   jmp b6
+  // CHECK:   .handlers b8
   // CHECK: #b6:
-  // CHECK:   prune $builtins.hack_is_true(n10)
   // CHECK:   jmp b7
   // CHECK: #b7:
-  // CHECK:   n11: *HackMixed = load &$0
-  // CHECK:   n12 = $builtins.hhbc_class_has_reified_generics(n11)
-  // CHECK:   jmp b8, b9
-  // CHECK:   .handlers b17
-  // CHECK: #b8:
-  // CHECK:   prune ! $builtins.hack_is_true(n12)
-  // CHECK:   jmp b12
-  // CHECK: #b9:
-  // CHECK:   prune $builtins.hack_is_true(n12)
-  // CHECK:   n13: *HackMixed = load &$0
-  // CHECK:   n14 = $builtins.hhbc_class_get_c(n13)
-  // CHECK:   jmp b16
-  // CHECK:   .handlers b17
-  // CHECK: #b10:
-  // CHECK:   prune ! $builtins.hack_is_true(n10)
-  // CHECK:   n15: *HackMixed = load &$0
-  // CHECK:   n16 = $builtins.hhbc_class_has_reified_generics(n15)
-  // CHECK:   jmp b11, b15
-  // CHECK:   .handlers b17
-  // CHECK: #b11:
-  // CHECK:   prune ! $builtins.hack_is_true(n16)
-  // CHECK:   jmp b12
-  // CHECK: #b12:
-  // CHECK:   n17: *HackMixed = load &$0
-  // CHECK:   n18 = $builtins.hhbc_has_reified_parent(n17)
-  // CHECK:   jmp b13, b14
-  // CHECK:   .handlers b17
-  // CHECK: #b13:
-  // CHECK:   prune ! $builtins.hack_is_true(n18)
-  // CHECK:   jmp b16
-  // CHECK: #b14:
-  // CHECK:   prune $builtins.hack_is_true(n18)
-  // CHECK:   n19: *HackMixed = load &$2
-  // CHECK:   n20 = $builtins.hhbc_cast_vec($builtins.hhbc_new_col_vector())
-  // CHECK:   n21 = n19.?._86reifiedinit(n20)
-  // CHECK:   jmp b16
-  // CHECK:   .handlers b17
-  // CHECK: #b15:
-  // CHECK:   prune $builtins.hack_is_true(n16)
-  // CHECK:   n22: *HackMixed = load &$2
-  // CHECK:   n23: *HackMixed = load &$1
-  // CHECK:   n24 = n22.?._86reifiedinit(n23)
-  // CHECK:   jmp b16
-  // CHECK:   .handlers b17
-  // CHECK: #b16:
-  // CHECK:   n25: *HackMixed = load &$2
-  // CHECK:   jmp b18
-  // CHECK:   .handlers b17
-  // CHECK: #b17(n26: *HackMixed):
+  // CHECK:   n6: *HackMixed = load &$2
+  // CHECK:   jmp b9
+  // CHECK:   .handlers b8
+  // CHECK: #b8(n7: *HackMixed):
   // CHECK:   store &$0 <- null: *HackMixed
   // CHECK:   store &$1 <- null: *HackMixed
   // CHECK:   store &$2 <- null: *HackMixed
-  // CHECK:   n27 = $builtins.hhbc_throw(n26)
+  // CHECK:   n8 = $builtins.hhbc_throw(n7)
   // CHECK:   unreachable
-  // CHECK: #b18:
+  // CHECK: #b9:
   // CHECK:   store &$0 <- null: *HackMixed
   // CHECK:   store &$1 <- null: *HackMixed
   // CHECK:   store &$2 <- null: *HackMixed
-  // CHECK:   n28 = n25.?.__construct($builtins.hack_int(1), $builtins.hack_string("x"), $builtins.hack_int(3))
-  // CHECK:   n29 = $builtins.hhbc_lock_obj(n25)
-  // CHECK:   store &$a <- n25: *HackMixed
+  // CHECK:   n9 = n6.?.__construct($builtins.hack_int(1), $builtins.hack_string("x"), $builtins.hack_int(3))
+  // CHECK:   n10 = $builtins.hhbc_lock_obj(n6)
+  // CHECK:   store &$a <- n6: *HackMixed
   // CHECK:   ret null
   // CHECK: }
   public function cons_static(): void {
@@ -164,48 +108,27 @@ class C {
   // CHECK:   n2 = __sil_allocate(<C>)
   // CHECK:   n3 = C._86pinit(n2)
   // CHECK:   store &$2 <- n2: *HackMixed
-  // CHECK:   n4 = $builtins.hhbc_class_has_reified_generics(n1)
-  // CHECK:   jmp b2, b5
-  // CHECK:   .handlers b7
+  // CHECK:   jmp b2
+  // CHECK:   .handlers b4
   // CHECK: #b2:
-  // CHECK:   prune ! $builtins.hack_is_true(n4)
-  // CHECK:   n5: *HackMixed = load &$0
-  // CHECK:   n6 = $builtins.hhbc_has_reified_parent(n5)
-  // CHECK:   jmp b3, b4
-  // CHECK:   .handlers b7
+  // CHECK:   jmp b3
   // CHECK: #b3:
-  // CHECK:   prune ! $builtins.hack_is_true(n6)
-  // CHECK:   jmp b6
-  // CHECK: #b4:
-  // CHECK:   prune $builtins.hack_is_true(n6)
-  // CHECK:   n7: *HackMixed = load &$2
-  // CHECK:   n8 = $builtins.hhbc_cast_vec($builtins.hhbc_new_col_vector())
-  // CHECK:   n9 = n7.?._86reifiedinit(n8)
-  // CHECK:   jmp b6
-  // CHECK:   .handlers b7
-  // CHECK: #b5:
-  // CHECK:   prune $builtins.hack_is_true(n4)
-  // CHECK:   n10: *HackMixed = load &$0
-  // CHECK:   n11 = $builtins.hhbc_class_get_c(n10)
-  // CHECK:   jmp b6
-  // CHECK:   .handlers b7
-  // CHECK: #b6:
-  // CHECK:   n12: *HackMixed = load &$2
-  // CHECK:   jmp b8
-  // CHECK:   .handlers b7
-  // CHECK: #b7(n13: *HackMixed):
+  // CHECK:   n4: *HackMixed = load &$2
+  // CHECK:   jmp b5
+  // CHECK:   .handlers b4
+  // CHECK: #b4(n5: *HackMixed):
   // CHECK:   store &$0 <- null: *HackMixed
   // CHECK:   store &$1 <- null: *HackMixed
   // CHECK:   store &$2 <- null: *HackMixed
-  // CHECK:   n14 = $builtins.hhbc_throw(n13)
+  // CHECK:   n6 = $builtins.hhbc_throw(n5)
   // CHECK:   unreachable
-  // CHECK: #b8:
+  // CHECK: #b5:
   // CHECK:   store &$0 <- null: *HackMixed
   // CHECK:   store &$1 <- null: *HackMixed
   // CHECK:   store &$2 <- null: *HackMixed
-  // CHECK:   n15 = n12.?.__construct($builtins.hack_int(1), $builtins.hack_string("x"), $builtins.hack_int(3))
-  // CHECK:   n16 = $builtins.hhbc_lock_obj(n12)
-  // CHECK:   store &$a <- n12: *HackMixed
+  // CHECK:   n7 = n4.?.__construct($builtins.hack_int(1), $builtins.hack_string("x"), $builtins.hack_int(3))
+  // CHECK:   n8 = $builtins.hhbc_lock_obj(n4)
+  // CHECK:   store &$a <- n4: *HackMixed
   // CHECK:   ret null
   // CHECK: }
   public function cons_self(): void {
@@ -224,48 +147,27 @@ class C {
   // CHECK:   n2 = __sil_allocate(<C>)
   // CHECK:   n3 = C._86pinit(n2)
   // CHECK:   store &$2 <- n2: *HackMixed
-  // CHECK:   n4 = $builtins.hhbc_class_has_reified_generics(n1)
-  // CHECK:   jmp b2, b5
-  // CHECK:   .handlers b7
+  // CHECK:   jmp b2
+  // CHECK:   .handlers b4
   // CHECK: #b2:
-  // CHECK:   prune ! $builtins.hack_is_true(n4)
-  // CHECK:   n5: *HackMixed = load &$0
-  // CHECK:   n6 = $builtins.hhbc_has_reified_parent(n5)
-  // CHECK:   jmp b3, b4
-  // CHECK:   .handlers b7
+  // CHECK:   jmp b3
   // CHECK: #b3:
-  // CHECK:   prune ! $builtins.hack_is_true(n6)
-  // CHECK:   jmp b6
-  // CHECK: #b4:
-  // CHECK:   prune $builtins.hack_is_true(n6)
-  // CHECK:   n7: *HackMixed = load &$2
-  // CHECK:   n8 = $builtins.hhbc_cast_vec($builtins.hhbc_new_col_vector())
-  // CHECK:   n9 = n7.?._86reifiedinit(n8)
-  // CHECK:   jmp b6
-  // CHECK:   .handlers b7
-  // CHECK: #b5:
-  // CHECK:   prune $builtins.hack_is_true(n4)
-  // CHECK:   n10: *HackMixed = load &$0
-  // CHECK:   n11 = $builtins.hhbc_class_get_c(n10)
-  // CHECK:   jmp b6
-  // CHECK:   .handlers b7
-  // CHECK: #b6:
-  // CHECK:   n12: *HackMixed = load &$2
-  // CHECK:   jmp b8
-  // CHECK:   .handlers b7
-  // CHECK: #b7(n13: *HackMixed):
+  // CHECK:   n4: *HackMixed = load &$2
+  // CHECK:   jmp b5
+  // CHECK:   .handlers b4
+  // CHECK: #b4(n5: *HackMixed):
   // CHECK:   store &$0 <- null: *HackMixed
   // CHECK:   store &$1 <- null: *HackMixed
   // CHECK:   store &$2 <- null: *HackMixed
-  // CHECK:   n14 = $builtins.hhbc_throw(n13)
+  // CHECK:   n6 = $builtins.hhbc_throw(n5)
   // CHECK:   unreachable
-  // CHECK: #b8:
+  // CHECK: #b5:
   // CHECK:   store &$0 <- null: *HackMixed
   // CHECK:   store &$1 <- null: *HackMixed
   // CHECK:   store &$2 <- null: *HackMixed
-  // CHECK:   n15 = n12.?.__construct($builtins.hack_int(1), $builtins.hack_string("x"), $builtins.hack_int(3))
-  // CHECK:   n16 = $builtins.hhbc_lock_obj(n12)
-  // CHECK:   store &$a <- n12: *HackMixed
+  // CHECK:   n7 = n4.?.__construct($builtins.hack_int(1), $builtins.hack_string("x"), $builtins.hack_int(3))
+  // CHECK:   n8 = $builtins.hhbc_lock_obj(n4)
+  // CHECK:   store &$a <- n4: *HackMixed
   // CHECK:   ret null
   // CHECK: }
   public function cons_inst(): void {
@@ -338,18 +240,9 @@ class C {
   // CHECK:   store n0.?.prop5 <- n3: *HackMixed
   // CHECK:   n4 = $builtins.hack_int(2)
   // CHECK:   store n0.?.type <- n4: *HackMixed
-  // CHECK:   jmp b1, b2
-  // CHECK: #b1:
-  // CHECK:   prune $builtins.hack_is_true($builtins.hack_bool(false))
-  // CHECK:   jmp b3
-  // CHECK: #b2:
-  // CHECK:   prune ! $builtins.hack_is_true($builtins.hack_bool(false))
   // CHECK:   n5 = __sil_lazy_class_initialize(<D>)
   // CHECK:   n6 = $builtins.hack_field_get(n5, "C")
-  // CHECK:   n7: *HackMixed = load &$this
-  // CHECK:   store n7.?.prop5 <- n6: *HackMixed
-  // CHECK:   jmp b3
-  // CHECK: #b3:
+  // CHECK:   store n0.?.prop5 <- n6: *HackMixed
   // CHECK:   ret null
   // CHECK: }
 }

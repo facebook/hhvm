@@ -27,18 +27,9 @@ class D extends C { }
 // CHECK:   n1 = D._86pinit(n0)
 // CHECK:   n2 = null
 // CHECK:   store n0.?.prop <- n2: *HackMixed
-// CHECK:   jmp b1, b2
-// CHECK: #b1:
-// CHECK:   prune $builtins.hack_is_true($builtins.hack_bool(false))
-// CHECK:   jmp b3
-// CHECK: #b2:
-// CHECK:   prune ! $builtins.hack_is_true($builtins.hack_bool(false))
 // CHECK:   n3 = __sil_lazy_class_initialize(<C>)
 // CHECK:   n4 = $builtins.hack_field_get(n3, "A")
-// CHECK:   n5: *HackMixed = load &$this
-// CHECK:   store n5.?.prop <- n4: *HackMixed
-// CHECK:   jmp b3
-// CHECK: #b3:
+// CHECK:   store n0.?.prop <- n4: *HackMixed
 // CHECK:   ret null
 // CHECK: }
 

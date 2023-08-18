@@ -107,7 +107,6 @@ impl LowerInstrs<'_> {
             Hhbc::CastString(..) => hack::Hhbc::CastString,
             Hhbc::CastVec(..) => hack::Hhbc::CastVec,
             Hhbc::ClassGetC(..) => hack::Hhbc::ClassGetC,
-            Hhbc::ClassHasReifiedGenerics(..) => hack::Hhbc::ClassHasReifiedGenerics,
             Hhbc::CheckClsRGSoft(..) => hack::Hhbc::CheckClsRGSoft,
             Hhbc::CmpOp(_, CmpOp::Eq, _) => hack::Hhbc::CmpEq,
             Hhbc::CmpOp(_, CmpOp::Gt, _) => hack::Hhbc::CmpGt,
@@ -123,7 +122,6 @@ impl LowerInstrs<'_> {
             Hhbc::Div(..) => hack::Hhbc::Div,
             Hhbc::GetClsRGProp(..) => hack::Hhbc::GetClsRGProp,
             Hhbc::GetMemoKeyL(..) => hack::Hhbc::GetMemoKeyL,
-            Hhbc::HasReifiedParent(..) => hack::Hhbc::HasReifiedParent,
             Hhbc::Idx(..) => hack::Hhbc::Idx,
             Hhbc::IsLateBoundCls(..) => hack::Hhbc::IsLateBoundCls,
             Hhbc::IsTypeC(_, IsTypeOp::ArrLike, _) => hack::Hhbc::IsTypeArrLike,
@@ -745,6 +743,36 @@ impl TransformInstr for LowerInstrs<'_> {
                 let lid = iter_var_name(id, &builder.strings);
                 let value = builder.emit(Instr::Hhbc(Hhbc::CGetL(lid, loc)));
                 builder.hhbc_builtin(hack::Hhbc::IterFree, &[value], loc)
+            }
+            Instr::Hhbc(Hhbc::ClassHasReifiedGenerics(..) | Hhbc::HasReifiedParent(..)) => {
+                // Reified generics generate a lot of IR that is opaque to the analysis and actually
+                // negatively affects the precision. Lowering these checks to a constant value
+                // 'false' allows us to skip the whole branches related to reified generics.
+                let value = builder.emit_constant(Constant::Bool(false));
+                Instr::copy(value)
+            }
+            Instr::Terminator(Terminator::JmpOp {
+                cond,
+                pred,
+                targets: [true_bid, false_bid],
+                loc,
+            }) => {
+                match lookup_constant(&builder.func, cond) {
+                    // TODO(arr): do we need to check any other known falsy/truthy values here?
+                    Some(Constant::Bool(cond)) => {
+                        let reachable_branch = if *cond && pred == Predicate::NonZero
+                            || !*cond && pred == Predicate::Zero
+                        {
+                            true_bid
+                        } else {
+                            false_bid
+                        };
+                        Instr::Terminator(Terminator::Jmp(reachable_branch, loc))
+                    }
+                    _ => {
+                        return instr;
+                    }
+                }
             }
             Instr::Terminator(Terminator::IterInit(args, value)) => {
                 self.iter_init(builder, args, value)

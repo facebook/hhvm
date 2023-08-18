@@ -2853,6 +2853,14 @@ where
     lift_awaits_in_statement_(Either::Left(node), env, f)
 }
 
+fn strip_parens<'a>(node: S<'a>) -> S<'a> {
+    match node.children {
+        ParenthesizedExpression(c) => strip_parens(&c.expression),
+        BracedExpression(c) => strip_parens(&c.expression),
+        _ => node,
+    }
+}
+
 fn lift_awaits_in_statement_<'a, F>(
     pos: Either<S<'a>, &Pos>,
     env: &mut Env<'a>,
@@ -2881,7 +2889,7 @@ where
         if !lifted_awaits.awaits.is_empty() {
             let awaits = process_lifted_awaits(lifted_awaits, env)?;
             let pos = match pos {
-                Either::Left(n) => p_pos(n, env),
+                Either::Left(n) => p_pos(strip_parens(n), env),
                 Either::Right(p) => p.clone(),
             };
             return Ok(ast::Stmt::new(

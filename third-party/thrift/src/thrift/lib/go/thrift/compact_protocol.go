@@ -672,41 +672,14 @@ func (p *CompactProtocol) writeCollectionBegin(elemType Type, size int) (int, er
 // TODO(pomack): make a permanent buffer like writeVarint64?
 func (p *CompactProtocol) writeVarint32(n int32) (int, error) {
 	i32buf := p.wBuffer[0:5]
-	idx := 0
-	for {
-		if (n & ^0x7F) == 0 {
-			i32buf[idx] = byte(n)
-			idx++
-			// p.writeByteDirect(byte(n));
-			break
-			// return;
-		} else {
-			i32buf[idx] = byte((n & 0x7F) | 0x80)
-			idx++
-			// p.writeByteDirect(byte(((n & 0x7F) | 0x80)));
-			u := uint32(n)
-			n = int32(u >> 7)
-		}
-	}
+	idx := binary.PutUvarint(i32buf, uint64(uint32(n)))
 	return p.trans.Write(i32buf[0:idx])
 }
 
 // Write an i64 as a varint. Results in 1-10 bytes on the wire.
 func (p *CompactProtocol) writeVarint64(n int64) (int, error) {
 	varint64out := p.wBuffer[0:10]
-	idx := 0
-	for {
-		if (n & ^0x7F) == 0 {
-			varint64out[idx] = byte(n)
-			idx++
-			break
-		} else {
-			varint64out[idx] = byte((n & 0x7F) | 0x80)
-			idx++
-			u := uint64(n)
-			n = int64(u >> 7)
-		}
-	}
+	idx := binary.PutUvarint(varint64out, uint64(n))
 	return p.trans.Write(varint64out[0:idx])
 }
 

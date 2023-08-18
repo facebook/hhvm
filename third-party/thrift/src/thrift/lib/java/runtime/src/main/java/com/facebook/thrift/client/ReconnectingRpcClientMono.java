@@ -174,7 +174,14 @@ final class ReconnectingRpcClientMono extends Mono<RpcClient> {
 
   private void handleConnectionError(Throwable t) {
     setStateDisconnected();
-    LOGGER.info("error connecting to {}", socketAddress);
+
+    LOGGER.info(
+        "error connecting to {} due to {} (current state = {}, wip = {}, retry count = {})",
+        socketAddress,
+        (t != null && t.getMessage() != null) ? t.getMessage() : "unknown",
+        state,
+        wip,
+        retryCount);
 
     if (!subscribers.isEmpty()) {
       tryDrain();

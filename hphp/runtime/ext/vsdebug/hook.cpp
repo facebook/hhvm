@@ -45,8 +45,11 @@ struct BreakContext {
 };
 
 void VSDebugHook::onRequestInit() {
-  RID().setDebuggerAttachedAtInit(true);
   BreakContext breakContext(false);
+  auto const disableJit = breakContext.m_debugger ?
+    breakContext.m_debugger->getDebuggerOptions().disableJit :
+    RuntimeOption::EvalJitDisabledByVSDebug;
+  RID().setVSDebugDisablesJit(disableJit);
 }
 
 void VSDebugHook::onOpcode(PC /*pc*/) {

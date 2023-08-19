@@ -89,7 +89,8 @@ void markFunctionWithDebuggerIntr(const Func* f) {
 // lets the opcode execute.
 void phpDebuggerOpcodeHook(const unsigned char* pc) {
   VMRegAnchor anchor;
-  TRACE(5, "in phpDebuggerOpcodeHook() with pc %p\n", pc);
+  TRACE(5, "in phpDebuggerOpcodeHook() with pc %p, function %s\n",
+        pc, vmfp()->func()->fullName()->data());
   // Short-circuit when we're doing things like evaling PHP for print command,
   // or conditional breakpoints.
   if (UNLIKELY(g_context->m_dbgNoBreak)) {
@@ -277,7 +278,8 @@ void phpDebuggerExceptionThrownHook(ObjectData* exception) {
 void phpDebuggerExceptionHandlerHook() noexcept {
   try {
     VMRegAnchor anchor;
-    TRACE(5, "in phpDebuggerExceptionHandlerHook()\n");
+    TRACE(5, "in phpDebuggerExceptionHandlerHook() with function %s\n",
+          vmfp() ? vmfp()->func()->fullName()->data() : "");
     if (UNLIKELY(g_context->m_dbgNoBreak)) {
       TRACE(5, "NoBreak flag is on\n");
       return;

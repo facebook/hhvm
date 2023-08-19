@@ -199,6 +199,9 @@ struct DebuggerOptions {
 
   // Don't redirect stdout to the debugger console
   bool disableStdoutRedirection;
+
+  // Disable JIT when debugger is attached
+  bool disableJit;
 };
 
 struct ClientInfo {

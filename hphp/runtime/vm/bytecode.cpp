@@ -2161,7 +2161,7 @@ OPTBLD_INLINE void iopThrow(PC&) {
   vmStack().discard();
   DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionThrownHook(obj.get()));
   if (UNLIKELY(RuntimeOption::EnableVSDebugger &&
-               !RuntimeOption::EvalJitDisabledByVSDebug &&
+               !RID().getVSDebugDisablesJit() &&
                !g_context->m_dbgNoBreak &&
                RID().getDebuggerStepIntr())) {
     walkStack([&] (const BTFrame& f) {
@@ -5827,7 +5827,7 @@ JitResumeAddr dispatchBB() {
   // When dispatchBB returns with debugger interrupt set, the next check in JIT
   // for debugger interrupt must bring the execution back to interpreter.
   if (UNLIKELY(RuntimeOption::EnableVSDebugger &&
-               !RuntimeOption::EvalJitDisabledByVSDebug &&
+               !RID().getVSDebugDisablesJit() &&
                !g_context->m_dbgNoBreak &&
                RID().getDebuggerStepIntr() &&
                vmfp())) {

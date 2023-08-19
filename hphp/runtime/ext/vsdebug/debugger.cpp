@@ -63,8 +63,10 @@ bool Debugger::getDebuggerOption(const HPHP::String& option) {
     return options.disablePostDummyEvalHelper;
   } else if (optionStr == "disableStdoutRedirection") {
     return options.disableStdoutRedirection;
+  } else if (optionStr == "disablejit") {
+    return options.disableJit;
   } else {
-    raise_error("setDebuggerOption: Unknown option specified");
+    raise_error("getDebuggerOption: Unknown option specified");
   }
 }
 
@@ -87,10 +89,12 @@ void Debugger::setDebuggerOption(const HPHP::String& option, bool value) {
     options.disableUniqueVarRef = value;
   } else if (optionStr == "disablepostdummyevalhelper") {
     options.disablePostDummyEvalHelper = value;
-  } else if (optionStr == "disableStdoutRedirection") {
+  } else if (optionStr == "disablestdoutredirection") {
     options.disableStdoutRedirection = value;
+  } else if (optionStr == "disablejit") {
+    options.disableJit = value;
   } else {
-    raise_error("getDebuggerOption: Unknown option specified");
+    raise_error("setDebuggerOption: Unknown option specified");
   }
 
   setDebuggerOptions(options);
@@ -109,14 +113,16 @@ void Debugger::setDebuggerOptions(DebuggerOptions options) {
       "disableUniqueVarRef: %s\n"
       "disablePostDummyEvalHelper: %s\n"
       "maxReturnedStringLength: %d\n"
-      "disableStdoutRedirection: %s\n",
+      "disableStdoutRedirection: %s\n"
+      "disableJit: %s\n",
     options.showDummyOnAsyncPause ? "YES" : "NO",
     options.warnOnInterceptedFunctions ? "YES" : "NO",
     options.notifyOnBpCalibration ? "YES" : "NO",
     options.disableUniqueVarRef ? "YES" : "NO",
     options.disablePostDummyEvalHelper ? "YES" : "NO",
     options.maxReturnedStringLength,
-    options.disableStdoutRedirection ? "YES" : "NO"
+    options.disableStdoutRedirection ? "YES" : "NO",
+    options.disableJit ? "YES" : "NO"
   );
 }
 

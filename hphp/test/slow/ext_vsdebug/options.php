@@ -51,7 +51,7 @@ checkObjEqualRecursively($msg, darray[
   "type" => "event",
   "event" => "output",
   "body" => darray[
-    "output" => "Hit fatal : setDebuggerOption: Unknown option specified\n"
+    "output" => "Hit fatal : getDebuggerOption: Unknown option specified\n"
   ]]);
 
 // This raised a notice, which will spew a bunch of error to stdout.

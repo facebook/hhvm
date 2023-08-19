@@ -229,7 +229,8 @@ struct RequestInjectionData {
   bool getDebuggerAttached();
   void setDebuggerAttached(bool);
 
-  void setDebuggerAttachedAtInit(bool);
+  void setVSDebugDisablesJit(bool);
+  bool getVSDebugDisablesJit() const { return m_vsdebugDisablesJit; }
 
   /*
    * Returns true if the debugger should force interrupts due to any of the
@@ -337,7 +338,7 @@ private:
   RequestTimer m_userTimeoutTimer;
 
   bool m_debuggerAttached{false};
-  bool m_hasDebuggerAttachedAtInit{false};
+  bool m_vsdebugDisablesJit{false};
   bool m_coverage{false};
   bool m_jit{false};
   bool m_jittingDisabled{false};

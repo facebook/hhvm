@@ -82,8 +82,8 @@ inline void RequestInjectionData::setDebuggerAttached(bool flag) {
   updateJit();
 }
 
-inline void RequestInjectionData::setDebuggerAttachedAtInit(bool flag) {
-  m_hasDebuggerAttachedAtInit = flag;
+inline void RequestInjectionData::setVSDebugDisablesJit(bool flag) {
+  m_vsdebugDisablesJit = flag;
   updateJit();
 }
 

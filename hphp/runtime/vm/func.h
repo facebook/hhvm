@@ -1193,6 +1193,23 @@ public:
   rds::Handle getCoverageHandle() const;
 
   /////////////////////////////////////////////////////////////////////////////
+  // Debugger.
+  /*
+   * Return an RDS handle that when initialized, indicates that this function
+   * needs to be run in the interpreter so that the debugger hooks are run.
+   * Once the handle is initialized, it is not reset
+   * for remainder of the request.
+   */
+  rds::Handle debuggerIntrSetHandle() const;
+  rds::Link<bool, rds::Mode::Normal> debuggerIntrSetLink() const;
+
+  /*
+   * The handle must be bound before inserting debugger interrupt checks
+   * in a function and before resolving any breakpoints in the function.
+   */
+  void ensureDebuggerIntrSetLinkBound() const;
+
+  /////////////////////////////////////////////////////////////////////////////
   // Public setters.
   //
   // TODO(#4504609): These setters are only used by Class at Class creation
@@ -1358,6 +1375,8 @@ private:
 
     LowStringPtr m_retUserType;
     UserAttributeMap m_userAttributes;
+    // The link can be bound for const Func.
+    mutable rds::Link<bool, rds::Mode::Normal> m_funcHasDebuggerIntr;
     TypeConstraint m_retTypeConstraint; // NB: sizeof(TypeConstraint) == 12
     LowStringPtr m_originalFilename;
     RepoAuthType m_repoReturnType;
@@ -1392,7 +1411,7 @@ private:
     mutable LockFreePtrWrapper<VMCompactVector<LineInfo>> m_lineMap;
     mutable LockFreePtrWrapper<LineTablePtr> m_lineTable;
   };
-  static_assert(CheckSize<SharedData, use_lowptr ? 160 : 184>(), "");
+  static_assert(CheckSize<SharedData, use_lowptr ? 160 : 192>(), "");
 
   /*
    * If this Func represents a native function or is exceptionally large
@@ -1426,7 +1445,7 @@ private:
     LowStringPtr m_docComment;
     LowStringPtr m_originalModuleName;
   };
-  static_assert(CheckSize<ExtendedSharedData, use_lowptr ? 296 : 328>(), "");
+  static_assert(CheckSize<ExtendedSharedData, use_lowptr ? 296 : 336>(), "");
 
   /*
    * SharedData accessors for internal use.

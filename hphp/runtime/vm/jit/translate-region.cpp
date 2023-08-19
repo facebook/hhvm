@@ -269,6 +269,11 @@ void emitGuards(irgen::IRGS& irgs,
       irgen::checkCoverage(irgs);
     }
 
+    if (RO::EnableVSDebugger && RO::EvalEmitDebuggerIntrCheck &&
+        !sk.trivialDVFuncEntry()) {
+      irgen::checkDebuggerIntr(irgs, curSrcKey(irgs));
+    }
+
     if (irgs.context.kind == TransKind::Profile) {
       assertx(irgs.context.transIDs.size() == 1);
       auto const transID = *irgs.context.transIDs.begin();

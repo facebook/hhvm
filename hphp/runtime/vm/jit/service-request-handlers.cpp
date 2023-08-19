@@ -134,6 +134,11 @@ TranslationResult getTranslation(SrcKey sk) {
     return TranslationResult::failTransiently();
   }
 
+  if (UNLIKELY(RO::EnableVSDebugger && RO::EvalEmitDebuggerIntrCheck)) {
+    assertx(!RO::RepoAuthoritative);
+    sk.func()->ensureDebuggerIntrSetLinkBound();
+  }
+
   if (UNLIKELY(!RO::RepoAuthoritative && sk.unit()->isCoverageEnabled())) {
     assertx(RO::EvalEnablePerFileCoverage);
     SKTRACE(2, sk, "punting because per file code coverage is enabled\n");

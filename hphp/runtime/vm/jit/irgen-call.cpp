@@ -315,9 +315,27 @@ SSATmp* callFuncEntry(IRGS& env, SrcKey entry, SSATmp* objOrClass,
 
 void handleCallReturn(IRGS& env, const Func* callee, SSATmp* retVal,
                       Offset asyncEagerOffset, bool unlikely) {
+  // Insert a debugger interrupt check after returning from a call
+  // if the translation is not exited before the next source key.
+  auto const insertIntrCheck = [&](SrcKey nextSk) {
+    if (env.formingRegion) return;
+    assertx(env.region);
+    // If the call is the last bytecode of the region, there is no need to
+    // insert the debugger interrupt check as it will be checked at the
+    // beginning of next translation.
+    if (RO::EnableVSDebugger && RO::EvalEmitDebuggerIntrCheck &&
+        curSrcKey(env) != env.region->lastSrcKey()) {
+      irgen::checkDebuggerIntr(env, nextSk);
+    }
+  };
+
   if (asyncEagerOffset == kInvalidOffset) {
     push(env, retVal);
-    if (unlikely) gen(env, Jmp, makeExit(env, nextSrcKey(env)));
+    if (unlikely) {
+      gen(env, Jmp, makeExit(env, nextSrcKey(env)));
+    } else {
+      insertIntrCheck(nextSrcKey(env));
+    }
     return;
   }
 
@@ -342,6 +360,7 @@ void handleCallReturn(IRGS& env, const Func* callee, SSATmp* retVal,
       if (unlikely) {
         gen(env, Jmp, makeExit(env, SrcKey{curSrcKey(env), absAEOffset}));
       } else {
+        insertIntrCheck(SrcKey{curSrcKey(env), absAEOffset});
         jmpImpl(env, absAEOffset);
       }
     },
@@ -349,7 +368,11 @@ void handleCallReturn(IRGS& env, const Func* callee, SSATmp* retVal,
       hint(env, Block::Hint::Unlikely);
       auto const ty = callee ? callReturnType(callee) : TInitCell;
       push(env, gen(env, AssertType, ty, retVal));
-      if (unlikely) gen(env, Jmp, makeExit(env, nextSrcKey(env)));
+      if (unlikely) {
+        gen(env, Jmp, makeExit(env, nextSrcKey(env)));
+      } else {
+        insertIntrCheck(nextSrcKey(env));
+      }
     }
   );
 }

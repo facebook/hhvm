@@ -208,6 +208,30 @@ void checkCoverage(IRGS& env) {
   );
 }
 
+void checkDebuggerIntr(IRGS& env, SrcKey sk) {
+  assertx(!RuntimeOption::RepoAuthoritative);
+  assertx(RuntimeOption::EnableVSDebugger);
+  assertx(RuntimeOption::EvalEmitDebuggerIntrCheck);
+  assertx(curFunc(env) == sk.func());
+  if (sk.func()->isBuiltin()) return;
+  assertx(!isInlining(env));
+  auto const handle = RDSHandleData { curFunc(env)->debuggerIntrSetHandle() };
+  ifElse(
+    env,
+    [&] (Block* next) { gen(env, CheckRDSInitialized, next, handle); },
+    [&] {
+      // Exit to the interpreter at the given SrcKey location.
+      hint(env, Block::Hint::Unlikely);
+      auto const irSP = spOffBCFromIRSP(env);
+      auto const invSP = spOffBCFromStackBase(env);
+      auto const rbjData = ReqBindJmpData {
+        sk, invSP, irSP, sk.funcEntry() /* popFrame */
+      };
+      gen(env, ReqInterpBBNoTranslate, rbjData, sp(env), fp(env));
+    }
+  );
+}
+
 void ringbufferEntry(IRGS& env, Trace::RingBufferType t, SrcKey sk, int level) {
   if (!Trace::moduleEnabled(Trace::ringbuffer, level)) return;
   gen(env, RBTraceEntry, RBEntryData(t, sk));

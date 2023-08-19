@@ -139,6 +139,14 @@ inline void RequestInjectionData::setDebuggerFlowDepth(int depth) {
   m_debuggerFlowDepth = depth;
 }
 
+inline void RequestInjectionData::clearPCFilters() {
+  m_breakPointFilter.clear();
+  m_flowFilter.clear();
+  m_lineBreakPointFilter.clear();
+  m_callBreakPointFilter.clear();
+  m_retBreakPointFilter.clear();
+}
+
 inline int RequestInjectionData::getActiveLineBreak() const {
   return m_activeLineBreaks.empty() ? -1 : m_activeLineBreaks.top();
 }

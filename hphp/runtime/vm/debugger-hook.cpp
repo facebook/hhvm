@@ -56,11 +56,7 @@ void DebuggerHook::detach(RequestInfo* ti /* = nullptr */) {
 
   if (ti == &RI()) {
     // Clear the pc filters.  We can only do this for the current thread.
-    ti->m_reqInjectionData.m_breakPointFilter.clear();
-    ti->m_reqInjectionData.m_flowFilter.clear();
-    ti->m_reqInjectionData.m_lineBreakPointFilter.clear();
-    ti->m_reqInjectionData.m_callBreakPointFilter.clear();
-    ti->m_reqInjectionData.m_retBreakPointFilter.clear();
+    ti->m_reqInjectionData.clearPCFilters();
   }
 
   // Disble function entry/exit events
@@ -76,6 +72,13 @@ void DebuggerHook::detach(RequestInfo* ti /* = nullptr */) {
 Mutex DebuggerHook::s_lock;
 int DebuggerHook::s_numAttached {0};
 DebuggerHook* DebuggerHook::s_activeHook {nullptr};
+
+//////////////////////////////////////////////////////////////////////////
+
+void markFunctionWithDebuggerIntr(const Func* f) {
+  f->ensureDebuggerIntrSetLinkBound();
+  f->debuggerIntrSetLink().markInit();
+}
 
 //////////////////////////////////////////////////////////////////////////
 // Hooks
@@ -462,6 +465,7 @@ void phpDebuggerNext() {
 void phpAddBreakPoint(const Func* f, Offset offset) {
   PC pc = f->at(offset);
   getBreakPointFilter()->addPC(pc);
+  markFunctionWithDebuggerIntr(f);
 }
 
 void phpAddBreakPointFuncEntry(const Func* f) {
@@ -476,6 +480,7 @@ void phpAddBreakPointFuncEntry(const Func* f) {
 
   // Add to the breakpoint filter and the func entry filter
   getBreakPointFilter()->addPC(pc);
+  markFunctionWithDebuggerIntr(f);
   RID().m_callBreakPointFilter.addPC(pc);
 }
 
@@ -492,6 +497,7 @@ void phpAddBreakPointFuncExit(const Func* f) {
     getBreakPointFilter()->addPC(pc);
     RID().m_retBreakPointFilter.addPC(pc);
   }
+  markFunctionWithDebuggerIntr(f);
 }
 
 bool phpAddBreakPointLine(const Unit* unit, int line) {

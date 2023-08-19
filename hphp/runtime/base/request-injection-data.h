@@ -285,6 +285,11 @@ struct RequestInjectionData {
    */
   size_t getDebuggerStackDepth() const;
 
+  /*
+   * Clear all breakpoint and flow filters.
+   */
+  void clearPCFilters();
+
   /* Getters and setters for user settable INI settings. */
 
   const std::string& getDefaultMimeType() const;

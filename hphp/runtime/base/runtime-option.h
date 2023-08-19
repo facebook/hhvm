@@ -963,6 +963,7 @@ struct RuntimeOption {
                                                                         \
   F(bool, JitDisabledByHphpd,          false)                           \
   F(bool, JitDisabledByVSDebug,        true)                            \
+  F(bool, EmitDebuggerIntrCheck,       false)                           \
   F(uint32_t, JitWarmupStatusBytes,    ((25 << 10) + 1))                \
   F(uint32_t, JitWarmupMaxCodeGenRate, 20000)                           \
   F(uint32_t, JitWarmupRateSeconds,    64)                              \

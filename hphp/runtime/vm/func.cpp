@@ -1234,6 +1234,25 @@ void Func::EnableCoverage() {
   tl_called_functions.emplace(Array::CreateDict());
 }
 
+rds::Handle Func::debuggerIntrSetHandle() const {
+  assertx(shared()->m_funcHasDebuggerIntr.bound());
+  return shared()->m_funcHasDebuggerIntr.handle();
+}
+
+rds::Link<bool, rds::Mode::Normal> Func::debuggerIntrSetLink() const {
+  assertx(shared()->m_funcHasDebuggerIntr.bound());
+  return shared()->m_funcHasDebuggerIntr;
+}
+
+void Func::ensureDebuggerIntrSetLinkBound() const {
+  if (!shared()->m_funcHasDebuggerIntr.bound()) {
+    shared()->m_funcHasDebuggerIntr.bind(
+      rds::Mode::Normal,
+      rds::LinkName{"FunctionDebuggerIntr", fullName()}
+    );
+  }
+}
+
 std::string show(PrologueID pid) {
   auto func = pid.func();
   return folly::sformat("{}(id 0x{:#x}) # of args: {}",

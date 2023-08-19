@@ -559,11 +559,7 @@ void RequestInjectionData::reset() {
   m_debuggerNext = false;
   m_suppressClassConversionWarnings = false;
 
-  m_breakPointFilter.clear();
-  m_flowFilter.clear();
-  m_lineBreakPointFilter.clear();
-  m_callBreakPointFilter.clear();
-  m_retBreakPointFilter.clear();
+  clearPCFilters();
   while (!m_activeLineBreaks.empty()) {
     m_activeLineBreaks.pop();
   }

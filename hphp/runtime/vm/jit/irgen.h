@@ -143,6 +143,11 @@ void checkCold(IRGS&, TransID);
  */
 void checkCoverage(IRGS& env);
 
+/*
+ * Exit if debugger interrupt is set on the current function.
+ */
+void checkDebuggerIntr(IRGS& env, SrcKey sk);
+
 uint64_t curProfCount(const IRGS& env);
 uint64_t calleeProfCount(const IRGS& env, const RegionDesc& calleeRegion);
 

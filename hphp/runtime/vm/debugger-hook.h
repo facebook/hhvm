@@ -67,6 +67,10 @@ inline bool requestHasBreakpoints(RequestInjectionData& rid) {
 // debugger interrupts for every opcode executed (modulo filters.)
 #define DEBUGGER_FORCE_INTR (RID().getDebuggerForceIntr())
 
+// Initialize a RDS handle indicating function f needs to run in the interpreter
+// so that the debugger hooks are run.
+void markFunctionWithDebuggerIntr(const Func* f);
+
 enum class StackDepthDisposition {
   Equal,        // Same.
   Shallower,    // Less than baseline.

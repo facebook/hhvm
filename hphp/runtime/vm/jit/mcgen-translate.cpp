@@ -590,7 +590,9 @@ TranslationResult retranslate(TransArgs args, const RegionContext& ctx) {
 bool retranslateOpt(FuncId funcId) {
   VMProtect _;
 
-  if (isDebuggerAttachedProcess()) return false;
+  if (RuntimeOption::EvalJitDisabledByVSDebug && isDebuggerAttachedProcess()) {
+    return false;
+  }
 
   auto const func = const_cast<Func*>(Func::fromFuncId(funcId));
   if (profData() == nullptr) return false;

@@ -239,6 +239,11 @@ struct RequestInjectionData {
   void setDebuggerIntr(bool);
 
   /*
+   * Whether the debugger is running any step command.
+   */
+  bool getDebuggerStepIntr() const;
+
+  /*
    * Whether the debugger is running a "step in" command.
    */
   bool getDebuggerStepIn() const;

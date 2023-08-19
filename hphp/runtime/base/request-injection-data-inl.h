@@ -102,6 +102,10 @@ inline bool RequestInjectionData::getDebuggerForceIntr() const {
     m_debuggerStepOut == StepOutState::Out;
 }
 
+inline bool RequestInjectionData::getDebuggerStepIntr() const {
+  return m_debuggerStepIn || m_debuggerStepOut == StepOutState::Out;
+}
+
 inline void RequestInjectionData::setDebuggerIntr(bool flag) {
   m_debuggerIntr = flag;
 }

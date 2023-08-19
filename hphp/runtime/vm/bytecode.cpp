@@ -2160,6 +2160,18 @@ OPTBLD_INLINE void iopThrow(PC&) {
   auto obj = Object::attach(c1->m_data.pobj);
   vmStack().discard();
   DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionThrownHook(obj.get()));
+  if (UNLIKELY(RuntimeOption::EnableVSDebugger &&
+               !RuntimeOption::EvalJitDisabledByVSDebug &&
+               !g_context->m_dbgNoBreak &&
+               RID().getDebuggerStepIntr())) {
+    walkStack([&] (const BTFrame& f) {
+      auto const func = f.func();
+      if (!func->isBuiltin() &&
+          findCatchHandler(func, f.bcOff()) != kInvalidOffset) {
+        markFunctionWithDebuggerIntr(func);
+      }
+    });
+  }
   throw req::root<Object>(std::move(obj));
 }
 
@@ -5817,7 +5829,7 @@ JitResumeAddr dispatchBB() {
   if (UNLIKELY(RuntimeOption::EnableVSDebugger &&
                !RuntimeOption::EvalJitDisabledByVSDebug &&
                !g_context->m_dbgNoBreak &&
-               RID().getDebuggerForceIntr() &&
+               RID().getDebuggerStepIntr() &&
                vmfp())) {
     markFunctionWithDebuggerIntr(vmfp()->func());
   }

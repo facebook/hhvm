@@ -32,9 +32,13 @@ def deserialize_with_length(
     klass: typing.Type[sT],
     buf: typing.Union[bytes, bytearray, IOBuf, memoryview],
     protocol: Protocol = Protocol.COMPACT,
+    *,
+    fully_populate_cache: bool = False,
 ) -> typing.Tuple[sT, int]: ...
 def deserialize(
     klass: typing.Type[sT],
     buf: typing.Union[bytes, bytearray, IOBuf, memoryview],
     protocol: Protocol = Protocol.COMPACT,
+    *,
+    fully_populate_cache: bool = False,
 ) -> sT: ...

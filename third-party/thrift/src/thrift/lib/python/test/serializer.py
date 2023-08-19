@@ -113,6 +113,12 @@ class SerializerTests(unittest.TestCase):
             self.assertIsInstance(decoded, type(control))
             self.assertEqual(control, decoded)
 
+            decoded_with_full_cache = deserialize(
+                type(control), encoded, protocol=proto, fully_populate_cache=True
+            )
+            self.assertIsInstance(decoded_with_full_cache, type(control))
+            self.assertEqual(control, decoded_with_full_cache)
+
     def pickle_round_trip(
         self,
         # pyre-ignore[2]

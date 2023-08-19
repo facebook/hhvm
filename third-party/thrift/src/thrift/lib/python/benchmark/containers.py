@@ -26,6 +26,7 @@ class Flavor(Enum):
     PYTHON = 0
     PY3 = 1
     PY_DEPRECATED = 2
+    PYTHON_FULLY_POPULATE_CACHE = 3
 
 
 def import_statement(flavor: Flavor) -> str:
@@ -33,6 +34,7 @@ def import_statement(flavor: Flavor) -> str:
         Flavor.PYTHON: "thrift_types",
         Flavor.PY3: "types",
         Flavor.PY_DEPRECATED: "ttypes",
+        Flavor.PYTHON_FULLY_POPULATE_CACHE: "thrift_types",
     }
     return (
         f"from thrift.benchmark.struct.{NAMESPACES[flavor]} import Included, MyStruct"
@@ -103,6 +105,13 @@ def deserialize(klass, bytes):
         bytes,
         klass()
     )
+"""
+    elif flavor == Flavor.PYTHON_FULLY_POPULATE_CACHE:
+        return """
+from thrift.python.serializer import deserialize as d, serialize
+
+def deserialize(klass, bytes):
+    return d(klass, bytes, fully_populate_cache=True)
 """
 
 

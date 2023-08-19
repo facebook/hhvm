@@ -31,7 +31,7 @@ def serialize_iobuf(StructOrError strct, Protocol protocol=Protocol.COMPACT):
 def serialize(StructOrError struct, Protocol protocol=Protocol.COMPACT):
     return b''.join(serialize_iobuf(struct, protocol))
 
-def deserialize_with_length(klass, Buf buf, Protocol protocol=Protocol.COMPACT):
+def deserialize_with_length(klass, Buf buf, Protocol protocol=Protocol.COMPACT, *, fully_populate_cache=False):
     if not issubclass(klass, (StructOrUnion, GeneratedError)):
         raise TypeError("Only Struct, Union, or Exception classes can be deserialized")
     cdef IOBuf iobuf = buf if isinstance(buf, IOBuf) else IOBuf(buf)
@@ -40,6 +40,8 @@ def deserialize_with_length(klass, Buf buf, Protocol protocol=Protocol.COMPACT):
     try:
         if issubclass(klass, Struct):
             length = (<Struct>inst)._deserialize(iobuf, protocol)
+            if fully_populate_cache:
+                (<Struct>inst)._fbthrift_fully_populate_cache()
         elif issubclass(klass, Union):
             length = (<Union>inst)._deserialize(iobuf, protocol)
         else:
@@ -48,5 +50,5 @@ def deserialize_with_length(klass, Buf buf, Protocol protocol=Protocol.COMPACT):
         raise Error.__new__(Error, *e.args) from None
     return inst, length
 
-def deserialize(klass, Buf buf, Protocol protocol=Protocol.COMPACT):
-    return deserialize_with_length(klass, buf, protocol)[0]
+def deserialize(klass, Buf buf, Protocol protocol=Protocol.COMPACT, *, fully_populate_cache=False):
+    return deserialize_with_length(klass, buf, protocol, fully_populate_cache=fully_populate_cache)[0]

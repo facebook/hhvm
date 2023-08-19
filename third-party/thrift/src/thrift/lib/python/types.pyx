@@ -626,12 +626,25 @@ cdef class Struct(StructOrUnion):
         Py_INCREF(py_value)
         return py_value
 
-
     cdef _fbthrift_populate_primitive_fields(self):
         for index, name, type_info in self._fbthrift_primitive_types:
             data = self._fbthrift_data[index + 1]
             val = type_info.to_python_value(data) if data is not None else None
             object.__setattr__(self, name, val)
+
+    cdef _fbthrift_fully_populate_cache(self):
+        for _, field in self:
+            if isinstance(field, (Sequence, Set)):
+                for elem in field:
+                    if not isinstance(elem, Struct):
+                        break
+                    (<Struct>elem)._fbthrift_fully_populate_cache()
+            elif isinstance(field, Mapping):
+                # keys are already materialized upon hashing
+                for elem in field.values():
+                    if not isinstance(elem, Struct):
+                        break
+                    (<Struct>elem)._fbthrift_fully_populate_cache()
 
     @classmethod
     def _fbthrift_create(cls, data):

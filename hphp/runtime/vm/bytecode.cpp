@@ -5811,7 +5811,17 @@ JitResumeAddr dispatchBB() {
   if (Trace::moduleEnabled(Trace::ringbuffer)) {
     Trace::ringbufferEntry(Trace::RBTypeDispatchBB, sk().toAtomicInt(), 0);
   }
-  return dispatchImpl<true>();
+  auto const retAddr = dispatchImpl<true>();
+  // When dispatchBB returns with debugger interrupt set, the next check in JIT
+  // for debugger interrupt must bring the execution back to interpreter.
+  if (UNLIKELY(RuntimeOption::EnableVSDebugger &&
+               !RuntimeOption::EvalJitDisabledByVSDebug &&
+               !g_context->m_dbgNoBreak &&
+               RID().getDebuggerForceIntr() &&
+               vmfp())) {
+    markFunctionWithDebuggerIntr(vmfp()->func());
+  }
+  return retAddr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

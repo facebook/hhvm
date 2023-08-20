@@ -263,7 +263,6 @@ class ast_builder : public parser_actions {
   diagnostics_engine& diags_;
   t_program& program_; // The program being built.
   t_scope* scope_; // The program scope.
-  std::unordered_map<std::string, t_named*> definitions_;
   const parsing_params& params_;
   include_handler on_include_;
   boost::optional<comment> doctext_; // The last parsed doctext comment.
@@ -356,14 +355,6 @@ class ast_builder : public parser_actions {
       node.add_structured_annotation(std::move(annotation));
     }
     set_annotations(&node, std::move(attrs->deprecated_annotations));
-  }
-
-  void add_definition(std::unique_ptr<t_named> definition) {
-    const std::string& name = definition->name();
-    if (!definitions_.insert(std::make_pair(name, definition.get())).second) {
-      diags_.error(*definition, "redefinition of '{}'", name);
-    }
-    program_.add_definition(std::move(definition));
   }
 
   // DEPRECATED! Allocates a new field id using automatic numbering.
@@ -665,7 +656,7 @@ class ast_builder : public parser_actions {
     set_attributes(*service, std::move(attrs), range);
     service->set_functions(std::move(functions));
     scope_->add_service(program_.scope_name(*service), service.get());
-    add_definition(std::move(service));
+    program_.add_definition(std::move(service));
   }
 
   void on_interaction(
@@ -679,7 +670,7 @@ class ast_builder : public parser_actions {
     interaction->set_functions(std::move(functions));
     scope_->add_interaction(
         program_.scope_name(*interaction), interaction.get());
-    add_definition(std::move(interaction));
+    program_.add_definition(std::move(interaction));
   }
 
   std::unique_ptr<t_function> on_function(
@@ -791,7 +782,7 @@ class ast_builder : public parser_actions {
       }
     }
     scope_->add_type(program_.scope_name(*typedef_node), typedef_node.get());
-    add_definition(std::move(typedef_node));
+    program_.add_definition(std::move(typedef_node));
   }
 
   void on_struct(
@@ -804,7 +795,7 @@ class ast_builder : public parser_actions {
     set_attributes(*struct_node, std::move(attrs), range);
     set_fields(*struct_node, std::move(fields));
     scope_->add_type(program_.scope_name(*struct_node), struct_node.get());
-    add_definition(std::move(struct_node));
+    program_.add_definition(std::move(struct_node));
   }
 
   void on_union(
@@ -817,7 +808,7 @@ class ast_builder : public parser_actions {
     set_attributes(*union_node, std::move(attrs), range);
     set_fields(*union_node, std::move(fields));
     scope_->add_type(program_.scope_name(*union_node), union_node.get());
-    add_definition(std::move(union_node));
+    program_.add_definition(std::move(union_node));
   }
 
   void on_exception(
@@ -836,7 +827,7 @@ class ast_builder : public parser_actions {
     exception->set_blame(blame);
     set_fields(*exception, std::move(fields));
     scope_->add_type(program_.scope_name(*exception), exception.get());
-    add_definition(std::move(exception));
+    program_.add_definition(std::move(exception));
   }
 
   std::unique_ptr<t_field> on_field(
@@ -891,7 +882,7 @@ class ast_builder : public parser_actions {
       scope_->add_constant(program_.scope_name(*enum_node, value), &value);
     }
 
-    add_definition(std::move(enum_node));
+    program_.add_definition(std::move(enum_node));
   }
 
   std::unique_ptr<t_enum_value> on_enum_value(
@@ -921,7 +912,7 @@ class ast_builder : public parser_actions {
         &program_, std::move(type), fmt::to_string(name.str), std::move(value));
     set_attributes(*constant, std::move(attrs), range);
     scope_->add_constant(program_.scope_name(*constant), constant.get());
-    add_definition(std::move(constant));
+    program_.add_definition(std::move(constant));
   }
 
   std::unique_ptr<t_const_value> on_const_ref(const identifier& name) override {

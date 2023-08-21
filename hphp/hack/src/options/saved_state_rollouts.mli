@@ -14,6 +14,7 @@ type t = {
   dummy_three: bool;  (** Some documentation for dummy_three *)
   no_ancestor_edges: bool;
       (** Whether the depgraph contains the transitive closure of extends edges. *)
+  optimized_member_fanout: bool;
 }
 [@@deriving eq, show]
 

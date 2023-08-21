@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3b5e5d7c7962e66bdae7d01579254161>>
+// @generated SignedSource<<aea56eaa63bbc78aae062b27e44995eb>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -43,6 +43,7 @@ pub struct SavedStateRollouts {
     pub dummy_three: bool,
     /// Whether the depgraph contains the transitive closure of extends edges.
     pub no_ancestor_edges: bool,
+    pub optimized_member_fanout: bool,
 }
 impl TrivialDrop for SavedStateRollouts {}
 arena_deserializer::impl_deserialize_in_arena!(SavedStateRollouts);
@@ -75,6 +76,8 @@ pub enum Flag {
     DummyThree,
     #[rust_to_ocaml(name = "No_ancestor_edges")]
     NoAncestorEdges,
+    #[rust_to_ocaml(name = "Optimized_member_fanout")]
+    OptimizedMemberFanout,
 }
 impl TrivialDrop for Flag {}
 arena_deserializer::impl_deserialize_in_arena!(Flag);

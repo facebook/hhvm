@@ -14,6 +14,7 @@ type t = {
   dummy_three: bool;
   no_ancestor_edges: bool;
       (** Whether the depgraph contains the transitive closure of extends edges. *)
+  optimized_member_fanout: bool;
 }
 [@@deriving eq, show]
 
@@ -31,6 +32,7 @@ type flag =
   | Dummy_two
   | Dummy_three
   | No_ancestor_edges
+  | Optimized_member_fanout
 [@@deriving show { with_path = false }]
 
 type flag_name = string
@@ -142,6 +144,7 @@ let rollout_order =
   | Dummy_two -> 1
   | Dummy_three -> 2
   | No_ancestor_edges -> 3
+  | Optimized_member_fanout -> 4
 
 let make
     ~current_rolled_out_flag_idx
@@ -169,6 +172,7 @@ let make
     dummy_two = get_flag_value Dummy_two;
     dummy_three = get_flag_value Dummy_three;
     no_ancestor_edges = get_flag_value No_ancestor_edges;
+    optimized_member_fanout = get_flag_value Optimized_member_fanout;
   }
 
 let default : t =
@@ -182,11 +186,20 @@ let output t =
   let print_flag flag value =
     Printf.eprintf "%s = %b\n" (flag_name flag) value
   in
-  let { dummy_one; dummy_two; dummy_three; no_ancestor_edges } = t in
+  let {
+    dummy_one;
+    dummy_two;
+    dummy_three;
+    no_ancestor_edges;
+    optimized_member_fanout;
+  } =
+    t
+  in
   print_flag Dummy_one dummy_one;
   print_flag Dummy_two dummy_two;
   print_flag Dummy_three dummy_three;
   print_flag No_ancestor_edges no_ancestor_edges;
+  print_flag Optimized_member_fanout optimized_member_fanout;
   ()
 
 let to_bit_array_string t : string =
@@ -194,5 +207,17 @@ let to_bit_array_string t : string =
     | true -> "1"
     | false -> "0"
   in
-  let { dummy_one; dummy_two; dummy_three; no_ancestor_edges } = t in
-  s dummy_one ^ s dummy_two ^ s dummy_three ^ s no_ancestor_edges
+  let {
+    dummy_one;
+    dummy_two;
+    dummy_three;
+    no_ancestor_edges;
+    optimized_member_fanout;
+  } =
+    t
+  in
+  s dummy_one
+  ^ s dummy_two
+  ^ s dummy_three
+  ^ s no_ancestor_edges
+  ^ s optimized_member_fanout

@@ -844,8 +844,7 @@ void validate_function_return_type(
 
   if (ctx.has(context_type::no_legacy)) {
     ctx.check(
-        node.return_type().get_type() != nullptr &&
-            node.return_type().get_type()->is_struct(),
+        node.return_type() && node.return_type()->is_struct(),
         "Function `{}`'s return type must be a thrift struct.",
         node.name());
   }
@@ -857,8 +856,7 @@ void validate_oneway_function(diagnostic_context& ctx, const t_function& node) {
   }
 
   ctx.check(
-      node.return_type().get_type() != nullptr &&
-          node.return_type().get_type()->is_void() &&
+      node.return_type() && node.return_type()->is_void() &&
           !node.returned_interaction(),
       "Oneway methods must have void return type: {}",
       node.name());

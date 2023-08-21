@@ -635,7 +635,7 @@ class ast_builder : public parser_actions {
       std::unique_ptr<attributes> attrs,
       const identifier& name,
       const identifier& base,
-      t_function_list functions) override {
+      node_list<t_function> functions) override {
     auto find_base_service = [&]() -> const t_service* {
       if (base.str.size() != 0) {
         auto base_name = fmt::to_string(base.str);
@@ -663,7 +663,7 @@ class ast_builder : public parser_actions {
       source_range range,
       std::unique_ptr<attributes> attrs,
       const identifier& name,
-      t_function_list functions) override {
+      node_list<t_function> functions) override {
     auto interaction =
         std::make_unique<t_interaction>(&program_, fmt::to_string(name.str));
     set_attributes(*interaction, std::move(attrs), range);

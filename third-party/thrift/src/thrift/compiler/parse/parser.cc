@@ -386,9 +386,9 @@ class parser {
   // interface_body: "{" (function | performs)* "}
   // function: function comma_or_semicolon?
   // performs: "performs" identifier ";"
-  t_function_list parse_interface_body() {
+  node_list<t_function> parse_interface_body() {
     expect_and_consume('{');
-    auto functions = t_function_list();
+    auto functions = node_list<t_function>();
     while (token_.kind != '}') {
       if (token_.kind != tok::kw_performs) {
         functions.emplace_back(parse_function());

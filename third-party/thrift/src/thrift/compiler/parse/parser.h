@@ -105,13 +105,13 @@ class parser_actions {
       std::unique_ptr<attributes> attrs,
       const identifier& name,
       const identifier& base,
-      t_function_list functions) = 0;
+      node_list<t_function> functions) = 0;
 
   virtual void on_interaction(
       source_range range,
       std::unique_ptr<attributes> attrs,
       const identifier& name,
-      t_function_list functions) = 0;
+      node_list<t_function> functions) = 0;
 
   virtual std::unique_ptr<t_function> on_function(
       source_range range,

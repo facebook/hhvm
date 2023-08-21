@@ -41,11 +41,11 @@ class t_interface : public t_type {
   node_list_view<t_function> functions() { return functions_; }
   node_list_view<const t_function> functions() const { return functions_; }
 
-  void set_functions(t_function_list functions);
+  void set_functions(node_list<t_function> functions);
   void add_function(std::unique_ptr<t_function> func);
 
  private:
-  t_function_list functions_;
+  node_list<t_function> functions_;
 
   // TODO(afuller): Remove everything below this comment. It is only provided
   // for backwards compatibility.

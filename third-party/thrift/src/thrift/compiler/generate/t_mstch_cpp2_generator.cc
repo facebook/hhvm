@@ -864,8 +864,7 @@ class cpp_mstch_function : public mstch_function {
     return cpp2::get_name(function_->returned_interaction().get_type());
   }
   mstch::node sync_returns_by_outparam() {
-    return is_complex_return(
-               function_->return_type().deref().get_true_type()) &&
+    return is_complex_return(function_->return_type()->get_true_type()) &&
         !function_->returned_interaction();
   }
 

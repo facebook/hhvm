@@ -23,7 +23,6 @@
 #include <thrift/compiler/ast/node_list.h>
 #include <thrift/compiler/ast/t_base_type.h>
 #include <thrift/compiler/ast/t_named.h>
-#include <thrift/compiler/ast/t_node.h>
 #include <thrift/compiler/ast/t_paramlist.h>
 #include <thrift/compiler/ast/t_sink.h>
 #include <thrift/compiler/ast/t_stream.h>
@@ -70,14 +69,11 @@ class t_function final : public t_named {
         sink_or_stream_(std::move(sink_or_stream)),
         paramlist_(std::make_unique<t_paramlist>(program)) {}
 
-  const t_type* get_return_type() const { return return_type().get_type(); }
-
-  t_type_ref return_type() const {
+  const t_type* return_type() const {
     if (response_pos_ != -1) {
-      return return_types_[response_pos_];
+      return return_types_[response_pos_].get_type();
     }
-    return t_type_ref::from_ptr(
-        stream() ? sink_or_stream_.get() : &t_base_type::t_void());
+    return stream() ? sink_or_stream_.get() : &t_base_type::t_void();
   }
   void set_return_type(t_type_ref ret) {
     response_pos_ = return_types_.size();
@@ -165,14 +161,13 @@ class t_function final : public t_named {
       t_function_qualifier qualifier = {});
 
   t_paramlist* get_paramlist() const { return paramlist_.get(); }
-  const t_type* get_returntype() const { return return_type().get_type(); }
+  const t_type* get_return_type() const { return return_type(); }
+  const t_type* get_returntype() const { return return_type(); }
   const t_throws* get_xceptions() const {
     return t_throws::or_empty(exceptions());
   }
   bool is_oneway() const { return qualifier_ == t_function_qualifier::one_way; }
 };
-
-using t_function_list = node_list<t_function>;
 
 } // namespace compiler
 } // namespace thrift

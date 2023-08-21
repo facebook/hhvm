@@ -22,7 +22,7 @@ namespace apache {
 namespace thrift {
 namespace compiler {
 
-void t_interface::set_functions(t_function_list functions) {
+void t_interface::set_functions(node_list<t_function> functions) {
   functions_ = std::move(functions);
   old_functions_raw_.clear();
   for (const auto& func : functions_) {

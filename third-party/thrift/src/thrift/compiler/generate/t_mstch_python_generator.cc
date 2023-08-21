@@ -822,18 +822,18 @@ class python_mstch_function : public mstch_function {
 
   mstch::node returns_tuple() {
     // TOOD add in sinks, etc
-    const auto& rettype = *function_->return_type();
-    auto stream = dynamic_cast<const t_stream_response*>(&rettype);
+    const t_stream_response* stream = function_->stream();
     return (stream && !stream->first_response_type().empty()) ||
-        (!function_->returned_interaction().empty() && !rettype.is_void());
+        (!function_->returned_interaction().empty() &&
+         !function_->return_type()->is_void());
   }
 
   mstch::node early_client_return() {
     // TOOD add in sinks, etc
-    const auto& rettype = *function_->return_type();
-    auto stream = dynamic_cast<const t_stream_response*>(&rettype);
+    const t_stream_response* stream = function_->stream();
     return !(
-        rettype.is_void() || (stream && stream->first_response_type().empty()));
+        function_->return_type()->is_void() ||
+        (stream && stream->first_response_type().empty()));
   }
 
   mstch::node regular_response_type() {

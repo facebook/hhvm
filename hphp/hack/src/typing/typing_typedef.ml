@@ -16,7 +16,6 @@ module Env = Typing_env
 module SN = Naming_special_names
 module Phase = Typing_phase
 module EnvFromDef = Typing_env_from_def
-module DTMap = Typing_case_types.DataType.Map
 
 let get_cnstr_errs env tcstr reverse t_pos ty =
   match tcstr with
@@ -85,7 +84,7 @@ let casetype_def env typedef =
   | (Aast.CaseType, (_, Hunion hints)) ->
     let data_type_map = Typing_case_types.mk_data_type_mapping env hints in
     let errs =
-      DTMap.filter_map
+      SMap.filter_map
         begin
           fun tag hints ->
             if List.length hints > 1 then
@@ -94,7 +93,7 @@ let casetype_def env typedef =
                   {
                     pos = t_pos;
                     name = t_name;
-                    tag = Typing_case_types.DataType.Tag.name tag;
+                    tag;
                     why =
                       lazy
                         begin
@@ -115,7 +114,7 @@ let casetype_def env typedef =
         end
         data_type_map
     in
-    let err1 = Typing_error.multiple_opt @@ DTMap.values errs in
+    let err1 = Typing_error.multiple_opt @@ SMap.values errs in
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) err1;
     env
   | _ -> env

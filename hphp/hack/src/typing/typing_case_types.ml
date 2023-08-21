@@ -13,9 +13,19 @@ module Cls = Decl_provider.Class
 module Env = Typing_env
 module SN = Naming_special_names
 
-module DataType = struct
+module DataType : sig
+  type t
+
+  val fromTy : env -> locl_ty -> t
+
+  val are_disjoint : t -> t -> bool
+
+  val to_sset : t -> SSet.t
+end = struct
   (* Modelled after data types in HHVM. See hphp/runtime/base/datatype.h *)
   module Tag = struct
+    type ctx = unit
+
     type t =
       | DictData
       | VecData
@@ -27,7 +37,7 @@ module DataType = struct
       | FloatData
       | NullData
       | ObjectData
-    [@@deriving show, eq, ord]
+    [@@deriving eq]
 
     let name = function
       | DictData -> "dict"
@@ -40,34 +50,77 @@ module DataType = struct
       | FloatData -> "float"
       | NullData -> "null"
       | ObjectData -> "object"
-  end
 
-  module Map = struct
-    include WrappedMap.Make (Tag)
+    let relation tag1 ~ctx:_ tag2 =
+      let open ApproxSet.Set_relation in
+      if equal tag1 tag2 then
+        Equal
+      else
+        Disjoint
+
+    let all_tags =
+      [
+        DictData;
+        VecData;
+        KeysetData;
+        StringData;
+        ResourceData;
+        BoolData;
+        IntData;
+        FloatData;
+        NullData;
+        ObjectData;
+      ]
   end
 
   module Set = struct
-    include Caml.Set.Make (Tag)
+    module ASet = ApproxSet.Make (Tag)
+    include ASet
+
+    type t = ASet.t option
+
+    let empty = None
+
+    let singleton tag = Some (singleton tag)
+
+    let union set1 set2 =
+      match (set1, set2) with
+      | (set, None)
+      | (None, set) ->
+        set
+      | (Some a, Some b) -> Some (union a b)
+
+    let inter set1 set2 =
+      match (set1, set2) with
+      | (_, None)
+      | (None, _) ->
+        None
+      | (Some a, Some b) -> Some (inter a b)
+
+    let diff set1 set2 =
+      match (set1, set2) with
+      | (set, None) -> set
+      | (None, _) -> None
+      | (Some a, Some b) -> Some (diff a b)
+
+    let of_list tags =
+      List.fold tags ~init:empty ~f:(fun acc tag -> union acc @@ singleton tag)
+
+    let add tag set = union set @@ singleton tag
+
+    let disjoint () set1 set2 =
+      match (set1, set2) with
+      | (None, _)
+      | (_, None) ->
+        Sat
+      | (Some set1, Some set2) -> disjoint () set1 set2
   end
 
-  type t = Set.t [@@deriving eq, ord]
+  type t = Set.t
 
   (** `mixed` should cover all possible data types.
-    * Update if addition tags are added to [Tag.t] *)
-  let mixed =
-    Set.of_list
-      [
-        Tag.DictData;
-        Tag.VecData;
-        Tag.KeysetData;
-        Tag.StringData;
-        Tag.ResourceData;
-        Tag.BoolData;
-        Tag.IntData;
-        Tag.FloatData;
-        Tag.NullData;
-        Tag.ObjectData;
-      ]
+      Update [Tag.all_tags] if additional tags are added to [Tag.t] *)
+  let mixed = Set.of_list Tag.all_tags
 
   let prim_to_datatypes (prim : Aast.tprim) : t =
     let open Aast in
@@ -268,6 +321,19 @@ module DataType = struct
         | Neg_class (_, cls) -> Class.to_datatypes env cls
       in
       minus mixed right
+
+  let are_disjoint set1 set2 =
+    match Set.disjoint () set1 set2 with
+    | Set.Sat -> true
+    | _ -> false
+
+  (* Temporary hack *)
+  let to_sset set =
+    List.fold Tag.all_tags ~init:SSet.empty ~f:(fun acc tag ->
+        if are_disjoint (Set.singleton tag) set then
+          acc
+        else
+          SSet.add (Tag.name tag) acc)
 end
 
 let mk_data_type_mapping env variants =
@@ -276,13 +342,13 @@ let mk_data_type_mapping env variants =
       Decl_hint.hint env.decl_env variant
       |> Typing_utils.localize_no_subst env ~ignore_errors:true
     in
-    let tags = DataType.fromTy env ty in
-    DataType.Set.fold
-      (fun tag acc -> DataType.Map.add ~combine:( @ ) tag [variant] acc)
+    let tags = DataType.(fromTy env ty |> to_sset) in
+    SSet.fold
+      (fun tag acc -> SMap.add ~combine:( @ ) tag [variant] acc)
       tags
       map
   in
-  List.fold variants ~init:DataType.Map.empty ~f
+  List.fold variants ~init:SMap.empty ~f
 
 (**
  * Given the variants of a case type (encoded as a locl_ty) and another locl_ty [intersecting_ty]
@@ -305,8 +371,7 @@ let filter_variants_using_datatype env reason variants intersecting_ty =
     List.filter
       ~f:(fun ty ->
         let variant_tags = DataType.fromTy env ty in
-        let refined_tags = DataType.intersect variant_tags tags in
-        not @@ DataType.Set.is_empty refined_tags)
+        not @@ DataType.are_disjoint variant_tags tags)
       variants
   in
   Typing_utils.union_list env reason tyl

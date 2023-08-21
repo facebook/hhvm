@@ -337,7 +337,8 @@
   typing_utils
   typing_visibility
   decl_typedef_expand
-  lru)
+  lru
+  approx_set)
  (preprocess
   (pps ppx_deriving.std)))
 

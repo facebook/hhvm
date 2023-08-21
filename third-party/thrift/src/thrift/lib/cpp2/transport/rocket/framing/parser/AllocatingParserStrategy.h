@@ -79,14 +79,52 @@ class AllocatingParserStrategy {
         return;
       }
 
-      ParsingState state;
-      handleExcessBytesAndCreateNewBuffer(state);
+      size_t excessByteSize = size_ - frameLengthAndFieldSize_;
+      size_t nextFrameLength = 0;
+      size_t nextFrameLengthAndFieldSize = 0;
 
-      // hand frame off
-      handleFrame();
+      // if excessByteSize contains enough data to parse next frame length, we
+      // allocate a new buffer big enough to hold the new frame. copy
+      // excessBytes into the new frame and handle current frame to owner_
+      if (excessByteSize >= Serializer::kBytesForFrameOrMetadataLength) {
+        nextFrameLength = computeFrameLength(frameLengthAndFieldSize_);
+        nextFrameLengthAndFieldSize =
+            nextFrameLength + Serializer::kBytesForFrameOrMetadataLength;
+        if (UNLIKELY(!owner_.incMemoryUsage(nextFrameLengthAndFieldSize))) {
+          return;
+        }
+      }
+      size_t newBufferSize = std::max(
+          {excessByteSize, minBufferSize_, nextFrameLengthAndFieldSize});
+      ElemType* buffer = Traits::allocate(allocator_, newBufferSize);
+      if (excessByteSize > 0) {
+        std::uninitialized_copy(
+            buffer_ + frameLengthAndFieldSize_, buffer_ + size_, buffer);
+      }
 
-      // reset parser state
-      reset(state);
+      // mark buffer_ as staging and reset the state
+      ElemType* stagingBuffer = buffer_;
+      size_t stagingBufferSize = currentBufferSize_;
+      size_t stagingFrameLengthAndFieldSize = frameLengthAndFieldSize_;
+      size_t trimEnd = currentBufferSize_ - frameLengthAndFieldSize_;
+      currentBufferSize_ = newBufferSize;
+      size_ = excessByteSize;
+      frameLength_ = nextFrameLength;
+      frameLengthAndFieldSize_ = nextFrameLengthAndFieldSize;
+      buffer_ = buffer;
+
+      // TODO: T161472735 figure out how to avoid allocation here.
+      auto* allocAndSize =
+          new std::pair<Allocator&, size_t>(allocator_, stagingBufferSize);
+      auto frame = folly::IOBuf::takeOwnership(
+          stagingBuffer,
+          stagingBufferSize,
+          &deallocate,
+          folly::bit_cast<void*>(allocAndSize));
+      frame->trimStart(Serializer::kBytesForFrameOrMetadataLength);
+      frame->trimEnd(trimEnd);
+      owner_.handleFrame(std::move(frame));
+      owner_.decMemoryUsage(stagingFrameLengthAndFieldSize);
     }
   }
 
@@ -124,14 +162,6 @@ class AllocatingParserStrategy {
   size_t minBufferSize_;
   ElemType* buffer_{nullptr};
 
-  struct ParsingState {
-    size_t excessByteSize_;
-    size_t frameLen_;
-    size_t frameLenAndFieldSize_;
-    size_t newBufferSize_;
-    ElemType* newBuf_;
-  };
-
   // Compute rocket frame length using
   // Serializer::kBytesForFrameOrMetadataLength bytes from offset.
   size_t computeFrameLength(size_t offset) {
@@ -156,60 +186,6 @@ class AllocatingParserStrategy {
       currentBufferSize_ = frameLengthAndFieldSize_;
       buffer_ = buffer;
     }
-  }
-
-  void handleExcessBytesAndCreateNewBuffer(ParsingState& state) {
-    size_t excessByteSize = size_ - frameLengthAndFieldSize_;
-    size_t nextFrameLength = 0;
-    size_t nextFrameLengthAndFieldSize = 0;
-
-    // if excessByteSize contains enough data to parse next frame length, we
-    // allocate a new buffer big enough to hold the new frame. copy
-    // excessBytes into the new frame and handle current frame to owner_
-    if (excessByteSize >= Serializer::kBytesForFrameOrMetadataLength) {
-      nextFrameLength = computeFrameLength(frameLengthAndFieldSize_);
-      nextFrameLengthAndFieldSize =
-          nextFrameLength + Serializer::kBytesForFrameOrMetadataLength;
-      if (UNLIKELY(!owner_.incMemoryUsage(nextFrameLengthAndFieldSize))) {
-        return;
-      }
-    }
-    size_t newBufferSize =
-        std::max({excessByteSize, minBufferSize_, nextFrameLengthAndFieldSize});
-    ElemType* buffer = Traits::allocate(allocator_, newBufferSize);
-    if (excessByteSize > 0) {
-      std::uninitialized_copy(
-          buffer_ + frameLengthAndFieldSize_, buffer_ + size_, buffer);
-    }
-    state.newBuf_ = buffer;
-    state.excessByteSize_ = excessByteSize;
-    state.frameLen_ = nextFrameLength;
-    state.frameLenAndFieldSize_ = nextFrameLengthAndFieldSize;
-    state.newBufferSize_ = newBufferSize;
-  }
-
-  void handleFrame() {
-    size_t trimEnd = currentBufferSize_ - frameLengthAndFieldSize_;
-    // TODO: figure out how to avoid allocation here.
-    auto* allocAndSize =
-        new std::pair<Allocator&, size_t>(allocator_, currentBufferSize_);
-    auto frame = folly::IOBuf::takeOwnership(
-        buffer_,
-        currentBufferSize_,
-        &deallocate,
-        folly::bit_cast<void*>(allocAndSize));
-    frame->trimStart(Serializer::kBytesForFrameOrMetadataLength);
-    frame->trimEnd(trimEnd);
-    owner_.handleFrame(std::move(frame));
-    owner_.decMemoryUsage(frameLengthAndFieldSize_);
-  }
-
-  void reset(const ParsingState& state) {
-    currentBufferSize_ = state.newBufferSize_;
-    size_ = state.excessByteSize_;
-    frameLength_ = state.frameLen_;
-    frameLengthAndFieldSize_ = state.frameLenAndFieldSize_;
-    buffer_ = state.newBuf_;
   }
 
   static void deallocate(void* buf, void* userData) {

@@ -423,11 +423,7 @@ TEST(AllocatingParserStrategyTest, testManyTinyFrame) {
       &static_cast<uint8_t*>(buf)[bytesWritten], lenReturn);
   serializer3.writeFrameOrMetadataSize(testFrameLen3);
   bytesWritten += Serializer::kBytesForFrameOrMetadataLength;
-  for (size_t i = 0; i < bytesWritten; ++i) {
-    LOG(WARNING) << (int)static_cast<uint8_t*>(buf)[i];
-  }
   std::string t3(testFrameLen3, 'd');
-  LOG(WARNING) << "bytesWritten: " << bytesWritten;
   memcpy(&static_cast<uint8_t*>(buf)[bytesWritten], t3.data(), testFrameLen3);
   bytesWritten += testFrameLen3;
 

@@ -699,13 +699,7 @@ void RocketServerConnection::handleSinkFrame(
 
     case FrameType::EXT: {
       ExtFrame extFrame(streamId, flags, cursor, std::move(frame));
-      auto extFrameType = extFrame.extFrameType();
-      if (extFrameType == ExtFrameType::ALIGNED_PAGE) {
-        PayloadFrame payloadFrame(
-            streamId, std::move(extFrame.payload()), flags);
-        handleSinkPayload(std::move(payloadFrame));
-        break;
-      }
+      extFrame.extFrameType();
     }
       [[fallthrough]];
 

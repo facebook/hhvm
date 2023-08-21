@@ -49,11 +49,6 @@ class InteractionId;
  */
 class RpcOptions {
  public:
-  enum class MemAllocType : uint8_t {
-    ALLOC_DEFAULT = 0,
-    ALLOC_PAGE_ALIGN = 1,
-  };
-
   /**
    * Priority levels used to classify requests based on their impact on the end
    * user.
@@ -133,9 +128,6 @@ class RpcOptions {
   void setReadHeaders(transport::THeader::StringToStringMap&& readHeaders);
   const transport::THeader::StringToStringMap& getReadHeaders() const;
 
-  RpcOptions& setMemAllocType(MemAllocType memAllocType);
-  MemAllocType getMemAllocType() const;
-
   // Primarily used by generated code
   RpcOptions& setInteractionId(const InteractionId& id);
   int64_t getInteractionId() const;
@@ -179,7 +171,6 @@ class RpcOptions {
   uint8_t priority_{apache::thrift::concurrency::N_PRIORITIES};
   bool clientOnlyTimeouts_{false};
   bool enableChecksum_{false};
-  MemAllocType memAllocType_{MemAllocType::ALLOC_DEFAULT};
   BufferOptions bufferOptions_;
   int64_t interactionId_{0};
   uint64_t routingHint_{0};

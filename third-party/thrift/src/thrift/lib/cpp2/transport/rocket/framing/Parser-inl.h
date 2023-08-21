@@ -44,19 +44,17 @@ namespace rocket {
 template <class T>
 void Parser<T>::getReadBufferOld(void** bufout, size_t* lenout) {
   DCHECK(!readBuffer_.isChained());
-  if (LIKELY(
-          allocType_ ==
-          apache::thrift::RpcOptions::MemAllocType::ALLOC_DEFAULT)) {
-    readBuffer_.unshareOne();
-    if (readBuffer_.length() == 0) {
-      DCHECK(readBuffer_.capacity() > 0);
-      // If we read everything, reset pointers to 0 and reuse the buffer
-      readBuffer_.clear();
-    } else if (readBuffer_.headroom() > 0) {
-      // Move partially read data to the beginning
-      readBuffer_.retreat(readBuffer_.headroom());
-    }
+
+  readBuffer_.unshareOne();
+  if (readBuffer_.length() == 0) {
+    DCHECK(readBuffer_.capacity() > 0);
+    // If we read everything, reset pointers to 0 and reuse the buffer
+    readBuffer_.clear();
+  } else if (readBuffer_.headroom() > 0) {
+    // Move partially read data to the beginning
+    readBuffer_.retreat(readBuffer_.headroom());
   }
+
   *bufout = readBuffer_.writableTail();
   *lenout = readBuffer_.tailroom();
 }
@@ -112,31 +110,6 @@ void Parser<T>::readDataAvailableOld(size_t nbytes) {
       currentFrameLength_ = totalFrameSize;
     }
 
-    readStreamId(cursor);
-    uint8_t frameType;
-    std::tie(frameType, std::ignore) = readFrameTypeAndFlagsUnsafe(cursor);
-    if (UNLIKELY(
-            static_cast<FrameType>(frameType) == FrameType::EXT &&
-            allocType_ ==
-                apache::thrift::RpcOptions::MemAllocType::ALLOC_DEFAULT)) {
-      if (readBuffer_.length() < Serializer::kBytesForFrameOrMetadataLength +
-              ExtFrame::frameHeaderSize()) {
-        return;
-      }
-
-      ExtFrameType extType = readExtFrameType(cursor);
-      if (UNLIKELY(extType == ExtFrameType::ALIGNED_PAGE)) {
-        if (alignTo4k(
-                readBuffer_,
-                Serializer::kBytesForFrameOrMetadataLength +
-                    ExtFrame::frameHeaderSize(),
-                totalFrameSize)) {
-          allocType_ =
-              apache::thrift::RpcOptions::MemAllocType::ALLOC_PAGE_ALIGN;
-        }
-      }
-    }
-
     if (readBuffer_.length() < totalFrameSize) {
       if (readBuffer_.length() + readBuffer_.tailroom() < totalFrameSize) {
         DCHECK(!readBuffer_.isChained());
@@ -159,7 +132,6 @@ void Parser<T>::readDataAvailableOld(size_t nbytes) {
     owner_.decMemoryUsage(currentFrameLength_);
     currentFrameLength_ = 0;
     readBuffer_.trimStart(totalFrameSize);
-    allocType_ = apache::thrift::RpcOptions::MemAllocType::ALLOC_DEFAULT;
     owner_.handleFrame(std::move(frame));
   }
 
@@ -187,32 +159,6 @@ void Parser<T>::readDataAvailableNew(size_t nbytes) {
       currentFrameLength_ = totalFrameSize;
     }
 
-    readStreamId(cursor);
-    uint8_t frameType;
-    std::tie(frameType, std::ignore) = readFrameTypeAndFlagsUnsafe(cursor);
-    if (UNLIKELY(
-            static_cast<FrameType>(frameType) == FrameType::EXT &&
-            allocType_ ==
-                apache::thrift::RpcOptions::MemAllocType::ALLOC_DEFAULT)) {
-      if (readBufQueue_.chainLength() <
-          Serializer::kBytesForFrameOrMetadataLength +
-              ExtFrame::frameHeaderSize()) {
-        return;
-      }
-
-      ExtFrameType extType = readExtFrameType(cursor);
-      if (UNLIKELY(extType == ExtFrameType::ALIGNED_PAGE)) {
-        if (alignTo4kBufQueue(
-                readBufQueue_,
-                Serializer::kBytesForFrameOrMetadataLength +
-                    ExtFrame::frameHeaderSize(),
-                totalFrameSize)) {
-          allocType_ =
-              apache::thrift::RpcOptions::MemAllocType::ALLOC_PAGE_ALIGN;
-        }
-      }
-    }
-
     if (readBufQueue_.chainLength() < currentFrameLength_) {
       bufferSize_ = currentFrameLength_ - readBufQueue_.chainLength();
       return;
@@ -225,7 +171,6 @@ void Parser<T>::readDataAvailableNew(size_t nbytes) {
     owner_.decMemoryUsage(currentFrameLength_);
     currentFrameLength_ = 0;
     bufferSize_ = kMinBufferSize;
-    allocType_ = apache::thrift::RpcOptions::MemAllocType::ALLOC_DEFAULT;
   }
 }
 
@@ -271,42 +216,6 @@ void Parser<T>::readDataAvailableHybrid(size_t nbytes) {
     const size_t totalSize =
         currentFrameLength_ + Serializer::kBytesForFrameOrMetadataLength;
 
-    if (UNLIKELY(
-            static_cast<FrameType>(currentFrameType_) == FrameType::EXT &&
-            allocType_ ==
-                apache::thrift::RpcOptions::MemAllocType::ALLOC_DEFAULT)) {
-      if (bufLen < Serializer::kBytesForFrameOrMetadataLength +
-              ExtFrame::frameHeaderSize()) {
-        return;
-      }
-      ExtFrameType extType = readExtFrameType(cursor);
-      if (UNLIKELY(extType == ExtFrameType::ALIGNED_PAGE)) {
-        allocType_ = apache::thrift::RpcOptions::MemAllocType::ALLOC_PAGE_ALIGN;
-        const size_t bytesToCopy = std::min(
-            currentFrameLength_,
-            readBuffer_.length() - Serializer::kBytesForFrameOrMetadataLength);
-        dynamicBuffer_ = get4kAlignedBuf(
-            currentFrameLength_, ExtFrame::frameHeaderSize(), bytesToCopy);
-        if (LIKELY(dynamicBuffer_ != nullptr)) {
-          allocType_ = apache::thrift::RpcOptions::MemAllocType::ALLOC_DEFAULT;
-          readBuffer_.trimStart(Serializer::kBytesForFrameOrMetadataLength);
-          memcpy(
-              dynamicBuffer_->writableData(), readBuffer_.data(), bytesToCopy);
-          readBuffer_.trimStart(bytesToCopy);
-          // if we had the full frame, send it right away and continue loop
-          if (bytesToCopy == currentFrameLength_) {
-            owner_.handleFrame(std::move(dynamicBuffer_));
-            owner_.decMemoryUsage(currentFrameLength_);
-            currentFrameLength_ = 0;
-            currentFrameType_ = 0;
-            continue;
-          }
-          // otherwise, return to read rest of frame into dynamic buffer
-          return;
-        }
-      }
-    }
-
     // we may have an incomplete frame
     if (totalSize > bufLen) {
       // switch to dynamic buffer only if there is no way to fit the whole frame
@@ -333,7 +242,6 @@ void Parser<T>::readDataAvailableHybrid(size_t nbytes) {
     std::unique_ptr<folly::IOBuf> frame;
     cursor.clone(frame, currentFrameLength_);
     readBuffer_.trimStart(totalSize);
-    allocType_ = apache::thrift::RpcOptions::MemAllocType::ALLOC_DEFAULT;
     owner_.handleFrame(std::move(frame));
     owner_.decMemoryUsage(currentFrameLength_);
     currentFrameLength_ = 0;
@@ -403,10 +311,7 @@ void Parser<T>::readErr(const folly::AsyncSocketException& ex) noexcept {
 // THRIFT_FLAG(rocket_parser_dont_hold_buffer_enabled) is stable.
 template <class T>
 void Parser<T>::timeoutExpired() noexcept {
-  if (LIKELY(
-          allocType_ ==
-              apache::thrift::RpcOptions::MemAllocType::ALLOC_DEFAULT &&
-          !blockResize_)) {
+  if (LIKELY(!blockResize_)) {
     resizeBuffer();
   }
 }

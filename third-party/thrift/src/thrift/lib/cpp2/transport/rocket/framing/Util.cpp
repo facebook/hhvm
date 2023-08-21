@@ -22,10 +22,6 @@
 
 #include <folly/Conv.h>
 
-namespace {
-constexpr size_t kPageSize = 4096;
-} // namespace
-
 namespace apache {
 namespace thrift {
 namespace rocket {
@@ -86,61 +82,8 @@ std::pair<FrameType, Flags> readFrameTypeAndFlags(folly::io::Cursor& cursor) {
 }
 
 ExtFrameType readExtFrameType(folly::io::Cursor& cursor) {
-  const auto extFrameType = cursor.readBE<uint32_t>();
-  switch (static_cast<ExtFrameType>(extFrameType)) {
-    case ExtFrameType::ALIGNED_PAGE:
-      return static_cast<ExtFrameType>(extFrameType);
-    default:
-      return ExtFrameType::UNKNOWN;
-  }
-}
-
-bool alignTo4k(folly::IOBuf& buffer, size_t startOffset, size_t frameSize) {
-  auto iobuf = get4kAlignedBuf(
-      std::max(buffer.length(), frameSize), startOffset, buffer.length());
-  if (UNLIKELY(!iobuf)) {
-    return false;
-  }
-
-  memcpy(iobuf->writableData(), buffer.writableData(), buffer.length());
-  buffer = *std::move(iobuf);
-  return true;
-}
-
-bool alignTo4kBufQueue(
-    folly::IOBufQueue& bufQueue, size_t startOffset, size_t frameSize) {
-  auto iobuf = get4kAlignedBuf(
-      std::max(bufQueue.chainLength(), frameSize),
-      startOffset,
-      bufQueue.chainLength());
-  if (UNLIKELY(!iobuf)) {
-    return false;
-  }
-
-  folly::io::Cursor cursor(bufQueue.front());
-  cursor.pull(iobuf->writableData(), bufQueue.chainLength());
-  folly::IOBufQueue bufQ{folly::IOBufQueue::cacheChainLength()};
-  bufQ.append(*std::move(iobuf));
-  bufQueue = std::move(bufQ);
-  return true;
-}
-
-std::unique_ptr<folly::IOBuf> get4kAlignedBuf(
-    size_t numBytes, size_t startOffset, size_t trimLength) {
-  DCHECK_LE(trimLength, numBytes);
-  const size_t padding = kPageSize - (startOffset % kPageSize);
-  const size_t size = numBytes + padding;
-  void* rawbuf = folly::aligned_malloc(size, kPageSize);
-  if (UNLIKELY(!rawbuf)) {
-    LOG(ERROR) << "Allocating : " << kPageSize
-               << " aligned memory of size: " << numBytes << " failed!";
-    return nullptr;
-  }
-  auto iobuf = folly::IOBuf::takeOwnership(
-      rawbuf, size, size, [](void* p, void*) { folly::aligned_free(p); });
-  iobuf->trimStart(padding);
-  iobuf->trimEnd(size - std::min(numBytes, trimLength) - padding);
-  return iobuf;
+  cursor.readBE<uint32_t>();
+  return ExtFrameType::UNKNOWN;
 }
 
 // Has both false positives and false negatives

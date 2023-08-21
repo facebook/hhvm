@@ -195,22 +195,6 @@ apache::thrift::SinkConsumer<int32_t, bool> TestSinkService::sinkFinalThrow() {
 
 void TestSinkService::purge() {}
 
-apache::thrift::SinkConsumer<IOBuf, int32_t> TestSinkService::alignment(
-    std::unique_ptr<std::string> expected) {
-  return apache::thrift::SinkConsumer<IOBuf, int32_t>{
-      [expected = std::move(expected)](folly::coro::AsyncGenerator<IOBuf&&> gen)
-          -> folly::coro::Task<int32_t> {
-        int32_t res = 0;
-        while (auto buf = co_await gen.next()) {
-          EXPECT_EQ(*expected, folly::StringPiece(buf->coalesce()));
-          res = reinterpret_cast<std::uintptr_t>(buf->data()) % 4096u;
-        }
-        co_return res;
-      },
-      10 /* buffer size */
-  };
-}
-
 apache::thrift::SinkConsumer<int32_t, bool> TestSinkService::rangeCancelAt(
     int32_t from, int32_t to, int32_t cancelAt) {
   return apache::thrift::SinkConsumer<int32_t, bool>{

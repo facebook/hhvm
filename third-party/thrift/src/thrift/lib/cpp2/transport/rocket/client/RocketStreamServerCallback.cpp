@@ -153,25 +153,15 @@ void RocketStreamServerCallbackWithChunkTimeout::cancelTimeout() {
 // RocketSinkServerCallback
 bool RocketSinkServerCallback::onSinkNext(StreamPayload&& payload) {
   DCHECK(state_ == State::BothOpen);
-  switch (memAllocType_) {
-    case RpcOptions::MemAllocType::ALLOC_DEFAULT: {
-      // apply compression if client has specified compression codec
-      if (compressionConfig_) {
-        rocket::detail::setCompressionCodec(
-            *compressionConfig_,
-            payload.metadata,
-            payload.payload->computeChainDataLength());
-      }
-      std::ignore = client_.sendPayload(
-          streamId_, std::move(payload), rocket::Flags().next(true));
-      break;
-    }
-    case RpcOptions::MemAllocType::ALLOC_PAGE_ALIGN: {
-      client_.sendExtAlignedPage(
-          streamId_, std::move(payload).payload, rocket::Flags().next(true));
-      break;
-    }
+  // apply compression if client has specified compression codec
+  if (compressionConfig_) {
+    rocket::detail::setCompressionCodec(
+        *compressionConfig_,
+        payload.metadata,
+        payload.payload->computeChainDataLength());
   }
+  std::ignore = client_.sendPayload(
+      streamId_, std::move(payload), rocket::Flags().next(true));
   return true;
 }
 void RocketSinkServerCallback::onSinkError(folly::exception_wrapper ew) {

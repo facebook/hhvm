@@ -123,8 +123,6 @@ class RocketClient : public virtual folly::DelayedDestruction,
       Payload&& request,
       std::chrono::milliseconds firstResponseTimeout,
       SinkClientCallback* clientCallback,
-      RpcOptions::MemAllocType memAllocType =
-          RpcOptions::MemAllocType::ALLOC_DEFAULT,
       folly::Optional<CompressionConfig> compressionConfig = folly::none);
 
   FOLLY_NODISCARD bool sendRequestN(StreamId streamId, int32_t n);
@@ -133,8 +131,6 @@ class RocketClient : public virtual folly::DelayedDestruction,
       StreamId streamId, StreamPayload&& payload, Flags flags);
   void sendError(StreamId streamId, RocketException&& rex);
   void sendComplete(StreamId streamId, bool closeStream);
-  void sendExtAlignedPage(
-      StreamId streamId, std::unique_ptr<folly::IOBuf> payload, Flags flags);
   FOLLY_NODISCARD bool sendHeadersPush(
       StreamId streamId, HeadersPayload&& payload);
   // sink error can use different frames depends on server version

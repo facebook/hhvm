@@ -127,12 +127,10 @@ class RocketSinkServerCallback : public SinkServerCallback {
       rocket::StreamId streamId,
       rocket::RocketClient& client,
       SinkClientCallback& clientCallback,
-      RpcOptions::MemAllocType memAllocType,
       std::unique_ptr<CompressionConfig> compressionConfig)
       : client_(client),
         clientCallback_(&clientCallback),
         streamId_(streamId),
-        memAllocType_(memAllocType),
         compressionConfig_(std::move(compressionConfig)) {}
 
   bool onSinkNext(StreamPayload&&) override;
@@ -157,8 +155,6 @@ class RocketSinkServerCallback : public SinkServerCallback {
   rocket::RocketClient& client_;
   SinkClientCallback* clientCallback_;
   rocket::StreamId streamId_;
-  RpcOptions::MemAllocType memAllocType_{
-      RpcOptions::MemAllocType::ALLOC_DEFAULT};
   enum class State { BothOpen, StreamOpen };
   State state_{State::BothOpen};
   std::unique_ptr<CompressionConfig> compressionConfig_;

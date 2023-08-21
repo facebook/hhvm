@@ -159,8 +159,6 @@ class Parser final : public folly::AsyncTransport::ReadCallback,
   size_t bufferSize_{kMinBufferSize};
   // TODO: readBuffer_ should be removed once the new buffer logic controlled by
   // THRIFT_FLAG(rocket_parser_dont_hold_buffer_enabled) is stable.
-  apache::thrift::RpcOptions::MemAllocType allocType_{
-      apache::thrift::RpcOptions::MemAllocType::ALLOC_DEFAULT};
   size_t currentFrameLength_{0};
   uint8_t currentFrameType_{0};
   // used by readDataAvailable or readBufferAvailable API (only one will be

@@ -54,9 +54,6 @@ class TestSinkService : public apache::thrift::ServiceHandler<TestSinkService> {
 
   apache::thrift::SinkConsumer<int32_t, bool> sinkFinalThrow() override;
 
-  apache::thrift::SinkConsumer<folly::IOBuf, int32_t> alignment(
-      std::unique_ptr<std::string> expected) override;
-
   apache::thrift::SinkConsumer<int32_t, bool> rangeCancelAt(
       int32_t from, int32_t to, int32_t cancelAt) override;
 

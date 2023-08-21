@@ -50,15 +50,6 @@ std::pair<FrameType, Flags> readFrameTypeAndFlags(folly::io::Cursor& cursor);
 
 ExtFrameType readExtFrameType(folly::io::Cursor& cursor);
 
-bool alignTo4k(folly::IOBuf& buffer, size_t startOffset, size_t frameSize);
-// Used in the new buffer logic in rocket parser. alignTo4k will be deprecated
-// once the new buffer logic is stable.
-bool alignTo4kBufQueue(
-    folly::IOBufQueue& bufQueue, size_t startOffset, size_t frameSize);
-
-std::unique_ptr<folly::IOBuf> get4kAlignedBuf(
-    size_t numBytes, size_t startOffset, size_t trimLength);
-
 // Has both false positives and false negatives
 bool isMaybeRocketFrame(const folly::IOBuf& data);
 

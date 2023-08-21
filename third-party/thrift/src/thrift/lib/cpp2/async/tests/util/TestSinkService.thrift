@@ -51,8 +51,6 @@ service TestSinkService {
   sink<i32, bool throws (1: FinalException e)> sinkFinalThrow();
   void purge();
 
-  sink<IOBuf, i32> alignment(1: binary expected);
-
   sink<i32, bool> rangeCancelAt(1: i32 from, 2: i32 to, 3: i32 cancelAt);
   sink<i32, bool> rangeSlowFinalResponse(1: i32 from, 2: i32 to);
 }

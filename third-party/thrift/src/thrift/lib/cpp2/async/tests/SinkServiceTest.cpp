@@ -285,24 +285,6 @@ TEST_F(SinkServiceTest, AssignmentNoLeak) {
       });
 }
 
-TEST_F(SinkServiceTest, AlignedSink) {
-  connectToServer(
-      [](Client<TestSinkService>& client) -> folly::coro::Task<void> {
-        {
-          apache::thrift::RpcOptions option;
-          option.setMemAllocType(
-              apache::thrift::RpcOptions::MemAllocType::ALLOC_PAGE_ALIGN);
-          std::string s = "abcdefghijk";
-          auto sink = co_await client.co_alignment(option, s);
-          int32_t alignment = co_await sink.sink(
-              [s]() -> folly::coro::AsyncGenerator<folly::IOBuf&&> {
-                co_yield std::move(*folly::IOBuf::copyBuffer(s));
-              }());
-          EXPECT_EQ(alignment, 0);
-        }
-      });
-}
-
 folly::coro::Task<void> neverStream() {
   folly::coro::Baton baton;
   folly::CancellationCallback cb{

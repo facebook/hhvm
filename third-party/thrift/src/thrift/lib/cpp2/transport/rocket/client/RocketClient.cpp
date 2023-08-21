@@ -816,7 +816,6 @@ void RocketClient::sendRequestSink(
     Payload&& request,
     std::chrono::milliseconds firstResponseTimeout,
     SinkClientCallback* clientCallback,
-    RpcOptions::MemAllocType memAllocType,
     folly::Optional<CompressionConfig> compressionConfig) {
   const auto streamId = makeStreamId();
 
@@ -826,11 +825,7 @@ void RocketClient::sendRequestSink(
         std::make_unique<CompressionConfig>(*compressionConfig);
   }
   auto serverCallback = std::make_unique<RocketSinkServerCallback>(
-      streamId,
-      *this,
-      *clientCallback,
-      memAllocType,
-      std::move(compressionConfigP));
+      streamId, *this, *clientCallback, std::move(compressionConfigP));
   sendRequestStreamChannel(
       streamId,
       std::move(request),
@@ -1101,25 +1096,6 @@ bool RocketClient::sendSinkError(StreamId streamId, StreamPayload&& payload) {
   freeStream(streamId);
   return sendPayload(
       streamId, std::move(payload), Flags().next(true).complete(true));
-}
-
-void RocketClient::sendExtAlignedPage(
-    StreamId streamId, std::unique_ptr<folly::IOBuf> payload, Flags flags) {
-  auto g = makeRequestCountGuard(RequestType::INTERNAL);
-  auto onError = [dg = DestructorGuard(this), this, g = std::move(g)](
-                     transport::TTransportException ex) {
-    FB_LOG_EVERY_MS(ERROR, 1000)
-        << "sendExtAlignedPage failed, closing now: " << ex.what();
-    close(std::move(ex));
-  };
-
-  std::ignore = sendFrame(
-      ExtFrame(
-          streamId,
-          Payload::makeFromData(std::move(payload)),
-          flags.ignore(true),
-          ExtFrameType::ALIGNED_PAGE),
-      std::move(onError));
 }
 
 folly::Try<void> RocketClient::scheduleWrite(RequestContext& ctx) {

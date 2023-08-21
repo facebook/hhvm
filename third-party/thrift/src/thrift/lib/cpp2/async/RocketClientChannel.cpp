@@ -905,7 +905,7 @@ void RocketClientChannel::sendRequestSink(
           std::move(*metadata.name_ref()),
           clientCallback,
           evb_),
-      rpcOptions.getMemAllocType(),
+      // rpcOptions.getMemAllocType(),
       header->getDesiredCompressionConfig());
 }
 

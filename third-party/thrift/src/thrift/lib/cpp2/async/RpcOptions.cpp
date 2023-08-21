@@ -186,15 +186,6 @@ transport::THeader::StringToStringMap RpcOptions::releaseWriteHeaders() {
   return std::exchange(writeHeaders_, std::nullopt).value_or(kEmptyMap());
 }
 
-RpcOptions::MemAllocType RpcOptions::getMemAllocType() const {
-  return memAllocType_;
-}
-
-RpcOptions& RpcOptions::setMemAllocType(MemAllocType memAllocType) {
-  memAllocType_ = memAllocType;
-  return *this;
-}
-
 RpcOptions& RpcOptions::setInteractionId(const InteractionId& id) {
   interactionId_ = id;
   DCHECK_GT(interactionId_, 0);

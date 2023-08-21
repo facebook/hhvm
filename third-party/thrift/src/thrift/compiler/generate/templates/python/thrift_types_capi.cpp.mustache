@@ -46,58 +46,58 @@ bool ensure_module_imported() {
 
 {{#program:structs}}
 {{#struct:marshal_capi?}}
-ExtractorResult<{{program:cpp_namespaces}}::{{struct:cpp_name}}>
-Extractor<{{program:cpp_namespaces}}::{{struct:cpp_name}}>::operator()(PyObject* obj) {
+ExtractorResult<{{struct:cpp_name}}>
+Extractor<{{struct:cpp_name}}>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
         PyErr_SetString(PyExc_TypeError, "Not a {{struct:name}}");
       }
-      return extractorError<{{program:cpp_namespaces}}::{{struct:cpp_name}}>(
+      return extractorError<{{struct:cpp_name}}>(
           "Marshal error: {{struct:name}}");
   }
   {{#struct:fields?}}
   {{! getThriftData increments tuple struct refcnt}}
   StrongRef fbThriftData(get{{#struct:exception?}}Exception{{/struct:exception?}}ThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      {{program:cpp_namespaces}}::{{struct:cpp_name}}>>{}(*fbThriftData);
+      {{struct:cpp_name}}>>{}(*fbThriftData);
   {{/struct:fields?}}
   {{^struct:fields?}}
-  return {{program:cpp_namespaces}}::{{struct:cpp_name}}{};
+  return {{struct:cpp_name}}{};
   {{/struct:fields?}}
 }
 {{/struct:marshal_capi?}}
 {{^struct:marshal_capi?}}
-ExtractorResult<{{program:cpp_namespaces}}::{{struct:cpp_name}}>
-Extractor<{{program:cpp_namespaces}}::{{struct:cpp_name}}>::operator()(PyObject* obj) {
+ExtractorResult<{{struct:cpp_name}}>
+Extractor<{{struct:cpp_name}}>::operator()(PyObject* obj) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<{{program:cpp_namespaces}}::{{struct:cpp_name}}>(
+    return extractorError<{{struct:cpp_name}}>(
       "Module {{program:module_path}} import error");
   }
   std::unique_ptr<folly::IOBuf> val(
       extract__{{program:capi_module_prefix}}__{{struct:name}}(obj));
   if (!val) {
     CHECK(PyErr_Occurred());
-    return extractorError<{{program:cpp_namespaces}}::{{struct:cpp_name}}>(
+    return extractorError<{{struct:cpp_name}}>(
         "Thrift serialize error: {{struct:name}}");
   }
   {{#struct:cpp_adapter?}}
   return detail::deserialize_iobuf_to_adapted<
-      {{program:cpp_namespaces}}::{{struct:cpp_name}}, {{cpp_adapter:name}}
+      {{struct:cpp_name}}, {{cpp_adapter:name}}
     >(std::move(val));
   {{/struct:cpp_adapter?}}
   {{^struct:cpp_adapter?}}
-  return detail::deserialize_iobuf<{{program:cpp_namespaces}}::{{struct:cpp_name}}>(std::move(val));
+  return detail::deserialize_iobuf<{{struct:cpp_name}}>(std::move(val));
   {{/struct:cpp_adapter?}}
 }
 {{/struct:marshal_capi?}}
 
 {{#struct:marshal_capi?}}
-ExtractorResult<{{program:cpp_namespaces}}::{{struct:cpp_name}}>
+ExtractorResult<{{struct:cpp_name}}>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    {{program:cpp_namespaces}}::{{struct:cpp_name}}>>::operator()(PyObject* fbThriftData) {
-  {{program:cpp_namespaces}}::{{struct:cpp_name}} cpp;
+    {{struct:cpp_name}}>>::operator()(PyObject* fbThriftData) {
+  {{struct:cpp_name}} cpp;
 {{#struct:fields?}}
   std::optional<std::string_view> error;
   {{^struct:union?}}
@@ -136,24 +136,24 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 {{/struct:marshal_capi?}}
 
 {{^struct:marshal_capi?}}
-ExtractorResult<{{program:cpp_namespaces}}::{{struct:cpp_name}}>
+ExtractorResult<{{struct:cpp_name}}>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    {{program:cpp_namespaces}}::{{struct:cpp_name}}>>::operator()(PyObject* fbthrift_data) {
+    {{struct:cpp_name}}>>::operator()(PyObject* fbthrift_data) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<{{program:cpp_namespaces}}::{{struct:cpp_name}}>(
+    return extractorError<{{struct:cpp_name}}>(
       "Module {{program:module_path}} import error");
   }
   auto obj = StrongRef(init__{{program:capi_module_prefix}}__{{struct:name}}(fbthrift_data));
   if (!obj) {
-      return extractorError<{{program:cpp_namespaces}}::{{struct:cpp_name}}>(
+      return extractorError<{{struct:cpp_name}}>(
           "Init from fbthrift error: {{struct:name}}");
   }
-  return Extractor<{{program:cpp_namespaces}}::{{struct:cpp_name}}>{}(*obj);
+  return Extractor<{{struct:cpp_name}}>{}(*obj);
 }
 {{/struct:marshal_capi?}}
 
-int Extractor<{{program:cpp_namespaces}}::{{struct:cpp_name}}>::typeCheck(PyObject* obj) {
+int Extractor<{{struct:cpp_name}}>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module {{program:module_path}} import error");
@@ -168,15 +168,15 @@ int Extractor<{{program:cpp_namespaces}}::{{struct:cpp_name}}>::typeCheck(PyObje
 }
 
 
-PyObject* Constructor<{{program:cpp_namespaces}}::{{struct:cpp_name}}>::operator()(
-    const {{program:cpp_namespaces}}::{{struct:cpp_name}}& val) {
+PyObject* Constructor<{{struct:cpp_name}}>::operator()(
+    const {{struct:cpp_name}}& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   {{#struct:marshal_capi?}}
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        {{program:cpp_namespaces}}::{{struct:cpp_name}}>> ctor;
+        {{struct:cpp_name}}>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
@@ -200,8 +200,8 @@ PyObject* Constructor<{{program:cpp_namespaces}}::{{struct:cpp_name}}>::operator
 
 {{#struct:marshal_capi?}}
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        {{program:cpp_namespaces}}::{{struct:cpp_name}}>>::operator()(
-    FOLLY_MAYBE_UNUSED const {{program:cpp_namespaces}}::{{struct:cpp_name}}& val) {
+        {{struct:cpp_name}}>>::operator()(
+    FOLLY_MAYBE_UNUSED const {{struct:cpp_name}}& val) {
   {{^struct:union?}}
   StrongRef fbthrift_data(createStructTuple({{struct:fields_size}}));
   {{#struct:fields}}
@@ -237,9 +237,9 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 {{^struct:marshal_capi?}}
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        {{program:cpp_namespaces}}::{{struct:cpp_name}}>>::operator()(
-    const {{program:cpp_namespaces}}::{{struct:cpp_name}}& val) {
-  auto obj = StrongRef(Constructor<{{program:cpp_namespaces}}::{{struct:cpp_name}}>{}(val));
+        {{struct:cpp_name}}>>::operator()(
+    const {{struct:cpp_name}}& val) {
+  auto obj = StrongRef(Constructor<{{struct:cpp_name}}>{}(val));
   if (!obj) {
     return nullptr;
   }

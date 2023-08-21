@@ -31,6 +31,7 @@
 #include <thrift/compiler/ast/t_field.h>
 #include <thrift/compiler/ast/t_service.h>
 #include <thrift/compiler/detail/mustache/mstch.h>
+#include <thrift/compiler/gen/cpp/type_resolver.h>
 #include <thrift/compiler/generate/common.h>
 #include <thrift/compiler/generate/mstch_objects.h>
 #include <thrift/compiler/generate/t_mstch_generator.h>
@@ -286,7 +287,7 @@ std::string format_marshal_type(
   } else if (true_type->is_double()) {
     return override_or("double");
   } else if (true_type->is_binary() && is_type_iobuf(t_override)) {
-    return override_or("Bytes");
+    return std::string(t_override);
   } else if (true_type->is_string_or_binary()) {
     // unicode's internal_data representation is binary
     return "Bytes";
@@ -1039,11 +1040,15 @@ class python_mstch_struct : public mstch_struct {
     return ::apache::thrift::compiler::generate_legacy_api(*struct_);
   }
 
-  mstch::node cpp_name() { return cpp2::get_name(struct_); }
+  mstch::node cpp_name() {
+    return cpp_resolver_.get_underlying_namespaced_name(*struct_);
+  }
+
   mstch::node fields_size() { return std::to_string(struct_->fields().size()); }
 
  private:
   const t_const* adapter_annotation_;
+  gen::cpp::type_resolver cpp_resolver_;
 };
 
 class python_mstch_field : public mstch_field {

@@ -32,32 +32,32 @@ namespace python {
 namespace capi {
 {{#program:structs}}
 template <>
-struct Extractor<{{program:cpp_namespaces}}::{{struct:cpp_name}}>
-    : public BaseExtractor<{{program:cpp_namespaces}}::{{struct:cpp_name}}> {
-  ExtractorResult<{{program:cpp_namespaces}}::{{struct:cpp_name}}> operator()(PyObject* obj);
+struct Extractor<{{struct:cpp_name}}>
+    : public BaseExtractor<{{struct:cpp_name}}> {
+  ExtractorResult<{{struct:cpp_name}}> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        {{program:cpp_namespaces}}::{{struct:cpp_name}}>>
+        {{struct:cpp_name}}>>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        {{program:cpp_namespaces}}::{{struct:cpp_name}}>> {
-  ExtractorResult<{{program:cpp_namespaces}}::{{struct:cpp_name}}> operator()(PyObject* obj);
+        {{struct:cpp_name}}>> {
+  ExtractorResult<{{struct:cpp_name}}> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<{{program:cpp_namespaces}}::{{struct:cpp_name}}>
-    : public BaseConstructor<{{program:cpp_namespaces}}::{{struct:cpp_name}}> {
-  PyObject* operator()(const {{program:cpp_namespaces}}::{{struct:cpp_name}}& val);
+struct Constructor<{{struct:cpp_name}}>
+    : public BaseConstructor<{{struct:cpp_name}}> {
+  PyObject* operator()(const {{struct:cpp_name}}& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        {{program:cpp_namespaces}}::{{struct:cpp_name}}>>
+        {{struct:cpp_name}}>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        {{program:cpp_namespaces}}::{{struct:cpp_name}}>> {
-  PyObject* operator()(const {{program:cpp_namespaces}}::{{struct:cpp_name}}& val);
+        {{struct:cpp_name}}>> {
+  PyObject* operator()(const {{struct:cpp_name}}& val);
 };
 
 {{/program:structs}}

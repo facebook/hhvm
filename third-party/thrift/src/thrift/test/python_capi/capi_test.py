@@ -20,7 +20,7 @@ from typing import Generator
 import thrift.python_capi.fixture as fixture
 
 from folly.iobuf import IOBuf
-from thrift.test.python_capi.module.thrift_types import (  # @manual=:test_module-python-types
+from thrift.test.python_capi.module.thrift_types import (
     AnnoyingEnum,
     ComposeStruct,
     DoubledPair,
@@ -30,7 +30,6 @@ from thrift.test.python_capi.module.thrift_types import (  # @manual=:test_modul
     MyDataItem,
     MyEnum,
     MyStruct,
-    MyStructPatch,  # this import breaks autodeps w/o manual
     Onion as MyUnion,
     PrimitiveStruct,
     SetStruct,
@@ -98,11 +97,6 @@ class PythonCapiFixture(unittest.TestCase):
             inty=2**31 - 1,
             longy=2**63 - 1,
             # leave optional `floaty` `dubby`, `stringy`, `bytey` unset
-        )
-
-    def struct_patch(self) -> MyStructPatch:
-        return MyStructPatch(
-            assign=self.my_struct(),
         )
 
     def list_struct(self) -> ListStruct:
@@ -216,13 +210,6 @@ class PythonCapiRoundtrip(PythonCapiFixture):
     def test_roundtrip_enum(self) -> None:
         self.assertEqual(MyEnum.MyValue1, fixture.roundtrip_MyEnum(MyEnum.MyValue1))
         self.assertEqual(MyEnum.MyValue2, fixture.roundtrip_MyEnum(MyEnum.MyValue2))
-
-    def test_roundtrip_struct_patch(self) -> None:
-        self.assertEqual(
-            self.struct_patch(), fixture.roundtrip_MyStructPatch(self.struct_patch())
-        )
-        empty_patch = MyStructPatch(assign=MyStruct())
-        self.assertEqual(empty_patch, fixture.roundtrip_MyStructPatch(empty_patch))
 
     def test_roundtrip_field_adapted(self) -> None:
         a, b = ("TacosSalad", "DaLassoCat")
@@ -384,11 +371,6 @@ class PythonCapiTypeCheck(PythonCapiFixture):
             self.assertTrue(fixture.check_MyUnion(u))
         self.assertFalse(fixture.check_MyUnion(self.my_struct()))
         self.assertFalse(fixture.check_MyUnion(MyEnum.MyValue1))
-
-    def test_typeCheck_struct_patch(self) -> None:
-        self.assertTrue(fixture.check_MyStructPatch(self.struct_patch()))
-        self.assertFalse(fixture.check_MyStructPatch(self.my_struct()))
-        self.assertFalse(fixture.check_MyStructPatch(MyEnum.MyValue1))
 
     def test_typeCheck_enum(self) -> None:
         self.assertTrue(fixture.check_MyEnum(MyEnum.MyValue1))

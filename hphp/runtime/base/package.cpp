@@ -262,8 +262,8 @@ namespace {
 bool is_module_outside_active_deployment(const PackageInfo& packageInfo,
                                          const StringData* module) {
   if (!RO::EvalEnforceDeployment) return false;
+  assertx(module);
   if (auto const activeDeployment = packageInfo.getActiveDeployment()) {
-    if (!module) return true;
     return !packageInfo.moduleInDeployment(module, *activeDeployment, DeployKind::Hard);
   }
   return false;

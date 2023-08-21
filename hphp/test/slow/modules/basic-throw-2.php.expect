@@ -1,2 +1,2 @@
-Accessing internal method Cls::foo_static in module A from outside of a module is not allowed
-Accessing internal method Cls::foo in module A from outside of a module is not allowed
+Accessing internal method Cls::foo_static in module A from the default module is not allowed
+Accessing internal method Cls::foo in module A from the default module is not allowed

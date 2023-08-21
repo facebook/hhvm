@@ -1,0 +1,9 @@
+in default_foo
+in default_foo
+in DefaultFoo constructor
+in DefaultFoo constructor
+string(25) "in DefaultFoo::static_foo"
+string(25) "in DefaultFoo::static_foo"
+string(25) "in DefaultFoo::static_foo"
+string(25) "in DefaultFoo::static_foo"
+in DefaultFoo constructor

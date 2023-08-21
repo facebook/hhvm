@@ -1183,6 +1183,14 @@ bool process(CompilerOptions &po) {
         moduleInDeployment.insert(module);
       }
     }
+    // Check for the default module separately since there is no module
+    // declaration for the default module.
+    static auto const defaultModule = makeStaticString(Module::DEFAULT);
+    if (packageInfo.moduleInDeployment(defaultModule,
+                                       it->second,
+                                       DeployKind::HardOrSoft)) {
+      moduleInDeployment.insert(defaultModule);
+    }
   }
 
   Optional<RepoAutoloadMapBuilder> autoload;

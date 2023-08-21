@@ -922,7 +922,7 @@ static Array HHVM_METHOD(ReflectionFunctionAbstract, getCoeffects) {
 static Variant HHVM_METHOD(ReflectionFunctionAbstract, getModule) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
   auto const name = func->moduleName();
-  if (!name) return init_null_variant;
+  if (!name || Module::isDefault(name)) return init_null_variant;
   return String::attach(const_cast<StringData*>(name));
 }
 
@@ -1326,7 +1326,7 @@ static bool HHVM_METHOD(ReflectionClass, isInternalToModule) {
 static Variant HHVM_METHOD(ReflectionClass, getModule) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
   auto const name = cls->moduleName();
-  if (!name) return init_null_variant;
+  if (!name || Module::isDefault(name)) return init_null_variant;
   return String::attach(const_cast<StringData*>(name));
 }
 

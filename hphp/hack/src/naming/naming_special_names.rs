@@ -1201,6 +1201,10 @@ pub mod expression_trees {
     pub const DOLLARDOLLAR_TMP_VAR: &str = "$0dollardollar";
 }
 
+pub mod modules {
+    pub const DEFAULT: &str = "default";
+}
+
 #[cfg(test)]
 mod test {
     use crate::members::is_special_xhp_attribute;

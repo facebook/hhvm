@@ -1,9 +1,7 @@
-<?hh
-
-module a.b;
+<?hh // in the default module (in the active deployment)
 
 <<__EntryPoint>>
-function main_throw_1() :mixed{
+function main_throw_2() :mixed{
   try {
     foo();
   } catch (Exception $e) {

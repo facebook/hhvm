@@ -13,6 +13,7 @@ proc-macro = true
 
 [dependencies]
 aast_parser = { version = "0.0.0", path = "../../../../parser/cargo/aast_parser" }
+naming_special_names_rust = { version = "0.0.0", path = "../../../../naming" }
 once_cell = "1.12"
 oxidized = { version = "0.0.0", path = "../../../../oxidized" }
 parser_core_types = { version = "0.0.0", path = "../../../../parser/cargo/core_types" }

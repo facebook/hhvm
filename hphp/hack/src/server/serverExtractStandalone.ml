@@ -293,10 +293,11 @@ end = struct
       | Module md -> Some md
       | Fun _
       | GConst _
-      | GConstName _ ->
+      | GConstName _
+      | Declares ->
         None)
 
-  let get_dep_pos ctx dep =
+  let get_dep_pos ctx dep : Pos.t option =
     let open Typing_deps.Dep in
     match dep with
     | Fun name -> Decl.get_fun_pos ctx name
@@ -314,6 +315,7 @@ end = struct
     | GConstName name ->
       Decl.get_gconst_pos ctx name
     | Module name -> Decl.get_module_pos ctx name
+    | Declares -> None
 
   let get_relative_path ctx dep =
     Option.map ~f:(fun pos -> Pos.filename pos) @@ get_dep_pos ctx dep
@@ -1985,7 +1987,7 @@ end = struct
         PartClsElt (cls_name, Class_elt.(mk_method is_interface ast)))
     @@ Nast_helper.get_method ctx cls_name method_name
 
-  let of_dep ctx dep =
+  let of_dep ctx dep : dep_part =
     Typing_deps.Dep.(
       match dep with
       (* -- Class elements -- *)
@@ -2048,7 +2050,8 @@ end = struct
       | AllMembers _
       | Extends _
       (* TODO(T108206307) *)
-      | Module _ ->
+      | Module _
+      | Declares ->
         PartIgnore)
 
   let of_deps ctx target_opt deps =

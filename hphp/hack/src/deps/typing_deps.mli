@@ -62,6 +62,8 @@ module Dep : sig
     | Module : string -> 'a variant
         (** Represents a toplevel symbol being defined as a member of
         this module *)
+    | Declares : 'a variant
+        (** An edge `Method(c, m) -> Declares` means that class c declares m. *)
 
   val dependency_of_variant : 'a variant -> dependency variant
 
@@ -79,6 +81,7 @@ module Dep : sig
     | KAllMembers
     | KGConstName
     | KModule
+    | KDeclares
   [@@deriving enum]
 
   val dep_kind_of_variant : 'a variant -> dep_kind
@@ -140,6 +143,9 @@ module Dep : sig
   val variant_to_string : 'a variant -> string
 
   val pp_variant : Format.formatter -> 'a variant -> unit
+
+  (** Wether a dep is the hash for the Declares variant. *)
+  val is_declares : t -> bool
 end
 
 module DepHashKey : sig

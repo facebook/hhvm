@@ -39,6 +39,7 @@ module Dep = struct
     | AllMembers : string -> dependency variant
     | GConstName : string -> 'a variant
     | Module : string -> 'a variant
+    | Declares : 'a variant
 
   let dependency_of_variant : type a. a variant -> dependency variant = function
     | GConst s -> GConst s
@@ -54,6 +55,7 @@ module Dep = struct
     | Constructor s -> Constructor s
     | AllMembers s -> AllMembers s
     | Extends s -> Extends s
+    | Declares -> Declares
 
   (** NOTE: keep in sync with `typing_deps_hash.rs`. *)
   type dep_kind =
@@ -70,6 +72,7 @@ module Dep = struct
     | KAllMembers [@value 11]
     | KGConstName [@value 12]
     | KModule [@value 13]
+    | KDeclares [@value 14]
   [@@deriving enum]
 
   module Member = struct
@@ -143,6 +146,7 @@ module Dep = struct
     | AllMembers _ -> 10
     | GConstName _ -> 11
     | Module _ -> 12
+    | Declares -> 13
 
   let compare_variant (type a) (v1 : a variant) (v2 : a variant) : int =
     match (v1, v2) with
@@ -164,10 +168,11 @@ module Dep = struct
         res
       else
         String.compare m1 m2
+    | (Declares, Declares) -> 0
     | ( _,
         ( GConst _ | Fun _ | Type _ | Extends _ | Const _ | Constructor _
         | Prop _ | SProp _ | Method _ | SMethod _ | AllMembers _ | GConstName _
-        | Module _ ) ) ->
+        | Module _ | Declares ) ) ->
       ordinal_variant v1 - ordinal_variant v2
 
   let dep_kind_of_variant : type a. a variant -> dep_kind = function
@@ -184,6 +189,7 @@ module Dep = struct
     | AllMembers _ -> KAllMembers
     | Extends _ -> KExtends
     | Module _ -> KModule
+    | Declares -> KDeclares
 
   let make_member_dep_from_type_dep : t -> Member.t -> t =
    fun type_hash -> function
@@ -194,6 +200,10 @@ module Dep = struct
     | Member.Method name -> hash2 (dep_kind_to_enum KMethod) type_hash name
     | Member.SMethod name -> hash2 (dep_kind_to_enum KSMethod) type_hash name
     | Member.All -> hash2 (dep_kind_to_enum KAllMembers) type_hash ""
+
+  let declares_hash = hash1 (dep_kind_to_enum KDeclares) ""
+
+  let is_declares : t -> bool = Int.equal declares_hash
 
   (* Keep in sync with the tags for `DepType` in `typing_deps_hash.rs`. *)
   let rec make : type a. a variant -> t = function
@@ -219,6 +229,7 @@ module Dep = struct
       make_member_dep_from_type_dep (make (Type name1)) (Member.SMethod name2)
     | AllMembers name1 ->
       make_member_dep_from_type_dep (make (Type name1)) Member.All
+    | Declares -> declares_hash
 
   let is_class x = x land 1 = 1
 
@@ -240,6 +251,7 @@ module Dep = struct
     | AllMembers s -> Utils.strip_ns s
     | Extends s -> Utils.strip_ns s
     | Module m -> m
+    | Declares -> "__declares__"
 
   let extract_root_name : type a. ?strip_namespace:bool -> a variant -> string =
    fun ?(strip_namespace = true) variant ->
@@ -261,6 +273,7 @@ module Dep = struct
         Utils.strip_ns s
       else
         s
+    | Declares -> "__declares__"
 
   let extract_member_name : type a. a variant -> string option = function
     | GConst _
@@ -270,7 +283,8 @@ module Dep = struct
     | Extends _
     | Module _
     | Type _
-    | Fun _ ->
+    | Fun _
+    | Declares ->
       None
     | Const (_cls, s)
     | Prop (_cls, s)
@@ -294,6 +308,7 @@ module Dep = struct
       Decl_reference.GlobalConstant s
     | Fun s -> Decl_reference.Function s
     | Module m -> Decl_reference.Module m
+    | Declares -> failwith "No Decl_reference.t for Declares Dep.variant"
 
   let to_debug_string = string_of_int
 
@@ -322,8 +337,11 @@ module Dep = struct
       | AllMembers _ -> "AllMembers"
       | Extends _ -> "Extends"
       | Module _ -> "Module"
+      | Declares -> "Declares"
     in
-    prefix ^ " " ^ extract_name dep
+    match dep with
+    | Declares -> prefix
+    | _ -> prefix ^ " " ^ extract_name dep
 
   let pp_variant fmt variant =
     Format.fprintf fmt "%s" (variant_to_string variant)

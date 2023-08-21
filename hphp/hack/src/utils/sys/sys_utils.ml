@@ -447,11 +447,6 @@ let splitext filename =
   (root, ext)
 
 let enable_telemetry () =
-  (* The production builds where we want telemetry all have both build_mode and build-revision set. *)
-  let is_production_build =
-    (not (String.is_empty Build_id.build_mode))
-    && not (String.is_empty Build_id.build_revision)
-  in
   (* There are some cases where we want telemetry even from a non-production build,
      so achieve that by setting HH_TEST_MODE=0.
      There are other cases where we want to disable telemetry even in a production build,
@@ -459,7 +454,7 @@ let enable_telemetry () =
   match Sys.getenv_opt "HH_TEST_MODE" with
   | Some "0" -> true
   | Some _ -> false
-  | None -> is_production_build
+  | None -> not Build_id.is_dev_build
 
 let deterministic_behavior_for_tests () =
   (* The only time we want A/B experiments is if we get telemetry on their outcomes!

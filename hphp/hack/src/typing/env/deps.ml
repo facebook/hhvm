@@ -125,10 +125,15 @@ let make_depend_on_constructor_name env class_name =
 let make_depend_on_constructor env class_ =
   if not (Pos_or_decl.is_hhi (Cls.pos class_)) then (
     make_depend_on_constructor_name env (Cls.name class_);
-    Option.iter
-      (fst (Cls.construct class_))
-      ~f:(fun ce ->
-        make_depend_on_constructor_name env ce.Typing_defs.ce_origin)
+    if
+      not
+        (TypecheckerOptions.optimized_member_fanout
+           Typing_env_types.(env.genv.tcopt))
+    then
+      Option.iter
+        (fst (Cls.construct class_))
+        ~f:(fun ce ->
+          make_depend_on_constructor_name env ce.Typing_defs.ce_origin)
   )
 
 let make_depend_on_module_name env module_name =
@@ -165,7 +170,12 @@ let add_member_dep ~is_method ~is_static env (class_ : Cls.t) mid class_elt_opt
   if not (Pos_or_decl.is_hhi (Cls.pos class_)) then (
     make_depend_on_class_name env (Cls.name class_);
     add_dep (Cls.name class_);
-    Option.iter class_elt_opt ~f:(fun ce -> add_dep ce.Typing_defs.ce_origin)
+    if
+      not
+        (TypecheckerOptions.optimized_member_fanout
+           Typing_env_types.(env.genv.tcopt))
+    then
+      Option.iter class_elt_opt ~f:(fun ce -> add_dep ce.Typing_defs.ce_origin)
   );
   ()
 

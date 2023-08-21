@@ -245,6 +245,10 @@ let saved_state_loading t = GlobalOptions.(t.tco_saved_state.loading)
 
 let saved_state_rollouts t = GlobalOptions.(t.tco_saved_state.rollouts)
 
+let optimized_member_fanout t =
+  GlobalOptions.(t.tco_saved_state.rollouts)
+    .Saved_state_rollouts.optimized_member_fanout
+
 let dummy_one t =
   GlobalOptions.(t.tco_saved_state.rollouts).Saved_state_rollouts.dummy_one
 

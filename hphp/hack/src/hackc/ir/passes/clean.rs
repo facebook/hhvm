@@ -55,9 +55,21 @@ fn merge_simple_jumps(func: &mut Func<'_>) {
             match terminator {
                 Some(Terminator::Jmp(target_bid, _)) => {
                     let target_bid = *target_bid;
-                    if (func.block(bid).tcid == func.block(target_bid).tcid)
-                        && (predecessors[&target_bid].len() == 1)
-                    {
+                    let tcid = func.block(bid).tcid;
+                    let target_tcid = func.block(target_bid).tcid;
+                    let has_compatible_tcid = tcid == target_tcid ||
+                    // Single jump block can be merged even when it's not in the same try-catch block
+                    // with the target
+                        (tcid.is_none() && func.block(bid).iids.len() == 1);
+                    if has_compatible_tcid && (predecessors[&target_bid].len() == 1) {
+                        trace!(
+                            "Merge blocks: {}[{:?}] <- {}[{:?}]",
+                            bid,
+                            tcid,
+                            target_bid,
+                            target_tcid
+                        );
+
                         // Steal the target's iids.  If the target is later then
                         // it will show as having no terminator.
                         let target_iids = std::mem::take(&mut func.block_mut(target_bid).iids);
@@ -65,8 +77,11 @@ fn merge_simple_jumps(func: &mut Func<'_>) {
                         let block = func.block_mut(bid);
                         // ...remove the terminator
                         block.iids.pop();
-                        // ...amend the target block.
+                        // ...amend the target block
                         block.iids.extend(target_iids.into_iter());
+
+                        // ...update tcid
+                        block.tcid = target_tcid;
 
                         // Don't need to update the predecessors - since we only
                         // check that there is only a single predecessor that

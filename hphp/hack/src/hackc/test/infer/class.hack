@@ -49,47 +49,31 @@ class C {
   // CHECK: define C.cons_static($this: *C) : *void {
   // CHECK: local $a: *void, $0: *void, $1: *void, $2: *void
   // CHECK: #b0:
-  // CHECK:   jmp b1
-  // CHECK: #b1:
   // CHECK:   n0: *C = load &$this
   // CHECK:   n1 = $builtins.hack_get_static_class(n0)
   // CHECK:   store &$0 <- n1: *HackMixed
   // CHECK:   n2 = $builtins.hack_get_static_class(n0)
   // CHECK:   n3 = n2.?.__factory()
   // CHECK:   store &$2 <- n3: *HackMixed
-  // CHECK:   jmp b2
-  // CHECK:   .handlers b8
-  // CHECK: #b2:
-  // CHECK:   jmp b3
-  // CHECK: #b3:
+  // CHECK:   jmp b1
+  // CHECK: #b1:
   // CHECK:   n4: *HackMixed = load &$0
-  // CHECK:   jmp b4
-  // CHECK:   .handlers b8
-  // CHECK: #b4:
-  // CHECK:   jmp b5
-  // CHECK: #b5:
-  // CHECK:   n5: *HackMixed = load &$0
-  // CHECK:   jmp b6
-  // CHECK:   .handlers b8
-  // CHECK: #b6:
-  // CHECK:   jmp b7
-  // CHECK: #b7:
-  // CHECK:   n6: *HackMixed = load &$2
-  // CHECK:   jmp b9
-  // CHECK:   .handlers b8
-  // CHECK: #b8(n7: *HackMixed):
+  // CHECK:   n5: *HackMixed = load &$2
+  // CHECK:   jmp b3
+  // CHECK:   .handlers b2
+  // CHECK: #b2(n6: *HackMixed):
   // CHECK:   store &$0 <- null: *HackMixed
   // CHECK:   store &$1 <- null: *HackMixed
   // CHECK:   store &$2 <- null: *HackMixed
-  // CHECK:   n8 = $builtins.hhbc_throw(n7)
+  // CHECK:   n7 = $builtins.hhbc_throw(n6)
   // CHECK:   unreachable
-  // CHECK: #b9:
+  // CHECK: #b3:
   // CHECK:   store &$0 <- null: *HackMixed
   // CHECK:   store &$1 <- null: *HackMixed
   // CHECK:   store &$2 <- null: *HackMixed
-  // CHECK:   n9 = n6.?.__construct($builtins.hack_int(1), $builtins.hack_string("x"), $builtins.hack_int(3))
-  // CHECK:   n10 = $builtins.hhbc_lock_obj(n6)
-  // CHECK:   store &$a <- n6: *HackMixed
+  // CHECK:   n8 = n5.?.__construct($builtins.hack_int(1), $builtins.hack_string("x"), $builtins.hack_int(3))
+  // CHECK:   n9 = $builtins.hhbc_lock_obj(n5)
+  // CHECK:   store &$a <- n5: *HackMixed
   // CHECK:   ret null
   // CHECK: }
   public function cons_static(): void {
@@ -100,35 +84,31 @@ class C {
   // CHECK: define C.cons_self($this: *C) : *void {
   // CHECK: local $a: *void, $0: *void, $1: *void, $2: *void
   // CHECK: #b0:
-  // CHECK:   jmp b1
-  // CHECK: #b1:
   // CHECK:   n0: *C = load &$this
   // CHECK:   n1 = $builtins.hack_get_static_class(n0)
   // CHECK:   store &$0 <- n1: *HackMixed
   // CHECK:   n2 = __sil_allocate(<C>)
   // CHECK:   n3 = C._86pinit(n2)
   // CHECK:   store &$2 <- n2: *HackMixed
-  // CHECK:   jmp b2
-  // CHECK:   .handlers b4
-  // CHECK: #b2:
+  // CHECK:   jmp b1
+  // CHECK: #b1:
+  // CHECK:   n4: *HackMixed = load &$0
+  // CHECK:   n5: *HackMixed = load &$2
   // CHECK:   jmp b3
-  // CHECK: #b3:
-  // CHECK:   n4: *HackMixed = load &$2
-  // CHECK:   jmp b5
-  // CHECK:   .handlers b4
-  // CHECK: #b4(n5: *HackMixed):
+  // CHECK:   .handlers b2
+  // CHECK: #b2(n6: *HackMixed):
   // CHECK:   store &$0 <- null: *HackMixed
   // CHECK:   store &$1 <- null: *HackMixed
   // CHECK:   store &$2 <- null: *HackMixed
-  // CHECK:   n6 = $builtins.hhbc_throw(n5)
+  // CHECK:   n7 = $builtins.hhbc_throw(n6)
   // CHECK:   unreachable
-  // CHECK: #b5:
+  // CHECK: #b3:
   // CHECK:   store &$0 <- null: *HackMixed
   // CHECK:   store &$1 <- null: *HackMixed
   // CHECK:   store &$2 <- null: *HackMixed
-  // CHECK:   n7 = n4.?.__construct($builtins.hack_int(1), $builtins.hack_string("x"), $builtins.hack_int(3))
-  // CHECK:   n8 = $builtins.hhbc_lock_obj(n4)
-  // CHECK:   store &$a <- n4: *HackMixed
+  // CHECK:   n8 = n5.?.__construct($builtins.hack_int(1), $builtins.hack_string("x"), $builtins.hack_int(3))
+  // CHECK:   n9 = $builtins.hhbc_lock_obj(n5)
+  // CHECK:   store &$a <- n5: *HackMixed
   // CHECK:   ret null
   // CHECK: }
   public function cons_self(): void {
@@ -139,35 +119,31 @@ class C {
   // CHECK: define C.cons_inst($this: *C) : *void {
   // CHECK: local $a: *void, $0: *void, $1: *void, $2: *void
   // CHECK: #b0:
-  // CHECK:   jmp b1
-  // CHECK: #b1:
   // CHECK:   n0: *C = load &$this
   // CHECK:   n1 = $builtins.hack_get_static_class(n0)
   // CHECK:   store &$0 <- n1: *HackMixed
   // CHECK:   n2 = __sil_allocate(<C>)
   // CHECK:   n3 = C._86pinit(n2)
   // CHECK:   store &$2 <- n2: *HackMixed
-  // CHECK:   jmp b2
-  // CHECK:   .handlers b4
-  // CHECK: #b2:
+  // CHECK:   jmp b1
+  // CHECK: #b1:
+  // CHECK:   n4: *HackMixed = load &$0
+  // CHECK:   n5: *HackMixed = load &$2
   // CHECK:   jmp b3
-  // CHECK: #b3:
-  // CHECK:   n4: *HackMixed = load &$2
-  // CHECK:   jmp b5
-  // CHECK:   .handlers b4
-  // CHECK: #b4(n5: *HackMixed):
+  // CHECK:   .handlers b2
+  // CHECK: #b2(n6: *HackMixed):
   // CHECK:   store &$0 <- null: *HackMixed
   // CHECK:   store &$1 <- null: *HackMixed
   // CHECK:   store &$2 <- null: *HackMixed
-  // CHECK:   n6 = $builtins.hhbc_throw(n5)
+  // CHECK:   n7 = $builtins.hhbc_throw(n6)
   // CHECK:   unreachable
-  // CHECK: #b5:
+  // CHECK: #b3:
   // CHECK:   store &$0 <- null: *HackMixed
   // CHECK:   store &$1 <- null: *HackMixed
   // CHECK:   store &$2 <- null: *HackMixed
-  // CHECK:   n7 = n4.?.__construct($builtins.hack_int(1), $builtins.hack_string("x"), $builtins.hack_int(3))
-  // CHECK:   n8 = $builtins.hhbc_lock_obj(n4)
-  // CHECK:   store &$a <- n4: *HackMixed
+  // CHECK:   n8 = n5.?.__construct($builtins.hack_int(1), $builtins.hack_string("x"), $builtins.hack_int(3))
+  // CHECK:   n9 = $builtins.hhbc_lock_obj(n5)
+  // CHECK:   store &$a <- n5: *HackMixed
   // CHECK:   ret null
   // CHECK: }
   public function cons_inst(): void {

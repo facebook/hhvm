@@ -46,17 +46,17 @@ const StaticString
   s_SimpleXMLIterator("SimpleXMLIterator");
 
 const Class* SimpleXMLElement_classof() {
-  static auto cls = nullptr;
+  static Class* cls = nullptr;
   return SystemLib::classLoad(s_SimpleXMLElement.get(), cls);
 }
 
 const Class* SimpleXMLElementIterator_classof() {
-  static auto cls = nullptr;
+  static Class* cls = nullptr;
   return SystemLib::classLoad(s_SimpleXMLElementIterator.get(), cls);
 }
 
 const Class* SimpleXMLIterator_classof() {
-  static auto cls = nullptr;
+  static Class* cls = nullptr;
   return SystemLib::classLoad(s_SimpleXMLIterator.get(), cls);
 }
 

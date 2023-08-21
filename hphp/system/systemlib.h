@@ -185,8 +185,8 @@ void setupNullCtor(Class* cls);
  */
 Func* getNull86reifiedinit(Class* cls);
 
-Func* funcLoad(const StringData* name, Func* cache);
-Class* classLoad(const StringData* name, Class* cache);
+Func* funcLoad(const StringData* name, Func*& cache);
+Class* classLoad(const StringData* name, Class*& cache);
 
 ///////////////////////////////////////////////////////////////////////////////
 

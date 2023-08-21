@@ -416,7 +416,7 @@ Func* getNull86reifiedinit(Class* cls) {
   return f;
 }
 
-Func* funcLoad(const StringData* name, Func* cache) {
+Func* funcLoad(const StringData* name, Func*& cache) {
   if (UNLIKELY(cache == nullptr)) {
     cache = Func::load(name);
     assertx(cache);
@@ -427,7 +427,7 @@ Func* funcLoad(const StringData* name, Func* cache) {
   return cache;
 }
 
-Class* classLoad(const StringData* name, Class* cache) {
+Class* classLoad(const StringData* name, Class*& cache) {
   if (UNLIKELY(cache == nullptr)) {
     cache = Class::load(name);
     assertx(cache);

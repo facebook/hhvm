@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b81b36634ae444197c045dcfb60026b1>>
+// @generated SignedSource<<7cf908a0a8fef6eaa43de34a93c20664>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2144,6 +2144,11 @@ pub struct Class_<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(attr = "transform.explicit")]
     pub xhp_attr_uses: &'a [&'a XhpAttrHint<'a>],
+    /// Categories are the equivalent of interfaces for XHP classes.
+    /// These are either listed after the `implements` keyword, or as such
+    /// within the XHP class:
+    ///
+    /// category cat1, cat2, cat3;
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(attr = "transform.opaque")]
     pub xhp_category: Option<&'a (&'a Pos<'a>, &'a [&'a Pstring<'a>])>,
@@ -2160,10 +2165,13 @@ pub struct Class_<'a, Ex, En> {
     pub consts: &'a [&'a ClassConst<'a, Ex, En>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub typeconsts: &'a [&'a ClassTypeconstDef<'a, Ex, En>],
+    /// a.k.a properties
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub vars: &'a [&'a ClassVar<'a, Ex, En>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub methods: &'a [&'a Method_<'a, Ex, En>],
+    /// XHP allows an XHP class to declare which types are allowed
+    /// as chidren using the `children` keyword.
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub xhp_children: &'a [(&'a Pos<'a>, XhpChild<'a>)],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

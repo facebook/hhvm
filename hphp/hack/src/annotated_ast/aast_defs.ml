@@ -955,14 +955,23 @@ and ('ex, 'en) class_ = {
   c_uses: trait_hint list; [@transform.explicit]
   c_xhp_attr_uses: xhp_attr_hint list; [@transform.explicit]
   c_xhp_category: (pos * pstring list) option; [@transform.opaque]
+      (** Categories are the equivalent of interfaces for XHP classes.
+        These are either listed after the `implements` keyword, or as such
+        within the XHP class:
+
+          category cat1, cat2, cat3;
+        *)
   c_reqs: class_req list; [@transform.explicit]
   c_implements: class_hint list; [@transform.explicit]
   c_where_constraints: where_constraint_hint list;
   c_consts: ('ex, 'en) class_const list; [@transform.explicit]
   c_typeconsts: ('ex, 'en) class_typeconst_def list;
   c_vars: ('ex, 'en) class_var list;
+      (** a.k.a properties *)
   c_methods: ('ex, 'en) method_ list;
   c_xhp_children: ((pos[@transform.opaque]) * xhp_child) list;
+      (** XHP allows an XHP class to declare which types are allowed
+        as chidren using the `children` keyword. *)
   c_xhp_attrs: ('ex, 'en) xhp_attr list; [@transform.explicit]
   c_namespace: nsenv;
   c_user_attributes: ('ex, 'en) user_attributes; [@transform.explicit]

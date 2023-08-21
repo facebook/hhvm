@@ -54,3 +54,19 @@ val make_depend_on_parent :
   string ->
   Decl_provider.Class.t option ->
   unit
+
+val mark_class_constant_declared :
+  Typing_env_types.env -> string -> string -> unit
+
+val mark_typeconst_declared : Typing_env_types.env -> string -> string -> unit
+
+val mark_property_declared :
+  Typing_env_types.env -> is_static:bool -> string -> string -> unit
+
+val mark_method_declared :
+  Typing_env_types.env -> is_static:bool -> string -> string -> unit
+
+val mark_xhp_attribute_declared :
+  Typing_env_types.env -> string -> string -> unit
+
+val mark_constructor_declared : Typing_env_types.env -> string -> unit

@@ -268,6 +268,9 @@ val get_current_module : env -> string option
     module *)
 val make_depend_on_current_module : Typing_env_types.env -> unit
 
+val mark_members_declared_in_depgraph :
+  Typing_env_types.env -> Nast.class_ -> unit
+
 (** Register the droot as being dependent on all of the ancestor classes,
     interfaces, and traits of the given class (i.e., the recursive ancestors
     returned by [Typing_classes_heap.Api.all_ancestor_names] and stored in

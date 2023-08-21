@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<edc37d984fd8ec5d2942273f5f4672f3>>
+// @generated SignedSource<<2e1191d03a3599f2deeb278208fe984e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1741,6 +1741,11 @@ pub struct Class_<Ex, En> {
     pub uses: Vec<TraitHint>,
     #[rust_to_ocaml(attr = "transform.explicit")]
     pub xhp_attr_uses: Vec<XhpAttrHint>,
+    /// Categories are the equivalent of interfaces for XHP classes.
+    /// These are either listed after the `implements` keyword, or as such
+    /// within the XHP class:
+    ///
+    /// category cat1, cat2, cat3;
     #[rust_to_ocaml(attr = "transform.opaque")]
     pub xhp_category: Option<(Pos, Vec<Pstring>)>,
     #[rust_to_ocaml(attr = "transform.explicit")]
@@ -1751,8 +1756,11 @@ pub struct Class_<Ex, En> {
     #[rust_to_ocaml(attr = "transform.explicit")]
     pub consts: Vec<ClassConst<Ex, En>>,
     pub typeconsts: Vec<ClassTypeconstDef<Ex, En>>,
+    /// a.k.a properties
     pub vars: Vec<ClassVar<Ex, En>>,
     pub methods: Vec<Method_<Ex, En>>,
+    /// XHP allows an XHP class to declare which types are allowed
+    /// as chidren using the `children` keyword.
     pub xhp_children: Vec<(Pos, XhpChild)>,
     #[rust_to_ocaml(attr = "transform.explicit")]
     pub xhp_attrs: Vec<XhpAttr<Ex, En>>,

@@ -52,6 +52,9 @@ let add_fine_dep_if_enabled env dependency =
       decl_env.Decl_env.droot_member
       dependency
 
+let mark_declared_fine mode dep =
+  Typing_pessimisation_deps.try_add_fine_dep mode (Some Dep.Declares) None dep
+
 let add_dependency_edge (env : Typing_env_types.env) dep : unit =
   let decl_env = env.Typing_env_types.decl_env in
   Option.iter decl_env.Decl_env.droot ~f:(fun root ->
@@ -59,6 +62,42 @@ let add_dependency_edge (env : Typing_env_types.env) dep : unit =
       let deps_mode = Provider_context.get_deps_mode ctx in
       Typing_deps.add_idep deps_mode root dep);
   add_fine_dep_if_enabled env dep
+
+let mark_declared env dep =
+  let mode =
+    Provider_context.get_deps_mode env.Typing_env_types.decl_env.Decl_env.ctx
+  in
+  Typing_deps.add_idep mode Dep.Declares dep;
+  mark_declared_fine mode dep;
+  ()
+
+let mark_class_constant_declared env class_name const_name =
+  mark_declared env (Dep.Const (class_name, const_name))
+
+let mark_typeconst_declared env class_name typeconst_name =
+  mark_declared env (Dep.Const (class_name, typeconst_name))
+
+let mark_property_declared env ~is_static class_name property_name =
+  mark_declared
+    env
+    (if is_static then
+      Dep.SProp (class_name, property_name)
+    else
+      Dep.Prop (class_name, property_name))
+
+let mark_method_declared env ~is_static class_name method_name =
+  mark_declared
+    env
+    (if is_static then
+      Dep.SMethod (class_name, method_name)
+    else
+      Dep.Method (class_name, method_name))
+
+let mark_constructor_declared env class_name =
+  mark_declared env (Dep.Constructor class_name)
+
+let mark_xhp_attribute_declared env class_name attr_name =
+  mark_declared env (Dep.Prop (class_name, attr_name))
 
 let make_depend_on_gconst env name def =
   match def with

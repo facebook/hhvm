@@ -1801,6 +1801,11 @@ let class_def ctx (c : _ class_) =
     None
   | Some tc ->
     Env.make_depend_on_current_module env;
+    if
+      (TCO.saved_state_rollouts (Provider_context.get_tcopt ctx))
+        .Saved_state_rollouts.optimized_member_fanout
+    then
+      Env.mark_members_declared_in_depgraph env c;
     Typing_helpers.add_decl_errors ~env (Cls.decl_errors tc);
     if
       not

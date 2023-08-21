@@ -589,6 +589,57 @@ let make_depend_on_current_module env =
     Typing_env_types.(env.genv.current_module)
     ~f:(fun (_, mid) -> Deps.make_depend_on_module_name env mid)
 
+let mark_members_declared_in_depgraph env (c : _ Aast.class_) =
+  let {
+    c_span = _;
+    c_annotation = _;
+    c_mode = _;
+    c_final = _;
+    c_is_xhp = _;
+    c_has_xhp_keyword = _;
+    c_kind = _;
+    c_name = (_p, class_name);
+    c_tparams = _;
+    c_extends = _;
+    c_uses = _;
+    c_xhp_attr_uses = _;
+    c_xhp_category = _;
+    c_reqs = _;
+    c_implements = _;
+    c_where_constraints = _;
+    c_consts;
+    c_typeconsts;
+    c_vars;
+    c_methods;
+    c_xhp_children = _;
+    c_xhp_attrs;
+    c_namespace = _;
+    c_user_attributes = _;
+    c_file_attributes = _;
+    c_docs_url = _;
+    c_enum = _;
+    c_doc_comment = _;
+    c_emit_id = _;
+    c_internal = _;
+    c_module = _;
+  } =
+    c
+  in
+  List.iter c_consts ~f:(fun { cc_id = (_p, name); _ } ->
+      Deps.mark_class_constant_declared env class_name name);
+  List.iter c_typeconsts ~f:(fun { c_tconst_name = (_p, name); _ } ->
+      Deps.mark_typeconst_declared env class_name name);
+  List.iter c_vars ~f:(fun { cv_id = (_p, name); cv_is_static; _ } ->
+      Deps.mark_property_declared env ~is_static:cv_is_static class_name name);
+  List.iter c_methods ~f:(fun { m_name = (_p, name); m_static; _ } ->
+      if String.equal Naming_special_names.Members.__construct name then
+        Deps.mark_constructor_declared env class_name
+      else
+        Deps.mark_method_declared env ~is_static:m_static class_name name);
+  List.iter c_xhp_attrs ~f:(fun (_ty, { cv_id = (_p, name); _ }, _tag, _el) ->
+      Deps.mark_xhp_attribute_declared env class_name name);
+  ()
+
 let make_depend_on_ancestors = Deps.make_depend_on_ancestors
 
 let set_internal env b = { env with genv = { env.genv with this_internal = b } }

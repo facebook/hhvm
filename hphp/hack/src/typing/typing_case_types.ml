@@ -20,7 +20,12 @@ module DataType : sig
 
   val are_disjoint : t -> t -> bool
 
-  val to_sset : t -> SSet.t
+  (** The witness that proves an overlap exists between two data types *)
+  type witness = SameTags of string
+
+  (** Checks if two data types overlap. If they do not [None] is returned.
+      Otherwise a [witness] is produced. *)
+  val find_overlap : t -> t -> witness option
 end = struct
   (* Modelled after data types in HHVM. See hphp/runtime/base/datatype.h *)
   module Tag = struct
@@ -40,16 +45,16 @@ end = struct
     [@@deriving eq]
 
     let name = function
-      | DictData -> "dict"
-      | VecData -> "vec"
-      | KeysetData -> "keyset"
-      | StringData -> "string"
-      | ResourceData -> "resource"
-      | BoolData -> "bool"
-      | IntData -> "int"
-      | FloatData -> "float"
-      | NullData -> "null"
-      | ObjectData -> "object"
+      | DictData -> "Dict"
+      | VecData -> "Vec"
+      | KeysetData -> "Keyset"
+      | StringData -> "String"
+      | ResourceData -> "Resource"
+      | BoolData -> "Boolean"
+      | IntData -> "Int64"
+      | FloatData -> "Double"
+      | NullData -> "Null"
+      | ObjectData -> "Object"
 
     let relation tag1 ~ctx:_ tag2 =
       let open ApproxSet.Set_relation in
@@ -327,28 +332,20 @@ end = struct
     | Set.Sat -> true
     | _ -> false
 
-  (* Temporary hack *)
-  let to_sset set =
-    List.fold Tag.all_tags ~init:SSet.empty ~f:(fun acc tag ->
-        if are_disjoint (Set.singleton tag) set then
-          acc
-        else
-          SSet.add (Tag.name tag) acc)
+  type witness = SameTags of string
+
+  let find_overlap set1 set2 =
+    match Set.disjoint () set1 set2 with
+    | Set.Sat -> None
+    | Set.Unsat (tag, _) -> Some (SameTags (Tag.name tag))
 end
 
-let mk_data_type_mapping env variants =
-  let f map variant =
-    let ((env, _), ty) =
-      Decl_hint.hint env.decl_env variant
-      |> Typing_utils.localize_no_subst env ~ignore_errors:true
-    in
-    let tags = DataType.(fromTy env ty |> to_sset) in
-    SSet.fold
-      (fun tag acc -> SMap.add ~combine:( @ ) tag [variant] acc)
-      tags
-      map
+let data_type_from_hint (env : env) (hint : Aast.hint) : locl_ty * DataType.t =
+  let decl_ty = Decl_hint.hint env.decl_env hint in
+  let ((env, _), ty) =
+    Typing_utils.localize_no_subst env ~ignore_errors:true decl_ty
   in
-  List.fold variants ~init:SMap.empty ~f
+  (ty, DataType.fromTy env ty)
 
 (**
  * Given the variants of a case type (encoded as a locl_ty) and another locl_ty [intersecting_ty]

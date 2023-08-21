@@ -1,136 +1,150 @@
 File "case_type_overlapping_variants_special_interfaces.php", line 4, characters 11-19:
-The case type `ArrayData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `dict`: (Typing[4475])
+Invalid case type declaration. More than one variant of `ArrayData` has the runtime data type `Dict` (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 5, characters 5-30:
-  AnyArray<|(), |()>
+  This is the type `AnyArray<nothing, nothing>`, which includes `Dict` values
   File "case_type_overlapping_variants_special_interfaces.php", line 6, characters 5-24:
-  vec_or_dict<arraykey, |()>
+  It overlaps with `vec_or_dict<arraykey, nothing>`, which also includes `Dict` values
+File "case_type_overlapping_variants_special_interfaces.php", line 4, characters 11-19:
+Invalid case type declaration. More than one variant of `ArrayData` has the runtime data type `Dict` (Typing[4475])
+  File "case_type_overlapping_variants_special_interfaces.php", line 5, characters 5-30:
+  This is the type `AnyArray<nothing, nothing>`, which includes `Dict` values
   File "case_type_overlapping_variants_special_interfaces.php", line 7, characters 5-26:
-  dict<|(), |()>
+  It overlaps with `dict<nothing, nothing>`, which also includes `Dict` values
 File "case_type_overlapping_variants_special_interfaces.php", line 4, characters 11-19:
-The case type `ArrayData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `keyset`: (Typing[4475])
-  File "case_type_overlapping_variants_special_interfaces.php", line 5, characters 5-30:
-  AnyArray<|(), |()>
-  File "case_type_overlapping_variants_special_interfaces.php", line 8, characters 5-19:
-  keyset<|()>
-File "case_type_overlapping_variants_special_interfaces.php", line 4, characters 11-19:
-The case type `ArrayData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `vec`: (Typing[4475])
-  File "case_type_overlapping_variants_special_interfaces.php", line 5, characters 5-30:
-  AnyArray<|(), |()>
+Invalid case type declaration. More than one variant of `ArrayData` has the runtime data type `Dict` (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 6, characters 5-24:
-  vec_or_dict<arraykey, |()>
+  This is the type `vec_or_dict<arraykey, nothing>`, which includes `Dict` values
+  File "case_type_overlapping_variants_special_interfaces.php", line 7, characters 5-26:
+  It overlaps with `dict<nothing, nothing>`, which also includes `Dict` values
+File "case_type_overlapping_variants_special_interfaces.php", line 4, characters 11-19:
+Invalid case type declaration. More than one variant of `ArrayData` has the runtime data type `Keyset` (Typing[4475])
+  File "case_type_overlapping_variants_special_interfaces.php", line 5, characters 5-30:
+  This is the type `AnyArray<nothing, nothing>`, which includes `Keyset` values
+  File "case_type_overlapping_variants_special_interfaces.php", line 8, characters 5-19:
+  It overlaps with `keyset<nothing>`, which also includes `Keyset` values
+File "case_type_overlapping_variants_special_interfaces.php", line 4, characters 11-19:
+Invalid case type declaration. More than one variant of `ArrayData` has the runtime data type `Vec` (Typing[4475])
+  File "case_type_overlapping_variants_special_interfaces.php", line 5, characters 5-30:
+  This is the type `AnyArray<nothing, nothing>`, which includes `Vec` values
   File "case_type_overlapping_variants_special_interfaces.php", line 9, characters 5-16:
-  vec<|()>
+  It overlaps with `vec<nothing>`, which also includes `Vec` values
+File "case_type_overlapping_variants_special_interfaces.php", line 4, characters 11-19:
+Invalid case type declaration. More than one variant of `ArrayData` has the runtime data type `Vec` (Typing[4475])
+  File "case_type_overlapping_variants_special_interfaces.php", line 6, characters 5-24:
+  This is the type `vec_or_dict<arraykey, nothing>`, which includes `Vec` values
+  File "case_type_overlapping_variants_special_interfaces.php", line 9, characters 5-16:
+  It overlaps with `vec<nothing>`, which also includes `Vec` values
 File "case_type_overlapping_variants_special_interfaces.php", line 11, characters 11-23:
-The case type `ContainerData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `dict`: (Typing[4475])
+Invalid case type declaration. More than one variant of `ContainerData` has the runtime data type `Dict` (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 12, characters 5-22:
-  Container<|()>
+  This is the type `Container<nothing>`, which includes `Dict` values
   File "case_type_overlapping_variants_special_interfaces.php", line 13, characters 5-26:
-  dict<|(), |()>
+  It overlaps with `dict<nothing, nothing>`, which also includes `Dict` values
 File "case_type_overlapping_variants_special_interfaces.php", line 11, characters 11-23:
-The case type `ContainerData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `keyset`: (Typing[4475])
+Invalid case type declaration. More than one variant of `ContainerData` has the runtime data type `Keyset` (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 12, characters 5-22:
-  Container<|()>
+  This is the type `Container<nothing>`, which includes `Keyset` values
   File "case_type_overlapping_variants_special_interfaces.php", line 14, characters 5-19:
-  keyset<|()>
+  It overlaps with `keyset<nothing>`, which also includes `Keyset` values
 File "case_type_overlapping_variants_special_interfaces.php", line 11, characters 11-23:
-The case type `ContainerData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `vec`: (Typing[4475])
+Invalid case type declaration. More than one variant of `ContainerData` has the runtime data type `Vec` (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 12, characters 5-22:
-  Container<|()>
+  This is the type `Container<nothing>`, which includes `Vec` values
   File "case_type_overlapping_variants_special_interfaces.php", line 15, characters 5-16:
-  vec<|()>
+  It overlaps with `vec<nothing>`, which also includes `Vec` values
 File "case_type_overlapping_variants_special_interfaces.php", line 17, characters 11-28:
-The case type `KeyedContainerData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `dict`: (Typing[4475])
+Invalid case type declaration. More than one variant of `KeyedContainerData` has the runtime data type `Dict` (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 18, characters 5-36:
-  KeyedContainer<|(), |()>
+  This is the type `KeyedContainer<nothing, nothing>`, which includes `Dict` values
   File "case_type_overlapping_variants_special_interfaces.php", line 19, characters 5-26:
-  dict<|(), |()>
+  It overlaps with `dict<nothing, nothing>`, which also includes `Dict` values
 File "case_type_overlapping_variants_special_interfaces.php", line 17, characters 11-28:
-The case type `KeyedContainerData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `keyset`: (Typing[4475])
+Invalid case type declaration. More than one variant of `KeyedContainerData` has the runtime data type `Keyset` (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 18, characters 5-36:
-  KeyedContainer<|(), |()>
+  This is the type `KeyedContainer<nothing, nothing>`, which includes `Keyset` values
   File "case_type_overlapping_variants_special_interfaces.php", line 20, characters 5-19:
-  keyset<|()>
+  It overlaps with `keyset<nothing>`, which also includes `Keyset` values
 File "case_type_overlapping_variants_special_interfaces.php", line 17, characters 11-28:
-The case type `KeyedContainerData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `vec`: (Typing[4475])
+Invalid case type declaration. More than one variant of `KeyedContainerData` has the runtime data type `Vec` (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 18, characters 5-36:
-  KeyedContainer<|(), |()>
+  This is the type `KeyedContainer<nothing, nothing>`, which includes `Vec` values
   File "case_type_overlapping_variants_special_interfaces.php", line 21, characters 5-16:
-  vec<|()>
+  It overlaps with `vec<nothing>`, which also includes `Vec` values
 File "case_type_overlapping_variants_special_interfaces.php", line 23, characters 11-25:
-The case type `TraversableData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `dict`: (Typing[4475])
+Invalid case type declaration. More than one variant of `TraversableData` has the runtime data type `Dict` (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 24, characters 5-24:
-  Traversable<|()>
+  This is the type `Traversable<nothing>`, which includes `Dict` values
   File "case_type_overlapping_variants_special_interfaces.php", line 25, characters 5-26:
-  dict<|(), |()>
+  It overlaps with `dict<nothing, nothing>`, which also includes `Dict` values
 File "case_type_overlapping_variants_special_interfaces.php", line 23, characters 11-25:
-The case type `TraversableData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `keyset`: (Typing[4475])
+Invalid case type declaration. More than one variant of `TraversableData` has the runtime data type `Keyset` (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 24, characters 5-24:
-  Traversable<|()>
+  This is the type `Traversable<nothing>`, which includes `Keyset` values
   File "case_type_overlapping_variants_special_interfaces.php", line 26, characters 5-19:
-  keyset<|()>
+  It overlaps with `keyset<nothing>`, which also includes `Keyset` values
 File "case_type_overlapping_variants_special_interfaces.php", line 23, characters 11-25:
-The case type `TraversableData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `vec`: (Typing[4475])
+Invalid case type declaration. More than one variant of `TraversableData` has the runtime data type `Vec` (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 24, characters 5-24:
-  Traversable<|()>
+  This is the type `Traversable<nothing>`, which includes `Vec` values
   File "case_type_overlapping_variants_special_interfaces.php", line 27, characters 5-16:
-  vec<|()>
+  It overlaps with `vec<nothing>`, which also includes `Vec` values
 File "case_type_overlapping_variants_special_interfaces.php", line 29, characters 11-30:
-The case type `KeyedTraversableData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `dict`: (Typing[4475])
+Invalid case type declaration. More than one variant of `KeyedTraversableData` has the runtime data type `Dict` (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 30, characters 5-38:
-  KeyedTraversable<|(), |()>
+  This is the type `KeyedTraversable<nothing, nothing>`, which includes `Dict` values
   File "case_type_overlapping_variants_special_interfaces.php", line 31, characters 5-26:
-  dict<|(), |()>
+  It overlaps with `dict<nothing, nothing>`, which also includes `Dict` values
 File "case_type_overlapping_variants_special_interfaces.php", line 29, characters 11-30:
-The case type `KeyedTraversableData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `keyset`: (Typing[4475])
+Invalid case type declaration. More than one variant of `KeyedTraversableData` has the runtime data type `Keyset` (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 30, characters 5-38:
-  KeyedTraversable<|(), |()>
+  This is the type `KeyedTraversable<nothing, nothing>`, which includes `Keyset` values
   File "case_type_overlapping_variants_special_interfaces.php", line 32, characters 5-19:
-  keyset<|()>
+  It overlaps with `keyset<nothing>`, which also includes `Keyset` values
 File "case_type_overlapping_variants_special_interfaces.php", line 29, characters 11-30:
-The case type `KeyedTraversableData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `vec`: (Typing[4475])
+Invalid case type declaration. More than one variant of `KeyedTraversableData` has the runtime data type `Vec` (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 30, characters 5-38:
-  KeyedTraversable<|(), |()>
+  This is the type `KeyedTraversable<nothing, nothing>`, which includes `Vec` values
   File "case_type_overlapping_variants_special_interfaces.php", line 33, characters 5-16:
-  vec<|()>
+  It overlaps with `vec<nothing>`, which also includes `Vec` values
 File "case_type_overlapping_variants_special_interfaces.php", line 35, characters 11-23:
-The case type `StringishData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `string`: (Typing[4475])
+Invalid case type declaration. More than one variant of `StringishData` has the runtime data type `String` (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 36, characters 5-13:
-  Stringish
+  This is the type `Stringish`, which includes `String` values
   File "case_type_overlapping_variants_special_interfaces.php", line 37, characters 5-10:
-  string
+  It overlaps with `string`, which also includes `String` values
 File "case_type_overlapping_variants_special_interfaces.php", line 39, characters 11-17:
-The case type `XhpData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `dict`: (Typing[4475])
+Invalid case type declaration. More than one variant of `XhpData` has the runtime data type `Dict` (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 40, characters 5-12:
-  XHPChild
+  This is the type `XHPChild`, which includes `Dict` values
   File "case_type_overlapping_variants_special_interfaces.php", line 46, characters 5-18:
-  dict<int, int>
+  It overlaps with `dict<int, int>`, which also includes `Dict` values
 File "case_type_overlapping_variants_special_interfaces.php", line 39, characters 11-17:
-The case type `XhpData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `float`: (Typing[4475])
+Invalid case type declaration. More than one variant of `XhpData` has the runtime data type `Double` (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 40, characters 5-12:
-  XHPChild
+  This is the type `XHPChild`, which includes `Double` values
   File "case_type_overlapping_variants_special_interfaces.php", line 43, characters 5-9:
-  float
+  It overlaps with `float`, which also includes `Double` values
 File "case_type_overlapping_variants_special_interfaces.php", line 39, characters 11-17:
-The case type `XhpData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `int`: (Typing[4475])
+Invalid case type declaration. More than one variant of `XhpData` has the runtime data type `Int64` (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 40, characters 5-12:
-  XHPChild
+  This is the type `XHPChild`, which includes `Int64` values
   File "case_type_overlapping_variants_special_interfaces.php", line 42, characters 5-7:
-  int
+  It overlaps with `int`, which also includes `Int64` values
 File "case_type_overlapping_variants_special_interfaces.php", line 39, characters 11-17:
-The case type `XhpData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `keyset`: (Typing[4475])
+Invalid case type declaration. More than one variant of `XhpData` has the runtime data type `Keyset` (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 40, characters 5-12:
-  XHPChild
+  This is the type `XHPChild`, which includes `Keyset` values
   File "case_type_overlapping_variants_special_interfaces.php", line 45, characters 5-15:
-  keyset<int>
+  It overlaps with `keyset<int>`, which also includes `Keyset` values
 File "case_type_overlapping_variants_special_interfaces.php", line 39, characters 11-17:
-The case type `XhpData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `string`: (Typing[4475])
+Invalid case type declaration. More than one variant of `XhpData` has the runtime data type `String` (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 40, characters 5-12:
-  XHPChild
+  This is the type `XHPChild`, which includes `String` values
   File "case_type_overlapping_variants_special_interfaces.php", line 41, characters 5-10:
-  string
+  It overlaps with `string`, which also includes `String` values
 File "case_type_overlapping_variants_special_interfaces.php", line 39, characters 11-17:
-The case type `XhpData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `vec`: (Typing[4475])
+Invalid case type declaration. More than one variant of `XhpData` has the runtime data type `Vec` (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 40, characters 5-12:
-  XHPChild
+  This is the type `XHPChild`, which includes `Vec` values
   File "case_type_overlapping_variants_special_interfaces.php", line 44, characters 5-12:
-  vec<int>
+  It overlaps with `vec<int>`, which also includes `Vec` values

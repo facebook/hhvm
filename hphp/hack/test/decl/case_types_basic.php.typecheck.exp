@@ -1,6 +1,6 @@
 File "case_types_basic.php", line 4, characters 11-13:
-The case type `CT1` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `keyset`: (Typing[4475])
+Invalid case type declaration. More than one variant of `CT1` has the runtime data type `Keyset` (Typing[4475])
   File "case_types_basic.php", line 4, characters 53-62:
-  keyset<T1>
+  This is the type `keyset<T1>`, which includes `Keyset` values
   File "case_types_basic.php", line 4, characters 66-82:
-  (function(T2): T)
+  It overlaps with `(function(T2): T)`, which also includes `Keyset` values

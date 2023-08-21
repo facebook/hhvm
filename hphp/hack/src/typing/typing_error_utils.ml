@@ -1492,7 +1492,7 @@ module Eval_primary = struct
           ( pos,
             let name = Utils.strip_ns name in
             Printf.sprintf
-              "The case type `%s` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `%s`:"
+              "Invalid case type declaration. More than one variant of `%s` has the runtime data type `%s`"
               name
               tag )
       in

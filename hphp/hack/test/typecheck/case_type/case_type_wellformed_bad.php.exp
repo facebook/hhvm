@@ -1,36 +1,36 @@
 File "case_type_wellformed_bad.php", line 4, characters 11-14:
-The case type `Bad1` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `vec`: (Typing[4475])
+Invalid case type declaration. More than one variant of `Bad1` has the runtime data type `Vec` (Typing[4475])
   File "case_type_wellformed_bad.php", line 4, characters 18-25:
-  vec<int>
+  This is the type `vec<int>`, which includes `Vec` values
   File "case_type_wellformed_bad.php", line 4, characters 29-47:
-  Traversable<string>
+  It overlaps with `Traversable<string>`, which also includes `Vec` values
 File "case_type_wellformed_bad.php", line 14, characters 11-14:
-The case type `Bad2` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `object`: (Typing[4475])
+Invalid case type declaration. More than one variant of `Bad2` has the runtime data type `Object` (Typing[4475])
   File "case_type_wellformed_bad.php", line 14, characters 18-19:
-  I1
+  This is the type `I1`, which includes `Object` values
   File "case_type_wellformed_bad.php", line 14, characters 23-29:
-  I2<int>
+  It overlaps with `I2<int>`, which also includes `Object` values
 File "case_type_wellformed_bad.php", line 16, characters 11-15:
-The case type `Good2` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `object`: (Typing[4475])
+Invalid case type declaration. More than one variant of `Good2` has the runtime data type `Object` (Typing[4475])
   File "case_type_wellformed_bad.php", line 16, characters 19-19:
-  C
+  This is the type `C`, which includes `Object` values
   File "case_type_wellformed_bad.php", line 16, characters 23-29:
-  I2<int>
+  It overlaps with `I2<int>`, which also includes `Object` values
 File "case_type_wellformed_bad.php", line 18, characters 11-15:
-The case type `Good3` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `object`: (Typing[4475])
+Invalid case type declaration. More than one variant of `Good3` has the runtime data type `Object` (Typing[4475])
   File "case_type_wellformed_bad.php", line 18, characters 19-19:
-  C
+  This is the type `C`, which includes `Object` values
   File "case_type_wellformed_bad.php", line 18, characters 23-24:
-  I1
+  It overlaps with `I1`, which also includes `Object` values
 File "case_type_wellformed_bad.php", line 20, characters 11-14:
-The case type `Bad3` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `vec`: (Typing[4475])
+Invalid case type declaration. More than one variant of `Bad3` has the runtime data type `Vec` (Typing[4475])
   File "case_type_wellformed_bad.php", line 20, characters 18-25:
-  vec<int>
+  This is the type `vec<int>`, which includes `Vec` values
   File "case_type_wellformed_bad.php", line 20, characters 29-38:
-  (int, int)
+  It overlaps with `(int, int)`, which also includes `Vec` values
 File "case_type_wellformed_bad.php", line 24, characters 11-14:
-The case type `Bad4` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `dict`: (Typing[4475])
+Invalid case type declaration. More than one variant of `Bad4` has the runtime data type `Dict` (Typing[4475])
   File "case_type_wellformed_bad.php", line 24, characters 18-34:
-  dict<string, int>
+  This is the type `dict<string, int>`, which includes `Dict` values
   File "case_type_wellformed_bad.php", line 24, characters 38-54:
-  shape('x' => int)
+  It overlaps with `shape('x' => int)`, which also includes `Dict` values

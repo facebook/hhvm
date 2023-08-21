@@ -80,42 +80,65 @@ let casetype_def env typedef =
   } =
     typedef
   in
+  let open Typing_case_types in
   match (t_vis, varaints) with
   | (Aast.CaseType, (_, Hunion hints)) ->
-    let data_type_map = Typing_case_types.mk_data_type_mapping env hints in
-    let errs =
-      SMap.filter_map
-        begin
-          fun tag hints ->
-            if List.length hints > 1 then
-              let err =
-                Typing_error.Primary.CaseType.Overlapping_variant_types
-                  {
-                    pos = t_pos;
-                    name = t_name;
-                    tag;
-                    why =
-                      lazy
-                        begin
-                          List.map hints ~f:(fun (p, h) ->
-                              let h =
-                                Decl_hint.hint
-                                  env.Typing_env_types.decl_env
-                                  (p, h)
-                              in
-                              ( Pos_or_decl.of_raw_pos p,
-                                Typing_print.full_strip_ns_decl env h ))
-                        end;
-                  }
-              in
-              Some (Typing_error.casetype err)
-            else
-              None
-        end
-        data_type_map
+    (* Given two types with their associated data types, check if
+       the data types overlap. If they do report an error *)
+    let check (ty1, data_type1) acc (ty2, data_type2) =
+      match DataType.find_overlap data_type1 data_type2 with
+      | None -> acc
+      | Some (DataType.SameTags tag) ->
+        let err =
+          Typing_error.Primary.CaseType.Overlapping_variant_types
+            {
+              pos = t_pos;
+              name = t_name;
+              tag;
+              why =
+                lazy
+                  begin
+                    let why ~f ty =
+                      let ty_str = Typing_print.full_strip_ns env ty in
+                      Reason.to_string
+                        (f ty_str tag)
+                        (Typing_defs.get_reason ty)
+                    in
+                    let why1 =
+                      why
+                        ty1
+                        ~f:
+                          (Printf.sprintf
+                             "This is the type `%s`, which includes `%s` values")
+                    in
+                    let why2 =
+                      why
+                        ty2
+                        ~f:
+                          (Printf.sprintf
+                             "It overlaps with `%s`, which also includes `%s` values")
+                    in
+                    why1 @ why2
+                  end;
+            }
+        in
+        Typing_error.casetype err :: acc
     in
-    let err1 = Typing_error.multiple_opt @@ SMap.values errs in
-    Option.iter ~f:(Typing_error_utils.add_typing_error ~env) err1;
+
+    (* We check for overlaps pairwise between each variant type in the union *)
+    let rec pairwise_check acc = function
+      | a :: rest ->
+        let acc = List.fold ~init:acc ~f:(check a) rest in
+        pairwise_check acc rest
+      | [] -> acc
+    in
+    let errs =
+      hints
+      |> List.map ~f:(Typing_case_types.data_type_from_hint env)
+      |> pairwise_check []
+    in
+    let err = Typing_error.multiple_opt errs in
+    Option.iter ~f:(Typing_error_utils.add_typing_error ~env) err;
     env
   | _ -> env
 

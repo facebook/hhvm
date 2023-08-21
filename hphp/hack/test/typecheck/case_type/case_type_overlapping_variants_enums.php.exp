@@ -1,32 +1,72 @@
 File "case_type_overlapping_variants_enums.php", line 10, characters 11-17:
-The case type `StrData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `int`: (Typing[4475])
+Invalid case type declaration. More than one variant of `StrData` has the runtime data type `Int64` (Typing[4475])
   File "case_type_overlapping_variants_enums.php", line 11, characters 5-13:
-  StrOpaque
+  This is the type `StrOpaque`, which includes `Int64` values
   File "case_type_overlapping_variants_enums.php", line 12, characters 5-13:
-  IntOpaque
+  It overlaps with `IntOpaque`, which also includes `Int64` values
 File "case_type_overlapping_variants_enums.php", line 10, characters 11-17:
-The case type `StrData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `string`: (Typing[4475])
+Invalid case type declaration. More than one variant of `StrData` has the runtime data type `String` (Typing[4475])
   File "case_type_overlapping_variants_enums.php", line 11, characters 5-13:
-  StrOpaque
-  File "case_type_overlapping_variants_enums.php", line 12, characters 5-13:
-  IntOpaque
+  This is the type `StrOpaque`, which includes `String` values
   File "case_type_overlapping_variants_enums.php", line 13, characters 5-11:
-  StrEnum
+  It overlaps with `StrEnum`, which also includes `String` values
+File "case_type_overlapping_variants_enums.php", line 10, characters 11-17:
+Invalid case type declaration. More than one variant of `StrData` has the runtime data type `String` (Typing[4475])
+  File "case_type_overlapping_variants_enums.php", line 11, characters 5-13:
+  This is the type `StrOpaque`, which includes `String` values
   File "case_type_overlapping_variants_enums.php", line 14, characters 5-10:
-  string
+  It overlaps with `string`, which also includes `String` values
+File "case_type_overlapping_variants_enums.php", line 10, characters 11-17:
+Invalid case type declaration. More than one variant of `StrData` has the runtime data type `String` (Typing[4475])
+  File "case_type_overlapping_variants_enums.php", line 12, characters 5-13:
+  This is the type `IntOpaque`, which includes `String` values
+  File "case_type_overlapping_variants_enums.php", line 13, characters 5-11:
+  It overlaps with `StrEnum`, which also includes `String` values
+File "case_type_overlapping_variants_enums.php", line 10, characters 11-17:
+Invalid case type declaration. More than one variant of `StrData` has the runtime data type `String` (Typing[4475])
+  File "case_type_overlapping_variants_enums.php", line 12, characters 5-13:
+  This is the type `IntOpaque`, which includes `String` values
+  File "case_type_overlapping_variants_enums.php", line 14, characters 5-10:
+  It overlaps with `string`, which also includes `String` values
+File "case_type_overlapping_variants_enums.php", line 10, characters 11-17:
+Invalid case type declaration. More than one variant of `StrData` has the runtime data type `String` (Typing[4475])
+  File "case_type_overlapping_variants_enums.php", line 13, characters 5-11:
+  This is the type `StrEnum`, which includes `String` values
+  File "case_type_overlapping_variants_enums.php", line 14, characters 5-10:
+  It overlaps with `string`, which also includes `String` values
 File "case_type_overlapping_variants_enums.php", line 16, characters 11-17:
-The case type `IntData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `int`: (Typing[4475])
+Invalid case type declaration. More than one variant of `IntData` has the runtime data type `Int64` (Typing[4475])
   File "case_type_overlapping_variants_enums.php", line 17, characters 5-13:
-  StrOpaque
+  This is the type `StrOpaque`, which includes `Int64` values
   File "case_type_overlapping_variants_enums.php", line 18, characters 5-13:
-  IntOpaque
+  It overlaps with `IntOpaque`, which also includes `Int64` values
+File "case_type_overlapping_variants_enums.php", line 16, characters 11-17:
+Invalid case type declaration. More than one variant of `IntData` has the runtime data type `Int64` (Typing[4475])
+  File "case_type_overlapping_variants_enums.php", line 17, characters 5-13:
+  This is the type `StrOpaque`, which includes `Int64` values
   File "case_type_overlapping_variants_enums.php", line 19, characters 5-11:
-  IntEnum
-  File "case_type_overlapping_variants_enums.php", line 20, characters 5-7:
-  int
+  It overlaps with `IntEnum`, which also includes `Int64` values
 File "case_type_overlapping_variants_enums.php", line 16, characters 11-17:
-The case type `IntData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `string`: (Typing[4475])
+Invalid case type declaration. More than one variant of `IntData` has the runtime data type `Int64` (Typing[4475])
   File "case_type_overlapping_variants_enums.php", line 17, characters 5-13:
-  StrOpaque
+  This is the type `StrOpaque`, which includes `Int64` values
+  File "case_type_overlapping_variants_enums.php", line 20, characters 5-7:
+  It overlaps with `int`, which also includes `Int64` values
+File "case_type_overlapping_variants_enums.php", line 16, characters 11-17:
+Invalid case type declaration. More than one variant of `IntData` has the runtime data type `Int64` (Typing[4475])
   File "case_type_overlapping_variants_enums.php", line 18, characters 5-13:
-  IntOpaque
+  This is the type `IntOpaque`, which includes `Int64` values
+  File "case_type_overlapping_variants_enums.php", line 19, characters 5-11:
+  It overlaps with `IntEnum`, which also includes `Int64` values
+File "case_type_overlapping_variants_enums.php", line 16, characters 11-17:
+Invalid case type declaration. More than one variant of `IntData` has the runtime data type `Int64` (Typing[4475])
+  File "case_type_overlapping_variants_enums.php", line 18, characters 5-13:
+  This is the type `IntOpaque`, which includes `Int64` values
+  File "case_type_overlapping_variants_enums.php", line 20, characters 5-7:
+  It overlaps with `int`, which also includes `Int64` values
+File "case_type_overlapping_variants_enums.php", line 16, characters 11-17:
+Invalid case type declaration. More than one variant of `IntData` has the runtime data type `Int64` (Typing[4475])
+  File "case_type_overlapping_variants_enums.php", line 19, characters 5-11:
+  This is the type `IntEnum`, which includes `Int64` values
+  File "case_type_overlapping_variants_enums.php", line 20, characters 5-7:
+  It overlaps with `int`, which also includes `Int64` values

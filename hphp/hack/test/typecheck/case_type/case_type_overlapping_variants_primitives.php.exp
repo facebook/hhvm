@@ -1,496 +1,500 @@
 File "case_type_overlapping_variants_primitives.php", line 46, characters 5-8:
 You can only use the `void` type as the return type of a function or method (Naming[2063])
 File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
-The case type `StringData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `bool`: (Typing[4475])
+Invalid case type declaration. More than one variant of `StringData` has the runtime data type `Int64` (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 5, characters 5-9:
-  mixed
-  File "case_type_overlapping_variants_primitives.php", line 6, characters 5-11:
-  nonnull
-  File "case_type_overlapping_variants_primitives.php", line 7, characters 5-21:
-  (function(): void)
-File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
-The case type `StringData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `dict`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 5, characters 5-9:
-  mixed
-  File "case_type_overlapping_variants_primitives.php", line 6, characters 5-11:
-  nonnull
-  File "case_type_overlapping_variants_primitives.php", line 7, characters 5-21:
-  (function(): void)
-File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
-The case type `StringData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `float`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 5, characters 5-9:
-  mixed
-  File "case_type_overlapping_variants_primitives.php", line 6, characters 5-11:
-  nonnull
-  File "case_type_overlapping_variants_primitives.php", line 7, characters 5-21:
-  (function(): void)
-File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
-The case type `StringData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `int`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 5, characters 5-9:
-  mixed
-  File "case_type_overlapping_variants_primitives.php", line 6, characters 5-11:
-  nonnull
-  File "case_type_overlapping_variants_primitives.php", line 7, characters 5-21:
-  (function(): void)
+  This is the type `mixed`, which includes `Int64` values
   File "case_type_overlapping_variants_primitives.php", line 9, characters 5-12:
-  arraykey
+  It overlaps with `arraykey`, which also includes `Int64` values
 File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
-The case type `StringData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `keyset`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 5, characters 5-9:
-  mixed
+Invalid case type declaration. More than one variant of `StringData` has the runtime data type `Int64` (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 6, characters 5-11:
-  nonnull
-  File "case_type_overlapping_variants_primitives.php", line 7, characters 5-21:
-  (function(): void)
+  This is the type `nonnull`, which includes `Int64` values
+  File "case_type_overlapping_variants_primitives.php", line 9, characters 5-12:
+  It overlaps with `arraykey`, which also includes `Int64` values
 File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
-The case type `StringData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `null`: (Typing[4475])
+Invalid case type declaration. More than one variant of `StringData` has the runtime data type `Int64` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 7, characters 5-21:
+  This is the type `(function(): void)`, which includes `Int64` values
+  File "case_type_overlapping_variants_primitives.php", line 9, characters 5-12:
+  It overlaps with `arraykey`, which also includes `Int64` values
+File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
+Invalid case type declaration. More than one variant of `StringData` has the runtime data type `Null` (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 5, characters 5-9:
-  mixed
+  This is the type `mixed`, which includes `Null` values
+  File "case_type_overlapping_variants_primitives.php", line 6, characters 5-11:
+  It overlaps with `nonnull`, which also includes `Null` values
+File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
+Invalid case type declaration. More than one variant of `StringData` has the runtime data type `Null` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 5, characters 5-9:
+  This is the type `mixed`, which includes `Null` values
+  File "case_type_overlapping_variants_primitives.php", line 7, characters 5-21:
+  It overlaps with `(function(): void)`, which also includes `Null` values
+File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
+Invalid case type declaration. More than one variant of `StringData` has the runtime data type `Null` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 5, characters 5-9:
+  This is the type `mixed`, which includes `Null` values
   File "case_type_overlapping_variants_primitives.php", line 11, characters 5-6:
-  ?T
+  It overlaps with `?T`, which also includes `Null` values
 File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
-The case type `StringData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `object`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 5, characters 5-9:
-  mixed
+Invalid case type declaration. More than one variant of `StringData` has the runtime data type `Null` (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 6, characters 5-11:
-  nonnull
+  This is the type `nonnull`, which includes `Null` values
   File "case_type_overlapping_variants_primitives.php", line 7, characters 5-21:
-  (function(): void)
+  It overlaps with `(function(): void)`, which also includes `Null` values
 File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
-The case type `StringData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `resource`: (Typing[4475])
+Invalid case type declaration. More than one variant of `StringData` has the runtime data type `String` (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 5, characters 5-9:
-  mixed
-  File "case_type_overlapping_variants_primitives.php", line 6, characters 5-11:
-  nonnull
-  File "case_type_overlapping_variants_primitives.php", line 7, characters 5-21:
-  (function(): void)
-File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
-The case type `StringData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `string`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 5, characters 5-9:
-  mixed
-  File "case_type_overlapping_variants_primitives.php", line 6, characters 5-11:
-  nonnull
-  File "case_type_overlapping_variants_primitives.php", line 7, characters 5-21:
-  (function(): void)
+  This is the type `mixed`, which includes `String` values
   File "case_type_overlapping_variants_primitives.php", line 8, characters 5-20:
-  classname<mixed>
-  File "case_type_overlapping_variants_primitives.php", line 9, characters 5-12:
-  arraykey
-  File "case_type_overlapping_variants_primitives.php", line 10, characters 5-10:
-  string
-  File "case_type_overlapping_variants_primitives.php", line 11, characters 5-6:
-  ?T
+  It overlaps with `classname<mixed>`, which also includes `String` values
 File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
-The case type `StringData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `vec`: (Typing[4475])
+Invalid case type declaration. More than one variant of `StringData` has the runtime data type `String` (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 5, characters 5-9:
-  mixed
+  This is the type `mixed`, which includes `String` values
+  File "case_type_overlapping_variants_primitives.php", line 10, characters 5-10:
+  It overlaps with `string`, which also includes `String` values
+File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
+Invalid case type declaration. More than one variant of `StringData` has the runtime data type `String` (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 6, characters 5-11:
-  nonnull
+  This is the type `nonnull`, which includes `String` values
+  File "case_type_overlapping_variants_primitives.php", line 8, characters 5-20:
+  It overlaps with `classname<mixed>`, which also includes `String` values
+File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
+Invalid case type declaration. More than one variant of `StringData` has the runtime data type `String` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 6, characters 5-11:
+  This is the type `nonnull`, which includes `String` values
+  File "case_type_overlapping_variants_primitives.php", line 10, characters 5-10:
+  It overlaps with `string`, which also includes `String` values
+File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
+Invalid case type declaration. More than one variant of `StringData` has the runtime data type `String` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 6, characters 5-11:
+  This is the type `nonnull`, which includes `String` values
+  File "case_type_overlapping_variants_primitives.php", line 11, characters 5-6:
+  It overlaps with `?T`, which also includes `String` values
+File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
+Invalid case type declaration. More than one variant of `StringData` has the runtime data type `String` (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 7, characters 5-21:
-  (function(): void)
+  This is the type `(function(): void)`, which includes `String` values
+  File "case_type_overlapping_variants_primitives.php", line 8, characters 5-20:
+  It overlaps with `classname<mixed>`, which also includes `String` values
+File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
+Invalid case type declaration. More than one variant of `StringData` has the runtime data type `String` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 7, characters 5-21:
+  This is the type `(function(): void)`, which includes `String` values
+  File "case_type_overlapping_variants_primitives.php", line 10, characters 5-10:
+  It overlaps with `string`, which also includes `String` values
+File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
+Invalid case type declaration. More than one variant of `StringData` has the runtime data type `String` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 7, characters 5-21:
+  This is the type `(function(): void)`, which includes `String` values
+  File "case_type_overlapping_variants_primitives.php", line 11, characters 5-6:
+  It overlaps with `?T`, which also includes `String` values
+File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
+Invalid case type declaration. More than one variant of `StringData` has the runtime data type `String` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 8, characters 5-20:
+  This is the type `classname<mixed>`, which includes `String` values
+  File "case_type_overlapping_variants_primitives.php", line 9, characters 5-12:
+  It overlaps with `arraykey`, which also includes `String` values
+File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
+Invalid case type declaration. More than one variant of `StringData` has the runtime data type `String` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 8, characters 5-20:
+  This is the type `classname<mixed>`, which includes `String` values
+  File "case_type_overlapping_variants_primitives.php", line 10, characters 5-10:
+  It overlaps with `string`, which also includes `String` values
+File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
+Invalid case type declaration. More than one variant of `StringData` has the runtime data type `String` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 8, characters 5-20:
+  This is the type `classname<mixed>`, which includes `String` values
+  File "case_type_overlapping_variants_primitives.php", line 11, characters 5-6:
+  It overlaps with `?T`, which also includes `String` values
+File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
+Invalid case type declaration. More than one variant of `StringData` has the runtime data type `String` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 9, characters 5-12:
+  This is the type `arraykey`, which includes `String` values
+  File "case_type_overlapping_variants_primitives.php", line 10, characters 5-10:
+  It overlaps with `string`, which also includes `String` values
+File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
+Invalid case type declaration. More than one variant of `StringData` has the runtime data type `String` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 9, characters 5-12:
+  This is the type `arraykey`, which includes `String` values
+  File "case_type_overlapping_variants_primitives.php", line 11, characters 5-6:
+  It overlaps with `?T`, which also includes `String` values
+File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
+Invalid case type declaration. More than one variant of `StringData` has the runtime data type `String` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 10, characters 5-10:
+  This is the type `string`, which includes `String` values
+  File "case_type_overlapping_variants_primitives.php", line 11, characters 5-6:
+  It overlaps with `?T`, which also includes `String` values
 File "case_type_overlapping_variants_primitives.php", line 13, characters 11-22:
-The case type `ResourceData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `bool`: (Typing[4475])
+Invalid case type declaration. More than one variant of `ResourceData` has the runtime data type `Null` (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 14, characters 5-9:
-  mixed
+  This is the type `mixed`, which includes `Null` values
   File "case_type_overlapping_variants_primitives.php", line 15, characters 5-11:
-  nonnull
-  File "case_type_overlapping_variants_primitives.php", line 16, characters 5-21:
-  (function(): void)
+  It overlaps with `nonnull`, which also includes `Null` values
 File "case_type_overlapping_variants_primitives.php", line 13, characters 11-22:
-The case type `ResourceData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `dict`: (Typing[4475])
+Invalid case type declaration. More than one variant of `ResourceData` has the runtime data type `Null` (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 14, characters 5-9:
-  mixed
-  File "case_type_overlapping_variants_primitives.php", line 15, characters 5-11:
-  nonnull
+  This is the type `mixed`, which includes `Null` values
   File "case_type_overlapping_variants_primitives.php", line 16, characters 5-21:
-  (function(): void)
+  It overlaps with `(function(): void)`, which also includes `Null` values
 File "case_type_overlapping_variants_primitives.php", line 13, characters 11-22:
-The case type `ResourceData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `float`: (Typing[4475])
+Invalid case type declaration. More than one variant of `ResourceData` has the runtime data type `Null` (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 14, characters 5-9:
-  mixed
-  File "case_type_overlapping_variants_primitives.php", line 15, characters 5-11:
-  nonnull
-  File "case_type_overlapping_variants_primitives.php", line 16, characters 5-21:
-  (function(): void)
-File "case_type_overlapping_variants_primitives.php", line 13, characters 11-22:
-The case type `ResourceData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `int`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 14, characters 5-9:
-  mixed
-  File "case_type_overlapping_variants_primitives.php", line 15, characters 5-11:
-  nonnull
-  File "case_type_overlapping_variants_primitives.php", line 16, characters 5-21:
-  (function(): void)
-File "case_type_overlapping_variants_primitives.php", line 13, characters 11-22:
-The case type `ResourceData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `keyset`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 14, characters 5-9:
-  mixed
-  File "case_type_overlapping_variants_primitives.php", line 15, characters 5-11:
-  nonnull
-  File "case_type_overlapping_variants_primitives.php", line 16, characters 5-21:
-  (function(): void)
-File "case_type_overlapping_variants_primitives.php", line 13, characters 11-22:
-The case type `ResourceData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `null`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 14, characters 5-9:
-  mixed
+  This is the type `mixed`, which includes `Null` values
   File "case_type_overlapping_variants_primitives.php", line 17, characters 5-6:
-  ?T
+  It overlaps with `?T`, which also includes `Null` values
 File "case_type_overlapping_variants_primitives.php", line 13, characters 11-22:
-The case type `ResourceData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `object`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 14, characters 5-9:
-  mixed
+Invalid case type declaration. More than one variant of `ResourceData` has the runtime data type `Null` (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 15, characters 5-11:
-  nonnull
+  This is the type `nonnull`, which includes `Null` values
   File "case_type_overlapping_variants_primitives.php", line 16, characters 5-21:
-  (function(): void)
+  It overlaps with `(function(): void)`, which also includes `Null` values
 File "case_type_overlapping_variants_primitives.php", line 13, characters 11-22:
-The case type `ResourceData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `resource`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 14, characters 5-9:
-  mixed
+Invalid case type declaration. More than one variant of `ResourceData` has the runtime data type `Resource` (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 15, characters 5-11:
-  nonnull
-  File "case_type_overlapping_variants_primitives.php", line 16, characters 5-21:
-  (function(): void)
+  This is the type `nonnull`, which includes `Resource` values
   File "case_type_overlapping_variants_primitives.php", line 17, characters 5-6:
-  ?T
+  It overlaps with `?T`, which also includes `Resource` values
 File "case_type_overlapping_variants_primitives.php", line 13, characters 11-22:
-The case type `ResourceData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `string`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 14, characters 5-9:
-  mixed
-  File "case_type_overlapping_variants_primitives.php", line 15, characters 5-11:
-  nonnull
+Invalid case type declaration. More than one variant of `ResourceData` has the runtime data type `Resource` (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 16, characters 5-21:
-  (function(): void)
-File "case_type_overlapping_variants_primitives.php", line 13, characters 11-22:
-The case type `ResourceData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `vec`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 14, characters 5-9:
-  mixed
-  File "case_type_overlapping_variants_primitives.php", line 15, characters 5-11:
-  nonnull
-  File "case_type_overlapping_variants_primitives.php", line 16, characters 5-21:
-  (function(): void)
+  This is the type `(function(): void)`, which includes `Resource` values
+  File "case_type_overlapping_variants_primitives.php", line 17, characters 5-6:
+  It overlaps with `?T`, which also includes `Resource` values
 File "case_type_overlapping_variants_primitives.php", line 19, characters 11-18:
-The case type `BoolData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `bool`: (Typing[4475])
+Invalid case type declaration. More than one variant of `BoolData` has the runtime data type `Boolean` (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 20, characters 5-9:
-  mixed
-  File "case_type_overlapping_variants_primitives.php", line 21, characters 5-11:
-  nonnull
-  File "case_type_overlapping_variants_primitives.php", line 22, characters 5-21:
-  (function(): void)
+  This is the type `mixed`, which includes `Boolean` values
   File "case_type_overlapping_variants_primitives.php", line 23, characters 5-8:
-  bool
+  It overlaps with `bool`, which also includes `Boolean` values
+File "case_type_overlapping_variants_primitives.php", line 19, characters 11-18:
+Invalid case type declaration. More than one variant of `BoolData` has the runtime data type `Boolean` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 21, characters 5-11:
+  This is the type `nonnull`, which includes `Boolean` values
+  File "case_type_overlapping_variants_primitives.php", line 23, characters 5-8:
+  It overlaps with `bool`, which also includes `Boolean` values
+File "case_type_overlapping_variants_primitives.php", line 19, characters 11-18:
+Invalid case type declaration. More than one variant of `BoolData` has the runtime data type `Boolean` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 21, characters 5-11:
+  This is the type `nonnull`, which includes `Boolean` values
   File "case_type_overlapping_variants_primitives.php", line 24, characters 5-6:
-  ?T
+  It overlaps with `?T`, which also includes `Boolean` values
 File "case_type_overlapping_variants_primitives.php", line 19, characters 11-18:
-The case type `BoolData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `dict`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 20, characters 5-9:
-  mixed
-  File "case_type_overlapping_variants_primitives.php", line 21, characters 5-11:
-  nonnull
+Invalid case type declaration. More than one variant of `BoolData` has the runtime data type `Boolean` (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 22, characters 5-21:
-  (function(): void)
+  This is the type `(function(): void)`, which includes `Boolean` values
+  File "case_type_overlapping_variants_primitives.php", line 23, characters 5-8:
+  It overlaps with `bool`, which also includes `Boolean` values
 File "case_type_overlapping_variants_primitives.php", line 19, characters 11-18:
-The case type `BoolData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `float`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 20, characters 5-9:
-  mixed
-  File "case_type_overlapping_variants_primitives.php", line 21, characters 5-11:
-  nonnull
+Invalid case type declaration. More than one variant of `BoolData` has the runtime data type `Boolean` (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 22, characters 5-21:
-  (function(): void)
-File "case_type_overlapping_variants_primitives.php", line 19, characters 11-18:
-The case type `BoolData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `int`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 20, characters 5-9:
-  mixed
-  File "case_type_overlapping_variants_primitives.php", line 21, characters 5-11:
-  nonnull
-  File "case_type_overlapping_variants_primitives.php", line 22, characters 5-21:
-  (function(): void)
-File "case_type_overlapping_variants_primitives.php", line 19, characters 11-18:
-The case type `BoolData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `keyset`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 20, characters 5-9:
-  mixed
-  File "case_type_overlapping_variants_primitives.php", line 21, characters 5-11:
-  nonnull
-  File "case_type_overlapping_variants_primitives.php", line 22, characters 5-21:
-  (function(): void)
-File "case_type_overlapping_variants_primitives.php", line 19, characters 11-18:
-The case type `BoolData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `null`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 20, characters 5-9:
-  mixed
+  This is the type `(function(): void)`, which includes `Boolean` values
   File "case_type_overlapping_variants_primitives.php", line 24, characters 5-6:
-  ?T
+  It overlaps with `?T`, which also includes `Boolean` values
 File "case_type_overlapping_variants_primitives.php", line 19, characters 11-18:
-The case type `BoolData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `object`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 20, characters 5-9:
-  mixed
-  File "case_type_overlapping_variants_primitives.php", line 21, characters 5-11:
-  nonnull
-  File "case_type_overlapping_variants_primitives.php", line 22, characters 5-21:
-  (function(): void)
+Invalid case type declaration. More than one variant of `BoolData` has the runtime data type `Boolean` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 23, characters 5-8:
+  This is the type `bool`, which includes `Boolean` values
+  File "case_type_overlapping_variants_primitives.php", line 24, characters 5-6:
+  It overlaps with `?T`, which also includes `Boolean` values
 File "case_type_overlapping_variants_primitives.php", line 19, characters 11-18:
-The case type `BoolData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `resource`: (Typing[4475])
+Invalid case type declaration. More than one variant of `BoolData` has the runtime data type `Null` (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 20, characters 5-9:
-  mixed
+  This is the type `mixed`, which includes `Null` values
   File "case_type_overlapping_variants_primitives.php", line 21, characters 5-11:
-  nonnull
-  File "case_type_overlapping_variants_primitives.php", line 22, characters 5-21:
-  (function(): void)
+  It overlaps with `nonnull`, which also includes `Null` values
 File "case_type_overlapping_variants_primitives.php", line 19, characters 11-18:
-The case type `BoolData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `string`: (Typing[4475])
+Invalid case type declaration. More than one variant of `BoolData` has the runtime data type `Null` (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 20, characters 5-9:
-  mixed
-  File "case_type_overlapping_variants_primitives.php", line 21, characters 5-11:
-  nonnull
+  This is the type `mixed`, which includes `Null` values
   File "case_type_overlapping_variants_primitives.php", line 22, characters 5-21:
-  (function(): void)
+  It overlaps with `(function(): void)`, which also includes `Null` values
 File "case_type_overlapping_variants_primitives.php", line 19, characters 11-18:
-The case type `BoolData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `vec`: (Typing[4475])
+Invalid case type declaration. More than one variant of `BoolData` has the runtime data type `Null` (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 20, characters 5-9:
-  mixed
+  This is the type `mixed`, which includes `Null` values
+  File "case_type_overlapping_variants_primitives.php", line 24, characters 5-6:
+  It overlaps with `?T`, which also includes `Null` values
+File "case_type_overlapping_variants_primitives.php", line 19, characters 11-18:
+Invalid case type declaration. More than one variant of `BoolData` has the runtime data type `Null` (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 21, characters 5-11:
-  nonnull
+  This is the type `nonnull`, which includes `Null` values
   File "case_type_overlapping_variants_primitives.php", line 22, characters 5-21:
-  (function(): void)
+  It overlaps with `(function(): void)`, which also includes `Null` values
 File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
-The case type `IntData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `bool`: (Typing[4475])
+Invalid case type declaration. More than one variant of `IntData` has the runtime data type `Int64` (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 27, characters 5-9:
-  mixed
-  File "case_type_overlapping_variants_primitives.php", line 28, characters 5-11:
-  nonnull
-  File "case_type_overlapping_variants_primitives.php", line 29, characters 5-21:
-  (function(): void)
-File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
-The case type `IntData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `dict`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 27, characters 5-9:
-  mixed
-  File "case_type_overlapping_variants_primitives.php", line 28, characters 5-11:
-  nonnull
-  File "case_type_overlapping_variants_primitives.php", line 29, characters 5-21:
-  (function(): void)
-File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
-The case type `IntData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `float`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 27, characters 5-9:
-  mixed
-  File "case_type_overlapping_variants_primitives.php", line 28, characters 5-11:
-  nonnull
-  File "case_type_overlapping_variants_primitives.php", line 29, characters 5-21:
-  (function(): void)
+  This is the type `mixed`, which includes `Int64` values
   File "case_type_overlapping_variants_primitives.php", line 30, characters 5-7:
-  num
+  It overlaps with `num`, which also includes `Int64` values
 File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
-The case type `IntData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `int`: (Typing[4475])
+Invalid case type declaration. More than one variant of `IntData` has the runtime data type `Int64` (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 27, characters 5-9:
-  mixed
-  File "case_type_overlapping_variants_primitives.php", line 28, characters 5-11:
-  nonnull
-  File "case_type_overlapping_variants_primitives.php", line 29, characters 5-21:
-  (function(): void)
-  File "case_type_overlapping_variants_primitives.php", line 30, characters 5-7:
-  num
+  This is the type `mixed`, which includes `Int64` values
   File "case_type_overlapping_variants_primitives.php", line 31, characters 5-12:
-  arraykey
+  It overlaps with `arraykey`, which also includes `Int64` values
+File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
+Invalid case type declaration. More than one variant of `IntData` has the runtime data type `Int64` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 27, characters 5-9:
+  This is the type `mixed`, which includes `Int64` values
   File "case_type_overlapping_variants_primitives.php", line 32, characters 5-7:
-  int
-  File "case_type_overlapping_variants_primitives.php", line 33, characters 5-6:
-  ?T
+  It overlaps with `int`, which also includes `Int64` values
 File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
-The case type `IntData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `keyset`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 27, characters 5-9:
-  mixed
+Invalid case type declaration. More than one variant of `IntData` has the runtime data type `Int64` (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 28, characters 5-11:
-  nonnull
-  File "case_type_overlapping_variants_primitives.php", line 29, characters 5-21:
-  (function(): void)
+  This is the type `nonnull`, which includes `Int64` values
+  File "case_type_overlapping_variants_primitives.php", line 30, characters 5-7:
+  It overlaps with `num`, which also includes `Int64` values
 File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
-The case type `IntData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `null`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 27, characters 5-9:
-  mixed
-  File "case_type_overlapping_variants_primitives.php", line 33, characters 5-6:
-  ?T
-File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
-The case type `IntData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `object`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 27, characters 5-9:
-  mixed
+Invalid case type declaration. More than one variant of `IntData` has the runtime data type `Int64` (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 28, characters 5-11:
-  nonnull
-  File "case_type_overlapping_variants_primitives.php", line 29, characters 5-21:
-  (function(): void)
-File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
-The case type `IntData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `resource`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 27, characters 5-9:
-  mixed
-  File "case_type_overlapping_variants_primitives.php", line 28, characters 5-11:
-  nonnull
-  File "case_type_overlapping_variants_primitives.php", line 29, characters 5-21:
-  (function(): void)
-File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
-The case type `IntData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `string`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 27, characters 5-9:
-  mixed
-  File "case_type_overlapping_variants_primitives.php", line 28, characters 5-11:
-  nonnull
-  File "case_type_overlapping_variants_primitives.php", line 29, characters 5-21:
-  (function(): void)
+  This is the type `nonnull`, which includes `Int64` values
   File "case_type_overlapping_variants_primitives.php", line 31, characters 5-12:
-  arraykey
+  It overlaps with `arraykey`, which also includes `Int64` values
 File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
-The case type `IntData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `vec`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 27, characters 5-9:
-  mixed
+Invalid case type declaration. More than one variant of `IntData` has the runtime data type `Int64` (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 28, characters 5-11:
-  nonnull
+  This is the type `nonnull`, which includes `Int64` values
+  File "case_type_overlapping_variants_primitives.php", line 32, characters 5-7:
+  It overlaps with `int`, which also includes `Int64` values
+File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
+Invalid case type declaration. More than one variant of `IntData` has the runtime data type `Int64` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 28, characters 5-11:
+  This is the type `nonnull`, which includes `Int64` values
+  File "case_type_overlapping_variants_primitives.php", line 33, characters 5-6:
+  It overlaps with `?T`, which also includes `Int64` values
+File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
+Invalid case type declaration. More than one variant of `IntData` has the runtime data type `Int64` (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 29, characters 5-21:
-  (function(): void)
+  This is the type `(function(): void)`, which includes `Int64` values
+  File "case_type_overlapping_variants_primitives.php", line 30, characters 5-7:
+  It overlaps with `num`, which also includes `Int64` values
+File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
+Invalid case type declaration. More than one variant of `IntData` has the runtime data type `Int64` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 29, characters 5-21:
+  This is the type `(function(): void)`, which includes `Int64` values
+  File "case_type_overlapping_variants_primitives.php", line 31, characters 5-12:
+  It overlaps with `arraykey`, which also includes `Int64` values
+File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
+Invalid case type declaration. More than one variant of `IntData` has the runtime data type `Int64` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 29, characters 5-21:
+  This is the type `(function(): void)`, which includes `Int64` values
+  File "case_type_overlapping_variants_primitives.php", line 32, characters 5-7:
+  It overlaps with `int`, which also includes `Int64` values
+File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
+Invalid case type declaration. More than one variant of `IntData` has the runtime data type `Int64` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 29, characters 5-21:
+  This is the type `(function(): void)`, which includes `Int64` values
+  File "case_type_overlapping_variants_primitives.php", line 33, characters 5-6:
+  It overlaps with `?T`, which also includes `Int64` values
+File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
+Invalid case type declaration. More than one variant of `IntData` has the runtime data type `Int64` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 30, characters 5-7:
+  This is the type `num`, which includes `Int64` values
+  File "case_type_overlapping_variants_primitives.php", line 31, characters 5-12:
+  It overlaps with `arraykey`, which also includes `Int64` values
+File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
+Invalid case type declaration. More than one variant of `IntData` has the runtime data type `Int64` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 30, characters 5-7:
+  This is the type `num`, which includes `Int64` values
+  File "case_type_overlapping_variants_primitives.php", line 32, characters 5-7:
+  It overlaps with `int`, which also includes `Int64` values
+File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
+Invalid case type declaration. More than one variant of `IntData` has the runtime data type `Int64` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 30, characters 5-7:
+  This is the type `num`, which includes `Int64` values
+  File "case_type_overlapping_variants_primitives.php", line 33, characters 5-6:
+  It overlaps with `?T`, which also includes `Int64` values
+File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
+Invalid case type declaration. More than one variant of `IntData` has the runtime data type `Int64` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 31, characters 5-12:
+  This is the type `arraykey`, which includes `Int64` values
+  File "case_type_overlapping_variants_primitives.php", line 32, characters 5-7:
+  It overlaps with `int`, which also includes `Int64` values
+File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
+Invalid case type declaration. More than one variant of `IntData` has the runtime data type `Int64` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 31, characters 5-12:
+  This is the type `arraykey`, which includes `Int64` values
+  File "case_type_overlapping_variants_primitives.php", line 33, characters 5-6:
+  It overlaps with `?T`, which also includes `Int64` values
+File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
+Invalid case type declaration. More than one variant of `IntData` has the runtime data type `Int64` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 32, characters 5-7:
+  This is the type `int`, which includes `Int64` values
+  File "case_type_overlapping_variants_primitives.php", line 33, characters 5-6:
+  It overlaps with `?T`, which also includes `Int64` values
+File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
+Invalid case type declaration. More than one variant of `IntData` has the runtime data type `Null` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 27, characters 5-9:
+  This is the type `mixed`, which includes `Null` values
+  File "case_type_overlapping_variants_primitives.php", line 28, characters 5-11:
+  It overlaps with `nonnull`, which also includes `Null` values
+File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
+Invalid case type declaration. More than one variant of `IntData` has the runtime data type `Null` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 27, characters 5-9:
+  This is the type `mixed`, which includes `Null` values
+  File "case_type_overlapping_variants_primitives.php", line 29, characters 5-21:
+  It overlaps with `(function(): void)`, which also includes `Null` values
+File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
+Invalid case type declaration. More than one variant of `IntData` has the runtime data type `Null` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 27, characters 5-9:
+  This is the type `mixed`, which includes `Null` values
+  File "case_type_overlapping_variants_primitives.php", line 33, characters 5-6:
+  It overlaps with `?T`, which also includes `Null` values
+File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
+Invalid case type declaration. More than one variant of `IntData` has the runtime data type `Null` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 28, characters 5-11:
+  This is the type `nonnull`, which includes `Null` values
+  File "case_type_overlapping_variants_primitives.php", line 29, characters 5-21:
+  It overlaps with `(function(): void)`, which also includes `Null` values
 File "case_type_overlapping_variants_primitives.php", line 35, characters 11-19:
-The case type `FloatData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `bool`: (Typing[4475])
+Invalid case type declaration. More than one variant of `FloatData` has the runtime data type `Double` (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 36, characters 5-9:
-  mixed
-  File "case_type_overlapping_variants_primitives.php", line 37, characters 5-11:
-  nonnull
-  File "case_type_overlapping_variants_primitives.php", line 38, characters 5-21:
-  (function(): void)
-File "case_type_overlapping_variants_primitives.php", line 35, characters 11-19:
-The case type `FloatData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `dict`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 36, characters 5-9:
-  mixed
-  File "case_type_overlapping_variants_primitives.php", line 37, characters 5-11:
-  nonnull
-  File "case_type_overlapping_variants_primitives.php", line 38, characters 5-21:
-  (function(): void)
-File "case_type_overlapping_variants_primitives.php", line 35, characters 11-19:
-The case type `FloatData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `float`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 36, characters 5-9:
-  mixed
-  File "case_type_overlapping_variants_primitives.php", line 37, characters 5-11:
-  nonnull
-  File "case_type_overlapping_variants_primitives.php", line 38, characters 5-21:
-  (function(): void)
-  File "case_type_overlapping_variants_primitives.php", line 39, characters 5-7:
-  num
+  This is the type `mixed`, which includes `Double` values
   File "case_type_overlapping_variants_primitives.php", line 40, characters 5-9:
-  float
-  File "case_type_overlapping_variants_primitives.php", line 41, characters 5-6:
-  ?T
+  It overlaps with `float`, which also includes `Double` values
 File "case_type_overlapping_variants_primitives.php", line 35, characters 11-19:
-The case type `FloatData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `int`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 36, characters 5-9:
-  mixed
+Invalid case type declaration. More than one variant of `FloatData` has the runtime data type `Double` (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 37, characters 5-11:
-  nonnull
+  This is the type `nonnull`, which includes `Double` values
+  File "case_type_overlapping_variants_primitives.php", line 40, characters 5-9:
+  It overlaps with `float`, which also includes `Double` values
+File "case_type_overlapping_variants_primitives.php", line 35, characters 11-19:
+Invalid case type declaration. More than one variant of `FloatData` has the runtime data type `Double` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 37, characters 5-11:
+  This is the type `nonnull`, which includes `Double` values
+  File "case_type_overlapping_variants_primitives.php", line 41, characters 5-6:
+  It overlaps with `?T`, which also includes `Double` values
+File "case_type_overlapping_variants_primitives.php", line 35, characters 11-19:
+Invalid case type declaration. More than one variant of `FloatData` has the runtime data type `Double` (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 38, characters 5-21:
-  (function(): void)
+  This is the type `(function(): void)`, which includes `Double` values
+  File "case_type_overlapping_variants_primitives.php", line 40, characters 5-9:
+  It overlaps with `float`, which also includes `Double` values
+File "case_type_overlapping_variants_primitives.php", line 35, characters 11-19:
+Invalid case type declaration. More than one variant of `FloatData` has the runtime data type `Double` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 38, characters 5-21:
+  This is the type `(function(): void)`, which includes `Double` values
+  File "case_type_overlapping_variants_primitives.php", line 41, characters 5-6:
+  It overlaps with `?T`, which also includes `Double` values
+File "case_type_overlapping_variants_primitives.php", line 35, characters 11-19:
+Invalid case type declaration. More than one variant of `FloatData` has the runtime data type `Double` (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 39, characters 5-7:
-  num
+  This is the type `num`, which includes `Double` values
+  File "case_type_overlapping_variants_primitives.php", line 40, characters 5-9:
+  It overlaps with `float`, which also includes `Double` values
 File "case_type_overlapping_variants_primitives.php", line 35, characters 11-19:
-The case type `FloatData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `keyset`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 36, characters 5-9:
-  mixed
-  File "case_type_overlapping_variants_primitives.php", line 37, characters 5-11:
-  nonnull
-  File "case_type_overlapping_variants_primitives.php", line 38, characters 5-21:
-  (function(): void)
-File "case_type_overlapping_variants_primitives.php", line 35, characters 11-19:
-The case type `FloatData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `null`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 36, characters 5-9:
-  mixed
+Invalid case type declaration. More than one variant of `FloatData` has the runtime data type `Double` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 39, characters 5-7:
+  This is the type `num`, which includes `Double` values
   File "case_type_overlapping_variants_primitives.php", line 41, characters 5-6:
-  ?T
+  It overlaps with `?T`, which also includes `Double` values
 File "case_type_overlapping_variants_primitives.php", line 35, characters 11-19:
-The case type `FloatData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `object`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 36, characters 5-9:
-  mixed
-  File "case_type_overlapping_variants_primitives.php", line 37, characters 5-11:
-  nonnull
-  File "case_type_overlapping_variants_primitives.php", line 38, characters 5-21:
-  (function(): void)
+Invalid case type declaration. More than one variant of `FloatData` has the runtime data type `Double` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 40, characters 5-9:
+  This is the type `float`, which includes `Double` values
+  File "case_type_overlapping_variants_primitives.php", line 41, characters 5-6:
+  It overlaps with `?T`, which also includes `Double` values
 File "case_type_overlapping_variants_primitives.php", line 35, characters 11-19:
-The case type `FloatData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `resource`: (Typing[4475])
+Invalid case type declaration. More than one variant of `FloatData` has the runtime data type `Int64` (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 36, characters 5-9:
-  mixed
-  File "case_type_overlapping_variants_primitives.php", line 37, characters 5-11:
-  nonnull
-  File "case_type_overlapping_variants_primitives.php", line 38, characters 5-21:
-  (function(): void)
+  This is the type `mixed`, which includes `Int64` values
+  File "case_type_overlapping_variants_primitives.php", line 39, characters 5-7:
+  It overlaps with `num`, which also includes `Int64` values
 File "case_type_overlapping_variants_primitives.php", line 35, characters 11-19:
-The case type `FloatData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `string`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 36, characters 5-9:
-  mixed
+Invalid case type declaration. More than one variant of `FloatData` has the runtime data type `Int64` (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 37, characters 5-11:
-  nonnull
-  File "case_type_overlapping_variants_primitives.php", line 38, characters 5-21:
-  (function(): void)
+  This is the type `nonnull`, which includes `Int64` values
+  File "case_type_overlapping_variants_primitives.php", line 39, characters 5-7:
+  It overlaps with `num`, which also includes `Int64` values
 File "case_type_overlapping_variants_primitives.php", line 35, characters 11-19:
-The case type `FloatData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `vec`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 36, characters 5-9:
-  mixed
-  File "case_type_overlapping_variants_primitives.php", line 37, characters 5-11:
-  nonnull
+Invalid case type declaration. More than one variant of `FloatData` has the runtime data type `Int64` (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 38, characters 5-21:
-  (function(): void)
+  This is the type `(function(): void)`, which includes `Int64` values
+  File "case_type_overlapping_variants_primitives.php", line 39, characters 5-7:
+  It overlaps with `num`, which also includes `Int64` values
+File "case_type_overlapping_variants_primitives.php", line 35, characters 11-19:
+Invalid case type declaration. More than one variant of `FloatData` has the runtime data type `Null` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 36, characters 5-9:
+  This is the type `mixed`, which includes `Null` values
+  File "case_type_overlapping_variants_primitives.php", line 37, characters 5-11:
+  It overlaps with `nonnull`, which also includes `Null` values
+File "case_type_overlapping_variants_primitives.php", line 35, characters 11-19:
+Invalid case type declaration. More than one variant of `FloatData` has the runtime data type `Null` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 36, characters 5-9:
+  This is the type `mixed`, which includes `Null` values
+  File "case_type_overlapping_variants_primitives.php", line 38, characters 5-21:
+  It overlaps with `(function(): void)`, which also includes `Null` values
+File "case_type_overlapping_variants_primitives.php", line 35, characters 11-19:
+Invalid case type declaration. More than one variant of `FloatData` has the runtime data type `Null` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 36, characters 5-9:
+  This is the type `mixed`, which includes `Null` values
+  File "case_type_overlapping_variants_primitives.php", line 41, characters 5-6:
+  It overlaps with `?T`, which also includes `Null` values
+File "case_type_overlapping_variants_primitives.php", line 35, characters 11-19:
+Invalid case type declaration. More than one variant of `FloatData` has the runtime data type `Null` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 37, characters 5-11:
+  This is the type `nonnull`, which includes `Null` values
+  File "case_type_overlapping_variants_primitives.php", line 38, characters 5-21:
+  It overlaps with `(function(): void)`, which also includes `Null` values
 File "case_type_overlapping_variants_primitives.php", line 43, characters 11-18:
-The case type `NullData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `bool`: (Typing[4475])
+Invalid case type declaration. More than one variant of `NullData` has the runtime data type `Null` (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 44, characters 5-9:
-  mixed
+  This is the type `mixed`, which includes `Null` values
   File "case_type_overlapping_variants_primitives.php", line 45, characters 5-9:
-  ?bool
-  File "case_type_overlapping_variants_primitives.php", line 46, characters 5-8:
-  _
+  It overlaps with `?bool`, which also includes `Null` values
 File "case_type_overlapping_variants_primitives.php", line 43, characters 11-18:
-The case type `NullData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `dict`: (Typing[4475])
+Invalid case type declaration. More than one variant of `NullData` has the runtime data type `Null` (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 44, characters 5-9:
-  mixed
+  This is the type `mixed`, which includes `Null` values
   File "case_type_overlapping_variants_primitives.php", line 46, characters 5-8:
-  _
+  It overlaps with `_`, which also includes `Null` values
 File "case_type_overlapping_variants_primitives.php", line 43, characters 11-18:
-The case type `NullData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `float`: (Typing[4475])
+Invalid case type declaration. More than one variant of `NullData` has the runtime data type `Null` (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 44, characters 5-9:
-  mixed
-  File "case_type_overlapping_variants_primitives.php", line 46, characters 5-8:
-  _
-File "case_type_overlapping_variants_primitives.php", line 43, characters 11-18:
-The case type `NullData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `int`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 44, characters 5-9:
-  mixed
-  File "case_type_overlapping_variants_primitives.php", line 46, characters 5-8:
-  _
-File "case_type_overlapping_variants_primitives.php", line 43, characters 11-18:
-The case type `NullData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `keyset`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 44, characters 5-9:
-  mixed
-  File "case_type_overlapping_variants_primitives.php", line 46, characters 5-8:
-  _
-File "case_type_overlapping_variants_primitives.php", line 43, characters 11-18:
-The case type `NullData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `null`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 44, characters 5-9:
-  mixed
-  File "case_type_overlapping_variants_primitives.php", line 45, characters 5-9:
-  ?bool
-  File "case_type_overlapping_variants_primitives.php", line 46, characters 5-8:
-  _
+  This is the type `mixed`, which includes `Null` values
   File "case_type_overlapping_variants_primitives.php", line 47, characters 5-8:
-  null
+  It overlaps with `null`, which also includes `Null` values
+File "case_type_overlapping_variants_primitives.php", line 43, characters 11-18:
+Invalid case type declaration. More than one variant of `NullData` has the runtime data type `Null` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 44, characters 5-9:
+  This is the type `mixed`, which includes `Null` values
   File "case_type_overlapping_variants_primitives.php", line 48, characters 5-5:
-  T
+  It overlaps with `T`, which also includes `Null` values
 File "case_type_overlapping_variants_primitives.php", line 43, characters 11-18:
-The case type `NullData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `object`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 44, characters 5-9:
-  mixed
+Invalid case type declaration. More than one variant of `NullData` has the runtime data type `Null` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 45, characters 5-9:
+  This is the type `?bool`, which includes `Null` values
   File "case_type_overlapping_variants_primitives.php", line 46, characters 5-8:
-  _
+  It overlaps with `_`, which also includes `Null` values
 File "case_type_overlapping_variants_primitives.php", line 43, characters 11-18:
-The case type `NullData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `resource`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 44, characters 5-9:
-  mixed
-  File "case_type_overlapping_variants_primitives.php", line 46, characters 5-8:
-  _
+Invalid case type declaration. More than one variant of `NullData` has the runtime data type `Null` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 45, characters 5-9:
+  This is the type `?bool`, which includes `Null` values
+  File "case_type_overlapping_variants_primitives.php", line 47, characters 5-8:
+  It overlaps with `null`, which also includes `Null` values
 File "case_type_overlapping_variants_primitives.php", line 43, characters 11-18:
-The case type `NullData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `string`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 44, characters 5-9:
-  mixed
-  File "case_type_overlapping_variants_primitives.php", line 46, characters 5-8:
-  _
+Invalid case type declaration. More than one variant of `NullData` has the runtime data type `Null` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 45, characters 5-9:
+  This is the type `?bool`, which includes `Null` values
+  File "case_type_overlapping_variants_primitives.php", line 48, characters 5-5:
+  It overlaps with `T`, which also includes `Null` values
 File "case_type_overlapping_variants_primitives.php", line 43, characters 11-18:
-The case type `NullData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `vec`: (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 44, characters 5-9:
-  mixed
+Invalid case type declaration. More than one variant of `NullData` has the runtime data type `Null` (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 46, characters 5-8:
-  _
+  This is the type `_`, which includes `Null` values
+  File "case_type_overlapping_variants_primitives.php", line 47, characters 5-8:
+  It overlaps with `null`, which also includes `Null` values
+File "case_type_overlapping_variants_primitives.php", line 43, characters 11-18:
+Invalid case type declaration. More than one variant of `NullData` has the runtime data type `Null` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 46, characters 5-8:
+  This is the type `_`, which includes `Null` values
+  File "case_type_overlapping_variants_primitives.php", line 48, characters 5-5:
+  It overlaps with `T`, which also includes `Null` values
+File "case_type_overlapping_variants_primitives.php", line 43, characters 11-18:
+Invalid case type declaration. More than one variant of `NullData` has the runtime data type `Null` (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 47, characters 5-8:
+  This is the type `null`, which includes `Null` values
+  File "case_type_overlapping_variants_primitives.php", line 48, characters 5-5:
+  It overlaps with `T`, which also includes `Null` values

@@ -131,6 +131,7 @@ type t = {
   symbol_write_sym_hash_in: string option;
   symbol_write_exclude_out: string option;
   symbol_write_referenced_out: string option;
+  symbol_write_reindexed_out: string option;
   symbol_write_sym_hash_out: bool;
   po_disallow_func_ptrs_in_constants: bool;
   tco_error_php_lambdas: bool;
@@ -259,6 +260,7 @@ let default =
     symbol_write_sym_hash_in = None;
     symbol_write_exclude_out = None;
     symbol_write_referenced_out = None;
+    symbol_write_reindexed_out = None;
     symbol_write_sym_hash_out = false;
     po_disallow_func_ptrs_in_constants = false;
     tco_error_php_lambdas = false;
@@ -384,6 +386,7 @@ let set
     ?symbol_write_sym_hash_in
     ?symbol_write_exclude_out
     ?symbol_write_referenced_out
+    ?symbol_write_reindexed_out
     ?symbol_write_sym_hash_out
     ?po_disallow_func_ptrs_in_constants
     ?tco_error_php_lambdas
@@ -621,6 +624,8 @@ let set
       setting_opt
         symbol_write_referenced_out
         options.symbol_write_referenced_out;
+    symbol_write_reindexed_out =
+      setting_opt symbol_write_reindexed_out options.symbol_write_reindexed_out;
     symbol_write_sym_hash_out =
       setting symbol_write_sym_hash_out options.symbol_write_sym_hash_out;
     po_disallow_func_ptrs_in_constants =

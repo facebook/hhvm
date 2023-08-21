@@ -43,7 +43,7 @@ let log_elapsed s elapsed =
   let { Unix.tm_min; tm_sec; _ } = Unix.gmtime elapsed in
   Hh_logger.log "%s %dm%ds" s tm_min tm_sec
 
-let write_referenced referenced output_file =
+let write_file referenced output_file =
   let open Out_channel in
   let oc = create output_file in
   SSet.iter
@@ -53,7 +53,7 @@ let write_referenced referenced output_file =
     referenced;
   close oc
 
-let write_file out_dir num_tasts json_chunks =
+let write_facts_file out_dir num_tasts json_chunks =
   let (_out_file, channel) =
     Caml.Filename.open_temp_file
       ~temp_dir:out_dir
@@ -98,7 +98,7 @@ let write_json
      let json_chunks =
        Symbol_index_batch.build_json ctx files_info ~ownership
      in
-     write_file out_dir (List.length files_info) json_chunks
+     write_facts_file out_dir (List.length files_info) json_chunks
    with
    | WorkerCancel.Worker_should_exit as exn ->
      (* Cancellation requests must be re-raised *)
@@ -209,6 +209,7 @@ let go
     (workers : MultiWorker.worker list option)
     (ctx : Provider_context.t)
     ~(referenced_file : string option)
+    ~(reindexed_file : string option)
     ~(namespace_map : (string * string) list)
     ~(gen_sym_hash : bool)
     ~(ownership : bool)
@@ -248,9 +249,11 @@ let go
   let global_facts =
     gen_global_facts namespace_map ~ownership ~shard_name jobs.JobReturn.hashes
   in
-  write_file out_dir 1 global_facts;
+  write_facts_file out_dir 1 global_facts;
+  (* TODO remove this log once the workflows use the reindexed_file option *)
   SSet.iter (Hh_logger.log "Reindexed: %s") jobs.JobReturn.reindexed;
-  Option.iter referenced_file ~f:(write_referenced jobs.JobReturn.referenced);
+  Option.iter referenced_file ~f:(write_file jobs.JobReturn.referenced);
+  Option.iter reindexed_file ~f:(write_file jobs.JobReturn.reindexed);
   let cumulated_elapsed = jobs.JobReturn.elapsed in
   log_elapsed "Processed all batches (cumulated time) in " cumulated_elapsed;
   let elapsed = Unix.gettimeofday () -. start_time in

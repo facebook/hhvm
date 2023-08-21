@@ -109,6 +109,7 @@ impl Default for GlobalOptions {
             symbol_write_sym_hash_in: None,
             symbol_write_exclude_out: None,
             symbol_write_referenced_out: None,
+            symbol_write_reindexed_out: None,
             symbol_write_sym_hash_out: false,
             po_disable_hh_ignore_error: 0,
             tco_is_systemlib: false,

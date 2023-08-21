@@ -199,6 +199,8 @@ type t = {
   (* Path to file containing referenced files *)
   symbol_write_referenced_out: string option;
   (* Generate symbols hash table *)
+  symbol_write_reindexed_out: string option;
+  (* Generate reindexed files *)
   symbol_write_sym_hash_out: bool;
   (* Flag to disallow HH\fun and HH\class_meth in constants and constant initializers *)
   po_disallow_func_ptrs_in_constants: bool;
@@ -405,6 +407,7 @@ val set :
   ?symbol_write_sym_hash_in:string ->
   ?symbol_write_exclude_out:string ->
   ?symbol_write_referenced_out:string ->
+  ?symbol_write_reindexed_out:string ->
   ?symbol_write_sym_hash_out:bool ->
   ?po_disallow_func_ptrs_in_constants:bool ->
   ?tco_error_php_lambdas:bool ->

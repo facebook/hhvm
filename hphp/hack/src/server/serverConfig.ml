@@ -322,6 +322,7 @@ let load_config config options =
     ?symbol_write_exclude_out:(string_opt "symbol_write_exclude_out" config)
     ?symbol_write_referenced_out:
       (string_opt "symbol_write_referenced_out" config)
+    ?symbol_write_reindexed_out:(string_opt "symbol_write_reindexed_out" config)
     ?symbol_write_sym_hash_out:(bool_opt "symbol_write_sym_hash_out" config)
     ?po_disallow_func_ptrs_in_constants:
       (bool_opt "disallow_func_ptrs_in_constants" config)

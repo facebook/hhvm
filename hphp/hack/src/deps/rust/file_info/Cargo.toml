@@ -20,6 +20,6 @@ parser_core_types = { version = "0.0.0", path = "../../../parser/cargo/core_type
 rc_pos = { version = "0.0.0", path = "../../../utils/rust/pos" }
 relative_path = { version = "0.0.0", path = "../../../utils/rust/relative_path" }
 rusqlite = { version = "0.29.0", features = ["backup", "blob", "column_decltype", "limits"] }
-serde = { version = "1.0.176", features = ["derive", "rc"] }
+serde = { version = "1.0.185", features = ["derive", "rc"] }
 thiserror = "1.0.43"
 typing_deps_hash = { version = "0.0.0", path = "../../cargo/typing_deps_hash" }

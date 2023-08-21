@@ -15,4 +15,4 @@ bumpalo = { version = "3.11.1", features = ["collections"] }
 full_fidelity_schema_version_number = { version = "0.0.0", path = "../../../schema" }
 parser = { version = "0.0.0", path = "../../../core" }
 positioned_smart_constructors = { version = "0.0.0", path = "../../../cargo/positioned_smart_constructors" }
-serde = { version = "1.0.176", features = ["derive", "rc"] }
+serde = { version = "1.0.185", features = ["derive", "rc"] }

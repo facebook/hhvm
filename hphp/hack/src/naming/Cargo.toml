@@ -11,5 +11,5 @@ path = "naming_special_names.rs"
 [dependencies]
 hash = { version = "0.0.0", path = "../utils/hash" }
 lazy_static = "1.4"
-serde = { version = "1.0.176", features = ["derive", "rc"] }
+serde = { version = "1.0.185", features = ["derive", "rc"] }
 write_bytes = { version = "0.0.0", path = "../utils/write_bytes/write_bytes" }

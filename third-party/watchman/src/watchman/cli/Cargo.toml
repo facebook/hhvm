@@ -11,7 +11,7 @@ ahash = "0.8"
 anyhow = "1.0.71"
 duct = "0.13.6"
 jwalk = "0.6"
-serde = { version = "1.0.176", features = ["derive", "rc"] }
+serde = { version = "1.0.185", features = ["derive", "rc"] }
 serde_json = { version = "1.0.100", features = ["float_roundtrip", "unbounded_depth"] }
 structopt = "0.3.23"
 sysinfo = "0.26.8"

@@ -15,5 +15,5 @@ bstr = { version = "1.4.0", features = ["serde", "std", "unicode"] }
 bumpalo = { version = "3.11.1", features = ["collections"] }
 oxidized_by_ref = { version = "0.0.0", path = "../../../oxidized_by_ref" }
 relative_path = { version = "0.0.0", path = "../../rust/relative_path" }
-serde = { version = "1.0.176", features = ["derive", "rc"] }
+serde = { version = "1.0.185", features = ["derive", "rc"] }
 serde_json = { version = "1.0.100", features = ["float_roundtrip", "unbounded_depth"] }

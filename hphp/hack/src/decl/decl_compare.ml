@@ -47,62 +47,30 @@ module ClassDiff = struct
 
   let smap s1 s2 = SSet.union (smap_left s1 s2) (smap_left s2 s1)
 
-  let add_inverted_dep mode build_obj x acc =
-    DepSet.union (Typing_deps.get_ideps mode (build_obj x)) acc
-
-  let add_inverted_deps mode acc build_obj xset =
-    SSet.fold (add_inverted_dep mode build_obj) xset acc
-
-  let compare mode cid class1 class2 =
-    let acc = DepSet.make () in
+  let compare class1 class2 =
     let is_unchanged = true in
     (* compare class constants *)
     let consts_diff = smap class1.dc_consts class2.dc_consts in
     let is_unchanged = is_unchanged && SSet.is_empty consts_diff in
-    let acc =
-      add_inverted_deps mode acc (fun x -> Dep.Const (cid, x)) consts_diff
-    in
     (* compare class members *)
     let props_diff = smap class1.dc_props class2.dc_props in
     let is_unchanged = is_unchanged && SSet.is_empty props_diff in
-    let acc =
-      add_inverted_deps mode acc (fun x -> Dep.Prop (cid, x)) props_diff
-    in
     (* compare class static members *)
     let sprops_diff = smap class1.dc_sprops class2.dc_sprops in
     let is_unchanged = is_unchanged && SSet.is_empty sprops_diff in
-    let acc =
-      add_inverted_deps mode acc (fun x -> Dep.SProp (cid, x)) sprops_diff
-    in
     (* compare class methods *)
     let methods_diff = smap class1.dc_methods class2.dc_methods in
     let is_unchanged = is_unchanged && SSet.is_empty methods_diff in
-    let acc =
-      add_inverted_deps mode acc (fun x -> Dep.Method (cid, x)) methods_diff
-    in
     (* compare class static methods *)
     let smethods_diff = smap class1.dc_smethods class2.dc_smethods in
     let is_unchanged = is_unchanged && SSet.is_empty smethods_diff in
-    let acc =
-      add_inverted_deps mode acc (fun x -> Dep.SMethod (cid, x)) smethods_diff
-    in
     (* compare class constructors *)
     let ctor_diff = Poly.( <> ) class1.dc_construct class2.dc_construct in
     let is_unchanged = is_unchanged && not ctor_diff in
-    let ctor_ideps = Typing_deps.get_ideps mode (Dep.Constructor cid) in
-    let acc =
-      if ctor_diff then
-        DepSet.union acc ctor_ideps
-      else
-        acc
-    in
     (* compare class type constants *)
     let typeconsts_diff = smap class1.dc_typeconsts class2.dc_typeconsts in
     let is_unchanged = is_unchanged && SSet.is_empty typeconsts_diff in
-    let acc =
-      add_inverted_deps mode acc (fun x -> Dep.Const (cid, x)) typeconsts_diff
-    in
-    (acc, is_unchanged)
+    is_unchanged
 end
 
 (*****************************************************************************)
@@ -113,17 +81,13 @@ end
 module ClassEltDiff = struct
   open Decl_heap
 
-  let add_inverted_dep mode build_obj x _ acc =
-    DepSet.union (Typing_deps.get_ideps mode (build_obj x)) acc
-
-  let add_inverted_deps mode (acc, is_unchanged) build_obj xmap =
+  let acc_diff is_unchanged xmap =
     let is_unchanged =
       match is_unchanged with
       | `Unchanged when not @@ SMap.is_empty xmap -> `Changed
       | x -> x
     in
-    let acc = SMap.fold (add_inverted_dep mode build_obj) xmap acc in
-    (acc, is_unchanged)
+    is_unchanged
 
   let diff_elts
       (type t)
@@ -166,7 +130,7 @@ module ClassEltDiff = struct
       elts1
       elts2
 
-  let compare_props mode class1 class2 acc =
+  let compare_props class1 class2 acc =
     let cid = class1.dc_name in
     let (elts1, elts2) = (class1.dc_props, class2.dc_props) in
     let diff =
@@ -177,9 +141,9 @@ module ClassEltDiff = struct
         ~elts2
         ~normalize:Decl_pos_utils.NormalizeSig.ty
     in
-    add_inverted_deps mode acc (fun x -> Dep.Prop (cid, x)) diff
+    acc_diff acc diff
 
-  let compare_sprops mode class1 class2 acc =
+  let compare_sprops class1 class2 acc =
     let cid = class1.dc_name in
     let (elts1, elts2) = (class1.dc_sprops, class2.dc_sprops) in
     let diff =
@@ -190,9 +154,9 @@ module ClassEltDiff = struct
         ~elts2
         ~normalize:Decl_pos_utils.NormalizeSig.ty
     in
-    add_inverted_deps mode acc (fun x -> Dep.SProp (cid, x)) diff
+    acc_diff acc diff
 
-  let compare_meths mode class1 class2 acc =
+  let compare_meths class1 class2 acc =
     let cid = class1.dc_name in
     let (elts1, elts2) = (class1.dc_methods, class2.dc_methods) in
     let diff =
@@ -203,9 +167,9 @@ module ClassEltDiff = struct
         ~elts2
         ~normalize:Decl_pos_utils.NormalizeSig.fun_elt
     in
-    add_inverted_deps mode acc (fun x -> Dep.Method (cid, x)) diff
+    acc_diff acc diff
 
-  let compare_smeths mode class1 class2 acc =
+  let compare_smeths class1 class2 acc =
     let cid = class1.dc_name in
     let (elts1, elts2) = (class1.dc_smethods, class2.dc_smethods) in
     let diff =
@@ -216,9 +180,9 @@ module ClassEltDiff = struct
         ~elts2
         ~normalize:Decl_pos_utils.NormalizeSig.fun_elt
     in
-    add_inverted_deps mode acc (fun x -> Dep.SMethod (cid, x)) diff
+    acc_diff acc diff
 
-  let compare_cstrs mode class1 class2 =
+  let compare_cstrs class1 class2 =
     let cid = class1.dc_name in
     let match1 =
       match class1.dc_construct with
@@ -234,23 +198,23 @@ module ClassEltDiff = struct
       match (Constructors.get_old cid, Constructors.get cid) with
       | (None, _)
       | (_, None) ->
-        (Typing_deps.get_ideps mode (Dep.Constructor cid), `Changed)
+        `Changed
       | (Some fe1, Some fe2) ->
         let fe1 = Decl_pos_utils.NormalizeSig.fun_elt fe1 in
         let fe2 = Decl_pos_utils.NormalizeSig.fun_elt fe2 in
         if Poly.( = ) fe1 fe2 then
-          (DepSet.make (), `Unchanged)
+          `Unchanged
         else
-          (Typing_deps.get_ideps mode (Dep.Constructor cid), `Changed)
+          `Changed
     else
-      (DepSet.make (), `Unchanged)
+      `Unchanged
 
-  let compare mode class1 class2 =
-    compare_cstrs mode class1 class2
-    |> compare_props mode class1 class2
-    |> compare_sprops mode class1 class2
-    |> compare_meths mode class1 class2
-    |> compare_smeths mode class1 class2
+  let compare class1 class2 =
+    compare_cstrs class1 class2
+    |> compare_props class1 class2
+    |> compare_sprops class1 class2
+    |> compare_meths class1 class2
+    |> compare_smeths class1 class2
 end
 
 (*****************************************************************************)

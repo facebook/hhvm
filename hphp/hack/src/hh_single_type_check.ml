@@ -1334,17 +1334,15 @@ let compare_funs f1 f2 =
   let f2 = Decl_pos_utils.NormalizeSig.fun_elt f2 in
   if Poly.(f1 <> f2) then fail_comparison "funs"
 
-let compare_classes mode c1 c2 =
+let compare_classes c1 c2 =
   if Decl_compare.class_big_diff c1 c2 then fail_comparison "class_big_diff";
 
   let c1 = Decl_pos_utils.NormalizeSig.class_type c1 in
   let c2 = Decl_pos_utils.NormalizeSig.class_type c2 in
-  let (_, is_unchanged) =
-    Decl_compare.ClassDiff.compare mode c1.Decl_defs.dc_name c1 c2
-  in
+  let is_unchanged = Decl_compare.ClassDiff.compare c1 c2 in
   if not is_unchanged then fail_comparison "ClassDiff";
 
-  let (_, is_unchanged) = Decl_compare.ClassEltDiff.compare mode c1 c2 in
+  let is_unchanged = Decl_compare.ClassEltDiff.compare c1 c2 in
   match is_unchanged with
   | `Changed -> fail_comparison "ClassEltDiff"
   | _ -> ()
@@ -1405,10 +1403,9 @@ let test_decl_compare ctx filenames builtins files_contents files_info =
     let files_contents = Relative_path.Map.map files_contents ~f:add_newline in
     add_decls_to_heap ctx files_contents;
     let (typedefs2, funs2, classes2) = get_decls defs in
-    let deps_mode = Provider_context.get_deps_mode ctx in
     List.iter2_exn typedefs1 typedefs2 ~f:compare_typedefs;
     List.iter2_exn funs1 funs2 ~f:compare_funs;
-    List.iter2_exn classes1 classes2 ~f:(compare_classes deps_mode);
+    List.iter2_exn classes1 classes2 ~f:compare_classes;
     ()
 
 let compute_nasts ctx files_info interesting_files =

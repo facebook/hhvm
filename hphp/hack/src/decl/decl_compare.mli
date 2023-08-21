@@ -13,16 +13,11 @@ open Decl_heap
 val class_big_diff : Class.t -> Class.t -> bool
 
 module ClassDiff : sig
-  val compare :
-    Typing_deps_mode.t -> string -> Class.t -> Class.t -> DepSet.t * bool
+  val compare : Class.t -> Class.t -> bool
 end
 
 module ClassEltDiff : sig
-  val compare :
-    Typing_deps_mode.t ->
-    Class.t ->
-    Class.t ->
-    DepSet.t * [> `Changed | `Unchanged ]
+  val compare : Class.t -> Class.t -> [> `Changed | `Unchanged ]
 end
 
 val get_extend_deps : Typing_deps_mode.t -> DepSet.elt -> DepSet.t -> DepSet.t

@@ -51,6 +51,20 @@ TEST(CompilerTest, missing_type_definition) {
   )");
 }
 
+TEST(CompilerTest, redefinition) {
+  check_compile(R"(
+    struct A {}
+    struct A {}      # expected-error: redefinition of 'A'
+    union A {}       # expected-error: redefinition of 'A'
+    exception A {}   # expected-error: redefinition of 'A'
+    enum A {}        # expected-error: redefinition of 'A'
+    typedef i32 A;   # expected-error: redefinition of 'A'
+    service A {}     # expected-error: redefinition of 'A'
+    interaction A {} # expected-error: redefinition of 'A'
+    const i32 A = 0; # expected-error: redefinition of 'A'
+  )");
+}
+
 TEST(CompilerTest, zero_as_field_id) {
   check_compile(R"(
     struct Foo {
@@ -498,7 +512,7 @@ TEST(CompilerTest, undefined_annotation) {
     struct S {}
 
     @bad.Annotation # expected-error: Type `bad.Annotation` not defined.
-    struct S {}
+    struct T {}
   )");
 }
 
@@ -539,14 +553,6 @@ TEST(CompilerTest, annotation_positions) {
       i32 (annot) foo() # expected-error: Annotations are not allowed in this position. Extract the type into a named typedef instead.
       void bar(1: i32 (annot) p) # expected-error: Annotations are not allowed in this position. Extract the type into a named typedef instead.
     }
-  )");
-}
-
-TEST(CompilerTest, duplicated_struct_names) {
-  check_compile(R"(
-    struct Foo {}
-    struct Bar {}
-    struct Foo {} # expected-error: Redefinition of type `Foo`.
   )");
 }
 

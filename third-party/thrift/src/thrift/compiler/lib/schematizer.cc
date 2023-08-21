@@ -480,6 +480,10 @@ std::unique_ptr<t_const_value> schematizer::gen_full_schema(
     }
   }
 
+  if (auto parent = node.extends()) {
+    add_as_definition(*dfns_schema, "serviceDef", gen_schema(*parent));
+  }
+
   schema->add_map(val("definitions"), std::move(dfns_schema));
   return schema;
 }
@@ -556,7 +560,11 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
   }
   svc_schema->add_map(val("functions"), std::move(functions_schema));
 
-  // TODO: add inheritedService
+  if (auto parent = node.extends()) {
+    auto ref = mapval();
+    ref->add_map(val("uri"), typeUri(*parent, node.program()));
+    svc_schema->add_map(val("baseService"), std::move(ref));
+  }
 
   return svc_schema;
 }

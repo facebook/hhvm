@@ -237,6 +237,15 @@ struct DocBlock {
 } (py3.hidden)
 
 /**
+ * A reference to a Thrift interface type.
+ * Analogous to type.Type.
+ */
+struct InterfaceRef {
+  1: standard.TypeUri uri;
+// TODO: symbol span
+}
+
+/**
  * A Thrift enum value.
  *
  *     enum ... {
@@ -556,7 +565,7 @@ typedef list<Function> Functions (py3.hidden)
 /**
  * A Thrift service.
  *
- *     service {attrs.name} [extends {inheritedService}] { ... functions ... }
+ *     service {attrs.name} [extends {baseService}] { ... functions ... }
  */
 struct Service {
   /** The definition attributes. */
@@ -571,9 +580,7 @@ struct Service {
   2: Functions functions;
 
   /** The service that it inherits functions from. */
-  @thrift.Deprecated
-  @thrift.Box
-  3: optional Service inheritedService;
+  3: InterfaceRef baseService;
 } (py3.hidden)
 
 /**

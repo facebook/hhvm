@@ -109,7 +109,8 @@ class AstGeneratorTest(unittest.TestCase):
             "foo.thrift",
             textwrap.dedent(
                 """
-                service Foo {
+                service Parent {}
+                service Foo extends Parent {
                     void foo();
                     i32 bar();
                     stream<string> baz();
@@ -119,7 +120,7 @@ class AstGeneratorTest(unittest.TestCase):
         )
 
         ast = self.run_thrift("foo.thrift")
-        serviceDef = ast.definitions[0].serviceDef
+        serviceDef = ast.definitions[1].serviceDef
         self.assertEqual(serviceDef.attrs.name, "Foo")
         self.assertEqual(len(serviceDef.functions), 3)
         self.assertEqual(serviceDef.functions[0].attrs.name, "foo")
@@ -136,6 +137,8 @@ class AstGeneratorTest(unittest.TestCase):
         self.assertEqual(
             len(serviceDef.functions[2].returnTypes), 0
         )  # streams not supported yet
+
+        self.assertEqual(serviceDef.baseService.uri.scopedName, "foo.Parent")
 
     def test_docs(self):
         write_file(

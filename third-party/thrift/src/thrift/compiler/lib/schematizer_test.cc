@@ -150,6 +150,8 @@ TEST(SchematizerTest, Service) {
   svc.set_uri(service_uri);
   std::string struct_name("Struct");
   std::string struct_uri("path/to/Struct");
+  t_service parent(&program, "Parent");
+  svc.set_extends(&parent);
 
   t_struct return_type(&program, struct_name);
   return_type.set_uri(struct_uri);
@@ -170,7 +172,7 @@ TEST(SchematizerTest, Service) {
   auto schema = schematizer().gen_full_schema(svc);
   auto map = flatten_map(*schema);
   auto dfns = map.at("definitions")->get_list();
-  EXPECT_EQ(dfns.size(), 4);
+  EXPECT_EQ(dfns.size(), 5);
   auto dfn_map = flatten_map(*dfns.at(0));
 
   auto svc_map = flatten_map(*dfn_map.at("serviceDef"));
@@ -194,6 +196,14 @@ TEST(SchematizerTest, Service) {
   EXPECT_EQ(func0_exs.size(), 1);
   auto ex0_schema = func0_exs.at(0);
   validate_exception(*ex0_schema, "ex0", "", 0, 3);
+
+  auto extends = svc_map.at("baseService")
+                     ->get_map()
+                     .at(0)
+                     .second->get_map()
+                     .at(0)
+                     .second->get_string();
+  EXPECT_EQ(extends, "Program.Parent");
 }
 
 TEST(SchematizerTest, Structured) {

@@ -1237,7 +1237,7 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
     pub(crate) fn write_todo(&mut self, msg: &str) -> Result<Sid> {
         textual_todo! {
             message = ("TODO: {msg}"),
-            let target = FunctionName::Unmangled(format!("$todo.{msg}"));
+            let target = FunctionName::Unmangled(format!("TODO_{msg}"));
             self.fb.call(&target, ())
         }
     }

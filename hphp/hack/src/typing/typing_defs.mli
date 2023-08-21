@@ -196,7 +196,6 @@ type wildcard_action =
   | Wildcard_higher_kinded_placeholder
   | Wildcard_require_explicit of decl_tparam
   | Wildcard_illegal
-  | Wildcard_fresh_generic_type_argument
 
 (** Tracks information about how a type was expanded *)
 type expand_env = {

@@ -143,7 +143,7 @@ let typedef_def ctx typedef =
     t_super_constraint = tsupercstr;
     t_kind = hint;
     t_user_attributes = _;
-    t_vis = vis;
+    t_vis = _;
     t_mode = _;
     t_namespace = _;
     t_span = _;
@@ -158,7 +158,7 @@ let typedef_def ctx typedef =
     typedef
   in
 
-  let (env, ty_opt) =
+  let env =
     if TypecheckerOptions.use_type_alias_heap (Env.get_tcopt env) then
       match Decl_provider.get_typedef ctx t_name with
       | Some _ ->
@@ -187,10 +187,10 @@ let typedef_def ctx typedef =
         Option.iter
           ~f:(Typing_error_utils.add_typing_error ~env)
           (Option.merge ~f:Typing_error.both ty_err_opt3 ty_err_opt4);
-        (env, Some ty)
+        env
       | None ->
         (* We get here if there's a "Name already bound" error. *)
-        (env, None)
+        env
     else
       let ((env, ty_err_opt2), ty) =
         Phase.localize_hint_no_subst
@@ -207,48 +207,7 @@ let typedef_def ctx typedef =
       Option.iter
         ~f:(Typing_error_utils.add_typing_error ~env)
         (Option.merge ~f:Typing_error.both ty_err_opt3 ty_err_opt4);
-      (env, Some ty)
-  in
-
-  let env =
-    match (vis, hint, ty_opt) with
-    | (Aast.CaseType, (pos, Hunion hints), Some ty) ->
-      let unrecoverable_hint env hint =
-        let ((env, _), hint_ty) =
-          Phase.localize_hint_no_subst env ~ignore_errors:false hint
-        in
-        let (env, refined_ty) =
-          Typing.refine_hint
-            ~pos
-            ~reason:(Typing_reason.Rwitness (fst hint))
-            env
-            ty
-            hint
-        in
-        not @@ Typing_utils.is_sub_type env refined_ty hint_ty
-      in
-      let hints = List.filter hints ~f:(unrecoverable_hint env) in
-      let _ =
-        match hints with
-        | [] -> ()
-        | _ ->
-          let err =
-            Typing_error.Primary.CaseType.Unrecoverable_variant_type
-              {
-                pos = t_pos;
-                name = Utils.strip_ns t_name;
-                hints =
-                  List.map hints ~f:(fun (p, h) ->
-                      let h =
-                        Decl_hint.hint env.Typing_env_types.decl_env (p, h)
-                      in
-                      (p, Typing_print.full_strip_ns_decl env h));
-              }
-          in
-          Typing_error_utils.add_typing_error ~env @@ Typing_error.casetype err
-      in
       env
-    | _ -> env
   in
 
   let env =

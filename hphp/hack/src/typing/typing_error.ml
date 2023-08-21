@@ -361,11 +361,6 @@ module Primary = struct
           tag: string;
           why: Pos_or_decl.t Message.t list Lazy.t;
         }
-      | Unrecoverable_variant_type of {
-          pos: Pos.t;
-          name: string;
-          hints: (Pos.t * string) list;
-        }
     [@@deriving show]
   end
 

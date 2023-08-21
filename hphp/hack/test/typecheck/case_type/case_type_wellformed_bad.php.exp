@@ -4,22 +4,12 @@ The case type `Bad1` cannot be decomposed because it contains overlapping varian
   vec<int>
   File "case_type_wellformed_bad.php", line 4, characters 29-47:
   Traversable<string>
-File "case_type_wellformed_bad.php", line 4, characters 11-14:
-The case type `Bad1` is invalid because one or more of its variants cannot be recovered using type tests (Typing[4475])
-  File "case_type_wellformed_bad.php", line 4, characters 18-25:
-  `vec<int>` cannot be recovered
-  File "case_type_wellformed_bad.php", line 4, characters 29-47:
-  `Traversable<string>` cannot be recovered
 File "case_type_wellformed_bad.php", line 14, characters 11-14:
 The case type `Bad2` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `object`: (Typing[4475])
   File "case_type_wellformed_bad.php", line 14, characters 18-19:
   I1
   File "case_type_wellformed_bad.php", line 14, characters 23-29:
   I2<int>
-File "case_type_wellformed_bad.php", line 14, characters 11-14:
-The case type `Bad2` is invalid because one or more of its variants cannot be recovered using type tests (Typing[4475])
-  File "case_type_wellformed_bad.php", line 14, characters 23-29:
-  `I2<int>` cannot be recovered
 File "case_type_wellformed_bad.php", line 16, characters 11-15:
 The case type `Good2` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `object`: (Typing[4475])
   File "case_type_wellformed_bad.php", line 16, characters 19-19:
@@ -38,17 +28,9 @@ The case type `Bad3` cannot be decomposed because it contains overlapping varian
   vec<int>
   File "case_type_wellformed_bad.php", line 20, characters 29-38:
   (int, int)
-File "case_type_wellformed_bad.php", line 20, characters 11-14:
-The case type `Bad3` is invalid because one or more of its variants cannot be recovered using type tests (Typing[4475])
-  File "case_type_wellformed_bad.php", line 20, characters 18-25:
-  `vec<int>` cannot be recovered
 File "case_type_wellformed_bad.php", line 24, characters 11-14:
 The case type `Bad4` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `dict`: (Typing[4475])
   File "case_type_wellformed_bad.php", line 24, characters 18-34:
   dict<string, int>
   File "case_type_wellformed_bad.php", line 24, characters 38-54:
   shape('x' => int)
-File "case_type_wellformed_bad.php", line 24, characters 11-14:
-The case type `Bad4` is invalid because one or more of its variants cannot be recovered using type tests (Typing[4475])
-  File "case_type_wellformed_bad.php", line 24, characters 18-34:
-  `dict<string, int>` cannot be recovered

@@ -328,7 +328,6 @@ end
  *  4. Reject, when in a type argument to a generic parameter marked <<__Explicit>>
  *       Example: makeVec<_>(3)  where function makeVec<<<__Explicit>> T>(T $_): void
  *  5. Reject, because the type must be explicit.
- *  6. (Specially for case type checking). Replace any type argument by a fresh generic.
  *)
 type wildcard_action =
   | Wildcard_fresh_tyvar
@@ -336,7 +335,6 @@ type wildcard_action =
   | Wildcard_higher_kinded_placeholder
   | Wildcard_require_explicit of decl_tparam
   | Wildcard_illegal
-  | Wildcard_fresh_generic_type_argument
 
 (** Tracks information about how a type was expanded *)
 type expand_env = {

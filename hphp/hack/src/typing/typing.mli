@@ -94,11 +94,3 @@ val check_function_dynamically_callable :
   Typing_defs.decl_ty option list ->
   Typing_defs.locl_ty ->
   Typing_env_types.env * Tast.fun_param list * Tast.stmt list * Tast.ty
-
-val refine_hint :
-  pos:Pos.t ->
-  reason:Typing_reason.t ->
-  Typing_env_types.env ->
-  Typing_defs.locl_ty ->
-  Aast.hint ->
-  Typing_env_types.env * Typing_defs.locl_ty

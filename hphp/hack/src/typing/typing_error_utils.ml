@@ -1498,26 +1498,11 @@ module Eval_primary = struct
       in
       (Error_code.IllegalCaseTypeVariants, claim, why, [])
 
-    let unrecoverable_variant_type pos name hints =
-      let transform (p, n) =
-        (Pos_or_decl.of_raw_pos p, Printf.sprintf "`%s` cannot be recovered" n)
-      in
-      ( Error_code.IllegalCaseTypeVariants,
-        lazy
-          ( pos,
-            Printf.sprintf
-              "The case type `%s` is invalid because one or more of its variants cannot be recovered using type tests"
-              name ),
-        lazy (List.map hints ~f:transform),
-        [] )
-
     let to_error t ~env:_ =
       let open Typing_error.Primary.CaseType in
       match t with
       | Overlapping_variant_types { pos; name; tag; why } ->
         overlapping_variant_types pos name tag why
-      | Unrecoverable_variant_type { pos; name; hints } ->
-        unrecoverable_variant_type pos name hints
   end
 
   let unify_error pos msg_opt reasons_opt =

@@ -439,7 +439,6 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
      * (3) Wildcard_higher_kinded_placeholder, in Typing_kinding.ml
      *)
     | Wildcard_fresh_generic
-    | Wildcard_fresh_generic_type_argument
     | Wildcard_illegal
     | Wildcard_higher_kinded_placeholder ->
       let (env, ty) =
@@ -669,8 +668,7 @@ and localize_targs_by_kind
 and localize_targ_by_kind (env, ety_env) ty (nkind : KindDefs.Simple.named_kind)
     =
   match (get_node ty, ety_env.wildcard_action) with
-  | (Twildcard, Wildcard_fresh_generic)
-  | (_, Wildcard_fresh_generic_type_argument) ->
+  | (Twildcard, Wildcard_fresh_generic) ->
     let r = get_reason ty in
     let pos = get_pos ty in
     let r = Typing_reason.localize r in

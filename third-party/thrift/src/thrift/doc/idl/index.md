@@ -51,7 +51,9 @@ id_start    ::=  "a"..."z" | "A"..."Z" | "_"
 id_continue ::=  id_start | digit
 ```
 
-A qualified identifier is a sequence of two or more identifiers separated by periods, e.g. `search_types.Query`. `maybe_qualified_id` denotes a qualified or unqualified identifier.
+A qualified identifier is a sequence of two or more identifiers separated by periods. The first component in a qualified identifier is the name of a Thrift file without extension and the second component is the name of a definition in that file. For example, `search_types.Query` denotes the definition named `Query` in `search_types.thrift`.
+
+`maybe_qualified_id` denotes a qualified or unqualified identifier.
 
 ```grammar
 maybe_qualified_id ::=  identifier ["." identifier]*
@@ -649,7 +651,7 @@ service Logger {
 Oneway methods may be silently dropped and are therefore discouraged for most use cases.
 :::
 
-Services may extend (inherit from) other services. The set of functions in the inherited service is included in the inheriting service. The name that refers to the inherited service after the reserved word `extends` can be an identifier that denotes another service defined earlier in the same Thrift file, or a qualified name of the form `filename.servicename` where `filename` and `servicename` are identifiers, and `servicename` denotes a service defined in the Thrift file denoted by `filename`.
+Services may extend (inherit from) other services. The set of functions in the inherited (base) service is included in the inheriting service. The name of the base service is given as a, possibly qualified, identifier after the reserved word `extends`.
 
 Service names are visible after the end of the service definition in which they have been introduced, and in other Thrift files that include this Thrift file.
 

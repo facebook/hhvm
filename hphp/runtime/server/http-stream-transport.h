@@ -39,6 +39,7 @@ struct HttpStreamServerTransport final : StreamTransport {
   void close() override;
   void closeNow() override { }
   bool isClosed() const override { return m_eom_sent; }
+  bool isClosing() const override { return m_eom_sent; }
 
   bool isReady() const {
     return m_onData != nullptr;

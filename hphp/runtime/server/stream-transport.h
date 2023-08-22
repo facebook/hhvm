@@ -59,6 +59,7 @@ struct StreamTransport {
   /// After `closeNow()` will return true immediately.
   /// After `close()` will return true only once all bytes are flushed.
   virtual bool isClosed() const = 0;
+  virtual bool isClosing() const = 0;
 
   virtual void write(folly::StringPiece data) = 0;
 

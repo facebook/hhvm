@@ -20,6 +20,7 @@ from typing import Generator
 import thrift.python_capi.fixture as fixture
 
 from folly.iobuf import IOBuf
+from thrift.python.serializer import Protocol, serialize, serialize_iobuf
 from thrift.test.python_capi.module.thrift_types import (
     AdaptedFields,
     AnnoyingEnum,
@@ -438,3 +439,70 @@ class PythonCapiTypeCheck(PythonCapiFixture):
         self.assertTrue(fixture.check_ComposeStruct(ComposeStruct()))
         self.assertFalse(fixture.check_ComposeStruct(MyEnum.MyValue1))
         self.assertFalse(fixture.check_ComposeStruct(self.my_struct()))
+
+
+class PythonCapiSerializeParity(PythonCapiFixture):
+    def serialize(self, s: object) -> IOBuf:
+        return serialize_iobuf(s, protocol=Protocol.BINARY)
+
+    def test_PrimitiveStruct_extract(self) -> None:
+        self.assertEqual(
+            bytes(fixture.extract_and_serialize_PrimitiveStruct(PrimitiveStruct())),
+            serialize(PrimitiveStruct(), protocol=Protocol.BINARY),
+        )
+        # need to actually create a thrift-cpp2 struct with both methods
+        # to ensure consistent ordering of map and set fields
+        self.assertEqual(
+            fixture.extract_and_serialize_PrimitiveStruct(self.primitive()),
+            fixture.deserialize_and_serialize_PrimitiveStruct(
+                self.serialize(self.primitive())
+            ),
+        )
+
+    def test_MyStruct_extract(self) -> None:
+        self.assertEqual(
+            fixture.extract_and_serialize_MyStruct(self.my_struct()),
+            fixture.deserialize_and_serialize_MyStruct(
+                self.serialize(self.my_struct())
+            ),
+        )
+
+    def test_AdaptedFields_extract(self) -> None:
+        self.assertEqual(
+            fixture.extract_and_serialize_AdaptedFields(self.adapted_fields()),
+            fixture.deserialize_and_serialize_AdaptedFields(
+                self.serialize(self.adapted_fields())
+            ),
+        )
+
+    def test_ListStruct_extract(self) -> None:
+        self.assertEqual(
+            fixture.extract_and_serialize_ListStruct(self.list_struct()),
+            fixture.deserialize_and_serialize_ListStruct(
+                self.serialize(self.list_struct())
+            ),
+        )
+
+    def test_SetStruct_extract(self) -> None:
+        self.assertEqual(
+            fixture.extract_and_serialize_SetStruct(self.set_struct()),
+            fixture.deserialize_and_serialize_SetStruct(
+                self.serialize(self.set_struct())
+            ),
+        )
+
+    def test_MapStruct_extract(self) -> None:
+        self.assertEqual(
+            fixture.extract_and_serialize_MapStruct(self.map_struct()),
+            fixture.deserialize_and_serialize_MapStruct(
+                self.serialize(self.map_struct())
+            ),
+        )
+
+    def test_ComposeStruct_extract(self) -> None:
+        self.assertEqual(
+            fixture.extract_and_serialize_ComposeStruct(self.composed()),
+            fixture.deserialize_and_serialize_ComposeStruct(
+                self.serialize(self.composed())
+            ),
+        )

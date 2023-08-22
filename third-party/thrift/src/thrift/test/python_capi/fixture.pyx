@@ -33,7 +33,8 @@ cdef extern from "thrift/test/python_capi/gen-cpp2/module_types.h" namespace "th
 cdef extern from "thrift/test/python_capi/fixture.h" namespace "apache::thrift::test":
     cdef object __shim__roundtrip[T](object)
     cdef cbool __shim__typeCheck[T](object)
-
+    cdef object __shim__marshal_to_iobuf[T](object)
+    cdef object __shim__serialize_to_iobuf[T](object obj)
 
 def roundtrip_MyStruct(object x):
     return __shim__roundtrip[MyStruct](x)
@@ -106,3 +107,46 @@ def check_MapStruct(object x):
 
 def check_ComposeStruct(object x):
     return bool(__shim__typeCheck[ComposeStruct](x))
+
+# Test marshal parity with serialize
+def extract_and_serialize_PrimitiveStruct(object x):
+    return __shim__marshal_to_iobuf[PrimitiveStruct](x)
+
+def deserialize_and_serialize_PrimitiveStruct(object x):
+    return __shim__serialize_to_iobuf[PrimitiveStruct](x)
+
+def extract_and_serialize_MyStruct(object x):
+    return __shim__marshal_to_iobuf[MyStruct](x)
+
+def deserialize_and_serialize_MyStruct(object x):
+    return __shim__serialize_to_iobuf[MyStruct](x)
+
+def extract_and_serialize_AdaptedFields(object x):
+    return __shim__marshal_to_iobuf[AdaptedFields](x)
+
+def deserialize_and_serialize_AdaptedFields(object x):
+    return __shim__serialize_to_iobuf[AdaptedFields](x)
+
+def extract_and_serialize_ListStruct(object x):
+    return __shim__marshal_to_iobuf[ListStruct](x)
+
+def deserialize_and_serialize_ListStruct(object x):
+    return __shim__serialize_to_iobuf[ListStruct](x)
+
+def extract_and_serialize_SetStruct(object x):
+    return __shim__marshal_to_iobuf[SetStruct](x)
+
+def deserialize_and_serialize_SetStruct(object x):
+    return __shim__serialize_to_iobuf[SetStruct](x)
+
+def extract_and_serialize_MapStruct(object x):
+    return __shim__marshal_to_iobuf[MapStruct](x)
+
+def deserialize_and_serialize_MapStruct(object x):
+    return __shim__serialize_to_iobuf[MapStruct](x)
+
+def extract_and_serialize_ComposeStruct(object x):
+    return __shim__marshal_to_iobuf[ComposeStruct](x)
+
+def deserialize_and_serialize_ComposeStruct(object x):
+    return __shim__serialize_to_iobuf[ComposeStruct](x)

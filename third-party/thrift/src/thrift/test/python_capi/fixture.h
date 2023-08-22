@@ -16,8 +16,10 @@
 
 #pragma once
 
+#include <folly/python/iobuf.h>
 #include <thrift/lib/python/capi/constructor.h>
 #include <thrift/lib/python/capi/extractor.h>
+#include <thrift/lib/python/capi/iobuf.h>
 
 #include <thrift/test/python_capi/gen-python/module/thrift_types_capi.h>
 
@@ -35,6 +37,24 @@ PyObject* __shim__roundtrip(PyObject* obj) {
 template <typename T>
 int __shim__typeCheck(PyObject* obj) {
   return python::capi::Extractor<T>{}.typeCheck(obj);
+}
+
+template <typename T>
+PyObject* __shim__marshal_to_iobuf(PyObject* obj) {
+  auto cpp = python::capi::Extractor<T>{}(obj);
+  if (cpp.hasValue()) {
+    return folly::python::make_python_iobuf(
+        python::capi::detail::serialize_to_iobuf(*cpp));
+  }
+  return nullptr;
+}
+
+template <typename T>
+PyObject* __shim__serialize_to_iobuf(PyObject* obj) {
+  auto cpp = python::capi::detail::deserialize_iobuf<T>(
+      folly::python::iobuf_ptr_from_python_iobuf(obj));
+  return folly::python::make_python_iobuf(
+      python::capi::detail::serialize_to_iobuf(cpp));
 }
 
 } // namespace apache::thrift::test

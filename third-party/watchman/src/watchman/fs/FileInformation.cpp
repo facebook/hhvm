@@ -36,11 +36,9 @@ FileInformation::FileInformation(uint32_t dwFileAttributes)
     mode = 0666;
   }
   if (fileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) {
-    // It's a symlink, but to be msvc compatible, we report
-    // this as a file.  Note that a reparse point can also
-    // have FILE_ATTRIBUTE_DIRECTORY set if the symlink was
-    // created with the intention of it appearing as a file.
-    mode |= _S_IFREG;
+    // Report it as a symlink. This is used by source control
+    // to detect symlinks.
+    mode |= S_IFLNK;
   } else if (fileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
     mode |= _S_IFDIR | 0111 /* executable/searchable */;
   } else {

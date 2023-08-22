@@ -36,6 +36,7 @@ static_assert(S_IFMT == 0xF000, "The S_IFMT on Windows should be 0xF000");
 #define DT_CHR ((_S_IFCHR) >> 12)
 #define DT_DIR ((_S_IFDIR) >> 12)
 #define DT_REG ((_S_IFREG) >> 12)
+#define S_IFLNK 0xA000
 
 #endif
 

@@ -19,6 +19,7 @@ class DoubledPair;
 class StringPair;
 class VapidStruct;
 class PrimitiveStruct;
+class AdaptedFields;
 class ListStruct;
 class SetStruct;
 class MapStruct;

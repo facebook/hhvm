@@ -21,6 +21,7 @@ import thrift.python_capi.fixture as fixture
 
 from folly.iobuf import IOBuf
 from thrift.test.python_capi.module.thrift_types import (
+    AdaptedFields,
     AnnoyingEnum,
     ComposeStruct,
     DoubledPair,
@@ -97,6 +98,14 @@ class PythonCapiFixture(unittest.TestCase):
             inty=2**31 - 1,
             longy=2**63 - 1,
             # leave optional `floaty` `dubby`, `stringy`, `bytey` unset
+        )
+
+    def adapted_fields(self) -> AdaptedFields:
+        return AdaptedFields(
+            adapted_int=4247,
+            list_adapted_int=[1, 1, 2, 3, 5, 8],
+            set_adapted_int={2, 3, 5, 7, 11, 13},
+            inline_adapted_int=47,
         )
 
     def list_struct(self) -> ListStruct:
@@ -354,6 +363,15 @@ class PythonCapiRoundtrip(PythonCapiFixture):
         )
         self.assertEqual(
             self.composed(), fixture.roundtrip_ComposeStruct(self.composed())
+        )
+
+    def test_roundtrip_marshal_AdaptedFields(self) -> None:
+        self.assertEqual(
+            AdaptedFields(), fixture.roundtrip_AdaptedFields(AdaptedFields())
+        )
+        self.assertEqual(
+            self.adapted_fields(),
+            fixture.roundtrip_AdaptedFields(self.adapted_fields()),
         )
 
 

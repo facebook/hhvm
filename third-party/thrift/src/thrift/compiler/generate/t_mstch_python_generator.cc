@@ -108,8 +108,9 @@ std::string_view get_cpp_template(const t_node& node) {
   return "";
 }
 
-const t_const* find_structured_adapter_annotation(const t_named& node) {
-  return node.find_structured_annotation_or_null(kPythonAdapterUri);
+const t_const* find_structured_adapter_annotation(
+    const t_named& node, const char* uri = kPythonAdapterUri) {
+  return node.find_structured_annotation_or_null(uri);
 }
 
 const t_const* find_structured_adapter_annotation(
@@ -264,10 +265,34 @@ std::string format_map_type(
 }
 
 // Assumes t_node is a t_field or t_type
+std::string format_marshal_type_unadapted(
+    const t_node& node, std::string_view type_override);
+
+std::string format_adapted(const t_const* adapter, const t_type* type) {
+  auto adaptedType = get_annotation_property(adapter, "adaptedType");
+  if (adaptedType.empty()) {
+    return fmt::format(
+        "::apache::thrift::python::capi::AdaptedThrift<{}, {}>",
+        get_annotation_property(adapter, "name"),
+        format_marshal_type_unadapted(*type, ""));
+  }
+  return fmt::format(
+      "::apache::thrift::python::capi::CircularlyAdaptedThrift<{}, {}>",
+      get_annotation_property(adapter, "name"),
+      adaptedType);
+}
+
 std::string format_marshal_type(
     const t_node& node, std::string_view type_override) {
-  const t_type* maybe_typedef = type_of_node(node);
-  const t_type* true_type = maybe_typedef->get_true_type();
+  if (auto adapter = find_structured_annotation(node, kCppAdapterUri)) {
+    return format_adapted(adapter, type_of_node(node));
+  }
+  return format_marshal_type_unadapted(node, type_override);
+}
+
+std::string format_marshal_type_unadapted(
+    const t_node& node, std::string_view type_override) {
+  const t_type* true_type = type_of_node(node)->get_true_type();
   std::string_view t_override = cpp_type_override(node);
   auto override_or = [&](const char* default_) {
     return t_override.empty() ? std::string(default_) : std::string(t_override);

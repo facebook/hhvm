@@ -12,6 +12,8 @@
 #include "thrift/lib/thrift/gen-cpp2/patch_types.h"
 #include "thrift/compiler/test/fixtures/basic-python-capi/src/gen-cpp2/thrift_dep_types.h"
 #include "thrift/compiler/test/fixtures/basic-python-capi/src/gen-cpp2/serialized_dep_types.h"
+#include "thrift/lib/thrift/gen-cpp2/id_types.h"
+#include "thrift/lib/thrift/gen-cpp2/schema_types.h"
 #include <deque>
 #include <unordered_map>
 #include <unordered_set>
@@ -54,6 +56,10 @@ struct empty_struct;
 struct fbstring;
 struct managed_string_view;
 struct some_error;
+struct adapted_int;
+struct list_adapted_int;
+struct set_adapted_int;
+struct inline_adapted_int;
 struct boolz;
 struct intz;
 struct stringz;
@@ -96,6 +102,7 @@ struct myString;
 struct intSet;
 struct doubleList;
 struct strMap;
+struct adaptedInt;
 struct assign;
 struct clear;
 struct patchPrior;
@@ -260,6 +267,22 @@ APACHE_THRIFT_DEFINE_ACCESSOR(managed_string_view);
 #ifndef APACHE_THRIFT_ACCESSOR_some_error
 #define APACHE_THRIFT_ACCESSOR_some_error
 APACHE_THRIFT_DEFINE_ACCESSOR(some_error);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_adapted_int
+#define APACHE_THRIFT_ACCESSOR_adapted_int
+APACHE_THRIFT_DEFINE_ACCESSOR(adapted_int);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_list_adapted_int
+#define APACHE_THRIFT_ACCESSOR_list_adapted_int
+APACHE_THRIFT_DEFINE_ACCESSOR(list_adapted_int);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_set_adapted_int
+#define APACHE_THRIFT_ACCESSOR_set_adapted_int
+APACHE_THRIFT_DEFINE_ACCESSOR(set_adapted_int);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_inline_adapted_int
+#define APACHE_THRIFT_ACCESSOR_inline_adapted_int
+APACHE_THRIFT_DEFINE_ACCESSOR(inline_adapted_int);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_boolz
 #define APACHE_THRIFT_ACCESSOR_boolz
@@ -428,6 +451,10 @@ APACHE_THRIFT_DEFINE_ACCESSOR(doubleList);
 #ifndef APACHE_THRIFT_ACCESSOR_strMap
 #define APACHE_THRIFT_ACCESSOR_strMap
 APACHE_THRIFT_DEFINE_ACCESSOR(strMap);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_adaptedInt
+#define APACHE_THRIFT_ACCESSOR_adaptedInt
+APACHE_THRIFT_DEFINE_ACCESSOR(adaptedInt);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_assign
 #define APACHE_THRIFT_ACCESSOR_assign
@@ -721,6 +748,7 @@ class DoubledPair;
 class StringPair;
 class VapidStruct;
 class PrimitiveStruct;
+class AdaptedFields;
 class ListStruct;
 class SetStruct;
 class MapStruct;
@@ -2977,6 +3005,295 @@ class PrimitiveStruct final  {
 
 template <class Protocol_>
 unsigned long PrimitiveStruct::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+
+class AdaptedFields final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static const char* __fbthrift_thrift_uri();
+  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static const folly::StringPiece __fbthrift_get_class_name();
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::adapted_int,
+    ::apache::thrift::ident::list_adapted_int,
+    ::apache::thrift::ident::set_adapted_int,
+    ::apache::thrift::ident::inline_adapted_int
+  >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::adapted<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ProtocolId>, ::apache::thrift::type::i64_t>,
+    ::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::FieldId>, ::apache::thrift::type::i16_t>>,
+    ::apache::thrift::type::set<::apache::thrift::type::adapted<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ValueId>, ::apache::thrift::type::i64_t>>,
+    ::apache::thrift::type::adapted<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ValueId>, ::apache::thrift::type::i64_t>
+  >;
+
+  static constexpr std::size_t __fbthrift_field_size_v = 4;
+
+  template<class T>
+  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
+
+  template<class T>
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
+  template<class T>
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
+
+  template<class T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
+    ::apache::thrift::detail::getFieldOrdinal<T,
+                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_type_tags>(
+      __fbthrift_reflection_field_id_list
+    )
+  >;
+  void __fbthrift_clear();
+  void __fbthrift_clear_terse_fields();
+  bool __fbthrift_is_empty() const;
+
+ public:
+  using __fbthrift_cpp2_type = AdaptedFields;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
+
+  AdaptedFields();
+
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  AdaptedFields(apache::thrift::FragileConstructor, ::apache::thrift::type::ProtocolId adapted_int__arg, ::std::vector<::apache::thrift::type::FieldId> list_adapted_int__arg, ::apache::thrift::type::AnnotationIds set_adapted_int__arg, ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ValueId>, 4, ::apache::thrift::type::ExternId, AdaptedFields> inline_adapted_int__arg);
+
+  AdaptedFields(AdaptedFields&&) noexcept;
+  AdaptedFields(const AdaptedFields& src);
+
+
+  AdaptedFields& operator=(AdaptedFields&&) noexcept;
+  AdaptedFields& operator=(const AdaptedFields& src);
+
+  ~AdaptedFields();
+
+ private:
+  ::apache::thrift::type::ProtocolId __fbthrift_field_adapted_int;
+ private:
+  ::std::vector<::apache::thrift::type::FieldId> __fbthrift_field_list_adapted_int;
+ private:
+  ::apache::thrift::type::AnnotationIds __fbthrift_field_set_adapted_int;
+ private:
+  ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ValueId>, 4, ::apache::thrift::type::ExternId, AdaptedFields> __fbthrift_field_inline_adapted_int;
+ private:
+  apache::thrift::detail::isset_bitset<4, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+
+ public:
+
+  bool operator==(const AdaptedFields&) const;
+  bool operator<(const AdaptedFields&) const;
+
+  template <typename..., typename T = ::apache::thrift::type::ProtocolId>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> adapted_int_ref() const& {
+    return {this->__fbthrift_field_adapted_int, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::type::ProtocolId>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> adapted_int_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_adapted_int), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::type::ProtocolId>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> adapted_int_ref() & {
+    return {this->__fbthrift_field_adapted_int, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::type::ProtocolId>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> adapted_int_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_adapted_int), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::type::ProtocolId>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> adapted_int() const& {
+    return {this->__fbthrift_field_adapted_int, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::type::ProtocolId>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> adapted_int() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_adapted_int), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::type::ProtocolId>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> adapted_int() & {
+    return {this->__fbthrift_field_adapted_int, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::type::ProtocolId>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> adapted_int() && {
+    return {static_cast<T&&>(this->__fbthrift_field_adapted_int), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::vector<::apache::thrift::type::FieldId>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> list_adapted_int_ref() const& {
+    return {this->__fbthrift_field_list_adapted_int, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::vector<::apache::thrift::type::FieldId>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> list_adapted_int_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_list_adapted_int), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::vector<::apache::thrift::type::FieldId>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> list_adapted_int_ref() & {
+    return {this->__fbthrift_field_list_adapted_int, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::vector<::apache::thrift::type::FieldId>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> list_adapted_int_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_list_adapted_int), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::vector<::apache::thrift::type::FieldId>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> list_adapted_int() const& {
+    return {this->__fbthrift_field_list_adapted_int, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::vector<::apache::thrift::type::FieldId>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> list_adapted_int() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_list_adapted_int), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::vector<::apache::thrift::type::FieldId>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> list_adapted_int() & {
+    return {this->__fbthrift_field_list_adapted_int, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::vector<::apache::thrift::type::FieldId>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> list_adapted_int() && {
+    return {static_cast<T&&>(this->__fbthrift_field_list_adapted_int), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::type::AnnotationIds>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> set_adapted_int_ref() const& {
+    return {this->__fbthrift_field_set_adapted_int, __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::type::AnnotationIds>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> set_adapted_int_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_set_adapted_int), __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::type::AnnotationIds>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> set_adapted_int_ref() & {
+    return {this->__fbthrift_field_set_adapted_int, __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::type::AnnotationIds>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> set_adapted_int_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_set_adapted_int), __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::type::AnnotationIds>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> set_adapted_int() const& {
+    return {this->__fbthrift_field_set_adapted_int, __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::type::AnnotationIds>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> set_adapted_int() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_set_adapted_int), __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::type::AnnotationIds>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> set_adapted_int() & {
+    return {this->__fbthrift_field_set_adapted_int, __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::type::AnnotationIds>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> set_adapted_int() && {
+    return {static_cast<T&&>(this->__fbthrift_field_set_adapted_int), __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ValueId>, 4, ::apache::thrift::type::ExternId, AdaptedFields>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> inline_adapted_int_ref() const& {
+    return {this->__fbthrift_field_inline_adapted_int, __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ValueId>, 4, ::apache::thrift::type::ExternId, AdaptedFields>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> inline_adapted_int_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_inline_adapted_int), __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ValueId>, 4, ::apache::thrift::type::ExternId, AdaptedFields>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> inline_adapted_int_ref() & {
+    return {this->__fbthrift_field_inline_adapted_int, __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ValueId>, 4, ::apache::thrift::type::ExternId, AdaptedFields>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> inline_adapted_int_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_inline_adapted_int), __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ValueId>, 4, ::apache::thrift::type::ExternId, AdaptedFields>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> inline_adapted_int() const& {
+    return {this->__fbthrift_field_inline_adapted_int, __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ValueId>, 4, ::apache::thrift::type::ExternId, AdaptedFields>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> inline_adapted_int() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_inline_adapted_int), __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ValueId>, 4, ::apache::thrift::type::ExternId, AdaptedFields>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> inline_adapted_int() & {
+    return {this->__fbthrift_field_inline_adapted_int, __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ValueId>, 4, ::apache::thrift::type::ExternId, AdaptedFields>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> inline_adapted_int() && {
+    return {static_cast<T&&>(this->__fbthrift_field_inline_adapted_int), __isset.at(3), __isset.bit(3)};
+  }
+  const ::std::vector<::apache::thrift::type::FieldId>& get_list_adapted_int() const&;
+  ::std::vector<::apache::thrift::type::FieldId> get_list_adapted_int() &&;
+
+  template <typename T_AdaptedFields_list_adapted_int_struct_setter = ::std::vector<::apache::thrift::type::FieldId>>
+  [[deprecated("Use `FOO.list_adapted_int_ref() = BAR;` instead of `FOO.set_list_adapted_int(BAR);`")]]
+  ::std::vector<::apache::thrift::type::FieldId>& set_list_adapted_int(T_AdaptedFields_list_adapted_int_struct_setter&& list_adapted_int_) {
+    list_adapted_int_ref() = std::forward<T_AdaptedFields_list_adapted_int_struct_setter>(list_adapted_int_);
+    return __fbthrift_field_list_adapted_int;
+  }
+  const ::apache::thrift::type::AnnotationIds& get_set_adapted_int() const&;
+  ::apache::thrift::type::AnnotationIds get_set_adapted_int() &&;
+
+  template <typename T_AdaptedFields_set_adapted_int_struct_setter = ::apache::thrift::type::AnnotationIds>
+  [[deprecated("Use `FOO.set_adapted_int_ref() = BAR;` instead of `FOO.set_set_adapted_int(BAR);`")]]
+  ::apache::thrift::type::AnnotationIds& set_set_adapted_int(T_AdaptedFields_set_adapted_int_struct_setter&& set_adapted_int_) {
+    set_adapted_int_ref() = std::forward<T_AdaptedFields_set_adapted_int_struct_setter>(set_adapted_int_);
+    return __fbthrift_field_set_adapted_int;
+  }
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<AdaptedFields>;
+  friend void swap(AdaptedFields& a, AdaptedFields& b);
+};
+
+template <class Protocol_>
+unsigned long AdaptedFields::read(Protocol_* iprot) {
   auto _xferStart = iprot->getCursorPosition();
   readNoXfer(iprot);
   return iprot->getCursorPosition() - _xferStart;
@@ -5253,20 +5570,22 @@ class Shallot final  {
     ::apache::thrift::ident::myString,
     ::apache::thrift::ident::intSet,
     ::apache::thrift::ident::doubleList,
-    ::apache::thrift::ident::strMap
+    ::apache::thrift::ident::strMap,
+    ::apache::thrift::ident::adaptedInt
   >;
 
-  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,4,6,8,9};
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,4,6,8,9,10};
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::enum_t<::test::fixtures::basic-python-capi::MyEnum>,
     ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::PrimitiveStruct>,
     ::apache::thrift::type::string_t,
     ::apache::thrift::type::set<::apache::thrift::type::i64_t>,
     ::apache::thrift::type::list<::apache::thrift::type::double_t>,
-    ::apache::thrift::type::map<::apache::thrift::type::binary_t, ::apache::thrift::type::string_t>
+    ::apache::thrift::type::map<::apache::thrift::type::binary_t, ::apache::thrift::type::string_t>,
+    ::apache::thrift::type::adapted<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ProtocolId>, ::apache::thrift::type::i64_t>
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 6;
+  static constexpr std::size_t __fbthrift_field_size_v = 7;
 
   template<class T>
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
@@ -5302,6 +5621,7 @@ class Shallot final  {
     intSet = 6,
     doubleList = 8,
     strMap = 9,
+    adaptedInt = 10,
   } ;
 
   Shallot()
@@ -5343,6 +5663,11 @@ class Shallot final  {
       case Type::strMap:
       {
         set_strMap(std::move(rhs.value_.strMap));
+        break;
+      }
+      case Type::adaptedInt:
+      {
+        set_adaptedInt(std::move(rhs.value_.adaptedInt));
         break;
       }
       default:
@@ -5392,6 +5717,11 @@ class Shallot final  {
         set_strMap(rhs.value_.strMap);
         break;
       }
+      case Type::adaptedInt:
+      {
+        set_adaptedInt(rhs.value_.adaptedInt);
+        break;
+      }
       default:
       {
         assert(false);
@@ -5436,6 +5766,11 @@ class Shallot final  {
       case Type::strMap:
       {
         set_strMap(std::move(rhs.value_.strMap));
+        break;
+      }
+      case Type::adaptedInt:
+      {
+        set_adaptedInt(std::move(rhs.value_.adaptedInt));
         break;
       }
       default:
@@ -5486,6 +5821,11 @@ class Shallot final  {
         set_strMap(rhs.value_.strMap);
         break;
       }
+      case Type::adaptedInt:
+      {
+        set_adaptedInt(rhs.value_.adaptedInt);
+        break;
+      }
       default:
       {
         assert(false);
@@ -5506,6 +5846,7 @@ class Shallot final  {
     ::std::set<::std::int64_t> intSet;
     ::std::vector<double> doubleList;
     ::std::map<::std::string, ::std::string> strMap;
+    ::apache::thrift::type::ProtocolId adaptedInt;
 
     storage_type() {}
     ~storage_type() {}
@@ -5659,6 +6000,16 @@ class Shallot final  {
     return value_.strMap;
   }
 
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  ::apache::thrift::type::ProtocolId& set_adaptedInt(::apache::thrift::type::ProtocolId t = ::apache::thrift::type::ProtocolId()) {
+    using T0 = ::apache::thrift::type::ProtocolId;
+    using T = folly::type_t<T0, A...>;
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::adaptedInt);
+    ::new (std::addressof(value_.adaptedInt)) T(t);
+    return value_.adaptedInt;
+  }
+
   ::test::fixtures::basic-python-capi::MyEnum const& get_myEnum() const {
     if (getType() != Type::myEnum) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -5701,6 +6052,13 @@ class Shallot final  {
     return value_.strMap;
   }
 
+  ::apache::thrift::type::ProtocolId const& get_adaptedInt() const {
+    if (getType() != Type::adaptedInt) {
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
+    }
+    return value_.adaptedInt;
+  }
+
   ::test::fixtures::basic-python-capi::MyEnum& mutable_myEnum() {
     assert(getType() == Type::myEnum);
     return value_.myEnum;
@@ -5731,6 +6089,11 @@ class Shallot final  {
     return value_.strMap;
   }
 
+  ::apache::thrift::type::ProtocolId& mutable_adaptedInt() {
+    assert(getType() == Type::adaptedInt);
+    return value_.adaptedInt;
+  }
+
   ::test::fixtures::basic-python-capi::MyEnum move_myEnum() {
     assert(getType() == Type::myEnum);
     return std::move(value_.myEnum);
@@ -5759,6 +6122,11 @@ class Shallot final  {
   ::std::map<::std::string, ::std::string> move_strMap() {
     assert(getType() == Type::strMap);
     return std::move(value_.strMap);
+  }
+
+  ::apache::thrift::type::ProtocolId move_adaptedInt() {
+    assert(getType() == Type::adaptedInt);
+    return std::move(value_.adaptedInt);
   }
 
   template <typename..., typename T = ::test::fixtures::basic-python-capi::MyEnum>
@@ -5874,6 +6242,25 @@ class Shallot final  {
   template <typename..., typename T = ::std::map<::std::string, ::std::string>>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> strMap_ref() && {
     return {std::move(value_.strMap), type_, folly::to_underlying(Type::strMap), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+  template <typename..., typename T = ::apache::thrift::type::ProtocolId>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> adaptedInt_ref() const& {
+    return {value_.adaptedInt, type_, folly::to_underlying(Type::adaptedInt), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::apache::thrift::type::ProtocolId>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> adaptedInt_ref() const&& {
+    return {std::move(value_.adaptedInt), type_, folly::to_underlying(Type::adaptedInt), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::apache::thrift::type::ProtocolId>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> adaptedInt_ref() & {
+    return {value_.adaptedInt, type_, folly::to_underlying(Type::adaptedInt), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::apache::thrift::type::ProtocolId>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> adaptedInt_ref() && {
+    return {std::move(value_.adaptedInt), type_, folly::to_underlying(Type::adaptedInt), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   Type getType() const { return static_cast<Type>(type_); }
 
@@ -9262,7 +9649,7 @@ template <> struct TEnumDataStorage<::test::fixtures::basic-python-capi::Shallot
 template <> struct TEnumTraits<::test::fixtures::basic-python-capi::Shallot::Type> {
   using type = ::test::fixtures::basic-python-capi::Shallot::Type;
 
-  static constexpr std::size_t const size = 6;
+  static constexpr std::size_t const size = 7;
   static folly::Range<type const*> const values;
   static folly::Range<folly::StringPiece const*> const names;
 

@@ -32,6 +32,8 @@ struct VisitUnion<::test::fixtures::basic-python-capi::Shallot> {
       return f(4, *static_cast<T&&>(t).doubleList_ref());
     case Union::Type::strMap:
       return f(5, *static_cast<T&&>(t).strMap_ref());
+    case Union::Type::adaptedInt:
+      return f(6, *static_cast<T&&>(t).adaptedInt_ref());
     case Union::Type::__EMPTY__:
       return decltype(f(0, *static_cast<T&&>(t).myEnum_ref()))();
     }

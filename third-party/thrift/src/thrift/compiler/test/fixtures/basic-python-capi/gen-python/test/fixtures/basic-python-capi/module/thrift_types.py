@@ -14,6 +14,10 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 
 import apache.thrift.op.patch.thrift_types
 
+import apache.thrift.type.id.thrift_types
+
+import apache.thrift.type.schema.thrift_types
+
 import test.fixtures.basic-python-capi.serialized_dep.thrift_types
 
 import test.fixtures.basic-python-capi.thrift_dep.thrift_types
@@ -473,6 +477,70 @@ class PrimitiveStruct(metaclass=_fbthrift_python_types.StructMeta):
         py_deprecated_types = importlib.import_module("module.ttypes")
         import thrift.util.converter
         return thrift.util.converter.to_py_struct(py_deprecated_types.PrimitiveStruct, self)
+
+
+class AdaptedFields(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        (
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "adapted_int",  # name
+            _fbthrift_python_types.typeinfo_i64,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            2,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "list_adapted_int",  # name
+            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i16),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            3,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "set_adapted_int",  # name
+            lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i64),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            4,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "inline_adapted_int",  # name
+            _fbthrift_python_types.typeinfo_i64,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.AdaptedFields"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return "test.dev/fixtures/basic-python-capi/AdaptedFields"
+
+    @staticmethod
+    def __get_metadata__():
+        return _fbthrift_metadata__struct_AdaptedFields()
+
+    def _to_python(self):
+        return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("test.fixtures.basic-python-capi.module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.AdaptedFields, self)
+
+    def _to_py_deprecated(self):
+        import importlib
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        import thrift.util.converter
+        return thrift.util.converter.to_py_struct(py_deprecated_types.AdaptedFields, self)
 
 
 class ListStruct(metaclass=_fbthrift_python_types.StructMeta):
@@ -938,6 +1006,14 @@ class Onion(metaclass=_fbthrift_python_types.UnionMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "strMap",  # name
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_binary, _fbthrift_python_types.typeinfo_string),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            10,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "adaptedInt",  # name
+            _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
             None,  # adapter info
         ),
@@ -1739,6 +1815,8 @@ def _fbthrift_metadata__struct_EmptyStruct():
     return test.fixtures.basic-python-capi.module.thrift_metadata.gen_metadata_struct_EmptyStruct()
 def _fbthrift_metadata__struct_PrimitiveStruct():
     return test.fixtures.basic-python-capi.module.thrift_metadata.gen_metadata_struct_PrimitiveStruct()
+def _fbthrift_metadata__struct_AdaptedFields():
+    return test.fixtures.basic-python-capi.module.thrift_metadata.gen_metadata_struct_AdaptedFields()
 def _fbthrift_metadata__struct_ListStruct():
     return test.fixtures.basic-python-capi.module.thrift_metadata.gen_metadata_struct_ListStruct()
 def _fbthrift_metadata__struct_SetStruct():
@@ -1778,6 +1856,7 @@ _fbthrift_all_structs = [
     StringPair,
     EmptyStruct,
     PrimitiveStruct,
+    AdaptedFields,
     ListStruct,
     SetStruct,
     MapStruct,

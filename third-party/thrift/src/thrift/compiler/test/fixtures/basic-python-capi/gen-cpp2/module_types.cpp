@@ -1069,6 +1069,176 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
+void TccStructTraits<::test::fixtures::basic-python-capi::AdaptedFields>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic-python-capi::AdaptedFields>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace test { namespace fixtures { namespace basic-python-capi {
+
+const char* AdaptedFields::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/basic-python-capi/AdaptedFields";
+}
+
+const folly::StringPiece AdaptedFields::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<AdaptedFields>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece AdaptedFields::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<AdaptedFields>::name;
+}
+
+AdaptedFields::AdaptedFields(const AdaptedFields& srcObj) :
+    __fbthrift_field_adapted_int(srcObj.__fbthrift_field_adapted_int),
+    __fbthrift_field_list_adapted_int(srcObj.__fbthrift_field_list_adapted_int),
+    __fbthrift_field_set_adapted_int(srcObj.__fbthrift_field_set_adapted_int),
+    __fbthrift_field_inline_adapted_int(srcObj.__fbthrift_field_inline_adapted_int),
+    __isset(srcObj.__isset) {
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ProtocolId>, 1>(__fbthrift_field_adapted_int, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ValueId>, 4>(__fbthrift_field_inline_adapted_int, *this);
+}
+
+AdaptedFields& AdaptedFields::operator=(const AdaptedFields& other) {
+  AdaptedFields tmp(other);
+  swap(*this, tmp);
+  return *this;
+}
+
+AdaptedFields::AdaptedFields() :
+      __fbthrift_field_adapted_int(),
+      __fbthrift_field_inline_adapted_int() {
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ProtocolId>, 1>(__fbthrift_field_adapted_int, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ValueId>, 4>(__fbthrift_field_inline_adapted_int, *this);
+}
+
+
+AdaptedFields::~AdaptedFields() {}
+
+AdaptedFields::AdaptedFields(FOLLY_MAYBE_UNUSED AdaptedFields&& other) noexcept :
+    __fbthrift_field_adapted_int(std::move(other.__fbthrift_field_adapted_int)),
+    __fbthrift_field_list_adapted_int(std::move(other.__fbthrift_field_list_adapted_int)),
+    __fbthrift_field_set_adapted_int(std::move(other.__fbthrift_field_set_adapted_int)),
+    __fbthrift_field_inline_adapted_int(std::move(other.__fbthrift_field_inline_adapted_int)),
+    __isset(other.__isset) {
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ProtocolId>, 1>(__fbthrift_field_adapted_int, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ValueId>, 4>(__fbthrift_field_inline_adapted_int, *this);
+}
+
+AdaptedFields& AdaptedFields::operator=(FOLLY_MAYBE_UNUSED AdaptedFields&& other) noexcept {
+    this->__fbthrift_field_adapted_int = std::move(other.__fbthrift_field_adapted_int);
+    this->__fbthrift_field_list_adapted_int = std::move(other.__fbthrift_field_list_adapted_int);
+    this->__fbthrift_field_set_adapted_int = std::move(other.__fbthrift_field_set_adapted_int);
+    this->__fbthrift_field_inline_adapted_int = std::move(other.__fbthrift_field_inline_adapted_int);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+AdaptedFields::AdaptedFields(apache::thrift::FragileConstructor, ::apache::thrift::type::ProtocolId adapted_int__arg, ::std::vector<::apache::thrift::type::FieldId> list_adapted_int__arg, ::apache::thrift::type::AnnotationIds set_adapted_int__arg, ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ValueId>, 4, ::apache::thrift::type::ExternId, AdaptedFields> inline_adapted_int__arg) :
+    __fbthrift_field_adapted_int(std::move(adapted_int__arg)),
+    __fbthrift_field_list_adapted_int(std::move(list_adapted_int__arg)),
+    __fbthrift_field_set_adapted_int(std::move(set_adapted_int__arg)),
+    __fbthrift_field_inline_adapted_int(std::move(inline_adapted_int__arg)) {
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ProtocolId>, 1>(__fbthrift_field_adapted_int, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ValueId>, 4>(__fbthrift_field_inline_adapted_int, *this);
+  __isset.set(folly::index_constant<0>(), true);
+  __isset.set(folly::index_constant<1>(), true);
+  __isset.set(folly::index_constant<2>(), true);
+  __isset.set(folly::index_constant<3>(), true);
+}
+
+
+void AdaptedFields::__fbthrift_clear() {
+  // clear all fields
+  ::apache::thrift::adapt_detail::clear<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ProtocolId>, 1>(__fbthrift_field_adapted_int, *this);
+  this->__fbthrift_field_list_adapted_int.clear();
+  this->__fbthrift_field_set_adapted_int.clear();
+  ::apache::thrift::adapt_detail::clear<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ValueId>, 4>(__fbthrift_field_inline_adapted_int, *this);
+  __isset = {};
+}
+
+void AdaptedFields::__fbthrift_clear_terse_fields() {
+}
+
+bool AdaptedFields::__fbthrift_is_empty() const {
+  return false;
+}
+
+bool AdaptedFields::operator==(FOLLY_MAYBE_UNUSED const AdaptedFields& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ProtocolId>>(lhs.__fbthrift_field_adapted_int, rhs.__fbthrift_field_adapted_int)) {
+    return false;
+  }
+  if (!(lhs.list_adapted_int_ref() == rhs.list_adapted_int_ref())) {
+    return false;
+  }
+  if (!(lhs.set_adapted_int_ref() == rhs.set_adapted_int_ref())) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ValueId>>(lhs.__fbthrift_field_inline_adapted_int, rhs.__fbthrift_field_inline_adapted_int)) {
+    return false;
+  }
+  return true;
+}
+
+bool AdaptedFields::operator<(FOLLY_MAYBE_UNUSED const AdaptedFields& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+const ::std::vector<::apache::thrift::type::FieldId>& AdaptedFields::get_list_adapted_int() const& {
+  return __fbthrift_field_list_adapted_int;
+}
+
+::std::vector<::apache::thrift::type::FieldId> AdaptedFields::get_list_adapted_int() && {
+  return std::move(__fbthrift_field_list_adapted_int);
+}
+
+const ::apache::thrift::type::AnnotationIds& AdaptedFields::get_set_adapted_int() const& {
+  return __fbthrift_field_set_adapted_int;
+}
+
+::apache::thrift::type::AnnotationIds AdaptedFields::get_set_adapted_int() && {
+  return std::move(__fbthrift_field_set_adapted_int);
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED AdaptedFields& a, FOLLY_MAYBE_UNUSED AdaptedFields& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_adapted_int, b.__fbthrift_field_adapted_int);
+  swap(a.__fbthrift_field_list_adapted_int, b.__fbthrift_field_list_adapted_int);
+  swap(a.__fbthrift_field_set_adapted_int, b.__fbthrift_field_set_adapted_int);
+  swap(a.__fbthrift_field_inline_adapted_int, b.__fbthrift_field_inline_adapted_int);
+  swap(a.__isset, b.__isset);
+}
+
+template void AdaptedFields::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t AdaptedFields::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t AdaptedFields::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t AdaptedFields::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void AdaptedFields::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t AdaptedFields::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t AdaptedFields::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t AdaptedFields::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+}}} // test::fixtures::basic-python-capi
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
 void TccStructTraits<::test::fixtures::basic-python-capi::ListStruct>::translateFieldName(
     folly::StringPiece _fname,
     int16_t& fid,
@@ -2134,6 +2304,9 @@ void Shallot::__fbthrift_clear() {
       break;
     case Type::strMap:
       destruct(value_.strMap);
+      break;
+    case Type::adaptedInt:
+      destruct(value_.adaptedInt);
       break;
     default:
       assert(false);
@@ -3934,6 +4107,9 @@ template uint32_t MyDataItemEnsureStruct::serializedSizeZC<>(apache::thrift::Com
 namespace test { namespace fixtures { namespace basic-python-capi { namespace {
 FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
   ::apache::thrift::adapt_detail::validateFieldAdapter<::thrift::test::lib::StringDoubler, 2, ::std::string, ::test::fixtures::basic-python-capi::StringPair>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ProtocolId>, 1, ::apache::thrift::type::ExternId, ::test::fixtures::basic-python-capi::AdaptedFields>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ValueId>, 4, ::apache::thrift::type::ExternId, ::test::fixtures::basic-python-capi::AdaptedFields>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ProtocolId>, 10, ::apache::thrift::type::ExternId, ::test::fixtures::basic-python-capi::Shallot>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>, 3, ::test::fixtures::basic-python-capi::MyStructFieldPatchStruct, ::test::fixtures::basic-python-capi::MyStructPatchStruct>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>, 6, ::test::fixtures::basic-python-capi::MyStructFieldPatchStruct, ::test::fixtures::basic-python-capi::MyStructPatchStruct>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7, ::std::vector<::std::int16_t>, ::test::fixtures::basic-python-capi::MyStructPatchStruct>();

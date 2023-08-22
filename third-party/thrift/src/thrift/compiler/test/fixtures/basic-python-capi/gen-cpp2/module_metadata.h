@@ -13,6 +13,8 @@
 #include "thrift/lib/thrift/gen-cpp2/patch_metadata.h"
 #include "thrift/compiler/test/fixtures/basic-python-capi/src/gen-cpp2/thrift_dep_metadata.h"
 #include "thrift/compiler/test/fixtures/basic-python-capi/src/gen-cpp2/serialized_dep_metadata.h"
+#include "thrift/lib/thrift/gen-cpp2/id_metadata.h"
+#include "thrift/lib/thrift/gen-cpp2/schema_metadata.h"
 
 
 namespace apache {
@@ -62,6 +64,11 @@ class StructMetadata<::test::fixtures::basic-python-capi::VapidStruct> {
 };
 template <>
 class StructMetadata<::test::fixtures::basic-python-capi::PrimitiveStruct> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::test::fixtures::basic-python-capi::AdaptedFields> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };

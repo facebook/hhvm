@@ -80,7 +80,6 @@ StructMetadata<::test::fixtures::basic-python-capi::MyStruct>::gen(ThriftMetadat
     module_MyStruct.fields()->push_back(std::move(field));
   }
   module_MyStruct.structured_annotations()->push_back(*cvStruct("patch.GeneratePatch", {}).cv_struct_ref());
-  module_MyStruct.structured_annotations()->push_back(*cvStruct("python.MarshalCapi", {}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -106,7 +105,6 @@ StructMetadata<::test::fixtures::basic-python-capi::MyDataItem>::gen(ThriftMetad
     module_MyDataItem.fields()->push_back(std::move(field));
   }
   module_MyDataItem.structured_annotations()->push_back(*cvStruct("patch.GeneratePatch", {}).cv_struct_ref());
-  module_MyDataItem.structured_annotations()->push_back(*cvStruct("python.MarshalCapi", {}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -120,7 +118,6 @@ StructMetadata<::test::fixtures::basic-python-capi::TransitiveDoubler>::gen(Thri
   module_TransitiveDoubler.is_union() = false;
   module_TransitiveDoubler.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString("::thrift::test::lib::StructDoubler")}}).cv_struct_ref());
   module_TransitiveDoubler.structured_annotations()->push_back(*cvStruct("scope.Transitive", {}).cv_struct_ref());
-  module_TransitiveDoubler.structured_annotations()->push_back(*cvStruct("python.MarshalCapi", {}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -147,7 +144,6 @@ StructMetadata<::test::fixtures::basic-python-capi::detail::DoubledPair>::gen(Th
     module_DoubledPair.fields()->push_back(std::move(field));
   }
   module_DoubledPair.structured_annotations()->push_back(*cvStruct("module.TransitiveDoubler", {}).cv_struct_ref());
-  module_DoubledPair.structured_annotations()->push_back(*cvStruct("python.MarshalCapi", {}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -173,7 +169,6 @@ StructMetadata<::test::fixtures::basic-python-capi::StringPair>::gen(ThriftMetad
     field.structured_annotations() = f.structured_annotations;
     module_StringPair.fields()->push_back(std::move(field));
   }
-  module_StringPair.structured_annotations()->push_back(*cvStruct("python.MarshalCapi", {}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -185,7 +180,6 @@ StructMetadata<::test::fixtures::basic-python-capi::VapidStruct>::gen(ThriftMeta
   ::apache::thrift::metadata::ThriftStruct& module_EmptyStruct = res.first->second;
   module_EmptyStruct.name() = "module.EmptyStruct";
   module_EmptyStruct.is_union() = false;
-  module_EmptyStruct.structured_annotations()->push_back(*cvStruct("python.MarshalCapi", {}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -225,7 +219,33 @@ StructMetadata<::test::fixtures::basic-python-capi::PrimitiveStruct>::gen(Thrift
     field.structured_annotations() = f.structured_annotations;
     module_PrimitiveStruct.fields()->push_back(std::move(field));
   }
-  module_PrimitiveStruct.structured_annotations()->push_back(*cvStruct("python.MarshalCapi", {}).cv_struct_ref());
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::test::fixtures::basic-python-capi::AdaptedFields>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.AdaptedFields", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_AdaptedFields = res.first->second;
+  module_AdaptedFields.name() = "module.AdaptedFields";
+  module_AdaptedFields.is_union() = false;
+  static const auto* const
+  module_AdaptedFields_fields = new std::array<EncodedThriftField, 4>{{
+    {1, "adapted_int", false, std::make_unique<Typedef>("id.ProtocolId", std::make_unique<Typedef>("id.ExternId", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{*cvStruct("thrift.Experimental", {}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString("::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ProtocolId>")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{}},
+    {2, "list_adapted_int", false, std::make_unique<List>(std::make_unique<Typedef>("id.FieldId", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString("::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::FieldId>")}}).cv_struct_ref(), })), std::vector<ThriftConstStruct>{}},
+    {3, "set_adapted_int", false, std::make_unique<Typedef>("schema.AnnotationIds", std::make_unique<Set>(std::make_unique<Typedef>("id.ValueId", std::make_unique<Typedef>("id.ExternId", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{*cvStruct("thrift.Experimental", {}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString("::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ValueId>")}}).cv_struct_ref(), })), std::vector<ThriftConstStruct>{*cvStruct("thrift.Experimental", {}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{}},
+    {4, "inline_adapted_int", false, std::make_unique<Typedef>("id.ExternId", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{*cvStruct("thrift.Experimental", {}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString("::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ValueId>")}}).cv_struct_ref(), }},
+  }};
+  for (const auto& f : *module_AdaptedFields_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    module_AdaptedFields.fields()->push_back(std::move(field));
+  }
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -258,7 +278,6 @@ StructMetadata<::test::fixtures::basic-python-capi::ListStruct>::gen(ThriftMetad
     field.structured_annotations() = f.structured_annotations;
     module_ListStruct.fields()->push_back(std::move(field));
   }
-  module_ListStruct.structured_annotations()->push_back(*cvStruct("python.MarshalCapi", {}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -289,7 +308,6 @@ StructMetadata<::test::fixtures::basic-python-capi::SetStruct>::gen(ThriftMetada
     field.structured_annotations() = f.structured_annotations;
     module_SetStruct.fields()->push_back(std::move(field));
   }
-  module_SetStruct.structured_annotations()->push_back(*cvStruct("python.MarshalCapi", {}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -323,7 +341,6 @@ StructMetadata<::test::fixtures::basic-python-capi::MapStruct>::gen(ThriftMetada
     field.structured_annotations() = f.structured_annotations;
     module_MapStruct.fields()->push_back(std::move(field));
   }
-  module_MapStruct.structured_annotations()->push_back(*cvStruct("python.MarshalCapi", {}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -357,7 +374,6 @@ StructMetadata<::test::fixtures::basic-python-capi::ComposeStruct>::gen(ThriftMe
     field.structured_annotations() = f.structured_annotations;
     module_ComposeStruct.fields()->push_back(std::move(field));
   }
-  module_ComposeStruct.structured_annotations()->push_back(*cvStruct("python.MarshalCapi", {}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -370,13 +386,14 @@ StructMetadata<::test::fixtures::basic-python-capi::Shallot>::gen(ThriftMetadata
   module_Onion.name() = "module.Onion";
   module_Onion.is_union() = true;
   static const auto* const
-  module_Onion_fields = new std::array<EncodedThriftField, 6>{{
+  module_Onion_fields = new std::array<EncodedThriftField, 7>{{
     {1, "myEnum", false, std::make_unique<Enum<::test::fixtures::basic-python-capi::MyEnum>>("module.MyEnum"), std::vector<ThriftConstStruct>{}},
     {2, "myStruct", false, std::make_unique<Struct<::test::fixtures::basic-python-capi::PrimitiveStruct>>("module.PrimitiveStruct"), std::vector<ThriftConstStruct>{}},
     {4, "myString", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
     {6, "intSet", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)), std::vector<ThriftConstStruct>{}},
     {8, "doubleList", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE)), std::vector<ThriftConstStruct>{}},
     {9, "strMap", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{}},
+    {10, "adaptedInt", false, std::make_unique<Typedef>("id.ProtocolId", std::make_unique<Typedef>("id.ExternId", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{*cvStruct("thrift.Experimental", {}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString("::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ProtocolId>")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{}},
   }};
   for (const auto& f : *module_Onion_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -387,7 +404,6 @@ StructMetadata<::test::fixtures::basic-python-capi::Shallot>::gen(ThriftMetadata
     field.structured_annotations() = f.structured_annotations;
     module_Onion.fields()->push_back(std::move(field));
   }
-  module_Onion.structured_annotations()->push_back(*cvStruct("python.MarshalCapi", {}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&

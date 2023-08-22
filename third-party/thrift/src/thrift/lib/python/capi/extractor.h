@@ -179,6 +179,18 @@ SPECIALIZE_SCALAR(folly::IOBuf);
 
 #undef SPECIALIZE_SCALAR
 
+template <typename Adapter, typename ThriftT, typename CppT>
+struct Extractor<AdaptedThrift<Adapter, ThriftT, CppT>>
+    : public BaseExtractor<AdaptedThrift<Adapter, ThriftT, CppT>> {
+  ExtractorResult<CppT> operator()(PyObject* obj) {
+    auto result = Extractor<ThriftT>{}(obj);
+    if (result.hasError()) {
+      return extractorError<CppT>(result.error());
+    }
+    return Adapter::fromThrift(std::move(*result));
+  }
+};
+
 template <typename T>
 struct Extractor<ComposedEnum<T>> : public BaseExtractor<ComposedEnum<T>> {
   ExtractorResult<T> operator()(PyObject* obj) {

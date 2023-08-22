@@ -48,6 +48,11 @@ cdef api int can_extract__test__fixtures__basic_python_capi__module__PrimitiveSt
 
 cdef api object init__test__fixtures__basic_python_capi__module__PrimitiveStruct(object data)
 
+cdef api int can_extract__test__fixtures__basic_python_capi__module__AdaptedFields(object) except -1
+
+
+cdef api object init__test__fixtures__basic_python_capi__module__AdaptedFields(object data)
+
 cdef api int can_extract__test__fixtures__basic_python_capi__module__ListStruct(object) except -1
 
 

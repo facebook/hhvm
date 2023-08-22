@@ -16,6 +16,7 @@ from libcpp cimport bool as cbool
 
 
 cdef extern from "thrift/test/python_capi/gen-cpp2/module_types.h" namespace "thrift::test::python_capi":
+    cppclass AdaptedFields
     cppclass ComposeStruct
     cppclass DoubledPair
     cppclass ListStruct
@@ -69,6 +70,9 @@ def roundtrip_MapStruct(object x):
 
 def roundtrip_ComposeStruct(object x):
     return __shim__roundtrip[ComposeStruct](x)
+
+def roundtrip_AdaptedFields(object x):
+    return __shim__roundtrip[AdaptedFields](x)
 
 def check_MyStruct(object x):
     return bool(__shim__typeCheck[MyStruct](x))

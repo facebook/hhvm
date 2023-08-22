@@ -92,6 +92,17 @@ struct ForEachField<::test::fixtures::basic-python-capi::PrimitiveStruct> {
 };
 
 template <>
+struct ForEachField<::test::fixtures::basic-python-capi::AdaptedFields> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).adapted_int_ref()...);
+    f(1, static_cast<T&&>(t).list_adapted_int_ref()...);
+    f(2, static_cast<T&&>(t).set_adapted_int_ref()...);
+    f(3, static_cast<T&&>(t).inline_adapted_int_ref()...);
+  }
+};
+
+template <>
 struct ForEachField<::test::fixtures::basic-python-capi::ListStruct> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
@@ -165,6 +176,7 @@ struct ForEachField<::test::fixtures::basic-python-capi::Shallot> {
     f(3, static_cast<T&&>(t).intSet_ref()...);
     f(4, static_cast<T&&>(t).doubleList_ref()...);
     f(5, static_cast<T&&>(t).strMap_ref()...);
+    f(6, static_cast<T&&>(t).adaptedInt_ref()...);
   }
 };
 

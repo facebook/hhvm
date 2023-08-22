@@ -103,7 +103,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
   {{^struct:union?}}
   {{#struct:fields}}
   Extractor<{{field:marshal_type}}>{}.extractInto(
-      cpp.{{field:cpp_name}}(),
+      cpp.{{field:cpp_name}}_ref(),
       PyTuple_GET_ITEM(fbThriftData, {{field:index}} + 1),{{! idx=0 records which fields set}}
       error);
   {{/struct:fields}}
@@ -205,7 +205,9 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   {{^struct:union?}}
   StrongRef fbthrift_data(createStructTuple({{struct:fields_size}}));
   {{#struct:fields}}
-  StrongRef _fbthrift__{{field:name}}(Constructor<{{field:marshal_type}}>{}.constructFrom(val.{{field:cpp_name}}()));
+  StrongRef _fbthrift__{{field:name}}(
+    Constructor<{{field:marshal_type}}>{}
+    .constructFrom(val.{{field:cpp_name}}_ref()));
   if (!_fbthrift__{{field:name}} || setStructField(*fbthrift_data, {{field:index}}, *_fbthrift__{{field:name}}) == -1) {
     {{! struct and previous fields auto-decref'd by StrongRef}}
     return nullptr;
@@ -223,7 +225,9 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
       break;
   {{#struct:fields}}
     case {{field:key}}:
-      py_val = StrongRef(Constructor<{{field:marshal_type}}>{}.constructFrom(val.{{field:cpp_name}}_ref()));
+      py_val = StrongRef(
+          Constructor<{{field:marshal_type}}>{}
+          .constructFrom(val.{{field:cpp_name}}_ref()));
       break;
   {{/struct:fields}}
   }

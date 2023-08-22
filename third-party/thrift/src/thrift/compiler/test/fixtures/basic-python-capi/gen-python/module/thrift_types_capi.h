@@ -222,6 +222,35 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 };
 
 template <>
+struct Extractor<::test::fixtures::basic-python-capi::AdaptedFields>
+    : public BaseExtractor<::test::fixtures::basic-python-capi::AdaptedFields> {
+  ExtractorResult<::test::fixtures::basic-python-capi::AdaptedFields> operator()(PyObject* obj);
+  int typeCheck(PyObject* obj);
+};
+
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::AdaptedFields>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::AdaptedFields>> {
+  ExtractorResult<::test::fixtures::basic-python-capi::AdaptedFields> operator()(PyObject* obj);
+};
+
+template <>
+struct Constructor<::test::fixtures::basic-python-capi::AdaptedFields>
+    : public BaseConstructor<::test::fixtures::basic-python-capi::AdaptedFields> {
+  PyObject* operator()(const ::test::fixtures::basic-python-capi::AdaptedFields& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::AdaptedFields>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::AdaptedFields>> {
+  PyObject* operator()(const ::test::fixtures::basic-python-capi::AdaptedFields& val);
+};
+
+template <>
 struct Extractor<::test::fixtures::basic-python-capi::ListStruct>
     : public BaseExtractor<::test::fixtures::basic-python-capi::ListStruct> {
   ExtractorResult<::test::fixtures::basic-python-capi::ListStruct> operator()(PyObject* obj);

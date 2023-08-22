@@ -15,10 +15,11 @@
  */
 
 include "thrift/annotation/cpp.thrift"
-include "thrift/annotation/python.thrift"
 include "thrift/lib/thrift/patch.thrift"
 include "thrift/test/python_capi/thrift_dep.thrift"
 include "thrift/test/python_capi/serialized_dep.thrift"
+include "thrift/lib/thrift/id.thrift"
+include "thrift/lib/thrift/schema.thrift"
 
 cpp_include "<deque>"
 cpp_include "<unordered_map>"
@@ -47,7 +48,6 @@ enum AnnoyingEnum {
 } (cpp.name = "NormalDecentEnum")
 
 @patch.GeneratePatch
-@python.MarshalCapi
 struct MyStruct {
   1: i64 inty;
   2: string stringy;
@@ -60,31 +60,26 @@ struct MyStruct {
 }
 
 @patch.GeneratePatch
-@python.MarshalCapi
 struct MyDataItem {
   1: string s;
 }
 
 @cpp.Adapter{name = "::thrift::test::lib::StructDoubler"}
 @scope.Transitive
-@python.MarshalCapi
 struct TransitiveDoubler {}
 
 @TransitiveDoubler
-@python.MarshalCapi
 struct DoubledPair {
   1: string s;
   2: i32 x;
 }
 
-@python.MarshalCapi
 struct StringPair {
   1: string normal;
   @cpp.Adapter{name = "::thrift::test::lib::StringDoubler"}
   2: string doubled;
 }
 
-@python.MarshalCapi
 struct EmptyStruct {} (cpp.name = "VapidStruct")
 
 typedef byte signed_byte
@@ -93,7 +88,6 @@ typedef binary IOBuf
 @cpp.Type{name = "std::unique_ptr<folly::IOBuf>"}
 typedef binary IOBufPtr
 
-@python.MarshalCapi
 struct PrimitiveStruct {
   1: bool booly;
   2: signed_byte charry;
@@ -120,7 +114,16 @@ struct PrimitiveStruct {
   22: thrift_dep.SomeError some_error;
 }
 
-@python.MarshalCapi
+struct AdaptedFields {
+  1: id.ProtocolId adapted_int;
+  2: list<id.FieldId> list_adapted_int;
+  3: schema.AnnotationIds set_adapted_int;
+  @cpp.Adapter{
+    name = "::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ValueId>",
+  }
+  4: id.ExternId inline_adapted_int;
+}
+
 struct ListStruct {
   1: list<bool> boolz;
   2: optional list<i64> intz;
@@ -139,7 +142,6 @@ struct ListStruct {
 } (cpp.noncopyable)
 typedef ListStruct ListAlias
 
-@python.MarshalCapi
 struct SetStruct {
   1: set<MyEnum> enumz;
   2: optional set<i32> intz;
@@ -154,7 +156,6 @@ struct SetStruct {
   7: list<set<i64>> setz;
 }
 
-@python.MarshalCapi
 struct MapStruct {
   1: map<MyEnum, string> enumz;
   2: optional map<i32, string> intz;
@@ -172,7 +173,6 @@ struct MapStruct {
   10: map<ui64, list<ui64>> unsigned_list_map;
 }
 
-@python.MarshalCapi
 struct ComposeStruct {
   1: MyEnum enum_;
   2: AnnoyingEnum renamed_;
@@ -187,7 +187,6 @@ struct ComposeStruct {
   10: serialized_dep.SerializedError serial_error;
 } (cpp.noncopyable)
 
-@python.MarshalCapi
 union Onion {
   1: MyEnum myEnum;
   2: PrimitiveStruct myStruct;
@@ -195,4 +194,5 @@ union Onion {
   6: set<i64> intSet;
   8: list<double> doubleList;
   9: map<binary, string> strMap;
+  10: id.ProtocolId adapted_int;
 } (cpp.name = "Shallot")

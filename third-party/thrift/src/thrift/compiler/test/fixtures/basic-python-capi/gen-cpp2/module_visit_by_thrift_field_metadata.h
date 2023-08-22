@@ -149,6 +149,25 @@ struct VisitByFieldId<::test::fixtures::basic-python-capi::PrimitiveStruct> {
 };
 
 template <>
+struct VisitByFieldId<::test::fixtures::basic-python-capi::AdaptedFields> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).adapted_int_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).list_adapted_int_ref());
+    case 3:
+      return f(2, static_cast<T&&>(t).set_adapted_int_ref());
+    case 4:
+      return f(3, static_cast<T&&>(t).inline_adapted_int_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::test::fixtures::basic-python-capi::AdaptedFields");
+    }
+  }
+};
+
+template <>
 struct VisitByFieldId<::test::fixtures::basic-python-capi::ListStruct> {
   template <typename F, typename T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
@@ -281,6 +300,8 @@ struct VisitByFieldId<::test::fixtures::basic-python-capi::Shallot> {
       return f(4, static_cast<T&&>(t).doubleList_ref());
     case 9:
       return f(5, static_cast<T&&>(t).strMap_ref());
+    case 10:
+      return f(6, static_cast<T&&>(t).adaptedInt_ref());
     default:
       throwInvalidThriftId(fieldId, "::test::fixtures::basic-python-capi::Shallot");
     }

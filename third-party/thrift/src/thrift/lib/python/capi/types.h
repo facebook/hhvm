@@ -20,6 +20,7 @@
 #include <set>
 #include <string>
 #include <string_view>
+#include <type_traits>
 #include <vector>
 
 #include <Python.h>
@@ -114,6 +115,31 @@ template <>
 struct native<StringView> {
   using type = std::string_view;
 };
+
+/**
+ * Used to denote Extractors that need to apply
+ * Adapter::fromThrift to Extractor result to obtain cpp type,
+ * and Constructors that need to apply Adapter::toThrift before
+ * constructing from cpp type.
+ */
+template <
+    typename Adapter,
+    typename ThriftT,
+    typename CppT = std::remove_const_t<std::remove_reference_t<
+        decltype(Adapter::fromThrift(std::declval<native_t<ThriftT>>()))>>>
+struct AdaptedThrift;
+
+template <typename Adapter, typename ThriftT, typename CppT>
+struct native<AdaptedThrift<Adapter, ThriftT, CppT>> {
+  using type = CppT;
+};
+
+template <typename Adapter, typename AdaptedType>
+using CircularlyAdaptedThrift = AdaptedThrift<
+    Adapter,
+    native_t<std::remove_const_t<std::remove_reference_t<
+        decltype(Adapter::toThrift(std::declval<AdaptedType>()))>>>,
+    AdaptedType>;
 
 template <typename T>
 struct ComposedEnum {};

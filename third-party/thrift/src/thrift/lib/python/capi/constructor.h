@@ -140,6 +140,14 @@ SPECIALIZE_IOBUF(folly::IOBuf);
 SPECIALIZE_IOBUF(std::unique_ptr<folly::IOBuf>);
 #undef SPECIALIZE_IOBUF
 
+template <typename Adapter, typename ThriftT, typename CppT>
+struct Constructor<AdaptedThrift<Adapter, ThriftT, CppT>>
+    : public BaseConstructor<AdaptedThrift<Adapter, ThriftT, CppT>> {
+  PyObject* FOLLY_NULLABLE operator()(const CppT& cpp_val) {
+    return Constructor<ThriftT>{}(Adapter::toThrift(cpp_val));
+  }
+};
+
 template <typename T>
 struct Constructor<ComposedEnum<T>> : public BaseConstructor<ComposedEnum<T>> {
   // The internal python representation of enum is integer value.

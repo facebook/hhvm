@@ -68,6 +68,13 @@ cdef api int can_extract__test__fixtures__basic_python_capi__module__PrimitiveSt
 cdef api object init__test__fixtures__basic_python_capi__module__PrimitiveStruct(object data):
     return __thrift_types.PrimitiveStruct._fbthrift_create(data)
 
+cdef api int can_extract__test__fixtures__basic_python_capi__module__AdaptedFields(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.AdaptedFields) else 0
+
+
+cdef api object init__test__fixtures__basic_python_capi__module__AdaptedFields(object data):
+    return __thrift_types.AdaptedFields._fbthrift_create(data)
+
 cdef api int can_extract__test__fixtures__basic_python_capi__module__ListStruct(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.ListStruct) else 0
 

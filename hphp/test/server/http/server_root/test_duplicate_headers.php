@@ -2,7 +2,6 @@
 
 <<__EntryPoint>>
 function test_duplicate_headers_entrypoint() :mixed{
-show(getallheaders());
 show(HH\get_headers_secure());
 }
 

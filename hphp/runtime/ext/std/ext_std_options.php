@@ -535,9 +535,14 @@ namespace __SystemLib {
     }
 
     private function reportHeaders(): void {
-      if (!\function_exists('getallheaders')) return;
+      if (!\function_exists('HH\\get_headers_secure')) return;
+      $headers = dict[];
+      foreach (\HH\get_headers_secure() as $k => $vs) {
+        // preserve "last seen header" behavior of `getallheaders`
+        $headers[$k] = $vs[\count($vs) - 1];
+      }
       $this->appendChildren($this->body,
-                            $this->table('Headers', \getallheaders()));
+                            $this->table('Headers', $headers));
     }
 
     private function reportMap(string $name, darray<string, mixed> $map): void {

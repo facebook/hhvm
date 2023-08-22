@@ -39,18 +39,6 @@ Requesting 'test_header.php?test_string=f%%0d%%0aoo'
 NULL
 Requesting 'test_duplicate_headers.php'
 string(%d) "dict(5) {
-  ["Accept"]=>
-  string(3) "*/*"
-  ["Host"]=>
-  string(%d) "%s"
-  ["User-Agent"]=>
-  string(%s) "%s"
-  ["xxxxx"]=>
-  string(2) "45"
-  ["xyzzy"]=>
-  string(2) "44"
-}
-dict(5) {
   ["accept"]=>
   vec(1) {
     string(3) "*/*"

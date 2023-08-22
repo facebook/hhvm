@@ -3,12 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8dcd55d500eb9fb523fa66bdedb6afa6>>
+// @generated SignedSource<<97714b4d47fd35c35874c7e9db506240>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
-
-pub use core::*;
 
 use arena_trait::TrivialDrop;
 use eq_modulo_pos::EqModuloPos;

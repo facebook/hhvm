@@ -84,7 +84,7 @@ fn main() -> Result<()> {
     }
 
     if let Some(out_path) = &opts.out_path {
-        write_file(out_path, &ocaml_src)?;
+        std::fs::write(out_path, &ocaml_src)?;
     } else {
         let mut stdout = std::io::stdout().lock();
         stdout.write_all(&ocaml_src)?;
@@ -151,10 +151,4 @@ fn ocamlformat(
         std::env::set_current_dir(prev_dir)?;
     }
     Ok(output.stdout)
-}
-
-fn write_file(path: &Path, contents: &[u8]) -> Result<()> {
-    let mut file = std::fs::File::create(path)?;
-    file.write_all(contents)?;
-    Ok(())
 }

@@ -17,39 +17,32 @@
 #pragma once
 
 #include <memory>
+#include <stdexcept>
 #include <vector>
-
-#include <thrift/compiler/ast/detail/view.h>
 
 namespace apache {
 namespace thrift {
 namespace compiler {
 
-// The type to use to hold a list of nodes of type T.
+// A list of AST nodes.
 template <typename T>
 using node_list = std::vector<std::unique_ptr<T>>;
 
 // A view of a node_list of nodes of type T.
 //
-// If T is const, only provides const access to the nodes in the
-// node_list.
+// If T is const, only provides const access to the nodes in the node_list.
 //
 // Like std::ranges::view, std::span and std::string_view, this class provides
 // access to memory it does not own and must not be accessed after the
 // associated node_list is destroyed.
-//
-// TODO(afuller): When c++20 can be used, switch to using
-// std::ranges::transform_view instead.
 template <typename T>
-class node_list_view : public ast_detail::base_view<node_list_view<T>, T*> {
-  using base = ast_detail::base_view<node_list_view<T>, T*>;
+class node_list_view {
   using node_list_type = node_list<std::remove_cv_t<T>>;
 
  public:
   using size_type = typename node_list_type::size_type;
   using difference_type = typename node_list_type::difference_type;
 
-  // Return by reference.
   using value_type = std::remove_const_t<T>;
   using pointer = T*;
   using reference = T&;
@@ -117,26 +110,34 @@ class node_list_view : public ast_detail::base_view<node_list_view<T>, T*> {
     __FBTHRIFT_NODE_SPAN_ITR_FWD_OP(>=)
 #undef __FBTHRIFT_NODE_SPAN_ITR_FWD_OP
   };
-  using reverse_iterator = std::reverse_iterator<iterator>;
 
+  constexpr node_list_view() = default;
   /* implicit */ constexpr node_list_view(const node_list_type& list) noexcept
-      : list_(&list) {}
+      : begin_(list.begin()), size_(list.size()) {}
 
   constexpr node_list_view(const node_list_view&) noexcept = default;
   constexpr node_list_view& operator=(const node_list_view&) noexcept = default;
 
-  constexpr reference front() const { return *list_->front(); }
-  constexpr reference back() const { return *list_->back(); }
+  constexpr reference front() const { return *begin_; }
+  constexpr reference back() const { return begin_[size_ - 1]; }
   constexpr reference operator[](std::size_t pos) const { return at(pos); }
-  constexpr iterator begin() const noexcept { return list_->begin(); }
-  constexpr iterator end() const noexcept { return list_->end(); }
-  constexpr std::size_t size() const noexcept { return list_->size(); }
+  constexpr iterator begin() const noexcept { return begin_; }
+  constexpr iterator end() const noexcept { return begin_ + size_; }
+  constexpr std::size_t size() const noexcept { return size_; }
+  constexpr bool empty() const noexcept { return size_ == 0; }
+
+  constexpr auto rbegin() const noexcept {
+    return std::make_reverse_iterator(end());
+  }
+  constexpr auto rend() const noexcept {
+    return std::make_reverse_iterator(begin());
+  }
 
   // Create an std::vector with the same contents as this span.
   constexpr std::vector<T*> copy() const noexcept {
     std::vector<T*> result;
-    for (auto& ptr : *list_) {
-      result.emplace_back(ptr.get());
+    for (size_t i = 0; i < size_; ++i) {
+      result.emplace_back(&begin_[i]);
     }
     return result;
   }
@@ -145,12 +146,18 @@ class node_list_view : public ast_detail::base_view<node_list_view<T>, T*> {
   using const_iterator = iterator;
   using const_reference = reference;
   using const_pointer = pointer;
-  constexpr iterator cbegin() const noexcept { return list_->cbegin(); }
-  constexpr iterator cend() const noexcept { return list_->cend(); }
-  constexpr reference at(std::size_t pos) const { return *list_->at(pos); }
+  constexpr iterator cbegin() const noexcept { return begin_; }
+  constexpr iterator cend() const noexcept { return begin_ + size_; }
+  constexpr reference at(std::size_t pos) const {
+    if (pos >= size_) {
+      throw std::out_of_range("index out of range");
+    }
+    return begin_[pos];
+  }
 
  private:
-  const node_list_type* list_;
+  iterator begin_;
+  size_t size_ = 0;
 };
 
 } // namespace compiler

@@ -16,16 +16,52 @@
 
 #pragma once
 
+#include <assert.h>
 #include <initializer_list>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include <thrift/compiler/ast/detail/view.h>
-
 namespace apache {
 namespace thrift {
 namespace compiler {
+namespace detail {
+
+template <typename Derived, typename T>
+class base_span {
+ public:
+  using size_type = std::size_t;
+  using difference_type = std::ptrdiff_t;
+  using value_type = T;
+  using pointer = T*;
+  using reference = T&;
+  using iterator = pointer;
+  using reverse_iterator = std::reverse_iterator<iterator>;
+  using const_iterator = iterator;
+
+  constexpr base_span(pointer data, std::size_t size) noexcept
+      : data_(data), size_(size) {}
+
+  constexpr iterator begin() const noexcept { return data_; }
+  constexpr iterator end() const noexcept { return data_ + size_; }
+  constexpr size_type size() const noexcept { return size_; }
+  constexpr reference operator[](size_type pos) const {
+    assert(pos < size_);
+    return *(data_ + pos);
+  }
+  constexpr reference front() const { return operator[](0); }
+  constexpr reference back() const {
+    assert(size_ > 0);
+    return operator[](size_ - 1);
+  }
+  constexpr bool empty() const noexcept { return size_ == 0; }
+
+ private:
+  pointer data_;
+  size_type size_;
+};
+
+} // namespace detail
 
 // An ordered list of the aliases for an annotation.
 //
@@ -35,8 +71,8 @@ namespace compiler {
 // Like std::span and std::string_view, this class provides access
 // to memory it does not own and must not be accessed after the associated
 // data is destroyed.
-class alias_span : public ast_detail::base_span<alias_span, const std::string> {
-  using base = ast_detail::base_span<alias_span, const std::string>;
+class alias_span : public detail::base_span<alias_span, const std::string> {
+  using base = detail::base_span<alias_span, const std::string>;
 
  public:
   using base::base;

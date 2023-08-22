@@ -3745,7 +3745,7 @@ and transform_node_if_ignored node =
   let (leading_before, leading_including_and_after) =
     leading_ignore_comment (Syntax.leading_trivia node)
   in
-  if List.length leading_including_and_after = 0 then
+  if List.is_empty leading_including_and_after then
     None
   else
     let node = replace_leading_trivia node leading_including_and_after in

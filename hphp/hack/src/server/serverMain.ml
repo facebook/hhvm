@@ -1582,7 +1582,7 @@ let run_once options config local_config =
       Hh_logger.log
         "Inserted symbols into the naming table:\n%s"
         (Naming_sqlite.show_save_result save_result);
-      if List.length save_result.Naming_sqlite.errors > 0 then begin
+      if not (List.is_empty save_result.Naming_sqlite.errors) then begin
         Sys_utils.rm_dir_tree filename;
         failwith "Naming table state had errors - deleting output file!"
       end else

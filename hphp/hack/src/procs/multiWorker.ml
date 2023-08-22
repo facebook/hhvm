@@ -133,7 +133,7 @@ let call_stateless :
 let call_with_interrupt
     ?on_cancelled workers ~job ~merge ~neutral ~next ~interrupt =
   match workers with
-  | Some workers when List.length workers <> 0 ->
+  | Some workers when not (List.is_empty workers) ->
     Hh_logger.log
       "MultiThreadedCall.call_with_interrupt called with %d workers"
       (List.length workers);

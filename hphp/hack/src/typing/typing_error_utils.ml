@@ -2206,7 +2206,7 @@ module Eval_primary = struct
       lazy
         begin
           let reasons = Lazy.force ty_reasons in
-          if List.length reasons = 0 then
+          if List.is_empty reasons then
             [(decl_pos, "Definition is here")]
           else
             reasons

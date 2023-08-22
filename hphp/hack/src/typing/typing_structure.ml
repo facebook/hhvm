@@ -191,7 +191,7 @@ let rec transform_shapemap ?(nullable = false) env pos ty shape =
         | (TSFlit_str (_, "generic_types"), _, _) when is_generic ->
           (env, acc_field_with_type sft_ty)
         | (TSFlit_str (_, "generic_types"), _, (r, Tclass (_, _, tyl)))
-          when List.length tyl > 0 ->
+          when not (List.is_empty tyl) ->
           let (env, tyl) = List.map_env env tyl ~f:make_ts in
           (env, acc_field_with_type (mk (r, Ttuple tyl)))
         | (TSFlit_str (_, ("kind" | "name" | "alias")), _, _) ->

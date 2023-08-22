@@ -105,7 +105,7 @@ let update_file
         let popt = Provider_context.get_popt ctx in
         let namespace_map = ParserOptions.auto_namespace_map popt in
         let contents = IndexBuilder.parse_one_file ~namespace_map ~path in
-        if List.length contents = 0 then
+        if List.is_empty contents then
           convert_fileinfo_to_contents ~ctx ~sienv ~info ~filepath
         else
           contents

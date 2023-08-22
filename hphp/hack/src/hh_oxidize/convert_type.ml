@@ -21,7 +21,7 @@ let primitives =
   [@@ocamlformat "disable"]
 
 let is_primitive ty args =
-  List.length args = 0 && List.mem primitives ty ~equal:String.equal
+  List.is_empty args && List.mem primitives ty ~equal:String.equal
 
 let rec is_copy ty =
   if is_ref ty then

@@ -223,7 +223,7 @@ let snippet_for_params (params : 'a Typing_defs.fun_param list) : string =
 
 let get_snippet_for_xhp_req_attrs tag attrs has_children =
   let content =
-    if List.length attrs > 0 then
+    if not (List.is_empty attrs) then
       let attr_content =
         List.mapi attrs ~f:(fun i name ->
             Format.sprintf "%s={${%d}}" name (i + 1))
@@ -240,7 +240,7 @@ let get_snippet_for_xhp_req_attrs tag attrs has_children =
 
 let insert_text_for_xhp_req_attrs tag attrs has_children =
   let content = get_snippet_for_xhp_req_attrs tag attrs has_children in
-  let insert_type = List.length attrs > 0 && has_children in
+  let insert_type = (not (List.is_empty attrs)) && has_children in
   if insert_type then
     InsertAsSnippet { snippet = content; fallback = tag }
   else
@@ -1906,7 +1906,7 @@ let visitor
       if is_auto_complete (snd sid) then
         complete_xhp_tag
           ~id:sid
-          ~does_autocomplete_snippet:(List.length attrs <= 0)
+          ~does_autocomplete_snippet:(List.is_empty attrs)
           ~sienv_ref
           ~pctx:ctx;
 

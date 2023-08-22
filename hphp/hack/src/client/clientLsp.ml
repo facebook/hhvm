@@ -1538,7 +1538,7 @@ let watch_refs_stream_file
             let uri = path_to_lsp_uri filename ~default_path:filename in
             not (UriMap.mem uri open_file_results))
       in
-      if List.length results > 0 then add (Some results);
+      if not (List.is_empty results) then add (Some results);
       watch file_pos
   in
   let (_watcher_future : unit Lwt.t) = watch 0 in

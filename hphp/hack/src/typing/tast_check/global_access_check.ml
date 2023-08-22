@@ -618,7 +618,7 @@ let rec get_data_srcs_from_expr env ctx (tp, _, te) =
      gets the data source for each expression in the list and do the union; specially,
      if the list is empty (e.g. vec[]), the data source is NullOrEmpty. *)
   let get_data_srcs_of_expr_list list =
-    if List.length list = 0 then
+    if List.is_empty list then
       DataSourceSet.singleton NullOrEmpty
     else
       List.fold list ~init:DataSourceSet.empty ~f:(fun cur_src_set e ->
@@ -629,7 +629,7 @@ let rec get_data_srcs_from_expr env ctx (tp, _, te) =
      get_data_srcs_of_pair_expr_list gets the data source for the 2nd expression in each
      pair and do the union; specially, return NullOrEmpty if the list is empty (e.g. dict[]). *)
   let get_data_srcs_of_pair_expr_list list =
-    if List.length list = 0 then
+    if List.is_empty list then
       DataSourceSet.singleton NullOrEmpty
     else
       List.fold list ~init:DataSourceSet.empty ~f:(fun cur_src_set (_, e) ->

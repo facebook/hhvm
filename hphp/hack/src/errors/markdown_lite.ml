@@ -126,7 +126,8 @@ let rec parse_and_format_until (delimiter : delimiter) (state : parse_state) :
     (* Example: "*foo bar*" is a valid section, while
        "**", "* foo bar*", "*foo bar *", and "* foo bar *" are not.
        The absence of a leading space is checked before entering this function. *)
-    List.length section > 0 && not (Char.equal ' ' (List.hd_exn section |> snd))
+    (not (List.is_empty section))
+    && not (Char.equal ' ' (List.hd_exn section |> snd))
   in
   match eat_prefix (delimiter_to_string delimiter) state with
   | Some { parsed; remaining } when is_valid_section parsed ->

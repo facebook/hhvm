@@ -68,7 +68,7 @@ let file_refs_to_incoming_calls
   let def_call_sites = List.map (call_sites refs) present_occ_defs in
   let def_call_sites_zipped = List.combine present_occ_defs def_call_sites in
   let def_call_sites_zipped_filtered =
-    List.filter (fun (_, r) -> List.length r != 0) def_call_sites_zipped
+    List.filter (fun (_, r) -> not (Core.List.is_empty r)) def_call_sites_zipped
   in
   let (present_occ_defs_filtered, def_call_sites_filtered) =
     List.split def_call_sites_zipped_filtered

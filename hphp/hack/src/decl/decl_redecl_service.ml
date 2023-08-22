@@ -393,11 +393,11 @@ let filter_dependent_classes_parallel
     ~(bucket_size : int)
     (classes : SSet.t)
     (maybe_dependent_classes : string list) : string list =
-  if List.length maybe_dependent_classes < 10 then
+  let classes_initial_count = List.length maybe_dependent_classes in
+  if classes_initial_count < 10 then
     filter_dependent_classes classes maybe_dependent_classes
   else (
     ClassSetStore.store classes;
-    let classes_initial_count = List.length maybe_dependent_classes in
     let classes_filtered_count = ref 0 in
     let t = Unix.gettimeofday () in
     Hh_logger.log ~lvl "Filtering %d dependent classes" classes_initial_count;

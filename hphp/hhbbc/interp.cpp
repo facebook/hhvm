@@ -201,7 +201,10 @@ bool mutate_add_elem_array(ISS& env, Fn&& mutate) {
 void finish_tracked_elem(ISS& env) {
   auto const arr = add_elem_array(env);
   env.trackedElems.pop_back();
-  if (arr) ArrayData::GetScalarArray(arr);
+  if (arr) {
+    ArrayData::GetScalarArray(arr);
+    reprocess(env);
+  }
 }
 
 void finish_tracked_elems(ISS& env, size_t depth) {

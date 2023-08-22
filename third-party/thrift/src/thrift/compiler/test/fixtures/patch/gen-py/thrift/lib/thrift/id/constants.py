@@ -17,7 +17,7 @@ if sys.version_info[0] >= 3:
   long = int
 
 
-from .ttypes import UTF8STRINGS, FieldId, ExternId, ValueId, ProtocolId, TypeId, DefinitionId, PackageId, ProgramId, SourceId
+from .ttypes import UTF8STRINGS, FieldId, ExternId, ValueId, ProtocolId, TypeId, DefinitionId, ProgramId, SourceId
 
 noId = 0
 

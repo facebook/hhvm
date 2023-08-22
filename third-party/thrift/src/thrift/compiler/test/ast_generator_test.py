@@ -178,3 +178,24 @@ class AstGeneratorTest(unittest.TestCase):
         self.assertEqual(docs.sourceRange.beginColumn, 18)
         self.assertEqual(docs.sourceRange.endLine, 5)
         self.assertEqual(docs.sourceRange.endColumn, 1)
+
+    def test_program(self):
+        write_file(
+            "foo.thrift",
+            textwrap.dedent(
+                """
+                package "test.dev/foo"
+                namespace cpp2 facebook.foo
+                """
+            ),
+        )
+
+        ast = self.run_thrift("foo.thrift")
+        program = ast.programs[0]
+        self.assertEqual(program.attrs.name, "foo")
+        self.assertEqual(program.attrs.uri, "test.dev/foo")
+        self.assertEqual(ast.sources[1].fileName, "foo.thrift")
+        self.assertEqual(
+            ast.values[ast.sources[1].namespaces["cpp2"] - 1].stringValue,
+            "facebook.foo",
+        )

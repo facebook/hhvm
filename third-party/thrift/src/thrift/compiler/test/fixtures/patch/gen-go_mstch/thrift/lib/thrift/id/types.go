@@ -175,33 +175,6 @@ if err != nil {
   return decodeResult, decodeErr
 }
 
-type PackageId = ExternId
-
-func NewPackageId() PackageId {
-  return NewExternId()
-}
-
-func WritePackageId(item PackageId, p thrift.Protocol) error {
-  err := WriteExternId(item, p)
-if err != nil {
-    return err
-}
-  return nil
-}
-
-func ReadPackageId(p thrift.Protocol) (PackageId, error) {
-  var decodeResult PackageId
-  decodeErr := func() error {
-    result, err := ReadExternId(p)
-if err != nil {
-    return err
-}
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
-}
-
 type ProgramId = ExternId
 
 func NewProgramId() ProgramId {

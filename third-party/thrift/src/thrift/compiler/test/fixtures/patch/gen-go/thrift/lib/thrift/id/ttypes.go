@@ -46,10 +46,6 @@ type DefinitionId = ExternId
 
 func DefinitionIdPtr(v DefinitionId) *DefinitionId { return &v }
 
-type PackageId = ExternId
-
-func PackageIdPtr(v PackageId) *PackageId { return &v }
-
 type ProgramId = ExternId
 
 func ProgramIdPtr(v ProgramId) *ProgramId { return &v }

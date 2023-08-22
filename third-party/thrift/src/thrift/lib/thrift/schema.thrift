@@ -100,9 +100,6 @@ struct DecodedUri {
   6: string fragment;
 } (py3.hidden)
 
-/** A list of parsed packages, accessible via a `PackageId`. */
-typedef list<DecodedUri> PackageList (py3.hidden)
-
 /**
  * The (pre)release state for a given definition/feature.
  *
@@ -646,18 +643,12 @@ typedef list<Definition> DefinitionList (py3.hidden)
  *       ... {definitions} ...
  */
 struct Program {
-  /** The definition attributes. */
+  /**
+   * The definition attributes.
+   * The package name is available as attrs.uri.
+   */
   @thrift.Mixin
   1: DefinitionAttrs attrs;
-
-  /**
-   * The parsed package for the program, if available.
-   *
-   * The unparsed package is available as {attrs.uri}.
-   */
-  // TODO(afuller): Allow 'package' as an ident in Thrift and remove trailing
-  // '_' (or change the name slightly in some other way).
-  2: id.PackageId package_ (cpp.name = "package");
 
   /**
    * The included programs, in the order included in the IDL/AST.
@@ -698,9 +689,6 @@ struct Schema {
 
   /** The values, accessible by `ValueId`. */
   3: list<protocol.Value> values;
-
-  /** The packages, accessible by `PackageId`. */
-  4: PackageList packages;
 
   /** The definitions, accessible by `DefinitionId`. */
   5: DefinitionList definitions;

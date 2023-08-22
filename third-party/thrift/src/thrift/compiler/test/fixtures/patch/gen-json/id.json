@@ -118,7 +118,7 @@
         }
       }
     },
-    "PackageId" : {
+    "ProgramId" : {
       "lineno" : 140,
       "type_enum" : "TYPEDEF",
       "spec_args" : "ExternId",
@@ -133,7 +133,7 @@
         }
       }
     },
-    "ProgramId" : {
+    "SourceId" : {
       "lineno" : 148,
       "type_enum" : "TYPEDEF",
       "spec_args" : "ExternId",
@@ -144,21 +144,6 @@
         },
         "end" : {
           "line" : 151,
-          "column" : 27
-        }
-      }
-    },
-    "SourceId" : {
-      "lineno" : 156,
-      "type_enum" : "TYPEDEF",
-      "spec_args" : "ExternId",
-      "source_range" : {
-        "begin" : {
-          "line" : 156,
-          "column" : 1
-        },
-        "end" : {
-          "line" : 159,
           "column" : 26
         }
       }

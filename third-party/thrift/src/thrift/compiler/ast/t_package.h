@@ -17,6 +17,7 @@
 #pragma once
 
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include <thrift/compiler/ast/t_node.h>
@@ -45,6 +46,15 @@ class t_package : public t_node {
 
   // If the package has been set.
   bool empty() const { return uriPrefix_.empty(); }
+
+  // The raw package name.
+  std::string_view name() const {
+    std::string_view ret = uriPrefix_;
+    if (!empty()) {
+      ret.remove_suffix(1);
+    }
+    return ret;
+  }
 
  private:
   std::string uriPrefix_;

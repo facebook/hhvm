@@ -53,9 +53,6 @@ struct Ast {
   /** The values, accessible by `ValueId`. */
   2: list<protocol.Value> values;
 
-  /** The packages, accessible by `PackageId`. */
-  3: schema.PackageList packages;
-
   /** The definitions, accessible by `DefinitionId`. */
   4: schema.DefinitionList definitions;
 

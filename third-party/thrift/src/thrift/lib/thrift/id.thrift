@@ -134,14 +134,6 @@ typedef ExternId TypeId
 }
 typedef ExternId DefinitionId
 
-// The id of an externally stored package.
-//
-// See 'schema.thrift'.
-@cpp.Adapter{
-  name = "::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::PackageId>",
-}
-typedef ExternId PackageId
-
 // The id of an externally stored program.
 //
 // See 'schema.thrift'.

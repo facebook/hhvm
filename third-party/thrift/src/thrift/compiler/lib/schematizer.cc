@@ -37,6 +37,9 @@ std::unique_ptr<t_const_value> val(Enm val) {
   return std::make_unique<t_const_value>(
       static_cast<std::underlying_type_t<Enm>>(val));
 }
+std::unique_ptr<t_const_value> val(std::string_view s) {
+  return val(std::string{s});
+}
 std::unique_ptr<t_const_value> mapval() {
   auto ret = val();
   ret->set_map();
@@ -67,6 +70,10 @@ void add_definition(
   definition->add_map(val("name"), val(node.name()));
   if (!node.uri().empty()) {
     definition->add_map(val("uri"), val(node.uri()));
+  } else if (auto program = dynamic_cast<const t_program*>(&node)) {
+    if (!program->package().empty()) {
+      definition->add_map(val("uri"), val(program->package().name()));
+    }
   }
 
   auto structured = node.structured_annotations();

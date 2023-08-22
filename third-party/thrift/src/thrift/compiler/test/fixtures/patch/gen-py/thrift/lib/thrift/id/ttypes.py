@@ -32,7 +32,7 @@ except ImportError:
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'FieldId', 'ExternId', 'ValueId', 'ProtocolId', 'TypeId', 'DefinitionId', 'PackageId', 'ProgramId', 'SourceId']
+__all__ = ['UTF8STRINGS', 'FieldId', 'ExternId', 'ValueId', 'ProtocolId', 'TypeId', 'DefinitionId', 'ProgramId', 'SourceId']
 
 FieldId = UnimplementedTypedef()
 ExternId = UnimplementedTypedef()
@@ -40,7 +40,6 @@ ValueId = ExternId
 ProtocolId = ExternId
 TypeId = ExternId
 DefinitionId = ExternId
-PackageId = ExternId
 ProgramId = ExternId
 SourceId = ExternId
 fix_spec(all_structs)

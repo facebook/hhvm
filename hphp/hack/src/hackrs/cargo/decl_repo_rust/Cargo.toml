@@ -18,7 +18,7 @@ find_utils = { version = "0.0.0", path = "../../../utils/find_utils" }
 folded_decl_provider = { version = "0.0.0", path = "../../folded_decl_provider/cargo/folded_decl_provider" }
 hackrs_test_utils = { version = "0.0.0", path = "../../hackrs_test_utils/cargo/hackrs_test_utils" }
 hhi = { version = "0.0.0", path = "../../../hhi/rust" }
-indicatif = { version = "0.17.3", features = ["improved_unicode", "rayon", "tokio"] }
+indicatif = { version = "0.17.6", features = ["improved_unicode", "rayon", "tokio"] }
 jwalk = "0.6"
 oxidized = { version = "0.0.0", path = "../../../oxidized" }
 pos = { version = "0.0.0", path = "../../pos/cargo/pos" }

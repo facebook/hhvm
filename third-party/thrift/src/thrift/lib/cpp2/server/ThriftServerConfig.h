@@ -29,7 +29,6 @@ THRIFT_FLAG_DECLARE_int64(server_default_queue_timeout_ms);
 THRIFT_FLAG_DECLARE_int64(server_polled_service_health_liveness_ms);
 THRIFT_FLAG_DECLARE_int64(
     server_ingress_memory_limit_enforcement_payload_size_min_bytes);
-THRIFT_FLAG_DECLARE_bool(server_reject_header_connections);
 
 namespace apache::thrift {
 class ThriftServerInitialConfig;
@@ -221,8 +220,6 @@ class ThriftServerConfig {
 
   const ServerAttributeDynamic<std::chrono::milliseconds>&
   getPolledServiceHealthLiveness() const;
-
-  const ServerAttributeDynamic<bool>& isHeaderDisabled() const;
 
   const ServerAttributeDynamic<folly::SocketOptionMap>&
   getPerConnectionSocketOptions() const;
@@ -525,11 +522,6 @@ class ThriftServerConfig {
           liveness,
       AttributeSource source = AttributeSource::OVERRIDE);
 
-  // Rejects all header-backed connections to this server
-  void disableLegacyTransports(
-      folly::observer::Observer<std::optional<bool>> value,
-      AttributeSource source = AttributeSource::OVERRIDE);
-
   void setPerConnectionSocketOptions(
       folly::observer::Observer<std::optional<folly::SocketOptionMap>> options,
       AttributeSource source = AttributeSource::OVERRIDE);
@@ -794,12 +786,6 @@ class ThriftServerConfig {
                server_polled_service_health_liveness_ms)]() {
             return std::chrono::milliseconds(**livenessMs);
           })};
-
-  /**
-   * Enable to reject all header-backed connections
-   */
-  ServerAttributeDynamic<bool> disableHeaderTransport_{
-      THRIFT_FLAG_OBSERVE(server_reject_header_connections)};
 
   /**
    * Socket options that will be applied to every connection to clients.

@@ -3519,7 +3519,8 @@ TEST(ThriftServer, RocketOnly) {
   TestThriftServerFactory<TestInterface> factory;
   auto serv = factory.create();
   ScopedServerThread sst(serv);
-  serv->disableLegacyTransports();
+  serv->setLegacyTransport(
+      apache::thrift::BaseThriftServer::LegacyTransport::DISABLED);
   folly::EventBase base;
 
   // Header rejected
@@ -3545,6 +3546,38 @@ TEST(ThriftServer, RocketOnly) {
   // Rocket accepted
   try {
     TestServiceAsyncClient client(RocketClientChannel::newChannel(
+        folly::AsyncSocket::newSocket(&base, *sst.getAddress())));
+    client.sync_voidResponse();
+  } catch (const TTransportException&) {
+    ADD_FAILURE() << "should accept";
+  }
+}
+
+TEST(ThriftServer, DisableHeaderReject) {
+  THRIFT_FLAG_SET_MOCK(server_rocket_upgrade_enabled, true);
+  TestThriftServerFactory<TestInterface> factory;
+  auto serv = factory.create();
+  ScopedServerThread sst(serv);
+  serv->setLegacyTransport(
+      apache::thrift::BaseThriftServer::LegacyTransport::DISABLED);
+  folly::EventBase base;
+
+  // Header traffic rejected
+  try {
+    Client<TestService> client(HeaderClientChannel::newChannel(
+        HeaderClientChannel::WithoutRocketUpgrade{},
+        folly::AsyncSocket::newSocket(&base, *sst.getAddress())));
+    client.sync_voidResponse();
+    ADD_FAILURE() << "should reject";
+  } catch (const TTransportException&) {
+  }
+
+  // Disabled header reject and connection accepted
+  try {
+    serv->setLegacyTransport(
+        apache::thrift::BaseThriftServer::LegacyTransport::ALLOWED);
+    Client<TestService> client(HeaderClientChannel::newChannel(
+        HeaderClientChannel::WithRocketUpgrade{},
         folly::AsyncSocket::newSocket(&base, *sst.getAddress())));
     client.sync_voidResponse();
   } catch (const TTransportException&) {

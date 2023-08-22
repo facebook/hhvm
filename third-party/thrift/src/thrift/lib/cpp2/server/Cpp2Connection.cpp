@@ -437,8 +437,11 @@ void Cpp2Connection::requestReceived(
     }
   }
 
-  if (worker_->getServer()->isHeaderDisabled() ||
-      THRIFT_FLAG(server_header_reject_all)) {
+  if ((worker_->getServer()->getLegacyTransport() ==
+           BaseThriftServer::LegacyTransport::DEFAULT &&
+       THRIFT_FLAG(server_header_reject_all)) ||
+      worker_->getServer()->getLegacyTransport() ==
+          BaseThriftServer::LegacyTransport::DISABLED) {
     THRIFT_CONNECTION_EVENT(connection_rejected.header).log(context_);
 
     disconnect("Rejecting Header connection");

@@ -172,6 +172,17 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
     // in the ThreadManagerExecutorAdapter when in ThreadManager mode
   };
 
+  /**
+   * Behavior when a thrift client calls server with legacy transport, ie,
+   * header. Default behavior is determined by thrift flags
+   */
+  enum class LegacyTransport : int {
+    DEFAULT = 0, // Use thrift flags(server_header_reject_all) to decide whether
+                 // to reject or allow header traffic
+    DISABLED = 1, // Always reject header traffic
+    ALLOWED = 2, // Always allow header traffic
+  };
+
   struct RuntimeServerActions {
     bool userSuppliedThreadManager{false};
     bool userSuppliedResourcePools{false};
@@ -281,6 +292,9 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
 
   // Explicitly set control service interface handler
   std::shared_ptr<ControlServerInterface> controlServiceHandler_;
+
+  // Server behavior to wrt header traffic
+  LegacyTransport legacyTransport_{LegacyTransport::DEFAULT};
 
   Metadata metadata_;
 
@@ -1536,15 +1550,10 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
     return adaptiveConcurrencyController_;
   }
 
-  // Rejects all header-backed connections to this server
-  void disableLegacyTransports(bool value = true) {
-    thriftConfig_.disableLegacyTransports(
-        folly::observer::makeStaticObserver(std::optional{value}),
-        AttributeSource::OVERRIDE);
-  }
-  bool isHeaderDisabled() const {
-    return thriftConfig_.isHeaderDisabled().get();
-  }
+  // Define Server behavior to allow or reject header traffic
+  void setLegacyTransport(LegacyTransport value) { legacyTransport_ = value; }
+
+  LegacyTransport getLegacyTransport() const { return legacyTransport_; }
 
   const folly::SocketOptionMap& getPerConnectionSocketOptions() const {
     return thriftConfig_.getPerConnectionSocketOptions().get();

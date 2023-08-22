@@ -297,11 +297,6 @@ ThriftServerConfig::getPolledServiceHealthLiveness() const {
   return polledServiceHealthLiveness_;
 }
 
-const ServerAttributeDynamic<bool>& ThriftServerConfig::isHeaderDisabled()
-    const {
-  return disableHeaderTransport_;
-}
-
 const ServerAttributeDynamic<folly::SocketOptionMap>&
 ThriftServerConfig::getPerConnectionSocketOptions() const {
   return perConnectionSocketOptions_;
@@ -556,12 +551,6 @@ void ThriftServerConfig::setPolledServiceHealthLiveness(
         liveness,
     AttributeSource source) {
   polledServiceHealthLiveness_.set(liveness, source);
-}
-
-void ThriftServerConfig::disableLegacyTransports(
-    folly::observer::Observer<std::optional<bool>> value,
-    AttributeSource source) {
-  disableHeaderTransport_.set(value, source);
 }
 
 void ThriftServerConfig::setPerConnectionSocketOptions(

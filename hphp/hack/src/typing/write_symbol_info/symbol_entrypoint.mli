@@ -11,24 +11,21 @@
 open Hh_prelude
 module Indexable = Symbol_indexable
 module Sym_hash = Symbol_sym_hash
+module Indexer_options = Symbol_indexer_options
 
+(* simpler entry point, uses default options indexing options, doesn't
+   use worker. This is used by hh_single_type_check. *)
 val index_files :
   Provider_context.t -> out_dir:string -> files:Relative_path.t list -> unit
 
 val sym_hashes :
   Provider_context.t -> files:Relative_path.t list -> (string * Md5.t) list
 
+(* namespace_map is the aliases map, used to generate hack.GlobalNamespaceAlias *)
 val go :
   MultiWorker.worker list option ->
   Provider_context.t ->
-  referenced_file:string option ->
-  reindexed_file:string option ->
+  Indexer_options.t ->
   namespace_map:(string * string) list ->
-  gen_sym_hash:bool ->
-  ownership:bool ->
-  out_dir:string ->
-  root_path:string ->
-  hhi_path:string ->
-  incremental:Sym_hash.t option ->
   files:Indexable.t list ->
   unit

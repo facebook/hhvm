@@ -205,8 +205,12 @@ let collect_inherited_members ctx def =
   (def, inherited_member_clusters)
 
 let create
-    ctx Indexable.{ path; fanout } ~gen_sym_hash ~sym_path ~root_path ~hhi_path
-    =
+    ctx
+    Indexable.{ path; fanout }
+    ~gen_sym_hash
+    ~gen_references
+    ~root_path
+    ~hhi_path =
   let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
   let path_str =
     Relative_path.to_absolute_with_prefix
@@ -226,7 +230,7 @@ let create
   let symbol_occs = IdentifySymbolService.all_symbols ctx tast in
   let symbols =
     List.map symbol_occs ~f:(fun occ ->
-        { occ; def = Sym_def.resolve ctx occ ~sym_path })
+        { occ; def = Sym_def.resolve ctx occ ~sym_path:gen_references })
   in
   let tast = List.map tast ~f:(collect_inherited_members ctx) in
   let sym_hash =

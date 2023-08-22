@@ -925,15 +925,13 @@ let write_symbol_info
       ~telemetry_label:"write_symbol_info.naming"
       ~cgroup_steps
   in
-  let namespace_map = ParserOptions.auto_namespace_map env.tcopt in
   let paths = env.swriteopt.symbol_write_index_paths in
   let paths_file = env.swriteopt.symbol_write_index_paths_file in
-  let referenced_file = env.swriteopt.symbol_write_referenced_out in
-  let reindexed_file = env.swriteopt.symbol_write_reindexed_out in
   let include_hhi = env.swriteopt.symbol_write_include_hhi in
   let ignore_paths = env.swriteopt.symbol_write_ignore_paths in
-  let incremental = env.swriteopt.symbol_write_sym_hash_in in
-  let gen_sym_hash = env.swriteopt.symbol_write_sym_hash_out in
+
+  (* files to index, they could be either provided or deduced
+     from the naming table, depending on the combination of options *)
   let files =
     if List.length paths > 0 || Option.is_some paths_file then
       Symbol_indexable.from_options ~paths ~paths_file ~include_hhi
@@ -945,6 +943,7 @@ let write_symbol_info
   in
   match env.swriteopt.symbol_write_index_paths_file_output with
   | Some output ->
+    (* Don't run indexer, just returns list of all files to index *)
     List.map
       ~f:(fun Symbol_indexable.{ path; _ } ->
         Relative_path.storage_to_string path)
@@ -957,49 +956,10 @@ let write_symbol_info
       | None -> failwith "No write directory specified for --write-symbol-info"
       | Some s -> s
     in
-    (* Ensure we are writing to fresh files *)
-    let is_invalid =
-      try
-        if not (Sys.is_directory out_dir) then
-          true
-        else
-          Array.length (Sys.readdir out_dir) > 0
-      with
-      | _ ->
-        Sys_utils.mkdir_p out_dir;
-        false
-    in
-    if is_invalid then failwith "JSON write directory is invalid or non-empty";
-
-    Hh_logger.log "Indexing: %d files" (List.length files);
-    Hh_logger.log "Writing JSON to: %s" out_dir;
-    (match incremental with
-    | Some t -> Hh_logger.log "Reading hashtable from: %s" t
-    | None -> ());
-    let incremental =
-      Option.map ~f:(fun path -> Symbol_sym_hash.read ~path) incremental
-    in
-
+    let opts = Symbol_indexer_options.create env.swriteopt ~out_dir in
+    let namespace_map = ParserOptions.auto_namespace_map env.tcopt in
     let ctx = Provider_utils.ctx_from_server_env env in
-    let root_path = env.swriteopt.symbol_write_root_path in
-    let hhi_path = env.swriteopt.symbol_write_hhi_path in
-    let ownership = env.swriteopt.symbol_write_ownership in
-    Hh_logger.log "Ownership mode: %b" ownership;
-    Hh_logger.log "Gen_sym_hash: %b" gen_sym_hash;
-    Symbol_entrypoint.go
-      genv.workers
-      ctx
-      ~referenced_file
-      ~reindexed_file
-      ~namespace_map
-      ~gen_sym_hash
-      ~ownership
-      ~out_dir
-      ~root_path
-      ~hhi_path
-      ~incremental
-      ~files;
-
+    Symbol_entrypoint.go genv.workers ctx opts ~namespace_map ~files;
     (env, t)
 
 let write_symbol_info_full_init

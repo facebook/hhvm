@@ -13,6 +13,7 @@ module Add_fact = Symbol_add_fact
 module Fact_acc = Symbol_predicate.Fact_acc
 module Indexable = Symbol_indexable
 module Sym_hash = Symbol_sym_hash
+module Indexer_options = Symbol_indexer_options
 
 module JobReturn = struct
   type t = {
@@ -122,35 +123,36 @@ let references_from_files_info files_info =
 
 let recheck_job
     (ctx : Provider_context.t)
-    (out_dir : string)
-    (root_path : string)
-    (hhi_path : string)
-    ~(gen_sym_hash : bool)
-    ~(incremental : Sym_hash.t option)
-    (ownership : bool)
-    ~(gen_references : bool)
+    (opts : Indexer_options.t)
     (_ : JobReturn.t)
     (progress : Indexable.t list) : JobReturn.t =
+  let open Indexer_options in
   let start_time = Unix.gettimeofday () in
-  let gen_sym_hash = gen_sym_hash || Option.is_some incremental in
+
+  (* file hashes must be computed for incremental indexing, bases or increments *)
+  let gen_sym_hash = opts.gen_sym_hash || Option.is_some opts.incremental in
+
+  (* in order to compute referenced files, we need to compute the path of referenced
+     symbols *)
+  let gen_references = Option.is_some opts.referenced_file in
   let files_info =
     List.map
       progress
       ~f:
         (File_info.create
            ctx
-           ~root_path
-           ~hhi_path
+           ~root_path:opts.root_path
+           ~hhi_path:opts.hhi_path
            ~gen_sym_hash
-           ~sym_path:gen_references)
+           ~gen_references)
   in
   let reindex f =
-    match (f.File_info.fanout, incremental, f.File_info.sym_hash) with
+    match (f.File_info.fanout, opts.incremental, f.File_info.sym_hash) with
     | (true, Some table, Some hash) when Sym_hash.mem table hash -> false
     | _ -> true
   in
   let to_reindex = List.filter ~f:reindex files_info in
-  let res = write_json ctx ownership out_dir to_reindex start_time in
+  let res = write_json ctx opts.ownership opts.out_dir to_reindex start_time in
   let fanout_reindexed =
     let f File_info.{ path; fanout; _ } =
       if fanout then
@@ -176,7 +178,7 @@ let sym_hashes ctx ~files =
         ~root_path:"www"
         ~hhi_path:"hhi"
         ~gen_sym_hash:true
-        ~sym_path:false
+        ~gen_references:false
         (Indexable.from_file file)
     in
     let sym_hash =
@@ -191,53 +193,26 @@ let sym_hashes ctx ~files =
 
 let index_files ctx ~out_dir ~files =
   let idx = List.map files ~f:Indexable.from_file in
-  recheck_job
-    ctx
-    out_dir
-    "www"
-    "hhi"
-    ~gen_sym_hash:false
-    ~incremental:None
-    ~gen_references:false
-    false
-    JobReturn.neutral
-    idx
-  |> ignore
+  let opts = Indexer_options.default ~out_dir in
+  recheck_job ctx opts JobReturn.neutral idx |> ignore
 
-(* TODO create a type for all these options *)
 let go
     (workers : MultiWorker.worker list option)
     (ctx : Provider_context.t)
-    ~(referenced_file : string option)
-    ~(reindexed_file : string option)
+    (opts : Indexer_options.t)
     ~(namespace_map : (string * string) list)
-    ~(gen_sym_hash : bool)
-    ~(ownership : bool)
-    ~(out_dir : string)
-    ~(root_path : string)
-    ~(hhi_path : string)
-    ~(incremental : Sym_hash.t option)
     ~(files : Indexable.t list) : unit =
+  Indexer_options.log opts;
   let num_workers =
     match workers with
     | Some w -> List.length w
     | None -> 1
   in
   let start_time = Unix.gettimeofday () in
-  let gen_references = Option.is_some referenced_file in
   let jobs =
     MultiWorker.call
       workers
-      ~job:
-        (recheck_job
-           ctx
-           out_dir
-           root_path
-           hhi_path
-           ~gen_sym_hash
-           ~incremental
-           ~gen_references
-           ownership)
+      ~job:(recheck_job ctx opts)
       ~merge:JobReturn.merge
       ~next:(Bucket.make ~num_workers ~max_size:115 files)
       ~neutral:JobReturn.neutral
@@ -247,13 +222,21 @@ let go
     Md5.digest_string (Float.to_string start_time) |> Md5.to_hex
   in
   let global_facts =
-    gen_global_facts namespace_map ~ownership ~shard_name jobs.JobReturn.hashes
+    gen_global_facts
+      namespace_map
+      ~ownership:opts.Indexer_options.ownership
+      ~shard_name
+      jobs.JobReturn.hashes
   in
-  write_facts_file out_dir 1 global_facts;
+  write_facts_file opts.Indexer_options.out_dir 1 global_facts;
   (* TODO remove this log once the workflows use the reindexed_file option *)
   SSet.iter (Hh_logger.log "Reindexed: %s") jobs.JobReturn.reindexed;
-  Option.iter referenced_file ~f:(write_file jobs.JobReturn.referenced);
-  Option.iter reindexed_file ~f:(write_file jobs.JobReturn.reindexed);
+  Option.iter
+    opts.Indexer_options.referenced_file
+    ~f:(write_file jobs.JobReturn.referenced);
+  Option.iter
+    opts.Indexer_options.reindexed_file
+    ~f:(write_file jobs.JobReturn.reindexed);
   let cumulated_elapsed = jobs.JobReturn.elapsed in
   log_elapsed "Processed all batches (cumulated time) in " cumulated_elapsed;
   let elapsed = Unix.gettimeofday () -. start_time in

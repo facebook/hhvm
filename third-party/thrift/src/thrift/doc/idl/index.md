@@ -661,35 +661,37 @@ New parameters could be added to a method, but it is better to define an input s
 
 #### Streaming
 
+A function containing `stream<T>` in its declaration establises a server-to-client stream when called. `T` is a stream element type.
+
+A function containing `sink<T, U>` in its declaration establishes a client-to-server stream. `T` is a stream element type and `U` is a final response type.
+
+Both `sink` and `stream` may be preceded by an initial response type. Omitting the initial response type is equivalent to specifying `void`.
+
+Example:
+
+```thrift
+struct GetFileRequest {
+  1: string fileName;
+  2: i64 chunkSize;
+}
+
+struct GetFileResponse {
+  1: i64 fileSize;
+}
+
+struct FileChunk {
+  1: binary data;
+}
+
+service FileServer {
+  // Returns a GetFileResponse object and establishes
+  // a server-to-client stream of FileChunk objects.
+  GetFileResponse, stream<FileChunk>
+    getFile(1: GetFileRequest request);
+}
 ```
-struct Foo {
-  1: i64 field1 = 101;
-  2: string field2;
-}
 
-exception BarException {
-  1: string message,
-  2: i64 errorCode,
-}
-
-exception FooException {
-  1: string message,
-  2: i64 errorCode,
-}
-
-struct GetFoosRequest {
-  1: list<i64> ids;
-}
-
-service Bar {
-  stream Foo getStream(1: GetFoosRequest request)
-      throws (1: BarException e1) stream throws (1: FooException e2),
-  i32, stream Foo getResponseAndStream(1: GetFoosRequest request)
-      throws (1: BarException e1) stream throws (1: FooException e2),
-}
-```
-
-Please refer [Thrift Streaming](/fb/features/streaming/index.md) for more information on Streaming.
+Refer to [Thrift Streaming](/fb/features/streaming/index.md) for more information.
 
 ### Interactions
 

@@ -29,7 +29,7 @@ namespace compiler {
 class t_program;
 
 /**
- * A service consists of a set of functions.
+ * Represents a service definition.
  */
 class t_service : public t_interface {
  public:

@@ -45,10 +45,9 @@ enum class t_error_safety {
 };
 
 /**
- * A thrift exception.
+ * Represents an exception definition.
  *
- * Exceptions are structured, like unions and structs, but can only
- * be used in error-specific contexts.
+ * Exceptions are similar to structs but can only be used in throws clauses.
  */
 // TODO(afuller): Inherit from t_structured instead.
 class t_exception : public t_struct {

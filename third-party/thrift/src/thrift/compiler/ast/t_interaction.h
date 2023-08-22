@@ -28,7 +28,9 @@ namespace compiler {
 class t_program;
 
 /**
- * An interaction is a service with context.
+ * Represents an interaction definition.
+ *
+ * An interaction is an interface with context.
  */
 // TODO(afuller): Inherit from t_interface directly.
 class t_interaction : public t_service {

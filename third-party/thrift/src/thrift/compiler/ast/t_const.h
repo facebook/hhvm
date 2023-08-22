@@ -29,12 +29,12 @@ namespace compiler {
 class t_program;
 
 /**
- *  class t_const
+ * Represents a const definition.
  *
- * A const is a constant value defined across languages that has a type and
- * a value. The trick here is that the declared type might not match the type
- * of the value object, since that is not determined until after parsing the
- * whole thing out.
+ * A const definition introduces a named constant in target languages that has
+ * a type and a value. The trick here is that the declared type might not match
+ * the type of the value object, since that is not determined until after
+ * parsing the whole thing out.
  */
 class t_const final : public t_named {
  public:

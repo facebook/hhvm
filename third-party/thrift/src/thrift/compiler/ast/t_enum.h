@@ -33,7 +33,7 @@ namespace thrift {
 namespace compiler {
 
 /**
- * An enumerated type. A list of constant objects with a name for the type.
+ * Represents an enum definition.
  */
 class t_enum : public t_type {
  public:

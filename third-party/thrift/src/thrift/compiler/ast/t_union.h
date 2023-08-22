@@ -22,6 +22,9 @@ namespace apache {
 namespace thrift {
 namespace compiler {
 
+/**
+ * Represents a union definition.
+ */
 // TODO(afuller): Inherit from t_structured instead.
 class t_union : public t_struct {
  public:

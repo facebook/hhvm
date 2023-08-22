@@ -28,7 +28,9 @@ namespace thrift {
 namespace compiler {
 
 /**
- * A typedef is a mapping from a name to another type.
+ * Represents a typedef definition.
+ *
+ * A typedef introduces a named alias of a type.
  */
 class t_typedef : public t_type {
  public:

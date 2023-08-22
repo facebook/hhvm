@@ -31,6 +31,8 @@ namespace compiler {
 class t_program;
 
 /**
+ * Represents an interface definition.
+ *
  * An interface consists of a set of functions.
  */
 class t_interface : public t_type {

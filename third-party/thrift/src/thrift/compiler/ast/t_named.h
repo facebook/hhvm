@@ -59,7 +59,7 @@ enum class t_release_state {
 };
 
 /**
- * Base class for any named AST node.
+ * A base class for any named AST node such as a definition.
  *
  * Anything that is named, can be annotated.
  */

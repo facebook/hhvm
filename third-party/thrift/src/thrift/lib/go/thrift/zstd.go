@@ -18,17 +18,31 @@ package thrift
 
 import (
 	"bytes"
-	"fmt"
+	"github.com/klauspost/compress/zstd"
 )
 
 const (
-	zstdTransformSupport = false
+	zstdTransformSupport = true
 )
 
 func zstdRead(rd byteReader) (byteReader, error) {
-	return nil, fmt.Errorf("zstd compression not supported")
+	zlrd, err := zstd.NewReader(rd)
+	if err != nil {
+		return nil, err
+	}
+	return ensureByteReader(zlrd), nil
 }
 
 func zstdWriter(tmpbuf *bytes.Buffer, buf *bytes.Buffer) error {
-	return fmt.Errorf("zstd compression not supported")
+	zwr, err := zstd.NewWriter(tmpbuf)
+	if err != nil {
+		return err
+	}
+	if _, err := buf.WriteTo(zwr); err != nil {
+		return err
+	}
+	if err := zwr.Close(); err != nil {
+		return err
+	}
+	return nil
 }

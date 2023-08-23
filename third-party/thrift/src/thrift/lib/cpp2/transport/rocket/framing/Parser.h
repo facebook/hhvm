@@ -32,7 +32,6 @@
 #include <thrift/lib/cpp2/transport/rocket/framing/parser/ParserStrategy.h>
 
 THRIFT_FLAG_DECLARE_bool(rocket_parser_dont_hold_buffer_enabled);
-THRIFT_FLAG_DECLARE_bool(rocket_parser_hybrid_buffer_enabled);
 THRIFT_FLAG_DECLARE_bool(rocket_strategy_parser);
 THRIFT_FLAG_DECLARE_bool(rocket_allocating_strategy_parser);
 
@@ -50,13 +49,8 @@ class Parser final : public folly::AsyncTransport::ReadCallback,
   explicit Parser(T& owner)
       : newBufferLogicEnabled_(
             THRIFT_FLAG(rocket_parser_dont_hold_buffer_enabled)),
-        hybridBufferLogicEnabled_(
-            THRIFT_FLAG(rocket_parser_hybrid_buffer_enabled) &&
-            !newBufferLogicEnabled_),
         owner_(owner),
-        readBuffer_(
-            folly::IOBuf::CreateOp(),
-            hybridBufferLogicEnabled_ ? kStaticBufferSize : bufferSize_),
+        readBuffer_(folly::IOBuf::CreateOp(), bufferSize_),
         useStrategyParser_(THRIFT_FLAG(rocket_strategy_parser)),
         useAllocatingStrategyParser_(
             THRIFT_FLAG(rocket_allocating_strategy_parser)) {
@@ -117,8 +111,6 @@ class Parser final : public folly::AsyncTransport::ReadCallback,
   size_t getReadBufLength() const {
     if (newBufferLogicEnabled_) {
       return readBufQueue_.chainLength();
-    } else if (hybridBufferLogicEnabled_) {
-      return dynamicBuffer_ ? dynamicBuffer_->length() : readBuffer_.length();
     }
     return readBuffer_.computeChainDataLength();
   }
@@ -139,16 +131,9 @@ class Parser final : public folly::AsyncTransport::ReadCallback,
   // TODO: remove once hybrid logic is stable
   void getReadBufferNew(void** bufout, size_t* lenout);
   void readDataAvailableNew(size_t nbytes);
-  // hybrid logic: maintain small, static read buffer in Parser (like "old"
-  // logic), allocate space in dynamic buffer and immediately transfer ownership
-  // if necessary (like "new" logic)
-  void getReadBufferHybrid(void** bufout, size_t* lenout);
-  void readDataAvailableHybrid(size_t nbytes);
 
   // Flag that controls if the parser should use the new buffer logic
   const bool newBufferLogicEnabled_;
-  // Flag that controls if the parser should use the hybrid buffer logic
-  const bool hybridBufferLogicEnabled_;
 
   // TODO: This should be removed once the new buffer logic controlled by
   // THRIFT_FLAG(rocket_parser_dont_hold_buffer_enabled) is stable.
@@ -165,12 +150,6 @@ class Parser final : public folly::AsyncTransport::ReadCallback,
   // invoked for a given AsyncTransport)
   folly::IOBufQueue readBufQueue_{folly::IOBufQueue::cacheChainLength()};
   folly::IOBuf readBuffer_;
-
-  // hybrid logic
-  static constexpr size_t kStaticBufferSize = 1024;
-  static constexpr size_t kReallocateThreshold = 64;
-  std::unique_ptr<folly::IOBuf> dynamicBuffer_{nullptr};
-  bool reallocateIfShared_{false};
   bool blockResize_{false};
 
   bool useStrategyParser_{false};

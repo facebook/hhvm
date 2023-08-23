@@ -68,29 +68,6 @@ void Parser<T>::getReadBufferNew(void** bufout, size_t* lenout) {
 }
 
 template <class T>
-void Parser<T>::getReadBufferHybrid(void** bufout, size_t* lenout) {
-  // if dynamic buffer is not null, read the remainder of currentFrameLength_
-  // into it, so it contains exactly one full frame
-  if (dynamicBuffer_) {
-    *bufout = dynamicBuffer_->writableTail();
-    *lenout = currentFrameLength_ - dynamicBuffer_->length();
-  } else {
-    if (!readBuffer_.isSharedOne()) {
-      // without external refs, we can move data (same as clear() if length==0)
-      readBuffer_.retreat(readBuffer_.headroom());
-    } else if (reallocateIfShared_) {
-      auto buf = folly::IOBuf(folly::IOBuf::CreateOp(), kStaticBufferSize);
-      memcpy(buf.writableData(), readBuffer_.data(), readBuffer_.length());
-      buf.append(readBuffer_.length());
-      readBuffer_ = std::move(buf);
-    }
-    reallocateIfShared_ = false;
-    *bufout = readBuffer_.writableTail();
-    *lenout = readBuffer_.tailroom();
-  }
-}
-
-template <class T>
 void Parser<T>::readDataAvailableOld(size_t nbytes) {
   readBuffer_.append(nbytes);
 
@@ -175,81 +152,6 @@ void Parser<T>::readDataAvailableNew(size_t nbytes) {
 }
 
 template <class T>
-void Parser<T>::readDataAvailableHybrid(size_t nbytes) {
-  if (dynamicBuffer_) {
-    dynamicBuffer_->append(nbytes);
-    if (dynamicBuffer_->length() < currentFrameLength_) {
-      return;
-    }
-    DCHECK_EQ(dynamicBuffer_->length(), currentFrameLength_);
-    owner_.handleFrame(std::move(dynamicBuffer_));
-    owner_.decMemoryUsage(currentFrameLength_);
-    currentFrameLength_ = 0;
-    currentFrameType_ = 0;
-    return;
-  }
-  // set reallocate hint if latest read filled most of the buffer
-  DCHECK_LE(nbytes, readBuffer_.tailroom());
-  reallocateIfShared_ = readBuffer_.tailroom() - nbytes < kReallocateThreshold;
-  readBuffer_.append(nbytes);
-  while (!readBuffer_.empty()) {
-    const size_t bufLen = readBuffer_.length();
-    if (bufLen < Serializer::kMinimumFrameHeaderLength) {
-      return;
-    }
-
-    folly::io::Cursor cursor(&readBuffer_);
-    if (!currentFrameLength_) {
-      auto frameLength = readFrameOrMetadataSize(cursor);
-      if (!owner_.incMemoryUsage(frameLength)) {
-        return;
-      }
-      currentFrameLength_ = frameLength;
-      // skip over stream ID
-      cursor.skipNoAdvance(sizeof(StreamId::underlying_type));
-      // read frameType and ignore flags
-      std::tie(currentFrameType_, std::ignore) =
-          readFrameTypeAndFlagsUnsafe(cursor);
-    } else {
-      cursor.skipNoAdvance(Serializer::kMinimumFrameHeaderLength);
-    }
-    const size_t totalSize =
-        currentFrameLength_ + Serializer::kBytesForFrameOrMetadataLength;
-
-    // we may have an incomplete frame
-    if (totalSize > bufLen) {
-      // switch to dynamic buffer only if there is no way to fit the whole frame
-      // into the static buffer
-      if (totalSize - bufLen > readBuffer_.tailroom() &&
-          LIKELY(totalSize > kStaticBufferSize || readBuffer_.isSharedOne())) {
-        dynamicBuffer_ = folly::IOBuf::createCombined(currentFrameLength_);
-        readBuffer_.trimStart(Serializer::kBytesForFrameOrMetadataLength);
-        memcpy(
-            dynamicBuffer_->writableData(),
-            readBuffer_.data(),
-            readBuffer_.length());
-        dynamicBuffer_->append(readBuffer_.length());
-        // "free" the data we just copied in readBuffer_
-        readBuffer_.prepend(Serializer::kBytesForFrameOrMetadataLength);
-        readBuffer_.trimEnd(readBuffer_.length());
-      }
-      return;
-    }
-
-    // otherwise, we have a full frame
-    cursor.reset(&readBuffer_);
-    cursor.skipNoAdvance(Serializer::kBytesForFrameOrMetadataLength);
-    std::unique_ptr<folly::IOBuf> frame;
-    cursor.clone(frame, currentFrameLength_);
-    readBuffer_.trimStart(totalSize);
-    owner_.handleFrame(std::move(frame));
-    owner_.decMemoryUsage(currentFrameLength_);
-    currentFrameLength_ = 0;
-    currentFrameType_ = 0;
-  }
-}
-
-template <class T>
 void Parser<T>::getReadBuffer(void** bufout, size_t* lenout) {
   blockResize_ = true;
   if (useStrategyParser_) {
@@ -258,8 +160,6 @@ void Parser<T>::getReadBuffer(void** bufout, size_t* lenout) {
     allocatingParser_->getReadBuffer(bufout, lenout);
   } else if (newBufferLogicEnabled_) {
     getReadBufferNew(bufout, lenout);
-  } else if (hybridBufferLogicEnabled_) {
-    getReadBufferHybrid(bufout, lenout);
   } else {
     getReadBufferOld(bufout, lenout);
   }
@@ -276,8 +176,6 @@ void Parser<T>::readDataAvailable(size_t nbytes) noexcept {
       allocatingParser_->readDataAvailable(nbytes);
     } else if (newBufferLogicEnabled_) {
       readDataAvailableNew(nbytes);
-    } else if (hybridBufferLogicEnabled_) {
-      readDataAvailableHybrid(nbytes);
     } else {
       readDataAvailableOld(nbytes);
     }
@@ -389,10 +287,6 @@ constexpr size_t Parser<T>::kMaxBufferSize;
 // THRIFT_FLAG(rocket_parser_dont_hold_buffer_enabled) is stable.
 template <class T>
 constexpr std::chrono::milliseconds Parser<T>::kDefaultBufferResizeInterval;
-template <class T>
-constexpr size_t Parser<T>::kStaticBufferSize;
-template <class T>
-constexpr size_t Parser<T>::kReallocateThreshold;
 
 } // namespace rocket
 } // namespace thrift

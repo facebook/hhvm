@@ -114,11 +114,12 @@ class AcceptorTest : public ::testing::TestWithParam<TestSSLConfig> {
         folly::SSLContext::SSLVersion::TLSv1_2);
     TestSSLConfig testConfig = GetParam();
     if (testConfig == TestSSLConfig::SSL) {
-      sslContext->loadCertKeyPairFromFiles(folly::kTestCert, folly::kTestKey);
+      sslContext->loadCertKeyPairFromFiles(
+          folly::test::kTestCert, folly::test::kTestKey);
     } else if (testConfig == TestSSLConfig::SSL_MULTI_CA) {
       // Use a different cert.
       sslContext->loadCertKeyPairFromFiles(
-          folly::kClientTestCert, folly::kClientTestKey);
+          folly::test::kClientTestCert, folly::test::kClientTestKey);
     }
     sslContext->setOptions(SSL_OP_NO_TICKET);
     sslContext->ciphers("ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
@@ -128,12 +129,13 @@ class AcceptorTest : public ::testing::TestWithParam<TestSSLConfig> {
   static wangle::SSLContextConfig getTestSslContextConfig() {
     wangle::SSLContextConfig sslCtxConfig;
     TestSSLConfig testConfig = GetParam();
-    sslCtxConfig.setCertificate(folly::kTestCert, folly::kTestKey, "");
+    sslCtxConfig.setCertificate(
+        folly::test::kTestCert, folly::test::kTestKey, "");
     if (testConfig == TestSSLConfig::SSL_MULTI_CA) {
-      sslCtxConfig.clientCAFiles =
-          std::vector<std::string>{folly::kTestCA, folly::kClientTestCA};
+      sslCtxConfig.clientCAFiles = std::vector<std::string>{
+          folly::test::kTestCA, folly::test::kClientTestCA};
     } else {
-      sslCtxConfig.clientCAFile = folly::kTestCA;
+      sslCtxConfig.clientCAFile = folly::test::kTestCA;
     }
     sslCtxConfig.sessionContext = "AcceptorTest";
     sslCtxConfig.isDefault = true;

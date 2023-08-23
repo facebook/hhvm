@@ -128,8 +128,10 @@ TEST(ScopedServerInterfaceThread, newClientWithSSLPolicyREQUIRED) {
       make_shared<SimpleServiceImpl>(), "::1", 0, [](ThriftServer& server) {
         // server TLS setup
         auto sslConfig = std::make_shared<wangle::SSLContextConfig>();
-        sslConfig->setCertificate(folly::kTestCert, folly::kTestKey, "");
-        sslConfig->clientCAFiles = std::vector<std::string>{folly::kTestCA};
+        sslConfig->setCertificate(
+            folly::test::kTestCert, folly::test::kTestKey, "");
+        sslConfig->clientCAFiles =
+            std::vector<std::string>{folly::test::kTestCA};
         sslConfig->sessionContext = "ThriftServerTest";
         sslConfig->setNextProtocols(
             **apache::thrift::ThriftServer::defaultNextProtocols());

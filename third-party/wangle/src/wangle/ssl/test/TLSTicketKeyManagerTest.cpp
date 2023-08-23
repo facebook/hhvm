@@ -175,11 +175,11 @@ TEST(
   serverCtx->setTicketHandler(std::move(ticketHandler));
 
   // start listening on a local port
-  folly::ReadCallback readCallback(nullptr);
-  readCallback.state = folly::STATE_SUCCEEDED;
-  folly::HandshakeCallback handshakeCallback(&readCallback);
-  folly::SSLServerAcceptCallback acceptCallback(&handshakeCallback);
-  folly::TestSSLServer server(&acceptCallback, std::move(serverCtx));
+  folly::test::ReadCallback readCallback(nullptr);
+  readCallback.state = folly::test::STATE_SUCCEEDED;
+  folly::test::HandshakeCallback handshakeCallback(&readCallback);
+  folly::test::SSLServerAcceptCallback acceptCallback(&handshakeCallback);
+  folly::test::TestSSLServer server(&acceptCallback, std::move(serverCtx));
 
   folly::EventBase evb;
   auto clientCtx = std::make_shared<folly::SSLContext>();

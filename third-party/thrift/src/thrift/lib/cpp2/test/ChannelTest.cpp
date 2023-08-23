@@ -228,8 +228,8 @@ class SocketPairTest {
     clientCtx->ciphers("ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
 
     serverCtx->ciphers("ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
-    serverCtx->loadCertificate(folly::kTestCert);
-    serverCtx->loadPrivateKey(folly::kTestKey);
+    serverCtx->loadCertificate(folly::test::kTestCert);
+    serverCtx->loadPrivateKey(folly::test::kTestKey);
   }
 
   int getFd0() { return socket0_->getNetworkSocket().toFd(); }

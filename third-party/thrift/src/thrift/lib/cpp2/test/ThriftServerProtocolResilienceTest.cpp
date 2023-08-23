@@ -45,7 +45,7 @@ void testTHeaderWithData(
   ScopedServerInterfaceThread runner(handler);
 
   auto addr = runner.getAddress();
-  BlockingSocket socket(addr, nullptr);
+  folly::test::BlockingSocket socket(addr, nullptr);
   socket.open();
 
   auto sent =

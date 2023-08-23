@@ -47,12 +47,12 @@ struct FileRegionTest : public Test {
     socket->close();
   }
 
-  TestServer server;
+  folly::test::TestServer server;
   EventBase evb;
   std::shared_ptr<AsyncSocket> socket;
   std::shared_ptr<AsyncSocket> acceptedSocket;
-  ConnCallback ccb;
-  ReadCallback rcb;
+  folly::test::ConnCallback ccb;
+  folly::test::ReadCallback rcb;
   int fd;
 };
 
@@ -73,7 +73,7 @@ TEST_F(FileRegionTest, Basic) {
   socket->shutdownWrite();
   evb.loopIgnoreKeepAlive();
 
-  ASSERT_EQ(rcb.state, STATE_SUCCEEDED);
+  ASSERT_EQ(rcb.state, folly::test::STATE_SUCCEEDED);
 
   size_t receivedBytes = 0;
   for (auto& buf : rcb.buffers) {
@@ -102,7 +102,7 @@ TEST_F(FileRegionTest, Repeated) {
   socket->shutdownWrite();
   evb.loopIgnoreKeepAlive();
 
-  ASSERT_EQ(rcb.state, STATE_SUCCEEDED);
+  ASSERT_EQ(rcb.state, folly::test::STATE_SUCCEEDED);
 
   size_t receivedBytes = 0;
   for (auto& buf : rcb.buffers) {

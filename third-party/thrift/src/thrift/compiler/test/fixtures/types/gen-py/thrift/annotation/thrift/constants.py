@@ -13,5 +13,5 @@ from thrift.protocol.TProtocol import TProtocolException
 
 
 
-from .ttypes import UTF8STRINGS, Beta, Experimental, Testing, ReserveIds, RequiresBackwardCompatibility, NoTesting, NoExperimental, NoBeta, Released, NoLegacy, NoDeprecated, TerseWrite, Box, Mixin, SerializeInFieldIdOrder, BitmaskEnum, v1, v1beta, v1alpha, v1test, ExceptionMessage, GenerateRuntimeSchema, InternBox
+from .ttypes import UTF8STRINGS, Beta, Experimental, Testing, Deprecated, ReserveIds, RequiresBackwardCompatibility, NoTesting, NoExperimental, NoBeta, Released, NoLegacy, NoDeprecated, TerseWrite, Box, Mixin, SerializeInFieldIdOrder, BitmaskEnum, v1, v1beta, v1alpha, v1test, ExceptionMessage, GenerateRuntimeSchema, InternBox
 

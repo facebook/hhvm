@@ -256,6 +256,119 @@ class Testing implements \IThriftSyncStruct, \IThriftStructMetadata {
 }
 
 /**
+ * Indicates a definition/feature should no longer be used.
+ *
+ * Original thrift struct:-
+ * Deprecated
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/Deprecated'))>>
+class Deprecated implements \IThriftSyncStruct, \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    1 => shape(
+      'var' => 'message',
+      'type' => \TType::STRING,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'message' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'message' => ?string,
+  );
+
+  const int STRUCTURAL_ID = 2427562471238739676;
+  /**
+   * Original thrift field:-
+   * 1: string message
+   */
+  public string $message;
+
+  public function __construct(?string $message = null)[] {
+    $this->message = $message ?? '';
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'message'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'Deprecated';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "thrift.Deprecated",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                )
+              ),
+              "name" => "message",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\Beta' => \facebook\thrift\annotation\Beta::fromShape(
+          shape(
+          )
+        ),
+        '\facebook\thrift\annotation\Program' => \facebook\thrift\annotation\Program::fromShape(
+          shape(
+          )
+        ),
+        '\facebook\thrift\annotation\Definition' => \facebook\thrift\annotation\Definition::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'message') !== null) {
+      $this->message = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['message']);
+    }
+  }
+
+}
+
+/**
  * Annotate a thrift structured or enum to indicate if ids or values should not
  * be used.
  * 

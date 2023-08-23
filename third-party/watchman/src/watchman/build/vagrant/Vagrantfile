@@ -165,23 +165,25 @@ Vagrant.configure("2") do |config|
     sync_fuse ubuntu
   end
 
-  config.vm.define "watchman-fedora-35", autostart: false do |fedora35|
-    fedora35.vm.box = "generic/fedora35"
-    fedora35.vm.hostname = "watchman-fedora-35"
+  fedora_vms = [
+    {name: "watchman-fedora-35", box: "generic/fedora35"},
+    {name: "watchman-fedora-36", box: "generic/fedora36"},
+    {name: "watchman-fedora-37", box: "generic/fedora37"},
+    # boxen needs many more packages installed by default. Maybe
+    # generic/ will release a Fedora 38 box soon.
+    {name: "watchman-fedora-38", box: "boxen/fedora-38-x86_64"},
+  ]
 
-    provision_fedora fedora35
-    provider_linux fedora35
-    sync_fuse fedora35
-  end
+  fedora_vms.each { |fedora_vm|
+    config.vm.define fedora_vm[:name], autostart: false do |config|
+      config.vm.box = fedora_vm[:box]
+      config.vm.hostname = fedora_vm[:name]
 
-  config.vm.define "watchman-fedora-36", autostart: false do |fedora36|
-    fedora36.vm.box = "generic/fedora36"
-    fedora36.vm.hostname = "watchman-fedora-36"
-
-    provision_fedora fedora36
-    provider_linux fedora36
-    sync_fuse fedora36
-  end
+      provision_fedora config
+      provider_linux config
+      sync_fuse config
+    end
+  }
 
   config.vm.define "watchman-freebsd" do |freebsd|
     freebsd.vm.box = "generic/freebsd12"

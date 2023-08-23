@@ -73,6 +73,8 @@ class StreamClientCallback {
 onFirstResponse and onFirstResponseError are equivalent to onResponse and onResponseError for request-response, with the exception that onFirstResponse also receives a server callback for sending outgoing payloads and events. The methods form the edges of a state machine documented [here.](https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/async/StreamCallbacks.h) It is guaranteed that the state machine will transition to the terminal state. It is the implementer’s responsibility to respect the per-stream flow control and to return the correct boolean value.
 Sink has a similar structure documented [here.](https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/async/StreamCallbacks.h)
 
+`StreamServerCallback` callbacks must be called on the EventBase passed into `onFirstResponse`.
+
 ### Interactions
 
 To send methods over an interaction you must call `createInteraction,` store the returned object and pass it to `RpcOptions::setInteractionId` for each request, then pass it to `terminateInteraction` to dispose of it. (It will crash the program if destroyed any other way). It is not necessary to wait for responses before calling terminateInteraction.

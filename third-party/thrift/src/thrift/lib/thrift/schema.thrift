@@ -198,11 +198,11 @@ struct DefinitionAttrs {
   3: AnnotationIds annotations;
 
   /**
+   * DEPRECATED!
    * The unstructured annotations associated with this definition, for the current context.
    *
    * For example, none are present in the runtime schema while all are present in the AST.
    */
-  @thrift.Deprecated
   4: map<string, string> unstructuredAnnotations;
 
   /** The release state associated with this definition. */

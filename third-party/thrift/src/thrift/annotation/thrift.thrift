@@ -50,16 +50,6 @@ struct Experimental {}
 @scope.Definition
 struct Testing {}
 
-/** Indicates a definition/feature should no longer be used. */
-// TODO(afuller): Add a validator to produce warnings when annotated definitions
-// are used.
-@Beta // TODO(afuller): Hook up to code gen.
-@scope.Program
-@scope.Definition
-struct Deprecated {
-  1: string message;
-}
-
 /**
  * Annotate a thrift structured or enum to indicate if ids or values should not
  * be used.

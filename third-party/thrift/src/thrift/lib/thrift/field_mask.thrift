@@ -18,7 +18,7 @@ include "thrift/annotation/thrift.thrift"
 include "thrift/annotation/cpp.thrift"
 cpp_include "folly/container/F14Map.h"
 
-@thrift.v1alpha
+@thrift.Experimental
 package "facebook.com/thrift/protocol"
 
 namespace cpp2 apache.thrift.protocol

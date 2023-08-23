@@ -28,7 +28,7 @@ include "thrift/lib/thrift/standard.thrift"
  * '{name}{Type}. For example, for a 'public' exception `Foo`, the underlying
  * type would be `exception FooException`.
  */
-@thrift.v1alpha
+@thrift.Experimental
 package "facebook.com/thrift/type"
 
 namespace cpp2 apache.thrift.type

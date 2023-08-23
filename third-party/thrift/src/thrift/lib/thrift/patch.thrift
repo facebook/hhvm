@@ -22,10 +22,8 @@ include "thrift/lib/thrift/id.thrift"
 
 cpp_include "thrift/lib/cpp2/op/detail/Patch.h"
 
-// TODO(dokwon): Remove @thrift.TerseWrite after fixing @scope.Transitive bug.
 @thrift.TerseWrite
 @thrift.Experimental
-@thrift.v1alpha
 package "facebook.com/thrift/op"
 
 namespace cpp2 apache.thrift.op

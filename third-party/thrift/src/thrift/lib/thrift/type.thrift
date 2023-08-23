@@ -24,7 +24,7 @@ cpp_include "<thrift/lib/cpp2/type/Protocol.h>"
 cpp_include "<thrift/lib/cpp2/type/Type.h>"
 
 /** Canonical representations for well-known Thrift types. */
-@thrift.v1alpha
+@thrift.Experimental
 package "facebook.com/thrift/type"
 
 namespace cpp2 apache.thrift.type

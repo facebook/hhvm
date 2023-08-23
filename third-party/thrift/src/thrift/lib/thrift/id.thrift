@@ -26,7 +26,7 @@ include "thrift/annotation/thrift.thrift"
 // These definitions always include the suffix `Id` in their names:
 // '{name}Id'. For example, for a type `Foo`, the ID typedef would be
 // `typedef id.ExternId FooId`.
-@thrift.v1alpha
+@thrift.Experimental
 package "facebook.com/thrift/type"
 
 namespace cpp2 apache.thrift.type

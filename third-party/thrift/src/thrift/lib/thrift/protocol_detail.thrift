@@ -24,7 +24,7 @@ cpp_include "thrift/lib/thrift/detail/protocol.h"
 cpp_include "folly/container/F14Map.h"
 cpp_include "folly/container/F14Set.h"
 
-@thrift.v1alpha
+@thrift.Experimental
 package "facebook.com/thrift/protocol/detail"
 
 namespace cpp2 apache.thrift.protocol.detail

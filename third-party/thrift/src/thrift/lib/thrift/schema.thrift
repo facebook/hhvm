@@ -37,7 +37,7 @@ include "thrift/lib/thrift/type.thrift"
  * performing semantic analysis on an AST, to distill the result of interpreting
  * the source file in to the representations found in this file.
  */
-@thrift.v1alpha
+@thrift.Experimental
 package "facebook.com/thrift/type"
 
 namespace cpp2 apache.thrift.type

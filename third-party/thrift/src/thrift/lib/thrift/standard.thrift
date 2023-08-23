@@ -21,7 +21,7 @@ cpp_include "<folly/io/IOBuf.h>"
 cpp_include "<folly/FBString.h>"
 
 /** The **standard** types all Thrift implementations support. */
-@thrift.v1alpha
+@thrift.Experimental
 package "facebook.com/thrift/type"
 
 namespace cpp2 apache.thrift.type

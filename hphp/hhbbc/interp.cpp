@@ -3401,7 +3401,9 @@ void in(ISS& env, const bc::IncDecS& op) {
 }
 
 void in(ISS& env, const bc::UnsetL& op) {
-  if (locRaw(env, op.loc1).subtypeOf(TUninit)) {
+  // Peek so that we don't register a ready on the local if we're
+  // going to optimize this away.
+  if (peekLocRaw(env, op.loc1).subtypeOf(TUninit)) {
     return reduce(env);
   }
 

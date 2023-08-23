@@ -16,10 +16,20 @@
 
 package thrift
 
-import "testing"
+import (
+	"runtime"
+	"testing"
+)
 
 func TestNewSocket(t *testing.T) {
-	socket, err := NewSocket(SocketTimeout(10), SocketAddr("localhost6:1234"))
+	if runtime.GOOS == "windows" {
+		t.Skip("skipping on windows")
+	}
+	address := "localhost6:1234"
+	if runtime.GOOS == "darwin" {
+		address = "localhost:1234"
+	}
+	socket, err := NewSocket(SocketTimeout(10), SocketAddr(address))
 	if err != nil {
 		t.Error(err)
 	}

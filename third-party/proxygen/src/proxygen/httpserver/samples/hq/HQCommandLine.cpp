@@ -203,12 +203,6 @@ void initializeTransportSettings(HQToolParams& hqUberParams) {
   if (!FLAGS_protocol.empty()) {
     hqParams.protocol = FLAGS_protocol;
     hqParams.supportedAlpns = {hqParams.protocol};
-  } else {
-    hqParams.supportedAlpns = {proxygen::kH3,
-                               proxygen::kHQ,
-                               proxygen::kH3FBCurrentDraft,
-                               proxygen::kH3CurrentDraft,
-                               proxygen::kHQCurrentDraft};
   }
 
   hqParams.transportSettings.advertisedInitialConnectionFlowControlWindow =

@@ -21,51 +21,75 @@
 namespace HPHP {
 namespace stream_transport {
 
+namespace {
+
+template<typename T>
+inline T take(T& value, T&& repl = T{}) {
+  auto tmp = std::move(repl);
+  std::swap(tmp, value);
+  return tmp;
+}
+
+} // anonymous namespace
+
 void HttpStreamServerTransport::doOnData(std::unique_ptr<folly::IOBuf> buf) {
-  if (m_onData) {
-    m_onData(std::move(buf));
+  auto onData = m_sharedData.lock()->onData;
+  if (onData) {
+    onData(std::move(buf));
   }
 }
 
 void HttpStreamServerTransport::doOnClose() {
-  if (m_onClose) {
-    m_onClose();
+  auto onClose = take(m_sharedData.lock()->onClose);
+  if (onClose) {
+    onClose();
   }
-  m_eom_received = true;
+  m_sharedData.lock()->eom_received = true;
 }
 
 void HttpStreamServerTransport::setOnClose(OnCloseType callback) {
-  assertx(!callback || !m_onClose);
-  m_onClose = callback;
-  if (m_eom_received && m_onClose) {
-    m_onClose();
+  auto eom_received = m_sharedData.withLock([callback = std::move(callback)](auto& sharedData) {
+    assertx(!callback || !sharedData.onClose);
+    return sharedData.eom_received;
+  });
+  if (eom_received) {
+    doOnClose();
   }
 }
 
 void HttpStreamServerTransport::write(folly::StringPiece data) {
-  assertx(m_transport);
-  if (m_eom_sent) {
+  if (m_sharedData.lock()->eom_sent) {
     return;
   }
   m_transport->sendStreamResponse(data.data(), data.size());
 }
 
 void HttpStreamServerTransport::setOnData(OnDataType callback) {
-  assertx(!callback || !m_onData);
-  m_onData = callback;
-  assertx(m_transport);
-  if (callback) {
+  bool nonnull = (bool)callback;
+  m_sharedData.withLock([callback = std::move(callback)](auto& sharedData) mutable {
+    assertx(!callback || !sharedData.onData);
+    sharedData.onData = std::move(callback);
+  });
+  if (nonnull) {
     m_transport->onStreamReady();
   }
 }
 
 void HttpStreamServerTransport::close() {
-  if (m_eom_sent) {
-    return;
-  }
-  assertx(m_transport);
-  m_transport->sendStreamEOM();
-  m_eom_sent = true;
+  m_sharedData.withLock([transport = m_transport](auto& sharedData) {
+    if (sharedData.eom_sent) {
+      return;
+    }
+    transport->sendStreamEOM();
+    sharedData.eom_sent = true;
+    sharedData.onData = nullptr;
+    sharedData.onClose = nullptr;
+  });
 }
+
+void HttpStreamServerTransport::closeNow() {
+  close();
+}
+
 } // namaespace stream_transport
 } // namespace HPHP

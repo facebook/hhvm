@@ -21,6 +21,7 @@
 #include "hphp/util/assertions.h"
 
 #include <folly/io/IOBuf.h>
+#include <folly/Synchronized.h>
 
 namespace HPHP {
 
@@ -31,18 +32,20 @@ namespace stream_transport {
 // chuncked responses to implement a StreamTransport for the server.
 // A non-blocking POST message contains a custom NonBlockingPost header.
 struct HttpStreamServerTransport final : StreamTransport {
-  explicit HttpStreamServerTransport(Transport* t) : m_transport(t) {}
+  explicit HttpStreamServerTransport(Transport* t) : m_transport(t) {
+    assertx(t);
+  }
   ~HttpStreamServerTransport() override {}
 
   void write(folly::StringPiece slice) override;
 
   void close() override;
-  void closeNow() override { }
-  bool isClosed() const override { return m_eom_sent; }
-  bool isClosing() const override { return m_eom_sent; }
+  void closeNow() override;
+  bool isClosed() const override { return m_sharedData.lock()->eom_sent; }
+  bool isClosing() const override { return m_sharedData.lock()->eom_sent; }
 
   bool isReady() const {
-    return m_onData != nullptr;
+    return m_sharedData.lock()->onData != nullptr;
   }
 
   void setOnData(OnDataType callback) override;
@@ -52,11 +55,14 @@ struct HttpStreamServerTransport final : StreamTransport {
   void doOnClose();
 
 private:
-  Transport* m_transport;
-  bool m_eom_sent{false};
-  bool m_eom_received{false};
-  OnDataType m_onData;
-  OnCloseType m_onClose;
+  Transport* const m_transport;
+  struct SharedData {
+    bool eom_sent{false};
+    bool eom_received{false};
+    OnDataType onData;
+    OnCloseType onClose;
+  };
+  folly::Synchronized<SharedData, std::mutex> m_sharedData;
 };
 } // namespace stream_transport
 } // namespace HPHP

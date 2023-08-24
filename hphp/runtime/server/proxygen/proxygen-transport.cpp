@@ -487,6 +487,12 @@ bool ProxygenTransport::hasMorePostData() {
 
 void ProxygenTransport::onStreamReady() {
   assertx(m_streamTransport && m_streamTransport->isReady());
+
+  // Now that the stream is ready send a blank datum which will trigger the
+  // headers to send.
+  m_responseCode = 200;
+  sendStreamResponse("", 0);
+
   Lock lock(this);
   while (!m_bodyData.empty()) {
     auto buf = m_bodyData.pop_front();
@@ -634,11 +640,6 @@ bool ProxygenTransport::isServerStopping() {
 }
 
 void ProxygenTransport::sendErrorResponse(uint32_t code) noexcept {
-  // TODO: Implement proper error handling for srteam transports.
-  if (auto stream = getStreamTransport()) {
-    stream->close();
-    return;
-  }
   HTTPMessage response;
   response.setHTTPVersion(1, 1);
   response.setStatusCode(code);
@@ -656,6 +657,11 @@ void ProxygenTransport::sendErrorResponse(uint32_t code) noexcept {
   CHECK(m_clientTxn && !m_egressError);
   m_clientTxn->sendHeaders(response);
   m_clientTxn->sendEOM();
+
+  if (auto stream = getStreamTransport()) {
+    // This shouldn't be necessary - but can't hurt.
+    stream->close();
+  }
 }
 
 void ProxygenTransport::onError(const HTTPException& err) noexcept {
@@ -778,19 +784,11 @@ void ProxygenTransport::messageAvailable(ResponseMessage&& message) noexcept {
 void ProxygenTransport::sendStreamResponse(const void* data, int size) {
   // TODO: track and log response size.
   assertx(isStreamTransport());
-  if (m_responseCode < 0) {
-    m_responseCode = 200;
-  }
-  assertx(m_responseCode == 200);
   sendImpl(data, size, m_responseCode, true, false);
 }
 
 void ProxygenTransport::sendStreamEOM() {
   assertx(isStreamTransport());
-  if (m_responseCode < 0) {
-    m_responseCode = 200;
-  }
-  assertx(m_responseCode == 200);
   sendImpl("", 0, m_responseCode, true, true);
 }
 

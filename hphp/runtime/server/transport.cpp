@@ -444,9 +444,6 @@ bool Transport::acceptEncoding(const char *encoding) {
 }
 
 void Transport::setResponse(int code, const char *info) {
-  if (isStreamTransport()) {
-    return;
-  }
   m_responseCode = code;
   m_responseCodeInfo = info ? info : HttpProtocol::GetReasonString(code);
 }
@@ -743,10 +740,9 @@ void Transport::sendRaw(const char *data, int size, int code /* = 200 */,
   if (m_sendEnded) {
     return;
   }
-  // This API cannot be used for streaming transports.
-  if (isStreamTransport()) {
-    return;
-  }
+
+  // Note: This API is used when `isStreamTransport()` to report request errors
+  // (such as 404).
 
   if (!precompressed && RuntimeOption::ForceChunkedEncoding) {
     chunked = true;

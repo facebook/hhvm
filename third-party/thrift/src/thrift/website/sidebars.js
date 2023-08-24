@@ -249,6 +249,7 @@ module.exports = {
             },
             items: [
               'fb/languages/java/caveats',
+              'fb/languages/java/client',
               'fb/languages/java/exec',
               'fb/languages/java/generatedfiles',
               'fb/languages/java/hyperthrift',

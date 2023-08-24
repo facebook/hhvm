@@ -51,7 +51,7 @@ id_start    ::=  "a"..."z" | "A"..."Z" | "_"
 id_continue ::=  id_start | digit
 ```
 
-A qualified identifier is a sequence of two or more identifiers separated by periods. The first component in a qualified identifier is the name of a Thrift file without extension and the second component is the name of a definition in that file. For example, `search_types.Query` denotes the definition named `Query` in `search_types.thrift`.
+A qualified identifier is a sequence of two or more identifiers separated by periods. It can be used to refer to a definition in another Thrift file in which case the first component is the name of that file without extension and the second component is the name of the definition. For example, `search_types.Query` denotes the definition named `Query` in `search_types.thrift`.
 
 `maybe_qualified_id` denotes a qualified or unqualified identifier.
 

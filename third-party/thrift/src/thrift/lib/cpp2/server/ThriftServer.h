@@ -182,6 +182,7 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
 
   bool preferIoUring_ = false;
   bool useDefaultIoUringExecutor_ = false;
+  bool usingIoUring_ = false;
 
   std::weak_ptr<folly::ShutdownSocketSet> wShutdownSocketSet_;
 
@@ -661,6 +662,8 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   void setPreferIoUring(bool b) { preferIoUring_ = b; }
 
   bool preferIoUring() const { return preferIoUring_; }
+
+  bool usingIoUring() const { return usingIoUring_; }
 
   void setUseDefaultIoUringExecutor(bool b) { useDefaultIoUringExecutor_ = b; }
 

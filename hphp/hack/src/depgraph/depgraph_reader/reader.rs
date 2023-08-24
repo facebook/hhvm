@@ -142,8 +142,11 @@ impl DepGraph {
         }
     }
 
-    /// Query the direct typing dependents for the given set of dependencies.
-    pub fn query_typing_deps_multi(&self, deps: &HashTrieSet<Dep>) -> HashTrieSet<Dep> {
+    /// Returns the union of the provided dep set and their direct typing dependents.
+    pub fn query_and_accumulate_typing_deps_multi(
+        &self,
+        deps: &HashTrieSet<Dep>,
+    ) -> HashTrieSet<Dep> {
         let mut acc = deps.clone();
         for dep in deps {
             self.add_typing_deps_for_dep(&mut acc, *dep);

@@ -452,8 +452,8 @@ module CustomGraph = struct
     = "hh_custom_dep_graph_replace"
     [@@noalloc]
 
-  external hh_custom_dep_graph_has_edge : Mode.t -> Dep.t -> Dep.t -> bool
-    = "hh_custom_dep_graph_has_edge"
+  external base_dep_graph_has_edge : Mode.t -> Dep.t -> Dep.t -> bool
+    = "hh_base_dep_graph_has_edge"
     [@@noalloc]
 
   external get_ideps_from_hash : Mode.t -> Dep.t -> DepSet.t
@@ -522,8 +522,7 @@ module CustomGraph = struct
       Hashtbl.fold
         begin
           fun ({ idependent; idependency } as edge) () s ->
-            if not (hh_custom_dep_graph_has_edge mode idependent idependency)
-            then
+            if not (base_dep_graph_has_edge mode idependent idependency) then
               DepEdgeSet.add edge s
             else
               s
@@ -720,10 +719,7 @@ end = struct
         fun CustomGraph.{ idependent; idependency } () ->
           if
             not
-              (CustomGraph.hh_custom_dep_graph_has_edge
-                 mode
-                 idependent
-                 idependency)
+              (CustomGraph.base_dep_graph_has_edge mode idependent idependency)
           then begin
             (* To be kept in sync with typing_deps.rs::hh_custom_dep_graph_save_delta! *)
 

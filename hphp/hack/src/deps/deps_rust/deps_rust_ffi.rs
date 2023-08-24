@@ -154,91 +154,35 @@ ocaml_ffi! {
         dep_graph_override(mode);
     }
 
-    fn hh_custom_dep_graph_has_edge(mode: RawTypingDepsMode, dependent: Dep, dependency: Dep) -> bool {
-        // Safety: we don't call into OCaml again, so mode will remain valid.
-        dep_graph_with_default(mode, false, move |g| {
-            g.dependent_dependency_edge_exists(dependent, dependency)
-        })
+    fn hh_base_dep_graph_has_edge(mode: RawTypingDepsMode, dependent: Dep, dependency: Dep) -> bool {
+        base_dep_graph_has_edge(mode, dependent, dependency)
     }
 
     fn hh_custom_dep_graph_get_ideps_from_hash(mode: RawTypingDepsMode, dep: Dep) -> Custom<DepSet> {
-        let mut deps = HashTrieSet::new();
-        dep_graph_delta_with(|delta| {
-            if let Some(delta_deps) = delta.get(dep) {
-                for delta_dep in delta_deps {
-                    deps.insert_mut(*delta_dep)
-                }
-            }
-        });
-        // Safety: we don't call into OCaml again, so mode will remain valid.
-        dep_graph_with_default(mode, (), |g| {
-            if let Some(hash_list) = g.hash_list_for(dep) {
-                for hash in g.hash_list_hashes(hash_list) {
-                    deps.insert_mut(hash);
-                }
-            }
-        });
-
-        Custom::from(DepSet::from(deps))
+        get_ideps_from_hash(mode, dep)
     }
 
+    // Returns the union of the provided dep set and their direct typing dependents.
     fn hh_custom_dep_graph_add_typing_deps(mode: RawTypingDepsMode, query: Custom<DepSet>) -> Custom<DepSet> {
-        // Safety: we don't call into OCaml again, so mode will remain valid.
-        let mut s = dep_graph_with_option(mode, |g| match g {
-            Some(g) => g.query_typing_deps_multi(&query),
-            None => query.clone(),
-        });
-        dep_graph_delta_with(|delta| {
-            for dep in query.iter() {
-                if let Some(depies) = delta.get(*dep) {
-                    for depy in depies {
-                        s.insert_mut(*depy);
-                    }
-                }
-            }
-        });
-        Custom::from(DepSet::from(s))
+        query_and_accumulate_typing_deps(mode, query)
     }
 
+    // Returns the union of the provided dep set and their recursive 'extends' dependents.
     fn hh_custom_dep_graph_add_extend_deps(mode: RawTypingDepsMode, query: Custom<DepSet>) -> Custom<DepSet> {
-        let mut visited = HashSet::default();
-        let mut queue = VecDeque::new();
-        let mut acc = query.clone();
-        for source_class in query.iter() {
-            // Safety: we don't call into OCaml again, so mode will remain valid.
-            unsafe {
-                get_extend_deps_visit(mode, &mut visited, &mut queue, *source_class, &mut acc);
-            }
-        }
-        while let Some(source_class) = queue.pop_front() {
-            // Safety: we don't call into OCaml again, so mode will remain valid.
-            unsafe {
-                get_extend_deps_visit(mode, &mut visited, &mut queue, source_class, &mut acc);
-            }
-        }
-        Custom::from(acc.into())
+        add_extend_deps(mode, query)
     }
 
+    // Returns the recursive 'extends' dependents of a dep.
     fn hh_custom_dep_graph_get_extend_deps(
         mode: RawTypingDepsMode,
         visited: Custom<VisitedSet>,
         source_class: Dep,
         acc: Custom<DepSet>,
     ) -> Custom<DepSet> {
-        let mut visited = visited.borrow_mut();
-        let mut queue = VecDeque::new();
-        let mut acc = acc.clone();
-
-        // Safety: we don't call into OCaml again, so mode will remain valid.
-        unsafe {
-            get_extend_deps_visit(mode, &mut visited, &mut queue, source_class, &mut acc);
-            while let Some(source_class) = queue.pop_front() {
-                get_extend_deps_visit(mode, &mut visited, &mut queue, source_class, &mut acc);
-            }
-        }
-        Custom::from(acc.into())
+        get_extend_deps(mode, visited, source_class, acc)
     }
 
+    // Add edge into the in-memory depgraph delta
     fn hh_custom_dep_graph_register_discovered_dep_edge(
         dependent: Dep,
         dependency: Dep,
@@ -253,51 +197,11 @@ ocaml_ffi! {
     }
 
     fn hh_custom_dep_graph_save_delta(dest: OsString, reset_state_after_saving: bool) -> usize {
-        let f = std::fs::OpenOptions::new()
-            .create(true)
-            .append(true)
-            .open(dest).unwrap();
-        let hashes_added = dep_graph_delta_with(move |s| {
-            let mut w = std::io::BufWriter::new(f);
-            let hashes_added = s.write_to(&mut w).unwrap();
-            w.into_inner().unwrap();
-            hashes_added
-        });
-
-        if reset_state_after_saving {
-            dep_graph_delta_with_mut(|s| {
-                s.clear();
-            });
-        }
-        hashes_added
+        save_delta(dest, reset_state_after_saving)
     }
 
     fn hh_custom_dep_graph_load_delta(mode: RawTypingDepsMode, source: OsString) -> usize {
-        let f = File::open(source).unwrap();
-        let mut r = std::io::BufReader::new(f);
-
-        // Safety: we don't call into OCaml again, so mode will remain valid.
-        dep_graph_with_option(mode, move |g| {
-            dep_graph_delta_with_mut(|s| {
-                let result = match g {
-                    Some(g) => {
-                        s.read_from(
-                            &mut r,
-                            |dependent, dependency| {
-                                // Only add when it's not already in
-                                // the graph!
-                                !g.dependent_dependency_edge_exists(
-                                    dependent,
-                                    dependency,
-                                )
-                            },
-                        )
-                    }
-                    None => s.read_from(&mut r, |_, _| true),
-                };
-                result.unwrap()
-            })
-        })
+        load_delta(mode, source)
     }
 
     // Moves the source file to the destination directory.
@@ -309,6 +213,97 @@ ocaml_ffi! {
         // Technically we loaded 0 deps into the hh_server dep graph
         0
     }
+}
+
+fn base_dep_graph_has_edge(mode: RawTypingDepsMode, dependent: Dep, dependency: Dep) -> bool {
+    // Safety: we don't call into OCaml again, so mode will remain valid.
+    dep_graph_with_default(mode, false, move |g| {
+        g.dependent_dependency_edge_exists(dependent, dependency)
+    })
+}
+
+fn get_ideps_from_hash(mode: RawTypingDepsMode, dep: Dep) -> Custom<DepSet> {
+    let mut deps = HashTrieSet::new();
+    dep_graph_delta_with(|delta| {
+        if let Some(delta_deps) = delta.get(dep) {
+            for delta_dep in delta_deps {
+                deps.insert_mut(*delta_dep)
+            }
+        }
+    });
+    // Safety: we don't call into OCaml again, so mode will remain valid.
+    dep_graph_with_default(mode, (), |g| {
+        if let Some(hash_list) = g.hash_list_for(dep) {
+            for hash in g.hash_list_hashes(hash_list) {
+                deps.insert_mut(hash);
+            }
+        }
+    });
+
+    Custom::from(DepSet::from(deps))
+}
+
+/// Returns the union of the provided dep set and their direct typing dependents.
+fn query_and_accumulate_typing_deps(
+    mode: RawTypingDepsMode,
+    query: Custom<DepSet>,
+) -> Custom<DepSet> {
+    // Safety: we don't call into OCaml again, so mode will remain valid.
+    let mut acc = dep_graph_with_option(mode, |g| match g {
+        Some(g) => g.query_and_accumulate_typing_deps_multi(&query),
+        None => query.clone(),
+    });
+    dep_graph_delta_with(|delta| {
+        for dep in query.iter() {
+            if let Some(dependents) = delta.get(*dep) {
+                for dependent in dependents {
+                    acc.insert_mut(*dependent);
+                }
+            }
+        }
+    });
+    Custom::from(DepSet::from(acc))
+}
+
+/// Returns the union of the provided dep set and their recursive 'extends' dependents.
+fn add_extend_deps(mode: RawTypingDepsMode, query: Custom<DepSet>) -> Custom<DepSet> {
+    let mut visited = HashSet::default();
+    let mut queue = VecDeque::new();
+    let mut acc = query.clone();
+    for source_class in query.iter() {
+        // Safety: we don't call into OCaml again, so mode will remain valid.
+        unsafe {
+            get_extend_deps_visit(mode, &mut visited, &mut queue, *source_class, &mut acc);
+        }
+    }
+    while let Some(source_class) = queue.pop_front() {
+        // Safety: we don't call into OCaml again, so mode will remain valid.
+        unsafe {
+            get_extend_deps_visit(mode, &mut visited, &mut queue, source_class, &mut acc);
+        }
+    }
+    Custom::from(acc.into())
+}
+
+/// Returns the recursive 'extends' dependents of a dep.
+fn get_extend_deps(
+    mode: RawTypingDepsMode,
+    visited: Custom<VisitedSet>,
+    source_class: Dep,
+    acc: Custom<DepSet>,
+) -> Custom<DepSet> {
+    let mut visited = visited.borrow_mut();
+    let mut queue = VecDeque::new();
+    let mut acc = acc.clone();
+
+    // Safety: we don't call into OCaml again, so mode will remain valid.
+    unsafe {
+        get_extend_deps_visit(mode, &mut visited, &mut queue, source_class, &mut acc);
+        while let Some(source_class) = queue.pop_front() {
+            get_extend_deps_visit(mode, &mut visited, &mut queue, source_class, &mut acc);
+        }
+    }
+    Custom::from(acc.into())
 }
 
 /// Helper function to recursively get extend deps
@@ -349,6 +344,49 @@ unsafe fn get_extend_deps_visit(
             g.hash_list_hashes(hash_list)
                 .for_each(&mut handle_extends_dep);
         }
+    })
+}
+
+fn save_delta(dest: OsString, reset_state_after_saving: bool) -> usize {
+    let f = std::fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(dest)
+        .unwrap();
+    let hashes_added = dep_graph_delta_with(move |s| {
+        let mut w = std::io::BufWriter::new(f);
+        let hashes_added = s.write_to(&mut w).unwrap();
+        w.into_inner().unwrap();
+        hashes_added
+    });
+
+    if reset_state_after_saving {
+        dep_graph_delta_with_mut(|s| {
+            s.clear();
+        });
+    }
+    hashes_added
+}
+
+fn load_delta(mode: RawTypingDepsMode, source: OsString) -> usize {
+    let f = File::open(source).unwrap();
+    let mut r = std::io::BufReader::new(f);
+
+    // Safety: we don't call into OCaml again, so mode will remain valid.
+    dep_graph_with_option(mode, move |g| {
+        dep_graph_delta_with_mut(|s| {
+            let result = match g {
+                Some(g) => {
+                    s.read_from(&mut r, |dependent, dependency| {
+                        // Only add when it's not already in
+                        // the graph!
+                        !g.dependent_dependency_edge_exists(dependent, dependency)
+                    })
+                }
+                None => s.read_from(&mut r, |_, _| true),
+            };
+            result.unwrap()
+        })
     })
 }
 

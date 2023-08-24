@@ -57,7 +57,7 @@ pub enum TypingDepsMode {
     ///
     /// The first parameter is (optionally) a path to an existing custom 64-bit
     /// dependency graph. If it is present, only new edges will be written,
-    /// of not, all edges will be written.
+    /// if not, all edges will be written.
     SaveToDiskMode {
         graph: Option<String>,
         new_edges_dir: String,
@@ -147,7 +147,7 @@ fn load_global_dep_graph(mode: RawTypingDepsMode) -> Result<(), String> {
     Ok(())
 }
 
-pub fn replace_dep_graph(mode: RawTypingDepsMode) -> Result<(), String> {
+fn replace_dep_graph(mode: RawTypingDepsMode) -> Result<(), String> {
     let mut dep_graph_guard = DEP_GRAPH.lock();
     // # Safety
     //

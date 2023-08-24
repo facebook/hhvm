@@ -98,8 +98,8 @@ patch2.apply(v);
 is equivalent to
 
 ```
-patch2.merge(patch1);
-patch2.apply(v);
+patch1.merge(patch2);
+patch1.apply(v);
 ```
 
 ### Patch as Thrift Struct

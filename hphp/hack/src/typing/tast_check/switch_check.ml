@@ -350,7 +350,9 @@ let check_exhaustiveness env pos ty ((_, dfl) as caselist) =
   let tcopt = env |> Env.get_decl_env |> Decl_env.tcopt in
   if TypecheckerOptions.tco_log_exhaustivity_check tcopt then
     Env.ty_to_json env ~show_like_ty:true ty
-    |> log_exhaustivity_check env pos dfl outcomes
+    |> log_exhaustivity_check env pos dfl outcomes;
+  if TypecheckerOptions.tco_enable_strict_switch tcopt then
+    Hh_logger.log "[hh_tco_enable_strict_switch]"
 
 let handler =
   object

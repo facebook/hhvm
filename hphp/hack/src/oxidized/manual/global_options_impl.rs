@@ -160,6 +160,7 @@ impl Default for GlobalOptions {
             tco_package_info: PackageInfo::default(),
             po_unwrap_concurrent: false,
             tco_log_exhaustivity_check: false,
+            tco_enable_strict_switch: false,
         }
     }
 }

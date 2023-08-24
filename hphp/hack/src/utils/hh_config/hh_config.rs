@@ -379,6 +379,9 @@ impl HhConfig {
                 "log_exhaustivity_check" => {
                     go.tco_log_exhaustivity_check = parse_json(&value)?;
                 }
+                "enable_strict_switch" => {
+                    go.tco_enable_strict_switch = parse_json(&value)?;
+                }
                 _ => c.unknown.push((key, value)),
             }
         }

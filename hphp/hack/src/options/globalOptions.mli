@@ -338,6 +338,8 @@ type t = {
       (** Replace concurrent blocks with their bodies in the AST *)
   tco_log_exhaustivity_check: bool;
       (** Instrument the existing exhaustivity lint (for strict switch statements) *)
+  tco_enable_strict_switch: bool;
+      (** Enable strict switch statement type and exhausitivity checking *)
 }
 [@@deriving eq, show]
 
@@ -466,6 +468,7 @@ val set :
   ?tco_package_info:PackageInfo.t ->
   ?po_unwrap_concurrent:bool ->
   ?tco_log_exhaustivity_check:bool ->
+  ?tco_enable_strict_switch:bool ->
   t ->
   t
 

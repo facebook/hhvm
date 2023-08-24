@@ -9,8 +9,12 @@
 namespace fizz {
 namespace server {
 
+// out-of-line definition of constexpr static data member is redundant in C++17
+// and is deprecated
+#if __cplusplus < 201703L
 template <CertificateStorage Storage>
 constexpr folly::StringPiece TicketCodec<Storage>::Label;
+#endif // __cplusplus < 201703L
 
 template <CertificateStorage Storage>
 Buf TicketCodec<Storage>::encode(ResumptionState resState) {

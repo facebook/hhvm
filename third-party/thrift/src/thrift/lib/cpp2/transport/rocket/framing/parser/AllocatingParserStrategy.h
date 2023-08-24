@@ -18,8 +18,11 @@
 
 #include <memory>
 #include <folly/io/IOBuf.h>
+#include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Serializer.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Util.h>
+
+THRIFT_FLAG_DECLARE_int64(rocket_allocating_parser_min_buffer_size);
 
 namespace apache {
 namespace thrift {
@@ -42,9 +45,12 @@ class AllocatingParserStrategy {
       "Passed in Allocator doesn't operate on bytes");
 
  public:
-  explicit AllocatingParserStrategy(
-      T& owner, Allocator allocator = Allocator(), size_t minBufferSize = 16)
-      : owner_(owner), allocator_(allocator), minBufferSize_(minBufferSize) {}
+  explicit AllocatingParserStrategy(T& owner, Allocator allocator = Allocator())
+      : owner_(owner),
+        allocator_(allocator),
+        minBufferSize_(THRIFT_FLAG(rocket_allocating_parser_min_buffer_size)) {
+    DCHECK_GE(minBufferSize_, Serializer::kBytesForFrameOrMetadataLength);
+  }
   ~AllocatingParserStrategy() {
     if (buffer_) {
       Traits::deallocate(allocator_, buffer_, currentBufferSize_);

@@ -196,7 +196,7 @@ namespace {
       }
     }
 
-    std::unordered_set<c_WaitableWaitHandle*> m_importSet;
+    hphp_fast_set<c_WaitableWaitHandle*> m_importSet;
     std::vector<c_WaitableWaitHandle*> m_pending;
     context_idx_t const m_contextIdx;
   };

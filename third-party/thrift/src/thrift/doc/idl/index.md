@@ -703,6 +703,10 @@ interaction ::=
   "}"
 ```
 
+An **interaction** is a multi-request contract that keeps related methods together, manages states, and integrates with the routing layer to ensure those requests are sent over the same connection to the same host. It can be created using a **factory function** that returns an interaction or a **constructor** using reserved word `performs` that generates a non-RPC constructor on the client and server. The server also listens to a **termination signal** that immediately is invoked instead of waiting for outstanding requests and streams unlike the destructor. Using annotations, it supports serial interaction that limits processing to a single method at a time and event base threading model that directly processes on the I/O thread instead of the server executor.
+
+Refer to [Interactions](/fb/features/interactions.md) for more information.
+
 ### Constants
 
 ```grammar

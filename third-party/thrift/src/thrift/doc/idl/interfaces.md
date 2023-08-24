@@ -2,7 +2,7 @@
 state: draft
 ---
 
-# Interface Types
+# Interfaces
 
 Types that send and/or receive data using [interface protocols](/fb/server/interface/index.md).
 
@@ -31,7 +31,3 @@ A **stream** is a communication abstraction between a client and server, where a
 ## Sink
 
 A **sink** is similar to a stream, but the client acts as the producer and the server acts as the consumer. It allows the flow of ordered messages from the client to the server. It may initially return an initial response specified in the IDL, and it always returns a final response. The client will wait for a final response back from the server marking the completion of the sink. The client can terminate the sink by sending an exception to the server. The server can also terminate the sink by sending an exception while consuming payloads. The exception acts as the termination of the sink. Therefore, the client will not wait for the final response back from the server when it receives an exception. Please refer to the [schema](https://github.com/facebook/fbthrift/blob/main/thrift/lib/thrift/schema.thrift) and the [protocol spec](/fb/server/interface/index.md) for more information about sinks.
-
-## Interaction
-
-An **interaction** is a multi-request contract that keeps related methods together, manages states, and integrates with the routing layer to ensure those requests are sent over the same connection to the same host. It can be created using a **factory function** that returns an interaction. Or, a **constructor** that is generated using reserved keyword `performs`, and it generates a non-RPC constructor on the client and server. The server also listens to a **termination signal** that immediately is invoked instead of waiting for outstanding requests and streams unlike the destructor. Using annotations, it supports serial interaction that limits processing to a single method at a time and event base threading model that directly processes on the I/O thread instead of the server executor. Please refer to the [schema](https://github.com/facebook/fbthrift/blob/main/thrift/lib/thrift/schema.thrift) and the [protocol spec](/fb/server/interface/index.md) for more information about interactions.

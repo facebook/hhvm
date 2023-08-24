@@ -18,6 +18,7 @@
 
 import (
     "fmt"
+    "strings"
 
     {{#program:thrift_imports}}
     {{program:go_package_alias}} "{{program:go_import_path}}"
@@ -30,6 +31,7 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 
 {{! Typedefs }}
 {{#program:typedefs?}}

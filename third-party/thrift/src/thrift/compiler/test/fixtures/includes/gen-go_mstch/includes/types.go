@@ -5,6 +5,7 @@ package includes // [[[ program thrift source path ]]]
 
 import (
     "fmt"
+    "strings"
 
     transitive "transitive"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
@@ -15,6 +16,7 @@ var _ = transitive.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 
 
 type IncludedInt64 = int64
@@ -186,6 +188,14 @@ if err != nil {
     return nil
 }
 
+func (x *Included) toString1() string {  // MyIntField
+    return fmt.Sprintf("%v", x.GetMyIntFieldNonCompat())
+}
+
+func (x *Included) toString2() string {  // MyTransitiveField
+    return fmt.Sprintf("%v", x.GetMyTransitiveFieldNonCompat())
+}
+
 // Deprecated: Use NewIncluded().GetMyTransitiveField() instead.
 var Included_MyTransitiveField_DEFAULT = NewIncluded().GetMyTransitiveField()
 
@@ -195,12 +205,6 @@ func (x *Included) DefaultGetMyTransitiveField() *transitive.Foo {
         return transitive.NewFoo()
     }
     return x.MyTransitiveField
-}
-
-func (x *Included) String() string {
-    type IncludedAlias Included
-    valueAlias := (*IncludedAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -295,6 +299,20 @@ func (x *Included) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Included) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Included({")
+    sb.WriteString(fmt.Sprintf("MyIntField:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("MyTransitiveField:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

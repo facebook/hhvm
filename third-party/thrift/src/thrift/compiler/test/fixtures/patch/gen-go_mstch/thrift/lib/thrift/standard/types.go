@@ -5,6 +5,7 @@ package standard // [[[ program thrift source path ]]]
 
 import (
     "fmt"
+    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
@@ -13,6 +14,7 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 
 
 type ByteString = []byte
@@ -395,17 +397,29 @@ if err != nil {
     return nil
 }
 
+func (x *TypeUri) toString1() string {  // Uri
+    if x.IsSetUri() {
+        return fmt.Sprintf("%v", *x.GetUriNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetUriNonCompat())
+}
+
+func (x *TypeUri) toString2() string {  // TypeHashPrefixSha2_256
+    return fmt.Sprintf("%v", x.GetTypeHashPrefixSha2_256NonCompat())
+}
+
+func (x *TypeUri) toString3() string {  // ScopedName
+    if x.IsSetScopedName() {
+        return fmt.Sprintf("%v", *x.GetScopedNameNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetScopedNameNonCompat())
+}
+
 // Deprecated: Use NewTypeUri().GetUri() instead.
 var TypeUri_Uri_DEFAULT = NewTypeUri().GetUri()
 
 // Deprecated: Use NewTypeUri().GetScopedName() instead.
 var TypeUri_ScopedName_DEFAULT = NewTypeUri().GetScopedName()
-
-func (x *TypeUri) String() string {
-    type TypeUriAlias TypeUri
-    valueAlias := (*TypeUriAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
 
 func (x *TypeUri) countSetFields() int {
     count := int(0)
@@ -533,6 +547,21 @@ func (x *TypeUri) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *TypeUri) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("TypeUri({")
+    sb.WriteString(fmt.Sprintf("Uri:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("TypeHashPrefixSha2_256:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("ScopedName:%s", x.toString3()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type TypeName struct {
     BoolType *Void `thrift:"boolType,1" json:"boolType" db:"boolType"`
@@ -1529,6 +1558,110 @@ result := Void(enumResult)
     return nil
 }
 
+func (x *TypeName) toString1() string {  // BoolType
+    if x.IsSetBoolType() {
+        return fmt.Sprintf("%v", *x.GetBoolTypeNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetBoolTypeNonCompat())
+}
+
+func (x *TypeName) toString2() string {  // ByteType
+    if x.IsSetByteType() {
+        return fmt.Sprintf("%v", *x.GetByteTypeNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetByteTypeNonCompat())
+}
+
+func (x *TypeName) toString3() string {  // I16Type
+    if x.IsSetI16Type() {
+        return fmt.Sprintf("%v", *x.GetI16TypeNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetI16TypeNonCompat())
+}
+
+func (x *TypeName) toString4() string {  // I32Type
+    if x.IsSetI32Type() {
+        return fmt.Sprintf("%v", *x.GetI32TypeNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetI32TypeNonCompat())
+}
+
+func (x *TypeName) toString5() string {  // I64Type
+    if x.IsSetI64Type() {
+        return fmt.Sprintf("%v", *x.GetI64TypeNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetI64TypeNonCompat())
+}
+
+func (x *TypeName) toString6() string {  // FloatType
+    if x.IsSetFloatType() {
+        return fmt.Sprintf("%v", *x.GetFloatTypeNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetFloatTypeNonCompat())
+}
+
+func (x *TypeName) toString7() string {  // DoubleType
+    if x.IsSetDoubleType() {
+        return fmt.Sprintf("%v", *x.GetDoubleTypeNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetDoubleTypeNonCompat())
+}
+
+func (x *TypeName) toString8() string {  // StringType
+    if x.IsSetStringType() {
+        return fmt.Sprintf("%v", *x.GetStringTypeNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetStringTypeNonCompat())
+}
+
+func (x *TypeName) toString9() string {  // BinaryType
+    if x.IsSetBinaryType() {
+        return fmt.Sprintf("%v", *x.GetBinaryTypeNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetBinaryTypeNonCompat())
+}
+
+func (x *TypeName) toString10() string {  // EnumType
+    return fmt.Sprintf("%v", x.GetEnumTypeNonCompat())
+}
+
+func (x *TypeName) toString17() string {  // TypedefType
+    return fmt.Sprintf("%v", x.GetTypedefTypeNonCompat())
+}
+
+func (x *TypeName) toString11() string {  // StructType
+    return fmt.Sprintf("%v", x.GetStructTypeNonCompat())
+}
+
+func (x *TypeName) toString12() string {  // UnionType
+    return fmt.Sprintf("%v", x.GetUnionTypeNonCompat())
+}
+
+func (x *TypeName) toString13() string {  // ExceptionType
+    return fmt.Sprintf("%v", x.GetExceptionTypeNonCompat())
+}
+
+func (x *TypeName) toString14() string {  // ListType
+    if x.IsSetListType() {
+        return fmt.Sprintf("%v", *x.GetListTypeNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetListTypeNonCompat())
+}
+
+func (x *TypeName) toString15() string {  // SetType
+    if x.IsSetSetType() {
+        return fmt.Sprintf("%v", *x.GetSetTypeNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetSetTypeNonCompat())
+}
+
+func (x *TypeName) toString16() string {  // MapType
+    if x.IsSetMapType() {
+        return fmt.Sprintf("%v", *x.GetMapTypeNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetMapTypeNonCompat())
+}
+
 // Deprecated: Use NewTypeName().GetBoolType() instead.
 var TypeName_BoolType_DEFAULT = NewTypeName().GetBoolType()
 
@@ -1619,12 +1752,6 @@ var TypeName_SetType_DEFAULT = NewTypeName().GetSetType()
 
 // Deprecated: Use NewTypeName().GetMapType() instead.
 var TypeName_MapType_DEFAULT = NewTypeName().GetMapType()
-
-func (x *TypeName) String() string {
-    type TypeNameAlias TypeName
-    valueAlias := (*TypeNameAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
 
 func (x *TypeName) countSetFields() int {
     count := int(0)
@@ -1976,6 +2103,35 @@ func (x *TypeName) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *TypeName) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("TypeName({")
+    sb.WriteString(fmt.Sprintf("BoolType:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("ByteType:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("I16Type:%s ", x.toString3()))
+    sb.WriteString(fmt.Sprintf("I32Type:%s ", x.toString4()))
+    sb.WriteString(fmt.Sprintf("I64Type:%s ", x.toString5()))
+    sb.WriteString(fmt.Sprintf("FloatType:%s ", x.toString6()))
+    sb.WriteString(fmt.Sprintf("DoubleType:%s ", x.toString7()))
+    sb.WriteString(fmt.Sprintf("StringType:%s ", x.toString8()))
+    sb.WriteString(fmt.Sprintf("BinaryType:%s ", x.toString9()))
+    sb.WriteString(fmt.Sprintf("EnumType:%s ", x.toString10()))
+    sb.WriteString(fmt.Sprintf("TypedefType:%s ", x.toString17()))
+    sb.WriteString(fmt.Sprintf("StructType:%s ", x.toString11()))
+    sb.WriteString(fmt.Sprintf("UnionType:%s ", x.toString12()))
+    sb.WriteString(fmt.Sprintf("ExceptionType:%s ", x.toString13()))
+    sb.WriteString(fmt.Sprintf("ListType:%s ", x.toString14()))
+    sb.WriteString(fmt.Sprintf("SetType:%s ", x.toString15()))
+    sb.WriteString(fmt.Sprintf("MapType:%s", x.toString16()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

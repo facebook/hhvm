@@ -5,6 +5,7 @@ package module // [[[ program thrift source path ]]]
 
 import (
     "fmt"
+    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
@@ -13,6 +14,7 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 
 
 type MyEnum int32
@@ -603,6 +605,42 @@ if err != nil {
     return nil
 }
 
+func (x *MyStruct) toString1() string {  // MyIntField
+    return fmt.Sprintf("%v", x.GetMyIntFieldNonCompat())
+}
+
+func (x *MyStruct) toString2() string {  // MyStringField
+    return fmt.Sprintf("%v", x.GetMyStringFieldNonCompat())
+}
+
+func (x *MyStruct) toString3() string {  // MyDataField
+    return fmt.Sprintf("%v", x.GetMyDataFieldNonCompat())
+}
+
+func (x *MyStruct) toString4() string {  // MyEnum
+    return fmt.Sprintf("%v", x.GetMyEnumNonCompat())
+}
+
+func (x *MyStruct) toString5() string {  // Oneway
+    return fmt.Sprintf("%v", x.GetOnewayNonCompat())
+}
+
+func (x *MyStruct) toString6() string {  // Readonly
+    return fmt.Sprintf("%v", x.GetReadonlyNonCompat())
+}
+
+func (x *MyStruct) toString7() string {  // Idempotent
+    return fmt.Sprintf("%v", x.GetIdempotentNonCompat())
+}
+
+func (x *MyStruct) toString8() string {  // FloatSet
+    return fmt.Sprintf("%v", x.GetFloatSetNonCompat())
+}
+
+func (x *MyStruct) toString9() string {  // NoHackCodegenField
+    return fmt.Sprintf("%v", x.GetNoHackCodegenFieldNonCompat())
+}
+
 // Deprecated: Use NewMyStruct().GetMyDataField() instead.
 var MyStruct_MyDataField_DEFAULT = NewMyStruct().GetMyDataField()
 
@@ -612,12 +650,6 @@ func (x *MyStruct) DefaultGetMyDataField() *MyDataItem {
         return NewMyDataItem()
     }
     return x.MyDataField
-}
-
-func (x *MyStruct) String() string {
-    type MyStructAlias MyStruct
-    valueAlias := (*MyStructAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -803,6 +835,27 @@ func (x *MyStruct) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MyStruct) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyStruct({")
+    sb.WriteString(fmt.Sprintf("MyIntField:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("MyStringField:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("MyDataField:%s ", x.toString3()))
+    sb.WriteString(fmt.Sprintf("MyEnum:%s ", x.toString4()))
+    sb.WriteString(fmt.Sprintf("Oneway:%s ", x.toString5()))
+    sb.WriteString(fmt.Sprintf("Readonly:%s ", x.toString6()))
+    sb.WriteString(fmt.Sprintf("Idempotent:%s ", x.toString7()))
+    sb.WriteString(fmt.Sprintf("FloatSet:%s ", x.toString8()))
+    sb.WriteString(fmt.Sprintf("NoHackCodegenField:%s", x.toString9()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type MyDataItem struct {
 }
@@ -811,12 +864,6 @@ var _ thrift.Struct = &MyDataItem{}
 
 func NewMyDataItem() *MyDataItem {
     return (&MyDataItem{})
-}
-
-func (x *MyDataItem) String() string {
-    type MyDataItemAlias MyDataItem
-    valueAlias := (*MyDataItemAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -885,6 +932,18 @@ func (x *MyDataItem) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MyDataItem) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyDataItem({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type MyUnion struct {
     MyEnum *MyEnum `thrift:"myEnum,1" json:"myEnum" db:"myEnum"`
@@ -1155,6 +1214,25 @@ result := setResult
     return nil
 }
 
+func (x *MyUnion) toString1() string {  // MyEnum
+    if x.IsSetMyEnum() {
+        return fmt.Sprintf("%v", *x.GetMyEnumNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetMyEnumNonCompat())
+}
+
+func (x *MyUnion) toString2() string {  // MyStruct
+    return fmt.Sprintf("%v", x.GetMyStructNonCompat())
+}
+
+func (x *MyUnion) toString3() string {  // MyDataItem
+    return fmt.Sprintf("%v", x.GetMyDataItemNonCompat())
+}
+
+func (x *MyUnion) toString4() string {  // FloatSet
+    return fmt.Sprintf("%v", x.GetFloatSetNonCompat())
+}
+
 // Deprecated: Use NewMyUnion().GetMyEnum() instead.
 var MyUnion_MyEnum_DEFAULT = NewMyUnion().GetMyEnum()
 
@@ -1178,12 +1256,6 @@ func (x *MyUnion) DefaultGetMyDataItem() *MyDataItem {
         return NewMyDataItem()
     }
     return x.MyDataItem
-}
-
-func (x *MyUnion) String() string {
-    type MyUnionAlias MyUnion
-    valueAlias := (*MyUnionAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 func (x *MyUnion) countSetFields() int {
@@ -1328,6 +1400,22 @@ func (x *MyUnion) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MyUnion) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyUnion({")
+    sb.WriteString(fmt.Sprintf("MyEnum:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("MyStruct:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("MyDataItem:%s ", x.toString3()))
+    sb.WriteString(fmt.Sprintf("FloatSet:%s", x.toString4()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type ReservedKeyword struct {
     ReservedField int32 `thrift:"reserved_field,1" json:"reserved_field" db:"reserved_field"`
@@ -1384,10 +1472,8 @@ if err != nil {
     return nil
 }
 
-func (x *ReservedKeyword) String() string {
-    type ReservedKeywordAlias ReservedKeyword
-    valueAlias := (*ReservedKeywordAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *ReservedKeyword) toString1() string {  // ReservedField
+    return fmt.Sprintf("%v", x.GetReservedFieldNonCompat())
 }
 
 
@@ -1469,6 +1555,19 @@ func (x *ReservedKeyword) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *ReservedKeyword) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("ReservedKeyword({")
+    sb.WriteString(fmt.Sprintf("ReservedField:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type UnionToBeRenamed struct {
     ReservedField *int32 `thrift:"reserved_field,1" json:"reserved_field" db:"reserved_field"`
@@ -1536,14 +1635,15 @@ if err != nil {
     return nil
 }
 
+func (x *UnionToBeRenamed) toString1() string {  // ReservedField
+    if x.IsSetReservedField() {
+        return fmt.Sprintf("%v", *x.GetReservedFieldNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetReservedFieldNonCompat())
+}
+
 // Deprecated: Use NewUnionToBeRenamed().GetReservedField() instead.
 var UnionToBeRenamed_ReservedField_DEFAULT = NewUnionToBeRenamed().GetReservedField()
-
-func (x *UnionToBeRenamed) String() string {
-    type UnionToBeRenamedAlias UnionToBeRenamed
-    valueAlias := (*UnionToBeRenamedAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
 
 func (x *UnionToBeRenamed) countSetFields() int {
     count := int(0)
@@ -1639,6 +1739,19 @@ func (x *UnionToBeRenamed) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *UnionToBeRenamed) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("UnionToBeRenamed({")
+    sb.WriteString(fmt.Sprintf("ReservedField:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

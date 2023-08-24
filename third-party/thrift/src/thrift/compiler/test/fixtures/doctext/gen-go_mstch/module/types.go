@@ -5,6 +5,7 @@ package module // [[[ program thrift source path ]]]
 
 import (
     "fmt"
+    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
@@ -13,6 +14,7 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 
 
 type Lanyard = string
@@ -172,10 +174,8 @@ if err != nil {
     return nil
 }
 
-func (x *A) String() string {
-    type AAlias A
-    valueAlias := (*AAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *A) toString1() string {  // UselessField
+    return fmt.Sprintf("%v", x.GetUselessFieldNonCompat())
 }
 
 
@@ -257,6 +257,19 @@ func (x *A) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *A) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("A({")
+    sb.WriteString(fmt.Sprintf("UselessField:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type U struct {
     I *int32 `thrift:"i,1" json:"i" db:"i"`
@@ -381,17 +394,25 @@ if err != nil {
     return nil
 }
 
+func (x *U) toString1() string {  // I
+    if x.IsSetI() {
+        return fmt.Sprintf("%v", *x.GetINonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetINonCompat())
+}
+
+func (x *U) toString2() string {  // S
+    if x.IsSetS() {
+        return fmt.Sprintf("%v", *x.GetSNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetSNonCompat())
+}
+
 // Deprecated: Use NewU().GetI() instead.
 var U_I_DEFAULT = NewU().GetI()
 
 // Deprecated: Use NewU().GetS() instead.
 var U_S_DEFAULT = NewU().GetS()
-
-func (x *U) String() string {
-    type UAlias U
-    valueAlias := (*UAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
 
 func (x *U) countSetFields() int {
     count := int(0)
@@ -503,6 +524,20 @@ func (x *U) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *U) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("U({")
+    sb.WriteString(fmt.Sprintf("I:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("S:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Bang struct {
     Message string `thrift:"message,1" json:"message" db:"message"`
@@ -559,16 +594,8 @@ if err != nil {
     return nil
 }
 
-func (x *Bang) String() string {
-    type BangAlias Bang
-    valueAlias := (*BangAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
-
-func (x *Bang) Error() string {
-    type BangAlias Bang
-    valueAlias := (*BangAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *Bang) toString1() string {  // Message
+    return fmt.Sprintf("%v", x.GetMessageNonCompat())
 }
 
 
@@ -650,6 +677,22 @@ func (x *Bang) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Bang) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Bang({")
+    sb.WriteString(fmt.Sprintf("Message:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+func (x *Bang) Error() string {
+    return x.String()
+}
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

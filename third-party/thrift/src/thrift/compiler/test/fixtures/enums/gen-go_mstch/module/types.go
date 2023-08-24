@@ -5,6 +5,7 @@ package module // [[[ program thrift source path ]]]
 
 import (
     "fmt"
+    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
@@ -13,6 +14,7 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 
 
 type Metasyntactic int32
@@ -721,10 +723,20 @@ result := setResult
     return nil
 }
 
-func (x *SomeStruct) String() string {
-    type SomeStructAlias SomeStruct
-    valueAlias := (*SomeStructAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *SomeStruct) toString1() string {  // Reasonable
+    return fmt.Sprintf("%v", x.GetReasonableNonCompat())
+}
+
+func (x *SomeStruct) toString2() string {  // Fine
+    return fmt.Sprintf("%v", x.GetFineNonCompat())
+}
+
+func (x *SomeStruct) toString3() string {  // Questionable
+    return fmt.Sprintf("%v", x.GetQuestionableNonCompat())
+}
+
+func (x *SomeStruct) toString4() string {  // Tags
+    return fmt.Sprintf("%v", x.GetTagsNonCompat())
 }
 
 
@@ -845,6 +857,22 @@ func (x *SomeStruct) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *SomeStruct) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("SomeStruct({")
+    sb.WriteString(fmt.Sprintf("Reasonable:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Fine:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("Questionable:%s ", x.toString3()))
+    sb.WriteString(fmt.Sprintf("Tags:%s", x.toString4()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type MyStruct struct {
     Me2_3 MyEnum2 `thrift:"me2_3,1" json:"me2_3" db:"me2_3"`
@@ -1051,10 +1079,20 @@ result := MyEnum1(enumResult)
     return nil
 }
 
-func (x *MyStruct) String() string {
-    type MyStructAlias MyStruct
-    valueAlias := (*MyStructAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *MyStruct) toString1() string {  // Me2_3
+    return fmt.Sprintf("%v", x.GetMe2_3NonCompat())
+}
+
+func (x *MyStruct) toString2() string {  // Me3N3
+    return fmt.Sprintf("%v", x.GetMe3N3NonCompat())
+}
+
+func (x *MyStruct) toString4() string {  // Me1T1
+    return fmt.Sprintf("%v", x.GetMe1T1NonCompat())
+}
+
+func (x *MyStruct) toString6() string {  // Me1T2
+    return fmt.Sprintf("%v", x.GetMe1T2NonCompat())
 }
 
 
@@ -1175,6 +1213,22 @@ func (x *MyStruct) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MyStruct) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyStruct({")
+    sb.WriteString(fmt.Sprintf("Me2_3:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Me3N3:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("Me1T1:%s ", x.toString4()))
+    sb.WriteString(fmt.Sprintf("Me1T2:%s", x.toString6()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

@@ -5,6 +5,7 @@ package service // [[[ program thrift source path ]]]
 
 import (
     "fmt"
+    "strings"
 
     module "module"
     includes "includes"
@@ -17,6 +18,7 @@ var _ = includes.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 
 
 type IncludesIncluded = includes.Included

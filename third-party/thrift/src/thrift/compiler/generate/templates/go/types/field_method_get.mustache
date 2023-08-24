@@ -28,7 +28,7 @@ func (x *{{struct:go_name}}) Get{{field:go_name}}() {{#field:type}}{{#type:struc
     {{#field:nilable?}}
     if !x.IsSet{{field:go_name}}() {
         {{#field:value}}
-        return {{#field:dereference?}}*{{/field:dereference?}}{{struct:go_qualified_new_func}}().{{field:go_name}}
+        return {{#field:non_struct_pointer?}}*{{/field:non_struct_pointer?}}{{struct:go_qualified_new_func}}().{{field:go_name}}
         {{/field:value}}
         {{^field:value}}
         {{#field:type}}
@@ -43,7 +43,7 @@ func (x *{{struct:go_name}}) Get{{field:go_name}}() {{#field:type}}{{#type:struc
     }
 
     {{/field:nilable?}}
-    return {{#field:dereference?}}*{{/field:dereference?}}x.{{field:go_name}}
+    return {{#field:non_struct_pointer?}}*{{/field:non_struct_pointer?}}x.{{field:go_name}}
 }
 {{/program:compat_getters?}}
 {{! new line }}

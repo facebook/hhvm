@@ -5,6 +5,7 @@ package module // [[[ program thrift source path ]]]
 
 import (
     "fmt"
+    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
@@ -13,6 +14,7 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 
 
 type Foo struct {
@@ -70,10 +72,8 @@ if err != nil {
     return nil
 }
 
-func (x *Foo) String() string {
-    type FooAlias Foo
-    valueAlias := (*FooAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *Foo) toString1() string {  // MyInt
+    return fmt.Sprintf("%v", x.GetMyIntNonCompat())
 }
 
 
@@ -155,6 +155,19 @@ func (x *Foo) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Foo) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Foo({")
+    sb.WriteString(fmt.Sprintf("MyInt:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

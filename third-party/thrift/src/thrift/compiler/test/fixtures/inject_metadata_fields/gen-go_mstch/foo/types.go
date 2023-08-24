@@ -5,6 +5,7 @@ package foo // [[[ program thrift source path ]]]
 
 import (
     "fmt"
+    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
@@ -13,6 +14,7 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 
 
 type Fields struct {
@@ -184,17 +186,29 @@ if err != nil {
     return nil
 }
 
+func (x *Fields) toString100() string {  // InjectedField
+    return fmt.Sprintf("%v", x.GetInjectedFieldNonCompat())
+}
+
+func (x *Fields) toString101() string {  // InjectedStructuredAnnotationField
+    if x.IsSetInjectedStructuredAnnotationField() {
+        return fmt.Sprintf("%v", *x.GetInjectedStructuredAnnotationFieldNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetInjectedStructuredAnnotationFieldNonCompat())
+}
+
+func (x *Fields) toString102() string {  // InjectedUnstructuredAnnotationField
+    if x.IsSetInjectedUnstructuredAnnotationField() {
+        return fmt.Sprintf("%v", *x.GetInjectedUnstructuredAnnotationFieldNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetInjectedUnstructuredAnnotationFieldNonCompat())
+}
+
 // Deprecated: Use NewFields().GetInjectedStructuredAnnotationField() instead.
 var Fields_InjectedStructuredAnnotationField_DEFAULT = NewFields().GetInjectedStructuredAnnotationField()
 
 // Deprecated: Use NewFields().GetInjectedUnstructuredAnnotationField() instead.
 var Fields_InjectedUnstructuredAnnotationField_DEFAULT = NewFields().GetInjectedUnstructuredAnnotationField()
-
-func (x *Fields) String() string {
-    type FieldsAlias Fields
-    valueAlias := (*FieldsAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
 
 
 // Deprecated: Use Fields.Set* methods instead or set the fields directly.
@@ -301,6 +315,21 @@ func (x *Fields) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Fields) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Fields({")
+    sb.WriteString(fmt.Sprintf("InjectedField:%s ", x.toString100()))
+    sb.WriteString(fmt.Sprintf("InjectedStructuredAnnotationField:%s ", x.toString101()))
+    sb.WriteString(fmt.Sprintf("InjectedUnstructuredAnnotationField:%s", x.toString102()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

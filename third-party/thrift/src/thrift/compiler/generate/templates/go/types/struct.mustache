@@ -43,3 +43,11 @@
 
 {{! read (deserialize) }}
 {{> types/struct_method_read}}
+
+{{! string }}
+{{> types/struct_method_string}}
+{{#struct:exception?}}
+
+{{! error }}
+{{> types/struct_method_error}}
+{{/struct:exception?}}

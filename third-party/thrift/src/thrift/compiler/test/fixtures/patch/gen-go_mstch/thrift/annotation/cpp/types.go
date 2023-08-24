@@ -5,6 +5,7 @@ package cpp // [[[ program thrift source path ]]]
 
 import (
     "fmt"
+    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
@@ -13,6 +14,7 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 
 
 type RefType int32
@@ -246,10 +248,12 @@ if err != nil {
     return nil
 }
 
-func (x *Type) String() string {
-    type TypeAlias Type
-    valueAlias := (*TypeAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *Type) toString1() string {  // Name
+    return fmt.Sprintf("%v", x.GetNameNonCompat())
+}
+
+func (x *Type) toString2() string {  // Template
+    return fmt.Sprintf("%v", x.GetTemplateNonCompat())
 }
 
 
@@ -344,6 +348,20 @@ func (x *Type) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Type) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Type({")
+    sb.WriteString(fmt.Sprintf("Name:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Template:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Ref struct {
     Type RefType `thrift:"type,1" json:"type" db:"type"`
@@ -401,10 +419,8 @@ result := RefType(enumResult)
     return nil
 }
 
-func (x *Ref) String() string {
-    type RefAlias Ref
-    valueAlias := (*RefAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *Ref) toString1() string {  // Type
+    return fmt.Sprintf("%v", x.GetTypeNonCompat())
 }
 
 
@@ -486,6 +502,19 @@ func (x *Ref) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Ref) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Ref({")
+    sb.WriteString(fmt.Sprintf("Type:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Lazy struct {
     Ref bool `thrift:"ref,1" json:"ref" db:"ref"`
@@ -542,10 +571,8 @@ if err != nil {
     return nil
 }
 
-func (x *Lazy) String() string {
-    type LazyAlias Lazy
-    valueAlias := (*LazyAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *Lazy) toString1() string {  // Ref
+    return fmt.Sprintf("%v", x.GetRefNonCompat())
 }
 
 
@@ -627,6 +654,19 @@ func (x *Lazy) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Lazy) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Lazy({")
+    sb.WriteString(fmt.Sprintf("Ref:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type DisableLazyChecksum struct {
 }
@@ -635,12 +675,6 @@ var _ thrift.Struct = &DisableLazyChecksum{}
 
 func NewDisableLazyChecksum() *DisableLazyChecksum {
     return (&DisableLazyChecksum{})
-}
-
-func (x *DisableLazyChecksum) String() string {
-    type DisableLazyChecksumAlias DisableLazyChecksum
-    valueAlias := (*DisableLazyChecksumAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -709,6 +743,18 @@ func (x *DisableLazyChecksum) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *DisableLazyChecksum) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("DisableLazyChecksum({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Adapter struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
@@ -949,10 +995,24 @@ if err != nil {
     return nil
 }
 
-func (x *Adapter) String() string {
-    type AdapterAlias Adapter
-    valueAlias := (*AdapterAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *Adapter) toString1() string {  // Name
+    return fmt.Sprintf("%v", x.GetNameNonCompat())
+}
+
+func (x *Adapter) toString2() string {  // AdaptedType
+    return fmt.Sprintf("%v", x.GetAdaptedTypeNonCompat())
+}
+
+func (x *Adapter) toString3() string {  // UnderlyingName
+    return fmt.Sprintf("%v", x.GetUnderlyingNameNonCompat())
+}
+
+func (x *Adapter) toString4() string {  // ExtraNamespace
+    return fmt.Sprintf("%v", x.GetExtraNamespaceNonCompat())
+}
+
+func (x *Adapter) toString5() string {  // MoveOnly
+    return fmt.Sprintf("%v", x.GetMoveOnlyNonCompat())
 }
 
 
@@ -1086,6 +1146,23 @@ func (x *Adapter) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Adapter) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Adapter({")
+    sb.WriteString(fmt.Sprintf("Name:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("AdaptedType:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("UnderlyingName:%s ", x.toString3()))
+    sb.WriteString(fmt.Sprintf("ExtraNamespace:%s ", x.toString4()))
+    sb.WriteString(fmt.Sprintf("MoveOnly:%s", x.toString5()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type PackIsset struct {
     Atomic bool `thrift:"atomic,1" json:"atomic" db:"atomic"`
@@ -1142,10 +1219,8 @@ if err != nil {
     return nil
 }
 
-func (x *PackIsset) String() string {
-    type PackIssetAlias PackIsset
-    valueAlias := (*PackIssetAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *PackIsset) toString1() string {  // Atomic
+    return fmt.Sprintf("%v", x.GetAtomicNonCompat())
 }
 
 
@@ -1227,6 +1302,19 @@ func (x *PackIsset) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *PackIsset) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("PackIsset({")
+    sb.WriteString(fmt.Sprintf("Atomic:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type MinimizePadding struct {
 }
@@ -1235,12 +1323,6 @@ var _ thrift.Struct = &MinimizePadding{}
 
 func NewMinimizePadding() *MinimizePadding {
     return (&MinimizePadding{})
-}
-
-func (x *MinimizePadding) String() string {
-    type MinimizePaddingAlias MinimizePadding
-    valueAlias := (*MinimizePaddingAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1309,6 +1391,18 @@ func (x *MinimizePadding) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MinimizePadding) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MinimizePadding({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type TriviallyRelocatable struct {
 }
@@ -1317,12 +1411,6 @@ var _ thrift.Struct = &TriviallyRelocatable{}
 
 func NewTriviallyRelocatable() *TriviallyRelocatable {
     return (&TriviallyRelocatable{})
-}
-
-func (x *TriviallyRelocatable) String() string {
-    type TriviallyRelocatableAlias TriviallyRelocatable
-    valueAlias := (*TriviallyRelocatableAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1391,6 +1479,18 @@ func (x *TriviallyRelocatable) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *TriviallyRelocatable) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("TriviallyRelocatable({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type ScopedEnumAsUnionType struct {
 }
@@ -1399,12 +1499,6 @@ var _ thrift.Struct = &ScopedEnumAsUnionType{}
 
 func NewScopedEnumAsUnionType() *ScopedEnumAsUnionType {
     return (&ScopedEnumAsUnionType{})
-}
-
-func (x *ScopedEnumAsUnionType) String() string {
-    type ScopedEnumAsUnionTypeAlias ScopedEnumAsUnionType
-    valueAlias := (*ScopedEnumAsUnionTypeAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1473,6 +1567,18 @@ func (x *ScopedEnumAsUnionType) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *ScopedEnumAsUnionType) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("ScopedEnumAsUnionType({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type StrongType struct {
 }
@@ -1481,12 +1587,6 @@ var _ thrift.Struct = &StrongType{}
 
 func NewStrongType() *StrongType {
     return (&StrongType{})
-}
-
-func (x *StrongType) String() string {
-    type StrongTypeAlias StrongType
-    valueAlias := (*StrongTypeAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1555,6 +1655,18 @@ func (x *StrongType) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *StrongType) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("StrongType({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type FieldInterceptor struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
@@ -1657,10 +1769,12 @@ if err != nil {
     return nil
 }
 
-func (x *FieldInterceptor) String() string {
-    type FieldInterceptorAlias FieldInterceptor
-    valueAlias := (*FieldInterceptorAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *FieldInterceptor) toString1() string {  // Name
+    return fmt.Sprintf("%v", x.GetNameNonCompat())
+}
+
+func (x *FieldInterceptor) toString2() string {  // Noinline
+    return fmt.Sprintf("%v", x.GetNoinlineNonCompat())
 }
 
 
@@ -1755,6 +1869,20 @@ func (x *FieldInterceptor) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *FieldInterceptor) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("FieldInterceptor({")
+    sb.WriteString(fmt.Sprintf("Name:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Noinline:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type UseOpEncode struct {
 }
@@ -1763,12 +1891,6 @@ var _ thrift.Struct = &UseOpEncode{}
 
 func NewUseOpEncode() *UseOpEncode {
     return (&UseOpEncode{})
-}
-
-func (x *UseOpEncode) String() string {
-    type UseOpEncodeAlias UseOpEncode
-    valueAlias := (*UseOpEncodeAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1837,6 +1959,18 @@ func (x *UseOpEncode) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *UseOpEncode) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("UseOpEncode({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type EnumType struct {
     Type EnumUnderlyingType `thrift:"type,1" json:"type" db:"type"`
@@ -1894,10 +2028,8 @@ result := EnumUnderlyingType(enumResult)
     return nil
 }
 
-func (x *EnumType) String() string {
-    type EnumTypeAlias EnumType
-    valueAlias := (*EnumTypeAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *EnumType) toString1() string {  // Type
+    return fmt.Sprintf("%v", x.GetTypeNonCompat())
 }
 
 
@@ -1979,6 +2111,19 @@ func (x *EnumType) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *EnumType) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("EnumType({")
+    sb.WriteString(fmt.Sprintf("Type:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Frozen2Exclude struct {
 }
@@ -1987,12 +2132,6 @@ var _ thrift.Struct = &Frozen2Exclude{}
 
 func NewFrozen2Exclude() *Frozen2Exclude {
     return (&Frozen2Exclude{})
-}
-
-func (x *Frozen2Exclude) String() string {
-    type Frozen2ExcludeAlias Frozen2Exclude
-    valueAlias := (*Frozen2ExcludeAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2061,6 +2200,18 @@ func (x *Frozen2Exclude) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Frozen2Exclude) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Frozen2Exclude({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Frozen2RequiresCompleteContainerParams struct {
 }
@@ -2069,12 +2220,6 @@ var _ thrift.Struct = &Frozen2RequiresCompleteContainerParams{}
 
 func NewFrozen2RequiresCompleteContainerParams() *Frozen2RequiresCompleteContainerParams {
     return (&Frozen2RequiresCompleteContainerParams{})
-}
-
-func (x *Frozen2RequiresCompleteContainerParams) String() string {
-    type Frozen2RequiresCompleteContainerParamsAlias Frozen2RequiresCompleteContainerParams
-    valueAlias := (*Frozen2RequiresCompleteContainerParamsAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2143,6 +2288,18 @@ func (x *Frozen2RequiresCompleteContainerParams) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Frozen2RequiresCompleteContainerParams) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Frozen2RequiresCompleteContainerParams({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

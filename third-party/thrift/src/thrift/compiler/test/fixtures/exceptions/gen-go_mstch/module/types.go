@@ -5,6 +5,7 @@ package module // [[[ program thrift source path ]]]
 
 import (
     "fmt"
+    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
@@ -13,6 +14,7 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 
 
 type Fiery struct {
@@ -70,16 +72,8 @@ if err != nil {
     return nil
 }
 
-func (x *Fiery) String() string {
-    type FieryAlias Fiery
-    valueAlias := (*FieryAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
-
-func (x *Fiery) Error() string {
-    type FieryAlias Fiery
-    valueAlias := (*FieryAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *Fiery) toString1() string {  // Message
+    return fmt.Sprintf("%v", x.GetMessageNonCompat())
 }
 
 
@@ -161,6 +155,22 @@ func (x *Fiery) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Fiery) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Fiery({")
+    sb.WriteString(fmt.Sprintf("Message:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+func (x *Fiery) Error() string {
+    return x.String()
+}
 
 type Serious struct {
     Sonnet *string `thrift:"sonnet,1,optional" json:"sonnet,omitempty" db:"sonnet"`
@@ -228,20 +238,15 @@ if err != nil {
     return nil
 }
 
+func (x *Serious) toString1() string {  // Sonnet
+    if x.IsSetSonnet() {
+        return fmt.Sprintf("%v", *x.GetSonnetNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetSonnetNonCompat())
+}
+
 // Deprecated: Use NewSerious().GetSonnet() instead.
 var Serious_Sonnet_DEFAULT = NewSerious().GetSonnet()
-
-func (x *Serious) String() string {
-    type SeriousAlias Serious
-    valueAlias := (*SeriousAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
-
-func (x *Serious) Error() string {
-    type SeriousAlias Serious
-    valueAlias := (*SeriousAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
 
 
 // Deprecated: Use Serious.Set* methods instead or set the fields directly.
@@ -322,6 +327,22 @@ func (x *Serious) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Serious) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Serious({")
+    sb.WriteString(fmt.Sprintf("Sonnet:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+func (x *Serious) Error() string {
+    return x.String()
+}
 
 type ComplexFieldNames struct {
     ErrorMessage string `thrift:"error_message,1" json:"error_message" db:"error_message"`
@@ -424,16 +445,12 @@ if err != nil {
     return nil
 }
 
-func (x *ComplexFieldNames) String() string {
-    type ComplexFieldNamesAlias ComplexFieldNames
-    valueAlias := (*ComplexFieldNamesAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *ComplexFieldNames) toString1() string {  // ErrorMessage
+    return fmt.Sprintf("%v", x.GetErrorMessageNonCompat())
 }
 
-func (x *ComplexFieldNames) Error() string {
-    type ComplexFieldNamesAlias ComplexFieldNames
-    valueAlias := (*ComplexFieldNamesAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *ComplexFieldNames) toString2() string {  // InternalErrorMessage
+    return fmt.Sprintf("%v", x.GetInternalErrorMessageNonCompat())
 }
 
 
@@ -528,6 +545,23 @@ func (x *ComplexFieldNames) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *ComplexFieldNames) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("ComplexFieldNames({")
+    sb.WriteString(fmt.Sprintf("ErrorMessage:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("InternalErrorMessage:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+func (x *ComplexFieldNames) Error() string {
+    return x.String()
+}
 
 type CustomFieldNames struct {
     ErrorMessage string `thrift:"error_message,1" json:"error_message" db:"error_message"`
@@ -630,16 +664,12 @@ if err != nil {
     return nil
 }
 
-func (x *CustomFieldNames) String() string {
-    type CustomFieldNamesAlias CustomFieldNames
-    valueAlias := (*CustomFieldNamesAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *CustomFieldNames) toString1() string {  // ErrorMessage
+    return fmt.Sprintf("%v", x.GetErrorMessageNonCompat())
 }
 
-func (x *CustomFieldNames) Error() string {
-    type CustomFieldNamesAlias CustomFieldNames
-    valueAlias := (*CustomFieldNamesAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *CustomFieldNames) toString2() string {  // InternalErrorMessage
+    return fmt.Sprintf("%v", x.GetInternalErrorMessageNonCompat())
 }
 
 
@@ -734,6 +764,23 @@ func (x *CustomFieldNames) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *CustomFieldNames) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("CustomFieldNames({")
+    sb.WriteString(fmt.Sprintf("ErrorMessage:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("InternalErrorMessage:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+func (x *CustomFieldNames) Error() string {
+    return x.String()
+}
 
 type ExceptionWithPrimitiveField struct {
     Message string `thrift:"message,1" json:"message" db:"message"`
@@ -836,16 +883,12 @@ if err != nil {
     return nil
 }
 
-func (x *ExceptionWithPrimitiveField) String() string {
-    type ExceptionWithPrimitiveFieldAlias ExceptionWithPrimitiveField
-    valueAlias := (*ExceptionWithPrimitiveFieldAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *ExceptionWithPrimitiveField) toString1() string {  // Message
+    return fmt.Sprintf("%v", x.GetMessageNonCompat())
 }
 
-func (x *ExceptionWithPrimitiveField) Error() string {
-    type ExceptionWithPrimitiveFieldAlias ExceptionWithPrimitiveField
-    valueAlias := (*ExceptionWithPrimitiveFieldAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *ExceptionWithPrimitiveField) toString2() string {  // ErrorCode
+    return fmt.Sprintf("%v", x.GetErrorCodeNonCompat())
 }
 
 
@@ -940,6 +983,23 @@ func (x *ExceptionWithPrimitiveField) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *ExceptionWithPrimitiveField) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("ExceptionWithPrimitiveField({")
+    sb.WriteString(fmt.Sprintf("Message:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("ErrorCode:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+func (x *ExceptionWithPrimitiveField) Error() string {
+    return x.String()
+}
 
 type ExceptionWithStructuredAnnotation struct {
     MessageField string `thrift:"message_field,1" json:"message_field" db:"message_field"`
@@ -1042,16 +1102,12 @@ if err != nil {
     return nil
 }
 
-func (x *ExceptionWithStructuredAnnotation) String() string {
-    type ExceptionWithStructuredAnnotationAlias ExceptionWithStructuredAnnotation
-    valueAlias := (*ExceptionWithStructuredAnnotationAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *ExceptionWithStructuredAnnotation) toString1() string {  // MessageField
+    return fmt.Sprintf("%v", x.GetMessageFieldNonCompat())
 }
 
-func (x *ExceptionWithStructuredAnnotation) Error() string {
-    type ExceptionWithStructuredAnnotationAlias ExceptionWithStructuredAnnotation
-    valueAlias := (*ExceptionWithStructuredAnnotationAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *ExceptionWithStructuredAnnotation) toString2() string {  // ErrorCode
+    return fmt.Sprintf("%v", x.GetErrorCodeNonCompat())
 }
 
 
@@ -1146,6 +1202,23 @@ func (x *ExceptionWithStructuredAnnotation) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *ExceptionWithStructuredAnnotation) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("ExceptionWithStructuredAnnotation({")
+    sb.WriteString(fmt.Sprintf("MessageField:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("ErrorCode:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+func (x *ExceptionWithStructuredAnnotation) Error() string {
+    return x.String()
+}
 
 type Banal struct {
 }
@@ -1154,18 +1227,6 @@ var _ thrift.Struct = &Banal{}
 
 func NewBanal() *Banal {
     return (&Banal{})
-}
-
-func (x *Banal) String() string {
-    type BanalAlias Banal
-    valueAlias := (*BanalAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
-
-func (x *Banal) Error() string {
-    type BanalAlias Banal
-    valueAlias := (*BanalAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1234,6 +1295,21 @@ func (x *Banal) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Banal) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Banal({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
+func (x *Banal) Error() string {
+    return x.String()
+}
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

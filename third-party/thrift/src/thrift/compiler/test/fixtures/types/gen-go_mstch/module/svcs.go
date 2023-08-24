@@ -7,6 +7,7 @@ package module // [[[ program thrift source path ]]]
 import (
     "context"
     "fmt"
+    "strings"
     "sync"
 
     included "included"
@@ -20,6 +21,7 @@ var _ = included.GoUnusedProtection__
 var _ = context.Background
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 var _ = sync.Mutex{}
 
 
@@ -224,10 +226,8 @@ if err != nil {
     return nil
 }
 
-func (x *reqSomeServiceBounceMap) String() string {
-    type reqSomeServiceBounceMapAlias reqSomeServiceBounceMap
-    valueAlias := (*reqSomeServiceBounceMapAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *reqSomeServiceBounceMap) toString1() string {  // M
+    return fmt.Sprintf("%v", x.GetMNonCompat())
 }
 
 
@@ -309,6 +309,19 @@ func (x *reqSomeServiceBounceMap) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqSomeServiceBounceMap) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqSomeServiceBounceMap({")
+    sb.WriteString(fmt.Sprintf("M:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respSomeServiceBounceMap struct {
     Value included.SomeMap `thrift:"value,0" json:"value" db:"value"`
 }
@@ -378,10 +391,8 @@ if err != nil {
     return nil
 }
 
-func (x *respSomeServiceBounceMap) String() string {
-    type respSomeServiceBounceMapAlias respSomeServiceBounceMap
-    valueAlias := (*respSomeServiceBounceMapAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *respSomeServiceBounceMap) toString0() string {  // Value
+    return fmt.Sprintf("%v", x.GetValueNonCompat())
 }
 
 
@@ -467,6 +478,19 @@ func (x *respSomeServiceBounceMap) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respSomeServiceBounceMap) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respSomeServiceBounceMap({")
+    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type reqSomeServiceBinaryKeyedMap struct {
     R []int64 `thrift:"r,1" json:"r" db:"r"`
 }
@@ -565,10 +589,8 @@ result := listResult
     return nil
 }
 
-func (x *reqSomeServiceBinaryKeyedMap) String() string {
-    type reqSomeServiceBinaryKeyedMapAlias reqSomeServiceBinaryKeyedMap
-    valueAlias := (*reqSomeServiceBinaryKeyedMapAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *reqSomeServiceBinaryKeyedMap) toString1() string {  // R
+    return fmt.Sprintf("%v", x.GetRNonCompat())
 }
 
 
@@ -650,6 +672,19 @@ func (x *reqSomeServiceBinaryKeyedMap) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqSomeServiceBinaryKeyedMap) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqSomeServiceBinaryKeyedMap({")
+    sb.WriteString(fmt.Sprintf("R:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respSomeServiceBinaryKeyedMap struct {
     Value map[*TBinary]int64 `thrift:"value,0" json:"value" db:"value"`
 }
@@ -765,10 +800,8 @@ result := mapResult
     return nil
 }
 
-func (x *respSomeServiceBinaryKeyedMap) String() string {
-    type respSomeServiceBinaryKeyedMapAlias respSomeServiceBinaryKeyedMap
-    valueAlias := (*respSomeServiceBinaryKeyedMapAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *respSomeServiceBinaryKeyedMap) toString0() string {  // Value
+    return fmt.Sprintf("%v", x.GetValueNonCompat())
 }
 
 
@@ -854,6 +887,19 @@ func (x *respSomeServiceBinaryKeyedMap) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respSomeServiceBinaryKeyedMap) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respSomeServiceBinaryKeyedMap({")
+    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 
 type SomeServiceProcessor struct {

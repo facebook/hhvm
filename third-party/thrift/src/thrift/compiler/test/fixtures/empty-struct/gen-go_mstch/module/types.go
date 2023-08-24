@@ -5,6 +5,7 @@ package module // [[[ program thrift source path ]]]
 
 import (
     "fmt"
+    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
@@ -13,6 +14,7 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 
 
 type Empty struct {
@@ -22,12 +24,6 @@ var _ thrift.Struct = &Empty{}
 
 func NewEmpty() *Empty {
     return (&Empty{})
-}
-
-func (x *Empty) String() string {
-    type EmptyAlias Empty
-    valueAlias := (*EmptyAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -96,6 +92,18 @@ func (x *Empty) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Empty) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Empty({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Nada struct {
 }
@@ -104,12 +112,6 @@ var _ thrift.Struct = &Nada{}
 
 func NewNada() *Nada {
     return (&Nada{})
-}
-
-func (x *Nada) String() string {
-    type NadaAlias Nada
-    valueAlias := (*NadaAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 func (x *Nada) countSetFields() int {
@@ -190,6 +192,18 @@ func (x *Nada) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Nada) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Nada({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

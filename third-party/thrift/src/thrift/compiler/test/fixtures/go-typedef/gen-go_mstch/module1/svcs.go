@@ -7,6 +7,7 @@ package module1 // [[[ program thrift source path ]]]
 import (
     "context"
     "fmt"
+    "strings"
     "sync"
 
     module0 "module0"
@@ -20,6 +21,7 @@ var _ = module0.GoUnusedProtection__
 var _ = context.Background
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 var _ = sync.Mutex{}
 
 
@@ -231,10 +233,8 @@ if err != nil {
     return nil
 }
 
-func (x *reqFinderByPlate) String() string {
-    type reqFinderByPlateAlias reqFinderByPlate
-    valueAlias := (*reqFinderByPlateAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *reqFinderByPlate) toString1() string {  // Plate
+    return fmt.Sprintf("%v", x.GetPlateNonCompat())
 }
 
 
@@ -316,6 +316,19 @@ func (x *reqFinderByPlate) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqFinderByPlate) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqFinderByPlate({")
+    sb.WriteString(fmt.Sprintf("Plate:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respFinderByPlate struct {
     Value *Automobile `thrift:"value,0" json:"value" db:"value"`
 }
@@ -385,6 +398,10 @@ if err != nil {
     return nil
 }
 
+func (x *respFinderByPlate) toString0() string {  // Value
+    return fmt.Sprintf("%v", x.GetValueNonCompat())
+}
+
 // Deprecated: Use newRespFinderByPlate().GetValue() instead.
 var respFinderByPlate_Value_DEFAULT = newRespFinderByPlate().GetValue()
 
@@ -394,12 +411,6 @@ func (x *respFinderByPlate) DefaultGetValue() *Automobile {
         return NewAutomobile()
     }
     return x.Value
-}
-
-func (x *respFinderByPlate) String() string {
-    type respFinderByPlateAlias respFinderByPlate
-    valueAlias := (*respFinderByPlateAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -485,6 +496,19 @@ func (x *respFinderByPlate) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respFinderByPlate) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respFinderByPlate({")
+    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type reqFinderAliasByPlate struct {
     Plate Plate `thrift:"plate,1" json:"plate" db:"plate"`
 }
@@ -543,10 +567,8 @@ if err != nil {
     return nil
 }
 
-func (x *reqFinderAliasByPlate) String() string {
-    type reqFinderAliasByPlateAlias reqFinderAliasByPlate
-    valueAlias := (*reqFinderAliasByPlateAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *reqFinderAliasByPlate) toString1() string {  // Plate
+    return fmt.Sprintf("%v", x.GetPlateNonCompat())
 }
 
 
@@ -628,6 +650,19 @@ func (x *reqFinderAliasByPlate) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqFinderAliasByPlate) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqFinderAliasByPlate({")
+    sb.WriteString(fmt.Sprintf("Plate:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respFinderAliasByPlate struct {
     Value *Car `thrift:"value,0" json:"value" db:"value"`
 }
@@ -697,6 +732,10 @@ if err != nil {
     return nil
 }
 
+func (x *respFinderAliasByPlate) toString0() string {  // Value
+    return fmt.Sprintf("%v", x.GetValueNonCompat())
+}
+
 // Deprecated: Use newRespFinderAliasByPlate().GetValue() instead.
 var respFinderAliasByPlate_Value_DEFAULT = newRespFinderAliasByPlate().GetValue()
 
@@ -706,12 +745,6 @@ func (x *respFinderAliasByPlate) DefaultGetValue() *Car {
         return NewCar()
     }
     return x.Value
-}
-
-func (x *respFinderAliasByPlate) String() string {
-    type respFinderAliasByPlateAlias respFinderAliasByPlate
-    valueAlias := (*respFinderAliasByPlateAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -797,6 +830,19 @@ func (x *respFinderAliasByPlate) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respFinderAliasByPlate) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respFinderAliasByPlate({")
+    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type reqFinderPreviousPlate struct {
     Plate Plate `thrift:"plate,1" json:"plate" db:"plate"`
 }
@@ -855,10 +901,8 @@ if err != nil {
     return nil
 }
 
-func (x *reqFinderPreviousPlate) String() string {
-    type reqFinderPreviousPlateAlias reqFinderPreviousPlate
-    valueAlias := (*reqFinderPreviousPlateAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *reqFinderPreviousPlate) toString1() string {  // Plate
+    return fmt.Sprintf("%v", x.GetPlateNonCompat())
 }
 
 
@@ -940,6 +984,19 @@ func (x *reqFinderPreviousPlate) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqFinderPreviousPlate) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqFinderPreviousPlate({")
+    sb.WriteString(fmt.Sprintf("Plate:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respFinderPreviousPlate struct {
     Value Plate `thrift:"value,0" json:"value" db:"value"`
 }
@@ -997,10 +1054,8 @@ if err != nil {
     return nil
 }
 
-func (x *respFinderPreviousPlate) String() string {
-    type respFinderPreviousPlateAlias respFinderPreviousPlate
-    valueAlias := (*respFinderPreviousPlateAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *respFinderPreviousPlate) toString0() string {  // Value
+    return fmt.Sprintf("%v", x.GetValueNonCompat())
 }
 
 
@@ -1086,6 +1141,19 @@ func (x *respFinderPreviousPlate) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respFinderPreviousPlate) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respFinderPreviousPlate({")
+    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 
 type FinderProcessor struct {

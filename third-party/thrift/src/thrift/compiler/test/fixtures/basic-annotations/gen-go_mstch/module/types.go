@@ -5,6 +5,7 @@ package module // [[[ program thrift source path ]]]
 
 import (
     "fmt"
+    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
@@ -13,6 +14,7 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 
 
 type IncredibleStruct = MyStruct
@@ -184,10 +186,8 @@ if err != nil {
     return nil
 }
 
-func (x *MyStructNestedAnnotation) String() string {
-    type MyStructNestedAnnotationAlias MyStructNestedAnnotation
-    valueAlias := (*MyStructNestedAnnotationAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *MyStructNestedAnnotation) toString1() string {  // Name
+    return fmt.Sprintf("%v", x.GetNameNonCompat())
 }
 
 
@@ -269,6 +269,19 @@ func (x *MyStructNestedAnnotation) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MyStructNestedAnnotation) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyStructNestedAnnotation({")
+    sb.WriteString(fmt.Sprintf("Name:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type MyUnion struct {
 }
@@ -277,12 +290,6 @@ var _ thrift.Struct = &MyUnion{}
 
 func NewMyUnion() *MyUnion {
     return (&MyUnion{})
-}
-
-func (x *MyUnion) String() string {
-    type MyUnionAlias MyUnion
-    valueAlias := (*MyUnionAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 func (x *MyUnion) countSetFields() int {
@@ -363,6 +370,18 @@ func (x *MyUnion) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MyUnion) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyUnion({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type MyException struct {
 }
@@ -371,18 +390,6 @@ var _ thrift.Struct = &MyException{}
 
 func NewMyException() *MyException {
     return (&MyException{})
-}
-
-func (x *MyException) String() string {
-    type MyExceptionAlias MyException
-    valueAlias := (*MyExceptionAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
-
-func (x *MyException) Error() string {
-    type MyExceptionAlias MyException
-    valueAlias := (*MyExceptionAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -451,6 +458,21 @@ func (x *MyException) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MyException) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyException({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
+func (x *MyException) Error() string {
+    return x.String()
+}
 
 type MyStruct struct {
     MajorVer int64 `thrift:"major,2" json:"major" db:"major"`
@@ -930,6 +952,42 @@ if err != nil {
     return nil
 }
 
+func (x *MyStruct) toString2() string {  // MajorVer
+    return fmt.Sprintf("%v", x.GetMajorVerNonCompat())
+}
+
+func (x *MyStruct) toString1() string {  // PackageName
+    return fmt.Sprintf("%v", x.GetPackageNameNonCompat())
+}
+
+func (x *MyStruct) toString3() string {  // AnnotationWithQuote
+    return fmt.Sprintf("%v", x.GetAnnotationWithQuoteNonCompat())
+}
+
+func (x *MyStruct) toString4() string {  // Class_
+    return fmt.Sprintf("%v", x.GetClass_NonCompat())
+}
+
+func (x *MyStruct) toString5() string {  // AnnotationWithTrailingComma
+    return fmt.Sprintf("%v", x.GetAnnotationWithTrailingCommaNonCompat())
+}
+
+func (x *MyStruct) toString6() string {  // EmptyAnnotations
+    return fmt.Sprintf("%v", x.GetEmptyAnnotationsNonCompat())
+}
+
+func (x *MyStruct) toString7() string {  // MyEnum
+    return fmt.Sprintf("%v", x.GetMyEnumNonCompat())
+}
+
+func (x *MyStruct) toString8() string {  // CppTypeAnnotation
+    return fmt.Sprintf("%v", x.GetCppTypeAnnotationNonCompat())
+}
+
+func (x *MyStruct) toString9() string {  // MyUnion
+    return fmt.Sprintf("%v", x.GetMyUnionNonCompat())
+}
+
 // Deprecated: Use NewMyStruct().GetMyUnion() instead.
 var MyStruct_MyUnion_DEFAULT = NewMyStruct().GetMyUnion()
 
@@ -939,12 +997,6 @@ func (x *MyStruct) DefaultGetMyUnion() *MyUnion {
         return NewMyUnion()
     }
     return x.MyUnion
-}
-
-func (x *MyStruct) String() string {
-    type MyStructAlias MyStruct
-    valueAlias := (*MyStructAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1130,6 +1182,27 @@ func (x *MyStruct) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MyStruct) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyStruct({")
+    sb.WriteString(fmt.Sprintf("MajorVer:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("PackageName:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("AnnotationWithQuote:%s ", x.toString3()))
+    sb.WriteString(fmt.Sprintf("Class_:%s ", x.toString4()))
+    sb.WriteString(fmt.Sprintf("AnnotationWithTrailingComma:%s ", x.toString5()))
+    sb.WriteString(fmt.Sprintf("EmptyAnnotations:%s ", x.toString6()))
+    sb.WriteString(fmt.Sprintf("MyEnum:%s ", x.toString7()))
+    sb.WriteString(fmt.Sprintf("CppTypeAnnotation:%s ", x.toString8()))
+    sb.WriteString(fmt.Sprintf("MyUnion:%s", x.toString9()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type SecretStruct struct {
     Id int64 `thrift:"id,1" json:"id" db:"id"`
@@ -1232,10 +1305,12 @@ if err != nil {
     return nil
 }
 
-func (x *SecretStruct) String() string {
-    type SecretStructAlias SecretStruct
-    valueAlias := (*SecretStructAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *SecretStruct) toString1() string {  // Id
+    return fmt.Sprintf("%v", x.GetIdNonCompat())
+}
+
+func (x *SecretStruct) toString2() string {  // Password
+    return fmt.Sprintf("%v", x.GetPasswordNonCompat())
 }
 
 
@@ -1330,6 +1405,20 @@ func (x *SecretStruct) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *SecretStruct) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("SecretStruct({")
+    sb.WriteString(fmt.Sprintf("Id:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Password:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

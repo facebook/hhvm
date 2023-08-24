@@ -5,6 +5,7 @@ package python // [[[ program thrift source path ]]]
 
 import (
     "fmt"
+    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
@@ -13,6 +14,7 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 
 
 type Py3Hidden struct {
@@ -22,12 +24,6 @@ var _ thrift.Struct = &Py3Hidden{}
 
 func NewPy3Hidden() *Py3Hidden {
     return (&Py3Hidden{})
-}
-
-func (x *Py3Hidden) String() string {
-    type Py3HiddenAlias Py3Hidden
-    valueAlias := (*Py3HiddenAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -96,6 +92,18 @@ func (x *Py3Hidden) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Py3Hidden) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Py3Hidden({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Flags struct {
 }
@@ -104,12 +112,6 @@ var _ thrift.Struct = &Flags{}
 
 func NewFlags() *Flags {
     return (&Flags{})
-}
-
-func (x *Flags) String() string {
-    type FlagsAlias Flags
-    valueAlias := (*FlagsAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -178,6 +180,18 @@ func (x *Flags) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Flags) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Flags({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Name struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
@@ -234,10 +248,8 @@ if err != nil {
     return nil
 }
 
-func (x *Name) String() string {
-    type NameAlias Name
-    valueAlias := (*NameAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *Name) toString1() string {  // Name
+    return fmt.Sprintf("%v", x.GetNameNonCompat())
 }
 
 
@@ -319,6 +331,19 @@ func (x *Name) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Name) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Name({")
+    sb.WriteString(fmt.Sprintf("Name:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Adapter struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
@@ -421,10 +446,12 @@ if err != nil {
     return nil
 }
 
-func (x *Adapter) String() string {
-    type AdapterAlias Adapter
-    valueAlias := (*AdapterAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *Adapter) toString1() string {  // Name
+    return fmt.Sprintf("%v", x.GetNameNonCompat())
+}
+
+func (x *Adapter) toString2() string {  // TypeHint
+    return fmt.Sprintf("%v", x.GetTypeHintNonCompat())
 }
 
 
@@ -519,6 +546,20 @@ func (x *Adapter) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Adapter) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Adapter({")
+    sb.WriteString(fmt.Sprintf("Name:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("TypeHint:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type MarshalCapi struct {
 }
@@ -527,12 +568,6 @@ var _ thrift.Struct = &MarshalCapi{}
 
 func NewMarshalCapi() *MarshalCapi {
     return (&MarshalCapi{})
-}
-
-func (x *MarshalCapi) String() string {
-    type MarshalCapiAlias MarshalCapi
-    valueAlias := (*MarshalCapiAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -601,6 +636,18 @@ func (x *MarshalCapi) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MarshalCapi) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MarshalCapi({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

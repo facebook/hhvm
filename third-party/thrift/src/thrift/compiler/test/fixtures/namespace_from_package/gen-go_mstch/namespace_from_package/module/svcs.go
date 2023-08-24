@@ -7,6 +7,7 @@ package module // [[[ program thrift source path ]]]
 import (
     "context"
     "fmt"
+    "strings"
     "sync"
 
 
@@ -18,6 +19,7 @@ import (
 var _ = context.Background
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 var _ = sync.Mutex{}
 
 
@@ -190,10 +192,8 @@ if err != nil {
     return nil
 }
 
-func (x *reqTestServiceInit) String() string {
-    type reqTestServiceInitAlias reqTestServiceInit
-    valueAlias := (*reqTestServiceInitAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *reqTestServiceInit) toString1() string {  // Int1
+    return fmt.Sprintf("%v", x.GetInt1NonCompat())
 }
 
 
@@ -275,6 +275,19 @@ func (x *reqTestServiceInit) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqTestServiceInit) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqTestServiceInit({")
+    sb.WriteString(fmt.Sprintf("Int1:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respTestServiceInit struct {
     Value int64 `thrift:"value,0" json:"value" db:"value"`
 }
@@ -331,10 +344,8 @@ if err != nil {
     return nil
 }
 
-func (x *respTestServiceInit) String() string {
-    type respTestServiceInitAlias respTestServiceInit
-    valueAlias := (*respTestServiceInitAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *respTestServiceInit) toString0() string {  // Value
+    return fmt.Sprintf("%v", x.GetValueNonCompat())
 }
 
 
@@ -420,6 +431,19 @@ func (x *respTestServiceInit) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respTestServiceInit) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respTestServiceInit({")
+    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 
 type TestServiceProcessor struct {

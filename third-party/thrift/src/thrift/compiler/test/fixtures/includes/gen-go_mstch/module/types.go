@@ -5,6 +5,7 @@ package module // [[[ program thrift source path ]]]
 
 import (
     "fmt"
+    "strings"
 
     includes "includes"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
@@ -15,6 +16,7 @@ var _ = includes.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 
 
 type MyStruct struct {
@@ -193,6 +195,18 @@ if err != nil {
     return nil
 }
 
+func (x *MyStruct) toString1() string {  // MyIncludedField
+    return fmt.Sprintf("%v", x.GetMyIncludedFieldNonCompat())
+}
+
+func (x *MyStruct) toString2() string {  // MyOtherIncludedField
+    return fmt.Sprintf("%v", x.GetMyOtherIncludedFieldNonCompat())
+}
+
+func (x *MyStruct) toString3() string {  // MyIncludedInt
+    return fmt.Sprintf("%v", x.GetMyIncludedIntNonCompat())
+}
+
 // Deprecated: Use NewMyStruct().GetMyIncludedField() instead.
 var MyStruct_MyIncludedField_DEFAULT = NewMyStruct().GetMyIncludedField()
 
@@ -213,12 +227,6 @@ func (x *MyStruct) DefaultGetMyOtherIncludedField() *includes.Included {
         return includes.NewIncluded()
     }
     return x.MyOtherIncludedField
-}
-
-func (x *MyStruct) String() string {
-    type MyStructAlias MyStruct
-    valueAlias := (*MyStructAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -326,6 +334,21 @@ func (x *MyStruct) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MyStruct) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyStruct({")
+    sb.WriteString(fmt.Sprintf("MyIncludedField:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("MyOtherIncludedField:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("MyIncludedInt:%s", x.toString3()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

@@ -5,6 +5,7 @@ package module // [[[ program thrift source path ]]]
 
 import (
     "fmt"
+    "strings"
 
     foo "foo"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
@@ -15,6 +16,7 @@ var _ = foo.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 
 
 type Fields struct {
@@ -72,10 +74,8 @@ if err != nil {
     return nil
 }
 
-func (x *Fields) String() string {
-    type FieldsAlias Fields
-    valueAlias := (*FieldsAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *Fields) toString100() string {  // InjectedField
+    return fmt.Sprintf("%v", x.GetInjectedFieldNonCompat())
 }
 
 
@@ -157,6 +157,19 @@ func (x *Fields) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Fields) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Fields({")
+    sb.WriteString(fmt.Sprintf("InjectedField:%s", x.toString100()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type FieldsInjectedToEmptyStruct struct {
     InjectedField string `thrift:"injected_field,-1100" json:"injected_field" db:"injected_field"`
@@ -213,10 +226,8 @@ if err != nil {
     return nil
 }
 
-func (x *FieldsInjectedToEmptyStruct) String() string {
-    type FieldsInjectedToEmptyStructAlias FieldsInjectedToEmptyStruct
-    valueAlias := (*FieldsInjectedToEmptyStructAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *FieldsInjectedToEmptyStruct) toString_1100() string {  // InjectedField
+    return fmt.Sprintf("%v", x.GetInjectedFieldNonCompat())
 }
 
 
@@ -298,6 +309,19 @@ func (x *FieldsInjectedToEmptyStruct) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *FieldsInjectedToEmptyStruct) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("FieldsInjectedToEmptyStruct({")
+    sb.WriteString(fmt.Sprintf("InjectedField:%s", x.toString_1100()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type FieldsInjectedToStruct struct {
     StringField string `thrift:"string_field,1" json:"string_field" db:"string_field"`
@@ -400,10 +424,12 @@ if err != nil {
     return nil
 }
 
-func (x *FieldsInjectedToStruct) String() string {
-    type FieldsInjectedToStructAlias FieldsInjectedToStruct
-    valueAlias := (*FieldsInjectedToStructAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *FieldsInjectedToStruct) toString1() string {  // StringField
+    return fmt.Sprintf("%v", x.GetStringFieldNonCompat())
+}
+
+func (x *FieldsInjectedToStruct) toString_1100() string {  // InjectedField
+    return fmt.Sprintf("%v", x.GetInjectedFieldNonCompat())
 }
 
 
@@ -498,6 +524,20 @@ func (x *FieldsInjectedToStruct) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *FieldsInjectedToStruct) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("FieldsInjectedToStruct({")
+    sb.WriteString(fmt.Sprintf("StringField:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("InjectedField:%s", x.toString_1100()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type FieldsInjectedWithIncludedStruct struct {
     StringField string `thrift:"string_field,1" json:"string_field" db:"string_field"`
@@ -714,17 +754,33 @@ if err != nil {
     return nil
 }
 
+func (x *FieldsInjectedWithIncludedStruct) toString1() string {  // StringField
+    return fmt.Sprintf("%v", x.GetStringFieldNonCompat())
+}
+
+func (x *FieldsInjectedWithIncludedStruct) toString_1100() string {  // InjectedField
+    return fmt.Sprintf("%v", x.GetInjectedFieldNonCompat())
+}
+
+func (x *FieldsInjectedWithIncludedStruct) toString_1101() string {  // InjectedStructuredAnnotationField
+    if x.IsSetInjectedStructuredAnnotationField() {
+        return fmt.Sprintf("%v", *x.GetInjectedStructuredAnnotationFieldNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetInjectedStructuredAnnotationFieldNonCompat())
+}
+
+func (x *FieldsInjectedWithIncludedStruct) toString_1102() string {  // InjectedUnstructuredAnnotationField
+    if x.IsSetInjectedUnstructuredAnnotationField() {
+        return fmt.Sprintf("%v", *x.GetInjectedUnstructuredAnnotationFieldNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetInjectedUnstructuredAnnotationFieldNonCompat())
+}
+
 // Deprecated: Use NewFieldsInjectedWithIncludedStruct().GetInjectedStructuredAnnotationField() instead.
 var FieldsInjectedWithIncludedStruct_InjectedStructuredAnnotationField_DEFAULT = NewFieldsInjectedWithIncludedStruct().GetInjectedStructuredAnnotationField()
 
 // Deprecated: Use NewFieldsInjectedWithIncludedStruct().GetInjectedUnstructuredAnnotationField() instead.
 var FieldsInjectedWithIncludedStruct_InjectedUnstructuredAnnotationField_DEFAULT = NewFieldsInjectedWithIncludedStruct().GetInjectedUnstructuredAnnotationField()
-
-func (x *FieldsInjectedWithIncludedStruct) String() string {
-    type FieldsInjectedWithIncludedStructAlias FieldsInjectedWithIncludedStruct
-    valueAlias := (*FieldsInjectedWithIncludedStructAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
 
 
 // Deprecated: Use FieldsInjectedWithIncludedStruct.Set* methods instead or set the fields directly.
@@ -844,6 +900,22 @@ func (x *FieldsInjectedWithIncludedStruct) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *FieldsInjectedWithIncludedStruct) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("FieldsInjectedWithIncludedStruct({")
+    sb.WriteString(fmt.Sprintf("StringField:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("InjectedField:%s ", x.toString_1100()))
+    sb.WriteString(fmt.Sprintf("InjectedStructuredAnnotationField:%s ", x.toString_1101()))
+    sb.WriteString(fmt.Sprintf("InjectedUnstructuredAnnotationField:%s", x.toString_1102()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

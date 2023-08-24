@@ -5,6 +5,7 @@ package module // [[[ program thrift source path ]]]
 
 import (
     "fmt"
+    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
@@ -13,6 +14,7 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 
 
 type SetWithAdapter = []string
@@ -1120,10 +1122,12 @@ result := Color(enumResult)
     return nil
 }
 
-func (x *MyAnnotation) String() string {
-    type MyAnnotationAlias MyAnnotation
-    valueAlias := (*MyAnnotationAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *MyAnnotation) toString1() string {  // Signature
+    return fmt.Sprintf("%v", x.GetSignatureNonCompat())
+}
+
+func (x *MyAnnotation) toString2() string {  // Color
+    return fmt.Sprintf("%v", x.GetColorNonCompat())
 }
 
 
@@ -1218,6 +1222,20 @@ func (x *MyAnnotation) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MyAnnotation) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyAnnotation({")
+    sb.WriteString(fmt.Sprintf("Signature:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Color:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Foo struct {
     IntField int32 `thrift:"intField,1" json:"intField" db:"intField"`
@@ -1902,14 +1920,55 @@ if err != nil {
     return nil
 }
 
+func (x *Foo) toString1() string {  // IntField
+    return fmt.Sprintf("%v", x.GetIntFieldNonCompat())
+}
+
+func (x *Foo) toString2() string {  // OptionalIntField
+    if x.IsSetOptionalIntField() {
+        return fmt.Sprintf("%v", *x.GetOptionalIntFieldNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetOptionalIntFieldNonCompat())
+}
+
+func (x *Foo) toString3() string {  // IntFieldWithDefault
+    return fmt.Sprintf("%v", x.GetIntFieldWithDefaultNonCompat())
+}
+
+func (x *Foo) toString4() string {  // SetField
+    return fmt.Sprintf("%v", x.GetSetFieldNonCompat())
+}
+
+func (x *Foo) toString5() string {  // OptionalSetField
+    return fmt.Sprintf("%v", x.GetOptionalSetFieldNonCompat())
+}
+
+func (x *Foo) toString6() string {  // MapField
+    return fmt.Sprintf("%v", x.GetMapFieldNonCompat())
+}
+
+func (x *Foo) toString7() string {  // OptionalMapField
+    return fmt.Sprintf("%v", x.GetOptionalMapFieldNonCompat())
+}
+
+func (x *Foo) toString8() string {  // BinaryField
+    return fmt.Sprintf("%v", x.GetBinaryFieldNonCompat())
+}
+
+func (x *Foo) toString9() string {  // LongField
+    return fmt.Sprintf("%v", x.GetLongFieldNonCompat())
+}
+
+func (x *Foo) toString10() string {  // AdaptedLongField
+    return fmt.Sprintf("%v", x.GetAdaptedLongFieldNonCompat())
+}
+
+func (x *Foo) toString11() string {  // DoubleAdaptedField
+    return fmt.Sprintf("%v", x.GetDoubleAdaptedFieldNonCompat())
+}
+
 // Deprecated: Use NewFoo().GetOptionalIntField() instead.
 var Foo_OptionalIntField_DEFAULT = NewFoo().GetOptionalIntField()
-
-func (x *Foo) String() string {
-    type FooAlias Foo
-    valueAlias := (*FooAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
 
 
 // Deprecated: Use Foo.Set* methods instead or set the fields directly.
@@ -2120,6 +2179,29 @@ func (x *Foo) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Foo) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Foo({")
+    sb.WriteString(fmt.Sprintf("IntField:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("OptionalIntField:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("IntFieldWithDefault:%s ", x.toString3()))
+    sb.WriteString(fmt.Sprintf("SetField:%s ", x.toString4()))
+    sb.WriteString(fmt.Sprintf("OptionalSetField:%s ", x.toString5()))
+    sb.WriteString(fmt.Sprintf("MapField:%s ", x.toString6()))
+    sb.WriteString(fmt.Sprintf("OptionalMapField:%s ", x.toString7()))
+    sb.WriteString(fmt.Sprintf("BinaryField:%s ", x.toString8()))
+    sb.WriteString(fmt.Sprintf("LongField:%s ", x.toString9()))
+    sb.WriteString(fmt.Sprintf("AdaptedLongField:%s ", x.toString10()))
+    sb.WriteString(fmt.Sprintf("DoubleAdaptedField:%s", x.toString11()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Baz struct {
     IntField *int32 `thrift:"intField,1" json:"intField" db:"intField"`
@@ -2464,17 +2546,37 @@ if err != nil {
     return nil
 }
 
+func (x *Baz) toString1() string {  // IntField
+    if x.IsSetIntField() {
+        return fmt.Sprintf("%v", *x.GetIntFieldNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetIntFieldNonCompat())
+}
+
+func (x *Baz) toString4() string {  // SetField
+    return fmt.Sprintf("%v", x.GetSetFieldNonCompat())
+}
+
+func (x *Baz) toString6() string {  // MapField
+    return fmt.Sprintf("%v", x.GetMapFieldNonCompat())
+}
+
+func (x *Baz) toString8() string {  // BinaryField
+    return fmt.Sprintf("%v", x.GetBinaryFieldNonCompat())
+}
+
+func (x *Baz) toString9() string {  // LongField
+    if x.IsSetLongField() {
+        return fmt.Sprintf("%v", *x.GetLongFieldNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetLongFieldNonCompat())
+}
+
 // Deprecated: Use NewBaz().GetIntField() instead.
 var Baz_IntField_DEFAULT = NewBaz().GetIntField()
 
 // Deprecated: Use NewBaz().GetLongField() instead.
 var Baz_LongField_DEFAULT = NewBaz().GetLongField()
-
-func (x *Baz) String() string {
-    type BazAlias Baz
-    valueAlias := (*BazAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
 
 func (x *Baz) countSetFields() int {
     count := int(0)
@@ -2634,6 +2736,23 @@ func (x *Baz) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Baz) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Baz({")
+    sb.WriteString(fmt.Sprintf("IntField:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("SetField:%s ", x.toString4()))
+    sb.WriteString(fmt.Sprintf("MapField:%s ", x.toString6()))
+    sb.WriteString(fmt.Sprintf("BinaryField:%s ", x.toString8()))
+    sb.WriteString(fmt.Sprintf("LongField:%s", x.toString9()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Bar struct {
     StructField *Foo `thrift:"structField,1" json:"structField" db:"structField"`
@@ -3112,6 +3231,34 @@ if err != nil {
     return nil
 }
 
+func (x *Bar) toString1() string {  // StructField
+    return fmt.Sprintf("%v", x.GetStructFieldNonCompat())
+}
+
+func (x *Bar) toString2() string {  // OptionalStructField
+    return fmt.Sprintf("%v", x.GetOptionalStructFieldNonCompat())
+}
+
+func (x *Bar) toString3() string {  // StructListField
+    return fmt.Sprintf("%v", x.GetStructListFieldNonCompat())
+}
+
+func (x *Bar) toString4() string {  // OptionalStructListField
+    return fmt.Sprintf("%v", x.GetOptionalStructListFieldNonCompat())
+}
+
+func (x *Bar) toString5() string {  // UnionField
+    return fmt.Sprintf("%v", x.GetUnionFieldNonCompat())
+}
+
+func (x *Bar) toString6() string {  // OptionalUnionField
+    return fmt.Sprintf("%v", x.GetOptionalUnionFieldNonCompat())
+}
+
+func (x *Bar) toString7() string {  // AdaptedStructField
+    return fmt.Sprintf("%v", x.GetAdaptedStructFieldNonCompat())
+}
+
 // Deprecated: Use NewBar().GetStructField() instead.
 var Bar_StructField_DEFAULT = NewBar().GetStructField()
 
@@ -3165,12 +3312,6 @@ func (x *Bar) DefaultGetAdaptedStructField() *DirectlyAdapted {
         return NewDirectlyAdapted()
     }
     return x.AdaptedStructField
-}
-
-func (x *Bar) String() string {
-    type BarAlias Bar
-    valueAlias := (*BarAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -3330,6 +3471,25 @@ func (x *Bar) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Bar) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Bar({")
+    sb.WriteString(fmt.Sprintf("StructField:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("OptionalStructField:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("StructListField:%s ", x.toString3()))
+    sb.WriteString(fmt.Sprintf("OptionalStructListField:%s ", x.toString4()))
+    sb.WriteString(fmt.Sprintf("UnionField:%s ", x.toString5()))
+    sb.WriteString(fmt.Sprintf("OptionalUnionField:%s ", x.toString6()))
+    sb.WriteString(fmt.Sprintf("AdaptedStructField:%s", x.toString7()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type DirectlyAdapted struct {
     Field int32 `thrift:"field,1" json:"field" db:"field"`
@@ -3386,10 +3546,8 @@ if err != nil {
     return nil
 }
 
-func (x *DirectlyAdapted) String() string {
-    type DirectlyAdaptedAlias DirectlyAdapted
-    valueAlias := (*DirectlyAdaptedAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *DirectlyAdapted) toString1() string {  // Field
+    return fmt.Sprintf("%v", x.GetFieldNonCompat())
 }
 
 
@@ -3471,6 +3629,19 @@ func (x *DirectlyAdapted) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *DirectlyAdapted) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("DirectlyAdapted({")
+    sb.WriteString(fmt.Sprintf("Field:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type IndependentDirectlyAdapted struct {
     Field int32 `thrift:"field,1" json:"field" db:"field"`
@@ -3527,10 +3698,8 @@ if err != nil {
     return nil
 }
 
-func (x *IndependentDirectlyAdapted) String() string {
-    type IndependentDirectlyAdaptedAlias IndependentDirectlyAdapted
-    valueAlias := (*IndependentDirectlyAdaptedAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *IndependentDirectlyAdapted) toString1() string {  // Field
+    return fmt.Sprintf("%v", x.GetFieldNonCompat())
 }
 
 
@@ -3612,6 +3781,19 @@ func (x *IndependentDirectlyAdapted) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *IndependentDirectlyAdapted) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("IndependentDirectlyAdapted({")
+    sb.WriteString(fmt.Sprintf("Field:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type StructWithFieldAdapter struct {
     Field int32 `thrift:"field,1" json:"field" db:"field"`
@@ -3828,17 +4010,33 @@ if err != nil {
     return nil
 }
 
+func (x *StructWithFieldAdapter) toString1() string {  // Field
+    return fmt.Sprintf("%v", x.GetFieldNonCompat())
+}
+
+func (x *StructWithFieldAdapter) toString2() string {  // SharedField
+    return fmt.Sprintf("%v", x.GetSharedFieldNonCompat())
+}
+
+func (x *StructWithFieldAdapter) toString3() string {  // OptSharedField
+    if x.IsSetOptSharedField() {
+        return fmt.Sprintf("%v", *x.GetOptSharedFieldNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetOptSharedFieldNonCompat())
+}
+
+func (x *StructWithFieldAdapter) toString4() string {  // OptBoxedField
+    if x.IsSetOptBoxedField() {
+        return fmt.Sprintf("%v", *x.GetOptBoxedFieldNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetOptBoxedFieldNonCompat())
+}
+
 // Deprecated: Use NewStructWithFieldAdapter().GetOptSharedField() instead.
 var StructWithFieldAdapter_OptSharedField_DEFAULT = NewStructWithFieldAdapter().GetOptSharedField()
 
 // Deprecated: Use NewStructWithFieldAdapter().GetOptBoxedField() instead.
 var StructWithFieldAdapter_OptBoxedField_DEFAULT = NewStructWithFieldAdapter().GetOptBoxedField()
-
-func (x *StructWithFieldAdapter) String() string {
-    type StructWithFieldAdapterAlias StructWithFieldAdapter
-    valueAlias := (*StructWithFieldAdapterAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
 
 
 // Deprecated: Use StructWithFieldAdapter.Set* methods instead or set the fields directly.
@@ -3958,6 +4156,22 @@ func (x *StructWithFieldAdapter) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *StructWithFieldAdapter) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("StructWithFieldAdapter({")
+    sb.WriteString(fmt.Sprintf("Field:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("SharedField:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("OptSharedField:%s ", x.toString3()))
+    sb.WriteString(fmt.Sprintf("OptBoxedField:%s", x.toString4()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type TerseAdaptedFields struct {
     IntField int32 `thrift:"int_field,1" json:"int_field" db:"int_field"`
@@ -4147,10 +4361,16 @@ result := setResult
     return nil
 }
 
-func (x *TerseAdaptedFields) String() string {
-    type TerseAdaptedFieldsAlias TerseAdaptedFields
-    valueAlias := (*TerseAdaptedFieldsAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *TerseAdaptedFields) toString1() string {  // IntField
+    return fmt.Sprintf("%v", x.GetIntFieldNonCompat())
+}
+
+func (x *TerseAdaptedFields) toString2() string {  // StringField
+    return fmt.Sprintf("%v", x.GetStringFieldNonCompat())
+}
+
+func (x *TerseAdaptedFields) toString3() string {  // SetField
+    return fmt.Sprintf("%v", x.GetSetFieldNonCompat())
 }
 
 
@@ -4258,6 +4478,21 @@ func (x *TerseAdaptedFields) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *TerseAdaptedFields) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("TerseAdaptedFields({")
+    sb.WriteString(fmt.Sprintf("IntField:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("StringField:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("SetField:%s", x.toString3()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type B struct {
     A *AdaptedA `thrift:"a,1" json:"a" db:"a"`
@@ -4327,6 +4562,10 @@ if err != nil {
     return nil
 }
 
+func (x *B) toString1() string {  // A
+    return fmt.Sprintf("%v", x.GetANonCompat())
+}
+
 // Deprecated: Use NewB().GetA() instead.
 var B_A_DEFAULT = NewB().GetA()
 
@@ -4336,12 +4575,6 @@ func (x *B) DefaultGetA() *AdaptedA {
         return NewAdaptedA()
     }
     return x.A
-}
-
-func (x *B) String() string {
-    type BAlias B
-    valueAlias := (*BAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -4423,6 +4656,19 @@ func (x *B) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *B) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("B({")
+    sb.WriteString(fmt.Sprintf("A:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type A struct {
 }
@@ -4431,12 +4677,6 @@ var _ thrift.Struct = &A{}
 
 func NewA() *A {
     return (&A{})
-}
-
-func (x *A) String() string {
-    type AAlias A
-    valueAlias := (*AAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -4505,6 +4745,18 @@ func (x *A) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *A) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("A({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Config struct {
     Path string `thrift:"path,1" json:"path" db:"path"`
@@ -4561,10 +4813,8 @@ if err != nil {
     return nil
 }
 
-func (x *Config) String() string {
-    type ConfigAlias Config
-    valueAlias := (*ConfigAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *Config) toString1() string {  // Path
+    return fmt.Sprintf("%v", x.GetPathNonCompat())
 }
 
 
@@ -4646,6 +4896,19 @@ func (x *Config) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Config) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Config({")
+    sb.WriteString(fmt.Sprintf("Path:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type MyStruct struct {
     Field int32 `thrift:"field,1" json:"field" db:"field"`
@@ -4761,10 +5024,12 @@ if err != nil {
     return nil
 }
 
-func (x *MyStruct) String() string {
-    type MyStructAlias MyStruct
-    valueAlias := (*MyStructAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *MyStruct) toString1() string {  // Field
+    return fmt.Sprintf("%v", x.GetFieldNonCompat())
+}
+
+func (x *MyStruct) toString2() string {  // SetString
+    return fmt.Sprintf("%v", x.GetSetStringNonCompat())
 }
 
 
@@ -4859,6 +5124,20 @@ func (x *MyStruct) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MyStruct) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyStruct({")
+    sb.WriteString(fmt.Sprintf("Field:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("SetString:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type AdaptTestStruct struct {
     Delay DurationMs `thrift:"delay,1" json:"delay" db:"delay"`
@@ -5358,10 +5637,44 @@ if err != nil {
     return nil
 }
 
-func (x *AdaptTestStruct) String() string {
-    type AdaptTestStructAlias AdaptTestStruct
-    valueAlias := (*AdaptTestStructAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *AdaptTestStruct) toString1() string {  // Delay
+    return fmt.Sprintf("%v", x.GetDelayNonCompat())
+}
+
+func (x *AdaptTestStruct) toString2() string {  // Custom
+    return fmt.Sprintf("%v", x.GetCustomNonCompat())
+}
+
+func (x *AdaptTestStruct) toString3() string {  // Timeout
+    return fmt.Sprintf("%v", x.GetTimeoutNonCompat())
+}
+
+func (x *AdaptTestStruct) toString4() string {  // Data
+    return fmt.Sprintf("%v", x.GetDataNonCompat())
+}
+
+func (x *AdaptTestStruct) toString5() string {  // Meta
+    return fmt.Sprintf("%v", x.GetMetaNonCompat())
+}
+
+func (x *AdaptTestStruct) toString6() string {  // IndirectionString
+    return fmt.Sprintf("%v", x.GetIndirectionStringNonCompat())
+}
+
+func (x *AdaptTestStruct) toString7() string {  // StringData
+    return fmt.Sprintf("%v", x.GetStringDataNonCompat())
+}
+
+func (x *AdaptTestStruct) toString8() string {  // DoubleWrappedBool
+    return fmt.Sprintf("%v", x.GetDoubleWrappedBoolNonCompat())
+}
+
+func (x *AdaptTestStruct) toString9() string {  // DoubleWrappedInteger
+    return fmt.Sprintf("%v", x.GetDoubleWrappedIntegerNonCompat())
+}
+
+func (x *AdaptTestStruct) toString10() string {  // BinaryData
+    return fmt.Sprintf("%v", x.GetBinaryDataNonCompat())
 }
 
 
@@ -5560,6 +5873,28 @@ func (x *AdaptTestStruct) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *AdaptTestStruct) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("AdaptTestStruct({")
+    sb.WriteString(fmt.Sprintf("Delay:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Custom:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("Timeout:%s ", x.toString3()))
+    sb.WriteString(fmt.Sprintf("Data:%s ", x.toString4()))
+    sb.WriteString(fmt.Sprintf("Meta:%s ", x.toString5()))
+    sb.WriteString(fmt.Sprintf("IndirectionString:%s ", x.toString6()))
+    sb.WriteString(fmt.Sprintf("StringData:%s ", x.toString7()))
+    sb.WriteString(fmt.Sprintf("DoubleWrappedBool:%s ", x.toString8()))
+    sb.WriteString(fmt.Sprintf("DoubleWrappedInteger:%s ", x.toString9()))
+    sb.WriteString(fmt.Sprintf("BinaryData:%s", x.toString10()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type AdaptTemplatedTestStruct struct {
     AdaptedBool AdaptedBool `thrift:"adaptedBool,1" json:"adaptedBool" db:"adaptedBool"`
@@ -6892,10 +7227,92 @@ if err != nil {
     return nil
 }
 
-func (x *AdaptTemplatedTestStruct) String() string {
-    type AdaptTemplatedTestStructAlias AdaptTemplatedTestStruct
-    valueAlias := (*AdaptTemplatedTestStructAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *AdaptTemplatedTestStruct) toString1() string {  // AdaptedBool
+    return fmt.Sprintf("%v", x.GetAdaptedBoolNonCompat())
+}
+
+func (x *AdaptTemplatedTestStruct) toString2() string {  // AdaptedByte
+    return fmt.Sprintf("%v", x.GetAdaptedByteNonCompat())
+}
+
+func (x *AdaptTemplatedTestStruct) toString3() string {  // AdaptedShort
+    return fmt.Sprintf("%v", x.GetAdaptedShortNonCompat())
+}
+
+func (x *AdaptTemplatedTestStruct) toString4() string {  // AdaptedInteger
+    return fmt.Sprintf("%v", x.GetAdaptedIntegerNonCompat())
+}
+
+func (x *AdaptTemplatedTestStruct) toString5() string {  // AdaptedLong
+    return fmt.Sprintf("%v", x.GetAdaptedLongNonCompat())
+}
+
+func (x *AdaptTemplatedTestStruct) toString6() string {  // AdaptedDouble
+    return fmt.Sprintf("%v", x.GetAdaptedDoubleNonCompat())
+}
+
+func (x *AdaptTemplatedTestStruct) toString7() string {  // AdaptedString
+    return fmt.Sprintf("%v", x.GetAdaptedStringNonCompat())
+}
+
+func (x *AdaptTemplatedTestStruct) toString8() string {  // AdaptedList
+    return fmt.Sprintf("%v", x.GetAdaptedListNonCompat())
+}
+
+func (x *AdaptTemplatedTestStruct) toString9() string {  // AdaptedSet
+    return fmt.Sprintf("%v", x.GetAdaptedSetNonCompat())
+}
+
+func (x *AdaptTemplatedTestStruct) toString10() string {  // AdaptedMap
+    return fmt.Sprintf("%v", x.GetAdaptedMapNonCompat())
+}
+
+func (x *AdaptTemplatedTestStruct) toString11() string {  // AdaptedBoolDefault
+    return fmt.Sprintf("%v", x.GetAdaptedBoolDefaultNonCompat())
+}
+
+func (x *AdaptTemplatedTestStruct) toString12() string {  // AdaptedByteDefault
+    return fmt.Sprintf("%v", x.GetAdaptedByteDefaultNonCompat())
+}
+
+func (x *AdaptTemplatedTestStruct) toString13() string {  // AdaptedShortDefault
+    return fmt.Sprintf("%v", x.GetAdaptedShortDefaultNonCompat())
+}
+
+func (x *AdaptTemplatedTestStruct) toString14() string {  // AdaptedIntegerDefault
+    return fmt.Sprintf("%v", x.GetAdaptedIntegerDefaultNonCompat())
+}
+
+func (x *AdaptTemplatedTestStruct) toString15() string {  // AdaptedLongDefault
+    return fmt.Sprintf("%v", x.GetAdaptedLongDefaultNonCompat())
+}
+
+func (x *AdaptTemplatedTestStruct) toString16() string {  // AdaptedDoubleDefault
+    return fmt.Sprintf("%v", x.GetAdaptedDoubleDefaultNonCompat())
+}
+
+func (x *AdaptTemplatedTestStruct) toString17() string {  // AdaptedStringDefault
+    return fmt.Sprintf("%v", x.GetAdaptedStringDefaultNonCompat())
+}
+
+func (x *AdaptTemplatedTestStruct) toString18() string {  // AdaptedEnum
+    return fmt.Sprintf("%v", x.GetAdaptedEnumNonCompat())
+}
+
+func (x *AdaptTemplatedTestStruct) toString19() string {  // AdaptedListDefault
+    return fmt.Sprintf("%v", x.GetAdaptedListDefaultNonCompat())
+}
+
+func (x *AdaptTemplatedTestStruct) toString20() string {  // AdaptedSetDefault
+    return fmt.Sprintf("%v", x.GetAdaptedSetDefaultNonCompat())
+}
+
+func (x *AdaptTemplatedTestStruct) toString21() string {  // AdaptedMapDefault
+    return fmt.Sprintf("%v", x.GetAdaptedMapDefaultNonCompat())
+}
+
+func (x *AdaptTemplatedTestStruct) toString22() string {  // DoubleTypedefBool
+    return fmt.Sprintf("%v", x.GetDoubleTypedefBoolNonCompat())
 }
 
 
@@ -7250,6 +7667,40 @@ func (x *AdaptTemplatedTestStruct) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *AdaptTemplatedTestStruct) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("AdaptTemplatedTestStruct({")
+    sb.WriteString(fmt.Sprintf("AdaptedBool:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("AdaptedByte:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("AdaptedShort:%s ", x.toString3()))
+    sb.WriteString(fmt.Sprintf("AdaptedInteger:%s ", x.toString4()))
+    sb.WriteString(fmt.Sprintf("AdaptedLong:%s ", x.toString5()))
+    sb.WriteString(fmt.Sprintf("AdaptedDouble:%s ", x.toString6()))
+    sb.WriteString(fmt.Sprintf("AdaptedString:%s ", x.toString7()))
+    sb.WriteString(fmt.Sprintf("AdaptedList:%s ", x.toString8()))
+    sb.WriteString(fmt.Sprintf("AdaptedSet:%s ", x.toString9()))
+    sb.WriteString(fmt.Sprintf("AdaptedMap:%s ", x.toString10()))
+    sb.WriteString(fmt.Sprintf("AdaptedBoolDefault:%s ", x.toString11()))
+    sb.WriteString(fmt.Sprintf("AdaptedByteDefault:%s ", x.toString12()))
+    sb.WriteString(fmt.Sprintf("AdaptedShortDefault:%s ", x.toString13()))
+    sb.WriteString(fmt.Sprintf("AdaptedIntegerDefault:%s ", x.toString14()))
+    sb.WriteString(fmt.Sprintf("AdaptedLongDefault:%s ", x.toString15()))
+    sb.WriteString(fmt.Sprintf("AdaptedDoubleDefault:%s ", x.toString16()))
+    sb.WriteString(fmt.Sprintf("AdaptedStringDefault:%s ", x.toString17()))
+    sb.WriteString(fmt.Sprintf("AdaptedEnum:%s ", x.toString18()))
+    sb.WriteString(fmt.Sprintf("AdaptedListDefault:%s ", x.toString19()))
+    sb.WriteString(fmt.Sprintf("AdaptedSetDefault:%s ", x.toString20()))
+    sb.WriteString(fmt.Sprintf("AdaptedMapDefault:%s ", x.toString21()))
+    sb.WriteString(fmt.Sprintf("DoubleTypedefBool:%s", x.toString22()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type AdaptTemplatedNestedTestStruct struct {
     AdaptedStruct *AdaptTemplatedTestStruct `thrift:"adaptedStruct,1" json:"adaptedStruct" db:"adaptedStruct"`
@@ -7319,6 +7770,10 @@ if err != nil {
     return nil
 }
 
+func (x *AdaptTemplatedNestedTestStruct) toString1() string {  // AdaptedStruct
+    return fmt.Sprintf("%v", x.GetAdaptedStructNonCompat())
+}
+
 // Deprecated: Use NewAdaptTemplatedNestedTestStruct().GetAdaptedStruct() instead.
 var AdaptTemplatedNestedTestStruct_AdaptedStruct_DEFAULT = NewAdaptTemplatedNestedTestStruct().GetAdaptedStruct()
 
@@ -7328,12 +7783,6 @@ func (x *AdaptTemplatedNestedTestStruct) DefaultGetAdaptedStruct() *AdaptTemplat
         return NewAdaptTemplatedTestStruct()
     }
     return x.AdaptedStruct
-}
-
-func (x *AdaptTemplatedNestedTestStruct) String() string {
-    type AdaptTemplatedNestedTestStructAlias AdaptTemplatedNestedTestStruct
-    valueAlias := (*AdaptTemplatedNestedTestStructAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -7415,6 +7864,19 @@ func (x *AdaptTemplatedNestedTestStruct) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *AdaptTemplatedNestedTestStruct) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("AdaptTemplatedNestedTestStruct({")
+    sb.WriteString(fmt.Sprintf("AdaptedStruct:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type AdaptTestUnion struct {
     Delay *DurationMs `thrift:"delay,1" json:"delay" db:"delay"`
@@ -7541,14 +8003,19 @@ if err != nil {
     return nil
 }
 
+func (x *AdaptTestUnion) toString1() string {  // Delay
+    if x.IsSetDelay() {
+        return fmt.Sprintf("%v", *x.GetDelayNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetDelayNonCompat())
+}
+
+func (x *AdaptTestUnion) toString2() string {  // Custom
+    return fmt.Sprintf("%v", x.GetCustomNonCompat())
+}
+
 // Deprecated: Use NewAdaptTestUnion().GetDelay() instead.
 var AdaptTestUnion_Delay_DEFAULT = NewAdaptTestUnion().GetDelay()
-
-func (x *AdaptTestUnion) String() string {
-    type AdaptTestUnionAlias AdaptTestUnion
-    valueAlias := (*AdaptTestUnionAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
 
 func (x *AdaptTestUnion) countSetFields() int {
     count := int(0)
@@ -7660,6 +8127,20 @@ func (x *AdaptTestUnion) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *AdaptTestUnion) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("AdaptTestUnion({")
+    sb.WriteString(fmt.Sprintf("Delay:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Custom:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type AdaptedStruct struct {
     Data int64 `thrift:"data,1" json:"data" db:"data"`
@@ -7716,10 +8197,8 @@ if err != nil {
     return nil
 }
 
-func (x *AdaptedStruct) String() string {
-    type AdaptedStructAlias AdaptedStruct
-    valueAlias := (*AdaptedStructAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *AdaptedStruct) toString1() string {  // Data
+    return fmt.Sprintf("%v", x.GetDataNonCompat())
 }
 
 
@@ -7801,6 +8280,19 @@ func (x *AdaptedStruct) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *AdaptedStruct) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("AdaptedStruct({")
+    sb.WriteString(fmt.Sprintf("Data:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type DirectlyAdaptedStruct struct {
     Data int64 `thrift:"data,1" json:"data" db:"data"`
@@ -7857,10 +8349,8 @@ if err != nil {
     return nil
 }
 
-func (x *DirectlyAdaptedStruct) String() string {
-    type DirectlyAdaptedStructAlias DirectlyAdaptedStruct
-    valueAlias := (*DirectlyAdaptedStructAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *DirectlyAdaptedStruct) toString1() string {  // Data
+    return fmt.Sprintf("%v", x.GetDataNonCompat())
 }
 
 
@@ -7942,6 +8432,19 @@ func (x *DirectlyAdaptedStruct) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *DirectlyAdaptedStruct) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("DirectlyAdaptedStruct({")
+    sb.WriteString(fmt.Sprintf("Data:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type StructFieldAdaptedStruct struct {
     AdaptedStruct *AdaptedStruct `thrift:"adaptedStruct,1" json:"adaptedStruct" db:"adaptedStruct"`
@@ -8188,6 +8691,22 @@ if err != nil {
     return nil
 }
 
+func (x *StructFieldAdaptedStruct) toString1() string {  // AdaptedStruct
+    return fmt.Sprintf("%v", x.GetAdaptedStructNonCompat())
+}
+
+func (x *StructFieldAdaptedStruct) toString2() string {  // AdaptedTypedef
+    return fmt.Sprintf("%v", x.GetAdaptedTypedefNonCompat())
+}
+
+func (x *StructFieldAdaptedStruct) toString3() string {  // DirectlyAdapted
+    return fmt.Sprintf("%v", x.GetDirectlyAdaptedNonCompat())
+}
+
+func (x *StructFieldAdaptedStruct) toString4() string {  // TypedefOfAdapted
+    return fmt.Sprintf("%v", x.GetTypedefOfAdaptedNonCompat())
+}
+
 // Deprecated: Use NewStructFieldAdaptedStruct().GetAdaptedStruct() instead.
 var StructFieldAdaptedStruct_AdaptedStruct_DEFAULT = NewStructFieldAdaptedStruct().GetAdaptedStruct()
 
@@ -8230,12 +8749,6 @@ func (x *StructFieldAdaptedStruct) DefaultGetTypedefOfAdapted() *TypedefOfDirect
         return NewTypedefOfDirect()
     }
     return x.TypedefOfAdapted
-}
-
-func (x *StructFieldAdaptedStruct) String() string {
-    type StructFieldAdaptedStructAlias StructFieldAdaptedStruct
-    valueAlias := (*StructFieldAdaptedStructAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -8356,6 +8869,22 @@ func (x *StructFieldAdaptedStruct) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *StructFieldAdaptedStruct) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("StructFieldAdaptedStruct({")
+    sb.WriteString(fmt.Sprintf("AdaptedStruct:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("AdaptedTypedef:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("DirectlyAdapted:%s ", x.toString3()))
+    sb.WriteString(fmt.Sprintf("TypedefOfAdapted:%s", x.toString4()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type CircularAdaptee struct {
     Field *CircularStruct `thrift:"field,1" json:"field" db:"field"`
@@ -8425,6 +8954,10 @@ if err != nil {
     return nil
 }
 
+func (x *CircularAdaptee) toString1() string {  // Field
+    return fmt.Sprintf("%v", x.GetFieldNonCompat())
+}
+
 // Deprecated: Use NewCircularAdaptee().GetField() instead.
 var CircularAdaptee_Field_DEFAULT = NewCircularAdaptee().GetField()
 
@@ -8434,12 +8967,6 @@ func (x *CircularAdaptee) DefaultGetField() *CircularStruct {
         return NewCircularStruct()
     }
     return x.Field
-}
-
-func (x *CircularAdaptee) String() string {
-    type CircularAdapteeAlias CircularAdaptee
-    valueAlias := (*CircularAdapteeAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -8521,6 +9048,19 @@ func (x *CircularAdaptee) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *CircularAdaptee) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("CircularAdaptee({")
+    sb.WriteString(fmt.Sprintf("Field:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type CircularStruct struct {
     Field *AdaptedCircularAdaptee `thrift:"field,1,optional" json:"field,omitempty" db:"field"`
@@ -8589,6 +9129,10 @@ if err != nil {
     return nil
 }
 
+func (x *CircularStruct) toString1() string {  // Field
+    return fmt.Sprintf("%v", x.GetFieldNonCompat())
+}
+
 // Deprecated: Use NewCircularStruct().GetField() instead.
 var CircularStruct_Field_DEFAULT = NewCircularStruct().GetField()
 
@@ -8598,12 +9142,6 @@ func (x *CircularStruct) DefaultGetField() *AdaptedCircularAdaptee {
         return NewAdaptedCircularAdaptee()
     }
     return x.Field
-}
-
-func (x *CircularStruct) String() string {
-    type CircularStructAlias CircularStruct
-    valueAlias := (*CircularStructAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -8685,6 +9223,19 @@ func (x *CircularStruct) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *CircularStruct) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("CircularStruct({")
+    sb.WriteString(fmt.Sprintf("Field:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type ReorderedStruct struct {
     ReorderedDependentAdapted *DeclaredAfterStruct `thrift:"reordered_dependent_adapted,1" json:"reordered_dependent_adapted" db:"reordered_dependent_adapted"`
@@ -8754,6 +9305,10 @@ if err != nil {
     return nil
 }
 
+func (x *ReorderedStruct) toString1() string {  // ReorderedDependentAdapted
+    return fmt.Sprintf("%v", x.GetReorderedDependentAdaptedNonCompat())
+}
+
 // Deprecated: Use NewReorderedStruct().GetReorderedDependentAdapted() instead.
 var ReorderedStruct_ReorderedDependentAdapted_DEFAULT = NewReorderedStruct().GetReorderedDependentAdapted()
 
@@ -8763,12 +9318,6 @@ func (x *ReorderedStruct) DefaultGetReorderedDependentAdapted() *DeclaredAfterSt
         return NewDeclaredAfterStruct()
     }
     return x.ReorderedDependentAdapted
-}
-
-func (x *ReorderedStruct) String() string {
-    type ReorderedStructAlias ReorderedStruct
-    valueAlias := (*ReorderedStructAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -8850,6 +9399,19 @@ func (x *ReorderedStruct) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *ReorderedStruct) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("ReorderedStruct({")
+    sb.WriteString(fmt.Sprintf("ReorderedDependentAdapted:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type DeclaredAfterStruct struct {
 }
@@ -8858,12 +9420,6 @@ var _ thrift.Struct = &DeclaredAfterStruct{}
 
 func NewDeclaredAfterStruct() *DeclaredAfterStruct {
     return (&DeclaredAfterStruct{})
-}
-
-func (x *DeclaredAfterStruct) String() string {
-    type DeclaredAfterStructAlias DeclaredAfterStruct
-    valueAlias := (*DeclaredAfterStructAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -8932,6 +9488,18 @@ func (x *DeclaredAfterStruct) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *DeclaredAfterStruct) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("DeclaredAfterStruct({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type RenamedStruct struct {
     Data int64 `thrift:"data,1" json:"data" db:"data"`
@@ -8988,10 +9556,8 @@ if err != nil {
     return nil
 }
 
-func (x *RenamedStruct) String() string {
-    type RenamedStructAlias RenamedStruct
-    valueAlias := (*RenamedStructAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *RenamedStruct) toString1() string {  // Data
+    return fmt.Sprintf("%v", x.GetDataNonCompat())
 }
 
 
@@ -9073,6 +9639,19 @@ func (x *RenamedStruct) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *RenamedStruct) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("RenamedStruct({")
+    sb.WriteString(fmt.Sprintf("Data:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type SameNamespaceStruct struct {
     Data int64 `thrift:"data,1" json:"data" db:"data"`
@@ -9129,10 +9708,8 @@ if err != nil {
     return nil
 }
 
-func (x *SameNamespaceStruct) String() string {
-    type SameNamespaceStructAlias SameNamespaceStruct
-    valueAlias := (*SameNamespaceStructAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *SameNamespaceStruct) toString1() string {  // Data
+    return fmt.Sprintf("%v", x.GetDataNonCompat())
 }
 
 
@@ -9214,6 +9791,19 @@ func (x *SameNamespaceStruct) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *SameNamespaceStruct) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("SameNamespaceStruct({")
+    sb.WriteString(fmt.Sprintf("Data:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type HeapAllocated struct {
 }
@@ -9222,12 +9812,6 @@ var _ thrift.Struct = &HeapAllocated{}
 
 func NewHeapAllocated() *HeapAllocated {
     return (&HeapAllocated{})
-}
-
-func (x *HeapAllocated) String() string {
-    type HeapAllocatedAlias HeapAllocated
-    valueAlias := (*HeapAllocatedAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -9296,6 +9880,18 @@ func (x *HeapAllocated) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *HeapAllocated) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("HeapAllocated({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type MoveOnly struct {
     Ptr *HeapAllocated `thrift:"ptr,1" json:"ptr" db:"ptr"`
@@ -9365,6 +9961,10 @@ if err != nil {
     return nil
 }
 
+func (x *MoveOnly) toString1() string {  // Ptr
+    return fmt.Sprintf("%v", x.GetPtrNonCompat())
+}
+
 // Deprecated: Use NewMoveOnly().GetPtr() instead.
 var MoveOnly_Ptr_DEFAULT = NewMoveOnly().GetPtr()
 
@@ -9374,12 +9974,6 @@ func (x *MoveOnly) DefaultGetPtr() *HeapAllocated {
         return NewHeapAllocated()
     }
     return x.Ptr
-}
-
-func (x *MoveOnly) String() string {
-    type MoveOnlyAlias MoveOnly
-    valueAlias := (*MoveOnlyAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -9461,6 +10055,19 @@ func (x *MoveOnly) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MoveOnly) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MoveOnly({")
+    sb.WriteString(fmt.Sprintf("Ptr:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type AlsoMoveOnly struct {
     Ptr int64 `thrift:"ptr,1" json:"ptr" db:"ptr"`
@@ -9517,10 +10124,8 @@ if err != nil {
     return nil
 }
 
-func (x *AlsoMoveOnly) String() string {
-    type AlsoMoveOnlyAlias AlsoMoveOnly
-    valueAlias := (*AlsoMoveOnlyAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *AlsoMoveOnly) toString1() string {  // Ptr
+    return fmt.Sprintf("%v", x.GetPtrNonCompat())
 }
 
 
@@ -9602,6 +10207,19 @@ func (x *AlsoMoveOnly) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *AlsoMoveOnly) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("AlsoMoveOnly({")
+    sb.WriteString(fmt.Sprintf("Ptr:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type ApplyAdapter struct {
 }
@@ -9610,12 +10228,6 @@ var _ thrift.Struct = &ApplyAdapter{}
 
 func NewApplyAdapter() *ApplyAdapter {
     return (&ApplyAdapter{})
-}
-
-func (x *ApplyAdapter) String() string {
-    type ApplyAdapterAlias ApplyAdapter
-    valueAlias := (*ApplyAdapterAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -9684,6 +10296,18 @@ func (x *ApplyAdapter) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *ApplyAdapter) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("ApplyAdapter({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type TransitiveAdapted struct {
 }
@@ -9692,12 +10316,6 @@ var _ thrift.Struct = &TransitiveAdapted{}
 
 func NewTransitiveAdapted() *TransitiveAdapted {
     return (&TransitiveAdapted{})
-}
-
-func (x *TransitiveAdapted) String() string {
-    type TransitiveAdaptedAlias TransitiveAdapted
-    valueAlias := (*TransitiveAdaptedAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -9766,6 +10384,18 @@ func (x *TransitiveAdapted) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *TransitiveAdapted) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("TransitiveAdapted({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type CountingStruct struct {
     RegularInt *int64 `thrift:"regularInt,1,optional" json:"regularInt,omitempty" db:"regularInt"`
@@ -9948,6 +10578,27 @@ if err != nil {
     return nil
 }
 
+func (x *CountingStruct) toString1() string {  // RegularInt
+    if x.IsSetRegularInt() {
+        return fmt.Sprintf("%v", *x.GetRegularIntNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetRegularIntNonCompat())
+}
+
+func (x *CountingStruct) toString2() string {  // CountingInt
+    if x.IsSetCountingInt() {
+        return fmt.Sprintf("%v", *x.GetCountingIntNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetCountingIntNonCompat())
+}
+
+func (x *CountingStruct) toString3() string {  // RegularString
+    if x.IsSetRegularString() {
+        return fmt.Sprintf("%v", *x.GetRegularStringNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetRegularStringNonCompat())
+}
+
 // Deprecated: Use NewCountingStruct().GetRegularInt() instead.
 var CountingStruct_RegularInt_DEFAULT = NewCountingStruct().GetRegularInt()
 
@@ -9956,12 +10607,6 @@ var CountingStruct_CountingInt_DEFAULT = NewCountingStruct().GetCountingInt()
 
 // Deprecated: Use NewCountingStruct().GetRegularString() instead.
 var CountingStruct_RegularString_DEFAULT = NewCountingStruct().GetRegularString()
-
-func (x *CountingStruct) String() string {
-    type CountingStructAlias CountingStruct
-    valueAlias := (*CountingStructAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
 
 
 // Deprecated: Use CountingStruct.Set* methods instead or set the fields directly.
@@ -10068,6 +10713,21 @@ func (x *CountingStruct) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *CountingStruct) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("CountingStruct({")
+    sb.WriteString(fmt.Sprintf("RegularInt:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("CountingInt:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("RegularString:%s", x.toString3()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Person struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
@@ -10124,10 +10784,8 @@ if err != nil {
     return nil
 }
 
-func (x *Person) String() string {
-    type PersonAlias Person
-    valueAlias := (*PersonAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *Person) toString1() string {  // Name
+    return fmt.Sprintf("%v", x.GetNameNonCompat())
 }
 
 
@@ -10209,6 +10867,19 @@ func (x *Person) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Person) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Person({")
+    sb.WriteString(fmt.Sprintf("Name:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Person2 struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
@@ -10265,10 +10936,8 @@ if err != nil {
     return nil
 }
 
-func (x *Person2) String() string {
-    type Person2Alias Person2
-    valueAlias := (*Person2Alias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *Person2) toString1() string {  // Name
+    return fmt.Sprintf("%v", x.GetNameNonCompat())
 }
 
 
@@ -10350,6 +11019,19 @@ func (x *Person2) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Person2) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Person2({")
+    sb.WriteString(fmt.Sprintf("Name:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

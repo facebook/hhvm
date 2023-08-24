@@ -5,6 +5,7 @@ package rust // [[[ program thrift source path ]]]
 
 import (
     "fmt"
+    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
@@ -13,6 +14,7 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 
 
 type Adapter struct {
@@ -70,10 +72,8 @@ if err != nil {
     return nil
 }
 
-func (x *Adapter) String() string {
-    type AdapterAlias Adapter
-    valueAlias := (*AdapterAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *Adapter) toString1() string {  // Name
+    return fmt.Sprintf("%v", x.GetNameNonCompat())
 }
 
 
@@ -155,6 +155,19 @@ func (x *Adapter) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Adapter) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Adapter({")
+    sb.WriteString(fmt.Sprintf("Name:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Derive struct {
     Derives []string `thrift:"derives,1" json:"derives" db:"derives"`
@@ -252,10 +265,8 @@ result := listResult
     return nil
 }
 
-func (x *Derive) String() string {
-    type DeriveAlias Derive
-    valueAlias := (*DeriveAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *Derive) toString1() string {  // Derives
+    return fmt.Sprintf("%v", x.GetDerivesNonCompat())
 }
 
 
@@ -337,6 +348,19 @@ func (x *Derive) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Derive) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Derive({")
+    sb.WriteString(fmt.Sprintf("Derives:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type ServiceExn struct {
     AnyhowToApplicationExn bool `thrift:"anyhow_to_application_exn,1" json:"anyhow_to_application_exn" db:"anyhow_to_application_exn"`
@@ -393,10 +417,8 @@ if err != nil {
     return nil
 }
 
-func (x *ServiceExn) String() string {
-    type ServiceExnAlias ServiceExn
-    valueAlias := (*ServiceExnAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *ServiceExn) toString1() string {  // AnyhowToApplicationExn
+    return fmt.Sprintf("%v", x.GetAnyhowToApplicationExnNonCompat())
 }
 
 
@@ -478,6 +500,19 @@ func (x *ServiceExn) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *ServiceExn) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("ServiceExn({")
+    sb.WriteString(fmt.Sprintf("AnyhowToApplicationExn:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

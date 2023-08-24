@@ -7,6 +7,7 @@ package service // [[[ program thrift source path ]]]
 import (
     "context"
     "fmt"
+    "strings"
     "sync"
 
     module "module"
@@ -22,6 +23,7 @@ var _ = includes.GoUnusedProtection__
 var _ = context.Background
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 var _ = sync.Mutex{}
 
 
@@ -287,6 +289,14 @@ if err != nil {
     return nil
 }
 
+func (x *reqMyServiceQuery) toString1() string {  // S
+    return fmt.Sprintf("%v", x.GetSNonCompat())
+}
+
+func (x *reqMyServiceQuery) toString2() string {  // I
+    return fmt.Sprintf("%v", x.GetINonCompat())
+}
+
 // Deprecated: Use newReqMyServiceQuery().GetS() instead.
 var reqMyServiceQuery_S_DEFAULT = newReqMyServiceQuery().GetS()
 
@@ -307,12 +317,6 @@ func (x *reqMyServiceQuery) DefaultGetI() *includes.Included {
         return includes.NewIncluded()
     }
     return x.I
-}
-
-func (x *reqMyServiceQuery) String() string {
-    type reqMyServiceQueryAlias reqMyServiceQuery
-    valueAlias := (*reqMyServiceQueryAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -407,6 +411,20 @@ func (x *reqMyServiceQuery) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqMyServiceQuery) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqMyServiceQuery({")
+    sb.WriteString(fmt.Sprintf("S:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("I:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respMyServiceQuery struct {
 }
 // Compile time interface enforcer
@@ -415,12 +433,6 @@ var _ thrift.WritableResult = &respMyServiceQuery{}
 
 func newRespMyServiceQuery() *respMyServiceQuery {
     return (&respMyServiceQuery{})
-}
-
-func (x *respMyServiceQuery) String() string {
-    type respMyServiceQueryAlias respMyServiceQuery
-    valueAlias := (*respMyServiceQueryAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -493,6 +505,18 @@ func (x *respMyServiceQuery) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respMyServiceQuery) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respMyServiceQuery({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type reqMyServiceHasArgDocs struct {
     S *module.MyStruct `thrift:"s,1" json:"s" db:"s"`
     I *includes.Included `thrift:"i,2" json:"i" db:"i"`
@@ -622,6 +646,14 @@ if err != nil {
     return nil
 }
 
+func (x *reqMyServiceHasArgDocs) toString1() string {  // S
+    return fmt.Sprintf("%v", x.GetSNonCompat())
+}
+
+func (x *reqMyServiceHasArgDocs) toString2() string {  // I
+    return fmt.Sprintf("%v", x.GetINonCompat())
+}
+
 // Deprecated: Use newReqMyServiceHasArgDocs().GetS() instead.
 var reqMyServiceHasArgDocs_S_DEFAULT = newReqMyServiceHasArgDocs().GetS()
 
@@ -642,12 +674,6 @@ func (x *reqMyServiceHasArgDocs) DefaultGetI() *includes.Included {
         return includes.NewIncluded()
     }
     return x.I
-}
-
-func (x *reqMyServiceHasArgDocs) String() string {
-    type reqMyServiceHasArgDocsAlias reqMyServiceHasArgDocs
-    valueAlias := (*reqMyServiceHasArgDocsAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -742,6 +768,20 @@ func (x *reqMyServiceHasArgDocs) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqMyServiceHasArgDocs) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqMyServiceHasArgDocs({")
+    sb.WriteString(fmt.Sprintf("S:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("I:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respMyServiceHasArgDocs struct {
 }
 // Compile time interface enforcer
@@ -750,12 +790,6 @@ var _ thrift.WritableResult = &respMyServiceHasArgDocs{}
 
 func newRespMyServiceHasArgDocs() *respMyServiceHasArgDocs {
     return (&respMyServiceHasArgDocs{})
-}
-
-func (x *respMyServiceHasArgDocs) String() string {
-    type respMyServiceHasArgDocsAlias respMyServiceHasArgDocs
-    valueAlias := (*respMyServiceHasArgDocsAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -828,6 +862,18 @@ func (x *respMyServiceHasArgDocs) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respMyServiceHasArgDocs) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respMyServiceHasArgDocs({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 
 type MyServiceProcessor struct {

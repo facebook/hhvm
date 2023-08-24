@@ -5,6 +5,7 @@ package go_ // [[[ program thrift source path ]]]
 
 import (
     "fmt"
+    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
@@ -13,6 +14,7 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 
 
 type Name struct {
@@ -70,10 +72,8 @@ if err != nil {
     return nil
 }
 
-func (x *Name) String() string {
-    type NameAlias Name
-    valueAlias := (*NameAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *Name) toString1() string {  // Name
+    return fmt.Sprintf("%v", x.GetNameNonCompat())
 }
 
 
@@ -155,6 +155,19 @@ func (x *Name) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Name) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Name({")
+    sb.WriteString(fmt.Sprintf("Name:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Tag struct {
     Tag string `thrift:"tag,1" json:"tag" db:"tag"`
@@ -211,10 +224,8 @@ if err != nil {
     return nil
 }
 
-func (x *Tag) String() string {
-    type TagAlias Tag
-    valueAlias := (*TagAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *Tag) toString1() string {  // Tag
+    return fmt.Sprintf("%v", x.GetTagNonCompat())
 }
 
 
@@ -296,6 +307,19 @@ func (x *Tag) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Tag) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Tag({")
+    sb.WriteString(fmt.Sprintf("Tag:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type NewType_ struct {
 }
@@ -304,12 +328,6 @@ var _ thrift.Struct = &NewType_{}
 
 func NewNewType_() *NewType_ {
     return (&NewType_{})
-}
-
-func (x *NewType_) String() string {
-    type NewType_Alias NewType_
-    valueAlias := (*NewType_Alias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -378,6 +396,18 @@ func (x *NewType_) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *NewType_) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("NewType_({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

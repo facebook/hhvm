@@ -5,6 +5,7 @@ package module0 // [[[ program thrift source path ]]]
 
 import (
     "fmt"
+    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
@@ -13,6 +14,7 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 
 
 type Accessory struct {
@@ -116,10 +118,12 @@ if err != nil {
     return nil
 }
 
-func (x *Accessory) String() string {
-    type AccessoryAlias Accessory
-    valueAlias := (*AccessoryAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *Accessory) toString1() string {  // InventoryId
+    return fmt.Sprintf("%v", x.GetInventoryIdNonCompat())
+}
+
+func (x *Accessory) toString2() string {  // Name
+    return fmt.Sprintf("%v", x.GetNameNonCompat())
 }
 
 
@@ -214,6 +218,20 @@ func (x *Accessory) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Accessory) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Accessory({")
+    sb.WriteString(fmt.Sprintf("InventoryId:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Name:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type PartName struct {
     InventoryId int32 `thrift:"InventoryId,1" json:"InventoryId" db:"InventoryId"`
@@ -316,10 +334,12 @@ if err != nil {
     return nil
 }
 
-func (x *PartName) String() string {
-    type PartNameAlias PartName
-    valueAlias := (*PartNameAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *PartName) toString1() string {  // InventoryId
+    return fmt.Sprintf("%v", x.GetInventoryIdNonCompat())
+}
+
+func (x *PartName) toString2() string {  // Name
+    return fmt.Sprintf("%v", x.GetNameNonCompat())
 }
 
 
@@ -414,6 +434,20 @@ func (x *PartName) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *PartName) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("PartName({")
+    sb.WriteString(fmt.Sprintf("InventoryId:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Name:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

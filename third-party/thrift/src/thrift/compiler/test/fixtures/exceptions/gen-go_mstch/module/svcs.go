@@ -7,6 +7,7 @@ package module // [[[ program thrift source path ]]]
 import (
     "context"
     "fmt"
+    "strings"
     "sync"
 
 
@@ -18,6 +19,7 @@ import (
 var _ = context.Background
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 var _ = sync.Mutex{}
 
 
@@ -209,12 +211,6 @@ func newReqRaiserDoBland() *reqRaiserDoBland {
     return (&reqRaiserDoBland{})
 }
 
-func (x *reqRaiserDoBland) String() string {
-    type reqRaiserDoBlandAlias reqRaiserDoBland
-    valueAlias := (*reqRaiserDoBlandAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
-
 
 // Deprecated: Use reqRaiserDoBland.Set* methods instead or set the fields directly.
 type reqRaiserDoBlandBuilder struct {
@@ -281,6 +277,18 @@ func (x *reqRaiserDoBland) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqRaiserDoBland) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqRaiserDoBland({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respRaiserDoBland struct {
 }
 // Compile time interface enforcer
@@ -289,12 +297,6 @@ var _ thrift.WritableResult = &respRaiserDoBland{}
 
 func newRespRaiserDoBland() *respRaiserDoBland {
     return (&respRaiserDoBland{})
-}
-
-func (x *respRaiserDoBland) String() string {
-    type respRaiserDoBlandAlias respRaiserDoBland
-    valueAlias := (*respRaiserDoBlandAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -367,6 +369,18 @@ func (x *respRaiserDoBland) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respRaiserDoBland) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respRaiserDoBland({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type reqRaiserDoRaise struct {
 }
 // Compile time interface enforcer
@@ -376,12 +390,6 @@ type RaiserDoRaiseArgs = reqRaiserDoRaise
 
 func newReqRaiserDoRaise() *reqRaiserDoRaise {
     return (&reqRaiserDoRaise{})
-}
-
-func (x *reqRaiserDoRaise) String() string {
-    type reqRaiserDoRaiseAlias reqRaiserDoRaise
-    valueAlias := (*reqRaiserDoRaiseAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -450,6 +458,18 @@ func (x *reqRaiserDoRaise) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqRaiserDoRaise) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqRaiserDoRaise({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respRaiserDoRaise struct {
     B *Banal `thrift:"b,1,optional" json:"b,omitempty" db:"b"`
     F *Fiery `thrift:"f,2,optional" json:"f,omitempty" db:"f"`
@@ -634,6 +654,18 @@ if err != nil {
     return nil
 }
 
+func (x *respRaiserDoRaise) toString1() string {  // B
+    return fmt.Sprintf("%v", x.GetBNonCompat())
+}
+
+func (x *respRaiserDoRaise) toString2() string {  // F
+    return fmt.Sprintf("%v", x.GetFNonCompat())
+}
+
+func (x *respRaiserDoRaise) toString3() string {  // S
+    return fmt.Sprintf("%v", x.GetSNonCompat())
+}
+
 // Deprecated: Use newRespRaiserDoRaise().GetB() instead.
 var respRaiserDoRaise_B_DEFAULT = newRespRaiserDoRaise().GetB()
 
@@ -665,12 +697,6 @@ func (x *respRaiserDoRaise) DefaultGetS() *Serious {
         return NewSerious()
     }
     return x.S
-}
-
-func (x *respRaiserDoRaise) String() string {
-    type respRaiserDoRaiseAlias respRaiserDoRaise
-    valueAlias := (*respRaiserDoRaiseAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -791,6 +817,21 @@ func (x *respRaiserDoRaise) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respRaiserDoRaise) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respRaiserDoRaise({")
+    sb.WriteString(fmt.Sprintf("B:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("F:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("S:%s", x.toString3()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type reqRaiserGet200 struct {
 }
 // Compile time interface enforcer
@@ -800,12 +841,6 @@ type RaiserGet200Args = reqRaiserGet200
 
 func newReqRaiserGet200() *reqRaiserGet200 {
     return (&reqRaiserGet200{})
-}
-
-func (x *reqRaiserGet200) String() string {
-    type reqRaiserGet200Alias reqRaiserGet200
-    valueAlias := (*reqRaiserGet200Alias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -874,6 +909,18 @@ func (x *reqRaiserGet200) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqRaiserGet200) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqRaiserGet200({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respRaiserGet200 struct {
     Value string `thrift:"value,0" json:"value" db:"value"`
 }
@@ -930,10 +977,8 @@ if err != nil {
     return nil
 }
 
-func (x *respRaiserGet200) String() string {
-    type respRaiserGet200Alias respRaiserGet200
-    valueAlias := (*respRaiserGet200Alias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *respRaiserGet200) toString0() string {  // Value
+    return fmt.Sprintf("%v", x.GetValueNonCompat())
 }
 
 
@@ -1019,6 +1064,19 @@ func (x *respRaiserGet200) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respRaiserGet200) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respRaiserGet200({")
+    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type reqRaiserGet500 struct {
 }
 // Compile time interface enforcer
@@ -1028,12 +1086,6 @@ type RaiserGet500Args = reqRaiserGet500
 
 func newReqRaiserGet500() *reqRaiserGet500 {
     return (&reqRaiserGet500{})
-}
-
-func (x *reqRaiserGet500) String() string {
-    type reqRaiserGet500Alias reqRaiserGet500
-    valueAlias := (*reqRaiserGet500Alias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1102,6 +1154,18 @@ func (x *reqRaiserGet500) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqRaiserGet500) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqRaiserGet500({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respRaiserGet500 struct {
     Value string `thrift:"value,0" json:"value" db:"value"`
     F *Fiery `thrift:"f,1,optional" json:"f,omitempty" db:"f"`
@@ -1332,6 +1396,22 @@ if err != nil {
     return nil
 }
 
+func (x *respRaiserGet500) toString0() string {  // Value
+    return fmt.Sprintf("%v", x.GetValueNonCompat())
+}
+
+func (x *respRaiserGet500) toString1() string {  // F
+    return fmt.Sprintf("%v", x.GetFNonCompat())
+}
+
+func (x *respRaiserGet500) toString2() string {  // B
+    return fmt.Sprintf("%v", x.GetBNonCompat())
+}
+
+func (x *respRaiserGet500) toString3() string {  // S
+    return fmt.Sprintf("%v", x.GetSNonCompat())
+}
+
 // Deprecated: Use newRespRaiserGet500().GetF() instead.
 var respRaiserGet500_F_DEFAULT = newRespRaiserGet500().GetF()
 
@@ -1363,12 +1443,6 @@ func (x *respRaiserGet500) DefaultGetS() *Serious {
         return NewSerious()
     }
     return x.S
-}
-
-func (x *respRaiserGet500) String() string {
-    type respRaiserGet500Alias respRaiserGet500
-    valueAlias := (*respRaiserGet500Alias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1502,6 +1576,22 @@ func (x *respRaiserGet500) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respRaiserGet500) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respRaiserGet500({")
+    sb.WriteString(fmt.Sprintf("Value:%s ", x.toString0()))
+    sb.WriteString(fmt.Sprintf("F:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("B:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("S:%s", x.toString3()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 
 type RaiserProcessor struct {

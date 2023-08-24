@@ -30,7 +30,7 @@ func (x *{{struct:go_name}}) writeField{{field:key_str}}(p thrift.Protocol) erro
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := {{#field:dereference?}}*{{/field:dereference?}}x.Get{{field:go_name}}{{#program:compat_getters?}}NonCompat{{/program:compat_getters?}}()
+    item := {{#field:non_struct_pointer?}}*{{/field:non_struct_pointer?}}x.Get{{field:go_name}}{{#program:compat_getters?}}NonCompat{{/program:compat_getters?}}()
     {{#field:type}}
     {{> codec/encode}}
     {{/field:type}}

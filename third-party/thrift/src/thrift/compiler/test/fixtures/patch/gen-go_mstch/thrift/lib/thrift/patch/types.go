@@ -5,6 +5,7 @@ package patch // [[[ program thrift source path ]]]
 
 import (
     "fmt"
+    "strings"
 
     standard "thrift/lib/thrift/standard"
     id "thrift/lib/thrift/id"
@@ -17,6 +18,7 @@ var _ = id.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 
 
 type FieldId = id.FieldId
@@ -205,12 +207,6 @@ func NewGeneratePatch() *GeneratePatch {
     return (&GeneratePatch{})
 }
 
-func (x *GeneratePatch) String() string {
-    type GeneratePatchAlias GeneratePatch
-    valueAlias := (*GeneratePatchAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
-
 
 // Deprecated: Use GeneratePatch.Set* methods instead or set the fields directly.
 type GeneratePatchBuilder struct {
@@ -277,6 +273,18 @@ func (x *GeneratePatch) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *GeneratePatch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("GeneratePatch({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type AssignOnlyPatch struct {
 }
@@ -285,12 +293,6 @@ var _ thrift.Struct = &AssignOnlyPatch{}
 
 func NewAssignOnlyPatch() *AssignOnlyPatch {
     return (&AssignOnlyPatch{})
-}
-
-func (x *AssignOnlyPatch) String() string {
-    type AssignOnlyPatchAlias AssignOnlyPatch
-    valueAlias := (*AssignOnlyPatchAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -359,6 +361,18 @@ func (x *AssignOnlyPatch) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *AssignOnlyPatch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("AssignOnlyPatch({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type BoolPatch struct {
     Assign *bool `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
@@ -518,14 +532,23 @@ if err != nil {
     return nil
 }
 
+func (x *BoolPatch) toString1() string {  // Assign
+    if x.IsSetAssign() {
+        return fmt.Sprintf("%v", *x.GetAssignNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+}
+
+func (x *BoolPatch) toString2() string {  // Clear
+    return fmt.Sprintf("%v", x.GetClearNonCompat())
+}
+
+func (x *BoolPatch) toString9() string {  // Invert
+    return fmt.Sprintf("%v", x.GetInvertNonCompat())
+}
+
 // Deprecated: Use NewBoolPatch().GetAssign() instead.
 var BoolPatch_Assign_DEFAULT = NewBoolPatch().GetAssign()
-
-func (x *BoolPatch) String() string {
-    type BoolPatchAlias BoolPatch
-    valueAlias := (*BoolPatchAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
 
 
 // Deprecated: Use BoolPatch.Set* methods instead or set the fields directly.
@@ -632,6 +655,21 @@ func (x *BoolPatch) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *BoolPatch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("BoolPatch({")
+    sb.WriteString(fmt.Sprintf("Assign:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Clear:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("Invert:%s", x.toString9()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type BytePatch struct {
     Assign *int8 `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
@@ -793,14 +831,23 @@ if err != nil {
     return nil
 }
 
+func (x *BytePatch) toString1() string {  // Assign
+    if x.IsSetAssign() {
+        return fmt.Sprintf("%v", *x.GetAssignNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+}
+
+func (x *BytePatch) toString2() string {  // Clear
+    return fmt.Sprintf("%v", x.GetClearNonCompat())
+}
+
+func (x *BytePatch) toString8() string {  // Add
+    return fmt.Sprintf("%v", x.GetAddNonCompat())
+}
+
 // Deprecated: Use NewBytePatch().GetAssign() instead.
 var BytePatch_Assign_DEFAULT = NewBytePatch().GetAssign()
-
-func (x *BytePatch) String() string {
-    type BytePatchAlias BytePatch
-    valueAlias := (*BytePatchAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
 
 
 // Deprecated: Use BytePatch.Set* methods instead or set the fields directly.
@@ -907,6 +954,21 @@ func (x *BytePatch) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *BytePatch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("BytePatch({")
+    sb.WriteString(fmt.Sprintf("Assign:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Clear:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("Add:%s", x.toString8()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type I16Patch struct {
     Assign *int16 `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
@@ -1066,14 +1128,23 @@ if err != nil {
     return nil
 }
 
+func (x *I16Patch) toString1() string {  // Assign
+    if x.IsSetAssign() {
+        return fmt.Sprintf("%v", *x.GetAssignNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+}
+
+func (x *I16Patch) toString2() string {  // Clear
+    return fmt.Sprintf("%v", x.GetClearNonCompat())
+}
+
+func (x *I16Patch) toString8() string {  // Add
+    return fmt.Sprintf("%v", x.GetAddNonCompat())
+}
+
 // Deprecated: Use NewI16Patch().GetAssign() instead.
 var I16Patch_Assign_DEFAULT = NewI16Patch().GetAssign()
-
-func (x *I16Patch) String() string {
-    type I16PatchAlias I16Patch
-    valueAlias := (*I16PatchAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
 
 
 // Deprecated: Use I16Patch.Set* methods instead or set the fields directly.
@@ -1180,6 +1251,21 @@ func (x *I16Patch) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *I16Patch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("I16Patch({")
+    sb.WriteString(fmt.Sprintf("Assign:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Clear:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("Add:%s", x.toString8()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type I32Patch struct {
     Assign *int32 `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
@@ -1339,14 +1425,23 @@ if err != nil {
     return nil
 }
 
+func (x *I32Patch) toString1() string {  // Assign
+    if x.IsSetAssign() {
+        return fmt.Sprintf("%v", *x.GetAssignNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+}
+
+func (x *I32Patch) toString2() string {  // Clear
+    return fmt.Sprintf("%v", x.GetClearNonCompat())
+}
+
+func (x *I32Patch) toString8() string {  // Add
+    return fmt.Sprintf("%v", x.GetAddNonCompat())
+}
+
 // Deprecated: Use NewI32Patch().GetAssign() instead.
 var I32Patch_Assign_DEFAULT = NewI32Patch().GetAssign()
-
-func (x *I32Patch) String() string {
-    type I32PatchAlias I32Patch
-    valueAlias := (*I32PatchAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
 
 
 // Deprecated: Use I32Patch.Set* methods instead or set the fields directly.
@@ -1453,6 +1548,21 @@ func (x *I32Patch) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *I32Patch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("I32Patch({")
+    sb.WriteString(fmt.Sprintf("Assign:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Clear:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("Add:%s", x.toString8()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type I64Patch struct {
     Assign *int64 `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
@@ -1612,14 +1722,23 @@ if err != nil {
     return nil
 }
 
+func (x *I64Patch) toString1() string {  // Assign
+    if x.IsSetAssign() {
+        return fmt.Sprintf("%v", *x.GetAssignNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+}
+
+func (x *I64Patch) toString2() string {  // Clear
+    return fmt.Sprintf("%v", x.GetClearNonCompat())
+}
+
+func (x *I64Patch) toString8() string {  // Add
+    return fmt.Sprintf("%v", x.GetAddNonCompat())
+}
+
 // Deprecated: Use NewI64Patch().GetAssign() instead.
 var I64Patch_Assign_DEFAULT = NewI64Patch().GetAssign()
-
-func (x *I64Patch) String() string {
-    type I64PatchAlias I64Patch
-    valueAlias := (*I64PatchAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
 
 
 // Deprecated: Use I64Patch.Set* methods instead or set the fields directly.
@@ -1726,6 +1845,21 @@ func (x *I64Patch) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *I64Patch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("I64Patch({")
+    sb.WriteString(fmt.Sprintf("Assign:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Clear:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("Add:%s", x.toString8()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type FloatPatch struct {
     Assign *float32 `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
@@ -1885,14 +2019,23 @@ if err != nil {
     return nil
 }
 
+func (x *FloatPatch) toString1() string {  // Assign
+    if x.IsSetAssign() {
+        return fmt.Sprintf("%v", *x.GetAssignNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+}
+
+func (x *FloatPatch) toString2() string {  // Clear
+    return fmt.Sprintf("%v", x.GetClearNonCompat())
+}
+
+func (x *FloatPatch) toString8() string {  // Add
+    return fmt.Sprintf("%v", x.GetAddNonCompat())
+}
+
 // Deprecated: Use NewFloatPatch().GetAssign() instead.
 var FloatPatch_Assign_DEFAULT = NewFloatPatch().GetAssign()
-
-func (x *FloatPatch) String() string {
-    type FloatPatchAlias FloatPatch
-    valueAlias := (*FloatPatchAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
 
 
 // Deprecated: Use FloatPatch.Set* methods instead or set the fields directly.
@@ -1999,6 +2142,21 @@ func (x *FloatPatch) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *FloatPatch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("FloatPatch({")
+    sb.WriteString(fmt.Sprintf("Assign:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Clear:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("Add:%s", x.toString8()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type DoublePatch struct {
     Assign *float64 `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
@@ -2158,14 +2316,23 @@ if err != nil {
     return nil
 }
 
+func (x *DoublePatch) toString1() string {  // Assign
+    if x.IsSetAssign() {
+        return fmt.Sprintf("%v", *x.GetAssignNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+}
+
+func (x *DoublePatch) toString2() string {  // Clear
+    return fmt.Sprintf("%v", x.GetClearNonCompat())
+}
+
+func (x *DoublePatch) toString8() string {  // Add
+    return fmt.Sprintf("%v", x.GetAddNonCompat())
+}
+
 // Deprecated: Use NewDoublePatch().GetAssign() instead.
 var DoublePatch_Assign_DEFAULT = NewDoublePatch().GetAssign()
-
-func (x *DoublePatch) String() string {
-    type DoublePatchAlias DoublePatch
-    valueAlias := (*DoublePatchAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
 
 
 // Deprecated: Use DoublePatch.Set* methods instead or set the fields directly.
@@ -2272,6 +2439,21 @@ func (x *DoublePatch) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *DoublePatch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("DoublePatch({")
+    sb.WriteString(fmt.Sprintf("Assign:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Clear:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("Add:%s", x.toString8()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type StringPatch struct {
     Assign *string `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
@@ -2477,14 +2659,27 @@ if err != nil {
     return nil
 }
 
+func (x *StringPatch) toString1() string {  // Assign
+    if x.IsSetAssign() {
+        return fmt.Sprintf("%v", *x.GetAssignNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+}
+
+func (x *StringPatch) toString2() string {  // Clear
+    return fmt.Sprintf("%v", x.GetClearNonCompat())
+}
+
+func (x *StringPatch) toString8() string {  // Prepend
+    return fmt.Sprintf("%v", x.GetPrependNonCompat())
+}
+
+func (x *StringPatch) toString9() string {  // Append
+    return fmt.Sprintf("%v", x.GetAppendNonCompat())
+}
+
 // Deprecated: Use NewStringPatch().GetAssign() instead.
 var StringPatch_Assign_DEFAULT = NewStringPatch().GetAssign()
-
-func (x *StringPatch) String() string {
-    type StringPatchAlias StringPatch
-    valueAlias := (*StringPatchAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
 
 
 // Deprecated: Use StringPatch.Set* methods instead or set the fields directly.
@@ -2604,6 +2799,22 @@ func (x *StringPatch) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *StringPatch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("StringPatch({")
+    sb.WriteString(fmt.Sprintf("Assign:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Clear:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("Prepend:%s ", x.toString8()))
+    sb.WriteString(fmt.Sprintf("Append:%s", x.toString9()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type BinaryPatch struct {
     Assign standard.ByteBuffer `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
@@ -2836,10 +3047,20 @@ if err != nil {
     return nil
 }
 
-func (x *BinaryPatch) String() string {
-    type BinaryPatchAlias BinaryPatch
-    valueAlias := (*BinaryPatchAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *BinaryPatch) toString1() string {  // Assign
+    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+}
+
+func (x *BinaryPatch) toString2() string {  // Clear
+    return fmt.Sprintf("%v", x.GetClearNonCompat())
+}
+
+func (x *BinaryPatch) toString8() string {  // Prepend
+    return fmt.Sprintf("%v", x.GetPrependNonCompat())
+}
+
+func (x *BinaryPatch) toString9() string {  // Append
+    return fmt.Sprintf("%v", x.GetAppendNonCompat())
 }
 
 
@@ -2960,6 +3181,22 @@ func (x *BinaryPatch) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *BinaryPatch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("BinaryPatch({")
+    sb.WriteString(fmt.Sprintf("Assign:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Clear:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("Prepend:%s ", x.toString8()))
+    sb.WriteString(fmt.Sprintf("Append:%s", x.toString9()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

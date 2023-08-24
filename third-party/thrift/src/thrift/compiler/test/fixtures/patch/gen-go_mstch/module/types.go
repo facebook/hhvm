@@ -5,6 +5,7 @@ package module // [[[ program thrift source path ]]]
 
 import (
     "fmt"
+    "strings"
 
     patch "thrift/lib/thrift/patch"
     standard "thrift/lib/thrift/standard"
@@ -17,6 +18,7 @@ var _ = standard.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 
 
 type MyEnum int32
@@ -170,10 +172,12 @@ if err != nil {
     return nil
 }
 
-func (x *MyData) String() string {
-    type MyDataAlias MyData
-    valueAlias := (*MyDataAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *MyData) toString1() string {  // Data1
+    return fmt.Sprintf("%v", x.GetData1NonCompat())
+}
+
+func (x *MyData) toString2() string {  // Data2
+    return fmt.Sprintf("%v", x.GetData2NonCompat())
 }
 
 
@@ -268,6 +272,20 @@ func (x *MyData) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MyData) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyData({")
+    sb.WriteString(fmt.Sprintf("Data1:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Data2:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type MyDataWithCustomDefault struct {
     Data1 string `thrift:"data1,1" json:"data1" db:"data1"`
@@ -370,10 +388,12 @@ if err != nil {
     return nil
 }
 
-func (x *MyDataWithCustomDefault) String() string {
-    type MyDataWithCustomDefaultAlias MyDataWithCustomDefault
-    valueAlias := (*MyDataWithCustomDefaultAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *MyDataWithCustomDefault) toString1() string {  // Data1
+    return fmt.Sprintf("%v", x.GetData1NonCompat())
+}
+
+func (x *MyDataWithCustomDefault) toString2() string {  // Data2
+    return fmt.Sprintf("%v", x.GetData2NonCompat())
 }
 
 
@@ -468,6 +488,20 @@ func (x *MyDataWithCustomDefault) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MyDataWithCustomDefault) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyDataWithCustomDefault({")
+    sb.WriteString(fmt.Sprintf("Data1:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Data2:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type InnerUnion struct {
     InnerOption []byte `thrift:"innerOption,1" json:"innerOption" db:"innerOption"`
@@ -535,10 +569,8 @@ if err != nil {
     return nil
 }
 
-func (x *InnerUnion) String() string {
-    type InnerUnionAlias InnerUnion
-    valueAlias := (*InnerUnionAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *InnerUnion) toString1() string {  // InnerOption
+    return fmt.Sprintf("%v", x.GetInnerOptionNonCompat())
 }
 
 func (x *InnerUnion) countSetFields() int {
@@ -635,6 +667,19 @@ func (x *InnerUnion) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *InnerUnion) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("InnerUnion({")
+    sb.WriteString(fmt.Sprintf("InnerOption:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type MyUnion struct {
     Option1 *string `thrift:"option1,1" json:"option1" db:"option1"`
@@ -817,6 +862,24 @@ if err != nil {
     return nil
 }
 
+func (x *MyUnion) toString1() string {  // Option1
+    if x.IsSetOption1() {
+        return fmt.Sprintf("%v", *x.GetOption1NonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetOption1NonCompat())
+}
+
+func (x *MyUnion) toString2() string {  // Option2
+    if x.IsSetOption2() {
+        return fmt.Sprintf("%v", *x.GetOption2NonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetOption2NonCompat())
+}
+
+func (x *MyUnion) toString3() string {  // Option3
+    return fmt.Sprintf("%v", x.GetOption3NonCompat())
+}
+
 // Deprecated: Use NewMyUnion().GetOption1() instead.
 var MyUnion_Option1_DEFAULT = NewMyUnion().GetOption1()
 
@@ -832,12 +895,6 @@ func (x *MyUnion) DefaultGetOption3() *InnerUnion {
         return NewInnerUnion()
     }
     return x.Option3
-}
-
-func (x *MyUnion) String() string {
-    type MyUnionAlias MyUnion
-    valueAlias := (*MyUnionAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 func (x *MyUnion) countSetFields() int {
@@ -966,6 +1023,21 @@ func (x *MyUnion) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MyUnion) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyUnion({")
+    sb.WriteString(fmt.Sprintf("Option1:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Option2:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("Option3:%s", x.toString3()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type MyStruct struct {
     BoolVal bool `thrift:"boolVal,-1" json:"boolVal" db:"boolVal"`
@@ -3041,6 +3113,165 @@ if err != nil {
     return nil
 }
 
+func (x *MyStruct) toString_1() string {  // BoolVal
+    return fmt.Sprintf("%v", x.GetBoolValNonCompat())
+}
+
+func (x *MyStruct) toString_2() string {  // ByteVal
+    return fmt.Sprintf("%v", x.GetByteValNonCompat())
+}
+
+func (x *MyStruct) toString_3() string {  // I16Val
+    return fmt.Sprintf("%v", x.GetI16ValNonCompat())
+}
+
+func (x *MyStruct) toString_4() string {  // I32Val
+    return fmt.Sprintf("%v", x.GetI32ValNonCompat())
+}
+
+func (x *MyStruct) toString_5() string {  // I64Val
+    return fmt.Sprintf("%v", x.GetI64ValNonCompat())
+}
+
+func (x *MyStruct) toString_6() string {  // FloatVal
+    return fmt.Sprintf("%v", x.GetFloatValNonCompat())
+}
+
+func (x *MyStruct) toString_7() string {  // DoubleVal
+    return fmt.Sprintf("%v", x.GetDoubleValNonCompat())
+}
+
+func (x *MyStruct) toString_8() string {  // StringVal
+    return fmt.Sprintf("%v", x.GetStringValNonCompat())
+}
+
+func (x *MyStruct) toString_9() string {  // BinaryVal
+    return fmt.Sprintf("%v", x.GetBinaryValNonCompat())
+}
+
+func (x *MyStruct) toString_10() string {  // EnumVal
+    return fmt.Sprintf("%v", x.GetEnumValNonCompat())
+}
+
+func (x *MyStruct) toString_11() string {  // StructVal
+    return fmt.Sprintf("%v", x.GetStructValNonCompat())
+}
+
+func (x *MyStruct) toString_12() string {  // UnionVal
+    return fmt.Sprintf("%v", x.GetUnionValNonCompat())
+}
+
+func (x *MyStruct) toString_13() string {  // LateStructVal
+    return fmt.Sprintf("%v", x.GetLateStructValNonCompat())
+}
+
+func (x *MyStruct) toString_14() string {  // OptBoolVal
+    if x.IsSetOptBoolVal() {
+        return fmt.Sprintf("%v", *x.GetOptBoolValNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetOptBoolValNonCompat())
+}
+
+func (x *MyStruct) toString_15() string {  // OptByteVal
+    if x.IsSetOptByteVal() {
+        return fmt.Sprintf("%v", *x.GetOptByteValNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetOptByteValNonCompat())
+}
+
+func (x *MyStruct) toString_16() string {  // OptI16Val
+    if x.IsSetOptI16Val() {
+        return fmt.Sprintf("%v", *x.GetOptI16ValNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetOptI16ValNonCompat())
+}
+
+func (x *MyStruct) toString_17() string {  // OptI32Val
+    if x.IsSetOptI32Val() {
+        return fmt.Sprintf("%v", *x.GetOptI32ValNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetOptI32ValNonCompat())
+}
+
+func (x *MyStruct) toString_18() string {  // OptI64Val
+    if x.IsSetOptI64Val() {
+        return fmt.Sprintf("%v", *x.GetOptI64ValNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetOptI64ValNonCompat())
+}
+
+func (x *MyStruct) toString_19() string {  // OptFloatVal
+    if x.IsSetOptFloatVal() {
+        return fmt.Sprintf("%v", *x.GetOptFloatValNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetOptFloatValNonCompat())
+}
+
+func (x *MyStruct) toString_20() string {  // OptDoubleVal
+    if x.IsSetOptDoubleVal() {
+        return fmt.Sprintf("%v", *x.GetOptDoubleValNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetOptDoubleValNonCompat())
+}
+
+func (x *MyStruct) toString_21() string {  // OptStringVal
+    if x.IsSetOptStringVal() {
+        return fmt.Sprintf("%v", *x.GetOptStringValNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetOptStringValNonCompat())
+}
+
+func (x *MyStruct) toString_22() string {  // OptBinaryVal
+    return fmt.Sprintf("%v", x.GetOptBinaryValNonCompat())
+}
+
+func (x *MyStruct) toString_23() string {  // OptEnumVal
+    if x.IsSetOptEnumVal() {
+        return fmt.Sprintf("%v", *x.GetOptEnumValNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetOptEnumValNonCompat())
+}
+
+func (x *MyStruct) toString_24() string {  // OptStructVal
+    return fmt.Sprintf("%v", x.GetOptStructValNonCompat())
+}
+
+func (x *MyStruct) toString_25() string {  // OptLateStructVal
+    return fmt.Sprintf("%v", x.GetOptLateStructValNonCompat())
+}
+
+func (x *MyStruct) toString_26() string {  // OptListVal
+    return fmt.Sprintf("%v", x.GetOptListValNonCompat())
+}
+
+func (x *MyStruct) toString_27() string {  // OptSetVal
+    return fmt.Sprintf("%v", x.GetOptSetValNonCompat())
+}
+
+func (x *MyStruct) toString_28() string {  // OptMapVal
+    return fmt.Sprintf("%v", x.GetOptMapValNonCompat())
+}
+
+func (x *MyStruct) toString_29() string {  // ListMap
+    return fmt.Sprintf("%v", x.GetListMapNonCompat())
+}
+
+func (x *MyStruct) toString_30() string {  // MapMap
+    return fmt.Sprintf("%v", x.GetMapMapNonCompat())
+}
+
+func (x *MyStruct) toString_31() string {  // I32WithCustomDefault
+    return fmt.Sprintf("%v", x.GetI32WithCustomDefaultNonCompat())
+}
+
+func (x *MyStruct) toString_32() string {  // StructWithCustomDefault
+    return fmt.Sprintf("%v", x.GetStructWithCustomDefaultNonCompat())
+}
+
+func (x *MyStruct) toString1() string {  // StructWithFieldCustomDefault
+    return fmt.Sprintf("%v", x.GetStructWithFieldCustomDefaultNonCompat())
+}
+
 // Deprecated: Use NewMyStruct().GetStructVal() instead.
 var MyStruct_StructVal_DEFAULT = NewMyStruct().GetStructVal()
 
@@ -3143,12 +3374,6 @@ func (x *MyStruct) DefaultGetStructWithFieldCustomDefault() *MyData {
         return NewMyData()
     }
     return x.StructWithFieldCustomDefault
-}
-
-func (x *MyStruct) String() string {
-    type MyStructAlias MyStruct
-    valueAlias := (*MyStructAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -3646,6 +3871,51 @@ func (x *MyStruct) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MyStruct) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyStruct({")
+    sb.WriteString(fmt.Sprintf("BoolVal:%s ", x.toString_1()))
+    sb.WriteString(fmt.Sprintf("ByteVal:%s ", x.toString_2()))
+    sb.WriteString(fmt.Sprintf("I16Val:%s ", x.toString_3()))
+    sb.WriteString(fmt.Sprintf("I32Val:%s ", x.toString_4()))
+    sb.WriteString(fmt.Sprintf("I64Val:%s ", x.toString_5()))
+    sb.WriteString(fmt.Sprintf("FloatVal:%s ", x.toString_6()))
+    sb.WriteString(fmt.Sprintf("DoubleVal:%s ", x.toString_7()))
+    sb.WriteString(fmt.Sprintf("StringVal:%s ", x.toString_8()))
+    sb.WriteString(fmt.Sprintf("BinaryVal:%s ", x.toString_9()))
+    sb.WriteString(fmt.Sprintf("EnumVal:%s ", x.toString_10()))
+    sb.WriteString(fmt.Sprintf("StructVal:%s ", x.toString_11()))
+    sb.WriteString(fmt.Sprintf("UnionVal:%s ", x.toString_12()))
+    sb.WriteString(fmt.Sprintf("LateStructVal:%s ", x.toString_13()))
+    sb.WriteString(fmt.Sprintf("OptBoolVal:%s ", x.toString_14()))
+    sb.WriteString(fmt.Sprintf("OptByteVal:%s ", x.toString_15()))
+    sb.WriteString(fmt.Sprintf("OptI16Val:%s ", x.toString_16()))
+    sb.WriteString(fmt.Sprintf("OptI32Val:%s ", x.toString_17()))
+    sb.WriteString(fmt.Sprintf("OptI64Val:%s ", x.toString_18()))
+    sb.WriteString(fmt.Sprintf("OptFloatVal:%s ", x.toString_19()))
+    sb.WriteString(fmt.Sprintf("OptDoubleVal:%s ", x.toString_20()))
+    sb.WriteString(fmt.Sprintf("OptStringVal:%s ", x.toString_21()))
+    sb.WriteString(fmt.Sprintf("OptBinaryVal:%s ", x.toString_22()))
+    sb.WriteString(fmt.Sprintf("OptEnumVal:%s ", x.toString_23()))
+    sb.WriteString(fmt.Sprintf("OptStructVal:%s ", x.toString_24()))
+    sb.WriteString(fmt.Sprintf("OptLateStructVal:%s ", x.toString_25()))
+    sb.WriteString(fmt.Sprintf("OptListVal:%s ", x.toString_26()))
+    sb.WriteString(fmt.Sprintf("OptSetVal:%s ", x.toString_27()))
+    sb.WriteString(fmt.Sprintf("OptMapVal:%s ", x.toString_28()))
+    sb.WriteString(fmt.Sprintf("ListMap:%s ", x.toString_29()))
+    sb.WriteString(fmt.Sprintf("MapMap:%s ", x.toString_30()))
+    sb.WriteString(fmt.Sprintf("I32WithCustomDefault:%s ", x.toString_31()))
+    sb.WriteString(fmt.Sprintf("StructWithCustomDefault:%s ", x.toString_32()))
+    sb.WriteString(fmt.Sprintf("StructWithFieldCustomDefault:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type LateDefStruct struct {
 }
@@ -3654,12 +3924,6 @@ var _ thrift.Struct = &LateDefStruct{}
 
 func NewLateDefStruct() *LateDefStruct {
     return (&LateDefStruct{})
-}
-
-func (x *LateDefStruct) String() string {
-    type LateDefStructAlias LateDefStruct
-    valueAlias := (*LateDefStructAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -3728,6 +3992,18 @@ func (x *LateDefStruct) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *LateDefStruct) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("LateDefStruct({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Recursive struct {
     Nodes map[string]*Recursive `thrift:"nodes,-1" json:"nodes" db:"nodes"`
@@ -3843,10 +4119,8 @@ result := mapResult
     return nil
 }
 
-func (x *Recursive) String() string {
-    type RecursiveAlias Recursive
-    valueAlias := (*RecursiveAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *Recursive) toString_1() string {  // Nodes
+    return fmt.Sprintf("%v", x.GetNodesNonCompat())
 }
 
 
@@ -3928,6 +4202,19 @@ func (x *Recursive) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Recursive) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Recursive({")
+    sb.WriteString(fmt.Sprintf("Nodes:%s", x.toString_1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Bar struct {
     Loop *Loop `thrift:"loop,-1" json:"loop" db:"loop"`
@@ -3997,6 +4284,10 @@ if err != nil {
     return nil
 }
 
+func (x *Bar) toString_1() string {  // Loop
+    return fmt.Sprintf("%v", x.GetLoopNonCompat())
+}
+
 // Deprecated: Use NewBar().GetLoop() instead.
 var Bar_Loop_DEFAULT = NewBar().GetLoop()
 
@@ -4006,12 +4297,6 @@ func (x *Bar) DefaultGetLoop() *Loop {
         return NewLoop()
     }
     return x.Loop
-}
-
-func (x *Bar) String() string {
-    type BarAlias Bar
-    valueAlias := (*BarAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -4093,6 +4378,19 @@ func (x *Bar) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Bar) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Bar({")
+    sb.WriteString(fmt.Sprintf("Loop:%s", x.toString_1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Loop struct {
     Bar *Bar `thrift:"bar,-1" json:"bar" db:"bar"`
@@ -4162,6 +4460,10 @@ if err != nil {
     return nil
 }
 
+func (x *Loop) toString_1() string {  // Bar
+    return fmt.Sprintf("%v", x.GetBarNonCompat())
+}
+
 // Deprecated: Use NewLoop().GetBar() instead.
 var Loop_Bar_DEFAULT = NewLoop().GetBar()
 
@@ -4171,12 +4473,6 @@ func (x *Loop) DefaultGetBar() *Bar {
         return NewBar()
     }
     return x.Bar
-}
-
-func (x *Loop) String() string {
-    type LoopAlias Loop
-    valueAlias := (*LoopAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -4258,6 +4554,19 @@ func (x *Loop) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Loop) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Loop({")
+    sb.WriteString(fmt.Sprintf("Bar:%s", x.toString_1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type MyDataPatch struct {
     Assign *MyData `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
@@ -4608,6 +4917,30 @@ if err != nil {
     return nil
 }
 
+func (x *MyDataPatch) toString1() string {  // Assign
+    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+}
+
+func (x *MyDataPatch) toString2() string {  // Clear
+    return fmt.Sprintf("%v", x.GetClearNonCompat())
+}
+
+func (x *MyDataPatch) toString3() string {  // PatchPrior
+    return fmt.Sprintf("%v", x.GetPatchPriorNonCompat())
+}
+
+func (x *MyDataPatch) toString5() string {  // Ensure
+    return fmt.Sprintf("%v", x.GetEnsureNonCompat())
+}
+
+func (x *MyDataPatch) toString6() string {  // Patch
+    return fmt.Sprintf("%v", x.GetPatchNonCompat())
+}
+
+func (x *MyDataPatch) toString7() string {  // Remove
+    return fmt.Sprintf("%v", x.GetRemoveNonCompat())
+}
+
 // Deprecated: Use NewMyDataPatch().GetAssign() instead.
 var MyDataPatch_Assign_DEFAULT = NewMyDataPatch().GetAssign()
 
@@ -4650,12 +4983,6 @@ func (x *MyDataPatch) DefaultGetPatch() *MyDataFieldPatch {
         return NewMyDataFieldPatch()
     }
     return x.Patch
-}
-
-func (x *MyDataPatch) String() string {
-    type MyDataPatchAlias MyDataPatch
-    valueAlias := (*MyDataPatchAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -4802,6 +5129,24 @@ func (x *MyDataPatch) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MyDataPatch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyDataPatch({")
+    sb.WriteString(fmt.Sprintf("Assign:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Clear:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("PatchPrior:%s ", x.toString3()))
+    sb.WriteString(fmt.Sprintf("Ensure:%s ", x.toString5()))
+    sb.WriteString(fmt.Sprintf("Patch:%s ", x.toString6()))
+    sb.WriteString(fmt.Sprintf("Remove:%s", x.toString7()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type MyDataFieldPatch struct {
     Data1 *patch.StringPatch `thrift:"data1,1" json:"data1" db:"data1"`
@@ -4930,6 +5275,14 @@ if err != nil {
     return nil
 }
 
+func (x *MyDataFieldPatch) toString1() string {  // Data1
+    return fmt.Sprintf("%v", x.GetData1NonCompat())
+}
+
+func (x *MyDataFieldPatch) toString2() string {  // Data2
+    return fmt.Sprintf("%v", x.GetData2NonCompat())
+}
+
 // Deprecated: Use NewMyDataFieldPatch().GetData1() instead.
 var MyDataFieldPatch_Data1_DEFAULT = NewMyDataFieldPatch().GetData1()
 
@@ -4950,12 +5303,6 @@ func (x *MyDataFieldPatch) DefaultGetData2() *patch.I32Patch {
         return patch.NewI32Patch()
     }
     return x.Data2
-}
-
-func (x *MyDataFieldPatch) String() string {
-    type MyDataFieldPatchAlias MyDataFieldPatch
-    valueAlias := (*MyDataFieldPatchAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -5050,6 +5397,20 @@ func (x *MyDataFieldPatch) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MyDataFieldPatch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyDataFieldPatch({")
+    sb.WriteString(fmt.Sprintf("Data1:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Data2:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type MyDataEnsureStruct struct {
     Data1 *string `thrift:"data1,1,optional" json:"data1,omitempty" db:"data1"`
@@ -5174,17 +5535,25 @@ if err != nil {
     return nil
 }
 
+func (x *MyDataEnsureStruct) toString1() string {  // Data1
+    if x.IsSetData1() {
+        return fmt.Sprintf("%v", *x.GetData1NonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetData1NonCompat())
+}
+
+func (x *MyDataEnsureStruct) toString2() string {  // Data2
+    if x.IsSetData2() {
+        return fmt.Sprintf("%v", *x.GetData2NonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetData2NonCompat())
+}
+
 // Deprecated: Use NewMyDataEnsureStruct().GetData1() instead.
 var MyDataEnsureStruct_Data1_DEFAULT = NewMyDataEnsureStruct().GetData1()
 
 // Deprecated: Use NewMyDataEnsureStruct().GetData2() instead.
 var MyDataEnsureStruct_Data2_DEFAULT = NewMyDataEnsureStruct().GetData2()
-
-func (x *MyDataEnsureStruct) String() string {
-    type MyDataEnsureStructAlias MyDataEnsureStruct
-    valueAlias := (*MyDataEnsureStructAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
 
 
 // Deprecated: Use MyDataEnsureStruct.Set* methods instead or set the fields directly.
@@ -5278,6 +5647,20 @@ func (x *MyDataEnsureStruct) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MyDataEnsureStruct) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyDataEnsureStruct({")
+    sb.WriteString(fmt.Sprintf("Data1:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Data2:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type MyDataWithCustomDefaultPatch struct {
     Assign *MyDataWithCustomDefault `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
@@ -5628,6 +6011,30 @@ if err != nil {
     return nil
 }
 
+func (x *MyDataWithCustomDefaultPatch) toString1() string {  // Assign
+    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+}
+
+func (x *MyDataWithCustomDefaultPatch) toString2() string {  // Clear
+    return fmt.Sprintf("%v", x.GetClearNonCompat())
+}
+
+func (x *MyDataWithCustomDefaultPatch) toString3() string {  // PatchPrior
+    return fmt.Sprintf("%v", x.GetPatchPriorNonCompat())
+}
+
+func (x *MyDataWithCustomDefaultPatch) toString5() string {  // Ensure
+    return fmt.Sprintf("%v", x.GetEnsureNonCompat())
+}
+
+func (x *MyDataWithCustomDefaultPatch) toString6() string {  // Patch
+    return fmt.Sprintf("%v", x.GetPatchNonCompat())
+}
+
+func (x *MyDataWithCustomDefaultPatch) toString7() string {  // Remove
+    return fmt.Sprintf("%v", x.GetRemoveNonCompat())
+}
+
 // Deprecated: Use NewMyDataWithCustomDefaultPatch().GetAssign() instead.
 var MyDataWithCustomDefaultPatch_Assign_DEFAULT = NewMyDataWithCustomDefaultPatch().GetAssign()
 
@@ -5670,12 +6077,6 @@ func (x *MyDataWithCustomDefaultPatch) DefaultGetPatch() *MyDataWithCustomDefaul
         return NewMyDataWithCustomDefaultFieldPatch()
     }
     return x.Patch
-}
-
-func (x *MyDataWithCustomDefaultPatch) String() string {
-    type MyDataWithCustomDefaultPatchAlias MyDataWithCustomDefaultPatch
-    valueAlias := (*MyDataWithCustomDefaultPatchAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -5822,6 +6223,24 @@ func (x *MyDataWithCustomDefaultPatch) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MyDataWithCustomDefaultPatch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyDataWithCustomDefaultPatch({")
+    sb.WriteString(fmt.Sprintf("Assign:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Clear:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("PatchPrior:%s ", x.toString3()))
+    sb.WriteString(fmt.Sprintf("Ensure:%s ", x.toString5()))
+    sb.WriteString(fmt.Sprintf("Patch:%s ", x.toString6()))
+    sb.WriteString(fmt.Sprintf("Remove:%s", x.toString7()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type MyDataWithCustomDefaultFieldPatch struct {
     Data1 *patch.StringPatch `thrift:"data1,1" json:"data1" db:"data1"`
@@ -5950,6 +6369,14 @@ if err != nil {
     return nil
 }
 
+func (x *MyDataWithCustomDefaultFieldPatch) toString1() string {  // Data1
+    return fmt.Sprintf("%v", x.GetData1NonCompat())
+}
+
+func (x *MyDataWithCustomDefaultFieldPatch) toString2() string {  // Data2
+    return fmt.Sprintf("%v", x.GetData2NonCompat())
+}
+
 // Deprecated: Use NewMyDataWithCustomDefaultFieldPatch().GetData1() instead.
 var MyDataWithCustomDefaultFieldPatch_Data1_DEFAULT = NewMyDataWithCustomDefaultFieldPatch().GetData1()
 
@@ -5970,12 +6397,6 @@ func (x *MyDataWithCustomDefaultFieldPatch) DefaultGetData2() *patch.I32Patch {
         return patch.NewI32Patch()
     }
     return x.Data2
-}
-
-func (x *MyDataWithCustomDefaultFieldPatch) String() string {
-    type MyDataWithCustomDefaultFieldPatchAlias MyDataWithCustomDefaultFieldPatch
-    valueAlias := (*MyDataWithCustomDefaultFieldPatchAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -6070,6 +6491,20 @@ func (x *MyDataWithCustomDefaultFieldPatch) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MyDataWithCustomDefaultFieldPatch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyDataWithCustomDefaultFieldPatch({")
+    sb.WriteString(fmt.Sprintf("Data1:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Data2:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type MyDataWithCustomDefaultEnsureStruct struct {
     Data1 *string `thrift:"data1,1,optional" json:"data1,omitempty" db:"data1"`
@@ -6194,17 +6629,25 @@ if err != nil {
     return nil
 }
 
+func (x *MyDataWithCustomDefaultEnsureStruct) toString1() string {  // Data1
+    if x.IsSetData1() {
+        return fmt.Sprintf("%v", *x.GetData1NonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetData1NonCompat())
+}
+
+func (x *MyDataWithCustomDefaultEnsureStruct) toString2() string {  // Data2
+    if x.IsSetData2() {
+        return fmt.Sprintf("%v", *x.GetData2NonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetData2NonCompat())
+}
+
 // Deprecated: Use NewMyDataWithCustomDefaultEnsureStruct().GetData1() instead.
 var MyDataWithCustomDefaultEnsureStruct_Data1_DEFAULT = NewMyDataWithCustomDefaultEnsureStruct().GetData1()
 
 // Deprecated: Use NewMyDataWithCustomDefaultEnsureStruct().GetData2() instead.
 var MyDataWithCustomDefaultEnsureStruct_Data2_DEFAULT = NewMyDataWithCustomDefaultEnsureStruct().GetData2()
-
-func (x *MyDataWithCustomDefaultEnsureStruct) String() string {
-    type MyDataWithCustomDefaultEnsureStructAlias MyDataWithCustomDefaultEnsureStruct
-    valueAlias := (*MyDataWithCustomDefaultEnsureStructAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
 
 
 // Deprecated: Use MyDataWithCustomDefaultEnsureStruct.Set* methods instead or set the fields directly.
@@ -6298,6 +6741,20 @@ func (x *MyDataWithCustomDefaultEnsureStruct) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MyDataWithCustomDefaultEnsureStruct) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyDataWithCustomDefaultEnsureStruct({")
+    sb.WriteString(fmt.Sprintf("Data1:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Data2:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type InnerUnionPatch struct {
     Assign *InnerUnion `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
@@ -6589,6 +7046,26 @@ if err != nil {
     return nil
 }
 
+func (x *InnerUnionPatch) toString1() string {  // Assign
+    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+}
+
+func (x *InnerUnionPatch) toString2() string {  // Clear
+    return fmt.Sprintf("%v", x.GetClearNonCompat())
+}
+
+func (x *InnerUnionPatch) toString3() string {  // PatchPrior
+    return fmt.Sprintf("%v", x.GetPatchPriorNonCompat())
+}
+
+func (x *InnerUnionPatch) toString4() string {  // Ensure
+    return fmt.Sprintf("%v", x.GetEnsureNonCompat())
+}
+
+func (x *InnerUnionPatch) toString6() string {  // Patch
+    return fmt.Sprintf("%v", x.GetPatchNonCompat())
+}
+
 // Deprecated: Use NewInnerUnionPatch().GetAssign() instead.
 var InnerUnionPatch_Assign_DEFAULT = NewInnerUnionPatch().GetAssign()
 
@@ -6631,12 +7108,6 @@ func (x *InnerUnionPatch) DefaultGetPatch() *InnerUnionFieldPatch {
         return NewInnerUnionFieldPatch()
     }
     return x.Patch
-}
-
-func (x *InnerUnionPatch) String() string {
-    type InnerUnionPatchAlias InnerUnionPatch
-    valueAlias := (*InnerUnionPatchAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -6770,6 +7241,23 @@ func (x *InnerUnionPatch) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *InnerUnionPatch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("InnerUnionPatch({")
+    sb.WriteString(fmt.Sprintf("Assign:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Clear:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("PatchPrior:%s ", x.toString3()))
+    sb.WriteString(fmt.Sprintf("Ensure:%s ", x.toString4()))
+    sb.WriteString(fmt.Sprintf("Patch:%s", x.toString6()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type InnerUnionFieldPatch struct {
     InnerOption *patch.BinaryPatch `thrift:"innerOption,1" json:"innerOption" db:"innerOption"`
@@ -6839,6 +7327,10 @@ if err != nil {
     return nil
 }
 
+func (x *InnerUnionFieldPatch) toString1() string {  // InnerOption
+    return fmt.Sprintf("%v", x.GetInnerOptionNonCompat())
+}
+
 // Deprecated: Use NewInnerUnionFieldPatch().GetInnerOption() instead.
 var InnerUnionFieldPatch_InnerOption_DEFAULT = NewInnerUnionFieldPatch().GetInnerOption()
 
@@ -6848,12 +7340,6 @@ func (x *InnerUnionFieldPatch) DefaultGetInnerOption() *patch.BinaryPatch {
         return patch.NewBinaryPatch()
     }
     return x.InnerOption
-}
-
-func (x *InnerUnionFieldPatch) String() string {
-    type InnerUnionFieldPatchAlias InnerUnionFieldPatch
-    valueAlias := (*InnerUnionFieldPatchAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -6935,6 +7421,19 @@ func (x *InnerUnionFieldPatch) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *InnerUnionFieldPatch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("InnerUnionFieldPatch({")
+    sb.WriteString(fmt.Sprintf("InnerOption:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type MyUnionPatch struct {
     Assign *MyUnion `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
@@ -7226,6 +7725,26 @@ if err != nil {
     return nil
 }
 
+func (x *MyUnionPatch) toString1() string {  // Assign
+    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+}
+
+func (x *MyUnionPatch) toString2() string {  // Clear
+    return fmt.Sprintf("%v", x.GetClearNonCompat())
+}
+
+func (x *MyUnionPatch) toString3() string {  // PatchPrior
+    return fmt.Sprintf("%v", x.GetPatchPriorNonCompat())
+}
+
+func (x *MyUnionPatch) toString4() string {  // Ensure
+    return fmt.Sprintf("%v", x.GetEnsureNonCompat())
+}
+
+func (x *MyUnionPatch) toString6() string {  // Patch
+    return fmt.Sprintf("%v", x.GetPatchNonCompat())
+}
+
 // Deprecated: Use NewMyUnionPatch().GetAssign() instead.
 var MyUnionPatch_Assign_DEFAULT = NewMyUnionPatch().GetAssign()
 
@@ -7268,12 +7787,6 @@ func (x *MyUnionPatch) DefaultGetPatch() *MyUnionFieldPatch {
         return NewMyUnionFieldPatch()
     }
     return x.Patch
-}
-
-func (x *MyUnionPatch) String() string {
-    type MyUnionPatchAlias MyUnionPatch
-    valueAlias := (*MyUnionPatchAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -7407,6 +7920,23 @@ func (x *MyUnionPatch) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MyUnionPatch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyUnionPatch({")
+    sb.WriteString(fmt.Sprintf("Assign:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Clear:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("PatchPrior:%s ", x.toString3()))
+    sb.WriteString(fmt.Sprintf("Ensure:%s ", x.toString4()))
+    sb.WriteString(fmt.Sprintf("Patch:%s", x.toString6()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type MyUnionFieldPatch struct {
     Option1 *patch.StringPatch `thrift:"option1,1" json:"option1" db:"option1"`
@@ -7594,6 +8124,18 @@ if err != nil {
     return nil
 }
 
+func (x *MyUnionFieldPatch) toString1() string {  // Option1
+    return fmt.Sprintf("%v", x.GetOption1NonCompat())
+}
+
+func (x *MyUnionFieldPatch) toString2() string {  // Option2
+    return fmt.Sprintf("%v", x.GetOption2NonCompat())
+}
+
+func (x *MyUnionFieldPatch) toString3() string {  // Option3
+    return fmt.Sprintf("%v", x.GetOption3NonCompat())
+}
+
 // Deprecated: Use NewMyUnionFieldPatch().GetOption1() instead.
 var MyUnionFieldPatch_Option1_DEFAULT = NewMyUnionFieldPatch().GetOption1()
 
@@ -7625,12 +8167,6 @@ func (x *MyUnionFieldPatch) DefaultGetOption3() *InnerUnionPatch {
         return NewInnerUnionPatch()
     }
     return x.Option3
-}
-
-func (x *MyUnionFieldPatch) String() string {
-    type MyUnionFieldPatchAlias MyUnionFieldPatch
-    valueAlias := (*MyUnionFieldPatchAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -7738,6 +8274,21 @@ func (x *MyUnionFieldPatch) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MyUnionFieldPatch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyUnionFieldPatch({")
+    sb.WriteString(fmt.Sprintf("Option1:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Option2:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("Option3:%s", x.toString3()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type MyStructPatch struct {
     Assign *MyStruct `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
@@ -8088,6 +8639,30 @@ if err != nil {
     return nil
 }
 
+func (x *MyStructPatch) toString1() string {  // Assign
+    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+}
+
+func (x *MyStructPatch) toString2() string {  // Clear
+    return fmt.Sprintf("%v", x.GetClearNonCompat())
+}
+
+func (x *MyStructPatch) toString3() string {  // PatchPrior
+    return fmt.Sprintf("%v", x.GetPatchPriorNonCompat())
+}
+
+func (x *MyStructPatch) toString5() string {  // Ensure
+    return fmt.Sprintf("%v", x.GetEnsureNonCompat())
+}
+
+func (x *MyStructPatch) toString6() string {  // Patch
+    return fmt.Sprintf("%v", x.GetPatchNonCompat())
+}
+
+func (x *MyStructPatch) toString7() string {  // Remove
+    return fmt.Sprintf("%v", x.GetRemoveNonCompat())
+}
+
 // Deprecated: Use NewMyStructPatch().GetAssign() instead.
 var MyStructPatch_Assign_DEFAULT = NewMyStructPatch().GetAssign()
 
@@ -8130,12 +8705,6 @@ func (x *MyStructPatch) DefaultGetPatch() *MyStructFieldPatch {
         return NewMyStructFieldPatch()
     }
     return x.Patch
-}
-
-func (x *MyStructPatch) String() string {
-    type MyStructPatchAlias MyStructPatch
-    valueAlias := (*MyStructPatchAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -8282,6 +8851,24 @@ func (x *MyStructPatch) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MyStructPatch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyStructPatch({")
+    sb.WriteString(fmt.Sprintf("Assign:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Clear:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("PatchPrior:%s ", x.toString3()))
+    sb.WriteString(fmt.Sprintf("Ensure:%s ", x.toString5()))
+    sb.WriteString(fmt.Sprintf("Patch:%s ", x.toString6()))
+    sb.WriteString(fmt.Sprintf("Remove:%s", x.toString7()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type MyStructField10Patch struct {
     Assign *MyEnum `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
@@ -8396,14 +8983,19 @@ if err != nil {
     return nil
 }
 
+func (x *MyStructField10Patch) toString1() string {  // Assign
+    if x.IsSetAssign() {
+        return fmt.Sprintf("%v", *x.GetAssignNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+}
+
+func (x *MyStructField10Patch) toString2() string {  // Clear
+    return fmt.Sprintf("%v", x.GetClearNonCompat())
+}
+
 // Deprecated: Use NewMyStructField10Patch().GetAssign() instead.
 var MyStructField10Patch_Assign_DEFAULT = NewMyStructField10Patch().GetAssign()
-
-func (x *MyStructField10Patch) String() string {
-    type MyStructField10PatchAlias MyStructField10Patch
-    valueAlias := (*MyStructField10PatchAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
 
 
 // Deprecated: Use MyStructField10Patch.Set* methods instead or set the fields directly.
@@ -8497,6 +9089,20 @@ func (x *MyStructField10Patch) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MyStructField10Patch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyStructField10Patch({")
+    sb.WriteString(fmt.Sprintf("Assign:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Clear:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type MyStructField23Patch struct {
     Assign *MyEnum `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
@@ -8611,14 +9217,19 @@ if err != nil {
     return nil
 }
 
+func (x *MyStructField23Patch) toString1() string {  // Assign
+    if x.IsSetAssign() {
+        return fmt.Sprintf("%v", *x.GetAssignNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+}
+
+func (x *MyStructField23Patch) toString2() string {  // Clear
+    return fmt.Sprintf("%v", x.GetClearNonCompat())
+}
+
 // Deprecated: Use NewMyStructField23Patch().GetAssign() instead.
 var MyStructField23Patch_Assign_DEFAULT = NewMyStructField23Patch().GetAssign()
-
-func (x *MyStructField23Patch) String() string {
-    type MyStructField23PatchAlias MyStructField23Patch
-    valueAlias := (*MyStructField23PatchAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
 
 
 // Deprecated: Use MyStructField23Patch.Set* methods instead or set the fields directly.
@@ -8712,6 +9323,20 @@ func (x *MyStructField23Patch) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MyStructField23Patch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyStructField23Patch({")
+    sb.WriteString(fmt.Sprintf("Assign:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Clear:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type MyStructField26Patch struct {
     Assign []int16 `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
@@ -9028,10 +9653,20 @@ result := listResult
     return nil
 }
 
-func (x *MyStructField26Patch) String() string {
-    type MyStructField26PatchAlias MyStructField26Patch
-    valueAlias := (*MyStructField26PatchAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *MyStructField26Patch) toString1() string {  // Assign
+    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+}
+
+func (x *MyStructField26Patch) toString2() string {  // Clear
+    return fmt.Sprintf("%v", x.GetClearNonCompat())
+}
+
+func (x *MyStructField26Patch) toString8() string {  // Prepend
+    return fmt.Sprintf("%v", x.GetPrependNonCompat())
+}
+
+func (x *MyStructField26Patch) toString9() string {  // Append
+    return fmt.Sprintf("%v", x.GetAppendNonCompat())
 }
 
 
@@ -9152,6 +9787,22 @@ func (x *MyStructField26Patch) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MyStructField26Patch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyStructField26Patch({")
+    sb.WriteString(fmt.Sprintf("Assign:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Clear:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("Prepend:%s ", x.toString8()))
+    sb.WriteString(fmt.Sprintf("Append:%s", x.toString9()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type MyStructField27Patch struct {
     Assign []string `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
@@ -9468,10 +10119,20 @@ result := setResult
     return nil
 }
 
-func (x *MyStructField27Patch) String() string {
-    type MyStructField27PatchAlias MyStructField27Patch
-    valueAlias := (*MyStructField27PatchAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *MyStructField27Patch) toString1() string {  // Assign
+    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+}
+
+func (x *MyStructField27Patch) toString2() string {  // Clear
+    return fmt.Sprintf("%v", x.GetClearNonCompat())
+}
+
+func (x *MyStructField27Patch) toString7() string {  // Remove
+    return fmt.Sprintf("%v", x.GetRemoveNonCompat())
+}
+
+func (x *MyStructField27Patch) toString8() string {  // Add
+    return fmt.Sprintf("%v", x.GetAddNonCompat())
 }
 
 
@@ -9592,6 +10253,22 @@ func (x *MyStructField27Patch) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MyStructField27Patch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyStructField27Patch({")
+    sb.WriteString(fmt.Sprintf("Assign:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Clear:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("Remove:%s ", x.toString7()))
+    sb.WriteString(fmt.Sprintf("Add:%s", x.toString8()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type MyStructField28Patch struct {
     Assign map[string]string `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
@@ -10256,10 +10933,32 @@ result := mapResult
     return nil
 }
 
-func (x *MyStructField28Patch) String() string {
-    type MyStructField28PatchAlias MyStructField28Patch
-    valueAlias := (*MyStructField28PatchAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *MyStructField28Patch) toString1() string {  // Assign
+    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+}
+
+func (x *MyStructField28Patch) toString2() string {  // Clear
+    return fmt.Sprintf("%v", x.GetClearNonCompat())
+}
+
+func (x *MyStructField28Patch) toString3() string {  // PatchPrior
+    return fmt.Sprintf("%v", x.GetPatchPriorNonCompat())
+}
+
+func (x *MyStructField28Patch) toString5() string {  // Add
+    return fmt.Sprintf("%v", x.GetAddNonCompat())
+}
+
+func (x *MyStructField28Patch) toString6() string {  // Patch
+    return fmt.Sprintf("%v", x.GetPatchNonCompat())
+}
+
+func (x *MyStructField28Patch) toString7() string {  // Remove
+    return fmt.Sprintf("%v", x.GetRemoveNonCompat())
+}
+
+func (x *MyStructField28Patch) toString9() string {  // Put
+    return fmt.Sprintf("%v", x.GetPutNonCompat())
 }
 
 
@@ -10419,6 +11118,25 @@ func (x *MyStructField28Patch) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MyStructField28Patch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyStructField28Patch({")
+    sb.WriteString(fmt.Sprintf("Assign:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Clear:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("PatchPrior:%s ", x.toString3()))
+    sb.WriteString(fmt.Sprintf("Add:%s ", x.toString5()))
+    sb.WriteString(fmt.Sprintf("Patch:%s ", x.toString6()))
+    sb.WriteString(fmt.Sprintf("Remove:%s ", x.toString7()))
+    sb.WriteString(fmt.Sprintf("Put:%s", x.toString9()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type MyStructField29Patch struct {
     Assign []map[string]int32 `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
@@ -10873,10 +11591,20 @@ result := listResult
     return nil
 }
 
-func (x *MyStructField29Patch) String() string {
-    type MyStructField29PatchAlias MyStructField29Patch
-    valueAlias := (*MyStructField29PatchAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *MyStructField29Patch) toString1() string {  // Assign
+    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+}
+
+func (x *MyStructField29Patch) toString2() string {  // Clear
+    return fmt.Sprintf("%v", x.GetClearNonCompat())
+}
+
+func (x *MyStructField29Patch) toString8() string {  // Prepend
+    return fmt.Sprintf("%v", x.GetPrependNonCompat())
+}
+
+func (x *MyStructField29Patch) toString9() string {  // Append
+    return fmt.Sprintf("%v", x.GetAppendNonCompat())
 }
 
 
@@ -10997,6 +11725,22 @@ func (x *MyStructField29Patch) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MyStructField29Patch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyStructField29Patch({")
+    sb.WriteString(fmt.Sprintf("Assign:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Clear:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("Prepend:%s ", x.toString8()))
+    sb.WriteString(fmt.Sprintf("Append:%s", x.toString9()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type MyStructField30Patch struct {
     Assign map[string]map[string]int32 `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
@@ -11799,10 +12543,32 @@ result := mapResult
     return nil
 }
 
-func (x *MyStructField30Patch) String() string {
-    type MyStructField30PatchAlias MyStructField30Patch
-    valueAlias := (*MyStructField30PatchAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *MyStructField30Patch) toString1() string {  // Assign
+    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+}
+
+func (x *MyStructField30Patch) toString2() string {  // Clear
+    return fmt.Sprintf("%v", x.GetClearNonCompat())
+}
+
+func (x *MyStructField30Patch) toString3() string {  // PatchPrior
+    return fmt.Sprintf("%v", x.GetPatchPriorNonCompat())
+}
+
+func (x *MyStructField30Patch) toString5() string {  // Add
+    return fmt.Sprintf("%v", x.GetAddNonCompat())
+}
+
+func (x *MyStructField30Patch) toString6() string {  // Patch
+    return fmt.Sprintf("%v", x.GetPatchNonCompat())
+}
+
+func (x *MyStructField30Patch) toString7() string {  // Remove
+    return fmt.Sprintf("%v", x.GetRemoveNonCompat())
+}
+
+func (x *MyStructField30Patch) toString9() string {  // Put
+    return fmt.Sprintf("%v", x.GetPutNonCompat())
 }
 
 
@@ -11962,6 +12728,25 @@ func (x *MyStructField30Patch) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MyStructField30Patch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyStructField30Patch({")
+    sb.WriteString(fmt.Sprintf("Assign:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Clear:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("PatchPrior:%s ", x.toString3()))
+    sb.WriteString(fmt.Sprintf("Add:%s ", x.toString5()))
+    sb.WriteString(fmt.Sprintf("Patch:%s ", x.toString6()))
+    sb.WriteString(fmt.Sprintf("Remove:%s ", x.toString7()))
+    sb.WriteString(fmt.Sprintf("Put:%s", x.toString9()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type MyStructField30Patch1 struct {
     Assign map[string]int32 `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
@@ -12626,10 +13411,32 @@ result := mapResult
     return nil
 }
 
-func (x *MyStructField30Patch1) String() string {
-    type MyStructField30Patch1Alias MyStructField30Patch1
-    valueAlias := (*MyStructField30Patch1Alias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *MyStructField30Patch1) toString1() string {  // Assign
+    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+}
+
+func (x *MyStructField30Patch1) toString2() string {  // Clear
+    return fmt.Sprintf("%v", x.GetClearNonCompat())
+}
+
+func (x *MyStructField30Patch1) toString3() string {  // PatchPrior
+    return fmt.Sprintf("%v", x.GetPatchPriorNonCompat())
+}
+
+func (x *MyStructField30Patch1) toString5() string {  // Add
+    return fmt.Sprintf("%v", x.GetAddNonCompat())
+}
+
+func (x *MyStructField30Patch1) toString6() string {  // Patch
+    return fmt.Sprintf("%v", x.GetPatchNonCompat())
+}
+
+func (x *MyStructField30Patch1) toString7() string {  // Remove
+    return fmt.Sprintf("%v", x.GetRemoveNonCompat())
+}
+
+func (x *MyStructField30Patch1) toString9() string {  // Put
+    return fmt.Sprintf("%v", x.GetPutNonCompat())
 }
 
 
@@ -12789,6 +13596,25 @@ func (x *MyStructField30Patch1) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MyStructField30Patch1) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyStructField30Patch1({")
+    sb.WriteString(fmt.Sprintf("Assign:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Clear:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("PatchPrior:%s ", x.toString3()))
+    sb.WriteString(fmt.Sprintf("Add:%s ", x.toString5()))
+    sb.WriteString(fmt.Sprintf("Patch:%s ", x.toString6()))
+    sb.WriteString(fmt.Sprintf("Remove:%s ", x.toString7()))
+    sb.WriteString(fmt.Sprintf("Put:%s", x.toString9()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type MyStructFieldPatch struct {
     StructWithCustomDefault *MyDataWithCustomDefaultPatch `thrift:"structWithCustomDefault,-32" json:"structWithCustomDefault" db:"structWithCustomDefault"`
@@ -14746,6 +15572,138 @@ if err != nil {
     return nil
 }
 
+func (x *MyStructFieldPatch) toString_32() string {  // StructWithCustomDefault
+    return fmt.Sprintf("%v", x.GetStructWithCustomDefaultNonCompat())
+}
+
+func (x *MyStructFieldPatch) toString_31() string {  // I32WithCustomDefault
+    return fmt.Sprintf("%v", x.GetI32WithCustomDefaultNonCompat())
+}
+
+func (x *MyStructFieldPatch) toString_30() string {  // MapMap
+    return fmt.Sprintf("%v", x.GetMapMapNonCompat())
+}
+
+func (x *MyStructFieldPatch) toString_29() string {  // ListMap
+    return fmt.Sprintf("%v", x.GetListMapNonCompat())
+}
+
+func (x *MyStructFieldPatch) toString_28() string {  // OptMapVal
+    return fmt.Sprintf("%v", x.GetOptMapValNonCompat())
+}
+
+func (x *MyStructFieldPatch) toString_27() string {  // OptSetVal
+    return fmt.Sprintf("%v", x.GetOptSetValNonCompat())
+}
+
+func (x *MyStructFieldPatch) toString_26() string {  // OptListVal
+    return fmt.Sprintf("%v", x.GetOptListValNonCompat())
+}
+
+func (x *MyStructFieldPatch) toString_25() string {  // OptLateStructVal
+    return fmt.Sprintf("%v", x.GetOptLateStructValNonCompat())
+}
+
+func (x *MyStructFieldPatch) toString_24() string {  // OptStructVal
+    return fmt.Sprintf("%v", x.GetOptStructValNonCompat())
+}
+
+func (x *MyStructFieldPatch) toString_23() string {  // OptEnumVal
+    return fmt.Sprintf("%v", x.GetOptEnumValNonCompat())
+}
+
+func (x *MyStructFieldPatch) toString_22() string {  // OptBinaryVal
+    return fmt.Sprintf("%v", x.GetOptBinaryValNonCompat())
+}
+
+func (x *MyStructFieldPatch) toString_21() string {  // OptStringVal
+    return fmt.Sprintf("%v", x.GetOptStringValNonCompat())
+}
+
+func (x *MyStructFieldPatch) toString_20() string {  // OptDoubleVal
+    return fmt.Sprintf("%v", x.GetOptDoubleValNonCompat())
+}
+
+func (x *MyStructFieldPatch) toString_19() string {  // OptFloatVal
+    return fmt.Sprintf("%v", x.GetOptFloatValNonCompat())
+}
+
+func (x *MyStructFieldPatch) toString_18() string {  // OptI64Val
+    return fmt.Sprintf("%v", x.GetOptI64ValNonCompat())
+}
+
+func (x *MyStructFieldPatch) toString_17() string {  // OptI32Val
+    return fmt.Sprintf("%v", x.GetOptI32ValNonCompat())
+}
+
+func (x *MyStructFieldPatch) toString_16() string {  // OptI16Val
+    return fmt.Sprintf("%v", x.GetOptI16ValNonCompat())
+}
+
+func (x *MyStructFieldPatch) toString_15() string {  // OptByteVal
+    return fmt.Sprintf("%v", x.GetOptByteValNonCompat())
+}
+
+func (x *MyStructFieldPatch) toString_14() string {  // OptBoolVal
+    return fmt.Sprintf("%v", x.GetOptBoolValNonCompat())
+}
+
+func (x *MyStructFieldPatch) toString_13() string {  // LateStructVal
+    return fmt.Sprintf("%v", x.GetLateStructValNonCompat())
+}
+
+func (x *MyStructFieldPatch) toString_12() string {  // UnionVal
+    return fmt.Sprintf("%v", x.GetUnionValNonCompat())
+}
+
+func (x *MyStructFieldPatch) toString_11() string {  // StructVal
+    return fmt.Sprintf("%v", x.GetStructValNonCompat())
+}
+
+func (x *MyStructFieldPatch) toString_10() string {  // EnumVal
+    return fmt.Sprintf("%v", x.GetEnumValNonCompat())
+}
+
+func (x *MyStructFieldPatch) toString_9() string {  // BinaryVal
+    return fmt.Sprintf("%v", x.GetBinaryValNonCompat())
+}
+
+func (x *MyStructFieldPatch) toString_8() string {  // StringVal
+    return fmt.Sprintf("%v", x.GetStringValNonCompat())
+}
+
+func (x *MyStructFieldPatch) toString_7() string {  // DoubleVal
+    return fmt.Sprintf("%v", x.GetDoubleValNonCompat())
+}
+
+func (x *MyStructFieldPatch) toString_6() string {  // FloatVal
+    return fmt.Sprintf("%v", x.GetFloatValNonCompat())
+}
+
+func (x *MyStructFieldPatch) toString_5() string {  // I64Val
+    return fmt.Sprintf("%v", x.GetI64ValNonCompat())
+}
+
+func (x *MyStructFieldPatch) toString_4() string {  // I32Val
+    return fmt.Sprintf("%v", x.GetI32ValNonCompat())
+}
+
+func (x *MyStructFieldPatch) toString_3() string {  // I16Val
+    return fmt.Sprintf("%v", x.GetI16ValNonCompat())
+}
+
+func (x *MyStructFieldPatch) toString_2() string {  // ByteVal
+    return fmt.Sprintf("%v", x.GetByteValNonCompat())
+}
+
+func (x *MyStructFieldPatch) toString_1() string {  // BoolVal
+    return fmt.Sprintf("%v", x.GetBoolValNonCompat())
+}
+
+func (x *MyStructFieldPatch) toString1() string {  // StructWithFieldCustomDefault
+    return fmt.Sprintf("%v", x.GetStructWithFieldCustomDefaultNonCompat())
+}
+
 // Deprecated: Use NewMyStructFieldPatch().GetStructWithCustomDefault() instead.
 var MyStructFieldPatch_StructWithCustomDefault_DEFAULT = NewMyStructFieldPatch().GetStructWithCustomDefault()
 
@@ -15107,12 +16065,6 @@ func (x *MyStructFieldPatch) DefaultGetStructWithFieldCustomDefault() *MyDataPat
         return NewMyDataPatch()
     }
     return x.StructWithFieldCustomDefault
-}
-
-func (x *MyStructFieldPatch) String() string {
-    type MyStructFieldPatchAlias MyStructFieldPatch
-    valueAlias := (*MyStructFieldPatchAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -15610,6 +16562,51 @@ func (x *MyStructFieldPatch) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MyStructFieldPatch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyStructFieldPatch({")
+    sb.WriteString(fmt.Sprintf("StructWithCustomDefault:%s ", x.toString_32()))
+    sb.WriteString(fmt.Sprintf("I32WithCustomDefault:%s ", x.toString_31()))
+    sb.WriteString(fmt.Sprintf("MapMap:%s ", x.toString_30()))
+    sb.WriteString(fmt.Sprintf("ListMap:%s ", x.toString_29()))
+    sb.WriteString(fmt.Sprintf("OptMapVal:%s ", x.toString_28()))
+    sb.WriteString(fmt.Sprintf("OptSetVal:%s ", x.toString_27()))
+    sb.WriteString(fmt.Sprintf("OptListVal:%s ", x.toString_26()))
+    sb.WriteString(fmt.Sprintf("OptLateStructVal:%s ", x.toString_25()))
+    sb.WriteString(fmt.Sprintf("OptStructVal:%s ", x.toString_24()))
+    sb.WriteString(fmt.Sprintf("OptEnumVal:%s ", x.toString_23()))
+    sb.WriteString(fmt.Sprintf("OptBinaryVal:%s ", x.toString_22()))
+    sb.WriteString(fmt.Sprintf("OptStringVal:%s ", x.toString_21()))
+    sb.WriteString(fmt.Sprintf("OptDoubleVal:%s ", x.toString_20()))
+    sb.WriteString(fmt.Sprintf("OptFloatVal:%s ", x.toString_19()))
+    sb.WriteString(fmt.Sprintf("OptI64Val:%s ", x.toString_18()))
+    sb.WriteString(fmt.Sprintf("OptI32Val:%s ", x.toString_17()))
+    sb.WriteString(fmt.Sprintf("OptI16Val:%s ", x.toString_16()))
+    sb.WriteString(fmt.Sprintf("OptByteVal:%s ", x.toString_15()))
+    sb.WriteString(fmt.Sprintf("OptBoolVal:%s ", x.toString_14()))
+    sb.WriteString(fmt.Sprintf("LateStructVal:%s ", x.toString_13()))
+    sb.WriteString(fmt.Sprintf("UnionVal:%s ", x.toString_12()))
+    sb.WriteString(fmt.Sprintf("StructVal:%s ", x.toString_11()))
+    sb.WriteString(fmt.Sprintf("EnumVal:%s ", x.toString_10()))
+    sb.WriteString(fmt.Sprintf("BinaryVal:%s ", x.toString_9()))
+    sb.WriteString(fmt.Sprintf("StringVal:%s ", x.toString_8()))
+    sb.WriteString(fmt.Sprintf("DoubleVal:%s ", x.toString_7()))
+    sb.WriteString(fmt.Sprintf("FloatVal:%s ", x.toString_6()))
+    sb.WriteString(fmt.Sprintf("I64Val:%s ", x.toString_5()))
+    sb.WriteString(fmt.Sprintf("I32Val:%s ", x.toString_4()))
+    sb.WriteString(fmt.Sprintf("I16Val:%s ", x.toString_3()))
+    sb.WriteString(fmt.Sprintf("ByteVal:%s ", x.toString_2()))
+    sb.WriteString(fmt.Sprintf("BoolVal:%s ", x.toString_1()))
+    sb.WriteString(fmt.Sprintf("StructWithFieldCustomDefault:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type MyStructEnsureStruct struct {
     StructWithCustomDefault *MyDataWithCustomDefault `thrift:"structWithCustomDefault,-32,optional" json:"structWithCustomDefault,omitempty" db:"structWithCustomDefault"`
@@ -17783,6 +18780,195 @@ if err != nil {
     return nil
 }
 
+func (x *MyStructEnsureStruct) toString_32() string {  // StructWithCustomDefault
+    return fmt.Sprintf("%v", x.GetStructWithCustomDefaultNonCompat())
+}
+
+func (x *MyStructEnsureStruct) toString_31() string {  // I32WithCustomDefault
+    if x.IsSetI32WithCustomDefault() {
+        return fmt.Sprintf("%v", *x.GetI32WithCustomDefaultNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetI32WithCustomDefaultNonCompat())
+}
+
+func (x *MyStructEnsureStruct) toString_30() string {  // MapMap
+    return fmt.Sprintf("%v", x.GetMapMapNonCompat())
+}
+
+func (x *MyStructEnsureStruct) toString_29() string {  // ListMap
+    return fmt.Sprintf("%v", x.GetListMapNonCompat())
+}
+
+func (x *MyStructEnsureStruct) toString_28() string {  // OptMapVal
+    return fmt.Sprintf("%v", x.GetOptMapValNonCompat())
+}
+
+func (x *MyStructEnsureStruct) toString_27() string {  // OptSetVal
+    return fmt.Sprintf("%v", x.GetOptSetValNonCompat())
+}
+
+func (x *MyStructEnsureStruct) toString_26() string {  // OptListVal
+    return fmt.Sprintf("%v", x.GetOptListValNonCompat())
+}
+
+func (x *MyStructEnsureStruct) toString_25() string {  // OptLateStructVal
+    return fmt.Sprintf("%v", x.GetOptLateStructValNonCompat())
+}
+
+func (x *MyStructEnsureStruct) toString_24() string {  // OptStructVal
+    return fmt.Sprintf("%v", x.GetOptStructValNonCompat())
+}
+
+func (x *MyStructEnsureStruct) toString_23() string {  // OptEnumVal
+    if x.IsSetOptEnumVal() {
+        return fmt.Sprintf("%v", *x.GetOptEnumValNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetOptEnumValNonCompat())
+}
+
+func (x *MyStructEnsureStruct) toString_22() string {  // OptBinaryVal
+    return fmt.Sprintf("%v", x.GetOptBinaryValNonCompat())
+}
+
+func (x *MyStructEnsureStruct) toString_21() string {  // OptStringVal
+    if x.IsSetOptStringVal() {
+        return fmt.Sprintf("%v", *x.GetOptStringValNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetOptStringValNonCompat())
+}
+
+func (x *MyStructEnsureStruct) toString_20() string {  // OptDoubleVal
+    if x.IsSetOptDoubleVal() {
+        return fmt.Sprintf("%v", *x.GetOptDoubleValNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetOptDoubleValNonCompat())
+}
+
+func (x *MyStructEnsureStruct) toString_19() string {  // OptFloatVal
+    if x.IsSetOptFloatVal() {
+        return fmt.Sprintf("%v", *x.GetOptFloatValNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetOptFloatValNonCompat())
+}
+
+func (x *MyStructEnsureStruct) toString_18() string {  // OptI64Val
+    if x.IsSetOptI64Val() {
+        return fmt.Sprintf("%v", *x.GetOptI64ValNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetOptI64ValNonCompat())
+}
+
+func (x *MyStructEnsureStruct) toString_17() string {  // OptI32Val
+    if x.IsSetOptI32Val() {
+        return fmt.Sprintf("%v", *x.GetOptI32ValNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetOptI32ValNonCompat())
+}
+
+func (x *MyStructEnsureStruct) toString_16() string {  // OptI16Val
+    if x.IsSetOptI16Val() {
+        return fmt.Sprintf("%v", *x.GetOptI16ValNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetOptI16ValNonCompat())
+}
+
+func (x *MyStructEnsureStruct) toString_15() string {  // OptByteVal
+    if x.IsSetOptByteVal() {
+        return fmt.Sprintf("%v", *x.GetOptByteValNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetOptByteValNonCompat())
+}
+
+func (x *MyStructEnsureStruct) toString_14() string {  // OptBoolVal
+    if x.IsSetOptBoolVal() {
+        return fmt.Sprintf("%v", *x.GetOptBoolValNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetOptBoolValNonCompat())
+}
+
+func (x *MyStructEnsureStruct) toString_13() string {  // LateStructVal
+    return fmt.Sprintf("%v", x.GetLateStructValNonCompat())
+}
+
+func (x *MyStructEnsureStruct) toString_12() string {  // UnionVal
+    return fmt.Sprintf("%v", x.GetUnionValNonCompat())
+}
+
+func (x *MyStructEnsureStruct) toString_11() string {  // StructVal
+    return fmt.Sprintf("%v", x.GetStructValNonCompat())
+}
+
+func (x *MyStructEnsureStruct) toString_10() string {  // EnumVal
+    if x.IsSetEnumVal() {
+        return fmt.Sprintf("%v", *x.GetEnumValNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetEnumValNonCompat())
+}
+
+func (x *MyStructEnsureStruct) toString_9() string {  // BinaryVal
+    return fmt.Sprintf("%v", x.GetBinaryValNonCompat())
+}
+
+func (x *MyStructEnsureStruct) toString_8() string {  // StringVal
+    if x.IsSetStringVal() {
+        return fmt.Sprintf("%v", *x.GetStringValNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetStringValNonCompat())
+}
+
+func (x *MyStructEnsureStruct) toString_7() string {  // DoubleVal
+    if x.IsSetDoubleVal() {
+        return fmt.Sprintf("%v", *x.GetDoubleValNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetDoubleValNonCompat())
+}
+
+func (x *MyStructEnsureStruct) toString_6() string {  // FloatVal
+    if x.IsSetFloatVal() {
+        return fmt.Sprintf("%v", *x.GetFloatValNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetFloatValNonCompat())
+}
+
+func (x *MyStructEnsureStruct) toString_5() string {  // I64Val
+    if x.IsSetI64Val() {
+        return fmt.Sprintf("%v", *x.GetI64ValNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetI64ValNonCompat())
+}
+
+func (x *MyStructEnsureStruct) toString_4() string {  // I32Val
+    if x.IsSetI32Val() {
+        return fmt.Sprintf("%v", *x.GetI32ValNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetI32ValNonCompat())
+}
+
+func (x *MyStructEnsureStruct) toString_3() string {  // I16Val
+    if x.IsSetI16Val() {
+        return fmt.Sprintf("%v", *x.GetI16ValNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetI16ValNonCompat())
+}
+
+func (x *MyStructEnsureStruct) toString_2() string {  // ByteVal
+    if x.IsSetByteVal() {
+        return fmt.Sprintf("%v", *x.GetByteValNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetByteValNonCompat())
+}
+
+func (x *MyStructEnsureStruct) toString_1() string {  // BoolVal
+    if x.IsSetBoolVal() {
+        return fmt.Sprintf("%v", *x.GetBoolValNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetBoolValNonCompat())
+}
+
+func (x *MyStructEnsureStruct) toString1() string {  // StructWithFieldCustomDefault
+    return fmt.Sprintf("%v", x.GetStructWithFieldCustomDefaultNonCompat())
+}
+
 // Deprecated: Use NewMyStructEnsureStruct().GetStructWithCustomDefault() instead.
 var MyStructEnsureStruct_StructWithCustomDefault_DEFAULT = NewMyStructEnsureStruct().GetStructWithCustomDefault()
 
@@ -17915,12 +19101,6 @@ func (x *MyStructEnsureStruct) DefaultGetStructWithFieldCustomDefault() *MyData 
         return NewMyData()
     }
     return x.StructWithFieldCustomDefault
-}
-
-func (x *MyStructEnsureStruct) String() string {
-    type MyStructEnsureStructAlias MyStructEnsureStruct
-    valueAlias := (*MyStructEnsureStructAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -18418,6 +19598,51 @@ func (x *MyStructEnsureStruct) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MyStructEnsureStruct) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyStructEnsureStruct({")
+    sb.WriteString(fmt.Sprintf("StructWithCustomDefault:%s ", x.toString_32()))
+    sb.WriteString(fmt.Sprintf("I32WithCustomDefault:%s ", x.toString_31()))
+    sb.WriteString(fmt.Sprintf("MapMap:%s ", x.toString_30()))
+    sb.WriteString(fmt.Sprintf("ListMap:%s ", x.toString_29()))
+    sb.WriteString(fmt.Sprintf("OptMapVal:%s ", x.toString_28()))
+    sb.WriteString(fmt.Sprintf("OptSetVal:%s ", x.toString_27()))
+    sb.WriteString(fmt.Sprintf("OptListVal:%s ", x.toString_26()))
+    sb.WriteString(fmt.Sprintf("OptLateStructVal:%s ", x.toString_25()))
+    sb.WriteString(fmt.Sprintf("OptStructVal:%s ", x.toString_24()))
+    sb.WriteString(fmt.Sprintf("OptEnumVal:%s ", x.toString_23()))
+    sb.WriteString(fmt.Sprintf("OptBinaryVal:%s ", x.toString_22()))
+    sb.WriteString(fmt.Sprintf("OptStringVal:%s ", x.toString_21()))
+    sb.WriteString(fmt.Sprintf("OptDoubleVal:%s ", x.toString_20()))
+    sb.WriteString(fmt.Sprintf("OptFloatVal:%s ", x.toString_19()))
+    sb.WriteString(fmt.Sprintf("OptI64Val:%s ", x.toString_18()))
+    sb.WriteString(fmt.Sprintf("OptI32Val:%s ", x.toString_17()))
+    sb.WriteString(fmt.Sprintf("OptI16Val:%s ", x.toString_16()))
+    sb.WriteString(fmt.Sprintf("OptByteVal:%s ", x.toString_15()))
+    sb.WriteString(fmt.Sprintf("OptBoolVal:%s ", x.toString_14()))
+    sb.WriteString(fmt.Sprintf("LateStructVal:%s ", x.toString_13()))
+    sb.WriteString(fmt.Sprintf("UnionVal:%s ", x.toString_12()))
+    sb.WriteString(fmt.Sprintf("StructVal:%s ", x.toString_11()))
+    sb.WriteString(fmt.Sprintf("EnumVal:%s ", x.toString_10()))
+    sb.WriteString(fmt.Sprintf("BinaryVal:%s ", x.toString_9()))
+    sb.WriteString(fmt.Sprintf("StringVal:%s ", x.toString_8()))
+    sb.WriteString(fmt.Sprintf("DoubleVal:%s ", x.toString_7()))
+    sb.WriteString(fmt.Sprintf("FloatVal:%s ", x.toString_6()))
+    sb.WriteString(fmt.Sprintf("I64Val:%s ", x.toString_5()))
+    sb.WriteString(fmt.Sprintf("I32Val:%s ", x.toString_4()))
+    sb.WriteString(fmt.Sprintf("I16Val:%s ", x.toString_3()))
+    sb.WriteString(fmt.Sprintf("ByteVal:%s ", x.toString_2()))
+    sb.WriteString(fmt.Sprintf("BoolVal:%s ", x.toString_1()))
+    sb.WriteString(fmt.Sprintf("StructWithFieldCustomDefault:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type LateDefStructPatch struct {
     Assign *LateDefStruct `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
@@ -18768,6 +19993,30 @@ if err != nil {
     return nil
 }
 
+func (x *LateDefStructPatch) toString1() string {  // Assign
+    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+}
+
+func (x *LateDefStructPatch) toString2() string {  // Clear
+    return fmt.Sprintf("%v", x.GetClearNonCompat())
+}
+
+func (x *LateDefStructPatch) toString3() string {  // PatchPrior
+    return fmt.Sprintf("%v", x.GetPatchPriorNonCompat())
+}
+
+func (x *LateDefStructPatch) toString5() string {  // Ensure
+    return fmt.Sprintf("%v", x.GetEnsureNonCompat())
+}
+
+func (x *LateDefStructPatch) toString6() string {  // Patch
+    return fmt.Sprintf("%v", x.GetPatchNonCompat())
+}
+
+func (x *LateDefStructPatch) toString7() string {  // Remove
+    return fmt.Sprintf("%v", x.GetRemoveNonCompat())
+}
+
 // Deprecated: Use NewLateDefStructPatch().GetAssign() instead.
 var LateDefStructPatch_Assign_DEFAULT = NewLateDefStructPatch().GetAssign()
 
@@ -18810,12 +20059,6 @@ func (x *LateDefStructPatch) DefaultGetPatch() *LateDefStructFieldPatch {
         return NewLateDefStructFieldPatch()
     }
     return x.Patch
-}
-
-func (x *LateDefStructPatch) String() string {
-    type LateDefStructPatchAlias LateDefStructPatch
-    valueAlias := (*LateDefStructPatchAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -18962,6 +20205,24 @@ func (x *LateDefStructPatch) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *LateDefStructPatch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("LateDefStructPatch({")
+    sb.WriteString(fmt.Sprintf("Assign:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Clear:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("PatchPrior:%s ", x.toString3()))
+    sb.WriteString(fmt.Sprintf("Ensure:%s ", x.toString5()))
+    sb.WriteString(fmt.Sprintf("Patch:%s ", x.toString6()))
+    sb.WriteString(fmt.Sprintf("Remove:%s", x.toString7()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type LateDefStructFieldPatch struct {
 }
@@ -18970,12 +20231,6 @@ var _ thrift.Struct = &LateDefStructFieldPatch{}
 
 func NewLateDefStructFieldPatch() *LateDefStructFieldPatch {
     return (&LateDefStructFieldPatch{})
-}
-
-func (x *LateDefStructFieldPatch) String() string {
-    type LateDefStructFieldPatchAlias LateDefStructFieldPatch
-    valueAlias := (*LateDefStructFieldPatchAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -19044,6 +20299,18 @@ func (x *LateDefStructFieldPatch) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *LateDefStructFieldPatch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("LateDefStructFieldPatch({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type LateDefStructEnsureStruct struct {
 }
@@ -19052,12 +20319,6 @@ var _ thrift.Struct = &LateDefStructEnsureStruct{}
 
 func NewLateDefStructEnsureStruct() *LateDefStructEnsureStruct {
     return (&LateDefStructEnsureStruct{})
-}
-
-func (x *LateDefStructEnsureStruct) String() string {
-    type LateDefStructEnsureStructAlias LateDefStructEnsureStruct
-    valueAlias := (*LateDefStructEnsureStructAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -19126,6 +20387,18 @@ func (x *LateDefStructEnsureStruct) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *LateDefStructEnsureStruct) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("LateDefStructEnsureStruct({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type RecursivePatch struct {
     Assign *Recursive `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
@@ -19476,6 +20749,30 @@ if err != nil {
     return nil
 }
 
+func (x *RecursivePatch) toString1() string {  // Assign
+    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+}
+
+func (x *RecursivePatch) toString2() string {  // Clear
+    return fmt.Sprintf("%v", x.GetClearNonCompat())
+}
+
+func (x *RecursivePatch) toString3() string {  // PatchPrior
+    return fmt.Sprintf("%v", x.GetPatchPriorNonCompat())
+}
+
+func (x *RecursivePatch) toString5() string {  // Ensure
+    return fmt.Sprintf("%v", x.GetEnsureNonCompat())
+}
+
+func (x *RecursivePatch) toString6() string {  // Patch
+    return fmt.Sprintf("%v", x.GetPatchNonCompat())
+}
+
+func (x *RecursivePatch) toString7() string {  // Remove
+    return fmt.Sprintf("%v", x.GetRemoveNonCompat())
+}
+
 // Deprecated: Use NewRecursivePatch().GetAssign() instead.
 var RecursivePatch_Assign_DEFAULT = NewRecursivePatch().GetAssign()
 
@@ -19518,12 +20815,6 @@ func (x *RecursivePatch) DefaultGetPatch() *RecursiveFieldPatch {
         return NewRecursiveFieldPatch()
     }
     return x.Patch
-}
-
-func (x *RecursivePatch) String() string {
-    type RecursivePatchAlias RecursivePatch
-    valueAlias := (*RecursivePatchAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -19670,6 +20961,24 @@ func (x *RecursivePatch) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *RecursivePatch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("RecursivePatch({")
+    sb.WriteString(fmt.Sprintf("Assign:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Clear:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("PatchPrior:%s ", x.toString3()))
+    sb.WriteString(fmt.Sprintf("Ensure:%s ", x.toString5()))
+    sb.WriteString(fmt.Sprintf("Patch:%s ", x.toString6()))
+    sb.WriteString(fmt.Sprintf("Remove:%s", x.toString7()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type RecursiveField1Patch struct {
     Assign map[string]*Recursive `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
@@ -19830,10 +21139,12 @@ if err != nil {
     return nil
 }
 
-func (x *RecursiveField1Patch) String() string {
-    type RecursiveField1PatchAlias RecursiveField1Patch
-    valueAlias := (*RecursiveField1PatchAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *RecursiveField1Patch) toString1() string {  // Assign
+    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+}
+
+func (x *RecursiveField1Patch) toString2() string {  // Clear
+    return fmt.Sprintf("%v", x.GetClearNonCompat())
 }
 
 
@@ -19928,6 +21239,20 @@ func (x *RecursiveField1Patch) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *RecursiveField1Patch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("RecursiveField1Patch({")
+    sb.WriteString(fmt.Sprintf("Assign:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Clear:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type RecursiveFieldPatch struct {
     Nodes *RecursiveField1Patch `thrift:"nodes,-1" json:"nodes" db:"nodes"`
@@ -19997,6 +21322,10 @@ if err != nil {
     return nil
 }
 
+func (x *RecursiveFieldPatch) toString_1() string {  // Nodes
+    return fmt.Sprintf("%v", x.GetNodesNonCompat())
+}
+
 // Deprecated: Use NewRecursiveFieldPatch().GetNodes() instead.
 var RecursiveFieldPatch_Nodes_DEFAULT = NewRecursiveFieldPatch().GetNodes()
 
@@ -20006,12 +21335,6 @@ func (x *RecursiveFieldPatch) DefaultGetNodes() *RecursiveField1Patch {
         return NewRecursiveField1Patch()
     }
     return x.Nodes
-}
-
-func (x *RecursiveFieldPatch) String() string {
-    type RecursiveFieldPatchAlias RecursiveFieldPatch
-    valueAlias := (*RecursiveFieldPatchAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -20093,6 +21416,19 @@ func (x *RecursiveFieldPatch) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *RecursiveFieldPatch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("RecursiveFieldPatch({")
+    sb.WriteString(fmt.Sprintf("Nodes:%s", x.toString_1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type RecursiveEnsureStruct struct {
     Nodes map[string]*Recursive `thrift:"nodes,-1,optional" json:"nodes,omitempty" db:"nodes"`
@@ -20207,10 +21543,8 @@ result := mapResult
     return nil
 }
 
-func (x *RecursiveEnsureStruct) String() string {
-    type RecursiveEnsureStructAlias RecursiveEnsureStruct
-    valueAlias := (*RecursiveEnsureStructAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *RecursiveEnsureStruct) toString_1() string {  // Nodes
+    return fmt.Sprintf("%v", x.GetNodesNonCompat())
 }
 
 
@@ -20292,6 +21626,19 @@ func (x *RecursiveEnsureStruct) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *RecursiveEnsureStruct) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("RecursiveEnsureStruct({")
+    sb.WriteString(fmt.Sprintf("Nodes:%s", x.toString_1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type BarPatch struct {
     Assign *Bar `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
@@ -20642,6 +21989,30 @@ if err != nil {
     return nil
 }
 
+func (x *BarPatch) toString1() string {  // Assign
+    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+}
+
+func (x *BarPatch) toString2() string {  // Clear
+    return fmt.Sprintf("%v", x.GetClearNonCompat())
+}
+
+func (x *BarPatch) toString3() string {  // PatchPrior
+    return fmt.Sprintf("%v", x.GetPatchPriorNonCompat())
+}
+
+func (x *BarPatch) toString5() string {  // Ensure
+    return fmt.Sprintf("%v", x.GetEnsureNonCompat())
+}
+
+func (x *BarPatch) toString6() string {  // Patch
+    return fmt.Sprintf("%v", x.GetPatchNonCompat())
+}
+
+func (x *BarPatch) toString7() string {  // Remove
+    return fmt.Sprintf("%v", x.GetRemoveNonCompat())
+}
+
 // Deprecated: Use NewBarPatch().GetAssign() instead.
 var BarPatch_Assign_DEFAULT = NewBarPatch().GetAssign()
 
@@ -20684,12 +22055,6 @@ func (x *BarPatch) DefaultGetPatch() *BarFieldPatch {
         return NewBarFieldPatch()
     }
     return x.Patch
-}
-
-func (x *BarPatch) String() string {
-    type BarPatchAlias BarPatch
-    valueAlias := (*BarPatchAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -20836,6 +22201,24 @@ func (x *BarPatch) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *BarPatch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("BarPatch({")
+    sb.WriteString(fmt.Sprintf("Assign:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Clear:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("PatchPrior:%s ", x.toString3()))
+    sb.WriteString(fmt.Sprintf("Ensure:%s ", x.toString5()))
+    sb.WriteString(fmt.Sprintf("Patch:%s ", x.toString6()))
+    sb.WriteString(fmt.Sprintf("Remove:%s", x.toString7()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type BarFieldPatch struct {
     Loop *LoopPatch `thrift:"loop,-1" json:"loop" db:"loop"`
@@ -20905,6 +22288,10 @@ if err != nil {
     return nil
 }
 
+func (x *BarFieldPatch) toString_1() string {  // Loop
+    return fmt.Sprintf("%v", x.GetLoopNonCompat())
+}
+
 // Deprecated: Use NewBarFieldPatch().GetLoop() instead.
 var BarFieldPatch_Loop_DEFAULT = NewBarFieldPatch().GetLoop()
 
@@ -20914,12 +22301,6 @@ func (x *BarFieldPatch) DefaultGetLoop() *LoopPatch {
         return NewLoopPatch()
     }
     return x.Loop
-}
-
-func (x *BarFieldPatch) String() string {
-    type BarFieldPatchAlias BarFieldPatch
-    valueAlias := (*BarFieldPatchAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -21001,6 +22382,19 @@ func (x *BarFieldPatch) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *BarFieldPatch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("BarFieldPatch({")
+    sb.WriteString(fmt.Sprintf("Loop:%s", x.toString_1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type BarEnsureStruct struct {
     Loop *Loop `thrift:"loop,-1,optional" json:"loop,omitempty" db:"loop"`
@@ -21069,6 +22463,10 @@ if err != nil {
     return nil
 }
 
+func (x *BarEnsureStruct) toString_1() string {  // Loop
+    return fmt.Sprintf("%v", x.GetLoopNonCompat())
+}
+
 // Deprecated: Use NewBarEnsureStruct().GetLoop() instead.
 var BarEnsureStruct_Loop_DEFAULT = NewBarEnsureStruct().GetLoop()
 
@@ -21078,12 +22476,6 @@ func (x *BarEnsureStruct) DefaultGetLoop() *Loop {
         return NewLoop()
     }
     return x.Loop
-}
-
-func (x *BarEnsureStruct) String() string {
-    type BarEnsureStructAlias BarEnsureStruct
-    valueAlias := (*BarEnsureStructAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -21165,6 +22557,19 @@ func (x *BarEnsureStruct) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *BarEnsureStruct) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("BarEnsureStruct({")
+    sb.WriteString(fmt.Sprintf("Loop:%s", x.toString_1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type LoopPatch struct {
     Assign *Loop `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
@@ -21279,6 +22684,14 @@ if err != nil {
     return nil
 }
 
+func (x *LoopPatch) toString1() string {  // Assign
+    return fmt.Sprintf("%v", x.GetAssignNonCompat())
+}
+
+func (x *LoopPatch) toString2() string {  // Clear
+    return fmt.Sprintf("%v", x.GetClearNonCompat())
+}
+
 // Deprecated: Use NewLoopPatch().GetAssign() instead.
 var LoopPatch_Assign_DEFAULT = NewLoopPatch().GetAssign()
 
@@ -21288,12 +22701,6 @@ func (x *LoopPatch) DefaultGetAssign() *Loop {
         return NewLoop()
     }
     return x.Assign
-}
-
-func (x *LoopPatch) String() string {
-    type LoopPatchAlias LoopPatch
-    valueAlias := (*LoopPatchAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -21388,6 +22795,20 @@ func (x *LoopPatch) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *LoopPatch) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("LoopPatch({")
+    sb.WriteString(fmt.Sprintf("Assign:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Clear:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

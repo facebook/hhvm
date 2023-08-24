@@ -7,6 +7,7 @@ package module // [[[ program thrift source path ]]]
 import (
     "context"
     "fmt"
+    "strings"
     "sync"
 
 
@@ -18,6 +19,7 @@ import (
 var _ = context.Background
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 var _ = sync.Mutex{}
 
 
@@ -143,12 +145,6 @@ func newReqMyServiceFoo() *reqMyServiceFoo {
     return (&reqMyServiceFoo{})
 }
 
-func (x *reqMyServiceFoo) String() string {
-    type reqMyServiceFooAlias reqMyServiceFoo
-    valueAlias := (*reqMyServiceFooAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
-
 
 // Deprecated: Use reqMyServiceFoo.Set* methods instead or set the fields directly.
 type reqMyServiceFooBuilder struct {
@@ -215,6 +211,18 @@ func (x *reqMyServiceFoo) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqMyServiceFoo) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqMyServiceFoo({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respMyServiceFoo struct {
 }
 // Compile time interface enforcer
@@ -223,12 +231,6 @@ var _ thrift.WritableResult = &respMyServiceFoo{}
 
 func newRespMyServiceFoo() *respMyServiceFoo {
     return (&respMyServiceFoo{})
-}
-
-func (x *respMyServiceFoo) String() string {
-    type respMyServiceFooAlias respMyServiceFoo
-    valueAlias := (*respMyServiceFooAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -301,6 +303,18 @@ func (x *respMyServiceFoo) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respMyServiceFoo) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respMyServiceFoo({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 
 type MyServiceProcessor struct {

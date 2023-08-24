@@ -5,6 +5,7 @@ package module // [[[ program thrift source path ]]]
 
 import (
     "fmt"
+    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
@@ -13,6 +14,7 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 
 
 type PersonID = int64
@@ -294,10 +296,20 @@ if err != nil {
     return nil
 }
 
-func (x *Color) String() string {
-    type ColorAlias Color
-    valueAlias := (*ColorAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *Color) toString1() string {  // Red
+    return fmt.Sprintf("%v", x.GetRedNonCompat())
+}
+
+func (x *Color) toString2() string {  // Green
+    return fmt.Sprintf("%v", x.GetGreenNonCompat())
+}
+
+func (x *Color) toString3() string {  // Blue
+    return fmt.Sprintf("%v", x.GetBlueNonCompat())
+}
+
+func (x *Color) toString4() string {  // Alpha
+    return fmt.Sprintf("%v", x.GetAlphaNonCompat())
 }
 
 
@@ -418,6 +430,22 @@ func (x *Color) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Color) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Color({")
+    sb.WriteString(fmt.Sprintf("Red:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Green:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("Blue:%s ", x.toString3()))
+    sb.WriteString(fmt.Sprintf("Alpha:%s", x.toString4()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Vehicle struct {
     Color *Color `thrift:"color,1" json:"color" db:"color"`
@@ -716,6 +744,38 @@ if err != nil {
     return nil
 }
 
+func (x *Vehicle) toString1() string {  // Color
+    return fmt.Sprintf("%v", x.GetColorNonCompat())
+}
+
+func (x *Vehicle) toString2() string {  // LicensePlate
+    if x.IsSetLicensePlate() {
+        return fmt.Sprintf("%v", *x.GetLicensePlateNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetLicensePlateNonCompat())
+}
+
+func (x *Vehicle) toString3() string {  // Description
+    if x.IsSetDescription() {
+        return fmt.Sprintf("%v", *x.GetDescriptionNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetDescriptionNonCompat())
+}
+
+func (x *Vehicle) toString4() string {  // Name
+    if x.IsSetName() {
+        return fmt.Sprintf("%v", *x.GetNameNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetNameNonCompat())
+}
+
+func (x *Vehicle) toString5() string {  // HasAC
+    if x.IsSetHasAC() {
+        return fmt.Sprintf("%v", *x.GetHasACNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetHasACNonCompat())
+}
+
 // Deprecated: Use NewVehicle().GetColor() instead.
 var Vehicle_Color_DEFAULT = NewVehicle().GetColor()
 
@@ -738,12 +798,6 @@ var Vehicle_Name_DEFAULT = NewVehicle().GetName()
 
 // Deprecated: Use NewVehicle().GetHasAC() instead.
 var Vehicle_HasAC_DEFAULT = NewVehicle().GetHasAC()
-
-func (x *Vehicle) String() string {
-    type VehicleAlias Vehicle
-    valueAlias := (*VehicleAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
 
 
 // Deprecated: Use Vehicle.Set* methods instead or set the fields directly.
@@ -876,6 +930,23 @@ func (x *Vehicle) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Vehicle) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Vehicle({")
+    sb.WriteString(fmt.Sprintf("Color:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("LicensePlate:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("Description:%s ", x.toString3()))
+    sb.WriteString(fmt.Sprintf("Name:%s ", x.toString4()))
+    sb.WriteString(fmt.Sprintf("HasAC:%s", x.toString5()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Person struct {
     Id PersonID `thrift:"id,1" json:"id" db:"id"`
@@ -1545,6 +1616,58 @@ result := listResult
     return nil
 }
 
+func (x *Person) toString1() string {  // Id
+    return fmt.Sprintf("%v", x.GetIdNonCompat())
+}
+
+func (x *Person) toString2() string {  // Name
+    return fmt.Sprintf("%v", x.GetNameNonCompat())
+}
+
+func (x *Person) toString3() string {  // Age
+    if x.IsSetAge() {
+        return fmt.Sprintf("%v", *x.GetAgeNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetAgeNonCompat())
+}
+
+func (x *Person) toString4() string {  // Address
+    if x.IsSetAddress() {
+        return fmt.Sprintf("%v", *x.GetAddressNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetAddressNonCompat())
+}
+
+func (x *Person) toString5() string {  // FavoriteColor
+    return fmt.Sprintf("%v", x.GetFavoriteColorNonCompat())
+}
+
+func (x *Person) toString6() string {  // Friends
+    return fmt.Sprintf("%v", x.GetFriendsNonCompat())
+}
+
+func (x *Person) toString7() string {  // BestFriend
+    if x.IsSetBestFriend() {
+        return fmt.Sprintf("%v", *x.GetBestFriendNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetBestFriendNonCompat())
+}
+
+func (x *Person) toString8() string {  // PetNames
+    return fmt.Sprintf("%v", x.GetPetNamesNonCompat())
+}
+
+func (x *Person) toString9() string {  // AfraidOfAnimal
+    if x.IsSetAfraidOfAnimal() {
+        return fmt.Sprintf("%v", *x.GetAfraidOfAnimalNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetAfraidOfAnimalNonCompat())
+}
+
+func (x *Person) toString10() string {  // Vehicles
+    return fmt.Sprintf("%v", x.GetVehiclesNonCompat())
+}
+
 // Deprecated: Use NewPerson().GetAge() instead.
 var Person_Age_DEFAULT = NewPerson().GetAge()
 
@@ -1567,12 +1690,6 @@ var Person_BestFriend_DEFAULT = NewPerson().GetBestFriend()
 
 // Deprecated: Use NewPerson().GetAfraidOfAnimal() instead.
 var Person_AfraidOfAnimal_DEFAULT = NewPerson().GetAfraidOfAnimal()
-
-func (x *Person) String() string {
-    type PersonAlias Person
-    valueAlias := (*PersonAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
 
 
 // Deprecated: Use Person.Set* methods instead or set the fields directly.
@@ -1770,6 +1887,28 @@ func (x *Person) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Person) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Person({")
+    sb.WriteString(fmt.Sprintf("Id:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Name:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("Age:%s ", x.toString3()))
+    sb.WriteString(fmt.Sprintf("Address:%s ", x.toString4()))
+    sb.WriteString(fmt.Sprintf("FavoriteColor:%s ", x.toString5()))
+    sb.WriteString(fmt.Sprintf("Friends:%s ", x.toString6()))
+    sb.WriteString(fmt.Sprintf("BestFriend:%s ", x.toString7()))
+    sb.WriteString(fmt.Sprintf("PetNames:%s ", x.toString8()))
+    sb.WriteString(fmt.Sprintf("AfraidOfAnimal:%s ", x.toString9()))
+    sb.WriteString(fmt.Sprintf("Vehicles:%s", x.toString10()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

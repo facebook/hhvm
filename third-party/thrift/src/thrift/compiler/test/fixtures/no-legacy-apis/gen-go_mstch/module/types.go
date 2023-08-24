@@ -5,6 +5,7 @@ package module // [[[ program thrift source path ]]]
 
 import (
     "fmt"
+    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
@@ -13,6 +14,7 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 
 
 type MyEnum int32
@@ -171,10 +173,12 @@ if err != nil {
     return nil
 }
 
-func (x *MyStruct) String() string {
-    type MyStructAlias MyStruct
-    valueAlias := (*MyStructAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *MyStruct) toString1() string {  // MyIntField
+    return fmt.Sprintf("%v", x.GetMyIntFieldNonCompat())
+}
+
+func (x *MyStruct) toString2() string {  // MyStringField
+    return fmt.Sprintf("%v", x.GetMyStringFieldNonCompat())
 }
 
 
@@ -269,6 +273,20 @@ func (x *MyStruct) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MyStruct) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyStruct({")
+    sb.WriteString(fmt.Sprintf("MyIntField:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("MyStringField:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type MyUnion struct {
     MyEnum *MyEnum `thrift:"myEnum,1" json:"myEnum" db:"myEnum"`
@@ -395,6 +413,17 @@ if err != nil {
     return nil
 }
 
+func (x *MyUnion) toString1() string {  // MyEnum
+    if x.IsSetMyEnum() {
+        return fmt.Sprintf("%v", *x.GetMyEnumNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetMyEnumNonCompat())
+}
+
+func (x *MyUnion) toString2() string {  // MyDataItem
+    return fmt.Sprintf("%v", x.GetMyDataItemNonCompat())
+}
+
 // Deprecated: Use NewMyUnion().GetMyEnum() instead.
 var MyUnion_MyEnum_DEFAULT = NewMyUnion().GetMyEnum()
 
@@ -407,12 +436,6 @@ func (x *MyUnion) DefaultGetMyDataItem() *MyStruct {
         return NewMyStruct()
     }
     return x.MyDataItem
-}
-
-func (x *MyUnion) String() string {
-    type MyUnionAlias MyUnion
-    valueAlias := (*MyUnionAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 func (x *MyUnion) countSetFields() int {
@@ -525,6 +548,20 @@ func (x *MyUnion) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MyUnion) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyUnion({")
+    sb.WriteString(fmt.Sprintf("MyEnum:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("MyDataItem:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

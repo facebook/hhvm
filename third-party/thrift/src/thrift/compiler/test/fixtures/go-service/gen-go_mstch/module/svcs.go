@@ -7,6 +7,7 @@ package module // [[[ program thrift source path ]]]
 import (
     "context"
     "fmt"
+    "strings"
     "sync"
 
 
@@ -18,6 +19,7 @@ import (
 var _ = context.Background
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 var _ = sync.Mutex{}
 
 
@@ -422,6 +424,10 @@ if err != nil {
     return nil
 }
 
+func (x *reqGetEntityGetEntity) toString1() string {  // R
+    return fmt.Sprintf("%v", x.GetRNonCompat())
+}
+
 // Deprecated: Use newReqGetEntityGetEntity().GetR() instead.
 var reqGetEntityGetEntity_R_DEFAULT = newReqGetEntityGetEntity().GetR()
 
@@ -431,12 +437,6 @@ func (x *reqGetEntityGetEntity) DefaultGetR() *GetEntityRequest {
         return NewGetEntityRequest()
     }
     return x.R
-}
-
-func (x *reqGetEntityGetEntity) String() string {
-    type reqGetEntityGetEntityAlias reqGetEntityGetEntity
-    valueAlias := (*reqGetEntityGetEntityAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -518,6 +518,19 @@ func (x *reqGetEntityGetEntity) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqGetEntityGetEntity) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqGetEntityGetEntity({")
+    sb.WriteString(fmt.Sprintf("R:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respGetEntityGetEntity struct {
     Value *GetEntityResponse `thrift:"value,0" json:"value" db:"value"`
 }
@@ -587,6 +600,10 @@ if err != nil {
     return nil
 }
 
+func (x *respGetEntityGetEntity) toString0() string {  // Value
+    return fmt.Sprintf("%v", x.GetValueNonCompat())
+}
+
 // Deprecated: Use newRespGetEntityGetEntity().GetValue() instead.
 var respGetEntityGetEntity_Value_DEFAULT = newRespGetEntityGetEntity().GetValue()
 
@@ -596,12 +613,6 @@ func (x *respGetEntityGetEntity) DefaultGetValue() *GetEntityResponse {
         return NewGetEntityResponse()
     }
     return x.Value
-}
-
-func (x *respGetEntityGetEntity) String() string {
-    type respGetEntityGetEntityAlias respGetEntityGetEntity
-    valueAlias := (*respGetEntityGetEntityAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -687,6 +698,19 @@ func (x *respGetEntityGetEntity) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respGetEntityGetEntity) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respGetEntityGetEntity({")
+    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type reqGetEntityGetBool struct {
 }
 // Compile time interface enforcer
@@ -696,12 +720,6 @@ type GetEntityGetBoolArgs = reqGetEntityGetBool
 
 func newReqGetEntityGetBool() *reqGetEntityGetBool {
     return (&reqGetEntityGetBool{})
-}
-
-func (x *reqGetEntityGetBool) String() string {
-    type reqGetEntityGetBoolAlias reqGetEntityGetBool
-    valueAlias := (*reqGetEntityGetBoolAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -770,6 +788,18 @@ func (x *reqGetEntityGetBool) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqGetEntityGetBool) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqGetEntityGetBool({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respGetEntityGetBool struct {
     Value bool `thrift:"value,0" json:"value" db:"value"`
 }
@@ -826,10 +856,8 @@ if err != nil {
     return nil
 }
 
-func (x *respGetEntityGetBool) String() string {
-    type respGetEntityGetBoolAlias respGetEntityGetBool
-    valueAlias := (*respGetEntityGetBoolAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *respGetEntityGetBool) toString0() string {  // Value
+    return fmt.Sprintf("%v", x.GetValueNonCompat())
 }
 
 
@@ -915,6 +943,19 @@ func (x *respGetEntityGetBool) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respGetEntityGetBool) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respGetEntityGetBool({")
+    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type reqGetEntityGetByte struct {
 }
 // Compile time interface enforcer
@@ -924,12 +965,6 @@ type GetEntityGetByteArgs = reqGetEntityGetByte
 
 func newReqGetEntityGetByte() *reqGetEntityGetByte {
     return (&reqGetEntityGetByte{})
-}
-
-func (x *reqGetEntityGetByte) String() string {
-    type reqGetEntityGetByteAlias reqGetEntityGetByte
-    valueAlias := (*reqGetEntityGetByteAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -998,6 +1033,18 @@ func (x *reqGetEntityGetByte) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqGetEntityGetByte) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqGetEntityGetByte({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respGetEntityGetByte struct {
     Value int8 `thrift:"value,0" json:"value" db:"value"`
 }
@@ -1055,10 +1102,8 @@ if err != nil {
     return nil
 }
 
-func (x *respGetEntityGetByte) String() string {
-    type respGetEntityGetByteAlias respGetEntityGetByte
-    valueAlias := (*respGetEntityGetByteAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *respGetEntityGetByte) toString0() string {  // Value
+    return fmt.Sprintf("%v", x.GetValueNonCompat())
 }
 
 
@@ -1144,6 +1189,19 @@ func (x *respGetEntityGetByte) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respGetEntityGetByte) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respGetEntityGetByte({")
+    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type reqGetEntityGetI16 struct {
 }
 // Compile time interface enforcer
@@ -1153,12 +1211,6 @@ type GetEntityGetI16Args = reqGetEntityGetI16
 
 func newReqGetEntityGetI16() *reqGetEntityGetI16 {
     return (&reqGetEntityGetI16{})
-}
-
-func (x *reqGetEntityGetI16) String() string {
-    type reqGetEntityGetI16Alias reqGetEntityGetI16
-    valueAlias := (*reqGetEntityGetI16Alias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1227,6 +1279,18 @@ func (x *reqGetEntityGetI16) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqGetEntityGetI16) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqGetEntityGetI16({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respGetEntityGetI16 struct {
     Value int16 `thrift:"value,0" json:"value" db:"value"`
 }
@@ -1283,10 +1347,8 @@ if err != nil {
     return nil
 }
 
-func (x *respGetEntityGetI16) String() string {
-    type respGetEntityGetI16Alias respGetEntityGetI16
-    valueAlias := (*respGetEntityGetI16Alias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *respGetEntityGetI16) toString0() string {  // Value
+    return fmt.Sprintf("%v", x.GetValueNonCompat())
 }
 
 
@@ -1372,6 +1434,19 @@ func (x *respGetEntityGetI16) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respGetEntityGetI16) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respGetEntityGetI16({")
+    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type reqGetEntityGetI32 struct {
 }
 // Compile time interface enforcer
@@ -1381,12 +1456,6 @@ type GetEntityGetI32Args = reqGetEntityGetI32
 
 func newReqGetEntityGetI32() *reqGetEntityGetI32 {
     return (&reqGetEntityGetI32{})
-}
-
-func (x *reqGetEntityGetI32) String() string {
-    type reqGetEntityGetI32Alias reqGetEntityGetI32
-    valueAlias := (*reqGetEntityGetI32Alias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1455,6 +1524,18 @@ func (x *reqGetEntityGetI32) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqGetEntityGetI32) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqGetEntityGetI32({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respGetEntityGetI32 struct {
     Value int32 `thrift:"value,0" json:"value" db:"value"`
 }
@@ -1511,10 +1592,8 @@ if err != nil {
     return nil
 }
 
-func (x *respGetEntityGetI32) String() string {
-    type respGetEntityGetI32Alias respGetEntityGetI32
-    valueAlias := (*respGetEntityGetI32Alias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *respGetEntityGetI32) toString0() string {  // Value
+    return fmt.Sprintf("%v", x.GetValueNonCompat())
 }
 
 
@@ -1600,6 +1679,19 @@ func (x *respGetEntityGetI32) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respGetEntityGetI32) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respGetEntityGetI32({")
+    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type reqGetEntityGetI64 struct {
 }
 // Compile time interface enforcer
@@ -1609,12 +1701,6 @@ type GetEntityGetI64Args = reqGetEntityGetI64
 
 func newReqGetEntityGetI64() *reqGetEntityGetI64 {
     return (&reqGetEntityGetI64{})
-}
-
-func (x *reqGetEntityGetI64) String() string {
-    type reqGetEntityGetI64Alias reqGetEntityGetI64
-    valueAlias := (*reqGetEntityGetI64Alias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1683,6 +1769,18 @@ func (x *reqGetEntityGetI64) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqGetEntityGetI64) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqGetEntityGetI64({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respGetEntityGetI64 struct {
     Value int64 `thrift:"value,0" json:"value" db:"value"`
 }
@@ -1739,10 +1837,8 @@ if err != nil {
     return nil
 }
 
-func (x *respGetEntityGetI64) String() string {
-    type respGetEntityGetI64Alias respGetEntityGetI64
-    valueAlias := (*respGetEntityGetI64Alias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *respGetEntityGetI64) toString0() string {  // Value
+    return fmt.Sprintf("%v", x.GetValueNonCompat())
 }
 
 
@@ -1828,6 +1924,19 @@ func (x *respGetEntityGetI64) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respGetEntityGetI64) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respGetEntityGetI64({")
+    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type reqGetEntityGetDouble struct {
 }
 // Compile time interface enforcer
@@ -1837,12 +1946,6 @@ type GetEntityGetDoubleArgs = reqGetEntityGetDouble
 
 func newReqGetEntityGetDouble() *reqGetEntityGetDouble {
     return (&reqGetEntityGetDouble{})
-}
-
-func (x *reqGetEntityGetDouble) String() string {
-    type reqGetEntityGetDoubleAlias reqGetEntityGetDouble
-    valueAlias := (*reqGetEntityGetDoubleAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1911,6 +2014,18 @@ func (x *reqGetEntityGetDouble) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqGetEntityGetDouble) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqGetEntityGetDouble({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respGetEntityGetDouble struct {
     Value float64 `thrift:"value,0" json:"value" db:"value"`
 }
@@ -1967,10 +2082,8 @@ if err != nil {
     return nil
 }
 
-func (x *respGetEntityGetDouble) String() string {
-    type respGetEntityGetDoubleAlias respGetEntityGetDouble
-    valueAlias := (*respGetEntityGetDoubleAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *respGetEntityGetDouble) toString0() string {  // Value
+    return fmt.Sprintf("%v", x.GetValueNonCompat())
 }
 
 
@@ -2056,6 +2169,19 @@ func (x *respGetEntityGetDouble) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respGetEntityGetDouble) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respGetEntityGetDouble({")
+    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type reqGetEntityGetString struct {
 }
 // Compile time interface enforcer
@@ -2065,12 +2191,6 @@ type GetEntityGetStringArgs = reqGetEntityGetString
 
 func newReqGetEntityGetString() *reqGetEntityGetString {
     return (&reqGetEntityGetString{})
-}
-
-func (x *reqGetEntityGetString) String() string {
-    type reqGetEntityGetStringAlias reqGetEntityGetString
-    valueAlias := (*reqGetEntityGetStringAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2139,6 +2259,18 @@ func (x *reqGetEntityGetString) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqGetEntityGetString) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqGetEntityGetString({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respGetEntityGetString struct {
     Value string `thrift:"value,0" json:"value" db:"value"`
 }
@@ -2195,10 +2327,8 @@ if err != nil {
     return nil
 }
 
-func (x *respGetEntityGetString) String() string {
-    type respGetEntityGetStringAlias respGetEntityGetString
-    valueAlias := (*respGetEntityGetStringAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *respGetEntityGetString) toString0() string {  // Value
+    return fmt.Sprintf("%v", x.GetValueNonCompat())
 }
 
 
@@ -2284,6 +2414,19 @@ func (x *respGetEntityGetString) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respGetEntityGetString) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respGetEntityGetString({")
+    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type reqGetEntityGetBinary struct {
 }
 // Compile time interface enforcer
@@ -2293,12 +2436,6 @@ type GetEntityGetBinaryArgs = reqGetEntityGetBinary
 
 func newReqGetEntityGetBinary() *reqGetEntityGetBinary {
     return (&reqGetEntityGetBinary{})
-}
-
-func (x *reqGetEntityGetBinary) String() string {
-    type reqGetEntityGetBinaryAlias reqGetEntityGetBinary
-    valueAlias := (*reqGetEntityGetBinaryAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2367,6 +2504,18 @@ func (x *reqGetEntityGetBinary) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqGetEntityGetBinary) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqGetEntityGetBinary({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respGetEntityGetBinary struct {
     Value []byte `thrift:"value,0" json:"value" db:"value"`
 }
@@ -2435,10 +2584,8 @@ if err != nil {
     return nil
 }
 
-func (x *respGetEntityGetBinary) String() string {
-    type respGetEntityGetBinaryAlias respGetEntityGetBinary
-    valueAlias := (*respGetEntityGetBinaryAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *respGetEntityGetBinary) toString0() string {  // Value
+    return fmt.Sprintf("%v", x.GetValueNonCompat())
 }
 
 
@@ -2524,6 +2671,19 @@ func (x *respGetEntityGetBinary) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respGetEntityGetBinary) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respGetEntityGetBinary({")
+    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type reqGetEntityGetMap struct {
 }
 // Compile time interface enforcer
@@ -2533,12 +2693,6 @@ type GetEntityGetMapArgs = reqGetEntityGetMap
 
 func newReqGetEntityGetMap() *reqGetEntityGetMap {
     return (&reqGetEntityGetMap{})
-}
-
-func (x *reqGetEntityGetMap) String() string {
-    type reqGetEntityGetMapAlias reqGetEntityGetMap
-    valueAlias := (*reqGetEntityGetMapAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2607,6 +2761,18 @@ func (x *reqGetEntityGetMap) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqGetEntityGetMap) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqGetEntityGetMap({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respGetEntityGetMap struct {
     Value map[string]string `thrift:"value,0" json:"value" db:"value"`
 }
@@ -2721,10 +2887,8 @@ result := mapResult
     return nil
 }
 
-func (x *respGetEntityGetMap) String() string {
-    type respGetEntityGetMapAlias respGetEntityGetMap
-    valueAlias := (*respGetEntityGetMapAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *respGetEntityGetMap) toString0() string {  // Value
+    return fmt.Sprintf("%v", x.GetValueNonCompat())
 }
 
 
@@ -2810,6 +2974,19 @@ func (x *respGetEntityGetMap) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respGetEntityGetMap) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respGetEntityGetMap({")
+    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type reqGetEntityGetSet struct {
 }
 // Compile time interface enforcer
@@ -2819,12 +2996,6 @@ type GetEntityGetSetArgs = reqGetEntityGetSet
 
 func newReqGetEntityGetSet() *reqGetEntityGetSet {
     return (&reqGetEntityGetSet{})
-}
-
-func (x *reqGetEntityGetSet) String() string {
-    type reqGetEntityGetSetAlias reqGetEntityGetSet
-    valueAlias := (*reqGetEntityGetSetAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2893,6 +3064,18 @@ func (x *reqGetEntityGetSet) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqGetEntityGetSet) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqGetEntityGetSet({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respGetEntityGetSet struct {
     Value []string `thrift:"value,0" json:"value" db:"value"`
 }
@@ -2990,10 +3173,8 @@ result := setResult
     return nil
 }
 
-func (x *respGetEntityGetSet) String() string {
-    type respGetEntityGetSetAlias respGetEntityGetSet
-    valueAlias := (*respGetEntityGetSetAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *respGetEntityGetSet) toString0() string {  // Value
+    return fmt.Sprintf("%v", x.GetValueNonCompat())
 }
 
 
@@ -3079,6 +3260,19 @@ func (x *respGetEntityGetSet) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respGetEntityGetSet) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respGetEntityGetSet({")
+    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type reqGetEntityGetList struct {
 }
 // Compile time interface enforcer
@@ -3088,12 +3282,6 @@ type GetEntityGetListArgs = reqGetEntityGetList
 
 func newReqGetEntityGetList() *reqGetEntityGetList {
     return (&reqGetEntityGetList{})
-}
-
-func (x *reqGetEntityGetList) String() string {
-    type reqGetEntityGetListAlias reqGetEntityGetList
-    valueAlias := (*reqGetEntityGetListAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -3162,6 +3350,18 @@ func (x *reqGetEntityGetList) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqGetEntityGetList) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqGetEntityGetList({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respGetEntityGetList struct {
     Value []string `thrift:"value,0" json:"value" db:"value"`
 }
@@ -3259,10 +3459,8 @@ result := listResult
     return nil
 }
 
-func (x *respGetEntityGetList) String() string {
-    type respGetEntityGetListAlias respGetEntityGetList
-    valueAlias := (*respGetEntityGetListAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *respGetEntityGetList) toString0() string {  // Value
+    return fmt.Sprintf("%v", x.GetValueNonCompat())
 }
 
 
@@ -3348,6 +3546,19 @@ func (x *respGetEntityGetList) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respGetEntityGetList) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respGetEntityGetList({")
+    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type reqGetEntityGetLegacyStuff struct {
     NumPos int64 `thrift:"numPos,1" json:"numPos" db:"numPos"`
     NumNeg1 int64 `thrift:"numNeg1,-1" json:"numNeg1" db:"numNeg1"`
@@ -3497,10 +3708,16 @@ if err != nil {
     return nil
 }
 
-func (x *reqGetEntityGetLegacyStuff) String() string {
-    type reqGetEntityGetLegacyStuffAlias reqGetEntityGetLegacyStuff
-    valueAlias := (*reqGetEntityGetLegacyStuffAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *reqGetEntityGetLegacyStuff) toString1() string {  // NumPos
+    return fmt.Sprintf("%v", x.GetNumPosNonCompat())
+}
+
+func (x *reqGetEntityGetLegacyStuff) toString_1() string {  // NumNeg1
+    return fmt.Sprintf("%v", x.GetNumNeg1NonCompat())
+}
+
+func (x *reqGetEntityGetLegacyStuff) toString_2() string {  // NumNeg2
+    return fmt.Sprintf("%v", x.GetNumNeg2NonCompat())
 }
 
 
@@ -3608,6 +3825,21 @@ func (x *reqGetEntityGetLegacyStuff) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqGetEntityGetLegacyStuff) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqGetEntityGetLegacyStuff({")
+    sb.WriteString(fmt.Sprintf("NumPos:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("NumNeg1:%s ", x.toString_1()))
+    sb.WriteString(fmt.Sprintf("NumNeg2:%s", x.toString_2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respGetEntityGetLegacyStuff struct {
     Value int32 `thrift:"value,0" json:"value" db:"value"`
 }
@@ -3664,10 +3896,8 @@ if err != nil {
     return nil
 }
 
-func (x *respGetEntityGetLegacyStuff) String() string {
-    type respGetEntityGetLegacyStuffAlias respGetEntityGetLegacyStuff
-    valueAlias := (*respGetEntityGetLegacyStuffAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *respGetEntityGetLegacyStuff) toString0() string {  // Value
+    return fmt.Sprintf("%v", x.GetValueNonCompat())
 }
 
 
@@ -3753,6 +3983,19 @@ func (x *respGetEntityGetLegacyStuff) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respGetEntityGetLegacyStuff) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respGetEntityGetLegacyStuff({")
+    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 
 type GetEntityProcessor struct {

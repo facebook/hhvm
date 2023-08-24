@@ -5,6 +5,7 @@ package terse_write // [[[ program thrift source path ]]]
 
 import (
     "fmt"
+    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
@@ -13,6 +14,7 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 
 
 type MyInteger = int32
@@ -105,12 +107,6 @@ func NewMyStruct() *MyStruct {
     return (&MyStruct{})
 }
 
-func (x *MyStruct) String() string {
-    type MyStructAlias MyStruct
-    valueAlias := (*MyStructAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
-
 
 // Deprecated: Use MyStruct.Set* methods instead or set the fields directly.
 type MyStructBuilder struct {
@@ -177,6 +173,18 @@ func (x *MyStruct) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MyStruct) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyStruct({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type MyUnion struct {
     BoolField *bool `thrift:"bool_field,1" json:"bool_field" db:"bool_field"`
@@ -1092,6 +1100,89 @@ if err != nil {
     return nil
 }
 
+func (x *MyUnion) toString1() string {  // BoolField
+    if x.IsSetBoolField() {
+        return fmt.Sprintf("%v", *x.GetBoolFieldNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetBoolFieldNonCompat())
+}
+
+func (x *MyUnion) toString2() string {  // ByteField
+    if x.IsSetByteField() {
+        return fmt.Sprintf("%v", *x.GetByteFieldNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetByteFieldNonCompat())
+}
+
+func (x *MyUnion) toString3() string {  // ShortField
+    if x.IsSetShortField() {
+        return fmt.Sprintf("%v", *x.GetShortFieldNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetShortFieldNonCompat())
+}
+
+func (x *MyUnion) toString4() string {  // IntField
+    if x.IsSetIntField() {
+        return fmt.Sprintf("%v", *x.GetIntFieldNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetIntFieldNonCompat())
+}
+
+func (x *MyUnion) toString5() string {  // LongField
+    if x.IsSetLongField() {
+        return fmt.Sprintf("%v", *x.GetLongFieldNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetLongFieldNonCompat())
+}
+
+func (x *MyUnion) toString6() string {  // FloatField
+    if x.IsSetFloatField() {
+        return fmt.Sprintf("%v", *x.GetFloatFieldNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetFloatFieldNonCompat())
+}
+
+func (x *MyUnion) toString7() string {  // DoubleField
+    if x.IsSetDoubleField() {
+        return fmt.Sprintf("%v", *x.GetDoubleFieldNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetDoubleFieldNonCompat())
+}
+
+func (x *MyUnion) toString8() string {  // StringField
+    if x.IsSetStringField() {
+        return fmt.Sprintf("%v", *x.GetStringFieldNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetStringFieldNonCompat())
+}
+
+func (x *MyUnion) toString9() string {  // BinaryField
+    return fmt.Sprintf("%v", x.GetBinaryFieldNonCompat())
+}
+
+func (x *MyUnion) toString10() string {  // EnumField
+    if x.IsSetEnumField() {
+        return fmt.Sprintf("%v", *x.GetEnumFieldNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetEnumFieldNonCompat())
+}
+
+func (x *MyUnion) toString11() string {  // ListField
+    return fmt.Sprintf("%v", x.GetListFieldNonCompat())
+}
+
+func (x *MyUnion) toString12() string {  // SetField
+    return fmt.Sprintf("%v", x.GetSetFieldNonCompat())
+}
+
+func (x *MyUnion) toString13() string {  // MapField
+    return fmt.Sprintf("%v", x.GetMapFieldNonCompat())
+}
+
+func (x *MyUnion) toString14() string {  // StructField
+    return fmt.Sprintf("%v", x.GetStructFieldNonCompat())
+}
+
 // Deprecated: Use NewMyUnion().GetBoolField() instead.
 var MyUnion_BoolField_DEFAULT = NewMyUnion().GetBoolField()
 
@@ -1128,12 +1219,6 @@ func (x *MyUnion) DefaultGetStructField() *MyStruct {
         return NewMyStruct()
     }
     return x.StructField
-}
-
-func (x *MyUnion) String() string {
-    type MyUnionAlias MyUnion
-    valueAlias := (*MyUnionAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 func (x *MyUnion) countSetFields() int {
@@ -1438,6 +1523,32 @@ func (x *MyUnion) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MyUnion) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyUnion({")
+    sb.WriteString(fmt.Sprintf("BoolField:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("ByteField:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("ShortField:%s ", x.toString3()))
+    sb.WriteString(fmt.Sprintf("IntField:%s ", x.toString4()))
+    sb.WriteString(fmt.Sprintf("LongField:%s ", x.toString5()))
+    sb.WriteString(fmt.Sprintf("FloatField:%s ", x.toString6()))
+    sb.WriteString(fmt.Sprintf("DoubleField:%s ", x.toString7()))
+    sb.WriteString(fmt.Sprintf("StringField:%s ", x.toString8()))
+    sb.WriteString(fmt.Sprintf("BinaryField:%s ", x.toString9()))
+    sb.WriteString(fmt.Sprintf("EnumField:%s ", x.toString10()))
+    sb.WriteString(fmt.Sprintf("ListField:%s ", x.toString11()))
+    sb.WriteString(fmt.Sprintf("SetField:%s ", x.toString12()))
+    sb.WriteString(fmt.Sprintf("MapField:%s ", x.toString13()))
+    sb.WriteString(fmt.Sprintf("StructField:%s", x.toString14()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type MyStructWithCustomDefault struct {
     Field1 int64 `thrift:"field1,1" json:"field1" db:"field1"`
@@ -1494,10 +1605,8 @@ if err != nil {
     return nil
 }
 
-func (x *MyStructWithCustomDefault) String() string {
-    type MyStructWithCustomDefaultAlias MyStructWithCustomDefault
-    valueAlias := (*MyStructWithCustomDefaultAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *MyStructWithCustomDefault) toString1() string {  // Field1
+    return fmt.Sprintf("%v", x.GetField1NonCompat())
 }
 
 
@@ -1579,6 +1688,19 @@ func (x *MyStructWithCustomDefault) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MyStructWithCustomDefault) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MyStructWithCustomDefault({")
+    sb.WriteString(fmt.Sprintf("Field1:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type StructLevelTerseStruct struct {
     BoolField bool `thrift:"bool_field,1" json:"bool_field" db:"bool_field"`
@@ -2459,6 +2581,66 @@ if err != nil {
     return nil
 }
 
+func (x *StructLevelTerseStruct) toString1() string {  // BoolField
+    return fmt.Sprintf("%v", x.GetBoolFieldNonCompat())
+}
+
+func (x *StructLevelTerseStruct) toString2() string {  // ByteField
+    return fmt.Sprintf("%v", x.GetByteFieldNonCompat())
+}
+
+func (x *StructLevelTerseStruct) toString3() string {  // ShortField
+    return fmt.Sprintf("%v", x.GetShortFieldNonCompat())
+}
+
+func (x *StructLevelTerseStruct) toString4() string {  // IntField
+    return fmt.Sprintf("%v", x.GetIntFieldNonCompat())
+}
+
+func (x *StructLevelTerseStruct) toString5() string {  // LongField
+    return fmt.Sprintf("%v", x.GetLongFieldNonCompat())
+}
+
+func (x *StructLevelTerseStruct) toString6() string {  // FloatField
+    return fmt.Sprintf("%v", x.GetFloatFieldNonCompat())
+}
+
+func (x *StructLevelTerseStruct) toString7() string {  // DoubleField
+    return fmt.Sprintf("%v", x.GetDoubleFieldNonCompat())
+}
+
+func (x *StructLevelTerseStruct) toString8() string {  // StringField
+    return fmt.Sprintf("%v", x.GetStringFieldNonCompat())
+}
+
+func (x *StructLevelTerseStruct) toString9() string {  // BinaryField
+    return fmt.Sprintf("%v", x.GetBinaryFieldNonCompat())
+}
+
+func (x *StructLevelTerseStruct) toString10() string {  // EnumField
+    return fmt.Sprintf("%v", x.GetEnumFieldNonCompat())
+}
+
+func (x *StructLevelTerseStruct) toString11() string {  // ListField
+    return fmt.Sprintf("%v", x.GetListFieldNonCompat())
+}
+
+func (x *StructLevelTerseStruct) toString12() string {  // SetField
+    return fmt.Sprintf("%v", x.GetSetFieldNonCompat())
+}
+
+func (x *StructLevelTerseStruct) toString13() string {  // MapField
+    return fmt.Sprintf("%v", x.GetMapFieldNonCompat())
+}
+
+func (x *StructLevelTerseStruct) toString14() string {  // StructField
+    return fmt.Sprintf("%v", x.GetStructFieldNonCompat())
+}
+
+func (x *StructLevelTerseStruct) toString15() string {  // UnionField
+    return fmt.Sprintf("%v", x.GetUnionFieldNonCompat())
+}
+
 // Deprecated: Use NewStructLevelTerseStruct().GetStructField() instead.
 var StructLevelTerseStruct_StructField_DEFAULT = NewStructLevelTerseStruct().GetStructField()
 
@@ -2479,12 +2661,6 @@ func (x *StructLevelTerseStruct) DefaultGetUnionField() *MyUnion {
         return NewMyUnion()
     }
     return x.UnionField
-}
-
-func (x *StructLevelTerseStruct) String() string {
-    type StructLevelTerseStructAlias StructLevelTerseStruct
-    valueAlias := (*StructLevelTerseStructAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2748,6 +2924,33 @@ func (x *StructLevelTerseStruct) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *StructLevelTerseStruct) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("StructLevelTerseStruct({")
+    sb.WriteString(fmt.Sprintf("BoolField:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("ByteField:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("ShortField:%s ", x.toString3()))
+    sb.WriteString(fmt.Sprintf("IntField:%s ", x.toString4()))
+    sb.WriteString(fmt.Sprintf("LongField:%s ", x.toString5()))
+    sb.WriteString(fmt.Sprintf("FloatField:%s ", x.toString6()))
+    sb.WriteString(fmt.Sprintf("DoubleField:%s ", x.toString7()))
+    sb.WriteString(fmt.Sprintf("StringField:%s ", x.toString8()))
+    sb.WriteString(fmt.Sprintf("BinaryField:%s ", x.toString9()))
+    sb.WriteString(fmt.Sprintf("EnumField:%s ", x.toString10()))
+    sb.WriteString(fmt.Sprintf("ListField:%s ", x.toString11()))
+    sb.WriteString(fmt.Sprintf("SetField:%s ", x.toString12()))
+    sb.WriteString(fmt.Sprintf("MapField:%s ", x.toString13()))
+    sb.WriteString(fmt.Sprintf("StructField:%s ", x.toString14()))
+    sb.WriteString(fmt.Sprintf("UnionField:%s", x.toString15()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type FieldLevelTerseStruct struct {
     TerseBoolField bool `thrift:"terse_bool_field,1" json:"terse_bool_field" db:"terse_bool_field"`
@@ -4498,6 +4701,126 @@ if err != nil {
     return nil
 }
 
+func (x *FieldLevelTerseStruct) toString1() string {  // TerseBoolField
+    return fmt.Sprintf("%v", x.GetTerseBoolFieldNonCompat())
+}
+
+func (x *FieldLevelTerseStruct) toString2() string {  // TerseByteField
+    return fmt.Sprintf("%v", x.GetTerseByteFieldNonCompat())
+}
+
+func (x *FieldLevelTerseStruct) toString3() string {  // TerseShortField
+    return fmt.Sprintf("%v", x.GetTerseShortFieldNonCompat())
+}
+
+func (x *FieldLevelTerseStruct) toString4() string {  // TerseIntField
+    return fmt.Sprintf("%v", x.GetTerseIntFieldNonCompat())
+}
+
+func (x *FieldLevelTerseStruct) toString5() string {  // TerseLongField
+    return fmt.Sprintf("%v", x.GetTerseLongFieldNonCompat())
+}
+
+func (x *FieldLevelTerseStruct) toString6() string {  // TerseFloatField
+    return fmt.Sprintf("%v", x.GetTerseFloatFieldNonCompat())
+}
+
+func (x *FieldLevelTerseStruct) toString7() string {  // TerseDoubleField
+    return fmt.Sprintf("%v", x.GetTerseDoubleFieldNonCompat())
+}
+
+func (x *FieldLevelTerseStruct) toString8() string {  // TerseStringField
+    return fmt.Sprintf("%v", x.GetTerseStringFieldNonCompat())
+}
+
+func (x *FieldLevelTerseStruct) toString9() string {  // TerseBinaryField
+    return fmt.Sprintf("%v", x.GetTerseBinaryFieldNonCompat())
+}
+
+func (x *FieldLevelTerseStruct) toString10() string {  // TerseEnumField
+    return fmt.Sprintf("%v", x.GetTerseEnumFieldNonCompat())
+}
+
+func (x *FieldLevelTerseStruct) toString11() string {  // TerseListField
+    return fmt.Sprintf("%v", x.GetTerseListFieldNonCompat())
+}
+
+func (x *FieldLevelTerseStruct) toString12() string {  // TerseSetField
+    return fmt.Sprintf("%v", x.GetTerseSetFieldNonCompat())
+}
+
+func (x *FieldLevelTerseStruct) toString13() string {  // TerseMapField
+    return fmt.Sprintf("%v", x.GetTerseMapFieldNonCompat())
+}
+
+func (x *FieldLevelTerseStruct) toString14() string {  // TerseStructField
+    return fmt.Sprintf("%v", x.GetTerseStructFieldNonCompat())
+}
+
+func (x *FieldLevelTerseStruct) toString29() string {  // TerseUnionField
+    return fmt.Sprintf("%v", x.GetTerseUnionFieldNonCompat())
+}
+
+func (x *FieldLevelTerseStruct) toString15() string {  // BoolField
+    return fmt.Sprintf("%v", x.GetBoolFieldNonCompat())
+}
+
+func (x *FieldLevelTerseStruct) toString16() string {  // ByteField
+    return fmt.Sprintf("%v", x.GetByteFieldNonCompat())
+}
+
+func (x *FieldLevelTerseStruct) toString17() string {  // ShortField
+    return fmt.Sprintf("%v", x.GetShortFieldNonCompat())
+}
+
+func (x *FieldLevelTerseStruct) toString18() string {  // IntField
+    return fmt.Sprintf("%v", x.GetIntFieldNonCompat())
+}
+
+func (x *FieldLevelTerseStruct) toString19() string {  // LongField
+    return fmt.Sprintf("%v", x.GetLongFieldNonCompat())
+}
+
+func (x *FieldLevelTerseStruct) toString20() string {  // FloatField
+    return fmt.Sprintf("%v", x.GetFloatFieldNonCompat())
+}
+
+func (x *FieldLevelTerseStruct) toString21() string {  // DoubleField
+    return fmt.Sprintf("%v", x.GetDoubleFieldNonCompat())
+}
+
+func (x *FieldLevelTerseStruct) toString22() string {  // StringField
+    return fmt.Sprintf("%v", x.GetStringFieldNonCompat())
+}
+
+func (x *FieldLevelTerseStruct) toString23() string {  // BinaryField
+    return fmt.Sprintf("%v", x.GetBinaryFieldNonCompat())
+}
+
+func (x *FieldLevelTerseStruct) toString24() string {  // EnumField
+    return fmt.Sprintf("%v", x.GetEnumFieldNonCompat())
+}
+
+func (x *FieldLevelTerseStruct) toString25() string {  // ListField
+    return fmt.Sprintf("%v", x.GetListFieldNonCompat())
+}
+
+func (x *FieldLevelTerseStruct) toString26() string {  // SetField
+    return fmt.Sprintf("%v", x.GetSetFieldNonCompat())
+}
+
+func (x *FieldLevelTerseStruct) toString27() string {  // MapField
+    return fmt.Sprintf("%v", x.GetMapFieldNonCompat())
+}
+
+func (x *FieldLevelTerseStruct) toString28() string {  // StructField
+    return fmt.Sprintf("%v", x.GetStructFieldNonCompat())
+}
+
+func (x *FieldLevelTerseStruct) toString30() string {  // UnionField
+    return fmt.Sprintf("%v", x.GetUnionFieldNonCompat())
+}
+
 // Deprecated: Use NewFieldLevelTerseStruct().GetTerseStructField() instead.
 var FieldLevelTerseStruct_TerseStructField_DEFAULT = NewFieldLevelTerseStruct().GetTerseStructField()
 
@@ -4540,12 +4863,6 @@ func (x *FieldLevelTerseStruct) DefaultGetUnionField() *MyUnion {
         return NewMyUnion()
     }
     return x.UnionField
-}
-
-func (x *FieldLevelTerseStruct) String() string {
-    type FieldLevelTerseStructAlias FieldLevelTerseStruct
-    valueAlias := (*FieldLevelTerseStructAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -5004,6 +5321,48 @@ func (x *FieldLevelTerseStruct) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *FieldLevelTerseStruct) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("FieldLevelTerseStruct({")
+    sb.WriteString(fmt.Sprintf("TerseBoolField:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("TerseByteField:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("TerseShortField:%s ", x.toString3()))
+    sb.WriteString(fmt.Sprintf("TerseIntField:%s ", x.toString4()))
+    sb.WriteString(fmt.Sprintf("TerseLongField:%s ", x.toString5()))
+    sb.WriteString(fmt.Sprintf("TerseFloatField:%s ", x.toString6()))
+    sb.WriteString(fmt.Sprintf("TerseDoubleField:%s ", x.toString7()))
+    sb.WriteString(fmt.Sprintf("TerseStringField:%s ", x.toString8()))
+    sb.WriteString(fmt.Sprintf("TerseBinaryField:%s ", x.toString9()))
+    sb.WriteString(fmt.Sprintf("TerseEnumField:%s ", x.toString10()))
+    sb.WriteString(fmt.Sprintf("TerseListField:%s ", x.toString11()))
+    sb.WriteString(fmt.Sprintf("TerseSetField:%s ", x.toString12()))
+    sb.WriteString(fmt.Sprintf("TerseMapField:%s ", x.toString13()))
+    sb.WriteString(fmt.Sprintf("TerseStructField:%s ", x.toString14()))
+    sb.WriteString(fmt.Sprintf("TerseUnionField:%s ", x.toString29()))
+    sb.WriteString(fmt.Sprintf("BoolField:%s ", x.toString15()))
+    sb.WriteString(fmt.Sprintf("ByteField:%s ", x.toString16()))
+    sb.WriteString(fmt.Sprintf("ShortField:%s ", x.toString17()))
+    sb.WriteString(fmt.Sprintf("IntField:%s ", x.toString18()))
+    sb.WriteString(fmt.Sprintf("LongField:%s ", x.toString19()))
+    sb.WriteString(fmt.Sprintf("FloatField:%s ", x.toString20()))
+    sb.WriteString(fmt.Sprintf("DoubleField:%s ", x.toString21()))
+    sb.WriteString(fmt.Sprintf("StringField:%s ", x.toString22()))
+    sb.WriteString(fmt.Sprintf("BinaryField:%s ", x.toString23()))
+    sb.WriteString(fmt.Sprintf("EnumField:%s ", x.toString24()))
+    sb.WriteString(fmt.Sprintf("ListField:%s ", x.toString25()))
+    sb.WriteString(fmt.Sprintf("SetField:%s ", x.toString26()))
+    sb.WriteString(fmt.Sprintf("MapField:%s ", x.toString27()))
+    sb.WriteString(fmt.Sprintf("StructField:%s ", x.toString28()))
+    sb.WriteString(fmt.Sprintf("UnionField:%s", x.toString30()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type TerseStructWithCustomDefault struct {
     BoolField bool `thrift:"bool_field,1" json:"bool_field" db:"bool_field"`
@@ -5839,6 +6198,62 @@ if err != nil {
     return nil
 }
 
+func (x *TerseStructWithCustomDefault) toString1() string {  // BoolField
+    return fmt.Sprintf("%v", x.GetBoolFieldNonCompat())
+}
+
+func (x *TerseStructWithCustomDefault) toString2() string {  // ByteField
+    return fmt.Sprintf("%v", x.GetByteFieldNonCompat())
+}
+
+func (x *TerseStructWithCustomDefault) toString3() string {  // ShortField
+    return fmt.Sprintf("%v", x.GetShortFieldNonCompat())
+}
+
+func (x *TerseStructWithCustomDefault) toString4() string {  // IntField
+    return fmt.Sprintf("%v", x.GetIntFieldNonCompat())
+}
+
+func (x *TerseStructWithCustomDefault) toString5() string {  // LongField
+    return fmt.Sprintf("%v", x.GetLongFieldNonCompat())
+}
+
+func (x *TerseStructWithCustomDefault) toString6() string {  // FloatField
+    return fmt.Sprintf("%v", x.GetFloatFieldNonCompat())
+}
+
+func (x *TerseStructWithCustomDefault) toString7() string {  // DoubleField
+    return fmt.Sprintf("%v", x.GetDoubleFieldNonCompat())
+}
+
+func (x *TerseStructWithCustomDefault) toString8() string {  // StringField
+    return fmt.Sprintf("%v", x.GetStringFieldNonCompat())
+}
+
+func (x *TerseStructWithCustomDefault) toString9() string {  // BinaryField
+    return fmt.Sprintf("%v", x.GetBinaryFieldNonCompat())
+}
+
+func (x *TerseStructWithCustomDefault) toString10() string {  // EnumField
+    return fmt.Sprintf("%v", x.GetEnumFieldNonCompat())
+}
+
+func (x *TerseStructWithCustomDefault) toString11() string {  // ListField
+    return fmt.Sprintf("%v", x.GetListFieldNonCompat())
+}
+
+func (x *TerseStructWithCustomDefault) toString12() string {  // SetField
+    return fmt.Sprintf("%v", x.GetSetFieldNonCompat())
+}
+
+func (x *TerseStructWithCustomDefault) toString13() string {  // MapField
+    return fmt.Sprintf("%v", x.GetMapFieldNonCompat())
+}
+
+func (x *TerseStructWithCustomDefault) toString14() string {  // StructField
+    return fmt.Sprintf("%v", x.GetStructFieldNonCompat())
+}
+
 // Deprecated: Use NewTerseStructWithCustomDefault().GetStructField() instead.
 var TerseStructWithCustomDefault_StructField_DEFAULT = NewTerseStructWithCustomDefault().GetStructField()
 
@@ -5848,12 +6263,6 @@ func (x *TerseStructWithCustomDefault) DefaultGetStructField() *MyStructWithCust
         return NewMyStructWithCustomDefault()
     }
     return x.StructField
-}
-
-func (x *TerseStructWithCustomDefault) String() string {
-    type TerseStructWithCustomDefaultAlias TerseStructWithCustomDefault
-    valueAlias := (*TerseStructWithCustomDefaultAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -6104,6 +6513,32 @@ func (x *TerseStructWithCustomDefault) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *TerseStructWithCustomDefault) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("TerseStructWithCustomDefault({")
+    sb.WriteString(fmt.Sprintf("BoolField:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("ByteField:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("ShortField:%s ", x.toString3()))
+    sb.WriteString(fmt.Sprintf("IntField:%s ", x.toString4()))
+    sb.WriteString(fmt.Sprintf("LongField:%s ", x.toString5()))
+    sb.WriteString(fmt.Sprintf("FloatField:%s ", x.toString6()))
+    sb.WriteString(fmt.Sprintf("DoubleField:%s ", x.toString7()))
+    sb.WriteString(fmt.Sprintf("StringField:%s ", x.toString8()))
+    sb.WriteString(fmt.Sprintf("BinaryField:%s ", x.toString9()))
+    sb.WriteString(fmt.Sprintf("EnumField:%s ", x.toString10()))
+    sb.WriteString(fmt.Sprintf("ListField:%s ", x.toString11()))
+    sb.WriteString(fmt.Sprintf("SetField:%s ", x.toString12()))
+    sb.WriteString(fmt.Sprintf("MapField:%s ", x.toString13()))
+    sb.WriteString(fmt.Sprintf("StructField:%s", x.toString14()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type AdaptedFields struct {
     Field1 MyInteger `thrift:"field1,1" json:"field1" db:"field1"`
@@ -6254,10 +6689,16 @@ if err != nil {
     return nil
 }
 
-func (x *AdaptedFields) String() string {
-    type AdaptedFieldsAlias AdaptedFields
-    valueAlias := (*AdaptedFieldsAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *AdaptedFields) toString1() string {  // Field1
+    return fmt.Sprintf("%v", x.GetField1NonCompat())
+}
+
+func (x *AdaptedFields) toString2() string {  // Field2
+    return fmt.Sprintf("%v", x.GetField2NonCompat())
+}
+
+func (x *AdaptedFields) toString3() string {  // Field3
+    return fmt.Sprintf("%v", x.GetField3NonCompat())
 }
 
 
@@ -6365,6 +6806,21 @@ func (x *AdaptedFields) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *AdaptedFields) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("AdaptedFields({")
+    sb.WriteString(fmt.Sprintf("Field1:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Field2:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("Field3:%s", x.toString3()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type WrappedFields struct {
     Field1 int32 `thrift:"field1,1" json:"field1" db:"field1"`
@@ -6421,10 +6877,8 @@ if err != nil {
     return nil
 }
 
-func (x *WrappedFields) String() string {
-    type WrappedFieldsAlias WrappedFields
-    valueAlias := (*WrappedFieldsAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *WrappedFields) toString1() string {  // Field1
+    return fmt.Sprintf("%v", x.GetField1NonCompat())
 }
 
 
@@ -6506,6 +6960,19 @@ func (x *WrappedFields) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *WrappedFields) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("WrappedFields({")
+    sb.WriteString(fmt.Sprintf("Field1:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type TerseException struct {
     Msg string `thrift:"msg,1" json:"msg" db:"msg"`
@@ -6562,16 +7029,8 @@ if err != nil {
     return nil
 }
 
-func (x *TerseException) String() string {
-    type TerseExceptionAlias TerseException
-    valueAlias := (*TerseExceptionAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
-
-func (x *TerseException) Error() string {
-    type TerseExceptionAlias TerseException
-    valueAlias := (*TerseExceptionAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *TerseException) toString1() string {  // Msg
+    return fmt.Sprintf("%v", x.GetMsgNonCompat())
 }
 
 
@@ -6653,6 +7112,22 @@ func (x *TerseException) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *TerseException) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("TerseException({")
+    sb.WriteString(fmt.Sprintf("Msg:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+func (x *TerseException) Error() string {
+    return x.String()
+}
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

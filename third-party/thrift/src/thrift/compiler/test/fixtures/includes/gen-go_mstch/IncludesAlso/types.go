@@ -5,6 +5,7 @@ package IncludesAlso // [[[ program thrift source path ]]]
 
 import (
     "fmt"
+    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
@@ -13,6 +14,7 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 
 
 type Also struct {
@@ -22,12 +24,6 @@ var _ thrift.Struct = &Also{}
 
 func NewAlso() *Also {
     return (&Also{})
-}
-
-func (x *Also) String() string {
-    type AlsoAlias Also
-    valueAlias := (*AlsoAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -96,6 +92,18 @@ func (x *Also) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Also) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Also({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

@@ -320,12 +320,13 @@ class mstch_go_field : public mstch_field {
             {"field:go_arg_name", &mstch_go_field::go_arg_name},
             {"field:go_setter_name", &mstch_go_field::go_setter_name},
             {"field:pointer?", &mstch_go_field::is_pointer},
+            {"field:non_struct_pointer?",
+             &mstch_go_field::is_non_struct_pointer},
             {"field:compat_setter_pointer?",
              &mstch_go_field::is_compat_setter_pointer},
             {"field:compat_setter_value_op",
              &mstch_go_field::compat_setter_value_op},
             {"field:nilable?", &mstch_go_field::is_nilable},
-            {"field:dereference?", &mstch_go_field::should_dereference},
             {"field:key_str", &mstch_go_field::key_str},
             {"field:go_tag?", &mstch_go_field::has_go_tag},
             {"field:go_tag", &mstch_go_field::go_tag},
@@ -367,10 +368,8 @@ class mstch_go_field : public mstch_field {
     return go::is_type_go_struct(real_type) || is_inside_union_() ||
         is_optional_() || go::is_type_nilable(real_type);
   }
-  mstch::node should_dereference() {
-    // Whether this field should be dereferenced when inside the compat-get
-    // and writeField methods.
-    // Dereference all pointers, except structs and exceptions.
+  mstch::node is_non_struct_pointer() {
+    // Whether this field is a non-struct pointer.
     auto real_type = field_->type()->get_true_type();
     return is_pointer_() && !go::is_type_go_struct(real_type);
   }

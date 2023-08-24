@@ -5,6 +5,7 @@ package module1 // [[[ program thrift source path ]]]
 
 import (
     "fmt"
+    "strings"
 
     module0 "module0"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
@@ -15,6 +16,7 @@ var _ = module0.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 
 
 type Plate = string
@@ -703,17 +705,45 @@ result := mapResult
     return nil
 }
 
+func (x *Automobile) toString1() string {  // Plate
+    return fmt.Sprintf("%v", x.GetPlateNonCompat())
+}
+
+func (x *Automobile) toString2() string {  // PreviousPlate
+    if x.IsSetPreviousPlate() {
+        return fmt.Sprintf("%v", *x.GetPreviousPlateNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetPreviousPlateNonCompat())
+}
+
+func (x *Automobile) toString3() string {  // FirstPlate
+    if x.IsSetFirstPlate() {
+        return fmt.Sprintf("%v", *x.GetFirstPlateNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetFirstPlateNonCompat())
+}
+
+func (x *Automobile) toString4() string {  // Year
+    return fmt.Sprintf("%v", x.GetYearNonCompat())
+}
+
+func (x *Automobile) toString5() string {  // Drivers
+    return fmt.Sprintf("%v", x.GetDriversNonCompat())
+}
+
+func (x *Automobile) toString6() string {  // Accessories
+    return fmt.Sprintf("%v", x.GetAccessoriesNonCompat())
+}
+
+func (x *Automobile) toString7() string {  // PartNames
+    return fmt.Sprintf("%v", x.GetPartNamesNonCompat())
+}
+
 // Deprecated: Use NewAutomobile().GetPreviousPlate() instead.
 var Automobile_PreviousPlate_DEFAULT = NewAutomobile().GetPreviousPlate()
 
 // Deprecated: Use NewAutomobile().GetFirstPlate() instead.
 var Automobile_FirstPlate_DEFAULT = NewAutomobile().GetFirstPlate()
-
-func (x *Automobile) String() string {
-    type AutomobileAlias Automobile
-    valueAlias := (*AutomobileAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
 
 
 // Deprecated: Use Automobile.Set* methods instead or set the fields directly.
@@ -872,6 +902,25 @@ func (x *Automobile) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Automobile) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Automobile({")
+    sb.WriteString(fmt.Sprintf("Plate:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("PreviousPlate:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("FirstPlate:%s ", x.toString3()))
+    sb.WriteString(fmt.Sprintf("Year:%s ", x.toString4()))
+    sb.WriteString(fmt.Sprintf("Drivers:%s ", x.toString5()))
+    sb.WriteString(fmt.Sprintf("Accessories:%s ", x.toString6()))
+    sb.WriteString(fmt.Sprintf("PartNames:%s", x.toString7()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type MapKey struct {
     Num int64 `thrift:"num,1" json:"num" db:"num"`
@@ -974,10 +1023,12 @@ if err != nil {
     return nil
 }
 
-func (x *MapKey) String() string {
-    type MapKeyAlias MapKey
-    valueAlias := (*MapKeyAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *MapKey) toString1() string {  // Num
+    return fmt.Sprintf("%v", x.GetNumNonCompat())
+}
+
+func (x *MapKey) toString2() string {  // Strval
+    return fmt.Sprintf("%v", x.GetStrvalNonCompat())
 }
 
 
@@ -1072,6 +1123,20 @@ func (x *MapKey) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MapKey) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MapKey({")
+    sb.WriteString(fmt.Sprintf("Num:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Strval:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type MapContainer struct {
     Mapval map[MapKey]string `thrift:"mapval,1" json:"mapval" db:"mapval"`
@@ -1187,10 +1252,8 @@ result := mapResult
     return nil
 }
 
-func (x *MapContainer) String() string {
-    type MapContainerAlias MapContainer
-    valueAlias := (*MapContainerAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *MapContainer) toString1() string {  // Mapval
+    return fmt.Sprintf("%v", x.GetMapvalNonCompat())
 }
 
 
@@ -1272,6 +1335,19 @@ func (x *MapContainer) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *MapContainer) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("MapContainer({")
+    sb.WriteString(fmt.Sprintf("Mapval:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Pair struct {
     Automobile *Automobile `thrift:"automobile,1" json:"automobile" db:"automobile"`
@@ -1400,6 +1476,14 @@ if err != nil {
     return nil
 }
 
+func (x *Pair) toString1() string {  // Automobile
+    return fmt.Sprintf("%v", x.GetAutomobileNonCompat())
+}
+
+func (x *Pair) toString2() string {  // Car
+    return fmt.Sprintf("%v", x.GetCarNonCompat())
+}
+
 // Deprecated: Use NewPair().GetAutomobile() instead.
 var Pair_Automobile_DEFAULT = NewPair().GetAutomobile()
 
@@ -1420,12 +1504,6 @@ func (x *Pair) DefaultGetCar() *Car {
         return NewCar()
     }
     return x.Car
-}
-
-func (x *Pair) String() string {
-    type PairAlias Pair
-    valueAlias := (*PairAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1520,6 +1598,20 @@ func (x *Pair) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Pair) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Pair({")
+    sb.WriteString(fmt.Sprintf("Automobile:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Car:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Collection struct {
     Automobiles []*Automobile `thrift:"automobiles,1" json:"automobiles" db:"automobiles"`
@@ -1706,10 +1798,12 @@ result := listResult
     return nil
 }
 
-func (x *Collection) String() string {
-    type CollectionAlias Collection
-    valueAlias := (*CollectionAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *Collection) toString1() string {  // Automobiles
+    return fmt.Sprintf("%v", x.GetAutomobilesNonCompat())
+}
+
+func (x *Collection) toString2() string {  // Cars
+    return fmt.Sprintf("%v", x.GetCarsNonCompat())
 }
 
 
@@ -1804,6 +1898,20 @@ func (x *Collection) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Collection) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Collection({")
+    sb.WriteString(fmt.Sprintf("Automobiles:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Cars:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

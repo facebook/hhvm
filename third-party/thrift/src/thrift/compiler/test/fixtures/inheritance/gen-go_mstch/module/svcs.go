@@ -7,6 +7,7 @@ package module // [[[ program thrift source path ]]]
 import (
     "context"
     "fmt"
+    "strings"
     "sync"
 
 
@@ -18,6 +19,7 @@ import (
 var _ = context.Background
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 var _ = sync.Mutex{}
 
 
@@ -143,12 +145,6 @@ func newReqMyRootDoRoot() *reqMyRootDoRoot {
     return (&reqMyRootDoRoot{})
 }
 
-func (x *reqMyRootDoRoot) String() string {
-    type reqMyRootDoRootAlias reqMyRootDoRoot
-    valueAlias := (*reqMyRootDoRootAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
-
 
 // Deprecated: Use reqMyRootDoRoot.Set* methods instead or set the fields directly.
 type reqMyRootDoRootBuilder struct {
@@ -215,6 +211,18 @@ func (x *reqMyRootDoRoot) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqMyRootDoRoot) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqMyRootDoRoot({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respMyRootDoRoot struct {
 }
 // Compile time interface enforcer
@@ -223,12 +231,6 @@ var _ thrift.WritableResult = &respMyRootDoRoot{}
 
 func newRespMyRootDoRoot() *respMyRootDoRoot {
     return (&respMyRootDoRoot{})
-}
-
-func (x *respMyRootDoRoot) String() string {
-    type respMyRootDoRootAlias respMyRootDoRoot
-    valueAlias := (*respMyRootDoRootAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -301,6 +303,18 @@ func (x *respMyRootDoRoot) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respMyRootDoRoot) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respMyRootDoRoot({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 
 type MyRootProcessor struct {
@@ -529,12 +543,6 @@ func newReqMyNodeDoMid() *reqMyNodeDoMid {
     return (&reqMyNodeDoMid{})
 }
 
-func (x *reqMyNodeDoMid) String() string {
-    type reqMyNodeDoMidAlias reqMyNodeDoMid
-    valueAlias := (*reqMyNodeDoMidAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
-
 
 // Deprecated: Use reqMyNodeDoMid.Set* methods instead or set the fields directly.
 type reqMyNodeDoMidBuilder struct {
@@ -601,6 +609,18 @@ func (x *reqMyNodeDoMid) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqMyNodeDoMid) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqMyNodeDoMid({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respMyNodeDoMid struct {
 }
 // Compile time interface enforcer
@@ -609,12 +629,6 @@ var _ thrift.WritableResult = &respMyNodeDoMid{}
 
 func newRespMyNodeDoMid() *respMyNodeDoMid {
     return (&respMyNodeDoMid{})
-}
-
-func (x *respMyNodeDoMid) String() string {
-    type respMyNodeDoMidAlias respMyNodeDoMid
-    valueAlias := (*respMyNodeDoMidAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -687,6 +701,18 @@ func (x *respMyNodeDoMid) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respMyNodeDoMid) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respMyNodeDoMid({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 
 type MyNodeProcessor struct {
@@ -890,12 +916,6 @@ func newReqMyLeafDoLeaf() *reqMyLeafDoLeaf {
     return (&reqMyLeafDoLeaf{})
 }
 
-func (x *reqMyLeafDoLeaf) String() string {
-    type reqMyLeafDoLeafAlias reqMyLeafDoLeaf
-    valueAlias := (*reqMyLeafDoLeafAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
-
 
 // Deprecated: Use reqMyLeafDoLeaf.Set* methods instead or set the fields directly.
 type reqMyLeafDoLeafBuilder struct {
@@ -962,6 +982,18 @@ func (x *reqMyLeafDoLeaf) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqMyLeafDoLeaf) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqMyLeafDoLeaf({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respMyLeafDoLeaf struct {
 }
 // Compile time interface enforcer
@@ -970,12 +1002,6 @@ var _ thrift.WritableResult = &respMyLeafDoLeaf{}
 
 func newRespMyLeafDoLeaf() *respMyLeafDoLeaf {
     return (&respMyLeafDoLeaf{})
-}
-
-func (x *respMyLeafDoLeaf) String() string {
-    type respMyLeafDoLeafAlias respMyLeafDoLeaf
-    valueAlias := (*respMyLeafDoLeafAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1048,6 +1074,18 @@ func (x *respMyLeafDoLeaf) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respMyLeafDoLeaf) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respMyLeafDoLeaf({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 
 type MyLeafProcessor struct {

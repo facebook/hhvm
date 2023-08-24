@@ -7,6 +7,7 @@ package module // [[[ program thrift source path ]]]
 import (
     "context"
     "fmt"
+    "strings"
     "sync"
 
 
@@ -18,6 +19,7 @@ import (
 var _ = context.Background
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 var _ = sync.Mutex{}
 
 
@@ -166,12 +168,6 @@ func newReqCF() *reqCF {
     return (&reqCF{})
 }
 
-func (x *reqCF) String() string {
-    type reqCFAlias reqCF
-    valueAlias := (*reqCFAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
-
 
 // Deprecated: Use reqCF.Set* methods instead or set the fields directly.
 type reqCFBuilder struct {
@@ -238,6 +234,18 @@ func (x *reqCF) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqCF) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqCF({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respCF struct {
 }
 // Compile time interface enforcer
@@ -246,12 +254,6 @@ var _ thrift.WritableResult = &respCF{}
 
 func newRespCF() *respCF {
     return (&respCF{})
-}
-
-func (x *respCF) String() string {
-    type respCFAlias respCF
-    valueAlias := (*respCFAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -324,6 +326,18 @@ func (x *respCF) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respCF) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respCF({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type reqCThing struct {
     A int32 `thrift:"a,1" json:"a" db:"a"`
     B string `thrift:"b,2" json:"b" db:"b"`
@@ -514,10 +528,16 @@ result := setResult
     return nil
 }
 
-func (x *reqCThing) String() string {
-    type reqCThingAlias reqCThing
-    valueAlias := (*reqCThingAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *reqCThing) toString1() string {  // A
+    return fmt.Sprintf("%v", x.GetANonCompat())
+}
+
+func (x *reqCThing) toString2() string {  // B
+    return fmt.Sprintf("%v", x.GetBNonCompat())
+}
+
+func (x *reqCThing) toString3() string {  // C
+    return fmt.Sprintf("%v", x.GetCNonCompat())
 }
 
 
@@ -625,6 +645,21 @@ func (x *reqCThing) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqCThing) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqCThing({")
+    sb.WriteString(fmt.Sprintf("A:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("B:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("C:%s", x.toString3()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respCThing struct {
     Value string `thrift:"value,0" json:"value" db:"value"`
     Bang *Bang `thrift:"bang,1,optional" json:"bang,omitempty" db:"bang"`
@@ -739,6 +774,14 @@ if err != nil {
     return nil
 }
 
+func (x *respCThing) toString0() string {  // Value
+    return fmt.Sprintf("%v", x.GetValueNonCompat())
+}
+
+func (x *respCThing) toString1() string {  // Bang
+    return fmt.Sprintf("%v", x.GetBangNonCompat())
+}
+
 // Deprecated: Use newRespCThing().GetBang() instead.
 var respCThing_Bang_DEFAULT = newRespCThing().GetBang()
 
@@ -748,12 +791,6 @@ func (x *respCThing) DefaultGetBang() *Bang {
         return NewBang()
     }
     return x.Bang
-}
-
-func (x *respCThing) String() string {
-    type respCThingAlias respCThing
-    valueAlias := (*respCThingAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -855,6 +892,20 @@ func (x *respCThing) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respCThing) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respCThing({")
+    sb.WriteString(fmt.Sprintf("Value:%s ", x.toString0()))
+    sb.WriteString(fmt.Sprintf("Bang:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 
 type CProcessor struct {

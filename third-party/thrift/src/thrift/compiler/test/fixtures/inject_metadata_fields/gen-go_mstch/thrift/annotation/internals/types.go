@@ -5,6 +5,7 @@ package internals // [[[ program thrift source path ]]]
 
 import (
     "fmt"
+    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
@@ -13,6 +14,7 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 
 
 type InjectMetadataFields struct {
@@ -70,10 +72,8 @@ if err != nil {
     return nil
 }
 
-func (x *InjectMetadataFields) String() string {
-    type InjectMetadataFieldsAlias InjectMetadataFields
-    valueAlias := (*InjectMetadataFieldsAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *InjectMetadataFields) toString1() string {  // Type
+    return fmt.Sprintf("%v", x.GetTypeNonCompat())
 }
 
 
@@ -155,6 +155,19 @@ func (x *InjectMetadataFields) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *InjectMetadataFields) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("InjectMetadataFields({")
+    sb.WriteString(fmt.Sprintf("Type:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

@@ -5,6 +5,7 @@ package module // [[[ program thrift source path ]]]
 
 import (
     "fmt"
+    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
@@ -13,6 +14,7 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 
 
 type GetEntityRequest struct {
@@ -70,10 +72,8 @@ if err != nil {
     return nil
 }
 
-func (x *GetEntityRequest) String() string {
-    type GetEntityRequestAlias GetEntityRequest
-    valueAlias := (*GetEntityRequestAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *GetEntityRequest) toString1() string {  // Id
+    return fmt.Sprintf("%v", x.GetIdNonCompat())
 }
 
 
@@ -155,6 +155,19 @@ func (x *GetEntityRequest) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *GetEntityRequest) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("GetEntityRequest({")
+    sb.WriteString(fmt.Sprintf("Id:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type GetEntityResponse struct {
     Entity string `thrift:"entity,1" json:"entity" db:"entity"`
@@ -211,10 +224,8 @@ if err != nil {
     return nil
 }
 
-func (x *GetEntityResponse) String() string {
-    type GetEntityResponseAlias GetEntityResponse
-    valueAlias := (*GetEntityResponseAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *GetEntityResponse) toString1() string {  // Entity
+    return fmt.Sprintf("%v", x.GetEntityNonCompat())
 }
 
 
@@ -296,6 +307,19 @@ func (x *GetEntityResponse) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *GetEntityResponse) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("GetEntityResponse({")
+    sb.WriteString(fmt.Sprintf("Entity:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

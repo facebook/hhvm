@@ -7,6 +7,7 @@ package module // [[[ program thrift source path ]]]
 import (
     "context"
     "fmt"
+    "strings"
     "sync"
 
 
@@ -18,6 +19,7 @@ import (
 var _ = context.Background
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 var _ = sync.Mutex{}
 
 
@@ -353,10 +355,8 @@ result := mapResult
     return nil
 }
 
-func (x *reqNestedContainersMapList) String() string {
-    type reqNestedContainersMapListAlias reqNestedContainersMapList
-    valueAlias := (*reqNestedContainersMapListAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *reqNestedContainersMapList) toString1() string {  // Foo
+    return fmt.Sprintf("%v", x.GetFooNonCompat())
 }
 
 
@@ -438,6 +438,19 @@ func (x *reqNestedContainersMapList) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqNestedContainersMapList) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqNestedContainersMapList({")
+    sb.WriteString(fmt.Sprintf("Foo:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respNestedContainersMapList struct {
 }
 // Compile time interface enforcer
@@ -446,12 +459,6 @@ var _ thrift.WritableResult = &respNestedContainersMapList{}
 
 func newRespNestedContainersMapList() *respNestedContainersMapList {
     return (&respNestedContainersMapList{})
-}
-
-func (x *respNestedContainersMapList) String() string {
-    type respNestedContainersMapListAlias respNestedContainersMapList
-    valueAlias := (*respNestedContainersMapListAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -524,6 +531,18 @@ func (x *respNestedContainersMapList) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respNestedContainersMapList) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respNestedContainersMapList({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type reqNestedContainersMapSet struct {
     Foo map[int32][]int32 `thrift:"foo,1" json:"foo" db:"foo"`
 }
@@ -668,10 +687,8 @@ result := mapResult
     return nil
 }
 
-func (x *reqNestedContainersMapSet) String() string {
-    type reqNestedContainersMapSetAlias reqNestedContainersMapSet
-    valueAlias := (*reqNestedContainersMapSetAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *reqNestedContainersMapSet) toString1() string {  // Foo
+    return fmt.Sprintf("%v", x.GetFooNonCompat())
 }
 
 
@@ -753,6 +770,19 @@ func (x *reqNestedContainersMapSet) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqNestedContainersMapSet) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqNestedContainersMapSet({")
+    sb.WriteString(fmt.Sprintf("Foo:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respNestedContainersMapSet struct {
 }
 // Compile time interface enforcer
@@ -761,12 +791,6 @@ var _ thrift.WritableResult = &respNestedContainersMapSet{}
 
 func newRespNestedContainersMapSet() *respNestedContainersMapSet {
     return (&respNestedContainersMapSet{})
-}
-
-func (x *respNestedContainersMapSet) String() string {
-    type respNestedContainersMapSetAlias respNestedContainersMapSet
-    valueAlias := (*respNestedContainersMapSetAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -839,6 +863,18 @@ func (x *respNestedContainersMapSet) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respNestedContainersMapSet) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respNestedContainersMapSet({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type reqNestedContainersListMap struct {
     Foo []map[int32]int32 `thrift:"foo,1" json:"foo" db:"foo"`
 }
@@ -983,10 +1019,8 @@ result := listResult
     return nil
 }
 
-func (x *reqNestedContainersListMap) String() string {
-    type reqNestedContainersListMapAlias reqNestedContainersListMap
-    valueAlias := (*reqNestedContainersListMapAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *reqNestedContainersListMap) toString1() string {  // Foo
+    return fmt.Sprintf("%v", x.GetFooNonCompat())
 }
 
 
@@ -1068,6 +1102,19 @@ func (x *reqNestedContainersListMap) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqNestedContainersListMap) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqNestedContainersListMap({")
+    sb.WriteString(fmt.Sprintf("Foo:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respNestedContainersListMap struct {
 }
 // Compile time interface enforcer
@@ -1076,12 +1123,6 @@ var _ thrift.WritableResult = &respNestedContainersListMap{}
 
 func newRespNestedContainersListMap() *respNestedContainersListMap {
     return (&respNestedContainersListMap{})
-}
-
-func (x *respNestedContainersListMap) String() string {
-    type respNestedContainersListMapAlias respNestedContainersListMap
-    valueAlias := (*respNestedContainersListMapAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1154,6 +1195,18 @@ func (x *respNestedContainersListMap) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respNestedContainersListMap) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respNestedContainersListMap({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type reqNestedContainersListSet struct {
     Foo [][]int32 `thrift:"foo,1" json:"foo" db:"foo"`
 }
@@ -1281,10 +1334,8 @@ result := listResult
     return nil
 }
 
-func (x *reqNestedContainersListSet) String() string {
-    type reqNestedContainersListSetAlias reqNestedContainersListSet
-    valueAlias := (*reqNestedContainersListSetAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *reqNestedContainersListSet) toString1() string {  // Foo
+    return fmt.Sprintf("%v", x.GetFooNonCompat())
 }
 
 
@@ -1366,6 +1417,19 @@ func (x *reqNestedContainersListSet) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqNestedContainersListSet) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqNestedContainersListSet({")
+    sb.WriteString(fmt.Sprintf("Foo:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respNestedContainersListSet struct {
 }
 // Compile time interface enforcer
@@ -1374,12 +1438,6 @@ var _ thrift.WritableResult = &respNestedContainersListSet{}
 
 func newRespNestedContainersListSet() *respNestedContainersListSet {
     return (&respNestedContainersListSet{})
-}
-
-func (x *respNestedContainersListSet) String() string {
-    type respNestedContainersListSetAlias respNestedContainersListSet
-    valueAlias := (*respNestedContainersListSetAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1452,6 +1510,18 @@ func (x *respNestedContainersListSet) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respNestedContainersListSet) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respNestedContainersListSet({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type reqNestedContainersTurtles struct {
     Foo [][]map[int32]map[int32][]int32 `thrift:"foo,1" json:"foo" db:"foo"`
 }
@@ -1700,10 +1770,8 @@ result := listResult
     return nil
 }
 
-func (x *reqNestedContainersTurtles) String() string {
-    type reqNestedContainersTurtlesAlias reqNestedContainersTurtles
-    valueAlias := (*reqNestedContainersTurtlesAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *reqNestedContainersTurtles) toString1() string {  // Foo
+    return fmt.Sprintf("%v", x.GetFooNonCompat())
 }
 
 
@@ -1785,6 +1853,19 @@ func (x *reqNestedContainersTurtles) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqNestedContainersTurtles) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqNestedContainersTurtles({")
+    sb.WriteString(fmt.Sprintf("Foo:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respNestedContainersTurtles struct {
 }
 // Compile time interface enforcer
@@ -1793,12 +1874,6 @@ var _ thrift.WritableResult = &respNestedContainersTurtles{}
 
 func newRespNestedContainersTurtles() *respNestedContainersTurtles {
     return (&respNestedContainersTurtles{})
-}
-
-func (x *respNestedContainersTurtles) String() string {
-    type respNestedContainersTurtlesAlias respNestedContainersTurtles
-    valueAlias := (*respNestedContainersTurtlesAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1871,6 +1946,18 @@ func (x *respNestedContainersTurtles) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respNestedContainersTurtles) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respNestedContainersTurtles({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 
 type NestedContainersProcessor struct {

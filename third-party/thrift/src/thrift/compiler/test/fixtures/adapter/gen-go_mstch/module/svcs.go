@@ -7,6 +7,7 @@ package module // [[[ program thrift source path ]]]
 import (
     "context"
     "fmt"
+    "strings"
     "sync"
 
 
@@ -18,6 +19,7 @@ import (
 var _ = context.Background
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 var _ = sync.Mutex{}
 
 
@@ -298,6 +300,18 @@ if err != nil {
     return nil
 }
 
+func (x *reqServiceFunc) toString1() string {  // Arg1
+    return fmt.Sprintf("%v", x.GetArg1NonCompat())
+}
+
+func (x *reqServiceFunc) toString2() string {  // Arg2
+    return fmt.Sprintf("%v", x.GetArg2NonCompat())
+}
+
+func (x *reqServiceFunc) toString3() string {  // Arg3
+    return fmt.Sprintf("%v", x.GetArg3NonCompat())
+}
+
 // Deprecated: Use newReqServiceFunc().GetArg3() instead.
 var reqServiceFunc_Arg3_DEFAULT = newReqServiceFunc().GetArg3()
 
@@ -307,12 +321,6 @@ func (x *reqServiceFunc) DefaultGetArg3() *Foo {
         return NewFoo()
     }
     return x.Arg3
-}
-
-func (x *reqServiceFunc) String() string {
-    type reqServiceFuncAlias reqServiceFunc
-    valueAlias := (*reqServiceFuncAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -420,6 +428,21 @@ func (x *reqServiceFunc) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqServiceFunc) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqServiceFunc({")
+    sb.WriteString(fmt.Sprintf("Arg1:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Arg2:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("Arg3:%s", x.toString3()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respServiceFunc struct {
     Value MyI32_4873 `thrift:"value,0" json:"value" db:"value"`
 }
@@ -477,10 +500,8 @@ if err != nil {
     return nil
 }
 
-func (x *respServiceFunc) String() string {
-    type respServiceFuncAlias respServiceFunc
-    valueAlias := (*respServiceFuncAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *respServiceFunc) toString0() string {  // Value
+    return fmt.Sprintf("%v", x.GetValueNonCompat())
 }
 
 
@@ -566,6 +587,19 @@ func (x *respServiceFunc) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respServiceFunc) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respServiceFunc({")
+    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 
 type ServiceProcessor struct {
@@ -806,12 +840,6 @@ func newReqAdapterServiceCount() *reqAdapterServiceCount {
     return (&reqAdapterServiceCount{})
 }
 
-func (x *reqAdapterServiceCount) String() string {
-    type reqAdapterServiceCountAlias reqAdapterServiceCount
-    valueAlias := (*reqAdapterServiceCountAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
-
 
 // Deprecated: Use reqAdapterServiceCount.Set* methods instead or set the fields directly.
 type reqAdapterServiceCountBuilder struct {
@@ -878,6 +906,18 @@ func (x *reqAdapterServiceCount) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqAdapterServiceCount) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqAdapterServiceCount({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respAdapterServiceCount struct {
     Value *CountingStruct `thrift:"value,0" json:"value" db:"value"`
 }
@@ -947,6 +987,10 @@ if err != nil {
     return nil
 }
 
+func (x *respAdapterServiceCount) toString0() string {  // Value
+    return fmt.Sprintf("%v", x.GetValueNonCompat())
+}
+
 // Deprecated: Use newRespAdapterServiceCount().GetValue() instead.
 var respAdapterServiceCount_Value_DEFAULT = newRespAdapterServiceCount().GetValue()
 
@@ -956,12 +1000,6 @@ func (x *respAdapterServiceCount) DefaultGetValue() *CountingStruct {
         return NewCountingStruct()
     }
     return x.Value
-}
-
-func (x *respAdapterServiceCount) String() string {
-    type respAdapterServiceCountAlias respAdapterServiceCount
-    valueAlias := (*respAdapterServiceCountAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1047,6 +1085,19 @@ func (x *respAdapterServiceCount) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respAdapterServiceCount) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respAdapterServiceCount({")
+    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type reqAdapterServiceAdaptedTypes struct {
     Arg *HeapAllocated `thrift:"arg,1" json:"arg" db:"arg"`
 }
@@ -1117,6 +1168,10 @@ if err != nil {
     return nil
 }
 
+func (x *reqAdapterServiceAdaptedTypes) toString1() string {  // Arg
+    return fmt.Sprintf("%v", x.GetArgNonCompat())
+}
+
 // Deprecated: Use newReqAdapterServiceAdaptedTypes().GetArg() instead.
 var reqAdapterServiceAdaptedTypes_Arg_DEFAULT = newReqAdapterServiceAdaptedTypes().GetArg()
 
@@ -1126,12 +1181,6 @@ func (x *reqAdapterServiceAdaptedTypes) DefaultGetArg() *HeapAllocated {
         return NewHeapAllocated()
     }
     return x.Arg
-}
-
-func (x *reqAdapterServiceAdaptedTypes) String() string {
-    type reqAdapterServiceAdaptedTypesAlias reqAdapterServiceAdaptedTypes
-    valueAlias := (*reqAdapterServiceAdaptedTypesAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1213,6 +1262,19 @@ func (x *reqAdapterServiceAdaptedTypes) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqAdapterServiceAdaptedTypes) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqAdapterServiceAdaptedTypes({")
+    sb.WriteString(fmt.Sprintf("Arg:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respAdapterServiceAdaptedTypes struct {
     Value *HeapAllocated `thrift:"value,0" json:"value" db:"value"`
 }
@@ -1282,6 +1344,10 @@ if err != nil {
     return nil
 }
 
+func (x *respAdapterServiceAdaptedTypes) toString0() string {  // Value
+    return fmt.Sprintf("%v", x.GetValueNonCompat())
+}
+
 // Deprecated: Use newRespAdapterServiceAdaptedTypes().GetValue() instead.
 var respAdapterServiceAdaptedTypes_Value_DEFAULT = newRespAdapterServiceAdaptedTypes().GetValue()
 
@@ -1291,12 +1357,6 @@ func (x *respAdapterServiceAdaptedTypes) DefaultGetValue() *HeapAllocated {
         return NewHeapAllocated()
     }
     return x.Value
-}
-
-func (x *respAdapterServiceAdaptedTypes) String() string {
-    type respAdapterServiceAdaptedTypesAlias respAdapterServiceAdaptedTypes
-    valueAlias := (*respAdapterServiceAdaptedTypesAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1382,6 +1442,19 @@ func (x *respAdapterServiceAdaptedTypes) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respAdapterServiceAdaptedTypes) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respAdapterServiceAdaptedTypes({")
+    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 
 type AdapterServiceProcessor struct {

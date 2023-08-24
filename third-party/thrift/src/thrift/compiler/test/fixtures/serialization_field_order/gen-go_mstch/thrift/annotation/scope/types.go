@@ -5,6 +5,7 @@ package scope // [[[ program thrift source path ]]]
 
 import (
     "fmt"
+    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
@@ -13,6 +14,7 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 
 
 type Transitive struct {
@@ -22,12 +24,6 @@ var _ thrift.Struct = &Transitive{}
 
 func NewTransitive() *Transitive {
     return (&Transitive{})
-}
-
-func (x *Transitive) String() string {
-    type TransitiveAlias Transitive
-    valueAlias := (*TransitiveAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -96,6 +92,18 @@ func (x *Transitive) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Transitive) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Transitive({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Schema struct {
 }
@@ -104,12 +112,6 @@ var _ thrift.Struct = &Schema{}
 
 func NewSchema() *Schema {
     return (&Schema{})
-}
-
-func (x *Schema) String() string {
-    type SchemaAlias Schema
-    valueAlias := (*SchemaAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -178,6 +180,18 @@ func (x *Schema) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Schema) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Schema({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Program struct {
 }
@@ -186,12 +200,6 @@ var _ thrift.Struct = &Program{}
 
 func NewProgram() *Program {
     return (&Program{})
-}
-
-func (x *Program) String() string {
-    type ProgramAlias Program
-    valueAlias := (*ProgramAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -260,6 +268,18 @@ func (x *Program) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Program) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Program({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Struct struct {
 }
@@ -268,12 +288,6 @@ var _ thrift.Struct = &Struct{}
 
 func NewStruct() *Struct {
     return (&Struct{})
-}
-
-func (x *Struct) String() string {
-    type StructAlias Struct
-    valueAlias := (*StructAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -342,6 +356,18 @@ func (x *Struct) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Struct) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Struct({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Union struct {
 }
@@ -350,12 +376,6 @@ var _ thrift.Struct = &Union{}
 
 func NewUnion() *Union {
     return (&Union{})
-}
-
-func (x *Union) String() string {
-    type UnionAlias Union
-    valueAlias := (*UnionAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -424,6 +444,18 @@ func (x *Union) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Union) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Union({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Exception struct {
 }
@@ -432,12 +464,6 @@ var _ thrift.Struct = &Exception{}
 
 func NewException() *Exception {
     return (&Exception{})
-}
-
-func (x *Exception) String() string {
-    type ExceptionAlias Exception
-    valueAlias := (*ExceptionAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -506,6 +532,18 @@ func (x *Exception) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Exception) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Exception({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Field struct {
 }
@@ -514,12 +552,6 @@ var _ thrift.Struct = &Field{}
 
 func NewField() *Field {
     return (&Field{})
-}
-
-func (x *Field) String() string {
-    type FieldAlias Field
-    valueAlias := (*FieldAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -588,6 +620,18 @@ func (x *Field) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Field) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Field({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Typedef struct {
 }
@@ -596,12 +640,6 @@ var _ thrift.Struct = &Typedef{}
 
 func NewTypedef() *Typedef {
     return (&Typedef{})
-}
-
-func (x *Typedef) String() string {
-    type TypedefAlias Typedef
-    valueAlias := (*TypedefAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -670,6 +708,18 @@ func (x *Typedef) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Typedef) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Typedef({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Service struct {
 }
@@ -678,12 +728,6 @@ var _ thrift.Struct = &Service{}
 
 func NewService() *Service {
     return (&Service{})
-}
-
-func (x *Service) String() string {
-    type ServiceAlias Service
-    valueAlias := (*ServiceAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -752,6 +796,18 @@ func (x *Service) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Service) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Service({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Interaction struct {
 }
@@ -760,12 +816,6 @@ var _ thrift.Struct = &Interaction{}
 
 func NewInteraction() *Interaction {
     return (&Interaction{})
-}
-
-func (x *Interaction) String() string {
-    type InteractionAlias Interaction
-    valueAlias := (*InteractionAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -834,6 +884,18 @@ func (x *Interaction) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Interaction) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Interaction({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Function struct {
 }
@@ -842,12 +904,6 @@ var _ thrift.Struct = &Function{}
 
 func NewFunction() *Function {
     return (&Function{})
-}
-
-func (x *Function) String() string {
-    type FunctionAlias Function
-    valueAlias := (*FunctionAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -916,6 +972,18 @@ func (x *Function) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Function) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Function({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type EnumValue struct {
 }
@@ -924,12 +992,6 @@ var _ thrift.Struct = &EnumValue{}
 
 func NewEnumValue() *EnumValue {
     return (&EnumValue{})
-}
-
-func (x *EnumValue) String() string {
-    type EnumValueAlias EnumValue
-    valueAlias := (*EnumValueAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -998,6 +1060,18 @@ func (x *EnumValue) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *EnumValue) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("EnumValue({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Const struct {
 }
@@ -1006,12 +1080,6 @@ var _ thrift.Struct = &Const{}
 
 func NewConst() *Const {
     return (&Const{})
-}
-
-func (x *Const) String() string {
-    type ConstAlias Const
-    valueAlias := (*ConstAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1080,6 +1148,18 @@ func (x *Const) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Const) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Const({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Enum struct {
 }
@@ -1088,12 +1168,6 @@ var _ thrift.Struct = &Enum{}
 
 func NewEnum() *Enum {
     return (&Enum{})
-}
-
-func (x *Enum) String() string {
-    type EnumAlias Enum
-    valueAlias := (*EnumAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1162,6 +1236,18 @@ func (x *Enum) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Enum) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Enum({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Structured struct {
 }
@@ -1170,12 +1256,6 @@ var _ thrift.Struct = &Structured{}
 
 func NewStructured() *Structured {
     return (&Structured{})
-}
-
-func (x *Structured) String() string {
-    type StructuredAlias Structured
-    valueAlias := (*StructuredAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1244,6 +1324,18 @@ func (x *Structured) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Structured) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Structured({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Interface struct {
 }
@@ -1252,12 +1344,6 @@ var _ thrift.Struct = &Interface{}
 
 func NewInterface() *Interface {
     return (&Interface{})
-}
-
-func (x *Interface) String() string {
-    type InterfaceAlias Interface
-    valueAlias := (*InterfaceAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1326,6 +1412,18 @@ func (x *Interface) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Interface) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Interface({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type RootDefinition struct {
 }
@@ -1334,12 +1432,6 @@ var _ thrift.Struct = &RootDefinition{}
 
 func NewRootDefinition() *RootDefinition {
     return (&RootDefinition{})
-}
-
-func (x *RootDefinition) String() string {
-    type RootDefinitionAlias RootDefinition
-    valueAlias := (*RootDefinitionAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1408,6 +1500,18 @@ func (x *RootDefinition) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *RootDefinition) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("RootDefinition({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Definition struct {
 }
@@ -1416,12 +1520,6 @@ var _ thrift.Struct = &Definition{}
 
 func NewDefinition() *Definition {
     return (&Definition{})
-}
-
-func (x *Definition) String() string {
-    type DefinitionAlias Definition
-    valueAlias := (*DefinitionAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1490,6 +1588,18 @@ func (x *Definition) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Definition) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Definition({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

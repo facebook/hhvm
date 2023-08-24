@@ -5,6 +5,7 @@ package module // [[[ program thrift source path ]]]
 
 import (
     "fmt"
+    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
@@ -13,6 +14,7 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 
 
 type MyCompany = Company
@@ -614,6 +616,35 @@ if err != nil {
     return nil
 }
 
+func (x *Internship) toString1() string {  // Weeks
+    return fmt.Sprintf("%v", x.GetWeeksNonCompat())
+}
+
+func (x *Internship) toString2() string {  // Title
+    return fmt.Sprintf("%v", x.GetTitleNonCompat())
+}
+
+func (x *Internship) toString3() string {  // Employer
+    if x.IsSetEmployer() {
+        return fmt.Sprintf("%v", *x.GetEmployerNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetEmployerNonCompat())
+}
+
+func (x *Internship) toString4() string {  // Compensation
+    if x.IsSetCompensation() {
+        return fmt.Sprintf("%v", *x.GetCompensationNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetCompensationNonCompat())
+}
+
+func (x *Internship) toString5() string {  // School
+    if x.IsSetSchool() {
+        return fmt.Sprintf("%v", *x.GetSchoolNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetSchoolNonCompat())
+}
+
 // Deprecated: Use NewInternship().GetEmployer() instead.
 var Internship_Employer_DEFAULT = NewInternship().GetEmployer()
 
@@ -622,12 +653,6 @@ var Internship_Compensation_DEFAULT = NewInternship().GetCompensation()
 
 // Deprecated: Use NewInternship().GetSchool() instead.
 var Internship_School_DEFAULT = NewInternship().GetSchool()
-
-func (x *Internship) String() string {
-    type InternshipAlias Internship
-    valueAlias := (*InternshipAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
 
 
 // Deprecated: Use Internship.Set* methods instead or set the fields directly.
@@ -760,6 +785,23 @@ func (x *Internship) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Internship) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Internship({")
+    sb.WriteString(fmt.Sprintf("Weeks:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Title:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("Employer:%s ", x.toString3()))
+    sb.WriteString(fmt.Sprintf("Compensation:%s ", x.toString4()))
+    sb.WriteString(fmt.Sprintf("School:%s", x.toString5()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Range struct {
     Min int32 `thrift:"min,1,required" json:"min" db:"min"`
@@ -862,10 +904,12 @@ if err != nil {
     return nil
 }
 
-func (x *Range) String() string {
-    type RangeAlias Range
-    valueAlias := (*RangeAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *Range) toString1() string {  // Min
+    return fmt.Sprintf("%v", x.GetMinNonCompat())
+}
+
+func (x *Range) toString2() string {  // Max
+    return fmt.Sprintf("%v", x.GetMaxNonCompat())
 }
 
 
@@ -960,6 +1004,20 @@ func (x *Range) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Range) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Range({")
+    sb.WriteString(fmt.Sprintf("Min:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Max:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Struct1 struct {
     A int32 `thrift:"a,1" json:"a" db:"a"`
@@ -1062,10 +1120,12 @@ if err != nil {
     return nil
 }
 
-func (x *Struct1) String() string {
-    type Struct1Alias Struct1
-    valueAlias := (*Struct1Alias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *Struct1) toString1() string {  // A
+    return fmt.Sprintf("%v", x.GetANonCompat())
+}
+
+func (x *Struct1) toString2() string {  // B
+    return fmt.Sprintf("%v", x.GetBNonCompat())
 }
 
 
@@ -1160,6 +1220,20 @@ func (x *Struct1) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Struct1) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Struct1({")
+    sb.WriteString(fmt.Sprintf("A:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("B:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Struct2 struct {
     A int32 `thrift:"a,1" json:"a" db:"a"`
@@ -1408,6 +1482,22 @@ result := listResult
     return nil
 }
 
+func (x *Struct2) toString1() string {  // A
+    return fmt.Sprintf("%v", x.GetANonCompat())
+}
+
+func (x *Struct2) toString2() string {  // B
+    return fmt.Sprintf("%v", x.GetBNonCompat())
+}
+
+func (x *Struct2) toString3() string {  // C
+    return fmt.Sprintf("%v", x.GetCNonCompat())
+}
+
+func (x *Struct2) toString4() string {  // D
+    return fmt.Sprintf("%v", x.GetDNonCompat())
+}
+
 // Deprecated: Use NewStruct2().GetC() instead.
 var Struct2_C_DEFAULT = NewStruct2().GetC()
 
@@ -1417,12 +1507,6 @@ func (x *Struct2) DefaultGetC() *Struct1 {
         return NewStruct1()
     }
     return x.C
-}
-
-func (x *Struct2) String() string {
-    type Struct2Alias Struct2
-    valueAlias := (*Struct2Alias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1543,6 +1627,22 @@ func (x *Struct2) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Struct2) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Struct2({")
+    sb.WriteString(fmt.Sprintf("A:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("B:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("C:%s ", x.toString3()))
+    sb.WriteString(fmt.Sprintf("D:%s", x.toString4()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Struct3 struct {
     A string `thrift:"a,1" json:"a" db:"a"`
@@ -1704,6 +1804,18 @@ if err != nil {
     return nil
 }
 
+func (x *Struct3) toString1() string {  // A
+    return fmt.Sprintf("%v", x.GetANonCompat())
+}
+
+func (x *Struct3) toString2() string {  // B
+    return fmt.Sprintf("%v", x.GetBNonCompat())
+}
+
+func (x *Struct3) toString3() string {  // C
+    return fmt.Sprintf("%v", x.GetCNonCompat())
+}
+
 // Deprecated: Use NewStruct3().GetC() instead.
 var Struct3_C_DEFAULT = NewStruct3().GetC()
 
@@ -1713,12 +1825,6 @@ func (x *Struct3) DefaultGetC() *Struct2 {
         return NewStruct2()
     }
     return x.C
-}
-
-func (x *Struct3) String() string {
-    type Struct3Alias Struct3
-    valueAlias := (*Struct3Alias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1826,6 +1932,21 @@ func (x *Struct3) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Struct3) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Struct3({")
+    sb.WriteString(fmt.Sprintf("A:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("B:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("C:%s", x.toString3()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Struct4 struct {
     A int32 `thrift:"a,1" json:"a" db:"a"`
@@ -1997,17 +2118,29 @@ if err != nil {
     return nil
 }
 
+func (x *Struct4) toString1() string {  // A
+    return fmt.Sprintf("%v", x.GetANonCompat())
+}
+
+func (x *Struct4) toString2() string {  // B
+    if x.IsSetB() {
+        return fmt.Sprintf("%v", *x.GetBNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetBNonCompat())
+}
+
+func (x *Struct4) toString3() string {  // C
+    if x.IsSetC() {
+        return fmt.Sprintf("%v", *x.GetCNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetCNonCompat())
+}
+
 // Deprecated: Use NewStruct4().GetB() instead.
 var Struct4_B_DEFAULT = NewStruct4().GetB()
 
 // Deprecated: Use NewStruct4().GetC() instead.
 var Struct4_C_DEFAULT = NewStruct4().GetC()
-
-func (x *Struct4) String() string {
-    type Struct4Alias Struct4
-    valueAlias := (*Struct4Alias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
 
 
 // Deprecated: Use Struct4.Set* methods instead or set the fields directly.
@@ -2114,6 +2247,21 @@ func (x *Struct4) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Struct4) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Struct4({")
+    sb.WriteString(fmt.Sprintf("A:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("B:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("C:%s", x.toString3()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Union1 struct {
     I *int32 `thrift:"i,1" json:"i" db:"i"`
@@ -2238,17 +2386,25 @@ if err != nil {
     return nil
 }
 
+func (x *Union1) toString1() string {  // I
+    if x.IsSetI() {
+        return fmt.Sprintf("%v", *x.GetINonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetINonCompat())
+}
+
+func (x *Union1) toString2() string {  // D
+    if x.IsSetD() {
+        return fmt.Sprintf("%v", *x.GetDNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetDNonCompat())
+}
+
 // Deprecated: Use NewUnion1().GetI() instead.
 var Union1_I_DEFAULT = NewUnion1().GetI()
 
 // Deprecated: Use NewUnion1().GetD() instead.
 var Union1_D_DEFAULT = NewUnion1().GetD()
-
-func (x *Union1) String() string {
-    type Union1Alias Union1
-    valueAlias := (*Union1Alias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
 
 func (x *Union1) countSetFields() int {
     count := int(0)
@@ -2360,6 +2516,20 @@ func (x *Union1) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Union1) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Union1({")
+    sb.WriteString(fmt.Sprintf("I:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("D:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Union2 struct {
     I *int32 `thrift:"i,1" json:"i" db:"i"`
@@ -2600,6 +2770,28 @@ if err != nil {
     return nil
 }
 
+func (x *Union2) toString1() string {  // I
+    if x.IsSetI() {
+        return fmt.Sprintf("%v", *x.GetINonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetINonCompat())
+}
+
+func (x *Union2) toString2() string {  // D
+    if x.IsSetD() {
+        return fmt.Sprintf("%v", *x.GetDNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetDNonCompat())
+}
+
+func (x *Union2) toString3() string {  // S
+    return fmt.Sprintf("%v", x.GetSNonCompat())
+}
+
+func (x *Union2) toString4() string {  // U
+    return fmt.Sprintf("%v", x.GetUNonCompat())
+}
+
 // Deprecated: Use NewUnion2().GetI() instead.
 var Union2_I_DEFAULT = NewUnion2().GetI()
 
@@ -2626,12 +2818,6 @@ func (x *Union2) DefaultGetU() *Union1 {
         return NewUnion1()
     }
     return x.U
-}
-
-func (x *Union2) String() string {
-    type Union2Alias Union2
-    valueAlias := (*Union2Alias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 func (x *Union2) countSetFields() int {
@@ -2776,6 +2962,22 @@ func (x *Union2) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Union2) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Union2({")
+    sb.WriteString(fmt.Sprintf("I:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("D:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("S:%s ", x.toString3()))
+    sb.WriteString(fmt.Sprintf("U:%s", x.toString4()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

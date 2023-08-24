@@ -5,6 +5,7 @@ package matching_names // [[[ program thrift source path ]]]
 
 import (
     "fmt"
+    "strings"
 
     includesAlso "IncludesAlso"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
@@ -15,6 +16,7 @@ var _ = includesAlso.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 
 
 type IncludesAlso struct {
@@ -85,6 +87,10 @@ if err != nil {
     return nil
 }
 
+func (x *IncludesAlso) toString1() string {  // Also
+    return fmt.Sprintf("%v", x.GetAlsoNonCompat())
+}
+
 // Deprecated: Use NewIncludesAlso().GetAlso() instead.
 var IncludesAlso_Also_DEFAULT = NewIncludesAlso().GetAlso()
 
@@ -94,12 +100,6 @@ func (x *IncludesAlso) DefaultGetAlso() *includesAlso.Also {
         return includesAlso.NewAlso()
     }
     return x.Also
-}
-
-func (x *IncludesAlso) String() string {
-    type IncludesAlsoAlias IncludesAlso
-    valueAlias := (*IncludesAlsoAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -181,6 +181,19 @@ func (x *IncludesAlso) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *IncludesAlso) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("IncludesAlso({")
+    sb.WriteString(fmt.Sprintf("Also:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

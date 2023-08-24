@@ -7,6 +7,7 @@ package module // [[[ program thrift source path ]]]
 import (
     "context"
     "fmt"
+    "strings"
     "sync"
 
 
@@ -18,6 +19,7 @@ import (
 var _ = context.Background
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 var _ = sync.Mutex{}
 
 
@@ -203,6 +205,10 @@ if err != nil {
     return nil
 }
 
+func (x *reqMyServiceQuery) toString1() string {  // U
+    return fmt.Sprintf("%v", x.GetUNonCompat())
+}
+
 // Deprecated: Use newReqMyServiceQuery().GetU() instead.
 var reqMyServiceQuery_U_DEFAULT = newReqMyServiceQuery().GetU()
 
@@ -212,12 +218,6 @@ func (x *reqMyServiceQuery) DefaultGetU() *MyUnion {
         return NewMyUnion()
     }
     return x.U
-}
-
-func (x *reqMyServiceQuery) String() string {
-    type reqMyServiceQueryAlias reqMyServiceQuery
-    valueAlias := (*reqMyServiceQueryAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -299,6 +299,19 @@ func (x *reqMyServiceQuery) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqMyServiceQuery) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqMyServiceQuery({")
+    sb.WriteString(fmt.Sprintf("U:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respMyServiceQuery struct {
     Value *MyStruct `thrift:"value,0" json:"value" db:"value"`
 }
@@ -368,6 +381,10 @@ if err != nil {
     return nil
 }
 
+func (x *respMyServiceQuery) toString0() string {  // Value
+    return fmt.Sprintf("%v", x.GetValueNonCompat())
+}
+
 // Deprecated: Use newRespMyServiceQuery().GetValue() instead.
 var respMyServiceQuery_Value_DEFAULT = newRespMyServiceQuery().GetValue()
 
@@ -377,12 +394,6 @@ func (x *respMyServiceQuery) DefaultGetValue() *MyStruct {
         return NewMyStruct()
     }
     return x.Value
-}
-
-func (x *respMyServiceQuery) String() string {
-    type respMyServiceQueryAlias respMyServiceQuery
-    valueAlias := (*respMyServiceQueryAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -468,6 +479,19 @@ func (x *respMyServiceQuery) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respMyServiceQuery) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respMyServiceQuery({")
+    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 
 type MyServiceProcessor struct {

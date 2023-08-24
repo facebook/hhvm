@@ -5,6 +5,7 @@ package java // [[[ program thrift source path ]]]
 
 import (
     "fmt"
+    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
@@ -13,6 +14,7 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 
 
 type Mutable struct {
@@ -22,12 +24,6 @@ var _ thrift.Struct = &Mutable{}
 
 func NewMutable() *Mutable {
     return (&Mutable{})
-}
-
-func (x *Mutable) String() string {
-    type MutableAlias Mutable
-    valueAlias := (*MutableAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -96,6 +92,18 @@ func (x *Mutable) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Mutable) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Mutable({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Annotation struct {
     JavaAnnotation string `thrift:"java_annotation,1" json:"java_annotation" db:"java_annotation"`
@@ -152,10 +160,8 @@ if err != nil {
     return nil
 }
 
-func (x *Annotation) String() string {
-    type AnnotationAlias Annotation
-    valueAlias := (*AnnotationAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *Annotation) toString1() string {  // JavaAnnotation
+    return fmt.Sprintf("%v", x.GetJavaAnnotationNonCompat())
 }
 
 
@@ -237,6 +243,19 @@ func (x *Annotation) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Annotation) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Annotation({")
+    sb.WriteString(fmt.Sprintf("JavaAnnotation:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type BinaryString struct {
 }
@@ -245,12 +264,6 @@ var _ thrift.Struct = &BinaryString{}
 
 func NewBinaryString() *BinaryString {
     return (&BinaryString{})
-}
-
-func (x *BinaryString) String() string {
-    type BinaryStringAlias BinaryString
-    valueAlias := (*BinaryStringAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -319,6 +332,18 @@ func (x *BinaryString) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *BinaryString) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("BinaryString({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Adapter struct {
     AdapterClassName string `thrift:"adapterClassName,1" json:"adapterClassName" db:"adapterClassName"`
@@ -421,10 +446,12 @@ if err != nil {
     return nil
 }
 
-func (x *Adapter) String() string {
-    type AdapterAlias Adapter
-    valueAlias := (*AdapterAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *Adapter) toString1() string {  // AdapterClassName
+    return fmt.Sprintf("%v", x.GetAdapterClassNameNonCompat())
+}
+
+func (x *Adapter) toString2() string {  // TypeClassName
+    return fmt.Sprintf("%v", x.GetTypeClassNameNonCompat())
 }
 
 
@@ -519,6 +546,20 @@ func (x *Adapter) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Adapter) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Adapter({")
+    sb.WriteString(fmt.Sprintf("AdapterClassName:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("TypeClassName:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Wrapper struct {
     WrapperClassName string `thrift:"wrapperClassName,1" json:"wrapperClassName" db:"wrapperClassName"`
@@ -621,10 +662,12 @@ if err != nil {
     return nil
 }
 
-func (x *Wrapper) String() string {
-    type WrapperAlias Wrapper
-    valueAlias := (*WrapperAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *Wrapper) toString1() string {  // WrapperClassName
+    return fmt.Sprintf("%v", x.GetWrapperClassNameNonCompat())
+}
+
+func (x *Wrapper) toString2() string {  // TypeClassName
+    return fmt.Sprintf("%v", x.GetTypeClassNameNonCompat())
 }
 
 
@@ -719,6 +762,20 @@ func (x *Wrapper) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Wrapper) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Wrapper({")
+    sb.WriteString(fmt.Sprintf("WrapperClassName:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("TypeClassName:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

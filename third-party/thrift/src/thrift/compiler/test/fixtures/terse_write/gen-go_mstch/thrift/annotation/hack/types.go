@@ -5,6 +5,7 @@ package hack // [[[ program thrift source path ]]]
 
 import (
     "fmt"
+    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
@@ -13,6 +14,7 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 
 
 type FieldWrapper struct {
@@ -70,10 +72,8 @@ if err != nil {
     return nil
 }
 
-func (x *FieldWrapper) String() string {
-    type FieldWrapperAlias FieldWrapper
-    valueAlias := (*FieldWrapperAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *FieldWrapper) toString1() string {  // Name
+    return fmt.Sprintf("%v", x.GetNameNonCompat())
 }
 
 
@@ -155,6 +155,19 @@ func (x *FieldWrapper) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *FieldWrapper) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("FieldWrapper({")
+    sb.WriteString(fmt.Sprintf("Name:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Wrapper struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
@@ -303,10 +316,16 @@ if err != nil {
     return nil
 }
 
-func (x *Wrapper) String() string {
-    type WrapperAlias Wrapper
-    valueAlias := (*WrapperAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *Wrapper) toString1() string {  // Name
+    return fmt.Sprintf("%v", x.GetNameNonCompat())
+}
+
+func (x *Wrapper) toString2() string {  // UnderlyingName
+    return fmt.Sprintf("%v", x.GetUnderlyingNameNonCompat())
+}
+
+func (x *Wrapper) toString3() string {  // ExtraNamespace
+    return fmt.Sprintf("%v", x.GetExtraNamespaceNonCompat())
 }
 
 
@@ -414,6 +433,21 @@ func (x *Wrapper) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Wrapper) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Wrapper({")
+    sb.WriteString(fmt.Sprintf("Name:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("UnderlyingName:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("ExtraNamespace:%s", x.toString3()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Adapter struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
@@ -470,10 +504,8 @@ if err != nil {
     return nil
 }
 
-func (x *Adapter) String() string {
-    type AdapterAlias Adapter
-    valueAlias := (*AdapterAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *Adapter) toString1() string {  // Name
+    return fmt.Sprintf("%v", x.GetNameNonCompat())
 }
 
 
@@ -555,6 +587,19 @@ func (x *Adapter) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Adapter) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Adapter({")
+    sb.WriteString(fmt.Sprintf("Name:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type SkipCodegen struct {
     Reason string `thrift:"reason,1" json:"reason" db:"reason"`
@@ -611,10 +656,8 @@ if err != nil {
     return nil
 }
 
-func (x *SkipCodegen) String() string {
-    type SkipCodegenAlias SkipCodegen
-    valueAlias := (*SkipCodegenAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *SkipCodegen) toString1() string {  // Reason
+    return fmt.Sprintf("%v", x.GetReasonNonCompat())
 }
 
 
@@ -696,6 +739,19 @@ func (x *SkipCodegen) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *SkipCodegen) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("SkipCodegen({")
+    sb.WriteString(fmt.Sprintf("Reason:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Name struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
@@ -798,10 +854,12 @@ if err != nil {
     return nil
 }
 
-func (x *Name) String() string {
-    type NameAlias Name
-    valueAlias := (*NameAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *Name) toString1() string {  // Name
+    return fmt.Sprintf("%v", x.GetNameNonCompat())
+}
+
+func (x *Name) toString2() string {  // Reason
+    return fmt.Sprintf("%v", x.GetReasonNonCompat())
 }
 
 
@@ -896,6 +954,20 @@ func (x *Name) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Name) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Name({")
+    sb.WriteString(fmt.Sprintf("Name:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Reason:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type UnionEnumAttributes struct {
     Attributes []string `thrift:"attributes,1" json:"attributes" db:"attributes"`
@@ -993,10 +1065,8 @@ result := listResult
     return nil
 }
 
-func (x *UnionEnumAttributes) String() string {
-    type UnionEnumAttributesAlias UnionEnumAttributes
-    valueAlias := (*UnionEnumAttributesAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *UnionEnumAttributes) toString1() string {  // Attributes
+    return fmt.Sprintf("%v", x.GetAttributesNonCompat())
 }
 
 
@@ -1078,6 +1148,19 @@ func (x *UnionEnumAttributes) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *UnionEnumAttributes) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("UnionEnumAttributes({")
+    sb.WriteString(fmt.Sprintf("Attributes:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type StructTrait struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
@@ -1134,10 +1217,8 @@ if err != nil {
     return nil
 }
 
-func (x *StructTrait) String() string {
-    type StructTraitAlias StructTrait
-    valueAlias := (*StructTraitAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *StructTrait) toString1() string {  // Name
+    return fmt.Sprintf("%v", x.GetNameNonCompat())
 }
 
 
@@ -1219,6 +1300,19 @@ func (x *StructTrait) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *StructTrait) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("StructTrait({")
+    sb.WriteString(fmt.Sprintf("Name:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type Attributes struct {
     Attributes []string `thrift:"attributes,1" json:"attributes" db:"attributes"`
@@ -1316,10 +1410,8 @@ result := listResult
     return nil
 }
 
-func (x *Attributes) String() string {
-    type AttributesAlias Attributes
-    valueAlias := (*AttributesAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *Attributes) toString1() string {  // Attributes
+    return fmt.Sprintf("%v", x.GetAttributesNonCompat())
 }
 
 
@@ -1401,6 +1493,19 @@ func (x *Attributes) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *Attributes) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Attributes({")
+    sb.WriteString(fmt.Sprintf("Attributes:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type StructAsTrait struct {
 }
@@ -1409,12 +1514,6 @@ var _ thrift.Struct = &StructAsTrait{}
 
 func NewStructAsTrait() *StructAsTrait {
     return (&StructAsTrait{})
-}
-
-func (x *StructAsTrait) String() string {
-    type StructAsTraitAlias StructAsTrait
-    valueAlias := (*StructAsTraitAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1483,6 +1582,18 @@ func (x *StructAsTrait) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *StructAsTrait) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("StructAsTrait({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 type ModuleInternal struct {
 }
@@ -1491,12 +1602,6 @@ var _ thrift.Struct = &ModuleInternal{}
 
 func NewModuleInternal() *ModuleInternal {
     return (&ModuleInternal{})
-}
-
-func (x *ModuleInternal) String() string {
-    type ModuleInternalAlias ModuleInternal
-    valueAlias := (*ModuleInternalAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1565,6 +1670,18 @@ func (x *ModuleInternal) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *ModuleInternal) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("ModuleInternal({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

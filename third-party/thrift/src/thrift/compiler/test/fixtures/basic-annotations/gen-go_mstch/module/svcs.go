@@ -7,6 +7,7 @@ package module // [[[ program thrift source path ]]]
 import (
     "context"
     "fmt"
+    "strings"
     "sync"
 
 
@@ -18,6 +19,7 @@ import (
 var _ = context.Background
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = strings.Split
 var _ = sync.Mutex{}
 
 
@@ -254,12 +256,6 @@ func newReqMyServicePing() *reqMyServicePing {
     return (&reqMyServicePing{})
 }
 
-func (x *reqMyServicePing) String() string {
-    type reqMyServicePingAlias reqMyServicePing
-    valueAlias := (*reqMyServicePingAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
-
 
 // Deprecated: Use reqMyServicePing.Set* methods instead or set the fields directly.
 type reqMyServicePingBuilder struct {
@@ -326,6 +322,18 @@ func (x *reqMyServicePing) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqMyServicePing) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqMyServicePing({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respMyServicePing struct {
     MyExcept *MyException `thrift:"myExcept,1,optional" json:"myExcept,omitempty" db:"myExcept"`
 }
@@ -394,6 +402,10 @@ if err != nil {
     return nil
 }
 
+func (x *respMyServicePing) toString1() string {  // MyExcept
+    return fmt.Sprintf("%v", x.GetMyExceptNonCompat())
+}
+
 // Deprecated: Use newRespMyServicePing().GetMyExcept() instead.
 var respMyServicePing_MyExcept_DEFAULT = newRespMyServicePing().GetMyExcept()
 
@@ -403,12 +415,6 @@ func (x *respMyServicePing) DefaultGetMyExcept() *MyException {
         return NewMyException()
     }
     return x.MyExcept
-}
-
-func (x *respMyServicePing) String() string {
-    type respMyServicePingAlias respMyServicePing
-    valueAlias := (*respMyServicePingAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -497,6 +503,19 @@ func (x *respMyServicePing) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respMyServicePing) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respMyServicePing({")
+    sb.WriteString(fmt.Sprintf("MyExcept:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type reqMyServiceGetRandomData struct {
 }
 // Compile time interface enforcer
@@ -506,12 +525,6 @@ type MyServiceGetRandomDataArgs = reqMyServiceGetRandomData
 
 func newReqMyServiceGetRandomData() *reqMyServiceGetRandomData {
     return (&reqMyServiceGetRandomData{})
-}
-
-func (x *reqMyServiceGetRandomData) String() string {
-    type reqMyServiceGetRandomDataAlias reqMyServiceGetRandomData
-    valueAlias := (*reqMyServiceGetRandomDataAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -580,6 +593,18 @@ func (x *reqMyServiceGetRandomData) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqMyServiceGetRandomData) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqMyServiceGetRandomData({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respMyServiceGetRandomData struct {
     Value string `thrift:"value,0" json:"value" db:"value"`
 }
@@ -636,10 +661,8 @@ if err != nil {
     return nil
 }
 
-func (x *respMyServiceGetRandomData) String() string {
-    type respMyServiceGetRandomDataAlias respMyServiceGetRandomData
-    valueAlias := (*respMyServiceGetRandomDataAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *respMyServiceGetRandomData) toString0() string {  // Value
+    return fmt.Sprintf("%v", x.GetValueNonCompat())
 }
 
 
@@ -725,6 +748,19 @@ func (x *respMyServiceGetRandomData) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respMyServiceGetRandomData) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respMyServiceGetRandomData({")
+    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type reqMyServiceHasDataById struct {
     Id int64 `thrift:"id,1" json:"id" db:"id"`
 }
@@ -782,10 +818,8 @@ if err != nil {
     return nil
 }
 
-func (x *reqMyServiceHasDataById) String() string {
-    type reqMyServiceHasDataByIdAlias reqMyServiceHasDataById
-    valueAlias := (*reqMyServiceHasDataByIdAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *reqMyServiceHasDataById) toString1() string {  // Id
+    return fmt.Sprintf("%v", x.GetIdNonCompat())
 }
 
 
@@ -867,6 +901,19 @@ func (x *reqMyServiceHasDataById) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqMyServiceHasDataById) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqMyServiceHasDataById({")
+    sb.WriteString(fmt.Sprintf("Id:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respMyServiceHasDataById struct {
     Value bool `thrift:"value,0" json:"value" db:"value"`
 }
@@ -923,10 +970,8 @@ if err != nil {
     return nil
 }
 
-func (x *respMyServiceHasDataById) String() string {
-    type respMyServiceHasDataByIdAlias respMyServiceHasDataById
-    valueAlias := (*respMyServiceHasDataByIdAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *respMyServiceHasDataById) toString0() string {  // Value
+    return fmt.Sprintf("%v", x.GetValueNonCompat())
 }
 
 
@@ -1012,6 +1057,19 @@ func (x *respMyServiceHasDataById) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respMyServiceHasDataById) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respMyServiceHasDataById({")
+    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type reqMyServiceGoGetDataById struct {
     Id int64 `thrift:"id,1" json:"id" db:"id"`
 }
@@ -1069,10 +1127,8 @@ if err != nil {
     return nil
 }
 
-func (x *reqMyServiceGoGetDataById) String() string {
-    type reqMyServiceGoGetDataByIdAlias reqMyServiceGoGetDataById
-    valueAlias := (*reqMyServiceGoGetDataByIdAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *reqMyServiceGoGetDataById) toString1() string {  // Id
+    return fmt.Sprintf("%v", x.GetIdNonCompat())
 }
 
 
@@ -1154,6 +1210,19 @@ func (x *reqMyServiceGoGetDataById) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqMyServiceGoGetDataById) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqMyServiceGoGetDataById({")
+    sb.WriteString(fmt.Sprintf("Id:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respMyServiceGoGetDataById struct {
     Value string `thrift:"value,0" json:"value" db:"value"`
 }
@@ -1210,10 +1279,8 @@ if err != nil {
     return nil
 }
 
-func (x *respMyServiceGoGetDataById) String() string {
-    type respMyServiceGoGetDataByIdAlias respMyServiceGoGetDataById
-    valueAlias := (*respMyServiceGoGetDataByIdAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *respMyServiceGoGetDataById) toString0() string {  // Value
+    return fmt.Sprintf("%v", x.GetValueNonCompat())
 }
 
 
@@ -1299,6 +1366,19 @@ func (x *respMyServiceGoGetDataById) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respMyServiceGoGetDataById) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respMyServiceGoGetDataById({")
+    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type reqMyServicePutDataById struct {
     Id int64 `thrift:"id,1" json:"id" db:"id"`
     Data string `thrift:"data,2" json:"data" db:"data"`
@@ -1402,10 +1482,12 @@ if err != nil {
     return nil
 }
 
-func (x *reqMyServicePutDataById) String() string {
-    type reqMyServicePutDataByIdAlias reqMyServicePutDataById
-    valueAlias := (*reqMyServicePutDataByIdAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *reqMyServicePutDataById) toString1() string {  // Id
+    return fmt.Sprintf("%v", x.GetIdNonCompat())
+}
+
+func (x *reqMyServicePutDataById) toString2() string {  // Data
+    return fmt.Sprintf("%v", x.GetDataNonCompat())
 }
 
 
@@ -1500,6 +1582,20 @@ func (x *reqMyServicePutDataById) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqMyServicePutDataById) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqMyServicePutDataById({")
+    sb.WriteString(fmt.Sprintf("Id:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Data:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respMyServicePutDataById struct {
 }
 // Compile time interface enforcer
@@ -1508,12 +1604,6 @@ var _ thrift.WritableResult = &respMyServicePutDataById{}
 
 func newRespMyServicePutDataById() *respMyServicePutDataById {
     return (&respMyServicePutDataById{})
-}
-
-func (x *respMyServicePutDataById) String() string {
-    type respMyServicePutDataByIdAlias respMyServicePutDataById
-    valueAlias := (*respMyServicePutDataByIdAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1586,6 +1676,18 @@ func (x *respMyServicePutDataById) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respMyServicePutDataById) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respMyServicePutDataById({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type reqMyServiceLobDataById struct {
     Id int64 `thrift:"id,1" json:"id" db:"id"`
     Data string `thrift:"data,2" json:"data" db:"data"`
@@ -1689,10 +1791,12 @@ if err != nil {
     return nil
 }
 
-func (x *reqMyServiceLobDataById) String() string {
-    type reqMyServiceLobDataByIdAlias reqMyServiceLobDataById
-    valueAlias := (*reqMyServiceLobDataByIdAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *reqMyServiceLobDataById) toString1() string {  // Id
+    return fmt.Sprintf("%v", x.GetIdNonCompat())
+}
+
+func (x *reqMyServiceLobDataById) toString2() string {  // Data
+    return fmt.Sprintf("%v", x.GetDataNonCompat())
 }
 
 
@@ -1787,6 +1891,20 @@ func (x *reqMyServiceLobDataById) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqMyServiceLobDataById) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqMyServiceLobDataById({")
+    sb.WriteString(fmt.Sprintf("Id:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Data:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respMyServiceLobDataById struct {
 }
 // Compile time interface enforcer
@@ -1795,12 +1913,6 @@ var _ thrift.WritableResult = &respMyServiceLobDataById{}
 
 func newRespMyServiceLobDataById() *respMyServiceLobDataById {
     return (&respMyServiceLobDataById{})
-}
-
-func (x *respMyServiceLobDataById) String() string {
-    type respMyServiceLobDataByIdAlias respMyServiceLobDataById
-    valueAlias := (*respMyServiceLobDataByIdAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1873,6 +1985,18 @@ func (x *respMyServiceLobDataById) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respMyServiceLobDataById) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respMyServiceLobDataById({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type reqMyServiceGoDoNothing struct {
 }
 // Compile time interface enforcer
@@ -1882,12 +2006,6 @@ type MyServiceGoDoNothingArgs = reqMyServiceGoDoNothing
 
 func newReqMyServiceGoDoNothing() *reqMyServiceGoDoNothing {
     return (&reqMyServiceGoDoNothing{})
-}
-
-func (x *reqMyServiceGoDoNothing) String() string {
-    type reqMyServiceGoDoNothingAlias reqMyServiceGoDoNothing
-    valueAlias := (*reqMyServiceGoDoNothingAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1956,6 +2074,18 @@ func (x *reqMyServiceGoDoNothing) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqMyServiceGoDoNothing) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqMyServiceGoDoNothing({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respMyServiceGoDoNothing struct {
 }
 // Compile time interface enforcer
@@ -1964,12 +2094,6 @@ var _ thrift.WritableResult = &respMyServiceGoDoNothing{}
 
 func newRespMyServiceGoDoNothing() *respMyServiceGoDoNothing {
     return (&respMyServiceGoDoNothing{})
-}
-
-func (x *respMyServiceGoDoNothing) String() string {
-    type respMyServiceGoDoNothingAlias respMyServiceGoDoNothing
-    valueAlias := (*respMyServiceGoDoNothingAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2042,6 +2166,18 @@ func (x *respMyServiceGoDoNothing) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respMyServiceGoDoNothing) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respMyServiceGoDoNothing({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 
 type MyServiceProcessor struct {
@@ -2606,12 +2742,6 @@ func newReqMyServicePrioParentPing() *reqMyServicePrioParentPing {
     return (&reqMyServicePrioParentPing{})
 }
 
-func (x *reqMyServicePrioParentPing) String() string {
-    type reqMyServicePrioParentPingAlias reqMyServicePrioParentPing
-    valueAlias := (*reqMyServicePrioParentPingAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
-
 
 // Deprecated: Use reqMyServicePrioParentPing.Set* methods instead or set the fields directly.
 type reqMyServicePrioParentPingBuilder struct {
@@ -2678,6 +2808,18 @@ func (x *reqMyServicePrioParentPing) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqMyServicePrioParentPing) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqMyServicePrioParentPing({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respMyServicePrioParentPing struct {
 }
 // Compile time interface enforcer
@@ -2686,12 +2828,6 @@ var _ thrift.WritableResult = &respMyServicePrioParentPing{}
 
 func newRespMyServicePrioParentPing() *respMyServicePrioParentPing {
     return (&respMyServicePrioParentPing{})
-}
-
-func (x *respMyServicePrioParentPing) String() string {
-    type respMyServicePrioParentPingAlias respMyServicePrioParentPing
-    valueAlias := (*respMyServicePrioParentPingAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2764,6 +2900,18 @@ func (x *respMyServicePrioParentPing) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respMyServicePrioParentPing) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respMyServicePrioParentPing({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type reqMyServicePrioParentPong struct {
 }
 // Compile time interface enforcer
@@ -2773,12 +2921,6 @@ type MyServicePrioParentPongArgs = reqMyServicePrioParentPong
 
 func newReqMyServicePrioParentPong() *reqMyServicePrioParentPong {
     return (&reqMyServicePrioParentPong{})
-}
-
-func (x *reqMyServicePrioParentPong) String() string {
-    type reqMyServicePrioParentPongAlias reqMyServicePrioParentPong
-    valueAlias := (*reqMyServicePrioParentPongAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2847,6 +2989,18 @@ func (x *reqMyServicePrioParentPong) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqMyServicePrioParentPong) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqMyServicePrioParentPong({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respMyServicePrioParentPong struct {
 }
 // Compile time interface enforcer
@@ -2855,12 +3009,6 @@ var _ thrift.WritableResult = &respMyServicePrioParentPong{}
 
 func newRespMyServicePrioParentPong() *respMyServicePrioParentPong {
     return (&respMyServicePrioParentPong{})
-}
-
-func (x *respMyServicePrioParentPong) String() string {
-    type respMyServicePrioParentPongAlias respMyServicePrioParentPong
-    valueAlias := (*respMyServicePrioParentPongAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2933,6 +3081,18 @@ func (x *respMyServicePrioParentPong) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respMyServicePrioParentPong) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respMyServicePrioParentPong({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 
 type MyServicePrioParentProcessor struct {
@@ -3213,12 +3373,6 @@ func newReqMyServicePrioChildPang() *reqMyServicePrioChildPang {
     return (&reqMyServicePrioChildPang{})
 }
 
-func (x *reqMyServicePrioChildPang) String() string {
-    type reqMyServicePrioChildPangAlias reqMyServicePrioChildPang
-    valueAlias := (*reqMyServicePrioChildPangAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
-
 
 // Deprecated: Use reqMyServicePrioChildPang.Set* methods instead or set the fields directly.
 type reqMyServicePrioChildPangBuilder struct {
@@ -3285,6 +3439,18 @@ func (x *reqMyServicePrioChildPang) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqMyServicePrioChildPang) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqMyServicePrioChildPang({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respMyServicePrioChildPang struct {
 }
 // Compile time interface enforcer
@@ -3293,12 +3459,6 @@ var _ thrift.WritableResult = &respMyServicePrioChildPang{}
 
 func newRespMyServicePrioChildPang() *respMyServicePrioChildPang {
     return (&respMyServicePrioChildPang{})
-}
-
-func (x *respMyServicePrioChildPang) String() string {
-    type respMyServicePrioChildPangAlias respMyServicePrioChildPang
-    valueAlias := (*respMyServicePrioChildPangAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -3371,6 +3531,18 @@ func (x *respMyServicePrioChildPang) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respMyServicePrioChildPang) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respMyServicePrioChildPang({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 
 type MyServicePrioChildProcessor struct {
@@ -3565,12 +3737,6 @@ func newReqBadServiceBar() *reqBadServiceBar {
     return (&reqBadServiceBar{})
 }
 
-func (x *reqBadServiceBar) String() string {
-    type reqBadServiceBarAlias reqBadServiceBar
-    valueAlias := (*reqBadServiceBarAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
-
 
 // Deprecated: Use reqBadServiceBar.Set* methods instead or set the fields directly.
 type reqBadServiceBarBuilder struct {
@@ -3637,6 +3803,18 @@ func (x *reqBadServiceBar) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqBadServiceBar) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqBadServiceBar({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respBadServiceBar struct {
     Value int32 `thrift:"value,0" json:"value" db:"value"`
 }
@@ -3693,10 +3871,8 @@ if err != nil {
     return nil
 }
 
-func (x *respBadServiceBar) String() string {
-    type respBadServiceBarAlias respBadServiceBar
-    valueAlias := (*respBadServiceBarAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
+func (x *respBadServiceBar) toString0() string {  // Value
+    return fmt.Sprintf("%v", x.GetValueNonCompat())
 }
 
 
@@ -3782,6 +3958,19 @@ func (x *respBadServiceBar) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respBadServiceBar) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respBadServiceBar({")
+    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 
 type BadServiceProcessor struct {
@@ -4038,12 +4227,6 @@ func newReqFooBarBazServiceFooStructured() *reqFooBarBazServiceFooStructured {
     return (&reqFooBarBazServiceFooStructured{})
 }
 
-func (x *reqFooBarBazServiceFooStructured) String() string {
-    type reqFooBarBazServiceFooStructuredAlias reqFooBarBazServiceFooStructured
-    valueAlias := (*reqFooBarBazServiceFooStructuredAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
-
 
 // Deprecated: Use reqFooBarBazServiceFooStructured.Set* methods instead or set the fields directly.
 type reqFooBarBazServiceFooStructuredBuilder struct {
@@ -4110,6 +4293,18 @@ func (x *reqFooBarBazServiceFooStructured) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqFooBarBazServiceFooStructured) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqFooBarBazServiceFooStructured({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respFooBarBazServiceFooStructured struct {
 }
 // Compile time interface enforcer
@@ -4118,12 +4313,6 @@ var _ thrift.WritableResult = &respFooBarBazServiceFooStructured{}
 
 func newRespFooBarBazServiceFooStructured() *respFooBarBazServiceFooStructured {
     return (&respFooBarBazServiceFooStructured{})
-}
-
-func (x *respFooBarBazServiceFooStructured) String() string {
-    type respFooBarBazServiceFooStructuredAlias respFooBarBazServiceFooStructured
-    valueAlias := (*respFooBarBazServiceFooStructuredAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -4196,6 +4385,18 @@ func (x *respFooBarBazServiceFooStructured) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respFooBarBazServiceFooStructured) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respFooBarBazServiceFooStructured({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type reqFooBarBazServiceBarNonStructured struct {
 }
 // Compile time interface enforcer
@@ -4205,12 +4406,6 @@ type FooBarBazServiceBarNonStructuredArgs = reqFooBarBazServiceBarNonStructured
 
 func newReqFooBarBazServiceBarNonStructured() *reqFooBarBazServiceBarNonStructured {
     return (&reqFooBarBazServiceBarNonStructured{})
-}
-
-func (x *reqFooBarBazServiceBarNonStructured) String() string {
-    type reqFooBarBazServiceBarNonStructuredAlias reqFooBarBazServiceBarNonStructured
-    valueAlias := (*reqFooBarBazServiceBarNonStructuredAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -4279,6 +4474,18 @@ func (x *reqFooBarBazServiceBarNonStructured) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqFooBarBazServiceBarNonStructured) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqFooBarBazServiceBarNonStructured({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respFooBarBazServiceBarNonStructured struct {
 }
 // Compile time interface enforcer
@@ -4287,12 +4494,6 @@ var _ thrift.WritableResult = &respFooBarBazServiceBarNonStructured{}
 
 func newRespFooBarBazServiceBarNonStructured() *respFooBarBazServiceBarNonStructured {
     return (&respFooBarBazServiceBarNonStructured{})
-}
-
-func (x *respFooBarBazServiceBarNonStructured) String() string {
-    type respFooBarBazServiceBarNonStructuredAlias respFooBarBazServiceBarNonStructured
-    valueAlias := (*respFooBarBazServiceBarNonStructuredAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -4365,6 +4566,18 @@ func (x *respFooBarBazServiceBarNonStructured) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respFooBarBazServiceBarNonStructured) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respFooBarBazServiceBarNonStructured({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type reqFooBarBazServiceBaz struct {
 }
 // Compile time interface enforcer
@@ -4374,12 +4587,6 @@ type FooBarBazServiceBazArgs = reqFooBarBazServiceBaz
 
 func newReqFooBarBazServiceBaz() *reqFooBarBazServiceBaz {
     return (&reqFooBarBazServiceBaz{})
-}
-
-func (x *reqFooBarBazServiceBaz) String() string {
-    type reqFooBarBazServiceBazAlias reqFooBarBazServiceBaz
-    valueAlias := (*reqFooBarBazServiceBazAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -4448,6 +4655,18 @@ func (x *reqFooBarBazServiceBaz) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *reqFooBarBazServiceBaz) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqFooBarBazServiceBaz({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 type respFooBarBazServiceBaz struct {
 }
 // Compile time interface enforcer
@@ -4456,12 +4675,6 @@ var _ thrift.WritableResult = &respFooBarBazServiceBaz{}
 
 func newRespFooBarBazServiceBaz() *respFooBarBazServiceBaz {
     return (&respFooBarBazServiceBaz{})
-}
-
-func (x *respFooBarBazServiceBaz) String() string {
-    type respFooBarBazServiceBazAlias respFooBarBazServiceBaz
-    valueAlias := (*respFooBarBazServiceBazAlias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -4534,6 +4747,18 @@ func (x *respFooBarBazServiceBaz) Read(p thrift.Protocol) error {
     return nil
 }
 
+func (x *respFooBarBazServiceBaz) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respFooBarBazServiceBaz({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 
 type FooBarBazServiceProcessor struct {

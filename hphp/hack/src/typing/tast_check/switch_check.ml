@@ -148,7 +148,7 @@ let check_enum_exhaustiveness
  * - enums are localized to `Tnewtype (name, _, _)` where name is the name of
  *   the enum. This can be checked using `Env.is_enum`
  * - enum classes are not inhabited by design. The type of elements is
- *   HH\MemberOf<name, _> were name is the name of the enum class. This
+ *   HH\MemberOf<name, interface> were name is the name of the enum class. This
  *   is localized as Tnewtype("HH\MemberOf", [enum; interface]) where
  *   enum is localized as Tclass(name, _, _) where Env.is_enum_class name is
  *   true.

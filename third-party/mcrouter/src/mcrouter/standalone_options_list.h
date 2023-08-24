@@ -285,6 +285,14 @@ MCROUTER_OPTION_INTEGER(
     no_short,
     "Thrift Port to listen on")
 
+MCROUTER_OPTION_DOUBLE(
+    double,
+    core_multiplier,
+    1.0,
+    "core-multiplier",
+    no_short,
+    "When > 0, number of proxies used will be num-proxies * core-multiplier")
+
 #ifdef ADDITIONAL_STANDALONE_OPTIONS_FILE
 #include ADDITIONAL_STANDALONE_OPTIONS_FILE
 #endif

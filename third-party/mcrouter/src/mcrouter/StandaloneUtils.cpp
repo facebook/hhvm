@@ -460,6 +460,10 @@ void setupStandaloneMcrouter(
   auto standaloneErrors =
       standaloneOptions.updateFromDict(standaloneOptionsDict);
 
+  if (standaloneOptions.core_multiplier > 0) {
+    libmcrouterOptions.num_proxies *= standaloneOptions.core_multiplier;
+  }
+
   if (libmcrouterOptions.enable_failure_logging) {
     initFailureLogger();
   }

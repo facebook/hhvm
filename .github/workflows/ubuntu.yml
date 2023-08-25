@@ -44,12 +44,12 @@ jobs:
         ./llvm.sh ${CLANG_VERSION}
     - name: Making LLVM the default compiler
       run: |
-        if command -v cc &> /dev/null
+        if [ -f /etc/alternatives/cc ]
         then
           update-alternatives --remove-all cc
         fi
 
-        if command -v c++ &> /dev/null
+        if [ -f /etc/alternatives/c++ ]
         then
           update-alternatives --remove-all c++
         fi

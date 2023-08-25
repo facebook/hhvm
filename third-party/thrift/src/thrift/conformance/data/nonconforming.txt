@@ -5639,8 +5639,6 @@ go/CompatibilityTest/testset.string/ChangeSingularToContainer/utf8.Binary
 go/CompatibilityTest/testset.string/ChangeSingularToContainer/utf8.Compact
 go/CompatibilityTest/testset.string/ChangeContainerToSingular/utf8.Binary
 go/CompatibilityTest/testset.string/ChangeContainerToSingular/utf8.Compact
-go/CompatibilityTest/testset.binary.string/ChangeFieldType/bad_utf8.Binary
-go/CompatibilityTest/testset.binary.string/ChangeFieldType/bad_utf8.Compact
 go/CompatibilityTest/testset.Unqualified.Terse/ChangeQualifier/empty.Binary
 go/CompatibilityTest/testset.Unqualified.Terse/ChangeQualifier/empty.Compact
 go/CompatibilityTest/testset.Terse.Unqualified/ChangeQualifier/empty.Binary
@@ -5911,6 +5909,12 @@ go/CompatibilityTest/testset.double/ChangeSingularToContainer/NaN.Binary
 go/CompatibilityTest/testset.double/ChangeSingularToContainer/NaN.Compact
 go/CompatibilityTest/testset.double/ChangeContainerToSingular/NaN.Binary
 go/CompatibilityTest/testset.double/ChangeContainerToSingular/NaN.Compact
+
+#
+# bad_utf8 Go Data conformance compatibility tests [FAILED]
+# bad_utf8 is broken in test harness and not a Go specific issue
+go/CompatibilityTest/testset.binary.string/ChangeFieldType/bad_utf8.Binary
+go/CompatibilityTest/testset.binary.string/ChangeFieldType/bad_utf8.Compact
 
 #
 # Go Data conformance compatibility tests [SKIPPED]

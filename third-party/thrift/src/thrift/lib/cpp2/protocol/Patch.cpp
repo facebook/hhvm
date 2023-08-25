@@ -65,7 +65,7 @@ PatchOp toOp(FieldId id) {
 void checkOps(
     const Object& patch,
     Value::Type valueType,
-    std::unordered_set<PatchOp> supportedOps) {
+    folly::F14FastSet<PatchOp> supportedOps) {
   for (const auto& field : patch) {
     auto op = toOp(FieldId{field.first});
     if (supportedOps.find(op) == supportedOps.end()) {

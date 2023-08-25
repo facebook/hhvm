@@ -1185,8 +1185,18 @@ struct CompactReader {
       hasTypeWrapper = hasTypeWrapper || spec.val().isTypeWrapped;
       if (s_harray.equal(spec.format)) {
         VecInit arr(size);
-        for (uint32_t i = 0; i < size; i++) {
-          arr.append(readField(spec.val(), valueType, hasTypeWrapper));
+        if (spec.val().adapter == nullptr && valueType == T_BYTE) {
+          for (uint32_t i = 0; i < size; i++) {
+            arr.append(transport.readI8());
+          }
+        } else if (spec.val().adapter == nullptr && typeIsInt(valueType)) {
+          for (uint32_t i = 0; i < size; i++) {
+            arr.append(readI());
+          }
+        } else {
+          for (uint32_t i = 0; i < size; i++) {
+            arr.append(readField(spec.val(), valueType, hasTypeWrapper));
+          }
         }
         readCollectionEnd();
         return arr.toVariant();

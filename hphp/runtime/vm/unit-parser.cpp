@@ -157,17 +157,6 @@ CompilerResult assemble_string_handle_errors(folly::StringPiece code,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-std::string displayMismatch(const std::string& assemblerOut,
-                            const std::string& hackCTranslatorOut) {
-  int i = 0;
-  int min = std::min(assemblerOut.length(), hackCTranslatorOut.length());
-  while (i < min && assemblerOut[i] == hackCTranslatorOut[i]) i++;
-
-  int first = i - 100;
-  int length = 400;
-  return "assembler out:\n" + assemblerOut.substr(first, length)
-    + "\n\n" + "hackCTranslator out:\n" + hackCTranslatorOut.substr(first, length);
-}
 
 CompilerResult hackc_compile(
   folly::StringPiece code,
@@ -284,24 +273,6 @@ CompilerResult hackc_compile(
     return res;
   };
 
-  if (RO::EvalVerifyTranslateHackC) {
-    auto const disassembleResult = [](CompilerResult& res) -> std::string {
-      if (auto ue = boost::get<std::unique_ptr<UnitEmitter>>(&res)) {
-        (*ue)->finish();
-        return disassemble((*ue)->create().get());
-      }
-      return boost::get<std::string>(res);
-    };
-    auto assemblerResult =  fromHhas();
-    auto hackCTranslatorResult = fromHackCUnit();
-    auto const assemblerOut = disassembleResult(assemblerResult);
-    auto const hackCTranslatorOut = disassembleResult(hackCTranslatorResult);
-    SCOPE_ASSERT_DETAIL("translator mismatch") {
-      return displayMismatch(assemblerOut, hackCTranslatorOut);
-    };
-    always_assert(hackCTranslatorOut == assemblerOut);
-    return hackCTranslatorResult;
-  }
   if (RO::EvalTranslateHackC){
     return fromHackCUnit();
   } else {

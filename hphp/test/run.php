@@ -330,7 +330,6 @@ final class Options {
     public ?string $failure_file;
     public bool $wholecfg = false;
     public bool $hhas_round_trip = false;
-    public bool $verify_hackc_translator = false;
     public bool $color = false;
     public bool $no_fun = false;
     public bool $no_skipif = false;
@@ -392,7 +391,6 @@ function get_options(
     'failure-file:' => '',
     '*wholecfg' => '',
     '*hhas-round-trip' => '',
-    '*verify-hackc-translator' => '',
     'color' => 'c',
     'no-fun' => '',
     'no-skipif' => '',
@@ -879,10 +877,6 @@ function hhvm_cmd_impl(
     if ($options->hhas_round_trip) {
       $args[] = '-vEval.AllowHhas=1';
       $args[] = '-vEval.LoadFilepathFromUnitCache=1';
-    }
-
-    if ($options->verify_hackc_translator) {
-      $args[] = '-vEval.VerifyTranslateHackC=1';
     }
 
     if (!$options->cores) {

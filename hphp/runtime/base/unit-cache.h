@@ -98,7 +98,6 @@ Unit* lookupSyslibUnit(StringData* path);
   R(EnableXHP)                                  \
   R(EvalEnableCallBuiltin)                      \
   R(EvalHackArrCompatSerializeNotices)          \
-  R(EvalHackCompilerVerboseErrors)              \
   R(EvalJitEnableRenameFunction)                \
   R(EvalLoadFilepathFromUnitCache)              \
   R(EvalForbidDynamicCallsToFunc)               \
@@ -119,7 +118,6 @@ Unit* lookupSyslibUnit(StringData* path);
   R(EvalFoldLazyClassKeys)                      \
   R(EvalEnableAbstractContextConstants)         \
   R(EvalTraitConstantInterfaceBehavior)         \
-  R(EvalTranslateHackC)                         \
   R(EvalUnitCacheBreaker)                       \
   R(EvalDiamondTraitMethods)                    \
   R(EvalClassPassesClassname)                   \

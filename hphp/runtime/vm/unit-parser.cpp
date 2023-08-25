@@ -104,58 +104,6 @@ CompilerResult unitEmitterFromHackCUnitHandleErrors(const hackc::hhbc::Unit& uni
   }
 }
 
-CompilerResult assemble_string_handle_errors(folly::StringPiece code,
-                                             const std::string& hhas,
-                                             const char* filename,
-                                             const SHA1& sha1,
-                                             const Extension* extension,
-                                             bool& internal_error,
-                                             CompileAbortMode mode,
-                                             const PackageInfo& packageInfo) {
-  try {
-    return assemble_string(hhas.c_str(),
-                           hhas.length(),
-                           filename,
-                           sha1,
-                           extension,
-                           packageInfo,
-                           false);  /* swallow errors */
-  } catch (const FatalErrorException&) {
-    throw;
-  } catch (const TranslationFatal& ex) {
-    // Assembler returned an error when building this unit
-    if (mode >= CompileAbortMode::VerifyErrors) internal_error = true;
-    return ex.what();
-  } catch (const AssemblerUnserializationError& ex) {
-    // Variable unserializer threw when called from the assembler, treat it
-    // as an internal error.
-    internal_error = true;
-    return ex.what();
-  } catch (const AssemblerError& ex) {
-    if (mode >= CompileAbortMode::VerifyErrors) internal_error = true;
-
-    if (RuntimeOption::EvalHackCompilerVerboseErrors) {
-      auto const msg = folly::sformat(
-        "{}\n"
-        "========== PHP Source ==========\n"
-        "{}\n"
-        "========== HackC Result ==========\n"
-        "{}\n",
-        ex.what(),
-        code,
-        hhas
-      );
-      Logger::FError("HackC Generated a bad unit: {}", msg);
-      return msg;
-    } else {
-      return ex.what();
-    }
-  } catch (const std::exception& ex) {
-    internal_error = true;
-    return ex.what();
-  }
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 
 CompilerResult hackc_compile(
@@ -218,66 +166,28 @@ CompilerResult hackc_compile(
     native_env.non_interceptable_functions.emplace_back(rust::String{f});
   }
 
-  auto const fromHackCUnit = [&]() -> CompilerResult {
-    rust::Box<hackc::UnitWrapper> unit_wrapped = [&] {
-      tracing::Block _{
-        "hackc_translator",
-        [&] {
-          return tracing::Props{}
-            .add("filename", filename ? filename : "")
-            .add("code_size", code.size());
-        }
-      };
-      return hackc::compile_unit_from_text(
-          native_env,
-          {(const uint8_t*)code.data(), code.size()}
-      );
-    }();
-
-    auto const bcSha1 = SHA1(hash_unit(*unit_wrapped));
-    const hackc::hhbc::Unit* unit = hackCUnitRaw(unit_wrapped);
-    auto hackCResult = unitEmitterFromHackCUnitHandleErrors(
-      *unit, filename, sha1, bcSha1, extension,
-      internal_error, mode, options.packageInfo()
+  rust::Box<hackc::UnitWrapper> unit_wrapped = [&] {
+    tracing::Block _{
+      "hackc_translator",
+      [&] {
+        return tracing::Props{}
+          .add("filename", filename ? filename : "")
+          .add("code_size", code.size());
+      }
+    };
+    return hackc::compile_unit_from_text(
+        native_env,
+        {(const uint8_t*)code.data(), code.size()}
     );
-    return hackCResult;
-  };
+  }();
 
-  auto const fromHhas = [&]() -> CompilerResult {
-    // Invoke hackc, producing a rust Vec<u8> containing HHAS.
-    rust::Vec<uint8_t> hhas_vec = [&] {
-      tracing::Block _{
-        "hackc",
-        [&] {
-          return tracing::Props{}
-            .add("filename", filename ? filename : "")
-            .add("code_size", code.size());
-        }
-      };
-      return hackc::compile_from_text(
-          native_env,
-          {(const uint8_t*)code.data(), code.size()}
-      );
-    }();
-    auto const hhas = std::string(hhas_vec.begin(), hhas_vec.end());
-
-    // Assemble HHAS into a UnitEmitter, or a std::string if there were errors.
-    auto res = assemble_string_handle_errors(code,
-                                            hhas,
-                                            filename,
-                                            sha1,
-                                            extension,
-                                            internal_error,
-                                            mode,
-                                            options.packageInfo());
-    return res;
-  };
-
-  if (RO::EvalTranslateHackC){
-    return fromHackCUnit();
-  } else {
-    return fromHhas();
-  }
+  auto const bcSha1 = SHA1(hash_unit(*unit_wrapped));
+  const hackc::hhbc::Unit* unit = hackCUnitRaw(unit_wrapped);
+  auto hackCResult = unitEmitterFromHackCUnitHandleErrors(
+    *unit, filename, sha1, bcSha1, extension,
+    internal_error, mode, options.packageInfo()
+  );
+  return hackCResult;
 }
 
 /// A simple UnitCompiler that invokes hackc in-process.

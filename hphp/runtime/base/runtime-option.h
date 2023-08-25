@@ -803,10 +803,6 @@ struct RuntimeOption {
   F(uint64_t, FactsWorkers,            Process::GetCPUCount())          \
   /* Whether to log extern compiler performance */                      \
   F(bool, LogExternCompilerPerf,       false)                           \
-  /* Whether to write verbose log messages to the error log and include
-     the hhas from failing units in the fatal error messages produced by
-     bad hh_single_compile units. */                                    \
-  F(bool, HackCompilerVerboseErrors,   true)                            \
   /* Whether the HackC compiler should inherit the compiler config of the
      HHVM process that launches it. */                                  \
   F(bool, HackCompilerInheritConfig,   true)                            \
@@ -877,7 +873,6 @@ struct RuntimeOption {
   F(bool, EnableLogBridge,             true)                            \
   F(bool, MoreAccurateMemStats,        true)                            \
   F(bool, MemInfoCheckCgroup2,         true)                            \
-  F(bool, TranslateHackC,              true)                            \
   F(bool, JitNoGdb,                    true)                            \
   F(bool, SpinOnCrash,                 false)                           \
   F(uint32_t, DumpRingBufferOnCrash,   0)                               \

@@ -274,7 +274,7 @@ class pyi_mstch_program : public mstch_program {
     std::set<std::string> visited;
     for (const auto* service : mstch_program::program_->services()) {
       for (const auto* function : service->get_functions()) {
-        const auto* returnType = function->get_returntype();
+        const auto* returnType = function->return_type();
         std::string name = to_flat_type_name(returnType);
 
         if (visited.find(name) == visited.end()) {
@@ -294,7 +294,7 @@ class pyi_mstch_program : public mstch_program {
           this->add_containers(visited, param.get_type());
         }
 
-        auto return_type = function.get_returntype();
+        auto return_type = function.return_type();
         this->add_containers(visited, return_type);
       }
     }
@@ -544,7 +544,7 @@ class pyi_mstch_function : public mstch_function {
     // Stream and sink functions are not supported, see
     // t_py_generator::get_functions.
     return !function_->sink_or_stream() &&
-        !function_->get_returntype()->is_service();
+        !function_->return_type()->is_service();
   }
 };
 

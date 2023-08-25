@@ -2145,8 +2145,8 @@ void t_py_generator::generate_py_function_helpers(const t_function* tfunction) {
     t_struct result(
         program_, rename_reserved_keywords(tfunction->get_name()) + "_result");
     auto success =
-        std::make_unique<t_field>(tfunction->get_returntype(), "success", 0);
-    if (!tfunction->get_returntype()->is_void()) {
+        std::make_unique<t_field>(tfunction->return_type(), "success", 0);
+    if (!tfunction->return_type()->is_void()) {
       result.append(std::move(success));
     }
 
@@ -2461,7 +2461,7 @@ void t_py_generator::generate_service_client(const t_service* tservice) {
                  << "result = self._fbthrift_cpp_transport._send_request(\""
                  << tservice->get_name() << "\", \"" << (*f_iter)->get_name()
                  << "\", args, " << (*f_iter)->get_name() << "_result)" << endl;
-      if (!(*f_iter)->get_returntype()->is_void()) {
+      if (!(*f_iter)->return_type()->is_void()) {
         f_service_ << indent() << "if result.success is not None:" << endl
                    << indent() << "  return result.success" << endl;
       }
@@ -2473,7 +2473,7 @@ void t_py_generator::generate_service_client(const t_service* tservice) {
                    << indent() << "  raise result." << name << endl;
       }
 
-      if ((*f_iter)->get_returntype()->is_void()) {
+      if ((*f_iter)->return_type()->is_void()) {
         f_service_ << indent() << "return None" << endl;
       } else {
         f_service_
@@ -2510,7 +2510,7 @@ void t_py_generator::generate_service_client(const t_service* tservice) {
       if (gen_asyncio_) {
         f_service_ << "return fut" << endl;
       } else {
-        if (!(*f_iter)->get_returntype()->is_void()) {
+        if (!(*f_iter)->return_type()->is_void()) {
           f_service_ << "return ";
         }
         f_service_ << "self.recv_" << funname << "()" << endl;
@@ -2561,7 +2561,7 @@ void t_py_generator::generate_service_client(const t_service* tservice) {
                    << "(self, iprot, mtype, rseqid):" << endl;
       } else {
         t_function recv_function(
-            (*f_iter)->get_returntype(),
+            (*f_iter)->return_type(),
             string("recv_") + (*f_iter)->get_name(),
             std::make_unique<t_paramlist>(program_));
         f_service_ << indent() << "def " << function_signature(&recv_function)
@@ -2608,7 +2608,7 @@ void t_py_generator::generate_service_client(const t_service* tservice) {
       }
 
       // Careful, only return _result if not a void function
-      if (!(*f_iter)->get_returntype()->is_void()) {
+      if (!(*f_iter)->return_type()->is_void()) {
         f_service_ << indent() << "if result.success != None:" << endl;
         if (gen_asyncio_) {
           f_service_ << indent() << "  fut.set_result(result.success)" << endl
@@ -2637,7 +2637,7 @@ void t_py_generator::generate_service_client(const t_service* tservice) {
       }
 
       // Careful, only return _result if not a void function
-      if ((*f_iter)->get_returntype()->is_void()) {
+      if ((*f_iter)->return_type()->is_void()) {
         if (gen_asyncio_) {
           f_service_ << indent() << "fut.set_result(None)" << endl
                      << indent() << "return" << endl;
@@ -2731,7 +2731,7 @@ void t_py_generator::generate_service_remote(const t_service* tservice) {
       if (fn->qualifier() == t_function_qualifier::one_way) {
         f_remote << "None, ";
       } else {
-        f_remote << "'" << thrift_type_name(fn->get_returntype()) << "', ";
+        f_remote << "'" << thrift_type_name(fn->return_type()) << "', ";
       }
 
       f_remote << "[";
@@ -3044,7 +3044,7 @@ void t_py_generator::generate_process_function(
     f_service_ << indent();
 
     if (tfunction->qualifier() != t_function_qualifier::one_way &&
-        !tfunction->get_returntype()->is_void()) {
+        !tfunction->return_type()->is_void()) {
       f_service_ << "result.success = ";
     }
     f_service_ << handler << "(";
@@ -3807,7 +3807,7 @@ const std::vector<t_function*>& t_py_generator::get_functions(
   }
   std::vector<t_function*> funcs;
   for (auto func : tservice->get_functions()) {
-    if (!func->sink_or_stream() && !func->get_returntype()->is_service()) {
+    if (!func->sink_or_stream() && !func->return_type()->is_service()) {
       funcs.push_back(func);
     }
   }

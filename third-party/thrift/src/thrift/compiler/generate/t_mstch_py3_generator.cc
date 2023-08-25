@@ -119,7 +119,7 @@ bool is_hidden(const t_named& node) {
 
 bool is_func_supported(bool no_stream, const t_function* func) {
   return !is_hidden(*func) && !(no_stream && func->stream()) && !func->sink() &&
-      !func->get_returntype()->is_service();
+      !func->return_type()->is_service();
 }
 
 bool is_hidden(const t_type& node) {

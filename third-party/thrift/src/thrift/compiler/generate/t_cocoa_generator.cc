@@ -1690,8 +1690,8 @@ void t_cocoa_generator::generate_function_helpers(const t_function* tfunction) {
   // and a field for each type of exception thrown
   t_struct result(program_, function_result_helper_struct_type(tfunction));
   auto success =
-      std::make_unique<t_field>(tfunction->get_returntype(), "success", 0);
-  if (!tfunction->get_returntype()->is_void()) {
+      std::make_unique<t_field>(tfunction->return_type(), "success", 0);
+  if (!tfunction->return_type()->is_void()) {
     result.append(std::move(success));
   }
 
@@ -1871,7 +1871,7 @@ void t_cocoa_generator::generate_cocoa_service_client_implementation(
 
     if (function->qualifier() != t_function_qualifier::one_way) {
       t_function recv_function(
-          function->get_returntype(),
+          function->return_type(),
           std::string("recv_") + function->name(),
           std::make_unique<t_paramlist>(program_),
           t_struct::clone_DO_NOT_USE(function->get_xceptions()));
@@ -1905,7 +1905,7 @@ void t_cocoa_generator::generate_cocoa_service_client_implementation(
       indent(out) << "[inProtocol readMessageEnd];" << std::endl;
 
       // Careful, only return _result if not a void function
-      if (!function->get_returntype()->is_void()) {
+      if (!function->return_type()->is_void()) {
         out << indent() << "if ([result successIsSet]) {" << std::endl
             << indent() << "  return [result success];" << std::endl
             << indent() << "}" << std::endl;
@@ -1922,7 +1922,7 @@ void t_cocoa_generator::generate_cocoa_service_client_implementation(
       }
 
       // If you get here it's an exception, unless a void function
-      if (function->get_returntype()->is_void()) {
+      if (function->return_type()->is_void()) {
         indent(out) << "return;" << std::endl;
       } else {
         out << indent()
@@ -1960,7 +1960,7 @@ void t_cocoa_generator::generate_cocoa_service_client_implementation(
 
     if (function->qualifier() != t_function_qualifier::one_way) {
       out << indent();
-      if (!function->get_returntype()->is_void()) {
+      if (!function->return_type()->is_void()) {
         out << "return ";
       }
       out << "[self recv_" << funname << "];" << std::endl;
@@ -2118,7 +2118,7 @@ void t_cocoa_generator::generate_cocoa_service_server_implementation(
 
     // make the call to the actual service object
     out << indent();
-    if (!function->get_returntype()->is_void()) {
+    if (!function->return_type()->is_void()) {
       out << "[result setSuccess: ";
     }
     out << "[mService " << funname;
@@ -2133,7 +2133,7 @@ void t_cocoa_generator::generate_cocoa_service_server_implementation(
       }
     }
     out << "]";
-    if (!function->get_returntype()->is_void()) {
+    if (!function->return_type()->is_void()) {
       out << "]";
     }
     out << ";" << std::endl;
@@ -3079,7 +3079,7 @@ std::string t_cocoa_generator::declare_property(const t_field* tfield) {
  * @return String of rendered function definition
  */
 std::string t_cocoa_generator::function_signature(const t_function* tfunction) {
-  const t_type* ttype = tfunction->get_returntype();
+  const t_type* ttype = tfunction->return_type();
   std::string result = "(" + type_name(ttype) + ") " + tfunction->name() +
       argument_list(tfunction->get_paramlist());
   return result;

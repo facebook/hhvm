@@ -288,7 +288,7 @@ class t_java_deprecated_generator : public t_concat_generator {
   // indicate if we can generate the method
   // E.g. Java doesn't support streaming, so all streaming methods are skipped
   bool can_generate_method(const t_function* func) {
-    return !func->sink_or_stream() && !func->get_returntype()->is_service();
+    return !func->sink_or_stream() && !func->return_type()->is_service();
   }
 
   bool is_field_sensitive(const t_field* field) {

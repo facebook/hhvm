@@ -647,7 +647,7 @@ class mstch_java_service : public mstch_service {
   mstch::node get_request_response_functions() {
     std::vector<t_function*> funcs;
     for (auto func : service_->get_functions()) {
-      if (!func->sink_or_stream() && !func->get_returntype()->is_service() &&
+      if (!func->sink_or_stream() && !func->return_type()->is_service() &&
           !func->is_oneway()) {
         funcs.push_back(func);
       }
@@ -657,7 +657,7 @@ class mstch_java_service : public mstch_service {
   mstch::node get_single_request_functions() {
     std::vector<t_function*> funcs;
     for (auto func : service_->get_functions()) {
-      if (!func->sink_or_stream() && !func->get_returntype()->is_service()) {
+      if (!func->sink_or_stream() && !func->return_type()->is_service()) {
         funcs.push_back(func);
       }
     }
@@ -740,7 +740,7 @@ class mstch_java_function : public mstch_function {
     return java::mangle_java_name(function_->get_name(), false);
   }
 
-  mstch::node is_void_type() { return function_->get_returntype()->is_void(); }
+  mstch::node is_void_type() { return function_->return_type()->is_void(); }
 };
 
 class mstch_java_field : public mstch_field {

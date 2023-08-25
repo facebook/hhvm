@@ -1031,7 +1031,7 @@ class t_hack_generator : public t_concat_generator {
     std::vector<const t_function*> funcs;
     for (auto func : tservice->get_functions()) {
       if (!is_client_only_function(func) &&
-          !func->get_returntype()->is_service()) {
+          !func->return_type()->is_service()) {
         funcs.push_back(func);
       }
     }
@@ -1058,7 +1058,7 @@ class t_hack_generator : public t_concat_generator {
     std::vector<const t_service*> interactions;
     for (const auto& func : tservice->get_functions()) {
       if (const auto* interaction =
-              dynamic_cast<const t_service*>(func->get_returntype())) {
+              dynamic_cast<const t_service*>(func->return_type())) {
         interactions.push_back(interaction);
       }
     }
@@ -2455,7 +2455,7 @@ std::unique_ptr<t_const_value> t_hack_generator::function_to_tmeta(
     return_tmeta->add_map(
         std::make_unique<t_const_value>("t_stream"), std::move(stream_tmeta));
   } else {
-    return_tmeta = type_to_tmeta(function->get_returntype());
+    return_tmeta = type_to_tmeta(function->return_type());
   }
   tmeta_ThriftFunction->add_map(
       std::make_unique<t_const_value>("return_type"), std::move(return_tmeta));
@@ -4844,7 +4844,7 @@ std::string t_hack_generator::render_service_metadata_response(
         if (const t_node* sink_or_stream = function.sink_or_stream()) {
           queue.push(sink_or_stream);
         } else {
-          queue.push(function.get_returntype());
+          queue.push(function.return_type());
         }
         queue.push(&function.params());
         queue.push(function.exceptions());
@@ -5800,7 +5800,7 @@ void t_hack_generator::generate_process_function(
 
   f_service_ << indent();
   if (tfunction->qualifier() != t_function_qualifier::one_way &&
-      !tfunction->get_returntype()->is_void()) {
+      !tfunction->return_type()->is_void()) {
     f_service_ << "$result->success = ";
   }
   f_service_ << (async ? "await " : "") << "$this->handler->"
@@ -6076,11 +6076,11 @@ void t_hack_generator::generate_php_function_helpers(
   if (tfunction->qualifier() != t_function_qualifier::one_way) {
     generate_php_function_result_helpers(
         tfunction,
-        tfunction->get_returntype(),
+        tfunction->return_type(),
         tfunction->exceptions(),
         service_name,
         "_result",
-        tfunction->get_returntype()->is_void());
+        tfunction->return_type()->is_void());
   }
 }
 
@@ -6218,11 +6218,11 @@ void t_hack_generator::generate_php_interaction_function_helpers(
   if (tfunction->qualifier() != t_function_qualifier::one_way) {
     generate_php_function_result_helpers(
         tfunction,
-        tfunction->get_returntype(),
+        tfunction->return_type(),
         tfunction->exceptions(),
         prefix,
         "_result",
-        tfunction->get_returntype()->is_void());
+        tfunction->return_type()->is_void());
   }
 }
 
@@ -6302,7 +6302,7 @@ void t_hack_generator::generate_php_docstring(
         out, sink->final_response_exceptions());
     out << ">\n";
   } else {
-    out << thrift_type_name(tfunction->get_returntype()) << "\n";
+    out << thrift_type_name(tfunction->return_type()) << "\n";
   }
 
   // Function name.
@@ -6829,7 +6829,7 @@ void t_hack_generator::generate_service_interface(
     } else if (const t_sink* sink = function->sink()) {
       return_typehint = get_sink_function_return_typehint(sink);
     } else {
-      return_typehint = type_to_typehint(function->get_returntype());
+      return_typehint = type_to_typehint(function->return_type());
     }
 
     if (async || client) {
@@ -7149,8 +7149,7 @@ void t_hack_generator::_generate_service_client_children(
         continue;
       }
       const std::string& funname = find_hack_name(function);
-      std::string return_typehint =
-          type_to_typehint(function->get_returntype());
+      std::string return_typehint = type_to_typehint(function->return_type());
       auto fqlfr =
           (has_hack_module_internal(tservice) ||
                    has_hack_module_internal(function)
@@ -7167,11 +7166,11 @@ void t_hack_generator::_generate_service_client_children(
 
       if (function->qualifier() != t_function_qualifier::one_way) {
         t_function recv_function(
-            function->get_returntype(),
+            function->return_type(),
             std::string("recv_") + find_hack_name(function),
             std::make_unique<t_paramlist>(program_));
         // Open function
-        bool is_void = function->get_returntype()->is_void();
+        bool is_void = function->return_type()->is_void();
         std::string resultname = generate_function_helper_name(
             tservice, function, PhpFunctionNameSuffix::RESULT);
         out << indent() << fqlfr << " function "
@@ -7214,7 +7213,7 @@ void t_hack_generator::_generate_service_client_child_fn(
       find_hack_name(tfunction) + (legacy_arrays ? "__LEGACY_ARRAYS" : "");
   const std::string& tservice_name =
       (tservice->is_interaction() ? service_name_ : tservice->name());
-  std::string return_typehint = type_to_typehint(tfunction->get_returntype());
+  std::string return_typehint = type_to_typehint(tfunction->return_type());
 
   generate_php_docstring(out, tfunction);
   indent(out) << (has_hack_module_internal(tservice) ||
@@ -7252,14 +7251,14 @@ void t_hack_generator::_generate_service_client_child_fn(
   _generate_current_seq_id(out, tservice, tfunction);
 
   if (tfunction->qualifier() != t_function_qualifier::one_way) {
-    if (!tfunction->get_returntype()->is_void()) {
+    if (!tfunction->return_type()->is_void()) {
       indent(out) << "return ";
     } else {
       indent(out);
     }
     std::string resultname = generate_function_helper_name(
         tservice, tfunction, PhpFunctionNameSuffix::RESULT);
-    bool is_void = tfunction->get_returntype()->is_void();
+    bool is_void = tfunction->return_type()->is_void();
     out << "await $this->genAwaitResponse(" << resultname << "::class, "
         << "\"" << tfunction->name() << "\", " << (is_void ? "true" : "false")
         << ", $currentseqid, $rpc_options";
@@ -7481,7 +7480,7 @@ std::string t_hack_generator::function_signature(
     std::string more_tail_parameters,
     std::string typehint) {
   if (typehint.empty()) {
-    typehint = type_to_typehint(tfunction->get_returntype());
+    typehint = type_to_typehint(tfunction->return_type());
   }
 
   return find_hack_name(tfunction) + "(" +

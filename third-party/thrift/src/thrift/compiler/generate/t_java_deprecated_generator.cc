@@ -2562,7 +2562,7 @@ void t_java_deprecated_generator::generate_service_client(
 
     if ((*f_iter)->qualifier() != t_function_qualifier::one_way) {
       f_service_ << indent();
-      if (!(*f_iter)->get_returntype()->is_void()) {
+      if (!(*f_iter)->return_type()->is_void()) {
         f_service_ << "return ";
       }
       f_service_ << "recv_" << funname << "();" << endl;
@@ -2619,7 +2619,7 @@ void t_java_deprecated_generator::generate_service_client(
       string resultname = (*f_iter)->get_name() + "_result";
 
       t_function recv_function(
-          (*f_iter)->get_returntype(),
+          (*f_iter)->return_type(),
           string("recv_") + (*f_iter)->get_name(),
           std::make_unique<t_paramlist>(program_),
           t_struct::clone_DO_NOT_USE((*f_iter)->get_xceptions()));
@@ -2663,7 +2663,7 @@ void t_java_deprecated_generator::generate_service_client(
                  << endl;
 
       // Careful, only return _result if not a void function
-      if (!(*f_iter)->get_returntype()->is_void()) {
+      if (!(*f_iter)->return_type()->is_void()) {
         f_service_ << indent() << "if (result."
                    << generate_isset_check("success") << ") {" << endl
                    << indent() << "  return result.success;" << endl
@@ -2682,7 +2682,7 @@ void t_java_deprecated_generator::generate_service_client(
       }
 
       // If you get here it's an exception, unless a void function
-      if ((*f_iter)->get_returntype()->is_void()) {
+      if ((*f_iter)->return_type()->is_void()) {
         indent(f_service_) << "return;" << endl;
       } else {
         f_service_
@@ -2751,7 +2751,7 @@ void t_java_deprecated_generator::generate_service_async_client(
       continue;
     }
     string funname = (*f_iter)->get_name();
-    const t_type* ret_type = (*f_iter)->get_returntype();
+    const t_type* ret_type = (*f_iter)->return_type();
     const t_struct* arg_struct = (*f_iter)->get_paramlist();
     string funclassname = funname + "_call";
     const vector<t_field*>& fields = arg_struct->get_members();
@@ -3047,8 +3047,8 @@ void t_java_deprecated_generator::generate_function_helpers(
 
   t_struct result(program_, tfunction->get_name() + "_result");
   auto success =
-      std::make_unique<t_field>(tfunction->get_returntype(), "success", 0);
-  if (!tfunction->get_returntype()->is_void()) {
+      std::make_unique<t_field>(tfunction->return_type(), "success", 0);
+  if (!tfunction->return_type()->is_void()) {
     result.append(std::move(success));
   }
 
@@ -3122,7 +3122,7 @@ void t_java_deprecated_generator::generate_process_function(
 
   f_service_ << indent();
   if (tfunction->qualifier() != t_function_qualifier::one_way &&
-      !tfunction->get_returntype()->is_void()) {
+      !tfunction->return_type()->is_void()) {
     f_service_ << "result.success = ";
   }
   f_service_ << "iface_." << tfunction->get_name() << "(";
@@ -3139,8 +3139,8 @@ void t_java_deprecated_generator::generate_process_function(
 
   // Set isset on success field
   if (tfunction->qualifier() != t_function_qualifier::one_way &&
-      !tfunction->get_returntype()->is_void() &&
-      !type_can_be_null(tfunction->get_returntype())) {
+      !tfunction->return_type()->is_void() &&
+      !type_can_be_null(tfunction->return_type())) {
     f_service_ << indent() << "result.set" << get_cap_name("success")
                << get_cap_name("isSet") << "(true);" << endl;
   }
@@ -3791,7 +3791,7 @@ string t_java_deprecated_generator::declare_field(
  */
 string t_java_deprecated_generator::function_signature(
     const t_function* tfunction, string prefix) {
-  const t_type* ttype = tfunction->get_returntype();
+  const t_type* ttype = tfunction->return_type();
   std::string result = type_name(ttype) + " " + prefix + tfunction->get_name() +
       "(" + argument_list(tfunction->get_paramlist()) + ") throws ";
   const t_struct* xs = tfunction->get_xceptions();

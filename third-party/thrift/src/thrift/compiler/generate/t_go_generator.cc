@@ -384,7 +384,7 @@ std::vector<const t_function*> t_go_generator::get_supported_functions(
     const t_service* tservice) {
   std::vector<const t_function*> funcs;
   for (const auto* func : tservice->get_functions()) {
-    if (!func->sink_or_stream() && !func->get_returntype()->is_service()) {
+    if (!func->sink_or_stream() && !func->return_type()->is_service()) {
       funcs.push_back(func);
     }
   }
@@ -2189,10 +2189,10 @@ void t_go_generator::generate_go_function_helpers(const t_function* tfunction) {
   if (tfunction->qualifier() != t_function_qualifier::one_way) {
     t_struct result(program_, tfunction->get_name() + "_result");
     auto success =
-        std::make_unique<t_field>(tfunction->get_returntype(), "success", 0);
+        std::make_unique<t_field>(tfunction->return_type(), "success", 0);
     success->set_req(t_field::e_req::optional);
 
-    if (!tfunction->get_returntype()->is_void()) {
+    if (!tfunction->return_type()->is_void()) {
       result.append(std::move(success));
     }
 
@@ -2313,7 +2313,7 @@ void t_go_generator::generate_service_client_channel_call(
   auto result_type_name = publicize(func->get_name() + "_result", true);
   auto argsType = publicize(methodName + "_args", true);
   auto isOneway = func->qualifier() == t_function_qualifier::one_way;
-  auto returnsVoid = func->get_returntype()->is_void();
+  auto returnsVoid = func->return_type()->is_void();
   const auto& exceptions = func->get_xceptions()->get_members();
   // bool raisesExceptions = exceptions.size() > 0;
 
@@ -2396,7 +2396,7 @@ void t_go_generator::generate_service_client_recv_method(
     string& clientTypeName, const t_function* func) {
   std::string result_type_name = publicize(func->get_name() + "_result", true);
   auto methodName = func->get_name();
-  auto returnsVoid = func->get_returntype()->is_void();
+  auto returnsVoid = func->return_type()->is_void();
   const auto& exceptions = func->get_xceptions()->get_members();
   bool raisesExceptions = exceptions.size() > 0;
 
@@ -2406,7 +2406,7 @@ void t_go_generator::generate_service_client_recv_method(
              << publicize(func->get_name()) << "() (";
 
   if (!returnsVoid) {
-    f_service_ << "value " << type_to_go_type(func->get_returntype()) << ", ";
+    f_service_ << "value " << type_to_go_type(func->return_type()) << ", ";
   }
 
   f_service_ << "err error) {" << endl;
@@ -3017,7 +3017,7 @@ void t_go_generator::generate_run_function(
   indent(f_service_) << "if ";
 
   if (tfunction->qualifier() != t_function_qualifier::one_way) {
-    if (!tfunction->get_returntype()->is_void()) {
+    if (!tfunction->return_type()->is_void()) {
       f_service_ << "retval, ";
     }
   }
@@ -3069,10 +3069,10 @@ void t_go_generator::generate_run_function(
   indent_down();
   indent(f_service_) << "}"; // closes err != nil
 
-  bool need_reference = type_need_reference(tfunction->get_returntype());
+  bool need_reference = type_need_reference(tfunction->return_type());
 
   if (tfunction->qualifier() != t_function_qualifier::one_way &&
-      !tfunction->get_returntype()->is_void()) {
+      !tfunction->return_type()->is_void()) {
     f_service_ << " else {"
                << endl; // make sure we set Success retval only on success
     indent_up();
@@ -3789,7 +3789,7 @@ string t_go_generator::function_signature_if(
     signature += args.length() > 0 ? ", " : "";
   }
   signature += args + ") (";
-  const t_type* ret = tfunction->get_returntype();
+  const t_type* ret = tfunction->return_type();
 
   if (!ret->is_void()) {
     signature += "_r " + type_to_go_type(ret) + ", ";

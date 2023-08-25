@@ -600,7 +600,7 @@ class rust_mstch_program : public mstch_program {
         for (const auto& param : function.get_paramlist()->fields()) {
           f(param.get_type());
         }
-        f(function.get_returntype());
+        f(function.return_type());
       }
     }
     for (auto typedf : program_->typedefs()) {
@@ -1016,8 +1016,8 @@ class rust_mstch_function : public mstch_function {
     for (const t_field& field : function_->get_xceptions()->fields()) {
       add_return(field.name(), get_ttype(*field.type()), field.id());
     }
-    auto ttype = function_->stream() ? "Stream"
-                                     : get_ttype(*function_->get_returntype());
+    auto ttype =
+        function_->stream() ? "Stream" : get_ttype(*function_->return_type());
     add_return("Success", ttype, 0);
     std::sort(returns.begin(), returns.end());
     auto array = mstch::array();
@@ -1033,7 +1033,7 @@ class rust_mstch_function : public mstch_function {
     if (!function_->returned_interaction().empty()) {
       return function_->returned_interaction()->get_name();
     }
-    return function_->get_returntype()->get_name();
+    return function_->return_type()->get_name();
   }
   mstch::node rust_void_excluding_interaction() {
     return function_->get_return_type()->is_void() &&

@@ -523,9 +523,9 @@ class mstch_service : public mstch_base {
 
     // Collect performed interactions and cache them
     for (const auto* function : get_functions()) {
-      if (function->get_returntype()->is_service()) {
+      if (function->return_type()->is_service()) {
         interactions_.insert(
-            dynamic_cast<const t_interaction*>(function->get_returntype()));
+            dynamic_cast<const t_interaction*>(function->return_type()));
       } else if (auto interaction = function->returned_interaction()) {
         interactions_.insert(
             dynamic_cast<const t_interaction*>(interaction->get_true_type()));
@@ -678,7 +678,7 @@ class mstch_function : public mstch_base {
 
   mstch::node arg_list();
   mstch::node starts_interaction() {
-    return function_->get_returntype()->is_service();
+    return function_->return_type()->is_service();
   }
   mstch::node has_structured_annotations() {
     return !function_->structured_annotations().empty();

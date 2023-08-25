@@ -221,7 +221,7 @@ mstch::map t_mstch_generator::dump(const t_function& function) {
   mstch::map result{
       {"name", function.get_name()},
       {"oneway?", function.qualifier() == t_function_qualifier::one_way},
-      {"return_type", dump(*function.get_returntype())},
+      {"return_type", dump(*function.return_type())},
       {"exceptions", dump_elems(function.get_xceptions()->fields())},
       {"exceptions?", function.get_xceptions()->has_fields()},
       {"annotations", dump_elems(function.annotations())},

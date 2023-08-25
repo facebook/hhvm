@@ -930,8 +930,8 @@ void t_js_generator::generate_js_function_helpers(const t_function* tfunction) {
   t_struct result(
       program_, service_name_ + "_" + tfunction->get_name() + "_result");
   auto success =
-      std::make_unique<t_field>(tfunction->get_returntype(), "success", 0);
-  if (!tfunction->get_returntype()->is_void()) {
+      std::make_unique<t_field>(tfunction->return_type(), "success", 0);
+  if (!tfunction->return_type()->is_void()) {
     result.append(std::move(success));
   }
 
@@ -1038,7 +1038,7 @@ void t_js_generator::generate_service_client(const t_service* tservice) {
 
     if (!gen_node_ && (*f_iter)->qualifier() != t_function_qualifier::one_way) {
       f_service_ << indent();
-      if (!(*f_iter)->get_returntype()->is_void()) {
+      if (!(*f_iter)->return_type()->is_void()) {
         f_service_ << "return ";
       }
       f_service_ << "this.recv_" << funname << "();" << endl;
@@ -1129,7 +1129,7 @@ void t_js_generator::generate_service_client(const t_service* tservice) {
                    << " = function(input,mtype,rseqid) {" << endl;
       } else {
         t_function recv_function(
-            (*f_iter)->get_returntype(),
+            (*f_iter)->return_type(),
             string("recv_") + (*f_iter)->get_name(),
             std::make_unique<t_paramlist>(program_));
         // Open function
@@ -1190,7 +1190,7 @@ void t_js_generator::generate_service_client(const t_service* tservice) {
       }
 
       // Careful, only return result if not a void function
-      if (!(*f_iter)->get_returntype()->is_void()) {
+      if (!(*f_iter)->return_type()->is_void()) {
         f_service_ << indent() << "if (null !== result.success) {" << endl
                    << indent() << "  " << render_recv_return("result.success")
                    << endl

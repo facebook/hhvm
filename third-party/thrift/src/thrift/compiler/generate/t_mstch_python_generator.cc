@@ -759,15 +759,14 @@ class python_mstch_service : public mstch_service {
   mstch::node supported_functions() {
     return make_mstch_functions(
         get_supported_functions([](const t_function* func) -> bool {
-          return !func->sink() && !func->get_returntype()->is_service();
+          return !func->sink() && !func->return_type()->is_service();
         }));
   }
 
   mstch::node supported_service_functions() {
     return make_mstch_functions(
         get_supported_functions([](const t_function* func) -> bool {
-          return !func->sink_or_stream() &&
-              !func->get_returntype()->is_service();
+          return !func->sink_or_stream() && !func->return_type()->is_service();
         }));
   }
 
@@ -878,12 +877,12 @@ class python_mstch_function : public mstch_function {
     if (auto stream = function_->stream()) {
       return !stream->first_response_type().empty();
     }
-    return !function_->get_returntype()->is_void();
+    return !function_->return_type()->is_void();
   }
 
   mstch::node async_only() {
     return function_->sink_or_stream() ||
-        function_->get_returntype()->is_service() ||
+        function_->return_type()->is_service() ||
         function_->is_interaction_member() ||
         !function_->returned_interaction().empty();
   }

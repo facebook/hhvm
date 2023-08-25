@@ -30,6 +30,7 @@
 #include <fmt/core.h>
 #include <folly/Traits.h>
 #include <folly/Utility.h>
+#include <folly/lang/Exception.h>
 #include <thrift/lib/cpp2/type/Tag.h>
 
 namespace apache {
@@ -111,7 +112,8 @@ inline constexpr Ordinal toOrdinal(size_t pos) {
   constexpr auto max_size = static_cast<size_t>(
       std::numeric_limits<std::underlying_type_t<Ordinal>>::max());
   if (pos >= max_size) {
-    throw std::out_of_range(fmt::format("max size supported is {}", max_size));
+    folly::throw_exception<std::out_of_range>(
+        fmt::format("max size supported is {}", max_size));
   }
   return Ordinal(pos + 1);
 }
@@ -127,7 +129,8 @@ inline constexpr Ordinal toOrdinal(size_t pos) {
 inline constexpr size_t toPosition(Ordinal ordinal, size_t max = 0) {
   auto val = static_cast<size_t>(ordinal);
   if (max && val > max) {
-    throw std::out_of_range(fmt::format("max size supported is {}", max));
+    folly::throw_exception<std::out_of_range>(
+        fmt::format("max size supported is {}", max));
   }
   return val - 1;
 }

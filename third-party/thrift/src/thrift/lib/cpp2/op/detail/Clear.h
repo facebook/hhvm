@@ -20,6 +20,7 @@
 
 #include <folly/CPortability.h>
 #include <folly/Portability.h>
+#include <folly/ScopeGuard.h>
 #include <folly/Utility.h>
 #include <folly/io/IOBuf.h>
 #include <folly/memory/SanitizeLeak.h>
@@ -141,13 +142,9 @@ struct ThriftClearDefault {
   const auto& operator()() const {
     static const auto& obj = *[] {
       auto* p = new type::native_type<Tag>();
-      try {
-        apache::thrift::clear(*p);
-        return p;
-      } catch (...) {
-        delete p;
-        throw;
-      }
+      SCOPE_FAIL { delete p; };
+      apache::thrift::clear(*p);
+      return p;
     }();
     return obj;
   }
@@ -216,14 +213,10 @@ struct GetDefault<
     static const auto& obj = *[] {
       // TODO(afuller): Remove or move this logic to the adapter.
       auto* s = new Struct{};
-      try {
-        auto* adapted = new type::native_type<Tag>(op::create<Tag>(*s));
-        folly::lsan_ignore_object(s);
-        return adapted;
-      } catch (...) {
-        delete s;
-        throw;
-      }
+      SCOPE_FAIL { delete s; };
+      auto* adapted = new type::native_type<Tag>(op::create<Tag>(*s));
+      folly::lsan_ignore_object(s);
+      return adapted;
     }();
     return obj;
   }
@@ -256,20 +249,15 @@ struct GetIntrinsicDefault<adapted_field_tag<Adapter, UTag, Struct, FieldId>> {
     static const auto& obj = *[] {
       // TODO(afuller): Remove or move this logic to the adapter.
       auto* s = new Struct{};
-      type::native_type<Tag>* adapted = nullptr;
-      try {
-        apache::thrift::clear(*s);
-        adapted = new type::native_type<Tag>(AdapterT::fromThriftField(
-            folly::copy(GetIntrinsicDefault<UTag>{}()),
-            FieldContext<Struct, FieldId>{*s}));
-        adapt_detail::construct<Adapter, FieldId>(adapted, *s);
-        folly::lsan_ignore_object(s);
-        return adapted;
-      } catch (...) {
-        delete adapted;
-        delete s;
-        throw;
-      }
+      SCOPE_FAIL { delete s; };
+      apache::thrift::clear(*s);
+      auto adapted = new type::native_type<Tag>(AdapterT::fromThriftField(
+          folly::copy(GetIntrinsicDefault<UTag>{}()),
+          FieldContext<Struct, FieldId>{*s}));
+      SCOPE_FAIL { delete adapted; };
+      adapt_detail::construct<Adapter, FieldId>(adapted, *s);
+      folly::lsan_ignore_object(s);
+      return adapted;
     }();
     return obj;
   }

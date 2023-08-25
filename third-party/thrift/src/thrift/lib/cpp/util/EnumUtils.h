@@ -23,6 +23,7 @@
 
 #include <folly/Conv.h>
 #include <folly/Portability.h>
+#include <folly/lang/Exception.h>
 
 #include <thrift/lib/cpp/Thrift.h>
 
@@ -57,7 +58,7 @@ template <typename EnumType>
 EnumType enumValueOrThrow(folly::StringPiece name) {
   EnumType out;
   if (!tryParseEnum(name, &out)) {
-    throw std::out_of_range("name not found in enum");
+    folly::throw_exception<std::out_of_range>("name not found in enum");
   }
   return out;
 }
@@ -94,7 +95,7 @@ const char* enumNameOrThrow(EnumType value) {
   if (const char* name = enumName(value)) {
     return name;
   }
-  throw std::out_of_range("value not found in enum");
+  folly::throw_exception<std::out_of_range>("value not found in enum");
 }
 
 } // namespace util

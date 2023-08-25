@@ -41,16 +41,6 @@ inline void reset_field<::facebook::thrift::annotation::Testing>(
 }
 
 template<>
-inline void reset_field<::facebook::thrift::annotation::Deprecated>(
-    ::facebook::thrift::annotation::Deprecated& obj, uint16_t index) {
-  switch (index) {
-    case 0:
-      obj.message_ref().copy_from(default_inst<::facebook::thrift::annotation::Deprecated>().message_ref());
-      return;
-  }
-}
-
-template<>
 inline void reset_field<::facebook::thrift::annotation::ReserveIds>(
     ::facebook::thrift::annotation::ReserveIds& obj, uint16_t index) {
   switch (index) {
@@ -228,16 +218,6 @@ inline const std::unordered_map<std::string_view, std::string_view>& PyStructTra
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::Testing>::namesmap() {
-  static const folly::Indestructible<NamesMap> map {
-    {
-    }
-  };
-  return *map;
-}
-
-template<>
-inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
-    ::facebook::thrift::annotation::Deprecated>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

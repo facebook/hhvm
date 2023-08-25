@@ -66,7 +66,7 @@ class ClingoContext:
         return Number(self.min_stub_interfaces)
 
 
-class CodeGenerator(object):
+class CodeGenerator:
     """A base generator to emit raw model from Clingo output only
     The children classes can extend the functionality to produce
     corresponding Hack/Java/C# code.

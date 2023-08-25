@@ -25,7 +25,7 @@ import clingo
 from hphp.hack.src.hh_codesynthesis.codeGenerator import ClingoContext, CodeGenerator
 
 
-class _HackBaseGenerator(object):
+class _HackBaseGenerator:
     """
     _HackBaseGenerator for the shared part of _HackInterfaceGenerator and
     _HackClassGenerator. In this case is the body of each class or interface

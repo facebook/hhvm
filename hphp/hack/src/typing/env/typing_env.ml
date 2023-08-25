@@ -640,8 +640,6 @@ let mark_members_declared_in_depgraph env (c : _ Aast.class_) =
       Deps.mark_xhp_attribute_declared env class_name name);
   ()
 
-let make_depend_on_ancestors = Deps.make_depend_on_ancestors
-
 let set_internal env b = { env with genv = { env.genv with this_internal = b } }
 
 let get_internal env = env.genv.this_internal

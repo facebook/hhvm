@@ -40,14 +40,6 @@ val add_member_dep :
   Typing_defs.class_elt option ->
   unit
 
-(** Register the droot as being dependent on all of the ancestor classes,
-    interfaces, and traits of the given class (i.e., the recursive ancestors
-    returned by [Typing_classes_heap.Api.all_ancestor_names] and stored in
-    [Decl_defs.dc_ancestors]). Should be invoked once when typechecking the
-    given class (after [droot] has been set to correspond to the given class). *)
-val make_depend_on_ancestors :
-  Typing_env_types.env -> Decl_provider.Class.t -> unit
-
 val make_depend_on_parent :
   Typing_env_types.env ->
   skip_constructor_dep:bool ->

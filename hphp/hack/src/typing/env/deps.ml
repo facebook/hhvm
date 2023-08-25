@@ -144,10 +144,6 @@ let make_depend_on_module env name md =
   | Some md when Pos_or_decl.is_hhi md.Typing_defs.mdt_pos -> ()
   | _ -> make_depend_on_module_name env name
 
-let make_depend_on_ancestors (env : Typing_env_types.env) (cls : Cls.t) : unit =
-  List.iter (Cls.all_ancestor_names cls) ~f:(fun ancestor ->
-      add_dependency_edge env (Dep.Type ancestor))
-
 let make_depend_on_parent env ~skip_constructor_dep name class_ =
   match class_ with
   | Some cd when Pos_or_decl.is_hhi (Cls.pos cd) -> ()

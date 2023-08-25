@@ -1804,12 +1804,6 @@ let class_def ctx (c : _ class_) =
     if TCO.optimized_member_fanout (Provider_context.get_tcopt ctx) then
       Env.mark_members_declared_in_depgraph env c;
     Typing_helpers.add_decl_errors ~env (Cls.decl_errors tc);
-    if
-      not
-        (TCO.saved_state_rollouts (Provider_context.get_tcopt ctx))
-          .Saved_state_rollouts.no_ancestor_edges
-    then
-      Env.make_depend_on_ancestors env tc;
     Some (class_def_ env c tc)
 
 type class_member_standalone_check_env = {

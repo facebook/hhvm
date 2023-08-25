@@ -512,13 +512,15 @@ struct Interaction {
 } (py3.hidden)
 
 /** A Thrift function return type. */
+// TODO (T161963504): rename to StreamOrSink
 union ReturnType {
+  // DEPRECATED
   1: type.Type thriftType;
   /** The stream return type. */
   2: Stream streamType;
   /** The sink return type. */
   3: Sink sinkType;
-  /** The interaction return type. */
+  /** DEPRECATED: The interaction return type. */
   4: id.DefinitionId interactionType;
 } (py3.hidden)
 
@@ -536,8 +538,7 @@ struct Function {
   // TODO(dokwon): Document compatibility semantics, and add conformance tests.
   1: FunctionQualifier qualifier;
 
-  /** The list of return types of the function. */
-  // TODO(dokwon): Document compatibility semantics, and add conformance tests.
+  /** DEPRECATED (T161963504): a list containing `returnType` if present. */
   2: ReturnTypes returnTypes;
 
   /** The definition attributes. */
@@ -549,6 +550,15 @@ struct Function {
 
   /** The exceptions of the function. */
   5: Exceptions exceptions;
+
+  /** The return or first response type of the function. */
+  6: type.Type returnType;
+
+  /** The stream or sink type returned by the function. */
+  7: ReturnType streamOrSink;
+
+  /** The interaction type created by the function. */
+  8: InterfaceRef interactionType;
 } (py3.hidden)
 
 /**

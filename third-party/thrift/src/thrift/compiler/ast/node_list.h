@@ -48,6 +48,7 @@ class node_list_view {
   using reference = T&;
 
   class iterator {
+    template <typename>
     friend class node_list_view;
     using itr_type = typename node_list_type::const_iterator;
     /* implicit */ constexpr iterator(itr_type itr) : itr_(std::move(itr)) {}
@@ -114,6 +115,14 @@ class node_list_view {
   constexpr node_list_view() = default;
   /* implicit */ constexpr node_list_view(const node_list_type& list) noexcept
       : begin_(list.begin()), size_(list.size()) {}
+  // Allow conversion from view<T> to view<const T>.
+  template <
+      typename U,
+      typename std::enable_if_t<
+          (!std::is_same_v<U, T> && std::is_same_v<const U, T>),
+          int> = 0>
+  /* implicit */ constexpr node_list_view(node_list_view<U> nonconst) noexcept
+      : begin_(nonconst.begin().itr_), size_(nonconst.size()) {}
 
   constexpr node_list_view(const node_list_view&) noexcept = default;
   constexpr node_list_view& operator=(const node_list_view&) noexcept = default;

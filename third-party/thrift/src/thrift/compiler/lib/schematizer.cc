@@ -147,6 +147,8 @@ void add_as_definition(
   defns_schema.add_list(std::move(defn_schema));
 }
 
+/// Returns a constant of type type_rep.TypeStruct,
+/// resolving placeholder typedefs if needed.
 std::unique_ptr<t_const_value> gen_type(
     schematizer* generator,
     const t_program* program,
@@ -281,7 +283,6 @@ std::unique_ptr<t_const_value> gen_type(
   }
   return schema;
 }
-
 std::unique_ptr<t_const_value> gen_type(
     const t_type& type, const t_program* program) {
   return gen_type(nullptr, program, nullptr, type);
@@ -526,19 +527,78 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
       return 0; // Default
     }());
 
-    auto return_types_schema = val();
-    return_types_schema->set_list();
     for (const auto& ret : func.return_types()) {
-      // TODO: Handle sink, stream, interactions
-      if (!func.sink_or_stream() && !ret->is_service()) {
-        auto return_type_schema = val();
-        return_type_schema->set_map();
-        return_type_schema->add_map(
-            val("thriftType"), gen_type(*ret->get_true_type(), node.program()));
-        return_types_schema->add_list(std::move(return_type_schema));
+      auto type = ret.get_type();
+      if (auto interaction = dynamic_cast<const t_interaction*>(type)) {
+        auto ref = mapval();
+        ref->add_map(val("uri"), typeUri(*interaction, node.program()));
+        func_schema->add_map(val("interactionType"), std::move(ref));
+      } else if (auto stream = dynamic_cast<const t_stream_response*>(type)) {
+        assert(false); // handled below
+      } else if (auto sink = dynamic_cast<const t_sink*>(type)) {
+        assert(false); // handled below
+      } else {
+        func_schema->add_map(
+            val("returnType"), gen_type(*type, node.program()));
+        // Double write of return type for backwards compatibility (T161963504).
+        auto return_types_schema = val();
+        return_types_schema->set_list();
+        auto schema = mapval();
+        schema->add_map(val("thriftType"), gen_type(*ret, node.program()));
+        return_types_schema->add_list(std::move(schema));
+        func_schema->add_map(
+            val("returnTypes"), std::move(return_types_schema));
       }
     }
-    func_schema->add_map(val("returnTypes"), std::move(return_types_schema));
+
+    if (auto stream = func.stream()) {
+      auto stream_schema = mapval();
+      stream_schema->add_map(
+          val("payload"), gen_type(*stream->elem_type(), node.program()));
+      if (auto throws = stream->get_throws_struct()) {
+        add_fields(
+            this,
+            node.program(),
+            nullptr,
+            *stream_schema,
+            "exceptions",
+            throws->fields(),
+            intern_value_);
+      }
+      auto return_type = mapval();
+      return_type->add_map(val("streamType"), std::move(stream_schema));
+      func_schema->add_map(val("streamOrSink"), std::move(return_type));
+    } else if (auto sink = func.sink()) {
+      auto sink_schema = mapval();
+      sink_schema->add_map(
+          val("payload"), gen_type(*sink->elem_type(), node.program()));
+      if (auto throws = sink->sink_exceptions()) {
+        add_fields(
+            this,
+            node.program(),
+            nullptr,
+            *sink_schema,
+            "clientExceptions",
+            throws->fields(),
+            intern_value_);
+      }
+      sink_schema->add_map(
+          val("finalResponse"),
+          gen_type(*sink->final_response_type(), node.program()));
+      if (auto throws = sink->final_response_exceptions()) {
+        add_fields(
+            this,
+            node.program(),
+            nullptr,
+            *sink_schema,
+            "serverExceptions",
+            throws->fields(),
+            intern_value_);
+      }
+      auto return_type = mapval();
+      return_type->add_map(val("sinkType"), std::move(sink_schema));
+      func_schema->add_map(val("streamOrSink"), std::move(return_type));
+    }
 
     auto param_list_schema = val();
     param_list_schema->set_map();

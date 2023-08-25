@@ -352,7 +352,6 @@ let main_hack
     (naming_table : string option)
     (sharedmem_config : SharedMem.config) : unit =
   Folly.ensure_folly_init ();
-  (* TODO: We should have a per file config *)
   Sys_utils.signal Sys.sigusr1 (Sys.Signal_handle Typing.debug_print_last_pos);
   EventLogger.init_fake ();
 

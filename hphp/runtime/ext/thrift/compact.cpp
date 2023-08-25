@@ -1178,6 +1178,28 @@ struct CompactReader {
       }
     }
 
+    void readIntegralListFast(VecInit& arr, size_t size) {
+      const char *startPtr = transport.getBuffer();
+      const char *ptr = startPtr;
+      const char *endPtr = startPtr + transport.getBufferSize() - 10;
+      while ((ptr <= endPtr) && (size > 0)) {
+        // We definately should have enough data to read single value
+        int64_t value = zigzagToI64(readVarintFast(&ptr));
+        arr.append(value);
+        size--;
+      }
+      intptr_t skipLen = ptr - startPtr;
+      if (transport.skipNoAdvance(skipLen) != skipLen) {
+        thrift_error("Invalid skip value", ERR_INVALID_DATA);
+      }
+      // Finish tail using slow byte-by-byte path
+      while (size > 0) {
+        int64_t value = readI();
+        arr.append(value);
+        size--;
+      }
+    }
+
     Variant readList(const FieldSpec& spec, bool& hasTypeWrapper) {
       TType valueType;
       uint32_t size;
@@ -1190,9 +1212,7 @@ struct CompactReader {
             arr.append(transport.readI8());
           }
         } else if (spec.val().adapter == nullptr && typeIsInt(valueType)) {
-          for (uint32_t i = 0; i < size; i++) {
-            arr.append(readI());
-          }
+          readIntegralListFast(arr, size);
         } else {
           for (uint32_t i = 0; i < size; i++) {
             arr.append(readField(spec.val(), valueType, hasTypeWrapper));

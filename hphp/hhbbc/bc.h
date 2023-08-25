@@ -687,6 +687,9 @@ auto equals(const eq_operand<T,S>& t, E e) -> decltype(e(t.l, t.r, t.type)) {
 template<typename T, typename S, typename... Unused>
 typename std::enable_if<sizeof...(Unused) == 1, bool>::type
 equals(const eq_operand<T,S>& t, Unused...) {
+  if constexpr (std::is_floating_point_v<T>) {
+    return double_equals(t.l, t.r);
+  }
   return t.l == t.r;
 }
 

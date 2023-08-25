@@ -100,6 +100,16 @@ constexpr const ExnNodeId NoExnNodeId = -1;
 
 //////////////////////////////////////////////////////////////////////
 
+inline bool double_equals(double a, double b) {
+  // +ve and -ve zero must not compare equal, but (for purposes of
+  // Type equivalence), NaNs are equal.
+  return a == b
+    ? std::signbit(a) == std::signbit(b)
+    : (std::isnan(a) && std::isnan(b));
+}
+
+//////////////////////////////////////////////////////////////////////
+
 /*
  * Many places in the code want to bump tracing levels by some amount
  * for systemlib-related processing.  This is the amount they all bump

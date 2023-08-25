@@ -1998,16 +1998,6 @@ struct KeysetAppendInit : KeysetInit {
 
 //////////////////////////////////////////////////////////////////////
 
-bool double_equals(double a, double b) {
-  // +ve and -ve zero must not compare equal, but (for purposes of
-  // Type equivalence), NaNs are equal.
-  return a == b
-    ? std::signbit(a) == std::signbit(b)
-    : (std::isnan(a) && std::isnan(b));
-}
-
-//////////////////////////////////////////////////////////////////////
-
 }
 
 //////////////////////////////////////////////////////////////////////

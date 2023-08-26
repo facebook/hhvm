@@ -2148,73 +2148,18 @@ std::vector<TypeConstraint> parse_type_constraint_union(AsmState& as) {
 /*
  * type-info       : maybe-string-literal type-constraint
  */
-std::pair<const StringData*, TypeConstraint> parse_type_info(AsmState& as) {
+std::tuple<const StringData*, TypeConstraint, UpperBoundVec>
+parse_type_info(AsmState& as) {
   auto const userType = read_maybe_litstr(as);
   auto const typeConstraint = parse_type_constraint(as);
-  return {userType, typeConstraint};
-}
-
-TParamNameVec parse_shadowed_tparams(AsmState& as) {
-  TParamNameVec ret;
-  as.in.skipWhitespace();
-  if (as.in.peek() != '{') return ret;
-  as.in.getc();
-  std::string name;
-  for (;;) {
-    as.in.skipWhitespace();
-    if (as.in.readword(name)) ret.push_back(makeStaticString(name));
-    if (as.in.peek() == '}') break;
-    as.in.expectWs(',');
-  }
-  as.in.expectWs('}');
-  return ret;
-}
-
-void parse_ub(AsmState& as, UpperBoundMap& ubs) {
-  as.in.skipWhitespace();
-  if (as.in.peek() != '(') return;
-  as.in.getc();
-  std::string name;
-  if (!as.in.readword(name)) {
-    as.error("Type name expected");
-  }
-  auto nameStr = makeStaticString(name);
-  if (!as.in.readword(name) || name != "as") {
-    as.error("Expected keyword as");
-  }
-  for (;;) {
-    const auto& tc = parse_type_constraint(as);
-    auto& v = ubs[nameStr];
-    v.add(tc);
+  UpperBoundVec ubs;
+  while (true) {
     as.in.skipWhitespace();
     if (as.in.peek() != ',') break;
     as.in.getc();
-    as.in.skipWhitespace();
+    ubs.add(parse_type_constraint(as));
   }
-  as.in.expectWs(')');
-}
-
-/*
- * upper-bound-list : '{' upper-bound-name-list '}'
- *                ;
- *
- * upper-bound-name-list : empty
- *                       | '(' type-name 'as' type-constraint-list ')'
- *                 ;
- */
-
-UpperBoundMap parse_ubs(AsmState& as) {
-  UpperBoundMap ret;
-  as.in.skipWhitespace();
-  if (as.in.peek() != '{') return ret;
-  as.in.getc();
-  for (;;) {
-    parse_ub(as, ret);
-    if (as.in.peek() == '}') break;
-    as.in.expectWs(',');
-  }
-  as.in.expect('}');
-  return ret;
+  return {userType, typeConstraint, ubs};
 }
 
 /*
@@ -2237,11 +2182,7 @@ UpperBoundMap parse_ubs(AsmState& as) {
  *             | '(' long-string-literal ')'
  *             ;
  */
-void parse_parameter_list(AsmState& as,
-                          const UpperBoundMap& ubs,
-                          const UpperBoundMap& class_ubs,
-                          const TParamNameVec& shadowed_tparams,
-                          bool hasReifiedGenerics) {
+void parse_parameter_list(AsmState& as) {
   as.in.skipWhitespace();
   if (as.in.peek() != '(') return;
   as.in.getc();
@@ -2283,16 +2224,11 @@ void parse_parameter_list(AsmState& as,
       param.setFlag(Func::ParamInfo::Flags::Readonly);
     }
 
-    std::tie(param.userType, param.typeConstraint) = parse_type_info(as);
-    auto currUBs = getRelevantUpperBounds(param.typeConstraint, ubs,
-                                          class_ubs, shadowed_tparams);
-    if (currUBs.isSimple() && !hasReifiedGenerics) {
-      applyFlagsToUB(currUBs.asSimpleMut(), param.typeConstraint);
-      param.typeConstraint = currUBs.asSimple();
-    } else if (!currUBs.isTop()) {
-      param.upperBounds = std::move(currUBs);
-      as.fe->hasParamsWithMultiUBs = true;
-    }
+    auto [userType, tc, ubs] = parse_type_info(as);
+    param.userType = userType;
+    param.typeConstraint = tc;
+    param.upperBounds = std::move(ubs);
+    if (!param.upperBounds.isTop()) as.fe->hasParamsWithMultiUBs = true;
 
     as.in.skipWhitespace();
     ch = as.in.getc();
@@ -2402,8 +2338,6 @@ void check_native(AsmState& as) {
 void parse_function(AsmState& as) {
   as.in.skipWhitespace();
 
-  auto const ubs = parse_ubs(as);
-
   UserAttributeMap userAttrs;
   Attr attrs = parse_attribute_list(as, AttrContext::Func, &userAttrs);
   assertx(IMPLIES(as.ue->isASystemLib(), attrs & AttrBuiltin));
@@ -2412,7 +2346,7 @@ void parse_function(AsmState& as) {
   int line1;
   parse_line_range(as, line0, line1);
 
-  auto retTypeInfo = parse_type_info(as);
+  auto [userType, tc, ubs] = parse_type_info(as);
   std::string name;
   if (!as.in.readname(name)) {
     as.error(".function must have a name");
@@ -2424,21 +2358,14 @@ void parse_function(AsmState& as) {
   as.fe = as.ue->newFuncEmitter(sname);
   as.fe->init(line0, line1, attrs, nullptr);
 
-  auto currUBs = getRelevantUpperBounds(retTypeInfo.second, ubs, {}, {});
-  auto const hasReifiedGenerics =
-    userAttrs.find(s___Reified.get()) != userAttrs.end();
-  if (currUBs.isSimple() && !hasReifiedGenerics) {
-    applyFlagsToUB(currUBs.asSimpleMut(), retTypeInfo.second);
-    retTypeInfo.second = currUBs.asSimple();
-  } else if (!currUBs.isTop()) {
-    as.fe->retUpperBounds = std::move(currUBs);
-    as.fe->hasReturnWithMultiUBs = true;
-  }
+  as.fe->retUserType = userType;
+  as.fe->retTypeConstraint = tc;
+  as.fe->retUpperBounds = std::move(ubs);
+  as.fe->hasReturnWithMultiUBs = !as.fe->retUpperBounds.isTop();
 
-  std::tie(as.fe->retUserType, as.fe->retTypeConstraint) = retTypeInfo;
   as.fe->userAttributes = userAttrs;
 
-  parse_parameter_list(as, ubs, {}, {}, hasReifiedGenerics);
+  parse_parameter_list(as);
   // parse_function_flabs relies on as.fe already having valid attrs
   parse_function_flags(as);
 
@@ -2457,11 +2384,8 @@ void parse_function(AsmState& as) {
  *                      parameter-list function-flags '{' function-body
  *                  ;
  */
-void parse_method(AsmState& as, const UpperBoundMap& class_ubs) {
+void parse_method(AsmState& as) {
   as.in.skipWhitespace();
-
-  auto const shadowed_tparams = parse_shadowed_tparams(as);
-  auto const ubs = parse_ubs(as);
 
   UserAttributeMap userAttrs;
   Attr attrs = parse_attribute_list(as, AttrContext::Func, &userAttrs);
@@ -2472,7 +2396,7 @@ void parse_method(AsmState& as, const UpperBoundMap& class_ubs) {
   int line1;
   parse_line_range(as, line0, line1);
 
-  auto retTypeInfo = parse_type_info(as);
+  auto [userType, tc, ubs] = parse_type_info(as);
   std::string name;
   if (!as.in.readname(name)) {
     as.error(".method requires a method name");
@@ -2487,26 +2411,14 @@ void parse_method(AsmState& as, const UpperBoundMap& class_ubs) {
   as.pce->addMethod(as.fe);
   as.fe->init(line0, line1, attrs, nullptr);
 
-  auto const hasReifiedGenerics =
-    userAttrs.find(s___Reified.get()) != userAttrs.end() ||
-    as.pce->userAttributes().find(s___Reified.get()) !=
-    as.pce->userAttributes().end();
+  as.fe->retUserType = userType;
+  as.fe->retTypeConstraint = tc;
+  as.fe->retUpperBounds = std::move(ubs);
+  as.fe->hasReturnWithMultiUBs = !as.fe->retUpperBounds.isTop();
 
-  auto currUBs = getRelevantUpperBounds(retTypeInfo.second, ubs,
-                                        class_ubs, shadowed_tparams);
-  if (currUBs.isSimple() && !hasReifiedGenerics) {
-    applyFlagsToUB(currUBs.asSimpleMut(), retTypeInfo.second);
-    retTypeInfo.second = currUBs.asSimple();
-  } else if (!currUBs.isTop()) {
-    as.fe->retUpperBounds = std::move(currUBs);
-    as.fe->hasReturnWithMultiUBs = true;
-  }
-
-  std::tie(as.fe->retUserType, as.fe->retTypeConstraint) = retTypeInfo;
   as.fe->userAttributes = userAttrs;
 
-  parse_parameter_list(as, ubs, class_ubs,
-                       shadowed_tparams, hasReifiedGenerics);
+  parse_parameter_list(as);
   // parse_function_flabs relies on as.fe already having valid attrs
   parse_function_flags(as);
 
@@ -2573,7 +2485,7 @@ TypedValue parse_member_tv_initializer(AsmState& as) {
  *
  * Define a property with an associated type and heredoc.
  */
-void parse_property(AsmState& as, const UpperBoundMap& class_ubs) {
+void parse_property(AsmState& as) {
   as.in.skipWhitespace();
 
   UserAttributeMap userAttributes;
@@ -2586,21 +2498,8 @@ void parse_property(AsmState& as, const UpperBoundMap& class_ubs) {
 
   auto const heredoc = makeDocComment(parse_maybe_long_string(as));
 
-  const StringData* userTy;
-  TypeConstraint typeConstraint;
-  std::tie(userTy, typeConstraint) = parse_type_info(as);
-  auto const userTyStr = userTy ? userTy : staticEmptyString();
+  auto [userType, tc, ubs] = parse_type_info(as);
 
-  auto const hasReifiedGenerics =
-    userAttributes.find(s___Reified.get()) != userAttributes.end();
-  auto ub = getRelevantUpperBounds(typeConstraint, class_ubs, {}, {});
-  auto needsMultiUBs = false;
-  if (ub.isSimple() && !hasReifiedGenerics) {
-    applyFlagsToUB(ub.asSimpleMut(), typeConstraint);
-    typeConstraint = ub.asSimple();
-  } else if (!ub.isTop()) {
-    needsMultiUBs = true;
-  }
   std::string name;
   as.in.skipSpaceTab();
   as.in.consumePred(!boost::is_any_of(" \t\r\n#;="),
@@ -2613,9 +2512,9 @@ void parse_property(AsmState& as, const UpperBoundMap& class_ubs) {
   as.pce->addProperty(
       makeStaticString(name),
       attrs,
-      userTyStr,
-      typeConstraint,
-      needsMultiUBs ? std::move(ub) : UpperBoundVec{},
+      userType ? userType : staticEmptyString(),
+      tc,
+      std::move(ubs),
       heredoc,
       &tvInit,
       RepoAuthType{},
@@ -2832,14 +2731,14 @@ void parse_cls_doccomment(AsmState& as) {
  *                 | ".doc"          directive-doccomment
  *                 ;
  */
-void parse_class_body(AsmState& as, const UpperBoundMap& class_ubs) {
+void parse_class_body(AsmState& as) {
   std::string directive;
   while (as.in.readword(directive)) {
     if (directive == ".property") {
-      parse_property(as, class_ubs);
+      parse_property(as);
       continue;
     }
-    if (directive == ".method")       { parse_method(as, class_ubs); continue; }
+    if (directive == ".method")       { parse_method(as);         continue; }
     if (directive == ".const")        { parse_class_constant(as); continue; }
     if (directive == ".use")          { parse_use(as);            continue; }
     if (directive == ".default_ctor") { parse_default_ctor(as);   continue; }
@@ -2870,8 +2769,6 @@ void parse_class_body(AsmState& as, const UpperBoundMap& class_ubs) {
  */
 void parse_class(AsmState& as) {
   as.in.skipWhitespace();
-
-  auto ubs = parse_ubs(as);
 
   UserAttributeMap userAttrs;
   Attr attrs = parse_attribute_list(as, AttrContext::Class, &userAttrs);
@@ -2941,7 +2838,7 @@ void parse_class(AsmState& as) {
   as.pce->setUserAttributes(userAttrs);
 
   as.in.expectWs('{');
-  parse_class_body(as, ubs);
+  parse_class_body(as);
 
   as.finishClass();
 }

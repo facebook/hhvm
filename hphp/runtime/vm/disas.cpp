@@ -155,9 +155,6 @@ struct FuncInfo {
 
   // Try/catch protected region starts in order.
   std::vector<std::pair<Offset,const EHEnt*>> ehStarts;
-
-  // Upper-bounds for params and return types
-  UBMap ubs;
 };
 
 FuncInfo find_func_info(const Func* func) {
@@ -209,27 +206,9 @@ FuncInfo find_func_info(const Func* func) {
     }
   };
 
-  auto find_upper_bounds = [&] {
-    if (func->hasParamsWithMultiUBs()) {
-      auto const& params = func->params();
-      for (auto const& p : func->paramUBs()) {
-        auto const& typeName = params[p.first].typeConstraint.typeName();
-        auto& v = finfo.ubs[typeName];
-        if (v.isTop()) v.m_constraints.assign(std::begin(p.second.m_constraints), std::end(p.second.m_constraints));
-      }
-    }
-    if (func->hasReturnWithMultiUBs()) {
-      auto& v = finfo.ubs[func->returnTypeConstraint().typeName()];
-      if (v.isTop()) {
-        v.m_constraints.assign(std::begin(func->returnUBs().m_constraints), std::end(func->returnUBs().m_constraints));
-      }
-    }
-  };
-
   find_jump_targets();
   find_eh_entries();
   find_dv_entries();
-  find_upper_bounds();
   return finfo;
 }
 
@@ -552,9 +531,15 @@ std::string opt_type_constraint(const TypeConstraint& tc) {
   return folly::format("<{}> ", type_constraint(tc)).str();
 }
 
-std::string type_info(const StringData* userType, const TypeConstraint& tc) {
+std::string type_info(const StringData* userType, const TypeConstraint& tc,
+                      const VMTypeIntersectionConstraint& ubs) {
   std::string utype = userType ? escaped(userType) : "N";
-  return folly::format("{} {}", utype, opt_type_constraint(tc)).str();
+  auto ret = folly::format("{} {}", utype, opt_type_constraint(tc)).str();
+  for (auto const& ub : ubs.m_constraints) {
+    ret += ", ";
+    ret += opt_type_constraint(ub);
+  }
+  return ret;
 }
 
 std::string opt_attrs(AttrContext ctx, Attr attrs,
@@ -590,8 +575,13 @@ std::string func_param_list(const FuncInfo& finfo) {
     if (func->isReadonly(i)) {
       ret += "readonly ";
     }
-    ret += type_info(func->params()[i].userType,
-                     func->params()[i].typeConstraint);
+    ret += type_info(
+      func->params()[i].userType,
+      func->params()[i].typeConstraint,
+      func->hasParamsWithMultiUBs() && func->paramUBs().contains(i)
+        ? func->paramUBs().at(i)
+        : Func::UpperBoundVec{}
+    );
     ret += folly::format("{}", loc_name(finfo, i)).str();
     if (func->params()[i].hasDefaultValue()) {
       auto const off = func->params()[i].funcletOff;
@@ -620,40 +610,17 @@ std::string func_flag_list(const FuncInfo& finfo) {
   return " ";
 }
 
-// We do not need to emit shadowed type parameters in disassembly
-// because we do not emit any type parameters for classes.
-// We need to emit the empty list so that assembler can parse it.
-std::string opt_shadowed_tparams() {
-  return "{}";
-}
-
-std::string opt_ubs(const UBMap& ubs) {
-  std::string ret = {};
-  ret += "{";
-  for (auto const& p : ubs) {
-    ret += "(";
-    ret += p.first->data();
-    ret += " as ";
-    bool first = true;
-    for (auto const& ub : p.second.m_constraints) {
-      if (!first) ret += ", ";
-      ret += opt_type_constraint(ub);
-      first = false;
-    }
-    ret += ")";
-  }
-  ret += "}";
-  return ret;
-}
-
 void print_func(Output& out, const Func* func) {
   auto const finfo = find_func_info(func);
 
-  out.fmtln(".function{}{}{} {}{}({}){}{{",
-    opt_ubs(finfo.ubs),
+  out.fmtln(".function{}{} {}{}({}){}{{",
     opt_attrs(AttrContext::Func, func->attrs(), &func->userAttributes()),
     format_line_pair(func),
-    type_info(func->returnUserType(), func->returnTypeConstraint()),
+    type_info(
+      func->returnUserType(),
+      func->returnTypeConstraint(),
+      func->hasReturnWithMultiUBs() ? func->returnUBs() : Func::UpperBoundVec{}
+    ),
     func->name(),
     func_param_list(finfo),
     func_flag_list(finfo));
@@ -718,7 +685,7 @@ void print_prop_or_field_impl(Output& out, const T& f) {
     RuntimeOption::EvalDisassemblerPropDocComments
       ? opt_escaped_long(f.docComment())
       : std::string(""),
-    type_info(f.userType(), f.typeConstraint()),
+    type_info(f.userType(), f.typeConstraint(), f.upperBounds()),
     f.name()->data());
   indented(out, [&] {
       out.fmtln("{};", member_tv_initializer(f.val()));
@@ -731,12 +698,14 @@ void print_property(Output& out, const PreClass::Prop* prop) {
 
 void print_method(Output& out, const Func* func) {
   auto const finfo = find_func_info(func);
-  out.fmtln(".method{}{}{}{} {}{}({}){}{{",
-    opt_shadowed_tparams(),
-    opt_ubs(finfo.ubs),
+  out.fmtln(".method{}{} {}{}({}){}{{",
     opt_attrs(AttrContext::Func, func->attrs(), &func->userAttributes()),
     format_line_pair(func),
-    type_info(func->returnUserType(), func->returnTypeConstraint()),
+    type_info(
+      func->returnUserType(),
+      func->returnTypeConstraint(),
+      func->hasReturnWithMultiUBs() ? func->returnUBs() : Func::UpperBoundVec{}
+    ),
     func->name(),
     func_param_list(finfo),
     func_flag_list(finfo));
@@ -835,8 +804,7 @@ void print_cls(Output& out, const PreClass* cls) {
     }
   }
 
-  out.fmt(".class {} {} {}{}",
-    opt_ubs(cls_ubs),
+  out.fmt(".class {} {}{}",
     opt_attrs(AttrContext::Class, cls->attrs(), &cls->userAttributes()),
     name,
     format_line_pair(cls));

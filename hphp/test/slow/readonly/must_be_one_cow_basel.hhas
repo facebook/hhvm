@@ -1,6 +1,6 @@
 .adata A_1073741824 = """v:3:{v:1:{i:0;}v:1:{i:1;}v:1:{i:2;}}""";
 
-.function{} ["__EntryPoint"("""v:0:{}""")] (19,25) "HH\\void" <N  > test() {
+.function ["__EntryPoint"("""v:0:{}""")] (19,25) "HH\\void" <N  > test() {
   .declvars $b;
   .srcloc 20:8,20:16;
   NewObjD "Bar"
@@ -62,12 +62,12 @@
   RetC
 }
 
-.class {}  Foo1 (3,8) {
+.class Foo1 (3,8) {
   .property [public readonly] "HH\\vec<HH\\vec<HH\\int>>" <"HH\\vec" extended_hint > b =
     """v:3:{v:1:{i:0;}v:1:{i:1;}v:1:{i:2;}}""";
   .property [public deep_init readonly] "HH\\vec<HH\\Vector<HH\\vec<HH\\int>>>" <"HH\\vec" extended_hint > bad_b =
     uninit;
-  .method{}{} [private static no_injection] (3,8) N 86pinit() {
+  .method [private static no_injection] (3,8) N 86pinit() {
     .coeffects_static pure;
     .srcloc 3:1,8:170;
     CheckProp "bad_b"
@@ -85,12 +85,12 @@
   }
 }
 
-.class {}  Foo (10,12) {
+.class Foo (10,12) {
   .property [public sys_initial_val] "HH\\vec<Foo1>" <"HH\\vec" extended_hint > c =
     """N;""";
 }
 
-.class {}  Bar (14,16) {
+.class Bar (14,16) {
   .property [public sys_initial_val] "Foo" <"Foo" extended_hint > myFoo =
     """N;""";
 }

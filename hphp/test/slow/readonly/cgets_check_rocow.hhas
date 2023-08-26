@@ -1,6 +1,6 @@
 .file_attributes ["__EnableUnstableFeatures"("""y:1:{s:8:\"readonly\";}""")] ;
 
-.function{} ["__EntryPoint"("""y:0:{}""")] (8,10) "" <N  > main() {
+.function ["__EntryPoint"("""y:0:{}""")] (8,10) "" <N  > main() {
   .declvars $x;
   .srcloc 9:13,9:20;
   String "ro_prop"
@@ -16,7 +16,7 @@
   RetC
 }
 
-.class {}  Foo (3,5) {
+.class Foo (3,5) {
   .property [public static readonly sys_initial_val] "Bar" <"Bar" extended_hint > ro_prop =
     """N;""";
 }

@@ -199,9 +199,16 @@ class ConnectionManager : public folly::DelayedDestruction,
 
   /**
    * Drop conections based on idle timeout.
+   *
+   * @param targetIdleTimeMS The target idle timeout for all connections.
+   * @param droppedConnectionsCB Callback will be called at the end of the
+   *    method with number of dropped connections as input.
+   *
+   * @return Number of connections dropped.
    */
   size_t dropIdleConnectionsBasedOnTimeout(
-      std::chrono::milliseconds targetIdleTimeMs);
+      std::chrono::milliseconds targetIdleTimeMs,
+      const std::function<void(size_t)>& droppedConnectionsCB = [](size_t) {});
 
   /**
    * reportActivity is meant to be called when significant activity occurred on

@@ -418,7 +418,8 @@ size_t ConnectionManager::dropIdleConnections(size_t num) {
 }
 
 size_t ConnectionManager::dropIdleConnectionsBasedOnTimeout(
-    std::chrono::milliseconds targetIdleTimeMs) {
+    std::chrono::milliseconds targetIdleTimeMs,
+    const std::function<void(size_t)>& droppedConnectionsCB) {
   VLOG(4)
       << "attempt to drop all the connections for which idle time is greater or equal to "
       << targetIdleTimeMs.count();
@@ -431,13 +432,14 @@ size_t ConnectionManager::dropIdleConnectionsBasedOnTimeout(
       VLOG(4) << "conn's idletime: " << idleTimeMs.count()
               << ", in-activity threshold: " << targetIdleTimeMs.count()
               << ", dropped " << count << "/" << count;
-      return count;
+      break;
     }
     ManagedConnection& conn = *idleIterator_;
     idleIterator_++;
     conn.dropConnection();
     count++;
   }
+  droppedConnectionsCB(count);
   return count;
 }
 

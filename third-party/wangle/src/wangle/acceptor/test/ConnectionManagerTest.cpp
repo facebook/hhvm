@@ -478,7 +478,14 @@ TEST_F(ConnectionManagerTest, testDropIdleConnectionsBasedOnIdleTimeDropAll) {
         }));
   }
 
-  cm_->dropIdleConnectionsBasedOnTimeout(std::chrono::milliseconds(99));
+  bool callbackCalled{false};
+  cm_->dropIdleConnectionsBasedOnTimeout(
+      std::chrono::milliseconds(99),
+      [this, &callbackCalled](size_t numConnectionsDropped) {
+        EXPECT_EQ(numConnectionsDropped, conns_.size());
+        callbackCalled = true;
+      });
+  EXPECT_TRUE(callbackCalled);
 }
 
 TEST_F(ConnectionManagerTest, testDropIdleConnectionsBasedOnIdleTimeDropNone) {
@@ -500,7 +507,10 @@ TEST_F(ConnectionManagerTest, testDropIdleConnectionsBasedOnIdleTimeDropNone) {
     EXPECT_CALL(*conns_[i], dropConnection(_)).Times(0);
   }
 
-  cm_->dropIdleConnectionsBasedOnTimeout(std::chrono::milliseconds(100));
+  cm_->dropIdleConnectionsBasedOnTimeout(
+      std::chrono::milliseconds(100), [](size_t numConnectionsDropped) {
+        EXPECT_EQ(numConnectionsDropped, 0);
+      });
 }
 
 TEST_F(ConnectionManagerTest, testDropIdleConnectionsBasedOnIdleTimeDropHalf) {
@@ -529,7 +539,52 @@ TEST_F(ConnectionManagerTest, testDropIdleConnectionsBasedOnIdleTimeDropHalf) {
         }));
   }
 
-  cm_->dropIdleConnectionsBasedOnTimeout(std::chrono::milliseconds(99));
+  bool callbackCalled{false};
+  cm_->dropIdleConnectionsBasedOnTimeout(
+      std::chrono::milliseconds(99),
+      [this, &callbackCalled](size_t numConnectionsDropped) {
+        EXPECT_EQ(numConnectionsDropped, conns_.size() / 2 - 2);
+        callbackCalled = true;
+      });
+  EXPECT_TRUE(callbackCalled);
+}
+
+TEST_F(ConnectionManagerTest, testDropIdleConnectionsBasedOnIdleTimeEarlyStop) {
+  size_t halfConnectionsSize = conns_.size() / 2;
+  for (size_t i = halfConnectionsSize; i < conns_.size(); i++) {
+    EXPECT_CALL(*conns_[i], getIdleTime())
+        .WillRepeatedly(Return(std::chrono::milliseconds(10)));
+  }
+
+  for (size_t i = 0; i < halfConnectionsSize; i++) {
+    // Set everyone to be idle for 100ms
+    EXPECT_CALL(*conns_[i], getIdleTime())
+        .WillRepeatedly(Return(std::chrono::milliseconds(100)));
+  }
+
+  // Mark every connection idle
+  for (size_t i = 0; i < conns_.size(); i++) {
+    cm_->onDeactivated(*conns_[i]);
+  }
+
+  InSequence enforceOrder;
+
+  // Expect the remaining idle conns to drop
+  for (size_t i = 0; i < halfConnectionsSize; i++) {
+    EXPECT_CALL(*conns_[i], dropConnection(_))
+        .WillOnce(Invoke([this, i](const std::string&) {
+          cm_->removeConnection(conns_[i].get());
+        }));
+  }
+
+  bool callbackCalled{false};
+  cm_->dropIdleConnectionsBasedOnTimeout(
+      std::chrono::milliseconds(99),
+      [halfConnectionsSize, &callbackCalled](size_t numConnectionsDropped) {
+        EXPECT_EQ(numConnectionsDropped, halfConnectionsSize);
+        callbackCalled = true;
+      });
+  EXPECT_TRUE(callbackCalled);
 }
 
 TEST_F(ConnectionManagerTest, testAddDuringShutdown) {

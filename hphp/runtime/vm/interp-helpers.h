@@ -51,11 +51,10 @@ void verifyParamType(const Func* func, int32_t id, tv_lval val,
     tc.verifyParam(val, ctx, func, id);
   }
   if (func->hasParamsWithMultiUBs()) {
-    auto& ubs = const_cast<Func::ParamUBMap&>(func->paramUBs());
-    auto it = ubs.find(id);
+    auto const& ubs = func->paramUBs();
+    auto const it = ubs.find(id);
     if (it != ubs.end()) {
-      for (auto& ub : it->second.m_constraints) {
-        applyFlagsToUB(ub, tc);
+      for (auto const& ub : it->second.m_constraints) {
         if (ub.isCheckable()) {
           auto const ctx = ub.isThis() ? getCtx() : nullptr;
           ub.verifyParam(val, ctx, func, id);

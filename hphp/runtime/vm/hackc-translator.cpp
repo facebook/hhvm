@@ -467,7 +467,6 @@ void translateProperty(TranslationState& ts, const hhbc::Property& p, const Uppe
 
   auto needsMultiUBs = false;
   if (ub.isSimple() && !hasReifiedGenerics) {
-    applyFlagsToUB(ub.asSimpleMut(), typeConstraint);
     typeConstraint = ub.asSimple();
   } else if (!ub.isTop()) {
     needsMultiUBs = true;
@@ -976,7 +975,6 @@ void upperBoundsHelper(TranslationState& ts,
                        bool isParam) {
   auto currUBs = getRelevantUpperBounds(tc, ubs, classUbs, shadowedTParams);
   if (currUBs.isSimple() && !hasReifiedGenerics) {
-    applyFlagsToUB(currUBs.asSimpleMut(), tc);
     tc = currUBs.asSimple();
   } else if (!currUBs.isTop()) {
     upperBounds = std::move(currUBs);

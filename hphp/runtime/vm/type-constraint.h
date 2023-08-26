@@ -531,6 +531,7 @@ inline bool setOpNeedsTypeCheck(const TypeConstraint& tc,
   return !tc.alwaysPasses(KindOfString);
 }
 
-// Add all flags in tc (except TypeVar) to ub
+// Add all flags in tc (except TypeVar) to ub.
+// FIXME: applying random flags such as Resolved is super sketchy
 void applyFlagsToUB(TypeConstraint& ub, const TypeConstraint& tc);
 }

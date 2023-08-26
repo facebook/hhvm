@@ -838,8 +838,7 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
     }
     return std::any_of(
       begin(prop.ubs.m_constraints), end(prop.ubs.m_constraints),
-      [&] (TypeConstraint ub) {
-        applyFlagsToUB(ub, prop.typeConstraint);
+      [&] (const TypeConstraint& ub) {
         return !initial.moreRefined(
           lookup_constraint(index, ctx, ub, initial).lower
         );

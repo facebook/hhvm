@@ -3531,8 +3531,8 @@ void Class::checkPrePropVal(XProp& prop, const PreClass::Prop* preProp) {
   auto const alwaysPassesAll = [&] {
     if (!tc.alwaysPasses(&tv)) return false;
     if (RuntimeOption::EvalEnforceGenericsUB > 0) {
-      auto& ubs = const_cast<PreClass::UpperBoundVec&>(preProp->upperBounds());
-      for (auto& ub : ubs.m_constraints) {
+      auto const& ubs = preProp->upperBounds();
+      for (auto const& ub : ubs.m_constraints) {
         if (!ub.alwaysPasses(&tv)) return false;
       }
     }
@@ -3571,8 +3571,6 @@ void Class::initProp(XProp& prop, const PreClass::Prop* preProp) {
   prop.ubs                 = preProp->upperBounds();
   prop.repoAuthType        = preProp->repoAuthType();
 
-  // If type constraint has soft or nullable flags, apply them to upper-bounds.
-  for (auto &ub : prop.ubs.m_constraints) applyFlagsToUB(ub, prop.typeConstraint);
   // Check if this property's initial value needs to be type checked at
   // runtime.
   checkPrePropVal(prop, preProp);

@@ -5454,8 +5454,7 @@ PropMergeResult prop_tc_effects(const Index& index,
   // Otherwise check every generic upper-bound. We'll feed the
   // narrowed type into each successive round. If we reach the point
   // where we'll know we'll definitely fail, just stop.
-  for (auto ub : prop.ubs.m_constraints) {
-    applyFlagsToUB(ub, prop.typeConstraint);
+  for (auto const& ub : prop.ubs.m_constraints) {
     auto r = check(ub, result.adjusted);
     result.throws &= r.throws;
     result.adjusted = std::move(r.adjusted);
@@ -8608,8 +8607,7 @@ private:
         };
 
         if (!initial.subtypeOf(make_type(prop.typeConstraint))) return false;
-        for (auto ub : prop.ubs.m_constraints) {
-          applyFlagsToUB(ub, prop.typeConstraint);
+        for (auto const& ub : prop.ubs.m_constraints) {
           if (!initial.subtypeOf(make_type(ub))) return false;
         }
         return true;
@@ -8660,11 +8658,9 @@ private:
             return false;
           }
 
-          for (auto ub : prop.ubs.m_constraints) {
-            applyFlagsToUB(ub, prop.typeConstraint);
-            for (auto pub : parentProp->ubs.m_constraints) {
+          for (auto const& ub : prop.ubs.m_constraints) {
+            for (auto& pub : parentProp->ubs.m_constraints) {
               update_type_constraint(index, pub, true, nullptr);
-              applyFlagsToUB(pub, parentProp->typeConstraint);
               if (ub.maybeInequivalentForProp(pub)) return false;
             }
           }

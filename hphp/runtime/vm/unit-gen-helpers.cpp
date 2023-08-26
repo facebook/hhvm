@@ -47,16 +47,24 @@ UpperBoundVec getRelevantUpperBounds(const TypeConstraint& tc,
                                      const UpperBoundMap& ubs,
                                      const UpperBoundMap& class_ubs,
                                      const TParamNameVec& shadowed_tparams) {
-  UpperBoundVec ret;
-  if (!tc.isTypeVar()) return ret;
+  if (!tc.isTypeVar()) return UpperBoundVec{};
+
+  auto const applyFlags = [&](UpperBoundVec ret) {
+    for (auto& ub : ret.m_constraints) {
+      applyFlagsToUB(ub, tc);
+    }
+    return ret;
+  };
+
   auto const typeName = tc.typeName();
   auto it = ubs.find(typeName);
-  if (it != ubs.end()) return it->second;
+  if (it != ubs.end()) return applyFlags(it->second);
   if (std::find(shadowed_tparams.begin(), shadowed_tparams.end(), typeName) ==
                 shadowed_tparams.end()) {
     it = class_ubs.find(typeName);
-    if (it != class_ubs.end()) return it->second;
+    if (it != class_ubs.end()) return applyFlags(it->second);
   }
+
   return UpperBoundVec{};
 }
 

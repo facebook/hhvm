@@ -5647,7 +5647,6 @@ void in(ISS& env, const bc::InitProp& op) {
       auto [refined, effectFree] = refine(prop.typeConstraint);
       for (auto ub : prop.ubs.m_constraints) {
         if (!effectFree) break;
-        applyFlagsToUB(ub, prop.typeConstraint);
         auto [refined2, effectFree2] = refine(ub);
         refined &= refined2;
         if (refined.is(BBottom)) effectFree = false;

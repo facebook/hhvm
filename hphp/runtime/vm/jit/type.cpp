@@ -1098,13 +1098,10 @@ Type typeFromFuncParam(const Func* func, uint32_t paramId) {
 
   auto t = typeFromTCImpl(tc, getThisType, func->cls()) & TInitCell;
   if (func->hasParamsWithMultiUBs()) {
-    auto& ubs = const_cast<Func::ParamUBMap&>(func->paramUBs());
-    auto it = ubs.find(paramId);
+    auto const& ubs = func->paramUBs();
+    auto const it = ubs.find(paramId);
     if (it != ubs.end()) {
-      for (auto& ub : it->second.m_constraints) {
-        // FIXME: doesn't seem right to update these structures at runtime,
-        // but we do the same in VerifyParamType.
-        applyFlagsToUB(ub, tc);
+      for (auto const& ub : it->second.m_constraints) {
         t &= typeFromTCImpl(ub, getThisType, func->cls());
       }
     }

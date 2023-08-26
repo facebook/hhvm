@@ -4604,11 +4604,10 @@ OPTBLD_INLINE void iopVerifyOutType(local_var param) {
     tc.verifyOutParam(vmStack().topTV(), ctx, func, paramId);
   }
   if (func->hasParamsWithMultiUBs()) {
-    auto& ubs = const_cast<Func::ParamUBMap&>(func->paramUBs());
-    auto it = ubs.find(paramId);
+    auto const& ubs = func->paramUBs();
+    auto const it = ubs.find(paramId);
     if (it != ubs.end()) {
-      for (auto& ub : it->second.m_constraints) {
-        applyFlagsToUB(ub, tc);
+      for (auto const& ub : it->second.m_constraints) {
         if (ub.isCheckable()) {
           auto const ctx = ub.isThis() ? frameStaticClass(vmfp()) : nullptr;
           ub.verifyOutParam(vmStack().topTV(), ctx, func, paramId);
@@ -4628,9 +4627,8 @@ OPTBLD_INLINE void verifyRetTypeImpl(size_t ind) {
     tc.verifyReturn(vmStack().indC(ind), ctx, func);
   }
   if (func->hasReturnWithMultiUBs()) {
-    auto& ubs = const_cast<Func::UpperBoundVec&>(func->returnUBs());
-    for (auto& ub : ubs.m_constraints) {
-      applyFlagsToUB(ub, tc);
+    auto const& ubs = func->returnUBs();
+    for (auto const& ub : ubs.m_constraints) {
       if (ub.isCheckable()) {
         auto const ctx = ub.isThis() ? frameStaticClass(vmfp()) : nullptr;
         ub.verifyReturn(vmStack().indC(ind), ctx, func);

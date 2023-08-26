@@ -1,17 +1,17 @@
 <?hh
 
-class TestStruct {
+class ListI64 {
   const SPEC = darray[
     1 => darray[
-      'var' => 'aList',
+      'var' => 'data',
       'format' => 'harray',
       'type' => TType::LST,
-      'etype' => TType::I32,
-      'elem' => darray[ 'type' => TType::I32 ],
+      'etype' => TType::I64,
+      'elem' => darray[ 'type' => TType::I64 ],
     ],
   ];
 
-  public $aList = null;
+  public $data = null;
 
   public static function withDefaultValues()[]: this {
     return new static();
@@ -20,25 +20,40 @@ class TestStruct {
   public function clearTerseFields()[write_props]: void {}
 }
 
-function test($name, $list) :mixed{
-  $s = new TestStruct();
-  $s->aList = $list;
+class ListI08 {
+  const SPEC = darray[
+    1 => darray[
+      'var' => 'data',
+      'format' => 'harray',
+      'type' => TType::LST,
+      'etype' => TType::I08,
+      'elem' => darray[ 'type' => TType::I08 ],
+    ],
+  ];
 
-  echo "---- $name: compact ----\n";
+  public $data = null;
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public function clearTerseFields()[write_props]: void {}
+}
+
+function test($name, $classname, $data) :mixed{
+  $obj = new $classname();
+  $obj->data = $data;
+
+  echo "---- $name ----\n";
   $p = new DummyProtocol();
-  thrift_protocol_write_compact2($p, 'foo', 2, $s, 20);
-  var_dump(thrift_protocol_read_compact($p, 'TestStruct'));
+  thrift_protocol_write_compact2($p, 'foo', 2, $obj, 20);
+  var_dump(thrift_protocol_read_compact($p, $classname));
 }
 
 function main(): mixed {
-  test("empty list", vec[]);
-  test("small list", vec[1, 2, 3]);
-
-  $data = vec[];
-  for ($idx = 0; $idx < 100; $idx++) {
-    $data[] = 1000000 * $idx;
-  }
-  test("big list", $data);
+  test("empty vec", ListI64::class, vec[]);
+  test("fast decoded vec", ListI64::class, vec[0x7FFFFFFFFFFFFF00, 0x7FFFFFFFFFFFFF01]);
+  test("fast decoded vec", ListI08::class, vec[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 }
 
 <<__EntryPoint>>

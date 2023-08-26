@@ -1113,6 +1113,7 @@ struct CompactReader {
           case TType::T_I32:
           case TType::T_I64: {
             if (
+                keyType != TType::T_BYTE && valueType != TType::T_BYTE &&
                 typeIsInt(valueType) &&
                 spec.key().adapter == nullptr &&
                 spec.val().adapter == nullptr

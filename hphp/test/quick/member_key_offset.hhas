@@ -1,6 +1,6 @@
 #tests that verifier rejects illegal stack offsets in member keys
 
-.function ["__EntryPoint"("""y:0:{}""")] main() {
+.function ["__EntryPoint"("""y:0:{}""")] N main() {
   .declvars $foo $baz $t;
   Null
   SetL $foo

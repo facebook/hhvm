@@ -1,5 +1,5 @@
 .class Closure$foo;1 extends Closure {
-  .method [public static] (3,3) <"" N  > __invoke() isClosureBody {
+  .method [public static] (3,3) "" <N  > __invoke() isClosureBody {
     Null
     RetC
   }

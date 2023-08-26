@@ -1,6 +1,6 @@
 .adata A_0 = """y:1:{Y:2:{s:4:\"kind\";i:19;s:13:\"generic_types\";y:2:{Y:1:{s:4:\"kind\";i:1;}Y:2:{s:4:\"kind\";i:101;s:9:\"classname\";s:1:\"C\";}}}}""";
 
-.function ["__Reified"("""y:4:{i:1;i:0;i:0;i:0;}""")] (3,3) <"" N  > f() {
+.function ["__Reified"("""y:4:{i:1;i:0;i:0;i:0;}""")] (3,3) "" <N  > f() {
   .declvars $0ReifiedGenerics;
   .srcloc 3:30,3:37;
   String "done\n"
@@ -12,7 +12,7 @@
   RetC
 }
 
-.function ["__EntryPoint"("""y:0:{}""")] main() {
+.function ["__EntryPoint"("""y:0:{}""")] N main() {
   NullUninit
   NullUninit
   Vec @A_0

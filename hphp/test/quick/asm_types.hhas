@@ -3,32 +3,32 @@
 .adata A_0 = """D:0:{}""";
 
 
-.function use_class(<"@C" "C" extended_hint soft> $x) {
+.function N use_class("@C" <"C" extended_hint soft> $x) {
   Null
   RetC
 }
 
-.function use_int_soft(<"@HH\\int" "HH\\int" extended_hint soft> $x) {
+.function N use_int_soft("@HH\\int" <"HH\\int" extended_hint soft> $x) {
   Null
   RetC
 }
 
-.function use_int_nullable(<"?HH\\int" "HH\\int" nullable extended_hint> $x) {
+.function N use_int_nullable("?HH\\int" <"HH\\int" nullable extended_hint> $x) {
   Null
   RetC
 }
 
-.function use_int(<"HH\\int" "HH\\int"> $x) {
+.function N use_int("HH\\int" <"HH\\int"> $x) {
   Null
   RetC
 }
 
-.function use_mixed(<"HH\\mixed" N> $x) {
+.function N use_mixed("HH\\mixed" <N> $x) {
   Null
   RetC
 }
 
-.function ["__EntryPoint"("""y:0:{}""")] main() {
+.function ["__EntryPoint"("""y:0:{}""")] N main() {
   NullUninit
   NullUninit
   NewObjD "C"
@@ -90,7 +90,7 @@
 }
 
 .class C {
-  .method [public static] <"HH\\int" "HH\\int" extended_hint> test() {
+  .method [public static] "HH\\int" <"HH\\int" extended_hint> test() {
     Int 42
     RetC
   }

@@ -1,22 +1,22 @@
 # Test declaring type aliases
 
 
-.function foo(<"@Foo" "Foo" extended_hint soft > $x) {
+.function N foo("@Foo" <"Foo" extended_hint soft > $x) {
   Null
   RetC
 }
 
-.function bar(<"@Bar" "Bar" extended_hint soft > $x) {
+.function N bar("@Bar" <"Bar" extended_hint soft > $x) {
   Null
   RetC
 }
 
-.function baz(<"@Baz" "Baz" extended_hint soft > $x) {
+.function N baz("@Baz" <"Baz" extended_hint soft > $x) {
   Null
   RetC
 }
 
-.function quux(<"@Quux" "Quux" extended_hint soft > $x) {
+.function N quux("@Quux" <"Quux" extended_hint soft > $x) {
   Null
   RetC
 }
@@ -29,7 +29,7 @@
 .alias Baz = <"C" nullable> """Y:3:{s:8:\"nullable\";b:1;s:4:\"kind\";i:101;s:9:\"classname\";s:1:\"C\";}""";
 .alias Quux = <N> """Y:1:{s:4:\"kind\";i:1;}""";
 
-.function ["__EntryPoint"("""y:0:{}""")] main() {
+.function ["__EntryPoint"("""y:0:{}""")] N main() {
   .declvars $x;
   NullUninit
   NullUninit

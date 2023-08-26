@@ -2,13 +2,13 @@
 # Can't redefine builtins, even if you bypass the parser
 #
 
-.function parse_str {
+.function N parse_str {
   String "Fake parse_str!\n"
   Print
   RetC
 }
 
-.function ["__EntryPoint"("""y:0:{}""")] main() {
+.function ["__EntryPoint"("""y:0:{}""")] N main() {
   NullUninit
   NullUninit
   FCallFuncD <> 0 1 "" "" - "" "parse_str"

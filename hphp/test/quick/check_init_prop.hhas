@@ -1,7 +1,7 @@
 .class C {
   .default_ctor;
 
-  .method [static public] 86sinit() {
+  .method [static public] N 86sinit() {
     String "default ::foo value"
     InitProp "foo" Static
 
@@ -9,7 +9,7 @@
     RetC
   }
 
-  .method [static public] 86pinit() {
+  .method [static public] N 86pinit() {
     CheckProp "bar"
     String "string"
     InitProp "baz" Static
@@ -18,7 +18,7 @@
   }
 }
 
-.function ["__EntryPoint"("""y:0:{}""")] main() {
+.function ["__EntryPoint"("""y:0:{}""")] N main() {
   NewObjD "C"
   Dup
   NullUninit

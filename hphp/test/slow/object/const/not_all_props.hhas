@@ -1,4 +1,4 @@
-.function ["__EntryPoint"("""y:0:{}""")] (8,8) <"" N  > main() {
+.function ["__EntryPoint"("""y:0:{}""")] (8,8) "" <N  > main() {
   String "FAIL: this file should not run\n"
   Print
   PopC
@@ -7,8 +7,8 @@
 }
 
 .class [is_const no_dynamic_props "__Const"("""y:0:{}""")] C {
-  .property [public is_const] <"HH\\int" "HH\\int" extended_hint > p =
+  .property [public is_const] "HH\\int" <"HH\\int" extended_hint > p =
     """i:0;""";
-  .property [public] <"HH\\int" "HH\\int" extended_hint > q =
+  .property [public] "HH\\int" <"HH\\int" extended_hint > q =
     """i:1;""";
 }

@@ -193,7 +193,7 @@ createSymlinkWrapper(const std::string& fileName,
       std::string escapedName;
       folly::cEscape(fe->name->toCppString(), escapedName);
       ss << ".function{} [persistent "
-        "\"__EntryPoint\"(\"\"\"y:0:{}\"\"\")] (4,7) <\"\" N  > "
+        "\"__EntryPoint\"(\"\"\"y:0:{}\"\"\")] (4,7) \"\" <N> "
         "entrypoint$symlink$" << string_sha1(fileName) << "() {\n"
          << "  String \"" << targetPath << "\"\n"
          << "  ReqOnce\n"

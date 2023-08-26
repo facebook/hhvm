@@ -1,6 +1,6 @@
 .file_attributes ["__EnableUnstableFeatures"("""v:1:{s:8:\"readonly\";}""")] ;
 
-.function{} ["__EntryPoint"("""v:0:{}""")] (13,16) <"HH\\void" N  > test() {
+.function{} ["__EntryPoint"("""v:0:{}""")] (13,16) "HH\\void" <N  > test() {
   .srcloc 14:8,14:9;
   String "c"
   String "Foo"
@@ -38,11 +38,11 @@
 }
 
 .class {}  Bar (4,6) {
-  .property [public readonly] <"HH\\vec<HH\\int>" "HH\\vec" extended_hint > bar =
+  .property [public readonly] "HH\\vec<HH\\int>" <"HH\\vec" extended_hint > bar =
     """v:1:{i:1;}""";
 }
 
 .class {}  Foo (8,10) {
-  .property [public static readonly sys_initial_val] <"HH\\Vector<Bar>" "HH\\Vector" extended_hint > c =
+  .property [public static readonly sys_initial_val] "HH\\Vector<Bar>" <"HH\\Vector" extended_hint > c =
     """N;""";
 }

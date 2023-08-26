@@ -1,4 +1,4 @@
-.function ["__EntryPoint"("""y:0:{}""")] (7,7) <"" N  > main() {
+.function ["__EntryPoint"("""y:0:{}""")] (7,7) "" <N  > main() {
   String "Parses Ok\n"
   Print
   PopC
@@ -7,6 +7,6 @@
 }
 
 .class C {
-  .property [public is_const sys_initial_val late_init "__Const"("""y:0:{}""") "__LateInit"("""y:0:{}""")] <"HH\\int" "HH\\int" extended_hint > p =
+  .property [public is_const sys_initial_val late_init "__Const"("""y:0:{}""") "__LateInit"("""y:0:{}""")] "HH\\int" <"HH\\int" extended_hint > p =
     uninit;
 }

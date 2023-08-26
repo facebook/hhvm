@@ -8,7 +8,7 @@
 .class B extends a {
   .default_ctor;
 
-  .method [public static] print() {
+  .method [public static] N print() {
     String "hi\n"
     Print
     PopC
@@ -19,7 +19,7 @@
 
 }
 
-.function ["__EntryPoint"("""y:0:{}""")] main() {
+.function ["__EntryPoint"("""y:0:{}""")] N main() {
   NullUninit
   NullUninit
   FCallClsMethodD <> 0 1 "" "" - "" "B" "print"

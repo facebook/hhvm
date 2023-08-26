@@ -1,6 +1,6 @@
 # Check that some corner cases for string escaping work
 
-.function ["__EntryPoint"("""y:0:{}""")] main() {
+.function ["__EntryPoint"("""y:0:{}""")] N main() {
   String "\0441\n"
   Print
   PopC

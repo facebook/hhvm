@@ -1,7 +1,7 @@
 # This input used to cause the HHIR simplifier to do a use-after-free in the IR
 # NSame opcode.
 
-.function foo($a, $b) {
+.function N foo(N $a, N $b) {
   .declvars $k $k2;
   CGetL $a
   Dup
@@ -26,7 +26,7 @@
   RetC
 }
 
-.function ["__EntryPoint"("""y:0:{}""")] main() {
+.function ["__EntryPoint"("""y:0:{}""")] N main() {
   .declvars $a $b;
   Int 1
   Int 2

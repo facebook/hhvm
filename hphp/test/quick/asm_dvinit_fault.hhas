@@ -4,7 +4,7 @@
 # HHVM doesn't generate code like this, but it's legal bytecode.
 #
 
-.function foo($x = dv_init1, $y = dv_init2) {
+.function N foo(N $x = dv_init1, N $y = dv_init2) {
 main_entry:
   CGetL $x
   CGetL2 $y
@@ -44,7 +44,7 @@ out_of_catch:
   Jmp main_entry
 }
 
-.function ["__EntryPoint"("""y:0:{}""")] main {
+.function ["__EntryPoint"("""y:0:{}""")] N main {
   NullUninit
   NullUninit
     NullUninit

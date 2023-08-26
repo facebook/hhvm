@@ -1,16 +1,16 @@
 .class Foo {
   .default_ctor;
 
-  .property [public] x = """s:3:"heh";""";
+  .property [public] N x = """s:3:"heh";""";
 
-  .method [public] __toString() {
+  .method [public] N __toString() {
     String "hey\n"
     RetC
   }
 
   # Do all this work in a member function so that we will assert
   # specific object types without RepoAuthoritative mode
-  .method [public] main($x) {
+  .method [public] N main(N $x) {
     # Test that the guard for an optional AssertObj stays: we could be
     # called with the object or nulls.
 
@@ -26,7 +26,7 @@
   }
 }
 
-.function ["__EntryPoint"("""y:0:{}""")] main() {
+.function ["__EntryPoint"("""y:0:{}""")] N main() {
   .declvars $object;
   NewObjD "Foo"
   Dup

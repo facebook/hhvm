@@ -1,6 +1,6 @@
 # tests that AssertRATL cannot appear at the end of a block
 
-.function foo($x){
+.function N foo(N $x){
     NullUninit
     NullUninit
     Int 2
@@ -12,7 +12,7 @@
     RetC
 }
 
-.function ["__EntryPoint"("""y:0:{}""")] main() {
+.function ["__EntryPoint"("""y:0:{}""")] N main() {
   NullUninit
   NullUninit
   Int 9

@@ -2,7 +2,7 @@
 .file_attributes ["__EnableUnstableFeatures"("""v:1:{s:8:\"readonly\";}""")] ;
 .adata A_0 = """v:3:{v:1:{i:0;}v:1:{i:1;}v:1:{i:2;}}""";
 
-.function{} ["__EntryPoint"("""v:0:{}""")] (15,26) <"HH\\void" N  > test() {
+.function{} ["__EntryPoint"("""v:0:{}""")] (15,26) "HH\\void" <N  > test() {
   .declvars $a $e;
   .srcloc 16:8,16:16;
   NewObjD "Bar"
@@ -101,11 +101,11 @@ L0:
 }
 
 .class {}  Foo (4,7) {
-  .property [public readonly] <"HH\\vec<HH\\int>" "HH\\vec" extended_hint > c =
+  .property [public readonly] "HH\\vec<HH\\int>" <"HH\\vec" extended_hint > c =
     """v:3:{v:1:{i:0;}v:1:{i:1;}v:1:{i:2;}}""";
-  .property [public deep_init readonly] <"HH\\Vector<HH\\int>" "HH\\Vector" extended_hint > bad_c =
+  .property [public deep_init readonly] "HH\\Vector<HH\\int>" <"HH\\Vector" extended_hint > bad_c =
     uninit;
-  .method{}{} [private static no_injection] (4,7) 86pinit() {
+  .method{}{} [private static no_injection] (4,7) N 86pinit() {
     .srcloc 4:1,7:146;
     CheckProp "bad_c"
     JmpNZ L0
@@ -121,8 +121,8 @@ L0:
 }
 
 .class {}  Bar (9,12) {
-  .property [public sys_initial_val] <"Foo" "Foo" extended_hint > foo =
+  .property [public sys_initial_val] "Foo" <"Foo" extended_hint > foo =
     """N;""";
-  .property [public readonly sys_initial_val] <"Foo" "Foo" extended_hint > ro_foo =
+  .property [public readonly sys_initial_val] "Foo" <"Foo" extended_hint > ro_foo =
     """N;""";
 }

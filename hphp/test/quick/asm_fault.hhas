@@ -1,6 +1,6 @@
 # Some tests for catch regions.
 
-.function throw_stuff($msg) {
+.function N throw_stuff(N $msg) {
   .try {
     String "about to throw: "
     CGetL $msg
@@ -26,7 +26,7 @@
   }
 }
 
-.function foo() {
+.function N foo() {
   String "testing catch region\n"
   Print
   PopC
@@ -61,7 +61,7 @@
 .class Three extends Exception {
 }
 
-.function throw_various() {
+.function N throw_various() {
   .declvars $counter;
            Int 0
            SetL $counter
@@ -128,7 +128,7 @@ on_three:    String "three\n"
            }
 }
 
-.function ["__EntryPoint"("""y:0:{}""")] main() {
+.function ["__EntryPoint"("""y:0:{}""")] N main() {
   .declvars $ever_caught $ex;
          False
          SetL $ever_caught

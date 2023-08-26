@@ -1,12 +1,12 @@
 # Tests that silence ends without silence starts fail the verifier
-.function <"" N  > add($x, $y) {
+.function "" <N  > add(N $x, N $y) {
   CGetL $y
   CGetL2 $x
   Add
   RetC
 }
 
-.function ["__EntryPoint"("""y:0:{}""")] main() {
+.function ["__EntryPoint"("""y:0:{}""")] N main() {
   .declvars $z;
   NullUninit
   NullUninit

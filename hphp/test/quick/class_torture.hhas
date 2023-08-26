@@ -14,7 +14,7 @@
 
 
 .class [final] D {
-  .method [public no_injection] __construct() {
+  .method [public no_injection] N __construct() {
     Null
     RetC
   }
@@ -31,7 +31,7 @@
 
 }
 
-.function ["__EntryPoint"("""y:0:{}""")] main() {
+.function ["__EntryPoint"("""y:0:{}""")] N main() {
   .declvars $x;
 
   NewObjD "A"

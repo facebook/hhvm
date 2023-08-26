@@ -2,7 +2,7 @@
 # test declvars
 #
 
-.function foo($x) {
+.function N foo(N $x) {
   # $y should get assigned to _1 even though $z is used first
   .declvars $y $z;
   .allow_aliased_locals;
@@ -29,7 +29,7 @@
   RetC
 }
 
-.function ["__EntryPoint"("""y:0:{}""")] main() {
+.function ["__EntryPoint"("""y:0:{}""")] N main() {
   NullUninit
   NullUninit
   Int 12

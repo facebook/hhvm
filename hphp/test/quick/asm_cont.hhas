@@ -2,7 +2,7 @@
 # Basic test of continuations in HH assembler.
 #
 
-.function R() isGenerator {
+.function N R() isGenerator {
   CreateCont
   PopC
   Int 1
@@ -18,7 +18,7 @@
   RetC
 }
 
-.function ["__EntryPoint"("""y:0:{}""")] main {
+.function ["__EntryPoint"("""y:0:{}""")] N main {
   .numiters 1;
   .declvars $i;
   NullUninit

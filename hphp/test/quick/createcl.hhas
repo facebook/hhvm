@@ -1,6 +1,6 @@
 # tests that verifier checks properties of the CreateCl bytecode
 
-.function foo() {
+.function N foo() {
   Int 1
   Int 1
   Int 1
@@ -8,31 +8,31 @@
   RetC
 }
 
-.function bar() {
+.function N bar() {
   CreateCl 0 "B"
   RetC
 }
 
-.function baz() {
+.function N baz() {
   CreateCl 0 "Blah"
   RetC
 }
 
 .class A extends Closure {
-  .method [public] <"" N  > __invoke() isClosureBody {
+  .method [public] "" <N  > __invoke() isClosureBody {
     Int 1
     RetC
   }
 }
 
 .class B {
-  .method [public] <"" N  > foo() {
+  .method [public] "" <N  > foo() {
     Int 1
     RetC
   }
 }
 
-.function ["__EntryPoint"("""y:0:{}""")] main() {
+.function ["__EntryPoint"("""y:0:{}""")] N main() {
   NullUninit
   NullUninit
   FCallFuncD <> 0 1 "" "" - "" "foo"

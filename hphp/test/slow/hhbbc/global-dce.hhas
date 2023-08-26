@@ -1,4 +1,4 @@
-.function <"" N  > test(<"\?HH\\string" "HH\\string" nullable extended_hint > $a, <"\?HH\\string" "HH\\string" nullable extended_hint > $b, <"HH\\string" "HH\\string" > $c) {
+.function "" <N  > test("\?HH\\string" <"HH\\string" nullable extended_hint > $a, "\?HH\\string" <"HH\\string" nullable extended_hint > $b, "HH\\string" <"HH\\string" > $c) {
   IsTypeL $a Null
   JmpZ L1
   Null
@@ -15,7 +15,7 @@ L4:
   RetC
 }
 
-.function ["__EntryPoint"("""y:0:{}""")] main {
+.function ["__EntryPoint"("""y:0:{}""")] N main {
   NullUninit
   NullUninit
   NullUninit

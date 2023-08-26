@@ -2,7 +2,7 @@
 # unnamed vars
 #
 
-.function ["__EntryPoint"("""y:0:{}""")] main() {
+.function ["__EntryPoint"("""y:0:{}""")] N main() {
   .declvars $x;
   Int 5
   SetL $x

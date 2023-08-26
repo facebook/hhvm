@@ -1,17 +1,17 @@
 #tests that fields and methods with != 1 access modifier fail verification
 
 .class A {
-  .property [public private] attre =
+  .property [public private] N attre =
     """N;""";
-  .property blah =
+  .property N blah =
     """N;""";
-  .method [protected public] <"" N  > get() {
+  .method [protected public] "" <N> get() {
     CheckThis
     BaseH
     QueryM 0 CGet PT:"attre" Any
     RetC
   }
-  .method <"" N  > set($x) {
+  .method "" <N> set(N $x) {
     CheckThis
     CGetL $x
     BaseH
@@ -20,7 +20,7 @@
     Null
     RetC
   }
-  .method [public] <"" N  > __construct($attre) {
+  .method [public] "" <N> __construct(N $attre) {
     CGetL $attre
     BaseH
     SetM 0 PT:"attre" Any
@@ -30,7 +30,7 @@
   }
 }
 
-.function ["__EntryPoint"("""y:0:{}""")] main() {
+.function ["__EntryPoint"("""y:0:{}""")] N main() {
   .declvars $x;
   NewObjD "A"
   Dup

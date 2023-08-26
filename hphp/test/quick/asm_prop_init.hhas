@@ -5,17 +5,17 @@
 .class Init {
   .default_ctor;
   .const BAR = """s:4:"1242";""";
-  .property [static public] foo = """s:11:"static prop";""";
-  .property [public] nonstat = """s:25:"this is a normal property";""";
+  .property [static public] N foo = """s:11:"static prop";""";
+  .property [public] N nonstat = """s:25:"this is a normal property";""";
 }
 
 .class Uninit {
   .default_ctor;
   .const BAR = uninit;
-  .property [static public] foo = uninit;
-  .property [public] nonstat = uninit;
+  .property [static public] N foo = uninit;
+  .property [public] N nonstat = uninit;
 
-  .method [static public] 86cinit($which) {
+  .method [static public] N 86cinit(N $which) {
     CGetL $which
     String "BAR"
     Same
@@ -29,7 +29,7 @@
     Fatal Runtime
   }
 
-  .method [static public] 86sinit() {
+  .method [static public] N 86sinit() {
     .coeffects_static pure;
     String "default ::foo value"
     InitProp "foo" Static
@@ -38,7 +38,7 @@
     RetC
   }
 
-  .method [static public] 86pinit() {
+  .method [static public] N 86pinit() {
     .coeffects_static pure;
     CheckProp "nonstat"
     JmpNZ isset
@@ -51,7 +51,7 @@
   }
 }
 
-.function do_test($who) {
+.function N do_test(N $who) {
   .declvars $obj;
   CGetL $who
   ClassGetC
@@ -93,7 +93,7 @@
   RetC
 }
 
-.function init_test {
+.function N init_test {
   NullUninit
   NullUninit
     String "Init"
@@ -101,7 +101,7 @@
   RetC
 }
 
-.function uninit_test {
+.function N uninit_test {
   NullUninit
   NullUninit
     String "Uninit"
@@ -109,7 +109,7 @@
   RetC
 }
 
-.function ["__EntryPoint"("""y:0:{}""")] main() {
+.function ["__EntryPoint"("""y:0:{}""")] N main() {
   NullUninit
   NullUninit
   FCallFuncD <> 0 1 "" "" - "" "init_test"

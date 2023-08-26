@@ -1,4 +1,4 @@
-.function ["__EntryPoint"("""y:0:{}""")] (5,5) <"" N  > main() {
+.function ["__EntryPoint"("""y:0:{}""")] (5,5) "" <N  > main() {
   String "Parses Ok\n"
   Print
   PopC

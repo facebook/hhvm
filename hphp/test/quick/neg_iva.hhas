@@ -1,6 +1,6 @@
 #tests that files with negative IVA values fail assembly
 
-.function ["__EntryPoint"("""y:0:{}""")] main() {
+.function ["__EntryPoint"("""y:0:{}""")] N main() {
   .declvars $foo $baz $t;
   Null
   SetL $foo

@@ -1,6 +1,6 @@
 # tests that AssertRATStk cannot appear at the end of a block
 
-.function ["__EntryPoint"("""y:0:{}""")] main() {
+.function ["__EntryPoint"("""y:0:{}""")] N main() {
   Int 1
   NullUninit
   NullUninit

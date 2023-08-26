@@ -2,7 +2,7 @@
 # Test some function call junk
 #
 
-.function caller($who, $arg) {
+.function N caller(N $who, N $arg) {
   .declvars $ret;
   NullUninit
   NullUninit
@@ -22,7 +22,7 @@
   RetC
 }
 
-.function b() {
+.function N b() {
   String "In b() now\n"
   Print
   PopC
@@ -31,7 +31,7 @@
   RetC
 }
 
-.function a($arg) {
+.function N a(N $arg) {
   CGetL $arg
   String "\n"
   Concat
@@ -42,14 +42,14 @@
   RetC
 }
 
-.function byref(inout $foo) {
+.function N byref(inout N $foo) {
   Null
   Int 42
   SetL $foo
   RetM 2
 }
 
-.function ["__EntryPoint"("""y:0:{}""")] main() {
+.function ["__EntryPoint"("""y:0:{}""")] N main() {
   .declvars $funk;
   NullUninit
   NullUninit

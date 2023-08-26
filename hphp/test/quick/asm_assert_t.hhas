@@ -5,7 +5,7 @@
 .class Foo {
   .default_ctor;
 
-  .method [public] returns_int {
+  .method [public] N returns_int {
     Int 12
     RetC
   }
@@ -15,7 +15,7 @@
   .default_ctor;
 }
 
-.function obj_type($x, $sub) {
+.function N obj_type(N $x, N $sub) {
   CGetL $x
   AssertRATStk 0 Obj=Foo
   AssertRATL $x Obj=Foo
@@ -30,7 +30,7 @@
   RetC
 }
 
-.function make_bar() {
+.function N make_bar() {
   NewObjD "Bar"
   Dup
   NullUninit
@@ -45,7 +45,7 @@
   RetC
 }
 
-.function obj_type2() {
+.function N obj_type2() {
   .declvars $x;
   NullUninit
   NullUninit
@@ -60,7 +60,7 @@
   RetC
 }
 
-.function foo() {
+.function N foo() {
   .declvars $obj $k;
   Jmp stuff
 out:
@@ -88,7 +88,7 @@ stuff:
   Jmp out
 }
 
-.function ["__EntryPoint"("""y:0:{}""")] main() {
+.function ["__EntryPoint"("""y:0:{}""")] N main() {
   .declvars $x $y;
   NullUninit
   NullUninit

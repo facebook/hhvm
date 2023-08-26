@@ -540,21 +540,21 @@ void print_func_body(Output& out, const FuncInfo& finfo) {
   }
 }
 
-std::string type_constraint(const TypeConstraint &tc) {
+std::string type_constraint(const TypeConstraint& tc) {
   std::string typeName = tc.typeName() ? escaped(tc.typeName()) : "N";
   return folly::format("{} {} ",
                        typeName,
                        type_flags_to_string(tc.flags())).str();
 }
-std::string opt_type_info(const StringData *userType,
-                          const TypeConstraint &tc) {
-  if (userType || tc.typeName() || tc.flags()) {
-    std::string utype = userType ? escaped(userType) : "N";
-    return folly::format("<{} {}> ",
-                         utype,
-                         type_constraint(tc)).str();
-  }
-  return "";
+
+std::string opt_type_constraint(const TypeConstraint& tc) {
+  if (!tc.typeName() && !tc.flags()) return "";
+  return folly::format("<{}> ", type_constraint(tc)).str();
+}
+
+std::string type_info(const StringData* userType, const TypeConstraint& tc) {
+  std::string utype = userType ? escaped(userType) : "N";
+  return folly::format("{} {}", utype, opt_type_constraint(tc)).str();
 }
 
 std::string opt_attrs(AttrContext ctx, Attr attrs,
@@ -590,8 +590,8 @@ std::string func_param_list(const FuncInfo& finfo) {
     if (func->isReadonly(i)) {
       ret += "readonly ";
     }
-    ret += opt_type_info(func->params()[i].userType,
-                         func->params()[i].typeConstraint);
+    ret += type_info(func->params()[i].userType,
+                     func->params()[i].typeConstraint);
     ret += folly::format("{}", loc_name(finfo, i)).str();
     if (func->params()[i].hasDefaultValue()) {
       auto const off = func->params()[i].funcletOff;
@@ -637,7 +637,7 @@ std::string opt_ubs(const UBMap& ubs) {
     bool first = true;
     for (auto const& ub : p.second.m_constraints) {
       if (!first) ret += ", ";
-      ret += opt_type_info(nullptr, ub);
+      ret += opt_type_constraint(ub);
       first = false;
     }
     ret += ")";
@@ -653,7 +653,7 @@ void print_func(Output& out, const Func* func) {
     opt_ubs(finfo.ubs),
     opt_attrs(AttrContext::Func, func->attrs(), &func->userAttributes()),
     format_line_pair(func),
-    opt_type_info(func->returnUserType(), func->returnTypeConstraint()),
+    type_info(func->returnUserType(), func->returnTypeConstraint()),
     func->name(),
     func_param_list(finfo),
     func_flag_list(finfo));
@@ -718,7 +718,7 @@ void print_prop_or_field_impl(Output& out, const T& f) {
     RuntimeOption::EvalDisassemblerPropDocComments
       ? opt_escaped_long(f.docComment())
       : std::string(""),
-    opt_type_info(f.userType(), f.typeConstraint()),
+    type_info(f.userType(), f.typeConstraint()),
     f.name()->data());
   indented(out, [&] {
       out.fmtln("{};", member_tv_initializer(f.val()));
@@ -736,7 +736,7 @@ void print_method(Output& out, const Func* func) {
     opt_ubs(finfo.ubs),
     opt_attrs(AttrContext::Func, func->attrs(), &func->userAttributes()),
     format_line_pair(func),
-    opt_type_info(func->returnUserType(), func->returnTypeConstraint()),
+    type_info(func->returnUserType(), func->returnTypeConstraint()),
     func->name(),
     func_param_list(finfo),
     func_flag_list(finfo));

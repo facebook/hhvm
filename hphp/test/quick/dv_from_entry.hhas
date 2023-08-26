@@ -1,4 +1,4 @@
-.function <"" N  > foo($b = DV1("""22"""), $c = DV2("""33""")) {
+.function "" <N  > foo(N $b = DV1("""22"""), N $c = DV2("""33""")) {
 L0:
   String "/"
   CGetL $b
@@ -24,7 +24,7 @@ DV2:
   Enter L0
 }
 
-.function ["__EntryPoint"("""y:0:{}""")] main() {
+.function ["__EntryPoint"("""y:0:{}""")] N main() {
   NullUninit
   NullUninit
   FCallFuncD <> 0 1 "" "" - "" "foo"

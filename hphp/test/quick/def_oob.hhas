@@ -1,28 +1,28 @@
 .class A {
-  .method [public] __construct() {
+  .method [public] N __construct() {
     Int 1
     RetC
   }
 }
 .class B {
-  .method [public] __construct() {
+  .method [public] N __construct() {
     Int 1
     RetC
   }
 }
 .class C extends Closure {
-  .method [static public] __invoke() isClosureBody {
+  .method [static public] N __invoke() isClosureBody {
     Int 1
     RetC
   }
 }
-.function foo() {
+.function N foo() {
   Int 1
   RetC
 }
 .alias al = <"HH\\int"> """Y:1:{s:4:\"kind\";i:1;}""";
 
-.function ["__EntryPoint"("""y:0:{}""")] main() {
+.function ["__EntryPoint"("""y:0:{}""")] N main() {
   CreateCl 0 "C"
   PopC
 

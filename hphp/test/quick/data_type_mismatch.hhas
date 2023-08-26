@@ -7,7 +7,7 @@
 .adata A_4 = """Y:1:{i:1;i:1;}""";
 .adata A_5 = """y:1:{i:1;}""";
 
-.function ["__EntryPoint"("""y:0:{}""")] main() {
+.function ["__EntryPoint"("""y:0:{}""")] N main() {
   Dict @A_0
   PopC
   Dict @A_1

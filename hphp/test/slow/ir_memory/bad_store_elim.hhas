@@ -1,4 +1,4 @@
-.function ["__EntryPoint"("""y:0:{}""")] main() {
+.function ["__EntryPoint"("""y:0:{}""")] N main() {
   NullUninit
   NullUninit
   FCallFuncD <> 0 1 "" "" - "" "test"
@@ -24,12 +24,12 @@
   RetC
 }
 
-.function callee() {
+.function N callee() {
   Int 1
   RetC
 }
 
-.function test() {
+.function N test() {
   .declvars $x;
   Int 0
   SetL $x

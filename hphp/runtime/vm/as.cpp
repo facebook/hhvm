@@ -2103,23 +2103,16 @@ Attr parse_attribute_list(AsmState& as, AttrContext ctx,
 }
 
 /*
- * type-info       : empty
- *                 | '<' maybe-string-literal maybe-string-literal
- *                       type-flag* '>'
- *                 ;
  * type-constraint : empty
  *                 | '<' maybe-string-literal
  *                       type-flag* '>'
  *                 ;
- * This parses type-info if noUserType is false, type-constraint if true
  */
-std::pair<const StringData *, TypeConstraint> parse_type_info(
-    AsmState& as, bool noUserType = false) {
+TypeConstraint parse_type_constraint(AsmState& as) {
   as.in.skipWhitespace();
   if (as.in.peek() != '<') return {};
   as.in.getc();
 
-  const StringData *userType = noUserType ? nullptr : read_maybe_litstr(as);
   const StringData *typeName = read_maybe_litstr(as);
 
   std::string word;
@@ -2138,10 +2131,7 @@ std::pair<const StringData *, TypeConstraint> parse_type_info(
     as.error("unrecognized type flag `" + word + "' in this context");
   }
   as.in.expect('>');
-  return std::make_pair(userType, TypeConstraint{typeName, flags});
-}
-TypeConstraint parse_type_constraint(AsmState& as) {
-  return parse_type_info(as, true).second;
+  return TypeConstraint{typeName, flags};
 }
 
 std::vector<TypeConstraint> parse_type_constraint_union(AsmState& as) {
@@ -2153,6 +2143,15 @@ std::vector<TypeConstraint> parse_type_constraint_union(AsmState& as) {
     tcs.push_back(parse_type_constraint(as));
   }
   return tcs;
+}
+
+/*
+ * type-info       : maybe-string-literal type-constraint
+ */
+std::pair<const StringData*, TypeConstraint> parse_type_info(AsmState& as) {
+  auto const userType = read_maybe_litstr(as);
+  auto const typeConstraint = parse_type_constraint(as);
+  return {userType, typeConstraint};
 }
 
 TParamNameVec parse_shadowed_tparams(AsmState& as) {
@@ -2184,7 +2183,7 @@ void parse_ub(AsmState& as, UpperBoundMap& ubs) {
     as.error("Expected keyword as");
   }
   for (;;) {
-    const auto& tc = parse_type_info(as).second;
+    const auto& tc = parse_type_constraint(as);
     auto& v = ubs[nameStr];
     v.add(tc);
     as.in.skipWhitespace();
@@ -2589,7 +2588,7 @@ void parse_property(AsmState& as, const UpperBoundMap& class_ubs) {
 
   const StringData* userTy;
   TypeConstraint typeConstraint;
-  std::tie(userTy, typeConstraint) = parse_type_info(as, false);
+  std::tie(userTy, typeConstraint) = parse_type_info(as);
   auto const userTyStr = userTy ? userTy : staticEmptyString();
 
   auto const hasReifiedGenerics =

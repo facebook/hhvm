@@ -2,13 +2,13 @@
 
 .adata A_0 = """D:0:{}""";
 
-.function <"HH\\int" "HH\\int" extended_hint> fail() {
+.function "HH\\int" <"HH\\int" extended_hint> fail() {
   Dict @A_0
   VerifyRetTypeC
   RetC
 }
 
-.function ["__EntryPoint"("""y:0:{}""")] main() {
+.function ["__EntryPoint"("""y:0:{}""")] N main() {
   NullUninit
   NullUninit
   FCallFuncD <> 0 1 "" "" - "" "fail"

@@ -4,7 +4,7 @@
 
 
 .class Base {
-  .method [public] __construct {
+  .method [public] N __construct {
     String "default constructor\n"
     Print
     PopC
@@ -13,7 +13,7 @@
     RetC
   }
 
-  .method [public static] print_it($x) {
+  .method [public static] N print_it(N $x) {
     CGetL $x
     String "\n"
     Concat
@@ -24,13 +24,13 @@
     RetC
   }
 
-  .method [protected] prot_method() {
+  .method [protected] N prot_method() {
     String "In protected method\n"
     Print
     RetC
   }
 
-  .method [public] overriden() {
+  .method [public] N overriden() {
     String "Base::overriden\n"
     Print
     RetC
@@ -39,7 +39,7 @@
 
 .class [interface] IDunno {
   .default_ctor;
-  .method [public abstract] abs_method {
+  .method [public abstract] N abs_method {
     String "Pure virtual method called"
     Fatal RuntimeOmitFrame
   }
@@ -48,7 +48,7 @@
 .class [interface] IDunno2 { .default_ctor; }
 
 .class Derived extends Base implements(IDunno IDunno2) {
-  .method [public] some_junk {
+  .method [public] N some_junk {
     This
     NullUninit
     FCallObjMethodD <> 0 1 "" "" - "" "" NullThrows "prot_method"
@@ -58,13 +58,13 @@
     RetC
   }
 
-  .method [public] overriden() {
+  .method [public] N overriden() {
     String "Derived::overriden\n"
     Print
     RetC
   }
 
-  .method [public] abs_method() {
+  .method [public] N abs_method() {
     String "in an abstract method\n"
     Print
     RetC
@@ -72,9 +72,9 @@
 }
 
 .class WithProps {
-  .property [public] funk;
+  .property [public] N funk;
 
-  .method [public] print_funk {
+  .method [public] N print_funk {
     .declvars $name;
     String "funk"
     SetL $name
@@ -89,11 +89,11 @@
     RetC
   }
 
-  .property [private] defaulted = """s:3:"heh";""";
-  .property [private] badstring =
+  .property [private] N defaulted = """s:3:"heh";""";
+  .property [private] N badstring =
     """s:30:"bad string\"""has triple quotes";""";
 
-  .method [public] print_defaulted {
+  .method [public] N print_defaulted {
     This
     BaseC 0 Warn
     QueryM 1 CGet PT:"defaulted" Any
@@ -117,7 +117,7 @@
   }
 }
 
-.function prop_test {
+.function N prop_test {
   .declvars $obj;
   NewObjD "WithProps"
   Dup
@@ -148,7 +148,7 @@
   RetC
 }
 
-.function ["__EntryPoint"("""y:0:{}""")] main {
+.function ["__EntryPoint"("""y:0:{}""")] N main {
   .declvars $base $derived;
   NewObjD "Base"
   Dup

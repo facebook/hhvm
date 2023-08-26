@@ -2,7 +2,7 @@
 # Can only use AddNewElemC on PHP arrays
 #
 
-.function ["__EntryPoint"("""y:0:{}""")] main {
+.function ["__EntryPoint"("""y:0:{}""")] N main {
   .declvars $v;
   NewDictArray 1
   Int 100

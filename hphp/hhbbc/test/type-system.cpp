@@ -264,19 +264,19 @@ Index make_index() {
     }
 
     .class Closure$ChildClosure1 extends Closure {
-      .method [public static] __invoke() isClosureBody {
+      .method [public static] N __invoke() isClosureBody {
         Null
         RetC
       }
     }
     .class Closure$ChildClosure2 extends Closure {
-      .method [public static] __invoke() isClosureBody {
+      .method [public static] N __invoke() isClosureBody {
         Null
         RetC
       }
     }
     .class Closure$ChildClosure3 extends Closure {
-      .method [public static] __invoke() isClosureBody {
+      .method [public static] N __invoke() isClosureBody {
         Null
         RetC
       }
@@ -635,7 +635,7 @@ Index make_index() {
     .class Abs6_C1 extends Abs6 {
     }
 
-    .function test() {
+    .function N test() {
       Int 1
       RetC
     }

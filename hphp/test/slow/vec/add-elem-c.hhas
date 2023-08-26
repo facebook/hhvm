@@ -2,7 +2,7 @@
 # Can only use AddElemC on PHP arrays or dicts
 #
 
-.function ["__EntryPoint"("""y:0:{}""")] main {
+.function ["__EntryPoint"("""y:0:{}""")] N main {
   .declvars $v;
   Int 1
   Int 2

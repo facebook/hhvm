@@ -1,6 +1,6 @@
 # tests that OODeclExists with bad argument types properly punts to the interpreter
 
-.function ["__EntryPoint"("""y:0:{}""")] main() {
+.function ["__EntryPoint"("""y:0:{}""")] N main() {
   NullUninit
   NullUninit
   String "abc"

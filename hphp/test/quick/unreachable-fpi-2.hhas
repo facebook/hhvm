@@ -1,4 +1,4 @@
-.function <"" N  > foo() {
+.function "" <N  > foo() {
   Jmp L0
 L2:
   Jmp L1
@@ -13,7 +13,7 @@ L0:
   RetC
 }
 
-.function ["__EntryPoint"("""y:0:{}""")] main() {
+.function ["__EntryPoint"("""y:0:{}""")] N main() {
   NullUninit
   NullUninit
   FCallFuncD <> 0 1 "" "" - "" "foo"

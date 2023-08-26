@@ -1,6 +1,6 @@
 # Check that BareThis NeverNull fails to verify if $this can be null
 
-.function bar() {
+.function N bar() {
   Int 1
   JmpZ chk    # b1
   Jmp foo     # b2
@@ -19,18 +19,18 @@
 }
 
 .class C {
-  .method [public] __construct() {
+  .method [public] N __construct() {
     Null
     RetC
   }
 
-  .method [public static] foo() {
+  .method [public static] N foo() {
     BareThis NeverNull
     RetC
   }
 }
 
-.function ["__EntryPoint"("""y:0:{}""")] main() {
+.function ["__EntryPoint"("""y:0:{}""")] N main() {
   Int 1       # b1
   JmpZ chk
   Jmp foo     # b2

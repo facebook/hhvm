@@ -3,15 +3,15 @@
 
 
 .class A {
-  .property [public] attre =
+  .property [public] N attre =
     """N;""";
-  .method [public] <"" N  > get() {
+  .method [public] "" <N  > get() {
     CheckThis
     BaseH
     QueryM 0 CGet PT:"attre" Any
     RetC
   }
-  .method [public] <"" N  > set($x) {
+  .method [public] "" <N  > set(N $x) {
     CheckThis
     CGetL $x
     BaseH
@@ -20,7 +20,7 @@
     Null
     RetC
   }
-  .method [public static] <"" N  > __construct($attre) {
+  .method [public static] "" <N  > __construct(N $attre) {
     CGetL $attre
     BaseH
     SetM 0 PT:"attre" Any
@@ -31,7 +31,7 @@
 }
 
 .class B {
-  .method [public] <"" N  > __construct() isClosureBody {
+  .method [public] "" <N  > __construct() isClosureBody {
     String ""
     BaseH
     SetM 0 PT:"attre" Any
@@ -41,7 +41,7 @@
   }
 }
 
-.function ["__EntryPoint"("""y:0:{}""")] main() {
+.function ["__EntryPoint"("""y:0:{}""")] N main() {
   .declvars $x;
   NewObjD "A"
   Dup

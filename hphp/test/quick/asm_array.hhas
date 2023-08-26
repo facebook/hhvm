@@ -5,11 +5,11 @@
 .adata my_array = """D:2:{s:3:"foo";s:3:"bar";s:3:"baz";s:4:"blah";}""";
 
 .class ClassWithArray {
-  .property [static public] arr =
+  .property [static public] N arr =
             """D:4:{i:0;i:1;i:1;i:2;i:2;i:3;i:3;i:4;}""";
 }
 
-.function ArrayMember() {
+.function N ArrayMember() {
   .declvars $x;
   NullUninit
   NullUninit
@@ -38,7 +38,7 @@
   RetC
 }
 
-.function ["__EntryPoint"("""y:0:{}""")] main() {
+.function ["__EntryPoint"("""y:0:{}""")] N main() {
   .declvars $arr $key;
   NullUninit
   NullUninit

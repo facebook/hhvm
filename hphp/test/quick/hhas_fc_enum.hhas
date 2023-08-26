@@ -1,7 +1,7 @@
 # Test out making enums
 
 
-.function test(<"Foo" "Foo"> $x) {
+.function N test("Foo" <"Foo"> $x) {
   Null
   RetC
 }
@@ -13,7 +13,7 @@
   .default_ctor;
 }
 
-.function ["__EntryPoint"("""y:0:{}""")] main() {
+.function ["__EntryPoint"("""y:0:{}""")] N main() {
   NullUninit
   NullUninit
   ClsCnsD "FOO" "Foo"

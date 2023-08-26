@@ -2,7 +2,7 @@
 # Try out dv initializers in the assembler
 #
 
-.function foo($x, $y = y_init) {
+.function N foo(N $x, N $y = y_init) {
   entry:
           CGetL $x
           CGetL $y
@@ -16,9 +16,9 @@
           Jmp entry
 }
 
-.function multiple($x = x_init,
-                   $y = y_init,
-                   $z = z_init) {
+.function N multiple(N $x = x_init,
+                     N $y = y_init,
+                     N $z = z_init) {
   entry:  String "x = "
           CGetL $x
           Concat
@@ -52,7 +52,7 @@
           Jmp entry
 }
 
-.function ["__EntryPoint"("""y:0:{}""")] main() {
+.function ["__EntryPoint"("""y:0:{}""")] N main() {
   String "beginning...\n"
   Print
   PopC

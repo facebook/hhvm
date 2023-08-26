@@ -1,6 +1,6 @@
 .class [final persistent] Cls1 {
   .default_ctor;
-  .method [public] foobaz($a, $b, $c, $d, $e) {
+  .method [public] N foobaz(N $a, N $b, N $c, N $d, N $e) {
     CGetL $c
     RetC
   }
@@ -8,13 +8,13 @@
 
 .class [final persistent] Cls2 {
   .default_ctor;
-  .method [public] foobaz($a, $b, $c, $d, $e) {
+  .method [public] N foobaz(N $a, N $b, N $c, N $d, N $e) {
     CGetL $b
     RetC
   }
 }
 
-.function test($obj, $type, $x) {
+.function N test(N $obj, N $type, N $x) {
   CGetL $type
   JmpZ cls2
 
@@ -45,7 +45,7 @@ end:
   RetC
 }
 
-.function test_outer($type, $x) {
+.function N test_outer(N $type, N $x) {
   .declvars $obj;
   CGetL $type
   JmpZ cls2
@@ -84,7 +84,7 @@ cls2:
   RetC
 }
 
-.function loop($type, $total) {
+.function N loop(N $type, N $total) {
   .declvars $count;
   Int 0
   SetL $count
@@ -111,7 +111,7 @@ end:
   RetC
 }
 
-.function ["__EntryPoint"("""y:0:{}""")] main() {
+.function ["__EntryPoint"("""y:0:{}""")] N main() {
   NullUninit
   NullUninit
   False

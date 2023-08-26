@@ -6,7 +6,7 @@
   .method [public
            "Thing"("""a:1:{i:0;s:3:\"Odd\";}""")
            "Number"("""a:1:{i:0;i:1000;}""")]
-         benchmarkEven($n) {
+         N benchmarkEven(N $n) {
     Null
     RetC
   }

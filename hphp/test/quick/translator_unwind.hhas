@@ -1,7 +1,7 @@
 # Tests unwinding with dirty callee-saved registers that are mapped to
 # execution stack locations.
 
-.function thrower() {
+.function N thrower() {
   NewObjD "Exception"
   Dup
   NullUninit
@@ -13,7 +13,7 @@
 }
 
 .class DtorPrinter {
-  .method [public] __construct($id) {
+  .method [public] N __construct(N $id) {
     String "ctor: "
     CGetL $id
     Concat
@@ -31,10 +31,10 @@
     RetC
   }
 
-  .property [private] x;
+  .property [private] N x;
 }
 
-.function make_obj($id) {
+.function N make_obj(N $id) {
   NewObjD "DtorPrinter"
   Dup
   NullUninit
@@ -48,7 +48,7 @@
 # We do this in a separate scope to avoid
 # having the $k_* locals in test_unwind_dirty_stack_regs()
 # getting caught in the $context parameter to handler()
-.function get_undefined_var() {
+.function N get_undefined_var() {
   .declvars $k_99;
   CGetL $k_99  # undefined variable
   RetC
@@ -61,7 +61,7 @@
 # emitter, but this accomplishes it by CGetL'ing everything to the
 # stack.
 
-.function test_unwind_dirty_stack_regs() {
+.function N test_unwind_dirty_stack_regs() {
   .declvars $k_0 $k_1 $k_2 $k_3 $k_4 $k_5 $k_6 $k_7 $k_8 $k_9 $k_10 $k_11 $k_12
             $k_13 $k_14;
   NullUninit
@@ -199,7 +199,7 @@
   RetC
 }
 
-.function ["__EntryPoint"("""y:0:{}""")] main() {
+.function ["__EntryPoint"("""y:0:{}""")] N main() {
   NullUninit
   NullUninit
     String "thrower"

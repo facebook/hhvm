@@ -1,4 +1,4 @@
-.function ["__EntryPoint"("""y:0:{}""")] main() {
+.function ["__EntryPoint"("""y:0:{}""")] N main() {
   String "asd"
   String "asd"
   AddNewElemC

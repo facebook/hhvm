@@ -65,7 +65,7 @@ def _buf_pos(buf, pos) -> bytes:
     return ret
 
 
-class _bser_buffer(object):
+class _bser_buffer:
     def __init__(self, version):
         self.bser_version = version
         self.buf = ctypes.create_string_buffer(8192)
@@ -264,7 +264,7 @@ def dumps(obj, version: int = 1, capabilities: int = 0):
 # This is a quack-alike with the bserObjectType in bser.c
 # It provides by getattr accessors and getitem for both index
 # and name.
-class _BunserDict(object):
+class _BunserDict:
     __slots__ = ("_keys", "_values")
 
     def __init__(self, keys, values):
@@ -290,7 +290,7 @@ class _BunserDict(object):
         return len(self._keys)
 
 
-class Bunser(object):
+class Bunser:
     def __init__(self, mutable=True, value_encoding=None, value_errors=None):
         self.mutable = mutable
         self.value_encoding = value_encoding

@@ -219,7 +219,7 @@ class WindowsSocketException(Exception):
         )
 
 
-class WindowsSocketHandle(object):
+class WindowsSocketHandle:
     AF_UNIX = 1
     SOCK_STREAM = 1
 

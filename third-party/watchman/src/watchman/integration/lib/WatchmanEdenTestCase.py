@@ -39,7 +39,7 @@ except ImportError:
     def can_run_eden():
         return False
 
-    class WatchmanEdenTestCase(object):
+    class WatchmanEdenTestCase:
         pass
 
 else:

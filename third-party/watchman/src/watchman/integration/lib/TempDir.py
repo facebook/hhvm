@@ -20,7 +20,7 @@ from . import path_utils as path
 global_temp_dir = None
 
 
-class TempDir(object):
+class TempDir:
     """
     This is a helper for locating a reasonable place for temporary files.
     When run in the watchman test suite, we compute this up-front and then

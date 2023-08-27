@@ -52,7 +52,7 @@ def mergeTestConfig(config):
     return {**test_config, **(config or {})}
 
 
-class InitWithFilesMixin(object):
+class InitWithFilesMixin:
     def _init_state(self) -> None:
         # pyre-fixme[16]: `InitWithFilesMixin` has no attribute `base_dir`.
         self.base_dir = tempfile.mkdtemp(prefix="inst")
@@ -87,7 +87,7 @@ class InitWithFilesMixin(object):
         ]
 
 
-class InitWithDirMixin(object):
+class InitWithDirMixin:
     """A mixin to allow setting up a state dir rather than a state file. This is
     only meant to test state dir creation and permissions -- most operations are
     unlikely to work.
@@ -121,7 +121,7 @@ class InitWithDirMixin(object):
         return ["--test-state-dir={0}".format(self.base_dir)]
 
 
-class _Instance(object):
+class _Instance:
     # Tracks a running watchman instance.  It is created with an
     # overridden global configuration file; you may pass that
     # in to the constructor

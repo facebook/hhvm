@@ -25,7 +25,7 @@ from fuzz import ttypes
 from thrift import Thrift
 
 
-class TestRandomizer(object):
+class TestRandomizer:
     iterations = 1024
 
     def get_randomizer(self, ttypes, spec_args, constraints):

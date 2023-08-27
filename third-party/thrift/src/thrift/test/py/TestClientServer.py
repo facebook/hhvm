@@ -101,7 +101,7 @@ def wait_for_server(port, timeout, ssl=False):
     return False
 
 
-class AbstractTest(object):
+class AbstractTest:
     @classmethod
     def setUpClass(cls):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

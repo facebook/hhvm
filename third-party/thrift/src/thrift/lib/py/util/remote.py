@@ -57,7 +57,7 @@ from thrift.transport import THttpClient, TSocket, TSSLSocket, TTransport
 from thrift.transport.THeaderTransport import THeaderTransport
 
 
-class Function(object):
+class Function:
     """Metadata for a service method"""
 
     def __init__(self, fn_name, svc_name, return_type, args):
@@ -380,7 +380,7 @@ def get_json_template_obj(name, functions, service_class):
     return __get_template_for_struct(ans_class)
 
 
-class RemoteClient(object):
+class RemoteClient:
     def __init__(
         self, functions, service_names, service_class, ttypes, print_usage, default_port
     ):
@@ -648,7 +648,7 @@ class RemoteUNIXDomainClient(RemoteTransportClient):
         return self._get_client_by_transport(options, transport, socket=socket)
 
 
-class Namespace(object):
+class Namespace:
     def __init__(self, attrs=None):
         if attrs is not None:
             self.__dict__.update(attrs)
@@ -660,7 +660,7 @@ class Namespace(object):
         self.__dict__[key] = value
 
 
-class Remote(object):
+class Remote:
     __client_types = set()
     __occupied_args = {}
     __parser = argparse.ArgumentParser(add_help=False)

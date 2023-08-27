@@ -23,7 +23,7 @@ def us_to_sec(microseconds):
     return float(microseconds) / 1000000
 
 
-class LoadHandler(object):
+class LoadHandler:
     def __init__(self):
         pass
 

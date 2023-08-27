@@ -62,7 +62,7 @@ def get_spec(ttype, spec_args):
 get_spec.cache = []
 
 
-class ThriftTypeSpec(object):
+class ThriftTypeSpec:
     """Base class that abstracts the functionality required by the randomizer"""
 
     SUBTYPE_ELEMENT = "element"

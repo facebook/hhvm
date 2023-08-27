@@ -21,7 +21,7 @@ from hphp.hack.src.hh_codesynthesis.codeGenerator import ClingoContext, CodeGene
 from hphp.hack.src.hh_codesynthesis.hackGenerator import HackCodeGenerator
 
 
-class Agent(object):
+class Agent:
     """To hold all information belongs to one agent."""
 
     def __init__(self, generator: CodeGenerator, solving_context: ClingoContext):

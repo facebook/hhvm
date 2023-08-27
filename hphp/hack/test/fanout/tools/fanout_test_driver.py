@@ -44,7 +44,7 @@ DEFAULT_HH_SERVER_FLAGS: List[str] = [
 
 
 @attr.s(auto_attribs=True)
-class Binaries(object):
+class Binaries:
     hh_client: str
     hh_server: str
     hh_single_type_check: str
@@ -93,7 +93,7 @@ class Binaries(object):
 
 
 @attr.s(auto_attribs=True)
-class RepoRoot(object):
+class RepoRoot:
     path: str
 
     def cleanup(self) -> None:
@@ -104,7 +104,7 @@ class RepoRoot(object):
 
 
 @attr.s(auto_attribs=True)
-class SavedStateDir(object):
+class SavedStateDir:
     path: str
 
     def cleanup(self) -> None:
@@ -137,7 +137,7 @@ class SavedStateDir(object):
 
 
 @attr.s(auto_attribs=True)
-class ExecResult(object):
+class ExecResult:
     exit_code: int
     stdout: str
     stderr: str

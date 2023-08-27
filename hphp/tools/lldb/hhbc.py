@@ -192,7 +192,7 @@ def show_fca_num_args(numArgs: int, boolVecArgs: lldb.SBValue) -> str:
     return out
 
 
-class HHBC(object):
+class HHBC:
     """
     Namespace for HHBC inspection helpers.
     """

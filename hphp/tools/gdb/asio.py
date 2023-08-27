@@ -20,7 +20,7 @@ from sizeof import sizeof
 #------------------------------------------------------------------------------
 # WaitHandle wrapper class.
 
-class WaitHandle(object):
+class WaitHandle:
     """Wrapper class for a HHVM::c_Awaitable*."""
 
     ##

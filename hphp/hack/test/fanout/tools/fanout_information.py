@@ -11,7 +11,7 @@ FANOUT_INFORMATION_RE: re.Pattern = re.compile(r"\[fanout_information\]\s+(.*)$"
 
 
 @attr.s(auto_attribs=True)
-class FanoutInformation(object):
+class FanoutInformation:
     tag: str
     hashes: List[str]
 

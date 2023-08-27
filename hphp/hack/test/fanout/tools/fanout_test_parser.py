@@ -64,7 +64,7 @@ def parse_multifile_contents(filename: str) -> Dict[str, str]:
 
 
 @attr.s(auto_attribs=True)
-class FanoutTest(object):
+class FanoutTest:
     """Represents a fanout test scenario.
 
     We make use of the multifile format, e.g.:

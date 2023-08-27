@@ -22,7 +22,7 @@ from hhbc import as_idx
 #------------------------------------------------------------------------------
 # Legacy iteration.
 
-class _BaseIterator(object):
+class _BaseIterator:
     """Base iterator for Python 2 compatibility (in Python 3, next() is renamed
     to __next__()).  See http://legacy.python.org/dev/peps/pep-3114/.
     """
@@ -36,7 +36,7 @@ class _BaseIterator(object):
 #------------------------------------------------------------------------------
 # StringData.
 
-class StringDataPrinter(object):
+class StringDataPrinter:
     RECOGNIZE = '^HPHP::StringData$'
 
     def __init__(self, val):
@@ -135,7 +135,7 @@ class SetTVBriefCommand(gdb.Command):
 SetTVBriefCommand()
 
 
-class TypedValuePrinter(object):
+class TypedValuePrinter:
     RECOGNIZE = '^HPHP::(TypedValue|Cell|Ref|Variant|VarNR)$'
 
     def __init__(self, val):
@@ -148,7 +148,7 @@ class TypedValuePrinter(object):
 #------------------------------------------------------------------------------
 # Pointers.
 
-class PtrPrinter(object):
+class PtrPrinter:
     def _string(self):
         ptr = self._pointer()
         if ptr == nullptr():
@@ -237,7 +237,7 @@ class LowPtrPrinter(PtrPrinter):
 #------------------------------------------------------------------------------
 # folly::Optional
 
-class OptionalPrinter(object):
+class OptionalPrinter:
     RECOGNIZE = '^(HPHP::req|folly)::Optional<.*>$'
 
     def __init__(self, val):
@@ -254,7 +254,7 @@ class OptionalPrinter(object):
 # (HPHP::req|std)::vector
 
 
-class ReqVectorPrinter(object):
+class ReqVectorPrinter:
     RECOGNIZE = '^(HPHP::req|std)::vector<.*>$'
 
     class _iterator(_BaseIterator):
@@ -295,7 +295,7 @@ class ReqVectorPrinter(object):
 # ArrayData.
 
 
-class ArrayDataPrinter(object):
+class ArrayDataPrinter:
     RECOGNIZE = '^HPHP::(ArrayData|VanillaDict)$'
 
     class _vec_iterator(_BaseIterator):
@@ -421,7 +421,7 @@ class ArrayDataPrinter(object):
 #------------------------------------------------------------------------------
 # ObjectData.
 
-class ObjectDataPrinter(object):
+class ObjectDataPrinter:
     RECOGNIZE = '^HPHP::(ObjectData)$'
 
     class _iterator(_BaseIterator):
@@ -473,7 +473,7 @@ class ObjectDataPrinter(object):
 # print for enum values of type Op
 
 
-class HhbcOpsPrinter(object):
+class HhbcOpsPrinter:
     RECOGNIZE = '^HPHP::Op$'
 
     def __init__(self, val):
@@ -489,7 +489,7 @@ class HhbcOpsPrinter(object):
 # HHBBC::Bytecode
 
 
-class HhbbcBytecodePrinter(object):
+class HhbbcBytecodePrinter:
     RECOGNIZE = '^HPHP::HHBBC::Bytecode$'
 
     def __init__(self, val):
@@ -503,7 +503,7 @@ class HhbbcBytecodePrinter(object):
 # Lookup function.
 
 
-class CompactVectorPrinter(object):
+class CompactVectorPrinter:
     RECOGNIZE = '^HPHP::CompactVector(<.*>)$'
 
     class _iterator(_BaseIterator):
@@ -557,7 +557,7 @@ class CompactVectorPrinter(object):
 #------------------------------------------------------------------------------
 # SrcKey.
 
-class SrcKeyPrinter(object):
+class SrcKeyPrinter:
     RECOGNIZE = '^HPHP::SrcKey$'
 
     def __init__(self, val):
@@ -593,7 +593,7 @@ class SrcKeyPrinter(object):
 # AsioBlockable.
 
 
-class AsioBlockablePrinter(object):
+class AsioBlockablePrinter:
     RECOGNIZE = '^HPHP::AsioBlockable$'
 
     def __init__(self, val):

@@ -35,7 +35,7 @@ class Mode(Enum):
 
 
 @attr.s(auto_attribs=True)
-class Opts(object):
+class Opts:
     hh_client: str
     hh_server: str
     hh_single_type_check: str

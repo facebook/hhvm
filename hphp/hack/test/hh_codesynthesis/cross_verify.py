@@ -8,7 +8,7 @@ import tempfile
 from typing import Dict, List, Set
 
 
-class DependencyEdges(object):
+class DependencyEdges:
     """A simple internal representation to categorize DependencyEdges"""
 
     edge_types = ["Extends", "Type", "Method", "SMethod", "Fun"]

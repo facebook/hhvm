@@ -15,7 +15,7 @@ import frame
 #------------------------------------------------------------------------------
 # HHVM unwinder.
 
-class FrameId(object):
+class FrameId:
     __slots__ = ['sp', 'pc', 'special']
 
     def __init__(self, sp, ip, special):

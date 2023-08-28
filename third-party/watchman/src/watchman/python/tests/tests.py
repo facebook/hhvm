@@ -151,7 +151,7 @@ def expand_bser_mods(test_class):
         make_class(mod, suffix)
 
 
-class FakeFile(object):
+class FakeFile:
     def __init__(self, data):
         self._data = data
         self._ptr = 0

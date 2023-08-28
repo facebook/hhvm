@@ -389,7 +389,7 @@ tls = threading.local()
 
 # Manage printing from concurrent threads
 # http://stackoverflow.com/a/3030755/149111
-class ThreadSafeFile(object):
+class ThreadSafeFile:
     def __init__(self, f):
         self.f = f
         self.lock = threading.RLock()

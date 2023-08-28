@@ -67,7 +67,7 @@ async def _resolve_sockname():
     return await loop.run_in_executor(None, _resolve_sockname_helper)
 
 
-class AsyncTransport(object):
+class AsyncTransport:
     """Communication transport to the Watchman Service."""
 
     async def activate(self, **kwargs):
@@ -116,7 +116,7 @@ class AsyncUnixSocketTransport(AsyncTransport):
             self.writer.close()
 
 
-class AsyncCodec(object):
+class AsyncCodec:
     """Communication encoding for the Watchman service."""
 
     def __init__(self, transport):
@@ -177,7 +177,7 @@ class ReceiveLoopError(Exception):
     pass
 
 
-class AIOClient(object):
+class AIOClient:
     """Create and manage an asyncio Watchman connection.
 
     Example usage:

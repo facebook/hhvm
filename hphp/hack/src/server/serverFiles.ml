@@ -35,7 +35,7 @@ let path_of_root root extension =
   (* TODO: move this to places that write this file *)
   Sys_utils.mkdir_no_fail (get_tmp ());
   let root_part = Path.slash_escaped_string_of_path root in
-  Filename.concat (get_tmp ()) (spf "%s.%s" root_part extension)
+  Filename.concat (get_tmp ()) (spf "%s%s" root_part extension)
 
 let is_of_root root fn =
   let root_part = Path.slash_escaped_string_of_path root in
@@ -44,33 +44,33 @@ let is_of_root root fn =
 (**
  * Lock on this file will be held after the server has finished initializing.
  * *)
-let lock_file root = path_of_root root "lock"
+let lock_file root = path_of_root root ".lock"
 
-let log_link root = path_of_root root "log"
+let log_link root = path_of_root root ".log"
 
-let pids_file root = path_of_root root "pids"
+let pids_file root = path_of_root root ".pids"
 
-let socket_file root = path_of_root root "sock"
+let socket_file root = path_of_root root ".sock"
 
-let dfind_log root = path_of_root root "dfind"
+let dfind_log root = path_of_root root ".dfind"
 
-let client_log root = path_of_root root "client_log"
+let client_log root = path_of_root root ".client_log"
 
-let client_lsp_log root = path_of_root root "client_lsp_log"
+let client_lsp_log root = path_of_root root ".client_lsp_log"
 
-let client_ide_log root = path_of_root root "client_ide_log"
+let client_ide_log root = path_of_root root ".client_ide_log"
 
-let client_ide_naming_table root = path_of_root root "client_ide_naming_table"
+let client_ide_naming_table root = path_of_root root ".client_ide_naming_table"
 
-let monitor_log_link root = path_of_root root "monitor_log"
+let monitor_log_link root = path_of_root root ".monitor_log"
 
-let errors_file_path (root : Path.t) : string = path_of_root root "errors.bin"
+let errors_file_path (root : Path.t) : string = path_of_root root ".errors.bin"
 
 let server_finale_file (pid : int) : string =
   Filename.concat (get_tmp ()) (spf "%d.fin" pid)
 
 let server_progress_file (root : Path.t) : string =
-  path_of_root root "progress.json"
+  path_of_root root ".progress.json"
 
 let server_receipt_to_monitor_file (pid : int) : string =
   Filename.concat (get_tmp ()) (spf "server_receipt_to_monitor.%d.json" pid)

@@ -1,9 +1,9 @@
-let lock root = ServerFiles.path_of_root root "watchman_event_watcher_lock"
+let lock root = ServerFiles.path_of_root root ".watchman_event_watcher_lock"
 
-let log_link root = ServerFiles.path_of_root root "watchman_event_watcher_log"
+let log_link root = ServerFiles.path_of_root root ".watchman_event_watcher_log"
 
 let socket_file root =
-  ServerFiles.path_of_root root "watchman_event_watcher_sock"
+  ServerFiles.path_of_root root ".watchman_event_watcher_sock"
 
 module Responses = struct
   let unknown_str = "unknown"

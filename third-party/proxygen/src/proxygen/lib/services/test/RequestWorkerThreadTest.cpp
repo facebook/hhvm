@@ -11,8 +11,6 @@
 
 #include "proxygen/lib/services/RequestWorkerThread.h"
 
-using namespace ::testing;
-
 namespace proxygen {
 
 class FinishCallbackTest : public RequestWorkerThread::FinishCallback {

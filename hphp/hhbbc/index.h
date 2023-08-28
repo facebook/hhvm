@@ -1082,32 +1082,41 @@ struct Index {
   bool func_depends_on_arg(const php::Func* func, size_t arg) const;
 
   /*
+   * Return type knowledge. The type and whether it's effect-free.
+   */
+  struct ReturnType {
+    Type t;
+    bool effectFree{false};
+  };
+
+  /*
    * If func is effect-free when called with args, and it returns a constant,
    * return that constant; otherwise return TInitCell.
    */
-  Type lookup_foldable_return_type(Context ctx,
-                                   const CallContext& calleeCtx) const;
+  ReturnType lookup_foldable_return_type(Context ctx,
+                                         const CallContext& calleeCtx) const;
 
   /*
    * Return the best known return type for a resolved function, in a
    * context insensitive way.  Returns TInitCell at worst.
    */
-  Type lookup_return_type(Context, MethodsInfo*, res::Func,
-                          Dep dep = Dep::ReturnTy) const;
+  ReturnType lookup_return_type(Context, MethodsInfo*, res::Func,
+                                Dep dep = Dep::ReturnTy) const;
 
   /*
-   * Return the best known return type for a resolved function, given
-   * the supplied calling context.  Returns TInitCell at worst.
+   * Return the best known return type for a resolved function and
+   * whether it is effect-free, given the supplied calling context.
+   * Returns TInitCell at worst.
    *
    * During analyze phases, this function may re-enter analyze in
    * order to interpret the callee with these argument types.
    */
-  Type lookup_return_type(Context caller,
-                          MethodsInfo*,
-                          const CompactVector<Type>& args,
-                          const Type& context,
-                          res::Func,
-                          Dep dep = Dep::ReturnTy) const;
+  ReturnType lookup_return_type(Context caller,
+                                MethodsInfo*,
+                                const CompactVector<Type>& args,
+                                const Type& context,
+                                res::Func,
+                                Dep dep = Dep::ReturnTy) const;
 
   /*
    * Look up raw return type information for an unresolved
@@ -1120,7 +1129,7 @@ struct Index {
    * Nothing may be writing to the index when this function is used,
    * but concurrent readers are allowed.
    */
-  std::pair<Type, size_t> lookup_return_type_raw(const php::Func*) const;
+  std::pair<ReturnType, size_t> lookup_return_type_raw(const php::Func*) const;
 
   /*
    * Return the best known types of a closure's used variables (on
@@ -1363,17 +1372,6 @@ struct Index {
   void update_prop_initial_values(const Context&,
                                   const ResolvedPropInits&,
                                   DependencyContextSet&);
-
-  /*
-   * Return true if the function is effect free.
-   */
-  bool is_effect_free(Context, res::Func rfunc) const;
-
-  /*
-   * Like is_effect_free, but does not register a dependency, so not
-   * appropriate during analysis.
-   */
-  bool is_effect_free_raw(const php::Func* func) const;
 
   struct IndexData;
 private:

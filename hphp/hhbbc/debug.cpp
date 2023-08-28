@@ -181,9 +181,9 @@ void dump_func_state(std::ostream& out,
       )
     : folly::sformat("{}()", f.name);
 
-  auto const retTy = index.lookup_return_type_raw(&f).first;
+  auto const [retTy, effectFree] = index.lookup_return_type_raw(&f).first;
   out << name << " :: " << show(retTy) <<
-    (index.is_effect_free_raw(&f) ? " (effect-free)\n" : "\n");
+    (effectFree ? " (effect-free)\n" : "\n");
 }
 
 }

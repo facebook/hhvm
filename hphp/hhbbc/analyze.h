@@ -198,7 +198,7 @@ private:
 
 struct ClassAnalysisWork {
   ClassAnalysisWorklist worklist;
-  hphp_fast_map<const php::Func*, Type> returnTypes;
+  hphp_fast_map<const php::Func*, Index::ReturnType> returnTypes;
   hphp_fast_map<const php::Func*, hphp_fast_set<SString>> propMutators;
   bool propsRefined = false;
 };

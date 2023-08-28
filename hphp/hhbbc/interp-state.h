@@ -529,7 +529,7 @@ struct MethodsInfo {
   // Look up the best known return type for the current class's
   // method, return std::nullopt if not known, or if the Func is not a
   // method of the current class.
-  Optional<Type> lookupReturnType(const php::Func&);
+  Optional<Index::ReturnType> lookupReturnType(const php::Func&);
 
 private:
   ClassAnalysis* m_cls;

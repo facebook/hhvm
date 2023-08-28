@@ -995,7 +995,7 @@ void emit_finish_func(EmitUnitState& state, FuncEmitter& fe,
   for (auto& name : func.staticCoeffects) fe.staticCoeffects.push_back(name);
   for (auto& rule : func.coeffectRules)   fe.coeffectRules.push_back(rule);
 
-  auto const retTy = state.index.lookup_return_type_raw(&func).first;
+  auto const [retTy, _] = state.index.lookup_return_type_raw(&func).first;
   if (!retTy.subtypeOf(BBottom)) {
     fe.repoReturnType = make_repo_type(retTy);
   }

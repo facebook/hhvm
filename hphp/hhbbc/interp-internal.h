@@ -510,33 +510,19 @@ bool shouldAttemptToFold(ISS& env, const php::Func* func, const FCallArgs& fca,
 
   // The function has no args. Check if it's effect free and returns
   // a literal.
-  if (env.index.is_effect_free(env.ctx, rfunc) &&
-      is_scalar(
-        env.index.lookup_return_type(
-          env.ctx,
-          &env.collect.methods,
-          rfunc,
-          Dep::InlineDepthLimit
-        )
-      )
-     ) {
-    return true;
-  }
+  auto [retTy, effectFree] = env.index.lookup_return_type(
+    env.ctx,
+    &env.collect.methods,
+    rfunc,
+    Dep::InlineDepthLimit
+  );
+  auto const isScalar = is_scalar(retTy);
+  if (effectFree && isScalar) return true;
 
   if (!(func->attrs & AttrStatic) && func->cls) {
     // May be worth trying to fold if the method returns a scalar,
     // assuming its only "effect" is checking for existence of $this.
-    if (is_scalar(
-          env.index.lookup_return_type(
-            env.ctx,
-            &env.collect.methods,
-            rfunc,
-            Dep::InlineDepthLimit
-          )
-        )
-       ) {
-      return true;
-    }
+    if (isScalar) return true;
 
     // The method may be foldable if we know more about $this.
     if (is_specialized_obj(context)) {

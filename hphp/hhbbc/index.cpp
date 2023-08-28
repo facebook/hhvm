@@ -302,7 +302,7 @@ static_assert(CheckSize<MethTabEntry, 16>(), "");
 
 using ContextRetTyMap = tbb::concurrent_hash_map<
   CallContext,
-  Type,
+  Index::ReturnType,
   CallContextHashCompare
 >;
 
@@ -552,7 +552,7 @@ struct res::Func::FuncFamily {
   // State in the FuncFamily which might vary depending on whether
   // we're considering the regular subset or not.
   struct Info {
-    LockFreeLazy<Type> m_returnTy;
+    LockFreeLazy<Index::ReturnType> m_returnTy;
     const StaticInfo* m_static{nullptr};
   };
 
@@ -5175,16 +5175,16 @@ Type adjust_closure_context(const Index& index, const CallContext& ctx) {
   return ctx.context;
 }
 
-Type context_sensitive_return_type(IndexData& data,
-                                   const Context& ctx,
-                                   CallContext callCtx,
-                                   Type returnType) {
+Index::ReturnType context_sensitive_return_type(IndexData& data,
+                                                const Context& ctx,
+                                                CallContext callCtx,
+                                                Index::ReturnType returnType) {
   constexpr auto max_interp_nexting_level = 2;
   static __thread uint32_t interp_nesting_level;
   auto const finfo = func_info(data, callCtx.callee);
 
   auto const adjustedCtx = adjust_closure_context(*data.m_index, callCtx);
-  returnType = return_with_context(std::move(returnType), adjustedCtx);
+  returnType.t = return_with_context(std::move(returnType.t), adjustedCtx);
 
   auto const checkParam = [&] (int i) {
     auto const& constraint = finfo->func->params[i].typeConstraint;
@@ -5208,7 +5208,7 @@ Type context_sensitive_return_type(IndexData& data,
     if (finfo->func->noContextSensitiveAnalysis ||
         finfo->func->params.empty() ||
         interp_nesting_level + 1 >= max_interp_nexting_level ||
-        returnType == TBottom) {
+        returnType.t.is(BBottom)) {
       return false;
     }
 
@@ -5232,7 +5232,9 @@ Type context_sensitive_return_type(IndexData& data,
   {
     ContextRetTyMap::const_accessor acc;
     if (data.contextualReturnTypes.find(acc, callCtx)) {
-      if (data.frozen || acc->second == TBottom || is_scalar(acc->second)) {
+      if (data.frozen ||
+          acc->second.t.is(BBottom) ||
+          is_scalar(acc->second.t)) {
         return acc->second;
       }
     }
@@ -5252,37 +5254,44 @@ Type context_sensitive_return_type(IndexData& data,
       func->cls,
       &ctx.forDep()
     };
-    auto const ty = analyze_func_inline(
+    auto fa = analyze_func_inline(
       *data.m_index,
       calleeCtx,
       adjustedCtx,
       callCtx.args
-    ).inferredReturn;
-    return return_with_context(ty, adjustedCtx);
+    );
+    return Index::ReturnType{
+      return_with_context(std::move(fa.inferredReturn), adjustedCtx),
+      fa.effectFree
+    };
   }();
 
   if (!interp_nesting_level) {
     FTRACE(3,
            "Context sensitive type: {}\n"
            "Context insensitive type: {}\n",
-           show(contextType), show(returnType));
+           show(contextType.t), show(returnType.t));
   }
 
-  if (!returnType.subtypeOf(BUnc)) {
+  if (!returnType.t.subtypeOf(BUnc)) {
     // If the context insensitive return type could be non-static, staticness
     // could be a result of temporary context sensitive bytecode optimizations.
-    contextType = loosen_staticness(std::move(contextType));
+    contextType.t = loosen_staticness(std::move(contextType.t));
   }
 
-  auto ret = intersection_of(std::move(returnType), std::move(contextType));
+  auto ret = Index::ReturnType{
+    intersection_of(std::move(returnType.t), std::move(contextType.t)),
+    returnType.effectFree && contextType.effectFree
+  };
 
   if (!interp_nesting_level) {
-    FTRACE(3, "Context sensitive result: {}\n", show(ret));
+    FTRACE(3, "Context sensitive result: {}\n", show(ret.t));
   }
 
   ContextRetTyMap::accessor acc;
   if (data.contextualReturnTypes.insert(acc, callCtx) ||
-      ret.strictSubtypeOf(acc->second)) {
+      ret.t.strictSubtypeOf(acc->second.t) ||
+      (ret.effectFree && !acc->second.effectFree)) {
     acc->second = ret;
   }
 
@@ -14791,53 +14800,6 @@ res::Func Index::resolve_func_or_method(const php::Func& f) const {
   return res::Func { res::Func::Method { func_info(*m_data, &f) } };
 }
 
-bool Index::is_effect_free_raw(const php::Func* func) const {
-  return func_info(*m_data, func)->effectFree;
-}
-
-bool Index::is_effect_free(Context ctx, res::Func rfunc) const {
-  auto const processFF = [&] (FuncFamily* ff, bool regularOnly) {
-    for (auto const possible : ff->possibleFuncs()) {
-      if (regularOnly && !possible.inRegular()) continue;
-      auto const func = possible.ptr();
-      add_dependency(*m_data, func, ctx, Dep::InlineDepthLimit);
-      auto const effectFree = func_info(*m_data, func)->effectFree;
-      if (!effectFree) return false;
-    }
-    return true;
-  };
-
-  return match<bool>(
-    rfunc.val,
-    [&](res::Func::FuncName)   { return false; },
-    [&](res::Func::MethodName) { return false; },
-    [&](res::Func::Fun f)      {
-      add_dependency(*m_data, f.finfo->func, ctx, Dep::InlineDepthLimit);
-      return f.finfo->effectFree;
-    },
-    [&] (res::Func::Method m) {
-      add_dependency(*m_data, m.finfo->func, ctx, Dep::InlineDepthLimit);
-      return m.finfo->effectFree;
-    },
-    [&] (res::Func::MethodFamily fam) {
-      return processFF(fam.family, fam.regularOnly);
-    },
-    [&] (res::Func::MethodOrMissing m) { return false; },
-    [&] (res::Func::Missing) { return false; },
-    [&] (const res::Func::Isect& i) {
-      for (auto const ff : i.families) {
-        if (processFF(ff, i.regularOnly)) return true;
-      }
-      return false;
-    },
-    [&] (res::Func::Fun2)             -> bool { always_assert(false); },
-    [&] (res::Func::Method2)          -> bool { always_assert(false); },
-    [&] (res::Func::MethodFamily2)    -> bool { always_assert(false); },
-    [&] (res::Func::MethodOrMissing2) -> bool { always_assert(false); },
-    [&] (res::Func::Isect2&)          -> bool { always_assert(false); }
-  );
-}
-
 bool Index::func_depends_on_arg(const php::Func* func, size_t arg) const {
   auto const& finfo = *func_info(*m_data, func);
   return arg >= finfo.unusedParams.size() || !finfo.unusedParams.test(arg);
@@ -15169,25 +15131,34 @@ Type Index::lookup_constant(Context ctx, SString cnsName) const {
   auto rfunc = resolve_func(func_name);
   assertx(rfunc.exactFunc());
 
-  return lookup_return_type(ctx, nullptr, rfunc, Dep::ConstVal);
+  return lookup_return_type(ctx, nullptr, rfunc, Dep::ConstVal).t;
 }
 
-Type Index::lookup_foldable_return_type(Context ctx,
-                                        const CallContext& calleeCtx) const {
+Index::ReturnType
+Index::lookup_foldable_return_type(Context ctx,
+                                   const CallContext& calleeCtx) const {
   auto const func = calleeCtx.callee;
   constexpr auto max_interp_nexting_level = 2;
   static __thread uint32_t interp_nesting_level;
+
+  using R = ReturnType;
 
   auto const ctxType = adjust_closure_context(*this, calleeCtx);
 
   // Don't fold functions when staticness mismatches
   if (!func->isClosureBody) {
-    if ((func->attrs & AttrStatic) && ctxType.couldBe(TObj)) return TInitCell;
-    if (!(func->attrs & AttrStatic) && ctxType.couldBe(TCls)) return TInitCell;
+    if ((func->attrs & AttrStatic) && ctxType.couldBe(TObj)) {
+      return R{ TInitCell, false };
+    }
+    if (!(func->attrs & AttrStatic) && ctxType.couldBe(TCls)) {
+      return R{ TInitCell, false };
+    }
   }
 
   auto const& finfo = *func_info(*m_data, func);
-  if (finfo.effectFree && is_scalar(finfo.returnTy)) return finfo.returnTy;
+  if (finfo.effectFree && is_scalar(finfo.returnTy)) {
+    return R{ finfo.returnTy, true };
+  }
 
   auto showArgs DEBUG_ONLY = [] (const CompactVector<Type>& a) {
     std::string ret, sep;
@@ -15210,7 +15181,8 @@ Type Index::lookup_foldable_return_type(Context ctx,
         showArgs(calleeCtx.args),
         CallContextHashCompare{}.hash(calleeCtx));
 
-      assertx(is_scalar(acc->second));
+      assertx(is_scalar(acc->second.t));
+      assertx(acc->second.effectFree);
       return acc->second;
     }
   }
@@ -15224,12 +15196,12 @@ Type Index::lookup_foldable_return_type(Context ctx,
       func->name,
       showArgs(calleeCtx.args),
       CallContextHashCompare{}.hash(calleeCtx));
-    return TInitCell;
+    return R{ TInitCell, false };
   }
 
   if (interp_nesting_level > max_interp_nexting_level) {
     add_dependency(*m_data, func, ctx, Dep::InlineDepthLimit);
-    return TInitCell;
+    return R{ TInitCell, false };
   }
 
   auto const contextType = [&] {
@@ -15245,108 +15217,125 @@ Type Index::lookup_foldable_return_type(Context ctx,
       nullptr,
       CollectionOpts::EffectFreeOnly
     );
-    return fa.effectFree ? fa.inferredReturn : TInitCell;
+    return R{
+      fa.effectFree ? fa.inferredReturn : TInitCell,
+      fa.effectFree
+    };
   }();
 
-  if (!is_scalar(contextType)) return TInitCell;
+  if (!is_scalar(contextType.t)) return R{ TInitCell, false };
 
   ContextRetTyMap::accessor acc;
   if (m_data->foldableReturnTypeMap.insert(acc, calleeCtx)) {
     acc->second = contextType;
   } else {
     // someone beat us to it
-    assertx(acc->second == contextType);
+    assertx(acc->second.t == contextType.t);
   }
   return contextType;
 }
 
-Type Index::lookup_return_type(Context ctx,
-                               MethodsInfo* methods,
-                               res::Func rfunc,
-                               Dep dep) const {
+Index::ReturnType Index::lookup_return_type(Context ctx,
+                                            MethodsInfo* methods,
+                                            res::Func rfunc,
+                                            Dep dep) const {
+  using R = ReturnType;
+
   auto const funcFamily = [&] (FuncFamily* fam, bool regularOnly) {
     add_dependency(*m_data, fam, ctx, dep);
     return fam->infoFor(regularOnly).m_returnTy.get(
       [&] {
         auto ret = TBottom;
+        auto effectFree = true;
         for (auto const pf : fam->possibleFuncs()) {
           if (regularOnly && !pf.inRegular()) continue;
           auto const finfo = func_info(*m_data, pf.ptr());
-          if (!finfo->func) return TInitCell;
+          if (!finfo->func) return R{ TInitCell, false };
           ret |= unctx(finfo->returnTy);
-          if (!ret.strictSubtypeOf(BInitCell)) return ret;
+          effectFree &= finfo->effectFree;
+          if (!ret.strictSubtypeOf(BInitCell) && !effectFree) break;
         }
-        return ret;
+        return R{ std::move(ret), effectFree };
       }
     );
   };
   auto const meth = [&] (const php::Func* func) {
     if (methods) {
       if (auto ret = methods->lookupReturnType(*func)) {
-        return unctx(std::move(*ret));
+        return R{ unctx(std::move(ret->t)), ret->effectFree };
       }
     }
     add_dependency(*m_data, func, ctx, dep);
     auto const finfo = func_info(*m_data, func);
-    if (!finfo->func) return TInitCell;
-    return unctx(finfo->returnTy);
+    if (!finfo->func) return R{ TInitCell, false };
+    return R{ unctx(finfo->returnTy), finfo->effectFree };
   };
 
-  return match<Type>(
+  return match<R>(
     rfunc.val,
-    [&] (res::Func::FuncName)   { return TInitCell; },
-    [&] (res::Func::MethodName) { return TInitCell; },
+    [&] (res::Func::FuncName)   { return R{ TInitCell, false }; },
+    [&] (res::Func::MethodName) { return R{ TInitCell, false }; },
     [&] (res::Func::Fun f) {
       add_dependency(*m_data, f.finfo->func, ctx, dep);
-      return unctx(f.finfo->returnTy);
+      return R{ unctx(f.finfo->returnTy), f.finfo->effectFree };
     },
     [&] (res::Func::Method m)          { return meth(m.finfo->func); },
     [&] (res::Func::MethodFamily fam)  {
       return funcFamily(fam.family, fam.regularOnly);
     },
     [&] (res::Func::MethodOrMissing m) { return meth(m.finfo->func); },
-    [&] (res::Func::Missing)           { return TBottom; },
+    [&] (res::Func::Missing)           { return R{ TBottom, false }; },
     [&] (const res::Func::Isect& i) {
       auto ty = TInitCell;
+      auto anyEffectFree = false;
       for (auto const ff : i.families) {
-        ty &= funcFamily(ff, i.regularOnly);
+        auto const [t, e] = funcFamily(ff, i.regularOnly);
+        ty &= t;
+        if (e) anyEffectFree = true;
       }
-      return ty;
+      return R{ std::move(ty), anyEffectFree };
     },
-    [&] (res::Func::Fun2)             -> Type { always_assert(false); },
-    [&] (res::Func::Method2)          -> Type { always_assert(false); },
-    [&] (res::Func::MethodFamily2)    -> Type { always_assert(false); },
-    [&] (res::Func::MethodOrMissing2) -> Type { always_assert(false); },
-    [&] (res::Func::Isect2&)          -> Type { always_assert(false); }
+    [&] (res::Func::Fun2)             -> R { always_assert(false); },
+    [&] (res::Func::Method2)          -> R { always_assert(false); },
+    [&] (res::Func::MethodFamily2)    -> R { always_assert(false); },
+    [&] (res::Func::MethodOrMissing2) -> R { always_assert(false); },
+    [&] (res::Func::Isect2&)          -> R { always_assert(false); }
   );
 }
 
-Type Index::lookup_return_type(Context caller,
-                               MethodsInfo* methods,
-                               const CompactVector<Type>& args,
-                               const Type& context,
-                               res::Func rfunc,
-                               Dep dep) const {
+Index::ReturnType Index::lookup_return_type(Context caller,
+                                            MethodsInfo* methods,
+                                            const CompactVector<Type>& args,
+                                            const Type& context,
+                                            res::Func rfunc,
+                                            Dep dep) const {
+  using R = ReturnType;
+
   auto const funcFamily = [&] (FuncFamily* fam, bool regularOnly) {
     add_dependency(*m_data, fam, caller, dep);
     auto ret = fam->infoFor(regularOnly).m_returnTy.get(
       [&] {
         auto ty = TBottom;
+        auto effectFree = true;
         for (auto const pf : fam->possibleFuncs()) {
           if (regularOnly && !pf.inRegular()) continue;
           auto const finfo = func_info(*m_data, pf.ptr());
-          if (!finfo->func) return TInitCell;
+          if (!finfo->func) return R{ TInitCell, false };
           ty |= finfo->returnTy;
-          if (!ty.strictSubtypeOf(BInitCell)) return ty;
+          effectFree &= finfo->effectFree;
+          if (!ty.strictSubtypeOf(BInitCell) && !effectFree) break;
         }
-        return ty;
+        return R{ std::move(ty), effectFree };
       }
     );
-    return return_with_context(std::move(ret), context);
+    return R{
+      return_with_context(std::move(ret.t), context),
+      ret.effectFree
+    };
   };
   auto const meth = [&] (const php::Func* func) {
     auto const finfo = func_info(*m_data, func);
-    if (!finfo->func) return TInitCell;
+    if (!finfo->func) return R{ TInitCell, false };
 
     auto returnType = [&] {
       if (methods) {
@@ -15355,7 +15344,7 @@ Type Index::lookup_return_type(Context caller,
         }
       }
       add_dependency(*m_data, func, caller, dep);
-      return finfo->returnTy;
+      return R{ finfo->returnTy, finfo->effectFree };
     }();
 
     return context_sensitive_return_type(
@@ -15366,7 +15355,7 @@ Type Index::lookup_return_type(Context caller,
     );
   };
 
-  return match<Type>(
+  return match<R>(
     rfunc.val,
     [&] (res::Func::FuncName) {
       return lookup_return_type(caller, methods, rfunc, dep);
@@ -15380,7 +15369,7 @@ Type Index::lookup_return_type(Context caller,
         *m_data,
         caller,
         { f.finfo->func, args, context },
-        f.finfo->returnTy
+        R{ f.finfo->returnTy, f.finfo->effectFree }
       );
     },
     [&] (res::Func::Method m)          { return meth(m.finfo->func); },
@@ -15388,29 +15377,36 @@ Type Index::lookup_return_type(Context caller,
       return funcFamily(fam.family, fam.regularOnly);
     },
     [&] (res::Func::MethodOrMissing m) { return meth(m.finfo->func); },
-    [&] (res::Func::Missing)           { return TBottom; },
+    [&] (res::Func::Missing)           { return R{ TBottom, false }; },
     [&] (const res::Func::Isect& i) {
       auto ty = TInitCell;
+      auto anyEffectFree = false;
       for (auto const ff : i.families) {
-        ty &= funcFamily(ff, i.regularOnly);
+        auto const [t, e] = funcFamily(ff, i.regularOnly);
+        ty &= t;
+        if (e) anyEffectFree = true;
       }
-      return ty;
+      return R{ std::move(ty), anyEffectFree };
     },
-    [&] (res::Func::Fun2)             -> Type { always_assert(false); },
-    [&] (res::Func::Method2)          -> Type { always_assert(false); },
-    [&] (res::Func::MethodFamily2)    -> Type { always_assert(false); },
-    [&] (res::Func::MethodOrMissing2) -> Type { always_assert(false); },
-    [&] (res::Func::Isect2&)          -> Type { always_assert(false); }
+    [&] (res::Func::Fun2)             -> R { always_assert(false); },
+    [&] (res::Func::Method2)          -> R { always_assert(false); },
+    [&] (res::Func::MethodFamily2)    -> R { always_assert(false); },
+    [&] (res::Func::MethodOrMissing2) -> R { always_assert(false); },
+    [&] (res::Func::Isect2&)          -> R { always_assert(false); }
   );
 }
 
-std::pair<Type, size_t> Index::lookup_return_type_raw(const php::Func* f) const {
+std::pair<Index::ReturnType, size_t>
+Index::lookup_return_type_raw(const php::Func* f) const {
   auto it = func_info(*m_data, f);
   if (it->func) {
     assertx(it->func == f);
-    return { it->returnTy, it->returnRefinements };
+    return {
+      ReturnType{ it->returnTy, it->effectFree },
+      it->returnRefinements
+    };
   }
-  return { TInitCell, 0 };
+  return { ReturnType{ TInitCell, false }, 0 };
 }
 
 CompactVector<Type>

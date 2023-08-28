@@ -1790,7 +1790,7 @@ bool isTypeHelper(ISS& env,
 // If the current function is a memoize wrapper, return the inferred return type
 // of the function being wrapped along with if the wrapped function is effect
 // free.
-std::pair<Type, bool> memoizeImplRetType(ISS& env) {
+Index::ReturnType memoizeImplRetType(ISS& env) {
   always_assert(env.ctx.func->isMemoizeWrapper);
 
   // Lookup the wrapped function. This should always resolve to a precise
@@ -1832,21 +1832,17 @@ std::pair<Type, bool> memoizeImplRetType(ISS& env) {
     return TBottom;
   }();
 
-  auto retTy = env.index.lookup_return_type(
+  auto [retTy, effectFree] = env.index.lookup_return_type(
     env.ctx,
     &env.collect.methods,
     args,
     ctxType,
     memo_impl_func
   );
-  auto const effectFree = env.index.is_effect_free(
-    env.ctx,
-    memo_impl_func
-  );
   // Regardless of anything we know the return type will be an InitCell (this is
   // a requirement of memoize functions).
   if (!retTy.subtypeOf(BInitCell)) return { TInitCell, effectFree };
-  return { retTy, effectFree };
+  return { std::move(retTy), effectFree };
 }
 
 template<class JmpOp>
@@ -3694,7 +3690,7 @@ bool fcallTryFold(
   };
   if (env.collect.unfoldableFuncs.count(calleeCtx)) return false;
 
-  auto foldableReturnType = env.index.lookup_foldable_return_type(
+  auto [foldableReturnType, _] = env.index.lookup_foldable_return_type(
     env.ctx,
     calleeCtx
   );
@@ -3798,7 +3794,7 @@ void fcallKnownImpl(
   Optional<uint32_t> inOutNum
 ) {
   auto const numArgs = fca.numArgs();
-  auto returnType = [&] {
+  auto [returnType, _] = [&] {
     CompactVector<Type> args(numArgs);
     auto const firstArgPos = numExtraInputs + fca.numInputs() - 1;
     for (auto i = uint32_t{0}; i < numArgs; ++i) {
@@ -5708,7 +5704,7 @@ bool memoGetImpl(ISS& env, const Op& op, Rebind&& rebind) {
     }
   }
 
-  auto retTy = memoizeImplRetType(env);
+  auto [retTy, effectFree] = memoizeImplRetType(env);
 
   // MemoGet can raise if we give a non arr-key local, or if we're in a method
   // and $this isn't available.
@@ -5721,15 +5717,15 @@ bool memoGetImpl(ISS& env, const Op& op, Rebind&& rebind) {
        (env.ctx.func->attrs & AttrStatic) ||
        thisAvailable(env))) {
     if (will_reduce(env)) {
-      if (retTy.first.subtypeOf(BBottom)) {
+      if (retTy.subtypeOf(BBottom)) {
         reduce(env);
         jmp_setdest(env, op.target1);
         return true;
       }
       // deal with constprop manually; otherwise we will propagate the
       // taken edge and *then* replace the MemoGet with a constant.
-      if (retTy.second) {
-        if (auto v = tv(retTy.first)) {
+      if (effectFree) {
+        if (auto v = tv(retTy)) {
           reduce(env, gen_constant(*v));
           return true;
         }
@@ -5738,13 +5734,13 @@ bool memoGetImpl(ISS& env, const Op& op, Rebind&& rebind) {
     effect_free(env);
   }
 
-  if (retTy.first == TBottom) {
+  if (retTy.is(BBottom)) {
     jmp_setdest(env, op.target1);
     return true;
   }
 
   env.propagate(op.target1, &env.state);
-  push(env, std::move(retTy.first));
+  push(env, std::move(retTy));
   return false;
 }
 

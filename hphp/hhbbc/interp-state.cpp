@@ -395,7 +395,7 @@ MethodsInfo::MethodsInfo(Context ctx, ClassAnalysis* cls)
   , m_func{ctx.func}
 {}
 
-Optional<Type> MethodsInfo::lookupReturnType(const php::Func& f) {
+Optional<Index::ReturnType> MethodsInfo::lookupReturnType(const php::Func& f) {
   if (!m_cls || !m_cls->work) return std::nullopt;
   auto const& types = m_cls->work->returnTypes;
   auto const it = types.find(&f);

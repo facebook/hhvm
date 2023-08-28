@@ -354,13 +354,13 @@ void collect_simple(Stats& stats, const Bytecode& bc) {
 void collect_func(Stats& stats, const Index& index, const php::Func& func) {
   if (!func.cls) ++stats.totalFunctions;
 
-  if (index.is_effect_free_raw(&func)) {
+  auto const [ty, effectFree] = index.lookup_return_type_raw(&func).first;
+  if (effectFree) {
     ++stats.effectFreeFuncs;
   } else {
     ++stats.effectfulFuncs;
   }
 
-  auto const ty = index.lookup_return_type_raw(&func).first;
   add_type(stats.returns, ty);
 
   auto const cf = php::WideFunc::cns(&func);

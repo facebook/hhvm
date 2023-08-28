@@ -1098,7 +1098,7 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
 
       auto const oldTypeIt = work.returnTypes.find(f);
       assertx(oldTypeIt != work.returnTypes.end());
-      auto& oldType = oldTypeIt->second;
+      auto& [oldType, oldEffectFree] = oldTypeIt->second;
 
       // Heed the return type refinement limit
       if (results.inferredReturn.strictlyMoreRefined(oldType)) {
@@ -1108,11 +1108,22 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
           work.worklist.scheduleForReturnType(*f);
         } else if (meta.localReturnRefinements > 0) {
           results.inferredReturn = oldType;
+          results.effectFree = oldEffectFree;
         }
         ++meta.localReturnRefinements;
       } else if (!results.inferredReturn.moreRefined(oldType)) {
         // If we have a monotonicity violation, bail out immediately
         // and let the Index complain.
+        bail = true;
+        break;
+      }
+
+      if (results.effectFree) {
+        if (!oldEffectFree) {
+          oldEffectFree = true;
+          work.worklist.scheduleForReturnType(*f);
+        }
+      } else if (oldEffectFree) {
         bail = true;
         break;
       }
@@ -1141,7 +1152,7 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
       auto returnTypeIt = work.returnTypes.find(f);
       assertx(returnTypeIt != work.returnTypes.end());
 
-      auto& oldReturn = returnTypeIt->second;
+      auto& [oldReturn, oldEffectFree] = returnTypeIt->second;
 
       // Heed the return type refinement limit
       if (results.inferredReturn.strictlyMoreRefined(oldReturn)) {
@@ -1152,11 +1163,22 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
           changed.emplace(f);
         } else if (meta.localReturnRefinements > 0) {
           results.inferredReturn = oldReturn;
+          results.effectFree = oldEffectFree;
         }
         ++meta.localReturnRefinements;
       } else if (!results.inferredReturn.moreRefined(oldReturn)) {
         // If we have a monotonicity violation, bail out immediately
         // and let the Index complain.
+        bail = true;
+        break;
+      }
+
+      if (results.effectFree) {
+        if (!oldEffectFree) {
+          oldEffectFree = true;
+          work.worklist.scheduleForReturnType(*f);
+        }
+      } else if (oldEffectFree) {
         bail = true;
         break;
       }

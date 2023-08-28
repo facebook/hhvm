@@ -640,6 +640,22 @@ void Acceptor::dropEstablishedConnections(
   });
 }
 
+void Acceptor::dropIdleConnectionsBasedOnTimeout(
+    std::chrono::milliseconds targetIdleTimeMs,
+    const std::function<void(size_t)>& droppedConnectionsCB) {
+  base_->runInEventBaseThread([&] {
+    if (downstreamConnectionManager_) {
+      VLOG(3) << "Dropping connections based on idle timeout "
+              << targetIdleTimeMs.count() << " from acceptor=" << this
+              << " in thread " << base_;
+      assert(base_->isInEventBaseThread());
+
+      downstreamConnectionManager_->dropIdleConnectionsBasedOnTimeout(
+          targetIdleTimeMs, droppedConnectionsCB);
+    }
+  });
+}
+
 Acceptor::AcceptObserverList::AcceptObserverList(Acceptor* acceptor)
     : acceptor_(acceptor) {}
 

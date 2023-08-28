@@ -276,6 +276,18 @@ class ServerAcceptor : public Acceptor,
     Acceptor::dropEstablishedConnections(pct, filter);
   }
 
+  void dropIdleConnectionsBasedOnTimeout(
+      std::chrono::milliseconds targetIdleTimeMs,
+      const std::function<void(size_t)>& droppedConnectionsCB) override {
+    auto ew = folly::make_exception_wrapper<AcceptorException>(
+        AcceptorException::ExceptionType::DROP_CONN_PCT,
+        "dropping idle connections");
+
+    acceptPipeline_->readException(ew);
+    Acceptor::dropIdleConnectionsBasedOnTimeout(
+        targetIdleTimeMs, droppedConnectionsCB);
+  }
+
   void forceStop() noexcept override {
     auto ew = folly::make_exception_wrapper<AcceptorException>(
         AcceptorException::ExceptionType::FORCE_STOP, "hard shutdown timeout");

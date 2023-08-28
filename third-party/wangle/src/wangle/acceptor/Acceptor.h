@@ -289,6 +289,18 @@ class Acceptor : public folly::AsyncServerSocket::AcceptCallback,
       const std::function<bool(ManagedConnection*)>& filter);
 
   /**
+   * Drops every idle for which idle time is less then *timeout*
+   *
+   * @param timeout - idle time threshold.
+   * @param droppedConnectionsCB - Callback will be invoked for dropped
+   *   connections, having number of dropped connection as input.
+   *
+   */
+  virtual void dropIdleConnectionsBasedOnTimeout(
+      std::chrono::milliseconds targetIdleTimeMs,
+      const std::function<void(size_t)>& droppedConnectionsCB);
+
+  /**
    * Wrapper for connectionReady() that can be overridden by
    * subclasses to deal with plaintext connections.
    */

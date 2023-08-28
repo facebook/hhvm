@@ -13,7 +13,6 @@
 #include <proxygen/lib/http/codec/test/TestUtils.h>
 
 using namespace proxygen;
-using namespace testing;
 
 namespace {
 void parseBufWithH1Codec(FakeHTTPCodecCallback& callback,

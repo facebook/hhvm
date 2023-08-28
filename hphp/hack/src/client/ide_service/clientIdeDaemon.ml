@@ -1136,6 +1136,7 @@ let handle_request
     Lwt.return (Initialized istate, Ok result)
   (* Autocomplete docblock resolve *)
   | (Initialized istate, Completion_resolve (symbol, kind)) ->
+    HackEventLogger.completion_call ~method_name:"Completion_resolve";
     let ctx = make_empty_ctx istate.icommon in
     let result = ServerDocblockAt.go_docblock_for_symbol ~ctx ~symbol ~kind in
     Lwt.return (Initialized istate, Ok result)
@@ -1146,6 +1147,7 @@ let handle_request
        We will only serve autocomplete docblocks as of truth on disk.
        Hence, we construct temporary entry to reflect the file which
        contained the target of the resolve. *)
+    HackEventLogger.completion_call ~method_name:"Completion_resolve_location";
     let path =
       file_path |> Path.to_string |> Relative_path.create_detect_prefix
     in

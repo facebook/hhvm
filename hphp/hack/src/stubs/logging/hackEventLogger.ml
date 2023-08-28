@@ -272,6 +272,8 @@ let glean_query_error
 
 let glean_fetch_namespaces ~count:_ ~start_time:_ = ()
 
+let completion_call ~method_name:_ = ()
+
 let glean_fetch_namespaces_error _ = ()
 
 let ranked_autocomplete_duration ~start_time:_ = ()

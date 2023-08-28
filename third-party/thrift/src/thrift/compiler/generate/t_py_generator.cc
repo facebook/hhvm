@@ -75,7 +75,6 @@ class t_py_generator : public t_concat_generator {
   void process_options(
       const std::map<std::string, std::string>& options) override {
     gen_json_ = options.find("json") != options.end();
-    gen_newstyle_ = options.find("new_style") != options.end();
     gen_slots_ = options.find("slots") != options.end();
     gen_asyncio_ = options.find("asyncio") != options.end();
     gen_future_ = options.find("future") != options.end();
@@ -303,11 +302,6 @@ class t_py_generator : public t_concat_generator {
    * True iff we should generate a function parse json to thrift object.
    */
   bool gen_json_;
-
-  /**
-   * True iff we should generate new-style classes.
-   */
-  bool gen_newstyle_;
 
   /**
    * True iff we should generate __slots__ for thrift structs.
@@ -1017,8 +1011,8 @@ void t_py_generator::generate_typedef(const t_typedef* ttypedef) {
 void t_py_generator::generate_enum(const t_enum* tenum) {
   std::ostringstream to_string_mapping, from_string_mapping;
 
-  f_types_ << "class " << rename_reserved_keywords(tenum->get_name())
-           << (gen_newstyle_ ? "(object)" : "") << ":" << endl;
+  f_types_ << "class " << rename_reserved_keywords(tenum->get_name()) << ":"
+           << endl;
 
   indent_up();
   generate_python_docstring(f_types_, tenum);
@@ -1648,8 +1642,6 @@ void t_py_generator::generate_py_struct_definition(
   out << "class " << rename_reserved_keywords(tstruct->get_name());
   if (is_exception) {
     out << "(TException)";
-  } else if (gen_newstyle_) {
-    out << "(object)";
   }
   out << ":" << endl;
   indent_up();
@@ -2212,8 +2204,6 @@ void t_py_generator::generate_service_interface(
   if (tservice->get_extends() != nullptr) {
     extends = type_name(tservice->get_extends());
     extends_if = "(" + extends + "." + iface_prefix + "Iface)";
-  } else if (gen_newstyle_) {
-    extends_if = "(object)";
   }
 
   f_service_ << "class " << iface_prefix << "Iface" << extends_if << ":"
@@ -3845,7 +3835,6 @@ THRIFT_REGISTER_GENERATOR(
     py,
     "Python",
     "    json:            Generate function to parse entity from json\n"
-    "    new_style:       Generate new-style classes.\n"
     "    slots:           Generate code using slots for instance members.\n"
     "    sort_keys:       Serialize maps sorted by key and sets by value.\n"
     "    thrift_port=NNN: Default port to use in remote client (default "

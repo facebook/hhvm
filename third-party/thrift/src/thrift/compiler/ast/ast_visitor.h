@@ -318,8 +318,8 @@ enum class context_type {
   no_testing = static_cast<int>(t_release_state::testing),
   no_experimental = static_cast<int>(t_release_state::experimental),
   no_beta = static_cast<int>(t_release_state::beta),
-  no_legacy = static_cast<int>(t_release_state::legacy),
-  no_deprecated = static_cast<int>(t_release_state::deprecated),
+  no_legacy,
+  no_deprecated,
 };
 
 constexpr inline const char* getContextTypeUri(context_type type) {

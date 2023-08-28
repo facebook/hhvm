@@ -237,10 +237,28 @@ void set_generated(diagnostic_context&, mutator_context&, t_named& node) {
   }
 }
 
+const char* get_release_state_uri(t_release_state state) {
+  switch (state) {
+    case t_release_state::testing:
+      return "facebook.com/thrift/annotation/Testing";
+    case t_release_state::experimental:
+      return "facebook.com/thrift/annotation/Experimental";
+    case t_release_state::beta:
+      return "facebook.com/thrift/annotation/Beta";
+    case t_release_state::released:
+      return "facebook.com/thrift/annotation/Released";
+    default:
+      break;
+  }
+  return "";
+}
+
 void set_release_state(diagnostic_context&, mutator_context&, t_named& node) {
-  for (t_release_state state = t_release_state::begin;
-       state != t_release_state::end;
-       state = next(state)) {
+  for (t_release_state state :
+       {t_release_state::testing,
+        t_release_state::experimental,
+        t_release_state::beta,
+        t_release_state::released}) {
     if (node.find_structured_annotation_or_null(get_release_state_uri(state))) {
       node.set_release_state(state);
       return;

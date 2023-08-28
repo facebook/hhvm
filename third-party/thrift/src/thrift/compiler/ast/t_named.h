@@ -35,15 +35,14 @@ class t_program;
 /**
  * The (pre)release state for a given t_named.
  *
- * Currently configured via the standard annotations:
- *  @thrift.Testing
- *  @thrift.Experimental
- *  @thrift.Beta
- *  @thrift.Released
- *  @thrift.Deprecated
- *  @thrift.Legacy
+ * Currently configured via the annotations:
  *
- * See thrift/annotation/thrift.thrift for more details.
+ *   @thrift.Testing
+ *   @thrift.Experimental
+ *   @thrift.Beta
+ *   @thrift.Released
+ *
+ * defined in thrift/annotation/thrift.thrift.
  */
 enum class t_release_state {
   testing = -3,
@@ -51,11 +50,6 @@ enum class t_release_state {
   beta = -1,
   unspecified = 0,
   released = 1,
-  deprecated = 2,
-  legacy = 3,
-
-  end,
-  begin = -3,
 };
 
 /**
@@ -126,35 +120,6 @@ class t_named : public t_node {
 // Returns true iff the node is a definition of a transitive annotation,
 // i.e. it has the @scope.Transitive annotation itself.
 bool is_transitive_annotation(const t_named& node);
-
-constexpr const char* get_release_state_uri(t_release_state state) {
-  switch (state) {
-    case t_release_state::testing:
-      return "facebook.com/thrift/annotation/Testing";
-    case t_release_state::experimental:
-      return "facebook.com/thrift/annotation/Experimental";
-    case t_release_state::beta:
-      return "facebook.com/thrift/annotation/Beta";
-    case t_release_state::unspecified:
-      break;
-    case t_release_state::released:
-      return "facebook.com/thrift/annotation/Released";
-    case t_release_state::deprecated:
-      return "facebook.com/thrift/annotation/Deprecated";
-    case t_release_state::legacy:
-      return "facebook.com/thrift/annotation/Legacy";
-    default:
-      break;
-  }
-  return "";
-}
-
-constexpr t_release_state next(t_release_state cur) {
-  return static_cast<t_release_state>(static_cast<int>(cur) + 1);
-}
-constexpr t_release_state prev(t_release_state cur) {
-  return static_cast<t_release_state>(static_cast<int>(cur) - 1);
-}
 
 } // namespace compiler
 } // namespace thrift

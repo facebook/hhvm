@@ -65,6 +65,10 @@ class TestAcceptor : public Acceptor {
   DefaultToFizzPeekingCallback* getFizzPeeker() override {
     return Acceptor::getFizzPeeker();
   }
+
+  void stop() {
+    acceptStopped();
+  }
 };
 
 enum class TestSSLConfig { NO_SSL, SSL, SSL_MULTI_CA };
@@ -432,6 +436,12 @@ TEST_P(AcceptorTest, AcceptObserverStopAcceptorThenRemoveCallback) {
   EXPECT_CALL(*cb, observerDetach(acceptor.get()));
   EXPECT_TRUE(acceptor->removeAcceptObserver(cb.get()));
   Mock::VerifyAndClearExpectations(cb.get());
+}
+
+TEST_P(AcceptorTest, AcceptDrain) {
+  ServerSocketConfig config;
+  TestAcceptor acceptor(config);
+  acceptor.stop();
 }
 
 /**

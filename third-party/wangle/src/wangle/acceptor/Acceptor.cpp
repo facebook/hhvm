@@ -553,7 +553,7 @@ void Acceptor::onEmpty(const ConnectionManager&) {
 
 void Acceptor::checkDrained() {
   CHECK(state_ == State::kDraining);
-  if (forceShutdownInProgress_ ||
+  if (forceShutdownInProgress_ || !downstreamConnectionManager_ ||
       (downstreamConnectionManager_->getNumConnections() != 0) ||
       (numPendingSSLConns_ != 0)) {
     return;

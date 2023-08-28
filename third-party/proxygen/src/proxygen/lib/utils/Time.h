@@ -24,6 +24,7 @@ using SteadyClock = std::chrono::steady_clock;
 using SystemClock = std::chrono::system_clock;
 using TimePoint = SteadyClock::time_point;
 using SystemTimePoint = SystemClock::time_point;
+using SteadyTimePoint = SteadyClock::time_point;
 
 template <typename T>
 bool durationInitialized(const T& duration) {

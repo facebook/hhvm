@@ -1,0 +1,81 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+Generated Cpp2 <-> Python converters for Thrift types
+}}
+{{> common/auto_generated_cpp}}
+
+#pragma once
+
+#include <thrift/lib/python/capi/constructor.h>
+#include <thrift/lib/python/capi/extractor.h>
+
+#include <{{program:includePrefix}}gen-cpp2/{{program:name}}_types.h>
+
+namespace apache {
+namespace thrift {
+namespace python {
+namespace capi {
+{{#program:structs}}
+template <>
+struct Extractor<{{struct:cpp_name}}>
+    : public BaseExtractor<{{struct:cpp_name}}> {
+  ExtractorResult<{{struct:cpp_name}}> operator()(PyObject* obj);
+  int typeCheck(PyObject* obj);
+};
+
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        {{struct:cpp_name}}>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        {{struct:cpp_name}}>> {
+  ExtractorResult<{{struct:cpp_name}}> operator()(PyObject* obj);
+};
+
+template <>
+struct Constructor<{{struct:cpp_name}}>
+    : public BaseConstructor<{{struct:cpp_name}}> {
+  PyObject* operator()(const {{struct:cpp_name}}& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        {{struct:cpp_name}}>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        {{struct:cpp_name}}>> {
+  PyObject* operator()(const {{struct:cpp_name}}& val);
+};
+
+{{/program:structs}}
+{{#program:enums}}
+template <>
+struct Extractor<{{program:cpp_namespaces}}::{{enum:cpp_name}}>
+    : public BaseExtractor<{{program:cpp_namespaces}}::{{enum:cpp_name}}> {
+  ExtractorResult<{{program:cpp_namespaces}}::{{enum:cpp_name}}> operator()(PyObject* obj);
+  int typeCheck(PyObject* obj);
+};
+
+template <>
+struct Constructor<{{program:cpp_namespaces}}::{{enum:cpp_name}}> {
+  PyObject* operator()({{program:cpp_namespaces}}::{{enum:cpp_name}} val);
+};
+
+{{/program:enums}}
+} // namespace capi
+} // namespace python
+} // namespace thrift
+} // namespace apache

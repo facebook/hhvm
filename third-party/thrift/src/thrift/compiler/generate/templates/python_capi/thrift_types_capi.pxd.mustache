@@ -1,0 +1,48 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+Generated Cpp2 <-> Python converters for Thrift types
+}}
+{{> common/auto_generated_cython}}
+
+from cpython.ref cimport PyObject
+from libc.stdint cimport int64_t
+from libcpp.memory cimport unique_ptr as __unique_ptr
+
+from folly.iobuf cimport cIOBuf as __cIOBuf
+
+
+{{#program:structs}}
+cdef api int can_extract__{{program:capi_module_prefix}}__{{struct:name}}(object) except -1
+
+{{^struct:marshal_capi?}}
+cdef api __cIOBuf* extract__{{program:capi_module_prefix}}__{{struct:name}}(object) except NULL
+
+cdef api object construct__{{program:capi_module_prefix}}__{{struct:name}}(__unique_ptr[__cIOBuf])
+{{/struct:marshal_capi?}}
+
+cdef api object init__{{program:capi_module_prefix}}__{{struct:name}}(object data)
+
+{{/program:structs}}
+{{#program:enums}}
+cdef api int can_extract__{{program:capi_module_prefix}}__{{enum:name}}(object) except -1
+
+cdef api int64_t extract__{{program:capi_module_prefix}}__{{enum:name}}(object) except -1
+
+cdef api object construct__{{program:capi_module_prefix}}__{{enum:name}}(int64_t)
+
+{{/program:enums}}

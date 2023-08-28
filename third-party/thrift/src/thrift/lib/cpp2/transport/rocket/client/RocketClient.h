@@ -42,10 +42,6 @@
 
 namespace folly {
 class IOBuf;
-
-namespace fibers {
-class FiberManager;
-} // namespace fibers
 } // namespace folly
 
 namespace apache {

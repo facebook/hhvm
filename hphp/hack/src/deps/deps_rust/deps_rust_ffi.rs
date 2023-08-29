@@ -234,20 +234,12 @@ fn query_and_accumulate_typing_deps(
     mode: RawTypingDepsMode,
     query: Custom<DepSet>,
 ) -> Custom<DepSet> {
-    // Safety: we don't call into OCaml again, so mode will remain valid.
-    let mut acc = dep_graph_with_option(mode, |g| match g {
-        Some(g) => g.query_and_accumulate_typing_deps_multi(&query),
-        None => query.clone(),
-    });
-    dep_graph_delta_with(|delta| {
-        for dep in query.iter() {
-            if let Some(dependents) = delta.get(*dep) {
-                for dependent in dependents {
-                    acc.insert_mut(*dependent);
-                }
-            }
-        }
-    });
+    let mut acc = query.clone();
+    for dependency in query.iter() {
+        iter_dependents_with_duplicates(mode, *dependency, |iter| {
+            iter.for_each(|dependent| acc.insert_mut(dependent))
+        })
+    }
     Custom::from(DepSet::from(acc))
 }
 

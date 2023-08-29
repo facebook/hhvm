@@ -14,7 +14,6 @@ pub use dep::Dep;
 use memmap2::Mmap;
 use rayon::iter::Either;
 use rayon::prelude::*;
-use rpds::HashTrieSet;
 
 use crate::compress::*;
 
@@ -130,28 +129,6 @@ impl DepGraph {
             DepGraph::New(dg) => Either::Left(dg.par_all_hashes()),
             DepGraph::Old(dg) => Either::Right(dg.par_all_hashes()),
         }
-    }
-
-    /// Add the direct typing dependents for one dependency (i.e. the fanout of
-    /// that one dependency).
-    pub fn add_typing_deps_for_dep(&self, acc: &mut HashTrieSet<Dep>, dep: Dep) {
-        if let Some(dept_hash_list) = self.hash_list_for(dep) {
-            for dept in self.hash_list_hashes(dept_hash_list) {
-                acc.insert_mut(dept);
-            }
-        }
-    }
-
-    /// Returns the union of the provided dep set and their direct typing dependents.
-    pub fn query_and_accumulate_typing_deps_multi(
-        &self,
-        deps: &HashTrieSet<Dep>,
-    ) -> HashTrieSet<Dep> {
-        let mut acc = deps.clone();
-        for dep in deps {
-            self.add_typing_deps_for_dep(&mut acc, *dep);
-        }
-        acc
     }
 }
 

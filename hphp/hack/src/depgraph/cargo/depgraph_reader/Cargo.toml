@@ -14,6 +14,5 @@ bytemuck = { version = "1.12.3", features = ["derive"] }
 dep = { version = "0.0.0", path = "../dep" }
 memmap2 = "0.5.10"
 rayon = "1.2"
-rpds = "0.11.0"
 static_assertions = "1.1.0"
 vint64 = "1.0.1"

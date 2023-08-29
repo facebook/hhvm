@@ -220,12 +220,20 @@ pub fn dep_graph_override(mode: RawTypingDepsMode) {
 ///
 /// The pointer to the dependency graph mode should still be pointing
 /// to a valid OCaml object.
-pub fn dep_graph_with_default<F, R>(mode: RawTypingDepsMode, default: R, f: F) -> R
+pub fn dep_graph_map_or<F, R>(mode: RawTypingDepsMode, default: R, f: F) -> R
 where
     F: FnOnce(&DepGraph) -> R,
 {
+    dep_graph_map_or_else(mode, || default, f)
+}
+
+pub fn dep_graph_map_or_else<F, D, R>(mode: RawTypingDepsMode, default: D, f: F) -> R
+where
+    D: FnOnce() -> R,
+    F: FnOnce(&DepGraph) -> R,
+{
     load_global_dep_graph(mode).unwrap();
-    DEP_GRAPH.read().as_ref().map_or(default, f)
+    DEP_GRAPH.read().as_ref().map_or_else(default, f)
 }
 
 /// Run the closure with the loaded dep graph. If the custom dep graph
@@ -419,6 +427,43 @@ impl From<RefCell<HashSet<Dep>>> for VisitedSet {
 
 impl CamlSerialize for VisitedSet {
     caml_serialize_default_impls!();
+}
+
+/// Iterates over all dependents of a dependency, with possibly duplicate dependents.
+pub fn iter_dependents_with_duplicates<F, R>(mode: RawTypingDepsMode, dep: Dep, mut f: F) -> R
+where
+    F: FnMut(&mut dyn Iterator<Item = Dep>) -> R,
+{
+    dep_graph_delta_with(|delta| {
+        dep_graph_with_option(mode, |g| {
+            let mut f_option = |iter| match iter {
+                None => f(&mut std::iter::empty()),
+                Some(mut iter) => f(&mut iter),
+            };
+
+            let delta_iter = delta.get(dep).map(|deps| deps.iter().copied());
+            match g {
+                None => f_option(delta_iter),
+                Some(g) => {
+                    let hashes = g.hash_list_for(dep);
+                    match hashes {
+                        None => f_option(delta_iter),
+                        Some(hashes) => {
+                            let mut base_iter = g.hash_list_hashes(hashes);
+                            match delta_iter {
+                                None => f(&mut base_iter),
+                                Some(delta_iter) => f(&mut (delta_iter.chain(base_iter))),
+                            }
+                        }
+                    }
+                }
+            }
+        })
+    })
+}
+
+pub fn dep_graph_delta_num_edges() -> usize {
+    dep_graph_delta_with(|s| s.len())
 }
 
 #[cfg(test)]

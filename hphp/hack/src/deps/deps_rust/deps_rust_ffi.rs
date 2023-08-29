@@ -14,9 +14,10 @@ use std::path::Path;
 use dep::Dep;
 use deps_rust::dep_graph_delta_with;
 use deps_rust::dep_graph_delta_with_mut;
+use deps_rust::dep_graph_map_or;
 use deps_rust::dep_graph_override;
-use deps_rust::dep_graph_with_default;
 use deps_rust::dep_graph_with_option;
+use deps_rust::iter_dependents_with_duplicates;
 use deps_rust::DepSet;
 use deps_rust::RawTypingDepsMode;
 use deps_rust::VisitedSet;
@@ -193,7 +194,7 @@ ocaml_ffi! {
     }
 
     fn hh_custom_dep_graph_dep_graph_delta_num_edges() -> usize {
-        dep_graph_delta_with(|s| s.len())
+        deps_rust::dep_graph_delta_num_edges()
     }
 
     fn hh_custom_dep_graph_save_delta(dest: OsString, reset_state_after_saving: bool) -> usize {
@@ -217,29 +218,14 @@ ocaml_ffi! {
 
 fn base_dep_graph_has_edge(mode: RawTypingDepsMode, dependent: Dep, dependency: Dep) -> bool {
     // Safety: we don't call into OCaml again, so mode will remain valid.
-    dep_graph_with_default(mode, false, move |g| {
+    dep_graph_map_or(mode, false, move |g| {
         g.dependent_dependency_edge_exists(dependent, dependency)
     })
 }
 
 fn get_ideps_from_hash(mode: RawTypingDepsMode, dep: Dep) -> Custom<DepSet> {
-    let mut deps = HashTrieSet::new();
-    dep_graph_delta_with(|delta| {
-        if let Some(delta_deps) = delta.get(dep) {
-            for delta_dep in delta_deps {
-                deps.insert_mut(*delta_dep)
-            }
-        }
-    });
-    // Safety: we don't call into OCaml again, so mode will remain valid.
-    dep_graph_with_default(mode, (), |g| {
-        if let Some(hash_list) = g.hash_list_for(dep) {
-            for hash in g.hash_list_hashes(hash_list) {
-                deps.insert_mut(hash);
-            }
-        }
-    });
-
+    let deps =
+        iter_dependents_with_duplicates(mode, dep, |iter_dep| iter_dep.collect::<HashTrieSet<_>>());
     Custom::from(DepSet::from(deps))
 }
 
@@ -326,24 +312,15 @@ unsafe fn get_extend_deps_visit(
         None => return,
         Some(hash) => hash,
     };
-    let mut handle_extends_dep = |dep: Dep| {
-        if dep.is_class() {
-            if !acc.contains(&dep) {
-                acc.insert_mut(dep);
-                queue.push_back(dep);
+    iter_dependents_with_duplicates(mode, extends_hash, |iter| {
+        iter.for_each(|dep: Dep| {
+            if dep.is_class() {
+                if !acc.contains(&dep) {
+                    acc.insert_mut(dep);
+                    queue.push_back(dep);
+                }
             }
-        }
-    };
-    dep_graph_delta_with(|delta| {
-        if let Some(delta_deps) = delta.get(extends_hash) {
-            delta_deps.iter().copied().for_each(&mut handle_extends_dep);
-        }
-    });
-    dep_graph_with_default(mode, (), |g| {
-        if let Some(hash_list) = g.hash_list_for(extends_hash) {
-            g.hash_list_hashes(hash_list)
-                .for_each(&mut handle_extends_dep);
-        }
+        })
     })
 }
 

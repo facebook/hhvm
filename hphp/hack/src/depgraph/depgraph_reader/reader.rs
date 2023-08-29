@@ -769,30 +769,30 @@ impl<'bytes> HashList<'bytes> {
     // FIXME: Can we delete this? It's O(n) for NewHashList.
     pub fn len(&self) -> u32 {
         match self {
-            HashList::Old(x) => x.len(),
-            HashList::New(x) => x.len(),
+            Self::Old(x) => x.len(),
+            Self::New(x) => x.len(),
         }
     }
 
     pub fn is_empty(&self) -> bool {
         match self {
-            HashList::Old(x) => x.is_empty(),
-            HashList::New(x) => x.is_empty(),
+            Self::Old(x) => x.is_empty(),
+            Self::New(x) => x.is_empty(),
         }
     }
 
     fn has_index(&self, index: u32) -> bool {
         match self {
-            HashList::Old(x) => x.has_index(index),
-            HashList::New(x) => x.has_index(index),
+            Self::Old(x) => x.has_index(index),
+            Self::New(x) => x.has_index(index),
         }
     }
 
     /// Return all raw hash indices in this list.
     pub fn hash_indices(&self) -> impl Iterator<Item = u32> + '_ {
         match self {
-            HashList::Old(x) => Either::Left(x.hash_indices()),
-            HashList::New(x) => Either::Right(x.hash_indices()),
+            Self::Old(x) => Either::Left(x.hash_indices()),
+            Self::New(x) => Either::Right(x.hash_indices()),
         }
     }
 }

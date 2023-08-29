@@ -78,7 +78,7 @@ cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:
 cdef extern from "{{program:includePrefix}}gen-py3/{{program:name}}/types.h":
   pass
 {{#program:python_capi_converter?}}
-cdef extern from "{{program:includePrefix}}gen-python/{{program:name}}/thrift_types_capi.h":
+cdef extern from "{{program:includePrefix}}gen-python-capi/{{program:name}}/thrift_types_capi.h":
   pass
 {{/program:python_capi_converter?}}
 

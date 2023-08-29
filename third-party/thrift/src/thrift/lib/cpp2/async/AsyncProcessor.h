@@ -689,6 +689,8 @@ class GeneratedAsyncProcessorBase : public AsyncProcessor {
       folly::StringPiece interaction = "",
       bool isInteractionFactoryFunction = false);
 
+  bool setUpRequestProcessing(ServerRequest& req);
+
  public:
   template <typename ChildType>
   static void processInThread(
@@ -723,6 +725,9 @@ class GeneratedAsyncProcessorBase : public AsyncProcessor {
       folly::EventBase& eb,
       ServerInterface* si,
       bool isFactoryFunction);
+
+  // Returns false if interaction id is duplicated.
+  bool createInteraction(ServerRequest& req);
 
  protected:
   virtual std::unique_ptr<Tile> createInteractionImpl(const std::string& name);

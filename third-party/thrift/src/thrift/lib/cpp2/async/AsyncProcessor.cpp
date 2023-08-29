@@ -121,6 +121,84 @@ void AsyncProcessor::executeRequest(
   LOG(FATAL) << "Unimplemented executeRequest called";
 }
 
+bool GeneratedAsyncProcessorBase::createInteraction(ServerRequest& req) {
+  auto& eb = *apache::thrift::detail::ServerRequestHelper::eventBase(req);
+  eb.dcheckIsInEventBaseThread();
+
+  auto nullthrows = [](std::unique_ptr<Tile> tile) {
+    if (!tile) {
+      DLOG(FATAL) << "Nullptr returned from interaction constructor";
+      throw std::runtime_error("Nullptr returned from interaction constructor");
+    }
+    return tile;
+  };
+  auto& conn = *req.requestContext()->getConnectionContext();
+  bool isFactoryFunction = req.methodMetadata()->createsInteraction;
+  auto interactionCreate = req.requestContext()->getInteractionCreate();
+  auto isEbMethod =
+      req.methodMetadata()->executorType == MethodMetadata::ExecutorType::EVB;
+  auto id = req.requestContext()->getInteractionId();
+
+  // In the eb model with old-style constructor we create the interaction
+  // inline.
+  if (isEbMethod && !isFactoryFunction) {
+    auto tile = folly::makeTryWith([&] {
+      return nullthrows(createInteractionImpl(
+          std::move(*interactionCreate->interactionName_ref()).str()));
+    });
+    if (tile.hasException()) {
+      req.request()->sendErrorWrapped(
+          folly::make_exception_wrapper<TApplicationException>(
+              "Interaction constructor failed with " +
+              tile.exception().what().toStdString()),
+          kInteractionConstructorErrorErrorCode);
+      return true; // Not a duplicate; caller will see missing tile.
+    }
+    return conn.addTile(id, {tile->release(), &eb});
+  }
+
+  // Otherwise we use a promise.
+  auto promisePtr =
+      new TilePromise(isFactoryFunction); // freed by RefGuard on next line
+  if (!conn.addTile(id, {promisePtr, &eb})) {
+    return false;
+  }
+
+  auto executor = apache::thrift::detail::ServerRequestHelper::executor(req);
+
+  // Old-style constructor + tm : schedule constructor and return
+  if (!isFactoryFunction) {
+    apache::thrift::detail::ServerRequestHelper::executor(req)->add(
+        [=, &eb, &conn] {
+          std::exception_ptr ex;
+          try {
+            auto tilePtr = nullthrows(createInteractionImpl(
+                std::move(*interactionCreate->interactionName_ref()).str()));
+            eb.add([=, &conn, &eb, t = std::move(tilePtr)]() mutable {
+              TilePtr tile{t.release(), &eb};
+              promisePtr->fulfill(*tile, executor, eb);
+              conn.tryReplaceTile(id, std::move(tile));
+            });
+            return;
+          } catch (...) {
+            ex = std::current_exception();
+          }
+          DCHECK(ex);
+          eb.add([promisePtr, ex = std::move(ex)]() {
+            promisePtr->failWith(
+                folly::make_exception_wrapper<TApplicationException>(
+                    folly::to<std::string>(
+                        "Interaction constructor failed with ",
+                        folly::exceptionStr(ex))),
+                kInteractionConstructorErrorErrorCode);
+          });
+        });
+    return true;
+  }
+  // Factory function: the handler method will fulfill the promise
+  return true;
+}
+
 bool GeneratedAsyncProcessorBase::createInteraction(
     const ResponseChannelRequest::UniquePtr& req,
     int64_t id,
@@ -280,6 +358,68 @@ bool GeneratedAsyncProcessorBase::validateRpcKind(
 bool GeneratedAsyncProcessorBase::validateRpcKind(const ServerRequest& req) {
   DCHECK(req.methodMetadata()->rpcKind);
   return validateRpcKind(req.request(), *req.methodMetadata()->rpcKind);
+}
+
+bool GeneratedAsyncProcessorBase::setUpRequestProcessing(ServerRequest& req) {
+  if (!validateRpcKind(req)) {
+    return false;
+  }
+
+  auto ctx = req.requestContext();
+  auto eb = apache::thrift::detail::ServerRequestHelper::eventBase(req);
+  auto isEbMethod =
+      req.methodMetadata()->executorType == MethodMetadata::ExecutorType::EVB;
+  auto& interactionName = req.methodMetadata()->interactionName;
+  bool interactionMetadataValid;
+  if (auto interactionId = ctx->getInteractionId()) {
+    if (auto interactionCreate = ctx->getInteractionCreate()) {
+      if (!interactionName ||
+          *interactionCreate->interactionName_ref() !=
+              interactionName.value()) {
+        interactionMetadataValid = false;
+      } else if (!createInteraction(req)) {
+        // Duplicate id is a contract violation so close the connection.
+        // Terminate this interaction first so queued requests can't use it
+        // (which could result in UB).
+        terminateInteraction(interactionId, *ctx->getConnectionContext(), *eb);
+        req.request()->sendErrorWrapped(
+            TApplicationException(
+                "Attempting to create interaction with duplicate id. Failing all requests in that interaction."),
+            kConnectionClosingErrorCode);
+        return false;
+      } else {
+        interactionMetadataValid = true;
+      }
+    } else {
+      interactionMetadataValid = interactionName.has_value();
+    }
+
+    if (interactionMetadataValid && isEbMethod) {
+      try {
+        // This is otherwise done while constructing InteractionEventTask.
+        auto& tile = ctx->getConnectionContext()->getTile(interactionId);
+        ctx->setTile({&tile, eb});
+      } catch (const std::out_of_range&) {
+        req.request()->sendErrorWrapped(
+            TApplicationException(
+                "Invalid interaction id " + std::to_string(interactionId)),
+            kInteractionIdUnknownErrorCode);
+        return false;
+      }
+    }
+  } else {
+    interactionMetadataValid = !interactionName.has_value();
+  }
+  if (!interactionMetadataValid) {
+    req.request()->sendErrorWrapped(
+        folly::make_exception_wrapper<TApplicationException>(
+            TApplicationException::TApplicationExceptionType::UNKNOWN_METHOD,
+            "Interaction and method do not match"),
+        kMethodUnknownErrorCode);
+    return false;
+  }
+
+  return true;
 }
 
 bool GeneratedAsyncProcessorBase::setUpRequestProcessing(

@@ -43,72 +43,47 @@ module type S = sig
   val disjoint : Domain.ctx -> t -> t -> disjoint
 end
 
-(* To keep the logic simple we do not perform any simplification during
-   construction of the set. Instead specific simplification rules are
-   applied when computing [disjoint] *)
+(* Sets over [Domain.t]; representation is in NNF by construction *)
 module Make (Domain : DomainType) : S with module Domain := Domain = struct
+  type atom = {
+    comp: bool;
+    elt: Domain.t;
+  }
+
   type t =
-    | Set of Domain.t
+    | Set of atom
     | Union of t * t
     | Inter of t * t
-    | Compl of t
 
   type disjoint =
     | Sat
     | Unsat of Domain.t * Domain.t
 
-  let singleton elt = Set elt
+  let singleton elt = Set { comp = false; elt }
 
-  let rec disjoint ctx set1 set2 =
-    let open Set_relation in
-    match (set1, set2) with
-    (* (L ∪ R) disj S if (L disj S) && (R disj S) *)
-    | (Union (l, r), set) ->
-      let result =
-        match disjoint ctx l set with
-        | Sat -> disjoint ctx r set
-        | Unsat _ as unsat -> unsat
-      in
-      result
-    (* (L ∩ R) disj S if (L disj S) || (R disj S) *)
-    | (Inter (l, r), set) ->
-      let result =
-        match disjoint ctx l set with
-        | Sat -> Sat
-        | Unsat _ -> disjoint ctx r set
-      in
-      result
-    (* !(!A) = A *)
-    | (Compl (Compl a), b) -> disjoint ctx a b
-    (* De Morgan's Law: !(A ∪ B) = !A ∩ !B *)
-    | (Compl (Union (a, b)), set) -> disjoint ctx (Inter (Compl a, Compl b)) set
-    (* De Morgan's Law: !(A ∩ B) = !A ∪ !B *)
-    | (Compl (Inter (a, b)), set) -> disjoint ctx (Union (Compl a, Compl b)) set
-    | (Set elt1, Set elt2) ->
-      let result =
-        match Domain.relation ~ctx elt1 elt2 with
+  let rec disjoint_atom atom1 atom2 ~ctx =
+    match (atom1, atom2) with
+    | ({ comp = false; elt = elt1 }, { comp = false; elt = elt2 }) ->
+      Set_relation.(
+        (match Domain.relation ~ctx elt1 elt2 with
         | Disjoint -> Sat
         | Equal
         | Subset
         | Superset
         | Unknown ->
-          Unsat (elt1, elt2)
-      in
-      result
-    | (Set a, Compl (Set b)) ->
-      (* (A disj !B) if A ⊆ B *)
-      let result =
-        match Domain.relation ~ctx a b with
+          Unsat (elt1, elt2)))
+    | ({ comp = false; elt = elt1 }, { comp = true; elt = elt2 }) ->
+      Set_relation.(
+        (* (A disj !B) if A ⊆ B *)
+        (match Domain.relation ~ctx elt1 elt2 with
         | Equal
         | Subset ->
           Sat
         | Superset
         | Unknown
         | Disjoint ->
-          Unsat (a, b)
-      in
-      result
-    | (Compl (Set set1), Compl (Set set2)) ->
+          Unsat (elt1, elt2)))
+    | ({ comp = true; elt = elt1 }, { comp = true; elt = elt2 }) ->
       (* Approximation:
 
          (!A disj !B) iff (A ∪ B) = U && A = !B
@@ -117,15 +92,39 @@ module Make (Domain : DomainType) : S with module Domain := Domain = struct
          There is no way in our model to determine if (A ∪ B) = U holds
          so we are forced to approximate the result. The safest approximation
          is to assume the sets are not disjoint *)
-      Unsat (set1, set2)
-    | (Compl (Set _), (Union _ | Inter _ | Compl _ | Set _))
-    | (Set _, (Union _ | Inter _ | Compl _)) ->
-      disjoint ctx set2 set1
+      Unsat (elt1, elt2)
+    | _ -> disjoint_atom atom2 atom1 ~ctx
+
+  let rec disjoint ctx set1 set2 =
+    match (set1, set2) with
+    (* (L ∪ R) disj S if (L disj S) && (R disj S) *)
+    | (Union (l, r), set) -> begin
+      match disjoint ctx l set with
+      | Sat -> disjoint ctx r set
+      | Unsat _ as unsat -> unsat
+    end
+    (* (L ∩ R) disj S if (L disj S) || (R disj S) *)
+    | (Inter (l, r), set) -> begin
+      match disjoint ctx l set with
+      | Sat -> Sat
+      | Unsat _ -> disjoint ctx r set
+    end
+    | (Set atom1, Set atom2) -> disjoint_atom atom1 atom2 ~ctx
+    | (Set _, (Union _ | Inter _)) -> disjoint ctx set2 set1
 
   let union (l : t) (r : t) : t = Union (l, r)
 
   let inter (l : t) (r : t) : t = Inter (l, r)
 
+  (*  Keep values in negation normal form by construction *)
+  let rec comp = function
+    (* !(!A) = A *)
+    | Set atom -> Set { atom with comp = not atom.comp }
+    (* De Morgan's Law: !(A ∪ B) = !A ∩ !B *)
+    | Union (a, b) -> inter (comp a) (comp b)
+    (* De Morgan's Law: !(A ∩ B) = !A ∪ !B *)
+    | Inter (a, b) -> union (comp a) (comp b)
+
   (* A ∖ B = A ∩ !B *)
-  let diff (a : t) (b : t) : t = inter a (Compl b)
+  let diff (a : t) (b : t) : t = inter a (comp b)
 end

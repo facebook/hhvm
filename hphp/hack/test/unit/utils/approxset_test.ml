@@ -117,6 +117,20 @@ let test_complex _ =
     expected
     result
 
+let test_origin_reporting _ =
+  let lhs = a and rhs = def ||| abc in
+  let res1 = ASet.disjoint () lhs rhs and res2 = ASet.disjoint () rhs lhs in
+  assert_equal
+    ~msg:"Expect same result whichever way round we provide arguments"
+    res1
+    res2
+    ~cmp:(fun t1 t2 ->
+      match (t1, t2) with
+      | (ASet.Sat, ASet.Sat) -> true
+      | (ASet.Unsat (l1, l2), ASet.Unsat (r1, r2)) ->
+        Char.Set.equal l1 r1 && Char.Set.equal l2 r2
+      | _ -> false)
+
 let test_unknown _ =
   let abcd = mk ['a'; 'b'; 'c'; 'd'] in
   assert_unsat "Cannot determine if abcd is disjoint from def" abcd def;
@@ -130,5 +144,6 @@ let () =
          "test_diff" >:: test_diff;
          "test_complex" >:: test_complex;
          "test_unknown" >:: test_unknown;
+         "test_origin_reporting" >:: test_origin_reporting;
        ]
   |> run_test_tt_main

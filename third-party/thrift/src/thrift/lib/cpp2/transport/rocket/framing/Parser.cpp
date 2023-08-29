@@ -16,11 +16,6 @@
 
 #include <thrift/lib/cpp2/transport/rocket/framing/Parser.h>
 
-// Flag to control whether or not the new parser memory manangement logic is
-// enabled. (Do not hold buffer internally in rocket parser. Always hand
-// payloads to application as soon as they are read from the socket.)
-THRIFT_FLAG_DEFINE_bool(rocket_parser_dont_hold_buffer_enabled, false);
-
 // Add a flag to enable strategy based parser. Default strategy right now uses.
 THRIFT_FLAG_DEFINE_bool(rocket_strategy_parser, false);
 

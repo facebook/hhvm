@@ -60,14 +60,6 @@ void Parser<T>::getReadBufferOld(void** bufout, size_t* lenout) {
 }
 
 template <class T>
-void Parser<T>::getReadBufferNew(void** bufout, size_t* lenout) {
-  const auto ret = readBufQueue_.preallocate(bufferSize_, kMaxBufferSize);
-  *bufout = ret.first;
-  *lenout = ret.second;
-  return;
-}
-
-template <class T>
 void Parser<T>::readDataAvailableOld(size_t nbytes) {
   readBuffer_.append(nbytes);
 
@@ -118,48 +110,12 @@ void Parser<T>::readDataAvailableOld(size_t nbytes) {
 }
 
 template <class T>
-void Parser<T>::readDataAvailableNew(size_t nbytes) {
-  readBufQueue_.postallocate(nbytes);
-
-  while (!readBufQueue_.empty()) {
-    if (readBufQueue_.chainLength() < Serializer::kMinimumFrameHeaderLength) {
-      return;
-    }
-    folly::io::Cursor cursor(readBufQueue_.front());
-    const size_t totalFrameSize = Serializer::kBytesForFrameOrMetadataLength +
-        readFrameOrMetadataSize(cursor);
-
-    if (!currentFrameLength_) {
-      if (!owner_.incMemoryUsage(totalFrameSize)) {
-        return;
-      }
-      currentFrameLength_ = totalFrameSize;
-    }
-
-    if (readBufQueue_.chainLength() < currentFrameLength_) {
-      bufferSize_ = currentFrameLength_ - readBufQueue_.chainLength();
-      return;
-    }
-    // Otherwise, we have a full frame to handle.
-    readBufQueue_.trimStart(Serializer::kBytesForFrameOrMetadataLength);
-    auto frame = readBufQueue_.split(
-        currentFrameLength_ - Serializer::kBytesForFrameOrMetadataLength);
-    owner_.handleFrame(std::move(frame));
-    owner_.decMemoryUsage(currentFrameLength_);
-    currentFrameLength_ = 0;
-    bufferSize_ = kMinBufferSize;
-  }
-}
-
-template <class T>
 void Parser<T>::getReadBuffer(void** bufout, size_t* lenout) {
   blockResize_ = true;
   if (useStrategyParser_) {
     frameLengthParser_->getReadBuffer(bufout, lenout);
   } else if (useAllocatingStrategyParser_) {
     allocatingParser_->getReadBuffer(bufout, lenout);
-  } else if (newBufferLogicEnabled_) {
-    getReadBufferNew(bufout, lenout);
   } else {
     getReadBufferOld(bufout, lenout);
   }
@@ -174,8 +130,6 @@ void Parser<T>::readDataAvailable(size_t nbytes) noexcept {
       frameLengthParser_->readDataAvailable(nbytes);
     } else if (useAllocatingStrategyParser_) {
       allocatingParser_->readDataAvailable(nbytes);
-    } else if (newBufferLogicEnabled_) {
-      readDataAvailableNew(nbytes);
     } else {
       readDataAvailableOld(nbytes);
     }
@@ -205,8 +159,6 @@ void Parser<T>::readErr(const folly::AsyncSocketException& ex) noexcept {
   owner_.close(transport::TTransportException(ex));
 }
 
-// TODO: This should be removed once the new buffer logic controlled by
-// THRIFT_FLAG(rocket_parser_dont_hold_buffer_enabled) is stable.
 template <class T>
 void Parser<T>::timeoutExpired() noexcept {
   if (LIKELY(!blockResize_)) {
@@ -262,8 +214,6 @@ void Parser<T>::readBufferAvailable(
   }
 }
 
-// TODO: This should be removed once the new buffer logic controlled by
-// THRIFT_FLAG(rocket_parser_dont_hold_buffer_enabled) is stable.
 template <class T>
 void Parser<T>::resizeBuffer() {
   if (bufferSize_ <= kMaxBufferSize || readBuffer_.length() >= kMaxBufferSize) {
@@ -283,8 +233,6 @@ template <class T>
 constexpr size_t Parser<T>::kMinBufferSize;
 template <class T>
 constexpr size_t Parser<T>::kMaxBufferSize;
-// TODO: This should be removed once the new buffer logic controlled by
-// THRIFT_FLAG(rocket_parser_dont_hold_buffer_enabled) is stable.
 template <class T>
 constexpr std::chrono::milliseconds Parser<T>::kDefaultBufferResizeInterval;
 

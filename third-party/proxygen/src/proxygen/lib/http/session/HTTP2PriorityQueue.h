@@ -407,7 +407,7 @@ class HTTP2PriorityQueue : public HTTP2PriorityQueueBase {
     folly::IntrusiveList<Node, &Node::enqueuedHook_> enqueuedChildren_;
   };
 
-  using NodeMap = std::unordered_map<HTTPCodec::StreamID, Node*>;
+  using NodeMap = folly::F14FastMap<HTTPCodec::StreamID, Node*>;
 
   NodeMap nodes_;
   Node root_;

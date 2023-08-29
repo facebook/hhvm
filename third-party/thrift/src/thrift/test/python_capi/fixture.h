@@ -21,7 +21,7 @@
 #include <thrift/lib/python/capi/extractor.h>
 #include <thrift/lib/python/capi/iobuf.h>
 
-#include <thrift/test/python_capi/gen-python-capi/module/thrift_types_capi.h> // @manual=:test_module-python_capi-types
+#include <thrift/test/python_capi/gen-python-capi/module/thrift_types_capi.h>
 
 namespace apache::thrift::test {
 

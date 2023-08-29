@@ -31,7 +31,6 @@
 #include <thrift/compiler/ast/t_field.h>
 #include <thrift/compiler/ast/t_service.h>
 #include <thrift/compiler/detail/mustache/mstch.h>
-#include <thrift/compiler/gen/cpp/type_resolver.h>
 #include <thrift/compiler/generate/common.h>
 #include <thrift/compiler/generate/mstch_objects.h>
 #include <thrift/compiler/generate/t_mstch_generator.h>
@@ -51,61 +50,6 @@ bool is_type_iobuf(std::string_view name) {
 
 bool is_type_iobuf(const t_type* type) {
   return is_type_iobuf(cpp2::get_type(type));
-}
-
-// t_node must be t_type or t_field
-const t_const* find_structured_annotation(const t_node& node, const char* uri) {
-  if (auto field = dynamic_cast<const t_field*>(&node)) {
-    const t_const* annotation = field->find_structured_annotation_or_null(uri);
-    return annotation ? annotation
-                      : t_typedef::get_first_structured_annotation_or_null(
-                            field->get_type(), uri);
-  } else if (auto type = dynamic_cast<const t_type*>(&node)) {
-    return t_typedef::get_first_structured_annotation_or_null(type, uri);
-  }
-  return nullptr;
-}
-
-const t_const_value* structured_type_override(
-    const t_node& node, const char* key = "name") {
-  if (auto annotation = find_structured_annotation(node, kCppTypeUri)) {
-    return annotation->get_value_from_structured_annotation_or_null(key);
-  }
-  return nullptr;
-}
-
-const t_type* type_of_node(const t_node& node) {
-  if (auto* field = dynamic_cast<const t_field*>(&node)) {
-    return field->get_type();
-  } else if (auto* type = dynamic_cast<const t_type*>(&node)) {
-    return type;
-  }
-  return nullptr;
-}
-
-std::string_view cpp_type_override(const t_node& node) {
-  if (auto typedef_override = structured_type_override(node)) {
-    return typedef_override->get_string();
-  }
-  if (auto type = type_of_node(node)) {
-    // finds unstructured annotation type, if present
-    return cpp2::get_type(type->get_true_type());
-  }
-  return "";
-}
-
-std::string_view get_cpp_template(const t_node& node) {
-  if (auto template_override = structured_type_override(node, "template")) {
-    return template_override->get_string();
-  }
-  if (auto type = type_of_node(node)) {
-    // finds unstructured annotation template, if present
-    if (const auto* _template = type->get_true_type()->find_annotation_or_null(
-            {"cpp.template", "cpp2.template"})) {
-      return *_template;
-    }
-  }
-  return "";
 }
 
 const t_const* find_structured_adapter_annotation(
@@ -131,10 +75,6 @@ std::string_view get_annotation_property(
   return "";
 }
 
-bool marshal_capi_override_annotation(const t_named& node) {
-  return node.find_structured_annotation_or_null(kMarshalCapiUri) != nullptr;
-}
-
 const t_const* get_transitive_annotation_of_adapter_or_null(
     const t_named& node) {
   for (const auto& annotation : node.structured_annotations()) {
@@ -155,13 +95,6 @@ std::string_view extract_module_path(std::string_view fully_qualified_name) {
     return "";
   }
   return fully_qualified_name.substr(0, last_dot);
-}
-
-inline std::string get_capi_include_namespace(const t_program* prog) {
-  return fmt::format(
-      "{}gen-python/{}/thrift_types_capi.h",
-      prog->include_prefix(),
-      prog->name());
 }
 
 class python_mstch_const_value;
@@ -198,151 +131,6 @@ mstch::node adapter_node(
   return node;
 }
 
-// Formats a field's type, or a sub-type
-// of a compound type (e.g., a container)
-// Hence, assumes t_node is a t_field or t_type
-std::string format_marshal_type(
-    const t_node& node, std::string_view type_override = "");
-
-// Assumes t_node is a t_field or t_type
-std::string format_unary_type(
-    const t_node& node,
-    const t_type* elem_type,
-    const char* container,
-    std::string_view type_override) {
-  if (type_override.empty()) {
-    type_override = cpp_type_override(node);
-  }
-  if (!type_override.empty()) {
-    std::string elem_thrift_type = format_marshal_type(
-        *elem_type, fmt::format("{}::value_type", type_override));
-    return fmt::format(
-        "{}<{}, {}>", container, elem_thrift_type, type_override);
-  }
-  auto template_override = get_cpp_template(node);
-  std::string elem_thrift_type = format_marshal_type(*elem_type);
-  if (!template_override.empty()) {
-    return fmt::format(
-        "{}<{}, {}<native_t<{}>>>",
-        container,
-        elem_thrift_type,
-        template_override,
-        elem_thrift_type);
-  }
-  return fmt::format("{}<{}>", container, elem_thrift_type);
-}
-
-// Assumes t_node is a t_field or t_type
-std::string format_map_type(
-    const t_node& node,
-    const t_type* key_type,
-    const t_type* val_type,
-    std::string_view type_override) {
-  if (type_override.empty()) {
-    type_override = cpp_type_override(node);
-  }
-  if (!type_override.empty()) {
-    std::string key_thrift_type = format_marshal_type(
-        *key_type, fmt::format("{}::key_type", type_override));
-    std::string val_thrift_type = format_marshal_type(
-        *val_type, fmt::format("{}::mapped_type", type_override));
-    return fmt::format(
-        "map<{}, {}, {}>", key_thrift_type, val_thrift_type, type_override);
-  }
-  auto template_override = get_cpp_template(node);
-  std::string key_thrift_type = format_marshal_type(*key_type);
-  std::string val_thrift_type = format_marshal_type(*val_type);
-  if (!template_override.empty()) {
-    return fmt::format(
-        "map<{}, {}, {}<native_t<{}>, native_t<{}>>>",
-        key_thrift_type,
-        val_thrift_type,
-        template_override,
-        key_thrift_type,
-        val_thrift_type);
-  }
-  return fmt::format("map<{}, {}>", key_thrift_type, val_thrift_type);
-}
-
-// Assumes t_node is a t_field or t_type
-std::string format_marshal_type_unadapted(
-    const t_node& node, std::string_view type_override);
-
-std::string format_adapted(const t_const* adapter, const t_type* type) {
-  auto adaptedType = get_annotation_property(adapter, "adaptedType");
-  if (adaptedType.empty()) {
-    return fmt::format(
-        "::apache::thrift::python::capi::AdaptedThrift<{}, {}>",
-        get_annotation_property(adapter, "name"),
-        format_marshal_type_unadapted(*type, ""));
-  }
-  return fmt::format(
-      "::apache::thrift::python::capi::CircularlyAdaptedThrift<{}, {}>",
-      get_annotation_property(adapter, "name"),
-      adaptedType);
-}
-
-std::string format_marshal_type(
-    const t_node& node, std::string_view type_override) {
-  if (auto adapter = find_structured_annotation(node, kCppAdapterUri)) {
-    return format_adapted(adapter, type_of_node(node));
-  }
-  return format_marshal_type_unadapted(node, type_override);
-}
-
-std::string format_marshal_type_unadapted(
-    const t_node& node, std::string_view type_override) {
-  const t_type* true_type = type_of_node(node)->get_true_type();
-  std::string_view t_override = cpp_type_override(node);
-  auto override_or = [&](const char* default_) {
-    return t_override.empty() ? std::string(default_) : std::string(t_override);
-  };
-  if (true_type->is_bool()) {
-    return override_or("bool");
-  } else if (true_type->is_byte()) {
-    return override_or("int8_t");
-  } else if (true_type->is_i16()) {
-    return override_or("int16_t");
-  } else if (true_type->is_i32()) {
-    return override_or("int32_t");
-  } else if (true_type->is_i64()) {
-    return override_or("int64_t");
-  } else if (true_type->is_float()) {
-    return override_or("float");
-  } else if (true_type->is_double()) {
-    return override_or("double");
-  } else if (true_type->is_binary() && is_type_iobuf(t_override)) {
-    return std::string(t_override);
-  } else if (true_type->is_string_or_binary()) {
-    // unicode's internal_data representation is binary
-    return "Bytes";
-  } else if (true_type->is_enum()) {
-    return fmt::format(
-        "::apache::thrift::python::capi::ComposedEnum<{}::{}>",
-        cpp2::get_gen_namespace(*true_type->program()),
-        cpp2::get_name(true_type));
-  } else if (true_type->is_struct() || true_type->is_exception()) {
-    return fmt::format(
-        "::apache::thrift::python::capi::ComposedStruct<{}::{}>",
-        cpp2::get_gen_namespace(*true_type->program()),
-        cpp2::get_name(true_type));
-  } else if (true_type->is_list()) {
-    const auto* elem_type =
-        dynamic_cast<const t_list*>(true_type)->get_elem_type();
-    return format_unary_type(node, elem_type, "list", type_override);
-  } else if (true_type->is_set()) {
-    const auto* elem_type =
-        dynamic_cast<const t_set*>(true_type)->get_elem_type();
-    return format_unary_type(node, elem_type, "set", type_override);
-  } else if (true_type->is_map()) {
-    const auto* map = dynamic_cast<const t_map*>(true_type);
-    return format_map_type(
-        node, map->get_key_type(), map->get_val_type(), type_override);
-  }
-  // if not supported, empty string to cause compile error
-  return "";
-}
-
 class python_mstch_program : public mstch_program {
  public:
   python_mstch_program(
@@ -352,18 +140,11 @@ class python_mstch_program : public mstch_program {
         this,
         {
             {"program:module_path", &python_mstch_program::module_path},
-            {"program:generate_capi?", &python_mstch_program::has_types},
-            {"program:marshal_capi?", &python_mstch_program::has_marshal_types},
-            {"program:capi_module_prefix",
-             &python_mstch_program::capi_module_prefix},
             {"program:py_deprecated_module_path",
              &python_mstch_program::py_deprecated_module_path},
             {"program:is_types_file?", &python_mstch_program::is_types_file},
             {"program:include_namespaces",
              &python_mstch_program::include_namespaces},
-            {"program:capi_includes", &python_mstch_program::capi_includes},
-            {"program:cpp_namespaces",
-             &python_mstch_program::get_cpp2_namespace},
             {"program:base_library_package",
              &python_mstch_program::base_library_package},
             {"program:root_module_prefix",
@@ -374,10 +155,6 @@ class python_mstch_program : public mstch_program {
         });
     register_has_option("program:import_static?", "import_static");
     gather_included_program_namespaces();
-    has_marshal_types_ = check_has_marshal_types();
-    if (has_marshal_types_) {
-      gather_capi_includes();
-    }
     visit_types_for_services_and_interactions();
     visit_types_for_objects();
     visit_types_for_constants();
@@ -407,44 +184,9 @@ class python_mstch_program : public mstch_program {
     return a;
   }
 
-  mstch::node capi_includes() {
-    std::vector<const CapiInclude*> namespaces;
-    for (const auto& it : capi_includes_) {
-      namespaces.push_back(&it.second);
-    }
-    std::sort(
-        namespaces.begin(), namespaces.end(), [](const auto* m, const auto* n) {
-          return m->include_prefix < n->include_prefix;
-        });
-    mstch::array a;
-    for (const auto& it : namespaces) {
-      a.push_back(mstch::map{{"include_prefix", it->include_prefix}});
-    }
-    return a;
-  }
-
   mstch::node module_path() {
     return get_py3_namespace_with_name_and_prefix(
         program_, get_option("root_module_prefix"));
-  }
-
-  mstch::node has_types() {
-    return program_->structs().size() > 0 ||
-        program_->exceptions().size() > 0 || program_->enums().size() > 0;
-  }
-
-  mstch::node has_marshal_types() { return has_marshal_types_; }
-
-  mstch::node capi_module_prefix() {
-    std::string prefix = get_py3_namespace_with_name_and_prefix(
-        program_, get_option("root_module_prefix"), "__");
-    // kebab is not kosher in cpp fn names
-    std::replace(prefix.begin(), prefix.end(), '-', '_');
-    return prefix;
-  }
-
-  mstch::node get_cpp2_namespace() {
-    return cpp2::get_gen_namespace(*program_);
   }
 
   mstch::node py_deprecated_module_path() {
@@ -478,10 +220,6 @@ class python_mstch_program : public mstch_program {
     bool has_types;
   };
 
-  struct CapiInclude {
-    std::string include_prefix;
-  };
-
   void gather_included_program_namespaces() {
     for (const t_program* included_program :
          program_->get_includes_for_codegen()) {
@@ -499,38 +237,6 @@ class python_mstch_program : public mstch_program {
     }
   }
 
-  bool check_has_marshal_types() {
-    if (has_option("marshal_python_capi") &&
-        (!program_->structs().empty() || !program_->exceptions().empty())) {
-      return true;
-    }
-    for (const t_struct* s : program_->structs()) {
-      if (marshal_capi_override_annotation(*s)) {
-        return true;
-      }
-    }
-    for (const t_struct* e : program_->exceptions()) {
-      if (marshal_capi_override_annotation(*e)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  void gather_capi_includes() {
-    for (const t_program* included_program :
-         program_->get_includes_for_codegen()) {
-      if (included_program->objects().empty() &&
-          included_program->enums().empty() &&
-          included_program->typedefs().empty()) {
-        continue;
-      }
-      capi_includes_[included_program->path()] = CapiInclude{
-          get_capi_include_namespace(included_program),
-      };
-    }
-  }
-
   void add_typedef_namespace(const t_type* type) {
     auto prog = type->program();
     if (prog && prog != program_) {
@@ -544,11 +250,6 @@ class python_mstch_program : public mstch_program {
       ns.has_services = false;
       ns.has_types = true;
       include_namespaces_[path] = std::move(ns);
-
-      if (has_marshal_types_) {
-        capi_includes_[prog->path()] =
-            CapiInclude{get_capi_include_namespace(prog)};
-      }
     }
   }
 
@@ -703,11 +404,9 @@ class python_mstch_program : public mstch_program {
   }
 
   std::unordered_map<std::string, Namespace> include_namespaces_;
-  std::unordered_map<std::string_view, CapiInclude> capi_includes_;
   std::unordered_set<const t_type*> seen_types_;
   std::unordered_set<std::string_view> adapter_modules_;
   std::unordered_set<std::string_view> adapter_type_hint_modules_;
-  bool has_marshal_types_ = false;
 };
 
 class python_mstch_service : public mstch_service {
@@ -885,9 +584,6 @@ class python_mstch_function : public mstch_function {
         function_->is_interaction_member() ||
         !function_->returned_interaction().empty();
   }
-
- protected:
-  const std::string cppName_;
 };
 
 class python_mstch_type : public mstch_type {
@@ -1015,10 +711,7 @@ class python_mstch_struct : public mstch_struct {
             {"struct:exception_message",
              &python_mstch_struct::exception_message},
             {"struct:has_adapter?", &python_mstch_struct::adapter},
-            {"struct:marshal_capi?", &python_mstch_struct::marshal_capi},
             {"struct:legacy_api?", &python_mstch_struct::legacy_api},
-            {"struct:cpp_name", &python_mstch_struct::cpp_name},
-            {"struct:cpp_adapter?", &python_mstch_struct::cpp_adapter},
             {"struct:fields_size", &python_mstch_struct::fields_size},
         });
   }
@@ -1036,42 +729,18 @@ class python_mstch_struct : public mstch_struct {
   }
   mstch::node exception_message() { return struct_->get_annotation("message"); }
 
-  mstch::node marshal_capi() {
-    return !struct_->generated() &&
-        (has_option("marshal_python_capi") ||
-         marshal_capi_override_annotation(*struct_) ||
-         struct_->fields().empty());
-  }
-
   mstch::node adapter() {
     return adapter_node(adapter_annotation_, nullptr, context_, pos_);
-  }
-
-  mstch::node cpp_adapter() {
-    auto adapter_annotation =
-        find_structured_adapter_annotation(*struct_, kCppAdapterUri);
-    if (!adapter_annotation) {
-      return false;
-    }
-    return mstch::map{
-        {"cpp_adapter:name",
-         get_annotation_property(adapter_annotation, "name")},
-    };
   }
 
   mstch::node legacy_api() {
     return ::apache::thrift::compiler::generate_legacy_api(*struct_);
   }
 
-  mstch::node cpp_name() {
-    return cpp_resolver_.get_underlying_namespaced_name(*struct_);
-  }
-
   mstch::node fields_size() { return std::to_string(struct_->fields().size()); }
 
  private:
   const t_const* adapter_annotation_;
-  gen::cpp::type_resolver cpp_resolver_;
 };
 
 class python_mstch_field : public mstch_field {
@@ -1095,8 +764,6 @@ class python_mstch_field : public mstch_field {
             {"field:user_default_value",
              &python_mstch_field::user_default_value},
             {"field:has_adapter?", &python_mstch_field::adapter},
-            {"field:cpp_name", &python_mstch_field::cpp_name},
-            {"field:marshal_type", &python_mstch_field::marshal_type},
         });
   }
 
@@ -1112,7 +779,6 @@ class python_mstch_field : public mstch_field {
     }
     return py_name_;
   }
-  mstch::node cpp_name() { return cpp2::get_name(field_); }
   mstch::node tablebased_qualifier() {
     const std::string enum_type = "FieldQualifier.";
     switch (field_->qualifier()) {
@@ -1150,8 +816,6 @@ class python_mstch_field : public mstch_field {
         adapter_annotation_, transitive_adapter_annotation_, context_, pos_);
   }
 
-  mstch::node marshal_type() { return format_marshal_type(*field_); }
-
  private:
   const std::string py_name_;
   const t_const* adapter_annotation_;
@@ -1168,7 +832,6 @@ class python_mstch_enum : public mstch_enum {
         {
             {"enum:flags?", &python_mstch_enum::has_flags},
             {"enum:legacy_api?", &python_mstch_enum::legacy_api},
-            {"enum:cpp_name", &python_mstch_enum::cpp_name},
         });
   }
 
@@ -1180,8 +843,6 @@ class python_mstch_enum : public mstch_enum {
   mstch::node legacy_api() {
     return ::apache::thrift::compiler::generate_legacy_api(*enum_);
   }
-
-  mstch::node cpp_name() { return cpp2::get_name(enum_); }
 };
 
 class python_mstch_enum_value : public mstch_enum_value {
@@ -1527,12 +1188,6 @@ void t_mstch_python_generator::generate_file(
 void t_mstch_python_generator::generate_types() {
   generate_file("thrift_types.py", IsTypesFile, generate_root_path_);
   generate_file("thrift_types.pyi", IsTypesFile, generate_root_path_);
-  if (has_option("generate_python_capi")) {
-    generate_file("thrift_types_capi.pxd", IsTypesFile, generate_root_path_);
-    generate_file("thrift_types_capi.pyx", IsTypesFile, generate_root_path_);
-    generate_file("thrift_types_capi.h", IsTypesFile, "");
-    generate_file("thrift_types_capi.cpp", IsTypesFile, "");
-  }
 }
 
 void t_mstch_python_generator::generate_metadata() {

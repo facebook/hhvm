@@ -2232,19 +2232,18 @@ let do_resolve_local
           try Jget.string_exn params.Completion.data "fullname" with
           | _ -> params.Completion.label
         in
-        let ranking_source =
-          try Jget.int_opt params.Completion.data "ranking_source" with
-          | _ -> None
-        in
         let request =
           ClientIdeMessage.Completion_resolve
-            (symbolname, resolve_ranking_source kind ranking_source)
+            ClientIdeMessage.Completion_resolve.{ symbol = symbolname; kind }
         in
 
         let%lwt raw_docblock =
           ide_rpc ide_service ~env ~tracking_id ~ref_unblocked_time request
         in
-        let documentation = docblock_to_markdown raw_docblock in
+        let documentation =
+          docblock_to_markdown
+            raw_docblock.ClientIdeMessage.Completion_resolve.docblock
+        in
         Lwt.return { params with Completion.documentation }
     in
     Lwt.return result

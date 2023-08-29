@@ -24,6 +24,18 @@ module Initialize_from_saved_state = struct
   }
 end
 
+module Completion_resolve = struct
+  type request = {
+    symbol: string;  (** fully qualified *)
+    kind: SearchTypes.si_kind;
+  }
+
+  type result = {
+    docblock: DocblockService.result;
+    signature: string option;
+  }
+end
+
 type document = {
   file_path: Path.t;
   file_contents: string;
@@ -112,8 +124,8 @@ type _ t =
       and this method will look up B.PHP to find the docblock for that class and return it.
       Typically B.PHP won't even be open. That's why we only provide it as Path.t *)
   | Completion_resolve :
-      string * SearchTypes.si_kind
-      -> DocblockService.result t
+      Completion_resolve.request
+      -> Completion_resolve.result t
       (** "completionItem/resolve" LSP messages - if we have symbol name, and [Completion_resolve_location] failed *)
   | Document_highlight : document * location -> Ide_api_types.range list t
       (** Handles "textDocument/documentHighlight" LSP messages *)
@@ -204,7 +216,7 @@ let t_to_string : type a. a t -> string = function
     Printf.sprintf "Definition(%s)" (Path.to_string file_path)
   | Completion ({ file_path; _ }, _, _) ->
     Printf.sprintf "Completion(%s)" (Path.to_string file_path)
-  | Completion_resolve (symbol, _) ->
+  | Completion_resolve Completion_resolve.{ symbol; kind = _ } ->
     Printf.sprintf "Completion_resolve(%s)" symbol
   | Completion_resolve_location (file_path, _, _) ->
     Printf.sprintf "Completion_resolve_location(%s)" (Path.to_string file_path)

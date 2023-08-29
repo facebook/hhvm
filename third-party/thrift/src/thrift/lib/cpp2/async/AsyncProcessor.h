@@ -740,6 +740,8 @@ class EventTask : public concurrency::Runnable, public InteractionTask {
 
   void setTile(TilePtr&& tile) override;
 
+  friend class TilePromise;
+
  protected:
   ServerRequest req_;
   bool oneway_;
@@ -1207,6 +1209,8 @@ class HandlerCallbackBase {
 
   [[deprecated("use getHandlerExecutor()")]] concurrency::ThreadManager*
   getThreadManager_deprecated();
+
+  bool isResourcePoolEnabled();
 
   folly::Executor* getHandlerExecutor();
 

@@ -422,6 +422,19 @@ concurrency::ThreadManager* HandlerCallbackBase::getThreadManager_deprecated() {
   return nullptr;
 }
 
+bool HandlerCallbackBase::isResourcePoolEnabled() {
+  if (reqCtx_) {
+    if (auto connCtx = reqCtx_->getConnectionContext()) {
+      if (auto workerCtx = connCtx->getWorkerContext()) {
+        if (auto serverCtx = workerCtx->getServerContext()) {
+          return serverCtx->resourcePoolEnabled();
+        }
+      }
+    }
+  }
+  return false;
+}
+
 folly::Executor* HandlerCallbackBase::getThreadManager() {
   return getHandlerExecutor();
 }
@@ -562,10 +575,16 @@ bool HandlerCallbackBase::fulfillTilePromise(std::unique_ptr<Tile> ptr) {
              interaction = std::move(interaction_),
              ptr = std::move(ptr),
              tm = getThreadManager_deprecated(),
-             eb = eb_]() mutable {
+             eb = eb_,
+             executor = executor_,
+             isRPEnabled = isResourcePoolEnabled()]() mutable {
     TilePtr tile{ptr.release(), eb};
     DCHECK(dynamic_cast<TilePromise*>(interaction.get()));
-    static_cast<TilePromise&>(*interaction).fulfill(*tile, tm, *eb);
+    if (isRPEnabled) {
+      static_cast<TilePromise&>(*interaction).fulfill(*tile, executor, *eb);
+    } else {
+      static_cast<TilePromise&>(*interaction).fulfill(*tile, tm, *eb);
+    }
     ctx->getConnectionContext()->tryReplaceTile(
         ctx->getInteractionId(), std::move(tile));
   };

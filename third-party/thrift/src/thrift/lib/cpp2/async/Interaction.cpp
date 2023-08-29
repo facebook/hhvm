@@ -38,10 +38,15 @@ void Tile::decRef(folly::EventBase& eb, InteractionReleaseEvent event) {
             queue.size());
         auto& item = queue.front();
         folly::RequestContextScopeGuard rctx(item.context);
-        tm_->getKeepAlive(
-               std::move(item.scope),
-               concurrency::ThreadManager::Source::INTERNAL)
-            ->add([task = std::move(item.task)]() { task->run(); });
+        if (executor_) {
+          auto& serverTask = dynamic_cast<InteractionTask&>(*item.task);
+          serverTask.acceptIntoResourcePool(folly::Executor::HI_PRI);
+        } else {
+          tm_->getKeepAlive(
+                 std::move(item.scope),
+                 concurrency::ThreadManager::Source::INTERNAL)
+              ->add([task = std::move(item.task)]() { task->run(); });
+        }
         queue.pop();
       } else {
         serial->hasActiveRequest_ = false;
@@ -50,7 +55,9 @@ void Tile::decRef(folly::EventBase& eb, InteractionReleaseEvent event) {
   }
 
   if (event != InteractionReleaseEvent::STREAM_TRANSFER && --refCount_ == 0) {
-    if (tm_) {
+    if (executor_) {
+      executor_->add([ptr = std::unique_ptr<Tile>(this)]() {});
+    } else if (tm_) {
       std::move(tm_).add([ptr = std::unique_ptr<Tile>(this)](auto&&) {});
     } else {
       delete this;
@@ -72,7 +79,11 @@ void Tile::__fbthrift_onTermination(
 #if FOLLY_HAS_COROUTINES
   eb.dcheckIsInEventBaseThread();
   auto* tile = ptr.get();
-  if (tile->tm_) {
+  if (tile->executor_) {
+    tile->co_onTermination()
+        .scheduleOn(tile->executor_)
+        .start([ptr = std::move(ptr)](auto&&) {});
+  } else if (tile->tm_) {
     tile->co_onTermination().scheduleOn(tile->tm_).start(
         [ptr = std::move(ptr)](auto&&) {});
   } else {
@@ -149,7 +160,7 @@ void TilePromise::failWith(
 
 #if FOLLY_HAS_COROUTINES
 folly::coro::Task<void> TilePromise::co_onTermination() {
-  DCHECK(!tm_);
+  DCHECK(!tm_ && !executor_);
   terminated_ = true;
   co_return;
 }
@@ -182,6 +193,31 @@ void TilePtr::release(InteractionReleaseEvent event) {
 TileStreamGuard::TileStreamGuard(TilePtr&& ptr) : tile_(std::move(ptr)) {
   if (auto tile = tile_.get()) {
     tile_->decRef(*tile_.eb_, InteractionReleaseEvent::STREAM_TRANSFER);
+  }
+}
+
+void TilePromise::fulfill(
+    Tile& tile, folly::Executor::KeepAlive<> executor, folly::EventBase& eb) {
+  if (!tile.__fbthrift_runsInEventBase()) {
+    DCHECK(executor) << "thread=eb factory function can only create "
+                     << "process_in_event_base interaction";
+    tile.executor_ = executor;
+  }
+  if (terminated_) {
+    Tile::__fbthrift_onTermination({&tile, &eb}, eb);
+  }
+
+  // Inline destruction of this is possible at the setTile()
+  auto continuations = std::move(continuations_);
+  while (!continuations.empty()) {
+    auto& item = continuations.front();
+    folly::RequestContextScopeGuard rctx(item.context);
+    auto& serverTask = dynamic_cast<InteractionTask&>(*item.task);
+    serverTask.setTile({&tile, &eb});
+    if (!tile.__fbthrift_maybeEnqueue(std::move(item.task), item.scope)) {
+      serverTask.acceptIntoResourcePool(folly::Executor::MID_PRI);
+    }
+    continuations.pop();
   }
 }
 

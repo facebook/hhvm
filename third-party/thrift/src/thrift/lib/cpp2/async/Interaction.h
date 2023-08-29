@@ -27,6 +27,8 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
+enum class InternalPriority;
+
 struct InteractionTask {
   std::unique_ptr<concurrency::Runnable> task;
   concurrency::ThreadManager::ExecutionScope scope;
@@ -114,6 +116,7 @@ class Tile {
 
   size_t refCount_{0};
   folly::Executor::KeepAlive<concurrency::ThreadManager> tm_;
+  folly::Executor::KeepAlive<> executor_{}; // Used only for ResourcePools
   friend class TilePromise;
   friend class TilePtr;
   friend class TileStreamGuard;
@@ -147,6 +150,9 @@ class TilePromise final : public Tile {
 
   void fulfill(
       Tile& tile, concurrency::ThreadManager* tm, folly::EventBase& eb);
+
+  void fulfill(
+      Tile& tile, folly::Executor::KeepAlive<> executor, folly::EventBase& eb);
 
   void failWith(folly::exception_wrapper ew, const std::string& exCode);
 
@@ -231,6 +237,9 @@ class InteractionTask {
   virtual ~InteractionTask() = default;
   virtual void setTile(TilePtr&&) = 0;
   virtual void failWith(folly::exception_wrapper ew, std::string exCode) = 0;
+  virtual void acceptIntoResourcePool(int8_t) {
+    LOG(FATAL) << "Unimplemented acceptIntoResourcePool() method";
+  }
 };
 
 } // namespace thrift

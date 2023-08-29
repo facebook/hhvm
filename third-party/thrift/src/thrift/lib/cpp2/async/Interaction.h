@@ -91,11 +91,6 @@ class Tile {
  public:
   virtual ~Tile() { DCHECK_EQ(refCount_, 0); }
 
-  // Only moves in arg when it returns true
-  virtual bool __fbthrift_maybeEnqueue(
-      std::unique_ptr<concurrency::Runnable>&& task,
-      const concurrency::ThreadManager::ExecutionScope& scope);
-
 #if FOLLY_HAS_COROUTINES
   // Called as soon as termination signal is received
   // Destructor may or may not run as soon as this completes
@@ -103,11 +98,16 @@ class Tile {
   virtual folly::coro::Task<void> co_onTermination();
 #endif
 
-  static void __fbthrift_onTermination(TilePtr tile, folly::EventBase& eb);
-
-  virtual bool __fbthrift_runsInEventBase() { return false; }
-
  private:
+  // Only moves in arg when it returns true
+  virtual bool maybeEnqueue(
+      std::unique_ptr<concurrency::Runnable>&& task,
+      const concurrency::ThreadManager::ExecutionScope& scope);
+
+  static void onTermination(TilePtr tile, folly::EventBase& eb);
+
+  virtual bool runsInEventBase() { return false; }
+
   void incRef(folly::EventBase& eb) {
     eb.dcheckIsInEventBaseThread();
     ++refCount_;
@@ -120,33 +120,29 @@ class Tile {
   friend class TilePromise;
   friend class TilePtr;
   friend class TileStreamGuard;
+  friend class GeneratedAsyncProcessorBase;
 };
 
 class SerialInteractionTile : public Tile {
- public:
-  bool __fbthrift_maybeEnqueue(
+ private:
+  bool maybeEnqueue(
       std::unique_ptr<concurrency::Runnable>&& task,
       const concurrency::ThreadManager::ExecutionScope& scope) override;
 
- private:
   detail::InteractionTaskQueue taskQueue_;
   bool hasActiveRequest_{false};
   friend class Tile;
 };
 
 class EventBaseTile : public Tile {
- public:
-  bool __fbthrift_runsInEventBase() final { return true; }
+ private:
+  bool runsInEventBase() final { return true; }
 };
 
 class TilePromise final : public Tile {
  public:
   explicit TilePromise(bool isFactoryFunction)
       : factoryPending_(isFactoryFunction) {}
-
-  bool __fbthrift_maybeEnqueue(
-      std::unique_ptr<concurrency::Runnable>&& task,
-      const concurrency::ThreadManager::ExecutionScope& scope) override;
 
   void fulfill(
       Tile& tile, concurrency::ThreadManager* tm, folly::EventBase& eb);
@@ -161,6 +157,10 @@ class TilePromise final : public Tile {
 #endif
 
  private:
+  bool maybeEnqueue(
+      std::unique_ptr<concurrency::Runnable>&& task,
+      const concurrency::ThreadManager::ExecutionScope& scope) override;
+
   detail::InteractionTaskQueue continuations_;
   bool terminated_{false};
   bool factoryPending_;

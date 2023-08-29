@@ -152,7 +152,7 @@ void GeneratedAsyncProcessorBase::processInteraction(ServerRequest&& req) {
   auto& request = task->req_;
   std::unique_ptr<concurrency::Runnable> runnableTask = std::move(task);
 
-  if (tile && tile->__fbthrift_maybeEnqueue(std::move(runnableTask), scope)) {
+  if (tile && tile->maybeEnqueue(std::move(runnableTask), scope)) {
     return;
   }
 
@@ -336,7 +336,7 @@ void GeneratedAsyncProcessorBase::terminateInteraction(
   eb.dcheckIsInEventBaseThread();
 
   if (auto tile = conn.removeTile(id)) {
-    Tile::__fbthrift_onTermination(std::move(tile), eb);
+    Tile::onTermination(std::move(tile), eb);
     auto ctxStack =
         getContextStack(getServiceName(), "#terminateInteraction", &conn);
     if (ctxStack) {

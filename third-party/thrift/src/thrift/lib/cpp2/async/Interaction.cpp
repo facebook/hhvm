@@ -19,7 +19,7 @@
 namespace apache {
 namespace thrift {
 
-bool Tile::__fbthrift_maybeEnqueue(
+bool Tile::maybeEnqueue(
     std::unique_ptr<concurrency::Runnable>&&,
     const concurrency::ThreadManager::ExecutionScope&) {
   return false;
@@ -74,7 +74,7 @@ folly::coro::Task<void> Tile::co_onTermination() {
 }
 #endif
 
-void Tile::__fbthrift_onTermination(
+void Tile::onTermination(
     FOLLY_MAYBE_UNUSED TilePtr ptr, FOLLY_MAYBE_UNUSED folly::EventBase& eb) {
 #if FOLLY_HAS_COROUTINES
   eb.dcheckIsInEventBaseThread();
@@ -93,7 +93,7 @@ void Tile::__fbthrift_onTermination(
 #endif
 }
 
-bool TilePromise::__fbthrift_maybeEnqueue(
+bool TilePromise::maybeEnqueue(
     std::unique_ptr<concurrency::Runnable>&& task,
     const concurrency::ThreadManager::ExecutionScope& scope) {
   // If the first request is a factory method we mustn't enqueue it
@@ -114,7 +114,7 @@ bool TilePromise::__fbthrift_maybeEnqueue(
 
 void TilePromise::fulfill(
     Tile& tile, concurrency::ThreadManager* tm, folly::EventBase& eb) {
-  if (tile.__fbthrift_runsInEventBase()) {
+  if (tile.runsInEventBase()) {
     tm = nullptr;
   } else {
     DCHECK(tm) << "thread=eb factory function can only create "
@@ -122,7 +122,7 @@ void TilePromise::fulfill(
     tile.tm_ = tm;
   }
   if (terminated_) {
-    Tile::__fbthrift_onTermination({&tile, &eb}, eb);
+    Tile::onTermination({&tile, &eb}, eb);
   }
 
   // Inline destruction of this is possible at the setTile()
@@ -131,7 +131,7 @@ void TilePromise::fulfill(
     auto& item = continuations.front();
     folly::RequestContextScopeGuard rctx(item.context);
     dynamic_cast<InteractionTask&>(*item.task).setTile({&tile, &eb});
-    if (!tile.__fbthrift_maybeEnqueue(std::move(item.task), item.scope)) {
+    if (!tile.maybeEnqueue(std::move(item.task), item.scope)) {
       if (tm) {
         tm->getKeepAlive(
               std::move(item.scope),
@@ -166,7 +166,7 @@ folly::coro::Task<void> TilePromise::co_onTermination() {
 }
 #endif
 
-bool SerialInteractionTile::__fbthrift_maybeEnqueue(
+bool SerialInteractionTile::maybeEnqueue(
     std::unique_ptr<concurrency::Runnable>&& task,
     const concurrency::ThreadManager::ExecutionScope& scope) {
   if (hasActiveRequest_) {
@@ -198,13 +198,13 @@ TileStreamGuard::TileStreamGuard(TilePtr&& ptr) : tile_(std::move(ptr)) {
 
 void TilePromise::fulfill(
     Tile& tile, folly::Executor::KeepAlive<> executor, folly::EventBase& eb) {
-  if (!tile.__fbthrift_runsInEventBase()) {
+  if (!tile.runsInEventBase()) {
     DCHECK(executor) << "thread=eb factory function can only create "
                      << "process_in_event_base interaction";
     tile.executor_ = executor;
   }
   if (terminated_) {
-    Tile::__fbthrift_onTermination({&tile, &eb}, eb);
+    Tile::onTermination({&tile, &eb}, eb);
   }
 
   // Inline destruction of this is possible at the setTile()
@@ -214,7 +214,7 @@ void TilePromise::fulfill(
     folly::RequestContextScopeGuard rctx(item.context);
     auto& serverTask = dynamic_cast<InteractionTask&>(*item.task);
     serverTask.setTile({&tile, &eb});
-    if (!tile.__fbthrift_maybeEnqueue(std::move(item.task), item.scope)) {
+    if (!tile.maybeEnqueue(std::move(item.task), item.scope)) {
       serverTask.acceptIntoResourcePool(folly::Executor::MID_PRI);
     }
     continuations.pop();

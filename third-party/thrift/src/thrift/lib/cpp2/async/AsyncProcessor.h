@@ -1663,7 +1663,7 @@ void GeneratedAsyncProcessorBase::processInThread(
       childClass,
       tile);
 
-  if (tile && tile->__fbthrift_maybeEnqueue(std::move(task), scope)) {
+  if (tile && tile->maybeEnqueue(std::move(task), scope)) {
     return;
   }
 

@@ -460,8 +460,10 @@ const std::vector<const t_field*>& mstch_struct::get_members_in_key_order() {
 }
 
 mstch::node mstch_function::return_type() {
-  return context_.type_factory->make_mstch_object(
-      function_->get_return_type(), context_, pos_);
+  const t_type* type = function_->has_return_type() || !function_->stream()
+      ? function_->return_type()
+      : function_->stream();
+  return context_.type_factory->make_mstch_object(type, context_, pos_);
 }
 
 mstch::node mstch_function::arg_list() {

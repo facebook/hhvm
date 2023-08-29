@@ -740,7 +740,9 @@ class mstch_java_function : public mstch_function {
     return java::mangle_java_name(function_->get_name(), false);
   }
 
-  mstch::node is_void_type() { return function_->return_type()->is_void(); }
+  mstch::node is_void_type() {
+    return function_->return_type()->is_void() && !function_->stream();
+  }
 };
 
 class mstch_java_field : public mstch_field {

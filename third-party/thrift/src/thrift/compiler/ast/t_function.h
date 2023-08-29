@@ -70,15 +70,14 @@ class t_function final : public t_named {
         paramlist_(std::make_unique<t_paramlist>(program)) {}
 
   const t_type* return_type() const {
-    if (response_pos_ != -1) {
-      return return_types_[response_pos_].get_type();
-    }
-    return stream() ? sink_or_stream_.get() : &t_base_type::t_void();
+    return response_pos_ != -1 ? return_types_[response_pos_].get_type()
+                               : &t_base_type::t_void();
   }
   void set_return_type(t_type_ref ret) {
     response_pos_ = return_types_.size();
     return_types_.push_back(ret);
   }
+  bool has_return_type() const { return response_pos_ != -1; }
 
   t_type* sink_or_stream() { return sink_or_stream_.get(); }
   const t_type* sink_or_stream() const { return sink_or_stream_.get(); }

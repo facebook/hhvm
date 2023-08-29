@@ -856,9 +856,8 @@ class python_mstch_function : public mstch_function {
   mstch::node early_client_return() {
     // TOOD add in sinks, etc
     const t_stream_response* stream = function_->stream();
-    return !(
-        function_->return_type()->is_void() ||
-        (stream && stream->first_response_type().empty()));
+    return stream ? !stream->first_response_type().empty()
+                  : !function_->return_type()->is_void();
   }
 
   mstch::node regular_response_type() {

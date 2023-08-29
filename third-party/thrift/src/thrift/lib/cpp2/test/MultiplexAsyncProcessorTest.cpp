@@ -630,6 +630,10 @@ TEST_F(MultiplexAsyncProcessorServerTest, Interaction) {
       delegate_->terminateInteraction(id, ctx, eb);
     }
 
+    void processInteraction(ServerRequest&& request) override {
+      delegate_->processInteraction(std::move(request));
+    }
+
     explicit TerminateInteractionTrackingProcessor(
         std::unique_ptr<AsyncProcessor>&& delegate, Counter& numCalls)
         : delegate_(std::move(delegate)), numCalls_(numCalls) {}

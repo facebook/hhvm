@@ -1161,9 +1161,10 @@ void RocketClient::FlushManager::resetFlushPolicy() {
   timeoutExpired();
 }
 
-void RocketClient::FlushManager::enqueueFlush(RocketClient& client) {
+void RocketClient::FlushManager::enqueueFlush(
+    folly::EventBase::LoopCallback& writeLoopCallback) {
   // add write callback to flush list and schedule flush manager callback
-  flushList_.push_back(client.writeLoopCallback_);
+  flushList_.push_back(writeLoopCallback);
   pendingFlushes_++;
   if (!isLoopCallbackScheduled() &&
       (!flushPolicy_.has_value() ||
@@ -1187,7 +1188,7 @@ void RocketClient::scheduleWriteLoopCallback() {
       flushList_->push_back(writeLoopCallback_);
     } else {
       // use FlushManager to handle scheduling
-      flushManager_->enqueueFlush(*this);
+      flushManager_->enqueueFlush(this->writeLoopCallback_);
     }
   }
 }

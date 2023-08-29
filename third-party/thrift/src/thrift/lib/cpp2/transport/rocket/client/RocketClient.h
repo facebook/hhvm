@@ -222,7 +222,7 @@ class RocketClient : public virtual folly::DelayedDestruction,
     static FlushManager& getInstance(folly::EventBase& evb) {
       return getEventBaseLocal().try_emplace(evb, evb);
     }
-    void enqueueFlush(RocketClient& client);
+    void enqueueFlush(folly::EventBase::LoopCallback& writeLoopCallback);
     // has time complexity linear to number of elements in flush list
     size_t getNumPendingClients() const { return flushList_.size(); }
 

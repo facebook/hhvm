@@ -27,7 +27,7 @@ impl LocalGen {
         self.dedicated
             .temp_map
             .get(s)
-            .expect("Unnamed local never init'ed")
+            .unwrap_or_else(|| panic!("Unnamed local {} never init'ed", s))
     }
 
     pub fn init_unnamed_for_tempname(&mut self, s: &str) -> &Local {

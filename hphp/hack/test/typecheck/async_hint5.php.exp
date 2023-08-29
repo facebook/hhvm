@@ -1,4 +1,4 @@
-File "async_hint5.php", line 5, characters 32-33:
+File "async_hint5.php", line 5, characters 26-33:
 Was expecting an Awaitable but type is unknown (Typing[4297])
   File "async_hint5.php", line 5, characters 19-20:
   It is unknown because the type of the lambda parameter could not be determined. Please add a type hint to the parameter

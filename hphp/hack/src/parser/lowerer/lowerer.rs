@@ -207,6 +207,8 @@ pub struct Env<'a> {
     pub token_factory: PositionedTokenFactory<'a>,
     pub arena: &'a Bump,
 
+    pub lift_awaits: bool,
+
     state: Rc<RefCell<State>>,
 }
 
@@ -239,6 +241,7 @@ impl<'a> Env<'a> {
             empty_ns_env: namespace_env,
             token_factory,
             arena,
+            lift_awaits: false,
 
             state: Rc::new(RefCell::new(State {
                 cls_generics: HashMap::default(),
@@ -2810,7 +2813,10 @@ where
         awaits: vec![],
         lift_kind: LiftedAwaitKind::LiftedFromConcurrent,
     });
+    let old_lift_awaits = env.lift_awaits;
+    env.lift_awaits = true;
     let result = f(env);
+    env.lift_awaits = old_lift_awaits;
     let lifted_awaits = mem::replace(&mut env.lifted_awaits, saved_lifted_awaits);
     let result = result?;
     let awaits = match lifted_awaits {
@@ -2915,6 +2921,9 @@ fn lift_await<'a>(
     use ExprLocation::AsStatement;
     use ExprLocation::RightOfAssignmentInUsingStatement;
     use ExprLocation::UsingStatement;
+    if !env.lift_awaits {
+        return Expr_::mk_await(expr);
+    }
     match (&env.lifted_awaits, location) {
         (_, UsingStatement) | (_, RightOfAssignmentInUsingStatement) | (None, _) => {
             Expr_::mk_await(expr)

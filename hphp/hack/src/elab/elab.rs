@@ -21,6 +21,7 @@ macro_rules! passes {
 mod elab_utils;
 mod env;
 mod lambda_captures;
+mod lift_await;
 mod pass;
 mod passes;
 mod transform;
@@ -91,6 +92,7 @@ pub fn elaborate_program_for_codegen(
     elaborate_for_codegen(&env, program, opts);
     // Passes below here can emit errors
     typed_local::elaborate_program(&mut env, program, tco.po_codegen);
+    lift_await::elaborate_program(&mut env, program);
     let errs = env.into_errors();
     match Vec1::try_from_vec(errs) {
         Err(_) => Ok(()),

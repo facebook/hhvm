@@ -84,9 +84,11 @@ fn is_dynamic(class_id: &ClassId) -> bool {
         | ClassId_::CIself
         | ClassId_::CIstatic
         | ClassId_::CI(..)
-        | ClassId_::CIexpr(Expr(_, _, Expr_::Lvar(..) | Expr_::This | Expr_::Dollardollar(..))) => {
-            false
-        }
+        | ClassId_::CIexpr(Expr(
+            _,
+            _,
+            Expr_::Lvar(..) | Expr_::This | Expr_::Dollardollar(..) | Expr_::Await(..),
+        )) => false,
         ClassId_::CIexpr(_) => true,
     }
 }

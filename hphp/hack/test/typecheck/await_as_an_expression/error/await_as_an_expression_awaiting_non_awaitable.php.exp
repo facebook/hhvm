@@ -1,6 +1,6 @@
-File "await_as_an_expression_awaiting_non_awaitable.php", line 7, characters 17-22:
+File "await_as_an_expression_awaiting_non_awaitable.php", line 7, characters 11-22:
 `await` can only operate on an `Awaitable` (Typing[4110])
-  File "await_as_an_expression_awaiting_non_awaitable.php", line 7, characters 17-22:
+  File "await_as_an_expression_awaiting_non_awaitable.php", line 7, characters 11-22:
   Expected `Awaitable<nothing>`
   File "await_as_an_expression_awaiting_non_awaitable.php", line 3, characters 18-20:
   But got `int`

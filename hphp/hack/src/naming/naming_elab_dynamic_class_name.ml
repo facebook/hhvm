@@ -12,7 +12,7 @@ module SN = Naming_special_names
 let is_dynamic = function
   | Aast.(
       ( CIparent | CIself | CIstatic | CI _
-      | CIexpr (_, _, (Lvar _ | This | Dollardollar _)) )) ->
+      | CIexpr (_, _, (Lvar _ | This | Dollardollar _ | Await _)) )) ->
     false
   | _ -> true
 

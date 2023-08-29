@@ -1010,9 +1010,10 @@ bool ThriftServer::runtimeResourcePoolsChecks() {
           runtimeServerActions_.noServiceRequestInfo = true;
           runtimeDisableResourcePoolsDeprecated();
         }
-        if (metadata.interactionType ==
-            AsyncProcessorFactory::MethodMetadata::InteractionType::
-                INTERACTION_V1) {
+        if (!THRIFT_FLAG(enable_resource_pools_for_interaction) &&
+            metadata.interactionType ==
+                AsyncProcessorFactory::MethodMetadata::InteractionType::
+                    INTERACTION_V1) {
           // We've found an interaction in this service. Mark it is incompatible
           // with resource pools
           LOG(INFO) << "Resource pools disabled. Interaction on request "

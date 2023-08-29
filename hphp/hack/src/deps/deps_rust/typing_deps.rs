@@ -18,7 +18,7 @@ use ocamlrep::Value;
 use ocamlrep_custom::caml_serialize_default_impls;
 use ocamlrep_custom::CamlSerialize;
 use once_cell::sync::OnceCell;
-use parking_lot::Mutex;
+use parking_lot::RwLock;
 use rpds::HashTrieSet;
 
 /// A structure wrapping the memory-mapped dependency graph.
@@ -27,7 +27,7 @@ use rpds::HashTrieSet;
 ///
 /// It's an option, because custom mode might be enabled without
 /// an existing saved-state.
-static DEP_GRAPH: Mutex<Option<DepGraph>> = Mutex::new(None);
+static DEP_GRAPH: RwLock<Option<DepGraph>> = RwLock::new(None);
 
 fn _static_assert() {
     // The use of 64-bit (actually 63-bit) dependency hashes requires that we
@@ -108,7 +108,7 @@ impl RawTypingDepsMode {
 /// The pointer to the dependency graph mode should still be pointing
 /// to a valid OCaml object.
 fn load_global_dep_graph(mode: RawTypingDepsMode) -> Result<(), String> {
-    let mut dep_graph_guard = DEP_GRAPH.lock();
+    let mut dep_graph_guard = DEP_GRAPH.write();
 
     if dep_graph_guard.is_none() {
         let mode = unsafe { mode.to_rust().unwrap() };
@@ -148,7 +148,7 @@ fn load_global_dep_graph(mode: RawTypingDepsMode) -> Result<(), String> {
 }
 
 fn replace_dep_graph(mode: RawTypingDepsMode) -> Result<(), String> {
-    let mut dep_graph_guard = DEP_GRAPH.lock();
+    let mut dep_graph_guard = DEP_GRAPH.write();
     // # Safety
     //
     // The pointer to the dependency graph mode should still be pointing
@@ -225,7 +225,7 @@ where
     F: FnOnce(&DepGraph) -> R,
 {
     load_global_dep_graph(mode).unwrap();
-    DEP_GRAPH.lock().as_ref().map_or(default, f)
+    DEP_GRAPH.read().as_ref().map_or(default, f)
 }
 
 /// Run the closure with the loaded dep graph. If the custom dep graph
@@ -251,15 +251,15 @@ where
     F: FnOnce(Option<&DepGraph>) -> R,
 {
     load_global_dep_graph(mode).unwrap();
-    f(DEP_GRAPH.lock().as_ref())
+    f(DEP_GRAPH.read().as_ref())
 }
 
-pub fn dep_graph_delta_with_cell<R>(f: impl FnOnce(&Mutex<DepGraphDelta>) -> R) -> R {
+pub fn dep_graph_delta_with_cell<R>(f: impl FnOnce(&RwLock<DepGraphDelta>) -> R) -> R {
     /// The dependency graph delta.
     ///
     /// Even though this is only used in a single-threaded context (from OCaml)
     /// we wrap it in a `Mutex` to ensure safety.
-    static DEP_GRAPH_DELTA: OnceCell<Mutex<DepGraphDelta>> = OnceCell::new();
+    static DEP_GRAPH_DELTA: OnceCell<RwLock<DepGraphDelta>> = OnceCell::new();
 
     f(DEP_GRAPH_DELTA.get_or_init(Default::default))
 }
@@ -273,7 +273,7 @@ pub fn dep_graph_delta_with_cell<R>(f: impl FnOnce(&Mutex<DepGraphDelta>) -> R) 
 /// `with`/`with_mut` auxiliary functions disallow the reference
 /// to escape.
 pub fn dep_graph_delta_with<R>(f: impl FnOnce(&DepGraphDelta) -> R) -> R {
-    dep_graph_delta_with_cell(|cell| f(&cell.lock()))
+    dep_graph_delta_with_cell(|cell| f(&cell.read()))
 }
 
 /// Run the closure with the mutable dep graph delta.
@@ -282,7 +282,7 @@ pub fn dep_graph_delta_with<R>(f: impl FnOnce(&DepGraphDelta) -> R) -> R {
 ///
 /// See `with`
 pub fn dep_graph_delta_with_mut<R>(f: impl FnOnce(&mut DepGraphDelta) -> R) -> R {
-    dep_graph_delta_with_cell(|cell| f(&mut cell.lock()))
+    dep_graph_delta_with_cell(|cell| f(&mut cell.write()))
 }
 
 /// Rust set of dependencies that can be transferred from

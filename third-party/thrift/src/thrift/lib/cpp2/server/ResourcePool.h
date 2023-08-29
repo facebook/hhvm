@@ -26,6 +26,7 @@
 
 #include <thrift/lib/cpp2/async/AsyncProcessorHelper.h>
 #include <thrift/lib/cpp2/server/ConcurrencyControllerInterface.h>
+#include <thrift/lib/cpp2/server/IResourcePoolAcceptor.h>
 #include <thrift/lib/cpp2/server/RequestPileInterface.h>
 
 namespace apache::thrift {
@@ -39,14 +40,14 @@ namespace apache::thrift {
 //
 // The request pile and concurrency controller are dedicated to a resource pool
 // but the executor may be shared amongst multiple resource pools if desired.
-class ResourcePool {
+class ResourcePool : public IResourcePoolAcceptor {
  public:
   // It is prefereble that the executor used in a resource pool has at least
   // this many priorities so that we can deprioritize tasks that start new
   // requests (compared to tasks that are continuations of existing requests).
-  static constexpr unsigned int kPreferredExecutorNumPriorities = 2;
+  static constexpr unsigned int kPreferredExecutorNumPriorities = 3;
 
-  ~ResourcePool();
+  ~ResourcePool() override;
 
   // Access to the request pile if it exists.
   std::optional<std::reference_wrapper<RequestPileInterface>> requestPile() {
@@ -92,7 +93,8 @@ class ResourcePool {
   //
   // Once a request has been accepted the only outcomes should be
   // timeout/expired or executed.
-  std::optional<ServerRequestRejection> accept(ServerRequest&& request);
+  std::optional<ServerRequestRejection> accept(
+      ServerRequest&& request) override;
 
   // Stop the resource pool. Prevent the concurrency controller from scheduling
   // new requests and join the threads in the executor to ensure all requests

@@ -517,6 +517,11 @@ void Cpp2Worker::dispatchRequest(
         apache::thrift::detail::ServerRequestHelper::setResourcePool(
             serverRequest, resourcePool);
 
+        if (cpp2ReqCtx->getInteractionId()) {
+          processor->processInteraction(std::move(serverRequest));
+          return;
+        }
+
         // This will be used to put the request on the right queue on the
         // executor
         apache::thrift::detail::ServerRequestHelper::setInternalPriority(

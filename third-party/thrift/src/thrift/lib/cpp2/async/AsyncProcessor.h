@@ -373,6 +373,8 @@ class AsyncProcessor : public TProcessorBase {
   virtual void destroyAllInteractions(
       Cpp2ConnContext& conn, folly::EventBase&) noexcept;
 
+  virtual void processInteraction(ServerRequest&&) {}
+
   // This is the main interface we are migrating to. Eventually it should
   // replace all the processSerialized... methods.
   //
@@ -690,6 +692,8 @@ class GeneratedAsyncProcessorBase : public AsyncProcessor {
       bool isInteractionFactoryFunction = false);
 
   bool setUpRequestProcessing(ServerRequest& req);
+
+  void processInteraction(ServerRequest&& req) override;
 
  public:
   template <typename ChildType>

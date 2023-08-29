@@ -121,6 +121,52 @@ void AsyncProcessor::executeRequest(
   LOG(FATAL) << "Unimplemented executeRequest called";
 }
 
+void GeneratedAsyncProcessorBase::processInteraction(ServerRequest&& req) {
+  if (!setUpRequestProcessing(req)) {
+    return;
+  }
+  auto ctx = req.requestContext();
+
+  Tile* tile = nullptr;
+  if (auto interactionId = ctx->getInteractionId()) { // includes create
+    try {
+      tile = &ctx->getConnectionContext()->getTile(interactionId);
+    } catch (const std::out_of_range&) {
+      req.request()->sendErrorWrapped(
+          TApplicationException(
+              "Invalid interaction id " + std::to_string(interactionId)),
+          kInteractionIdUnknownErrorCode);
+      return;
+    }
+  }
+
+  auto scope = ctx->getRequestExecutionScope();
+  auto task = std::make_unique<ServerRequestTask>(std::move(req));
+  if (tile) {
+    task->setTile(
+        {tile,
+         ctx->getConnectionContext()
+             ->getWorkerContext()
+             ->getWorkerEventBase()});
+  }
+  auto& request = task->req_;
+  std::unique_ptr<concurrency::Runnable> runnableTask = std::move(task);
+
+  if (tile && tile->__fbthrift_maybeEnqueue(std::move(runnableTask), scope)) {
+    return;
+  }
+
+  // If the task was not enqueued, accessing `request` is still valid
+  auto source = tile && !ctx->getInteractionCreate() ? folly::Executor::MID_PRI
+                                                     : folly::Executor::LO_PRI;
+
+  apache::thrift::detail::ServerRequestHelper::setInternalPriority(
+      request, source);
+
+  apache::thrift::detail::ServerRequestHelper::resourcePool(request)->accept(
+      std::move(request));
+}
+
 bool GeneratedAsyncProcessorBase::createInteraction(ServerRequest& req) {
   auto& eb = *apache::thrift::detail::ServerRequestHelper::eventBase(req);
   eb.dcheckIsInEventBaseThread();

@@ -150,35 +150,13 @@ class MultiplexAsyncProcessor final : public AsyncProcessor {
       Cpp2RequestContext* context,
       folly::EventBase* eb,
       concurrency::ThreadManager* tm) override {
-    auto maybeTrackInteraction = [&](AsyncProcessor& processor) {
-      if (auto interactionCreate = context->getInteractionCreate();
-          interactionCreate.has_value() &&
-          *interactionCreate->interactionId_ref() > 0) {
-        if (&processor == defaultInteractionProcessor_) {
-          return;
-        }
-        if (defaultInteractionProcessor_ == nullptr) {
-          // The first to create an interaction gets the privilege of being the
-          // "default"
-          defaultInteractionProcessor_ = &processor;
-        } else {
-          // Note that when there is a duplicate interaction we do not replace
-          // the existing entry. A connection should have unique interaction IDs
-          // which means that the underlying processor should fail (and close
-          // the connection) - it's safe to ignore the duplicated ID.
-          inflightInteractions_.emplace(
-              *interactionCreate->interactionId_ref(), &processor);
-        }
-      }
-    };
-
     if (!untypedMethodMetadata.isWildcard()) {
       const auto& methodMetadata =
           AsyncProcessorHelper::expectMetadataOfType<MetadataImpl>(
               untypedMethodMetadata);
       DCHECK(methodMetadata.sourceIndex < processors_.size());
       auto& processor = *processors_[methodMetadata.sourceIndex];
-      maybeTrackInteraction(processor);
+      maybeTrackInteraction(context, processor);
       processor.processSerializedCompressedRequestWithMetadata(
           std::move(req),
           std::move(serializedRequest),
@@ -201,7 +179,7 @@ class MultiplexAsyncProcessor final : public AsyncProcessor {
                 wildcard) {
           DCHECK(wildcard.index < processors_.size());
           auto& processor = *processors_[wildcard.index];
-          maybeTrackInteraction(processor);
+          maybeTrackInteraction(context, processor);
           processor.processSerializedCompressedRequestWithMetadata(
               std::move(req),
               std::move(serializedRequest),
@@ -210,6 +188,35 @@ class MultiplexAsyncProcessor final : public AsyncProcessor {
               context,
               eb,
               tm);
+        });
+  }
+
+  void processInteraction(ServerRequest&& req) override {
+    auto context = req.requestContext();
+    auto& untypedMethodMetadata = *req.methodMetadata();
+    if (!untypedMethodMetadata.isWildcard()) {
+      const auto& methodMetadata =
+          AsyncProcessorHelper::expectMetadataOfType<MetadataImpl>(
+              untypedMethodMetadata);
+      DCHECK(methodMetadata.sourceIndex < processors_.size());
+      auto& processor = *processors_[methodMetadata.sourceIndex];
+      maybeTrackInteraction(context, processor);
+      processor.processInteraction(std::move(req));
+      return;
+    }
+
+    folly::variant_match(
+        compositionMetadata_.firstWildcardLike,
+        [](std::monostate) {
+          LOG(FATAL)
+              << "Received WildcardMethodMetadata but expected no WildcardMethodMetadataMap was composed";
+        },
+        [&](const MultiplexAsyncProcessorFactory::CompositionMetadata::Wildcard&
+                wildcard) {
+          DCHECK(wildcard.index < processors_.size());
+          auto& processor = *processors_[wildcard.index];
+          maybeTrackInteraction(context, processor);
+          processor.processInteraction(std::move(req));
         });
   }
 
@@ -315,6 +322,29 @@ class MultiplexAsyncProcessor final : public AsyncProcessor {
   // chunk of the traffic. To save memory, we avoid tracking interactions in the
   // map for the first processor that creates an interaction.
   AsyncProcessor* defaultInteractionProcessor_{nullptr};
+
+  void maybeTrackInteraction(
+      Cpp2RequestContext* context, AsyncProcessor& processor) {
+    if (auto interactionCreate = context->getInteractionCreate();
+        interactionCreate.has_value() &&
+        *interactionCreate->interactionId_ref() > 0) {
+      if (&processor == defaultInteractionProcessor_) {
+        return;
+      }
+      if (defaultInteractionProcessor_ == nullptr) {
+        // The first to create an interaction gets the privilege of being the
+        // "default"
+        defaultInteractionProcessor_ = &processor;
+      } else {
+        // Note that when there is a duplicate interaction we do not replace
+        // the existing entry. A connection should have unique interaction IDs
+        // which means that the underlying processor should fail (and close
+        // the connection) - it's safe to ignore the duplicated ID.
+        inflightInteractions_.emplace(
+            *interactionCreate->interactionId_ref(), &processor);
+      }
+    }
+  }
 
   std::pair<AsyncProcessor*, const AsyncProcessorFactory::MethodMetadata*>
   derefProcessor(const MethodMetadata& methodMetadata) const {

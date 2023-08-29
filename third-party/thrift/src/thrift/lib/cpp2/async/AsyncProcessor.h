@@ -80,6 +80,7 @@ struct HandlerCallbackHelper;
 class AsyncProcessor;
 class ServiceHandlerBase;
 class ServerRequest;
+class IResourcePoolAcceptor;
 
 // This contains information about a request that is required in the thrift
 // server prior to the AsyncProcessor::executeRequest interface.
@@ -519,9 +520,19 @@ class ServerRequest {
     return sr.executor_ ? sr.executor_ : eventBase(sr);
   }
 
+  // Only available once the request has been assigned to
+  // a resource pool.
+  static IResourcePoolAcceptor* resourcePool(ServerRequest& sr) {
+    return sr.resourcePool_ ? sr.resourcePool_ : nullptr;
+  }
+
   static void setExecutor(
       ServerRequest& sr, folly::Executor::KeepAlive<> executor) {
     sr.executor_ = std::move(executor);
+  }
+
+  static void setResourcePool(ServerRequest& sr, IResourcePoolAcceptor* rp) {
+    sr.resourcePool_ = rp;
   }
 
   static protocol::PROTOCOL_TYPES protocol(ServerRequest& sr) {
@@ -555,6 +566,7 @@ class ServerRequest {
   RequestCompletionCallback* notifyConcurrencyController_{nullptr};
   ServerRequestData requestData_;
   intptr_t queueObserverPayload_;
+  IResourcePoolAcceptor* resourcePool_{nullptr};
 };
 
 namespace detail {
@@ -571,7 +583,9 @@ class ServerRequestHelper : public ServerRequest {
   using ServerRequest::queueObserverPayload;
   using ServerRequest::request;
   using ServerRequest::requestContext;
+  using ServerRequest::resourcePool;
   using ServerRequest::setExecutor;
+  using ServerRequest::setResourcePool;
 };
 
 } // namespace detail

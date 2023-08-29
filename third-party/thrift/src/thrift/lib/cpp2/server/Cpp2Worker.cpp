@@ -514,6 +514,9 @@ void Cpp2Worker::dispatchRequest(
         auto executor = resourcePool->executor();
         apache::thrift::detail::ServerRequestHelper::setExecutor(
             serverRequest, executor ? &executor.value().get() : nullptr);
+        apache::thrift::detail::ServerRequestHelper::setResourcePool(
+            serverRequest, resourcePool);
+
         auto result = resourcePool->accept(std::move(serverRequest));
         if (result) {
           auto errorCode = errorCodeFromTapplicationException(

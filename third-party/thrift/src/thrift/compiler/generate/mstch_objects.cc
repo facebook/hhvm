@@ -471,7 +471,8 @@ mstch::node mstch_function::arg_list() {
 }
 
 mstch::node mstch_function::exceptions() {
-  return make_mstch_fields(function_->get_xceptions()->get_members());
+  const t_throws* throws = function_->exceptions();
+  return throws ? make_mstch_fields(throws->get_members()) : mstch::node();
 }
 
 mstch::node mstch_function::sink_first_response_type() {

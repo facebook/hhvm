@@ -935,11 +935,8 @@ void t_js_generator::generate_js_function_helpers(const t_function* tfunction) {
     result.append(std::move(success));
   }
 
-  const t_struct* xs = tfunction->get_xceptions();
-  const vector<t_field*>& fields = xs->get_members();
-  vector<t_field*>::const_iterator f_iter;
-  for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {
-    result.append((*f_iter)->clone_DO_NOT_USE());
+  for (const t_field& x : get_elems(tfunction->exceptions())) {
+    result.append(x.clone_DO_NOT_USE());
   }
 
   generate_js_struct_definition(f_service_, &result, false, false);
@@ -1177,15 +1174,11 @@ void t_js_generator::generate_service_client(const t_service* tservice) {
       f_service_ << indent() << inputVar << ".readMessageEnd();" << endl
                  << endl;
 
-      const t_struct* xs = (*f_iter)->get_xceptions();
-      const std::vector<t_field*>& xceptions = xs->get_members();
-      vector<t_field*>::const_iterator x_iter;
-      for (x_iter = xceptions.begin(); x_iter != xceptions.end(); ++x_iter) {
-        f_service_ << indent() << "if (null !== result."
-                   << (*x_iter)->get_name() << ") {" << endl
+      for (const t_field& x : get_elems((*f_iter)->exceptions())) {
+        f_service_ << indent() << "if (null !== result." << x.get_name()
+                   << ") {" << endl
                    << indent() << "  "
-                   << render_recv_throw("result." + (*x_iter)->get_name())
-                   << endl
+                   << render_recv_throw("result." + x.get_name()) << endl
                    << indent() << "}" << endl;
       }
 

@@ -1719,7 +1719,7 @@ void t_cocoa_generator::generate_cocoa_service_protocol(
   for (const auto* function : tservice->get_functions()) {
     out << "- " << function_signature(function) << ";"
         << "  // throws ";
-    for (const auto& x : t_throws::or_empty(function->exceptions())->fields()) {
+    for (const t_field& x : get_elems(function->exceptions())) {
       out << type_name(x.get_type()) + ", ";
     }
     out << "TException" << std::endl;
@@ -1870,11 +1870,12 @@ void t_cocoa_generator::generate_cocoa_service_client_implementation(
     out << std::endl;
 
     if (function->qualifier() != t_function_qualifier::one_way) {
+      const t_throws* exceptions = function->exceptions();
       t_function recv_function(
           function->return_type(),
           std::string("recv_") + function->name(),
           std::make_unique<t_paramlist>(program_),
-          t_struct::clone_DO_NOT_USE(function->get_xceptions()));
+          exceptions ? t_struct::clone_DO_NOT_USE(exceptions) : nullptr);
       // Open function
       indent(out) << "- " << function_signature(&recv_function) << std::endl;
       scope_up(out);
@@ -2902,139 +2903,6 @@ std::string t_cocoa_generator::render_const_value(
   }
   return render.str();
 }
-
-#if 0
-/**
-ORIGINAL
- * Spit out code that evaluates to the specified constant value.
- */
-std::string t_cocoa_generator::render_const_value(std::string name,
-                                             const t_type* type,
-                                             t_const_value* value,
-                                             bool containerize_it) {
-  type = type->get_true_type();
-  std::ostringstream render;
-
-  if (type->is_base_type()) {
-    t_base_type::t_base tbase = ((t_base_type*)type)->get_base();
-    switch (tbase) {
-    case t_base_type::TYPE_STRING:
-      render << "@\"" << get_escaped_string(value) << '"';
-      break;
-    case t_base_type::TYPE_BOOL:
-      render << ((value->get_integer() > 0) ? "YES" : "NO");
-      break;
-    case t_base_type::TYPE_BYTE:
-    case t_base_type::TYPE_I16:
-    case t_base_type::TYPE_I32:
-    case t_base_type::TYPE_I64:
-      render << value->get_integer();
-      break;
-    case t_base_type::TYPE_DOUBLE:
-      if (value->get_type() == t_const_value::CV_INTEGER) {
-        render << value->get_integer();
-      } else {
-        render << value->get_double();
-      }
-      break;
-    default:
-      throw std::runtime_error("compiler error: no const of base type " + t_base_type::t_base_name(tbase));
-    }
-  } else if (type->is_enum()) {
-    render << value->get_integer();
-  } else if (type->is_struct() || type->is_exception()) {
-    const auto* as_struct = std::static_cast<const t_struct*>(type);
-    if (value->get_map().empty()) {
-      render << "[[" << type_name(type, true) << " alloc] init";
-    } else{
-      render << "[[" << type_name(type, true) << " alloc] initWith";
-    }
-    bool first = true;
-    for (const auto& entry : value->get_map()) {
-      // FIXME The generated code does not match with initWithXXX
-      //       initializer and causes compile error.
-      //       Try: test/DebugProtoTest.thrift and test/SmallTest.thrift
-      const auto* field = as_struct->get_field_by_name(entry.first->get_string());
-      if (field == nullptr) {
-        throw std::runtime_error("type error: " + type->name() + " has no field " + entry.first->get_string());
-      }
-      if (first) {
-        render << capitalize(field.name());
-        first = false;
-      } else {
-        render << " " << field.name();
-      }
-      render << ": " << render_const_value(name, field.get_type(), entry.second);
-    }
-    render << "]";
-  } else if (type->is_map()) {
-    render << "[[NSDictionary alloc] initWithObjectsAndKeys: ";
-    const t_type* ktype = ((t_map*)type)->get_key_type();
-    const t_type* vtype = ((t_map*)type)->get_val_type();
-    const std::map<t_const_value*, t_const_value*>& val = value->get_map();
-    std::map<t_const_value*, t_const_value*>::const_iterator v_iter;
-    bool first = true;
-    for (v_iter = val.begin(); v_iter != val.end(); ++v_iter) {
-      std::string key = render_const_value(name, ktype, v_iter->first, true);
-      std::string val = render_const_value(name, vtype, v_iter->second, true);
-      if (first) {
-        first = false;
-      } else {
-        render << ", ";
-      }
-      render << val << ", " << key;
-    }
-    if (first)
-      render << " nil]";
-    else
-      render << ", nil]";
-  } else if (type->is_list()) {
-    render << "[[NSArray alloc] initWithObjects: ";
-    t_type * etype = ((t_list*)type)->get_elem_type();
-    const std::vector<t_const_value*>& val = value->get_list();
-    bool first = true;
-    std::vector<t_const_value*>::const_iterator v_iter;
-    for (v_iter = val.begin(); v_iter != val.end(); ++v_iter) {
-      if (first) {
-        first = false;
-      } else {
-        render << ", ";
-      }
-      render << render_const_value(name, etype, *v_iter, true);
-    }
-    if (first)
-      render << " nil]";
-    else
-      render << ", nil]";
-  } else if (type->is_set()) {
-    render << "[[NSSet alloc] initWithObjects: ";
-    t_type * etype = ((t_set*)type)->get_elem_type();
-    const std::vector<t_const_value*>& val = value->get_list();
-    bool first = true;
-    std::vector<t_const_value*>::const_iterator v_iter;
-    for (v_iter = val.begin(); v_iter != val.end(); ++v_iter) {
-      if (first) {
-        first = false;
-      } else {
-        render << ", ";
-      }
-      render << render_const_value(name, etype, *v_iter, true);
-    }
-    if (first)
-      render << " nil]";
-    else
-      render << ", nil]";
-  } else {
-    throw std::runtime_error("don't know how to render constant for type: " + type->name());
-  }
-
-  if (containerize_it) {
-    return containerize(type, render.str());
-  }
-
-  return render.str();
-}
-#endif
 
 /**
  * Declares a field.

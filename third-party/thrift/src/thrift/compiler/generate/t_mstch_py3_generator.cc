@@ -1186,7 +1186,7 @@ void py3_mstch_program::visit_type_single_service(const t_service* service) {
         streamExceptions_.emplace(visit_type(field.get_type()), exType);
       }
     }
-    for (const auto& field : function.get_xceptions()->fields()) {
+    for (const t_field& field : get_elems(function.exceptions())) {
       visit_type(field.get_type());
     }
 

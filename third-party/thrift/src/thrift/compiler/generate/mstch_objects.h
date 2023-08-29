@@ -662,7 +662,7 @@ class mstch_function : public mstch_base {
     return function_->qualifier() == t_function_qualifier::one_way;
   }
   mstch::node has_exceptions() {
-    return function_->get_xceptions()->has_fields();
+    return !get_elems(function_->exceptions()).empty();
   }
   mstch::node has_args() { return has_args_(); }
   mstch::node arg_comma() {

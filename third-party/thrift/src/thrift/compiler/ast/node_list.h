@@ -60,6 +60,8 @@ class node_list_view {
     using pointer = node_list_view::pointer;
     using reference = node_list_view::reference;
 
+    iterator() = default;
+
     reference operator*() const noexcept { return itr_->operator*(); }
     reference operator[](difference_type n) const noexcept { return *itr_[n]; }
 

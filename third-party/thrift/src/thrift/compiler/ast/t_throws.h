@@ -32,15 +32,6 @@ class t_throws : public t_struct {
  public:
   t_throws() : t_struct(nullptr, "") {}
 
-  static const t_throws* no_exceptions() {
-    static const auto* kEmpty = new t_throws;
-    return kEmpty;
-  }
-
-  // A helper that returns `no_exceptions` if value == nullptr.
-  static const t_throws* or_empty(const t_throws* value) {
-    return value == nullptr ? no_exceptions() : value;
-  }
   // A helper that returns true if value contains now exceptions, either because
   // it is not set, or because it is empty.
   static bool is_null_or_empty(const t_throws* value) {
@@ -55,6 +46,12 @@ class t_throws : public t_struct {
     return clone.release();
   }
 };
+
+// Returns a view of all the elements in the throws clause if it is non-null
+// or an empty view otherwise.
+inline node_list_view<const t_field> get_elems(const t_throws* t) {
+  return t ? t->fields() : node_list_view<const t_field>();
+}
 
 } // namespace compiler
 } // namespace thrift

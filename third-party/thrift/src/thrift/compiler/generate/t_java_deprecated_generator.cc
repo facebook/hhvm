@@ -2618,11 +2618,12 @@ void t_java_deprecated_generator::generate_service_client(
     if ((*f_iter)->qualifier() != t_function_qualifier::one_way) {
       string resultname = (*f_iter)->get_name() + "_result";
 
+      const t_throws* exceptions = (*f_iter)->exceptions();
       t_function recv_function(
           (*f_iter)->return_type(),
           string("recv_") + (*f_iter)->get_name(),
           std::make_unique<t_paramlist>(program_),
-          t_struct::clone_DO_NOT_USE((*f_iter)->get_xceptions()));
+          exceptions ? t_struct::clone_DO_NOT_USE(exceptions) : nullptr);
       // Open the recv function
       indent(f_service_) << "public " << function_signature(&recv_function)
                          << endl;
@@ -2670,14 +2671,11 @@ void t_java_deprecated_generator::generate_service_client(
                    << indent() << "}" << endl;
       }
 
-      const t_struct* xs = (*f_iter)->get_xceptions();
-      const std::vector<t_field*>& xceptions = xs->get_members();
-      vector<t_field*>::const_iterator x_iter;
-      for (x_iter = xceptions.begin(); x_iter != xceptions.end(); ++x_iter) {
-        f_service_ << indent() << "if (result." << (*x_iter)->get_name()
-                   << " != null) {" << endl
-                   << indent() << "  throw result." << (*x_iter)->get_name()
-                   << ";" << endl
+      for (const auto& x : get_elems((*f_iter)->exceptions())) {
+        f_service_ << indent() << "if (result." << x.get_name() << " != null) {"
+                   << endl
+                   << indent() << "  throw result." << x.get_name() << ";"
+                   << endl
                    << indent() << "}" << endl;
       }
 
@@ -2755,8 +2753,6 @@ void t_java_deprecated_generator::generate_service_async_client(
     const t_struct* arg_struct = (*f_iter)->get_paramlist();
     string funclassname = funname + "_call";
     const vector<t_field*>& fields = arg_struct->get_members();
-    const std::vector<t_field*>& xceptions =
-        (*f_iter)->get_xceptions()->get_members();
     vector<t_field*>::const_iterator fld_iter;
     string args_name = (*f_iter)->get_name() + "_args";
     string result_name = (*f_iter)->get_name() + "_result";
@@ -2853,9 +2849,8 @@ void t_java_deprecated_generator::generate_service_async_client(
     // Return method
     indent(f_service_) << "public " + type_name(ret_type) +
             " getResult() throws ";
-    vector<t_field*>::const_iterator x_iter;
-    for (x_iter = xceptions.begin(); x_iter != xceptions.end(); ++x_iter) {
-      f_service_ << type_name((*x_iter)->get_type(), false, false) + ", ";
+    for (const t_field& x : get_elems((*f_iter)->exceptions())) {
+      f_service_ << type_name(x.get_type(), false, false) + ", ";
     }
     f_service_ << "TException {" << endl;
 
@@ -3052,11 +3047,8 @@ void t_java_deprecated_generator::generate_function_helpers(
     result.append(std::move(success));
   }
 
-  const t_struct* xs = tfunction->get_xceptions();
-  const vector<t_field*>& fields = xs->get_members();
-  vector<t_field*>::const_iterator f_iter;
-  for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {
-    result.append((*f_iter)->clone_DO_NOT_USE());
+  for (const t_field& x : get_elems(tfunction->exceptions())) {
+    result.append(x.clone_DO_NOT_USE());
   }
 
   StructGenParams params;
@@ -3099,18 +3091,15 @@ void t_java_deprecated_generator::generate_process_function(
              << indent() << "event_handler_.postRead(handler_ctx, "
              << pservice_fn_name << ", args);" << endl;
 
-  const t_struct* xs = tfunction->get_xceptions();
-  const std::vector<t_field*>& xceptions = xs->get_members();
-  vector<t_field*>::const_iterator x_iter;
-
   // Declare result for non oneway function
   if (tfunction->qualifier() != t_function_qualifier::one_way) {
     f_service_ << indent() << resultname << " result = new " << resultname
                << "();" << endl;
   }
 
-  // Try block for a function with exceptions
-  if (xceptions.size() > 0) {
+  // Emit a try block for a function with exceptions.
+  auto exceptions = get_elems(tfunction->exceptions());
+  if (!exceptions.empty()) {
     f_service_ << indent() << "try {" << endl;
     indent_up();
   }
@@ -3146,24 +3135,24 @@ void t_java_deprecated_generator::generate_process_function(
   }
 
   if (tfunction->qualifier() != t_function_qualifier::one_way &&
-      xceptions.size() > 0) {
+      !exceptions.empty()) {
     string pservice_func_name =
         "\"" + tservice->get_name() + "." + tfunction->get_name() + "\"";
     string pservice_func_name_error =
         tservice->get_name() + "." + tfunction->get_name();
     indent_down();
     f_service_ << indent() << "}";
-    for (x_iter = xceptions.begin(); x_iter != xceptions.end(); ++x_iter) {
-      f_service_ << " catch (" << type_name((*x_iter)->get_type(), false, false)
-                 << " " << (*x_iter)->get_name() << ") {" << endl;
+    for (const t_field& x : exceptions) {
+      f_service_ << " catch (" << type_name(x.get_type(), false, false) << " "
+                 << x.get_name() << ") {" << endl;
       if (tfunction->qualifier() != t_function_qualifier::one_way) {
         indent_up();
-        f_service_ << indent() << "result." << (*x_iter)->get_name() << " = "
-                   << (*x_iter)->get_name() << ";" << endl
+        f_service_ << indent() << "result." << x.get_name() << " = "
+                   << x.get_name() << ";" << endl
                    << indent()
                    << "event_handler_.declaredUserException(handler_ctx, "
-                   << pservice_func_name << ", " << (*x_iter)->get_name()
-                   << ");" << endl;
+                   << pservice_func_name << ", " << x.get_name() << ");"
+                   << endl;
         indent_down();
         f_service_ << indent() << "}";
       } else {
@@ -3794,11 +3783,8 @@ string t_java_deprecated_generator::function_signature(
   const t_type* ttype = tfunction->return_type();
   std::string result = type_name(ttype) + " " + prefix + tfunction->get_name() +
       "(" + argument_list(tfunction->get_paramlist()) + ") throws ";
-  const t_struct* xs = tfunction->get_xceptions();
-  const std::vector<t_field*>& xceptions = xs->get_members();
-  vector<t_field*>::const_iterator x_iter;
-  for (x_iter = xceptions.begin(); x_iter != xceptions.end(); ++x_iter) {
-    result += type_name((*x_iter)->get_type(), false, false) + ", ";
+  for (const t_field& x : get_elems(tfunction->exceptions())) {
+    result += type_name(x.get_type(), false, false) + ", ";
   }
   result += "TException";
   return result;

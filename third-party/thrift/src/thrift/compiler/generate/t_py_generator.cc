@@ -2142,11 +2142,8 @@ void t_py_generator::generate_py_function_helpers(const t_function* tfunction) {
       result.append(std::move(success));
     }
 
-    const t_struct* xs = tfunction->get_xceptions();
-    const vector<t_field*>& fields = xs->get_members();
-    vector<t_field*>::const_iterator f_iter;
-    for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {
-      result.append((*f_iter)->clone_DO_NOT_USE());
+    for (const t_field& x : get_elems(tfunction->exceptions())) {
+      result.append(x.clone_DO_NOT_USE());
     }
     generate_py_struct_definition(f_service_, &result, false, true);
     generate_py_thrift_spec(f_service_, &result, false);
@@ -2456,8 +2453,8 @@ void t_py_generator::generate_service_client(const t_service* tservice) {
                    << indent() << "  return result.success" << endl;
       }
 
-      for (const auto& ex : (*f_iter)->get_xceptions()->get_members()) {
-        auto name = rename_reserved_keywords(ex->get_name());
+      for (const t_field& ex : get_elems((*f_iter)->exceptions())) {
+        auto name = rename_reserved_keywords(ex.get_name());
         f_service_ << indent() << "if result." << name
                    << " is not None:" << endl
                    << indent() << "  raise result." << name << endl;
@@ -2608,21 +2605,17 @@ void t_py_generator::generate_service_client(const t_service* tservice) {
         }
       }
 
-      const t_struct* xs = (*f_iter)->get_xceptions();
-      const std::vector<t_field*>& xceptions = xs->get_members();
-      vector<t_field*>::const_iterator x_iter;
-      for (x_iter = xceptions.begin(); x_iter != xceptions.end(); ++x_iter) {
+      for (const t_field& x : get_elems((*f_iter)->exceptions())) {
         f_service_ << indent() << "if result."
-                   << rename_reserved_keywords((*x_iter)->get_name())
+                   << rename_reserved_keywords(x.get_name())
                    << " != None:" << endl;
         if (gen_asyncio_) {
           f_service_ << indent() << "  fut.set_exception(result."
-                     << rename_reserved_keywords((*x_iter)->get_name()) << ")"
-                     << endl
+                     << rename_reserved_keywords(x.get_name()) << ")" << endl
                      << indent() << "  return" << endl;
         } else {
           f_service_ << indent() << "  raise result."
-                     << rename_reserved_keywords((*x_iter)->get_name()) << endl;
+                     << rename_reserved_keywords(x.get_name()) << endl;
         }
       }
 
@@ -2953,10 +2946,6 @@ void t_py_generator::generate_process_function(
   }
   indent_up();
 
-  const t_struct* xs = tfunction->get_xceptions();
-  const std::vector<t_field*>& xceptions = xs->get_members();
-  vector<t_field*>::const_iterator x_iter;
-
   // Declare result for non oneway function
   if (tfunction->qualifier() != t_function_qualifier::one_way) {
     f_service_ << indent() << "result = " << fn_name + "_result()" << endl;
@@ -2996,16 +2985,15 @@ void t_py_generator::generate_process_function(
 
     if (tfunction->qualifier() != t_function_qualifier::one_way) {
       string known_exceptions = "{";
-      int exc_num;
-      for (exc_num = 0, x_iter = xceptions.begin(); x_iter != xceptions.end();
-           ++x_iter, ++exc_num) {
-        if (exc_num > 0) {
+      int exc_num = 0;
+      for (const t_field& x : get_elems(tfunction->exceptions())) {
+        if (exc_num++ > 0) {
           known_exceptions += ", ";
         }
         known_exceptions += "'";
-        known_exceptions += rename_reserved_keywords((*x_iter)->get_name());
+        known_exceptions += rename_reserved_keywords(x.get_name());
         known_exceptions += "': ";
-        known_exceptions += type_name((*x_iter)->get_type());
+        known_exceptions += type_name(x.get_type());
       }
       known_exceptions += "}";
 
@@ -3054,10 +3042,9 @@ void t_py_generator::generate_process_function(
     f_service_ << ")" << (future ? ".result()" : "") << endl;
 
     indent_down();
-    int exc_num;
-    for (exc_num = 0, x_iter = xceptions.begin(); x_iter != xceptions.end();
-         ++x_iter, ++exc_num) {
-      f_service_ << indent() << "except " << type_name((*x_iter)->get_type())
+    int exc_num = 0;
+    for (const t_field& x : get_elems(tfunction->exceptions())) {
+      f_service_ << indent() << "except " << type_name(x.get_type())
                  << " as exc" << exc_num << ":" << endl;
       if (tfunction->qualifier() != t_function_qualifier::one_way) {
         indent_up();
@@ -3065,12 +3052,13 @@ void t_py_generator::generate_process_function(
                    << "self._event_handler.handlerException(handler_ctx, '"
                    << fn_name << "', exc" << exc_num << ")" << endl
                    << indent() << "result."
-                   << rename_reserved_keywords((*x_iter)->get_name())
-                   << " = exc" << exc_num << endl;
+                   << rename_reserved_keywords(x.get_name()) << " = exc"
+                   << exc_num << endl;
         indent_down();
       } else {
         f_service_ << indent() << "pass" << endl;
       }
+      ++exc_num;
     }
     f_service_ << indent() << "except:" << endl
                << indent() << "  ex = sys.exc_info()[1]" << endl

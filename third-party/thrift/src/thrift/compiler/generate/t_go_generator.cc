@@ -193,7 +193,7 @@ class t_go_generator : public t_concat_generator {
   void generate_service_client_send_msg_call(const t_function*);
   void generate_service_client_recv_method(string&, const t_function*);
   void generate_service_client_recv_method_exception_handling(
-      const std::vector<t_field*>& exceptions);
+      const t_throws* exceptions);
   void generate_service_client_threadsafe(const t_service* tservice);
   void generate_service_server(const t_service* tservice);
   void generate_process_function_type(
@@ -2196,12 +2196,8 @@ void t_go_generator::generate_go_function_helpers(const t_function* tfunction) {
       result.append(std::move(success));
     }
 
-    const t_struct* xs = tfunction->get_xceptions();
-    const vector<t_field*>& fields = xs->get_members();
-    vector<t_field*>::const_iterator f_iter;
-
-    for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {
-      auto new_f = (*f_iter)->clone_DO_NOT_USE();
+    for (const t_field& x : get_elems(tfunction->exceptions())) {
+      auto new_f = x.clone_DO_NOT_USE();
       new_f->set_req(t_field::e_req::optional);
       result.append(std::move(new_f));
     }
@@ -2314,8 +2310,6 @@ void t_go_generator::generate_service_client_channel_call(
   auto argsType = publicize(methodName + "_args", true);
   auto isOneway = func->qualifier() == t_function_qualifier::one_way;
   auto returnsVoid = func->return_type()->is_void();
-  const auto& exceptions = func->get_xceptions()->get_members();
-  // bool raisesExceptions = exceptions.size() > 0;
 
   auto arg_struct = func->get_paramlist();
   const auto& fields = arg_struct->get_members();
@@ -2348,7 +2342,7 @@ void t_go_generator::generate_service_client_channel_call(
 
   // If there are no exceptions, no code is generated. So we can always call
   // this.
-  generate_service_client_recv_method_exception_handling(exceptions);
+  generate_service_client_recv_method_exception_handling(func->exceptions());
 
   // Careful, only return _result if not a void function
   if (returnsVoid || isOneway) {
@@ -2397,8 +2391,7 @@ void t_go_generator::generate_service_client_recv_method(
   std::string result_type_name = publicize(func->get_name() + "_result", true);
   auto methodName = func->get_name();
   auto returnsVoid = func->return_type()->is_void();
-  const auto& exceptions = func->get_xceptions()->get_members();
-  bool raisesExceptions = exceptions.size() > 0;
+  bool raisesExceptions = !get_elems(func->exceptions()).empty();
 
   // Open function
   f_service_ << endl
@@ -2423,7 +2416,7 @@ void t_go_generator::generate_service_client_recv_method(
 
     // If there are no exceptions, no code is generated. So we can always call
     // this.
-    generate_service_client_recv_method_exception_handling(exceptions);
+    generate_service_client_recv_method_exception_handling(func->exceptions());
 
     // Careful, only return _result if not a void function
     if (!returnsVoid) {
@@ -2439,7 +2432,7 @@ void t_go_generator::generate_service_client_recv_method(
 }
 
 void t_go_generator::generate_service_client_recv_method_exception_handling(
-    const std::vector<t_field*>& exceptions) {
+    const t_throws* exceptions) {
   // NOTE: Trick to avoid copying the entire string every iteration of
   // the for loop below. We just copy the pointer to the string instead of the
   // whole thing.
@@ -2447,8 +2440,8 @@ void t_go_generator::generate_service_client_recv_method_exception_handling(
   auto else_delim = " else ";
   auto* delim = indent_str.c_str();
 
-  for (const auto& exception : exceptions) {
-    const std::string pubname = publicize(exception->get_name());
+  for (const t_field& x : get_elems(exceptions)) {
+    const std::string pubname = publicize(x.get_name());
 
     f_service_ << delim << "if __result." << pubname << " != nil {" << endl;
     f_service_ << indent() << "  err = __result." << pubname << endl;
@@ -2873,8 +2866,6 @@ void t_go_generator::generate_read_function(
   string processorName = privatize(tservice->get_name()) + "Processor" +
       publicize(tfunction->get_name());
   string argsname = publicize(tfunction->get_name() + "_args", true);
-  // t_struct* xs = tfunction->get_xceptions();
-  // const std::vector<t_field*>& xceptions = xs->get_members();
   f_service_ << indent() << "func (p *" << processorName
              << ") Read(iprot thrift.Protocol) "
              << "(thrift.Struct, thrift.Exception) {" << endl;
@@ -2907,15 +2898,11 @@ void t_go_generator::generate_struct_error_result_fn(
              << ") Exception() thrift.WritableException {" << endl;
   indent_up();
   f_service_ << indent() << "if p == nil { return nil }" << endl;
-  const t_struct* exceptions = tfunction->get_xceptions();
-  const vector<t_field*>& x_fields = exceptions->get_members();
-  vector<t_field*>::const_iterator xf_iter;
-  for (xf_iter = x_fields.begin(); xf_iter != x_fields.end(); ++xf_iter) {
-    indent(f_service_) << "if p." << publicize((*xf_iter)->get_name())
-                       << " != nil {" << endl;
-    indent_up();
-    indent(f_service_) << "return p." << publicize((*xf_iter)->get_name())
+  for (const t_field& x : get_elems(tfunction->exceptions())) {
+    indent(f_service_) << "if p." << publicize(x.get_name()) << " != nil {"
                        << endl;
+    indent_up();
+    indent(f_service_) << "return p." << publicize(x.get_name()) << endl;
     indent_down();
     f_service_ << indent() << "}" << endl;
   }
@@ -2941,17 +2928,15 @@ void t_go_generator::generate_write_function(
   f_service_ << indent() << "var err2 error" << endl;
   f_service_ << indent() << "messageType := thrift.REPLY" << endl;
 
-  const t_struct* exceptions = tfunction->get_xceptions();
-  const vector<t_field*>& x_fields = exceptions->get_members();
-  vector<t_field*>::const_iterator xf_iter;
-  f_service_ << indent() << "switch " << (x_fields.empty() ? "" : "v := ")
+  auto exceptions = get_elems(tfunction->exceptions());
+  f_service_ << indent() << "switch " << (exceptions.empty() ? "" : "v := ")
              << "result.(type) {" << endl;
-  for (xf_iter = x_fields.begin(); xf_iter != x_fields.end(); ++xf_iter) {
-    indent(f_service_) << "case " << type_to_go_type(((*xf_iter)->get_type()))
-                       << ":" << endl;
+  for (const t_field& x : exceptions) {
+    indent(f_service_) << "case " << type_to_go_type(x.get_type()) << ":"
+                       << endl;
     indent_up();
     indent(f_service_) << "msg := " << resultname << "{"
-                       << publicize((*xf_iter)->get_name()) << ": v}" << endl;
+                       << publicize(x.get_name()) << ": v}" << endl;
     indent(f_service_) << "result = &msg" << endl;
     indent_down();
   }
@@ -3008,9 +2993,6 @@ void t_go_generator::generate_run_function(
     indent(f_service_) << "args := argStruct.(*" << argsname << ")" << endl;
   }
 
-  const t_struct* exceptions = tfunction->get_xceptions();
-  const vector<t_field*>& x_fields = exceptions->get_members();
-
   if (tfunction->qualifier() != t_function_qualifier::one_way) {
     indent(f_service_) << "var __result " << resultname << endl;
   }
@@ -3043,17 +3025,16 @@ void t_go_generator::generate_run_function(
   f_service_ << "); err != nil {" << endl;
   indent_up();
 
-  f_service_ << indent() << "switch " << (x_fields.empty() ? "" : "v := ")
+  auto exceptions = get_elems(tfunction->exceptions());
+  f_service_ << indent() << "switch " << (exceptions.empty() ? "" : "v := ")
              << "err.(type) {" << endl;
 
-  vector<t_field*>::const_iterator xf_iter;
-
-  for (xf_iter = x_fields.begin(); xf_iter != x_fields.end(); ++xf_iter) {
-    indent(f_service_) << "case " << type_to_go_type(((*xf_iter)->get_type()))
-                       << ":" << endl;
+  for (const t_field& x : exceptions) {
+    indent(f_service_) << "case " << type_to_go_type(x.get_type()) << ":"
+                       << endl;
     indent_up();
-    indent(f_service_) << "__result." << publicize((*xf_iter)->get_name())
-                       << " = v" << endl;
+    indent(f_service_) << "__result." << publicize(x.get_name()) << " = v"
+                       << endl;
     indent_down();
   }
 

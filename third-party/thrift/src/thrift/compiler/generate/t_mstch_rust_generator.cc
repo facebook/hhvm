@@ -931,7 +931,7 @@ class rust_mstch_function : public mstch_function {
   }
   mstch::node rust_index() { return pos_.index; }
   mstch::node rust_unique_exceptions() {
-    return rust_make_unique_exceptions(function_->get_xceptions());
+    return rust_make_unique_exceptions(function_->exceptions());
   }
   mstch::node rust_unique_stream_exceptions() {
     const t_stream_response* stream = function_->stream();
@@ -1013,7 +1013,7 @@ class rust_mstch_function : public mstch_function {
           return "";
       }
     };
-    for (const t_field& field : function_->get_xceptions()->fields()) {
+    for (const t_field& field : get_elems(function_->exceptions())) {
       add_return(field.name(), get_ttype(*field.type()), field.id());
     }
     auto ttype =
@@ -2030,7 +2030,7 @@ mstch::node rust_mstch_service::rust_all_exceptions() {
       function_map;
   std::map<const t_type*, std::vector<const t_field*>> field_map;
   for (const auto& fun : service_->functions()) {
-    for (const auto& fld : fun.get_xceptions()->fields()) {
+    for (const t_field& fld : get_elems(fun.exceptions())) {
       function_map[&fld.type().deref()].push_back(&fun);
       field_map[&fld.type().deref()].push_back(&fld);
     }

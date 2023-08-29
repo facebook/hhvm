@@ -258,7 +258,7 @@ class python_mstch_program : public mstch_program {
       for (const auto& field : function.get_paramlist()->fields()) {
         visit_type(field.get_type());
       }
-      for (const auto& field : function.get_xceptions()->fields()) {
+      for (const t_field& field : get_elems(function.exceptions())) {
         visit_type(field.get_type());
       }
       if (const t_stream_response* stream = function.stream()) {

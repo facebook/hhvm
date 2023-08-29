@@ -160,9 +160,6 @@ class t_function final : public t_named {
       t_function_qualifier qualifier = {});
 
   t_paramlist* get_paramlist() const { return paramlist_.get(); }
-  const t_throws* get_xceptions() const {
-    return t_throws::or_empty(exceptions());
-  }
   bool is_oneway() const { return qualifier_ == t_function_qualifier::one_way; }
 };
 

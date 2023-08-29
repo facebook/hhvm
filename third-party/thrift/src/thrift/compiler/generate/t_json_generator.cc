@@ -765,16 +765,16 @@ void t_json_generator::generate_service(const t_service* tservice) {
     f_out_ << "]," << endl;
 
     indent(f_out_) << "\"throws\" : [";
-    vector<t_field*> excepts = (*fn_iter)->get_xceptions()->get_members();
-    vector<t_field*>::iterator ex_iter = excepts.begin();
-    if (ex_iter != excepts.end()) {
+    auto exceptions = get_elems((*fn_iter)->exceptions());
+    if (!exceptions.empty()) {
       f_out_ << endl;
       indent_up();
-      for (; ex_iter != excepts.end(); ex_iter++) {
-        if (ex_iter != excepts.begin()) {
+      auto ex_iter = exceptions.begin();
+      for (; ex_iter != exceptions.end(); ++ex_iter) {
+        if (ex_iter != exceptions.begin()) {
           f_out_ << "," << endl;
         }
-        indent(f_out_) << type_to_spec_args((*ex_iter)->get_type());
+        indent(f_out_) << type_to_spec_args((*ex_iter).get_type());
       }
       f_out_ << endl;
       indent_down();

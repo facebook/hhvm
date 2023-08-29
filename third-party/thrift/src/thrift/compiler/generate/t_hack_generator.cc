@@ -5819,7 +5819,7 @@ void t_hack_generator::generate_process_function(
 
   indent_down();
   int exc_num = 0;
-  for (const auto& x : t_throws::or_empty(tfunction->exceptions())->fields()) {
+  for (const t_field& x : get_elems(tfunction->exceptions())) {
     f_service_ << indent() << "} catch (" << hack_name(x.get_type()) << " $exc"
                << exc_num << ") {\n";
     if (tfunction->qualifier() != t_function_qualifier::one_way) {
@@ -6316,12 +6316,12 @@ void t_hack_generator::generate_php_docstring(
   out << ")";
 
   // Exceptions.
-  if (tfunction->get_xceptions()->has_fields()) {
+  if (!get_elems(tfunction->exceptions()).empty()) {
     out << "\n" << indent() << " * " << indent(1) << "throws (";
     // Find the position after the " * " from where the exceptions should be
     // rendered.
     start_pos = get_indent_size() + strlen("throws (");
-    generate_php_docstring_args(out, start_pos, tfunction->get_xceptions());
+    generate_php_docstring_args(out, start_pos, tfunction->exceptions());
     out << ")";
   }
   out << ";\n";
@@ -6503,21 +6503,22 @@ void t_hack_generator::generate_php_docstring_args(
 
 void t_hack_generator::generate_php_docstring_stream_exceptions(
     std::ofstream& out, const t_throws* ex) {
-  // Exceptions.
-  if (t_throws::or_empty(ex)->has_fields()) {
-    out << ", throws (";
-    auto first = true;
-    for (const auto& param : ex->fields()) {
-      if (first) {
-        first = false;
-      } else {
-        out << ", ";
-      }
-      out << param.id() << ": " << thrift_type_name(param.get_type()) << " "
-          << param.name();
-    }
-    out << ")";
+  auto params = get_elems(ex);
+  if (params.empty()) {
+    return;
   }
+  out << ", throws (";
+  auto first = true;
+  for (const t_field& param : params) {
+    if (first) {
+      first = false;
+    } else {
+      out << ", ";
+    }
+    out << param.id() << ": " << thrift_type_name(param.get_type()) << " "
+        << param.name();
+  }
+  out << ")";
 }
 
 std::string t_hack_generator::get_container_keyword(

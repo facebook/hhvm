@@ -486,6 +486,8 @@ class ServerRequest {
   }
 
  protected:
+  using InternalPriority = int8_t;
+
   // The protected accessors are for use only by the thrift server
   // implementation itself. They are accessed using
   // detail::ServerRequestHelper.
@@ -526,6 +528,10 @@ class ServerRequest {
     return sr.resourcePool_ ? sr.resourcePool_ : nullptr;
   }
 
+  static InternalPriority internalPriority(ServerRequest& sr) {
+    return sr.priority_;
+  }
+
   static void setExecutor(
       ServerRequest& sr, folly::Executor::KeepAlive<> executor) {
     sr.executor_ = std::move(executor);
@@ -533,6 +539,11 @@ class ServerRequest {
 
   static void setResourcePool(ServerRequest& sr, IResourcePoolAcceptor* rp) {
     sr.resourcePool_ = rp;
+  }
+
+  static void setInternalPriority(
+      ServerRequest& sr, InternalPriority priority) {
+    sr.priority_ = priority;
   }
 
   static protocol::PROTOCOL_TYPES protocol(ServerRequest& sr) {
@@ -567,6 +578,7 @@ class ServerRequest {
   ServerRequestData requestData_;
   intptr_t queueObserverPayload_;
   IResourcePoolAcceptor* resourcePool_{nullptr};
+  InternalPriority priority_{folly::Executor::LO_PRI};
 };
 
 namespace detail {
@@ -577,6 +589,7 @@ class ServerRequestHelper : public ServerRequest {
   using ServerRequest::compressedRequest;
   using ServerRequest::eventBase;
   using ServerRequest::executor;
+  using ServerRequest::internalPriority;
   using ServerRequest::moveConcurrencyControllerNotification;
   using ServerRequest::moveRequestPileNotification;
   using ServerRequest::protocol;
@@ -585,6 +598,7 @@ class ServerRequestHelper : public ServerRequest {
   using ServerRequest::requestContext;
   using ServerRequest::resourcePool;
   using ServerRequest::setExecutor;
+  using ServerRequest::setInternalPriority;
   using ServerRequest::setResourcePool;
 };
 

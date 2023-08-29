@@ -517,6 +517,11 @@ void Cpp2Worker::dispatchRequest(
         apache::thrift::detail::ServerRequestHelper::setResourcePool(
             serverRequest, resourcePool);
 
+        // This will be used to put the request on the right queue on the
+        // executor
+        apache::thrift::detail::ServerRequestHelper::setInternalPriority(
+            serverRequest, folly::Executor::LO_PRI);
+
         auto result = resourcePool->accept(std::move(serverRequest));
         if (result) {
           auto errorCode = errorCodeFromTapplicationException(

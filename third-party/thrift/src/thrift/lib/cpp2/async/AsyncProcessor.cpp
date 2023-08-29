@@ -99,7 +99,8 @@ void ServerRequestTask::setTile(TilePtr&& tile) {
   req_.requestContext()->setTile(std::move(tile));
 }
 
-void ServerRequestTask::acceptIntoResourcePool(int8_t) {
+void ServerRequestTask::acceptIntoResourcePool(int8_t priority) {
+  detail::ServerRequestHelper::setInternalPriority(req_, priority);
   detail::ServerRequestHelper::resourcePool(req_)->accept(std::move(req_));
 }
 

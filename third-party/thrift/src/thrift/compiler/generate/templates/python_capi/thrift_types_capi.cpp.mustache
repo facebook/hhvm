@@ -255,12 +255,8 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 {{#program:enums}}
 ExtractorResult<{{program:cpp_namespaces}}::{{enum:cpp_name}}>
 Extractor<{{program:cpp_namespaces}}::{{enum:cpp_name}}>::operator()(PyObject* obj) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<{{program:cpp_namespaces}}::{{enum:cpp_name}}>(
-      "Module {{program:module_path}} import error");
-  }
-  int64_t val = extract__{{program:capi_module_prefix}}__{{enum:name}}(obj);
+  {{! thrift-python enums have int parent class}}
+  long val = PyLong_AsLong(obj);
   if (val == -1 && PyErr_Occurred()) {
     return extractorError<{{program:cpp_namespaces}}::{{enum:cpp_name}}>(
         "Error getting python int value: {{enum:name}}");

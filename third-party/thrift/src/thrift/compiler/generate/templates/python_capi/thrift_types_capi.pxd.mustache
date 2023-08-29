@@ -41,8 +41,6 @@ cdef api object init__{{program:capi_module_prefix}}__{{struct:name}}(object dat
 {{#program:enums}}
 cdef api int can_extract__{{program:capi_module_prefix}}__{{enum:name}}(object) except -1
 
-cdef api int64_t extract__{{program:capi_module_prefix}}__{{enum:name}}(object) except -1
-
 cdef api object construct__{{program:capi_module_prefix}}__{{enum:name}}(int64_t)
 
 {{/program:enums}}

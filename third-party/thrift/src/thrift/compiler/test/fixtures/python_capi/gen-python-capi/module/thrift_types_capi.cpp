@@ -2396,12 +2396,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 ExtractorResult<::test::fixtures::python_capi::MyEnum>
 Extractor<::test::fixtures::python_capi::MyEnum>::operator()(PyObject* obj) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::test::fixtures::python_capi::MyEnum>(
-      "Module test.fixtures.python_capi.module import error");
-  }
-  int64_t val = extract__test__fixtures__python_capi__module__MyEnum(obj);
+  long val = PyLong_AsLong(obj);
   if (val == -1 && PyErr_Occurred()) {
     return extractorError<::test::fixtures::python_capi::MyEnum>(
         "Error getting python int value: MyEnum");
@@ -2440,12 +2435,7 @@ PyObject* Constructor<::test::fixtures::python_capi::MyEnum>::operator()(
 
 ExtractorResult<::test::fixtures::python_capi::NormalDecentEnum>
 Extractor<::test::fixtures::python_capi::NormalDecentEnum>::operator()(PyObject* obj) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::test::fixtures::python_capi::NormalDecentEnum>(
-      "Module test.fixtures.python_capi.module import error");
-  }
-  int64_t val = extract__test__fixtures__python_capi__module__AnnoyingEnum(obj);
+  long val = PyLong_AsLong(obj);
   if (val == -1 && PyErr_Occurred()) {
     return extractorError<::test::fixtures::python_capi::NormalDecentEnum>(
         "Error getting python int value: AnnoyingEnum");

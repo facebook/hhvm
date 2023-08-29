@@ -240,7 +240,7 @@ class PythonCapiRoundtrip(PythonCapiFixture):
             fixture.roundtrip_MyDataItem(MyEnum.MyValue1)
         with self.assertRaises(TypeError):
             fixture.roundtrip_MyUnion(MyEnum.MyValue1)
-        with self.assertRaises(AttributeError):
+        with self.assertRaises(TypeError):
             fixture.roundtrip_MyEnum(self.my_struct())
 
     def test_roundtrip_OverflowError(self) -> None:

@@ -160,13 +160,9 @@ cdef api object init__test__fixtures__python_capi__module__MyDataItemEnsureStruc
 
 cdef api int can_extract__test__fixtures__python_capi__module__MyEnum(object) except -1
 
-cdef api int64_t extract__test__fixtures__python_capi__module__MyEnum(object) except -1
-
 cdef api object construct__test__fixtures__python_capi__module__MyEnum(int64_t)
 
 cdef api int can_extract__test__fixtures__python_capi__module__AnnoyingEnum(object) except -1
-
-cdef api int64_t extract__test__fixtures__python_capi__module__AnnoyingEnum(object) except -1
 
 cdef api object construct__test__fixtures__python_capi__module__AnnoyingEnum(int64_t)
 

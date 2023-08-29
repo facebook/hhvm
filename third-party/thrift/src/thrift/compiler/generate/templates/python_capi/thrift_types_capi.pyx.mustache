@@ -57,9 +57,6 @@ cdef api object init__{{program:capi_module_prefix}}__{{struct:name}}(object dat
 cdef api int can_extract__{{program:capi_module_prefix}}__{{enum:name}}(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.{{enum:name}}) else 0
 
-cdef api int64_t extract__{{program:capi_module_prefix}}__{{enum:name}}(object __obj) except -1:
-    return __obj.value
-
 cdef api object construct__{{program:capi_module_prefix}}__{{enum:name}}(int64_t __val):
     return __thrift_types.{{enum:name}}(__val)
 

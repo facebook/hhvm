@@ -4983,27 +4983,39 @@ void in(ISS& env, const bc::BareThis& op) {
 void in(ISS& env, const bc::OODeclExists& op) {
   auto flag = popC(env);
   auto name = popC(env);
-  push(env, [&] {
-      if (!name.strictSubtypeOf(TStr)) return TBool;
-      auto const v = tv(name);
-      if (!v) return TBool;
-      auto rcls = env.index.resolve_class(v->m_data.pstr);
-      if (!rcls) return TFalse;
-      if (!rcls->cls()) return TBool;
-      auto const exist = [&] () -> bool {
-        switch (op.subop1) {
-          case OODeclExistsOp::Class:
-            return !(rcls->cls()->attrs & (AttrInterface | AttrTrait));
-          case OODeclExistsOp::Interface:
-            return rcls->cls()->attrs & AttrInterface;
-          case OODeclExistsOp::Trait:
-            return rcls->cls()->attrs & AttrTrait;
-        }
-        not_reached();
-      }();
-      constprop(env);
-      return exist ? TTrue : TFalse;
-    } ());
+  if (!flag.couldBe(BBool) || !name.couldBe(BStr)) {
+    unreachable(env);
+    push(env, TBottom);
+    return;
+  }
+
+  if (flag.subtypeOf(BBool) && name.subtypeOf(BStr)) {
+    constprop(env);
+  }
+
+  auto const v = tv(name);
+  if (!v) return push(env, TBool);
+
+  assertx(isStringType(v->m_type));
+  auto const rcls = env.index.resolve_class(v->m_data.pstr);
+  if (!rcls) return push(env, TFalse);
+
+  // We know the Class* exists, but not its type.
+  if (!rcls->cls()) return push(env, TBool);
+
+  auto const exist = [&] () -> bool {
+    switch (op.subop1) {
+      case OODeclExistsOp::Class:
+        return !(rcls->cls()->attrs & (AttrInterface | AttrTrait));
+      case OODeclExistsOp::Interface:
+        return rcls->cls()->attrs & AttrInterface;
+      case OODeclExistsOp::Trait:
+        return rcls->cls()->attrs & AttrTrait;
+    }
+    not_reached();
+  }();
+
+  push(env, exist ? TTrue : TFalse);
 }
 
 namespace {

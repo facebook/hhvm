@@ -289,13 +289,15 @@ apache::thrift::ServiceRequestInfoMap GoodServiceServiceInfoHolder::staticReques
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "BadService.bar",
      std::nullopt,
-     apache::thrift::concurrency::NORMAL}},
+     apache::thrift::concurrency::NORMAL,
+     std::nullopt}},
   {"BadInteraction.foo",
     {false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "BadService.BadInteraction.foo",
      "BadInteraction",
-     apache::thrift::concurrency::NORMAL}},
+     apache::thrift::concurrency::NORMAL,
+     std::nullopt}},
   };
 
   return requestInfoMap;

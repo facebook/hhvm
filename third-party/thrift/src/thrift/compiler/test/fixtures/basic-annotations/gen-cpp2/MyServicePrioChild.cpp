@@ -184,7 +184,8 @@ apache::thrift::ServiceRequestInfoMap MyServicePrioChildServiceInfoHolder::stati
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "MyServicePrioChild.pang",
      std::nullopt,
-     apache::thrift::concurrency::BEST_EFFORT}},
+     apache::thrift::concurrency::BEST_EFFORT,
+     std::nullopt}},
   };
   apache::thrift::ServiceRequestInfoMap parentMap = ::cpp2::MyServicePrioParentServiceInfoHolder::staticRequestInfoMap();
   requestInfoMap.insert(std::begin(parentMap), std::end(parentMap));

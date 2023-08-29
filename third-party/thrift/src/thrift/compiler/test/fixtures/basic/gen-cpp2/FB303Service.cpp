@@ -184,7 +184,8 @@ apache::thrift::ServiceRequestInfoMap FB303ServiceServiceInfoHolder::staticReque
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "FB303Service.simple_rpc",
      std::nullopt,
-     apache::thrift::concurrency::NORMAL}},
+     apache::thrift::concurrency::NORMAL,
+     std::nullopt}},
   };
 
   return requestInfoMap;

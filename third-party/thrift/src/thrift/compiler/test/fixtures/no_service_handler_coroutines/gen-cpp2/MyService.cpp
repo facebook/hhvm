@@ -256,13 +256,15 @@ apache::thrift::ServiceRequestInfoMap MyServiceServiceInfoHolder::staticRequestI
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "MyService.foo",
      std::nullopt,
-     apache::thrift::concurrency::NORMAL}},
+     apache::thrift::concurrency::NORMAL,
+     std::nullopt}},
   {"bar",
     {false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "MyService.bar",
      std::nullopt,
-     apache::thrift::concurrency::NORMAL}},
+     apache::thrift::concurrency::NORMAL,
+     std::nullopt}},
   };
 
   return requestInfoMap;

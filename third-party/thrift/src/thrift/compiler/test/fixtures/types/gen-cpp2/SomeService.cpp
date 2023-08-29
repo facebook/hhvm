@@ -303,13 +303,15 @@ apache::thrift::ServiceRequestInfoMap SomeServiceServiceInfoHolder::staticReques
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SomeService.bounce_map",
      std::nullopt,
-     apache::thrift::concurrency::NORMAL}},
+     apache::thrift::concurrency::NORMAL,
+     std::nullopt}},
   {"binary_keyed_map",
     {false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "SomeService.binary_keyed_map",
      std::nullopt,
-     apache::thrift::concurrency::NORMAL}},
+     apache::thrift::concurrency::NORMAL,
+     std::nullopt}},
   };
 
   return requestInfoMap;

@@ -182,7 +182,8 @@ apache::thrift::ServiceRequestInfoMap ServiceServiceInfoHolder::staticRequestInf
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "Service.func",
      std::nullopt,
-     apache::thrift::concurrency::NORMAL}},
+     apache::thrift::concurrency::NORMAL,
+     std::nullopt}},
   };
 
   return requestInfoMap;

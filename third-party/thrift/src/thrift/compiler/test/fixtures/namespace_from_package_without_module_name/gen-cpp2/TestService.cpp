@@ -182,7 +182,8 @@ apache::thrift::ServiceRequestInfoMap TestServiceServiceInfoHolder::staticReques
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "TestService.init",
      std::nullopt,
-     apache::thrift::concurrency::NORMAL}},
+     apache::thrift::concurrency::NORMAL,
+     std::nullopt}},
   };
 
   return requestInfoMap;

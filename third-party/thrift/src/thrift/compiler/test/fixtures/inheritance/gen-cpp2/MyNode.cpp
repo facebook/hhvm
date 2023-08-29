@@ -184,7 +184,8 @@ apache::thrift::ServiceRequestInfoMap MyNodeServiceInfoHolder::staticRequestInfo
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "MyNode.do_mid",
      std::nullopt,
-     apache::thrift::concurrency::NORMAL}},
+     apache::thrift::concurrency::NORMAL,
+     std::nullopt}},
   };
   apache::thrift::ServiceRequestInfoMap parentMap = ::cpp2::MyRootServiceInfoHolder::staticRequestInfoMap();
   requestInfoMap.insert(std::begin(parentMap), std::end(parentMap));

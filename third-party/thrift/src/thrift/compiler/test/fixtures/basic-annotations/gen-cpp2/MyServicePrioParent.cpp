@@ -303,13 +303,15 @@ apache::thrift::ServiceRequestInfoMap MyServicePrioParentServiceInfoHolder::stat
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "MyServicePrioParent.ping",
      std::nullopt,
-     apache::thrift::concurrency::IMPORTANT}},
+     apache::thrift::concurrency::IMPORTANT,
+     std::nullopt}},
   {"pong",
     {false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "MyServicePrioParent.pong",
      std::nullopt,
-     apache::thrift::concurrency::HIGH_IMPORTANT}},
+     apache::thrift::concurrency::HIGH_IMPORTANT,
+     std::nullopt}},
   };
 
   return requestInfoMap;

@@ -303,13 +303,15 @@ apache::thrift::ServiceRequestInfoMap AdapterServiceServiceInfoHolder::staticReq
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "AdapterService.count",
      std::nullopt,
-     apache::thrift::concurrency::NORMAL}},
+     apache::thrift::concurrency::NORMAL,
+     std::nullopt}},
   {"adaptedTypes",
     {false,
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "AdapterService.adaptedTypes",
      std::nullopt,
-     apache::thrift::concurrency::NORMAL}},
+     apache::thrift::concurrency::NORMAL,
+     std::nullopt}},
   };
 
   return requestInfoMap;

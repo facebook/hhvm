@@ -184,7 +184,8 @@ apache::thrift::ServiceRequestInfoMap MyRootServiceInfoHolder::staticRequestInfo
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "MyRoot.do_root",
      std::nullopt,
-     apache::thrift::concurrency::NORMAL}},
+     apache::thrift::concurrency::NORMAL,
+     std::nullopt}},
   };
 
   return requestInfoMap;

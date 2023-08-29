@@ -94,6 +94,8 @@ struct ServiceRequestInfo {
   std::optional<std::string_view>
       interactionName; // Interaction name if part of an interaction
   concurrency::PRIORITY priority; // Method priority set in the IDL
+  std::optional<std::string_view>
+      createdInteraction; // The name of the interaction created by the RPC
 };
 
 using ServiceRequestInfoMap =
@@ -163,18 +165,24 @@ class AsyncProcessorFactory {
         ExecutorType executor,
         InteractionType interaction,
         RpcKind kind,
-        concurrency::PRIORITY prio)
+        concurrency::PRIORITY prio,
+        const std::optional<std::string_view> interactName,
+        bool createsInteract)
         : executorType(executor),
           interactionType(interaction),
           rpcKind(kind),
-          priority(prio) {}
+          priority(prio),
+          interactionName(interactName),
+          createsInteraction(createsInteract) {}
 
    protected:
     MethodMetadata(const MethodMetadata& other)
         : executorType(other.executorType),
           interactionType(other.interactionType),
           rpcKind(other.rpcKind),
-          priority(other.priority) {}
+          priority(other.priority),
+          interactionName(other.interactionName),
+          createsInteraction(other.createsInteraction) {}
 
    public:
     virtual ~MethodMetadata() = default;
@@ -195,6 +203,8 @@ class AsyncProcessorFactory {
     const InteractionType interactionType{InteractionType::UNKNOWN};
     const std::optional<RpcKind> rpcKind{};
     const std::optional<concurrency::PRIORITY> priority{};
+    const std::optional<std::string_view> interactionName;
+    const bool createsInteraction{false};
 
    private:
     enum class WildcardStatus : std::uint8_t { UNKNOWN, NO, YES };
@@ -995,8 +1005,16 @@ class ServerInterface : public virtual AsyncProcessorFactory,
         ExecutorType executor,
         InteractionType interaction,
         RpcKind rpcKind,
-        concurrency::PRIORITY priority)
-        : MethodMetadata(executor, interaction, rpcKind, priority),
+        concurrency::PRIORITY priority,
+        const std::optional<std::string_view> interactionName,
+        const bool createsInteraction)
+        : MethodMetadata(
+              executor,
+              interaction,
+              rpcKind,
+              priority,
+              interactionName,
+              createsInteraction),
           processFuncs(funcs) {}
 
     GeneratedAsyncProcessorBase::ProcessFuncs<Processor> processFuncs;

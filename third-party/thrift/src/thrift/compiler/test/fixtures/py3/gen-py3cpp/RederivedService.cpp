@@ -182,7 +182,8 @@ apache::thrift::ServiceRequestInfoMap RederivedServiceServiceInfoHolder::staticR
      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
      "RederivedService.get_seven",
      std::nullopt,
-     apache::thrift::concurrency::NORMAL}},
+     apache::thrift::concurrency::NORMAL,
+     std::nullopt}},
   };
   apache::thrift::ServiceRequestInfoMap parentMap = ::py3::simple::DerivedServiceServiceInfoHolder::staticRequestInfoMap();
   requestInfoMap.insert(std::begin(parentMap), std::end(parentMap));

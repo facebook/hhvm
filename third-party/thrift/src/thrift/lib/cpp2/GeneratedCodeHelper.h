@@ -1233,6 +1233,12 @@ void populateMethodMetadataMap(
   for (const auto& [methodName, processFuncs] :
        CurrentProcessor::getOwnProcessMap()) {
     const auto& requestInfo = requestInfoMap.at(methodName);
+    std::optional<std::string_view> interactionName =
+        requestInfo.interactionName;
+    if (!interactionName) {
+      // If this is a normal RPC that creates an interaction
+      interactionName = requestInfo.createdInteraction;
+    }
     map.emplace(
         methodName,
         // Always create GeneratatedMethodMetadata<MostDerivedProcessor> so that
@@ -1248,7 +1254,9 @@ void populateMethodMetadataMap(
                       INTERACTION_V1
                 : AsyncProcessorFactory::MethodMetadata::InteractionType::NONE,
             requestInfo.rpcKind,
-            requestInfo.priority));
+            requestInfo.priority,
+            std::move(interactionName),
+            requestInfo.createdInteraction.has_value()));
   }
   if constexpr (!is_root_async_processor<CurrentProcessor>) {
     populateMethodMetadataMap<

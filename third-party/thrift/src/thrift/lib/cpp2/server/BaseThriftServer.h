@@ -306,6 +306,12 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
  protected:
   ThriftServerConfig thriftConfig_;
 
+  /**
+   * In cases where multiple services are running in the same process, this
+   * will be used to indicate which is the primary server.
+   */
+  bool isPrimaryServer_{false};
+
  private:
   AdaptiveConcurrencyController adaptiveConcurrencyController_;
 
@@ -317,6 +323,9 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
   CPUConcurrencyController cpuConcurrencyController_;
 
  public:
+  void setAsPrimaryServer() { isPrimaryServer_ = true; }
+  bool isPrimaryServer() const { return isPrimaryServer_; }
+
   void setMockCPUConcurrencyControllerConfig(
       CPUConcurrencyController::Config config) {
     mockCPUConcurrencyControllerConfig_.setValue(config);

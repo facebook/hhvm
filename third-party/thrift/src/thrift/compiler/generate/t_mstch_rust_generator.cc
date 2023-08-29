@@ -1036,8 +1036,7 @@ class rust_mstch_function : public mstch_function {
     return function_->return_type()->get_name();
   }
   mstch::node rust_void_excluding_interaction() {
-    return function_->get_return_type()->is_void() &&
-        !function_->sink_or_stream();
+    return function_->return_type()->is_void() && !function_->sink_or_stream();
   }
   mstch::node rust_anyhow_to_application_exn() {
     if (const t_const* annot =

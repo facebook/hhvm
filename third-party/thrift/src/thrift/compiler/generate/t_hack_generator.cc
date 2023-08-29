@@ -2878,7 +2878,7 @@ bool t_hack_generator::skip_codegen(const t_function* tfunction) {
       tfunction->find_structured_annotation_or_null(kHackSkipCodegenUri);
   const t_type* invalid_type = nullptr;
   std::string field_name;
-  const t_type* type = tfunction->get_return_type();
+  const t_type* type = tfunction->return_type();
   if (!is_valid_hack_type(type)) {
     invalid_type = type;
     field_name = "return type";

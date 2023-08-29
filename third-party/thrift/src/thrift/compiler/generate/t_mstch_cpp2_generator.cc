@@ -854,8 +854,7 @@ class cpp_mstch_function : public mstch_function {
   }
   // Specifies if the generated C++ function is void.
   mstch::node is_cpp_void() {
-    return function_->get_return_type()->is_void() &&
-        !function_->sink_or_stream();
+    return function_->return_type()->is_void() && !function_->sink_or_stream();
   }
   mstch::node stack_arguments() {
     return cpp2::is_stack_arguments(context_.options, *function_);

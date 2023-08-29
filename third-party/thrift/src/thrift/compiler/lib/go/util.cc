@@ -405,9 +405,9 @@ std::vector<t_struct*> get_service_req_resp_structs(const t_service* service) {
     auto resp_struct_name =
         go::munge_ident("resp" + svcGoName + funcGoName, false);
     auto resp_struct = new t_struct(service->program(), resp_struct_name);
-    if (!func->get_return_type()->is_void()) {
+    if (!func->return_type()->is_void()) {
       auto resp_field = std::make_unique<t_field>(
-          func->get_return_type(), DEFAULT_RETVAL_FIELD_NAME, 0);
+          func->return_type(), DEFAULT_RETVAL_FIELD_NAME, 0);
       resp_field->set_qualifier(t_field_qualifier::none);
       resp_struct->append_field(std::move(resp_field));
     }

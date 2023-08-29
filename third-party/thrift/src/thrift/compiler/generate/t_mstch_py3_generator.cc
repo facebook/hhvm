@@ -172,8 +172,7 @@ class py3_mstch_program : public mstch_program {
     visit_types_for_mixin_fields();
 
     for (const t_function* func : lifecycleFunctions()) {
-      add_function_by_unique_return_type(
-          func, visit_type(func->get_return_type()));
+      add_function_by_unique_return_type(func, visit_type(func->return_type()));
     }
   }
 
@@ -1211,7 +1210,7 @@ void py3_mstch_program::visit_type_single_service(const t_service* service) {
         response_and_stream_functions_.push_back(&function);
       }
     } else if (!function.sink()) {
-      return_type_name = visit_type(function.get_return_type());
+      return_type_name = visit_type(function.return_type());
     }
     add_function_by_unique_return_type(&function, std::move(return_type_name));
   }

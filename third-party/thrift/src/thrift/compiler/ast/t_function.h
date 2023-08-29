@@ -160,7 +160,6 @@ class t_function final : public t_named {
       t_function_qualifier qualifier = {});
 
   t_paramlist* get_paramlist() const { return paramlist_.get(); }
-  const t_type* get_return_type() const { return return_type(); }
   const t_throws* get_xceptions() const {
     return t_throws::or_empty(exceptions());
   }

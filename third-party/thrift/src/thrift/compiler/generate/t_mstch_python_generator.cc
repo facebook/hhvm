@@ -272,7 +272,7 @@ class python_mstch_program : public mstch_program {
         }
         visit_type(stream->get_elem_type());
       } else {
-        visit_type(function.get_return_type());
+        visit_type(function.return_type());
       }
     }
   }

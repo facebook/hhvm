@@ -709,7 +709,7 @@ class mstch_function : public mstch_base {
         function_->is_interaction_member();
   }
   mstch::node is_void() {
-    return function_->get_return_type()->is_void() &&
+    return function_->return_type()->is_void() &&
         !function_->returned_interaction() && !function_->sink_or_stream();
   }
 

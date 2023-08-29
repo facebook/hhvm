@@ -747,6 +747,31 @@ class EventTask : public concurrency::Runnable, public InteractionTask {
   bool oneway_;
 };
 
+class ServerRequestTask : public concurrency::Runnable, public InteractionTask {
+ public:
+  explicit ServerRequestTask(ServerRequest&& req) : req_(std::move(req)) {}
+  ~ServerRequestTask() override;
+
+  void failWith(folly::exception_wrapper ex, std::string exCode) override;
+
+  void setTile(TilePtr&& tile) override;
+
+  void run() override {
+    // This override exists because these tasks are stored as Runnable in the
+    // interaction queues.
+    LOG(FATAL) << "Should never be called";
+  }
+
+  void acceptIntoResourcePool(int8_t priority) override;
+
+  friend class Tile;
+  friend class TilePromise;
+  friend class GeneratedAsyncProcessorBase;
+
+ private:
+  ServerRequest req_;
+};
+
 template <typename ChildType>
 class RequestTask final : public EventTask {
  public:

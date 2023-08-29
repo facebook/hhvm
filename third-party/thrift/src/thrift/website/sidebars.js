@@ -266,7 +266,10 @@ module.exports = {
               type: 'doc',
               id: 'fb/languages/python/index',
             },
-            items: ['fb/languages/python/code-frameworks'],
+            items: [
+              'fb/languages/python/code-frameworks',
+              'fb/languages/python/python-capi',
+            ],
           },
         ]),
       ],

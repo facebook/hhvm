@@ -239,6 +239,11 @@ bool GeneratedAsyncProcessorBase::validateRpcKind(
   return false;
 }
 
+bool GeneratedAsyncProcessorBase::validateRpcKind(const ServerRequest& req) {
+  DCHECK(req.methodMetadata()->rpcKind);
+  return validateRpcKind(req.request(), *req.methodMetadata()->rpcKind);
+}
+
 bool GeneratedAsyncProcessorBase::setUpRequestProcessing(
     const ResponseChannelRequest::UniquePtr& req,
     Cpp2RequestContext* ctx,

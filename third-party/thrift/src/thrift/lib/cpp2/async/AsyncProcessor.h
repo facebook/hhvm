@@ -611,6 +611,7 @@ class GeneratedAsyncProcessorBase : public AsyncProcessor {
   // Sends an error response if validation fails.
   static bool validateRpcKind(
       const ResponseChannelRequest::UniquePtr& req, RpcKind kind);
+  static bool validateRpcKind(const ServerRequest& req);
 
  protected:
   template <typename ProtocolIn, typename Args>

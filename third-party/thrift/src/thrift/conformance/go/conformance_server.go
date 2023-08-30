@@ -38,6 +38,7 @@ import (
 	"thrift/conformance/serialization"
 	"thrift/lib/go/thrift"
 	"thrift/test/testset"
+	enum "thrift/test/testset/Enum"
 )
 
 // typeRegistry is a registry from thrift_uri or a hash of thrift_uri to thrift objects.
@@ -124,6 +125,7 @@ func main() {
 	// Register all types from the testset
 	registry := newTypeRegistry()
 	testset.RegisterTypes(registry)
+	enum.RegisterTypes(registry)
 
 	// Startup thrift server
 	handler := &dataConformanceServiceHandler{registry}

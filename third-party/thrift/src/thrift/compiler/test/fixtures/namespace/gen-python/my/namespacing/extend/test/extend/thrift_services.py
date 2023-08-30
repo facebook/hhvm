@@ -14,7 +14,7 @@ import folly.iobuf as _fbthrift_iobuf
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 from thrift.python.serializer import serialize_iobuf, deserialize, Protocol
-from thrift.python.server import ServiceInterface, oneway, PythonUserException
+from thrift.python.server import ServiceInterface, RpcKind, PythonUserException
 
 import python_module_root.my.namespacing.extend.test.extend.thrift_types
 import python_module_root.my.namespacing.extend.test.extend.thrift_metadata
@@ -33,7 +33,7 @@ class ExtendTestServiceInterface(
     # pyre-ignore[3]: it can return anything
     def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., _typing.Any]]:
         functionTable = {
-            b"check": self._fbthrift__handler_check,
+            b"check": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_check),
         }
         return {**super().getFunctionTable(), **functionTable}
 

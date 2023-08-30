@@ -15,6 +15,7 @@
 
 import ipaddress
 import os
+from enum import Enum
 from types import TracebackType
 from typing import Any, Awaitable, Callable, Mapping, Optional, Type, TypeVar, Union
 
@@ -30,7 +31,11 @@ Path = Union[str, bytes, os.PathLike]
 
 _T = TypeVar("_T", bound=Callable[..., Awaitable[None]])
 
-def oneway(func: _T) -> _T: ...
+class RpcKind(Enum):
+    SINGLE_REQUEST_SINGLE_RESPONSE: RpcKind = ...
+    SINGLE_REQUEST_NO_RESPONSE: RpcKind = ...
+    SINGLE_REQUEST_STREAMING_RESPONSE: RpcKind = ...
+    SINK: RpcKind = ...
 
 class PythonUserException(Exception):
     def __init__(self, type_: str, reason: str, buf: IOBuf) -> None: ...

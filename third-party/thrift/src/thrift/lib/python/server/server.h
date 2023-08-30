@@ -26,6 +26,7 @@
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
 #include <thrift/lib/cpp2/gen/service_tcc.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
+#include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 #include <thrift/lib/thrift/gen-cpp2/metadata_types.h>
 
 namespace thrift {
@@ -67,7 +68,9 @@ class PythonAsyncProcessor : public apache::thrift::AsyncProcessor {
  public:
   PythonAsyncProcessor(
       PyObject* python_server,
-      const std::map<std::string, PyObject*>& functions,
+      const std::map<
+          std::string,
+          std::pair<apache::thrift::RpcKind, PyObject*>>& functions,
       folly::Executor::KeepAlive<> executor,
       std::string serviceName)
       : python_server_(python_server),
@@ -283,7 +286,8 @@ class PythonAsyncProcessor : public apache::thrift::AsyncProcessor {
  private:
   PyObject* python_server_;
   std::unordered_map<std::string, std::string> functionFullNameMap_;
-  const std::map<std::string, PyObject*>& functions_;
+  const std::map<std::string, std::pair<apache::thrift::RpcKind, PyObject*>>&
+      functions_;
   folly::Executor::KeepAlive<> executor;
   std::string serviceName_;
   static inline const PythonAsyncProcessor::ProcessFuncs singleFunc_{
@@ -388,14 +392,13 @@ class PythonAsyncProcessorFactory
  public:
   PythonAsyncProcessorFactory(
       PyObject* python_server,
-      std::map<std::string, PyObject*> functions,
-      std::unordered_set<std::string> oneways,
+      std::map<std::string, std::pair<apache::thrift::RpcKind, PyObject*>>
+          functions,
       std::vector<PyObject*> lifecycleFuncs,
       folly::Executor::KeepAlive<> executor,
       std::string serviceName)
       : python_server_(python_server),
         functions_(std::move(functions)),
-        oneways_(std::move(oneways)),
         lifecycleFuncs_(std::move(lifecycleFuncs)),
         executor(std::move(executor)),
         serviceName_(std::move(serviceName)) {}
@@ -422,11 +425,21 @@ class PythonAsyncProcessorFactory
         std::make_shared<PythonAsyncProcessor::PythonMetadata>(
             PythonAsyncProcessor::getOnewayFunc());
 
-    for (const auto& [methodName, _] : functions_) {
-      const auto& func = oneways_.find(methodName) != oneways_.end()
-          ? onewayFunc
-          : processFunc;
-      result.emplace(methodName, func);
+    for (const auto& [methodName, function] : functions_) {
+      switch (function.first) {
+        case apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE:
+          result.emplace(methodName, processFunc);
+          break;
+        case apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE:
+          result.emplace(methodName, onewayFunc);
+          break;
+        case apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE:
+          result.emplace(methodName, processFunc); // TODO stream
+          break;
+        case apache::thrift::RpcKind::SINK:
+          result.emplace(methodName, processFunc); // TODO sink
+          break;
+      }
     }
 
     return result;
@@ -436,8 +449,8 @@ class PythonAsyncProcessorFactory
   folly::SemiFuture<folly::Unit> callLifecycle(LifecycleFunc);
 
   PyObject* python_server_;
-  const std::map<std::string, PyObject*> functions_;
-  const std::unordered_set<std::string> oneways_;
+  const std::map<std::string, std::pair<apache::thrift::RpcKind, PyObject*>>
+      functions_;
   const std::vector<PyObject*> lifecycleFuncs_;
   folly::Executor::KeepAlive<> executor;
   std::string serviceName_;

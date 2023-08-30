@@ -19,6 +19,13 @@ from thrift.python.types cimport ServiceInterface as cServiceInterface
 from thrift.py3.server cimport cAsyncProcessorFactory, AsyncProcessorFactory, ThriftServer as ThriftServer_py3
 from thrift.py3.exceptions cimport cException
 
+cdef extern from "thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h" namespace "::apache::thrift":
+    cpdef enum class RpcKind:
+        SINGLE_REQUEST_SINGLE_RESPONSE = 0
+        SINGLE_REQUEST_NO_RESPONSE = 1
+        SINGLE_REQUEST_STREAMING_RESPONSE = 4
+        SINK = 6
+
 cdef extern from "thrift/lib/python/server/server.h" namespace "::thrift::python":
     cdef cppclass cPythonAsyncProcessorFactory "::thrift::python::PythonAsyncProcessorFactory"(cAsyncProcessorFactory):
         cPythonAsyncProcessorFactory()

@@ -14,7 +14,7 @@ import folly.iobuf as _fbthrift_iobuf
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 from thrift.python.serializer import serialize_iobuf, deserialize, Protocol
-from thrift.python.server import ServiceInterface, oneway, PythonUserException
+from thrift.python.server import ServiceInterface, RpcKind, PythonUserException
 
 import s.thrift_types
 import s.thrift_metadata
@@ -33,7 +33,7 @@ class TestServiceInterface(
     # pyre-ignore[3]: it can return anything
     def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., _typing.Any]]:
         functionTable = {
-            b"test": self._fbthrift__handler_test,
+            b"test": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_test),
         }
         return {**super().getFunctionTable(), **functionTable}
 

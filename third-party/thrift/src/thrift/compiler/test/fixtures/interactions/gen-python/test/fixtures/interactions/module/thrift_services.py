@@ -14,7 +14,7 @@ import folly.iobuf as _fbthrift_iobuf
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 from thrift.python.serializer import serialize_iobuf, deserialize, Protocol
-from thrift.python.server import ServiceInterface, oneway, PythonUserException
+from thrift.python.server import ServiceInterface, RpcKind, PythonUserException
 
 import test.fixtures.interactions.module.thrift_types
 import test.fixtures.interactions.module.thrift_metadata
@@ -31,9 +31,9 @@ class MyServiceInterface(
     # pyre-ignore[3]: it can return anything
     def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., _typing.Any]]:
         functionTable = {
-            b"foo": self._fbthrift__handler_foo,
-            b"interact": self._fbthrift__handler_interact,
-            b"interactFast": self._fbthrift__handler_interactFast,
+            b"foo": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_foo),
+            b"interact": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_interact),
+            b"interactFast": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_interactFast),
         }
         return {**super().getFunctionTable(), **functionTable}
 

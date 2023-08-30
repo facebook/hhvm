@@ -24,6 +24,7 @@ from cpython.ref cimport PyObject
 from cython.operator cimport dereference
 from libcpp.map cimport map as cmap
 from libcpp.memory cimport make_unique, make_shared, static_pointer_cast
+from libcpp.pair cimport pair
 from libcpp.unordered_set cimport unordered_set
 from libcpp.utility cimport move as cmove
 from libcpp.vector cimport vector as cvector
@@ -38,10 +39,6 @@ from folly cimport (
   cFollyUnit,
   c_unit,
 )
-
-def oneway(func):
-    func.is_one_way = True
-    return func
 
 cdef class PythonUserException(Exception):
     def __init__(self, type_: str, reason: str, buf: IOBuf) -> None:
@@ -196,24 +193,24 @@ cdef public api unique_ptr[cIOBuf] getSerializedPythonMetadata(object server):
     iobuf = serialize_iobuf(metadata, protocol=Protocol.BINARY)
     return cmove((<IOBuf>iobuf)._ours)
 
+# Cython is dumb
+ctypedef PyObject* PyObjPtr
+
 cdef class PythonAsyncProcessorFactory(AsyncProcessorFactory):
     @staticmethod
     cdef PythonAsyncProcessorFactory create(dict funcMap, list lifecycleFuncs, bytes serviceName, object server):
-        cdef cmap[string, PyObject*] funcs
-        cdef unordered_set[string] oneways
+        cdef cmap[string, pair[RpcKind, PyObjPtr]] funcs
         cdef cvector[PyObject*] lifecycle
 
-        for name, func in funcMap.items():
-            funcs[<string>name] = <PyObject*>func
-            if getattr(func, "is_one_way", False):
-                oneways.insert(name)
+        for name, (rpc_kind, func) in funcMap.items():
+            funcs[<string>name] = pair[RpcKind, PyObjPtr](<RpcKind>rpc_kind, <PyObject*>func)
 
         for func in lifecycleFuncs:
             lifecycle.push_back(<PyObject*>func)
 
         cdef PythonAsyncProcessorFactory inst = PythonAsyncProcessorFactory.__new__(PythonAsyncProcessorFactory)
         inst._cpp_obj = static_pointer_cast[cAsyncProcessorFactory, cPythonAsyncProcessorFactory](
-            make_shared[cPythonAsyncProcessorFactory](<PyObject*>server, cmove(funcs), cmove(oneways), cmove(lifecycle), get_executor(), serviceName))
+            make_shared[cPythonAsyncProcessorFactory](<PyObject*>server, cmove(funcs), cmove(lifecycle), get_executor(), serviceName))
         return inst
 
 cdef class ThriftServer(ThriftServer_py3):

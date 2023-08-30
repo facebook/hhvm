@@ -14,7 +14,7 @@ import folly.iobuf as _fbthrift_iobuf
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 from thrift.python.serializer import serialize_iobuf, deserialize, Protocol
-from thrift.python.server import ServiceInterface, oneway, PythonUserException
+from thrift.python.server import ServiceInterface, RpcKind, PythonUserException
 
 import test.fixtures.basic.module.thrift_types
 import test.fixtures.basic.module.thrift_metadata
@@ -31,7 +31,7 @@ class FooServiceInterface(
     # pyre-ignore[3]: it can return anything
     def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., _typing.Any]]:
         functionTable = {
-            b"simple_rpc": self._fbthrift__handler_simple_rpc,
+            b"simple_rpc": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_simple_rpc),
         }
         return {**super().getFunctionTable(), **functionTable}
 
@@ -73,7 +73,7 @@ class FB303ServiceInterface(
     # pyre-ignore[3]: it can return anything
     def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., _typing.Any]]:
         functionTable = {
-            b"simple_rpc": self._fbthrift__handler_simple_rpc,
+            b"simple_rpc": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_simple_rpc),
         }
         return {**super().getFunctionTable(), **functionTable}
 
@@ -116,16 +116,16 @@ class MyServiceInterface(
     # pyre-ignore[3]: it can return anything
     def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., _typing.Any]]:
         functionTable = {
-            b"ping": self._fbthrift__handler_ping,
-            b"getRandomData": self._fbthrift__handler_getRandomData,
-            b"sink": self._fbthrift__handler_sink,
-            b"putDataById": self._fbthrift__handler_putDataById,
-            b"hasDataById": self._fbthrift__handler_hasDataById,
-            b"getDataById": self._fbthrift__handler_getDataById,
-            b"deleteDataById": self._fbthrift__handler_deleteDataById,
-            b"lobDataById": self._fbthrift__handler_lobDataById,
-            b"invalid_return_for_hack": self._fbthrift__handler_invalid_return_for_hack,
-            b"rpc_skipped_codegen": self._fbthrift__handler_rpc_skipped_codegen,
+            b"ping": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_ping),
+            b"getRandomData": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_getRandomData),
+            b"sink": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_sink),
+            b"putDataById": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_putDataById),
+            b"hasDataById": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_hasDataById),
+            b"getDataById": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_getDataById),
+            b"deleteDataById": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_deleteDataById),
+            b"lobDataById": (RpcKind.SINGLE_REQUEST_NO_RESPONSE, self._fbthrift__handler_lobDataById),
+            b"invalid_return_for_hack": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_invalid_return_for_hack),
+            b"rpc_skipped_codegen": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_rpc_skipped_codegen),
         }
         return {**super().getFunctionTable(), **functionTable}
 
@@ -247,7 +247,6 @@ class MyServiceInterface(
         ) -> None:
         raise NotImplementedError("async def lobDataById is not implemented")
 
-    @oneway
     async def _fbthrift__handler_lobDataById(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> None:
         args_struct = deserialize(test.fixtures.basic.module.thrift_types._fbthrift_MyService_lobDataById_args, args, protocol)
         value = await self.lobDataById(args_struct.id,args_struct.data,)
@@ -291,8 +290,8 @@ class DbMixedStackArgumentsInterface(
     # pyre-ignore[3]: it can return anything
     def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., _typing.Any]]:
         functionTable = {
-            b"getDataByKey0": self._fbthrift__handler_getDataByKey0,
-            b"getDataByKey1": self._fbthrift__handler_getDataByKey1,
+            b"getDataByKey0": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_getDataByKey0),
+            b"getDataByKey1": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_getDataByKey1),
         }
         return {**super().getFunctionTable(), **functionTable}
 

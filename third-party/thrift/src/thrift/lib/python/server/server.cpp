@@ -43,7 +43,7 @@ void PythonAsyncProcessor::handlePythonServerCallback(
     apache::thrift::SerializedRequest serializedRequest) {
   FOLLY_MAYBE_UNUSED static bool done = (do_import(), false);
   handleServerCallback(
-      functions_.at(context->getMethodName()),
+      functions_.at(context->getMethodName()).second,
       serviceName_ + "." + context->getMethodName(),
       context,
       std::move(promise),
@@ -58,7 +58,7 @@ void PythonAsyncProcessor::handlePythonServerCallbackOneway(
     apache::thrift::SerializedRequest serializedRequest) {
   FOLLY_MAYBE_UNUSED static bool done = (do_import(), false);
   handleServerCallbackOneway(
-      functions_.at(context->getMethodName()),
+      functions_.at(context->getMethodName()).second,
       serviceName_ + "." + context->getMethodName(),
       context,
       std::move(promise),

@@ -14,7 +14,7 @@ import folly.iobuf as _fbthrift_iobuf
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 from thrift.python.serializer import serialize_iobuf, deserialize, Protocol
-from thrift.python.server import ServiceInterface, oneway, PythonUserException
+from thrift.python.server import ServiceInterface, RpcKind, PythonUserException
 
 import module.thrift_types
 import module.thrift_metadata
@@ -31,10 +31,10 @@ class RaiserInterface(
     # pyre-ignore[3]: it can return anything
     def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., _typing.Any]]:
         functionTable = {
-            b"doBland": self._fbthrift__handler_doBland,
-            b"doRaise": self._fbthrift__handler_doRaise,
-            b"get200": self._fbthrift__handler_get200,
-            b"get500": self._fbthrift__handler_get500,
+            b"doBland": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_doBland),
+            b"doRaise": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_doRaise),
+            b"get200": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_get200),
+            b"get500": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_get500),
         }
         return {**super().getFunctionTable(), **functionTable}
 

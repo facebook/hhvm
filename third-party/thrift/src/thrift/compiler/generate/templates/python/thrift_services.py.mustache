@@ -26,7 +26,7 @@ import folly.iobuf as _fbthrift_iobuf
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 from {{program:base_library_package}}.serializer import serialize_iobuf, deserialize, Protocol
-from {{program:base_library_package}}.server import ServiceInterface, oneway, PythonUserException
+from {{program:base_library_package}}.server import ServiceInterface, RpcKind, PythonUserException
 
 import {{program:module_path}}.thrift_types
 import {{program:module_path}}.thrift_metadata
@@ -58,7 +58,7 @@ class {{service:name}}Interface(
     def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., _typing.Any]]:
         functionTable = {
         {{#service:supported_service_functions}}
-            b"{{function:name}}": self._fbthrift__handler_{{function:name}},
+            b"{{function:name}}": ({{> services/function_kind }}, self._fbthrift__handler_{{function:name}}),
         {{/service:supported_service_functions}}
         }
         return {**super().getFunctionTable(), **functionTable}
@@ -84,9 +84,6 @@ class {{service:name}}Interface(
         ) -> {{#function:return_type}}{{> types/pep484_type}}{{/function:return_type}}:
         raise NotImplementedError("async def {{function:name}} is not implemented")
 
-    {{#function:oneway?}}
-    @oneway
-    {{/function:oneway?}}
     async def _fbthrift__handler_{{function:name}}(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) {{!
             }}-> {{#function:oneway?}}None{{/function:oneway?}}{{^function:oneway?}}_fbthrift_iobuf.IOBuf{{/function:oneway?}}:
         args_struct = deserialize({{> types/function_args_type}}, args, protocol)

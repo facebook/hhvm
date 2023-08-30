@@ -324,7 +324,7 @@ func (x *GetEntityResponse) String() string {
 type NonComparableStruct struct {
     Foo string `thrift:"foo,1" json:"foo" db:"foo"`
     Bar []string `thrift:"bar,2" json:"bar" db:"bar"`
-    Baz map[NonComparableStruct]int64 `thrift:"baz,3" json:"baz" db:"baz"`
+    Baz map[*NonComparableStruct]int64 `thrift:"baz,3" json:"baz" db:"baz"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &NonComparableStruct{}
@@ -356,11 +356,11 @@ func (x *NonComparableStruct) GetBar() []string {
     return x.Bar
 }
 
-func (x *NonComparableStruct) GetBazNonCompat() map[NonComparableStruct]int64 {
+func (x *NonComparableStruct) GetBazNonCompat() map[*NonComparableStruct]int64 {
     return x.Baz
 }
 
-func (x *NonComparableStruct) GetBaz() map[NonComparableStruct]int64 {
+func (x *NonComparableStruct) GetBaz() map[*NonComparableStruct]int64 {
     if !x.IsSetBaz() {
         return nil
     }
@@ -388,12 +388,12 @@ func (x *NonComparableStruct) SetBar(value []string) *NonComparableStruct {
     return x
 }
 
-func (x *NonComparableStruct) SetBazNonCompat(value map[NonComparableStruct]int64) *NonComparableStruct {
+func (x *NonComparableStruct) SetBazNonCompat(value map[*NonComparableStruct]int64) *NonComparableStruct {
     x.Baz = value
     return x
 }
 
-func (x *NonComparableStruct) SetBaz(value map[NonComparableStruct]int64) *NonComparableStruct {
+func (x *NonComparableStruct) SetBaz(value map[*NonComparableStruct]int64) *NonComparableStruct {
     x.Baz = value
     return x
 }
@@ -535,16 +535,16 @@ if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
 }
 
-mapResult := make(map[NonComparableStruct]int64, size)
+mapResult := make(map[*NonComparableStruct]int64, size)
 for i := 0; i < size; i++ {
-    var key NonComparableStruct
+    var key *NonComparableStruct
     {
         result := *NewNonComparableStruct()
 err := result.Read(p)
 if err != nil {
     return err
 }
-        key = result
+        key = &result
     }
 
     var value int64
@@ -602,7 +602,7 @@ func (x *NonComparableStructBuilder) Bar(value []string) *NonComparableStructBui
     return x
 }
 
-func (x *NonComparableStructBuilder) Baz(value map[NonComparableStruct]int64) *NonComparableStructBuilder {
+func (x *NonComparableStructBuilder) Baz(value map[*NonComparableStruct]int64) *NonComparableStructBuilder {
     x.obj.Baz = value
     return x
 }

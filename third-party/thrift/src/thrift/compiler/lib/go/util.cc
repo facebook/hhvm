@@ -319,7 +319,7 @@ bool is_type_go_struct(const t_type* type) {
 }
 
 bool is_type_go_comparable(
-    const t_type* type, std::set<std::string> visited_type_names) {
+    const t_type* type, std::map<std::string, int> visited_type_names) {
   // Whether the underlying Go type is comparable.
   // As per: https://go.dev/ref/spec#Comparison_operators
   //   > Slice, map, and function types are not comparable.
@@ -328,7 +328,8 @@ bool is_type_go_comparable(
   // Struct hierarchy can sometime be recursive.
   // Check if we have already visited this type.
   auto type_name = type->get_full_name();
-  if (visited_type_names.count(type_name) > 0) {
+  auto iter = visited_type_names.find(type_name);
+  if (iter != visited_type_names.end() && iter->second > 1) {
     return true;
   }
 
@@ -344,7 +345,10 @@ bool is_type_go_comparable(
     if (as_struct != nullptr) {
       for (auto member : as_struct->get_members()) {
         auto member_type = member->type().get_type();
-        visited_type_names.insert(member_type->get_full_name());
+        auto member_name = member_type->get_full_name();
+        // Insert 0 if member_name is not yet in the map.
+        auto emplace_pair = visited_type_names.emplace(member_name, 0);
+        emplace_pair.first->second += 1;
         if (!is_type_go_comparable(member_type, visited_type_names)) {
           return false;
         }

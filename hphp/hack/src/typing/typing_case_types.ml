@@ -9,117 +9,62 @@
 open Hh_prelude
 open Typing_defs
 open Typing_env_types
-module Cls = Decl_provider.Class
 module Env = Typing_env
 module SN = Naming_special_names
 
-module DataType : sig
-  type t
+(* Modelled after data types in HHVM. See hphp/runtime/base/datatype.h *)
+module Tag = struct
+  type ctx = unit
 
-  val fromTy : env -> locl_ty -> t
+  type t =
+    | DictData
+    | VecData
+    | KeysetData
+    | StringData
+    | ResourceData
+    | BoolData
+    | IntData
+    | FloatData
+    | NullData
+    | ObjectData
+  [@@deriving eq]
 
-  val are_disjoint : t -> t -> bool
+  let name = function
+    | DictData -> "Dict"
+    | VecData -> "Vec"
+    | KeysetData -> "Keyset"
+    | StringData -> "String"
+    | ResourceData -> "Resource"
+    | BoolData -> "Boolean"
+    | IntData -> "Int64"
+    | FloatData -> "Double"
+    | NullData -> "Null"
+    | ObjectData -> "Object"
 
-  (** The witness that proves an overlap exists between two data types *)
-  type witness = SameTags of string
+  let relation tag1 ~ctx:_ tag2 =
+    let open ApproxSet.Set_relation in
+    if equal tag1 tag2 then
+      Equal
+    else
+      Disjoint
 
-  (** Checks if two data types overlap. If they do not [None] is returned.
-      Otherwise a [witness] is produced. *)
-  val find_overlap : t -> t -> witness option
-end = struct
-  (* Modelled after data types in HHVM. See hphp/runtime/base/datatype.h *)
-  module Tag = struct
-    type ctx = unit
+  let all_tags =
+    [
+      DictData;
+      VecData;
+      KeysetData;
+      StringData;
+      ResourceData;
+      BoolData;
+      IntData;
+      FloatData;
+      NullData;
+      ObjectData;
+    ]
+end
 
-    type t =
-      | DictData
-      | VecData
-      | KeysetData
-      | StringData
-      | ResourceData
-      | BoolData
-      | IntData
-      | FloatData
-      | NullData
-      | ObjectData
-    [@@deriving eq]
-
-    let name = function
-      | DictData -> "Dict"
-      | VecData -> "Vec"
-      | KeysetData -> "Keyset"
-      | StringData -> "String"
-      | ResourceData -> "Resource"
-      | BoolData -> "Boolean"
-      | IntData -> "Int64"
-      | FloatData -> "Double"
-      | NullData -> "Null"
-      | ObjectData -> "Object"
-
-    let relation tag1 ~ctx:_ tag2 =
-      let open ApproxSet.Set_relation in
-      if equal tag1 tag2 then
-        Equal
-      else
-        Disjoint
-
-    let all_tags =
-      [
-        DictData;
-        VecData;
-        KeysetData;
-        StringData;
-        ResourceData;
-        BoolData;
-        IntData;
-        FloatData;
-        NullData;
-        ObjectData;
-      ]
-  end
-
-  module Set = struct
-    module ASet = ApproxSet.Make (Tag)
-    include ASet
-
-    type t = ASet.t option
-
-    let empty = None
-
-    let singleton tag = Some (singleton tag)
-
-    let union set1 set2 =
-      match (set1, set2) with
-      | (set, None)
-      | (None, set) ->
-        set
-      | (Some a, Some b) -> Some (union a b)
-
-    let inter set1 set2 =
-      match (set1, set2) with
-      | (_, None)
-      | (None, _) ->
-        None
-      | (Some a, Some b) -> Some (inter a b)
-
-    let diff set1 set2 =
-      match (set1, set2) with
-      | (set, None) -> set
-      | (None, _) -> None
-      | (Some a, Some b) -> Some (diff a b)
-
-    let of_list tags =
-      List.fold tags ~init:empty ~f:(fun acc tag -> union acc @@ singleton tag)
-
-    let add tag set = union set @@ singleton tag
-
-    let disjoint () set1 set2 =
-      match (set1, set2) with
-      | (None, _)
-      | (_, None) ->
-        Sat
-      | (Some set1, Some set2) -> disjoint () set1 set2
-  end
+module DataType = struct
+  module Set = ApproxSet.Make (Tag)
 
   type t = Set.t
 
@@ -203,17 +148,20 @@ end = struct
             name
             ()
       in
-      List.fold
-        tag_to_type
-        ~init:Set.empty
-        ~f:
-          begin
-            fun acc (tag, tag_ty) ->
-              if Typing_utils.can_sub_type env tag_ty interface_ty then
-                Set.add tag acc
-              else
-                acc
-          end
+      let tags =
+        List.fold
+          tag_to_type
+          ~init:[]
+          ~f:
+            begin
+              fun acc (tag, tag_ty) ->
+                if Typing_utils.can_sub_type env tag_ty interface_ty then
+                  tag :: acc
+                else
+                  acc
+            end
+      in
+      Set.of_list tags
 
     let special_interface_cache : t String.Table.t = String.Table.create ()
 
@@ -230,24 +178,18 @@ end = struct
       | cls when SSet.mem cls special_interfaces ->
         String.Table.find_or_add special_interface_cache cls ~default:(fun () ->
             let tags = special_interface_to_datatypes env cls in
-            Set.add Tag.ObjectData tags)
+            Set.union (Set.singleton Tag.ObjectData) tags)
       | _ -> Set.singleton Tag.ObjectData
   end
-
-  let union (left : t) (right : t) : t = Set.union left right
-
-  and intersect (left : t) (right : t) : t = Set.inter left right
-
-  and minus (left : t) (right : t) : t = Set.diff left right
 
   let rec fromTy (env : env) (ty : locl_ty) : t =
     let (env, ty) = Env.expand_type env ty in
     match get_node ty with
     | Tprim prim -> prim_to_datatypes prim
-    | Tnonnull -> minus mixed @@ Set.singleton Tag.NullData
+    | Tnonnull -> Set.diff mixed @@ Set.singleton Tag.NullData
     | Tdynamic -> mixed
     | Tany _ -> mixed
-    | Toption ty -> fromTy env ty |> union @@ Set.singleton Tag.NullData
+    | Toption ty -> fromTy env ty |> Set.union @@ Set.singleton Tag.NullData
     (* For now say it has the same tags as `nonnull`.
      * We should be able to be more precise, but need to
      * validate what are all the data types that are valid callables *)
@@ -258,15 +200,15 @@ end = struct
     | Tgeneric (name, tyl) ->
       let upper_bounds = Env.get_upper_bounds env name tyl in
       Typing_set.fold
-        (fun ty acc -> intersect acc @@ fromTy env ty)
+        (fun ty acc -> Set.inter acc @@ fromTy env ty)
         upper_bounds
         mixed
     | Tunion tyl ->
       List.fold tyl ~init:Set.empty ~f:(fun acc ty ->
-          union acc @@ fromTy env ty)
+          Set.union acc @@ fromTy env ty)
     | Tintersection tyl ->
       List.fold tyl ~init:mixed ~f:(fun acc ty ->
-          intersect acc @@ fromTy env ty)
+          Set.inter acc @@ fromTy env ty)
     | Tvec_or_dict _ -> Set.of_list [Tag.VecData; Tag.DictData]
     | Taccess (root_ty, id) ->
       let ety_env = empty_expand_env in
@@ -325,27 +267,49 @@ end = struct
         | Neg_prim prim -> prim_to_datatypes prim
         | Neg_class (_, cls) -> Class.to_datatypes env cls
       in
-      minus mixed right
+      Set.diff mixed right
 
   let are_disjoint set1 set2 =
     match Set.disjoint () set1 set2 with
     | Set.Sat -> true
     | _ -> false
-
-  type witness = SameTags of string
-
-  let find_overlap set1 set2 =
-    match Set.disjoint () set1 set2 with
-    | Set.Sat -> None
-    | Set.Unsat (tag, _) -> Some (SameTags (Tag.name tag))
 end
 
-let data_type_from_hint (env : env) (hint : Aast.hint) : locl_ty * DataType.t =
+type runtime_data_type = decl_ty * DataType.t
+
+let data_type_from_hint (env : env) (hint : Aast.hint) : runtime_data_type =
   let decl_ty = Decl_hint.hint env.decl_env hint in
   let ((env, _), ty) =
     Typing_utils.localize_no_subst env ~ignore_errors:true decl_ty
   in
-  (ty, DataType.fromTy env ty)
+  (decl_ty, DataType.fromTy env ty)
+
+let check_overlapping env (ty1, data_type1) (ty2, data_type2) =
+  match DataType.Set.disjoint () data_type1 data_type2 with
+  | DataType.Set.Sat -> None
+  | DataType.Set.Unsat (tag, _) ->
+    let tag_str = Tag.name tag in
+    let why () =
+      let why_ty ~f ty =
+        let ty_str = Typing_print.full_strip_ns_decl env ty in
+        Reason.to_string (f ty_str tag_str) (Typing_defs.get_reason ty)
+      in
+      let why1 =
+        why_ty
+          ty1
+          ~f:
+            (Printf.sprintf "This is the type `%s`, which includes `%s` values")
+      in
+      let why2 =
+        why_ty
+          ty2
+          ~f:
+            (Printf.sprintf
+               "It overlaps with `%s`, which also includes `%s` values")
+      in
+      why1 @ why2
+    in
+    Some (tag_str, Lazy.from_fun why)
 
 (**
  * Given the variants of a case type (encoded as a locl_ty) and another locl_ty [intersecting_ty]

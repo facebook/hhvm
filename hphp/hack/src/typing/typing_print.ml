@@ -676,6 +676,7 @@ module Full = struct
       let generic_doc = to_doc s ^^ tys_doc in
       (fuel, generic_doc)
     | Ttuple tyl -> ttuple ~fuel k tyl
+    | Tunion [] -> (fuel, text "nothing")
     | Tunion tyl ->
       let (fuel, tys_doc) = ttuple ~fuel k tyl in
       let union_doc = Concat [text "|"; tys_doc] in

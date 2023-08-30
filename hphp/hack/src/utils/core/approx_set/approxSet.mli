@@ -44,6 +44,8 @@ module type S = sig
   (** Type of an instance of the approximate set *)
   type t
 
+  val empty : t
+
   (** Create an approximate set from an atomic element in the domain *)
   val singleton : Domain.t -> t
 
@@ -58,6 +60,8 @@ module type S = sig
       be approximated to [Unsat] *)
   val diff : t -> t -> t
 
+  val of_list : Domain.t list -> t
+
   (** The result of testing two sets for disjointness *)
   type disjoint =
     | Sat  (** The two sets are definitely disjoint *)
@@ -69,6 +73,8 @@ module type S = sig
       If the sets cannot definitively be proven to be disjoint, will return
       [Unsat] *)
   val disjoint : Domain.ctx -> t -> t -> disjoint
+
+  val are_disjoint : Domain.ctx -> t -> t -> bool
 end
 
 (** Constructs an approximate set representation over the given [Domain] *)

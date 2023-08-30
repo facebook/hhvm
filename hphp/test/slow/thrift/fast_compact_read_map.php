@@ -1,6 +1,16 @@
 <?hh
 
-class DictI64 {
+abstract class ThriftData {
+  public $data = null;
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public function clearTerseFields()[write_props]: void {}
+}
+
+class DictI64 extends ThriftData {
   const SPEC = darray[
     1 => darray[
       'var' => 'data',
@@ -12,17 +22,9 @@ class DictI64 {
       'val' => darray['type' => TType::I64],
     ],
   ];
-
-  public $data = null;
-
-  public static function withDefaultValues()[]: this {
-    return new static();
-  }
-
-  public function clearTerseFields()[write_props]: void {}
 }
 
-class DictI08 {
+class DictI08 extends ThriftData {
   const SPEC = darray[
     1 => darray[
       'var' => 'data',
@@ -34,14 +36,34 @@ class DictI08 {
       'val' => darray['type' => TType::I08],
     ],
   ];
+}
 
-  public $data = null;
+class MapI64 extends ThriftData {
+  const SPEC = darray[
+    1 => darray[
+      'var' => 'data',
+      'format' => 'collection',
+      'type' => TType::MAP,
+      'ktype' => TType::I64,
+      'vtype' => TType::I64,
+      'key' => darray['type' => TType::I64],
+      'val' => darray['type' => TType::I64],
+    ],
+  ];
+}
 
-  public static function withDefaultValues()[]: this {
-    return new static();
-  }
-
-  public function clearTerseFields()[write_props]: void {}
+class MapI08 extends ThriftData {
+  const SPEC = darray[
+    1 => darray[
+      'var' => 'data',
+      'format' => 'collection',
+      'type' => TType::MAP,
+      'ktype' => TType::I08,
+      'vtype' => TType::I08,
+      'key' => darray['type' => TType::I08],
+      'val' => darray['type' => TType::I08],
+    ],
+  ];
 }
 
 function test($name, $classname, $data) {
@@ -56,8 +78,12 @@ function test($name, $classname, $data) {
 
 function main(): mixed {
   test("empty dict", DictI64::class, dict[]);
-  test("fast decoded DictI64", DictI64::class, dict[1 => 0x7FFFFFFFFFFFFF00, 2 => 0x7FFFFFFFFFFFFF01]);
-  test("fast decoded DictI08", DictI08::class, dict[0 => 100, 1 => 101, 2 => 102, 3 => 103, 4 => 104, 5 => 105, 6 => 106, 7 => 107, 8 => 108, 9 => 109, 10 => 110]);
+  test("fast decoded DictI64", DictI64::class, dict(vec[0x7FFFFFFFFFFFFF00, 0x7FFFFFFFFFFFFF01]));
+  test("fast decoded DictI08", DictI08::class, dict(vec[100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110]));
+
+  test("empty map", MapI64::class, new Map(null));
+  test("fast decoded MapI64", MapI64::class, new Map(Vector{0x7FFFFFFFFFFFFF00, 0x7FFFFFFFFFFFFF01}));
+  test("fast decoded MapI08", MapI08::class, new Map(Vector{100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110}));
 }
 
 <<__EntryPoint>>

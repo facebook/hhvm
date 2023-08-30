@@ -102,7 +102,6 @@
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/srckey.h"
-#include "hphp/runtime/vm/super-inlining-bros.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unwind.h"
 #include "hphp/runtime/vm/workload-stats.h"
@@ -5659,22 +5658,8 @@ JitResumeAddr dispatchImpl() {
   };
   bool collectCoverage = checkCoverage();
 
-  auto const inlineInterp = [&]{
-    using IIS = ExecutionContext::InlineInterpState;
-    auto const state = g_context->m_inlineInterpState;
-    assertx(IMPLIES(breakOnCtlFlow, state == IIS::NONE));
-    if constexpr (breakOnCtlFlow) return false;
-
-    switch (state) {
-      case IIS::NONE:  return false;
-      case IIS::START: g_context->m_inlineInterpState = IIS::BLOCK; return true;
-      case IIS::BLOCK: throw Exception("Re-entry during inline interp");
-      default: always_assert(false);
-    }
-  }();
-
 #ifdef CTI_SUPPORTED
-  if (cti_enabled() && !inlineInterp) {
+  if (cti_enabled()) {
     return dispatchThreaded<breakOnCtlFlow>(collectCoverage);
   }
 #endif
@@ -5743,18 +5728,8 @@ JitResumeAddr dispatchImpl() {
     if (breakOnCtlFlow && Stats::enableInstrCount()) {        \
       Stats::inc(Stats::Instr_InterpBB##name);                \
     }                                                         \
-    if (inlineInterp) {                                       \
-      switch (callInlineInterpHook()) {                       \
-        case InlineInterpHookResult::NONE: break;             \
-        case InlineInterpHookResult::SKIP:                    \
-          pc = vmpc(); goto name##Done;                       \
-        case InlineInterpHookResult::STOP:                    \
-          return JitResumeAddr::none();                       \
-      }                                                       \
-    }                                                         \
     retAddr = iopWrap##name<breakOnCtlFlow>(pc);              \
     vmpc() = pc;                                              \
-name##Done:                                                   \
     if (isFCallFunc(Op::name) ||                              \
         Op::name == Op::NativeImpl) {                         \
       collectCoverage = checkCoverage();                      \

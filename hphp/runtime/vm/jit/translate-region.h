@@ -47,13 +47,6 @@ bool irGenTryInlineFCall(irgen::IRGS& irgs, SrcKey entry, SSATmp* ctx,
                          Offset asyncEagerOffset, SSATmp* calleeFP);
 
 /*
- * Super inlining.
- */
-bool irGenTrySuperInlineFCall(irgen::IRGS& irgs, const Func* callee,
-                              const FCallArgs& fca, SSATmp* ctx,
-                              bool dynamicCall);
-
-/*
  * Generate an IRUnit which simulates the inlining of region. This unit should
  * not be used to emit machine code, but may be used to generate a Vunit.
  *

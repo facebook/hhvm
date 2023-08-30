@@ -34,7 +34,6 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/vm/super-inlining-bros.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/vm/vm-regs.h"
@@ -883,7 +882,7 @@ bool TypeConstraint::tryCommonCoercions(tv_lval val, const Class* ctx,
     return true;
   }
 
-  return MysteryBox::TryConstrain(val, *this, ctx, propDecl);
+  return false;
 }
 
 bool TypeConstraint::maybeStringCompatible() const {
@@ -914,7 +913,6 @@ void TypeConstraint::verifyParamFail(tv_lval val,
     isSoft() ||
     isThis() ||
     (RO::EvalEnforceGenericsUB < 2 && isUpperBound()) ||
-    MysteryBox::IsMysteryBox(*val) ||
     check(val, ctx)
   );
 }

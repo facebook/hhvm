@@ -24,7 +24,6 @@
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/unit-cache.h"
 
-#include "hphp/runtime/vm/super-inlining-bros.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
@@ -126,60 +125,6 @@ void HHVM_FUNCTION(dummy_lots_inout,
                    Variant& p1, Variant& p2, Variant& p3, Variant& p4,
                    Variant& p5, Variant& p6, Variant& p7, Variant& p8,
                    Variant& p9, Variant& p10, Variant& p11, Variant& p12) {
-}
-
-namespace {
-Variant makeROMResource(ROMHandle&& rom) {
-  auto romRsrc = req::make<ROMResourceHandle>();
-  auto romPtr = romRsrc.get();
-  *(static_cast<ROMHandle*>(romPtr)) = std::move(rom);
-  return Variant(romRsrc);
-}
-}
-
-Variant HHVM_FUNCTION(new_mystery_box, StringArg input) {
-  auto const box = [&]{
-    if (input.isNull() || input->empty()) return MysteryBox::Make();
-    return MysteryBox::Make({input->data(), safe_cast<size_t>(input->size())});
-  }();
-  return Variant(box);
-}
-
-Variant HHVM_FUNCTION(run_inline_interp, const Variant& fn,
-                      const Variant& ctx, const Array& args) {
-  auto context = CallCtx { nullptr, nullptr, nullptr, false };
-  if (ctx.isObject()) {
-    context.this_ = ctx.toObject().get();
-  } else if (ctx.isString()) {
-    context.cls = Class::load(ctx.toString().get());
-  } else if (ctx.isClass()) {
-    context.cls = ctx.toClassVal();
-  } else if (ctx.isLazyClass()) {
-    context.cls = Class::load(ctx.toLazyClassVal().name());
-  }
-  vm_decode_function(fn, context);
-
-  std::vector<TypedValue> args_vector;
-  IterateV(args.get(), [&](auto const tv) { args_vector.push_back(tv); });
-  auto rom = runInlineInterp(context.func, *ctx.asTypedValue(),
-                             args_vector.size(), &args_vector[0],
-                             RuntimeCoeffects::fixme());
-  if (!rom.has_value()) return init_null();
-  return makeROMResource(std::move(*rom));
-}
-
-Variant HHVM_FUNCTION(render_rom, const Variant& rom, const Array& args) {
-  auto const romHandle = dyn_cast_or_null<ROMResourceHandle>(rom).get();
-  if (!romHandle) return init_null();
-  std::vector<TypedValue> args_vector;
-  IterateV(args.get(), [&](auto const tv) { args_vector.push_back(tv); });
-  auto res = renderROMOnce(romHandle->get(), make_tv<KindOfNull>(),
-                           std::move(args_vector), false);
-  VecInit init(res.size());
-  for (auto const tv : res) {
-    init.append(tv);
-  }
-  return init.toVariant();
 }
 
 String HHVM_FUNCTION(serialize_with_format, const Variant& thing,
@@ -536,10 +481,6 @@ static struct IntrinsicsExtension final : Extension {
     HHVM_FALIAS(__hhvm_intrinsics\\dummy_int_upper_bound, dummy_int_upper_bound);
 
     HHVM_FALIAS(__hhvm_intrinsics\\dummy_lots_inout, dummy_lots_inout);
-
-    HHVM_FALIAS(__hhvm_intrinsics\\new_mystery_box, new_mystery_box);
-    HHVM_FALIAS(__hhvm_intrinsics\\run_inline_interp, run_inline_interp);
-    HHVM_FALIAS(__hhvm_intrinsics\\render_rom, render_rom);
 
     HHVM_FALIAS(__hhvm_intrinsics\\serialize_with_format, serialize_with_format);
     HHVM_FALIAS(__hhvm_intrinsics\\deserialize_with_format,

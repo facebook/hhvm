@@ -555,12 +555,6 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
 
     updateStackOffset(env);
 
-    if (isFCall(curSrcKey(env).op())) {
-      if (irGenTrySuperInlineFCall(env, callee, fca, objOrClass, dynamicCall)) {
-        return;
-      }
-    }
-
     auto numArgsInclUnpack = fca.numArgs + (fca.hasUnpack() ? 1U : 0U);
     auto const coeffects = curCoeffects(env);
     auto const prologueFlags = cns(env, PrologueFlags(

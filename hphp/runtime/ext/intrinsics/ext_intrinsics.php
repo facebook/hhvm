@@ -87,15 +87,6 @@ function dummy_lots_inout(inout $p1, inout $p2, inout $p3, inout $p4,
                           inout $p1, inout $p2, inout $p3, inout $p4,
                           inout $p1, inout $p2, inout $p3, inout $p4): void;
 
-<<__Native>>
-function new_mystery_box(string $type = ''): mixed;
-
-<<__Native>>
-function run_inline_interp(mixed $fn, mixed $ctx, vec<mixed> $args): mixed;
-
-<<__Native>>
-function render_rom(mixed $rom, vec<mixed> $tv): ?vec<mixed>;
-
 function apc_fetch_no_check(mixed $key) {
   $ignored = false;
   return \apc_fetch($key, inout $ignored);

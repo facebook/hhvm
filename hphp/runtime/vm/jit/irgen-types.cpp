@@ -22,7 +22,6 @@
 
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/vm/super-inlining-bros.h"
 
 #include "hphp/runtime/vm/jit/is-type-struct-profile.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"
@@ -1499,46 +1498,6 @@ void verifyPropType(IRGS& env,
       verifyFunc(&ub);
     }
   }
-}
-
-void verifyMysteryBoxConstraint(IRGS& env, const MysteryBoxConstraint& c,
-                                SSATmp* val, Block* fail) {
-  auto const genFail = [&] {
-    gen(env, Jmp, fail);
-  };
-  UNUSED auto const& valType = val->type();
-
-  FTRACE_MOD(Trace::sib, 3, "Verifying constraint {} {}\n", valType.toString(),
-             c.tc.displayName());
-
-  verifyTypeImpl(
-    env,
-    c.tc,
-    false,
-    [&] { // Get value to test
-      return val;
-    },
-    [&] { // Get the class representing `this' type
-      if (c.propDecl) return cns(env, c.propDecl);
-      if (c.ctx) return cns(env, c.ctx);
-      return cns(env, nullptr);
-    },
-    [&] (SSATmp*) { // Set the potentially coerced value
-    },
-    [&] (SSATmp*, SSATmp*, bool) { // Check failure
-      genFail();
-    },
-    [&] (SSATmp*) { // Callable check
-      genFail();
-    },
-    [&] (SSATmp*, SSATmp*) {
-      genFail();
-    },
-    [&] (SSATmp*, SSATmp*, bool) { // Fallback
-      genFail();
-      return nullptr;
-    }
-  );
 }
 
 void emitVerifyRetTypeC(IRGS& env) {

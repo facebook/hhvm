@@ -15,6 +15,7 @@
  */
 
 #include <memory>
+#include <thrift/lib/python/server/PythonAsyncProcessorFactory.h>
 #include <thrift/lib/python/server/server.h>
 #include <thrift/lib/python/server/server_api.h> // @manual
 

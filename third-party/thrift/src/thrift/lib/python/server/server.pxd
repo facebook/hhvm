@@ -27,10 +27,12 @@ cdef extern from "thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h" namespace "::a
         SINK = 6
 
 cdef extern from "thrift/lib/python/server/server.h" namespace "::thrift::python":
-    cdef cppclass cPythonAsyncProcessorFactory "::thrift::python::PythonAsyncProcessorFactory"(cAsyncProcessorFactory):
-        cPythonAsyncProcessorFactory()
     cdef cppclass cPythonUserException "::thrift::python::PythonUserException"(cException):
         cPythonUserException(string, string, unique_ptr[cIOBuf] buf) except +
+
+cdef extern from "thrift/lib/python/server/PythonAsyncProcessorFactory.h" namespace "::thrift::python":
+    cdef cppclass cPythonAsyncProcessorFactory "::thrift::python::PythonAsyncProcessorFactory"(cAsyncProcessorFactory):
+        cPythonAsyncProcessorFactory()
 
 cdef extern from "thrift/lib/cpp2/async/RpcTypes.h" namespace "::apache::thrift":
     cdef cppclass SerializedRequest "::apache::thrift::SerializedRequest":

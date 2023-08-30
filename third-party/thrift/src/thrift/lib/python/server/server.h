@@ -189,10 +189,20 @@ class PythonAsyncProcessor : public apache::thrift::GeneratedAsyncProcessorBase,
     (this->*pfn)(std::move(req), std::move(serializedRequest), context, eb, tm);
   }
 
-  template <typename ProtocolIn_, typename ProtocolOut_>
-  apache::thrift::ContextStack::UniquePtr preProcessRequest(
-      apache::thrift::SerializedRequest& serializedRequest,
-      apache::thrift::Cpp2RequestContext* ctx) {
+  template <
+      typename ProtocolIn_,
+      typename ProtocolOut_,
+      apache::thrift::RpcKind kind>
+  void genericProcessor(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      apache::thrift::SerializedCompressedRequest&& serializedCompressedRequest,
+      apache::thrift::Cpp2RequestContext* ctx,
+      folly::EventBase* eb,
+      apache::thrift::concurrency::ThreadManager* tm) {
+    ProtocolIn_ prot;
+    auto serializedRequest =
+        std::move(serializedCompressedRequest).uncompress();
+
     static_assert(ProtocolIn_::protocolType() == ProtocolOut_::protocolType());
     apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(
         serviceName_.c_str(),
@@ -215,22 +225,6 @@ class PythonAsyncProcessor : public apache::thrift::GeneratedAsyncProcessorBase,
                                            // python code
     }
 
-    return ctxStack;
-  }
-
-  template <typename ProtocolIn_, typename ProtocolOut_>
-  void genericProcessor(
-      apache::thrift::ResponseChannelRequest::UniquePtr req,
-      apache::thrift::SerializedCompressedRequest&& serializedCompressedRequest,
-      apache::thrift::Cpp2RequestContext* ctx,
-      folly::EventBase* eb,
-      apache::thrift::concurrency::ThreadManager* tm) {
-    ProtocolIn_ prot;
-    auto serializedRequest =
-        std::move(serializedCompressedRequest).uncompress();
-    apache::thrift::ContextStack::UniquePtr ctxStack =
-        preProcessRequest<ProtocolIn_, ProtocolOut_>(serializedRequest, ctx);
-
     folly::via(
         this->executor,
         [this,
@@ -242,70 +236,52 @@ class PythonAsyncProcessor : public apache::thrift::GeneratedAsyncProcessorBase,
          ctxStack = std::move(ctxStack),
          serializedRequest = std::move(serializedRequest)]() mutable {
           if (req && req->getShouldStartProcessing()) {
-            auto callback = std::make_unique<apache::thrift::HandlerCallback<
-                std::unique_ptr<::folly::IOBuf>>>(
-                std::move(req),
-                std::move(ctxStack),
-                return_serialized<ProtocolIn_, ProtocolOut_>,
-                throw_wrapped<ProtocolIn_, ProtocolOut_>,
-                ctx->getProtoSeqId(),
-                eb,
-                tm,
-                ctx);
-            auto [promise, future] =
-                folly::makePromiseContract<std::unique_ptr<folly::IOBuf>>();
-            handlePythonServerCallback(
-                prot.protocolType(),
-                ctx,
-                std::move(promise),
-                std::move(serializedRequest));
-            std::move(future)
-                .via(this->executor)
-                .thenTry([callback = std::move(callback)](
-                             folly::Try<std::unique_ptr<folly::IOBuf>>&& t) {
-                  callback->complete(std::move(t));
-                });
-          }
-        });
-  }
-
-  template <typename ProtocolIn_, typename ProtocolOut_>
-  void onewayProcessor(
-      apache::thrift::ResponseChannelRequest::UniquePtr req,
-      apache::thrift::SerializedCompressedRequest&& serializedCompressedRequest,
-      apache::thrift::Cpp2RequestContext* ctx,
-      folly::EventBase* eb,
-      apache::thrift::concurrency::ThreadManager* tm) {
-    ProtocolIn_ prot;
-    auto serializedRequest =
-        std::move(serializedCompressedRequest).uncompress();
-    apache::thrift::ContextStack::UniquePtr ctxStack =
-        preProcessRequest<ProtocolIn_, ProtocolOut_>(serializedRequest, ctx);
-
-    folly::via(
-        this->executor,
-        [this,
-         prot,
-         ctx,
-         eb,
-         tm,
-         req = std::move(req),
-         ctxStack = std::move(ctxStack),
-         serializedRequest = std::move(serializedRequest)]() mutable {
-          if (req && req->getShouldStartProcessing()) {
-            auto callback =
-                std::make_unique<apache::thrift::HandlerCallbackBase>(
-                    std::move(req), std::move(ctxStack), nullptr, eb, tm, ctx);
-            auto [promise, future] = folly::makePromiseContract<folly::Unit>();
-            handlePythonServerCallbackOneway(
-                prot.protocolType(),
-                ctx,
-                std::move(promise),
-                std::move(serializedRequest));
-            std::move(future)
-                .via(this->executor)
-                .thenTry([callback = std::move(callback)](
-                             folly::Try<folly::Unit>&& /* t */) {});
+            if constexpr (
+                kind == apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE) {
+              auto callback =
+                  std::make_unique<apache::thrift::HandlerCallbackBase>(
+                      std::move(req),
+                      std::move(ctxStack),
+                      nullptr,
+                      eb,
+                      tm,
+                      ctx);
+              auto [promise, future] =
+                  folly::makePromiseContract<folly::Unit>();
+              handlePythonServerCallbackOneway(
+                  prot.protocolType(),
+                  ctx,
+                  std::move(promise),
+                  std::move(serializedRequest));
+              std::move(future)
+                  .via(this->executor)
+                  .thenTry([callback = std::move(callback)](
+                               folly::Try<folly::Unit>&& /* t */) {});
+            } else {
+              auto callback = std::make_unique<apache::thrift::HandlerCallback<
+                  std::unique_ptr<::folly::IOBuf>>>(
+                  std::move(req),
+                  std::move(ctxStack),
+                  return_serialized<ProtocolIn_, ProtocolOut_>,
+                  throw_wrapped<ProtocolIn_, ProtocolOut_>,
+                  ctx->getProtoSeqId(),
+                  eb,
+                  tm,
+                  ctx);
+              auto [promise, future] =
+                  folly::makePromiseContract<std::unique_ptr<folly::IOBuf>>();
+              handlePythonServerCallback(
+                  prot.protocolType(),
+                  ctx,
+                  std::move(promise),
+                  std::move(serializedRequest));
+              std::move(future)
+                  .via(this->executor)
+                  .thenTry([callback = std::move(callback)](
+                               folly::Try<std::unique_ptr<folly::IOBuf>>&& t) {
+                    callback->complete(std::move(t));
+                  });
+            }
           }
         });
   }
@@ -347,17 +323,21 @@ class PythonAsyncProcessor : public apache::thrift::GeneratedAsyncProcessorBase,
   static inline const PythonAsyncProcessor::ProcessFuncs singleFunc_{
       &PythonAsyncProcessor::genericProcessor<
           apache::thrift::CompactProtocolReader,
-          apache::thrift::CompactProtocolWriter>,
+          apache::thrift::CompactProtocolWriter,
+          apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>,
       &PythonAsyncProcessor::genericProcessor<
           apache::thrift::BinaryProtocolReader,
-          apache::thrift::BinaryProtocolWriter>};
+          apache::thrift::BinaryProtocolWriter,
+          apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>};
   static inline const PythonAsyncProcessor::ProcessFuncs onewayFunc_{
-      &PythonAsyncProcessor::onewayProcessor<
+      &PythonAsyncProcessor::genericProcessor<
           apache::thrift::CompactProtocolReader,
-          apache::thrift::CompactProtocolWriter>,
-      &PythonAsyncProcessor::onewayProcessor<
+          apache::thrift::CompactProtocolWriter,
+          apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE>,
+      &PythonAsyncProcessor::genericProcessor<
           apache::thrift::BinaryProtocolReader,
-          apache::thrift::BinaryProtocolWriter>};
+          apache::thrift::BinaryProtocolWriter,
+          apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE>};
 
   template <class ProtocolIn, class ProtocolOut>
   static apache::thrift::SerializedResponse return_serialized(
@@ -438,76 +418,6 @@ class PythonAsyncProcessor : public apache::thrift::GeneratedAsyncProcessorBase,
       }
     }
   }
-};
-
-class PythonAsyncProcessorFactory
-    : public apache::thrift::AsyncProcessorFactory,
-      public apache::thrift::ServiceHandlerBase {
- public:
-  PythonAsyncProcessorFactory(
-      PyObject* python_server,
-      std::map<std::string, std::pair<apache::thrift::RpcKind, PyObject*>>
-          functions,
-      std::vector<PyObject*> lifecycleFuncs,
-      folly::Executor::KeepAlive<> executor,
-      std::string serviceName)
-      : python_server_(python_server),
-        functions_(std::move(functions)),
-        lifecycleFuncs_(std::move(lifecycleFuncs)),
-        executor(std::move(executor)),
-        serviceName_(std::move(serviceName)) {}
-
-  folly::SemiFuture<folly::Unit> semifuture_onStartServing() override;
-  folly::SemiFuture<folly::Unit> semifuture_onStopRequested() override;
-
-  std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override {
-    return std::make_unique<PythonAsyncProcessor>(
-        python_server_, functions_, executor, serviceName_);
-  }
-
-  std::vector<apache::thrift::ServiceHandlerBase*> getServiceHandlers()
-      override {
-    return {this};
-  }
-
-  CreateMethodMetadataResult createMethodMetadata() override {
-    AsyncProcessorFactory::MethodMetadataMap result;
-    const auto processFunc =
-        std::make_shared<PythonAsyncProcessor::PythonMetadata>(
-            PythonAsyncProcessor::getSingleFunc());
-    const auto onewayFunc =
-        std::make_shared<PythonAsyncProcessor::PythonMetadata>(
-            PythonAsyncProcessor::getOnewayFunc());
-
-    for (const auto& [methodName, function] : functions_) {
-      switch (function.first) {
-        case apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE:
-          result.emplace(methodName, processFunc);
-          break;
-        case apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE:
-          result.emplace(methodName, onewayFunc);
-          break;
-        case apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE:
-          result.emplace(methodName, processFunc); // TODO stream
-          break;
-        case apache::thrift::RpcKind::SINK:
-          result.emplace(methodName, processFunc); // TODO sink
-          break;
-      }
-    }
-
-    return result;
-  }
-
- private:
-  folly::SemiFuture<folly::Unit> callLifecycle(LifecycleFunc);
-
-  PyObject* python_server_;
-  const std::map<std::string, std::pair<apache::thrift::RpcKind, PyObject*>>
-      functions_;
-  const std::vector<PyObject*> lifecycleFuncs_;
-  folly::Executor::KeepAlive<> executor;
-  std::string serviceName_;
 };
 
 } // namespace python

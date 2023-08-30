@@ -55,12 +55,20 @@ type newable_class_info =
   * [ `Class of pos_id * Cls.t * locl_ty | `Dynamic ] list
 
 type dyn_func_kind =
-  | Supportdyn_function
+  (* true: pessimise all parameter types
+   * false: check each parameter unpessimised and pessimised
+   *)
+  | Supportdyn_function of bool
   | Like_function
 
 type branch_info = {
   lset: Local_id.Set.t;
   pkgs: SSet.t;
+}
+
+type call_aux_result = {
+  should_forget_fakes: bool;
+  checked_like_params_only: bool;
 }
 
 (*****************************************************************************)
@@ -1537,7 +1545,8 @@ let check_argument_type_against_parameter_type_helper
                 ^
                 match dynamic_func with
                 | None -> "None"
-                | Some Supportdyn_function -> "sd"
+                | Some (Supportdyn_function false) -> "sd"
+                | Some (Supportdyn_function true) -> "sd ~ only"
                 | Some Like_function -> "~"),
                 [
                   Log_type ("param_ty", param.fp_type.et_type);
@@ -1551,7 +1560,7 @@ let check_argument_type_against_parameter_type_helper
          in this case we are semantically just using the &dynamic part of the type to call them.
          For like functions, they have to check both sides. *)
       match dyn_func_kind with
-      | Supportdyn_function ->
+      | Supportdyn_function _ ->
         MakeType.locl_like
           (get_reason param.fp_type.et_type)
           param.fp_type.et_type
@@ -1592,42 +1601,54 @@ let check_argument_type_against_parameter_type
     | Ast_defs.Pnormal -> pos
     | Ast_defs.Pinout pk_pos -> Pos.merge pk_pos pos
   in
-  let (env, opt_e, used_dynamic) =
-    (* First try statically *)
-    let (env1, e1opt) =
-      check_argument_type_against_parameter_type_helper
-        ~dynamic_func:None
-        env
-        pos
-        param
-        dep_ty
-    in
-    if Option.is_some dynamic_func then
-      match e1opt with
-      | None -> (env1, None, false)
-      | Some e1 ->
-        let (env2, e2opt) =
-          check_argument_type_against_parameter_type_helper
-            ~dynamic_func
-            env
-            pos
-            param
-            dep_ty
-        in
-        (match e2opt with
-        (* We used dynamic calling to get a successful check *)
-        | None -> (env2, None, true)
-        (* We failed on both, pick the one with fewest errors! (preferring static on a tie) *)
-        | Some e2 ->
-          if Typing_error.count e1 <= Typing_error.count e2 then
-            (env1, Some e1, false)
-          else
-            (env2, Some e2, true))
-    else
-      (env1, e1opt, false)
+  let (env, opt_e, checked_dynamic) =
+    match dynamic_func with
+    | Some (Supportdyn_function true) ->
+      let (env, e_opt) =
+        check_argument_type_against_parameter_type_helper
+          ~dynamic_func
+          env
+          pos
+          param
+          dep_ty
+      in
+      (env, e_opt, true)
+    | _ ->
+      (* First try statically *)
+      let (env1, e1opt) =
+        check_argument_type_against_parameter_type_helper
+          ~dynamic_func:None
+          env
+          pos
+          param
+          dep_ty
+      in
+      if Option.is_some dynamic_func then
+        match e1opt with
+        | None -> (env1, None, false)
+        | Some e1 ->
+          let (env2, e2opt) =
+            check_argument_type_against_parameter_type_helper
+              ~dynamic_func
+              env
+              pos
+              param
+              dep_ty
+          in
+          (match e2opt with
+          (* We used dynamic calling to get a successful check *)
+          | None -> (env2, None, true)
+          (* We failed on both, pick the one with fewest errors! (preferring static on a tie) *)
+          | Some e2 ->
+            if Typing_error.count e1 <= Typing_error.count e2 then
+              (env1, Some e1, false)
+            else
+              (env2, Some e2, true))
+      else
+        (env1, e1opt, false)
   in
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) opt_e;
-  (env, mk_ty_mismatch_opt arg_ty param.fp_type.et_type opt_e, used_dynamic)
+  (env, mk_ty_mismatch_opt arg_ty param.fp_type.et_type opt_e, checked_dynamic)
 
 let bad_call env p ty =
   if not (TUtils.is_tyvar_error env ty) then
@@ -2635,7 +2656,7 @@ and has_dispose_method env has_await p e ty =
       ty
   in
   Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
-  let (env, (_tel, _typed_unpack_element, _ty, _should_forget_fakes)) =
+  let (env, (_tel, _typed_unpack_element, _ty, _)) =
     call ~expected:None ~expr_pos:p ~recv_pos:obj_pos env tfty [] None
   in
   env
@@ -4069,7 +4090,7 @@ and expr_
         ty
     in
     Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
-    let (env, (_tel, _typed_unpack_element, _ty, _should_forget_fakes)) =
+    let (env, (_tel, _typed_unpack_element, _ty, _)) =
       call ~expected:None ~expr_pos:p ~recv_pos:p env tfty [] None
     in
     make_result env p (Aast.Clone te) ty
@@ -7291,7 +7312,11 @@ and dispatch_call
   let dispatch_id env id =
     let (env, fty, tal) = fun_type_of_id env id explicit_targs el in
     check_disposable_in_return env fty;
-    let (env, (tel, typed_unpack_element, ty, should_forget_fakes)) =
+    let ( env,
+          ( tel,
+            typed_unpack_element,
+            ty,
+            { should_forget_fakes; checked_like_params_only = _ } ) ) =
       call ~expected ~expr_pos:p ~recv_pos:(fst id) env fty el unpacked_element
     in
     let (env, inner_te) =
@@ -7352,7 +7377,11 @@ and dispatch_call
     in
     Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
     check_disposable_in_return env fty;
-    let (env, (tel, typed_unpack_element, ty, should_forget_fakes)) =
+    let ( env,
+          ( tel,
+            typed_unpack_element,
+            ty,
+            { should_forget_fakes; checked_like_params_only = _ } ) ) =
       call ~expected ~expr_pos:p ~recv_pos:fpos env fty el unpacked_element
     in
     let (env, te) =
@@ -7423,7 +7452,7 @@ and dispatch_call
           (* first type the `unsafe_cast` as a call, handling arity errors *)
           let (env, fty, tal) = fun_type_of_id env id explicit_targs el in
           check_disposable_in_return env fty;
-          let (env, (tel, _, ty, _should_forget_fakes)) =
+          let (env, (tel, _, ty, _)) =
             call
               ~expected
               ~expr_pos:p
@@ -7757,7 +7786,11 @@ and dispatch_call
     in
     Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
     check_disposable_in_return env tfty;
-    let (env, (tel, typed_unpack_element, ty, should_forget_fakes)) =
+    let ( env,
+          ( tel,
+            typed_unpack_element,
+            ty,
+            { should_forget_fakes; checked_like_params_only = _ } ) ) =
       call
         ~nullsafe
         ~expected
@@ -7865,8 +7898,11 @@ and dispatch_call
     in
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
     check_disposable_in_return env method_ty;
-    let (env, (typed_params, typed_unpack_element, ret_ty, should_forget_fakes))
-        =
+    let ( env,
+          ( typed_params,
+            typed_unpack_element,
+            ret_ty,
+            { should_forget_fakes; checked_like_params_only = _ } ) ) =
       call
         ~nullsafe
         ~expected
@@ -7929,7 +7965,11 @@ and dispatch_call
         fty
     in
     check_disposable_in_return env fty;
-    let (env, (tel, typed_unpack_element, ty, should_forget_fakes)) =
+    let ( env,
+          ( tel,
+            typed_unpack_element,
+            ty,
+            { should_forget_fakes; checked_like_params_only = _ } ) ) =
       call ~expected ~expr_pos:p ~recv_pos:fpos env fty el unpacked_element
     in
     let result =
@@ -8965,7 +9005,11 @@ and call_construct
         Errors.internal_error p "Expected function type for constructor";
         Env.fresh_type_error env p
     in
-    let (env, (tel, typed_unpack_element, _ty, should_forget_fakes)) =
+    let ( env,
+          ( tel,
+            typed_unpack_element,
+            _ty,
+            { should_forget_fakes; checked_like_params_only = _ } ) ) =
       call
         ~expected:None
         ~expr_pos:p
@@ -9017,7 +9061,7 @@ and call
     * ((Ast_defs.param_kind * Tast.expr) list
       * Tast.expr option
       * locl_ty
-      * bool) =
+      * call_aux_result) =
   Typing_log.(
     log_with_level env "typing" ~level:1 (fun () ->
         log_types
@@ -9029,7 +9073,7 @@ and call
                 ^
                 match dynamic_func with
                 | None -> "None"
-                | Some Supportdyn_function -> "sd"
+                | Some (Supportdyn_function _) -> "sd"
                 | Some Like_function -> "~"),
                 [Log_type ("fty", fty)] );
           ]));
@@ -9065,7 +9109,9 @@ and call
     let should_forget_fakes = true in
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
     let (env, ty) = Env.fresh_type_error env expr_pos in
-    (env, ([], None, ty, should_forget_fakes))
+    ( env,
+      ([], None, ty, { should_forget_fakes; checked_like_params_only = false })
+    )
   end else
     let (env, fty) = Inter.intersect_list env (get_reason fty) tyl in
     let ((env, ty_err_opt), efty) =
@@ -9160,7 +9206,11 @@ and call
         let should_forget_fakes = true in
         let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
         Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-        (env, (tel, None, ty, should_forget_fakes))
+        ( env,
+          ( tel,
+            None,
+            ty,
+            { should_forget_fakes; checked_like_params_only = false } ) )
       | (r, ((Tprim Tnull | Tdynamic | Tany _ | Tunion [] | Tvar _) as ty))
         when match ty with
              | Tprim Tnull -> Option.is_some nullsafe
@@ -9202,7 +9252,11 @@ and call
         in
         let should_forget_fakes = true in
         Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-        (env, (tel, None, ty, should_forget_fakes))
+        ( env,
+          ( tel,
+            None,
+            ty,
+            { should_forget_fakes; checked_like_params_only = false } ) )
       | (_, Tunion [ty]) ->
         call
           ~expected
@@ -9231,7 +9285,13 @@ and call
                 unpacked_element)
         in
         let should_forget_fakes =
-          List.exists resl ~f:(fun (_, _, _, forget) -> forget)
+          List.exists resl ~f:(fun (_, _, _, { should_forget_fakes = f; _ }) ->
+              f)
+        in
+        let checked_like_params_only =
+          List.for_all
+            resl
+            ~f:(fun (_, _, _, { checked_like_params_only = c; _ }) -> c)
         in
         let retl = List.map resl ~f:(fun (_, _, x, _) -> x) in
         let (env, ty) = Union.union_list env r retl in
@@ -9242,7 +9302,11 @@ and call
          * through function types
          *)
         let (tel, typed_unpack_element, _, _) = List.hd_exn (List.rev resl) in
-        (env, (tel, typed_unpack_element, ty, should_forget_fakes))
+        ( env,
+          ( tel,
+            typed_unpack_element,
+            ty,
+            { should_forget_fakes; checked_like_params_only } ) )
       | (r, Tintersection tyl) ->
         let (env, resl) =
           TUtils.run_on_intersection env tyl ~f:(fun env ty ->
@@ -9259,7 +9323,13 @@ and call
                 unpacked_element)
         in
         let should_forget_fakes =
-          List.for_all resl ~f:(fun (_, _, _, forget) -> forget)
+          List.for_all resl ~f:(fun (_, _, _, { should_forget_fakes = f; _ }) ->
+              f)
+        in
+        let checked_like_params_only =
+          List.exists
+            resl
+            ~f:(fun (_, _, _, { checked_like_params_only = c; _ }) -> c)
         in
         let retl = List.map resl ~f:(fun (_, _, x, _) -> x) in
         let (env, ty) = Inter.intersect_list env r retl in
@@ -9270,7 +9340,11 @@ and call
          * through function types
          *)
         let (tel, typed_unpack_element, _, _) = List.hd_exn (List.rev resl) in
-        (env, (tel, typed_unpack_element, ty, should_forget_fakes))
+        ( env,
+          ( tel,
+            typed_unpack_element,
+            ty,
+            { should_forget_fakes; checked_like_params_only } ) )
       | (r2, Tfun ft) ->
         (* Typing of format string functions. It is dependent on the arguments (el)
          * so it cannot be done earlier.
@@ -9402,7 +9476,7 @@ and call
                  *)
                 let (env, pess_type) =
                   match dynamic_func with
-                  | Some Supportdyn_function ->
+                  | Some (Supportdyn_function _) ->
                     Typing_array_access.pessimise_type env param.fp_type.et_type
                   | _ -> (env, param.fp_type.et_type)
                 in
@@ -9466,36 +9540,39 @@ and call
         in
         (* Given an expected function type ft, check types for the non-unpacked
          * arguments. Don't check lambda expressions if check_lambdas=false *)
-        let rec check_args_aux check_lambdas env el paraml used_dynamic rl =
+        let rec check_args_aux check_lambdas env el paraml checked_dynamicl rl =
           match el with
           (* We've got an argument *)
           | ((pk, e), opt_result) :: el ->
             (* Pick up next parameter type info *)
             let (is_variadic, opt_param, paraml) = get_next_param_info paraml in
-            let (env, one_result, used_dynamic') =
+            let (env, one_result, checked_dynamicl) =
               match (check_lambdas, is_lambda e) with
               | (false, false)
               | (true, true) ->
-                check_arg env pk e opt_param ~is_variadic
+                let (env, opt_result, checked_dynamic) =
+                  check_arg env pk e opt_param ~is_variadic
+                in
+                (env, opt_result, checked_dynamic :: checked_dynamicl)
               | (false, true) ->
                 let env = set_tyvar_variance_from_lambda_param env opt_param in
-                (env, opt_result, false)
-              | (true, false) -> (env, opt_result, false)
+                (env, opt_result, checked_dynamicl)
+              | (true, false) -> (env, opt_result, checked_dynamicl)
             in
             check_args_aux
               check_lambdas
               env
               el
               paraml
-              (used_dynamic || used_dynamic')
+              checked_dynamicl
               (((pk, e), one_result) :: rl)
-          | [] -> (env, rl, paraml, used_dynamic)
+          | [] -> (env, rl, paraml, checked_dynamicl)
         in
-        let check_args check_lambdas env el paraml =
-          let (env, rl, paraml, used_dynamic) =
-            check_args_aux check_lambdas env el paraml false []
+        let check_args check_lambdas env el paraml checked_dynamicl =
+          let (env, rl, paraml, checked_dynamicl) =
+            check_args_aux check_lambdas env el paraml checked_dynamicl []
           in
-          (env, List.rev rl, paraml, used_dynamic)
+          (env, List.rev rl, paraml, checked_dynamicl)
         in
         (* Same as above, but checks the types of the implicit arguments, which are
          * read from the context *)
@@ -9545,7 +9622,6 @@ and call
             capability
             (MakeType.capability Reason.Rnone SN.Capabilities.writeProperty)
         in
-
         (* First check the non-lambda arguments. For generic functions, this
          * is likely to resolve type variables to concrete types *)
         let rl = List.map el ~f:(fun e -> (e, None)) in
@@ -9555,12 +9631,12 @@ and call
           else
             ft.ft_params
         in
-        let (env, rl, _, used_dynamic1) =
-          check_args false env rl non_variadic_ft_params
+        let (env, rl, _, checked_dynamicl) =
+          check_args false env rl non_variadic_ft_params []
         in
         (* Now check the lambda arguments, hopefully with type variables resolved *)
-        let (env, rl, paraml, used_dynamic2) =
-          check_args true env rl non_variadic_ft_params
+        let (env, rl, paraml, checked_dynamicl) =
+          check_args true env rl non_variadic_ft_params checked_dynamicl
         in
         (* We expect to see results for all arguments after this second pass *)
         let get_param ((pk, _), opt) =
@@ -9574,9 +9650,9 @@ and call
         in
         let (env, ty_err_opt) = check_implicit_args env in
         Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-        let (env, typed_unpack_element, arity, did_unpack, used_dynamic3) =
+        let (env, typed_unpack_element, arity, did_unpack, checked_dynamicl) =
           match unpacked_element with
-          | None -> (env, None, List.length el, false, false)
+          | None -> (env, None, List.length el, false, checked_dynamicl)
           | Some e ->
             (* Now that we're considering an splat (Some e) we need to construct a type that
              * represents the remainder of the function's parameters. `paraml` represents those
@@ -9624,7 +9700,7 @@ and call
                 destructure_ty
                 Typing_error.Callback.unify_error
             in
-            let (env, te, used_dynamic) =
+            let (env, te, checked_dynamicl) =
               match ty_err_opt with
               | Some _ ->
                 (* Our type cannot be destructured, add a hole with `nothing`
@@ -9633,17 +9709,17 @@ and call
                   MakeType.nothing
                   @@ Reason.Rsolve_fail (Pos_or_decl.of_raw_pos expr_pos)
                 in
-                (env, mk_hole te ~ty_have:ty ~ty_expect, false)
+                (env, mk_hole te ~ty_have:ty ~ty_expect, checked_dynamicl)
               | None ->
                 (* We have a type that can be destructured so continue and use
                    the type variables for the remaining parameters *)
-                let (env, err_opts, used_dynamic) =
+                let (env, err_opts, checked_dynamicl) =
                   List.fold2_exn
-                    ~init:(env, [], false)
+                    ~init:(env, [], checked_dynamicl)
                     d_required
                     required_params
-                    ~f:(fun (env, errs, used_dynamic_acc) elt param ->
-                      let (env, err_opt, used_dynamic) =
+                    ~f:(fun (env, errs, checked_dynamicl) elt param ->
+                      let (env, err_opt, checked_dynamic) =
                         check_argument_type_against_parameter_type
                           ~dynamic_func
                           env
@@ -9652,15 +9728,15 @@ and call
                           (e, elt)
                           ~is_variadic:false
                       in
-                      (env, err_opt :: errs, used_dynamic_acc || used_dynamic))
+                      (env, err_opt :: errs, checked_dynamic :: checked_dynamicl))
                 in
-                let (env, err_opts, used_dynamic) =
+                let (env, err_opts, checked_dynamicl) =
                   List.fold2_exn
-                    ~init:(env, err_opts, used_dynamic)
+                    ~init:(env, err_opts, checked_dynamicl)
                     d_optional
                     optional_params
-                    ~f:(fun (env, errs, used_dynamic_acc) elt param ->
-                      let (env, err_opt, used_dynamic) =
+                    ~f:(fun (env, errs, checked_dynamicl) elt param ->
+                      let (env, err_opt, checked_dynamic) =
                         check_argument_type_against_parameter_type
                           ~dynamic_func
                           env
@@ -9669,9 +9745,9 @@ and call
                           (e, elt)
                           ~is_variadic:false
                       in
-                      (env, err_opt :: errs, used_dynamic_acc || used_dynamic))
+                      (env, err_opt :: errs, checked_dynamic :: checked_dynamicl))
                 in
-                let (env, var_err_opt, var_used_dynamic) =
+                let (env, var_err_opt, var_checked_dynamic) =
                   Option.map2 d_variadic var_param ~f:(fun v vp ->
                       check_argument_type_against_parameter_type
                         ~dynamic_func
@@ -9693,23 +9769,25 @@ and call
                       ~ty_mismatch_opt:
                         (Some (ty, pack_errs pos ty subtyping_errs))
                 in
-                (env, te, used_dynamic || var_used_dynamic)
+                (env, te, var_checked_dynamic :: checked_dynamicl)
             in
             Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
             ( env,
               Some te,
               List.length el + List.length d_required,
               Option.is_some d_variadic,
-              used_dynamic )
+              checked_dynamicl )
         in
-        let used_dynamic = used_dynamic1 || used_dynamic2 || used_dynamic3 in
         (* If dynamic_func is set, then the function type is supportdyn<t1 ... tn -> t>
            or ~(t1 ... tn -> t)
            and we are trying to call it as though it were dynamic. Hence all of the
            arguments must be subtypes of dynamic, regardless of whether they have
            a like type. *)
+        let checked_some_dynamic =
+          List.exists ~f:(fun x -> x) checked_dynamicl
+        in
         let env =
-          if used_dynamic then begin
+          if checked_some_dynamic then begin
             let rec check_args_dynamic env argtys =
               match argtys with
               (* We've got an argument *)
@@ -9737,10 +9815,18 @@ and call
         let env = wfold_left2 inout_write_back env non_variadic_ft_params el in
         let ret =
           match dynamic_func with
-          | Some _ when used_dynamic -> MakeType.locl_like r2 ft.ft_ret.et_type
+          | Some _ when checked_some_dynamic ->
+            MakeType.locl_like r2 ft.ft_ret.et_type
           | _ -> ft.ft_ret.et_type
         in
-        (env, (tel, typed_unpack_element, ret, should_forget_fakes))
+        let checked_like_params_only =
+          List.for_all ~f:(fun x -> x) checked_dynamicl
+        in
+        ( env,
+          ( tel,
+            typed_unpack_element,
+            ret,
+            { should_forget_fakes; checked_like_params_only } ) )
       | (r, Tvar _) when TCO.method_call_inference (Env.get_tcopt env) ->
         (*
             Typecheck calls with unresolved function type by constructing a
@@ -9849,7 +9935,11 @@ and call
         in
         let should_forget_fakes = true in
         Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-        (env, (typed_el, typed_unpacked_element, return_ty, should_forget_fakes))
+        ( env,
+          ( typed_el,
+            typed_unpacked_element,
+            return_ty,
+            { should_forget_fakes; checked_like_params_only = false } ) )
       | (_, Tnewtype (name, [ty], _))
         when String.equal name SN.Classes.cSupportDyn ->
         let (env, ty) = Env.expand_type env ty in
@@ -9891,17 +9981,62 @@ and call
               el
               unpacked_element
           | _ ->
-            call
-              ~expected
-              ~nullsafe
-              ?in_await
-              ?dynamic_func:(Some Supportdyn_function)
-              ~expr_pos
-              ~recv_pos
-              env
-              ty
-              el
-              unpacked_element
+            if List.length el = 1 then
+              call
+                ~expected
+                ~nullsafe
+                ?in_await
+                ?dynamic_func:(Some (Supportdyn_function false))
+                ~expr_pos
+                ~recv_pos
+                env
+                ty
+                el
+                unpacked_element
+            else
+              let (errors, ((_, (_, _, _, aux_result)) as result)) =
+                Errors.do_ (fun () ->
+                    call
+                      ~expected
+                      ~nullsafe
+                      ?in_await
+                      ?dynamic_func:(Some (Supportdyn_function false))
+                      ~expr_pos
+                      ~recv_pos
+                      env
+                      ty
+                      el
+                      unpacked_element)
+              in
+              if Errors.is_empty errors then
+                result
+              else begin
+                (* We've already checked all arguments against like type params so don't repeat the check *)
+                if aux_result.checked_like_params_only then (
+                  Errors.merge_into_current errors;
+                  result
+                ) else
+                  let (errors2, result2) =
+                    Errors.do_ (fun () ->
+                        call
+                          ~expected
+                          ~nullsafe
+                          ?in_await
+                          ?dynamic_func:(Some (Supportdyn_function true))
+                          ~expr_pos
+                          ~recv_pos
+                          env
+                          ty
+                          el
+                          unpacked_element)
+                  in
+                  if Errors.is_empty errors2 then
+                    result2
+                  else (
+                    Errors.merge_into_current errors;
+                    result
+                  )
+              end
         end
       | _ ->
         if not (TUtils.is_tyvar_error env efty) then bad_call env expr_pos efty;
@@ -9911,7 +10046,11 @@ and call
         let should_forget_fakes = true in
         Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
         let (env, ty) = Env.fresh_type_error env expr_pos in
-        (env, ([], None, ty, should_forget_fakes)))
+        ( env,
+          ( [],
+            None,
+            ty,
+            { should_forget_fakes; checked_like_params_only = false } ) ))
 
 and call_untyped_unpack env f_pos unpacked_element =
   match unpacked_element with
@@ -10220,7 +10359,11 @@ and overload_function
       method_id
       class_id
   in
-  let (env, (tel, typed_unpack_element, res, should_forget_fakes)) =
+  let ( env,
+        ( tel,
+          typed_unpack_element,
+          res,
+          { should_forget_fakes; checked_like_params_only = _ } ) ) =
     call
       ~expected:None
       ~expr_pos:p

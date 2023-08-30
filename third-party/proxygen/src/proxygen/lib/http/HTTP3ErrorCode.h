@@ -15,7 +15,7 @@
 namespace proxygen {
 
 namespace HTTP3 {
-enum ErrorCode : uint16_t {
+enum ErrorCode : uint64_t {
   // HTTP/3 error codes from draft
   HTTP_NO_ERROR = 0x100,
   HTTP_GENERAL_PROTOCOL_ERROR = 0x101,

@@ -22,6 +22,12 @@ struct GetEntityResponse {
   1: string entity;
 }
 
+struct NonComparableStruct {
+  1: string foo;
+  2: list<string> bar;
+  3: map<NonComparableStruct, i64> baz;
+}
+
 service GetEntity {
   GetEntityResponse getEntity(1: GetEntityRequest r);
 

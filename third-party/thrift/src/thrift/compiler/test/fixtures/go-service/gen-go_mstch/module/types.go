@@ -321,6 +321,386 @@ func (x *GetEntityResponse) String() string {
     return sb.String()
 }
 
+type NonComparableStruct struct {
+    Foo string `thrift:"foo,1" json:"foo" db:"foo"`
+    Bar []string `thrift:"bar,2" json:"bar" db:"bar"`
+    Baz map[NonComparableStruct]int64 `thrift:"baz,3" json:"baz" db:"baz"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &NonComparableStruct{}
+
+func NewNonComparableStruct() *NonComparableStruct {
+    return (&NonComparableStruct{}).
+        SetFooNonCompat("").
+        SetBarNonCompat(nil).
+        SetBazNonCompat(nil)
+}
+
+func (x *NonComparableStruct) GetFooNonCompat() string {
+    return x.Foo
+}
+
+func (x *NonComparableStruct) GetFoo() string {
+    return x.Foo
+}
+
+func (x *NonComparableStruct) GetBarNonCompat() []string {
+    return x.Bar
+}
+
+func (x *NonComparableStruct) GetBar() []string {
+    if !x.IsSetBar() {
+        return nil
+    }
+
+    return x.Bar
+}
+
+func (x *NonComparableStruct) GetBazNonCompat() map[NonComparableStruct]int64 {
+    return x.Baz
+}
+
+func (x *NonComparableStruct) GetBaz() map[NonComparableStruct]int64 {
+    if !x.IsSetBaz() {
+        return nil
+    }
+
+    return x.Baz
+}
+
+func (x *NonComparableStruct) SetFooNonCompat(value string) *NonComparableStruct {
+    x.Foo = value
+    return x
+}
+
+func (x *NonComparableStruct) SetFoo(value string) *NonComparableStruct {
+    x.Foo = value
+    return x
+}
+
+func (x *NonComparableStruct) SetBarNonCompat(value []string) *NonComparableStruct {
+    x.Bar = value
+    return x
+}
+
+func (x *NonComparableStruct) SetBar(value []string) *NonComparableStruct {
+    x.Bar = value
+    return x
+}
+
+func (x *NonComparableStruct) SetBazNonCompat(value map[NonComparableStruct]int64) *NonComparableStruct {
+    x.Baz = value
+    return x
+}
+
+func (x *NonComparableStruct) SetBaz(value map[NonComparableStruct]int64) *NonComparableStruct {
+    x.Baz = value
+    return x
+}
+
+func (x *NonComparableStruct) IsSetBar() bool {
+    return x.Bar != nil
+}
+
+func (x *NonComparableStruct) IsSetBaz() bool {
+    return x.Baz != nil
+}
+
+func (x *NonComparableStruct) writeField1(p thrift.Protocol) error {  // Foo
+    if err := p.WriteFieldBegin("foo", thrift.STRING, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetFooNonCompat()
+    if err := p.WriteString(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *NonComparableStruct) writeField2(p thrift.Protocol) error {  // Bar
+    if !x.IsSetBar() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("bar", thrift.LIST, 2); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetBarNonCompat()
+    if err := p.WriteListBegin(thrift.STRING, len(item)); err != nil {
+    return thrift.PrependError("error writing list begin: ", err)
+}
+for _, v := range item {
+    {
+        item := v
+        if err := p.WriteString(item); err != nil {
+    return err
+}
+    }
+}
+if err := p.WriteListEnd(); err != nil {
+    return thrift.PrependError("error writing list end: ", err)
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *NonComparableStruct) writeField3(p thrift.Protocol) error {  // Baz
+    if !x.IsSetBaz() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("baz", thrift.MAP, 3); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetBazNonCompat()
+    if err := p.WriteMapBegin(thrift.STRUCT, thrift.I64, len(item)); err != nil {
+    return thrift.PrependError("error writing map begin: ", err)
+}
+for k, v := range item {
+    {
+        item := k
+        if err := item.Write(p); err != nil {
+    return err
+}
+    }
+
+    {
+        item := v
+        if err := p.WriteI64(item); err != nil {
+    return err
+}
+    }
+}
+if err := p.WriteMapEnd(); err != nil {
+    return thrift.PrependError("error writing map end: ", err)
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *NonComparableStruct) readField1(p thrift.Protocol) error {  // Foo
+    result, err := p.ReadString()
+if err != nil {
+    return err
+}
+
+    x.SetFooNonCompat(result)
+    return nil
+}
+
+func (x *NonComparableStruct) readField2(p thrift.Protocol) error {  // Bar
+    _ /* elemType */, size, err := p.ReadListBegin()
+if err != nil {
+    return thrift.PrependError("error reading list begin: ", err)
+}
+
+listResult := make([]string, 0, size)
+for i := 0; i < size; i++ {
+    var elem string
+    {
+        result, err := p.ReadString()
+if err != nil {
+    return err
+}
+        elem = result
+    }
+    listResult = append(listResult, elem)
+}
+
+if err := p.ReadListEnd(); err != nil {
+    return thrift.PrependError("error reading list end: ", err)
+}
+result := listResult
+
+    x.SetBarNonCompat(result)
+    return nil
+}
+
+func (x *NonComparableStruct) readField3(p thrift.Protocol) error {  // Baz
+    _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
+if err != nil {
+    return thrift.PrependError("error reading map begin: ", err)
+}
+
+mapResult := make(map[NonComparableStruct]int64, size)
+for i := 0; i < size; i++ {
+    var key NonComparableStruct
+    {
+        result := *NewNonComparableStruct()
+err := result.Read(p)
+if err != nil {
+    return err
+}
+        key = result
+    }
+
+    var value int64
+    {
+        result, err := p.ReadI64()
+if err != nil {
+    return err
+}
+        value = result
+    }
+
+    mapResult[key] = value
+}
+
+if err := p.ReadMapEnd(); err != nil {
+    return thrift.PrependError("error reading map end: ", err)
+}
+result := mapResult
+
+    x.SetBazNonCompat(result)
+    return nil
+}
+
+func (x *NonComparableStruct) toString1() string {  // Foo
+    return fmt.Sprintf("%v", x.GetFooNonCompat())
+}
+
+func (x *NonComparableStruct) toString2() string {  // Bar
+    return fmt.Sprintf("%v", x.GetBarNonCompat())
+}
+
+func (x *NonComparableStruct) toString3() string {  // Baz
+    return fmt.Sprintf("%v", x.GetBazNonCompat())
+}
+
+
+// Deprecated: Use NonComparableStruct.Set* methods instead or set the fields directly.
+type NonComparableStructBuilder struct {
+    obj *NonComparableStruct
+}
+
+func NewNonComparableStructBuilder() *NonComparableStructBuilder {
+    return &NonComparableStructBuilder{
+        obj: NewNonComparableStruct(),
+    }
+}
+
+func (x *NonComparableStructBuilder) Foo(value string) *NonComparableStructBuilder {
+    x.obj.Foo = value
+    return x
+}
+
+func (x *NonComparableStructBuilder) Bar(value []string) *NonComparableStructBuilder {
+    x.obj.Bar = value
+    return x
+}
+
+func (x *NonComparableStructBuilder) Baz(value map[NonComparableStruct]int64) *NonComparableStructBuilder {
+    x.obj.Baz = value
+    return x
+}
+
+func (x *NonComparableStructBuilder) Emit() *NonComparableStruct {
+    var objCopy NonComparableStruct = *x.obj
+    return &objCopy
+}
+
+func (x *NonComparableStruct) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("NonComparableStruct"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField2(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField3(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *NonComparableStruct) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, typ, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if typ == thrift.STOP {
+            break;
+        }
+
+        switch id {
+        case 1:  // foo
+            if err := x.readField1(p); err != nil {
+                return err
+            }
+        case 2:  // bar
+            if err := x.readField2(p); err != nil {
+                return err
+            }
+        case 3:  // baz
+            if err := x.readField3(p); err != nil {
+                return err
+            }
+        default:
+            if err := p.Skip(typ); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *NonComparableStruct) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("NonComparableStruct({")
+    sb.WriteString(fmt.Sprintf("Foo:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Bar:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("Baz:%s", x.toString3()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {
 	  RegisterType(name string, obj any)

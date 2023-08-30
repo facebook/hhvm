@@ -788,34 +788,34 @@ func (p *GetEntityProcessor) FunctionServiceMap() map[string]string {
 }
 
 func NewGetEntityProcessor(handler GetEntity) *GetEntityProcessor {
-  self0 := &GetEntityProcessor{handler:handler, processorMap:make(map[string]thrift.ProcessorFunction), functionServiceMap:make(map[string]string)}
-  self0.processorMap["getEntity"] = &getEntityProcessorGetEntity{handler:handler}
-  self0.processorMap["getBool"] = &getEntityProcessorGetBool{handler:handler}
-  self0.processorMap["getByte"] = &getEntityProcessorGetByte{handler:handler}
-  self0.processorMap["getI16"] = &getEntityProcessorGetI16{handler:handler}
-  self0.processorMap["getI32"] = &getEntityProcessorGetI32{handler:handler}
-  self0.processorMap["getI64"] = &getEntityProcessorGetI64{handler:handler}
-  self0.processorMap["getDouble"] = &getEntityProcessorGetDouble{handler:handler}
-  self0.processorMap["getString"] = &getEntityProcessorGetString{handler:handler}
-  self0.processorMap["getBinary"] = &getEntityProcessorGetBinary{handler:handler}
-  self0.processorMap["getMap"] = &getEntityProcessorGetMap{handler:handler}
-  self0.processorMap["getSet"] = &getEntityProcessorGetSet{handler:handler}
-  self0.processorMap["getList"] = &getEntityProcessorGetList{handler:handler}
-  self0.processorMap["getLegacyStuff"] = &getEntityProcessorGetLegacyStuff{handler:handler}
-  self0.functionServiceMap["getEntity"] = "GetEntity"
-  self0.functionServiceMap["getBool"] = "GetEntity"
-  self0.functionServiceMap["getByte"] = "GetEntity"
-  self0.functionServiceMap["getI16"] = "GetEntity"
-  self0.functionServiceMap["getI32"] = "GetEntity"
-  self0.functionServiceMap["getI64"] = "GetEntity"
-  self0.functionServiceMap["getDouble"] = "GetEntity"
-  self0.functionServiceMap["getString"] = "GetEntity"
-  self0.functionServiceMap["getBinary"] = "GetEntity"
-  self0.functionServiceMap["getMap"] = "GetEntity"
-  self0.functionServiceMap["getSet"] = "GetEntity"
-  self0.functionServiceMap["getList"] = "GetEntity"
-  self0.functionServiceMap["getLegacyStuff"] = "GetEntity"
-  return self0
+  self3 := &GetEntityProcessor{handler:handler, processorMap:make(map[string]thrift.ProcessorFunction), functionServiceMap:make(map[string]string)}
+  self3.processorMap["getEntity"] = &getEntityProcessorGetEntity{handler:handler}
+  self3.processorMap["getBool"] = &getEntityProcessorGetBool{handler:handler}
+  self3.processorMap["getByte"] = &getEntityProcessorGetByte{handler:handler}
+  self3.processorMap["getI16"] = &getEntityProcessorGetI16{handler:handler}
+  self3.processorMap["getI32"] = &getEntityProcessorGetI32{handler:handler}
+  self3.processorMap["getI64"] = &getEntityProcessorGetI64{handler:handler}
+  self3.processorMap["getDouble"] = &getEntityProcessorGetDouble{handler:handler}
+  self3.processorMap["getString"] = &getEntityProcessorGetString{handler:handler}
+  self3.processorMap["getBinary"] = &getEntityProcessorGetBinary{handler:handler}
+  self3.processorMap["getMap"] = &getEntityProcessorGetMap{handler:handler}
+  self3.processorMap["getSet"] = &getEntityProcessorGetSet{handler:handler}
+  self3.processorMap["getList"] = &getEntityProcessorGetList{handler:handler}
+  self3.processorMap["getLegacyStuff"] = &getEntityProcessorGetLegacyStuff{handler:handler}
+  self3.functionServiceMap["getEntity"] = "GetEntity"
+  self3.functionServiceMap["getBool"] = "GetEntity"
+  self3.functionServiceMap["getByte"] = "GetEntity"
+  self3.functionServiceMap["getI16"] = "GetEntity"
+  self3.functionServiceMap["getI32"] = "GetEntity"
+  self3.functionServiceMap["getI64"] = "GetEntity"
+  self3.functionServiceMap["getDouble"] = "GetEntity"
+  self3.functionServiceMap["getString"] = "GetEntity"
+  self3.functionServiceMap["getBinary"] = "GetEntity"
+  self3.functionServiceMap["getMap"] = "GetEntity"
+  self3.functionServiceMap["getSet"] = "GetEntity"
+  self3.functionServiceMap["getList"] = "GetEntity"
+  self3.functionServiceMap["getLegacyStuff"] = "GetEntity"
+  return self3
 }
 
 type getEntityProcessorGetEntity struct {
@@ -3471,19 +3471,19 @@ func (p *GetEntityGetMapResult)  ReadField0(iprot thrift.Protocol) error {
   tMap := make(map[string]string, size)
   p.Success =  tMap
   for i := 0; i < size; i ++ {
-    var _key2 string
+    var _key5 string
     if v, err := iprot.ReadString(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _key2 = v
+      _key5 = v
     }
-    var _val3 string
+    var _val6 string
     if v, err := iprot.ReadString(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _val3 = v
+      _val6 = v
     }
-    p.Success[_key2] = _val3
+    p.Success[_key5] = _val6
   }
   if err := iprot.ReadMapEnd(); err != nil {
     return thrift.PrependError("error reading map end: ", err)
@@ -3685,13 +3685,13 @@ func (p *GetEntityGetSetResult)  ReadField0(iprot thrift.Protocol) error {
   tSet := make([]string, 0, size)
   p.Success =  tSet
   for i := 0; i < size; i ++ {
-    var _elem4 string
+    var _elem7 string
     if v, err := iprot.ReadString(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _elem4 = v
+      _elem7 = v
     }
-    p.Success = append(p.Success, _elem4)
+    p.Success = append(p.Success, _elem7)
   }
   if err := iprot.ReadSetEnd(); err != nil {
     return thrift.PrependError("error reading set end: ", err)
@@ -3898,13 +3898,13 @@ func (p *GetEntityGetListResult)  ReadField0(iprot thrift.Protocol) error {
   tSlice := make([]string, 0, size)
   p.Success =  tSlice
   for i := 0; i < size; i ++ {
-    var _elem5 string
+    var _elem8 string
     if v, err := iprot.ReadString(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _elem5 = v
+      _elem8 = v
     }
-    p.Success = append(p.Success, _elem5)
+    p.Success = append(p.Success, _elem8)
   }
   if err := iprot.ReadListEnd(); err != nil {
     return thrift.PrependError("error reading list end: ", err)

@@ -2410,7 +2410,7 @@ let rec bind_param
             pure
         in
         with_special_coeffects env cap pure @@ fun env ->
-        expr ?expected env e ~allow_awaitable:(*?*) false |> triple_to_pair
+        expr ?expected env e |> triple_to_pair
       in
       Typing_sequencing.sequence_check_expr e;
       let (env, ty1) =
@@ -2653,9 +2653,7 @@ and check_using_expr has_await env ((_, pos, content) as using_clause) =
   match content with
   (* Simple assignment to local of form `$lvar = e` *)
   | Binop { bop = Ast_defs.Eq None; lhs = (_, lvar_pos, Lvar lvar); rhs = e } ->
-    let (env, te, ty) =
-      expr ~is_using_clause:true env e ~allow_awaitable:(*?*) false
-    in
+    let (env, te, ty) = expr ~is_using_clause:true env e in
     let env = has_dispose_method env has_await pos e ty in
     let env =
       set_valid_rvalue
@@ -2681,7 +2679,7 @@ and check_using_expr has_await env ((_, pos, content) as using_clause) =
   (* Arbitrary expression. This will be assigned to a temporary *)
   | _ ->
     let (env, typed_using_clause, ty) =
-      expr ~is_using_clause:true env using_clause ~allow_awaitable:(*?*) false
+      expr ~is_using_clause:true env using_clause
     in
     let env = has_dispose_method env has_await pos using_clause ty in
     (env, (typed_using_clause, []))
@@ -2706,8 +2704,6 @@ and stmt env (pos, st) =
   (env, (pos, st))
 
 and stmt_ env pos st =
-  let expr ?(allow_awaitable = (*?*) false) = expr ~allow_awaitable in
-  let exprs = exprs ~allow_awaitable:(*?*) false in
   (* Type check a loop. f env = (env, result) checks the body of the loop.
    * We iterate over the loop until the "next" continuation environment is
    * stable. alias_depth is supposed to be an upper bound on this; but in
@@ -3133,7 +3129,7 @@ and stmt_ env pos st =
     let env = might_throw ~join_pos:pos env in
     let (env, el) =
       List.fold_left el ~init:(env, []) ~f:(fun (env, tel) (e1, e2) ->
-          let (env, te2, ty2) = expr env e2 ~allow_awaitable:true in
+          let (env, te2, ty2) = expr env e2 in
           let (_, pos2, _) = e2 in
           let (env, ty2) =
             Async.overload_extract_from_awaitable env ~p:pos2 ty2
@@ -3326,7 +3322,7 @@ and case_list parent_locals ty env switch_pos cl dfl =
       | [] -> (env, [])
       | (((_, pos, _) as e), b) :: rl ->
         let env = initialize_next_cont env in
-        let (env, te, _) = expr env e ~allow_awaitable:(*?*) false in
+        let (env, te, _) = expr env e in
         let (env, tb) = block env b in
         let last = List.is_empty rl && Option.is_none dfl in
         let next_pos =
@@ -3408,7 +3404,6 @@ and expr
     ?(valkind = Other)
     ?(check_defined = true)
     ?in_await
-    ~allow_awaitable
     env
     ((_, p, _) as e) =
   try
@@ -3434,7 +3429,6 @@ and expr
       ~check_defined
       ?in_await
       ?expected
-      ~allow_awaitable
       env
       e
   with
@@ -3447,13 +3441,12 @@ and expr
 
 (* Some (legacy) special functions are allowed in initializers,
    therefore treat them as pure and insert the matching capabilities. *)
-and expr_with_pure_coeffects
-    ?(expected : ExpectedTy.t option) ~allow_awaitable env e =
+and expr_with_pure_coeffects ?(expected : ExpectedTy.t option) env e =
   let (_, p, _) = e in
   let pure = MakeType.mixed (Reason.Rwitness p) in
   let (env, (te, ty)) =
     with_special_coeffects env pure pure @@ fun env ->
-    expr env e ?expected ~allow_awaitable |> triple_to_pair
+    expr env e ?expected |> triple_to_pair
   in
   (env, te, ty)
 
@@ -3465,7 +3458,6 @@ and raw_expr
     ?(valkind = Other)
     ?(check_defined = true)
     ?in_await
-    ~allow_awaitable
     env
     e =
   let (_, p, _) = e in
@@ -3476,14 +3468,12 @@ and raw_expr
     ?expected
     ?lhs_of_null_coalesce
     ?in_await
-    ~allow_awaitable
     ~valkind
     ~check_defined
     env
     e
 
-and lvalue env e =
-  expr_ ~valkind:Lvalue ~check_defined:false env e ~allow_awaitable:(*?*) false
+and lvalue env e = expr_ ~valkind:Lvalue ~check_defined:false env e
 
 and lvalues env el =
   match el with
@@ -3497,7 +3487,7 @@ and lvalues env el =
  * look for sketchy null checks in the condition. *)
 (* TODO TAST: type refinement should be made explicit in the typed AST *)
 and eif env ~(expected : ExpectedTy.t option) ?in_await p c e1 e2 =
-  let (env, tc, tyc) = raw_expr env c ~allow_awaitable:false in
+  let (env, tc, tyc) = raw_expr env c in
   let parent_lenv = env.lenv in
   let (env, _) = condition env true tc in
   let (env, te1, ty1) =
@@ -3508,15 +3498,13 @@ and eif env ~(expected : ExpectedTy.t option) ?in_await p c e1 e2 =
       in
       (env, None, ty)
     | Some e1 ->
-      let (env, te1, ty1) =
-        expr ?expected ?in_await env e1 ~allow_awaitable:true
-      in
+      let (env, te1, ty1) = expr ?expected ?in_await env e1 in
       (env, Some te1, ty1)
   in
   let lenv1 = env.lenv in
   let env = { env with lenv = parent_lenv } in
   let (env, _) = condition env false tc in
-  let (env, te2, ty2) = expr ?expected ?in_await env e2 ~allow_awaitable:true in
+  let (env, te2, ty2) = expr ?expected ?in_await env e2 in
   let lenv2 = env.lenv in
   let env = LEnv.union_lenvs ~join_pos:p env parent_lenv lenv1 lenv2 in
   let (env, ty) = Union.union ~approx_cancel_neg:true env ty1 ty2 in
@@ -3527,31 +3515,16 @@ and exprs
     ?(expected : ExpectedTy.t option)
     ?(valkind = Other)
     ?(check_defined = true)
-    ~allow_awaitable
     env
     el =
   match el with
   | [] -> (env, [], [])
   | e :: el ->
     let (env, te, ty) =
-      expr
-        ~accept_using_var
-        ?expected
-        ~valkind
-        ~check_defined
-        env
-        e
-        ~allow_awaitable
+      expr ~accept_using_var ?expected ~valkind ~check_defined env e
     in
     let (env, tel, tyl) =
-      exprs
-        ~accept_using_var
-        ?expected
-        ~valkind
-        ~check_defined
-        env
-        el
-        ~allow_awaitable
+      exprs ~accept_using_var ?expected ~valkind ~check_defined env el
     in
     (env, te :: tel, ty :: tyl)
 
@@ -3568,10 +3541,10 @@ and exprs_expected (pos, ur, expected_tyl) env el =
   | ([], _) -> (env, [], [])
   | (e :: el, expected_ty :: expected_tyl) ->
     let expected = ExpectedTy.make pos ur expected_ty in
-    let (env, te, ty) = expr ~expected env e ~allow_awaitable:(*?*) false in
+    let (env, te, ty) = expr ~expected env e in
     let (env, tel, tyl) = exprs_expected (pos, ur, expected_tyl) env el in
     (env, te :: tel, ty :: tyl)
-  | (el, []) -> exprs env el ~allow_awaitable:(*?*) false
+  | (el, []) -> exprs env el
 
 and coerce_nonlike_and_like
     ~coerce_for_op ~coerce env pos reason ty ety ety_like =
@@ -3611,7 +3584,6 @@ and expr_
     ?(is_using_clause = false)
     ?lhs_of_null_coalesce
     ?in_await
-    ~allow_awaitable
     ~(valkind : valkind)
     ~check_defined
     env
@@ -3622,13 +3594,9 @@ and expr_
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
     (env, te, ty))
   @@
-  let expr ?(allow_awaitable = allow_awaitable) =
-    expr ~check_defined ~allow_awaitable
-  in
-  let exprs = exprs ~check_defined ~allow_awaitable in
-  let raw_expr ?(allow_awaitable = allow_awaitable) =
-    raw_expr ~check_defined ~allow_awaitable
-  in
+  let expr = expr ~check_defined in
+  let exprs = exprs ~check_defined in
+  let raw_expr = raw_expr ~check_defined in
   (*
    * Given an expected type for elements (as extracted from a parameter or return hint,
    * or explicit type argument), a list of expressions, and a function that infers
@@ -3883,7 +3851,6 @@ and expr_
       ~is_using_clause
       ?lhs_of_null_coalesce
       ?in_await
-      ~allow_awaitable
       ~valkind
       ~check_defined
       env
@@ -4582,12 +4549,10 @@ and expr_
     let (env, fty) = set_readonly_this p env fty in
     make_result env p e fty
   | Binop { bop = Ast_defs.QuestionQuestion; lhs = e1; rhs = e2 } ->
-    let (env, te1, ty1) =
-      raw_expr ~lhs_of_null_coalesce:true env e1 ~allow_awaitable:true
-    in
+    let (env, te1, ty1) = raw_expr ~lhs_of_null_coalesce:true env e1 in
     let parent_lenv = env.lenv in
     let lenv1 = env.lenv in
-    let (env, te2, ty2) = expr ?expected env e2 ~allow_awaitable:true in
+    let (env, te2, ty2) = expr ?expected env e2 in
     let lenv2 = env.lenv in
     let env = LEnv.union_lenvs ~join_pos:p env parent_lenv lenv1 lenv2 in
     (* There are two cases: either the left argument was null in which case we
@@ -4709,7 +4674,7 @@ and expr_
     let env =
       Env.set_local ~is_defined:true ~bound_ty:None env dd_var ty1 Pos.none
     in
-    let (env, te2, ty2) = expr env e2 ~allow_awaitable:true in
+    let (env, te2, ty2) = expr env e2 in
     let env =
       match dd_old_ty with
       | None -> Env.unset_local env dd_var
@@ -4941,7 +4906,7 @@ and expr_
     let (env, te2) = TUtils.make_simplify_typed_expr env pos ty te2 in
     make_result env p (Aast.Obj_get (te1, te2, nullflavor, prop_or_method)) ty
   | Yield af ->
-    let (env, (taf, opt_key, value)) = array_field ~allow_awaitable env af in
+    let (env, (taf, opt_key, value)) = array_field env af in
     let Typing_env_return_info.{ return_type = expected_return; _ } =
       Env.get_return env
     in
@@ -5012,12 +4977,7 @@ and expr_
     let env = might_throw ~join_pos:p env in
     (* Await is permitted in a using clause e.g. using (await make_handle()) *)
     let (env, te, rty) =
-      expr
-        ~is_using_clause
-        ~in_await:(Reason.Rwitness p)
-        env
-        e
-        ~allow_awaitable:true
+      expr ~is_using_clause ~in_await:(Reason.Rwitness p) env e
     in
     let (env, ty) = Async.overload_extract_from_awaitable env ~p rty in
     make_result env p (Aast.Await te) ty
@@ -5705,7 +5665,7 @@ and xhp_check_get_attribute pos env base_expr prop null_flavour =
     let call_get_attr =
       Typing_xhp.rewrite_attribute_access_into_call pos base_expr null_flavour
     in
-    let (env, _, _) = expr ~allow_awaitable:false env call_get_attr in
+    let (env, _, _) = expr env call_get_attr in
     (* Snap the local env back to avoid manipualting refinements twice. *)
     { env with lenv = base_lenv }
   else
@@ -5718,7 +5678,7 @@ and xhp_check_get_attribute pos env base_expr prop null_flavour =
  *)
 and xhp_spread_attribute env c_onto valexpr sid obj =
   let (_, p, _) = valexpr in
-  let (env, te, valty) = expr env valexpr ~allow_awaitable:(*?*) false in
+  let (env, te, valty) = expr env valexpr in
   let ((env, xhp_req_err_opt), attr_ptys) =
     match c_onto with
     | None -> ((env, None), [])
@@ -5751,7 +5711,7 @@ and xhp_spread_attribute env c_onto valexpr sid obj =
  *)
 and xhp_simple_attribute env id valexpr sid obj =
   let (_, p, _) = valexpr in
-  let (env, te, valty) = expr env valexpr ~allow_awaitable:(*?*) false in
+  let (env, te, valty) = expr env valexpr in
   (* This converts the attribute name to a member name. *)
   let name = ":" ^ snd id in
   let attr_pty = ((fst id, name), (p, valty)) in
@@ -5853,7 +5813,7 @@ and closure_bind_opt_param env param : env =
     let (env, _) = bind_param env (None, param) in
     env
   | Some default ->
-    let (env, _te, ty) = expr env default ~allow_awaitable:(*?*) false in
+    let (env, _te, ty) = expr env default in
     Typing_sequencing.sequence_check_expr default;
     let (env, _) = bind_param env (Some ty, param) in
     env
@@ -6326,7 +6286,7 @@ and expression_tree env p et =
   *)
   let (env, t_virtualized_expr, ty_virtual) =
     Env.with_inside_expr_tree env et_hint (fun env ->
-        expr env et_virtualized_expr ~allow_awaitable:false)
+        expr env et_virtualized_expr)
   in
 
   (* If the virtualized expression type is pessimised, we should strip off likes.
@@ -6361,9 +6321,7 @@ and expression_tree env p et =
   let (env, runtime_expr) =
     maketree_with_type_param env p et_runtime_expr ty_virtual
   in
-  let (env, t_runtime_expr, ty_runtime_expr) =
-    expr env runtime_expr ~allow_awaitable:false
-  in
+  let (env, t_runtime_expr, ty_runtime_expr) = expr env runtime_expr in
 
   make_result
     env
@@ -6432,7 +6390,7 @@ and et_splice env dsl_opt p e =
        Cls.get_docs_url cls)
   in
 
-  let (env, te, ty) = expr env e ~allow_awaitable:(*?*) false in
+  let (env, te, ty) = expr env e in
   let (env, ty_visitor) = Env.fresh_type env p in
   let (env, ty_res) = Env.fresh_type env p in
   let (env, ty_infer) = Env.fresh_type env p in
@@ -6663,16 +6621,12 @@ and new_object
   let (env, tel, typed_unpack_element, ty, ctor_fty) =
     match class_types_and_ctor_types with
     | [] ->
-      let (env, tel, _) =
-        argument_list_exprs (expr ~allow_awaitable:false) env el
-      in
+      let (env, tel, _) = argument_list_exprs expr env el in
       let (env, typed_unpack_element, _) =
         match unpacked_element with
         | None -> (env, None, MakeType.nothing Reason.Rnone)
         | Some unpacked_element ->
-          let (env, e, ty) =
-            expr env unpacked_element ~allow_awaitable:(*?*) false
-          in
+          let (env, e, ty) = expr env unpacked_element in
           (env, Some e, ty)
       in
       let (env, ty) = Env.fresh_type_error env p in
@@ -6785,7 +6739,6 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
   match e1 with
   | (_, _, Hole (e, _, _, _)) -> assign_with_subtype_err_ p ur env e pos2 ty2
   | _ ->
-    let allow_awaitable = (*?*) false in
     let env =
       match e1 with
       | (_, _, Lvar (_, x)) ->
@@ -6899,9 +6852,7 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
         | OG_nullthrows -> None
         | OG_nullsafe -> Some (Reason.Rnullsafe_op pobj)
       in
-      let (env, tobj, obj_ty) =
-        expr ~accept_using_var:true env obj ~allow_awaitable
-      in
+      let (env, tobj, obj_ty) = expr ~accept_using_var:true env obj in
       let env = might_throw ~join_pos:p env in
       let (_, p1, _) = obj in
       let ( (env, ty_err_opt),
@@ -7033,7 +6984,7 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
       Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
       (env, te, ty, val_ty_mismatch_opt)
     | (_, pos, Array_get (e1, Some e)) ->
-      let (env, te, ty) = expr env e ~allow_awaitable in
+      let (env, te, ty) = expr env e in
       let parent_lenv = env.lenv in
       let (env, te1, ty1) = update_array_type pos env e1 Lvalue in
       let env = might_throw ~join_pos:p env in
@@ -7100,17 +7051,17 @@ and assign_simple pos ur env e1 ty2 =
   let ty_mismatch = mk_ty_mismatch_opt ty2 ty1 ty_err_opt in
   (env, te1, ty2, ty_mismatch)
 
-and array_field env ~allow_awaitable = function
+and array_field env = function
   | AFvalue ve ->
-    let (env, tve, tv) = expr env ve ~allow_awaitable in
+    let (env, tve, tv) = expr env ve in
     (env, (Aast.AFvalue tve, None, tv))
   | AFkvalue (ke, ve) ->
-    let (env, tke, tk) = expr env ke ~allow_awaitable in
-    let (env, tve, tv) = expr env ve ~allow_awaitable in
+    let (env, tke, tk) = expr env ke in
+    let (env, tve, tv) = expr env ve in
     (env, (Aast.AFkvalue (tke, tve), Some tk, tv))
 
 and array_value ~(expected : ExpectedTy.t option) env x =
-  let (env, te, ty) = expr ?expected env x ~allow_awaitable:(*?*) false in
+  let (env, te, ty) = expr ?expected env x in
   (env, (te, ty))
 
 and arraykey_value
@@ -7300,7 +7251,6 @@ and dispatch_call
     explicit_targs
     el
     unpacked_element =
-  let expr = expr ~allow_awaitable:(*?*) false in
   let make_call env func targs args unpacked_arg ty =
     make_result env p (Aast.Call { func; targs; args; unpacked_arg }) ty
   in
@@ -8756,7 +8706,7 @@ and class_expr
         make_result env tal (Aast.CI c) ty)
   end
   | CIexpr ((_, p, _) as e) ->
-    let (env, te, ty) = expr env e ~allow_awaitable:(*?*) false in
+    let (env, te, ty) = expr env e in
     let fold_errs errs =
       let rec aux = function
         | (Ok xs, Ok x :: rest) -> aux (Ok (x :: xs), rest)
@@ -8920,9 +8870,7 @@ and call_construct
       Typing_error_utils.add_typing_error
         ~env
         Typing_error.(primary @@ Primary.Constructor_no_args p);
-    let (env, tel, _tyl) =
-      argument_list_exprs (expr ~allow_awaitable:false) env el
-    in
+    let (env, tel, _tyl) = argument_list_exprs expr env el in
     let should_forget_fakes = true in
     (* Construct a default __construct type *)
     let ft =
@@ -9102,7 +9050,6 @@ and call
     | Some _ -> dynamic_func
     | None -> Some Like_function
   in
-  let expr = expr ~allow_awaitable:(*?*) false in
   let (env, tyl) =
     TUtils.get_concrete_supertypes
       ~expand_supportdyn:false
@@ -9973,7 +9920,7 @@ and call_untyped_unpack env f_pos unpacked_element =
    * be actually unpacked. *)
   | None -> (env, None)
   | Some e ->
-    let (env, _, ety) = expr env e ~allow_awaitable:(*?*) false in
+    let (env, _, ety) = expr env e in
     let (_, p, _) = e in
     let (env, ty) = Env.fresh_type env p in
     let destructure_ty =
@@ -10078,9 +10025,7 @@ and condition env tparamet ((ty, p, e) as te : Tast.expr) =
     (* This is necessary in case there is an assignment in e2
      * We essentially redo what has been undone in the
      * `Binop (Ampamp|Barbar)` case of `expr` *)
-    let (env, _, _) =
-      expr env (Tast.to_nast_expr e2) ~allow_awaitable:(*?*) false
-    in
+    let (env, _, _) = expr env (Tast.to_nast_expr e2) in
     let (env, { lset = lset2; pkgs = pkgs2 }) = condition env tparamet e2 in
     let lset = Local_id.Set.union lset1 lset2 in
     let pkgs =
@@ -10110,9 +10055,7 @@ and condition env tparamet ((ty, p, e) as te : Tast.expr) =
           (* Similarly to the conjunction case, there might be an assignment in
              cond2 which we must account for. Again we redo what has been undone in
              the `Binop (Ampamp|Barbar)` case of `expr` *)
-          let (env, _, _) =
-            expr env (Tast.to_nast_expr e2) ~allow_awaitable:(*?*) false
-          in
+          let (env, _, _) = expr env (Tast.to_nast_expr e2) in
           condition env tparamet e2)
     in
     (env, { lset = Local_id.Set.union lset1 lset2; pkgs = SSet.empty })
@@ -10183,7 +10126,7 @@ and condition env tparamet ((ty, p, e) as te : Tast.expr) =
 and string2 env idl =
   let (env, tel) =
     List.fold_left idl ~init:(env, []) ~f:(fun (env, tel) x ->
-        let (env, te, ty) = expr env x ~allow_awaitable:(*?*) false in
+        let (env, te, ty) = expr env x in
         let (_, p, _) = x in
         if TCO.enable_strict_string_concat_interp (Env.get_tcopt env) then (
           let r = Reason.Rinterp_operand p in
@@ -10218,7 +10161,7 @@ and string2 env idl =
 and user_attribute env ua =
   let (env, typed_ua_params) =
     List.map_env env ua.ua_params ~f:(fun env e ->
-        let (env, te, _) = expr env e ~allow_awaitable:(*?*) false in
+        let (env, te, _) = expr env e in
         (env, te))
   in
   (env, { Aast.ua_name = ua.ua_name; Aast.ua_params = typed_ua_params })
@@ -10308,12 +10251,7 @@ and update_array_type ?lhs_of_null_coalesce p env e1 valkind =
   | Lvalue
   | Lvalue_subexpr -> begin
     let (env, te1, ty1) =
-      raw_expr
-        ~valkind:Lvalue_subexpr
-        ~check_defined:true
-        env
-        e1
-        ~allow_awaitable:(*?*) false
+      raw_expr ~valkind:Lvalue_subexpr ~check_defined:true env e1
     in
     match e1 with
     | (_, _, Lvar (_, x)) ->
@@ -10328,16 +10266,15 @@ and update_array_type ?lhs_of_null_coalesce p env e1 valkind =
       (env, te1, ty1)
     | _ -> (env, te1, ty1)
   end
-  | Other -> raw_expr ?lhs_of_null_coalesce env e1 ~allow_awaitable:(*?*) false
+  | Other -> raw_expr ?lhs_of_null_coalesce env e1
 
 (* External API *)
 let expr ?expected env e =
-  Env.with_origin2 env Decl_counters.Body (fun env ->
-      expr ?expected env e ~allow_awaitable:(*?*) false)
+  Env.with_origin2 env Decl_counters.Body (fun env -> expr ?expected env e)
 
 let expr_with_pure_coeffects ?expected env e =
   Env.with_origin2 env Decl_counters.Body (fun env ->
-      expr_with_pure_coeffects ?expected env e ~allow_awaitable:(*?*) false)
+      expr_with_pure_coeffects ?expected env e)
 
 let stmt env st =
   Env.with_origin env Decl_counters.Body (fun env -> stmt env st)

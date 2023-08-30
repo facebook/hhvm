@@ -34,17 +34,14 @@ with the CMDLINE_OPTIONS attribute. See the implementations of RemoteHostClient
 and RemoteHttpClient for examples.
 """
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import argparse
 import json
 import os
 import pprint
 import sys
 import traceback
+from urllib.parse import urlparse
 
-from six import string_types
-from six.moves.urllib.parse import urlparse
 from thrift import Thrift
 from thrift.protocol import (
     TBinaryProtocol,
@@ -144,7 +141,7 @@ def get_helper_for_format(name, format_type: str):
 
 @add_format("python", "output")
 def __python_output_handler(ret: object) -> None:
-    if isinstance(ret, string_types):
+    if isinstance(ret, str):
         print(ret)
     else:
         pprint.pprint(ret, indent=2)

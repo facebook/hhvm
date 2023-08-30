@@ -106,6 +106,7 @@ class Client : public ClientBase {
     item.respSizeBytes = carbon::valuePtrUnsafe(reply)
         ? carbon::valuePtrUnsafe(reply)->computeChainDataLength()
         : 0;
+    item.resultCode = carbon::resultToString(*reply.result_ref());
     return item;
   }
 
@@ -229,10 +230,10 @@ class ThreadPool : public std::enable_shared_from_this<ThreadPool> {
       ExternalCarbonConnectionLoggerOptions loggerOptions =
           ExternalCarbonConnectionLoggerOptions(
               opts.enableLogging,
-              opts.maxLogBurstSize,
+              opts.logSampleRate,
               0,
               opts.hourlyLogRate,
-              opts.logSampleRate);
+              opts.maxLogBurstSize);
       logger_ = std::make_shared<ExternalConnectionLogger>(loggerOptions);
     }
   }

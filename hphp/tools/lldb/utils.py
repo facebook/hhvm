@@ -865,12 +865,12 @@ def cast_as_specialized_array_data_kind(array_data: lldb.SBValue) -> lldb.SBValu
     elif has_array_kind(array_data, 'Keyset'):
         array_data = array_data.address_of.Cast(Type("HPHP::VanillaKeyset", array_data.target).GetPointerType()).deref
     elif has_array_kind(array_data, 'BespokeVec', 'BespokeDict', 'BespokeKeyset'):
-        print(f"Unsupported bespoke array type ('{m_kind}')! Run `expression -R -- {array_data.path}` to see its raw form", file=sys.stderr)
+        raise Exception(f"Unsupported bespoke array type ('{m_kind}')! Run `expression -R -- {array_data.path}` to see its raw form")
     else:
-        print(f"Invalid array type ('{m_kind}')! Run `expression -R -- {array_data.path}` to see its raw form", file=sys.stderr)
+        raise Exception(f"Invalid array type ('{m_kind}')! Run `expression -R -- {array_data.path}` to see its raw form")
 
     if array_data.GetError().Fail():
-        print(f"Unable to properly cast array data to specialized type: {array_data.GetError().GetCString()}", file=sys.stderr)
+        raise Exception(f"Unable to properly cast array data to specialized type: {array_data.GetError().GetCString()}")
     return array_data
 
 

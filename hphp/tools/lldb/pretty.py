@@ -213,7 +213,7 @@ class pp_ArrayData:
 
     def num_children(self) -> int:
         if self.size is None:
-            print("Unable to determine number of children of ArrayData object, returning 0", file=sys.stderr)
+            utils.debug_print("Unable to determine number of children of ArrayData object, returning 0")
             return 0
         return self.size.unsigned
 
@@ -273,6 +273,10 @@ class pp_ArrayData:
 @format("^HPHP::Array$", regex=True, synthetic_children=True)
 class pp_Array(pp_ArrayData):
     def __init__(self, val_obj, _internal_dict):
+        if val_obj.GetError().Fail():
+            utils.debug_print(f"Invalid array. Error: {val_obj.GetError().GetCString()}")
+            return
+
         val = utils.deref(utils.get(val_obj, "m_arr"))
         super().__init__(val, _internal_dict)
 

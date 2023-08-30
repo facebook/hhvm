@@ -13,8 +13,8 @@
 # limitations under the License.
 
 from libcpp.memory cimport unique_ptr, shared_ptr
+from libcpp.optional cimport optional
 from libcpp.pair cimport pair
-from thrift.py3.std_libcpp cimport optional
 from folly cimport cFollyExecutor
 from folly.coro cimport cFollyCoroTask
 from folly.optional cimport cOptional

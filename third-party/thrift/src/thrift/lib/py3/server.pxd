@@ -21,7 +21,8 @@ from folly.range cimport StringPiece
 from folly cimport cFollyExecutor
 from cpython.ref cimport PyObject
 from thrift.py3.common cimport cPriority, Priority_to_cpp, Headers, cThriftMetadata
-from thrift.py3.std_libcpp cimport milliseconds, seconds, optional, string_view
+from thrift.py3.std_libcpp cimport milliseconds, seconds, string_view
+from libcpp.optional cimport optional
 from libcpp.utility cimport pair
 
 

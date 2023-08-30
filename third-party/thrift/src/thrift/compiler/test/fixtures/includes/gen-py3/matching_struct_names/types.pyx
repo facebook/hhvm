@@ -7,6 +7,7 @@
 cimport cython as __cython
 from cpython.object cimport PyTypeObject, Py_LT, Py_LE, Py_EQ, Py_NE, Py_GT, Py_GE
 from libcpp.memory cimport shared_ptr, make_shared, unique_ptr, make_unique
+from libcpp.optional cimport optional as __optional
 from libcpp.string cimport string
 from libcpp cimport bool as cbool
 from libcpp.iterator cimport inserter as cinserter
@@ -43,7 +44,6 @@ from thrift.py3.types cimport (
     UnionTypeEnumData as __UnionTypeEnumData,
     createEnumDataForUnionType as __createEnumDataForUnionType,
 )
-cimport thrift.py3.std_libcpp as std_libcpp
 cimport thrift.py3.serializer as serializer
 import folly.iobuf as _fbthrift_iobuf
 from folly.optional cimport cOptional
@@ -386,7 +386,7 @@ cdef class List__MyStruct(thrift.py3.types.List):
             raise err
         cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj).size())
         cdef cMyStruct citem = deref((<MyStruct>item)._cpp_obj)
-        cdef std_libcpp.optional[size_t] found = __list_index[vector[cMyStruct]](self._cpp_obj, indices[0], indices[1], citem)
+        cdef __optional[size_t] found = __list_index[vector[cMyStruct]](self._cpp_obj, indices[0], indices[1], citem)
         if not found.has_value():
             raise err
         return found.value()
@@ -469,7 +469,7 @@ cdef class List__List__MyStruct(thrift.py3.types.List):
             raise err
         cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj).size())
         cdef vector[cMyStruct] citem = deref((<List__MyStruct>item)._cpp_obj)
-        cdef std_libcpp.optional[size_t] found = __list_index[vector[vector[cMyStruct]]](self._cpp_obj, indices[0], indices[1], citem)
+        cdef __optional[size_t] found = __list_index[vector[vector[cMyStruct]]](self._cpp_obj, indices[0], indices[1], citem)
         if not found.has_value():
             raise err
         return found.value()
@@ -546,7 +546,7 @@ cdef class List__module_MyStruct(thrift.py3.types.List):
             raise err
         cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj).size())
         cdef _module_types.cMyStruct citem = deref((<_module_types.MyStruct>item)._cpp_obj)
-        cdef std_libcpp.optional[size_t] found = __list_index[vector[_module_types.cMyStruct]](self._cpp_obj, indices[0], indices[1], citem)
+        cdef __optional[size_t] found = __list_index[vector[_module_types.cMyStruct]](self._cpp_obj, indices[0], indices[1], citem)
         if not found.has_value():
             raise err
         return found.value()
@@ -629,7 +629,7 @@ cdef class List__List__module_MyStruct(thrift.py3.types.List):
             raise err
         cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj).size())
         cdef vector[_module_types.cMyStruct] citem = deref((<List__module_MyStruct>item)._cpp_obj)
-        cdef std_libcpp.optional[size_t] found = __list_index[vector[vector[_module_types.cMyStruct]]](self._cpp_obj, indices[0], indices[1], citem)
+        cdef __optional[size_t] found = __list_index[vector[vector[_module_types.cMyStruct]]](self._cpp_obj, indices[0], indices[1], citem)
         if not found.has_value():
             raise err
         return found.value()

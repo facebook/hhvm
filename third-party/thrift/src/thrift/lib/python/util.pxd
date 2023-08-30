@@ -14,8 +14,7 @@
 
 from folly cimport cFollyExecutor, cFollyPromise
 from folly.async_generator cimport cAsyncGenerator
-
-from thrift.py3.std_libcpp cimport optional
+from libcpp.optional cimport optional
 
 cdef extern from "thrift/lib/python/util.h" namespace "::thrift::python":
   cAsyncGenerator[TChunk] toAsyncGenerator[TChunk](

@@ -18,8 +18,7 @@ from folly cimport cFollyExecutor, cFollyPromise
 from folly.async_generator cimport cAsyncGenerator
 from folly.coro cimport cFollyCoroTask
 from folly.iobuf cimport cIOBuf
-
-from thrift.py3.std_libcpp cimport optional
+from libcpp.optional cimport optional
 
 cdef extern from "thrift/lib/cpp2/async/Sink.h" namespace "::apache::thrift":
   cdef cppclass cClientSink "::apache::thrift::ClientSink"[TChunk, TFinalResponse]:

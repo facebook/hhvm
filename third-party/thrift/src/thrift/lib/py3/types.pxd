@@ -20,10 +20,11 @@ from folly.range cimport StringPiece as cStringPiece, Range as cRange
 from libc.stdint cimport uint32_t, uint16_t
 from libcpp.string cimport string
 from libcpp.memory cimport shared_ptr, unique_ptr
+from libcpp.optional cimport optional
 from libcpp.vector cimport vector
 from libcpp.pair cimport pair
 
-from thrift.py3.std_libcpp cimport string_view, optional, sv_to_str
+from thrift.py3.std_libcpp cimport string_view, sv_to_str
 from thrift.py3.common cimport Protocol, cThriftMetadata
 
 cdef extern from *:

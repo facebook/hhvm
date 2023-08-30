@@ -7,6 +7,7 @@
 cimport cython as __cython
 from cpython.object cimport PyTypeObject, Py_LT, Py_LE, Py_EQ, Py_NE, Py_GT, Py_GE
 from libcpp.memory cimport shared_ptr, make_shared, unique_ptr, make_unique
+from libcpp.optional cimport optional as __optional
 from libcpp.string cimport string
 from libcpp cimport bool as cbool
 from libcpp.iterator cimport inserter as cinserter
@@ -43,7 +44,6 @@ from thrift.py3.types cimport (
     UnionTypeEnumData as __UnionTypeEnumData,
     createEnumDataForUnionType as __createEnumDataForUnionType,
 )
-cimport thrift.py3.std_libcpp as std_libcpp
 cimport thrift.py3.serializer as serializer
 import folly.iobuf as _fbthrift_iobuf
 from folly.optional cimport cOptional
@@ -4487,7 +4487,7 @@ cdef class List__i64(thrift.py3.types.List):
             raise err
         cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj).size())
         cdef cint64_t citem = item
-        cdef std_libcpp.optional[size_t] found = __list_index[vector[cint64_t]](self._cpp_obj, indices[0], indices[1], citem)
+        cdef __optional[size_t] found = __list_index[vector[cint64_t]](self._cpp_obj, indices[0], indices[1], citem)
         if not found.has_value():
             raise err
         return found.value()
@@ -4661,7 +4661,7 @@ cdef class List__i32(thrift.py3.types.List):
             raise err
         cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj).size())
         cdef cint32_t citem = item
-        cdef std_libcpp.optional[size_t] found = __list_index[vector[cint32_t]](self._cpp_obj, indices[0], indices[1], citem)
+        cdef __optional[size_t] found = __list_index[vector[cint32_t]](self._cpp_obj, indices[0], indices[1], citem)
         if not found.has_value():
             raise err
         return found.value()
@@ -4739,7 +4739,7 @@ cdef class std_list__List__i32(thrift.py3.types.List):
             raise err
         cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj).size())
         cdef cint32_t citem = item
-        cdef std_libcpp.optional[size_t] found = __list_index[std_list[cint32_t]](self._cpp_obj, indices[0], indices[1], citem)
+        cdef __optional[size_t] found = __list_index[std_list[cint32_t]](self._cpp_obj, indices[0], indices[1], citem)
         if not found.has_value():
             raise err
         return found.value()
@@ -4817,7 +4817,7 @@ cdef class std_deque__List__i32(thrift.py3.types.List):
             raise err
         cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj).size())
         cdef cint32_t citem = item
-        cdef std_libcpp.optional[size_t] found = __list_index[std_deque[cint32_t]](self._cpp_obj, indices[0], indices[1], citem)
+        cdef __optional[size_t] found = __list_index[std_deque[cint32_t]](self._cpp_obj, indices[0], indices[1], citem)
         if not found.has_value():
             raise err
         return found.value()
@@ -4895,7 +4895,7 @@ cdef class folly_fbvector__List__i32(thrift.py3.types.List):
             raise err
         cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj).size())
         cdef cint32_t citem = item
-        cdef std_libcpp.optional[size_t] found = __list_index[folly_fbvector[cint32_t]](self._cpp_obj, indices[0], indices[1], citem)
+        cdef __optional[size_t] found = __list_index[folly_fbvector[cint32_t]](self._cpp_obj, indices[0], indices[1], citem)
         if not found.has_value():
             raise err
         return found.value()
@@ -4973,7 +4973,7 @@ cdef class folly_small_vector__List__i32(thrift.py3.types.List):
             raise err
         cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj).size())
         cdef cint32_t citem = item
-        cdef std_libcpp.optional[size_t] found = __list_index[folly_small_vector[cint32_t]](self._cpp_obj, indices[0], indices[1], citem)
+        cdef __optional[size_t] found = __list_index[folly_small_vector[cint32_t]](self._cpp_obj, indices[0], indices[1], citem)
         if not found.has_value():
             raise err
         return found.value()
@@ -5228,7 +5228,7 @@ cdef class std_list_int32_t__List__i32(thrift.py3.types.List):
             raise err
         cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj).size())
         cdef cint32_t citem = item
-        cdef std_libcpp.optional[size_t] found = __list_index[std_list_int32_t](self._cpp_obj, indices[0], indices[1], citem)
+        cdef __optional[size_t] found = __list_index[std_list_int32_t](self._cpp_obj, indices[0], indices[1], citem)
         if not found.has_value():
             raise err
         return found.value()
@@ -5407,7 +5407,7 @@ cdef class List__std_unordered_map__Map__i32_string(thrift.py3.types.List):
             raise err
         cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj).size())
         cdef std_unordered_map[cint32_t,string] citem = deref((<std_unordered_map__Map__i32_string>item)._cpp_obj)
-        cdef std_libcpp.optional[size_t] found = __list_index[vector[std_unordered_map[cint32_t,string]]](self._cpp_obj, indices[0], indices[1], citem)
+        cdef __optional[size_t] found = __list_index[vector[std_unordered_map[cint32_t,string]]](self._cpp_obj, indices[0], indices[1], citem)
         if not found.has_value():
             raise err
         return found.value()
@@ -5676,7 +5676,7 @@ cdef class _std_list__List__IncompleteListDep(thrift.py3.types.List):
             raise err
         cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj).size())
         cdef cIncompleteListDep citem = deref((<IncompleteListDep>item)._cpp_obj)
-        cdef std_libcpp.optional[size_t] found = __list_index[_std_list[cIncompleteListDep]](self._cpp_obj, indices[0], indices[1], citem)
+        cdef __optional[size_t] found = __list_index[_std_list[cIncompleteListDep]](self._cpp_obj, indices[0], indices[1], citem)
         if not found.has_value():
             raise err
         return found.value()
@@ -5753,7 +5753,7 @@ cdef class folly_small_vector__List__CompleteListDep(thrift.py3.types.List):
             raise err
         cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj).size())
         cdef cCompleteListDep citem = deref((<CompleteListDep>item)._cpp_obj)
-        cdef std_libcpp.optional[size_t] found = __list_index[folly_small_vector[cCompleteListDep]](self._cpp_obj, indices[0], indices[1], citem)
+        cdef __optional[size_t] found = __list_index[folly_small_vector[cCompleteListDep]](self._cpp_obj, indices[0], indices[1], citem)
         if not found.has_value():
             raise err
         return found.value()
@@ -5830,7 +5830,7 @@ cdef class List__AdaptedListDep(thrift.py3.types.List):
             raise err
         cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj).size())
         cdef cAdaptedListDep citem = deref((<AdaptedListDep>item)._cpp_obj)
-        cdef std_libcpp.optional[size_t] found = __list_index[vector[cAdaptedListDep]](self._cpp_obj, indices[0], indices[1], citem)
+        cdef __optional[size_t] found = __list_index[vector[cAdaptedListDep]](self._cpp_obj, indices[0], indices[1], citem)
         if not found.has_value():
             raise err
         return found.value()
@@ -5907,7 +5907,7 @@ cdef class List__DependentAdaptedListDep(thrift.py3.types.List):
             raise err
         cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj).size())
         cdef cDependentAdaptedListDep citem = deref((<DependentAdaptedListDep>item)._cpp_obj)
-        cdef std_libcpp.optional[size_t] found = __list_index[vector[cDependentAdaptedListDep]](self._cpp_obj, indices[0], indices[1], citem)
+        cdef __optional[size_t] found = __list_index[vector[cDependentAdaptedListDep]](self._cpp_obj, indices[0], indices[1], citem)
         if not found.has_value():
             raise err
         return found.value()

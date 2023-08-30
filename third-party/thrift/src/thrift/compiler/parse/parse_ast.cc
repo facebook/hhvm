@@ -315,7 +315,7 @@ class ast_builder : public parser_actions {
   }
 
   // Updates doctext of the given node.
-  void set_doctext(t_node& node, boost::optional<comment> doc) const {
+  void set_doctext(t_named& node, boost::optional<comment> doc) const {
     if (!doc) {
       return;
     }

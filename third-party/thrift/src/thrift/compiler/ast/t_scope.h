@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <map>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -54,7 +55,7 @@ class t_scope {
   const t_named* add_def(const t_named& node);
 
   // Return the t_named associated with the given Thrift URI, or nullptr.
-  const t_named* find_def(const std::string& uri) {
+  const t_named* find_def(std::string_view uri) {
     return find_or_null(defs_, uri);
   }
 
@@ -62,7 +63,7 @@ class t_scope {
     types_[std::move(name)] = type;
   }
 
-  const t_type* find_type(const std::string& name) const {
+  const t_type* find_type(std::string_view name) const {
     return find_or_null(types_, name);
   }
 
@@ -70,7 +71,7 @@ class t_scope {
     services_[std::move(name)] = service;
   }
 
-  const t_service* find_service(const std::string& name) const {
+  const t_service* find_service(std::string_view name) const {
     return find_or_null(services_, name);
   }
 
@@ -78,13 +79,13 @@ class t_scope {
     interactions_[std::move(name)] = interaction;
   }
 
-  const t_interaction* find_interaction(const std::string& name) const {
+  const t_interaction* find_interaction(std::string_view name) const {
     return find_or_null(interactions_, name);
   }
 
   void add_constant(std::string name, const t_const* constant);
 
-  const t_const* find_constant(const std::string& name) const {
+  const t_const* find_constant(std::string_view name) const {
     return find_or_null(constants_, name);
   }
 
@@ -116,24 +117,25 @@ class t_scope {
   node_list<t_placeholder_typedef> placeholder_typedefs_;
 
   template <typename T>
-  static const T* find_or_null(
-      const std::unordered_map<std::string, const T*>& map,
-      const std::string& name) {
+  using map_type = std::map<std::string, const T*, std::less<>>;
+
+  template <typename T>
+  static const T* find_or_null(const map_type<T>& map, std::string_view name) {
     auto it = map.find(name);
     return it != map.end() ? it->second : nullptr;
   }
 
   // Map of names to types.
-  std::unordered_map<std::string, const t_type*> types_;
+  map_type<t_type> types_;
 
   // Map of names to constants.
-  std::unordered_map<std::string, const t_const*> constants_;
+  map_type<t_const> constants_;
 
   // Map of names to services.
-  std::unordered_map<std::string, const t_service*> services_;
+  map_type<t_service> services_;
 
   // Map of names to interactions.
-  std::unordered_map<std::string, const t_interaction*> interactions_;
+  map_type<t_interaction> interactions_;
 
   // Set of enum value names that are redefined and are ambiguous
   // if referred to without the enum name.
@@ -143,7 +145,7 @@ class t_scope {
   std::unordered_map<std::string, std::unordered_set<std::string>> enum_values_;
 
   // Definitions by uri.
-  std::unordered_map<std::string, const t_named*> defs_;
+  map_type<t_named> defs_;
 };
 
 } // namespace compiler

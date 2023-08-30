@@ -777,21 +777,21 @@ void FrameStateMgr::handleConservatively(const IRInstruction* inst) {
 
   match<void>(
     effects,
-    [&] (GeneralEffects x) {
+    [&] (const GeneralEffects& x) {
       store(x.stores);
       store(x.inout);
     },
-    [&] (CallEffects x) {
+    [&] (const CallEffects& x) {
       store(x.actrec);
       store(x.outputs);
     },
-    [&] (PureStore x)       { store(x.dst); },
-    [&] (PureInlineCall x)  { store(x.base); },
-    [&] (UnknownEffects)    { store(AUnknown); },
-    [&] (ReturnEffects x)   {},
-    [&] (ExitEffects x)     {},
-    [&] (PureLoad)          {},
-    [&] (IrrelevantEffects) {}
+    [&] (const PureStore& x)       { store(x.dst); },
+    [&] (const PureInlineCall& x)  { store(x.base); },
+    [&] (const UnknownEffects&)    { store(AUnknown); },
+    [&] (const ReturnEffects&)     {},
+    [&] (const ExitEffects&)       {},
+    [&] (const PureLoad&)          {},
+    [&] (const IrrelevantEffects&) {}
   );
 }
 

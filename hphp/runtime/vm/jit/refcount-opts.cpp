@@ -1012,15 +1012,15 @@ void mrinfo_step_impl(Env& env,
   auto const effects = memory_effects(inst);
   match<void>(
     effects,
-    [&](IrrelevantEffects) {},
-    [&](ExitEffects) {},
-    [&](ReturnEffects) {},
-    [&](GeneralEffects) {},
-    [&](PureInlineCall) {},
-    [&](CallEffects) {},
+    [&](const IrrelevantEffects&) {},
+    [&](const ExitEffects&) {},
+    [&](const ReturnEffects&) {},
+    [&](const GeneralEffects&) {},
+    [&](const PureInlineCall&) {},
+    [&](const CallEffects&) {},
 
-    [&](UnknownEffects) { kill(ALocBits{}.set()); },
-    [&](PureStore x) { do_store(x.dst, x.value); },
+    [&](const UnknownEffects&) { kill(ALocBits{}.set()); },
+    [&](const PureStore& x) { do_store(x.dst, x.value); },
 
     /*
      * Note that loads do not kill a location.  In fact, it's possible that the
@@ -1036,7 +1036,7 @@ void mrinfo_step_impl(Env& env,
      * won't be able to remove support from the previous aset, and won't raise
      * the lower bound on the new loaded value.
      */
-    [&](PureLoad) {});
+    [&](const PureLoad&) {});
 }
 
 // Helper for stepping after we've created a MemRefAnalysis.
@@ -1348,21 +1348,21 @@ bool irrelevant_inst(const IRInstruction& inst) {
     effects,
     // Pure loads, stores, and IrrelevantEffects do not read or write any
     // object reference counts.
-    [&] (PureLoad) { return true; },
-    [&] (PureStore) { return true; },
-    [&] (IrrelevantEffects) { return true; },
-    [&] (PureInlineCall) { return true; },
+    [&] (const PureLoad&) { return true; },
+    [&] (const PureStore&) { return true; },
+    [&] (const IrrelevantEffects&) { return true; },
+    [&] (const PureInlineCall&) { return true; },
 
     // Inlining related instructions can manipulate the frame but don't
     // observe reference counts.
-    [&] (GeneralEffects g) {
+    [&] (const GeneralEffects& g) {
       if (inst.is(EndInlining, InlineCall, EnterInlineFrame)) {
         return true;
       }
       if (inst.consumesReferences()) return false;
 
       if (g.loads <= AEmpty &&
-          g.backtrace <= AEmpty &&
+          g.backtrace.empty() &&
           g.stores <= AEmpty &&
           g.inout <= AEmpty) {
         return true;
@@ -1371,10 +1371,10 @@ bool irrelevant_inst(const IRInstruction& inst) {
     },
 
     // Everything else may.
-    [&] (CallEffects)       { return false; },
-    [&] (ReturnEffects)     { return false; },
-    [&] (ExitEffects)       { return false; },
-    [&] (UnknownEffects)    { return false; }
+    [&] (const CallEffects&)       { return false; },
+    [&] (const ReturnEffects&)     { return false; },
+    [&] (const ExitEffects&)       { return false; },
+    [&] (const UnknownEffects&)    { return false; }
   );
 }
 
@@ -1976,7 +1976,7 @@ void create_store_support(Env& env, RCState& state, AliasClass dst, SSATmp* tmp,
 //////////////////////////////////////////////////////////////////////
 
 void handle_call(Env& env, RCState& state, const IRInstruction& /*inst*/,
-                 CallEffects e, PreAdder add_node) {
+                 const CallEffects& e, PreAdder add_node) {
   // The call can affect any unsupported_refs
   observe_unbalanced_decrefs(env, state, add_node);
   kill_unsupported_refs(state);
@@ -2053,11 +2053,11 @@ void analyze_mem_effects(Env& env,
   FTRACE(4, "    mem: {}\n", show(effects));
   match<void>(
     effects,
-    [&] (IrrelevantEffects) {},
+    [&] (const IrrelevantEffects&) {},
 
-    [&] (PureInlineCall) {},
+    [&] (const PureInlineCall&) {},
 
-    [&] (GeneralEffects x)  {
+    [&] (const GeneralEffects& x) {
       if (inst.is(CallBuiltin)) {
         observe_unbalanced_decrefs(env, state, add_node);
         kill_unsupported_refs(state, add_node);
@@ -2083,22 +2083,24 @@ void analyze_mem_effects(Env& env,
       reduce_support(env, state, x.moves, false, add_node);
     },
 
-    [&] (ReturnEffects)     {
+    [&] (const ReturnEffects&)     {
       observe_all(env, state, add_node);
     },
-    [&] (ExitEffects)       {
+    [&] (const ExitEffects&) {
       observe_all(env, state, add_node);
     },
-
-    [&] (UnknownEffects)    {
+    [&] (const UnknownEffects&) {
       pessimize_all(env, state, add_node);
     },
-
-    [&] (CallEffects e) {
+    [&] (const CallEffects& e) {
       handle_call(env, state, inst, e, add_node);
     },
-    [&] (PureStore x)   { pure_store(env, state, x.dst, x.value, add_node); },
-    [&] (PureLoad x)    { pure_load(env, state, x.src, inst.dst(), add_node); }
+    [&] (const PureStore& x) {
+      pure_store(env, state, x.dst, x.value, add_node);
+    },
+    [&] (const PureLoad& x) {
+      pure_load(env, state, x.src, inst.dst(), add_node);
+    }
   );
 }
 

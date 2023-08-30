@@ -20,6 +20,7 @@
 #include <boost/variant.hpp>
 
 #include "hphp/runtime/vm/jit/alias-class.h"
+#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/vm-reg-liveness.h"
 
 namespace HPHP::jit {
@@ -72,8 +73,8 @@ struct IRInstruction;
  * primarily used for inout stack slots with CallBuiltin.
  *
  * `backtrace' represents the set of locals that may be accessed due to
- * backtracing. They are currently separated out to avoid pessimizing the loads
- * AliasClass.
+ * backtracing. They are currently separated out from loads and by frame to
+ * avoid pessimizing the AliasClass.
  *
  * If there is an overlap between `loads' and `kills', then `kills' takes
  * precedence for locations that are contained in both (i.e. those locations
@@ -85,7 +86,7 @@ struct GeneralEffects   { AliasClass loads;
                           AliasClass moves;
                           AliasClass kills;
                           AliasClass inout;
-                          AliasClass backtrace; };
+                          jit::vector<AliasClass> backtrace; };
 
 /*
  * The effect of definitely loading from an abstract location, without
@@ -135,7 +136,9 @@ struct PureInlineCall { AliasClass base; SSATmp* fp; AliasClass actrec; };
  * The `outputs' set contains stack locations the call will write inout
  * variables to.
  *
- * The `locals` set contains frame locations that the call might read.
+ * The `locals` set contains frame locations that the call might read. There
+ * is one AliasClass per frame, as we pessimize unions of ALocals of different
+ * frames.
  *
  * Note that calls that have been weakened to CallBuiltin use GeneralEffects,
  * not CallEffects.
@@ -145,7 +148,7 @@ struct CallEffects    { AliasClass kills;
                         AliasClass inputs;
                         AliasClass actrec;
                         AliasClass outputs;
-                        AliasClass locals; };
+                        jit::vector<AliasClass> backtrace; };
 
 /*
  * ReturnEffects is a return from the top level php function, ending the entire
@@ -212,7 +215,7 @@ MemEffects memory_effects(const IRInstruction&);
  * canonical name (chasing passthrough instructions like canonical() from
  * analysis.h)
  */
-MemEffects canonicalize(MemEffects);
+MemEffects canonicalize(const MemEffects&);
 
 /*
  * Return an alias class representing the pointee of the given value,
@@ -224,7 +227,7 @@ AliasClass pointee(const Type&);
 /*
  * Produces a string about some MemEffects for debug-printing.
  */
-std::string show(MemEffects);
+std::string show(const MemEffects&);
 
 /*
  * Given a known VMReg liveness, computes a more precise GeneralEffects.
@@ -233,7 +236,7 @@ std::string show(MemEffects);
  * For Live VMRegState, the VMRegs may not be stored.
  */
 GeneralEffects general_effects_for_vmreg_liveness(
-    GeneralEffects l, KnownRegState liveness);
+    const GeneralEffects& l, KnownRegState liveness);
 
 //////////////////////////////////////////////////////////////////////
 

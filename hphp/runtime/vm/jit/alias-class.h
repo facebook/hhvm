@@ -21,6 +21,7 @@
 
 #include "hphp/runtime/vm/jit/alias-id-set.h"
 #include "hphp/runtime/vm/jit/analysis.h"
+#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 
 #include <bitset>
@@ -540,11 +541,13 @@ auto const AOther             = AliasClass{AliasClass::BOther};
  * passthrough instructions as with canonical() from analysis.h.)
  */
 AliasClass canonicalize(AliasClass);
+jit::vector<AliasClass> canonicalize(jit::vector<AliasClass>);
 
 /*
  * Produce a debug string for an alias class.
  */
 std::string show(AliasClass);
+std::string show(const jit::vector<AliasClass>&);
 
 //////////////////////////////////////////////////////////////////////
 

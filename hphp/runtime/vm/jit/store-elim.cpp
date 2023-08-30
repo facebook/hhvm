@@ -579,7 +579,7 @@ void visit(Local& env, IRInstruction& inst) {
 
   match<void>(
     effects,
-    [&] (IrrelevantEffects) {
+    [&] (const IrrelevantEffects&) {
       switch (inst.op()) {
       case AssertLoc:
         load(env, ALocal { inst.src(0), inst.extra<AssertLoc>()->locId });
@@ -591,7 +591,7 @@ void visit(Local& env, IRInstruction& inst) {
         return;
       }
     },
-    [&] (UnknownEffects) {
+    [&] (const UnknownEffects&) {
       addAllLoad(env);
       env.mayStore.set();
       if (env.global.vmRegsLiveness[inst] == KnownRegState::Dead) {
@@ -600,7 +600,7 @@ void visit(Local& env, IRInstruction& inst) {
         kill(env, AVMRegAny);
       }
     },
-    [&] (PureLoad l) {
+    [&] (const PureLoad& l) {
       if (auto bit = pure_store_bit(env, l.src)) {
         if (env.reStores[*bit]) {
           auto const st = memory_effects(*env.global.reStores[*bit]);
@@ -615,18 +615,20 @@ void visit(Local& env, IRInstruction& inst) {
       }
       load(env, l.src);
     },
-    [&] (GeneralEffects preL)  {
+    [&] (const GeneralEffects& preL)  {
       auto const liveness = env.global.vmRegsLiveness[inst];
       auto const l = general_effects_for_vmreg_liveness(preL, liveness);
       load(env, l.loads);
       load(env, l.inout);
-      load(env, l.backtrace);
+      for (auto const& frame : l.backtrace) {
+        load(env, frame);
+      }
       mayStore(env, l.stores);
       mayStore(env, l.inout);
       kill(env, l.kills);
     },
 
-    [&] (ReturnEffects l) {
+    [&] (const ReturnEffects& l) {
       // Return from the main function.  Locations other than the frame and
       // stack (e.g. object properties and whatnot) are always live on a
       // function return---so mark everything read before we start killing
@@ -641,13 +643,13 @@ void visit(Local& env, IRInstruction& inst) {
       }
     },
 
-    [&] (ExitEffects l) {
+    [&] (const ExitEffects& l) {
       load(env, l.live);
       kill(env, l.uninits);
       kill(env, l.kills);
     },
 
-    [&] (PureInlineCall l) {
+    [&] (const PureInlineCall& l) {
       store(env, l.base);
       load(env, l.actrec);
     },
@@ -657,19 +659,21 @@ void visit(Local& env, IRInstruction& inst) {
      * register state (which must be dirty), but we can be more precise about
      * everything else.
      */
-    [&] (CallEffects l) {
+    [&] (const CallEffects& l) {
       store(env, l.outputs);
       load(env, AHeapAny);
       load(env, AVMRegState);
       load(env, ARdsAny);
-      load(env, l.locals);
+      for (auto const& frame : l.backtrace) {
+        load(env, frame);
+      }
       load(env, l.inputs);
       kill(env, l.actrec);
       kill(env, l.uninits);
       kill(env, l.kills);
     },
 
-    [&] (PureStore l) { doPureStore(l); }
+    [&] (const PureStore& l) { doPureStore(l); }
   );
 }
 

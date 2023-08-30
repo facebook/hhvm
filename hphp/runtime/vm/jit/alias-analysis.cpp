@@ -47,28 +47,36 @@ void visit_locations(const BlockList& blocks, Visit visit) {
       FTRACE(1, "  {: <30} -- {}\n", show(effects), inst.toString());
       match<void>(
         effects,
-        [&] (IrrelevantEffects)   {},
-        [&] (UnknownEffects)      {},
-        [&] (ReturnEffects x)     { visit(x.kills); },
-        [&] (CallEffects x)       { visit(x.kills);
-                                    visit(x.uninits);
-                                    visit(x.inputs);
-                                    visit(x.actrec);
-                                    visit(x.outputs);
-                                    visit(x.locals); },
-        [&] (GeneralEffects x)    { visit(x.loads);
-                                    visit(x.stores);
-                                    visit(x.inout);
-                                    visit(x.moves);
-                                    visit(x.kills);
-                                    visit(x.backtrace); },
-        [&] (PureLoad x)          { visit(x.src); },
-        [&] (PureStore x)         { visit(x.dst); },
-        [&] (ExitEffects x)       { visit(x.live);
-                                    visit(x.kills);
-                                    visit(x.uninits); },
-        [&] (PureInlineCall x)    { visit(x.base);
-                                    visit(x.actrec); }
+        [&] (const IrrelevantEffects&)   {},
+        [&] (const UnknownEffects&)      {},
+        [&] (const ReturnEffects& x)     { visit(x.kills); },
+        [&] (const CallEffects& x) {
+          visit(x.kills);
+          visit(x.uninits);
+          visit(x.inputs);
+          visit(x.actrec);
+          visit(x.outputs);
+          for (auto const& frame : x.backtrace) {
+            visit(frame);
+          }
+        },
+        [&] (const GeneralEffects& x) {
+          visit(x.loads);
+          visit(x.stores);
+          visit(x.inout);
+          visit(x.moves);
+          visit(x.kills);
+          for (auto const& frame : x.backtrace) {
+            visit(frame);
+          }
+        },
+        [&] (const PureLoad& x)          { visit(x.src); },
+        [&] (const PureStore& x)         { visit(x.dst); },
+        [&] (const ExitEffects& x)       { visit(x.live);
+                                           visit(x.kills);
+                                           visit(x.uninits); },
+        [&] (const PureInlineCall& x)    { visit(x.base);
+                                           visit(x.actrec); }
       );
     }
   }

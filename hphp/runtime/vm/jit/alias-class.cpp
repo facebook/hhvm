@@ -812,6 +812,11 @@ AliasClass canonicalize(AliasClass a) {
   not_reached();
 }
 
+jit::vector<AliasClass> canonicalize(jit::vector<AliasClass> as) {
+  for (auto& a : as) a = canonicalize(a);
+  return as;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 std::string show(AliasClass acls) {
@@ -867,6 +872,18 @@ std::string show(AliasClass acls) {
     }
   }
 
+  return ret;
+}
+
+std::string show(const jit::vector<AliasClass>& as) {
+  std::string ret = "[";
+  auto first = true;
+  for (auto const& a : as) {
+    if (!first) ret += ", ";
+    first = false;
+    ret += show(a);
+  }
+  ret += "]";
   return ret;
 }
 

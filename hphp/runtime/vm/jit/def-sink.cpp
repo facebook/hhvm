@@ -509,7 +509,11 @@ bool conflicts(const IRInstruction& instr,
   assertx(g.stores == AEmpty && g.kills == AEmpty && g.inout == AEmpty);
 
   auto const test_reads = [&] (const AliasClass& acls) {
-    return g.loads.maybe(acls) || g.backtrace.maybe(acls);
+    if (g.loads.maybe(acls)) return true;
+    for (auto const& frame : g.backtrace) {
+      if (frame.maybe(acls)) return true;
+    }
+    return false;
   };
 
   auto const effects = canonicalize(memory_effects(instr));

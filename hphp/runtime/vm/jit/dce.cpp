@@ -1048,22 +1048,21 @@ void processCatchBlock(IRUnit& unit, DceState& state, Block* block,
     auto const effects = canonicalize(memory_effects(*inst));
     done = match<bool>(
       effects,
-      [&] (IrrelevantEffects)    { return false; },
-      [&] (UnknownEffects)       { return true; },
-      [&] (ReturnEffects x)      { return true; },
-      [&] (CallEffects x)        { return true; },
-      [&] (GeneralEffects x)     {
+      [&] (const IrrelevantEffects&)    { return false; },
+      [&] (const UnknownEffects&)       { return true; },
+      [&] (const ReturnEffects&)        { return true; },
+      [&] (const CallEffects&)          { return true; },
+      [&] (const GeneralEffects& x)     {
         return
           process_stack(x.loads) ||
           process_stack(x.inout) ||
           process_stack(x.stores) ||
-          process_stack(x.backtrace) ||
           process_stack(x.kills);
       },
-      [&] (PureLoad x)           { return process_stack(x.src); },
-      [&] (PureStore x)          { return do_store(x.dst, &*inst); },
-      [&] (ExitEffects x)        { return process_stack(x.live); },
-      [&] (PureInlineCall x) {
+      [&] (const PureLoad& x)           { return process_stack(x.src); },
+      [&] (const PureStore& x)          { return do_store(x.dst, &*inst); },
+      [&] (const ExitEffects& x)        { return process_stack(x.live); },
+      [&] (const PureInlineCall& x) {
         return
           process_stack(x.base) ||
           process_stack(x.actrec);

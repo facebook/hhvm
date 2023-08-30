@@ -428,7 +428,8 @@ Flags store(Local& env, AliasClass acls, SSATmp* value) {
   return FNone{};
 }
 
-bool handle_minstr(Local& env, const IRInstruction& inst, GeneralEffects m) {
+bool handle_minstr(Local& env, const IRInstruction& inst,
+                   const GeneralEffects& m) {
   if (!hasMInstrBaseEffects(inst)) return false;
 
   auto const base = inst.src(0);
@@ -460,7 +461,7 @@ bool handle_minstr(Local& env, const IRInstruction& inst, GeneralEffects m) {
 
 Flags handle_general_effects(Local& env,
                              const IRInstruction& inst,
-                             GeneralEffects preM) {
+                             const GeneralEffects& preM) {
   auto const liveness = env.global.vmRegsLiveness[inst];
   auto const m = general_effects_for_vmreg_liveness(preM, liveness);
 
@@ -475,7 +476,7 @@ Flags handle_general_effects(Local& env,
 
   auto const handleCheck = [&](Type typeParam) -> Optional<Flags> {
     assertx(m.inout == AEmpty);
-    assertx(m.backtrace == AEmpty);
+    assertx(m.backtrace.empty());
     auto const meta = env.global.ainfo.find(canonicalize(m.loads));
     if (!meta) return std::nullopt;
 
@@ -542,7 +543,7 @@ Flags handle_general_effects(Local& env,
 
       case CheckIter: {
         assertx(m.inout == AEmpty);
-        assertx(m.backtrace == AEmpty);
+        assertx(m.backtrace.empty());
         auto const meta = env.global.ainfo.find(canonicalize(m.loads));
         if (!meta || !env.state.avail[meta->index]) return std::nullopt;
         auto const& type = env.state.tracked[meta->index].knownType;
@@ -632,7 +633,7 @@ Flags handle_general_effects(Local& env,
 
 void handle_call_effects(Local& env,
                          const IRInstruction& inst,
-                         CallEffects effects) {
+                         const CallEffects& effects) {
   /*
    * Keep types for stack, locals, and iterators, and throw away the
    * values.  We are just doing this to avoid extending lifetimes
@@ -839,17 +840,19 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
   auto flags = Flags{};
   match<void>(
     effects,
-    [&] (IrrelevantEffects) {},
-    [&] (UnknownEffects)    { clear_everything(env); },
-    [&] (ExitEffects)       { clear_everything(env); },
-    [&] (ReturnEffects)     {},
+    [&] (const IrrelevantEffects&) {},
+    [&] (const UnknownEffects&)    { clear_everything(env); },
+    [&] (const ExitEffects&)       { clear_everything(env); },
+    [&] (const ReturnEffects&)     {},
 
-    [&] (PureStore m)       { flags = store(env, m.dst, m.value); },
-    [&] (PureLoad m)        { flags = load(env, inst, m.src); },
+    [&] (const PureStore& m)       { flags = store(env, m.dst, m.value); },
+    [&] (const PureLoad& m)        { flags = load(env, inst, m.src); },
 
-    [&] (PureInlineCall m)  { store(env, m.base, m.fp); },
-    [&] (GeneralEffects m)  { flags = handle_general_effects(env, inst, m); },
-    [&] (CallEffects x)     { handle_call_effects(env, inst, x); }
+    [&] (const PureInlineCall& m)  { store(env, m.base, m.fp); },
+    [&] (const GeneralEffects& m) {
+      flags = handle_general_effects(env, inst, m);
+    },
+    [&] (const CallEffects& x)     { handle_call_effects(env, inst, x); }
   );
 
   switch (inst.op()) {
@@ -1480,7 +1483,7 @@ void save_taken_state(Global& genv, const IRInstruction& inst,
     auto const effects = memory_effects(inst);
     auto const ge = boost::get<GeneralEffects>(effects);
     assertx(ge.inout == AEmpty);
-    assertx(ge.backtrace == AEmpty);
+    assertx(ge.backtrace.empty());
     auto const meta = genv.ainfo.find(canonicalize(ge.loads));
     if (auto const tloc = find_tracked(outState, meta)) {
       tloc->knownType = negativeCheckType(

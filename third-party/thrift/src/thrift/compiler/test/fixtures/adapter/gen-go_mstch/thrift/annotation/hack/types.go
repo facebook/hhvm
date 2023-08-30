@@ -1685,17 +1685,17 @@ func (x *ModuleInternal) String() string {
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {
-	  RegisterType(name string, obj any)
+	  RegisterType(name string, initializer func() any)
 }) {
-    registry.RegisterType("facebook.com/thrift/annotation/hack/FieldWrapper", &FieldWrapper{})
-    registry.RegisterType("facebook.com/thrift/annotation/hack/Wrapper", &Wrapper{})
-    registry.RegisterType("facebook.com/thrift/annotation/hack/Adapter", &Adapter{})
-    registry.RegisterType("facebook.com/thrift/annotation/hack/SkipCodegen", &SkipCodegen{})
-    registry.RegisterType("facebook.com/thrift/annotation/hack/Name", &Name{})
-    registry.RegisterType("facebook.com/thrift/annotation/hack/UnionEnumAttributes", &UnionEnumAttributes{})
-    registry.RegisterType("facebook.com/thrift/annotation/hack/StructTrait", &StructTrait{})
-    registry.RegisterType("facebook.com/thrift/annotation/hack/Attributes", &Attributes{})
-    registry.RegisterType("facebook.com/thrift/annotation/hack/StructAsTrait", &StructAsTrait{})
-    registry.RegisterType("facebook.com/thrift/annotation/hack/ModuleInternal", &ModuleInternal{})
+    registry.RegisterType("facebook.com/thrift/annotation/hack/FieldWrapper", func() any { return NewFieldWrapper() })
+    registry.RegisterType("facebook.com/thrift/annotation/hack/Wrapper", func() any { return NewWrapper() })
+    registry.RegisterType("facebook.com/thrift/annotation/hack/Adapter", func() any { return NewAdapter() })
+    registry.RegisterType("facebook.com/thrift/annotation/hack/SkipCodegen", func() any { return NewSkipCodegen() })
+    registry.RegisterType("facebook.com/thrift/annotation/hack/Name", func() any { return NewName() })
+    registry.RegisterType("facebook.com/thrift/annotation/hack/UnionEnumAttributes", func() any { return NewUnionEnumAttributes() })
+    registry.RegisterType("facebook.com/thrift/annotation/hack/StructTrait", func() any { return NewStructTrait() })
+    registry.RegisterType("facebook.com/thrift/annotation/hack/Attributes", func() any { return NewAttributes() })
+    registry.RegisterType("facebook.com/thrift/annotation/hack/StructAsTrait", func() any { return NewStructAsTrait() })
+    registry.RegisterType("facebook.com/thrift/annotation/hack/ModuleInternal", func() any { return NewModuleInternal() })
 
 }

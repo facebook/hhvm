@@ -41,21 +41,24 @@ import (
 	enum "thrift/test/testset/Enum"
 )
 
-// typeRegistry is a registry from thrift_uri or a hash of thrift_uri to thrift objects.
+// Registry initializer func type
+type registryInitializerFuncType = func() any
+
+// typeRegistry is a registry from thrift_uri or its hash Thrift initializer function.
 // typeRegistry is used to serialize and deserialize thrift.Any.
 type typeRegistry struct {
-	names  map[string]any
-	hash32 map[[32]byte]any
-	hash16 map[[16]byte]any
-	hash8  map[[8]byte]any
+	names  map[string]registryInitializerFuncType
+	hash32 map[[32]byte]registryInitializerFuncType
+	hash16 map[[16]byte]registryInitializerFuncType
+	hash8  map[[8]byte]registryInitializerFuncType
 }
 
 func newTypeRegistry() *typeRegistry {
 	return &typeRegistry{
-		names:  make(map[string]any),
-		hash32: make(map[[32]byte]any),
-		hash16: make(map[[16]byte]any),
-		hash8:  make(map[[8]byte]any),
+		names:  make(map[string]registryInitializerFuncType),
+		hash32: make(map[[32]byte]registryInitializerFuncType),
+		hash16: make(map[[16]byte]registryInitializerFuncType),
+		hash8:  make(map[[8]byte]registryInitializerFuncType),
 	}
 }
 
@@ -63,55 +66,55 @@ const thriftURIPrefix = "fbthrift://"
 
 // RegisterType is called by the generated RegisterTypes function in thrift packages.
 // Only types with a thrift_uri is registered.
-func (r *typeRegistry) RegisterType(name string, obj any) {
-	r.names[name] = obj
+func (r *typeRegistry) RegisterType(name string, initializer registryInitializerFuncType) {
+	r.names[name] = initializer
 	h := sha256.New()
 	h.Write([]byte(thriftURIPrefix + name))
 	hash := h.Sum(nil)
 	hash32 := *(*[32]byte)(hash[0:32])
 	hash16 := *(*[16]byte)(hash[0:16])
 	hash8 := *(*[8]byte)(hash[0:8])
-	r.hash32[hash32] = obj
-	r.hash16[hash16] = obj
-	r.hash8[hash8] = obj
+	r.hash32[hash32] = initializer
+	r.hash16[hash16] = initializer
+	r.hash8[hash8] = initializer
 }
 
-// LoadWithName loads objects from the type registry for deserialization given the thrift_uri name.
-func (r *typeRegistry) LoadWithName(name string) (any, error) {
-	obj, ok := r.names[name]
+// LoadInitializerWithName loads initializer from the type registry for deserialization given the thrift_uri name.
+func (r *typeRegistry) LoadInitializerWithName(name string) (registryInitializerFuncType, error) {
+	initializer, ok := r.names[name]
 	if !ok {
 		return nil, fmt.Errorf("load from registry error: %s is not registered", name)
 	}
-	return obj, nil
+	return initializer, nil
 }
 
-// LoadWithHash loads objects from the type registry for deserialization given the hashed thrift_uri name.
+// LoadInitializerWithHash loads initializer from the type registry for deserialization given the hashed thrift_uri name.
 // The hashed thrift_uri can either be of length 8, 16 or 32.
-func (r *typeRegistry) LoadWithHash(hash []byte) (any, error) {
-	var obj any
+func (r *typeRegistry) LoadInitializerWithHash(hash []byte) (registryInitializerFuncType, error) {
+	var initializer registryInitializerFuncType
 	var ok bool
 	if len(hash) == 8 {
 		hash8 := *(*[8]byte)(hash[0:8])
-		obj, ok = r.hash8[hash8]
+		initializer, ok = r.hash8[hash8]
 		if !ok {
 			return nil, fmt.Errorf("load from hash8 registry error: %s is not registered", string(hash))
 		}
 	}
 	if len(hash) == 16 {
 		hash16 := *(*[16]byte)(hash[0:16])
-		obj, ok = r.hash16[hash16]
+		initializer, ok = r.hash16[hash16]
 		if !ok {
 			return nil, fmt.Errorf("load from hash16 registry error: %s is not registered", string(hash))
 		}
 	}
 	if len(hash) == 32 {
 		hash32 := *(*[32]byte)(hash[0:32])
-		obj, ok = r.hash32[hash32]
+		initializer, ok = r.hash32[hash32]
 		if !ok {
 			return nil, fmt.Errorf("load from hash32 registry error: %s is not registered", string(hash))
 		}
 	}
-	return obj, nil
+	return initializer, nil
 }
 
 func main() {
@@ -214,25 +217,25 @@ func serialize(obj thrift.Struct, protoc *protocol.ProtocolStruct) ([]byte, erro
 // Any specifies the thrift.Struct to load either with a thrift_uri stored in the Type field
 // Or with a hashed version of thrift_uri stored in TypeHashPrefixSha2_256.
 func loadStruct(registry *typeRegistry, value *thrift_any.Any) (thrift.Struct, error) {
-	var obj any
+	var initializer registryInitializerFuncType
+	var err error
 	if value.IsSetType() {
 		typ := value.GetType()
-		var err error
-		obj, err = registry.LoadWithName(typ)
+		initializer, err = registry.LoadInitializerWithName(typ)
 		if err != nil {
 			return nil, err
 		}
 	} else if value.IsSetTypeHashPrefixSha2_256() {
 		hash := value.GetTypeHashPrefixSha2_256()
-		var err error
-		obj, err = registry.LoadWithHash(hash)
+		initializer, err = registry.LoadInitializerWithHash(hash)
 		if err != nil {
 			return nil, err
 		}
 	}
-	structObj, ok := obj.(thrift.Struct)
+	anyObj := initializer()
+	structObj, ok := anyObj.(thrift.Struct)
 	if !ok {
-		return nil, fmt.Errorf("deserialize currently only supports thrift.Struct and not %T", obj)
+		return nil, fmt.Errorf("deserialize currently only supports thrift.Struct and not %T", anyObj)
 	}
 	return structObj, nil
 }

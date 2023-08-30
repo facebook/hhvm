@@ -516,10 +516,10 @@ func (x *ServiceExn) String() string {
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {
-	  RegisterType(name string, obj any)
+	  RegisterType(name string, initializer func() any)
 }) {
-    registry.RegisterType("facebook.com/thrift/annotation/rust/Adapter", &Adapter{})
-    registry.RegisterType("facebook.com/thrift/annotation/rust/Derive", &Derive{})
-    registry.RegisterType("facebook.com/thrift/annotation/rust/ServiceExn", &ServiceExn{})
+    registry.RegisterType("facebook.com/thrift/annotation/rust/Adapter", func() any { return NewAdapter() })
+    registry.RegisterType("facebook.com/thrift/annotation/rust/Derive", func() any { return NewDerive() })
+    registry.RegisterType("facebook.com/thrift/annotation/rust/ServiceExn", func() any { return NewServiceExn() })
 
 }

@@ -5445,8 +5445,6 @@ go/CompatibilityTest/testset.list<i64>.set<i64>/ChangeFieldType/duplicate.Binary
 go/CompatibilityTest/testset.list<i64>.set<i64>/ChangeFieldType/duplicate.Compact
 go/CompatibilityTest/testset.list<i64>.set<i64>/ChangeFieldType/reverse.Binary
 go/CompatibilityTest/testset.list<i64>.set<i64>/ChangeFieldType/reverse.Compact
-go/CompatibilityTest/testset.i16/AddFieldWithCustomDefault.Binary
-go/CompatibilityTest/testset.i16/AddFieldWithCustomDefault.Compact
 go/CompatibilityTest/testset.i16/AddTerseFieldWithCustomDefault.Binary
 go/CompatibilityTest/testset.i16/AddTerseFieldWithCustomDefault.Compact
 go/CompatibilityTest/testset.i16/ChangeSingularToContainer/zero.Binary
@@ -5466,8 +5464,6 @@ go/CompatibilityTest/testset.i16/ChangeContainerToSingular/one.Compact
 go/CompatibilityTest/testset.i16/ChangeSingularToContainer/neg_one.Binary
 go/CompatibilityTest/testset.i16/ChangeContainerToSingular/neg_one.Binary
 go/CompatibilityTest/testset.i16/ChangeContainerToSingular/neg_one.Compact
-go/CompatibilityTest/testset.i32/AddFieldWithCustomDefault.Binary
-go/CompatibilityTest/testset.i32/AddFieldWithCustomDefault.Compact
 go/CompatibilityTest/testset.i32/AddTerseFieldWithCustomDefault.Binary
 go/CompatibilityTest/testset.i32/AddTerseFieldWithCustomDefault.Compact
 go/CompatibilityTest/testset.i32/ChangeSingularToContainer/zero.Binary
@@ -5487,8 +5483,6 @@ go/CompatibilityTest/testset.i32/ChangeContainerToSingular/one.Compact
 go/CompatibilityTest/testset.i32/ChangeSingularToContainer/neg_one.Binary
 go/CompatibilityTest/testset.i32/ChangeContainerToSingular/neg_one.Binary
 go/CompatibilityTest/testset.i32/ChangeContainerToSingular/neg_one.Compact
-go/CompatibilityTest/testset.i64/AddFieldWithCustomDefault.Binary
-go/CompatibilityTest/testset.i64/AddFieldWithCustomDefault.Compact
 go/CompatibilityTest/testset.i64/AddTerseFieldWithCustomDefault.Binary
 go/CompatibilityTest/testset.i64/AddTerseFieldWithCustomDefault.Compact
 go/CompatibilityTest/testset.i64/ChangeContainerToSingular/zero.Binary
@@ -5505,8 +5499,6 @@ go/CompatibilityTest/testset.i64/ChangeContainerToSingular/one.Compact
 go/CompatibilityTest/testset.i64/ChangeSingularToContainer/neg_one.Binary
 go/CompatibilityTest/testset.i64/ChangeContainerToSingular/neg_one.Binary
 go/CompatibilityTest/testset.i64/ChangeContainerToSingular/neg_one.Compact
-go/CompatibilityTest/testset.string/AddFieldWithCustomDefault.Binary
-go/CompatibilityTest/testset.string/AddFieldWithCustomDefault.Compact
 go/CompatibilityTest/testset.string/AddTerseFieldWithCustomDefault.Binary
 go/CompatibilityTest/testset.string/AddTerseFieldWithCustomDefault.Compact
 go/CompatibilityTest/testset.string/ChangeSingularToContainer/empty.Binary
@@ -5537,8 +5529,6 @@ go/CompatibilityTest/testset.Terse.Unqualified/ChangeQualifier/empty.Binary
 go/CompatibilityTest/testset.Terse.Unqualified/ChangeQualifier/empty.Compact
 go/CompatibilityTest/testset.Optional.Terse/ChangeQualifier/empty.Binary
 go/CompatibilityTest/testset.Optional.Terse/ChangeQualifier/empty.Compact
-go/CompatibilityTest/testset.bool/AddFieldWithCustomDefault.Binary
-go/CompatibilityTest/testset.bool/AddFieldWithCustomDefault.Compact
 go/CompatibilityTest/testset.bool/AddTerseFieldWithCustomDefault.Binary
 go/CompatibilityTest/testset.bool/AddTerseFieldWithCustomDefault.Compact
 go/CompatibilityTest/testset.bool/ChangeSingularToContainer/true.Binary
@@ -5547,8 +5537,6 @@ go/CompatibilityTest/testset.bool/ChangeContainerToSingular/true.Compact
 go/CompatibilityTest/testset.bool/ChangeSingularToContainer/false.Binary
 go/CompatibilityTest/testset.bool/ChangeSingularToContainer/false.Compact
 go/CompatibilityTest/testset.bool/ChangeContainerToSingular/false.Compact
-go/CompatibilityTest/testset.byte/AddFieldWithCustomDefault.Binary
-go/CompatibilityTest/testset.byte/AddFieldWithCustomDefault.Compact
 go/CompatibilityTest/testset.byte/AddTerseFieldWithCustomDefault.Binary
 go/CompatibilityTest/testset.byte/AddTerseFieldWithCustomDefault.Compact
 go/CompatibilityTest/testset.byte/ChangeSingularToContainer/zero.Binary
@@ -5569,8 +5557,6 @@ go/CompatibilityTest/testset.byte/ChangeSingularToContainer/neg_one.Binary
 go/CompatibilityTest/testset.byte/ChangeSingularToContainer/neg_one.Compact
 go/CompatibilityTest/testset.byte/ChangeContainerToSingular/neg_one.Binary
 go/CompatibilityTest/testset.byte/ChangeContainerToSingular/neg_one.Compact
-go/CompatibilityTest/testset.float/AddFieldWithCustomDefault.Binary
-go/CompatibilityTest/testset.float/AddFieldWithCustomDefault.Compact
 go/CompatibilityTest/testset.float/AddTerseFieldWithCustomDefault.Binary
 go/CompatibilityTest/testset.float/AddTerseFieldWithCustomDefault.Compact
 go/CompatibilityTest/testset.float/ChangeSingularToContainer/zero.Binary
@@ -5649,8 +5635,6 @@ go/CompatibilityTest/testset.float/ChangeSingularToContainer/neg_zero.Binary
 go/CompatibilityTest/testset.float/ChangeSingularToContainer/neg_zero.Compact
 go/CompatibilityTest/testset.float/ChangeContainerToSingular/neg_zero.Binary
 go/CompatibilityTest/testset.float/ChangeContainerToSingular/neg_zero.Compact
-go/CompatibilityTest/testset.double/AddFieldWithCustomDefault.Binary
-go/CompatibilityTest/testset.double/AddFieldWithCustomDefault.Compact
 go/CompatibilityTest/testset.double/AddTerseFieldWithCustomDefault.Binary
 go/CompatibilityTest/testset.double/AddTerseFieldWithCustomDefault.Compact
 go/CompatibilityTest/testset.double/ChangeContainerToSingular/zero.Binary
@@ -5733,10 +5717,6 @@ go/CompatibilityTest/testset.double/ChangeContainerToSingular/fmt_case_2.Compact
 go/CompatibilityTest/testset.double/ChangeSingularToContainer/neg_zero.Compact
 go/CompatibilityTest/testset.double/ChangeContainerToSingular/neg_zero.Binary
 go/CompatibilityTest/testset.double/ChangeContainerToSingular/neg_zero.Compact
-go/CompatibilityTest/testset.binary/AddField.Binary
-go/CompatibilityTest/testset.binary/AddField.Compact
-go/CompatibilityTest/testset.binary/AddFieldWithCustomDefault.Binary
-go/CompatibilityTest/testset.binary/AddFieldWithCustomDefault.Compact
 go/CompatibilityTest/testset.binary/ChangeSingularToContainer/empty.Binary
 go/CompatibilityTest/testset.binary/ChangeContainerToSingular/empty.Binary
 go/CompatibilityTest/testset.binary/ChangeContainerToSingular/empty.Compact
@@ -5763,6 +5743,44 @@ go/CompatibilityTest/testset.binary/ChangeSingularToContainer/bad_utf8.Binary
 go/CompatibilityTest/testset.binary/ChangeSingularToContainer/bad_utf8.Compact
 go/CompatibilityTest/testset.binary/ChangeContainerToSingular/bad_utf8.Binary
 go/CompatibilityTest/testset.binary/ChangeContainerToSingular/bad_utf8.Compact
+go/CompatibilityTest/testset.bool/AddOptionalFieldWithCustomDefault.Binary
+go/CompatibilityTest/testset.bool/AddOptionalFieldWithCustomDefault.Compact
+go/CompatibilityTest/testset.bool/ChangeOptionalFieldCustomDefault.Binary
+go/CompatibilityTest/testset.bool/ChangeOptionalFieldCustomDefault.Compact
+go/CompatibilityTest/testset.byte/AddOptionalFieldWithCustomDefault.Binary
+go/CompatibilityTest/testset.byte/AddOptionalFieldWithCustomDefault.Compact
+go/CompatibilityTest/testset.byte/ChangeOptionalFieldCustomDefault.Binary
+go/CompatibilityTest/testset.byte/ChangeOptionalFieldCustomDefault.Compact
+go/CompatibilityTest/testset.float/AddOptionalFieldWithCustomDefault.Binary
+go/CompatibilityTest/testset.float/AddOptionalFieldWithCustomDefault.Compact
+go/CompatibilityTest/testset.float/ChangeOptionalFieldCustomDefault.Binary
+go/CompatibilityTest/testset.float/ChangeOptionalFieldCustomDefault.Compact
+go/CompatibilityTest/testset.double/AddOptionalFieldWithCustomDefault.Binary
+go/CompatibilityTest/testset.double/AddOptionalFieldWithCustomDefault.Compact
+go/CompatibilityTest/testset.double/ChangeOptionalFieldCustomDefault.Binary
+go/CompatibilityTest/testset.double/ChangeOptionalFieldCustomDefault.Compact
+go/CompatibilityTest/testset.binary/AddOptionalFieldWithCustomDefault.Binary
+go/CompatibilityTest/testset.binary/AddOptionalFieldWithCustomDefault.Compact
+go/CompatibilityTest/testset.binary/AddTerseFieldWithCustomDefault.Binary
+go/CompatibilityTest/testset.binary/AddTerseFieldWithCustomDefault.Compact
+go/CompatibilityTest/testset.binary/ChangeOptionalFieldCustomDefault.Binary
+go/CompatibilityTest/testset.binary/ChangeOptionalFieldCustomDefault.Compact
+go/CompatibilityTest/testset.i16/AddOptionalFieldWithCustomDefault.Binary
+go/CompatibilityTest/testset.i16/AddOptionalFieldWithCustomDefault.Compact
+go/CompatibilityTest/testset.i16/ChangeOptionalFieldCustomDefault.Binary
+go/CompatibilityTest/testset.i16/ChangeOptionalFieldCustomDefault.Compact
+go/CompatibilityTest/testset.i32/AddOptionalFieldWithCustomDefault.Binary
+go/CompatibilityTest/testset.i32/AddOptionalFieldWithCustomDefault.Compact
+go/CompatibilityTest/testset.i32/ChangeOptionalFieldCustomDefault.Binary
+go/CompatibilityTest/testset.i32/ChangeOptionalFieldCustomDefault.Compact
+go/CompatibilityTest/testset.i64/AddOptionalFieldWithCustomDefault.Binary
+go/CompatibilityTest/testset.i64/AddOptionalFieldWithCustomDefault.Compact
+go/CompatibilityTest/testset.i64/ChangeOptionalFieldCustomDefault.Binary
+go/CompatibilityTest/testset.i64/ChangeOptionalFieldCustomDefault.Compact
+go/CompatibilityTest/testset.string/AddOptionalFieldWithCustomDefault.Binary
+go/CompatibilityTest/testset.string/AddOptionalFieldWithCustomDefault.Compact
+go/CompatibilityTest/testset.string/ChangeOptionalFieldCustomDefault.Binary
+go/CompatibilityTest/testset.string/ChangeOptionalFieldCustomDefault.Compact
 
 #
 # NaN Go Data conformance compatibility tests [FAILED]

@@ -2135,11 +2135,11 @@ func (x *TypeName) String() string {
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {
-	  RegisterType(name string, obj any)
+	  RegisterType(name string, initializer func() any)
 }) {
-    registry.RegisterType("facebook.com/thrift/type/TypeUri", &TypeUri{})
-    registry.RegisterType("facebook.com/thrift/type/TypeName", &TypeName{})
+    registry.RegisterType("facebook.com/thrift/type/TypeUri", func() any { return NewTypeUri() })
+    registry.RegisterType("facebook.com/thrift/type/TypeName", func() any { return NewTypeName() })
 
-    registry.RegisterType("facebook.com/thrift/type/Void", Void(0))
-    registry.RegisterType("facebook.com/thrift/type/StandardProtocol", StandardProtocol(0))
+    registry.RegisterType("facebook.com/thrift/type/Void", func() any { return Void(0) })
+    registry.RegisterType("facebook.com/thrift/type/StandardProtocol", func() any { return StandardProtocol(0) })
 }

@@ -7131,17 +7131,17 @@ func (x *TerseException) Error() string {
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {
-	  RegisterType(name string, obj any)
+	  RegisterType(name string, initializer func() any)
 }) {
-    registry.RegisterType("facebook.com/thrift/test/terse_write/MyStruct", &MyStruct{})
-    registry.RegisterType("facebook.com/thrift/test/terse_write/MyUnion", &MyUnion{})
-    registry.RegisterType("facebook.com/thrift/test/terse_write/MyStructWithCustomDefault", &MyStructWithCustomDefault{})
-    registry.RegisterType("facebook.com/thrift/test/terse_write/StructLevelTerseStruct", &StructLevelTerseStruct{})
-    registry.RegisterType("facebook.com/thrift/test/terse_write/FieldLevelTerseStruct", &FieldLevelTerseStruct{})
-    registry.RegisterType("facebook.com/thrift/test/terse_write/TerseStructWithCustomDefault", &TerseStructWithCustomDefault{})
-    registry.RegisterType("facebook.com/thrift/test/terse_write/AdaptedFields", &AdaptedFields{})
-    registry.RegisterType("facebook.com/thrift/test/terse_write/WrappedFields", &WrappedFields{})
-    registry.RegisterType("facebook.com/thrift/test/terse_write/TerseException", &TerseException{})
+    registry.RegisterType("facebook.com/thrift/test/terse_write/MyStruct", func() any { return NewMyStruct() })
+    registry.RegisterType("facebook.com/thrift/test/terse_write/MyUnion", func() any { return NewMyUnion() })
+    registry.RegisterType("facebook.com/thrift/test/terse_write/MyStructWithCustomDefault", func() any { return NewMyStructWithCustomDefault() })
+    registry.RegisterType("facebook.com/thrift/test/terse_write/StructLevelTerseStruct", func() any { return NewStructLevelTerseStruct() })
+    registry.RegisterType("facebook.com/thrift/test/terse_write/FieldLevelTerseStruct", func() any { return NewFieldLevelTerseStruct() })
+    registry.RegisterType("facebook.com/thrift/test/terse_write/TerseStructWithCustomDefault", func() any { return NewTerseStructWithCustomDefault() })
+    registry.RegisterType("facebook.com/thrift/test/terse_write/AdaptedFields", func() any { return NewAdaptedFields() })
+    registry.RegisterType("facebook.com/thrift/test/terse_write/WrappedFields", func() any { return NewWrappedFields() })
+    registry.RegisterType("facebook.com/thrift/test/terse_write/TerseException", func() any { return NewTerseException() })
 
-    registry.RegisterType("facebook.com/thrift/test/terse_write/MyEnum", MyEnum(0))
+    registry.RegisterType("facebook.com/thrift/test/terse_write/MyEnum", func() any { return MyEnum(0) })
 }

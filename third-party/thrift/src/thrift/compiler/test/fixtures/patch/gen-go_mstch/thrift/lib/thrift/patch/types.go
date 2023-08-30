@@ -3200,19 +3200,19 @@ func (x *BinaryPatch) String() string {
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {
-	  RegisterType(name string, obj any)
+	  RegisterType(name string, initializer func() any)
 }) {
-    registry.RegisterType("facebook.com/thrift/op/GeneratePatch", &GeneratePatch{})
-    registry.RegisterType("facebook.com/thrift/op/AssignOnlyPatch", &AssignOnlyPatch{})
-    registry.RegisterType("facebook.com/thrift/op/BoolPatch", &BoolPatch{})
-    registry.RegisterType("facebook.com/thrift/op/BytePatch", &BytePatch{})
-    registry.RegisterType("facebook.com/thrift/op/I16Patch", &I16Patch{})
-    registry.RegisterType("facebook.com/thrift/op/I32Patch", &I32Patch{})
-    registry.RegisterType("facebook.com/thrift/op/I64Patch", &I64Patch{})
-    registry.RegisterType("facebook.com/thrift/op/FloatPatch", &FloatPatch{})
-    registry.RegisterType("facebook.com/thrift/op/DoublePatch", &DoublePatch{})
-    registry.RegisterType("facebook.com/thrift/op/StringPatch", &StringPatch{})
-    registry.RegisterType("facebook.com/thrift/op/BinaryPatch", &BinaryPatch{})
+    registry.RegisterType("facebook.com/thrift/op/GeneratePatch", func() any { return NewGeneratePatch() })
+    registry.RegisterType("facebook.com/thrift/op/AssignOnlyPatch", func() any { return NewAssignOnlyPatch() })
+    registry.RegisterType("facebook.com/thrift/op/BoolPatch", func() any { return NewBoolPatch() })
+    registry.RegisterType("facebook.com/thrift/op/BytePatch", func() any { return NewBytePatch() })
+    registry.RegisterType("facebook.com/thrift/op/I16Patch", func() any { return NewI16Patch() })
+    registry.RegisterType("facebook.com/thrift/op/I32Patch", func() any { return NewI32Patch() })
+    registry.RegisterType("facebook.com/thrift/op/I64Patch", func() any { return NewI64Patch() })
+    registry.RegisterType("facebook.com/thrift/op/FloatPatch", func() any { return NewFloatPatch() })
+    registry.RegisterType("facebook.com/thrift/op/DoublePatch", func() any { return NewDoublePatch() })
+    registry.RegisterType("facebook.com/thrift/op/StringPatch", func() any { return NewStringPatch() })
+    registry.RegisterType("facebook.com/thrift/op/BinaryPatch", func() any { return NewBinaryPatch() })
 
-    registry.RegisterType("facebook.com/thrift/op/PatchOp", PatchOp(0))
+    registry.RegisterType("facebook.com/thrift/op/PatchOp", func() any { return PatchOp(0) })
 }

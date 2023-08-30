@@ -565,10 +565,10 @@ func (x *MyUnion) String() string {
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {
-	  RegisterType(name string, obj any)
+	  RegisterType(name string, initializer func() any)
 }) {
-    registry.RegisterType("test.dev/fixtures/no-legacy-apis/MyStruct", &MyStruct{})
-    registry.RegisterType("test.dev/fixtures/no-legacy-apis/MyUnion", &MyUnion{})
+    registry.RegisterType("test.dev/fixtures/no-legacy-apis/MyStruct", func() any { return NewMyStruct() })
+    registry.RegisterType("test.dev/fixtures/no-legacy-apis/MyUnion", func() any { return NewMyUnion() })
 
-    registry.RegisterType("test.dev/fixtures/no-legacy-apis/MyEnum", MyEnum(0))
+    registry.RegisterType("test.dev/fixtures/no-legacy-apis/MyEnum", func() any { return MyEnum(0) })
 }

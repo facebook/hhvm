@@ -22,17 +22,17 @@
 }}
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {
-	  RegisterType(name string, obj any)
+	  RegisterType(name string, initializer func() any)
 }) {
     {{#program:structs}}
     {{#struct:thrift_uri}}
-    registry.RegisterType("{{struct:thrift_uri}}", &{{struct:go_name}}{})
+    registry.RegisterType("{{struct:thrift_uri}}", func() any { return {{struct:go_qualified_new_func}}() })
     {{/struct:thrift_uri}}
     {{/program:structs}}
 
     {{#program:enums}}
     {{#enum:thrift_uri}}
-    registry.RegisterType("{{enum:thrift_uri}}", {{enum:go_name}}(0))
+    registry.RegisterType("{{enum:thrift_uri}}", func() any { return {{enum:go_name}}(0) })
     {{/enum:thrift_uri}}
     {{/program:enums}}
 }

@@ -651,12 +651,12 @@ func (x *MarshalCapi) String() string {
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {
-	  RegisterType(name string, obj any)
+	  RegisterType(name string, initializer func() any)
 }) {
-    registry.RegisterType("facebook.com/thrift/annotation/python/Py3Hidden", &Py3Hidden{})
-    registry.RegisterType("facebook.com/thrift/annotation/python/Flags", &Flags{})
-    registry.RegisterType("facebook.com/thrift/annotation/python/Name", &Name{})
-    registry.RegisterType("facebook.com/thrift/annotation/python/Adapter", &Adapter{})
-    registry.RegisterType("facebook.com/thrift/annotation/python/MarshalCapi", &MarshalCapi{})
+    registry.RegisterType("facebook.com/thrift/annotation/python/Py3Hidden", func() any { return NewPy3Hidden() })
+    registry.RegisterType("facebook.com/thrift/annotation/python/Flags", func() any { return NewFlags() })
+    registry.RegisterType("facebook.com/thrift/annotation/python/Name", func() any { return NewName() })
+    registry.RegisterType("facebook.com/thrift/annotation/python/Adapter", func() any { return NewAdapter() })
+    registry.RegisterType("facebook.com/thrift/annotation/python/MarshalCapi", func() any { return NewMarshalCapi() })
 
 }

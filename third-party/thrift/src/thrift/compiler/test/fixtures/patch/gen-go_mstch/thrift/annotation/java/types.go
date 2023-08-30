@@ -779,12 +779,12 @@ func (x *Wrapper) String() string {
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {
-	  RegisterType(name string, obj any)
+	  RegisterType(name string, initializer func() any)
 }) {
-    registry.RegisterType("facebook.com/thrift/annotation/java/Mutable", &Mutable{})
-    registry.RegisterType("facebook.com/thrift/annotation/java/Annotation", &Annotation{})
-    registry.RegisterType("facebook.com/thrift/annotation/java/BinaryString", &BinaryString{})
-    registry.RegisterType("facebook.com/thrift/annotation/java/Adapter", &Adapter{})
-    registry.RegisterType("facebook.com/thrift/annotation/java/Wrapper", &Wrapper{})
+    registry.RegisterType("facebook.com/thrift/annotation/java/Mutable", func() any { return NewMutable() })
+    registry.RegisterType("facebook.com/thrift/annotation/java/Annotation", func() any { return NewAnnotation() })
+    registry.RegisterType("facebook.com/thrift/annotation/java/BinaryString", func() any { return NewBinaryString() })
+    registry.RegisterType("facebook.com/thrift/annotation/java/Adapter", func() any { return NewAdapter() })
+    registry.RegisterType("facebook.com/thrift/annotation/java/Wrapper", func() any { return NewWrapper() })
 
 }

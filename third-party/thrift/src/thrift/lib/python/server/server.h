@@ -64,7 +64,8 @@ class PythonUserException : public std::exception {
   std::unique_ptr<folly::IOBuf> buf_;
 };
 
-class PythonAsyncProcessor : public apache::thrift::AsyncProcessor {
+class PythonAsyncProcessor : public apache::thrift::GeneratedAsyncProcessorBase,
+                             public apache::thrift::ServerInterface {
  public:
   PythonAsyncProcessor(
       PyObject* python_server,
@@ -137,6 +138,40 @@ class PythonAsyncProcessor : public apache::thrift::AsyncProcessor {
     const auto& methodMetadata =
         apache::thrift::AsyncProcessorHelper::expectMetadataOfType<
             PythonMetadata>(untypedMethodMetadata);
+
+    // TODO just copying this from the rust thrift server, fetch this data
+    // from the actual python server
+    std::string interactionName;
+    bool interactionFactoryMethod = false;
+    if (context->getInteractionId()) {
+      std::string_view serviceName{context->getMethodName()};
+      serviceName = serviceName.substr(0, serviceName.find("."));
+      if (auto interactionCreate = context->getInteractionCreate()) {
+        if (interactionCreate->interactionName_ref()->view() == serviceName) {
+          interactionName = serviceName;
+          interactionFactoryMethod = false;
+        } else {
+          interactionName = interactionCreate->interactionName_ref()->str();
+          interactionFactoryMethod = true;
+        }
+      } else {
+        interactionName = serviceName;
+        interactionFactoryMethod = false;
+      }
+    }
+
+    if (!setUpRequestProcessing(
+            req,
+            context,
+            eb,
+            tm,
+            functions_.at(context->getMethodName())
+                .first, // TODO check if this will error out
+            this,
+            interactionName,
+            interactionFactoryMethod)) {
+      return;
+    }
     ProcessFunc pfn;
     switch (protType) {
       case apache::thrift::protocol::T_BINARY_PROTOCOL: {
@@ -273,6 +308,25 @@ class PythonAsyncProcessor : public apache::thrift::AsyncProcessor {
                              folly::Try<folly::Unit>&& /* t */) {});
           }
         });
+  }
+
+  // Dud method for GeneratedAsyncProcessor
+  const char* getServiceName() override {
+    LOG(WARNING) << "PythonAsyncProcessor::getServiceName called unexpectedly";
+    return "PythonService";
+  }
+
+  // Dud method for ServerInterface
+  std::string_view getGeneratedName() const override {
+    LOG(WARNING)
+        << "PythonAsyncProcessor::getGeneratedName called unexpectedly";
+    return "PythonService";
+  }
+
+  // Dud method for ServerInterface
+  std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override {
+    LOG(WARNING) << "PythonAsyncProcessor::getProcessor called unexpectedly";
+    return nullptr;
   }
 
   static const PythonAsyncProcessor::ProcessFuncs getSingleFunc() {

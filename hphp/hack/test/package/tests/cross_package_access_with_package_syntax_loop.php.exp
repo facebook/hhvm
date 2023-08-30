@@ -21,11 +21,11 @@ cross_package_access_with_package_syntax_loop.php--modules.php:3:12
      4 | new module b.b1 {}  // package pkg2
      5 | new module d {}     // package pkg4
 
-../PACKAGES.toml:10:11
-     8 | includes = ["pkg1"]
-     9 | 
-[4] 10 | [packages.pkg3]
-    11 | uses = ["c"]
-    12 | includes = ["pkg2"]
+../PACKAGES.toml:11:11
+     9 | includes = ["pkg1", "default"]
+    10 | 
+[4] 11 | [packages.pkg3]
+    12 | uses = ["c"]
+    13 | includes = ["pkg2", "default"]
 
 1 error found.

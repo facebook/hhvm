@@ -11,6 +11,12 @@ open Typing_defs
 module Env = Typing_env
 module Cls = Decl_provider.Class
 
+(* Convert None to a default module for package checks *)
+let none_to_default_module module_opt =
+  match module_opt with
+  | None -> Some Naming_special_names.Modules.default
+  | _ -> module_opt
+
 let can_access_internal
     ~(env : Typing_env_types.env)
     ~(current : string option)
@@ -77,6 +83,7 @@ let satisfies_rules test_module_opt rules =
 let find_module_symbol env name_opt =
   match name_opt with
   | None -> None
+  | Some s when String.equal s Naming_special_names.Modules.default -> None
   | Some name -> Some (name, Env.get_module env name)
 
 let satisfies_import_rules env current target =
@@ -124,6 +131,8 @@ let satisfies_package_deps env current_pkg target_pkg =
           Some (get_package_pos current_pkg_info, r)))
 
 let satisfies_pkg_rules env current target =
+  let current = none_to_default_module current in
+  let target = none_to_default_module target in
   let target_pkg = Option.bind target ~f:(Env.get_package_for_module env) in
   let (current_pkg, current_module_pos) =
     match find_module_symbol env current with

@@ -2,15 +2,20 @@
 
 [packages.pkg1]
 uses = ["a", "b.*"]
+includes=["default"]
 
 [packages.pkg2]
 uses = ["b.b1"]
-includes = ["pkg1"]
+includes = ["pkg1", "default"]
 
 [packages.pkg3]
 uses = ["c"]
-includes = ["pkg2"]
+includes = ["pkg2", "default"]
 
 [packages.pkg4]
 uses = ["d", "d.*"]
+includes=["default"]
 soft_includes = ["pkg2"]
+
+[packages.default]
+uses=["*"]

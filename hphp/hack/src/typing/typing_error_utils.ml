@@ -1200,7 +1200,7 @@ module Eval_primary = struct
               target_module
               (match current_module_opt with
               | Some m -> Printf.sprintf "in module `%s`" m
-              | None -> "outside of a module") )
+              | None -> "in the default module") )
       and reason =
         lazy
           [(decl_pos, Printf.sprintf "This is from module `%s`" target_module)]
@@ -1277,7 +1277,7 @@ module Eval_primary = struct
     let get_module_str m_opt =
       match m_opt with
       | Some s -> Printf.sprintf "module `%s`" s
-      | None -> "outside of a module"
+      | None -> "the default module"
 
     let get_package_str p_opt =
       match p_opt with

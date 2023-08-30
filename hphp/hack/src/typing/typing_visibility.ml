@@ -381,7 +381,12 @@ let check_class_access ~is_method ~use_pos ~def_pos env (vis, lsb) cid class_ =
 let check_cross_package ~use_pos ~def_pos env (cross_package : string option) =
   match cross_package with
   | Some target ->
-    let current_module = Env.get_current_module env in
+    (* Convert None to the "default" module for packages *)
+    let current_module =
+      match Env.get_current_module env with
+      | None -> Some Naming_special_names.Modules.default
+      | x -> x
+    in
     let current_pkg =
       Option.bind ~f:(Env.get_package_for_module env) current_module
     in

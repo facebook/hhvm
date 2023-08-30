@@ -1,5 +1,5 @@
 File "module_internal_class.php--everywhere.php", line 3, characters 17-17:
-Cannot access an internal element from module `here` outside of a module (Typing[4444])
+Cannot access an internal element from module `here` in the default module (Typing[4444])
   File "module_internal_class.php--here.php", line 7, characters 16-16:
   This is from module `here`
 File "module_internal_class.php--here.php", line 19, characters 11-11:

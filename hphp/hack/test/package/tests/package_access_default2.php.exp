@@ -1,45 +1,57 @@
-Typing[4472] Cannot access a public element in package pkg1 from the default package [1]
+Typing[4472] Cannot access a public element in package pkg1 from package default [1]
 -> This is from module a, which is in package pkg1 [2]
--> But this is from module x, which belongs to the default package [3]
--> And the default package does not include package pkg1 [3]
+-> But this is from module x, which belongs to package default [3]
+-> And package default does not include package pkg1 [4]
 
 package_access_default2.php--x.php:4:20
-    2 | <<file:__EnableUnstableFeatures("package")>>
-    3 | module x;
-[1] 4 | public type YInt = XInt; // error
-    5 | function test(): void {
-    6 |   if(package pkg1) {
+     2 | <<file:__EnableUnstableFeatures("package")>>
+     3 | module x;
+[1]  4 | public type YInt = XInt; // error
+     5 | function test(): void {
+     6 |   if(package pkg1) {
 
 package_access_default2.php--a.php:3:13
-    1 | <?hh
-    2 | module a;
-[2] 3 | public type XInt = int;
-    4 | function foo(): void {}
+     1 | <?hh
+     2 | module a;
+[2]  3 | public type XInt = int;
+     4 | function foo(): void {}
 
 package_access_default2.php--modules.php:2:12
-    1 | <?hh
-[3] 2 | new module x {}    // default package
-    3 | new module a {}    // pkg1
+     1 | <?hh
+[3]  2 | new module x {}    // default package
+     3 | new module a {}    // pkg1
 
-Typing[4472] Cannot access a public element in package pkg1 from the default package [1]
+../PACKAGES.toml:20:11
+    18 | soft_includes = ["pkg2"]
+    19 | 
+[4] 20 | [packages.default]
+    21 | uses=["*"]
+
+Typing[4472] Cannot access a public element in package pkg1 from package default [1]
 -> This is from module a, which is in package pkg1 [2]
--> But this is from module x, which belongs to the default package [3]
--> And the default package does not include package pkg1 [3]
+-> But this is from module x, which belongs to package default [3]
+-> And package default does not include package pkg1 [4]
 
 package_access_default2.php--x.php:9:3
-    7 |     foo(); // ok
-    8 |   }
-[1] 9 |   foo(); // error
-   10 | }
+     7 |     foo(); // ok
+     8 |   }
+[1]  9 |   foo(); // error
+    10 | }
 
 package_access_default2.php--a.php:4:10
-    2 | module a;
-    3 | public type XInt = int;
-[2] 4 | function foo(): void {}
+     2 | module a;
+     3 | public type XInt = int;
+[2]  4 | function foo(): void {}
 
 package_access_default2.php--modules.php:2:12
-    1 | <?hh
-[3] 2 | new module x {}    // default package
-    3 | new module a {}    // pkg1
+     1 | <?hh
+[3]  2 | new module x {}    // default package
+     3 | new module a {}    // pkg1
+
+../PACKAGES.toml:20:11
+    18 | soft_includes = ["pkg2"]
+    19 | 
+[4] 20 | [packages.default]
+    21 | uses=["*"]
 
 2 errors found.

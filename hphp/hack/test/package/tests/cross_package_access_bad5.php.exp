@@ -1,6 +1,6 @@
 Typing[4472] Cannot access a public element in package pkg1 from the default package [1]
 -> This is from module a, which is in package pkg1 [2]
--> But this is from outside of a module, which belongs to the default package [3]
+-> But this is from the default module, which belongs to the default package [3]
 -> And the default package does not include package pkg1 [3]
 
 cross_package_access_bad5.php--b.php:5:14

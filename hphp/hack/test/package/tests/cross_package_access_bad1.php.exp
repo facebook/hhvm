@@ -24,6 +24,6 @@ cross_package_access_bad1.php--modules.php:2:12
     2 | 
 [4] 3 | [packages.pkg1]
     4 | uses = ["a", "b.*"]
-    5 | 
+    5 | includes=["default"]
 
 1 error found.

@@ -3,6 +3,6 @@ Cannot access an internal element from module `A` in module `B` (Typing[4444])
   File "basic_fun_call.php--A.php", line 5, characters 19-19:
   This is from module `A`
 File "basic_fun_call.php--main.php", line 3, characters 25-25:
-Cannot access an internal element from module `A` outside of a module (Typing[4444])
+Cannot access an internal element from module `A` in the default module (Typing[4444])
   File "basic_fun_call.php--A.php", line 5, characters 19-19:
   This is from module `A`

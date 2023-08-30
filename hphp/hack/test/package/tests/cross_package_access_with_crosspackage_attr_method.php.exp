@@ -26,7 +26,7 @@ cross_package_access_with_crosspackage_attr_method.php--modules.php:2:12
     2 | 
 [4] 3 | [packages.pkg1]
     4 | uses = ["a", "b.*"]
-    5 | 
+    5 | includes=["default"]
 
 Typing[4472] Cannot access a public element in package pkg2 from package pkg1 [1]
 -> This is from module b.b1, which is in package pkg2 [2]
@@ -56,6 +56,6 @@ cross_package_access_with_crosspackage_attr_method.php--modules.php:2:12
      2 | 
 [4]  3 | [packages.pkg1]
      4 | uses = ["a", "b.*"]
-     5 | 
+     5 | includes=["default"]
 
 2 errors found.

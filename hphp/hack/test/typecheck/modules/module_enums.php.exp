@@ -11,10 +11,10 @@ Cannot access an internal element from module `X` in module `Y` (Typing[4444])
   File "module_enums.php--X.php", line 6, characters 15-15:
   This is from module `X`
 File "module_enums.php--no-module.php", line 4, characters 13-13:
-Cannot access an internal element from module `X` outside of a module (Typing[4444])
+Cannot access an internal element from module `X` in the default module (Typing[4444])
   File "module_enums.php--X.php", line 6, characters 15-15:
   This is from module `X`
 File "module_enums.php--no-module.php", line 7, characters 8-8:
-Cannot access an internal element from module `X` outside of a module (Typing[4444])
+Cannot access an internal element from module `X` in the default module (Typing[4444])
   File "module_enums.php--X.php", line 6, characters 15-15:
   This is from module `X`

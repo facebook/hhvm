@@ -19,12 +19,12 @@ cross_package_access_bad_soft.php--modules.php:4:12
      3 | new module b.b1 {}  // package pkg2 (include pkg1)
 [3]  4 | new module d.a {} // package pkg4 (soft include pkg2)
 
-../PACKAGES.toml:14:11
-    12 | includes = ["pkg2"]
-    13 | 
-[4] 14 | [packages.pkg4]
-    15 | uses = ["d", "d.*"]
-    16 | soft_includes = ["pkg2"]
+../PACKAGES.toml:15:11
+    13 | includes = ["pkg2", "default"]
+    14 | 
+[4] 15 | [packages.pkg4]
+    16 | uses = ["d", "d.*"]
+    17 | includes=["default"]
 
 Typing[4473] Cannot access a public element in package pkg2 from package pkg4 [1]
 -> This is from module b.b1, which is in package pkg2 [2]
@@ -48,11 +48,11 @@ cross_package_access_bad_soft.php--modules.php:4:12
      3 | new module b.b1 {}  // package pkg2 (include pkg1)
 [3]  4 | new module d.a {} // package pkg4 (soft include pkg2)
 
-../PACKAGES.toml:14:11
-    12 | includes = ["pkg2"]
-    13 | 
-[4] 14 | [packages.pkg4]
-    15 | uses = ["d", "d.*"]
-    16 | soft_includes = ["pkg2"]
+../PACKAGES.toml:15:11
+    13 | includes = ["pkg2", "default"]
+    14 | 
+[4] 15 | [packages.pkg4]
+    16 | uses = ["d", "d.*"]
+    17 | includes=["default"]
 
 2 errors found.

@@ -129,162 +129,125 @@ class ClientServerTests(unittest.TestCase):
     These are tests where a client and server talk to each other
     """
 
-    def test_get_context(self) -> None:
-        loop = asyncio.get_event_loop()
+    async def test_get_context(self) -> None:
 
-        async def inner_test() -> None:
-            async with TestServer(ip="::1") as sa:
-                ip, port = sa.ip, sa.port
-                assert ip and port
-                async with get_client(TestingService, host=ip, port=port) as client:
-                    options = RpcOptions()
-                    options.timeout = 100.0
+        async with TestServer(ip="::1") as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            async with get_client(TestingService, host=ip, port=port) as client:
+                options = RpcOptions()
+                options.timeout = 100.0
 
-                    self.assertEqual(
-                        "Testing", await client.getName(rpc_options=options)
-                    )
-                    self.assertEqual("true", options.read_headers["contextvar"])
-                    self.assertEqual(
-                        "getMethodName",
-                        await client.getMethodName(),
-                    )
-                    # requestId is a 16 char wide hex string
-                    self.assertEqual(
-                        len(await client.getRequestId()),
-                        16,
-                    )
-                    self.assertEqual(
-                        100.0,
-                        await client.getRequestTimeout(rpc_options=options),
-                    )
+                self.assertEqual("Testing", await client.getName(rpc_options=options))
+                self.assertEqual("true", options.read_headers["contextvar"])
+                self.assertEqual(
+                    "getMethodName",
+                    await client.getMethodName(),
+                )
+                # requestId is a 16 char wide hex string
+                self.assertEqual(
+                    len(await client.getRequestId()),
+                    16,
+                )
+                self.assertEqual(
+                    100.0,
+                    await client.getRequestTimeout(rpc_options=options),
+                )
 
-        loop.run_until_complete(inner_test())
+        handler = Handler()  # so we can call it outside the thrift server
+        with self.assertRaises(LookupError):
+            await handler.getName()
 
-        async def outside_context_test() -> None:
-            handler = Handler()  # so we can call it outside the thrift server
-            with self.assertRaises(LookupError):
-                await handler.getName()
+    async def test_rpc_headers(self) -> None:
 
-        loop.run_until_complete(outside_context_test())
+        async with TestServer(ip="::1") as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            async with get_client(TestingService, host=ip, port=port) as client:
+                options = RpcOptions()
+                options.set_header("from client", "with love")
+                self.assertFalse(await client.invert(True, rpc_options=options))
+                self.assertIn("from server", options.read_headers)
 
-    def test_rpc_headers(self) -> None:
-        loop = asyncio.get_event_loop()
+    async def test_server_localhost(self) -> None:
 
-        async def inner_test() -> None:
-            async with TestServer(ip="::1") as sa:
-                ip, port = sa.ip, sa.port
-                assert ip and port
-                async with get_client(TestingService, host=ip, port=port) as client:
-                    options = RpcOptions()
-                    options.set_header("from client", "with love")
-                    self.assertFalse(await client.invert(True, rpc_options=options))
-                    self.assertIn("from server", options.read_headers)
-
-        loop.run_until_complete(inner_test())
-
-    def test_server_localhost(self) -> None:
-        loop = asyncio.get_event_loop()
-
-        async def inner_test() -> None:
-            async with TestServer(ip="::1") as sa:
-                ip, port = sa.ip, sa.port
-                assert ip and port
-                async with get_client(TestingService, host=ip, port=port) as client:
-                    self.assertTrue(await client.invert(False))
-                    self.assertFalse(await client.invert(True))
-                    # TODO (ffrancet): after RPC headers are supported, check uex and uexw
-                    with self.assertRaises(SimpleError):
-                        await client.takes_a_list([])
-
-        loop.run_until_complete(inner_test())
-
-    def test_no_client_aexit(self) -> None:
-        loop = asyncio.get_event_loop()
-
-        async def inner_test() -> None:
-            async with TestServer() as sa:
-                ip, port = sa.ip, sa.port
-                assert ip and port
-                client = get_client(TestingService, host=ip, port=port)
-                await client.__aenter__()
+        async with TestServer(ip="::1") as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            async with get_client(TestingService, host=ip, port=port) as client:
                 self.assertTrue(await client.invert(False))
                 self.assertFalse(await client.invert(True))
+                # TODO (ffrancet): after RPC headers are supported, check uex and uexw
+                with self.assertRaises(SimpleError):
+                    await client.takes_a_list([])
 
-        # If we do not abort here then good
+    async def test_no_client_aexit(self) -> None:
 
-        loop.run_until_complete(inner_test())
+        async with TestServer() as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            client = get_client(TestingService, host=ip, port=port)
+            await client.__aenter__()
+            self.assertTrue(await client.invert(False))
+            self.assertFalse(await client.invert(True))
 
-    def test_client_aexit_no_await(self) -> None:
+    # If we do not abort here then good
+
+    async def test_client_aexit_no_await(self) -> None:
         """
         This actually handles the case if __aexit__ is not awaited
         """
-        loop = asyncio.get_event_loop()
 
-        async def inner_test() -> None:
-            async with TestServer() as sa:
-                ip, port = sa.ip, sa.port
-                assert ip and port
-                client = get_client(TestingService, host=ip, port=port)
-                await client.__aenter__()
-                self.assertTrue(await client.invert(False))
-                self.assertFalse(await client.invert(True))
-                # pyre-fixme[1001]: Async expression is not awaited.
-                _ = client.__aexit__(None, None, None)
-                del client  # If we do not abort here then good
+        async with TestServer() as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            client = get_client(TestingService, host=ip, port=port)
+            await client.__aenter__()
+            self.assertTrue(await client.invert(False))
+            self.assertFalse(await client.invert(True))
+            # pyre-fixme[1001]: Async expression is not awaited.
+            _ = client.__aexit__(None, None, None)
+            del client  # If we do not abort here then good
 
-        loop.run_until_complete(inner_test())
-
-    def test_no_client_no_aenter(self) -> None:
+    async def test_no_client_no_aenter(self) -> None:
         """
         This covers if aenter was canceled since those two are the same really
         """
-        loop = asyncio.get_event_loop()
 
-        async def inner_test() -> None:
-            async with TestServer() as sa:
-                ip, port = sa.ip, sa.port
-                assert ip and port
-                get_client(TestingService, host=ip, port=port)
+        async with TestServer() as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            get_client(TestingService, host=ip, port=port)
 
-        # If we do not abort here then good
+    # If we do not abort here then good
 
-        loop.run_until_complete(inner_test())
-
-    def test_derived_service(self) -> None:
+    async def test_derived_service(self) -> None:
         """
         This tests calling methods from a derived service
         """
-        loop = asyncio.get_event_loop()
 
-        async def inner_test() -> None:
-            async with TestServer(handler=DerivedHandler()) as sa:
-                ip, port = sa.ip, sa.port
-                assert ip and port
-                async with get_client(
-                    DerivedTestingService,
-                    host=ip,
-                    port=port,
-                ) as client:
-                    self.assertEqual(await client.getName(), "DerivedTesting")
-                    self.assertEqual(
-                        await client.derived_pick_a_color(Color.red), Color.red
-                    )
+        async with TestServer(handler=DerivedHandler()) as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            async with get_client(
+                DerivedTestingService,
+                host=ip,
+                port=port,
+            ) as client:
+                self.assertEqual(await client.getName(), "DerivedTesting")
+                self.assertEqual(
+                    await client.derived_pick_a_color(Color.red), Color.red
+                )
 
-        loop.run_until_complete(inner_test())
+    async def test_renamed_func(self) -> None:
 
-    def test_renamed_func(self) -> None:
-        loop = asyncio.get_event_loop()
+        async with TestServer(ip="::1") as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            async with get_client(TestingService, host=ip, port=port) as client:
+                self.assertEqual(True, await client.renamed_func(True))
 
-        async def inner_test() -> None:
-            async with TestServer(ip="::1") as sa:
-                ip, port = sa.ip, sa.port
-                assert ip and port
-                async with get_client(TestingService, host=ip, port=port) as client:
-                    self.assertEqual(True, await client.renamed_func(True))
-
-        loop.run_until_complete(inner_test())
-
-    def test_queue_timeout(self) -> None:
+    async def test_queue_timeout(self) -> None:
         """
         This tests whether queue timeout functions properly.
         """
@@ -299,7 +262,6 @@ class ClientServerTests(unittest.TestCase):
 
         testing = TestServer(handler=SlowDerivedHandler())
         testing.server.set_queue_timeout(0.01)
-        loop = asyncio.get_event_loop()
 
         async def client_call(sa: SocketAddress) -> str:
             ip, port = sa.ip, sa.port
@@ -324,9 +286,9 @@ class ClientServerTests(unittest.TestCase):
                 )
                 self.assertIn("Queue Timeout", results)
 
-        loop.run_until_complete(clients_run(testing))
+        await clients_run(testing)
 
-    def test_cancelled_task(self) -> None:
+    async def test_cancelled_task(self) -> None:
         """
         This tests whether cancelled tasks are handled properly.
         """
@@ -338,23 +300,18 @@ class ClientServerTests(unittest.TestCase):
                     cancelledMessage
                 )  # Pretend that this is some await call that gets cancelled
 
-        loop = asyncio.get_event_loop()
+        async with TestServer(handler=CancelHandler(), ip="::1") as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            async with get_client(TestingService, host=ip, port=port) as client:
+                with self.assertRaises(ApplicationError) as ex:
+                    await client.getName()
+                self.assertEqual(
+                    ex.exception.message,
+                    f"Application was cancelled on the server with message: {cancelledMessage}",
+                )
 
-        async def inner_test() -> None:
-            async with TestServer(handler=CancelHandler(), ip="::1") as sa:
-                ip, port = sa.ip, sa.port
-                assert ip and port
-                async with get_client(TestingService, host=ip, port=port) as client:
-                    with self.assertRaises(ApplicationError) as ex:
-                        await client.getName()
-                    self.assertEqual(
-                        ex.exception.message,
-                        f"Application was cancelled on the server with message: {cancelledMessage}",
-                    )
-
-        loop.run_until_complete(inner_test())
-
-    def test_unexpected_error(self) -> None:
+    async def test_unexpected_error(self) -> None:
         """
         This tests whether unexpected errors handled properly.
         """
@@ -364,54 +321,41 @@ class ClientServerTests(unittest.TestCase):
             async def getName(self) -> str:
                 raise Exception(errMessage)
 
-        loop = asyncio.get_event_loop()
+        async with TestServer(handler=ErrorHandler(), ip="::1") as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            async with get_client(TestingService, host=ip, port=port) as client:
+                with self.assertRaises(ApplicationError) as ex:
+                    await client.getName()
+                self.assertEqual(
+                    ex.exception.message,
+                    f"Exception('{errMessage}')",
+                )
 
-        async def inner_test() -> None:
-            async with TestServer(handler=ErrorHandler(), ip="::1") as sa:
-                ip, port = sa.ip, sa.port
-                assert ip and port
-                async with get_client(TestingService, host=ip, port=port) as client:
-                    with self.assertRaises(ApplicationError) as ex:
-                        await client.getName()
-                    self.assertEqual(
-                        ex.exception.message,
-                        f"Exception('{errMessage}')",
-                    )
+    async def test_request_with_default_rpc_options(self) -> None:
 
-        loop.run_until_complete(inner_test())
+        async with TestServer(ip="::1") as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            async with get_client(TestingService, host=ip, port=port) as client:
+                timeout = await client.getRequestTimeout()
+                self.assertEqual(timeout, 0.0)
+                priority = await client.getPriority()
+                self.assertEqual(Priority(priority), Priority.N_PRIORITIES)
 
-    def test_request_with_default_rpc_options(self) -> None:
-        loop = asyncio.get_event_loop()
+    async def test_request_with_specified_rpc_options(self) -> None:
 
-        async def inner_test() -> None:
-            async with TestServer(ip="::1") as sa:
-                ip, port = sa.ip, sa.port
-                assert ip and port
-                async with get_client(TestingService, host=ip, port=port) as client:
-                    timeout = await client.getRequestTimeout()
-                    self.assertEqual(timeout, 0.0)
-                    priority = await client.getPriority()
-                    self.assertEqual(Priority(priority), Priority.N_PRIORITIES)
-
-        loop.run_until_complete(inner_test())
-
-    def test_request_with_specified_rpc_options(self) -> None:
-        loop = asyncio.get_event_loop()
-
-        async def inner_test() -> None:
-            async with TestServer(ip="::1") as sa:
-                ip, port = sa.ip, sa.port
-                assert ip and port
-                async with get_client(TestingService, host=ip, port=port) as client:
-                    options = RpcOptions()
-                    options.timeout = 15.0
-                    options.priority = Priority.BEST_EFFORT
-                    timeout = await client.getRequestTimeout(rpc_options=options)
-                    self.assertEqual(timeout, 15.0)
-                    priority = await client.getPriority(rpc_options=options)
-                    self.assertEqual(Priority(priority), Priority.BEST_EFFORT)
-
-        loop.run_until_complete(inner_test())
+        async with TestServer(ip="::1") as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            async with get_client(TestingService, host=ip, port=port) as client:
+                options = RpcOptions()
+                options.timeout = 15.0
+                options.priority = Priority.BEST_EFFORT
+                timeout = await client.getRequestTimeout(rpc_options=options)
+                self.assertEqual(timeout, 15.0)
+                priority = await client.getPriority(rpc_options=options)
+                self.assertEqual(Priority(priority), Priority.BEST_EFFORT)
 
 
 class StackHandler(StackServiceInterface):
@@ -449,24 +393,20 @@ class ClientStackServerTests(unittest.TestCase):
     These are tests where a client and server(stack_arguments) talk to each other
     """
 
-    def test_server_localhost(self) -> None:
-        loop = asyncio.get_event_loop()
+    async def test_server_localhost(self) -> None:
 
-        async def inner_test() -> None:
-            async with TestServer(handler=StackHandler(), ip="::1") as sa:
-                ip, port = sa.ip, sa.port
-                assert ip and port
-                async with get_client(StackService, host=ip, port=port) as client:
-                    self.assertEqual(
-                        (3, 4, 5, 6), await client.add_to(lst=(1, 2, 3, 4), value=2)
-                    )
-                    self.assertEqual(66, (await client.get_simple()).val)
-                    self.assertEqual((await client.get_simple_no_sa()).val, 88)
-                    await client.take_simple(simple(val=10))
-                    self.assertEqual(b"abc", b"".join(await client.get_iobuf()))
-                    await client.take_iobuf(IOBuf(b"cba"))
-                    # currently unsupported by cpp backend:
-                    # self.assertEqual(b'xyz', (await client.get_iobuf_ptr()))
-                    await client.take_iobuf_ptr(IOBuf(b"zyx"))
-
-        loop.run_until_complete(inner_test())
+        async with TestServer(handler=StackHandler(), ip="::1") as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            async with get_client(StackService, host=ip, port=port) as client:
+                self.assertEqual(
+                    (3, 4, 5, 6), await client.add_to(lst=(1, 2, 3, 4), value=2)
+                )
+                self.assertEqual(66, (await client.get_simple()).val)
+                self.assertEqual((await client.get_simple_no_sa()).val, 88)
+                await client.take_simple(simple(val=10))
+                self.assertEqual(b"abc", b"".join(await client.get_iobuf()))
+                await client.take_iobuf(IOBuf(b"cba"))
+                # currently unsupported by cpp backend:
+                # self.assertEqual(b'xyz', (await client.get_iobuf_ptr()))
+                await client.take_iobuf_ptr(IOBuf(b"zyx"))

@@ -103,152 +103,117 @@ class TestServer:
 
 
 class StreamClientTest(unittest.TestCase):
-    def test_return_stream(self) -> None:
-        loop = asyncio.get_event_loop()
+    async def test_return_stream(self) -> None:
+        async with TestServer(ip="::1") as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            async with get_client(
+                StreamTestService,
+                host=ip,
+                port=port,
+                client_type=ClientType.THRIFT_ROCKET_CLIENT_TYPE,
+            ) as client:
+                stream = await client.returnstream(10, 1024)
+                res = [n async for n in stream]
+                self.assertEqual(res, list(range(10, 1024)))
 
-        async def inner_test() -> None:
-            async with TestServer(ip="::1") as sa:
-                ip, port = sa.ip, sa.port
-                assert ip and port
-                async with get_client(
-                    StreamTestService,
-                    host=ip,
-                    port=port,
-                    client_type=ClientType.THRIFT_ROCKET_CLIENT_TYPE,
-                ) as client:
-                    stream = await client.returnstream(10, 1024)
-                    res = [n async for n in stream]
-                    self.assertEqual(res, list(range(10, 1024)))
+    async def test_method_name_stream(self) -> None:
+        async with TestServer(ip="::1") as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            async with get_client(
+                StreamTestService,
+                host=ip,
+                port=port,
+                client_type=ClientType.THRIFT_ROCKET_CLIENT_TYPE,
+            ) as client:
+                stream = await client.methodNameStream()
+                res = [n async for n in stream]
+                self.assertEqual(res, list("methodNameStream"))
 
-        loop.run_until_complete(inner_test())
+    async def test_stringstream(self) -> None:
+        async with TestServer(ip="::1") as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            async with get_client(
+                StreamTestService,
+                host=ip,
+                port=port,
+                client_type=ClientType.THRIFT_ROCKET_CLIENT_TYPE,
+            ) as client:
+                stream = await client.stringstream()
+                res = [n async for n in stream]
+                self.assertEqual(res, ["hi", "hello"])
 
-    def test_method_name_stream(self) -> None:
-        loop = asyncio.get_event_loop()
+    async def test_stream_throws(self) -> None:
+        async with TestServer(ip="::1") as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            async with get_client(
+                StreamTestService,
+                host=ip,
+                port=port,
+                client_type=ClientType.THRIFT_ROCKET_CLIENT_TYPE,
+            ) as client:
+                with self.assertRaises(FuncEx):
+                    await client.streamthrows(True)
+                stream = await client.streamthrows(False)
+                with self.assertRaises(StreamEx):
+                    async for _ in stream:  # noqa: F841 current flake8 version too old to support "async for _ in"
+                        pass
 
-        async def inner_test() -> None:
-            async with TestServer(ip="::1") as sa:
-                ip, port = sa.ip, sa.port
-                assert ip and port
-                async with get_client(
-                    StreamTestService,
-                    host=ip,
-                    port=port,
-                    client_type=ClientType.THRIFT_ROCKET_CLIENT_TYPE,
-                ) as client:
-                    stream = await client.methodNameStream()
-                    res = [n async for n in stream]
-                    self.assertEqual(res, list("methodNameStream"))
+    async def test_stream_cancel(self) -> None:
+        async with TestServer(ip="::1") as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            async with get_client(
+                StreamTestService,
+                host=ip,
+                port=port,
+                client_type=ClientType.THRIFT_ROCKET_CLIENT_TYPE,
+            ) as client:
+                _ = await client.streamthrows(False)
+                otherStream = await client.stringstream()
+                async for val in otherStream:
+                    self.assertEqual(val, "hi")
+                    break
+                thirdStream = await client.stringstream()
+                res = [n async for n in thirdStream]
+                self.assertEqual(res, ["hi", "hello"])
 
-        loop.run_until_complete(inner_test())
+    async def test_return_response_and_stream(self) -> None:
+        async with TestServer(ip="::1") as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            async with get_client(
+                StreamTestService,
+                host=ip,
+                port=port,
+                client_type=ClientType.THRIFT_ROCKET_CLIENT_TYPE,
+            ) as client:
+                # pyre-fixme[23]: response and server stream aren't unpackable according to pyre
+                resp, stream = await client.returnresponseandstream(
+                    Included(from_=39, to=42)
+                )
+                self.assertEqual(resp, Included(from_=100, to=200))
+                expected_to = 39
+                async for n in stream:
+                    self.assertEqual(n, Included(from_=39, to=expected_to))
+                    expected_to += 1
+                self.assertEqual(expected_to, 42)
 
-    def test_stringstream(self) -> None:
-        loop = asyncio.get_event_loop()
-
-        async def inner_test() -> None:
-            async with TestServer(ip="::1") as sa:
-                ip, port = sa.ip, sa.port
-                assert ip and port
-                async with get_client(
-                    StreamTestService,
-                    host=ip,
-                    port=port,
-                    client_type=ClientType.THRIFT_ROCKET_CLIENT_TYPE,
-                ) as client:
-                    stream = await client.stringstream()
-                    res = [n async for n in stream]
-                    self.assertEqual(res, ["hi", "hello"])
-
-        loop.run_until_complete(inner_test())
-
-    def test_stream_throws(self) -> None:
-        loop = asyncio.get_event_loop()
-
-        async def inner_test() -> None:
-            async with TestServer(ip="::1") as sa:
-                ip, port = sa.ip, sa.port
-                assert ip and port
-                async with get_client(
-                    StreamTestService,
-                    host=ip,
-                    port=port,
-                    client_type=ClientType.THRIFT_ROCKET_CLIENT_TYPE,
-                ) as client:
-                    with self.assertRaises(FuncEx):
-                        await client.streamthrows(True)
-                    stream = await client.streamthrows(False)
-                    with self.assertRaises(StreamEx):
-                        async for _ in stream:  # noqa: F841 current flake8 version too old to support "async for _ in"
-                            pass
-
-        loop.run_until_complete(inner_test())
-
-    def test_stream_cancel(self) -> None:
-        loop = asyncio.get_event_loop()
-
-        async def inner_test() -> None:
-            async with TestServer(ip="::1") as sa:
-                ip, port = sa.ip, sa.port
-                assert ip and port
-                async with get_client(
-                    StreamTestService,
-                    host=ip,
-                    port=port,
-                    client_type=ClientType.THRIFT_ROCKET_CLIENT_TYPE,
-                ) as client:
-                    _ = await client.streamthrows(False)
-                    otherStream = await client.stringstream()
-                    async for val in otherStream:
-                        self.assertEqual(val, "hi")
-                        break
-                    thirdStream = await client.stringstream()
-                    res = [n async for n in thirdStream]
-                    self.assertEqual(res, ["hi", "hello"])
-
-        loop.run_until_complete(inner_test())
-
-    def test_return_response_and_stream(self) -> None:
-        loop = asyncio.get_event_loop()
-
-        async def inner_test() -> None:
-            async with TestServer(ip="::1") as sa:
-                ip, port = sa.ip, sa.port
-                assert ip and port
-                async with get_client(
-                    StreamTestService,
-                    host=ip,
-                    port=port,
-                    client_type=ClientType.THRIFT_ROCKET_CLIENT_TYPE,
-                ) as client:
-                    # pyre-fixme[23]: response and server stream aren't unpackable according to pyre
-                    resp, stream = await client.returnresponseandstream(
-                        Included(from_=39, to=42)
-                    )
-                    self.assertEqual(resp, Included(from_=100, to=200))
-                    expected_to = 39
-                    async for n in stream:
-                        self.assertEqual(n, Included(from_=39, to=expected_to))
-                        expected_to += 1
-                    self.assertEqual(expected_to, 42)
-
-        loop.run_until_complete(inner_test())
-
-    def test_return_stream_set_buffer_size(self) -> None:
-        loop = asyncio.get_event_loop()
-
-        async def inner_test() -> None:
-            options = RpcOptions()
-            options.chunk_buffer_size = 64
-            async with TestServer(ip="::1") as sa:
-                ip, port = sa.ip, sa.port
-                assert ip and port
-                async with get_client(
-                    StreamTestService,
-                    host=ip,
-                    port=port,
-                    client_type=ClientType.THRIFT_ROCKET_CLIENT_TYPE,
-                ) as client:
-                    stream = await client.returnstream(10, 1024, rpc_options=options)
-                    res = [n async for n in stream]
-                    self.assertEqual(res, list(range(10, 1024)))
-
-        loop.run_until_complete(inner_test())
+    async def test_return_stream_set_buffer_size(self) -> None:
+        options = RpcOptions()
+        options.chunk_buffer_size = 64
+        async with TestServer(ip="::1") as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            async with get_client(
+                StreamTestService,
+                host=ip,
+                port=port,
+                client_type=ClientType.THRIFT_ROCKET_CLIENT_TYPE,
+            ) as client:
+                stream = await client.returnstream(10, 1024, rpc_options=options)
+                res = [n async for n in stream]
+                self.assertEqual(res, list(range(10, 1024)))

@@ -115,49 +115,44 @@ class TestServer:
 
 
 class ClientBinaryServerTests(unittest.TestCase):
-    def test_send_recv(self) -> None:
-        loop = asyncio.get_event_loop()
-
-        async def inner_test() -> None:
-            async with TestServer(handler=BinaryHandler(self), ip="::1") as sa:
-                ip, port = sa.ip, sa.port
-                assert ip and port
-                async with get_client(BinaryService, host=ip, port=port) as client:
-                    # pyre-fixme[33]: Given annotation cannot be `Any`.
-                    val: Any
-                    val = await client.sendRecvBinaries(
-                        Binaries(
-                            no_special_type=b"c1",
-                            iobuf_val=IOBuf(b"c2"),
-                            iobuf_ptr=IOBuf(b"c3"),
-                            fbstring=b"c4",
-                            nonstandard_type=b"c5",
-                        )
+    async def test_send_recv(self) -> None:
+        async with TestServer(handler=BinaryHandler(self), ip="::1") as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            async with get_client(BinaryService, host=ip, port=port) as client:
+                # pyre-fixme[33]: Given annotation cannot be `Any`.
+                val: Any
+                val = await client.sendRecvBinaries(
+                    Binaries(
+                        no_special_type=b"c1",
+                        iobuf_val=IOBuf(b"c2"),
+                        iobuf_ptr=IOBuf(b"c3"),
+                        fbstring=b"c4",
+                        nonstandard_type=b"c5",
                     )
-                    self.assertEqual(val.no_special_type, b"s1")
-                    self.assertEqual(bytes(val.iobuf_val), b"s2")
-                    assert val.iobuf_ptr is not None
-                    self.assertEqual(bytes(val.iobuf_ptr), b"s3")
-                    self.assertEqual(val.fbstring, b"s4")
-                    self.assertEqual(val.nonstandard_type, b"s5")
+                )
+                self.assertEqual(val.no_special_type, b"s1")
+                self.assertEqual(bytes(val.iobuf_val), b"s2")
+                assert val.iobuf_ptr is not None
+                self.assertEqual(bytes(val.iobuf_ptr), b"s3")
+                self.assertEqual(val.fbstring, b"s4")
+                self.assertEqual(val.nonstandard_type, b"s5")
 
-                    val = await client.sendRecvBinary(b"cv1")
-                    self.assertEqual(val, b"sv1")
+                val = await client.sendRecvBinary(b"cv1")
+                self.assertEqual(val, b"sv1")
 
-                    val = await client.sendRecvIOBuf(IOBuf(b"cv2"))
-                    self.assertEqual(bytes(val), b"sv2")
+                val = await client.sendRecvIOBuf(IOBuf(b"cv2"))
+                self.assertEqual(bytes(val), b"sv2")
 
-                    val = await client.sendRecvIOBufPtr(IOBuf(b"cv3"))
-                    self.assertEqual(bytes(val), b"sv3")
+                val = await client.sendRecvIOBufPtr(IOBuf(b"cv3"))
+                self.assertEqual(bytes(val), b"sv3")
 
-                    val = await client.sendRecvFbstring(b"cv4")
-                    self.assertEqual(val, b"sv4")
+                val = await client.sendRecvFbstring(b"cv4")
+                self.assertEqual(val, b"sv4")
 
-                    val = await client.sendRecvBuffer(b"cv5")
-                    self.assertEqual(val, b"sv5")
+                val = await client.sendRecvBuffer(b"cv5")
+                self.assertEqual(val, b"sv5")
 
-                    bu = BinaryUnion(iobuf_val=IOBuf(b"cv6"))
-                    val = await client.sendRecBinaryUnion(bu)
-                    self.assertEqual(bytes(val.iobuf_val), b"sv6")
-
-        loop.run_until_complete(inner_test())
+                bu = BinaryUnion(iobuf_val=IOBuf(b"cv6"))
+                val = await client.sendRecBinaryUnion(bu)
+                self.assertEqual(bytes(val.iobuf_val), b"sv6")

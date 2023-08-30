@@ -110,20 +110,15 @@ class MetadataResponseTest(unittest.TestCase):
     These are tests where a client and server talk to each other
     """
 
-    def test_server_localhost(self) -> None:
-        loop = asyncio.get_event_loop()
-
-        async def inner_test() -> None:
-            server = TestServer(ip="::1")
-            async with server as _:
-                metadata_cpp = deserialize(
-                    ThriftServiceMetadataResponse,
-                    await get_serialized_cpp_metadata(server.server),
-                    protocol=Protocol.BINARY,
-                )
-                metadata_python = (
-                    TestingServiceInterface.__get_metadata_service_response__()
-                )
-                self.assertEqual(metadata_cpp, metadata_python)
-
-        loop.run_until_complete(inner_test())
+    async def test_server_localhost(self) -> None:
+        server = TestServer(ip="::1")
+        async with server as _:
+            metadata_cpp = deserialize(
+                ThriftServiceMetadataResponse,
+                await get_serialized_cpp_metadata(server.server),
+                protocol=Protocol.BINARY,
+            )
+            metadata_python = (
+                TestingServiceInterface.__get_metadata_service_response__()
+            )
+            self.assertEqual(metadata_cpp, metadata_python)

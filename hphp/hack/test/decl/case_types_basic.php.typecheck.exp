@@ -1,6 +1,6 @@
 File "case_types_basic.php", line 4, characters 11-13:
-Invalid case type declaration. More than one variant of `CT1` has the runtime data type `Keyset` (Typing[4475])
-  File "case_types_basic.php", line 4, characters 53-62:
-  This is the type `keyset<T1>`, which includes `Keyset` values
+Invalid case type declaration. More than one variant of `CT1` could contain values with the same runtime tag (Typing[4475])
   File "case_types_basic.php", line 4, characters 66-82:
-  It overlaps with `(function(T2): T)`, which also includes `Keyset` values
+  This is the type `(function(T2): T)`, which includes **keysets** because a function could be any value at runtime
+  File "case_types_basic.php", line 4, characters 53-62:
+  It overlaps with `keyset<T1>`, which also includes **keysets**

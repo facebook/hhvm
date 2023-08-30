@@ -1,36 +1,36 @@
 File "case_type_wellformed_bad.php", line 4, characters 11-14:
-Invalid case type declaration. More than one variant of `Bad1` has the runtime data type `Vec` (Typing[4475])
-  File "case_type_wellformed_bad.php", line 4, characters 18-25:
-  This is the type `vec<int>`, which includes `Vec` values
+Invalid case type declaration. More than one variant of `Bad1` could contain values with the same runtime tag (Typing[4475])
   File "case_type_wellformed_bad.php", line 4, characters 29-47:
-  It overlaps with `Traversable<string>`, which also includes `Vec` values
+  This is the type `Traversable<string>`, which includes **vecs** because `Traversable` is a special interface that includes non-object values
+  File "case_type_wellformed_bad.php", line 4, characters 18-25:
+  It overlaps with `vec<int>`, which also includes **vecs**
 File "case_type_wellformed_bad.php", line 14, characters 11-14:
-Invalid case type declaration. More than one variant of `Bad2` has the runtime data type `Object` (Typing[4475])
+Invalid case type declaration. More than one variant of `Bad2` could contain values with the same runtime tag (Typing[4475])
   File "case_type_wellformed_bad.php", line 14, characters 18-19:
-  This is the type `I1`, which includes `Object` values
+  This is the type `I1`, which includes **objects**
   File "case_type_wellformed_bad.php", line 14, characters 23-29:
-  It overlaps with `I2<int>`, which also includes `Object` values
+  It overlaps with `I2<int>`, which also includes **objects**
 File "case_type_wellformed_bad.php", line 16, characters 11-15:
-Invalid case type declaration. More than one variant of `Good2` has the runtime data type `Object` (Typing[4475])
+Invalid case type declaration. More than one variant of `Good2` could contain values with the same runtime tag (Typing[4475])
   File "case_type_wellformed_bad.php", line 16, characters 19-19:
-  This is the type `C`, which includes `Object` values
+  This is the type `C`, which includes **objects**
   File "case_type_wellformed_bad.php", line 16, characters 23-29:
-  It overlaps with `I2<int>`, which also includes `Object` values
+  It overlaps with `I2<int>`, which also includes **objects**
 File "case_type_wellformed_bad.php", line 18, characters 11-15:
-Invalid case type declaration. More than one variant of `Good3` has the runtime data type `Object` (Typing[4475])
+Invalid case type declaration. More than one variant of `Good3` could contain values with the same runtime tag (Typing[4475])
   File "case_type_wellformed_bad.php", line 18, characters 19-19:
-  This is the type `C`, which includes `Object` values
+  This is the type `C`, which includes **objects**
   File "case_type_wellformed_bad.php", line 18, characters 23-24:
-  It overlaps with `I1`, which also includes `Object` values
+  It overlaps with `I1`, which also includes **objects**
 File "case_type_wellformed_bad.php", line 20, characters 11-14:
-Invalid case type declaration. More than one variant of `Bad3` has the runtime data type `Vec` (Typing[4475])
+Invalid case type declaration. More than one variant of `Bad3` could contain values with the same runtime tag (Typing[4475])
   File "case_type_wellformed_bad.php", line 20, characters 18-25:
-  This is the type `vec<int>`, which includes `Vec` values
+  This is the type `vec<int>`, which includes **vecs**
   File "case_type_wellformed_bad.php", line 20, characters 29-38:
-  It overlaps with `(int, int)`, which also includes `Vec` values
+  It overlaps with `(int, int)`, which also includes **vecs** because tuples are vecs at runtime
 File "case_type_wellformed_bad.php", line 24, characters 11-14:
-Invalid case type declaration. More than one variant of `Bad4` has the runtime data type `Dict` (Typing[4475])
+Invalid case type declaration. More than one variant of `Bad4` could contain values with the same runtime tag (Typing[4475])
   File "case_type_wellformed_bad.php", line 24, characters 18-34:
-  This is the type `dict<string, int>`, which includes `Dict` values
+  This is the type `dict<string, int>`, which includes **dicts**
   File "case_type_wellformed_bad.php", line 24, characters 38-54:
-  It overlaps with `shape('x' => int)`, which also includes `Dict` values
+  It overlaps with `shape('x' => int)`, which also includes **dicts** because shapes are dicts at runtime

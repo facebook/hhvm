@@ -73,8 +73,8 @@ Invalid constraint on `newtype` (Typing[4332])
   File "case_type_wellformed.php", line 14, characters 83-86:
   But got `bool`
 File "case_type_wellformed.php", line 6, characters 11-27:
-Invalid case type declaration. More than one variant of `VarianceIsChecked` has the runtime data type `Dict` (Typing[4475])
+Invalid case type declaration. More than one variant of `VarianceIsChecked` could contain values with the same runtime tag (Typing[4475])
   File "case_type_wellformed.php", line 7, characters 5-30:
-  This is the type `(function(Tin, Tout): int)`, which includes `Dict` values
+  This is the type `(function(Tin, Tout): int)`, which includes **dicts** because a function could be any value at runtime
   File "case_type_wellformed.php", line 8, characters 5-19:
-  It overlaps with `dict<Tin, Tout>`, which also includes `Dict` values
+  It overlaps with `dict<Tin, Tout>`, which also includes **dicts**

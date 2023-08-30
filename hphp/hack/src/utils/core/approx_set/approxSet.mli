@@ -21,14 +21,14 @@ end
     function. *)
 module type DomainType = sig
   (** Type of atomic elements of the domain *)
-  type t
+  type 'a t
 
   (** Contextual data that will be provided to [relation] when determining
       [set_relation] between atomic elements of the domain *)
   type ctx
 
   (** Determines between atomic elements of the domain based on the given context *)
-  val relation : t -> ctx:ctx -> t -> Set_relation.t
+  val relation : 'a t -> ctx:ctx -> 'a t -> Set_relation.t
 end
 
 (** An abstract representation of a set, designed specifically to determine if two
@@ -42,39 +42,43 @@ module type S = sig
   module Domain : DomainType
 
   (** Type of an instance of the approximate set *)
-  type t
+  type 'a t
 
-  val empty : t
+  val empty : 'a t
 
   (** Create an approximate set from an atomic element in the domain *)
-  val singleton : Domain.t -> t
+  val singleton : 'a Domain.t -> 'a t
 
   (** Set union *)
-  val union : t -> t -> t
+  val union : 'a t -> 'a t -> 'a t
 
   (** Set intersection *)
-  val inter : t -> t -> t
+  val inter : 'a t -> 'a t -> 'a t
 
   (** Set difference. Note that in some cases we cannot determine precisely if
       two sets involving [diff] are disjoint. In these cases the result will
       be approximated to [Unsat] *)
-  val diff : t -> t -> t
+  val diff : 'a t -> 'a t -> 'a t
 
-  val of_list : Domain.t list -> t
+  val of_list : 'a Domain.t list -> 'a t
 
   (** The result of testing two sets for disjointness *)
-  type disjoint =
+  type 'a disjoint =
     | Sat  (** The two sets are definitely disjoint *)
-    | Unsat of Domain.t * Domain.t
+    | Unsat of {
+        left: 'a Domain.t;
+        relation: Set_relation.t;
+        right: 'a Domain.t;
+      }
         (** The two sets are not disjoint because of the relation between
             the given pair of [Domain.t]s *)
 
   (** Determines if a pair of sets are disjoint in the given [ctx].
       If the sets cannot definitively be proven to be disjoint, will return
       [Unsat] *)
-  val disjoint : Domain.ctx -> t -> t -> disjoint
+  val disjoint : Domain.ctx -> 'a t -> 'a t -> 'a disjoint
 
-  val are_disjoint : Domain.ctx -> t -> t -> bool
+  val are_disjoint : Domain.ctx -> 'a t -> 'a t -> bool
 end
 
 (** Constructs an approximate set representation over the given [Domain] *)

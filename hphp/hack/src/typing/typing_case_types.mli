@@ -34,7 +34,7 @@ val check_overlapping :
   env ->
   runtime_data_type ->
   runtime_data_type ->
-  (string * Pos_or_decl.t Message.t list Lazy.t) option
+  Pos_or_decl.t Message.t list Lazy.t option
 
 (**
   Given the variants of a case type (encoded as a locl_ty) and another locl_ty [intersecting_ty]

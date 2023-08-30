@@ -16,55 +16,63 @@ module Set_relation = struct
 end
 
 module type DomainType = sig
-  type t
+  type 'a t
 
   type ctx
 
-  val relation : t -> ctx:ctx -> t -> Set_relation.t
+  val relation : 'a t -> ctx:ctx -> 'a t -> Set_relation.t
 end
 
 module type S = sig
   module Domain : DomainType
 
-  type t
+  type 'a t
 
-  val empty : t
+  val empty : 'a t
 
-  val singleton : Domain.t -> t
+  val singleton : 'a Domain.t -> 'a t
 
-  val union : t -> t -> t
+  val union : 'a t -> 'a t -> 'a t
 
-  val inter : t -> t -> t
+  val inter : 'a t -> 'a t -> 'a t
 
-  val diff : t -> t -> t
+  val diff : 'a t -> 'a t -> 'a t
 
-  val of_list : Domain.t list -> t
+  val of_list : 'a Domain.t list -> 'a t
 
-  type disjoint =
+  type 'a disjoint =
     | Sat
-    | Unsat of Domain.t * Domain.t
+    | Unsat of {
+        left: 'a Domain.t;
+        relation: Set_relation.t;
+        right: 'a Domain.t;
+      }
 
-  val disjoint : Domain.ctx -> t -> t -> disjoint
+  val disjoint : Domain.ctx -> 'a t -> 'a t -> 'a disjoint
 
-  val are_disjoint : Domain.ctx -> t -> t -> bool
+  val are_disjoint : Domain.ctx -> 'a t -> 'a t -> bool
 end
 
 module Make (Domain : DomainType) : S with module Domain := Domain = struct
-  type disjoint =
+  type 'a disjoint =
     | Sat
-    | Unsat of Domain.t * Domain.t
+    | Unsat of {
+        left: 'a Domain.t;
+        relation: Set_relation.t;
+        right: 'a Domain.t;
+      }
 
   (* Sets over [Domain.t]; representation is in NNF by construction *)
   module Impl = struct
-    type atom = {
+    type 'a atom = {
       comp: bool;
-      elt: Domain.t;
+      elt: 'a Domain.t;
     }
 
-    type t =
-      | Set of atom
-      | Union of t * t
-      | Inter of t * t
+    type 'a t =
+      | Set of 'a atom
+      | Union of 'a t * 'a t
+      | Inter of 'a t * 'a t
 
     let singleton elt = Set { comp = false; elt }
 
@@ -74,11 +82,8 @@ module Make (Domain : DomainType) : S with module Domain := Domain = struct
         Set_relation.(
           (match Domain.relation ~ctx elt1 elt2 with
           | Disjoint -> Sat
-          | Equal
-          | Subset
-          | Superset
-          | Unknown ->
-            Unsat (elt1, elt2)))
+          | (Equal | Subset | Superset | Unknown) as relation ->
+            Unsat { left = elt1; relation; right = elt2 }))
       | ({ comp = false; elt = elt1 }, { comp = true; elt = elt2 }) ->
         Set_relation.(
           (* (A disj !B) if A ⊆ B *)
@@ -86,10 +91,8 @@ module Make (Domain : DomainType) : S with module Domain := Domain = struct
           | Equal
           | Subset ->
             Sat
-          | Superset
-          | Unknown
-          | Disjoint ->
-            Unsat (elt1, elt2)))
+          | (Superset | Unknown | Disjoint) as relation ->
+            Unsat { left = elt1; relation; right = elt2 }))
       | ({ comp = true; elt = elt1 }, { comp = true; elt = elt2 }) ->
         (* Approximation:
 
@@ -99,7 +102,7 @@ module Make (Domain : DomainType) : S with module Domain := Domain = struct
            There is no way in our model to determine if (A ∪ B) = U holds
            so we are forced to approximate the result. The safest approximation
            is to assume the sets are not disjoint *)
-        Unsat (elt1, elt2)
+        Unsat { left = elt1; relation = Set_relation.Unknown; right = elt2 }
       | _ -> disjoint_atom atom2 atom1 ~ctx
 
     let rec disjoint ctx set1 set2 =
@@ -119,9 +122,9 @@ module Make (Domain : DomainType) : S with module Domain := Domain = struct
       | (Set atom1, Set atom2) -> disjoint_atom atom1 atom2 ~ctx
       | (Set _, (Union _ | Inter _)) -> disjoint ctx set2 set1
 
-    let union (l : t) (r : t) : t = Union (l, r)
+    let union l r = Union (l, r)
 
-    let inter (l : t) (r : t) : t = Inter (l, r)
+    let inter l r = Inter (l, r)
 
     (*  Keep values in negation normal form by construction *)
     let rec comp = function
@@ -133,13 +136,13 @@ module Make (Domain : DomainType) : S with module Domain := Domain = struct
       | Inter (a, b) -> union (comp a) (comp b)
 
     (* A ∖ B = A ∩ !B *)
-    let diff (a : t) (b : t) : t = inter a (comp b)
+    let diff a b = inter a (comp b)
   end
 
   open Impl
 
   (* We encode an empty set using [Option.None] *)
-  type nonrec t = t option
+  type nonrec 'a t = 'a t option
 
   let empty = None
 
@@ -168,7 +171,7 @@ module Make (Domain : DomainType) : S with module Domain := Domain = struct
   let of_list elt =
     List.fold_left (fun acc tag -> union acc @@ singleton tag) empty elt
 
-  let disjoint ctx (set1 : t) (set2 : t) =
+  let disjoint ctx set1 set2 =
     match (set1, set2) with
     | (None, _)
     | (_, None) ->

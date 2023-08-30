@@ -1486,23 +1486,22 @@ module Eval_primary = struct
   end
 
   module Eval_casetype = struct
-    let overlapping_variant_types pos name tag why =
+    let overlapping_variant_types pos name why =
       let claim =
         lazy
           ( pos,
             let name = Utils.strip_ns name in
-            Printf.sprintf
-              "Invalid case type declaration. More than one variant of `%s` has the runtime data type `%s`"
-              name
-              tag )
+            "Invalid case type declaration. More than one variant of "
+            ^ Markdown_lite.md_codify name
+            ^ " could contain values with the same runtime tag" )
       in
       (Error_code.IllegalCaseTypeVariants, claim, why, [])
 
     let to_error t ~env:_ =
       let open Typing_error.Primary.CaseType in
       match t with
-      | Overlapping_variant_types { pos; name; tag; why } ->
-        overlapping_variant_types pos name tag why
+      | Overlapping_variant_types { pos; name; why } ->
+        overlapping_variant_types pos name why
   end
 
   let unify_error pos msg_opt reasons_opt =

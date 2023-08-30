@@ -10,7 +10,7 @@ open Hh_prelude
 open OUnit2
 
 module ASet = ApproxSet.Make (struct
-  type t = Char.Set.t
+  type 'a t = Char.Set.t
 
   type ctx = unit
 
@@ -28,7 +28,7 @@ module ASet = ApproxSet.Make (struct
       Unknown
 end)
 
-let mk lst = ASet.singleton @@ Char.Set.of_list lst
+let mk lst : unit ASet.t = ASet.singleton @@ Char.Set.of_list lst
 
 let a = mk ['a']
 
@@ -127,7 +127,8 @@ let test_origin_reporting _ =
     ~cmp:(fun t1 t2 ->
       match (t1, t2) with
       | (ASet.Sat, ASet.Sat) -> true
-      | (ASet.Unsat (l1, l2), ASet.Unsat (r1, r2)) ->
+      | ( ASet.Unsat { left = l1; right = l2; _ },
+          ASet.Unsat { left = r1; right = r2; _ } ) ->
         Char.Set.equal l1 r1 && Char.Set.equal l2 r2
       | _ -> false)
 

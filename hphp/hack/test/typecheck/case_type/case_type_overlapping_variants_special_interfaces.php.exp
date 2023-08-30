@@ -1,150 +1,150 @@
 File "case_type_overlapping_variants_special_interfaces.php", line 4, characters 11-19:
-Invalid case type declaration. More than one variant of `ArrayData` has the runtime data type `Dict` (Typing[4475])
+Invalid case type declaration. More than one variant of `ArrayData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 5, characters 5-30:
-  This is the type `AnyArray<nothing, nothing>`, which includes `Dict` values
-  File "case_type_overlapping_variants_special_interfaces.php", line 6, characters 5-24:
-  It overlaps with `vec_or_dict<arraykey, nothing>`, which also includes `Dict` values
-File "case_type_overlapping_variants_special_interfaces.php", line 4, characters 11-19:
-Invalid case type declaration. More than one variant of `ArrayData` has the runtime data type `Dict` (Typing[4475])
-  File "case_type_overlapping_variants_special_interfaces.php", line 5, characters 5-30:
-  This is the type `AnyArray<nothing, nothing>`, which includes `Dict` values
+  This is the type `AnyArray<nothing, nothing>`, which includes **dicts**
   File "case_type_overlapping_variants_special_interfaces.php", line 7, characters 5-26:
-  It overlaps with `dict<nothing, nothing>`, which also includes `Dict` values
+  It overlaps with `dict<nothing, nothing>`, which also includes **dicts**
 File "case_type_overlapping_variants_special_interfaces.php", line 4, characters 11-19:
-Invalid case type declaration. More than one variant of `ArrayData` has the runtime data type `Dict` (Typing[4475])
-  File "case_type_overlapping_variants_special_interfaces.php", line 6, characters 5-24:
-  This is the type `vec_or_dict<arraykey, nothing>`, which includes `Dict` values
-  File "case_type_overlapping_variants_special_interfaces.php", line 7, characters 5-26:
-  It overlaps with `dict<nothing, nothing>`, which also includes `Dict` values
-File "case_type_overlapping_variants_special_interfaces.php", line 4, characters 11-19:
-Invalid case type declaration. More than one variant of `ArrayData` has the runtime data type `Keyset` (Typing[4475])
+Invalid case type declaration. More than one variant of `ArrayData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 5, characters 5-30:
-  This is the type `AnyArray<nothing, nothing>`, which includes `Keyset` values
+  This is the type `AnyArray<nothing, nothing>`, which includes **keysets**
   File "case_type_overlapping_variants_special_interfaces.php", line 8, characters 5-19:
-  It overlaps with `keyset<nothing>`, which also includes `Keyset` values
+  It overlaps with `keyset<nothing>`, which also includes **keysets**
 File "case_type_overlapping_variants_special_interfaces.php", line 4, characters 11-19:
-Invalid case type declaration. More than one variant of `ArrayData` has the runtime data type `Vec` (Typing[4475])
+Invalid case type declaration. More than one variant of `ArrayData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 5, characters 5-30:
-  This is the type `AnyArray<nothing, nothing>`, which includes `Vec` values
+  This is the type `AnyArray<nothing, nothing>`, which includes **vecs**
   File "case_type_overlapping_variants_special_interfaces.php", line 9, characters 5-16:
-  It overlaps with `vec<nothing>`, which also includes `Vec` values
+  It overlaps with `vec<nothing>`, which also includes **vecs**
 File "case_type_overlapping_variants_special_interfaces.php", line 4, characters 11-19:
-Invalid case type declaration. More than one variant of `ArrayData` has the runtime data type `Vec` (Typing[4475])
+Invalid case type declaration. More than one variant of `ArrayData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 6, characters 5-24:
-  This is the type `vec_or_dict<arraykey, nothing>`, which includes `Vec` values
+  This is the type `vec_or_dict<arraykey, nothing>`, which includes **dicts**
+  File "case_type_overlapping_variants_special_interfaces.php", line 5, characters 5-30:
+  It overlaps with `AnyArray<nothing, nothing>`, which also includes **dicts**
+File "case_type_overlapping_variants_special_interfaces.php", line 4, characters 11-19:
+Invalid case type declaration. More than one variant of `ArrayData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_special_interfaces.php", line 6, characters 5-24:
+  This is the type `vec_or_dict<arraykey, nothing>`, which includes **dicts**
+  File "case_type_overlapping_variants_special_interfaces.php", line 7, characters 5-26:
+  It overlaps with `dict<nothing, nothing>`, which also includes **dicts**
+File "case_type_overlapping_variants_special_interfaces.php", line 4, characters 11-19:
+Invalid case type declaration. More than one variant of `ArrayData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_special_interfaces.php", line 6, characters 5-24:
+  This is the type `vec_or_dict<arraykey, nothing>`, which includes **vecs**
   File "case_type_overlapping_variants_special_interfaces.php", line 9, characters 5-16:
-  It overlaps with `vec<nothing>`, which also includes `Vec` values
+  It overlaps with `vec<nothing>`, which also includes **vecs**
 File "case_type_overlapping_variants_special_interfaces.php", line 11, characters 11-23:
-Invalid case type declaration. More than one variant of `ContainerData` has the runtime data type `Dict` (Typing[4475])
+Invalid case type declaration. More than one variant of `ContainerData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 12, characters 5-22:
-  This is the type `Container<nothing>`, which includes `Dict` values
+  This is the type `Container<nothing>`, which includes **dicts** because `Container` is a special interface that includes non-object values
   File "case_type_overlapping_variants_special_interfaces.php", line 13, characters 5-26:
-  It overlaps with `dict<nothing, nothing>`, which also includes `Dict` values
+  It overlaps with `dict<nothing, nothing>`, which also includes **dicts**
 File "case_type_overlapping_variants_special_interfaces.php", line 11, characters 11-23:
-Invalid case type declaration. More than one variant of `ContainerData` has the runtime data type `Keyset` (Typing[4475])
+Invalid case type declaration. More than one variant of `ContainerData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 12, characters 5-22:
-  This is the type `Container<nothing>`, which includes `Keyset` values
+  This is the type `Container<nothing>`, which includes **keysets** because `Container` is a special interface that includes non-object values
   File "case_type_overlapping_variants_special_interfaces.php", line 14, characters 5-19:
-  It overlaps with `keyset<nothing>`, which also includes `Keyset` values
+  It overlaps with `keyset<nothing>`, which also includes **keysets**
 File "case_type_overlapping_variants_special_interfaces.php", line 11, characters 11-23:
-Invalid case type declaration. More than one variant of `ContainerData` has the runtime data type `Vec` (Typing[4475])
+Invalid case type declaration. More than one variant of `ContainerData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 12, characters 5-22:
-  This is the type `Container<nothing>`, which includes `Vec` values
+  This is the type `Container<nothing>`, which includes **vecs** because `Container` is a special interface that includes non-object values
   File "case_type_overlapping_variants_special_interfaces.php", line 15, characters 5-16:
-  It overlaps with `vec<nothing>`, which also includes `Vec` values
+  It overlaps with `vec<nothing>`, which also includes **vecs**
 File "case_type_overlapping_variants_special_interfaces.php", line 17, characters 11-28:
-Invalid case type declaration. More than one variant of `KeyedContainerData` has the runtime data type `Dict` (Typing[4475])
+Invalid case type declaration. More than one variant of `KeyedContainerData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 18, characters 5-36:
-  This is the type `KeyedContainer<nothing, nothing>`, which includes `Dict` values
+  This is the type `KeyedContainer<nothing, nothing>`, which includes **dicts** because `KeyedContainer` is a special interface that includes non-object values
   File "case_type_overlapping_variants_special_interfaces.php", line 19, characters 5-26:
-  It overlaps with `dict<nothing, nothing>`, which also includes `Dict` values
+  It overlaps with `dict<nothing, nothing>`, which also includes **dicts**
 File "case_type_overlapping_variants_special_interfaces.php", line 17, characters 11-28:
-Invalid case type declaration. More than one variant of `KeyedContainerData` has the runtime data type `Keyset` (Typing[4475])
+Invalid case type declaration. More than one variant of `KeyedContainerData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 18, characters 5-36:
-  This is the type `KeyedContainer<nothing, nothing>`, which includes `Keyset` values
+  This is the type `KeyedContainer<nothing, nothing>`, which includes **keysets** because `KeyedContainer` is a special interface that includes non-object values
   File "case_type_overlapping_variants_special_interfaces.php", line 20, characters 5-19:
-  It overlaps with `keyset<nothing>`, which also includes `Keyset` values
+  It overlaps with `keyset<nothing>`, which also includes **keysets**
 File "case_type_overlapping_variants_special_interfaces.php", line 17, characters 11-28:
-Invalid case type declaration. More than one variant of `KeyedContainerData` has the runtime data type `Vec` (Typing[4475])
+Invalid case type declaration. More than one variant of `KeyedContainerData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 18, characters 5-36:
-  This is the type `KeyedContainer<nothing, nothing>`, which includes `Vec` values
+  This is the type `KeyedContainer<nothing, nothing>`, which includes **vecs** because `KeyedContainer` is a special interface that includes non-object values
   File "case_type_overlapping_variants_special_interfaces.php", line 21, characters 5-16:
-  It overlaps with `vec<nothing>`, which also includes `Vec` values
+  It overlaps with `vec<nothing>`, which also includes **vecs**
 File "case_type_overlapping_variants_special_interfaces.php", line 23, characters 11-25:
-Invalid case type declaration. More than one variant of `TraversableData` has the runtime data type `Dict` (Typing[4475])
+Invalid case type declaration. More than one variant of `TraversableData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 24, characters 5-24:
-  This is the type `Traversable<nothing>`, which includes `Dict` values
+  This is the type `Traversable<nothing>`, which includes **dicts** because `Traversable` is a special interface that includes non-object values
   File "case_type_overlapping_variants_special_interfaces.php", line 25, characters 5-26:
-  It overlaps with `dict<nothing, nothing>`, which also includes `Dict` values
+  It overlaps with `dict<nothing, nothing>`, which also includes **dicts**
 File "case_type_overlapping_variants_special_interfaces.php", line 23, characters 11-25:
-Invalid case type declaration. More than one variant of `TraversableData` has the runtime data type `Keyset` (Typing[4475])
+Invalid case type declaration. More than one variant of `TraversableData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 24, characters 5-24:
-  This is the type `Traversable<nothing>`, which includes `Keyset` values
+  This is the type `Traversable<nothing>`, which includes **keysets** because `Traversable` is a special interface that includes non-object values
   File "case_type_overlapping_variants_special_interfaces.php", line 26, characters 5-19:
-  It overlaps with `keyset<nothing>`, which also includes `Keyset` values
+  It overlaps with `keyset<nothing>`, which also includes **keysets**
 File "case_type_overlapping_variants_special_interfaces.php", line 23, characters 11-25:
-Invalid case type declaration. More than one variant of `TraversableData` has the runtime data type `Vec` (Typing[4475])
+Invalid case type declaration. More than one variant of `TraversableData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 24, characters 5-24:
-  This is the type `Traversable<nothing>`, which includes `Vec` values
+  This is the type `Traversable<nothing>`, which includes **vecs** because `Traversable` is a special interface that includes non-object values
   File "case_type_overlapping_variants_special_interfaces.php", line 27, characters 5-16:
-  It overlaps with `vec<nothing>`, which also includes `Vec` values
+  It overlaps with `vec<nothing>`, which also includes **vecs**
 File "case_type_overlapping_variants_special_interfaces.php", line 29, characters 11-30:
-Invalid case type declaration. More than one variant of `KeyedTraversableData` has the runtime data type `Dict` (Typing[4475])
+Invalid case type declaration. More than one variant of `KeyedTraversableData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 30, characters 5-38:
-  This is the type `KeyedTraversable<nothing, nothing>`, which includes `Dict` values
+  This is the type `KeyedTraversable<nothing, nothing>`, which includes **dicts** because `KeyedTraversable` is a special interface that includes non-object values
   File "case_type_overlapping_variants_special_interfaces.php", line 31, characters 5-26:
-  It overlaps with `dict<nothing, nothing>`, which also includes `Dict` values
+  It overlaps with `dict<nothing, nothing>`, which also includes **dicts**
 File "case_type_overlapping_variants_special_interfaces.php", line 29, characters 11-30:
-Invalid case type declaration. More than one variant of `KeyedTraversableData` has the runtime data type `Keyset` (Typing[4475])
+Invalid case type declaration. More than one variant of `KeyedTraversableData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 30, characters 5-38:
-  This is the type `KeyedTraversable<nothing, nothing>`, which includes `Keyset` values
+  This is the type `KeyedTraversable<nothing, nothing>`, which includes **keysets** because `KeyedTraversable` is a special interface that includes non-object values
   File "case_type_overlapping_variants_special_interfaces.php", line 32, characters 5-19:
-  It overlaps with `keyset<nothing>`, which also includes `Keyset` values
+  It overlaps with `keyset<nothing>`, which also includes **keysets**
 File "case_type_overlapping_variants_special_interfaces.php", line 29, characters 11-30:
-Invalid case type declaration. More than one variant of `KeyedTraversableData` has the runtime data type `Vec` (Typing[4475])
+Invalid case type declaration. More than one variant of `KeyedTraversableData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 30, characters 5-38:
-  This is the type `KeyedTraversable<nothing, nothing>`, which includes `Vec` values
+  This is the type `KeyedTraversable<nothing, nothing>`, which includes **vecs** because `KeyedTraversable` is a special interface that includes non-object values
   File "case_type_overlapping_variants_special_interfaces.php", line 33, characters 5-16:
-  It overlaps with `vec<nothing>`, which also includes `Vec` values
+  It overlaps with `vec<nothing>`, which also includes **vecs**
 File "case_type_overlapping_variants_special_interfaces.php", line 35, characters 11-23:
-Invalid case type declaration. More than one variant of `StringishData` has the runtime data type `String` (Typing[4475])
+Invalid case type declaration. More than one variant of `StringishData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 36, characters 5-13:
-  This is the type `Stringish`, which includes `String` values
+  This is the type `Stringish`, which includes **strings** because `Stringish` is a special interface that includes non-object values
   File "case_type_overlapping_variants_special_interfaces.php", line 37, characters 5-10:
-  It overlaps with `string`, which also includes `String` values
+  It overlaps with `string`, which also includes **strings**
 File "case_type_overlapping_variants_special_interfaces.php", line 39, characters 11-17:
-Invalid case type declaration. More than one variant of `XhpData` has the runtime data type `Dict` (Typing[4475])
+Invalid case type declaration. More than one variant of `XhpData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 40, characters 5-12:
-  This is the type `XHPChild`, which includes `Dict` values
+  This is the type `XHPChild`, which includes **dicts** because `XHPChild` is a special interface that includes non-object values
   File "case_type_overlapping_variants_special_interfaces.php", line 46, characters 5-18:
-  It overlaps with `dict<int, int>`, which also includes `Dict` values
+  It overlaps with `dict<int, int>`, which also includes **dicts**
 File "case_type_overlapping_variants_special_interfaces.php", line 39, characters 11-17:
-Invalid case type declaration. More than one variant of `XhpData` has the runtime data type `Double` (Typing[4475])
+Invalid case type declaration. More than one variant of `XhpData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 40, characters 5-12:
-  This is the type `XHPChild`, which includes `Double` values
+  This is the type `XHPChild`, which includes **floats** because `XHPChild` is a special interface that includes non-object values
   File "case_type_overlapping_variants_special_interfaces.php", line 43, characters 5-9:
-  It overlaps with `float`, which also includes `Double` values
+  It overlaps with `float`, which also includes **floats**
 File "case_type_overlapping_variants_special_interfaces.php", line 39, characters 11-17:
-Invalid case type declaration. More than one variant of `XhpData` has the runtime data type `Int64` (Typing[4475])
+Invalid case type declaration. More than one variant of `XhpData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 40, characters 5-12:
-  This is the type `XHPChild`, which includes `Int64` values
+  This is the type `XHPChild`, which includes **ints** because `XHPChild` is a special interface that includes non-object values
   File "case_type_overlapping_variants_special_interfaces.php", line 42, characters 5-7:
-  It overlaps with `int`, which also includes `Int64` values
+  It overlaps with `int`, which also includes **ints**
 File "case_type_overlapping_variants_special_interfaces.php", line 39, characters 11-17:
-Invalid case type declaration. More than one variant of `XhpData` has the runtime data type `Keyset` (Typing[4475])
+Invalid case type declaration. More than one variant of `XhpData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 40, characters 5-12:
-  This is the type `XHPChild`, which includes `Keyset` values
+  This is the type `XHPChild`, which includes **keysets** because `XHPChild` is a special interface that includes non-object values
   File "case_type_overlapping_variants_special_interfaces.php", line 45, characters 5-15:
-  It overlaps with `keyset<int>`, which also includes `Keyset` values
+  It overlaps with `keyset<int>`, which also includes **keysets**
 File "case_type_overlapping_variants_special_interfaces.php", line 39, characters 11-17:
-Invalid case type declaration. More than one variant of `XhpData` has the runtime data type `String` (Typing[4475])
+Invalid case type declaration. More than one variant of `XhpData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 40, characters 5-12:
-  This is the type `XHPChild`, which includes `String` values
+  This is the type `XHPChild`, which includes **strings** because `XHPChild` is a special interface that includes non-object values
   File "case_type_overlapping_variants_special_interfaces.php", line 41, characters 5-10:
-  It overlaps with `string`, which also includes `String` values
+  It overlaps with `string`, which also includes **strings**
 File "case_type_overlapping_variants_special_interfaces.php", line 39, characters 11-17:
-Invalid case type declaration. More than one variant of `XhpData` has the runtime data type `Vec` (Typing[4475])
+Invalid case type declaration. More than one variant of `XhpData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 40, characters 5-12:
-  This is the type `XHPChild`, which includes `Vec` values
+  This is the type `XHPChild`, which includes **vecs** because `XHPChild` is a special interface that includes non-object values
   File "case_type_overlapping_variants_special_interfaces.php", line 44, characters 5-12:
-  It overlaps with `vec<int>`, which also includes `Vec` values
+  It overlaps with `vec<int>`, which also includes **vecs**

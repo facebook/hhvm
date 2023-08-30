@@ -358,7 +358,6 @@ module Primary = struct
       | Overlapping_variant_types of {
           pos: Pos.t;
           name: string;
-          tag: string;
           why: Pos_or_decl.t Message.t list Lazy.t;
         }
     [@@deriving show]

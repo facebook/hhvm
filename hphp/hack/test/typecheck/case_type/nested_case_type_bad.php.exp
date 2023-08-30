@@ -1,0 +1,12 @@
+File "nested_case_type_bad.php", line 6, characters 11-13:
+Invalid case type declaration. More than one variant of `Bad` could contain values with the same runtime tag (Typing[4475])
+  File "nested_case_type_bad.php", line 6, characters 17-23:
+  This is the type `Scalars`, which includes **ints**
+  File "nested_case_type_bad.php", line 4, characters 21-23:
+    via this variant of the case type `Scalars`
+  File "nested_case_type_bad.php", line 6, characters 27-27:
+  It overlaps with `E`, which also includes **ints**
+  File "nested_case_type_bad.php", line 8, characters 15-15:
+    via the constraint on the enum `E`
+  File "nested_case_type_bad.php", line 12, characters 17-19:
+    via the constraint on the enum `F`

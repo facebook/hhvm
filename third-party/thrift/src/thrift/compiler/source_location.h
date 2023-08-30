@@ -25,7 +25,6 @@
 #include <vector>
 
 #include <boost/optional.hpp>
-#include <fmt/core.h>
 
 namespace apache {
 namespace thrift {
@@ -93,7 +92,7 @@ class resolved_location {
 // A view of a source owned by `source_manager`.
 struct source {
   source_location start; // The source start location.
-  fmt::string_view text; // The source text including a terminating '\0'.
+  std::string_view text; // The source text including a terminating '\0'.
 };
 
 // A source manager that caches sources in memory, loads files and enables

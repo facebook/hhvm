@@ -39,7 +39,7 @@ class t_stream_response;
 class t_throws;
 
 struct identifier {
-  fmt::string_view str;
+  std::string_view str;
   source_location loc;
 };
 
@@ -82,21 +82,21 @@ class parser_actions {
   virtual void on_package(
       source_range range,
       std::unique_ptr<attributes> attrs,
-      fmt::string_view name) = 0;
+      std::string_view name) = 0;
 
-  virtual void on_include(source_range range, fmt::string_view str) = 0;
-  virtual void on_cpp_include(source_range range, fmt::string_view str) = 0;
-  virtual void on_hs_include(source_range range, fmt::string_view str) = 0;
+  virtual void on_include(source_range range, std::string_view str) = 0;
+  virtual void on_cpp_include(source_range range, std::string_view str) = 0;
+  virtual void on_hs_include(source_range range, std::string_view str) = 0;
 
   virtual void on_namespace(
-      const identifier& language, fmt::string_view ns) = 0;
+      const identifier& language, std::string_view ns) = 0;
 
   virtual boost::optional<comment> on_doctext() = 0;
   virtual void on_program_doctext() = 0;
-  virtual comment on_inline_doc(source_range range, fmt::string_view text) = 0;
+  virtual comment on_inline_doc(source_range range, std::string_view text) = 0;
 
   virtual std::unique_ptr<t_const> on_structured_annotation(
-      source_range range, fmt::string_view name) = 0;
+      source_range range, std::string_view name) = 0;
   virtual std::unique_ptr<t_const> on_structured_annotation(
       source_range range, std::unique_ptr<t_const_value> value) = 0;
 
@@ -192,7 +192,7 @@ class parser_actions {
 
   virtual t_type_ref on_type(
       source_range range,
-      fmt::string_view name,
+      std::string_view name,
       std::unique_ptr<deprecated_annotations> annotations) = 0;
 
   virtual void on_enum(
@@ -227,7 +227,7 @@ class parser_actions {
   virtual std::unique_ptr<t_const_value> on_list_literal() = 0;
   virtual std::unique_ptr<t_const_value> on_map_literal() = 0;
   virtual std::unique_ptr<t_const_value> on_struct_literal(
-      source_range range, fmt::string_view name) = 0;
+      source_range range, std::string_view name) = 0;
 
   virtual int64_t on_integer(source_range range, sign s, uint64_t value) = 0;
 

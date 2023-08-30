@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <fmt/core.h>
 #include <thrift/compiler/ast/t_node.h>
 
 namespace apache {

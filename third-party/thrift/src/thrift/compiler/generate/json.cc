@@ -17,6 +17,8 @@
 #include <thrift/compiler/ast/t_const_value.h>
 #include <thrift/compiler/generate/json.h>
 
+#include <fmt/core.h>
+
 #include <algorithm>
 #include <cstdint>
 #include <ostream>

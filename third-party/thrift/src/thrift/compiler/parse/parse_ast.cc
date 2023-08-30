@@ -300,7 +300,7 @@ class ast_builder : public parser_actions {
   }
 
   // Strips comment text and aligns leading whitespace on multiline doctext.
-  std::string strip_doctext(fmt::string_view text) {
+  std::string strip_doctext(std::string_view text) {
     std::string str(text.data(), text.size());
     if (str.compare(0, 3, "/**") == 0) {
       str = str.substr(3, str.length() - 3 - 2);
@@ -513,7 +513,7 @@ class ast_builder : public parser_actions {
     const std::string& type_name = unresolved_type->name();
     size_t sep_pos = type_name.find(".");
     if (sep_pos == std::string::npos ||
-        fmt::string_view(type_name.data(), sep_pos) == program_.name()) {
+        std::string_view(type_name.data(), sep_pos) == program_.name()) {
       // Local types are handled separately because they can be used before
       // definition.
       return;
@@ -569,7 +569,7 @@ class ast_builder : public parser_actions {
   void on_package(
       source_range range,
       std::unique_ptr<attributes> attrs,
-      fmt::string_view name) override {
+      std::string_view name) override {
     set_attributes(program_, std::move(attrs), range);
     if (!program_.package().empty()) {
       diags_.error(range.begin, "Package already specified.");
@@ -583,7 +583,7 @@ class ast_builder : public parser_actions {
     }
   }
 
-  void on_include(source_range range, fmt::string_view str) override {
+  void on_include(source_range range, std::string_view str) override {
     std::string include_name = fmt::to_string(str);
     auto included_program = on_include_(range, include_name, program_);
     auto last_slash = include_name.find_last_of("/\\");
@@ -595,15 +595,15 @@ class ast_builder : public parser_actions {
     program_.add_include(std::move(include));
   }
 
-  void on_cpp_include(source_range, fmt::string_view str) override {
+  void on_cpp_include(source_range, std::string_view str) override {
     program_.add_language_include("cpp", fmt::to_string(str));
   }
 
-  void on_hs_include(source_range, fmt::string_view str) override {
+  void on_hs_include(source_range, std::string_view str) override {
     program_.add_language_include("hs", fmt::to_string(str));
   }
 
-  void on_namespace(const identifier& language, fmt::string_view ns) override {
+  void on_namespace(const identifier& language, std::string_view ns) override {
     program_.set_namespace(fmt::to_string(language.str), fmt::to_string(ns));
   }
 
@@ -614,12 +614,12 @@ class ast_builder : public parser_actions {
     set_doctext(program_, pop_doctext());
   }
 
-  comment on_inline_doc(source_range range, fmt::string_view text) override {
+  comment on_inline_doc(source_range range, std::string_view text) override {
     return {strip_doctext(text), range};
   }
 
   std::unique_ptr<t_const> on_structured_annotation(
-      source_range range, fmt::string_view name) override {
+      source_range range, std::string_view name) override {
     auto const_value = std::make_unique<t_const_value>();
     const_value->set_map();
     t_type_ref type = new_type_ref(fmt::to_string(name), nullptr, range);
@@ -868,7 +868,7 @@ class ast_builder : public parser_actions {
 
   t_type_ref on_type(
       source_range range,
-      fmt::string_view name,
+      std::string_view name,
       std::unique_ptr<deprecated_annotations> annotations) override {
     return new_type_ref(fmt::to_string(name), std::move(annotations), range);
   }
@@ -1002,7 +1002,7 @@ class ast_builder : public parser_actions {
   }
 
   std::unique_ptr<t_const_value> on_struct_literal(
-      source_range range, fmt::string_view name) override {
+      source_range range, std::string_view name) override {
     auto const_value = std::make_unique<t_const_value>();
     const_value->set_map();
     const_value->set_ttype(
@@ -1039,7 +1039,7 @@ class ast_builder : public parser_actions {
     // Consume doctext and store it in `doctext_`. Documentation comments are
     // handled separately to avoid complicating the main parser logic and the
     // grammar.
-    auto on_doc_comment = [this](fmt::string_view text, source_range range) {
+    auto on_doc_comment = [this](std::string_view text, source_range range) {
       clear_doctext();
       doctext_ = comment{strip_doctext(text), range};
     };

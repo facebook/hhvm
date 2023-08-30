@@ -29,13 +29,6 @@
 #include <boost/functional/hash.hpp>
 #include <thrift/compiler/diagnostic.h>
 
-template <>
-struct std::hash<fmt::string_view> {
-  size_t operator()(fmt::string_view s) const {
-    return boost::hash_range(s.begin(), s.end());
-  }
-};
-
 namespace apache {
 namespace thrift {
 namespace compiler {
@@ -134,7 +127,7 @@ const char* lex_float_literal(const char* p) {
   return p ? lex_float_exponent(p, p) : nullptr;
 }
 
-const std::unordered_map<fmt::string_view, tok> keywords = {
+const std::unordered_map<std::string_view, tok> keywords = {
     {"false", tok::bool_literal},
     {"true", tok::bool_literal},
     {"include", tok::kw_include},
@@ -194,7 +187,7 @@ lexer::lexer(
 }
 
 token lexer::make_int_literal(int offset, int base) {
-  fmt::string_view text = token_text();
+  std::string_view text = token_text();
   errno = 0;
   char* end = nullptr;
   uint64_t val = strtoull(text.data() + offset, &end, base);
@@ -207,7 +200,7 @@ token lexer::make_int_literal(int offset, int base) {
 }
 
 token lexer::make_float_literal() {
-  fmt::string_view text = token_text();
+  std::string_view text = token_text();
   errno = 0;
   char* end = nullptr;
   double val = strtod(text.data(), &end);

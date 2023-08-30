@@ -28,12 +28,12 @@ namespace compiler {
 
 class diagnostics_engine;
 
-using doc_comment_handler = std::function<void(fmt::string_view, source_range)>;
+using doc_comment_handler = std::function<void(std::string_view, source_range)>;
 
 // A Thrift lexer.
 class lexer {
  private:
-  fmt::string_view source_; // Source being lexed; has a terminating '\0'.
+  std::string_view source_; // Source being lexed; has a terminating '\0'.
   source_location start_;
   const char* ptr_; // Current position in the source.
   const char* token_start_;
@@ -54,7 +54,7 @@ class lexer {
   // Returns the string representation of the last token reported via
   // `get_next_token` or `lex_handler`. If no token has been reported returns
   // an empty string.
-  fmt::string_view token_text() const {
+  std::string_view token_text() const {
     return {token_start_, static_cast<size_t>(ptr_ - token_start_)};
   }
 
@@ -76,7 +76,7 @@ class lexer {
   comment_lex_result lex_block_comment();
   comment_lex_result lex_whitespace_or_comment();
 
-  static void ignore_comments(fmt::string_view, source_range) {}
+  static void ignore_comments(std::string_view, source_range) {}
 
  public:
   // on_doc_comment is invoked on a documentation comment such as

@@ -16,8 +16,6 @@
 
 #include <thrift/compiler/source_location.h>
 
-#include <fmt/format.h>
-
 #include <assert.h>
 #include <errno.h>
 #include <string.h>
@@ -67,7 +65,7 @@ class file {
 source source_manager::add_source(
     const std::string& file_name, std::vector<char> text) {
   assert(text.back() == '\0');
-  auto sv = fmt::string_view(text.data(), text.size());
+  auto sv = std::string_view(text.data(), text.size());
   auto src = source_info{file_name, std::move(text), {}};
 
   src.line_offsets.push_back(0);

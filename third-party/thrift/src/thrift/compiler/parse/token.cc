@@ -16,6 +16,8 @@
 
 #include <thrift/compiler/parse/token.h>
 
+#include <fmt/core.h>
+
 #include <algorithm>
 #include <cassert>
 #include <stdexcept>
@@ -136,7 +138,7 @@ constexpr token_kind_names names;
 
 } // namespace
 
-fmt::string_view to_string(token_kind kind) {
+std::string_view to_string(token_kind kind) {
   int int_kind = static_cast<int>(kind.value);
   assert(int_kind < num_token_kinds);
   return names.data[int_kind];

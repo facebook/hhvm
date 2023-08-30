@@ -17,6 +17,8 @@
 #include <folly/portability/GTest.h>
 #include <thrift/compiler/parse/token.h>
 
+#include <fmt/core.h>
+
 using namespace apache::thrift::compiler; // NOLINT
 
 class TokenTest : public testing::Test {

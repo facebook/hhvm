@@ -18,7 +18,6 @@
 
 #include <cassert>
 
-#include <fmt/core.h>
 #include <thrift/compiler/source_location.h>
 
 namespace apache {
@@ -190,7 +189,7 @@ struct token_kind {
   }
 };
 
-fmt::string_view to_string(token_kind kind);
+std::string_view to_string(token_kind kind);
 
 // A lexed token.
 class token {
@@ -220,16 +219,16 @@ class token {
   }
 
   static token make_string_literal(
-      const source_range& r, fmt::string_view value) {
+      const source_range& r, std::string_view value) {
     return make_string_token(tok::string_literal, r, value);
   }
 
-  static token make_identifier(const source_range& r, fmt::string_view value) {
+  static token make_identifier(const source_range& r, std::string_view value) {
     return make_string_token(tok::identifier, r, value);
   }
 
   static token make_inline_doc(
-      const source_range& r, fmt::string_view value) {
+      const source_range& r, std::string_view value) {
     return make_string_token(tok::inline_doc, r, value);
   }
 
@@ -257,7 +256,7 @@ class token {
 
   // Returns the value of an identifier, string literal or inline doc.
   // The string is owned by the source manager.
-  fmt::string_view string_value() const {
+  std::string_view string_value() const {
     if (kind != tok::identifier && kind != tok::string_literal &&
         kind != tok::inline_doc) {
       throw_invalid_kind("string");
@@ -280,7 +279,7 @@ class token {
 
   // Creates a string-valued token such as a string literal or an identifier.
   static token make_string_token(
-      tok kind, const source_range& r, fmt::string_view value) {
+      tok kind, const source_range& r, std::string_view value) {
     auto t = token(kind, r);
     t.as.string_value = {value.data(), value.size()};
     return t;

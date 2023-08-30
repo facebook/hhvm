@@ -94,7 +94,7 @@ class parser {
     return *str;
   }
 
-  [[noreturn]] void report_expected(fmt::string_view expected) {
+  [[noreturn]] void report_expected(std::string_view expected) {
     diags_.error(token_.range.begin, "expected {}", expected);
     throw parse_error();
   }

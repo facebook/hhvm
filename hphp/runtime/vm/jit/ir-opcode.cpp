@@ -378,7 +378,6 @@ bool opcodeMayRaise(Opcode opc) {
   case PropDX:
   case PropQ:
   case PropTypeRedefineCheck:
-  case PropTypeValid:
   case PropX:
   case RaiseCoeffectsCallViolation:
   case RaiseCoeffectsFunParamCoeffectRulesViolation:

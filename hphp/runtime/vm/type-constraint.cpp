@@ -965,17 +965,6 @@ void TypeConstraint::verifyPropFail(const Class* thisCls,
   );
 }
 
-void TypeConstraint::validForPropFail(const Class* declCls,
-                                      const StringData* propName) const {
-  // (Mostly) match the error that HackC produces during parsing.
-  raise_error(
-    "Invalid property type-hint for '%s::$%s' (via '%s')",
-    declCls->name()->data(),
-    propName->data(),
-    typeName()->data()
-  );
-}
-
 void TypeConstraint::verifyFail(tv_lval c, const Class* ctx, const Func* func,
                                 int id) const {
   if (tryCommonCoercions(c, ctx, nullptr)) return;

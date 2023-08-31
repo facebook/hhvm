@@ -427,7 +427,6 @@ bool canDCE(const IRInstruction& inst) {
   case FuncCred:
   case InitProps:
   case PropTypeRedefineCheck:
-  case PropTypeValid:
   case InitSProps:
   case InitObjProps:
   case InitObjMemoSlots:

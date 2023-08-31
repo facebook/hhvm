@@ -168,19 +168,6 @@ void cgPropTypeRedefineCheck(IRLS& env, const IRInstruction* inst) {
   );
 }
 
-void cgPropTypeValid(IRLS& env, const IRInstruction* inst) {
-  auto const cls = inst->src(0)->clsVal();
-  assertx(cls->needsPropInitialValueCheck());
-  cgCallHelper(
-    vmain(env),
-    env,
-    CallSpec::method(&Class::checkPropInitialValues),
-    kVoidDest,
-    SyncOptions::Sync,
-    argGroup(env, inst).immPtr(cls)
-  );
-}
-
 IMPL_OPCODE_CALL(InitProps)
 IMPL_OPCODE_CALL(InitSProps)
 

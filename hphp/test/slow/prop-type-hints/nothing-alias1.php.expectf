@@ -1,2 +1,0 @@
-Fatal error: Invalid property type-hint for 'A::$foo' (via 'Impossible') in %s/nothing-alias1.php on line %d
-

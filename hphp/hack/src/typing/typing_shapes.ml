@@ -84,13 +84,6 @@ let refine_shape field_name pos env shape =
     shape
     (MakeType.open_shape Reason.Rnone (TShapeMap.singleton field_name sft))
 
-let make_locl_like_type env ty =
-  if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
-    let dyn = MakeType.dynamic (Reason.Renforceable (get_pos ty)) in
-    Typing_union.union env dyn ty
-  else
-    (env, ty)
-
 (*****************************************************************************)
 (* Remove a field from all the shapes found in a given type.
  * The function leaves all the other types (non-shapes) unchanged.
@@ -271,10 +264,7 @@ let idx_without_default env ~expr_pos ~shape_pos shape_ty field_name =
     let nullable_super_shape = mk (Reason.Rnone, Toption fake_super_shape_ty) in
     let super_shape =
       if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
-        let like_nullable_super_shape =
-          MakeType.locl_like (Reason.Rwitness shape_pos) nullable_super_shape
-        in
-        like_nullable_super_shape
+        MakeType.locl_like (Reason.Rwitness shape_pos) nullable_super_shape
       else
         nullable_super_shape
     in
@@ -290,17 +280,13 @@ let idx_without_default env ~expr_pos ~shape_pos shape_ty field_name =
     let (env, res) = TUtils.union env res (MakeType.null Reason.Rnone) in
     ((env, ty_err_opt), res)
   in
-  let (env, res) =
-    match get_node (TUtils.strip_dynamic env shape_ty) with
-    | Tnewtype (n, _, _)
-      when String.equal n Naming_special_names.Classes.cSupportDyn ->
-      let r = get_reason shape_ty in
-      TUtils.make_supportdyn r env res
-    | _ -> (env, res)
-  in
-
   Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
-  make_locl_like_type env res
+  match get_node (TUtils.strip_dynamic env shape_ty) with
+  | Tnewtype (n, _, _)
+    when String.equal n Naming_special_names.Classes.cSupportDyn ->
+    let r = get_reason shape_ty in
+    TUtils.make_supportdyn r env res
+  | _ -> (env, res)
 
 let remove_key_with_ty_err p env shape_ty ((_, field_p, _) as field) =
   let (fld_opt, ty_err_opt) = TUtils.shape_field_name_with_ty_err env field in

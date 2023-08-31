@@ -7,9 +7,11 @@ use std::cell::RefCell;
 use std::io::Write;
 
 use dep_graph_delta::DepGraphDelta;
+use dep_graph_delta::HashSetDelta;
 pub use depgraph_reader::Dep;
 use depgraph_reader::DepGraph;
 use hash::HashSet;
+use itertools::Either;
 use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep::FromError;
 use ocamlrep::FromOcamlRep;
@@ -436,24 +438,23 @@ where
 {
     dep_graph_delta_with(|delta| {
         dep_graph_with_option(mode, |g| {
-            let mut f_option = |iter| match iter {
-                None => f(&mut std::iter::empty()),
-                Some(mut iter) => f(&mut iter),
+            let HashSetDelta { added, removed } = delta.get(dep);
+            let mut added_iter = added
+                .map(|s| s.iter().copied())
+                .map_or(Either::Right(std::iter::empty::<Dep>()), Either::Left);
+            let is_removed = |d: &Dep| match removed {
+                None => false,
+                Some(removed) => removed.contains(d),
             };
-
-            let delta_iter = delta.get(dep).map(|deps| deps.iter().copied());
             match g {
-                None => f_option(delta_iter),
+                None => f(&mut added_iter),
                 Some(g) => {
                     let hashes = g.hash_list_for(dep);
                     match hashes {
-                        None => f_option(delta_iter),
+                        None => f(&mut added_iter),
                         Some(hashes) => {
-                            let mut base_iter = g.hash_list_hashes(hashes);
-                            match delta_iter {
-                                None => f(&mut base_iter),
-                                Some(delta_iter) => f(&mut (delta_iter.chain(base_iter))),
-                            }
+                            let base_iter = g.hash_list_hashes(hashes);
+                            f(&mut added_iter.chain(base_iter.filter(|d| !is_removed(d))))
                         }
                     }
                 }
@@ -463,7 +464,7 @@ where
 }
 
 pub fn dep_graph_delta_num_edges() -> usize {
-    dep_graph_delta_with(|s| s.len())
+    dep_graph_delta_with(|s| s.added_edges_count())
 }
 
 #[cfg(test)]

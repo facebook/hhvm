@@ -13,74 +13,100 @@ use hash::HashSet;
 use serde::Deserialize;
 use serde::Serialize;
 
-/// Structure to keep track of the dependency graph delta.
-#[derive(Default, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct DepGraphDelta {
-    /// Maps each dependency to a set of dependents
-    rdeps: HashMap<Dep, HashSet<Dep>>,
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+struct Graph {
+    map: HashMap<Dep, HashSet<Dep>>,
 
     /// Total number of edges. Tracks the sum:
-    /// `rdeps.values().map(|set|set.len()).sum()`
+    /// `map.values().map(|set|set.len()).sum()`
     num_edges: usize,
 }
 
-impl DepGraphDelta {
+impl Graph {
     // The high bit of a value being set distinguishes dependency from dependent.
     const DEPENDENCY_TAG: u64 = 1 << 63;
 
-    pub fn insert(&mut self, dependent: Dep, dependency: Dep) {
-        if (self.rdeps.entry(dependency))
-            .or_default()
-            .insert(dependent)
-        {
+    fn insert(&mut self, key: Dep, value: Dep) {
+        if self.map.entry(key).or_default().insert(value) {
             self.num_edges += 1;
         }
     }
 
-    pub fn extend(&mut self, other: Self) {
-        use std::collections::hash_map::Entry::*;
-        for (dependency, dependents) in other.rdeps {
-            match self.rdeps.entry(dependency) {
-                Occupied(e) => {
-                    let ds = e.into_mut();
-                    let n = ds.len();
-                    ds.extend(dependents);
-                    self.num_edges += ds.len() - n;
-                }
-                Vacant(e) => {
-                    self.num_edges += dependents.len();
-                    e.insert(dependents);
+    fn remove(&mut self, key: Dep, value: Dep) {
+        let mut removed = false;
+        let mut is_empty = false;
+        self.map.entry(key).and_modify(|values| {
+            removed = values.remove(&value);
+            is_empty = values.is_empty();
+        });
+        if removed {
+            self.num_edges -= 1;
+        }
+        if is_empty {
+            self.map.remove(&key);
+        }
+    }
+
+    fn extend(&mut self, other: &Self) {
+        for (key, other_values) in &other.map {
+            let values = self.map.entry(*key).or_default();
+            for value in other_values {
+                if values.insert(*value) {
+                    self.num_edges += 1;
                 }
             }
         }
     }
 
-    pub fn get(&self, dependency: Dep) -> Option<&HashSet<Dep>> {
-        self.rdeps.get(&dependency)
+    fn remove_many(&mut self, other: &Self) {
+        for (key, other_values) in &other.map {
+            let values = self.map.entry(*key).or_default();
+            for value in other_values {
+                if values.remove(value) {
+                    self.num_edges -= 1;
+                }
+            }
+            if values.is_empty() {
+                self.map.remove(key);
+            }
+        }
     }
 
-    /// Return an iterator over this dependency graph delta.
-    ///
-    /// Iterates over (dependent, dependency) pairs
-    pub fn iter(&self) -> impl Iterator<Item = (Dep, Dep)> + '_ {
-        self.rdeps.iter().flat_map(|(&dependency, dependents_set)| {
+    fn get(&self, key: &Dep) -> Option<&HashSet<Dep>> {
+        self.map.get(key)
+    }
+
+    fn has_edge(&self, key: Dep, value: Dep) -> bool {
+        match self.map.get(&key) {
+            None => false,
+            Some(values) => values.contains(&value),
+        }
+    }
+
+    fn len(&self) -> usize {
+        self.num_edges
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.num_edges == 0
+    }
+
+    fn clear(&mut self) {
+        self.map.clear();
+        self.num_edges = 0;
+    }
+
+    /// Return an iterator over this graph
+    fn iter(&self) -> impl Iterator<Item = (Dep, Dep)> + '_ {
+        self.map.iter().flat_map(|(&dependency, dependents_set)| {
             dependents_set
                 .iter()
                 .map(move |&dependent| (dependent, dependency))
         })
     }
 
-    pub fn into_rdeps(self) -> impl Iterator<Item = (Dep, HashSet<Dep>)> {
-        self.rdeps.into_iter()
-    }
-
-    /// Return the number of edges in the dep graph delta.
-    pub fn len(&self) -> usize {
-        self.num_edges
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.num_edges == 0
+    fn into_iter(self) -> impl Iterator<Item = (Dep, HashSet<Dep>)> {
+        self.map.into_iter()
     }
 
     /// Write one (dependency, dependents) list.
@@ -114,7 +140,7 @@ impl DepGraphDelta {
     /// but is arbitrary since we're iterating HashMap & HashSet.
     pub fn write_to<W: Write>(&self, mut w: W) -> io::Result<usize> {
         let mut edges_added = 0;
-        for (&dependency, dependents) in self.rdeps.iter() {
+        for (&dependency, dependents) in self.map.iter() {
             Self::write_list(&mut w, dependency, dependents.iter().copied())?;
             edges_added += dependents.len();
         }
@@ -126,7 +152,7 @@ impl DepGraphDelta {
     ///
     /// The output is deterministic sorted order.
     pub fn write_sorted<W: Write>(&self, mut w: W) -> io::Result<()> {
-        let mut dependencies: Vec<_> = self.rdeps.iter().collect();
+        let mut dependencies: Vec<_> = self.map.iter().collect();
         dependencies.sort_unstable_by_key(|(dep, _)| *dep);
         for (&dependency, dependents) in dependencies {
             let mut dependents: Vec<Dep> = dependents.iter().copied().collect();
@@ -173,7 +199,7 @@ impl DepGraphDelta {
                     dependency.expect("Expected a dependent hash before a dependency hash");
 
                 if f(dependent, dependency) {
-                    self.insert(dependent, dependency);
+                    self.insert(dependency, dependent);
                     edges_read += 1;
                 }
             }
@@ -181,10 +207,116 @@ impl DepGraphDelta {
 
         Ok(edges_read)
     }
+}
+
+pub struct HashSetDelta<'a, T> {
+    pub added: Option<&'a HashSet<T>>,
+    pub removed: Option<&'a HashSet<T>>,
+}
+
+/// Structure to keep track of the dependency graph delta.
+///
+/// Assuming this delta is applied to a graph with edge set B (for base),
+/// and A is the set of added edges and R the set of removed edges,
+/// then the resulting set of edges will be
+///
+///    B + A - R
+///
+/// with invariant A /\ R = 0 (A and R are disjoint).
+#[derive(Default, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct DepGraphDelta {
+    /// Maps each dependency to a set of dependents
+    added_edges: Graph,
+
+    /// Edges to be removed from the base dependency graph.
+    /// Invariant: `removed_edges` and `added_edges` are disjoint.
+    removed_edges: Graph,
+}
+
+impl DepGraphDelta {
+    pub fn insert(&mut self, dependent: Dep, dependency: Dep) {
+        self.added_edges.insert(dependency, dependent);
+        self.removed_edges.remove(dependency, dependent);
+    }
+
+    pub fn remove(&mut self, dependent: Dep, dependency: Dep) {
+        self.removed_edges.insert(dependency, dependent);
+        self.added_edges.remove(dependency, dependent);
+    }
+
+    pub fn extend(&mut self, mut other: Self) {
+        self.added_edges.remove_many(&other.removed_edges);
+        other.added_edges.remove_many(&self.removed_edges);
+        self.added_edges.extend(&other.added_edges);
+        self.removed_edges.extend(&other.removed_edges);
+    }
+
+    pub fn get<'a>(&'a self, dependency: Dep) -> HashSetDelta<'a, Dep> {
+        HashSetDelta {
+            added: self.added_edges.get(&dependency),
+            removed: self.removed_edges.get(&dependency),
+        }
+    }
+
+    pub fn edge_is_removed(&self, dependent: Dep, dependency: Dep) -> bool {
+        self.removed_edges.has_edge(dependency, dependent)
+    }
+
+    /// Return the number of added edges in the dep graph delta. Ignore removed edges.
+    pub fn added_edges_count(&self) -> usize {
+        self.added_edges.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.added_edges.is_empty() && self.removed_edges.is_empty()
+    }
+
+    /// Return an iterator over this dependency graph delta.
+    ///
+    /// Iterates over (dependent, dependency) pairs
+    pub fn iter_added_edges(&self) -> impl Iterator<Item = (Dep, Dep)> + '_ {
+        self.added_edges.iter()
+    }
+
+    pub fn into_iter_added_edges(self) -> impl Iterator<Item = (Dep, HashSet<Dep>)> {
+        self.added_edges.into_iter()
+    }
+
+    /// Write all edges in the delta to the writer in a custom format.
+    ///
+    /// The output is deterministic if the insertion order is deterministic,
+    /// but is arbitrary since we're iterating HashMap & HashSet.
+    pub fn write_added_edges_to<W: Write>(&self, w: W) -> io::Result<usize> {
+        self.added_edges.write_to(w)
+    }
+
+    /// Write all edges in the delta to the writer in a custom format.
+    ///
+    /// The output is deterministic sorted order.
+    pub fn write_sorted_added_edges<W: Write>(&self, w: W) -> io::Result<()> {
+        self.added_edges.write_sorted(w)
+    }
+
+    /// Load all edges into the delta.
+    ///
+    /// The predicate determines whether or not to add a loaded edge to the delta.
+    /// If the predicate returns true for a given dependent-dependency edge
+    /// (in that order), the edge is added.
+    ///
+    /// Returns the number of edges actually read.
+    ///
+    /// See write_to() for details about the file format.
+    pub fn read_added_edges_from<R: Read>(
+        &mut self,
+        r: R,
+        f: impl Fn(Dep, Dep) -> bool,
+    ) -> io::Result<usize> {
+        self.added_edges.read_from(r, f)
+    }
 
     pub fn clear(&mut self) {
-        self.rdeps.clear();
-        self.num_edges = 0;
+        self.added_edges.clear();
+        self.removed_edges.clear();
     }
 }
 
@@ -213,15 +345,15 @@ impl<'a> Iterator for DepGraphDeltaIterator<'a> {
             // just point to them directly.
             let end = rest
                 .iter()
-                .position(|&x| (x & DepGraphDelta::DEPENDENCY_TAG) != 0)
+                .position(|&x| (x & Graph::DEPENDENCY_TAG) != 0)
                 .unwrap_or(rest.len());
 
             // Advance the iterator to the next edge list (if any).
             let (dependents, rest) = rest.split_at(end);
             self.raw_data = rest;
 
-            debug_assert_ne!(first & DepGraphDelta::DEPENDENCY_TAG, 0);
-            let dependency = Dep::new(first & !DepGraphDelta::DEPENDENCY_TAG);
+            debug_assert_ne!(first & Graph::DEPENDENCY_TAG, 0);
+            let dependency = Dep::new(first & !Graph::DEPENDENCY_TAG);
             let dependents = Dep::from_u64_slice(dependents);
             (dependency, dependents)
         })
@@ -235,14 +367,89 @@ mod tests {
     use super::*;
 
     #[test]
+    fn test_insert_remove() {
+        let mut delta = DepGraphDelta::default();
+        delta.insert(Dep::new(10), Dep::new(1));
+        delta.insert(Dep::new(20), Dep::new(1));
+        delta.remove(Dep::new(10), Dep::new(1));
+
+        delta.insert(Dep::new(30), Dep::new(3));
+        delta.remove(Dep::new(30), Dep::new(3));
+
+        assert!(delta.edge_is_removed(Dep::new(10), Dep::new(1)));
+        let HashSetDelta { added, removed } = delta.get(Dep::new(1));
+        assert_set_equals(added, [Dep::new(20)]);
+        assert_set_equals(removed, [Dep::new(10)]);
+
+        assert!(delta.edge_is_removed(Dep::new(30), Dep::new(3)));
+        let HashSetDelta { added, removed } = delta.get(Dep::new(3));
+        assert!(is_empty(added));
+        assert_set_equals(removed, [Dep::new(30)]);
+        assert_eq!(delta.added_edges_count(), 1);
+
+        // Re-add removed edge
+        delta.insert(Dep::new(30), Dep::new(3));
+        assert!(!delta.edge_is_removed(Dep::new(3), Dep::new(30)));
+        let HashSetDelta { added, removed } = delta.get(Dep::new(3));
+        assert_set_equals(added, [Dep::new(30)]);
+        assert!(is_empty(removed));
+        assert_eq!(delta.added_edges_count(), 2);
+    }
+
+    #[test]
+    fn test_extend() {
+        let mut delta1 = DepGraphDelta::default();
+        delta1.insert(Dep::new(1), Dep::new(10));
+        delta1.insert(Dep::new(1), Dep::new(20));
+        delta1.insert(Dep::new(3), Dep::new(30));
+        delta1.remove(Dep::new(2), Dep::new(10));
+        delta1.remove(Dep::new(5), Dep::new(10));
+
+        let mut delta2 = DepGraphDelta::default();
+        delta2.insert(Dep::new(2), Dep::new(10));
+        delta2.insert(Dep::new(1), Dep::new(20));
+        delta2.insert(Dep::new(4), Dep::new(30));
+        delta2.remove(Dep::new(3), Dep::new(30));
+        delta2.remove(Dep::new(1), Dep::new(10));
+        delta1.remove(Dep::new(5), Dep::new(10));
+
+        delta1.extend(delta2);
+
+        let mut expected = DepGraphDelta::default();
+        expected.insert(Dep::new(1), Dep::new(20));
+        expected.insert(Dep::new(4), Dep::new(30));
+        expected.remove(Dep::new(2), Dep::new(10));
+        expected.remove(Dep::new(3), Dep::new(30));
+        expected.remove(Dep::new(1), Dep::new(10));
+        expected.remove(Dep::new(5), Dep::new(10));
+
+        assert_eq!(delta1, expected);
+        assert_eq!(delta1.added_edges_count(), 2);
+    }
+
+    fn is_empty<T>(set: Option<&HashSet<T>>) -> bool {
+        set.is_none() || set.is_some_and(|set| set.is_empty())
+    }
+
+    fn assert_set_equals<const N: usize>(actual: Option<&HashSet<Dep>>, expected: [Dep; N]) {
+        let mut expected_set = HashSet::default();
+        for d in expected {
+            expected_set.insert(d);
+        }
+        assert_eq!(actual, Some(&expected_set))
+    }
+
+    #[test]
     fn test_dep_graph_delta_serialize_empty() {
         let x = DepGraphDelta::default();
         let mut bytes = Vec::new();
-        x.write_to(&mut bytes).unwrap();
+        x.write_added_edges_to(&mut bytes).unwrap();
 
         let mut y = DepGraphDelta::default();
         let mut bytes_read: &[u8] = &bytes;
-        let num_loaded = y.read_from(&mut bytes_read, |_, _| true).unwrap();
+        let num_loaded = y
+            .read_added_edges_from(&mut bytes_read, |_, _| true)
+            .unwrap();
 
         assert_eq!(num_loaded, 0);
         assert_eq!(x, y);
@@ -256,11 +463,13 @@ mod tests {
         x.insert(Dep::new(11), Dep::new(2));
         x.insert(Dep::new(12), Dep::new(3));
         let mut bytes = Vec::new();
-        x.write_to(&mut bytes).unwrap();
+        x.write_added_edges_to(&mut bytes).unwrap();
 
         let mut y = DepGraphDelta::default();
         let mut bytes_read: &[u8] = &bytes;
-        let num_loaded = y.read_from(&mut bytes_read, |_, _| true).unwrap();
+        let num_loaded = y
+            .read_added_edges_from(&mut bytes_read, |_, _| true)
+            .unwrap();
 
         assert_eq!(num_loaded, 4);
         assert_eq!(x, y);
@@ -269,7 +478,7 @@ mod tests {
     #[test]
     fn test_dep_graph_delta_iter_empty() {
         let x = DepGraphDelta::default();
-        let v: Vec<_> = x.iter().collect();
+        let v: Vec<_> = x.iter_added_edges().collect();
         assert_eq!(v.len(), 0);
     }
 
@@ -285,7 +494,7 @@ mod tests {
         for (dependency, dependent) in edges.iter() {
             x.insert(*dependency, *dependent)
         }
-        let mut v: Vec<_> = x.iter().collect();
+        let mut v: Vec<_> = x.iter_added_edges().collect();
         v.sort();
         assert_eq!(v, edges);
     }

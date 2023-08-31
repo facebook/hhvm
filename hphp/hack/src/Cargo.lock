@@ -1417,6 +1417,7 @@ dependencies = [
  "dep_graph_delta",
  "depgraph_reader",
  "hash",
+ "itertools 0.10.5",
  "ocamlrep",
  "ocamlrep_custom",
  "once_cell",

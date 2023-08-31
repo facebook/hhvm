@@ -16,7 +16,7 @@ use serde::Deserialize;
 use serde::Serialize;
 
 #[repr(transparent)]
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Copy, Default, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
 #[derive(bytemuck::Pod, bytemuck::Zeroable)]
 #[derive(Serialize, Deserialize)]
 pub struct Dep(u64);

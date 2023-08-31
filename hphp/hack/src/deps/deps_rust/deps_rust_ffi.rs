@@ -155,8 +155,10 @@ ocaml_ffi! {
         dep_graph_override(mode);
     }
 
-    fn hh_base_dep_graph_has_edge(mode: RawTypingDepsMode, dependent: Dep, dependency: Dep) -> bool {
-        base_dep_graph_has_edge(mode, dependent, dependency)
+    // Returns true if we know for sure that the depgraph has the edge, false
+    // if we don't know.
+    fn hh_depgraph_has_edge_for_sure(mode: RawTypingDepsMode, dependent: Dep, dependency: Dep) -> bool {
+        depgraph_has_edge_for_sure(mode, dependent, dependency)
     }
 
     fn hh_custom_dep_graph_get_ideps_from_hash(mode: RawTypingDepsMode, dep: Dep) -> Custom<DepSet> {
@@ -216,11 +218,13 @@ ocaml_ffi! {
     }
 }
 
-fn base_dep_graph_has_edge(mode: RawTypingDepsMode, dependent: Dep, dependency: Dep) -> bool {
+/// Returns true if we know for sure that the depgraph has the edge, false
+/// if we don't know.
+fn depgraph_has_edge_for_sure(mode: RawTypingDepsMode, dependent: Dep, dependency: Dep) -> bool {
     // Safety: we don't call into OCaml again, so mode will remain valid.
     dep_graph_map_or(mode, false, move |g| {
         g.dependent_dependency_edge_exists(dependent, dependency)
-    })
+    }) && dep_graph_delta_with(|delta| !delta.edge_is_removed(dependent, dependency))
 }
 
 fn get_ideps_from_hash(mode: RawTypingDepsMode, dep: Dep) -> Custom<DepSet> {
@@ -324,7 +328,7 @@ fn save_delta(dest: OsString, reset_state_after_saving: bool) -> usize {
         .unwrap();
     let hashes_added = dep_graph_delta_with(move |s| {
         let mut w = std::io::BufWriter::new(f);
-        let hashes_added = s.write_to(&mut w).unwrap();
+        let hashes_added = s.write_added_edges_to(&mut w).unwrap();
         w.into_inner().unwrap();
         hashes_added
     });
@@ -346,13 +350,13 @@ fn load_delta(mode: RawTypingDepsMode, source: OsString) -> usize {
         dep_graph_delta_with_mut(|s| {
             let result = match g {
                 Some(g) => {
-                    s.read_from(&mut r, |dependent, dependency| {
+                    s.read_added_edges_from(&mut r, |dependent, dependency| {
                         // Only add when it's not already in
                         // the graph!
                         !g.dependent_dependency_edge_exists(dependent, dependency)
                     })
                 }
-                None => s.read_from(&mut r, |_, _| true),
+                None => s.read_added_edges_from(&mut r, |_, _| true),
             };
             result.unwrap()
         })

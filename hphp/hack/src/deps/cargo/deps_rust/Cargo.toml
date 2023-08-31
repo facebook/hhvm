@@ -13,6 +13,7 @@ crate-type = ["lib", "staticlib"]
 dep_graph_delta = { version = "0.0.0", path = "../.." }
 depgraph_reader = { version = "0.0.0", path = "../../../depgraph/cargo/depgraph_reader" }
 hash = { version = "0.0.0", path = "../../../utils/hash" }
+itertools = "0.10.3"
 ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 ocamlrep_custom = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 once_cell = "1.12"

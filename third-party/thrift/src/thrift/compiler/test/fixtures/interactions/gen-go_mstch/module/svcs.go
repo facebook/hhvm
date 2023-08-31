@@ -183,25 +183,25 @@ func (x *reqMyServiceFoo) Read(p thrift.Protocol) error {
     }
 
     for {
-        _, typ, id, err := p.ReadFieldBegin()
+        _, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
             return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
         }
 
-        if typ == thrift.STOP {
+        if wireType == thrift.STOP {
             break;
         }
 
         switch id {
         default:
-            if err := p.Skip(typ); err != nil {
+            if err := p.Skip(wireType); err != nil {
                 return err
             }
         }
+    }
 
-        if err := p.ReadFieldEnd(); err != nil {
-            return err
-        }
+    if err := p.ReadFieldEnd(); err != nil {
+        return err
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -275,25 +275,25 @@ func (x *respMyServiceFoo) Read(p thrift.Protocol) error {
     }
 
     for {
-        _, typ, id, err := p.ReadFieldBegin()
+        _, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
             return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
         }
 
-        if typ == thrift.STOP {
+        if wireType == thrift.STOP {
             break;
         }
 
         switch id {
         default:
-            if err := p.Skip(typ); err != nil {
+            if err := p.Skip(wireType); err != nil {
                 return err
             }
         }
+    }
 
-        if err := p.ReadFieldEnd(); err != nil {
-            return err
-        }
+    if err := p.ReadFieldEnd(); err != nil {
+        return err
     }
 
     if err := p.ReadStructEnd(); err != nil {

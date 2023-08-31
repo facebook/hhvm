@@ -25,31 +25,40 @@ func (x *{{struct:go_name}}) Read(p thrift.Protocol) error {
     }
 
     for {
-        _, typ, id, err := p.ReadFieldBegin()
+        _, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
             return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
         }
 
-        if typ == thrift.STOP {
+        if wireType == thrift.STOP {
             break;
         }
 
         switch id {
         {{#struct:fields}}
         case {{field:key}}:  // {{field:name}}
-            if err := x.readField{{field:key_str}}(p); err != nil {
-                return err
+            {{#field:type}}
+            expectedType := thrift.Type({{> common/ttype}})
+            if wireType == expectedType {
+                if err := x.readField{{field:key_str}}(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
             }
+            {{/field:type}}
         {{/struct:fields}}
         default:
-            if err := p.Skip(typ); err != nil {
+            if err := p.Skip(wireType); err != nil {
                 return err
             }
         }
+    }
 
-        if err := p.ReadFieldEnd(); err != nil {
-            return err
-        }
+    if err := p.ReadFieldEnd(); err != nil {
+        return err
     }
 
     if err := p.ReadStructEnd(); err != nil {

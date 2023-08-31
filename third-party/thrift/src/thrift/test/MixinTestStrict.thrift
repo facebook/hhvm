@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-include "thrift/annotation/thrift.thrift"
-
-@thrift.NoLegacy
 package "facebook.com/thrift/test"
 
 namespace cpp2 thrift.test.strict

@@ -22,8 +22,6 @@ namespace annotation {
   ::apache::thrift::detail::md::StructMetadata<NoExperimental>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<NoBeta>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Released>::gen(metadata);
-  ::apache::thrift::detail::md::StructMetadata<NoLegacy>::gen(metadata);
-  ::apache::thrift::detail::md::StructMetadata<NoDeprecated>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<TerseWrite>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Box>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Mixin>::gen(metadata);

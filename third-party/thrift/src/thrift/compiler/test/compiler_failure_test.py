@@ -62,31 +62,6 @@ class CompilerFailureTest(unittest.TestCase):
         err = err.replace("\r\n", "\n")
         return p.returncode, out, err
 
-    def test_function_return_type(self):
-        write_file(
-            "foo.thrift",
-            textwrap.dedent(
-                """\
-                include "thrift/annotation/thrift.thrift"
-                struct Empty {}
-
-                @thrift.NoLegacy
-                service MyService {
-                    string foo();
-                    i32 bar();
-                    Empty baz();
-                }
-                """
-            ),
-        )
-        ret, out, err = self.run_thrift("foo.thrift")
-        self.assertEqual(
-            err,
-            "[ERROR:foo.thrift:6] Function `foo`'s return type must be a thrift struct.\n"
-            "[ERROR:foo.thrift:7] Function `bar`'s return type must be a thrift struct.\n",
-        )
-        self.assertEqual(ret, 1)
-
     def test_duplicate_method_name_base_base(self):
         # tests overriding a method of the parent and the grandparent services
         write_file(
@@ -1680,29 +1655,6 @@ class CompilerFailureTest(unittest.TestCase):
             err,
             "[ERROR:foo.thrift:6] `@cpp.FieldInterceptor` cannot be used without `name` specified in `field2`.\n"
             "[ERROR:foo.thrift:10] `@cpp.EnumType` cannot be used without `type` specified in `MyEnum1`.\n",
-        )
-
-    def test_no_required_field(self):
-        write_file(
-            "foo.thrift",
-            textwrap.dedent(
-                """\
-                include "thrift/annotation/thrift.thrift"
-
-                @thrift.NoLegacy
-                struct Fields {
-                    1: i64 field1;
-                    2: optional i64 field2;
-                    3: required i64 field3;
-                }
-                """
-            ),
-        )
-        ret, out, err = self.run_thrift("foo.thrift")
-        self.assertEqual(ret, 1)
-        self.assertEqual(
-            err,
-            "[ERROR:foo.thrift:7] Required field is deprecated: `field3`.\n",
         )
 
     def test_cpp_adapter_compatibility(self):

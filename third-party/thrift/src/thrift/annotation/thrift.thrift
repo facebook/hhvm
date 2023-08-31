@@ -119,28 +119,6 @@ struct NoBeta {}
 @scope.Transitive
 struct Released {}
 
-/**
- * Disables legacy features.
- */
-// TODO(ytj): Everyone should be able to test without legacy features. Fix
-// compatibility with legacy reflection and move to @Beta.
-@scope.Program
-@scope.Definition
-@Experimental
-struct NoLegacy {}
-
-/**
- * Disables @Deprecated features.
- *
- * Should only be enabled in `test` versions, as deprecated implies removing
- * the feature will break current usage (otherwise it would be legacy or
- * deleted).
- */
-@NoLegacy // Implies NoLegacy
-@Beta // Everyone should be able to test without deprecated features.
-@scope.Transitive
-struct NoDeprecated {}
-
 ////
 // Thrift feature annotations.
 ////
@@ -210,7 +188,6 @@ struct v1 {}
  * released Thrift features.
  */
 @v1 // All v1 features.
-// @NoLegacy // Disables features that will be removed.
 @Beta // All uses of v1beta inherit `@Beta`.
 // @TerseWrite
 @scope.Transitive
@@ -233,7 +210,6 @@ struct v1alpha {}
  * Enables experimental features, even those that are known to break common
  * use cases.
  */
-@NoDeprecated // Remove deprecated features by default for tests.
 @v1alpha // All v1alpha features.
 @Testing // Should only be used in tests.
 @scope.Transitive

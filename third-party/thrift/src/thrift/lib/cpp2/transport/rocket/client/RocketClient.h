@@ -36,6 +36,7 @@
 #include <thrift/lib/cpp2/transport/rocket/client/RequestContext.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RequestContextQueue.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RocketStreamServerCallback.h>
+#include <thrift/lib/cpp2/transport/rocket/flush/FlushManager.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Parser.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
@@ -59,10 +60,7 @@ namespace rocket {
 class RocketClient : public virtual folly::DelayedDestruction,
                      private folly::AsyncTransport::WriteCallback {
  public:
-  using FlushList = boost::intrusive::list<
-      folly::EventBase::LoopCallback,
-      boost::intrusive::constant_time_size<false>>;
-
+  using FlushList = FlushManager::FlushList;
   RocketClient(const RocketClient&) = delete;
   RocketClient(RocketClient&&) = delete;
   RocketClient& operator=(const RocketClient&) = delete;
@@ -212,56 +210,6 @@ class RocketClient : public virtual folly::DelayedDestruction,
    * Note2: call to detachEventBase() would reset the list back to nullptr.
    */
   void setFlushList(FlushList* flushList) { flushList_ = flushList; }
-
-  class FlushManager : private folly::EventBase::LoopCallback,
-                       public folly::AsyncTimeout {
-   public:
-    explicit FlushManager(folly::EventBase& evb) : evb_(evb) {
-      attachEventBase(&evb_);
-    }
-    static FlushManager& getInstance(folly::EventBase& evb) {
-      return getEventBaseLocal().try_emplace(evb, evb);
-    }
-    void enqueueFlush(folly::EventBase::LoopCallback& writeLoopCallback);
-    // has time complexity linear to number of elements in flush list
-    size_t getNumPendingClients() const { return flushList_.size(); }
-
-    void timeoutExpired() noexcept override;
-
-    /*
-     * When not using setFlushList to manage flushes, this sets the flush
-     * policy for the FlushManager. maxPendingFlushes is the number of client
-     * flushes which will be batched before scheduling a flush in the next
-     * loop callback. maxFlushLatency is the amount of time to wait for
-     * maxPendingFlushes before scheduling a loop callback. I.e., it is the
-     * latency tolerance for a RocketClient's flush.
-     */
-    void setFlushPolicy(
-        size_t maxPendingFlushes, std::chrono::microseconds maxFlushLatency) {
-      flushPolicy_.emplace(maxPendingFlushes, maxFlushLatency);
-    }
-
-    /*
-     * Reset the flush policy to no policy. Also act as if the timeout elapsed
-     * immediately.
-     */
-    void resetFlushPolicy();
-
-   private:
-    void runLoopCallback() noexcept override final;
-
-    folly::EventBase& evb_;
-    FlushList flushList_;
-    bool rescheduled_{false};
-    size_t pendingFlushes_{0};
-    struct FlushPolicy {
-      FlushPolicy(size_t m, std::chrono::microseconds f)
-          : maxPendingFlushes(m), maxFlushLatency(f) {}
-      size_t maxPendingFlushes{0};
-      std::chrono::microseconds maxFlushLatency{0};
-    };
-    std::optional<FlushPolicy> flushPolicy_;
-  };
 
   void scheduleTimeout(
       folly::HHWheelTimer::Callback* callback,
@@ -418,7 +366,6 @@ class RocketClient : public virtual folly::DelayedDestruction,
   FlushList* flushList_{nullptr};
 
   FlushManager* flushManager_{nullptr};
-  static folly::EventBaseLocal<FlushManager>& getEventBaseLocal();
 
   folly::AsyncTransport::UniquePtr socket_;
   folly::Function<void()> onDetachable_;

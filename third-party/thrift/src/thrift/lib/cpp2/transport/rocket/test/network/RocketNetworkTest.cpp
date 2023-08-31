@@ -148,7 +148,7 @@ TEST_F(RocketNetworkTest, FlushManager) {
 
     auto& client1 = client.getRawClient();
     auto& eventBase = client.getEventBase();
-    RocketClient::FlushManager* flushManager{nullptr};
+    FlushManager* flushManager{nullptr};
 
     auto& fm = folly::fibers::getFiberManager(eventBase);
 
@@ -169,7 +169,7 @@ TEST_F(RocketNetworkTest, FlushManager) {
               &onWriteSuccess2);
         });
 
-        flushManager = &RocketClient::FlushManager::getInstance(eventBase);
+        flushManager = &FlushManager::getInstance(eventBase);
         EXPECT_EQ(flushManager->getNumPendingClients(), 2);
         EXPECT_FALSE(onWriteSuccess1.writeSuccess);
         EXPECT_FALSE(onWriteSuccess2.writeSuccess);
@@ -194,12 +194,12 @@ TEST_F(RocketNetworkTest, FlushManagerLowMaxPendingFlushPolicy) {
 
     auto& client1 = client.getRawClient();
     auto& eventBase = client.getEventBase();
-    RocketClient::FlushManager* flushManager{nullptr};
+    FlushManager* flushManager{nullptr};
 
     auto& fm = folly::fibers::getFiberManager(eventBase);
     // FlushPolicy of 1 basically means immediate flushes.
     client.getEventBase().runInEventBaseThreadAndWait([&] {
-      flushManager = &RocketClient::FlushManager::getInstance(eventBase);
+      flushManager = &FlushManager::getInstance(eventBase);
       flushManager->setFlushPolicy(1, std::chrono::milliseconds(1));
     });
 
@@ -244,12 +244,12 @@ TEST_F(RocketNetworkTest, FlushManagerHighMaxPendingFlushPolicy) {
 
     auto& client1 = client.getRawClient();
     auto& eventBase = client.getEventBase();
-    RocketClient::FlushManager* flushManager{nullptr};
+    FlushManager* flushManager{nullptr};
 
     auto& fm = folly::fibers::getFiberManager(eventBase);
     // FlushPolicy of 1000 to force the timeout to trigger flushes.
     client.getEventBase().runInEventBaseThreadAndWait([&] {
-      flushManager = &RocketClient::FlushManager::getInstance(eventBase);
+      flushManager = &FlushManager::getInstance(eventBase);
       flushManager->setFlushPolicy(1000, std::chrono::milliseconds(1));
     });
 
@@ -294,12 +294,12 @@ TEST_F(RocketNetworkTest, FlushManagerHighMaxPendingFlushPolicyResetPolicy) {
 
     auto& client1 = client.getRawClient();
     auto& eventBase = client.getEventBase();
-    RocketClient::FlushManager* flushManager{nullptr};
+    FlushManager* flushManager{nullptr};
 
     auto& fm = folly::fibers::getFiberManager(eventBase);
     // FlushPolicy of 1000 to force the timeout to trigger flushes.
     client.getEventBase().runInEventBaseThreadAndWait([&] {
-      flushManager = &RocketClient::FlushManager::getInstance(eventBase);
+      flushManager = &FlushManager::getInstance(eventBase);
       flushManager->setFlushPolicy(1000, std::chrono::milliseconds(1));
     });
 
@@ -344,7 +344,7 @@ TEST_F(RocketNetworkTest, FlushList) {
     constexpr folly::StringPiece kMetadata("metadata");
     constexpr folly::StringPiece kData("test_request");
 
-    RocketClient::FlushList flushList;
+    FlushManager::FlushList flushList;
     auto& rawClient = client.getRawClient();
     auto& eventBase = client.getEventBase();
 
@@ -394,15 +394,15 @@ TEST_F(RocketNetworkTest, FlushListFlushPolicyNoop) {
     constexpr folly::StringPiece kMetadata("metadata");
     constexpr folly::StringPiece kData("test_request");
 
-    RocketClient::FlushList flushList;
+    FlushManager::FlushList flushList;
     auto& rawClient = client.getRawClient();
     auto& eventBase = client.getEventBase();
-    RocketClient::FlushManager* flushManager{nullptr};
+    FlushManager* flushManager{nullptr};
 
     auto& fm = folly::fibers::getFiberManager(eventBase);
 
     client.getEventBase().runInEventBaseThreadAndWait([&] {
-      flushManager = &RocketClient::FlushManager::getInstance(eventBase);
+      flushManager = &FlushManager::getInstance(eventBase);
       flushManager->setFlushPolicy(1000, std::chrono::milliseconds(1));
     });
 

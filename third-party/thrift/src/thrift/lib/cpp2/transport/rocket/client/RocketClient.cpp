@@ -90,14 +90,6 @@ folly::exception_wrapper makeContractViolation(std::string msg) {
 }
 } // namespace
 
-folly::EventBaseLocal<RocketClient::FlushManager>&
-RocketClient::getEventBaseLocal() {
-  static folly::Indestructible<
-      folly::EventBaseLocal<RocketClient::FlushManager>>
-      evbLocal;
-  return *evbLocal;
-}
-
 RocketClient::RocketClient(
     folly::EventBase& evb,
     folly::AsyncTransport::UniquePtr socket,
@@ -1130,52 +1122,6 @@ StreamId RocketClient::makeStreamId() {
     clientState_.hitMaxStreamId = true;
   }
   return id;
-}
-
-void RocketClient::FlushManager::runLoopCallback() noexcept {
-  // always reschedule until the end of event loop.
-  if (!std::exchange(rescheduled_, true)) {
-    evb_.runInLoop(this, true /* thisIteration */);
-    return;
-  }
-  rescheduled_ = false;
-
-  auto cbs = std::move(flushList_);
-  while (!cbs.empty()) {
-    auto callback = &cbs.front();
-    cbs.pop_front();
-    callback->runLoopCallback();
-  }
-  pendingFlushes_ = 0;
-}
-
-void RocketClient::FlushManager::timeoutExpired() noexcept {
-  if (!isLoopCallbackScheduled()) {
-    evb_.runInLoop(this);
-  }
-}
-
-void RocketClient::FlushManager::resetFlushPolicy() {
-  flushPolicy_.reset();
-  cancelTimeout();
-  timeoutExpired();
-}
-
-void RocketClient::FlushManager::enqueueFlush(
-    folly::EventBase::LoopCallback& writeLoopCallback) {
-  // add write callback to flush list and schedule flush manager callback
-  flushList_.push_back(writeLoopCallback);
-  pendingFlushes_++;
-  if (!isLoopCallbackScheduled() &&
-      (!flushPolicy_.has_value() ||
-       pendingFlushes_ > flushPolicy_->maxPendingFlushes)) {
-    evb_.runInLoop(this);
-    cancelTimeout();
-  }
-  if (flushPolicy_.has_value() && !isLoopCallbackScheduled() &&
-      !isScheduled()) {
-    evb_.scheduleTimeoutHighRes(this, flushPolicy_->maxFlushLatency);
-  }
 }
 
 void RocketClient::WriteLoopCallback::runLoopCallback() noexcept {

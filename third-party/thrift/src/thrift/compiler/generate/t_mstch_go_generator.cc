@@ -331,6 +331,7 @@ class mstch_go_field : public mstch_field {
             {"field:go_tag?", &mstch_go_field::has_go_tag},
             {"field:go_tag", &mstch_go_field::go_tag},
             {"field:retval?", &mstch_go_field::is_retval},
+            {"field:json_omitempty?", &mstch_go_field::is_json_omitempty},
         });
   }
 
@@ -405,6 +406,11 @@ class mstch_go_field : public mstch_field {
   }
   mstch::node is_retval() {
     return field_->name() == go::DEFAULT_RETVAL_FIELD_NAME;
+  }
+  mstch::node is_json_omitempty() {
+    // Whether this field should be tagged with 'json:"omitempty"'.
+    // Optional and union fields should be tagged as such.
+    return is_optional_() || is_inside_union_();
   }
 
  private:

@@ -187,20 +187,20 @@ func (x *MyStruct) String() string {
 }
 
 type MyUnion struct {
-    BoolField *bool `thrift:"bool_field,1" json:"bool_field" db:"bool_field"`
-    ByteField *int8 `thrift:"byte_field,2" json:"byte_field" db:"byte_field"`
-    ShortField *int16 `thrift:"short_field,3" json:"short_field" db:"short_field"`
-    IntField *int32 `thrift:"int_field,4" json:"int_field" db:"int_field"`
-    LongField *int64 `thrift:"long_field,5" json:"long_field" db:"long_field"`
-    FloatField *float32 `thrift:"float_field,6" json:"float_field" db:"float_field"`
-    DoubleField *float64 `thrift:"double_field,7" json:"double_field" db:"double_field"`
-    StringField *string `thrift:"string_field,8" json:"string_field" db:"string_field"`
-    BinaryField []byte `thrift:"binary_field,9" json:"binary_field" db:"binary_field"`
-    EnumField *MyEnum `thrift:"enum_field,10" json:"enum_field" db:"enum_field"`
-    ListField []int16 `thrift:"list_field,11" json:"list_field" db:"list_field"`
-    SetField []int16 `thrift:"set_field,12" json:"set_field" db:"set_field"`
-    MapField map[int16]int16 `thrift:"map_field,13" json:"map_field" db:"map_field"`
-    StructField *MyStruct `thrift:"struct_field,14" json:"struct_field" db:"struct_field"`
+    BoolField *bool `thrift:"bool_field,1" json:"bool_field,omitempty" db:"bool_field"`
+    ByteField *int8 `thrift:"byte_field,2" json:"byte_field,omitempty" db:"byte_field"`
+    ShortField *int16 `thrift:"short_field,3" json:"short_field,omitempty" db:"short_field"`
+    IntField *int32 `thrift:"int_field,4" json:"int_field,omitempty" db:"int_field"`
+    LongField *int64 `thrift:"long_field,5" json:"long_field,omitempty" db:"long_field"`
+    FloatField *float32 `thrift:"float_field,6" json:"float_field,omitempty" db:"float_field"`
+    DoubleField *float64 `thrift:"double_field,7" json:"double_field,omitempty" db:"double_field"`
+    StringField *string `thrift:"string_field,8" json:"string_field,omitempty" db:"string_field"`
+    BinaryField []byte `thrift:"binary_field,9" json:"binary_field,omitempty" db:"binary_field"`
+    EnumField *MyEnum `thrift:"enum_field,10" json:"enum_field,omitempty" db:"enum_field"`
+    ListField []int16 `thrift:"list_field,11" json:"list_field,omitempty" db:"list_field"`
+    SetField []int16 `thrift:"set_field,12" json:"set_field,omitempty" db:"set_field"`
+    MapField map[int16]int16 `thrift:"map_field,13" json:"map_field,omitempty" db:"map_field"`
+    StructField *MyStruct `thrift:"struct_field,14" json:"struct_field,omitempty" db:"struct_field"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MyUnion{}

@@ -532,7 +532,7 @@ func (x *MyDataWithCustomDefault) String() string {
 }
 
 type InnerUnion struct {
-    InnerOption []byte `thrift:"innerOption,1" json:"innerOption" db:"innerOption"`
+    InnerOption []byte `thrift:"innerOption,1" json:"innerOption,omitempty" db:"innerOption"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &InnerUnion{}
@@ -717,9 +717,9 @@ func (x *InnerUnion) String() string {
 }
 
 type MyUnion struct {
-    Option1 *string `thrift:"option1,1" json:"option1" db:"option1"`
-    Option2 *int32 `thrift:"option2,2" json:"option2" db:"option2"`
-    Option3 *InnerUnion `thrift:"option3,3" json:"option3" db:"option3"`
+    Option1 *string `thrift:"option1,1" json:"option1,omitempty" db:"option1"`
+    Option2 *int32 `thrift:"option2,2" json:"option2,omitempty" db:"option2"`
+    Option3 *InnerUnion `thrift:"option3,3" json:"option3,omitempty" db:"option3"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MyUnion{}

@@ -279,8 +279,8 @@ func (x *A) String() string {
 }
 
 type U struct {
-    I *int32 `thrift:"i,1" json:"i" db:"i"`
-    S *string `thrift:"s,2" json:"s" db:"s"`
+    I *int32 `thrift:"i,1" json:"i,omitempty" db:"i"`
+    S *string `thrift:"s,2" json:"s,omitempty" db:"s"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &U{}

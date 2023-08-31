@@ -2397,8 +2397,8 @@ func (x *Struct4) String() string {
 }
 
 type Union1 struct {
-    I *int32 `thrift:"i,1" json:"i" db:"i"`
-    D *float64 `thrift:"d,2" json:"d" db:"d"`
+    I *int32 `thrift:"i,1" json:"i,omitempty" db:"i"`
+    D *float64 `thrift:"d,2" json:"d,omitempty" db:"d"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Union1{}
@@ -2679,10 +2679,10 @@ func (x *Union1) String() string {
 }
 
 type Union2 struct {
-    I *int32 `thrift:"i,1" json:"i" db:"i"`
-    D *float64 `thrift:"d,2" json:"d" db:"d"`
-    S *Struct1 `thrift:"s,3" json:"s" db:"s"`
-    U *Union1 `thrift:"u,4" json:"u" db:"u"`
+    I *int32 `thrift:"i,1" json:"i,omitempty" db:"i"`
+    D *float64 `thrift:"d,2" json:"d,omitempty" db:"d"`
+    S *Struct1 `thrift:"s,3" json:"s,omitempty" db:"s"`
+    U *Union1 `thrift:"u,4" json:"u,omitempty" db:"u"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Union2{}

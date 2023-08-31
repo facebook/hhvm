@@ -303,8 +303,8 @@ func (x *MyStruct) String() string {
 }
 
 type MyUnion struct {
-    MyEnum *MyEnum `thrift:"myEnum,1" json:"myEnum" db:"myEnum"`
-    MyDataItem *MyStruct `thrift:"myDataItem,2" json:"myDataItem" db:"myDataItem"`
+    MyEnum *MyEnum `thrift:"myEnum,1" json:"myEnum,omitempty" db:"myEnum"`
+    MyDataItem *MyStruct `thrift:"myDataItem,2" json:"myDataItem,omitempty" db:"myDataItem"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MyUnion{}

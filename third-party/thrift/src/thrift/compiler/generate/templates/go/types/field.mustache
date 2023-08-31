@@ -30,6 +30,6 @@
   }}{{field:go_tag}}{{!
 }}{{/field:go_tag?}}{{!
 }}{{^field:go_tag?}}{{!
-  }}json:"{{field:name}}{{#field:optional?}},omitempty{{/field:optional?}}" {{!
+  }}json:"{{field:name}}{{#field:json_omitempty?}},omitempty{{/field:json_omitempty?}}" {{!
   }}db:"{{field:name}}"{{!
 }}{{/field:go_tag?}}`

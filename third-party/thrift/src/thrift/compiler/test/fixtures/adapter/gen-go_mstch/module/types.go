@@ -2295,11 +2295,11 @@ func (x *Foo) String() string {
 }
 
 type Baz struct {
-    IntField *int32 `thrift:"intField,1" json:"intField" db:"intField"`
-    SetField SetWithAdapter `thrift:"setField,4" json:"setField" db:"setField"`
-    MapField map[string]ListWithElemAdapterWithAdapter_2312 `thrift:"mapField,6" json:"mapField" db:"mapField"`
-    BinaryField []byte `thrift:"binaryField,8" json:"binaryField" db:"binaryField"`
-    LongField *MyI64 `thrift:"longField,9" json:"longField" db:"longField"`
+    IntField *int32 `thrift:"intField,1" json:"intField,omitempty" db:"intField"`
+    SetField SetWithAdapter `thrift:"setField,4" json:"setField,omitempty" db:"setField"`
+    MapField map[string]ListWithElemAdapterWithAdapter_2312 `thrift:"mapField,6" json:"mapField,omitempty" db:"mapField"`
+    BinaryField []byte `thrift:"binaryField,8" json:"binaryField,omitempty" db:"binaryField"`
+    LongField *MyI64 `thrift:"longField,9" json:"longField,omitempty" db:"longField"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Baz{}
@@ -8376,8 +8376,8 @@ func (x *AdaptTemplatedNestedTestStruct) String() string {
 }
 
 type AdaptTestUnion struct {
-    Delay *DurationMs `thrift:"delay,1" json:"delay" db:"delay"`
-    Custom CustomProtocolType `thrift:"custom,2" json:"custom" db:"custom"`
+    Delay *DurationMs `thrift:"delay,1" json:"delay,omitempty" db:"delay"`
+    Custom CustomProtocolType `thrift:"custom,2" json:"custom,omitempty" db:"custom"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &AdaptTestUnion{}

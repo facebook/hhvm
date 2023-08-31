@@ -90,12 +90,12 @@ result := mapResult
 }
 
 type ComplexUnion struct {
-    IntValue *int64 `thrift:"intValue,1" json:"intValue" db:"intValue"`
-    StringValue *string `thrift:"stringValue,5" json:"stringValue" db:"stringValue"`
-    IntListValue []int64 `thrift:"intListValue,2" json:"intListValue" db:"intListValue"`
-    StringListValue []string `thrift:"stringListValue,3" json:"stringListValue" db:"stringListValue"`
-    TypedefValue ContainerTypedef `thrift:"typedefValue,9" json:"typedefValue" db:"typedefValue"`
-    StringRef *string `thrift:"stringRef,14" json:"stringRef" db:"stringRef"`
+    IntValue *int64 `thrift:"intValue,1" json:"intValue,omitempty" db:"intValue"`
+    StringValue *string `thrift:"stringValue,5" json:"stringValue,omitempty" db:"stringValue"`
+    IntListValue []int64 `thrift:"intListValue,2" json:"intListValue,omitempty" db:"intListValue"`
+    StringListValue []string `thrift:"stringListValue,3" json:"stringListValue,omitempty" db:"stringListValue"`
+    TypedefValue ContainerTypedef `thrift:"typedefValue,9" json:"typedefValue,omitempty" db:"typedefValue"`
+    StringRef *string `thrift:"stringRef,14" json:"stringRef,omitempty" db:"stringRef"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &ComplexUnion{}
@@ -777,8 +777,8 @@ func (x *ComplexUnion) String() string {
 }
 
 type ListUnion struct {
-    IntListValue []int64 `thrift:"intListValue,2" json:"intListValue" db:"intListValue"`
-    StringListValue []string `thrift:"stringListValue,3" json:"stringListValue" db:"stringListValue"`
+    IntListValue []int64 `thrift:"intListValue,2" json:"intListValue,omitempty" db:"intListValue"`
+    StringListValue []string `thrift:"stringListValue,3" json:"stringListValue,omitempty" db:"stringListValue"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &ListUnion{}
@@ -1105,8 +1105,8 @@ func (x *ListUnion) String() string {
 }
 
 type DataUnion struct {
-    BinaryData []byte `thrift:"binaryData,1" json:"binaryData" db:"binaryData"`
-    StringData *string `thrift:"stringData,2" json:"stringData" db:"stringData"`
+    BinaryData []byte `thrift:"binaryData,1" json:"binaryData,omitempty" db:"binaryData"`
+    StringData *string `thrift:"stringData,2" json:"stringData,omitempty" db:"stringData"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &DataUnion{}
@@ -1695,8 +1695,8 @@ func (x *Val) String() string {
 }
 
 type ValUnion struct {
-    V1 *Val `thrift:"v1,1" json:"v1" db:"v1"`
-    V2 *Val `thrift:"v2,2" json:"v2" db:"v2"`
+    V1 *Val `thrift:"v1,1" json:"v1,omitempty" db:"v1"`
+    V2 *Val `thrift:"v2,2" json:"v2,omitempty" db:"v2"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &ValUnion{}
@@ -1989,8 +1989,8 @@ func (x *ValUnion) String() string {
 }
 
 type VirtualComplexUnion struct {
-    ThingOne *string `thrift:"thingOne,1" json:"thingOne" db:"thingOne"`
-    ThingTwo *string `thrift:"thingTwo,2" json:"thingTwo" db:"thingTwo"`
+    ThingOne *string `thrift:"thingOne,1" json:"thingOne,omitempty" db:"thingOne"`
+    ThingTwo *string `thrift:"thingTwo,2" json:"thingTwo,omitempty" db:"thingTwo"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &VirtualComplexUnion{}
@@ -2430,7 +2430,7 @@ func (x *NonCopyableStruct) String() string {
 }
 
 type NonCopyableUnion struct {
-    S *NonCopyableStruct `thrift:"s,1" json:"s" db:"s"`
+    S *NonCopyableStruct `thrift:"s,1" json:"s,omitempty" db:"s"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &NonCopyableUnion{}

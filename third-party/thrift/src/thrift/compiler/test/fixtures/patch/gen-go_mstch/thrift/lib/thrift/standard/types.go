@@ -216,9 +216,9 @@ func StandardProtocolPtr(v StandardProtocol) *StandardProtocol {
 
 
 type TypeUri struct {
-    Uri *Uri `thrift:"uri,1" json:"uri" db:"uri"`
-    TypeHashPrefixSha2_256 ByteString `thrift:"typeHashPrefixSha2_256,2" json:"typeHashPrefixSha2_256" db:"typeHashPrefixSha2_256"`
-    ScopedName *string `thrift:"scopedName,3" json:"scopedName" db:"scopedName"`
+    Uri *Uri `thrift:"uri,1" json:"uri,omitempty" db:"uri"`
+    TypeHashPrefixSha2_256 ByteString `thrift:"typeHashPrefixSha2_256,2" json:"typeHashPrefixSha2_256,omitempty" db:"typeHashPrefixSha2_256"`
+    ScopedName *string `thrift:"scopedName,3" json:"scopedName,omitempty" db:"scopedName"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &TypeUri{}
@@ -585,23 +585,23 @@ func (x *TypeUri) String() string {
 }
 
 type TypeName struct {
-    BoolType *Void `thrift:"boolType,1" json:"boolType" db:"boolType"`
-    ByteType *Void `thrift:"byteType,2" json:"byteType" db:"byteType"`
-    I16Type *Void `thrift:"i16Type,3" json:"i16Type" db:"i16Type"`
-    I32Type *Void `thrift:"i32Type,4" json:"i32Type" db:"i32Type"`
-    I64Type *Void `thrift:"i64Type,5" json:"i64Type" db:"i64Type"`
-    FloatType *Void `thrift:"floatType,6" json:"floatType" db:"floatType"`
-    DoubleType *Void `thrift:"doubleType,7" json:"doubleType" db:"doubleType"`
-    StringType *Void `thrift:"stringType,8" json:"stringType" db:"stringType"`
-    BinaryType *Void `thrift:"binaryType,9" json:"binaryType" db:"binaryType"`
-    EnumType *TypeUri `thrift:"enumType,10" json:"enumType" db:"enumType"`
-    TypedefType *TypeUri `thrift:"typedefType,17" json:"typedefType" db:"typedefType"`
-    StructType *TypeUri `thrift:"structType,11" json:"structType" db:"structType"`
-    UnionType *TypeUri `thrift:"unionType,12" json:"unionType" db:"unionType"`
-    ExceptionType *TypeUri `thrift:"exceptionType,13" json:"exceptionType" db:"exceptionType"`
-    ListType *Void `thrift:"listType,14" json:"listType" db:"listType"`
-    SetType *Void `thrift:"setType,15" json:"setType" db:"setType"`
-    MapType *Void `thrift:"mapType,16" json:"mapType" db:"mapType"`
+    BoolType *Void `thrift:"boolType,1" json:"boolType,omitempty" db:"boolType"`
+    ByteType *Void `thrift:"byteType,2" json:"byteType,omitempty" db:"byteType"`
+    I16Type *Void `thrift:"i16Type,3" json:"i16Type,omitempty" db:"i16Type"`
+    I32Type *Void `thrift:"i32Type,4" json:"i32Type,omitempty" db:"i32Type"`
+    I64Type *Void `thrift:"i64Type,5" json:"i64Type,omitempty" db:"i64Type"`
+    FloatType *Void `thrift:"floatType,6" json:"floatType,omitempty" db:"floatType"`
+    DoubleType *Void `thrift:"doubleType,7" json:"doubleType,omitempty" db:"doubleType"`
+    StringType *Void `thrift:"stringType,8" json:"stringType,omitempty" db:"stringType"`
+    BinaryType *Void `thrift:"binaryType,9" json:"binaryType,omitempty" db:"binaryType"`
+    EnumType *TypeUri `thrift:"enumType,10" json:"enumType,omitempty" db:"enumType"`
+    TypedefType *TypeUri `thrift:"typedefType,17" json:"typedefType,omitempty" db:"typedefType"`
+    StructType *TypeUri `thrift:"structType,11" json:"structType,omitempty" db:"structType"`
+    UnionType *TypeUri `thrift:"unionType,12" json:"unionType,omitempty" db:"unionType"`
+    ExceptionType *TypeUri `thrift:"exceptionType,13" json:"exceptionType,omitempty" db:"exceptionType"`
+    ListType *Void `thrift:"listType,14" json:"listType,omitempty" db:"listType"`
+    SetType *Void `thrift:"setType,15" json:"setType,omitempty" db:"setType"`
+    MapType *Void `thrift:"mapType,16" json:"mapType,omitempty" db:"mapType"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &TypeName{}

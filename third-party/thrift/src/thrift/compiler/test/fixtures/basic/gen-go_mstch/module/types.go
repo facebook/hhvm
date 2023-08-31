@@ -1009,10 +1009,10 @@ func (x *MyDataItem) String() string {
 }
 
 type MyUnion struct {
-    MyEnum *MyEnum `thrift:"myEnum,1" json:"myEnum" db:"myEnum"`
-    MyStruct *MyStruct `thrift:"myStruct,2" json:"myStruct" db:"myStruct"`
-    MyDataItem *MyDataItem `thrift:"myDataItem,3" json:"myDataItem" db:"myDataItem"`
-    FloatSet []float32 `thrift:"floatSet,4" json:"floatSet" db:"floatSet"`
+    MyEnum *MyEnum `thrift:"myEnum,1" json:"myEnum,omitempty" db:"myEnum"`
+    MyStruct *MyStruct `thrift:"myStruct,2" json:"myStruct,omitempty" db:"myStruct"`
+    MyDataItem *MyDataItem `thrift:"myDataItem,3" json:"myDataItem,omitempty" db:"myDataItem"`
+    FloatSet []float32 `thrift:"floatSet,4" json:"floatSet,omitempty" db:"floatSet"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MyUnion{}
@@ -1668,7 +1668,7 @@ func (x *ReservedKeyword) String() string {
 }
 
 type UnionToBeRenamed struct {
-    ReservedField *int32 `thrift:"reserved_field,1" json:"reserved_field" db:"reserved_field"`
+    ReservedField *int32 `thrift:"reserved_field,1" json:"reserved_field,omitempty" db:"reserved_field"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &UnionToBeRenamed{}

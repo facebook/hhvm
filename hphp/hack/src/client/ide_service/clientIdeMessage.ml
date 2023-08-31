@@ -26,7 +26,7 @@ end
 
 module Completion_resolve = struct
   type request = {
-    symbol: string;  (** fully qualified *)
+    fullname: string;
     kind: SearchTypes.si_kind;
   }
 
@@ -216,8 +216,8 @@ let t_to_string : type a. a t -> string = function
     Printf.sprintf "Definition(%s)" (Path.to_string file_path)
   | Completion ({ file_path; _ }, _, _) ->
     Printf.sprintf "Completion(%s)" (Path.to_string file_path)
-  | Completion_resolve Completion_resolve.{ symbol; kind = _ } ->
-    Printf.sprintf "Completion_resolve(%s)" symbol
+  | Completion_resolve Completion_resolve.{ fullname; kind = _ } ->
+    Printf.sprintf "Completion_resolve(%s)" fullname
   | Completion_resolve_location (file_path, _, _) ->
     Printf.sprintf "Completion_resolve_location(%s)" (Path.to_string file_path)
   | Document_highlight ({ file_path; _ }, _) ->

@@ -2263,17 +2263,12 @@ let do_resolve_local
         (* If that fails, next try using symbol *)
       with
       | _ ->
-        (* The "fullname" value includes the fully qualified namespace, so
-         * we want to use that.  However, if it's missing (it shouldn't be)
-         * let's default to using the label which doesn't include the
-         * namespace. *)
-        let symbolname =
-          try Jget.string_exn params.Completion.data "fullname" with
-          | _ -> params.Completion.label
-        in
+        (* Completion.data was produced by [make_ide_completion_response]
+         * which in all codepaths provides a "fullname" field to data *)
+        let fullname = Jget.string_exn params.Completion.data "fullname" in
         let request =
           ClientIdeMessage.Completion_resolve
-            ClientIdeMessage.Completion_resolve.{ symbol = symbolname; kind }
+            ClientIdeMessage.Completion_resolve.{ fullname; kind }
         in
 
         let%lwt raw_docblock =

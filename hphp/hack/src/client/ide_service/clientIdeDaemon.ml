@@ -1135,8 +1135,8 @@ let handle_request
     let istate = { istate with sienv = !sienv_ref } in
     Lwt.return (Initialized istate, Ok result)
   (* Autocomplete docblock resolve *)
-  | (Initialized istate, Completion_resolve Completion_resolve.{ symbol; kind })
-    ->
+  | ( Initialized istate,
+      Completion_resolve Completion_resolve.{ fullname = symbol; kind } ) ->
     HackEventLogger.completion_call ~method_name:"Completion_resolve";
     let ctx = make_empty_ctx istate.icommon in
     let result = ServerDocblockAt.go_docblock_for_symbol ~ctx ~symbol ~kind in

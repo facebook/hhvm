@@ -449,6 +449,7 @@ module.exports = {
             items: [
               'fb/troubleshooting/dogpiles/index',
               'fb/troubleshooting/dogpiles/server_overload',
+              'fb/troubleshooting/dogpiles/development',
             ],
           },
           'fb/troubleshooting/fb303-counters',

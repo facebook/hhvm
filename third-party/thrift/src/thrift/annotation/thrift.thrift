@@ -170,51 +170,6 @@ struct SerializeInFieldIdOrder {}
 @Experimental // TODO: Support in C++, Python, Java.
 struct BitmaskEnum {}
 
-////
-// Thrift version annotations.
-////
-
-/** Enables all released v1 features. */
-// TODO: Release features ;-).
-@scope.Transitive
-struct v1 {}
-
-// TODO(dokwon): Re-enable v1 features.
-/**
- * Enables all beta v1 features.
- *
- * Beta features are guaranteed to *not* break unrelated Thrift features
- * so they should be relatively safe to test alongside other beta or
- * released Thrift features.
- */
-@v1 // All v1 features.
-@Beta // All uses of v1beta inherit `@Beta`.
-// @TerseWrite
-@scope.Transitive
-struct v1beta {}
-
-/**
- * Enables all experimental v1 features.
- *
- * Use with *caution* and only with explicit permission. This may enable
- * features may change significantly without notice or not work correctly
- * in all contexts.
- */
-@v1beta // All v1beta features.
-@SerializeInFieldIdOrder
-@Experimental // All uses of v1alpha inherit `@Experimental`.
-@scope.Transitive
-struct v1alpha {}
-
-/**
- * Enables experimental features, even those that are known to break common
- * use cases.
- */
-@v1alpha // All v1alpha features.
-@Testing // Should only be used in tests.
-@scope.Transitive
-struct v1test {}
-
 /**
  * Specifies the field where the exception message is stored. The field
  * is used to generate an additional method to get it.

@@ -40,8 +40,13 @@ class hoist_annotated_types {
     const_ast_visitor visitor;
 
     visitor.add_container_visitor([=](const auto& type) { visit_type(type); });
+    // Have to visit containers first to handle nesting correctly
+    visitor(prog_);
+
+    visitor = {};
     visitor.add_function_visitor([=](const auto& f) { visit_function(f); });
     visitor.add_const_visitor([=](const auto& c) { visit_const(c); });
+    visitor.add_field_visitor([=](const auto& f) { visit_field(f); });
 
     visitor(prog_);
 
@@ -167,26 +172,7 @@ class hoist_annotated_types {
     }
 
     for (auto& field : f.params().fields()) {
-      if (auto type = field.type(); needs_replacement(type)) {
-        auto range = f.src_range();
-        auto type_begin_offset = range.end.offset();
-        auto type_end_offset = range.begin.offset();
-        for (const auto& [k, v] : type.get_type()->annotations()) {
-          type_begin_offset =
-              std::min(type_begin_offset, v.src_range.begin.offset());
-          type_end_offset = std::max(type_end_offset, v.src_range.end.offset());
-        }
-        auto old_content = fm_.old_content();
-        while (type_begin_offset > 0 &&
-               old_content[type_begin_offset - 1] != ':') {
-          type_begin_offset--;
-        }
-        while (type_end_offset < old_content.size() &&
-               old_content[type_end_offset++] != ')') {
-        }
-        fm_.add(
-            {type_begin_offset, type_end_offset, maybe_create_typedef(type)});
-      }
+      visit_field(field);
     }
   }
 
@@ -206,6 +192,28 @@ class hoist_annotated_types {
           {range.begin.offset(),
            annotations_end_offset,
            fmt::format("const {}", maybe_create_typedef(type))});
+    }
+  }
+
+  void visit_field(const t_field& f) {
+    if (auto type = f.type(); needs_replacement(type)) {
+      auto range = f.src_range();
+      auto type_begin_offset = range.end.offset();
+      auto type_end_offset = range.begin.offset();
+      for (const auto& [k, v] : type.get_type()->annotations()) {
+        type_begin_offset =
+            std::min(type_begin_offset, v.src_range.begin.offset());
+        type_end_offset = std::max(type_end_offset, v.src_range.end.offset());
+      }
+      auto old_content = fm_.old_content();
+      while (type_begin_offset > 0 &&
+             old_content[type_begin_offset - 1] != ':') {
+        type_begin_offset--;
+      }
+      while (type_end_offset < old_content.size() &&
+             old_content[type_end_offset++] != ')') {
+      }
+      fm_.add({type_begin_offset, type_end_offset, maybe_create_typedef(type)});
     }
   }
 

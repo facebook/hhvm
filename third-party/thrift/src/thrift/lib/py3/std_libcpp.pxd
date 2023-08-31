@@ -81,15 +81,6 @@ cdef extern from "<algorithm>" namespace "std" nogil:
         Iter2 last2,
         OutputIter result)
 
-cdef extern from "<optional>" namespace "std" nogil:
-    cdef cppclass optional "std::optional"[T]:
-        optional()
-        optional(T&& val)
-        bint has_value()
-        T& value()
-        T value_or(T&& altValue)
-        void reset()
-
 cdef extern from "<string_view>" namespace "std" nogil:
     cdef cppclass string_view "std::string_view":
         string_view()

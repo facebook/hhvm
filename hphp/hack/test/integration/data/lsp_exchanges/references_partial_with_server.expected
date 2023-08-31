@@ -1,0 +1,109 @@
+[
+  {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "result": {
+      "capabilities": {
+        "textDocumentSync": {
+          "openClose": true,
+          "change": 2,
+          "willSave": false,
+          "willSaveWaitUntil": true,
+          "save": {
+            "includeText": false
+          }
+        },
+        "hoverProvider": true,
+        "completionProvider": {
+          "resolveProvider": true,
+          "triggerCharacters": [
+            "$",
+            ">",
+            "\\",
+            ":",
+            "<",
+            "[",
+            "'",
+            "\"",
+            "{",
+            "#"
+          ]
+        },
+        "signatureHelpProvider": {
+          "triggerCharacters": [
+            "(",
+            ","
+          ]
+        },
+        "definitionProvider": true,
+        "typeDefinitionProvider": true,
+        "referencesProvider": true,
+        "documentHighlightProvider": true,
+        "documentSymbolProvider": true,
+        "workspaceSymbolProvider": true,
+        "codeActionProvider": {
+          "resolveProvider": true
+        },
+        "documentFormattingProvider": true,
+        "documentRangeFormattingProvider": true,
+        "documentOnTypeFormattingProvider": {
+          "firstTriggerCharacter": ";",
+          "moreTriggerCharacter": [
+            "}"
+          ]
+        },
+        "renameProvider": true,
+        "implementationProvider": true,
+        "rageProvider": true,
+        "experimental": {
+          "snippetTextEdit": true
+        }
+      }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "method": "$/progress",
+    "params": {
+      "token": "prt123",
+      "value": [
+        {
+          "uri": "file://${root_path}/references.php",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 21
+            },
+            "end": {
+              "line": 19,
+              "character": 36
+            }
+          }
+        },
+        {
+          "uri": "file://${root_path}/references.php",
+          "range": {
+            "start": {
+              "line": 9,
+              "character": 18
+            },
+            "end": {
+              "line": 9,
+              "character": 33
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 12,
+    "result": []
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 999,
+    "result": null
+  }
+]

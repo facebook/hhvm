@@ -446,7 +446,10 @@ module.exports = {
               type: 'doc',
               id: 'fb/troubleshooting/dogpiles/index',
             },
-            items: ['fb/troubleshooting/dogpiles/io'],
+            items: [
+              'fb/troubleshooting/dogpiles/index',
+              'fb/troubleshooting/dogpiles/server_overload',
+            ],
           },
           'fb/troubleshooting/fb303-counters',
         ],

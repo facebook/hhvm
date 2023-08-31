@@ -1526,6 +1526,10 @@ struct RuntimeOption {
   F(uint64_t, PageletServerHeaderCollide, 0)                            \
   /* Whether we should dump the request headers into $_SERVER */        \
   F(bool, SetHeadersInServerSuperGlobal, true)                          \
+  /* Whether we should stop parsing cookies out of the headers and
+     setting it into a few super globals - including fully removing
+     the existance of the $_COOKIE superglobal */                       \
+  F(bool, DisableParsedCookies, false)                                  \
   /* */
 
 private:

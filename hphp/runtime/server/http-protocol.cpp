@@ -217,7 +217,9 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   php_global_set(s__FILES, emptyArr);
   php_global_set(s__REQUEST, emptyArr);
   php_global_set(s__ENV, emptyArr);
-  php_global_set(s__COOKIE, emptyArr);
+  if (!RuntimeOption::EvalDisableParsedCookies) {
+    php_global_set(s__COOKIE, emptyArr);
+  }
 
   // according to doc if content type is multipart/form-data
   // $HTTP_RAW_POST_DATA should always not available
@@ -240,7 +242,6 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   X(ENV)
   X(GET)
   X(POST)
-  X(COOKIE)
   X(FILES)
   X(SERVER)
   X(REQUEST)
@@ -251,6 +252,13 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   SCOPE_EXIT {
     if (shouldSetHttpRawPostData) {
       php_global_set(s_HTTP_RAW_POST_DATA, std::move(HTTP_RAW_POST_DATA));
+    }
+  };
+
+  auto COOKIEarr = empty_dict_array();
+  SCOPE_EXIT {
+    if (!RuntimeOption::EvalDisableParsedCookies) {
+      php_global_set(s__COOKIE, COOKIEarr);
     }
   };
 
@@ -267,7 +275,9 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
                         FILESarr, transport, r);
 
   // Cookie
-  PrepareCookieVariable(COOKIEarr, transport);
+  if (!RuntimeOption::EvalDisableParsedCookies) {
+    PrepareCookieVariable(COOKIEarr, transport);
+  }
 
   // Server
   StartRequest(SERVERarr);
@@ -286,6 +296,7 @@ void HttpProtocol::PrepareRequestVariables(Array& request,
                                            const Array& cookie) {
   CopyParams(request, get);
   CopyParams(request, post);
+  // if EvalDisableParsedCookies is set this is just a no-op
   CopyParams(request, cookie);
 }
 

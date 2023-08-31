@@ -1512,9 +1512,14 @@ let ide_rpc
   | Error error_data -> raise (Daemon_nonfatal_exception error_data)
 
 (** This sets up a background watcher which polls the file for size changes due
-to it being appended to; each sie change, it writes to a stream everything that
-has been appended since last append. The background watcher will terminate
-and the stream be closed once the file has been unlinked. *)
+to it being appended to; each change, it writes to a stream everything that
+has been appended since last append. Once the file has been unlinked, then
+the background watcher will gather everything that has been appended until
+that point, write it to the stream, close the stream, and terminate.
+Note: if you have a watcher, and unlink the file, and start a new file
+with the same name without first waiting for the stream to close, then
+there might be a race condition. Suggestion: wait for the stream to close
+before starting a new file! *)
 let watch_refs_stream_file
     (file : Path.t)
     ~(open_file_results : (string * Pos.absolute) list Lsp.UriMap.t) :
@@ -1523,12 +1528,13 @@ let watch_refs_stream_file
   let fd = Unix.openfile (Path.to_string file) [Unix.O_RDONLY] 0o666 in
   let rec watch file_pos =
     match (Unix.fstat fd).Unix.st_size with
-    | size when file_pos = size && Path.file_exists file ->
-      let%lwt () = Lwt_unix.sleep 0.2 in
-      watch file_pos
-    | size when file_pos = size ->
+    | size when file_pos = size && not (Path.file_exists file) ->
+      (* The stream only gets closed if we've read everything up to the end... *)
       add None;
       Lwt.return_unit
+    | size when file_pos = size ->
+      let%lwt () = Lwt_unix.sleep 0.2 in
+      watch file_pos
     | _ ->
       let (results, file_pos) =
         FindRefsWireFormat.Ide_stream.read fd ~pos:file_pos
@@ -1543,6 +1549,22 @@ let watch_refs_stream_file
   in
   let (_watcher_future : unit Lwt.t) = watch 0 in
   q
+
+(** If there was a streaming find-refs result file, this function will unlink it.
+We do this first just to clean up after ourselves, but second because doing this will
+terminate the [watch_refs_stream_file] background thread. *)
+let unlink_refs_stream_file_if_present
+    (shellable_type : Lost_env.shellable_type) : unit =
+  match shellable_type with
+  | Lost_env.(FindRefs { stream_file = Some { file; _ }; _ }) ->
+    (try Unix.unlink (Path.to_string file) with
+    | exn ->
+      let e = Exception.wrap exn in
+      HackEventLogger.invariant_violation_bug
+        ~data:(Exception.to_string e)
+        "Streaming find-refs file was already absent";
+      Hh_logger.log "Streaming find-refs file was already absent")
+  | _ -> ()
 
 (** Historical quirk: we log kind and method-name a bit idiosyncratically... *)
 let get_message_kind_and_method_for_logging (message : lsp_message) :
@@ -1690,6 +1712,7 @@ let kickoff_shell_out_and_maybe_cancel
       ~f:(fun
            {
              Lost_env.cancellation_token;
+             shellable_type;
              triggering_request =
                {
                  Lost_env.id = prev_id;
@@ -1700,6 +1723,7 @@ let kickoff_shell_out_and_maybe_cancel
              _;
            }
          ->
+        unlink_refs_stream_file_if_present shellable_type;
         (* Send SIGTERM to the underlying process.
            We won't wait for it -- that'd make it too hard to reason about concurrency. *)
         Lwt.wakeup_later cancellation_token ();
@@ -2556,11 +2580,24 @@ let do_findReferences2
   let all_locations = List.rev_append ide_locations hh_locations in
   (* LSP spec explains: "If a server reports partial result via a corresponding $/progress, the whole result
      must be reported using n $/progress notifications. The final response has to be empty in terms of result values."
-     Thus, if we were using a streaming file and partial results, we'll give an empty response now. *)
+     Thus we'll give an empty response here.
+     But first, flush whatever remaining $/progress. The protocol of [watch_refs_stream_file] is that it opens an fd
+     on [file], polls the fd for changes and writes them to [q], but also polls and when [file] is unlinked then
+     it closes [q]. Thus our protocol is: unlink [file], await all items until [q] is closed, publish them
+     as $/progress, and then give an empty response.
+     Proof of termination: this is guaranteed to terminate if no one creates another file with the same name as [file].
+     Since the filename includes our PID, only we can create another file. But we're not
+     going to create another file while we're here waiting! *)
   match stream_file with
-  | Some { Lost_env.file; _ } ->
+  | Some { Lost_env.file; q; partial_result_token = _ } ->
     Unix.unlink (Path.to_string file);
-    let _TODO_ljw = state in
+    (* This awaits until the stream is closed, picking up all remaining items. *)
+    let%lwt items_list = Lwt_stream.to_list q in
+    List.iter items_list ~f:(fun items ->
+        let (_ : result_telemetry option) =
+          handle_refs_file_items ~state (Some items)
+        in
+        ());
     Lwt.return (FindReferencesResult [], List.length all_locations)
   | None ->
     Lwt.return (FindReferencesResult all_locations, List.length all_locations)
@@ -3628,6 +3665,7 @@ let handle_shell_out_complete
           ~current_stack:false
           message
       in
+      unlink_refs_stream_file_if_present shellable_type;
       Lwt.return (ErrorResult lsp_error, 0, None)
     | Ok { Lwt_utils.Process_success.stdout; start_time; end_time; _ } -> begin
       log

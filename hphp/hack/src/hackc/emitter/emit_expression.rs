@@ -4892,6 +4892,8 @@ fn emit_null_coalesce_assignment<'a, 'arena, 'decl>(
         instr::jmp(end_label),
         instr::label(do_set_label),
         instr::pop_c(),
+        // null_coalesce_assignment is true so emit_lval_op will assume the
+        // sources are already pushed on the stack.
         emit_lval_op(e, env, pos, LValOp::Set, e1, Some(e2), true)?,
         instr::label(end_label),
     ]))
@@ -5376,31 +5378,31 @@ fn emit_base_<'a, 'arena, 'decl>(
         }
     };
     // Called when emitting a base with MOpMode::Define on a Readonly expression
-    let emit_readonly_lval_base = |
-        e: &mut Emitter<'arena, 'decl>,
-        env: &Env<'a, 'arena>,
-        inner_expr: &ast::Expr, // expression inside of readonly expression
-    | -> Option<Result<ArrayGetBase<'_>>> {
+    let emit_readonly_lval_base = |e: &mut Emitter<'arena, 'decl>,
+                                   env: &Env<'a, 'arena>,
+                                   // expression inside of readonly expression
+                                   inner_expr: &ast::Expr|
+     -> Option<Result<ArrayGetBase<'_>>> {
         // Readonly local variable requires a CheckROCOW
         if let aast::Expr(_, _, Expr_::Lvar(x)) = inner_expr {
             if !is_local_this(env, &x.1) || env.flags.contains(EnvFlags::NEEDS_LOCAL_THIS) {
                 match get_local(e, env, &x.0, &(x.1).1) {
                     Ok(v) => {
-                    let base_instr = if local_temp_kind.is_some() {
-                        instr::c_get_quiet_l(v)
-                    } else {
-                        instr::empty()
-                    };
-                    Some(Ok(emit_default(
-                        e,
-                        base_instr,
-                        instr::empty(),
-                        instr::base_l( v, MOpMode::Define, ReadonlyOp::CheckROCOW),
-                        0,
-                        0,
-                    )))
-                 }
-                    Err(e) => Some(Err(e))
+                        let base_instr = if local_temp_kind.is_some() {
+                            instr::c_get_quiet_l(v)
+                        } else {
+                            instr::empty()
+                        };
+                        Some(Ok(emit_default(
+                            e,
+                            base_instr,
+                            instr::empty(),
+                            instr::base_l(v, MOpMode::Define, ReadonlyOp::CheckROCOW),
+                            0,
+                            0,
+                        )))
+                    }
+                    Err(e) => Some(Err(e)),
                 }
             } else {
                 None // Found a local variable case that does not work
@@ -5427,8 +5429,11 @@ fn emit_base_<'a, 'arena, 'decl>(
 
     use ast::Expr_;
     match expr_ {
-        // Readonly expression in assignment
-        Expr_::ReadonlyExpr(r) if base_mode == MOpMode::Define => {
+        // Readonly expression in assignment. If null_coalesce_assignment is
+        // true then it's REALLY important that we don't change how we set up
+        // the stack for the initial query vs the null-sided assignment because
+        // the caller assumes they're the same.
+        Expr_::ReadonlyExpr(r) if base_mode == MOpMode::Define && !null_coalesce_assignment => {
             if let Some(result) = emit_readonly_lval_base(e, env, r) {
                 result
             } else {
@@ -6142,11 +6147,11 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena, 'decl>(
                     emit_final_local_op(outer_pos, op, lid)
                 })
             }
-            Expr_::ArrayGet(x) => match (&(x.0).1, x.1.as_ref()) {
-                (_, None) if !env.flags.contains(env::Flags::ALLOWS_ARRAY_APPEND) => {
+            Expr_::ArrayGet(x) => match x.1.as_ref() {
+                None if !env.flags.contains(env::Flags::ALLOWS_ARRAY_APPEND) => {
                     return Err(Error::fatal_runtime(pos, "Can't use [] for reading"));
                 }
-                (_, opt_elem_expr) => {
+                opt_elem_expr => {
                     let mode = match op {
                         LValOp::Unset => MOpMode::Unset,
                         _ => MOpMode::Define,

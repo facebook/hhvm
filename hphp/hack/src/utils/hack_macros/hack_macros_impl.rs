@@ -496,6 +496,7 @@ fn parse_aast_from_string(input: &str, internal_offset: usize, span: Span) -> Re
 
     let mut default_unstable_features = HashSet::default();
     default_unstable_features.insert(UnstableFeatures::TypedLocalVariables);
+    default_unstable_features.insert(UnstableFeatures::PipeAwait);
 
     let aast =
         aast_parser::AastParser::from_text(&env, &indexed_source_text, default_unstable_features)

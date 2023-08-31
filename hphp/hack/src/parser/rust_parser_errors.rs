@@ -107,6 +107,7 @@ pub enum UnstableFeatures {
     CaseTypes,
     ModuleLevelTraits,
     TypedLocalVariables,
+    PipeAwait,
     MatchStatements,
 }
 impl UnstableFeatures {
@@ -137,6 +138,7 @@ impl UnstableFeatures {
             UnstableFeatures::CaseTypes => Unstable,
             UnstableFeatures::ModuleLevelTraits => Preview,
             UnstableFeatures::TypedLocalVariables => Unstable,
+            UnstableFeatures::PipeAwait => Unstable,
             UnstableFeatures::MatchStatements => Unstable,
         }
     }
@@ -1074,9 +1076,7 @@ fn get_positions_binop_allows_await(t: S<'_>) -> BinopAllowsAwaitInPositions {
     match token_kind(t) {
         None => BinopAllowAwaitNone,
         Some(t) => match t {
-            BarBar | AmpersandAmpersand | QuestionColon | QuestionQuestion | BarGreaterThan => {
-                BinopAllowAwaitLeft
-            }
+            BarBar | AmpersandAmpersand | QuestionColon | QuestionQuestion => BinopAllowAwaitLeft,
             Equal
             | BarEqual
             | PlusEqual
@@ -1110,7 +1110,8 @@ fn get_positions_binop_allows_await(t: S<'_>) -> BinopAllowsAwaitInPositions {
             | Bar
             | LessThanLessThan
             | GreaterThanGreaterThan
-            | Carat => BinopAllowAwaitBoth,
+            | Carat
+            | BarGreaterThan => BinopAllowAwaitBoth,
             _ => BinopAllowAwaitNone,
         },
     }
@@ -2871,11 +2872,25 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     if std::ptr::eq(node, &x.right_operand)
                         && token_kind(&x.operator) == Some(TokenKind::BarGreaterThan) =>
                 {
-                    self.errors.push(make_error_from_node(
-                        await_node,
-                        errors::invalid_await_position_pipe,
-                    ));
-                    break;
+                    let feature = UnstableFeatures::PipeAwait;
+                    let enabled = self.env.context.active_unstable_features.contains(&feature)
+                    // Preview features with an ongoing release should be allowed by the
+                    // runtime, but not the typechecker
+                    || {
+                        feature.get_feature_status() == FeatureStatus::OngoingRelease
+                            && self.env.codegen
+                    };
+
+                    if !enabled {
+                        self.errors.push(make_error_from_node(
+                            node,
+                            Cow::Owned(format!(
+                                "`await` cannot be used as an expression right of a pipe operator, unless unstable feature: `{}` is enabled.",
+                                feature
+                            )),
+                        ))
+                    }
+                    continue;
                 }
                 // left or right operand of binary expressions are considered legal locations
                 // if operator is not short-circuiting and containing expression

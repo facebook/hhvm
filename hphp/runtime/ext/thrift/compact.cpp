@@ -1105,7 +1105,7 @@ struct CompactReader {
       }
     }
 
-    Variant readHArrayMap(const FieldSpec& spec, const TType keyType, const TType valueType, const uint32_t size, bool& hasTypeWrapper) {
+    Variant readMapHArray(const FieldSpec& spec, const TType keyType, const TType valueType, const uint32_t size, bool& hasTypeWrapper) {
         DictInit arr(size);
         switch (keyType) {
           case TType::T_I08:
@@ -1152,14 +1152,7 @@ struct CompactReader {
         return arr.toVariant();
     }
 
-    Variant readMap(const FieldSpec& spec, bool& hasTypeWrapper) {
-      TType keyType, valueType;
-      uint32_t size;
-      readMapBegin(keyType, valueType, size);
-      hasTypeWrapper = hasTypeWrapper || spec.val().isTypeWrapped;
-      if (s_harray.equal(spec.format)) {
-        return readHArrayMap(spec, keyType, valueType, size, hasTypeWrapper);
-      } else if (s_collection.equal(spec.format)) {
+    Variant readMapCollection(const FieldSpec& spec, const TType keyType, const TType valueType, const uint32_t size, bool& hasTypeWrapper) {
         auto ret(req::make<c_Map>(size));
         for (uint32_t i = 0; i < size; i++) {
           Variant key = readField(spec.key(), keyType, hasTypeWrapper);
@@ -1168,6 +1161,17 @@ struct CompactReader {
         }
         readCollectionEnd();
         return Variant(std::move(ret));
+    }
+
+    Variant readMap(const FieldSpec& spec, bool& hasTypeWrapper) {
+      TType keyType, valueType;
+      uint32_t size;
+      readMapBegin(keyType, valueType, size);
+      hasTypeWrapper = hasTypeWrapper || spec.val().isTypeWrapped;
+      if (s_harray.equal(spec.format)) {
+        return readMapHArray(spec, keyType, valueType, size, hasTypeWrapper);
+      } else if (s_collection.equal(spec.format)) {
+        return readMapCollection(spec, keyType, valueType, size, hasTypeWrapper);
       } else {
         DictInit arr(size);
         if (options & k_THRIFT_MARK_LEGACY_ARRAYS) {

@@ -1300,7 +1300,7 @@ module Eval_primary = struct
         lazy
           ( pos,
             Printf.sprintf
-              "Cannot reference this CrossPackage method using package %s from %s"
+              "Cannot reference this CrossPackage method defined in package %s from %s"
               target_package
               current_package )
       and reason =
@@ -1341,7 +1341,7 @@ module Eval_primary = struct
         lazy
           ( pos,
             Printf.sprintf
-              "Cannot access a public element in %s from %s"
+              "Cannot access a public element which belongs to %s from %s"
               target_package
               current_package )
       and reason =
@@ -1349,7 +1349,7 @@ module Eval_primary = struct
           [
             ( decl_pos,
               Printf.sprintf
-                "This is from %s, which is in %s"
+                "This is from %s, which belongs to %s"
                 target_module
                 target_package );
             ( module_pos,

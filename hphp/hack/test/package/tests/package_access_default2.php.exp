@@ -1,5 +1,5 @@
-Typing[4472] Cannot access a public element in package pkg1 from package default [1]
--> This is from module a, which is in package pkg1 [2]
+Typing[4472] Cannot access a public element which belongs to package pkg1 from package default [1]
+-> This is from module a, which belongs to package pkg1 [2]
 -> But this is from module x, which belongs to package default [3]
 -> And package default does not include package pkg1 [4]
 
@@ -27,8 +27,8 @@ package_access_default2.php--modules.php:2:12
 [4] 20 | [packages.default]
     21 | uses=["*"]
 
-Typing[4472] Cannot access a public element in package pkg1 from package default [1]
--> This is from module a, which is in package pkg1 [2]
+Typing[4472] Cannot access a public element which belongs to package pkg1 from package default [1]
+-> This is from module a, which belongs to package pkg1 [2]
 -> But this is from module x, which belongs to package default [3]
 -> And package default does not include package pkg1 [4]
 

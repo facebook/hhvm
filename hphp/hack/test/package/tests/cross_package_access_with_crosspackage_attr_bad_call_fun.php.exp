@@ -1,4 +1,4 @@
-Typing[4472] Cannot reference this CrossPackage method using package pkg2 from package pkg1 [1]
+Typing[4472] Cannot reference this CrossPackage method defined in package pkg2 from package pkg1 [1]
 -> This function is marked cross package, so requires the package pkg2 to be loaded. You can check if package pkg2 is loaded by placing this call inside a block like if(package pkg2) [2]
 
 cross_package_access_with_crosspackage_attr_bad_call_fun.php--a.php:6:5

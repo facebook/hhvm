@@ -1,5 +1,5 @@
-Typing[4472] Cannot access a public element in package pkg2 from package pkg1 [1]
--> This is from module b.b1, which is in package pkg2 [2]
+Typing[4472] Cannot access a public element which belongs to package pkg2 from package pkg1 [1]
+-> This is from module b.b1, which belongs to package pkg2 [2]
 -> But this is from module a, which belongs to package pkg1 [3]
 -> And package pkg1 does not include package pkg2 [4]
 

@@ -1,5 +1,5 @@
-Typing[4472] Cannot access a public element in package pkg1 from package pkg4 [1]
--> This is from module a, which is in package pkg1 [2]
+Typing[4472] Cannot access a public element which belongs to package pkg1 from package pkg4 [1]
+-> This is from module a, which belongs to package pkg1 [2]
 -> But this is from module d.a, which belongs to package pkg4 [3]
 -> And package pkg4 does not include package pkg1 [4]
 
@@ -26,8 +26,8 @@ cross_package_access_bad_soft.php--modules.php:4:12
     16 | uses = ["d", "d.*"]
     17 | includes=["default"]
 
-Typing[4473] Cannot access a public element in package pkg2 from package pkg4 [1]
--> This is from module b.b1, which is in package pkg2 [2]
+Typing[4473] Cannot access a public element which belongs to package pkg2 from package pkg4 [1]
+-> This is from module b.b1, which belongs to package pkg2 [2]
 -> But this is from module d.a, which belongs to package pkg4 [3]
 -> And package pkg4 only soft includes package pkg2 [4]
 

@@ -1,5 +1,5 @@
-Typing[4472] Cannot access a public element in package pkg1 from package pkg3 [1]
--> This is from module a, which is in package pkg1 [2]
+Typing[4472] Cannot access a public element which belongs to package pkg1 from package pkg3 [1]
+-> This is from module a, which belongs to package pkg1 [2]
 -> But this is from module c, which belongs to package pkg3 [3]
 -> And package pkg3 does not include package pkg1 [4]
 
@@ -28,8 +28,8 @@ cross_package_access_with_package_syntax_if_disjunction.php--modules.php:3:12
     12 | uses = ["c"]
     13 | includes = ["pkg2", "default"]
 
-Typing[4472] Cannot access a public element in package pkg4 from package pkg3 [1]
--> This is from module d, which is in package pkg4 [2]
+Typing[4472] Cannot access a public element which belongs to package pkg4 from package pkg3 [1]
+-> This is from module d, which belongs to package pkg4 [2]
 -> But this is from module c, which belongs to package pkg3 [3]
 -> And package pkg3 does not include package pkg4 [4]
 

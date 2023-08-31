@@ -2484,9 +2484,49 @@ let do_findReferences_local
     in
     Lwt.return (state, result_telemetry)
 
+let handle_refs_file_items
+    ~(state : state)
+    (items : FindRefsWireFormat.half_open_one_based list option) :
+    result_telemetry option =
+  match (items, state) with
+  | ( Some refs,
+      Lost_server
+        Lost_env.
+          {
+            current_hh_shell =
+              Some
+                {
+                  shellable_type =
+                    FindRefs
+                      { stream_file = Some { partial_result_token; _ }; _ };
+                  _;
+                };
+            _;
+          } ) ->
+    let notification =
+      FindReferencesPartialResultNotification
+        ( partial_result_token,
+          List.map refs ~f:ide_shell_out_pos_to_lsp_location )
+    in
+    notification |> print_lsp_notification |> to_stdout;
+    None
+  | (None, _) ->
+    (* This signals that the stream has been closed. The function [watch_refs_stream_file] only closes
+       the stream when the stream-file has been unlinked. We only unlink the file in [handle_shell_out_complete],
+       which also updates [state] to no longer be watching this file. Therefore, we should never encounter
+       a closed stream. *)
+    log "Refs-file: unexpected end of stream";
+    HackEventLogger.invariant_violation_bug "refs-file unexpected end of stream";
+    None
+  | (Some _, _) ->
+    log "Refs-file: unexpected items when stream isn't open";
+    HackEventLogger.invariant_violation_bug "refs-file unexpected items";
+    None
+
 (** This is called when a shell-out to "hh --ide-find-refs-by-symbol" completes successfully *)
-let do_findReferences2 ~ide_calculated_positions ~hh_locations ~stream_file :
-    Lsp.lsp_result * int =
+let do_findReferences2
+    ~state ~ide_calculated_positions ~hh_locations ~stream_file :
+    (Lsp.lsp_result * int) Lwt.t =
   (* lsp_locations return a file for each position. To support unsaved, edited files
      let's discard locations for files that we previously fetched from ClientIDEDaemon.
 
@@ -2520,8 +2560,10 @@ let do_findReferences2 ~ide_calculated_positions ~hh_locations ~stream_file :
   match stream_file with
   | Some { Lost_env.file; _ } ->
     Unix.unlink (Path.to_string file);
-    (FindReferencesResult [], List.length all_locations)
-  | None -> (FindReferencesResult all_locations, List.length all_locations)
+    let _TODO_ljw = state in
+    Lwt.return (FindReferencesResult [], List.length all_locations)
+  | None ->
+    Lwt.return (FindReferencesResult all_locations, List.length all_locations)
 
 let do_goToImplementation_local
     (state : state)
@@ -3520,51 +3562,13 @@ let try_open_errors_file ~(state : state ref) : unit Lwt.t =
     latest_hh_server_errors := errors_conn;
     Lwt.return_unit
 
-let handle_refs_file_items
-    ~(state : state ref)
-    (items : FindRefsWireFormat.half_open_one_based list option) :
-    result_telemetry option =
-  match (items, !state) with
-  | ( Some refs,
-      Lost_server
-        Lost_env.
-          {
-            current_hh_shell =
-              Some
-                {
-                  shellable_type =
-                    FindRefs
-                      { stream_file = Some { partial_result_token; _ }; _ };
-                  _;
-                };
-            _;
-          } ) ->
-    let notification =
-      FindReferencesPartialResultNotification
-        ( partial_result_token,
-          List.map refs ~f:ide_shell_out_pos_to_lsp_location )
-    in
-    notification |> print_lsp_notification |> to_stdout;
-    None
-  | (None, _) ->
-    (* This signals that the stream has been closed. The function [watch_refs_stream_file] only closes
-       the stream when the stream-file has been unlinked. We only unlink the file in [handle_shell_out_complete],
-       which also updates [state] to no longer be watching this file. Therefore, we should never encounter
-       a closed stream. *)
-    log "Refs-file: unexpected end of stream";
-    HackEventLogger.invariant_violation_bug "refs-file unexpected end of stream";
-    None
-  | (Some _, _) ->
-    log "Refs-file: unexpected items when stream isn't open";
-    HackEventLogger.invariant_violation_bug "refs-file unexpected items";
-    None
-
 (** This function handles the success/failure of a shell-out.
 It is guaranteed to produce an LSP response for [shellable_type]. *)
 let handle_shell_out_complete
+    ~(state : state)
     (result : (Lwt_utils.Process_success.t, Lwt_utils.Process_failure.t) result)
     (triggering_request : Lost_env.triggering_request)
-    (shellable_type : Lost_env.shellable_type) : result_telemetry option =
+    (shellable_type : Lost_env.shellable_type) : result_telemetry option Lwt.t =
   let start_postprocess_time = Unix.gettimeofday () in
   let make_duration_telemetry ~start_time ~end_time =
     let end_postprocess_time = Unix.gettimeofday () in
@@ -3586,7 +3590,7 @@ let handle_shell_out_complete
          ~start_time:start_postprocess_time
          ~end_time:end_postprocess_time
   in
-  let (lsp_result, result_count, result_extra_data) =
+  let%lwt (lsp_result, result_count, result_extra_data) =
     match result with
     | Error
         ({
@@ -3624,7 +3628,7 @@ let handle_shell_out_complete
           ~current_stack:false
           message
       in
-      (ErrorResult lsp_error, 0, None)
+      Lwt.return (ErrorResult lsp_error, 0, None)
     | Ok { Lwt_utils.Process_success.stdout; start_time; end_time; _ } -> begin
       log
         "shell-out completed. %s"
@@ -3633,25 +3637,31 @@ let handle_shell_out_complete
         |> Option.value ~default:""
         |> String_utils.truncate 80);
       try
-        let (lsp_result, result_count) =
+        let%lwt (lsp_result, result_count) =
           let open Lost_env in
           match shellable_type with
           | FindRefs { ide_calculated_positions; stream_file; _ } ->
             let hh_locations = shellout_locations_to_lsp_locations_exn stdout in
-            do_findReferences2
-              ~ide_calculated_positions
-              ~hh_locations
-              ~stream_file
+            let%lwt (lsp_result, result_count) =
+              do_findReferences2
+                ~state
+                ~ide_calculated_positions
+                ~hh_locations
+                ~stream_file
+            in
+            Lwt.return (lsp_result, result_count)
           | GoToImpl { ide_calculated_positions; _ } ->
             let hh_locations = shellout_locations_to_lsp_locations_exn stdout in
-            do_goToImplementation2 ~ide_calculated_positions ~hh_locations
+            Lwt.return
+              (do_goToImplementation2 ~ide_calculated_positions ~hh_locations)
           | Rename { ide_calculated_patches; _ } ->
             let hh_edits = shellout_patch_list_to_lsp_edits_exn stdout in
-            do_documentRename2 ~ide_calculated_patches ~hh_edits
+            Lwt.return (do_documentRename2 ~ide_calculated_patches ~hh_edits)
         in
-        ( lsp_result,
-          result_count,
-          Some (make_duration_telemetry ~start_time ~end_time) )
+        Lwt.return
+          ( lsp_result,
+            result_count,
+            Some (make_duration_telemetry ~start_time ~end_time) )
       with
       | exn ->
         let e = Exception.wrap exn in
@@ -3666,7 +3676,7 @@ let handle_shell_out_complete
             ~current_stack:false
             message
         in
-        (ErrorResult lsp_error, 0, None)
+        Lwt.return (ErrorResult lsp_error, 0, None)
     end
   in
   let { Lost_env.id; metadata; start_time_local_handle; request } =
@@ -3683,8 +3693,8 @@ let handle_shell_out_complete
       lsp_error
       Error_from_daemon_recoverable
       start_time_local_handle;
-    Some (make_result_telemetry 0 ~log_immediately:false)
-  | _ -> Some (make_result_telemetry result_count ?result_extra_data)
+    Lwt.return_some (make_result_telemetry 0 ~log_immediately:false)
+  | _ -> Lwt.return_some (make_result_telemetry result_count ?result_extra_data)
 
 let do_initialize (local_config : ServerLocalConfig.t) : Initialize.result =
   let initialize_params = initialize_params_exc () in
@@ -4769,10 +4779,14 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
             ~ref_unblocked_time
         | Errors_file result ->
           handle_errors_file_item ~state ~ide_service result
-        | Refs_file result -> Lwt.return (handle_refs_file_items ~state result)
+        | Refs_file result ->
+          Lwt.return (handle_refs_file_items ~state:!state result)
         | Shell_out_complete (result, triggering_request, shellable_type) ->
-          Lwt.return
-            (handle_shell_out_complete result triggering_request shellable_type)
+          handle_shell_out_complete
+            ~state:!state
+            result
+            triggering_request
+            shellable_type
         | Tick -> handle_tick ~state
       in
       (* for LSP requests and notifications, we keep a log of what+when we responded.

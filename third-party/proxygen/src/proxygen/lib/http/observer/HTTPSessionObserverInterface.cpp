@@ -52,7 +52,8 @@ HTTPSessionObserverInterface::PreWriteEvent::Builder::build() && {
 HTTPSessionObserverInterface::PreWriteEvent::PreWriteEvent(
     PreWriteEvent::BuilderFields& builderFields)
     : pendingEgressBytes(*CHECK_NOTNULL(
-          builderFields.maybePendingEgressBytesRef.get_pointer())) {
+          builderFields.maybePendingEgressBytesRef.get_pointer())),
+      timestamp(*CHECK_NOTNULL(builderFields.maybeTimestampRef.get_pointer())) {
 }
 
 HTTPSessionObserverInterface::PingReplyEvent::Builder&&
@@ -64,7 +65,7 @@ HTTPSessionObserverInterface::PingReplyEvent::Builder::setId(
 HTTPSessionObserverInterface::PingReplyEvent::Builder&&
 HTTPSessionObserverInterface::PingReplyEvent::Builder::setTimestamp(
     const TimePoint& timestampIn) {
-  maybeTimestamp = timestampIn;
+  maybeTimestampRef = timestampIn;
   return std::move(*this);
 }
 
@@ -76,7 +77,7 @@ HTTPSessionObserverInterface::PingReplyEvent::Builder::build() && {
 HTTPSessionObserverInterface::PingReplyEvent::PingReplyEvent(
     PingReplyEvent::BuilderFields& builderFields)
     : id(*CHECK_NOTNULL(builderFields.maybeId.get_pointer())),
-      timestamp(*CHECK_NOTNULL(builderFields.maybeTimestamp.get_pointer())) {
+      timestamp(*CHECK_NOTNULL(builderFields.maybeTimestampRef.get_pointer())) {
 }
 
 } // namespace proxygen

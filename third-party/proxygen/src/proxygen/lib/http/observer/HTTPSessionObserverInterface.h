@@ -120,7 +120,8 @@ class HTTPSessionObserverInterface {
 
     struct BuilderFields {
       folly::Optional<std::reference_wrapper<const uint64_t>> maybeId;
-      folly::Optional<std::reference_wrapper<const TimePoint>> maybeTimestamp;
+      folly::Optional<std::reference_wrapper<const TimePoint>>
+          maybeTimestampRef;
       explicit BuilderFields() = default;
     };
 

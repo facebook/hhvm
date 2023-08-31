@@ -609,6 +609,31 @@ class RocketClient : public virtual folly::DelayedDestruction,
    private:
     RocketClient& client_;
   };
+
+  // We must guard the client against deletion while there are still
+  // unfulfilled write operations. A delete may happen while handling a
+  // writeErr() or writeSuccess() event. If a delete were to occur at that
+  // time, subsequent writeErr() callbacks may trigger a use-after-free fault.
+  void prepareWriteEvent() {
+    if (!pendingWriteEvents_++) {
+      DCHECK(!pendingWriteGuard_);
+      pendingWriteGuard_ = DestructorGuard(this);
+    }
+  }
+
+  void finishWriteEvent() {
+    DCHECK_GT(pendingWriteEvents_, 0);
+    if (!--pendingWriteEvents_) {
+      DCHECK(pendingWriteGuard_);
+      pendingWriteGuard_ = DestructorGuard(nullptr);
+    }
+  }
+
+  // Number of in-progress writeChain() operations
+  size_t pendingWriteEvents_{0};
+  // Guards against deletion while there are pending writes
+  DestructorGuard pendingWriteGuard_{nullptr};
+
   std::unique_ptr<ServerVersionTimeout> serverVersionTimeout_;
   void onServerVersionRequired();
   void setServerVersion(int32_t serverVersion);

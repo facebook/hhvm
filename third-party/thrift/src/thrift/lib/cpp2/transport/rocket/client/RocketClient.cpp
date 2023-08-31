@@ -1224,11 +1224,13 @@ void RocketClient::writeScheduledRequestsToSocket() noexcept {
       // FINAL fragment of that message.  Today, message fragments are not
       // interleaved, so there is no explicit logic around this, but this
       // invariant must be preserved going forward.
+      prepareWriteEvent();
       writeChainWithFds(
           socket_.get(), this, std::move(buf), std::move(req.fds));
     });
     // This batch didn't have any FDs attached.
     if (buf) {
+      prepareWriteEvent();
       socket_->writeChain(this, std::move(buf));
     }
   }
@@ -1239,6 +1241,8 @@ void RocketClient::writeScheduledRequestsToSocket() noexcept {
 void RocketClient::writeSuccess() noexcept {
   DestructorGuard dg(this);
   DCHECK(clientState_.connState != ConnectionState::CLOSED);
+
+  finishWriteEvent();
 
   queue_.markNextSendingBatchAsSent([&](auto& req) {
     req.onWriteSuccess();
@@ -1252,6 +1256,8 @@ void RocketClient::writeErr(
     size_t bytesWritten, const folly::AsyncSocketException& ex) noexcept {
   DestructorGuard dg(this);
   DCHECK(clientState_.connState != ConnectionState::CLOSED);
+
+  finishWriteEvent();
 
   queue_.markNextSendingBatchAsSent([&](auto& req) {
     if (bytesWritten < req.endOffsetInBatch()) {
@@ -1311,6 +1317,8 @@ void RocketClient::closeNowImpl() noexcept {
   DestructorGuard dg(this);
   DCHECK(clientState_.connState == ConnectionState::ERROR);
 
+  // Notice that AsyncSocket::closeNow() is a no-op if the socket is already in
+  // the ERROR state -- such as if we are currently handling a writeErr() event.
   DCHECK(socket_);
   socket_->closeNow();
   // AsyncSocket::closeNow() may not unset the read callback. AsyncSocket

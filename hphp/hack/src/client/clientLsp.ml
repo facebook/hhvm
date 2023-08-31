@@ -2439,8 +2439,8 @@ let do_findReferences_local
         ~f:(fun partial_result_token ->
           let file =
             Caml.Filename.temp_file
-              ~temp_dir:(get_root_exn () |> Path.to_string)
-              "find_refs_stream"
+              ~temp_dir:(ServerFiles.get_tmp ())
+              (Printf.sprintf "find_refs_stream_%d_pid" (Unix.getpid ()))
               ".jsonl"
           in
           (* We want the [ide_calculated_positions] at the start of the streaming file so they

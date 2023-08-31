@@ -15,16 +15,21 @@ type half_open_one_based = {
   char_end: int;  (** 1-based *)
 }
 
+let from_absolute (pos : Pos.absolute) : half_open_one_based =
+  let (line, char_start, _line_end, char_end) = Pos.destruct_range pos in
+  let filename = Pos.filename pos in
+  { filename; line; char_start; char_end }
+
 let pos_to_one_based_json
     ?(timestamp : float option)
     ~(half_open_interval : bool)
     ((name, pos) : string * Pos.absolute) : Hh_json.json =
-  let (st_line, st_column, _ed_line, ed_column) =
+  let { filename; line; char_start; char_end } =
     if half_open_interval then
-      Pos.destruct_range pos
+      from_absolute pos
     else
-      let (line, start, end_) = Pos.info_pos pos in
-      (line, start, line, end_)
+      let (line, char_start, char_end) = Pos.info_pos pos in
+      { filename = Pos.filename pos; line; char_start; char_end }
   in
   let timestamp =
     match timestamp with
@@ -35,10 +40,10 @@ let pos_to_one_based_json
     (timestamp
     @ [
         ("name", Hh_json.JSON_String name);
-        ("filename", Hh_json.JSON_String (Pos.filename pos));
-        ("line", Hh_json.int_ st_line);
-        ("char_start", Hh_json.int_ st_column);
-        ("char_end", Hh_json.int_ ed_column);
+        ("filename", Hh_json.JSON_String filename);
+        ("line", Hh_json.int_ line);
+        ("char_start", Hh_json.int_ char_start);
+        ("char_end", Hh_json.int_ char_end);
       ])
 
 let half_open_one_based_json_to_pos_exn (json : Hh_json.json) :

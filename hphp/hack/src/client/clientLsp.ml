@@ -1512,8 +1512,15 @@ let ide_rpc
   | Error error_data -> raise (Daemon_nonfatal_exception error_data)
 
 (** This sets up a background watcher which polls the file for size changes due
-to it being appended to; each change, it writes to a stream everything that
-has been appended since last append. Once the file has been unlinked, then
+to it being appended to; each file size change, it writes to an [Lwt_stream.t] everything that
+has been appended since last append. (Except: the first item it places on the stream
+comes not from the file, but rather from the [open_file_results] parameter; moreover
+subsequent items that it reads from the file are culled if they refer to files
+mentioned in [open_file_results]. This exception is a vehicle for (1) the rest of the
+code to read IDE-results and file-results in a uniform way, (2) an easy way for us
+to "mask" file-results by culling out all file-results that pertain to files open in the IDE.)
+
+Once the file has been unlinked, then
 the background watcher will gather everything that has been appended until
 that point, write it to the stream, close the stream, and terminate.
 Note: if you have a watcher, and unlink the file, and start a new file
@@ -1525,6 +1532,14 @@ let watch_refs_stream_file
     ~(open_file_results : (string * Pos.absolute) list Lsp.UriMap.t) :
     FindRefsWireFormat.half_open_one_based list Lwt_stream.t =
   let (q, add) = Lwt_stream.create () in
+  let ide_results =
+    open_file_results
+    |> UriMap.values
+    |> List.concat
+    |> List.map ~f:(fun (_name, pos) -> FindRefsWireFormat.from_absolute pos)
+  in
+  if not (List.is_empty ide_results) then add (Some ide_results);
+
   let fd = Unix.openfile (Path.to_string file) [Unix.O_RDONLY] 0o666 in
   let rec watch file_pos =
     match (Unix.fstat fd).Unix.st_size with
@@ -2467,13 +2482,6 @@ let do_findReferences_local
               (Printf.sprintf "find_refs_stream_%d_pid" (Unix.getpid ()))
               ".jsonl"
           in
-          (* We want the [ide_calculated_positions] at the start of the streaming file so they
-             will get displayed first. *)
-          let fd = Unix.openfile file [Unix.O_WRONLY; Unix.O_APPEND] 0o666 in
-          FindRefsWireFormat.Ide_stream.append
-            fd
-            (open_file_results |> UriMap.values |> List.concat);
-          Unix.close fd;
           let file = Path.make file in
           let q = watch_refs_stream_file file ~open_file_results in
           Lost_env.{ file; partial_result_token; q })

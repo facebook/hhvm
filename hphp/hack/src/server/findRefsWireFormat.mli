@@ -13,6 +13,8 @@ type half_open_one_based = {
   char_end: int;  (** 1-based *)
 }
 
+val from_absolute : Pos.absolute -> half_open_one_based
+
 (** Produced by "hh --ide-find-refs-by-symbol" and parsed by clientLsp *)
 module IdeShellout : sig
   val to_string : (string * Pos.absolute) list -> string

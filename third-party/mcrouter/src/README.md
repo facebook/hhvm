@@ -1,7 +1,7 @@
 # Mcrouter [![Build Status](https://github.com/facebook/mcrouter/workflows/build/badge.svg)](https://github.com/facebook/mcrouter/actions?workflow=build)
 [![Support Ukraine](https://img.shields.io/badge/Support-Ukraine-FFD500?style=flat&labelColor=005BBB)](https://opensource.fb.com/support-ukraine) [![License](https://img.shields.io/badge/license-MIT-blue)](https://github.com/facebook/mcrouter/blob/master/LICENSE)
 
-Mcrouter (pronounced mc router) is a memcached protocol router for scaling [memcached](http://memcached.org/)
+Mcrouter (pronounced mc router) is a memcached protocol router for scaling [memcached](https://memcached.org/)
 deployments. It's a core component of cache
 infrastructure at Facebook and Instagram where mcrouter handles almost
 5 billion requests per second at peak.

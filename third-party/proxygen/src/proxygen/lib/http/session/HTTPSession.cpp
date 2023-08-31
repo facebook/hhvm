@@ -860,6 +860,7 @@ void HTTPSession::onHeadersComplete(HTTPCodec::StreamID streamID,
     if (auto msgPtr = msg.get()) {
       const auto event =
           HTTPSessionObserverInterface::RequestStartedEvent::Builder()
+              .setTimestamp(HTTPSessionObserverInterface::Clock::now())
               .setHeaders(msgPtr->getHeaders())
               .build();
       sessionObserverContainer_.invokeInterfaceMethod<
@@ -1644,6 +1645,7 @@ void HTTPSession::sendHeaders(HTTPTransaction* txn,
   if (isUpstream()) {
     const auto event =
         HTTPSessionObserverInterface::RequestStartedEvent::Builder()
+            .setTimestamp(HTTPSessionObserverInterface::Clock::now())
             .setHeaders(headers.getHeaders())
             .build();
     sessionObserverContainer_.invokeInterfaceMethod<

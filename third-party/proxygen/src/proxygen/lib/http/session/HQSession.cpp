@@ -2446,6 +2446,7 @@ void HQSession::HQStreamTransportBase::onHeadersComplete(
     if (auto msgPtr = msg.get()) {
       const auto event =
           HTTPSessionObserverInterface::RequestStartedEvent::Builder()
+              .setTimestamp(HTTPSessionObserverInterface::Clock::now())
               .setHeaders(msgPtr->getHeaders())
               .build();
       session_.sessionObserverContainer_.invokeInterfaceMethod<
@@ -2800,6 +2801,7 @@ void HQSession::HQStreamTransportBase::sendHeaders(HTTPTransaction* txn,
   if (session_.direction_ == TransportDirection::UPSTREAM) {
     const auto event =
         HTTPSessionObserverInterface::RequestStartedEvent::Builder()
+            .setTimestamp(HTTPSessionObserverInterface::Clock::now())
             .setHeaders(headers.getHeaders())
             .build();
     session_.sessionObserverContainer_.invokeInterfaceMethod<

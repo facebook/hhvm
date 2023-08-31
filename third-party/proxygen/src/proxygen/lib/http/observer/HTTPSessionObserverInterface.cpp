@@ -6,11 +6,18 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include "proxygen/lib/http/observer/HTTPSessionObserverInterface.h"
 #include <cstdint>
+#include <proxygen/lib/http/observer/HTTPSessionObserverInterface.h>
 #include <sys/types.h>
 
 namespace proxygen {
+
+HTTPSessionObserverInterface::RequestStartedEvent::Builder&&
+HTTPSessionObserverInterface::RequestStartedEvent::Builder::setTimestamp(
+    const TimePoint& timestampIn) {
+  maybeTimestampRef = timestampIn;
+  return std::move(*this);
+}
 
 HTTPSessionObserverInterface::RequestStartedEvent::Builder&&
 HTTPSessionObserverInterface::RequestStartedEvent::Builder::setHeaders(
@@ -26,7 +33,8 @@ HTTPSessionObserverInterface::RequestStartedEvent::Builder::build() && {
 
 HTTPSessionObserverInterface::RequestStartedEvent::RequestStartedEvent(
     const RequestStartedEvent::BuilderFields& builderFields)
-    : requestHeaders(
+    : timestamp(*CHECK_NOTNULL(builderFields.maybeTimestampRef.get_pointer())),
+      requestHeaders(
           *CHECK_NOTNULL(builderFields.maybeHTTPHeadersRef.get_pointer())) {
 }
 

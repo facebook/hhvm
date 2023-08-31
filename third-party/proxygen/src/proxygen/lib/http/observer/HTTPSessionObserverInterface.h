@@ -55,20 +55,25 @@ class HTTPSessionObserverInterface {
    */
 
   struct RequestStartedEvent {
+    const TimePoint timestamp;
     const HTTPHeaders& requestHeaders;
 
     // Do not support copy or move given that requestHeaders is a ref.
     RequestStartedEvent(RequestStartedEvent&&) = delete;
     RequestStartedEvent& operator=(const RequestStartedEvent&) = delete;
     RequestStartedEvent& operator=(RequestStartedEvent&& rhs) = delete;
+    RequestStartedEvent(const RequestStartedEvent&) = delete;
 
     struct BuilderFields {
+      folly::Optional<std::reference_wrapper<const TimePoint>>
+          maybeTimestampRef;
       folly::Optional<std::reference_wrapper<const HTTPHeaders>>
           maybeHTTPHeadersRef;
       explicit BuilderFields() = default;
     };
 
     struct Builder : public BuilderFields {
+      Builder&& setTimestamp(const TimePoint& timestamp);
       Builder&& setHeaders(const proxygen::HTTPHeaders& headers);
       RequestStartedEvent build() &&;
       explicit Builder() = default;
@@ -82,7 +87,6 @@ class HTTPSessionObserverInterface {
     const uint64_t pendingEgressBytes;
     const TimePoint timestamp;
 
-    // Do not support copy or move given that requestHeaders is a ref.
     PreWriteEvent(PreWriteEvent&&) = delete;
     PreWriteEvent& operator=(const PreWriteEvent&) = delete;
     PreWriteEvent& operator=(PreWriteEvent&& rhs) = delete;
@@ -112,7 +116,7 @@ class HTTPSessionObserverInterface {
   struct PingReplyEvent {
     const uint64_t id;
     const TimePoint timestamp;
-    // Do not support copy or move given that requestHeaders is a ref.
+
     PingReplyEvent(PingReplyEvent&&) = delete;
     PingReplyEvent& operator=(const PingReplyEvent&) = delete;
     PingReplyEvent& operator=(PingReplyEvent&& rhs) = delete;

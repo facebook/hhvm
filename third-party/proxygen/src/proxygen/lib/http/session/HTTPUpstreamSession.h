@@ -17,7 +17,7 @@ namespace proxygen {
 
 class HTTPSessionStats;
 
-class HTTPUpstreamSession final : public HTTPSession {
+class HTTPUpstreamSession : public HTTPSession {
   using NewTransactionError = std::string;
 
  public:
@@ -143,9 +143,10 @@ class HTTPUpstreamSession final : public HTTPSession {
   folly::Expected<HTTPTransaction*, NewTransactionError>
   newTransactionWithError(HTTPTransaction::Handler* handler);
 
- private:
+ protected:
   ~HTTPUpstreamSession() override;
 
+ private:
   /**
    * Called by onHeadersComplete(). Currently a no-op for upstream.
    */

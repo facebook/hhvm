@@ -103,9 +103,10 @@ class HQUpstreamSession : public HQSession {
     return static_cast<uint32_t>(numberOfIngressPushStreams());
   }
 
- private:
+ protected:
   ~HQUpstreamSession() override;
 
+ private:
   void connectTimeoutExpired() noexcept;
 
 #ifdef _MSC_VER

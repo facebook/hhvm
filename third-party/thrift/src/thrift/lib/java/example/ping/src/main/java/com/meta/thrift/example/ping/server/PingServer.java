@@ -89,18 +89,14 @@ public class PingServer {
     PingServerConfig config = parseArgs(args);
     RpcServerHandler handler = PingService.serverHandlerBuilder(new PingImpl()).build();
 
-    LOG.info("starting server");
-    if ("header".equals(config.getTransport())) {
-      ServerTransport transport =
-          RpcServerUtils.createServerTransport(
-                  new ThriftServerConfig().setPort(config.getPort()),
-                  TransportType.THEADER,
-                  handler)
-              .block();
-      LOG.info("server started at -> " + transport.getAddress());
-      transport.onClose().block();
-    } else {
-      throw new UnsupportedOperationException("Need to Support RSocket");
-    }
+    TransportType type =
+        "header".equals(config.getTransport()) ? TransportType.THEADER : TransportType.RSOCKET;
+    LOG.info("starting server using {} transport", type);
+    ServerTransport transport =
+        RpcServerUtils.createServerTransport(
+                new ThriftServerConfig().setPort(config.getPort()), type, handler)
+            .block();
+    LOG.info("server started at -> " + transport.getAddress());
+    transport.onClose().block();
   }
 }

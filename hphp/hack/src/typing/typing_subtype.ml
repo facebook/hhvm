@@ -2766,6 +2766,7 @@ and simplify_subtype_i
               simplify_subtype
                 ~subtype_env
                 ~sub_supportdyn:None
+                ~super_like
                 lty
                 lower_bound
                 env

@@ -1,5 +1,6 @@
 go src/module.thrift
 hack:json,server=1,shapes=1 src/module.thrift
+hack:json,server=1,shapes=1 src/override.thrift
 java_deprecated src/module.thrift
 json_experimental src/module.thrift
 json src/module.thrift

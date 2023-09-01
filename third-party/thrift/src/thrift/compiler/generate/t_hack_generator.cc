@@ -862,12 +862,6 @@ class t_hack_generator : public t_concat_generator {
     return "";
   }
 
-  std::string hack_namespace(const t_program* p) const {
-    std::string hack_ns = p->get_namespace("hack");
-    std::replace(hack_ns.begin(), hack_ns.end(), '.', '\\');
-    return hack_ns;
-  }
-
   std::string php_namespace(const t_program* p) const {
     std::string php_ns = p->get_namespace("php");
     if (!php_ns.empty()) {
@@ -896,12 +890,18 @@ class t_hack_generator : public t_concat_generator {
       const t_program* p) const {
     std::string ns = "";
     HackThriftNamespaceType type_ = HackThriftNamespaceType::EMPTY;
-    auto hack_ns = hack_namespace(p);
+    const auto& namespaces = p->namespaces();
+
     auto php_ns = php_namespace(p);
     auto pkg_ns = package_namespace(p);
-    if (!hack_ns.empty()) {
-      ns = hack_ns;
-      type_ = HackThriftNamespaceType::HACK;
+    if (auto hack_ns = namespaces.find("hack"); hack_ns != namespaces.end()) {
+      // Provided hack namespace can be empty
+      // Empty Hack namespace should be treated as no namespace
+      if (!hack_ns->second.empty()) {
+        ns = hack_ns->second;
+        std::replace(ns.begin(), ns.end(), '.', '\\');
+        type_ = HackThriftNamespaceType::HACK;
+      }
     } else if (!php_ns.empty()) {
       ns = php_ns;
       type_ = HackThriftNamespaceType::PHP;

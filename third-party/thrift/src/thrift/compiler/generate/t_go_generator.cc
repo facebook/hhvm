@@ -3661,7 +3661,7 @@ void t_go_generator::generate_go_docstring(
 
   if (tdoc->has_doc()) {
     has_doc = true;
-    ss << tdoc->get_doc();
+    ss << tdoc->doc();
   }
 
   const vector<t_field*>& fields = tstruct->get_members();
@@ -3680,7 +3680,7 @@ void t_go_generator::generate_go_docstring(
       ss << " - " << publicize(p->get_name());
 
       if (p->has_doc()) {
-        ss << ": " << p->get_doc();
+        ss << ": " << p->doc();
       } else {
         ss << endl;
       }
@@ -3697,7 +3697,7 @@ void t_go_generator::generate_go_docstring(
  */
 void t_go_generator::generate_go_docstring(ofstream& out, const t_node* tdoc) {
   if (tdoc->has_doc()) {
-    generate_docstring_comment(out, "", "//", tdoc->get_doc(), "");
+    generate_docstring_comment(out, "", "//", tdoc->doc(), "");
   }
 }
 

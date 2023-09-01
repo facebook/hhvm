@@ -140,8 +140,8 @@ class json_experimental_program : public mstch_program {
         {"last?", true}});
     return result;
   }
-  mstch::node has_docstring() { return !program_->get_doc().empty(); }
-  mstch::node get_docstring() { return json_quote_ascii(program_->get_doc()); }
+  mstch::node has_docstring() { return !program_->doc().empty(); }
+  mstch::node get_docstring() { return json_quote_ascii(program_->doc()); }
 
   mstch::node include_prefix() {
     auto prefix = program_->include_prefix();
@@ -175,7 +175,7 @@ class json_experimental_service : public mstch_service {
     return compiler::get_lineno(*service_, *data_.sm);
   }
   mstch::node has_docstring() { return service_->has_doc(); }
-  mstch::node get_docstring() { return json_quote_ascii(service_->get_doc()); }
+  mstch::node get_docstring() { return json_quote_ascii(service_->doc()); }
   mstch::node path() {
     return compiler::get_filepath(*service_, *data_.sm, data_.compiler_path);
   }
@@ -204,7 +204,7 @@ class json_experimental_function : public mstch_function {
     return compiler::get_lineno(*function_, source_mgr_);
   }
   mstch::node has_docstring() { return function_->has_doc(); }
-  mstch::node get_docstring() { return json_quote_ascii(function_->get_doc()); }
+  mstch::node get_docstring() { return json_quote_ascii(function_->doc()); }
 
  private:
   source_manager& source_mgr_;
@@ -230,7 +230,7 @@ class json_experimental_struct : public mstch_struct {
     return compiler::get_lineno(*struct_, source_mgr_);
   }
   mstch::node has_docstring() { return struct_->has_doc(); }
-  mstch::node get_docstring() { return json_quote_ascii(struct_->get_doc()); }
+  mstch::node get_docstring() { return json_quote_ascii(struct_->doc()); }
 
  private:
   source_manager& source_mgr_;
@@ -286,7 +286,7 @@ class json_experimental_field : public mstch_field {
     return compiler::get_lineno(*field_, source_mgr_);
   }
   mstch::node has_docstring() { return field_->has_doc(); }
-  mstch::node get_docstring() { return json_quote_ascii(field_->get_doc()); }
+  mstch::node get_docstring() { return json_quote_ascii(field_->doc()); }
 
  private:
   source_manager& source_mgr_;
@@ -313,7 +313,7 @@ class json_experimental_typedef : public mstch_typedef {
     return compiler::get_lineno(*typedef_, source_mgr_);
   }
   mstch::node has_docstring() { return typedef_->has_doc(); }
-  mstch::node get_docstring() { return json_quote_ascii(typedef_->get_doc()); }
+  mstch::node get_docstring() { return json_quote_ascii(typedef_->doc()); }
   mstch::node is_exception() { return typedef_->is_exception(); }
 
  private:
@@ -340,7 +340,7 @@ class json_experimental_enum : public mstch_enum {
   mstch::node is_empty() { return enum_->get_enum_values().empty(); }
   mstch::node get_lineno() { return compiler::get_lineno(*enum_, source_mgr_); }
   mstch::node has_docstring() { return enum_->has_doc(); }
-  mstch::node get_docstring() { return json_quote_ascii(enum_->get_doc()); }
+  mstch::node get_docstring() { return json_quote_ascii(enum_->doc()); }
 
  private:
   source_manager& source_mgr_;
@@ -368,9 +368,7 @@ class json_experimental_enum_value : public mstch_enum_value {
     return compiler::get_lineno(*enum_value_, source_mgr_);
   }
   mstch::node has_docstring() { return enum_value_->has_doc(); }
-  mstch::node get_docstring() {
-    return json_quote_ascii(enum_value_->get_doc());
-  }
+  mstch::node get_docstring() { return json_quote_ascii(enum_value_->doc()); }
 
  private:
   source_manager& source_mgr_;
@@ -405,7 +403,7 @@ class json_experimental_const_value : public mstch_const_value {
   }
   mstch::node has_docstring() { return current_const_->has_doc(); }
   mstch::node get_docstring() {
-    return json_quote_ascii(current_const_->get_doc());
+    return json_quote_ascii(current_const_->doc());
   }
 
   mstch::node get_type_name() {

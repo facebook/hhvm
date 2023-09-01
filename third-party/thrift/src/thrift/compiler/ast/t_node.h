@@ -134,10 +134,6 @@ class t_node {
   boost::optional<node_doc> doc_;
 
   std::map<std::string, annotation_value> annotations_;
-  // TODO(afuller): Remove everything below this comment. It is only provideed
-  // for backwards compatibility.
- public:
-  const std::string& get_doc() const { return doc(); }
 };
 
 using t_annotation = std::map<std::string, annotation_value>::value_type;

@@ -3963,7 +3963,7 @@ void t_java_deprecated_generator::generate_java_doc(
     ofstream& out, const t_field* field) {
   if (field->get_type()->is_enum()) {
     string combined_message =
-        field->get_doc() + "\n@see " + get_enum_class_name(field->get_type());
+        field->doc() + "\n@see " + get_enum_class_name(field->get_type());
     generate_java_docstring_comment(out, combined_message);
   } else {
     generate_java_doc(out, (t_node*)field);
@@ -3976,7 +3976,7 @@ void t_java_deprecated_generator::generate_java_doc(
 void t_java_deprecated_generator::generate_java_doc(
     ofstream& out, const t_node* tdoc) {
   if (tdoc->has_doc()) {
-    generate_java_docstring_comment(out, tdoc->get_doc());
+    generate_java_docstring_comment(out, tdoc->doc());
   }
 }
 
@@ -3987,14 +3987,14 @@ void t_java_deprecated_generator::generate_java_doc(
     ofstream& out, const t_function* tfunction) {
   if (tfunction->has_doc()) {
     stringstream ss;
-    ss << tfunction->get_doc();
+    ss << tfunction->doc();
     const vector<t_field*>& fields = tfunction->get_paramlist()->get_members();
     vector<t_field*>::const_iterator p_iter;
     for (p_iter = fields.begin(); p_iter != fields.end(); ++p_iter) {
       const t_field* p = *p_iter;
       ss << "\n@param " << p->get_name();
       if (p->has_doc()) {
-        ss << " " << p->get_doc();
+        ss << " " << p->doc();
       }
     }
     generate_docstring_comment(out, "/**\n", " * ", ss.str(), " */\n");

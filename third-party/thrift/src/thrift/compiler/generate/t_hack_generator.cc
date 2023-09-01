@@ -6236,7 +6236,7 @@ void t_hack_generator::generate_php_docstring(
         out, // out
         "/**\n", // comment_start
         " * ", // line_prefix
-        tdoc->get_doc(), // contents
+        tdoc->doc(),
         " */\n"); // comment_end
   }
 }
@@ -6264,7 +6264,7 @@ void t_hack_generator::generate_php_docstring(
         out, // out
         "", // comment_start
         " * ", // line_prefix
-        tfunction->get_doc(), // contents
+        tfunction->doc(),
         ""); // comment_end
   }
 
@@ -6347,7 +6347,7 @@ void t_hack_generator::generate_php_docstring(
         out, // out
         "", // comment_start
         " * ", // line_prefix
-        tfield->get_doc(), // contents
+        tfield->doc(),
         ""); // comment_end
     indent(out) << " * \n";
   }
@@ -6378,7 +6378,7 @@ void t_hack_generator::generate_php_docstring(
         out, // out
         "", // comment_start
         " * ", // line_prefix
-        tstruct->get_doc(), // contents
+        tstruct->doc(),
         ""); // comment_end
     indent(out) << " *\n";
   }
@@ -6408,7 +6408,7 @@ void t_hack_generator::generate_php_docstring(
         out, // out
         "", // comment_start
         " * ", // line_prefix
-        tenum->get_doc(), // contents
+        tenum->doc(),
         ""); // comment_end
     indent(out) << " * \n";
   }
@@ -6437,7 +6437,7 @@ void t_hack_generator::generate_php_docstring(
         out, // out
         "", // comment_start
         " * ", // line_prefix
-        tservice->get_doc(), // contents
+        tservice->doc(),
         ""); // comment_end
     indent(out) << " * \n";
   }
@@ -6466,7 +6466,7 @@ void t_hack_generator::generate_php_docstring(
         out, // out
         "", // comment_start
         " * ", // line_prefix
-        tconst->get_doc(), // contents
+        tconst->doc(),
         ""); // comment_end
     indent(out) << " * \n";
   }

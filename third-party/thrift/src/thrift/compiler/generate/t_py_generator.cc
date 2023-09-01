@@ -3535,7 +3535,7 @@ void t_py_generator::generate_python_docstring(
   stringstream ss;
   if (tdoc->has_doc()) {
     has_doc = true;
-    ss << tdoc->get_doc();
+    ss << tdoc->doc();
   }
 
   const vector<t_field*>& fields = tstruct->get_members();
@@ -3550,7 +3550,7 @@ void t_py_generator::generate_python_docstring(
       const t_field* p = *p_iter;
       ss << " - " << rename_reserved_keywords(p->get_name());
       if (p->has_doc()) {
-        ss << ": " << p->get_doc();
+        ss << ": " << p->doc();
       } else {
         ss << endl;
       }
@@ -3568,8 +3568,7 @@ void t_py_generator::generate_python_docstring(
 void t_py_generator::generate_python_docstring(
     ofstream& out, const t_node* tdoc) {
   if (tdoc->has_doc()) {
-    generate_docstring_comment(
-        out, "r\"\"\"\n", "", tdoc->get_doc(), "\"\"\"\n");
+    generate_docstring_comment(out, "r\"\"\"\n", "", tdoc->doc(), "\"\"\"\n");
   }
 }
 

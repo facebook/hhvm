@@ -46,7 +46,7 @@ namespace rust {
 const std::string_view kRustCratePrefix = "crate::";
 
 std::string quoted_rust_doc(const t_node* node) {
-  const std::string doc = node->get_doc();
+  const std::string doc = node->doc();
 
   // strip leading/trailing whitespace
   static const std::string whitespace = "\n\r\t ";

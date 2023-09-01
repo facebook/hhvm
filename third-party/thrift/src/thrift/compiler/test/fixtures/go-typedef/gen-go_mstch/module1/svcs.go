@@ -1199,14 +1199,14 @@ func (x *respFinderPreviousPlate) String() string {
 
 
 type FinderProcessor struct {
-    processorMap       map[string]thrift.ProcessorFunction
+    processorMap       map[string]thrift.ProcessorFunctionContext
     functionServiceMap map[string]string
     handler            Finder
 }
 // Compile time interface enforcer
-var _ thrift.Processor = &FinderProcessor{}
+var _ thrift.ProcessorContext = &FinderProcessor{}
 
-func (p *FinderProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
+func (p *FinderProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
     p.processorMap[key] = processor
 }
 
@@ -1214,14 +1214,14 @@ func (p *FinderProcessor) AddToFunctionServiceMap(key, service string) {
     p.functionServiceMap[key] = service
 }
 
-func (p *FinderProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction, err error) {
+func (p *FinderProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext, err error) {
     if processor, ok := p.processorMap[key]; ok {
         return processor, nil
     }
     return nil, nil
 }
 
-func (p *FinderProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
+func (p *FinderProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {
     return p.processorMap
 }
 
@@ -1232,7 +1232,7 @@ func (p *FinderProcessor) FunctionServiceMap() map[string]string {
 func NewFinderProcessor(handler Finder) *FinderProcessor {
     p := &FinderProcessor{
         handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunction),
+        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
         functionServiceMap: make(map[string]string),
     }
     p.AddToProcessorMap("byPlate", &procFuncFinderByPlate{handler: handler})
@@ -1250,7 +1250,7 @@ type procFuncFinderByPlate struct {
     handler Finder
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncFinderByPlate{}
+var _ thrift.ProcessorFunctionContext = &procFuncFinderByPlate{}
 
 func (p *procFuncFinderByPlate) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqFinderByPlate()
@@ -1284,10 +1284,10 @@ func (p *procFuncFinderByPlate) Write(seqId int32, result thrift.WritableStruct,
     return err
 }
 
-func (p *procFuncFinderByPlate) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncFinderByPlate) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqFinderByPlate)
     result := newRespFinderByPlate()
-    retval, err := p.handler.ByPlate(args.Plate)
+    retval, err := p.handler.ByPlate(ctx, args.Plate)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing ByPlate: " + err.Error(), err)
         return x, x
@@ -1302,7 +1302,7 @@ type procFuncFinderAliasByPlate struct {
     handler Finder
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncFinderAliasByPlate{}
+var _ thrift.ProcessorFunctionContext = &procFuncFinderAliasByPlate{}
 
 func (p *procFuncFinderAliasByPlate) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqFinderAliasByPlate()
@@ -1336,10 +1336,10 @@ func (p *procFuncFinderAliasByPlate) Write(seqId int32, result thrift.WritableSt
     return err
 }
 
-func (p *procFuncFinderAliasByPlate) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncFinderAliasByPlate) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqFinderAliasByPlate)
     result := newRespFinderAliasByPlate()
-    retval, err := p.handler.AliasByPlate(args.Plate)
+    retval, err := p.handler.AliasByPlate(ctx, args.Plate)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing AliasByPlate: " + err.Error(), err)
         return x, x
@@ -1354,7 +1354,7 @@ type procFuncFinderPreviousPlate struct {
     handler Finder
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncFinderPreviousPlate{}
+var _ thrift.ProcessorFunctionContext = &procFuncFinderPreviousPlate{}
 
 func (p *procFuncFinderPreviousPlate) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqFinderPreviousPlate()
@@ -1388,10 +1388,10 @@ func (p *procFuncFinderPreviousPlate) Write(seqId int32, result thrift.WritableS
     return err
 }
 
-func (p *procFuncFinderPreviousPlate) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncFinderPreviousPlate) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqFinderPreviousPlate)
     result := newRespFinderPreviousPlate()
-    retval, err := p.handler.PreviousPlate(args.Plate)
+    retval, err := p.handler.PreviousPlate(ctx, args.Plate)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing PreviousPlate: " + err.Error(), err)
         return x, x

@@ -944,14 +944,14 @@ func (x *respCThing) String() string {
 
 
 type CProcessor struct {
-    processorMap       map[string]thrift.ProcessorFunction
+    processorMap       map[string]thrift.ProcessorFunctionContext
     functionServiceMap map[string]string
     handler            C
 }
 // Compile time interface enforcer
-var _ thrift.Processor = &CProcessor{}
+var _ thrift.ProcessorContext = &CProcessor{}
 
-func (p *CProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
+func (p *CProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
     p.processorMap[key] = processor
 }
 
@@ -959,14 +959,14 @@ func (p *CProcessor) AddToFunctionServiceMap(key, service string) {
     p.functionServiceMap[key] = service
 }
 
-func (p *CProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction, err error) {
+func (p *CProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext, err error) {
     if processor, ok := p.processorMap[key]; ok {
         return processor, nil
     }
     return nil, nil
 }
 
-func (p *CProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
+func (p *CProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {
     return p.processorMap
 }
 
@@ -977,7 +977,7 @@ func (p *CProcessor) FunctionServiceMap() map[string]string {
 func NewCProcessor(handler C) *CProcessor {
     p := &CProcessor{
         handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunction),
+        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
         functionServiceMap: make(map[string]string),
     }
     p.AddToProcessorMap("f", &procFuncCF{handler: handler})
@@ -993,7 +993,7 @@ type procFuncCF struct {
     handler C
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncCF{}
+var _ thrift.ProcessorFunctionContext = &procFuncCF{}
 
 func (p *procFuncCF) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqCF()
@@ -1027,9 +1027,9 @@ func (p *procFuncCF) Write(seqId int32, result thrift.WritableStruct, oprot thri
     return err
 }
 
-func (p *procFuncCF) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncCF) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespCF()
-    err := p.handler.F()
+    err := p.handler.F(ctx)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing F: " + err.Error(), err)
         return x, x
@@ -1043,7 +1043,7 @@ type procFuncCThing struct {
     handler C
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncCThing{}
+var _ thrift.ProcessorFunctionContext = &procFuncCThing{}
 
 func (p *procFuncCThing) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqCThing()
@@ -1081,10 +1081,10 @@ func (p *procFuncCThing) Write(seqId int32, result thrift.WritableStruct, oprot 
     return err
 }
 
-func (p *procFuncCThing) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncCThing) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqCThing)
     result := newRespCThing()
-    retval, err := p.handler.Thing(args.A, args.B, args.C)
+    retval, err := p.handler.Thing(ctx, args.A, args.B, args.C)
     if err != nil {
         switch v := err.(type) {
         case *Bang:

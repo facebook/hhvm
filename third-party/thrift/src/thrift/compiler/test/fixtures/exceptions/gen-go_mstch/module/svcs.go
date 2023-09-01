@@ -1651,14 +1651,14 @@ func (x *respRaiserGet500) String() string {
 
 
 type RaiserProcessor struct {
-    processorMap       map[string]thrift.ProcessorFunction
+    processorMap       map[string]thrift.ProcessorFunctionContext
     functionServiceMap map[string]string
     handler            Raiser
 }
 // Compile time interface enforcer
-var _ thrift.Processor = &RaiserProcessor{}
+var _ thrift.ProcessorContext = &RaiserProcessor{}
 
-func (p *RaiserProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
+func (p *RaiserProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
     p.processorMap[key] = processor
 }
 
@@ -1666,14 +1666,14 @@ func (p *RaiserProcessor) AddToFunctionServiceMap(key, service string) {
     p.functionServiceMap[key] = service
 }
 
-func (p *RaiserProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction, err error) {
+func (p *RaiserProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext, err error) {
     if processor, ok := p.processorMap[key]; ok {
         return processor, nil
     }
     return nil, nil
 }
 
-func (p *RaiserProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
+func (p *RaiserProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {
     return p.processorMap
 }
 
@@ -1684,7 +1684,7 @@ func (p *RaiserProcessor) FunctionServiceMap() map[string]string {
 func NewRaiserProcessor(handler Raiser) *RaiserProcessor {
     p := &RaiserProcessor{
         handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunction),
+        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
         functionServiceMap: make(map[string]string),
     }
     p.AddToProcessorMap("doBland", &procFuncRaiserDoBland{handler: handler})
@@ -1704,7 +1704,7 @@ type procFuncRaiserDoBland struct {
     handler Raiser
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncRaiserDoBland{}
+var _ thrift.ProcessorFunctionContext = &procFuncRaiserDoBland{}
 
 func (p *procFuncRaiserDoBland) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqRaiserDoBland()
@@ -1738,9 +1738,9 @@ func (p *procFuncRaiserDoBland) Write(seqId int32, result thrift.WritableStruct,
     return err
 }
 
-func (p *procFuncRaiserDoBland) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncRaiserDoBland) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespRaiserDoBland()
-    err := p.handler.DoBland()
+    err := p.handler.DoBland(ctx)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing DoBland: " + err.Error(), err)
         return x, x
@@ -1754,7 +1754,7 @@ type procFuncRaiserDoRaise struct {
     handler Raiser
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncRaiserDoRaise{}
+var _ thrift.ProcessorFunctionContext = &procFuncRaiserDoRaise{}
 
 func (p *procFuncRaiserDoRaise) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqRaiserDoRaise()
@@ -1800,9 +1800,9 @@ func (p *procFuncRaiserDoRaise) Write(seqId int32, result thrift.WritableStruct,
     return err
 }
 
-func (p *procFuncRaiserDoRaise) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncRaiserDoRaise) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespRaiserDoRaise()
-    err := p.handler.DoRaise()
+    err := p.handler.DoRaise(ctx)
     if err != nil {
         switch v := err.(type) {
         case *Banal:
@@ -1825,7 +1825,7 @@ type procFuncRaiserGet200 struct {
     handler Raiser
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncRaiserGet200{}
+var _ thrift.ProcessorFunctionContext = &procFuncRaiserGet200{}
 
 func (p *procFuncRaiserGet200) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqRaiserGet200()
@@ -1859,9 +1859,9 @@ func (p *procFuncRaiserGet200) Write(seqId int32, result thrift.WritableStruct, 
     return err
 }
 
-func (p *procFuncRaiserGet200) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncRaiserGet200) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespRaiserGet200()
-    retval, err := p.handler.Get200()
+    retval, err := p.handler.Get200(ctx)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Get200: " + err.Error(), err)
         return x, x
@@ -1876,7 +1876,7 @@ type procFuncRaiserGet500 struct {
     handler Raiser
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncRaiserGet500{}
+var _ thrift.ProcessorFunctionContext = &procFuncRaiserGet500{}
 
 func (p *procFuncRaiserGet500) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqRaiserGet500()
@@ -1922,9 +1922,9 @@ func (p *procFuncRaiserGet500) Write(seqId int32, result thrift.WritableStruct, 
     return err
 }
 
-func (p *procFuncRaiserGet500) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncRaiserGet500) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespRaiserGet500()
-    retval, err := p.handler.Get500()
+    retval, err := p.handler.Get500(ctx)
     if err != nil {
         switch v := err.(type) {
         case *Fiery:

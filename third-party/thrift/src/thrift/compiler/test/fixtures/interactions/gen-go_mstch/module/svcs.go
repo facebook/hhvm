@@ -318,14 +318,14 @@ func (x *respMyServiceFoo) String() string {
 
 
 type MyServiceProcessor struct {
-    processorMap       map[string]thrift.ProcessorFunction
+    processorMap       map[string]thrift.ProcessorFunctionContext
     functionServiceMap map[string]string
     handler            MyService
 }
 // Compile time interface enforcer
-var _ thrift.Processor = &MyServiceProcessor{}
+var _ thrift.ProcessorContext = &MyServiceProcessor{}
 
-func (p *MyServiceProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
+func (p *MyServiceProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
     p.processorMap[key] = processor
 }
 
@@ -333,14 +333,14 @@ func (p *MyServiceProcessor) AddToFunctionServiceMap(key, service string) {
     p.functionServiceMap[key] = service
 }
 
-func (p *MyServiceProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction, err error) {
+func (p *MyServiceProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext, err error) {
     if processor, ok := p.processorMap[key]; ok {
         return processor, nil
     }
     return nil, nil
 }
 
-func (p *MyServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
+func (p *MyServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {
     return p.processorMap
 }
 
@@ -351,7 +351,7 @@ func (p *MyServiceProcessor) FunctionServiceMap() map[string]string {
 func NewMyServiceProcessor(handler MyService) *MyServiceProcessor {
     p := &MyServiceProcessor{
         handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunction),
+        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
         functionServiceMap: make(map[string]string),
     }
     p.AddToProcessorMap("foo", &procFuncMyServiceFoo{handler: handler})
@@ -365,7 +365,7 @@ type procFuncMyServiceFoo struct {
     handler MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncMyServiceFoo{}
+var _ thrift.ProcessorFunctionContext = &procFuncMyServiceFoo{}
 
 func (p *procFuncMyServiceFoo) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqMyServiceFoo()
@@ -399,9 +399,9 @@ func (p *procFuncMyServiceFoo) Write(seqId int32, result thrift.WritableStruct, 
     return err
 }
 
-func (p *procFuncMyServiceFoo) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncMyServiceFoo) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespMyServiceFoo()
-    err := p.handler.Foo()
+    err := p.handler.Foo(ctx)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Foo: " + err.Error(), err)
         return x, x

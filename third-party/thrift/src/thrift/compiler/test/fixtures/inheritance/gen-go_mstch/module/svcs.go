@@ -318,14 +318,14 @@ func (x *respMyRootDoRoot) String() string {
 
 
 type MyRootProcessor struct {
-    processorMap       map[string]thrift.ProcessorFunction
+    processorMap       map[string]thrift.ProcessorFunctionContext
     functionServiceMap map[string]string
     handler            MyRoot
 }
 // Compile time interface enforcer
-var _ thrift.Processor = &MyRootProcessor{}
+var _ thrift.ProcessorContext = &MyRootProcessor{}
 
-func (p *MyRootProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
+func (p *MyRootProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
     p.processorMap[key] = processor
 }
 
@@ -333,14 +333,14 @@ func (p *MyRootProcessor) AddToFunctionServiceMap(key, service string) {
     p.functionServiceMap[key] = service
 }
 
-func (p *MyRootProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction, err error) {
+func (p *MyRootProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext, err error) {
     if processor, ok := p.processorMap[key]; ok {
         return processor, nil
     }
     return nil, nil
 }
 
-func (p *MyRootProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
+func (p *MyRootProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {
     return p.processorMap
 }
 
@@ -351,7 +351,7 @@ func (p *MyRootProcessor) FunctionServiceMap() map[string]string {
 func NewMyRootProcessor(handler MyRoot) *MyRootProcessor {
     p := &MyRootProcessor{
         handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunction),
+        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
         functionServiceMap: make(map[string]string),
     }
     p.AddToProcessorMap("do_root", &procFuncMyRootDoRoot{handler: handler})
@@ -365,7 +365,7 @@ type procFuncMyRootDoRoot struct {
     handler MyRoot
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncMyRootDoRoot{}
+var _ thrift.ProcessorFunctionContext = &procFuncMyRootDoRoot{}
 
 func (p *procFuncMyRootDoRoot) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqMyRootDoRoot()
@@ -399,9 +399,9 @@ func (p *procFuncMyRootDoRoot) Write(seqId int32, result thrift.WritableStruct, 
     return err
 }
 
-func (p *procFuncMyRootDoRoot) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncMyRootDoRoot) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespMyRootDoRoot()
-    err := p.handler.DoRoot()
+    err := p.handler.DoRoot(ctx)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing DoRoot: " + err.Error(), err)
         return x, x
@@ -720,7 +720,7 @@ type MyNodeProcessor struct {
     *MyRootProcessor
 }
 // Compile time interface enforcer
-var _ thrift.Processor = &MyNodeProcessor{}
+var _ thrift.ProcessorContext = &MyNodeProcessor{}
 
 
 func NewMyNodeProcessor(handler MyNode) *MyNodeProcessor {
@@ -738,7 +738,7 @@ type procFuncMyNodeDoMid struct {
     handler MyNode
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncMyNodeDoMid{}
+var _ thrift.ProcessorFunctionContext = &procFuncMyNodeDoMid{}
 
 func (p *procFuncMyNodeDoMid) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqMyNodeDoMid()
@@ -772,9 +772,9 @@ func (p *procFuncMyNodeDoMid) Write(seqId int32, result thrift.WritableStruct, o
     return err
 }
 
-func (p *procFuncMyNodeDoMid) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncMyNodeDoMid) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespMyNodeDoMid()
-    err := p.handler.DoMid()
+    err := p.handler.DoMid(ctx)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing DoMid: " + err.Error(), err)
         return x, x
@@ -1093,7 +1093,7 @@ type MyLeafProcessor struct {
     *MyNodeProcessor
 }
 // Compile time interface enforcer
-var _ thrift.Processor = &MyLeafProcessor{}
+var _ thrift.ProcessorContext = &MyLeafProcessor{}
 
 
 func NewMyLeafProcessor(handler MyLeaf) *MyLeafProcessor {
@@ -1111,7 +1111,7 @@ type procFuncMyLeafDoLeaf struct {
     handler MyLeaf
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncMyLeafDoLeaf{}
+var _ thrift.ProcessorFunctionContext = &procFuncMyLeafDoLeaf{}
 
 func (p *procFuncMyLeafDoLeaf) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqMyLeafDoLeaf()
@@ -1145,9 +1145,9 @@ func (p *procFuncMyLeafDoLeaf) Write(seqId int32, result thrift.WritableStruct, 
     return err
 }
 
-func (p *procFuncMyLeafDoLeaf) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncMyLeafDoLeaf) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespMyLeafDoLeaf()
-    err := p.handler.DoLeaf()
+    err := p.handler.DoLeaf(ctx)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing DoLeaf: " + err.Error(), err)
         return x, x

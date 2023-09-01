@@ -461,14 +461,14 @@ func (x *respTestServiceInit) String() string {
 
 
 type TestServiceProcessor struct {
-    processorMap       map[string]thrift.ProcessorFunction
+    processorMap       map[string]thrift.ProcessorFunctionContext
     functionServiceMap map[string]string
     handler            TestService
 }
 // Compile time interface enforcer
-var _ thrift.Processor = &TestServiceProcessor{}
+var _ thrift.ProcessorContext = &TestServiceProcessor{}
 
-func (p *TestServiceProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
+func (p *TestServiceProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
     p.processorMap[key] = processor
 }
 
@@ -476,14 +476,14 @@ func (p *TestServiceProcessor) AddToFunctionServiceMap(key, service string) {
     p.functionServiceMap[key] = service
 }
 
-func (p *TestServiceProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction, err error) {
+func (p *TestServiceProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext, err error) {
     if processor, ok := p.processorMap[key]; ok {
         return processor, nil
     }
     return nil, nil
 }
 
-func (p *TestServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
+func (p *TestServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {
     return p.processorMap
 }
 
@@ -494,7 +494,7 @@ func (p *TestServiceProcessor) FunctionServiceMap() map[string]string {
 func NewTestServiceProcessor(handler TestService) *TestServiceProcessor {
     p := &TestServiceProcessor{
         handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunction),
+        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
         functionServiceMap: make(map[string]string),
     }
     p.AddToProcessorMap("init", &procFuncTestServiceInit{handler: handler})
@@ -508,7 +508,7 @@ type procFuncTestServiceInit struct {
     handler TestService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncTestServiceInit{}
+var _ thrift.ProcessorFunctionContext = &procFuncTestServiceInit{}
 
 func (p *procFuncTestServiceInit) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqTestServiceInit()
@@ -542,10 +542,10 @@ func (p *procFuncTestServiceInit) Write(seqId int32, result thrift.WritableStruc
     return err
 }
 
-func (p *procFuncTestServiceInit) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncTestServiceInit) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqTestServiceInit)
     result := newRespTestServiceInit()
-    retval, err := p.handler.Init(args.Int1)
+    retval, err := p.handler.Init(ctx, args.Int1)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Init: " + err.Error(), err)
         return x, x

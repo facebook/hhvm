@@ -4118,14 +4118,14 @@ func (x *respGetEntityGetLegacyStuff) String() string {
 
 
 type GetEntityProcessor struct {
-    processorMap       map[string]thrift.ProcessorFunction
+    processorMap       map[string]thrift.ProcessorFunctionContext
     functionServiceMap map[string]string
     handler            GetEntity
 }
 // Compile time interface enforcer
-var _ thrift.Processor = &GetEntityProcessor{}
+var _ thrift.ProcessorContext = &GetEntityProcessor{}
 
-func (p *GetEntityProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
+func (p *GetEntityProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
     p.processorMap[key] = processor
 }
 
@@ -4133,14 +4133,14 @@ func (p *GetEntityProcessor) AddToFunctionServiceMap(key, service string) {
     p.functionServiceMap[key] = service
 }
 
-func (p *GetEntityProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction, err error) {
+func (p *GetEntityProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext, err error) {
     if processor, ok := p.processorMap[key]; ok {
         return processor, nil
     }
     return nil, nil
 }
 
-func (p *GetEntityProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
+func (p *GetEntityProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {
     return p.processorMap
 }
 
@@ -4151,7 +4151,7 @@ func (p *GetEntityProcessor) FunctionServiceMap() map[string]string {
 func NewGetEntityProcessor(handler GetEntity) *GetEntityProcessor {
     p := &GetEntityProcessor{
         handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunction),
+        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
         functionServiceMap: make(map[string]string),
     }
     p.AddToProcessorMap("getEntity", &procFuncGetEntityGetEntity{handler: handler})
@@ -4189,7 +4189,7 @@ type procFuncGetEntityGetEntity struct {
     handler GetEntity
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncGetEntityGetEntity{}
+var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetEntity{}
 
 func (p *procFuncGetEntityGetEntity) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetEntity()
@@ -4223,10 +4223,10 @@ func (p *procFuncGetEntityGetEntity) Write(seqId int32, result thrift.WritableSt
     return err
 }
 
-func (p *procFuncGetEntityGetEntity) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncGetEntityGetEntity) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqGetEntityGetEntity)
     result := newRespGetEntityGetEntity()
-    retval, err := p.handler.GetEntity(args.R)
+    retval, err := p.handler.GetEntity(ctx, args.R)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetEntity: " + err.Error(), err)
         return x, x
@@ -4241,7 +4241,7 @@ type procFuncGetEntityGetBool struct {
     handler GetEntity
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncGetEntityGetBool{}
+var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetBool{}
 
 func (p *procFuncGetEntityGetBool) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetBool()
@@ -4275,9 +4275,9 @@ func (p *procFuncGetEntityGetBool) Write(seqId int32, result thrift.WritableStru
     return err
 }
 
-func (p *procFuncGetEntityGetBool) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncGetEntityGetBool) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespGetEntityGetBool()
-    retval, err := p.handler.GetBool()
+    retval, err := p.handler.GetBool(ctx)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetBool: " + err.Error(), err)
         return x, x
@@ -4292,7 +4292,7 @@ type procFuncGetEntityGetByte struct {
     handler GetEntity
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncGetEntityGetByte{}
+var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetByte{}
 
 func (p *procFuncGetEntityGetByte) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetByte()
@@ -4326,9 +4326,9 @@ func (p *procFuncGetEntityGetByte) Write(seqId int32, result thrift.WritableStru
     return err
 }
 
-func (p *procFuncGetEntityGetByte) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncGetEntityGetByte) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespGetEntityGetByte()
-    retval, err := p.handler.GetByte()
+    retval, err := p.handler.GetByte(ctx)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetByte: " + err.Error(), err)
         return x, x
@@ -4343,7 +4343,7 @@ type procFuncGetEntityGetI16 struct {
     handler GetEntity
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncGetEntityGetI16{}
+var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetI16{}
 
 func (p *procFuncGetEntityGetI16) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetI16()
@@ -4377,9 +4377,9 @@ func (p *procFuncGetEntityGetI16) Write(seqId int32, result thrift.WritableStruc
     return err
 }
 
-func (p *procFuncGetEntityGetI16) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncGetEntityGetI16) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespGetEntityGetI16()
-    retval, err := p.handler.GetI16()
+    retval, err := p.handler.GetI16(ctx)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetI16: " + err.Error(), err)
         return x, x
@@ -4394,7 +4394,7 @@ type procFuncGetEntityGetI32 struct {
     handler GetEntity
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncGetEntityGetI32{}
+var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetI32{}
 
 func (p *procFuncGetEntityGetI32) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetI32()
@@ -4428,9 +4428,9 @@ func (p *procFuncGetEntityGetI32) Write(seqId int32, result thrift.WritableStruc
     return err
 }
 
-func (p *procFuncGetEntityGetI32) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncGetEntityGetI32) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespGetEntityGetI32()
-    retval, err := p.handler.GetI32()
+    retval, err := p.handler.GetI32(ctx)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetI32: " + err.Error(), err)
         return x, x
@@ -4445,7 +4445,7 @@ type procFuncGetEntityGetI64 struct {
     handler GetEntity
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncGetEntityGetI64{}
+var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetI64{}
 
 func (p *procFuncGetEntityGetI64) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetI64()
@@ -4479,9 +4479,9 @@ func (p *procFuncGetEntityGetI64) Write(seqId int32, result thrift.WritableStruc
     return err
 }
 
-func (p *procFuncGetEntityGetI64) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncGetEntityGetI64) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespGetEntityGetI64()
-    retval, err := p.handler.GetI64()
+    retval, err := p.handler.GetI64(ctx)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetI64: " + err.Error(), err)
         return x, x
@@ -4496,7 +4496,7 @@ type procFuncGetEntityGetDouble struct {
     handler GetEntity
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncGetEntityGetDouble{}
+var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetDouble{}
 
 func (p *procFuncGetEntityGetDouble) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetDouble()
@@ -4530,9 +4530,9 @@ func (p *procFuncGetEntityGetDouble) Write(seqId int32, result thrift.WritableSt
     return err
 }
 
-func (p *procFuncGetEntityGetDouble) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncGetEntityGetDouble) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespGetEntityGetDouble()
-    retval, err := p.handler.GetDouble()
+    retval, err := p.handler.GetDouble(ctx)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetDouble: " + err.Error(), err)
         return x, x
@@ -4547,7 +4547,7 @@ type procFuncGetEntityGetString struct {
     handler GetEntity
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncGetEntityGetString{}
+var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetString{}
 
 func (p *procFuncGetEntityGetString) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetString()
@@ -4581,9 +4581,9 @@ func (p *procFuncGetEntityGetString) Write(seqId int32, result thrift.WritableSt
     return err
 }
 
-func (p *procFuncGetEntityGetString) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncGetEntityGetString) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespGetEntityGetString()
-    retval, err := p.handler.GetString()
+    retval, err := p.handler.GetString(ctx)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetString: " + err.Error(), err)
         return x, x
@@ -4598,7 +4598,7 @@ type procFuncGetEntityGetBinary struct {
     handler GetEntity
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncGetEntityGetBinary{}
+var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetBinary{}
 
 func (p *procFuncGetEntityGetBinary) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetBinary()
@@ -4632,9 +4632,9 @@ func (p *procFuncGetEntityGetBinary) Write(seqId int32, result thrift.WritableSt
     return err
 }
 
-func (p *procFuncGetEntityGetBinary) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncGetEntityGetBinary) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespGetEntityGetBinary()
-    retval, err := p.handler.GetBinary()
+    retval, err := p.handler.GetBinary(ctx)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetBinary: " + err.Error(), err)
         return x, x
@@ -4649,7 +4649,7 @@ type procFuncGetEntityGetMap struct {
     handler GetEntity
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncGetEntityGetMap{}
+var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetMap{}
 
 func (p *procFuncGetEntityGetMap) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetMap()
@@ -4683,9 +4683,9 @@ func (p *procFuncGetEntityGetMap) Write(seqId int32, result thrift.WritableStruc
     return err
 }
 
-func (p *procFuncGetEntityGetMap) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncGetEntityGetMap) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespGetEntityGetMap()
-    retval, err := p.handler.GetMap()
+    retval, err := p.handler.GetMap(ctx)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetMap: " + err.Error(), err)
         return x, x
@@ -4700,7 +4700,7 @@ type procFuncGetEntityGetSet struct {
     handler GetEntity
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncGetEntityGetSet{}
+var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetSet{}
 
 func (p *procFuncGetEntityGetSet) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetSet()
@@ -4734,9 +4734,9 @@ func (p *procFuncGetEntityGetSet) Write(seqId int32, result thrift.WritableStruc
     return err
 }
 
-func (p *procFuncGetEntityGetSet) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncGetEntityGetSet) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespGetEntityGetSet()
-    retval, err := p.handler.GetSet()
+    retval, err := p.handler.GetSet(ctx)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetSet: " + err.Error(), err)
         return x, x
@@ -4751,7 +4751,7 @@ type procFuncGetEntityGetList struct {
     handler GetEntity
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncGetEntityGetList{}
+var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetList{}
 
 func (p *procFuncGetEntityGetList) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetList()
@@ -4785,9 +4785,9 @@ func (p *procFuncGetEntityGetList) Write(seqId int32, result thrift.WritableStru
     return err
 }
 
-func (p *procFuncGetEntityGetList) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncGetEntityGetList) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespGetEntityGetList()
-    retval, err := p.handler.GetList()
+    retval, err := p.handler.GetList(ctx)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetList: " + err.Error(), err)
         return x, x
@@ -4802,7 +4802,7 @@ type procFuncGetEntityGetLegacyStuff struct {
     handler GetEntity
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncGetEntityGetLegacyStuff{}
+var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetLegacyStuff{}
 
 func (p *procFuncGetEntityGetLegacyStuff) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqGetEntityGetLegacyStuff()
@@ -4836,10 +4836,10 @@ func (p *procFuncGetEntityGetLegacyStuff) Write(seqId int32, result thrift.Writa
     return err
 }
 
-func (p *procFuncGetEntityGetLegacyStuff) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncGetEntityGetLegacyStuff) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqGetEntityGetLegacyStuff)
     result := newRespGetEntityGetLegacyStuff()
-    retval, err := p.handler.GetLegacyStuff(args.NumPos, args.NumNeg1, args.NumNeg2)
+    retval, err := p.handler.GetLegacyStuff(ctx, args.NumPos, args.NumNeg1, args.NumNeg2)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetLegacyStuff: " + err.Error(), err)
         return x, x

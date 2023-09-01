@@ -38,8 +38,6 @@ struct go_codegen_data {
   // package name override (otherwise inferred from thrift file by default)
   std::string package_override;
 
-  // whether to use ctx.Context in processor code
-  bool use_context = false;
   // whether to generate code compatible with the old Go generator
   // (to make the migration easier)
   bool compat = true;
@@ -546,9 +544,6 @@ class mstch_go_service : public mstch_service {
         this,
         {
             {"service:go_name", &mstch_go_service::go_name},
-            {"service:use_context?", &mstch_go_service::is_use_context_enabled},
-            {"service:proc_func_interface",
-             &mstch_go_service::proc_func_interface},
             {"service:go_qualified_name", &mstch_go_service::go_qualified_name},
             {"service:go_package_alias_prefix",
              &mstch_go_service::go_package_alias_prefix_},
@@ -557,14 +552,6 @@ class mstch_go_service : public mstch_service {
   }
 
   mstch::node go_name() { return go::munge_ident(service_->name()); }
-  mstch::node is_use_context_enabled() { return data_.use_context; }
-  mstch::node proc_func_interface() {
-    if (data_.use_context) {
-      return std::string("thrift.ProcessorFunctionContext");
-    } else {
-      return std::string("thrift.ProcessorFunction");
-    }
-  }
   mstch::node go_qualified_name() {
     auto prefix = go_package_alias_prefix(service_->program(), data_);
     auto name = go::munge_ident(service_->name());
@@ -720,7 +707,6 @@ void t_mstch_go_generator::generate_program() {
   if (auto package_override = get_option("package")) {
     data_.package_override = *package_override;
   }
-  data_.use_context = has_option("use_context");
 
   const auto* program = get_program();
   const auto& prog = cached_program(program);

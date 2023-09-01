@@ -1996,14 +1996,14 @@ func (x *respNestedContainersTurtles) String() string {
 
 
 type NestedContainersProcessor struct {
-    processorMap       map[string]thrift.ProcessorFunction
+    processorMap       map[string]thrift.ProcessorFunctionContext
     functionServiceMap map[string]string
     handler            NestedContainers
 }
 // Compile time interface enforcer
-var _ thrift.Processor = &NestedContainersProcessor{}
+var _ thrift.ProcessorContext = &NestedContainersProcessor{}
 
-func (p *NestedContainersProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
+func (p *NestedContainersProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
     p.processorMap[key] = processor
 }
 
@@ -2011,14 +2011,14 @@ func (p *NestedContainersProcessor) AddToFunctionServiceMap(key, service string)
     p.functionServiceMap[key] = service
 }
 
-func (p *NestedContainersProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction, err error) {
+func (p *NestedContainersProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext, err error) {
     if processor, ok := p.processorMap[key]; ok {
         return processor, nil
     }
     return nil, nil
 }
 
-func (p *NestedContainersProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
+func (p *NestedContainersProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {
     return p.processorMap
 }
 
@@ -2029,7 +2029,7 @@ func (p *NestedContainersProcessor) FunctionServiceMap() map[string]string {
 func NewNestedContainersProcessor(handler NestedContainers) *NestedContainersProcessor {
     p := &NestedContainersProcessor{
         handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunction),
+        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
         functionServiceMap: make(map[string]string),
     }
     p.AddToProcessorMap("mapList", &procFuncNestedContainersMapList{handler: handler})
@@ -2051,7 +2051,7 @@ type procFuncNestedContainersMapList struct {
     handler NestedContainers
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncNestedContainersMapList{}
+var _ thrift.ProcessorFunctionContext = &procFuncNestedContainersMapList{}
 
 func (p *procFuncNestedContainersMapList) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqNestedContainersMapList()
@@ -2085,10 +2085,10 @@ func (p *procFuncNestedContainersMapList) Write(seqId int32, result thrift.Writa
     return err
 }
 
-func (p *procFuncNestedContainersMapList) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncNestedContainersMapList) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqNestedContainersMapList)
     result := newRespNestedContainersMapList()
-    err := p.handler.MapList(args.Foo)
+    err := p.handler.MapList(ctx, args.Foo)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing MapList: " + err.Error(), err)
         return x, x
@@ -2102,7 +2102,7 @@ type procFuncNestedContainersMapSet struct {
     handler NestedContainers
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncNestedContainersMapSet{}
+var _ thrift.ProcessorFunctionContext = &procFuncNestedContainersMapSet{}
 
 func (p *procFuncNestedContainersMapSet) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqNestedContainersMapSet()
@@ -2136,10 +2136,10 @@ func (p *procFuncNestedContainersMapSet) Write(seqId int32, result thrift.Writab
     return err
 }
 
-func (p *procFuncNestedContainersMapSet) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncNestedContainersMapSet) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqNestedContainersMapSet)
     result := newRespNestedContainersMapSet()
-    err := p.handler.MapSet(args.Foo)
+    err := p.handler.MapSet(ctx, args.Foo)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing MapSet: " + err.Error(), err)
         return x, x
@@ -2153,7 +2153,7 @@ type procFuncNestedContainersListMap struct {
     handler NestedContainers
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncNestedContainersListMap{}
+var _ thrift.ProcessorFunctionContext = &procFuncNestedContainersListMap{}
 
 func (p *procFuncNestedContainersListMap) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqNestedContainersListMap()
@@ -2187,10 +2187,10 @@ func (p *procFuncNestedContainersListMap) Write(seqId int32, result thrift.Writa
     return err
 }
 
-func (p *procFuncNestedContainersListMap) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncNestedContainersListMap) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqNestedContainersListMap)
     result := newRespNestedContainersListMap()
-    err := p.handler.ListMap(args.Foo)
+    err := p.handler.ListMap(ctx, args.Foo)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing ListMap: " + err.Error(), err)
         return x, x
@@ -2204,7 +2204,7 @@ type procFuncNestedContainersListSet struct {
     handler NestedContainers
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncNestedContainersListSet{}
+var _ thrift.ProcessorFunctionContext = &procFuncNestedContainersListSet{}
 
 func (p *procFuncNestedContainersListSet) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqNestedContainersListSet()
@@ -2238,10 +2238,10 @@ func (p *procFuncNestedContainersListSet) Write(seqId int32, result thrift.Writa
     return err
 }
 
-func (p *procFuncNestedContainersListSet) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncNestedContainersListSet) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqNestedContainersListSet)
     result := newRespNestedContainersListSet()
-    err := p.handler.ListSet(args.Foo)
+    err := p.handler.ListSet(ctx, args.Foo)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing ListSet: " + err.Error(), err)
         return x, x
@@ -2255,7 +2255,7 @@ type procFuncNestedContainersTurtles struct {
     handler NestedContainers
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncNestedContainersTurtles{}
+var _ thrift.ProcessorFunctionContext = &procFuncNestedContainersTurtles{}
 
 func (p *procFuncNestedContainersTurtles) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqNestedContainersTurtles()
@@ -2289,10 +2289,10 @@ func (p *procFuncNestedContainersTurtles) Write(seqId int32, result thrift.Writa
     return err
 }
 
-func (p *procFuncNestedContainersTurtles) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncNestedContainersTurtles) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqNestedContainersTurtles)
     result := newRespNestedContainersTurtles()
-    err := p.handler.Turtles(args.Foo)
+    err := p.handler.Turtles(ctx, args.Foo)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Turtles: " + err.Error(), err)
         return x, x

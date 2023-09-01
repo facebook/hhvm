@@ -318,14 +318,14 @@ func (x *respFooServiceSimpleRPC) String() string {
 
 
 type FooServiceProcessor struct {
-    processorMap       map[string]thrift.ProcessorFunction
+    processorMap       map[string]thrift.ProcessorFunctionContext
     functionServiceMap map[string]string
     handler            FooService
 }
 // Compile time interface enforcer
-var _ thrift.Processor = &FooServiceProcessor{}
+var _ thrift.ProcessorContext = &FooServiceProcessor{}
 
-func (p *FooServiceProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
+func (p *FooServiceProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
     p.processorMap[key] = processor
 }
 
@@ -333,14 +333,14 @@ func (p *FooServiceProcessor) AddToFunctionServiceMap(key, service string) {
     p.functionServiceMap[key] = service
 }
 
-func (p *FooServiceProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction, err error) {
+func (p *FooServiceProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext, err error) {
     if processor, ok := p.processorMap[key]; ok {
         return processor, nil
     }
     return nil, nil
 }
 
-func (p *FooServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
+func (p *FooServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {
     return p.processorMap
 }
 
@@ -351,7 +351,7 @@ func (p *FooServiceProcessor) FunctionServiceMap() map[string]string {
 func NewFooServiceProcessor(handler FooService) *FooServiceProcessor {
     p := &FooServiceProcessor{
         handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunction),
+        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
         functionServiceMap: make(map[string]string),
     }
     p.AddToProcessorMap("simple_rpc", &procFuncFooServiceSimpleRPC{handler: handler})
@@ -365,7 +365,7 @@ type procFuncFooServiceSimpleRPC struct {
     handler FooService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncFooServiceSimpleRPC{}
+var _ thrift.ProcessorFunctionContext = &procFuncFooServiceSimpleRPC{}
 
 func (p *procFuncFooServiceSimpleRPC) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqFooServiceSimpleRPC()
@@ -399,9 +399,9 @@ func (p *procFuncFooServiceSimpleRPC) Write(seqId int32, result thrift.WritableS
     return err
 }
 
-func (p *procFuncFooServiceSimpleRPC) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncFooServiceSimpleRPC) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespFooServiceSimpleRPC()
-    err := p.handler.SimpleRPC()
+    err := p.handler.SimpleRPC(ctx)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing SimpleRPC: " + err.Error(), err)
         return x, x
@@ -874,14 +874,14 @@ func (x *respFB303ServiceSimpleRPC) String() string {
 
 
 type FB303ServiceProcessor struct {
-    processorMap       map[string]thrift.ProcessorFunction
+    processorMap       map[string]thrift.ProcessorFunctionContext
     functionServiceMap map[string]string
     handler            FB303Service
 }
 // Compile time interface enforcer
-var _ thrift.Processor = &FB303ServiceProcessor{}
+var _ thrift.ProcessorContext = &FB303ServiceProcessor{}
 
-func (p *FB303ServiceProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
+func (p *FB303ServiceProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
     p.processorMap[key] = processor
 }
 
@@ -889,14 +889,14 @@ func (p *FB303ServiceProcessor) AddToFunctionServiceMap(key, service string) {
     p.functionServiceMap[key] = service
 }
 
-func (p *FB303ServiceProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction, err error) {
+func (p *FB303ServiceProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext, err error) {
     if processor, ok := p.processorMap[key]; ok {
         return processor, nil
     }
     return nil, nil
 }
 
-func (p *FB303ServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
+func (p *FB303ServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {
     return p.processorMap
 }
 
@@ -907,7 +907,7 @@ func (p *FB303ServiceProcessor) FunctionServiceMap() map[string]string {
 func NewFB303ServiceProcessor(handler FB303Service) *FB303ServiceProcessor {
     p := &FB303ServiceProcessor{
         handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunction),
+        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
         functionServiceMap: make(map[string]string),
     }
     p.AddToProcessorMap("simple_rpc", &procFuncFB303ServiceSimpleRPC{handler: handler})
@@ -921,7 +921,7 @@ type procFuncFB303ServiceSimpleRPC struct {
     handler FB303Service
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncFB303ServiceSimpleRPC{}
+var _ thrift.ProcessorFunctionContext = &procFuncFB303ServiceSimpleRPC{}
 
 func (p *procFuncFB303ServiceSimpleRPC) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqFB303ServiceSimpleRPC()
@@ -955,10 +955,10 @@ func (p *procFuncFB303ServiceSimpleRPC) Write(seqId int32, result thrift.Writabl
     return err
 }
 
-func (p *procFuncFB303ServiceSimpleRPC) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncFB303ServiceSimpleRPC) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqFB303ServiceSimpleRPC)
     result := newRespFB303ServiceSimpleRPC()
-    retval, err := p.handler.SimpleRPC(args.IntParameter)
+    retval, err := p.handler.SimpleRPC(ctx, args.IntParameter)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing SimpleRPC: " + err.Error(), err)
         return x, x
@@ -3952,14 +3952,14 @@ func (x *respMyServiceRpcSkippedCodegen) String() string {
 
 
 type MyServiceProcessor struct {
-    processorMap       map[string]thrift.ProcessorFunction
+    processorMap       map[string]thrift.ProcessorFunctionContext
     functionServiceMap map[string]string
     handler            MyService
 }
 // Compile time interface enforcer
-var _ thrift.Processor = &MyServiceProcessor{}
+var _ thrift.ProcessorContext = &MyServiceProcessor{}
 
-func (p *MyServiceProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
+func (p *MyServiceProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
     p.processorMap[key] = processor
 }
 
@@ -3967,14 +3967,14 @@ func (p *MyServiceProcessor) AddToFunctionServiceMap(key, service string) {
     p.functionServiceMap[key] = service
 }
 
-func (p *MyServiceProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction, err error) {
+func (p *MyServiceProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext, err error) {
     if processor, ok := p.processorMap[key]; ok {
         return processor, nil
     }
     return nil, nil
 }
 
-func (p *MyServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
+func (p *MyServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {
     return p.processorMap
 }
 
@@ -3985,7 +3985,7 @@ func (p *MyServiceProcessor) FunctionServiceMap() map[string]string {
 func NewMyServiceProcessor(handler MyService) *MyServiceProcessor {
     p := &MyServiceProcessor{
         handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunction),
+        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
         functionServiceMap: make(map[string]string),
     }
     p.AddToProcessorMap("ping", &procFuncMyServicePing{handler: handler})
@@ -4017,7 +4017,7 @@ type procFuncMyServicePing struct {
     handler MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncMyServicePing{}
+var _ thrift.ProcessorFunctionContext = &procFuncMyServicePing{}
 
 func (p *procFuncMyServicePing) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqMyServicePing()
@@ -4051,9 +4051,9 @@ func (p *procFuncMyServicePing) Write(seqId int32, result thrift.WritableStruct,
     return err
 }
 
-func (p *procFuncMyServicePing) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncMyServicePing) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespMyServicePing()
-    err := p.handler.Ping()
+    err := p.handler.Ping(ctx)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Ping: " + err.Error(), err)
         return x, x
@@ -4067,7 +4067,7 @@ type procFuncMyServiceGetRandomData struct {
     handler MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncMyServiceGetRandomData{}
+var _ thrift.ProcessorFunctionContext = &procFuncMyServiceGetRandomData{}
 
 func (p *procFuncMyServiceGetRandomData) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqMyServiceGetRandomData()
@@ -4101,9 +4101,9 @@ func (p *procFuncMyServiceGetRandomData) Write(seqId int32, result thrift.Writab
     return err
 }
 
-func (p *procFuncMyServiceGetRandomData) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncMyServiceGetRandomData) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespMyServiceGetRandomData()
-    retval, err := p.handler.GetRandomData()
+    retval, err := p.handler.GetRandomData(ctx)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetRandomData: " + err.Error(), err)
         return x, x
@@ -4118,7 +4118,7 @@ type procFuncMyServiceSink struct {
     handler MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncMyServiceSink{}
+var _ thrift.ProcessorFunctionContext = &procFuncMyServiceSink{}
 
 func (p *procFuncMyServiceSink) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqMyServiceSink()
@@ -4152,10 +4152,10 @@ func (p *procFuncMyServiceSink) Write(seqId int32, result thrift.WritableStruct,
     return err
 }
 
-func (p *procFuncMyServiceSink) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncMyServiceSink) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqMyServiceSink)
     result := newRespMyServiceSink()
-    err := p.handler.Sink(args.Sink)
+    err := p.handler.Sink(ctx, args.Sink)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Sink: " + err.Error(), err)
         return x, x
@@ -4169,7 +4169,7 @@ type procFuncMyServicePutDataById struct {
     handler MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncMyServicePutDataById{}
+var _ thrift.ProcessorFunctionContext = &procFuncMyServicePutDataById{}
 
 func (p *procFuncMyServicePutDataById) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqMyServicePutDataById()
@@ -4203,10 +4203,10 @@ func (p *procFuncMyServicePutDataById) Write(seqId int32, result thrift.Writable
     return err
 }
 
-func (p *procFuncMyServicePutDataById) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncMyServicePutDataById) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqMyServicePutDataById)
     result := newRespMyServicePutDataById()
-    err := p.handler.PutDataById(args.Id, args.Data)
+    err := p.handler.PutDataById(ctx, args.Id, args.Data)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing PutDataById: " + err.Error(), err)
         return x, x
@@ -4220,7 +4220,7 @@ type procFuncMyServiceHasDataById struct {
     handler MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncMyServiceHasDataById{}
+var _ thrift.ProcessorFunctionContext = &procFuncMyServiceHasDataById{}
 
 func (p *procFuncMyServiceHasDataById) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqMyServiceHasDataById()
@@ -4254,10 +4254,10 @@ func (p *procFuncMyServiceHasDataById) Write(seqId int32, result thrift.Writable
     return err
 }
 
-func (p *procFuncMyServiceHasDataById) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncMyServiceHasDataById) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqMyServiceHasDataById)
     result := newRespMyServiceHasDataById()
-    retval, err := p.handler.HasDataById(args.Id)
+    retval, err := p.handler.HasDataById(ctx, args.Id)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing HasDataById: " + err.Error(), err)
         return x, x
@@ -4272,7 +4272,7 @@ type procFuncMyServiceGetDataById struct {
     handler MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncMyServiceGetDataById{}
+var _ thrift.ProcessorFunctionContext = &procFuncMyServiceGetDataById{}
 
 func (p *procFuncMyServiceGetDataById) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqMyServiceGetDataById()
@@ -4306,10 +4306,10 @@ func (p *procFuncMyServiceGetDataById) Write(seqId int32, result thrift.Writable
     return err
 }
 
-func (p *procFuncMyServiceGetDataById) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncMyServiceGetDataById) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqMyServiceGetDataById)
     result := newRespMyServiceGetDataById()
-    retval, err := p.handler.GetDataById(args.Id)
+    retval, err := p.handler.GetDataById(ctx, args.Id)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetDataById: " + err.Error(), err)
         return x, x
@@ -4324,7 +4324,7 @@ type procFuncMyServiceDeleteDataById struct {
     handler MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncMyServiceDeleteDataById{}
+var _ thrift.ProcessorFunctionContext = &procFuncMyServiceDeleteDataById{}
 
 func (p *procFuncMyServiceDeleteDataById) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqMyServiceDeleteDataById()
@@ -4358,10 +4358,10 @@ func (p *procFuncMyServiceDeleteDataById) Write(seqId int32, result thrift.Writa
     return err
 }
 
-func (p *procFuncMyServiceDeleteDataById) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncMyServiceDeleteDataById) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqMyServiceDeleteDataById)
     result := newRespMyServiceDeleteDataById()
-    err := p.handler.DeleteDataById(args.Id)
+    err := p.handler.DeleteDataById(ctx, args.Id)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing DeleteDataById: " + err.Error(), err)
         return x, x
@@ -4375,7 +4375,7 @@ type procFuncMyServiceLobDataById struct {
     handler MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncMyServiceLobDataById{}
+var _ thrift.ProcessorFunctionContext = &procFuncMyServiceLobDataById{}
 
 func (p *procFuncMyServiceLobDataById) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqMyServiceLobDataById()
@@ -4409,9 +4409,9 @@ func (p *procFuncMyServiceLobDataById) Write(seqId int32, result thrift.Writable
     return err
 }
 
-func (p *procFuncMyServiceLobDataById) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncMyServiceLobDataById) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqMyServiceLobDataById)
-    err := p.handler.LobDataById(args.Id, args.Data)
+    err := p.handler.LobDataById(ctx, args.Id, args.Data)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing LobDataById: " + err.Error(), err)
         return x, x
@@ -4425,7 +4425,7 @@ type procFuncMyServiceInvalidReturnForHack struct {
     handler MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncMyServiceInvalidReturnForHack{}
+var _ thrift.ProcessorFunctionContext = &procFuncMyServiceInvalidReturnForHack{}
 
 func (p *procFuncMyServiceInvalidReturnForHack) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqMyServiceInvalidReturnForHack()
@@ -4459,9 +4459,9 @@ func (p *procFuncMyServiceInvalidReturnForHack) Write(seqId int32, result thrift
     return err
 }
 
-func (p *procFuncMyServiceInvalidReturnForHack) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncMyServiceInvalidReturnForHack) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespMyServiceInvalidReturnForHack()
-    retval, err := p.handler.InvalidReturnForHack()
+    retval, err := p.handler.InvalidReturnForHack(ctx)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing InvalidReturnForHack: " + err.Error(), err)
         return x, x
@@ -4476,7 +4476,7 @@ type procFuncMyServiceRpcSkippedCodegen struct {
     handler MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncMyServiceRpcSkippedCodegen{}
+var _ thrift.ProcessorFunctionContext = &procFuncMyServiceRpcSkippedCodegen{}
 
 func (p *procFuncMyServiceRpcSkippedCodegen) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqMyServiceRpcSkippedCodegen()
@@ -4510,9 +4510,9 @@ func (p *procFuncMyServiceRpcSkippedCodegen) Write(seqId int32, result thrift.Wr
     return err
 }
 
-func (p *procFuncMyServiceRpcSkippedCodegen) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncMyServiceRpcSkippedCodegen) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespMyServiceRpcSkippedCodegen()
-    err := p.handler.RpcSkippedCodegen()
+    err := p.handler.RpcSkippedCodegen(ctx)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing RpcSkippedCodegen: " + err.Error(), err)
         return x, x
@@ -5327,14 +5327,14 @@ func (x *respDbMixedStackArgumentsGetDataByKey1) String() string {
 
 
 type DbMixedStackArgumentsProcessor struct {
-    processorMap       map[string]thrift.ProcessorFunction
+    processorMap       map[string]thrift.ProcessorFunctionContext
     functionServiceMap map[string]string
     handler            DbMixedStackArguments
 }
 // Compile time interface enforcer
-var _ thrift.Processor = &DbMixedStackArgumentsProcessor{}
+var _ thrift.ProcessorContext = &DbMixedStackArgumentsProcessor{}
 
-func (p *DbMixedStackArgumentsProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
+func (p *DbMixedStackArgumentsProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
     p.processorMap[key] = processor
 }
 
@@ -5342,14 +5342,14 @@ func (p *DbMixedStackArgumentsProcessor) AddToFunctionServiceMap(key, service st
     p.functionServiceMap[key] = service
 }
 
-func (p *DbMixedStackArgumentsProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction, err error) {
+func (p *DbMixedStackArgumentsProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext, err error) {
     if processor, ok := p.processorMap[key]; ok {
         return processor, nil
     }
     return nil, nil
 }
 
-func (p *DbMixedStackArgumentsProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
+func (p *DbMixedStackArgumentsProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {
     return p.processorMap
 }
 
@@ -5360,7 +5360,7 @@ func (p *DbMixedStackArgumentsProcessor) FunctionServiceMap() map[string]string 
 func NewDbMixedStackArgumentsProcessor(handler DbMixedStackArguments) *DbMixedStackArgumentsProcessor {
     p := &DbMixedStackArgumentsProcessor{
         handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunction),
+        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
         functionServiceMap: make(map[string]string),
     }
     p.AddToProcessorMap("getDataByKey0", &procFuncDbMixedStackArgumentsGetDataByKey0{handler: handler})
@@ -5376,7 +5376,7 @@ type procFuncDbMixedStackArgumentsGetDataByKey0 struct {
     handler DbMixedStackArguments
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncDbMixedStackArgumentsGetDataByKey0{}
+var _ thrift.ProcessorFunctionContext = &procFuncDbMixedStackArgumentsGetDataByKey0{}
 
 func (p *procFuncDbMixedStackArgumentsGetDataByKey0) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqDbMixedStackArgumentsGetDataByKey0()
@@ -5410,10 +5410,10 @@ func (p *procFuncDbMixedStackArgumentsGetDataByKey0) Write(seqId int32, result t
     return err
 }
 
-func (p *procFuncDbMixedStackArgumentsGetDataByKey0) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncDbMixedStackArgumentsGetDataByKey0) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqDbMixedStackArgumentsGetDataByKey0)
     result := newRespDbMixedStackArgumentsGetDataByKey0()
-    retval, err := p.handler.GetDataByKey0(args.Key)
+    retval, err := p.handler.GetDataByKey0(ctx, args.Key)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetDataByKey0: " + err.Error(), err)
         return x, x
@@ -5428,7 +5428,7 @@ type procFuncDbMixedStackArgumentsGetDataByKey1 struct {
     handler DbMixedStackArguments
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncDbMixedStackArgumentsGetDataByKey1{}
+var _ thrift.ProcessorFunctionContext = &procFuncDbMixedStackArgumentsGetDataByKey1{}
 
 func (p *procFuncDbMixedStackArgumentsGetDataByKey1) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqDbMixedStackArgumentsGetDataByKey1()
@@ -5462,10 +5462,10 @@ func (p *procFuncDbMixedStackArgumentsGetDataByKey1) Write(seqId int32, result t
     return err
 }
 
-func (p *procFuncDbMixedStackArgumentsGetDataByKey1) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncDbMixedStackArgumentsGetDataByKey1) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqDbMixedStackArgumentsGetDataByKey1)
     result := newRespDbMixedStackArgumentsGetDataByKey1()
-    retval, err := p.handler.GetDataByKey1(args.Key)
+    retval, err := p.handler.GetDataByKey1(ctx, args.Key)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetDataByKey1: " + err.Error(), err)
         return x, x

@@ -28,16 +28,16 @@ type {{service:go_name}}Processor struct {
     {{/service:extends}}
     {{/service:extends?}}
     {{^service:extends?}}
-    processorMap       map[string]{{service:proc_func_interface}}
+    processorMap       map[string]thrift.ProcessorFunctionContext
     functionServiceMap map[string]string
     handler            {{service:go_name}}
     {{/service:extends?}}
 }
 // Compile time interface enforcer
-var _ thrift.Processor{{#service:use_context?}}Context{{/service:use_context?}} = &{{service:go_name}}Processor{}
+var _ thrift.ProcessorContext = &{{service:go_name}}Processor{}
 
 {{^service:extends?}}
-func (p *{{service:go_name}}Processor) AddToProcessorMap(key string, processor {{service:proc_func_interface}}) {
+func (p *{{service:go_name}}Processor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
     p.processorMap[key] = processor
 }
 
@@ -45,15 +45,15 @@ func (p *{{service:go_name}}Processor) AddToFunctionServiceMap(key, service stri
     p.functionServiceMap[key] = service
 }
 
-func (p *{{service:go_name}}Processor) GetProcessorFunction{{#service:use_context?}}Context{{/service:use_context?}}{{!
-  }}(key string) (processor {{service:proc_func_interface}}, err error) {
+func (p *{{service:go_name}}Processor) GetProcessorFunctionContext{{!
+  }}(key string) (processor thrift.ProcessorFunctionContext, err error) {
     if processor, ok := p.processorMap[key]; ok {
         return processor, nil
     }
     return nil, nil
 }
 
-func (p *{{service:go_name}}Processor) ProcessorMap() map[string]{{service:proc_func_interface}} {
+func (p *{{service:go_name}}Processor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {
     return p.processorMap
 }
 
@@ -71,7 +71,7 @@ func New{{service:go_name}}Processor(handler {{service:go_name}}) *{{service:go_
     {{/service:extends?}}
     {{^service:extends?}}
         handler:            handler,
-        processorMap:       make(map[string]{{service:proc_func_interface}}),
+        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
         functionServiceMap: make(map[string]string),
     {{/service:extends?}}
     }
@@ -96,7 +96,7 @@ type {{> svc/proc_func_name}} struct {
     handler {{service:go_name}}
 }
 // Compile time interface enforcer
-var _ {{service:proc_func_interface}} = &{{> svc/proc_func_name}}{}
+var _ thrift.ProcessorFunctionContext = &{{> svc/proc_func_name}}{}
 
 func (p *{{> svc/proc_func_name}}) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReq{{service:go_name}}{{function:go_name}}()
@@ -138,9 +138,7 @@ func (p *{{> svc/proc_func_name}}) Write(seqId int32, result thrift.WritableStru
     return err
 }
 
-func (p *{{> svc/proc_func_name}}) {{!
-  }}Run{{#service:use_context?}}Context{{/service:use_context?}}{{!
-  }}({{#service:use_context?}}ctx context.Context, {{/service:use_context?}}reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *{{> svc/proc_func_name}}) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     {{#function:args?}}
     args := reqStruct.(*req{{service:go_name}}{{function:go_name}})
     {{/function:args?}}
@@ -148,7 +146,7 @@ func (p *{{> svc/proc_func_name}}) {{!
     result := newResp{{service:go_name}}{{function:go_name}}()
     {{/function:oneway?}}
     {{^function:void?}}retval, {{/function:void?}}err := p.handler.{{function:go_name}}({{!
-        }}{{#service:use_context?}}ctx{{function:comma}}{{/service:use_context?}}{{!
+        }}ctx{{function:comma}}{{!
         }}{{#function:args}}{{!
           }}args.{{field:go_name}}{{!
           }}{{^last?}}, {{/last?}}{{!

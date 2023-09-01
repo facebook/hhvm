@@ -931,14 +931,14 @@ func (x *respSomeServiceBinaryKeyedMap) String() string {
 
 
 type SomeServiceProcessor struct {
-    processorMap       map[string]thrift.ProcessorFunction
+    processorMap       map[string]thrift.ProcessorFunctionContext
     functionServiceMap map[string]string
     handler            SomeService
 }
 // Compile time interface enforcer
-var _ thrift.Processor = &SomeServiceProcessor{}
+var _ thrift.ProcessorContext = &SomeServiceProcessor{}
 
-func (p *SomeServiceProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
+func (p *SomeServiceProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
     p.processorMap[key] = processor
 }
 
@@ -946,14 +946,14 @@ func (p *SomeServiceProcessor) AddToFunctionServiceMap(key, service string) {
     p.functionServiceMap[key] = service
 }
 
-func (p *SomeServiceProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction, err error) {
+func (p *SomeServiceProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext, err error) {
     if processor, ok := p.processorMap[key]; ok {
         return processor, nil
     }
     return nil, nil
 }
 
-func (p *SomeServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
+func (p *SomeServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {
     return p.processorMap
 }
 
@@ -964,7 +964,7 @@ func (p *SomeServiceProcessor) FunctionServiceMap() map[string]string {
 func NewSomeServiceProcessor(handler SomeService) *SomeServiceProcessor {
     p := &SomeServiceProcessor{
         handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunction),
+        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
         functionServiceMap: make(map[string]string),
     }
     p.AddToProcessorMap("bounce_map", &procFuncSomeServiceBounceMap{handler: handler})
@@ -980,7 +980,7 @@ type procFuncSomeServiceBounceMap struct {
     handler SomeService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncSomeServiceBounceMap{}
+var _ thrift.ProcessorFunctionContext = &procFuncSomeServiceBounceMap{}
 
 func (p *procFuncSomeServiceBounceMap) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqSomeServiceBounceMap()
@@ -1014,10 +1014,10 @@ func (p *procFuncSomeServiceBounceMap) Write(seqId int32, result thrift.Writable
     return err
 }
 
-func (p *procFuncSomeServiceBounceMap) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncSomeServiceBounceMap) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqSomeServiceBounceMap)
     result := newRespSomeServiceBounceMap()
-    retval, err := p.handler.BounceMap(args.M)
+    retval, err := p.handler.BounceMap(ctx, args.M)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing BounceMap: " + err.Error(), err)
         return x, x
@@ -1032,7 +1032,7 @@ type procFuncSomeServiceBinaryKeyedMap struct {
     handler SomeService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncSomeServiceBinaryKeyedMap{}
+var _ thrift.ProcessorFunctionContext = &procFuncSomeServiceBinaryKeyedMap{}
 
 func (p *procFuncSomeServiceBinaryKeyedMap) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqSomeServiceBinaryKeyedMap()
@@ -1066,10 +1066,10 @@ func (p *procFuncSomeServiceBinaryKeyedMap) Write(seqId int32, result thrift.Wri
     return err
 }
 
-func (p *procFuncSomeServiceBinaryKeyedMap) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncSomeServiceBinaryKeyedMap) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqSomeServiceBinaryKeyedMap)
     result := newRespSomeServiceBinaryKeyedMap()
-    retval, err := p.handler.BinaryKeyedMap(args.R)
+    retval, err := p.handler.BinaryKeyedMap(ctx, args.R)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing BinaryKeyedMap: " + err.Error(), err)
         return x, x

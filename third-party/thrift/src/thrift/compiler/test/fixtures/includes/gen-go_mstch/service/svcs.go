@@ -905,14 +905,14 @@ func (x *respMyServiceHasArgDocs) String() string {
 
 
 type MyServiceProcessor struct {
-    processorMap       map[string]thrift.ProcessorFunction
+    processorMap       map[string]thrift.ProcessorFunctionContext
     functionServiceMap map[string]string
     handler            MyService
 }
 // Compile time interface enforcer
-var _ thrift.Processor = &MyServiceProcessor{}
+var _ thrift.ProcessorContext = &MyServiceProcessor{}
 
-func (p *MyServiceProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunction) {
+func (p *MyServiceProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
     p.processorMap[key] = processor
 }
 
@@ -920,14 +920,14 @@ func (p *MyServiceProcessor) AddToFunctionServiceMap(key, service string) {
     p.functionServiceMap[key] = service
 }
 
-func (p *MyServiceProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction, err error) {
+func (p *MyServiceProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext, err error) {
     if processor, ok := p.processorMap[key]; ok {
         return processor, nil
     }
     return nil, nil
 }
 
-func (p *MyServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunction {
+func (p *MyServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {
     return p.processorMap
 }
 
@@ -938,7 +938,7 @@ func (p *MyServiceProcessor) FunctionServiceMap() map[string]string {
 func NewMyServiceProcessor(handler MyService) *MyServiceProcessor {
     p := &MyServiceProcessor{
         handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunction),
+        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
         functionServiceMap: make(map[string]string),
     }
     p.AddToProcessorMap("query", &procFuncMyServiceQuery{handler: handler})
@@ -954,7 +954,7 @@ type procFuncMyServiceQuery struct {
     handler MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncMyServiceQuery{}
+var _ thrift.ProcessorFunctionContext = &procFuncMyServiceQuery{}
 
 func (p *procFuncMyServiceQuery) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqMyServiceQuery()
@@ -988,10 +988,10 @@ func (p *procFuncMyServiceQuery) Write(seqId int32, result thrift.WritableStruct
     return err
 }
 
-func (p *procFuncMyServiceQuery) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncMyServiceQuery) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqMyServiceQuery)
     result := newRespMyServiceQuery()
-    err := p.handler.Query(args.S, args.I)
+    err := p.handler.Query(ctx, args.S, args.I)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Query: " + err.Error(), err)
         return x, x
@@ -1005,7 +1005,7 @@ type procFuncMyServiceHasArgDocs struct {
     handler MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncMyServiceHasArgDocs{}
+var _ thrift.ProcessorFunctionContext = &procFuncMyServiceHasArgDocs{}
 
 func (p *procFuncMyServiceHasArgDocs) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
     args := newReqMyServiceHasArgDocs()
@@ -1039,10 +1039,10 @@ func (p *procFuncMyServiceHasArgDocs) Write(seqId int32, result thrift.WritableS
     return err
 }
 
-func (p *procFuncMyServiceHasArgDocs) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+func (p *procFuncMyServiceHasArgDocs) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqMyServiceHasArgDocs)
     result := newRespMyServiceHasArgDocs()
-    err := p.handler.HasArgDocs(args.S, args.I)
+    err := p.handler.HasArgDocs(ctx, args.S, args.I)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing HasArgDocs: " + err.Error(), err)
         return x, x

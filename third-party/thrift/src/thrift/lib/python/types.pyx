@@ -36,6 +36,18 @@ import threading
 from thrift.python.exceptions cimport GeneratedError
 from thrift.python.serializer cimport cserialize, cdeserialize
 
+try:
+    import thrift.py3.types
+    def _is_py3_struct(obj):
+        return isinstance(obj, thrift.py3.types.Struct)
+    def _is_py3_enum(obj):
+        return isinstance(obj, thrift.py3.types.Enum)
+except ImportError:
+    def _is_py3_struct(obj):
+        return False
+    def _is_py3_enum(obj):
+        return False
+
 
 try:
     import cinder
@@ -372,7 +384,12 @@ cdef class StructTypeInfo:
     # validate and convert to format serializer may understand
     def to_internal_data(self, value not None):
         if not isinstance(value, self._class):
-            raise TypeError(f"value {value} is not a {self._class !r}, is actually of type {type(value)}.")
+            if _is_py3_struct(value):
+                value = value._to_python()
+                if not isinstance(value, self._class):
+                    raise TypeError(f"value {value} is a py3 struct of type {type(value)}, can not be converted to {self._class !r}.")
+            else:
+                raise TypeError(f"value {value} is not a {self._class !r}, is actually of type {type(value)}.")
         if isinstance(value, Struct):
             return (<Struct>value)._fbthrift_data
         if isinstance(value, GeneratedError):
@@ -400,7 +417,12 @@ cdef class EnumTypeInfo:
         if isinstance(value, BadEnum):
             return int(value)
         if not isinstance(value, self._class):
-            raise TypeError(f"value {value} is not '{self._class}', is actually of type {type(value)}.")
+            if _is_py3_enum(value):
+                value = value._to_python()
+                if not isinstance(value, self._class):
+                    raise TypeError(f"value {value} is a py3 enum of type {type(value)}, can not be converted to {self._class !r}.")
+            else:
+                raise TypeError(f"value {value} is not '{self._class}', is actually of type {type(value)}.")
         return value._fbthrift_value_
 
     # convert deserialized data to user format

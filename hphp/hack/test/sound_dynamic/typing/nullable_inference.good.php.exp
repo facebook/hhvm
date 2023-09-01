@@ -1,1 +1,16 @@
-No errors
+Typing[4110] Invalid argument [1]
+-> Expected T [2]
+-> But got dynamic [3]
+
+nullable_inference.good.php:15:47
+     8 | <<__SupportDynamicType>>
+     9 | interface Getter<T as supportdyn<mixed> > {
+[3] 10 |   public function getPlaceholder(): ~?T;
+    11 | }
+    12 | 
+    13 | <<__SupportDynamicType>>
+[2] 14 | function onPlaceholder<T as supportdyn<mixed> >(Getter<T> $field, supportdyn<(function(T): ~bool)> $callback): void {
+[1] 15 |     my_map_nullable($field->getPlaceholder(), $callback);
+    16 | }
+
+1 error found.

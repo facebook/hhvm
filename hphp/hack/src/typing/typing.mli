@@ -59,11 +59,6 @@ val type_param :
 
 type dyn_func_kind
 
-type call_aux_result = {
-  should_forget_fakes: bool;
-  checked_like_params_only: bool;
-}
-
 val call :
   expected:Typing_helpers.ExpectedTy.t option ->
   ?nullsafe:Pos.t option ->
@@ -79,7 +74,7 @@ val call :
   * ((Ast_defs.param_kind * Tast.expr) list
     * Tast.expr option
     * Typing_defs.locl_ty
-    * call_aux_result)
+    * bool)
 
 val with_special_coeffects :
   Typing_env_types.env ->

@@ -257,29 +257,21 @@ bool PackageInfo::moduleInASoftPackage(const StringData* module) const {
   return false;
 }
 
-namespace {
-
-bool is_module_outside_active_deployment(const PackageInfo& packageInfo,
-                                         const StringData* module) {
+bool PackageInfo::outsideActiveDeployment(const StringData* module) const {
   if (!RO::EvalEnforceDeployment) return false;
-  assertx(module);
-  if (auto const activeDeployment = packageInfo.getActiveDeployment()) {
-    return !packageInfo.moduleInDeployment(module, *activeDeployment, DeployKind::Hard);
+  if (!module || module->empty()) return false;
+  if (auto const activeDeployment = getActiveDeployment()) {
+    return!moduleInDeployment(module, *activeDeployment, DeployKind::Hard);
   }
   return false;
 }
 
-} // namespace
-
-bool will_symbol_raise_deployment_boundary_violation(const PackageInfo& packageInfo,
-                                                     const Func& callee) {
-  if (callee.unit()->isSystemLib()) return false;
-  return is_module_outside_active_deployment(packageInfo, callee.moduleName());
+bool PackageInfo::outsideActiveDeployment(const Func& callee) const {
+  return outsideActiveDeployment(callee.moduleName());
 }
 
-bool will_symbol_raise_deployment_boundary_violation(const PackageInfo& packageInfo,
-                                                     const Class& cls) {
-  return is_module_outside_active_deployment(packageInfo, cls.moduleName());
+bool PackageInfo::outsideActiveDeployment(const Class& cls) const {
+  return outsideActiveDeployment(cls.moduleName());
 }
 
 } // namespace HPHP

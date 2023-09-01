@@ -5031,7 +5031,7 @@ void handleModuleBoundaryViolation(const Class* cls, const Func* caller) {
   }
   if (RO::EvalEnforceDeployment) {
     auto const& packageInfo = g_context->getPackageInfo();
-    if (will_symbol_raise_deployment_boundary_violation(packageInfo, *cls)) {
+    if (packageInfo.outsideActiveDeployment(*cls)) {
       raiseDeploymentBoundaryViolation(cls);
     }
   }

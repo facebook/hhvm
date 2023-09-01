@@ -682,13 +682,11 @@ void invalidArrayKeyHelper(const ArrayData* ad, TypedValue key) {
 }
 
 bool callViolatesDeploymentBoundaryHelper(const Func* symbol) {
-  auto const packageInfo = g_context->getPackageInfo();
-  return will_symbol_raise_deployment_boundary_violation(packageInfo, *symbol);
+  return g_context->getPackageInfo().outsideActiveDeployment(*symbol);
 }
 
 bool callViolatesDeploymentBoundaryHelper(const Class* symbol) {
-  auto const packageInfo = g_context->getPackageInfo();
-  return will_symbol_raise_deployment_boundary_violation(packageInfo, *symbol);
+  return g_context->getPackageInfo().outsideActiveDeployment(*symbol);
 }
 
 namespace MInstrHelpers {

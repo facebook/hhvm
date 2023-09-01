@@ -940,7 +940,7 @@ void checkModuleBoundaryViolation(const Class* ctx, const Func& callee) {
   // since class method calls will be handled at the class level.
   if (!ctx && RO::EvalEnforceDeployment) {
     auto const packageInfo = g_context->getPackageInfo();
-    if (will_symbol_raise_deployment_boundary_violation(packageInfo, callee)) {
+    if (packageInfo.outsideActiveDeployment(callee)) {
       raiseDeploymentBoundaryViolation(&callee);
     }
   }
@@ -953,7 +953,7 @@ void checkModuleBoundaryViolation(const Class& cls) {
   }
   if (RO::EvalEnforceDeployment) {
     auto const packageInfo = g_context->getPackageInfo();
-    if (will_symbol_raise_deployment_boundary_violation(packageInfo, cls)) {
+    if (packageInfo.outsideActiveDeployment(cls)) {
       raiseDeploymentBoundaryViolation(&cls);
     }
   }

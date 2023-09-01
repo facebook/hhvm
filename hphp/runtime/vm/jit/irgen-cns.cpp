@@ -72,7 +72,7 @@ void exactClsCns(IRGS& env,
 
   if (cls &&
       (will_symbol_raise_module_boundary_violation(cls, curFunc(env))
-      || will_symbol_raise_deployment_boundary_violation(env.unit.packageInfo(), *cls))) {
+      || env.unit.packageInfo().outsideActiveDeployment(*cls))) {
     auto const cns = gen(env, InitClsCns, TInitCell, clsCnsName);
     pushIncRef(env, cns);
     return;

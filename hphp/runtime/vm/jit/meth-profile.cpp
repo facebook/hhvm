@@ -38,10 +38,7 @@ void MethProfile::reportMeth(const Class* cls, const Func* meth,
         will_symbol_raise_module_boundary_violation(f, callerFunc)) {
       return true;
     }
-    return cls && will_symbol_raise_deployment_boundary_violation(
-      g_context->getPackageInfo(),
-      *cls
-    );
+    return cls && g_context->getPackageInfo().outsideActiveDeployment(*cls);
   };
 
   auto val = methValue();

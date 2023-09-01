@@ -96,6 +96,10 @@ struct PackageInfo {
 
   bool moduleInASoftPackage(const StringData* module) const;
 
+  bool outsideActiveDeployment(const StringData* module) const;
+  bool outsideActiveDeployment(const Func& callee) const;
+  bool outsideActiveDeployment(const Class& cls) const;
+
   std::string mangleForCacheKey() const;
 
   template <typename SerDe> void serde(SerDe& sd) {
@@ -125,15 +129,5 @@ private:
   std::vector<std::pair<std::string, std::string>> m_globToPackage;
 
 };
-
-bool will_symbol_raise_deployment_boundary_violation(
-  const PackageInfo& packageInfo,
-  const Func& callee
-);
-
-bool will_symbol_raise_deployment_boundary_violation(
-  const PackageInfo& packageInfo,
-  const Class& callee
-);
 
 } // namespace HPHP

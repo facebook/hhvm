@@ -124,8 +124,7 @@ const Func* lookupMethodCtx(const Class* cls,
   if (RO::EvalEnforceDeployment &&
       raise != MethodLookupErrorOptions::NoErrorOnModule &&
       !method->unit()->isSystemLib() &&
-      will_symbol_raise_deployment_boundary_violation(
-        g_context->getPackageInfo(), *cls) &&
+      g_context->getPackageInfo().outsideActiveDeployment(*cls) &&
       !shouldRaise(raise)) {
     return nullptr;
   }

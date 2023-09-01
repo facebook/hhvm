@@ -562,8 +562,6 @@ val remove_var :
   search_in_lower_bounds_of:ISet.t ->
   env
 
-val unsolve : env -> Ident.t -> env
-
 module Log : sig
   (** Convert a type variable from an environment into json *)
   val tyvar_to_json :

@@ -1889,8 +1889,6 @@ let remove_var env var ~search_in_upper_bounds_of ~search_in_lower_bounds_of =
            ~search_in_lower_bounds_of;
      }
 
-let unsolve env v = { env with inference_env = Inf.unsolve env.inference_env v }
-
 module Log = struct
   (** Convert a type variable from an environment into json *)
   let tyvar_to_json

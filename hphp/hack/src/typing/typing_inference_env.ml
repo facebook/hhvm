@@ -1012,36 +1012,3 @@ let remove_var env var ~search_in_upper_bounds_of ~search_in_lower_bounds_of =
   let tyvars_stack = remove_var_from_tyvars_stack tyvars_stack var in
   let subtype_prop = replace_var_by_ty_in_prop subtype_prop var ty in
   { tvenv; tyvars_stack; tyvar_occurrences; subtype_prop }
-
-(** This is a horrible thing meant to throw a warning when some invariant turns out
-    to be wrong (namely a variable should not yet be solved) and to help us get back
-    on our feet when this happens. Once we figure out why this invariant is wrong,
-    this function should die. *)
-let unsolve env v =
-  let { tvenv; tyvars_stack; subtype_prop; tyvar_occurrences } = env in
-  match IMap.find_opt v tvenv with
-  | None -> env
-  | Some tvinfo ->
-    let { solving_info; tyvar_pos; eager_solve_failed } = tvinfo in
-    (match solving_info with
-    | TVIConstraints _ -> env
-    | TVIType ty ->
-      let stack = Caml.Printexc.get_callstack 50 in
-      Printf.eprintf
-        "Did not expect variable #%d to be solved already. Unsolving it.\n"
-        v;
-      Caml.Printexc.print_raw_backtrace stderr stack;
-      Printf.eprintf "%!";
-      let solving_info =
-        TVIConstraints
-          {
-            appears_covariantly = false;
-            appears_contravariantly = false;
-            upper_bounds = ITySet.singleton (LoclType ty);
-            lower_bounds = ITySet.singleton (LoclType ty);
-            type_constants = SMap.empty;
-          }
-      in
-      let tvinfo = { solving_info; tyvar_pos; eager_solve_failed } in
-      let tvenv = IMap.add v tvinfo tvenv in
-      { tvenv; tyvars_stack; subtype_prop; tyvar_occurrences })

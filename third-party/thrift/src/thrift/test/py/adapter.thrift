@@ -19,12 +19,8 @@ namespace py thrift.test.py.adapter
 include "thrift/test/py/adapter_bar.thrift"
 
 struct Foo {
-  1: adapter_bar.Bar (
-    py.adapter = 'thrift.test.py.adapter_for_tests.AdapterTestStructToDict',
-  ) structField;
-  2: optional adapter_bar.Bar (
-    py.adapter = 'thrift.test.py.adapter_for_tests.AdapterTestStructToDict',
-  ) oStructField;
+  1: Bar_6216 structField;
+  2: Bar_6216 oStructField;
   3: map<i32, Bar_1448> mapField;
 }
 
@@ -38,3 +34,8 @@ struct FooWithoutAdapters {
 typedef adapter_bar.Bar (
   py.adapter = "thrift.test.py.adapter_for_tests.AdapterTestStructToDict",
 ) Bar_1448
+
+// The following were automatically generated and may benefit from renaming.
+typedef adapter_bar.Bar (
+  py.adapter = "thrift.test.py.adapter_for_tests.AdapterTestStructToDict",
+) Bar_6216

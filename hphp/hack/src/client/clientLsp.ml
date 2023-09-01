@@ -2232,13 +2232,15 @@ let do_resolve_local
   else
     let raw_kind = params.Completion.kind in
     let kind = completion_kind_to_si_kind raw_kind in
-    (* Some docblocks are for class methods.  Class methods need to know
-     * file/line/column/base_class to find the docblock. *)
+    (* [do_completion_local] happens to provide line+col+filename for members.
+       Since docblock resolution needs line+col+filename, and we've already computed them,
+       let's just use them! *)
     let%lwt result =
       try
         match params.Completion.data with
         | None -> raise NoLocationFound
         | Some _ as data ->
+          let fullname = Jget.string_exn params.Completion.data "fullname" in
           let filename = Jget.string_exn data "filename" in
           let file_path = Path.make filename in
           let line = Jget.int_exn data "line" in
@@ -2249,6 +2251,7 @@ let do_resolve_local
           let request =
             ClientIdeMessage.Completion_resolve_location
               ( file_path,
+                ClientIdeMessage.Full_name fullname,
                 { ClientIdeMessage.line; column },
                 resolve_ranking_source kind ranking_source )
           in

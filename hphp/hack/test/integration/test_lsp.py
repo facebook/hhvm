@@ -1467,6 +1467,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "insertTextFormat": 1,
                     "data": {
                         "filename": "${root_path}/completion.php",
+                        "fullname": "test_function",
                         "line": 8,
                         "char": 10,
                     },
@@ -1483,6 +1484,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "insertTextFormat": 1,
                     "data": {
                         "filename": "${root_path}/completion.php",
+                        "fullname": "test_function",
                         "line": 8,
                         "char": 10,
                     },
@@ -1879,6 +1881,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     },
                     "data": {
                         "filename": "${root_path}/completion.php",
+                        "fullname": "interfaceDocBlockMethod",
                         "line": 18,
                         "char": 19,
                     },
@@ -1897,6 +1900,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     },
                     "data": {
                         "filename": "${root_path}/completion.php",
+                        "fullname": "interfaceDocBlockMethod",
                         "line": 18,
                         "char": 19,
                     },
@@ -2108,6 +2112,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     },
                     "data": {
                         "filename": "${root_path}/completion.php",
+                        "fullname": "function",
                         "line": 30,
                         "char": 15,
                     },
@@ -2126,6 +2131,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     },
                     "data": {
                         "filename": "${root_path}/completion.php",
+                        "fullname": "function",
                         "line": 30,
                         "char": 15,
                     },

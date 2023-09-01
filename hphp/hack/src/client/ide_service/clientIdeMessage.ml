@@ -46,6 +46,8 @@ type location = {
   column: int;
 }
 
+type fullname = Full_name of string
+
 type find_refs_result =
   | Invalid_symbol
   | Find_refs_success of {
@@ -115,7 +117,7 @@ type _ t =
       -> AutocompleteTypes.ide_result t
       (** Handles "textDocument/completion" LSP messages *)
   | Completion_resolve_location :
-      Path.t * location * SearchTypes.si_kind
+      Path.t * fullname * location * SearchTypes.si_kind
       -> Completion_resolve.result t
       (** "completionItem/resolve" LSP messages - if we have file/line/column.
       The scenario is that VSCode requests textDocument/completion in A.PHP line 5 col 6,
@@ -218,7 +220,7 @@ let t_to_string : type a. a t -> string = function
     Printf.sprintf "Completion(%s)" (Path.to_string file_path)
   | Completion_resolve Completion_resolve.{ fullname; kind = _ } ->
     Printf.sprintf "Completion_resolve(%s)" fullname
-  | Completion_resolve_location (file_path, _, _) ->
+  | Completion_resolve_location (file_path, _, _, _) ->
     Printf.sprintf "Completion_resolve_location(%s)" (Path.to_string file_path)
   | Document_highlight ({ file_path; _ }, _) ->
     Printf.sprintf "Document_highlight(%s)" (Path.to_string file_path)

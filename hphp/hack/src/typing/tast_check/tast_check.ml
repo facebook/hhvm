@@ -28,6 +28,7 @@ let logger_handlers ctx =
       ("like_type", Like_type_logger.create_handler);
       ("shape_analysis", Shape_analysis_logger.create_handler);
       ("sdt_analysis", Sdt_analysis_logger.create_handler);
+      ("nothing_property", Nothing_property_logger.create_handler);
     ]
   in
   List.fold ~init:[] ~f:add_handler key_handler_pairs

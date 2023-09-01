@@ -4597,21 +4597,13 @@ void in(ISS& env, const bc::FCallClsMethodS& op) {
   fcallClsMethodSImpl(env, op, methName, true, true, updateBC);
 }
 
-namespace {
-
-void newObjDImpl(ISS& env, const StringData* className, bool rflavor) {
-  auto const rcls = env.index.resolve_class(className);
+void in(ISS& env, const bc::NewObjD& op)  {
+  auto const rcls = env.index.resolve_class(op.str1);
   if (!rcls) {
-    if (rflavor) popC(env);
     push(env, TBottom);
     unreachable(env);
     return;
   }
-  if (rflavor && !rcls->couldHaveReifiedGenerics()) {
-    return reduce(env, bc::PopC {}, bc::NewObjD { className });
-  }
-
-  if (rflavor) popC(env);
 
   auto obj = objExact(*rcls);
   if (obj.subtypeOf(BBottom)) {
@@ -4628,10 +4620,6 @@ void newObjDImpl(ISS& env, const StringData* className, bool rflavor) {
   }();
   push(env, setctx(std::move(obj), isCtx));
 }
-
-} // namespace
-
-void in(ISS& env, const bc::NewObjD& op)  { newObjDImpl(env, op.str1, false); }
 
 void in(ISS& env, const bc::NewObjS& op) {
   auto const cls = specialClsRefToCls(env, op.subop1);

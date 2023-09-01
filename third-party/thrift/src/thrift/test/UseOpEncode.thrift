@@ -59,7 +59,7 @@ struct OpEncodeStruct {
   5: list<AdaptedFoo> list_field;
   @cpp.Ref{type = cpp.RefType.Shared}
   6: optional list<AdaptedFoo> list_shared_ptr_field;
-  7: list<AdaptedFoo> list_cpp_type_field (cpp.template = "std::list");
+  7: list<AdaptedFoo> list_cpp_type_field;
   8: set<AdaptedFoo> set_field;
   9: map<AdaptedFoo, AdaptedFoo> map_field;
   10: map<i32, list<AdaptedFoo>> nested_field;
@@ -71,15 +71,12 @@ struct OpEncodeStruct {
   14: list<AdaptedFoo> adapted_list_field;
   15: string meta;
 
-  16: binary (
-    cpp.type = "::apache::thrift::test::IndirectionIOBuf",
-    cpp.indirection,
-  ) buf;
+  16: binary_8095 buf;
 
   @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
   17: list<AdaptedFoo> inplace_adapted_list_field;
 
-  18: i64 (cpp.type = "Timestamp", cpp.indirection) timestamp;
+  18: i64_6519 timestamp;
   19: map<AdaptedFoo, map<AdaptedBar, AdaptedI32>> nested_map_field;
 
   20: list<AdaptedSetOfI32> field20;
@@ -107,3 +104,9 @@ struct BazWithUseOpEncode {
   @cpp.Ref{type = cpp.RefType.Shared}
   6: optional list<AdaptedFoo> list_shared_ptr_field;
 }
+
+// The following were automatically generated and may benefit from renaming.
+@cpp.Type{name = "::apache::thrift::test::IndirectionIOBuf"}
+typedef binary (cpp.indirection = "1") binary_8095
+@cpp.Type{name = "Timestamp"}
+typedef i64 (cpp.indirection = "1") i64_6519

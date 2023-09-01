@@ -212,7 +212,7 @@ auto ValueGenerator<type::list<VTag>>::getValues(
     native_type frontSwap;
     addValues(values, std::back_inserter(frontSwap));
     std::swap(frontSwap[0], frontSwap[2]);
-    result.emplace_back(std::move(frontSwap), "front swap");
+    result.emplace_back(std::move(frontSwap), "frontSwap");
   }
   return result;
 }

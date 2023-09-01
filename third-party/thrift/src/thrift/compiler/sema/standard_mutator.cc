@@ -357,7 +357,7 @@ void generate_runtime_schema(
 
   auto program = const_cast<t_program*>(node.program());
   auto schemaType =
-      dynamic_cast<const t_type*>(program->scope()->find_def(schemaTypeUri));
+      dynamic_cast<const t_type*>(program->scope()->find_by_uri(schemaTypeUri));
   if (!schemaType) {
     ctx.error("Must include thrift/lib/thrift/schema.thrift");
     return;

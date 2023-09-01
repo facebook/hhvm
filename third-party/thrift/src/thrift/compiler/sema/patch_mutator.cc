@@ -139,7 +139,7 @@ struct StructGen {
 
   void add_frozen_exclude() {
     const t_type* annotation = dynamic_cast<const t_type*>(
-        program_.scope()->find_def(kCppFrozen2ExcludeUri));
+        program_.scope()->find_by_uri(kCppFrozen2ExcludeUri));
     if (!annotation) {
       return;
     }
@@ -151,8 +151,8 @@ struct StructGen {
   }
 
   void set_adapter(std::string name) {
-    const t_type* annotation =
-        dynamic_cast<const t_type*>(program_.scope()->find_def(kCppAdapterUri));
+    const t_type* annotation = dynamic_cast<const t_type*>(
+        program_.scope()->find_by_uri(kCppAdapterUri));
     assert(annotation); // transitive include from patch.thrift
     auto value = std::make_unique<t_const_value>();
     auto ns = gen::cpp::namespace_resolver::gen_namespace(program_);
@@ -175,8 +175,8 @@ struct StructGen {
   }
 
   t_field& intern_box(t_field& field) {
-    const t_type* annotation =
-        dynamic_cast<const t_type*>(program_.scope()->find_def(kInternBoxUri));
+    const t_type* annotation = dynamic_cast<const t_type*>(
+        program_.scope()->find_by_uri(kInternBoxUri));
 
     // Skip @thrift.InternBox optimization if the annotation is not found.
     if (!annotation) {
@@ -476,7 +476,7 @@ t_type_ref patch_generator::find_patch_type(
   if (auto* structured = dynamic_cast<const t_structured*>(ttype)) {
     if (!structured->uri().empty()) { // Try to look up by URI.
       if (auto* result = dynamic_cast<const t_type*>(
-              program_.scope()->find_def(structured->uri() + "Patch"))) {
+              program_.scope()->find_by_uri(structured->uri() + "Patch"))) {
         return t_type_ref::from_ptr(result);
       }
     }
@@ -527,7 +527,7 @@ t_type_ref patch_generator::find_patch_override(const t_named& node) const {
 t_type_ref patch_generator::find_patch_override(
     const t_node& node, const std::string& uri) const {
   if (const auto* result =
-          dynamic_cast<const t_type*>(program_.scope()->find_def(uri))) {
+          dynamic_cast<const t_type*>(program_.scope()->find_by_uri(uri))) {
     return t_type_ref::from_ptr(result);
   }
   ctx_.warning(node, "Could not find custom type: {}", uri);
@@ -543,7 +543,8 @@ t_struct& patch_generator::gen_struct(
   // thrift/compiler/lib/cpp2/util.cc sorts it correctly.
   generated->set_src_range(
       {annot.src_range().begin + (++count_), annot.src_range().end});
-  program_.scope()->add_type(program_.scope_name(*generated), generated.get());
+  program_.scope()->add_definition(
+      program_.scope_name(*generated), generated.get());
   return program_.add_def(std::move(generated));
 }
 

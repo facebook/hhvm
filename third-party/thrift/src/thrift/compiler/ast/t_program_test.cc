@@ -126,7 +126,7 @@ TEST(TProgram, AddDefinitionUri) {
     auto& def = program.add_def(std::make_unique<t_struct>(&program, "Struct"));
     EXPECT_FALSE(def.explicit_uri());
     EXPECT_EQ(def.uri(), "test.dev/foo/bar/Struct");
-    EXPECT_EQ(&def, program.scope()->find_def("test.dev/foo/bar/Struct"));
+    EXPECT_EQ(&def, program.scope()->find_by_uri("test.dev/foo/bar/Struct"));
   }
   { // Explicit override.
     auto& def = program.add_def(std::make_unique<t_enum>(&program, "Enum"), "");

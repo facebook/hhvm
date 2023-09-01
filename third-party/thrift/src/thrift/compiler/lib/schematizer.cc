@@ -55,7 +55,7 @@ std::unique_ptr<t_const_value> typeUri(
   }
   static const std::string kTypeUriUri = "facebook.com/thrift/type/TypeUri";
   auto typeUri_ttype = t_type_ref::from_ptr(
-      dynamic_cast<const t_type*>(program->scope()->find_def(kTypeUriUri)));
+      dynamic_cast<const t_type*>(program->scope()->find_by_uri(kTypeUriUri)));
   ret->set_ttype(typeUri_ttype);
   return ret;
 }
@@ -88,7 +88,7 @@ void add_definition(
       // May be null when run from thrift2ast, which doesn't read this value.
       auto structured_annotation_ttype =
           t_type_ref::from_ptr(dynamic_cast<const t_type*>(
-              program->scope()->find_def(kStructuredAnnotationSchemaUri)));
+              program->scope()->find_by_uri(kStructuredAnnotationSchemaUri)));
       annot->set_ttype(structured_annotation_ttype);
       annot->set_map();
       annot->add_map(val("type"), typeUri(*item.type(), program));
@@ -98,7 +98,7 @@ void add_definition(
         // May be null when run from thrift2ast, which doesn't read this value.
         auto protocol_value_ttype =
             t_type_ref::from_ptr(dynamic_cast<const t_type*>(
-                program->scope()->find_def(kProtocolValueUri)));
+                program->scope()->find_by_uri(kProtocolValueUri)));
         auto fields = val();
         fields->set_map();
         for (const auto& pair : item.value()->get_map()) {
@@ -367,7 +367,7 @@ void schematize_recursively(
 const t_enum* find_enum(const t_program* program, const std::string& enum_uri) {
   // May be null in unit tests.
   return program
-      ? dynamic_cast<const t_enum*>(program->scope()->find_def(enum_uri))
+      ? dynamic_cast<const t_enum*>(program->scope()->find_by_uri(enum_uri))
       : nullptr;
 }
 

@@ -93,7 +93,7 @@ t_type_ref t_scope::ref_type(
 
 const t_named* t_scope::add_def(const t_named& node) {
   if (!node.uri().empty()) {
-    auto result = defs_.emplace(node.uri(), &node);
+    auto result = definitions_by_uri_.emplace(node.uri(), &node);
     if (!result.second) {
       return result.first->second;
     }
@@ -129,12 +129,6 @@ std::string t_scope::get_fully_qualified_enum_value_names(
   }
   return join_strings_by_commas(
       enum_values_[name_split[name_split.size() - 1]]);
-}
-
-void t_scope::dump() const {
-  for (const auto& item : types_) {
-    printf("%s => %s\n", item.first.c_str(), item.second->get_name().c_str());
-  }
 }
 
 } // namespace compiler

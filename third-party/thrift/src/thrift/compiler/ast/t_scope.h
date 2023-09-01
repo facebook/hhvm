@@ -23,6 +23,7 @@
 #include <utility>
 
 #include <thrift/compiler/ast/node_list.h>
+#include <thrift/compiler/ast/t_interaction.h>
 #include <thrift/compiler/ast/t_type.h>
 #include <thrift/compiler/ast/t_typedef.h>
 #include <thrift/compiler/source_location.h>
@@ -32,7 +33,6 @@ namespace thrift {
 namespace compiler {
 
 class t_const;
-class t_interaction;
 class t_service;
 
 /**
@@ -54,17 +54,22 @@ class t_scope {
   // nullptr.
   const t_named* add_def(const t_named& node);
 
-  // Return the t_named associated with the given Thrift URI, or nullptr.
-  const t_named* find_def(std::string_view uri) {
-    return find_or_null(defs_, uri);
+  // Returns the type or interaction definition with the given name, or nullptr.
+  const t_named* find(std::string_view name) {
+    return find_or_null(definitions_, name);
   }
 
-  void add_type(std::string name, const t_type* type) {
-    types_[std::move(name)] = type;
+  // Returns the definition with the given Thrift URI, or nullptr.
+  const t_named* find_by_uri(std::string_view uri) {
+    return find_or_null(definitions_by_uri_, uri);
+  }
+
+  void add_definition(std::string name, const t_named* named) {
+    definitions_[std::move(name)] = named;
   }
 
   const t_type* find_type(std::string_view name) const {
-    return find_or_null(types_, name);
+    return dynamic_cast<const t_type*>(find_or_null(definitions_, name));
   }
 
   void add_service(std::string name, const t_service* service) {
@@ -75,12 +80,8 @@ class t_scope {
     return find_or_null(services_, name);
   }
 
-  void add_interaction(std::string name, const t_interaction* interaction) {
-    interactions_[std::move(name)] = interaction;
-  }
-
   const t_interaction* find_interaction(std::string_view name) const {
-    return find_or_null(interactions_, name);
+    return dynamic_cast<const t_interaction*>(find_or_null(definitions_, name));
   }
 
   void add_constant(std::string name, const t_const* constant);
@@ -95,9 +96,6 @@ class t_scope {
   }
 
   std::string get_fully_qualified_enum_value_names(const std::string& name);
-
-  // Dumps the content of type map to stdout.
-  void dump() const;
 
   t_type_ref add_placeholder_typedef(
       std::unique_ptr<t_placeholder_typedef> ptd) {
@@ -125,17 +123,14 @@ class t_scope {
     return it != map.end() ? it->second : nullptr;
   }
 
-  // Map of names to types.
-  map_type<t_type> types_;
+  // A map from names to type or interaction definitions.
+  map_type<t_named> definitions_;
 
   // Map of names to constants.
   map_type<t_const> constants_;
 
   // Map of names to services.
   map_type<t_service> services_;
-
-  // Map of names to interactions.
-  map_type<t_interaction> interactions_;
 
   // Set of enum value names that are redefined and are ambiguous
   // if referred to without the enum name.
@@ -145,7 +140,7 @@ class t_scope {
   std::unordered_map<std::string, std::unordered_set<std::string>> enum_values_;
 
   // Definitions by uri.
-  map_type<t_named> defs_;
+  map_type<t_named> definitions_by_uri_;
 };
 
 } // namespace compiler

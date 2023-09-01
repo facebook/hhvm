@@ -460,18 +460,38 @@ and try_special_union_of_intersection ~approx_cancel_neg env tyl1 tyl2 r :
   (* Assume that inter_ty is an intersection type and look for a pairs of a conjunct in
      inter_ty and an element of tyl that union to mixed. Remove these from the intersection,
      and return the remaining elements of the intersection,
-     or return None indicating that no pairs were found. *)
+     or return None indicating that no pairs were found.
+
+     If inter_ty is wrapped in supportdyn, remove it.
+     This is justified because supportdyn<t1 & t2> | u = (supportdyn<mixed> | u) & (t1 | u) & (t2 | u)
+     and if (say) t1 | u = mixed, then we get (supportdyn<mixed> | u) & (t2 | u) and we can pull out
+     u to get supportdyn<t2> | u.
+     If any of the types in tyl are supportdyn, then we can remove that too because
+     in supportdyn<t1 & t2> | supportdyn<u> we can lift the supportdyn out, simplify and then push it back.
+  *)
   let simplify_inter env inter_ty tyl : Typing_env_types.env * locl_ty option =
     let changed = ref false in
+    let (had_supportdyn_inter, env, stripped_inter_ty) =
+      Typing_utils.strip_supportdyn env inter_ty
+    in
+    let sd_r = get_reason inter_ty in
     let (env, (inter_tyl, inter_r)) =
-      Typing_intersection.destruct_inter_list env [inter_ty]
+      Typing_intersection.destruct_inter_list env [stripped_inter_ty]
     in
     let inter_r = Option.value inter_r ~default:r in
     let (env, new_inter_tyl) =
       List.filter_map_env env inter_tyl ~f:(fun env inter_ty ->
           match
             List.exists_env env tyl ~f:(fun env ty ->
-                match simplify_union_ ~approx_cancel_neg env inter_ty ty r with
+                let (_, env, stripped_ty) =
+                  if had_supportdyn_inter then
+                    Typing_utils.strip_supportdyn env ty
+                  else
+                    (false, env, ty)
+                in
+                match
+                  simplify_union_ ~approx_cancel_neg env inter_ty stripped_ty r
+                with
                 | (env, None) -> (env, false)
                 | (env, Some ty) -> (env, Utils.is_mixed env ty))
           with
@@ -482,15 +502,27 @@ and try_special_union_of_intersection ~approx_cancel_neg env tyl1 tyl2 r :
     in
     ( env,
       if !changed then
-        Some (MakeType.intersection inter_r new_inter_tyl)
+        let ty = MakeType.intersection inter_r new_inter_tyl in
+        if had_supportdyn_inter then
+          Some (MakeType.supportdyn sd_r ty)
+        else
+          Some ty
       else
         None )
   in
+  let is_intersection env ty =
+    let (_env, ty) = Env.expand_type env ty in
+    match get_node ty with
+    | Tnewtype (n, [ty], _)
+      when String.equal n Naming_special_names.Classes.cSupportDyn ->
+      Utils.is_tintersection env ty
+    | _ -> Utils.is_tintersection env ty
+  in
   let (inter_tyl1, not_inter_tyl1) =
-    List.partition_tf tyl1 ~f:(Utils.is_tintersection env)
+    List.partition_tf tyl1 ~f:(is_intersection env)
   in
   let (inter_tyl2, not_inter_tyl2) =
-    List.partition_tf tyl2 ~f:(Utils.is_tintersection env)
+    List.partition_tf tyl2 ~f:(is_intersection env)
   in
   let (env, res_tyl1) =
     match inter_tyl1 with

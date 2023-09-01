@@ -16,19 +16,20 @@
 
 }}{{!
 
-  This template defines a zero-value representation for a given type.
+  This template defines a Thrift default value for a given type.
+  Default values are based on Thrift specification.
 
   All type values are rendered as "concrete" values, except for structs - which
   are rendered as struct pointers. Callers are responsible for dereferencing
   appropriately if needed.
 
-  const/value.mustache and common/zero_value.mustache have complete type partity.
+  const/value.mustache and common/default_value.mustache have complete type partity.
 
 }}{{#type:typedef?}}{{!
   }}{{#type:typedef}}{{!
     }}{{#typedef:placeholder?}}{{
       }}{{#type:typedef_type}}{{
-        }}{{> common/zero_value}}{{!
+        }}{{> common/default_value}}{{!
       }}{{/type:typedef_type}}{{
     }}{{/typedef:placeholder?}}{{
     }}{{^typedef:placeholder?}}{{

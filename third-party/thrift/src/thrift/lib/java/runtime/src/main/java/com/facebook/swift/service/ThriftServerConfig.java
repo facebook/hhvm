@@ -47,7 +47,6 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
-@Deprecated
 public class ThriftServerConfig {
   private static final int DEFAULT_BOSS_THREAD_COUNT = 1;
   private static final int DEFAULT_IO_WORKER_THREAD_COUNT =

@@ -54,19 +54,23 @@ class t_scope {
   // nullptr.
   const t_named* add_def(const t_named& node);
 
-  // Returns the type or interaction definition with the given name, or nullptr.
-  const t_named* find(std::string_view name) {
+  // Returns the type, interaction or constant definition with the given name,
+  // or nullptr if there is no such definition.
+  const t_named* find(std::string_view name) const {
     return find_or_null(definitions_, name);
   }
 
-  // Returns the definition with the given Thrift URI, or nullptr.
-  const t_named* find_by_uri(std::string_view uri) {
+  // Returns the definition with the given Thrift URI, or nullptr if there is
+  // no such definition.
+  const t_named* find_by_uri(std::string_view uri) const {
     return find_or_null(definitions_by_uri_, uri);
   }
 
   void add_definition(std::string name, const t_named* named) {
     definitions_[std::move(name)] = named;
   }
+
+  void add_enum_value(std::string name, const t_const* value);
 
   const t_type* find_type(std::string_view name) const {
     return dynamic_cast<const t_type*>(find_or_null(definitions_, name));
@@ -84,10 +88,8 @@ class t_scope {
     return dynamic_cast<const t_interaction*>(find_or_null(definitions_, name));
   }
 
-  void add_constant(std::string name, const t_const* constant);
-
   const t_const* find_constant(std::string_view name) const {
-    return find_or_null(constants_, name);
+    return dynamic_cast<const t_const*>(find_or_null(definitions_, name));
   }
 
   bool is_ambiguous_enum_value(const std::string& enum_value_name) const {
@@ -123,11 +125,8 @@ class t_scope {
     return it != map.end() ? it->second : nullptr;
   }
 
-  // A map from names to type or interaction definitions.
+  // A map from names to type, interaction or constant definitions.
   map_type<t_named> definitions_;
-
-  // Map of names to constants.
-  map_type<t_const> constants_;
 
   // Map of names to services.
   map_type<t_service> services_;

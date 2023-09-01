@@ -102,21 +102,20 @@ const t_named* t_scope::add_def(const t_named& node) {
   return nullptr; // Success.
 }
 
-void t_scope::add_constant(std::string name, const t_const* constant) {
-  if (constant && constant->get_value()->is_enum()) {
-    const std::string& enum_value_name =
-        constant->get_value()->get_enum_value()->get_name();
-    std::vector<std::string> name_split = split_string_by_periods(name);
-    if (enum_value_name.compare("UNKNOWN") &&
-        (constants_.find(name) != constants_.end()) && constants_[name]) {
-      redefined_enum_values_.insert(name);
-    }
-    if (name_split.size() == 3) {
-      auto name_with_enum = name_split[1] + '.' + name_split[2];
-      enum_values_[enum_value_name].insert(name_with_enum);
-    }
+void t_scope::add_enum_value(std::string name, const t_const* constant) {
+  assert(constant->get_value()->is_enum());
+  const std::string& enum_value_name =
+      constant->get_value()->get_enum_value()->get_name();
+  if (enum_value_name != "UNKNOWN" &&
+      definitions_.find(name) != definitions_.end()) {
+    redefined_enum_values_.insert(name);
   }
-  constants_[std::move(name)] = constant;
+  if (std::count(name.begin(), name.end(), '.') == 2) {
+    // The name has two periods and three components, take the last two.
+    auto name_with_enum = name.substr(name.find('.') + 1);
+    enum_values_[enum_value_name].insert(name_with_enum);
+  }
+  definitions_.insert(std::make_pair(std::move(name), constant));
 }
 
 std::string t_scope::get_fully_qualified_enum_value_names(

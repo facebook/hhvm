@@ -787,7 +787,8 @@ class ast_builder : public parser_actions {
     if (true_type && true_type->is_enum()) {
       for (const auto& value :
            static_cast<const t_enum*>(true_type)->consts()) {
-        scope_->add_constant(program_.scope_name(*typedef_node, value), &value);
+        scope_->add_enum_value(
+            program_.scope_name(*typedef_node, value), &value);
       }
     }
     scope_->add_definition(
@@ -889,8 +890,8 @@ class ast_builder : public parser_actions {
     // Register enum value names in scope.
     for (const auto& value : enum_node->consts()) {
       // TODO: Remove the ability to access unscoped enum values.
-      scope_->add_constant(program_.scope_name(value), &value);
-      scope_->add_constant(program_.scope_name(*enum_node, value), &value);
+      scope_->add_enum_value(program_.scope_name(value), &value);
+      scope_->add_enum_value(program_.scope_name(*enum_node, value), &value);
     }
 
     add_definition(std::move(enum_node));
@@ -922,7 +923,7 @@ class ast_builder : public parser_actions {
     auto constant = std::make_unique<t_const>(
         &program_, std::move(type), fmt::to_string(name.str), std::move(value));
     set_attributes(*constant, std::move(attrs), range);
-    scope_->add_constant(program_.scope_name(*constant), constant.get());
+    scope_->add_definition(program_.scope_name(*constant), constant.get());
     add_definition(std::move(constant));
   }
 

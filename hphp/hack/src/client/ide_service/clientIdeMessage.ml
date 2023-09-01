@@ -116,7 +116,7 @@ type _ t =
       (** Handles "textDocument/completion" LSP messages *)
   | Completion_resolve_location :
       Path.t * location * SearchTypes.si_kind
-      -> DocblockService.result t
+      -> Completion_resolve.result t
       (** "completionItem/resolve" LSP messages - if we have file/line/column.
       The scenario is that VSCode requests textDocument/completion in A.PHP line 5 col 6,
       and we responded with a completion item that points to a class defined in B.PHP line 10 col 5,

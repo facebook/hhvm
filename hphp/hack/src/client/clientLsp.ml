@@ -2256,7 +2256,9 @@ let do_resolve_local
             ide_rpc ide_service ~env ~tracking_id ~ref_unblocked_time request
           in
           let documentation =
-            docblock_with_ranking_detail raw_docblock ranking_detail
+            docblock_with_ranking_detail
+              raw_docblock.ClientIdeMessage.Completion_resolve.docblock
+              ranking_detail
             |> docblock_to_markdown
           in
           Lwt.return { params with Completion.documentation }

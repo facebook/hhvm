@@ -1160,7 +1160,9 @@ let handle_request
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerDocblockAt.go_docblock_ctx ~ctx ~entry ~line ~column ~kind)
     in
-    Lwt.return (Initialized istate, Ok result)
+    Lwt.return
+      ( Initialized istate,
+        Ok Completion_resolve.{ docblock = result; signature = None } )
   (* Document highlighting *)
   | (Initialized istate, Document_highlight (document, { line; column })) ->
     let (istate, ctx, entry, _) = update_file_ctx istate document in

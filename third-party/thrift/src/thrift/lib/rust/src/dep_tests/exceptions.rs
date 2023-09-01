@@ -27,7 +27,7 @@ fn test_should_implement_error() -> Result<()> {
         message: "invalid grape peeler".into(),
         ..Default::default()
     };
-    assert!(matches!(err.source(), None));
+    assert!(err.source().is_none());
 
     Ok(())
 }

@@ -17,8 +17,6 @@
 #include <folly/Conv.h>
 #include <folly/Range.h>
 
-#include "mcrouter/ProxyBase.h"
-
 #include "mcrouter/AsyncWriter.h"
 #include "mcrouter/McrouterFiberContext.h"
 #include "mcrouter/McrouterLogFailure.h"
@@ -46,6 +44,13 @@ FOLLY_NOINLINE bool spoolAxonProxy(
     const memcache::McDeleteRequest& req,
     const std::shared_ptr<AxonContext>& axonCtx,
     uint64_t bucketId);
+
+FOLLY_NOINLINE bool spoolAsynclog(
+    ProxyBase* proxy,
+    const memcache::McDeleteRequest& req,
+    const std::shared_ptr<const AccessPoint>& host,
+    bool keepRoutingPrefix,
+    folly::StringPiece asynclogName);
 
 } // namespace mcrouter
 } // namespace memcache

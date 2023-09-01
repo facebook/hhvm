@@ -17,8 +17,8 @@
 #include "mcrouter/AsyncLog.h"
 #include "mcrouter/AsyncWriter.h"
 #include "mcrouter/CarbonRouterInstanceBase.h"
-#include "mcrouter/McInvalidationUtils.h"
 #include "mcrouter/McReqUtil.h"
+#include "mcrouter/McSpoolUtils.h"
 #include "mcrouter/McrouterFiberContext.h"
 #include "mcrouter/McrouterLogFailure.h"
 #include "mcrouter/ProxyDestination.h"
@@ -377,51 +377,8 @@ class DestinationRoute {
     return bucketId;
   }
 
-  template <class Request>
-  FOLLY_NOINLINE bool spoolAsynclog(const Request& req) const {
-    auto asynclogName = fiber_local<RouterInfo>::getAsynclogName();
-    if (asynclogName.empty()) {
-      return false;
-    }
-
-    folly::StringPiece key = keepRoutingPrefix_
-        ? req.key_ref()->fullKey()
-        : req.key_ref()->keyWithoutRoute();
-
-    auto proxy = &fiber_local<RouterInfo>::getSharedCtx()->proxy();
-    auto& ap = *destination_->accessPoint();
-    folly::fibers::Baton b;
-    auto res = false;
-    auto attr = *req.attributes_ref();
-    const auto asyncWriteStartUs = nowUs();
-    if (auto asyncWriter = proxy->router().asyncWriter()) {
-      res = asyncWriter->run([&b, &ap, &attr, proxy, key, asynclogName]() {
-        if (proxy->asyncLog().writeDelete(ap, key, asynclogName, attr)) {
-          proxy->stats().increment(asynclog_spool_success_rate_stat);
-        }
-        b.post();
-      });
-    }
-    if (!res) {
-      MC_LOG_FAILURE(
-          proxy->router().opts(),
-          memcache::failure::Category::kOutOfResources,
-          "Could not enqueue asynclog request (key {}, pool {})",
-          key,
-          asynclogName);
-    } else {
-      // Don't reply to the user until we safely logged the request to disk
-      b.wait();
-      const auto asyncWriteDurationUs = nowUs() - asyncWriteStartUs;
-      proxy->stats().asyncLogDurationUs().insertSample(asyncWriteDurationUs);
-      proxy->stats().increment(asynclog_requests_rate_stat);
-    }
-    return true;
-  }
-
-  template <class Request>
   FOLLY_NOINLINE bool spool(
-      const Request& req,
+      const McDeleteRequest& req,
       const std::shared_ptr<AxonContext>& axonCtx,
       const std::optional<uint64_t>& bucketId) const {
     // return true if axonlog is enabled and appending to axon client succeed.
@@ -438,7 +395,12 @@ class DestinationRoute {
     bool asyncLogRes = false;
     if (!axonCtx || !axonCtx->fallbackAsynclog || !axonLogRes) {
       // return true if asyclog is enabled
-      asyncLogRes = spoolAsynclog(req);
+      asyncLogRes = spoolAsynclog(
+          &fiber_local<RouterInfo>::getSharedCtx()->proxy(),
+          req,
+          destination_->accessPoint(),
+          keepRoutingPrefix_,
+          fiber_local<RouterInfo>::getAsynclogName());
     }
     return asyncLogRes || axonLogRes;
   }

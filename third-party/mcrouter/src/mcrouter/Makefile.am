@@ -67,8 +67,8 @@ libmcroutercore_a_SOURCES = \
   McrouterLogger.h \
   McrouterManager.cpp\
   McrouterManager.h\
-  McInvalidationUtils.h \
-  McInvalidationUtils.cpp \
+  McSpoolUtils.h \
+  McSpoolUtils.cpp \
   lib/invalidation/McInvalidationKvPairs.h \
   lib/invalidation/McInvalidationKvPairs.cpp \
   lib/invalidation/McInvalidationDefs.h \

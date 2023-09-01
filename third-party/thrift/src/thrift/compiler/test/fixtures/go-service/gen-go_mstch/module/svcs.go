@@ -149,7 +149,7 @@ func (c *GetEntityChannelClient) GetEntity(ctx context.Context, r *GetEntityRequ
     out := newRespGetEntityGetEntity()
     err := c.ch.Call(ctx, "getEntity", in, out)
     if err != nil {
-        return out.Value, err
+        return nil, err
     }
     return out.Value, nil
 }
@@ -165,7 +165,7 @@ func (c *GetEntityChannelClient) GetBool(ctx context.Context) (bool, error) {
     out := newRespGetEntityGetBool()
     err := c.ch.Call(ctx, "getBool", in, out)
     if err != nil {
-        return out.Value, err
+        return false, err
     }
     return out.Value, nil
 }
@@ -181,7 +181,7 @@ func (c *GetEntityChannelClient) GetByte(ctx context.Context) (int8, error) {
     out := newRespGetEntityGetByte()
     err := c.ch.Call(ctx, "getByte", in, out)
     if err != nil {
-        return out.Value, err
+        return 0, err
     }
     return out.Value, nil
 }
@@ -197,7 +197,7 @@ func (c *GetEntityChannelClient) GetI16(ctx context.Context) (int16, error) {
     out := newRespGetEntityGetI16()
     err := c.ch.Call(ctx, "getI16", in, out)
     if err != nil {
-        return out.Value, err
+        return 0, err
     }
     return out.Value, nil
 }
@@ -213,7 +213,7 @@ func (c *GetEntityChannelClient) GetI32(ctx context.Context) (int32, error) {
     out := newRespGetEntityGetI32()
     err := c.ch.Call(ctx, "getI32", in, out)
     if err != nil {
-        return out.Value, err
+        return 0, err
     }
     return out.Value, nil
 }
@@ -229,7 +229,7 @@ func (c *GetEntityChannelClient) GetI64(ctx context.Context) (int64, error) {
     out := newRespGetEntityGetI64()
     err := c.ch.Call(ctx, "getI64", in, out)
     if err != nil {
-        return out.Value, err
+        return 0, err
     }
     return out.Value, nil
 }
@@ -245,7 +245,7 @@ func (c *GetEntityChannelClient) GetDouble(ctx context.Context) (float64, error)
     out := newRespGetEntityGetDouble()
     err := c.ch.Call(ctx, "getDouble", in, out)
     if err != nil {
-        return out.Value, err
+        return 0.0, err
     }
     return out.Value, nil
 }
@@ -261,7 +261,7 @@ func (c *GetEntityChannelClient) GetString(ctx context.Context) (string, error) 
     out := newRespGetEntityGetString()
     err := c.ch.Call(ctx, "getString", in, out)
     if err != nil {
-        return out.Value, err
+        return "", err
     }
     return out.Value, nil
 }
@@ -277,7 +277,7 @@ func (c *GetEntityChannelClient) GetBinary(ctx context.Context) ([]byte, error) 
     out := newRespGetEntityGetBinary()
     err := c.ch.Call(ctx, "getBinary", in, out)
     if err != nil {
-        return out.Value, err
+        return nil, err
     }
     return out.Value, nil
 }
@@ -293,7 +293,7 @@ func (c *GetEntityChannelClient) GetMap(ctx context.Context) (map[string]string,
     out := newRespGetEntityGetMap()
     err := c.ch.Call(ctx, "getMap", in, out)
     if err != nil {
-        return out.Value, err
+        return nil, err
     }
     return out.Value, nil
 }
@@ -309,7 +309,7 @@ func (c *GetEntityChannelClient) GetSet(ctx context.Context) ([]string, error) {
     out := newRespGetEntityGetSet()
     err := c.ch.Call(ctx, "getSet", in, out)
     if err != nil {
-        return out.Value, err
+        return nil, err
     }
     return out.Value, nil
 }
@@ -325,7 +325,7 @@ func (c *GetEntityChannelClient) GetList(ctx context.Context) ([]string, error) 
     out := newRespGetEntityGetList()
     err := c.ch.Call(ctx, "getList", in, out)
     if err != nil {
-        return out.Value, err
+        return nil, err
     }
     return out.Value, nil
 }
@@ -344,7 +344,7 @@ func (c *GetEntityChannelClient) GetLegacyStuff(ctx context.Context, numPos int6
     out := newRespGetEntityGetLegacyStuff()
     err := c.ch.Call(ctx, "getLegacyStuff", in, out)
     if err != nil {
-        return out.Value, err
+        return 0, err
     }
     return out.Value, nil
 }

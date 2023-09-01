@@ -145,11 +145,11 @@ func (c *{{service:go_name}}ChannelClient) {{> svc/func_signature}} {
     out := newResp{{service:go_name}}{{function:go_name}}()
     err := c.ch.Call(ctx, "{{function:name}}", in, out)
     if err != nil {
-        return {{^function:void?}}out.Value, {{/function:void?}}err
+        return {{^function:void?}}{{#function:return_type}}{{> common/go_zero_value}}{{/function:return_type}}, {{/function:void?}}err
     }{{#function:exceptions?}}{{!
     }}{{#function:exceptions}}{{!
     }} else if out.{{field:go_name}} != nil {
-        return {{^function:void?}}out.Value, {{/function:void?}}out.{{field:go_name}}
+        return {{^function:void?}}{{#function:return_type}}{{> common/go_zero_value}}{{/function:return_type}}, {{/function:void?}}out.{{field:go_name}}
     }{{/function:exceptions}}{{!
     }}{{/function:exceptions?}}
     return {{^function:void?}}out.Value, {{/function:void?}}nil

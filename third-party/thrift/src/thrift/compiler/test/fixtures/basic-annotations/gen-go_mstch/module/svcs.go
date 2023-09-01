@@ -154,7 +154,7 @@ func (c *MyServiceChannelClient) GetRandomData(ctx context.Context) (string, err
     out := newRespMyServiceGetRandomData()
     err := c.ch.Call(ctx, "getRandomData", in, out)
     if err != nil {
-        return out.Value, err
+        return "", err
     }
     return out.Value, nil
 }
@@ -171,7 +171,7 @@ func (c *MyServiceChannelClient) HasDataById(ctx context.Context, id int64) (boo
     out := newRespMyServiceHasDataById()
     err := c.ch.Call(ctx, "hasDataById", in, out)
     if err != nil {
-        return out.Value, err
+        return false, err
     }
     return out.Value, nil
 }
@@ -188,7 +188,7 @@ func (c *MyServiceChannelClient) GoGetDataById(ctx context.Context, id int64) (s
     out := newRespMyServiceGoGetDataById()
     err := c.ch.Call(ctx, "getDataById", in, out)
     if err != nil {
-        return out.Value, err
+        return "", err
     }
     return out.Value, nil
 }
@@ -3786,7 +3786,7 @@ func (c *BadServiceChannelClient) Bar(ctx context.Context) (int32, error) {
     out := newRespBadServiceBar()
     err := c.ch.Call(ctx, "bar", in, out)
     if err != nil {
-        return out.Value, err
+        return 0, err
     }
     return out.Value, nil
 }

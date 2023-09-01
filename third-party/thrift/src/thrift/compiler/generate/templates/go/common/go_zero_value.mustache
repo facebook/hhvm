@@ -1,0 +1,43 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+  This template defines a Go zero-value representation for a given Thrift type.
+
+}}{{#type:typedef?}}{{!
+  }}{{#type:typedef}}{{!
+    }}{{#type:typedef_type}}{{
+      }}{{> common/go_zero_value}}{{!
+    }}{{/type:typedef_type}}{{
+  }}{{/type:typedef}}{{!
+}}{{/type:typedef?}}{{!
+}}{{^type:typedef?}}{{!
+  }}{{#type:string?}}""{{/type:string?}}{{!
+  }}{{#type:binary?}}nil{{/type:binary?}}{{!
+  }}{{#type:bool?}}false{{/type:bool?}}{{!
+  }}{{#type:byte?}}0{{/type:byte?}}{{!
+  }}{{#type:i16?}}0{{/type:i16?}}{{!
+  }}{{#type:i32?}}0{{/type:i32?}}{{!
+  }}{{#type:i64?}}0{{/type:i64?}}{{!
+  }}{{#type:double?}}0.0{{/type:double?}}{{!
+  }}{{#type:float?}}0.0{{/type:float?}}{{!
+  }}{{#type:enum?}}0{{/type:enum?}}{{!
+  }}{{#type:list?}}nil{{/type:list?}}{{!
+  }}{{#type:set?}}nil{{/type:set?}}{{!
+  }}{{#type:map?}}nil{{/type:map?}}{{!
+  }}{{#type:struct?}}nil{{/type:struct?}}{{!
+}}{{/type:typedef?}}

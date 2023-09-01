@@ -127,7 +127,7 @@ func (c *ServiceChannelClient) Func(ctx context.Context, arg1 StringWithAdapter_
     out := newRespServiceFunc()
     err := c.ch.Call(ctx, "func", in, out)
     if err != nil {
-        return out.Value, err
+        return 0, err
     }
     return out.Value, nil
 }
@@ -830,7 +830,7 @@ func (c *AdapterServiceChannelClient) Count(ctx context.Context) (*CountingStruc
     out := newRespAdapterServiceCount()
     err := c.ch.Call(ctx, "count", in, out)
     if err != nil {
-        return out.Value, err
+        return nil, err
     }
     return out.Value, nil
 }
@@ -847,7 +847,7 @@ func (c *AdapterServiceChannelClient) AdaptedTypes(ctx context.Context, arg *Hea
     out := newRespAdapterServiceAdaptedTypes()
     err := c.ch.Call(ctx, "adaptedTypes", in, out)
     if err != nil {
-        return out.Value, err
+        return nil, err
     }
     return out.Value, nil
 }

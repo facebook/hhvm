@@ -514,7 +514,7 @@ func (c *FB303ServiceChannelClient) SimpleRPC(ctx context.Context, intParameter 
     out := newRespFB303ServiceSimpleRPC()
     err := c.ch.Call(ctx, "simple_rpc", in, out)
     if err != nil {
-        return out.Value, err
+        return nil, err
     }
     return out.Value, nil
 }
@@ -1105,7 +1105,7 @@ func (c *MyServiceChannelClient) GetRandomData(ctx context.Context) (string, err
     out := newRespMyServiceGetRandomData()
     err := c.ch.Call(ctx, "getRandomData", in, out)
     if err != nil {
-        return out.Value, err
+        return "", err
     }
     return out.Value, nil
 }
@@ -1157,7 +1157,7 @@ func (c *MyServiceChannelClient) HasDataById(ctx context.Context, id int64) (boo
     out := newRespMyServiceHasDataById()
     err := c.ch.Call(ctx, "hasDataById", in, out)
     if err != nil {
-        return out.Value, err
+        return false, err
     }
     return out.Value, nil
 }
@@ -1174,7 +1174,7 @@ func (c *MyServiceChannelClient) GetDataById(ctx context.Context, id int64) (str
     out := newRespMyServiceGetDataById()
     err := c.ch.Call(ctx, "getDataById", in, out)
     if err != nil {
-        return out.Value, err
+        return "", err
     }
     return out.Value, nil
 }
@@ -1220,7 +1220,7 @@ func (c *MyServiceChannelClient) InvalidReturnForHack(ctx context.Context) ([]fl
     out := newRespMyServiceInvalidReturnForHack()
     err := c.ch.Call(ctx, "invalid_return_for_hack", in, out)
     if err != nil {
-        return out.Value, err
+        return nil, err
     }
     return out.Value, nil
 }
@@ -4627,7 +4627,7 @@ func (c *DbMixedStackArgumentsChannelClient) GetDataByKey0(ctx context.Context, 
     out := newRespDbMixedStackArgumentsGetDataByKey0()
     err := c.ch.Call(ctx, "getDataByKey0", in, out)
     if err != nil {
-        return out.Value, err
+        return nil, err
     }
     return out.Value, nil
 }
@@ -4644,7 +4644,7 @@ func (c *DbMixedStackArgumentsChannelClient) GetDataByKey1(ctx context.Context, 
     out := newRespDbMixedStackArgumentsGetDataByKey1()
     err := c.ch.Call(ctx, "getDataByKey1", in, out)
     if err != nil {
-        return out.Value, err
+        return nil, err
     }
     return out.Value, nil
 }

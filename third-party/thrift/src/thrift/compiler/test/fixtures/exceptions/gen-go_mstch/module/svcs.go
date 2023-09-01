@@ -168,7 +168,7 @@ func (c *RaiserChannelClient) Get200(ctx context.Context) (string, error) {
     out := newRespRaiserGet200()
     err := c.ch.Call(ctx, "get200", in, out)
     if err != nil {
-        return out.Value, err
+        return "", err
     }
     return out.Value, nil
 }
@@ -184,13 +184,13 @@ func (c *RaiserChannelClient) Get500(ctx context.Context) (string, error) {
     out := newRespRaiserGet500()
     err := c.ch.Call(ctx, "get500", in, out)
     if err != nil {
-        return out.Value, err
+        return "", err
     } else if out.F != nil {
-        return out.Value, out.F
+        return "", out.F
     } else if out.B != nil {
-        return out.Value, out.B
+        return "", out.B
     } else if out.S != nil {
-        return out.Value, out.S
+        return "", out.S
     }
     return out.Value, nil
 }

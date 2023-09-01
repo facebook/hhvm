@@ -131,7 +131,7 @@ func (c *FinderChannelClient) ByPlate(ctx context.Context, plate Plate) (*Automo
     out := newRespFinderByPlate()
     err := c.ch.Call(ctx, "byPlate", in, out)
     if err != nil {
-        return out.Value, err
+        return nil, err
     }
     return out.Value, nil
 }
@@ -148,7 +148,7 @@ func (c *FinderChannelClient) AliasByPlate(ctx context.Context, plate Plate) (*C
     out := newRespFinderAliasByPlate()
     err := c.ch.Call(ctx, "aliasByPlate", in, out)
     if err != nil {
-        return out.Value, err
+        return nil, err
     }
     return out.Value, nil
 }
@@ -165,7 +165,7 @@ func (c *FinderChannelClient) PreviousPlate(ctx context.Context, plate Plate) (P
     out := newRespFinderPreviousPlate()
     err := c.ch.Call(ctx, "previousPlate", in, out)
     if err != nil {
-        return out.Value, err
+        return "", err
     }
     return out.Value, nil
 }

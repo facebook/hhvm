@@ -145,9 +145,9 @@ func (c *CChannelClient) Thing(ctx context.Context, a int32, b string, c []int32
     out := newRespCThing()
     err := c.ch.Call(ctx, "thing", in, out)
     if err != nil {
-        return out.Value, err
+        return "", err
     } else if out.Bang != nil {
-        return out.Value, out.Bang
+        return "", out.Bang
     }
     return out.Value, nil
 }

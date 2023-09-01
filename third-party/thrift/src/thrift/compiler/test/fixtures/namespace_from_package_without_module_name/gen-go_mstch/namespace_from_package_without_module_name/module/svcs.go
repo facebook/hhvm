@@ -125,7 +125,7 @@ func (c *TestServiceChannelClient) Init(ctx context.Context, int1 int64) (int64,
     out := newRespTestServiceInit()
     err := c.ch.Call(ctx, "init", in, out)
     if err != nil {
-        return out.Value, err
+        return 0, err
     }
     return out.Value, nil
 }

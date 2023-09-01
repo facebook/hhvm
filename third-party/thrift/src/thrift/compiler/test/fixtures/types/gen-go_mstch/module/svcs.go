@@ -129,7 +129,7 @@ func (c *SomeServiceChannelClient) BounceMap(ctx context.Context, m included.Som
     out := newRespSomeServiceBounceMap()
     err := c.ch.Call(ctx, "bounce_map", in, out)
     if err != nil {
-        return out.Value, err
+        return nil, err
     }
     return out.Value, nil
 }
@@ -146,7 +146,7 @@ func (c *SomeServiceChannelClient) BinaryKeyedMap(ctx context.Context, r []int64
     out := newRespSomeServiceBinaryKeyedMap()
     err := c.ch.Call(ctx, "binary_keyed_map", in, out)
     if err != nil {
-        return out.Value, err
+        return nil, err
     }
     return out.Value, nil
 }

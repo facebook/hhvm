@@ -1340,6 +1340,7 @@ Variant HHVM_FUNCTION(get_product_attribution_id_internal) {
     assertx(local != kInvalidId);
     auto const val = frm.local(local);
     assertx(tvIsPlausible(*val));
+    if (val->type() == KindOfUninit) return false; // skip over uninit vals
     result = Variant{variant_ref{val}};
     return true;
   });

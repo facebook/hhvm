@@ -17,6 +17,7 @@
 namespace go thrift.test.go.if.thrifttest
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/go.thrift"
 
 enum Numberz {
   ONE = 1,
@@ -53,7 +54,8 @@ struct WeirdNames {
   // golang generator does not support this combination of ambiguous names
   // 3: bool SetMe;
   4: bool SetMe_;
-  5: bool _setMe (go.name = "XSetMe");
+  @go.Name{name = "XSetMe"}
+  5: bool _setMe;
   6: bool p;
   7: bool b;
 }
@@ -159,7 +161,8 @@ service ThriftTest {
   oneway void doTestOneway(1: i32 secondsToSleep);
 
   /* Test poor naming */
-  void _doTestPoorName() (go.name = "XDoTestPoorName");
+  @go.Name{name = "XDoTestPoorName"}
+  void _doTestPoorName();
 }
 
 struct VersioningTestV1 {

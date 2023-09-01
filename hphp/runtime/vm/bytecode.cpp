@@ -2188,7 +2188,7 @@ OPTBLD_INLINE void iopRaiseClassStringConversionWarning() {
 
 OPTBLD_INLINE void iopResolveClass(Id id) {
   auto const cname = vmfp()->unit()->lookupLitstrId(id);
-  auto const class_ = Class::resolve(cname, vmfp()->func());
+  auto const class_ = Class::load(cname);
   if (class_) vmStack().pushClass(class_);
   else raise_resolve_class_undefined(cname);
 }

@@ -1898,8 +1898,8 @@ erlang/ThriftRPCClientTest/StreamInitialTimeout/Success.StreamInitialTimeoutTest
 
 # Go
 #
-# Go Data conformance roundtrip tests [FAILED] [WONTFIX]
-# Go does not support Terse
+# Go Data conformance roundtrip tests [FAILED]
+# Go does not support Terse [WONTFIX]
 go/RoundTripTest/testset.Terse.bool/false.Binary
 go/RoundTripTest/testset.Terse.bool/false.Compact
 go/RoundTripTest/testset.Terse.byte/zero.Binary
@@ -1920,8 +1920,8 @@ go/RoundTripTest/testset.Terse.binary/empty.Binary
 go/RoundTripTest/testset.Terse.binary/empty.Compact
 
 #
-# Go Data conformance roundtrip tests [FAILED] [TODO]
-# We have a known issue with Registration
+# Go Data conformance roundtrip tests [FAILED]
+# We have a known issue with Registration T161920399
 go/RoundTripTest/bool/true.Binary
 go/RoundTripTest/bool/true.Compact
 go/RoundTripTest/bool/false.Binary
@@ -5335,8 +5335,8 @@ go/RoundTripTest/testset.list<float>/frontCompact
 go/RoundTripTest/testset.Adapted.map<adapted<i64>,adapted<i64>>/zeroBinary
 
 #
-# Go Data conformance compatibility tests [FAILED] [WONTFIX]
-# Go does not support Terse
+# Go Data conformance compatibility tests [FAILED]
+# Go does not support Terse [WONTFIX]
 go/CompatibilityTest/testset.i16/AddTerseFieldWithCustomDefault.Binary
 go/CompatibilityTest/testset.i16/AddTerseFieldWithCustomDefault.Compact
 go/CompatibilityTest/testset.i32/AddTerseFieldWithCustomDefault.Binary
@@ -5364,7 +5364,8 @@ go/CompatibilityTest/testset.binary/AddTerseFieldWithCustomDefault.Compact
 
 #
 # Go Data conformance compatibility tests [FAILED]
-# Change Singular to Container will be fixed once everyone has migrated to new code generator and we make final fix
+# Change Singular to Container will be fixed once everyone has migrated to new mstch code generator.
+# We will need to make a backwards incompatible change to Go to fix this, see T161911568.
 go/CompatibilityTest/testset.i16/ChangeSingularToContainer/zero.Binary
 go/CompatibilityTest/testset.i16/ChangeSingularToContainer/zero.Compact
 go/CompatibilityTest/testset.i16/ChangeSingularToContainer/min.Binary
@@ -5523,7 +5524,7 @@ go/CompatibilityTest/testset.binary/ChangeSingularToContainer/bad_utf8.Binary
 go/CompatibilityTest/testset.binary/ChangeSingularToContainer/bad_utf8.Compact
 
 # Go Data conformance compatibility tests [FAILED]
-# Failed tests related to optional defaults
+# Failed tests related to optional defaults T162510833
 go/CompatibilityTest/testset.bool/AddOptionalFieldWithCustomDefault.Binary
 go/CompatibilityTest/testset.bool/AddOptionalFieldWithCustomDefault.Compact
 go/CompatibilityTest/testset.bool/ChangeOptionalFieldCustomDefault.Binary

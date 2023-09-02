@@ -39,8 +39,7 @@ class PythonAsyncProcessorFactory
  public:
   PythonAsyncProcessorFactory(
       PyObject* python_server,
-      std::map<std::string, std::pair<apache::thrift::RpcKind, PyObject*>>
-          functions,
+      FunctionMapType functions,
       std::vector<PyObject*> lifecycleFuncs,
       folly::Executor::KeepAlive<> executor,
       std::string serviceName)
@@ -71,6 +70,9 @@ class PythonAsyncProcessorFactory
     const auto onewayFunc =
         std::make_shared<PythonAsyncProcessor::PythonMetadata>(
             PythonAsyncProcessor::getOnewayFunc());
+    const auto streamFunc =
+        std::make_shared<PythonAsyncProcessor::PythonMetadata>(
+            PythonAsyncProcessor::getStreamFunc());
 
     for (const auto& [methodName, function] : functions_) {
       switch (function.first) {
@@ -81,10 +83,14 @@ class PythonAsyncProcessorFactory
           result.emplace(methodName, onewayFunc);
           break;
         case apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE:
-          result.emplace(methodName, processFunc); // TODO stream
+          result.emplace(methodName, streamFunc);
           break;
         case apache::thrift::RpcKind::SINK:
-          result.emplace(methodName, processFunc); // TODO sink
+          // Leaving this commented out on purpose, as python doesn't support
+          // sink methods yet, but we'll still need this switch branch for when
+          // it does
+
+          // result.emplace(methodName, processFunc); // TODO sink
           break;
       }
     }
@@ -96,8 +102,7 @@ class PythonAsyncProcessorFactory
   folly::SemiFuture<folly::Unit> callLifecycle(LifecycleFunc);
 
   PyObject* python_server_;
-  const std::map<std::string, std::pair<apache::thrift::RpcKind, PyObject*>>
-      functions_;
+  const FunctionMapType functions_;
   const std::vector<PyObject*> lifecycleFuncs_;
   folly::Executor::KeepAlive<> executor;
   std::string serviceName_;

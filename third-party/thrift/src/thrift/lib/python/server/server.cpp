@@ -41,7 +41,8 @@ void PythonAsyncProcessor::handlePythonServerCallback(
     apache::thrift::ProtocolType protocol,
     apache::thrift::Cpp2RequestContext* context,
     folly::Promise<std::unique_ptr<folly::IOBuf>> promise,
-    apache::thrift::SerializedRequest serializedRequest) {
+    apache::thrift::SerializedRequest serializedRequest,
+    apache::thrift::RpcKind kind) {
   FOLLY_MAYBE_UNUSED static bool done = (do_import(), false);
   handleServerCallback(
       functions_.at(context->getMethodName()).second,
@@ -49,14 +50,35 @@ void PythonAsyncProcessor::handlePythonServerCallback(
       context,
       std::move(promise),
       std::move(serializedRequest),
-      protocol);
+      protocol,
+      kind);
+}
+
+void PythonAsyncProcessor::handlePythonServerCallbackStreaming(
+    apache::thrift::ProtocolType protocol,
+    apache::thrift::Cpp2RequestContext* context,
+    folly::Promise<::apache::thrift::ResponseAndServerStream<
+        std::unique_ptr<::folly::IOBuf>,
+        std::unique_ptr<::folly::IOBuf>>> promise,
+    apache::thrift::SerializedRequest serializedRequest,
+    apache::thrift::RpcKind kind) {
+  FOLLY_MAYBE_UNUSED static bool done = (do_import(), false);
+  handleServerStreamCallback(
+      functions_.at(context->getMethodName()).second,
+      serviceName_ + "." + context->getMethodName(),
+      context,
+      std::move(promise),
+      std::move(serializedRequest),
+      protocol,
+      kind);
 }
 
 void PythonAsyncProcessor::handlePythonServerCallbackOneway(
     apache::thrift::ProtocolType protocol,
     apache::thrift::Cpp2RequestContext* context,
     folly::Promise<folly::Unit> promise,
-    apache::thrift::SerializedRequest serializedRequest) {
+    apache::thrift::SerializedRequest serializedRequest,
+    apache::thrift::RpcKind kind) {
   FOLLY_MAYBE_UNUSED static bool done = (do_import(), false);
   handleServerCallbackOneway(
       functions_.at(context->getMethodName()).second,
@@ -64,7 +86,8 @@ void PythonAsyncProcessor::handlePythonServerCallbackOneway(
       context,
       std::move(promise),
       std::move(serializedRequest),
-      protocol);
+      protocol,
+      kind);
 }
 
 enum class LifecycleFunc {

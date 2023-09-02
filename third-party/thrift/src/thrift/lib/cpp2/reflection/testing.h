@@ -17,7 +17,7 @@
 #pragma once
 #include <folly/portability/GTest.h>
 
-#include <thrift/lib/cpp2/reflection/debug.h>
+#include <thrift/lib/cpp2/debug_thrift_data_difference/debug.h>
 
 namespace apache {
 namespace thrift {
@@ -26,25 +26,29 @@ template <class T>
 ::testing::AssertionResult thriftEqualHelper(
     const char* left, const char* right, const T& a, const T& b) {
   ::testing::AssertionResult result(false);
-  if (debug_equals(a, b, make_debug_output_callback(result, left, right))) {
+  if (facebook::thrift::debug_thrift_data_difference(
+          a,
+          b,
+          facebook::thrift::make_debug_output_callback(result, left, right))) {
     return ::testing::AssertionResult(true);
   } else {
     return result;
   }
 }
 
-template <class TC, class T>
-::testing::AssertionResult thriftEqualHelperTC(
+template <class Tag, class T>
+::testing::AssertionResult thriftEqualHelperTag(
     const char*,
     const char* left,
     const char* right,
-    const TC&,
+    const Tag&,
     const T& a,
     const T& b) {
   ::testing::AssertionResult result(false);
-  std::string path = "$";
-  if (detail::debug_equals<TC>(
-          path, a, b, make_debug_output_callback(result, left, right))) {
+  if (facebook::thrift::debug_thrift_data_difference<Tag>(
+          a,
+          b,
+          facebook::thrift::make_debug_output_callback(result, left, right))) {
     return ::testing::AssertionResult(true);
   } else {
     return result;
@@ -60,8 +64,8 @@ template <class TC, class T>
 #define ASSERT_THRIFT_EQ(a, b) \
   ASSERT_PRED_FORMAT2(::apache::thrift::thriftEqualHelper, a, b)
 
-#define EXPECT_THRIFT_TC_EQ(tc, a, b) \
-  EXPECT_PRED_FORMAT3(::apache::thrift::thriftEqualHelperTC, tc, a, b)
+#define EXPECT_THRIFT_TAG_EQ(tag, a, b) \
+  EXPECT_PRED_FORMAT3(::apache::thrift::thriftEqualHelperTag, tag, a, b)
 
-#define ASSERT_THRIFT_TC_EQ(tc, a, b) \
-  ASSERT_PRED_FORMAT3(::apache::thrift::thriftEqualHelperTC, tc, a, b)
+#define ASSERT_THRIFT_TAG_EQ(tag, a, b) \
+  ASSERT_PRED_FORMAT3(::apache::thrift::thriftEqualHelperTag, tag, a, b)

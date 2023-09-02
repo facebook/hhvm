@@ -15,8 +15,6 @@
  */
 
 #include <thrift/lib/cpp2/reflection/debug.h>
-#include <thrift/lib/cpp2/reflection/gmock_matching.h>
-#include <thrift/lib/cpp2/reflection/testing.h>
 
 #include <thrift/test/reflection/gen-cpp2/reflection_fatal_types.h>
 
@@ -135,23 +133,6 @@ struct test_callback {
 
 TEST(fatal_debug, equal) {
   TEST_IMPL(test_data(), test_data());
-}
-
-TEST(Equal, Failure) {
-  auto pod = test_data();
-  struct3 pod1, pod2;
-  *pod1.fieldR()["a"].c() = 1;
-  *pod1.fieldR()["b"].c() = 2;
-  *pod1.fieldR()["c"].c() = 3;
-  *pod1.fieldR()["d"].c() = 4;
-  *pod2.fieldR()["d"].c() = 4;
-  *pod2.fieldR()["c"].c() = 3;
-  *pod2.fieldR()["b"].c() = 2;
-  *pod2.fieldR()["a"].c() = 1;
-  EXPECT_THRIFT_EQ(pod1, pod2);
-  // This is just to test that the ThriftEq matcher works:
-  using apache::thrift::ThriftEq;
-  EXPECT_THAT(pod2, ThriftEq(pod1));
 }
 
 TEST(fatal_debug, fieldA) {

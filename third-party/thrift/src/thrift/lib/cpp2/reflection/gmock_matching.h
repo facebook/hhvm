@@ -18,7 +18,7 @@
 
 #include <folly/portability/GMock.h>
 
-#include <thrift/lib/cpp2/reflection/debug.h>
+#include <thrift/lib/cpp2/debug_thrift_data_difference/debug.h>
 
 // This is a gmock Matcher for thrift object equality. On mismatch this uses the
 // facilities from debug.h to provide a more-usable description of the
@@ -44,10 +44,11 @@ struct ThriftEqMatcher : testing::MatcherInterface<T> {
 #endif
   bool MatchAndExplain(
       GMockT actual, testing::MatchResultListener* listener) const override {
-    return debug_equals(
+    return facebook::thrift::debug_thrift_data_difference(
         *expected_,
         actual,
-        make_debug_output_callback(*listener, "expected", "actual"));
+        facebook::thrift::make_debug_output_callback(
+            *listener, "expected", "actual"));
   }
 
   void DescribeTo(std::ostream* os) const override {

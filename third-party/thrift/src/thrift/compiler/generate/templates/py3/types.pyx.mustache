@@ -77,6 +77,9 @@ from thrift.py3.types cimport (
     UnionTypeEnumData as __UnionTypeEnumData,
     createEnumDataForUnionType as __createEnumDataForUnionType,
 )
+{{#program:intercompatible?}}
+from thrift.py3.types import _is_python_enum, _is_python_struct
+{{/program:intercompatible?}}
 cimport thrift.py3.serializer as serializer
 import folly.iobuf as _fbthrift_iobuf
 from folly.optional cimport cOptional
@@ -212,16 +215,31 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
 
     def __init__(
         self, *{{#struct:py3_fields}},
-        {{#field:type}}{{!
+        {{^program:intercompatible?}}{{#field:type}}{{!
             }}{{#type:cythonTypeNoneable?}}{{!
                 }}{{> types/cython_python_type}} {{!
             }}{{/type:cythonTypeNoneable?}}{{!
-        }}{{/field:type}}{{!
+        }}{{/field:type}}{{/program:intercompatible?}}{{!
             }}{{field:py_name}}=None{{!
         }}{{/struct:py3_fields}}
     ):
         {{#struct:py3_fields}}
         {{#field:type}}
+        {{#program:intercompatible?}}
+        if {{field:py_name}} is not None:
+            if not isinstance({{field:py_name}}, {{> types/python_is_instance_type}}):
+                if _is_python_struct({{field:py_name}}) or _is_python_enum({{field:py_name}}):
+                    {{field:py_name}} = {{field:py_name}}._to_py3()
+                    if not isinstance({{field:py_name}}, {{> types/python_is_instance_type}}):
+                        raise TypeError(f'{{field:py_name}} is a thrift-python type that can not be converted to { {{> types/python_type}} !r}.')
+                else:
+                    raise TypeError(f'{{field:py_name}} is not a { {{> types/python_type}} !r}.')
+            {{#type:integer?}}
+            {{! inject cython int overflow checks }}
+            {{field:py_name}} = <{{> types/cython_python_type}}> {{field:py_name}}
+            {{/type:integer?}}
+        {{/program:intercompatible?}}
+        {{^program:intercompatible?}}
         {{^type:cythonTypeNoneable?}}
         {{^type:container?}}
         if {{field:py_name}} is not None:
@@ -234,6 +252,7 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
 
         {{/type:container?}}
         {{/type:cythonTypeNoneable?}}
+        {{/program:intercompatible?}}
         {{/field:type}}
         {{/struct:py3_fields}}
         self._cpp_obj = __to_shared_ptr(cmove({{struct:name}}._make_instance(

@@ -16,6 +16,7 @@ from thrift.py3.types cimport (
 )
 
 from thrift.py3.types cimport const_pointer_cast, BadEnum as _fbthrift_BadEnum
+from thrift.py3.types import _is_python_enum, _is_python_struct
 
 
 @__cython.auto_pickle(False)
@@ -212,7 +213,12 @@ cdef class __ComplexStruct_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_types.cComplexStruct](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, _module_types.SimpleStruct):
-            raise TypeError(f'structOne is not a { _module_types.SimpleStruct !r}.')
+            if _is_python_struct(_fbthrift_value):
+                _fbthrift_value = _fbthrift_value._to_py3()
+                if not isinstance(_fbthrift_value, _module_types.SimpleStruct):
+                    raise TypeError(f'structOne is a thrift-python struct of type {type(_fbthrift_value) !r} that can not be converted to { _module_types.SimpleStruct !r}.')
+            else:
+                raise TypeError(f'structOne is not a { _module_types.SimpleStruct !r}.')
         deref(self._struct_cpp_obj).structOne_ref().assign(deref((<_module_types.SimpleStruct?> _fbthrift_value)._cpp_obj))
 
     cdef void _set_field_1(self, _fbthrift_value) except *:
@@ -221,7 +227,12 @@ cdef class __ComplexStruct_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_types.cComplexStruct](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, _module_types.SimpleStruct):
-            raise TypeError(f'structTwo is not a { _module_types.SimpleStruct !r}.')
+            if _is_python_struct(_fbthrift_value):
+                _fbthrift_value = _fbthrift_value._to_py3()
+                if not isinstance(_fbthrift_value, _module_types.SimpleStruct):
+                    raise TypeError(f'structTwo is a thrift-python struct of type {type(_fbthrift_value) !r} that can not be converted to { _module_types.SimpleStruct !r}.')
+            else:
+                raise TypeError(f'structTwo is not a { _module_types.SimpleStruct !r}.')
         deref(self._struct_cpp_obj).structTwo_ref().assign(deref((<_module_types.SimpleStruct?> _fbthrift_value)._cpp_obj))
 
     cdef void _set_field_2(self, _fbthrift_value) except *:
@@ -249,7 +260,12 @@ cdef class __ComplexStruct_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_types.cComplexStruct](deref(self._struct_cpp_obj), 4)
             return
         if not isinstance(_fbthrift_value, _fbthrift_BadEnum) and not isinstance(_fbthrift_value, _module_types.AnEnum):
-            raise TypeError(f'field an_enum value: {repr(_fbthrift_value)} is not of the enum type { _module_types.AnEnum }.')
+            if _is_python_enum(_fbthrift_value):
+                _fbthrift_value = _fbthrift_value._to_py3()
+                if not isinstance(_fbthrift_value, _module_types.AnEnum):
+                    raise TypeError(f'field an_enum value: {repr(_fbthrift_value)} is a thrift-python enum that can not be converted to enum type { _module_types.AnEnum }.')
+            else:
+                raise TypeError(f'field an_enum value: {repr(_fbthrift_value)} is not of the enum type { _module_types.AnEnum }.')
         deref(self._struct_cpp_obj).an_enum_ref().assign(<_module_types.cAnEnum><int>_fbthrift_value)
 
     cdef void _set_field_5(self, _fbthrift_value) except *:
@@ -312,6 +328,11 @@ cdef class __BinaryUnionStruct_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_types.cBinaryUnionStruct](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, _module_types.BinaryUnion):
-            raise TypeError(f'u is not a { _module_types.BinaryUnion !r}.')
+            if _is_python_struct(_fbthrift_value):
+                _fbthrift_value = _fbthrift_value._to_py3()
+                if not isinstance(_fbthrift_value, _module_types.BinaryUnion):
+                    raise TypeError(f'u is a thrift-python struct of type {type(_fbthrift_value) !r} that can not be converted to { _module_types.BinaryUnion !r}.')
+            else:
+                raise TypeError(f'u is not a { _module_types.BinaryUnion !r}.')
         deref(self._struct_cpp_obj).u_ref().assign(deref((<_module_types.BinaryUnion?> _fbthrift_value)._cpp_obj))
 

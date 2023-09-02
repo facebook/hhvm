@@ -30,6 +30,9 @@ from thrift.py3.types cimport (
 {{#program:structs?}}
 from thrift.py3.types cimport const_pointer_cast, BadEnum as _fbthrift_BadEnum
 {{/program:structs?}}
+{{#program:intercompatible?}}
+from thrift.py3.types import _is_python_enum, _is_python_struct
+{{/program:intercompatible?}}
 
 {{#program:filtered_structs}}
 {{^struct:union?}}
@@ -63,11 +66,36 @@ cdef class __{{struct:name}}_FieldsSetter(__StructFieldsSetter):
         {{^type:container?}}
         {{#type:enum?}}
         if not isinstance(_fbthrift_value, _fbthrift_BadEnum) and not isinstance(_fbthrift_value, {{> types/python_type}}):
+            {{#program:intercompatible?}}
+            if _is_python_enum(_fbthrift_value):
+                _fbthrift_value = _fbthrift_value._to_py3()
+                if not isinstance(_fbthrift_value, {{> types/python_type}}):
+                    raise TypeError(f'field {{field:py_name}} value: {repr(_fbthrift_value)} is a thrift-python enum that can not be converted to enum type { {{> types/python_type}} }.')
+            else:
+                raise TypeError(f'field {{field:py_name}} value: {repr(_fbthrift_value)} is not of the enum type { {{> types/python_type}} }.')
+            {{/program:intercompatible?}}
+            {{^program:intercompatible?}}
             raise TypeError(f'field {{field:py_name}} value: {repr(_fbthrift_value)} is not of the enum type { {{> types/python_type}} }.')
+            {{/program:intercompatible?}}
         {{/type:enum?}}
         {{^type:enum?}}
         if not isinstance(_fbthrift_value, {{> types/python_is_instance_type}}):
+            {{#program:intercompatible?}}
+            {{#type:struct?}}
+            if _is_python_struct(_fbthrift_value):
+                _fbthrift_value = _fbthrift_value._to_py3()
+                if not isinstance(_fbthrift_value, {{> types/python_is_instance_type}}):
+                    raise TypeError(f'{{field:py_name}} is a thrift-python struct of type {type(_fbthrift_value) !r} that can not be converted to { {{> types/python_type}} !r}.')
+            else:
+                raise TypeError(f'{{field:py_name}} is not a { {{> types/python_type}} !r}.')
+            {{/type:struct?}}
+            {{^type:struct?}}
             raise TypeError(f'{{field:py_name}} is not a { {{> types/python_type}} !r}.')
+            {{/type:struct?}}
+            {{/program:intercompatible?}}
+            {{^program:intercompatible?}}
+            raise TypeError(f'{{field:py_name}} is not a { {{> types/python_type}} !r}.')
+            {{/program:intercompatible?}}
         {{#type:integer?}}
         {{! inject cython int overflow checks }}
         _fbthrift_value = <{{> types/cython_python_type}}> _fbthrift_value

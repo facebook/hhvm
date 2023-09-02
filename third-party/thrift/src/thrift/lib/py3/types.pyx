@@ -806,3 +806,16 @@ cdef translate_cpp_enum_to_python(object EnumClass, int value):
         return EnumClass(value)
     except ValueError:
         return BadEnum(EnumClass, value)
+
+
+try:
+    import thrift.python.types
+    def _is_python_struct(obj):
+        return isinstance(obj, thrift.python.types.StructOrUnion)
+    def _is_python_enum(obj):
+        return isinstance(obj, thrift.python.types.Enum)
+except ImportError:
+    def _is_python_struct(obj):
+        return False
+    def _is_python_enum(obj):
+        return False

@@ -837,6 +837,7 @@ bool Class::initialized() const {
 void Class::initProps() const {
   assertx(m_pinitVec.size() > 0);
   assertx(getPropData() == nullptr);
+
   // Copy initial values for properties to a new vector that can be used to
   // complete initialization for non-scalar properties via the iterative
   // 86pinit() calls below. 86pinit() takes a reference to an array to populate
@@ -917,14 +918,17 @@ void Class::initSProps() const {
 
   // Perform scalar inits.
   for (Slot slot = 0, n = m_staticProperties.size(); slot < n; ++slot) {
+    auto const& sProp = m_staticProperties[slot];
+    assertx(sProp.typeConstraint.validForProp());
+
     if (m_sPropCache[slot].isPersistent()) continue;
 
-    auto const& sProp = m_staticProperties[slot];
     // TODO(T61738946): We can remove the temporary here once we no longer
     // coerce class_meth types.
     auto val = sProp.val;
 
     if (sProp.cls == this || sProp.attrs & AttrLSB) {
+      sProp.typeConstraint.validForPropResolved(sProp.cls, sProp.name);
       if (RuntimeOption::EvalCheckPropTypeHints > 0 &&
           !(sProp.attrs & (AttrInitialSatisfiesTC|AttrSystemInitialValue)) &&
           sProp.val.m_type != KindOfUninit) {
@@ -988,7 +992,6 @@ Slot Class::lsbMemoSlot(const Func* func, bool forValue) const {
 
 void Class::checkPropInitialValues() const {
   assertx(m_allFlags.m_needsPropInitialCheck);
-  assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
   assertx(m_extra.get() != nullptr);
 
   auto extra = m_extra.get();
@@ -997,8 +1000,16 @@ void Class::checkPropInitialValues() const {
 
   for (Slot slot = 0; slot < m_declProperties.size(); ++slot) {
     auto const& prop = m_declProperties[slot];
-    if (prop.attrs & (AttrInitialSatisfiesTC|AttrSystemInitialValue)) continue;
     auto const& tc = prop.typeConstraint;
+
+    assertx(tc.validForProp());
+    tc.validForPropResolved(prop.cls, prop.name);
+    for (auto const& ub : prop.ubs.m_constraints) {
+      ub.validForPropResolved(prop.cls, prop.name);
+    }
+
+    if (RO::EvalCheckPropTypeHints <= 0) continue;
+    if (prop.attrs & (AttrInitialSatisfiesTC|AttrSystemInitialValue)) continue;
     auto const index = propSlotToIndex(slot);
     auto const rval = m_declPropInit[index].val;
     if (type(rval) == KindOfUninit) continue;
@@ -3515,6 +3526,7 @@ void Class::checkPrePropVal(XProp& prop, const PreClass::Prop* preProp) {
     tv.m_type != KindOfNull ||
     !(preProp->attrs() & AttrNoImplicitNullable)
   );
+  assertx(tc.validForProp());
 
   auto const alwaysPassesAll = [&] {
     if (!tc.alwaysPasses(&tv)) return false;
@@ -3525,19 +3537,25 @@ void Class::checkPrePropVal(XProp& prop, const PreClass::Prop* preProp) {
       }
     }
     return true;
-  };
+  }();
+  if (alwaysPassesAll) {
+    prop.attrs |= AttrInitialSatisfiesTC;
+    return;
+  }
+
+  // Otherwise the property can have a type which isn't allowed for
+  // properties, so we need to check.
+  m_allFlags.m_needsPropInitialCheck = true;
+  if (preProp->attrs() & AttrStatic) {
+    prop.attrs = Attr(prop.attrs & ~AttrPersistent);
+  }
 
   if (RuntimeOption::EvalCheckPropTypeHints > 0 &&
       !(preProp->attrs() & AttrInitialSatisfiesTC) &&
+      (preProp->attrs() & AttrSystemInitialValue) &&
       tv.m_type != KindOfUninit) {
     // System provided initial values should always be correct
-    if ((preProp->attrs() & AttrSystemInitialValue) || alwaysPassesAll()) {
-      prop.attrs |= AttrInitialSatisfiesTC;
-    } else if (preProp->attrs() & AttrStatic) {
-      prop.attrs = Attr(prop.attrs & ~AttrPersistent);
-    } else {
-      m_allFlags.m_needsPropInitialCheck = true;
-    }
+    prop.attrs |= AttrInitialSatisfiesTC;
   }
 }
 

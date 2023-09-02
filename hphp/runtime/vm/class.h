@@ -948,6 +948,7 @@ public:
    */
   void checkPropTypeRedefinition(Slot) const;
 
+  void checkPropInitialValues() const;
   /*
    * Check if class has been initialized.
    */
@@ -1801,7 +1802,6 @@ private:
 
   void initLSBMemoHandles();
   void checkPropTypeRedefinitions() const;
-  void checkPropInitialValues() const;
 
   void setupSProps();
 

@@ -163,7 +163,6 @@ void checkPropTypeRedefs(IRGS& env, const Class* cls) {
 
 void checkPropInitialValues(IRGS& env, const Class* cls) {
   assertx(cls->needsPropInitialValueCheck());
-  assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
 
   ifThen(
     env,
@@ -180,9 +179,30 @@ void checkPropInitialValues(IRGS& env, const Class* cls) {
       IRUnit::Hinter h(env.irb->unit(), Block::Hint::Unlikely);
 
       auto const& props = cls->declProperties();
+
+      auto const anyUnresolved = [&] {
+        for (Slot slot = 0; slot < props.size(); ++slot) {
+          auto const& prop = props[slot];
+          if (prop.typeConstraint.isUnresolved()) return true;
+          for (auto const& ub : prop.ubs.m_constraints) {
+            if (ub.isUnresolved()) return true;
+          }
+        }
+        return false;
+      }();
+      if (anyUnresolved) {
+        // Will do all the checking for us
+        gen(env, PropTypeValid, cns(env, cls));
+        return;
+      }
+      assertx(RO::EvalCheckPropTypeHints > 0);
+
       for (Slot slot = 0; slot < props.size(); ++slot) {
         auto const& prop = props[slot];
-        if (prop.attrs & AttrInitialSatisfiesTC) continue;
+
+        if (prop.attrs & (AttrInitialSatisfiesTC|AttrSystemInitialValue)) {
+          continue;
+        }
         auto const isAnyCheckable = [&] {
           if (prop.typeConstraint.isCheckable()) return true;
           for (auto const& ub : prop.ubs.m_constraints) {

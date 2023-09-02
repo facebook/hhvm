@@ -119,6 +119,13 @@ inline bool enumSupportsAnnot(AnnotType at) {
     at == AnnotType::Classname;
 }
 
+inline bool propSupportsAnnot(AnnotType at) {
+  return
+    at != AnnotType::Callable &&
+    at != AnnotType::Nothing &&
+    at != AnnotType::NoReturn;
+}
+
 enum class AnnotAction {
   Pass,
   Fail,

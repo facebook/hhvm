@@ -1937,6 +1937,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case OutlineSetOp:
   case ThrowAsTypeStructException:
   case PropTypeRedefineCheck: // Can raise and autoload
+  case PropTypeValid: // Can raise and autoload
   case HandleRequestSurprise:
   case BespokeEscalateToVanilla:
     return may_load_store(AHeapAny, AHeapAny);

@@ -26,7 +26,7 @@
 namespace test_cpp2 {
 namespace cpp_reflection {
 
-struct3 test_data() {
+static struct3 test_data() {
   structA a1;
   *a1.a() = 99;
   *a1.b() = "abc";

@@ -30,7 +30,7 @@ using output_result = std::false_type;
 namespace test_cpp2 {
 namespace cpp_reflection {
 
-std::string adjust(std::string input) {
+static std::string adjust(std::string input) {
   return folly::rtrimWhitespace(folly::stripLeftMargin(std::move(input))).str();
 }
 

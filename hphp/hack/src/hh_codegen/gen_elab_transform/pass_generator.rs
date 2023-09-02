@@ -34,34 +34,36 @@ pub fn gen(ctx: &Context) -> TokenStream {
         type Ex = ();
         type En = ();
 
-        pub trait Pass {
+        pub trait Pass : PassClone {
             #(#pass_methods)*
         }
 
-        pub struct Passes<P, Q>
-        where
-            P: Pass,
-            Q: Pass,
-        {
-            pub fst: P,
-            pub snd: Q,
+        pub trait PassClone {
+            fn clone_box(&self) -> Box<dyn Pass>;
         }
-
-        impl<P, Q> Clone for Passes<P, Q>
+        impl<T> PassClone for T
         where
-           P: Pass + Clone,
-           Q: Pass + Clone,
+            T: 'static + Pass + Clone,
         {
-            fn clone(&self) -> Self {
-                Passes { fst: self.fst.clone(), snd: self.snd.clone() }
+            fn clone_box(&self) -> Box<dyn Pass> {
+                Box::new(self.clone())
+            }
+        }
+        impl Clone for Box<dyn Pass> {
+            fn clone(&self) -> Box<dyn Pass> {
+                self.clone_box()
             }
         }
 
-        impl<P, Q> Pass for Passes<P, Q>
-        where
-            P: Pass,
-            Q: Pass,
-        {
+        pub struct Passes {
+            pub passes: Vec<Box<dyn Pass>>,
+        }
+        impl Clone for Passes {
+            fn clone(&self) -> Self {
+                Self { passes: self.passes.clone() }
+            }
+        }
+        impl Pass for Passes {
             #(#passes_methods)*
         }
     }
@@ -113,8 +115,10 @@ impl Body {
         match self {
             Body::Default => quote!(Continue(())),
             Body::Passes => quote! {
-                self.fst.#name(env, elem)?;
-                self.snd.#name(env, elem)
+                for pass in &mut self.passes {
+                    pass.#name(env, elem)?;
+                }
+                Continue(())
             },
         }
     }

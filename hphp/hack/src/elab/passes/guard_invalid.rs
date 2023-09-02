@@ -47,7 +47,9 @@ mod tests {
     fn test() {
         let env = Env::default();
 
-        let mut pass = passes![GuardInvalidPass, RewriteZero];
+        let mut pass = crate::pass::Passes {
+            passes: vec![Box::new(GuardInvalidPass), Box::new(RewriteZero)],
+        };
 
         let mut elem = Expr_::Binop(Box::new(Binop {
             bop: Bop::Lt,

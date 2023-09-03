@@ -280,18 +280,6 @@ class t_go_generator : public t_concat_generator {
   void generate_serialize_list_element(
       std::ofstream& out, const t_list* tlist, std::string iter);
 
-  void generate_go_docstring(std::ofstream& out, const t_struct* tstruct);
-
-  void generate_go_docstring(std::ofstream& out, const t_function* tfunction);
-
-  void generate_go_docstring(
-      std::ofstream& out,
-      const t_node* tdoc,
-      const t_struct* tstruct,
-      const char* subheader);
-
-  void generate_go_docstring(std::ofstream& out, const t_node* tdoc);
-
   /**
    * Helper rendering functions
    */
@@ -364,6 +352,18 @@ class t_go_generator : public t_concat_generator {
 
   std::set<std::string> commonInitialisms;
   std::unordered_set<std::string> protectedMethods;
+
+  void generate_go_docstring(std::ofstream& out, const t_struct* tstruct);
+
+  void generate_go_docstring(std::ofstream& out, const t_function* tfunction);
+
+  void generate_go_docstring(std::ofstream& out, const t_named* named_node);
+
+  void generate_go_docstring(
+      std::ofstream& out,
+      const t_named* named_node,
+      const t_struct* tstruct,
+      const char* subheader);
 
   std::string camelcase(const std::string& value) const;
   std::string publicize(
@@ -3653,15 +3653,15 @@ void t_go_generator::generate_go_docstring(
  */
 void t_go_generator::generate_go_docstring(
     ofstream& out,
-    const t_node* tdoc,
+    const t_named* named_node,
     const t_struct* tstruct,
     const char* subheader) {
   bool has_doc = false;
   stringstream ss;
 
-  if (tdoc->has_doc()) {
+  if (named_node->has_doc()) {
     has_doc = true;
-    ss << tdoc->doc();
+    ss << named_node->doc();
   }
 
   const vector<t_field*>& fields = tstruct->get_members();
@@ -3695,9 +3695,10 @@ void t_go_generator::generate_go_docstring(
 /**
  * Generates the docstring for a generic object.
  */
-void t_go_generator::generate_go_docstring(ofstream& out, const t_node* tdoc) {
-  if (tdoc->has_doc()) {
-    generate_docstring_comment(out, "", "//", tdoc->doc(), "");
+void t_go_generator::generate_go_docstring(
+    ofstream& out, const t_named* named_node) {
+  if (named_node->has_doc()) {
+    generate_docstring_comment(out, "", "//", named_node->doc(), "");
   }
 }
 

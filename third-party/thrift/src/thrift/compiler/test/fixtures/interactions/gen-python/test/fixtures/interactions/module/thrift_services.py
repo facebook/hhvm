@@ -34,6 +34,7 @@ class MyServiceInterface(
             b"foo": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_foo),
             b"interact": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_interact),
             b"interactFast": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_interactFast),
+            b"serialize": (RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE, self._fbthrift__handler_serialize),
         }
         return {**super().getFunctionTable(), **functionTable}
 
@@ -60,6 +61,7 @@ class MyServiceInterface(
         args_struct = deserialize(test.fixtures.interactions.module.thrift_types._fbthrift_MyService_foo_args, args, protocol)
         value = await self.foo()
         return_struct = test.fixtures.interactions.module.thrift_types._fbthrift_MyService_foo_result()
+        
 
         return serialize_iobuf(return_struct, protocol)
 
@@ -74,6 +76,7 @@ class MyServiceInterface(
         args_struct = deserialize(test.fixtures.interactions.module.thrift_types._fbthrift_MyService_interact_args, args, protocol)
         value = await self.interact(args_struct.arg,)
         return_struct = test.fixtures.interactions.module.thrift_types._fbthrift_MyService_interact_result()
+        
 
         return serialize_iobuf(return_struct, protocol)
 
@@ -87,6 +90,29 @@ class MyServiceInterface(
         args_struct = deserialize(test.fixtures.interactions.module.thrift_types._fbthrift_MyService_interactFast_args, args, protocol)
         value = await self.interactFast()
         return_struct = test.fixtures.interactions.module.thrift_types._fbthrift_MyService_interactFast_result(success=value)
+        
 
         return serialize_iobuf(return_struct, protocol)
+
+
+    async def serialize(
+            self
+        ) -> _typing.Tuple[int, _typing.Awaitable[_typing.AsyncIterator[int]] | _typing.AsyncIterator[int]]:
+        raise NotImplementedError("async def serialize is not implemented")
+
+    async def _fbthrift__stream_wrapper_serialize(self, stream_generator: _typing.AsyncIterator[int], protocol: Protocol) -> _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]:
+        async for item in stream_generator:
+            yield serialize_iobuf(test.fixtures.interactions.module.thrift_types._fbthrift_MyService_serialize_result_stream(success=item), protocol)
+
+    async def _fbthrift__handler_serialize(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _typing.Tuple[_fbthrift_iobuf.IOBuf, _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]]:
+        args_struct = deserialize(test.fixtures.interactions.module.thrift_types._fbthrift_MyService_serialize_args, args, protocol)
+        value = self.serialize()
+        value, stream = await value
+        if not isinstance(stream, _typing.AsyncIterator):
+            stream = await stream
+        return_struct = test.fixtures.interactions.module.thrift_types._fbthrift_MyService_serialize_result(success=value)
+        return_stream = self._fbthrift__stream_wrapper_serialize(stream, protocol)
+        
+
+        return (serialize_iobuf(return_struct, protocol), return_stream)
 

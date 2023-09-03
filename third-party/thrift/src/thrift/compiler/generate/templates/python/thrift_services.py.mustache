@@ -78,24 +78,42 @@ class {{service:name}}Interface(
 
 {{#service:supported_service_functions}}
 
-    async def {{function:name}}(
+    {{^function:stream?}}async {{/function:stream?}}{{#function:stream_has_first_response?}}async {{/function:stream_has_first_response?}}def {{function:name}}(
             self{{#function:args}},
             {{field:py_name}}: {{#field:type}}{{> types/pep484_type}}{{/field:type}}{{/function:args}}
-        ) -> {{#function:return_type}}{{> types/pep484_type}}{{/function:return_type}}:
+        ) -> {{#function:return_type}}{{> services/service_func_return_type }}{{/function:return_type}}:
         raise NotImplementedError("async def {{function:name}} is not implemented")
 
+    {{#function:stream?}}
+    async def _fbthrift__stream_wrapper_{{function:name}}(self, stream_generator: _typing.AsyncIterator[{{#function:stream_elem_type}}{{> types/pep484_type}}{{/function:stream_elem_type}}], protocol: Protocol) -> _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]:
+        {{#function:stream_exceptions?}}
+        try:
+            async for item in stream_generator:
+                yield serialize_iobuf({{> types/function_second_return_type}}(success=item), protocol)
+        {{#function:stream_exceptions}}{{#field:type}}
+        except {{type:module_path}}.{{#type:struct}}{{> structs/unadapted_name}}{{/type:struct}} as e:
+            return_struct = {{> types/function_second_return_type}}({{field:py_name}}=e)
+            buf = serialize_iobuf(return_struct, protocol)
+            exp = PythonUserException('{{type:py3_namespace}}{{#type:struct}}{{> structs/unadapted_name}}{{/type:struct}}', str(e), buf)
+            raise exp
+        {{/field:type}}
+        {{/function:stream_exceptions}}
+        {{/function:stream_exceptions?}}
+        {{^function:stream_exceptions?}}
+        async for item in stream_generator:
+            yield serialize_iobuf({{> types/function_second_return_type}}(success=item), protocol)
+        {{/function:stream_exceptions?}}
+
+    {{/function:stream?}}
     async def _fbthrift__handler_{{function:name}}(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) {{!
-            }}-> {{#function:oneway?}}None{{/function:oneway?}}{{^function:oneway?}}_fbthrift_iobuf.IOBuf{{/function:oneway?}}:
+            }}-> {{> services/service_handler_return_type }}:
         args_struct = deserialize({{> types/function_args_type}}, args, protocol)
         {{! TODO: call the postWrite hook here }}
         {{#function:exceptions?}}
         try:
-            value = await self.{{function:name}}({{#function:args}}args_struct.{{field:py_name}},{{/function:args}})
-            {{^function:oneway?}}
-            return_struct = {{> types/function_return_type}}({{!
-            }}{{#function:return_type}}{{^type:void?}}success=value{{/type:void?}}{{/function:return_type}})
-            {{/function:oneway?}}
+            {{> services/get_handler_result }}
         {{#function:exceptions}}{{#field:type}}
+
         except {{type:module_path}}.{{#type:struct}}{{> structs/unadapted_name}}{{/type:struct}} as e:
             return_struct = {{> types/function_return_type}}({{field:py_name}}=e)
             buf = serialize_iobuf(return_struct, protocol)
@@ -105,15 +123,17 @@ class {{service:name}}Interface(
         {{/function:exceptions}}
         {{/function:exceptions?}}
         {{^function:exceptions?}}
-        value = await self.{{function:name}}({{#function:args}}args_struct.{{field:py_name}},{{/function:args}})
-        {{^function:oneway?}}
-        return_struct = {{> types/function_return_type}}({{!
-        }}{{#function:return_type}}{{^type:void?}}success=value{{/type:void?}}{{/function:return_type}})
-        {{/function:oneway?}}
+        {{> services/get_handler_result }}
         {{/function:exceptions?}}
 
+
         {{^function:oneway?}}
+        {{^function:stream?}}
         return serialize_iobuf(return_struct, protocol)
+        {{/function:stream?}}
+        {{#function:stream?}}
+        return (serialize_iobuf(return_struct, protocol), return_stream)
+        {{/function:stream?}}
         {{/function:oneway?}}
 
 {{/service:supported_service_functions}}

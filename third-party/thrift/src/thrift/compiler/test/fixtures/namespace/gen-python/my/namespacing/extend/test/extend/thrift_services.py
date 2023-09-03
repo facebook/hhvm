@@ -61,6 +61,7 @@ class ExtendTestServiceInterface(
         args_struct = deserialize(python_module_root.my.namespacing.extend.test.extend.thrift_types._fbthrift_ExtendTestService_check_args, args, protocol)
         value = await self.check(args_struct.struct1,)
         return_struct = python_module_root.my.namespacing.extend.test.extend.thrift_types._fbthrift_ExtendTestService_check_result(success=value)
+        
 
         return serialize_iobuf(return_struct, protocol)
 

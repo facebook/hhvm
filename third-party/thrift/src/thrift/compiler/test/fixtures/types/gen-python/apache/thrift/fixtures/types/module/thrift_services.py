@@ -61,6 +61,7 @@ class SomeServiceInterface(
         args_struct = deserialize(apache.thrift.fixtures.types.module.thrift_types._fbthrift_SomeService_bounce_map_args, args, protocol)
         value = await self.bounce_map(args_struct.m,)
         return_struct = apache.thrift.fixtures.types.module.thrift_types._fbthrift_SomeService_bounce_map_result(success=value)
+        
 
         return serialize_iobuf(return_struct, protocol)
 
@@ -75,6 +76,7 @@ class SomeServiceInterface(
         args_struct = deserialize(apache.thrift.fixtures.types.module.thrift_types._fbthrift_SomeService_binary_keyed_map_args, args, protocol)
         value = await self.binary_keyed_map(args_struct.r,)
         return_struct = apache.thrift.fixtures.types.module.thrift_types._fbthrift_SomeService_binary_keyed_map_result(success=value)
+        
 
         return serialize_iobuf(return_struct, protocol)
 

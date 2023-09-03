@@ -15,8 +15,7 @@
   limitations under the License.
 
 }}{{!
-This is the struct that wraps function return
-}}{{#function:oneway?}}None{{/function:oneway?}}{{!!
-}}{{^function:oneway?}}{{!
-  }}{{program:module_path}}.thrift_types._fbthrift_{{service:name}}_{{function:name}}_result{{!
-}}{{/function:oneway?}}
+This is the struct that wraps function secondary return type (ie. stream, sink)
+}}{{#function:stream?}}{{!
+  }}{{program:module_path}}.thrift_types._fbthrift_{{service:name}}_{{function:name}}_result_stream{{!
+}}{{/function:stream?}}

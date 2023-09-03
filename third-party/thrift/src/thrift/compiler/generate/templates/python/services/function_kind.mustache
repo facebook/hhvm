@@ -15,19 +15,19 @@
   limitations under the License.
 
 }}{{^function:oneway?}}{{!
-  }}{{^function:returns_stream?}}{{!
-    }}{{^function:returns_sink?}}{{!
+  }}{{^function:stream?}}{{!
+    }}{{^function:sink?}}{{!
       }}RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE{{!
-    }}{{/function:returns_sink?}}{{!
+    }}{{/function:sink?}}{{!
 
-    }}{{#function:returns_sink?}}{{!
+    }}{{#function:sink?}}{{!
       }}RpcKind.SINK{{!
-    }}{{/function:returns_sink?}}{{!
-  }}{{/function:returns_stream?}}{{!
+    }}{{/function:sink?}}{{!
+  }}{{/function:stream?}}{{!
 
-  }}{{#function:returns_stream?}}{{!
+  }}{{#function:stream?}}{{!
     }}RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE{{!
-  }}{{/function:returns_stream?}}{{!
+  }}{{/function:stream?}}{{!
 }}{{/function:oneway?}}{{!
 
 }}{{#function:oneway?}}{{!

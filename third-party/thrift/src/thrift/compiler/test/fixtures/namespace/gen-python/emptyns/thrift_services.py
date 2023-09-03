@@ -59,6 +59,7 @@ class TestServiceInterface(
         args_struct = deserialize(emptyns.thrift_types._fbthrift_TestService_init_args, args, protocol)
         value = await self.init(args_struct.int1,)
         return_struct = emptyns.thrift_types._fbthrift_TestService_init_result(success=value)
+        
 
         return serialize_iobuf(return_struct, protocol)
 

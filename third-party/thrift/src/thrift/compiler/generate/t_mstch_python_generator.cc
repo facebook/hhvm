@@ -465,7 +465,7 @@ class python_mstch_service : public mstch_service {
   mstch::node supported_service_functions() {
     return make_mstch_functions(
         get_supported_functions([](const t_function* func) -> bool {
-          return !func->sink_or_stream() && !func->return_type()->is_service();
+          return !func->sink() && !func->return_type()->is_service();
         }));
   }
 

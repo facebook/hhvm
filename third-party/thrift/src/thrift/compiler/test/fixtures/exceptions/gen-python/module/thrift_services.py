@@ -61,6 +61,7 @@ class RaiserInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_Raiser_doBland_args, args, protocol)
         value = await self.doBland()
         return_struct = module.thrift_types._fbthrift_Raiser_doBland_result()
+        
 
         return serialize_iobuf(return_struct, protocol)
 
@@ -75,21 +76,25 @@ class RaiserInterface(
         try:
             value = await self.doRaise()
             return_struct = module.thrift_types._fbthrift_Raiser_doRaise_result()
+            
         except module.thrift_types.Banal as e:
             return_struct = module.thrift_types._fbthrift_Raiser_doRaise_result(b=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('Banal', str(e), buf)
             raise exp
+
         except module.thrift_types.Fiery as e:
             return_struct = module.thrift_types._fbthrift_Raiser_doRaise_result(f=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('Fiery', str(e), buf)
             raise exp
+
         except module.thrift_types.Serious as e:
             return_struct = module.thrift_types._fbthrift_Raiser_doRaise_result(s=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('Serious', str(e), buf)
             raise exp
+
 
         return serialize_iobuf(return_struct, protocol)
 
@@ -103,6 +108,7 @@ class RaiserInterface(
         args_struct = deserialize(module.thrift_types._fbthrift_Raiser_get200_args, args, protocol)
         value = await self.get200()
         return_struct = module.thrift_types._fbthrift_Raiser_get200_result(success=value)
+        
 
         return serialize_iobuf(return_struct, protocol)
 
@@ -117,21 +123,25 @@ class RaiserInterface(
         try:
             value = await self.get500()
             return_struct = module.thrift_types._fbthrift_Raiser_get500_result(success=value)
+            
         except module.thrift_types.Fiery as e:
             return_struct = module.thrift_types._fbthrift_Raiser_get500_result(f=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('Fiery', str(e), buf)
             raise exp
+
         except module.thrift_types.Banal as e:
             return_struct = module.thrift_types._fbthrift_Raiser_get500_result(b=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('Banal', str(e), buf)
             raise exp
+
         except module.thrift_types.Serious as e:
             return_struct = module.thrift_types._fbthrift_Raiser_get500_result(s=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('Serious', str(e), buf)
             raise exp
+
 
         return serialize_iobuf(return_struct, protocol)
 

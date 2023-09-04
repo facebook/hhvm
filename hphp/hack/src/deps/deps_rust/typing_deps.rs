@@ -6,8 +6,6 @@
 use std::cell::RefCell;
 use std::io::Write;
 
-use dep_graph_with_delta::DepGraphTraversor;
-pub use dep_graph_with_delta::DependentIterator;
 use dep_graph_with_delta::LockedDepgraphWithDelta;
 pub use depgraph_reader::Dep;
 use hash::HashSet;
@@ -18,8 +16,6 @@ use ocamlrep::ToOcamlRep;
 use ocamlrep::Value;
 use ocamlrep_custom::caml_serialize_default_impls;
 use ocamlrep_custom::CamlSerialize;
-use once_cell::sync::OnceCell;
-use parking_lot::RwLock;
 use rpds::HashTrieSet;
 
 mod dep_graph_with_delta;
@@ -30,9 +26,7 @@ mod dep_graph_with_delta;
 ///
 /// It's an option, because custom mode might be enabled without
 /// an existing saved-state.
-pub static DEP_GRAPH: DepGraphTraversor<LockedDepgraphWithDelta> = DepGraphTraversor::new(
-    LockedDepgraphWithDelta::new(RwLock::new(None), OnceCell::new()),
-);
+pub static DEP_GRAPH: LockedDepgraphWithDelta = LockedDepgraphWithDelta::new();
 
 fn _static_assert() {
     // The use of 64-bit (actually 63-bit) dependency hashes requires that we
@@ -100,11 +94,6 @@ impl RawTypingDepsMode {
     unsafe fn to_rust(self) -> Result<TypingDepsMode, FromError> {
         let value: Value<'_> = Value::from_bits(self.0);
         TypingDepsMode::from_ocamlrep(value)
-    }
-
-    #[cfg(test)]
-    pub const fn dummy_for_test() -> Self {
-        Self(0)
     }
 }
 

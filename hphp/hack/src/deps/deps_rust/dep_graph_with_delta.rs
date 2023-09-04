@@ -4,8 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::collections::VecDeque;
-use std::ops::Deref;
-use std::ops::DerefMut;
+use std::ffi::OsString;
+use std::fs::File;
 
 use dep_graph_delta::DepGraphDelta;
 use dep_graph_delta::HashSetDelta;
@@ -15,32 +15,57 @@ use depgraph_reader::DepGraph;
 use hash::HashSet;
 use itertools::Either;
 use once_cell::sync::OnceCell;
+use parking_lot::MappedRwLockReadGuard;
+use parking_lot::MappedRwLockWriteGuard;
 use parking_lot::RwLock;
+use parking_lot::RwLockReadGuard;
+use parking_lot::RwLockWriteGuard;
 use rpds::HashTrieSet;
 use typing_deps_hash::DepType;
 
 use crate::RawTypingDepsMode;
 use crate::TypingDepsMode;
 
-pub trait DependentIterator {
-    fn iter_dependents_with_duplicates<F, R>(&self, mode: RawTypingDepsMode, dep: Dep, f: F) -> R
-    where
-        F: FnMut(&mut dyn Iterator<Item = Dep>) -> R;
+pub struct DepGraphWithDelta<B: BaseDepgraphTrait> {
+    /// A structure wrapping the memory-mapped dependency graph.
+    /// Each worker will itself lazily (or eagerly upon request)
+    /// open a memory-mapping to the dependency graph.
+    ///
+    /// It's an option, because custom mode might be enabled without
+    /// an existing saved-state.
+    base: Option<B>,
+    /// The dependency graph delta.
+    ///
+    /// Even though this is only used in a single-threaded context (from OCaml)
+    /// we wrap it in a `Mutex` to ensure safety.
+    delta: DepGraphDelta,
 }
 
-pub struct DepGraphWithDelta<'a, B> {
-    base: Option<&'a B>,
-    delta: &'a DepGraphDelta,
+impl<B: BaseDepgraphTrait> Default for DepGraphWithDelta<B> {
+    fn default() -> Self {
+        Self::new(None, DepGraphDelta::default())
+    }
 }
 
-impl<'a, B: BaseDepgraphTrait> DependentIterator for DepGraphWithDelta<'a, B> {
+impl<B: BaseDepgraphTrait> DepGraphWithDelta<B> {
+    pub fn new(base: Option<B>, delta: DepGraphDelta) -> Self {
+        Self { base, delta }
+    }
+
+    pub fn delta(&self) -> &DepGraphDelta {
+        &self.delta
+    }
+
+    pub fn delta_mut(&mut self) -> &mut DepGraphDelta {
+        &mut self.delta
+    }
+
+    pub fn base(&self) -> Option<&B> {
+        self.base.as_ref()
+    }
+
     /// Iterates over all dependents of a dependency, with possibly duplicate dependents.
-    fn iter_dependents_with_duplicates<F, R>(
-        &self,
-        _mode: RawTypingDepsMode,
-        dep: Dep,
-        mut f: F,
-    ) -> R
+    pub fn iter_dependents_with_duplicates<F, R>(&self, dep: Dep, mut f: F) -> R
     where
         F: FnMut(&mut dyn Iterator<Item = Dep>) -> R,
     {
@@ -58,89 +83,177 @@ impl<'a, B: BaseDepgraphTrait> DependentIterator for DepGraphWithDelta<'a, B> {
             }
         }
     }
-}
-
-impl<'a, B: BaseDepgraphTrait> DepGraphWithDelta<'a, B> {
-    pub fn new(base: Option<&'a B>, delta: &'a DepGraphDelta) -> Self {
-        Self { base, delta }
-    }
 
     pub fn has_edge(&self, dependent: Dep, dependency: Dep) -> bool {
         let Self { base, delta } = self;
         let HashSetDelta { added, removed } = delta.get(dependency);
         added.is_some_and(|added| added.contains(&dependent))
-            || (base.map_or(false, |g| {
+            || (base.as_ref().map_or(false, |g| {
                 g.dependent_dependency_edge_exists(dependent, dependency)
             }) && !removed.is_some_and(|removed| removed.contains(&dependent)))
     }
+
+    /// Returns the recursive 'extends' dependents of a dep.
+    /// Does not include the dep itself.
+    pub fn get_extend_deps(
+        &self,
+        visited: &mut HashSet<Dep>,
+        source_class: Dep,
+        acc: &mut HashTrieSet<Dep>,
+    ) {
+        let mut queue = VecDeque::new();
+        self.get_extend_deps_visit(visited, &mut queue, source_class, acc);
+        while let Some(source_class) = queue.pop_front() {
+            self.get_extend_deps_visit(visited, &mut queue, source_class, acc);
+        }
+    }
+
+    /// Helper function to recursively get extend deps
+    fn get_extend_deps_visit(
+        &self,
+        visited: &mut HashSet<Dep>,
+        queue: &mut VecDeque<Dep>,
+        source_class: Dep,
+        acc: &mut HashTrieSet<Dep>,
+    ) {
+        if !visited.insert(source_class) {
+            return;
+        }
+        let extends_hash = match source_class.class_to_extends() {
+            None => return,
+            Some(hash) => hash,
+        };
+        self.iter_dependents_with_duplicates(extends_hash, |iter| {
+            iter.for_each(|dep: Dep| {
+                if dep.is_class() {
+                    if !acc.contains(&dep) {
+                        acc.insert_mut(dep);
+                        queue.push_back(dep);
+                    }
+                }
+            })
+        })
+    }
+
+    /// Returns the union of the provided dep set and their recursive 'extends' dependents.
+    pub fn add_extend_deps(&self, acc: &mut HashTrieSet<Dep>) {
+        let mut visited = HashSet::default();
+        let mut queue = VecDeque::new();
+        for source_class in acc.iter() {
+            queue.push_back(*source_class);
+        }
+        while let Some(source_class) = queue.pop_front() {
+            self.get_extend_deps_visit(&mut visited, &mut queue, source_class, acc);
+        }
+    }
+
+    /// The fanout of a member `m` in type `A` contains:
+    /// - the members `m` in descendants of `A` down to the first members `m` which are declared.
+    /// - the dependents of those members `m` in descendants,
+    ///   but excluding dependents of declared members.
+    ///
+    /// We also include `A::m` itself in the result.
+    /// The computed fanout is added to the provided fanout accumulator.
+    pub fn get_member_fanout(
+        &self,
+        class_dep: Dep,
+        member_type: DepType,
+        member_name: &str,
+        fanout_acc: &mut HashTrieSet<Dep>,
+    ) {
+        let mut queue = VecDeque::new();
+        let mut visited = HashSet::default();
+
+        self.visit_class_dep_for_member_fanout(
+            class_dep,
+            member_type,
+            member_name,
+            &mut visited,
+            &mut queue,
+            fanout_acc,
+            false,
+        );
+
+        while let Some(class_dep) = queue.pop_front() {
+            self.visit_class_dep_for_member_fanout(
+                class_dep,
+                member_type,
+                member_name,
+                &mut visited,
+                &mut queue,
+                fanout_acc,
+                true,
+            );
+        }
+    }
+
+    fn visit_class_dep_for_member_fanout(
+        &self,
+        class_dep: Dep,
+        member_type: DepType,
+        member_name: &str,
+        visited: &mut HashSet<Dep>,
+        queue: &mut VecDeque<Dep>,
+        fanout_acc: &mut HashTrieSet<Dep>,
+        stop_if_declared: bool,
+    ) {
+        if !visited.insert(class_dep) {
+            return;
+        }
+        fanout_acc.insert_mut(class_dep);
+        let member_dep = class_dep.member(member_type, member_name);
+        let mut member_is_declared = false;
+        let mut member_deps = HashSet::default();
+        self.iter_dependents_with_duplicates(member_dep, |deps| {
+            for dep in deps {
+                if dep.is_declares() {
+                    member_is_declared = true;
+                    if stop_if_declared {
+                        break;
+                    }
+                } else {
+                    member_deps.insert(dep);
+                }
+            }
+        });
+        if !(stop_if_declared && member_is_declared) {
+            member_deps
+                .into_iter()
+                .for_each(|dep| fanout_acc.insert_mut(dep));
+            let extends_dep_for_class = class_dep.class_to_extends().unwrap();
+            self.iter_dependents_with_duplicates(extends_dep_for_class, |iter| {
+                iter.for_each(|dep| queue.push_back(dep));
+            })
+        }
+    }
+
+    pub fn load_delta(&mut self, source: OsString) -> usize {
+        let f = File::open(source).unwrap();
+        let mut r = std::io::BufReader::new(f);
+
+        let Self { base, delta } = self;
+        let result = match base {
+            Some(base) => {
+                delta.read_added_edges_from(&mut r, |dependent, dependency| {
+                    // Only add when it's not already in
+                    // the graph!
+                    !base.dependent_dependency_edge_exists(dependent, dependency)
+                })
+            }
+            None => delta.read_added_edges_from(&mut r, |_, _| true),
+        };
+        result.unwrap()
+    }
 }
 
-pub struct LockedDepgraphWithDelta {
-    /// A structure wrapping the memory-mapped dependency graph.
-    /// Each worker will itself lazily (or eagerly upon request)
-    /// open a memory-mapping to the dependency graph.
-    ///
-    /// It's an option, because custom mode might be enabled without
-    /// an existing saved-state.
-    base: RwLock<Option<DepGraph>>,
-    /// The dependency graph delta.
-    ///
-    /// Even though this is only used in a single-threaded context (from OCaml)
-    /// we wrap it in a `Mutex` to ensure safety.
-    delta: OnceCell<RwLock<DepGraphDelta>>,
-}
-
-impl LockedDepgraphWithDelta {
-    pub const fn new(
-        base: RwLock<Option<DepGraph>>,
-        delta: OnceCell<RwLock<DepGraphDelta>>,
-    ) -> Self {
-        Self { base, delta }
-    }
-
-    pub fn base(&self) -> &RwLock<Option<DepGraph>> {
-        &self.base
-    }
-
-    pub fn delta(&self) -> &RwLock<DepGraphDelta> {
-        self.delta.get_or_init(Default::default)
-    }
-
-    /// Run the closure with the dep graph delta.
-    ///
-    /// # Panics
-    ///
-    /// When another reference to delta is still active, but that
-    /// isn't likely,given that we only have one thread, and the
-    /// `with`/`with_mut` auxiliary functions disallow the reference
-    /// to escape.
-    pub fn lock_delta_and<R>(&self, f: impl FnOnce(&DepGraphDelta) -> R) -> R {
-        f(self.delta().read().deref())
-    }
-
-    /// Run the closure with the mutable dep graph delta.
-    ///
-    /// # Panics
-    ///
-    /// See `with`
-    pub fn lock_mut_delta_and<R>(&self, f: impl FnOnce(&mut DepGraphDelta) -> R) -> R {
-        f(self.delta().write().deref_mut())
-    }
-
+impl DepGraphWithDelta<DepGraph> {
     /// Load the graph using the given mode.
     ///
     /// The mode is only used on the first call, to establish some global state, and
     /// then ignored for future calls.
-    ///
-    /// # Safety
-    ///
-    /// The pointer to the dependency graph mode should still be pointing
-    /// to a valid OCaml object.
-    fn load_base(&self, mode: RawTypingDepsMode) -> Result<(), String> {
-        let mut dep_graph_guard = self.base().write();
-
-        if dep_graph_guard.is_none() {
-            *dep_graph_guard = Self::base_dep_graph_from_mode(mode)?;
+    fn load_base(&mut self, mode: RawTypingDepsMode) -> Result<(), String> {
+        if self.base.is_none() {
+            self.base = Self::base_dep_graph_from_mode(mode)?;
         }
 
         Ok(())
@@ -159,9 +272,8 @@ impl LockedDepgraphWithDelta {
     ///
     /// The pointer to the dependency graph mode should still be pointing
     /// to a valid OCaml object.
-    pub fn replace_dep_graph(&self, mode: RawTypingDepsMode) -> Result<(), String> {
-        let mut dep_graph_guard = self.base().write();
-        *dep_graph_guard = Self::base_dep_graph_from_mode(mode)?;
+    pub fn replace_dep_graph(&mut self, mode: RawTypingDepsMode) -> Result<(), String> {
+        self.base = Self::base_dep_graph_from_mode(mode)?;
         Ok(())
     }
 
@@ -201,219 +313,88 @@ impl LockedDepgraphWithDelta {
             }
         }
     }
+}
 
-    /// Run the closure with the loaded dep graph. If the custom dep graph
-    /// mode was enabled without a saved-state, the closure is run without
-    /// a dep graph.
-    ///
-    /// The mode is only used on the first call, to establish some global state, and
-    /// then ignored for future calls.
+pub struct LockedDepgraphWithDelta(RwLock<OnceCell<DepGraphWithDelta<DepGraph>>>);
+
+impl LockedDepgraphWithDelta {
+    pub const fn new() -> Self {
+        Self(RwLock::new(OnceCell::new()))
+    }
+
+    fn read_init(&self) -> MappedRwLockReadGuard<'_, DepGraphWithDelta<DepGraph>> {
+        RwLockReadGuard::map(self.0.read(), |c| c.get_or_init(DepGraphWithDelta::default))
+    }
+
+    fn write_init(&self) -> MappedRwLockWriteGuard<'_, DepGraphWithDelta<DepGraph>> {
+        RwLockWriteGuard::map(self.0.write(), |c| {
+            c.get_or_init(DepGraphWithDelta::default);
+            c.get_mut().unwrap()
+        })
+    }
+
+    /// Locks the depgraph delta for reading, which also maintains a lock on the depgraph
     ///
     /// # Panics
     ///
-    /// Panics if the graph is not loaded, and custom mode was not enabled.
+    /// When another reference to delta is still active, but that
+    /// isn't likely, given that we only have one thread, and the
+    /// `with`/`with_mut` auxiliary functions disallow the reference
+    /// to escape.
+    pub fn read_delta(&self) -> MappedRwLockReadGuard<'_, DepGraphDelta> {
+        MappedRwLockReadGuard::map(self.read_init(), |g| g.delta())
+    }
+
+    /// Locks the depgraph delta for writing, which also maintains a lock on the depgraph
+    pub fn write_delta(&self) -> MappedRwLockWriteGuard<'_, DepGraphDelta> {
+        MappedRwLockWriteGuard::map(self.write_init(), |g| g.delta_mut())
+    }
+
+    /// Locks the depgraph for reading.
     ///
-    /// Panics if the graph is not yet loaded, and opening
-    /// the graph results in an error.
+    /// The mode is only used on the first call, to establish some global state, and
+    /// then ignored for future calls.
     ///
     /// # Safety
     ///
     /// The pointer to the dependency graph mode should still be pointing
     /// to a valid OCaml object.
-    pub fn lock_base_and<F, R>(&self, mode: RawTypingDepsMode, f: F) -> R
-    where
-        F: FnOnce(Option<&DepGraph>) -> R,
-    {
-        self.load_base(mode).unwrap();
-        f(self.base().read().as_ref())
-    }
-
-    pub fn lock_and<F, R>(&self, mode: RawTypingDepsMode, f: F) -> R
-    where
-        F: FnOnce(DepGraphWithDelta<'_, DepGraph>) -> R,
-    {
-        self.lock_delta_and(|delta| {
-            self.lock_base_and(mode, |g| f(DepGraphWithDelta::new(g, delta)))
-        })
-    }
-}
-
-impl DependentIterator for LockedDepgraphWithDelta {
-    /// Iterates over all dependents of a dependency, with possibly duplicate dependents.
-    fn iter_dependents_with_duplicates<F, R>(&self, mode: RawTypingDepsMode, dep: Dep, f: F) -> R
-    where
-        F: FnMut(&mut dyn Iterator<Item = Dep>) -> R,
-    {
-        self.lock_and(mode, |g| g.iter_dependents_with_duplicates(mode, dep, f))
-    }
-}
-
-pub struct DepGraphTraversor<G: DependentIterator>(G);
-
-impl<G: DependentIterator> DepGraphTraversor<G> {
-    pub const fn new(g: G) -> Self {
-        Self(g)
-    }
-}
-
-impl<G: DependentIterator> Deref for DepGraphTraversor<G> {
-    type Target = G;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl<G: DependentIterator> DepGraphTraversor<G> {
-    /// Returns the recursive 'extends' dependents of a dep.
-    /// Does not include the dep itself.
-    pub fn get_extend_deps(
+    pub fn read(
         &self,
         mode: RawTypingDepsMode,
-        visited: &mut HashSet<Dep>,
-        source_class: Dep,
-        acc: &mut HashTrieSet<Dep>,
-    ) {
-        let mut queue = VecDeque::new();
-        // Safety: we don't call into OCaml again, so mode will remain valid.
-        unsafe {
-            self.get_extend_deps_visit(mode, visited, &mut queue, source_class, acc);
-            while let Some(source_class) = queue.pop_front() {
-                self.get_extend_deps_visit(mode, visited, &mut queue, source_class, acc);
-            }
-        }
+    ) -> MappedRwLockReadGuard<'_, DepGraphWithDelta<DepGraph>> {
+        self.load_base(mode).unwrap();
+        self.read_init()
     }
 
-    /// Helper function to recursively get extend deps
+    /// Locks the depgraph for writing.
+    ///
+    /// The mode is only used on the first call, to establish some global state, and
+    /// then ignored for future calls.
     ///
     /// # Safety
     ///
-    /// The dependency graph mode must be a pointer to an OCaml value that's
-    /// still valid.
-    unsafe fn get_extend_deps_visit(
+    /// The pointer to the dependency graph mode should still be pointing
+    /// to a valid OCaml object.
+    pub fn write(
         &self,
         mode: RawTypingDepsMode,
-        visited: &mut HashSet<Dep>,
-        queue: &mut VecDeque<Dep>,
-        source_class: Dep,
-        acc: &mut HashTrieSet<Dep>,
-    ) {
-        if !visited.insert(source_class) {
-            return;
-        }
-        let extends_hash = match source_class.class_to_extends() {
-            None => return,
-            Some(hash) => hash,
-        };
-        self.iter_dependents_with_duplicates(mode, extends_hash, |iter| {
-            iter.for_each(|dep: Dep| {
-                if dep.is_class() {
-                    if !acc.contains(&dep) {
-                        acc.insert_mut(dep);
-                        queue.push_back(dep);
-                    }
-                }
-            })
-        })
+    ) -> MappedRwLockWriteGuard<'_, DepGraphWithDelta<DepGraph>> {
+        self.load_base(mode).unwrap();
+        self.write_init()
     }
 
-    /// Returns the union of the provided dep set and their recursive 'extends' dependents.
-    pub fn add_extend_deps(&self, mode: RawTypingDepsMode, acc: &mut HashTrieSet<Dep>) {
-        let mut visited = HashSet::default();
-        let mut queue = VecDeque::new();
-        for source_class in acc.iter() {
-            queue.push_back(*source_class);
-        }
-        while let Some(source_class) = queue.pop_front() {
-            // Safety: we don't call into OCaml again, so mode will remain valid.
-            unsafe {
-                self.get_extend_deps_visit(mode, &mut visited, &mut queue, source_class, acc);
-            }
-        }
-    }
-
-    /// The fanout of a member `m` in type `A` contains:
-    /// - the members `m` in descendants of `A` down to the first members `m` which are declared.
-    /// - the dependents of those members `m` in descendants,
-    ///   but excluding dependents of declared members.
+    /// Load the graph using the given mode.
     ///
-    /// We also include `A::m` itself in the result.
-    /// The computed fanout is added to the provided fanout accumulator.
-    pub fn get_member_fanout(
-        &self,
-        mode: RawTypingDepsMode,
-        class_dep: Dep,
-        member_type: DepType,
-        member_name: &str,
-        fanout_acc: &mut HashTrieSet<Dep>,
-    ) {
-        let mut queue = VecDeque::new();
-        let mut visited = HashSet::default();
-
-        self.visit_class_dep_for_member_fanout(
-            mode,
-            class_dep,
-            member_type,
-            member_name,
-            &mut visited,
-            &mut queue,
-            fanout_acc,
-            false,
-        );
-
-        while let Some(class_dep) = queue.pop_front() {
-            self.visit_class_dep_for_member_fanout(
-                mode,
-                class_dep,
-                member_type,
-                member_name,
-                &mut visited,
-                &mut queue,
-                fanout_acc,
-                true,
-            );
-        }
-    }
-
-    fn visit_class_dep_for_member_fanout(
-        &self,
-        mode: RawTypingDepsMode,
-        class_dep: Dep,
-        member_type: DepType,
-        member_name: &str,
-        visited: &mut HashSet<Dep>,
-        queue: &mut VecDeque<Dep>,
-        fanout_acc: &mut HashTrieSet<Dep>,
-        stop_if_declared: bool,
-    ) {
-        if !visited.insert(class_dep) {
-            return;
-        }
-        fanout_acc.insert_mut(class_dep);
-        let member_dep = class_dep.member(member_type, member_name);
-        let mut member_is_declared = false;
-        let mut member_deps = HashSet::default();
-        self.iter_dependents_with_duplicates(mode, member_dep, |deps| {
-            for dep in deps {
-                if dep.is_declares() {
-                    member_is_declared = true;
-                    if stop_if_declared {
-                        break;
-                    }
-                } else {
-                    member_deps.insert(dep);
-                }
-            }
-        });
-        if !(stop_if_declared && member_is_declared) {
-            member_deps
-                .into_iter()
-                .for_each(|dep| fanout_acc.insert_mut(dep));
-            let extends_dep_for_class = class_dep.class_to_extends().unwrap();
-            self.iter_dependents_with_duplicates(mode, extends_dep_for_class, |iter| {
-                iter.for_each(|dep| queue.push_back(dep));
-            })
-        }
+    /// The mode is only used on the first call, to establish some global state, and
+    /// then ignored for future calls.
+    ///
+    /// # Safety
+    ///
+    /// The pointer to the dependency graph mode should still be pointing
+    /// to a valid OCaml object.
+    fn load_base(&self, mode: RawTypingDepsMode) -> Result<(), String> {
+        self.write_init().load_base(mode)
     }
 }
 
@@ -456,22 +437,6 @@ mod tests {
         }
     }
 
-    impl DependentIterator for SimpleDepGraph {
-        fn iter_dependents_with_duplicates<F, R>(
-            &self,
-            _mode: RawTypingDepsMode,
-            dep: Dep,
-            mut f: F,
-        ) -> R
-        where
-            F: FnMut(&mut dyn Iterator<Item = Dep>) -> R,
-        {
-            f(&mut self.iter_dependents(dep))
-        }
-    }
-
-    static MODE: RawTypingDepsMode = RawTypingDepsMode::dummy_for_test();
-
     #[test]
     fn test_some_base() {
         let base = SimpleDepGraph::from([
@@ -484,16 +449,14 @@ mod tests {
         delta.insert(Dep::new(4), Dep::new(0));
         delta.remove(Dep::new(2), Dep::new(0));
         delta.remove(Dep::new(4), Dep::new(0));
-        let dg = DepGraphWithDelta::new(Some(&base), &delta);
+        let dg = DepGraphWithDelta::new(Some(base), delta);
 
         assert_eq!(
-            dg.iter_dependents_with_duplicates(MODE, Dep::new(0), |iter| iter
-                .collect::<HashSet<_>>()),
+            dg.iter_dependents_with_duplicates(Dep::new(0), |iter| iter.collect::<HashSet<_>>()),
             HashSet::from([Dep::new(1), Dep::new(3)])
         );
         assert_eq!(
-            dg.iter_dependents_with_duplicates(MODE, Dep::new(3), |iter| iter
-                .collect::<HashSet<_>>()),
+            dg.iter_dependents_with_duplicates(Dep::new(3), |iter| iter.collect::<HashSet<_>>()),
             HashSet::from([Dep::new(2), Dep::new(4)])
         );
         assert!(dg.has_edge(Dep::new(1), Dep::new(0)));
@@ -511,16 +474,14 @@ mod tests {
         delta.insert(Dep::new(4), Dep::new(3));
         delta.insert(Dep::new(3), Dep::new(0));
         delta.remove(Dep::new(2), Dep::new(0));
-        let dg = DepGraphWithDelta::<SimpleDepGraph>::new(None, &delta);
+        let dg = DepGraphWithDelta::<SimpleDepGraph>::new(None, delta);
 
         assert_eq!(
-            dg.iter_dependents_with_duplicates(MODE, Dep::new(0), |iter| iter
-                .collect::<HashSet<_>>()),
+            dg.iter_dependents_with_duplicates(Dep::new(0), |iter| iter.collect::<HashSet<_>>()),
             HashSet::from([Dep::new(3)])
         );
         assert_eq!(
-            dg.iter_dependents_with_duplicates(MODE, Dep::new(3), |iter| iter
-                .collect::<HashSet<_>>()),
+            dg.iter_dependents_with_duplicates(Dep::new(3), |iter| iter.collect::<HashSet<_>>()),
             HashSet::from([Dep::new(4)])
         );
         assert!(dg.has_edge(Dep::new(4), Dep::new(3)));
@@ -544,8 +505,8 @@ mod tests {
         let class_l = class_dep(11);
         let class_m = class_dep(12);
 
-        let dg = DepGraphTraversor::<SimpleDepGraph>::new(
-            ([
+        let dg = DepGraphWithDelta::new(
+            Some(SimpleDepGraph::from([
                 // 'Extends' edges
                 (
                     class_a.class_to_extends().unwrap(),
@@ -562,12 +523,12 @@ mod tests {
                 // Regular edges
                 (class_a, HashSet::from([class_k])),
                 (class_c, HashSet::from([class_l, class_m])),
-            ])
-            .into(),
+            ])),
+            DepGraphDelta::default(),
         );
         let mut visited = hash::HashSet::<Dep>::default();
         let mut acc = HashTrieSet::new();
-        dg.get_extend_deps(MODE, &mut visited, class_a, &mut acc);
+        dg.get_extend_deps(&mut visited, class_a, &mut acc);
         assert_eq!(
             HashSet::from_iter(acc.iter().copied()),
             HashSet::from([class_b, class_c, class_d, class_e, class_f])
@@ -602,8 +563,8 @@ mod tests {
         let class_q = class_dep(16);
         let class_r = class_dep(17);
 
-        let dg = DepGraphTraversor::<SimpleDepGraph>::new(
-            ([
+        let dg = DepGraphWithDelta::new(
+            Some(SimpleDepGraph::from([
                 // 'Extends' edges
                 (
                     class_a.class_to_extends().unwrap(),
@@ -638,11 +599,11 @@ mod tests {
                 (class_c, HashSet::from([class_l, class_m])),
                 (class_i, HashSet::from([class_n])),
                 (class_j, HashSet::from([class_o])),
-            ])
-            .into(),
+            ])),
+            DepGraphDelta::default(),
         );
         let mut acc = HashTrieSet::new().insert(class_a).insert(class_i);
-        dg.add_extend_deps(MODE, &mut acc);
+        dg.add_extend_deps(&mut acc);
         assert_eq!(
             HashSet::from_iter(acc.iter().copied()),
             HashSet::from([
@@ -697,8 +658,8 @@ mod tests {
         let d19 = Dep::new(119);
         let d20 = Dep::new(120);
 
-        let dg = DepGraphTraversor::<SimpleDepGraph>::new(
-            ([
+        let dg = DepGraphWithDelta::new(
+            Some(SimpleDepGraph::from([
                 // 'Extends' edges
                 (
                     class_a.class_to_extends().unwrap(),
@@ -749,11 +710,11 @@ mod tests {
                 (class_g, HashSet::from([d18])),
                 (class_h, HashSet::from([d19])),
                 (class_i, HashSet::from([d20])),
-            ])
-            .into(),
+            ])),
+            DepGraphDelta::default(),
         );
         let mut fanout = HashTrieSet::new();
-        dg.get_member_fanout(MODE, class_b, DepType::Method, "m", &mut fanout);
+        dg.get_member_fanout(class_b, DepType::Method, "m", &mut fanout);
         assert_eq!(
             fanout.into_iter().copied().sorted().collect::<Vec<_>>(),
             [

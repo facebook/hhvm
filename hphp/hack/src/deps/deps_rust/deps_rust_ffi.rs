@@ -7,12 +7,10 @@
 
 use std::cell::RefCell;
 use std::ffi::OsString;
-use std::fs::File;
 use std::path::Path;
 
 use dep::Dep;
 use deps_rust::DepSet;
-use deps_rust::DependentIterator;
 use deps_rust::RawTypingDepsMode;
 use deps_rust::VisitedSet;
 use deps_rust::DEP_GRAPH;
@@ -147,13 +145,13 @@ ocaml_ffi! {
 ocaml_ffi! {
     fn hh_custom_dep_graph_replace(mode: RawTypingDepsMode) {
         // Safety: we don't call into OCaml again, so mode will remain valid.
-        DEP_GRAPH.replace_dep_graph(mode).unwrap();
+        DEP_GRAPH.write(mode).replace_dep_graph(mode).unwrap();
     }
 
     // Returns true if we know for sure that the depgraph has the edge, false
     // if we don't know.
     fn hh_depgraph_has_edge(mode: RawTypingDepsMode, dependent: Dep, dependency: Dep) -> bool {
-        depgraph_has_edge(mode, dependent, dependency)
+        DEP_GRAPH.read(mode).has_edge(dependent, dependency)
     }
 
     fn hh_custom_dep_graph_get_ideps_from_hash(mode: RawTypingDepsMode, dep: Dep) -> Custom<DepSet> {
@@ -168,7 +166,7 @@ ocaml_ffi! {
     // Returns the union of the provided dep set and their recursive 'extends' dependents.
     fn hh_custom_dep_graph_add_extend_deps(mode: RawTypingDepsMode, query: Custom<DepSet>) -> Custom<DepSet> {
         let mut acc = query.clone();
-        DEP_GRAPH.add_extend_deps(mode, &mut acc);
+        DEP_GRAPH.read(mode).add_extend_deps(&mut acc);
         Custom::from(acc.into())
     }
 
@@ -180,7 +178,7 @@ ocaml_ffi! {
         acc: Custom<DepSet>,
     ) -> Custom<DepSet> {
         let mut acc = acc.clone();
-        DEP_GRAPH.get_extend_deps(mode, &mut visited.borrow_mut(), source_class, &mut acc);
+        DEP_GRAPH.read(mode).get_extend_deps(&mut visited.borrow_mut(), source_class, &mut acc);
         Custom::from(acc.into())
     }
 
@@ -192,8 +190,7 @@ ocaml_ffi! {
         fanout_acc: Custom<DepSet>,
     ) -> Custom<DepSet> {
         let mut fanout_acc = fanout_acc.clone();
-        DEP_GRAPH.get_member_fanout(
-            mode,
+        DEP_GRAPH.read(mode).get_member_fanout(
             class_dep,
             member_type,
             &member_name,
@@ -207,13 +204,11 @@ ocaml_ffi! {
         dependent: Dep,
         dependency: Dep,
     ) {
-        DEP_GRAPH.lock_mut_delta_and(move |s| {
-            s.insert(dependent, dependency);
-        });
+        DEP_GRAPH.write_delta().insert(dependent, dependency);
     }
 
     fn hh_custom_dep_graph_dep_graph_delta_num_edges() -> usize {
-        DEP_GRAPH.lock_delta_and(|delta| delta.added_edges_count())
+        DEP_GRAPH.read_delta().added_edges_count()
     }
 
     fn hh_custom_dep_graph_save_delta(dest: OsString, reset_state_after_saving: bool) -> usize {
@@ -221,7 +216,7 @@ ocaml_ffi! {
     }
 
     fn hh_custom_dep_graph_load_delta(mode: RawTypingDepsMode, source: OsString) -> usize {
-        load_delta(mode, source)
+        DEP_GRAPH.write(mode).load_delta(source)
     }
 
     // Moves the source file to the destination directory.
@@ -235,14 +230,10 @@ ocaml_ffi! {
     }
 }
 
-fn depgraph_has_edge(mode: RawTypingDepsMode, dependent: Dep, dependency: Dep) -> bool {
-    DEP_GRAPH.lock_and(mode, |g| g.has_edge(dependent, dependency))
-}
-
 fn get_ideps_from_hash(mode: RawTypingDepsMode, dep: Dep) -> Custom<DepSet> {
-    let deps = DEP_GRAPH.iter_dependents_with_duplicates(mode, dep, |iter_dep| {
-        iter_dep.collect::<HashTrieSet<_>>()
-    });
+    let deps = DEP_GRAPH
+        .read(mode)
+        .iter_dependents_with_duplicates(dep, |iter_dep| iter_dep.collect::<HashTrieSet<_>>());
     Custom::from(DepSet::from(deps))
 }
 
@@ -253,9 +244,11 @@ fn query_and_accumulate_typing_deps(
 ) -> Custom<DepSet> {
     let mut acc = query.clone();
     for dependency in query.iter() {
-        DEP_GRAPH.iter_dependents_with_duplicates(mode, *dependency, |iter| {
-            iter.for_each(|dependent| acc.insert_mut(dependent))
-        })
+        DEP_GRAPH
+            .read(mode)
+            .iter_dependents_with_duplicates(*dependency, |iter| {
+                iter.for_each(|dependent| acc.insert_mut(dependent))
+            })
     }
     Custom::from(DepSet::from(acc))
 }
@@ -266,41 +259,17 @@ fn save_delta(dest: OsString, reset_state_after_saving: bool) -> usize {
         .append(true)
         .open(dest)
         .unwrap();
-    let hashes_added = DEP_GRAPH.lock_delta_and(move |s| {
-        let mut w = std::io::BufWriter::new(f);
-        let hashes_added = s.write_added_edges_to(&mut w).unwrap();
-        w.into_inner().unwrap();
-        hashes_added
-    });
+    let mut w = std::io::BufWriter::new(f);
+    let hashes_added = DEP_GRAPH
+        .write_delta()
+        .write_added_edges_to(&mut w)
+        .unwrap();
+    w.into_inner().unwrap();
 
     if reset_state_after_saving {
-        DEP_GRAPH.lock_mut_delta_and(|s| {
-            s.clear();
-        });
+        DEP_GRAPH.write_delta().clear();
     }
     hashes_added
-}
-
-fn load_delta(mode: RawTypingDepsMode, source: OsString) -> usize {
-    let f = File::open(source).unwrap();
-    let mut r = std::io::BufReader::new(f);
-
-    // Safety: we don't call into OCaml again, so mode will remain valid.
-    DEP_GRAPH.lock_base_and(mode, move |g| {
-        DEP_GRAPH.lock_mut_delta_and(|s| {
-            let result = match g {
-                Some(g) => {
-                    s.read_added_edges_from(&mut r, |dependent, dependency| {
-                        // Only add when it's not already in
-                        // the graph!
-                        !g.dependent_dependency_edge_exists(dependent, dependency)
-                    })
-                }
-                None => s.read_added_edges_from(&mut r, |_, _| true),
-            };
-            result.unwrap()
-        })
-    })
 }
 
 // Auxiliary functions for Typing_deps.DepSet/Typing_deps.VisitedSet

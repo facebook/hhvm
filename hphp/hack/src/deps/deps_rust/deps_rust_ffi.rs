@@ -12,15 +12,12 @@ use std::fs::File;
 use std::path::Path;
 
 use dep::Dep;
-use deps_rust::dep_graph_delta_with;
-use deps_rust::dep_graph_delta_with_mut;
 use deps_rust::dep_graph_override;
-use deps_rust::dep_graph_with_option;
 use deps_rust::iter_dependents_with_duplicates;
-use deps_rust::lock_depgraph_and;
 use deps_rust::DepSet;
 use deps_rust::RawTypingDepsMode;
 use deps_rust::VisitedSet;
+use deps_rust::DEP_GRAPH;
 use hash::HashSet;
 use ocamlrep::Value;
 use ocamlrep_custom::CamlSerialize;
@@ -190,7 +187,7 @@ ocaml_ffi! {
         dependent: Dep,
         dependency: Dep,
     ) {
-        dep_graph_delta_with_mut(move |s| {
+        DEP_GRAPH.lock_mut_delta_and(move |s| {
             s.insert(dependent, dependency);
         });
     }
@@ -221,7 +218,7 @@ ocaml_ffi! {
 /// Returns true if we know for sure that the depgraph has the edge, false
 /// if we don't know.
 fn depgraph_has_edge_for_sure(mode: RawTypingDepsMode, dependent: Dep, dependency: Dep) -> bool {
-    lock_depgraph_and(mode, |g| g.has_edge_for_sure(dependent, dependency))
+    DEP_GRAPH.lock_and(mode, |g| g.has_edge_for_sure(dependent, dependency))
 }
 
 fn get_ideps_from_hash(mode: RawTypingDepsMode, dep: Dep) -> Custom<DepSet> {
@@ -323,7 +320,7 @@ fn save_delta(dest: OsString, reset_state_after_saving: bool) -> usize {
         .append(true)
         .open(dest)
         .unwrap();
-    let hashes_added = dep_graph_delta_with(move |s| {
+    let hashes_added = DEP_GRAPH.lock_delta_and(move |s| {
         let mut w = std::io::BufWriter::new(f);
         let hashes_added = s.write_added_edges_to(&mut w).unwrap();
         w.into_inner().unwrap();
@@ -331,7 +328,7 @@ fn save_delta(dest: OsString, reset_state_after_saving: bool) -> usize {
     });
 
     if reset_state_after_saving {
-        dep_graph_delta_with_mut(|s| {
+        DEP_GRAPH.lock_mut_delta_and(|s| {
             s.clear();
         });
     }
@@ -343,8 +340,8 @@ fn load_delta(mode: RawTypingDepsMode, source: OsString) -> usize {
     let mut r = std::io::BufReader::new(f);
 
     // Safety: we don't call into OCaml again, so mode will remain valid.
-    dep_graph_with_option(mode, move |g| {
-        dep_graph_delta_with_mut(|s| {
+    DEP_GRAPH.lock_base_and(mode, move |g| {
+        DEP_GRAPH.lock_mut_delta_and(|s| {
             let result = match g {
                 Some(g) => {
                     s.read_added_edges_from(&mut r, |dependent, dependency| {

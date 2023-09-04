@@ -17,6 +17,7 @@ use itertools::Either;
 use once_cell::sync::OnceCell;
 use parking_lot::RwLock;
 use rpds::HashTrieSet;
+use typing_deps_hash::DepType;
 
 use crate::RawTypingDepsMode;
 use crate::TypingDepsMode;
@@ -333,12 +334,98 @@ impl<G: DependentIterator> DepGraphTraversor<G> {
             }
         }
     }
+
+    /// The fanout of a member `m` in type `A` contains:
+    /// - the members `m` in descendants of `A` down to the first members `m` which are declared.
+    /// - the dependents of those members `m` in descendants,
+    ///   but excluding dependents of declared members.
+    ///
+    /// We also include `A::m` itself in the result.
+    /// The computed fanout is added to the provided fanout accumulator.
+    pub fn get_member_fanout(
+        &self,
+        mode: RawTypingDepsMode,
+        class_dep: Dep,
+        member_type: DepType,
+        member_name: &str,
+        fanout_acc: &mut HashTrieSet<Dep>,
+    ) {
+        let mut queue = VecDeque::new();
+        let mut visited = HashSet::default();
+
+        self.visit_class_dep_for_member_fanout(
+            mode,
+            class_dep,
+            member_type,
+            member_name,
+            &mut visited,
+            &mut queue,
+            fanout_acc,
+            false,
+        );
+
+        while let Some(class_dep) = queue.pop_front() {
+            self.visit_class_dep_for_member_fanout(
+                mode,
+                class_dep,
+                member_type,
+                member_name,
+                &mut visited,
+                &mut queue,
+                fanout_acc,
+                true,
+            );
+        }
+    }
+
+    fn visit_class_dep_for_member_fanout(
+        &self,
+        mode: RawTypingDepsMode,
+        class_dep: Dep,
+        member_type: DepType,
+        member_name: &str,
+        visited: &mut HashSet<Dep>,
+        queue: &mut VecDeque<Dep>,
+        fanout_acc: &mut HashTrieSet<Dep>,
+        stop_if_declared: bool,
+    ) {
+        if !visited.insert(class_dep) {
+            return;
+        }
+        fanout_acc.insert_mut(class_dep);
+        let member_dep = class_dep.member(member_type, member_name);
+        let mut member_is_declared = false;
+        let mut member_deps = HashSet::default();
+        self.iter_dependents_with_duplicates(mode, member_dep, |deps| {
+            for dep in deps {
+                if dep.is_declares() {
+                    member_is_declared = true;
+                    if stop_if_declared {
+                        break;
+                    }
+                } else {
+                    member_deps.insert(dep);
+                }
+            }
+        });
+        if !(stop_if_declared && member_is_declared) {
+            member_deps
+                .into_iter()
+                .for_each(|dep| fanout_acc.insert_mut(dep));
+            let extends_dep_for_class = class_dep.class_to_extends().unwrap();
+            self.iter_dependents_with_duplicates(mode, extends_dep_for_class, |iter| {
+                iter.for_each(|dep| queue.push_back(dep));
+            })
+        }
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use std::collections::HashMap;
     use std::collections::HashSet;
+
+    use itertools::Itertools;
 
     use super::*;
 
@@ -556,6 +643,120 @@ mod tests {
                 class_a, class_b, class_c, class_d, class_e, class_f, class_g, class_h, class_i,
                 class_j
             ])
+        );
+    }
+
+    #[test]
+    fn test_member_fanout() {
+        fn class_dep(n: u64) -> Dep {
+            Dep::new((n << 1) + 1)
+        }
+        let class_a = class_dep(0);
+        let class_b = class_dep(1);
+        let class_c = class_dep(2);
+        let class_d = class_dep(3);
+        let class_e = class_dep(4);
+        let class_f = class_dep(5);
+        let class_g = class_dep(6);
+        let class_h = class_dep(7);
+        let class_i = class_dep(8);
+        let class_j = class_dep(9);
+        let a_m = class_a.member(DepType::Method, "m");
+        let b_m = class_b.member(DepType::Method, "m");
+        let c_m = class_c.member(DepType::Method, "m");
+        let d_m = class_d.member(DepType::Method, "m");
+        let e_m = class_e.member(DepType::Method, "m");
+        let f_m = class_f.member(DepType::Method, "m");
+        let g_m = class_g.member(DepType::Method, "m");
+        let h_m = class_h.member(DepType::Method, "m");
+        let d0 = Dep::new(100);
+        let d1 = Dep::new(101);
+        let d2 = Dep::new(102);
+        let d3 = Dep::new(103);
+        let d4 = Dep::new(104);
+        let d5 = Dep::new(105);
+        let d6 = Dep::new(106);
+        let d7 = Dep::new(107);
+        let d8 = Dep::new(108);
+        let d9 = Dep::new(109);
+        let d10 = Dep::new(110);
+        let d11 = Dep::new(111);
+        let d12 = Dep::new(112);
+        let d13 = Dep::new(113);
+        let d14 = Dep::new(114);
+        let d15 = Dep::new(115);
+        let d16 = Dep::new(116);
+        let d17 = Dep::new(117);
+        let d18 = Dep::new(118);
+        let d19 = Dep::new(119);
+        let d20 = Dep::new(120);
+
+        let dg = DepGraphTraversor::<SimpleDepGraph>::new(
+            ([
+                // 'Extends' edges
+                (
+                    class_a.class_to_extends().unwrap(),
+                    HashSet::from([class_b]),
+                ),
+                (
+                    class_b.class_to_extends().unwrap(),
+                    HashSet::from([class_c, class_f, class_j]),
+                ),
+                (
+                    class_c.class_to_extends().unwrap(),
+                    HashSet::from([class_d, class_g, class_i]),
+                ),
+                (
+                    class_d.class_to_extends().unwrap(),
+                    HashSet::from([class_e]),
+                ),
+                (
+                    class_g.class_to_extends().unwrap(),
+                    HashSet::from([class_h]),
+                ),
+                (
+                    class_i.class_to_extends().unwrap(),
+                    HashSet::from([class_f]), // makes the graph a DAG instead of just a tree
+                ),
+                // Let's introduce a cycle
+                (
+                    class_j.class_to_extends().unwrap(),
+                    HashSet::from([class_b]),
+                ),
+                // member deps
+                (a_m, HashSet::from([d0])),
+                (b_m, HashSet::from([Dep::declares(), d1])),
+                (c_m, HashSet::from([d2])),
+                (d_m, HashSet::from([d3, Dep::declares(), d8])),
+                (e_m, HashSet::from([d4, d10])),
+                (f_m, HashSet::from([d5, Dep::declares()])),
+                (g_m, HashSet::from([d6, d11])),
+                (h_m, HashSet::from([d7, Dep::declares(), d9])),
+                // I::m and J::m does not appear in the graph
+                // Other class deps
+                (class_a, HashSet::from([d12])),
+                (class_b, HashSet::from([d13])),
+                (class_c, HashSet::from([d14])),
+                (class_d, HashSet::from([d15])),
+                (class_e, HashSet::from([d16])),
+                (class_f, HashSet::from([d17])),
+                (class_g, HashSet::from([d18])),
+                (class_h, HashSet::from([d19])),
+                (class_i, HashSet::from([d20])),
+            ])
+            .into(),
+        );
+        let mut fanout = HashTrieSet::new();
+        dg.get_member_fanout(MODE, class_b, DepType::Method, "m", &mut fanout);
+        assert_eq!(
+            fanout.into_iter().copied().sorted().collect::<Vec<_>>(),
+            [
+                class_b, class_c, class_d, class_f, class_g, class_h, class_i, class_j, d1, d2, d6,
+                d11
+            ]
+            .into_iter()
+            .sorted()
+            .collect::<Vec<_>>()
         );
     }
 }

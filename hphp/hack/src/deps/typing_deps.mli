@@ -143,9 +143,6 @@ module Dep : sig
   val variant_to_string : 'a variant -> string
 
   val pp_variant : Format.formatter -> 'a variant -> unit
-
-  (** Wether a dep is the hash for the Declares variant. *)
-  val is_declares : t -> bool
 end
 
 module DepHashKey : sig
@@ -288,6 +285,16 @@ val add_typing_deps : Mode.t -> DepSet.t -> DepSet.t
 
 (** add_extend_deps and add_typing_deps chained together *)
 val add_all_deps : Mode.t -> DepSet.t -> DepSet.t
+
+(** The fanout of a member `m` in type `A` contains:
+  - the members `m` in descendants of `A` down to the first members `m` which are declared.
+  - the dependents of those members `m` in descendants,
+    but excluding dependents of declared members.
+
+  We also include `A::m` itself in the result.
+  The computed fanout is added to the provided DepSet accumulator. *)
+val get_member_fanout :
+  Mode.t -> class_dep:Dep.t -> Dep.Member.t -> DepSet.t -> DepSet.t
 
 module Telemetry : sig
   val depgraph_delta_num_edges : Mode.t -> int option

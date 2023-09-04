@@ -6,11 +6,12 @@
 use std::hash::Hasher;
 
 use fnv::FnvHasher;
+use ocamlrep::FromOcamlRep;
 
 /// Variant types used in the depgraph table.
 ///
 /// NOTE: Keep in sync with the order of the fields in `Typing_deps.ml`.
-#[derive(Copy, Clone, Debug, PartialEq, Eq, strum::EnumString)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, strum::EnumString, FromOcamlRep)]
 #[repr(u8)]
 pub enum DepType {
     GConst = 0,
@@ -109,4 +110,8 @@ pub fn hash2(dep_type: DepType, type_hash: u64, name2: &[u8]) -> u64 {
     hasher.write_u64(type_hash);
     hasher.write(name2);
     postprocess_hash(dep_type, hasher.finish())
+}
+
+pub fn declares_hash() -> u64 {
+    hash1(DepType::Declares, &[])
 }

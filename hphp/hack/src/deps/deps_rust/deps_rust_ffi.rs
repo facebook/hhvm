@@ -184,6 +184,24 @@ ocaml_ffi! {
         Custom::from(acc.into())
     }
 
+    fn hh_get_member_fanout(
+        mode: RawTypingDepsMode,
+        class_dep: Dep,
+        member_type: DepType,
+        member_name: String,
+        fanout_acc: Custom<DepSet>,
+    ) -> Custom<DepSet> {
+        let mut fanout_acc = fanout_acc.clone();
+        DEP_GRAPH.get_member_fanout(
+            mode,
+            class_dep,
+            member_type,
+            &member_name,
+            &mut fanout_acc,
+        );
+        Custom::from(fanout_acc.into())
+    }
+
     // Add edge into the in-memory depgraph delta
     fn hh_custom_dep_graph_register_discovered_dep_edge(
         dependent: Dep,

@@ -98,6 +98,17 @@ module Dep = struct
     let const name = Const name
 
     let all = All
+
+    let to_dep_kind_and_name (member : t) : dep_kind * string =
+      let default_name = "" in
+      match member with
+      | Const name -> (KConst, name)
+      | Constructor -> (KConstructor, default_name)
+      | Prop name -> (KProp, name)
+      | SProp name -> (KSProp, name)
+      | Method name -> (KMethod, name)
+      | SMethod name -> (KSMethod, name)
+      | All -> (KAllMembers, default_name)
   end
 
   external hash1 : int -> string -> int = "hash1_ocaml" [@@noalloc]
@@ -191,19 +202,9 @@ module Dep = struct
     | Module _ -> KModule
     | Declares -> KDeclares
 
-  let make_member_dep_from_type_dep : t -> Member.t -> t =
-   fun type_hash -> function
-    | Member.Const name -> hash2 (dep_kind_to_enum KConst) type_hash name
-    | Member.Constructor -> hash2 (dep_kind_to_enum KConstructor) type_hash ""
-    | Member.Prop name -> hash2 (dep_kind_to_enum KProp) type_hash name
-    | Member.SProp name -> hash2 (dep_kind_to_enum KSProp) type_hash name
-    | Member.Method name -> hash2 (dep_kind_to_enum KMethod) type_hash name
-    | Member.SMethod name -> hash2 (dep_kind_to_enum KSMethod) type_hash name
-    | Member.All -> hash2 (dep_kind_to_enum KAllMembers) type_hash ""
-
-  let declares_hash = hash1 (dep_kind_to_enum KDeclares) ""
-
-  let is_declares : t -> bool = Int.equal declares_hash
+  let make_member_dep_from_type_dep (type_dep : t) (member : Member.t) : t =
+    let (dep_kind, member_name) = Member.to_dep_kind_and_name member in
+    hash2 (dep_kind_to_enum dep_kind) type_dep member_name
 
   (* Keep in sync with the tags for `DepType` in `typing_deps_hash.rs`. *)
   let rec make : type a. a variant -> t = function
@@ -229,7 +230,7 @@ module Dep = struct
       make_member_dep_from_type_dep (make (Type name1)) (Member.SMethod name2)
     | AllMembers name1 ->
       make_member_dep_from_type_dep (make (Type name1)) Member.All
-    | Declares -> declares_hash
+    | Declares -> hash1 (dep_kind_to_enum KDeclares) ""
 
   let is_class x = x land 1 = 1
 
@@ -468,6 +469,10 @@ module CustomGraph = struct
   external get_extend_deps :
     Mode.t -> VisitedSet.t -> Dep.t -> DepSet.t -> DepSet.t
     = "hh_custom_dep_graph_get_extend_deps"
+
+  external get_member_fanout :
+    Mode.t -> Dep.t -> Dep.dep_kind -> string -> DepSet.t -> DepSet.t
+    = "hh_get_member_fanout"
 
   external register_discovered_dep_edge : Dep.t -> Dep.t -> unit
     = "hh_custom_dep_graph_register_discovered_dep_edge"
@@ -996,6 +1001,15 @@ let add_extend_deps mode acc = CustomGraph.add_extend_deps mode acc
 let add_typing_deps mode acc = CustomGraph.add_typing_deps mode acc
 
 let add_all_deps mode acc = CustomGraph.add_all_deps mode acc
+
+let get_member_fanout mode ~class_dep member fanout_acc =
+  let (member_dep_kind, member_name) = Dep.Member.to_dep_kind_and_name member in
+  CustomGraph.get_member_fanout
+    mode
+    class_dep
+    member_dep_kind
+    member_name
+    fanout_acc
 
 let dump_current_edge_buffer_in_memory_mode =
   CustomGraph.dump_current_edge_buffer

@@ -10,4 +10,5 @@ path = "../../typing_deps_hash.rs"
 
 [dependencies]
 fnv = "1.0"
+ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 strum = { version = "0.24", features = ["derive"] }

@@ -14,6 +14,9 @@ use ocamlrep::ToOcamlRep;
 use ocamlrep::Value;
 use serde::Deserialize;
 use serde::Serialize;
+use typing_deps_hash::declares_hash;
+use typing_deps_hash::hash2;
+use typing_deps_hash::DepType;
 
 #[repr(transparent)]
 #[derive(Clone, Copy, Default, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
@@ -36,6 +39,22 @@ impl Dep {
         } else {
             Some(Dep(self.0 & (!1)))
         }
+    }
+
+    /// The `Declares` special dep, used to mark declared members.
+    pub fn declares() -> Self {
+        Dep(declares_hash())
+    }
+
+    /// Whether a dep is the `Declares` special dep.
+    pub fn is_declares(&self) -> bool {
+        *self == Self::declares()
+    }
+
+    /// Assuming `self` is the dep of a type `A`, returns the dep of
+    /// member `name` in `A` with member kind `dep_type`.
+    pub fn member(&self, dep_type: DepType, name: &str) -> Self {
+        Dep(hash2(dep_type, self.0, name.as_bytes()))
     }
 
     #[inline]

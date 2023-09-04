@@ -19,3 +19,4 @@ ocamlrep_custom = { version = "0.1.0", git = "https://github.com/facebook/ocamlr
 once_cell = "1.12"
 parking_lot = { version = "0.12.1", features = ["send_guard"] }
 rpds = "0.11.0"
+typing_deps_hash = { version = "0.0.0", path = "../typing_deps_hash" }

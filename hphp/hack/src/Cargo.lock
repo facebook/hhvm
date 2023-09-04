@@ -1360,6 +1360,7 @@ dependencies = [
  "bytemuck",
  "ocamlrep",
  "serde",
+ "typing_deps_hash",
 ]
 
 [[package]]
@@ -1423,6 +1424,7 @@ dependencies = [
  "once_cell",
  "parking_lot",
  "rpds",
+ "typing_deps_hash",
 ]
 
 [[package]]
@@ -5651,6 +5653,7 @@ name = "typing_deps_hash"
 version = "0.0.0"
 dependencies = [
  "fnv",
+ "ocamlrep",
  "strum",
 ]
 

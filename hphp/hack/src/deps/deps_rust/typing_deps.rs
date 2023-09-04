@@ -403,7 +403,7 @@ impl CamlSerialize for VisitedSet {
 
 pub fn lock_depgraph_and<F, R>(mode: RawTypingDepsMode, f: F) -> R
 where
-    F: FnOnce(DepGraphWithDelta<'_>) -> R,
+    F: FnOnce(DepGraphWithDelta<'_, DepGraph>) -> R,
 {
     dep_graph_delta_with(|delta| {
         dep_graph_with_option(mode, |g| f(DepGraphWithDelta::new(g, delta)))

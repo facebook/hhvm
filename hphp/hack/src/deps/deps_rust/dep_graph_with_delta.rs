@@ -5,17 +5,17 @@
 
 use dep_graph_delta::DepGraphDelta;
 use dep_graph_delta::HashSetDelta;
+use depgraph_reader::BaseDepgraphTrait;
 use depgraph_reader::Dep;
-use depgraph_reader::DepGraph;
 use itertools::Either;
 
-pub struct DepGraphWithDelta<'a> {
-    base: Option<&'a DepGraph>,
+pub struct DepGraphWithDelta<'a, B> {
+    base: Option<&'a B>,
     delta: &'a DepGraphDelta,
 }
 
-impl<'a> DepGraphWithDelta<'a> {
-    pub fn new(base: Option<&'a DepGraph>, delta: &'a DepGraphDelta) -> Self {
+impl<'a, B: BaseDepgraphTrait> DepGraphWithDelta<'a, B> {
+    pub fn new(base: Option<&'a B>, delta: &'a DepGraphDelta) -> Self {
         Self { base, delta }
     }
 
@@ -36,14 +36,8 @@ impl<'a> DepGraphWithDelta<'a> {
         match base {
             None => f(&mut added_iter),
             Some(base) => {
-                let hashes = base.hash_list_for(dep);
-                match hashes {
-                    None => f(&mut added_iter),
-                    Some(hashes) => {
-                        let base_iter = base.hash_list_hashes(hashes);
-                        f(&mut added_iter.chain(base_iter.filter(|d| !is_removed(d))))
-                    }
-                }
+                let base_iter = base.iter_dependents(dep);
+                f(&mut added_iter.chain(base_iter.filter(|d| !is_removed(d))))
             }
         }
     }
@@ -55,5 +49,87 @@ impl<'a> DepGraphWithDelta<'a> {
         base.map_or(false, |g| {
             g.dependent_dependency_edge_exists(dependent, dependency)
         }) && !delta.edge_is_removed(dependent, dependency)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::collections::HashMap;
+    use std::collections::HashSet;
+
+    use super::*;
+
+    pub struct SimpleDepGraph {
+        graph: HashMap<Dep, HashSet<Dep>>,
+    }
+
+    impl<const N: usize> From<[(Dep, HashSet<Dep>); N]> for SimpleDepGraph {
+        fn from(arr: [(Dep, HashSet<Dep>); N]) -> Self {
+            Self {
+                graph: arr.into_iter().collect(),
+            }
+        }
+    }
+
+    impl BaseDepgraphTrait for SimpleDepGraph {
+        fn iter_dependents(&self, dep: Dep) -> Box<dyn Iterator<Item = Dep> + '_> {
+            Box::new(
+                self.graph
+                    .get(&dep)
+                    .map_or(Either::Left(std::iter::empty()), |set| {
+                        Either::Right(set.iter().copied())
+                    }),
+            )
+        }
+
+        fn dependent_dependency_edge_exists(&self, dependent: Dep, dependency: Dep) -> bool {
+            self.graph
+                .get(&dependency)
+                .map_or(false, |set| set.contains(&dependent))
+        }
+    }
+
+    #[test]
+    fn test_some_base() {
+        let base = SimpleDepGraph::from([
+            (Dep::new(0), HashSet::from([Dep::new(1), Dep::new(2)])),
+            (Dep::new(3), HashSet::from([Dep::new(2)])),
+        ]);
+        let mut delta = DepGraphDelta::default();
+        delta.insert(Dep::new(4), Dep::new(3));
+        delta.insert(Dep::new(3), Dep::new(0));
+        delta.remove(Dep::new(2), Dep::new(0));
+        let dg = DepGraphWithDelta::new(Some(&base), &delta);
+
+        assert_eq!(
+            dg.iter_dependents_with_duplicates(Dep::new(0), |iter| iter.collect::<HashSet<_>>()),
+            HashSet::from([Dep::new(1), Dep::new(3)])
+        );
+        assert_eq!(
+            dg.iter_dependents_with_duplicates(Dep::new(3), |iter| iter.collect::<HashSet<_>>()),
+            HashSet::from([Dep::new(2), Dep::new(4)])
+        );
+        assert!(!dg.has_edge_for_sure(Dep::new(2), Dep::new(0)));
+        assert!(dg.has_edge_for_sure(Dep::new(2), Dep::new(3)));
+    }
+
+    #[test]
+    fn test_no_base() {
+        let mut delta = DepGraphDelta::default();
+        delta.insert(Dep::new(4), Dep::new(3));
+        delta.insert(Dep::new(3), Dep::new(0));
+        delta.remove(Dep::new(2), Dep::new(0));
+        let dg = DepGraphWithDelta::<SimpleDepGraph>::new(None, &delta);
+
+        assert_eq!(
+            dg.iter_dependents_with_duplicates(Dep::new(0), |iter| iter.collect::<HashSet<_>>()),
+            HashSet::from([Dep::new(3)])
+        );
+        assert_eq!(
+            dg.iter_dependents_with_duplicates(Dep::new(3), |iter| iter.collect::<HashSet<_>>()),
+            HashSet::from([Dep::new(4)])
+        );
+        assert!(!dg.has_edge_for_sure(Dep::new(2), Dep::new(0)));
+        assert!(!dg.has_edge_for_sure(Dep::new(2), Dep::new(3)));
     }
 }

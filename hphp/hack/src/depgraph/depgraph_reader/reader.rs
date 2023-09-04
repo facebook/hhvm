@@ -2,6 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+
 pub mod byteutils;
 pub mod compress;
 
@@ -129,6 +130,26 @@ impl DepGraph {
             DepGraph::New(dg) => Either::Left(dg.par_all_hashes()),
             DepGraph::Old(dg) => Either::Right(dg.par_all_hashes()),
         }
+    }
+}
+
+pub trait BaseDepgraphTrait {
+    fn iter_dependents(&self, dep: Dep) -> Box<dyn Iterator<Item = Dep> + '_>;
+
+    fn dependent_dependency_edge_exists(&self, dependent: Dep, dependency: Dep) -> bool;
+}
+
+impl BaseDepgraphTrait for DepGraph {
+    fn iter_dependents(&self, dep: Dep) -> Box<dyn Iterator<Item = Dep> + '_> {
+        Box::new(match self.hash_list_for(dep) {
+            None => Either::Left(std::iter::empty()),
+            Some(hashes) => Either::Right(self.hash_list_hashes(hashes)),
+        })
+    }
+
+    fn dependent_dependency_edge_exists(&self, dependent: Dep, dependency: Dep) -> bool {
+        self.deref()
+            .dependent_dependency_edge_exists(dependent, dependency)
     }
 }
 

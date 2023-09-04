@@ -31,10 +31,7 @@ class A {
 }
 //// changed-b.php
 <?hh
-class B extends A {
-  // Removing B::C will change the origin field of C::C and thus
-  // trigger a type check of places that use C::C! Weird!
-}
+class B extends A {}
 //// changed-c.php
 <?hh
 class C extends B {}

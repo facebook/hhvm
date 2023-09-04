@@ -1,9 +1,4 @@
-Fun accept_a_const
-Fun accept_b_const
-Fun accept_c_const
 Fun use_a_const
-Fun use_b_const
-Fun use_c_const
 Type A
+Fun accept_a_const
 Type B
-Type C

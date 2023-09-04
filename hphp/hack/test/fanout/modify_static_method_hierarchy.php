@@ -9,7 +9,7 @@ class A {
 <?hh
 
 class B extends A {
-  public static function foo(int $c): void {}
+  public static function foo(string $c): void {}
 }
 
 //// base-c.php
@@ -78,7 +78,9 @@ class A {
 //// changed-b.php
 <?hh
 
-class B extends A {}
+class B extends A {
+  public static function foo(int $c): void {}
+}
 
 //// changed-c.php
 <?hh

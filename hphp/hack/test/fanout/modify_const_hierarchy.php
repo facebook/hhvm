@@ -2,14 +2,14 @@
 <?hh
 
 class A {
-  public static function foo(string $c): void {}
+  const int C = 0;
 }
 
 //// base-b.php
 <?hh
 
 class B extends A {
-  public static function foo(int $c): void {}
+  const int C = 0;
 }
 
 //// base-c.php
@@ -21,7 +21,7 @@ class C extends B {}
 <?hh
 
 class D extends C {
-  public static function foo(string $c): void {}
+  const int C = 0;
 }
 
 //// base-e.php
@@ -33,7 +33,7 @@ class E extends C {}
 <?hh
 
 class F extends E {
-  public static function foo(string $c): void {}
+  const int C = 0;
 }
 
 //// base-g.php
@@ -45,40 +45,42 @@ class G extends F {}
 <?hh
 
 function f_b(): void {
-  B::foo("");
+  B::C;
 }
 
 //// base-use-c.php
 <?hh
 
 function f_c(): void {
-  C::foo("");
+  C::C;
 }
 
 //// base-use-d.php
 <?hh
 
 function f_d(): void {
-  D::foo("");
+  D::C;
 }
 //// base-use-g.php
 <?hh
 
 function f_g(): void {
-  G::foo("");
+  F::C;
 }
 
 //// changed-a.php
 <?hh
 
 class A {
-  public static function foo(string $c): void {}
+  const int C = 0;
 }
 
 //// changed-b.php
 <?hh
 
-class B extends A {}
+class B extends A {
+  const string C = "";
+}
 
 //// changed-c.php
 <?hh
@@ -89,7 +91,7 @@ class C extends B {}
 <?hh
 
 class D extends C {
-  public static function foo(string $c): void {}
+  const int C = 0;
 }
 
 //// changed-e.php
@@ -101,7 +103,7 @@ class E extends C {}
 <?hh
 
 class F extends E {
-  public static function foo(string $c): void {}
+  const int C = 0;
 }
 
 //// changed-g.php
@@ -113,25 +115,25 @@ class G extends F {}
 <?hh
 
 function f_b(): void {
-  B::foo("");
+  B::C;
 }
 
 //// changed-use-c.php
 <?hh
 
 function f_c(): void {
-  C::foo("");
+  C::C;
 }
 
 //// changed-use-d.php
 <?hh
 
 function f_d(): void {
-  D::foo("");
+  D::C;
 }
 //// changed-use-g.php
 <?hh
 
 function f_g(): void {
-  G::foo("");
+  F::C;
 }

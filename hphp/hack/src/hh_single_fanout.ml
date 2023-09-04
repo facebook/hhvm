@@ -17,6 +17,15 @@ let tcopt =
     GlobalOptions.default with
     GlobalOptions.tco_enable_modules = true;
     tco_allow_all_files_for_module_declarations = true;
+    tco_saved_state =
+      {
+        GlobalOptions.default_saved_state with
+        GlobalOptions.rollouts =
+          {
+            Saved_state_rollouts.default with
+            Saved_state_rollouts.optimized_member_fanout = true;
+          };
+      };
   }
 
 let popt =
@@ -181,7 +190,16 @@ let init_paths (hhi_root : Path.t) : unit =
   Relative_path.set_path_prefix Relative_path.Tmp (Path.make "tmp");
   ()
 
-module DepToSymbolsMap = struct
+module DepToSymbolsMap : sig
+  val get :
+    unit ->
+    Typing_deps.Dep.dependency Typing_deps.Dep.variant Typing_deps.DepMap.t
+
+  val callback :
+    Typing_deps.Dep.dependent Typing_deps.Dep.variant ->
+    Typing_deps.Dep.dependency Typing_deps.Dep.variant ->
+    unit
+end = struct
   let map :
       Typing_deps.Dep.dependency Typing_deps.Dep.variant Typing_deps.DepMap.t
       ref =

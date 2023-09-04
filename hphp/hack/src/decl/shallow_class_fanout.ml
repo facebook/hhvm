@@ -30,6 +30,48 @@ let get_minor_change_fanout
     ~(ctx : Provider_context.t)
     (class_dep : Dep.t)
     (member_diff : ClassDiff.member_diff) : DepSet.t =
+  let { consts; typeconsts; props; sprops; methods; smethods; constructor } =
+    member_diff
+  in
+  let acc_fanout member fanout_acc =
+    Typing_deps.get_member_fanout
+      (Provider_context.get_deps_mode ctx)
+      ~class_dep
+      member
+      fanout_acc
+  in
+  let acc_fanouts make_member changes fanout_acc =
+    SMap.fold changes ~init:fanout_acc ~f:(fun name _change fanout_acc ->
+        acc_fanout (make_member name) fanout_acc)
+  in
+  let fanout_acc =
+    DepSet.singleton class_dep
+    |> acc_fanouts Dep.Member.const consts
+    |> acc_fanouts Dep.Member.const typeconsts
+    |> acc_fanouts Dep.Member.prop props
+    |> acc_fanouts Dep.Member.sprop sprops
+    |> acc_fanouts Dep.Member.method_ methods
+    |> acc_fanouts Dep.Member.smethod smethods
+  in
+  let fanout_acc =
+    Option.fold constructor ~init:fanout_acc ~f:(fun fanout_acc _change ->
+        acc_fanout Dep.Member.constructor fanout_acc)
+  in
+  let fanout_acc =
+    if
+      SMap.exists consts ~f:(fun _name change ->
+          method_or_property_change_affects_descendants change)
+    then
+      acc_fanout Dep.Member.all fanout_acc
+    else
+      fanout_acc
+  in
+  fanout_acc
+
+let get_minor_change_fanout_legacy
+    ~(ctx : Provider_context.t)
+    (class_dep : Dep.t)
+    (member_diff : ClassDiff.member_diff) : DepSet.t =
   let mode = Provider_context.get_deps_mode ctx in
   let changed = DepSet.singleton class_dep in
   let acc = DepSet.singleton class_dep in
@@ -124,7 +166,13 @@ let get_fanout ~(ctx : Provider_context.t) (class_name, diff) : DepSet.t =
   | Unchanged -> DepSet.make ()
   | Major_change _major_change -> get_maximum_fanout ctx class_dep
   | Minor_change minor_change ->
-    get_minor_change_fanout ~ctx class_dep minor_change
+    if
+      TypecheckerOptions.optimized_member_fanout
+        (Provider_context.get_tcopt ctx)
+    then
+      get_minor_change_fanout ~ctx class_dep minor_change
+    else
+      get_minor_change_fanout_legacy ~ctx class_dep minor_change
 
 let direct_references_cardinal mode class_name : int =
   Typing_deps.get_ideps mode (Dep.Type class_name) |> DepSet.cardinal

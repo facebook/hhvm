@@ -40,6 +40,8 @@ DEFAULT_HH_SERVER_FLAGS: List[str] = [
     "allow_all_files_for_module_declarations=true",
     "--config",
     "disable_xhp_element_mangling=false",
+    "--config",
+    "ss_force=prod_with_flag_on:optimized_member_fanout",
 ]
 
 

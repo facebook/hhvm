@@ -22,11 +22,48 @@ class D extends C {
   public int $foo = 0;
 }
 
-//// base-use.php
+//// base-e.php
 <?hh
 
-function f(): void {
-  $c->foo = 0;
+class E extends C {}
+
+//// base-f.php
+<?hh
+
+class F extends E {
+  public int $foo = 0;
+}
+
+//// base-g.php
+<?hh
+
+class G extends F {}
+
+//// base-use-b.php
+<?hh
+
+function f_b(B $x): void {
+  $x->foo = 0;
+}
+
+//// base-use-c.php
+<?hh
+
+function f_c(C $x): void {
+  $x->foo = 0;
+}
+
+//// base-use-d.php
+<?hh
+
+function f_d(D $x): void {
+  $x->foo = 0;
+}
+//// base-use-g.php
+<?hh
+
+function f_g(G $x): void {
+  $x->foo = 0;
 }
 
 //// changed-a.php
@@ -55,9 +92,46 @@ class D extends C {
   public int $foo = 0;
 }
 
-//// changed-use.php
+//// changed-e.php
 <?hh
 
-function f(): void {
-  $c->foo = 0;
+class E extends C {}
+
+//// changed-f.php
+<?hh
+
+class F extends E {
+  public int $foo = 0;
+}
+
+//// changed-g.php
+<?hh
+
+class G extends F {}
+
+//// changed-use-b.php
+<?hh
+
+function f_b(B $x): void {
+  $x->foo = 0;
+}
+
+//// changed-use-c.php
+<?hh
+
+function f_c(C $x): void {
+  $x->foo = 0;
+}
+
+//// changed-use-d.php
+<?hh
+
+function f_d(D $x): void {
+  $x->foo = 0;
+}
+//// changed-use-g.php
+<?hh
+
+function f_g(G $x): void {
+  $x->foo = 0;
 }

@@ -86,11 +86,21 @@ let class_id_ty env (id : Ast_defs.id) : Tast.ty =
  * cannot assume that the structure of the CST is reflected in the TAST.
  *)
 
-let base_visitor ~human_friendly ~under_dynamic line char =
+let base_visitor ~human_friendly ~under_dynamic line_char_pairs =
+  let size = List.length line_char_pairs in
+  let zero = List.init size ~f:(fun _ -> None) in
   object (self)
     inherit [_] Tast_visitor.reduce as super
 
-    inherit [Pos.t * _ * _] Visitors_runtime.option_monoid
+    inherit [(Pos.t * _ * _) option list] Visitors_runtime.monoid
+
+    method private select_pos pos env ty =
+      let correct_assumptions = self#correct_assumptions env in
+      List.map line_char_pairs ~f:(fun (line, char) ->
+          if Pos.inside pos line char && correct_assumptions then
+            Some (pos, env, ty)
+          else
+            None)
 
     method private correct_assumptions env =
       let is_under_dynamic_assumptions =
@@ -99,61 +109,57 @@ let base_visitor ~human_friendly ~under_dynamic line char =
       in
       Bool.equal is_under_dynamic_assumptions under_dynamic
 
-    method private merge lhs rhs =
-      (* A node with position P is not always a parent of every other node with
-       * a position contained by P. Some desugaring can cause nodes to be
-       * rearranged so that this is no longer the case (e.g., `invariant`).
-       *
-       * To deal with this, we simply take the smaller node. *)
-      let (lpos, _, _) = lhs in
-      let (rpos, _, _) = rhs in
-      if Pos.length lpos <= Pos.length rpos then
-        lhs
-      else
-        rhs
+    method private zero = zero
 
-    method private merge_opt lhs rhs =
-      match (lhs, rhs) with
-      | (Some lhs, Some rhs) -> Some (self#merge lhs rhs)
-      | (Some lhs, None) -> Some lhs
-      | (None, Some rhs) -> Some rhs
-      | (None, None) -> None
+    method private plus lhss rhss =
+      let merge lhs rhs =
+        (* A node with position P is not always a parent of every other node with
+         * a position contained by P. Some desugaring can cause nodes to be
+         * rearranged so that this is no longer the case (e.g., `invariant`).
+         *
+         * To deal with this, we simply take the smaller node. *)
+        let (lpos, _, _) = lhs in
+        let (rpos, _, _) = rhs in
+        if Pos.length lpos <= Pos.length rpos then
+          lhs
+        else
+          rhs
+      in
+      let merge_opt lhs rhs =
+        match (lhs, rhs) with
+        | (Some lhs, Some rhs) -> Some (merge lhs rhs)
+        | (Some lhs, None) -> Some lhs
+        | (None, Some rhs) -> Some rhs
+        | (None, None) -> None
+      in
+      List.map2_exn lhss rhss ~f:merge_opt
 
     method! on_expr env ((ty, pos, _) as expr) =
-      if Pos.inside pos line char && self#correct_assumptions env then begin
-        match shape_indexing_receiver env expr with
-        | Some recv when human_friendly ->
-          (* If we're looking at a shape indexing expression, we don't
-             want to recurse on the string literal.
+      let res = self#select_pos pos env ty in
+      match shape_indexing_receiver env expr with
+      | Some recv when human_friendly ->
+        (* If we're looking at a shape indexing expression, we don't
+           want to recurse on the string literal.
 
-             For example, if we have the code $user['age'] and hover
-             over 'age', we want the hover type to be int, not string. *)
-          self#merge_opt (Some (pos, env, ty)) (self#on_expr env recv)
-        | _ -> self#merge_opt (Some (pos, env, ty)) (super#on_expr env expr)
-      end else
-        super#on_expr env expr
+           For example, if we have the code $user['age'] and hover
+           over 'age', we want the hover type to be int, not string. *)
+        self#plus res (self#on_expr env recv)
+      | _ -> self#plus res (super#on_expr env expr)
 
     method! on_fun_param env fp =
-      if Pos.inside fp.Aast.param_pos line char && self#correct_assumptions env
-      then
-        self#merge_opt
-          (Some (fp.Aast.param_pos, env, fp.Aast.param_annotation))
-          (super#on_fun_param env fp)
-      else
-        super#on_fun_param env fp
+      let res =
+        self#select_pos fp.Aast.param_pos env fp.Aast.param_annotation
+      in
+      self#plus res (super#on_fun_param env fp)
 
     method! on_capture_lid env ((ty, (pos, _)) as cl) =
-      if Pos.inside pos line char && self#correct_assumptions env then
-        Some (pos, env, ty)
-      else
-        super#on_capture_lid env cl
+      let res = self#select_pos pos env ty in
+      self#plus res (super#on_capture_lid env cl)
 
     method! on_xhp_simple env attribute =
       let (pos, _) = attribute.Aast.xs_name in
-      if Pos.inside pos line char && self#correct_assumptions env then
-        Some (pos, env, attribute.Aast.xs_type)
-      else
-        super#on_xhp_simple env attribute
+      let res = self#select_pos pos env attribute.Aast.xs_type in
+      self#plus res (super#on_xhp_simple env attribute)
 
     method! on_class_id env ((ty, pos, _) as cid) =
       match cid with
@@ -163,29 +169,26 @@ let base_visitor ~human_friendly ~under_dynamic line char =
          smaller position. *)
       | (_, _, Aast.CIexpr e) -> self#on_expr env e
       | _ ->
-        if Pos.inside pos line char && self#correct_assumptions env then
-          self#merge_opt (Some (pos, env, ty)) (super#on_class_id env cid)
-        else
-          super#on_class_id env cid
+        let res = self#select_pos pos env ty in
+        self#plus res (super#on_class_id env cid)
 
     method! on_class_const env cc =
       let acc = super#on_class_const env cc in
 
       let (pos, _) = cc.Aast.cc_id in
-      if Pos.inside pos line char && self#correct_assumptions env then
-        match class_const_ty env cc with
-        | Some ty -> self#merge_opt (Some (pos, env, ty)) acc
-        | None -> acc
-      else
-        acc
+      match class_const_ty env cc with
+      | Some ty ->
+        let res = self#select_pos pos env ty in
+        self#plus res acc
+      | None -> acc
 
     method! on_EnumClassLabel env id label_name =
       let acc = super#on_EnumClassLabel env id label_name in
       match id with
-      | Some ((pos, _) as id)
-        when Pos.inside pos line char && self#correct_assumptions env ->
+      | Some ((pos, _) as id) ->
         let ty = class_id_ty env id in
-        Some (pos, env, ty)
+        let res = self#select_pos pos env ty in
+        self#plus res acc
       | _ -> acc
 
     method! on_If env cond then_block else_block =
@@ -252,10 +255,12 @@ let type_at_pos
     (tast : Tast.program Tast_with_dynamic.t)
     (line : int)
     (char : int) : (Tast_env.env * Tast.ty) option =
-  (base_visitor ~human_friendly:false ~under_dynamic:false line char)#go
+  (base_visitor ~human_friendly:false ~under_dynamic:false [(line, char)])#go
     ctx
     tast.Tast_with_dynamic.under_normal_assumptions
-  >>| fun (_, env, ty) -> (env, ty)
+  |> function
+  | [Some (_, env, ty)] -> Some (env, ty)
+  | _ -> None
 
 (* Return the expanded type of smallest expression at this
    position. Skips string literals in shape indexing expressions so
@@ -278,8 +283,10 @@ let human_friendly_type_at_pos
     else
       tast.Tast_with_dynamic.under_normal_assumptions
   in
-  (base_visitor ~human_friendly:true ~under_dynamic line char)#go ctx tast
-  |> Option.map ~f:(fun (_, env, ty) -> (env, Tast_expand.expand_ty env ty))
+  (base_visitor ~human_friendly:true ~under_dynamic [(line, char)])#go ctx tast
+  |> function
+  | [Some (_, env, ty)] -> Some (env, Tast_expand.expand_ty env ty)
+  | _ -> None
 
 let type_at_range
     (ctx : Provider_context.t)

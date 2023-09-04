@@ -542,7 +542,17 @@ module Eval_primary = struct
             "`switch` statement nonexhaustive; at least the following cases are missing: "
             ^ (List.map ~f:Markdown_lite.md_codify missing
               |> String.concat ~sep:", ") )
-      and reason = lazy [(decl_pos, kind ^ " declared here")] in
+      and reason =
+        lazy
+          [
+            ( decl_pos,
+              Option.value_map
+                kind
+                ~default:
+                  "only unions and intersections of bool, null and enums can be switched on without a default"
+                ~f:(fun kind -> kind ^ " declared here") );
+          ]
+      in
       (Error_code.EnumSwitchNonexhaustive, claim, reason, [])
 
     let enum_switch_redundant_default pos kind decl_pos =

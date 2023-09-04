@@ -82,7 +82,7 @@ module Primary = struct
         }
       | Enum_switch_nonexhaustive of {
           pos: Pos.t;
-          kind: string;
+          kind: string option;
           decl_pos: Pos_or_decl.t;
           missing: string list;
         }

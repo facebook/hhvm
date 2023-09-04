@@ -582,18 +582,7 @@ class t_hack_generator : public t_concat_generator {
       PhpFunctionNameSuffix suffix);
   std::string type_to_cast(const t_type* ttype);
   std::string type_to_enum(const t_type* ttype);
-  void generate_php_docstring(std::ofstream& out, const t_node* tdoc);
-  void generate_php_docstring(std::ofstream& out, const t_enum* tenum);
-  void generate_php_docstring(std::ofstream& out, const t_service* tservice);
-  void generate_php_docstring(std::ofstream& out, const t_const* tconst);
-  void generate_php_docstring(std::ofstream& out, const t_function* tfunction);
-  void generate_php_docstring(std::ofstream& out, const t_field* tfield);
-  void generate_php_docstring(
-      std::ofstream& out, const t_struct* tstruct, bool is_exception = false);
-  void generate_php_docstring_args(
-      std::ofstream& out, int start_pos, const t_struct* arg_list);
-  void generate_php_docstring_stream_exceptions(
-      std::ofstream& out, const t_throws* ex);
+
   static std::string render_string(const std::string& value);
 
   std::string field_to_typehint(
@@ -980,6 +969,19 @@ class t_hack_generator : public t_concat_generator {
       t_name_generator& namer);
 
  private:
+  void generate_php_docstring(std::ofstream& out, const t_named* named_node);
+  void generate_php_docstring(std::ofstream& out, const t_enum* tenum);
+  void generate_php_docstring(std::ofstream& out, const t_service* tservice);
+  void generate_php_docstring(std::ofstream& out, const t_const* tconst);
+  void generate_php_docstring(std::ofstream& out, const t_function* tfunction);
+  void generate_php_docstring(std::ofstream& out, const t_field* tfield);
+  void generate_php_docstring(
+      std::ofstream& out, const t_struct* tstruct, bool is_exception = false);
+  void generate_php_docstring_args(
+      std::ofstream& out, int start_pos, const t_struct* arg_list);
+  void generate_php_docstring_stream_exceptions(
+      std::ofstream& out, const t_throws* ex);
+
   /**
    * Generate the namespace mangled string, if necessary
    */
@@ -1682,14 +1684,14 @@ void t_hack_generator::generate_enum(const t_enum* tenum) {
 
   indent_up();
 
-  for (const auto* constant : tenum->get_enum_values()) {
-    int32_t value = constant->get_value();
+  for (const t_enum_value* enum_value : tenum->get_enum_values()) {
+    int32_t value = enum_value->get_value();
 
-    generate_php_docstring(f_types_, constant);
+    generate_php_docstring(f_types_, enum_value);
     if (!hack_enum) {
       indent(f_types_) << "const " << typehint << " ";
     }
-    indent(f_types_) << find_hack_name(constant) << " = " << value << ";\n";
+    indent(f_types_) << find_hack_name(enum_value) << " = " << value << ";\n";
   }
 
   indent_down();
@@ -4178,7 +4180,7 @@ void t_hack_generator::generate_php_struct_fields(
     const t_struct* tstruct,
     const std::string& struct_hack_name_with_ns,
     ThriftStructType type) {
-  for (const auto& field : tstruct->fields()) {
+  for (const t_field& field : tstruct->fields()) {
     if (skip_codegen(&field)) {
       continue;
     }
@@ -6230,13 +6232,13 @@ void t_hack_generator::generate_php_interaction_function_helpers(
  * Generates the docstring for a generic object.
  */
 void t_hack_generator::generate_php_docstring(
-    std::ofstream& out, const t_node* tdoc) {
-  if (tdoc->has_doc()) {
+    std::ofstream& out, const t_named* named_node) {
+  if (named_node->has_doc()) {
     generate_docstring_comment(
         out, // out
         "/**\n", // comment_start
         " * ", // line_prefix
-        tdoc->doc(),
+        named_node->doc(),
         " */\n"); // comment_end
   }
 }
@@ -6810,7 +6812,7 @@ void t_hack_generator::generate_service_interface(
       (tservice->find_structured_annotation_or_null(kHackModuleInternalUri) !=
        nullptr);
 
-  for (const auto* function : functions) {
+  for (const t_function* function : functions) {
     if (skip_codegen(function) ||
         (async && client && !is_client_only_function(function))) {
       continue;

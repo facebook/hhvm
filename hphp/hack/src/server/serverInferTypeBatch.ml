@@ -65,30 +65,81 @@ let result_to_string result (fn, line, char, range_end) =
     json_to_string obj)
 
 let helper ctx acc pos_list =
-  let path_list = List.map pos_list ~f:(fun (path, _, _, _) -> path) in
+  let empty_map = Relative_path.Map.empty in
+  let (at_pos_map, at_range_map) =
+    List.fold
+      pos_list
+      ~init:(empty_map, empty_map)
+      ~f:
+        begin
+          fun (at_pos_map, at_range_map) (fn, line, char, range_end) ->
+            let add map ~data =
+              Relative_path.Map.update
+                fn
+                (function
+                  | None -> Some [data]
+                  | Some acc -> Some (data :: acc))
+                map
+            in
+            match range_end with
+            | Some (end_line, end_char) ->
+              let data = (line, char, end_line, end_char) in
+              (at_pos_map, add at_range_map ~data)
+            | None ->
+              let data = (line, char) in
+              (add at_pos_map ~data, at_range_map)
+        end
+  in
+  let path_list =
+    Relative_path.Map.keys at_pos_map @ Relative_path.Map.keys at_range_map
+  in
   let (ctx, tasts) = get_tast_map ctx path_list in
-  List.fold pos_list ~init:acc ~f:(fun acc pos ->
-      let (fn, line, char, range_end) = pos in
-      let result =
-        Relative_path.Map.find_opt tasts fn
-        |> Result.of_option ~error:"No such file or directory"
-        |> Result.map ~f:(fun tast ->
-               let env_and_ty =
-                 match range_end with
-                 | None -> ServerInferType.type_at_pos ctx tast line char
-                 | Some (end_line, end_char) ->
-                   ServerInferType.type_at_range
-                     ctx
-                     tast
-                     line
-                     char
-                     end_line
-                     end_char
-               in
-               Option.map env_and_ty ~f:(fun (env, ty) ->
-                   Tast_env.ty_to_json env ty))
-      in
-      result_to_string result pos :: acc)
+  let type_at_range_results =
+    Relative_path.Map.mapi at_range_map ~f:(fun fn pos_list ->
+        match Relative_path.Map.find_opt tasts fn with
+        | None ->
+          List.map pos_list ~f:(fun (line, char, end_line, end_char) ->
+              let result = "No such file or directory" in
+              let pos = (fn, line, char, Some (end_line, end_char)) in
+              result_to_string (Result.Error result) pos)
+        | Some tast ->
+          List.map pos_list ~f:(fun (line, char, end_line, end_char) ->
+              let result =
+                ServerInferType.type_at_range
+                  ctx
+                  tast
+                  line
+                  char
+                  end_line
+                  end_char
+                |> Option.map ~f:(fun (env, ty) -> Tast_env.ty_to_json env ty)
+              in
+              let pos = (fn, line, char, Some (end_line, end_char)) in
+              result_to_string (Result.Ok result) pos))
+  in
+  let acc =
+    List.concat (Relative_path.Map.values type_at_range_results) @ acc
+  in
+  let type_at_pos_results =
+    Relative_path.Map.mapi at_pos_map ~f:(fun fn pos_list ->
+        match Relative_path.Map.find_opt tasts fn with
+        | None ->
+          List.map pos_list ~f:(fun (line, char) ->
+              let result = "No such file or directory" in
+              let pos = (fn, line, char, None) in
+              result_to_string (Result.Error result) pos)
+        | Some tast ->
+          let results = ServerInferType.type_at_pos_fused ctx tast pos_list in
+          List.map2_exn pos_list results ~f:(fun (line, char) env_and_ty ->
+              let result =
+                env_and_ty
+                |> Option.map ~f:(fun (env, ty) -> Tast_env.ty_to_json env ty)
+              in
+              let pos = (fn, line, char, None) in
+              result_to_string (Result.Ok result) pos))
+  in
+  let acc = List.concat (Relative_path.Map.values type_at_pos_results) @ acc in
+  acc
 
 (** This divides files amongst all the workers.
 No file is handled by more than one worker. *)

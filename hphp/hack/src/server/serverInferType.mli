@@ -6,6 +6,12 @@
  *
  *)
 
+val type_at_pos_fused :
+  Provider_context.t ->
+  Tast.program Tast_with_dynamic.t ->
+  (int * int) list ->
+  (Tast_env.env * Tast.ty) option list
+
 val type_at_pos :
   Provider_context.t ->
   Tast.program Tast_with_dynamic.t ->

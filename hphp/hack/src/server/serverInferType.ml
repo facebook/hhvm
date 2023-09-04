@@ -250,16 +250,23 @@ let range_visitor startl startc endl endc =
         super#on_class_id env cid
   end
 
+let type_at_pos_fused
+    (ctx : Provider_context.t)
+    (tast : Tast.program Tast_with_dynamic.t)
+    (line_char_pairs : (int * int) list) : (Tast_env.env * Tast.ty) option list
+    =
+  (base_visitor ~human_friendly:false ~under_dynamic:false line_char_pairs)#go
+    ctx
+    tast.Tast_with_dynamic.under_normal_assumptions
+  |> List.map ~f:(Option.map ~f:(fun (_, env, ty) -> (env, ty)))
+
 let type_at_pos
     (ctx : Provider_context.t)
     (tast : Tast.program Tast_with_dynamic.t)
     (line : int)
     (char : int) : (Tast_env.env * Tast.ty) option =
-  (base_visitor ~human_friendly:false ~under_dynamic:false [(line, char)])#go
-    ctx
-    tast.Tast_with_dynamic.under_normal_assumptions
-  |> function
-  | [Some (_, env, ty)] -> Some (env, ty)
+  type_at_pos_fused ctx tast [(line, char)] |> function
+  | [res] -> res
   | _ -> None
 
 (* Return the expanded type of smallest expression at this

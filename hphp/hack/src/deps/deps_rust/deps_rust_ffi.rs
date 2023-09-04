@@ -14,10 +14,10 @@ use std::path::Path;
 use dep::Dep;
 use deps_rust::dep_graph_delta_with;
 use deps_rust::dep_graph_delta_with_mut;
-use deps_rust::dep_graph_map_or;
 use deps_rust::dep_graph_override;
 use deps_rust::dep_graph_with_option;
 use deps_rust::iter_dependents_with_duplicates;
+use deps_rust::lock_depgraph_and;
 use deps_rust::DepSet;
 use deps_rust::RawTypingDepsMode;
 use deps_rust::VisitedSet;
@@ -221,10 +221,7 @@ ocaml_ffi! {
 /// Returns true if we know for sure that the depgraph has the edge, false
 /// if we don't know.
 fn depgraph_has_edge_for_sure(mode: RawTypingDepsMode, dependent: Dep, dependency: Dep) -> bool {
-    // Safety: we don't call into OCaml again, so mode will remain valid.
-    dep_graph_map_or(mode, false, move |g| {
-        g.dependent_dependency_edge_exists(dependent, dependency)
-    }) && dep_graph_delta_with(|delta| !delta.edge_is_removed(dependent, dependency))
+    lock_depgraph_and(mode, |g| g.has_edge_for_sure(dependent, dependency))
 }
 
 fn get_ideps_from_hash(mode: RawTypingDepsMode, dep: Dep) -> Custom<DepSet> {

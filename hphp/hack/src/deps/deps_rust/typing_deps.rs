@@ -7,11 +7,10 @@ use std::cell::RefCell;
 use std::io::Write;
 
 use dep_graph_delta::DepGraphDelta;
-use dep_graph_delta::HashSetDelta;
+use dep_graph_with_delta::DepGraphWithDelta;
 pub use depgraph_reader::Dep;
 use depgraph_reader::DepGraph;
 use hash::HashSet;
-use itertools::Either;
 use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep::FromError;
 use ocamlrep::FromOcamlRep;
@@ -22,6 +21,8 @@ use ocamlrep_custom::CamlSerialize;
 use once_cell::sync::OnceCell;
 use parking_lot::RwLock;
 use rpds::HashTrieSet;
+
+mod dep_graph_with_delta;
 
 /// A structure wrapping the memory-mapped dependency graph.
 /// Each worker will itself lazily (or eagerly upon request)
@@ -205,37 +206,6 @@ fn replace_dep_graph(mode: RawTypingDepsMode) -> Result<(), String> {
 /// to a valid OCaml object.
 pub fn dep_graph_override(mode: RawTypingDepsMode) {
     replace_dep_graph(mode).unwrap();
-}
-
-/// Run the closure with the loaded dep graph. If the custom dep graph
-/// mode was enabled without a saved-state, return the passed default
-/// value.
-///
-/// # Panics
-///
-/// Panics if the graph is not loaded, and custom mode was not enabled.
-///
-/// Panics if the graph is not yet loaded, and opening
-/// the graph results in an error.
-///
-/// # Safety
-///
-/// The pointer to the dependency graph mode should still be pointing
-/// to a valid OCaml object.
-pub fn dep_graph_map_or<F, R>(mode: RawTypingDepsMode, default: R, f: F) -> R
-where
-    F: FnOnce(&DepGraph) -> R,
-{
-    dep_graph_map_or_else(mode, || default, f)
-}
-
-pub fn dep_graph_map_or_else<F, D, R>(mode: RawTypingDepsMode, default: D, f: F) -> R
-where
-    D: FnOnce() -> R,
-    F: FnOnce(&DepGraph) -> R,
-{
-    load_global_dep_graph(mode).unwrap();
-    DEP_GRAPH.read().as_ref().map_or_else(default, f)
 }
 
 /// Run the closure with the loaded dep graph. If the custom dep graph
@@ -431,36 +401,21 @@ impl CamlSerialize for VisitedSet {
     caml_serialize_default_impls!();
 }
 
+pub fn lock_depgraph_and<F, R>(mode: RawTypingDepsMode, f: F) -> R
+where
+    F: FnOnce(DepGraphWithDelta<'_>) -> R,
+{
+    dep_graph_delta_with(|delta| {
+        dep_graph_with_option(mode, |g| f(DepGraphWithDelta::new(g, delta)))
+    })
+}
+
 /// Iterates over all dependents of a dependency, with possibly duplicate dependents.
-pub fn iter_dependents_with_duplicates<F, R>(mode: RawTypingDepsMode, dep: Dep, mut f: F) -> R
+pub fn iter_dependents_with_duplicates<F, R>(mode: RawTypingDepsMode, dep: Dep, f: F) -> R
 where
     F: FnMut(&mut dyn Iterator<Item = Dep>) -> R,
 {
-    dep_graph_delta_with(|delta| {
-        dep_graph_with_option(mode, |g| {
-            let HashSetDelta { added, removed } = delta.get(dep);
-            let mut added_iter = added
-                .map(|s| s.iter().copied())
-                .map_or(Either::Right(std::iter::empty::<Dep>()), Either::Left);
-            let is_removed = |d: &Dep| match removed {
-                None => false,
-                Some(removed) => removed.contains(d),
-            };
-            match g {
-                None => f(&mut added_iter),
-                Some(g) => {
-                    let hashes = g.hash_list_for(dep);
-                    match hashes {
-                        None => f(&mut added_iter),
-                        Some(hashes) => {
-                            let base_iter = g.hash_list_hashes(hashes);
-                            f(&mut added_iter.chain(base_iter.filter(|d| !is_removed(d))))
-                        }
-                    }
-                }
-            }
-        })
-    })
+    lock_depgraph_and(mode, |g| g.iter_dependents_with_duplicates(dep, f))
 }
 
 pub fn dep_graph_delta_num_edges() -> usize {

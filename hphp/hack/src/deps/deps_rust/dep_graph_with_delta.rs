@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::collections::VecDeque;
 use std::ops::Deref;
 use std::ops::DerefMut;
 
@@ -11,9 +12,11 @@ use dep_graph_delta::HashSetDelta;
 use depgraph_reader::BaseDepgraphTrait;
 use depgraph_reader::Dep;
 use depgraph_reader::DepGraph;
+use hash::HashSet;
 use itertools::Either;
 use once_cell::sync::OnceCell;
 use parking_lot::RwLock;
+use rpds::HashTrieSet;
 
 use crate::RawTypingDepsMode;
 use crate::TypingDepsMode;
@@ -247,6 +250,91 @@ impl DependentIterator for LockedDepgraphWithDelta {
     }
 }
 
+pub struct DepGraphTraversor<G: DependentIterator>(G);
+
+impl<G: DependentIterator> DepGraphTraversor<G> {
+    pub const fn new(g: G) -> Self {
+        Self(g)
+    }
+}
+
+impl<G: DependentIterator> Deref for DepGraphTraversor<G> {
+    type Target = G;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl<G: DependentIterator> DepGraphTraversor<G> {
+    /// Returns the recursive 'extends' dependents of a dep.
+    /// Does not include the dep itself.
+    pub fn get_extend_deps(
+        &self,
+        mode: RawTypingDepsMode,
+        visited: &mut HashSet<Dep>,
+        source_class: Dep,
+        acc: &mut HashTrieSet<Dep>,
+    ) {
+        let mut queue = VecDeque::new();
+        // Safety: we don't call into OCaml again, so mode will remain valid.
+        unsafe {
+            self.get_extend_deps_visit(mode, visited, &mut queue, source_class, acc);
+            while let Some(source_class) = queue.pop_front() {
+                self.get_extend_deps_visit(mode, visited, &mut queue, source_class, acc);
+            }
+        }
+    }
+
+    /// Helper function to recursively get extend deps
+    ///
+    /// # Safety
+    ///
+    /// The dependency graph mode must be a pointer to an OCaml value that's
+    /// still valid.
+    unsafe fn get_extend_deps_visit(
+        &self,
+        mode: RawTypingDepsMode,
+        visited: &mut HashSet<Dep>,
+        queue: &mut VecDeque<Dep>,
+        source_class: Dep,
+        acc: &mut HashTrieSet<Dep>,
+    ) {
+        if !visited.insert(source_class) {
+            return;
+        }
+        let extends_hash = match source_class.class_to_extends() {
+            None => return,
+            Some(hash) => hash,
+        };
+        self.iter_dependents_with_duplicates(mode, extends_hash, |iter| {
+            iter.for_each(|dep: Dep| {
+                if dep.is_class() {
+                    if !acc.contains(&dep) {
+                        acc.insert_mut(dep);
+                        queue.push_back(dep);
+                    }
+                }
+            })
+        })
+    }
+
+    /// Returns the union of the provided dep set and their recursive 'extends' dependents.
+    pub fn add_extend_deps(&self, mode: RawTypingDepsMode, acc: &mut HashTrieSet<Dep>) {
+        let mut visited = HashSet::default();
+        let mut queue = VecDeque::new();
+        for source_class in acc.iter() {
+            queue.push_back(*source_class);
+        }
+        while let Some(source_class) = queue.pop_front() {
+            // Safety: we don't call into OCaml again, so mode will remain valid.
+            unsafe {
+                self.get_extend_deps_visit(mode, &mut visited, &mut queue, source_class, acc);
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::collections::HashMap;
@@ -281,6 +369,20 @@ mod tests {
             self.graph
                 .get(&dependency)
                 .map_or(false, |set| set.contains(&dependent))
+        }
+    }
+
+    impl DependentIterator for SimpleDepGraph {
+        fn iter_dependents_with_duplicates<F, R>(
+            &self,
+            _mode: RawTypingDepsMode,
+            dep: Dep,
+            mut f: F,
+        ) -> R
+        where
+            F: FnMut(&mut dyn Iterator<Item = Dep>) -> R,
+        {
+            f(&mut self.iter_dependents(dep))
         }
     }
 
@@ -332,5 +434,128 @@ mod tests {
         );
         assert!(!dg.has_edge_for_sure(Dep::new(2), Dep::new(0)));
         assert!(!dg.has_edge_for_sure(Dep::new(2), Dep::new(3)));
+    }
+
+    #[test]
+    fn test_extends_deps() {
+        fn class_dep(n: u64) -> Dep {
+            Dep::new((n << 1) + 1)
+        }
+        let class_a = class_dep(0);
+        let class_b = class_dep(1);
+        let class_c = class_dep(2);
+        let class_d = class_dep(3);
+        let class_e = class_dep(4);
+        let class_f = class_dep(5);
+        let class_k = class_dep(10);
+        let class_l = class_dep(11);
+        let class_m = class_dep(12);
+
+        let dg = DepGraphTraversor::<SimpleDepGraph>::new(
+            ([
+                // 'Extends' edges
+                (
+                    class_a.class_to_extends().unwrap(),
+                    HashSet::from([class_b, class_c]),
+                ),
+                (
+                    class_b.class_to_extends().unwrap(),
+                    HashSet::from([class_d]),
+                ),
+                (
+                    class_c.class_to_extends().unwrap(),
+                    HashSet::from([class_e, class_f]),
+                ),
+                // Regular edges
+                (class_a, HashSet::from([class_k])),
+                (class_c, HashSet::from([class_l, class_m])),
+            ])
+            .into(),
+        );
+        let mut visited = hash::HashSet::<Dep>::default();
+        let mut acc = HashTrieSet::new();
+        dg.get_extend_deps(MODE, &mut visited, class_a, &mut acc);
+        assert_eq!(
+            HashSet::from_iter(acc.iter().copied()),
+            HashSet::from([class_b, class_c, class_d, class_e, class_f])
+        );
+        assert_eq!(
+            HashSet::from_iter(visited.iter().copied()),
+            HashSet::from([class_a, class_b, class_c, class_d, class_e, class_f])
+        );
+    }
+
+    #[test]
+    fn test_add_extends_deps() {
+        fn class_dep(n: u64) -> Dep {
+            Dep::new((n << 1) + 1)
+        }
+        let class_a = class_dep(0);
+        let class_b = class_dep(1);
+        let class_c = class_dep(2);
+        let class_d = class_dep(3);
+        let class_e = class_dep(4);
+        let class_f = class_dep(5);
+        let class_g = class_dep(6);
+        let class_h = class_dep(7);
+        let class_i = class_dep(8);
+        let class_j = class_dep(9);
+        let class_k = class_dep(10);
+        let class_l = class_dep(11);
+        let class_m = class_dep(12);
+        let class_n = class_dep(13);
+        let class_o = class_dep(14);
+        let class_p = class_dep(15);
+        let class_q = class_dep(16);
+        let class_r = class_dep(17);
+
+        let dg = DepGraphTraversor::<SimpleDepGraph>::new(
+            ([
+                // 'Extends' edges
+                (
+                    class_a.class_to_extends().unwrap(),
+                    HashSet::from([class_b, class_c]),
+                ),
+                (
+                    class_b.class_to_extends().unwrap(),
+                    HashSet::from([class_d]),
+                ),
+                (
+                    class_c.class_to_extends().unwrap(),
+                    HashSet::from([class_e, class_f]),
+                ),
+                (
+                    class_f.class_to_extends().unwrap(),
+                    HashSet::from([class_g, class_h]),
+                ),
+                (
+                    class_i.class_to_extends().unwrap(),
+                    HashSet::from([class_j, class_f]),
+                ),
+                (
+                    class_p.class_to_extends().unwrap(),
+                    HashSet::from([class_q, class_r]),
+                ),
+                (
+                    class_r.class_to_extends().unwrap(),
+                    HashSet::from([class_c, class_i]),
+                ),
+                // Regular edges
+                (class_a, HashSet::from([class_k])),
+                (class_c, HashSet::from([class_l, class_m])),
+                (class_i, HashSet::from([class_n])),
+                (class_j, HashSet::from([class_o])),
+            ])
+            .into(),
+        );
+        let mut acc = HashTrieSet::new().insert(class_a).insert(class_i);
+        dg.add_extend_deps(MODE, &mut acc);
+        assert_eq!(
+            HashSet::from_iter(acc.iter().copied()),
+            HashSet::from([
+                class_a, class_b, class_c, class_d, class_e, class_f, class_g, class_h, class_i,
+                class_j
+            ])
+        );
     }
 }

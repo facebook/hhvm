@@ -6,7 +6,8 @@
 use std::cell::RefCell;
 use std::io::Write;
 
-use dep_graph_with_delta::DependentIterator;
+use dep_graph_with_delta::DepGraphTraversor;
+pub use dep_graph_with_delta::DependentIterator;
 use dep_graph_with_delta::LockedDepgraphWithDelta;
 pub use depgraph_reader::Dep;
 use hash::HashSet;
@@ -29,8 +30,9 @@ mod dep_graph_with_delta;
 ///
 /// It's an option, because custom mode might be enabled without
 /// an existing saved-state.
-pub static DEP_GRAPH: LockedDepgraphWithDelta =
-    LockedDepgraphWithDelta::new(RwLock::new(None), OnceCell::new());
+pub static DEP_GRAPH: DepGraphTraversor<LockedDepgraphWithDelta> = DepGraphTraversor::new(
+    LockedDepgraphWithDelta::new(RwLock::new(None), OnceCell::new()),
+);
 
 fn _static_assert() {
     // The use of 64-bit (actually 63-bit) dependency hashes requires that we
@@ -104,23 +106,6 @@ impl RawTypingDepsMode {
     pub const fn dummy_for_test() -> Self {
         Self(0)
     }
-}
-
-/// Override the loaded dep graph.
-///
-/// # Panics
-///
-/// Panics if the graph is not loaded, and custom mode was not enabled.
-///
-/// Panics if the graph is not yet loaded, and opening
-/// the graph results in an error.
-///
-/// # Safety
-///
-/// The pointer to the dependency graph mode should still be pointing
-/// to a valid OCaml object.
-pub fn dep_graph_override(mode: RawTypingDepsMode) {
-    DEP_GRAPH.replace_dep_graph(mode).unwrap();
 }
 
 /// Rust set of dependencies that can be transferred from
@@ -257,18 +242,6 @@ impl From<RefCell<HashSet<Dep>>> for VisitedSet {
 
 impl CamlSerialize for VisitedSet {
     caml_serialize_default_impls!();
-}
-
-/// Iterates over all dependents of a dependency, with possibly duplicate dependents.
-pub fn iter_dependents_with_duplicates<F, R>(mode: RawTypingDepsMode, dep: Dep, f: F) -> R
-where
-    F: FnMut(&mut dyn Iterator<Item = Dep>) -> R,
-{
-    DEP_GRAPH.iter_dependents_with_duplicates(mode, dep, f)
-}
-
-pub fn dep_graph_delta_num_edges() -> usize {
-    DEP_GRAPH.lock_delta_and(|delta| delta.added_edges_count())
 }
 
 #[cfg(test)]

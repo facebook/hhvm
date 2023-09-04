@@ -6,15 +6,13 @@
 #![cfg_attr(use_unstable_features, feature(test))]
 
 use std::cell::RefCell;
-use std::collections::VecDeque;
 use std::ffi::OsString;
 use std::fs::File;
 use std::path::Path;
 
 use dep::Dep;
-use deps_rust::dep_graph_override;
-use deps_rust::iter_dependents_with_duplicates;
 use deps_rust::DepSet;
+use deps_rust::DependentIterator;
 use deps_rust::RawTypingDepsMode;
 use deps_rust::VisitedSet;
 use deps_rust::DEP_GRAPH;
@@ -149,7 +147,7 @@ ocaml_ffi! {
 ocaml_ffi! {
     fn hh_custom_dep_graph_replace(mode: RawTypingDepsMode) {
         // Safety: we don't call into OCaml again, so mode will remain valid.
-        dep_graph_override(mode);
+        DEP_GRAPH.replace_dep_graph(mode).unwrap();
     }
 
     // Returns true if we know for sure that the depgraph has the edge, false
@@ -169,7 +167,9 @@ ocaml_ffi! {
 
     // Returns the union of the provided dep set and their recursive 'extends' dependents.
     fn hh_custom_dep_graph_add_extend_deps(mode: RawTypingDepsMode, query: Custom<DepSet>) -> Custom<DepSet> {
-        add_extend_deps(mode, query)
+        let mut acc = query.clone();
+        DEP_GRAPH.add_extend_deps(mode, &mut acc);
+        Custom::from(acc.into())
     }
 
     // Returns the recursive 'extends' dependents of a dep.
@@ -179,7 +179,9 @@ ocaml_ffi! {
         source_class: Dep,
         acc: Custom<DepSet>,
     ) -> Custom<DepSet> {
-        get_extend_deps(mode, visited, source_class, acc)
+        let mut acc = acc.clone();
+        DEP_GRAPH.get_extend_deps(mode, &mut visited.borrow_mut(), source_class, &mut acc);
+        Custom::from(acc.into())
     }
 
     // Add edge into the in-memory depgraph delta
@@ -193,7 +195,7 @@ ocaml_ffi! {
     }
 
     fn hh_custom_dep_graph_dep_graph_delta_num_edges() -> usize {
-        deps_rust::dep_graph_delta_num_edges()
+        DEP_GRAPH.lock_delta_and(|delta| delta.added_edges_count())
     }
 
     fn hh_custom_dep_graph_save_delta(dest: OsString, reset_state_after_saving: bool) -> usize {
@@ -222,8 +224,9 @@ fn depgraph_has_edge_for_sure(mode: RawTypingDepsMode, dependent: Dep, dependenc
 }
 
 fn get_ideps_from_hash(mode: RawTypingDepsMode, dep: Dep) -> Custom<DepSet> {
-    let deps =
-        iter_dependents_with_duplicates(mode, dep, |iter_dep| iter_dep.collect::<HashTrieSet<_>>());
+    let deps = DEP_GRAPH.iter_dependents_with_duplicates(mode, dep, |iter_dep| {
+        iter_dep.collect::<HashTrieSet<_>>()
+    });
     Custom::from(DepSet::from(deps))
 }
 
@@ -234,84 +237,11 @@ fn query_and_accumulate_typing_deps(
 ) -> Custom<DepSet> {
     let mut acc = query.clone();
     for dependency in query.iter() {
-        iter_dependents_with_duplicates(mode, *dependency, |iter| {
+        DEP_GRAPH.iter_dependents_with_duplicates(mode, *dependency, |iter| {
             iter.for_each(|dependent| acc.insert_mut(dependent))
         })
     }
     Custom::from(DepSet::from(acc))
-}
-
-/// Returns the union of the provided dep set and their recursive 'extends' dependents.
-fn add_extend_deps(mode: RawTypingDepsMode, query: Custom<DepSet>) -> Custom<DepSet> {
-    let mut visited = HashSet::default();
-    let mut queue = VecDeque::new();
-    let mut acc = query.clone();
-    for source_class in query.iter() {
-        // Safety: we don't call into OCaml again, so mode will remain valid.
-        unsafe {
-            get_extend_deps_visit(mode, &mut visited, &mut queue, *source_class, &mut acc);
-        }
-    }
-    while let Some(source_class) = queue.pop_front() {
-        // Safety: we don't call into OCaml again, so mode will remain valid.
-        unsafe {
-            get_extend_deps_visit(mode, &mut visited, &mut queue, source_class, &mut acc);
-        }
-    }
-    Custom::from(acc.into())
-}
-
-/// Returns the recursive 'extends' dependents of a dep.
-fn get_extend_deps(
-    mode: RawTypingDepsMode,
-    visited: Custom<VisitedSet>,
-    source_class: Dep,
-    acc: Custom<DepSet>,
-) -> Custom<DepSet> {
-    let mut visited = visited.borrow_mut();
-    let mut queue = VecDeque::new();
-    let mut acc = acc.clone();
-
-    // Safety: we don't call into OCaml again, so mode will remain valid.
-    unsafe {
-        get_extend_deps_visit(mode, &mut visited, &mut queue, source_class, &mut acc);
-        while let Some(source_class) = queue.pop_front() {
-            get_extend_deps_visit(mode, &mut visited, &mut queue, source_class, &mut acc);
-        }
-    }
-    Custom::from(acc.into())
-}
-
-/// Helper function to recursively get extend deps
-///
-/// # Safety
-///
-/// The dependency graph mode must be a pointer to an OCaml value that's
-/// still valid.
-unsafe fn get_extend_deps_visit(
-    mode: RawTypingDepsMode,
-    visited: &mut HashSet<Dep>,
-    queue: &mut VecDeque<Dep>,
-    source_class: Dep,
-    acc: &mut HashTrieSet<Dep>,
-) {
-    if !visited.insert(source_class) {
-        return;
-    }
-    let extends_hash = match source_class.class_to_extends() {
-        None => return,
-        Some(hash) => hash,
-    };
-    iter_dependents_with_duplicates(mode, extends_hash, |iter| {
-        iter.for_each(|dep: Dep| {
-            if dep.is_class() {
-                if !acc.contains(&dep) {
-                    acc.insert_mut(dep);
-                    queue.push_back(dep);
-                }
-            }
-        })
-    })
 }
 
 fn save_delta(dest: OsString, reset_state_after_saving: bool) -> usize {

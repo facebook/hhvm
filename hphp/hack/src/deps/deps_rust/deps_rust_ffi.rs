@@ -152,8 +152,8 @@ ocaml_ffi! {
 
     // Returns true if we know for sure that the depgraph has the edge, false
     // if we don't know.
-    fn hh_depgraph_has_edge_for_sure(mode: RawTypingDepsMode, dependent: Dep, dependency: Dep) -> bool {
-        depgraph_has_edge_for_sure(mode, dependent, dependency)
+    fn hh_depgraph_has_edge(mode: RawTypingDepsMode, dependent: Dep, dependency: Dep) -> bool {
+        depgraph_has_edge(mode, dependent, dependency)
     }
 
     fn hh_custom_dep_graph_get_ideps_from_hash(mode: RawTypingDepsMode, dep: Dep) -> Custom<DepSet> {
@@ -235,10 +235,8 @@ ocaml_ffi! {
     }
 }
 
-/// Returns true if we know for sure that the depgraph has the edge, false
-/// if we don't know.
-fn depgraph_has_edge_for_sure(mode: RawTypingDepsMode, dependent: Dep, dependency: Dep) -> bool {
-    DEP_GRAPH.lock_and(mode, |g| g.has_edge_for_sure(dependent, dependency))
+fn depgraph_has_edge(mode: RawTypingDepsMode, dependent: Dep, dependency: Dep) -> bool {
+    DEP_GRAPH.lock_and(mode, |g| g.has_edge(dependent, dependency))
 }
 
 fn get_ideps_from_hash(mode: RawTypingDepsMode, dep: Dep) -> Custom<DepSet> {

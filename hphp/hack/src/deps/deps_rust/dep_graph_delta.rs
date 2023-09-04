@@ -76,13 +76,6 @@ impl Graph {
         self.map.get(key)
     }
 
-    fn has_edge(&self, key: Dep, value: Dep) -> bool {
-        match self.map.get(&key) {
-            None => false,
-            Some(values) => values.contains(&value),
-        }
-    }
-
     fn len(&self) -> usize {
         self.num_edges
     }
@@ -258,10 +251,6 @@ impl DepGraphDelta {
         }
     }
 
-    pub fn edge_is_removed(&self, dependent: Dep, dependency: Dep) -> bool {
-        self.removed_edges.has_edge(dependency, dependent)
-    }
-
     /// Return the number of added edges in the dep graph delta. Ignore removed edges.
     pub fn added_edges_count(&self) -> usize {
         self.added_edges.len()
@@ -376,12 +365,10 @@ mod tests {
         delta.insert(Dep::new(30), Dep::new(3));
         delta.remove(Dep::new(30), Dep::new(3));
 
-        assert!(delta.edge_is_removed(Dep::new(10), Dep::new(1)));
         let HashSetDelta { added, removed } = delta.get(Dep::new(1));
         assert_set_equals(added, [Dep::new(20)]);
         assert_set_equals(removed, [Dep::new(10)]);
 
-        assert!(delta.edge_is_removed(Dep::new(30), Dep::new(3)));
         let HashSetDelta { added, removed } = delta.get(Dep::new(3));
         assert!(is_empty(added));
         assert_set_equals(removed, [Dep::new(30)]);
@@ -389,7 +376,6 @@ mod tests {
 
         // Re-add removed edge
         delta.insert(Dep::new(30), Dep::new(3));
-        assert!(!delta.edge_is_removed(Dep::new(3), Dep::new(30)));
         let HashSetDelta { added, removed } = delta.get(Dep::new(3));
         assert_set_equals(added, [Dep::new(30)]);
         assert!(is_empty(removed));

@@ -49,10 +49,7 @@ impl<'a, B: BaseDepgraphTrait> DependentIterator for DepGraphWithDelta<'a, B> {
         let mut added_iter = added
             .map(|s| s.iter().copied())
             .map_or(Either::Right(std::iter::empty::<Dep>()), Either::Left);
-        let is_removed = |d: &Dep| match removed {
-            None => false,
-            Some(removed) => removed.contains(d),
-        };
+        let is_removed = |d: &Dep| removed.is_some_and(|removed| removed.contains(d));
         match base {
             None => f(&mut added_iter),
             Some(base) => {
@@ -68,13 +65,13 @@ impl<'a, B: BaseDepgraphTrait> DepGraphWithDelta<'a, B> {
         Self { base, delta }
     }
 
-    /// Returns true if we know for sure that the depgraph has the edge, false
-    /// if we don't know.
-    pub fn has_edge_for_sure(&self, dependent: Dep, dependency: Dep) -> bool {
+    pub fn has_edge(&self, dependent: Dep, dependency: Dep) -> bool {
         let Self { base, delta } = self;
-        base.map_or(false, |g| {
-            g.dependent_dependency_edge_exists(dependent, dependency)
-        }) && !delta.edge_is_removed(dependent, dependency)
+        let HashSetDelta { added, removed } = delta.get(dependency);
+        added.is_some_and(|added| added.contains(&dependent))
+            || (base.map_or(false, |g| {
+                g.dependent_dependency_edge_exists(dependent, dependency)
+            }) && !removed.is_some_and(|removed| removed.contains(&dependent)))
     }
 }
 
@@ -484,7 +481,9 @@ mod tests {
         let mut delta = DepGraphDelta::default();
         delta.insert(Dep::new(4), Dep::new(3));
         delta.insert(Dep::new(3), Dep::new(0));
+        delta.insert(Dep::new(4), Dep::new(0));
         delta.remove(Dep::new(2), Dep::new(0));
+        delta.remove(Dep::new(4), Dep::new(0));
         let dg = DepGraphWithDelta::new(Some(&base), &delta);
 
         assert_eq!(
@@ -497,8 +496,13 @@ mod tests {
                 .collect::<HashSet<_>>()),
             HashSet::from([Dep::new(2), Dep::new(4)])
         );
-        assert!(!dg.has_edge_for_sure(Dep::new(2), Dep::new(0)));
-        assert!(dg.has_edge_for_sure(Dep::new(2), Dep::new(3)));
+        assert!(dg.has_edge(Dep::new(1), Dep::new(0)));
+        assert!(!dg.has_edge(Dep::new(2), Dep::new(0)));
+        assert!(dg.has_edge(Dep::new(2), Dep::new(3)));
+        assert!(dg.has_edge(Dep::new(4), Dep::new(3)));
+        assert!(dg.has_edge(Dep::new(3), Dep::new(0)));
+        assert!(!dg.has_edge(Dep::new(4), Dep::new(0)));
+        assert!(!dg.has_edge(Dep::new(10), Dep::new(11)));
     }
 
     #[test]
@@ -519,8 +523,10 @@ mod tests {
                 .collect::<HashSet<_>>()),
             HashSet::from([Dep::new(4)])
         );
-        assert!(!dg.has_edge_for_sure(Dep::new(2), Dep::new(0)));
-        assert!(!dg.has_edge_for_sure(Dep::new(2), Dep::new(3)));
+        assert!(dg.has_edge(Dep::new(4), Dep::new(3)));
+        assert!(dg.has_edge(Dep::new(3), Dep::new(0)));
+        assert!(!dg.has_edge(Dep::new(2), Dep::new(0)));
+        assert!(!dg.has_edge(Dep::new(2), Dep::new(3)));
     }
 
     #[test]

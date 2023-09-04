@@ -16,7 +16,9 @@ open Hh_prelude
 
 type path = string
 
-type content = string
+type content = string [@@deriving show]
+
+type repo = content Relative_path.Map.t [@@deriving show]
 
 let delim_regexp = "////.*\n"
 
@@ -25,21 +27,36 @@ let delim = Str.regexp delim_regexp
 let short_suffix path =
   Relative_path.suffix path |> Str.replace_first (Str.regexp "^.*--") ""
 
-let split_multifile_content content =
+let split_multifile_content content : (string * content) list =
+  let file_name_of_header header =
+    let pattern = Str.regexp "\n////" in
+    let header = Str.global_replace pattern "" header in
+    let pattern = Str.regexp "[ |\n]*" in
+    let filename = Str.global_replace pattern "" header in
+    filename
+  in
   let rec make_files = function
     | [] -> []
     | Str.Delim header :: Str.Text content :: rl ->
-      let pattern = Str.regexp "\n////" in
-      let header = Str.global_replace pattern "" header in
-      let pattern = Str.regexp "[ |\n]*" in
-      let filename = Str.global_replace pattern "" header in
+      let filename = file_name_of_header header in
       (filename, content) :: make_files rl
-    | _ -> assert false
+    | Str.Delim header :: rl ->
+      (* We can have a Delim not followed by a Text if the file content is empty. *)
+      let filename = file_name_of_header header in
+      (filename, "") :: make_files rl
+    | Str.Text txt :: _ ->
+      failwith (Printf.sprintf "unexpected split result `Text (%s)`" txt)
   in
   let contents =
     Str.full_split (Str.regexp ("\n" ^ delim_regexp)) ("\n" ^ content)
   in
   make_files contents
+
+(** Concatenate both provided strings with "--" in between
+  and make a Relative_path out of the result. *)
+let full_path (real_filename : string) (sub_filename : string) : Relative_path.t
+    =
+  Relative_path.create Relative_path.Dummy (real_filename ^ "--" ^ sub_filename)
 
 (* We have some hacky "syntax extensions" to have one file contain multiple
  * files, which can be located at arbitrary paths. This is useful e.g. for
@@ -65,8 +82,7 @@ let file_to_file_list file =
   let content = Sys_utils.cat abs_fn in
   if Str.string_match delim content 0 then
     let files = split_multifile_content content in
-    List.map files ~f:(fun (sub_fn, c) ->
-        (Relative_path.create Relative_path.Dummy (abs_fn ^ "--" ^ sub_fn), c))
+    List.map files ~f:(fun (sub_fn, c) -> (full_path abs_fn sub_fn, c))
   else if String.is_prefix content ~prefix:"// @directory " then (
     let contentl = Str.split (Str.regexp "\n") content in
     let first_line = List.hd_exn contentl in
@@ -121,17 +137,82 @@ let print_files_as_multifile files =
     |> String.concat ~sep:"\n"
     |> Out_channel.output_string stdout
 
-(** This module handles multifiles with internal file names like
-  'base-xxx.php' and 'changed-xxx.php' *)
-module States : sig
-  val base_files : path -> content Relative_path.Map.t
+module States = struct
+  type change =
+    | Modified of content
+    | Deleted
+  [@@deriving show]
 
-  val changed_files : path -> content Relative_path.Map.t
-end = struct
-  let files path ~prefix =
-    let content = Sys_utils.cat path in
-    let files = split_multifile_content content in
-    List.filter_map files ~f:(fun (sub_fn, content) ->
+  type repo_change = change Relative_path.Map.t [@@deriving show]
+
+  type t = {
+    base: repo;
+    changes: repo_change list;
+  }
+  [@@deriving show]
+
+  let apply_repo_change (base : repo) (repo_change : repo_change) : repo =
+    Relative_path.Map.fold repo_change ~init:base ~f:(fun path change repo ->
+        match change with
+        | Deleted -> Relative_path.Map.remove repo path
+        | Modified content -> Relative_path.Map.add repo ~key:path ~data:content)
+
+  let is_only_slashes s = String.to_list s |> List.for_all ~f:(Char.equal '/')
+
+  (** The file we parse here starts as a regular multifile to represent the base state of the repo,
+    then each repo change is separated by a line of only slashes, like
+
+    ////////////
+
+    Between those delimiters, we have other multifiles representing either file changes
+    (or file addition if the file wasn't present in the base state),
+    or file deletion if the file name is prefixed with "deleted-"
+    (in which case the file content is ignored and assumed to be empty. *)
+  let parse_series_of_repo_changes path file_contents : t =
+    let rec parse_bases file_contents base_acc =
+      match file_contents with
+      | [] -> ([], base_acc)
+      | (filename, content) :: file_contents ->
+        if is_only_slashes filename then
+          (file_contents, base_acc)
+        else
+          let base_acc =
+            Relative_path.Map.add
+              base_acc
+              ~key:(full_path path filename)
+              ~data:content
+          in
+          parse_bases file_contents base_acc
+    in
+    let (file_contents, base) =
+      parse_bases file_contents Relative_path.Map.empty
+    in
+    let (last_repo_change, past_repo_changes) =
+      List.fold
+        file_contents
+        ~init:(Relative_path.Map.empty, [])
+        ~f:(fun (current_repo_change, past_repo_changes) (filename, content) ->
+          if is_only_slashes filename then
+            (Relative_path.Map.empty, current_repo_change :: past_repo_changes)
+          else
+            let (filename, change) =
+              match String.chop_prefix ~prefix:"deleted-" filename with
+              | None -> (filename, Modified content)
+              | Some filename -> (filename, Deleted)
+            in
+            let current_repo_change =
+              Relative_path.Map.add
+                current_repo_change
+                ~key:(full_path path filename)
+                ~data:change
+            in
+            (current_repo_change, past_repo_changes))
+    in
+    let changes = List.rev (last_repo_change :: past_repo_changes) in
+    { base; changes }
+
+  let files path file_contents ~prefix =
+    List.filter_map file_contents ~f:(fun (sub_fn, content) ->
         match String.chop_prefix sub_fn ~prefix:(prefix ^ "-") with
         | None -> None
         | Some sub_fn ->
@@ -140,7 +221,30 @@ end = struct
               content ))
     |> Relative_path.Map.of_list
 
+  (** Get the base files from a multifile, simarly to {!file_to_files),
+    stripping the "base-" prefix for internal file names. *)
   let base_files = files ~prefix:"base"
 
+  (** Get the base files from a multifile, simarly to {!file_to_files),
+    stripping the "changed-" prefix for internal file names. *)
   let changed_files = files ~prefix:"changed"
+
+  let parse path : t =
+    let content = Sys_utils.cat path in
+    let file_contents = split_multifile_content content in
+    let has_multi_repo_changes =
+      List.exists file_contents ~f:(fun (filename, _) ->
+          is_only_slashes filename)
+    in
+    if has_multi_repo_changes then
+      parse_series_of_repo_changes path file_contents
+    else
+      {
+        base = base_files path file_contents;
+        changes =
+          [
+            changed_files path file_contents
+            |> Relative_path.Map.map ~f:(fun content -> Modified content);
+          ];
+      }
 end

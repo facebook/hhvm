@@ -152,16 +152,12 @@ let update_naming_table_and_compute_fanout
   to_recheck
 
 module FileSystem = struct
-  let read_test_file_and_provide_before (file_path : string) :
-      Relative_path.t list =
+  let provide_files_before (files : Multifile.repo) : Relative_path.t list =
     File_provider.local_changes_push_sharedmem_stack ();
-    let files = Multifile.States.base_files file_path in
     Relative_path.Map.iter files ~f:File_provider.provide_file_for_tests;
     Relative_path.Map.keys files
 
-  let read_test_file_and_provide_after (file_path : string) :
-      Relative_path.t list =
-    let files = Multifile.States.changed_files file_path in
+  let provide_files_after (files : Multifile.repo) : Relative_path.t list =
     Relative_path.Map.fold
       files
       ~init:[]
@@ -179,7 +175,10 @@ module FileSystem = struct
           changed_files)
 end
 
-let print_fanout fanout = SSet.iter (Printf.printf "%s\n") fanout
+let print_fanout fanout =
+  SSet.iter (Printf.printf "%s\n") fanout;
+  Printf.printf "\n";
+  ()
 
 let init_paths (hhi_root : Path.t) : unit =
   (* dummy path, not actually used *)
@@ -295,10 +294,9 @@ let process_pre_changes ctx options (files : Relative_path.t list) :
 
 (** Process changed files by making those files available in the typechecker as a side effect
   and returning the list of changed files. *)
-let process_changed_files options (test_file : string) : Relative_path.t list =
-  let files_with_changes =
-    FileSystem.read_test_file_and_provide_after test_file
-  in
+let process_changed_files options (repo : Multifile.repo) : Relative_path.t list
+    =
+  let files_with_changes = FileSystem.provide_files_after repo in
   Ast_provider.clear_local_cache ();
   Ast_provider.clear_parser_cache ();
   if options.debug then
@@ -314,23 +312,31 @@ let process_changed_files options (test_file : string) : Relative_path.t list =
   To do so, it typechecks the base version to create a depgraph and naming table,
   then uses those to compute a fanout. *)
 let go (test_file : string) options =
+  (if not options.debug then Hh_logger.Level.(set_min_level Off));
   Tempfile.with_tempdir @@ fun hhi_root ->
   let ctx = init hhi_root in
-  let files = FileSystem.read_test_file_and_provide_before test_file in
+  let { Multifile.States.base; changes } = Multifile.States.parse test_file in
+  let files = FileSystem.provide_files_before base in
   let naming_table = process_pre_changes ctx options files in
-  let files_with_changes = process_changed_files options test_file in
-  let dep_to_symbol_map =
-    make_dep_to_symbol_map ctx options files_with_changes
+  let _end_repo =
+    List.fold changes ~init:base ~f:(fun repo repo_change ->
+        let repo = Multifile.States.apply_repo_change repo repo_change in
+        let files_with_changes = process_changed_files options repo in
+        let dep_to_symbol_map =
+          make_dep_to_symbol_map ctx options files_with_changes
+        in
+        let fanout =
+          update_naming_table_and_compute_fanout
+            ctx
+            options
+            files_with_changes
+            naming_table
+            dep_to_symbol_map
+        in
+        print_fanout fanout;
+        repo)
   in
-  let fanout =
-    update_naming_table_and_compute_fanout
-      ctx
-      options
-      files_with_changes
-      naming_table
-      dep_to_symbol_map
-  in
-  print_fanout fanout
+  ()
 
 let die str =
   let oc = stderr in

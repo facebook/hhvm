@@ -16,6 +16,8 @@ type path = string
 
 type content = string
 
+type repo = content Relative_path.Map.t
+
 val file_to_file_list : Relative_path.t -> (Relative_path.t * content) list
 
 (** Takes the path of a "multifile".
@@ -41,7 +43,7 @@ val file_to_file_list : Relative_path.t -> (Relative_path.t * content) list
   ";
     ]
   *)
-val file_to_files : Relative_path.t -> content Relative_path.Map.t
+val file_to_files : Relative_path.t -> repo
 
 (** Multifile pathnames are like (DummyRoot, "/home/ljw/a.php--chess.php"),
 or just (DummyRoot, "/home/ljw/chess.php") if there weren't any multifiles within the file.
@@ -53,16 +55,22 @@ val short_suffix : Relative_path.t -> string
   to `another/file/name.php`. *)
 val read_file_from_multifile : path -> content list
 
-val print_files_as_multifile : content Relative_path.Map.t -> unit
+val print_files_as_multifile : repo -> unit
 
-(** This module handles multifiles with internal file names like
-  'base-xxx.php' and 'changed-xxx.php' *)
 module States : sig
-  (** Get the base files from a multifile, simarly to [file_to_files],
-    stripping the "base-" prefix for internal file names. *)
-  val base_files : path -> content Relative_path.Map.t
+  type change =
+    | Modified of content
+    | Deleted
 
-  (** Get the changed files from a multifile, simarly to [file_to_files],
-    stripping the "changed-" prefix for internal file names. *)
-  val changed_files : path -> content Relative_path.Map.t
+  type repo_change = change Relative_path.Map.t
+
+  type t = {
+    base: repo;
+    changes: repo_change list;
+  }
+  [@@deriving show]
+
+  val apply_repo_change : repo -> repo_change -> repo
+
+  val parse : path -> t
 end

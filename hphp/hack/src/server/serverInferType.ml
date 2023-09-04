@@ -202,52 +202,46 @@ let base_visitor ~human_friendly ~under_dynamic line_char_pairs =
     When more than one node has the given range, return the type of the first
     node visited in a preorder traversal.
 *)
-let range_visitor startl startc endl endc =
-  object
+let range_visitor line_char_pairs =
+  let size = List.length line_char_pairs in
+  let zero = List.init size ~f:(fun _ -> None) in
+  object (self)
     inherit [_] Tast_visitor.reduce as super
 
-    inherit [_] Visitors_runtime.option_monoid
+    inherit [_ option list] Visitors_runtime.monoid
 
-    method merge x _ = x
+    method private select_pos pos env ty =
+      List.map line_char_pairs ~f:(fun (startl, startc, endl, endc) ->
+          if
+            Pos.exactly_matches_range
+              pos
+              ~start_line:startl
+              ~start_col:startc
+              ~end_line:endl
+              ~end_col:endc
+          then
+            Some (env, ty)
+          else
+            None)
+
+    method private zero = zero
+
+    method private plus lhss rhss =
+      List.map2_exn lhss rhss ~f:(Option.merge ~f:(fun x _ -> x))
 
     method! on_expr env ((ty, pos, _) as expr) =
-      if
-        Pos.exactly_matches_range
-          pos
-          ~start_line:startl
-          ~start_col:startc
-          ~end_line:endl
-          ~end_col:endc
-      then
-        Some (env, ty)
-      else
-        super#on_expr env expr
+      let res = self#select_pos pos env ty in
+      self#plus res (super#on_expr env expr)
 
     method! on_fun_param env fp =
-      if
-        Pos.exactly_matches_range
-          fp.Aast.param_pos
-          ~start_line:startl
-          ~start_col:startc
-          ~end_line:endl
-          ~end_col:endc
-      then
-        Some (env, fp.Aast.param_annotation)
-      else
-        super#on_fun_param env fp
+      let res =
+        self#select_pos fp.Aast.param_pos env fp.Aast.param_annotation
+      in
+      self#plus res (super#on_fun_param env fp)
 
     method! on_class_id env ((ty, pos, _) as cid) =
-      if
-        Pos.exactly_matches_range
-          pos
-          ~start_line:startl
-          ~start_col:startc
-          ~end_line:endl
-          ~end_col:endc
-      then
-        Some (env, ty)
-      else
-        super#on_class_id env cid
+      let res = self#select_pos pos env ty in
+      self#plus res (super#on_class_id env cid)
   end
 
 let type_at_pos_fused
@@ -302,9 +296,12 @@ let type_at_range
     (start_char : int)
     (end_line : int)
     (end_char : int) : (Tast_env.env * Tast.ty) option =
-  (range_visitor start_line start_char end_line end_char)#go
+  (range_visitor [(start_line, start_char, end_line, end_char)])#go
     ctx
     tast.Tast_with_dynamic.under_normal_assumptions
+  |> function
+  | [result] -> result
+  | _ -> None
 
 let go_ctx
     ~(ctx : Provider_context.t)

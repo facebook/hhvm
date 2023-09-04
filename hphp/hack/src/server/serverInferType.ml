@@ -289,6 +289,15 @@ let human_friendly_type_at_pos
   | [Some (_, env, ty)] -> Some (env, Tast_expand.expand_ty env ty)
   | _ -> None
 
+let type_at_range_fused
+    (ctx : Provider_context.t)
+    (tast : Tast.program Tast_with_dynamic.t)
+    (line_char_pairs : (int * int * int * int) list) :
+    (Tast_env.env * Tast.ty) option list =
+  (range_visitor line_char_pairs)#go
+    ctx
+    tast.Tast_with_dynamic.under_normal_assumptions
+
 let type_at_range
     (ctx : Provider_context.t)
     (tast : Tast.program Tast_with_dynamic.t)
@@ -296,9 +305,7 @@ let type_at_range
     (start_char : int)
     (end_line : int)
     (end_char : int) : (Tast_env.env * Tast.ty) option =
-  (range_visitor [(start_line, start_char, end_line, end_char)])#go
-    ctx
-    tast.Tast_with_dynamic.under_normal_assumptions
+  type_at_range_fused ctx tast [(start_line, start_char, end_line, end_char)]
   |> function
   | [result] -> result
   | _ -> None

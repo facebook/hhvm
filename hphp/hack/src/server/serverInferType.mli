@@ -27,6 +27,12 @@ val human_friendly_type_at_pos :
   int ->
   (Tast_env.env * Tast.ty) option
 
+val type_at_range_fused :
+  Provider_context.t ->
+  Tast.program Tast_with_dynamic.t ->
+  (int * int * int * int) list ->
+  (Tast_env.env * Tast.ty) option list
+
 val type_at_range :
   Provider_context.t ->
   Tast.program Tast_with_dynamic.t ->

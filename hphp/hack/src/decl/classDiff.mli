@@ -105,7 +105,7 @@ module MajorChange : sig
     | Unknown
     | Added
     | Removed
-    | Modified of class_shell_change
+    | Modified of class_shell_change * member_diff
   [@@deriving eq, show]
 end
 

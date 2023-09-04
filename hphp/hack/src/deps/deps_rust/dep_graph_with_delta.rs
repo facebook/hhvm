@@ -244,6 +244,10 @@ impl<B: BaseDepgraphTrait> DepGraphWithDelta<B> {
         };
         result.unwrap()
     }
+
+    pub fn remove(&mut self, dependent: Dep, dependency: Dep) {
+        self.delta.remove(dependent, dependency)
+    }
 }
 
 impl DepGraphWithDelta<DepGraph> {

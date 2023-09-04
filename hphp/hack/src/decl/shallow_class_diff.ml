@@ -694,12 +694,13 @@ let diff_class (info : PackageInfo.t) (c1 : shallow_class) (c2 : shallow_class)
   let same_package = same_package info c1 c2 in
   let class_shell1 = normalize c1 ~same_package
   and class_shell2 = normalize c2 ~same_package in
+  let member_diff = diff_class_members c1 c2 in
   if not (equal_shallow_class class_shell1 class_shell2) then
     Major_change
-      (MajorChange.Modified (diff_class_shells class_shell1 class_shell2))
+      (MajorChange.Modified
+         (diff_class_shells class_shell1 class_shell2, member_diff))
   else
     let mro_inputs_equal = mro_inputs_equal c1 c2 in
-    let member_diff = diff_class_members c1 c2 in
     if mro_inputs_equal && ClassDiff.is_empty_member_diff member_diff then
       Unchanged
     else

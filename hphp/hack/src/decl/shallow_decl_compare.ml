@@ -55,6 +55,69 @@ let compute_class_diffs
       else
         (cid, diff) :: acc)
 
+let untag_removed_members_in_depgraph
+    ~ctx (changes : (string * ClassDiff.t) list) =
+  let removed_member_deps =
+    List.fold
+      changes
+      ~init:(Typing_deps.DepSet.make ())
+      ~f:(fun deps_acc (class_name, diff) ->
+        match diff with
+        | ClassDiff.Unchanged
+        | ClassDiff.(Major_change MajorChange.(Unknown | Added | Removed)) ->
+          deps_acc
+        | ClassDiff.(Major_change (MajorChange.Modified (_, member_diff)))
+        | ClassDiff.Minor_change member_diff ->
+          let class_dep =
+            Typing_deps.Dep.make (Typing_deps.Dep.Type class_name)
+          in
+          let {
+            ClassDiff.consts;
+            typeconsts;
+            props;
+            sprops;
+            methods;
+            smethods;
+            constructor;
+          } =
+            member_diff
+          in
+          let acc_removed_member member change deps_acc =
+            match change with
+            | ClassDiff.Added
+            | ClassDiff.Modified
+            | ClassDiff.Changed_inheritance
+            | ClassDiff.Private_change ->
+              deps_acc
+            | ClassDiff.Removed ->
+              let member_dep =
+                Typing_deps.Dep.make_member_dep_from_type_dep class_dep member
+              in
+              Typing_deps.DepSet.add deps_acc member_dep
+          in
+          let acc_removed_members make_member members deps_acc =
+            SMap.fold
+              members
+              ~init:deps_acc
+              ~f:(fun member_name change deps_acc ->
+                acc_removed_member (make_member member_name) change deps_acc)
+          in
+          Option.fold constructor ~init:deps_acc ~f:(fun deps_acc change ->
+              acc_removed_member
+                Typing_deps.Dep.Member.constructor
+                change
+                deps_acc)
+          |> acc_removed_members Typing_deps.Dep.Member.const consts
+          |> acc_removed_members Typing_deps.Dep.Member.const typeconsts
+          |> acc_removed_members Typing_deps.Dep.Member.prop props
+          |> acc_removed_members Typing_deps.Dep.Member.sprop sprops
+          |> acc_removed_members Typing_deps.Dep.Member.method_ methods
+          |> acc_removed_members Typing_deps.Dep.Member.smethod smethods)
+  in
+  Typing_deps.remove_declared_tags
+    (Provider_context.get_deps_mode ctx)
+    removed_member_deps
+
 let compute_class_fanout
     (ctx : Provider_context.t)
     ~during_init
@@ -70,4 +133,8 @@ let compute_class_fanout
   else
     Hh_logger.log "Computing fanout from %d changed classes" change_count;
 
-  Shallow_class_fanout.fanout_of_changes ~ctx changes
+  let fanout = Shallow_class_fanout.fanout_of_changes ~ctx changes in
+  if TypecheckerOptions.optimized_member_fanout (Provider_context.get_tcopt ctx)
+  then
+    untag_removed_members_in_depgraph ~ctx changes;
+  fanout

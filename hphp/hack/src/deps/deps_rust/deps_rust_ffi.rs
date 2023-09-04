@@ -207,6 +207,10 @@ ocaml_ffi! {
         DEP_GRAPH.write_delta().insert(dependent, dependency);
     }
 
+    fn hh_custom_dep_graph_remove_edge(dependent: Dep, dependency: Dep) {
+        DEP_GRAPH.write_delta().remove(dependent, dependency);
+    }
+
     fn hh_custom_dep_graph_dep_graph_delta_num_edges() -> usize {
         DEP_GRAPH.read_delta().added_edges_count()
     }

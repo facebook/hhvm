@@ -434,6 +434,22 @@ module VisitedSet = struct
   let make () : t = hh_visited_set_make ()
 end
 
+type dep_edge = {
+  idependent: Dep.t;  (** The node depending on the dependency *)
+  idependency: Dep.t;  (** The node the dependent depends upon *)
+}
+
+module DepEdgeSet = Caml.Set.Make (struct
+  type t = dep_edge
+
+  let compare x y =
+    let d1 = Int.compare x.idependent y.idependent in
+    if d1 = 0 then
+      Int.compare x.idependency y.idependency
+    else
+      d1
+end)
+
 (** Graph management in the new system with custom file format. *)
 module CustomGraph = struct
   external hh_custom_dep_graph_register_custom_types : unit -> unit
@@ -478,6 +494,10 @@ module CustomGraph = struct
     = "hh_custom_dep_graph_register_discovered_dep_edge"
     [@@noalloc]
 
+  external remove_edge : Dep.t -> Dep.t -> unit
+    = "hh_custom_dep_graph_remove_edge"
+    [@@noalloc]
+
   external dep_graph_delta_num_edges : unit -> int
     = "hh_custom_dep_graph_dep_graph_delta_num_edges"
     [@@noalloc]
@@ -488,22 +508,6 @@ module CustomGraph = struct
     = "hh_custom_dep_graph_load_delta"
 
   let add_all_deps mode x = x |> add_extend_deps mode |> add_typing_deps mode
-
-  type dep_edge = {
-    idependent: Dep.t;  (** The node depending on the dependency *)
-    idependency: Dep.t;  (** The node the dependent depends upon *)
-  }
-
-  module DepEdgeSet = Caml.Set.Make (struct
-    type t = dep_edge
-
-    let compare x y =
-      let d1 = Int.compare x.idependent y.idependent in
-      if d1 = 0 then
-        Int.compare x.idependency y.idependency
-      else
-        d1
-  end)
 
   (** A batch of discovered dependency edges, of which some might
     already be in the dependency graph! *)
@@ -545,6 +549,15 @@ module CustomGraph = struct
       begin
         fun { idependent; idependency } ->
           register_discovered_dep_edge idependent idependency
+      end
+      s
+
+  let remove_edges : DepEdgeSet.t -> unit =
+   fun s ->
+    assert_master ();
+    DepEdgeSet.iter
+      begin
+        (fun { idependent; idependency } -> remove_edge idependent idependency)
       end
       s
 
@@ -686,8 +699,7 @@ end = struct
   external hh_save_custom_dep_graph_save_delta : string -> string -> int
     = "hh_save_custom_dep_graph_save_delta"
 
-  let discovered_deps_batch : (CustomGraph.dep_edge, unit) Hashtbl.t =
-    Hashtbl.create 1000
+  let discovered_deps_batch : (dep_edge, unit) Hashtbl.t = Hashtbl.create 1000
 
   let destination_file_handle_ref : Out_channel.t option ref = ref None
 
@@ -721,7 +733,7 @@ end = struct
     let handle = destination_file_handle mode in
     Hashtbl.iter
       begin
-        fun CustomGraph.{ idependent; idependency } () ->
+        fun { idependent; idependency } () ->
           if not (CustomGraph.depgraph_has_edge mode idependent idependency)
           then begin
             (* To be kept in sync with typing_deps.rs::hh_custom_dep_graph_save_delta! *)
@@ -751,10 +763,7 @@ end = struct
     else (
       Caml.Hashtbl.iter (fun _ f -> f dependent dependency) dependency_callbacks;
       if !trace then begin
-        Hashtbl.replace
-          discovered_deps_batch
-          CustomGraph.{ idependent; idependency }
-          ();
+        Hashtbl.replace discovered_deps_batch { idependent; idependency } ();
         if Hashtbl.length discovered_deps_batch >= 1000 then
           filter_discovered_deps_batch ~flush:false mode
       end;
@@ -780,14 +789,13 @@ end = struct
     (Dep.t * Dep.t) list ->
     unit = "hh_fanout_ffi_add_idep_batch"
 
-  let discovered_deps_batch : (CustomGraph.dep_edge, unit) Hashtbl.t =
-    Hashtbl.create 1000
+  let discovered_deps_batch : (dep_edge, unit) Hashtbl.t = Hashtbl.create 1000
 
   let flush_edges hh_fanout_ffi =
     let edges =
       Hashtbl.fold
         begin
-          fun CustomGraph.{ idependent; idependency } () acc ->
+          fun { idependent; idependency } () acc ->
             (idependency, idependent) :: acc
         end
         discovered_deps_batch
@@ -812,10 +820,7 @@ end = struct
     else (
       Caml.Hashtbl.iter (fun _ f -> f dependent dependency) dependency_callbacks;
       if !trace then begin
-        Hashtbl.replace
-          discovered_deps_batch
-          CustomGraph.{ idependent; idependency }
-          ();
+        Hashtbl.replace discovered_deps_batch { idependent; idependency } ();
         if Hashtbl.length discovered_deps_batch >= 1000 then
           flush_edges hh_fanout_ffi
       end;
@@ -895,9 +900,7 @@ module Telemetry = struct
     | HhFanoutRustMode _ -> None
 end
 
-type dep_edge = CustomGraph.dep_edge
-
-type dep_edges = CustomGraph.DepEdgeSet.t option
+type dep_edges = DepEdgeSet.t option
 
 (** As part of few optimizations (prechecked files, interruptible typechecking), we
     allow the dependency table to get out of date (in order to be able to prioritize
@@ -926,7 +929,7 @@ let replace mode =
   | InMemoryMode _ -> CustomGraph.hh_custom_dep_graph_replace mode
   | _ -> ()
 
-let dep_edges_make () : dep_edges = Some CustomGraph.DepEdgeSet.empty
+let dep_edges_make () : dep_edges = Some DepEdgeSet.empty
 
 (** Depending on [mode], either return discovered edges
   which are not already in the dep graph
@@ -937,7 +940,7 @@ let flush_ideps_batch mode : dep_edges =
     (* Make sure we don't miss any dependencies! *)
     CustomGraph.filter_discovered_deps_batch mode;
     let old_batch = !CustomGraph.filtered_deps_batch in
-    CustomGraph.filtered_deps_batch := CustomGraph.DepEdgeSet.empty;
+    CustomGraph.filtered_deps_batch := DepEdgeSet.empty;
     Some old_batch
   | SaveToDiskMode _ ->
     SaveCustomGraph.filter_discovered_deps_batch ~flush:true mode;
@@ -955,13 +958,29 @@ let hh_fanout_flush_ideps mode : unit =
 
 let merge_dep_edges (x : dep_edges) (y : dep_edges) : dep_edges =
   match (x, y) with
-  | (Some x, Some y) -> Some (CustomGraph.DepEdgeSet.union x y)
+  | (Some x, Some y) -> Some (DepEdgeSet.union x y)
   | _ -> None
 
 (** Register the provided dep edges in the dep table delta in [typing_deps.rs] *)
 let register_discovered_dep_edges : dep_edges -> unit = function
   | None -> ()
   | Some batch -> CustomGraph.register_discovered_dep_edges batch
+
+let remove_edges mode edges =
+  match mode with
+  | InMemoryMode _
+  | SaveToDiskMode _ ->
+    CustomGraph.remove_edges edges
+  | HhFanoutRustMode _ ->
+    failwith "remove_edges not supported for HhFanoutRustMode"
+
+let remove_declared_tags mode deps =
+  let edges =
+    DepSet.fold deps ~init:DepEdgeSet.empty ~f:(fun dep edges_acc ->
+        let edge = { idependency = dep; idependent = Dep.make Dep.Declares } in
+        DepEdgeSet.add edge edges_acc)
+  in
+  remove_edges mode edges
 
 let save_discovered_edges mode ~dest ~reset_state_after_saving =
   match mode with

@@ -355,7 +355,7 @@ module MajorChange = struct
     | Unknown
     | Added
     | Removed
-    | Modified of class_shell_change
+    | Modified of class_shell_change * member_diff
   [@@deriving eq, show { with_path = false }]
 end
 
@@ -640,20 +640,31 @@ module MajorChangeCategory = struct
     | Unknown
     | Added
     | Removed
-    | Modified of ClassShellChangeCategory.t
+    | Modified of ClassShellChangeCategory.t * MemberDiffCategory.t
 
   let of_major_change = function
     | MajorChange.Unknown -> Unknown
     | MajorChange.Added -> Added
     | MajorChange.Removed -> Removed
-    | MajorChange.Modified change ->
-      Modified (ClassShellChangeCategory.of_class_shell_change change)
+    | MajorChange.Modified (change, member_diff) ->
+      Modified
+        ( ClassShellChangeCategory.of_class_shell_change change,
+          MemberDiffCategory.of_member_diff member_diff )
 
   let to_json = function
     | Unknown -> Hh_json.string_ "Unknown"
     | Added -> Hh_json.string_ "Added"
     | Removed -> Hh_json.string_ "Removed"
-    | Modified change -> ClassShellChangeCategory.to_json change
+    | Modified (change, member_diff) ->
+      Hh_json.JSON_Object
+        [
+          ( "Modified",
+            Hh_json.JSON_Array
+              [
+                ClassShellChangeCategory.to_json change;
+                MemberDiffCategory.to_json member_diff;
+              ] );
+        ]
 end
 
 module ChangeCategory = struct

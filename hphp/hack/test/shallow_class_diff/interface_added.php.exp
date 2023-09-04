@@ -1,5 +1,5 @@
 C: (Major_change
-      (Modified
+      (Modified (
          { classish_kind = (Cclass Concrete);
            parent_changes =
            (Some { extends_changes = None;
@@ -14,4 +14,5 @@ C: (Major_change
            internal_change = None; has_xhp_keyword_change = None;
            support_dynamic_type_change = None; module_change = None;
            xhp_enum_values_change = false; user_attributes_changes = None;
-           enum_type_change = None }))
+           enum_type_change = None },
+         {})))

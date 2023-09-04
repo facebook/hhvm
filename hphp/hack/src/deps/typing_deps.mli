@@ -241,6 +241,8 @@ val merge_dep_edges : dep_edges -> dep_edges -> dep_edges
 (** Register the provided dep edges in the dep table delta in [typing_deps.rs] *)
 val register_discovered_dep_edges : dep_edges -> unit
 
+val remove_declared_tags : Mode.t -> DepSet.t -> unit
+
 (** Save discovered edges to a binary file.
 
   - If mode is [InMemoryMode], the dep table delta in [typing_deps.rs] is saved.

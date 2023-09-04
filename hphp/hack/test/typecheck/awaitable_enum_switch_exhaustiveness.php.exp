@@ -1,0 +1,4 @@
+File "awaitable_enum_switch_exhaustiveness.php", line 15, characters 13-17:
+`switch` statement nonexhaustive; at least the following cases are missing: `B` (Typing[4019])
+  File "awaitable_enum_switch_exhaustiveness.php", line 3, characters 6-19:
+  Enum declared here

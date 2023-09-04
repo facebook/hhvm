@@ -22,7 +22,16 @@ type kind =
   | EnumClass
   | EnumClassLabel
 
-let is_arraykey env ty = Env.is_sub_type env ty (MakeType.arraykey Reason.Rnone)
+(* This is used for a heuristic to handle a common case in enum refinements.
+   So, it identifies the common enum bounds, namely, arraykey, string, and int.
+
+   I am deliberately not using subtyping because it causes the heuristic to
+   capture intersections of two enums. *)
+let is_common_enum_bound env ty =
+  let (_env, ty) = Env.expand_type env ty in
+  match get_node ty with
+  | Tprim Ast_defs.(Tarraykey | Tint | Tstring) -> true
+  | _ -> false
 
 let is_dynamic env ty = Env.is_sub_type env ty (MakeType.dynamic Reason.Rnone)
 
@@ -229,8 +238,17 @@ let rec check_exhaustiveness_
     in
     List.fold_left tyl ~init:(outcomes, env) ~f:(fun (outcomes, env) ty ->
         check_exhaustiveness_ env pos ty caselist new_enum ~outcomes)
-  | Tintersection [arraykey; like_ty]
-    when is_arraykey env arraykey && is_like_enum env like_ty ->
+  | Tintersection [enum_bound; like_ty]
+    when is_common_enum_bound env enum_bound && is_like_enum env like_ty ->
+    check_exhaustiveness_
+      env
+      pos
+      like_ty
+      caselist
+      enum_coming_from_unresolved
+      ~outcomes
+  | Tintersection [like_ty; enum_bound]
+    when is_common_enum_bound env enum_bound && is_like_enum env like_ty ->
     check_exhaustiveness_
       env
       pos

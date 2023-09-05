@@ -34,23 +34,12 @@ import reactor.core.publisher.SignalType;
  * This class wraps an RpcClient and instruments the calls. It publishes the stats to the {@link
  * ThriftClientStats} class.
  */
-public class InstrumentedRpcClient implements RpcClient {
-  private final RpcClient delegate;
+public class InstrumentedRpcClient extends DelegatingRpcClient {
   private final ThriftClientStats thriftClientStats;
 
   public InstrumentedRpcClient(RpcClient delegate, ThriftClientStats thriftClientStats) {
-    this.delegate = delegate;
+    super(delegate);
     this.thriftClientStats = thriftClientStats;
-  }
-
-  @Override
-  public Mono<Void> onClose() {
-    return delegate.onClose();
-  }
-
-  @Override
-  public void close() {
-    delegate.close();
   }
 
   private void handleDoFinally(SignalType signalType, String name, long start) {
@@ -74,7 +63,7 @@ public class InstrumentedRpcClient implements RpcClient {
       final InstrumentedClientRequestPayload<T> instrumentedClientRequestPayload =
           new InstrumentedClientRequestPayload<>(payload, name, thriftClientStats);
       thriftClientStats.call(name);
-      return delegate
+      return getDelegate()
           .singleRequestSingleResponse(instrumentedClientRequestPayload, options)
           .doFinally(signalType -> handleDoFinally(signalType, name, start));
     } catch (Throwable t) {
@@ -96,7 +85,7 @@ public class InstrumentedRpcClient implements RpcClient {
       final InstrumentedClientRequestPayload<T> instrumentedClientRequestPayload =
           new InstrumentedClientRequestPayload<>(payload, name, thriftClientStats);
       thriftClientStats.call(name);
-      return delegate
+      return getDelegate()
           .singleRequestNoResponse(instrumentedClientRequestPayload, options)
           .doFinally(signalType -> handleDoFinally(signalType, name, start));
     } catch (Throwable t) {
@@ -111,7 +100,7 @@ public class InstrumentedRpcClient implements RpcClient {
 
   @Override
   public Mono<Void> metadataPush(ClientPushMetadata clientMetadata, RpcOptions options) {
-    return delegate.metadataPush(clientMetadata, options);
+    return getDelegate().metadataPush(clientMetadata, options);
   }
 
   @Override
@@ -123,7 +112,7 @@ public class InstrumentedRpcClient implements RpcClient {
       final InstrumentedClientRequestPayload<T> instrumentedClientRequestPayload =
           new InstrumentedClientRequestPayload<>(payload, name, thriftClientStats);
       thriftClientStats.call(name);
-      return delegate
+      return getDelegate()
           .<T, K>singleRequestStreamingResponse(instrumentedClientRequestPayload, options)
           .doFinally(signalType -> handleDoFinally(signalType, name, start));
     } catch (Throwable t) {
@@ -147,7 +136,7 @@ public class InstrumentedRpcClient implements RpcClient {
                 final String name = payload.getRequestRpcMetadata().getName();
                 final long start = System.nanoTime();
                 thriftClientStats.call(name);
-                return delegate
+                return getDelegate()
                     .<T, K>streamingRequestStreamingResponse(clientRequestPayloadFlux, options)
                     .doFinally(signalType -> handleDoFinally(signalType, name, start));
               } catch (Throwable t) {

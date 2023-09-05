@@ -16,6 +16,7 @@
 
 package com.facebook.thrift.rsocket.client;
 
+import com.facebook.thrift.client.DelegatingRpcClient;
 import com.facebook.thrift.client.RpcClient;
 import com.facebook.thrift.client.RpcOptions;
 import com.facebook.thrift.model.StreamResponse;
@@ -30,47 +31,35 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-public final class HeaderAwareRSocketRpcClient implements RpcClient {
+public final class HeaderAwareRSocketRpcClient extends DelegatingRpcClient {
 
   private static final String HEADER_KEY = "header_response";
 
-  private final RpcClient delegate;
-
   public HeaderAwareRSocketRpcClient(RpcClient delegate) {
-    this.delegate = delegate;
-  }
-
-  @Override
-  public Mono<Void> onClose() {
-    return delegate.onClose();
-  }
-
-  @Override
-  public void close() {
-    delegate.close();
+    super(delegate);
   }
 
   @Override
   public <T> Mono<ClientResponsePayload<T>> singleRequestSingleResponse(
       ClientRequestPayload<T> payload, RpcOptions options) {
-    return delegate.singleRequestSingleResponse(payload, options);
+    return getDelegate().singleRequestSingleResponse(payload, options);
   }
 
   @Override
   public <T> Mono<Void> singleRequestNoResponse(
       ClientRequestPayload<T> payload, RpcOptions options) {
-    return delegate.singleRequestNoResponse(payload, options);
+    return getDelegate().singleRequestNoResponse(payload, options);
   }
 
   @Override
   public Mono<Void> metadataPush(ClientPushMetadata clientMetadata, RpcOptions options) {
-    return delegate.metadataPush(clientMetadata, options);
+    return getDelegate().metadataPush(clientMetadata, options);
   }
 
   @Override
   public <T, K> Flux<ClientResponsePayload<K>> singleRequestStreamingResponse(
       ClientRequestPayload<T> payload, RpcOptions options) {
-    return delegate
+    return getDelegate()
         .<T, K>singleRequestStreamingResponse(payload, options)
         .map(new HeaderResponseHandler<>(payload.getResponseReader()));
   }
@@ -78,7 +67,7 @@ public final class HeaderAwareRSocketRpcClient implements RpcClient {
   @Override
   public <T, K> Flux<ClientResponsePayload<K>> streamingRequestStreamingResponse(
       Publisher<ClientRequestPayload<T>> payloads, RpcOptions options) {
-    return delegate.streamingRequestStreamingResponse(payloads, options);
+    return getDelegate().streamingRequestStreamingResponse(payloads, options);
   }
 
   /**

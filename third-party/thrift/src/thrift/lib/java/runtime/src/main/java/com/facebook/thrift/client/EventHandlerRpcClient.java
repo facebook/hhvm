@@ -33,24 +33,13 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /** This class wraps an RpcClient and executes ThriftClientEventHandler with the calls. */
-public class EventHandlerRpcClient implements RpcClient {
-  private final RpcClient delegate;
+public class EventHandlerRpcClient extends DelegatingRpcClient {
   private final List<? extends ThriftClientEventHandler> eventHandlers;
 
   public EventHandlerRpcClient(
       RpcClient delegate, List<? extends ThriftClientEventHandler> eventHandlers) {
-    this.delegate = delegate;
+    super(delegate);
     this.eventHandlers = eventHandlers;
-  }
-
-  @Override
-  public Mono<Void> onClose() {
-    return delegate.onClose();
-  }
-
-  @Override
-  public void close() {
-    delegate.close();
   }
 
   @Override
@@ -58,7 +47,7 @@ public class EventHandlerRpcClient implements RpcClient {
       ClientRequestPayload<T> payload, RpcOptions options) {
     final EventHandlerClientRequestPayload<T> requestPayload =
         new EventHandlerClientRequestPayload<>(payload, eventHandlers);
-    return delegate
+    return getDelegate()
         .singleRequestSingleResponse(requestPayload, options)
         .doOnNext(
             clientResponsePayload -> {
@@ -76,7 +65,7 @@ public class EventHandlerRpcClient implements RpcClient {
       ClientRequestPayload<T> payload, RpcOptions options) {
     final EventHandlerClientRequestPayload<T> requestPayload =
         new EventHandlerClientRequestPayload<>(payload, eventHandlers);
-    return delegate
+    return getDelegate()
         .singleRequestNoResponse(requestPayload, options)
         .doOnError(requestPayload::onError)
         .doFinally(__ -> requestPayload.done());
@@ -84,19 +73,19 @@ public class EventHandlerRpcClient implements RpcClient {
 
   @Override
   public Mono<Void> metadataPush(ClientPushMetadata clientMetadata, RpcOptions options) {
-    return delegate.metadataPush(clientMetadata, options);
+    return getDelegate().metadataPush(clientMetadata, options);
   }
 
   @Override
   public <T, K> Flux<ClientResponsePayload<K>> singleRequestStreamingResponse(
       ClientRequestPayload<T> payload, RpcOptions options) {
-    return delegate.singleRequestStreamingResponse(payload, options);
+    return getDelegate().singleRequestStreamingResponse(payload, options);
   }
 
   @Override
   public <T, K> Flux<ClientResponsePayload<K>> streamingRequestStreamingResponse(
       Publisher<ClientRequestPayload<T>> payloads, RpcOptions options) {
-    return delegate.streamingRequestStreamingResponse(payloads, options);
+    return getDelegate().streamingRequestStreamingResponse(payloads, options);
   }
 
   private static class EventHandlerClientRequestPayload<T>

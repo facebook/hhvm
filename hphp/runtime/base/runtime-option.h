@@ -922,7 +922,6 @@ struct RuntimeOption {
   F(uint32_t, JitRetranslateAllSeconds, retranslateAllSecondsDefault()) \
   F(bool,     JitRerunRetranslateAll,  false)                           \
   F(bool,     JitBuildOutliningHashes, false)                           \
-  F(bool,     JitAttemptSuperInlining,  false)                          \
   F(bool,     JitPGOLayoutSplitHotCold, pgoLayoutSplitHotColdDefault()) \
   F(bool,     JitPGOVasmBlockCounters, true)                            \
   F(bool,     JitPGOVasmBlockCountersOptPrologue, true)                 \

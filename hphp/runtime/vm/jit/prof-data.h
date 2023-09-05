@@ -264,6 +264,8 @@ struct ProfData {
   }
   static void setTriedDeserialization() {
     s_triedDeserialization.store(true, std::memory_order_relaxed);
+    static auto tried_deser = ServiceData::createCounter("jit.tried_deser");
+    tried_deser->setValue(1);
   }
 
   static bool wasDeserialized() {
@@ -285,6 +287,8 @@ struct ProfData {
     s_tag.store(makeStaticString(tag), std::memory_order_relaxed);
     s_buildTime.store(buildTime, std::memory_order_relaxed);
     s_wasDeserialized.store(true, std::memory_order_relaxed);
+    static auto was_deser = ServiceData::createCounter("jit.suceeded_deser");
+    was_deser->setValue(1);
   }
 
   static size_t prevProfSize() {

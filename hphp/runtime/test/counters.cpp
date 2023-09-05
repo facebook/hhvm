@@ -428,5 +428,4 @@ TEST(COUNTERS, server_stats) {
   EXPECT_EQ(stats.at("prefix.MyKey"), 45);
   EXPECT_EQ(stats.at("prefix.hit"), 1);
 }
-
 }

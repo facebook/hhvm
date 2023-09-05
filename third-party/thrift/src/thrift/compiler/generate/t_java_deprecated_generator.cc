@@ -3966,7 +3966,7 @@ void t_java_deprecated_generator::generate_java_doc(
         field->doc() + "\n@see " + get_enum_class_name(field->get_type());
     generate_java_docstring_comment(out, combined_message);
   } else {
-    generate_java_doc(out, (t_node*)field);
+    generate_java_doc(out, (t_named*)field);
   }
 }
 
@@ -3974,9 +3974,9 @@ void t_java_deprecated_generator::generate_java_doc(
  * Emits a JavaDoc comment if the provided object has a doc in Thrift
  */
 void t_java_deprecated_generator::generate_java_doc(
-    ofstream& out, const t_node* tdoc) {
-  if (tdoc->has_doc()) {
-    generate_java_docstring_comment(out, tdoc->doc());
+    ofstream& out, const t_named* named_node) {
+  if (named_node->has_doc()) {
+    generate_java_docstring_comment(out, named_node->doc());
   }
 }
 

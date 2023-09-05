@@ -205,15 +205,6 @@ class t_java_deprecated_generator : public t_concat_generator {
   void generate_serialize_list_element(
       std::ofstream& out, const t_list* tlist, std::string iter);
 
-  void generate_java_doc(std::ofstream& out, const t_field* field);
-
-  void generate_java_doc(std::ofstream& out, const t_node* tdoc);
-
-  void generate_java_doc(std::ofstream& out, const t_function* tdoc);
-
-  void generate_java_docstring_comment(
-      std::ofstream& out, std::string contents);
-
   virtual bool is_comparable(
       const t_type* type, std::vector<const t_type*>* enclosing = nullptr);
   bool struct_has_all_comparable_fields(
@@ -309,6 +300,16 @@ class t_java_deprecated_generator : public t_concat_generator {
   std::string package_dir_;
 
   static constexpr size_t MAX_NUM_JAVA_CONSTRUCTOR_PARAMS = 127;
+
+ private:
+  void generate_java_doc(std::ofstream& out, const t_field* field);
+
+  void generate_java_doc(std::ofstream& out, const t_named* named_node);
+
+  void generate_java_doc(std::ofstream& out, const t_function* tdoc);
+
+  void generate_java_docstring_comment(
+      std::ofstream& out, std::string contents);
 };
 
 } // namespace compiler

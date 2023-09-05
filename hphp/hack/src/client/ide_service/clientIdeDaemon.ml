@@ -586,6 +586,12 @@ let update_state_files (state : state) (files : open_files_state) : state =
   | Initialized istate -> Initialized { istate with ifiles = files }
   | _ -> failwith ("Update_state_files: unexpected " ^ state_to_log_string state)
 
+let get_signature (ctx : Provider_context.t) (name : string) : 'string =
+  let tast_env = Tast_env.empty ctx in
+  match Tast_env.get_fun tast_env name with
+  | None -> None
+  | Some fe -> Some (Tast_env.print_decl_ty tast_env fe.Typing_defs.fe_type)
+
 (** We avoid showing typing errors if there are parsing errors. *)
 let get_user_facing_errors
     ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) : Errors.t =
@@ -1140,12 +1146,14 @@ let handle_request
     HackEventLogger.completion_call ~method_name:"Completion_resolve";
     let ctx = make_empty_ctx istate.icommon in
     let result = ServerDocblockAt.go_docblock_for_symbol ~ctx ~symbol ~kind in
+    let signature = get_signature ctx symbol in
     Lwt.return
       ( Initialized istate,
-        Ok Completion_resolve.{ docblock = result; signature = None } )
+        Ok Completion_resolve.{ docblock = result; signature } )
   (* Autocomplete docblock resolve *)
   | ( Initialized istate,
-      Completion_resolve_location (file_path, _, { line; column }, kind) ) ->
+      Completion_resolve_location (file_path, fullname, { line; column }, kind)
+    ) ->
     (* We're given a location but it often won't be an opened file.
        We will only serve autocomplete docblocks as of truth on disk.
        Hence, we construct temporary entry to reflect the file which
@@ -1160,9 +1168,11 @@ let handle_request
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerDocblockAt.go_docblock_ctx ~ctx ~entry ~line ~column ~kind)
     in
+    let (Full_name s) = fullname in
+    let signature = get_signature ctx s in
     Lwt.return
       ( Initialized istate,
-        Ok Completion_resolve.{ docblock = result; signature = None } )
+        Ok Completion_resolve.{ docblock = result; signature } )
   (* Document highlighting *)
   | (Initialized istate, Document_highlight (document, { line; column })) ->
     let (istate, ctx, entry, _) = update_file_ctx istate document in

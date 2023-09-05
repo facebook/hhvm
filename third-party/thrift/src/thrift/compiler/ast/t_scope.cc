@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#include <stdio.h>
-
 #include <iterator>
 #include <sstream>
 #include <vector>
@@ -98,8 +96,7 @@ const t_named* t_scope::add_def(const t_named& node) {
       return result.first->second;
     }
   }
-  // TODO(afuller): Also index the defs by name, and scoped name.
-  return nullptr; // Success.
+  return nullptr;
 }
 
 void t_scope::add_enum_value(std::string name, const t_const* constant) {

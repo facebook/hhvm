@@ -251,8 +251,8 @@ class t_program : public t_named {
   std::string compute_name_from_file_path(std::string path);
 
   // Helpers for constrcuting program scoped names.
-  std::string scope_name(const std::string& defname) const {
-    return name() + "." + defname;
+  std::string scope_name(std::string_view defname) const {
+    return fmt::format("{}.{}", name(), defname);
   }
   std::string scope_name(const t_named& owner, const t_named& node) const {
     return name() + "." + owner.name() + "." + node.name();

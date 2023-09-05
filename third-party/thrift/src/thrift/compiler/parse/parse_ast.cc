@@ -647,11 +647,11 @@ class ast_builder : public parser_actions {
       node_list<t_function> functions) override {
     auto find_base_service = [&]() -> const t_service* {
       if (base.str.size() != 0) {
-        auto base_name = fmt::to_string(base.str);
-        if (auto* result = scope_->find_service(base_name)) {
+        auto base_name = base.str;
+        if (const t_service* result = scope_->find_service(base_name)) {
           return result;
         }
-        if (auto* result =
+        if (const t_service* result =
                 scope_->find_service(program_.scope_name(base_name))) {
           return result;
         }
@@ -664,7 +664,7 @@ class ast_builder : public parser_actions {
         &program_, fmt::to_string(name.str), find_base_service());
     set_attributes(*service, std::move(attrs), range);
     service->set_functions(std::move(functions));
-    scope_->add_service(program_.scope_name(*service), service.get());
+    scope_->add_definition(program_.scope_name(*service), service.get());
     add_definition(std::move(service));
   }
 

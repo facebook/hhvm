@@ -25,7 +25,6 @@ let logger_handlers ctx =
   let key_handler_pairs =
     [
       ("tany", Tany_logger.create_handler);
-      ("like_type", Like_type_logger.create_handler);
       ("shape_analysis", Shape_analysis_logger.create_handler);
       ("sdt_analysis", Sdt_analysis_logger.create_handler);
       ("nothing_property", Nothing_property_logger.create_handler);

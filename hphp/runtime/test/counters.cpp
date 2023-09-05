@@ -345,4 +345,8 @@ TEST(COUNTERS, alloc_arena_usage) {
 
 #endif
 
+TEST(COUNTERS, func_ids) {
+  EXPECT_EQ(getVal("admin.func_ids"), Func::maxFuncIdNum());
+}
+
 }

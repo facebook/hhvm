@@ -85,6 +85,13 @@ static InitFiniNode s_funcVecReinit([]{
 }, InitFiniNode::When::PostRuntimeOptions, "s_funcVec reinit");
 #endif
 
+static ServiceData::ExportedCounter* s_funcid_counter =
+  ServiceData::createCounter("admin.func_ids");
+static InitFiniNode s_funcidCounterInit([]{
+  // see comment on s_nextFuncId for why we start at 1.
+  s_funcid_counter->setValue(1);
+}, InitFiniNode::When::PostRuntimeOptions, "func_id counter init");
+
 namespace {
 inline int numProloguesForNumParams(int numParams) {
   // The number of prologues is numParams + 2. The extra 2 are needed for
@@ -378,6 +385,7 @@ FuncId::Int Func::maxFuncIdNum() {
 #ifdef USE_LOWPTR
 void Func::setNewFuncId() {
   s_nextFuncId.fetch_add(1, std::memory_order_relaxed);
+  s_funcid_counter->increment();
 }
 
 const Func* Func::fromFuncId(FuncId id) {
@@ -393,6 +401,7 @@ bool Func::isFuncIdValid(FuncId id) {
 void Func::setNewFuncId() {
   assertx(m_funcId.isInvalid());
   m_funcId = {s_nextFuncId.fetch_add(1, std::memory_order_relaxed)};
+  s_funcid_counter->increment();
 
   s_funcVec.ensureSize(m_funcId.toInt() + 1);
   assertx(s_funcVec.get(m_funcId.toInt()) == nullptr);

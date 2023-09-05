@@ -18,6 +18,7 @@
 
 #include "hphp/util/address-range.h"
 #include "hphp/util/assertions.h"
+#include "hphp/util/service-data.h"
 
 #if USE_JEMALLOC_EXTENT_HOOKS
 
@@ -68,7 +69,7 @@ NEVER_INLINE RangeState& getRange(AddrRangeClass index) {
 //////////////////////////////////////////////////////////////////////
 
 template<typename ExtentAllocator>
-std::string ManagedArena<ExtentAllocator>::reportStats() {
+std::string ManagedArena<ExtentAllocator>::reportStats() const {
   char buffer[128];
   using Traits = extent_allocator_traits<ExtentAllocator>;
   std::snprintf(buffer, sizeof(buffer),
@@ -151,12 +152,24 @@ void ManagedArena<ExtentAllocator>::updateHook() {
 template void ManagedArena<MultiRangeExtentAllocator>::create();
 template void ManagedArena<MultiRangeExtentAllocator>::updateHook();
 template size_t ManagedArena<MultiRangeExtentAllocator>::unusedSize();
-template std::string ManagedArena<MultiRangeExtentAllocator>::reportStats();
+template std::string ManagedArena<MultiRangeExtentAllocator>::reportStats() const;
 
 template void ManagedArena<DefaultExtentAllocator>::create();
 template void ManagedArena<DefaultExtentAllocator>::updateHook();
 template void ManagedArena<RangeFallbackExtentAllocator>::create();
 template void ManagedArena<RangeFallbackExtentAllocator>::updateHook();
+
+namespace {
+ServiceData::CounterCallback s_arena_usage([](ServiceData::CounterMap& counters) {
+  #define INSERT(which) \
+    if (auto a = alloc::which ## Arena()) { \
+      counters.emplace("admin." #which "_arena_usage", s_pageSize * mallctl_pactive(a->id())); \
+    }
+
+  INSERT(low)
+  INSERT(high)
+});
+}
 
 }
 

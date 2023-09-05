@@ -66,7 +66,7 @@ struct ManagedArena : public ExtentAllocator {
 
   // For stats reporting
   size_t unusedSize();
-  std::string reportStats();
+  std::string reportStats() const;
 
   template<typename... Args>
   static ManagedArena* CreateAt(void* addr, Args&&... args) {

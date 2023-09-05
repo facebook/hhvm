@@ -23,9 +23,12 @@
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/server/server-stats.h"
 
-#include "hphp/util/service-data.h"
 #include "hphp/runtime/vm/jit/tc-internal.h"
 
+#include "hphp/util/alloc-defs.h"
+#include "hphp/util/jemalloc-util.h"
+#include "hphp/util/managed-arena.h"
+#include "hphp/util/service-data.h"
 
 namespace HPHP {
 
@@ -324,5 +327,22 @@ TEST(COUNTERS, build_age) {
     EXPECT_GE(begin - ts, age);
     EXPECT_LE(age, end - ts);
 }
+
+#if USE_JEMALLOC_EXTENT_HOOKS
+TEST(COUNTERS, alloc_arena_usage) {
+  #define C(which) \
+  { \
+    auto val = getVal("admin." #which "_arena_usage"); \
+    auto a = alloc::which ## Arena(); \
+    auto compare = a ? s_pageSize * mallctl_pactive(a->id()) : 0; \
+    EXPECT_EQ(val, compare); \
+  }
+
+  C(low);
+  C(high);
+  #undef C
+}
+
+#endif
 
 }

@@ -405,6 +405,18 @@ int smashedCalls()    { return s_smashedCalls.size(); }
 int smashedBranches() { return s_smashedBranches.size(); }
 int recordedFuncs()   { return s_funcTCData.size(); }
 
+namespace {
+ServiceData::CounterCallback s_counters(
+  [](std::map<std::string, int64_t>& counters) {
+    if (!RuntimeOption::EvalEnableReusableTC) return;
+
+    counters["jit.tc.smashed_calls"] = s_smashedCalls.size();
+    counters["jit.tc.recorded_funcs"] = s_funcTCData.size();
+    counters["jit.tc.smashed_branches"] = s_smashedBranches.size();
+  }
+);
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 void recordFuncCaller(const Func* func, TCA toSmash, ProfTransRec* rec) {

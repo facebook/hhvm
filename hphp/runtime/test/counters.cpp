@@ -20,9 +20,11 @@
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/timestamp.h"
 #include "hphp/runtime/base/type-string.h"
+
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/server/server-stats.h"
 
+#include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/tc-internal.h"
 
 #include "hphp/util/alloc-defs.h"
@@ -357,6 +359,10 @@ TEST(COUNTERS, swappable_roarena_capac) {
   arena->allocate(4);
   EXPECT_NE(arena->capacity(), 0);
   EXPECT_EQ(getVal("admin.swappable-roarena-cap"), arena->capacity());
+}
+
+TEST(COUNTERS, num_catch_traces) {
+  EXPECT_EQ(getVal("admin.catch-traces"), jit::numCatchTraces());
 }
 
 }

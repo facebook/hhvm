@@ -104,6 +104,8 @@ void processInlineFrames(const CGMeta& cm) {
   insertStacks(start, cm.inlineStacks);
 }
 
+static auto s_trace_counter = ServiceData::createCounter("admin.catch-traces");
+
 }
 
 Optional<IStack> inlineStackAt(CTCA addr) {
@@ -148,6 +150,7 @@ size_t numCatchTraces() {
 void eraseCatchTrace(CTCA addr) {
   if (auto ct = s_catchTraceMap.find(tc::addrToOffset(addr))) {
     *ct = kInvalidCatchTrace;
+    s_trace_counter->decrement();
   }
 }
 
@@ -237,6 +240,7 @@ void CGMeta::process_only(
       *pos = val;
     } else {
       s_catchTraceMap.insert(key, val);
+      s_trace_counter->increment();
     }
   }
   catches.clear();

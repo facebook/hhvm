@@ -76,6 +76,43 @@ enum class AnnotType : uint16_t {
   Unresolved = (uint16_t)AnnotMetaType::Unresolved << 8 | (uint8_t)KindOfUninit,
 };
 
+constexpr const char* kAnnotTypeVarrayStr = "HH\\varray";
+constexpr const char* kAnnotTypeDarrayStr = "HH\\darray";
+constexpr const char* kAnnotTypeVarrayOrDarrayStr = "HH\\varray_or_darray";
+
+constexpr const char* annotNullableTypeName(AnnotType ty) {
+  switch (ty) {
+    case AnnotType::ArrayKey: return "?HH\\arraykey";
+    case AnnotType::ArrayLike: return "?HH\\AnyArray";
+    case AnnotType::Bool: return "?HH\\bool";
+    case AnnotType::Callable: return "?callable";
+    case AnnotType::Classname: return "?HH\\classname";
+    case AnnotType::Dict: return "?HH\\dict";
+    case AnnotType::Float: return "?HH\\float";
+    case AnnotType::Int: return "?HH\\int";
+    case AnnotType::Keyset: return "?HH\\keyset";
+    case AnnotType::Mixed: return "?HH\\mixed";
+    case AnnotType::NoReturn: return "?HH\\noreturn";
+    case AnnotType::Nonnull: return "?HH\\nonnull";
+    case AnnotType::Nothing: return "?HH\\nothing";
+    case AnnotType::Null: return "?HH\\null";
+    case AnnotType::Number: return "?HH\\num";
+    case AnnotType::Object: not_implemented();
+    case AnnotType::Resource: return "?HH\\resource";
+    case AnnotType::String: return "?HH\\string";
+    case AnnotType::This: return "?HH\\this";
+    case AnnotType::Unresolved: not_implemented();
+    case AnnotType::Vec: return "?HH\\vec";
+    case AnnotType::VecOrDict: return "?HH\\vec_or_dict";
+  }
+}
+
+constexpr const char* annotTypeName(AnnotType ty) {
+  const char* name = annotNullableTypeName(ty);
+  assertx(*name == '?');
+  return name + 1;
+}
+
 inline AnnotMetaType getAnnotMetaType(AnnotType at) {
   return (AnnotMetaType)((uint16_t)at >> 8);
 }
@@ -90,6 +127,8 @@ inline AnnotType enumDataTypeToAnnotType(DataType dt) {
   return (AnnotType)((uint8_t)dt | (uint16_t)AnnotMetaType::Precise << 8);
 }
 
+// This is the "user name" of the AnnotType. It has no direct relation to
+// nameToAnnotType().
 const char* annotName(AnnotType);
 
 const AnnotType* nameToAnnotType(const StringData* typeName);

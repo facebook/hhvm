@@ -4361,38 +4361,38 @@ Type from_hni_constraint(SString s) {
     ++p;
   }
 
-  if (!strcasecmp(p, "HH\\null"))     return opt(std::move(ret));
-  if (!strcasecmp(p, "HH\\resource")) return union_of(std::move(ret), TRes);
-  if (!strcasecmp(p, "HH\\bool"))     return union_of(std::move(ret), TBool);
-  if (!strcasecmp(p, "HH\\int"))      return union_of(std::move(ret), TInt);
-  if (!strcasecmp(p, "HH\\float"))    return union_of(std::move(ret), TDbl);
-  if (!strcasecmp(p, "HH\\num"))      return union_of(std::move(ret), TNum);
-  if (!strcasecmp(p, "HH\\string"))   return union_of(std::move(ret), TStr);
-  if (!strcasecmp(p, "HH\\arraykey")) return union_of(std::move(ret), TArrKey);
-  if (!strcasecmp(p, "HH\\dict"))     return union_of(std::move(ret), TDict);
-  if (!strcasecmp(p, "HH\\vec"))      return union_of(std::move(ret), TVec);
-  if (!strcasecmp(p, "HH\\keyset"))   return union_of(std::move(ret), TKeyset);
-  if (!strcasecmp(p, "HH\\varray")) {
+  if (!strcasecmp(p, annotTypeName(AnnotType::Null)))     return opt(std::move(ret));
+  if (!strcasecmp(p, annotTypeName(AnnotType::Resource))) return union_of(std::move(ret), TRes);
+  if (!strcasecmp(p, annotTypeName(AnnotType::Bool)))     return union_of(std::move(ret), TBool);
+  if (!strcasecmp(p, annotTypeName(AnnotType::Int)))      return union_of(std::move(ret), TInt);
+  if (!strcasecmp(p, annotTypeName(AnnotType::Float)))    return union_of(std::move(ret), TDbl);
+  if (!strcasecmp(p, annotTypeName(AnnotType::Number)))   return union_of(std::move(ret), TNum);
+  if (!strcasecmp(p, annotTypeName(AnnotType::String)))   return union_of(std::move(ret), TStr);
+  if (!strcasecmp(p, annotTypeName(AnnotType::ArrayKey))) return union_of(std::move(ret), TArrKey);
+  if (!strcasecmp(p, annotTypeName(AnnotType::Dict)))     return union_of(std::move(ret), TDict);
+  if (!strcasecmp(p, annotTypeName(AnnotType::Vec)))      return union_of(std::move(ret), TVec);
+  if (!strcasecmp(p, annotTypeName(AnnotType::Keyset)))   return union_of(std::move(ret), TKeyset);
+  if (!strcasecmp(p, kAnnotTypeVarrayStr)) {
     return union_of(std::move(ret), TVec);
   }
-  if (!strcasecmp(p, "HH\\darray")) {
+  if (!strcasecmp(p, kAnnotTypeDarrayStr)) {
     return union_of(std::move(ret), TDict);
   }
-  if (!strcasecmp(p, "HH\\varray_or_darray")) {
+  if (!strcasecmp(p, kAnnotTypeVarrayOrDarrayStr)) {
     return union_of(std::move(ret), TVec, TDict);
   }
-  if (!strcasecmp(p, "HH\\vec_or_dict")) {
+  if (!strcasecmp(p, annotTypeName(AnnotType::VecOrDict))) {
     return union_of(std::move(ret), TVec, TDict);
   }
-  if (!strcasecmp(p, "HH\\arraylike")) {
+  if (!strcasecmp(p, annotTypeName(AnnotType::ArrayLike))) {
     return union_of(std::move(ret), TArrLike);
   }
-  if (!strcasecmp(p, "HH\\classname") &&
+  if (!strcasecmp(p, annotTypeName(AnnotType::Classname)) &&
       RuntimeOption::EvalClassPassesClassname) {
     return union_of(ret, union_of(TStr, union_of(TCls, TLazyCls)));
   }
-  if (!strcasecmp(p, "HH\\mixed"))    return TInitCell;
-  if (!strcasecmp(p, "HH\\nonnull"))  return union_of(std::move(ret), TNonNull);
+  if (!strcasecmp(p, annotTypeName(AnnotType::Mixed)))    return TInitCell;
+  if (!strcasecmp(p, annotTypeName(AnnotType::Nonnull)))  return union_of(std::move(ret), TNonNull);
 
   // It might be an object, or we might want to support type aliases in HNI at
   // some point.  For now just be conservative.

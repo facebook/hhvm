@@ -72,7 +72,7 @@ const StaticString s_PHP_Incomplete_Class("__PHP_Incomplete_Class");
 const StaticString s_IMemoizeParam("HH\\IMemoizeParam");
 const StaticString s_getInstanceKey("getInstanceKey");
 const StaticString s_Closure("Closure");
-const StaticString s_this("HH\\this");
+const StaticString s_this(annotTypeName(AnnotType::This));
 
 bool poppable(Op op) {
   switch (op) {

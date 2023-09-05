@@ -797,14 +797,14 @@ std::string describe_actual_type(tv_rval val) {
     case KindOfString:        return "string";
     case KindOfPersistentVec:
     case KindOfVec:           {
-      return val.val().parr->isLegacyArray() ? "varray" : "HH\\vec";
+      return val.val().parr->isLegacyArray() ? "varray" : annotTypeName(AnnotType::Vec);
     }
     case KindOfPersistentDict:
     case KindOfDict:          {
-      return val.val().parr->isLegacyArray() ? "darray" : "HH\\dict";
+      return val.val().parr->isLegacyArray() ? "darray" : annotTypeName(AnnotType::Dict);
     }
     case KindOfPersistentKeyset:
-    case KindOfKeyset:        return "HH\\keyset";
+    case KindOfKeyset:        return annotTypeName(AnnotType::Keyset);
     case KindOfResource: {
       auto pres = val.val().pres;
       // pres should never be null - but sometimes it is anyway so let's guard

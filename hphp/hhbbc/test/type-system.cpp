@@ -5299,18 +5299,18 @@ TEST(Type, WaitH) {
 }
 
 TEST(Type, FromHNIConstraint) {
-  EXPECT_EQ(from_hni_constraint(makeStaticString("?HH\\resource")), TOptRes);
-  EXPECT_EQ(from_hni_constraint(makeStaticString("HH\\resource")), TRes);
-  EXPECT_EQ(from_hni_constraint(makeStaticString("HH\\bool")), TBool);
-  EXPECT_EQ(from_hni_constraint(makeStaticString("?HH\\bool")), TOptBool);
-  EXPECT_EQ(from_hni_constraint(makeStaticString("HH\\int")), TInt);
-  EXPECT_EQ(from_hni_constraint(makeStaticString("HH\\float")), TDbl);
-  EXPECT_EQ(from_hni_constraint(makeStaticString("?HH\\float")), TOptDbl);
-  EXPECT_EQ(from_hni_constraint(makeStaticString("HH\\mixed")), TInitCell);
-  EXPECT_EQ(from_hni_constraint(makeStaticString("HH\\arraykey")), TArrKey);
-  EXPECT_EQ(from_hni_constraint(makeStaticString("?HH\\arraykey")), TOptArrKey);
-  EXPECT_EQ(from_hni_constraint(makeStaticString("HH\\nonnull")), TNonNull);
-  EXPECT_EQ(from_hni_constraint(makeStaticString("?HH\\nonnull")), TInitCell);
+  EXPECT_EQ(from_hni_constraint(makeStaticString(annotNullableTypeName(AnnotType::Resource))), TOptRes);
+  EXPECT_EQ(from_hni_constraint(makeStaticString(annotTypeName(AnnotType::Resource))), TRes);
+  EXPECT_EQ(from_hni_constraint(makeStaticString(annotTypeName(AnnotType::Bool))), TBool);
+  EXPECT_EQ(from_hni_constraint(makeStaticString(annotNullableTypeName(AnnotType::Bool))), TOptBool);
+  EXPECT_EQ(from_hni_constraint(makeStaticString(annotTypeName(AnnotType::Int))), TInt);
+  EXPECT_EQ(from_hni_constraint(makeStaticString(annotTypeName(AnnotType::Float))), TDbl);
+  EXPECT_EQ(from_hni_constraint(makeStaticString(annotNullableTypeName(AnnotType::Float))), TOptDbl);
+  EXPECT_EQ(from_hni_constraint(makeStaticString(annotTypeName(AnnotType::Mixed))), TInitCell);
+  EXPECT_EQ(from_hni_constraint(makeStaticString(annotTypeName(AnnotType::ArrayKey))), TArrKey);
+  EXPECT_EQ(from_hni_constraint(makeStaticString(annotNullableTypeName(AnnotType::ArrayKey))), TOptArrKey);
+  EXPECT_EQ(from_hni_constraint(makeStaticString(annotTypeName(AnnotType::Nonnull))), TNonNull);
+  EXPECT_EQ(from_hni_constraint(makeStaticString(annotNullableTypeName(AnnotType::Nonnull))), TInitCell);
 
   // These are conservative, but we're testing them that way.  If we
   // make the function better later we'll remove the tests.

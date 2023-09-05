@@ -64,32 +64,32 @@ static const std::pair<HhvmStrToTypeMap, StdStrToTypeMap>& getAnnotTypeMaps() {
       AnnotType type;
     };
     std::vector<Pair> pairs = {
-      { "HH\\nothing",  AnnotType::Nothing },
-      { "HH\\noreturn", AnnotType::NoReturn },
-      { "HH\\null",     AnnotType::Null },
-      { "HH\\void",     AnnotType::Null },
-      { "HH\\bool",     AnnotType::Bool },
-      { "HH\\int",      AnnotType::Int },
-      { "HH\\float",    AnnotType::Float },
-      { "HH\\string",   AnnotType::String },
-      { "HH\\resource", AnnotType::Resource },
-      { "HH\\mixed",    AnnotType::Mixed },
-      { "HH\\nonnull",  AnnotType::Nonnull },
-      { "HH\\num",      AnnotType::Number },
-      { "HH\\arraykey", AnnotType::ArrayKey },
-      { "HH\\this",     AnnotType::This },
-      { "callable",     AnnotType::Callable },
-      { "HH\\vec",      AnnotType::Vec },
-      { "HH\\dict",     AnnotType::Dict },
-      { "HH\\keyset",   AnnotType::Keyset },
-      { "HH\\varray",   AnnotType::Vec },
-      { "HH\\darray",   AnnotType::Dict },
-      { "HH\\varray_or_darray", AnnotType::VecOrDict },
-      { "HH\\vec_or_dict", AnnotType::VecOrDict },
-      { "HH\\AnyArray", AnnotType::ArrayLike },
+      { annotTypeName(AnnotType::Nothing),   AnnotType::Nothing },
+      { annotTypeName(AnnotType::NoReturn),  AnnotType::NoReturn },
+      { annotTypeName(AnnotType::Null),      AnnotType::Null },
+      { "HH\\void",                          AnnotType::Null },
+      { annotTypeName(AnnotType::Bool),      AnnotType::Bool },
+      { annotTypeName(AnnotType::Int),       AnnotType::Int },
+      { annotTypeName(AnnotType::Float),     AnnotType::Float },
+      { annotTypeName(AnnotType::String),    AnnotType::String },
+      { annotTypeName(AnnotType::Resource),  AnnotType::Resource },
+      { annotTypeName(AnnotType::Mixed),     AnnotType::Mixed },
+      { annotTypeName(AnnotType::Nonnull),   AnnotType::Nonnull },
+      { annotTypeName(AnnotType::Number),    AnnotType::Number },
+      { annotTypeName(AnnotType::ArrayKey),  AnnotType::ArrayKey },
+      { annotTypeName(AnnotType::This),      AnnotType::This },
+      { annotTypeName(AnnotType::Callable),  AnnotType::Callable },
+      { annotTypeName(AnnotType::Vec),       AnnotType::Vec },
+      { annotTypeName(AnnotType::Dict),      AnnotType::Dict },
+      { annotTypeName(AnnotType::Keyset),    AnnotType::Keyset },
+      { kAnnotTypeVarrayStr,                 AnnotType::Vec },
+      { kAnnotTypeDarrayStr,                 AnnotType::Dict },
+      { kAnnotTypeVarrayOrDarrayStr,         AnnotType::VecOrDict },
+      { annotTypeName(AnnotType::VecOrDict), AnnotType::VecOrDict },
+      { annotTypeName(AnnotType::ArrayLike), AnnotType::ArrayLike },
     };
     if (RO::EvalClassPassesClassname) {
-      pairs.push_back({ "HH\\classname", AnnotType::Classname });
+      pairs.push_back({ annotTypeName(AnnotType::Classname), AnnotType::Classname });
     }
     for (unsigned i = 0; i < pairs.size(); ++i) {
       mappedPairs.first[makeStaticString(pairs[i].name)] = pairs[i].type;

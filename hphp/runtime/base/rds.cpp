@@ -154,6 +154,10 @@ std::string profilingKeyForSymbol(const Symbol& s) {
 
 namespace detail {
 
+static auto byte_counter = ServiceData::createCounter("admin.vm-tcspace.RDS");
+static auto local_byte_counter = ServiceData::createCounter("admin.vm-tcspace.RDSLocal");
+static auto pers_byte_counter = ServiceData::createCounter("admin.vm-tcspace.PersistentRDS");
+
 // Current allocation frontier for the non-persistent region.
 size_t s_normal_frontier = sizeof(Header);
 
@@ -321,6 +325,7 @@ Handle alloc(Mode mode, size_t numBytes,
         addFreeBlock(s_normal_free_lists, oldFrontier,
                      s_normal_frontier - oldFrontier);
         s_normal_frontier += adjBytes;
+        byte_counter->addValue(s_normal_frontier - oldFrontier);
         // tl_base might be nullptr here, if we're generating
         // pre-allocations
         if (debug && !jit::VMProtect::is_protected && tl_base) {
@@ -357,6 +362,7 @@ Handle alloc(Mode mode, size_t numBytes,
       align = folly::nextPowTwo(align);
       always_assert(align <= numBytes);
       s_persistent_usage += numBytes;
+      pers_byte_counter->addValue(numBytes);
 
       if (auto free = findFreeBlock(s_persistent_free_lists, numBytes, align)) {
         return *free;
@@ -390,6 +396,7 @@ Handle alloc(Mode mode, size_t numBytes,
         align = folly::nextPowTwo(align);
         always_assert(align <= numBytes);
 
+        const auto old_local_frontier = s_local_frontier;
         auto& frontier = s_local_frontier;
 
         frontier -= numBytes;
@@ -399,6 +406,7 @@ Handle alloc(Mode mode, size_t numBytes,
           frontier >= s_normal_frontier,
           "Ran out of RDS space (mode=Local)"
         );
+        local_byte_counter->addValue(old_local_frontier - frontier);
 
         handle = frontier;
       }
@@ -593,6 +601,7 @@ void processInit() {
   s_persistentTrue.bind(Mode::Persistent, LinkID{"RDSTrue"}, &init);
 
   local::RDSInit();
+  byte_counter->setValue(s_normal_frontier);
 }
 
 void requestInit() {

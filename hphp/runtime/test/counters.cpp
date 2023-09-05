@@ -23,6 +23,7 @@
 #include "hphp/runtime/server/server-stats.h"
 
 #include "hphp/util/service-data.h"
+#include "hphp/runtime/vm/jit/tc-internal.h"
 
 
 namespace HPHP {
@@ -288,6 +289,12 @@ TEST(COUNTERS, selected_counters_test) {
   EXPECT_EQ(cheap_calls, 7);
   EXPECT_EQ(cheap_two_calls, 7);
   EXPECT_EQ(expensive_calls, 5);
+}
+
+TEST(COUNTERS, tc_space) {
+  EXPECT_EQ(getVal("admin.vm-tcspace.RDS"), rds::usedBytes());
+  EXPECT_EQ(getVal("admin.vm-tcspace.RDSLocal"), rds::usedLocalBytes());
+  EXPECT_EQ(getVal("admin.vm-tcspace.PersistentRDS"), rds::usedPersistentBytes());
 }
 
 }

@@ -20,7 +20,10 @@ let strip_ns id =
 module Tag = struct
   type ctx = env
 
-  type class_kind = FinalClass [@@deriving eq]
+  type class_kind =
+    | Class
+    | FinalClass
+  [@@deriving eq]
 
   type t =
     | DictData
@@ -52,8 +55,10 @@ module Tag = struct
     | ObjectData -> "objects"
     | InstanceOf { name; kind = FinalClass } ->
       Printf.sprintf "instances of the final class %s" @@ strip_ns name
+    | InstanceOf { name; kind = Class } ->
+      Printf.sprintf "instances of the class %s" @@ strip_ns name
 
-  let relation tag1 ~ctx:_ tag2 =
+  let relation tag1 ~ctx:env tag2 =
     let open ApproxSet.Set_relation in
     if equal tag1 tag2 then
       Equal
@@ -61,6 +66,29 @@ module Tag = struct
       match (tag1, tag2) with
       | (ObjectData, InstanceOf _) -> Superset
       | (InstanceOf _, ObjectData) -> Subset
+      | ( InstanceOf { name = cls1; kind = kind1 },
+          InstanceOf { name = cls2; kind = kind2 } ) ->
+        let open Option.Let_syntax in
+        let is_instance_of sub sup =
+          let* cls = Env.get_class env sub in
+          return @@ Cls.has_ancestor cls sup
+        in
+
+        Option.value ~default:Unknown
+        @@ let* cls1_instance_of_cls2 = is_instance_of cls1 cls2 in
+           if cls1_instance_of_cls2 then
+             return Subset
+           else
+             let* cls2_instance_of_cls1 = is_instance_of cls2 cls1 in
+             if cls2_instance_of_cls1 then
+               return Superset
+             else (
+               match (kind1, kind2) with
+               | (FinalClass, _)
+               | (_, FinalClass) ->
+                 return Disjoint
+               | (Class, Class) -> return Disjoint
+             )
       | _ -> Disjoint
 
   let all_nonnull_tags =
@@ -329,7 +357,8 @@ module DataType = struct
           match Cls.kind cls with
           | Cclass _ when Cls.final cls ->
             Set.singleton ~reason @@ InstanceOf { name; kind = FinalClass }
-          | Cclass _
+          | Cclass _ ->
+            Set.singleton ~reason @@ InstanceOf { name; kind = Class }
           | Cinterface
           | Cenum
           | Cenum_class _

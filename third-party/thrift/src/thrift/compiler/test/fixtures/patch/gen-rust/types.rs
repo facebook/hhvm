@@ -1674,19 +1674,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        if type_id == ::std::any::TypeId::of::<thrift::types::Testing>() {
-            let mut tmp = Some(thrift::types::Testing {
-                ..::std::default::Default::default()
-            });
-            let r: &mut dyn ::std::any::Any = &mut tmp;
-            let r: &mut Option<T> = r.downcast_mut().unwrap();
-            return r.take();
-        }
-
-        if let Some(r) = <thrift::types::Testing as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-            return Some(r);
-        }
-
         None
     }
 

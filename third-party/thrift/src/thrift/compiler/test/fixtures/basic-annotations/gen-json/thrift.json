@@ -7,30 +7,8 @@
     }
   },
   "structs" : {
-    "Beta" : {
-      "lineno" : 28,
-      "is_exception" : false,
-      "is_union" : false,
-      "structured_annotations" : {
-        "scope.Program" : {  },
-        "scope.Definition" : {  }
-      },
-      "fields" : {
-
-      },
-      "source_range" : {
-        "begin" : {
-          "line" : 28,
-          "column" : 1
-        },
-        "end" : {
-          "line" : 30,
-          "column" : 15
-        }
-      }
-    },
     "Experimental" : {
-      "lineno" : 37,
+      "lineno" : 32,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -42,39 +20,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 37,
+          "line" : 32,
           "column" : 1
         },
         "end" : {
-          "line" : 39,
+          "line" : 34,
           "column" : 23
         }
       }
     },
-    "Testing" : {
-      "lineno" : 49,
-      "is_exception" : false,
-      "is_union" : false,
-      "structured_annotations" : {
-        "scope.Program" : {  },
-        "scope.Definition" : {  }
-      },
-      "fields" : {
-
-      },
-      "source_range" : {
-        "begin" : {
-          "line" : 49,
-          "column" : 1
-        },
-        "end" : {
-          "line" : 51,
-          "column" : 18
-        }
-      }
-    },
     "ReserveIds" : {
-      "lineno" : 70,
+      "lineno" : 53,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -88,11 +44,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 74,
+              "line" : 57,
               "column" : 3
             },
             "end" : {
-              "line" : 74,
+              "line" : 57,
               "column" : 20
             }
           }
@@ -103,11 +59,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 84,
+              "line" : 67,
               "column" : 3
             },
             "end" : {
-              "line" : 84,
+              "line" : 67,
               "column" : 30
             }
           }
@@ -115,17 +71,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 70,
+          "line" : 53,
           "column" : 1
         },
         "end" : {
-          "line" : 85,
+          "line" : 68,
           "column" : 2
         }
       }
     },
     "RequiresBackwardCompatibility" : {
-      "lineno" : 92,
+      "lineno" : 75,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -140,11 +96,11 @@
           "default_value" : false,
           "source_range" : {
             "begin" : {
-              "line" : 95,
+              "line" : 78,
               "column" : 3
             },
             "end" : {
-              "line" : 95,
+              "line" : 78,
               "column" : 30
             }
           }
@@ -152,106 +108,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 92,
+          "line" : 75,
           "column" : 1
         },
         "end" : {
-          "line" : 96,
+          "line" : 79,
           "column" : 2
         }
       }
     },
-    "NoTesting" : {
-      "lineno" : 99,
-      "is_exception" : false,
-      "is_union" : false,
-      "structured_annotations" : {
-        "scope.Program" : {  },
-        "scope.Definition" : {  }
-      },
-      "fields" : {
-
-      },
-      "source_range" : {
-        "begin" : {
-          "line" : 99,
-          "column" : 1
-        },
-        "end" : {
-          "line" : 101,
-          "column" : 20
-        }
-      }
-    },
-    "NoExperimental" : {
-      "lineno" : 104,
-      "is_exception" : false,
-      "is_union" : false,
-      "structured_annotations" : {
-        "scope.Program" : {  },
-        "scope.Definition" : {  }
-      },
-      "fields" : {
-
-      },
-      "source_range" : {
-        "begin" : {
-          "line" : 104,
-          "column" : 1
-        },
-        "end" : {
-          "line" : 106,
-          "column" : 25
-        }
-      }
-    },
-    "NoBeta" : {
-      "lineno" : 109,
-      "is_exception" : false,
-      "is_union" : false,
-      "structured_annotations" : {
-        "NoExperimental" : {  },
-        "scope.Transitive" : {  }
-      },
-      "fields" : {
-
-      },
-      "source_range" : {
-        "begin" : {
-          "line" : 109,
-          "column" : 1
-        },
-        "end" : {
-          "line" : 111,
-          "column" : 17
-        }
-      }
-    },
-    "Released" : {
-      "lineno" : 117,
-      "is_exception" : false,
-      "is_union" : false,
-      "structured_annotations" : {
-        "NoBeta" : {  },
-        "NoTesting" : {  },
-        "scope.Transitive" : {  }
-      },
-      "fields" : {
-
-      },
-      "source_range" : {
-        "begin" : {
-          "line" : 117,
-          "column" : 1
-        },
-        "end" : {
-          "line" : 120,
-          "column" : 19
-        }
-      }
-    },
     "TerseWrite" : {
-      "lineno" : 139,
+      "lineno" : 98,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -266,61 +133,59 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 139,
+          "line" : 98,
           "column" : 1
         },
         "end" : {
-          "line" : 144,
+          "line" : 103,
           "column" : 21
         }
       }
     },
     "Box" : {
-      "lineno" : 147,
+      "lineno" : 106,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
-        "scope.Field" : {  },
-        "Beta" : {  }
+        "scope.Field" : {  }
       },
       "fields" : {
 
       },
       "source_range" : {
         "begin" : {
-          "line" : 147,
+          "line" : 106,
           "column" : 1
         },
         "end" : {
-          "line" : 149,
+          "line" : 107,
           "column" : 14
         }
       }
     },
     "Mixin" : {
-      "lineno" : 152,
+      "lineno" : 110,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
-        "scope.Field" : {  },
-        "Beta" : {  }
+        "scope.Field" : {  }
       },
       "fields" : {
 
       },
       "source_range" : {
         "begin" : {
-          "line" : 152,
+          "line" : 110,
           "column" : 1
         },
         "end" : {
-          "line" : 154,
+          "line" : 111,
           "column" : 16
         }
       }
     },
     "SerializeInFieldIdOrder" : {
-      "lineno" : 162,
+      "lineno" : 119,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -332,17 +197,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 162,
+          "line" : 119,
           "column" : 1
         },
         "end" : {
-          "line" : 164,
+          "line" : 121,
           "column" : 34
         }
       }
     },
     "BitmaskEnum" : {
-      "lineno" : 169,
+      "lineno" : 126,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -354,17 +219,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 169,
+          "line" : 126,
           "column" : 1
         },
         "end" : {
-          "line" : 171,
+          "line" : 128,
           "column" : 22
         }
       }
     },
     "ExceptionMessage" : {
-      "lineno" : 180,
+      "lineno" : 137,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -378,11 +243,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 183,
+              "line" : 140,
               "column" : 3
             },
             "end" : {
-              "line" : 183,
+              "line" : 140,
               "column" : 19
             }
           }
@@ -390,17 +255,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 180,
+          "line" : 137,
           "column" : 1
         },
         "end" : {
-          "line" : 184,
+          "line" : 141,
           "column" : 2
         }
       }
     },
     "GenerateRuntimeSchema" : {
-      "lineno" : 191,
+      "lineno" : 148,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -418,11 +283,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 198,
+              "line" : 155,
               "column" : 3
             },
             "end" : {
-              "line" : 198,
+              "line" : 155,
               "column" : 18
             }
           }
@@ -430,17 +295,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 191,
+          "line" : 148,
           "column" : 1
         },
         "end" : {
-          "line" : 199,
+          "line" : 156,
           "column" : 2
         }
       }
     },
     "InternBox" : {
-      "lineno" : 205,
+      "lineno" : 162,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -452,11 +317,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 205,
+          "line" : 162,
           "column" : 1
         },
         "end" : {
-          "line" : 207,
+          "line" : 164,
           "column" : 20
         }
       }

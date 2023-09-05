@@ -192,7 +192,6 @@ StructMetadata<::test::fixtures::patch::MyStruct>::gen(ThriftMetadata& metadata)
     field.structured_annotations() = f.structured_annotations;
     module_MyStruct.fields()->push_back(std::move(field));
   }
-  module_MyStruct.structured_annotations()->push_back(*cvStruct("thrift.Testing", {}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&

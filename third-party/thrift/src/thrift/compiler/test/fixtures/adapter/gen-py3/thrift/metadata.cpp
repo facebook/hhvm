@@ -13,15 +13,9 @@ namespace annotation {
 ::apache::thrift::metadata::ThriftMetadata thrift_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata_ref();
-  ::apache::thrift::detail::md::StructMetadata<Beta>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Experimental>::gen(metadata);
-  ::apache::thrift::detail::md::StructMetadata<Testing>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<ReserveIds>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<RequiresBackwardCompatibility>::gen(metadata);
-  ::apache::thrift::detail::md::StructMetadata<NoTesting>::gen(metadata);
-  ::apache::thrift::detail::md::StructMetadata<NoExperimental>::gen(metadata);
-  ::apache::thrift::detail::md::StructMetadata<NoBeta>::gen(metadata);
-  ::apache::thrift::detail::md::StructMetadata<Released>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<TerseWrite>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Box>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Mixin>::gen(metadata);

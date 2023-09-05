@@ -17,7 +17,6 @@
 include "thrift/lib/thrift/patch.thrift"
 
 @patch.GeneratePatch
-@thrift.Testing
 package "facebook.com/thrift/test/patch"
 
 namespace cpp2 apache.thrift.test.patch

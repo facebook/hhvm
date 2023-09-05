@@ -20,7 +20,6 @@ include "thrift/lib/thrift/patch.thrift"
 include "thrift/lib/thrift/standard.thrift"
 include "thrift/test/StructPatchTestInclude.thrift"
 
-@thrift.Testing
 @patch.GeneratePatch
 package "facebook.com/thrift/test/patch"
 

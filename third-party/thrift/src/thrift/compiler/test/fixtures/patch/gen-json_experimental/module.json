@@ -126,69 +126,59 @@
       },
       "MyStruct" : {
         "name" : "MyStruct",
-        "structured_annotations": {
-          "thrift.Testing" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Testing",
-  "path" : "thrift/annotation/thrift.thrift"
-},
-        "value" : {}
-      }
-        },
         "fields" : {
           "boolVal" : {
             "name" : "boolVal",
             "key" : -1,
-            "lineno" : 57,
+            "lineno" : 56,
             "type" : "bool"
                   },
           "byteVal" : {
             "name" : "byteVal",
             "key" : -2,
-            "lineno" : 58,
+            "lineno" : 57,
             "type" : "byte"
                   },
           "i16Val" : {
             "name" : "i16Val",
             "key" : -3,
-            "lineno" : 59,
+            "lineno" : 58,
             "type" : "i16"
                   },
           "i32Val" : {
             "name" : "i32Val",
             "key" : -4,
-            "lineno" : 60,
+            "lineno" : 59,
             "type" : "i32"
                   },
           "i64Val" : {
             "name" : "i64Val",
             "key" : -5,
-            "lineno" : 61,
+            "lineno" : 60,
             "type" : "i64"
                   },
           "floatVal" : {
             "name" : "floatVal",
             "key" : -6,
-            "lineno" : 62,
+            "lineno" : 61,
             "type" : "float"
                   },
           "doubleVal" : {
             "name" : "doubleVal",
             "key" : -7,
-            "lineno" : 63,
+            "lineno" : 62,
             "type" : "double"
                   },
           "stringVal" : {
             "name" : "stringVal",
             "key" : -8,
-            "lineno" : 64,
+            "lineno" : 63,
             "type" : "string"
                   },
           "binaryVal" : {
             "name" : "binaryVal",
             "key" : -9,
-            "lineno" : 65,
+            "lineno" : 64,
             "type" : "binary"
             ,
             "structured_annotations": {
@@ -205,7 +195,7 @@
           "enumVal" : {
             "name" : "enumVal",
             "key" : -10,
-            "lineno" : 67,
+            "lineno" : 66,
             "type" : {
   "type" : "enum",
   "name" : "MyEnum"
@@ -214,7 +204,7 @@
           "structVal" : {
             "name" : "structVal",
             "key" : -11,
-            "lineno" : 68,
+            "lineno" : 67,
             "type" : {
   "type" : "struct",
   "name" : "MyData"
@@ -223,7 +213,7 @@
           "unionVal" : {
             "name" : "unionVal",
             "key" : -12,
-            "lineno" : 69,
+            "lineno" : 68,
             "type" : {
   "type" : "struct",
   "name" : "MyUnion"
@@ -232,7 +222,7 @@
           "lateStructVal" : {
             "name" : "lateStructVal",
             "key" : -13,
-            "lineno" : 70,
+            "lineno" : 69,
             "type" : {
   "type" : "struct",
   "name" : "LateDefStruct"
@@ -241,63 +231,63 @@
           "optBoolVal" : {
             "name" : "optBoolVal",
             "key" : -14,
-            "lineno" : 72,
+            "lineno" : 71,
             "required" : "optional",
             "type" : "bool"
                   },
           "optByteVal" : {
             "name" : "optByteVal",
             "key" : -15,
-            "lineno" : 73,
+            "lineno" : 72,
             "required" : "optional",
             "type" : "byte"
                   },
           "optI16Val" : {
             "name" : "optI16Val",
             "key" : -16,
-            "lineno" : 74,
+            "lineno" : 73,
             "required" : "optional",
             "type" : "i16"
                   },
           "optI32Val" : {
             "name" : "optI32Val",
             "key" : -17,
-            "lineno" : 75,
+            "lineno" : 74,
             "required" : "optional",
             "type" : "i32"
                   },
           "optI64Val" : {
             "name" : "optI64Val",
             "key" : -18,
-            "lineno" : 76,
+            "lineno" : 75,
             "required" : "optional",
             "type" : "i64"
                   },
           "optFloatVal" : {
             "name" : "optFloatVal",
             "key" : -19,
-            "lineno" : 77,
+            "lineno" : 76,
             "required" : "optional",
             "type" : "float"
                   },
           "optDoubleVal" : {
             "name" : "optDoubleVal",
             "key" : -20,
-            "lineno" : 78,
+            "lineno" : 77,
             "required" : "optional",
             "type" : "double"
                   },
           "optStringVal" : {
             "name" : "optStringVal",
             "key" : -21,
-            "lineno" : 79,
+            "lineno" : 78,
             "required" : "optional",
             "type" : "string"
                   },
           "optBinaryVal" : {
             "name" : "optBinaryVal",
             "key" : -22,
-            "lineno" : 80,
+            "lineno" : 79,
             "required" : "optional",
             "type" : "binary"
             ,
@@ -315,7 +305,7 @@
           "optEnumVal" : {
             "name" : "optEnumVal",
             "key" : -23,
-            "lineno" : 82,
+            "lineno" : 81,
             "required" : "optional",
             "type" : {
   "type" : "enum",
@@ -325,7 +315,7 @@
           "optStructVal" : {
             "name" : "optStructVal",
             "key" : -24,
-            "lineno" : 83,
+            "lineno" : 82,
             "required" : "optional",
             "type" : {
   "type" : "struct",
@@ -335,7 +325,7 @@
           "optLateStructVal" : {
             "name" : "optLateStructVal",
             "key" : -25,
-            "lineno" : 84,
+            "lineno" : 83,
             "required" : "optional",
             "type" : {
   "type" : "struct",
@@ -345,7 +335,7 @@
           "optListVal" : {
             "name" : "optListVal",
             "key" : -26,
-            "lineno" : 86,
+            "lineno" : 85,
             "required" : "optional",
             "type" : {
   "type" : "list",
@@ -355,7 +345,7 @@
           "optSetVal" : {
             "name" : "optSetVal",
             "key" : -27,
-            "lineno" : 87,
+            "lineno" : 86,
             "required" : "optional",
             "type" : {
   "type" : "set",
@@ -365,7 +355,7 @@
           "optMapVal" : {
             "name" : "optMapVal",
             "key" : -28,
-            "lineno" : 88,
+            "lineno" : 87,
             "required" : "optional",
             "type" : {
   "type" : "map",
@@ -376,7 +366,7 @@
           "listMap" : {
             "name" : "listMap",
             "key" : -29,
-            "lineno" : 90,
+            "lineno" : 89,
             "type" : {
   "type" : "list",
   "inner_type" : {
@@ -389,7 +379,7 @@
           "mapMap" : {
             "name" : "mapMap",
             "key" : -30,
-            "lineno" : 91,
+            "lineno" : 90,
             "type" : {
   "type" : "map",
   "key_type" : "string",
@@ -404,13 +394,13 @@
             "name" : "i32WithCustomDefault",
             "default_value" : 1,
             "key" : -31,
-            "lineno" : 93,
+            "lineno" : 92,
             "type" : "i32"
                   },
           "structWithCustomDefault" : {
             "name" : "structWithCustomDefault",
             "key" : -32,
-            "lineno" : 94,
+            "lineno" : 93,
             "type" : {
   "type" : "struct",
   "name" : "MyDataWithCustomDefault"
@@ -420,7 +410,7 @@
             "name" : "structWithFieldCustomDefault",
             "default_value" : {"\"data1\"" : "1","\"data2\"" : 2},
             "key" : 1,
-            "lineno" : 95,
+            "lineno" : 94,
             "type" : {
   "type" : "struct",
   "name" : "MyData"
@@ -435,7 +425,7 @@
         "name" : "LateDefStruct",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 99
+        "lineno" : 98
       },
       "Recursive" : {
         "name" : "Recursive",
@@ -443,7 +433,7 @@
           "nodes" : {
             "name" : "nodes",
             "key" : -1,
-            "lineno" : 102,
+            "lineno" : 101,
             "type" : {
   "type" : "map",
   "key_type" : "string",
@@ -467,7 +457,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 101
+        "lineno" : 100
       },
       "Bar" : {
         "name" : "Bar",
@@ -475,7 +465,7 @@
           "loop" : {
             "name" : "loop",
             "key" : -1,
-            "lineno" : 107,
+            "lineno" : 106,
             "type" : {
   "type" : "struct",
   "name" : "Loop"
@@ -495,7 +485,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 106
+        "lineno" : 105
       },
       "Loop" : {
         "name" : "Loop",
@@ -513,7 +503,7 @@
           "bar" : {
             "name" : "bar",
             "key" : -1,
-            "lineno" : 113,
+            "lineno" : 112,
             "type" : {
   "type" : "struct",
   "name" : "Bar"
@@ -533,7 +523,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 111
+        "lineno" : 110
       },
       "MyDataPatch" : {
         "name" : "MyDataPatch",
@@ -2978,7 +2968,7 @@
             "name" : "assign",
             "docstring" : "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned.\n\n",
             "key" : 1,
-            "lineno" : 102,
+            "lineno" : 101,
             "required" : "optional",
             "type" : {
   "type" : "map",
@@ -2993,13 +2983,13 @@
             "name" : "clear",
             "docstring" : "Clears a value. Applies first.\n",
             "key" : 2,
-            "lineno" : 102,
+            "lineno" : 101,
             "type" : "bool"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 103
+        "lineno" : 102
       },
       "RecursiveFieldPatch" : {
         "name" : "RecursiveFieldPatch",

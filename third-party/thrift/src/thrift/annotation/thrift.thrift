@@ -24,11 +24,6 @@ namespace py.asyncio facebook_thrift_asyncio.annotation.thrift
 namespace go thrift.annotation.thrift
 namespace py thrift.annotation.thrift
 
-/** Indicates a definition/feature may change in incompatible ways. */
-@scope.Program
-@scope.Definition
-struct Beta {}
-
 /**
  * Indicates a definition/feature should only be used with permission, may
  * only work in specific contexts, and may change in incompatible ways without
@@ -37,18 +32,6 @@ struct Beta {}
 @scope.Program
 @scope.Definition
 struct Experimental {}
-
-/**
- * Indicates a definition/feature should only be used in an ephemeral testing
- * enviornment.
- *
- * Such enviornments only store serialized values temporarly and strictly
- * control which versions of Thrift definitions are used, so 'compatibility'
- * is not a concern.
- */
-@scope.Program
-@scope.Definition
-struct Testing {}
 
 /**
  * Annotate a thrift structured or enum to indicate if ids or values should not
@@ -95,30 +78,6 @@ struct RequiresBackwardCompatibility {
   1: bool field_name = false;
 }
 
-/** Disables testing features. */
-@scope.Program
-@scope.Definition
-struct NoTesting {}
-
-/** Disables experimental features. */
-@scope.Program
-@scope.Definition
-struct NoExperimental {}
-
-/** Disables @Beta features. */
-@NoExperimental // Implies no experimental
-@scope.Transitive
-struct NoBeta {}
-
-/**
- * Indicates a definition/feature must not depend directly on an unreleased
- * or testing definition/feature.
- */
-@NoBeta
-@NoTesting
-@scope.Transitive
-struct Released {}
-
 ////
 // Thrift feature annotations.
 ////
@@ -145,12 +104,10 @@ struct TerseWrite {}
 
 /** Indicates that a field's value should never be stored on the stack. */
 @scope.Field
-@Beta
 struct Box {}
 
 // TODO(ytj): Document.
 @scope.Field
-@Beta
 struct Mixin {}
 
 /**

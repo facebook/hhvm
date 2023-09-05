@@ -1917,12 +1917,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
 
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
-      'struct' => dict[
-        '\facebook\thrift\annotation\Testing' => \facebook\thrift\annotation\Testing::fromShape(
-          shape(
-          )
-        ),
-      ],
+      'struct' => dict[],
       'fields' => dict[
         'binaryVal' => shape(
           'field' => dict[
@@ -5468,15 +5463,6 @@ class MyStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
         ),
       ],
       'fields' => dict[
-        'assign' => shape(
-          'field' => dict[],
-          'type' => dict[
-            '\facebook\thrift\annotation\Testing' => \facebook\thrift\annotation\Testing::fromShape(
-              shape(
-              )
-            ),
-          ],
-        ),
         'patchPrior' => shape(
           'field' => dict[],
           'type' => dict[

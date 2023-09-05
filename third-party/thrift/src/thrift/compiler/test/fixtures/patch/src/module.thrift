@@ -52,7 +52,6 @@ enum MyEnum {
   MyValue0 = 0,
 }
 
-@thrift.Testing
 struct MyStruct {
   bool boolVal;
   byte byteVal;

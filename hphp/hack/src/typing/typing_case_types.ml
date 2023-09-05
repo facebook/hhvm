@@ -133,6 +133,7 @@ module DataTypeReason = struct
     | GenericUpperbound of string
     | UpperboundOfNewType of string
     | UpperboundOfEnum of string
+    | SealedInterface of string
     | ExpansionOfTypeConstant of {
         root_ty: locl_ty;
         name: string;
@@ -161,6 +162,9 @@ module DataTypeReason = struct
 
   let type_constant ~trail reason root_ty name =
     append ~trail ~reason @@ ExpansionOfTypeConstant { root_ty; name }
+
+  let sealed_interface ~trail reason name =
+    append ~trail ~reason @@ SealedInterface name
 
   let to_message env ~f ((subreason, { origin; instances = trail }), tag) =
     let ty_str = Typing_print.full_strip_ns_decl env origin in
@@ -194,6 +198,8 @@ module DataTypeReason = struct
         @@ strip_ns name
       | UpperboundOfEnum name ->
         Printf.sprintf "  via the constraint on the enum `%s`" @@ strip_ns name
+      | SealedInterface name ->
+        Printf.sprintf "  via the sealed interface `%s`" @@ strip_ns name
       | ExpansionOfTypeConstant { root_ty; name } ->
         let name =
           Printf.sprintf "%s::%s" (Typing_print.full_strip_ns env root_ty) name
@@ -331,7 +337,7 @@ module DataType = struct
     let special_interface_cache : Tag.t list String.Table.t =
       String.Table.create ()
 
-    let to_datatypes ~trail (env : env) cls : 'phase t =
+    let rec to_datatypes ~trail (env : env) cls : 'phase t =
       let open Tag in
       let reason = DataTypeReason.(make NoSubreason trail) in
       match cls with
@@ -343,7 +349,41 @@ module DataType = struct
         Set.singleton ~reason VecData
       | cls when String.equal cls SN.Collections.cAnyArray ->
         Set.of_list ~reason [DictData; KeysetData; VecData]
-      | cls when SSet.mem cls special_interfaces ->
+      | name ->
+        (match Env.get_class env name with
+        | Some cls -> begin
+          let open Ast_defs in
+          match Cls.kind cls with
+          | Cclass _ when Cls.final cls ->
+            Set.singleton ~reason @@ InstanceOf { name; kind = FinalClass }
+          | Cclass _ ->
+            Set.singleton ~reason @@ InstanceOf { name; kind = Class }
+          | Cinterface -> begin
+            match Cls.sealed_whitelist cls with
+            | None ->
+              Set.singleton ~reason @@ InstanceOf { name; kind = Interface }
+            | Some whitelist ->
+              let trail =
+                DataTypeReason.sealed_interface
+                  ~trail
+                  (Reason.Rwitness_from_decl (Cls.pos cls))
+                  name
+              in
+              SSet.fold
+                (fun whitelist_cls acc ->
+                  Set.union (to_datatypes ~trail env whitelist_cls) acc)
+                whitelist
+                Set.empty
+          end
+          | Cenum
+          | Cenum_class _
+          | Ctrait ->
+            Set.singleton ~reason ObjectData
+        end
+        | None -> Set.singleton ~reason ObjectData)
+
+    let to_datatypes ~trail (env : env) cls : 'phase t =
+      if SSet.mem cls special_interfaces then
         let tags =
           String.Table.find_or_add
             special_interface_cache
@@ -355,24 +395,9 @@ module DataType = struct
             ~reason:DataTypeReason.(make (SpecialInterface cls) trail)
             tags
         in
-        Set.union set @@ Set.singleton ~reason ObjectData
-      | name ->
-        (match Env.get_class env name with
-        | Some cls -> begin
-          let open Ast_defs in
-          match Cls.kind cls with
-          | Cclass _ when Cls.final cls ->
-            Set.singleton ~reason @@ InstanceOf { name; kind = FinalClass }
-          | Cclass _ ->
-            Set.singleton ~reason @@ InstanceOf { name; kind = Class }
-          | Cinterface ->
-            Set.singleton ~reason @@ InstanceOf { name; kind = Interface }
-          | Cenum
-          | Cenum_class _
-          | Ctrait ->
-            Set.singleton ~reason ObjectData
-        end
-        | None -> Set.singleton ~reason ObjectData)
+        Set.union set @@ to_datatypes ~trail env cls
+      else
+        to_datatypes ~trail env cls
   end
 
   let rec fromTy ~trail (env : env) (ty : locl_ty) : 'phase t =

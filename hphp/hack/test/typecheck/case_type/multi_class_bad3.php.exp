@@ -1,0 +1,14 @@
+File "multi_class_bad3.php", line 4, characters 11-20:
+Invalid case type declaration. More than one variant of `MultiClass` could contain values with the same runtime tag (Typing[4475])
+  File "multi_class_bad3.php", line 4, characters 29-29:
+  This is the type `I`, which includes **instances of the class B**
+  File "multi_class_bad3.php", line 14, characters 11-11:
+    via the sealed interface `I`
+  File "multi_class_bad3.php", line 17, characters 11-12:
+    via the sealed interface `IB`
+  File "multi_class_bad3.php", line 4, characters 24-25:
+  It overlaps with `IC`, which includes **instances of the class C**
+  File "multi_class_bad3.php", line 7, characters 11-12:
+    via the sealed interface `IC`
+  File "multi_class_bad3.php", line 4, characters 11-20:
+  Because **instances of the class B** are also **instances of the class C**, `I` and `IC` cannot be in the same case type

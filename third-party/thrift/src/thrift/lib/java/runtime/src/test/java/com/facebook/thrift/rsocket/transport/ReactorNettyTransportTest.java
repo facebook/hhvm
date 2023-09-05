@@ -31,6 +31,7 @@ import io.rsocket.util.DefaultPayload;
 import java.net.InetSocketAddress;
 import java.time.Duration;
 import java.util.Objects;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -114,7 +115,10 @@ public class ReactorNettyTransportTest {
         .requestChannel(Flux.empty())
         .as(StepVerifier::create)
         .expectNextCount(0)
-        .expectComplete()
+        .expectErrorMatches(
+            error ->
+                (error instanceof CancellationException)
+                    && error.getMessage().contains("Empty Source"))
         .verify(getTimeout());
   }
 

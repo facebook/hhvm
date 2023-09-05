@@ -154,7 +154,7 @@ final class ReconnectingRpcClientMono extends Mono<RpcClient> {
       subscriber.onComplete();
       subscribers.poll();
     } catch (Throwable t) {
-      LOGGER.error("uncaught error when emitting rpc client to subscriber");
+      LOGGER.error("uncaught error when emitting rpc client to subscriber " + t.getMessage(), t);
     }
   }
 

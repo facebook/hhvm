@@ -18,7 +18,6 @@ package com.facebook.thrift.rsocket.transport.reactor.client;
 
 import com.facebook.thrift.client.ThriftClientConfig;
 import com.facebook.thrift.metadata.ThriftTransportType;
-import com.facebook.thrift.rsocket.transport.reactor.ReactorDuplexConnection;
 import com.facebook.thrift.util.NettyUtil;
 import com.facebook.thrift.util.RpcClientUtils;
 import com.facebook.thrift.util.resources.RpcResources;
@@ -26,13 +25,13 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.handler.ssl.SslContext;
 import io.rsocket.DuplexConnection;
 import io.rsocket.transport.ClientTransport;
+import io.rsocket.transport.netty.TcpDuplexConnection;
 import java.net.SocketAddress;
 import reactor.core.publisher.Mono;
 import reactor.netty.tcp.SslProvider;
 import reactor.netty.tcp.TcpClient;
 
 public class ReactorClientTransport implements ClientTransport {
-
   private final SocketAddress socketAddress;
   private final EventLoopGroup eventLoopGroup;
   private final SslContext sslContext;
@@ -68,6 +67,6 @@ public class ReactorClientTransport implements ClientTransport {
                 c.addHandlerLast(NettyUtil.getDefaultThriftFlushConsolidationHandler())
                     .addHandlerLast(NettyUtil.getRSocketLengthFieldBasedFrameDecoder()))
         .connect()
-        .map(ReactorDuplexConnection::new);
+        .map(conn -> new TcpDuplexConnection("client", conn));
   }
 }

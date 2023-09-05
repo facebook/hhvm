@@ -17,7 +17,6 @@
 package com.facebook.thrift.rsocket.transport.reactor.server;
 
 import com.facebook.swift.service.ThriftServerConfig;
-import com.facebook.thrift.rsocket.transport.reactor.ReactorDuplexConnection;
 import com.facebook.thrift.util.MetricsChannelDuplexHandler;
 import com.facebook.thrift.util.NettyUtil;
 import com.facebook.thrift.util.RpcServerUtils;
@@ -26,6 +25,7 @@ import com.facebook.thrift.util.resources.RpcResources;
 import io.netty.channel.EventLoopGroup;
 import io.netty.handler.ssl.SslContext;
 import io.rsocket.transport.ServerTransport;
+import io.rsocket.transport.netty.TcpDuplexConnection;
 import java.net.SocketAddress;
 import java.util.Objects;
 import org.slf4j.Logger;
@@ -60,13 +60,10 @@ public class ReactorServerTransport implements ServerTransport<ReactorServerClos
                   connection
                       .addHandlerLast(NettyUtil.getDefaultThriftFlushConsolidationHandler())
                       .addHandlerLast(new MetricsChannelDuplexHandler(metrics))
-                      .addHandlerLast(NettyUtil.getRSocketLengthFieldBasedFrameDecoder())
-                  // .addHandlerLast(RSocketProtocolDetector.class.getName(),
-                  // NettyUtil.getRSocketProtocolDetector(connection))
-                  ;
+                      .addHandlerLast(NettyUtil.getRSocketLengthFieldBasedFrameDecoder());
 
                   acceptor
-                      .apply(new ReactorDuplexConnection(connection))
+                      .apply(new TcpDuplexConnection("server", connection))
                       .then(Mono.<Void>never())
                       .subscribe(connection.disposeSubscriber());
                 })

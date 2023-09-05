@@ -100,7 +100,7 @@ See the CONTRIBUTING file for how to help out.
 
 <p><strong>pipeline(PipelineFactory&lt;AcceptPipeline&gt;)</strong></p>
 
-<p>This pipeline method is used to get the accepted socket (or udp message) *before* it has been handed off to an IO thread.  This can be used to steer the accept thread to a particular thread, or for logging.</p>
+<p>This pipeline method is used to get the accepted socket (or udp message) <strong>before</strong> it has been handed off to an IO thread.  This can be used to steer the accept thread to a particular thread, or for logging.</p>
 
 <p>See also AcceptRoutingHandler and RoutingDataHandler for additional help in reading data off of the accepted socket <strong>before</strong> it gets attached to an IO thread.  These can be used to hash incoming sockets to specific threads.</p>
 
@@ -186,7 +186,7 @@ See the CONTRIBUTING file for how to help out.
 
 <h3 id="staticpipeline">StaticPipeline <a href="#staticpipeline" class="headerLink">#</a></h3>
 
-<p>Instantiating all these handlers and pipelines can hit the allocator pretty hard.  There are two ways to try to do fewer allocations.  StaticPipeline allows *all* the handlers, and the pipeline, to be instantiated all in the same memory block, so we only hit the allocator once.</p>
+<p>Instantiating all these handlers and pipelines can hit the allocator pretty hard.  There are two ways to try to do fewer allocations.  StaticPipeline allows <strong>all</strong> the handlers, and the pipeline, to be instantiated all in the same memory block, so we only hit the allocator once.</p>
 
 <p>The other option is to allocate the handlers once at startup, and reuse them in many pipelines.  This means all state has to be saved in the HandlerContext object instead of the Handler itself, since each handler can be in multiple pipelines.  There is one context per pipeline to get around this limitation.</p></section><section class="dex_document"><h1>Built-in handlers</h1><p class="dex_introduction">The stuff that comes with the box</p><h2 id="byte-to-byte-handlers">Byte to byte handlers <a href="#byte-to-byte-handlers" class="headerLink">#</a></h2>
 

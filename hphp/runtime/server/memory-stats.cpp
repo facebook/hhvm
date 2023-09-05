@@ -115,6 +115,9 @@ ServiceData::CounterCallback s_counters(
       ProcStatus::VmHWMKb.load(std::memory_order_relaxed);
     counters["mem.vm-swap-kb"] =
       ProcStatus::VmSwapKb.load(std::memory_order_relaxed);
+    if (ProcStatus::valid()) {
+      counters["mem.vm-rss-adjusted-kb"] = ProcStatus::adjustedRssKb();
+    }
   }
 );
 

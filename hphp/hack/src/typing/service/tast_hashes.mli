@@ -10,17 +10,6 @@ type by_names
 
 type t [@@deriving yojson_of]
 
-val hash_tasts : Tast.by_names -> by_names
-
-(** Return a by_names structure with all hash values equal to -1 *)
-val error_while_hashing : Tast.by_names -> by_names
-
-val empty : t
-
-val union : t -> t -> t
-
-val add : t -> key:Relative_path.t -> data:by_names option -> t
-
 val is_enabled : TypecheckerOptions.t -> bool
 
 val map : Provider_context.t -> Relative_path.t -> Tast.by_names -> t

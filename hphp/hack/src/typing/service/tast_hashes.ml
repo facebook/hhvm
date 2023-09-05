@@ -57,8 +57,6 @@ let error_while_hashing
 
 let empty = Relative_path.Map.empty
 
-let union m1 m2 = Relative_path.Map.union m1 m2
-
 let add m ~key ~data =
   match data with
   | None -> m
@@ -67,7 +65,12 @@ let add m ~key ~data =
 let is_enabled tcopt = TypecheckerOptions.dump_tast_hashes tcopt
 
 let map _ctx path tasts =
-  let data = hash_tasts tasts in
+  let data =
+    Timeout.with_timeout
+      ~timeout:30
+      ~on_timeout:(fun _timings -> error_while_hashing tasts)
+      ~do_:(fun _timeout -> hash_tasts tasts)
+  in
   add empty ~key:path ~data:(Some data)
 
 let reduce xs ys =

@@ -85,14 +85,16 @@ let casetype_def env typedef =
     (* Given two types with their associated data types, check if
        the data types overlap. If they do report an error *)
     let check data_type1 acc data_type2 =
-      match Typing_case_types.check_overlapping env data_type1 data_type2 with
+      match
+        Typing_case_types.check_overlapping
+          ~pos:t_pos
+          ~name:t_name
+          env
+          data_type1
+          data_type2
+      with
       | None -> acc
-      | Some why ->
-        let err =
-          Typing_error.Primary.CaseType.Overlapping_variant_types
-            { pos = t_pos; name = t_name; why }
-        in
-        Typing_error.casetype err :: acc
+      | Some err -> Typing_error.casetype err :: acc
     in
 
     (* We check for overlaps pairwise between each variant type in the union *)

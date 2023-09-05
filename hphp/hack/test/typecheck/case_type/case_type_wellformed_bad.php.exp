@@ -13,15 +13,19 @@ Invalid case type declaration. More than one variant of `Bad2` could contain val
 File "case_type_wellformed_bad.php", line 16, characters 11-15:
 Invalid case type declaration. More than one variant of `Good2` could contain values with the same runtime tag (Typing[4475])
   File "case_type_wellformed_bad.php", line 16, characters 19-19:
-  This is the type `C`, which includes **objects**
+  This is the type `C`, which includes **instances of the final class C**
   File "case_type_wellformed_bad.php", line 16, characters 23-29:
-  It overlaps with `I2<int>`, which also includes **objects**
+  It overlaps with `I2<int>`, which includes **objects**
+  File "case_type_wellformed_bad.php", line 16, characters 11-15:
+  Because **instances of the final class C** are also **objects**, `C` and `I2<int>` cannot be in the same case type
 File "case_type_wellformed_bad.php", line 18, characters 11-15:
 Invalid case type declaration. More than one variant of `Good3` could contain values with the same runtime tag (Typing[4475])
   File "case_type_wellformed_bad.php", line 18, characters 19-19:
-  This is the type `C`, which includes **objects**
+  This is the type `C`, which includes **instances of the final class C**
   File "case_type_wellformed_bad.php", line 18, characters 23-24:
-  It overlaps with `I1`, which also includes **objects**
+  It overlaps with `I1`, which includes **objects**
+  File "case_type_wellformed_bad.php", line 18, characters 11-15:
+  Because **instances of the final class C** are also **objects**, `C` and `I1` cannot be in the same case type
 File "case_type_wellformed_bad.php", line 20, characters 11-14:
 Invalid case type declaration. More than one variant of `Bad3` could contain values with the same runtime tag (Typing[4475])
   File "case_type_wellformed_bad.php", line 20, characters 18-25:

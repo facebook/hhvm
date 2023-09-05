@@ -9,6 +9,7 @@
 open Hh_prelude
 open Typing_defs
 open Typing_env_types
+module Cls = Decl_provider.Class
 module Env = Typing_env
 module SN = Naming_special_names
 
@@ -18,6 +19,8 @@ let strip_ns id =
 (* Modelled after data types in HHVM. See hphp/runtime/base/datatype.h *)
 module Tag = struct
   type ctx = env
+
+  type class_kind = FinalClass [@@deriving eq]
 
   type t =
     | DictData
@@ -30,6 +33,10 @@ module Tag = struct
     | FloatData
     | NullData
     | ObjectData
+    | InstanceOf of {
+        name: string;
+        kind: class_kind;
+      }
   [@@deriving eq]
 
   let describe = function
@@ -43,13 +50,18 @@ module Tag = struct
     | FloatData -> "floats"
     | NullData -> "the value null"
     | ObjectData -> "objects"
+    | InstanceOf { name; kind = FinalClass } ->
+      Printf.sprintf "instances of the final class %s" @@ strip_ns name
 
   let relation tag1 ~ctx:_ tag2 =
     let open ApproxSet.Set_relation in
     if equal tag1 tag2 then
       Equal
     else
-      Disjoint
+      match (tag1, tag2) with
+      | (ObjectData, InstanceOf _) -> Superset
+      | (InstanceOf _, ObjectData) -> Subset
+      | _ -> Disjoint
 
   let all_nonnull_tags =
     [
@@ -310,7 +322,21 @@ module DataType = struct
             tags
         in
         Set.union set @@ Set.singleton ~reason ObjectData
-      | _ -> Set.singleton ~reason ObjectData
+      | name ->
+        (match Env.get_class env name with
+        | Some cls -> begin
+          let open Ast_defs in
+          match Cls.kind cls with
+          | Cclass _ when Cls.final cls ->
+            Set.singleton ~reason @@ InstanceOf { name; kind = FinalClass }
+          | Cclass _
+          | Cinterface
+          | Cenum
+          | Cenum_class _
+          | Ctrait ->
+            Set.singleton ~reason ObjectData
+        end
+        | None -> Set.singleton ~reason ObjectData)
   end
 
   let rec fromTy ~trail (env : env) (ty : locl_ty) : 'phase t =
@@ -449,27 +475,70 @@ type runtime_data_type = decl_phase DataType.t
 
 let data_type_from_hint = DataType.fromHint
 
-let check_overlapping env data_type1 data_type2 =
+let check_overlapping env ~pos ~name data_type1 data_type2 =
   let open DataType in
   match Set.disjoint env data_type1 data_type2 with
   | Set.Sat -> None
-  | Set.Unsat { left; relation = _; right } ->
-    let why () =
-      let why1 =
+  | Set.Unsat { left; relation; right } ->
+    let rec why
+        (((_, { DataTypeReason.origin = ty1; _ }), tag1) as left)
+        relation
+        (((_, { DataTypeReason.origin = ty2; _ }), tag2) as right) =
+      let primary_why ~f =
         DataTypeReason.to_message
           env
           left
           ~f:(Printf.sprintf "This is the type `%s`, which includes ")
+        @ DataTypeReason.to_message env right ~f
       in
-      let why2 =
-        DataTypeReason.to_message
-          env
-          right
+      let secondary_why ~f =
+        let describe tag = Markdown_lite.md_bold @@ Tag.describe tag in
+        let ty_str ty =
+          Markdown_lite.md_codify @@ Typing_print.full_strip_ns_decl env ty
+        in
+        [
+          ( Pos_or_decl.of_raw_pos pos,
+            f (describe tag1) (describe tag2)
+            ^ Printf.sprintf
+                ", %s and %s cannot be in the same case type"
+                (ty_str ty1)
+                (ty_str ty2) );
+        ]
+      in
+      let open ApproxSet.Set_relation in
+      match relation with
+      | Superset -> why right Subset left
+      | Equal ->
+        primary_why
           ~f:(Printf.sprintf "It overlaps with `%s`, which also includes ")
-      in
-      why1 @ why2
+      | Subset ->
+        primary_why ~f:(Printf.sprintf "It overlaps with `%s`, which includes ")
+        @ secondary_why ~f:(Printf.sprintf "Because %s are also %s")
+      | Unknown ->
+        primary_why
+          ~f:(Printf.sprintf "It may overlap with `%s`, which includes ")
+        @ secondary_why
+            ~f:
+              (Printf.sprintf
+                 "Because it is possible for values to be both %s and %s")
+      (* Disjoint will only occur here if one of the types involved was a negated type.
+         These types cannot appear inside case type declarations and thus should never
+         hit this code path. If negated types every become denotable this code will
+         need to change. *)
+      | Disjoint ->
+        let desc = "Reporting a case type is disjoint when it should not be" in
+        let telemetry =
+          Telemetry.(create () |> string_ ~key:"casetype name" ~value:name)
+        in
+        Errors.invariant_violation pos telemetry desc ~report_to_user:false;
+        []
     in
-    Some (Lazy.from_fun why)
+
+    let err =
+      Typing_error.Primary.CaseType.Overlapping_variant_types
+        { pos; name; why = lazy (why left relation right) }
+    in
+    Some err
 
 (**
  * Given the variants of a case type (encoded as a locl_ty) and another locl_ty [intersecting_ty]

@@ -27,14 +27,16 @@ val data_type_from_hint : env -> Aast.hint -> runtime_data_type
   Checks if two different runtime data types can possibly overlap. Two
   runtime data types are considered to overlap if there exist a value at
   runtime that can belong to both data types. If no such value can exist then
-  [None] is returned. Otherwise an message is produced that explains why the
+  [None] is returned. Otherwise an error is produced that explains why the
   two runtime data types are considered to be overlapping.
 *)
 val check_overlapping :
   env ->
+  pos:Pos.t ->
+  name:string ->
   runtime_data_type ->
   runtime_data_type ->
-  Pos_or_decl.t Message.t list Lazy.t option
+  Typing_error.Primary.CaseType.t option
 
 (**
   Given the variants of a case type (encoded as a locl_ty) and another locl_ty [intersecting_ty]

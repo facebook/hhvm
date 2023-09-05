@@ -5932,10 +5932,10 @@ split_buckets(const std::vector<std::vector<SString>>& items,
  *   ever be promoted, so those will be skipped.
 */
 
-// Single output bucket for assign_hierarchial_work. Each bucket
+// Single output bucket for assign_hierarchical_work. Each bucket
 // contains classes which will be processed and returned as output,
 // and a set of dependency classes which will just be used as inputs.
-struct HierarchialWorkBucket {
+struct HierarchicalWorkBucket {
   std::vector<SString> classes;
   std::vector<SString> deps;
 };
@@ -5943,7 +5943,7 @@ struct HierarchialWorkBucket {
 /*
  * Assign work for a set of root classes (using the above
  * algorithm). The function is named because it's meant for situations
- * where we're processing classes in a "hierarchial" manner (either
+ * where we're processing classes in a "hierarchical" manner (either
  * from parent class to children, or from leaf class to parents).
  *
  * The dependencies for each class is provided by the getDeps
@@ -5955,8 +5955,8 @@ struct HierarchialWorkBucket {
  * upper bound on the possible returned indices.
  */
 template <typename GetDeps, typename GetIdx>
-std::vector<HierarchialWorkBucket>
-assign_hierarchial_work(std::vector<SString> roots,
+std::vector<HierarchicalWorkBucket>
+assign_hierarchical_work(std::vector<SString> roots,
                         size_t numClasses,
                         size_t bucketSize,
                         size_t maxSize,
@@ -6077,7 +6077,7 @@ assign_hierarchial_work(std::vector<SString> roots,
       std::sort(depOut.begin(), depOut.end(), string_data_lti{});
       assertx(std::adjacent_find(bucket.begin(), bucket.end()) == bucket.end());
       assertx(std::adjacent_find(depOut.begin(), depOut.end()) == depOut.end());
-      return HierarchialWorkBucket{
+      return HierarchicalWorkBucket{
         std::move(bucket),
         std::move(depOut)
       };
@@ -8862,7 +8862,7 @@ Job<MissingClassFixupJob> s_missingClassFixupJob;
 
 /*
  * For efficiency reasons, we want to do class flattening all in one
- * pass. So, we use assign_hierarchial_work (described above) to
+ * pass. So, we use assign_hierarchical_work (described above) to
  * calculate work buckets to allow us to do this.
  *
  * - The "root" classes are the leaf classes in the hierarchy. These are
@@ -9216,7 +9216,7 @@ flatten_classes_assign(IndexFlattenMetadata& meta) {
   constexpr size_t kBucketSize = 2000;
   constexpr size_t kMaxBucketSize = 30000;
 
-  auto assignments = assign_hierarchial_work(
+  auto assignments = assign_hierarchical_work(
     [&] {
       std::vector<SString> l;
       auto const size = meta.allCls.size();
@@ -9526,7 +9526,7 @@ void flatten_classes_fixup_units(IndexData& index,
 // Closure base class) into here. There's a lot of them, but we can
 // predict their results without running build subclass pass on them.
 struct SubclassMetadata {
-  // Immediately children and parents of class (not transitive!).
+  // Immediate children and parents of class (not transitive!).
   struct Meta {
     std::vector<SString> children;
     std::vector<SString> parents;
@@ -12029,7 +12029,7 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
       );
     }
 
-    // We have a root set now. So use assign_hierarchial_work to turn
+    // We have a root set now. So use assign_hierarchical_work to turn
     // it into a set of buckets:
 
     auto const bucketSize = [&] {
@@ -12043,7 +12043,7 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
       return 1ul;
     }();
 
-    auto const work = assign_hierarchial_work(
+    auto const work = assign_hierarchical_work(
       roots,
       maxClassIdx,
       bucketSize,
@@ -12062,7 +12062,7 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
       }
     );
 
-    // The output of assign_hierarchial_work is just buckets with the
+    // The output of assign_hierarchical_work is just buckets with the
     // names. We need to map those to classes or edge nodes and put
     // them in the correct data structure in the output. If there's a
     // class dependency on a split node, we also need to record an

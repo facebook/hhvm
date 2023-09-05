@@ -1,5 +1,5 @@
 File "use_trait_partial_override.php", line 11, characters 7-8:
-Class `TP` inherits trait method `foo` via multiple traits.  Remove the multiple paths or override the method (Typing[4439])
+Class `TP` inherits trait method `foo` via multiple traits.  Add the __EnableMethodTraitDiamond attribute to `TP`, remove the multiple paths, or override the method (Typing[4439])
   File "use_trait_partial_override.php", line 4, characters 19-21:
   Trait method is defined here
   File "use_trait_partial_override.php", line 12, characters 11-12:

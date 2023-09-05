@@ -3177,8 +3177,9 @@ module Eval_primary = struct
            ^ class_name
            ^ " inherits trait method "
            ^ method_name
-           ^ " via multiple traits.  Remove the multiple paths or override the method"
-         ))
+           ^ " via multiple traits.  Add the __EnableMethodTraitDiamond attribute to "
+           ^ class_name
+           ^ ", remove the multiple paths, or override the method" ))
     in
     let reason =
       Lazy.(

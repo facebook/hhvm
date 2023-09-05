@@ -1,5 +1,5 @@
 File "trait_diamond_no_attr_1.bad.php", line 13, characters 7-13:
-Class `MyClass` inherits trait method `testFun` via multiple traits.  Remove the multiple paths or override the method (Typing[4439])
+Class `MyClass` inherits trait method `testFun` via multiple traits.  Add the __EnableMethodTraitDiamond attribute to `MyClass`, remove the multiple paths, or override the method (Typing[4439])
   File "trait_diamond_no_attr_1.bad.php", line 7, characters 19-25:
   Trait method is defined here
   File "trait_diamond_no_attr_1.bad.php", line 15, characters 7-14:

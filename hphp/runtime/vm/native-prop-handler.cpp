@@ -18,7 +18,7 @@
 
 namespace HPHP::Native {
 //////////////////////////////////////////////////////////////////////////////
-using NativePropHandlerMap = std::unordered_map
+using NativePropHandlerMap = hphp_fast_map
   <const StringData*, NativePropHandler>;
 
 static NativePropHandlerMap s_nativePropHandlerMap;

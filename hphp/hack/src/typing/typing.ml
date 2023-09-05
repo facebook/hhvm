@@ -3578,6 +3578,128 @@ and coerce_nonlike_and_like
       (env2, err2, true)
   end
 
+(* Type check a binop, where e1 is the lhs and e2 is the rhs sub-exression.
+   In case we've already checked e2, allow it to be passed in as it's TAST and type
+*)
+and check_binop ~check_defined ?expected env outer p bop e1 e2 =
+  let expr = expr ~check_defined in
+  let raw_expr = raw_expr ~check_defined in
+  let check_e2 checker env e2 =
+    match e2 with
+    | Stdlib.Either.Left expr -> checker env expr
+    | Stdlib.Either.Right (te, ty) -> (env, te, ty)
+  in
+  match bop with
+  | Ast_defs.QuestionQuestion ->
+    let (env, te1, ty1) = raw_expr ~lhs_of_null_coalesce:true env e1 in
+    let parent_lenv = env.lenv in
+    let lenv1 = env.lenv in
+    let (env, te2, ty2) = check_e2 (expr ?expected) env e2 in
+    let lenv2 = env.lenv in
+    let env = LEnv.union_lenvs ~join_pos:p env parent_lenv lenv1 lenv2 in
+    (* There are two cases: either the left argument was null in which case we
+       evaluate the second argument which gets as ty2, or that ty1 wasn't null.
+       The following intersection adds the nonnull information. *)
+    let (env, ty1) =
+      Inter.intersect env ~r:Reason.Rnone ty1 (MakeType.nonnull Reason.Rnone)
+    in
+    let (env, ty) = Union.union ~approx_cancel_neg:true env ty1 ty2 in
+    make_result
+      env
+      p
+      (Aast.Binop { bop = Ast_defs.QuestionQuestion; lhs = te1; rhs = te2 })
+      ty
+  | Ast_defs.Eq op_opt ->
+    let make_result env p te ty =
+      let (env, te, ty) = make_result env p te ty in
+      let env = Typing_local_ops.check_assignment env te in
+      (env, te, ty)
+    in
+    (match op_opt with
+    (* For example, e1 += e2. This is typed and translated as if
+     * written e1 = e1 + e2.
+     * TODO TAST: is this right? e1 will get evaluated more than once
+     *)
+    | Some op ->
+      let (_, _, expr_) = e1 in
+      (match (op, expr_) with
+      | (Ast_defs.QuestionQuestion, Class_get _) ->
+        Errors.experimental_feature
+          p
+          "null coalesce assignment operator with static properties";
+        expr_error env p outer
+      | _ ->
+        let (env, te, ty) =
+          check_binop ~check_defined ?expected env outer p op e1 e2
+        in
+        let (env, te2, ty2) =
+          check_binop
+            ~check_defined
+            ?expected
+            env
+            outer
+            p
+            (Ast_defs.Eq None)
+            e1
+            (Stdlib.Either.Right (te, ty))
+        in
+        let te_opt = resugar_binop te2 in
+        begin
+          match te_opt with
+          | Some (_, _, te) -> make_result env p te ty2
+          | _ -> assert false
+        end)
+    | None ->
+      let (env, te2, ty2) = check_e2 raw_expr env e2 in
+      let (_, pos2, _) = te2 in
+      let (env, te1, ty, ty_mismatch_opt) = assign p env e1 pos2 ty2 in
+      let te =
+        Aast.Binop
+          {
+            bop = Ast_defs.Eq None;
+            lhs = te1;
+            rhs = hole_on_ty_mismatch ~ty_mismatch_opt te2;
+          }
+      in
+      make_result env p te ty)
+  | Ast_defs.Ampamp
+  | Ast_defs.Barbar ->
+    let c = Ast_defs.(equal_bop bop Ampamp) in
+    let (env, te1, _) = expr env e1 in
+    let lenv = env.lenv in
+    let (env, _) = condition env c te1 in
+    let (env, te2, _) = check_e2 expr env e2 in
+    let env = { env with lenv } in
+    make_result
+      env
+      p
+      (Aast.Binop { bop; lhs = te1; rhs = te2 })
+      (MakeType.bool (Reason.Rlogic_ret p))
+  | _ ->
+    let (env, te1, ty1) = raw_expr env e1 in
+    let (env, te2, ty2) = check_e2 raw_expr env e2 in
+    let env =
+      match bop with
+      (* TODO: This could be less conservative: we only need to account for
+       * the possibility of exception if the operator is `/` or `/=`.
+       *)
+      | Ast_defs.Eqeqeq
+      | Ast_defs.Diff2 ->
+        env
+      | _ -> might_throw ~join_pos:p env
+    in
+    let (_, p1, _) = e1 in
+    let p2 =
+      match e2 with
+      | Stdlib.Either.Left (_, p, _)
+      | Stdlib.Either.Right ((_, p, _), _) ->
+        p
+    in
+    let (env, te3, ty) =
+      Typing_arithmetic.binop p env bop p1 te1 ty1 p2 te2 ty2
+    in
+    (env, te3, ty)
+
 and expr_
     ?(expected : ExpectedTy.t option)
     ?(accept_using_var = false)
@@ -4548,108 +4670,16 @@ and expr_
     (* All function pointers are readonly_this since they are always a toplevel function or static method *)
     let (env, fty) = set_readonly_this p env fty in
     make_result env p e fty
-  | Binop { bop = Ast_defs.QuestionQuestion; lhs = e1; rhs = e2 } ->
-    let (env, te1, ty1) = raw_expr ~lhs_of_null_coalesce:true env e1 in
-    let parent_lenv = env.lenv in
-    let lenv1 = env.lenv in
-    let (env, te2, ty2) = expr ?expected env e2 in
-    let lenv2 = env.lenv in
-    let env = LEnv.union_lenvs ~join_pos:p env parent_lenv lenv1 lenv2 in
-    (* There are two cases: either the left argument was null in which case we
-       evaluate the second argument which gets as ty2, or that ty1 wasn't null.
-       The following intersection adds the nonnull information. *)
-    let (env, ty1) =
-      Inter.intersect env ~r:Reason.Rnone ty1 (MakeType.nonnull Reason.Rnone)
-    in
-    let (env, ty) = Union.union ~approx_cancel_neg:true env ty1 ty2 in
-    make_result
-      env
-      p
-      (Aast.Binop { bop = Ast_defs.QuestionQuestion; lhs = te1; rhs = te2 })
-      ty
-  | Binop { bop = Ast_defs.Eq op_opt; lhs = e1; rhs = e2 } ->
-    let make_result env p te ty =
-      let (env, te, ty) = make_result env p te ty in
-      let env = Typing_local_ops.check_assignment env te in
-      (env, te, ty)
-    in
-    (match op_opt with
-    (* For example, e1 += e2. This is typed and translated as if
-     * written e1 = e1 + e2.
-     * TODO TAST: is this right? e1 will get evaluated more than once
-     *)
-    | Some op ->
-      let (_, _, expr_) = e1 in
-      (match (op, expr_) with
-      | (Ast_defs.QuestionQuestion, Class_get _) ->
-        Errors.experimental_feature
-          p
-          "null coalesce assignment operator with static properties";
-        expr_error env p outer
-      | _ ->
-        let e_fake =
-          ( (),
-            p,
-            Binop
-              {
-                bop = Ast_defs.Eq None;
-                lhs = e1;
-                rhs = ((), p, Binop { bop = op; lhs = e1; rhs = e2 });
-              } )
-        in
-        let (env, te_fake, ty) = raw_expr env e_fake in
-        let te_opt = resugar_binop te_fake in
-        begin
-          match te_opt with
-          | Some (_, _, te) -> make_result env p te ty
-          | _ -> assert false
-        end)
-    | None ->
-      let (env, te2, ty2) = raw_expr env e2 in
-      let (_, pos2, _) = te2 in
-      let (env, te1, ty, ty_mismatch_opt) = assign p env e1 pos2 ty2 in
-      let te =
-        Aast.Binop
-          {
-            bop = Ast_defs.Eq None;
-            lhs = te1;
-            rhs = hole_on_ty_mismatch ~ty_mismatch_opt te2;
-          }
-      in
-      make_result env p te ty)
-  | Binop
-      { bop = (Ast_defs.Ampamp | Ast_defs.Barbar) as bop; lhs = e1; rhs = e2 }
-    ->
-    let c = Ast_defs.(equal_bop bop Ampamp) in
-    let (env, te1, _) = expr env e1 in
-    let lenv = env.lenv in
-    let (env, _) = condition env c te1 in
-    let (env, te2, _) = expr env e2 in
-    let env = { env with lenv } in
-    make_result
-      env
-      p
-      (Aast.Binop { bop; lhs = te1; rhs = te2 })
-      (MakeType.bool (Reason.Rlogic_ret p))
   | Binop { bop; lhs = e1; rhs = e2 } ->
-    let (env, te1, ty1) = raw_expr env e1 in
-    let (env, te2, ty2) = raw_expr env e2 in
-    let env =
-      match bop with
-      (* TODO: This could be less conservative: we only need to account for
-       * the possibility of exception if the operator is `/` or `/=`.
-       *)
-      | Ast_defs.Eqeqeq
-      | Ast_defs.Diff2 ->
-        env
-      | _ -> might_throw ~join_pos:p env
-    in
-    let (_, p1, _) = e1 in
-    let (_, p2, _) = e2 in
-    let (env, te3, ty) =
-      Typing_arithmetic.binop p env bop p1 te1 ty1 p2 te2 ty2
-    in
-    (env, te3, ty)
+    check_binop
+      ~check_defined
+      ?expected
+      env
+      outer
+      p
+      bop
+      e1
+      (Stdlib.Either.Left e2)
   | Pipe (e0, e1, e2) ->
     (* If it weren't for local variable assignment or refinement the pipe
      * expression e1 |> e2 could be typed using this rule (E is environment with

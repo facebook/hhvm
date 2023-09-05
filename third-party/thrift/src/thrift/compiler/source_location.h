@@ -140,6 +140,12 @@ class source_manager {
   // Returns a pointer to the source text at the specified location or nullptr
   // if the location is invalid.
   const char* get_text(source_location loc) const;
+
+  // Locates a filename among the include paths.
+  static std::string find_include_file(
+      const std::string& filename,
+      const std::string& program_path,
+      const std::vector<std::string>& search_paths);
 };
 
 } // namespace compiler

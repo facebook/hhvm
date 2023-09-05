@@ -22,7 +22,6 @@
 #include <limits>
 #include <set>
 
-#include <boost/filesystem.hpp>
 #include <boost/optional.hpp>
 #include <fmt/format.h>
 
@@ -211,50 +210,13 @@ std::string find_include_file(
     const t_program& program,
     const std::vector<std::string>& search_paths,
     diagnostics_engine& diags) {
-  // Absolute path? Just try that.
-  boost::filesystem::path path(filename);
-  if (path.has_root_directory()) {
-    try {
-      return boost::filesystem::canonical(path).string();
-    } catch (const boost::filesystem::filesystem_error& e) {
-      diags.error(
-          loc, "Could not find file: {}. Error: {}", filename, e.what());
-      end_parsing();
-    }
+  try {
+    return source_manager::find_include_file(
+        filename, program.path(), search_paths);
+  } catch (const std::exception& ex) {
+    diags.error(loc, "{}", ex.what());
+    end_parsing();
   }
-
-  // Relative path, start searching
-  // new search path with current dir global
-  std::vector<std::string> sp = search_paths;
-  auto dir = boost::filesystem::path(program.path()).parent_path().string();
-  dir = dir.empty() ? "." : dir;
-  sp.insert(sp.begin(), std::move(dir));
-  // Iterate through paths.
-  std::vector<std::string>::iterator it;
-  for (it = sp.begin(); it != sp.end(); it++) {
-    boost::filesystem::path sfilename = filename;
-    if ((*it) != "." && (*it) != "") {
-      sfilename = boost::filesystem::path(*(it)) / filename;
-    }
-    if (boost::filesystem::exists(sfilename)) {
-      return sfilename.string();
-    }
-#ifdef _WIN32
-    // On Windows, handle files found at potentially long paths.
-    sfilename = R"(\\?\)" +
-        boost::filesystem::absolute(sfilename)
-            .make_preferred()
-            .lexically_normal()
-            .string();
-    if (boost::filesystem::exists(sfilename)) {
-      return sfilename.string();
-    }
-#endif
-    diags.report(loc, diagnostic_level::debug, "Could not find: {}.", filename);
-  }
-  // File was not found.
-  diags.error(loc, "Could not find include file {}", filename);
-  end_parsing();
 }
 
 // A semantic analyzer and AST builder for a single Thrift program.

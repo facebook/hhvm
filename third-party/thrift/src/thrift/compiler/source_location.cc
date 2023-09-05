@@ -16,6 +16,9 @@
 
 #include <thrift/compiler/source_location.h>
 
+#include <boost/filesystem.hpp>
+#include <fmt/format.h>
+
 #include <assert.h>
 #include <errno.h>
 #include <string.h>
@@ -148,6 +151,54 @@ resolved_location::resolved_location(
   line_ = it != line_offsets.end() ? it - line_offsets.begin()
                                    : line_offsets.size();
   column_ = loc.offset_ - line_offsets[line_ - 1] + 1;
+}
+
+std::string source_manager::find_include_file(
+    const std::string& filename,
+    const std::string& program_path,
+    const std::vector<std::string>& search_paths) {
+  // Absolute path? Just try that.
+  boost::filesystem::path path(filename);
+  if (path.has_root_directory()) {
+    try {
+      return boost::filesystem::canonical(path).string();
+    } catch (const boost::filesystem::filesystem_error& e) {
+      throw std::runtime_error(fmt::format(
+          "Could not find file: {}. Error: {}", filename, e.what()));
+    }
+  }
+
+  // Relative path, start searching
+  // new search path with current dir global
+  std::vector<std::string> sp = search_paths;
+  auto dir = boost::filesystem::path(program_path).parent_path().string();
+  dir = dir.empty() ? "." : dir;
+  sp.insert(sp.begin(), std::move(dir));
+  // Iterate through paths.
+  std::vector<std::string>::iterator it;
+  for (it = sp.begin(); it != sp.end(); it++) {
+    boost::filesystem::path sfilename = filename;
+    if ((*it) != "." && (*it) != "") {
+      sfilename = boost::filesystem::path(*(it)) / filename;
+    }
+    if (boost::filesystem::exists(sfilename)) {
+      return sfilename.string();
+    }
+#ifdef _WIN32
+    // On Windows, handle files found at potentially long paths.
+    sfilename = R"(\\?\)" +
+        boost::filesystem::absolute(sfilename)
+            .make_preferred()
+            .lexically_normal()
+            .string();
+    if (boost::filesystem::exists(sfilename)) {
+      return sfilename.string();
+    }
+#endif
+  }
+  // File was not found.
+  throw std::runtime_error(
+      fmt::format("Could not find include file {}", filename));
 }
 
 } // namespace compiler

@@ -212,19 +212,6 @@ class t_py_generator : public t_concat_generator {
   void generate_serialize_list_element(
       std::ofstream& out, const t_list* tlist, std::string iter);
 
-  void generate_python_docstring(std::ofstream& out, const t_struct* tstruct);
-
-  void generate_python_docstring(
-      std::ofstream& out, const t_function* tfunction);
-
-  void generate_python_docstring(
-      std::ofstream& out,
-      const t_node* tdoc,
-      const t_struct* tstruct,
-      const char* subheader);
-
-  void generate_python_docstring(std::ofstream& out, const t_node* tdoc);
-
   void generate_json_enum(
       std::ofstream& out,
       const t_enum* tenum,
@@ -357,6 +344,19 @@ class t_py_generator : public t_concat_generator {
 
   void generate_json_reader_fn_signature(ofstream& out);
   static int32_t get_thrift_spec_key(const t_struct*, const t_field*);
+
+  void generate_python_docstring(std::ofstream& out, const t_struct* tstruct);
+
+  void generate_python_docstring(
+      std::ofstream& out, const t_function* tfunction);
+
+  void generate_python_docstring(
+      std::ofstream& out,
+      const t_named* named_node,
+      const t_struct* tstruct,
+      const char* subheader);
+
+  void generate_python_docstring(std::ofstream& out, const t_named* named_node);
 };
 
 std::string t_py_generator::get_real_py_module(const t_program* program) {
@@ -2213,7 +2213,7 @@ void t_py_generator::generate_service_interface(
     f_service_ << indent() << "}" << endl << endl;
   }
   std::string service_priority = get_priority(tservice);
-  const auto& functions = get_functions(tservice);
+  const std::vector<t_function*>& functions = get_functions(tservice);
   if (functions.empty()) {
     f_service_ << indent() << "pass" << endl;
   } else {
@@ -3528,14 +3528,14 @@ void t_py_generator::generate_python_docstring(
  */
 void t_py_generator::generate_python_docstring(
     ofstream& out,
-    const t_node* tdoc,
+    const t_named* named_node,
     const t_struct* tstruct,
     const char* subheader) {
   bool has_doc = false;
   stringstream ss;
-  if (tdoc->has_doc()) {
+  if (named_node->has_doc()) {
     has_doc = true;
-    ss << tdoc->doc();
+    ss << named_node->doc();
   }
 
   const vector<t_field*>& fields = tstruct->get_members();
@@ -3566,9 +3566,10 @@ void t_py_generator::generate_python_docstring(
  * Generates the docstring for a generic object.
  */
 void t_py_generator::generate_python_docstring(
-    ofstream& out, const t_node* tdoc) {
-  if (tdoc->has_doc()) {
-    generate_docstring_comment(out, "r\"\"\"\n", "", tdoc->doc(), "\"\"\"\n");
+    ofstream& out, const t_named* named_node) {
+  if (named_node->has_doc()) {
+    generate_docstring_comment(
+        out, "r\"\"\"\n", "", named_node->doc(), "\"\"\"\n");
   }
 }
 

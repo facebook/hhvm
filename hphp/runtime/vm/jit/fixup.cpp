@@ -92,6 +92,8 @@ struct FixupHash {
 };
 
 TreadHashMap<uint32_t,Fixup,FixupHash> s_fixups{kInitCapac};
+static ServiceData::ExportedCounter* s_fixupmap_counter =
+  ServiceData::createCounter("admin.fixup_map_size");
 
 void regsFromActRec(TCA tca, const ActRec* ar, const Fixup& fixup,
                     SBInvOffset extraSpOffset, VMRegs* outRegs) {
@@ -146,6 +148,7 @@ void recordFixup(CTCA tca, const Fixup& fixup) {
     *pos = fixup;
   } else {
     s_fixups.insert(offset, fixup);
+    s_fixupmap_counter->increment();
   }
 }
 

@@ -371,4 +371,8 @@ TEST(COUNTERS, named_entity_stats) {
   EXPECT_EQ(getVal("admin.named_entities_capacity"), stats[1].second);
 }
 
+TEST(COUNTERS, fixmup_map_size) {
+  EXPECT_EQ(getVal("admin.fixup_map_size"), jit::FixupMap::size());
+}
+
 }

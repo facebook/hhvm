@@ -44,54 +44,79 @@ namespace HPHP {
 
 TRACE_SET_MOD(runtime);
 
+using ObjectConstraint = TypeConstraint::ObjectConstraint;
+
 //////////////////////////////////////////////////////////////////////
 
 const StaticString s___invoke("__invoke");
 
 void TypeConstraint::init() {
-  if (m_typeName == nullptr || isTypeVar() || isTypeConstant()) {
-    m_type = Type::Mixed;
+  initSingle();
+}
+
+void ObjectConstraint::init(AnnotType const type) {
+  bool isObject = type == Type::Object;
+  bool isUnresolved = type == Type::Unresolved;
+  if (isObject) {
+    m_namedType = NamedType::get(m_clsName);
+  } else if (isUnresolved) {
+    m_namedType = NamedType::get(m_typeName);
+  }
+  FTRACE(5, "TypeConstraint: this {} NamedType: {}\n",
+        this, m_namedType.get());
+}
+
+void TypeConstraint::initSingle() {
+  auto& single = m_u.single;
+  if (single.object.m_typeName == nullptr || isTypeVar() || isTypeConstant()) {
+    single.type = Type::Mixed;
     return;
   }
-  TRACE(5, "TypeConstraint: this %p type %s, nullable %d\n",
-        this, m_typeName->data(), isNullable());
-  auto const mptr = nameToAnnotType(m_typeName);
+  FTRACE(5, "TypeConstraint: this {} type {}, nullable {}\n",
+        this, typeName(), isNullable());
+  auto const mptr = nameToAnnotType(typeName());
   if (mptr) {
-    m_type = *mptr;
-    assertx(m_type != Type::Object);
-    assertx(getAnnotDataType(m_type) != KindOfPersistentString);
+    single.type = *mptr;
+    assertx(single.type != Type::Object);
+    assertx(getAnnotDataType(single.type) != KindOfPersistentString);
     return;
   }
   if (m_flags & TypeConstraintFlags::Resolved) {
     TRACE(5, "TypeConstraint: this %p pre-resolved type %s, treating as %s\n",
-          this, m_typeName->data(), tname(getAnnotDataType(m_type)).c_str());
+          this, typeName()->data(), tname(getAnnotDataType(single.type)).c_str());
   } else {
     TRACE(5, "TypeConstraint: this %p no such type %s, marking as unresolved\n",
-          this, m_typeName->data());
-    m_type = Type::Unresolved;
+          this, typeName()->data());
+    single.type = Type::Unresolved;
   }
-  if (isObject()) {
-    m_namedType = NamedType::get(m_clsName);
-  } else if (isUnresolved()) {
-    m_namedType = NamedType::get(m_typeName);
-  }
-  TRACE(5, "TypeConstraint: this %p NamedType: %p\n",
-        this, m_namedType.get());
+  single.object.init(single.type);
+}
+
+bool ObjectConstraint::operator==(const ObjectConstraint& o) const {
+  // The named entity is defined based on the typeName() and is redundant to
+  // include in the equality operation.
+  return m_clsName == o.m_clsName && m_typeName == o.m_typeName;
 }
 
 bool TypeConstraint::operator==(const TypeConstraint& o) const {
-  // The named entity is defined based on the m_typeName and is redundant to
-  // include in the equality operation.
-  return m_type == o.m_type && m_flags == o.m_flags &&
-         m_clsName == o.m_clsName && m_typeName == o.m_typeName;
+  if (m_flags != o.m_flags) return false;
+
+  auto& a = m_u.single;
+  auto& b = o.m_u.single;
+  return a.type == b.type && a.object == b.object;
+}
+
+size_t ObjectConstraint::stableHash() const {
+  size_t clsHash = m_clsName ? m_clsName->hashStatic() : 0;
+  size_t typeName = m_typeName ? m_typeName->hashStatic() : 0;
+  return folly::hash::hash_combine(clsHash, typeName);
 }
 
 size_t TypeConstraint::stableHash() const {
   return folly::hash::hash_combine(
-    std::hash<AnnotType>()(m_type),
     std::hash<TypeConstraintFlags>()(m_flags),
-    m_clsName ? m_clsName->hashStatic() : 0,
-    m_typeName->hashStatic()
+    std::hash<AnnotType>()(m_u.single.type),
+    m_u.single.object.stableHash()
   );
 }
 
@@ -106,8 +131,8 @@ std::string TypeConstraint::displayName(const Class* context /*= nullptr*/,
     name += '?';
   }
 
-  const char* str = tn->data();
-  auto len = tn->size();
+  const char* str = tn ? tn->data() : "";
+  auto len = tn ? tn->size() : 0;
   if (len > 3 && tolower(str[0]) == 'h' && tolower(str[1]) == 'h' &&
       str[2] == '\\') {
     bool strip = false;
@@ -144,7 +169,7 @@ std::string TypeConstraint::displayName(const Class* context /*= nullptr*/,
 
   if (extra && m_flags & TypeConstraintFlags::Resolved) {
     const char* str = nullptr;
-    switch (m_type) {
+    switch (m_u.single.type) {
       case AnnotType::Nothing:  str = "nothing"; break;
       case AnnotType::NoReturn: str = "noreturn"; break;
       case AnnotType::Null:     str = "null"; break;
@@ -594,7 +619,7 @@ bool TypeConstraint::checkImpl(tv_rval val,
   }
 
   auto const name = isObject() ? clsName() : typeName();
-  auto const result = annotCompat(val.type(), m_type, name);
+  auto const result = annotCompat(val.type(), m_u.single.type, name);
   switch (result) {
     case AnnotAction::Pass: return true;
     case AnnotAction::Fail: return false;
@@ -695,7 +720,7 @@ bool TypeConstraint::alwaysPasses(DataType dt) const {
   if (isNullable() && dt == KindOfNull) return true;
 
   auto const name = isObject() ? clsName() : typeName();
-  auto const result = annotCompat(dt, m_type, name);
+  auto const result = annotCompat(dt, m_u.single.type, name);
   switch (result) {
     case AnnotAction::Pass:
       return true;
@@ -1038,7 +1063,7 @@ void TypeConstraint::verifyFail(tv_lval c, const Class* ctx, const Func* func,
       ).str()
     );
   } else {
-    auto cls = Class::lookup(m_typeName);
+    auto cls = Class::lookup(typeName());
     if (cls && isInterface(cls)) {
       auto const msg =
         folly::format(
@@ -1074,7 +1099,7 @@ void TypeConstraint::verifyFail(tv_lval c, const Class* ctx, const Func* func,
 void TypeConstraint::resolveType(AnnotType t,
                                  bool nullable,
                                  LowStringPtr clsName) {
-  assertx(m_type == AnnotType::Unresolved);
+  assertx(m_u.single.type == AnnotType::Unresolved);
   assertx(t != AnnotType::Unresolved);
   assertx(IMPLIES(t == AnnotType::Object, clsName != nullptr));
   assertx(IMPLIES(clsName != nullptr,
@@ -1082,14 +1107,14 @@ void TypeConstraint::resolveType(AnnotType t,
   auto flags = m_flags | TypeConstraintFlags::Resolved;
   if (nullable) flags |= TypeConstraintFlags::Nullable;
   m_flags = static_cast<TypeConstraintFlags>(flags);
-  m_type = t;
-  m_clsName = clsName;
+  m_u.single.type = t;
+  m_u.single.object.m_clsName = clsName;
 }
 
 void TypeConstraint::unresolve() {
   m_flags = static_cast<TypeConstraintFlags>(m_flags & ~TypeConstraintFlags::Resolved);
-  m_type = AnnotType::Unresolved;
-  m_clsName = nullptr;
+  m_u.single.type = AnnotType::Unresolved;
+  m_u.single.object.m_clsName = nullptr;
 }
 
 //////////////////////////////////////////////////////////////////////

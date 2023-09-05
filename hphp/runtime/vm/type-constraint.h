@@ -55,36 +55,97 @@ struct TypeConstraint {
 
   static const int32_t ReturnId = -1;
 
+  /// An ObjectConstraint is used to represent object-specific (or
+  /// enum-specific) information about a TypeConstraint.
+  struct ObjectConstraint {
+    /// Resolved class name. Only valid if this TypeConstraint represents a
+    /// resolved object or enum.
+    LowStringPtr m_clsName;
+    /// Source type name. In general this is the name from the source code.
+    LowStringPtr m_typeName;
+    /// The NamedType is used to differentiate implementations of
+    /// TypeConstraints between requests. The m_typeName is common (it's a
+    /// 'Foo') and the NamedType is specialized for each request to indicate the
+    /// actual underlying implementation of that Class* for each request.
+    LowPtr<const NamedType> m_namedType;
+
+    ObjectConstraint() = default;
+    explicit ObjectConstraint(LowStringPtr typeName)
+      : ObjectConstraint(nullptr, typeName, nullptr) {
+      assertx(!typeName || typeName->isStatic());
+    }
+    ObjectConstraint(LowStringPtr clsName,
+                     LowStringPtr typeName,
+                     LowPtr<const NamedType> namedType)
+      : m_clsName(clsName)
+      , m_typeName(typeName)
+      , m_namedType(namedType)
+    {
+      assertx(!clsName || clsName->isStatic());
+      assertx(!typeName || typeName->isStatic());
+    }
+
+    size_t stableHash() const;
+    bool operator==(const ObjectConstraint& o) const;
+
+    template<class SerDe>
+    void serdeHelper(SerDe& sd, bool resolved) {
+      sd(m_typeName);
+      if (resolved) {
+        sd(m_clsName);
+      }
+    }
+
+    template<class SerDe>
+    void serdeHelper(SerDe& sd, bool resolved) const {
+      sd(m_typeName);
+      if (resolved) {
+        sd(m_clsName);
+      }
+    }
+
+    void init(AnnotType type);
+  };
+
+  static_assert(CheckSize<ObjectConstraint, use_lowptr ? 12 : 24>(), "");
+
   TypeConstraint()
-    : m_flags(NoFlags)
-    , m_clsName(nullptr)
-    , m_typeName(nullptr)
-    , m_namedType(nullptr)
-  {
+      : m_flags(NoFlags)
+      , m_u {
+          .single={
+            .type=Type::Nothing,
+            .object=ObjectConstraint{nullptr}
+          }
+        } {
     init();
   }
 
   TypeConstraint(const StringData* typeName, TypeConstraintFlags flags)
-    : m_flags(flags)
-    , m_clsName(nullptr)
-    , m_typeName(typeName)
-    , m_namedType(nullptr)
-  {
+      : m_flags(flags)
+      , m_u {
+          .single={
+            .type=Type::Nothing,
+            .object=ObjectConstraint{typeName}
+          }
+        } {
     init();
   }
 
   template<class SerDe>
   void serde(SerDe& sd) {
-    sd(m_typeName)
-      (m_flags)
-      ;
-    if (m_flags & TypeConstraintFlags::Resolved) {
-      sd(m_type)
-        (m_clsName)
-        ;
+    sd(m_flags);
+    serdeSingle(sd);
+  }
+
+  template<class SerDe>
+  void serdeSingle(SerDe& sd) {
+    bool resolved = (m_flags & TypeConstraintFlags::Resolved) != 0;
+    if (resolved) {
+      sd(m_u.single.type);
     }
+    m_u.single.object.serdeHelper(sd, resolved);
     if (SerDe::deserializing) {
-      init();
+      initSingle();
     }
   }
 
@@ -107,28 +168,36 @@ struct TypeConstraint {
    * all.  If this function returns false, it means the parameter type
    * verification would be a no-op.
    */
-  bool hasConstraint() const { return m_typeName; }
+  bool hasConstraint() const { return m_u.single.object.m_typeName; }
 
   /*
    * Read access to various members.
    */
-  const StringData* clsName() const { return m_clsName; }
-  const StringData* typeName() const { return m_typeName; }
+  const StringData* clsName() const {
+    return m_u.single.object.m_clsName;
+  }
+  const StringData* typeName() const {
+    return m_u.single.object.m_typeName;
+  }
   const NamedType* clsNamedType() const {
     assertx(isObject());
-    return m_namedType;
+    return m_u.single.object.m_namedType;
   }
   const NamedType* typeNamedType() const {
     assertx(isUnresolved());
-    return m_namedType;
+    return m_u.single.object.m_namedType;
   }
-  const NamedType* anyNamedType() const { return m_namedType; }
+  const NamedType* anyNamedType() const {
+    return m_u.single.object.m_namedType;
+  }
   TypeConstraintFlags flags() const { return m_flags; }
 
   /*
    * Access to the "meta type" for this TypeConstraint.
    */
-  MetaType metaType() const { return getAnnotMetaType(m_type); }
+  MetaType metaType() const {
+    return getAnnotMetaType(m_u.single.type);
+  }
 
   /*
    * If this->isUnresolved(), resolve it using the autoloader.
@@ -140,10 +209,10 @@ struct TypeConstraint {
    */
   MaybeDataType underlyingDataType() const {
     if (!isPrecise()) return std::nullopt;
-    if (isObject() && interface_supports_non_objects(m_clsName)) {
+    if (isObject() && interface_supports_non_objects(m_u.single.object.m_clsName)) {
       return std::nullopt;
     }
-    return MaybeDataType(getAnnotDataType(m_type));
+    return MaybeDataType(getAnnotDataType(m_u.single.type));
   }
 
   /*
@@ -191,30 +260,30 @@ struct TypeConstraint {
   bool isUpperBound() const { return m_flags & UpperBound; }
 
   bool isPrecise()  const { return metaType() == MetaType::Precise; }
-  bool isMixed()    const { return m_type == Type::Mixed; }
-  bool isThis()     const { return m_type == Type::This; }
-  bool isCallable() const { return m_type == Type::Callable; }
-  bool isNumber()   const { return m_type == Type::Number; }
-  bool isNothing()  const { return m_type == Type::Nothing; }
-  bool isNoReturn() const { return m_type == Type::NoReturn; }
-  bool isArrayKey() const { return m_type == Type::ArrayKey; }
-  bool isDict()     const { return m_type == Type::Dict; }
-  bool isVec()      const { return m_type == Type::Vec; }
-  bool isKeyset()   const { return m_type == Type::Keyset; }
-  bool isObject()   const { return m_type == Type::Object; }
-  bool isInt()      const { return m_type == Type::Int; }
-  bool isString()   const { return m_type == Type::String; }
-  bool isArrayLike() const { return m_type == Type::ArrayLike; }
-  bool isVecOrDict() const { return m_type == Type::VecOrDict; }
-  bool isClassname() const { return m_type == Type::Classname; }
-  bool isUnresolved() const { return m_type == Type::Unresolved; }
+  bool isMixed()    const { return m_u.single.type == Type::Mixed; }
+  bool isThis()     const { return m_u.single.type == Type::This; }
+  bool isCallable() const { return m_u.single.type == Type::Callable; }
+  bool isNumber()   const { return m_u.single.type == Type::Number; }
+  bool isNothing()  const { return m_u.single.type == Type::Nothing; }
+  bool isNoReturn() const { return m_u.single.type == Type::NoReturn; }
+  bool isArrayKey() const { return m_u.single.type == Type::ArrayKey; }
+  bool isDict()     const { return m_u.single.type == Type::Dict; }
+  bool isVec()      const { return m_u.single.type == Type::Vec; }
+  bool isKeyset()   const { return m_u.single.type == Type::Keyset; }
+  bool isObject()   const { return m_u.single.type == Type::Object; }
+  bool isInt()      const { return m_u.single.type == Type::Int; }
+  bool isString()   const { return m_u.single.type == Type::String; }
+  bool isArrayLike() const { return m_u.single.type == Type::ArrayLike; }
+  bool isVecOrDict() const { return m_u.single.type == Type::VecOrDict; }
+  bool isClassname() const { return m_u.single.type == Type::Classname; }
+  bool isUnresolved() const { return m_u.single.type == Type::Unresolved; }
 
   // Returns true if we should convert a ClsMeth to a varray for this typehint.
   bool convertClsMethToArrLike() const;
 
-  AnnotType type()  const { return m_type; }
+  AnnotType type()  const { return m_u.single.type; }
 
-  bool validForProp() const { return propSupportsAnnot(m_type); }
+  bool validForProp() const { return propSupportsAnnot(m_u.single.type); }
 
   void validForPropResolved(const Class* declCls,
                             const StringData* propName) const {
@@ -254,7 +323,7 @@ struct TypeConstraint {
     // Nullable type-constraints should always default to null, as Hack
     // guarantees this.
     if (!isCheckable() || isNullable()) return make_tv<KindOfNull>();
-    return annotDefaultValue(m_type);
+    return annotDefaultValue(m_u.single.type);
   }
 
   /*
@@ -379,6 +448,7 @@ struct TypeConstraint {
 
 private:
   void init();
+  void initSingle();
 
   // There are a few cases where a type constraint does not pass, but we don't
   // raise an error. Some of these cases are resolved by mutating val instead.
@@ -413,16 +483,24 @@ private:
   void validForPropFail(const Class*, const StringData*) const;
 
 private:
-  // m_type represents the type to check on.  We don't know whether a
-  // bare name is a class/interface name or a type alias or an enum,
-  // so when this is set to Type::Unresolved we may have to resolve a type
-  // alias or enum and test for a different DataType (see annotCompat()
-  // for details).
-  Type m_type;
+#ifdef USE_LOWPTR
+#pragma pack(push, 2)
+#else
+#pragma pack(push, 4)
+#endif
   TypeConstraintFlags m_flags;
-  LowStringPtr m_clsName;   // valid iff isObject() or if an enum
-  LowStringPtr m_typeName;
-  LowPtr<const NamedType> m_namedType;
+  union {
+    struct {
+      // `type` represents the type to check on.  We don't know whether a
+      // bare name is a class/interface name or a type alias or an enum,
+      // so when this is set to Type::Unresolved we may have to resolve a type
+      // alias or enum and test for a different DataType (see annotCompat()
+      // for details).
+      Type type;
+      ObjectConstraint object;
+    } single;
+  } m_u;
+#pragma pack(pop)
 };
 
 static_assert(CheckSize<TypeConstraint, use_lowptr ? 16 : 32>(), "");

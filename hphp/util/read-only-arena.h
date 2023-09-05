@@ -17,6 +17,7 @@
 
 #include "hphp/util/address-range.h"
 #include "hphp/util/slab-manager.h"
+#include "hphp/util/service-data.h"
 
 #include <atomic>
 #include <mutex>
@@ -81,9 +82,13 @@ struct ReadOnlyArena : TaggedSlabList {
    * call to the allocator, and returns partially used chunks to `pool` when
    * destructed.
    */
-  explicit ReadOnlyArena(size_t minChunkSize, TaggedSlabList* pool = nullptr)
-    : m_pool(pool)
-    , m_minChunkSize((minChunkSize + kChunkSizeMask) & ~kChunkSizeMask) {}
+  explicit ReadOnlyArena(
+    size_t minChunkSize,
+    ServiceData::ExportedCounter* cap_counter,
+    TaggedSlabList* pool = nullptr)
+    : m_pool(pool),
+      m_cap_counter(cap_counter),
+      m_minChunkSize((minChunkSize + kChunkSizeMask) & ~kChunkSizeMask) {}
   ReadOnlyArena(const ReadOnlyArena&) = delete;
   ReadOnlyArena& operator=(const ReadOnlyArena&) = delete;
 
@@ -177,6 +182,7 @@ struct ReadOnlyArena : TaggedSlabList {
     auto const high = reinterpret_cast<uintptr_t>(mem + allocSize);
     chunk = new (mem) ReadOnlyChunk((uintptr_t)low, (uintptr_t)high);
     m_cap += allocSize;
+    m_cap_counter->addValue(allocSize);
     auto ret = chunk->tryAlloc(size, Alignment);
     assertx(ret);
     if (Local) recordLast(ret, size);
@@ -192,6 +198,7 @@ struct ReadOnlyArena : TaggedSlabList {
 
 private:
   TaggedSlabList* m_pool{nullptr};
+  ServiceData::ExportedCounter* m_cap_counter{nullptr};
   // Result of last allocation, used to support immediate deallocation after
   // allocation.
   void* m_lastAlloc{nullptr};

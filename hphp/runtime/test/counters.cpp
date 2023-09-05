@@ -349,4 +349,14 @@ TEST(COUNTERS, func_ids) {
   EXPECT_EQ(getVal("admin.func_ids"), Func::maxFuncIdNum());
 }
 
+TEST(COUNTERS, swappable_roarena_capac) {
+  setup_swappable_readonly_arena(32);
+  auto const arena = get_swappable_readonly_arena();
+  EXPECT_NE(arena, nullptr);
+  EXPECT_EQ(getVal("admin.swappable-roarena-cap"), 0);
+  arena->allocate(4);
+  EXPECT_NE(arena->capacity(), 0);
+  EXPECT_EQ(getVal("admin.swappable-roarena-cap"), arena->capacity());
+}
+
 }

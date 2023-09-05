@@ -435,7 +435,10 @@ void arenas_thread_init() {
     assertx(!tl_static_arena);
     constexpr size_t kStaticArenaChunkSize = 256 * 1024;
     static TaggedSlabList s_static_pool;
-    tl_static_arena = new TLStaticArena(kStaticArenaChunkSize, &s_static_pool);
+    tl_static_arena = new TLStaticArena(
+      kStaticArenaChunkSize,
+      ServiceData::createCounter("admin.tl-static-roarena-cap"),
+      &s_static_pool);
   }
 }
 
@@ -764,7 +767,8 @@ void set_cold_file_dir(const char* dir) {
 
 static SwappableReadonlyArena* s_swappable_readonly_arena = nullptr;
 void setup_swappable_readonly_arena(uint32_t chunk_size) {
-  s_swappable_readonly_arena = new SwappableReadonlyArena(chunk_size);
+  s_swappable_readonly_arena = new SwappableReadonlyArena(
+    chunk_size, ServiceData::createCounter("admin.swappable-roarena-cap"));
 }
 SwappableReadonlyArena* get_swappable_readonly_arena() {
   return s_swappable_readonly_arena;

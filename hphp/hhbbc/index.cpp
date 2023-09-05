@@ -10601,8 +10601,11 @@ protected:
     // Use the edges provided to the Job to know the mapping from
     // ClassInfo to split (it cannot be inferred otherwise).
     for (auto const& edge : edges) {
-      if (!index.classInfos.count(edge.cls)) continue;
-      if (!index.splits.count(edge.split)) continue;
+      SCOPE_ASSERT_DETAIL("Edge not present in job") {
+        return folly::sformat("{} -> {}", edge.cls, edge.split);
+      };
+      assertx(index.classInfos.count(edge.cls));
+      assertx(index.splits.count(edge.split));
       index.children[edge.cls].emplace(edge.split);
     }
 
@@ -10634,6 +10637,7 @@ protected:
         newChildren2.clear();
         for (auto const child : newChildren1) {
           auto const it = index.children.find(child);
+          // May not exist in index.children if processed in earlier round.
           if (it == end(index.children)) continue;
           for (auto const c : it->second) {
             if (children.count(c)) continue;
@@ -11814,6 +11818,8 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
         [&] {
           DepData out;
           for (auto const c : meta.children) {
+            // At a minimum, we need the immediate deps in order to
+            // construct the subclass lists for the parent.
             out.deps.emplace(c);
             if (splitDeps.count(c)) out.edges.emplace(c);
             auto const& childDeps = self(c, self);

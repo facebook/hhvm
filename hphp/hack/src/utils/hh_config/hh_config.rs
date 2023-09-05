@@ -198,7 +198,8 @@ impl HhConfig {
             match key.as_str() {
                 "current_saved_state_rollout_flag_index"
                 | "deactivate_saved_state_rollout"
-                | "override_hhconfig_hash" => {
+                | "override_hhconfig_hash"
+                | "ss_force" => {
                     // These were already queried for LocalConfig above.
                     // Ignore them so they aren't added to c.unknown.
                 }
@@ -381,6 +382,9 @@ impl HhConfig {
                 }
                 "enable_strict_switch" => {
                     go.tco_enable_strict_switch = parse_json(&value)?;
+                }
+                "dump_tast_hashes" => {
+                    go.dump_tast_hashes = parse_json(&value)?;
                 }
                 _ => c.unknown.push((key, value)),
             }

@@ -25,6 +25,7 @@
 #include "hphp/runtime/vm/containers.h"
 
 #include "hphp/util/functional.h"
+#include "hphp/util/check-size.h"
 
 #include <functional>
 #include <string>
@@ -423,6 +424,8 @@ private:
   LowStringPtr m_typeName;
   LowPtr<const NamedType> m_namedType;
 };
+
+static_assert(CheckSize<TypeConstraint, use_lowptr ? 16 : 32>(), "");
 
 /// TypeIntersectionConstraintT is generally used for upper-bounds. It's
 /// templated so we can have a common implementation with different vector

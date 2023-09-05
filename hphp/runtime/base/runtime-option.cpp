@@ -45,6 +45,7 @@
 #include "hphp/runtime/server/files-match.h"
 #include "hphp/runtime/server/satellite-server.h"
 #include "hphp/runtime/server/virtual-host.h"
+#include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/treadmill.h"
@@ -961,6 +962,7 @@ std::string RuntimeOption::StatsXSL;
 std::string RuntimeOption::StatsXSLProxy;
 uint32_t RuntimeOption::StatsSlotDuration = 10 * 60; // 10 minutes
 uint32_t RuntimeOption::StatsMaxSlot = 12 * 6; // 12 hours
+std::vector<std::string> RuntimeOption::StatsTrackedKeys;
 
 int64_t RuntimeOption::MaxSQLRowCount = 0;
 int64_t RuntimeOption::SocketDefaultTimeout = 60;
@@ -2743,6 +2745,7 @@ void RuntimeOption::Load(
                  12 * 6); // 12 hours
     StatsSlotDuration = std::max(1u, StatsSlotDuration);
     StatsMaxSlot = std::max(2u, StatsMaxSlot);
+    Config::Bind(StatsTrackedKeys, ini, config, "Stats.TrackedKeys");
     Config::Bind(ProfilerTraceBuffer, ini, config, "Stats.ProfilerTraceBuffer",
                  2000000);
     Config::Bind(ProfilerTraceExpansion, ini, config,

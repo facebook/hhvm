@@ -1002,7 +1002,7 @@ static bool send_report(Transport *transport) {
   std::string keys = transport->getParam("keys");
   std::string prefix = transport->getParam("prefix");
 
-  std::string out = ServerStats::Report(keys, prefix);
+  std::string out = ServerStats::ReportString(keys, prefix);
 
   transport->replaceHeader("Content-Type", "text/plain");
   transport->sendString(out);

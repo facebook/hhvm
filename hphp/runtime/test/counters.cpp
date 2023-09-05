@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/timestamp.h"
 #include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/base/unit-cache.h"
 
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/server/server-stats.h"
@@ -415,6 +416,17 @@ TEST(COUNTERS, profiling_and_optimized_funcs) {
   EXPECT_EQ(getVal("jit.profiling_funcs"), profData->profilingFuncs());
   profData->setOptimized(func->getFuncId());
   EXPECT_EQ(getVal("jit.optimized_funcs"), profData->optimizedFuncs());
+}
+
+TEST(COUNTERS, server_stats) {
+  RuntimeOption::EnableWebStats = true;
+  RuntimeOption::EnableStats = true;
+  HttpServer::Server = std::make_shared<HttpServer>();
+  ServerStats::Log("MyKey", 45);
+  ServerStats::LogPage("yup_this_page", 42);
+  auto stats = ServerStats::Report({"MyKey", "hit"}, "prefix");
+  EXPECT_EQ(stats.at("prefix.MyKey"), 45);
+  EXPECT_EQ(stats.at("prefix.hit"), 1);
 }
 
 }

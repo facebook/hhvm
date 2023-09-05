@@ -672,6 +672,7 @@ struct RuntimeOption {
   static std::string StatsXSLProxy;
   static uint32_t StatsSlotDuration;
   static uint32_t StatsMaxSlot;
+  static std::vector<std::string> StatsTrackedKeys;
 
   static int32_t ProfilerTraceBuffer;
   static double ProfilerTraceExpansion;

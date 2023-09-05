@@ -47,8 +47,10 @@ public:
   static void Reset();
   static void Clear();
   static std::string GetKeys();
-  static std::string Report(const std::string& keys,
-                            const std::string& prefix);
+  static std::string ReportString(const std::string& keys,
+                                  const std::string& prefix);
+  static hphp_fast_string_map<int64_t> Report(
+    const std::vector<std::string>& keys, const std::string& prefix);
 
   // thread status functions
   static void LogBytes(int64_t bytes);
@@ -112,8 +114,8 @@ private:
                     const KeyMap& wanted);
   static void Merge(TimeSlot& dest, const TimeSlot& src,
                     const KeyMap& wanted);
-  static KeyMap CompileKeys(const std::string& keys);
-  static std::string Report(const TimeSlot& s, const std::string& prefix);
+  static KeyMap CompileKeys(const std::vector<std::string>& rules);
+  static CounterMap ReportImpl(const KeyMap& keys);
 
   template<typename F> static void VisitAllSlots(F fun) {
     Lock lock(s_lock, false);
@@ -238,4 +240,3 @@ void server_stats_log_mutex(const std::string& stack, int64_t elapsed_us);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

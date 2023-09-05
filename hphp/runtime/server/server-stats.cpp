@@ -58,11 +58,11 @@ void ServerStats::Merge(TimeSlot& dest, const TimeSlot& src,
   Merge(dest.m_values, src.m_values, wanted);
 }
 
-ServerStats::KeyMap ServerStats::CompileKeys(const std::string& keys) {
+ServerStats::KeyMap ServerStats::CompileKeys(
+  const std::vector<std::string>& rules) {
+
   KeyMap res;
-  if (keys.empty()) return res;
-  std::vector<std::string> rules;
-  folly::split(',', keys.c_str(), rules, true);
+  if (rules.empty()) return res;
   for (auto const& rule : rules) {
     assertx(!rule.empty());
     auto len = rule.length();
@@ -189,9 +189,58 @@ std::string ServerStats::GetKeys() {
   return out;
 }
 
-std::string ServerStats::Report(const std::string& keys,
-                                const std::string& prefix) {
-  auto const wantedKeys = CompileKeys(keys);
+hphp_fast_string_map<int64_t> ServerStats::Report(
+  const std::vector<std::string>& keys, const std::string& prefix) {
+
+  auto report = ReportImpl(CompileKeys(keys));
+  if (prefix.empty()) return report;
+
+  hphp_fast_string_map<int64_t> result(report.size());
+  for (auto& val: report) {
+    result.emplace(prefix + "." + val.first, std::move(val.second));
+  }
+  return result;
+}
+
+std::string ServerStats::ReportString(const std::string& keys,
+                                      const std::string& prefix) {
+  std::vector<std::string> rules;
+  folly::split(',', keys.c_str(), rules, true);
+
+  auto const result = ReportImpl(CompileKeys(rules));
+
+  std::ostringstream out;
+  out << "{";
+  std::string key = prefix;
+  if (!key.empty()) {
+    key += ".";
+  }
+
+  // Sort keys in alphabetical order before printing to the string.
+  std::vector<std::pair<std::string, int64_t>> kvpVec;
+  kvpVec.reserve(result.size());
+  for (auto const& kvpair : result) {
+    kvpVec.push_back(kvpair);
+  }
+  std::sort(kvpVec.begin(), kvpVec.end());
+
+  bool firstKey = true;
+  for (auto const& kvpair : kvpVec) {
+    if (firstKey) {
+      firstKey = false;
+    } else {
+      out << ", ";
+    }
+    out << Writer::escape_for_json((key + kvpair.first).c_str())
+        << ": " << kvpair.second;
+  }
+  out << "}\n";
+
+  return out.str();
+}
+
+ServerStats::CounterMap ServerStats::ReportImpl(const KeyMap& wantedKeys) {
+
   auto const beginTime = static_cast<uint64_t>(time(nullptr));
   auto const SlotDuration = RuntimeOption::StatsSlotDuration;
   auto const now = beginTime / SlotDuration;
@@ -262,39 +311,7 @@ std::string ServerStats::Report(const std::string& keys,
     }
   }
 
-  return Report(ts, prefix);
-}
-
-std::string ServerStats::Report(const TimeSlot& s,
-                                const std::string& prefix) {
-  std::ostringstream out;
-  out << "{";
-  std::string key = prefix;
-  if (!key.empty()) {
-    key += ".";
-  }
-
-  // Sort keys in alphabetical order before printing to the string.
-  std::vector<std::pair<std::string, int64_t>> kvpVec;
-  kvpVec.reserve(s.m_values.size());
-  for (auto const& kvpair : s.m_values) {
-    kvpVec.push_back(kvpair);
-  }
-  std::sort(kvpVec.begin(), kvpVec.end());
-
-  bool firstKey = true;
-  for (auto const& kvpair : kvpVec) {
-    if (firstKey) {
-      firstKey = false;
-    } else {
-      out << ", ";
-    }
-    out << Writer::escape_for_json((key + kvpair.first).c_str())
-        << ": " << kvpair.second;
-  }
-  out << "}\n";
-
-  return out.str();
+  return ts.m_values;
 }
 
 static std::string format_duration(timeval& duration) {
@@ -757,6 +774,18 @@ void server_stats_log_mutex(const std::string& stack, int64_t elapsed_us) {
   auto const prefix = "mutex." + stack;
   ServerStats::Log(prefix + ".hit", 1);
   ServerStats::Log(prefix + ".time", elapsed_us);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+namespace {
+ServiceData::ExpensiveCounterCallback s_counters(
+  [](std::map<std::string, int64_t>& counters) {
+    const auto stats =
+      ServerStats::Report(RuntimeOption::StatsTrackedKeys, "admin.server_stats");
+    counters.insert(begin(stats), end(stats));
+  }
+);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

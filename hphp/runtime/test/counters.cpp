@@ -365,4 +365,10 @@ TEST(COUNTERS, num_catch_traces) {
   EXPECT_EQ(getVal("admin.catch-traces"), jit::numCatchTraces());
 }
 
+TEST(COUNTERS, named_entity_stats) {
+  const auto stats = namedEntityStats();
+  EXPECT_EQ(getVal("admin.named_entities_submaps"), stats[0].second);
+  EXPECT_EQ(getVal("admin.named_entities_capacity"), stats[1].second);
+}
+
 }

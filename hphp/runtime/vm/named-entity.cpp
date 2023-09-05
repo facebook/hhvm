@@ -260,5 +260,15 @@ std::vector<std::pair<const char*, int64_t>> namedEntityStats() {
   return stats;
 }
 
+ServiceData::CounterCallback s_counters(
+  [](std::map<std::string, int64_t>& counters) {
+    // avoid duplicating code for now. When we actually clean up the admin
+    // port, we can just inline namedEntityStats()
+    for (const auto& pair : namedEntityStats()) {
+      counters[folly::sformat("admin.named_entities_{}", pair.first)] = pair.second;
+    }
+  }
+);
+
 ///////////////////////////////////////////////////////////////////////////////
 }

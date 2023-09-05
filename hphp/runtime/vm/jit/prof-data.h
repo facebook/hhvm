@@ -427,6 +427,7 @@ struct ProfData {
       func->atomicFlags().set(Func::Flags::Optimized);
     assertx(!previousValue);
     m_optimizedFuncCount.fetch_add(1, std::memory_order_relaxed);
+    s_optimized_funcs_counter->increment();
   }
   void unsetOptimized(FuncId funcId) {
     auto func = Func::fromFuncId(funcId);
@@ -434,6 +435,7 @@ struct ProfData {
       func->atomicFlags().unset(Func::Flags::Optimized);
     assertx(previousValue);
     m_optimizedFuncCount.fetch_sub(1, std::memory_order_relaxed);
+    s_optimized_funcs_counter->decrement();
   }
   void setOptimized(SrcKey sk) {
     m_optimizedSKs.emplace(sk.toAtomicInt(), true).first->second = true;
@@ -480,7 +482,10 @@ struct ProfData {
 
     static auto const bcSizeCounter =
       ServiceData::createCounter("jit.profile-bc-size");
+    static auto const profilingFuncsCounter =
+      ServiceData::createCounter("jit.profiling_funcs");
     bcSizeCounter->setValue(profilingBCSize());
+    profilingFuncsCounter->increment();
   }
 
   template<class Fn>
@@ -662,6 +667,11 @@ struct ProfData {
   static std::atomic<StringData*> s_tag;
   static std::atomic<int64_t> s_buildTime;
   static std::atomic<size_t> s_prevProfSize;
+
+  /*
+   * profiling counter for number of optimized funcs
+   */
+  static ServiceData::ExportedCounter* s_optimized_funcs_counter;
 };
 
 //////////////////////////////////////////////////////////////////////

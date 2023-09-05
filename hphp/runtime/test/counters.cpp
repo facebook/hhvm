@@ -25,6 +25,7 @@
 #include "hphp/runtime/server/server-stats.h"
 
 #include "hphp/runtime/vm/jit/cg-meta.h"
+#include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/tc-internal.h"
 #include "hphp/runtime/vm/jit/tc-record.h"
@@ -351,6 +352,12 @@ TEST(COUNTERS, alloc_arena_usage) {
 
 TEST(COUNTERS, func_ids) {
   EXPECT_EQ(getVal("admin.func_ids"), Func::maxFuncIdNum());
+  auto obj = SystemLib::AllocInvalidArgumentExceptionObject("This is a test exception object for counters");
+  auto func = obj->getVMClass()->getCtor();
+  const auto prev = Func::maxFuncIdNum();
+  func->clone(obj->getVMClass(), makeStaticString("bananas"));
+  EXPECT_EQ(Func::maxFuncIdNum(), prev+1);
+  EXPECT_EQ(getVal("admin.func_ids"), Func::maxFuncIdNum());
 }
 
 TEST(COUNTERS, swappable_roarena_capac) {
@@ -396,6 +403,18 @@ TEST(COUNTERS, allocs_frees) {
   jit::tc::updateCodeSizeCounters();
 
   confirm_exists_and_zero();
+}
+
+TEST(COUNTERS, profiling_and_optimized_funcs) {
+  auto profData = const_cast<jit::ProfData*>(jit::globalProfData());
+  // this happens for some nopgo tests
+  if (!profData) return;
+  auto obj = SystemLib::AllocInvalidArgumentExceptionObject("This is a test exception object for counters");
+  auto func = obj->getVMClass()->getCtor();
+  profData->setProfiling(func);
+  EXPECT_EQ(getVal("jit.profiling_funcs"), profData->profilingFuncs());
+  profData->setOptimized(func->getFuncId());
+  EXPECT_EQ(getVal("jit.optimized_funcs"), profData->optimizedFuncs());
 }
 
 }

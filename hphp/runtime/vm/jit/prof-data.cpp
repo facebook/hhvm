@@ -237,6 +237,9 @@ std::atomic<StringData*> ProfData::s_tag{nullptr};
 std::atomic<int64_t> ProfData::s_buildTime{0};
 std::atomic<size_t> ProfData::s_prevProfSize{0};
 
+ServiceData::ExportedCounter* ProfData::s_optimized_funcs_counter =
+  ServiceData::createCounter("jit.optimized_funcs");
+
 RDS_LOCAL_NO_CHECK(ProfData*, rl_profData)(nullptr);
 
 void processInitProfData() {

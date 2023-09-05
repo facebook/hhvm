@@ -109,13 +109,32 @@ buildCodeSizeCounters() {
   return counters;
 }
 
-static std::map<std::string, ServiceData::ExportedTimeSeries*> s_counters;
+static std::map<std::string, ServiceData::ExportedTimeSeries*> s_used_counters;
 
 static std::atomic<uint64_t> s_trans_counters[NumTransKinds][kNumAreas];
 
+#define FOREACH_ALLOC_FREE_COUNTER \
+F(allocs) \
+F(frees) \
+F(bytes_free) \
+F(free_blocks)
+
+#define F(name) \
+  static std::map<std::string, ServiceData::ExportedCounter*> s_ ## name ## _counters;
+FOREACH_ALLOC_FREE_COUNTER;
+#undef F
+
 static InitFiniNode initCodeSizeCounters([] {
-  s_counters = buildCodeSizeCounters();
+  s_used_counters = buildCodeSizeCounters();
+  CodeCache::forEachName([](const char* name) {
+    #define F(n) s_ ## n ## _counters[name] = \
+      ServiceData::createCounter(folly::sformat("jit.code.{}." #n , name));
+    FOREACH_ALLOC_FREE_COUNTER;
+    #undef F
+  });
 }, InitFiniNode::When::PostRuntimeOptions);
+
+#undef FOREACH_SIZE_COUNTER
 
 static std::atomic<bool> s_warmedUp{false};
 
@@ -167,9 +186,9 @@ void recordTranslationSizes(const TransRec& tr) {
     default:
       return;
   }
-  auto mainCounter   = s_counters.at(folly::sformat("{}.main", kindName));
-  auto coldCounter   = s_counters.at(folly::sformat("{}.cold", kindName));
-  auto frozenCounter = s_counters.at(folly::sformat("{}.frozen", kindName));
+  auto mainCounter   = s_used_counters.at(folly::sformat("{}.main", kindName));
+  auto coldCounter   = s_used_counters.at(folly::sformat("{}.cold", kindName));
+  auto frozenCounter = s_used_counters.at(folly::sformat("{}.frozen", kindName));
   mainCounter->addValue(tr.aLen);
   coldCounter->addValue(tr.acoldLen);
   frozenCounter->addValue(tr.afrozenLen);
@@ -187,15 +206,26 @@ void recordTranslationSizes(const TransRec& tr) {
 void updateCodeSizeCounters() {
   assertOwnsCodeLock();
 
+  #define F(c_name, update_fn, block_name, block) \
+    s_ ## c_name ## _counters.at(block_name)->setValue(block.update_fn());
+
+  #define UPDATE_ALLOC_FREE_COUNTERS(...) \
+    F(allocs, numAllocs, __VA_ARGS__) \
+    F(frees, numFrees, __VA_ARGS__) \
+    F(bytes_free, bytesFree,  __VA_ARGS__) \
+    F(free_blocks, blocksFree, __VA_ARGS__)
+
   code().forEachBlock([&] (const char* name, const CodeBlock& a) {
-    auto codeUsed = s_counters.at(name);
+    auto codeUsed = s_used_counters.at(name);
     // Add delta
     codeUsed->addValue(a.used() - codeUsed->getSum());
+    UPDATE_ALLOC_FREE_COUNTERS(name, a);
   });
 
   // Manually add code.data.
-  auto codeUsed = s_counters.at("data");
+  auto codeUsed = s_used_counters.at("data");
   codeUsed->addValue(code().data().used() - codeUsed->getSum());
+  UPDATE_ALLOC_FREE_COUNTERS("data", code().data());
 }
 
 size_t getLiveMainUsage() {
@@ -483,8 +513,8 @@ std::string warmupStatusString() {
       status_str = "Waiting on retranslateAll().\n";
     } else {
       auto checkCodeSize = [&](std::string name, uint32_t maxSize) {
-        assertx(!s_counters.empty());
-        auto series = s_counters.at(name);
+        assertx(!s_used_counters.empty());
+        auto series = s_used_counters.at(name);
         if (!series) {
           status_str = "initializing";
           return;

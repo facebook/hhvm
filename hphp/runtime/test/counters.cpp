@@ -25,7 +25,9 @@
 #include "hphp/runtime/server/server-stats.h"
 
 #include "hphp/runtime/vm/jit/cg-meta.h"
+#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/tc-internal.h"
+#include "hphp/runtime/vm/jit/tc-record.h"
 
 #include "hphp/util/alloc-defs.h"
 #include "hphp/util/jemalloc-util.h"
@@ -373,6 +375,27 @@ TEST(COUNTERS, named_entity_stats) {
 
 TEST(COUNTERS, fixmup_map_size) {
   EXPECT_EQ(getVal("admin.fixup_map_size"), jit::FixupMap::size());
+}
+
+TEST(COUNTERS, allocs_frees) {
+  // EvalEnableReusableTC is false, so the best we can do is ensure that
+  // the counters are being created successfully and that the code runs
+  // without crashing.
+
+  const auto confirm_exists_and_zero = []() {
+  jit::tc::code().forEachName([](const char* name) {
+    EXPECT_EQ(getVal(folly::sformat("jit.code.{}.allocs", name).c_str()), 0);
+    EXPECT_EQ(getVal(folly::sformat("jit.code.{}.frees", name).c_str()), 0);
+    EXPECT_EQ(getVal(folly::sformat("jit.code.{}.bytes_free", name).c_str()), 0);
+    EXPECT_EQ(getVal(folly::sformat("jit.code.{}.free_blocks", name).c_str()), 0);
+  });
+  };
+  confirm_exists_and_zero();
+
+  const auto lock = jit::tc::lockCode(true);
+  jit::tc::updateCodeSizeCounters();
+
+  confirm_exists_and_zero();
 }
 
 }

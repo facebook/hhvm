@@ -3,17 +3,12 @@
 
 case type MultiClass = C | D | E ;
 
-interface I {
-  public function i(): int;
-}
-final class C implements I {
-  public function g(): int { return 0; }
-  public function i(): int { return $this->g(); }
+interface C {
+  public function g(): int;
 }
 
-final class D implements I {
+final class D {
   public function f(): int { return 1; }
-  public function i(): int { return $this->f(); }
 }
 
 final class E {
@@ -36,9 +31,4 @@ function impl3(MultiClass $x): int {
   if ($x is E) return $x->val;
   if ($x is C) return $x->g();
   return $x->f();
-}
-
-function impl_interface(MultiClass $x): int {
-  if ($x is I) return $x->i();
-  return $x->val;
 }

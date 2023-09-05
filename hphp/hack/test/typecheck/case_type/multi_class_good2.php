@@ -2,7 +2,9 @@
 <<file:__EnableUnstableFeatures('case_types')>>
 
 case type MultiClass = C | D | E ;
-
+interface I {
+  public function i(): int;
+}
 class C {
   public function g(): int { return 0; }
 }
@@ -28,6 +30,13 @@ function impl2(MultiClass $x): int {
 }
 
 function impl3(MultiClass $x): int {
+  if ($x is E) return $x->val;
+  if ($x is C) return $x->g();
+  return $x->f();
+}
+
+function impl_interface(MultiClass $x): int {
+  if ($x is I) return $x->i();
   if ($x is E) return $x->val;
   if ($x is C) return $x->g();
   return $x->f();

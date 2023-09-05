@@ -23,6 +23,7 @@ module Tag = struct
   type class_kind =
     | Class
     | FinalClass
+    | Interface
   [@@deriving eq]
 
   type t =
@@ -57,6 +58,8 @@ module Tag = struct
       Printf.sprintf "instances of the final class %s" @@ strip_ns name
     | InstanceOf { name; kind = Class } ->
       Printf.sprintf "instances of the class %s" @@ strip_ns name
+    | InstanceOf { name; kind = Interface } ->
+      Printf.sprintf "instances of the interface %s" @@ strip_ns name
 
   let relation tag1 ~ctx:env tag2 =
     let open ApproxSet.Set_relation in
@@ -87,6 +90,9 @@ module Tag = struct
                | (FinalClass, _)
                | (_, FinalClass) ->
                  return Disjoint
+               | (Interface, _)
+               | (_, Interface) ->
+                 return Unknown
                | (Class, Class) -> return Disjoint
              )
       | _ -> Disjoint
@@ -359,7 +365,8 @@ module DataType = struct
             Set.singleton ~reason @@ InstanceOf { name; kind = FinalClass }
           | Cclass _ ->
             Set.singleton ~reason @@ InstanceOf { name; kind = Class }
-          | Cinterface
+          | Cinterface ->
+            Set.singleton ~reason @@ InstanceOf { name; kind = Interface }
           | Cenum
           | Cenum_class _
           | Ctrait ->

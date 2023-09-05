@@ -69,14 +69,18 @@ public class ThriftServerRSocket implements RSocket {
       ServerRequestPayload requestPayload =
           deserializeRequest(payload, requestRpcMetadata, requestContext);
 
-      payload.release();
-
       assert requestPayload.getRequestRpcMetadata().getKind()
           == RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE;
 
       return rpcServerHandler
           .singleRequestSingleResponse(requestPayload)
-          .map(responsePayload -> handleResponse(alloc, requestPayload, responsePayload));
+          .map(responsePayload -> handleResponse(alloc, requestPayload, responsePayload))
+          .doFinally(
+              __ -> {
+                if (payload.refCnt() > 0) {
+                  payload.release();
+                }
+              });
     } catch (Throwable t) {
       payload.release();
       return Mono.error(t);
@@ -93,14 +97,18 @@ public class ThriftServerRSocket implements RSocket {
       ServerRequestPayload requestPayload =
           deserializeRequest(payload, requestRpcMetadata, requestContext);
 
-      payload.release();
-
       assert requestPayload.getRequestRpcMetadata().getKind()
           == RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE;
 
       return rpcServerHandler
           .singleRequestStreamingResponse(requestPayload)
-          .map(responsePayload -> handleStreamResponse(alloc, requestPayload, responsePayload));
+          .map(responsePayload -> handleStreamResponse(alloc, requestPayload, responsePayload))
+          .doFinally(
+              __ -> {
+                if (payload.refCnt() > 0) {
+                  payload.release();
+                }
+              });
     } catch (Throwable t) {
       payload.release();
       return Flux.error(t);
@@ -217,11 +225,16 @@ public class ThriftServerRSocket implements RSocket {
       ServerRequestPayload requestPayload =
           deserializeRequest(payload, requestRpcMetadata, requestContext);
 
-      payload.release();
-
       assert requestPayload.getRequestRpcMetadata().getKind() == RpcKind.SINGLE_REQUEST_NO_RESPONSE;
 
-      return rpcServerHandler.singleRequestNoResponse(requestPayload);
+      return rpcServerHandler
+          .singleRequestNoResponse(requestPayload)
+          .doFinally(
+              __ -> {
+                if (payload.refCnt() > 0) {
+                  payload.release();
+                }
+              });
     } catch (Throwable t) {
       payload.release();
       return Mono.error(t);

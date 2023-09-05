@@ -470,7 +470,12 @@ module ErrorsWrite = struct
       | Absent
       | Closed ->
         failwith ("Cannot report in state " ^ show_write_state !write_state)
-      | Reporting (fd, _n) ->
+      | Reporting (fd, n) ->
+        Hh_logger.log
+          "Errors-file: report#%d on %s: telemetry [%s]"
+          n
+          (Sys_utils.show_inode fd)
+          (telemetry |> Telemetry.to_json |> Hh_json.json_to_string);
         ErrorsFile.write_message fd (ErrorsFile.Item (Telemetry telemetry))
     end
 

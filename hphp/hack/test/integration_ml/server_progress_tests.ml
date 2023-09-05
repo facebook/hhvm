@@ -209,6 +209,23 @@ let rec wait_for_progress ~(deadline : float) ~(expected : string) : unit Lwt.t
     let%lwt () = Lwt_unix.sleep 0.1 in
     wait_for_progress ~deadline ~expected
 
+(** Looks for errors-file; will keep polling every 0.1s up to 'deadline' until it finds it,
+and will raise an exception if it doesn't. *)
+let rec wait_for_errors_file ~(deadline : float) (errors_file_path : string) :
+    Unix.file_descr Lwt.t =
+  let fd =
+    try Some (Unix.openfile errors_file_path [Unix.O_RDONLY] 0) with
+    | Unix.Unix_error (Unix.ENOENT, _, _) -> None
+  in
+  match fd with
+  | Some fd -> Lwt.return fd
+  | None when Float.(Unix.gettimeofday () > deadline) ->
+    failwith
+      (Printf.sprintf "Timeout waiting for errors-file %s" errors_file_path)
+  | None ->
+    let%lwt () = Lwt_unix.sleep 0.1 in
+    wait_for_errors_file ~deadline errors_file_path
+
 (** Scrapes the monitor log for '...server...pid: 012345' and returns it.
 Alas, this is the only means we have to find PIDs. *)
 let get_server_pid ~(root : Path.t) : int Lwt.t =
@@ -368,6 +385,9 @@ let test_errors_complete () : bool Lwt.t =
           ServerProgress.ErrorsRead.openfile fd |> Result.ok |> Option.value_exn
         in
         let q = ServerProgressLwt.watch_errors_file ~pid fd in
+        let%lwt () = expect_qitem q "Telemetry [to_recheck_count]" in
+        let%lwt () = expect_qitem q "Telemetry [will_use_distc]" in
+        let%lwt () = expect_qitem q "Telemetry [process_in_parallel]" in
         let%lwt () = expect_qitem q "Errors [b.php=1]" in
         let%lwt () = expect_qitem q "Complete [complete]" in
         let%lwt () = expect_qitem q "closed" in
@@ -378,6 +398,9 @@ let test_errors_complete () : bool Lwt.t =
           ServerProgress.ErrorsRead.openfile fd |> Result.ok |> Option.value_exn
         in
         let q = ServerProgressLwt.watch_errors_file ~pid fd in
+        let%lwt () = expect_qitem q "Telemetry [to_recheck_count]" in
+        let%lwt () = expect_qitem q "Telemetry [will_use_distc]" in
+        let%lwt () = expect_qitem q "Telemetry [process_in_parallel]" in
         let%lwt () = expect_qitem q "Errors [b.php=1]" in
         let%lwt () = expect_qitem q "Complete [complete]" in
         let%lwt () = expect_qitem q "closed" in
@@ -415,20 +438,22 @@ let test_errors_during () : bool Lwt.t =
             |]
         in
         (* the file loop_php causes the typechecker to spin, typechecking, for 10mins! *)
-        let%lwt () =
-          wait_for_progress
+        let errors_file_path = ServerFiles.errors_file_path root in
+        let%lwt fd1 =
+          wait_for_errors_file
+            errors_file_path
             ~deadline:(Unix.gettimeofday () +. 60.0)
-            ~expected:"[DWorking] typechecking"
         in
         (* at this point we should have one error available *)
-        let errors_file_path = ServerFiles.errors_file_path root in
-        let fd1 = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in
         let { ServerProgress.ErrorsRead.pid; _ } =
           ServerProgress.ErrorsRead.openfile fd1
           |> Result.ok
           |> Option.value_exn
         in
         let q1 = ServerProgressLwt.watch_errors_file ~pid fd1 in
+        let%lwt () = expect_qitem q1 "Telemetry [to_recheck_count]" in
+        let%lwt () = expect_qitem q1 "Telemetry [will_use_distc]" in
+        let%lwt () = expect_qitem q1 "Telemetry [process_in_parallel]" in
         let%lwt () = expect_qitem q1 "Errors [b.php=1]" in
         let%lwt () = expect_qitem q1 "nothing" in
         (* and a second client should be able to observe it too *)
@@ -439,6 +464,9 @@ let test_errors_during () : bool Lwt.t =
           |> Option.value_exn
         in
         let q2 = ServerProgressLwt.watch_errors_file ~pid fd2 in
+        let%lwt () = expect_qitem q2 "Telemetry [to_recheck_count]" in
+        let%lwt () = expect_qitem q2 "Telemetry [will_use_distc]" in
+        let%lwt () = expect_qitem q2 "Telemetry [process_in_parallel]" in
         let%lwt () = expect_qitem q2 "Errors [b.php=1]" in
         let%lwt () = expect_qitem q2 "nothing" in
         (* let's stop the server and verify that errors are absent *)
@@ -543,7 +571,16 @@ let test_errors_kill () : bool Lwt.t =
             ~expected:"[DWorking] typechecking"
         in
         let%lwt hh_client =
-          hh_open ~root ~tmp [| "check"; "--error-format"; "plain" |]
+          hh_open
+            ~root
+            ~tmp
+            [|
+              "check";
+              "--error-format";
+              "plain";
+              "--config";
+              "consume_streaming_errors=true";
+            |]
         in
         let%lwt () = hh_await_substring hh_client ~substring:"(Typing[" in
         (* Now, kill the server! *)
@@ -656,7 +693,15 @@ let test_client_during () : bool Lwt.t =
             ~deadline:(Unix.gettimeofday () +. 60.0)
             ~expected:"[DWorking] typechecking"
         in
-        let args = [| "check"; "--error-format"; "plain" |] in
+        let args =
+          [|
+            "check";
+            "--error-format";
+            "plain";
+            "--config";
+            "consume_streaming_errors=true";
+          |]
+        in
         let%lwt hh_client = hh_open ~root ~tmp args in
         let%lwt () = hh_await_substring hh_client ~substring:"(Typing[" in
         hh_client#kill Sys.sigkill;
@@ -807,20 +852,20 @@ let () =
   EventLogger.init_fake ();
   let tests =
     [
-      (* ("test_start_stop", test_start_stop);
-         ("test_typechecking", test_typechecking);
-         ("test_kill_server", test_kill_server);
-         ("test_kill_monitor", test_kill_monitor);
-         ("test_errors_complete", test_errors_complete);
-         ("test_errors_during", test_errors_during);
-         ("test_errors_kill", test_errors_kill);
-         ("test_errors_existing", test_errors_existing);
-         ("test_client_complete", test_client_complete);
-         ("test_client_during", test_client_during);
-         ("test_start", test_start);
-         ("test_no_start", test_no_start);
-         ("test_no_load", test_no_load);
-         ("test_hhi_error", test_hhi_error); *)
+      ("test_start_stop", test_start_stop);
+      ("test_typechecking", test_typechecking);
+      ("test_kill_server", test_kill_server);
+      ("test_kill_monitor", test_kill_monitor);
+      ("test_errors_complete", test_errors_complete);
+      ("test_errors_during", test_errors_during);
+      ("test_errors_kill", test_errors_kill);
+      ("test_errors_existing", test_errors_existing);
+      ("test_client_complete", test_client_complete);
+      ("test_client_during", test_client_during);
+      ("test_start", test_start);
+      ("test_no_start", test_no_start);
+      ("test_no_load", test_no_load);
+      ("test_hhi_error", test_hhi_error);
       ("test_interrupt", test_interrupt);
     ]
     |> List.map ~f:(fun (name, f) ->

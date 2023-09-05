@@ -26,7 +26,15 @@ let show_errors (errors : Errors.finalized_error list Relative_path.Map.t) :
 let show_read (read : ServerProgress.ErrorsRead.read_result) : string =
   match read with
   | Ok (ServerProgress.Errors { errors; timestamp = _ }) -> show_errors errors
-  | Ok (ServerProgress.Telemetry _) -> "Telemetry"
+  | Ok (ServerProgress.Telemetry telemetry) ->
+    let key =
+      match Telemetry.to_json telemetry with
+      | Hh_json.JSON_Object elems ->
+        let keys = List.map elems ~f:fst |> List.sort ~compare:String.compare in
+        List.hd keys |> Option.value ~default:"[]"
+      | _ -> "[primitive]"
+    in
+    Printf.sprintf "Telemetry [%s]" key
   | Error (e, log_message) ->
     Printf.sprintf
       "%s [%s]"

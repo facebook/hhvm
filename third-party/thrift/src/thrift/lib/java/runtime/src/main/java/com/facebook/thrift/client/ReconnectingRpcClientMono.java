@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
 import reactor.core.CoreSubscriber;
 import reactor.core.Disposable;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
 import reactor.core.publisher.Operators;
 import reactor.util.concurrent.Queues;
 
@@ -91,7 +90,7 @@ final class ReconnectingRpcClientMono extends Mono<RpcClient> {
     changeState(State.DISCONNECTED);
 
     if (rpcClient != null) {
-      rpcClient.close();
+      rpcClient.dispose();
       rpcClient = null;
     }
   }
@@ -148,8 +147,7 @@ final class ReconnectingRpcClientMono extends Mono<RpcClient> {
     Objects.requireNonNull(subscriber, "cannot emit if subscriber is null");
     Objects.requireNonNull(rpcClient, "cannot emit if rpc client is null");
     try {
-      MonoProcessor<Void> mono = (MonoProcessor<Void>) rpcClient.onClose();
-      if (mono.isDisposed()) {
+      if (rpcClient.isDisposed()) {
         return;
       }
       subscriber.onNext(rpcClient);

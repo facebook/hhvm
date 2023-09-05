@@ -74,8 +74,13 @@ public final class RSocketRpcClient implements RpcClient {
   }
 
   @Override
-  public void close() {
+  public void dispose() {
     rsocket.dispose();
+  }
+
+  @Override
+  public boolean isDisposed() {
+    return rsocket.isDisposed();
   }
 
   private boolean hasTimeoutSettings(RpcOptions options) {

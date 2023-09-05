@@ -207,7 +207,7 @@ final class FusableReconnectingRpcClientMono extends Mono<RpcClient> implements 
     if (oldClient != null) {
       Scannable scannable = (Scannable) oldClient.onClose();
       if (scannable.scanOrDefault(Attr.TERMINATED, false)) {
-        oldClient.close();
+        oldClient.dispose();
       }
     }
 

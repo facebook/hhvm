@@ -276,7 +276,7 @@ public class FusableReconnectingRpcClientMonoTest {
     void closeRpcClient() {
       RpcClient block = get().asMono().block();
       update();
-      block.close();
+      block.dispose();
     }
 
     @Override
@@ -295,7 +295,7 @@ public class FusableReconnectingRpcClientMonoTest {
     }
 
     @Override
-    public void close() {
+    public void dispose() {
       sink.tryEmitEmpty();
     }
   }

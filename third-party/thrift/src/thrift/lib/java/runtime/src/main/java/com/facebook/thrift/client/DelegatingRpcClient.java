@@ -42,8 +42,13 @@ public abstract class DelegatingRpcClient implements RpcClient {
   }
 
   @Override
-  public void close() {
-    delegate.close();
+  public void dispose() {
+    delegate.dispose();
+  }
+
+  @Override
+  public boolean isDisposed() {
+    return delegate.isDisposed();
   }
 
   @Override

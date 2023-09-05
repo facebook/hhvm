@@ -77,8 +77,13 @@ final class LegacyRpcClient implements RpcClient {
   }
 
   @Override
-  public void close() {
+  public void dispose() {
     channel.close();
+  }
+
+  @Override
+  public boolean isDisposed() {
+    return onClose.isDisposed();
   }
 
   private <T> Mono<T> forceExecutionOffLoopIfNecessary(Mono<T> mono) {

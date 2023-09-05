@@ -35,6 +35,7 @@
 #include "hphp/runtime/base/req-heap-sanitizer.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/static-string-table.h"
+#include "hphp/runtime/base/timestamp.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-url.h"
@@ -92,6 +93,8 @@
 #include <sys/auxv.h>
 #include <asm/hwcap.h>
 #endif
+
+#include "hphp/runtime/base/datetime.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -2968,6 +2971,31 @@ void RuntimeOption::Load(
 
   // Initialize defaults for repo-specific parser configuration options.
   RepoOptions::setDefaults(config, ini);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+namespace {
+
+ServiceData::CounterCallback s_build_info([](ServiceData::CounterMap& counters) {
+  if (RuntimeOption::BuildId.empty()) return;
+
+  std::vector<std::string> pieces;
+  pieces.reserve(4);
+  // ignore-job-rev-timestamp
+  folly::split('-', RuntimeOption::BuildId, pieces, true);
+
+  counters.emplace("admin.build.job", folly::to<int64_t>(pieces.at(1)));
+  counters.emplace("admin.build.rev", folly::to<int64_t>(pieces.at(2)));
+
+  std::tm t{};
+  std::istringstream ss{std::move(pieces.at(3))};
+  ss >> std::get_time(&t, "%Y%m%d%H%M%S");
+  if (!ss.fail()) {
+    counters.emplace("admin.build.age", std::time(nullptr) - mktime(&t));
+  }
+});
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////

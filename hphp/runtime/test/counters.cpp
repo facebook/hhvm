@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/static-string-table.h"
+#include "hphp/runtime/base/timestamp.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/server/server-stats.h"
@@ -295,6 +296,33 @@ TEST(COUNTERS, tc_space) {
   EXPECT_EQ(getVal("admin.vm-tcspace.RDS"), rds::usedBytes());
   EXPECT_EQ(getVal("admin.vm-tcspace.RDSLocal"), rds::usedLocalBytes());
   EXPECT_EQ(getVal("admin.vm-tcspace.PersistentRDS"), rds::usedPersistentBytes());
+}
+
+TEST(COUNTERS, build_age) {
+    RuntimeOption::BuildId = "4-1234-9876-20230731081921";
+    const auto begin = std::time(nullptr);
+    EXPECT_EQ(getVal("admin.build.job"), 1234);
+    EXPECT_EQ(getVal("admin.build.rev"), 9876);
+
+    bool error = false;
+    const auto ts = TimeStamp::Get(
+      error,
+      /* hour */   8,
+      /* minute */ 19,
+      /* second */ 21,
+      /* month */  7,
+      /* day */    31,
+      /* year */   2023
+    );
+    EXPECT_FALSE(error);
+
+    const int age = getVal("admin.build.age");
+    const auto end = std::time(nullptr);
+
+    // pinpointing the exact timestamp would be finicky, so just confirm
+    // it's within the reasonable range
+    EXPECT_GE(begin - ts, age);
+    EXPECT_LE(age, end - ts);
 }
 
 }

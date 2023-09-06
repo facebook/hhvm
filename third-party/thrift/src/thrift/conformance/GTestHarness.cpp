@@ -66,12 +66,7 @@ testing::AssertionResult runRoundTripTest(
   };
 
   auto toJson = [](const protocol::Object& obj) {
-    folly::json::serialization_opts opts;
-    opts.pretty_formatting = true;
-    opts.sort_keys = true;
-    opts.allow_non_string_keys = true;
-    opts.allow_nan_inf = true;
-    return folly::json::serialize(protocol::toDynamic(obj), opts);
+    return SimpleJSONSerializer::serialize<std::string>(obj);
   };
 
   protocol::Object actual = parseAny(*res.value());

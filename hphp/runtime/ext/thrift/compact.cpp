@@ -1081,9 +1081,9 @@ struct CompactReader {
       }
     }
 
-    using Inserter = folly::Function<void(int64_t, int64_t)>;
+    using IntMapInserter = folly::Function<void(int64_t, int64_t)>;
 
-    void readIntMap(Inserter inserter, uint32_t size) {
+    void readIntMap(IntMapInserter inserter, uint32_t size) {
       const char *startPtr = transport.getBuffer();
       const char *ptr = startPtr;
       const char *endPtr = startPtr + transport.getBufferSize() - 20;
@@ -1201,26 +1201,69 @@ struct CompactReader {
       }
     }
 
-    void readIntegralListFast(VecInit& arr, size_t size) {
+    using IntListInserter = folly::Function<void(int64_t)>;
+
+    void readIntList(IntListInserter inserter, size_t size) {
       const char *startPtr = transport.getBuffer();
       const char *ptr = startPtr;
       const char *endPtr = startPtr + transport.getBufferSize() - 10;
       while ((ptr <= endPtr) && (size > 0)) {
-        // We definately should have enough data to read single value
-        int64_t value = zigzagToI64(readVarintFast(&ptr));
-        arr.append(value);
+        // Because of 10B offset from the end of the buffer
+        // we have enough data to read 1 Varint fast
+        inserter(zigzagToI64(readVarintFast(&ptr)));
         size--;
       }
       intptr_t skipLen = ptr - startPtr;
       if (transport.skipNoAdvance(skipLen) != skipLen) {
         thrift_error("Invalid skip value", ERR_INVALID_DATA);
       }
-      // Finish tail using slow byte-by-byte path
+      // Finish tail using slow byte-by-byte reading
       while (size > 0) {
-        int64_t value = readI();
-        arr.append(value);
+        inserter(readI());
         size--;
       }
+    }
+
+    Variant readListHArray(
+      const FieldSpec& spec,
+      const TType valueType,
+      const uint32_t size,
+      bool& hasTypeWrapper
+    ) {
+      VecInit arr(size);
+      if (spec.val().adapter == nullptr && valueType == T_BYTE) {
+        for (uint32_t i = 0; i < size; i++) {
+          arr.append(transport.readI8());
+        }
+      } else if (spec.val().adapter == nullptr && typeIs16to64Int(valueType)) {
+        readIntList([&](int64_t val) { arr.append(val); }, size);
+      } else {
+        for (uint32_t i = 0; i < size; i++) {
+          arr.append(readField(spec.val(), valueType, hasTypeWrapper));
+        }
+      }
+      readCollectionEnd();
+      return arr.toVariant();
+    }
+
+    Variant readListCollection(
+      const FieldSpec& spec,
+      const TType valueType,
+      const uint32_t size,
+      bool& hasTypeWrapper
+    ) {
+      if (size == 0) {
+        readCollectionEnd();
+        return Variant(req::make<c_Vector>());
+      }
+      auto vec = req::make<c_Vector>(size);
+      int64_t i = 0;
+      do {
+        auto val = readField(spec.val(), valueType, hasTypeWrapper);
+        tvDup(*val.asTypedValue(), vec->appendForUnserialize(i));
+      } while (++i < size);
+      readCollectionEnd();
+      return Variant(std::move(vec));
     }
 
     Variant readList(const FieldSpec& spec, bool& hasTypeWrapper) {
@@ -1229,33 +1272,9 @@ struct CompactReader {
       readListBegin(valueType, size);
       hasTypeWrapper = hasTypeWrapper || spec.val().isTypeWrapped;
       if (s_harray.equal(spec.format)) {
-        VecInit arr(size);
-        if (spec.val().adapter == nullptr && valueType == T_BYTE) {
-          for (uint32_t i = 0; i < size; i++) {
-            arr.append(transport.readI8());
-          }
-        } else if (spec.val().adapter == nullptr && typeIsInt(valueType)) {
-          readIntegralListFast(arr, size);
-        } else {
-          for (uint32_t i = 0; i < size; i++) {
-            arr.append(readField(spec.val(), valueType, hasTypeWrapper));
-          }
-        }
-        readCollectionEnd();
-        return arr.toVariant();
+        return readListHArray(spec, valueType, size, hasTypeWrapper);
       } else if (s_collection.equal(spec.format)) {
-        if (size == 0) {
-          readCollectionEnd();
-          return Variant(req::make<c_Vector>());
-        }
-        auto vec = req::make<c_Vector>(size);
-        int64_t i = 0;
-        do {
-          auto val = readField(spec.val(), valueType, hasTypeWrapper);
-          tvDup(*val.asTypedValue(), vec->appendForUnserialize(i));
-        } while (++i < size);
-        readCollectionEnd();
-        return Variant(std::move(vec));
+        return readListCollection(spec, valueType, size, hasTypeWrapper);
       } else {
         VecInit vai(size);
         if (options & k_THRIFT_MARK_LEGACY_ARRAYS) {

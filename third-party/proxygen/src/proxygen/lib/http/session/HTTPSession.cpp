@@ -2097,6 +2097,8 @@ void HTTPSession::setHeaderIndexingStrategy(
 }
 
 void HTTPSession::getFlowControlInfo(HTTPTransaction::FlowControlInfo* info) {
+  info->sessionWritesPaused_ = writesPaused();
+  info->sessionReadsPaused_ = readsPaused();
   info->flowControlEnabled_ = connFlowControl_ != nullptr;
   if (connFlowControl_) {
     info->sessionRecvWindow_ = connFlowControl_->getRecvWindow().getCapacity();

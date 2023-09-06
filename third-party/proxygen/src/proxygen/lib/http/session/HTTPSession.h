@@ -160,6 +160,10 @@ class HTTPSession
     return HTTPSessionBase::getSetupTransportInfo();
   }
 
+  [[nodiscard]] std::chrono::seconds getLatestIdleTime() const override {
+    return HTTPSessionBase::getLatestIdleTime();
+  }
+
   bool getCurrentTransportInfo(wangle::TransportInfo* tinfo) override;
 
   void getFlowControlInfo(HTTPTransaction::FlowControlInfo* info) override;

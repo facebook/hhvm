@@ -1377,6 +1377,10 @@ class HQSession
       return session_.transportInfo_;
     }
 
+    [[nodiscard]] std::chrono::seconds getLatestIdleTime() const override {
+      return session_.getLatestIdleTime();
+    }
+
     bool getCurrentTransportInfo(wangle::TransportInfo* tinfo) override;
 
     void getFlowControlInfo(

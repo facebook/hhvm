@@ -119,6 +119,7 @@ class MockHTTPTransactionTransport : public HTTPTransaction::Transport {
         ->getPeerAddressNonConst();
   }
   MOCK_METHOD(void, describe, (std::ostream&), (const));
+  MOCK_METHOD((std::chrono::seconds), getLatestIdleTime, (), (const));
 
   MOCK_METHOD((const wangle::TransportInfo&),
               getSetupTransportInfoNonConst,

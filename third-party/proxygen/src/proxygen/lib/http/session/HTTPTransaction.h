@@ -27,6 +27,7 @@
 #include <proxygen/lib/http/session/HTTPEvent.h>
 #include <proxygen/lib/http/session/HTTPTransactionEgressSM.h>
 #include <proxygen/lib/http/session/HTTPTransactionIngressSM.h>
+#include <proxygen/lib/http/sink/FlowControlInfo.h>
 #include <proxygen/lib/utils/Time.h>
 #include <proxygen/lib/utils/TraceEvent.h>
 #include <proxygen/lib/utils/TraceEventObserver.h>
@@ -418,18 +419,7 @@ class HTTPTransaction
   using Handler = HTTPTransactionHandler;
   using PushHandler = HTTPPushTransactionHandler;
 
-  struct FlowControlInfo {
-    bool flowControlEnabled_{false};
-    int64_t sessionSendWindow_{-1};
-    int64_t sessionRecvWindow_{-1};
-    int64_t sessionSendOutstanding_{-1};
-    int64_t sessionRecvOutstanding_{-1};
-    int64_t streamSendWindow_{-1};
-    int64_t streamRecvWindow_{-1};
-    int64_t streamSendOutstanding_{-1};
-    int64_t streamRecvOutstanding_{-1};
-  };
-
+  using FlowControlInfo = proxygen::FlowControlInfo;
   /**
    * Experimental.
    *
@@ -539,6 +529,8 @@ class HTTPTransaction
     virtual const folly::SocketAddress& getLocalAddress() const noexcept = 0;
 
     virtual const folly::SocketAddress& getPeerAddress() const noexcept = 0;
+
+    [[nodiscard]] virtual std::chrono::seconds getLatestIdleTime() const = 0;
 
     virtual void describe(std::ostream&) const = 0;
 

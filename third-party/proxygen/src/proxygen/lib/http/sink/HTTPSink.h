@@ -11,6 +11,14 @@
 #include <folly/CppAttributes.h>
 #include <proxygen/lib/http/HTTPMessage.h>
 #include <proxygen/lib/http/session/HTTPTransaction.h>
+#include <proxygen/lib/http/sink/FlowControlInfo.h>
+
+namespace folly {
+class AsyncTransport;
+}
+namespace quic {
+class QuicSocket;
+}
 
 namespace proxygen {
 
@@ -33,6 +41,20 @@ class HTTPSink {
   virtual ~HTTPSink() = default;
 
   [[nodiscard]] virtual HTTPTransaction* FOLLY_NULLABLE getHTTPTxn() const = 0;
+  [[nodiscard]] virtual folly::Optional<HTTPCodec::StreamID> getStreamID()
+      const = 0;
+  [[nodiscard]] virtual CodecProtocol getCodecProtocol() const = 0;
+  [[nodiscard]] virtual const folly::SocketAddress& getLocalAddress() const = 0;
+  [[nodiscard]] virtual const folly::SocketAddress& getPeerAddress() const = 0;
+  [[nodiscard]] virtual folly::Optional<HTTPPriority> getHTTPPriority()
+      const = 0;
+  [[nodiscard]] virtual const folly::AsyncTransport* getTCPTransport()
+      const = 0;
+  [[nodiscard]] virtual quic::QuicSocket* getQUICTransport() const = 0;
+  [[nodiscard]] virtual std::chrono::seconds getSessionIdleDuration() const = 0;
+  virtual void getCurrentFlowControlInfo(FlowControlInfo*) const = 0;
+  [[nodiscard]] virtual CompressionInfo getHeaderCompressionInfo() const = 0;
+
   virtual void detachAndAbortIfIncomplete(std::unique_ptr<HTTPSink> self) = 0;
   // Sending data
   virtual void sendHeaders(const HTTPMessage& headers) = 0;
@@ -47,12 +69,17 @@ class HTTPSink {
   virtual void sendTrailers(const HTTPHeaders& trailers) = 0;
   virtual void sendEOM() = 0;
   virtual void sendAbort() = 0;
+  virtual void updateAndSendPriority(HTTPPriority priority) = 0;
+  enum class ByteEventFlags : uint8_t { ACK = 0x01, TX = 0x02 };
+  virtual bool trackEgressBodyOffset(uint64_t bodyOffset,
+                                     ByteEventFlags flags) = 0;
 
   // Check state
   [[nodiscard]] virtual bool canSendHeaders() const = 0;
   virtual const wangle::TransportInfo& getSetupTransportInfo()
       const noexcept = 0;
   virtual void getCurrentTransportInfo(wangle::TransportInfo* tinfo) const = 0;
+
   // Flow control
   virtual void pauseIngress() = 0;
   virtual void resumeIngress() = 0;

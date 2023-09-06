@@ -6,11 +6,20 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include "proxygen/lib/http/sink/HTTPTransactionSink.h"
+#include <proxygen/lib/http/session/HQSession.h>
+#include <proxygen/lib/http/sink/HTTPTransactionSink.h>
 
 #include <proxygen/lib/http/RFC2616.h>
 
 namespace proxygen {
+
+quic::QuicSocket* HTTPTransactionSink::getQUICTransport() const {
+  auto session = httpTransaction_->getTransport().getHTTPSessionBase();
+  if (auto hqSession = dynamic_cast<HQSession*>(session)) {
+    return hqSession->getQuicSocket();
+  }
+  return nullptr;
+}
 
 bool HTTPTransactionSink::safeToUpgrade(HTTPMessage* req) const {
   // There's a race condition if we haven't seen the end of a POST

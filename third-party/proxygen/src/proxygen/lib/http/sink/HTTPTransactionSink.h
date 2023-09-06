@@ -24,12 +24,47 @@ class HTTPTransactionSink : public HTTPSink {
       : httpTransaction_{clientTxn} {
     XCHECK(clientTxn)
         << "HTTPTransactionSink must be created with a valid clientTxn.";
+    if (httpTransaction_->getSequenceNumber() > 0) {
+      // TODO: There can be a gap between session open and first req
+      // but the session API precondition is seqNo > 0
+      sessionIdleDuration_ =
+          httpTransaction_->getTransport().getLatestIdleTime();
+    }
   }
   ~HTTPTransactionSink() override = default;
   [[nodiscard]] HTTPTransaction* FOLLY_NULLABLE getHTTPTxn() const override {
     return httpTransaction_;
   }
+  [[nodiscard]] folly::Optional<HTTPCodec::StreamID> getStreamID()
+      const override {
+    return httpTransaction_->getID();
+  }
 
+  [[nodiscard]] CodecProtocol getCodecProtocol() const override {
+    return httpTransaction_->getTransport().getCodec().getProtocol();
+  }
+  [[nodiscard]] folly::Optional<HTTPPriority> getHTTPPriority() const override {
+    return httpTransaction_->getHTTPPriority();
+  }
+  [[nodiscard]] const folly::SocketAddress& getLocalAddress() const override {
+    return httpTransaction_->getLocalAddress();
+  }
+  [[nodiscard]] const folly::SocketAddress& getPeerAddress() const override {
+    return httpTransaction_->getPeerAddress();
+  }
+  [[nodiscard]] const folly::AsyncTransport* getTCPTransport() const override {
+    return httpTransaction_->getTransport().getUnderlyingTransport();
+  }
+  [[nodiscard]] quic::QuicSocket* getQUICTransport() const override;
+  [[nodiscard]] std::chrono::seconds getSessionIdleDuration() const override {
+    return sessionIdleDuration_;
+  }
+  void getCurrentFlowControlInfo(FlowControlInfo* info) const override {
+    return httpTransaction_->getCurrentFlowControlInfo(info);
+  }
+  [[nodiscard]] CompressionInfo getHeaderCompressionInfo() const override {
+    return httpTransaction_->getCompressionInfo();
+  }
   void detachAndAbortIfIncomplete(std::unique_ptr<HTTPSink> self) override {
     CHECK_EQ(self.get(), this);
     httpTransaction_->setTransportCallback(nullptr);
@@ -77,6 +112,14 @@ class HTTPTransactionSink : public HTTPSink {
   void sendAbort() override {
     httpTransaction_->sendAbort();
   }
+  void updateAndSendPriority(HTTPPriority priority) override {
+    httpTransaction_->updateAndSendPriority(priority);
+  }
+  bool trackEgressBodyOffset(uint64_t bodyOffset,
+                             ByteEventFlags flags) override {
+    return httpTransaction_->trackEgressBodyOffset(
+        bodyOffset, ByteEvent::EventFlags(flags));
+  }
   [[nodiscard]] bool canSendHeaders() const override {
     return httpTransaction_->canSendHeaders();
   }
@@ -121,6 +164,7 @@ class HTTPTransactionSink : public HTTPSink {
 
  private:
   HTTPTransaction* httpTransaction_;
+  std::chrono::seconds sessionIdleDuration_{0};
 };
 
 } // namespace proxygen

@@ -1081,86 +1081,100 @@ struct CompactReader {
       }
     }
 
-    void readIntegralMapFast(DictInit &arr, size_t size) {
+    using Inserter = folly::Function<void(int64_t, int64_t)>;
+
+    void readIntMap(Inserter inserter, uint32_t size) {
       const char *startPtr = transport.getBuffer();
       const char *ptr = startPtr;
       const char *endPtr = startPtr + transport.getBufferSize() - 20;
       while ((ptr <= endPtr) && (size > 0)) {
-        // We definately should have enough data to read 2 VarInts
+        // Because of 20B offset from the end of the buffer
+        // we have enough data to read 2 Varints fast
         int64_t key = zigzagToI64(readVarintFast(&ptr));
         int64_t value = zigzagToI64(readVarintFast(&ptr));
-        arr.set(key, value);
+        inserter(key, value);
         size--;
       }
       intptr_t skipLen = ptr - startPtr;
       if (transport.skipNoAdvance(skipLen) != skipLen) {
         thrift_error("Invalid skip value", ERR_INVALID_DATA);
       }
-      // Finish tail using slow byte-by-byte path
+      // Finish tail using slow byte-by-byte reading
       while (size > 0) {
         int64_t key = readI();
         int64_t value = readI();
-        arr.set(key, value);
+        inserter(key, value);
         size--;
       }
     }
 
-    Variant readMapHArray(const FieldSpec& spec, const TType keyType, const TType valueType, const uint32_t size, bool& hasTypeWrapper) {
-        DictInit arr(size);
-        switch (keyType) {
-          case TType::T_I08:
-          case TType::T_I16:
-          case TType::T_I32:
-          case TType::T_I64: {
-            if (
-                keyType != TType::T_BYTE && valueType != TType::T_BYTE &&
-                typeIsInt(valueType) &&
-                spec.key().adapter == nullptr &&
-                spec.val().adapter == nullptr
-                ) {
-              hasTypeWrapper = hasTypeWrapper || spec.key().isTypeWrapped;
-              readIntegralMapFast(arr, size);
-            } else {
-              for (uint32_t i = 0; i < size; i++) {
-                int64_t key = readField(
-                  spec.key(), keyType, hasTypeWrapper
-                ).toInt64();
-                Variant value = readField(spec.val(), valueType, hasTypeWrapper);
-                arr.set(key, value);
-              }
-            }
-            break;
-          }
-          case TType::T_STRING: {
+    Variant readMapHArray(
+      const FieldSpec& spec,
+      const TType keyType,
+      const TType valueType,
+      const uint32_t size,
+      bool& hasTypeWrapper
+    ) {
+      DictInit arr(size);
+      switch (keyType) {
+        case TType::T_I08:
+        case TType::T_I16:
+        case TType::T_I32:
+        case TType::T_I64: {
+          if (keyType != TType::T_BYTE && typeIs16to64Int(valueType) &&
+              spec.key().adapter == nullptr && spec.val().adapter == nullptr) {
+            hasTypeWrapper = hasTypeWrapper || spec.key().isTypeWrapped;
+            readIntMap([&](int64_t key, int64_t val) { arr.set(key, val); }, size);
+          } else {
             for (uint32_t i = 0; i < size; i++) {
-              String key = readField(
-                spec.key(), keyType, hasTypeWrapper
-              ).toString();
+              int64_t key = readField(spec.key(), keyType, hasTypeWrapper).toInt64();
               Variant value = readField(spec.val(), valueType, hasTypeWrapper);
               arr.set(key, value);
             }
-            break;
           }
-          default:
-            if (size > 0) {
-              thrift_error(
-                  "Unable to deserialize non int/string array keys",
-                  ERR_INVALID_DATA);
-            }
+          break;
         }
-        readCollectionEnd();
-        return arr.toVariant();
+        case TType::T_STRING: {
+          for (uint32_t i = 0; i < size; i++) {
+            String key = readField(spec.key(), keyType, hasTypeWrapper).toString();
+            Variant value = readField(spec.val(), valueType, hasTypeWrapper);
+            arr.set(key, value);
+          }
+          break;
+        }
+        default:
+          if (size > 0) {
+            thrift_error(
+                "Unable to deserialize non int/string array keys",
+                ERR_INVALID_DATA);
+          }
+      }
+      readCollectionEnd();
+      return arr.toVariant();
     }
 
-    Variant readMapCollection(const FieldSpec& spec, const TType keyType, const TType valueType, const uint32_t size, bool& hasTypeWrapper) {
-        auto ret(req::make<c_Map>(size));
-        for (uint32_t i = 0; i < size; i++) {
-          Variant key = readField(spec.key(), keyType, hasTypeWrapper);
-          Variant value = readField(spec.val(), valueType, hasTypeWrapper);
-          BaseMap::OffsetSet(ret.get(), key.asTypedValue(), value.asTypedValue());
-        }
+    Variant readMapCollection(
+      const FieldSpec& spec,
+      const TType keyType,
+      const TType valueType,
+      const uint32_t size,
+      bool& hasTypeWrapper
+    ) {
+      auto map(req::make<c_Map>(size));
+      if (spec.key().adapter == nullptr && spec.val().adapter == nullptr &&
+          typeIs16to64Int(keyType) && typeIs16to64Int(valueType)) {
+        hasTypeWrapper = hasTypeWrapper || spec.key().isTypeWrapped || spec.val().isTypeWrapped;
+        readIntMap([&](int64_t key, int64_t val) { map.get()->set(key, val); }, size);
         readCollectionEnd();
-        return Variant(std::move(ret));
+        return Variant(std::move(map));
+      }
+      for (uint32_t i = 0; i < size; i++) {
+        Variant key = readField(spec.key(), keyType, hasTypeWrapper);
+        Variant value = readField(spec.val(), valueType, hasTypeWrapper);
+        BaseMap::OffsetSet(map.get(), key.asTypedValue(), value.asTypedValue());
+      }
+      readCollectionEnd();
+      return Variant(std::move(map));
     }
 
     Variant readMap(const FieldSpec& spec, bool& hasTypeWrapper) {
@@ -1399,6 +1413,10 @@ struct CompactReader {
 
     bool typeIsInt(TType t) {
       return (t == T_BYTE) || ((t >= T_I16) && (t <= T_I64));
+    }
+
+    bool typeIs16to64Int(TType t) {
+      return ((t >= T_I16) && (t <= T_I64));
     }
 
     bool typesAreCompatible(TType t1, TType t2) {

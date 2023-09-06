@@ -134,6 +134,7 @@ module DataTypeReason = struct
     | UpperboundOfNewType of string
     | UpperboundOfEnum of string
     | SealedInterface of string
+    | Requirement of string
     | ExpansionOfTypeConstant of {
         root_ty: locl_ty;
         name: string;
@@ -165,6 +166,8 @@ module DataTypeReason = struct
 
   let sealed_interface ~trail reason name =
     append ~trail ~reason @@ SealedInterface name
+
+  let requirement ~trail reason name = append ~trail ~reason @@ Requirement name
 
   let to_message env ~f ((subreason, { origin; instances = trail }), tag) =
     let ty_str = Typing_print.full_strip_ns_decl env origin in
@@ -200,6 +203,8 @@ module DataTypeReason = struct
         Printf.sprintf "  via the constraint on the enum `%s`" @@ strip_ns name
       | SealedInterface name ->
         Printf.sprintf "  via the sealed interface `%s`" @@ strip_ns name
+      | Requirement name ->
+        Printf.sprintf "  via this requirement on `%s`" @@ strip_ns name
       | ExpansionOfTypeConstant { root_ty; name } ->
         let name =
           Printf.sprintf "%s::%s" (Typing_print.full_strip_ns env root_ty) name
@@ -358,10 +363,35 @@ module DataType = struct
             Set.singleton ~reason @@ InstanceOf { name; kind = FinalClass }
           | Cclass _ ->
             Set.singleton ~reason @@ InstanceOf { name; kind = Class }
+          | Ctrait
           | Cinterface -> begin
             match Cls.sealed_whitelist cls with
             | None ->
-              Set.singleton ~reason @@ InstanceOf { name; kind = Interface }
+              let reqs = Cls.all_ancestor_reqs cls in
+              if List.is_empty reqs then
+                let default =
+                  if is_c_trait (Cls.kind cls) then
+                    Set.singleton ~reason ObjectData
+                  else
+                    Set.singleton ~reason
+                    @@ InstanceOf { name; kind = Interface }
+                in
+                default
+              else
+                List.fold
+                  ~init:(Set.singleton ~reason ObjectData)
+                  ~f:(fun acc (_, required_ty) ->
+                    match Typing_utils.try_unwrap_class_type required_ty with
+                    | None -> acc
+                    | Some (r, (_p, req_cls), _paraml) ->
+                      let trail =
+                        DataTypeReason.requirement
+                          ~trail
+                          (Reason.localize r)
+                          name
+                      in
+                      Set.inter acc @@ to_datatypes ~trail env req_cls)
+                  reqs
             | Some whitelist ->
               let trail =
                 DataTypeReason.sealed_interface
@@ -376,8 +406,7 @@ module DataType = struct
                 Set.empty
           end
           | Cenum
-          | Cenum_class _
-          | Ctrait ->
+          | Cenum_class _ ->
             Set.singleton ~reason ObjectData
         end
         | None -> Set.singleton ~reason ObjectData)

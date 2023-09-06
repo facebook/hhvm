@@ -1257,11 +1257,20 @@ struct CompactReader {
         return Variant(req::make<c_Vector>());
       }
       auto vec = req::make<c_Vector>(size);
-      int64_t i = 0;
-      do {
-        auto val = readField(spec.val(), valueType, hasTypeWrapper);
-        tvDup(*val.asTypedValue(), vec->appendForUnserialize(i));
-      } while (++i < size);
+      if (spec.val().adapter == nullptr && typeIs16to64Int(valueType)) {
+        readIntList(
+          [&, i = 0LL](int64_t val) mutable {
+            tvDup(*Variant(val).asTypedValue(), vec->appendForUnserialize(i++));
+          },
+          size
+        );
+      } else {
+        int64_t i = 0;
+        do {
+          auto val = readField(spec.val(), valueType, hasTypeWrapper);
+          tvDup(*val.asTypedValue(), vec->appendForUnserialize(i));
+        } while (++i < size);
+      }
       readCollectionEnd();
       return Variant(std::move(vec));
     }

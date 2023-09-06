@@ -21,7 +21,6 @@
   classMethodSearch
   customSearchService
   namespaceSearchService
-  sqliteSearchService
   symbolIndex)
  (libraries
   ast
@@ -40,7 +39,6 @@
   pos
   search_core
   search_utils
-  sqlite3
   state_loader
   trie))
 

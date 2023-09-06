@@ -16,9 +16,7 @@ let initialize
     ~(gleanopt : GleanOptions.t)
     ~(namespace_map : (string * string) list)
     ~(provider_name : string)
-    ~(quiet : bool)
-    ~(savedstate_file_opt : string option)
-    ~(workers : MultiWorker.worker list option) : si_env =
+    ~(quiet : bool) : si_env =
   (* Create the object *)
   let sienv =
     {
@@ -31,12 +29,6 @@ let initialize
   (* Basic initialization *)
   let sienv =
     match sienv.sie_provider with
-    | SqliteIndex ->
-      SqliteSearchService.initialize
-        ~sienv
-        ~workers
-        ~savedstate_file_opt
-        ~namespace_map
     | CustomIndex -> CustomSearchService.initialize ~sienv
     | NoIndex
     | MockIndex _
@@ -46,7 +38,6 @@ let initialize
   (* Fetch namespaces from provider-specific query *)
   let namespace_list =
     match sienv.sie_provider with
-    | SqliteIndex -> SqliteSearchService.fetch_namespaces ~sienv
     | CustomIndex -> CustomSearchService.fetch_namespaces ~sienv
     | NoIndex
     | MockIndex _
@@ -126,8 +117,7 @@ let find_matching_symbols
       | MockIndex _ ->
         []
       | CustomIndex
-      | LocalIndex
-      | SqliteIndex ->
+      | LocalIndex ->
         LocalSearchService.search_local_symbols
           ~sienv:!sienv_ref
           ~query_text
@@ -149,21 +139,6 @@ let find_matching_symbols
         in
         is_complete := custom_is_complete;
         LocalSearchService.extract_dead_results ~sienv:!sienv_ref ~results:r
-      | SqliteIndex ->
-        let results =
-          SqliteSearchService.sqlite_search
-            ~sienv:!sienv_ref
-            ~query_text
-            ~max_results
-            ~context
-            ~kind_filter
-        in
-        is_complete :=
-          if List.length results < max_results then
-            SearchTypes.Complete
-          else
-            SearchTypes.Incomplete;
-        LocalSearchService.extract_dead_results ~sienv:!sienv_ref ~results
       | MockIndex { mock_on_find } ->
         mock_on_find ~query_text ~context ~kind_filter
       | LocalIndex
@@ -197,7 +172,6 @@ let find_refs
   match !sienv_ref.sie_provider with
   | NoIndex
   | LocalIndex
-  | SqliteIndex
   | MockIndex _ ->
     None
   | CustomIndex -> CustomSearchService.find_refs ~sienv_ref ~action ~max_results

@@ -252,7 +252,6 @@ let parse_options () =
   let call_coeffects = ref true in
   let local_coeffects = ref true in
   let strict_contexts = ref true in
-  let symbolindex_file = ref None in
   let check_xhp_attribute = ref false in
   let check_redundant_generics = ref false in
   let disallow_static_memoized = ref false in
@@ -594,9 +593,6 @@ let parse_options () =
             custom_hhi_path := Some dir),
         " Enables checking explicitly pessimised files. Requires path to pessimised .hhi files "
       );
-      ( "--symbolindex-file",
-        Arg.String (fun str -> symbolindex_file := Some str),
-        " Load the symbol index from this file" );
       ( "--enable-supportdyn-hint",
         Arg.Set enable_supportdyn_hint,
         " Allow the supportdyn type hint" );

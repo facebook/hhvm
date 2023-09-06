@@ -21,14 +21,12 @@ type search_provider =
   | NoIndex
   | MockIndex of { mock_on_find: mock_on_find [@opaque] }
       (** used in testing and debugging *)
-  | SqliteIndex
   | LocalIndex
 [@@deriving show]
 
 (* Convert a string to a provider *)
 let provider_of_string (provider_str : string) : search_provider =
   match provider_str with
-  | "SqliteIndex" -> failwith "SqliteIndex is no longer supporter"
   | "NoIndex" -> NoIndex
   | "MockIndex" -> failwith ("unsupported provider " ^ provider_str)
   | "CustomIndex" -> CustomIndex
@@ -41,7 +39,6 @@ let descriptive_name_of_provider (provider : search_provider) : string =
   | CustomIndex -> "Custom symbol index"
   | NoIndex -> "Symbol index disabled"
   | MockIndex _ -> "Mock index"
-  | SqliteIndex -> "Sqlite"
   | LocalIndex -> "Local file index only"
 
 (* Shared Search code between Fuzzy and Trie based searches *)
@@ -207,15 +204,6 @@ type si_env = {
       this only exists for compatibility with stores (sql, www.autocomplete)
       that use filehashes, and won't be needed once we move solely
       to stures that use paths (local, www.hack.light). *)
-  (* SqliteSearchService *)
-  sql_symbolindex_db: Sqlite3.db option ref;
-  sql_select_symbols_stmt: Sqlite3.stmt option ref;
-  sql_select_symbols_by_kind_stmt: Sqlite3.stmt option ref;
-  sql_select_acid_stmt: Sqlite3.stmt option ref;
-  sql_select_acnew_stmt: Sqlite3.stmt option ref;
-  sql_select_actype_stmt: Sqlite3.stmt option ref;
-  sql_select_namespaces_stmt: Sqlite3.stmt option ref;
-  sql_select_namespaced_symbols_stmt: Sqlite3.stmt option ref;
   (* NamespaceSearchService *)
   nss_root_namespace: nss_node;
   (* CustomSearchService *)
@@ -239,15 +227,6 @@ let default_si_env =
     lss_fullitems = Relative_path.Map.empty;
     lss_tombstones = Relative_path.Set.empty;
     lss_tombstone_hashes = Tombstone_set.empty;
-    (* SqliteSearchService *)
-    sql_symbolindex_db = ref None;
-    sql_select_symbols_stmt = ref None;
-    sql_select_symbols_by_kind_stmt = ref None;
-    sql_select_acid_stmt = ref None;
-    sql_select_acnew_stmt = ref None;
-    sql_select_actype_stmt = ref None;
-    sql_select_namespaces_stmt = ref None;
-    sql_select_namespaced_symbols_stmt = ref None;
     (* NamespaceSearchService *)
     nss_root_namespace =
       {

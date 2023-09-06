@@ -70,10 +70,7 @@ let post_init genv (env, _t) =
           ~namespace_map
           ~provider_name:
             genv.local_config.ServerLocalConfig.symbolindex_search_provider
-          ~quiet:genv.local_config.ServerLocalConfig.symbolindex_quiet
-          ~savedstate_file_opt:
-            genv.local_config.ServerLocalConfig.symbolindex_file
-          ~workers:genv.workers;
+          ~quiet:genv.local_config.ServerLocalConfig.symbolindex_quiet;
     }
   in
   let env = { env with local_symbol_table = run_search genv env } in

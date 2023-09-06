@@ -215,7 +215,6 @@ type t = {
   symbolindex_search_provider: string;
       (** Selects a search provider for autocomplete and symbol search; see also [ide_symbolindex_search_provider] *)
   symbolindex_quiet: bool;
-  symbolindex_file: string option;
   tico_invalidate_files: bool;
       (** Allows hh_server to invalidate units in hhvm based on local changes *)
   tico_invalidate_smart: bool;  (** Use finer grain hh_server dependencies *)
@@ -331,7 +330,6 @@ let default =
        it defaults to whatever was computed for symbolindex_search_provider. *)
     ide_symbolindex_search_provider = "LocalIndex";
     symbolindex_quiet = false;
-    symbolindex_file = None;
     tico_invalidate_files = false;
     tico_invalidate_smart = false;
     per_file_profiling = HackEventLogger.PerFileProfilingConfig.default;
@@ -828,7 +826,6 @@ let load_
       ~current_version
       config
   in
-  let symbolindex_file = string_opt "symbolindex_file" config in
   let tico_invalidate_files =
     bool_if_min_version
       "tico_invalidate_files"
@@ -1149,7 +1146,6 @@ let load_
     enable_naming_table_fallback;
     symbolindex_search_provider;
     symbolindex_quiet;
-    symbolindex_file;
     tico_invalidate_files;
     tico_invalidate_smart;
     per_file_profiling =

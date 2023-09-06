@@ -112,8 +112,6 @@ let run_index_builder (harness : Test_harness.t) : si_env =
       ~namespace_map:[]
       ~provider_name:"LocalIndex"
       ~quiet:true
-      ~savedstate_file_opt:None
-      ~workers:None
   in
   let paths_with_addenda =
     Find.find

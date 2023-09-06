@@ -806,8 +806,6 @@ let decl_and_run_mode
         else
           "CustomIndex")
       ~quiet:true
-      ~savedstate_file_opt:None
-      ~workers:None
   in
   let sienv =
     {

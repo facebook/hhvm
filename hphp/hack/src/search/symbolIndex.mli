@@ -13,8 +13,6 @@ val initialize :
   namespace_map:(string * string) list ->
   provider_name:string ->
   quiet:bool ->
-  savedstate_file_opt:string option ->
-  workers:MultiWorker.worker list option ->
   SearchUtils.si_env
 
 (** Constructs+returns a mockable symbol-index *)

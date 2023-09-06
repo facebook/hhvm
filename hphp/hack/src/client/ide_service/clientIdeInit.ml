@@ -290,8 +290,6 @@ let init
       ~provider_name:
         local_config.ServerLocalConfig.ide_symbolindex_search_provider
       ~quiet:local_config.ServerLocalConfig.symbolindex_quiet
-      ~savedstate_file_opt:local_config.ServerLocalConfig.symbolindex_file
-      ~workers:None
   in
 
   (* We will make several attempts using different techniques, in order, to try

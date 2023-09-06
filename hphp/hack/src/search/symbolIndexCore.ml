@@ -65,8 +65,7 @@ let update_files
   | MockIndex _ ->
     sienv
   | CustomIndex
-  | LocalIndex
-  | SqliteIndex ->
+  | LocalIndex ->
     List.fold paths ~init:sienv ~f:(fun sienv (path, info, detector) ->
         match detector with
         | SearchUtils.TypeChecker ->
@@ -84,8 +83,7 @@ let update_from_addenda
   | MockIndex _ ->
     sienv
   | CustomIndex
-  | LocalIndex
-  | SqliteIndex ->
+  | LocalIndex ->
     List.fold
       paths_with_addenda
       ~init:sienv
@@ -106,8 +104,7 @@ let remove_files ~(sienv : SearchUtils.si_env) ~(paths : Relative_path.Set.t) :
   | MockIndex _ ->
     sienv
   | CustomIndex
-  | LocalIndex
-  | SqliteIndex ->
+  | LocalIndex ->
     Relative_path.Set.fold paths ~init:sienv ~f:(fun path sienv ->
         LocalSearchService.remove_file ~sienv ~path)
 

@@ -138,12 +138,12 @@ func (c *{{service:go_name}}ChannelClient) {{> svc/func_signature}} {
         {{/function:args}}
     }
     {{#function:oneway?}}
-    return c.ch.Oneway(ctx, "{{function:name}}", in)
+    return c.ch.Oneway({{function:ctx_arg_name}}, "{{function:name}}", in)
     {{/function:oneway?}}{{!
 
     }}{{^function:oneway?}}
     out := newResp{{service:go_name}}{{function:go_name}}()
-    err := c.ch.Call(ctx, "{{function:name}}", in, out)
+    err := c.ch.Call({{function:ctx_arg_name}}, "{{function:name}}", in, out)
     if err != nil {
         return {{^function:void?}}{{#function:return_type}}{{> common/go_zero_value}}{{/function:return_type}}, {{/function:void?}}err
     }{{#function:exceptions?}}{{!

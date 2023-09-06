@@ -590,11 +590,30 @@ class mstch_go_function : public mstch_function {
         {
             {"function:go_name", &mstch_go_function::go_name},
             {"function:go_supported?", &mstch_go_function::is_go_supported},
+            {"function:ctx_arg_name", &mstch_go_function::ctx_arg_name},
         });
   }
   mstch::node go_name() { return go::get_go_func_name(function_); }
 
   mstch::node is_go_supported() { return go::is_func_go_supported(function_); }
+
+  mstch::node ctx_arg_name() {
+    // This helper returns the Context object name to be used in the function
+    // signature. "ctx" by default, "ctx<num>" in case of name collisions with
+    // other function arguments. The name is guaranteed not to collide.
+    std::set<std::string> arg_names;
+    auto& members = function_->get_paramlist()->get_members();
+    for (auto& member : members) {
+      arg_names.insert(go::munge_ident(member->name(), /*exported*/ false));
+    }
+
+    std::string ctx_name = "ctx";
+    auto current_num = 0;
+    while (arg_names.count(ctx_name) > 0) {
+      ctx_name = std::string("ctx") + std::to_string(++current_num);
+    }
+    return ctx_name;
+  }
 
  private:
   go_codegen_data& data_;

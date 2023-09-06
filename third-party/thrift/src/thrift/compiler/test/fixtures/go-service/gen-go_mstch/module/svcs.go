@@ -38,6 +38,8 @@ type GetEntity interface {
     GetSet(ctx context.Context) ([]string, error)
     GetList(ctx context.Context) ([]string, error)
     GetLegacyStuff(ctx context.Context, numPos int64, numNeg1 int64, numNeg2 int64) (int32, error)
+    GetCtxCollision(ctx1 context.Context, ctx int64) (int32, error)
+    GetCtx1Collision(ctx2 context.Context, ctx int64, ctx1 int64) (int32, error)
 }
 
 // Deprecated: Use GetEntity instead.
@@ -56,6 +58,8 @@ type GetEntityClientInterface interface {
     GetSet() ([]string, error)
     GetList() ([]string, error)
     GetLegacyStuff(numPos int64, numNeg1 int64, numNeg2 int64) (int32, error)
+    GetCtxCollision(ctx int64) (int32, error)
+    GetCtx1Collision(ctx int64, ctx1 int64) (int32, error)
 }
 
 type GetEntityChannelClient struct {
@@ -351,6 +355,41 @@ func (c *GetEntityChannelClient) GetLegacyStuff(ctx context.Context, numPos int6
 
 func (c *GetEntityClient) GetLegacyStuff(numPos int64, numNeg1 int64, numNeg2 int64) (int32, error) {
     return c.chClient.GetLegacyStuff(context.TODO(), numPos, numNeg1, numNeg2)
+}
+
+
+func (c *GetEntityChannelClient) GetCtxCollision(ctx1 context.Context, ctx int64) (int32, error) {
+    in := &reqGetEntityGetCtxCollision{
+        Ctx: ctx,
+    }
+    out := newRespGetEntityGetCtxCollision()
+    err := c.ch.Call(ctx1, "getCtxCollision", in, out)
+    if err != nil {
+        return 0, err
+    }
+    return out.Value, nil
+}
+
+func (c *GetEntityClient) GetCtxCollision(ctx int64) (int32, error) {
+    return c.chClient.GetCtxCollision(context.TODO(), ctx)
+}
+
+
+func (c *GetEntityChannelClient) GetCtx1Collision(ctx2 context.Context, ctx int64, ctx1 int64) (int32, error) {
+    in := &reqGetEntityGetCtx1Collision{
+        Ctx: ctx,
+        Ctx1: ctx1,
+    }
+    out := newRespGetEntityGetCtx1Collision()
+    err := c.ch.Call(ctx2, "getCtx1Collision", in, out)
+    if err != nil {
+        return 0, err
+    }
+    return out.Value, nil
+}
+
+func (c *GetEntityClient) GetCtx1Collision(ctx int64, ctx1 int64) (int32, error) {
+    return c.chClient.GetCtx1Collision(context.TODO(), ctx, ctx1)
 }
 
 
@@ -4115,6 +4154,723 @@ func (x *respGetEntityGetLegacyStuff) String() string {
 
     return sb.String()
 }
+type reqGetEntityGetCtxCollision struct {
+    Ctx int64 `thrift:"ctx,1" json:"ctx" db:"ctx"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &reqGetEntityGetCtxCollision{}
+
+type GetEntityGetCtxCollisionArgs = reqGetEntityGetCtxCollision
+
+func newReqGetEntityGetCtxCollision() *reqGetEntityGetCtxCollision {
+    return (&reqGetEntityGetCtxCollision{}).
+        SetCtxNonCompat(0)
+}
+
+func (x *reqGetEntityGetCtxCollision) GetCtxNonCompat() int64 {
+    return x.Ctx
+}
+
+func (x *reqGetEntityGetCtxCollision) GetCtx() int64 {
+    return x.Ctx
+}
+
+func (x *reqGetEntityGetCtxCollision) SetCtxNonCompat(value int64) *reqGetEntityGetCtxCollision {
+    x.Ctx = value
+    return x
+}
+
+func (x *reqGetEntityGetCtxCollision) SetCtx(value int64) *reqGetEntityGetCtxCollision {
+    x.Ctx = value
+    return x
+}
+
+func (x *reqGetEntityGetCtxCollision) writeField1(p thrift.Protocol) error {  // Ctx
+    if err := p.WriteFieldBegin("ctx", thrift.I64, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetCtxNonCompat()
+    if err := p.WriteI64(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqGetEntityGetCtxCollision) readField1(p thrift.Protocol) error {  // Ctx
+    result, err := p.ReadI64()
+if err != nil {
+    return err
+}
+
+    x.SetCtxNonCompat(result)
+    return nil
+}
+
+func (x *reqGetEntityGetCtxCollision) toString1() string {  // Ctx
+    return fmt.Sprintf("%v", x.GetCtxNonCompat())
+}
+
+
+// Deprecated: Use reqGetEntityGetCtxCollision.Set* methods instead or set the fields directly.
+type reqGetEntityGetCtxCollisionBuilder struct {
+    obj *reqGetEntityGetCtxCollision
+}
+
+func newReqGetEntityGetCtxCollisionBuilder() *reqGetEntityGetCtxCollisionBuilder {
+    return &reqGetEntityGetCtxCollisionBuilder{
+        obj: newReqGetEntityGetCtxCollision(),
+    }
+}
+
+func (x *reqGetEntityGetCtxCollisionBuilder) Ctx(value int64) *reqGetEntityGetCtxCollisionBuilder {
+    x.obj.Ctx = value
+    return x
+}
+
+func (x *reqGetEntityGetCtxCollisionBuilder) Emit() *reqGetEntityGetCtxCollision {
+    var objCopy reqGetEntityGetCtxCollision = *x.obj
+    return &objCopy
+}
+
+func (x *reqGetEntityGetCtxCollision) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("reqGetEntityGetCtxCollision"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqGetEntityGetCtxCollision) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch id {
+        case 1:  // ctx
+            expectedType := thrift.Type(thrift.I64)
+            if wireType == expectedType {
+                if err := x.readField1(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+    }
+
+    if err := p.ReadFieldEnd(); err != nil {
+        return err
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *reqGetEntityGetCtxCollision) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqGetEntityGetCtxCollision({")
+    sb.WriteString(fmt.Sprintf("Ctx:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+type respGetEntityGetCtxCollision struct {
+    Value int32 `thrift:"value,0" json:"value" db:"value"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &respGetEntityGetCtxCollision{}
+var _ thrift.WritableResult = &respGetEntityGetCtxCollision{}
+
+func newRespGetEntityGetCtxCollision() *respGetEntityGetCtxCollision {
+    return (&respGetEntityGetCtxCollision{}).
+        SetValueNonCompat(0)
+}
+
+func (x *respGetEntityGetCtxCollision) GetValueNonCompat() int32 {
+    return x.Value
+}
+
+func (x *respGetEntityGetCtxCollision) GetValue() int32 {
+    return x.Value
+}
+
+func (x *respGetEntityGetCtxCollision) SetValueNonCompat(value int32) *respGetEntityGetCtxCollision {
+    x.Value = value
+    return x
+}
+
+func (x *respGetEntityGetCtxCollision) SetValue(value int32) *respGetEntityGetCtxCollision {
+    x.Value = value
+    return x
+}
+
+func (x *respGetEntityGetCtxCollision) writeField0(p thrift.Protocol) error {  // Value
+    if err := p.WriteFieldBegin("value", thrift.I32, 0); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetValueNonCompat()
+    if err := p.WriteI32(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respGetEntityGetCtxCollision) readField0(p thrift.Protocol) error {  // Value
+    result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+
+    x.SetValueNonCompat(result)
+    return nil
+}
+
+func (x *respGetEntityGetCtxCollision) toString0() string {  // Value
+    return fmt.Sprintf("%v", x.GetValueNonCompat())
+}
+
+
+// Deprecated: Use respGetEntityGetCtxCollision.Set* methods instead or set the fields directly.
+type respGetEntityGetCtxCollisionBuilder struct {
+    obj *respGetEntityGetCtxCollision
+}
+
+func newRespGetEntityGetCtxCollisionBuilder() *respGetEntityGetCtxCollisionBuilder {
+    return &respGetEntityGetCtxCollisionBuilder{
+        obj: newRespGetEntityGetCtxCollision(),
+    }
+}
+
+func (x *respGetEntityGetCtxCollisionBuilder) Value(value int32) *respGetEntityGetCtxCollisionBuilder {
+    x.obj.Value = value
+    return x
+}
+
+func (x *respGetEntityGetCtxCollisionBuilder) Emit() *respGetEntityGetCtxCollision {
+    var objCopy respGetEntityGetCtxCollision = *x.obj
+    return &objCopy
+}
+
+func (x *respGetEntityGetCtxCollision) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respGetEntityGetCtxCollision) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("respGetEntityGetCtxCollision"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respGetEntityGetCtxCollision) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch id {
+        case 0:  // value
+            expectedType := thrift.Type(thrift.I32)
+            if wireType == expectedType {
+                if err := x.readField0(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+    }
+
+    if err := p.ReadFieldEnd(); err != nil {
+        return err
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *respGetEntityGetCtxCollision) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respGetEntityGetCtxCollision({")
+    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+type reqGetEntityGetCtx1Collision struct {
+    Ctx int64 `thrift:"ctx,1" json:"ctx" db:"ctx"`
+    Ctx1 int64 `thrift:"ctx1,2" json:"ctx1" db:"ctx1"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &reqGetEntityGetCtx1Collision{}
+
+type GetEntityGetCtx1CollisionArgs = reqGetEntityGetCtx1Collision
+
+func newReqGetEntityGetCtx1Collision() *reqGetEntityGetCtx1Collision {
+    return (&reqGetEntityGetCtx1Collision{}).
+        SetCtxNonCompat(0).
+        SetCtx1NonCompat(0)
+}
+
+func (x *reqGetEntityGetCtx1Collision) GetCtxNonCompat() int64 {
+    return x.Ctx
+}
+
+func (x *reqGetEntityGetCtx1Collision) GetCtx() int64 {
+    return x.Ctx
+}
+
+func (x *reqGetEntityGetCtx1Collision) GetCtx1NonCompat() int64 {
+    return x.Ctx1
+}
+
+func (x *reqGetEntityGetCtx1Collision) GetCtx1() int64 {
+    return x.Ctx1
+}
+
+func (x *reqGetEntityGetCtx1Collision) SetCtxNonCompat(value int64) *reqGetEntityGetCtx1Collision {
+    x.Ctx = value
+    return x
+}
+
+func (x *reqGetEntityGetCtx1Collision) SetCtx(value int64) *reqGetEntityGetCtx1Collision {
+    x.Ctx = value
+    return x
+}
+
+func (x *reqGetEntityGetCtx1Collision) SetCtx1NonCompat(value int64) *reqGetEntityGetCtx1Collision {
+    x.Ctx1 = value
+    return x
+}
+
+func (x *reqGetEntityGetCtx1Collision) SetCtx1(value int64) *reqGetEntityGetCtx1Collision {
+    x.Ctx1 = value
+    return x
+}
+
+func (x *reqGetEntityGetCtx1Collision) writeField1(p thrift.Protocol) error {  // Ctx
+    if err := p.WriteFieldBegin("ctx", thrift.I64, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetCtxNonCompat()
+    if err := p.WriteI64(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqGetEntityGetCtx1Collision) writeField2(p thrift.Protocol) error {  // Ctx1
+    if err := p.WriteFieldBegin("ctx1", thrift.I64, 2); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetCtx1NonCompat()
+    if err := p.WriteI64(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqGetEntityGetCtx1Collision) readField1(p thrift.Protocol) error {  // Ctx
+    result, err := p.ReadI64()
+if err != nil {
+    return err
+}
+
+    x.SetCtxNonCompat(result)
+    return nil
+}
+
+func (x *reqGetEntityGetCtx1Collision) readField2(p thrift.Protocol) error {  // Ctx1
+    result, err := p.ReadI64()
+if err != nil {
+    return err
+}
+
+    x.SetCtx1NonCompat(result)
+    return nil
+}
+
+func (x *reqGetEntityGetCtx1Collision) toString1() string {  // Ctx
+    return fmt.Sprintf("%v", x.GetCtxNonCompat())
+}
+
+func (x *reqGetEntityGetCtx1Collision) toString2() string {  // Ctx1
+    return fmt.Sprintf("%v", x.GetCtx1NonCompat())
+}
+
+
+// Deprecated: Use reqGetEntityGetCtx1Collision.Set* methods instead or set the fields directly.
+type reqGetEntityGetCtx1CollisionBuilder struct {
+    obj *reqGetEntityGetCtx1Collision
+}
+
+func newReqGetEntityGetCtx1CollisionBuilder() *reqGetEntityGetCtx1CollisionBuilder {
+    return &reqGetEntityGetCtx1CollisionBuilder{
+        obj: newReqGetEntityGetCtx1Collision(),
+    }
+}
+
+func (x *reqGetEntityGetCtx1CollisionBuilder) Ctx(value int64) *reqGetEntityGetCtx1CollisionBuilder {
+    x.obj.Ctx = value
+    return x
+}
+
+func (x *reqGetEntityGetCtx1CollisionBuilder) Ctx1(value int64) *reqGetEntityGetCtx1CollisionBuilder {
+    x.obj.Ctx1 = value
+    return x
+}
+
+func (x *reqGetEntityGetCtx1CollisionBuilder) Emit() *reqGetEntityGetCtx1Collision {
+    var objCopy reqGetEntityGetCtx1Collision = *x.obj
+    return &objCopy
+}
+
+func (x *reqGetEntityGetCtx1Collision) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("reqGetEntityGetCtx1Collision"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField2(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqGetEntityGetCtx1Collision) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch id {
+        case 1:  // ctx
+            expectedType := thrift.Type(thrift.I64)
+            if wireType == expectedType {
+                if err := x.readField1(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
+        case 2:  // ctx1
+            expectedType := thrift.Type(thrift.I64)
+            if wireType == expectedType {
+                if err := x.readField2(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+    }
+
+    if err := p.ReadFieldEnd(); err != nil {
+        return err
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *reqGetEntityGetCtx1Collision) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqGetEntityGetCtx1Collision({")
+    sb.WriteString(fmt.Sprintf("Ctx:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("Ctx1:%s", x.toString2()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+type respGetEntityGetCtx1Collision struct {
+    Value int32 `thrift:"value,0" json:"value" db:"value"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &respGetEntityGetCtx1Collision{}
+var _ thrift.WritableResult = &respGetEntityGetCtx1Collision{}
+
+func newRespGetEntityGetCtx1Collision() *respGetEntityGetCtx1Collision {
+    return (&respGetEntityGetCtx1Collision{}).
+        SetValueNonCompat(0)
+}
+
+func (x *respGetEntityGetCtx1Collision) GetValueNonCompat() int32 {
+    return x.Value
+}
+
+func (x *respGetEntityGetCtx1Collision) GetValue() int32 {
+    return x.Value
+}
+
+func (x *respGetEntityGetCtx1Collision) SetValueNonCompat(value int32) *respGetEntityGetCtx1Collision {
+    x.Value = value
+    return x
+}
+
+func (x *respGetEntityGetCtx1Collision) SetValue(value int32) *respGetEntityGetCtx1Collision {
+    x.Value = value
+    return x
+}
+
+func (x *respGetEntityGetCtx1Collision) writeField0(p thrift.Protocol) error {  // Value
+    if err := p.WriteFieldBegin("value", thrift.I32, 0); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetValueNonCompat()
+    if err := p.WriteI32(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respGetEntityGetCtx1Collision) readField0(p thrift.Protocol) error {  // Value
+    result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+
+    x.SetValueNonCompat(result)
+    return nil
+}
+
+func (x *respGetEntityGetCtx1Collision) toString0() string {  // Value
+    return fmt.Sprintf("%v", x.GetValueNonCompat())
+}
+
+
+// Deprecated: Use respGetEntityGetCtx1Collision.Set* methods instead or set the fields directly.
+type respGetEntityGetCtx1CollisionBuilder struct {
+    obj *respGetEntityGetCtx1Collision
+}
+
+func newRespGetEntityGetCtx1CollisionBuilder() *respGetEntityGetCtx1CollisionBuilder {
+    return &respGetEntityGetCtx1CollisionBuilder{
+        obj: newRespGetEntityGetCtx1Collision(),
+    }
+}
+
+func (x *respGetEntityGetCtx1CollisionBuilder) Value(value int32) *respGetEntityGetCtx1CollisionBuilder {
+    x.obj.Value = value
+    return x
+}
+
+func (x *respGetEntityGetCtx1CollisionBuilder) Emit() *respGetEntityGetCtx1Collision {
+    var objCopy respGetEntityGetCtx1Collision = *x.obj
+    return &objCopy
+}
+
+func (x *respGetEntityGetCtx1Collision) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respGetEntityGetCtx1Collision) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("respGetEntityGetCtx1Collision"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respGetEntityGetCtx1Collision) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch id {
+        case 0:  // value
+            expectedType := thrift.Type(thrift.I32)
+            if wireType == expectedType {
+                if err := x.readField0(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+    }
+
+    if err := p.ReadFieldEnd(); err != nil {
+        return err
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *respGetEntityGetCtx1Collision) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respGetEntityGetCtx1Collision({")
+    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
 
 
 type GetEntityProcessor struct {
@@ -4167,6 +4923,8 @@ func NewGetEntityProcessor(handler GetEntity) *GetEntityProcessor {
     p.AddToProcessorMap("getSet", &procFuncGetEntityGetSet{handler: handler})
     p.AddToProcessorMap("getList", &procFuncGetEntityGetList{handler: handler})
     p.AddToProcessorMap("getLegacyStuff", &procFuncGetEntityGetLegacyStuff{handler: handler})
+    p.AddToProcessorMap("getCtxCollision", &procFuncGetEntityGetCtxCollision{handler: handler})
+    p.AddToProcessorMap("getCtx1Collision", &procFuncGetEntityGetCtx1Collision{handler: handler})
     p.AddToFunctionServiceMap("getEntity", "GetEntity")
     p.AddToFunctionServiceMap("getBool", "GetEntity")
     p.AddToFunctionServiceMap("getByte", "GetEntity")
@@ -4180,6 +4938,8 @@ func NewGetEntityProcessor(handler GetEntity) *GetEntityProcessor {
     p.AddToFunctionServiceMap("getSet", "GetEntity")
     p.AddToFunctionServiceMap("getList", "GetEntity")
     p.AddToFunctionServiceMap("getLegacyStuff", "GetEntity")
+    p.AddToFunctionServiceMap("getCtxCollision", "GetEntity")
+    p.AddToFunctionServiceMap("getCtx1Collision", "GetEntity")
 
     return p
 }
@@ -4842,6 +5602,110 @@ func (p *procFuncGetEntityGetLegacyStuff) RunContext(ctx context.Context, reqStr
     retval, err := p.handler.GetLegacyStuff(ctx, args.NumPos, args.NumNeg1, args.NumNeg2)
     if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetLegacyStuff: " + err.Error(), err)
+        return x, x
+    }
+
+    result.Value = retval
+    return result, nil
+}
+
+
+type procFuncGetEntityGetCtxCollision struct {
+    handler GetEntity
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetCtxCollision{}
+
+func (p *procFuncGetEntityGetCtxCollision) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+    args := newReqGetEntityGetCtxCollision()
+    if err := args.Read(iprot); err != nil {
+        return nil, err
+    }
+    iprot.ReadMessageEnd()
+    return args, nil
+}
+
+func (p *procFuncGetEntityGetCtxCollision) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+    var err2 error
+    messageType := thrift.REPLY
+    switch result.(type) {
+    case thrift.ApplicationException:
+        messageType = thrift.EXCEPTION
+    }
+
+    if err2 = oprot.WriteMessageBegin("getCtxCollision", messageType, seqId); err2 != nil {
+        err = err2
+    }
+    if err2 = result.Write(oprot); err == nil && err2 != nil {
+        err = err2
+    }
+    if err2 = oprot.WriteMessageEnd(); err == nil && err2 != nil {
+        err = err2
+    }
+    if err2 = oprot.Flush(); err == nil && err2 != nil {
+        err = err2
+    }
+    return err
+}
+
+func (p *procFuncGetEntityGetCtxCollision) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+    args := reqStruct.(*reqGetEntityGetCtxCollision)
+    result := newRespGetEntityGetCtxCollision()
+    retval, err := p.handler.GetCtxCollision(ctx, args.Ctx)
+    if err != nil {
+        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetCtxCollision: " + err.Error(), err)
+        return x, x
+    }
+
+    result.Value = retval
+    return result, nil
+}
+
+
+type procFuncGetEntityGetCtx1Collision struct {
+    handler GetEntity
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunctionContext = &procFuncGetEntityGetCtx1Collision{}
+
+func (p *procFuncGetEntityGetCtx1Collision) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+    args := newReqGetEntityGetCtx1Collision()
+    if err := args.Read(iprot); err != nil {
+        return nil, err
+    }
+    iprot.ReadMessageEnd()
+    return args, nil
+}
+
+func (p *procFuncGetEntityGetCtx1Collision) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+    var err2 error
+    messageType := thrift.REPLY
+    switch result.(type) {
+    case thrift.ApplicationException:
+        messageType = thrift.EXCEPTION
+    }
+
+    if err2 = oprot.WriteMessageBegin("getCtx1Collision", messageType, seqId); err2 != nil {
+        err = err2
+    }
+    if err2 = result.Write(oprot); err == nil && err2 != nil {
+        err = err2
+    }
+    if err2 = oprot.WriteMessageEnd(); err == nil && err2 != nil {
+        err = err2
+    }
+    if err2 = oprot.Flush(); err == nil && err2 != nil {
+        err = err2
+    }
+    return err
+}
+
+func (p *procFuncGetEntityGetCtx1Collision) RunContext(ctx context.Context, reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+    args := reqStruct.(*reqGetEntityGetCtx1Collision)
+    result := newRespGetEntityGetCtx1Collision()
+    retval, err := p.handler.GetCtx1Collision(ctx, args.Ctx, args.Ctx1)
+    if err != nil {
+        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetCtx1Collision: " + err.Error(), err)
         return x, x
     }
 

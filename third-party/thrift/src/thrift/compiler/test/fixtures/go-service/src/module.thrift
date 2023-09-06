@@ -45,4 +45,7 @@ service GetEntity {
 
   // Legacy method with negative parameter tags
   i32 getLegacyStuff(1: i64 numPos, -1: i64 numNeg1, -2: i64 numNeg2);
+
+  i32 getCtxCollision(1: i64 ctx);
+  i32 getCtx1Collision(1: i64 ctx, 2: i64 ctx1);
 }

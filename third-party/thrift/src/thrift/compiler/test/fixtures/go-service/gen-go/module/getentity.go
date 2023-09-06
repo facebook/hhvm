@@ -39,6 +39,13 @@ type GetEntity interface {
   //  - NumNeg1
   //  - NumNeg2
   GetLegacyStuff(numPos int64, numNeg1 int64, numNeg2 int64) (_r int32, err error)
+  // Parameters:
+  //  - Ctx
+  GetCtxCollision(ctx int64) (_r int32, err error)
+  // Parameters:
+  //  - Ctx
+  //  - Ctx1
+  GetCtx1Collision(ctx int64, ctx1 int64) (_r int32, err error)
 }
 
 type GetEntityClientInterface interface {
@@ -62,6 +69,13 @@ type GetEntityClientInterface interface {
   //  - NumNeg1
   //  - NumNeg2
   GetLegacyStuff(numPos int64, numNeg1 int64, numNeg2 int64) (_r int32, err error)
+  // Parameters:
+  //  - Ctx
+  GetCtxCollision(ctx int64) (_r int32, err error)
+  // Parameters:
+  //  - Ctx
+  //  - Ctx1
+  GetCtx1Collision(ctx int64, ctx1 int64) (_r int32, err error)
 }
 
 type GetEntityClient struct {
@@ -308,6 +322,48 @@ func (p *GetEntityClient) GetLegacyStuff(numPos int64, numNeg1 int64, numNeg2 in
 func (p *GetEntityClient) recvGetLegacyStuff() (value int32, err error) {
   var __result GetEntityGetLegacyStuffResult
   err = p.CC.RecvMsg("getLegacyStuff", &__result)
+  if err != nil { return }
+
+  return __result.GetSuccess(), nil
+}
+
+// Parameters:
+//  - Ctx
+func (p *GetEntityClient) GetCtxCollision(ctx int64) (_r int32, err error) {
+  args := GetEntityGetCtxCollisionArgs{
+    Ctx : ctx,
+  }
+  err = p.CC.SendMsg("getCtxCollision", &args, thrift.CALL)
+  if err != nil { return }
+  return p.recvGetCtxCollision()
+}
+
+
+func (p *GetEntityClient) recvGetCtxCollision() (value int32, err error) {
+  var __result GetEntityGetCtxCollisionResult
+  err = p.CC.RecvMsg("getCtxCollision", &__result)
+  if err != nil { return }
+
+  return __result.GetSuccess(), nil
+}
+
+// Parameters:
+//  - Ctx
+//  - Ctx1
+func (p *GetEntityClient) GetCtx1Collision(ctx int64, ctx1 int64) (_r int32, err error) {
+  args := GetEntityGetCtx1CollisionArgs{
+    Ctx : ctx,
+    Ctx1 : ctx1,
+  }
+  err = p.CC.SendMsg("getCtx1Collision", &args, thrift.CALL)
+  if err != nil { return }
+  return p.recvGetCtx1Collision()
+}
+
+
+func (p *GetEntityClient) recvGetCtx1Collision() (value int32, err error) {
+  var __result GetEntityGetCtx1CollisionResult
+  err = p.CC.RecvMsg("getCtx1Collision", &__result)
   if err != nil { return }
 
   return __result.GetSuccess(), nil
@@ -596,6 +652,52 @@ func (p *GetEntityThreadsafeClient) recvGetLegacyStuff() (value int32, err error
   return __result.GetSuccess(), nil
 }
 
+// Parameters:
+//  - Ctx
+func (p *GetEntityThreadsafeClient) GetCtxCollision(ctx int64) (_r int32, err error) {
+  p.Mu.Lock()
+  defer p.Mu.Unlock()
+  args := GetEntityGetCtxCollisionArgs{
+    Ctx : ctx,
+  }
+  err = p.CC.SendMsg("getCtxCollision", &args, thrift.CALL)
+  if err != nil { return }
+  return p.recvGetCtxCollision()
+}
+
+
+func (p *GetEntityThreadsafeClient) recvGetCtxCollision() (value int32, err error) {
+  var __result GetEntityGetCtxCollisionResult
+  err = p.CC.RecvMsg("getCtxCollision", &__result)
+  if err != nil { return }
+
+  return __result.GetSuccess(), nil
+}
+
+// Parameters:
+//  - Ctx
+//  - Ctx1
+func (p *GetEntityThreadsafeClient) GetCtx1Collision(ctx int64, ctx1 int64) (_r int32, err error) {
+  p.Mu.Lock()
+  defer p.Mu.Unlock()
+  args := GetEntityGetCtx1CollisionArgs{
+    Ctx : ctx,
+    Ctx1 : ctx1,
+  }
+  err = p.CC.SendMsg("getCtx1Collision", &args, thrift.CALL)
+  if err != nil { return }
+  return p.recvGetCtx1Collision()
+}
+
+
+func (p *GetEntityThreadsafeClient) recvGetCtx1Collision() (value int32, err error) {
+  var __result GetEntityGetCtx1CollisionResult
+  err = p.CC.RecvMsg("getCtx1Collision", &__result)
+  if err != nil { return }
+
+  return __result.GetSuccess(), nil
+}
+
 
 type GetEntityChannelClient struct {
   RequestChannel thrift.RequestChannel
@@ -757,6 +859,34 @@ func (p *GetEntityChannelClient) GetLegacyStuff(ctx context.Context, numPos int6
   return __result.GetSuccess(), nil
 }
 
+// Parameters:
+//  - Ctx
+func (p *GetEntityChannelClient) GetCtxCollision(ctx context.Context, ctx int64) (_r int32, err error) {
+  args := GetEntityGetCtxCollisionArgs{
+    Ctx : ctx,
+  }
+  var __result GetEntityGetCtxCollisionResult
+  err = p.RequestChannel.Call(ctx, "getCtxCollision", &args, &__result)
+  if err != nil { return }
+
+  return __result.GetSuccess(), nil
+}
+
+// Parameters:
+//  - Ctx
+//  - Ctx1
+func (p *GetEntityChannelClient) GetCtx1Collision(ctx context.Context, ctx int64, ctx1 int64) (_r int32, err error) {
+  args := GetEntityGetCtx1CollisionArgs{
+    Ctx : ctx,
+    Ctx1 : ctx1,
+  }
+  var __result GetEntityGetCtx1CollisionResult
+  err = p.RequestChannel.Call(ctx, "getCtx1Collision", &args, &__result)
+  if err != nil { return }
+
+  return __result.GetSuccess(), nil
+}
+
 
 type GetEntityProcessor struct {
   processorMap map[string]thrift.ProcessorFunction
@@ -802,6 +932,8 @@ func NewGetEntityProcessor(handler GetEntity) *GetEntityProcessor {
   self3.processorMap["getSet"] = &getEntityProcessorGetSet{handler:handler}
   self3.processorMap["getList"] = &getEntityProcessorGetList{handler:handler}
   self3.processorMap["getLegacyStuff"] = &getEntityProcessorGetLegacyStuff{handler:handler}
+  self3.processorMap["getCtxCollision"] = &getEntityProcessorGetCtxCollision{handler:handler}
+  self3.processorMap["getCtx1Collision"] = &getEntityProcessorGetCtx1Collision{handler:handler}
   self3.functionServiceMap["getEntity"] = "GetEntity"
   self3.functionServiceMap["getBool"] = "GetEntity"
   self3.functionServiceMap["getByte"] = "GetEntity"
@@ -815,6 +947,8 @@ func NewGetEntityProcessor(handler GetEntity) *GetEntityProcessor {
   self3.functionServiceMap["getSet"] = "GetEntity"
   self3.functionServiceMap["getList"] = "GetEntity"
   self3.functionServiceMap["getLegacyStuff"] = "GetEntity"
+  self3.functionServiceMap["getCtxCollision"] = "GetEntity"
+  self3.functionServiceMap["getCtx1Collision"] = "GetEntity"
   return self3
 }
 
@@ -1514,6 +1648,116 @@ func (p *getEntityProcessorGetLegacyStuff) Run(argStruct thrift.Struct) (thrift.
     switch err.(type) {
     default:
       x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing getLegacyStuff: " + err.Error(), err)
+      return x, x
+    }
+  } else {
+    __result.Success = &retval
+  }
+  return &__result, nil
+}
+
+type getEntityProcessorGetCtxCollision struct {
+  handler GetEntity
+}
+
+func (p *GetEntityGetCtxCollisionResult) Exception() thrift.WritableException {
+  if p == nil { return nil }
+  return nil
+}
+
+func (p *getEntityProcessorGetCtxCollision) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+  args := GetEntityGetCtxCollisionArgs{}
+  if err := args.Read(iprot); err != nil {
+    return nil, err
+  }
+  iprot.ReadMessageEnd()
+  return &args, nil
+}
+
+func (p *getEntityProcessorGetCtxCollision) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+  var err2 error
+  messageType := thrift.REPLY
+  switch result.(type) {
+  case thrift.ApplicationException:
+    messageType = thrift.EXCEPTION
+  }
+  if err2 = oprot.WriteMessageBegin("getCtxCollision", messageType, seqId); err2 != nil {
+    err = err2
+  }
+  if err2 = result.Write(oprot); err == nil && err2 != nil {
+    err = err2
+  }
+  if err2 = oprot.WriteMessageEnd(); err == nil && err2 != nil {
+    err = err2
+  }
+  if err2 = oprot.Flush(); err == nil && err2 != nil {
+    err = err2
+  }
+  return err
+}
+
+func (p *getEntityProcessorGetCtxCollision) Run(argStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+  args := argStruct.(*GetEntityGetCtxCollisionArgs)
+  var __result GetEntityGetCtxCollisionResult
+  if retval, err := p.handler.GetCtxCollision(args.Ctx); err != nil {
+    switch err.(type) {
+    default:
+      x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing getCtxCollision: " + err.Error(), err)
+      return x, x
+    }
+  } else {
+    __result.Success = &retval
+  }
+  return &__result, nil
+}
+
+type getEntityProcessorGetCtx1Collision struct {
+  handler GetEntity
+}
+
+func (p *GetEntityGetCtx1CollisionResult) Exception() thrift.WritableException {
+  if p == nil { return nil }
+  return nil
+}
+
+func (p *getEntityProcessorGetCtx1Collision) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+  args := GetEntityGetCtx1CollisionArgs{}
+  if err := args.Read(iprot); err != nil {
+    return nil, err
+  }
+  iprot.ReadMessageEnd()
+  return &args, nil
+}
+
+func (p *getEntityProcessorGetCtx1Collision) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+  var err2 error
+  messageType := thrift.REPLY
+  switch result.(type) {
+  case thrift.ApplicationException:
+    messageType = thrift.EXCEPTION
+  }
+  if err2 = oprot.WriteMessageBegin("getCtx1Collision", messageType, seqId); err2 != nil {
+    err = err2
+  }
+  if err2 = result.Write(oprot); err == nil && err2 != nil {
+    err = err2
+  }
+  if err2 = oprot.WriteMessageEnd(); err == nil && err2 != nil {
+    err = err2
+  }
+  if err2 = oprot.Flush(); err == nil && err2 != nil {
+    err = err2
+  }
+  return err
+}
+
+func (p *getEntityProcessorGetCtx1Collision) Run(argStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+  args := argStruct.(*GetEntityGetCtx1CollisionArgs)
+  var __result GetEntityGetCtx1CollisionResult
+  if retval, err := p.handler.GetCtx1Collision(args.Ctx, args.Ctx1); err != nil {
+    switch err.(type) {
+    default:
+      x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing getCtx1Collision: " + err.Error(), err)
       return x, x
     }
   } else {
@@ -4272,6 +4516,524 @@ func (p *GetEntityGetLegacyStuffResult) String() string {
     successVal = fmt.Sprintf("%v", *p.Success)
   }
   return fmt.Sprintf("GetEntityGetLegacyStuffResult({Success:%s})", successVal)
+}
+
+// Attributes:
+//  - Ctx
+type GetEntityGetCtxCollisionArgs struct {
+  thrift.IRequest
+  Ctx int64 `thrift:"ctx,1" db:"ctx" json:"ctx"`
+}
+
+func NewGetEntityGetCtxCollisionArgs() *GetEntityGetCtxCollisionArgs {
+  return &GetEntityGetCtxCollisionArgs{}
+}
+
+
+func (p *GetEntityGetCtxCollisionArgs) GetCtx() int64 {
+  return p.Ctx
+}
+type GetEntityGetCtxCollisionArgsBuilder struct {
+  obj *GetEntityGetCtxCollisionArgs
+}
+
+func NewGetEntityGetCtxCollisionArgsBuilder() *GetEntityGetCtxCollisionArgsBuilder{
+  return &GetEntityGetCtxCollisionArgsBuilder{
+    obj: NewGetEntityGetCtxCollisionArgs(),
+  }
+}
+
+func (p GetEntityGetCtxCollisionArgsBuilder) Emit() *GetEntityGetCtxCollisionArgs{
+  return &GetEntityGetCtxCollisionArgs{
+    Ctx: p.obj.Ctx,
+  }
+}
+
+func (g *GetEntityGetCtxCollisionArgsBuilder) Ctx(ctx int64) *GetEntityGetCtxCollisionArgsBuilder {
+  g.obj.Ctx = ctx
+  return g
+}
+
+func (g *GetEntityGetCtxCollisionArgs) SetCtx(ctx int64) *GetEntityGetCtxCollisionArgs {
+  g.Ctx = ctx
+  return g
+}
+
+func (p *GetEntityGetCtxCollisionArgs) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if err := p.ReadField1(iprot); err != nil {
+        return err
+      }
+    default:
+      if err := iprot.Skip(fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *GetEntityGetCtxCollisionArgs)  ReadField1(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadI64(); err != nil {
+    return thrift.PrependError("error reading field 1: ", err)
+  } else {
+    p.Ctx = v
+  }
+  return nil
+}
+
+func (p *GetEntityGetCtxCollisionArgs) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("getCtxCollision_args"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := p.writeField1(oprot); err != nil { return err }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *GetEntityGetCtxCollisionArgs) writeField1(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("ctx", thrift.I64, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:ctx: ", p), err) }
+  if err := oprot.WriteI64(int64(p.Ctx)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.ctx (1) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:ctx: ", p), err) }
+  return err
+}
+
+func (p *GetEntityGetCtxCollisionArgs) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  ctxVal := fmt.Sprintf("%v", p.Ctx)
+  return fmt.Sprintf("GetEntityGetCtxCollisionArgs({Ctx:%s})", ctxVal)
+}
+
+// Attributes:
+//  - Success
+type GetEntityGetCtxCollisionResult struct {
+  thrift.IResponse
+  Success *int32 `thrift:"success,0,optional" db:"success" json:"success,omitempty"`
+}
+
+func NewGetEntityGetCtxCollisionResult() *GetEntityGetCtxCollisionResult {
+  return &GetEntityGetCtxCollisionResult{}
+}
+
+var GetEntityGetCtxCollisionResult_Success_DEFAULT int32
+func (p *GetEntityGetCtxCollisionResult) GetSuccess() int32 {
+  if !p.IsSetSuccess() {
+    return GetEntityGetCtxCollisionResult_Success_DEFAULT
+  }
+  return *p.Success
+}
+func (p *GetEntityGetCtxCollisionResult) IsSetSuccess() bool {
+  return p != nil && p.Success != nil
+}
+
+type GetEntityGetCtxCollisionResultBuilder struct {
+  obj *GetEntityGetCtxCollisionResult
+}
+
+func NewGetEntityGetCtxCollisionResultBuilder() *GetEntityGetCtxCollisionResultBuilder{
+  return &GetEntityGetCtxCollisionResultBuilder{
+    obj: NewGetEntityGetCtxCollisionResult(),
+  }
+}
+
+func (p GetEntityGetCtxCollisionResultBuilder) Emit() *GetEntityGetCtxCollisionResult{
+  return &GetEntityGetCtxCollisionResult{
+    Success: p.obj.Success,
+  }
+}
+
+func (g *GetEntityGetCtxCollisionResultBuilder) Success(success *int32) *GetEntityGetCtxCollisionResultBuilder {
+  g.obj.Success = success
+  return g
+}
+
+func (g *GetEntityGetCtxCollisionResult) SetSuccess(success *int32) *GetEntityGetCtxCollisionResult {
+  g.Success = success
+  return g
+}
+
+func (p *GetEntityGetCtxCollisionResult) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 0:
+      if err := p.ReadField0(iprot); err != nil {
+        return err
+      }
+    default:
+      if err := iprot.Skip(fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *GetEntityGetCtxCollisionResult)  ReadField0(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadI32(); err != nil {
+    return thrift.PrependError("error reading field 0: ", err)
+  } else {
+    p.Success = &v
+  }
+  return nil
+}
+
+func (p *GetEntityGetCtxCollisionResult) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("getCtxCollision_result"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := p.writeField0(oprot); err != nil { return err }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *GetEntityGetCtxCollisionResult) writeField0(oprot thrift.Protocol) (err error) {
+  if p.IsSetSuccess() {
+    if err := oprot.WriteFieldBegin("success", thrift.I32, 0); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 0:success: ", p), err) }
+    if err := oprot.WriteI32(int32(*p.Success)); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T.success (0) field write error: ", p), err) }
+    if err := oprot.WriteFieldEnd(); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 0:success: ", p), err) }
+  }
+  return err
+}
+
+func (p *GetEntityGetCtxCollisionResult) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  var successVal string
+  if p.Success == nil {
+    successVal = "<nil>"
+  } else {
+    successVal = fmt.Sprintf("%v", *p.Success)
+  }
+  return fmt.Sprintf("GetEntityGetCtxCollisionResult({Success:%s})", successVal)
+}
+
+// Attributes:
+//  - Ctx
+//  - Ctx1
+type GetEntityGetCtx1CollisionArgs struct {
+  thrift.IRequest
+  Ctx int64 `thrift:"ctx,1" db:"ctx" json:"ctx"`
+  Ctx1 int64 `thrift:"ctx1,2" db:"ctx1" json:"ctx1"`
+}
+
+func NewGetEntityGetCtx1CollisionArgs() *GetEntityGetCtx1CollisionArgs {
+  return &GetEntityGetCtx1CollisionArgs{}
+}
+
+
+func (p *GetEntityGetCtx1CollisionArgs) GetCtx() int64 {
+  return p.Ctx
+}
+
+func (p *GetEntityGetCtx1CollisionArgs) GetCtx1() int64 {
+  return p.Ctx1
+}
+type GetEntityGetCtx1CollisionArgsBuilder struct {
+  obj *GetEntityGetCtx1CollisionArgs
+}
+
+func NewGetEntityGetCtx1CollisionArgsBuilder() *GetEntityGetCtx1CollisionArgsBuilder{
+  return &GetEntityGetCtx1CollisionArgsBuilder{
+    obj: NewGetEntityGetCtx1CollisionArgs(),
+  }
+}
+
+func (p GetEntityGetCtx1CollisionArgsBuilder) Emit() *GetEntityGetCtx1CollisionArgs{
+  return &GetEntityGetCtx1CollisionArgs{
+    Ctx: p.obj.Ctx,
+    Ctx1: p.obj.Ctx1,
+  }
+}
+
+func (g *GetEntityGetCtx1CollisionArgsBuilder) Ctx(ctx int64) *GetEntityGetCtx1CollisionArgsBuilder {
+  g.obj.Ctx = ctx
+  return g
+}
+
+func (g *GetEntityGetCtx1CollisionArgsBuilder) Ctx1(ctx1 int64) *GetEntityGetCtx1CollisionArgsBuilder {
+  g.obj.Ctx1 = ctx1
+  return g
+}
+
+func (g *GetEntityGetCtx1CollisionArgs) SetCtx(ctx int64) *GetEntityGetCtx1CollisionArgs {
+  g.Ctx = ctx
+  return g
+}
+
+func (g *GetEntityGetCtx1CollisionArgs) SetCtx1(ctx1 int64) *GetEntityGetCtx1CollisionArgs {
+  g.Ctx1 = ctx1
+  return g
+}
+
+func (p *GetEntityGetCtx1CollisionArgs) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if err := p.ReadField1(iprot); err != nil {
+        return err
+      }
+    case 2:
+      if err := p.ReadField2(iprot); err != nil {
+        return err
+      }
+    default:
+      if err := iprot.Skip(fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *GetEntityGetCtx1CollisionArgs)  ReadField1(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadI64(); err != nil {
+    return thrift.PrependError("error reading field 1: ", err)
+  } else {
+    p.Ctx = v
+  }
+  return nil
+}
+
+func (p *GetEntityGetCtx1CollisionArgs)  ReadField2(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadI64(); err != nil {
+    return thrift.PrependError("error reading field 2: ", err)
+  } else {
+    p.Ctx1 = v
+  }
+  return nil
+}
+
+func (p *GetEntityGetCtx1CollisionArgs) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("getCtx1Collision_args"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := p.writeField1(oprot); err != nil { return err }
+  if err := p.writeField2(oprot); err != nil { return err }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *GetEntityGetCtx1CollisionArgs) writeField1(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("ctx", thrift.I64, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:ctx: ", p), err) }
+  if err := oprot.WriteI64(int64(p.Ctx)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.ctx (1) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:ctx: ", p), err) }
+  return err
+}
+
+func (p *GetEntityGetCtx1CollisionArgs) writeField2(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("ctx1", thrift.I64, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:ctx1: ", p), err) }
+  if err := oprot.WriteI64(int64(p.Ctx1)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.ctx1 (2) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:ctx1: ", p), err) }
+  return err
+}
+
+func (p *GetEntityGetCtx1CollisionArgs) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  ctxVal := fmt.Sprintf("%v", p.Ctx)
+  ctx1Val := fmt.Sprintf("%v", p.Ctx1)
+  return fmt.Sprintf("GetEntityGetCtx1CollisionArgs({Ctx:%s Ctx1:%s})", ctxVal, ctx1Val)
+}
+
+// Attributes:
+//  - Success
+type GetEntityGetCtx1CollisionResult struct {
+  thrift.IResponse
+  Success *int32 `thrift:"success,0,optional" db:"success" json:"success,omitempty"`
+}
+
+func NewGetEntityGetCtx1CollisionResult() *GetEntityGetCtx1CollisionResult {
+  return &GetEntityGetCtx1CollisionResult{}
+}
+
+var GetEntityGetCtx1CollisionResult_Success_DEFAULT int32
+func (p *GetEntityGetCtx1CollisionResult) GetSuccess() int32 {
+  if !p.IsSetSuccess() {
+    return GetEntityGetCtx1CollisionResult_Success_DEFAULT
+  }
+  return *p.Success
+}
+func (p *GetEntityGetCtx1CollisionResult) IsSetSuccess() bool {
+  return p != nil && p.Success != nil
+}
+
+type GetEntityGetCtx1CollisionResultBuilder struct {
+  obj *GetEntityGetCtx1CollisionResult
+}
+
+func NewGetEntityGetCtx1CollisionResultBuilder() *GetEntityGetCtx1CollisionResultBuilder{
+  return &GetEntityGetCtx1CollisionResultBuilder{
+    obj: NewGetEntityGetCtx1CollisionResult(),
+  }
+}
+
+func (p GetEntityGetCtx1CollisionResultBuilder) Emit() *GetEntityGetCtx1CollisionResult{
+  return &GetEntityGetCtx1CollisionResult{
+    Success: p.obj.Success,
+  }
+}
+
+func (g *GetEntityGetCtx1CollisionResultBuilder) Success(success *int32) *GetEntityGetCtx1CollisionResultBuilder {
+  g.obj.Success = success
+  return g
+}
+
+func (g *GetEntityGetCtx1CollisionResult) SetSuccess(success *int32) *GetEntityGetCtx1CollisionResult {
+  g.Success = success
+  return g
+}
+
+func (p *GetEntityGetCtx1CollisionResult) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 0:
+      if err := p.ReadField0(iprot); err != nil {
+        return err
+      }
+    default:
+      if err := iprot.Skip(fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *GetEntityGetCtx1CollisionResult)  ReadField0(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadI32(); err != nil {
+    return thrift.PrependError("error reading field 0: ", err)
+  } else {
+    p.Success = &v
+  }
+  return nil
+}
+
+func (p *GetEntityGetCtx1CollisionResult) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("getCtx1Collision_result"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := p.writeField0(oprot); err != nil { return err }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *GetEntityGetCtx1CollisionResult) writeField0(oprot thrift.Protocol) (err error) {
+  if p.IsSetSuccess() {
+    if err := oprot.WriteFieldBegin("success", thrift.I32, 0); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 0:success: ", p), err) }
+    if err := oprot.WriteI32(int32(*p.Success)); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T.success (0) field write error: ", p), err) }
+    if err := oprot.WriteFieldEnd(); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 0:success: ", p), err) }
+  }
+  return err
+}
+
+func (p *GetEntityGetCtx1CollisionResult) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  var successVal string
+  if p.Success == nil {
+    successVal = "<nil>"
+  } else {
+    successVal = fmt.Sprintf("%v", *p.Success)
+  }
+  return fmt.Sprintf("GetEntityGetCtx1CollisionResult({Success:%s})", successVal)
 }
 
 

@@ -142,18 +142,13 @@ struct DefinitionAttrs {
   2: standard.Uri uri;
 
   /**
-   * The annotations associated with this definition, for the current context.
-   *
-   * For example, only annotations explicitly marked with '@scope.Schema' are
-   * present in the runtime schema, while all annotations are present in the AST.
+   * The annotations associated with this definition.
    */
   3: AnnotationIds annotations;
 
   /**
    * DEPRECATED!
-   * The unstructured annotations associated with this definition, for the current context.
-   *
-   * For example, none are present in the runtime schema while all are present in the AST.
+   * The unstructured annotations associated with this definition.
    */
   4: map<string, string> unstructuredAnnotations;
 

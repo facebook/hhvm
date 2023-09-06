@@ -67,13 +67,6 @@ namespace py thrift.annotation.scope
 struct Transitive {}
 
 /**
- * Indicates that an annotation should be included in the runtime schema.
- *
- * See thrift/lib/thrift/schema.thrift
- */
-struct Schema {}
-
-/**
  * The Program scope.
  *
  * This allows annotations on the `package` definition, which implies the

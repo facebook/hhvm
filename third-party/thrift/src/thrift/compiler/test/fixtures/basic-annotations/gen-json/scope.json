@@ -20,26 +20,8 @@
         }
       }
     },
-    "Schema" : {
-      "lineno" : 74,
-      "is_exception" : false,
-      "is_union" : false,
-      "fields" : {
-
-      },
-      "source_range" : {
-        "begin" : {
-          "line" : 74,
-          "column" : 1
-        },
-        "end" : {
-          "line" : 74,
-          "column" : 17
-        }
-      }
-    },
     "Program" : {
-      "lineno" : 82,
+      "lineno" : 75,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -47,17 +29,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 82,
+          "line" : 75,
           "column" : 1
         },
         "end" : {
-          "line" : 82,
+          "line" : 75,
           "column" : 18
         }
       }
     },
     "Struct" : {
-      "lineno" : 85,
+      "lineno" : 78,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -65,17 +47,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 85,
+          "line" : 78,
           "column" : 1
         },
         "end" : {
-          "line" : 85,
+          "line" : 78,
           "column" : 17
         }
       }
     },
     "Union" : {
-      "lineno" : 88,
+      "lineno" : 81,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -83,17 +65,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 88,
+          "line" : 81,
           "column" : 1
         },
         "end" : {
-          "line" : 88,
+          "line" : 81,
           "column" : 16
         }
       }
     },
     "Exception" : {
-      "lineno" : 91,
+      "lineno" : 84,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -101,17 +83,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 91,
+          "line" : 84,
           "column" : 1
         },
         "end" : {
-          "line" : 91,
+          "line" : 84,
           "column" : 20
         }
       }
     },
     "Field" : {
-      "lineno" : 94,
+      "lineno" : 87,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -119,17 +101,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 94,
+          "line" : 87,
           "column" : 1
         },
         "end" : {
-          "line" : 94,
+          "line" : 87,
           "column" : 16
         }
       }
     },
     "Typedef" : {
-      "lineno" : 97,
+      "lineno" : 90,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -137,17 +119,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 97,
+          "line" : 90,
           "column" : 1
         },
         "end" : {
-          "line" : 97,
+          "line" : 90,
           "column" : 18
         }
       }
     },
     "Service" : {
-      "lineno" : 100,
+      "lineno" : 93,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -155,17 +137,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 100,
+          "line" : 93,
           "column" : 1
         },
         "end" : {
-          "line" : 100,
+          "line" : 93,
           "column" : 18
         }
       }
     },
     "Interaction" : {
-      "lineno" : 103,
+      "lineno" : 96,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -173,17 +155,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 103,
+          "line" : 96,
           "column" : 1
         },
         "end" : {
-          "line" : 103,
+          "line" : 96,
           "column" : 22
         }
       }
     },
     "Function" : {
-      "lineno" : 106,
+      "lineno" : 99,
       "is_exception" : false,
       "is_union" : false,
       "annotations" : {
@@ -191,11 +173,11 @@
           "value" : "TFunction",
           "source_range" : {
             "begin" : {
-              "line" : 106,
+              "line" : 99,
               "column" : 21
             },
             "end" : {
-              "line" : 106,
+              "line" : 99,
               "column" : 44
             }
           }
@@ -205,11 +187,11 @@
           "value" : "TFunction",
           "source_range" : {
             "begin" : {
-              "line" : 106,
+              "line" : 99,
               "column" : 46
             },
             "end" : {
-              "line" : 106,
+              "line" : 99,
               "column" : 67
             }
           }
@@ -220,17 +202,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 106,
+          "line" : 99,
           "column" : 1
         },
         "end" : {
-          "line" : 106,
+          "line" : 99,
           "column" : 68
         }
       }
     },
     "EnumValue" : {
-      "lineno" : 109,
+      "lineno" : 102,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -238,17 +220,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 109,
+          "line" : 102,
           "column" : 1
         },
         "end" : {
-          "line" : 109,
+          "line" : 102,
           "column" : 20
         }
       }
     },
     "Const" : {
-      "lineno" : 112,
+      "lineno" : 105,
       "is_exception" : false,
       "is_union" : false,
       "annotations" : {
@@ -256,11 +238,11 @@
           "value" : "TConst",
           "source_range" : {
             "begin" : {
-              "line" : 112,
+              "line" : 105,
               "column" : 18
             },
             "end" : {
-              "line" : 112,
+              "line" : 105,
               "column" : 38
             }
           }
@@ -271,17 +253,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 112,
+          "line" : 105,
           "column" : 1
         },
         "end" : {
-          "line" : 112,
+          "line" : 105,
           "column" : 39
         }
       }
     },
     "Enum" : {
-      "lineno" : 116,
+      "lineno" : 109,
       "is_exception" : false,
       "is_union" : false,
       "annotations" : {
@@ -289,11 +271,11 @@
           "value" : "1",
           "source_range" : {
             "begin" : {
-              "line" : 116,
+              "line" : 109,
               "column" : 69
             },
             "end" : {
-              "line" : 116,
+              "line" : 109,
               "column" : 79
             }
           }
@@ -303,11 +285,11 @@
           "value" : "facebook.com/thrift/annotation/Enum",
           "source_range" : {
             "begin" : {
-              "line" : 116,
+              "line" : 109,
               "column" : 17
             },
             "end" : {
-              "line" : 116,
+              "line" : 109,
               "column" : 67
             }
           }
@@ -318,17 +300,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 116,
+          "line" : 109,
           "column" : 1
         },
         "end" : {
-          "line" : 116,
+          "line" : 109,
           "column" : 80
         }
       }
     },
     "Structured" : {
-      "lineno" : 119,
+      "lineno" : 112,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -342,17 +324,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 119,
+          "line" : 112,
           "column" : 1
         },
         "end" : {
-          "line" : 123,
+          "line" : 116,
           "column" : 21
         }
       }
     },
     "Interface" : {
-      "lineno" : 126,
+      "lineno" : 119,
       "is_exception" : false,
       "is_union" : false,
       "annotations" : {
@@ -360,11 +342,11 @@
           "value" : "TInterface",
           "source_range" : {
             "begin" : {
-              "line" : 129,
+              "line" : 122,
               "column" : 22
             },
             "end" : {
-              "line" : 129,
+              "line" : 122,
               "column" : 46
             }
           }
@@ -380,17 +362,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 126,
+          "line" : 119,
           "column" : 1
         },
         "end" : {
-          "line" : 129,
+          "line" : 122,
           "column" : 47
         }
       }
     },
     "RootDefinition" : {
-      "lineno" : 132,
+      "lineno" : 125,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -406,17 +388,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 132,
+          "line" : 125,
           "column" : 1
         },
         "end" : {
-          "line" : 138,
+          "line" : 131,
           "column" : 25
         }
       }
     },
     "Definition" : {
-      "lineno" : 141,
+      "lineno" : 134,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -431,11 +413,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 141,
+          "line" : 134,
           "column" : 1
         },
         "end" : {
-          "line" : 146,
+          "line" : 139,
           "column" : 21
         }
       }

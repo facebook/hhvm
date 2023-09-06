@@ -14,7 +14,6 @@ namespace annotation {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata_ref();
   ::apache::thrift::detail::md::StructMetadata<Transitive>::gen(metadata);
-  ::apache::thrift::detail::md::StructMetadata<Schema>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Program>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Struct>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Union>::gen(metadata);

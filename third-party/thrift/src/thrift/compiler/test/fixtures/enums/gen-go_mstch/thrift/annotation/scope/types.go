@@ -105,94 +105,6 @@ func (x *Transitive) String() string {
     return sb.String()
 }
 
-type Schema struct {
-}
-// Compile time interface enforcer
-var _ thrift.Struct = &Schema{}
-
-func NewSchema() *Schema {
-    return (&Schema{})
-}
-
-
-// Deprecated: Use Schema.Set* methods instead or set the fields directly.
-type SchemaBuilder struct {
-    obj *Schema
-}
-
-func NewSchemaBuilder() *SchemaBuilder {
-    return &SchemaBuilder{
-        obj: NewSchema(),
-    }
-}
-
-func (x *SchemaBuilder) Emit() *Schema {
-    var objCopy Schema = *x.obj
-    return &objCopy
-}
-
-func (x *Schema) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("Schema"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
-    }
-
-    if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
-    }
-
-    if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *Schema) Read(p thrift.Protocol) error {
-    if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
-    }
-
-    for {
-        _, wireType, id, err := p.ReadFieldBegin()
-        if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
-        }
-
-        if wireType == thrift.STOP {
-            break;
-        }
-
-        switch id {
-        default:
-            if err := p.Skip(wireType); err != nil {
-                return err
-            }
-        }
-    }
-
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
-    }
-
-    if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
-    }
-
-    return nil
-}
-
-func (x *Schema) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Schema({")
-    sb.WriteString("})")
-
-    return sb.String()
-}
-
 type Program struct {
 }
 // Compile time interface enforcer
@@ -1606,7 +1518,6 @@ func RegisterTypes(registry interface {
 	  RegisterType(name string, initializer func() any)
 }) {
     registry.RegisterType("facebook.com/thrift/annotation/Transitive", func() any { return NewTransitive() })
-    registry.RegisterType("facebook.com/thrift/annotation/Schema", func() any { return NewSchema() })
     registry.RegisterType("facebook.com/thrift/annotation/Program", func() any { return NewProgram() })
     registry.RegisterType("facebook.com/thrift/annotation/Struct", func() any { return NewStruct() })
     registry.RegisterType("facebook.com/thrift/annotation/Union", func() any { return NewUnion() })

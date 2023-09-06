@@ -13,5 +13,5 @@ from thrift.protocol.TProtocol import TProtocolException
 
 
 
-from .ttypes import UTF8STRINGS, Transitive, Schema, Program, Struct, Union, Exception, Field, Typedef, Service, Interaction, Function, EnumValue, Const, Enum, Structured, Interface, RootDefinition, Definition
+from .ttypes import UTF8STRINGS, Transitive, Program, Struct, Union, Exception, Field, Typedef, Service, Interaction, Function, EnumValue, Const, Enum, Structured, Interface, RootDefinition, Definition
 

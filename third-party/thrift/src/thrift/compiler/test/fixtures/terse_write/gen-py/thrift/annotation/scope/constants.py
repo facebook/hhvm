@@ -17,5 +17,5 @@ if sys.version_info[0] >= 3:
   long = int
 
 
-from .ttypes import UTF8STRINGS, Transitive, Schema, Program, Struct, Union, Exception, Field, Typedef, Service, Interaction, Function, EnumValue, Const, Enum, Structured, Interface, RootDefinition, Definition
+from .ttypes import UTF8STRINGS, Transitive, Program, Struct, Union, Exception, Field, Typedef, Service, Interaction, Function, EnumValue, Const, Enum, Structured, Interface, RootDefinition, Definition
 

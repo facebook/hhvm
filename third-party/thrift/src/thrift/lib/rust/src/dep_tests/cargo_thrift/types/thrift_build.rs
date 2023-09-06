@@ -45,7 +45,7 @@ fn main() {
 
         conf.types_crate("fbthrift_test_if__types");
 
-        let options = "serde";
+        let options = "deprecated_default_enum_min_i32,serde";
         if !options.is_empty() {
             conf.options(options);
         }

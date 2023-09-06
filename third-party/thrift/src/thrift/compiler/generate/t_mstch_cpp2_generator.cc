@@ -1817,46 +1817,7 @@ class cpp_mstch_field : public mstch_field {
         ref_type == gen::cpp::reference_type::boxed_intern;
   }
   mstch::node field_ref_type() {
-    static const std::string ns = "::apache::thrift::";
-
-    if (gen::cpp::find_ref_type(*field_) == gen::cpp::reference_type::boxed) {
-      switch (field_->get_req()) {
-        case t_field::e_req::optional:
-          return ns + "optional_boxed_field_ref";
-        case t_field::e_req::opt_in_req_out:
-        case t_field::e_req::terse:
-        case t_field::e_req::required:
-        default:
-          throw std::runtime_error("unsupported boxed field");
-      }
-    }
-
-    if (gen::cpp::find_ref_type(*field_) ==
-        gen::cpp::reference_type::boxed_intern) {
-      switch (field_->get_req()) {
-        case t_field::e_req::opt_in_req_out:
-          return ns + "intern_boxed_field_ref";
-        case t_field::e_req::terse:
-          return ns + "terse_intern_boxed_field_ref";
-        case t_field::e_req::required:
-        case t_field::e_req::optional:
-        default:
-          throw std::runtime_error("unsupported intern boxed field");
-      }
-    }
-
-    switch (field_->get_req()) {
-      case t_field::e_req::required:
-        return ns + "required_field_ref";
-      case t_field::e_req::optional:
-        return ns + "optional_field_ref";
-      case t_field::e_req::opt_in_req_out:
-        return ns + "field_ref";
-      case t_field::e_req::terse:
-        return ns + "terse_field_ref";
-      default:
-        throw std::runtime_error("unknown qualifier");
-    }
+    return cpp_context_->resolver().get_reference_type(*field_);
   }
 
   mstch::node tablebased_qualifier() {

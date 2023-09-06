@@ -38,6 +38,12 @@ struct base_annotation_builder {
     return name;
   }
 
+  static std::unique_ptr<t_const_value> make_integer(const int64_t value) {
+    auto name = std::make_unique<t_const_value>();
+    name->set_integer(value);
+    return name;
+  }
+
   const std::string& uri() { return type.uri(); }
 
  protected:

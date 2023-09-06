@@ -30,6 +30,27 @@
 
 namespace apache::thrift::compiler::gen::cpp {
 namespace {
+// Since we can not include `thrift/annotation/cpp.thrift`
+// This is a copy of apache::thrift::annotation::RefType
+// The same copy exists in the reference_type.cc.
+enum class RefType {
+  Unique = 0,
+  Shared = 1,
+  SharedMutable = 2,
+};
+
+struct ref_builder : base_thrift_annotation_builder {
+  explicit ref_builder(t_program& p, const std::string& lang)
+      : base_thrift_annotation_builder(p, lang, "Ref") {}
+
+  std::unique_ptr<t_const> make(const int64_t type) {
+    auto map = std::make_unique<t_const_value>();
+    map->set_map();
+    map->add_map(make_string("type"), make_integer(type));
+    return make_inst(std::move(map));
+  }
+};
+} // namespace
 
 class TypeResolverTest : public ::testing::Test {
  public:
@@ -56,6 +77,10 @@ class TypeResolverTest : public ::testing::Test {
 
   const std::string& get_storage_type(const t_field& node) {
     return resolver_.get_storage_type(node, struct_);
+  }
+
+  const std::string& get_reference_type(const t_field& node) {
+    return resolver_.get_reference_type(node);
   }
 
   std::string get_type_tag(const t_type& type) {
@@ -668,5 +693,36 @@ TEST_F(TypeResolverTest, GenTypeTagStruct) {
       "::apache::thrift::type::exception_t<::cpp2::exception_name>");
 }
 
-} // namespace
+TEST_F(TypeResolverTest, BasicQualifier) {
+  t_field default_i32 = t_field(t_base_type::t_i32(), "i32");
+  EXPECT_EQ(get_reference_type(default_i32), "::apache::thrift::field_ref");
+
+  t_field optional_i32 = t_field(t_base_type::t_i32(), "i32");
+  optional_i32.set_req(t_field::e_req::optional);
+  EXPECT_EQ(
+      get_reference_type(optional_i32), "::apache::thrift::optional_field_ref");
+
+  t_field terse_i32 = t_field(t_base_type::t_i32(), "i32");
+  terse_i32.set_req(t_field::e_req::terse);
+  EXPECT_EQ(get_reference_type(terse_i32), "::apache::thrift::terse_field_ref");
+}
+
+TEST_F(TypeResolverTest, HasReferenceTypeFalse) {
+  {
+    t_field field = t_field(t_base_type::t_i32(), "i32");
+    field.add_structured_annotation(
+        ref_builder(program_, "cpp").make((int)RefType::Unique));
+  }
+  {
+    t_field field = t_field(t_base_type::t_i32(), "i32");
+    field.add_structured_annotation(
+        ref_builder(program_, "cpp").make((int)RefType::Shared));
+  }
+  {
+    t_field field = t_field(t_base_type::t_i32(), "i32");
+    field.add_structured_annotation(
+        ref_builder(program_, "cpp").make((int)RefType::SharedMutable));
+  }
+}
+
 } // namespace apache::thrift::compiler::gen::cpp

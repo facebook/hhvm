@@ -235,6 +235,12 @@ const std::string& type_resolver::get_storage_type(
   });
 }
 
+const std::string& type_resolver::get_reference_type(const t_field& node) {
+  return detail::get_or_gen(field_reference_type_cache_, &node, [&]() {
+    return gen_reference_type(node);
+  });
+}
+
 const t_const* type_resolver::find_nontransitive_adapter(const t_type& node) {
   if (!is_transitive_annotation(node)) {
     return node.find_structured_annotation_or_null(kCppAdapterUri);
@@ -550,6 +556,48 @@ std::string type_resolver::gen_thrift_type_tag(const t_type& original_type) {
     return ns + "exception_t<" + get_standard_type(type) + ">";
   } else {
     throw std::runtime_error("unknown type for: " + type.get_full_name());
+  }
+}
+
+std::string type_resolver::gen_reference_type(const t_field& node) {
+  const std::string ns = "::apache::thrift::";
+
+  if (find_ref_type(node) == reference_type::boxed) {
+    switch (node.get_req()) {
+      case t_field::e_req::optional:
+        return ns + "optional_boxed_field_ref";
+      case t_field::e_req::opt_in_req_out:
+      case t_field::e_req::terse:
+      case t_field::e_req::required:
+      default:
+        throw std::runtime_error("unsupported boxed field");
+    }
+  }
+
+  if (find_ref_type(node) == reference_type::boxed_intern) {
+    switch (node.get_req()) {
+      case t_field::e_req::opt_in_req_out:
+        return ns + "intern_boxed_field_ref";
+      case t_field::e_req::terse:
+        return ns + "terse_intern_boxed_field_ref";
+      case t_field::e_req::required:
+      case t_field::e_req::optional:
+      default:
+        throw std::runtime_error("unsupported intern boxed field");
+    }
+  }
+
+  switch (node.get_req()) {
+    case t_field::e_req::required:
+      return ns + "required_field_ref";
+    case t_field::e_req::optional:
+      return ns + "optional_field_ref";
+    case t_field::e_req::opt_in_req_out:
+      return ns + "field_ref";
+    case t_field::e_req::terse:
+      return ns + "terse_field_ref";
+    default:
+      throw std::runtime_error("unknown qualifier");
   }
 }
 

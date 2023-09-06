@@ -138,6 +138,9 @@ class type_resolver {
   const std::string& get_storage_type(
       const t_field& field, const t_structured& parent);
 
+  // Returns the C++ reference type of the field.
+  const std::string& get_reference_type(const t_field& node);
+
   static const std::string* find_field_interceptor(const t_field& node) {
     return get_string_from_annotation_or_null(
         node, kCppFieldInterceptorUri, "name");
@@ -177,6 +180,7 @@ class type_resolver {
       storage_type_cache_;
   std::unordered_map<const t_type*, std::string> type_tag_cache_;
   std::unordered_map<const t_field*, std::string> field_type_tag_cache_;
+  std::unordered_map<const t_field*, std::string> field_reference_type_cache_;
 
   static const std::string* get_string_from_annotation_or_null(
       const t_named& node, const char* uri, const char* key);
@@ -212,6 +216,7 @@ class type_resolver {
   std::string gen_thrift_type_tag(const t_type&);
   std::string gen_type_tag(const t_type&);
   std::string gen_type_tag(const t_field&);
+  std::string gen_reference_type(const t_field& node);
 
   const std::string& resolve(type_resolve_fn resolve_fn, const t_type& node) {
     return (this->*resolve_fn)(node);

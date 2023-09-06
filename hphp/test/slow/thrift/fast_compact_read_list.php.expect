@@ -1,10 +1,10 @@
----- empty vec ----
+---- empty ListI64 ----
 object(ListI64) (1) {
   ["data"]=>
   vec(0) {
   }
 }
----- fast decoded vec ----
+---- fast decoded ListI64 ----
 object(ListI64) (1) {
   ["data"]=>
   vec(2) {
@@ -12,7 +12,7 @@ object(ListI64) (1) {
     int(9223372036854775553)
   }
 }
----- fast decoded vec ----
+---- fast decoded ListI08 ----
 object(ListI08) (1) {
   ["data"]=>
   vec(11) {
@@ -26,6 +26,50 @@ object(ListI08) (1) {
     int(7)
     int(8)
     int(9)
+    int(10)
+  }
+}
+---- empty VectorI64 ----
+object(VectorI64) (1) {
+  ["data"]=>
+  object(HH\Vector) (0) {
+  }
+}
+---- fast decoded VectorI64 ----
+object(VectorI64) (1) {
+  ["data"]=>
+  object(HH\Vector) (2) {
+    [0]=>
+    int(9223372036854775552)
+    [1]=>
+    int(9223372036854775553)
+  }
+}
+---- fast decoded VectorI08 ----
+object(VectorI08) (1) {
+  ["data"]=>
+  object(HH\Vector) (11) {
+    [0]=>
+    int(0)
+    [1]=>
+    int(1)
+    [2]=>
+    int(2)
+    [3]=>
+    int(3)
+    [4]=>
+    int(4)
+    [5]=>
+    int(5)
+    [6]=>
+    int(6)
+    [7]=>
+    int(7)
+    [8]=>
+    int(8)
+    [9]=>
+    int(9)
+    [10]=>
     int(10)
   }
 }

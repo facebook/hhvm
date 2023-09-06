@@ -394,6 +394,8 @@ let load_config config options =
     ?tco_log_exhaustivity_check:(bool_opt "log_exhaustivity_check" config)
     ?dump_tast_hashes:(bool_opt "dump_tast_hashes" config)
     ?tco_enable_strict_switch:(bool_opt "enable_strict_switch" config)
+    ?po_disallow_direct_superglobals_refs:
+      (bool_opt "disallow_direct_superglobals_refs" config)
     options
 
 let load ~silent options : t * ServerLocalConfig.t =

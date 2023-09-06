@@ -134,6 +134,12 @@ let with_disallow_static_constants_in_default_func_args po b =
     GlobalOptions.po_disallow_static_constants_in_default_func_args = b;
   }
 
+let disallow_direct_superglobals_refs po =
+  po.GlobalOptions.po_disallow_direct_superglobals_refs
+
+let with_disallow_direct_superglobals_refs po b =
+  { po with GlobalOptions.po_disallow_direct_superglobals_refs = b }
+
 let make
     ~auto_namespace_map
     ~codegen
@@ -154,7 +160,8 @@ let make
     ~disable_xhp_children_declarations
     ~disable_hh_ignore_error
     ~interpret_soft_types_as_like_types
-    ~is_systemlib =
+    ~is_systemlib
+    ~disallow_direct_superglobals_refs =
   GlobalOptions.
     {
       default with
@@ -178,11 +185,13 @@ let make
       po_disable_hh_ignore_error = disable_hh_ignore_error;
       po_interpret_soft_types_as_like_types = interpret_soft_types_as_like_types;
       tco_is_systemlib = is_systemlib;
+      po_disallow_direct_superglobals_refs = disallow_direct_superglobals_refs;
     }
 
 (* Changes here need to be synchronized with rust_parser_errors_ffi.rs *)
 type ffi_t =
   bool
+  * bool
   * bool
   * bool
   * bool
@@ -219,4 +228,5 @@ let to_rust_ffi_t po ~hhvm_compat_mode ~hhi_mode ~codegen =
     allow_unstable_features po,
     interpret_soft_types_as_like_types po,
     po.GlobalOptions.tco_is_systemlib,
-    po.GlobalOptions.po_disallow_static_constants_in_default_func_args )
+    po.GlobalOptions.po_disallow_static_constants_in_default_func_args,
+    disallow_direct_superglobals_refs po )

@@ -148,5 +148,12 @@ pub fn parser_options(config: &HhvmConfig) -> Result<ParserOptions> {
         &mut flags.po_enable_class_level_where_clauses,
         "Hack.Lang.EnableClassLevelWhereClauses",
     )?;
+
+    // Only hdf option in use
+    init(
+        &mut flags.po_disallow_direct_superglobals_refs,
+        "Hack.Lang.DisallowDirectSuperglobalsRefs",
+    )?;
+
     Ok(flags)
 }

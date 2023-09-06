@@ -48,6 +48,7 @@ type t = {
   enable_xhp_class_modifier: bool;
   ignore_missing_json: bool;
   disallow_static_constants_in_default_func_args: bool;
+  disallow_direct_superglobals_refs: bool;
 }
 
 let make
@@ -87,7 +88,8 @@ let make
     allow_unstable_features
     enable_xhp_class_modifier
     ignore_missing_json
-    disallow_static_constants_in_default_func_args =
+    disallow_static_constants_in_default_func_args
+    disallow_direct_superglobals_refs =
   {
     full_fidelity_json_parse_tree;
     full_fidelity_json;
@@ -126,6 +128,7 @@ let make
     enable_xhp_class_modifier;
     ignore_missing_json;
     disallow_static_constants_in_default_func_args;
+    disallow_direct_superglobals_refs;
   }
 
 let parse_args () =
@@ -185,6 +188,7 @@ let parse_args () =
   let enable_xhp_class_modifier = ref false in
   let ignore_missing_json = ref false in
   let disallow_static_constants_in_default_func_arg = ref false in
+  let disallow_direct_superglobals_refs = ref false in
   let options =
     [
       (* modes *)
@@ -327,6 +331,9 @@ No errors are filtered out."
       ( "--disallow-static-constants-in-default-func-args",
         Arg.Set disallow_static_constants_in_default_func_arg,
         "Disallow `static::*` in default arguments for functions" );
+      ( "--disallow-direct-superglobals-refs",
+        Arg.Set disallow_direct_superglobals_refs,
+        "Disallow accessing superglobals via their variable names" );
     ]
   in
   Arg.parse options push_file usage;
@@ -384,6 +391,7 @@ No errors are filtered out."
     !enable_xhp_class_modifier
     !ignore_missing_json
     !disallow_static_constants_in_default_func_arg
+    !disallow_direct_superglobals_refs
 
 let to_parser_options args =
   let popt = ParserOptions.default in
@@ -451,6 +459,11 @@ let to_parser_options args =
     ParserOptions.with_disallow_static_constants_in_default_func_args
       popt
       args.disallow_static_constants_in_default_func_args
+  in
+  let popt =
+    ParserOptions.with_disallow_direct_superglobals_refs
+      popt
+      args.disallow_direct_superglobals_refs
   in
   popt
 

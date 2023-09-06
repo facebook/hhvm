@@ -340,6 +340,8 @@ type t = {
       (** Instrument the existing exhaustivity lint (for strict switch statements) *)
   tco_enable_strict_switch: bool;
       (** Enable strict switch statement type and exhausitivity checking *)
+  po_disallow_direct_superglobals_refs: bool;
+      (** block accessing superglobals via their variable names *)
 }
 [@@deriving eq, show]
 
@@ -469,6 +471,7 @@ val set :
   ?po_unwrap_concurrent:bool ->
   ?tco_log_exhaustivity_check:bool ->
   ?tco_enable_strict_switch:bool ->
+  ?po_disallow_direct_superglobals_refs:bool ->
   t ->
   t
 

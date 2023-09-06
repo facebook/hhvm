@@ -126,7 +126,11 @@ struct RepoOptionsFlags {
    * contain a reified generic bytecode, powered by decl directed     \
    * bytecode                                                         \
    */                                                                 \
-  H(bool,           OptimizeReifiedParamChecks,       false)
+  H(bool,           OptimizeReifiedParamChecks,       false)          \
+  /* Make it so referencing superglobals directly via their $_[A-Z]+  \
+   * "variable" name hard-fails rather than emitting, e.g., CgetG     \
+   */                                                                 \
+  H(bool,           DisallowDirectSuperglobalsRefs,   false)          \
   /**/
 
   /**/

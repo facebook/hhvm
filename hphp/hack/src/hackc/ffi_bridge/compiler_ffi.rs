@@ -98,6 +98,7 @@ pub mod compile_ffi {
         enable_xhp_class_modifier: bool,
         enable_class_level_where_clauses: bool,
         disallow_static_constants_in_default_func_args: bool,
+        disallow_direct_superglobals_refs: bool,
     }
 
     struct DeclParserConfig {
@@ -294,6 +295,9 @@ impl compile_ffi::NativeEnv {
                     po_disallow_static_constants_in_default_func_args: self
                         .parser_flags
                         .disallow_static_constants_in_default_func_args,
+                    po_disallow_direct_superglobals_refs: self
+                        .parser_flags
+                        .disallow_direct_superglobals_refs,
                     ..Default::default()
                 },
             },

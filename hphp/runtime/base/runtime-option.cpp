@@ -369,6 +369,7 @@ void RepoOptionsFlags::initParserFlags(hackc::ParserFlags& flags) const {
   flags.disable_xhp_element_mangling = DisableXHPElementMangling;
   flags.disallow_func_ptrs_in_constants = DisallowFuncPtrsInConstants;
   flags.enable_xhp_class_modifier = EnableXHPClassModifier;
+  flags.disallow_direct_superglobals_refs = DisallowDirectSuperglobalsRefs;
 }
 
 void RepoOptionsFlags::calcCachedQuery() {

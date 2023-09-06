@@ -49,6 +49,7 @@ unsafe fn parser_options_from_ocaml_only_for_parser_errors(
     let tco_is_systemlib = bool::from_ocaml(*ocaml_opts.add(16)).unwrap();
     let po_disallow_static_constants_in_default_func_args =
         bool::from_ocaml(*ocaml_opts.add(17)).unwrap();
+    let po_disallow_direct_superglobals_refs = bool::from_ocaml(*ocaml_opts.add(18)).unwrap();
 
     parser_options.po_disable_lval_as_an_expression = po_disable_lval_as_an_expression;
     parser_options.po_disable_legacy_soft_typehints = po_disable_legacy_soft_typehints;
@@ -66,6 +67,7 @@ unsafe fn parser_options_from_ocaml_only_for_parser_errors(
     parser_options.tco_is_systemlib = tco_is_systemlib;
     parser_options.po_disallow_static_constants_in_default_func_args =
         po_disallow_static_constants_in_default_func_args;
+    parser_options.po_disallow_direct_superglobals_refs = po_disallow_direct_superglobals_refs;
     (
         parser_options,
         (hhvm_compat_mode, hhi_mode, codegen, tco_is_systemlib),

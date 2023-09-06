@@ -386,6 +386,9 @@ impl HhConfig {
                 "dump_tast_hashes" => {
                     go.dump_tast_hashes = parse_json(&value)?;
                 }
+                "disallow_direct_superglobals_refs" => {
+                    go.po_disallow_direct_superglobals_refs = parse_json(&value)?;
+                }
                 _ => c.unknown.push((key, value)),
             }
         }

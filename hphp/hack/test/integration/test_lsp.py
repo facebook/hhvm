@@ -43,7 +43,7 @@ lazy_decl = {use_saved_state}
 lazy_parse = {use_saved_state}
 lazy_init2 = {use_saved_state}
 symbolindex_search_provider = NoIndex
-ide_symbolindex_search_provider = SqliteIndex
+ide_symbolindex_search_provider = LocalIndex
 allow_unstable_features = true
 ide_batch_process_changes = true
 """.format(
@@ -484,6 +484,26 @@ class TestLsp(TestCase[LspTestDriver]):
         spec = (
             self.initialize_spec(LspTestSpec("ide_completion"))
             .ignore_notifications(method="textDocument/publishDiagnostics")
+            .notification(
+                comment="LocalIndex doesn't have any names in its SymbolIndex, so let's index these files...",
+                method="workspace/didChangeWatchedFiles",
+                params={
+                    "changes": [
+                        {
+                            "uri": "file://${root_path}/completion.php",
+                            "type": 2,
+                        },
+                        {
+                            "uri": "file://${root_path}/xhp_class_definitions.php",
+                            "type": 2,
+                        },
+                        {
+                            "uri": "file://${root_path}/completion_extras_namespace.php",
+                            "type": 2,
+                        },
+                    ]
+                },
+            )
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -2278,52 +2298,7 @@ class TestLsp(TestCase[LspTestDriver]):
                                 "newText": "string",
                             },
                             "data": {"fullname": "string"},
-                        },
-                        {
-                            "label": "StringBuffer",
-                            "kind": 7,
-                            "detail": "class",
-                            "sortText": "StringBuffer",
-                            "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 5},
-                                    "end": {"line": 3, "character": 10},
-                                },
-                                "newText": "StringBuffer",
-                            },
-                            "data": {"fullname": "StringBuffer"},
-                        },
-                        {
-                            "label": "Stringish",
-                            "kind": 8,
-                            "detail": "interface",
-                            "sortText": "Stringish",
-                            "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 5},
-                                    "end": {"line": 3, "character": 10},
-                                },
-                                "newText": "Stringish",
-                            },
-                            "data": {"fullname": "Stringish"},
-                        },
-                        {
-                            "label": "StringishObject",
-                            "kind": 8,
-                            "detail": "interface",
-                            "sortText": "StringishObject",
-                            "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 5},
-                                    "end": {"line": 3, "character": 10},
-                                },
-                                "newText": "StringishObject",
-                            },
-                            "data": {"fullname": "StringishObject"},
-                        },
+                        }
                     ],
                 },
                 powered_by="serverless_ide",
@@ -6188,6 +6163,18 @@ function unsaved_bar(): string { return "hello"; }
         spec = (
             self.initialize_spec(LspTestSpec("test_workspace_symbol"))
             .ignore_notifications(method="textDocument/publishDiagnostics")
+            .notification(
+                comment="LocalIndex doesn't have any names in its SymbolIndex, so let's index these files...",
+                method="workspace/didChangeWatchedFiles",
+                params={
+                    "changes": [
+                        {
+                            "uri": "file://${root_path}/completion_extras_namespace.php",
+                            "type": 2,
+                        }
+                    ]
+                },
+            )
             .request(
                 line=line(),
                 comment="Look up symbols",
@@ -6205,37 +6192,6 @@ function unsaved_bar(): string { return "hello"; }
                             },
                         },
                     }
-                ],
-                powered_by="serverless_ide",
-            )
-            .request(
-                line=line(),
-                comment="Look up symbols starting with 'test_f' within multiple namespaces",
-                method="workspace/symbol",
-                params={"query": "test_f"},
-                result=[
-                    {
-                        "name": "test_function",
-                        "kind": 12,
-                        "location": {
-                            "uri": "file://${root_path}/completion.php",
-                            "range": {
-                                "start": {"line": 7, "character": 9},
-                                "end": {"line": 7, "character": 22},
-                            },
-                        },
-                    },
-                    {
-                        "name": "TestNS\\test_func",
-                        "kind": 12,
-                        "location": {
-                            "uri": "file://${root_path}/completion_extras_namespace.php",
-                            "range": {
-                                "start": {"line": 4, "character": 9},
-                                "end": {"line": 4, "character": 25},
-                            },
-                        },
-                    },
                 ],
                 powered_by="serverless_ide",
             )
@@ -6657,9 +6613,18 @@ function aaa(): string {
 
         spec = (
             self.initialize_spec(LspTestSpec("serverless_ide_workspace_symbol"))
+            .notification(
+                comment="LocalIndex doesn't have any names in its SymbolIndex, so let's index this file...",
+                method="workspace/didChangeWatchedFiles",
+                params={
+                    "changes": [
+                        {"uri": "file://${root_path}/definition.php", "type": 2}
+                    ]
+                },
+            )
             .request(
                 line=line(),
-                comment="workspace symbol call, global, powered by sqlite (generated during serverless-ide-init)",
+                comment="workspace symbol call, global (derived from SymbolIndex)",
                 method="workspace/symbol",
                 params={"query": "TakesString"},
                 result=[
@@ -6679,7 +6644,7 @@ function aaa(): string {
             )
             .request(
                 line=line(),
-                comment="workspace symbol call, member (derived from naming-table)",
+                comment="workspace symbol call, member (derived from SymbolIndex followed by naming-table)",
                 method="workspace/symbol",
                 params={"query": "TakesString::"},
                 result=[

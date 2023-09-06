@@ -273,3 +273,6 @@ class AstGeneratorTest(unittest.TestCase):
         self.assertEqual(
             annot.objectValue.members[1].objectValue.members[3].stringValue, "foo.Annot"
         )
+        self.assertEqual(
+            annot.objectValue.type, "facebook.com/thrift/type/StructuredAnnotation"
+        )

@@ -200,8 +200,9 @@ inline protocol::Value const_to_value(const t_const_value& val) {
     case t_type::type::t_struct:
       if (val.ttype()) {
         auto& obj = ret.emplace_object();
-        auto& strct =
-            static_cast<const t_structured&>(*val.ttype()->get_true_type());
+        const auto& obj_type = *val.ttype()->get_true_type();
+        obj.type() = !obj_type.uri().empty() ? obj_type.uri() : obj_type.name();
+        auto& strct = static_cast<const t_structured&>(obj_type);
         for (const auto& map_elem : val.get_map()) {
           auto field = strct.get_field_by_name(map_elem.first->get_string());
           if (!field) {

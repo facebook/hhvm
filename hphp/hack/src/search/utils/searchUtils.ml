@@ -28,7 +28,7 @@ type search_provider =
 (* Convert a string to a provider *)
 let provider_of_string (provider_str : string) : search_provider =
   match provider_str with
-  | "SqliteIndex" -> SqliteIndex
+  | "SqliteIndex" -> failwith "SqliteIndex is no longer supporter"
   | "NoIndex" -> NoIndex
   | "MockIndex" -> failwith ("unsupported provider " ^ provider_str)
   | "CustomIndex" -> CustomIndex

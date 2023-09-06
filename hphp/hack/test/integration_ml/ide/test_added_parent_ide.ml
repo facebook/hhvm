@@ -44,21 +44,32 @@ function test(FooChild $foo_child) : void {
 }
 "
 
+let bar_initial_diagnostics =
+  "
+/bar.php:
+File \"/bar.php\", line 6, characters 24-24:
+No instance method `f` in `FooChild` (Typing[4053])
+  File \"/bar.php\", line 5, characters 15-22:
+  This is why I think it is an object of type FooChild
+  File \"/foo_child.php\", line 5, characters 7-14:
+  Declaration of `FooChild` is here
+"
+
 let bar_diagnostics =
   "
 /bar.php:
 File \"/bar.php\", line 6, characters 12-26:
 Invalid argument (Typing[4110])
-File \"/bar.php\", line 3, characters 19-21:
-Expected int
-File \"/foo.php\", line 5, characters 25-30:
-But got string
+  File \"/bar.php\", line 3, characters 19-21:
+  Expected `int`
+  File \"/foo.php\", line 5, characters 25-30:
+  But got `string`
 "
 
 let test () =
-  let env = Test.setup_server () in
+  Test.Client.with_env ~custom_config:None @@ fun env ->
   let env =
-    Test.setup_disk
+    Test.Client.setup_disk
       env
       [
         (foo_name, "");
@@ -66,18 +77,21 @@ let test () =
         (bar_name, bar_contents);
       ]
   in
-  let env = Test.connect_persistent_client env in
-  let (env, _loop_output) = Test.(run_loop_once env default_loop_input) in
 
-  let env = Test.open_file env foo_name in
-  let env = Test.open_file env bar_name in
-  let env = Test.wait env in
-  let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
-  Test.assert_no_diagnostics loop_output;
+  (* At first, bar.php reports "no member f found in FooChild"*)
+  let (env, diagnostics) = Test.Client.open_file env bar_name in
+  Test.Client.assert_diagnostics_string diagnostics bar_initial_diagnostics;
 
-  let (env, _) = Test.edit_file env foo_name foo_contents in
-  let env = Test.wait env in
-  let (_, _loop_output) = Test.(run_loop_once env default_loop_input) in
-  Test.assert_diagnostics_string
-    loop_output
-    "" (* TODO: this isn't right! there should be [bar_diagnostics] here! *)
+  (* We will define member f in Foo (the base of FooChild) *)
+  let env = Test.Client.setup_disk env [(foo_name, foo_contents)] in
+  (* But ClientIdeDaemon plays fast-and-lose with invalidation. It doesn't
+     flag that FooChild decl must be recomputed until we open foo_child.php.
+     And it doesn't flag that bar.php's TAST must be recomputed until
+     we close and open that file. *)
+  let (env, _diagnostics) = Test.Client.open_file env foo_child_name in
+  let (env, _diagnostics) = Test.Client.close_file env bar_name in
+  let (env, diagnostics) = Test.Client.open_file env bar_name in
+  Test.Client.assert_diagnostics_string diagnostics bar_diagnostics;
+
+  ignore env;
+  ()

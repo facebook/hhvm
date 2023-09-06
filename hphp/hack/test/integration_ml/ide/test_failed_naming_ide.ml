@@ -25,14 +25,6 @@ function test(): void {
 }
 "
 
-let init_errors =
-  {|
-File "/foo2.php", line 3, characters 10-12:
-Name already bound: `foo` (Naming[2012])
-  File "/foo1.php", line 3, characters 10-12:
-  Previous definition is here
-|}
-
 let init_diagnostics =
   {|
 /foo2.php:
@@ -47,9 +39,9 @@ let final_diagnostics = {|
 |}
 
 let test () =
-  let env = Test.setup_server () in
+  Test.Client.with_env ~custom_config:None @@ fun env ->
   let env =
-    Test.setup_disk
+    Test.Client.setup_disk
       env
       [
         (foo1_name, foo_contents);
@@ -57,33 +49,28 @@ let test () =
         ("bar.php", bar_contents);
       ]
   in
-  Test.assert_env_errors env init_errors;
 
-  let env = Test.connect_persistent_client env in
-  let env = Test.wait env in
-  let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
-  Test.assert_diagnostics_string loop_output init_diagnostics;
+  let (env, diagnostics) = Test.Client.open_file env foo2_name in
+  Test.Client.assert_diagnostics_string diagnostics init_diagnostics;
 
   (* Replace one of the duplicate definitions with a parsing error *)
-  let env = Test.open_file env foo2_name ~contents:"<?hh // strict \n {" in
-  (* Trigger a lazy recheck *)
-  let env = Test.wait env in
-  let (env, _) = Test.(run_loop_once env default_loop_input) in
-  (* Files with parsing errors are not redeclared during lazy recheck, so
-   * failed_naming should remain unchanged *)
-  let failed = Errors.get_failed_files env.ServerEnv.errorl in
-  let found =
-    Relative_path.Set.mem failed (Relative_path.from_root ~suffix:foo1_name)
-    || Relative_path.Set.mem failed (Relative_path.from_root ~suffix:foo2_name)
-  in
-  if not found then Test.fail "File missing from failed";
+  let env = Test.Client.setup_disk env [(foo2_name, "<?hh // strict \n {")] in
+  let (env, diagnostics) = Test.Client.open_file env foo2_name in
+  Test.Client.assert_diagnostics_string
+    diagnostics
+    {|
+/foo2.php:
+File "/foo2.php", line 2, characters 2-2:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
+
+File "/foo2.php", line 3, characters 1-1:
+A right brace `}` is expected here. (Parsing[1002])
+|};
 
   (* Remove the parsing error - there should be no errors after that *)
-  let (env, _) = Test.edit_file env foo2_name "<?hh // strict" in
-  let env = Test.wait env in
-  let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
-  Test.assert_diagnostics_string loop_output final_diagnostics;
+  let env = Test.Client.setup_disk env [(foo2_name, "<?hh // strict")] in
+  let (env, diagnostics) = Test.Client.open_file env foo2_name in
+  Test.Client.assert_no_diagnostics diagnostics;
 
-  (* Trigger a global recheck just to be sure *)
-  let (env, _) = Test.status env in
-  Test.assert_no_errors env
+  ignore env;
+  ()

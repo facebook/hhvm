@@ -35,6 +35,7 @@ function test(mixed $x): void {
 
 let disk_diagnostics =
   {|
+/bar.php:
 File "/bar.php", line 4, characters 7-8:
 Invalid argument (Typing[4110])
   File "/foo.php", line 3, characters 14-16:
@@ -45,6 +46,7 @@ Invalid argument (Typing[4110])
 
 let ide_diagnostics =
   {|
+/bar.php:
 File "/bar.php", line 4, characters 7-8:
 Invalid argument (Typing[4110])
   File "/foo.php", line 3, characters 14-19:
@@ -54,25 +56,33 @@ Invalid argument (Typing[4110])
 |}
 
 let test () =
-  let env = Test.setup_server () in
+  Test.Client.with_env ~custom_config:None @@ fun env ->
   let env =
-    Test.setup_disk
+    Test.Client.setup_disk
       env
       [(bar_name, bar_contents); (foo_name, foo_takes_int_contents)]
   in
-  let (env, loop_output) = Test.status env in
-  Test.assert_status loop_output disk_diagnostics;
+  let (env, diagnostics) = Test.Client.open_file env bar_name in
+  Test.Client.assert_diagnostics_string diagnostics disk_diagnostics;
 
-  let env = Test.connect_persistent_client env in
-  let env = Test.open_file env foo_name ~contents:foo_takes_string_contents in
-  let (env, _) = Test.full_check_status env in
-  let (env, loop_output) = Test.status env in
-  Test.assert_status loop_output ide_diagnostics;
+  (* an unsaved foo.php doesn't affect bar.php *)
+  let (env, _diagnostics) =
+    Test.Client.edit_file env foo_name foo_takes_string_contents
+  in
+  let (env, diagnostics) = Test.Client.open_file env bar_name in
+  Test.Client.assert_diagnostics_string diagnostics disk_diagnostics;
 
-  let (env, loop_output) = Test.status ~ignore_ide:true env in
-  Test.assert_status loop_output disk_diagnostics;
+  (* saving it does affect bar.php *)
+  let env =
+    Test.Client.setup_disk env [(foo_name, foo_takes_string_contents)]
+  in
+  let (env, diagnostics) = Test.Client.open_file env bar_name in
+  Test.Client.assert_diagnostics_string diagnostics ide_diagnostics;
 
-  let (env, _) = Test.full_check_status env in
-  let (env, loop_output) = Test.status ~ignore_ide:false env in
-  Test.assert_status loop_output ide_diagnostics;
-  ignore env
+  (* save it back again *)
+  let env = Test.Client.setup_disk env [(foo_name, foo_takes_int_contents)] in
+  let (env, diagnostics) = Test.Client.open_file env bar_name in
+  Test.Client.assert_diagnostics_string diagnostics disk_diagnostics;
+
+  ignore env;
+  ()

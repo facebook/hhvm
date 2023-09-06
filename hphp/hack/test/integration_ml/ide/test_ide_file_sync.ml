@@ -49,20 +49,40 @@ let build_code_edit st_line st_column ed_line ed_column text =
     }
 
 let test () =
-  let env = Test.setup_server () in
-  let env = Test.setup_disk env [(foo_name, foo_no_errors)] in
-  let env = Test.connect_persistent_client env in
+  Test.Client.with_env ~custom_config:None @@ fun env ->
+  let env = Test.Client.setup_disk env [(foo_name, foo_no_errors)] in
   (* Open a new file in editor *)
-  let env = Test.open_file env bar_name ~contents:"" in
+  let (env, _diagnostics) = Test.Client.edit_file env bar_name "" in
   (* Start typing in the new file *)
-  let (env, _) = Test.edit_file env bar_name bar_contents in
+  let (env, _diagnostics) = Test.Client.edit_file env bar_name bar_contents in
   (* Request completions *)
-  let (env, loop_output) = Test.ide_autocomplete env (bar_name, 3, 5) in
-  Test.assert_ide_autocomplete loop_output ["foo"];
+  let (env, response) =
+    ClientIdeDaemon.Test.handle
+      env
+      ClientIdeMessage.(
+        Completion
+          ( Test.doc bar_name bar_contents,
+            Test.loc 3 5,
+            { is_manually_invoked = true } ))
+  in
+  Test.assert_ide_completions response ["foo"];
 
   (* Add a new definition to the file and save it *)
-  let (env, _) = Test.edit_file env bar_name bar_new_contents in
-  let (env, _) = Test.save_file env bar_name bar_new_contents in
+  let (env, _diagnostics) =
+    Test.Client.edit_file env bar_name bar_new_contents
+  in
+  let env = Test.Client.setup_disk env [(bar_name, bar_new_contents)] in
   (* Check that new definition is among the completions *)
-  let (_, loop_output) = Test.ide_autocomplete env (bar_name, 4, 5) in
-  Test.assert_ide_autocomplete loop_output ["foo"; "foo2"]
+  let (env, response) =
+    ClientIdeDaemon.Test.handle
+      env
+      ClientIdeMessage.(
+        Completion
+          ( Test.doc bar_name bar_new_contents,
+            Test.loc 4 5,
+            { is_manually_invoked = true } ))
+  in
+  Test.assert_ide_completions response ["foo"; "foo2"];
+
+  ignore env;
+  ()

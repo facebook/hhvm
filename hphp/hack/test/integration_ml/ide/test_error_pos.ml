@@ -40,17 +40,6 @@ let rec create_bars acc = function
   | 0 -> acc
   | i -> create_bars (create_bar i :: acc) (i - 1)
 
-let assert_10_diagnostics loop_output =
-  let error_count =
-    SMap.fold
-      (fun _key errors count -> count + List.length errors)
-      (Test.get_diagnostics loop_output)
-      0
-  in
-  if error_count <> 10 then
-    Test.fail
-    @@ Printf.sprintf "Expected 10 push diagnostics but got %d." error_count
-
 let bar_107_foo_line_3_diagnostics =
   {|
 /bar107.php:
@@ -114,57 +103,40 @@ allowed_decl_fixme_codes = 4336
 "
 
 let test () =
-  Relative_path.set_path_prefix Relative_path.Root (Path.make root);
-  TestDisk.set hhconfig_filename hhconfig_contents;
-  let options = ServerArgs.default_options ~root in
-  let (custom_config, _) = ServerConfig.load ~silent:false options in
-  let env = Test.setup_server ~custom_config () in
+  let global_opts : GlobalOptions.t =
+    GlobalOptions.set
+      ~allowed_fixme_codes_strict:(ISet.of_list [4336])
+      ~po_allowed_decl_fixme_codes:(ISet.of_list [4336])
+      GlobalOptions.default
+  in
+  let custom_config = ServerConfig.default_config in
+  let custom_config = ServerConfig.set_tc_options custom_config global_opts in
+  let custom_config =
+    ServerConfig.set_parser_options custom_config global_opts
+  in
+  Test.Client.with_env ~custom_config:(Some custom_config) @@ fun env ->
   (* 200 files with errors *)
   let disk_contents = [(foo_name, foo_contents "")] in
   let disk_contents = create_bars disk_contents 200 in
-  let env = Test.setup_disk env disk_contents in
-  let env = Test.connect_persistent_client env in
-  let env = Test.wait env in
-  let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
-  Test.assert_diagnostics_in
-    loop_output
-    ~filename:bar_107_name
+  let env = Test.Client.setup_disk env disk_contents in
+  let (env, diagnostics) = Test.Client.open_file env bar_107_name in
+  Test.Client.assert_diagnostics_string
+    diagnostics
     bar_107_foo_line_3_diagnostics;
 
-  (* Move foo 2 lines down *)
-  let env = Test.open_file env foo_name ~contents:(foo_contents "\n\n") in
-  let env = Test.wait env in
-  let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
-  assert_10_diagnostics loop_output;
-  let (env, loop_output) = Test.full_check_status env in
-  Test.assert_diagnostics_in
-    loop_output
-    ~filename:bar_107_name
+  (* Move foo 2 lines down and save to disk *)
+  let env = Test.Client.setup_disk env [(foo_name, foo_contents "\n\n")] in
+  let (env, diagnostics) = Test.Client.open_file env bar_107_name in
+  Test.Client.assert_diagnostics_string
+    diagnostics
     bar_107_foo_line_5_diagnostics;
-  Test.assert_diagnostics_in
-    loop_output
-    ~filename:(bar_name 108)
+  let (env, diagnostics) = Test.Client.open_file env (bar_name 108) in
+  Test.Client.assert_diagnostics_string
+    diagnostics
     bar_108_foo_line_5_diagnostics;
 
-  (* Fix one of the errors *)
-  let (env, _) = Test.edit_file env bar_107_name "" in
-  let env = Test.wait env in
-  let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
-  Test.assert_diagnostics_string loop_output bar107_cleared;
-
-  (* Edit foo back to test "edit already opened file" scenario too. *)
-  let (env, _) = Test.edit_file env foo_name (foo_contents "") in
-  let env = Test.wait env in
-  let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
-  assert_10_diagnostics loop_output;
-
-  let (env, _) = Test.edit_file env bar_106_name "" in
-  let env = Test.wait env in
-  let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
-  Test.assert_diagnostics_in loop_output ~filename:bar_106_name bar106_cleared;
-  (* Notice that foo position is back to line 3 *)
-  Test.assert_diagnostics_in
-    loop_output
-    ~filename:(bar_name 109)
-    bar_109_foo_line_3_diagnostics;
-  ignore env
+  (* Fix one of the errors in the editor *)
+  let (env, diagnostics) = Test.Client.edit_file env bar_107_name "" in
+  Test.Client.assert_no_diagnostics diagnostics;
+  ignore env;
+  ()

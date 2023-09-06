@@ -58,26 +58,37 @@ function test(Foo $foo) {
 "
 
 let test () =
-  let env = Test.setup_server () in
-  let env = Test.connect_persistent_client env in
-  let env = Test.open_file env foo_parent_name ~contents:foo_parent_contents1 in
-  let env = Test.open_file env foo_name ~contents:foo_contents1 in
-  let env = Test.wait env in
-  let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
-  Test.assert_no_diagnostics loop_output;
+  Test.Client.with_env ~custom_config:None @@ fun env ->
+  let env =
+    Test.Client.setup_disk
+      env
+      [(foo_parent_name, foo_parent_contents1); (foo_name, foo_contents1)]
+  in
 
   (* Introduce an irrecoverable parsing error in Foo definition - if we would
    * proceed to try to redeclare foo.php, Foo will no longer exist *)
-  let (env, _) = Test.edit_file env foo_name foo_contents2 in
-  let env = Test.wait env in
-  let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
-  Test.assert_diagnostics_string loop_output foo_diagnostics;
+  let env = Test.Client.setup_disk env [(foo_name, foo_contents2)] in
+  let (env, diagnostics) = Test.Client.open_file env foo_name in
+  Test.Client.assert_diagnostics_string diagnostics foo_diagnostics;
 
   (* Change the Foo parent to trigger invalidating Foo *)
-  let (env, _) = Test.edit_file env foo_parent_name foo_parent_contents2 in
-  let env = Test.wait env in
-  let (env, _) = Test.(run_loop_once env default_loop_input) in
-  (* Check that Foo definiton is still available for querying *)
-  let env = Test.open_file env "test.php" ~contents:autocomplete_contents in
-  let (_, loop_output) = Test.ide_autocomplete env ("test.php", 4, 9) in
-  Test.assert_ide_autocomplete_does_not_contain loop_output ["bar"]
+  let env =
+    Test.Client.setup_disk env [(foo_parent_name, foo_parent_contents2)]
+  in
+  (* If Foo is irrecoverable, then it shouldn't be available for completion *)
+  let (env, _diagnostics) =
+    Test.Client.edit_file env "test.php" autocomplete_contents
+  in
+  let (env, response) =
+    ClientIdeDaemon.Test.handle
+      env
+      ClientIdeMessage.(
+        Completion
+          ( Test.doc "test.php" autocomplete_contents,
+            Test.loc 4 9,
+            { is_manually_invoked = true } ))
+  in
+  Test.assert_ide_completions response [];
+
+  ignore env;
+  ()

@@ -45,51 +45,45 @@ Invalid return type (Typing[4110])
   But got `string`
 "
 
-let bar_clear = "
-/bar.php:
-"
-
-let root = "/"
-
-let hhconfig_filename = Filename.concat root ".hhconfig"
-
-let hhconfig_contents =
-  "
-allowed_fixme_codes_strict = 4336
-allowed_decl_fixme_codes = 4336
-"
-
 let test () =
-  Relative_path.set_path_prefix Relative_path.Root (Path.make root);
-  TestDisk.set hhconfig_filename hhconfig_contents;
-  let options = ServerArgs.default_options ~root in
-  let (custom_config, _) = ServerConfig.load ~silent:false options in
-  let env = Test.setup_server ~custom_config () in
-  let env =
-    Test.setup_disk env [(foo_name, foo_returns_int); (bar_name, bar_contents)]
+  let global_opts : GlobalOptions.t =
+    GlobalOptions.set
+      ~allowed_fixme_codes_strict:(ISet.of_list [4336])
+      ~po_allowed_decl_fixme_codes:(ISet.of_list [4336])
+      GlobalOptions.default
   in
-  let env = Test.connect_persistent_client env in
-  let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
-  Test.assert_no_errors env;
-  Test.assert_no_diagnostics loop_output;
+  let custom_config = ServerConfig.default_config in
+  let custom_config = ServerConfig.set_tc_options custom_config global_opts in
+  let custom_config =
+    ServerConfig.set_parser_options custom_config global_opts
+  in
+  Test.Client.with_env ~custom_config:(Some custom_config) @@ fun env ->
+  let env =
+    Test.Client.setup_disk
+      env
+      [(foo_name, foo_returns_int); (bar_name, bar_contents)]
+  in
 
-  (* Open both files and make an edit to foo that results in errors in bar *)
-  let env = Test.open_file env foo_name in
-  let env = Test.open_file env bar_name in
-  let (env, _) = Test.edit_file env foo_name foo_returns_string in
-  let env = Test.wait env in
-  let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
-  Test.assert_diagnostics_string loop_output bar_diagnostics;
+  (* Bar is clean with respect to foo as it is on disk *)
+  let (env, diagnostics) = Test.Client.open_file env bar_name in
+  Test.Client.assert_no_diagnostics diagnostics;
 
-  (* Close bar, make sure that errors is still there, not cleared *)
-  let (env, _) = Test.close_file env bar_name in
-  let env = Test.wait env in
-  let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
-  Test.assert_diagnostics_string loop_output bar_diagnostics;
+  (* If we make an in-editor change to foo, that won't yet affect bar *)
+  let (env, _diagnostics) =
+    Test.Client.edit_file env foo_name foo_returns_string
+  in
+  let (env, diagnostics) = Test.Client.open_file env bar_name in
+  Test.Client.assert_no_diagnostics diagnostics;
 
-  (* Fix foo, check that the error in bar was cleared - even though the
-   * file is not currently open in IDE *)
-  let (env, _) = Test.edit_file env foo_name foo_returns_int in
-  let env = Test.wait env in
-  let (_, loop_output) = Test.(run_loop_once env default_loop_input) in
-  Test.assert_diagnostics_string loop_output bar_clear
+  (* If we save the changes to foo, then bar will now exhibit the error *)
+  let env = Test.Client.setup_disk env [(foo_name, foo_returns_string)] in
+  let (env, diagnostics) = Test.Client.open_file env bar_name in
+  Test.Client.assert_diagnostics_string diagnostics bar_diagnostics;
+
+  (* And if we fix foo, then bar will now be correct again *)
+  let env = Test.Client.setup_disk env [(foo_name, foo_returns_int)] in
+  let (env, diagnostics) = Test.Client.open_file env bar_name in
+  Test.Client.assert_no_diagnostics diagnostics;
+
+  ignore env;
+  ()

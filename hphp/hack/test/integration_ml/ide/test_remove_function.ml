@@ -30,33 +30,28 @@ let full_diagnostics =
   "
 /bar.php:
 File \"/bar.php\", line 4, characters 3-5:
-Unbound name (typing): `foo` (Typing[4107])
+Unbound name: `foo` (a global function) (Naming[2049])
 
 File \"/bar.php\", line 4, characters 3-5:
-Unbound name: `foo` (a global function) (Naming[2049])
+Unbound name (typing): `foo` (Typing[4107])
 "
 
 let test () =
-  let env = Test.setup_server () in
+  Test.Client.with_env ~custom_config:None @@ fun env ->
   let env =
-    Test.setup_disk
+    Test.Client.setup_disk
       env
       [(foo_name, foo_contents); (bar_name, bar_contents) (* no errors *)]
   in
-  let env = Test.connect_persistent_client env in
-  let (env, loop_outputs) = Test.(run_loop_once env default_loop_input) in
-  Test.assert_no_diagnostics loop_outputs;
 
   (* no diagnostics initially *)
-  let env = Test.open_file env foo_name in
-  (* Delete foo() *)
-  let (env, _) = Test.edit_file env foo_name "" in
-  let env = Test.wait env in
-  let (env, loop_outputs) = Test.(run_loop_once env default_loop_input) in
-  (* Change introduces an error in bar.php, but this file is not open in IDE
-   * so we don't recheck it immediately. *)
-  Test.assert_no_diagnostics loop_outputs;
+  let (env, diagnostics) = Test.Client.open_file env bar_name in
+  Test.Client.assert_no_diagnostics diagnostics;
 
-  (* Asking for global error list will trigger recheck of bar.php *)
-  let (_, loop_outputs) = Test.full_check_status env in
-  Test.assert_diagnostics_string loop_outputs full_diagnostics
+  (* Delete foo() *)
+  let env = Test.Client.setup_disk env [(foo_name, "")] in
+  let (env, diagnostics) = Test.Client.open_file env bar_name in
+  Test.Client.assert_diagnostics_string diagnostics full_diagnostics;
+
+  ignore env;
+  ()

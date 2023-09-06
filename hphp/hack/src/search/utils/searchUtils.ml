@@ -33,7 +33,7 @@ let provider_of_string (provider_str : string) : search_provider =
   | "MockIndex" -> failwith ("unsupported provider " ^ provider_str)
   | "CustomIndex" -> CustomIndex
   | "LocalIndex" -> LocalIndex
-  | _ -> SqliteIndex
+  | _ -> failwith ("invalid search-provider: " ^ provider_str)
 
 (* Convert a string to a human readable description of the provider *)
 let descriptive_name_of_provider (provider : search_provider) : string =

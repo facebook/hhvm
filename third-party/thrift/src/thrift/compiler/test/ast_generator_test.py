@@ -261,7 +261,10 @@ class AstGeneratorTest(unittest.TestCase):
                 """
                 struct Annot {}
                 @Annot
-                struct S {}
+                struct S {
+                    @Annot
+                    1: i32 field;
+                }
                 """
             ),
         )
@@ -275,4 +278,11 @@ class AstGeneratorTest(unittest.TestCase):
         )
         self.assertEqual(
             annot.objectValue.type, "facebook.com/thrift/type/StructuredAnnotation"
+        )
+
+        # Field annot
+        annot_id = next(iter(ast.definitions[1].structDef.fields[0].attrs.annotations))
+        annot = ast.values[annot_id - 1]
+        self.assertEqual(
+            annot.objectValue.members[1].objectValue.members[3].stringValue, "foo.Annot"
         )

@@ -83,7 +83,6 @@ let satisfies_rules test_module_opt rules =
 let find_module_symbol env name_opt =
   match name_opt with
   | None -> None
-  | Some s when String.equal s Naming_special_names.Modules.default -> None
   | Some name -> Some (name, Env.get_module env name)
 
 let satisfies_import_rules env current target =

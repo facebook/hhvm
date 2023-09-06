@@ -34,7 +34,7 @@ use toml::Spanned;
 pub const FILE_PATH_RELATIVE_TO_ROOT: &str = ".hhconfig";
 pub const PACKAGE_FILE_PATH_RELATIVE_TO_ROOT: &str = "PACKAGES.toml";
 
-fn convert_package_info(info: package::PackageInfo) -> OxidizedPackageInfo {
+fn convert_package_info(info: PackageInfo) -> OxidizedPackageInfo {
     // Convert IndexMap to SMap for existing_packages
     let mut existing_packages = SMap::new();
     let mut glob_to_package = SMap::new();
@@ -43,8 +43,7 @@ fn convert_package_info(info: package::PackageInfo) -> OxidizedPackageInfo {
     for package in packages {
         let name: String = package.name.1.clone();
         existing_packages.insert(name, package.clone());
-        let uses = package.uses.clone();
-        for use_ in uses {
+        for use_ in &package.uses {
             glob_to_package.insert(use_.1.clone(), package.clone());
         }
     }
@@ -54,7 +53,7 @@ fn convert_package_info(info: package::PackageInfo) -> OxidizedPackageInfo {
     }
 }
 
-pub fn package_info_to_vec(filename: String, info: package::PackageInfo) -> Vec<OxidizedPackage> {
+fn package_info_to_vec(filename: String, info: PackageInfo) -> Vec<OxidizedPackage> {
     let pos_from_span = |span: (usize, usize)| {
         let (start_offset, end_offset) = span;
         let start_lnum = info.line_number(start_offset);

@@ -1,22 +1,30 @@
 Typing[4472] Cannot access a public element which belongs to package pkg1 from the default package [1]
 -> This is from module a, which belongs to package pkg1 [2]
 -> But this is from the default module, which belongs to the default package [3]
--> And the default package does not include package pkg1 [3]
+-> And the default package does not include package pkg1 [4]
 
 cross_package_access_bad5.php--b.php:5:14
-    3 | class B {
-    4 |   public function test(): void {
-[1] 5 |     $a = new A(); // error
-    6 |   }
-    7 | }
+     3 | class B {
+     4 |   public function test(): void {
+[1]  5 |     $a = new A(); // error
+     6 |   }
+     7 | }
 
 cross_package_access_bad5.php--a.php:4:14
-    2 | // package pkg1
-    3 | module a;
-[2] 4 | public class A {}
-    5 | 
+     2 | // package pkg1
+     3 | module a;
+[2]  4 | public class A {}
+     5 | 
 
-.:0:0
-[3] 0 | No source found
+/tmp/71FWF8f8GH/modules.hhi:5:12
+     3 |   This module can be globbed by PACKAGES.toml, but you can't write `module default;` explicitly in any code.
+     4 | **/
+[3]  5 | new module default {}
+
+../PACKAGES.toml:20:11
+    18 | soft_includes = ["pkg2"]
+    19 | 
+[4] 20 | [packages.default]
+    21 | uses=["*"]
 
 1 error found.

@@ -29,8 +29,8 @@ let init_errors =
   {|
 File "/foo2.php", line 3, characters 10-12:
 Name already bound: `foo` (Naming[2012])
-File "/foo1.php", line 3, characters 10-12:
-Previous definition is here
+  File "/foo1.php", line 3, characters 10-12:
+  Previous definition is here
 |}
 
 let init_diagnostics =
@@ -38,8 +38,8 @@ let init_diagnostics =
 /foo2.php:
 File "/foo2.php", line 3, characters 10-12:
 Name already bound: `foo` (Naming[2012])
-File "/foo1.php", line 3, characters 10-12:
-Previous definition is here
+  File "/foo1.php", line 3, characters 10-12:
+  Previous definition is here
 |}
 
 let final_diagnostics = {|

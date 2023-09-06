@@ -10,18 +10,20 @@ let run = Runner_base.run
 
 let tests =
   [
-    ("ide/added_parent", run Test_added_parent.test);
+    ("ide/added_parent", run Test_added_parent_ide.test);
     ("ide/auto_ns_aliasing", run Test_auto_ns_aliasing.test);
     ("ide/diagnostics_in_closed_file", run Test_diagnostics_in_closed_file.test);
     ("ide/error_pos", run Test_error_pos.test);
     ("ide/error_throttling", run Test_error_throttling.test);
     ("ide/error_throttling_open_file", run Test_error_throttling_open_file.test);
     ("ide/exception_handling", run Test_exception_handling.test);
-    ("ide/failed_naming", run Test_failed_naming.test);
+    ("ide/failed_naming", run Test_failed_naming_ide.test);
     ("ide/hhi_phpstdlib", run Test_hhi_phpstdlib.test);
     ("ide/ide_check", run Test_ide_check.test);
     ("ide/ide_close", run Test_ide_close.test);
     ("ide/ide_consistency", run Test_ide_consistency.test);
+    ( "ide/ide_diagnostic_subscription",
+      run Test_ide_diagnostic_subscription.test );
     ("ide/ide_disk", run Test_ide_disk.test);
     ("ide/ide_file_sync", run Test_ide_file_sync.test);
     ("ide/identify_symbol", run Test_identify_symbol.test);

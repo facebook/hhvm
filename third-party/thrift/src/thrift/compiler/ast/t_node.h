@@ -47,14 +47,6 @@ class t_node {
   const source_range& src_range() const { return range_; }
   void set_src_range(const source_range& r) { range_ = r; }
 
-  // TODO: move to t_named.
-  const std::string& doc() const { return doc_ ? doc_->value : kEmptyString; }
-  bool has_doc() const { return !!doc_; }
-  void set_doc(std::string doc, source_range range) {
-    doc_ = node_doc{std::move(doc), range};
-  }
-  source_range doc_range() const { return doc_ ? doc_->range : source_range{}; }
-
   // The annotations declared directly on this node.
   const auto& annotations() const { return annotations_; }
 
@@ -126,12 +118,6 @@ class t_node {
 
  private:
   source_range range_;
-
-  struct node_doc {
-    std::string value;
-    source_range range;
-  };
-  boost::optional<node_doc> doc_;
 
   std::map<std::string, annotation_value> annotations_;
 };

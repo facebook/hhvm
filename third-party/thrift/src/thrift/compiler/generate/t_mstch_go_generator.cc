@@ -69,8 +69,8 @@ struct go_codegen_data {
   const t_program* current_program;
 };
 
-std::string doc_comment(const t_node* node) {
-  auto in = std::istringstream(node->doc());
+std::string doc_comment(const t_named* named_node) {
+  std::istringstream in(named_node->doc());
 
   std::string line;
   std::ostringstream out;

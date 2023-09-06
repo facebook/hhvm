@@ -72,6 +72,17 @@ class t_named : public t_node {
   //  yet, like enum values.
   const t_program* program() const { return program_; }
 
+  // Returns the documentation comment.
+  const std::string& doc() const { return doc_ ? doc_->value : kEmptyString; }
+
+  bool has_doc() const { return !!doc_; }
+
+  source_range doc_range() const { return doc_ ? doc_->range : source_range{}; }
+
+  void set_doc(std::string doc, source_range range) {
+    doc_ = node_doc{std::move(doc), range};
+  }
+
  protected:
   explicit t_named(const t_program* program = nullptr, std::string name = "");
   t_named(const t_named& named);
@@ -85,6 +96,12 @@ class t_named : public t_node {
   std::string uri_;
   bool explicit_uri_ = false;
   std::vector<std::unique_ptr<t_const>> structured_annotations_;
+
+  struct node_doc {
+    std::string value;
+    source_range range;
+  };
+  boost::optional<node_doc> doc_;
 
   // TODO(afuller): Remove everything below this comment. It is only provided
   // for backwards compatibility.

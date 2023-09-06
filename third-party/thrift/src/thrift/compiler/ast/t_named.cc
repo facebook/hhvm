@@ -33,7 +33,6 @@ t_named::t_named(const t_named& named)
       name_(named.name_),
       program_(named.program_),
       generated_(named.generated_),
-      release_state_(named.release_state_),
       uri_(named.uri_),
       explicit_uri_(named.explicit_uri_) {
   for (const auto& annotation : named.structured_annotations_) {

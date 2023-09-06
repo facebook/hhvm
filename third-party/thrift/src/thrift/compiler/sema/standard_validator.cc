@@ -59,6 +59,20 @@ const t_structured* get_mixin_type(const t_field& field) {
   return nullptr;
 }
 
+bool has_experimental_annotation(diagnostic_context& ctx, const t_named& node) {
+  if (node.find_structured_annotation_or_null(kExperimentalUri)) {
+    return true;
+  }
+  for (int pos = ctx.nodes().size() - 1; pos >= 0; --pos) {
+    const auto* parent = dynamic_cast<const t_named*>(ctx.nodes().at(pos));
+    if (parent != nullptr &&
+        parent->find_structured_annotation_or_null(kExperimentalUri)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 bool has_lazy_field(const t_structured& node) {
   for (const auto& field : node.fields()) {
     if (cpp2::is_lazy(&field)) {
@@ -532,8 +546,7 @@ void validate_required_field(diagnostic_context& ctx, const t_field& field) {
   if (field.qualifier() == t_field_qualifier::required) {
     ctx.report(
         field,
-        ctx.has(context_type::no_legacy) ? diagnostic_level::error
-                                         : diagnostic_level::warning,
+        diagnostic_level::warning,
         "Required field is deprecated: `{}`.",
         field.name());
   }
@@ -573,7 +586,7 @@ void validate_const_type_and_value(
   check_const_rec(ctx, node, &node.type().deref(), node.value());
   ctx.check(
       !node.find_structured_annotation_or_null(kCppAdapterUri) ||
-          node.release_state() <= t_release_state::experimental,
+          has_experimental_annotation(ctx, node),
       "Using adapters on const `{}` is only allowed in the experimental mode.",
       node.name());
 }
@@ -628,7 +641,7 @@ void limit_terse_write_on_experimental_mode(
     diagnostic_context& ctx, const t_named& node) {
   ctx.check(
       !node.find_structured_annotation_or_null(kTerseWriteUri) ||
-          node.release_state() <= t_release_state::experimental,
+          has_experimental_annotation(ctx, node),
       "Using @thrift.TerseWrite on field `{}` is only allowed in the experimental mode.",
       node.name());
 }
@@ -637,10 +650,7 @@ void validate_field_id(diagnostic_context& ctx, const t_field& node) {
   if (node.explicit_id() != node.id()) {
     ctx.report(
         node,
-        ctx.has(context_type::no_legacy) &&
-                node.release_state() > t_release_state::experimental
-            ? diagnostic_level::error
-            : diagnostic_level::warning,
+        diagnostic_level::warning,
         "No field id specified for `{}`, resulting protocol may have conflicts "
         "or not be backwards compatible!",
         node.name());
@@ -833,20 +843,6 @@ void validate_exception_php_annotations(
           v,
           node.name());
     }
-  }
-}
-
-void validate_function_return_type(
-    diagnostic_context& ctx, const t_function& node) {
-  if (node.is_oneway()) {
-    return;
-  }
-
-  if (ctx.has(context_type::no_legacy)) {
-    ctx.check(
-        node.return_type() && node.return_type()->is_struct(),
-        "Function `{}`'s return type must be a thrift struct.",
-        node.name());
   }
 }
 
@@ -1196,7 +1192,6 @@ ast_validator standard_validator() {
   validator.add_interaction_visitor(&validate_interaction_nesting);
   validator.add_throws_visitor(&validate_throws_exceptions);
   validator.add_function_visitor(&validate_oneway_function);
-  validator.add_function_visitor(&validate_function_return_type);
   validator.add_function_visitor(&validate_function_priority_annotation);
   validator.add_function_visitor(ValidateAnnotationPositions{});
 

@@ -101,55 +101,6 @@ struct DecodedUri {
   6: string fragment;
 } (py3.hidden)
 
-/**
- * The (pre)release state for a given definition/feature.
- *
- * Currently configured via the standard annotations:
- *  @thrift.Testing
- *  @thrift.Experimental
- *  @thrift.Beta
- *  @thrift.Released
- *  @thrift.Deprecated
- *  @thrift.Legacy
- *
- * See thrift/annotation/thrift.thrift for more details.
- */
-enum ReleaseState {
-  /**
-   * Indicates a definition/feature should only be used in an ephemeral testing
-   * enviornment.
-   *
-   * Such enviornments only store serialized values temporarly and strictly
-   * control which versions of Thrift definitions are used, so 'compatibility'
-   * is not a concern.
-   */
-  Testing = -3,
-
-  /**
-   * Indicates a definition/feature should only be used with permission, may only
-   * work in specific contexts, and may change in incompatible ways without notice.
-   */
-  Experimental = -2,
-
-  /** Indicates a definition/feature may change in 'incompatible' ways. */
-  Beta = -1,
-
-  /**
-   * Indicates a definition/feature must not depend directly on an unreleased
-   * definitions/feature.
-   */
-  Released = 1,
-
-  /** Indicates a definition/feature should no longer be used. */
-  Deprecated = 2,
-
-  /**
-   * Indicates a definition/feature will be removed in the ~next release.
-   *
-   * Pleased migrate off of all Legacy definitions/features as soon as possible.
-   */
-  Legacy = 3,
-}
 
 /** The attributes that can be associated with any Thrift definition. */
 struct DefinitionAttrs {
@@ -205,9 +156,6 @@ struct DefinitionAttrs {
    * For example, none are present in the runtime schema while all are present in the AST.
    */
   4: map<string, string> unstructuredAnnotations;
-
-  /** The release state associated with this definition. */
-  5: ReleaseState releaseState;
 
   /** Information about the documentation preceding the definition. */
   6: DocBlock docs;

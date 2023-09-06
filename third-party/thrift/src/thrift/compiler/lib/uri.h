@@ -26,6 +26,7 @@ namespace compiler {
 constexpr auto kBitmaskEnum = "facebook.com/thrift/annotation/BitmaskEnum";
 constexpr auto kBoxUri = "facebook.com/thrift/annotation/Box";
 constexpr auto kInternBoxUri = "facebook.com/thrift/annotation/InternBox";
+constexpr auto kExperimentalUri = "facebook.com/thrift/annotation/Experimental";
 constexpr auto kExceptionMessageUri =
     "facebook.com/thrift/annotation/ExceptionMessage";
 constexpr auto kGenerateRuntimeSchemaUri =

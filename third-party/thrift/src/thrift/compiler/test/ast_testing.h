@@ -60,19 +60,7 @@ class BaseProgramTest : public testing::Test {
 // TODO(afuller): Use to factor out code from moar tests!!
 class BaseVisitorTest : public BaseProgramTest {
  protected:
-  const t_struct& no_testing_;
-  const t_struct& no_experimental_;
-  const t_struct& no_beta_;
-  const t_struct& no_legacy_;
-  const t_struct& no_deprecated_;
-
-  BaseVisitorTest()
-      : BaseProgramTest{},
-        no_testing_(create_annotation("NoTesting")),
-        no_experimental_(create_annotation("NoExperimental")),
-        no_beta_(create_annotation("NoBeta")),
-        no_legacy_(create_annotation("NoLegacy")),
-        no_deprecated_(create_annotation("NoDeprecated")) {}
+  BaseVisitorTest() : BaseProgramTest{} {}
 };
 
 } // namespace apache::thrift::compiler::test

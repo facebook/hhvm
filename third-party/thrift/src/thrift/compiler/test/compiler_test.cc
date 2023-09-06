@@ -89,19 +89,10 @@ TEST(CompilerTest, zero_as_field_id_neg_keys) {
 
 TEST(CompilerTest, no_field_id) {
   check_compile(R"(
-    struct NoLegacy {} (thrift.uri = "facebook.com/thrift/annotation/NoLegacy")
-    struct Testing {} (thrift.uri = "facebook.com/thrift/annotation/Testing")
     struct Experimental {} (thrift.uri = "facebook.com/thrift/annotation/Experimental")
-
-    @NoLegacy
     struct Foo {
-      i32 field1; # expected-error: No field id specified for `field1`, resulting protocol may have conflicts or not be backwards compatible!
-
       @Experimental
       i32 field2; # expected-warning@-1: No field id specified for `field2`, resulting protocol may have conflicts or not be backwards compatible!
-
-      @Testing
-      i32 field3; # expected-warning@-1: No field id specified for `field3`, resulting protocol may have conflicts or not be backwards compatible!
     }
 
     struct Bar {

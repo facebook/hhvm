@@ -237,49 +237,6 @@ void set_generated(diagnostic_context&, mutator_context&, t_named& node) {
   }
 }
 
-const char* get_release_state_uri(t_release_state state) {
-  switch (state) {
-    case t_release_state::testing:
-      return "facebook.com/thrift/annotation/Testing";
-    case t_release_state::experimental:
-      return "facebook.com/thrift/annotation/Experimental";
-    case t_release_state::beta:
-      return "facebook.com/thrift/annotation/Beta";
-    case t_release_state::released:
-      return "facebook.com/thrift/annotation/Released";
-    default:
-      break;
-  }
-  return "";
-}
-
-void set_release_state(diagnostic_context&, mutator_context&, t_named& node) {
-  for (t_release_state state :
-       {t_release_state::testing,
-        t_release_state::experimental,
-        t_release_state::beta,
-        t_release_state::released}) {
-    if (node.find_structured_annotation_or_null(get_release_state_uri(state))) {
-      node.set_release_state(state);
-      return;
-    }
-  }
-}
-
-void inherit_release_state(
-    diagnostic_context& ctx, mutator_context&, t_named& node) {
-  if (node.release_state() != t_release_state::unspecified) {
-    return;
-  }
-  for (int pos = ctx.nodes().size() - 1; pos >= 0; --pos) {
-    const auto* parent = dynamic_cast<const t_named*>(ctx.nodes().at(pos));
-    if (parent != nullptr &&
-        parent->release_state() != t_release_state::unspecified) {
-      node.set_release_state(parent->release_state());
-    }
-  }
-}
-
 void normalize_return_type(
     diagnostic_context& ctx, mutator_context&, t_function& node) {
   auto& types = node.return_types();
@@ -504,12 +461,10 @@ ast_mutators standard_mutators() {
         &propagate_process_in_event_base_annotation);
     initial.add_function_visitor(&normalize_return_type);
     initial.add_definition_visitor(&set_generated);
-    initial.add_definition_visitor(&set_release_state);
   }
 
   {
     auto& main = mutators[standard_mutator_stage::main];
-    main.add_definition_visitor(&inherit_release_state);
     main.add_struct_visitor(&mutate_terse_write_annotation_structured);
     main.add_exception_visitor(&mutate_terse_write_annotation_structured);
     main.add_struct_visitor(&mutate_inject_metadata_fields);

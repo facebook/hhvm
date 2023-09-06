@@ -314,30 +314,6 @@ class basic_ast_visitor {
   }
 };
 
-enum class context_type {
-  no_testing = static_cast<int>(t_release_state::testing),
-  no_experimental = static_cast<int>(t_release_state::experimental),
-  no_beta = static_cast<int>(t_release_state::beta),
-  no_legacy,
-  no_deprecated,
-};
-
-constexpr inline const char* getContextTypeUri(context_type type) {
-  switch (type) {
-    case context_type::no_testing:
-      return "facebook.com/thrift/annotation/NoTesting";
-    case context_type::no_beta:
-      return "facebook.com/thrift/annotation/NoBeta";
-    case context_type::no_experimental:
-      return "facebook.com/thrift/annotation/NoExperimental";
-    case context_type::no_legacy:
-      return "facebook.com/thrift/annotation/NoLegacy";
-    case context_type::no_deprecated:
-      return "facebook.com/thrift/annotation/NoDeprecated";
-  }
-  return "";
-}
-
 template <bool is_const, typename N = t_node>
 class basic_visitor_context {
   using node_type = ast_detail::node_type<is_const, N>;
@@ -345,20 +321,6 @@ class basic_visitor_context {
 
  public:
   bool visiting() const noexcept { return !context_.empty(); }
-
-  bool has(context_type type) const {
-    // Get the uri for the associated annotation.
-    const char* uri = getContextTypeUri(type);
-    // Search for the context annotation.
-    for (auto itr = context_.rbegin(); itr != context_.rend(); ++itr) {
-      if (auto* named = dynamic_cast<const t_named*>(*itr)) {
-        if (named->find_structured_annotation_or_null(uri)) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
 
   // The first node visited.
   node_type* root() const noexcept {

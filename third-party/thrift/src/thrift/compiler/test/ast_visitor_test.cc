@@ -30,53 +30,6 @@ namespace {
 
 class VisitorContextTest : public test::BaseVisitorTest {};
 
-TEST_F(VisitorContextTest, ContextTypeUri) {
-  EXPECT_EQ(no_testing_.uri(), getContextTypeUri(context_type::no_testing));
-  EXPECT_EQ(
-      no_experimental_.uri(), getContextTypeUri(context_type::no_experimental));
-  EXPECT_EQ(no_beta_.uri(), getContextTypeUri(context_type::no_beta));
-  EXPECT_EQ(
-      no_deprecated_.uri(), getContextTypeUri(context_type::no_deprecated));
-  EXPECT_EQ(no_legacy_.uri(), getContextTypeUri(context_type::no_legacy));
-}
-
-TEST_F(VisitorContextTest, Has) {
-  auto& union1 = create_def<t_union>("Union1");
-  auto& struct1 = create_def<t_struct>("Struct1");
-
-  add_annot(no_legacy_, union1);
-  add_annot(no_deprecated_, struct1);
-  add_annot(no_beta_, program_);
-
-  visitor_context ctx;
-  EXPECT_FALSE(ctx.has(context_type::no_testing));
-  EXPECT_FALSE(ctx.has(context_type::no_experimental));
-  EXPECT_FALSE(ctx.has(context_type::no_beta));
-  EXPECT_FALSE(ctx.has(context_type::no_legacy));
-  EXPECT_FALSE(ctx.has(context_type::no_deprecated));
-
-  ctx.begin_visit(program_);
-  EXPECT_FALSE(ctx.has(context_type::no_testing));
-  EXPECT_FALSE(ctx.has(context_type::no_experimental));
-  EXPECT_TRUE(ctx.has(context_type::no_beta));
-  EXPECT_FALSE(ctx.has(context_type::no_legacy));
-  EXPECT_FALSE(ctx.has(context_type::no_deprecated));
-
-  ctx.begin_visit(union1);
-  EXPECT_FALSE(ctx.has(context_type::no_testing));
-  EXPECT_FALSE(ctx.has(context_type::no_experimental));
-  EXPECT_TRUE(ctx.has(context_type::no_beta));
-  EXPECT_TRUE(ctx.has(context_type::no_legacy));
-  EXPECT_FALSE(ctx.has(context_type::no_deprecated));
-
-  ctx.begin_visit(struct1);
-  EXPECT_FALSE(ctx.has(context_type::no_testing));
-  EXPECT_FALSE(ctx.has(context_type::no_experimental));
-  EXPECT_TRUE(ctx.has(context_type::no_beta));
-  EXPECT_TRUE(ctx.has(context_type::no_legacy));
-  EXPECT_TRUE(ctx.has(context_type::no_deprecated));
-}
-
 // A helper class for keeping track of visitation expectations.
 class MockAstVisitor {
  public:

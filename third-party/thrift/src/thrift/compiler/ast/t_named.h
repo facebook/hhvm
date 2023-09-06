@@ -33,26 +33,6 @@ class t_const;
 class t_program;
 
 /**
- * The (pre)release state for a given t_named.
- *
- * Currently configured via the annotations:
- *
- *   @thrift.Testing
- *   @thrift.Experimental
- *   @thrift.Beta
- *   @thrift.Released
- *
- * defined in thrift/annotation/thrift.thrift.
- */
-enum class t_release_state {
-  testing = -3,
-  experimental = -2,
-  beta = -1,
-  unspecified = 0,
-  released = 1,
-};
-
-/**
  * A base class for any named AST node such as a definition.
  *
  * Anything that is named, can be annotated.
@@ -87,10 +67,6 @@ class t_named : public t_node {
   bool generated() const noexcept { return generated_; }
   void set_generated(bool value = true) { generated_ = value; }
 
-  // The release state of this node.
-  t_release_state release_state() const noexcept { return release_state_; }
-  void set_release_state(t_release_state state) { release_state_ = state; }
-
   // The program this node appears in. Will be null for base types.
   //  Also null for definitions where no one has found value in tracking this
   //  yet, like enum values.
@@ -106,7 +82,6 @@ class t_named : public t_node {
 
  private:
   bool generated_ = false;
-  t_release_state release_state_ = t_release_state::unspecified;
   std::string uri_;
   bool explicit_uri_ = false;
   std::vector<std::unique_ptr<t_const>> structured_annotations_;

@@ -76,7 +76,7 @@ union Value {
   7: Double doubleValue;
 
   // Strings.
-  8: string stringValue;
+  8: binary stringValue; // Might not be valid UTF-8
 
   9: standard.ByteBuffer binaryValue;
 

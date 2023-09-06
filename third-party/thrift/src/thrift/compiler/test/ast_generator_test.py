@@ -242,5 +242,5 @@ class AstGeneratorTest(unittest.TestCase):
         self.assertEqual(ast.sources[1].fileName, "foo.thrift")
         self.assertEqual(
             ast.values[ast.sources[1].namespaces["cpp2"] - 1].stringValue,
-            "facebook.foo",
+            b"facebook.foo",
         )

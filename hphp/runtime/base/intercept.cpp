@@ -105,6 +105,14 @@ bool register_intercept(const String& name, const Variant& callback) {
     }
   }
 
+  if (StructuredLog::enabled() &&
+    RuntimeOption::EvalDumpJitEnableRenameFunctionStats &&
+    StructuredLog::coinflip(RO::EvalJitInterceptFunctionLogRate)) {
+    StructuredLogEntry entry;
+    entry.setStr("intercepted_func", interceptedFunc->fullName()->data());
+    StructuredLog::log("hhvm_intercept_function", entry);
+  }
+
 
   if (!callback.toBoolean()) {
     if (!s_intercept_data->empty()) {

@@ -955,7 +955,7 @@ struct RuntimeOption {
    * 2 - Functions in RenamableFunctions config list can be renamed
    */                                                                   \
   F(uint32_t, JitEnableRenameFunction, 0)                               \
-  F(uint32_t, JitRenameFunctionLogRate, 100)                            \
+  F(uint32_t, JitInterceptFunctionLogRate, 1000)                        \
   F(bool, JitUseVtuneAPI,              false)                           \
   F(bool, TraceCommandLineRequest,     true)                            \
                                                                         \

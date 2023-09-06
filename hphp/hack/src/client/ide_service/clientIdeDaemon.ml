@@ -671,7 +671,7 @@ let handle_request
     (message_queue : message_queue)
     (state : state)
     (_tracking_id : string)
-    (message : a ClientIdeMessage.t) : (state * (a, Lsp.Error.t) result) Lwt.t =
+    (message : a ClientIdeMessage.t) : state * (a, Lsp.Error.t) result =
   let open ClientIdeMessage in
   match (state, message) with
   (***********************************************************)
@@ -682,10 +682,10 @@ let handle_request
       Hh_logger.Level.set_min_level_file Hh_logger.Level.Debug
     else
       Hh_logger.Level.set_min_level_file Hh_logger.Level.Info;
-    Lwt.return (state, Ok ())
+    (state, Ok ())
   | (_, Shutdown ()) ->
     remove_hhi state;
-    Lwt.return (state, Ok ())
+    (state, Ok ())
   (***********************************************************)
   (************************* INITIALIZATION ******************)
   (***********************************************************)
@@ -714,7 +714,7 @@ let handle_request
           in
           Lwt.return_unit);
       log "Finished saved state initialization. State: %s" (show_dstate dstate);
-      Lwt.return (During_init dstate, Ok ())
+      (During_init dstate, Ok ())
     with
     | exn ->
       let e = Exception.wrap exn in
@@ -722,7 +722,7 @@ let handle_request
       (* Our caller has an exception handler. But we must handle this ourselves
          to change state to Failed_init; our caller's handler doesn't change state. *)
       (* TODO: remove_hhi *)
-      Lwt.return (Failed_init reason, Error (ClientIdeUtils.to_lsp_error reason))
+      (Failed_init reason, Error (ClientIdeUtils.to_lsp_error reason))
   end
   | (_, Initialize_from_saved_state _) ->
     failwith ("Unexpected init in " ^ state_to_log_string state)
@@ -742,7 +742,7 @@ let handle_request
           dfiles.changed_files_denominator + Relative_path.Set.cardinal changes;
       }
     in
-    Lwt.return (update_state_files state dfiles, Ok ())
+    (update_state_files state dfiles, Ok ())
   | (Initialized istate, Did_change_watched_files changes)
     when istate.icommon.local_config.ServerLocalConfig.ide_batch_process_changes
     ->
@@ -756,7 +756,7 @@ let handle_request
         changes
     in
     let istate = { istate with naming_table; sienv } in
-    Lwt.return (Initialized istate, Ok ())
+    (Initialized istate, Ok ())
   | (Initialized { ifiles; _ }, Did_change_watched_files changes) ->
     (* Legacy, will be deleted once we rollout ide_batch_process_changes *)
     let ifiles =
@@ -768,21 +768,21 @@ let handle_request
           ifiles.changed_files_denominator + Relative_path.Set.cardinal changes;
       }
     in
-    Lwt.return (update_state_files state ifiles, Ok ())
+    (update_state_files state ifiles, Ok ())
     (* didClose *)
   | (During_init { dfiles = files; _ }, Did_close file_path) ->
     let path =
       file_path |> Path.to_string |> Relative_path.create_detect_prefix
     in
     let files = close_file files path in
-    Lwt.return (update_state_files state files, Ok [])
+    (update_state_files state files, Ok [])
   | (Initialized istate, Did_close file_path) ->
     let path =
       file_path |> Path.to_string |> Relative_path.create_detect_prefix
     in
     let errors = get_errors_for_path istate path |> Errors.sort_and_finalize in
     let files = close_file istate.ifiles path in
-    Lwt.return (update_state_files state files, Ok errors)
+    (update_state_files state files, Ok errors)
   (* didOpen or didChange *)
   | ( During_init dstate,
       Did_open_or_change ({ file_path; file_contents }, _should_calculate_errors)
@@ -791,7 +791,7 @@ let handle_request
       file_path |> Path.to_string |> Relative_path.create_detect_prefix
     in
     let dstate = open_or_change_file_during_init dstate path file_contents in
-    Lwt.return (During_init dstate, Ok None)
+    (During_init dstate, Ok None)
   | ( Initialized istate,
       Did_open_or_change (document, { should_calculate_errors }) ) ->
     let (istate, ctx, entry, published_errors_ref) =
@@ -805,7 +805,7 @@ let handle_request
       end else
         None
     in
-    Lwt.return (Initialized istate, Ok errors)
+    (Initialized istate, Ok errors)
   (* Document Symbol *)
   | ( ( During_init { dfiles = files; dcommon = common; _ }
       | Initialized { ifiles = files; icommon = common; _ } ),
@@ -816,7 +816,7 @@ let handle_request
         ~popt:(ServerConfig.parser_options common.config)
         ~entry
     in
-    Lwt.return (update_state_files state files, Ok result)
+    (update_state_files state files, Ok result)
   (***********************************************************)
   (************************* UNABLE TO HANDLE ****************)
   (***********************************************************)
@@ -828,9 +828,9 @@ let handle_request
         data = None;
       }
     in
-    Lwt.return (During_init dstate, Error e)
+    (During_init dstate, Error e)
   | (Failed_init reason, _) ->
-    Lwt.return (Failed_init reason, Error (ClientIdeUtils.to_lsp_error reason))
+    (Failed_init reason, Error (ClientIdeUtils.to_lsp_error reason))
   | (Pending_init, _) ->
     failwith
       (Printf.sprintf
@@ -846,7 +846,7 @@ let handle_request
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerHover.go_quarantined ~ctx ~entry ~line ~column)
     in
-    Lwt.return (Initialized istate, Ok result)
+    (Initialized istate, Ok result)
   | ( Initialized istate,
       Go_to_implementation (document, { line; column }, document_list) ) ->
     let (istate, ctx, entry, _) = update_file_ctx istate document in
@@ -904,7 +904,7 @@ let handle_request
                 (name, action, single_file_positions) )
           | None -> (istate, ClientIdeMessage.Invalid_symbol_impl))
     in
-    Lwt.return (Initialized istate, Ok result)
+    (Initialized istate, Ok result)
     (* textDocument/rename *)
   | ( Initialized istate,
       Rename (document, { line; column }, new_name, document_list) ) ->
@@ -975,7 +975,7 @@ let handle_request
                 } )
           (* not a localvar, must defer to hh_server *))
     in
-    Lwt.return (Initialized istate, Ok result)
+    (Initialized istate, Ok result)
     (* textDocument/references - localvar only *)
   | ( Initialized istate,
       Find_references (document, { line; column }, document_list) ) ->
@@ -1119,7 +1119,7 @@ let handle_request
                   open_file_results = single_file_refs;
                 } ))
     in
-    Lwt.return (Initialized istate, Ok result)
+    (Initialized istate, Ok result)
   (* Autocomplete *)
   | ( Initialized istate,
       Completion
@@ -1139,7 +1139,7 @@ let handle_request
         ~naming_table:istate.naming_table
     in
     let istate = { istate with sienv = !sienv_ref } in
-    Lwt.return (Initialized istate, Ok result)
+    (Initialized istate, Ok result)
   (* Autocomplete docblock resolve *)
   | ( Initialized istate,
       Completion_resolve Completion_resolve.{ fullname = symbol; kind } ) ->
@@ -1147,9 +1147,7 @@ let handle_request
     let ctx = make_empty_ctx istate.icommon in
     let result = ServerDocblockAt.go_docblock_for_symbol ~ctx ~symbol ~kind in
     let signature = get_signature ctx symbol in
-    Lwt.return
-      ( Initialized istate,
-        Ok Completion_resolve.{ docblock = result; signature } )
+    (Initialized istate, Ok Completion_resolve.{ docblock = result; signature })
   (* Autocomplete docblock resolve *)
   | ( Initialized istate,
       Completion_resolve_location (file_path, fullname, { line; column }, kind)
@@ -1170,9 +1168,7 @@ let handle_request
     in
     let (Full_name s) = fullname in
     let signature = get_signature ctx s in
-    Lwt.return
-      ( Initialized istate,
-        Ok Completion_resolve.{ docblock = result; signature } )
+    (Initialized istate, Ok Completion_resolve.{ docblock = result; signature })
   (* Document highlighting *)
   | (Initialized istate, Document_highlight (document, { line; column })) ->
     let (istate, ctx, entry, _) = update_file_ctx istate document in
@@ -1180,7 +1176,7 @@ let handle_request
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerHighlightRefs.go_quarantined ~ctx ~entry ~line ~column)
     in
-    Lwt.return (Initialized istate, Ok results)
+    (Initialized istate, Ok results)
   (* Signature help *)
   | (Initialized istate, Signature_help (document, { line; column })) ->
     let (istate, ctx, entry, _) = update_file_ctx istate document in
@@ -1188,7 +1184,7 @@ let handle_request
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerSignatureHelp.go_quarantined ~ctx ~entry ~line ~column)
     in
-    Lwt.return (Initialized istate, Ok results)
+    (Initialized istate, Ok results)
   (* Type Hierarchy *)
   | (Initialized istate, Type_Hierarchy (document, { line; column })) ->
     let (istate, ctx, entry, _) = update_file_ctx istate document in
@@ -1196,7 +1192,7 @@ let handle_request
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerTypeHierarchy.go_quarantined ~ctx ~entry ~line ~column)
     in
-    Lwt.return (Initialized istate, Ok results)
+    (Initialized istate, Ok results)
   (* Code actions (refactorings, quickfixes) *)
   | (Initialized istate, Code_action (document, range)) ->
     let (istate, ctx, entry, published_errors_ref) =
@@ -1239,7 +1235,7 @@ let handle_request
         published_errors_ref := Some errors;
         Some (Errors.sort_and_finalize errors)
     in
-    Lwt.return (Initialized istate, Ok (results, errors_opt))
+    (Initialized istate, Ok (results, errors_opt))
   (* Code action resolve (refactorings, quickfixes) *)
   | ( Initialized istate,
       Code_action_resolve { document; range; resolve_title; use_snippet_edits }
@@ -1255,7 +1251,7 @@ let handle_request
             ~resolve_title
             ~use_snippet_edits)
     in
-    Lwt.return (Initialized istate, Ok result)
+    (Initialized istate, Ok result)
   (* Go to definition *)
   | (Initialized istate, Definition (document, { line; column })) ->
     let (istate, ctx, entry, _) = update_file_ctx istate document in
@@ -1263,7 +1259,7 @@ let handle_request
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerGoToDefinition.go_quarantined ~ctx ~entry ~line ~column)
     in
-    Lwt.return (Initialized istate, Ok result)
+    (Initialized istate, Ok result)
   (* Type Definition *)
   | (Initialized istate, Type_definition (document, { line; column })) ->
     let (istate, ctx, entry, _) = update_file_ctx istate document in
@@ -1271,7 +1267,7 @@ let handle_request
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerTypeDefinition.go_quarantined ~ctx ~entry ~line ~column)
     in
-    Lwt.return (Initialized istate, Ok result)
+    (Initialized istate, Ok result)
   (* Workspace Symbol *)
   | (Initialized istate, Workspace_symbol query) ->
     (* Note: needs reverse-naming-table, hence only works in initialized
@@ -1283,7 +1279,7 @@ let handle_request
     let sienv_ref = ref istate.sienv in
     let result = ServerSearch.go ctx query ~kind_filter:"" sienv_ref in
     let istate = { istate with sienv = !sienv_ref } in
-    Lwt.return (Initialized istate, Ok result)
+    (Initialized istate, Ok result)
 
 let write_status ~(out_fd : Lwt_unix.file_descr) (state : state) : unit Lwt.t =
   match state with
@@ -1406,20 +1402,15 @@ let handle_one_message_exn
       failwith ("Unexpected GotNamingTable in " ^ state_to_log_string state)
     | (_, Some (ClientRequest { ClientIdeMessage.tracking_id; message })) ->
       let unblocked_time = Unix.gettimeofday () in
-      let%lwt (state, response) =
-        try%lwt
-          let%lwt (s, r) =
-            handle_request message_queue state tracking_id message
-          in
-          Lwt.return (s, r)
-        with
+      let (state, response) =
+        try handle_request message_queue state tracking_id message with
         | exn ->
           (* Our caller has an exception handler which logs the exception.
              But we instead must fulfil our contract of responding to the client,
              even if we have an exception. Hence we need our own handler here. *)
           let e = Exception.wrap exn in
           let reason = ClientIdeUtils.make_rich_error "handle_request" ~e in
-          Lwt.return (state, Error (ClientIdeUtils.to_lsp_error reason))
+          (state, Error (ClientIdeUtils.to_lsp_error reason))
       in
       let%lwt () =
         write_message

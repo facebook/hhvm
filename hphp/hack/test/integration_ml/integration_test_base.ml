@@ -30,8 +30,6 @@ let tmp = "/tmp"
 
 let () = Folly.ensure_folly_init ()
 
-let () = Hh_logger.Level.set_min_level Hh_logger.Level.Off
-
 let server_config = ServerEnvBuild.default_genv.ServerEnv.config
 
 let global_opts =

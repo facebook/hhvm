@@ -137,7 +137,7 @@ func (c *FinderChannelClient) ByPlate(ctx context.Context, plate Plate) (*Automo
 }
 
 func (c *FinderClient) ByPlate(plate Plate) (*Automobile, error) {
-    return c.chClient.ByPlate(nil, plate)
+    return c.chClient.ByPlate(context.TODO(), plate)
 }
 
 
@@ -154,7 +154,7 @@ func (c *FinderChannelClient) AliasByPlate(ctx context.Context, plate Plate) (*C
 }
 
 func (c *FinderClient) AliasByPlate(plate Plate) (*Car, error) {
-    return c.chClient.AliasByPlate(nil, plate)
+    return c.chClient.AliasByPlate(context.TODO(), plate)
 }
 
 
@@ -171,7 +171,7 @@ func (c *FinderChannelClient) PreviousPlate(ctx context.Context, plate Plate) (P
 }
 
 func (c *FinderClient) PreviousPlate(plate Plate) (Plate, error) {
-    return c.chClient.PreviousPlate(nil, plate)
+    return c.chClient.PreviousPlate(context.TODO(), plate)
 }
 
 

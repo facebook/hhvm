@@ -131,7 +131,7 @@ func (c *TestServiceChannelClient) Init(ctx context.Context, int1 int64) (int64,
 }
 
 func (c *TestServiceClient) Init(int1 int64) (int64, error) {
-    return c.chClient.Init(nil, int1)
+    return c.chClient.Init(context.TODO(), int1)
 }
 
 

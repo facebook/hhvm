@@ -139,7 +139,7 @@ func (c *NestedContainersChannelClient) MapList(ctx context.Context, foo map[int
 }
 
 func (c *NestedContainersClient) MapList(foo map[int32][]int32) (error) {
-    return c.chClient.MapList(nil, foo)
+    return c.chClient.MapList(context.TODO(), foo)
 }
 
 
@@ -156,7 +156,7 @@ func (c *NestedContainersChannelClient) MapSet(ctx context.Context, foo map[int3
 }
 
 func (c *NestedContainersClient) MapSet(foo map[int32][]int32) (error) {
-    return c.chClient.MapSet(nil, foo)
+    return c.chClient.MapSet(context.TODO(), foo)
 }
 
 
@@ -173,7 +173,7 @@ func (c *NestedContainersChannelClient) ListMap(ctx context.Context, foo []map[i
 }
 
 func (c *NestedContainersClient) ListMap(foo []map[int32]int32) (error) {
-    return c.chClient.ListMap(nil, foo)
+    return c.chClient.ListMap(context.TODO(), foo)
 }
 
 
@@ -190,7 +190,7 @@ func (c *NestedContainersChannelClient) ListSet(ctx context.Context, foo [][]int
 }
 
 func (c *NestedContainersClient) ListSet(foo [][]int32) (error) {
-    return c.chClient.ListSet(nil, foo)
+    return c.chClient.ListSet(context.TODO(), foo)
 }
 
 
@@ -207,7 +207,7 @@ func (c *NestedContainersChannelClient) Turtles(ctx context.Context, foo [][]map
 }
 
 func (c *NestedContainersClient) Turtles(foo [][]map[int32]map[int32][]int32) (error) {
-    return c.chClient.Turtles(nil, foo)
+    return c.chClient.Turtles(context.TODO(), foo)
 }
 
 

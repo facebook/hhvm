@@ -157,8 +157,8 @@ func (c *{{service:go_name}}ChannelClient) {{> svc/func_signature}} {
 }
 
 func (c *{{service:go_name}}Client) {{> svc/func_signature_no_ctx}} {
-    return c.chClient.{{function:go_name}}(nil{{!
-      }}{{function:comma}}{{#function:args}}{{field:go_arg_name}}{{^last?}}, {{/last?}}{{/function:args}})
+    return c.chClient.{{function:go_name}}(context.TODO(){{function:comma}}{{!
+      }}{{#function:args}}{{field:go_arg_name}}{{^last?}}, {{/last?}}{{/function:args}})
 }
 
 {{/function:go_supported?}}

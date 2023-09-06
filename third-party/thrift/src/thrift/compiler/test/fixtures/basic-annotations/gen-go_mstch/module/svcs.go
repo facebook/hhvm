@@ -144,7 +144,7 @@ func (c *MyServiceChannelClient) Ping(ctx context.Context) (error) {
 }
 
 func (c *MyServiceClient) Ping() (error) {
-    return c.chClient.Ping(nil)
+    return c.chClient.Ping(context.TODO())
 }
 
 
@@ -160,7 +160,7 @@ func (c *MyServiceChannelClient) GetRandomData(ctx context.Context) (string, err
 }
 
 func (c *MyServiceClient) GetRandomData() (string, error) {
-    return c.chClient.GetRandomData(nil)
+    return c.chClient.GetRandomData(context.TODO())
 }
 
 
@@ -177,7 +177,7 @@ func (c *MyServiceChannelClient) HasDataById(ctx context.Context, id int64) (boo
 }
 
 func (c *MyServiceClient) HasDataById(id int64) (bool, error) {
-    return c.chClient.HasDataById(nil, id)
+    return c.chClient.HasDataById(context.TODO(), id)
 }
 
 
@@ -194,7 +194,7 @@ func (c *MyServiceChannelClient) GoGetDataById(ctx context.Context, id int64) (s
 }
 
 func (c *MyServiceClient) GoGetDataById(id int64) (string, error) {
-    return c.chClient.GoGetDataById(nil, id)
+    return c.chClient.GoGetDataById(context.TODO(), id)
 }
 
 
@@ -212,7 +212,7 @@ func (c *MyServiceChannelClient) PutDataById(ctx context.Context, id int64, data
 }
 
 func (c *MyServiceClient) PutDataById(id int64, data string) (error) {
-    return c.chClient.PutDataById(nil, id, data)
+    return c.chClient.PutDataById(context.TODO(), id, data)
 }
 
 
@@ -225,7 +225,7 @@ func (c *MyServiceChannelClient) LobDataById(ctx context.Context, id int64, data
 }
 
 func (c *MyServiceClient) LobDataById(id int64, data string) (error) {
-    return c.chClient.LobDataById(nil, id, data)
+    return c.chClient.LobDataById(context.TODO(), id, data)
 }
 
 
@@ -241,7 +241,7 @@ func (c *MyServiceChannelClient) GoDoNothing(ctx context.Context) (error) {
 }
 
 func (c *MyServiceClient) GoDoNothing() (error) {
-    return c.chClient.GoDoNothing(nil)
+    return c.chClient.GoDoNothing(context.TODO())
 }
 
 
@@ -2781,7 +2781,7 @@ func (c *MyServicePrioParentChannelClient) Ping(ctx context.Context) (error) {
 }
 
 func (c *MyServicePrioParentClient) Ping() (error) {
-    return c.chClient.Ping(nil)
+    return c.chClient.Ping(context.TODO())
 }
 
 
@@ -2797,7 +2797,7 @@ func (c *MyServicePrioParentChannelClient) Pong(ctx context.Context) (error) {
 }
 
 func (c *MyServicePrioParentClient) Pong() (error) {
-    return c.chClient.Pong(nil)
+    return c.chClient.Pong(context.TODO())
 }
 
 
@@ -3428,7 +3428,7 @@ func (c *MyServicePrioChildChannelClient) Pang(ctx context.Context) (error) {
 }
 
 func (c *MyServicePrioChildClient) Pang() (error) {
-    return c.chClient.Pang(nil)
+    return c.chClient.Pang(context.TODO())
 }
 
 
@@ -3792,7 +3792,7 @@ func (c *BadServiceChannelClient) Bar(ctx context.Context) (int32, error) {
 }
 
 func (c *BadServiceClient) Bar() (int32, error) {
-    return c.chClient.Bar(nil)
+    return c.chClient.Bar(context.TODO())
 }
 
 
@@ -4257,7 +4257,7 @@ func (c *FooBarBazServiceChannelClient) FooStructured(ctx context.Context) (erro
 }
 
 func (c *FooBarBazServiceClient) FooStructured() (error) {
-    return c.chClient.FooStructured(nil)
+    return c.chClient.FooStructured(context.TODO())
 }
 
 
@@ -4273,7 +4273,7 @@ func (c *FooBarBazServiceChannelClient) BarNonStructured(ctx context.Context) (e
 }
 
 func (c *FooBarBazServiceClient) BarNonStructured() (error) {
-    return c.chClient.BarNonStructured(nil)
+    return c.chClient.BarNonStructured(context.TODO())
 }
 
 
@@ -4289,7 +4289,7 @@ func (c *FooBarBazServiceChannelClient) Baz(ctx context.Context) (error) {
 }
 
 func (c *FooBarBazServiceClient) Baz() (error) {
-    return c.chClient.Baz(nil)
+    return c.chClient.Baz(context.TODO())
 }
 
 

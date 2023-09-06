@@ -9,49 +9,56 @@
 open Hh_prelude
 open Aast
 open Typing_defs
-module Env = Tast_env
 
 module Value = struct
-  type t = Universe  (** unit of intersection, but requires default case *)
-  [@@deriving eq, ord, sexp]
+  type t = Other  (** requires default case *) [@@deriving ord, sexp]
+
+  let universe = [Other]
+
+  let finite_or_dynamic _ = false
 
   let to_json = function
-    | Universe -> Hh_json.string_ "universe"
+    | Other -> Hh_json.string_ "other"
 end
 
-module ValueSet = Set.Make (Value)
+module ValueSet = struct
+  include Set.Make (Value)
+
+  let universe = of_list Value.universe
+
+  let intersection_list value_sets =
+    List.fold_right ~init:universe ~f:inter value_sets
+end
+
+let prim_to_values = function
+  | Tnoreturn -> ValueSet.empty
+  | Tnull
+  | Tvoid
+  | Tint
+  | Tbool
+  | Tfloat
+  | Tstring
+  | Tresource
+  | Tnum
+  | Tarraykey ->
+    ValueSet.singleton Value.Other
 
 (* Symbolically evaluate the values corresponding to a given type; the result is
    essentially in disjunctive normal form, so that cases can be partitioned
    according to each element (transparent enums need special care, see later). *)
 let rec symbolic_dnf_values env ty : ValueSet.t =
-  let (env, ty) = Env.expand_type env ty in
-  let open Value in
-  match get_node ty with
+  match Typing_defs.get_node ty with
   | Tunion tyl ->
     tyl |> List.map ~f:(symbolic_dnf_values env) |> ValueSet.union_list
   | Tintersection tyl ->
-    List.fold_right tyl ~init:(ValueSet.singleton Universe) ~f:(fun ty acc ->
-        ValueSet.inter (symbolic_dnf_values env ty) acc)
-  | Tnewtype (_, _, _)
-  | Toption _ ->
-    ValueSet.singleton Universe
-  | Tprim prim ->
-    (match prim with
-    | Tnoreturn -> ValueSet.empty
-    | Tnull
-    | Tvoid
-    | Tint
-    | Tbool
-    | Tfloat
-    | Tstring
-    | Tresource
-    | Tnum
-    | Tarraykey ->
-      ValueSet.singleton Universe)
-  | Tany _
+    tyl |> List.map ~f:(symbolic_dnf_values env) |> ValueSet.intersection_list
+  | Tprim prim -> prim_to_values prim
   | Tnonnull
+  | Toption _
   | Tneg _
+  | Tnewtype (_, _, _)
+  | Tany _ ->
+    ValueSet.universe
   | Tdynamic
   | Ttuple _
   | Tshape _
@@ -62,63 +69,67 @@ let rec symbolic_dnf_values env ty : ValueSet.t =
   | Tgeneric _
   | Tdependent _
   | Taccess _ ->
-    ValueSet.singleton Universe
+    ValueSet.singleton Value.Other
   | Tunapplied_alias _ ->
     Typing_defs.error_Tunapplied_alias_in_illegal_context ()
+
+module EnumErr = Typing_error.Primary.Enum
+
+let register_err env err =
+  Typing_error_utils.add_typing_error ~env @@ Typing_error.enum err
+
+type default = (Tast.ty, Tast.saved_env) Aast.default_case
+
+let check_default env pos (opt_default_case : default option) needs_default =
+  match (opt_default_case, needs_default) with
+  | (None, false)
+  | (Some _, true) ->
+    ()
+  | (Some (default_pos, _), false) ->
+    register_err env
+    @@ EnumErr.Enum_switch_redundant_default
+         {
+           pos;
+           kind = "default";
+           decl_pos = Pos_or_decl.of_raw_pos default_pos;
+         }
+  | (None, true) ->
+    register_err env
+    @@ EnumErr.Enum_switch_nonexhaustive
+         {
+           pos;
+           kind = None;
+           decl_pos = Pos_or_decl.of_raw_pos pos;
+           missing = ["default"];
+         }
 
 (* The algorithm below works as follows:
    1. Partition the case list into buckets for each (non-dynamic) element of the computed set.
      a. Any leftover values are considered to be redundant/ill-typed.
    2. For each finite value (bool, null, and enums) check that all cases have been covered.
    3. If any of the below are true, then we need a default case.
-     a. The value set is the singleton { Dyn }.
-     b. The value set contains an infinite value.
+     a. The value set is the singleton { Dynamic }.
+     b. The value set contains an neither-finite-nor-dynamic value.
      c. There are missing cases for finite values.
    4. Otherwise a default is redundant. *)
-let check_cases_against_values
-    env
-    pos
-    values
-    (opt_default_case : (Tast.ty, Tast.saved_env) Aast.default_case option) =
-  let open Value in
-  let needs_default = ValueSet.exists values ~f:(equal Universe) in
-  match (opt_default_case, needs_default) with
-  | (None, false)
-  | (Some _, true) ->
-    ()
-  | (Some (default_pos, _), false) ->
-    Typing_error_utils.add_typing_error
-      ~env:(Tast_env.tast_env_as_typing_env env)
-      Typing_error.(
-        enum
-        @@ Primary.Enum.Enum_switch_redundant_default
-             {
-               pos;
-               kind = "default";
-               decl_pos = Pos_or_decl.of_raw_pos default_pos;
-             })
-  | (None, true) ->
-    Typing_error_utils.add_typing_error
-      ~env:(Tast_env.tast_env_as_typing_env env)
-      Typing_error.(
-        enum
-        @@ Primary.Enum.Enum_switch_nonexhaustive
-             {
-               pos;
-               kind = None;
-               decl_pos = Pos_or_decl.of_raw_pos pos;
-               missing = ["default"];
-             })
+let check_cases_against_values env pos values opt_default_case =
+  let needs_default =
+    (* I write `exists ~f:(fun x -> not @@ finite x)` instead of all
+       `forall ~f:finite` to ensure set is non-empty *)
+    ValueSet.exists ~f:(fun x -> not @@ Value.finite_or_dynamic x) values
+  in
+  let typing_env = Tast_env.tast_env_as_typing_env env in
+  check_default typing_env pos opt_default_case needs_default
 
 let add_fields json ~fields =
   match json with
   | Hh_json.JSON_Object old -> Hh_json.JSON_Object (old @ fields)
   | _ -> Hh_json.JSON_Object (("warning_expected_object", json) :: fields)
 
-let check_exhaustiveness env pos ty dfl =
+let check_exhaustiveness env pos ty opt_default =
   let values = symbolic_dnf_values env ty in
-  check_cases_against_values env pos values dfl;
-  let tcopt = env |> Env.get_decl_env |> Decl_env.tcopt in
+  check_cases_against_values env pos values opt_default;
+  let tcopt = env |> Tast_env.get_decl_env |> Decl_env.tcopt in
   if TypecheckerOptions.tco_log_exhaustivity_check tcopt then
     let fields =
       [
@@ -127,7 +138,7 @@ let check_exhaustiveness env pos ty dfl =
       ]
     in
     ty
-    |> Env.ty_to_json env ~show_like_ty:true
+    |> Tast_env.ty_to_json env ~show_like_ty:true
     |> add_fields ~fields
     |> Hh_json.json_to_string
     |> Hh_logger.log "[hh_tco_enable_strict_switch] %s"

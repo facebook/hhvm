@@ -17,10 +17,10 @@ use toml::Spanned;
 pub type PackageMap = IndexMap<Spanned<String>, Package>;
 pub type DeploymentMap = IndexMap<Spanned<String>, Deployment>;
 
-#[derive(Debug, Default, Deserialize)]
+#[derive(Debug, Default, Deserialize, Clone, Eq, PartialEq)]
 pub struct NameSet(IndexSet<Spanned<String>>);
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone, PartialEq, Eq)]
 pub struct Package {
     pub uses: Option<NameSet>,
     pub includes: Option<NameSet>,

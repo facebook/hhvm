@@ -2511,9 +2511,13 @@ dependencies = [
  "anyhow",
  "config_file",
  "oxidized",
+ "package",
+ "rc_pos",
+ "relative_path",
  "serde",
  "serde_json",
  "sha1",
+ "toml 0.7.3",
 ]
 
 [[package]]

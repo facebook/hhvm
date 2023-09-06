@@ -12,7 +12,7 @@ use toml::Spanned;
 use crate::error::Error;
 use crate::types::DeploymentMap;
 use crate::types::NameSet;
-use crate::types::PackageMap;
+pub use crate::types::PackageMap;
 
 #[derive(Debug, Deserialize)]
 pub struct Config {

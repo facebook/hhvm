@@ -12,7 +12,7 @@ use crate::types::DeploymentMap;
 pub use crate::types::NameSet;
 use crate::types::PackageMap;
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct PackageInfo {
     packages: PackageMap,
     deployments: Option<DeploymentMap>,

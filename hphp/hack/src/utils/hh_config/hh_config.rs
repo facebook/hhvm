@@ -6,9 +6,11 @@ mod local_config;
 
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
+use std::ops::Range;
 use std::path::Path;
 use std::path::PathBuf;
 use std::str::FromStr;
+use std::sync::Arc;
 
 use anyhow::Context;
 use anyhow::Result;
@@ -17,11 +19,86 @@ pub use local_config::LocalConfig;
 use oxidized::custom_error_config::CustomErrorConfig;
 use oxidized::decl_parser_options::DeclParserOptions;
 use oxidized::global_options::GlobalOptions;
+use oxidized::package::Package as OxidizedPackage;
+use oxidized::package::PosId as OxidizedPosId;
+use oxidized::package_info::PackageInfo as OxidizedPackageInfo;
+use oxidized::s_map::SMap;
+use package::PackageInfo;
+use rc_pos::Pos;
+use relative_path::Prefix;
+use relative_path::RelativePath;
 use sha1::Digest;
 use sha1::Sha1;
+use toml::Spanned;
 
 pub const FILE_PATH_RELATIVE_TO_ROOT: &str = ".hhconfig";
 pub const PACKAGE_FILE_PATH_RELATIVE_TO_ROOT: &str = "PACKAGES.toml";
+
+fn convert_package_info(info: package::PackageInfo) -> OxidizedPackageInfo {
+    // Convert IndexMap to SMap for existing_packages
+    let mut existing_packages = SMap::new();
+    let mut glob_to_package = SMap::new();
+    let filename = String::from(PACKAGE_FILE_PATH_RELATIVE_TO_ROOT);
+    let packages: Vec<OxidizedPackage> = package_info_to_vec(filename, info);
+    for package in packages {
+        let name: String = package.name.1.clone();
+        existing_packages.insert(name, package.clone());
+        let uses = package.uses.clone();
+        for use_ in uses {
+            glob_to_package.insert(use_.1.clone(), package.clone());
+        }
+    }
+    OxidizedPackageInfo {
+        glob_to_package,
+        existing_packages,
+    }
+}
+
+pub fn package_info_to_vec(filename: String, info: package::PackageInfo) -> Vec<OxidizedPackage> {
+    let pos_from_span = |span: (usize, usize)| {
+        let (start_offset, end_offset) = span;
+        let start_lnum = info.line_number(start_offset);
+        let start_bol = info.beginning_of_line(start_lnum);
+        let end_lnum = info.line_number(end_offset);
+        let end_bol = info.beginning_of_line(end_lnum);
+
+        Pos::from_lnum_bol_offset(
+            Arc::new(RelativePath::make(
+                Prefix::Dummy,
+                PathBuf::from(filename.clone()),
+            )),
+            (start_lnum, start_bol, start_offset),
+            (end_lnum, end_bol, end_offset),
+        )
+    };
+    let packages: Vec<OxidizedPackage> = info
+        .packages()
+        .iter()
+        .map(|(name, package)| {
+            let convert = |x: &Spanned<String>| -> OxidizedPosId {
+                let Range { start, end } = x.span();
+                let pos = pos_from_span((start, end));
+                let id = x.to_owned().into_inner();
+                OxidizedPosId(pos, id)
+            };
+            let convert_many = |xs: &Option<package::NameSet>| -> Vec<OxidizedPosId> {
+                xs.as_ref()
+                    .unwrap_or_default()
+                    .iter()
+                    .map(convert)
+                    .collect()
+            };
+
+            OxidizedPackage {
+                name: convert(name),
+                uses: convert_many(&package.uses),
+                includes: convert_many(&package.includes),
+                soft_includes: convert_many(&package.soft_includes),
+            }
+        })
+        .collect();
+    packages
+}
 
 /// For now, this struct only contains the parts of .hhconfig which
 /// have been needed in Rust tools.
@@ -89,11 +166,13 @@ impl HhConfig {
         // Grab extra config and use it to process the hash
         let package_contents: String = if package_config_path.exists() {
             let ctxt = || package_config_path.display().to_string();
-            let bytes = std::fs::read(&package_config_path).with_context(ctxt)?;
+            let bytes = std::fs::read(package_config_path).with_context(ctxt)?;
             String::from_utf8(bytes).unwrap()
         } else {
             String::new()
         };
+        let package_info: PackageInfo =
+            PackageInfo::from_text(&package_contents).unwrap_or_default();
         let custom_error_contents: String = if custom_error_config_path.exists() {
             let ctxt = || custom_error_config_path.as_path().display().to_string();
             let bytes = std::fs::read(&custom_error_config_path).with_context(ctxt)?;
@@ -116,13 +195,13 @@ impl HhConfig {
             CustomErrorConfig::from_str(&custom_error_contents).unwrap_or_default();
         Ok(Self {
             hash,
-            ..Self::from_configs(hhconfig, hh_conf, custom_error_config)?
+            ..Self::from_configs(hhconfig, hh_conf, custom_error_config, package_info)?
         })
     }
 
     pub fn into_config_files(
         root: impl AsRef<Path>,
-    ) -> Result<(ConfigFile, ConfigFile, CustomErrorConfig)> {
+    ) -> Result<(ConfigFile, ConfigFile, CustomErrorConfig, PackageInfo)> {
         let hhconfig_path = root.as_ref().join(FILE_PATH_RELATIVE_TO_ROOT);
         let hh_conf_path = system_config_path();
         let custom_error_config_pathbuf = Self::create_custom_errors_path(hhconfig_path.as_path());
@@ -132,7 +211,24 @@ impl HhConfig {
         let hh_conf_file = ConfigFile::from_file(&hh_conf_path)
             .with_context(|| hh_conf_path.display().to_string())?;
         let custom_error_config = CustomErrorConfig::from_path(custom_error_config_path)?;
-        Ok((hh_conf_file, hh_config_file, custom_error_config))
+        let package_config_pathbuf = Self::create_packages_path(hhconfig_path.as_path());
+        let package_config_path = package_config_pathbuf.as_path();
+        let package_contents: String = if package_config_path.exists() {
+            let ctxt = || package_config_path.display().to_string();
+            let bytes = std::fs::read(package_config_path).with_context(ctxt)?;
+            String::from_utf8(bytes).unwrap()
+        } else {
+            String::new()
+        };
+        let package_info: PackageInfo =
+            PackageInfo::from_text(&package_contents).unwrap_or_default();
+
+        Ok((
+            hh_conf_file,
+            hh_config_file,
+            custom_error_config,
+            package_info,
+        ))
     }
 
     fn hash(
@@ -155,7 +251,12 @@ impl HhConfig {
         let (hash, config) = ConfigFile::from_slice_with_sha1(bytes);
         Ok(Self {
             hash,
-            ..Self::from_configs(config, Default::default(), Default::default())?
+            ..Self::from_configs(
+                config,
+                Default::default(),
+                Default::default(),
+                PackageInfo::default(),
+            )?
         })
     }
 
@@ -164,6 +265,7 @@ impl HhConfig {
         hhconfig: ConfigFile,
         hh_conf: ConfigFile,
         custom_error_config: CustomErrorConfig,
+        package_info: PackageInfo,
     ) -> Result<Self> {
         let current_rolled_out_flag_idx = hhconfig
             .get_int("current_saved_state_rollout_flag_index")
@@ -193,6 +295,7 @@ impl HhConfig {
             Some("true") => true,
             _ => false,
         };
+        go.tco_package_info = convert_package_info(package_info);
 
         for (key, mut value) in hhconfig {
             match key.as_str() {

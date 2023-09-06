@@ -7,4 +7,5 @@ mod config;
 mod error;
 mod package_info;
 pub use package_info::*;
+pub use types::PackageMap;
 mod types;

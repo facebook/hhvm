@@ -354,6 +354,8 @@ class parser {
   //     (function | performs)*
   //   "}"
   //   [deprecated_annotations]
+  //
+  // performs: "performs" identifier ";"
   void parse_service(source_location loc, std::unique_ptr<attributes> attrs) {
     auto range = range_tracker(loc, end_);
     expect_and_consume(tok::kw_service);
@@ -383,9 +385,6 @@ class parser {
         range, std::move(attrs), name, std::move(functions));
   }
 
-  // interface_body: "{" (function | performs)* "}
-  // function: function comma_or_semicolon?
-  // performs: "performs" identifier ";"
   node_list<t_function> parse_interface_body() {
     expect_and_consume('{');
     auto functions = node_list<t_function>();
@@ -407,8 +406,9 @@ class parser {
   }
 
   // function:
-  //   attributes function_qualifier?
-  //     return_type identifier "(" field* ")" throws? annotations
+  //   attributes [function_qualifier]
+  //   return_clause identifier "(" (parameter [","])* ")" [throws]
+  //   [deprecated_annotations]
   //
   // function_qualifier: "oneway" | "idempotent" | "readonly"
   std::unique_ptr<t_function> parse_function() {
@@ -434,7 +434,7 @@ class parser {
         break;
     }
 
-    auto ret = parse_return_type();
+    auto ret = parse_return_clause();
     auto name = parse_identifier();
     auto params = parse_param_list();
 
@@ -450,22 +450,18 @@ class parser {
         std::move(throws));
   }
 
-  // return_type: [interaction_name ","] basic_return_type
+  // return_clause:
+  //   return_type ["," (sink | stream)]
+  //   interaction_name ["," return_type] ["," (sink | stream)]
+  //
   // interaction_name: maybe_qualified_id
   //
-  // basic_return_type:
-  //     type
-  //   | "void"
-  //   | [initial_response_type ","] (sink | stream)
-  //
-  // initial_response_type: type
-  return_type parse_return_type() {
-    auto ret = return_type();
+  // return_type: type | "void"
+  return_clause parse_return_clause() {
+    auto ret = return_clause();
     if (token_.kind == tok::identifier) {
-      // Parse a type or an interaction.
-      auto range = token_.range;
-      auto name = consume_token().string_value();
-      ret.types.push_back(actions_.on_type(range, name, {}));
+      // Parse an interaction or type name.
+      ret.name = identifier{consume_token().string_value(), token_.range.begin};
       if (!try_consume_token(',')) {
         return ret;
       }
@@ -474,7 +470,7 @@ class parser {
     switch (token_.kind) {
       case tok::kw_void:
         is_void = true;
-        ret.types.push_back(t_base_type::t_void());
+        ret.type = &t_base_type::t_void();
         consume_token();
         break;
       case tok::kw_sink:
@@ -484,7 +480,7 @@ class parser {
         ret.sink_or_stream = parse_stream();
         return ret;
       default:
-        ret.types.push_back(parse_type());
+        ret.type = parse_type().get_type();
         break;
     }
     if (!try_consume_token(',')) {
@@ -725,10 +721,10 @@ class parser {
   //
   // We disallow context-sensitive keywords as field type identifiers.
   // This avoids an ambiguity in the resolution of the function_qualifier
-  // return_type part of the function rule, when one of the "oneway",
+  // return_clause part of the function rule, when one of the "oneway",
   // "idempotent" or "readonly" is encountered. It could either resolve
   // the token as function_qualifier or resolve "" as function_qualifier and
-  // the token as return_type.
+  // the token as return_clause.
   t_type_ref parse_type() {
     auto range = track_range();
     if (const t_base_type* type = try_parse_base_type()) {

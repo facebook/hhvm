@@ -65,8 +65,9 @@ struct type_throws_spec {
   std::unique_ptr<t_throws> throws;
 };
 
-struct return_type {
-  std::vector<t_type_ref> types;
+struct return_clause {
+  identifier name; // An interaction or type name.
+  const t_type* type;
   std::unique_ptr<t_type> sink_or_stream;
 };
 
@@ -117,7 +118,7 @@ class parser_actions {
       source_range range,
       std::unique_ptr<attributes> attrs,
       t_function_qualifier qual,
-      return_type ret,
+      return_clause ret,
       const identifier& name,
       t_field_list params,
       std::unique_ptr<t_throws> throws) = 0;

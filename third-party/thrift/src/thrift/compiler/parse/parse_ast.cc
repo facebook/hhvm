@@ -648,13 +648,23 @@ class ast_builder : public parser_actions {
       source_range range,
       std::unique_ptr<attributes> attrs,
       t_function_qualifier qual,
-      return_type ret,
+      return_clause ret,
       const identifier& name,
       t_field_list params,
       std::unique_ptr<t_throws> throws) override {
+    auto types = std::vector<t_type_ref>();
+    auto return_name = ret.name.str;
+    if (size_t size = return_name.size()) {
+      // Handle an interaction or return type name.
+      types.push_back(
+          on_type({ret.name.loc, ret.name.loc + size}, ret.name.str, {}));
+    }
+    if (ret.type) {
+      types.push_back(t_type_ref::from_ptr(ret.type));
+    }
     auto function = std::make_unique<t_function>(
         &program_,
-        std::move(ret.types),
+        std::move(types),
         std::move(ret.sink_or_stream),
         fmt::to_string(name.str));
     function->set_qualifier(qual);

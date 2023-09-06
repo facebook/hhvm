@@ -1528,3 +1528,91 @@ let daemon_main
 let daemon_entry_point : (ClientIdeMessage.daemon_args, unit, unit) Daemon.entry
     =
   Daemon.register_entry_point "ClientIdeService" daemon_main
+
+module Test = struct
+  type env = istate
+
+  let init ~custom_config ~naming_sqlite =
+    let config =
+      Option.value custom_config ~default:ServerConfig.default_config
+    in
+    let local_config = ServerLocalConfig.default in
+    let tcopt = ServerConfig.typechecker_options config in
+    let popt = ServerConfig.parser_options config in
+    Provider_backend.set_local_memory_backend
+      ~max_num_decls:1000
+      ~max_num_shallow_decls:1000;
+    let local_memory =
+      match Provider_backend.get () with
+      | Provider_backend.Local_memory local_memory -> local_memory
+      | _ -> failwith "expected local memory backend"
+    in
+    let sienv =
+      SymbolIndex.initialize
+        ~gleanopt:(ServerConfig.glean_options config)
+        ~namespace_map:(ParserOptions.auto_namespace_map tcopt)
+        ~provider_name:
+          local_config.ServerLocalConfig.ide_symbolindex_search_provider
+        ~quiet:local_config.ServerLocalConfig.symbolindex_quiet
+        ~savedstate_file_opt:local_config.ServerLocalConfig.symbolindex_file
+        ~workers:None
+    in
+    let ctx =
+      Provider_context.empty_for_tool
+        ~popt
+        ~tcopt
+        ~backend:(Provider_backend.Local_memory local_memory)
+        ~deps_mode:(Typing_deps_mode.InMemoryMode None)
+    in
+    let naming_table =
+      Naming_table.load_from_sqlite ctx (Path.to_string naming_sqlite)
+    in
+    {
+      naming_table;
+      sienv;
+      icommon = { hhi_root = Path.make "/"; config; local_config; local_memory };
+      ifiles =
+        {
+          open_files = Relative_path.Map.empty;
+          changed_files_to_process = Relative_path.Set.empty;
+          changed_files_denominator = 0;
+        };
+    }
+
+  let index istate changes =
+    Hh_logger.log
+      "--> [index] %s"
+      (Relative_path.Set.elements changes
+      |> List.map ~f:Relative_path.suffix
+      |> String.concat ~sep:" ");
+    let ClientIdeIncremental.Batch.{ naming_table; sienv; changes = _changes } =
+      batch_update_naming_table_and_invalidate_caches
+        ~ctx:(make_empty_ctx istate.icommon)
+        ~naming_table:istate.naming_table
+        ~sienv:istate.sienv
+        ~local_memory:istate.icommon.local_memory
+        ~open_files:istate.ifiles.open_files
+        changes
+    in
+    { istate with naming_table; sienv }
+
+  let handle istate message =
+    Hh_logger.log "--> %s" (ClientIdeMessage.t_to_string message);
+    let message_queue = Lwt_message_queue.create () in
+    match
+      handle_request message_queue (Initialized istate) "tracking_id" message
+    with
+    | (Initialized istate, Ok response) -> (istate, response)
+    | (_, Error { Lsp.Error.code; message; data }) ->
+      let msg =
+        Printf.sprintf
+          "handle_request %s: %s %s"
+          (Lsp.Error.show_code code)
+          message
+          (Option.value_map data ~default:"" ~f:Hh_json.json_to_multiline)
+      in
+      failwith msg
+    | (_, Ok _) ->
+      let msg = Printf.sprintf "handle_request ended in bad state" in
+      failwith msg
+end

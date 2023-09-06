@@ -216,6 +216,13 @@ let fail x =
 (******************************************************************************(
  * Utility functions to help format/throw errors for informative errors
 )******************************************************************************)
+
+let relativize (s : string) : string =
+  let root_regexp =
+    Str.regexp (Str.quote (Relative_path.path_of_prefix Relative_path.Root))
+  in
+  Str.global_replace root_regexp "/" s
+
 let indent_string_with (indent : string) (error : string) : string =
   indent ^ String.concat ~sep:("\n" ^ indent) Str.(split (regexp "\n") error)
 
@@ -760,19 +767,19 @@ let assert_ide_autocomplete_does_not_contain loop_output not_expected =
   else
     ()
 
-let assert_ide_autocomplete loop_output expected =
+let assert_ide_completions response expected =
   let results =
-    match loop_output.persistent_client_response with
-    | Some res -> res
-    | _ -> fail "Expected autocomplete response"
-  in
-  let results =
-    List.map results.AutocompleteTypes.completions ~f:(fun x ->
+    List.map response.AutocompleteTypes.completions ~f:(fun x ->
         x.AutocompleteTypes.res_label)
   in
   let results_as_string = list_to_string results in
   let expected_as_string = list_to_string expected in
   assertEqual expected_as_string results_as_string
+
+let assert_ide_autocomplete loop_output expected =
+  match loop_output.persistent_client_response with
+  | Some response -> assert_ide_completions response expected
+  | _ -> fail "Expected autocomplete response"
 
 let assert_status loop_output expected =
   let { Server_status.error_list; _ } =
@@ -850,3 +857,108 @@ let assert_needs_no_recheck env x =
   then
     let () = Printf.eprintf "Expected %s not to need recheck\n" x in
     assert false
+
+let doc (suffix : string) (file_contents : string) : ClientIdeMessage.document =
+  {
+    ClientIdeMessage.file_path =
+      Relative_path.from_root ~suffix |> Relative_path.to_absolute |> Path.make;
+    file_contents;
+  }
+
+let loc (line : int) (column : int) : ClientIdeMessage.location =
+  (* 1-based line and column *)
+  { ClientIdeMessage.line; column }
+
+module Client = struct
+  type env = ClientIdeDaemon.Test.env
+
+  let with_env ~(custom_config : ServerConfig.t option) (f : env -> unit) : unit
+      =
+    Printexc.record_backtrace true;
+    EventLogger.init_fake ();
+    Tempfile.with_real_tempdir @@ fun root ->
+    Tempfile.with_real_tempdir @@ fun hhi_root ->
+    Tempfile.with_real_tempdir @@ fun tmp ->
+    let naming_sqlite = Path.concat tmp "naming_table.sql" in
+    Relative_path.set_path_prefix Relative_path.Root root;
+    Relative_path.set_path_prefix Relative_path.Hhi hhi_root;
+    Relative_path.set_path_prefix Relative_path.Tmp tmp;
+    let (_save_result : Naming_sqlite.save_result) =
+      Naming_sqlite.save_file_infos
+        (Path.to_string naming_sqlite)
+        Relative_path.Map.empty
+        ~base_content_version:""
+    in
+    let env = ClientIdeDaemon.Test.init ~custom_config ~naming_sqlite in
+    f env;
+    ()
+
+  let setup_disk (env : env) (files_and_contents : (string * string) list) : env
+      =
+    let files_and_contents =
+      List.map files_and_contents ~f:(fun (suffix, contents) ->
+          (Relative_path.from_root ~suffix, contents))
+    in
+    List.iter files_and_contents ~f:(fun (path, contents) ->
+        let file = Relative_path.to_absolute path in
+        RealDisk.write_file ~file ~contents;
+        TestDisk.set file contents);
+    ClientIdeDaemon.Test.index
+      env
+      (Relative_path.Set.of_list (List.map files_and_contents ~f:fst))
+
+  let edit_file (env : env) (suffix : string) (contents : string) :
+      env * ServerCommandTypes.diagnostic_errors =
+    let message =
+      ClientIdeMessage.(
+        Did_open_or_change
+          (doc suffix contents, { should_calculate_errors = true }))
+    in
+    let (env, diagnostics) = ClientIdeDaemon.Test.handle env message in
+    let diagnostics =
+      FileMap.singleton ("/" ^ suffix) (Option.value_exn diagnostics)
+    in
+    (env, diagnostics)
+
+  let open_file (env : env) (suffix : string) :
+      env * ServerCommandTypes.diagnostic_errors =
+    let contents =
+      TestDisk.get (Relative_path.from_root ~suffix |> Relative_path.to_absolute)
+    in
+    edit_file env suffix contents
+
+  let close_file (env : env) (suffix : string) :
+      env * ServerCommandTypes.diagnostic_errors =
+    let message =
+      ClientIdeMessage.(
+        Did_close
+          (Relative_path.from_root ~suffix
+          |> Relative_path.to_absolute
+          |> Path.make))
+    in
+    let (env, diagnostics) = ClientIdeDaemon.Test.handle env message in
+    let diagnostics = FileMap.singleton ("/" ^ suffix) diagnostics in
+    (env, diagnostics)
+
+  let assert_no_diagnostics (diagnostics : ServerCommandTypes.diagnostic_errors)
+      =
+    let is_any =
+      FileMap.exists diagnostics ~f:(fun _file d -> not (List.is_empty d))
+    in
+    if is_any then begin
+      let diagnostics_as_string =
+        diagnostics_to_string diagnostics |> relativize
+      in
+      fail
+        ("Did not expect to receive IDE diagnostics. Got:\n"
+        ^ diagnostics_as_string)
+    end
+
+  let assert_diagnostics_string
+      (diagnostics : ServerCommandTypes.diagnostic_errors) (expected : string) :
+      unit =
+    let diagnostics_as_string =
+      diagnostics_to_string diagnostics |> relativize
+    in
+    assertEqual expected diagnostics_as_string
+end

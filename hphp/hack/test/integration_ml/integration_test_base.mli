@@ -105,7 +105,43 @@ val errors_to_string : Errors.finalized_error list -> string
 
 val print_telemetries : ServerEnv.env -> unit
 
+(** Some tests work with clientIdeDaemon rather than Server.
+They use the following module instead of [setup_server] and [setup_disk]. *)
+module Client : sig
+  type env = ClientIdeDaemon.Test.env
+
+  val with_env : custom_config:ServerConfig.t option -> (env -> unit) -> unit
+
+  val setup_disk : env -> (string * string) list -> env
+
+  val open_file : env -> string -> env * ServerCommandTypes.diagnostic_errors
+
+  val close_file : env -> string -> env * ServerCommandTypes.diagnostic_errors
+
+  val edit_file :
+    env -> string -> string -> env * ServerCommandTypes.diagnostic_errors
+
+  val assert_no_diagnostics : ServerCommandTypes.diagnostic_errors -> unit
+
+  val assert_diagnostics_string :
+    ServerCommandTypes.diagnostic_errors -> string -> unit
+end
+
+val doc :
+  string (* file-suffix *) -> string (* content *) -> ClientIdeMessage.document
+
+val loc :
+  int (* 1-based line *) ->
+  int (* 1-based column *) ->
+  ClientIdeMessage.location
+
 (* Helpers for asserting things *)
+
+(** This helper is designed to make tests that work with TestDisk roots
+like "/", or RealDisk roots like "/tmp/abc123/". It works by removing from
+the string any occurrence of the global mutable root prefix
+that was set by [Relative_path.set_prefix]. *)
+val relativize : string -> string
 
 val fail : string -> 'noreturn
 
@@ -136,6 +172,8 @@ val get_diagnostics :
 
 val assert_ide_autocomplete_does_not_contain :
   ('a, AutocompleteTypes.ide_result) loop_outputs -> string list -> unit
+
+val assert_ide_completions : AutocompleteTypes.ide_result -> string list -> unit
 
 val assert_ide_autocomplete :
   ('a, AutocompleteTypes.ide_result) loop_outputs -> string list -> unit

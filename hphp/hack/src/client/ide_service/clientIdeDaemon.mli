@@ -8,3 +8,13 @@
  *)
 
 val daemon_entry_point : (ClientIdeMessage.daemon_args, unit, unit) Daemon.entry
+
+module Test : sig
+  type env
+
+  val init : custom_config:ServerConfig.t option -> naming_sqlite:Path.t -> env
+
+  val index : env -> Relative_path.Set.t -> env
+
+  val handle : env -> 'a ClientIdeMessage.t -> env * 'a
+end

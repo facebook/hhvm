@@ -187,18 +187,18 @@ val assert_error_count :
   unit
 
 val assert_needs_retry :
-  ('a, 'b ServerCommandTypes.Done_or_retry.t) loop_outputs -> unit
+  ('a ServerCommandTypes.Done_or_retry.t, 'b) loop_outputs -> unit
 
 val assert_find_refs :
-  ('a, ServerCommandTypes.Find_refs.result_or_retry) loop_outputs ->
+  (ServerCommandTypes.Find_refs.result_or_retry, 'b) loop_outputs ->
   string list ->
   unit
 
 val assert_rename :
-  ('a, ServerCommandTypes.Rename.result_or_retry) loop_outputs -> string -> unit
+  (ServerCommandTypes.Rename.result_or_retry, 'b) loop_outputs -> string -> unit
 
 val assert_ide_rename :
-  ('a, ServerCommandTypes.Rename.ide_result_or_retry) loop_outputs ->
+  (ServerCommandTypes.Rename.ide_result_or_retry, 'b) loop_outputs ->
   string ->
   unit
 

@@ -807,14 +807,14 @@ let assert_error_count loop_output ~expected_count =
 
 let assert_needs_retry loop_output =
   Done_or_retry.(
-    match loop_output.persistent_client_response with
+    match loop_output.new_client_response with
     | Some Retry -> ()
     | Some (Done _) -> fail "Expected needing to retry"
     | None -> fail "Expected response")
 
 let assert_response loop_output =
   Done_or_retry.(
-    match loop_output.persistent_client_response with
+    match loop_output.new_client_response with
     | Some (Done res) -> res
     | Some Retry -> fail "Expecteded not needing to retry"
     | None -> fail "Expected response")

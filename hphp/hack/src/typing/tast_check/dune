@@ -16,4 +16,4 @@
   typing_pessimisation_deps
   utils_core)
  (preprocess
-  (pps ppx_deriving.std ppx_sexp_conv)))
+  (pps ppx_deriving.std ppx_sexp_conv ppx_hash)))

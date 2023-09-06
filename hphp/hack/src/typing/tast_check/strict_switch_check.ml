@@ -11,7 +11,7 @@ open Aast
 open Typing_defs
 
 module Value = struct
-  type t = Other  (** requires default case *) [@@deriving ord, sexp]
+  type t = Other  (** requires default case *) [@@deriving ord, sexp, hash]
 
   let universe = [Other]
 
@@ -73,10 +73,55 @@ let rec symbolic_dnf_values env ty : ValueSet.t =
   | Tunapplied_alias _ ->
     Typing_defs.error_Tunapplied_alias_in_illegal_context ()
 
+let key_present_data_consed table ~key ~data =
+  Hashtbl.find_and_call
+    table
+    key
+    ~if_found:(fun _ ->
+      Hashtbl.add_multi table ~key ~data;
+      true)
+    ~if_not_found:(fun _ -> false)
+
+type case = (Tast.ty, Tast.saved_env) Aast.expr
+
+let case_to_value env ((ty, _, _) : case) =
+  let (_, ty) = Tast_env.expand_type env ty in
+  match Typing_defs.get_node ty with
+  | _ -> Value.Other
+
+(* Partition cases based on their type *)
+let partition_cases env (cases : (case * _) list) values =
+  let partitions : (Value.t, (_ * _ * _) list) Hashtbl.t =
+    let tbl = Hashtbl.create (module Value) in
+    ValueSet.iter values ~f:(fun key -> Hashtbl.add_exn tbl ~key ~data:[]);
+    tbl
+  in
+  let unused_cases =
+    List.fold_left cases ~init:[] ~f:(fun unused (case, _) ->
+        let key = case_to_value env case in
+        if key_present_data_consed partitions ~key ~data:case then
+          unused
+        else
+          case :: unused)
+  in
+  (partitions, unused_cases)
+
 module EnumErr = Typing_error.Primary.Enum
 
 let register_err env err =
   Typing_error_utils.add_typing_error ~env @@ Typing_error.enum err
+
+let error_unused_cases env expected unused_cases =
+  let expected = lazy (Typing_print.full_strip_ns env expected) in
+  List.iter unused_cases ~f:(fun (ty, pos, _) ->
+      register_err env
+      @@ EnumErr.Enum_switch_wrong_class
+           {
+             pos;
+             kind = "";
+             expected = Lazy.force expected;
+             actual = Typing_print.full_strip_ns env ty;
+           })
 
 type default = (Tast.ty, Tast.saved_env) Aast.default_case
 
@@ -112,13 +157,15 @@ let check_default env pos (opt_default_case : default option) needs_default =
      b. The value set contains an neither-finite-nor-dynamic value.
      c. There are missing cases for finite values.
    4. Otherwise a default is redundant. *)
-let check_cases_against_values env pos values opt_default_case =
+let check_cases_against_values env pos expected values cases opt_default_case =
   let needs_default =
     (* I write `exists ~f:(fun x -> not @@ finite x)` instead of all
        `forall ~f:finite` to ensure set is non-empty *)
     ValueSet.exists ~f:(fun x -> not @@ Value.finite_or_dynamic x) values
   in
+  let (_partitions, unused_cases) = partition_cases env cases values in
   let typing_env = Tast_env.tast_env_as_typing_env env in
+  error_unused_cases typing_env expected unused_cases;
   check_default typing_env pos opt_default_case needs_default
 
 let add_fields json ~fields =
@@ -126,9 +173,9 @@ let add_fields json ~fields =
   | Hh_json.JSON_Object old -> Hh_json.JSON_Object (old @ fields)
   | _ -> Hh_json.JSON_Object (("warning_expected_object", json) :: fields)
 
-let check_exhaustiveness env pos ty opt_default =
+let check_exhaustiveness env pos ty cases opt_default =
   let values = symbolic_dnf_values env ty in
-  check_cases_against_values env pos values opt_default;
+  check_cases_against_values env pos ty values cases opt_default;
   let tcopt = env |> Tast_env.get_decl_env |> Decl_env.tcopt in
   if TypecheckerOptions.tco_log_exhaustivity_check tcopt then
     let fields =
@@ -149,7 +196,17 @@ let handler =
 
     method! at_stmt env x =
       match snd x with
-      | Switch ((scrutinee_ty, scrutinee_pos, _), _cases, opt_default_case) ->
-        check_exhaustiveness env scrutinee_pos scrutinee_ty opt_default_case
+      | Switch ((scrutinee_ty, scrutinee_pos, _), cases, opt_default_case) ->
+        let (_, scrutinee_ty) =
+          Typing_union.simplify_unions
+            (Tast_env.tast_env_as_typing_env env)
+            scrutinee_ty
+        in
+        check_exhaustiveness
+          env
+          scrutinee_pos
+          scrutinee_ty
+          cases
+          opt_default_case
       | _ -> ()
   end

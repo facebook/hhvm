@@ -1,0 +1,4 @@
+File "noreturn_default.php", line 6, characters 15-16:
+All cases already covered; a redundant `default` case prevents detecting future errors. If your goal is to guard against invalid values for this type, do an `is` check before the switch. (Typing[4022])
+  File "noreturn_default.php", line 7, characters 9-16:
+  default declared here

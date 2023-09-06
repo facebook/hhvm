@@ -1,0 +1,2 @@
+File "noreturn_case.php", line 7, characters 14-14:
+Switching on `nothing` but using constant from `int` (Typing[4023])

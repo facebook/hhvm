@@ -23,7 +23,7 @@ from thrift.Thrift import TApplicationException, TMessageType
 from thrift.transport.THeaderTransport import CLIENT_TYPE, THeaderTransport
 
 
-class THeaderProtocolAccelerate(object):
+class THeaderProtocolAccelerate:
 
     """Base class for pass through header protocols"""
 
@@ -221,7 +221,7 @@ class THeaderProtocol(TProtocolBase, THeaderProtocolAccelerate):
         return self.__proto.readString()
 
 
-class THeaderProtocolFactory(object):
+class THeaderProtocolFactory:
     def __init__(self, strictRead=False, client_types=None, client_type=None):
         self.strictRead = strictRead
         self.client_types = client_types

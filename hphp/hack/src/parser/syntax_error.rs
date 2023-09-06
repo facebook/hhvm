@@ -872,6 +872,12 @@ pub const xhp_class_attribute_type_constant: Error =
     Cow::Borrowed("Type constants are not allowed on xhp class attributes");
 pub const globals_disallowed: Error =
     Cow::Borrowed("`$GLOBALS` variable is removed from the language. Use HH\\global functions");
+pub fn superglobal_disallowed(name: &str) -> Error {
+    Cow::Owned(format!(
+        "`{}` is no longer accessible as a magic global variable. Use the HH\\global_* functions instead.",
+        name
+    ))
+}
 pub const invalid_this: Error =
     Cow::Borrowed("`$this` cannot be used in functions and static methods");
 pub const cannot_unset_this: Error = Cow::Borrowed("`$this` cannot be unset");

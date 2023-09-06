@@ -1,0 +1,24 @@
+====================== 1 =======================
+
+Fatal error: `$_GET` is no longer accessible as a magic global variable. Use the HH\global_* functions instead. in %s/disable_superglobals1.php.inc on line 4
+====================== 2 =======================
+
+Fatal error: `$_POST` is no longer accessible as a magic global variable. Use the HH\global_* functions instead. in %s/disable_superglobals2.php.inc on line 4
+====================== 3 =======================
+
+Fatal error: `$_FILES` is no longer accessible as a magic global variable. Use the HH\global_* functions instead. in %s/disable_superglobals3.php.inc on line 4
+====================== 4 =======================
+
+Fatal error: `$_REQUEST` is no longer accessible as a magic global variable. Use the HH\global_* functions instead. in %s/disable_superglobals4.php.inc on line 4
+====================== 5 =======================
+
+Fatal error: `$_ENV` is no longer accessible as a magic global variable. Use the HH\global_* functions instead. in %s/disable_superglobals5.php.inc on line 4
+====================== 6 =======================
+
+Fatal error: `$_SERVER` is no longer accessible as a magic global variable. Use the HH\global_* functions instead. in %s/disable_superglobals6.php.inc on line 4
+====================== 7 =======================
+
+Fatal error: `$_GET` is no longer accessible as a magic global variable. Use the HH\global_* functions instead. in %s/disable_superglobals7.php.inc on line 4
+====================== 8 =======================
+
+Fatal error: `$_ENV` is no longer accessible as a magic global variable. Use the HH\global_* functions instead. in %s/disable_superglobals8.php.inc on line 4

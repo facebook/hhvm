@@ -2633,10 +2633,18 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         match &node.children {
             VariableExpression(x) => {
                 // TODO(T75820862): Allow $GLOBALS to be used as a variable name
-                if self.text(&x.expression) == sn::superglobals::GLOBALS {
+                let name = self.text(&x.expression);
+                if name == sn::superglobals::GLOBALS {
                     self.errors
                         .push(make_error_from_node(node, errors::globals_disallowed))
-                } else if self.text(&x.expression) == sn::special_idents::THIS && !self.has_this() {
+                } else if self.env.parser_options.po_disallow_direct_superglobals_refs
+                    && sn::superglobals::is_superglobal(name)
+                {
+                    self.errors.push(make_error_from_node(
+                        node,
+                        errors::superglobal_disallowed(name),
+                    ))
+                } else if name == sn::special_idents::THIS && !self.has_this() {
                     // If we are in the special top level debugger function, lets not check for $this since
                     // it will be properly lifted in closure convert
                     if self

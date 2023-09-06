@@ -1,0 +1,1 @@
+--count=8 -vHack.Lang.DisallowDirectSuperglobalsRefs=true

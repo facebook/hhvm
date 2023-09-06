@@ -65,7 +65,7 @@ function typecheck_impl(string $input_client_name): TypecheckResult {
     '%s --timeout %d --retries 0 --json %s 2>&1',
     \escapeshellarg($client_name),
     $timeout,
-    \escapeshellarg(\dirname($_SERVER['SCRIPT_FILENAME'])),
+    \escapeshellarg(\dirname(\HH\global_get('_SERVER')['SCRIPT_FILENAME'])),
   );
 
   $ret = null;

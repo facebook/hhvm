@@ -1033,12 +1033,14 @@ std::unique_ptr<t_program_bundle> parse_ast(
     source_manager& sm,
     diagnostics_engine& diags,
     const std::string& path,
-    const parsing_params& params) {
-  auto programs =
-      std::make_unique<t_program_bundle>(std::make_unique<t_program>(path));
+    const parsing_params& params,
+    t_program_bundle* already_parsed) {
+  auto programs = std::make_unique<t_program_bundle>(
+      std::make_unique<t_program>(
+          path, already_parsed ? already_parsed->get_root_program() : nullptr),
+      already_parsed);
+  assert(!already_parsed || !already_parsed->find_program(path));
 
-  // A map from paths to corresponding programs.
-  auto parsed_programs = std::map<std::string, t_program*>{};
   auto circular_deps = std::set<std::string>{path};
 
   // Always enable allow_neg_field_keys when parsing included files.
@@ -1063,9 +1065,14 @@ std::unique_ptr<t_program_bundle> parse_ast(
     // Should have thrown an exception if not found.
     assert(!include_path.empty());
 
-    auto it = parsed_programs.find(include_path);
-    if (it != parsed_programs.end()) {
-      return it->second; // Skip already parsed files.
+    // Skip already parsed files.
+    if (auto program = programs->find_program(include_path)) {
+      if (program == programs->get_root_program()) {
+        // If we're including the root program we must have a dependency cycle.
+        assert(circular_deps.count(include_path));
+      } else {
+        return program;
+      }
     }
 
     // Fail on circular dependencies.
@@ -1083,7 +1090,6 @@ std::unique_ptr<t_program_bundle> parse_ast(
     auto included_program = std::make_unique<t_program>(include_path, &parent);
     t_program* program = included_program.get();
     programs->add_program(std::move(included_program));
-    parsed_programs[include_path] = program;
 
     try {
       ast_builder(diags, *program, include_params, on_include)

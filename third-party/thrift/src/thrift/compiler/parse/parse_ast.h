@@ -82,7 +82,8 @@ std::unique_ptr<t_program_bundle> parse_ast(
     source_manager& sm,
     diagnostics_engine& diags,
     const std::string& path,
-    const parsing_params& params);
+    const parsing_params& params,
+    t_program_bundle* already_parsed = nullptr);
 
 } // namespace compiler
 } // namespace thrift

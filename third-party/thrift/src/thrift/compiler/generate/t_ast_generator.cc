@@ -191,7 +191,13 @@ void t_ast_generator::generate_program() {
     }
   };
 
-  schematizer schema_source(intern_value);
+  if (!program_bundle_.root_program()->scope()->find_by_uri(
+          "facebook.com/thrift/type/TypeUri")) {
+    throw std::runtime_error(
+        "thrift/lib/thrift/schema.thrift must be present in one of the include paths.");
+  }
+
+  schematizer schema_source(&program_bundle_, intern_value);
   const_ast_visitor visitor;
   visitor.add_program_visitor([&](const t_program& program) {
     if (program_index.count(&program)) {

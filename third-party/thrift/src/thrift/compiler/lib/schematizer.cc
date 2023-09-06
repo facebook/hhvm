@@ -15,10 +15,12 @@
  */
 
 #include <string>
+#include <string_view>
 #include <utility>
 #include <thrift/compiler/ast/t_const.h>
 #include <thrift/compiler/ast/t_exception.h>
 #include <thrift/compiler/ast/t_program.h>
+#include <thrift/compiler/ast/t_program_bundle.h>
 #include <thrift/compiler/ast/t_service.h>
 #include <thrift/compiler/ast/t_typedef.h>
 #include <thrift/compiler/ast/t_union.h>
@@ -45,8 +47,15 @@ std::unique_ptr<t_const_value> mapval() {
   ret->set_map();
   return ret;
 }
-std::unique_ptr<t_const_value> typeUri(
-    const t_type& type, const t_program* program) {
+} // namespace
+
+t_type_ref schematizer::stdType(std::string_view uri) {
+  auto scope = bundle_->get_root_program()->scope();
+  return t_type_ref::from_req_ptr(
+      static_cast<const t_type*>(scope->find_by_uri(uri)));
+}
+
+std::unique_ptr<t_const_value> schematizer::typeUri(const t_type& type) {
   auto ret = mapval();
   if (!type.uri().empty()) {
     ret->add_map(val("uri"), val(type.uri()));
@@ -54,13 +63,12 @@ std::unique_ptr<t_const_value> typeUri(
     ret->add_map(val("scopedName"), val(type.get_scoped_name()));
   }
   static const std::string kTypeUriUri = "facebook.com/thrift/type/TypeUri";
-  auto typeUri_ttype = t_type_ref::from_ptr(
-      dynamic_cast<const t_type*>(program->scope()->find_by_uri(kTypeUriUri)));
+  auto typeUri_ttype = stdType(kTypeUriUri);
   ret->set_ttype(typeUri_ttype);
   return ret;
 }
 
-void add_definition(
+void schematizer::add_definition(
     t_const_value& schema,
     const t_named& node,
     const t_program* program,
@@ -85,20 +93,15 @@ void add_definition(
       auto annot = val();
       static const std::string kStructuredAnnotationSchemaUri =
           "facebook.com/thrift/type/StructuredAnnotation";
-      // May be null when run from thrift2ast, which doesn't read this value.
       auto structured_annotation_ttype =
-          t_type_ref::from_ptr(dynamic_cast<const t_type*>(
-              program->scope()->find_by_uri(kStructuredAnnotationSchemaUri)));
+          stdType(kStructuredAnnotationSchemaUri);
       annot->set_ttype(structured_annotation_ttype);
       annot->set_map();
-      annot->add_map(val("type"), typeUri(*item.type(), program));
+      annot->add_map(val("type"), typeUri(*item.type()));
       if (!item.value()->is_empty()) {
         static const std::string kProtocolValueUri =
             "facebook.com/thrift/protocol/Value";
-        // May be null when run from thrift2ast, which doesn't read this value.
-        auto protocol_value_ttype =
-            t_type_ref::from_ptr(dynamic_cast<const t_type*>(
-                program->scope()->find_by_uri(kProtocolValueUri)));
+        auto protocol_value_ttype = stdType(kProtocolValueUri);
         auto fields = val();
         fields->set_map();
         for (const auto& pair : item.value()->get_map()) {
@@ -149,7 +152,7 @@ void add_as_definition(
 
 /// Returns a constant of type type_rep.TypeStruct,
 /// resolving placeholder typedefs if needed.
-std::unique_ptr<t_const_value> gen_type(
+std::unique_ptr<t_const_value> schematizer::gen_type(
     schematizer* generator,
     const t_program* program,
     t_const_value* defns_schema,
@@ -167,7 +170,7 @@ std::unique_ptr<t_const_value> gen_type(
       continue;
     }
 
-    type_name->add_map(val("typedefType"), typeUri(*resolved_type, program));
+    type_name->add_map(val("typedefType"), typeUri(*resolved_type));
     schema->add_map(val("name"), std::move(type_name));
     return schema;
   }
@@ -240,7 +243,7 @@ std::unique_ptr<t_const_value> gen_type(
             generator->gen_schema(static_cast<const t_enum&>(*resolved_type));
         add_as_definition(*defns_schema, "enumDef", std::move(enum_schema));
       }
-      type_name->add_map(val("enumType"), typeUri(*resolved_type, program));
+      type_name->add_map(val("enumType"), typeUri(*resolved_type));
       break;
     }
     case t_type::type::t_struct: {
@@ -271,7 +274,7 @@ std::unique_ptr<t_const_value> gen_type(
               return "structType";
             }
           }()),
-          typeUri(*resolved_type, program));
+          typeUri(*resolved_type));
       break;
     }
     default:
@@ -282,10 +285,6 @@ std::unique_ptr<t_const_value> gen_type(
     schema->add_map(val("params"), std::move(params));
   }
   return schema;
-}
-std::unique_ptr<t_const_value> gen_type(
-    const t_type& type, const t_program* program) {
-  return gen_type(nullptr, program, nullptr, type);
 }
 
 void schematize_recursively(
@@ -381,7 +380,7 @@ void add_qualifier(const t_enum* t_enum, t_const_value& schema, int enum_val) {
   schema.add_map(val("qualifier"), std::move(qualifier_schema));
 }
 
-void add_fields(
+void schematizer::add_fields(
     schematizer* generator,
     const t_program* program,
     t_const_value* defns_schema,
@@ -429,7 +428,6 @@ void add_fields(
 
   schema.add_map(val(fields_name), std::move(fields_schema));
 }
-} // namespace
 
 std::unique_ptr<t_const_value> schematizer::gen_schema(
     const t_structured& node) {
@@ -531,7 +529,7 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
       auto type = ret.get_type();
       if (auto interaction = dynamic_cast<const t_interaction*>(type)) {
         auto ref = mapval();
-        ref->add_map(val("uri"), typeUri(*interaction, node.program()));
+        ref->add_map(val("uri"), typeUri(*interaction));
         func_schema->add_map(val("interactionType"), std::move(ref));
       } else if (auto stream = dynamic_cast<const t_stream_response*>(type)) {
         assert(false); // handled below
@@ -629,7 +627,7 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
 
   if (auto parent = node.extends()) {
     auto ref = mapval();
-    ref->add_map(val("uri"), typeUri(*parent, node.program()));
+    ref->add_map(val("uri"), typeUri(*parent));
     svc_schema->add_map(val("baseService"), std::move(ref));
   }
 

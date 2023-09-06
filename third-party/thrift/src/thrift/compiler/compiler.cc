@@ -316,6 +316,7 @@ bool generate(
     const gen_params& params,
     t_program& program,
     std::set<std::string>& already_generated,
+    t_program_bundle& program_bundle,
     diagnostics_engine& diags) {
   // Oooohh, recursive code generation, hot!!
   if (params.gen_recurse) {
@@ -323,7 +324,8 @@ bool generate(
     already_generated.emplace(program.path());
     for (const auto& include : program.get_included_programs()) {
       if (!already_generated.count(include->path()) &&
-          !generate(params, *include, already_generated, diags)) {
+          !generate(
+              params, *include, already_generated, program_bundle, diags)) {
         return false;
       }
     }
@@ -346,7 +348,7 @@ bool generate(
             return parse_control::more;
           });
       auto generator = generator_registry::make_generator(
-          generator_name, program, diags.source_mgr());
+          generator_name, program, diags.source_mgr(), program_bundle);
       if (!generator) {
         fmt::print(
             stderr, "Error: Invalid generator name: {}\n", generator_name);
@@ -395,9 +397,16 @@ bool generate(
 }
 
 bool generate(
-    const gen_params& params, t_program& program, diagnostics_engine& diags) {
+    const gen_params& params,
+    t_program_bundle& program_bundle,
+    diagnostics_engine& diags) {
   std::set<std::string> already_generated;
-  return generate(params, program, already_generated, diags);
+  return generate(
+      params,
+      *program_bundle.get_root_program(),
+      already_generated,
+      program_bundle,
+      diags);
 }
 
 std::string get_include_path(
@@ -441,8 +450,10 @@ std::unique_ptr<t_program_bundle> parse_and_mutate_program(
     diagnostic_context& ctx,
     const std::string& filename,
     parsing_params params,
-    bool return_nullptr_on_failure) {
-  auto programs = parse_ast(sm, ctx, filename, std::move(params));
+    bool return_nullptr_on_failure,
+    t_program_bundle* already_parsed) {
+  auto programs =
+      parse_ast(sm, ctx, filename, std::move(params), already_parsed);
   if (!programs || ctx.has_errors()) {
     // Mutations should be only performed on a valid AST.
     return !return_nullptr_on_failure ? std::move(programs) : nullptr;
@@ -517,36 +528,59 @@ compile_result compile(
   diagnostic_context ctx(source_mgr, result.detail, std::move(dparams));
 
   // Parse it!
-  auto program = parse_and_mutate_program(
+  auto programs = parse_and_mutate_program(
       source_mgr,
       ctx,
       input_filename,
-      std::move(pparams),
+      pparams,
       true /* return_nullptr_on_failure */);
-  if (!program) {
+  if (!programs) {
     return result;
   }
 
-  program->root_program()->set_include_prefix(
+  // Load standard library if available.
+  try {
+    auto path = source_manager::find_include_file(
+        "thrift/lib/thrift/schema.thrift", "", pparams.incl_searchpath);
+    if (!programs->find_program(path)) {
+      auto inc = parse_and_mutate_program(
+          source_mgr,
+          ctx,
+          path,
+          pparams,
+          true /* return_nullptr_on_failure */,
+          programs.get());
+      if (inc) {
+        programs->add_implicit_includes(std::move(inc));
+      }
+    }
+  } catch (const std::runtime_error& ex) {
+    ctx.warning(
+        source_location{},
+        "Could not load Thrift standard libraries: {}",
+        ex.what());
+  }
+
+  programs->root_program()->set_include_prefix(
       get_include_path(gparams.targets, input_filename));
 
   // Validate it!
-  validator::validate(program->root_program(), ctx);
-  standard_validator()(ctx, *program->root_program());
+  validator::validate(programs->root_program(), ctx);
+  standard_validator()(ctx, *programs->root_program());
   if (result.detail.has_error()) {
     return result;
   }
 
   // Generate it!
-  ctx.begin_visit(*program->root_program());
+  ctx.begin_visit(*programs->root_program());
   try {
-    if (generate(gparams, *program->root_program(), ctx)) {
+    if (generate(gparams, *programs, ctx)) {
       result.retcode = compile_retcode::success;
     }
   } catch (const std::exception& e) {
-    ctx.error(*program->root_program(), "{}", e.what());
+    ctx.error(*programs->root_program(), "{}", e.what());
   }
-  ctx.end_visit(*program->root_program());
+  ctx.end_visit(*programs->root_program());
   return result;
 }
 

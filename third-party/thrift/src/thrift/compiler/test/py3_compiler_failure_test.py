@@ -49,6 +49,8 @@ class CompilerFailureTest(unittest.TestCase):
     # returns expected error message, `args` is a list of `(lineno, name)`
     def _expected_enum_value_name_err(self, *args):
         errors = [
+            "[WARNING:] Could not load Thrift standard libraries: Could not find include file thrift/lib/thrift/schema.thrift\n"
+        ] + [
             (
                 f"[ERROR:foo.thrift:{lineno}] "
                 f"'{name}' should not be used as an enum/union field name in thrift-py3. "

@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <algorithm>
+#include <map>
 #include <memory>
 #include <vector>
 
@@ -31,7 +33,12 @@ namespace compiler {
  */
 class t_program_bundle {
  public:
-  explicit t_program_bundle(std::unique_ptr<t_program> root_program) {
+  explicit t_program_bundle(
+      std::unique_ptr<t_program> root_program,
+      t_program_bundle* already_parsed = nullptr) {
+    if (already_parsed) {
+      programs_by_path_ = already_parsed->programs_by_path_;
+    }
     add_program(std::move(root_program));
   }
 
@@ -42,11 +49,32 @@ class t_program_bundle {
   node_list_view<const t_program> programs() const { return programs_; }
   void add_program(std::unique_ptr<t_program> program) {
     programs_raw_.push_back(program.get());
+    programs_by_path_[program->path()] = program.get();
     programs_.emplace_back(std::move(program));
+  }
+
+  void add_implicit_includes(std::unique_ptr<t_program_bundle> inc) {
+    for (auto* prog : inc->programs_raw_) {
+      programs_by_path_[prog->path()] = prog;
+    }
+    std::move(
+        inc->programs_.begin(),
+        inc->programs_.end(),
+        std::back_inserter(implicit_includes_));
+  }
+
+  t_program* find_program(std::string_view path) {
+    if (auto itr = programs_by_path_.find(path);
+        itr != programs_by_path_.end()) {
+      return itr->second;
+    }
+    return nullptr;
   }
 
  private:
   node_list<t_program> programs_;
+  node_list<t_program> implicit_includes_;
+  std::map<std::string, t_program*, std::less<>> programs_by_path_;
 
   // TODO(afuller): Delete everything below here. It is only provided for
   // backwards compatibility.

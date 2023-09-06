@@ -44,14 +44,17 @@ class CompilerFailureTest(unittest.TestCase):
         self.tmp = tmp
         self.addCleanup(os.chdir, os.getcwd())
         os.chdir(self.tmp)
-        os.makedirs("thrift")
-        with resources.path(__package__, "annotation_files") as files:
-            shutil.copytree(files, "thrift/annotation")
         self.maxDiff = None
 
     def run_thrift(self, *args, gen="mstch_cpp2"):
         # Annotation files are copied from `thrift/annotation`
-        argsx = [thrift, "--gen", gen, "-I", self.tmp]
+        argsx = [
+            thrift,
+            "--gen",
+            gen,
+            "-I",
+            resources.path(__package__, "implicit_includes"),
+        ]
         argsx.extend(args)
         pipe = subprocess.PIPE
         p = subprocess.Popen(argsx, stdout=pipe, stderr=pipe)

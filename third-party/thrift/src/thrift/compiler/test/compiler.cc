@@ -105,6 +105,10 @@ void check_compile(const std::string& source, std::vector<std::string> args) {
   args.emplace_back("mstch_cpp2"); // target language
   args.emplace_back("-o"); // output directory
   args.emplace_back(tmp_dir.string() + "/");
+  if (auto* includes = std::getenv("IMPLICIT_INCLUDES")) {
+    args.emplace_back("-I"); // include directory
+    args.emplace_back(includes);
+  }
   args.emplace_back(TEST_FILE_NAME); // input file name
 
   compile_result result = compile(args, smgr);

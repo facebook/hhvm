@@ -331,56 +331,56 @@ void generate_runtime_schema(
 void generate_struct_schema(
     diagnostic_context& ctx, mutator_context& mCtx, t_struct& node) {
   generate_runtime_schema<t_struct&>(
-      ctx, mCtx, true, "facebook.com/thrift/type/Struct", node, [&node]() {
-        return schematizer().gen_schema(node);
+      ctx, mCtx, true, "facebook.com/thrift/type/Struct", node, [&]() {
+        return schematizer(mCtx.bundle).gen_schema(node);
       });
 }
 
 void generate_union_schema(
     diagnostic_context& ctx, mutator_context& mCtx, t_union& node) {
   generate_runtime_schema<t_union&>(
-      ctx, mCtx, true, "facebook.com/thrift/type/Union", node, [&node]() {
-        return schematizer().gen_schema(node);
+      ctx, mCtx, true, "facebook.com/thrift/type/Union", node, [&]() {
+        return schematizer(mCtx.bundle).gen_schema(node);
       });
 }
 
 void generate_exception_schema(
     diagnostic_context& ctx, mutator_context& mCtx, t_exception& node) {
   generate_runtime_schema<t_exception&>(
-      ctx, mCtx, true, "facebook.com/thrift/type/Exception", node, [&node]() {
-        return schematizer().gen_schema(node);
+      ctx, mCtx, true, "facebook.com/thrift/type/Exception", node, [&]() {
+        return schematizer(mCtx.bundle).gen_schema(node);
       });
 }
 
 void generate_service_schema(
     diagnostic_context& ctx, mutator_context& mCtx, t_service& node) {
   generate_runtime_schema<t_service&>(
-      ctx, mCtx, true, "facebook.com/thrift/type/Schema", node, [&node]() {
-        return schematizer().gen_full_schema(node);
+      ctx, mCtx, true, "facebook.com/thrift/type/Schema", node, [&]() {
+        return schematizer(mCtx.bundle).gen_full_schema(node);
       });
 }
 
 void generate_const_schema(
     diagnostic_context& ctx, mutator_context& mCtx, t_const& node) {
   generate_runtime_schema<t_const&>(
-      ctx, mCtx, true, "facebook.com/thrift/type/Const", node, [&node]() {
-        return schematizer().gen_schema(node);
+      ctx, mCtx, true, "facebook.com/thrift/type/Const", node, [&]() {
+        return schematizer(mCtx.bundle).gen_schema(node);
       });
 }
 
 void generate_typedef_schema(
     diagnostic_context& ctx, mutator_context& mCtx, t_typedef& node) {
   generate_runtime_schema<t_typedef&>(
-      ctx, mCtx, true, "facebook.com/thrift/type/Typedef", node, [&node]() {
-        return schematizer().gen_schema(node);
+      ctx, mCtx, true, "facebook.com/thrift/type/Typedef", node, [&]() {
+        return schematizer(mCtx.bundle).gen_schema(node);
       });
 }
 
 void generate_enum_schema(
     diagnostic_context& ctx, mutator_context& mCtx, t_enum& node) {
   generate_runtime_schema<t_enum&>(
-      ctx, mCtx, true, "facebook.com/thrift/type/Enum", node, [&node]() {
-        return schematizer().gen_schema(node);
+      ctx, mCtx, true, "facebook.com/thrift/type/Enum", node, [&]() {
+        return schematizer(mCtx.bundle).gen_schema(node);
       });
 }
 

@@ -46,7 +46,16 @@ class AstGeneratorTest(unittest.TestCase):
         self.maxDiff = None
 
     def run_thrift(self, file):
-        argsx = [thrift2ast, "--gen", "ast:protocol=compact", "-o", self.tmp, file]
+        argsx = [
+            thrift2ast,
+            "--gen",
+            "ast:protocol=compact",
+            "-o",
+            self.tmp,
+            "-I",
+            resources.path(__package__, "implicit_includes"),
+            file,
+        ]
         p = subprocess.run(argsx, capture_output=True)
         print("exit status:", p.returncode)
         print("stdout:", p.stdout.decode())
@@ -243,4 +252,24 @@ class AstGeneratorTest(unittest.TestCase):
         self.assertEqual(
             ast.values[ast.sources[1].namespaces["cpp2"] - 1].stringValue,
             b"facebook.foo",
+        )
+
+    def test_annotation(self):
+        write_file(
+            "foo.thrift",
+            textwrap.dedent(
+                """
+                struct Annot {}
+                @Annot
+                struct S {}
+                """
+            ),
+        )
+
+        ast = self.run_thrift("foo.thrift")
+        annot_id = next(iter(ast.definitions[1].structDef.attrs.annotations))
+        annot = ast.values[annot_id - 1]
+        # If standard library is not loaded this will have mapValue instead of objectValue
+        self.assertEqual(
+            annot.objectValue.members[1].objectValue.members[3].stringValue, "foo.Annot"
         )

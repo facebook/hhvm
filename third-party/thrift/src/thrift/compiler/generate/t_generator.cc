@@ -55,10 +55,13 @@ void generator_registry::register_generator(
 }
 
 std::unique_ptr<t_generator> generator_registry::make_generator(
-    const std::string& name, t_program& p, source_manager& sm) {
+    const std::string& name,
+    t_program& p,
+    source_manager& sm,
+    t_program_bundle& pb) {
   generator_map& map = get_generators();
   auto iter = map.find(name);
-  return iter != map.end() ? iter->second->make_generator(p, sm) : nullptr;
+  return iter != map.end() ? iter->second->make_generator(p, sm, pb) : nullptr;
 }
 
 generator_registry::generator_map& generator_registry::get_generators() {

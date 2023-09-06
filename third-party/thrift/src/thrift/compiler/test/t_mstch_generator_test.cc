@@ -18,6 +18,7 @@
 
 #include <folly/portability/GTest.h>
 
+#include <thrift/compiler/ast/t_program_bundle.h>
 #include <thrift/compiler/generate/t_mstch_generator.h>
 
 namespace apache {
@@ -43,8 +44,8 @@ TEST(t_mstch_generator_test, cache_leaks) {
 
   class leaky_generator : public t_mstch_generator {
    public:
-    leaky_generator(t_program& program, int* object_count)
-        : t_mstch_generator(program, source_mgr_),
+    leaky_generator(t_program& program, int* object_count, t_program_bundle& pb)
+        : t_mstch_generator(program, source_mgr_, pb),
           object_count_(object_count) {}
 
     std::string template_prefix() const override { return "."; }
@@ -61,8 +62,8 @@ TEST(t_mstch_generator_test, cache_leaks) {
 
   int object_count = 0;
   {
-    t_program program("my_leak.thrift");
-    leaky_generator generator(program, &object_count);
+    t_program_bundle pb(std::make_unique<t_program>("my_leak.thrift"));
+    leaky_generator generator(*pb.get_root_program(), &object_count, pb);
     generator.generate_program();
   }
 

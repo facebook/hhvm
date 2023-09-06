@@ -28,7 +28,9 @@ namespace thrift {
 namespace compiler {
 
 // Mutators have mutable access to the AST.
-using mutator_context = visitor_context;
+struct mutator_context : visitor_context {
+  t_program_bundle* bundle;
+};
 
 // An AST mutator is a ast_visitor that collects diagnostics and can
 // change the AST.
@@ -41,6 +43,7 @@ class ast_mutator
 
   void mutate(diagnostic_context& ctx, t_program_bundle& bundle) {
     mutator_context mctx;
+    mctx.bundle = &bundle;
     for (auto itr = bundle.programs().rbegin(); itr != bundle.programs().rend();
          ++itr) {
       operator()(ctx, mctx, *itr);

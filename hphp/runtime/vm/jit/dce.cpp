@@ -380,7 +380,8 @@ bool canDCE(const IRInstruction& inst) {
   case JmpSwitchDest:
   case ProfileSwitchDest:
   case CheckSurpriseFlags:
-  case CheckSurpriseAndStack:
+  case CheckSurpriseFlagsEnter:
+  case CheckStackOverflow:
   case HandleRequestSurprise:
   case ReturnHook:
   case SuspendHookAwaitEF:
@@ -671,8 +672,6 @@ bool canDCE(const IRInstruction& inst) {
   case EnterPrologue:
   case ExitPrologue:
   case EnterTranslation:
-  case CheckStackOverflow:
-  case CheckSurpriseFlagsEnter:
   case JmpPlaceholder:
   case ThrowOutOfBounds:
   case ThrowInvalidArrayKey:

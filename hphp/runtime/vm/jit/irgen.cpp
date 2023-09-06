@@ -136,7 +136,6 @@ SSATmp* genInstruction(IRGS& env, IRInstruction* inst) {
                    SuspendHookAwaitEF,
                    SuspendHookAwaitEG,
                    SuspendHookCreateCont,
-                   CheckSurpriseAndStack,
                    CheckSurpriseFlagsEnter)) {
         return EndCatchData::CatchMode::LocalsDecRefd;
       }

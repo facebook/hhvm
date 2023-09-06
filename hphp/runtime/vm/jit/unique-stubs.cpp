@@ -527,9 +527,9 @@ TCA emitFCallHelperNoTranslateThunk(CodeBlock& main, CodeBlock& cold,
   return emitFCallHelperThunkImpl(main, cold, data, us, name, false);
 }
 
-TCA emitFunctionEnterHelper(CodeBlock& main, CodeBlock& cold,
-                            DataBlock& data, UniqueStubs& us,
-                            const char* name) {
+TCA emitFunctionSurprised(CodeBlock& main, CodeBlock& cold,
+                          DataBlock& data, UniqueStubs& us,
+                          const char* name) {
   alignCacheLine(main);
 
   CGMeta meta;
@@ -618,7 +618,7 @@ TCA emitFunctionSurprisedOrStackOverflow(CodeBlock& main,
     emitStubCatch(vc, us, [] (Vout& v) { loadVmfp(v); });
 
     v = done;
-    v << tailcallstub{us.functionEnterHelper};
+    v << tailcallstub{us.functionSurprised};
   }, name);
 
   meta.process(nullptr);
@@ -1326,9 +1326,9 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
   ADD(funcPrologueRedispatchUnpack,
       hotView(),
       emitFuncPrologueRedispatchUnpack, hot(), cold, data, *this);
-  ADD(functionEnterHelper,
+  ADD(functionSurprised,
       hotView(),
-      emitFunctionEnterHelper, hot(), cold, data, *this);
+      emitFunctionSurprised, hot(), cold, data, *this);
   ADD(functionSurprisedOrStackOverflow,
       hotView(),
       emitFunctionSurprisedOrStackOverflow, hot(), cold, data, *this);

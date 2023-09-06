@@ -659,11 +659,10 @@ void emitSurpriseCheck(IRGS& env, const Func* callee) {
 
   // Check surprise flags in the same place as the interpreter: after func entry
   // and DV initializers, right before entering the main body.
-  if (stack_check_kind(callee) == StackCheck::Combine) {
-    gen(env, CheckSurpriseAndStack, FuncData { callee }, fp(env));
-  } else {
-    gen(env, CheckSurpriseFlagsEnter, FuncData { callee }, fp(env));
-  }
+  auto const checkStackOverflow =
+    stack_check_kind(callee) == StackCheck::Combine;
+  auto const data = CheckSurpriseFlagsEnterData { callee, checkStackOverflow };
+  gen(env, CheckSurpriseFlagsEnter, data, fp(env));
 }
 
 }

@@ -131,12 +131,6 @@ void emitTypeCheck(Vout& v, IRLS& env, Type type,
 void emitCheckSurpriseFlags(Vout& v, Vreg fp, Vlabel handleSurprise);
 
 /*
- * Check the surprise flags, and call functionEnterHelper if they are set.
- */
-void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vcold, Vreg fp,
-                                 Fixup fixup, Vlabel catchBlock);
-
-/*
  * Emits vasm instructions to get crc32 hash of the given arr
  */
 Vreg emitHashInt64(IRLS& env, const IRInstruction* inst, Vreg arr);

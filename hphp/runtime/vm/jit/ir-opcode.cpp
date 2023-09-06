@@ -272,7 +272,6 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckInOutMismatch:
   case CheckReadonlyMismatch:
   case CheckStackOverflow:
-  case CheckSurpriseAndStack:
   case CheckSurpriseFlagsEnter:
   case Clone:
   case CmpArrLike:

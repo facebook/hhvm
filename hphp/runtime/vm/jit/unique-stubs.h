@@ -151,7 +151,7 @@ struct UniqueStubs {
    *            jmp from functionSurprisedOrStackOverflow
    * @context:  stub
    */
-  TCA functionEnterHelper;
+  TCA functionSurprised;
 
   /*
    * Handle either a surprise condition or a stack overflow.

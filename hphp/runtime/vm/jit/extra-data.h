@@ -2818,6 +2818,35 @@ struct AliasClassData : IRExtraData {
   AliasClass acls;
 };
 
+struct CheckSurpriseFlagsEnterData : IRExtraData {
+  explicit CheckSurpriseFlagsEnterData(const Func* func,
+                                       bool checkStackOverflow)
+    : func(func), checkStackOverflow(checkStackOverflow)
+  {}
+
+  std::string show() const {
+    return folly::format(
+      "{} checkStackOverflow={}",
+      func->fullName(), checkStackOverflow
+    ).str();
+  }
+
+  bool equals(const CheckSurpriseFlagsEnterData& o) const {
+    return func == o.func && checkStackOverflow == o.checkStackOverflow;
+  }
+
+  size_t stableHash() const {
+    return folly::hash::hash_combine(
+      func->stableHash(),
+      std::hash<bool>()(checkStackOverflow)
+    );
+  }
+
+  const Func* func;
+  bool checkStackOverflow;
+};
+
+
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -3026,8 +3055,7 @@ X(LdInitPropAddr,               IndexData);
 X(DeserializeLazyProp,          IndexData);
 X(NewCol,                       NewColData);
 X(NewColFromArray,              NewColData);
-X(CheckSurpriseFlagsEnter,      FuncData);
-X(CheckSurpriseAndStack,        FuncData);
+X(CheckSurpriseFlagsEnter,      CheckSurpriseFlagsEnterData);
 X(ContCheckNext,                IsAsyncData);
 X(ContValid,                    IsAsyncData);
 X(LdContResumeAddr,             IsAsyncData);

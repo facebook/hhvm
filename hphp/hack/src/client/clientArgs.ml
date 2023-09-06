@@ -658,20 +658,8 @@ let parse_check_args cmd ~from_default =
         " save map of 64bit hashes to names to files in the given directory" );
       Common_argspecs.saved_state_ignore_hhconfig saved_state_ignore_hhconfig;
       ( "--search",
-        Arg.String (fun x -> set_mode (MODE_SEARCH (x, ""))),
-        " (mode) fuzzy search symbol definitions" );
-      ( "--search-class",
-        Arg.String (fun x -> set_mode (MODE_SEARCH (x, "class"))),
-        " (mode) fuzzy search class definitions" );
-      ( "--search-constant",
-        Arg.String (fun x -> set_mode (MODE_SEARCH (x, "constant"))),
-        " (mode) fuzzy search constant definitions" );
-      ( "--search-function",
-        Arg.String (fun x -> set_mode (MODE_SEARCH (x, "function"))),
-        " (mode) fuzzy search function definitions" );
-      ( "--search-typedef",
-        Arg.String (fun x -> set_mode (MODE_SEARCH (x, "typedef"))),
-        " (mode) fuzzy search typedef definitions" );
+        Arg.String (fun x -> set_mode (MODE_SEARCH x)),
+        " (mode) --search this_is_just_to_check_liveness_of_hh_server" );
       ( "--server-rage",
         Arg.Unit (fun () -> set_mode MODE_SERVER_RAGE),
         " (mode) dumps internal state of hh_server" );

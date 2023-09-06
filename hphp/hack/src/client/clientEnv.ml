@@ -60,8 +60,7 @@ type client_mode =
   | MODE_RETRIEVE_CHECKPOINT of string
   | MODE_SAVE_NAMING of string
   | MODE_SAVE_STATE of string
-  (* TODO figure out why we can't reference FuzzySearchService from here *)
-  | MODE_SEARCH of string * string
+  | MODE_SEARCH of string
   | MODE_SERVER_RAGE
   | MODE_STATS
   | MODE_STATUS

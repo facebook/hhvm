@@ -313,11 +313,9 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       (env, SaveStateService.go env filename)
     else
       (env, Error "There are typecheck errors; cannot generate saved state.")
-  | SEARCH (query, type_) ->
-    let ctx = Provider_utils.ctx_from_server_env env in
-    let sienv_ref = ref env.ServerEnv.local_symbol_table in
-    let r = ServerSearch.go ctx query ~kind_filter:type_ sienv_ref in
-    ({ env with ServerEnv.local_symbol_table = !sienv_ref }, r)
+  | CHECK_LIVENESS ->
+    (* This is for the client to know "is the server available to process requests?" *)
+    (env, ())
   | LINT fnl ->
     let ctx = Provider_utils.ctx_from_server_env env in
     (env, ServerLint.go genv ctx fnl)

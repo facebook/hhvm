@@ -65,7 +65,7 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | OUTLINE _ -> false
   | RAGE -> false
   | CST_SEARCH _ -> false
-  | SEARCH _ -> false
+  | CHECK_LIVENESS -> false
   | FUN_DEPS_BATCH _ -> false
   | DEPS_OUT_BATCH _ -> false
   | FILE_DEPENDENTS _ -> true

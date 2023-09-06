@@ -723,10 +723,17 @@ let main_internal
         args.max_errors
     in
     Lwt.return (exit_status, telemetry)
-  | MODE_SEARCH (query, type_) ->
-    let%lwt (results, telemetry) = rpc args @@ Rpc.SEARCH (query, type_) in
-    ClientSearch.go results args.output_json;
-    Lwt.return (Exit_status.No_error, telemetry)
+  | MODE_SEARCH query ->
+    if not (String.equal query "this_is_just_to_check_liveness_of_hh_server")
+    then begin
+      prerr_endline
+        "Usage: hh --search this_is_just_to_check_liveness_of_hh_server";
+      Lwt.return (Exit_status.Input_error, Telemetry.create ())
+    end else begin
+      let%lwt ((), telemetry) = rpc args @@ Rpc.CHECK_LIVENESS in
+      if args.output_json then print_endline "[]";
+      Lwt.return (Exit_status.No_error, telemetry)
+    end
   | MODE_LINT ->
     let fnl = filter_real_paths args.paths in
     begin

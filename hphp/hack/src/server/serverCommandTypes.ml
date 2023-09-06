@@ -404,7 +404,7 @@ type _ t =
   | SAVE_STATE :
       (string * bool)
       -> (SaveStateServiceTypes.save_state_result, string) Stdlib.result t
-  | SEARCH : string * string -> SearchUtils.result t
+  | CHECK_LIVENESS : unit t
   | LINT : string list -> ServerLintTypes.result t
   | LINT_STDIN : lint_stdin_input -> ServerLintTypes.result t
   | LINT_ALL : int -> ServerLintTypes.result t

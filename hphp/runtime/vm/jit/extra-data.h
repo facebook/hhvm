@@ -2818,9 +2818,9 @@ struct AliasClassData : IRExtraData {
   AliasClass acls;
 };
 
-struct CheckSurpriseFlagsEnterData : IRExtraData {
-  explicit CheckSurpriseFlagsEnterData(const Func* func,
-                                       bool checkStackOverflow)
+struct CheckHandleSurpriseEnterData : IRExtraData {
+  explicit CheckHandleSurpriseEnterData(const Func* func,
+                                        bool checkStackOverflow)
     : func(func), checkStackOverflow(checkStackOverflow)
   {}
 
@@ -2831,7 +2831,7 @@ struct CheckSurpriseFlagsEnterData : IRExtraData {
     ).str();
   }
 
-  bool equals(const CheckSurpriseFlagsEnterData& o) const {
+  bool equals(const CheckHandleSurpriseEnterData& o) const {
     return func == o.func && checkStackOverflow == o.checkStackOverflow;
   }
 
@@ -3055,7 +3055,8 @@ X(LdInitPropAddr,               IndexData);
 X(DeserializeLazyProp,          IndexData);
 X(NewCol,                       NewColData);
 X(NewColFromArray,              NewColData);
-X(CheckSurpriseFlagsEnter,      CheckSurpriseFlagsEnterData);
+X(CheckSurpriseFlagsEnter,      CheckHandleSurpriseEnterData);
+X(HandleSurpriseEnter,          CheckHandleSurpriseEnterData);
 X(ContCheckNext,                IsAsyncData);
 X(ContValid,                    IsAsyncData);
 X(LdContResumeAddr,             IsAsyncData);

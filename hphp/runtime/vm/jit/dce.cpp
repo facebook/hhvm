@@ -383,6 +383,7 @@ bool canDCE(const IRInstruction& inst) {
   case CheckSurpriseFlagsEnter:
   case CheckStackOverflow:
   case HandleRequestSurprise:
+  case HandleSurpriseEnter:
   case ReturnHook:
   case SuspendHookAwaitEF:
   case SuspendHookAwaitEG:

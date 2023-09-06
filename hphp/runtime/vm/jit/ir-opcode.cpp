@@ -272,7 +272,7 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckInOutMismatch:
   case CheckReadonlyMismatch:
   case CheckStackOverflow:
-  case CheckSurpriseFlagsEnter:
+  case HandleSurpriseEnter:
   case Clone:
   case CmpArrLike:
   case CmpObj:
@@ -524,6 +524,7 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckStk:
   case CheckSubClsCns:
   case CheckSurpriseFlags:
+  case CheckSurpriseFlagsEnter:
   case CheckType:
   case CheckTypeMem:
   case CheckVecBounds:

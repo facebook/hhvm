@@ -661,8 +661,18 @@ void emitSurpriseCheck(IRGS& env, const Func* callee) {
   // and DV initializers, right before entering the main body.
   auto const checkStackOverflow =
     stack_check_kind(callee) == StackCheck::Combine;
-  auto const data = CheckSurpriseFlagsEnterData { callee, checkStackOverflow };
-  gen(env, CheckSurpriseFlagsEnter, data, fp(env));
+  auto const data = CheckHandleSurpriseEnterData { callee, checkStackOverflow };
+
+  ifThen(
+    env,
+    [&] (Block* taken) {
+      gen(env, CheckSurpriseFlagsEnter, data, taken, fp(env));
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      gen(env, HandleSurpriseEnter, data, fp(env));
+    }
+  );
 }
 
 }

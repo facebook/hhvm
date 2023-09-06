@@ -126,31 +126,39 @@ void cgCheckSurpriseFlagsEnter(IRLS& env, const IRInstruction* inst) {
   }
   v << cmpqm{neededTop, rvmtl()[rds::kSurpriseFlagsOff], sf};
 
-  unlikelyIfThen(v, vcold(env), CC_AE, sf, [&] (Vout& v) {
-    // Call the surprise / stack overflow handler.
-    auto const stub = extra->checkStackOverflow
-      ? tc::ustubs().functionSurprisedOrStackOverflow
-      : tc::ustubs().functionSurprised;
-    auto const done = v.makeBlock();
-    auto const catchBlock = label(env, inst->taken());
-    auto const fixup = makeFixup(inst->marker(), SyncOptions::Sync);
-    v << vinvoke{CallSpec::stub(stub), v.makeVcallArgs({}), v.makeTuple({}),
-                 {done, catchBlock}, fixup};
-    v = done;
+  auto const done = v.makeBlock();
+  auto const handleSurprise = label(env, inst->taken());
+  v << jcc{CC_AE, sf, {done, handleSurprise}};
+  v = done;
+}
 
-    // If the function is not interceptable, the handler returned nullptr.
-    if (!extra->func->isInterceptable()) return;
+void cgHandleSurpriseEnter(IRLS& env, const IRInstruction* inst) {
+  auto const& extra = inst->extra<HandleSurpriseEnter>();
+  auto& v = vmain(env);
 
-    auto const sf = v.makeReg();
-    auto const rIntercept = rarg(3); // NB: must match emitFunctionSurprised
-    assertx(!php_return_regs().contains(rIntercept));
+  // Call the surprise / stack overflow handler.
+  auto const stub = extra->checkStackOverflow
+    ? tc::ustubs().functionSurprisedOrStackOverflow
+    : tc::ustubs().functionSurprised;
+  auto const done = v.makeBlock();
+  auto const catchBlock = label(env, inst->taken());
+  auto const fixup = makeFixup(inst->marker(), SyncOptions::Sync);
+  v << vinvoke{CallSpec::stub(stub), v.makeVcallArgs({}), v.makeTuple({}),
+               {done, catchBlock}, fixup};
+  v = done;
 
-    v << testq{rIntercept, rIntercept, sf};
-    ifThen(v, CC_NZ, sf, [&] (Vout& v) {
-      // We are intercepting. Return to the caller.
-      v << unrecordbasenativesp{};
-      v << jmpr{rIntercept, php_return_regs()};
-    });
+  // If the function is not interceptable, the handler returned nullptr.
+  if (!extra->func->isInterceptable()) return;
+
+  auto const sf = v.makeReg();
+  auto const rIntercept = rarg(3); // NB: must match emitFunctionSurprised
+  assertx(!php_return_regs().contains(rIntercept));
+
+  v << testq{rIntercept, rIntercept, sf};
+  ifThen(v, CC_NZ, sf, [&] (Vout& v) {
+    // We are intercepting. Return to the caller.
+    v << unrecordbasenativesp{};
+    v << jmpr{rIntercept, php_return_regs()};
   });
 }
 

@@ -3596,11 +3596,15 @@ fields of that struct for holding intermediate values.
   Check if the stack depth has exceeded its limit.  If it has, jump to the
   stack overflow helper stub, which will throw.
 
-| CheckSurpriseFlagsEnter<func,checkStackOverflow>, ND, S(FramePtr), NF
+| CheckSurpriseFlagsEnter<func,checkStackOverflow>, ND, S(FramePtr), B
 
-  Test the implementation-specific surprise flags.  If they're nonzero, call
-  the function enter helper. If `checkStackOverflow' is true, check for stack
-  overflow at the same time.
+  Test the implementation-specific surprise flags. Branch if they are nonzero,
+  or if `checkStackOverflow' flag is true and stack would overflow.
+
+| HandleSurpriseEnter<func,checkStackOverflow>, ND, S(FramePtr), NF
+
+  Handle the surprise flag or stack overflow condition (if `checkStackOverflow'
+  is true).
 
 | LdARFlags, D(Int), S(FramePtr), NF
 

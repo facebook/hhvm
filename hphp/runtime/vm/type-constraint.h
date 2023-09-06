@@ -168,7 +168,7 @@ struct TypeConstraint {
    * all.  If this function returns false, it means the parameter type
    * verification would be a no-op.
    */
-  bool hasConstraint() const { return m_u.single.object.m_typeName; }
+  bool hasConstraint() const { return (bool)typeName(); }
 
   /*
    * Read access to various members.
@@ -278,24 +278,12 @@ struct TypeConstraint {
   bool isClassname() const { return m_u.single.type == Type::Classname; }
   bool isUnresolved() const { return m_u.single.type == Type::Unresolved; }
 
-  // Returns true if we should convert a ClsMeth to a varray for this typehint.
-  bool convertClsMethToArrLike() const;
-
   AnnotType type()  const { return m_u.single.type; }
 
-  bool validForProp() const { return propSupportsAnnot(m_u.single.type); }
+  bool validForProp() const;
 
   void validForPropResolved(const Class* declCls,
-                            const StringData* propName) const {
-    assertx(validForProp());
-    if (!isUnresolved()) return;
-    auto const r = resolvedWithAutoload();
-    auto const b = std::all_of(
-      std::begin(r), std::end(r),
-      [] (const TypeConstraint& tc) { return tc.validForProp(); }
-    );
-    if (!b) validForPropFail(declCls, propName);
-  }
+                            const StringData* propName) const;
 
   bool validForEnumBase() const {
     auto const resolvedVec = resolvedWithAutoload();
@@ -319,12 +307,7 @@ struct TypeConstraint {
    * the initial value is chosen to satisfy the type-constraint, but this isn't
    * always possible (for example, for objects).
    */
-  TypedValue defaultValue() const {
-    // Nullable type-constraints should always default to null, as Hack
-    // guarantees this.
-    if (!isCheckable() || isNullable()) return make_tv<KindOfNull>();
-    return annotDefaultValue(m_u.single.type);
-  }
+  TypedValue defaultValue() const;
 
   /*
    * Returns whether this and another type-constraint might not be equivalent at

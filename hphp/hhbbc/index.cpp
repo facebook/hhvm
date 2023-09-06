@@ -8381,6 +8381,36 @@ private:
     return newClosures;
   }
 
+  static bool resolveOne(TypeConstraint& tc,
+                         const php::TypeAndValue& tv,
+                         SString firstEnum,
+                         bool nullable,
+                         ISStringSet* uses,
+                         bool isProp,
+                         bool /*isUnion*/) {
+    // Whatever it's an alias of isn't valid, so leave unresolved.
+    if (tv.type == AnnotType::Unresolved) return false;
+    if (isProp && !propSupportsAnnot(tv.type)) return false;
+    auto const value = [&] () -> SString {
+      // Store the first enum encountered during resolution. This
+      // lets us fixup the type later if needed.
+      if (firstEnum) return firstEnum;
+      if (tv.type == AnnotType::Object) {
+        assertx(tv.value);
+        return tv.value;
+      }
+      return nullptr;
+    }();
+    tc.resolveType(
+      tv.type,
+      nullable,
+      value
+    );
+    assertx(IMPLIES(isProp, tc.validForProp()));
+    if (uses && value) uses->emplace(value);
+    return true;
+  }
+
   // Update a type constraint to it's ultimate type, or leave it as
   // unresolved if it resolves to nothing valid. Record the new type
   // in case it needs to be fixed up later.
@@ -8404,29 +8434,10 @@ private:
         // for param, return, upper bound and property type hints
         always_assert(RO::EvalTreatCaseTypesAsMixed);
       }
+
+      // This unresolved name resolves to a single type.
       assertx(tm->typeAndValueUnion.size() == 1);
-      auto const tm_type = tm->typeAndValueUnion[0].type;
-      // Whatever it's an alias of isn't valid, so leave unresolved.
-      if (tm_type == AnnotType::Unresolved) return;
-      if (isProp && !propSupportsAnnot(tm_type)) return;
-      auto const value = [&] () -> SString {
-        // Store the first enum encountered during resolution. This
-        // lets us fixup the type later if needed.
-        if (tm->firstEnum) return tm->firstEnum;
-        if (tm_type == AnnotType::Object) {
-          auto const tm_value = tm->typeAndValueUnion[0].value;
-          assertx(tm_value);
-          return tm_value;
-        }
-        return nullptr;
-      }();
-      tc.resolveType(
-        tm_type,
-        tm->nullable,
-        value
-      );
-      assertx(IMPLIES(isProp, tc.validForProp()));
-      if (uses && value) uses->emplace(value);
+      resolveOne(tc, tm->typeAndValueUnion[0], tm->firstEnum, tm->nullable, uses, isProp, false);
       return;
     }
 

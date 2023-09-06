@@ -200,6 +200,8 @@ void verifyTypeImpl(IRGS& env,
                     TVerifyCls verifyCls,
                     TFallback fallback) {
 
+  // Ensure that we should bother checking the type at all. If it's uncheckable
+  // (because it's an unenforcible type) then just return.
   if (!tc.isCheckable()) return;
   assertx(!tc.isUpperBound() || RuntimeOption::EvalEnforceGenericsUB != 0);
 
@@ -217,7 +219,8 @@ void verifyTypeImpl(IRGS& env,
     return fail(val, thisCls, failHard);
   };
 
-  auto const checkOneType = [&](SSATmp* val, AnnotAction result) {
+  // Check `val` against `tc` using `result` as a rule.
+  auto const checkOneType = [&](SSATmp* val, AnnotAction result) -> void {
     assertx(val->type().isKnownDataType());
 
     switch (result) {
@@ -241,6 +244,7 @@ void verifyTypeImpl(IRGS& env,
         return;
 
       case AnnotAction::ObjectCheck:
+        // We'll check objects next.
         break;
 
       case AnnotAction::WarnClass:
@@ -270,16 +274,19 @@ void verifyTypeImpl(IRGS& env,
     assertx(val->type() <= TObj);
     assertx(!onlyCheckNullability);
 
+    SSATmp* thisCls = nullptr;
+    auto genCheckThis = [&](Block* taken) {
+      // For 'this' type checks, the class needs to be an exact match.
+      thisCls = getThisCls();
+      auto const objClass = gen(env, LdObjClass, val);
+      return gen(env, JmpZero, taken, gen(env, EqCls, thisCls, objClass));
+    };
+
     // At this point, we know that val is a TObj.
     if (tc.isThis()) {
-      // For this type checks, the class needs to be an exact match.
-      auto const thisCls = getThisCls();
-      auto const objClass = gen(env, LdObjClass, val);
       ifThen(
         env,
-        [&] (Block* taken) {
-          gen(env, JmpZero, taken, gen(env, EqCls, thisCls, objClass));
-        },
+        genCheckThis,
         [&] {
           hint(env, Block::Hint::Unlikely);
           genFail(val, thisCls);
@@ -314,6 +321,7 @@ void verifyTypeImpl(IRGS& env,
   assertx(genericVal->type() <= TCell);
   auto const genericValType = genericVal->type();
 
+  // Given a DataType compute what AnnotAction to take.
   auto const computeAction = [&](DataType dt) {
     if (dt == KindOfNull && tc.isNullable()) return AnnotAction::Pass;
     auto const name = tc.isObject() ? tc.clsName() : tc.typeName();
@@ -345,33 +353,54 @@ void verifyTypeImpl(IRGS& env,
   };
 
   if (genericValType.isKnownDataType()) {
+    // The type is well-known statically. Compute and then perform an action
+    // based on the static type.
     auto const dt = genericValType.toDataType();
     return checkOneType(genericVal, computeAction(dt));
   }
 
+  // Order matters here. When merging we always take the "largest" value.
   enum { None, Fail, Fallback, FallbackCoerce } fallbackAction = None;
 
   auto const options = [&]{
     TinyVector<std::pair<DataType, AnnotAction>, kNumDataTypes> result;
+    // Go through the basic datatypes and for each one that the TC could be add
+    // an entry to `result` saying how to handle it.
     for (auto const dt : kDataTypes) {
       auto const type = Type(dt);
       if (!genericValType.maybe(type)) continue;
       auto const action = computeAction(dt);
       switch (action) {
         case AnnotAction::Fail:
+          // We should never get this - we already determined that the types
+          // could overlap so when would we ever get 'Fail'?
           fallbackAction = std::max(fallbackAction, Fail);
           break;
         case AnnotAction::Fallback:
+          // We can't compute this statically - so we need to fall back to
+          // runtime evaluation.
           fallbackAction = std::max(fallbackAction, Fallback);
           break;
         case AnnotAction::FallbackCoerce:
+          // We can't compute this statically - so we need to fall back to
+          // runtime evaluation and then we'll write the coerced value back to
+          // the variable (this happens for Class or LazyClass).
           fallbackAction = std::max(fallbackAction, FallbackCoerce);
           break;
-        default:
+        case AnnotAction::CallableCheck:
+        case AnnotAction::ConvertClass:
+        case AnnotAction::ConvertLazyClass:
+        case AnnotAction::ObjectCheck:
+        case AnnotAction::Pass:
+        case AnnotAction::WarnClass:
+        case AnnotAction::WarnClassname:
+        case AnnotAction::WarnLazyClass:
           result.emplace_back(dt, action);
           break;
       }
     }
+    // We had no options to try and no action just do nothing. Note that this is
+    // different behavior than an empty union (which is default fail)!
     return result;
   }();
 
@@ -384,6 +413,10 @@ void verifyTypeImpl(IRGS& env,
 
   // TODO(kshaunak): If we were a bit more sophisticated here, we could
   // merge the cases for certain types, like TVec|TDict, or TArrLike.
+
+  // At runtime do a type-switch and figure out which (if any) of our options
+  // actually matches and perform that action. In the case that nothing matches
+  // then perform the fallbackAction.
   MultiCond mc{env};
   for (auto const& pair : options) {
     mc.ifTypeThen(genericVal, Type(pair.first), [&](SSATmp* val) {

@@ -122,8 +122,8 @@ size_t TypeConstraint::stableHash() const {
 
 std::string TypeConstraint::displayName(const Class* context /*= nullptr*/,
                                         bool extra /* = false */) const {
-  const StringData* tn = typeName();
   std::string name;
+
   if (isSoft()) {
     name += '@';
   }
@@ -131,6 +131,7 @@ std::string TypeConstraint::displayName(const Class* context /*= nullptr*/,
     name += '?';
   }
 
+  const StringData* tn = typeName();
   const char* str = tn ? tn->data() : "";
   auto len = tn ? tn->size() : 0;
   if (len > 3 && tolower(str[0]) == 'h' && tolower(str[1]) == 'h' &&
@@ -198,6 +199,13 @@ std::string TypeConstraint::displayName(const Class* context /*= nullptr*/,
     if (str) folly::format(&name, " ({})", str);
   }
   return name;
+}
+
+TypedValue TypeConstraint::defaultValue() const {
+  // Nullable type-constraints should always default to null, as Hack
+  // guarantees this.
+  if (!isCheckable() || isNullable()) return make_tv<KindOfNull>();
+  return annotDefaultValue(m_u.single.type);
 }
 
 namespace {
@@ -584,6 +592,8 @@ bool TypeConstraint::checkImpl(tv_rval val,
       return checkTypeAliasImpl<isAssert>(val.val().pobj->getVMClass());
     }
 
+    // The constraint is resolved but it's not an object.
+
     switch (metaType()) {
       case MetaType::This:
         if (isAssert) return true;
@@ -737,6 +747,22 @@ bool TypeConstraint::alwaysPasses(DataType dt) const {
       return false;
   }
   not_reached();
+}
+
+bool TypeConstraint::validForProp() const {
+  return propSupportsAnnot(m_u.single.type);
+}
+
+void TypeConstraint::validForPropResolved(const Class* declCls,
+                                          const StringData* propName) const {
+  assertx(validForProp());
+  if (!isUnresolved()) return;
+  auto const r = resolvedWithAutoload();
+  auto const b = std::all_of(
+    std::begin(r), std::end(r),
+    [] (const TypeConstraint& tc) { return tc.validForProp(); }
+  );
+  if (!b) validForPropFail(declCls, propName);
 }
 
 void TypeConstraint::verifyParam(tv_lval val,

@@ -201,8 +201,6 @@ max_workers = 2
             hh_server,
             "--max-procs",
             "2",
-            "--config",
-            "symbolindex_search_provider=NoIndex",
             self.test_driver.repo_dir,
         ] + args
         self.test_driver.proc_call(cmd)

@@ -8,7 +8,6 @@
  *)
 
 open Hh_prelude
-open SearchServiceRunner
 open ServerEnv
 open Reordered_argument_collections
 module SLC = ServerLocalConfig
@@ -204,15 +203,6 @@ let indexing genv env to_check cgroup_steps =
   Ast_provider.remove_batch ide_files;
   Fixme_provider.remove_batch ide_files;
 
-  let env =
-    {
-      env with
-      local_symbol_table =
-        SymbolIndexCore.remove_files
-          ~sienv:env.local_symbol_table
-          ~paths:to_check;
-    }
-  in
   SharedMem.GC.collect `gentle;
   let get_next =
     MultiWorker.next genv.workers (Relative_path.Set.elements disk_files)
@@ -231,30 +221,6 @@ let indexing genv env to_check cgroup_steps =
            oldify the new version (and override the real old versions. *)
         false
   in
-
-  SearchServiceRunner.update_fileinfo_map
-    (Naming_table.create defs_per_file)
-    ~source:SearchUtils.TypeChecker;
-
-  (* During integration tests, we want to pretend that search is run
-     synchronously *)
-  let ctx = Provider_utils.ctx_from_server_env env in
-  let env =
-    {
-      env with
-      local_symbol_table =
-        (let sie = env.local_symbol_table in
-         if
-           SearchServiceRunner.should_run_completely
-             genv
-             sie.SearchUtils.sie_provider
-         then
-           SearchServiceRunner.run_completely ctx sie
-         else
-           sie);
-    }
-  in
-
   (env, defs_per_file)
 
 let get_interrupt_config genv env =

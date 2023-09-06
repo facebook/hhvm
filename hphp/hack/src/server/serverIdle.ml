@@ -8,7 +8,6 @@
  *)
 
 open Hh_prelude
-open SearchServiceRunner
 
 (*****************************************************************************)
 (* Periodically called by the daemon *)
@@ -114,6 +113,7 @@ let exit_if_unused () =
 (* The registered jobs *)
 (*****************************************************************************)
 let init (genv : ServerEnv.genv) (root : Path.t) : unit =
+  ignore genv;
   let jobs =
     [
       (* I'm not sure explicitly invoking the Gc here is necessary, but
@@ -153,13 +153,6 @@ let init (genv : ServerEnv.genv) (root : Path.t) : unit =
         fun ~env ->
           EventLogger.flush ();
           env );
-      ( Periodical.always,
-        fun ~env ->
-          let ctx = Provider_utils.ctx_from_server_env env in
-          let local_symbol_table =
-            SearchServiceRunner.run genv ctx env.ServerEnv.local_symbol_table
-          in
-          { env with ServerEnv.local_symbol_table } );
       ( Periodical.one_day,
         fun ~env ->
           exit_if_unused ();

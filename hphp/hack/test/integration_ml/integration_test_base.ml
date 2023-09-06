@@ -12,7 +12,6 @@ open Hh_prelude
 open Integration_test_base_types
 open Reordered_argument_collections
 open ServerCommandTypes
-open SearchServiceRunner
 open Int.Replace_polymorphic_compare
 
 exception Integration_test_failure
@@ -110,21 +109,9 @@ let setup_server ?custom_config ?(hhi_files = []) ?edges_dir () : ServerEnv.env
   in
   let hhi_set = Relative_path.Set.of_list hhi_file_list in
 
-  (* Initialize symbol index *)
-  let sienv =
-    SymbolIndex.initialize
-      ~gleanopt:env.ServerEnv.gleanopt
-      ~namespace_map:[]
-      ~provider_name:"LocalIndex"
-      ~quiet:true
-  in
   ServerProgress.disable ();
   (* Return environment *)
-  {
-    env with
-    ServerEnv.disk_needs_parsing = hhi_set;
-    ServerEnv.local_symbol_table = sienv;
-  }
+  { env with ServerEnv.disk_needs_parsing = hhi_set }
 
 let default_loop_input = { disk_changes = []; new_client = None }
 
@@ -162,14 +149,6 @@ let run_loop_once :
   (* Always pick up disk changes in tests immediately *)
   let env = ServerEnv.{ env with last_notifier_check_time = 0.0 } in
   let env = ServerMain.serve_one_iteration genv env client_provider in
-  let ctx = Provider_utils.ctx_from_server_env env in
-  let env =
-    {
-      env with
-      ServerEnv.local_symbol_table =
-        SearchServiceRunner.run_completely ctx env.ServerEnv.local_symbol_table;
-    }
-  in
   let {
     ServerEnv.RecheckLoopStats.total_changed_files_count;
     total_rechecked_count;

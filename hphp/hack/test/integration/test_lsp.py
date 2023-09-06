@@ -42,7 +42,6 @@ require_mini_state = {use_saved_state}
 lazy_decl = {use_saved_state}
 lazy_parse = {use_saved_state}
 lazy_init2 = {use_saved_state}
-symbolindex_search_provider = NoIndex
 ide_symbolindex_search_provider = LocalIndex
 allow_unstable_features = true
 ide_batch_process_changes = true

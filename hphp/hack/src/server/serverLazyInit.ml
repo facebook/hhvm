@@ -26,7 +26,6 @@ open Hh_prelude
 open GlobalOptions
 open Result.Export
 open Reordered_argument_collections
-open SearchServiceRunner
 open ServerEnv
 open ServerInitTypes
 module SLC = ServerLocalConfig
@@ -987,7 +986,6 @@ let full_init
       (Telemetry.create ()
       |> Telemetry.float_ ~key:"start_time" ~value:(Unix.gettimeofday ()))
   in
-  let is_check_mode = ServerArgs.check_mode genv.options in
   let existing_name_count =
     Naming_table.fold env.naming_table ~init:0 ~f:(fun _ _ i -> i + 1)
   in
@@ -1011,10 +1009,6 @@ let full_init
       cgroup_steps
   in
   ServerInitCommon.validate_no_errors env.errorl;
-  if not is_check_mode then
-    SearchServiceRunner.update_fileinfo_map
-      env.naming_table
-      ~source:SearchUtils.Init;
   let fnl = Naming_table.get_files env.naming_table in
   ServerInitCommon.defer_or_do_type_check
     genv
@@ -1208,9 +1202,6 @@ let post_saved_state_initialization
       ~cgroup_steps
       ~worker_call:MultiWorker.wrapper
   in
-  SearchServiceRunner.update_fileinfo_map
-    env.naming_table
-    ~source:SearchUtils.TypeChecker;
   let ctx = Provider_utils.ctx_from_server_env env in
   let t =
     remove_items_from_reverse_naming_table_or_build_new_reverse_naming_table

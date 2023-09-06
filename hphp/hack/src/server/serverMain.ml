@@ -454,14 +454,7 @@ let rec recheck_until_no_changes_left stats genv env select_outcome :
     Telemetry.duration telemetry ~key:"sorted_out_client" ~start_time
   in
   (* We have some new, or previously un-processed updates *)
-  let full_check =
-    ServerEnv.is_full_check_started env.full_check_status
-    (* Prioritize building search index over full rechecks. *)
-    && (Queue.is_empty SearchServiceRunner.SearchServiceRunner.queue
-       (* Unless there is something actively waiting for this *)
-       || Option.is_some
-            env.nonpersistent_client_pending_command_needs_full_check)
-  in
+  let full_check = ServerEnv.is_full_check_started env.full_check_status in
   let lazy_check =
     (not @@ Relative_path.Set.is_empty env.ide_needs_parsing) && is_idle
   in

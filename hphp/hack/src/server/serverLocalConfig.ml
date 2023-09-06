@@ -162,7 +162,7 @@ type t = {
   ide_max_num_decls: int;  (** tuning of clientIdeDaemon local cache *)
   ide_max_num_shallow_decls: int;  (** tuning of clientIdeDaemon local cache *)
   ide_symbolindex_search_provider: string;
-      (** like [symbolindex_search_provider] but for IDE *)
+      (** Selects a search provider for autocomplete and symbol search *)
   predeclare_ide: bool;
   max_typechecker_worker_memory_mb: int option;
       (** if set, the worker will stop early at the end of a file if its heap exceeds this number *)
@@ -212,8 +212,6 @@ type t = {
   naming_sqlite_path: string option;
       (** Enables the reverse naming table to fall back to SQLite for queries. *)
   enable_naming_table_fallback: bool;
-  symbolindex_search_provider: string;
-      (** Selects a search provider for autocomplete and symbol search; see also [ide_symbolindex_search_provider] *)
   symbolindex_quiet: bool;
   tico_invalidate_files: bool;
       (** Allows hh_server to invalidate units in hhvm based on local changes *)
@@ -325,9 +323,6 @@ let default =
     rust_provider_backend = false;
     naming_sqlite_path = None;
     enable_naming_table_fallback = false;
-    symbolindex_search_provider = "LocalIndex";
-    (* the code actually doesn't use this default for ide_symbolindex_search_provider;
-       it defaults to whatever was computed for symbolindex_search_provider. *)
     ide_symbolindex_search_provider = "LocalIndex";
     symbolindex_quiet = false;
     tico_invalidate_files = false;
@@ -807,16 +802,10 @@ let load_
     else
       None
   in
-  let symbolindex_search_provider =
-    string_
-      "symbolindex_search_provider"
-      ~default:default.symbolindex_search_provider
-      config
-  in
   let ide_symbolindex_search_provider =
     string_
       "ide_symbolindex_search_provider"
-      ~default:symbolindex_search_provider
+      ~default:default.ide_symbolindex_search_provider
       config
   in
   let symbolindex_quiet =
@@ -1144,7 +1133,6 @@ let load_
     rust_provider_backend;
     naming_sqlite_path;
     enable_naming_table_fallback;
-    symbolindex_search_provider;
     symbolindex_quiet;
     tico_invalidate_files;
     tico_invalidate_smart;

@@ -318,8 +318,6 @@ type env = {
       (** Structure tracking errors to push to LSP client. *)
   last_recheck_loop_stats: RecheckLoopStats.t;
   last_recheck_loop_stats_for_actual_work: RecheckLoopStats.t option;
-  local_symbol_table: SearchUtils.si_env; [@opaque]
-      (** Symbols for locally changed files *)
 }
 [@@deriving show]
 

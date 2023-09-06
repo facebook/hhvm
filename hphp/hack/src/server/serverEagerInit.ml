@@ -28,7 +28,6 @@
 *)
 
 open Hh_prelude
-open SearchServiceRunner
 open ServerEnv
 open ServerInitTypes
 module SLC = ServerLocalConfig
@@ -86,10 +85,6 @@ let init
       ~cgroup_steps
       ~worker_call:MultiWorker.wrapper
   in
-  if not (ServerArgs.check_mode genv.options) then
-    SearchServiceRunner.update_fileinfo_map
-      env.naming_table
-      ~source:SearchUtils.Init;
   let (env, t) =
     ServerInitCommon
     .update_reverse_naming_table_from_env_and_get_duplicate_name_errors

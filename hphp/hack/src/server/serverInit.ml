@@ -9,23 +9,9 @@
 
 open Hh_prelude
 open Result.Export
-open SearchServiceRunner
 open ServerEnv
 module SLC = ServerLocalConfig
 include ServerInitTypes
-
-let run_search (genv : ServerEnv.genv) (env : ServerEnv.env) :
-    SearchUtils.si_env =
-  let ctx = Provider_utils.ctx_from_server_env env in
-  let sienv = env.local_symbol_table in
-  if
-    SearchServiceRunner.should_run_completely
-      genv
-      sienv.SearchUtils.sie_provider
-  then
-    SearchServiceRunner.run_completely ctx sienv
-  else
-    sienv
 
 let save_state
     (genv : ServerEnv.genv) (env : ServerEnv.env) (output_filename : string) :
@@ -58,22 +44,7 @@ let save_state
     Some result
 
 let post_init genv (env, _t) =
-  (* Configure symbol index settings *)
-  ServerProgress.write "updating search index...";
-  let namespace_map = ParserOptions.auto_namespace_map env.tcopt in
-  let env =
-    {
-      env with
-      local_symbol_table =
-        SymbolIndex.initialize
-          ~gleanopt:env.gleanopt
-          ~namespace_map
-          ~provider_name:
-            genv.local_config.ServerLocalConfig.symbolindex_search_provider
-          ~quiet:genv.local_config.ServerLocalConfig.symbolindex_quiet;
-    }
-  in
-  let env = { env with local_symbol_table = run_search genv env } in
+  ignore genv;
   SharedMem.SMTelemetry.init_done ();
   env
 

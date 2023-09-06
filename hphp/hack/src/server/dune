@@ -454,7 +454,6 @@
  (wrapped false)
  (modules
   fullFidelityParseService
-  searchServiceRunner
   serverBusyStatus
   serverCheckUtils
   serverCheckpoint

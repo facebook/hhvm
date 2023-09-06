@@ -25,7 +25,7 @@ val setup_server :
 val setup_disk : ServerEnv.env -> disk_changes_type -> ServerEnv.env
 
 val change_files :
-  ServerEnv.env -> disk_changes_type -> ServerEnv.env * ('a, unit) loop_outputs
+  ServerEnv.env -> disk_changes_type -> ServerEnv.env * 'a loop_outputs
 
 val save_state :
   ?load_hhi_files:bool ->
@@ -58,52 +58,18 @@ val load_state :
 
 val in_daemon : (unit -> unit) -> unit
 
-val connect_persistent_client : ServerEnv.env -> ServerEnv.env
-
-val default_loop_input : ('a, 'b) loop_inputs
+val default_loop_input : 'a loop_inputs
 
 val run_loop_once :
-  ServerEnv.env -> ('a, 'b) loop_inputs -> ServerEnv.env * ('a, 'b) loop_outputs
+  ServerEnv.env -> 'a loop_inputs -> ServerEnv.env * 'a loop_outputs
 
 (* wrappers around run_loop_once for most common operations *)
 
-val open_file : ServerEnv.env -> ?contents:string -> string -> ServerEnv.env
-
-val edit_file :
-  ServerEnv.env -> string -> string -> ServerEnv.env * ('a, unit) loop_outputs
-
-val save_file :
-  ServerEnv.env -> string -> string -> ServerEnv.env * ('a, unit) loop_outputs
-
-val close_file :
-  ?ignore_response:bool ->
-  ServerEnv.env ->
-  string ->
-  ServerEnv.env * ('a, unit) loop_outputs
-
-val wait : ServerEnv.env -> ServerEnv.env
-
-val ide_autocomplete :
-  ServerEnv.env ->
-  string * int * int ->
-  ServerEnv.env * ('a, AutocompleteTypes.ide_result) loop_outputs
-
-val status :
-  ?ignore_ide:bool ->
-  ?max_errors:int option ->
-  ?remote:bool ->
-  ServerEnv.env ->
-  ServerEnv.env * (ServerCommandTypes.Server_status.t, 'a) loop_outputs
-
-val full_check_status : ServerEnv.env -> ServerEnv.env * ('a, unit) loop_outputs
+val full_check_status : ServerEnv.env -> ServerEnv.env * 'a loop_outputs
 
 val start_initial_full_check : ServerEnv.env -> ServerEnv.env * int
 
 val prepend_root : string -> string
-
-val errors_to_string : Errors.finalized_error list -> string
-
-val print_telemetries : ServerEnv.env -> unit
 
 (** Some tests work with clientIdeDaemon rather than Server.
 They use the following module instead of [setup_server] and [setup_disk]. *)
@@ -155,52 +121,18 @@ val assert_env_errors : ServerEnv.env -> string -> unit
 
 val assertSingleError : string -> Errors.error list -> unit
 
-val assert_no_diagnostics : ('a, 'b) loop_outputs -> unit
-
-val assert_has_diagnostics : ('a, 'b) loop_outputs -> unit
-
-val assert_diagnostics :
-  ('a, 'b) loop_outputs -> error_messages_per_file -> unit
-
-val assert_diagnostics_string : ('a, 'b) loop_outputs -> string -> unit
-
-val assert_diagnostics_in :
-  ('a, 'b) loop_outputs -> filename:string -> string -> unit
-
-val get_diagnostics :
-  ('a, 'b) loop_outputs -> Errors.finalized_error list SMap.t
-
-val assert_ide_autocomplete_does_not_contain :
-  ('a, AutocompleteTypes.ide_result) loop_outputs -> string list -> unit
-
 val assert_ide_completions : AutocompleteTypes.ide_result -> string list -> unit
 
-val assert_ide_autocomplete :
-  ('a, AutocompleteTypes.ide_result) loop_outputs -> string list -> unit
-
-val assert_status :
-  (ServerCommandTypes.Server_status.t, 'a) loop_outputs -> string -> unit
-
-val assert_error_count :
-  (ServerCommandTypes.Server_status.t, 'a) loop_outputs ->
-  expected_count:int ->
-  unit
-
 val assert_needs_retry :
-  ('a ServerCommandTypes.Done_or_retry.t, 'b) loop_outputs -> unit
+  'a ServerCommandTypes.Done_or_retry.t loop_outputs -> unit
 
 val assert_find_refs :
-  (ServerCommandTypes.Find_refs.result_or_retry, 'b) loop_outputs ->
+  ServerCommandTypes.Find_refs.result_or_retry loop_outputs ->
   string list ->
   unit
 
 val assert_rename :
-  (ServerCommandTypes.Rename.result_or_retry, 'b) loop_outputs -> string -> unit
-
-val assert_ide_rename :
-  (ServerCommandTypes.Rename.ide_result_or_retry, 'b) loop_outputs ->
-  string ->
-  unit
+  ServerCommandTypes.Rename.result_or_retry loop_outputs -> string -> unit
 
 val assert_needs_recheck : ServerEnv.env -> string -> unit
 

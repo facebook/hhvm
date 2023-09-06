@@ -1,5 +1,4 @@
 open Hh_prelude
-open IndexBuilderTypes
 open SearchUtils
 open SearchTypes
 open Test_harness
@@ -92,153 +91,47 @@ let run_index_builder (harness : Test_harness.t) : si_env =
   Relative_path.set_path_prefix Relative_path.Tmp (Path.make "/tmp");
   Relative_path.set_path_prefix Relative_path.Hhi hhi_folder;
   let repo_path = Path.to_string harness.repo_dir in
-  (* Set up initial variables *)
-  let fn = Caml.Filename.temp_file "autocomplete." ".db" in
-  let file_opt = Some fn in
-  let ctxt =
-    {
-      repo_folder = repo_path;
-      sqlite_filename = file_opt;
-      hhi_root_folder = Some hhi_folder;
-      namespace_map = [];
-      silent = true;
-    }
+  let options = ServerArgs.default_options ~root:repo_path in
+  let (hhconfig, _) = ServerConfig.load ~silent:true options in
+  let popt = ServerConfig.parser_options hhconfig in
+  let tcopt = ServerConfig.typechecker_options hhconfig in
+  let ctx =
+    Provider_context.empty_for_test
+      ~popt
+      ~tcopt
+      ~deps_mode:(Typing_deps_mode.InMemoryMode None)
   in
-  (* Scan the repo folder and produce answers in sqlite *)
-  IndexBuilder.go ctxt None;
+  let (_handle : SharedMem.handle) =
+    SharedMem.init ~num_workers:0 SharedMem.default_config
+  in
+
+  (* Scan the repo folder *)
   let sienv =
     SymbolIndex.initialize
       ~gleanopt:GleanOptions.default
       ~namespace_map:[]
-      ~provider_name:"SqliteIndex"
+      ~provider_name:"LocalIndex"
       ~quiet:true
-      ~savedstate_file_opt:file_opt
+      ~savedstate_file_opt:None
       ~workers:None
   in
-  Hh_logger.log "Built Sqlite database [%s]" fn;
+  let paths_with_addenda =
+    Find.find
+      ~file_only:true
+      ~filter:FindUtils.file_filter
+      [Path.make repo_path]
+    |> List.filter_map ~f:(fun path ->
+           let path = Relative_path.create_detect_prefix path in
+           let decls = Direct_decl_utils.direct_decl_parse ctx path in
+           match decls with
+           | None -> None
+           | Some decls ->
+             let addenda = Direct_decl_parser.decls_to_addenda decls in
+             Some (path, addenda, SearchUtils.TypeChecker))
+  in
+  let sienv = SymbolIndexCore.update_from_addenda ~sienv ~paths_with_addenda in
+
   sienv
-
-let test_sqlite_plus_local (harness : Test_harness.t) : bool =
-  let sienv_ref = ref (run_index_builder harness) in
-
-  (* Find one of each major type *)
-  assert_autocomplete ~query_text:"UsesA" ~kind:SI_Class ~expected:1 ~sienv_ref;
-  assert_autocomplete
-    ~query_text:"NoBigTrait"
-    ~kind:SI_Trait
-    ~expected:1
-    ~sienv_ref;
-  assert_autocomplete
-    ~query_text:"some_long_function_name"
-    ~kind:SI_Function
-    ~expected:1
-    ~sienv_ref;
-  assert_autocomplete
-    ~query_text:"ClassToBeIdentified"
-    ~kind:SI_Class
-    ~expected:1
-    ~sienv_ref;
-  Hh_logger.log "First pass complete";
-
-  (* Now, let's remove a few files and try again - assertions should change *)
-  let bar1path = Relative_path.from_root ~suffix:"/bar_1.php" in
-  let foo3path = Relative_path.from_root ~suffix:"/foo_3.php" in
-  let s = Relative_path.Set.empty in
-  let s = Relative_path.Set.add s bar1path in
-  let s = Relative_path.Set.add s foo3path in
-  sienv_ref := SymbolIndexCore.remove_files ~sienv:!sienv_ref ~paths:s;
-  Hh_logger.log "Removed files";
-
-  (* Two of these have been removed! *)
-  assert_autocomplete ~query_text:"UsesA" ~kind:SI_Class ~expected:1 ~sienv_ref;
-  assert_autocomplete
-    ~query_text:"NoBigTrait"
-    ~kind:SI_Trait
-    ~expected:0
-    ~sienv_ref;
-  assert_autocomplete
-    ~query_text:"some_long_function_name"
-    ~kind:SI_Function
-    ~expected:0
-    ~sienv_ref;
-  assert_autocomplete
-    ~query_text:"ClassToBeIdentified"
-    ~kind:SI_Class
-    ~expected:1
-    ~sienv_ref;
-  Hh_logger.log "Second pass complete";
-
-  (* Add the files back! *)
-  let nobigtrait_id =
-    (FileInfo.File (FileInfo.Class, bar1path), "\\NoBigTrait", None)
-  in
-  let some_long_function_name_id =
-    (FileInfo.File (FileInfo.Fun, foo3path), "\\some_long_function_name", None)
-  in
-  let bar1fileinfo =
-    {
-      FileInfo.hash = None;
-      file_mode = None;
-      funs = [];
-      classes = [nobigtrait_id];
-      typedefs = [];
-      consts = [];
-      comments = Some [];
-      modules = [];
-    }
-  in
-  let foo3fileinfo =
-    {
-      FileInfo.hash = None;
-      file_mode = None;
-      funs = [some_long_function_name_id];
-      classes = [];
-      typedefs = [];
-      consts = [];
-      comments = Some [];
-      modules = [];
-    }
-  in
-  let changelist =
-    [
-      (bar1path, bar1fileinfo, TypeChecker);
-      (foo3path, foo3fileinfo, TypeChecker);
-    ]
-  in
-  let init_id = Random_id.short_string () in
-  let env =
-    ServerEnvBuild.make_env
-      ~init_id
-      ~deps_mode:(Typing_deps_mode.InMemoryMode None)
-      ServerConfig.default_config
-  in
-  let ctx = Provider_utils.ctx_from_server_env env in
-  sienv_ref :=
-    SymbolIndexCore.update_files ~ctx ~sienv:!sienv_ref ~paths:changelist;
-  let n = LocalSearchService.count_local_fileinfos ~sienv:!sienv_ref in
-  Hh_logger.log "Added back; local search service now contains %d files" n;
-
-  (* Find one of each major type *)
-  assert_autocomplete ~query_text:"UsesA" ~kind:SI_Class ~expected:1 ~sienv_ref;
-  assert_autocomplete
-    ~query_text:"NoBigTrait"
-    ~kind:SI_Trait
-    ~expected:1
-    ~sienv_ref;
-  assert_autocomplete
-    ~query_text:"some_long_function_name"
-    ~kind:SI_Function
-    ~expected:1
-    ~sienv_ref;
-  assert_autocomplete
-    ~query_text:"ClassToBeIdentified"
-    ~kind:SI_Class
-    ~expected:1
-    ~sienv_ref;
-  Hh_logger.log "Third pass complete";
-
-  (* If we got here, all is well *)
-  true
 
 (* Test the ability of the index builder to capture a variety of
  * names and kinds correctly *)
@@ -427,12 +320,6 @@ let tests args =
     }
   in
   [
-    ( "test_sqlite_plus_local",
-      fun () ->
-        Test_harness.run_test
-          ~stop_server_in_teardown:false
-          harness_config
-          test_sqlite_plus_local );
     ( "test_builder_names",
       fun () ->
         Test_harness.run_test

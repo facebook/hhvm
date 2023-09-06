@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 #![feature(box_patterns)]
-#![feature(drain_filter)]
+#![feature(extract_if)]
 
 #[macro_use]
 extern crate rust_to_ocaml_attr;

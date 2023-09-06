@@ -1,7 +1,6 @@
 use std::fs::File;
 use std::fs::OpenOptions;
 use std::io::BufWriter;
-use std::io::ErrorKind;
 use std::io::Read;
 use std::io::Write;
 use std::ops::Deref;
@@ -137,30 +136,34 @@ fn decode_one_edge_list(mut b: &[u8]) -> Box<[u8]> {
 /// - Each edge array is delta-coded by the `.zhhdg` file writer. We need to
 ///   convert each one into the more verbose format that we use in `.hhdg` files.
 fn decompress_edge_lists(in_edge_lists: &[u8]) -> std::io::Result<(Vec<Box<[u8]>>, usize)> {
-    let mut z = zstd::stream::read::Decoder::with_buffer(in_edge_lists)?;
-
     // First zstd-uncompress the raw edge list bytes. This is an inherently serial process.
-    let mut edge_lists: Vec<Box<[u8]>> = vec![];
-    loop {
-        let num_bytes = match read_vint64(&mut z) {
-            Ok(n) => n,
-            Err(e) if e.kind() == ErrorKind::UnexpectedEof => break,
-            Err(e) => return Err(e),
-        };
-
-        let mut v = vec![0; num_bytes as usize];
-        z.read_exact(&mut v).unwrap();
-        edge_lists.push(v.into());
-    }
+    // Guess the output buffer is 1.33x as large as the input (we see 1.26x empirically).
+    // If this number is too small, no big deal, zstd will grow the Vec.
+    let mut unzstd_buf = Vec::with_capacity(in_edge_lists.len() * 4 / 3);
+    let mut z = zstd::stream::read::Decoder::with_buffer(in_edge_lists)?;
+    z.read_to_end(&mut unzstd_buf)?;
     drop(z);
+
+    // Chop the edge list into individual edge arrays.
+    let mut compressed_edge_lists: Vec<&[u8]> = vec![];
+    let mut buf = &unzstd_buf[..];
+    while !buf.is_empty() {
+        let num_edge_bytes = vint64::decode(&mut buf).unwrap();
+        let (edge_data, remaining_buf) = buf.split_at(num_edge_bytes.try_into().unwrap());
+        buf = remaining_buf;
+        compressed_edge_lists.push(edge_data);
+    }
 
     // In parallel, convert each edge list from .zhhdg to .hhdg format.
     let total_bytes = AtomicUsize::new(0);
-    edge_lists.par_iter_mut().for_each(|v| {
-        let d = decode_one_edge_list(v.as_ref());
-        total_bytes.fetch_add(d.len(), Ordering::Relaxed);
-        *v = d;
-    });
+    let edge_lists: Vec<Box<[u8]>> = compressed_edge_lists
+        .into_par_iter()
+        .map(|v| {
+            let d = decode_one_edge_list(v);
+            total_bytes.fetch_add(d.len(), Ordering::Relaxed);
+            d
+        })
+        .collect();
 
     Ok((edge_lists, total_bytes.into_inner()))
 }

@@ -13,6 +13,7 @@ type t = {
   dummy_two: bool;  (** Some documentation for dummy_two *)
   dummy_three: bool;  (** Some documentation for dummy_three *)
   optimized_member_fanout: bool;
+  optimized_parent_fanout: bool;
 }
 [@@deriving eq, show]
 

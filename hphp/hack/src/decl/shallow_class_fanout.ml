@@ -155,6 +155,7 @@ let get_minor_change_fanout_legacy
   in
   acc
 
+(** This is all descendants + anything that depends on any descendants. *)
 let get_maximum_fanout (ctx : Provider_context.t) (class_dep : Dep.t) : DepSet.t
     =
   let mode = Provider_context.get_deps_mode ctx in

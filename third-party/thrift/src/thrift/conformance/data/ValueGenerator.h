@@ -257,9 +257,9 @@ auto ValueGenerator<type::map<KTag, VTag>>::getValues(
 
       native_type single;
       single.emplace(key.value, value.value);
-      result.emplace_back(std::move(single), key.name + " -> " + value.name);
+      result.emplace_back(std::move(single), key.name + "_" + value.name);
     }
-    result.emplace_back(std::move(allKeys), "all keys -> " + value.name);
+    result.emplace_back(std::move(allKeys), "allKeys_" + value.name);
   }
   return result;
 }

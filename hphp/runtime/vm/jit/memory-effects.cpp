@@ -423,7 +423,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       return UnknownEffects {};
     }
     return ReturnEffects {
-      AStackAny | ALocalAny | AMIStateAny | AFBasePtr
+      AStackAny | ALocalAny | AMIStateAny | AFBasePtr | AFContextAny | AFFuncAny
     };
 
   case AsyncFuncRetPrefetch:

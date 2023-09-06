@@ -326,10 +326,10 @@ let default =
     rust_provider_backend = false;
     naming_sqlite_path = None;
     enable_naming_table_fallback = false;
-    symbolindex_search_provider = "SqliteIndex";
+    symbolindex_search_provider = "LocalIndex";
     (* the code actually doesn't use this default for ide_symbolindex_search_provider;
        it defaults to whatever was computed for symbolindex_search_provider. *)
-    ide_symbolindex_search_provider = "SqliteIndex";
+    ide_symbolindex_search_provider = "LocalIndex";
     symbolindex_quiet = false;
     symbolindex_file = None;
     tico_invalidate_files = false;

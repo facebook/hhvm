@@ -69,6 +69,41 @@ std::shared_ptr<StressTestHandler> createStressTestHandler() {
   return std::make_shared<StressTestHandler>();
 }
 
+std::unique_ptr<folly::EventBaseBackendBase> getEventBaseBackendFunc() {
+  try {
+    // TODO numa node affinitization
+    // static int sqSharedCore = 0;
+    // LOG(INFO) << "Sharing eb sq poll on core: " << sqSharedCore;
+    // options.setSQGroupName("fast_eb").setSQCpu(sqSharedCore);
+    return std::make_unique<folly::IoUringBackend>(getIoUringOptions());
+  } catch (const std::exception& ex) {
+    LOG(FATAL) << "Failed to create io_uring backend: "
+               << folly::exceptionStr(ex);
+  }
+}
+
+std::shared_ptr<folly::IOThreadPoolExecutor> getIOThreadPool(
+    const std::string& name, size_t numThreads) {
+  auto threadFactory = std::make_shared<folly::NamedThreadFactory>(name);
+  if (FLAGS_io_uring) {
+    LOG(INFO) << "using io_uring EventBase backend";
+    folly::EventBaseBackendBase::FactoryFunc func(getEventBaseBackendFunc);
+    static folly::EventBaseManager ebm(
+        folly::EventBase::Options().setBackendFactory(std::move(func)));
+
+    auto* evb = folly::EventBaseManager::get()->getEventBase();
+    // use the same EventBase for the main thread
+    if (evb) {
+      ebm.setEventBase(evb, false);
+    }
+    return std::make_shared<folly::IOThreadPoolExecutor>(
+        numThreads, threadFactory, &ebm);
+  } else {
+    return std::make_shared<folly::IOThreadPoolExecutor>(
+        numThreads, threadFactory);
+  }
+}
+
 std::shared_ptr<ThriftServer> createStressTestServer(
     std::shared_ptr<apache::thrift::ServiceHandler<StressTest>> handler) {
   if (!handler) {
@@ -78,7 +113,7 @@ std::shared_ptr<ThriftServer> createStressTestServer(
   server->setInterface(std::move(handler));
   server->setPort(FLAGS_port);
   server->setPreferIoUring(FLAGS_io_uring);
-  server->setUseDefaultIoUringExecutor(FLAGS_io_uring);
+  server->setUseDefaultIoUringExecutor(true);
   server->setNumCPUWorkerThreads(sanitizeNumThreads(FLAGS_cpu_threads));
 
   if (FLAGS_max_requests > -1) {

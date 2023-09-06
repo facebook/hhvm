@@ -44,6 +44,10 @@ class HeaderTable {
     return insertCount_;
   }
 
+  void disableNamesIndex() {
+    indexNames_ = false;
+  }
+
   /**
    * Add the header entry at the beginning of the table (index=1)
    *
@@ -214,6 +218,7 @@ class HeaderTable {
   uint32_t size_{0}; // how many entries we have in the table
   uint32_t head_{0}; // points to the first element of the ring
   uint32_t insertCount_{0};
+  bool indexNames_{true};
 
   names_map names_;
 

@@ -38,6 +38,7 @@ QPACKHeaderTable::QPACKHeaderTable(uint32_t capacityVal, bool trackReferences)
     minFree_ = getMinFree(capacityVal);
   } else {
     minFree_ = 0;
+    disableNamesIndex();
   }
 }
 

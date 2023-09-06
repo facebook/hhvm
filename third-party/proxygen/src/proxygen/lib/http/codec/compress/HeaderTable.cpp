@@ -52,7 +52,9 @@ bool HeaderTable::add(HPACKHeader header) {
   }
   head_ = next(head_);
   // index name
-  names_[header.name].push_back(head_);
+  if (indexNames_) {
+    names_[header.name].push_back(head_);
+  }
   bytes_ += header.bytes();
   table_[head_] = std::move(header);
 
@@ -75,6 +77,7 @@ std::pair<uint32_t, uint32_t> HeaderTable::getIndexImpl(
     const HPACKHeaderName& headerName,
     folly::StringPiece value,
     bool nameOnly) const {
+  CHECK(indexNames_);
   auto it = names_.find(headerName);
   if (it == names_.end()) {
     return {0, 0};
@@ -90,6 +93,7 @@ std::pair<uint32_t, uint32_t> HeaderTable::getIndexImpl(
 }
 
 bool HeaderTable::hasName(const HPACKHeaderName& headerName) {
+  CHECK(indexNames_);
   return names_.find(headerName) != names_.end();
 }
 
@@ -113,15 +117,17 @@ uint32_t HeaderTable::getMaxTableLength(uint32_t capacityVal) const {
 uint32_t HeaderTable::removeLast() {
   auto t = tail();
   // remove the first element from the names index
-  auto names_it = names_.find(table_[t].name);
-  DCHECK(names_it != names_.end());
-  auto& ilist = names_it->second;
-  DCHECK_EQ(ilist.front(), t);
-  ilist.pop_front();
+  if (indexNames_) {
+    auto names_it = names_.find(table_[t].name);
+    DCHECK(names_it != names_.end());
+    auto& ilist = names_it->second;
+    DCHECK_EQ(ilist.front(), t);
+    ilist.pop_front();
 
-  // remove the name if there are no indices associated with it
-  if (ilist.empty()) {
-    names_.erase(names_it);
+    // remove the name if there are no indices associated with it
+    if (ilist.empty()) {
+      names_.erase(names_it);
+    }
   }
   const auto& header = table_[t];
   uint32_t headerBytes = header.bytes();
@@ -176,15 +182,17 @@ void HeaderTable::increaseTableLengthTo(uint32_t newLength) {
     // of the now-larger table_
     updateResizedTable(oldTail, oldLength, newLength);
     // Update the names indecies that pointed to the old range
-    for (auto& names_it : names_) {
-      for (auto& idx : names_it.second) {
-        if (idx >= oldTail) {
-          DCHECK_LT(idx + (length() - oldLength), length());
-          idx += (length() - oldLength);
-        } else {
-          // remaining indecies in the list were smaller than oldTail, so
-          // should be indexed from 0
-          break;
+    if (indexNames_) {
+      for (auto& names_it : names_) {
+        for (auto& idx : names_it.second) {
+          if (idx >= oldTail) {
+            DCHECK_LT(idx + (length() - oldLength), length());
+            idx += (length() - oldLength);
+          } else {
+            // remaining indecies in the list were smaller than oldTail, so
+            // should be indexed from 0
+            break;
+          }
         }
       }
     }

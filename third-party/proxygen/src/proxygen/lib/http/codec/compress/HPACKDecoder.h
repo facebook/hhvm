@@ -26,6 +26,7 @@ class HPACKDecoder
       uint32_t tableSize = HPACK::kTableSize,
       uint32_t maxUncompressed = HeaderCodec::kMaxUncompressed)
       : HPACKDecoderBase(tableSize, maxUncompressed), HPACKContext(tableSize) {
+    table_.disableNamesIndex();
   }
 
   /**

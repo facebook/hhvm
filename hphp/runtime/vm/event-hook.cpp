@@ -478,6 +478,7 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
 
   const Func* func = ar->func();
   if (LIKELY(!func->maybeIntercepted())) return true;
+  assertx(func->isInterceptable());
 
   Variant* h = get_intercept_handler(func);
   if (!h) return true;
@@ -755,9 +756,12 @@ bool EventHook::onFunctionCall(const ActRec* ar, int funcType,
                                EventHook::Source sourceType) {
   assertx(!isResumed(ar));
   auto const flags = handle_request_surprise();
-  if (flags & InterceptFlag &&
-      !RunInterceptHandler(const_cast<ActRec*>(ar))) {
-    return false;
+  if (flags & InterceptFlag) {
+    DEBUG_ONLY auto const func = ar->func();
+    if (!RunInterceptHandler(const_cast<ActRec*>(ar))) {
+      assertx(func->isInterceptable());
+      return false;
+    }
   }
 
   // Xenon

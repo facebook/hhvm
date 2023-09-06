@@ -138,6 +138,9 @@ void cgCheckSurpriseFlagsEnter(IRLS& env, const IRInstruction* inst) {
                  {done, catchBlock}, fixup};
     v = done;
 
+    // If the function is not interceptable, the handler returned nullptr.
+    if (!extra->func->isInterceptable()) return;
+
     auto const sf = v.makeReg();
     auto const rIntercept = rarg(3); // NB: must match emitFunctionSurprised
     assertx(!php_return_regs().contains(rIntercept));

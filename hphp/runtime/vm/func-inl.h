@@ -846,6 +846,7 @@ inline bool Func::maybeIntercepted() const {
 }
 
 inline void Func::setMaybeIntercepted() {
+  assertx(isInterceptable());
   atomicFlags().set(Func::Flags::MaybeIntercepted);
 }
 

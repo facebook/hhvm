@@ -94,7 +94,7 @@ bool register_intercept(const String& name, const Variant& callback) {
    * intercepted. Otherwise, we refer to the NonInterceptableFunctions
    * blocklist in the config.
    */
-  if (!(interceptedFunc->attrs() & AttrInterceptable)) {
+  if (!(interceptedFunc->isInterceptable())) {
     if (RO::RepoAuthoritative) {
       raise_error("fb_intercept2 was used on a non-interceptable function (%s) "
                   "in RepoAuthoritative mode", interceptedFunc->fullName()->data());

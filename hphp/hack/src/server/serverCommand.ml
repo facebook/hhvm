@@ -45,7 +45,6 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | NO_PRECHECKED_FILES -> true
   | POPULATE_REMOTE_DECLS _ -> false
   | STATS -> false
-  | DISCONNECT -> false
   | STATUS_SINGLE _ -> false
   | INFER_TYPE _ -> false
   | INFER_TYPE_BATCH _ -> false
@@ -53,10 +52,6 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | IS_SUBTYPE _ -> false
   | TAST_HOLES _ -> false
   | TAST_HOLES_BATCH _ -> false
-  | IDE_HOVER _ -> false
-  | DOCBLOCK_AT _ -> false
-  | DOCBLOCK_FOR_SYMBOL _ -> false
-  | IDE_SIGNATURE_HELP _ -> false
   | XHP_AUTOCOMPLETE_SNIPPET _ -> true
   | IDENTIFY_FUNCTION _ -> false
   | IDENTIFY_SYMBOL _ -> false
@@ -67,27 +62,16 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | LINT_ALL _ -> false
   | FORMAT _ -> false
   | DUMP_FULL_FIDELITY_PARSE _ -> false
-  | IDE_AUTOCOMPLETE _ -> false
-  | CODE_ACTION _ -> false
-  | CODE_ACTION_RESOLVE _ -> false
   | OUTLINE _ -> false
-  | IDE_IDLE -> false
   | RAGE -> false
   | CST_SEARCH _ -> false
   | SEARCH _ -> false
-  | OPEN_FILE _ -> false
-  | CLOSE_FILE _ -> false
-  | EDIT_FILE _ -> false
   | FUN_DEPS_BATCH _ -> false
   | DEPS_OUT_BATCH _ -> false
   | FILE_DEPENDENTS _ -> true
   | IDENTIFY_TYPES _ -> false
   | EXTRACT_STANDALONE _ -> false
   | CONCATENATE_ALL _ -> true
-  | GO_TO_DEFINITION _ -> false
-  | PREPARE_CALL_HIERARCHY _ -> false
-  | CALL_HIERARCHY_INCOMING_CALLS _ -> true
-  | CALL_HIERARCHY_OUTGOING_CALLS _ -> false
   | PAUSE true -> false
   (* when you unpause, then it will catch up *)
   | PAUSE false -> true
@@ -99,24 +83,12 @@ let command_needs_full_check = function
   | Debug_DO_NOT_USE -> failwith "Debug_DO_NOT_USE"
 
 let is_edit : type a. a command -> bool = function
-  | Rpc (_metadata, EDIT_FILE _) -> true
   | _ -> false
 
 let use_priority_pipe (type result) (command : result ServerCommandTypes.t) :
     bool =
   match command with
   | _ when rpc_command_needs_full_check command -> false
-  | OPEN_FILE (path, _)
-  | EDIT_FILE (path, _)
-  | CLOSE_FILE path ->
-    HackEventLogger.invariant_violation_bug
-      "Asked whether to use priority-pipe for persistent-connection-only command"
-      ~data:path;
-    false
-  | DISCONNECT ->
-    HackEventLogger.invariant_violation_bug
-      "Asked whether to use priority-pipe for persistent-connection-only command";
-    false
   | _ -> true
 
 let full_recheck_if_needed' genv env reason profiling =
@@ -342,43 +314,6 @@ let handle
   let command_needs_writes (type a) (msg : a command) : bool =
     match msg with
     | Debug_DO_NOT_USE -> failwith "Debug_DO_NOT_USE"
-    | Rpc (_metadata, OPEN_FILE (path, ide_content)) ->
-      (* If the [ide_content] we're about to open is the same as what might have
-         previously been read from disk in the current typecheck (i.e. the typical case),
-         then this command won't end up altering file content and doesn't need to cancel
-         the current typecheck. (Why might they ever be different? Well, it's up to
-         VSCode what content it picks when the user opens a file. It'd be weird but
-         permissable say for VSCode to replace newlines upon open. *)
-      let disk_content = ServerFileSync.get_file_content_from_disk path in
-      let is_content_changed = not (String.equal ide_content disk_content) in
-      Hh_logger.log "OPEN_FILE is_content_changed? %b" is_content_changed;
-      is_content_changed
-    | Rpc (_metadata, EDIT_FILE _) ->
-      (* If the user is editing a file, it will necessary change file content,
-         and hence will necessarily cancel the current typecheck. Also we want
-         it to cancel the current typecheck so we can start a new Lazy_check
-         and get out squiggles for the just-edited file as soon as possible. *)
-      true
-    | Rpc (_metadata, CLOSE_FILE path) ->
-      (* If the [ide_content] we're closing is the same as what might be read
-         from disk in the current typecheck, then this command won't end up altering
-         file content and doesn't need to cancel the current typecheck.
-         The [ide_content] is necessarily what's in the File_provider for this path.
-         (Why might they ever be different? Well, if there were unsaved modifications
-         then the will be different.) *)
-      let ide_content =
-        ServerFileSync.get_file_content (ServerCommandTypes.FileName path)
-      in
-      let disk_content = ServerFileSync.get_file_content_from_disk path in
-      let is_content_changed = not (String.equal ide_content disk_content) in
-      Hh_logger.log "CLOSE_FILE is_content_changed? %b" is_content_changed;
-      is_content_changed
-    | Rpc (_metadata, DISCONNECT) ->
-      (* DISCONNECT involves CLOSE-ing all previously opened files.
-         We could be fancy and use the same logic as [CLOSE_FILE] above, but it's
-         not worth it; we're okay with cancelling the current typecheck in this
-         rare case. *)
-      true
     | Rpc (_metadata, _) -> false
   in
   if command_needs_writes msg then begin

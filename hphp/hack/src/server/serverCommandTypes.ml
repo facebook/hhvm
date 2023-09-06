@@ -7,7 +7,6 @@
  *)
 
 open Hh_prelude
-open Ide_api_types
 
 type connection_type =
   | Persistent
@@ -362,14 +361,6 @@ type _ t =
   | IS_SUBTYPE : string -> (string, string) result t
   | TAST_HOLES : file_input * Tast_hole.filter -> TastHolesService.result t
   | TAST_HOLES_BATCH : string list -> TastHolesService.result t
-  | IDE_HOVER : string * int * int -> HoverService.result t
-  | DOCBLOCK_AT :
-      (string * int * int * string option * SearchTypes.si_kind)
-      -> DocblockService.result t
-  | DOCBLOCK_FOR_SYMBOL :
-      (string * SearchTypes.si_kind)
-      -> DocblockService.result t
-  | IDE_SIGNATURE_HELP : (string * int * int) -> Lsp.SignatureHelp.result t
   | XHP_AUTOCOMPLETE_SNIPPET : string -> string option t
   | IDENTIFY_SYMBOL : string -> string SymbolDefinition.t list t
   | IDENTIFY_FUNCTION :
@@ -423,27 +414,7 @@ type _ t =
   | STATS : Stats.t t
   | FORMAT : ServerFormatTypes.action -> ServerFormatTypes.result t
   | DUMP_FULL_FIDELITY_PARSE : string -> string t
-  | OPEN_FILE : string * string -> unit t
-  | CLOSE_FILE : string -> unit t
-  | EDIT_FILE : string * text_edit list -> unit t
-  | IDE_AUTOCOMPLETE :
-      string * position * bool
-      -> AutocompleteTypes.ide_result t
-  | CODE_ACTION : {
-      path: string;
-      range: range;
-    }
-      -> Lsp.CodeAction.command_or_action list t
-  | CODE_ACTION_RESOLVE : {
-      path: string;
-      range: range;
-      resolve_title: string;
-      use_snippet_edits: bool;
-    }
-      -> Lsp.CodeActionResolve.result t
-  | DISCONNECT : unit t
   | OUTLINE : string -> Outline.outline t
-  | IDE_IDLE : unit t
   | RAGE : ServerRageTypes.result t
   | CST_SEARCH : cst_search_input -> (Hh_json.json, string) result t
   | NO_PRECHECKED_FILES : unit t
@@ -454,19 +425,6 @@ type _ t =
   | IDENTIFY_TYPES : labelled_file * int * int -> (Pos.absolute * string) list t
   | EXTRACT_STANDALONE : Extract_standalone.target -> string t
   | CONCATENATE_ALL : string list -> string t
-  | GO_TO_DEFINITION : labelled_file * int * int -> Go_to_definition.result t
-  | PREPARE_CALL_HIERARCHY :
-      labelled_file * int * int
-      -> Lsp.PrepareCallHierarchy.result t
-  | CALL_HIERARCHY_INCOMING_CALLS :
-      Lsp.CallHierarchyItem.t
-      -> Lsp.CallHierarchyIncomingCalls.callHierarchyIncomingCall list
-         Done_or_retry.t
-         list
-         t
-  | CALL_HIERARCHY_OUTGOING_CALLS :
-      Lsp.CallHierarchyItem.t
-      -> Lsp.CallHierarchyOutgoingCalls.result t
   | PAUSE : bool -> unit t
   | VERBOSE : bool -> unit t
   | DEPS_OUT_BATCH : (string * int * int) list -> string list t
@@ -481,22 +439,16 @@ type cmd_metadata = {
 }
 
 let is_disconnect_rpc : type a. a t -> bool = function
-  | DISCONNECT -> true
   | _ -> false
 
 let is_critical_rpc : type a. a t -> bool = function
   (* An exception during any critical rpc should shutdown the persistent connection. *)
   (* The critical ones are those that affect the state.                              *)
-  | DISCONNECT -> true
   | CREATE_CHECKPOINT _ -> true
   | DELETE_CHECKPOINT _ -> true
-  | OPEN_FILE _ -> true
-  | CLOSE_FILE _ -> true
-  | EDIT_FILE _ -> true
   | _ -> false
 
 let is_idle_rpc : type a. a t -> bool = function
-  | IDE_IDLE -> true
   | _ -> false
 
 type 'a command =

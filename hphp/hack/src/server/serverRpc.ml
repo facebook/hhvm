@@ -111,21 +111,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
           ServerInferTypeError.go_ctx ~ctx ~entry ~line ~column)
     in
     (env, result)
-  | IDE_HOVER (path, line, column) ->
-    let (ctx, entry) = single_ctx_path env path in
-    let result = ServerHover.go_quarantined ~ctx ~entry ~line ~column in
-    (env, result)
-  | DOCBLOCK_AT (path, line, column, _, kind) ->
-    let (ctx, entry) = single_ctx_path env path in
-    let r = ServerDocblockAt.go_docblock_ctx ~ctx ~entry ~line ~column ~kind in
-    (env, r)
-  | DOCBLOCK_FOR_SYMBOL (symbol, kind) ->
-    let ctx = Provider_utils.ctx_from_server_env env in
-    let r = ServerDocblockAt.go_docblock_for_symbol ~ctx ~symbol ~kind in
-    (env, r)
-  | IDE_SIGNATURE_HELP (path, line, column) ->
-    let (ctx, entry) = single_ctx_path env path in
-    (env, ServerSignatureHelp.go_quarantined ~ctx ~entry ~line ~column)
   (* TODO: edit this to look for classname *)
   | XHP_AUTOCOMPLETE_SNIPPET cls ->
     let ctx = Provider_utils.ctx_from_server_env env in
@@ -352,61 +337,11 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     in
     (env, ServerFormat.go ~content from to_ legacy_format_options)
   | DUMP_FULL_FIDELITY_PARSE file -> (env, FullFidelityParseService.go file)
-  | OPEN_FILE (path, contents) ->
-    let predeclare = genv.local_config.ServerLocalConfig.predeclare_ide in
-    (ServerFileSync.open_file ~predeclare env path contents, ())
-  | CLOSE_FILE path -> (ServerFileSync.close_file env path, ())
-  | EDIT_FILE (path, edits) ->
-    let predeclare = genv.local_config.ServerLocalConfig.predeclare_ide in
-    let edits = List.map edits ~f:Ide_api_types.ide_text_edit_to_fc in
-    (ServerFileSync.edit_file ~predeclare env path edits, ())
-  | IDE_AUTOCOMPLETE (filename, pos, is_manually_invoked) ->
-    let pos = pos |> Ide_api_types.ide_pos_to_fc in
-    let contents =
-      ServerFileSync.get_file_content (ServerCommandTypes.FileName filename)
-    in
-    let (ctx, entry) =
-      Provider_context.add_or_overwrite_entry_contents
-        ~ctx:(Provider_utils.ctx_from_server_env env)
-        ~path:(Relative_path.create_detect_prefix filename)
-        ~contents
-    in
-    let sienv_ref = ref env.ServerEnv.local_symbol_table in
-    let results =
-      Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-          ServerAutoComplete.go_ctx
-            ~ctx
-            ~entry
-            ~sienv_ref
-            ~is_manually_invoked
-            ~line:pos.File_content.line
-            ~column:pos.File_content.column
-            ~naming_table:env.naming_table)
-    in
-    let env = { env with ServerEnv.local_symbol_table = !sienv_ref } in
-    (env, results)
-  | CODE_ACTION { path; range } ->
-    let (ctx, entry) = single_ctx_path env path in
-    let actions = Server_code_actions_services.go ~ctx ~entry ~range in
-    (env, actions)
-  | CODE_ACTION_RESOLVE { path; range; resolve_title; use_snippet_edits } ->
-    let (ctx, entry) = single_ctx_path env path in
-    let action =
-      Server_code_actions_services.resolve
-        ~ctx
-        ~entry
-        ~range
-        ~resolve_title
-        ~use_snippet_edits
-    in
-    (env, action)
-  | DISCONNECT -> (ServerFileSync.clear_sync_data env, ())
   | OUTLINE path ->
     ( env,
       ServerCommandTypes.FileName path
       |> ServerFileSync.get_file_content
       |> FileOutline.outline env.popt )
-  | IDE_IDLE -> ({ env with ide_idle = true }, ())
   | RAGE -> (env, ServerRage.go genv env)
   | CST_SEARCH { sort_results; input; files_to_search } -> begin
     try
@@ -449,31 +384,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     let ctx = Provider_utils.ctx_from_server_env env in
     (env, ServerExtractStandalone.go ctx target)
   | CONCATENATE_ALL paths -> (env, ServerConcatenateAll.go genv env paths)
-  | GO_TO_DEFINITION (labelled_file, line, column) ->
-    let (path, file_input) =
-      ServerCommandTypesUtils.extract_labelled_file labelled_file
-    in
-    let (ctx, entry) = single_ctx env path file_input in
-    Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-        (env, ServerGoToDefinition.go_quarantined ~ctx ~entry ~line ~column))
-  | PREPARE_CALL_HIERARCHY (labelled_file, line, column) ->
-    let (path, file_input) =
-      ServerCommandTypesUtils.extract_labelled_file labelled_file
-    in
-    let (ctx, entry) = single_ctx env path file_input in
-    Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-        ( env,
-          ServerPrepareCallHierarchy.go_quarantined ~ctx ~entry ~line ~column ))
-  | CALL_HIERARCHY_INCOMING_CALLS call_item ->
-    let ctx = Provider_utils.ctx_from_server_env env in
-    let result =
-      ServerCallHierarchyIncomingCalls.go call_item ~ctx ~genv ~env
-    in
-    (env, result)
-  | CALL_HIERARCHY_OUTGOING_CALLS call_item ->
-    let ctx = Provider_utils.ctx_from_server_env env in
-    let result = ServerCallHierarchyOutgoingCalls.go call_item ~ctx in
-    (env, result)
   | VERBOSE verbose ->
     if verbose then
       Hh_logger.Level.set_min_level Hh_logger.Level.Debug

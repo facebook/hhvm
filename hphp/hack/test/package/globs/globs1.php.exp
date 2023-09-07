@@ -1,0 +1,60 @@
+Typing[4472] Cannot access a public element which belongs to package pkg3 from the default package [1]
+-> This is from module foo, which belongs to package pkg3 [2]
+-> But this is from the default module, which belongs to the default package [3]
+-> And the default package does not include package pkg3 [3]
+
+globs1.php--test.php:4:13
+    2 | // default module
+    3 | function test(): void {
+[1] 4 |    $x = new Foo();        // error: can't access pkg3
+    5 |    $y = new FooBar();     // error: can't access pkg1
+    6 |    $z = new FooBarBaz();  // error: can't access pkg2
+
+globs1.php--foo.php:3:14
+    1 | <?hh
+    2 | module foo;
+[2] 3 | public class Foo {}
+
+.:0:0
+[3] 0 | No source found
+
+Typing[4472] Cannot access a public element which belongs to package pkg1 from the default package [1]
+-> This is from module foo.bar, which belongs to package pkg1 [2]
+-> But this is from the default module, which belongs to the default package [3]
+-> And the default package does not include package pkg1 [3]
+
+globs1.php--test.php:5:13
+    3 | function test(): void {
+    4 |    $x = new Foo();        // error: can't access pkg3
+[1] 5 |    $y = new FooBar();     // error: can't access pkg1
+    6 |    $z = new FooBarBaz();  // error: can't access pkg2
+    7 | }
+
+globs1.php--foobar.php:3:14
+    1 | <?hh
+    2 | module foo.bar;
+[2] 3 | public class FooBar {}
+
+.:0:0
+[3] 0 | No source found
+
+Typing[4472] Cannot access a public element which belongs to package pkg2 from the default package [1]
+-> This is from module foo.bar.baz, which belongs to package pkg2 [2]
+-> But this is from the default module, which belongs to the default package [3]
+-> And the default package does not include package pkg2 [3]
+
+globs1.php--test.php:6:13
+    4 |    $x = new Foo();        // error: can't access pkg3
+    5 |    $y = new FooBar();     // error: can't access pkg1
+[1] 6 |    $z = new FooBarBaz();  // error: can't access pkg2
+    7 | }
+
+globs1.php--foobarbaz.php:3:14
+    1 | <?hh
+    2 | module foo.bar.baz;
+[2] 3 | public class FooBarBaz {}
+
+.:0:0
+[3] 0 | No source found
+
+3 errors found.

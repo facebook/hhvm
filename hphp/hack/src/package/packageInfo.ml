@@ -16,23 +16,27 @@ type t = {
 let empty = { glob_to_package = SMap.empty; existing_packages = SMap.empty }
 
 let module_name_matches_pattern module_name pattern =
-  if String.length pattern = 0 then
+  let pattern_len = String.length pattern in
+  if pattern_len = 0 then
     false
   else if String.equal pattern "*" then
     true
-  else
-    let size = String.length pattern in
+  else if
     (* If `pattern` is a prefix glob, check that its prefix
-       matches `module_name`'s prefix. *)
-    if String.is_suffix ~suffix:".*" pattern then
-      if String.length module_name <= size - 1 then
-        false
-      else
-        let prefix = String.sub pattern ~pos:0 ~len:(size - 1) in
-        String.is_prefix ~prefix module_name
+       matches `module_name` or `module_name`'s prefix. *)
+    String.is_suffix ~suffix:".*" pattern
+  then
+    let prefix = String.sub pattern ~pos:0 ~len:(pattern_len - 2) in
+    if
+      String.equal prefix module_name
+      || String.is_prefix ~prefix:(prefix ^ ".") module_name
+    then
+      true
     else
-      (* If `pattern` is a direct module name, check for an exact match. *)
-      String.equal module_name pattern
+      false
+  else
+    (* If `pattern` is a direct module name, check for an exact match. *)
+    String.equal module_name pattern
 
 let get_package_for_module (info : t) (md : string) : Package.t option =
   let candidates =
@@ -43,7 +47,7 @@ let get_package_for_module (info : t) (md : string) : Package.t option =
   let (_strictest_matching_glob, package_with_strictest_matching_glob) =
     SMap.fold
       (fun glob pkg ((glob', _) as acc) ->
-        if String.compare glob glob' > 0 then
+        if (not @@ String.equal glob' md) && String.compare glob glob' > 0 then
           (glob, Some pkg)
         else
           acc)

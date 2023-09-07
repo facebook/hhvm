@@ -1,0 +1,13 @@
+[packages]
+
+[packages.pkg1]
+uses = ["foo.bar"]
+
+[packages.pkg2]
+uses = ["foo.bar.*"]
+
+[packages.pkg3]
+uses = ["foo.*"]
+
+[packages.default]
+uses=["*"]

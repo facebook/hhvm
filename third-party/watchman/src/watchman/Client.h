@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <eden/common/utils/ProcessNameCache.h>
+#include <eden/common/utils/ProcessInfoCache.h>
 #include <fmt/core.h>
 
 #include <chrono>
@@ -236,7 +236,7 @@ class UserClient final : public Client {
 
   const std::chrono::system_clock::time_point since_;
   const pid_t peerPid_;
-  const facebook::eden::ProcessNameHandle peerName_;
+  const facebook::eden::ProcessInfoHandle peerName_;
 
   ClientStatus status_;
 };

@@ -25,13 +25,13 @@ namespace {
 
 using namespace facebook::eden;
 
-ProcessNameCache& getProcessNameCache() {
-  static auto* pnc = new ProcessNameCache;
+ProcessInfoCache& getProcessInfoCache() {
+  static auto* pnc = new ProcessInfoCache;
   return *pnc;
 }
 
-ProcessNameHandle lookupProcessName(pid_t pid) {
-  return getProcessNameCache().lookup(pid);
+ProcessInfoHandle lookupProcessName(pid_t pid) {
+  return getProcessInfoCache().lookup(pid);
 }
 
 constexpr size_t kResponseLogLimit = 0;

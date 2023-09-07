@@ -145,6 +145,7 @@ libmcroutercore_a_SOURCES = \
   routes/LatencyInjectionRoute.cpp \
   routes/LatestRoute.h \
   routes/McBucketRoute-inl.h \
+  routes/McBucketRoute.cpp \
   routes/McBucketRoute.h \
   routes/McExtraRouteHandleProvider-inl.h \
   routes/McExtraRouteHandleProvider.h \

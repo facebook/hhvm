@@ -45,7 +45,8 @@ class ShadowSettings {
    */
   static std::shared_ptr<ShadowSettings> create(
       const folly::dynamic& json,
-      CarbonRouterInstanceBase& router);
+      CarbonRouterInstanceBase& router,
+      size_t totalBuckets = 0);
 
   ~ShadowSettings();
 
@@ -69,6 +70,18 @@ class ShadowSettings {
   std::pair<uint32_t, uint32_t> keyRange() const {
     auto fraction = keyRange_.load();
     return {fraction >> 32, fraction & ((1UL << 32) - 1)};
+  }
+
+  struct BucketRange {
+    uint64_t start;
+    uint64_t end;
+  };
+  BucketRange bucketRange() const {
+    return bucketRange_.load();
+  }
+
+  void setTotalBuckets(size_t totalBuckets) {
+    totalBuckets_ = totalBuckets;
   }
 
   /**
@@ -101,13 +114,18 @@ class ShadowSettings {
    * @param rng   Random number generator.
    */
   template <class Request, class RNG>
-  bool shouldShadow(const Request& req, RNG&& rng) const {
-    return shouldShadowKey(req) && shouldShadowRandom(std::forward<RNG>(rng));
+  bool shouldShadow(
+      const Request& req,
+      const std::optional<uint64_t>& bucketId,
+      RNG&& rng) const {
+    return shouldShadowKey(req, bucketId) &&
+        shouldShadowRandom(std::forward<RNG>(rng));
   }
 
   template <class Request>
   std::enable_if_t<HasKeyTrait<Request>::value, bool> shouldShadowKey(
-      const Request& req) const {
+      const Request& req,
+      const std::optional<uint64_t>& bucketId) const {
     // If configured to use an explicit list of keys to be shadowed, check for
     // req.key_ref() in that list. Otherwise, decide to shadow based on
     // keyRange().
@@ -121,13 +139,18 @@ class ShadowSettings {
           std::less<std::tuple<uint32_t, folly::StringPiece>>());
     }
 
+    if (bucketId) {
+      auto bucketRange = bucketRange_.load();
+      return bucketRange.start <= *bucketId && *bucketId <= bucketRange.end;
+    }
     auto range = keyRange();
     return range.first <= req.key_ref()->routingKeyHash() &&
         req.key_ref()->routingKeyHash() <= range.second;
   }
   template <class Request>
   std::enable_if_t<!HasKeyTrait<Request>::value, bool> shouldShadowKey(
-      const Request& /* req */) const {
+      const Request& /* req */,
+      const std::optional<uint64_t>& /* bucketId */) const {
     return true;
   }
 
@@ -146,6 +169,9 @@ class ShadowSettings {
   std::vector<std::tuple<uint32_t, std::string>> keysToShadow_;
 
   std::atomic<uint64_t> keyRange_{0};
+
+  std::atomic<BucketRange> bucketRange_{{.start = 1, .end = 0}};
+  size_t totalBuckets_{0};
 
   bool validateReplies_{false};
 

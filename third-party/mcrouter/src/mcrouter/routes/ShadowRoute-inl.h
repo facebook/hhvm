@@ -12,6 +12,8 @@
 
 #include <folly/fibers/FiberManager.h>
 
+#include "mcrouter/routes/McBucketRoute.h"
+
 namespace facebook {
 namespace memcache {
 namespace mcrouter {
@@ -72,6 +74,14 @@ makeShadowRoutes(
     return children;
   }
 
+  size_t totalBucket = 0;
+  if (auto* jNeedBucketization = json.get_ptr("bucketize")) {
+    if (parseBool(*jNeedBucketization, "bucketize")) {
+      auto settings = parseMcBucketRouteSettings(json);
+      totalBucket = settings.totalBuckets;
+    }
+  }
+
   ShadowData<RouterInfo> data;
   data.reserve(jshadows->size());
   for (auto& shadow : *jshadows) {
@@ -91,7 +101,7 @@ makeShadowRoutes(
       continue;
     }
     try {
-      auto s = ShadowSettings::create(shadow, proxy.router());
+      auto s = ShadowSettings::create(shadow, proxy.router(), totalBucket);
       if (s) {
         data.emplace_back(factory.create(*jtarget), std::move(s));
       }

@@ -133,6 +133,8 @@ class McBucketRoute {
   const std::string bucketizationKeyspace_;
 };
 
+McBucketRouteSettings parseMcBucketRouteSettings(const folly::dynamic& json);
+
 template <class RouterInfo>
 typename RouterInfo::RouteHandlePtr makeMcBucketRoute(
     typename RouterInfo::RouteHandlePtr rh,

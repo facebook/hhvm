@@ -144,15 +144,17 @@ class ShadowRoute {
       return false;
     }
 
+    auto bucketId = fiber_local<RouterInfo>::getBucketId();
     if (!ctx) {
       LOG_FAILURE(
           "mcrouter",
           failure::Category::kInvalidConfig,
           "ShadowRoute: ProxyRequestContext is nullptr. Ignoring randomness.");
-      return settings->shouldShadowKey(req);
+      return settings->shouldShadowKey(req, bucketId);
     }
 
-    return settings->shouldShadow(req, ctx->proxy().randomGenerator());
+    return settings->shouldShadow(
+        req, bucketId, ctx->proxy().randomGenerator());
   }
 
   template <class Request>

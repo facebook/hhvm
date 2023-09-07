@@ -89,11 +89,13 @@ TEST_F(ShadowSettingsTest, shouldRoute) {
   ASSERT_TRUE(shadowSettings != nullptr);
 
   McGetRequest req1("good_key");
-  bool res1 = shadowSettings->shouldShadow(req1, randomGenerator());
+  bool res1 =
+      shadowSettings->shouldShadow(req1, std::nullopt, randomGenerator());
   EXPECT_TRUE(res1);
 
   McGetRequest req2("out_of_range_key_test");
-  bool res2 = shadowSettings->shouldShadow(req2, randomGenerator());
+  bool res2 =
+      shadowSettings->shouldShadow(req2, std::nullopt, randomGenerator());
   EXPECT_FALSE(res2);
 
   constexpr size_t kNumRuns = 10000;
@@ -104,7 +106,7 @@ TEST_F(ShadowSettingsTest, shouldRoute) {
   size_t no = 0;
   for (size_t i = 0; i < kNumRuns; ++i) {
     McGetRequest req(folly::to<std::string>(i));
-    if (shadowSettings->shouldShadow(req, randomGenerator())) {
+    if (shadowSettings->shouldShadow(req, std::nullopt, randomGenerator())) {
       ++yes;
     } else {
       ++no;
@@ -137,7 +139,7 @@ TEST_F(ShadowSettingsTest, shouldRoute_random) {
   size_t no = 0;
   for (size_t i = 0; i < kNumRuns; ++i) {
     McGetRequest req(folly::to<std::string>(i));
-    if (shadowSettings->shouldShadow(req, randomGenerator())) {
+    if (shadowSettings->shouldShadow(req, std::nullopt, randomGenerator())) {
       ++yes;
     } else {
       ++no;
@@ -146,4 +148,28 @@ TEST_F(ShadowSettingsTest, shouldRoute_random) {
 
   expectApproximatelyEqual(kExpected, yes, kMargin);
   expectApproximatelyEqual(kExpected, no, kMargin);
+}
+
+TEST_F(ShadowSettingsTest, shouldRouteByBucket) {
+  constexpr folly::StringPiece kConfig = R"(
+  {
+    "key_fraction_range": [0.2, 0.6]
+  }
+  )";
+
+  const auto json = folly::parseJson(kConfig);
+  auto& router = getRouter<MemcacheRouterInfo>();
+
+  auto shadowSettings = ShadowSettings::create(json, router, 100);
+  ASSERT_TRUE(shadowSettings != nullptr);
+  auto bucketRange = shadowSettings->bucketRange();
+  EXPECT_EQ(bucketRange.start, 19);
+  EXPECT_EQ(bucketRange.end, 59);
+
+  McGetRequest req("test_key");
+  for (int i = 0; i < 120; i++) {
+    EXPECT_EQ(
+        shadowSettings->shouldShadow(req, i, randomGenerator()),
+        i >= 19 && i <= 59);
+  }
 }

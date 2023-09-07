@@ -566,6 +566,11 @@ McRouteHandleProvider<RouterInfo>::createSRRoute(
   }
 
   route = wrapAxonLogRoute(std::move(route), proxy_, json);
+
+  if (json.count("shadows")) {
+    route = std::move(makeShadowRoutes(
+        factory, json, {std::move(route)}, proxy_, *extraProvider_)[0]);
+  }
   route = bucketize(std::move(route), json);
 
   if (auto jSRRouteName = json.get_ptr("service_name")) {
@@ -645,6 +650,16 @@ McRouteHandleProvider<RouterInfo>::makePoolRoute(
       }
       if (auto* jNeedBucketization = json.get_ptr("bucketize")) {
         if (parseBool(*jNeedBucketization, "bucketize")) {
+          jhashWithWeights["bucketize"] = true;
+        }
+      }
+      // When setting useBucketHashSelector, the PoolRoute is constructed with
+      // BucketHashSelector but skip init McBucketRoute as direct parent. This
+      // allow shadow PoolRoute to use the McBucketRoute from the associated
+      // normal route.
+      if (auto* jNeedBucketizationShadow =
+              json.get_ptr("useBucketHashSelector")) {
+        if (parseBool(*jNeedBucketizationShadow, "useBucketHashSelector")) {
           jhashWithWeights["bucketize"] = true;
         }
       }

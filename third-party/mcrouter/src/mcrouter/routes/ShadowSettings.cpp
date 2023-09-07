@@ -8,6 +8,7 @@
 #include "ShadowSettings.h"
 
 #include <algorithm>
+#include <cstddef>
 #include <memory>
 
 #include <folly/DynamicConverter.h>
@@ -25,11 +26,12 @@ namespace mcrouter {
 
 std::shared_ptr<ShadowSettings> ShadowSettings::create(
     const folly::dynamic& json,
-    CarbonRouterInstanceBase& router) {
+    CarbonRouterInstanceBase& router,
+    size_t totalBuckets) {
   auto result = std::shared_ptr<ShadowSettings>(new ShadowSettings());
   try {
     checkLogic(json.isObject(), "json is not an object");
-
+    result->setTotalBuckets(totalBuckets);
     if (auto jKeyFractionRange = json.get_ptr("key_fraction_range")) {
       checkLogic(
           jKeyFractionRange->isArray(), "key_fraction_range is not an array");
@@ -94,6 +96,11 @@ void ShadowSettings::setKeyRange(double start, double end) {
   uint64_t keyStart = start * std::numeric_limits<uint32_t>::max();
   uint64_t keyEnd = end * std::numeric_limits<uint32_t>::max();
   keyRange_ = (keyStart << 32UL) | keyEnd;
+  if (totalBuckets_ > 0) {
+    bucketRange_ = {
+        static_cast<uint64_t>(start * (totalBuckets_ - 1)),
+        static_cast<uint64_t>(end * (totalBuckets_ - 1))};
+  }
 }
 
 ShadowSettings::~ShadowSettings() {

@@ -939,24 +939,6 @@ class t_hack_generator : public t_concat_generator {
     return *underlying_name;
   }
 
-  std::string php_path(const t_program* p) {
-    std::string ns = p->get_namespace("php_path");
-    if (ns.empty()) {
-      return p->name();
-    }
-
-    // Transform the java-style namespace into a path.
-    for (char& c : ns) {
-      if (c == '.') {
-        c = '/';
-      }
-    }
-
-    return ns + '/' + p->name();
-  }
-
-  std::string php_path(const t_service* s) { return php_path(s->program()); }
-
   const char* UNION_EMPTY = "_EMPTY_";
 
   bool is_base_exception_property(const t_field*);

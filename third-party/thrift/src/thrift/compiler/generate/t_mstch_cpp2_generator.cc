@@ -142,9 +142,6 @@ std::string get_fatal_namespace_name_short_id(
     const std::string& lang, const std::string& ns) {
   std::string replacement = lang == "cpp" || lang == "cpp2" ? "__" : "_";
   std::string result = boost::algorithm::replace_all_copy(ns, ".", replacement);
-  if (lang == "php_path") {
-    return boost::algorithm::replace_all_copy(ns, "/", "_");
-  }
   return result;
 }
 

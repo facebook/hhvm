@@ -39,7 +39,7 @@ use crate::validation_err::ValidationErr;
 impl CustomErrorConfig {
     pub fn new(mut errors: Vec<CustomError>) -> Self {
         let invalid = errors
-            .extract_if(|e| {
+            .drain_filter(|e| {
                 let mut env = ValidationEnv::default();
                 !e.validate(&mut env)
             })

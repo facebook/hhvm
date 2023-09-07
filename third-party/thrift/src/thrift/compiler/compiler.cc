@@ -544,9 +544,18 @@ compile_result compile(
   if (path_or_error.index() == 0) {
     auto& path = std::get<0>(path_or_error);
     if (!programs->find_program(path)) {
+      diagnostic_context stdlib_ctx(
+          source_mgr,
+          [&](diagnostic&& d) {
+            ctx.warning(
+                source_location{},
+                "Could not load Thrift standard libraries: {}",
+                d.str());
+          },
+          diagnostic_params::only_errors());
       auto inc = parse_and_mutate_program(
           source_mgr,
-          ctx,
+          stdlib_ctx,
           path,
           pparams,
           true /* return_nullptr_on_failure */,

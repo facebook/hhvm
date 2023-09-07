@@ -53,7 +53,7 @@ struct MEMCACHEGlobals final {
 static RDS_LOCAL_NO_CHECK(MEMCACHEGlobals*, s_memcache_globals){nullptr};
 #define MEMCACHEG(name) (*s_memcache_globals)->name
 
-const StaticString s_MemcacheData("MemcacheData");
+const StaticString s_Memcache("Memcache");
 
 struct MemcacheData {
   memcached_st m_memcache;
@@ -800,7 +800,7 @@ struct MemcacheExtension final : Extension {
       HHVM_ME(Memcache, getextendedstats);
       HHVM_ME(Memcache, addserver);
 
-      Native::registerNativeDataInfo<MemcacheData>(s_MemcacheData.get());
+      Native::registerNativeDataInfo<MemcacheData>(s_Memcache.get());
     }
 } s_memcache_extension;;
 

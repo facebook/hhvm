@@ -3,7 +3,7 @@
 /**
  * Represents a connection to a set of memcached servers.
  */
-<<__NativeData("MemcachedData")>>
+<<__NativeData>>
 class Memcached {
   // Signifies we have provide a session handler
   const HAVE_SESSION = false;

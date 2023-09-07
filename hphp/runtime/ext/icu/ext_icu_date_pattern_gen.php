@@ -45,7 +45,7 @@
  *   IntlDatePatternGenerator::PATTERN_CONFLICT
  *
  */
-<<__NativeData("IntlDatePatternGenerator")>>
+<<__NativeData>>
 class IntlDatePatternGenerator {
 
   /**

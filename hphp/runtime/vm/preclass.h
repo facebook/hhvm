@@ -392,7 +392,7 @@ public:
   const ConstMap& constantsMap() const { return m_constants; }
 
   /*
-   * NativeData type declared in <<__NativeData("Type")>>.
+   * NativeData type declared in <<__NativeData>>.
    */
   const Native::NativeDataInfo* nativeDataInfo() const {
     return m_nativeDataInfo;

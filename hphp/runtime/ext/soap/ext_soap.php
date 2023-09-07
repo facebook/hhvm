@@ -1,6 +1,6 @@
 <?hh // partial
 
-<<__NativeData("SoapServer")>>
+<<__NativeData>>
 class SoapServer {
 
   <<__Native>>
@@ -115,7 +115,7 @@ class SoapServer {
   public function addSoapHeader(mixed $fault): void;
 }
 
-<<__NativeData("SoapClient")>>
+<<__NativeData>>
 class SoapClient {
 
   // Clean out different kinds of arrays, recursively, from an input. For
@@ -239,7 +239,7 @@ class SoapVar {
  * Represents parameter to a SOAP call.
  *
  */
-<<__NativeData("SoapParam")>>
+<<__NativeData>>
 class SoapParam {
 
   <<__Native>>
@@ -250,7 +250,7 @@ class SoapParam {
  * Represents a SOAP header.
  *
  */
-<<__NativeData("SoapHeader")>>
+<<__NativeData>>
 class SoapHeader {
 
   <<__Native>>

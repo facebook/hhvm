@@ -1,12 +1,12 @@
 <?hh
 
-<<__NativeData('A')>>
+<<__NativeData>>
 class A {
   <<__Native>>
   public function __construct(): void;
 }
 
-<<__NativeData('B')>>
+<<__NativeData>>
 class B extends A {
   public function __construct(): void {}
 }

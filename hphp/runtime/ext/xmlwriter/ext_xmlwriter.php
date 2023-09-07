@@ -4,7 +4,7 @@
 /** Represents a writer that provides a non-cached, forward-only means of
  * generating streams or files containing XML data.
  */
-<<__NativeData("XMLWriterData")>>
+<<__NativeData>>
 class XMLWriter {
   public function __construct() {}
 

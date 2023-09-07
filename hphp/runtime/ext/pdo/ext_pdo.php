@@ -3,7 +3,7 @@
 
 /* Represents a connection between PHP and a database server.
  */
-<<__NativeData("PDO")>>
+<<__NativeData>>
 class PDO {
 
   /* @param string $dsn
@@ -322,7 +322,7 @@ class PDO {
 /* Represents a prepared statement and, after the statement is executed, an
  * associated result set.
  */
-<<__NativeData("PDOStatement")>>
+<<__NativeData>>
 class PDOStatement implements Iterator {
 
   public ?string $queryString = null;

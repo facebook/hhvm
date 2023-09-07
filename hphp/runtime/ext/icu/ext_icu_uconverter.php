@@ -1,6 +1,6 @@
 <?hh // partial
 
-<<__NativeData("UConverter")>>
+<<__NativeData>>
 class UConverter implements IDisposable {
   /**
    * Create UConverter object

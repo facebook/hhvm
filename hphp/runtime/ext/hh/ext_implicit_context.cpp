@@ -43,7 +43,6 @@ namespace {
 
 Class* s_ImplicitContextDataClass = nullptr;
 const StaticString
-  s_ImplicitContext("ImplicitContext"),
   s_ImplicitContextDataClassName("HH\\ImplicitContext\\_Private\\ImplicitContextData"),
   s_ICInaccessibleMemoKey("%Inaccessible%"),
   s_ICSoftInaccessibleMemoKey("%SoftInaccessible%"),
@@ -341,7 +340,7 @@ Variant HHVM_FUNCTION(enter_zoned_with, const Variant& function) {
 static struct HHImplicitContext final : Extension {
   HHImplicitContext(): Extension("implicit_context", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) { }
   void moduleInit() override {
-    Native::registerNativeDataInfo<ImplicitContext>(s_ImplicitContext.get());
+    Native::registerNativeDataInfo<ImplicitContext>(s_ImplicitContextDataClassName.get());
 
     HHVM_NAMED_FE(HH\\ImplicitContext\\get_state_unsafe,
                   HHVM_FN(get_state_unsafe));

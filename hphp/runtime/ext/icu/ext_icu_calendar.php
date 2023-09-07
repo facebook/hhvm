@@ -1,6 +1,6 @@
 <?hh // partial
 
-<<__NativeData("IntlCalendar")>>
+<<__NativeData>>
 class IntlCalendar {
   /**
    * Add a (signed) amount of time to a field

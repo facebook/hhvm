@@ -31,7 +31,7 @@ class MCRouterOptionException extends Exception {
   }
 }
 
-<<__NativeData("MCRouter")>>
+<<__NativeData>>
 class MCRouter {
 
   /**

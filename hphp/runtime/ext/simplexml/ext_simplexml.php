@@ -3,7 +3,7 @@
 
 /** Represents an element in an XML document.
  */
-<<__NativeData("SimpleXMLElement")>>
+<<__NativeData>>
 class SimpleXMLElement implements ArrayAccess<mixed, mixed>, Traversable<mixed>, Countable {
 
   /** @param string $data
@@ -146,7 +146,7 @@ class SimpleXMLElement implements ArrayAccess<mixed, mixed>, Traversable<mixed>,
 
 }
 
-<<__NativeData("SimpleXMLElementIterator")>>
+<<__NativeData>>
 class SimpleXMLElementIterator implements Iterator<SimpleXMLElement> {
 
   <<__Native>>
@@ -172,7 +172,7 @@ class SimpleXMLElementIterator implements Iterator<SimpleXMLElement> {
   public function valid(): bool;
 }
 
-<<__NativeData("SimpleXMLIterator")>>
+<<__NativeData>>
 class SimpleXMLIterator extends SimpleXMLElement
                         implements RecursiveIterator<SimpleXMLElement> {
 

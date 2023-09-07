@@ -207,7 +207,7 @@ function gmp_xor(mixed $a,
                  mixed $b): mixed;
 
 
-<<__NativeData("GMPData")>>
+<<__NativeData>>
 class GMP implements Serializable {
   <<__Native>>
   public function serialize() : string;

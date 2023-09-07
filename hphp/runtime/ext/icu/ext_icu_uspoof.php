@@ -4,7 +4,7 @@
  * Unicode Security and Spoofing Detection
  * http://icu-project.org/apiref/icu4c/uspoof_8h.html
  */
-<<__NativeData("SpoofChecker")>>
+<<__NativeData>>
 class SpoofChecker {
   /**
    * Creates a spoof checker that checks for visually confusing

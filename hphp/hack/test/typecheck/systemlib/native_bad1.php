@@ -4,7 +4,7 @@ function get_float(): float;
 
 function get_void_no_attr(): void;
 
-<<__NativeData('Foobar')>>
+<<__NativeData>>
 class Foobar {
 
   public function getNull(): null;
@@ -13,7 +13,7 @@ class Foobar {
 
 }
 
-<<__NativeData('Baz')>>
+<<__NativeData>>
 abstract class Baz {
 
   public function getNull(): null;

@@ -1276,7 +1276,7 @@ public:
   // Native data.
 
   /*
-   * NativeData type declared in <<__NativeData("Type")>>.
+   * NativeData type declared in <<__NativeData>>.
    */
   const Native::NativeDataInfo* getNativeDataInfo() const;
 
@@ -1648,7 +1648,7 @@ private:
     VMCompactVector<ClassPtr> m_clonesWithThisScope;
 
     /*
-     * Objects with the <<__NativeData("T")>> UA are allocated with extra space
+     * Objects with the <<__NativeData>> UA are allocated with extra space
      * prior to the ObjectData structure itself.
      */
     const Native::NativeDataInfo *m_nativeDataInfo{nullptr};

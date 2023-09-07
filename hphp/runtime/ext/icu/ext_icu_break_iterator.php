@@ -13,7 +13,7 @@
  * beginning of the text (which has the location 0). The keys yielded by the
  * iterator simply form the sequence of natural numbers {0, 1, 2, ...}.
  */
-<<__NativeData("IntlBreakIterator")>>
+<<__NativeData>>
 class IntlBreakIterator implements \HH\Iterator {
   /**
    * Private constructor for disallowing instantiation

@@ -1453,7 +1453,7 @@ struct GMPExtension final : Extension {
     HHVM_FE(gmp_testbit);
     HHVM_FE(gmp_xor);
 
-    Native::registerNativeDataInfo<GMPData>(s_GMPData.get());
+    Native::registerNativeDataInfo<GMPData>(s_GMP_GMP.get());
     HHVM_ME(GMP, serialize);
     HHVM_ME(GMP, unserialize);
     HHVM_ME(GMP, __debugInfo);

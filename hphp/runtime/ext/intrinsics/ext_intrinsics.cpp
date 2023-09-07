@@ -429,7 +429,8 @@ struct DummyNativeData {
 
 namespace {
 
-const StaticString s_DummyNativeData("DummyNativeData");
+const StaticString s_ExtensibleNewableClassWithNativeData(
+  "__hhvm_intrinsics\\ExtensibleNewableClassWithNativeData");
 
 void
 HHVM_METHOD(ExtensibleNewableClassWithNativeData, setDummyValue, int64_t v) {
@@ -516,7 +517,8 @@ static struct IntrinsicsExtension final : Extension {
                   getDumyValue,
                   HHVM_MN(ExtensibleNewableClassWithNativeData,getDumyValue));
 
-    Native::registerNativeDataInfo<DummyNativeData>(s_DummyNativeData.get());
+    Native::registerNativeDataInfo<DummyNativeData>(
+      s_ExtensibleNewableClassWithNativeData.get());
   }
 } s_intrinsics_extension;
 

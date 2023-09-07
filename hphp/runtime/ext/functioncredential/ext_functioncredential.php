@@ -3,7 +3,7 @@
 
 /** Used to represent the type of object returned by __FUNCTION_CREDENTIAL__
  */
-<<__NativeData("FunctionCredential")>>
+<<__NativeData>>
 final class FunctionCredential {
   public final function __construct() {
     trigger_error("Can't create a FunctionCredential directly", E_ERROR);

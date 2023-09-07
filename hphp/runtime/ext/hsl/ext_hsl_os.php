@@ -17,7 +17,7 @@
  */
 namespace HH\Lib\OS {
 
-<<__NativeData("HSLFileDescriptor")>>
+<<__NativeData>>
 final class FileDescriptor {
   private function __construct() {}
 

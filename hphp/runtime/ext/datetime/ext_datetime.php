@@ -4,7 +4,7 @@
  * Representation of date and time.
  *
  */
-<<__NativeData("DateTime")>>
+<<__NativeData>>
 class DateTime implements DateTimeInterface {
 
   /**
@@ -220,7 +220,7 @@ class DateTime implements DateTimeInterface {
  * Representation of time zone.
  *
  */
-<<__NativeData("DateTimeZone")>>
+<<__NativeData>>
 class DateTimeZone {
 
   /**
@@ -311,7 +311,7 @@ class DateTimeZone {
  * Represents a date interval.
  *
  */
-<<__NativeData("DateInterval")>>
+<<__NativeData>>
 class DateInterval {
 
   /**

@@ -3,7 +3,7 @@
 /**
  * A timer that periodically interrupts a request thread.
  */
-<<__NativeData("IntervalTimer")>>
+<<__NativeData>>
 class IntervalTimer {
   /**
    * Create a new interval timer.

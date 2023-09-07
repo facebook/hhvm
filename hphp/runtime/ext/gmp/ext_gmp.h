@@ -51,7 +51,6 @@ namespace HPHP {
 // GMP class strings
 const StaticString s_GMP_GMP("GMP");
 const StaticString s_GMP_num("num");
-const StaticString s_GMPData("GMPData");
 
 // Array indexes for division functions
 const StaticString s_GMP_s("s");

@@ -1,6 +1,6 @@
 <?hh // partial
 
-<<__NativeData("IntlTimeZone")>>
+<<__NativeData>>
 class IntlTimeZone {
 
   /**

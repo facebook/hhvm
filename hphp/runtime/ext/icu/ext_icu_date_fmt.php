@@ -7,7 +7,7 @@
  * users to display dates in a localized format or to parse strings into PHP
  * date values using pattern strings and/or canned patterns.
  */
-<<__NativeData("IntlDateFormatter")>>
+<<__NativeData>>
 class IntlDateFormatter {
   /**
    * Create a date formatter

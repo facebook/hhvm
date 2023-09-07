@@ -5,7 +5,7 @@ namespace {
 
 /** An iterator implementation for iterating over a Set.
  */
-<<__NativeData("SetIterator")>>
+<<__NativeData>>
 final class SetIterator<T as arraykey> implements HH\Iterator<T> {
 
   public function __construct()[]: void {}

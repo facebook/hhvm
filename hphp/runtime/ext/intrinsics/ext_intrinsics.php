@@ -218,7 +218,7 @@ function debug_file_deps(): vec<string>;
  * without tripping over the funky behavior or (intentional) limitations
  * of the __NativeData classes that actually do something.
  */
-<<__NativeData("DummyNativeData")>>
+<<__NativeData>>
 class ExtensibleNewableClassWithNativeData {
   <<__Native>>
   public function setDummyValue(int $v): void;

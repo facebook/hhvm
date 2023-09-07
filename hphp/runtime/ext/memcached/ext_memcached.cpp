@@ -113,8 +113,6 @@ static memcached_return_t memcached_dump_callback(const memcached_st*,
   return MEMCACHED_SUCCESS;
 }
 
-const StaticString s_MemcachedData("MemcachedData");
-
 struct MemcachedData {
   struct Impl {
     Impl() :
@@ -1274,7 +1272,7 @@ struct MemcachedExtension final : Extension {
     HHVM_ME(Memcached, isPristine);
     HHVM_ME(Memcached, touchByKey);
 
-    Native::registerNativeDataInfo<MemcachedData>(s_MemcachedData.get());
+    Native::registerNativeDataInfo<MemcachedData>(s_Memcached.get());
 
     HHVM_RCC_BOOL(Memcached, HAVE_IGBINARY, false);
     HHVM_RCC_BOOL(Memcached, HAVE_JSON, true);

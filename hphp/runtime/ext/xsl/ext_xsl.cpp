@@ -63,7 +63,7 @@ static void xslt_ext_error_handler(void *,
 // NativeData
 
 const StaticString
-  s_XSLTProcessorData("XSLTProcessorData"),
+  s_XSLTProcessor("XSLTProcessor"),
   s_DOMDocument("DOMDocument"),
   s_DOMElement("DOMElement"),
   s_DOMAttr("DOMAttr"),
@@ -740,7 +740,7 @@ struct XSLExtension final : Extension {
       HHVM_ME(XSLTProcessor, transformToXML);
 
       Native::
-        registerNativeDataInfo<XSLTProcessorData>(s_XSLTProcessorData.get());
+        registerNativeDataInfo<XSLTProcessorData>(s_XSLTProcessor.get());
     }
 } s_xsl_extension;
 

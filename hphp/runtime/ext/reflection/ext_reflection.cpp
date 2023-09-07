@@ -649,7 +649,7 @@ void Reflection::ThrowReflectionExceptionObject(const Variant& message) {
 /////////////////////////////////////////////////////////////////////////////
 // class ReflectionFuncHandle
 
-const StaticString s_ReflectionFuncHandle("ReflectionFuncHandle");
+const StaticString s_ReflectionFunctionAbstract("ReflectionFunctionAbstract");
 
 static TypedValue HHVM_METHOD(ReflectionFunctionAbstract, getFileName) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
@@ -1088,7 +1088,7 @@ static String HHVM_METHOD(ReflectionMethod, getDeclaringClassname) {
 
 // ------------------------- class ReflectionFile
 
-const StaticString s_ReflectionFileHandle("ReflectionFileHandle");
+const StaticString s_ReflectionFile("ReflectionFile");
 
 // helper for __construct
 static String HHVM_METHOD(ReflectionFile, __init, const String& name) {
@@ -1133,7 +1133,7 @@ static Array HHVM_METHOD(ReflectionFile, getAttributesNamespaced) {
 
 // ------------------------- class ReflectionModule
 
-const StaticString s_ReflectionModuleHandle("ReflectionModuleHandle");
+const StaticString s_ReflectionModule("ReflectionModule");
 
 // helper for __construct
 static void HHVM_METHOD(ReflectionModule, __init, const String& name) {
@@ -1280,7 +1280,7 @@ static Variant HHVM_METHOD(ReflectionFunction, getClosureThisObject,
 /////////////////////////////////////////////////////////////////////////////
 // class ReflectionClass
 
-const StaticString s_ReflectionClassHandle("ReflectionClassHandle");
+const StaticString s_ReflectionClass("ReflectionClass");
 
 // helper for __construct
 static String HHVM_METHOD(ReflectionClass, __init, const String& name) {
@@ -1865,7 +1865,7 @@ struct reflection_extension_PropHandler :
 /////////////////////////////////////////////////////////////////////////////
 // class ReflectionTypeConstant
 
-const StaticString s_ReflectionConstHandle("ReflectionConstHandle");
+const StaticString s_ReflectionTypeConstant("ReflectionTypeConstant");
 
 // helper for __construct
 static bool HHVM_METHOD(ReflectionTypeConstant, __init,
@@ -1945,7 +1945,7 @@ static String HHVM_METHOD(ReflectionTypeConstant, getClassname) {
 /////////////////////////////////////////////////////////////////////////////
 // class ReflectionProperty
 
-const StaticString s_ReflectionPropHandle("ReflectionPropHandle");
+const StaticString s_ReflectionProperty("ReflectionProperty");
 
 static void HHVM_METHOD(ReflectionProperty, __construct,
                         const Variant& cls_or_obj, const String& prop_name) {
@@ -2248,7 +2248,7 @@ static bool HHVM_METHOD(ReflectionProperty, isReadonly) {
 /////////////////////////////////////////////////////////////////////////////
 // class ReflectionTypeAlias
 
-const StaticString s_ReflectionTypeAliasHandle("ReflectionTypeAliasHandle");
+const StaticString s_ReflectionTypeAlias("ReflectionTypeAlias");
 
 // helper for __construct:
 // caller throws exception when return value is false
@@ -2440,19 +2440,19 @@ struct ReflectionExtension final : Extension {
     HHVM_ME(ReflectionClass, getConstructorName);
 
     Native::registerNativeDataInfo<ReflectionFuncHandle>(
-      s_ReflectionFuncHandle.get());
+      s_ReflectionFunctionAbstract.get());
     Native::registerNativeDataInfo<ReflectionClassHandle>(
-      s_ReflectionClassHandle.get());
+      s_ReflectionClass.get());
     Native::registerNativeDataInfo<ReflectionConstHandle>(
-      s_ReflectionConstHandle.get());
+      s_ReflectionTypeConstant.get());
     Native::registerNativeDataInfo<ReflectionPropHandle>(
-      s_ReflectionPropHandle.get());
+      s_ReflectionProperty.get());
     Native::registerNativeDataInfo<ReflectionFileHandle>(
-      s_ReflectionFileHandle.get());
+      s_ReflectionFile.get());
     Native::registerNativeDataInfo<ReflectionModuleHandle>(
-      s_ReflectionModuleHandle.get());
+      s_ReflectionModule.get());
     Native::registerNativeDataInfo<ReflectionTypeAliasHandle>(
-      s_ReflectionTypeAliasHandle.get(), Native::NO_SWEEP);
+      s_ReflectionTypeAlias.get(), Native::NO_SWEEP);
 
     Native::registerNativePropHandler
       <reflection_extension_PropHandler>(s_reflectionextension);

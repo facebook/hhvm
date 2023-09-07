@@ -3,7 +3,7 @@
 
 /* The XSLTProcessor class.
  */
-<<__NativeData("XSLTProcessorData")>>
+<<__NativeData>>
 class XSLTProcessor {
   /* Creates a new XSLTProcessor object.
    */

@@ -50,12 +50,12 @@ function thrift_protocol_read_compact_struct(object $transportobj,
                                              string $obj_typename,
                                              int $options = 0): object;
 
-<<__NativeData("InteractionId")>>
+<<__NativeData>>
 class InteractionId {
   private function __construct()[]: void {}
 }
 
-<<__NativeData("RpcOptions")>>
+<<__NativeData>>
 final class RpcOptions implements IPureStringishObject {
   public function __construct()[]: void {}
 
@@ -102,7 +102,7 @@ final class ThriftApplicationException extends Exception {
   }
 }
 
-<<__NativeData("TClientBufferedStream")>>
+<<__NativeData>>
 final class TClientBufferedStream {
   public function __construct(): void {}
 
@@ -137,7 +137,7 @@ final class TClientBufferedStream {
   public function genNext(): Awaitable<(?vec<string>,?string)>;
 }
 
-<<__NativeData("TClientSink")>>
+<<__NativeData>>
 final class TClientSink {
   public function __construct(): void {}
 

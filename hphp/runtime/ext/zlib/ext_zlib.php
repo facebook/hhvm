@@ -361,7 +361,7 @@ function nzuncompress(string $compressed)[]: mixed;
  * Not a public API
  */
 namespace __SystemLib {
-<<__NativeData("__SystemLib\\ChunkedInflator")>>
+<<__NativeData>>
 class ChunkedInflator {
   <<__Native>>
   public function eof(): bool;
@@ -376,7 +376,7 @@ class ChunkedInflator {
   public function getUndecompressedByteCount(): int;
 }
 
-<<__NativeData("__SystemLib\\ChunkedGunzipper")>>
+<<__NativeData>>
 class ChunkedGunzipper {
   <<__Native>>
   public function eof(): bool;

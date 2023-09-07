@@ -16,7 +16,7 @@
  * methods. The result will be PHP value for simple resources and
  * ResourceBundle object for complex ones. All resources are read-only.
  */
-<<__NativeData("ResourceBundle")>>
+<<__NativeData>>
 class ResourceBundle implements \HH\Iterator, \ArrayAccess, \Countable {
   /**
    * Create a resource bundle

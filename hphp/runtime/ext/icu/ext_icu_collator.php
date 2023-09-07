@@ -4,7 +4,7 @@
  * Provides string comparison capability with support for appropriate
  * locale-sensitive sort orderings.
  */
-<<__NativeData("Collator")>>
+<<__NativeData>>
 class Collator {
   /**
    * Construct a new Collator instance

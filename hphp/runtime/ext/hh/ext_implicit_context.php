@@ -161,7 +161,7 @@ function get_state_unsafe()[zoned]: string /* State */;
 
 namespace ImplicitContext\_Private {
 
-<<__NativeData("ImplicitContext")>>
+<<__NativeData>>
 final class ImplicitContextData {}
 
 /**

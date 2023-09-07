@@ -7,7 +7,7 @@
  * A parent class to ReflectionFunction and ParentMethod. Read their
  * descriptions for details.
  */
-<<__NativeData('ReflectionFuncHandle')>>
+<<__NativeData>>
 abstract class ReflectionFunctionAbstract implements Reflector {
 
   const IS_STATIC    = 1;
@@ -1039,7 +1039,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
  *
  * The ReflectionClass class reports information about a class.
  */
-<<__NativeData('ReflectionClassHandle')>>
+<<__NativeData>>
 class ReflectionClass implements Reflector {
   const int IS_IMPLICIT_ABSTRACT = 16;
   const int IS_EXPLICIT_ABSTRACT = 32;
@@ -2215,7 +2215,7 @@ class ReflectionObject extends ReflectionClass {
  * The ReflectionTypeConstant class reports information about an object.
  *
  */
-<<__NativeData('ReflectionConstHandle')>>
+<<__NativeData>>
 class ReflectionTypeConstant implements Reflector {
 
   /**
@@ -2334,7 +2334,7 @@ class ReflectionTypeConstant implements Reflector {
 /** The ReflectionTypeAlias class reports information about a type
  * alias.
  */
-<<__NativeData('ReflectionTypeAliasHandle')>>
+<<__NativeData>>
 class ReflectionTypeAlias implements Reflector {
 
   private string $name = '';
@@ -2441,7 +2441,7 @@ class ReflectionTypeAlias implements Reflector {
 
 /** The ReflectionFile class reports information about a file.
  */
-<<__NativeData('ReflectionFileHandle')>>
+<<__NativeData>>
 final class ReflectionFile implements Reflector {
 
   private string $name = '';
@@ -2504,7 +2504,7 @@ final class ReflectionFile implements Reflector {
 
 /** The ReflectionModule class reports information about a module.
  */
-<<__NativeData('ReflectionModuleHandle')>>
+<<__NativeData>>
 final class ReflectionModule implements Reflector {
 
   private string $name = '';

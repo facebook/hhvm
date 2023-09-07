@@ -91,7 +91,6 @@ const StaticString
   s_DOMImplementation("DOMImplementation"),
   s_DOMXPath("DOMXPath"),
   s_DOMNameSpaceNode("DOMNameSpaceNode"),
-  s_DOMIterable("DOMIterable"),
   s_DOMNodeIterator("DOMNodeIterator");
 
 IMPLEMENT_GET_CLASS_FUNCTION(DOMNode)
@@ -6003,7 +6002,9 @@ struct DOMDocumentExtension final : Extension {
     Native::registerNativePropHandler<DOMNodeListPropHandler>(s_DOMNodeList);
 
     Native::registerNativeDataInfo<DOMIterable>(
-      s_DOMIterable.get(), Native::NDIFlags::NO_SWEEP);
+      s_DOMNamedNodeMap.get(), Native::NDIFlags::NO_SWEEP);
+    Native::registerNativeDataInfo<DOMIterable>(
+      s_DOMNodeList.get(), Native::NDIFlags::NO_SWEEP);
 
     HHVM_ME(DOMImplementation, createDocument);
     HHVM_ME(DOMImplementation, createDocumentType);

@@ -203,7 +203,7 @@ final class AsyncMysqlClient {
  * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
-<<__NativeData("AsyncMysqlConnectionPool")>>
+<<__NativeData>>
 class AsyncMysqlConnectionPool {
 
   /**
@@ -343,7 +343,7 @@ class AsyncMysqlConnectionPool {
  * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
-<<__NativeData("AsyncMysqlConnection")>>
+<<__NativeData>>
 final class AsyncMysqlConnection {
 
   private function __construct(): void {
@@ -691,7 +691,7 @@ final class AsyncMysqlConnection {
  * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
-<<__NativeData("MySSLContextProvider")>>
+<<__NativeData>>
 class MySSLContextProvider {
   /**
    * @internal
@@ -733,7 +733,7 @@ class MySSLContextProvider {
  * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
-<<__NativeData("AsyncMysqlConnectionOptions")>>
+<<__NativeData>>
 class AsyncMysqlConnectionOptions {
 
   // Sets the Connect Timeout for each connection attempt
@@ -809,7 +809,7 @@ class AsyncMysqlConnectionOptions {
  * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
-<<__NativeData("AsyncMysqlClientStats")>>
+<<__NativeData>>
 class AsyncMysqlClientStats {
   /**
    * @internal
@@ -895,7 +895,6 @@ class AsyncMysqlClientStats {
  * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
-<<__NativeData("AsyncMysqlResult")>>
 abstract class AsyncMysqlResult {
 
   /**
@@ -1019,7 +1018,7 @@ abstract class AsyncMysqlResult {
  * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
-<<__NativeData("AsyncMysqlConnectResult")>>
+<<__NativeData>>
 final class AsyncMysqlConnectResult extends AsyncMysqlResult {
 
   /**
@@ -1079,7 +1078,7 @@ final class AsyncMysqlConnectResult extends AsyncMysqlResult {
  * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
-<<__NativeData("AsyncMysqlErrorResult")>>
+<<__NativeData>>
 class AsyncMysqlErrorResult extends AsyncMysqlResult {
 
   /**
@@ -1181,7 +1180,7 @@ class AsyncMysqlErrorResult extends AsyncMysqlResult {
  * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
-<<__NativeData("AsyncMysqlQueryErrorResult")>>
+<<__NativeData>>
 final class AsyncMysqlQueryErrorResult extends AsyncMysqlErrorResult {
 
   /**
@@ -1228,7 +1227,7 @@ final class AsyncMysqlQueryErrorResult extends AsyncMysqlErrorResult {
  * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
-<<__NativeData("AsyncMysqlQueryResult")>>
+<<__NativeData>>
 final class AsyncMysqlQueryResult extends AsyncMysqlResult {
 
   /**
@@ -1475,7 +1474,7 @@ final class AsyncMysqlQueryResult extends AsyncMysqlResult {
  * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
-<<__NativeData("AsyncMysqlRowBlock")>>
+<<__NativeData>>
 final class AsyncMysqlRowBlock implements IteratorAggregate<mixed>, Countable {
   /**
    * @internal
@@ -1641,7 +1640,7 @@ final class AsyncMysqlRowBlock implements IteratorAggregate<mixed>, Countable {
  * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
-<<__NativeData("AsyncMysqlRowBlockIterator")>>
+<<__NativeData>>
 final class AsyncMysqlRowBlockIterator implements HH\KeyedIterator<string, AsyncMysqlRow> {
 
   /**
@@ -1704,7 +1703,7 @@ final class AsyncMysqlRowBlockIterator implements HH\KeyedIterator<string, Async
  * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
-<<__NativeData("AsyncMysqlRow")>>
+<<__NativeData>>
 final class AsyncMysqlRow implements MysqlRow {
 
   /**
@@ -1813,7 +1812,7 @@ final class AsyncMysqlRow implements MysqlRow {
  * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
-<<__NativeData("AsyncMysqlRowIterator")>>
+<<__NativeData>>
 final class AsyncMysqlRowIterator implements HH\KeyedIterator<string, string> {
   /**
    * @internal

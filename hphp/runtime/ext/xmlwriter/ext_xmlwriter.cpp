@@ -26,7 +26,7 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-const StaticString s_XMLWriterData("XMLWriterData");
+const StaticString s_XMLWriter("XMLWriter");
 
 struct XMLWriterData {
   XMLWriterData(): m_ptr(nullptr), m_output(nullptr) {}
@@ -959,7 +959,7 @@ struct XMLWriterExtension final : Extension {
       HHVM_FE(xmlwriter_flush);
       HHVM_FE(xmlwriter_output_memory);
 
-      Native::registerNativeDataInfo<XMLWriterData>(s_XMLWriterData.get());
+      Native::registerNativeDataInfo<XMLWriterData>(s_XMLWriter.get());
     }
 } s_xmlwriter_extension;
 

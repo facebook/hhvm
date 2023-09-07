@@ -1,6 +1,6 @@
 <?hh // partial
 
-<<__NativeData("Generator")>>
+<<__NativeData>>
 final class Generator implements HH\KeyedIterator {
 
   private function __construct(): void {}

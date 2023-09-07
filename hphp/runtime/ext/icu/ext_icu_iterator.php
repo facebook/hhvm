@@ -13,7 +13,7 @@
  * backed by the same state (e.g. the position of the iterator and its current
  * value).   Subclasses may provide richer functionality.
  */
-<<__NativeData("IntlIterator")>>
+<<__NativeData>>
 class IntlIterator implements Iterator {
 
   /**

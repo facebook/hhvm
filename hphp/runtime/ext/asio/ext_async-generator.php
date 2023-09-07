@@ -2,7 +2,7 @@
 
 namespace HH {
 
-<<__NativeData("HH\\AsyncGenerator")>>
+<<__NativeData>>
 final class AsyncGenerator<+Tk, +Tv, -Ts> implements AsyncKeyedIterator<Tk, Tv> {
 
   private function __construct(): void {}

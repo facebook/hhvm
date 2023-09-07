@@ -143,7 +143,7 @@ function bzwrite(resource $bz, string $data, int $length = 0): mixed;
  * Not a public API
  */
 namespace __SystemLib {
-<<__NativeData("__SystemLib\\ChunkedBunzipper")>>
+<<__NativeData>>
 class ChunkedBunzipper {
   <<__Native>>
   public function eof(): bool;

@@ -5,7 +5,7 @@ namespace {
 
 /** An iterator implementation for iterating over a Vector/ImmVector.
  */
-<<__NativeData("VectorIterator")>>
+<<__NativeData>>
 final class VectorIterator<T> implements HH\KeyedIterator<int, T> {
 
   /** Do nothing */

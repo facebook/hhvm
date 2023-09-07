@@ -6,7 +6,7 @@
  *
  * http://icu-project.org/apiref/icu4c/ucsdet_8h.html
  */
-<<__NativeData("EncodingDetector")>>
+<<__NativeData>>
 class EncodingDetector {
   /**
    * Creates an encoding detector.
@@ -55,7 +55,7 @@ class EncodingDetector {
 /**
   * Result of detecting the encoding of an array of bytes
   */
-<<__NativeData("EncodingMatch")>>
+<<__NativeData>>
 class EncodingMatch {
   /**
    * Internal only: Creates an encoding match.

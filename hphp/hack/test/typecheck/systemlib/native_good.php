@@ -9,7 +9,7 @@ function get_void(): void;
 <<__Native>>
 function get_mixed(): mixed;
 
-<<__NativeData('Foobar')>>
+<<__NativeData>>
 class Foobar {
 
   <<__Native>>
@@ -17,7 +17,7 @@ class Foobar {
 
 }
 
-<<__NativeData('Baz')>>
+<<__NativeData>>
 abstract class Baz {
 
   <<__Native>>
@@ -27,13 +27,13 @@ abstract class Baz {
 
 }
 
-<<__NativeData('BingParent')>>
+<<__NativeData>>
 class BingParent {
   <<__Native>>
   public function __construct(): void;
 }
 
-<<__NativeData('Bing')>>
+<<__NativeData>>
 class Bing extends BingParent {
   <<__Native>>
   public function __construct(): void;

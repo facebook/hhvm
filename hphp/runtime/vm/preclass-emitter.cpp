@@ -276,23 +276,11 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
     pc->m_nativeDataInfo = nullptr;
     if (!m_userAttributes.size()) return;
 
-    // Check for <<__NativeData("Type")>>.
+    // Check for <<__NativeData>>.
     auto it = m_userAttributes.find(s_NativeData.get());
     if (it == m_userAttributes.end()) return;
 
-    TypedValue ndiInfo = it->second;
-    if (!isArrayLikeType(ndiInfo.m_type)) return;
-
-    // Use the first string label which references a registered type.  In
-    // practice, there should generally only be one item and it should be a
-    // string, but maybe that'll be extended...
-    for (ArrayIter it(ndiInfo.m_data.parr); it; ++it) {
-      Variant val = it.second();
-      if (!val.isString()) continue;
-
-      pc->m_nativeDataInfo = Native::getNativeDataInfo(val.toString().get());
-      if (pc->m_nativeDataInfo) break;
-    }
+    pc->m_nativeDataInfo = Native::getNativeDataInfo(m_name.get());
   }();
 
   PreClass::MethodMap::Builder methodBuild;

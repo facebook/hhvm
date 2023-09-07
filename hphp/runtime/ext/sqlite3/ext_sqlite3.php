@@ -4,7 +4,7 @@
  * A class that interfaces SQLite 3 databases.
  *
  */
-<<__NativeData("SQLite3")>>
+<<__NativeData>>
 class SQLite3 {
 
   /**
@@ -260,7 +260,7 @@ class SQLite3 {
  * A class that handles prepared statements for the SQLite 3 extension.
  *
  */
-<<__NativeData("SQLite3Stmt")>>
+<<__NativeData>>
 class SQLite3Stmt {
 
   <<__Native>>
@@ -345,7 +345,7 @@ class SQLite3Stmt {
  * A class that handles result sets for the SQLite 3 extension.
  *
  */
-<<__NativeData("SQLite3Result")>>
+<<__NativeData>>
 class SQLite3Result {
 
   public function __construct(): void {}

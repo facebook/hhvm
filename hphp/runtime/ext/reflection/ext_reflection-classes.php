@@ -639,7 +639,7 @@ class ReflectionParameter implements Reflector {
  * properties.
  *
  */
-<<__NativeData('ReflectionPropHandle')>>
+<<__NativeData>>
 class ReflectionProperty implements Reflector {
   const IS_STATIC = 1;
   const IS_PUBLIC = 256;

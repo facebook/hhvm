@@ -22,12 +22,13 @@ use crate::emit_param;
 pub fn emit_body<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     scope: &Scope<'a, 'arena>,
+    class_name: &ast::Sid,
     class_attrs: &[ast::UserAttribute],
     name: &ast::Sid,
     params: &[ast::FunParam],
     ret: Option<&aast::Hint>,
 ) -> Result<Body<'arena>> {
-    let body_instrs = emit_native_opcode_impl(&name.1, params, class_attrs);
+    let body_instrs = emit_native_opcode_impl(&name.1, params, &class_name.1, class_attrs);
     let mut tparams = scope
         .get_tparams()
         .iter()
@@ -68,23 +69,22 @@ pub fn emit_body<'a, 'arena, 'decl>(
 fn emit_native_opcode_impl<'arena>(
     name: &str,
     params: &[ast::FunParam],
-    user_attrs: &[ast::UserAttribute],
+    class_name: &str,
+    class_user_attrs: &[ast::UserAttribute],
 ) -> Result<InstrSeq<'arena>> {
-    if let [ua] = user_attrs {
-        if ua.name.1 == "__NativeData" {
-            if let [p] = ua.params.as_slice() {
-                match p.2.as_string() {
-                    Some(s) if s == "HH\\AsyncGenerator" || s == "Generator" => {
-                        return emit_generator_method(name, params);
-                    }
-                    _ => {}
-                }
-            };
+    if let [ua] = class_user_attrs {
+        if ua.name.1 == "__NativeData"
+            && (class_name == "\\HH\\AsyncGenerator" || class_name == "\\Generator")
+        {
+            return emit_generator_method(name, params);
         }
     };
     Err(Error::fatal_runtime(
         &Pos::NONE,
-        format!("OpCodeImpl attribute is not applicable to {}", name),
+        format!(
+            "OpCodeImpl attribute is not applicable to {} in {}",
+            name, class_name
+        ),
     ))
 }
 

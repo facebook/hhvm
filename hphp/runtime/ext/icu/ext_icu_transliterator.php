@@ -3,7 +3,7 @@
 /**
  * Transliterator provides transliteration of strings.
  */
-<<__NativeData("Transliterator")>>
+<<__NativeData>>
 class Transliterator {
   public string $id = '';
 

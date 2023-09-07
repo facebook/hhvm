@@ -42,7 +42,6 @@ namespace HPHP {
 namespace {
 
 const StaticString
-  s_HSLFileDescriptor("HSLFileDescriptor"),
   s_fd("fd"),
   s_resource("resource"),
   s_type("type"),
@@ -1074,7 +1073,7 @@ struct OSExtension final : Extension {
   void moduleInit() override {
     // Remember to update the HHI :)
 
-    Native::registerNativeDataInfo<HSLFileDescriptor>(s_HSLFileDescriptor.get());
+    Native::registerNativeDataInfo<HSLFileDescriptor>(s_FQHSLFileDescriptor.get());
     HHVM_NAMED_ME(HH\\Lib\\OS\\FileDescriptor, __debugInfo, HHVM_MN(HSLFileDescriptor, __debugInfo));
 
     // The preprocessor doesn't like "\" immediately before a ##

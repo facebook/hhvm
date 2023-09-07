@@ -31,7 +31,6 @@ namespace HPHP {
 namespace {
 
 const StaticString
-  s_HSLLocale("HSLLocale"),
   s_FQHSLLocale("HH\\Lib\\_Private\\_Locale\\Locale"),
   s_InvalidLocaleException("HH\\Lib\\Locale\\InvalidLocaleException");
 
@@ -186,7 +185,7 @@ struct LocaleExtension final : Extension {
   void moduleInit() override {
     // Remember to update the HHI :)
 
-    Native::registerNativeDataInfo<HSLLocale>(s_HSLLocale.get());
+    Native::registerNativeDataInfo<HSLLocale>(s_FQHSLLocale.get());
     HHVM_NAMED_ME(HH\\Lib\\_Private\\_Locale\\Locale, __debugInfo, HHVM_MN(HSLLocale, __debugInfo));
 
     HHVM_FALIAS(HH\\Lib\\_Private\\_Locale\\get_c_locale, get_c_locale);

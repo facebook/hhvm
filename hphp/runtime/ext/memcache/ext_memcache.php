@@ -6,7 +6,7 @@ const bool MEMCACHE_HAVE_SESSION = false;
 
 /* Represents a connection to a set of memcache servers.
  */
-<<__NativeData("MemcacheData")>>
+<<__NativeData>>
 class Memcache {
   public function __construct() {}
 

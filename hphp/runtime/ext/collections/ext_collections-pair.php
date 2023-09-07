@@ -8,7 +8,7 @@ namespace {
  *
  * An iterator implementation for iterating over a Pair.
  */
-<<__NativeData("PairIterator")>>
+<<__NativeData>>
 final class PairIterator implements HH\KeyedIterator<int, mixed> {
 
   public function __construct()[]: void {}

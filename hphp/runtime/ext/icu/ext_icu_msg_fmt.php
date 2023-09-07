@@ -25,7 +25,7 @@
  * and select from an array of items. Typically, the message format will come
  * from resources and the arguments will be dynamically set at runtime.
  */
-<<__NativeData("MessageFormatter")>>
+<<__NativeData>>
 class MessageFormatter {
   /**
    * Constructs a new Message Formatter

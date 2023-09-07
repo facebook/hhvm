@@ -1,6 +1,6 @@
 <?hh // partial
 
-<<__NativeData("DOMNode")>>
+<<__NativeData>>
 class DOMNode {
 
   public function __construct(): void {
@@ -859,7 +859,7 @@ class DOMDocumentType extends DOMNode {
   public function __debugInfo(): darray<string, mixed>;
 }
 
-<<__NativeData("DOMElement")>>
+<<__NativeData>>
 class DOMElement extends DOMNode {
 
   <<__Native>>
@@ -1161,7 +1161,7 @@ class DOMProcessingInstruction extends DOMNode {
 class DOMNameSpaceNode extends DOMNode {
 }
 
-<<__NativeData("DOMNodeIterator")>>
+<<__NativeData>>
 class DOMNodeIterator implements Iterator<?DOMNode> {
 
   public function __construct(): void {
@@ -1183,7 +1183,7 @@ class DOMNodeIterator implements Iterator<?DOMNode> {
   public function valid(): bool;
 }
 
-<<__NativeData("DOMIterable")>>
+<<__NativeData>>
 class DOMNamedNodeMap implements IteratorAggregate<?DOMNode> {
 
   public function __construct()[]: void {
@@ -1231,7 +1231,7 @@ class DOMNamedNodeMap implements IteratorAggregate<?DOMNode> {
   public function getIterator()[]: DOMNodeIterator;
 }
 
-<<__NativeData("DOMIterable")>>
+<<__NativeData>>
 class DOMNodeList implements IteratorAggregate<?DOMNode> {
 
   public function __construct()[]: void {
@@ -1329,7 +1329,7 @@ class DOMImplementation {
  * Supports XPath 1.0
  *
  */
-<<__NativeData("DOMXPath")>>
+<<__NativeData>>
 class DOMXPath {
 
   <<__Native>>

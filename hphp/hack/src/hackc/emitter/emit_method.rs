@@ -238,6 +238,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
             emit_native_opcode::emit_body(
                 emitter,
                 &scope,
+                &class.name,
                 &class.user_attributes,
                 &method.name,
                 &method.params,

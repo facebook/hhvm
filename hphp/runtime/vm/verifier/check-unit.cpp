@@ -18,6 +18,7 @@
 #include <algorithm>
 
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
 #include "hphp/runtime/vm/verifier/check.h"
 #include "hphp/runtime/vm/verifier/cfg.h"
@@ -44,6 +45,7 @@ struct UnitChecker {
     const PreClassEmitter* preclass
   );
   bool checkClosure(const PreClassEmitter* closure);
+  bool checkNativeData(const PreClassEmitter* closure);
 
  private:
   template<class... Args>
@@ -113,7 +115,7 @@ bool UnitChecker::checkConstructor(
   return ok;
 }
 
-bool UnitChecker::checkClosure(const PreClassEmitter* cls){
+bool UnitChecker::checkClosure(const PreClassEmitter* cls) {
   bool ok = true;
   if (cls->methods().size() != 1 ||
       !cls->hasMethod(s_invoke.get()) ||
@@ -133,6 +135,21 @@ bool UnitChecker::checkClosure(const PreClassEmitter* cls){
   return ok;
 }
 
+bool UnitChecker::checkNativeData(const PreClassEmitter* cls) {
+  if (!RuntimeOption::EvalVerifySystemLibHasNativeImpl) {
+    return true;
+  }
+
+  auto nativeData = Native::getNativeDataInfo(cls->name());
+  if (!nativeData) {
+    error("Class %s's NativeData is not registered\n",
+          cls->name()->data());
+    return false;
+  }
+
+  return true;
+}
+
 /* Check the following conditions:
    - All constructors/destructors are non-static and not closure bodies
    - Properties/Methods have exactly one access modifier
@@ -142,12 +159,14 @@ bool UnitChecker::checkClosure(const PreClassEmitter* cls){
    - Classish cannot be both final and sealed
 */
 const StaticString s___Sealed("__Sealed");
+const StaticString s___NativeData("__NativeData");
 const StaticString s_Closure("Closure");
 bool UnitChecker::checkPreClasses() {
   bool ok = true;
 
   for (auto const preclass : m_unit->preclasses()) {
     auto classAttrs = preclass->attrs();
+    const auto& userAttrs = preclass->userAttributes();
 
     // Closures don't need constructors
     if (preclass->parentName()->isame(s_Closure.get())) {
@@ -177,8 +196,7 @@ bool UnitChecker::checkPreClasses() {
     }
 
     if (classAttrs & AttrSealed) {
-      const auto sealed_attr =
-        preclass->userAttributes().find(s___Sealed.get())->second;
+      const auto sealed_attr = userAttrs.find(s___Sealed.get())->second;
       IterateV(
         sealed_attr.m_data.parr, [this, preclass, &ok](TypedValue tv) -> bool {
           if (!isStringType(tv.m_type) &&
@@ -194,6 +212,10 @@ bool UnitChecker::checkPreClasses() {
         ok = false;
         error("Class %s is both final and sealed\n", preclass->name()->data());
       }
+    }
+
+    if (userAttrs.find(s___NativeData.get()) != userAttrs.end()) {
+      ok &= checkNativeData(preclass);
     }
 
     for(auto& prop : preclass->propMap().ordered_range()) {

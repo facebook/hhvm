@@ -14949,7 +14949,19 @@ ClsConstLookupResult Index::lookup_class_constant(Context ctx,
       }
 
       // Fully resolved constant with a known value
-      auto const mightThrow = bool(ci->cls->attrs & AttrInternal);
+      auto mightThrow = bool(ci->cls->attrs & AttrInternal);
+      if (!mightThrow) {
+        auto const unit = lookup_class_unit(*ci->cls);
+        auto const moduleName = unit->moduleName;
+        auto const packageInfo = unit->packageInfo;
+        if (auto const activeDeployment = packageInfo.getActiveDeployment()) {
+          if (moduleName && !moduleName->empty() &&
+              !packageInfo.moduleInDeployment(
+                moduleName, *activeDeployment, DeployKind::Hard)) {
+            mightThrow = true;
+          }
+        }
+      }
       return R{ from_cell(*cns.val), TriBool::Yes, mightThrow };
     }();
     ITRACE(4, "-> {}\n", show(r));

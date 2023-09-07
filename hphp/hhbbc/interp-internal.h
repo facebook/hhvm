@@ -464,11 +464,22 @@ bool shouldAttemptToFold(ISS& env, const php::Func* func, const FCallArgs& fca,
     return false;
   }
 
+  auto const funcUnit = env.index.lookup_func_unit(*func);
+
   // Internal functions may raise module boundary violations
   if ((func->attrs & AttrInternal) &&
       env.index.lookup_func_unit(*env.ctx.func)->moduleName !=
-      env.index.lookup_func_unit(*func)->moduleName) {
+      funcUnit->moduleName) {
     return false;
+  }
+
+  // Deployment violation may raise raise warning or throw an exception
+  auto const& packageInfo = funcUnit->packageInfo;
+  if (auto const activeDeployment = packageInfo.getActiveDeployment()) {
+    if (!packageInfo.moduleInDeployment(
+          funcUnit->moduleName, *activeDeployment, DeployKind::Hard)) {
+      return false;
+    }
   }
 
   // We only fold functions when numRets == 1

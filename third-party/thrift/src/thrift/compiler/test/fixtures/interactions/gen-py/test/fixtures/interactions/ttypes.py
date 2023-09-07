@@ -24,6 +24,7 @@ from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from thrift.protocol import TCompactProtocol
 from thrift.protocol import THeaderProtocol
+from thrift.Thrift import expand_thrift_spec as __EXPAND_THRIFT_SPEC
 fastproto = None
 try:
   from thrift.protocol import fastproto
@@ -148,10 +149,9 @@ class CustomException(TException):
     return self
 
 all_structs.append(CustomException)
-CustomException.thrift_spec = (
-  None, # 0
+CustomException.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRING, 'message', True, None, 2, ), # 1
-)
+)))
 
 CustomException.thrift_struct_annotations = {
 }

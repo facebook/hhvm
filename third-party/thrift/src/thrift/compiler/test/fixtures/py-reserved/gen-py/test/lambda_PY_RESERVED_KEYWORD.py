@@ -25,6 +25,7 @@ from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from thrift.protocol import TCompactProtocol
 from thrift.protocol import THeaderProtocol
+from thrift.Thrift import expand_thrift_spec as __EXPAND_THRIFT_SPEC
 fastproto = None
 try:
   from thrift.protocol import fastproto
@@ -161,10 +162,9 @@ class global_args:
   __hash__ = object.__hash__
 
 all_structs.append(global_args)
-global_args.thrift_spec = (
-  None, # 0
+global_args.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I64, 'raise_PY_RESERVED_KEYWORD', None, None, 2, ), # 1
-)
+)))
 
 global_args.thrift_struct_annotations = {
 }
@@ -275,9 +275,9 @@ class global_PY_RESERVED_KEYWORD_result:
   __hash__ = object.__hash__
 
 all_structs.append(global_PY_RESERVED_KEYWORD_result)
-global_PY_RESERVED_KEYWORD_result.thrift_spec = (
+global_PY_RESERVED_KEYWORD_result.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (0, TType.BOOL, 'success', None, None, 2, ), # 0
-)
+)))
 
 global_PY_RESERVED_KEYWORD_result.thrift_struct_annotations = {
 }
@@ -367,8 +367,8 @@ class import_args:
   __hash__ = object.__hash__
 
 all_structs.append(import_args)
-import_args.thrift_spec = (
-)
+import_args.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 import_args.thrift_struct_annotations = {
 }
@@ -469,9 +469,9 @@ class import_PY_RESERVED_KEYWORD_result:
   __hash__ = object.__hash__
 
 all_structs.append(import_PY_RESERVED_KEYWORD_result)
-import_PY_RESERVED_KEYWORD_result.thrift_spec = (
+import_PY_RESERVED_KEYWORD_result.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (0, TType.STRUCT, 'success', [def_PY_RESERVED_KEYWORD, def_PY_RESERVED_KEYWORD.thrift_spec, False], None, 2, ), # 0
-)
+)))
 
 import_PY_RESERVED_KEYWORD_result.thrift_struct_annotations = {
 }

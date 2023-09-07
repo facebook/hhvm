@@ -20,6 +20,7 @@ from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from thrift.protocol import TCompactProtocol
 from thrift.protocol import THeaderProtocol
+from thrift.Thrift import expand_thrift_spec as __EXPAND_THRIFT_SPEC
 fastproto = None
 try:
   from thrift.protocol import fastproto
@@ -289,11 +290,10 @@ class NegativeId:
     return self
 
 all_structs.append(Foo)
-Foo.thrift_spec = (
-  None, # 0
+Foo.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.MAP, 'mymap', (TType.STRING,True,TType.STRING,True), None, 2, ), # 1
   (2, TType.SET, 'myset', (TType.STRING,True), None, 2, ), # 2
-)
+)))
 
 Foo.thrift_struct_annotations = {
 }
@@ -315,12 +315,11 @@ Foo.__getstate__ = lambda self: self.__dict__.copy()
 Foo.__setstate__ = Foo__setstate__
 
 all_structs.append(NegativeId)
-NegativeId.thrift_spec = (
+NegativeId.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (-2, TType.I32, 'field2', None, 2, 2, ), # -2
   (-1, TType.I32, 'field1', None, 1, 2, ), # -1
-  None, # 0
   (1, TType.I32, 'field3', None, 3, 2, ), # 1
-)
+)))
 
 NegativeId.thrift_struct_annotations = {
 }

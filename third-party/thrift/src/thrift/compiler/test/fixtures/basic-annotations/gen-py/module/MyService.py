@@ -25,6 +25,7 @@ from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from thrift.protocol import TCompactProtocol
 from thrift.protocol import THeaderProtocol
+from thrift.Thrift import expand_thrift_spec as __EXPAND_THRIFT_SPEC
 fastproto = None
 try:
   from thrift.protocol import fastproto
@@ -198,8 +199,8 @@ class ping_args:
   __hash__ = object.__hash__
 
 all_structs.append(ping_args)
-ping_args.thrift_spec = (
-)
+ping_args.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 ping_args.thrift_struct_annotations = {
 }
@@ -300,10 +301,9 @@ class ping_result:
   __hash__ = object.__hash__
 
 all_structs.append(ping_result)
-ping_result.thrift_spec = (
-  None, # 0
+ping_result.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRUCT, 'myExcept', [MyException, MyException.thrift_spec, False], None, 2, ), # 1
-)
+)))
 
 ping_result.thrift_struct_annotations = {
 }
@@ -393,8 +393,8 @@ class getRandomData_args:
   __hash__ = object.__hash__
 
 all_structs.append(getRandomData_args)
-getRandomData_args.thrift_spec = (
-)
+getRandomData_args.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 getRandomData_args.thrift_struct_annotations = {
 }
@@ -493,9 +493,9 @@ class getRandomData_result:
   __hash__ = object.__hash__
 
 all_structs.append(getRandomData_result)
-getRandomData_result.thrift_spec = (
+getRandomData_result.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (0, TType.STRING, 'success', True, None, 2, ), # 0
-)
+)))
 
 getRandomData_result.thrift_struct_annotations = {
 }
@@ -606,10 +606,9 @@ class hasDataById_args:
   __hash__ = object.__hash__
 
 all_structs.append(hasDataById_args)
-hasDataById_args.thrift_spec = (
-  None, # 0
+hasDataById_args.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I64, 'id', None, None, 2, ), # 1
-)
+)))
 
 hasDataById_args.thrift_struct_annotations = {
 }
@@ -720,9 +719,9 @@ class hasDataById_result:
   __hash__ = object.__hash__
 
 all_structs.append(hasDataById_result)
-hasDataById_result.thrift_spec = (
+hasDataById_result.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (0, TType.BOOL, 'success', None, None, 2, ), # 0
-)
+)))
 
 hasDataById_result.thrift_struct_annotations = {
 }
@@ -833,10 +832,9 @@ class getDataById_args:
   __hash__ = object.__hash__
 
 all_structs.append(getDataById_args)
-getDataById_args.thrift_spec = (
-  None, # 0
+getDataById_args.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I64, 'id', None, None, 2, ), # 1
-)
+)))
 
 getDataById_args.thrift_struct_annotations = {
 }
@@ -947,9 +945,9 @@ class getDataById_result:
   __hash__ = object.__hash__
 
 all_structs.append(getDataById_result)
-getDataById_result.thrift_spec = (
+getDataById_result.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (0, TType.STRING, 'success', True, None, 2, ), # 0
-)
+)))
 
 getDataById_result.thrift_struct_annotations = {
 }
@@ -1077,11 +1075,10 @@ class putDataById_args:
   __hash__ = object.__hash__
 
 all_structs.append(putDataById_args)
-putDataById_args.thrift_spec = (
-  None, # 0
+putDataById_args.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I64, 'id', None, None, 2, ), # 1
   (2, TType.STRING, 'data', True, None, 2, ), # 2
-)
+)))
 
 putDataById_args.thrift_struct_annotations = {
 }
@@ -1173,8 +1170,8 @@ class putDataById_result:
   __hash__ = object.__hash__
 
 all_structs.append(putDataById_result)
-putDataById_result.thrift_spec = (
-)
+putDataById_result.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 putDataById_result.thrift_struct_annotations = {
 }
@@ -1290,11 +1287,10 @@ class lobDataById_args:
   __hash__ = object.__hash__
 
 all_structs.append(lobDataById_args)
-lobDataById_args.thrift_spec = (
-  None, # 0
+lobDataById_args.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I64, 'id', None, None, 2, ), # 1
   (2, TType.STRING, 'data', True, None, 2, ), # 2
-)
+)))
 
 lobDataById_args.thrift_struct_annotations = {
 }
@@ -1389,8 +1385,8 @@ class doNothing_args:
   __hash__ = object.__hash__
 
 all_structs.append(doNothing_args)
-doNothing_args.thrift_spec = (
-)
+doNothing_args.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 doNothing_args.thrift_struct_annotations = {
 }
@@ -1468,8 +1464,8 @@ class doNothing_result:
   __hash__ = object.__hash__
 
 all_structs.append(doNothing_result)
-doNothing_result.thrift_spec = (
-)
+doNothing_result.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 doNothing_result.thrift_struct_annotations = {
 }

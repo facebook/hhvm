@@ -24,6 +24,7 @@ from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from thrift.protocol import TCompactProtocol
 from thrift.protocol import THeaderProtocol
+from thrift.Thrift import expand_thrift_spec as __EXPAND_THRIFT_SPEC
 fastproto = None
 try:
   from thrift.protocol import fastproto
@@ -1553,8 +1554,8 @@ class Definition:
     return self
 
 all_structs.append(Transitive)
-Transitive.thrift_spec = (
-)
+Transitive.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 Transitive.thrift_struct_annotations = {
 }
@@ -1562,8 +1563,8 @@ Transitive.thrift_field_annotations = {
 }
 
 all_structs.append(Program)
-Program.thrift_spec = (
-)
+Program.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 Program.thrift_struct_annotations = {
 }
@@ -1571,8 +1572,8 @@ Program.thrift_field_annotations = {
 }
 
 all_structs.append(Struct)
-Struct.thrift_spec = (
-)
+Struct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 Struct.thrift_struct_annotations = {
 }
@@ -1580,8 +1581,8 @@ Struct.thrift_field_annotations = {
 }
 
 all_structs.append(Union)
-Union.thrift_spec = (
-)
+Union.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 Union.thrift_struct_annotations = {
 }
@@ -1589,8 +1590,8 @@ Union.thrift_field_annotations = {
 }
 
 all_structs.append(Exception)
-Exception.thrift_spec = (
-)
+Exception.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 Exception.thrift_struct_annotations = {
 }
@@ -1598,8 +1599,8 @@ Exception.thrift_field_annotations = {
 }
 
 all_structs.append(Field)
-Field.thrift_spec = (
-)
+Field.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 Field.thrift_struct_annotations = {
 }
@@ -1607,8 +1608,8 @@ Field.thrift_field_annotations = {
 }
 
 all_structs.append(Typedef)
-Typedef.thrift_spec = (
-)
+Typedef.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 Typedef.thrift_struct_annotations = {
 }
@@ -1616,8 +1617,8 @@ Typedef.thrift_field_annotations = {
 }
 
 all_structs.append(Service)
-Service.thrift_spec = (
-)
+Service.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 Service.thrift_struct_annotations = {
 }
@@ -1625,8 +1626,8 @@ Service.thrift_field_annotations = {
 }
 
 all_structs.append(Interaction)
-Interaction.thrift_spec = (
-)
+Interaction.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 Interaction.thrift_struct_annotations = {
 }
@@ -1634,8 +1635,8 @@ Interaction.thrift_field_annotations = {
 }
 
 all_structs.append(Function)
-Function.thrift_spec = (
-)
+Function.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 Function.thrift_struct_annotations = {
   "hack.name": "TFunction",
@@ -1645,8 +1646,8 @@ Function.thrift_field_annotations = {
 }
 
 all_structs.append(EnumValue)
-EnumValue.thrift_spec = (
-)
+EnumValue.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 EnumValue.thrift_struct_annotations = {
 }
@@ -1654,8 +1655,8 @@ EnumValue.thrift_field_annotations = {
 }
 
 all_structs.append(Const)
-Const.thrift_spec = (
-)
+Const.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 Const.thrift_struct_annotations = {
   "hack.name": "TConst",
@@ -1664,8 +1665,8 @@ Const.thrift_field_annotations = {
 }
 
 all_structs.append(Enum)
-Enum.thrift_spec = (
-)
+Enum.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 Enum.thrift_struct_annotations = {
   "py3.hidden": "1",
@@ -1675,8 +1676,8 @@ Enum.thrift_field_annotations = {
 }
 
 all_structs.append(Structured)
-Structured.thrift_spec = (
-)
+Structured.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 Structured.thrift_struct_annotations = {
 }
@@ -1684,8 +1685,8 @@ Structured.thrift_field_annotations = {
 }
 
 all_structs.append(Interface)
-Interface.thrift_spec = (
-)
+Interface.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 Interface.thrift_struct_annotations = {
   "hack.name": "TInterface",
@@ -1694,8 +1695,8 @@ Interface.thrift_field_annotations = {
 }
 
 all_structs.append(RootDefinition)
-RootDefinition.thrift_spec = (
-)
+RootDefinition.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 RootDefinition.thrift_struct_annotations = {
 }
@@ -1703,8 +1704,8 @@ RootDefinition.thrift_field_annotations = {
 }
 
 all_structs.append(Definition)
-Definition.thrift_spec = (
-)
+Definition.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 Definition.thrift_struct_annotations = {
 }

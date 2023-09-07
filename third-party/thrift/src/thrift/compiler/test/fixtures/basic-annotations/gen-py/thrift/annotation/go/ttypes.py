@@ -24,6 +24,7 @@ from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from thrift.protocol import TCompactProtocol
 from thrift.protocol import THeaderProtocol
+from thrift.Thrift import expand_thrift_spec as __EXPAND_THRIFT_SPEC
 fastproto = None
 try:
   from thrift.protocol import fastproto
@@ -332,10 +333,9 @@ class NewType:
     return self
 
 all_structs.append(Name)
-Name.thrift_spec = (
-  None, # 0
+Name.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRING, 'name', True, None, 2, ), # 1
-)
+)))
 
 Name.thrift_struct_annotations = {
 }
@@ -355,10 +355,9 @@ Name.__getstate__ = lambda self: self.__dict__.copy()
 Name.__setstate__ = Name__setstate__
 
 all_structs.append(Tag)
-Tag.thrift_spec = (
-  None, # 0
+Tag.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRING, 'tag', True, None, 2, ), # 1
-)
+)))
 
 Tag.thrift_struct_annotations = {
 }
@@ -378,8 +377,8 @@ Tag.__getstate__ = lambda self: self.__dict__.copy()
 Tag.__setstate__ = Tag__setstate__
 
 all_structs.append(NewType)
-NewType.thrift_spec = (
-)
+NewType.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 NewType.thrift_struct_annotations = {
 }

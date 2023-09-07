@@ -22,6 +22,7 @@ from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from thrift.protocol import TCompactProtocol
 from thrift.protocol import THeaderProtocol
+from thrift.Thrift import expand_thrift_spec as __EXPAND_THRIFT_SPEC
 fastproto = None
 try:
   from thrift.protocol import fastproto
@@ -142,13 +143,12 @@ class Included:
 IncludedInt64 = UnimplementedTypedef()
 TransitiveFoo = transitive.ttypes.Foo
 all_structs.append(Included)
-Included.thrift_spec = (
-  None, # 0
+Included.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I64, 'MyIntField', None, 0, 2, ), # 1
   (2, TType.STRUCT, 'MyTransitiveField', [transitive.ttypes.Foo, transitive.ttypes.Foo.thrift_spec, False], transitive.ttypes.Foo(**{
     "a" : 2,
   }), 2, ), # 2
-)
+)))
 
 Included.thrift_struct_annotations = {
 }

@@ -24,6 +24,7 @@ from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from thrift.protocol import TCompactProtocol
 from thrift.protocol import THeaderProtocol
+from thrift.Thrift import expand_thrift_spec as __EXPAND_THRIFT_SPEC
 fastproto = None
 try:
   from thrift.protocol import fastproto
@@ -798,10 +799,9 @@ class SinkException2(TException):
     return self
 
 all_structs.append(InitialResponse)
-InitialResponse.thrift_spec = (
-  None, # 0
+InitialResponse.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRING, 'content', True, None, 2, ), # 1
-)
+)))
 
 InitialResponse.thrift_struct_annotations = {
 }
@@ -821,10 +821,9 @@ InitialResponse.__getstate__ = lambda self: self.__dict__.copy()
 InitialResponse.__setstate__ = InitialResponse__setstate__
 
 all_structs.append(FinalResponse)
-FinalResponse.thrift_spec = (
-  None, # 0
+FinalResponse.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRING, 'content', True, None, 2, ), # 1
-)
+)))
 
 FinalResponse.thrift_struct_annotations = {
 }
@@ -844,10 +843,9 @@ FinalResponse.__getstate__ = lambda self: self.__dict__.copy()
 FinalResponse.__setstate__ = FinalResponse__setstate__
 
 all_structs.append(SinkPayload)
-SinkPayload.thrift_spec = (
-  None, # 0
+SinkPayload.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRING, 'content', True, None, 2, ), # 1
-)
+)))
 
 SinkPayload.thrift_struct_annotations = {
 }
@@ -867,10 +865,9 @@ SinkPayload.__getstate__ = lambda self: self.__dict__.copy()
 SinkPayload.__setstate__ = SinkPayload__setstate__
 
 all_structs.append(CompatibleWithKeywordSink)
-CompatibleWithKeywordSink.thrift_spec = (
-  None, # 0
+CompatibleWithKeywordSink.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRING, 'sink', True, None, 2, ), # 1
-)
+)))
 
 CompatibleWithKeywordSink.thrift_struct_annotations = {
 }
@@ -890,10 +887,9 @@ CompatibleWithKeywordSink.__getstate__ = lambda self: self.__dict__.copy()
 CompatibleWithKeywordSink.__setstate__ = CompatibleWithKeywordSink__setstate__
 
 all_structs.append(InitialException)
-InitialException.thrift_spec = (
-  None, # 0
+InitialException.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRING, 'reason', True, None, 2, ), # 1
-)
+)))
 
 InitialException.thrift_struct_annotations = {
 }
@@ -913,10 +909,9 @@ InitialException.__getstate__ = lambda self: self.__dict__.copy()
 InitialException.__setstate__ = InitialException__setstate__
 
 all_structs.append(SinkException1)
-SinkException1.thrift_spec = (
-  None, # 0
+SinkException1.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRING, 'reason', True, None, 2, ), # 1
-)
+)))
 
 SinkException1.thrift_struct_annotations = {
 }
@@ -936,10 +931,9 @@ SinkException1.__getstate__ = lambda self: self.__dict__.copy()
 SinkException1.__setstate__ = SinkException1__setstate__
 
 all_structs.append(SinkException2)
-SinkException2.thrift_spec = (
-  None, # 0
+SinkException2.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I64, 'reason', None, None, 2, ), # 1
-)
+)))
 
 SinkException2.thrift_struct_annotations = {
 }

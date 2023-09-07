@@ -22,6 +22,7 @@ from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from thrift.protocol import TCompactProtocol
 from thrift.protocol import THeaderProtocol
+from thrift.Thrift import expand_thrift_spec as __EXPAND_THRIFT_SPEC
 fastproto = None
 try:
   from thrift.protocol import fastproto
@@ -3994,8 +3995,8 @@ TBinary = UnimplementedTypedef()
 IntTypedef = UnimplementedTypedef()
 UintTypedef = IntTypedef
 all_structs.append(empty_struct)
-empty_struct.thrift_spec = (
-)
+empty_struct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 empty_struct.thrift_struct_annotations = {
 }
@@ -4003,10 +4004,9 @@ empty_struct.thrift_field_annotations = {
 }
 
 all_structs.append(decorated_struct)
-decorated_struct.thrift_spec = (
-  None, # 0
+decorated_struct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRING, 'field', True, None, 2, ), # 1
-)
+)))
 
 decorated_struct.thrift_struct_annotations = {
   "cpp.declare_equal_to": "1",
@@ -4028,9 +4028,7 @@ decorated_struct.__getstate__ = lambda self: self.__dict__.copy()
 decorated_struct.__setstate__ = decorated_struct__setstate__
 
 all_structs.append(ContainerStruct)
-ContainerStruct.thrift_spec = (
-  None, # 0
-  None, # 1
+ContainerStruct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (2, TType.LIST, 'fieldB', (TType.I32,None), None, 2, ), # 2
   (3, TType.LIST, 'fieldC', (TType.I32,None), None, 2, ), # 3
   (4, TType.LIST, 'fieldD', (TType.I32,None), None, 2, ), # 4
@@ -4038,11 +4036,8 @@ ContainerStruct.thrift_spec = (
   (6, TType.SET, 'fieldF', (TType.I32,None), None, 2, ), # 6
   (7, TType.MAP, 'fieldG', (TType.I32,None,TType.STRING,True), None, 2, ), # 7
   (8, TType.MAP, 'fieldH', (TType.I32,None,TType.STRING,True), None, 2, ), # 8
-  None, # 9
-  None, # 10
-  None, # 11
   (12, TType.LIST, 'fieldA', (TType.I32,None), None, 2, ), # 12
-)
+)))
 
 ContainerStruct.thrift_struct_annotations = {
 }
@@ -4076,10 +4071,9 @@ ContainerStruct.__getstate__ = lambda self: self.__dict__.copy()
 ContainerStruct.__setstate__ = ContainerStruct__setstate__
 
 all_structs.append(CppTypeStruct)
-CppTypeStruct.thrift_spec = (
-  None, # 0
+CppTypeStruct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.LIST, 'fieldA', (TType.I32,None), None, 2, ), # 1
-)
+)))
 
 CppTypeStruct.thrift_struct_annotations = {
 }
@@ -4099,10 +4093,9 @@ CppTypeStruct.__getstate__ = lambda self: self.__dict__.copy()
 CppTypeStruct.__setstate__ = CppTypeStruct__setstate__
 
 all_structs.append(VirtualStruct)
-VirtualStruct.thrift_spec = (
-  None, # 0
+VirtualStruct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I64, 'MyIntField', None, None, 2, ), # 1
-)
+)))
 
 VirtualStruct.thrift_struct_annotations = {
   "cpp.virtual": "1",
@@ -4123,11 +4116,10 @@ VirtualStruct.__getstate__ = lambda self: self.__dict__.copy()
 VirtualStruct.__setstate__ = VirtualStruct__setstate__
 
 all_structs.append(MyStructWithForwardRefEnum)
-MyStructWithForwardRefEnum.thrift_spec = (
-  None, # 0
+MyStructWithForwardRefEnum.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I32, 'a', MyForwardRefEnum,   12, 2, ), # 1
   (2, TType.I32, 'b', MyForwardRefEnum,   12, 2, ), # 2
-)
+)))
 
 MyStructWithForwardRefEnum.thrift_struct_annotations = {
 }
@@ -4153,11 +4145,10 @@ MyStructWithForwardRefEnum.__getstate__ = lambda self: self.__dict__.copy()
 MyStructWithForwardRefEnum.__setstate__ = MyStructWithForwardRefEnum__setstate__
 
 all_structs.append(TrivialNumeric)
-TrivialNumeric.thrift_spec = (
-  None, # 0
+TrivialNumeric.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I32, 'a', None, None, 2, ), # 1
   (2, TType.BOOL, 'b', None, None, 2, ), # 2
-)
+)))
 
 TrivialNumeric.thrift_struct_annotations = {
 }
@@ -4179,14 +4170,13 @@ TrivialNumeric.__getstate__ = lambda self: self.__dict__.copy()
 TrivialNumeric.__setstate__ = TrivialNumeric__setstate__
 
 all_structs.append(TrivialNestedWithDefault)
-TrivialNestedWithDefault.thrift_spec = (
-  None, # 0
+TrivialNestedWithDefault.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I32, 'z', None, 4, 2, ), # 1
   (2, TType.STRUCT, 'n', [TrivialNumeric, TrivialNumeric.thrift_spec, False], TrivialNumeric(**{
     "a" : 3,
     "b" : True,
   }), 2, ), # 2
-)
+)))
 
 TrivialNestedWithDefault.thrift_struct_annotations = {
 }
@@ -4216,11 +4206,10 @@ TrivialNestedWithDefault.__getstate__ = lambda self: self.__dict__.copy()
 TrivialNestedWithDefault.__setstate__ = TrivialNestedWithDefault__setstate__
 
 all_structs.append(ComplexString)
-ComplexString.thrift_spec = (
-  None, # 0
+ComplexString.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRING, 'a', True, None, 2, ), # 1
   (2, TType.MAP, 'b', (TType.STRING,True,TType.I32,None), None, 2, ), # 2
-)
+)))
 
 ComplexString.thrift_struct_annotations = {
 }
@@ -4242,8 +4231,7 @@ ComplexString.__getstate__ = lambda self: self.__dict__.copy()
 ComplexString.__setstate__ = ComplexString__setstate__
 
 all_structs.append(ComplexNestedWithDefault)
-ComplexNestedWithDefault.thrift_spec = (
-  None, # 0
+ComplexNestedWithDefault.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRING, 'z', True, "4", 2, ), # 1
   (2, TType.STRUCT, 'n', [ComplexString, ComplexString.thrift_spec, False], ComplexString(**{
     "a" : "3",
@@ -4251,7 +4239,7 @@ ComplexNestedWithDefault.thrift_spec = (
       "a" : 3,
     },
   }), 2, ), # 2
-)
+)))
 
 ComplexNestedWithDefault.thrift_struct_annotations = {
 }
@@ -4285,14 +4273,13 @@ ComplexNestedWithDefault.__getstate__ = lambda self: self.__dict__.copy()
 ComplexNestedWithDefault.__setstate__ = ComplexNestedWithDefault__setstate__
 
 all_structs.append(MinPadding)
-MinPadding.thrift_spec = (
-  None, # 0
+MinPadding.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.BYTE, 'small', None, None, 0, ), # 1
   (2, TType.I64, 'big', None, None, 0, ), # 2
   (3, TType.I16, 'medium', None, None, 0, ), # 3
   (4, TType.I32, 'biggish', None, None, 0, ), # 4
   (5, TType.BYTE, 'tiny', None, None, 0, ), # 5
-)
+)))
 
 MinPadding.thrift_struct_annotations = {
 }
@@ -4320,14 +4307,13 @@ MinPadding.__getstate__ = lambda self: self.__dict__.copy()
 MinPadding.__setstate__ = MinPadding__setstate__
 
 all_structs.append(MinPaddingWithCustomType)
-MinPaddingWithCustomType.thrift_spec = (
-  None, # 0
+MinPaddingWithCustomType.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.BYTE, 'small', None, None, 3, ), # 1
   (2, TType.I64, 'big', None, None, 3, ), # 2
   (3, TType.I16, 'medium', None, None, 3, ), # 3
   (4, TType.I32, 'biggish', None, None, 3, ), # 4
   (5, TType.BYTE, 'tiny', None, None, 3, ), # 5
-)
+)))
 
 MinPaddingWithCustomType.thrift_struct_annotations = {
 }
@@ -4355,13 +4341,12 @@ MinPaddingWithCustomType.__getstate__ = lambda self: self.__dict__.copy()
 MinPaddingWithCustomType.__setstate__ = MinPaddingWithCustomType__setstate__
 
 all_structs.append(MyStruct)
-MyStruct.thrift_spec = (
-  None, # 0
+MyStruct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I64, 'MyIntField', None, None, 2, ), # 1
   (2, TType.STRING, 'MyStringField', True, None, 2, ), # 2
   (3, TType.I64, 'majorVer', None, None, 2, ), # 3
   (4, TType.STRUCT, 'data', [MyDataItem, MyDataItem.thrift_spec, False], None, 2, ), # 4
-)
+)))
 
 MyStruct.thrift_struct_annotations = {
   "cpp.noncomparable": "1",
@@ -4388,8 +4373,8 @@ MyStruct.__getstate__ = lambda self: self.__dict__.copy()
 MyStruct.__setstate__ = MyStruct__setstate__
 
 all_structs.append(MyDataItem)
-MyDataItem.thrift_spec = (
-)
+MyDataItem.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 MyDataItem.thrift_struct_annotations = {
   "cpp.noncomparable": "1",
@@ -4398,10 +4383,9 @@ MyDataItem.thrift_field_annotations = {
 }
 
 all_structs.append(Renaming)
-Renaming.thrift_spec = (
-  None, # 0
+Renaming.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I64, 'foo', None, None, 2, ), # 1
-)
+)))
 
 Renaming.thrift_struct_annotations = {
   "cpp.name": "Renamed",
@@ -4425,11 +4409,10 @@ Renaming.__getstate__ = lambda self: self.__dict__.copy()
 Renaming.__setstate__ = Renaming__setstate__
 
 all_structs.append(AnnotatedTypes)
-AnnotatedTypes.thrift_spec = (
-  None, # 0
+AnnotatedTypes.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRING, 'binary_field', False, None, 2, ), # 1
   (2, TType.LIST, 'list_field', (TType.MAP,(TType.I32,None,TType.STRING,True)), None, 2, ), # 2
-)
+)))
 
 AnnotatedTypes.thrift_struct_annotations = {
 }
@@ -4451,11 +4434,10 @@ AnnotatedTypes.__getstate__ = lambda self: self.__dict__.copy()
 AnnotatedTypes.__setstate__ = AnnotatedTypes__setstate__
 
 all_structs.append(ForwardUsageRoot)
-ForwardUsageRoot.thrift_spec = (
-  None, # 0
+ForwardUsageRoot.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRUCT, 'ForwardUsageStruct', [ForwardUsageStruct, ForwardUsageStruct.thrift_spec, False], None, 1, ), # 1
   (2, TType.STRUCT, 'ForwardUsageByRef', [ForwardUsageByRef, ForwardUsageByRef.thrift_spec, False], None, 1, ), # 2
-)
+)))
 
 ForwardUsageRoot.thrift_struct_annotations = {
 }
@@ -4477,10 +4459,9 @@ ForwardUsageRoot.__getstate__ = lambda self: self.__dict__.copy()
 ForwardUsageRoot.__setstate__ = ForwardUsageRoot__setstate__
 
 all_structs.append(ForwardUsageStruct)
-ForwardUsageStruct.thrift_spec = (
-  None, # 0
+ForwardUsageStruct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRUCT, 'foo', [ForwardUsageRoot, ForwardUsageRoot.thrift_spec, False], None, 1, ), # 1
-)
+)))
 
 ForwardUsageStruct.thrift_struct_annotations = {
 }
@@ -4500,10 +4481,9 @@ ForwardUsageStruct.__getstate__ = lambda self: self.__dict__.copy()
 ForwardUsageStruct.__setstate__ = ForwardUsageStruct__setstate__
 
 all_structs.append(ForwardUsageByRef)
-ForwardUsageByRef.thrift_spec = (
-  None, # 0
+ForwardUsageByRef.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRUCT, 'foo', [ForwardUsageRoot, ForwardUsageRoot.thrift_spec, False], None, 1, ), # 1
-)
+)))
 
 ForwardUsageByRef.thrift_struct_annotations = {
 }
@@ -4523,10 +4503,9 @@ ForwardUsageByRef.__getstate__ = lambda self: self.__dict__.copy()
 ForwardUsageByRef.__setstate__ = ForwardUsageByRef__setstate__
 
 all_structs.append(IncompleteMap)
-IncompleteMap.thrift_spec = (
-  None, # 0
+IncompleteMap.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.MAP, 'field', (TType.I32,None,TType.STRUCT,[IncompleteMapDep, IncompleteMapDep.thrift_spec, False]), None, 1, ), # 1
-)
+)))
 
 IncompleteMap.thrift_struct_annotations = {
 }
@@ -4546,8 +4525,8 @@ IncompleteMap.__getstate__ = lambda self: self.__dict__.copy()
 IncompleteMap.__setstate__ = IncompleteMap__setstate__
 
 all_structs.append(IncompleteMapDep)
-IncompleteMapDep.thrift_spec = (
-)
+IncompleteMapDep.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 IncompleteMapDep.thrift_struct_annotations = {
 }
@@ -4555,10 +4534,9 @@ IncompleteMapDep.thrift_field_annotations = {
 }
 
 all_structs.append(CompleteMap)
-CompleteMap.thrift_spec = (
-  None, # 0
+CompleteMap.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.MAP, 'field', (TType.I32,None,TType.STRUCT,[CompleteMapDep, CompleteMapDep.thrift_spec, False]), None, 1, ), # 1
-)
+)))
 
 CompleteMap.thrift_struct_annotations = {
 }
@@ -4578,8 +4556,8 @@ CompleteMap.__getstate__ = lambda self: self.__dict__.copy()
 CompleteMap.__setstate__ = CompleteMap__setstate__
 
 all_structs.append(CompleteMapDep)
-CompleteMapDep.thrift_spec = (
-)
+CompleteMapDep.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 CompleteMapDep.thrift_struct_annotations = {
 }
@@ -4587,10 +4565,9 @@ CompleteMapDep.thrift_field_annotations = {
 }
 
 all_structs.append(IncompleteList)
-IncompleteList.thrift_spec = (
-  None, # 0
+IncompleteList.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.LIST, 'field', (TType.STRUCT,[IncompleteListDep, IncompleteListDep.thrift_spec, False]), None, 1, ), # 1
-)
+)))
 
 IncompleteList.thrift_struct_annotations = {
 }
@@ -4610,8 +4587,8 @@ IncompleteList.__getstate__ = lambda self: self.__dict__.copy()
 IncompleteList.__setstate__ = IncompleteList__setstate__
 
 all_structs.append(IncompleteListDep)
-IncompleteListDep.thrift_spec = (
-)
+IncompleteListDep.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 IncompleteListDep.thrift_struct_annotations = {
 }
@@ -4619,10 +4596,9 @@ IncompleteListDep.thrift_field_annotations = {
 }
 
 all_structs.append(CompleteList)
-CompleteList.thrift_spec = (
-  None, # 0
+CompleteList.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.LIST, 'field', (TType.STRUCT,[CompleteListDep, CompleteListDep.thrift_spec, False]), None, 1, ), # 1
-)
+)))
 
 CompleteList.thrift_struct_annotations = {
 }
@@ -4642,8 +4618,8 @@ CompleteList.__getstate__ = lambda self: self.__dict__.copy()
 CompleteList.__setstate__ = CompleteList__setstate__
 
 all_structs.append(CompleteListDep)
-CompleteListDep.thrift_spec = (
-)
+CompleteListDep.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 CompleteListDep.thrift_struct_annotations = {
 }
@@ -4651,10 +4627,9 @@ CompleteListDep.thrift_field_annotations = {
 }
 
 all_structs.append(AdaptedList)
-AdaptedList.thrift_spec = (
-  None, # 0
+AdaptedList.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.LIST, 'field', (TType.STRUCT,[AdaptedListDep, AdaptedListDep.thrift_spec, False]), None, 1, ), # 1
-)
+)))
 
 AdaptedList.thrift_struct_annotations = {
 }
@@ -4674,10 +4649,9 @@ AdaptedList.__getstate__ = lambda self: self.__dict__.copy()
 AdaptedList.__setstate__ = AdaptedList__setstate__
 
 all_structs.append(AdaptedListDep)
-AdaptedListDep.thrift_spec = (
-  None, # 0
+AdaptedListDep.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRUCT, 'field', [AdaptedList, AdaptedList.thrift_spec, False], None, 2, ), # 1
-)
+)))
 
 AdaptedListDep.thrift_struct_annotations = {
 }
@@ -4697,10 +4671,9 @@ AdaptedListDep.__getstate__ = lambda self: self.__dict__.copy()
 AdaptedListDep.__setstate__ = AdaptedListDep__setstate__
 
 all_structs.append(DependentAdaptedList)
-DependentAdaptedList.thrift_spec = (
-  None, # 0
+DependentAdaptedList.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.LIST, 'field', (TType.STRUCT,[DependentAdaptedListDep, DependentAdaptedListDep.thrift_spec, False]), None, 1, ), # 1
-)
+)))
 
 DependentAdaptedList.thrift_struct_annotations = {
 }
@@ -4720,10 +4693,9 @@ DependentAdaptedList.__getstate__ = lambda self: self.__dict__.copy()
 DependentAdaptedList.__setstate__ = DependentAdaptedList__setstate__
 
 all_structs.append(DependentAdaptedListDep)
-DependentAdaptedListDep.thrift_spec = (
-  None, # 0
+DependentAdaptedListDep.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I16, 'field', None, None, 1, ), # 1
-)
+)))
 
 DependentAdaptedListDep.thrift_struct_annotations = {
 }
@@ -4743,8 +4715,7 @@ DependentAdaptedListDep.__getstate__ = lambda self: self.__dict__.copy()
 DependentAdaptedListDep.__setstate__ = DependentAdaptedListDep__setstate__
 
 all_structs.append(AllocatorAware)
-AllocatorAware.thrift_spec = (
-  None, # 0
+AllocatorAware.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.LIST, 'aa_list', (TType.I32,None), None, 2, ), # 1
   (2, TType.SET, 'aa_set', (TType.I32,None), None, 2, ), # 2
   (3, TType.MAP, 'aa_map', (TType.I32,None,TType.I32,None), None, 2, ), # 3
@@ -4752,7 +4723,7 @@ AllocatorAware.thrift_spec = (
   (5, TType.I32, 'not_a_container', None, None, 2, ), # 5
   (6, TType.I32, 'aa_unique', None, None, 2, ), # 6
   (7, TType.I32, 'aa_shared', None, None, 2, ), # 7
-)
+)))
 
 AllocatorAware.thrift_struct_annotations = {
   "cpp.allocator": "some_allocator",
@@ -4785,11 +4756,10 @@ AllocatorAware.__getstate__ = lambda self: self.__dict__.copy()
 AllocatorAware.__setstate__ = AllocatorAware__setstate__
 
 all_structs.append(AllocatorAware2)
-AllocatorAware2.thrift_spec = (
-  None, # 0
+AllocatorAware2.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I32, 'not_a_container', None, None, 2, ), # 1
   (2, TType.I32, 'box_field', None, None, 1, ), # 2
-)
+)))
 
 AllocatorAware2.thrift_struct_annotations = {
   "cpp.allocator": "some_allocator",
@@ -4812,12 +4782,11 @@ AllocatorAware2.__getstate__ = lambda self: self.__dict__.copy()
 AllocatorAware2.__setstate__ = AllocatorAware2__setstate__
 
 all_structs.append(TypedefStruct)
-TypedefStruct.thrift_spec = (
-  None, # 0
+TypedefStruct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I32, 'i32_field', None, None, 2, ), # 1
   (2, TType.I32, 'IntTypedef_field', None, None, 2, ), # 2
   (3, TType.I32, 'UintTypedef_field', None, None, 2, ), # 3
-)
+)))
 
 TypedefStruct.thrift_struct_annotations = {
 }
@@ -4841,10 +4810,9 @@ TypedefStruct.__getstate__ = lambda self: self.__dict__.copy()
 TypedefStruct.__setstate__ = TypedefStruct__setstate__
 
 all_structs.append(StructWithDoubleUnderscores)
-StructWithDoubleUnderscores.thrift_spec = (
-  None, # 0
+StructWithDoubleUnderscores.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I32, '__field', None, None, 2, ), # 1
-)
+)))
 
 StructWithDoubleUnderscores.thrift_struct_annotations = {
 }

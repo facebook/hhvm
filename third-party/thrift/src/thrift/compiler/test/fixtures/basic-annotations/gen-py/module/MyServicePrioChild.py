@@ -26,6 +26,7 @@ from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from thrift.protocol import TCompactProtocol
 from thrift.protocol import THeaderProtocol
+from thrift.Thrift import expand_thrift_spec as __EXPAND_THRIFT_SPEC
 fastproto = None
 try:
   from thrift.protocol import fastproto
@@ -127,8 +128,8 @@ class pang_args:
   __hash__ = object.__hash__
 
 all_structs.append(pang_args)
-pang_args.thrift_spec = (
-)
+pang_args.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 pang_args.thrift_struct_annotations = {
 }
@@ -206,8 +207,8 @@ class pang_result:
   __hash__ = object.__hash__
 
 all_structs.append(pang_result)
-pang_result.thrift_spec = (
-)
+pang_result.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 pang_result.thrift_struct_annotations = {
 }

@@ -21,6 +21,7 @@ from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from thrift.protocol import TCompactProtocol
 from thrift.protocol import THeaderProtocol
+from thrift.Thrift import expand_thrift_spec as __EXPAND_THRIFT_SPEC
 fastproto = None
 try:
   from thrift.protocol import fastproto
@@ -123,8 +124,8 @@ class ping_args:
   __hash__ = object.__hash__
 
 all_structs.append(ping_args)
-ping_args.thrift_spec = (
-)
+ping_args.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 ping_args.thrift_struct_annotations = {
 }
@@ -189,8 +190,8 @@ class ping_result:
   __hash__ = object.__hash__
 
 all_structs.append(ping_result)
-ping_result.thrift_spec = (
-)
+ping_result.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 ping_result.thrift_struct_annotations = {
 }
@@ -274,9 +275,9 @@ class echo_args:
   __hash__ = object.__hash__
 
 all_structs.append(echo_args)
-echo_args.thrift_spec = (
+echo_args.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (-1, TType.STRING, 'input', True, None, 2, ), # -1
-)
+)))
 
 echo_args.thrift_struct_annotations = {
 }
@@ -372,9 +373,9 @@ class echo_result:
   __hash__ = object.__hash__
 
 all_structs.append(echo_result)
-echo_result.thrift_spec = (
+echo_result.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (0, TType.STRING, 'success', True, None, 2, ), # 0
-)
+)))
 
 echo_result.thrift_struct_annotations = {
 }

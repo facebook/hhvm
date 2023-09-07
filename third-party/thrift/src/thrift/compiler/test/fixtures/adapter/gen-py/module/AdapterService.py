@@ -28,6 +28,7 @@ from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from thrift.protocol import TCompactProtocol
 from thrift.protocol import THeaderProtocol
+from thrift.Thrift import expand_thrift_spec as __EXPAND_THRIFT_SPEC
 fastproto = None
 try:
   from thrift.protocol import fastproto
@@ -143,8 +144,8 @@ class count_args:
   __hash__ = object.__hash__
 
 all_structs.append(count_args)
-count_args.thrift_spec = (
-)
+count_args.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 count_args.thrift_struct_annotations = {
 }
@@ -245,9 +246,9 @@ class count_result:
   __hash__ = object.__hash__
 
 all_structs.append(count_result)
-count_result.thrift_spec = (
+count_result.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (0, TType.STRUCT, 'success', [CountingStruct, CountingStruct.thrift_spec, False], None, 2, ), # 0
-)
+)))
 
 count_result.thrift_struct_annotations = {
 }
@@ -360,10 +361,9 @@ class adaptedTypes_args:
   __hash__ = object.__hash__
 
 all_structs.append(adaptedTypes_args)
-adaptedTypes_args.thrift_spec = (
-  None, # 0
+adaptedTypes_args.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRUCT, 'arg', [HeapAllocated, HeapAllocated.thrift_spec, False], None, 2, ), # 1
-)
+)))
 
 adaptedTypes_args.thrift_struct_annotations = {
 }
@@ -476,9 +476,9 @@ class adaptedTypes_result:
   __hash__ = object.__hash__
 
 all_structs.append(adaptedTypes_result)
-adaptedTypes_result.thrift_spec = (
+adaptedTypes_result.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (0, TType.STRUCT, 'success', [HeapAllocated, HeapAllocated.thrift_spec, False], None, 2, ), # 0
-)
+)))
 
 adaptedTypes_result.thrift_struct_annotations = {
 }

@@ -20,6 +20,7 @@ from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from thrift.protocol import TCompactProtocol
 from thrift.protocol import THeaderProtocol
+from thrift.Thrift import expand_thrift_spec as __EXPAND_THRIFT_SPEC
 fastproto = None
 try:
   from thrift.protocol import fastproto
@@ -3947,8 +3948,7 @@ class Foo:
     return self
 
 all_structs.append(Foo)
-Foo.thrift_spec = (
-  None, # 0
+Foo.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I32, 'field1', None, None, 2, ), # 1
   (2, TType.I32, 'field2', None, None, 2, ), # 2
   (3, TType.I32, 'field3', None, None, 2, ), # 3
@@ -4205,7 +4205,7 @@ Foo.thrift_spec = (
   (254, TType.I32, 'field254', None, None, 2, ), # 254
   (255, TType.I32, 'field255', None, None, 2, ), # 255
   (256, TType.I32, 'field256', None, None, 2, ), # 256
-)
+)))
 
 Foo.thrift_struct_annotations = {
 }

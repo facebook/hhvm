@@ -24,6 +24,7 @@ from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from thrift.protocol import TCompactProtocol
 from thrift.protocol import THeaderProtocol
+from thrift.Thrift import expand_thrift_spec as __EXPAND_THRIFT_SPEC
 fastproto = None
 try:
   from thrift.protocol import fastproto
@@ -334,8 +335,7 @@ class def_PY_RESERVED_KEYWORD:
     return self
 
 all_structs.append(def_PY_RESERVED_KEYWORD)
-def_PY_RESERVED_KEYWORD.thrift_spec = (
-  None, # 0
+def_PY_RESERVED_KEYWORD.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I64, 'from_PY_RESERVED_KEYWORD', None, None, 2, ), # 1
   (2, TType.STRING, 'in_PY_RESERVED_KEYWORD', True, None, 2, ), # 2
   (3, TType.I32, 'as_PY_RESERVED_KEYWORD', None, None, 2, ), # 3
@@ -347,7 +347,7 @@ def_PY_RESERVED_KEYWORD.thrift_spec = (
   (9, TType.BOOL, 'break_PY_RESERVED_KEYWORD', None, None, 2, ), # 9
   (10, TType.BOOL, 'await_PY_RESERVED_KEYWORD', None, None, 2, ), # 10
   (11, TType.BOOL, 'return_PY_RESERVED_KEYWORD', None, None, 2, ), # 11
-)
+)))
 
 def_PY_RESERVED_KEYWORD.thrift_struct_annotations = {
 }

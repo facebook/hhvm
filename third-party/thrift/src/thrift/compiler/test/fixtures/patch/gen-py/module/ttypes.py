@@ -27,6 +27,7 @@ from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from thrift.protocol import TCompactProtocol
 from thrift.protocol import THeaderProtocol
+from thrift.Thrift import expand_thrift_spec as __EXPAND_THRIFT_SPEC
 fastproto = None
 try:
   from thrift.protocol import fastproto
@@ -8901,11 +8902,10 @@ class LoopPatch:
     return self
 
 all_structs.append(MyData)
-MyData.thrift_spec = (
-  None, # 0
+MyData.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRING, 'data1', True, None, 3, ), # 1
   (2, TType.I32, 'data2', None, None, 3, ), # 2
-)
+)))
 
 MyData.thrift_struct_annotations = {
 }
@@ -8927,11 +8927,10 @@ MyData.__getstate__ = lambda self: self.__dict__.copy()
 MyData.__setstate__ = MyData__setstate__
 
 all_structs.append(MyDataWithCustomDefault)
-MyDataWithCustomDefault.thrift_spec = (
-  None, # 0
+MyDataWithCustomDefault.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRING, 'data1', True, "1", 3, ), # 1
   (2, TType.I32, 'data2', None, 2, 3, ), # 2
-)
+)))
 
 MyDataWithCustomDefault.thrift_struct_annotations = {
 }
@@ -8953,10 +8952,9 @@ MyDataWithCustomDefault.__getstate__ = lambda self: self.__dict__.copy()
 MyDataWithCustomDefault.__setstate__ = MyDataWithCustomDefault__setstate__
 
 all_structs.append(InnerUnion)
-InnerUnion.thrift_spec = (
-  None, # 0
+InnerUnion.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRING, 'innerOption', False, None, 2, ), # 1
-)
+)))
 
 InnerUnion.thrift_struct_annotations = {
 }
@@ -8974,12 +8972,11 @@ def InnerUnion__init__(self, innerOption=None,):
 InnerUnion.__init__ = InnerUnion__init__
 
 all_structs.append(MyUnion)
-MyUnion.thrift_spec = (
-  None, # 0
+MyUnion.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRING, 'option1', True, None, 2, ), # 1
   (2, TType.I32, 'option2', None, None, 2, ), # 2
   (3, TType.STRUCT, 'option3', [InnerUnion, InnerUnion.thrift_spec, True], None, 2, ), # 3
-)
+)))
 
 MyUnion.thrift_struct_annotations = {
 }
@@ -9005,7 +9002,7 @@ def MyUnion__init__(self, option1=None, option2=None, option3=None,):
 MyUnion.__init__ = MyUnion__init__
 
 all_structs.append(MyStruct)
-MyStruct.thrift_spec = (
+MyStruct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (-32, TType.STRUCT, 'structWithCustomDefault', [MyDataWithCustomDefault, MyDataWithCustomDefault.thrift_spec, False], None, 3, ), # -32
   (-31, TType.I32, 'i32WithCustomDefault', None, 1, 3, ), # -31
   (-30, TType.MAP, 'mapMap', (TType.STRING,True,TType.MAP,(TType.STRING,True,TType.I32,None)), None, 3, ), # -30
@@ -9038,12 +9035,11 @@ MyStruct.thrift_spec = (
   (-3, TType.I16, 'i16Val', None, None, 3, ), # -3
   (-2, TType.BYTE, 'byteVal', None, None, 3, ), # -2
   (-1, TType.BOOL, 'boolVal', None, None, 3, ), # -1
-  None, # 0
   (1, TType.STRUCT, 'structWithFieldCustomDefault', [MyData, MyData.thrift_spec, False], MyData(**{
     "data1" : "1",
     "data2" : 2,
   }), 3, ), # 1
-)
+)))
 
 MyStruct.thrift_struct_annotations = {
 }
@@ -9135,8 +9131,8 @@ MyStruct.__getstate__ = lambda self: self.__dict__.copy()
 MyStruct.__setstate__ = MyStruct__setstate__
 
 all_structs.append(LateDefStruct)
-LateDefStruct.thrift_spec = (
-)
+LateDefStruct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 LateDefStruct.thrift_struct_annotations = {
 }
@@ -9144,9 +9140,9 @@ LateDefStruct.thrift_field_annotations = {
 }
 
 all_structs.append(Recursive)
-Recursive.thrift_spec = (
+Recursive.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (-1, TType.MAP, 'nodes', (TType.STRING,True,TType.STRUCT,[Recursive, Recursive.thrift_spec, False]), None, 3, ), # -1
-)
+)))
 
 Recursive.thrift_struct_annotations = {
 }
@@ -9166,9 +9162,9 @@ Recursive.__getstate__ = lambda self: self.__dict__.copy()
 Recursive.__setstate__ = Recursive__setstate__
 
 all_structs.append(Bar)
-Bar.thrift_spec = (
+Bar.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (-1, TType.STRUCT, 'loop', [Loop, Loop.thrift_spec, False], None, 3, ), # -1
-)
+)))
 
 Bar.thrift_struct_annotations = {
 }
@@ -9188,9 +9184,9 @@ Bar.__getstate__ = lambda self: self.__dict__.copy()
 Bar.__setstate__ = Bar__setstate__
 
 all_structs.append(Loop)
-Loop.thrift_spec = (
+Loop.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (-1, TType.STRUCT, 'bar', [Bar, Bar.thrift_spec, False], None, 3, ), # -1
-)
+)))
 
 Loop.thrift_struct_annotations = {
 }
@@ -9210,16 +9206,14 @@ Loop.__getstate__ = lambda self: self.__dict__.copy()
 Loop.__setstate__ = Loop__setstate__
 
 all_structs.append(MyDataPatch)
-MyDataPatch.thrift_spec = (
-  None, # 0
+MyDataPatch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRUCT, 'assign', [MyData, MyData.thrift_spec, False], None, 1, ), # 1
   (2, TType.BOOL, 'clear', None, None, 3, ), # 2
   (3, TType.STRUCT, 'patchPrior', [MyDataFieldPatch, MyDataFieldPatch.thrift_spec, False], None, 3, ), # 3
-  None, # 4
   (5, TType.STRUCT, 'ensure', [MyDataEnsureStruct, MyDataEnsureStruct.thrift_spec, False], None, 3, ), # 5
   (6, TType.STRUCT, 'patch', [MyDataFieldPatch, MyDataFieldPatch.thrift_spec, False], None, 3, ), # 6
   (7, TType.LIST, 'remove', (TType.I16,None), None, 3, ), # 7
-)
+)))
 
 MyDataPatch.thrift_struct_annotations = {
 }
@@ -9264,11 +9258,10 @@ MyDataPatch.__getstate__ = lambda self: self.__dict__.copy()
 MyDataPatch.__setstate__ = MyDataPatch__setstate__
 
 all_structs.append(MyDataFieldPatch)
-MyDataFieldPatch.thrift_spec = (
-  None, # 0
+MyDataFieldPatch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRUCT, 'data1', [thrift.lib.thrift.patch.ttypes.StringPatch, thrift.lib.thrift.patch.ttypes.StringPatch.thrift_spec, False], None, 3, ), # 1
   (2, TType.STRUCT, 'data2', [thrift.lib.thrift.patch.ttypes.I32Patch, thrift.lib.thrift.patch.ttypes.I32Patch.thrift_spec, False], None, 3, ), # 2
-)
+)))
 
 MyDataFieldPatch.thrift_struct_annotations = {
 }
@@ -9290,11 +9283,10 @@ MyDataFieldPatch.__getstate__ = lambda self: self.__dict__.copy()
 MyDataFieldPatch.__setstate__ = MyDataFieldPatch__setstate__
 
 all_structs.append(MyDataEnsureStruct)
-MyDataEnsureStruct.thrift_spec = (
-  None, # 0
+MyDataEnsureStruct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRING, 'data1', True, None, 1, ), # 1
   (2, TType.I32, 'data2', None, None, 1, ), # 2
-)
+)))
 
 MyDataEnsureStruct.thrift_struct_annotations = {
 }
@@ -9316,16 +9308,14 @@ MyDataEnsureStruct.__getstate__ = lambda self: self.__dict__.copy()
 MyDataEnsureStruct.__setstate__ = MyDataEnsureStruct__setstate__
 
 all_structs.append(MyDataWithCustomDefaultPatch)
-MyDataWithCustomDefaultPatch.thrift_spec = (
-  None, # 0
+MyDataWithCustomDefaultPatch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRUCT, 'assign', [MyDataWithCustomDefault, MyDataWithCustomDefault.thrift_spec, False], None, 1, ), # 1
   (2, TType.BOOL, 'clear', None, None, 3, ), # 2
   (3, TType.STRUCT, 'patchPrior', [MyDataWithCustomDefaultFieldPatch, MyDataWithCustomDefaultFieldPatch.thrift_spec, False], None, 3, ), # 3
-  None, # 4
   (5, TType.STRUCT, 'ensure', [MyDataWithCustomDefaultEnsureStruct, MyDataWithCustomDefaultEnsureStruct.thrift_spec, False], None, 3, ), # 5
   (6, TType.STRUCT, 'patch', [MyDataWithCustomDefaultFieldPatch, MyDataWithCustomDefaultFieldPatch.thrift_spec, False], None, 3, ), # 6
   (7, TType.LIST, 'remove', (TType.I16,None), None, 3, ), # 7
-)
+)))
 
 MyDataWithCustomDefaultPatch.thrift_struct_annotations = {
 }
@@ -9370,11 +9360,10 @@ MyDataWithCustomDefaultPatch.__getstate__ = lambda self: self.__dict__.copy()
 MyDataWithCustomDefaultPatch.__setstate__ = MyDataWithCustomDefaultPatch__setstate__
 
 all_structs.append(MyDataWithCustomDefaultFieldPatch)
-MyDataWithCustomDefaultFieldPatch.thrift_spec = (
-  None, # 0
+MyDataWithCustomDefaultFieldPatch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRUCT, 'data1', [thrift.lib.thrift.patch.ttypes.StringPatch, thrift.lib.thrift.patch.ttypes.StringPatch.thrift_spec, False], None, 3, ), # 1
   (2, TType.STRUCT, 'data2', [thrift.lib.thrift.patch.ttypes.I32Patch, thrift.lib.thrift.patch.ttypes.I32Patch.thrift_spec, False], None, 3, ), # 2
-)
+)))
 
 MyDataWithCustomDefaultFieldPatch.thrift_struct_annotations = {
 }
@@ -9396,11 +9385,10 @@ MyDataWithCustomDefaultFieldPatch.__getstate__ = lambda self: self.__dict__.copy
 MyDataWithCustomDefaultFieldPatch.__setstate__ = MyDataWithCustomDefaultFieldPatch__setstate__
 
 all_structs.append(MyDataWithCustomDefaultEnsureStruct)
-MyDataWithCustomDefaultEnsureStruct.thrift_spec = (
-  None, # 0
+MyDataWithCustomDefaultEnsureStruct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRING, 'data1', True, None, 1, ), # 1
   (2, TType.I32, 'data2', None, None, 1, ), # 2
-)
+)))
 
 MyDataWithCustomDefaultEnsureStruct.thrift_struct_annotations = {
 }
@@ -9422,15 +9410,13 @@ MyDataWithCustomDefaultEnsureStruct.__getstate__ = lambda self: self.__dict__.co
 MyDataWithCustomDefaultEnsureStruct.__setstate__ = MyDataWithCustomDefaultEnsureStruct__setstate__
 
 all_structs.append(InnerUnionPatch)
-InnerUnionPatch.thrift_spec = (
-  None, # 0
+InnerUnionPatch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRUCT, 'assign', [InnerUnion, InnerUnion.thrift_spec, True], None, 1, ), # 1
   (2, TType.BOOL, 'clear', None, None, 3, ), # 2
   (3, TType.STRUCT, 'patchPrior', [InnerUnionFieldPatch, InnerUnionFieldPatch.thrift_spec, False], None, 3, ), # 3
   (4, TType.STRUCT, 'ensure', [InnerUnion, InnerUnion.thrift_spec, True], None, 3, ), # 4
-  None, # 5
   (6, TType.STRUCT, 'patch', [InnerUnionFieldPatch, InnerUnionFieldPatch.thrift_spec, False], None, 3, ), # 6
-)
+)))
 
 InnerUnionPatch.thrift_struct_annotations = {
 }
@@ -9461,10 +9447,9 @@ InnerUnionPatch.__getstate__ = lambda self: self.__dict__.copy()
 InnerUnionPatch.__setstate__ = InnerUnionPatch__setstate__
 
 all_structs.append(InnerUnionFieldPatch)
-InnerUnionFieldPatch.thrift_spec = (
-  None, # 0
+InnerUnionFieldPatch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRUCT, 'innerOption', [thrift.lib.thrift.patch.ttypes.BinaryPatch, thrift.lib.thrift.patch.ttypes.BinaryPatch.thrift_spec, False], None, 3, ), # 1
-)
+)))
 
 InnerUnionFieldPatch.thrift_struct_annotations = {
 }
@@ -9484,15 +9469,13 @@ InnerUnionFieldPatch.__getstate__ = lambda self: self.__dict__.copy()
 InnerUnionFieldPatch.__setstate__ = InnerUnionFieldPatch__setstate__
 
 all_structs.append(MyUnionPatch)
-MyUnionPatch.thrift_spec = (
-  None, # 0
+MyUnionPatch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRUCT, 'assign', [MyUnion, MyUnion.thrift_spec, True], None, 1, ), # 1
   (2, TType.BOOL, 'clear', None, None, 3, ), # 2
   (3, TType.STRUCT, 'patchPrior', [MyUnionFieldPatch, MyUnionFieldPatch.thrift_spec, False], None, 3, ), # 3
   (4, TType.STRUCT, 'ensure', [MyUnion, MyUnion.thrift_spec, True], None, 3, ), # 4
-  None, # 5
   (6, TType.STRUCT, 'patch', [MyUnionFieldPatch, MyUnionFieldPatch.thrift_spec, False], None, 3, ), # 6
-)
+)))
 
 MyUnionPatch.thrift_struct_annotations = {
 }
@@ -9523,12 +9506,11 @@ MyUnionPatch.__getstate__ = lambda self: self.__dict__.copy()
 MyUnionPatch.__setstate__ = MyUnionPatch__setstate__
 
 all_structs.append(MyUnionFieldPatch)
-MyUnionFieldPatch.thrift_spec = (
-  None, # 0
+MyUnionFieldPatch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRUCT, 'option1', [thrift.lib.thrift.patch.ttypes.StringPatch, thrift.lib.thrift.patch.ttypes.StringPatch.thrift_spec, False], None, 3, ), # 1
   (2, TType.STRUCT, 'option2', [thrift.lib.thrift.patch.ttypes.I32Patch, thrift.lib.thrift.patch.ttypes.I32Patch.thrift_spec, False], None, 3, ), # 2
   (3, TType.STRUCT, 'option3', [InnerUnionPatch, InnerUnionPatch.thrift_spec, False], None, 3, ), # 3
-)
+)))
 
 MyUnionFieldPatch.thrift_struct_annotations = {
 }
@@ -9552,16 +9534,14 @@ MyUnionFieldPatch.__getstate__ = lambda self: self.__dict__.copy()
 MyUnionFieldPatch.__setstate__ = MyUnionFieldPatch__setstate__
 
 all_structs.append(MyStructPatch)
-MyStructPatch.thrift_spec = (
-  None, # 0
+MyStructPatch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRUCT, 'assign', [MyStruct, MyStruct.thrift_spec, False], None, 1, ), # 1
   (2, TType.BOOL, 'clear', None, None, 3, ), # 2
   (3, TType.STRUCT, 'patchPrior', [MyStructFieldPatch, MyStructFieldPatch.thrift_spec, False], None, 3, ), # 3
-  None, # 4
   (5, TType.STRUCT, 'ensure', [MyStructEnsureStruct, MyStructEnsureStruct.thrift_spec, False], None, 3, ), # 5
   (6, TType.STRUCT, 'patch', [MyStructFieldPatch, MyStructFieldPatch.thrift_spec, False], None, 3, ), # 6
   (7, TType.LIST, 'remove', (TType.I16,None), None, 3, ), # 7
-)
+)))
 
 MyStructPatch.thrift_struct_annotations = {
 }
@@ -9606,11 +9586,10 @@ MyStructPatch.__getstate__ = lambda self: self.__dict__.copy()
 MyStructPatch.__setstate__ = MyStructPatch__setstate__
 
 all_structs.append(MyStructField10Patch)
-MyStructField10Patch.thrift_spec = (
-  None, # 0
+MyStructField10Patch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I32, 'assign', MyEnum, None, 1, ), # 1
   (2, TType.BOOL, 'clear', None, None, 3, ), # 2
-)
+)))
 
 MyStructField10Patch.thrift_struct_annotations = {
 }
@@ -9632,11 +9611,10 @@ MyStructField10Patch.__getstate__ = lambda self: self.__dict__.copy()
 MyStructField10Patch.__setstate__ = MyStructField10Patch__setstate__
 
 all_structs.append(MyStructField23Patch)
-MyStructField23Patch.thrift_spec = (
-  None, # 0
+MyStructField23Patch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I32, 'assign', MyEnum, None, 1, ), # 1
   (2, TType.BOOL, 'clear', None, None, 3, ), # 2
-)
+)))
 
 MyStructField23Patch.thrift_struct_annotations = {
 }
@@ -9658,18 +9636,12 @@ MyStructField23Patch.__getstate__ = lambda self: self.__dict__.copy()
 MyStructField23Patch.__setstate__ = MyStructField23Patch__setstate__
 
 all_structs.append(MyStructField26Patch)
-MyStructField26Patch.thrift_spec = (
-  None, # 0
+MyStructField26Patch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.LIST, 'assign', (TType.I16,None), None, 1, ), # 1
   (2, TType.BOOL, 'clear', None, None, 3, ), # 2
-  None, # 3
-  None, # 4
-  None, # 5
-  None, # 6
-  None, # 7
   (8, TType.LIST, 'prepend', (TType.I16,None), None, 3, ), # 8
   (9, TType.LIST, 'append', (TType.I16,None), None, 3, ), # 9
-)
+)))
 
 MyStructField26Patch.thrift_struct_annotations = {
 }
@@ -9695,17 +9667,12 @@ MyStructField26Patch.__getstate__ = lambda self: self.__dict__.copy()
 MyStructField26Patch.__setstate__ = MyStructField26Patch__setstate__
 
 all_structs.append(MyStructField27Patch)
-MyStructField27Patch.thrift_spec = (
-  None, # 0
+MyStructField27Patch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.SET, 'assign', (TType.STRING,True), None, 1, ), # 1
   (2, TType.BOOL, 'clear', None, None, 3, ), # 2
-  None, # 3
-  None, # 4
-  None, # 5
-  None, # 6
   (7, TType.SET, 'remove', (TType.STRING,True), None, 3, ), # 7
   (8, TType.SET, 'add', (TType.STRING,True), None, 3, ), # 8
-)
+)))
 
 MyStructField27Patch.thrift_struct_annotations = {
 }
@@ -9731,18 +9698,15 @@ MyStructField27Patch.__getstate__ = lambda self: self.__dict__.copy()
 MyStructField27Patch.__setstate__ = MyStructField27Patch__setstate__
 
 all_structs.append(MyStructField28Patch)
-MyStructField28Patch.thrift_spec = (
-  None, # 0
+MyStructField28Patch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.MAP, 'assign', (TType.STRING,True,TType.STRING,True), None, 1, ), # 1
   (2, TType.BOOL, 'clear', None, None, 3, ), # 2
   (3, TType.MAP, 'patchPrior', (TType.STRING,True,TType.STRUCT,[thrift.lib.thrift.patch.ttypes.StringPatch, thrift.lib.thrift.patch.ttypes.StringPatch.thrift_spec, False]), None, 3, ), # 3
-  None, # 4
   (5, TType.MAP, 'add', (TType.STRING,True,TType.STRING,True), None, 3, ), # 5
   (6, TType.MAP, 'patch', (TType.STRING,True,TType.STRUCT,[thrift.lib.thrift.patch.ttypes.StringPatch, thrift.lib.thrift.patch.ttypes.StringPatch.thrift_spec, False]), None, 3, ), # 6
   (7, TType.SET, 'remove', (TType.STRING,True), None, 3, ), # 7
-  None, # 8
   (9, TType.MAP, 'put', (TType.STRING,True,TType.STRING,True), None, 3, ), # 9
-)
+)))
 
 MyStructField28Patch.thrift_struct_annotations = {
 }
@@ -9774,18 +9738,12 @@ MyStructField28Patch.__getstate__ = lambda self: self.__dict__.copy()
 MyStructField28Patch.__setstate__ = MyStructField28Patch__setstate__
 
 all_structs.append(MyStructField29Patch)
-MyStructField29Patch.thrift_spec = (
-  None, # 0
+MyStructField29Patch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.LIST, 'assign', (TType.MAP,(TType.STRING,True,TType.I32,None)), None, 1, ), # 1
   (2, TType.BOOL, 'clear', None, None, 3, ), # 2
-  None, # 3
-  None, # 4
-  None, # 5
-  None, # 6
-  None, # 7
   (8, TType.LIST, 'prepend', (TType.MAP,(TType.STRING,True,TType.I32,None)), None, 3, ), # 8
   (9, TType.LIST, 'append', (TType.MAP,(TType.STRING,True,TType.I32,None)), None, 3, ), # 9
-)
+)))
 
 MyStructField29Patch.thrift_struct_annotations = {
 }
@@ -9811,18 +9769,15 @@ MyStructField29Patch.__getstate__ = lambda self: self.__dict__.copy()
 MyStructField29Patch.__setstate__ = MyStructField29Patch__setstate__
 
 all_structs.append(MyStructField30Patch)
-MyStructField30Patch.thrift_spec = (
-  None, # 0
+MyStructField30Patch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.MAP, 'assign', (TType.STRING,True,TType.MAP,(TType.STRING,True,TType.I32,None)), None, 1, ), # 1
   (2, TType.BOOL, 'clear', None, None, 3, ), # 2
   (3, TType.MAP, 'patchPrior', (TType.STRING,True,TType.STRUCT,[MyStructField30Patch1, MyStructField30Patch1.thrift_spec, False]), None, 3, ), # 3
-  None, # 4
   (5, TType.MAP, 'add', (TType.STRING,True,TType.MAP,(TType.STRING,True,TType.I32,None)), None, 3, ), # 5
   (6, TType.MAP, 'patch', (TType.STRING,True,TType.STRUCT,[MyStructField30Patch1, MyStructField30Patch1.thrift_spec, False]), None, 3, ), # 6
   (7, TType.SET, 'remove', (TType.STRING,True), None, 3, ), # 7
-  None, # 8
   (9, TType.MAP, 'put', (TType.STRING,True,TType.MAP,(TType.STRING,True,TType.I32,None)), None, 3, ), # 9
-)
+)))
 
 MyStructField30Patch.thrift_struct_annotations = {
 }
@@ -9854,18 +9809,15 @@ MyStructField30Patch.__getstate__ = lambda self: self.__dict__.copy()
 MyStructField30Patch.__setstate__ = MyStructField30Patch__setstate__
 
 all_structs.append(MyStructField30Patch1)
-MyStructField30Patch1.thrift_spec = (
-  None, # 0
+MyStructField30Patch1.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.MAP, 'assign', (TType.STRING,True,TType.I32,None), None, 1, ), # 1
   (2, TType.BOOL, 'clear', None, None, 3, ), # 2
   (3, TType.MAP, 'patchPrior', (TType.STRING,True,TType.STRUCT,[thrift.lib.thrift.patch.ttypes.I32Patch, thrift.lib.thrift.patch.ttypes.I32Patch.thrift_spec, False]), None, 3, ), # 3
-  None, # 4
   (5, TType.MAP, 'add', (TType.STRING,True,TType.I32,None), None, 3, ), # 5
   (6, TType.MAP, 'patch', (TType.STRING,True,TType.STRUCT,[thrift.lib.thrift.patch.ttypes.I32Patch, thrift.lib.thrift.patch.ttypes.I32Patch.thrift_spec, False]), None, 3, ), # 6
   (7, TType.SET, 'remove', (TType.STRING,True), None, 3, ), # 7
-  None, # 8
   (9, TType.MAP, 'put', (TType.STRING,True,TType.I32,None), None, 3, ), # 9
-)
+)))
 
 MyStructField30Patch1.thrift_struct_annotations = {
 }
@@ -9897,7 +9849,7 @@ MyStructField30Patch1.__getstate__ = lambda self: self.__dict__.copy()
 MyStructField30Patch1.__setstate__ = MyStructField30Patch1__setstate__
 
 all_structs.append(MyStructFieldPatch)
-MyStructFieldPatch.thrift_spec = (
+MyStructFieldPatch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (-32, TType.STRUCT, 'structWithCustomDefault', [MyDataWithCustomDefaultPatch, MyDataWithCustomDefaultPatch.thrift_spec, False], None, 3, ), # -32
   (-31, TType.STRUCT, 'i32WithCustomDefault', [thrift.lib.thrift.patch.ttypes.I32Patch, thrift.lib.thrift.patch.ttypes.I32Patch.thrift_spec, False], None, 3, ), # -31
   (-30, TType.STRUCT, 'mapMap', [MyStructField30Patch, MyStructField30Patch.thrift_spec, False], None, 3, ), # -30
@@ -9930,9 +9882,8 @@ MyStructFieldPatch.thrift_spec = (
   (-3, TType.STRUCT, 'i16Val', [thrift.lib.thrift.patch.ttypes.I16Patch, thrift.lib.thrift.patch.ttypes.I16Patch.thrift_spec, False], None, 3, ), # -3
   (-2, TType.STRUCT, 'byteVal', [thrift.lib.thrift.patch.ttypes.BytePatch, thrift.lib.thrift.patch.ttypes.BytePatch.thrift_spec, False], None, 3, ), # -2
   (-1, TType.STRUCT, 'boolVal', [thrift.lib.thrift.patch.ttypes.BoolPatch, thrift.lib.thrift.patch.ttypes.BoolPatch.thrift_spec, False], None, 3, ), # -1
-  None, # 0
   (1, TType.STRUCT, 'structWithFieldCustomDefault', [MyDataPatch, MyDataPatch.thrift_spec, False], None, 3, ), # 1
-)
+)))
 
 MyStructFieldPatch.thrift_struct_annotations = {
 }
@@ -10016,7 +9967,7 @@ MyStructFieldPatch.__getstate__ = lambda self: self.__dict__.copy()
 MyStructFieldPatch.__setstate__ = MyStructFieldPatch__setstate__
 
 all_structs.append(MyStructEnsureStruct)
-MyStructEnsureStruct.thrift_spec = (
+MyStructEnsureStruct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (-32, TType.STRUCT, 'structWithCustomDefault', [MyDataWithCustomDefault, MyDataWithCustomDefault.thrift_spec, False], None, 1, ), # -32
   (-31, TType.I32, 'i32WithCustomDefault', None, None, 1, ), # -31
   (-30, TType.MAP, 'mapMap', (TType.STRING,True,TType.MAP,(TType.STRING,True,TType.I32,None)), None, 1, ), # -30
@@ -10049,9 +10000,8 @@ MyStructEnsureStruct.thrift_spec = (
   (-3, TType.I16, 'i16Val', None, None, 1, ), # -3
   (-2, TType.BYTE, 'byteVal', None, None, 1, ), # -2
   (-1, TType.BOOL, 'boolVal', None, None, 1, ), # -1
-  None, # 0
   (1, TType.STRUCT, 'structWithFieldCustomDefault', [MyData, MyData.thrift_spec, False], None, 1, ), # 1
-)
+)))
 
 MyStructEnsureStruct.thrift_struct_annotations = {
 }
@@ -10156,16 +10106,14 @@ MyStructEnsureStruct.__getstate__ = lambda self: self.__dict__.copy()
 MyStructEnsureStruct.__setstate__ = MyStructEnsureStruct__setstate__
 
 all_structs.append(LateDefStructPatch)
-LateDefStructPatch.thrift_spec = (
-  None, # 0
+LateDefStructPatch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRUCT, 'assign', [LateDefStruct, LateDefStruct.thrift_spec, False], None, 1, ), # 1
   (2, TType.BOOL, 'clear', None, None, 3, ), # 2
   (3, TType.STRUCT, 'patchPrior', [LateDefStructFieldPatch, LateDefStructFieldPatch.thrift_spec, False], None, 3, ), # 3
-  None, # 4
   (5, TType.STRUCT, 'ensure', [LateDefStructEnsureStruct, LateDefStructEnsureStruct.thrift_spec, False], None, 3, ), # 5
   (6, TType.STRUCT, 'patch', [LateDefStructFieldPatch, LateDefStructFieldPatch.thrift_spec, False], None, 3, ), # 6
   (7, TType.LIST, 'remove', (TType.I16,None), None, 3, ), # 7
-)
+)))
 
 LateDefStructPatch.thrift_struct_annotations = {
 }
@@ -10210,8 +10158,8 @@ LateDefStructPatch.__getstate__ = lambda self: self.__dict__.copy()
 LateDefStructPatch.__setstate__ = LateDefStructPatch__setstate__
 
 all_structs.append(LateDefStructFieldPatch)
-LateDefStructFieldPatch.thrift_spec = (
-)
+LateDefStructFieldPatch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 LateDefStructFieldPatch.thrift_struct_annotations = {
 }
@@ -10219,8 +10167,8 @@ LateDefStructFieldPatch.thrift_field_annotations = {
 }
 
 all_structs.append(LateDefStructEnsureStruct)
-LateDefStructEnsureStruct.thrift_spec = (
-)
+LateDefStructEnsureStruct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 LateDefStructEnsureStruct.thrift_struct_annotations = {
 }
@@ -10228,16 +10176,14 @@ LateDefStructEnsureStruct.thrift_field_annotations = {
 }
 
 all_structs.append(RecursivePatch)
-RecursivePatch.thrift_spec = (
-  None, # 0
+RecursivePatch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRUCT, 'assign', [Recursive, Recursive.thrift_spec, False], None, 1, ), # 1
   (2, TType.BOOL, 'clear', None, None, 3, ), # 2
   (3, TType.STRUCT, 'patchPrior', [RecursiveFieldPatch, RecursiveFieldPatch.thrift_spec, False], None, 3, ), # 3
-  None, # 4
   (5, TType.STRUCT, 'ensure', [RecursiveEnsureStruct, RecursiveEnsureStruct.thrift_spec, False], None, 3, ), # 5
   (6, TType.STRUCT, 'patch', [RecursiveFieldPatch, RecursiveFieldPatch.thrift_spec, False], None, 3, ), # 6
   (7, TType.LIST, 'remove', (TType.I16,None), None, 3, ), # 7
-)
+)))
 
 RecursivePatch.thrift_struct_annotations = {
 }
@@ -10282,11 +10228,10 @@ RecursivePatch.__getstate__ = lambda self: self.__dict__.copy()
 RecursivePatch.__setstate__ = RecursivePatch__setstate__
 
 all_structs.append(RecursiveField1Patch)
-RecursiveField1Patch.thrift_spec = (
-  None, # 0
+RecursiveField1Patch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.MAP, 'assign', (TType.STRING,True,TType.STRUCT,[Recursive, Recursive.thrift_spec, False]), None, 1, ), # 1
   (2, TType.BOOL, 'clear', None, None, 3, ), # 2
-)
+)))
 
 RecursiveField1Patch.thrift_struct_annotations = {
 }
@@ -10308,9 +10253,9 @@ RecursiveField1Patch.__getstate__ = lambda self: self.__dict__.copy()
 RecursiveField1Patch.__setstate__ = RecursiveField1Patch__setstate__
 
 all_structs.append(RecursiveFieldPatch)
-RecursiveFieldPatch.thrift_spec = (
+RecursiveFieldPatch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (-1, TType.STRUCT, 'nodes', [RecursiveField1Patch, RecursiveField1Patch.thrift_spec, False], None, 3, ), # -1
-)
+)))
 
 RecursiveFieldPatch.thrift_struct_annotations = {
 }
@@ -10330,9 +10275,9 @@ RecursiveFieldPatch.__getstate__ = lambda self: self.__dict__.copy()
 RecursiveFieldPatch.__setstate__ = RecursiveFieldPatch__setstate__
 
 all_structs.append(RecursiveEnsureStruct)
-RecursiveEnsureStruct.thrift_spec = (
+RecursiveEnsureStruct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (-1, TType.MAP, 'nodes', (TType.STRING,True,TType.STRUCT,[Recursive, Recursive.thrift_spec, False]), None, 1, ), # -1
-)
+)))
 
 RecursiveEnsureStruct.thrift_struct_annotations = {
 }
@@ -10352,16 +10297,14 @@ RecursiveEnsureStruct.__getstate__ = lambda self: self.__dict__.copy()
 RecursiveEnsureStruct.__setstate__ = RecursiveEnsureStruct__setstate__
 
 all_structs.append(BarPatch)
-BarPatch.thrift_spec = (
-  None, # 0
+BarPatch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRUCT, 'assign', [Bar, Bar.thrift_spec, False], None, 1, ), # 1
   (2, TType.BOOL, 'clear', None, None, 3, ), # 2
   (3, TType.STRUCT, 'patchPrior', [BarFieldPatch, BarFieldPatch.thrift_spec, False], None, 3, ), # 3
-  None, # 4
   (5, TType.STRUCT, 'ensure', [BarEnsureStruct, BarEnsureStruct.thrift_spec, False], None, 3, ), # 5
   (6, TType.STRUCT, 'patch', [BarFieldPatch, BarFieldPatch.thrift_spec, False], None, 3, ), # 6
   (7, TType.LIST, 'remove', (TType.I16,None), None, 3, ), # 7
-)
+)))
 
 BarPatch.thrift_struct_annotations = {
 }
@@ -10406,9 +10349,9 @@ BarPatch.__getstate__ = lambda self: self.__dict__.copy()
 BarPatch.__setstate__ = BarPatch__setstate__
 
 all_structs.append(BarFieldPatch)
-BarFieldPatch.thrift_spec = (
+BarFieldPatch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (-1, TType.STRUCT, 'loop', [LoopPatch, LoopPatch.thrift_spec, False], None, 3, ), # -1
-)
+)))
 
 BarFieldPatch.thrift_struct_annotations = {
 }
@@ -10428,9 +10371,9 @@ BarFieldPatch.__getstate__ = lambda self: self.__dict__.copy()
 BarFieldPatch.__setstate__ = BarFieldPatch__setstate__
 
 all_structs.append(BarEnsureStruct)
-BarEnsureStruct.thrift_spec = (
+BarEnsureStruct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (-1, TType.STRUCT, 'loop', [Loop, Loop.thrift_spec, False], None, 1, ), # -1
-)
+)))
 
 BarEnsureStruct.thrift_struct_annotations = {
 }
@@ -10453,11 +10396,10 @@ BarEnsureStruct.__getstate__ = lambda self: self.__dict__.copy()
 BarEnsureStruct.__setstate__ = BarEnsureStruct__setstate__
 
 all_structs.append(LoopPatch)
-LoopPatch.thrift_spec = (
-  None, # 0
+LoopPatch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRUCT, 'assign', [Loop, Loop.thrift_spec, False], None, 1, ), # 1
   (2, TType.BOOL, 'clear', None, None, 3, ), # 2
-)
+)))
 
 LoopPatch.thrift_struct_annotations = {
 }

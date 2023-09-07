@@ -24,6 +24,7 @@ from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from thrift.protocol import TCompactProtocol
 from thrift.protocol import THeaderProtocol
+from thrift.Thrift import expand_thrift_spec as __EXPAND_THRIFT_SPEC
 fastproto = None
 try:
   from thrift.protocol import fastproto
@@ -368,10 +369,9 @@ class ServiceExn:
     return self
 
 all_structs.append(Adapter)
-Adapter.thrift_spec = (
-  None, # 0
+Adapter.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRING, 'name', True, None, 2, ), # 1
-)
+)))
 
 Adapter.thrift_struct_annotations = {
   "thrift.uri": "facebook.com/thrift/annotation/rust/Adapter",
@@ -392,10 +392,9 @@ Adapter.__getstate__ = lambda self: self.__dict__.copy()
 Adapter.__setstate__ = Adapter__setstate__
 
 all_structs.append(Derive)
-Derive.thrift_spec = (
-  None, # 0
+Derive.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.LIST, 'derives', (TType.STRING,True), None, 2, ), # 1
-)
+)))
 
 Derive.thrift_struct_annotations = {
   "thrift.uri": "facebook.com/thrift/annotation/rust/Derive",
@@ -416,10 +415,9 @@ Derive.__getstate__ = lambda self: self.__dict__.copy()
 Derive.__setstate__ = Derive__setstate__
 
 all_structs.append(ServiceExn)
-ServiceExn.thrift_spec = (
-  None, # 0
+ServiceExn.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.BOOL, 'anyhow_to_application_exn', None, None, 2, ), # 1
-)
+)))
 
 ServiceExn.thrift_struct_annotations = {
   "thrift.uri": "facebook.com/thrift/annotation/rust/ServiceExn",

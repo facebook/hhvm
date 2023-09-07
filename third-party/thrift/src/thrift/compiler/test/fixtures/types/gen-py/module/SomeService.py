@@ -23,6 +23,7 @@ from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from thrift.protocol import TCompactProtocol
 from thrift.protocol import THeaderProtocol
+from thrift.Thrift import expand_thrift_spec as __EXPAND_THRIFT_SPEC
 fastproto = None
 try:
   from thrift.protocol import fastproto
@@ -168,10 +169,9 @@ class bounce_map_args:
   __hash__ = object.__hash__
 
 all_structs.append(bounce_map_args)
-bounce_map_args.thrift_spec = (
-  None, # 0
+bounce_map_args.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.MAP, 'm', (TType.I32,None,TType.STRING,True), None, 2, ), # 1
-)
+)))
 
 bounce_map_args.thrift_struct_annotations = {
 }
@@ -283,9 +283,9 @@ class bounce_map_result:
   __hash__ = object.__hash__
 
 all_structs.append(bounce_map_result)
-bounce_map_result.thrift_spec = (
+bounce_map_result.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (0, TType.MAP, 'success', (TType.I32,None,TType.STRING,True), None, 2, ), # 0
-)
+)))
 
 bounce_map_result.thrift_struct_annotations = {
 }
@@ -394,10 +394,9 @@ class binary_keyed_map_args:
   __hash__ = object.__hash__
 
 all_structs.append(binary_keyed_map_args)
-binary_keyed_map_args.thrift_spec = (
-  None, # 0
+binary_keyed_map_args.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.LIST, 'r', (TType.I64,None), None, 2, ), # 1
-)
+)))
 
 binary_keyed_map_args.thrift_struct_annotations = {
 }
@@ -509,9 +508,9 @@ class binary_keyed_map_result:
   __hash__ = object.__hash__
 
 all_structs.append(binary_keyed_map_result)
-binary_keyed_map_result.thrift_spec = (
+binary_keyed_map_result.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (0, TType.MAP, 'success', (TType.STRING,False,TType.I64,None), None, 2, ), # 0
-)
+)))
 
 binary_keyed_map_result.thrift_struct_annotations = {
 }

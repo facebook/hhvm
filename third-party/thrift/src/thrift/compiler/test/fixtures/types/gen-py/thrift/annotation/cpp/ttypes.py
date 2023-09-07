@@ -20,6 +20,7 @@ from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from thrift.protocol import TCompactProtocol
 from thrift.protocol import THeaderProtocol
+from thrift.Thrift import expand_thrift_spec as __EXPAND_THRIFT_SPEC
 fastproto = None
 try:
   from thrift.protocol import fastproto
@@ -1489,11 +1490,10 @@ class Frozen2RequiresCompleteContainerParams:
     return self
 
 all_structs.append(Type)
-Type.thrift_spec = (
-  None, # 0
+Type.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRING, 'name', True, None, 2, ), # 1
   (2, TType.STRING, 'template', True, None, 2, ), # 2
-)
+)))
 
 Type.thrift_struct_annotations = {
 }
@@ -1518,10 +1518,9 @@ Type.__getstate__ = lambda self: self.__dict__.copy()
 Type.__setstate__ = Type__setstate__
 
 all_structs.append(Ref)
-Ref.thrift_spec = (
-  None, # 0
+Ref.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I32, 'type', RefType, None, 2, ), # 1
-)
+)))
 
 Ref.thrift_struct_annotations = {
 }
@@ -1541,10 +1540,9 @@ Ref.__getstate__ = lambda self: self.__dict__.copy()
 Ref.__setstate__ = Ref__setstate__
 
 all_structs.append(Lazy)
-Lazy.thrift_spec = (
-  None, # 0
+Lazy.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.BOOL, 'ref', None, False, 2, ), # 1
-)
+)))
 
 Lazy.thrift_struct_annotations = {
 }
@@ -1564,8 +1562,8 @@ Lazy.__getstate__ = lambda self: self.__dict__.copy()
 Lazy.__setstate__ = Lazy__setstate__
 
 all_structs.append(DisableLazyChecksum)
-DisableLazyChecksum.thrift_spec = (
-)
+DisableLazyChecksum.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 DisableLazyChecksum.thrift_struct_annotations = {
 }
@@ -1573,14 +1571,13 @@ DisableLazyChecksum.thrift_field_annotations = {
 }
 
 all_structs.append(Adapter)
-Adapter.thrift_spec = (
-  None, # 0
+Adapter.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRING, 'name', True, None, 2, ), # 1
   (2, TType.STRING, 'adaptedType', True, None, 2, ), # 2
   (3, TType.STRING, 'underlyingName', True, None, 2, ), # 3
   (4, TType.STRING, 'extraNamespace', True, None, 2, ), # 4
   (5, TType.BOOL, 'moveOnly', None, None, 2, ), # 5
-)
+)))
 
 Adapter.thrift_struct_annotations = {
 }
@@ -1608,10 +1605,9 @@ Adapter.__getstate__ = lambda self: self.__dict__.copy()
 Adapter.__setstate__ = Adapter__setstate__
 
 all_structs.append(PackIsset)
-PackIsset.thrift_spec = (
-  None, # 0
+PackIsset.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.BOOL, 'atomic', None, True, 2, ), # 1
-)
+)))
 
 PackIsset.thrift_struct_annotations = {
 }
@@ -1631,8 +1627,8 @@ PackIsset.__getstate__ = lambda self: self.__dict__.copy()
 PackIsset.__setstate__ = PackIsset__setstate__
 
 all_structs.append(MinimizePadding)
-MinimizePadding.thrift_spec = (
-)
+MinimizePadding.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 MinimizePadding.thrift_struct_annotations = {
 }
@@ -1640,8 +1636,8 @@ MinimizePadding.thrift_field_annotations = {
 }
 
 all_structs.append(TriviallyRelocatable)
-TriviallyRelocatable.thrift_spec = (
-)
+TriviallyRelocatable.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 TriviallyRelocatable.thrift_struct_annotations = {
 }
@@ -1649,8 +1645,8 @@ TriviallyRelocatable.thrift_field_annotations = {
 }
 
 all_structs.append(ScopedEnumAsUnionType)
-ScopedEnumAsUnionType.thrift_spec = (
-)
+ScopedEnumAsUnionType.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 ScopedEnumAsUnionType.thrift_struct_annotations = {
 }
@@ -1658,8 +1654,8 @@ ScopedEnumAsUnionType.thrift_field_annotations = {
 }
 
 all_structs.append(StrongType)
-StrongType.thrift_spec = (
-)
+StrongType.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 StrongType.thrift_struct_annotations = {
 }
@@ -1667,11 +1663,10 @@ StrongType.thrift_field_annotations = {
 }
 
 all_structs.append(FieldInterceptor)
-FieldInterceptor.thrift_spec = (
-  None, # 0
+FieldInterceptor.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRING, 'name', True, None, 2, ), # 1
   (2, TType.BOOL, 'noinline', None, None, 2, ), # 2
-)
+)))
 
 FieldInterceptor.thrift_struct_annotations = {
 }
@@ -1693,8 +1688,8 @@ FieldInterceptor.__getstate__ = lambda self: self.__dict__.copy()
 FieldInterceptor.__setstate__ = FieldInterceptor__setstate__
 
 all_structs.append(UseOpEncode)
-UseOpEncode.thrift_spec = (
-)
+UseOpEncode.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 UseOpEncode.thrift_struct_annotations = {
 }
@@ -1702,10 +1697,9 @@ UseOpEncode.thrift_field_annotations = {
 }
 
 all_structs.append(EnumType)
-EnumType.thrift_spec = (
-  None, # 0
+EnumType.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I32, 'type', EnumUnderlyingType, None, 2, ), # 1
-)
+)))
 
 EnumType.thrift_struct_annotations = {
 }
@@ -1725,8 +1719,8 @@ EnumType.__getstate__ = lambda self: self.__dict__.copy()
 EnumType.__setstate__ = EnumType__setstate__
 
 all_structs.append(Frozen2Exclude)
-Frozen2Exclude.thrift_spec = (
-)
+Frozen2Exclude.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 Frozen2Exclude.thrift_struct_annotations = {
 }
@@ -1734,8 +1728,8 @@ Frozen2Exclude.thrift_field_annotations = {
 }
 
 all_structs.append(Frozen2RequiresCompleteContainerParams)
-Frozen2RequiresCompleteContainerParams.thrift_spec = (
-)
+Frozen2RequiresCompleteContainerParams.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 Frozen2RequiresCompleteContainerParams.thrift_struct_annotations = {
 }

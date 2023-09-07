@@ -25,6 +25,7 @@ from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from thrift.protocol import TCompactProtocol
 from thrift.protocol import THeaderProtocol
+from thrift.Thrift import expand_thrift_spec as __EXPAND_THRIFT_SPEC
 fastproto = None
 try:
   from thrift.protocol import fastproto
@@ -232,8 +233,8 @@ class ping_args:
   __hash__ = object.__hash__
 
 all_structs.append(ping_args)
-ping_args.thrift_spec = (
-)
+ping_args.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 ping_args.thrift_struct_annotations = {
 }
@@ -311,8 +312,8 @@ class ping_result:
   __hash__ = object.__hash__
 
 all_structs.append(ping_result)
-ping_result.thrift_spec = (
-)
+ping_result.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 ping_result.thrift_struct_annotations = {
 }
@@ -390,8 +391,8 @@ class getRandomData_args:
   __hash__ = object.__hash__
 
 all_structs.append(getRandomData_args)
-getRandomData_args.thrift_spec = (
-)
+getRandomData_args.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 getRandomData_args.thrift_struct_annotations = {
 }
@@ -490,9 +491,9 @@ class getRandomData_result:
   __hash__ = object.__hash__
 
 all_structs.append(getRandomData_result)
-getRandomData_result.thrift_spec = (
+getRandomData_result.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (0, TType.STRING, 'success', True, None, 2, ), # 0
-)
+)))
 
 getRandomData_result.thrift_struct_annotations = {
 }
@@ -603,10 +604,9 @@ class sink_args:
   __hash__ = object.__hash__
 
 all_structs.append(sink_args)
-sink_args.thrift_spec = (
-  None, # 0
+sink_args.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I64, 'sink', None, None, 2, ), # 1
-)
+)))
 
 sink_args.thrift_struct_annotations = {
 }
@@ -696,8 +696,8 @@ class sink_result:
   __hash__ = object.__hash__
 
 all_structs.append(sink_result)
-sink_result.thrift_spec = (
-)
+sink_result.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 sink_result.thrift_struct_annotations = {
 }
@@ -813,11 +813,10 @@ class putDataById_args:
   __hash__ = object.__hash__
 
 all_structs.append(putDataById_args)
-putDataById_args.thrift_spec = (
-  None, # 0
+putDataById_args.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I64, 'id', None, None, 2, ), # 1
   (2, TType.STRING, 'data', True, None, 2, ), # 2
-)
+)))
 
 putDataById_args.thrift_struct_annotations = {
 }
@@ -909,8 +908,8 @@ class putDataById_result:
   __hash__ = object.__hash__
 
 all_structs.append(putDataById_result)
-putDataById_result.thrift_spec = (
-)
+putDataById_result.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 putDataById_result.thrift_struct_annotations = {
 }
@@ -1009,10 +1008,9 @@ class hasDataById_args:
   __hash__ = object.__hash__
 
 all_structs.append(hasDataById_args)
-hasDataById_args.thrift_spec = (
-  None, # 0
+hasDataById_args.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I64, 'id', None, None, 2, ), # 1
-)
+)))
 
 hasDataById_args.thrift_struct_annotations = {
 }
@@ -1123,9 +1121,9 @@ class hasDataById_result:
   __hash__ = object.__hash__
 
 all_structs.append(hasDataById_result)
-hasDataById_result.thrift_spec = (
+hasDataById_result.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (0, TType.BOOL, 'success', None, None, 2, ), # 0
-)
+)))
 
 hasDataById_result.thrift_struct_annotations = {
 }
@@ -1236,10 +1234,9 @@ class getDataById_args:
   __hash__ = object.__hash__
 
 all_structs.append(getDataById_args)
-getDataById_args.thrift_spec = (
-  None, # 0
+getDataById_args.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I64, 'id', None, None, 2, ), # 1
-)
+)))
 
 getDataById_args.thrift_struct_annotations = {
 }
@@ -1350,9 +1347,9 @@ class getDataById_result:
   __hash__ = object.__hash__
 
 all_structs.append(getDataById_result)
-getDataById_result.thrift_spec = (
+getDataById_result.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (0, TType.STRING, 'success', True, None, 2, ), # 0
-)
+)))
 
 getDataById_result.thrift_struct_annotations = {
 }
@@ -1463,10 +1460,9 @@ class deleteDataById_args:
   __hash__ = object.__hash__
 
 all_structs.append(deleteDataById_args)
-deleteDataById_args.thrift_spec = (
-  None, # 0
+deleteDataById_args.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I64, 'id', None, None, 2, ), # 1
-)
+)))
 
 deleteDataById_args.thrift_struct_annotations = {
 }
@@ -1556,8 +1552,8 @@ class deleteDataById_result:
   __hash__ = object.__hash__
 
 all_structs.append(deleteDataById_result)
-deleteDataById_result.thrift_spec = (
-)
+deleteDataById_result.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 deleteDataById_result.thrift_struct_annotations = {
 }
@@ -1673,11 +1669,10 @@ class lobDataById_args:
   __hash__ = object.__hash__
 
 all_structs.append(lobDataById_args)
-lobDataById_args.thrift_spec = (
-  None, # 0
+lobDataById_args.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I64, 'id', None, None, 2, ), # 1
   (2, TType.STRING, 'data', True, None, 2, ), # 2
-)
+)))
 
 lobDataById_args.thrift_struct_annotations = {
 }
@@ -1769,8 +1764,8 @@ class invalid_return_for_hack_args:
   __hash__ = object.__hash__
 
 all_structs.append(invalid_return_for_hack_args)
-invalid_return_for_hack_args.thrift_spec = (
-)
+invalid_return_for_hack_args.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 invalid_return_for_hack_args.thrift_struct_annotations = {
 }
@@ -1884,9 +1879,9 @@ class invalid_return_for_hack_result:
   __hash__ = object.__hash__
 
 all_structs.append(invalid_return_for_hack_result)
-invalid_return_for_hack_result.thrift_spec = (
+invalid_return_for_hack_result.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (0, TType.SET, 'success', (TType.FLOAT,None), None, 2, ), # 0
-)
+)))
 
 invalid_return_for_hack_result.thrift_struct_annotations = {
 }
@@ -1976,8 +1971,8 @@ class rpc_skipped_codegen_args:
   __hash__ = object.__hash__
 
 all_structs.append(rpc_skipped_codegen_args)
-rpc_skipped_codegen_args.thrift_spec = (
-)
+rpc_skipped_codegen_args.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 rpc_skipped_codegen_args.thrift_struct_annotations = {
 }
@@ -2055,8 +2050,8 @@ class rpc_skipped_codegen_result:
   __hash__ = object.__hash__
 
 all_structs.append(rpc_skipped_codegen_result)
-rpc_skipped_codegen_result.thrift_spec = (
-)
+rpc_skipped_codegen_result.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 rpc_skipped_codegen_result.thrift_struct_annotations = {
 }

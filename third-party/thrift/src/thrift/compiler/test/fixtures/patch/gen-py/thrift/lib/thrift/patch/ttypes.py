@@ -27,6 +27,7 @@ from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from thrift.protocol import TCompactProtocol
 from thrift.protocol import THeaderProtocol
+from thrift.Thrift import expand_thrift_spec as __EXPAND_THRIFT_SPEC
 fastproto = None
 try:
   from thrift.protocol import fastproto
@@ -1619,8 +1620,8 @@ class BinaryPatch:
 FieldId = thrift.lib.thrift.id.ttypes.FieldId
 FieldIdList = UnimplementedTypedef()
 all_structs.append(GeneratePatch)
-GeneratePatch.thrift_spec = (
-)
+GeneratePatch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 GeneratePatch.thrift_struct_annotations = {
 }
@@ -1628,8 +1629,8 @@ GeneratePatch.thrift_field_annotations = {
 }
 
 all_structs.append(AssignOnlyPatch)
-AssignOnlyPatch.thrift_spec = (
-)
+AssignOnlyPatch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 AssignOnlyPatch.thrift_struct_annotations = {
 }
@@ -1637,18 +1638,11 @@ AssignOnlyPatch.thrift_field_annotations = {
 }
 
 all_structs.append(BoolPatch)
-BoolPatch.thrift_spec = (
-  None, # 0
+BoolPatch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.BOOL, 'assign', None, None, 1, ), # 1
   (2, TType.BOOL, 'clear', None, None, 3, ), # 2
-  None, # 3
-  None, # 4
-  None, # 5
-  None, # 6
-  None, # 7
-  None, # 8
   (9, TType.BOOL, 'invert', None, None, 3, ), # 9
-)
+)))
 
 BoolPatch.thrift_struct_annotations = {
 }
@@ -1672,17 +1666,11 @@ BoolPatch.__getstate__ = lambda self: self.__dict__.copy()
 BoolPatch.__setstate__ = BoolPatch__setstate__
 
 all_structs.append(BytePatch)
-BytePatch.thrift_spec = (
-  None, # 0
+BytePatch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.BYTE, 'assign', None, None, 1, ), # 1
   (2, TType.BOOL, 'clear', None, None, 3, ), # 2
-  None, # 3
-  None, # 4
-  None, # 5
-  None, # 6
-  None, # 7
   (8, TType.BYTE, 'add', None, None, 3, ), # 8
-)
+)))
 
 BytePatch.thrift_struct_annotations = {
 }
@@ -1706,17 +1694,11 @@ BytePatch.__getstate__ = lambda self: self.__dict__.copy()
 BytePatch.__setstate__ = BytePatch__setstate__
 
 all_structs.append(I16Patch)
-I16Patch.thrift_spec = (
-  None, # 0
+I16Patch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I16, 'assign', None, None, 1, ), # 1
   (2, TType.BOOL, 'clear', None, None, 3, ), # 2
-  None, # 3
-  None, # 4
-  None, # 5
-  None, # 6
-  None, # 7
   (8, TType.I16, 'add', None, None, 3, ), # 8
-)
+)))
 
 I16Patch.thrift_struct_annotations = {
 }
@@ -1740,17 +1722,11 @@ I16Patch.__getstate__ = lambda self: self.__dict__.copy()
 I16Patch.__setstate__ = I16Patch__setstate__
 
 all_structs.append(I32Patch)
-I32Patch.thrift_spec = (
-  None, # 0
+I32Patch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I32, 'assign', None, None, 1, ), # 1
   (2, TType.BOOL, 'clear', None, None, 3, ), # 2
-  None, # 3
-  None, # 4
-  None, # 5
-  None, # 6
-  None, # 7
   (8, TType.I32, 'add', None, None, 3, ), # 8
-)
+)))
 
 I32Patch.thrift_struct_annotations = {
 }
@@ -1774,17 +1750,11 @@ I32Patch.__getstate__ = lambda self: self.__dict__.copy()
 I32Patch.__setstate__ = I32Patch__setstate__
 
 all_structs.append(I64Patch)
-I64Patch.thrift_spec = (
-  None, # 0
+I64Patch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I64, 'assign', None, None, 1, ), # 1
   (2, TType.BOOL, 'clear', None, None, 3, ), # 2
-  None, # 3
-  None, # 4
-  None, # 5
-  None, # 6
-  None, # 7
   (8, TType.I64, 'add', None, None, 3, ), # 8
-)
+)))
 
 I64Patch.thrift_struct_annotations = {
 }
@@ -1808,17 +1778,11 @@ I64Patch.__getstate__ = lambda self: self.__dict__.copy()
 I64Patch.__setstate__ = I64Patch__setstate__
 
 all_structs.append(FloatPatch)
-FloatPatch.thrift_spec = (
-  None, # 0
+FloatPatch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.FLOAT, 'assign', None, None, 1, ), # 1
   (2, TType.BOOL, 'clear', None, None, 3, ), # 2
-  None, # 3
-  None, # 4
-  None, # 5
-  None, # 6
-  None, # 7
   (8, TType.FLOAT, 'add', None, None, 3, ), # 8
-)
+)))
 
 FloatPatch.thrift_struct_annotations = {
 }
@@ -1842,17 +1806,11 @@ FloatPatch.__getstate__ = lambda self: self.__dict__.copy()
 FloatPatch.__setstate__ = FloatPatch__setstate__
 
 all_structs.append(DoublePatch)
-DoublePatch.thrift_spec = (
-  None, # 0
+DoublePatch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.DOUBLE, 'assign', None, None, 1, ), # 1
   (2, TType.BOOL, 'clear', None, None, 3, ), # 2
-  None, # 3
-  None, # 4
-  None, # 5
-  None, # 6
-  None, # 7
   (8, TType.DOUBLE, 'add', None, None, 3, ), # 8
-)
+)))
 
 DoublePatch.thrift_struct_annotations = {
 }
@@ -1876,18 +1834,12 @@ DoublePatch.__getstate__ = lambda self: self.__dict__.copy()
 DoublePatch.__setstate__ = DoublePatch__setstate__
 
 all_structs.append(StringPatch)
-StringPatch.thrift_spec = (
-  None, # 0
+StringPatch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRING, 'assign', True, None, 1, ), # 1
   (2, TType.BOOL, 'clear', None, None, 3, ), # 2
-  None, # 3
-  None, # 4
-  None, # 5
-  None, # 6
-  None, # 7
   (8, TType.STRING, 'prepend', True, None, 3, ), # 8
   (9, TType.STRING, 'append', True, None, 3, ), # 9
-)
+)))
 
 StringPatch.thrift_struct_annotations = {
 }
@@ -1913,18 +1865,12 @@ StringPatch.__getstate__ = lambda self: self.__dict__.copy()
 StringPatch.__setstate__ = StringPatch__setstate__
 
 all_structs.append(BinaryPatch)
-BinaryPatch.thrift_spec = (
-  None, # 0
+BinaryPatch.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRING, 'assign', False, None, 1, ), # 1
   (2, TType.BOOL, 'clear', None, None, 3, ), # 2
-  None, # 3
-  None, # 4
-  None, # 5
-  None, # 6
-  None, # 7
   (8, TType.STRING, 'prepend', False, None, 3, ), # 8
   (9, TType.STRING, 'append', False, None, 3, ), # 9
-)
+)))
 
 BinaryPatch.thrift_struct_annotations = {
 }

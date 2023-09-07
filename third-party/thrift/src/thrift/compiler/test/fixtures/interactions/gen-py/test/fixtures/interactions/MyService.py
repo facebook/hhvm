@@ -25,6 +25,7 @@ from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from thrift.protocol import TCompactProtocol
 from thrift.protocol import THeaderProtocol
+from thrift.Thrift import expand_thrift_spec as __EXPAND_THRIFT_SPEC
 fastproto = None
 try:
   from thrift.protocol import fastproto
@@ -146,8 +147,8 @@ class foo_args:
   __hash__ = object.__hash__
 
 all_structs.append(foo_args)
-foo_args.thrift_spec = (
-)
+foo_args.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 foo_args.thrift_struct_annotations = {
 }
@@ -225,8 +226,8 @@ class foo_result:
   __hash__ = object.__hash__
 
 all_structs.append(foo_result)
-foo_result.thrift_spec = (
-)
+foo_result.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 foo_result.thrift_struct_annotations = {
 }
@@ -327,10 +328,9 @@ class interact_args:
   __hash__ = object.__hash__
 
 all_structs.append(interact_args)
-interact_args.thrift_spec = (
-  None, # 0
+interact_args.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I32, 'arg', None, None, 2, ), # 1
-)
+)))
 
 interact_args.thrift_struct_annotations = {
 }
@@ -420,8 +420,8 @@ class interact_result:
   __hash__ = object.__hash__
 
 all_structs.append(interact_result)
-interact_result.thrift_spec = (
-)
+interact_result.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 interact_result.thrift_struct_annotations = {
 }
@@ -499,8 +499,8 @@ class interactFast_args:
   __hash__ = object.__hash__
 
 all_structs.append(interactFast_args)
-interactFast_args.thrift_spec = (
-)
+interactFast_args.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 interactFast_args.thrift_struct_annotations = {
 }
@@ -601,9 +601,9 @@ class interactFast_result:
   __hash__ = object.__hash__
 
 all_structs.append(interactFast_result)
-interactFast_result.thrift_spec = (
+interactFast_result.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (0, TType.I32, 'success', None, None, 2, ), # 0
-)
+)))
 
 interactFast_result.thrift_struct_annotations = {
 }

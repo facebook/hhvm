@@ -20,6 +20,7 @@ from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from thrift.protocol import TCompactProtocol
 from thrift.protocol import THeaderProtocol
+from thrift.Thrift import expand_thrift_spec as __EXPAND_THRIFT_SPEC
 fastproto = None
 try:
   from thrift.protocol import fastproto
@@ -152,111 +153,11 @@ class Fields:
     return self
 
 all_structs.append(Fields)
-Fields.thrift_spec = (
-  None, # 0
-  None, # 1
-  None, # 2
-  None, # 3
-  None, # 4
-  None, # 5
-  None, # 6
-  None, # 7
-  None, # 8
-  None, # 9
-  None, # 10
-  None, # 11
-  None, # 12
-  None, # 13
-  None, # 14
-  None, # 15
-  None, # 16
-  None, # 17
-  None, # 18
-  None, # 19
-  None, # 20
-  None, # 21
-  None, # 22
-  None, # 23
-  None, # 24
-  None, # 25
-  None, # 26
-  None, # 27
-  None, # 28
-  None, # 29
-  None, # 30
-  None, # 31
-  None, # 32
-  None, # 33
-  None, # 34
-  None, # 35
-  None, # 36
-  None, # 37
-  None, # 38
-  None, # 39
-  None, # 40
-  None, # 41
-  None, # 42
-  None, # 43
-  None, # 44
-  None, # 45
-  None, # 46
-  None, # 47
-  None, # 48
-  None, # 49
-  None, # 50
-  None, # 51
-  None, # 52
-  None, # 53
-  None, # 54
-  None, # 55
-  None, # 56
-  None, # 57
-  None, # 58
-  None, # 59
-  None, # 60
-  None, # 61
-  None, # 62
-  None, # 63
-  None, # 64
-  None, # 65
-  None, # 66
-  None, # 67
-  None, # 68
-  None, # 69
-  None, # 70
-  None, # 71
-  None, # 72
-  None, # 73
-  None, # 74
-  None, # 75
-  None, # 76
-  None, # 77
-  None, # 78
-  None, # 79
-  None, # 80
-  None, # 81
-  None, # 82
-  None, # 83
-  None, # 84
-  None, # 85
-  None, # 86
-  None, # 87
-  None, # 88
-  None, # 89
-  None, # 90
-  None, # 91
-  None, # 92
-  None, # 93
-  None, # 94
-  None, # 95
-  None, # 96
-  None, # 97
-  None, # 98
-  None, # 99
+Fields.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (100, TType.STRING, 'injected_field', True, None, 2, ), # 100
   (101, TType.STRING, 'injected_structured_annotation_field', True, None, 1, ), # 101
   (102, TType.STRING, 'injected_unstructured_annotation_field', True, None, 1, ), # 102
-)
+)))
 
 Fields.thrift_struct_annotations = {
 }

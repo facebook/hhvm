@@ -359,3 +359,23 @@ class TApplicationException(TException):
 
 class UnimplementedTypedef:
     pass
+
+
+def expand_thrift_spec(spec):
+    """
+    Given a sparse thrift_spec generate a full thrift_spec as expected by fastproto.
+    The old form is a tuple where every position is the same as the thrift field id.
+    The new form is just a tuple of the used field ids without all the None padding, but its cheaper bytecode wise.
+    There is a bug in python 3.10 that causes large tuples to use more memory and generate larger .pyc than <=3.9.
+    See: https://github.com/python/cpython/issues/109036
+    """
+    next_id = 0
+    for item in spec:
+        # there is some concept of negative field ids
+        if next_id >= 0 and item[0] < 0:
+            next_id = item[0]
+        if item[0] != next_id:
+            for _ in range(next_id, item[0]):
+                yield None
+        yield item
+        next_id = item[0] + 1

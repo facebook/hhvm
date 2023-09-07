@@ -24,6 +24,7 @@ from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from thrift.protocol import TCompactProtocol
 from thrift.protocol import THeaderProtocol
+from thrift.Thrift import expand_thrift_spec as __EXPAND_THRIFT_SPEC
 fastproto = None
 try:
   from thrift.protocol import fastproto
@@ -311,8 +312,8 @@ class FooEx2(TException):
     return self
 
 all_structs.append(FooStreamEx)
-FooStreamEx.thrift_spec = (
-)
+FooStreamEx.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 FooStreamEx.thrift_struct_annotations = {
 }
@@ -320,8 +321,8 @@ FooStreamEx.thrift_field_annotations = {
 }
 
 all_structs.append(FooEx)
-FooEx.thrift_spec = (
-)
+FooEx.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 FooEx.thrift_struct_annotations = {
 }
@@ -329,8 +330,8 @@ FooEx.thrift_field_annotations = {
 }
 
 all_structs.append(FooEx2)
-FooEx2.thrift_spec = (
-)
+FooEx2.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 FooEx2.thrift_struct_annotations = {
 }

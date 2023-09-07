@@ -24,6 +24,7 @@ from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from thrift.protocol import TCompactProtocol
 from thrift.protocol import THeaderProtocol
+from thrift.Thrift import expand_thrift_spec as __EXPAND_THRIFT_SPEC
 fastproto = None
 try:
   from thrift.protocol import fastproto
@@ -184,11 +185,10 @@ class query_args:
   __hash__ = object.__hash__
 
 all_structs.append(query_args)
-query_args.thrift_spec = (
-  None, # 0
+query_args.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRUCT, 's', [module.ttypes.MyStruct, module.ttypes.MyStruct.thrift_spec, False], None, 2, ), # 1
   (2, TType.STRUCT, 'i', [includes.ttypes.Included, includes.ttypes.Included.thrift_spec, False], None, 2, ), # 2
-)
+)))
 
 query_args.thrift_struct_annotations = {
 }
@@ -267,8 +267,8 @@ class query_result:
   __hash__ = object.__hash__
 
 all_structs.append(query_result)
-query_result.thrift_spec = (
-)
+query_result.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 query_result.thrift_struct_annotations = {
 }
@@ -369,11 +369,10 @@ class has_arg_docs_args:
   __hash__ = object.__hash__
 
 all_structs.append(has_arg_docs_args)
-has_arg_docs_args.thrift_spec = (
-  None, # 0
+has_arg_docs_args.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRUCT, 's', [module.ttypes.MyStruct, module.ttypes.MyStruct.thrift_spec, False], None, 2, ), # 1
   (2, TType.STRUCT, 'i', [includes.ttypes.Included, includes.ttypes.Included.thrift_spec, False], None, 2, ), # 2
-)
+)))
 
 has_arg_docs_args.thrift_struct_annotations = {
 }
@@ -452,8 +451,8 @@ class has_arg_docs_result:
   __hash__ = object.__hash__
 
 all_structs.append(has_arg_docs_result)
-has_arg_docs_result.thrift_spec = (
-)
+has_arg_docs_result.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 has_arg_docs_result.thrift_struct_annotations = {
 }

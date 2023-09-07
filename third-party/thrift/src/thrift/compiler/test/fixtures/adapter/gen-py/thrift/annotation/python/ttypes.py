@@ -24,6 +24,7 @@ from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from thrift.protocol import TCompactProtocol
 from thrift.protocol import THeaderProtocol
+from thrift.Thrift import expand_thrift_spec as __EXPAND_THRIFT_SPEC
 fastproto = None
 try:
   from thrift.protocol import fastproto
@@ -519,8 +520,8 @@ class MarshalCapi:
     return self
 
 all_structs.append(Py3Hidden)
-Py3Hidden.thrift_spec = (
-)
+Py3Hidden.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 Py3Hidden.thrift_struct_annotations = {
 }
@@ -528,8 +529,8 @@ Py3Hidden.thrift_field_annotations = {
 }
 
 all_structs.append(Flags)
-Flags.thrift_spec = (
-)
+Flags.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 Flags.thrift_struct_annotations = {
 }
@@ -537,10 +538,9 @@ Flags.thrift_field_annotations = {
 }
 
 all_structs.append(Name)
-Name.thrift_spec = (
-  None, # 0
+Name.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRING, 'name', True, None, 2, ), # 1
-)
+)))
 
 Name.thrift_struct_annotations = {
 }
@@ -560,11 +560,10 @@ Name.__getstate__ = lambda self: self.__dict__.copy()
 Name.__setstate__ = Name__setstate__
 
 all_structs.append(Adapter)
-Adapter.thrift_spec = (
-  None, # 0
+Adapter.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRING, 'name', True, None, 2, ), # 1
   (2, TType.STRING, 'typeHint', True, None, 2, ), # 2
-)
+)))
 
 Adapter.thrift_struct_annotations = {
   "thrift.uri": "facebook.com/thrift/annotation/python/Adapter",
@@ -587,8 +586,8 @@ Adapter.__getstate__ = lambda self: self.__dict__.copy()
 Adapter.__setstate__ = Adapter__setstate__
 
 all_structs.append(MarshalCapi)
-MarshalCapi.thrift_spec = (
-)
+MarshalCapi.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 MarshalCapi.thrift_struct_annotations = {
   "thrift.uri": "facebook.com/thrift/annotation/python/MarshalCapi",

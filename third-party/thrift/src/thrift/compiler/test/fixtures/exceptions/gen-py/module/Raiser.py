@@ -21,6 +21,7 @@ from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from thrift.protocol import TCompactProtocol
 from thrift.protocol import THeaderProtocol
+from thrift.Thrift import expand_thrift_spec as __EXPAND_THRIFT_SPEC
 fastproto = None
 try:
   from thrift.protocol import fastproto
@@ -127,8 +128,8 @@ class doBland_args:
   __hash__ = object.__hash__
 
 all_structs.append(doBland_args)
-doBland_args.thrift_spec = (
-)
+doBland_args.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 doBland_args.thrift_struct_annotations = {
 }
@@ -193,8 +194,8 @@ class doBland_result:
   __hash__ = object.__hash__
 
 all_structs.append(doBland_result)
-doBland_result.thrift_spec = (
-)
+doBland_result.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 doBland_result.thrift_struct_annotations = {
 }
@@ -259,8 +260,8 @@ class doRaise_args:
   __hash__ = object.__hash__
 
 all_structs.append(doRaise_args)
-doRaise_args.thrift_spec = (
-)
+doRaise_args.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 doRaise_args.thrift_struct_annotations = {
 }
@@ -377,12 +378,11 @@ class doRaise_result:
   __hash__ = object.__hash__
 
 all_structs.append(doRaise_result)
-doRaise_result.thrift_spec = (
-  None, # 0
+doRaise_result.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRUCT, 'b', [Banal, Banal.thrift_spec, False], None, 2, ), # 1
   (2, TType.STRUCT, 'f', [Fiery, Fiery.thrift_spec, False], None, 2, ), # 2
   (3, TType.STRUCT, 's', [Serious, Serious.thrift_spec, False], None, 2, ), # 3
-)
+)))
 
 doRaise_result.thrift_struct_annotations = {
 }
@@ -463,8 +463,8 @@ class get200_args:
   __hash__ = object.__hash__
 
 all_structs.append(get200_args)
-get200_args.thrift_spec = (
-)
+get200_args.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 get200_args.thrift_struct_annotations = {
 }
@@ -548,9 +548,9 @@ class get200_result:
   __hash__ = object.__hash__
 
 all_structs.append(get200_result)
-get200_result.thrift_spec = (
+get200_result.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (0, TType.STRING, 'success', True, None, 2, ), # 0
-)
+)))
 
 get200_result.thrift_struct_annotations = {
 }
@@ -627,8 +627,8 @@ class get500_args:
   __hash__ = object.__hash__
 
 all_structs.append(get500_args)
-get500_args.thrift_spec = (
-)
+get500_args.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 get500_args.thrift_struct_annotations = {
 }
@@ -760,12 +760,12 @@ class get500_result:
   __hash__ = object.__hash__
 
 all_structs.append(get500_result)
-get500_result.thrift_spec = (
+get500_result.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (0, TType.STRING, 'success', True, None, 2, ), # 0
   (1, TType.STRUCT, 'f', [Fiery, Fiery.thrift_spec, False], None, 2, ), # 1
   (2, TType.STRUCT, 'b', [Banal, Banal.thrift_spec, False], None, 2, ), # 2
   (3, TType.STRUCT, 's', [Serious, Serious.thrift_spec, False], None, 2, ), # 3
-)
+)))
 
 get500_result.thrift_struct_annotations = {
 }

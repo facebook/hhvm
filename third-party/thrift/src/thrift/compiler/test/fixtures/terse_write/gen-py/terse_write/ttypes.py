@@ -24,6 +24,7 @@ from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from thrift.protocol import TCompactProtocol
 from thrift.protocol import THeaderProtocol
+from thrift.Thrift import expand_thrift_spec as __EXPAND_THRIFT_SPEC
 fastproto = None
 try:
   from thrift.protocol import fastproto
@@ -2743,8 +2744,8 @@ class TerseException(TException):
 
 MyInteger = UnimplementedTypedef()
 all_structs.append(MyStruct)
-MyStruct.thrift_spec = (
-)
+MyStruct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 MyStruct.thrift_struct_annotations = {
 }
@@ -2752,8 +2753,7 @@ MyStruct.thrift_field_annotations = {
 }
 
 all_structs.append(MyUnion)
-MyUnion.thrift_spec = (
-  None, # 0
+MyUnion.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.BOOL, 'bool_field', None, None, 2, ), # 1
   (2, TType.BYTE, 'byte_field', None, None, 2, ), # 2
   (3, TType.I16, 'short_field', None, None, 2, ), # 3
@@ -2768,7 +2768,7 @@ MyUnion.thrift_spec = (
   (12, TType.SET, 'set_field', (TType.I16,None), None, 2, ), # 12
   (13, TType.MAP, 'map_field', (TType.I16,None,TType.I16,None), None, 2, ), # 13
   (14, TType.STRUCT, 'struct_field', [MyStruct, MyStruct.thrift_spec, False], None, 2, ), # 14
-)
+)))
 
 MyUnion.thrift_struct_annotations = {
 }
@@ -2838,10 +2838,9 @@ def MyUnion__init__(self, bool_field=None, byte_field=None, short_field=None, in
 MyUnion.__init__ = MyUnion__init__
 
 all_structs.append(MyStructWithCustomDefault)
-MyStructWithCustomDefault.thrift_spec = (
-  None, # 0
+MyStructWithCustomDefault.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I64, 'field1', None, 1, 2, ), # 1
-)
+)))
 
 MyStructWithCustomDefault.thrift_struct_annotations = {
 }
@@ -2861,8 +2860,7 @@ MyStructWithCustomDefault.__getstate__ = lambda self: self.__dict__.copy()
 MyStructWithCustomDefault.__setstate__ = MyStructWithCustomDefault__setstate__
 
 all_structs.append(StructLevelTerseStruct)
-StructLevelTerseStruct.thrift_spec = (
-  None, # 0
+StructLevelTerseStruct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.BOOL, 'bool_field', None, None, 3, ), # 1
   (2, TType.BYTE, 'byte_field', None, None, 3, ), # 2
   (3, TType.I16, 'short_field', None, None, 3, ), # 3
@@ -2878,7 +2876,7 @@ StructLevelTerseStruct.thrift_spec = (
   (13, TType.MAP, 'map_field', (TType.I16,None,TType.I16,None), None, 3, ), # 13
   (14, TType.STRUCT, 'struct_field', [MyStruct, MyStruct.thrift_spec, False], None, 3, ), # 14
   (15, TType.STRUCT, 'union_field', [MyUnion, MyUnion.thrift_spec, True], None, 3, ), # 15
-)
+)))
 
 StructLevelTerseStruct.thrift_struct_annotations = {
 }
@@ -2926,8 +2924,7 @@ StructLevelTerseStruct.__getstate__ = lambda self: self.__dict__.copy()
 StructLevelTerseStruct.__setstate__ = StructLevelTerseStruct__setstate__
 
 all_structs.append(FieldLevelTerseStruct)
-FieldLevelTerseStruct.thrift_spec = (
-  None, # 0
+FieldLevelTerseStruct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.BOOL, 'terse_bool_field', None, None, 3, ), # 1
   (2, TType.BYTE, 'terse_byte_field', None, None, 3, ), # 2
   (3, TType.I16, 'terse_short_field', None, None, 3, ), # 3
@@ -2958,7 +2955,7 @@ FieldLevelTerseStruct.thrift_spec = (
   (28, TType.STRUCT, 'struct_field', [MyStruct, MyStruct.thrift_spec, False], None, 2, ), # 28
   (29, TType.STRUCT, 'terse_union_field', [MyUnion, MyUnion.thrift_spec, True], None, 3, ), # 29
   (30, TType.STRUCT, 'union_field', [MyUnion, MyUnion.thrift_spec, True], None, 2, ), # 30
-)
+)))
 
 FieldLevelTerseStruct.thrift_struct_annotations = {
 }
@@ -3036,8 +3033,7 @@ FieldLevelTerseStruct.__getstate__ = lambda self: self.__dict__.copy()
 FieldLevelTerseStruct.__setstate__ = FieldLevelTerseStruct__setstate__
 
 all_structs.append(TerseStructWithCustomDefault)
-TerseStructWithCustomDefault.thrift_spec = (
-  None, # 0
+TerseStructWithCustomDefault.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.BOOL, 'bool_field', None, True, 3, ), # 1
   (2, TType.BYTE, 'byte_field', None, 1, 3, ), # 2
   (3, TType.I16, 'short_field', None, 2, 3, ), # 3
@@ -3058,7 +3054,7 @@ TerseStructWithCustomDefault.thrift_spec = (
     1 : 1,
   }, 3, ), # 13
   (14, TType.STRUCT, 'struct_field', [MyStructWithCustomDefault, MyStructWithCustomDefault.thrift_spec, False], None, 3, ), # 14
-)
+)))
 
 TerseStructWithCustomDefault.thrift_struct_annotations = {
 }
@@ -3122,12 +3118,11 @@ TerseStructWithCustomDefault.__getstate__ = lambda self: self.__dict__.copy()
 TerseStructWithCustomDefault.__setstate__ = TerseStructWithCustomDefault__setstate__
 
 all_structs.append(AdaptedFields)
-AdaptedFields.thrift_spec = (
-  None, # 0
+AdaptedFields.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I32, 'field1', None, None, 3, ), # 1
   (2, TType.I32, 'field2', None, None, 3, ), # 2
   (3, TType.I32, 'field3', None, None, 3, ), # 3
-)
+)))
 
 AdaptedFields.thrift_struct_annotations = {
 }
@@ -3151,10 +3146,9 @@ AdaptedFields.__getstate__ = lambda self: self.__dict__.copy()
 AdaptedFields.__setstate__ = AdaptedFields__setstate__
 
 all_structs.append(WrappedFields)
-WrappedFields.thrift_spec = (
-  None, # 0
+WrappedFields.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I32, 'field1', None, 7, 3, ), # 1
-)
+)))
 
 WrappedFields.thrift_struct_annotations = {
 }
@@ -3174,10 +3168,9 @@ WrappedFields.__getstate__ = lambda self: self.__dict__.copy()
 WrappedFields.__setstate__ = WrappedFields__setstate__
 
 all_structs.append(TerseException)
-TerseException.thrift_spec = (
-  None, # 0
+TerseException.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRING, 'msg', True, None, 3, ), # 1
-)
+)))
 
 TerseException.thrift_struct_annotations = {
   "message": "msg",

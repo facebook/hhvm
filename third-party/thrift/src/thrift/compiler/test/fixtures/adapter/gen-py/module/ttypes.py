@@ -27,6 +27,7 @@ from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from thrift.protocol import TCompactProtocol
 from thrift.protocol import THeaderProtocol
+from thrift.Thrift import expand_thrift_spec as __EXPAND_THRIFT_SPEC
 fastproto = None
 try:
   from thrift.protocol import fastproto
@@ -5105,11 +5106,10 @@ ListWithElemAdapter_withAdapter_2312 = ListWithElemAdapter_withAdapter
 MyI32_4873 = MyI32
 StringWithAdapter_7208 = StringWithAdapter
 all_structs.append(MyAnnotation)
-MyAnnotation.thrift_spec = (
-  None, # 0
+MyAnnotation.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRING, 'signature', True, None, 2, ), # 1
   (2, TType.I32, 'color', Color,   1, 2, ), # 2
-)
+)))
 
 MyAnnotation.thrift_struct_annotations = {
 }
@@ -5131,8 +5131,7 @@ MyAnnotation.__getstate__ = lambda self: self.__dict__.copy()
 MyAnnotation.__setstate__ = MyAnnotation__setstate__
 
 all_structs.append(Foo)
-Foo.thrift_spec = (
-  None, # 0
+Foo.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I32, 'intField', None, None, 2, ), # 1
   (2, TType.I32, 'optionalIntField', None, None, 1, ), # 2
   (3, TType.I32, 'intFieldWithDefault', None, 13, 2, ), # 3
@@ -5144,7 +5143,7 @@ Foo.thrift_spec = (
   (9, TType.I64, 'longField', None, None, 2, ), # 9
   (10, TType.I64, 'adaptedLongField', None, None, 2, ), # 10
   (11, TType.I64, 'doubleAdaptedField', None, None, 2, ), # 11
-)
+)))
 
 Foo.thrift_struct_annotations = {
   "thrift.uri": "facebook.com/thrift/compiler/test/fixtures/adapter/src/module/Foo",
@@ -5185,18 +5184,13 @@ Foo.__getstate__ = lambda self: self.__dict__.copy()
 Foo.__setstate__ = Foo__setstate__
 
 all_structs.append(Baz)
-Baz.thrift_spec = (
-  None, # 0
+Baz.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I32, 'intField', None, None, 2, ), # 1
-  None, # 2
-  None, # 3
   (4, TType.SET, 'setField', (TType.STRING,True), None, 2, ), # 4
-  None, # 5
   (6, TType.MAP, 'mapField', (TType.STRING,True,TType.LIST,(TType.STRING,True)), None, 2, ), # 6
-  None, # 7
   (8, TType.STRING, 'binaryField', False, None, 2, ), # 8
   (9, TType.I64, 'longField', None, None, 2, ), # 9
-)
+)))
 
 Baz.thrift_struct_annotations = {
 }
@@ -5230,8 +5224,7 @@ def Baz__init__(self, intField=None, setField=None, mapField=None, binaryField=N
 Baz.__init__ = Baz__init__
 
 all_structs.append(Bar)
-Bar.thrift_spec = (
-  None, # 0
+Bar.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRUCT, 'structField', [Foo, Foo.thrift_spec, False, ::my.Adapter1], None, 2, ), # 1
   (2, TType.STRUCT, 'optionalStructField', [Foo, Foo.thrift_spec, False, my.Adapter1], None, 1, ), # 2
   (3, TType.LIST, 'structListField', (TType.STRUCT,[Foo, Foo.thrift_spec, False, my.Adapter1]), None, 2, ), # 3
@@ -5239,7 +5232,7 @@ Bar.thrift_spec = (
   (5, TType.STRUCT, 'unionField', [Baz, Baz.thrift_spec, True, my.Adapter1], None, 2, ), # 5
   (6, TType.STRUCT, 'optionalUnionField', [Baz, Baz.thrift_spec, True, my.Adapter1], None, 1, ), # 6
   (7, TType.STRUCT, 'adaptedStructField', [DirectlyAdapted, DirectlyAdapted.thrift_spec, False], None, 2, ), # 7
-)
+)))
 
 Bar.thrift_struct_annotations = {
 }
@@ -5271,10 +5264,9 @@ Bar.__getstate__ = lambda self: self.__dict__.copy()
 Bar.__setstate__ = Bar__setstate__
 
 all_structs.append(DirectlyAdapted)
-DirectlyAdapted.thrift_spec = (
-  None, # 0
+DirectlyAdapted.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I32, 'field', None, None, 2, ), # 1
-)
+)))
 
 DirectlyAdapted.thrift_struct_annotations = {
 }
@@ -5294,10 +5286,9 @@ DirectlyAdapted.__getstate__ = lambda self: self.__dict__.copy()
 DirectlyAdapted.__setstate__ = DirectlyAdapted__setstate__
 
 all_structs.append(IndependentDirectlyAdapted)
-IndependentDirectlyAdapted.thrift_spec = (
-  None, # 0
+IndependentDirectlyAdapted.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I32, 'field', None, None, 2, ), # 1
-)
+)))
 
 IndependentDirectlyAdapted.thrift_struct_annotations = {
 }
@@ -5317,13 +5308,12 @@ IndependentDirectlyAdapted.__getstate__ = lambda self: self.__dict__.copy()
 IndependentDirectlyAdapted.__setstate__ = IndependentDirectlyAdapted__setstate__
 
 all_structs.append(StructWithFieldAdapter)
-StructWithFieldAdapter.thrift_spec = (
-  None, # 0
+StructWithFieldAdapter.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I32, 'field', None, None, 2, ), # 1
   (2, TType.I32, 'shared_field', None, None, 2, ), # 2
   (3, TType.I32, 'opt_shared_field', None, None, 1, ), # 3
   (4, TType.I32, 'opt_boxed_field', None, None, 1, ), # 4
-)
+)))
 
 StructWithFieldAdapter.thrift_struct_annotations = {
 }
@@ -5349,12 +5339,11 @@ StructWithFieldAdapter.__getstate__ = lambda self: self.__dict__.copy()
 StructWithFieldAdapter.__setstate__ = StructWithFieldAdapter__setstate__
 
 all_structs.append(TerseAdaptedFields)
-TerseAdaptedFields.thrift_spec = (
-  None, # 0
+TerseAdaptedFields.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I32, 'int_field', None, None, 3, ), # 1
   (2, TType.STRING, 'string_field', True, None, 3, ), # 2
   (3, TType.SET, 'set_field', (TType.I32,None), None, 3, ), # 3
-)
+)))
 
 TerseAdaptedFields.thrift_struct_annotations = {
 }
@@ -5378,10 +5367,9 @@ TerseAdaptedFields.__getstate__ = lambda self: self.__dict__.copy()
 TerseAdaptedFields.__setstate__ = TerseAdaptedFields__setstate__
 
 all_structs.append(B)
-B.thrift_spec = (
-  None, # 0
+B.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRUCT, 'a', [A, A.thrift_spec, False], None, 2, ), # 1
-)
+)))
 
 B.thrift_struct_annotations = {
 }
@@ -5401,8 +5389,8 @@ B.__getstate__ = lambda self: self.__dict__.copy()
 B.__setstate__ = B__setstate__
 
 all_structs.append(A)
-A.thrift_spec = (
-)
+A.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 A.thrift_struct_annotations = {
 }
@@ -5410,10 +5398,9 @@ A.thrift_field_annotations = {
 }
 
 all_structs.append(Config)
-Config.thrift_spec = (
-  None, # 0
+Config.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRING, 'path', True, None, 2, ), # 1
-)
+)))
 
 Config.thrift_struct_annotations = {
 }
@@ -5433,11 +5420,10 @@ Config.__getstate__ = lambda self: self.__dict__.copy()
 Config.__setstate__ = Config__setstate__
 
 all_structs.append(MyStruct)
-MyStruct.thrift_spec = (
-  None, # 0
+MyStruct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I32, 'field', None, None, 2, ), # 1
   (2, TType.SET, 'set_string', (TType.STRING,True), None, 2, ), # 2
-)
+)))
 
 MyStruct.thrift_struct_annotations = {
 }
@@ -5459,8 +5445,7 @@ MyStruct.__getstate__ = lambda self: self.__dict__.copy()
 MyStruct.__setstate__ = MyStruct__setstate__
 
 all_structs.append(AdaptTestStruct)
-AdaptTestStruct.thrift_spec = (
-  None, # 0
+AdaptTestStruct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I64, 'delay', None, None, 2, ), # 1
   (2, TType.STRING, 'custom', False, None, 2, ), # 2
   (3, TType.I64, 'timeout', None, None, 2, ), # 3
@@ -5471,7 +5456,7 @@ AdaptTestStruct.thrift_spec = (
   (8, TType.BOOL, 'double_wrapped_bool', None, None, 2, ), # 8
   (9, TType.I32, 'double_wrapped_integer', None, None, 2, ), # 9
   (10, TType.STRING, 'binary_data', False, None, 2, ), # 10
-)
+)))
 
 AdaptTestStruct.thrift_struct_annotations = {
 }
@@ -5509,8 +5494,7 @@ AdaptTestStruct.__getstate__ = lambda self: self.__dict__.copy()
 AdaptTestStruct.__setstate__ = AdaptTestStruct__setstate__
 
 all_structs.append(AdaptTemplatedTestStruct)
-AdaptTemplatedTestStruct.thrift_spec = (
-  None, # 0
+AdaptTemplatedTestStruct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.BOOL, 'adaptedBool', None, None, 2, ), # 1
   (2, TType.BYTE, 'adaptedByte', None, None, 2, ), # 2
   (3, TType.I16, 'adaptedShort', None, None, 2, ), # 3
@@ -5539,7 +5523,7 @@ AdaptTemplatedTestStruct.thrift_spec = (
     1 : 1,
   }, 2, ), # 21
   (22, TType.BOOL, 'doubleTypedefBool', None, None, 2, ), # 22
-)
+)))
 
 AdaptTemplatedTestStruct.thrift_struct_annotations = {
 }
@@ -5635,10 +5619,9 @@ AdaptTemplatedTestStruct.__getstate__ = lambda self: self.__dict__.copy()
 AdaptTemplatedTestStruct.__setstate__ = AdaptTemplatedTestStruct__setstate__
 
 all_structs.append(AdaptTemplatedNestedTestStruct)
-AdaptTemplatedNestedTestStruct.thrift_spec = (
-  None, # 0
+AdaptTemplatedNestedTestStruct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRUCT, 'adaptedStruct', [AdaptTemplatedTestStruct, AdaptTemplatedTestStruct.thrift_spec, False], None, 2, ), # 1
-)
+)))
 
 AdaptTemplatedNestedTestStruct.thrift_struct_annotations = {
 }
@@ -5658,11 +5641,10 @@ AdaptTemplatedNestedTestStruct.__getstate__ = lambda self: self.__dict__.copy()
 AdaptTemplatedNestedTestStruct.__setstate__ = AdaptTemplatedNestedTestStruct__setstate__
 
 all_structs.append(AdaptTestUnion)
-AdaptTestUnion.thrift_spec = (
-  None, # 0
+AdaptTestUnion.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I64, 'delay', None, None, 2, ), # 1
   (2, TType.STRING, 'custom', False, None, 2, ), # 2
-)
+)))
 
 AdaptTestUnion.thrift_struct_annotations = {
   "cpp.name": "ThriftAdaptTestUnion",
@@ -5685,10 +5667,9 @@ def AdaptTestUnion__init__(self, delay=None, custom=None,):
 AdaptTestUnion.__init__ = AdaptTestUnion__init__
 
 all_structs.append(AdaptedStruct)
-AdaptedStruct.thrift_spec = (
-  None, # 0
+AdaptedStruct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I64, 'data', None, None, 2, ), # 1
-)
+)))
 
 AdaptedStruct.thrift_struct_annotations = {
   "cpp.name": "ThriftAdaptedStruct",
@@ -5709,10 +5690,9 @@ AdaptedStruct.__getstate__ = lambda self: self.__dict__.copy()
 AdaptedStruct.__setstate__ = AdaptedStruct__setstate__
 
 all_structs.append(DirectlyAdaptedStruct)
-DirectlyAdaptedStruct.thrift_spec = (
-  None, # 0
+DirectlyAdaptedStruct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I64, 'data', None, None, 2, ), # 1
-)
+)))
 
 DirectlyAdaptedStruct.thrift_struct_annotations = {
 }
@@ -5732,13 +5712,12 @@ DirectlyAdaptedStruct.__getstate__ = lambda self: self.__dict__.copy()
 DirectlyAdaptedStruct.__setstate__ = DirectlyAdaptedStruct__setstate__
 
 all_structs.append(StructFieldAdaptedStruct)
-StructFieldAdaptedStruct.thrift_spec = (
-  None, # 0
+StructFieldAdaptedStruct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRUCT, 'adaptedStruct', [AdaptedStruct, AdaptedStruct.thrift_spec, False], None, 2, ), # 1
   (2, TType.STRUCT, 'adaptedTypedef', [AdaptedStruct, AdaptedStruct.thrift_spec, False], None, 2, ), # 2
   (3, TType.STRUCT, 'directlyAdapted', [DirectlyAdaptedStruct, DirectlyAdaptedStruct.thrift_spec, False], None, 2, ), # 3
   (4, TType.STRUCT, 'typedefOfAdapted', [DirectlyAdaptedStruct, DirectlyAdaptedStruct.thrift_spec, False], None, 2, ), # 4
-)
+)))
 
 StructFieldAdaptedStruct.thrift_struct_annotations = {
 }
@@ -5764,10 +5743,9 @@ StructFieldAdaptedStruct.__getstate__ = lambda self: self.__dict__.copy()
 StructFieldAdaptedStruct.__setstate__ = StructFieldAdaptedStruct__setstate__
 
 all_structs.append(CircularAdaptee)
-CircularAdaptee.thrift_spec = (
-  None, # 0
+CircularAdaptee.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRUCT, 'field', [CircularStruct, CircularStruct.thrift_spec, False], None, 2, ), # 1
-)
+)))
 
 CircularAdaptee.thrift_struct_annotations = {
 }
@@ -5787,10 +5765,9 @@ CircularAdaptee.__getstate__ = lambda self: self.__dict__.copy()
 CircularAdaptee.__setstate__ = CircularAdaptee__setstate__
 
 all_structs.append(CircularStruct)
-CircularStruct.thrift_spec = (
-  None, # 0
+CircularStruct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRUCT, 'field', [CircularAdaptee, CircularAdaptee.thrift_spec, False], None, 1, ), # 1
-)
+)))
 
 CircularStruct.thrift_struct_annotations = {
 }
@@ -5810,10 +5787,9 @@ CircularStruct.__getstate__ = lambda self: self.__dict__.copy()
 CircularStruct.__setstate__ = CircularStruct__setstate__
 
 all_structs.append(ReorderedStruct)
-ReorderedStruct.thrift_spec = (
-  None, # 0
+ReorderedStruct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRUCT, 'reordered_dependent_adapted', [DeclaredAfterStruct, DeclaredAfterStruct.thrift_spec, False], None, 2, ), # 1
-)
+)))
 
 ReorderedStruct.thrift_struct_annotations = {
 }
@@ -5833,8 +5809,8 @@ ReorderedStruct.__getstate__ = lambda self: self.__dict__.copy()
 ReorderedStruct.__setstate__ = ReorderedStruct__setstate__
 
 all_structs.append(DeclaredAfterStruct)
-DeclaredAfterStruct.thrift_spec = (
-)
+DeclaredAfterStruct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 DeclaredAfterStruct.thrift_struct_annotations = {
 }
@@ -5842,10 +5818,9 @@ DeclaredAfterStruct.thrift_field_annotations = {
 }
 
 all_structs.append(RenamedStruct)
-RenamedStruct.thrift_spec = (
-  None, # 0
+RenamedStruct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I64, 'data', None, None, 2, ), # 1
-)
+)))
 
 RenamedStruct.thrift_struct_annotations = {
 }
@@ -5865,10 +5840,9 @@ RenamedStruct.__getstate__ = lambda self: self.__dict__.copy()
 RenamedStruct.__setstate__ = RenamedStruct__setstate__
 
 all_structs.append(SameNamespaceStruct)
-SameNamespaceStruct.thrift_spec = (
-  None, # 0
+SameNamespaceStruct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I64, 'data', None, None, 2, ), # 1
-)
+)))
 
 SameNamespaceStruct.thrift_struct_annotations = {
 }
@@ -5888,8 +5862,8 @@ SameNamespaceStruct.__getstate__ = lambda self: self.__dict__.copy()
 SameNamespaceStruct.__setstate__ = SameNamespaceStruct__setstate__
 
 all_structs.append(HeapAllocated)
-HeapAllocated.thrift_spec = (
-)
+HeapAllocated.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 HeapAllocated.thrift_struct_annotations = {
 }
@@ -5897,10 +5871,9 @@ HeapAllocated.thrift_field_annotations = {
 }
 
 all_structs.append(MoveOnly)
-MoveOnly.thrift_spec = (
-  None, # 0
+MoveOnly.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRUCT, 'ptr', [HeapAllocated, HeapAllocated.thrift_spec, False], None, 2, ), # 1
-)
+)))
 
 MoveOnly.thrift_struct_annotations = {
 }
@@ -5920,10 +5893,9 @@ MoveOnly.__getstate__ = lambda self: self.__dict__.copy()
 MoveOnly.__setstate__ = MoveOnly__setstate__
 
 all_structs.append(AlsoMoveOnly)
-AlsoMoveOnly.thrift_spec = (
-  None, # 0
+AlsoMoveOnly.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I64, 'ptr', None, None, 2, ), # 1
-)
+)))
 
 AlsoMoveOnly.thrift_struct_annotations = {
 }
@@ -5943,8 +5915,8 @@ AlsoMoveOnly.__getstate__ = lambda self: self.__dict__.copy()
 AlsoMoveOnly.__setstate__ = AlsoMoveOnly__setstate__
 
 all_structs.append(ApplyAdapter)
-ApplyAdapter.thrift_spec = (
-)
+ApplyAdapter.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 ApplyAdapter.thrift_struct_annotations = {
 }
@@ -5952,8 +5924,8 @@ ApplyAdapter.thrift_field_annotations = {
 }
 
 all_structs.append(TransitiveAdapted)
-TransitiveAdapted.thrift_spec = (
-)
+TransitiveAdapted.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 TransitiveAdapted.thrift_struct_annotations = {
 }
@@ -5961,12 +5933,11 @@ TransitiveAdapted.thrift_field_annotations = {
 }
 
 all_structs.append(CountingStruct)
-CountingStruct.thrift_spec = (
-  None, # 0
+CountingStruct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I64, 'regularInt', None, None, 1, ), # 1
   (2, TType.I64, 'countingInt', None, None, 1, ), # 2
   (3, TType.STRING, 'regularString', True, None, 1, ), # 3
-)
+)))
 
 CountingStruct.thrift_struct_annotations = {
 }
@@ -5990,10 +5961,9 @@ CountingStruct.__getstate__ = lambda self: self.__dict__.copy()
 CountingStruct.__setstate__ = CountingStruct__setstate__
 
 all_structs.append(Person)
-Person.thrift_spec = (
-  None, # 0
+Person.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRING, 'name', True, None, 2, ), # 1
-)
+)))
 
 Person.thrift_struct_annotations = {
 }
@@ -6013,10 +5983,9 @@ Person.__getstate__ = lambda self: self.__dict__.copy()
 Person.__setstate__ = Person__setstate__
 
 all_structs.append(Person2)
-Person2.thrift_spec = (
-  None, # 0
+Person2.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRING, 'name', True, None, 2, ), # 1
-)
+)))
 
 Person2.thrift_struct_annotations = {
 }

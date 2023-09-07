@@ -20,6 +20,7 @@ from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from thrift.protocol import TCompactProtocol
 from thrift.protocol import THeaderProtocol
+from thrift.Thrift import expand_thrift_spec as __EXPAND_THRIFT_SPEC
 fastproto = None
 try:
   from thrift.protocol import fastproto
@@ -1008,8 +1009,8 @@ class InternBox:
     return self
 
 all_structs.append(Experimental)
-Experimental.thrift_spec = (
-)
+Experimental.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 Experimental.thrift_struct_annotations = {
 }
@@ -1017,11 +1018,10 @@ Experimental.thrift_field_annotations = {
 }
 
 all_structs.append(ReserveIds)
-ReserveIds.thrift_spec = (
-  None, # 0
+ReserveIds.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.LIST, 'ids', (TType.I32,None), None, 2, ), # 1
   (2, TType.MAP, 'id_ranges', (TType.I32,None,TType.I32,None), None, 2, ), # 2
-)
+)))
 
 ReserveIds.thrift_struct_annotations = {
 }
@@ -1043,10 +1043,9 @@ ReserveIds.__getstate__ = lambda self: self.__dict__.copy()
 ReserveIds.__setstate__ = ReserveIds__setstate__
 
 all_structs.append(RequiresBackwardCompatibility)
-RequiresBackwardCompatibility.thrift_spec = (
-  None, # 0
+RequiresBackwardCompatibility.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.BOOL, 'field_name', None, False, 2, ), # 1
-)
+)))
 
 RequiresBackwardCompatibility.thrift_struct_annotations = {
 }
@@ -1066,8 +1065,8 @@ RequiresBackwardCompatibility.__getstate__ = lambda self: self.__dict__.copy()
 RequiresBackwardCompatibility.__setstate__ = RequiresBackwardCompatibility__setstate__
 
 all_structs.append(TerseWrite)
-TerseWrite.thrift_spec = (
-)
+TerseWrite.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 TerseWrite.thrift_struct_annotations = {
 }
@@ -1075,8 +1074,8 @@ TerseWrite.thrift_field_annotations = {
 }
 
 all_structs.append(Box)
-Box.thrift_spec = (
-)
+Box.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 Box.thrift_struct_annotations = {
 }
@@ -1084,8 +1083,8 @@ Box.thrift_field_annotations = {
 }
 
 all_structs.append(Mixin)
-Mixin.thrift_spec = (
-)
+Mixin.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 Mixin.thrift_struct_annotations = {
 }
@@ -1093,8 +1092,8 @@ Mixin.thrift_field_annotations = {
 }
 
 all_structs.append(SerializeInFieldIdOrder)
-SerializeInFieldIdOrder.thrift_spec = (
-)
+SerializeInFieldIdOrder.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 SerializeInFieldIdOrder.thrift_struct_annotations = {
 }
@@ -1102,8 +1101,8 @@ SerializeInFieldIdOrder.thrift_field_annotations = {
 }
 
 all_structs.append(BitmaskEnum)
-BitmaskEnum.thrift_spec = (
-)
+BitmaskEnum.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 BitmaskEnum.thrift_struct_annotations = {
 }
@@ -1111,10 +1110,9 @@ BitmaskEnum.thrift_field_annotations = {
 }
 
 all_structs.append(ExceptionMessage)
-ExceptionMessage.thrift_spec = (
-  None, # 0
+ExceptionMessage.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRING, 'field', True, None, 2, ), # 1
-)
+)))
 
 ExceptionMessage.thrift_struct_annotations = {
 }
@@ -1134,10 +1132,9 @@ ExceptionMessage.__getstate__ = lambda self: self.__dict__.copy()
 ExceptionMessage.__setstate__ = ExceptionMessage__setstate__
 
 all_structs.append(GenerateRuntimeSchema)
-GenerateRuntimeSchema.thrift_spec = (
-  None, # 0
+GenerateRuntimeSchema.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRING, 'name', True, None, 2, ), # 1
-)
+)))
 
 GenerateRuntimeSchema.thrift_struct_annotations = {
 }
@@ -1157,8 +1154,8 @@ GenerateRuntimeSchema.__getstate__ = lambda self: self.__dict__.copy()
 GenerateRuntimeSchema.__setstate__ = GenerateRuntimeSchema__setstate__
 
 all_structs.append(InternBox)
-InternBox.thrift_spec = (
-)
+InternBox.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 InternBox.thrift_struct_annotations = {
 }

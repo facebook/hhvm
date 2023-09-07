@@ -25,6 +25,7 @@ from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from thrift.protocol import TCompactProtocol
 from thrift.protocol import THeaderProtocol
+from thrift.Thrift import expand_thrift_spec as __EXPAND_THRIFT_SPEC
 fastproto = None
 try:
   from thrift.protocol import fastproto
@@ -140,8 +141,8 @@ class ping_args:
   __hash__ = object.__hash__
 
 all_structs.append(ping_args)
-ping_args.thrift_spec = (
-)
+ping_args.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 ping_args.thrift_struct_annotations = {
 }
@@ -219,8 +220,8 @@ class ping_result:
   __hash__ = object.__hash__
 
 all_structs.append(ping_result)
-ping_result.thrift_spec = (
-)
+ping_result.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 ping_result.thrift_struct_annotations = {
 }
@@ -298,8 +299,8 @@ class pong_args:
   __hash__ = object.__hash__
 
 all_structs.append(pong_args)
-pong_args.thrift_spec = (
-)
+pong_args.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 pong_args.thrift_struct_annotations = {
 }
@@ -377,8 +378,8 @@ class pong_result:
   __hash__ = object.__hash__
 
 all_structs.append(pong_result)
-pong_result.thrift_spec = (
-)
+pong_result.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
 
 pong_result.thrift_struct_annotations = {
 }

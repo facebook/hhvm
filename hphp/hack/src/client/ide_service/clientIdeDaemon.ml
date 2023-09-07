@@ -51,11 +51,6 @@ type open_files_state = {
       (** [changed_files_to_process] us grown [During_init] upon [Did_change_watched_files changes]
       and then discharged in [initialize2] before changing to [Initialized] state.
       TODO(ljw): move this field into [During_init]. *)
-  changed_files_denominator: int;
-      (** the user likes to see '5/10' for how many changed files has been processed
-      in the current batch of changes. The denominator counts up for every new file
-      that has to be processed, until the batch ends - i.e. changed_files_to_process
-      becomes empty - and we reset the denominator. *)
 }
 
 (** istate, "initialized state", is the state the daemon after it has
@@ -380,12 +375,7 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
   {
     start_time;
     dcommon = { hhi_root; config; local_config; local_memory };
-    dfiles =
-      {
-        open_files;
-        changed_files_to_process = Relative_path.Set.empty;
-        changed_files_denominator = 0;
-      };
+    dfiles = { open_files; changed_files_to_process = Relative_path.Set.empty };
   }
 
 (** initialize2 is called by handle_one_message upon receipt of a
@@ -429,19 +419,16 @@ let initialize2
           {
             open_files = dstate.dfiles.open_files;
             changed_files_to_process = Relative_path.Set.empty;
-            changed_files_denominator = 0;
           };
       }
     in
     (* Note: Done_init is needed to (1) transition clientIdeService state, (2) cause
        clientLsp to know to ask for squiggles to be refreshed on open files. *)
-    (* TODO: Done_init always shows "Done_init(0/0)". We should remove the progress here. *)
-    let p = { ClientIdeMessage.Processing_files.total = 0; processed = 0 } in
     let%lwt () =
       write_message
         ~out_fd
         ~message:
-          (ClientIdeMessage.Notification (ClientIdeMessage.Done_init (Ok p)))
+          (ClientIdeMessage.Notification (ClientIdeMessage.Done_init (Ok ())))
     in
     let count = Some changed_files_denominator in
     let (_ : float) = log_startup_time "initialize2" start_time ?count in
@@ -719,8 +706,6 @@ let handle_request
         dfiles with
         changed_files_to_process =
           Relative_path.Set.union dfiles.changed_files_to_process changes;
-        changed_files_denominator =
-          dfiles.changed_files_denominator + Relative_path.Set.cardinal changes;
       }
     in
     (update_state_files state dfiles, Ok ())
@@ -1248,145 +1233,39 @@ let handle_request
     let istate = { istate with sienv = !sienv_ref } in
     (Initialized istate, Ok result)
 
-let write_status ~(out_fd : Lwt_unix.file_descr) (state : state) : unit Lwt.t =
-  match state with
-  | Pending_init
-  | During_init _
-  | Failed_init _ ->
-    Lwt.return_unit
-  | Initialized { ifiles; _ } ->
-    if Relative_path.Set.is_empty ifiles.changed_files_to_process then
-      let%lwt () =
-        write_message
-          ~out_fd
-          ~message:
-            (ClientIdeMessage.Notification ClientIdeMessage.Done_processing)
-      in
-      Lwt.return_unit
-    else
-      let total = ifiles.changed_files_denominator in
-      let processed =
-        total - Relative_path.Set.cardinal ifiles.changed_files_to_process
-      in
-      let%lwt () =
-        write_message
-          ~out_fd
-          ~message:
-            (ClientIdeMessage.Notification
-               (ClientIdeMessage.Processing_files
-                  { ClientIdeMessage.Processing_files.processed; total }))
-      in
-      Lwt.return_unit
-
-(** Allow to process the next file change only if we have no new events to
-handle. To ensure correctness, we would have to actually process all file
-change events *before* we processed any other IDE queries. However, we're
-trying to maximize availability, even if occasionally we give stale
-results. We can revisit this trade-off later if we decide that the stale
-results are baffling users. *)
-let should_process_file_change
-    (in_fd : Lwt_unix.file_descr)
-    (message_queue : message_queue)
-    (istate : istate) : bool =
-  Lwt_message_queue.is_empty message_queue
-  && (not (Lwt_unix.readable in_fd))
-  && not (Relative_path.Set.is_empty istate.ifiles.changed_files_to_process)
-
-let process_one_file_change (out_fd : Lwt_unix.file_descr) (istate : istate) :
-    istate Lwt.t =
-  let next_file =
-    Relative_path.Set.choose istate.ifiles.changed_files_to_process
-  in
-  let changed_files_to_process =
-    Relative_path.Set.remove istate.ifiles.changed_files_to_process next_file
-  in
-  let ClientIdeIncremental.{ naming_table; sienv; old_file_info; _ } =
-    ClientIdeIncremental.update_naming_tables_for_changed_file
-      ~ctx:(make_empty_ctx istate.icommon)
-      ~naming_table:istate.naming_table
-      ~sienv:istate.sienv
-      ~path:next_file
-  in
-  Option.iter
-    old_file_info
-    ~f:
-      (Provider_utils.invalidate_local_decl_caches_for_file
-         istate.icommon.local_memory);
-  Relative_path.Map.iter istate.ifiles.open_files ~f:(fun _path (entry, _) ->
-      Provider_utils.invalidate_tast_cache_of_entry entry);
-  let changed_files_denominator =
-    if Relative_path.Set.is_empty changed_files_to_process then
-      0
-    else
-      istate.ifiles.changed_files_denominator
-  in
-  let istate =
-    {
-      naming_table;
-      sienv;
-      icommon = istate.icommon;
-      ifiles =
-        {
-          istate.ifiles with
-          changed_files_to_process;
-          changed_files_denominator;
-        };
-    }
-  in
-  let%lwt () = write_status ~out_fd (Initialized istate) in
-  Lwt.return istate
-
-(** This function will either process one change that's pending,
-or will await as necessary to handle one message. *)
+(** Awaits until the next message is available, and handles it *)
 let handle_one_message_exn
-    ~(in_fd : Lwt_unix.file_descr)
     ~(out_fd : Lwt_unix.file_descr)
     ~(message_queue : message_queue)
     ~(state : state) : state option Lwt.t =
-  (* The precise order of operations is to help us be responsive
-     to requests, to never to await if there are pending changes to process,
-     but also to await for the next thing to do:
-     (1) If there's a message in [message_queue] then handle it;
-     (2) Otherwise if there's a message in [in_fd] then await until it
-     gets pumped into [message_queue] and then handle it;
-     (3) Otherwise if there are pending file-changes then process them;
-     (4) otherwise await until the next client request arrives in [in_fd]
-     and gets pumped into [message_queue] and then handle it. *)
-  match state with
-  | Initialized istate
-    when should_process_file_change in_fd message_queue istate ->
-    let%lwt istate = process_one_file_change out_fd istate in
-    Lwt.return_some (Initialized istate)
-  | _ ->
-    let%lwt message = Lwt_message_queue.pop message_queue in
-    (match (state, message) with
-    | (_, None) ->
-      Lwt.return_none (* exit loop if message_queue has been closed *)
-    | (During_init dstate, Some (GotNamingTable naming_table_result)) ->
-      let%lwt state = initialize2 out_fd dstate naming_table_result in
-      Lwt.return_some state
-    | (_, Some (GotNamingTable _)) ->
-      failwith ("Unexpected GotNamingTable in " ^ state_to_log_string state)
-    | (_, Some (ClientRequest { ClientIdeMessage.tracking_id; message })) ->
-      let unblocked_time = Unix.gettimeofday () in
-      let (state, response) =
-        try handle_request message_queue state tracking_id message with
-        | exn ->
-          (* Our caller has an exception handler which logs the exception.
-             But we instead must fulfil our contract of responding to the client,
-             even if we have an exception. Hence we need our own handler here. *)
-          let e = Exception.wrap exn in
-          let reason = ClientIdeUtils.make_rich_error "handle_request" ~e in
-          (state, Error (ClientIdeUtils.to_lsp_error reason))
-      in
-      let%lwt () =
-        write_message
-          ~out_fd
-          ~message:
-            ClientIdeMessage.(
-              Response { response; tracking_id; unblocked_time })
-      in
-      Lwt.return_some state)
+  let%lwt message = Lwt_message_queue.pop message_queue in
+  match (state, message) with
+  | (_, None) ->
+    Lwt.return_none (* exit loop if message_queue has been closed *)
+  | (During_init dstate, Some (GotNamingTable naming_table_result)) ->
+    let%lwt state = initialize2 out_fd dstate naming_table_result in
+    Lwt.return_some state
+  | (_, Some (GotNamingTable _)) ->
+    failwith ("Unexpected GotNamingTable in " ^ state_to_log_string state)
+  | (_, Some (ClientRequest { ClientIdeMessage.tracking_id; message })) ->
+    let unblocked_time = Unix.gettimeofday () in
+    let (state, response) =
+      try handle_request message_queue state tracking_id message with
+      | exn ->
+        (* Our caller has an exception handler which logs the exception.
+           But we instead must fulfil our contract of responding to the client,
+           even if we have an exception. Hence we need our own handler here. *)
+        let e = Exception.wrap exn in
+        let reason = ClientIdeUtils.make_rich_error "handle_request" ~e in
+        (state, Error (ClientIdeUtils.to_lsp_error reason))
+    in
+    let%lwt () =
+      write_message
+        ~out_fd
+        ~message:
+          ClientIdeMessage.(Response { response; tracking_id; unblocked_time })
+    in
+    Lwt.return_some state
 
 let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
     unit Lwt.t =
@@ -1433,9 +1312,7 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
   let rec handle_messages ({ message_queue; state } : t) : unit Lwt.t =
     let%lwt next_state_opt =
       try%lwt
-        let%lwt state =
-          handle_one_message_exn ~in_fd ~out_fd ~message_queue ~state
-        in
+        let%lwt state = handle_one_message_exn ~out_fd ~message_queue ~state in
         Lwt.return state
       with
       | exn ->
@@ -1540,7 +1417,6 @@ module Test = struct
         {
           open_files = Relative_path.Map.empty;
           changed_files_to_process = Relative_path.Set.empty;
-          changed_files_denominator = 0;
         };
     }
 

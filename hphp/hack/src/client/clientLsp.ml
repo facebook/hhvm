@@ -694,8 +694,7 @@ let get_next_event
     | Some { Initialize.initializationOptions; _ }
       when initializationOptions.Initialize.delayUntilDoneInit -> begin
       match ClientIdeService.get_status !ide_service with
-      | ClientIdeService.Status.(Initializing | Processing_files _ | Rpc _) ->
-        false
+      | ClientIdeService.Status.(Initializing | Rpc _) -> false
       | ClientIdeService.Status.(Ready | Stopped _) -> true
     end
     | _ -> true
@@ -1341,12 +1340,6 @@ let merge_statuses_standalone
       ( (ServerProgress.DWorking, true),
         "Hack: initializing",
         "Hack IDE support is initializing (loading saved state)" )
-    | ClientIdeService.Status.Processing_files p ->
-      ( (ServerProgress.DWorking, false),
-        "Hack: indexing",
-        Printf.sprintf
-          "Hack IDE support is indexing %d files"
-          p.ClientIdeMessage.Processing_files.total )
     | ClientIdeService.Status.Rpc _ ->
       ( (ServerProgress.DWorking, false),
         "Hack",
@@ -3284,9 +3277,7 @@ let validate_error_item_TEMPORARY
           in
           log_diff uri "item-unreported" ~expected diff;
           lenv
-        | ( None,
-            ClientIdeService.Status.(
-              Initializing | Processing_files _ | Rpc _ | Stopped _) ) ->
+        | (None, ClientIdeService.Status.(Initializing | Rpc _ | Stopped _)) ->
           (* We got a report of errors in [uri] from the errors-file, but we don't
              currently have any diagnostics published for [uri] because clientIdeDaemon
              isn't even ready yet. Nothing worth checking. *)
@@ -4682,13 +4673,8 @@ let handle_daemon_notification
        our caller queries the ide_service for what status it wants to display to
        the user, so these notifications have the goal of triggering that refresh. *)
   match notification with
-  | ClientIdeMessage.Done_init (Ok p) ->
+  | ClientIdeMessage.Done_init (Ok ()) ->
     Lsp_helpers.telemetry_log to_stdout "[client-ide] Finished init: ok";
-    Lsp_helpers.telemetry_log
-      to_stdout
-      (Printf.sprintf
-         "[client-ide] Initialized; %d file changes to process"
-         p.ClientIdeMessage.Processing_files.total);
     let editor_open_files =
       (match get_editor_open_files !state with
       | Some files -> files
@@ -4718,15 +4704,6 @@ let handle_daemon_notification
     log_debug "<-- done_init";
     Lsp_helpers.telemetry_log to_stdout "[client-ide] Finished init: failure";
     let%lwt () = announce_ide_failure error_data in
-    Lwt.return_none
-  | ClientIdeMessage.Processing_files _ ->
-    (* used solely for triggering a refresh of status by our caller; nothing
-       for us to do here. *)
-    Lwt.return_none
-  | ClientIdeMessage.Done_processing ->
-    Lsp_helpers.telemetry_log
-      to_stdout
-      "[client-ide] Done processing file changes";
     Lwt.return_none
 
 (** Called once a second but only when there are no pending messages from client,

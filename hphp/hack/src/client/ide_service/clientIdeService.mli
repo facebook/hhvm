@@ -22,9 +22,6 @@ module Status : sig
     | Initializing
         (** The IDE services are still initializing (e.g. loading saved-state or
         building indexes.) *)
-    | Processing_files of ClientIdeMessage.Processing_files.t
-        (** The IDE services are available, but are also in the middle of
-        processing files. *)
     | Rpc of Telemetry.t list
         (** The IDE services will be available once they're done handling
         one or more existing requests. The telemetry items are information

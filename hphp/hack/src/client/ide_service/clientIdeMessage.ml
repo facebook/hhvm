@@ -279,20 +279,13 @@ type rich_error = {
   data: Hh_json.json option;  (** used in LSP Error message and telemetry *)
 }
 
-type notification =
-  | Done_init of (Processing_files.t, rich_error) result
-  | Processing_files of Processing_files.t
-  | Done_processing
+type notification = Done_init of (unit, rich_error) result
 
 let notification_to_string (n : notification) : string =
   match n with
-  | Done_init (Ok p) ->
-    Printf.sprintf "Done_init(%s)" (Processing_files.to_string p)
+  | Done_init (Ok ()) -> Printf.sprintf "Done_init."
   | Done_init (Error edata) ->
-    Printf.sprintf "Done_init(%s)" edata.medium_user_message
-  | Processing_files p ->
-    Printf.sprintf "Processing_file(%s)" (Processing_files.to_string p)
-  | Done_processing -> "Done_processing"
+    Printf.sprintf "Done_init failed - %s" edata.medium_user_message
 
 type 'a timed_response = {
   unblocked_time: float;

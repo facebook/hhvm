@@ -12,7 +12,6 @@ open Hh_prelude
 module Status = struct
   type t =
     | Initializing
-    | Processing_files of ClientIdeMessage.Processing_files.t
     | Rpc of Telemetry.t list
     | Ready
     | Stopped of ClientIdeMessage.rich_error
@@ -25,10 +24,6 @@ module Status = struct
   let to_log_string (t : t) : string =
     match t with
     | Initializing -> "Initializing"
-    | Processing_files p ->
-      Printf.sprintf
-        "Processing_files(%s)"
-        (ClientIdeMessage.Processing_files.to_string p)
     | Rpc requests ->
       Printf.sprintf
         "Rpc [%s]"
@@ -360,22 +355,15 @@ let initialize_from_saved_state
 let process_status_notification
     (t : t) (notification : ClientIdeMessage.notification) : unit =
   let open ClientIdeMessage in
-  let open ClientIdeMessage.Processing_files in
   match (t.state, notification) with
   | (Failed_to_initialize _, _)
   | (Stopped _, _) ->
     (* terminal states, which don't change with notifications *)
     ()
-  | (Uninitialized, Done_init (Ok { total = 0; _ })) ->
+  | (Uninitialized, Done_init (Ok ())) ->
     set_state t (Initialized { status = Status.Ready })
-  | (Uninitialized, Done_init (Ok p)) ->
-    set_state t (Initialized { status = Status.Processing_files p })
   | (Uninitialized, Done_init (Error edata)) ->
     set_state t (Failed_to_initialize edata)
-  | (Initialized _, Processing_files p) ->
-    set_state t (Initialized { status = Status.Processing_files p })
-  | (Initialized _, Done_processing) ->
-    set_state t (Initialized { status = Status.Ready })
   | (_, _) ->
     let message =
       Printf.sprintf

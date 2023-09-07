@@ -220,7 +220,6 @@ function syslog(int $priority, string $message): bool;
 
 namespace HH {
 
-<<__PHPStdLib>>
 function parse_cookies(
   string $header_value,
 )[]: dict<arraykey, mixed>;

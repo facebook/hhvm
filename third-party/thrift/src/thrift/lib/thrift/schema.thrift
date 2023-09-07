@@ -101,7 +101,6 @@ struct DecodedUri {
   6: string fragment;
 } (py3.hidden)
 
-
 /** The attributes that can be associated with any Thrift definition. */
 struct DefinitionAttrs {
   /**

@@ -153,7 +153,7 @@ resolved_location::resolved_location(
   column_ = loc.offset_ - line_offsets[line_ - 1] + 1;
 }
 
-std::string source_manager::find_include_file(
+source_manager::path_or_error source_manager::find_include_file(
     const std::string& filename,
     const std::string& program_path,
     const std::vector<std::string>& search_paths) {
@@ -161,10 +161,13 @@ std::string source_manager::find_include_file(
   boost::filesystem::path path(filename);
   if (path.has_root_directory()) {
     try {
-      return boost::filesystem::canonical(path).string();
+      return source_manager::path_or_error{
+          std::in_place_index<0>, boost::filesystem::canonical(path).string()};
     } catch (const boost::filesystem::filesystem_error& e) {
-      throw std::runtime_error(fmt::format(
-          "Could not find file: {}. Error: {}", filename, e.what()));
+      return source_manager::path_or_error{
+          std::in_place_index<1>,
+          fmt::format(
+              "Could not find file: {}. Error: {}", filename, e.what())};
     }
   }
 
@@ -182,7 +185,8 @@ std::string source_manager::find_include_file(
       sfilename = boost::filesystem::path(*(it)) / filename;
     }
     if (boost::filesystem::exists(sfilename)) {
-      return sfilename.string();
+      return source_manager::path_or_error{
+          std::in_place_index<0>, sfilename.string()};
     }
 #ifdef _WIN32
     // On Windows, handle files found at potentially long paths.
@@ -192,13 +196,15 @@ std::string source_manager::find_include_file(
             .lexically_normal()
             .string();
     if (boost::filesystem::exists(sfilename)) {
-      return sfilename.string();
+      return source_manager::path_or_error{
+          std::in_place_index<0>, sfilename.string()};
     }
 #endif
   }
   // File was not found.
-  throw std::runtime_error(
-      fmt::format("Could not find include file {}", filename));
+  return source_manager::path_or_error{
+      std::in_place_index<1>,
+      fmt::format("Could not find include file {}", filename)};
 }
 
 } // namespace compiler

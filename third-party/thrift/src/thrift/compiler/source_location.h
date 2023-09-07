@@ -22,6 +22,7 @@
 #include <deque>
 #include <string>
 #include <unordered_map>
+#include <variant>
 #include <vector>
 
 #include <boost/optional.hpp>
@@ -142,7 +143,8 @@ class source_manager {
   const char* get_text(source_location loc) const;
 
   // Locates a filename among the include paths.
-  static std::string find_include_file(
+  using path_or_error = std::variant<std::string, std::string>;
+  static path_or_error find_include_file(
       const std::string& filename,
       const std::string& program_path,
       const std::vector<std::string>& search_paths);

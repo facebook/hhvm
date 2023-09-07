@@ -210,13 +210,14 @@ std::string find_include_file(
     const t_program& program,
     const std::vector<std::string>& search_paths,
     diagnostics_engine& diags) {
-  try {
-    return source_manager::find_include_file(
-        filename, program.path(), search_paths);
-  } catch (const std::exception& ex) {
-    diags.error(loc, "{}", ex.what());
-    end_parsing();
+  auto path_or_error =
+      source_manager::find_include_file(filename, program.path(), search_paths);
+  if (path_or_error.index() == 0) {
+    return std::get<0>(path_or_error);
   }
+
+  diags.error(loc, "{}", std::get<1>(path_or_error));
+  end_parsing();
 }
 
 // A semantic analyzer and AST builder for a single Thrift program.

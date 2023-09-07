@@ -1,9 +1,0 @@
-{{> generated}}
-
-package {{program:javaPackage}};
-
-public interface Constants {
-{{#program:constants}}
-  {{#constant:type}}{{> Type}}{{/constant:type}} {{constant:javaCapitalName}} = {{#constant:type}}{{#constant:value}}{{> DefaultValue}}{{/constant:value}}{{/constant:type}};
-{{/program:constants}}
-}

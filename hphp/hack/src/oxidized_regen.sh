@@ -75,6 +75,7 @@ summary "Write oxidized/gen/"
   hphp/hack/src/package/packageInfo.ml                                        \
   hphp/hack/src/parser/full_fidelity_parser_env.ml                            \
   hphp/hack/src/search/utils/searchTypes.ml                                   \
+  hphp/hack/src/typing/service/reason_collector.ml                            \
   hphp/hack/src/typing/service/tast_hashes.ml                                 \
   hphp/hack/src/typing/service/type_counter.ml                                \
   hphp/hack/src/typing/service/map_reduce_ffi.ml                              \

@@ -98,6 +98,7 @@ pub use gen::patt_string;
 pub use gen::patt_var;
 pub use gen::pos_or_decl;
 pub use gen::quickfix;
+pub use gen::reason_collector;
 pub use gen::saved_state_rollouts;
 pub use gen::scoured_comments;
 pub use gen::search_types;

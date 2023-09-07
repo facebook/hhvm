@@ -33,6 +33,7 @@ end
 type map_reducer =
   | TastHashes
   | TypeCounter
+  | ReasonCollector
 [@@deriving eq, ord, show, enum]
 
 [@@@warning "+32"]
@@ -41,6 +42,7 @@ type map_reducer =
 type _ map_reducer_type =
   | TypeForTastHashes : Tast_hashes.t map_reducer_type
   | TypeForTypeCounter : Type_counter.t map_reducer_type
+  | TypeForReasonCollector : Reason_collector.t map_reducer_type
 
 (** Existential wrapper around the type for a map-reducer. *)
 type any_map_reducer_type =
@@ -52,6 +54,7 @@ Needs an entry when adding a map-reducer. *)
 let type_for : map_reducer -> any_map_reducer_type = function
   | TastHashes -> TypeForAny TypeForTastHashes
   | TypeCounter -> TypeForAny TypeForTypeCounter
+  | ReasonCollector -> TypeForAny TypeForReasonCollector
 
 (** A mapping from a map-reducer type to a compatible implementation operating
 on data for that type.
@@ -62,6 +65,7 @@ let implementation_for (type t) (mr : t map_reducer_type) :
   match mr with
   | TypeForTastHashes -> (module Tast_hashes)
   | TypeForTypeCounter -> (module Type_counter)
+  | TypeForReasonCollector -> (module Reason_collector)
 
 module MRMap = WrappedMap.Make (struct
   type t = map_reducer
@@ -88,6 +92,8 @@ let refine_map_reducer_result
   | (TypeForTastHashes, _) -> None
   | (TypeForTypeCounter, TypeForTypeCounter) -> Some (xv, yv)
   | (TypeForTypeCounter, _) -> None
+  | (TypeForReasonCollector, TypeForReasonCollector) -> Some (xv, yv)
+  | (TypeForReasonCollector, _) -> None
 
 let all_of_map_reducer : map_reducer list =
   List.init
@@ -159,11 +165,13 @@ let to_ffi xs =
       { s with tast_hashes = Some tast_hashes }
     | MapReducerResult (TypeForTypeCounter, type_counter) ->
       { s with type_counter = Some type_counter }
+    | MapReducerResult (TypeForReasonCollector, reason_collector) ->
+      { s with reason_collector = Some reason_collector }
   in
   MRMap.fold f xs Map_reduce_ffi.empty
 
 let of_ffi s =
-  let Map_reduce_ffi.{ tast_hashes; type_counter } = s in
+  let Map_reduce_ffi.{ tast_hashes; type_counter; reason_collector } = s in
   let elems =
     List.filter_map
       ~f:Fn.id
@@ -172,6 +180,9 @@ let of_ffi s =
             (TastHashes, MapReducerResult (TypeForTastHashes, tast_hashes)));
         Option.map type_counter ~f:(fun type_counter ->
             (TypeCounter, MapReducerResult (TypeForTypeCounter, type_counter)));
+        Option.map reason_collector ~f:(fun reason_collector ->
+            ( ReasonCollector,
+              MapReducerResult (TypeForReasonCollector, reason_collector) ));
       ]
   in
   MRMap.of_list elems

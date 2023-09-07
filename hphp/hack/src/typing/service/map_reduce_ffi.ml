@@ -12,7 +12,8 @@
 type t = {
   tast_hashes: Tast_hashes.t option; [@yojson.option]
   type_counter: Type_counter.t option; [@yojson.option]
+  reason_collector: Reason_collector.t option; [@yojson.option]
 }
 [@@deriving yojson_of]
 
-let empty = { tast_hashes = None; type_counter = None }
+let empty = { tast_hashes = None; type_counter = None; reason_collector = None }

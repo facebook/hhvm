@@ -90,6 +90,8 @@ search_types::SiKind
 search_types::AutocompleteType
 search_types::SiComplete
 tast::CheckStatus
+reason_collector::Category
+reason_collector::LoggedType
 type_counter::Category
 type_counter::LoggedType
 typing_defs::ClassConstKind

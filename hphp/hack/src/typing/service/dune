@@ -22,11 +22,24 @@
  (preprocess (pps ppx_deriving.std ppx_yojson_conv)))
 
 (library
+ (name reason_collector)
+ (wrapped false)
+ (modules reason_collector)
+ (libraries
+  collections
+  provider_context
+  relative_path
+  typing_ast
+  tast_env)
+ (preprocess (pps ppx_deriving.std ppx_yojson_conv)))
+
+(library
  (name map_reduce_ffi)
  (wrapped false)
  (modules
    map_reduce_ffi)
  (libraries
+  reason_collector
   tast_hashes
   type_counter)
  (preprocess (pps ppx_yojson_conv)))

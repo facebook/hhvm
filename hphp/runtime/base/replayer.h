@@ -22,6 +22,8 @@
 #include <unordered_map>
 #include <utility>
 
+#include <folly/ScopeGuard.h>
+
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/record-replay.h"
@@ -63,7 +65,13 @@ struct Replayer {
   struct WrapNativeFunc<f> {
     inline static const auto id{reinterpret_cast<std::uintptr_t>(f)};
     static R wrapper(A... args) {
-      return get().replayNativeFunc<R>(id, std::forward<A>(args)...);
+      if (auto& replayer{get()}; !replayer.m_inNativeCall) {
+        replayer.m_inNativeCall = true;
+        SCOPE_EXIT { replayer.m_inNativeCall = false; };
+        return replayer.replayNativeFunc<R>(id, std::forward<A>(args)...);
+      } else {
+        return f(std::forward<A>(args)...);
+      }
     }
   };
 
@@ -93,6 +101,7 @@ struct Replayer {
 
   HPHP::DebuggerHook* m_debuggerHook;
   std::unordered_map<std::string, std::string> m_files;
+  bool m_inNativeCall;
   std::deque<NativeCall> m_nativeCalls;
   std::unordered_map<std::string, std::uintptr_t> m_nativeFuncNames;
   std::size_t m_nextThreadCreationOrder;

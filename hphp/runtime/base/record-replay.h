@@ -29,6 +29,18 @@ namespace HPHP {
 constexpr bool shouldRecordReplay(std::string_view name) {
   // #lizard forgives (This disables 'Large Cyclomatic Complexity' check)
   return !(
+    // Native functions for collections and other primitives
+    name.starts_with("DateTime->") ||
+    name.starts_with("HH\\ImmMap->") ||
+    name.starts_with("HH\\ImmSet->") ||
+    name.starts_with("HH\\ImmVector->") ||
+    name.starts_with("HH\\Map->") ||
+    name.starts_with("HH\\Set->") ||
+    name.starts_with("HH\\Vector->") ||
+    name.starts_with("NativeTrimmableMap->") ||
+    name.starts_with("NativeTrimmableMap2->") ||
+    name.starts_with("NativeTrimmableMap3->") ||
+
     // Native functions participating in serialization/deserialization
     name.ends_with("->__sleep") ||
     name.ends_with("->__wakeup") ||
@@ -60,12 +72,15 @@ constexpr bool shouldRecordReplay(std::string_view name) {
     name == "set_error_handler" ||
     name == "set_exception_handler" ||
 
+    // Native functions that return unserializable values
+    name == "create_opaque_value_internal" ||
+    name == "debug_backtrace" ||
+    name == "HH\\dynamic_class_meth" ||
+    name == "unwrap_opaque_value" ||
+
     // Native functions that affect interpreter state
     name == "error_reporting" ||
     name == "fb_rename_function" ||
-
-    // Native functions that return unserializable values
-    name == "HH\\dynamic_class_meth" ||
 
     // Native functions that output directly to stdout/stderr
     name == "printf" ||
@@ -73,50 +88,14 @@ constexpr bool shouldRecordReplay(std::string_view name) {
     name == "vprintf" ||
     name == "vsprintf" ||
 
-    // FIXME: Below are temporarily not being recorded to unblock OBA.
-
-    // Native functions that are causing issues with OBA
-    name == "array_key_exists" ||
-    name == "array_reverse" ||
-    name == "DateTime->__construct" ||
-    name == "DateTime->setTimestamp" ||
-    name == "get_class" ||
-    name == "gettype" ||
-    name == "HH\\ImmMap->__construct" ||
-    name == "HH\\ImmSet->__construct" ||
-    name == "HH\\ImmSet->contains" ||
-    name == "HH\\is_meth_caller" ||
-    name == "HH\\Lib\\_Private\\_Str\\slice_l" ||
-    name == "HH\\Vector->__construct" ||
-    name == "is_a" ||
-    name == "is_callable_with_name" ||
-    name == "is_callable" ||
-    name == "NativeTrimmableMap->get" ||
-    name == "NativeTrimmableMap->remove" ||
-    name == "NativeTrimmableMap->set" ||
-    name == "NativeTrimmableMap2->get" ||
-    name == "NativeTrimmableMap2->remove" ||
-    name == "NativeTrimmableMap2->set" ||
-    name == "spl_object_hash" ||
-    name == "substr" ||
-    name == "var_dump" ||
-
     // Native functions that are common and known to be deterministic
-    name == "HH\\Lib\\_Private\\Native\\last" ||
-    name == "count" ||
-    name == "ord" ||
-    name == "strlen" ||
-    name == "HH\\ImmVector->__construct" ||
-    name == "chr" ||
     name == "HH\\BuiltinEnum::coerce" ||
-    name == "enum_exists" ||
-    name == "floor" ||
-    name == "HH\\Lib\\_Private\\_Str\\strpos_l" ||
-    name == "HH\\Lib\\_Private\\_Str\\starts_with_l" ||
-    name == "is_numeric" ||
-    name == "HH\\Lib\\_Private\\_Str\\split_l" ||
-    name == "HH\\Lib\\_Private\\Native\\first" ||
-    name == "inet_pton"
+    name == "HH\\Lib\\_Private\\Native\\last" ||
+    name == "chr" ||
+    name == "count" ||
+    name == "implode" ||
+    name == "ord" ||
+    name == "strlen"
   );
 }
 

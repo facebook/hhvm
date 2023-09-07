@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/hh/ext_implicit_context.h"
 
+#include <folly/Likely.h>
 #include <folly/Random.h>
 
 #include "hphp/runtime/base/array-init.h"
@@ -25,9 +26,12 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/ext/core/ext_core_closure.h"
 #include "hphp/runtime/ext/hh/ext_hh.h"
 #include "hphp/runtime/vm/coeffects.h"
+#include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
@@ -237,9 +241,19 @@ Object create_special_implicit_context_impl(int64_t type_enum,
       assertx(func->isSoftMakeICInaccessibleMemoize());
       return func->softMakeICInaccessibleSampleRate();
     }();
-    if (sampleRate > 1 && !folly::Random::oneIn(sampleRate)) {
-      // Return the previous object if we coinflipped false
-      return Object{prev_obj};
+    if (sampleRate > 1) {
+      bool shouldSample;
+      if (UNLIKELY(RO::EvalRecordReplay)) {
+        auto rand{reinterpret_cast<int64_t(*)(int64_t, const Variant&)>(
+          Func::lookup(StringData::Make("rand"))->nativeFuncPtr())};
+        shouldSample = rand(0, sampleRate - 1) != 0;
+      } else {
+        shouldSample = !folly::Random::oneIn(sampleRate);
+      }
+      if (shouldSample) {
+        // Return the previous object if we coinflipped false
+        return Object{prev_obj};
+      }
     }
   }
 

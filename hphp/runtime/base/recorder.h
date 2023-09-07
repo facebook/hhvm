@@ -53,7 +53,6 @@ struct Recorder {
   }
 
  private:
-  friend struct Replayer;
   struct DebuggerHook;
   struct LoggerHook;
   struct StdoutHook;
@@ -63,8 +62,8 @@ struct Recorder {
   struct WrapNativeFunc<f> {
     inline static const auto id{reinterpret_cast<std::uintptr_t>(f)};
     static R wrapper(A... args) {
-      if (UNLIKELY(get().m_enabled)) {
-        return get().recordNativeCall(f, id, std::forward<A>(args)...);
+      if (const auto recorder{get()}; UNLIKELY(recorder->m_enabled)) {
+        return recorder->recordNativeCall(f, id, std::forward<A>(args)...);
       } else {
         return f(std::forward<A>(args)...);
       }
@@ -72,16 +71,14 @@ struct Recorder {
   };
 
   static void addNativeFuncName(std::uintptr_t id, const char* name);
-  static Recorder& get();
+  static Recorder* get();
   static StdoutHook* getStdoutHook();
   void onNativeCallArg(const String& arg);
   void onNativeCallEntry(std::uintptr_t id);
   void onNativeCallExit();
   void onNativeCallReturn(const String& ret);
   void onNativeCallThrow(std::exception_ptr exc);
-  void onNativeCallWaitHandle(const Object& object);
-  void onReceived(
-    c_ExternalThreadEventWaitHandle* received, QueueCall::Method method);
+  void onNativeCallWaitHandle(const ObjectData* object);
   void resolveWaitHandles();
   template<typename T> static String serialize(T value);
   Array toArray() const;
@@ -105,13 +102,19 @@ struct Recorder {
       onNativeCallThrow(exc);
       std::rethrow_exception(exc);
     } else {
+      const ObjectData* obj{nullptr};
       if constexpr (std::is_same_v<R, Object>) {
-        if (ret && ret->isWaitHandle()) {
-          onNativeCallWaitHandle(ret);
-          return ret;
+        obj = ret.get();
+      } else if constexpr (std::is_same_v<R, Variant>) {
+        if (ret.isObject()) {
+          obj = ret.asCObjRef().get();
         }
       }
-      onNativeCallReturn(serialize(ret));
+      if (obj != nullptr && obj->isWaitHandle()) {
+        onNativeCallWaitHandle(obj);
+      } else {
+        onNativeCallReturn(serialize(ret));
+      }
       if constexpr (!std::is_void_v<R>) {
         return ret;
       }

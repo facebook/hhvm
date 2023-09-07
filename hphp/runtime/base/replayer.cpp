@@ -32,6 +32,7 @@
 #include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/base/type-resource.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/ext/asio/asio-external-thread-event.h"
 #include "hphp/runtime/ext/asio/asio-session.h"
@@ -70,7 +71,7 @@ String Replayer::init(const String& path) {
   ifs.seekg(0).read(data.data(), data.size());
   BlobDecoder decoder{data.data(), data.size()};
   const ArrayData* ptr;
-  BlobEncoderHelper<decltype(ptr)>::serde(decoder, ptr, false);
+  BlobEncoderHelper<decltype(ptr)>::serde(decoder, ptr, true);
   const Array recording{const_cast<ArrayData*>(ptr)};
   const auto header{recording[String{"header"}].asCArrRef()};
   const auto compilerId{header[String{"compilerId"}].asCStrRef()};
@@ -109,7 +110,7 @@ String Replayer::init(const String& path) {
 
 bool Replayer::onHasReceived() {
   auto& replayer{get()};
-  auto call{replayer.m_queueCalls.front()};
+  const auto call{std::move(replayer.m_queueCalls.front())};
   replayer.m_queueCalls.pop_front();
   always_assert(call.method == QueueCall::Method::HAS_RECEIVED);
   always_assert(call.value.size() == 1);
@@ -142,6 +143,7 @@ struct Replayer::ExternalThreadEvent final : public AsioExternalThreadEvent {
   }
 
   void unserialize(TypedValue& result) override {
+    markAsFinished();
     if (exception) {
       // NOLINTNEXTLINE(facebook-hte-ThrowNonStdExceptionIssue)
       throw req::root<Object>(exception);
@@ -274,6 +276,9 @@ Object Replayer::makeWaitHandle(const NativeCall& call) {
       m_threads[m_nextThreadCreationOrder++] = wh;
       return Object{wh};
     }
+    case c_Awaitable::Kind::Sleep:
+      Object HHVM_STATIC_METHOD(SleepWaitHandle, create, std::int64_t);
+      return HHVM_STATIC_MN(SleepWaitHandle, create)(nullptr, 0);
     case c_Awaitable::Kind::Static:
       if (exc) {
         return Object{c_StaticWaitHandle::CreateFailed(exc.detach())};
@@ -287,7 +292,14 @@ Object Replayer::makeWaitHandle(const NativeCall& call) {
 
 template<>
 void Replayer::nativeArg(const String& recordedArg, const Variant& arg) {
-  const auto str{Recorder::serialize<Variant>(arg)};
+  UnlimitSerializationScope _;
+  VariableSerializer vs{VariableSerializer::Type::DebuggerSerialize};
+  String str;
+  try {
+    str = vs.serializeValue(arg, false);
+  } catch (const req::root<Object>&) {
+    return; // FIXME Handle serialization errors
+  }
   always_assert_flog(recordedArg.equal(str), "{} != {}", recordedArg, str);
 }
 
@@ -419,7 +431,7 @@ void Replayer::nativeArg(const String& recordedArg, ObjectArg arg) {
 
 template<>
 void Replayer::nativeArg(const String& recordedArg, const Resource& arg) {
-  nativeArg<const Variant&>(recordedArg, arg);
+  const_cast<Resource&>(arg) = unserialize<Resource>(recordedArg);
 }
 
 template<>
@@ -448,7 +460,7 @@ void Replayer::nativeArg(const String& recordedArg, Variant& arg) {
 }
 
 c_ExternalThreadEventWaitHandle* Replayer::onReceive(QueueCall::Method method) {
-  const auto call{m_queueCalls.front()};
+  const auto call{std::move(m_queueCalls.front())};
   m_queueCalls.pop_front();
   always_assert(call.method == method);
   c_ExternalThreadEventWaitHandle* received{nullptr};
@@ -468,7 +480,7 @@ NativeCall Replayer::popNativeCall(std::uintptr_t id) {
       }
     }
   }
-  const auto call{m_nativeCalls.front()};
+  const auto call{std::move(m_nativeCalls.front())};
   m_nativeCalls.pop_front();
   if (call.id != id) {
     std::string recordedName, replayedName;

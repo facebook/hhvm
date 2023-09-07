@@ -45,6 +45,7 @@
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/native.h"
+#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/util/blob-encoder.h"
 #include "hphp/util/build-info.h"
 #include "hphp/util/exception.h"
@@ -58,19 +59,31 @@ namespace {
 } // namespace
 
 void Recorder::onHasReceived(bool received) {
-  if (auto& recorder{get()}; UNLIKELY(recorder.m_enabled)) {
-    auto& call{recorder.m_queueCalls.emplace_back()};
+  if (const auto recorder{get()}; UNLIKELY(recorder && recorder->m_enabled)) {
+    auto& call{recorder->m_queueCalls.emplace_back()};
     call.method = QueueCall::Method::HAS_RECEIVED;
     call.value.append(received);
   }
 }
 
 void Recorder::onReceiveSomeUntil(c_ExternalThreadEventWaitHandle* received) {
-  get().onReceived(received, QueueCall::Method::RECEIVE_SOME_UNTIL);
+  if (const auto recorder{get()}; UNLIKELY(recorder && recorder->m_enabled)) {
+    auto& call{recorder->m_queueCalls.emplace_back()};
+    call.method = QueueCall::Method::RECEIVE_SOME_UNTIL;
+    for (auto wh{received}; wh; wh = wh->getNextToProcess()) {
+      call.value.append(recorder->m_threads[wh]);
+    }
+  }
 }
 
 void Recorder::onTryReceiveSome(c_ExternalThreadEventWaitHandle* received) {
-  get().onReceived(received, QueueCall::Method::TRY_RECEIVE_SOME);
+  if (const auto recorder{get()}; UNLIKELY(recorder && recorder->m_enabled)) {
+    auto& call{recorder->m_queueCalls.emplace_back()};
+    call.method = QueueCall::Method::TRY_RECEIVE_SOME;
+    for (auto wh{received}; wh; wh = wh->getNextToProcess()) {
+      call.value.append(recorder->m_threads[wh]);
+    }
+  }
 }
 
 void Recorder::requestExit() {
@@ -102,7 +115,14 @@ void Recorder::requestExit() {
 }
 
 void Recorder::requestInit() {
-  m_enabled = folly::Random::oneIn64(RO::EvalRecordSampleRate);
+  switch (HPHP::Treadmill::sessionKind()) {
+    case HPHP::Treadmill::SessionKind::CLISession:
+    case HPHP::Treadmill::SessionKind::HttpRequest:
+      m_enabled = folly::Random::oneIn64(RO::EvalRecordSampleRate);
+      break;
+    default:
+      break;
+  }
   if (UNLIKELY(m_enabled)) {
     HPHP::DebuggerHook::attach<DebuggerHook>();
   }
@@ -121,7 +141,7 @@ struct Recorder::DebuggerHook final : public HPHP::DebuggerHook {
   void onRequestInit() override {
     const auto serverGlobal{php_global(StaticString{"_SERVER"}).asCArrRef()};
     for (auto i{serverGlobal.begin()}; i; ++i) {
-      Recorder::get().m_serverGlobal.set(i.first(), i.second());
+      Recorder::get()->m_serverGlobal.set(i.first(), i.second());
     }
     HPHP::DebuggerHook::detach();
   }
@@ -129,14 +149,14 @@ struct Recorder::DebuggerHook final : public HPHP::DebuggerHook {
 
 struct Recorder::LoggerHook final : public HPHP::LoggerHook {
   void operator()(const char*, const char* msg, const char* ending) override {
-    get().m_nativeCalls.back().stdouts.append(std::string{msg} + ending);
+    get()->m_nativeCalls.back().stdouts.append(std::string{msg} + ending);
   }
 };
 
 struct Recorder::StdoutHook final : public ExecutionContext::StdoutHook {
   void operator()(const char* s, int len) override {
     g_context->writeStdout(s, len, true);
-    get().m_nativeCalls.back().stdouts.append(std::string(s, len));
+    get()->m_nativeCalls.back().stdouts.append(std::string(s, len));
   }
 };
 
@@ -144,8 +164,8 @@ void Recorder::addNativeFuncName(std::uintptr_t id, const char* name) {
   g_nativeFuncNames[id] = name;
 }
 
-Recorder& Recorder::get() {
-  return g_context->m_recorder.value();
+Recorder* Recorder::get() {
+  return g_context->m_recorder ? &g_context->m_recorder.value() : nullptr;
 }
 
 Recorder::StdoutHook* Recorder::getStdoutHook() {
@@ -160,8 +180,7 @@ String Recorder::serialize(Variant value) {
   try {
     return vs.serializeValue(value, false);
   } catch (const req::root<Object>&) {
-    // TODO Record the error
-    return vs.serializeValue(init_null(), false);
+    return vs.serializeValue(init_null(), false); // FIXME Record the error
   }
 }
 
@@ -273,9 +292,9 @@ void Recorder::onNativeCallThrow(std::exception_ptr exc) {
   onNativeCallExit();
 }
 
-void Recorder::onNativeCallWaitHandle(const Object& object) {
+void Recorder::onNativeCallWaitHandle(const ObjectData* object) {
   resolveWaitHandles();
-  const auto wh{std::bit_cast<c_Awaitable*>(object.get())};
+  const auto wh{std::bit_cast<c_Awaitable*>(object)};
   m_nativeCalls.back().wh = static_cast<std::uint8_t>(wh->getKind()) + 1;
   m_pendingWaitHandleToNativeCall[wh] = m_nativeCalls.size() - 1;
   if (wh->getKind() == c_Awaitable::Kind::ExternalThreadEvent) {
@@ -283,17 +302,6 @@ void Recorder::onNativeCallWaitHandle(const Object& object) {
   }
   wh->incRefCount();
   onNativeCallExit();
-}
-
-void Recorder::onReceived(
-    c_ExternalThreadEventWaitHandle* received, QueueCall::Method method) {
-  if (UNLIKELY(m_enabled)) {
-    auto& call{m_queueCalls.emplace_back()};
-    call.method = method;
-    for (auto wh{received}; wh != nullptr; wh = wh->getNextToProcess()) {
-      call.value.append(m_threads[wh]);
-    }
-  }
 }
 
 void Recorder::resolveWaitHandles() {

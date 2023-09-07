@@ -2331,6 +2331,9 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
             properties.set(s_PHP_DebugDisplay, *val.asTypedValue());
           }
         } catch (const Object &e) {
+          if (UNLIKELY(RO::EvalRecordReplay && RO::EvalReplay)) {
+            throw;
+          }
           assertx(e->instanceof(SystemLib::getErrorClass()) ||
                   e->instanceof(SystemLib::getExceptionClass()));
           assertx(

@@ -155,7 +155,7 @@ type dstate = {
   dcommon: common_state;
   dopen_files: open_files_state; [@opaque]
   changed_files_to_process: Relative_path.Set.t;
-      (** [changed_files_to_process] us grown [During_init] upon [Did_change_watched_files changes]
+      (** [changed_files_to_process] is grown [During_init] upon [Did_change_watched_files changes]
     and then discharged in [initialize2] before changing to [Initialized] state. *)
 }
 [@@deriving show]

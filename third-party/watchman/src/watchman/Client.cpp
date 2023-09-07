@@ -26,11 +26,11 @@ namespace {
 using namespace facebook::eden;
 
 ProcessInfoCache& getProcessInfoCache() {
-  static auto* pnc = new ProcessInfoCache;
-  return *pnc;
+  static auto* pic = new ProcessInfoCache;
+  return *pic;
 }
 
-ProcessInfoHandle lookupProcessName(pid_t pid) {
+ProcessInfoHandle lookupProcessInfo(pid_t pid) {
   return getProcessInfoCache().lookup(pid);
 }
 
@@ -223,7 +223,7 @@ UserClient::UserClient(PrivateBadge, std::unique_ptr<watchman_stream> stm)
     : Client{std::move(stm)},
       since_{std::chrono::system_clock::now()},
       peerPid_{this->stm->getPeerProcessID()},
-      peerName_{lookupProcessName(peerPid_)} {
+      peerInfo_{lookupProcessInfo(peerPid_)} {
   clients.wlock()->insert(this);
 }
 
@@ -263,8 +263,8 @@ ClientDebugStatus UserClient::getDebugStatus() const {
   if (peerPid_) {
     rv.peer.emplace();
     rv.peer->pid = peerPid_;
-    // May briefly, once, block on the ProcessNameCache thread.
-    rv.peer->name = peerName_.get();
+    // May briefly, once, block on the ProcessInfoCache thread.
+    rv.peer->name = peerInfo_.get().name;
   }
   rv.since = std::chrono::system_clock::to_time_t(since_);
   return rv;

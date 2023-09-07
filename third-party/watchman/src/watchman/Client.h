@@ -236,7 +236,7 @@ class UserClient final : public Client {
 
   const std::chrono::system_clock::time_point since_;
   const pid_t peerPid_;
-  const facebook::eden::ProcessInfoHandle peerName_;
+  const facebook::eden::ProcessInfoHandle peerInfo_;
 
   ClientStatus status_;
 };

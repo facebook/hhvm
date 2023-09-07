@@ -126,7 +126,13 @@ jit::vector<AliasClass> backtrace_locals(const IRInstruction& inst) {
 
   return eachFunc([&] (SSATmp* fp, const Func* func, uint32_t depth) {
     auto ac = addInspectable(fp, func, depth);
-    auto const numParams = func->numParams();
+    // Normally only function parameters need to be sync'ed at the call-site
+    // when EnableArgsInBacktraces is true. However, if debugging is enabled,
+    // all named locals need to be sync'ed.
+    auto const numLocals =
+      RuntimeOption::EnableVSDebugger &&
+      RuntimeOption::EvalEmitDebuggerIntrCheck ?
+      func->numNamedLocals() : func->numParams();
 
     if (func->hasReifiedGenerics()) {
       ac |= ALocal { depth, func->reifiedGenericsLocalId() };
@@ -138,9 +144,9 @@ jit::vector<AliasClass> backtrace_locals(const IRInstruction& inst) {
       ac |= APropAny;
     }
 
-    if (numParams) {
-      AliasIdSet params { AliasIdSet::IdRange { 0, numParams } };
-      ac |= ALocal { depth, params };
+    if (numLocals) {
+      AliasIdSet locals { AliasIdSet::IdRange { 0, numLocals } };
+      ac |= ALocal { depth, locals };
     }
 
     // $this

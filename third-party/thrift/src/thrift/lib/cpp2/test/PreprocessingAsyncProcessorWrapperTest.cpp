@@ -68,10 +68,6 @@ class TestPreprocessingAsyncProcessorWrapper
       std::unique_ptr<AsyncProcessor> processor)
       : PreprocessingAsyncProcessorWrapper(std::move(processor)) {}
 
-  const char* getServiceName() override {
-    return "TestPreprocessingAsyncProcessorWrapper";
-  }
-
   PreprocessingAsyncProcessorWrapper::ProcessSerializedCompressedRequestReturnT
   processSerializedCompressedRequestWithMetadataImpl(
       ResponseChannelRequest::UniquePtr,

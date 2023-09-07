@@ -62,6 +62,8 @@ class PreprocessingAsyncProcessorWrapper : public AsyncProcessor {
       const AsyncProcessorFactory::MethodMetadata& methodMetadata)
       override final;
 
+  const char* getServiceName() override final;
+
  protected:
   using ProcessSerializedCompressedRequestReturnT = std::
       tuple<ResponseChannelRequest::UniquePtr, SerializedCompressedRequest>;

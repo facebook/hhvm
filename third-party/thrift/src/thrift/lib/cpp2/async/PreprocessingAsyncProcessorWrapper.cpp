@@ -63,6 +63,12 @@ void PreprocessingAsyncProcessorWrapper::
       tm);
 }
 
+const char* PreprocessingAsyncProcessorWrapper::getServiceName() {
+  auto* innerProcessor = inner();
+  CHECK(innerProcessor != nullptr);
+  return innerProcessor->getServiceName();
+}
+
 void PreprocessingAsyncProcessorWrapper::executeRequest(
     ServerRequest&& request,
     const AsyncProcessorFactory::MethodMetadata& methodMetadata) {

@@ -144,7 +144,7 @@ let check_enum_exhaustiveness
            {
              pos;
              kind = Some str_kind;
-             missing = unhandled;
+             missing = List.map ~f:(fun x -> `Label x) unhandled;
              decl_pos = Cls.pos tc;
            })
     | (true, true, false) ->

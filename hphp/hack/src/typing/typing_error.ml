@@ -84,7 +84,7 @@ module Primary = struct
           pos: Pos.t;
           kind: string option;
           decl_pos: Pos_or_decl.t;
-          missing: string list;
+          missing: [ `Default | `Null | `Label of string ] list;
         }
       | Enum_switch_redundant_default of {
           pos: Pos.t;

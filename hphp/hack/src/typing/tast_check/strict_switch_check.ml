@@ -147,7 +147,7 @@ let get_missing_cases env partitions =
       | Value.Null -> begin
         match data with
         | [_] -> missing_cases
-        | [] -> "null" :: missing_cases
+        | [] -> `Null :: missing_cases
         | (_, redundant_pos, _) :: (_ :: _ as tl) ->
           let (_, first_pos, _) = List.last_exn tl in
           register_err env
@@ -205,7 +205,7 @@ let add_default_if_needed values missing_cases =
   (* write `exists ~f:(fun x -> not @@ finite_or_dynamic x)` instead of
      `forall ~f:finite` to ensure set is non-empty *)
   if ValueSet.exists ~f:(fun x -> not @@ Value.finite_or_dynamic x) values then
-    "default" :: missing_cases
+    `Default :: missing_cases
   else
     missing_cases
 

@@ -536,11 +536,18 @@ module Eval_primary = struct
       (Error_code.EnumSwitchRedundant, claim, reason, [])
 
     let enum_switch_nonexhaustive pos kind decl_pos missing =
+      let to_string = function
+        | `Default -> "default"
+        | `Null -> "null"
+        | `Label str -> str
+      in
       let claim =
         lazy
           ( pos,
             "`switch` statement nonexhaustive; at least the following cases are missing: "
-            ^ (List.map ~f:Markdown_lite.md_codify missing
+            ^ (List.map
+                 ~f:(fun x -> x |> to_string |> Markdown_lite.md_codify)
+                 missing
               |> String.concat ~sep:", ") )
       and reason =
         lazy
@@ -548,7 +555,7 @@ module Eval_primary = struct
             match kind with
             | Some kind -> [(decl_pos, kind ^ " declared here")]
             | None ->
-              if List.exists missing ~f:(String.equal "default") then
+              if List.exists missing ~f:(Poly.( = ) `Default) then
                 [
                   ( decl_pos,
                     "only unions and intersections of bool, null and enums can be switched on without a default"

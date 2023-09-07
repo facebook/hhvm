@@ -42,7 +42,6 @@ function apache_get_rewrite_rules(): HH\FIXME\MISSING_RETURN_TYPE {}
 
 namespace HH {
 
-<<__PHPStdLib>>
 function get_headers_secure()[read_globals]: dict<string, vec<string>>;
 
 }

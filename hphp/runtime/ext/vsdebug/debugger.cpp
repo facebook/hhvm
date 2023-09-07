@@ -1567,11 +1567,9 @@ void Debugger::tryInstallBreakpoints(DebuggerRequestInfo* ri) {
   // after this will be added to the map by onCompilationUnitLoaded().
   if (!ri->m_flags.compilationUnitsMapped) {
     ri->m_flags.compilationUnitsMapped = true;
-    const auto evaledFiles = g_context->m_evaledFiles;
-    for (auto it = evaledFiles.begin(); it != evaledFiles.end(); it++) {
-      const HPHP::Unit* compilationUnit = it->second.unit;
-      const std::string filePath = getFilePathForUnit(compilationUnit);
-      ri->m_breakpointInfo->m_loadedUnits[filePath] = compilationUnit;
+    for (auto const u : g_context->m_loadedUnits) {
+      const std::string filePath = getFilePathForUnit(u);
+      ri->m_breakpointInfo->m_loadedUnits[filePath] = u;
     }
   }
 

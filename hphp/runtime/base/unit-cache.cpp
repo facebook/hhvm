@@ -1641,11 +1641,6 @@ Unit* lookupUnit(const StringData* path, const RepoUnitInfo* info,
   // able to successfully sync this request.
   forAutoload &= *rl_trustAutoloadedUnits;
 
-  /*
-   * NB: the m_evaledFiles map is only for the debugger, and could be omitted
-   * in RepoAuthoritative mode, but currently isn't.
-   */
-
   struct stat s;
   String spath;
   if (info) {
@@ -1709,8 +1704,9 @@ Unit* lookupUnit(const StringData* path, const RepoUnitInfo* info,
           {cunit.unit, s.st_mtime, static_cast<unsigned long>(s.st_mtim.tv_nsec),
            FileLoadFlags::kDup};
       }
-      DEBUGGER_ATTACHED_ONLY(phpDebuggerFileLoadHook(cunit.unit));
     }
+    eContext->m_loadedUnits.emplace(cunit.unit);
+    DEBUGGER_ATTACHED_ONLY(phpDebuggerFileLoadHook(cunit.unit));
   }
 
   lookupTimer.stop();

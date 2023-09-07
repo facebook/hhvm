@@ -391,14 +391,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
    */
   case ReturnHook:
     return may_load_store_kill(
-      AHeapAny | AActRec {inst.src(0)}, AHeapAny,
-      [&] {
-        auto const u =
-          AStackAny.precise_union(ALocalAny)->precise_union(AMIStateAny);
-        // The return hooks trashes the frame context in debug builds
-        if (debug) return *u->precise_union(AFContext { inst.src(0) });
-        return *u;
-      }()
+      AHeapAny | AFFunc { inst.src(0) } | AFMeta { inst.src(0) },
+      AHeapAny,
+      *AStackAny
+        .precise_union(ALocalAny)
+        ->precise_union(AMIStateAny)
+        ->precise_union(AFContext { inst.src(0) })
     );
 
   // The suspend hooks can load anything (re-entering the VM), but can't write

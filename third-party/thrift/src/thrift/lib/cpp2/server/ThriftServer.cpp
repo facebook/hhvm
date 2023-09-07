@@ -388,7 +388,7 @@ void ThriftServer::IdleServerAction::timeoutExpired() noexcept {
     const auto lastRequestTime = server_.lastRequestTime();
     const auto elapsed = std::chrono::steady_clock::now() - lastRequestTime;
     if (elapsed >= timeout_) {
-      VLOG(4) << "shutting down server due to inactivity after "
+      VLOG(1) << "shutting down server due to inactivity after "
               << std::chrono::duration_cast<std::chrono::milliseconds>(elapsed)
                      .count()
               << "ms";
@@ -684,7 +684,7 @@ void ThriftServer::setupThreadManager() {
           THRIFT_FLAG(experimental_use_resource_pools),
           FLAGS_thrift_experimental_use_resource_pools,
           FLAGS_thrift_disable_resource_pools);
-      VLOG(4)
+      VLOG(1)
           << "Using thread manager (resource pools not enabled) on address/port "
           << getAddressAsString() << ": " << explanation;
       if (auto observer = getObserverShared()) {
@@ -785,13 +785,13 @@ void ThriftServer::setupThreadManager() {
           THRIFT_FLAG(experimental_use_resource_pools),
           FLAGS_thrift_experimental_use_resource_pools,
           FLAGS_thrift_disable_resource_pools);
-      VLOG(4) << "Using resource pools on address/port " << getAddressAsString()
+      VLOG(1) << "Using resource pools on address/port " << getAddressAsString()
               << ": " << explanation;
       if (auto observer = getObserverShared()) {
         observer->resourcePoolsEnabled(explanation);
       }
 
-      VLOG(4) << "QPS limit will be enforced by "
+      VLOG(1) << "QPS limit will be enforced by "
               << (FLAGS_thrift_server_enforces_qps_limit
                       ? "the thrift server"
                       : "the concurrency controller");
@@ -873,7 +873,7 @@ void ThriftServer::setupThreadManager() {
   resourcePoolSet().lock();
 
   if (!resourcePoolSet().empty()) {
-    VLOG(4) << "Resource pools (" << resourcePoolSet().size()
+    VLOG(1) << "Resource pools (" << resourcePoolSet().size()
             << "): " << resourcePoolSet().describe();
 
     auto descriptions = resourcePoolSet().poolsDescriptions();
@@ -883,13 +883,13 @@ void ThriftServer::setupThreadManager() {
 
     size_t count{0};
     for (auto description : descriptions) {
-      VLOG(4) << fmt::format("Resource pool [{}]: {}", count++, description);
+      VLOG(1) << fmt::format("Resource pool [{}]: {}", count++, description);
     }
   }
   if (FLAGS_thrift_server_enforces_qps_limit) {
-    VLOG(4) << "QPS limit will be enforced by Thrift Server";
+    VLOG(1) << "QPS limit will be enforced by Thrift Server";
   } else {
-    VLOG(4) << "QPS limit will be enforced by Resource Pool";
+    VLOG(1) << "QPS limit will be enforced by Resource Pool";
   }
 }
 
@@ -957,7 +957,7 @@ bool ThriftServer::runtimeResourcePoolsChecks() {
       FLAGS_thrift_disable_resource_pools;
   if (runtimeDisableResourcePoolsSet()) {
     // No need to check if we've already set this.
-    VLOG(4)
+    VLOG(1)
         << "runtimeResourcePoolsChecks() returns false because of runtimeDisableResourcePoolsSet()";
     return false;
   }
@@ -965,7 +965,7 @@ bool ThriftServer::runtimeResourcePoolsChecks() {
   // but note below that it can exit early.
   if (runtimeServerActions_.checkComplete) {
     auto result = !runtimeDisableResourcePoolsSet();
-    VLOG(4) << "runtimeResourcePoolsChecks() is aleady completed and result is "
+    VLOG(1) << "runtimeResourcePoolsChecks() is aleady completed and result is "
             << result;
     return result;
   }
@@ -980,7 +980,7 @@ bool ThriftServer::runtimeResourcePoolsChecks() {
       // setup() and if it calls runtimeDisableResourcePoolsDeprecated() at that
       // time that will become a fatal error which is what we want (that can
       // only be triggered by a requireResourcePools() call in the server code).
-      VLOG(4)
+      VLOG(1)
           << "It's too early to call runtimeResourcePoolsChecks(), returning True for now";
       return true;
     }
@@ -1055,18 +1055,18 @@ bool ThriftServer::runtimeResourcePoolsChecks() {
         << "runtimeResourcePoolsChecks() returns false because of runtimeDisableResourcePoolsSet()";
     return false;
   }
-  VLOG(4) << "Resource pools check complete - allowed";
+  VLOG(1) << "Resource pools check complete - allowed";
   return true;
 }
 
 void ThriftServer::ensureResourcePools() {
   auto resourcePoolSupplied = !resourcePoolSet().empty();
   if (resourcePoolSupplied) {
-    VLOG(4) << "Resource pools supplied: " << resourcePoolSet().size();
+    VLOG(1) << "Resource pools supplied: " << resourcePoolSet().size();
   }
 
   if (!resourcePoolSet().hasResourcePool(ResourcePoolHandle::defaultSync())) {
-    VLOG(4) << "Creating a default sync pool";
+    VLOG(1) << "Creating a default sync pool";
     // Ensure there is a sync resource pool.
     resourcePoolSet().setResourcePool(
         ResourcePoolHandle::defaultSync(),
@@ -1079,7 +1079,7 @@ void ThriftServer::ensureResourcePools() {
   if (resourcePoolSupplied) {
     if (!resourcePoolSet().hasResourcePool(
             ResourcePoolHandle::defaultAsync())) {
-      VLOG(4)
+      VLOG(1)
           << "Default async pool is NOT supplied, creating a default async pool";
       auto threadFactory = [this]() -> std::shared_ptr<folly::ThreadFactory> {
         auto prefix = getThreadNameForPriority(

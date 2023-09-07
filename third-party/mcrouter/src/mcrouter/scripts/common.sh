@@ -17,7 +17,7 @@ shift $#
 MAKE_ARGS="$@ -j$(nproc)"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-mkdir -p "$PKG_DIR" "$INSTALL_DIR" 
+mkdir -p "$PKG_DIR" "$INSTALL_DIR"
 
 if [ -n "$3" ]; then
   mkdir -p "$INSTALL_AUX_DIR"

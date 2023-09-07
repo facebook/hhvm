@@ -23,6 +23,7 @@ AS_IF(
 )
 AC_SUBST([FBTHRIFT])
 
+AC_SUBST([INSTALL_DIR], [$INSTALL_DIR])
 
 AC_DEFINE_UNQUOTED([MCROUTER_PACKAGE_STRING], ["AC_PACKAGE_VERSION AC_PACKAGE_NAME"], [Full name and version of this package, with version coming first for libmemcached compatibility])
 

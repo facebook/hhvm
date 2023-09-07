@@ -5,7 +5,7 @@
 
 RECIPES_DIR := ./recipes
 
-all: .folly-done .fizz-done .wangle-done .fmt-done .fbthrift-done .gtest-done
+all: .folly-done .fizz-done .wangle-done .fmt-done .mvfst-done .fbthrift-done .gtest-done
 	${RECIPES_DIR}/mcrouter.sh $(PKG_DIR) $(INSTALL_DIR) $(INSTALL_AUX_DIR)
 	touch $@
 
@@ -13,7 +13,7 @@ mcrouter:
 	${RECIPES_DIR}/mcrouter.sh $(PKG_DIR) $(INSTALL_DIR) $(INSTALL_AUX_DIR)
 	touch $@
 
-deps: .folly-done .fizz-done .wangle-done .fmt-done .fbthrift-done .gtest-done
+deps: .folly-done .fizz-done .wangle-done .fmt-done .mvfst-done .fbthrift-done .gtest-done
 	touch $@
 
 .folly-done: .fmt-done
@@ -32,7 +32,11 @@ deps: .folly-done .fizz-done .wangle-done .fmt-done .fbthrift-done .gtest-done
 	${RECIPES_DIR}/fmtlib.sh $(PKG_DIR) $(INSTALL_DIR) $(INSTALL_AUX_DIR)
 	touch $@
 
-.fbthrift-done: .folly-done .fizz-done .wangle-done .fmt-done
+.mvfst-done: .wangle-done
+	${RECIPES_DIR}/mvfst.sh $(PKG_DIR) $(INSTALL_DIR) $(INSTALL_AUX_DIR)
+	touch $@
+
+.fbthrift-done: .folly-done .fizz-done .wangle-done .fmt-done .mvfst-done
 	${RECIPES_DIR}/fbthrift.sh $(PKG_DIR) $(INSTALL_DIR) $(INSTALL_AUX_DIR)
 	touch $@
 

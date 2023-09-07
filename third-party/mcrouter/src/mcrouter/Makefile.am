@@ -257,6 +257,7 @@ mcrouter_LDADD = \
   -lthrifttyperep \
   -lthriftprotocol \
   -lrpcmetadata \
+  -lthriftannotation \
   -lthriftmetadata \
   -lasync \
   -lconcurrency \

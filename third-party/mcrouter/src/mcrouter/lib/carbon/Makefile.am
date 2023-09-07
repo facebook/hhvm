@@ -27,4 +27,4 @@ gen-cpp2/carbon_types.h: gen-cpp2/carbon_types.tcc
 gen-cpp2/carbon_types.tcc: gen-cpp2/carbon_data.cpp
 gen-cpp2/carbon_data.cpp: gen-cpp2/carbon_data.h
 gen-cpp2/carbon_data.h: carbon.thrift
-	@FBTHRIFT@ -gen mstch_cpp2:stack_arguments,sync_methods_return_try,include_prefix=mcrouter/lib/carbon/ carbon.thrift
+	@FBTHRIFT@ -gen mstch_cpp2:stack_arguments,sync_methods_return_try,include_prefix=mcrouter/lib/carbon/ -I $(INSTALL_DIR)/include/ carbon.thrift

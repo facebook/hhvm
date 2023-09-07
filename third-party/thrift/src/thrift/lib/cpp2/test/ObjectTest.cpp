@@ -653,6 +653,10 @@ TEST(Value, Wrapper) {
     EXPECT_FALSE(value.TYPE##Value_ref());                             \
     value.ensure_##TYPE() = VALUE;                                     \
     EXPECT_TRUE(value.is_##TYPE());                                    \
+    value.emplace_##TYPE() = VALUE;                                    \
+    EXPECT_TRUE(value.is_##TYPE());                                    \
+    value.emplace_##TYPE(VALUE);                                       \
+    EXPECT_TRUE(value.is_##TYPE());                                    \
     EXPECT_EQ(value.as_##TYPE(), VALUE);                               \
     EXPECT_EQ(*value.if_##TYPE(), VALUE);                              \
     EXPECT_EQ(value.TYPE##Value_ref(), VALUE);                         \

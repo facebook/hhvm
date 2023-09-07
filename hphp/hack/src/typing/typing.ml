@@ -3403,6 +3403,7 @@ and expr
     ?(is_using_clause = false)
     ?(valkind = Other)
     ?(check_defined = true)
+    ?(is_attribute_param = false)
     ?in_await
     env
     ((_, p, _) as e) =
@@ -3427,6 +3428,7 @@ and expr
       ~is_using_clause
       ~valkind
       ~check_defined
+      ~is_attribute_param
       ?in_await
       ?expected
       env
@@ -3457,6 +3459,7 @@ and raw_expr
     ?lhs_of_null_coalesce
     ?(valkind = Other)
     ?(check_defined = true)
+    ?(is_attribute_param = false)
     ?in_await
     env
     e =
@@ -3470,6 +3473,7 @@ and raw_expr
     ?in_await
     ~valkind
     ~check_defined
+    ~is_attribute_param
     env
     e
 
@@ -3515,16 +3519,31 @@ and exprs
     ?(expected : ExpectedTy.t option)
     ?(valkind = Other)
     ?(check_defined = true)
+    ?(is_attribute_param = false)
     env
     el =
   match el with
   | [] -> (env, [], [])
   | e :: el ->
     let (env, te, ty) =
-      expr ~accept_using_var ?expected ~valkind ~check_defined env e
+      expr
+        ~accept_using_var
+        ?expected
+        ~valkind
+        ~check_defined
+        ~is_attribute_param
+        env
+        e
     in
     let (env, tel, tyl) =
-      exprs ~accept_using_var ?expected ~valkind ~check_defined env el
+      exprs
+        ~accept_using_var
+        ?expected
+        ~valkind
+        ~check_defined
+        ~is_attribute_param
+        env
+        el
     in
     (env, te :: tel, ty :: tyl)
 
@@ -3704,6 +3723,7 @@ and expr_
     ?(expected : ExpectedTy.t option)
     ?(accept_using_var = false)
     ?(is_using_clause = false)
+    ?(is_attribute_param = false)
     ?lhs_of_null_coalesce
     ?in_await
     ~(valkind : valkind)
@@ -3716,9 +3736,9 @@ and expr_
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
     (env, te, ty))
   @@
-  let expr = expr ~check_defined in
-  let exprs = exprs ~check_defined in
-  let raw_expr = raw_expr ~check_defined in
+  let expr = expr ~check_defined ~is_attribute_param in
+  let exprs = exprs ~check_defined ~is_attribute_param in
+  let raw_expr = raw_expr ~check_defined ~is_attribute_param in
   (*
    * Given an expected type for elements (as extracted from a parameter or return hint,
    * or explicit type argument), a list of expressions, and a function that infers
@@ -4776,7 +4796,7 @@ and expr_
       (* Should not expect None as we've checked whether the sid is a typedef *)
       expr_error env p outer
   end
-  | Class_const (cid, mid) -> class_const env p (cid, mid)
+  | Class_const (cid, mid) -> class_const env p ~is_attribute_param (cid, mid)
   | Class_get (((_, _, cid_) as cid), CGstring mid, Is_prop)
     when Env.FakeMembers.is_valid_static env cid_ (snd mid) ->
     let (env, local) = Env.FakeMembers.make_static env cid_ (snd mid) p in
@@ -5344,8 +5364,9 @@ and expr_
   | Package ((p, _) as id) ->
     make_result env p (Aast.Package id) (MakeType.bool (Reason.Rwitness p))
 
-and class_const ?(incl_tc = false) env p (cid, mid) =
-  let (env, _tal, ce, cty) = class_expr env [] cid in
+and class_const ?(is_attribute_param = false) ?(incl_tc = false) env p (cid, mid)
+    =
+  let (env, _tal, ce, cty) = class_expr ~is_attribute_param env [] cid in
   let env =
     match get_node cty with
     | Tclass ((_, n), _, _)
@@ -7980,6 +8001,7 @@ and class_get_res
     ~is_const
     ~transform_fty
     ~coerce_from_ty
+    ?(is_attribute_param = false)
     ?(explicit_targs = [])
     ?(incl_tc = false)
     ?(is_function_pointer = false)
@@ -8002,6 +8024,7 @@ and class_get_res
     ~incl_tc
     ~coerce_from_ty
     ~is_function_pointer
+    ~is_attribute_param
     env
     cid
     cty
@@ -8041,6 +8064,7 @@ and class_get
     ~is_const
     ~transform_fty
     ~coerce_from_ty
+    ?(is_attribute_param = false)
     ?explicit_targs
     ?incl_tc
     ?is_function_pointer
@@ -8054,6 +8078,7 @@ and class_get
       ~is_const
       ~transform_fty
       ~coerce_from_ty
+      ~is_attribute_param
       ?explicit_targs
       ?incl_tc
       ?is_function_pointer
@@ -8073,6 +8098,7 @@ and class_get_inner
     ?(explicit_targs = [])
     ?(incl_tc = false)
     ?(is_function_pointer = false)
+    ?(is_attribute_param = false)
     env
     ((_, _cid_pos, cid_) as cid)
     cty
@@ -8121,6 +8147,7 @@ and class_get_inner
             ~incl_tc
             ~coerce_from_ty
             ~is_function_pointer
+            ~is_attribute_param
             env
             cid
             ty
@@ -8144,6 +8171,7 @@ and class_get_inner
       ~incl_tc
       ~coerce_from_ty
       ~is_function_pointer
+      ~is_attribute_param
       env
       cid
       ty
@@ -8186,6 +8214,7 @@ and class_get_inner
         ~incl_tc
         ~coerce_from_ty
         ~is_function_pointer
+        ~is_attribute_param
         env
         cid
         ty
@@ -8270,6 +8299,7 @@ and class_get_inner
             ~incl_tc
             ~coerce_from_ty
             ~is_function_pointer
+            ~is_attribute_param
             env
             cid
             inter_ty
@@ -8348,16 +8378,18 @@ and class_get_inner
                _;
              } as ce) ->
           let def_pos = get_pos member_decl_ty in
-          Option.iter
-            ~f:(Typing_error_utils.add_typing_error ~env)
-            (TVis.check_class_access
-               ~is_method
-               ~use_pos:p
-               ~def_pos
-               env
-               (vis, get_ce_lsb ce)
-               cid_
-               class_);
+          (* Don't need to check visibilty on class constants in an attribute *)
+          if not is_attribute_param then
+            Option.iter
+              ~f:(Typing_error_utils.add_typing_error ~env)
+              (TVis.check_class_access
+                 ~is_method
+                 ~use_pos:p
+                 ~def_pos
+                 env
+                 (vis, get_ce_lsb ce)
+                 cid_
+                 class_);
           Option.iter
             ~f:(Typing_error_utils.add_typing_error ~env)
             (TVis.check_deprecated ~use_pos:p ~def_pos env ce_deprecated);
@@ -8592,6 +8624,7 @@ and this_for_method env (_, p, cid) default_ty =
  *)
 and class_expr
     ?(check_targs_well_kinded = false)
+    ?(is_attribute_param = false)
     ?(exact = nonexact)
     ?(check_explicit_targs = false)
     (env : env)
@@ -8703,15 +8736,16 @@ and class_expr
         let (env, ty) = Env.fresh_type_error env p in
         make_result env [] (Aast.CI c) ty
       | Some class_ ->
-        Option.iter
-          ~f:(Typing_error_utils.add_typing_error ~env)
-          (TVis.check_top_level_access
-             ~in_signature:false
-             ~use_pos:p
-             ~def_pos:(Cls.pos class_)
-             env
-             (Cls.internal class_)
-             (Cls.get_module class_));
+        if not is_attribute_param then
+          Option.iter
+            ~f:(Typing_error_utils.add_typing_error ~env)
+            (TVis.check_top_level_access
+               ~in_signature:false
+               ~use_pos:p
+               ~def_pos:(Cls.pos class_)
+               env
+               (Cls.internal class_)
+               (Cls.get_module class_));
         (* Don't add Exact superfluously to class type if it's final *)
         let exact =
           if Cls.final class_ then
@@ -10191,7 +10225,7 @@ and string2 env idl =
 and user_attribute env ua =
   let (env, typed_ua_params) =
     List.map_env env ua.ua_params ~f:(fun env e ->
-        let (env, te, _) = expr env e in
+        let (env, te, _) = expr env ~is_attribute_param:true e in
         (env, te))
   in
   (env, { Aast.ua_name = ua.ua_name; Aast.ua_params = typed_ua_params })

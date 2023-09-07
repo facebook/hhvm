@@ -51,27 +51,6 @@ let log_symbol_index_search
       ~caller
       ~search_provider
 
-(*
- * This method is called when the typechecker has finished re-checking a file,
- * or when the saved-state is fully loaded.  Any system that needs to cache
- * this information should capture it here.
- *)
-let update_files
-    ~(ctx : Provider_context.t)
-    ~(sienv : si_env)
-    ~(paths : (Relative_path.t * FileInfo.t * file_source) list) : si_env =
-  match sienv.sie_provider with
-  | NoIndex
-  | MockIndex _ ->
-    sienv
-  | CustomIndex
-  | LocalIndex ->
-    List.fold paths ~init:sienv ~f:(fun sienv (path, info, detector) ->
-        match detector with
-        | SearchUtils.TypeChecker ->
-          LocalSearchService.update_file ~ctx ~sienv ~path ~info
-        | _ -> sienv)
-
 type paths_with_addenda =
   (Relative_path.t * SearchTypes.si_addendum list * SearchUtils.file_source)
   list

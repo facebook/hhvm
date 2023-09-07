@@ -5,10 +5,8 @@
  (libraries
   ast
   decl_provider
-  facts
   file_info
   heap_shared_mem
-  index_builder
   logging
   naming_global
   parser_options
@@ -26,12 +24,10 @@
   ast
   ast_provider
   decl_provider
-  facts
   file_info
   full_fidelity
   future
   glean_options
-  index_builder
   logging
   naming
   naming_global

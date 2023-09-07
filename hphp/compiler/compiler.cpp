@@ -1207,6 +1207,9 @@ bool process(CompilerOptions &po) {
             Option::GenerateHhasHHBC);
 
     if (Option::GenerateTextHHBC || Option::GenerateHhasHHBC) {
+      auto old_repo_auth = RuntimeOption::RepoAuthoritative;
+      RuntimeOption::RepoAuthoritative = RuntimeOption::EvalUseHHBBC;
+      SCOPE_EXIT { RuntimeOption::RepoAuthoritative = old_repo_auth; };
       genText(*ue, po.outputDir);
     }
 

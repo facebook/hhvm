@@ -1,0 +1,4 @@
+File "double_null.php", line 7, characters 10-13:
+Redundant `case` statement (Typing[4021])
+  File "double_null.php", line 5, characters 10-13:
+  `null` already handled here

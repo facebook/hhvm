@@ -544,14 +544,19 @@ module Eval_primary = struct
               |> String.concat ~sep:", ") )
       and reason =
         lazy
-          [
-            ( decl_pos,
-              Option.value_map
-                kind
-                ~default:
-                  "only unions and intersections of bool, null and enums can be switched on without a default"
-                ~f:(fun kind -> kind ^ " declared here") );
-          ]
+          begin
+            match kind with
+            | Some kind -> [(decl_pos, kind ^ " declared here")]
+            | None ->
+              if List.exists missing ~f:(String.equal "default") then
+                [
+                  ( decl_pos,
+                    "only unions and intersections of bool, null and enums can be switched on without a default"
+                  );
+                ]
+              else
+                []
+          end
       in
       (Error_code.EnumSwitchNonexhaustive, claim, reason, [])
 
@@ -568,7 +573,10 @@ module Eval_primary = struct
 
     let enum_switch_not_const pos =
       let claim =
-        lazy (pos, "Case in `switch` on enum is not an enum constant")
+        lazy
+          ( pos,
+            "Case in `switch` must be either an enum constant or a literal expression."
+          )
       in
       (Error_code.EnumSwitchNotConst, claim, lazy [], [])
 

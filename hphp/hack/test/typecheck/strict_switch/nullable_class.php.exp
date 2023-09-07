@@ -1,0 +1,6 @@
+File "nullable_class.php", line 51, characters 11-12:
+All cases already covered; a redundant `default` case prevents detecting future errors. If your goal is to guard against invalid values for this type, do an `is` check before the switch. (Typing[4022])
+  File "nullable_class.php", line 54, characters 5-12:
+  default declared here
+File "nullable_class.php", line 20, characters 10-13:
+Switching on `C` but using constant from `null` (Typing[4023])

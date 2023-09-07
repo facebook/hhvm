@@ -1,0 +1,4 @@
+File "missing_null.php", line 4, characters 11-12:
+`switch` statement nonexhaustive; at least the following cases are missing: `null` (Typing[4019])
+File "missing_null.php", line 5, characters 10-11:
+Switching on `null` but using constant from `int` (Typing[4023])

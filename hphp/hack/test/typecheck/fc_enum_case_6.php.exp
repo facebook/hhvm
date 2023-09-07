@@ -3,4 +3,4 @@ File "fc_enum_case_6.php", line 11, characters 11-12:
   File "fc_enum_case_6.php", line 3, characters 6-8:
   Enum declared here
 File "fc_enum_case_6.php", line 12, characters 10-11:
-Case in `switch` on enum is not an enum constant (Typing[4020])
+Case in `switch` must be either an enum constant or a literal expression. (Typing[4020])

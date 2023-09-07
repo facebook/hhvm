@@ -1,0 +1,4 @@
+File "mixed_not_class.php", line 10, characters 11-12:
+`switch` statement nonexhaustive; at least the following cases are missing: `default` (Typing[4019])
+  File "mixed_not_class.php", line 10, characters 11-12:
+  only unions and intersections of bool, null and enums can be switched on without a default

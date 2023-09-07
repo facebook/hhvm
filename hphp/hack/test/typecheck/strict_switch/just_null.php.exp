@@ -1,0 +1,4 @@
+File "just_null.php", line 13, characters 11-12:
+`switch` statement nonexhaustive; at least the following cases are missing: `null` (Typing[4019])
+File "just_null.php", line 14, characters 10-11:
+Case in `switch` must be either an enum constant or a literal expression. (Typing[4020])

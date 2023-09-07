@@ -4426,13 +4426,13 @@ OPTBLD_INLINE void inclOp(InclOpFlags flags, const char* opName) {
                       nullptr, false);
   }();
 
-  vmStack().popC();
   if (unit == nullptr) {
     if (flags & InclOpFlags::Fatal) {
       raise_error("%s(%s): File not found", opName, path.data());
     } else {
       raise_warning("%s(%s): File not found", opName, path.data());
     }
+    vmStack().popC();
     vmStack().pushBool(false);
     return;
   }
@@ -4440,6 +4440,7 @@ OPTBLD_INLINE void inclOp(InclOpFlags flags, const char* opName) {
   if (!(flags & InclOpFlags::Once) || initial) {
     unit->merge();
   }
+  vmStack().popC();
   vmStack().pushBool(true);
 }
 

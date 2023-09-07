@@ -193,19 +193,12 @@ let load_saved_state ~(env : env) : saved_state_result Lwt.t =
       setup_result.ctx
       (Path.to_string naming_table_path)
   in
-  let naming_table =
-    Relative_path.Set.fold
-      changed_files
-      ~init:naming_table
-      ~f:(fun path naming_table ->
-        let { ClientIdeIncremental.naming_table; _ } =
-          ClientIdeIncremental.update_naming_tables_for_changed_file
-            ~ctx:setup_result.ctx
-            ~naming_table
-            ~sienv:SearchUtils.quiet_si_env
-            ~path
-        in
-        naming_table)
+  let ClientIdeIncremental.Batch.{ naming_table; sienv = _; changes = _ } =
+    ClientIdeIncremental.Batch.update_naming_tables_and_si
+      ~ctx:setup_result.ctx
+      ~naming_table
+      ~sienv:SearchUtils.quiet_si_env
+      ~changes:changed_files
   in
   Lwt.return
     {

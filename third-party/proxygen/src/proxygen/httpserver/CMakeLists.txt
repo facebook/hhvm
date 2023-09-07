@@ -119,9 +119,7 @@ if (BUILD_SAMPLES)
       EXPORT proxygen-exports
       DESTINATION bin
   )
-endif()
 
-if (BUILD_QUIC AND BUILD_SAMPLES)
   add_library(
       proxygenhqloggerhelper
       samples/hq/HQLoggerHelper.cpp

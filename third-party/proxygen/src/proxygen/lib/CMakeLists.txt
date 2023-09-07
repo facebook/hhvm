@@ -58,40 +58,38 @@ add_custom_target(
         ${PROXYGEN_GENERATED_ROOT}/proxygen/lib/utils/TraceFieldType.cpp
 )
 
-if (BUILD_QUIC)
-    set(
-        HTTP3_SOURCES
-        ${HTTP3_SOURCES}
-        http/SynchronizedLruQuicPskCache.cpp
-        http/HQConnector.cpp
-        http/codec/HTTPBinaryCodec.cpp
-        http/codec/HQControlCodec.cpp
-        http/codec/HQFramedCodec.cpp
-        http/codec/HQFramer.cpp
-        http/codec/HQStreamCodec.cpp
-        http/codec/HQUnidirectionalCodec.cpp
-        http/codec/HQUtils.cpp
-        http/session/HQByteEventTracker.cpp
-        http/session/HQDownstreamSession.cpp
-        http/session/HQSession.cpp
-        http/session/HQStreamBase.cpp
-        http/session/HQStreamDispatcher.cpp
-        http/session/HQUpstreamSession.cpp
-        transport/H3DatagramAsyncSocket.cpp
-        transport/PersistentQuicPskCache.cpp
-        transport/PersistentQuicTokenCache.cpp
-    )
-  set(
-      HTTP3_DEPEND_LIBS
-      ${HTTP3_DEPEND_LIBS}
-      mvfst::mvfst_transport
-      mvfst::mvfst_client
-      mvfst::mvfst_fizz_client
-      mvfst::mvfst_server
-      mvfst::mvfst_codec_types
-      mvfst::mvfst_state_machine
-  )
-endif()
+set(
+    HTTP3_SOURCES
+    ${HTTP3_SOURCES}
+    http/SynchronizedLruQuicPskCache.cpp
+    http/HQConnector.cpp
+    http/codec/HTTPBinaryCodec.cpp
+    http/codec/HQControlCodec.cpp
+    http/codec/HQFramedCodec.cpp
+    http/codec/HQFramer.cpp
+    http/codec/HQStreamCodec.cpp
+    http/codec/HQUnidirectionalCodec.cpp
+    http/codec/HQUtils.cpp
+    http/session/HQByteEventTracker.cpp
+    http/session/HQDownstreamSession.cpp
+    http/session/HQSession.cpp
+    http/session/HQStreamBase.cpp
+    http/session/HQStreamDispatcher.cpp
+    http/session/HQUpstreamSession.cpp
+    transport/H3DatagramAsyncSocket.cpp
+    transport/PersistentQuicPskCache.cpp
+    transport/PersistentQuicTokenCache.cpp
+)
+set(
+  HTTP3_DEPEND_LIBS
+  ${HTTP3_DEPEND_LIBS}
+  mvfst::mvfst_transport
+  mvfst::mvfst_client
+  mvfst::mvfst_fizz_client
+  mvfst::mvfst_server
+  mvfst::mvfst_codec_types
+  mvfst::mvfst_state_machine
+)
 
 add_library(
     proxygen

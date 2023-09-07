@@ -360,7 +360,6 @@ function setup_mvfst() {
 
 # Parse args
 JOBS=8
-WITH_QUIC=false
 INSTALL_DEPENDENCIES=true
 FETCH_DEPENDENCIES=true
 PREFIX=""
@@ -370,9 +369,6 @@ while [ "$1" != "" ]; do
   case $1 in
     -j | --jobs ) shift
                   JOBS=$1
-                  ;;
-    -q | --with-quic )
-                  WITH_QUIC=true
                   ;;
     -m | --no-jemalloc )
                   NO_JEMALLOC=true
@@ -433,11 +429,7 @@ setup_zstd
 setup_folly
 setup_fizz
 setup_wangle
-MAYBE_BUILD_QUIC=""
-if [ "$WITH_QUIC" == true ] ; then
-  setup_mvfst
-  MAYBE_BUILD_QUIC="-DBUILD_QUIC=On"
-fi
+setup_mvfst
 
 MAYBE_BUILD_FUZZERS=""
 MAYBE_USE_STATIC_DEPS=""
@@ -464,7 +456,6 @@ cmake                                     \
   -DCMAKE_BUILD_TYPE=RelWithDebInfo       \
   -DCMAKE_PREFIX_PATH="$DEPS_DIR"         \
   -DCMAKE_INSTALL_PREFIX="$PREFIX"        \
-  "$MAYBE_BUILD_QUIC"                     \
   "$MAYBE_BUILD_TESTS"                    \
   "$MAYBE_BUILD_FUZZERS"                  \
   "$MAYBE_BUILD_SHARED_LIBS"              \

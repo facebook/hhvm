@@ -36,35 +36,33 @@ proxygen_add_test(TARGET CodecTests
     testmain
 )
 
-if (BUILD_QUIC)
-  proxygen_add_test(TARGET HQFramerTests
-    SOURCES
-      HQFramerTest.cpp
-    DEPENDS
-      codectestutils
-      proxygen
-      testmain
-      mvfst::mvfst_codec_types
-  )
-
-  proxygen_add_test(TARGET HQCodecTests
-    SOURCES
-      HQCodecTest.cpp
-      HQMultiCodecTest.cpp
-    DEPENDS
-      codectestutils
-      proxygen
-      testmain
-      mvfst::mvfst_codec_types
-      mvfst::mvfst_state_machine
-  )
-
-  proxygen_add_test(TARGET BinaryCodecTests
-    SOURCES
-      HTTPBinaryCodecTest.cpp
-    DEPENDS
-      codectestutils
-      proxygen
-      testmain
+proxygen_add_test(TARGET HQFramerTests
+  SOURCES
+    HQFramerTest.cpp
+  DEPENDS
+    codectestutils
+    proxygen
+    testmain
+    mvfst::mvfst_codec_types
 )
-endif()
+
+proxygen_add_test(TARGET HQCodecTests
+  SOURCES
+    HQCodecTest.cpp
+    HQMultiCodecTest.cpp
+  DEPENDS
+    codectestutils
+    proxygen
+    testmain
+    mvfst::mvfst_codec_types
+    mvfst::mvfst_state_machine
+)
+
+proxygen_add_test(TARGET BinaryCodecTests
+  SOURCES
+    HTTPBinaryCodecTest.cpp
+  DEPENDS
+    codectestutils
+    proxygen
+    testmain
+)

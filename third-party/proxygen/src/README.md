@@ -134,10 +134,9 @@ Proxygen supports HTTP/3!
 
 It depends on Facebook's [mvfst](https://github.com/facebook/mvfst)
 library for the [IETF QUIC](https://github.com/quicwg/base-drafts) transport
-implementation, so we have made that dependency optional.  You can build the
-HTTP/3 code, tests and sample binaries with `./build.sh --with-quic`.
+implementation.
 
-This will also build a handy command-line utility that can be used as an HTTP/3
+This comes with a handy command-line utility that can be used as an HTTP/3
 server and client.
 
 Sample usage:

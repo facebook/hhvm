@@ -41,24 +41,22 @@ proxygen_add_test(TARGET SessionTests
     testmain
 )
 
-if (BUILD_QUIC)
-  proxygen_add_test(TARGET HQSessionTests
-    SOURCES
-      HQByteEventTrackerTest.cpp
-      HQDownstreamSessionTest.cpp
-      HQSessionMocksTest.cpp
-      HQSessionTestCommon.cpp
-      HQStreamBaseTest.cpp
-      HQStreamDispatcherTest.cpp
-      HQUpstreamSessionTest.cpp
-    DEPENDS
-      codectestutils
-      sessiontestutils
-      testtransport
-      proxygen
-      testmain
-      mvfst::mvfst_codec_types
-      mvfst::mvfst_dsr_types
-      mvfst::mvfst_state_machine
-  )
-endif()
+proxygen_add_test(TARGET HQSessionTests
+  SOURCES
+    HQByteEventTrackerTest.cpp
+    HQDownstreamSessionTest.cpp
+    HQSessionMocksTest.cpp
+    HQSessionTestCommon.cpp
+    HQStreamBaseTest.cpp
+    HQStreamDispatcherTest.cpp
+    HQUpstreamSessionTest.cpp
+  DEPENDS
+    codectestutils
+    sessiontestutils
+    testtransport
+    proxygen
+    testmain
+    mvfst::mvfst_codec_types
+    mvfst::mvfst_dsr_types
+    mvfst::mvfst_state_machine
+)

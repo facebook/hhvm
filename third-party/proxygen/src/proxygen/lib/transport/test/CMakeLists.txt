@@ -8,17 +8,15 @@ if(NOT BUILD_TESTS)
     return()
 endif()
 
-if (BUILD_QUIC)
-  proxygen_add_test(TARGET TransportTests
-    SOURCES
-        H3DatagramAsyncSocketTest.cpp
-      DEPENDS
-        codectestutils
-        sessiontestutils
-        proxygen
-        testmain
-        mvfst::mvfst_codec_types
-        mvfst::mvfst_dsr_types
-        mvfst::mvfst_state_machine
-    )
-endif()
+proxygen_add_test(TARGET TransportTests
+  SOURCES
+      H3DatagramAsyncSocketTest.cpp
+    DEPENDS
+      codectestutils
+      sessiontestutils
+      proxygen
+      testmain
+      mvfst::mvfst_codec_types
+      mvfst::mvfst_dsr_types
+      mvfst::mvfst_state_machine
+)

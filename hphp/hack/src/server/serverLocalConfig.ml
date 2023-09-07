@@ -251,8 +251,6 @@ type t = {
       (** POC: @nzthomas - allow ClientIdeDaemon to grab any naming table from disk before trying Watchman / Manifold *)
   ide_naming_table_update_threshold: int;
       (** POC: @nzthomas, if clientIDEDaemon is loading a naming table from disk instead of Manifold, set a globalrev distance threshold *)
-  ide_batch_process_changes: bool;
-      (* clientIdeDaemon should synchronously process file-changes, both for saved-state changes and incremental changes *)
   dump_tast_hashes: bool;
       (** Dump tast hashes into /tmp/hh_server/tast_hashes*)
   use_compressed_dep_graph: bool;
@@ -347,7 +345,6 @@ let default =
     hh_distc_fanout_threshold = 500_000;
     ide_load_naming_table_on_disk = true;
     ide_naming_table_update_threshold = 1000;
-    ide_batch_process_changes = true;
     dump_tast_hashes = false;
     glean_v2 = false;
   }
@@ -1050,12 +1047,6 @@ let load_
       ~default:default.ide_naming_table_update_threshold
       config
   in
-  let ide_batch_process_changes =
-    bool_
-      "ide_batch_process_changes"
-      ~default:default.ide_batch_process_changes
-      config
-  in
   let dump_tast_hashes =
     bool_ "dump_tast_hashes" ~default:default.dump_tast_hashes config
   in
@@ -1165,7 +1156,6 @@ let load_
     hh_distc_fanout_threshold;
     ide_load_naming_table_on_disk;
     ide_naming_table_update_threshold;
-    ide_batch_process_changes;
     dump_tast_hashes;
     glean_v2;
   }
@@ -1218,6 +1208,5 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       ide_load_naming_table_on_disk = options.ide_load_naming_table_on_disk;
       ide_naming_table_update_threshold =
         options.ide_naming_table_update_threshold;
-      ide_batch_process_changes = options.ide_batch_process_changes;
       glean_v2 = options.glean_v2;
     }

@@ -44,7 +44,6 @@ lazy_parse = {use_saved_state}
 lazy_init2 = {use_saved_state}
 ide_symbolindex_search_provider = LocalIndex
 allow_unstable_features = true
-ide_batch_process_changes = true
 """.format(
                     use_saved_state=str(use_saved_state).lower(),
                 )

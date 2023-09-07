@@ -48,9 +48,9 @@ type open_files_state = {
       the most recent version of the errors to have been returned to clientLsp
       by didOpen/didChange/didClose/codeAction. *)
   changed_files_to_process: Relative_path.Set.t;
-      (** changed_files_to_process is grown during File_changed events, and steadily
-      whittled down one by one in `serve` as we get around to processing them
-      via `process_changed_files`. *)
+      (** [changed_files_to_process] us grown [During_init] upon [Did_change_watched_files changes]
+      and then discharged in [initialize2] before changing to [Initialized] state.
+      TODO(ljw): move this field into [During_init]. *)
   changed_files_denominator: int;
       (** the user likes to see '5/10' for how many changed files has been processed
       in the current batch of changes. The denominator counts up for every new file
@@ -97,11 +97,11 @@ The key algorithms which read from these data-structures are:
 The invariants for forward and reverse naming tables:
 1. These tables only ever reflect truth about disk files; they are unaffected
    by open_file entries.
-2. They are updated asynchronously by update_naming_tables_for_changed_file_lwt
-   in response to DidChangeWatchedFile events. Thus, we might be asked to fetch
-   a shallow decl even before the naming-tables have been fully updated.
-   We might for instance read the naming-table and try to fetch a shallow
-   decl from a file that doesn't even exist on disk any more.
+2. They are updated in response to DidChangeWatchedFileEvents.
+   Because watchman and VSCode send those events asynchronously,
+   we might for instance find ourselves being asked to compute a TAST
+   by reading the naming-table and fetching a shallow-decl from a file
+   that doesn't even exist on disk any more (even though we don't yet know it).
 
 The invariants for AST, TAST, shallow, and folded-decl caches:
 1. AST, if present, reflects the AST of its entry's source text,
@@ -411,42 +411,27 @@ let initialize2
     let changed_files_denominator =
       Relative_path.Set.cardinal changed_files_to_process
     in
+    let ClientIdeIncremental.Batch.{ naming_table; sienv; changes = _changes } =
+      batch_update_naming_table_and_invalidate_caches
+        ~ctx:(make_empty_ctx dstate.dcommon)
+        ~naming_table
+        ~sienv
+        ~local_memory:dstate.dcommon.local_memory
+        ~open_files:dstate.dfiles.open_files
+        changed_files_to_process
+    in
     let istate =
-      if dstate.dcommon.local_config.ServerLocalConfig.ide_batch_process_changes
-      then
-        let ClientIdeIncremental.Batch.
-              { naming_table; sienv; changes = _changes } =
-          batch_update_naming_table_and_invalidate_caches
-            ~ctx:(make_empty_ctx dstate.dcommon)
-            ~naming_table
-            ~sienv
-            ~local_memory:dstate.dcommon.local_memory
-            ~open_files:dstate.dfiles.open_files
-            changed_files_to_process
-        in
-        {
-          naming_table;
-          sienv;
-          icommon = dstate.dcommon;
-          ifiles =
-            {
-              open_files = dstate.dfiles.open_files;
-              changed_files_to_process = Relative_path.Set.empty;
-              changed_files_denominator = 0;
-            };
-        }
-      else
-        {
-          naming_table;
-          sienv;
-          icommon = dstate.dcommon;
-          ifiles =
-            {
-              open_files = dstate.dfiles.open_files;
-              changed_files_to_process;
-              changed_files_denominator;
-            };
-        }
+      {
+        naming_table;
+        sienv;
+        icommon = dstate.dcommon;
+        ifiles =
+          {
+            open_files = dstate.dfiles.open_files;
+            changed_files_to_process = Relative_path.Set.empty;
+            changed_files_denominator = 0;
+          };
+      }
     in
     (* Note: Done_init is needed to (1) transition clientIdeService state, (2) cause
        clientLsp to know to ask for squiggles to be refreshed on open files. *)
@@ -458,11 +443,7 @@ let initialize2
         ~message:
           (ClientIdeMessage.Notification (ClientIdeMessage.Done_init (Ok p)))
     in
-    let count =
-      Option.some_if
-        dstate.dcommon.local_config.ServerLocalConfig.ide_batch_process_changes
-        changed_files_denominator
-    in
+    let count = Some changed_files_denominator in
     let (_ : float) = log_startup_time "initialize2" start_time ?count in
     log_debug "initialize2.done";
     Lwt.return (Initialized istate)
@@ -743,9 +724,7 @@ let handle_request
       }
     in
     (update_state_files state dfiles, Ok ())
-  | (Initialized istate, Did_change_watched_files changes)
-    when istate.icommon.local_config.ServerLocalConfig.ide_batch_process_changes
-    ->
+  | (Initialized istate, Did_change_watched_files changes) ->
     let ClientIdeIncremental.Batch.{ naming_table; sienv; changes = _changes } =
       batch_update_naming_table_and_invalidate_caches
         ~ctx:(make_empty_ctx istate.icommon)
@@ -757,18 +736,6 @@ let handle_request
     in
     let istate = { istate with naming_table; sienv } in
     (Initialized istate, Ok ())
-  | (Initialized { ifiles; _ }, Did_change_watched_files changes) ->
-    (* Legacy, will be deleted once we rollout ide_batch_process_changes *)
-    let ifiles =
-      {
-        ifiles with
-        changed_files_to_process =
-          Relative_path.Set.union ifiles.changed_files_to_process changes;
-        changed_files_denominator =
-          ifiles.changed_files_denominator + Relative_path.Set.cardinal changes;
-      }
-    in
-    (update_state_files state ifiles, Ok ())
     (* didClose *)
   | (During_init { dfiles = files; _ }, Did_close file_path) ->
     let path =

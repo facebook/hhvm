@@ -23,7 +23,7 @@ ocaml_ffi! {
         parser_options: DeclParserOptions,
         deregister_php_stdlib_if_hhi: bool,
         root: PathBuf,
-        filenames: Vec<RelativePath>,
+        filenames: Vec<(RelativePath, Option<Option<Vec<u8>>>)>,
     ) -> Vec<(RelativePath, Option<(FileInfo, Vec<SiAddendum>)>)> {
         let filenames_and_contents = par_read_file_root_only(&root, filenames).unwrap_ocaml();
         let filenames_and_contents: Vec<_> = filenames_and_contents
@@ -65,22 +65,31 @@ ocaml_ffi! {
 
 // For each file in filenames, return a tuple of its path followed by `Some` of
 // its contents if the file is found, otherwise `None`.
+// The filenames are either [("file1.php", None); ("absent.php", None)] to
+// indicate that we here in Rust should try to fetch the contents,
+// or [("file1.php", Some(Some(present))); ("absent.php", Some(None))] to
+// indicate that the content was supplied by our ocaml caller (used for
+// testing only, since the ocaml TestDisk isn't available to Rust).
 fn par_read_file_root_only(
     root: &Path,
-    filenames: Vec<RelativePath>,
+    filenames: Vec<(RelativePath, Option<Option<Vec<u8>>>)>,
 ) -> Result<Vec<(RelativePath, Option<Vec<u8>>)>> {
     filenames
         .into_par_iter()
-        .map(|relpath| {
-            let prefix = relpath.prefix();
-            let abspath = match prefix {
-                relative_path::Prefix::Root => root.join(relpath.path()),
-                _ => panic!("should only be reading files relative to root"),
-            };
-            match std::fs::read(abspath) {
-                Ok(text) => Ok((relpath, Some(text))),
-                Err(e) if e.kind() == io::ErrorKind::NotFound => Ok((relpath, None)),
-                Err(e) => Err(e.into()),
+        .map(|(relpath, test_contents)| {
+            if let Some(test_contents) = test_contents {
+                Ok((relpath, test_contents))
+            } else {
+                let prefix = relpath.prefix();
+                let abspath = match prefix {
+                    relative_path::Prefix::Root => root.join(relpath.path()),
+                    _ => panic!("should only be reading files relative to root"),
+                };
+                match std::fs::read(abspath) {
+                    Ok(text) => Ok((relpath, Some(text))),
+                    Err(e) if e.kind() == io::ErrorKind::NotFound => Ok((relpath, None)),
+                    Err(e) => Err(e.into()),
+                }
             }
         })
         .collect()

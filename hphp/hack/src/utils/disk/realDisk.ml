@@ -173,3 +173,5 @@ let rec treesize path : int =
   | _ -> 0
 
 let filemtime file = (Unix.stat file).Unix.st_mtime
+
+let is_real_disk = true

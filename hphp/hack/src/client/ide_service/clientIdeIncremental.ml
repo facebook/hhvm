@@ -130,7 +130,7 @@ module Batch = struct
     DeclParserOptions.t ->
     bool ->
     Path.t ->
-    Relative_path.t list ->
+    (Relative_path.t * string option option) list ->
     (Relative_path.t * (FileInfo.t * SearchTypes.si_addendum list) option) list
     = "batch_index_hackrs_ffi_root_relative_paths_only"
 
@@ -151,6 +151,21 @@ module Batch = struct
       (popt : ParserOptions.t) (paths : Relative_path.t list) :
       (Relative_path.t * (FileInfo.t * SearchTypes.si_addendum list) option)
       list =
+    let paths =
+      if Disk.is_real_disk then
+        List.map paths ~f:(fun path -> (path, None))
+      else
+        (* For tests which use test disk, the test disk lives in ocaml and can't be read
+           from the FFI rust parallel reader which only uses std::fs::read. Therefore, in
+           the test case, we'll read the files (sequentially) ourselves and give them to
+           rust. *)
+        List.map paths ~f:(fun path ->
+            let contents =
+              try Some (Disk.cat (Relative_path.to_absolute path)) with
+              | Disk.No_such_file_or_directory _ -> None
+            in
+            (path, Some contents))
+    in
     batch_index_root_relative_paths_only
       (DeclParserOptions.from_parser_options popt)
       (ParserOptions.deregister_php_stdlib popt)

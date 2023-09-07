@@ -11,6 +11,8 @@ end
 module type S = sig
   include module type of Types
 
+  val is_real_disk : bool
+
   val cat : string -> string
 
   val write_file : file:string -> contents:string -> unit

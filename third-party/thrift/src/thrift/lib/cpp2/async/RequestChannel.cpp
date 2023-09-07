@@ -15,9 +15,11 @@
  */
 
 #include <thrift/lib/cpp2/async/RequestChannel.h>
+#include <thrift/lib/cpp2/transport/core/RpcMetadataPlugins.h>
 
 namespace apache {
 namespace thrift {
+
 void RequestChannel::sendRequestResponse(
     const RpcOptions& rpcOptions,
     MethodMetadata&& metadata,
@@ -179,7 +181,10 @@ class RequestClientCallbackWrapper
     if (kTempKillswitch__EnableFdPassing) {
       tHeader->fds = std::move(firstResponse.fds.dcheckReceivedOrEmpty());
     }
-    apache::thrift::detail::fillTHeaderFromResponseRpcMetadata(
+    if (auto tfmr = firstResponse.metadata.frameworkMetadata_ref()) {
+      detail::ingestFrameworkMetadataFromResponse(std::move(*tfmr));
+    }
+    detail::fillTHeaderFromResponseRpcMetadata(
         firstResponse.metadata, *tHeader);
     requestCallback_.release()->onResponse(ClientReceiveState::create(
         std::move(firstResponse.payload),

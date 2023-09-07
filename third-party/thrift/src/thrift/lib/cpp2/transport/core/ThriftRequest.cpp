@@ -32,6 +32,12 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
     folly::F14NodeMap<std::string, std::string>&) {
   return false;
 }
+THRIFT_PLUGGABLE_FUNC_REGISTER(
+    std::unique_ptr<folly::IOBuf>,
+    makeThriftFrameworkMetadataOnResponse,
+    apache::thrift::transport::THeader::StringToStringMap&) {
+  return nullptr;
+}
 } // namespace detail
 
 ThriftRequestCore::ThriftRequestCore(
@@ -260,6 +266,10 @@ ResponseRpcMetadata ThriftRequestCore::makeResponseRpcMetadata(
     transport::THeader::StringToStringMap&& writeHeaders,
     std::optional<ProxiedPayloadMetadata> proxiedPayloadMetadata) {
   ResponseRpcMetadata metadata;
+
+  if (auto tfmr = detail::makeThriftFrameworkMetadataOnResponse(writeHeaders)) {
+    metadata.frameworkMetadata_ref() = std::move(tfmr);
+  }
 
   metadata.proxiedPayloadMetadata_ref().from_optional(proxiedPayloadMetadata);
 

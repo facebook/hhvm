@@ -75,7 +75,7 @@ public class ExceptionUtilTest {
 
     ResponseRpcMetadata metadata =
         new ResponseRpcMetadata(
-            Collections.singletonMap("ex", "x"), 0L, 0, null, null, null, 0, null, null);
+            Collections.singletonMap("ex", "x"), 0L, 0, null, null, null, 0, null, null, null);
 
     ClientResponsePayload responsePayload =
         ClientResponsePayload.createException(myExp, metadata, null, false);
@@ -90,7 +90,7 @@ public class ExceptionUtilTest {
 
     ResponseRpcMetadata metadata =
         new ResponseRpcMetadata(
-            Collections.singletonMap("ex", "3"), 0L, 0, null, null, null, 0, null, null);
+            Collections.singletonMap("ex", "3"), 0L, 0, null, null, null, 0, null, null, null);
 
     ClientResponsePayload responsePayload =
         ClientResponsePayload.createException(myExp, metadata, null, false);
@@ -106,7 +106,7 @@ public class ExceptionUtilTest {
 
     ResponseRpcMetadata metadata =
         new ResponseRpcMetadata(
-            Collections.singletonMap("ex", "3"), 0L, 0, null, null, null, 0, null, null);
+            Collections.singletonMap("ex", "3"), 0L, 0, null, null, null, 0, null, null, null);
 
     ClientResponsePayload responsePayload =
         ClientResponsePayload.createException(myExp, metadata, null, false);
@@ -121,7 +121,7 @@ public class ExceptionUtilTest {
 
     ResponseRpcMetadata metadata =
         new ResponseRpcMetadata(
-            Collections.singletonMap("ex", "4"), 0L, 0, null, null, null, 0, null, null);
+            Collections.singletonMap("ex", "4"), 0L, 0, null, null, null, 0, null, null, null);
 
     ClientResponsePayload responsePayload =
         ClientResponsePayload.createException(myExp, metadata, null, false);
@@ -135,7 +135,8 @@ public class ExceptionUtilTest {
     MyException myExp = new MyException("my exception");
 
     ResponseRpcMetadata metadata =
-        new ResponseRpcMetadata(Collections.emptyMap(), 0L, 0, null, null, null, 0, null, null);
+        new ResponseRpcMetadata(
+            Collections.emptyMap(), 0L, 0, null, null, null, 0, null, null, null);
 
     ClientResponsePayload responsePayload =
         ClientResponsePayload.createException(myExp, metadata, null, false);
@@ -149,7 +150,7 @@ public class ExceptionUtilTest {
 
     ResponseRpcMetadata metadata =
         new ResponseRpcMetadata(
-            Collections.singletonMap("ex", "5"), 0L, 0, null, null, null, 0, null, null);
+            Collections.singletonMap("ex", "5"), 0L, 0, null, null, null, 0, null, null, null);
 
     ClientResponsePayload responsePayload =
         ClientResponsePayload.createException(myExp, metadata, null, false);

@@ -55,6 +55,10 @@ THRIFT_PLUGGABLE_FUNC_DECLARE(
     bool,
     handleFrameworkMetadataHeader,
     folly::F14NodeMap<std::string, std::string>&);
+THRIFT_PLUGGABLE_FUNC_DECLARE(
+    std::unique_ptr<folly::IOBuf>,
+    makeThriftFrameworkMetadataOnResponse,
+    apache::thrift::transport::THeader::StringToStringMap&);
 } // namespace detail
 
 /**

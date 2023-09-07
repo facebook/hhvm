@@ -35,6 +35,9 @@ THRIFT_PLUGGABLE_FUNC_DECLARE(
 
 THRIFT_PLUGGABLE_FUNC_DECLARE(const std::string&, getFrameworkMetadataHttpKey);
 
+THRIFT_PLUGGABLE_FUNC_DECLARE(
+    void, ingestFrameworkMetadataFromResponse, std::unique_ptr<folly::IOBuf>&&);
+
 } // namespace detail
 } // namespace thrift
 } // namespace apache

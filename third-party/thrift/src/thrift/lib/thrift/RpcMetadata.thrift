@@ -297,6 +297,7 @@ struct ResponseRpcMetadata {
   // 11: Deprecated
   @thrift.Box
   12: optional FdMetadata fdMetadata;
+  13: optional IOBufPtr frameworkMetadata;
 }
 
 enum ResponseRpcErrorCategory {

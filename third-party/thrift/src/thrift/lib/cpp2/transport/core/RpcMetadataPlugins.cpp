@@ -32,4 +32,8 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
   return ret;
 }
 
+THRIFT_PLUGGABLE_FUNC_REGISTER(
+    void,
+    ingestFrameworkMetadataFromResponse,
+    std::unique_ptr<folly::IOBuf>&&) {}
 } // namespace apache::thrift::detail

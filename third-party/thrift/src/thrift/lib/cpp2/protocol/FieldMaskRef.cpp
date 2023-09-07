@@ -119,7 +119,7 @@ void copy_impl(MaskRef ref, const T& src, T& dst, Id id) {
     Object newObject;
     ref.copy(src.at(id).objectValue_ref().value(), newObject);
     if (!newObject.empty()) {
-      dst[id].emplace_object() = std::move(newObject);
+      dst[id].ensure_object() = std::move(newObject);
     }
     return;
   }
@@ -127,7 +127,7 @@ void copy_impl(MaskRef ref, const T& src, T& dst, Id id) {
     folly::F14FastMap<Value, Value> newMap;
     ref.copy(src.at(id).mapValue_ref().value(), newMap);
     if (!newMap.empty()) {
-      dst[id].emplace_map() = std::move(newMap);
+      dst[id].ensure_map() = std::move(newMap);
     }
     return;
   }

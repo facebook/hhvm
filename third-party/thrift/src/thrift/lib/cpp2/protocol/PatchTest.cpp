@@ -853,17 +853,16 @@ TEST_F(PatchTest, EnsureAndPatchObject) {
   // If field 1 doesn't exist, set it to an object that has field_2, whose
   // value is 3.
   Value ensure;
-  ensure.emplace_object()[FieldId{1}]
-      .emplace_object()[FieldId{2}]
-      .emplace_i32() = 3;
+  ensure.ensure_object()[FieldId{1}].ensure_object()[FieldId{2}].ensure_i32() =
+      3;
 
   // Assign 5 to field 1's field 4.
   Value fieldPatch;
-  fieldPatch.emplace_object()[FieldId{1}]
-      .emplace_object()[FieldId(op::PatchOp::PatchPrior)]
-      .emplace_object()[FieldId{4}]
-      .emplace_object()[FieldId(op::PatchOp::Assign)]
-      .emplace_i32() = 5;
+  fieldPatch.ensure_object()[FieldId{1}]
+      .ensure_object()[FieldId(op::PatchOp::PatchPrior)]
+      .ensure_object()[FieldId{4}]
+      .ensure_object()[FieldId(op::PatchOp::Assign)]
+      .ensure_i32() = 5;
 
   auto patchObj = patchAddOperation(
       makePatch(op::PatchOp::EnsureStruct, ensure),
@@ -888,15 +887,14 @@ TEST_F(PatchTest, EnsureAndPatchObject2) {
   // If field 1 doesn't exist, set it to an object that has field_2, whose
   // value is 3.
   Value ensure;
-  ensure.emplace_object()[FieldId{1}]
-      .emplace_object()[FieldId{2}]
-      .emplace_i32() = 3;
+  ensure.ensure_object()[FieldId{1}].ensure_object()[FieldId{2}].ensure_i32() =
+      3;
 
   // Assign empty struct to field 1.
   Value fieldPatch;
-  fieldPatch.emplace_object()[FieldId{1}]
-      .emplace_object()[FieldId(op::PatchOp::Assign)]
-      .emplace_object();
+  fieldPatch.ensure_object()[FieldId{1}]
+      .ensure_object()[FieldId(op::PatchOp::Assign)]
+      .ensure_object();
 
   auto patchObj = patchAddOperation(
       makePatch(op::PatchOp::EnsureStruct, ensure),
@@ -1629,12 +1627,12 @@ TEST_F(PatchTest, ApplyGeneratedPatchToSerializedData) {
 
 TEST(Patch, ManuallyConstruct) {
   protocol::Object s;
-  s[FieldId{1}].emplace_string() = "hi";
+  s[FieldId{1}].ensure_string() = "hi";
 
   protocol::Object patch;
   auto& patchPrior =
-      patch[static_cast<FieldId>(op::PatchOp::PatchPrior)].emplace_object();
-  auto& stringPatch = patchPrior[FieldId{1}].emplace_object();
+      patch[static_cast<FieldId>(op::PatchOp::PatchPrior)].ensure_object();
+  auto& stringPatch = patchPrior[FieldId{1}].ensure_object();
   stringPatch[static_cast<FieldId>(op::PatchOp::Add)] =
       asValueStruct<type::binary_t>("(");
   stringPatch[static_cast<FieldId>(op::PatchOp::Put)] =
@@ -1673,32 +1671,32 @@ TEST_F(PatchTest, PrettyPrintPatch) {
 
 TEST_F(PatchTest, RemoveField) {
   Object obj;
-  obj[FieldId{1}].emplace_i32() = 10;
-  obj[FieldId{2}].emplace_i32() = 20;
-  obj[FieldId{3}].emplace_i32() = 30;
+  obj[FieldId{1}].ensure_i32() = 10;
+  obj[FieldId{2}].ensure_i32() = 20;
+  obj[FieldId{3}].ensure_i32() = 30;
 
   Object patch;
-  patch[static_cast<FieldId>(op::PatchOp::Remove)].emplace_set() = {};
+  patch[static_cast<FieldId>(op::PatchOp::Remove)].ensure_set() = {};
   applyPatch(patch, obj);
   EXPECT_TRUE(obj.contains(FieldId{1}));
   EXPECT_TRUE(obj.contains(FieldId{2}));
   EXPECT_TRUE(obj.contains(FieldId{3}));
 
-  patch[static_cast<FieldId>(op::PatchOp::Remove)].emplace_set() = {
+  patch[static_cast<FieldId>(op::PatchOp::Remove)].ensure_set() = {
       asValueStruct<type::i16_t>(1), asValueStruct<type::i16_t>(2)};
   applyPatch(patch, obj);
   EXPECT_FALSE(obj.contains(FieldId{1}));
   EXPECT_FALSE(obj.contains(FieldId{2}));
   EXPECT_TRUE(obj.contains(FieldId{3}));
 
-  patch[static_cast<FieldId>(op::PatchOp::Remove)].emplace_set() = {
+  patch[static_cast<FieldId>(op::PatchOp::Remove)].ensure_set() = {
       asValueStruct<type::i16_t>(3)};
   applyPatch(patch, obj);
   EXPECT_FALSE(obj.contains(FieldId{1}));
   EXPECT_FALSE(obj.contains(FieldId{2}));
   EXPECT_FALSE(obj.contains(FieldId{3}));
 
-  patch[static_cast<FieldId>(op::PatchOp::Remove)].emplace_set() = {
+  patch[static_cast<FieldId>(op::PatchOp::Remove)].ensure_set() = {
       asValueStruct<type::i32_t>(1)};
   try {
     applyPatch(patch, obj);

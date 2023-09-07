@@ -132,7 +132,7 @@ inline protocol::Value const_to_value(const t_const_value& val) {
   }();
   switch (type) {
     case t_type::type::t_bool:
-      ret.emplace_bool();
+      ret.ensure_bool();
       if (val.get_type() == t_const_value::CV_BOOL) {
         ret.as_bool() = val.get_bool();
       } else if (val.get_type() == t_const_value::CV_INTEGER) {
@@ -142,64 +142,64 @@ inline protocol::Value const_to_value(const t_const_value& val) {
       }
       break;
     case t_type::type::t_byte:
-      ret.emplace_byte();
+      ret.ensure_byte();
       ret.as_byte() = val.get_integer();
       break;
     case t_type::type::t_i16:
-      ret.emplace_i16();
+      ret.ensure_i16();
       ret.as_i16() = val.get_integer();
       break;
     case t_type::type::t_i32:
-      ret.emplace_i32();
+      ret.ensure_i32();
       ret.as_i32() = val.get_integer();
       break;
     case t_type::type::t_i64:
-      ret.emplace_i64();
+      ret.ensure_i64();
       ret.as_i64() = val.get_integer();
       break;
     case t_type::type::t_float:
-      ret.emplace_float();
+      ret.ensure_float();
       ret.as_float() = val.get_double();
       break;
     case t_type::type::t_double:
-      ret.emplace_double();
+      ret.ensure_double();
       ret.as_double() = val.get_double();
       break;
     case t_type::type::t_string:
-      ret.emplace_string();
+      ret.ensure_string();
       ret.as_string() = val.get_string();
       break;
     case t_type::type::t_binary:
-      ret.emplace_binary();
+      ret.ensure_binary();
       ret.as_binary() =
           folly::IOBuf(folly::IOBuf::CopyBufferOp{}, val.get_string());
       break;
     case t_type::type::t_list:
-      ret.emplace_list();
+      ret.ensure_list();
       for (const auto& list_elem : val.get_list()) {
         ret.as_list().push_back(const_to_value(*list_elem));
       }
       break;
     case t_type::type::t_set:
-      ret.emplace_set();
+      ret.ensure_set();
       for (const auto& list_elem : val.get_list()) {
         ret.as_set().insert(const_to_value(*list_elem));
       }
       break;
     case t_type::type::t_map:
-      ret.emplace_map();
+      ret.ensure_map();
       for (const auto& map_elem : val.get_map()) {
         ret.as_map().emplace(
             const_to_value(*map_elem.first), const_to_value(*map_elem.second));
       }
       break;
     case t_type::type::t_enum:
-      ret.emplace_i32();
+      ret.ensure_i32();
       ret.as_i32() = val.get_integer();
       break;
     case t_type::type::t_struct:
       if (val.ttype()) {
-        auto& obj = ret.emplace_object();
+        auto& obj = ret.ensure_object();
         const auto& obj_type = *val.ttype()->get_true_type();
         obj.type() = !obj_type.uri().empty() ? obj_type.uri() : obj_type.name();
         auto& strct = static_cast<const t_structured&>(obj_type);
@@ -212,7 +212,7 @@ inline protocol::Value const_to_value(const t_const_value& val) {
           obj[FieldId{field->id()}] = const_to_value(*map_elem.second);
         }
       } else {
-        auto& map = ret.emplace_map();
+        auto& map = ret.ensure_map();
         for (const auto& map_elem : val.get_map()) {
           map.emplace(
               const_to_value(*map_elem.first),

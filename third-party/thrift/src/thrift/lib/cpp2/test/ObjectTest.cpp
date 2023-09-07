@@ -88,12 +88,12 @@ TEST(ObjectTest, Example) {
 
   // Test constructing the same Object manually
   Object foo;
-  foo[FieldId{1}].emplace_i32() = 42;
-  foo[FieldId{2}].emplace_binary() = *folly::IOBuf::copyBuffer("Everything");
+  foo[FieldId{1}].ensure_i32() = 42;
+  foo[FieldId{2}].ensure_binary() = *folly::IOBuf::copyBuffer("Everything");
 
   Object obj2;
   obj2[FieldId{10}] = asValueStruct<type::list<type::binary_t>>(*bar.field_3());
-  obj2[FieldId{20}].emplace_object() = foo;
+  obj2[FieldId{20}].ensure_object() = foo;
 
   EXPECT_EQ(obj, obj2);
 }
@@ -556,7 +556,7 @@ TYPED_TEST(TypedParseObjectTest, SerializeObjectWithMask) {
 TEST(Object, invalid_object) {
   {
     Object obj;
-    obj[FieldId{0}].emplace_list() = {
+    obj[FieldId{0}].ensure_list() = {
         asValueStruct<type::i32_t>(1), asValueStruct<type::i64_t>(1)};
     EXPECT_THROW(
         serializeObject<CompactSerializer::ProtocolWriter>(obj),
@@ -564,7 +564,7 @@ TEST(Object, invalid_object) {
   }
   {
     Object obj;
-    obj[FieldId{0}].emplace_set() = {
+    obj[FieldId{0}].ensure_set() = {
         asValueStruct<type::i32_t>(1), asValueStruct<type::i64_t>(1)};
     EXPECT_THROW(
         serializeObject<CompactSerializer::ProtocolWriter>(obj),
@@ -572,7 +572,7 @@ TEST(Object, invalid_object) {
   }
   {
     Object obj;
-    obj[FieldId{0}].emplace_map() = {
+    obj[FieldId{0}].ensure_map() = {
         {asValueStruct<type::i32_t>(1), asValueStruct<type::i32_t>(1)},
         {asValueStruct<type::i32_t>(2), asValueStruct<type::i64_t>(1)}};
     EXPECT_THROW(
@@ -581,7 +581,7 @@ TEST(Object, invalid_object) {
   }
   {
     Object obj;
-    obj[FieldId{0}].emplace_map() = {
+    obj[FieldId{0}].ensure_map() = {
         {asValueStruct<type::i32_t>(1), asValueStruct<type::i32_t>(1)},
         {asValueStruct<type::i64_t>(1), asValueStruct<type::i32_t>(1)}};
     EXPECT_THROW(
@@ -651,7 +651,7 @@ TEST(Value, Wrapper) {
     EXPECT_THROW(value.as_##TYPE(), apache::thrift::bad_field_access); \
     EXPECT_EQ(value.if_##TYPE(), nullptr);                             \
     EXPECT_FALSE(value.TYPE##Value_ref());                             \
-    value.emplace_##TYPE() = VALUE;                                    \
+    value.ensure_##TYPE() = VALUE;                                     \
     EXPECT_TRUE(value.is_##TYPE());                                    \
     EXPECT_EQ(value.as_##TYPE(), VALUE);                               \
     EXPECT_EQ(*value.if_##TYPE(), VALUE);                              \
@@ -680,7 +680,7 @@ TEST(Value, Wrapper) {
   EXPECT_THROW(value.as_binary(), apache::thrift::bad_field_access);
   EXPECT_EQ(value.if_binary(), nullptr);
   EXPECT_FALSE(value.binaryValue_ref());
-  value.emplace_binary() = buf;
+  value.ensure_binary() = buf;
   EXPECT_TRUE(value.is_binary());
   EXPECT_TRUE(folly::IOBufEqualTo{}(value.as_binary(), buf));
   EXPECT_TRUE(folly::IOBufEqualTo{}(*value.if_binary(), buf));
@@ -1068,26 +1068,26 @@ void testParseObjectWithMapMask(bool testSerialize) {
 
 TEST(ObjectTest, ToDynamic) {
   Value v;
-  v.emplace_bool() = true;
+  v.ensure_bool() = true;
   EXPECT_EQ(toDynamic(v), true);
-  v.emplace_byte() = 10;
+  v.ensure_byte() = 10;
   EXPECT_EQ(toDynamic(v), 10);
-  v.emplace_i16() = 20;
+  v.ensure_i16() = 20;
   EXPECT_EQ(toDynamic(v), 20);
-  v.emplace_i32() = 30;
+  v.ensure_i32() = 30;
   EXPECT_EQ(toDynamic(v), 30);
-  v.emplace_i64() = 40;
+  v.ensure_i64() = 40;
   EXPECT_EQ(toDynamic(v), 40);
-  v.emplace_float() = 50;
+  v.ensure_float() = 50;
   EXPECT_EQ(toDynamic(v), float(50));
-  v.emplace_double() = 60;
+  v.ensure_double() = 60;
   EXPECT_EQ(toDynamic(v), double(60));
-  v.emplace_string() = "70";
+  v.ensure_string() = "70";
   EXPECT_EQ(toDynamic(v), "70");
   v = asValueStruct<type::binary_t>("80");
   EXPECT_EQ(toDynamic(v), "80");
 
-  v.emplace_float() = NAN;
+  v.ensure_float() = NAN;
   EXPECT_TRUE(std::isnan(toDynamic(v).asDouble()));
 
   std::vector<int> vec = {1, 4, 2};
@@ -1102,24 +1102,24 @@ TEST(ObjectTest, ToDynamic) {
       toDynamic(v),
       folly::dynamic(folly::dynamic::object("4", "40")("1", "10")("2", "20")));
 
-  v.emplace_object();
-  v.as_object()[FieldId{10}].emplace_string() = "100";
-  v.as_object()[FieldId{40}].emplace_string() = "400";
-  v.as_object()[FieldId{20}].emplace_string() = "200";
+  v.ensure_object();
+  v.as_object()[FieldId{10}].ensure_string() = "100";
+  v.as_object()[FieldId{40}].ensure_string() = "400";
+  v.as_object()[FieldId{20}].ensure_string() = "200";
   EXPECT_EQ(
       toDynamic(v),
       folly::dynamic(
           folly::dynamic::object("40", "400")("10", "100")("20", "200")));
 
   Value v2;
-  v2.emplace_object()[FieldId{30}].emplace_string() = "300";
+  v2.ensure_object()[FieldId{30}].ensure_string() = "300";
   v2.as_object()[FieldId{50}] = v;
   EXPECT_EQ(
       toDynamic(v2),
       folly::dynamic(folly::dynamic::object("30", "300")("50", toDynamic(v))));
 
   v = asValueStruct<type::list<type::i16_t>>(vec);
-  v2.emplace_map()[v] = asValueStruct<type::i32_t>(10);
+  v2.ensure_map()[v] = asValueStruct<type::i32_t>(10);
   EXPECT_THROW(toDynamic(v2), std::runtime_error);
 }
 
@@ -1281,49 +1281,49 @@ TEST(Object, ParseObjectWithTwoMasks) {
 TEST(Object, ToType) {
   using namespace type;
   Value v;
-  v.emplace_bool() = true;
+  v.ensure_bool() = true;
   EXPECT_EQ(toType(v), Type::create<bool_t>());
-  v.emplace_byte() = 1;
+  v.ensure_byte() = 1;
   EXPECT_EQ(toType(v), Type::create<byte_t>());
-  v.emplace_i16() = 1;
+  v.ensure_i16() = 1;
   EXPECT_EQ(toType(v), Type::create<i16_t>());
-  v.emplace_i32() = 1;
+  v.ensure_i32() = 1;
   EXPECT_EQ(toType(v), Type::create<i32_t>());
-  v.emplace_i64() = 1;
+  v.ensure_i64() = 1;
   EXPECT_EQ(toType(v), Type::create<i64_t>());
-  v.emplace_float() = 1;
+  v.ensure_float() = 1;
   EXPECT_EQ(toType(v), Type::create<float_t>());
-  v.emplace_double() = 1;
+  v.ensure_double() = 1;
   EXPECT_EQ(toType(v), Type::create<double_t>());
-  v.emplace_string() = "1";
+  v.ensure_string() = "1";
   EXPECT_EQ(toType(v), Type::create<string_t>());
-  v.emplace_binary();
+  v.ensure_binary();
   EXPECT_EQ(toType(v), Type::create<binary_t>());
 
   Value elem;
-  elem.emplace_i32() = 20;
-  v.emplace_list() = {elem};
+  elem.ensure_i32() = 20;
+  v.ensure_list() = {elem};
   EXPECT_EQ(toType(v), Type::create<list_c>(Type::create<i32_t>()));
-  v.emplace_list().clear();
+  v.ensure_list().clear();
   EXPECT_EQ(toType(v), Type::create<list_c>(Type{}));
 
-  v.emplace_set() = {elem};
+  v.ensure_set() = {elem};
   EXPECT_EQ(toType(v), Type::create<set_c>(Type::create<i32_t>()));
-  v.emplace_set().clear();
+  v.ensure_set().clear();
   EXPECT_EQ(toType(v), Type::create<set_c>(Type{}));
 
   Value key, value;
-  key.emplace_i32() = 10;
-  value.emplace_string() = "10";
-  v.emplace_map() = {{key, value}};
+  key.ensure_i32() = 10;
+  value.ensure_string() = "10";
+  v.ensure_map() = {{key, value}};
   EXPECT_EQ(
       toType(v),
       Type::create<map_c>(Type::create<i32_t>(), Type::create<string_t>()));
-  v.emplace_map().clear();
+  v.ensure_map().clear();
   EXPECT_EQ(toType(v), Type::create<map_c>(Type{}, Type{}));
 
   Value obj;
-  obj.emplace_object();
+  obj.ensure_object();
   obj.as_object().type() = "facebook.com/to/obj";
   obj.as_object()[FieldId{1}] = elem;
   EXPECT_EQ(toType(obj), Type::create<struct_c>("facebook.com/to/obj"));
@@ -1341,7 +1341,7 @@ TEST(ToAnyTest, simple) {
       bar, type::StandardProtocol::Compact);
   auto serialized = CompactSerializer::serialize<folly::IOBufQueue>(bar).move();
   Value value;
-  value.emplace_object() =
+  value.ensure_object() =
       parseObject<CompactSerializer::ProtocolReader>(*serialized);
   EXPECT_THROW(
       toAny<CompactSerializer::ProtocolWriter>(value), std::runtime_error);

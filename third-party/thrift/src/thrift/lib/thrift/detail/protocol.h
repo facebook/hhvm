@@ -123,17 +123,19 @@ class ValueWrapper : public Base {
   // TODO(ytj): Provide boost.json.value like APIs
   // www.boost.org/doc/libs/release/libs/json/doc/html/json/ref/boost__json__value.html
 
-#define FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(TYPE)                       \
-  decltype(auto) as_##TYPE() { return *Base::TYPE##Value_ref(); }              \
-  decltype(auto) as_##TYPE() const { return *Base::TYPE##Value_ref(); }        \
-  bool is_##TYPE() const { return Base::TYPE##Value_ref().has_value(); }       \
-  decltype(auto) emplace_##TYPE() { return Base::TYPE##Value_ref().ensure(); } \
-  decltype(auto) if_##TYPE() {                                                 \
-    return is_##TYPE() ? &*Base::TYPE##Value_ref() : nullptr;                  \
-  }                                                                            \
-  decltype(auto) if_##TYPE() const {                                           \
-    return is_##TYPE() ? &*Base::TYPE##Value_ref() : nullptr;                  \
-  }                                                                            \
+#define FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(TYPE)                 \
+  decltype(auto) as_##TYPE() { return *Base::TYPE##Value_ref(); }        \
+  decltype(auto) as_##TYPE() const { return *Base::TYPE##Value_ref(); }  \
+  bool is_##TYPE() const { return Base::TYPE##Value_ref().has_value(); } \
+  [[deprecated]] decltype(auto) ensure_##TYPE() {                        \
+    return Base::TYPE##Value_ref().ensure();                             \
+  }                                                                      \
+  decltype(auto) if_##TYPE() {                                           \
+    return is_##TYPE() ? &*Base::TYPE##Value_ref() : nullptr;            \
+  }                                                                      \
+  decltype(auto) if_##TYPE() const {                                     \
+    return is_##TYPE() ? &*Base::TYPE##Value_ref() : nullptr;            \
+  }                                                                      \
   /* enforce semicolon after macro */ static_assert(true, "")
 
   FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(bool);

@@ -615,12 +615,12 @@ TEST(FieldMaskTest, SchemalessClear) {
   //            2: 10},
   //     2: "40",
   //     3: 5}
-  bazObject[FieldId{1}].emplace_i32() = 30;
-  fooObject[FieldId{1}].emplace_object() = bazObject;
-  fooObject[FieldId{2}].emplace_i32() = 10;
-  barObject[FieldId{1}].emplace_object() = fooObject;
-  barObject[FieldId{2}].emplace_string() = "40";
-  barObject[FieldId{3}].emplace_i32() = 5;
+  bazObject[FieldId{1}].ensure_i32() = 30;
+  fooObject[FieldId{1}].ensure_object() = bazObject;
+  fooObject[FieldId{2}].ensure_i32() = 10;
+  barObject[FieldId{1}].ensure_object() = fooObject;
+  barObject[FieldId{2}].ensure_string() = "40";
+  barObject[FieldId{3}].ensure_i32() = 5;
 
   Mask mask;
   // includes {2: excludes{},
@@ -650,7 +650,7 @@ TEST(FieldMaskTest, SchemalessClearException) {
   {
     protocol::Object barObject;
     // bar{2: "40"}
-    barObject[FieldId{2}].emplace_string() = "40";
+    barObject[FieldId{2}].ensure_string() = "40";
     Mask m; // object[2] is not an object but has an object mask.
     auto& includes = m.includes_ref().emplace();
     includes[2].includes_ref().emplace()[4] = noneMask();
@@ -660,9 +660,9 @@ TEST(FieldMaskTest, SchemalessClearException) {
   {
     protocol::Object fooObject, barObject;
     // bar{1: foo{2: 20}, 2: "40"}
-    fooObject[FieldId{2}].emplace_i32() = 20;
-    barObject[FieldId{1}].emplace_object() = fooObject;
-    barObject[FieldId{2}].emplace_string() = "40";
+    fooObject[FieldId{2}].ensure_i32() = 20;
+    barObject[FieldId{1}].ensure_object() = fooObject;
+    barObject[FieldId{2}].ensure_string() = "40";
     Mask m; // object[1][2] is not an object but has an object mask.
     auto& includes = m.includes_ref().emplace();
     includes[1].includes_ref().emplace()[2].excludes_ref().emplace()[5] =
@@ -691,8 +691,8 @@ TEST(FieldMaskTest, SchemalessClearMap) {
   barObject[FieldId{1}] = asValueStruct<
       type::map<type::i64_t, type::map<type::i16_t, type::string_t>>>(
       {{1, {{1, "1"}, {2, "2"}}}, {2, {{3, "3"}}}});
-  barObject[FieldId{2}].emplace_string() = "40";
-  barObject[FieldId{3}].emplace_i32() = 5;
+  barObject[FieldId{2}].ensure_string() = "40";
+  barObject[FieldId{3}].ensure_i32() = 5;
 
   Mask mask;
   // includes{2: excludes{},
@@ -729,8 +729,8 @@ TEST(FieldMaskTest, SchemalessClearStringMap) {
   barObject[FieldId{1}] = asValueStruct<
       type::map<type::string_t, type::map<type::string_t, type::string_t>>>(
       {{"1", {{"1", "1"}, {"2", "2"}}}, {"2", {{"3", "3"}}}});
-  barObject[FieldId{2}].emplace_string() = "40";
-  barObject[FieldId{3}].emplace_i32() = 5;
+  barObject[FieldId{2}].ensure_string() = "40";
+  barObject[FieldId{3}].ensure_i32() = 5;
 
   Mask mask;
   // includes{2: excludes{},
@@ -762,7 +762,7 @@ TEST(FieldMaskTest, SchemalessClearExceptionMap) {
   {
     protocol::Object barObject;
     // bar{2: "40"}
-    barObject[FieldId{2}].emplace_string() = "40";
+    barObject[FieldId{2}].ensure_string() = "40";
     {
       Mask m; // object[2] is not a map but has an integer map mask.
       auto& includes = m.includes_ref().emplace();
@@ -780,9 +780,9 @@ TEST(FieldMaskTest, SchemalessClearExceptionMap) {
   {
     protocol::Object fooObject, barObject;
     // bar{1: foo{2: 20}, 2: "40"}
-    fooObject[FieldId{2}].emplace_i32() = 20;
-    barObject[FieldId{1}].emplace_object() = fooObject;
-    barObject[FieldId{2}].emplace_string() = "40";
+    fooObject[FieldId{2}].ensure_i32() = 20;
+    barObject[FieldId{1}].ensure_object() = fooObject;
+    barObject[FieldId{2}].ensure_string() = "40";
     {
       Mask m; // object[1][2] is not a map but has an integer map mask.
       auto& includes = m.includes_ref().emplace();
@@ -806,7 +806,7 @@ TEST(FieldMaskTest, SchemalessClearExceptionMap) {
 
   {
     protocol::Object barObject, fooObject;
-    barObject[FieldId{1}].emplace_object() = fooObject;
+    barObject[FieldId{1}].ensure_object() = fooObject;
     {
       Mask m; // object[1] is an object but has an integer map mask.
       m.includes_ref().emplace()[1].includes_map_ref().emplace()[1] = allMask();
@@ -857,9 +857,9 @@ TEST(FieldMaskTest, SchemalessCopySimpleIncludes) {
   // foo{1: 10}
   // bar{1: "30", 2: 20}
   // baz = bar
-  fooObject[FieldId{1}].emplace_i32() = 10;
-  barObject[FieldId{2}].emplace_string() = "30";
-  barObject[FieldId{2}].emplace_i32() = 20;
+  fooObject[FieldId{1}].ensure_i32() = 10;
+  barObject[FieldId{2}].ensure_string() = "30";
+  barObject[FieldId{2}].ensure_i32() = 20;
   bazObject = barObject;
 
   Mask m;
@@ -895,10 +895,10 @@ TEST(FieldMaskTest, SchemalessCopySimpleExcludes) {
   protocol::Object fooObject, barObject;
   // foo{1: 10, 3: 40}
   // bar{1: "30", 2: 20}
-  fooObject[FieldId{1}].emplace_i32() = 10;
-  fooObject[FieldId{3}].emplace_i32() = 40;
-  barObject[FieldId{1}].emplace_string() = "30";
-  barObject[FieldId{2}].emplace_i32() = 20;
+  fooObject[FieldId{1}].ensure_i32() = 10;
+  fooObject[FieldId{3}].ensure_i32() = 40;
+  barObject[FieldId{1}].ensure_string() = "30";
+  barObject[FieldId{2}].ensure_i32() = 20;
 
   Mask m;
   // excludes{1: exludes{}}
@@ -917,15 +917,15 @@ TEST(FieldMaskTest, SchemalessCopyNestedRecursive) {
   // bar{1: foo{1: 10,
   //            2: 20},
   //     2: "40"}
-  fooObject[FieldId{1}].emplace_i32() = 10;
-  fooObject[FieldId{2}].emplace_i32() = 20;
-  barObject[FieldId{1}].emplace_object() = fooObject;
-  barObject[FieldId{2}].emplace_string() = "40";
+  fooObject[FieldId{1}].ensure_i32() = 10;
+  fooObject[FieldId{2}].ensure_i32() = 20;
+  barObject[FieldId{1}].ensure_object() = fooObject;
+  barObject[FieldId{2}].ensure_string() = "40";
 
   protocol::Object dst = barObject;
   protocol::Object& nestedObject = dst[FieldId{1}].objectValue_ref().value();
-  nestedObject[FieldId{1}].emplace_object() = fooObject;
-  nestedObject[FieldId{2}].emplace_i32() = 30;
+  nestedObject[FieldId{1}].ensure_object() = fooObject;
+  nestedObject[FieldId{2}].ensure_i32() = 30;
   // dst{1: {1: {1: 10,
   //             2: 20},
   //         2: 30},
@@ -954,10 +954,10 @@ TEST(FieldMaskTest, SchemalessCopyNestedAddField) {
   // bar{1: foo{1: 10,
   //            2: 20},
   //     2: "40"}
-  fooObject[FieldId{1}].emplace_i32() = 10;
-  fooObject[FieldId{2}].emplace_i32() = 20;
-  barObject[FieldId{1}].emplace_object() = fooObject;
-  barObject[FieldId{2}].emplace_string() = "40";
+  fooObject[FieldId{1}].ensure_i32() = 10;
+  fooObject[FieldId{2}].ensure_i32() = 20;
+  barObject[FieldId{1}].ensure_object() = fooObject;
+  barObject[FieldId{2}].ensure_string() = "40";
 
   Mask m1;
   // includes{1: includes{2: excludes{}},
@@ -1000,10 +1000,10 @@ TEST(FieldMaskTest, SchemalessCopyNestedRemoveField) {
   // bar{1: foo{1: 10,
   //            2: 20},
   //     2: "40"}
-  fooObject[FieldId{1}].emplace_i32() = 10;
-  fooObject[FieldId{2}].emplace_i32() = 20;
-  barObject[FieldId{1}].emplace_object() = fooObject;
-  barObject[FieldId{2}].emplace_string() = "40";
+  fooObject[FieldId{1}].ensure_i32() = 10;
+  fooObject[FieldId{2}].ensure_i32() = 20;
+  barObject[FieldId{1}].ensure_object() = fooObject;
+  barObject[FieldId{2}].ensure_string() = "40";
 
   Mask m;
   // includes{1: includes{2: excludes{}},
@@ -1026,11 +1026,11 @@ TEST(FieldMaskTest, SchemalessCopyNestedRemoveField) {
 TEST(FieldMaskTest, SchemalessCopyException) {
   protocol::Object fooObject, barObject, bazObject;
   // bar{1: foo{2: 20}, 2: "40"}
-  fooObject[FieldId{2}].emplace_i32() = 20;
-  barObject[FieldId{1}].emplace_object() = fooObject;
-  barObject[FieldId{2}].emplace_string() = "40";
+  fooObject[FieldId{2}].ensure_i32() = 20;
+  barObject[FieldId{1}].ensure_object() = fooObject;
+  barObject[FieldId{2}].ensure_string() = "40";
   // baz{2: {3: 40}}
-  bazObject[FieldId{2}].emplace_object()[FieldId{3}].emplace_i32() = 40;
+  bazObject[FieldId{2}].ensure_object()[FieldId{3}].ensure_i32() = 40;
 
   Mask m1; // bar[2] is not an object but has an object mask.
   m1.includes_ref().emplace()[2].includes_ref().emplace()[3] = allMask();
@@ -1277,7 +1277,7 @@ TEST(FieldMaskTest, SchemalessCopyExceptionMap) {
   // bar{1: map{2: 20}, 2: "40"}
   barObject[FieldId{1}] =
       asValueStruct<type::map<type::byte_t, type::i32_t>>({{2, 20}});
-  barObject[FieldId{2}].emplace_string() = "40";
+  barObject[FieldId{2}].ensure_string() = "40";
   // baz{2: map{3: 40}}
   bazObject[FieldId{2}] =
       asValueStruct<type::map<type::byte_t, type::i32_t>>({{3, 40}});
@@ -1299,7 +1299,7 @@ TEST(FieldMaskTest, SchemalessCopyExceptionStringMap) {
   // bar{1: map{"2": 20}, 2: "40"}
   barObject[FieldId{1}] =
       asValueStruct<type::map<type::string_t, type::i32_t>>({{"2", 20}});
-  barObject[FieldId{2}].emplace_string() = "40";
+  barObject[FieldId{2}].ensure_string() = "40";
   // baz{2: map{"3": 40}}
   bazObject[FieldId{2}] =
       asValueStruct<type::map<type::string_t, type::i32_t>>({{"3", 40}});

@@ -20,16 +20,17 @@ namespace apache {
 namespace thrift {
 PreprocessingAsyncProcessorWrapper::PreprocessingAsyncProcessorWrapper(
     std::unique_ptr<AsyncProcessor> innerProcessor)
-    : innerProcessor_(std::move(innerProcessor)) {}
+    : innerProcessor_(std::move(innerProcessor)) {
+  CHECK(innerProcessor_ != nullptr) << "Cannot wrap null async processor.";
+}
 
 void PreprocessingAsyncProcessorWrapper::addEventHandler(
     const std::shared_ptr<TProcessorEventHandler>& handler) {
-  auto* innerProcessor = inner();
-  CHECK(innerProcessor != nullptr);
-  innerProcessor->addEventHandler(handler);
+  inner()->addEventHandler(handler);
 }
 
-AsyncProcessor* PreprocessingAsyncProcessorWrapper::inner() const noexcept {
+AsyncProcessor* FOLLY_NONNULL
+PreprocessingAsyncProcessorWrapper::inner() const noexcept {
   return innerProcessor_.get();
 }
 
@@ -51,9 +52,7 @@ void PreprocessingAsyncProcessorWrapper::
           context,
           eb,
           tm);
-  auto* innerProcessor = inner();
-  CHECK(innerProcessor != nullptr);
-  innerProcessor->processSerializedCompressedRequestWithMetadata(
+  inner()->processSerializedCompressedRequestWithMetadata(
       std::move(processedReq),
       std::move(processedSerializedReq),
       methodMetadata,
@@ -64,18 +63,14 @@ void PreprocessingAsyncProcessorWrapper::
 }
 
 const char* PreprocessingAsyncProcessorWrapper::getServiceName() {
-  auto* innerProcessor = inner();
-  CHECK(innerProcessor != nullptr);
-  return innerProcessor->getServiceName();
+  return inner()->getServiceName();
 }
 
 void PreprocessingAsyncProcessorWrapper::executeRequest(
     ServerRequest&& request,
     const AsyncProcessorFactory::MethodMetadata& methodMetadata) {
   auto processedReq = executeRequestImpl(std::move(request), methodMetadata);
-  auto* innerProcessor = inner();
-  CHECK(innerProcessor != nullptr);
-  innerProcessor->executeRequest(std::move(processedReq), methodMetadata);
+  inner()->executeRequest(std::move(processedReq), methodMetadata);
 }
 } // namespace thrift
 } // namespace apache

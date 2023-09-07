@@ -98,8 +98,9 @@ TEST(PreprocessingAsyncProcessorWrapperTest, getInnerTest) {
   TestPreprocessingAsyncProcessorWrapper preprocessingAp(
       std::make_unique<MockAsyncProcessor>());
   EXPECT_TRUE(preprocessingAp.inner());
-  TestPreprocessingAsyncProcessorWrapper emptypreprocessingAp(nullptr);
-  EXPECT_FALSE(emptypreprocessingAp.inner());
+  EXPECT_DEATH(
+      TestPreprocessingAsyncProcessorWrapper emptypreprocessingAp(nullptr),
+      "Cannot wrap null async processor.");
 }
 
 MATCHER(CanBeUpCastedToTestChannelRequest, "") {

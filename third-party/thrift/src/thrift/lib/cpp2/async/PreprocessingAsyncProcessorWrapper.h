@@ -17,6 +17,7 @@
 #pragma once
 #include <memory>
 #include <tuple>
+#include <folly/CppAttributes.h>
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
 
 namespace apache {
@@ -46,7 +47,7 @@ class PreprocessingAsyncProcessorWrapper : public AsyncProcessor {
   void addEventHandler(
       const std::shared_ptr<TProcessorEventHandler>& handler) override final;
 
-  AsyncProcessor* inner() const noexcept;
+  AsyncProcessor* FOLLY_NONNULL inner() const noexcept;
 
   void processSerializedCompressedRequestWithMetadata(
       ResponseChannelRequest::UniquePtr req,

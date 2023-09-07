@@ -11,8 +11,6 @@ members = [
     "deps/cargo/deps_rust_ffi",
     "deps/cargo/hh_fanout_rust_ffi",
     "deps/cargo/typing_deps_hash",
-    "facts/cargo/facts_rust",
-    "facts/cargo/rust_facts_ffi",
     "hackc/bytecode_printer",
     "hackc",
     "hackc/compile/cargo/closure_convert",

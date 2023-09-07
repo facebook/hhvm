@@ -1855,18 +1855,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "facts_rust"
-version = "0.0.0"
-dependencies = [
- "hhbc_string_utils",
- "oxidized_by_ref",
- "pretty_assertions",
- "serde",
- "serde_derive",
- "serde_json",
-]
-
-[[package]]
 name = "fallible-iterator"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4532,19 +4520,6 @@ dependencies = [
  "oxidized",
  "oxidized_by_ref",
  "parser_core_types",
- "relative_path",
-]
-
-[[package]]
-name = "rust_facts_ffi"
-version = "0.0.0"
-dependencies = [
- "bumpalo",
- "direct_decl_parser",
- "facts_rust",
- "hhbc_string_utils",
- "ocamlrep",
- "ocamlrep_ocamlpool",
  "relative_path",
 ]
 

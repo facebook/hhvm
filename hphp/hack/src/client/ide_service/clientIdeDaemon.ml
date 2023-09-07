@@ -41,17 +41,11 @@ type common_state = {
 }
 [@@deriving show]
 
-type open_files_state = {
-  open_files:
-    (Provider_context.entry * Errors.t option ref) Relative_path.Map.t;
-      (** The [entry] caches the TAST+errors; the [Errors.t option] stores what was
-      the most recent version of the errors to have been returned to clientLsp
-      by didOpen/didChange/didClose/codeAction. *)
-  changed_files_to_process: Relative_path.Set.t;
-      (** [changed_files_to_process] us grown [During_init] upon [Did_change_watched_files changes]
-      and then discharged in [initialize2] before changing to [Initialized] state.
-      TODO(ljw): move this field into [During_init]. *)
-}
+(** The [entry] caches the TAST+errors; the [Errors.t option] stores what was
+the most recent version of the errors to have been returned to clientLsp
+by didOpen/didChange/didClose/codeAction. *)
+type open_files_state =
+  (Provider_context.entry * Errors.t option ref) Relative_path.Map.t
 
 (** istate, "initialized state", is the state the daemon after it has
 finished initialization (i.e. finished loading saved state),
@@ -138,7 +132,7 @@ Here are the algorithms we use that satisfy those invariants.
 *)
 type istate = {
   icommon: common_state;
-  ifiles: open_files_state; [@opaque]
+  iopen_files: open_files_state; [@opaque]
   naming_table: Naming_table.t; [@opaque]
       (** the forward-naming-table is constructed during initialize and updated
       during process_changed_files. It stores an in-memory map of FileInfos that
@@ -159,7 +153,10 @@ type dstate = {
   start_time: float;
       (** When did we kick off the attempt to load saved-state? *)
   dcommon: common_state;
-  dfiles: open_files_state; [@opaque]
+  dopen_files: open_files_state; [@opaque]
+  changed_files_to_process: Relative_path.Set.t;
+      (** [changed_files_to_process] us grown [During_init] upon [Did_change_watched_files changes]
+    and then discharged in [initialize2] before changing to [Initialized] state. *)
 }
 [@@deriving show]
 
@@ -178,18 +175,18 @@ type t = {
 }
 
 let state_to_log_string (state : state) : string =
-  let files_to_log_string (files : open_files_state) : string =
-    Printf.sprintf
-      "%d open_files; %d changed_files_to_process"
-      (Relative_path.Map.cardinal files.open_files)
-      (Relative_path.Set.cardinal files.changed_files_to_process)
+  let open_files_to_log_string (open_files : open_files_state) : string =
+    Printf.sprintf "%d open_files" (Relative_path.Map.cardinal open_files)
   in
   match state with
   | Pending_init -> "Pending_init"
-  | During_init { dfiles; _ } ->
-    Printf.sprintf "During_init(%s)" (files_to_log_string dfiles)
-  | Initialized { ifiles; _ } ->
-    Printf.sprintf "Initialized(%s)" (files_to_log_string ifiles)
+  | During_init { dopen_files; changed_files_to_process; _ } ->
+    Printf.sprintf
+      "During_init(%s, %d changed during)"
+      (open_files_to_log_string dopen_files)
+      (Relative_path.Set.cardinal changed_files_to_process)
+  | Initialized { iopen_files; _ } ->
+    Printf.sprintf "Initialized(%s)" (open_files_to_log_string iopen_files)
   | Failed_init reason ->
     Printf.sprintf "Failed_init(%s)" reason.ClientIdeMessage.category
 
@@ -375,7 +372,8 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
   {
     start_time;
     dcommon = { hhi_root; config; local_config; local_memory };
-    dfiles = { open_files; changed_files_to_process = Relative_path.Set.empty };
+    dopen_files = open_files;
+    changed_files_to_process = Relative_path.Set.empty;
   }
 
 (** initialize2 is called by handle_one_message upon receipt of a
@@ -394,12 +392,9 @@ let initialize2
   | Ok { ClientIdeInit.naming_table; sienv; changed_files } ->
     let changed_files_to_process =
       Relative_path.Set.union
-        dstate.dfiles.changed_files_to_process
+        dstate.changed_files_to_process
         (Relative_path.Set.of_list changed_files)
       |> Relative_path.Set.filter ~f:FindUtils.path_filter
-    in
-    let changed_files_denominator =
-      Relative_path.Set.cardinal changed_files_to_process
     in
     let ClientIdeIncremental.Batch.{ naming_table; sienv; changes = _changes } =
       batch_update_naming_table_and_invalidate_caches
@@ -407,7 +402,7 @@ let initialize2
         ~naming_table
         ~sienv
         ~local_memory:dstate.dcommon.local_memory
-        ~open_files:dstate.dfiles.open_files
+        ~open_files:dstate.dopen_files
         changed_files_to_process
     in
     let istate =
@@ -415,11 +410,7 @@ let initialize2
         naming_table;
         sienv;
         icommon = dstate.dcommon;
-        ifiles =
-          {
-            open_files = dstate.dfiles.open_files;
-            changed_files_to_process = Relative_path.Set.empty;
-          };
+        iopen_files = dstate.dopen_files;
       }
     in
     (* Note: Done_init is needed to (1) transition clientIdeService state, (2) cause
@@ -430,8 +421,8 @@ let initialize2
         ~message:
           (ClientIdeMessage.Notification (ClientIdeMessage.Done_init (Ok ())))
     in
-    let count = Some changed_files_denominator in
-    let (_ : float) = log_startup_time "initialize2" start_time ?count in
+    let count = Relative_path.Set.cardinal changed_files_to_process in
+    let (_ : float) = log_startup_time "initialize2" start_time ~count in
     log_debug "initialize2.done";
     Lwt.return (Initialized istate)
   | Error reason ->
@@ -472,29 +463,25 @@ let open_or_change_file_during_init
       ~path
       ~contents:(Provider_context.Provided_contents contents)
   in
-  let open_files =
-    Relative_path.Map.add
-      dstate.dfiles.open_files
-      ~key:path
-      ~data:(entry, ref None)
+  let dopen_files =
+    Relative_path.Map.add dstate.dopen_files ~key:path ~data:(entry, ref None)
   in
-  { dstate with dfiles = { dstate.dfiles with open_files } }
+  { dstate with dopen_files }
 
 (** Closes a file, in response to DidClose event, by removing the
 entry in open_files. If the LSP client sents us multile DidCloses,
 or DidClose for an unopen file, we won't complain. *)
-let close_file (files : open_files_state) (path : Relative_path.t) :
+let close_file (open_files : open_files_state) (path : Relative_path.t) :
     open_files_state =
-  if not (Relative_path.Map.mem files.open_files path) then
+  if not (Relative_path.Map.mem open_files path) then
     log_missing_open_file_BUG "close-without-open" path;
-  let open_files = Relative_path.Map.remove files.open_files path in
-  { files with open_files }
+  Relative_path.Map.remove open_files path
 
 (** Updates an existing opened file, with new contents; if the
 contents haven't changed then the existing open file's AST and TAST
 will be left intact. *)
 let update_file
-    (files : open_files_state) (document : ClientIdeMessage.document) :
+    (open_files : open_files_state) (document : ClientIdeMessage.document) :
     open_files_state * Provider_context.entry * Errors.t option ref =
   let path =
     document.ClientIdeMessage.file_path
@@ -503,7 +490,7 @@ let update_file
   in
   let contents = document.ClientIdeMessage.file_contents in
   let (entry, published_errors) =
-    match Relative_path.Map.find_opt files.open_files path with
+    match Relative_path.Map.find_opt open_files path with
     | None ->
       (* This is a common scenario although I'm not quite sure why *)
       ( Provider_context.make_entry
@@ -528,12 +515,9 @@ let update_file
         ref None )
   in
   let open_files =
-    Relative_path.Map.add
-      files.open_files
-      ~key:path
-      ~data:(entry, published_errors)
+    Relative_path.Map.add open_files ~key:path ~data:(entry, published_errors)
   in
-  ({ files with open_files }, entry, published_errors)
+  (open_files, entry, published_errors)
 
 (** like [update_file], but for convenience also produces a ctx for
 use in typechecking. Also ensures that hhi files haven't been deleted
@@ -541,18 +525,11 @@ by tmp_cleaner, so that type-checking will succeed. *)
 let update_file_ctx (istate : istate) (document : ClientIdeMessage.document) :
     istate * Provider_context.t * Provider_context.entry * Errors.t option ref =
   let istate = restore_hhi_root_if_necessary istate in
-  let (ifiles, entry, published_errors) = update_file istate.ifiles document in
+  let (iopen_files, entry, published_errors) =
+    update_file istate.iopen_files document
+  in
   let ctx = make_singleton_ctx istate.icommon entry in
-  ({ istate with ifiles }, ctx, entry, published_errors)
-
-(** Simple helper. It updates the [ifiles] or [dfiles] member of Initialized
-or During_init states, respectively. Will throw if you call it on any other
-state. *)
-let update_state_files (state : state) (files : open_files_state) : state =
-  match state with
-  | During_init dstate -> During_init { dstate with dfiles = files }
-  | Initialized istate -> Initialized { istate with ifiles = files }
-  | _ -> failwith ("Update_state_files: unexpected " ^ state_to_log_string state)
+  ({ istate with iopen_files }, ctx, entry, published_errors)
 
 let get_signature (ctx : Provider_context.t) (name : string) : 'string =
   let tast_env = Tast_env.empty ctx in
@@ -582,9 +559,7 @@ let get_errors_for_path (istate : istate) (path : Relative_path.t) : Errors.t =
   let disk_content_opt =
     Sys_utils.cat_or_failed (Relative_path.to_absolute path)
   in
-  let cached_entry_opt =
-    Relative_path.Map.find_opt istate.ifiles.open_files path
-  in
+  let cached_entry_opt = Relative_path.Map.find_opt istate.iopen_files path in
   let entry_opt =
     match (disk_content_opt, cached_entry_opt) with
     | (None, _) ->
@@ -697,18 +672,14 @@ let handle_request
   (***********************************************************)
   (************************* CAN HANDLE DURING INIT **********)
   (***********************************************************)
-  | (During_init { dfiles; _ }, Did_change_watched_files changes) ->
+  | (During_init dstate, Did_change_watched_files changes) ->
     (* While init is happening, we accumulate changes in [changed_files_to_process].
        Once naming-table has been loaded, then [initialize2] will process+discharge all these
        accumulated changes. *)
-    let dfiles =
-      {
-        dfiles with
-        changed_files_to_process =
-          Relative_path.Set.union dfiles.changed_files_to_process changes;
-      }
+    let changed_files_to_process =
+      Relative_path.Set.union dstate.changed_files_to_process changes
     in
-    (update_state_files state dfiles, Ok ())
+    (During_init { dstate with changed_files_to_process }, Ok ())
   | (Initialized istate, Did_change_watched_files changes) ->
     let ClientIdeIncremental.Batch.{ naming_table; sienv; changes = _changes } =
       batch_update_naming_table_and_invalidate_caches
@@ -716,25 +687,27 @@ let handle_request
         ~naming_table:istate.naming_table
         ~sienv:istate.sienv
         ~local_memory:istate.icommon.local_memory
-        ~open_files:istate.ifiles.open_files
+        ~open_files:istate.iopen_files
         changes
     in
     let istate = { istate with naming_table; sienv } in
     (Initialized istate, Ok ())
     (* didClose *)
-  | (During_init { dfiles = files; _ }, Did_close file_path) ->
+  | (During_init dstate, Did_close file_path) ->
     let path =
       file_path |> Path.to_string |> Relative_path.create_detect_prefix
     in
-    let files = close_file files path in
-    (update_state_files state files, Ok [])
+    ( During_init
+        { dstate with dopen_files = close_file dstate.dopen_files path },
+      Ok [] )
   | (Initialized istate, Did_close file_path) ->
     let path =
       file_path |> Path.to_string |> Relative_path.create_detect_prefix
     in
     let errors = get_errors_for_path istate path |> Errors.sort_and_finalize in
-    let files = close_file istate.ifiles path in
-    (update_state_files state files, Ok errors)
+    ( Initialized
+        { istate with iopen_files = close_file istate.iopen_files path },
+      Ok errors )
   (* didOpen or didChange *)
   | ( During_init dstate,
       Did_open_or_change ({ file_path; file_contents }, _should_calculate_errors)
@@ -759,16 +732,22 @@ let handle_request
     in
     (Initialized istate, Ok errors)
   (* Document Symbol *)
-  | ( ( During_init { dfiles = files; dcommon = common; _ }
-      | Initialized { ifiles = files; icommon = common; _ } ),
-      Document_symbol document ) ->
-    let (files, entry, _) = update_file files document in
+  | (During_init dstate, Document_symbol document) ->
+    let (dopen_files, entry, _) = update_file dstate.dopen_files document in
     let result =
       FileOutline.outline_entry_no_comments
-        ~popt:(ServerConfig.parser_options common.config)
+        ~popt:(ServerConfig.parser_options dstate.dcommon.config)
         ~entry
     in
-    (update_state_files state files, Ok result)
+    (During_init { dstate with dopen_files }, Ok result)
+  | (Initialized istate, Document_symbol document) ->
+    let (iopen_files, entry, _) = update_file istate.iopen_files document in
+    let result =
+      FileOutline.outline_entry_no_comments
+        ~popt:(ServerConfig.parser_options istate.icommon.config)
+        ~entry
+    in
+    (Initialized { istate with iopen_files }, Ok result)
   (***********************************************************)
   (************************* UNABLE TO HANDLE ****************)
   (***********************************************************)
@@ -1413,11 +1392,7 @@ module Test = struct
       naming_table;
       sienv;
       icommon = { hhi_root = Path.make "/"; config; local_config; local_memory };
-      ifiles =
-        {
-          open_files = Relative_path.Map.empty;
-          changed_files_to_process = Relative_path.Set.empty;
-        };
+      iopen_files = Relative_path.Map.empty;
     }
 
   let index istate changes =
@@ -1432,7 +1407,7 @@ module Test = struct
         ~naming_table:istate.naming_table
         ~sienv:istate.sienv
         ~local_memory:istate.icommon.local_memory
-        ~open_files:istate.ifiles.open_files
+        ~open_files:istate.iopen_files
         changes
     in
     { istate with naming_table; sienv }

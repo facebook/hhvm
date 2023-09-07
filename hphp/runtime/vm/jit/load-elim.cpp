@@ -372,15 +372,7 @@ Flags load(Local& env,
   }
 
   if (tracked.knownValue != nullptr) {
-    // Don't use knownValue if it's from a different block and we're currently
-    // in a catch trace, to avoid extending lifetimes too much.
-    auto const block = tracked.knownValue.match(
-      [] (SSATmp* tmp) { return tmp->inst()->block(); },
-      [] (Block* blk)  { return blk; }
-    );
-    if (inst.block() == block || inst.block()->hint() != Block::Hint::Unused) {
-      return FRedundant { tracked.knownValue, tracked.knownType, meta->index };
-    }
+    return FRedundant { tracked.knownValue, tracked.knownType, meta->index };
   } else {
     // Only set a new known value if we previously didn't have one. If we had a
     // known value already, we would have made the load redundant above, unless

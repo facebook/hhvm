@@ -1058,6 +1058,19 @@ void in(ISS& env, const bc::LazyClassFromClass&) {
   push(env, TLazyCls);
 }
 
+void in(ISS& env, const bc::EnumClassLabelName& op) {
+  auto const ty = topC(env);
+  if (ty.subtypeOf(BEnumClassLabel) && is_specialized_ecl(ty)) {
+    auto const& label = eclval_of(ty);
+    return reduce(env,
+                  bc::PopC {},
+                  bc::String { label });
+  }
+  if (ty.subtypeOf(BEnumClassLabel)) effect_free(env);
+  popC(env);
+  push(env, TSStr);
+}
+
 void concatHelper(ISS& env, uint32_t n) {
   auto changed = false;
   auto side_effects = false;

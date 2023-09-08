@@ -62,6 +62,7 @@ CASE(Class)
 CASE(LazyClass)
 CASE(ClsMeth)
 CASE(RClsMeth)
+CASE(EnumClassLabel)
 
 #undef CASE
 

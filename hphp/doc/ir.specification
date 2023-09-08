@@ -1256,6 +1256,10 @@ To string conversions:
 
   Load the name of the LazyClass in S0.
 
+| LdEnumClassLabelName, D(StaticStr), S(EnumClassLabel), NF
+
+  Load the name of the EnumClassLabel in S0.
+
 | LdFunc, D(Func|Nullptr), S(Str), NF
 
   Loads the Func whose name is S0, invoking autoloader if it is not defined yet.

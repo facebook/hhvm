@@ -130,6 +130,7 @@ impl LocalInfo {
             | Opcode::Dup
             | Opcode::Enter(..)
             | Opcode::EnumClassLabel(..)
+            | Opcode::EnumClassLabelName
             | Opcode::Eq
             | Opcode::Eval
             | Opcode::Exit

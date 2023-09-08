@@ -52,6 +52,7 @@ struct SSATmp {
   uint64_t           rawVal() const       { return type().rawVal(); }
   double             dblVal() const       { return type().dblVal(); }
   const StringData*  strVal() const       { return type().strVal(); }
+  const StringData*  eclVal() const       { return type().eclVal(); }
   const ArrayData*   arrVal() const       { return type().arrVal(); }
   const ArrayData*   shapeVal() const     { return type().shapeVal(); }
   const ArrayData*   vecVal() const       { return type().vecVal(); }

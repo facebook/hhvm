@@ -946,6 +946,10 @@ LazyClassFromClass    [C:Class] ->  [C:LazyClass]
 
   Push the lazy class corresponding to the class in $1.
 
+EnumClassLabelName [C:EnumClassLabel] -> [C:Static Str]
+
+  Push the name of the enum class label in $1 as a string.
+
 3. Operator instructions
 ------------------------
 

@@ -1419,6 +1419,7 @@ fn is_checkpoint_instr(instr: &NodeInstr<'_>) -> bool {
             | Opcode::DblAsBits
             | Opcode::Dim(..)
             | Opcode::Div
+            | Opcode::EnumClassLabelName
             | Opcode::Eq
             | Opcode::Eval
             | Opcode::Exit
@@ -1611,6 +1612,7 @@ fn clean_opcode<'arena>(opcode: &Opcode<'arena>) -> Opcode<'arena> {
         | Opcode::Dir
         | Opcode::Div
         | Opcode::Dup
+        | Opcode::EnumClassLabelName
         | Opcode::Eq
         | Opcode::Eval
         | Opcode::Exit

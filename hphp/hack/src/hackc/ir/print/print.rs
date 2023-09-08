@@ -900,6 +900,13 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func<'_>, hhbc: &
                 FmtVid(func, vids[1], verbose, strings)
             )?;
         }
+        Hhbc::EnumClassLabelName(vid, _) => {
+            write!(
+                w,
+                "enum_class_label_name {}",
+                FmtVid(func, vid, verbose, strings)
+            )?;
+        }
         Hhbc::GetClsRGProp(vid, _) => write!(
             w,
             "get_class_rg_prop {}",

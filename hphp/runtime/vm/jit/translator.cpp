@@ -129,6 +129,7 @@ static const struct {
   { OpMethod,      {None,             Stack1,       OutString       }},
   { OpClassName,   {Stack1,           Stack1,       OutString       }},
   { OpLazyClassFromClass, {Stack1,    Stack1,       OutLazyClass    }},
+  { OpEnumClassLabelName, {Stack1,    Stack1,       OutString       }},
   { OpFuncCred,    {None,             Stack1,       OutObject       }},
 
   /*** 3. Operator instructions ***/
@@ -1006,6 +1007,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::Pow:
   case Op::ClassName:
   case Op::LazyClassFromClass:
+  case Op::EnumClassLabelName:
   case Op::NativeImpl:
   case Op::NewCol:
   case Op::NewPair:

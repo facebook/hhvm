@@ -1025,6 +1025,7 @@ fn convert_opcode<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) -> boo
         Opcode::Dir => simple!(Constant::Dir),
         Opcode::Div => simple!(Hhbc::Div),
         Opcode::Double => simple!(Constant::Float),
+        Opcode::EnumClassLabelName => simple!(Hhbc::EnumClassLabelName),
         Opcode::Eq => simple!(Hhbc::CmpOp, CmpOp::Eq),
         Opcode::Exit => simple!(Terminator::Exit),
         Opcode::False => simple!(Constant::Bool, false),

@@ -73,6 +73,13 @@ void cgLdLazyClsName(IRLS& env, const IRInstruction* inst) {
   v << copy{lazyClsData, dst};
 }
 
+void cgLdEnumClassLabelName(IRLS& env, const IRInstruction* inst) {
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto const label = srcLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+  v << copy{label, dst};
+}
+
 void cgMethodExists(IRLS& env, const IRInstruction* inst) {
   auto const args = argGroup(env, inst).ssa(0).ssa(1);
   cgCallHelper(vmain(env), env, CallSpec::direct(methodExistsHelper),

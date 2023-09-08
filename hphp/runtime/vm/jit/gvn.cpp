@@ -281,6 +281,7 @@ bool supportsGVN(const IRInstruction* inst) {
   case LdClsName:
   case LdLazyCls:
   case LdLazyClsName:
+  case LdEnumClassLabelName:
   case Mov:
   case LdContActRec:
   case LdAFWHActRec:

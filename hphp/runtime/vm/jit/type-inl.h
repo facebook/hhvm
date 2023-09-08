@@ -406,6 +406,11 @@ IMPLEMENT_CNS_VAL(TMem,        ptr, const TypedValue*)
 
 #undef IMPLEMENT_CNS_VAL
 
+inline const StringData* Type::eclVal() const {
+  assertx(hasConstVal(TEnumClassLabel));
+  return m_strVal;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Specialized type creation.
 

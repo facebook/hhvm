@@ -277,6 +277,18 @@ void emitLazyClassFromClass(IRGS& env) {
   push(env, gen(env, LdLazyCls, cls));
 }
 
+const StaticString
+  s_name_of_not_enum_class_label("Attempting to get name of non enum class label");
+
+void emitEnumClassLabelName(IRGS& env) {
+  auto const tv = popC(env);
+  if (tv->isA(TEnumClassLabel)) {
+    push(env, gen(env, LdEnumClassLabelName, tv));
+    return;
+  }
+  gen(env, RaiseError, cns(env, s_name_of_not_enum_class_label.get()));
+}
+
 //////////////////////////////////////////////////////////////////////
 
 void emitCastVec(IRGS& env) {

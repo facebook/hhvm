@@ -591,6 +591,7 @@ public:
   int64_t intVal() const;
   double dblVal() const;
   const StringData* strVal() const;
+  const StringData* eclVal() const;
   const ArrayData* arrVal() const;
   const ArrayData* vecVal() const;
   const ArrayData* dictVal() const;

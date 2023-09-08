@@ -939,6 +939,7 @@ fn cmp_instr_hhbc(
         | (Hhbc::CreateCont(_), _)
         | (Hhbc::CreateSpecialImplicitContext(_, _), _)
         | (Hhbc::Div(_, _), _)
+        | (Hhbc::EnumClassLabelName(_, _), _)
         | (Hhbc::GetClsRGProp(_, _), _)
         | (Hhbc::GetMemoKeyL(_, _), _)
         | (Hhbc::HasReifiedParent(_, _), _)

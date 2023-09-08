@@ -332,6 +332,30 @@ SSATmp* implClsCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   return implClsishCmp(env, op, left, right, false);
 }
 
+SSATmp* implEnumClassLabelCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
+  assertx(left->isA(TEnumClassLabel));
+  assertx(right->isA(TEnumClassLabel));
+
+  switch (op) {
+    case Op::Gt:
+    case Op::Gte:
+    case Op::Lt:
+    case Op::Lte:
+    case Op::Cmp:
+      PUNT(EnumClassLabel-relationalcmp);
+    case Op::Eq:
+    case Op::Same:
+    case Op::Neq:
+    case Op::NSame: {
+      auto const l = gen(env, LdEnumClassLabelName, left);
+      auto const r = gen(env, LdEnumClassLabelName, right);
+      return gen(env, toStrCmpOpcode(op), l, r);
+    }
+    default: always_assert(false);
+  }
+  not_reached();
+}
+
 SSATmp* implClsMethCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   const auto eq = [&] { return cond(
     env,
@@ -437,6 +461,7 @@ void implCmp(IRGS& env, Op op) {
         if (leftTy <= TKeyset)  return implKeysetCmp;
         if (leftTy <= TLazyCls) return implLazyClsCmp;
         if (leftTy <= TClsMeth) return implClsMethCmp;
+        if (leftTy <= TEnumClassLabel) return implEnumClassLabelCmp;
         always_assert(false);
       }();
       push(env, (*impl)(env, op, left, right));

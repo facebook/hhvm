@@ -61,6 +61,7 @@ namespace HPHP {
   O(ClsCnsL,         ONE(LA),          ONE(CV),         ONE(CV),    NF) \
   O(ClassName,       NA,               ONE(CV),         ONE(CV),    NF) \
   O(LazyClassFromClass, NA,            ONE(CV),         ONE(CV),    NF) \
+  O(EnumClassLabelName, NA,            ONE(CV),         ONE(CV),    NF) \
   O(File,            NA,               NOV,             ONE(CV),    NF) \
   O(Dir,             NA,               NOV,             ONE(CV),    NF) \
   O(Method,          NA,               NOV,             ONE(CV),    NF) \

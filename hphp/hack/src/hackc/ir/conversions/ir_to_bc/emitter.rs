@@ -527,6 +527,7 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
             Hhbc::CreateCont(_) => Opcode::CreateCont,
             Hhbc::CreateSpecialImplicitContext(..) => Opcode::CreateSpecialImplicitContext,
             Hhbc::Div(..) => Opcode::Div,
+            Hhbc::EnumClassLabelName(..) => Opcode::EnumClassLabelName,
             Hhbc::GetClsRGProp(..) => Opcode::GetClsRGProp,
             Hhbc::GetMemoKeyL(lid, _) => {
                 let local = self.lookup_local(lid);

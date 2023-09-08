@@ -1103,6 +1103,14 @@ OPTBLD_INLINE void iopLazyClassFromClass() {
   vmStack().replaceC<KindOfLazyClass>(lclass);
 }
 
+OPTBLD_INLINE void iopEnumClassLabelName() {
+  auto const label  = vmStack().topC();
+  if (!tvIsEnumClassLabel(label)) {
+    raise_error("Attempting to get name of non enum class label");
+  }
+  vmStack().replaceC<KindOfPersistentString>(label->m_data.pstr);
+}
+
 OPTBLD_INLINE void iopInt(int64_t imm) {
   vmStack().pushInt(imm);
 }

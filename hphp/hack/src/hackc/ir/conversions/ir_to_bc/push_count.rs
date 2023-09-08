@@ -116,6 +116,7 @@ impl<'a> PushCount<'a> for instr::Hhbc {
             | Hhbc::CreateCont(..)
             | Hhbc::CreateSpecialImplicitContext(..)
             | Hhbc::Div(..)
+            | Hhbc::EnumClassLabelName(..)
             | Hhbc::GetClsRGProp(..)
             | Hhbc::GetMemoKeyL(..)
             | Hhbc::HasReifiedParent(..)

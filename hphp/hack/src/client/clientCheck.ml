@@ -778,27 +778,6 @@ let main_internal
     let%lwt (results, telemetry) = rpc args @@ Rpc.LINT_ALL code in
     ClientLint.go results args.output_json args.error_format;
     Lwt.return (Exit_status.No_error, telemetry)
-  | MODE_CREATE_CHECKPOINT x ->
-    let%lwt ((), telemetry) = rpc args @@ Rpc.CREATE_CHECKPOINT x in
-    Lwt.return (Exit_status.No_error, telemetry)
-  | MODE_RETRIEVE_CHECKPOINT x ->
-    let%lwt (results, telemetry) = rpc args @@ Rpc.RETRIEVE_CHECKPOINT x in
-    begin
-      match results with
-      | Some results ->
-        List.iter results ~f:print_endline;
-        Lwt.return (Exit_status.No_error, telemetry)
-      | None -> Lwt.return (Exit_status.Checkpoint_error, telemetry)
-    end
-  | MODE_DELETE_CHECKPOINT x ->
-    let%lwt (results, telemetry) = rpc args @@ Rpc.DELETE_CHECKPOINT x in
-    let exit_status =
-      if results then
-        Exit_status.No_error
-      else
-        Exit_status.Checkpoint_error
-    in
-    Lwt.return (exit_status, telemetry)
   | MODE_STATS ->
     let%lwt (stats, telemetry) = rpc args @@ Rpc.STATS in
     print_string @@ Hh_json.json_to_multiline (Stats.to_json stats);

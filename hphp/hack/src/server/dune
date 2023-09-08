@@ -453,7 +453,6 @@
  (modules
   fullFidelityParseService
   serverCheckUtils
-  serverCheckpoint
   serverConcatenateAll
   serverError
   serverExtractStandalone

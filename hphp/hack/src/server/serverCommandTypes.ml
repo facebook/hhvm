@@ -406,9 +406,6 @@ type _ t =
   | LINT : string list -> ServerLintTypes.result t
   | LINT_STDIN : lint_stdin_input -> ServerLintTypes.result t
   | LINT_ALL : int -> ServerLintTypes.result t
-  | CREATE_CHECKPOINT : string -> unit t
-  | RETRIEVE_CHECKPOINT : string -> string list option t
-  | DELETE_CHECKPOINT : string -> bool t
   | STATS : Stats.t t
   | FORMAT : ServerFormatTypes.action -> ServerFormatTypes.result t
   | DUMP_FULL_FIDELITY_PARSE : string -> string t
@@ -435,13 +432,6 @@ type cmd_metadata = {
   (* a short human-readable string, used in "hh_server is busy [desc]" *)
   desc: string;
 }
-
-let is_critical_rpc : type a. a t -> bool = function
-  (* An exception during any critical rpc should shutdown the persistent connection. *)
-  (* The critical ones are those that affect the state.                              *)
-  | CREATE_CHECKPOINT _ -> true
-  | DELETE_CHECKPOINT _ -> true
-  | _ -> false
 
 type 'a command =
   | Rpc of cmd_metadata * 'a t

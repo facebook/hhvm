@@ -38,9 +38,6 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | RENAME _ -> true
   | IDE_RENAME_BY_SYMBOL _ -> true
   (* Same case as Ai commands *)
-  | CREATE_CHECKPOINT _ -> true
-  | RETRIEVE_CHECKPOINT _ -> true
-  | DELETE_CHECKPOINT _ -> true
   | IN_MEMORY_DEP_TABLE_SIZE -> true
   | NO_PRECHECKED_FILES -> true
   | POPULATE_REMOTE_DECLS _ -> false
@@ -202,10 +199,7 @@ let actually_handle genv client msg full_recheck_needed ~is_stale env =
       try ServerRpc.handle ~is_stale genv env cmd with
       | exn ->
         let e = Exception.wrap exn in
-        if ServerCommandTypes.is_critical_rpc cmd then
-          Exception.reraise e
-        else
-          raise (Nonfatal_rpc_exception (e, env))
+        raise (Nonfatal_rpc_exception (e, env))
     in
 
     let parsed_files = Full_fidelity_parser_profiling.stop_profiling () in

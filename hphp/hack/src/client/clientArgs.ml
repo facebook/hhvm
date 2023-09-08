@@ -247,10 +247,6 @@ let parse_check_args cmd ~from_default =
            ]),
         "apply codemod for adding <<__NoAutoDynamic>>" );
       Common_argspecs.config config;
-      ( "--create-checkpoint",
-        Arg.String (fun x -> set_mode (MODE_CREATE_CHECKPOINT x)),
-        (* Create a checkpoint which can be used to retrieve changed files later *)
-        "" );
       ( "--cst-search",
         Arg.Unit (fun () -> set_mode (MODE_CST_SEARCH None)),
         " (mode) Search the concrete syntax trees of files in the codebase"
@@ -273,11 +269,6 @@ let parse_check_args cmd ~from_default =
         ^ " rather than all the files in the codebase." );
       Common_argspecs.custom_hhi_path custom_hhi_path;
       Common_argspecs.custom_telemetry_data custom_telemetry_data;
-      (* Delete an existing checkpoint.
-       * Exitcode will be non-zero if no checkpoint is found *)
-      ( "--delete-checkpoint",
-        Arg.String (fun x -> set_mode (MODE_DELETE_CHECKPOINT x)),
-        "" );
       ( "--deps-out-at-pos-batch",
         Arg.Rest
           begin
@@ -621,12 +612,6 @@ let parse_check_args cmd ~from_default =
       ( "--retries",
         Arg.Int (fun n -> timeout := Some (float_of_int (max 5 n))),
         " (deprecated) same as --timeout" );
-      (* Retrieve changed files since input checkpoint.
-       * Output is separated by newline.
-       * Exit code will be non-zero if no checkpoint is found *)
-      ( "--retrieve-checkpoint",
-        Arg.String (fun x -> set_mode (MODE_RETRIEVE_CHECKPOINT x)),
-        "" );
       ("--retry-if-init", Arg.Bool (fun _ -> ()), " (deprecated and ignored)");
       ( "--rewrite-lambda-parameters",
         Arg.Rest

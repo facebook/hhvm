@@ -325,9 +325,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
   | LINT_ALL code ->
     let ctx = Provider_utils.ctx_from_server_env env in
     (env, ServerLint.lint_all genv ctx code)
-  | CREATE_CHECKPOINT x -> (env, ServerCheckpoint.create_checkpoint x)
-  | RETRIEVE_CHECKPOINT x -> (env, ServerCheckpoint.retrieve_checkpoint x)
-  | DELETE_CHECKPOINT x -> (env, ServerCheckpoint.delete_checkpoint x)
   | STATS -> (env, Stats.get_stats ())
   | FORMAT (content, from, to_) ->
     let legacy_format_options =

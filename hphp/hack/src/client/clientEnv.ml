@@ -21,9 +21,7 @@ type client_mode =
       csdt_log_remotely: bool;
       csdt_tag: string;
     }
-  | MODE_CREATE_CHECKPOINT of string
   | MODE_CST_SEARCH of string list option
-  | MODE_DELETE_CHECKPOINT of string
   | MODE_DUMP_SYMBOL_INFO of string
   | MODE_EXTRACT_STANDALONE of string
   | MODE_CONCATENATE_ALL
@@ -57,7 +55,6 @@ type client_mode =
   | MODE_REMOVE_DEAD_FIXMES of int list
   | MODE_REMOVE_DEAD_UNSAFE_CASTS
   | MODE_REWRITE_LAMBDA_PARAMETERS of string list
-  | MODE_RETRIEVE_CHECKPOINT of string
   | MODE_SAVE_NAMING of string
   | MODE_SAVE_STATE of string
   | MODE_SEARCH of string

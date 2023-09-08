@@ -1054,8 +1054,6 @@ functor
           (Telemetry.create ()
           |> Telemetry.int_ ~key:"to_recheck_count" ~value:to_recheck_count);
 
-      ServerCheckpoint.process_updates files_to_check;
-
       let telemetry =
         Telemetry.duration telemetry ~key:"typecheck_start" ~start_time
       in

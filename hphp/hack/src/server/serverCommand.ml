@@ -87,10 +87,6 @@ let use_priority_pipe (type result) (command : result ServerCommandTypes.t) :
   | _ when rpc_command_needs_full_check command -> false
   | _ -> true
 
-let force_remote = function
-  | Rpc (_metadata, STATUS status) -> status.remote
-  | _ -> false
-
 let reason = ServerCommandTypesUtils.debug_describe_cmd
 
 (****************************************************************************)
@@ -212,7 +208,6 @@ let handle
          (ServerCommandTypesUtils.debug_describe_cmd msg)
          (ClientProvider.priority_to_string client))
     ~long_delay_okay:false;
-  let env = { env with ServerEnv.remote = force_remote msg } in
   let full_recheck_needed = command_needs_full_check msg in
   let is_stale =
     ServerEnv.(env.last_recheck_loop_stats.RecheckLoopStats.updates_stale)

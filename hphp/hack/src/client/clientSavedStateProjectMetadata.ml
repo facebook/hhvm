@@ -33,7 +33,6 @@ let main (env : ClientEnv.client_check_env) (config : ServerLocalConfig.t) :
     output_json = _;
     prechecked = _;
     mini_state = _;
-    remote = _;
     sort_results = _;
     stdin_name = _;
     deadline = _;

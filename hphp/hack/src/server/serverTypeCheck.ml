@@ -315,11 +315,11 @@ module FullCheckKind : CheckKindType = struct
     }
 
   let get_env_after_typing ~old_env ~errorl ~needs_recheck =
-    let (full_check_status, remote) =
+    let full_check_status =
       if Relative_path.Set.is_empty needs_recheck then
-        (Full_check_done, false)
+        Full_check_done
       else
-        (old_env.full_check_status, old_env.remote)
+        old_env.full_check_status
     in
     let why_needed_full_check =
       match old_env.init_env.why_needed_full_check with
@@ -333,7 +333,6 @@ module FullCheckKind : CheckKindType = struct
       errorl;
       needs_recheck;
       full_check_status;
-      remote;
       init_env = { old_env.init_env with why_needed_full_check };
     }
 

@@ -249,7 +249,6 @@ type env = {
     genv ->
     env ->
     (Unix.file_descr * env MultiThreadedCall.interrupt_handler) list;
-  remote: bool;  (** Whether we should force remote type checking or not *)
   nonpersistent_client_pending_command_needs_full_check:
     ((env -> env) * string * ClientProvider.client) option;
       [@opaque]

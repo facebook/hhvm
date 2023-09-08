@@ -111,7 +111,6 @@ let connect ?(use_priority_pipe = false) args =
     no_load;
     watchman_debug_logging;
     log_inference_constraints;
-    remote;
     show_spinner;
     ignore_hh_version;
     save_64bit;
@@ -148,7 +147,6 @@ let connect ?(use_priority_pipe = false) args =
         no_load;
         watchman_debug_logging;
         log_inference_constraints;
-        remote;
         progress_callback =
           ClientSpinner.report
             ~to_stderr:show_spinner
@@ -668,9 +666,7 @@ let main_internal
       Lwt.return (exit_status, telemetry)
     else
       let%lwt (status, telemetry) =
-        rpc
-          args
-          (Rpc.STATUS { max_errors = args.max_errors; remote = args.remote })
+        rpc args (Rpc.STATUS { max_errors = args.max_errors })
       in
       let exit_status =
         ClientCheckStatus.go
@@ -800,9 +796,7 @@ let main_internal
         Lwt.return (Exit_status.No_error, telemetry)
     end
   | MODE_REMOVE_DEAD_UNSAFE_CASTS ->
-    let status_cmd =
-      Rpc.STATUS { max_errors = args.max_errors; remote = false }
-    in
+    let status_cmd = Rpc.STATUS { max_errors = args.max_errors } in
     let rec go () =
       let%lwt (response, telemetry) =
         rpc args @@ Rpc.REMOVE_DEAD_UNSAFE_CASTS
@@ -822,9 +816,7 @@ let main_internal
     go ()
   | MODE_CODEMOD_SDT
       { csdt_path_to_jsonl; csdt_strategy; csdt_log_remotely; csdt_tag } ->
-    let status_cmd =
-      Rpc.STATUS { max_errors = args.max_errors; remote = false }
-    in
+    let status_cmd = Rpc.STATUS { max_errors = args.max_errors } in
     let get_error_count () =
       let%lwt (status, telemetry) = rpc args status_cmd in
       let error_count =

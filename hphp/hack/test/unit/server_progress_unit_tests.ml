@@ -533,7 +533,6 @@ let env =
       output_json = false;
       prechecked = None;
       mini_state = None;
-      remote = false;
       root = Path.dummy_path;
       sort_results = true;
       stdin_name = None;

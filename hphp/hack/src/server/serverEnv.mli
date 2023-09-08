@@ -123,7 +123,7 @@ type paused_env = { paused_recheck_id: string option }
     the current recheck. There are two cases the user might wish to do this in:
       1) The user notices that some change they made is taking a while to
         recheck, so they want to cancel the recheck because they want to make
-        further changes, or retry the recheck with the `--remote` argument
+        further changes
       2) While the server is in the paused state, the user explicitly starts
         a full recheck, but then decides that they want to cancel it
 
@@ -297,7 +297,6 @@ type env = {
     genv ->
     env ->
     (Unix.file_descr * env MultiThreadedCall.interrupt_handler) list;
-  remote: bool;  (** Whether we should force remote type checking or not *)
   nonpersistent_client_pending_command_needs_full_check:
     ((env -> env) * string * ClientProvider.client) option;
       [@opaque]

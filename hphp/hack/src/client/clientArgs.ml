@@ -145,7 +145,6 @@ let parse_check_args cmd ~from_default =
   let prechecked = ref None in
   let mini_state : string option ref = ref None in
   let rename_before = ref "" in
-  let remote = ref false in
   let sort_results = ref false in
   let stdin_name = ref None in
   let timeout = ref None in
@@ -583,7 +582,6 @@ let parse_check_args cmd ~from_default =
            ]),
         " (mode) rename a symbol, Usage: --refactor "
         ^ "[\"Class\", \"Function\", \"Method\"] <Current Name> <New Name>" );
-      ("--remote", Arg.Set remote, " force remote type checking");
       ( "--remove-dead-fixme",
         Arg.Int
           begin
@@ -834,7 +832,6 @@ let parse_check_args cmd ~from_default =
     output_json = !output_json;
     prechecked = !prechecked;
     mini_state = !mini_state;
-    remote = !remote;
     root;
     sort_results = !sort_results;
     stdin_name = !stdin_name;

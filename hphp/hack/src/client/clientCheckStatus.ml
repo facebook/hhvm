@@ -36,23 +36,9 @@ let is_stale_msg liveness =
       ^ " watchman being unresponsive)\n")
   | Live_status -> None
 
-let warn_unsaved_changes () =
-  (* Make sure any buffered diagnostics are printed before printing this
-     warning. *)
-  Out_channel.flush stdout;
-  Tty.cprintf (Tty.Bold Tty.Yellow) "Warning: " ~out_channel:stderr;
-  prerr_endline
-    {|there is an editor connected to the Hack server.
-The errors above may reflect your unsaved changes in the editor.|}
-
 let go status output_json from error_format max_errors =
-  let {
-    Server_status.liveness;
-    has_unsaved_changes;
-    error_list;
-    dropped_count;
-    last_recheck_stats;
-  } =
+  let { Server_status.liveness; error_list; dropped_count; last_recheck_stats }
+      =
     status
   in
   let stale_msg = is_stale_msg liveness in
@@ -80,11 +66,7 @@ let go status output_json from error_format max_errors =
     (* [stale_msg] ultimately comes from [ServerMain.query_notifier], and says whether the check
        reflects data from a watchman sync, or just whatever has arrived so far over the watchman
        subscription. *)
-    Option.iter stale_msg ~f:(fun msg -> Printf.printf "%s" msg);
-    (* [has_unsaved_changes] ultimately comes from whether clientLsp has a persistent
-       connection to hh_server, and has done IDE_OPEN/IDE_CHANGE rpc messages which are now
-       different from what's on disk. *)
-    if has_unsaved_changes then warn_unsaved_changes ()
+    Option.iter stale_msg ~f:(fun msg -> Printf.printf "%s" msg)
   end;
   if List.is_empty error_list then
     Exit_status.No_error

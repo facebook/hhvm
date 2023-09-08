@@ -53,20 +53,14 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       else
         Live_status
     in
-    let has_unsaved_changes = ServerFileSync.has_unsaved_changes env in
     let last_recheck_stats =
       Option.map
         env.ServerEnv.last_recheck_loop_stats_for_actual_work
         ~f:ServerEnv.RecheckLoopStats.to_user_telemetry
     in
     ( env,
-      {
-        Server_status.liveness;
-        has_unsaved_changes;
-        error_list;
-        dropped_count;
-        last_recheck_stats;
-      } )
+      { Server_status.liveness; error_list; dropped_count; last_recheck_stats }
+    )
   | STATUS_SINGLE { file_names; max_errors } ->
     let ctx = Provider_utils.ctx_from_server_env env in
     (env, take_max_errors (ServerStatusSingle.go file_names ctx) max_errors)

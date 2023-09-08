@@ -19,7 +19,6 @@ type status_liveness =
 module Server_status = struct
   type t = {
     liveness: status_liveness;
-    has_unsaved_changes: bool;
     error_list: Errors.finalized_error list;
     dropped_count: int;
     last_recheck_stats: Telemetry.t option;
@@ -341,7 +340,6 @@ type cst_search_input = {
  * MESSAGE_TAG : Argument type (sent from client to server) -> return type t *)
 type _ t =
   | STATUS : {
-      ignore_ide: bool;
       remote: bool;
       max_errors: int option;
     }

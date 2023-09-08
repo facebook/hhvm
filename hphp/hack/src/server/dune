@@ -457,7 +457,6 @@
   serverError
   serverExtractStandalone
   serverFileDependents
-  serverFileSync
   serverFormat
   serverIdle
   serverInferTypeBatch

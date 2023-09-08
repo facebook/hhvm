@@ -10,7 +10,6 @@ open Hh_prelude
 
 let process_parse_result
     ctx
-    ?(ide = false)
     ~quick
     ~trace
     ~cache_decls
@@ -35,12 +34,7 @@ let process_parse_result
       ast
   in
   let bytes = String.length content in
-  let content =
-    if ide then
-      File_provider.Ide content
-    else
-      File_provider.Disk content
-  in
+  let content = File_provider.Disk content in
   if Option.is_some file_mode then (
     (* If this file was parsed from a tmp directory,
        save it to the main directory instead *)

@@ -638,7 +638,6 @@ let main_internal
     SaveStateResultPrinter.go result args.output_json;
     Lwt.return (Exit_status.No_error, telemetry)
   | MODE_STATUS ->
-    let ignore_ide = ClientMessages.ignore_ide_from args.from in
     let prechecked = Option.value args.prechecked ~default:true in
     let%lwt ((), telemetry1) =
       if prechecked then
@@ -671,8 +670,7 @@ let main_internal
       let%lwt (status, telemetry) =
         rpc
           args
-          (Rpc.STATUS
-             { ignore_ide; max_errors = args.max_errors; remote = args.remote })
+          (Rpc.STATUS { max_errors = args.max_errors; remote = args.remote })
       in
       let exit_status =
         ClientCheckStatus.go
@@ -710,7 +708,6 @@ let main_internal
         error_list;
         dropped_count;
         Rpc.Server_status.liveness = Rpc.Live_status;
-        has_unsaved_changes = false;
         last_recheck_stats = None;
       }
     in
@@ -804,8 +801,7 @@ let main_internal
     end
   | MODE_REMOVE_DEAD_UNSAFE_CASTS ->
     let status_cmd =
-      Rpc.STATUS
-        { ignore_ide = true; max_errors = args.max_errors; remote = false }
+      Rpc.STATUS { max_errors = args.max_errors; remote = false }
     in
     let rec go () =
       let%lwt (response, telemetry) =
@@ -827,8 +823,7 @@ let main_internal
   | MODE_CODEMOD_SDT
       { csdt_path_to_jsonl; csdt_strategy; csdt_log_remotely; csdt_tag } ->
     let status_cmd =
-      Rpc.STATUS
-        { ignore_ide = true; max_errors = args.max_errors; remote = false }
+      Rpc.STATUS { max_errors = args.max_errors; remote = false }
     in
     let get_error_count () =
       let%lwt (status, telemetry) = rpc args status_cmd in

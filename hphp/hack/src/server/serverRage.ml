@@ -11,16 +11,6 @@ open Hh_prelude
 
 let go (_genv : ServerEnv.genv) (env : ServerEnv.env) : ServerRageTypes.result =
   let open ServerRageTypes in
-  (* Gather up the contents of all files that hh_server believes are in the
-     IDE different from what's on disk *)
-  let unsaved_items =
-    ServerFileSync.get_unsaved_changes env
-    |> Relative_path.Map.map ~f:fst
-    |> Relative_path.Map.elements
-    |> List.map ~f:(fun (relPath, data) ->
-           { title = "unsaved:" ^ Relative_path.to_absolute relPath; data })
-  in
-
   (* include PIDs that we know *)
   let pids_data =
     Printf.sprintf
@@ -43,12 +33,5 @@ let go (_genv : ServerEnv.genv) (env : ServerEnv.env) : ServerRageTypes.result =
   in
 
   (* that's it! *)
-  let data =
-    Printf.sprintf
-      "PIDS\n%s\n\nPAUSED\n%s\n\nIDE FILES\n%s\n"
-      pids_data
-      paused_data
-      (List.map unsaved_items ~f:(fun item -> item.title)
-      |> String.concat ~sep:"\n")
-  in
-  { title = "status"; data } :: unsaved_items
+  let data = Printf.sprintf "PIDS\n%s\n\nPAUSED\n%s\n" pids_data paused_data in
+  [{ title = "status"; data }]

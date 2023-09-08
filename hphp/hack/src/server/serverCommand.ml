@@ -87,59 +87,11 @@ let use_priority_pipe (type result) (command : result ServerCommandTypes.t) :
   | _ when rpc_command_needs_full_check command -> false
   | _ -> true
 
-let full_recheck_if_needed' genv env reason profiling =
-  if
-    ServerEnv.(is_full_check_done env.full_check_status)
-    && Relative_path.Set.is_empty env.ServerEnv.ide_needs_parsing
-  then
-    env
-  else
-    let () = Hh_logger.log "Starting a blocking type-check due to %s" reason in
-    let start_time = Unix.gettimeofday () in
-    let env = { env with ServerEnv.can_interrupt = false } in
-    let (env, _res, _telemetry) =
-      ServerTypeCheck.(type_check genv env CheckKind.Full start_time profiling)
-    in
-    let env = { env with ServerEnv.can_interrupt = true } in
-    assert (ServerEnv.(is_full_check_done env.full_check_status));
-    env
-
 let force_remote = function
   | Rpc (_metadata, STATUS status) -> status.remote
   | _ -> false
 
-let ignore_ide = function
-  | Rpc (_metadata, STATUS status) -> status.ignore_ide
-  | _ -> false
-
-let apply_changes env changes =
-  Relative_path.Map.fold changes ~init:env ~f:(fun path content env ->
-      ServerFileSync.open_file
-        ~predeclare:false
-        env
-        (Relative_path.to_absolute path)
-        content)
-
-let get_unsaved_changes env =
-  let changes = ServerFileSync.get_unsaved_changes env in
-  Relative_path.Map.(map ~f:fst changes, map ~f:snd changes)
-
 let reason = ServerCommandTypesUtils.debug_describe_cmd
-
-let full_recheck_if_needed genv env msg =
-  if ignore_ide msg then
-    let (ide, disk) = get_unsaved_changes env in
-    let env = apply_changes env disk in
-    let env =
-      CgroupProfiler.step_group "Full_check" ~log:true
-      @@ full_recheck_if_needed'
-           genv
-           { env with ServerEnv.remote = force_remote msg }
-           (reason msg)
-    in
-    apply_changes env ide
-  else
-    env
 
 (****************************************************************************)
 (* Called by the server *)
@@ -174,10 +126,6 @@ let actually_handle genv client msg full_recheck_needed ~is_stale env =
     (not full_recheck_needed)
     || ServerEnv.(is_full_check_done env.full_check_status));
 
-  (* There might be additional rechecking required when there are unsaved IDE
-   * changes and we asked for an answer that requires ignoring those.
-   * This is very rare. *)
-  let env = full_recheck_if_needed genv env msg in
   ClientProvider.track
     client
     ~key:Connection_tracker.Server_done_full_recheck

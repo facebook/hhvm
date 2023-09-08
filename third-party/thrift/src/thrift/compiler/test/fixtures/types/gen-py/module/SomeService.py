@@ -23,12 +23,23 @@ from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from thrift.protocol import TCompactProtocol
 from thrift.protocol import THeaderProtocol
-from thrift.Thrift import expand_thrift_spec as __EXPAND_THRIFT_SPEC
 fastproto = None
 try:
   from thrift.protocol import fastproto
 except ImportError:
   pass
+
+def __EXPAND_THRIFT_SPEC(spec):
+    next_id = 0
+    for item in spec:
+        if next_id >= 0 and item[0] < 0:
+            next_id = item[0]
+        if item[0] != next_id:
+            for _ in range(next_id, item[0]):
+                yield None
+        yield item
+        next_id = item[0] + 1
+
 
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3

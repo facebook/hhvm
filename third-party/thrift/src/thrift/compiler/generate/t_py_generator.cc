@@ -875,12 +875,29 @@ string t_py_generator::render_fastproto_includes() {
          "from thrift.protocol import TBinaryProtocol\n"
          "from thrift.protocol import TCompactProtocol\n"
          "from thrift.protocol import THeaderProtocol\n"
-         "from thrift.Thrift import expand_thrift_spec as __EXPAND_THRIFT_SPEC\n"
          "fastproto = None\n"
          "try:\n"
          "  from thrift.protocol import fastproto\n"
          "except ImportError:\n"
-         "  pass\n";
+         "  pass\n"
+         "\n"
+         /*
+    Given a sparse thrift_spec generate a full thrift_spec as expected by fastproto.
+    The old form is a tuple where every position is the same as the thrift field id.
+    The new form is just a tuple of the used field ids without all the None padding, but its cheaper bytecode wise.
+    There is a bug in python 3.10 that causes large tuples to use more memory and generate larger .pyc than <=3.9.
+    See: https://github.com/python/cpython/issues/109036
+          */
+         "def __EXPAND_THRIFT_SPEC(spec):\n"
+         "    next_id = 0\n"
+         "    for item in spec:\n"
+         "        if next_id >= 0 and item[0] < 0:\n"
+         "            next_id = item[0]\n"
+         "        if item[0] != next_id:\n"
+         "            for _ in range(next_id, item[0]):\n"
+         "                yield None\n"
+         "        yield item\n"
+         "        next_id = item[0] + 1\n\n";
 }
 
 /**

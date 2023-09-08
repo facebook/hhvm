@@ -80,8 +80,10 @@ let get_constant env tc kind (seen, has_default) case =
           ~env:(Tast_env.tast_env_as_typing_env env)
           Typing_error.(
             enum
-            @@ Primary.Enum.Enum_switch_redundant
-                 { const_name = const; first_pos = old_pos; pos });
+            @@ Primary.Enum.(
+                 Enum_switch_redundant
+                   { const_name = Case.Label const; first_pos = old_pos; pos }));
+
         (seen, has_default)
   in
   match case with
@@ -140,13 +142,14 @@ let check_enum_exhaustiveness
     match (all_cases_handled, has_default, coming_from_unresolved) with
     | (false, false, _) ->
       Some
-        (Primary.Enum.Enum_switch_nonexhaustive
-           {
-             pos;
-             kind = Some str_kind;
-             missing = List.map ~f:(fun x -> `Label x) unhandled;
-             decl_pos = Cls.pos tc;
-           })
+        Primary.Enum.(
+          Enum_switch_nonexhaustive
+            {
+              pos;
+              kind = Some str_kind;
+              missing = List.map ~f:(fun x -> Case.Label x) unhandled;
+              decl_pos = Cls.pos tc;
+            })
     | (true, true, false) ->
       Some
         (Primary.Enum.Enum_switch_redundant_default

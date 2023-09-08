@@ -137,9 +137,20 @@ let partition_cases (cases : (case * _) list) values =
   (partitions, unused_cases)
 
 module EnumErr = Typing_error.Primary.Enum
+module Case = EnumErr.Case
 
-let register_err env err =
+let add_err env err =
   Typing_error_utils.add_typing_error ~env @@ Typing_error.enum err
+
+let add_redundant_err env const_name = function
+  | []
+  | [_] ->
+    assert false
+  | (_, redundant_pos, _) :: (_ :: _ as tl) ->
+    let (_, first_pos, _) = List.last_exn tl in
+    add_err env
+    @@ EnumErr.Enum_switch_redundant
+         { const_name; first_pos; pos = redundant_pos }
 
 let get_missing_cases env partitions =
   Hashtbl.fold partitions ~init:[] ~f:(fun ~key ~data missing_cases ->
@@ -147,12 +158,9 @@ let get_missing_cases env partitions =
       | Value.Null -> begin
         match data with
         | [_] -> missing_cases
-        | [] -> `Null :: missing_cases
-        | (_, redundant_pos, _) :: (_ :: _ as tl) ->
-          let (_, first_pos, _) = List.last_exn tl in
-          register_err env
-          @@ EnumErr.Enum_switch_redundant
-               { const_name = "null"; first_pos; pos = redundant_pos };
+        | [] -> Case.Null :: missing_cases
+        | _ :: _ :: _ ->
+          add_redundant_err env Case.Null data;
           missing_cases
       end
       | Value.Other -> missing_cases)
@@ -167,7 +175,7 @@ let is_supported_literal : (Tast.ty, Tast.saved_env) Aast.expr_ -> bool =
 let error_unused_cases env expected unused_cases =
   let expected = lazy (Typing_print.full_strip_ns env expected) in
   List.iter unused_cases ~f:(fun (ty, pos, expr) ->
-      register_err env
+      add_err env
       @@
       if is_supported_literal expr then
         EnumErr.Enum_switch_wrong_class
@@ -189,7 +197,7 @@ let check_default
   | (Some _, true) ->
     ()
   | (Some (default_pos, _), false) ->
-    register_err env
+    add_err env
     @@ EnumErr.Enum_switch_redundant_default
          {
            pos;
@@ -197,7 +205,7 @@ let check_default
            decl_pos = Pos_or_decl.of_raw_pos default_pos;
          }
   | (None, true) ->
-    register_err env
+    add_err env
     @@ EnumErr.Enum_switch_nonexhaustive
          { pos; kind = None; decl_pos = Pos_or_decl.of_raw_pos pos; missing }
 
@@ -205,7 +213,7 @@ let add_default_if_needed values missing_cases =
   (* write `exists ~f:(fun x -> not @@ finite_or_dynamic x)` instead of
      `forall ~f:finite` to ensure set is non-empty *)
   if ValueSet.exists ~f:(fun x -> not @@ Value.finite_or_dynamic x) values then
-    `Default :: missing_cases
+    Case.Default :: missing_cases
   else
     missing_cases
 

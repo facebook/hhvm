@@ -74,17 +74,30 @@ module Primary = struct
   end
 
   module Enum = struct
+    module Case = struct
+      type t =
+        | Default
+        | Null
+        | Label of string
+      [@@deriving eq, show]
+
+      let to_user_string = function
+        | Default -> "default"
+        | Null -> "null"
+        | Label str -> str
+    end
+
     type t =
       | Enum_switch_redundant of {
           pos: Pos.t;
           first_pos: Pos.t;
-          const_name: string;
+          const_name: Case.t;
         }
       | Enum_switch_nonexhaustive of {
           pos: Pos.t;
           kind: string option;
           decl_pos: Pos_or_decl.t;
-          missing: [ `Default | `Null | `Label of string ] list;
+          missing: Case.t list;
         }
       | Enum_switch_redundant_default of {
           pos: Pos.t;

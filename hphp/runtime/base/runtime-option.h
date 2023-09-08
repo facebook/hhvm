@@ -1299,7 +1299,7 @@ struct RuntimeOption {
   F(bool, RaiseClassConversionWarning, false)                           \
   F(bool, EmitClsMethPointers, true)                                    \
   F(bool, FoldLazyClassKeys, true)                                      \
-  F(bool, EmitNativeEnumClassLabels, false)                             \
+  F(bool, EmitNativeEnumClassLabels, true)                              \
   /* When this flag is on, var_dump for
    * classes and lazy classes outputs string(...). */                   \
   F(bool, ClassAsStringVarDump, true)                                   \

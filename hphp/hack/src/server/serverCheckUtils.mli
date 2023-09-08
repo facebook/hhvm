@@ -19,7 +19,6 @@ val global_typecheck_kind :
 val user_filter_type_check_files :
   to_recheck:Relative_path.Set.t ->
   reparsed:Relative_path.Set.t ->
-  is_ide_file:(Relative_path.t -> bool) ->
   Relative_path.Set.t
 
 val get_naming_table_fallback_path : ServerEnv.genv -> string option

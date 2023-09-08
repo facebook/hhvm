@@ -776,7 +776,6 @@ let calculate_fanout_and_defer_or_do_type_check
             (Relative_path.Set.union
                dirty_files_unchanged_decls
                dirty_files_changed_decls)
-          ~is_ide_file:(fun _ -> false)
     in
     let (state_distance, state_age) =
       match env.init_env.saved_state_delta with

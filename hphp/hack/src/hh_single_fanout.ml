@@ -46,7 +46,6 @@ let parse_defs (ctx : Provider_context.t) (files : Relative_path.t list) :
          * oldify the new version (and override the real old versions*)
       false
     workers
-    ~ide_files:Relative_path.Set.empty
     ~get_next:(fun () ->
       if !done_ then
         Bucket.Done

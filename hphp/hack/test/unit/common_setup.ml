@@ -100,13 +100,7 @@ let setup
   in
   let get_next = MultiWorker.next None [foo_path; bar_path] in
   let (file_infos, _errors, _failed_parsing) =
-    ( Direct_decl_service.go
-        ctx
-        None
-        ~ide_files:Relative_path.Set.empty
-        ~get_next
-        ~trace:true
-        ~cache_decls:false,
+    ( Direct_decl_service.go ctx None ~get_next ~trace:true ~cache_decls:false,
       Errors.empty,
       Relative_path.Set.empty )
   in

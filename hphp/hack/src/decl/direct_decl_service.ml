@@ -43,16 +43,11 @@ let go
     ~(cache_decls : bool)
     ?(worker_call : MultiWorker.call_wrapper = MultiWorker.wrapper)
     (workers : MultiWorker.worker list option)
-    ~(ide_files : Relative_path.Set.t)
     ~(get_next : Relative_path.t list MultiWorker.Hh_bucket.next) :
     FileInfo.t Relative_path.Map.t =
-  let acc =
-    worker_call.MultiWorker.f
-      workers
-      ~job:(fun init -> List.fold ~init ~f:(parse ctx ~trace ~cache_decls))
-      ~neutral:Relative_path.Map.empty
-      ~merge:Relative_path.Map.union
-      ~next:get_next
-  in
-  Relative_path.Set.fold ide_files ~init:acc ~f:(fun fn acc ->
-      parse ctx ~trace ~cache_decls acc fn)
+  worker_call.MultiWorker.f
+    workers
+    ~job:(fun init -> List.fold ~init ~f:(parse ctx ~trace ~cache_decls))
+    ~neutral:Relative_path.Map.empty
+    ~merge:Relative_path.Map.union
+    ~next:get_next

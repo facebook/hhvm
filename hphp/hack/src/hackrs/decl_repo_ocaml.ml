@@ -135,13 +135,7 @@ let parse_repo
       ~extra_roots:(ServerConfig.extra_paths ServerConfig.default_config)
   in
   measure_time "parsing repo" @@ fun () ->
-  Direct_decl_service.go
-    ctx
-    workers
-    ~ide_files:Relative_path.Set.empty
-    ~get_next
-    ~trace:false
-    ~cache_decls:true
+  Direct_decl_service.go ctx workers ~get_next ~trace:false ~cache_decls:true
 
 let populate_naming_table
     (ctx : Provider_context.t)

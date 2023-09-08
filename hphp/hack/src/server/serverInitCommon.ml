@@ -50,7 +50,6 @@ let parse_files_and_update_forward_naming_table
       ctx
       ~worker_call
       genv.workers
-      ~ide_files:Relative_path.Set.empty
       ~get_next
       ~trace
       ~cache_decls
@@ -196,7 +195,6 @@ let defer_or_do_type_check
           ServerCheckUtils.user_filter_type_check_files
             ~to_recheck:files_to_check_set
             ~reparsed:Relative_path.Set.empty
-            ~is_ide_file:(fun _ -> false)
         in
         Relative_path.Set.elements filtered_check
     in

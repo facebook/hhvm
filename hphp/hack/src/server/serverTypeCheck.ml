@@ -190,22 +190,13 @@ let push_errors_outside_files_to_errors_file
   ()
 
 let indexing genv env to_check cgroup_steps =
-  let (ide_files, disk_files) =
-    Relative_path.Set.partition
-      (Relative_path.Set.mem env.editor_open_files)
-      to_check
-  in
-  File_provider.remove_batch disk_files;
-  Ast_provider.remove_batch disk_files;
-  Fixme_provider.remove_batch disk_files;
-
-  (* Do not remove ide files from file heap *)
-  Ast_provider.remove_batch ide_files;
-  Fixme_provider.remove_batch ide_files;
+  File_provider.remove_batch to_check;
+  Ast_provider.remove_batch to_check;
+  Fixme_provider.remove_batch to_check;
 
   SharedMem.GC.collect `gentle;
   let get_next =
-    MultiWorker.next genv.workers (Relative_path.Set.elements disk_files)
+    MultiWorker.next genv.workers (Relative_path.Set.elements to_check)
   in
   let ctx = Provider_utils.ctx_from_server_env env in
   let defs_per_file =
@@ -213,7 +204,6 @@ let indexing genv env to_check cgroup_steps =
     Direct_decl_service.go
       ctx
       genv.workers
-      ~ide_files
       ~get_next
       ~trace:true
       ~cache_decls:
@@ -282,10 +272,7 @@ module FullCheckKind : CheckKindType = struct
      * type check files that pass the filter *)
     let to_recheck =
       if enable_type_check_filter_files then
-        ServerCheckUtils.user_filter_type_check_files
-          ~to_recheck
-          ~reparsed
-          ~is_ide_file:(Relative_path.Set.mem env.editor_open_files)
+        ServerCheckUtils.user_filter_type_check_files ~to_recheck ~reparsed
       else
         to_recheck
     in
@@ -342,12 +329,6 @@ end
 module LazyCheckKind : CheckKindType = struct
   let get_files_to_parse env = env.ide_needs_parsing
 
-  let some_ide_diagnosed_files _env = Relative_path.Set.empty
-
-  let is_ide_file env x =
-    Relative_path.Set.mem (some_ide_diagnosed_files env) x
-    || Relative_path.Set.mem env.editor_open_files x
-
   let get_defs_to_recheck
       ~reparsed
       ~defs_per_file
@@ -360,26 +341,18 @@ module LazyCheckKind : CheckKindType = struct
      * to add unwanted files to the "type check later"-queue *)
     let to_recheck =
       if enable_type_check_filter_files then
-        ServerCheckUtils.user_filter_type_check_files
-          ~to_recheck
-          ~reparsed
-          ~is_ide_file:(is_ide_file env)
+        ServerCheckUtils.user_filter_type_check_files ~to_recheck ~reparsed
       else
         to_recheck
     in
     (* Same as FullCheckKind.get_defs_to_recheck, but we limit returned set only
      * to files that are relevant to IDE *)
     let stale_errors =
-      get_files_with_stale_errors
-        ~ctx
-        ~reparsed
-        ~filter:(Some (some_ide_diagnosed_files env))
-        ~errors:env.errorl
+      get_files_with_stale_errors ~ctx ~reparsed ~filter:None ~errors:env.errorl
     in
     let to_recheck = Relative_path.Set.union to_recheck stale_errors in
-    let (to_recheck_now, to_recheck_later) =
-      Relative_path.Set.partition (is_ide_file env) to_recheck
-    in
+    let to_recheck_now = Relative_path.Set.empty in
+    let to_recheck_later = to_recheck in
     let to_recheck_now =
       Relative_path.Set.union
         (Relative_path.Set.of_list (Relative_path.Map.keys defs_per_file))

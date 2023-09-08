@@ -193,7 +193,7 @@ let user_filters_should_type_check
     (user_filters : user_filter list) (path : Relative_path.t) : bool =
   List.for_all user_filters ~f:(fun f -> user_filter_should_type_check f path)
 
-let user_filter_type_check_files ~to_recheck ~reparsed ~is_ide_file =
+let user_filter_type_check_files ~to_recheck ~reparsed =
   Hh_logger.log "Filtering files to type check using user-defined predicates";
   let config_file_path =
     Sys_utils.expanduser "~/.hack_type_check_files_filter"
@@ -224,7 +224,6 @@ let user_filter_type_check_files ~to_recheck ~reparsed ~is_ide_file =
   let to_recheck =
     Relative_path.Set.filter to_recheck ~f:(fun path ->
         Relative_path.Set.mem reparsed path
-        || is_ide_file path
         || user_filters_should_type_check filters path)
   in
   let passed_filter_count = Relative_path.Set.cardinal to_recheck in

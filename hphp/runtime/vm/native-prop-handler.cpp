@@ -23,13 +23,13 @@ using NativePropHandlerMap = hphp_fast_map
 
 static NativePropHandlerMap s_nativePropHandlerMap;
 
-void registerNativePropHandler(const String& className,
+void registerNativePropHandler(const StringData* className,
                                NativePropHandler::GetFunc get,
                                NativePropHandler::SetFunc set,
                                NativePropHandler::IssetFunc isset,
                                NativePropHandler::UnsetFunc unset) {
 
-  assertx(s_nativePropHandlerMap.find(className.get()) ==
+  assertx(s_nativePropHandlerMap.find(className) ==
     s_nativePropHandlerMap.end());
 
   NativePropHandler propHandler;
@@ -38,7 +38,7 @@ void registerNativePropHandler(const String& className,
   propHandler.isset = isset;
   propHandler.unset = unset;
 
-  s_nativePropHandlerMap[className.get()] = propHandler;
+  s_nativePropHandlerMap[className] = propHandler;
 }
 
 NativePropHandler* getNativePropHandler(const StringData* className) {

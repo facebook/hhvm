@@ -18,6 +18,7 @@
 #define incl_HPHP_SYSTEMLIB_H_
 
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/tv-variant.h"
 #include "hphp/util/portability.h"
 
@@ -199,6 +200,29 @@ void keepRegisteredUnitEmitters(bool);
 void registerUnitEmitter(std::unique_ptr<UnitEmitter>);
 
 std::vector<std::unique_ptr<UnitEmitter>> claimRegisteredUnitEmitters();
+
+///////////////////////////////////////////////////////////////////////////////
+
+template<size_t N>
+struct StringLiteral {
+  /* implicit */ constexpr StringLiteral(const char (&str)[N]) {
+    std::copy_n(str, N, value);
+  }
+  char value[N];
+};
+
+template<StringLiteral NAME>
+struct ClassLoader {
+  static Class* classof() {
+    struct Class* cls = nullptr;
+    return SystemLib::classLoad(className().get(), cls);
+  }
+
+  static const StaticString& className() {
+    static const StaticString name(NAME.value);
+    return name;
+  }
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP::SystemLib

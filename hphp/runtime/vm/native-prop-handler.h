@@ -48,7 +48,7 @@ NativePropHandler* getNativePropHandler(const StringData* className);
 /**
  * Handler for a class with custom handling functions.
  */
-void registerNativePropHandler(const String& className,
+void registerNativePropHandler(const StringData* className,
                                NativePropHandler::GetFunc get,
                                NativePropHandler::SetFunc set,
                                NativePropHandler::IssetFunc isset,
@@ -117,7 +117,7 @@ Variant nativePropHandlerUnset(const Object& obj, const String& name) {
  * Example: Native::registerNativePropHandler<HandlerClassName>(className);
  */
 template<class T>
-void registerNativePropHandler(const String& className) {
+void registerNativePropHandler(const StringData* className) {
   registerNativePropHandler(
     className,
     &nativePropHandlerGet<T>,
@@ -125,6 +125,11 @@ void registerNativePropHandler(const String& className) {
     &nativePropHandlerIsset<T>,
     &nativePropHandlerUnset<T>
   );
+}
+
+template<class T>
+void registerNativePropHandler(const String& className) {
+  registerNativePropHandler<T>(className.get());
 }
 
 /**

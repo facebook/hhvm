@@ -236,6 +236,14 @@ typename std::enable_if<
     (flags & NDIFlags::CTOR_THROWS));
 }
 
+template<class T>
+typename std::enable_if<
+  !std::is_base_of<Sweepable, T>::value,
+  void
+>::type registerNativeDataInfo(int64_t flags = 0, uint8_t rt_attrs = 0) {
+  registerNativeDataInfo<T>(T::className().get(), flags, rt_attrs);
+}
+
 // Return the ObjectData payload allocated after this NativeNode header
 inline ObjectData* obj(NativeNode* node) {
   auto obj = reinterpret_cast<ObjectData*>(

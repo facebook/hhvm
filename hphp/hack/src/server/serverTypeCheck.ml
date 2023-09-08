@@ -343,9 +343,7 @@ end
 module LazyCheckKind : CheckKindType = struct
   let get_files_to_parse env = env.ide_needs_parsing
 
-  let some_ide_diagnosed_files env =
-    Diagnostic_pusher.get_files_with_diagnostics env.diagnostic_pusher
-    |> fun l -> List.take l 10 |> Relative_path.Set.of_list
+  let some_ide_diagnosed_files _env = Relative_path.Set.empty
 
   let is_ide_file env x =
     Relative_path.Set.mem (some_ide_diagnosed_files env) x
@@ -623,13 +621,11 @@ functor
                 {
                   Typing_check_service.errors = errorl;
                   telemetry;
-                  diagnostic_pusher =
-                    (diagnostic_pusher, time_first_typing_error);
+                  time_first_error;
                 } ),
               cancelled ) =
           let root = Some (ServerArgs.root genv.ServerEnv.options) in
           Typing_check_service.go_with_interrupt
-            ~diagnostic_pusher:env.ServerEnv.diagnostic_pusher
             ctx
             genv.workers
             telemetry
@@ -647,14 +643,7 @@ functor
                  genv
                  env)
         in
-        let env =
-          {
-            env with
-            diagnostic_pusher =
-              Option.value diagnostic_pusher ~default:env.diagnostic_pusher;
-          }
-        in
-        (errorl, telemetry, env, cancelled, time_first_typing_error)
+        (errorl, telemetry, env, cancelled, time_first_error)
       in
       let telemetry =
         telemetry
@@ -1381,10 +1370,6 @@ let type_check :
     mentioned in any of the *reasons* of those 10k files, and where those reasons intersect
     with changed-files then that causes need to redecl and compute fanout, and also need
     to recheck.)
-
-  (2) THE DIAGNOSTICS_PUSHER MODEL FOR ERRORS...
-  This is used for the persistent connection. It maintains its belief of what the persistent
-  client already knows, and pushes deltas. The less said about it, the better.
 
   (3) THE STREAMING MODEL FOR ERRORS...
   The errors-file grows monotonically: it has no "backsies", no way to remove an error

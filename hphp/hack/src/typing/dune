@@ -484,7 +484,6 @@
   server_env
   server_env_build
   deferred_decl
-  diagnostic_pusher
   errors
   typing_error
   typing_service_types

@@ -624,20 +624,9 @@ let idle_if_no_client env waiting_client =
   | ClientProvider.Select_persistent ->
     env
 
-(** Push diagnostics (typechecker errors in the IDE are called diagnostics) to IDE.
-    Return a reason why nothing was pushed and optionally the timestamp of the push. *)
-let push_diagnostics env : env * string * seconds_since_epoch option =
-  let (diagnostic_pusher, time_errors_pushed) =
-    Diagnostic_pusher.push_whats_left env.diagnostic_pusher
-  in
-  let env = { env with diagnostic_pusher } in
-  (env, "pushed any leftover", time_errors_pushed)
-
-let log_recheck_end (stats : ServerEnv.RecheckLoopStats.t) ~errors ~diag_reason
-    =
+let log_recheck_end (stats : ServerEnv.RecheckLoopStats.t) ~errors =
   let telemetry =
     ServerEnv.RecheckLoopStats.to_user_telemetry stats
-    |> Telemetry.string_ ~key:"diag_reason" ~value:diag_reason
     |> Telemetry.object_ ~key:"errors" ~value:(Errors.as_telemetry errors)
   in
   let {
@@ -769,10 +758,11 @@ let serve_one_iteration genv env client_provider =
       selected_client
   in
   let t_done_recheck = Unix.gettimeofday () in
-  let (env, diag_reason, time_errors_pushed) = push_diagnostics env in
   let t_sent_diagnostics = Unix.gettimeofday () in
   let stats =
-    ServerEnv.RecheckLoopStats.record_result_sent_ts stats time_errors_pushed
+    ServerEnv.RecheckLoopStats.record_result_sent_ts
+      stats
+      (Some t_sent_diagnostics)
   in
   let did_work = stats.RecheckLoopStats.total_rechecked_count > 0 in
   let env =
@@ -787,7 +777,7 @@ let serve_one_iteration genv env client_provider =
     }
   in
 
-  if did_work then log_recheck_end stats ~errors:env.errorl ~diag_reason;
+  if did_work then log_recheck_end stats ~errors:env.errorl;
 
   let env =
     match selected_client with

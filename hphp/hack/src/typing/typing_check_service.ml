@@ -528,27 +528,6 @@ let load_and_process_workitems
 (* Let's go! That's where the action is *)
 (*****************************************************************************)
 
-let possibly_push_new_errors_to_lsp_client :
-    progress:Typing_service_types.TypingProgress.t ->
-    Errors.t ->
-    Diagnostic_pusher.t option ->
-    Diagnostic_pusher.t option * seconds_since_epoch option =
- fun ~progress new_errors diag ->
-  match diag with
-  | None -> (None, None)
-  | Some diag ->
-    let rechecked =
-      TypingProgress.completed progress
-      |> List.filter_map ~f:(function
-             | Check { path; was_already_deferred = _ } -> Some path
-             | Declare _ -> None)
-      |> Relative_path.Set.of_list
-    in
-    let (diag, time_errors_pushed) =
-      Diagnostic_pusher.push_new_errors diag ~rechecked new_errors
-    in
-    (Some diag, time_errors_pushed)
-
 (** Merge the results from multiple workers.
 
     We don't really care about which files are left unchecked since we use
@@ -562,7 +541,6 @@ let merge
     (workitems_initial_count : int)
     (workitems_in_progress : workitem Hash_set.t)
     (files_checked_count : int ref)
-    (diagnostic_pusher : Diagnostic_pusher.t option ref)
     (time_first_error : seconds_since_epoch option ref)
     ( (worker_id : string),
       (produced_by_job : typing_result),
@@ -637,14 +615,9 @@ let merge
   if check_info.log_errors then
     ServerProgress.ErrorsWrite.report produced_by_job.errors;
   (* Handle errors paradigm (2) - push updates to lsp as well *)
-  let (diag_pusher, time_errors_pushed) =
-    possibly_push_new_errors_to_lsp_client
-      ~progress
-      produced_by_job.errors
-      !diagnostic_pusher
-  in
-  diagnostic_pusher := diag_pusher;
-  time_first_error := Option.first_some !time_first_error time_errors_pushed;
+  if not (Errors.is_empty produced_by_job.errors) then
+    time_first_error :=
+      Some (Option.value !time_first_error ~default:(Unix.gettimeofday ()));
 
   Typing_deps.register_discovered_dep_edges produced_by_job.dep_edges;
   Typing_deps.register_discovered_dep_edges acc.dep_edges;
@@ -893,7 +866,6 @@ let process_with_hh_distc
   `job` runs in each worker and does not have access to this mutable state.
  *)
 let process_in_parallel
-    ?diagnostic_pusher
     (ctx : Provider_context.t)
     (workers : MultiWorker.worker list option)
     (telemetry : Telemetry.t)
@@ -907,14 +879,13 @@ let process_in_parallel
     * Telemetry.t
     * _
     * (Relative_path.t list * MultiThreadedCall.cancel_reason) option
-    * (Diagnostic_pusher.t option * seconds_since_epoch option) =
+    * seconds_since_epoch option =
   let record = Measure.create () in
   (* [record] is used by [next] *)
   let workitems_to_process = ref workitems in
   let workitems_in_progress = Hash_set.Poly.create () in
   let workitems_initial_count = BigList.length workitems in
   let workitems_processed_count = ref 0 in
-  let diagnostic_pusher = ref diagnostic_pusher in
   let time_first_error = ref None in
   let errors_so_far = ref 0 in
   let batch_counts_by_worker_id = ref SMap.empty in
@@ -958,7 +929,6 @@ let process_in_parallel
            workitems_initial_count
            workitems_in_progress
            workitems_processed_count
-           diagnostic_pusher
            time_first_error)
       ~next
       ~on_cancelled:
@@ -983,11 +953,7 @@ let process_in_parallel
     Option.map cancelled_results ~f:(fun (unfinished, reason) ->
         (paths_of unfinished, reason))
   in
-  ( typing_result,
-    telemetry,
-    env,
-    cancelled_results,
-    (!diagnostic_pusher, !time_first_error) )
+  (typing_result, telemetry, env, cancelled_results, !time_first_error)
 
 type 'a job_result =
   'a * (Relative_path.t list * MultiThreadedCall.cancel_reason) option
@@ -1055,11 +1021,10 @@ module Mocking =
 type result = {
   errors: Errors.t;
   telemetry: Telemetry.t;
-  diagnostic_pusher: Diagnostic_pusher.t option * seconds_since_epoch option;
+  time_first_error: seconds_since_epoch option;
 }
 
 let go_with_interrupt
-    ?(diagnostic_pusher : Diagnostic_pusher.t option)
     (ctx : Provider_context.t)
     (workers : MultiWorker.worker list option)
     (telemetry : Telemetry.t)
@@ -1124,11 +1089,8 @@ let go_with_interrupt
       workers
   in
   Mocking.with_test_mocking fnl @@ fun fnl ->
-  let ( typing_result,
-        telemetry,
-        env,
-        cancelled_fnl_and_reason,
-        diagnostic_pusher ) =
+  let (typing_result, telemetry, env, cancelled_fnl_and_reason, time_first_error)
+      =
     let will_use_distc =
       use_hh_distc_instead_of_hulk
       && BigList.length fnl > Option.value_exn hh_distc_fanout_threshold
@@ -1139,6 +1101,7 @@ let go_with_interrupt
         |> Telemetry.bool_ ~key:"will_use_distc" ~value:will_use_distc);
     let results_via_distc =
       if will_use_distc then (
+        (* TODO(ljw): time_first_error isn't properly calculated in this path *)
         (* distc doesn't yet give any profiling_info about how its workers fared *)
         let profiling_info = Telemetry.create () in
         match process_with_hh_distc ~root ~interrupt ~check_info ~tcopt with
@@ -1148,7 +1111,7 @@ let go_with_interrupt
               telemetry,
               env,
               None,
-              (None, None) )
+              None )
         | Cancel (env, reason) ->
           (* Typecheck is cancelled due to interrupt *)
           Some
@@ -1161,7 +1124,7 @@ let go_with_interrupt
               telemetry,
               env,
               Some (original_fnl, reason),
-              (None, None) )
+              None )
         | DistCError msg ->
           Hh_logger.log "Error with hh_distc: %s" msg;
           HackEventLogger.invariant_violation_bug
@@ -1180,7 +1143,6 @@ let go_with_interrupt
           (Telemetry.create ()
           |> Telemetry.bool_ ~key:"process_in_parallel" ~value:true);
       process_in_parallel
-        ?diagnostic_pusher
         ctx
         workers
         telemetry
@@ -1202,7 +1164,7 @@ let go_with_interrupt
   let telemetry =
     telemetry |> Telemetry.object_ ~key:"profiling_info" ~value:profiling_info
   in
-  ((env, { errors; telemetry; diagnostic_pusher }), cancelled_fnl_and_reason)
+  ((env, { errors; telemetry; time_first_error }), cancelled_fnl_and_reason)
 
 let go
     (ctx : Provider_context.t)
@@ -1218,7 +1180,6 @@ let go
   let interrupt = MultiThreadedCall.no_interrupt () in
   let (((), result), unfinished_and_reason) =
     go_with_interrupt
-      ?diagnostic_pusher:None
       ctx
       workers
       telemetry

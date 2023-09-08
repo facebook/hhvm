@@ -30,7 +30,7 @@ val process_file :
 type result = {
   errors: Errors.t;
   telemetry: Telemetry.t;
-  diagnostic_pusher: Diagnostic_pusher.t option * seconds_since_epoch option;
+  time_first_error: seconds_since_epoch option;
 }
 
 val go :
@@ -49,7 +49,6 @@ val go :
 (** The last element returned, a list of paths, are the files which have not been
     processed fully or at all due to interrupts. *)
 val go_with_interrupt :
-  ?diagnostic_pusher:Diagnostic_pusher.t ->
   Provider_context.t ->
   MultiWorker.worker list option ->
   Telemetry.t ->

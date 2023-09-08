@@ -81,13 +81,7 @@ let test () =
       memtrace_dir = None;
     }
   in
-  let ( ( (),
-          {
-            Typing_check_service.errors;
-            diagnostic_pusher = (diag_pusher, _);
-            _;
-          } ),
-        cancelled ) =
+  let (((), { Typing_check_service.errors; _ }), cancelled) =
     Typing_check_service.go_with_interrupt
       ctx
       workers
@@ -101,7 +95,6 @@ let test () =
       ~hh_distc_fanout_threshold:None
       ~check_info
   in
-  assert (Option.is_none diag_pusher);
   (* Assert that we got the errors in bar2 only... *)
   Test.assert_errors errors expected_errors;
 

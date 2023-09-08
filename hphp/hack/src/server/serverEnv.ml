@@ -267,8 +267,6 @@ type env = {
           (due to needing full check) we put the continuation that finishes handling
           it here. The string specifies a reason why this command needs full
           recheck (for logging/debugging purposes) *)
-  diagnostic_pusher: Diagnostic_pusher.t;
-      (** Structure tracking errors to push to LSP client. *)
   last_recheck_loop_stats: RecheckLoopStats.t; [@opaque]
   last_recheck_loop_stats_for_actual_work: RecheckLoopStats.t option; [@opaque]
 }

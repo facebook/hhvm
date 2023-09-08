@@ -87,7 +87,6 @@ let make_env ~init_id ~deps_mode config : ServerEnv.env =
         saved_state_delta = None;
         naming_table_manifold_path = None;
       };
-    diagnostic_pusher = Diagnostic_pusher.init;
     last_recheck_loop_stats = RecheckLoopStats.empty ~recheck_id:"<none>";
     last_recheck_loop_stats_for_actual_work = None;
   }

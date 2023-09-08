@@ -258,8 +258,7 @@ module type CheckKindType = sig
 end
 
 module FullCheckKind : CheckKindType = struct
-  let get_files_to_parse env =
-    Relative_path.Set.(env.ide_needs_parsing |> union env.disk_needs_parsing)
+  let get_files_to_parse env = env.disk_needs_parsing
 
   let get_defs_to_recheck
       ~reparsed
@@ -297,7 +296,6 @@ module FullCheckKind : CheckKindType = struct
       old_env with
       naming_table;
       failed_naming;
-      ide_needs_parsing = Relative_path.Set.empty;
       disk_needs_parsing = Relative_path.Set.empty;
     }
 
@@ -327,7 +325,7 @@ module FullCheckKind : CheckKindType = struct
 end
 
 module LazyCheckKind : CheckKindType = struct
-  let get_files_to_parse env = env.ide_needs_parsing
+  let get_files_to_parse _env = Relative_path.Set.empty
 
   let get_defs_to_recheck
       ~reparsed
@@ -361,12 +359,7 @@ module LazyCheckKind : CheckKindType = struct
     (to_recheck_now, to_recheck_later)
 
   let get_env_after_decl ~old_env ~naming_table ~failed_naming =
-    {
-      old_env with
-      naming_table;
-      failed_naming;
-      ide_needs_parsing = Relative_path.Set.empty;
-    }
+    { old_env with naming_table; failed_naming }
 
   let get_env_after_typing ~old_env ~errorl ~needs_recheck =
     (* If it was started, it's still started, otherwise it needs starting *)
@@ -375,13 +368,7 @@ module LazyCheckKind : CheckKindType = struct
       | Full_check_started -> Full_check_started
       | _ -> Full_check_needed
     in
-    {
-      old_env with
-      errorl;
-      ide_needs_parsing = Relative_path.Set.empty;
-      needs_recheck;
-      full_check_status;
-    }
+    { old_env with errorl; needs_recheck; full_check_status }
 
   let is_full = false
 end

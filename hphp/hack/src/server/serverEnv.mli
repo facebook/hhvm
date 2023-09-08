@@ -254,9 +254,6 @@ type env = {
   last_notifier_check_time: float;
       (** Timestamp of last query for disk changes *)
   last_idle_job_time: float;  (** Timestamp of last ServerIdle.go run *)
-  ide_needs_parsing: Relative_path.Set.t;
-      (** Files which parse trees were invalidated (because they changed on disk
-          or in editor) and need to be re-parsed *)
   disk_needs_parsing: Relative_path.Set.t;
   clock: Watchman.clock option;
       (** This is the clock as of when disk_needs_parsing was last updated.

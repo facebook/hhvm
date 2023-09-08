@@ -359,14 +359,6 @@ let rec recheck_until_no_changes_left stats genv env select_outcome :
     |> Telemetry.duration ~key:"query_done" ~start_time
   in
   let stats = { stats with RecheckLoopStats.updates_stale } in
-  let is_idle =
-    (match select_outcome with
-    | ClientProvider.Select_persistent -> false
-    | _ -> true)
-    && (* "average person types [...] between 190 and 200 characters per minute"
-        * 60/200 = 0.3 *)
-    Float.(start_time - env.last_command_time > 0.3)
-  in
   (* saving any file is our trigger to start full recheck *)
   let env =
     if Option.is_some clock && not (Option.equal String.equal clock env.clock)
@@ -429,9 +421,7 @@ let rec recheck_until_no_changes_left stats genv env select_outcome :
   in
   (* We have some new, or previously un-processed updates *)
   let full_check = ServerEnv.is_full_check_started env.full_check_status in
-  let lazy_check =
-    (not @@ Relative_path.Set.is_empty env.ide_needs_parsing) && is_idle
-  in
+  let lazy_check = false in
   let telemetry =
     telemetry
     |> Telemetry.bool_ ~key:"full_check" ~value:full_check

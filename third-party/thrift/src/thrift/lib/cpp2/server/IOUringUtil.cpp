@@ -17,8 +17,8 @@
 #include <thrift/lib/cpp2/server/IOUringUtil.h>
 
 #ifdef HAS_IO_URING
-
 #include <folly/experimental/io/IoUringEventBaseLocal.h>
+#include <folly/system/HardwareConcurrency.h>
 
 namespace apache {
 namespace thrift {
@@ -55,9 +55,9 @@ std::shared_ptr<folly::IOThreadPoolExecutorBase> getDefaultIOUringExecutor(
     ebm.setEventBase(evb, false);
   }
   return std::make_shared<folly::IOThreadPoolExecutor>(
-      0,
+      folly::hardware_concurrency(),
       std::make_shared<folly::NamedThreadFactory>("ThriftIO"),
-      folly::EventBaseManager::get(),
+      &ebm,
       folly::IOThreadPoolExecutor::Options().setEnableThreadIdCollection(
           enableThreadIdCollection));
 }
@@ -74,7 +74,7 @@ bool validateExecutorSupportsIOUring(
       return t;
     }
   } catch (const std::exception& e) {
-    VLOG(1) << "error getting exector, configuring default: " << e.what();
+    VLOG(1) << "error getting executor, configuring default: " << e.what();
     return false;
   }
 

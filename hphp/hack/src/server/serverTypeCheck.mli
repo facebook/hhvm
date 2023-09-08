@@ -9,28 +9,6 @@
 
 module CheckKind : sig
   type t =
-    | Lazy
-        (** Lazy check is a check limited to the files open in IDE. It:
-            - produces push diagnostics for those files
-            - updates their parsing / naming / decl definitions on heap
-            - updates their parsing level indexes, like SymbolIndex or
-                ServerEnv.naming_table
-            - invalidates their declaration dependencies, by removing them from the
-                heap and depending on lazy declaration to redeclare them on
-                as-needed basis later
-            - stores the information about what it skipped doing to be finished later
-                by Full
-
-            It does not do the "full" expensive fanout:
-            - does not re-declare dependencies ("phase 2 decl")
-            - does not fan out to all typing dependencies
-            - because of that, it does not update structures depending on global state,
-                like global error list, dependency table or the lists of files that
-                failed parsing / declaration / checking
-
-            Any operation that need the global state to be up to date and cannot get
-            the data that they need through lazy decl, need to be preceded by
-            Full. *)
     | Full
         (** Full check brings the global state of the server to consistency by
             executing all the re-checks that lazy checks delayed. It processes the

@@ -13,17 +13,13 @@ open Reordered_argument_collections
 module SLC = ServerLocalConfig
 
 module CheckKind = struct
-  type t =
-    | Lazy
-    | Full
+  type t = Full
 
   let to_string = function
     | Full -> "Full_check"
-    | Lazy -> "Lazy_check"
 
   let is_full_check = function
     | Full -> true
-    | Lazy -> false
 end
 
 module CheckStats = struct
@@ -322,55 +318,6 @@ module FullCheckKind : CheckKindType = struct
     }
 
   let is_full = true
-end
-
-module LazyCheckKind : CheckKindType = struct
-  let get_files_to_parse _env = Relative_path.Set.empty
-
-  let get_defs_to_recheck
-      ~reparsed
-      ~defs_per_file
-      ~to_recheck
-      ~env
-      ~ctx
-      ~enable_type_check_filter_files =
-    (* If the user has enabled a custom file filter, we want to only
-     * type check files that pass the filter. As such, we don't want
-     * to add unwanted files to the "type check later"-queue *)
-    let to_recheck =
-      if enable_type_check_filter_files then
-        ServerCheckUtils.user_filter_type_check_files ~to_recheck ~reparsed
-      else
-        to_recheck
-    in
-    (* Same as FullCheckKind.get_defs_to_recheck, but we limit returned set only
-     * to files that are relevant to IDE *)
-    let stale_errors =
-      get_files_with_stale_errors ~ctx ~reparsed ~filter:None ~errors:env.errorl
-    in
-    let to_recheck = Relative_path.Set.union to_recheck stale_errors in
-    let to_recheck_now = Relative_path.Set.empty in
-    let to_recheck_later = to_recheck in
-    let to_recheck_now =
-      Relative_path.Set.union
-        (Relative_path.Set.of_list (Relative_path.Map.keys defs_per_file))
-        to_recheck_now
-    in
-    (to_recheck_now, to_recheck_later)
-
-  let get_env_after_decl ~old_env ~naming_table ~failed_naming =
-    { old_env with naming_table; failed_naming }
-
-  let get_env_after_typing ~old_env ~errorl ~needs_recheck =
-    (* If it was started, it's still started, otherwise it needs starting *)
-    let full_check_status =
-      match old_env.full_check_status with
-      | Full_check_started -> Full_check_started
-      | _ -> Full_check_needed
-    in
-    { old_env with errorl; needs_recheck; full_check_status }
-
-  let is_full = false
 end
 
 module Make : functor (_ : CheckKindType) -> sig
@@ -1234,13 +1181,11 @@ functor
   end
 
 module FC = Make (FullCheckKind)
-module LC = Make (LazyCheckKind)
 
 let type_check_unsafe genv env kind start_time profiling =
   let check_kind = CheckKind.to_string kind in
   let check_reason =
     match (kind, env.ServerEnv.init_env.ServerEnv.why_needed_full_check) with
-    | (CheckKind.Lazy, _) -> "keystroke"
     | (CheckKind.Full, Some init_telemetry) ->
       ServerEnv.Init_telemetry.get_reason init_telemetry
     | (CheckKind.Full, None) -> "incremental"
@@ -1255,24 +1200,6 @@ let type_check_unsafe genv env kind start_time profiling =
   HackEventLogger.with_check_kind ~check_kind ~check_reason @@ fun () ->
   Hh_logger.log "******************************************";
   match kind with
-  | CheckKind.Lazy ->
-    Hh_logger.log
-      "Check kind: will check only those files already open in IDE or with reported errors ('%s')"
-      check_kind;
-    let telemetry =
-      Telemetry.duration telemetry ~key:"core_start" ~start_time
-    in
-    let (env, stats, core_telemetry, cancel_reason) =
-      LC.type_check_core genv env start_time ~check_reason profiling
-    in
-    let telemetry =
-      telemetry
-      |> Telemetry.duration ~key:"core_end" ~start_time
-      |> Telemetry.object_ ~key:"core" ~value:core_telemetry
-    in
-    let stats = CheckStats.record_result_sent_ts stats in
-    let telemetry = Telemetry.duration telemetry ~key:"sent_done" ~start_time in
-    (env, stats, telemetry, cancel_reason)
   | CheckKind.Full ->
     Hh_logger.log
       "Check kind: will bring hh_server to consistency with code changes, by checking whatever fanout is needed ('%s')"

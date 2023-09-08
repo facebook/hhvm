@@ -415,14 +415,12 @@ let rec recheck_until_no_changes_left stats genv env select_outcome :
   in
   (* We have some new, or previously un-processed updates *)
   let full_check = ServerEnv.is_full_check_started env.full_check_status in
-  let lazy_check = false in
   let telemetry =
     telemetry
     |> Telemetry.bool_ ~key:"full_check" ~value:full_check
-    |> Telemetry.bool_ ~key:"lazy_check" ~value:lazy_check
     |> Telemetry.duration ~key:"figured_check_kind" ~start_time
   in
-  if (not full_check) && not lazy_check then
+  if not full_check then
     let telemetry =
       Telemetry.string_ telemetry ~key:"check_kind" ~value:"None"
     in
@@ -435,14 +433,9 @@ let rec recheck_until_no_changes_left stats genv env select_outcome :
     in
     (stats, env)
   else
-    let check_kind =
-      if lazy_check then
-        ServerTypeCheck.CheckKind.Lazy
-      else
-        ServerTypeCheck.CheckKind.Full
-    in
+    let check_kind = ServerTypeCheck.CheckKind.Full in
     let check_kind_str = ServerTypeCheck.CheckKind.to_string check_kind in
-    let env = { env with can_interrupt = not lazy_check } in
+    let env = { env with can_interrupt = true } in
     let needed_full_init = env.init_env.why_needed_full_check in
     let old_errorl = Errors.get_error_list env.errorl in
 
@@ -453,7 +446,7 @@ let rec recheck_until_no_changes_left stats genv env select_outcome :
       |> Telemetry.duration ~key:"type_check_start" ~start_time
     in
     let (env, check_stats, type_check_telemetry) =
-      CgroupProfiler.step_group check_kind_str ~log:(not lazy_check)
+      CgroupProfiler.step_group check_kind_str ~log:true
       @@ ServerTypeCheck.type_check genv env check_kind start_time
     in
     let telemetry =
@@ -484,11 +477,8 @@ let rec recheck_until_no_changes_left stats genv env select_outcome :
         ~start_time
         ~telemetry
     in
-    (* If a recheck was interrupted because of arrival of command
-     * that needs writes, break the recheck loop to give that command chance
-     * to be handled in main loop.
-     * Finally, tests have ability to opt-out of batching completely. *)
-    if lazy_check || !force_break_recheck_loop_for_test_ref then
+    (* Tests have ability to opt-out of batching completely. *)
+    if !force_break_recheck_loop_for_test_ref then
       (stats, env)
     else
       recheck_until_no_changes_left stats genv env select_outcome

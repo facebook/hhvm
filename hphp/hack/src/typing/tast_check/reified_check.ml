@@ -145,10 +145,11 @@ let verify_call_targs env expr_pos decl_pos tparams targs =
     List.iter2 tparams targs ~f:(verify_targ_valid env Type_validator.Resolved)
     |> ignore
 
-let rec get_ft_tparams fun_ty =
+let rec get_ft_tparams env fun_ty =
+  let fun_ty = Tast_env.strip_dynamic env fun_ty in
   match get_node fun_ty with
   | Tnewtype (name, _, ty1) when String.equal name SN.Classes.cSupportDyn ->
-    get_ft_tparams ty1
+    get_ft_tparams env ty1
   | Tfun ({ ft_tparams; _ } as fun_ty) -> Some (ft_tparams, fun_ty)
   | _ -> None
 
@@ -165,7 +166,7 @@ let handler =
             ~env:(Tast_env.tast_env_as_typing_env env)
             Typing_error.(primary @@ Primary.Class_get_reified call_pos)
       | (fun_ty, pos, Method_caller _) ->
-        (match get_ft_tparams fun_ty with
+        (match get_ft_tparams env fun_ty with
         | Some (ft_tparams, _) ->
           if tparams_has_reified ft_tparams then
             Typing_error_utils.add_typing_error
@@ -189,14 +190,14 @@ let handler =
           | _ -> ()
         end
       | (fun_ty, pos, FunctionPointer (_, targs)) -> begin
-        match get_ft_tparams fun_ty with
+        match get_ft_tparams env fun_ty with
         | Some (ft_tparams, _) ->
           verify_call_targs env pos (get_pos fun_ty) ft_tparams targs
         | None -> ()
       end
       | (_, pos, Call { func = (fun_ty, _, _); targs; _ }) ->
         let (env, efun_ty) = Env.expand_type env fun_ty in
-        (match get_ft_tparams efun_ty with
+        (match get_ft_tparams env efun_ty with
         | Some (ft_tparams, ty) when not @@ get_ft_is_function_pointer ty ->
           verify_call_targs env pos (get_pos efun_ty) ft_tparams targs
         | _ -> ())

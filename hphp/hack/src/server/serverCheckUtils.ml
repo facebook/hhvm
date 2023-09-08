@@ -111,12 +111,6 @@ let extend_defs_per_file
     extended_defs_per_file
   )
 
-let global_typecheck_kind genv _env =
-  if genv.ServerEnv.options |> ServerArgs.remote then
-    ServerCommandTypes.Remote_blocking "Forced remote type check"
-  else
-    ServerCommandTypes.Interruptible
-
 let get_check_info ~check_reason ~log_errors (genv : genv) env :
     Typing_service_types.check_info =
   {

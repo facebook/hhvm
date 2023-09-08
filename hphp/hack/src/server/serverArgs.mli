@@ -63,8 +63,6 @@ val no_load : options -> bool
 
 val prechecked : options -> bool option
 
-val remote : options -> bool
-
 val root : options -> Path.t
 
 val save_filename : options -> string option

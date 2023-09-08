@@ -445,11 +445,6 @@ let equal_errors errors1 errors2 =
 
 type diagnostic_errors = errors SMap.t [@@deriving eq, show]
 
-type global_typecheck_kind =
-  | Interruptible
-  | Remote_blocking of string
-[@@deriving eq, show]
-
 type 'a message_type =
   | Hello  (** Hello is the first message sent to the client by the server *)
   | Monitor_failed_to_handoff

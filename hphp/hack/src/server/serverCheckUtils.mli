@@ -13,9 +13,6 @@ val get_check_info :
   ServerEnv.env ->
   Typing_service_types.check_info
 
-val global_typecheck_kind :
-  ServerEnv.genv -> ServerEnv.env -> ServerCommandTypes.global_typecheck_kind
-
 val user_filter_type_check_files :
   to_recheck:Relative_path.Set.t ->
   reparsed:Relative_path.Set.t ->

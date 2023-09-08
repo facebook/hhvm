@@ -35,7 +35,6 @@ type options = {
   max_procs: int option;
   no_load: bool;
   prechecked: bool option;
-  remote: bool;
   root: Path.t;
   save_filename: string option;
   save_64bit: string option;
@@ -110,8 +109,6 @@ module Messages = struct
 
   let profile_log = " enable profile logging"
 
-  let remote = " force remote type checking"
-
   let save_state = " save server state to file"
 
   let save_naming = " save naming table to file"
@@ -165,7 +162,6 @@ let parse_options () : options =
   let max_procs = ref None in
   let no_load = ref false in
   let prechecked = ref None in
-  let remote = ref false in
   let root = ref "" in
   let save = ref None in
   let save_64bit = ref None in
@@ -237,7 +233,6 @@ let parse_options () : options =
       ( "--profile-log",
         Arg.Unit (fun () -> config := ("profile_log", "true") :: !config),
         Messages.profile_log );
-      ("--remote", Arg.Set remote, Messages.remote);
       ("--save-mini", Arg.String set_save_state, Messages.save_state);
       ("--save-naming", Arg.String set_save_naming, Messages.save_naming);
       ("--save-state", Arg.String set_save_state, Messages.save_state);
@@ -323,7 +318,6 @@ let parse_options () : options =
     max_procs = !max_procs;
     no_load = !no_load;
     prechecked = !prechecked;
-    remote = !remote;
     root = root_path;
     save_filename = !save;
     save_64bit = !save_64bit;
@@ -358,7 +352,6 @@ let default_options ~root =
     max_procs = None;
     no_load = true;
     prechecked = None;
-    remote = false;
     root = Path.make root;
     save_filename = None;
     save_64bit = None;
@@ -416,8 +409,6 @@ let max_procs options = options.max_procs
 let no_load options = options.no_load
 
 let prechecked options = options.prechecked
-
-let remote options = options.remote
 
 let root options = options.root
 
@@ -496,7 +487,6 @@ let to_string
       max_procs;
       no_load;
       prechecked;
-      remote;
       root;
       save_filename;
       save_64bit;
@@ -638,8 +628,6 @@ let to_string
     ", ";
     "prechecked: ";
     prechecked_str;
-    "remote: ";
-    string_of_bool remote;
     ", ";
     "root: ";
     Path.to_string root;

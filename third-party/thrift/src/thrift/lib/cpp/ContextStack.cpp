@@ -19,6 +19,7 @@
 
 #include <folly/tracing/StaticTracepoint.h>
 
+#include <thrift/lib/cpp2/detail/EventHandlerRuntime.h>
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
 
 namespace apache {
@@ -69,7 +70,7 @@ ContextStack::UniquePtr ContextStack::create(
     const char* method,
     TConnectionContext* connectionContext) {
   if (!handlers || handlers->empty()) {
-    return {};
+    return nullptr;
   }
 
   const size_t nbytes = sizeof(ContextStack) + handlers->size() * sizeof(void*);
@@ -88,7 +89,11 @@ ContextStack::UniquePtr ContextStack::createWithClientContext(
     const char* method,
     transport::THeader& header) {
   if (!handlers || handlers->empty()) {
-    return {};
+    return nullptr;
+  }
+  if (apache::thrift::detail::EventHandlerRuntime::isClientMethodBypassed(
+          serviceName, method)) {
+    return nullptr;
   }
 
   const size_t nbytes = sizeof(ContextStack) +
@@ -115,7 +120,11 @@ ContextStack::UniquePtr ContextStack::createWithClientContextCopyNames(
     const std::string& methodName,
     transport::THeader& header) {
   if (!handlers || handlers->empty()) {
-    return {};
+    return nullptr;
+  }
+  if (apache::thrift::detail::EventHandlerRuntime::isClientMethodBypassed(
+          serviceName, methodName)) {
+    return nullptr;
   }
 
   size_t serviceNameBytes = serviceName.size() + 1;

@@ -764,6 +764,10 @@ Type make_specialized_lazycls(trep bits, SString s) {
   return set_trep_for_testing(lazyclsval(s), bits);
 }
 
+Type make_specialized_enumclasslabel(trep bits, SString s) {
+  return set_trep_for_testing(enumclasslabelval(s), bits);
+}
+
 Type make_specialized_int(trep bits, int64_t i) {
   return set_trep_for_testing(ival(i), bits);
 }
@@ -851,6 +855,10 @@ Type sval_counted(const StaticString& s) {
 
 Type lazyclsval(const StaticString& s) {
   return HPHP::HHBBC::lazyclsval(s.get());
+}
+
+Type enumclasslabelval(const StaticString& s) {
+  return HPHP::HHBBC::enumclasslabelval(s.get());
 }
 
 TypedValue tv(SString s) { return make_tv<KindOfPersistentString>(s); }
@@ -999,7 +1007,7 @@ std::vector<Type> withData(const Index& index) {
   auto const skeyset2 = static_keyset(123, 456);
 
   auto const support = BStr | BDbl | BInt | BCls | BObj |
-                       BArrLikeN | BLazyCls;
+                       BArrLikeN | BLazyCls | BEnumClassLabel;
   auto const nonSupport = BCell & ~support;
 
   auto const add = [&] (trep b) {
@@ -1014,6 +1022,10 @@ std::vector<Type> withData(const Index& index) {
     if (couldBe(b, BLazyCls) && subtypeOf(b, BLazyCls | nonSupport)) {
       types.emplace_back(make_specialized_lazycls(b, s_A.get()));
       types.emplace_back(make_specialized_lazycls(b, s_B.get()));
+    }
+    if (couldBe(b, BEnumClassLabel) && subtypeOf(b, BEnumClassLabel | nonSupport)) {
+      types.emplace_back(make_specialized_enumclasslabel(b, s_A.get()));
+      types.emplace_back(make_specialized_enumclasslabel(b, s_B.get()));
     }
     if (couldBe(b, BInt) && subtypeOf(b, BInt | nonSupport)) {
       types.emplace_back(make_specialized_int(b, 123));
@@ -2664,6 +2676,7 @@ TEST(Type, Prim) {
     { TCls, TInitPrim },
     { TFunc, TInitPrim },
     { TLazyCls, TInitPrim },
+    { TEnumClassLabel, TInitPrim },
   };
 
   const std::initializer_list<std::pair<Type, Type>> couldbe_true{
@@ -3040,6 +3053,11 @@ TEST(Type, Option) {
   EXPECT_TRUE(TInitNull.subtypeOf(BOptLazyCls));
   EXPECT_TRUE(!TUninit.subtypeOf(BOptLazyCls));
 
+  EXPECT_TRUE(enumclasslabelval(s_test).subtypeOf(BOptEnumClassLabel));
+  EXPECT_TRUE(TEnumClassLabel.subtypeOf(BOptEnumClassLabel));
+  EXPECT_TRUE(TInitNull.subtypeOf(BOptEnumClassLabel));
+  EXPECT_TRUE(!TUninit.subtypeOf(BOptEnumClassLabel));
+
   EXPECT_TRUE(TObj.subtypeOf(BOptObj));
   EXPECT_TRUE(TInitNull.subtypeOf(BOptObj));
   EXPECT_TRUE(!TUninit.subtypeOf(BOptObj));
@@ -3221,6 +3239,7 @@ TEST(Type, TV) {
   EXPECT_FALSE(tv(make_specialized_int(BInt|BFalse, 123)).has_value());
   EXPECT_FALSE(tv(make_specialized_string(BStr|BFalse, s_A.get())).has_value());
   EXPECT_FALSE(tv(make_specialized_lazycls(BLazyCls|BFalse, s_A.get())).has_value());
+  EXPECT_FALSE(tv(make_specialized_enumclasslabel(BEnumClassLabel|BFalse, s_A.get())).has_value());
   EXPECT_FALSE(
     tv(
       make_specialized_arrmap(
@@ -3358,6 +3377,10 @@ TEST(Type, OptCouldBe) {
     { opt(lazyclsval(s_test)), TInitNull },
     { opt(lazyclsval(s_test)), lazyclsval(s_test) },
     { opt(sval(s_test)), sval_nonstatic(s_test) },
+
+    { opt(enumclasslabelval(s_test)), TEnumClassLabel },
+    { opt(enumclasslabelval(s_test)), TInitNull },
+    { opt(enumclasslabelval(s_test)), enumclasslabelval(s_test) },
 
     { opt(ival(2)), TInt },
     { opt(ival(2)), TInitNull },
@@ -5963,9 +5986,9 @@ TEST(Type, LoosenStaticness) {
     { TSKeyset, TKeyset },
     { TUncArrKey, TArrKey },
     { TUnc,
-      Type{BInitNull|BArrLike|BArrKey|BBool|BCls|BDbl|BFunc|BLazyCls|BClsMeth|BUninit} },
+      Type{BInitNull|BArrLike|BArrKey|BBool|BCls|BDbl|BFunc|BLazyCls|BEnumClassLabel|BClsMeth|BUninit} },
     { TInitUnc,
-      Type{BInitNull|BArrLike|BArrKey|BBool|BCls|BDbl|BFunc|BLazyCls|BClsMeth} },
+      Type{BInitNull|BArrLike|BArrKey|BBool|BCls|BDbl|BFunc|BLazyCls|BEnumClassLabel|BClsMeth} },
     { ival(123), ival(123) },
     { sval(s_test), sval_nonstatic(s_test) },
     { sdict_packedn(TInt), dict_packedn(TInt) },
@@ -6178,6 +6201,7 @@ TEST(Type, Emptiness) {
     { TStr, Emptiness::Maybe },
     { TLazyCls, Emptiness::NonEmpty },
     { TCls, Emptiness::NonEmpty },
+    { TEnumClassLabel, Emptiness::NonEmpty },
     { TDbl, Emptiness::Maybe }
   };
   for (auto const& p : tests) {
@@ -6244,6 +6268,7 @@ TEST(Type, AssertNonEmptiness) {
     { TInt, TInt },
     { TStr, TStr },
     { TLazyCls, TLazyCls },
+    { TEnumClassLabel, TEnumClassLabel },
     { TDbl, TDbl },
     { union_of(ival(1),TStr), union_of(ival(1),TStr) },
     { union_of(ival(0),TStr), TArrKey },
@@ -6311,6 +6336,7 @@ TEST(Type, AssertEmptiness) {
     { TStr, sempty_nonstatic() },
     { TSStr, sempty() },
     { TLazyCls, TBottom },
+    { TEnumClassLabel, TBottom },
     { TDbl, dval(0) },
     { union_of(ival(1),TStr), TArrKey },
     { union_of(ival(0),TStr), union_of(TInt,sempty_nonstatic()) },
@@ -6406,6 +6432,7 @@ TEST(Type, LoosenValues) {
         is_specialized_int(t) ||
         is_specialized_double(t) ||
         is_specialized_lazycls(t) ||
+        is_specialized_ecl(t) ||
         is_specialized_array_like(t)) {
       EXPECT_FALSE(loosen_values(t).hasData());
     } else if (!t.couldBe(BBool)) {
@@ -6428,6 +6455,7 @@ TEST(Type, LoosenValues) {
     { sval(s_test), TSStr },
     { sval_nonstatic(s_test), TStr },
     { lazyclsval(s_test), TLazyCls },
+    { enumclasslabelval(s_test), TEnumClassLabel },
     { dict_val(static_dict(0, 42, 1, 23, 2, 12)), TSDictN },
     { dict_packedn(TInt), TDictN },
     { dict_packed({TInt, TBool}), TDictN },
@@ -6632,7 +6660,8 @@ TEST(Type, Scalarize) {
     if (!t.hasData() && !t.subtypeOf(BArrLikeE)) {
       EXPECT_EQ(scalarize(t), t);
     }
-    if (is_specialized_int(t) || is_specialized_double(t) || is_specialized_lazycls(t)) {
+    if (is_specialized_int(t) || is_specialized_double(t) ||
+        is_specialized_lazycls(t) || is_specialized_ecl(t)) {
       EXPECT_EQ(scalarize(t), t);
     }
     if (is_specialized_string(t)) {
@@ -7474,6 +7503,7 @@ TEST(Type, LoosenLikenessRecursively) {
     { TCls, Type{BCls|BSStr} },
     { TLazyCls, Type{BLazyCls|BSStr} },
     { TInt, TInt },
+    { TEnumClassLabel, TEnumClassLabel },
     { Type{BInt|BCls}, Type{BCls|BSStr|BInt} },
     { wait_handle(index, TInt), wait_handle(index, TInt) },
     { wait_handle(index, TCls), wait_handle(index, Type{BCls|BSStr}) },
@@ -7519,6 +7549,7 @@ TEST(Type, PromoteClassish) {
     { TInt, TInt },
     { TObj, TObj },
     { TOptStr, TOptStr },
+    { TEnumClassLabel, TEnumClassLabel },
     { TBottom, TBottom },
     { union_of(TCls, TLazyCls), TSStr },
     { union_of(TLazyCls, TStr), TStr },

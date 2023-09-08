@@ -348,6 +348,7 @@ constexpr bool isClassType(DataType t) { return t == KindOfClass; }
 constexpr bool isClsMethType(DataType t) { return t == KindOfClsMeth; }
 constexpr bool isRClsMethType(DataType t) { return t == KindOfRClsMeth; }
 constexpr bool isLazyClassType(DataType t) { return t == KindOfLazyClass; }
+constexpr bool isEnumClassLabelType(DataType t) { return t == KindOfEnumClassLabel; }
 
 /*
  * Return whether two DataTypes for primitive types are "equivalent" as far as

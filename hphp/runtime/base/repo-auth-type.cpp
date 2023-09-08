@@ -379,6 +379,7 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
       O(Func,          isFuncType)
       O(ClsMeth,       isClsMethType)
       O(LazyCls,       isLazyClassType)
+      O(EnumClassLabel, isEnumClassLabelType)
       O(Num,           isNumType)
       O(VecCompat,     isVecCompatType)
       O(ArrLikeCompat, isArrLikeCompatType)

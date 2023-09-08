@@ -1431,6 +1431,7 @@ ConstraintType type_from_constraint_impl(const TypeConstraint& tc,
           case KindOfKeyset:       return exact(TKeyset);
           case KindOfResource:     return exact(TRes);
           case KindOfClsMeth:      return exact(TClsMeth);
+          case KindOfEnumClassLabel: return exact(TEnumClassLabel);
           case KindOfObject: {
             auto const cls = resolve(tc.clsName());
             auto lower = subObj(cls);
@@ -1474,7 +1475,6 @@ ConstraintType type_from_constraint_impl(const TypeConstraint& tc,
               union_of(TStr, TCls, TLazyCls),
               TriBool::Yes
             };
-          case KindOfEnumClassLabel: //TODO(T162042839): Implement this
           case KindOfUninit:
           case KindOfRFunc:
           case KindOfFunc:

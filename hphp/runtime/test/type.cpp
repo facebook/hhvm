@@ -741,8 +741,11 @@ TEST(Type, Const) {
   auto const rat2 = RepoAuthType::Array::packed(RepoAuthType::Array::Empty::No,
                                                 RepoAuthType(RepoAuthType::Tag::Int));
   auto const ratArray2 = Type::Dict(rat2);
-  EXPECT_EQ(ratArray1, ratArray1 & ratArray2);
-  EXPECT_EQ(ratArray1, ratArray2 & ratArray1);
+
+  // Read function chooseRATArray in hphp/runtime/vm/jit/type-specialization.cpp
+  // to understand the behavior of this intersection
+  EXPECT_EQ(ratArray2, ratArray1 & ratArray2);
+  EXPECT_EQ(ratArray2, ratArray2 & ratArray1);
   EXPECT_TRUE(ratArray1 <= TArrLike);
   EXPECT_TRUE(ratArray1 < TArrLike);
   EXPECT_TRUE(ratArray1 <= TDict);

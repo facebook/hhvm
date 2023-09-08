@@ -656,7 +656,7 @@ std::pair<Type, Effects> elemHelper(ISS& env, MOpMode mode, Type key) {
   }
 
   auto const warnsWithNull =
-    BTrue | BNum | BRes | BFunc | BRFunc | BRClsMeth | BClsMeth;
+    BTrue | BNum | BRes | BFunc | BRFunc | BRClsMeth | BClsMeth | BEnumClassLabel;
   auto const justNull = BNull | BFalse;
   auto const DEBUG_ONLY handled =
     warnsWithNull | justNull | BClsMeth |
@@ -751,7 +751,7 @@ Effects setOpElemHelper(ISS& env, int32_t nDiscard, const Type& key,
   auto const throws = BNull | BFalse | BStr;
   auto const null =
     BTrue | BNum | BRes | BFunc | BRFunc |
-    BCls | BLazyCls | BClsMeth | BRClsMeth;
+    BCls | BLazyCls | BClsMeth | BRClsMeth | BEnumClassLabel;
   auto const handled = throws | null | BArrLike | BObj;
 
   static_assert(handled == BCell);
@@ -872,7 +872,7 @@ Effects setOpNewElemHelper(ISS& env, int32_t nDiscard) {
   auto const alwaysThrow =
     BNull | BFalse | BStr | BArrLike | BObj | BClsMeth;
   auto const null =
-    BTrue | BNum | BRes | BRFunc | BFunc | BRClsMeth | BCls | BLazyCls;
+    BTrue | BNum | BRes | BRFunc | BFunc | BRClsMeth | BCls | BLazyCls| BEnumClassLabel;
   auto const handled = alwaysThrow | null;
 
   static_assert(handled == BCell);
@@ -1083,7 +1083,7 @@ Effects miElem(ISS& env, MOpMode mode, Type key, LocalId keyLoc) {
     auto const alwaysThrows =
       BCls | BLazyCls | BFunc | BRFunc | BStr | BClsMeth |
       BRClsMeth;
-    auto const movesToUninit = BPrim | BRes;
+    auto const movesToUninit = BPrim | BRes | BEnumClassLabel;
     auto const handled =
       alwaysThrows | movesToUninit | BObj | BArrLike;
 
@@ -1178,7 +1178,7 @@ Effects miElem(ISS& env, MOpMode mode, Type key, LocalId keyLoc) {
     auto const alwaysThrows = BNull | BFalse | BStr;
     auto const warnsAndNull =
       BTrue | BNum | BRes | BFunc | BRFunc | BCls | BLazyCls |
-      BClsMeth | BRClsMeth;
+      BClsMeth | BRClsMeth | BEnumClassLabel;
     auto const handled =
       alwaysThrows | warnsAndNull | BObj | BArrLike;
 
@@ -1281,7 +1281,7 @@ Effects miNewElem(ISS& env) {
     BNull | BFalse | BArrLike | BObj | BClsMeth;
   auto const uninit =
     BTrue | BNum | BRes | BRFunc | BFunc |
-    BRClsMeth | BCls | BLazyCls;
+    BRClsMeth | BCls | BLazyCls | BEnumClassLabel;
   auto const handled = alwaysThrows | uninit | BStr;
 
   static_assert(handled == BCell);
@@ -1659,7 +1659,7 @@ Effects miFinalSetElem(ISS& env,
   auto const alwaysThrows = BNull | BFalse;
   auto const pushesNull =
     BTrue | BNum | BRes | BFunc | BRFunc |
-    BCls | BLazyCls | BClsMeth | BRClsMeth;
+    BCls | BLazyCls | BClsMeth | BRClsMeth | BEnumClassLabel;
   auto const handled =
     alwaysThrows | pushesNull | BObj | BStr | BArrLike;
 
@@ -1778,7 +1778,7 @@ Effects miFinalUnsetElem(ISS& env, int32_t nDiscard, const Type& key) {
   auto& base = env.collect.mInstrState.base.type;
   assertx(!base.is(BBottom));
 
-  auto const doesNothing = BNull | BBool | BNum | BRes;
+  auto const doesNothing = BNull | BBool | BNum | BRes | BEnumClassLabel;
   auto const alwaysThrows =
     BFunc | BRFunc | BCls | BLazyCls | BStr | BClsMeth | BRClsMeth;
   auto const handled = doesNothing | alwaysThrows | BArrLike | BObj;
@@ -1851,7 +1851,7 @@ Effects miFinalSetNewElem(ISS& env, int32_t nDiscard) {
 
   auto const pushesNull =
     BTrue | BNum | BRes | BFunc | BRFunc | BCls |
-    BLazyCls | BClsMeth | BRClsMeth;
+    BLazyCls | BClsMeth | BRClsMeth | BEnumClassLabel;
   auto const alwaysThrows = BNull | BStr | BFalse;
   auto const handled = pushesNull | alwaysThrows | BObj | BArrLike;
 

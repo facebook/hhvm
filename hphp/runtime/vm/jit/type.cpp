@@ -942,7 +942,7 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
     O(Func,            TFunc)
     O(LazyCls,         TLazyCls)
     O(ClsMeth,         TClsMeth)
-    //TODO(T162042839): Add enum class label
+    O(EnumClassLabel,  TEnumClassLabel)
     O(ArrKey,          TInt | TStr)
     O(UncArrKey,       TInt | TPersistentStr)
     O(ArrKeyCompat,    TInt | TStr | TCls | TLazyCls)

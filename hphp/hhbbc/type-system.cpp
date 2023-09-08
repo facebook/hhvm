@@ -65,7 +65,7 @@ constexpr int kTypeWidenMaxDepth = 8;
 // only allow specialized data if there's only one support bit (there
 // can be any non-support bits).
 constexpr trep kSupportBits =
-  BStr | BDbl | BInt | BCls | BObj | BArrLikeN | BLazyCls;
+  BStr | BDbl | BInt | BCls | BObj | BArrLikeN | BLazyCls | BEnumClassLabel;
 // These bits don't correspond to any potential specialized data and
 // can be present freely.
 constexpr trep kNonSupportBits = BCell & ~kSupportBits;
@@ -2236,6 +2236,7 @@ Type Type::unctxHelper(Type t, bool& changed) {
   case DataTag::Str:
   case DataTag::ArrLikeVal:
   case DataTag::LazyCls:
+  case DataTag::EnumClassLabel:
     break;
   }
   return t;
@@ -2370,6 +2371,7 @@ Ret Type::dd2nd(const Type& o, DDHelperFn<Ret,T,F> f) const {
   case DataTag::Cls:            return f();
   case DataTag::Str:            return f();
   case DataTag::LazyCls:        return f();
+  case DataTag::EnumClassLabel: return f();
   case DataTag::Obj:            return f();
   case DataTag::WaitHandle:     return f();
   case DataTag::ArrLikeVal:     return f(o.m_data.aval);
@@ -2397,6 +2399,7 @@ Type::dualDispatchDataFn(const Type& o, F f) const {
   case DataTag::Cls:            return f();
   case DataTag::Str:            return f();
   case DataTag::LazyCls:        return f();
+  case DataTag::EnumClassLabel: return f();
   case DataTag::Obj:            return f();
   case DataTag::WaitHandle:     return f();
   case DataTag::ArrLikeVal:     return dd2nd(o, ddbind<R>(f, m_data.aval));
@@ -2444,6 +2447,10 @@ bool Type::equivImpl(const Type& o) const {
     assertx(m_data.lazyclsval->isStatic());
     assertx(o.m_data.lazyclsval->isStatic());
     return m_data.lazyclsval == o.m_data.lazyclsval;
+  case DataTag::EnumClassLabel:
+    assertx(m_data.eclval->isStatic());
+    assertx(o.m_data.eclval->isStatic());
+    return m_data.eclval == o.m_data.eclval;
   case DataTag::ArrLikeVal:
     assertx(m_data.aval->isStatic());
     assertx(o.m_data.aval->isStatic());
@@ -2550,6 +2557,8 @@ size_t Type::hash() const {
           return (uintptr_t)m_data.sval;
         case DataTag::LazyCls:
           return (uintptr_t)m_data.lazyclsval;
+        case DataTag::EnumClassLabel:
+          return (uintptr_t)m_data.eclval;
         case DataTag::Int:
           return m_data.ival;
         case DataTag::Dbl:
@@ -2658,6 +2667,12 @@ bool Type::subtypeOfImpl(const Type& o) const {
     return
       is_specialized_lazycls(*this) &&
       m_data.lazyclsval == o.m_data.lazyclsval;
+  }
+
+  if (couldBe(isect, BEnumClassLabel) && is_specialized_ecl(o)) {
+    return
+      is_specialized_ecl(*this) &&
+      m_data.eclval == o.m_data.eclval;
   }
 
   if (couldBe(isect, BInt) && is_specialized_int(o)) {
@@ -2771,6 +2786,13 @@ bool Type::couldBe(const Type& o) const {
     return m_data.lazyclsval == o.m_data.lazyclsval;
   }
 
+  if (subtypeOf(isect, BEnumClassLabel)) {
+    if (!is_specialized_ecl(*this) || !is_specialized_ecl(o)) {
+      return true;
+    }
+    return m_data.eclval == o.m_data.eclval;
+  }
+
   if (subtypeOf(isect, BInt)) {
     if (!is_specialized_int(*this) || !is_specialized_int(o)) return true;
     return m_data.ival == o.m_data.ival;
@@ -2819,6 +2841,11 @@ bool Type::checkInvariants() const {
     assertx(m_data.lazyclsval->isStatic());
     assertx(couldBe(BLazyCls));
     assertx(subtypeOf(BLazyCls | kNonSupportBits));
+    break;
+  case DataTag::EnumClassLabel:
+    assertx(m_data.eclval->isStatic());
+    assertx(couldBe(BEnumClassLabel));
+    assertx(subtypeOf(BEnumClassLabel | kNonSupportBits));
     break;
   case DataTag::Dbl:
     assertx(couldBe(BDbl));
@@ -3204,6 +3231,14 @@ Type lazyclsval(SString val) {
   auto r        = Type { BLazyCls, LegacyMark::Bottom };
   r.m_data.lazyclsval = val;
   r.m_dataTag   = DataTag::LazyCls;
+  assertx(r.checkInvariants());
+  return r;
+}
+
+Type enumclasslabelval(SString val) {
+  auto r        = Type { BEnumClassLabel, LegacyMark::Bottom };
+  r.m_data.eclval = val;
+  r.m_dataTag   = DataTag::EnumClassLabel;
   assertx(r.checkInvariants());
   return r;
 }
@@ -3643,6 +3678,7 @@ bool is_specialized_array_like(const Type& t) {
   case DataTag::None:
   case DataTag::Str:
   case DataTag::LazyCls:
+  case DataTag::EnumClassLabel:
   case DataTag::Obj:
   case DataTag::WaitHandle:
   case DataTag::Int:
@@ -3691,6 +3727,10 @@ bool is_specialized_string(const Type& t) {
 
 bool is_specialized_lazycls(const Type& t) {
   return t.m_dataTag == DataTag::LazyCls;
+}
+
+bool is_specialized_ecl(const Type& t) {
+  return t.m_dataTag == DataTag::EnumClassLabel;
 }
 
 bool is_specialized_int(const Type& t) {
@@ -3762,6 +3802,7 @@ Optional<int64_t> arr_size(const Type& t) {
     case DataTag::Dbl:
     case DataTag::Str:
     case DataTag::LazyCls:
+    case DataTag::EnumClassLabel:
     case DataTag::ArrLikePackedN:
     case DataTag::ArrLikeMapN:
     case DataTag::Obj:
@@ -3821,6 +3862,7 @@ Type::ArrayCat categorize_array(const Type& t) {
     case DataTag::Dbl:
     case DataTag::Str:
     case DataTag::LazyCls:
+    case DataTag::EnumClassLabel:
     case DataTag::ArrLikePackedN:
     case DataTag::ArrLikeMapN:
     case DataTag::Obj:
@@ -3862,6 +3904,7 @@ CompactVector<LSString> get_string_keys(const Type& t) {
     case DataTag::Dbl:
     case DataTag::Str:
     case DataTag::LazyCls:
+    case DataTag::EnumClassLabel:
     case DataTag::ArrLikePackedN:
     case DataTag::ArrLikeMapN:
     case DataTag::Obj:
@@ -3973,6 +4016,9 @@ R tvImpl(const Type& t) {
       if (!t.subtypeOf(BLazyCls)) break;
       return H::template make<KindOfLazyClass>(
           LazyClassData::create(t.m_data.lazyclsval));
+    case DataTag::EnumClassLabel:
+      if (!t.subtypeOf(BEnumClassLabel)) break;
+      return H::template make<KindOfEnumClassLabel>(t.m_data.eclval);
     case DataTag::ArrLikeVal:
       // It's a Type invariant that the bits will be exactly one of
       // the array types with ArrLikeVal. We don't care which.
@@ -4052,6 +4098,7 @@ Type scalarize(Type t) {
     case DataTag::Int:
     case DataTag::Dbl:
     case DataTag::LazyCls:
+    case DataTag::EnumClassLabel:
       break;
     case DataTag::ArrLikeVal:
       t.m_bits &= BSArrLike;
@@ -4269,6 +4316,12 @@ SString lazyclsval_of(const Type& t) {
   return t.m_data.lazyclsval;
 }
 
+SString eclval_of(const Type& t) {
+  assertx(t.checkInvariants());
+  assertx(is_specialized_ecl(t));
+  return t.m_data.eclval;
+}
+
 int64_t ival_of(const Type& t) {
   assertx(t.checkInvariants());
   assertx(is_specialized_int(t));
@@ -4310,6 +4363,10 @@ Type from_cell(TypedValue cell) {
 
   case KindOfLazyClass: return lazyclsval(cell.m_data.plazyclass.name());
 
+  case KindOfEnumClassLabel:
+    always_assert(cell.m_data.pstr->isStatic());
+    return enumclasslabelval(cell.m_data.pstr);
+
   case KindOfObject:
   case KindOfResource:
   case KindOfRFunc:
@@ -4317,7 +4374,6 @@ Type from_cell(TypedValue cell) {
   case KindOfClass:
   case KindOfClsMeth:
   case KindOfRClsMeth:
-  case KindOfEnumClassLabel: //TODO(T162042839): Implement this
     break;
   }
   always_assert(
@@ -4347,7 +4403,7 @@ Type from_DataType(DataType dt) {
   case KindOfLazyClass:  return TLazyCls;
   case KindOfClsMeth:  return TClsMeth;
   case KindOfRClsMeth: return TRClsMeth;
-  case KindOfEnumClassLabel: assertx(false); //TODO(T162042839): Implement this
+  case KindOfEnumClassLabel: return TEnumClassLabel;
   }
   always_assert(0 && "dt in from_DataType didn't satisfy preconditions");
 }
@@ -4706,6 +4762,18 @@ Type intersection_of(Type a, Type b) {
     if (couldBe(isect, BLazyCls)) return reuse(b);
   }
 
+  if (is_specialized_ecl(a)) {
+    if (is_specialized_ecl(b)) {
+      assertx(couldBe(isect, BEnumClassLabel));
+      if (a.m_data.eclval == b.m_data.eclval) return reuse(a);
+      isect &= ~BEnumClassLabel;
+      return isect ? nodata() : TBottom;
+    }
+    if (couldBe(isect, BEnumClassLabel)) return reuse(a);
+  } else if (is_specialized_ecl(b)) {
+    if (couldBe(isect, BEnumClassLabel)) return reuse(b);
+  }
+
   if (is_specialized_int(a)) {
     if (is_specialized_int(b)) {
       assertx(couldBe(isect, BInt));
@@ -4961,6 +5029,24 @@ Type union_of(Type a, Type b) {
     return reuse(b);
   }
 
+  if (is_specialized_ecl(a)) {
+    if (is_specialized_ecl(b)) {
+      if (a.m_data.eclval == b.m_data.eclval) return reuse(a);
+      return nodata();
+    }
+    if (b.couldBe(BEnumClassLabel) ||
+        !subtypeOf(combined, BEnumClassLabel | kNonSupportBits)) {
+      return nodata();
+    }
+    return reuse(a);
+  } else if (is_specialized_ecl(b)) {
+    if (a.couldBe(BEnumClassLabel) ||
+        !subtypeOf(combined, BEnumClassLabel | kNonSupportBits)) {
+      return nodata();
+    }
+    return reuse(b);
+  }
+
   if (is_specialized_int(a)) {
     if (is_specialized_int(b)) {
       if (a.m_data.ival == b.m_data.ival) return reuse(a);
@@ -5013,7 +5099,8 @@ Emptiness emptiness(const Type& t) {
   assertx(t.subtypeOf(BCell));
 
   auto const emptyMask = BNull | BFalse | BArrLikeE;
-  auto const nonEmptyMask = BTrue | BArrLikeN | BObj | BCls | BLazyCls;
+  auto const nonEmptyMask =
+    BTrue | BArrLikeN | BObj | BCls | BLazyCls | BEnumClassLabel;
   auto const bothMask =
     BCell & ~(emptyMask | nonEmptyMask | BInt | BDbl | BStr);
   auto empty = t.couldBe(emptyMask | bothMask);
@@ -5072,6 +5159,7 @@ void widen_type_impl(Type& t, uint32_t depth) {
     case DataTag::None:
     case DataTag::Str:
     case DataTag::LazyCls:
+    case DataTag::EnumClassLabel:
     case DataTag::Int:
     case DataTag::Dbl:
     case DataTag::Obj:
@@ -5183,6 +5271,7 @@ Type loosen_staticness(Type t) {
   };
   check(BStr);
   check(BLazyCls);
+  check(BEnumClassLabel);
   check(BVecE);
   check(BVecN);
   check(BDictE);
@@ -5196,6 +5285,7 @@ Type loosen_staticness(Type t) {
     case DataTag::None:
     case DataTag::Str:
     case DataTag::LazyCls:
+    case DataTag::EnumClassLabel:
     case DataTag::Int:
     case DataTag::Dbl:
     case DataTag::Obj:
@@ -5292,6 +5382,7 @@ Type loosen_array_values(Type a) {
     case DataTag::None:
     case DataTag::Str:
     case DataTag::LazyCls:
+    case DataTag::EnumClassLabel:
     case DataTag::Int:
     case DataTag::Dbl:
     case DataTag::Obj:
@@ -5307,6 +5398,7 @@ Type loosen_values(Type a) {
     switch (a.m_dataTag) {
     case DataTag::Str:
     case DataTag::LazyCls:
+    case DataTag::EnumClassLabel:
     case DataTag::Int:
     case DataTag::Dbl:
     case DataTag::ArrLikeVal:
@@ -5360,6 +5452,7 @@ Type loosen_likeness_recursively(Type t) {
   case DataTag::None:
   case DataTag::Str:
   case DataTag::LazyCls:
+  case DataTag::EnumClassLabel:
   case DataTag::Int:
   case DataTag::Dbl:
   case DataTag::Obj:
@@ -5567,6 +5660,7 @@ Type remove_bits(Type t, trep bits) {
       case DataTag::Dbl:        return BDbl;
       case DataTag::Str:        return BStr;
       case DataTag::LazyCls:    return BLazyCls;
+      case DataTag::EnumClassLabel: return BEnumClassLabel;
       case DataTag::Obj:
       case DataTag::WaitHandle: return BObj;
       case DataTag::Cls:        return BCls;
@@ -5684,6 +5778,10 @@ Type assert_emptiness(Type t) {
     t = remove_data(std::move(t), BCls);
   }
 
+  if (t.couldBe(BEnumClassLabel)) {
+    t = remove_data(std::move(t), BEnumClassLabel);
+  }
+
   if (!could_have_magic_bool_conversion(t) && t.couldBe(BObj)) {
     t = remove_data(std::move(t), BObj);
   }
@@ -5739,6 +5837,7 @@ Type assert_nonemptiness(Type t) {
     case DataTag::ArrLikeMapN:
     case DataTag::ArrLikeVal:
     case DataTag::LazyCls:
+    case DataTag::EnumClassLabel:
       break;
     case DataTag::Int:
       stripVal(make_tv<KindOfInt64>(t.m_data.ival), BInt);
@@ -5991,6 +6090,7 @@ void resolve_classes_impl(const Index& index, const Type& t, COWer& parent) {
     case DataTag::Dbl:
     case DataTag::Str:
     case DataTag::LazyCls:
+    case DataTag::EnumClassLabel:
     case DataTag::ArrLikeVal:
       // These can never contain objects or classes.
       break;
@@ -6182,6 +6282,7 @@ IterTypes iter_types(const Type& iterable) {
   case DataTag::None:
   case DataTag::Str:
   case DataTag::LazyCls:
+  case DataTag::EnumClassLabel:
   case DataTag::Obj:
   case DataTag::WaitHandle:
   case DataTag::Int:
@@ -6247,6 +6348,7 @@ bool could_contain_objects(const Type& t) {
   case DataTag::None:
   case DataTag::Str:
   case DataTag::LazyCls:
+  case DataTag::EnumClassLabel:
   case DataTag::Obj:
   case DataTag::WaitHandle:
   case DataTag::Int:
@@ -6322,6 +6424,7 @@ bool inner_types_might_raise(const Type& t1, const Type& t2) {
 
       case DataTag::Str:
       case DataTag::LazyCls:
+      case DataTag::EnumClassLabel:
       case DataTag::Obj:
       case DataTag::WaitHandle:
       case DataTag::Int:
@@ -6376,6 +6479,7 @@ bool inner_types_might_raise(const Type& t1, const Type& t2) {
 
         case DataTag::Str:
         case DataTag::LazyCls:
+        case DataTag::EnumClassLabel:
         case DataTag::Obj:
         case DataTag::WaitHandle:
         case DataTag::Int:
@@ -6600,6 +6704,7 @@ std::pair<Type, bool> array_like_elem_impl(const Type& arr, const Type& key) {
     switch (arr.m_dataTag) {
       case DataTag::Str:
       case DataTag::LazyCls:
+      case DataTag::EnumClassLabel:
       case DataTag::Obj:
       case DataTag::WaitHandle:
       case DataTag::Int:
@@ -7031,6 +7136,7 @@ std::pair<Type,bool> array_like_set_impl(Type arr,
   switch (arr.m_dataTag) {
     case DataTag::Str:
     case DataTag::LazyCls:
+    case DataTag::EnumClassLabel:
     case DataTag::Obj:
     case DataTag::WaitHandle:
     case DataTag::Int:
@@ -7278,6 +7384,7 @@ std::pair<Type, bool> array_like_newelem_impl(Type arr, const Type& val) {
   switch (arr.m_dataTag) {
     case DataTag::Str:
     case DataTag::LazyCls:
+    case DataTag::EnumClassLabel:
     case DataTag::Obj:
     case DataTag::WaitHandle:
     case DataTag::Int:
@@ -7450,6 +7557,7 @@ Optional<RepoAuthType> make_repo_type_arr(const Type& t) {
     case DataTag::None:
     case DataTag::Str:
     case DataTag::LazyCls:
+    case DataTag::EnumClassLabel:
     case DataTag::Obj:
     case DataTag::WaitHandle:
     case DataTag::Int:
@@ -7729,6 +7837,7 @@ Type loosen_mark_for_testing(Type t) {
     case DataTag::None:
     case DataTag::Str:
     case DataTag::LazyCls:
+    case DataTag::EnumClassLabel:
     case DataTag::Int:
     case DataTag::Dbl:
     case DataTag::Obj:

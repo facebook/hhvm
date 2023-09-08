@@ -192,6 +192,7 @@ namespace php { struct Class; };
   DT(WaitHandle, copy_ptr<DWaitHandle>, dwh)                    \
   DT(Cls, DCls, dcls)                                           \
   DT(LazyCls, SString, lazyclsval)                              \
+  DT(EnumClassLabel, SString, eclval)                           \
   DT(ArrLikePacked, copy_ptr<DArrLikePacked>, packed)           \
   DT(ArrLikePackedN, copy_ptr<DArrLikePackedN>, packedn)        \
   DT(ArrLikeMap, copy_ptr<DArrLikeMap>, map)                    \
@@ -665,6 +666,7 @@ private:
   friend bool is_specialized_obj(const Type&);
   friend bool is_specialized_cls(const Type&);
   friend bool is_specialized_lazycls(const Type&);
+  friend bool is_specialized_ecl(const Type&);
   friend bool is_specialized_string(const Type&);
   friend bool is_specialized_int(const Type&);
   friend bool is_specialized_double(const Type&);
@@ -675,6 +677,7 @@ private:
   friend Type ival(int64_t);
   friend Type dval(double);
   friend Type lazyclsval(SString);
+  friend Type enumclasslabelval(SString);
   friend Type subObj(res::Class);
   friend Type objExact(res::Class);
   friend Type subCls(res::Class, bool);
@@ -688,6 +691,7 @@ private:
   friend const DCls& dcls_of(const Type&);
   friend SString sval_of(const Type&);
   friend SString lazyclsval_of(const Type&);
+  friend SString eclval_of(const Type&);
   friend int64_t ival_of(const Type&);
   friend Type union_of(Type, Type);
   friend Type intersection_of(Type, Type);
@@ -999,6 +1003,7 @@ Type wait_handle_inner(const Type& t);
 Type ival(int64_t);
 Type dval(double);
 Type lazyclsval(SString);
+Type enumclasslabelval(SString);
 Type vec_val(SArray);
 Type dict_val(SArray);
 Type keyset_val(SArray);
@@ -1159,6 +1164,7 @@ bool is_specialized_cls(const Type&);
  */
 bool is_specialized_string(const Type&);
 bool is_specialized_lazycls(const Type&);
+bool is_specialized_ecl(const Type&);
 bool is_specialized_int(const Type&);
 bool is_specialized_double(const Type&);
 
@@ -1338,6 +1344,13 @@ SString sval_of(const Type& t);
  * Pre: is_specialized_lazycls(t)
  */
 SString lazyclsval_of(const Type& t);
+
+/*
+ * Return the SString for a strict subtype of TEnumClassLabel.
+ *
+ * Pre: is_specialized_ecl(t)
+ */
+SString eclval_of(const Type& t);
 
 /*
  * Return the specialized integer value for a type.

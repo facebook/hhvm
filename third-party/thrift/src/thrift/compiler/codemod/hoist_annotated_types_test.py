@@ -43,6 +43,8 @@ class HoistAnnotatedTypes(unittest.TestCase):
                     1: list<S (annotated)> (annotated) foo;
                     2: map<string, map<i32, fooMap> (annotated)> bar;
                     3: set<set<i16 (annotated)> (annotated)> nested;
+                    4: optional list<S (annotated)> (annotated) foo;
+                    5: required list<S (annotated)> (annotated) foo;
                 }
 
                 service X {
@@ -64,13 +66,15 @@ class HoistAnnotatedTypes(unittest.TestCase):
                 typedef map<i32_7683, S> fooMap;
 
                 struct S {
-                    1:list_S_5175 foo;
+                    1: list_S_5175 foo;
                     2: map<string, map_i32_fooMap_1878> bar;
                     3: set<set_i16_5922> nested;
+                    4: optional list_S_5175 foo;
+                    5: required list_S_5175 foo;
                 }
 
                 service X {
-                    i32_7683 foo(1:S_866 s);
+                    i32_7683 foo(1: S_866 s);
                 }
 
                 const S_8730 c = {};

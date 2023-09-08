@@ -198,22 +198,43 @@ class hoist_annotated_types {
   void visit_field(const t_field& f) {
     if (auto type = f.type(); needs_replacement(type)) {
       auto range = f.src_range();
-      auto type_begin_offset = range.end.offset();
+      auto type_begin_offset = range.begin.offset();
+      auto old_content = fm_.old_content();
+      while (type_begin_offset < range.end.offset() &&
+             old_content[type_begin_offset - 1] != ':') {
+        type_begin_offset++;
+      }
+      if (f.qualifier() == t_field_qualifier::optional) {
+        while (type_begin_offset < range.end.offset() &&
+               old_content[type_begin_offset - 1] != 'o') {
+          type_begin_offset++;
+        }
+        while (type_begin_offset < range.end.offset() &&
+               old_content[type_begin_offset - 1] != 'l') {
+          type_begin_offset++;
+        }
+      }
+      if (f.qualifier() == t_field_qualifier::required) {
+        while (type_begin_offset < range.end.offset() &&
+               old_content[type_begin_offset - 1] != 'r') {
+          type_begin_offset++;
+        }
+        while (type_begin_offset < range.end.offset() &&
+               old_content[type_begin_offset - 1] != 'd') {
+          type_begin_offset++;
+        }
+      }
       auto type_end_offset = range.begin.offset();
       for (const auto& [k, v] : type.get_type()->annotations()) {
-        type_begin_offset =
-            std::min(type_begin_offset, v.src_range.begin.offset());
         type_end_offset = std::max(type_end_offset, v.src_range.end.offset());
-      }
-      auto old_content = fm_.old_content();
-      while (type_begin_offset > 0 &&
-             old_content[type_begin_offset - 1] != ':') {
-        type_begin_offset--;
       }
       while (type_end_offset < old_content.size() &&
              old_content[type_end_offset++] != ')') {
       }
-      fm_.add({type_begin_offset, type_end_offset, maybe_create_typedef(type)});
+      fm_.add(
+          {type_begin_offset,
+           type_end_offset,
+           fmt::format(" {}", maybe_create_typedef(type))});
     }
   }
 

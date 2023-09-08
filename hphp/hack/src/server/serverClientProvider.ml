@@ -116,7 +116,6 @@ let select ~idle_gc_slice fd_list timeout =
     retrieve channels to client from monitor process. *)
 let sleep_and_check
     ({ default_in_fd; priority_in_fd; force_dormant_start_only_in_fd } : t)
-    (persistent_client_opt : client option)
     ~(ide_idle : bool)
     ~(idle_gc_slice : int)
     (kind : [< `Any | `Force_dormant_start_only | `Priority ]) : select_outcome
@@ -127,15 +126,10 @@ let sleep_and_check
     [default_in_fd; priority_in_fd; force_dormant_start_only_in_fd]
   in
   let fd_l =
-    match (kind, persistent_client_opt) with
-    | (`Force_dormant_start_only, _) -> [force_dormant_start_only_in_fd]
-    | (`Priority, _) -> [priority_in_fd]
-    | (`Any, Some (Non_persistent_client _)) ->
-      (* The arguments for "sleep_and_check" are "the source of new clients"
-       * and the "client we already store in the env". We only store
-       * persistent clients *)
-      assert false
-    | (`Any, None) -> in_fds
+    match kind with
+    | `Force_dormant_start_only -> [force_dormant_start_only_in_fd]
+    | `Priority -> [priority_in_fd]
+    | `Any -> in_fds
   in
   let ready_fd_l = select ~idle_gc_slice fd_l 0.1 in
   let t_monitor_fd_ready = Unix.gettimeofday () in

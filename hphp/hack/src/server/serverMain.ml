@@ -662,7 +662,6 @@ let serve_one_iteration genv env client_provider =
     | Some client_kind ->
       ClientProvider.sleep_and_check
         client_provider
-        None
         ~ide_idle:env.ide_idle
         ~idle_gc_slice:genv.local_config.ServerLocalConfig.idle_gc_slice
         client_kind
@@ -910,7 +909,6 @@ let priority_client_interrupt_handler genv client_provider :
       ) else
         ClientProvider.sleep_and_check
           client_provider
-          None
           ~ide_idle:env.ide_idle
           ~idle_gc_slice
           `Priority

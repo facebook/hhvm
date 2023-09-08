@@ -256,7 +256,6 @@ let query_notifier
 let update_stats_after_recheck :
     RecheckLoopStats.t ->
     ServerTypeCheck.CheckStats.t ->
-    check_kind:ServerTypeCheck.CheckKind.t ->
     telemetry:Telemetry.t ->
     start_time:seconds_since_epoch ->
     RecheckLoopStats.t =
@@ -269,7 +268,7 @@ let update_stats_after_recheck :
        last_iteration_start_time = _;
        duration;
        time_first_result = _;
-       any_full_checks;
+       any_full_checks = _;
      }
      {
        ServerTypeCheck.CheckStats.total_rechecked_count =
@@ -277,7 +276,6 @@ let update_stats_after_recheck :
        reparse_count;
        time_first_result;
      }
-     ~check_kind
      ~telemetry
      ~start_time ->
   {
@@ -291,8 +289,7 @@ let update_stats_after_recheck :
     last_iteration_start_time = start_time;
     duration = duration +. (Unix.gettimeofday () -. start_time);
     time_first_result;
-    any_full_checks =
-      any_full_checks || ServerTypeCheck.CheckKind.is_full_check check_kind;
+    any_full_checks = true;
   }
 
 (* This function loops until it has processed all outstanding changes.
@@ -433,8 +430,7 @@ let rec recheck_until_no_changes_left stats genv env select_outcome :
     in
     (stats, env)
   else
-    let check_kind = ServerTypeCheck.CheckKind.Full in
-    let check_kind_str = ServerTypeCheck.CheckKind.to_string check_kind in
+    let check_kind_str = "Full_check" in
     let env = { env with can_interrupt = true } in
     let needed_full_init = env.init_env.why_needed_full_check in
     let old_errorl = Errors.get_error_list env.errorl in
@@ -447,7 +443,7 @@ let rec recheck_until_no_changes_left stats genv env select_outcome :
     in
     let (env, check_stats, type_check_telemetry) =
       CgroupProfiler.step_group check_kind_str ~log:true
-      @@ ServerTypeCheck.type_check genv env check_kind start_time
+      @@ ServerTypeCheck.type_check genv env start_time
     in
     let telemetry =
       telemetry
@@ -470,12 +466,7 @@ let rec recheck_until_no_changes_left stats genv env select_outcome :
       Telemetry.duration telemetry ~key:"finalized_and_touched" ~start_time
     in
     let stats =
-      update_stats_after_recheck
-        stats
-        check_stats
-        ~check_kind
-        ~start_time
-        ~telemetry
+      update_stats_after_recheck stats check_stats ~start_time ~telemetry
     in
     (* Tests have ability to opt-out of batching completely. *)
     if !force_break_recheck_loop_for_test_ref then

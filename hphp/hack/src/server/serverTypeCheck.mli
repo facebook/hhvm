@@ -7,26 +7,6 @@
  *
  *)
 
-module CheckKind : sig
-  type t =
-    | Full
-        (** Full check brings the global state of the server to consistency by
-            executing all the re-checks that lazy checks delayed. It processes the
-            disk updates and typechecks the full fanout of accumulated changes. *)
-
-  (** This function is used to get the variant constructor names of
-      the check kind type. The names are used in a few places:
-      - the `type_check_unsafe` function below:
-        - logs the names into the server log
-        - uses HackEventLogger to log the names as the check_kind column value
-        - lots of dashboards depend on it
-      - serverMain writes it into telemetry
-      *)
-  val to_string : t -> string
-
-  val is_full_check : t -> bool
-end
-
 module CheckStats : sig
   type t = {
     reparse_count: int;
@@ -40,7 +20,6 @@ end
 val type_check :
   ServerEnv.genv ->
   ServerEnv.env ->
-  CheckKind.t ->
   float ->
   CgroupProfiler.step_group ->
   ServerEnv.env * CheckStats.t * Telemetry.t

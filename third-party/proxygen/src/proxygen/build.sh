@@ -364,7 +364,7 @@ INSTALL_DEPENDENCIES=true
 FETCH_DEPENDENCIES=true
 PREFIX=""
 COMPILER_FLAGS=""
-USAGE="./build.sh [-j num_jobs] [-q|--with-quic] [-m|--no-jemalloc] [--no-install-dependencies] [-p|--prefix] [-x|--compiler-flags] [--no-fetch-dependencies]"
+USAGE="./build.sh [-j num_jobs] [-m|--no-jemalloc] [--no-install-dependencies] [-p|--prefix] [-x|--compiler-flags] [--no-fetch-dependencies]"
 while [ "$1" != "" ]; do
   case $1 in
     -j | --jobs ) shift

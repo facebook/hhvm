@@ -69,13 +69,9 @@ module type S = sig
 
   val send_response_to_client : client -> 'a -> unit
 
-  val send_push_message_to_client : client -> ServerCommandTypes.push -> unit
-
   val client_has_message : client -> bool
 
   val read_client_msg : client -> 'a ServerCommandTypes.command
-
-  val make_persistent : client -> client
 
   val is_persistent : client -> bool
 

@@ -23,5 +23,4 @@ type 'a loop_outputs = {
   total_rechecked_count: int;
   last_actual_total_rechecked_count: int option;
   new_client_response: 'a option;
-  push_messages: ServerCommandTypes.push list;
 }

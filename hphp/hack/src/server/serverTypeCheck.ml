@@ -35,11 +35,11 @@ module CheckStats = struct
 
   (** Update field [time_first_result] if given timestamp is the
       first sent result. *)
-  let record_result_sent_ts stats new_result_sent_ts =
+  let record_result_sent_ts stats =
     {
       stats with
       time_first_result =
-        Option.first_some stats.time_first_result new_result_sent_ts;
+        Option.first_some stats.time_first_result (Some (Unix.gettimeofday ()));
     }
 end
 
@@ -1313,9 +1313,6 @@ let type_check_unsafe genv env kind start_time profiling =
     Hh_logger.log
       "Check kind: will check only those files already open in IDE or with reported errors ('%s')"
       check_kind;
-    let (_ : seconds option) =
-      ServerBusyStatus.send ServerCommandTypes.Doing_local_typecheck
-    in
     let telemetry =
       Telemetry.duration telemetry ~key:"core_start" ~start_time
     in
@@ -1327,21 +1324,13 @@ let type_check_unsafe genv env kind start_time profiling =
       |> Telemetry.duration ~key:"core_end" ~start_time
       |> Telemetry.object_ ~key:"core" ~value:core_telemetry
     in
-    let t_sent_done =
-      ServerBusyStatus.send ServerCommandTypes.Done_local_typecheck
-    in
-    let stats = CheckStats.record_result_sent_ts stats t_sent_done in
+    let stats = CheckStats.record_result_sent_ts stats in
     let telemetry = Telemetry.duration telemetry ~key:"sent_done" ~start_time in
     (env, stats, telemetry, cancel_reason)
   | CheckKind.Full ->
     Hh_logger.log
       "Check kind: will bring hh_server to consistency with code changes, by checking whatever fanout is needed ('%s')"
       check_kind;
-    let (_ : seconds option) =
-      ServerBusyStatus.send
-        (ServerCommandTypes.Doing_global_typecheck
-           (ServerCheckUtils.global_typecheck_kind genv env))
-    in
     let telemetry =
       Telemetry.duration telemetry ~key:"core_start" ~start_time
     in
@@ -1355,13 +1344,7 @@ let type_check_unsafe genv env kind start_time profiling =
       |> Telemetry.duration ~key:"core_end" ~start_time
       |> Telemetry.object_ ~key:"core" ~value:core_telemetry
     in
-    let t_sent_done =
-      if is_full_check_done env.full_check_status then
-        ServerBusyStatus.send ServerCommandTypes.Done_global_typecheck
-      else
-        None
-    in
-    let stats = CheckStats.record_result_sent_ts stats t_sent_done in
+    let stats = CheckStats.record_result_sent_ts stats in
     let telemetry =
       telemetry |> Telemetry.duration ~key:"sent_done" ~start_time
     in

@@ -68,7 +68,6 @@ let open_file
       else
         Relative_path.Set.add env.ide_needs_parsing path
     in
-    Ide_info_store.open_file path;
     (* Need to re-parse this file during next full check to update
      * global error list positions that refer to it *)
     let disk_needs_parsing =
@@ -98,7 +97,6 @@ let close_relative_path (env : ServerEnv.env) (path : Relative_path.t) :
     | Some c when String.equal c contents -> env.ide_needs_parsing
     | _ -> Relative_path.Set.add env.ide_needs_parsing path
   in
-  Ide_info_store.close_file path;
   let disk_needs_parsing = Relative_path.Set.add env.disk_needs_parsing path in
   let last_command_time = Unix.gettimeofday () in
   {
@@ -121,9 +119,6 @@ let edit_file ~predeclare env path (edits : File_content.text_edit list) =
     then
       let ctx = Provider_utils.ctx_from_server_env env in
       Decl.make_env ~sh:SharedMem.Uses ctx path);
-    let (_ : ServerEnv.seconds option) =
-      ServerBusyStatus.send ServerCommandTypes.Needs_local_typecheck
-    in
     let file_content =
       match File_provider.get path with
       | Some (File_provider.Ide content)
@@ -165,7 +160,6 @@ let clear_sync_data env =
     Relative_path.Set.fold env.editor_open_files ~init:env ~f:(fun x env ->
         close_relative_path env x)
   in
-  Ide_info_store.ide_disconnect ();
   env
 
 (** Determine which files are different in the IDE and on disk.

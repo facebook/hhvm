@@ -522,7 +522,6 @@ let rpc :
       |> get_telemetry
     in
     Lwt.return (response, telemetry)
-  | ServerCommandTypes.Push _ -> failwith "unexpected 'push' RPC response"
   | ServerCommandTypes.Hello -> failwith "unexpected 'hello' RPC response"
   | ServerCommandTypes.Ping -> failwith "unexpected 'ping' RPC response"
   | ServerCommandTypes.Monitor_failed_to_handoff ->

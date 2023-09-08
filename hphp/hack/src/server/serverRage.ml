@@ -11,7 +11,6 @@ open Hh_prelude
 
 let go (_genv : ServerEnv.genv) (env : ServerEnv.env) : ServerRageTypes.result =
   let open ServerRageTypes in
-  let open ServerEnv in
   (* Gather up the contents of all files that hh_server believes are in the
      IDE different from what's on disk *)
   let unsaved_items =
@@ -43,27 +42,12 @@ let go (_genv : ServerEnv.genv) (env : ServerEnv.env) : ServerRageTypes.result =
       |> String.concat ~sep:"\n")
   in
 
-  (* include current state of client, as we know it *)
-  let client_data =
-    match Ide_info_store.get_client () with
-    | None -> "no client"
-    | Some client ->
-      Printf.sprintf
-        ("client_has_message: %b\n"
-        ^^ "ide_needs_parsing: %b\n"
-        ^^ "error_count: %d\n")
-        (ClientProvider.client_has_message client)
-        (not (Relative_path.Set.is_empty env.ide_needs_parsing))
-        (Errors.count env.errorl)
-  in
-
   (* that's it! *)
   let data =
     Printf.sprintf
-      "PIDS\n%s\n\nPAUSED\n%s\n\nSUBSCRIPTION\n%s\n\nIDE FILES\n%s\n"
+      "PIDS\n%s\n\nPAUSED\n%s\n\nIDE FILES\n%s\n"
       pids_data
       paused_data
-      client_data
       (List.map unsaved_items ~f:(fun item -> item.title)
       |> String.concat ~sep:"\n")
   in

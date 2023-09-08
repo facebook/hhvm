@@ -288,7 +288,6 @@
  (modules
   clientProvider
   clientProvider_sig
-  ide_info_store
   serverClientProvider
   serverIdleGc
   testClientProvider)
@@ -454,7 +453,6 @@
  (wrapped false)
  (modules
   fullFidelityParseService
-  serverBusyStatus
   serverCheckUtils
   serverCheckpoint
   serverConcatenateAll

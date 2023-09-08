@@ -43,6 +43,7 @@ type client =
       (** In practice this is hh_client. There can be multiple non-persistent clients. *)
   | Persistent_client of persistent_client
       (** In practice this is the IDE. There is only one persistent client. *)
+[@@ocaml.warning "-37"]
 
 type handoff = {
   client: client;
@@ -296,19 +297,6 @@ let send_response_to_client client response =
   in
   ()
 
-let send_push_message_to_client client response =
-  match client with
-  | Non_persistent_client _ ->
-    failwith "non-persistent clients don't expect push messages "
-  | Persistent_client { fd; _ } ->
-    (try
-       let (_ : int) =
-         Marshal_tools.to_fd_with_preamble fd (ServerCommandTypes.Push response)
-       in
-       ()
-     with
-    | Unix.Unix_error (Unix.EPIPE, "write", "") -> raise Client_went_away)
-
 let read_client_msg ic =
   try
     Timeout.with_timeout
@@ -340,15 +328,6 @@ let get_channels = function
      * we don't have mocking for yet, like STREAM and DEBUG request types. We
      * have mocking for all the features of persistent clients, so this should
      * never be hit *)
-    assert false
-
-let make_persistent client =
-  match client with
-  | Non_persistent_client { ic; tracker; _ } ->
-    Persistent_client { fd = Timeout.descr_of_in_channel ic; tracker }
-  | Persistent_client _ ->
-    (* See comment on read_connection_type. Non_persistent_client can be
-       * turned into Persistent_client, but not the other way *)
     assert false
 
 let is_persistent = function

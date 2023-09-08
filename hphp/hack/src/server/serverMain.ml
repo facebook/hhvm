@@ -10,7 +10,6 @@
 open Hh_prelude
 open ServerEnv
 open Reordered_argument_collections
-open Option.Monad_infix
 
 (*****************************************************************************)
 (* Main initialization *)
@@ -702,7 +701,7 @@ let serve_one_iteration genv env client_provider =
     | Some client_kind ->
       ClientProvider.sleep_and_check
         client_provider
-        (Ide_info_store.get_client ())
+        None
         ~ide_idle:env.ide_idle
         ~idle_gc_slice:genv.local_config.ServerLocalConfig.idle_gc_slice
         client_kind
@@ -838,45 +837,6 @@ let serve_one_iteration genv env client_provider =
     end
   in
   let env =
-    match Ide_info_store.get_client () with
-    | None -> env
-    | Some client ->
-      (* Test whether at the beginning of this iteration of main loop
-       * there was a request to read and handle.
-       * If yes, we'll try to do it, but it's possible that we have ran a recheck
-       * in-between those two events, and if this recheck was non-blocking, we
-       * might have already handled this command there. Proceeding to
-       * handle_connection would then block reading a request that is not there
-       * anymore, so we need to call has_persistent_connection_request again. *)
-      if ClientProvider.has_persistent_connection_request client then (
-        HackEventLogger.got_persistent_client_channels t_start_recheck;
-        try
-          let env =
-            Client_command_handler
-            .handle_client_command_or_persistent_connection
-              genv
-              env
-              client
-              `Persistent
-            |> main_loop_command_handler `Persistent client
-          in
-          HackEventLogger.handled_persistent_connection t_start_recheck;
-          env
-        with
-        | exn ->
-          let e = Exception.wrap exn in
-          HackEventLogger.handle_persistent_connection_exception
-            "outer"
-            e
-            ~is_fatal:true;
-          Hh_logger.log
-            "HANDLE_PERSISTENT_CONNECTION_EXCEPTION(outer) [ignoring request] %s"
-            (Exception.to_string e);
-          env
-      ) else
-        env
-  in
-  let env =
     match env.pending_command_needs_writes with
     | Some f -> { (f env) with pending_command_needs_writes = None }
     | None -> env
@@ -1000,7 +960,7 @@ let priority_client_interrupt_handler genv client_provider :
       ) else
         ClientProvider.sleep_and_check
           client_provider
-          (Ide_info_store.get_client ())
+          None
           ~ide_idle:env.ide_idle
           ~idle_gc_slice
           `Priority
@@ -1077,63 +1037,6 @@ let priority_client_interrupt_handler genv client_provider :
     in
     (env, decision)
 
-let persistent_client_interrupt_handler genv :
-    env MultiThreadedCall.interrupt_handler =
- fun env ->
-  Hh_logger.info "Handling message on persistent client socket.";
-  match Ide_info_store.get_client () with
-  (* Several handlers can become ready simultaneously and one of them can remove
-   * the persistent client before we get to it. *)
-  | None -> (env, MultiThreadedCall.Continue)
-  | Some client ->
-    (match
-       Client_command_handler.handle_client_command_or_persistent_connection
-         genv
-         env
-         client
-         `Persistent
-     with
-    | ServerUtils.Needs_full_recheck { env; finish_command_handling; reason } ->
-      ServerProgress.write "typechecking";
-      (* This should not be possible, because persistent client will not send
-       * the next command before receiving results from the previous one. *)
-      assert (
-        Option.is_none env.persistent_client_pending_command_needs_full_check);
-      ( {
-          env with
-          persistent_client_pending_command_needs_full_check =
-            Some (finish_command_handling, reason);
-        },
-        MultiThreadedCall.Continue )
-    | ServerUtils.Needs_writes
-        { env; finish_command_handling; recheck_restart_is_needed; reason } ->
-      let full_check_status =
-        match env.full_check_status with
-        | Full_check_started when not recheck_restart_is_needed ->
-          Full_check_needed
-        | x -> x
-      in
-      (* this should not be possible, because persistent client will not send
-       * the next command before receiving results from the previous one *)
-      assert (Option.is_none env.pending_command_needs_writes);
-      ( {
-          env with
-          pending_command_needs_writes = Some finish_command_handling;
-          full_check_status;
-        },
-        MultiThreadedCall.Cancel
-          {
-            MultiThreadedCall.user_message =
-              Printf.sprintf
-                "Interrupted [%s]\n(Sorry about this nuisance... we're working to fix it T92870399)"
-                reason;
-            log_message = "";
-            timestamp = Unix.gettimeofday ();
-          } )
-    | ServerUtils.Done env ->
-      ServerProgress.write "typechecking";
-      (env, MultiThreadedCall.Continue))
-
 let setup_interrupts env client_provider =
   {
     env with
@@ -1160,14 +1063,6 @@ let setup_interrupts env client_provider =
           | Some fd when interrupt_on_client ->
             (fd, priority_client_interrupt_handler genv client_provider)
             :: handlers
-          | _ -> handlers
-        in
-        let handlers =
-          match
-            Ide_info_store.get_client () >>= ClientProvider.get_client_fd
-          with
-          | Some fd when interrupt_on_client ->
-            (fd, persistent_client_interrupt_handler genv) :: handlers
           | _ -> handlers
         in
         handlers);

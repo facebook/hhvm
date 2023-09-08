@@ -85,7 +85,6 @@ let debug_describe_message_type : type a. a message_type -> string = function
   | Monitor_failed_to_handoff -> "Monitor_failed_to_handoff"
   | Ping -> "Ping"
   | Response _ -> "Response"
-  | Push _ -> "Push"
 
 let extract_labelled_file (labelled_file : ServerCommandTypes.labelled_file) :
     Relative_path.t * ServerCommandTypes.file_input =

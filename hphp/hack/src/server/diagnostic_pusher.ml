@@ -404,6 +404,7 @@ type t = {
 type push_result =
   | DidPush of { timestamp: seconds_since_epoch }
   | DidNotPush
+[@@ocaml.warning "-37"]
 
 let push_result_as_option = function
   | DidPush { timestamp } -> Some timestamp
@@ -414,20 +415,7 @@ let init = { error_tracker = ErrorTracker.init; tracked_ide_id = None }
 let push_to_client :
     ServerCommandTypes.diagnostic_errors -> ClientProvider.client -> push_result
     =
- fun errors client ->
-  if ClientProvider.client_has_message client then
-    DidNotPush
-  else if SMap.is_empty errors then
-    DidNotPush
-  else
-    let message =
-      ServerCommandTypes.DIAGNOSTIC { errors; is_truncated = None }
-    in
-    try
-      ClientProvider.send_push_message_to_client client message;
-      DidPush { timestamp = Unix.gettimeofday () }
-    with
-    | ClientProvider.Client_went_away -> DidNotPush
+ (fun _errors _client -> DidNotPush)
 
 (** Reset the error tracker if the new client ID is different from the tracked one. *)
 let possibly_reset_tracker { error_tracker; tracked_ide_id } new_ide_id =
@@ -469,24 +457,11 @@ let possibly_reset_tracker { error_tracker; tracked_ide_id } new_ide_id =
   let tracked_ide_id = new_ide_id in
   { error_tracker; tracked_ide_id }
 
-let break_down_ide_info_option :
-    Ide_info_store.t option ->
-    int option * ClientProvider.client option * Relative_path.Set.t option =
-  function
-  | None -> (None, None, None)
-  | Some { Ide_info_store.id; client; open_files } ->
-    (Some id, Some client, Some open_files)
-
 (** Get client from the client provider and possibly reset the error tracker
     if we've lost the previous client. *)
 let get_client :
     t -> t * (ClientProvider.client option * Relative_path.Set.t option) =
- fun pusher ->
-  let (current_ide_id, current_client, current_ide_open_files) =
-    Ide_info_store.get () |> break_down_ide_info_option
-  in
-  let pusher = possibly_reset_tracker pusher current_ide_id in
-  (pusher, (current_client, current_ide_open_files))
+ (fun pusher -> (possibly_reset_tracker pusher None, (None, None)))
 
 let push_new_errors :
     t ->

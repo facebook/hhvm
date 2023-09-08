@@ -222,12 +222,7 @@ let actually_handle genv client msg full_recheck_needed ~is_stale env =
       ~parsed_files;
 
     ClientProvider.send_response_to_client client response;
-
-    if
-      ServerCommandTypes.is_disconnect_rpc cmd
-      || (not @@ ClientProvider.is_persistent client)
-    then
-      ClientProvider.shutdown_client client;
+    ClientProvider.shutdown_client client;
     new_env
   | Debug_DO_NOT_USE -> failwith "Debug_DO_NOT_USE"
 

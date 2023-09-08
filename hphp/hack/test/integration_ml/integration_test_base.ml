@@ -168,7 +168,6 @@ let run_loop_once :
           Some stats.ServerEnv.RecheckLoopStats.total_rechecked_count);
       new_client_response =
         TestClientProvider.get_client_response Non_persistent;
-      push_messages = TestClientProvider.get_push_messages ();
     } )
 
 let prepend_root x = root ^ x

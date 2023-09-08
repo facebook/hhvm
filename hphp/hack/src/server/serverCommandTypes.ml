@@ -8,9 +8,7 @@
 
 open Hh_prelude
 
-type connection_type =
-  | Persistent
-  | Non_persistent
+type connection_type = Non_persistent
 
 type connection_response = Connected
 
@@ -438,17 +436,11 @@ type cmd_metadata = {
   desc: string;
 }
 
-let is_disconnect_rpc : type a. a t -> bool = function
-  | _ -> false
-
 let is_critical_rpc : type a. a t -> bool = function
   (* An exception during any critical rpc should shutdown the persistent connection. *)
   (* The critical ones are those that affect the state.                              *)
   | CREATE_CHECKPOINT _ -> true
   | DELETE_CHECKPOINT _ -> true
-  | _ -> false
-
-let is_idle_rpc : type a. a t -> bool = function
   | _ -> false
 
 type 'a command =
@@ -470,44 +462,20 @@ let equal_errors errors1 errors2 =
 
 type diagnostic_errors = errors SMap.t [@@deriving eq, show]
 
-type push =
-  | DIAGNOSTIC of {
-      errors: diagnostic_errors;
-      is_truncated: int option;
-          (** Whether the list of errors has been truncated
-              to preserve IDE perf. *)
-    }
-  | BUSY_STATUS of busy_status
-  | NEW_CLIENT_CONNECTED
-  | FATAL_EXCEPTION of (Marshal_tools.remote_exception_data[@opaque])
-  | NONFATAL_EXCEPTION of (Marshal_tools.remote_exception_data[@opaque])
-
-and busy_status =
-  | Needs_local_typecheck
-  | Doing_local_typecheck
-  | Done_local_typecheck
-  | Doing_global_typecheck of global_typecheck_kind
-  | Done_global_typecheck
-
-and global_typecheck_kind =
+type global_typecheck_kind =
   | Blocking
   | Interruptible
   | Remote_blocking of string
 [@@deriving eq, show]
 
-type pushes = push list [@@deriving eq, show]
-
 type 'a message_type =
-  | Hello
-      (** Hello is the first message sent to the client by the server, for both persistent and non-persistent *)
+  | Hello  (** Hello is the first message sent to the client by the server *)
   | Monitor_failed_to_handoff
       (** However, if the handoff failed, this will be sent instead of Hello, and the connection terminated. *)
   | Ping
       (** Server sometimes sends these, after Hello and before Response, to check if client fd is still open *)
   | Response of 'a * Connection_tracker.t
-      (** Response message is the response to an RPC. For non-persistent, the server will close fd after this. *)
-  | Push of push
-      (** This is how errors are sent; only sent to persistent connections. *)
+      (** Response message is the response to an RPC. The server will close fd after this. *)
 
 (** Timeout on reading the command from the client - client probably frozen. *)
 exception Read_command_timeout

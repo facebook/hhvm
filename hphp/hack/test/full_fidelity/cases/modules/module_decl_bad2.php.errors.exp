@@ -1,2 +1,2 @@
-(5,19)-(5,19) A left brace `{` is expected here.
-(5,19)-(5,20) Encountered unexpected token `[`.
+(3,19)-(3,19) A left brace `{` is expected here.
+(3,19)-(3,20) Encountered unexpected token `[`.

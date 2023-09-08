@@ -1,5 +1,5 @@
-(8,11)-(8,11) A right brace `}` is expected here.
-(8,12)-(8,12) An expression is expected here.
-(8,13)-(9,1) A semicolon `;` is expected here.
-(9,4)-(10,1) An expression is expected here.
-(10,2)-(11,1) An expression is expected here.
+(7,11)-(7,11) A right brace `}` is expected here.
+(7,12)-(7,12) An expression is expected here.
+(7,13)-(8,1) A semicolon `;` is expected here.
+(8,4)-(9,1) An expression is expected here.
+(9,2)-(10,1) An expression is expected here.

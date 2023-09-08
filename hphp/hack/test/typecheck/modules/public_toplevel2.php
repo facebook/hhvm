@@ -1,5 +1,5 @@
 <?hh
-<<file:__EnableUnstableFeatures("modules")>>
+
 public class Foo {}
 public type FooAlias = Foo;
 public enum FooEnum : int {}

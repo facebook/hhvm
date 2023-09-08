@@ -1,15 +1,15 @@
 File root|module_attr.php--modules.php
 [("here",
   (Shallow_decl_defs.Module
-     { Typing_defs.mdt_pos = [4:12-16]; mdt_exports = None;
+     { Typing_defs.mdt_pos = [3:12-16]; mdt_exports = None;
        mdt_imports = None }));
   ("there",
    (Shallow_decl_defs.Module
-      { Typing_defs.mdt_pos = [5:12-17]; mdt_exports = None;
+      { Typing_defs.mdt_pos = [4:12-17]; mdt_exports = None;
         mdt_imports = None }));
   ("elsewhere",
    (Shallow_decl_defs.Module
-      { Typing_defs.mdt_pos = [6:12-21]; mdt_exports = None;
+      { Typing_defs.mdt_pos = [5:12-21]; mdt_exports = None;
         mdt_imports = None }))
   ]
 
@@ -17,36 +17,36 @@ File root|module_attr.php--here.php
 [("\\foo",
   (Shallow_decl_defs.Fun
      { Typing_defs.fe_deprecated = None;
-       fe_module = (Some ([3:8-12], "here")); fe_internal = false;
+       fe_module = (Some ([2:8-12], "here")); fe_internal = false;
        fe_type =
-       (Rwitness_from_decl ([5:10-13]),
+       (Rwitness_from_decl ([4:10-13]),
         (Tfun
            { ft_tparams = []; ft_where_constraints = []; ft_params = [];
-             ft_implicit_params = { capability = (CapDefaults [5:10-13]) };
+             ft_implicit_params = { capability = (CapDefaults [4:10-13]) };
              ft_ret =
              { et_enforced = Typing_defs_core.Unenforced;
-               et_type = (Rhint ([5:16-20]), (Tprim Tvoid)) };
+               et_type = (Rhint ([4:16-20]), (Tprim Tvoid)) };
              ft_flags =
              (make_ft_flags FSync ~return_disposable:false
                ~returns_readonly:false ~support_dynamic_type:false
                ~readonly_this:false ~is_memoized:false ~variadic:false);
              ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
-       fe_pos = [5:10-13]; fe_php_std_lib = false;
+       fe_pos = [4:10-13]; fe_php_std_lib = false;
        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
        fe_no_auto_likes = false }));
   ("\\Talias",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_module = (Some ([3:8-12], "here")); td_pos = [7:6-12];
+      { Typing_defs.td_module = (Some ([2:8-12], "here")); td_pos = [6:6-12];
         td_vis = Transparent; td_tparams = []; td_as_constraint = None;
         td_super_constraint = None;
-        td_type = (Rhint ([7:15-18]), (Tprim Tint)); td_is_ctx = false;
+        td_type = (Rhint ([6:15-18]), (Tprim Tint)); td_is_ctx = false;
         td_attributes = []; td_internal = false; td_docs_url = None }));
   ("\\Topaque",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_module = (Some ([3:8-12], "here")); td_pos = [9:9-16];
+      { Typing_defs.td_module = (Some ([2:8-12], "here")); td_pos = [8:9-16];
         td_vis = Opaque; td_tparams = []; td_as_constraint = None;
         td_super_constraint = None;
-        td_type = (Rhint ([9:19-25]), (Tprim Tstring)); td_is_ctx = false;
+        td_type = (Rhint ([8:19-25]), (Tprim Tstring)); td_is_ctx = false;
         td_attributes = []; td_internal = false; td_docs_url = None }))
   ]
 
@@ -56,7 +56,7 @@ File root|module_attr.php--there.php
      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
        sc_abstract = false; sc_is_xhp = false; sc_internal = false;
        sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
-       sc_module = (Some ([3:8-13], "there")); sc_name = ([5:7-8], "\\C");
+       sc_module = (Some ([2:8-13], "there")); sc_name = ([4:7-8], "\\C");
        sc_tparams = []; sc_where_constraints = []; sc_extends = [];
        sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
        sc_xhp_marked_empty = false; sc_req_extends = [];
@@ -65,15 +65,15 @@ File root|module_attr.php--there.php
        sc_props = []; sc_sprops = []; sc_constructor = None;
        sc_static_methods = [];
        sc_methods =
-       [{ Shallow_decl_defs.sm_name = ([6:19-22], "bar");
+       [{ Shallow_decl_defs.sm_name = ([5:19-22], "bar");
           sm_type =
-          (Rwitness_from_decl ([6:19-22]),
+          (Rwitness_from_decl ([5:19-22]),
            (Tfun
               { ft_tparams = []; ft_where_constraints = []; ft_params = [];
-                ft_implicit_params = { capability = (CapDefaults [6:19-22]) };
+                ft_implicit_params = { capability = (CapDefaults [5:19-22]) };
                 ft_ret =
                 { et_enforced = Typing_defs_core.Unenforced;
-                  et_type = (Rhint ([6:25-29]), (Tprim Tvoid)) };
+                  et_type = (Rhint ([5:25-29]), (Tprim Tvoid)) };
                 ft_flags =
                 (make_ft_flags FSync ~return_disposable:false
                   ~returns_readonly:false ~support_dynamic_type:false
@@ -91,13 +91,13 @@ File root|module_attr.php--elsewhere.php
      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
        sc_abstract = false; sc_is_xhp = false; sc_internal = false;
        sc_has_xhp_keyword = false; sc_kind = Cenum;
-       sc_module = (Some ([3:8-17], "elsewhere"));
-       sc_name = ([6:6-7], "\\E"); sc_tparams = [];
+       sc_module = (Some ([2:8-17], "elsewhere"));
+       sc_name = ([5:6-7], "\\E"); sc_tparams = [];
        sc_where_constraints = [];
        sc_extends =
-       [(Rhint ([6:6-7]),
-         (Tapply (([6:6-7], "\\HH\\BuiltinEnum"),
-            [(Rhint ([6:6-7]), (Tapply (([6:6-7], "\\E"), [])))])))
+       [(Rhint ([5:6-7]),
+         (Tapply (([5:6-7], "\\HH\\BuiltinEnum"),
+            [(Rhint ([5:6-7]), (Tapply (([5:6-7], "\\E"), [])))])))
          ];
        sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
        sc_xhp_marked_empty = false; sc_req_extends = [];
@@ -105,15 +105,15 @@ File root|module_attr.php--elsewhere.php
        sc_support_dynamic_type = false;
        sc_consts =
        [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
-          scc_name = ([7:3-4], "A");
-          scc_type = (Rwitness_from_decl ([7:7-8]), (Tprim Tint));
+          scc_name = ([6:3-4], "A");
+          scc_type = (Rwitness_from_decl ([6:7-8]), (Tprim Tint));
           scc_refs = [] }
          ];
        sc_typeconsts = []; sc_props = []; sc_sprops = [];
        sc_constructor = None; sc_static_methods = []; sc_methods = [];
        sc_user_attributes = [];
        sc_enum_type =
-       (Some { Typing_defs.te_base = (Rhint ([6:10-13]), (Tprim Tint));
+       (Some { Typing_defs.te_base = (Rhint ([5:10-13]), (Tprim Tint));
                te_constraint = None; te_includes = [] });
        sc_docs_url = None }))
   ]

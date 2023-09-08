@@ -1,2 +1,2 @@
-(5,18)-(5,18) A right brace `}` is expected here.
-(5,19)-(6,1) An expression is expected here.
+(3,18)-(3,18) A right brace `}` is expected here.
+(3,19)-(4,1) An expression is expected here.

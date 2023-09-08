@@ -1,20 +1,20 @@
 //// base-a-decl.php
 <?hh
-<<file: __EnableUnstableFeatures('modules')>>
+
 <<file: __EnableUnstableFeatures('module_references')>>
 
 new module A {}
 
 //// changed-a-decl.php
 <?hh
-<<file: __EnableUnstableFeatures('modules')>>
+
 <<file: __EnableUnstableFeatures('module_references')>>
 
 new module A {}
 
 //// base-b-decl.php
 <?hh
-<<file: __EnableUnstableFeatures('modules')>>
+
 <<file: __EnableUnstableFeatures('module_references')>>
 
 new module B {
@@ -25,7 +25,7 @@ new module B {
 
 //// changed-b-decl.php
 <?hh
-<<file: __EnableUnstableFeatures('modules')>>
+
 <<file: __EnableUnstableFeatures('module_references')>>
 
 new module B {
@@ -36,7 +36,7 @@ new module B {
 
 //// base-foo-defn.php
 <?hh
-<<file: __EnableUnstableFeatures('modules')>>
+
 module A;
 
 public class Foo {
@@ -46,7 +46,7 @@ public class Foo {
 
 //// changed-foo-defn.php
 <?hh
-<<file: __EnableUnstableFeatures('modules')>>
+
 module A;
 
 public class Foo {
@@ -55,7 +55,7 @@ public class Foo {
 
 //// base-foo-use.php
 <?hh
-<<file: __EnableUnstableFeatures('modules')>>
+
 module B;
 
 function call_foo(Foo $f): void {
@@ -64,7 +64,7 @@ function call_foo(Foo $f): void {
 
 //// changed-foo-use.php
 <?hh
-<<file: __EnableUnstableFeatures('modules')>>
+
 module B;
 
 function call_foo(Foo $f): void {

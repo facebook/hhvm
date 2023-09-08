@@ -1,2 +1,2 @@
-(8,7)-(8,7) A name is expected here.
-(8,7)-(8,11) Encountered unexpected token `self`.
+(7,7)-(7,7) A name is expected here.
+(7,7)-(7,11) Encountered unexpected token `self`.

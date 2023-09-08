@@ -38,159 +38,19 @@
         }
       },
       {
-        "kind":"file_attribute_specification",
-        "file_attribute_specification_left_double_angle":{
-          "kind":"token",
-          "token":{
-            "kind":"<<",
-            "text":"<<",
-            "offset":5,
-            "leading_width":1,
-            "width":2,
-            "trailing_width":0,
-            "leading":[{"kind":"end_of_line","text":"\n","offset":5,"width":1}],
-            "trailing":[],
-            "line_number":3
-          }
-        },
-        "file_attribute_specification_keyword":{
-          "kind":"token",
-          "token":{
-            "kind":"file",
-            "text":"file",
-            "offset":8,
-            "leading_width":0,
-            "width":4,
-            "trailing_width":0,
-            "leading":[],
-            "trailing":[],
-            "line_number":3
-          }
-        },
-        "file_attribute_specification_colon":{
-          "kind":"token",
-          "token":{
-            "kind":":",
-            "text":":",
-            "offset":12,
-            "leading_width":0,
-            "width":1,
-            "trailing_width":0,
-            "leading":[],
-            "trailing":[],
-            "line_number":3
-          }
-        },
-        "file_attribute_specification_attributes":{
-          "kind":"list",
-          "elements":[
-            {
-              "kind":"list_item",
-              "list_item":{
-                "kind":"constructor_call",
-                "constructor_call_type":{
-                  "kind":"simple_type_specifier",
-                  "simple_type_specifier":{
-                    "kind":"token",
-                    "token":{
-                      "kind":"name",
-                      "text":"__EnableUnstableFeatures",
-                      "offset":13,
-                      "leading_width":0,
-                      "width":24,
-                      "trailing_width":0,
-                      "leading":[],
-                      "trailing":[],
-                      "line_number":3
-                    }
-                  }
-                },
-                "constructor_call_left_paren":{
-                  "kind":"token",
-                  "token":{
-                    "kind":"(",
-                    "text":"(",
-                    "offset":37,
-                    "leading_width":0,
-                    "width":1,
-                    "trailing_width":0,
-                    "leading":[],
-                    "trailing":[],
-                    "line_number":3
-                  }
-                },
-                "constructor_call_argument_list":{
-                  "kind":"list",
-                  "elements":[
-                    {
-                      "kind":"list_item",
-                      "list_item":{
-                        "kind":"literal",
-                        "literal_expression":{
-                          "kind":"token",
-                          "token":{
-                            "kind":"single_quoted_string_literal",
-                            "text":"'modules'",
-                            "offset":38,
-                            "leading_width":0,
-                            "width":9,
-                            "trailing_width":0,
-                            "leading":[],
-                            "trailing":[],
-                            "line_number":3
-                          }
-                        }
-                      }
-                    }
-                  ]
-                },
-                "constructor_call_right_paren":{
-                  "kind":"token",
-                  "token":{
-                    "kind":")",
-                    "text":")",
-                    "offset":47,
-                    "leading_width":0,
-                    "width":1,
-                    "trailing_width":0,
-                    "leading":[],
-                    "trailing":[],
-                    "line_number":3
-                  }
-                }
-              }
-            }
-          ]
-        },
-        "file_attribute_specification_right_double_angle":{
-          "kind":"token",
-          "token":{
-            "kind":">>",
-            "text":">>",
-            "offset":48,
-            "leading_width":0,
-            "width":2,
-            "trailing_width":1,
-            "leading":[],
-            "trailing":[{"kind":"end_of_line","text":"\n","offset":50,"width":1}],
-            "line_number":3
-          }
-        }
-      },
-      {
         "kind":"module_declaration",
         "module_declaration_new_keyword":{
           "kind":"token",
           "token":{
             "kind":"new",
             "text":"new",
-            "offset":51,
+            "offset":5,
             "leading_width":1,
             "width":3,
             "trailing_width":1,
-            "leading":[{"kind":"end_of_line","text":"\n","offset":51,"width":1}],
-            "trailing":[{"kind":"whitespace","text":" ","offset":55,"width":1}],
-            "line_number":5
+            "leading":[{"kind":"end_of_line","text":"\n","offset":5,"width":1}],
+            "trailing":[{"kind":"whitespace","text":" ","offset":9,"width":1}],
+            "line_number":3
           }
         },
         "module_declaration_module_keyword":{
@@ -198,13 +58,13 @@
           "token":{
             "kind":"module",
             "text":"module",
-            "offset":56,
+            "offset":10,
             "leading_width":0,
             "width":6,
             "trailing_width":1,
             "leading":[],
-            "trailing":[{"kind":"whitespace","text":" ","offset":62,"width":1}],
-            "line_number":5
+            "trailing":[{"kind":"whitespace","text":" ","offset":16,"width":1}],
+            "line_number":3
           }
         },
         "module_declaration_name":{
@@ -219,13 +79,13 @@
                   "token":{
                     "kind":"name",
                     "text":"Foobar",
-                    "offset":63,
+                    "offset":17,
                     "leading_width":0,
                     "width":6,
                     "trailing_width":1,
                     "leading":[],
-                    "trailing":[{"kind":"whitespace","text":" ","offset":69,"width":1}],
-                    "line_number":5
+                    "trailing":[{"kind":"whitespace","text":" ","offset":23,"width":1}],
+                    "line_number":3
                   }
                 }
               }
@@ -237,13 +97,13 @@
           "token":{
             "kind":"{",
             "text":"{",
-            "offset":70,
+            "offset":24,
             "leading_width":0,
             "width":1,
             "trailing_width":1,
             "leading":[],
-            "trailing":[{"kind":"end_of_line","text":"\n","offset":71,"width":1}],
-            "line_number":5
+            "trailing":[{"kind":"end_of_line","text":"\n","offset":25,"width":1}],
+            "line_number":3
           }
         },
         "module_declaration_right_brace":{
@@ -251,13 +111,13 @@
           "token":{
             "kind":"}",
             "text":"}",
-            "offset":72,
+            "offset":26,
             "leading_width":1,
             "width":1,
             "trailing_width":1,
-            "leading":[{"kind":"end_of_line","text":"\n","offset":72,"width":1}],
-            "trailing":[{"kind":"end_of_line","text":"\n","offset":74,"width":1}],
-            "line_number":7
+            "leading":[{"kind":"end_of_line","text":"\n","offset":26,"width":1}],
+            "trailing":[{"kind":"end_of_line","text":"\n","offset":28,"width":1}],
+            "line_number":5
           }
         }
       },
@@ -268,13 +128,13 @@
           "token":{
             "kind":"new",
             "text":"new",
-            "offset":75,
+            "offset":29,
             "leading_width":1,
             "width":3,
             "trailing_width":1,
-            "leading":[{"kind":"end_of_line","text":"\n","offset":75,"width":1}],
-            "trailing":[{"kind":"whitespace","text":" ","offset":79,"width":1}],
-            "line_number":9
+            "leading":[{"kind":"end_of_line","text":"\n","offset":29,"width":1}],
+            "trailing":[{"kind":"whitespace","text":" ","offset":33,"width":1}],
+            "line_number":7
           }
         },
         "module_declaration_module_keyword":{
@@ -282,13 +142,13 @@
           "token":{
             "kind":"module",
             "text":"module",
-            "offset":80,
+            "offset":34,
             "leading_width":0,
             "width":6,
             "trailing_width":1,
             "leading":[],
-            "trailing":[{"kind":"whitespace","text":" ","offset":86,"width":1}],
-            "line_number":9
+            "trailing":[{"kind":"whitespace","text":" ","offset":40,"width":1}],
+            "line_number":7
           }
         },
         "module_declaration_name":{
@@ -303,13 +163,13 @@
                   "token":{
                     "kind":"name",
                     "text":"BiNgBaZ",
-                    "offset":87,
+                    "offset":41,
                     "leading_width":0,
                     "width":7,
                     "trailing_width":1,
                     "leading":[],
-                    "trailing":[{"kind":"whitespace","text":" ","offset":94,"width":1}],
-                    "line_number":9
+                    "trailing":[{"kind":"whitespace","text":" ","offset":48,"width":1}],
+                    "line_number":7
                   }
                 }
               }
@@ -321,13 +181,13 @@
           "token":{
             "kind":"{",
             "text":"{",
-            "offset":95,
+            "offset":49,
             "leading_width":0,
             "width":1,
             "trailing_width":0,
             "leading":[],
             "trailing":[],
-            "line_number":9
+            "line_number":7
           }
         },
         "module_declaration_right_brace":{
@@ -335,13 +195,13 @@
           "token":{
             "kind":"}",
             "text":"}",
-            "offset":96,
+            "offset":50,
             "leading_width":0,
             "width":1,
             "trailing_width":1,
             "leading":[],
-            "trailing":[{"kind":"end_of_line","text":"\n","offset":97,"width":1}],
-            "line_number":9
+            "trailing":[{"kind":"end_of_line","text":"\n","offset":51,"width":1}],
+            "line_number":7
           }
         }
       },
@@ -354,16 +214,16 @@
             "token":{
               "kind":"<<",
               "text":"<<",
-              "offset":98,
+              "offset":52,
               "leading_width":2,
               "width":2,
               "trailing_width":0,
               "leading":[
-                {"kind":"end_of_line","text":"\n","offset":98,"width":1},
-                {"kind":"end_of_line","text":"\n","offset":99,"width":1}
+                {"kind":"end_of_line","text":"\n","offset":52,"width":1},
+                {"kind":"end_of_line","text":"\n","offset":53,"width":1}
               ],
               "trailing":[],
-              "line_number":12
+              "line_number":10
             }
           },
           "old_attribute_specification_attributes":{
@@ -380,13 +240,13 @@
                       "token":{
                         "kind":"name",
                         "text":"Attributes",
-                        "offset":102,
+                        "offset":56,
                         "leading_width":0,
                         "width":10,
                         "trailing_width":0,
                         "leading":[],
                         "trailing":[],
-                        "line_number":12
+                        "line_number":10
                       }
                     }
                   },
@@ -395,13 +255,13 @@
                     "token":{
                       "kind":"(",
                       "text":"(",
-                      "offset":112,
+                      "offset":66,
                       "leading_width":0,
                       "width":1,
                       "trailing_width":0,
                       "leading":[],
                       "trailing":[],
-                      "line_number":12
+                      "line_number":10
                     }
                   },
                   "constructor_call_argument_list":{
@@ -416,13 +276,13 @@
                             "token":{
                               "kind":"single_quoted_string_literal",
                               "text":"'?'",
-                              "offset":113,
+                              "offset":67,
                               "leading_width":0,
                               "width":3,
                               "trailing_width":0,
                               "leading":[],
                               "trailing":[],
-                              "line_number":12
+                              "line_number":10
                             }
                           }
                         }
@@ -434,13 +294,13 @@
                     "token":{
                       "kind":")",
                       "text":")",
-                      "offset":116,
+                      "offset":70,
                       "leading_width":0,
                       "width":1,
                       "trailing_width":0,
                       "leading":[],
                       "trailing":[],
-                      "line_number":12
+                      "line_number":10
                     }
                   }
                 },
@@ -449,13 +309,13 @@
                   "token":{
                     "kind":",",
                     "text":",",
-                    "offset":117,
+                    "offset":71,
                     "leading_width":0,
                     "width":1,
                     "trailing_width":1,
                     "leading":[],
-                    "trailing":[{"kind":"whitespace","text":" ","offset":118,"width":1}],
-                    "line_number":12
+                    "trailing":[{"kind":"whitespace","text":" ","offset":72,"width":1}],
+                    "line_number":10
                   }
                 }
               },
@@ -470,13 +330,13 @@
                       "token":{
                         "kind":"name",
                         "text":"YesAttributes",
-                        "offset":119,
+                        "offset":73,
                         "leading_width":0,
                         "width":13,
                         "trailing_width":0,
                         "leading":[],
                         "trailing":[],
-                        "line_number":12
+                        "line_number":10
                       }
                     }
                   },
@@ -485,13 +345,13 @@
                     "token":{
                       "kind":"(",
                       "text":"(",
-                      "offset":132,
+                      "offset":86,
                       "leading_width":0,
                       "width":1,
                       "trailing_width":0,
                       "leading":[],
                       "trailing":[],
-                      "line_number":12
+                      "line_number":10
                     }
                   },
                   "constructor_call_argument_list":{
@@ -506,13 +366,13 @@
                             "token":{
                               "kind":"single_quoted_string_literal",
                               "text":"'.'",
-                              "offset":133,
+                              "offset":87,
                               "leading_width":0,
                               "width":3,
                               "trailing_width":0,
                               "leading":[],
                               "trailing":[],
-                              "line_number":12
+                              "line_number":10
                             }
                           }
                         }
@@ -524,13 +384,13 @@
                     "token":{
                       "kind":")",
                       "text":")",
-                      "offset":136,
+                      "offset":90,
                       "leading_width":0,
                       "width":1,
                       "trailing_width":0,
                       "leading":[],
                       "trailing":[],
-                      "line_number":12
+                      "line_number":10
                     }
                   }
                 }
@@ -542,13 +402,13 @@
             "token":{
               "kind":">>",
               "text":">>",
-              "offset":137,
+              "offset":91,
               "leading_width":0,
               "width":2,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"end_of_line","text":"\n","offset":139,"width":1}],
-              "line_number":12
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":93,"width":1}],
+              "line_number":10
             }
           }
         },
@@ -557,13 +417,13 @@
           "token":{
             "kind":"new",
             "text":"new",
-            "offset":140,
+            "offset":94,
             "leading_width":0,
             "width":3,
             "trailing_width":1,
             "leading":[],
-            "trailing":[{"kind":"whitespace","text":" ","offset":143,"width":1}],
-            "line_number":13
+            "trailing":[{"kind":"whitespace","text":" ","offset":97,"width":1}],
+            "line_number":11
           }
         },
         "module_declaration_module_keyword":{
@@ -571,13 +431,13 @@
           "token":{
             "kind":"module",
             "text":"module",
-            "offset":144,
+            "offset":98,
             "leading_width":0,
             "width":6,
             "trailing_width":1,
             "leading":[],
-            "trailing":[{"kind":"whitespace","text":" ","offset":150,"width":1}],
-            "line_number":13
+            "trailing":[{"kind":"whitespace","text":" ","offset":104,"width":1}],
+            "line_number":11
           }
         },
         "module_declaration_name":{
@@ -592,13 +452,13 @@
                   "token":{
                     "kind":"name",
                     "text":"Lol_Attributes",
-                    "offset":151,
+                    "offset":105,
                     "leading_width":0,
                     "width":14,
                     "trailing_width":1,
                     "leading":[],
-                    "trailing":[{"kind":"whitespace","text":" ","offset":165,"width":1}],
-                    "line_number":13
+                    "trailing":[{"kind":"whitespace","text":" ","offset":119,"width":1}],
+                    "line_number":11
                   }
                 }
               }
@@ -610,13 +470,13 @@
           "token":{
             "kind":"{",
             "text":"{",
-            "offset":166,
+            "offset":120,
             "leading_width":0,
             "width":1,
             "trailing_width":0,
             "leading":[],
             "trailing":[],
-            "line_number":13
+            "line_number":11
           }
         },
         "module_declaration_right_brace":{
@@ -624,13 +484,13 @@
           "token":{
             "kind":"}",
             "text":"}",
-            "offset":167,
+            "offset":121,
             "leading_width":0,
             "width":1,
             "trailing_width":1,
             "leading":[],
-            "trailing":[{"kind":"end_of_line","text":"\n","offset":168,"width":1}],
-            "line_number":13
+            "trailing":[{"kind":"end_of_line","text":"\n","offset":122,"width":1}],
+            "line_number":11
           }
         }
       },
@@ -641,13 +501,13 @@
           "token":{
             "kind":"end_of_file",
             "text":"",
-            "offset":169,
+            "offset":123,
             "leading_width":0,
             "width":0,
             "trailing_width":0,
             "leading":[],
             "trailing":[],
-            "line_number":14
+            "line_number":12
           }
         }
       }

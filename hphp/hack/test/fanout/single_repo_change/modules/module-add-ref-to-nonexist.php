@@ -7,20 +7,20 @@
 
 //// changed-decls.php
 <?hh
-<<file: __EnableUnstableFeatures('modules')>>
+
 
 new module A {}
 
 //// base-foobar.php
 <?hh
-<<file: __EnableUnstableFeatures('modules')>>
+
 module A;
 
 class Foobar {}
 
 //// changed-foobar.php
 <?hh
-<<file: __EnableUnstableFeatures('modules')>>
+
 module A;
 
 class Foobar {}

@@ -8,7 +8,6 @@
 
 let foo_contents =
   {|<?hh //strict
-  <<file:__EnableUnstableFeatures("modules")>>
   new module foo {}
   class Foo {
     public function foo (Bar $b) : int {
@@ -25,7 +24,6 @@ let foo_contents =
 
 let bar_contents =
   {|<?hh //strict
-  <<file:__EnableUnstableFeatures("modules")>>
   module foo;
   class A {}
   class B<T> {}

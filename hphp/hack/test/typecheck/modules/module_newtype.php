@@ -1,11 +1,11 @@
 //// module.php
 <?hh
-<<file:__EnableUnstableFeatures("modules")>>
+
 new module foo {}
 
 //// decl.php
 <?hh
-<<file:__EnableUnstableFeatures("modules")>>
+
 module foo;
 module newtype Foo = FooInternal; // ok
 module newtype FooBad as FooInternal = FooInternal; // error
@@ -19,7 +19,7 @@ function same_file(Foo $x) : void {
 
 //// use.php
 <?hh
-<<file:__EnableUnstableFeatures("modules")>>
+
 module foo;
 function same_module(Foo $x) : void {
   $x->foo(); // ok, it's FooInternal

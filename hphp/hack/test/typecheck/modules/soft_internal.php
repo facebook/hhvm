@@ -1,11 +1,11 @@
 ////file1.php
 <?hh
-<<file:__EnableUnstableFeatures("modules")>>
+
 new module foo {}
 
 ////file2.php
 <?hh
-<<file:__EnableUnstableFeatures("modules")>>
+
 
 module foo;
 <<__SoftInternal>>

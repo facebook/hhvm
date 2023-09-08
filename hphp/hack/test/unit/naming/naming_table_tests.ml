@@ -54,15 +54,11 @@ let files =
     ("qux.php", {|<?hh
     const int Qux = 5;
   |});
-    ( "corge.php",
-      {|<?hh
-    <<file: __EnableUnstableFeatures('modules')>>
+    ("corge.php", {|<?hh
     new module Corge {}
-  |}
-    );
+  |});
     ( "corge2.php",
       {|<?hh
-    <<file: __EnableUnstableFeatures('modules')>>
     // modules are case sensitive, this is a different symbol
     new module corge {}
   |}

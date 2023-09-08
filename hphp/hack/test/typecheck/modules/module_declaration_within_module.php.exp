@@ -1,4 +1,4 @@
-File "module_declaration_within_module.php", line 4, characters 8-10:
+File "module_declaration_within_module.php", line 3, characters 8-10:
 `module foo;` must be unique, and precede any other declarations in a file. (Parsing[1002])
-File "module_declaration_within_module.php", line 5, characters 12-14:
+File "module_declaration_within_module.php", line 4, characters 12-14:
 You cannot declare new modules within an existing module (Parsing[1002])

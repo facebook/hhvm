@@ -1,5 +1,4 @@
 <?hh
-<<file:__EnableUnstableFeatures("modules")>>
 module foo;
 internal abstract class Foo {
   internal function foo(): void {}

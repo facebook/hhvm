@@ -1,6 +1,6 @@
 //// base-a-decl.php
 <?hh
-<<file: __EnableUnstableFeatures('modules')>>
+
 <<file: __EnableUnstableFeatures('module_references')>>
 
 new module A {
@@ -11,7 +11,7 @@ new module A {
 
 //// changed-a-decl.php
 <?hh
-<<file: __EnableUnstableFeatures('modules')>>
+
 <<file: __EnableUnstableFeatures('module_references')>>
 
 new module A {
@@ -21,7 +21,7 @@ new module A {
 
 //// base-foo-defn.php
 <?hh
-<<file: __EnableUnstableFeatures('modules')>>
+
 module A;
 
 public class Foo {
@@ -33,7 +33,7 @@ public class Foo {
 
 //// changed-foo-defn.php
 <?hh
-<<file: __EnableUnstableFeatures('modules')>>
+
 module A;
 
 public class Foo {

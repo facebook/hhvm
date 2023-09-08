@@ -1,10 +1,10 @@
 //// mod.php
 <?hh
-<<file:__EnableUnstableFeatures("modules")>>
+
 new module b {}
 //// def.php
 <?hh
-<<file:__EnableUnstableFeatures("modules")>>
+
 module b;
 
 internal class SecretKey{

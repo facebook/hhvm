@@ -1,10 +1,10 @@
 //// mod.php
 <?hh
-<<file:__EnableUnstableFeatures("modules")>>
+
 new module foo {}
 //// file1.php
 <?hh
-<<file:__EnableUnstableFeatures("modules")>>
+
 module foo;
 interface IFoo {}
 internal class Sens implements IFoo {

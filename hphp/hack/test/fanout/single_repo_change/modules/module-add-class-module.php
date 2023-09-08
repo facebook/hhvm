@@ -1,18 +1,18 @@
 //// base-decls.php
 <?hh
-<<file: __EnableUnstableFeatures('modules')>>
+
 
 new module A {}
 
 //// changed-decls.php
 <?hh
-<<file: __EnableUnstableFeatures('modules')>>
+
 
 new module A {}
 
 //// base-foobar.php
 <?hh
-<<file: __EnableUnstableFeatures('modules')>>
+
 
 class Foobar {
   public function foo(): void {}
@@ -20,7 +20,7 @@ class Foobar {
 
 //// changed-foobar.php
 <?hh
-<<file: __EnableUnstableFeatures('modules')>>
+
 module A;
 
 class Foobar {
@@ -29,7 +29,7 @@ class Foobar {
 
 //// base-bing.php
 <?hh
-<<file: __EnableUnstableFeatures('modules')>>
+
 
 function test(Foobar $x): void {
   $x->foo();
@@ -37,7 +37,7 @@ function test(Foobar $x): void {
 
 //// changed-bing.php
 <?hh
-<<file: __EnableUnstableFeatures('modules')>>
+
 
 function test(Foobar $x): void {
   $x->foo();

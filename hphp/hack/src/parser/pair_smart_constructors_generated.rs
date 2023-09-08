@@ -513,6 +513,10 @@ where
         Node(self.0.make_isset_expression(keyword.0, left_paren.0, argument_list.0, right_paren.0), self.1.make_isset_expression(keyword.1, left_paren.1, argument_list.1, right_paren.1))
     }
 
+    fn make_nameof_expression(&mut self, keyword: Self::Output, target: Self::Output) -> Self::Output {
+        Node(self.0.make_nameof_expression(keyword.0, target.0), self.1.make_nameof_expression(keyword.1, target.1))
+    }
+
     fn make_function_call_expression(&mut self, receiver: Self::Output, type_args: Self::Output, left_paren: Self::Output, argument_list: Self::Output, right_paren: Self::Output) -> Self::Output {
         Node(self.0.make_function_call_expression(receiver.0, type_args.0, left_paren.0, argument_list.0, right_paren.0), self.1.make_function_call_expression(receiver.1, type_args.1, left_paren.1, argument_list.1, right_paren.1))
     }

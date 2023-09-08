@@ -147,6 +147,8 @@
       "token_text" : "mixed" },
     { "token_kind" : "Module",
       "token_text" : "module" },
+    { "token_kind" : "Nameof",
+      "token_text" : "nameof" },
     { "token_kind" : "Namespace",
       "token_text" : "namespace" },
     { "token_kind" : "New",
@@ -1524,6 +1526,14 @@
         { "field_name" : "left_paren" },
         { "field_name" : "argument_list" },
         { "field_name" : "right_paren" }
+      ] },
+    { "kind_name" : "NameofExpression",
+      "type_name" : "nameof_expression",
+      "description" : "nameof_expression",
+      "prefix" : "nameof",
+      "fields" : [
+        { "field_name" : "keyword" },
+        { "field_name" : "target" }
       ] },
     { "kind_name" : "FunctionCallExpression",
       "type_name" : "function_call_expression",

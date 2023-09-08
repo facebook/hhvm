@@ -133,6 +133,7 @@ impl<T: LexableToken, V> Syntax<'_, T, V> {
             SyntaxVariant::ConditionalExpression {..} => SyntaxKind::ConditionalExpression,
             SyntaxVariant::EvalExpression {..} => SyntaxKind::EvalExpression,
             SyntaxVariant::IssetExpression {..} => SyntaxKind::IssetExpression,
+            SyntaxVariant::NameofExpression {..} => SyntaxKind::NameofExpression,
             SyntaxVariant::FunctionCallExpression {..} => SyntaxKind::FunctionCallExpression,
             SyntaxVariant::FunctionPointerExpression {..} => SyntaxKind::FunctionPointerExpression,
             SyntaxVariant::ParenthesizedExpression {..} => SyntaxKind::ParenthesizedExpression,

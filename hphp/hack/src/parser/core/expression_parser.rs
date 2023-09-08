@@ -421,6 +421,7 @@ where
             }
             TokenKind::Package => self.parse_package_expression(),
             TokenKind::Empty => self.parse_empty(),
+            TokenKind::Nameof => self.parse_nameof(),
             kind if self.expects(kind) => {
                 // ERROR RECOVERY: if we've prematurely found a token we're expecting
                 // later, mark the expression missing, throw an error, and do not advance
@@ -1124,6 +1125,15 @@ where
         let package_kw = self.sc_mut().make_token(package_kw);
         self.sc_mut()
             .make_package_expression(package_kw, package_name)
+    }
+
+    fn parse_nameof(&mut self) -> S::Output {
+        // SPEC:
+        // nameof expr
+        let kw_token = self.next_token();
+        let kw = self.sc_mut().make_token(kw_token);
+        let expr = self.parse_expression();
+        self.sc_mut().make_nameof_expression(kw, expr)
     }
 
     fn peek_next_kind_if_operator(&self) -> Option<TokenKind> {

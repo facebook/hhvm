@@ -1,0 +1,8 @@
+File "simple.php", line 6, characters 10-17:
+Encountered unexpected text `nameof C`, was expecting a expression. (Parsing[1002])
+File "simple.php", line 6, characters 10-17:
+Invalid return type (Typing[4110])
+  File "simple.php", line 5, characters 15-20:
+  Expected `string`
+  File "simple.php", line 6, characters 10-17:
+  But got `null`

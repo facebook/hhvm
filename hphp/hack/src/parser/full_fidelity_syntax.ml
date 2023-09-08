@@ -168,6 +168,7 @@ module WithToken (Token : TokenType) = struct
       | ConditionalExpression _ -> SyntaxKind.ConditionalExpression
       | EvalExpression _ -> SyntaxKind.EvalExpression
       | IssetExpression _ -> SyntaxKind.IssetExpression
+      | NameofExpression _ -> SyntaxKind.NameofExpression
       | FunctionCallExpression _ -> SyntaxKind.FunctionCallExpression
       | FunctionPointerExpression _ -> SyntaxKind.FunctionPointerExpression
       | ParenthesizedExpression _ -> SyntaxKind.ParenthesizedExpression
@@ -493,6 +494,8 @@ module WithToken (Token : TokenType) = struct
     let is_eval_expression = has_kind SyntaxKind.EvalExpression
 
     let is_isset_expression = has_kind SyntaxKind.IssetExpression
+
+    let is_nameof_expression = has_kind SyntaxKind.NameofExpression
 
     let is_function_call_expression = has_kind SyntaxKind.FunctionCallExpression
 
@@ -1859,6 +1862,10 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc isset_left_paren in
         let acc = f acc isset_argument_list in
         let acc = f acc isset_right_paren in
+        acc
+      | NameofExpression { nameof_keyword; nameof_target } ->
+        let acc = f acc nameof_keyword in
+        let acc = f acc nameof_target in
         acc
       | FunctionCallExpression
           {
@@ -3633,6 +3640,8 @@ module WithToken (Token : TokenType) = struct
         [
           isset_keyword; isset_left_paren; isset_argument_list; isset_right_paren;
         ]
+      | NameofExpression { nameof_keyword; nameof_target } ->
+        [nameof_keyword; nameof_target]
       | FunctionCallExpression
           {
             function_call_receiver;
@@ -5399,6 +5408,8 @@ module WithToken (Token : TokenType) = struct
           "isset_argument_list";
           "isset_right_paren";
         ]
+      | NameofExpression { nameof_keyword; nameof_target } ->
+        ["nameof_keyword"; "nameof_target"]
       | FunctionCallExpression
           {
             function_call_receiver;
@@ -7352,6 +7363,8 @@ module WithToken (Token : TokenType) = struct
             isset_argument_list;
             isset_right_paren;
           }
+      | (SyntaxKind.NameofExpression, [nameof_keyword; nameof_target]) ->
+        NameofExpression { nameof_keyword; nameof_target }
       | ( SyntaxKind.FunctionCallExpression,
           [
             function_call_receiver;
@@ -9696,6 +9709,11 @@ module WithToken (Token : TokenType) = struct
               isset_right_paren;
             }
         in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_nameof_expression nameof_keyword nameof_target =
+        let syntax = NameofExpression { nameof_keyword; nameof_target } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value
 

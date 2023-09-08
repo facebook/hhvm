@@ -1228,6 +1228,15 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_nameof_expression(ctx: &C, keyword: Self, target: Self) -> Self {
+        let syntax = SyntaxVariant::NameofExpression(ctx.get_arena().alloc(NameofExpressionChildren {
+            keyword,
+            target,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
     fn make_function_call_expression(ctx: &C, receiver: Self, type_args: Self, left_paren: Self, argument_list: Self, right_paren: Self) -> Self {
         let syntax = SyntaxVariant::FunctionCallExpression(ctx.get_arena().alloc(FunctionCallExpressionChildren {
             receiver,

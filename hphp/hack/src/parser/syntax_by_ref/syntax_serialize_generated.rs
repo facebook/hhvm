@@ -1024,6 +1024,13 @@ ss.serialize_field("isset_argument_list", &self.with(argument_list))?;
 ss.serialize_field("isset_right_paren", &self.with(right_paren))?;
       ss.end()
 } 
+SyntaxVariant::NameofExpression (NameofExpressionChildren{keyword,target} ) => {
+      let mut ss = s.serialize_struct("", 3)?;
+      ss.serialize_field("kind", "nameof_expression")?;
+      ss.serialize_field("nameof_keyword", &self.with(keyword))?;
+ss.serialize_field("nameof_target", &self.with(target))?;
+      ss.end()
+} 
 SyntaxVariant::FunctionCallExpression (FunctionCallExpressionChildren{receiver,type_args,left_paren,argument_list,right_paren} ) => {
       let mut ss = s.serialize_struct("", 6)?;
       ss.serialize_field("kind", "function_call_expression")?;

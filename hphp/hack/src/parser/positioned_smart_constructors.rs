@@ -513,6 +513,10 @@ where
         <Self as SyntaxSmartConstructors<S, TF, St>>::make_isset_expression(self, arg0, arg1, arg2, arg3)
     }
 
+    fn make_nameof_expression(&mut self, arg0: Self::Output, arg1: Self::Output) -> Self::Output {
+        <Self as SyntaxSmartConstructors<S, TF, St>>::make_nameof_expression(self, arg0, arg1)
+    }
+
     fn make_function_call_expression(&mut self, arg0: Self::Output, arg1: Self::Output, arg2: Self::Output, arg3: Self::Output, arg4: Self::Output) -> Self::Output {
         <Self as SyntaxSmartConstructors<S, TF, St>>::make_function_call_expression(self, arg0, arg1, arg2, arg3, arg4)
     }

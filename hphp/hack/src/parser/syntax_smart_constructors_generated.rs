@@ -590,6 +590,11 @@ where
         Self::Output::make_isset_expression(self.state_mut(), arg0, arg1, arg2, arg3)
     }
 
+    fn make_nameof_expression(&mut self, arg0 : Self::Output, arg1 : Self::Output) -> Self::Output {
+        self.state_mut().next(&[&arg0, &arg1]);
+        Self::Output::make_nameof_expression(self.state_mut(), arg0, arg1)
+    }
+
     fn make_function_call_expression(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output) -> Self::Output {
         self.state_mut().next(&[&arg0, &arg1, &arg2, &arg3, &arg4]);
         Self::Output::make_function_call_expression(self.state_mut(), arg0, arg1, arg2, arg3, arg4)

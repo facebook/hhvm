@@ -498,6 +498,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> SmartConstructors for DirectDec
         <Self as FlattenSmartConstructors>::make_isset_expression(self, keyword, left_paren, argument_list, right_paren)
     }
 
+    fn make_nameof_expression(&mut self, keyword: Self::Output, target: Self::Output) -> Self::Output {
+        <Self as FlattenSmartConstructors>::make_nameof_expression(self, keyword, target)
+    }
+
     fn make_function_call_expression(&mut self, receiver: Self::Output, type_args: Self::Output, left_paren: Self::Output, argument_list: Self::Output, right_paren: Self::Output) -> Self::Output {
         <Self as FlattenSmartConstructors>::make_function_call_expression(self, receiver, type_args, left_paren, argument_list, right_paren)
     }

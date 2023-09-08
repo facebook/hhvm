@@ -128,6 +128,7 @@ pub trait SyntaxType<C>: SyntaxTypeBase<C>
     fn make_conditional_expression(ctx: &C, conditional_test: Self, conditional_question: Self, conditional_consequence: Self, conditional_colon: Self, conditional_alternative: Self) -> Self;
     fn make_eval_expression(ctx: &C, eval_keyword: Self, eval_left_paren: Self, eval_argument: Self, eval_right_paren: Self) -> Self;
     fn make_isset_expression(ctx: &C, isset_keyword: Self, isset_left_paren: Self, isset_argument_list: Self, isset_right_paren: Self) -> Self;
+    fn make_nameof_expression(ctx: &C, nameof_keyword: Self, nameof_target: Self) -> Self;
     fn make_function_call_expression(ctx: &C, function_call_receiver: Self, function_call_type_args: Self, function_call_left_paren: Self, function_call_argument_list: Self, function_call_right_paren: Self) -> Self;
     fn make_function_pointer_expression(ctx: &C, function_pointer_receiver: Self, function_pointer_type_args: Self) -> Self;
     fn make_parenthesized_expression(ctx: &C, parenthesized_expression_left_paren: Self, parenthesized_expression_expression: Self, parenthesized_expression_right_paren: Self) -> Self;

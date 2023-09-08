@@ -1699,6 +1699,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           WithRule
             (Rule.Parental, Concat [Nest [t env expr]; Split; t env right_p]);
         ]
+    | Syntax.NameofExpression { nameof_keyword = k; nameof_target = e } ->
+      Concat [t env k; Space; t env e]
     | Syntax.ETSpliceExpression
         {
           et_splice_expression_dollar = dollar;

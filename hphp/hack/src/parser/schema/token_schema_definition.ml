@@ -140,6 +140,7 @@ let given_text_tokens =
     make_token_node "Match" "match" ~allowed_as_identifier:true ();
     make_token_node "Mixed" "mixed" ~allowed_as_identifier:true ();
     make_token_node "Module" "module" ();
+    make_token_node "Nameof" "nameof" ();
     make_token_node "Namespace" "namespace" ();
     make_token_node "New" "new" ();
     make_token_node "Newctx" "newctx" ~allowed_as_identifier:true ();

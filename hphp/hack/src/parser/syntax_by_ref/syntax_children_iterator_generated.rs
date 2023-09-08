@@ -1131,6 +1131,14 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     }
                 })
             },
+            NameofExpression(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.keyword),
+                    1 => Some(&x.target),
+                        _ => None,
+                    }
+                })
+            },
             FunctionCallExpression(x) => {
                 get_index(5).and_then(|index| { match index {
                         0 => Some(&x.receiver),

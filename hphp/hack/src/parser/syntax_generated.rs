@@ -1222,6 +1222,15 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_nameof_expression(_: &C, nameof_keyword: Self, nameof_target: Self) -> Self {
+        let syntax = SyntaxVariant::NameofExpression(Box::new(NameofExpressionChildren {
+            nameof_keyword,
+            nameof_target,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
     fn make_function_call_expression(_: &C, function_call_receiver: Self, function_call_type_args: Self, function_call_left_paren: Self, function_call_argument_list: Self, function_call_right_paren: Self) -> Self {
         let syntax = SyntaxVariant::FunctionCallExpression(Box::new(FunctionCallExpressionChildren {
             function_call_receiver,
@@ -2905,6 +2914,12 @@ where
                 let acc = f(isset_right_paren, acc);
                 acc
             },
+            SyntaxVariant::NameofExpression(x) => {
+                let NameofExpressionChildren { nameof_keyword, nameof_target } = *x;
+                let acc = f(nameof_keyword, acc);
+                let acc = f(nameof_target, acc);
+                acc
+            },
             SyntaxVariant::FunctionCallExpression(x) => {
                 let FunctionCallExpressionChildren { function_call_receiver, function_call_type_args, function_call_left_paren, function_call_argument_list, function_call_right_paren } = *x;
                 let acc = f(function_call_receiver, acc);
@@ -3589,6 +3604,7 @@ where
             SyntaxVariant::ConditionalExpression {..} => SyntaxKind::ConditionalExpression,
             SyntaxVariant::EvalExpression {..} => SyntaxKind::EvalExpression,
             SyntaxVariant::IssetExpression {..} => SyntaxKind::IssetExpression,
+            SyntaxVariant::NameofExpression {..} => SyntaxKind::NameofExpression,
             SyntaxVariant::FunctionCallExpression {..} => SyntaxKind::FunctionCallExpression,
             SyntaxVariant::FunctionPointerExpression {..} => SyntaxKind::FunctionPointerExpression,
             SyntaxVariant::ParenthesizedExpression {..} => SyntaxKind::ParenthesizedExpression,
@@ -4435,6 +4451,11 @@ where
                  isset_keyword: ts.pop().unwrap(),
                  
              })),
+             (SyntaxKind::NameofExpression, 2) => SyntaxVariant::NameofExpression(Box::new(NameofExpressionChildren {
+                 nameof_target: ts.pop().unwrap(),
+                 nameof_keyword: ts.pop().unwrap(),
+                 
+             })),
              (SyntaxKind::FunctionCallExpression, 5) => SyntaxVariant::FunctionCallExpression(Box::new(FunctionCallExpressionChildren {
                  function_call_right_paren: ts.pop().unwrap(),
                  function_call_argument_list: ts.pop().unwrap(),
@@ -5045,6 +5066,7 @@ where
             SyntaxVariant::ConditionalExpression(x) => unsafe { std::slice::from_raw_parts(&x.conditional_test, 5) },
             SyntaxVariant::EvalExpression(x) => unsafe { std::slice::from_raw_parts(&x.eval_keyword, 4) },
             SyntaxVariant::IssetExpression(x) => unsafe { std::slice::from_raw_parts(&x.isset_keyword, 4) },
+            SyntaxVariant::NameofExpression(x) => unsafe { std::slice::from_raw_parts(&x.nameof_keyword, 2) },
             SyntaxVariant::FunctionCallExpression(x) => unsafe { std::slice::from_raw_parts(&x.function_call_receiver, 5) },
             SyntaxVariant::FunctionPointerExpression(x) => unsafe { std::slice::from_raw_parts(&x.function_pointer_receiver, 2) },
             SyntaxVariant::ParenthesizedExpression(x) => unsafe { std::slice::from_raw_parts(&x.parenthesized_expression_left_paren, 3) },
@@ -5235,6 +5257,7 @@ where
             SyntaxVariant::ConditionalExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.conditional_test, 5) },
             SyntaxVariant::EvalExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.eval_keyword, 4) },
             SyntaxVariant::IssetExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.isset_keyword, 4) },
+            SyntaxVariant::NameofExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.nameof_keyword, 2) },
             SyntaxVariant::FunctionCallExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.function_call_receiver, 5) },
             SyntaxVariant::FunctionPointerExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.function_pointer_receiver, 2) },
             SyntaxVariant::ParenthesizedExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.parenthesized_expression_left_paren, 3) },
@@ -6296,6 +6319,13 @@ pub struct IssetExpressionChildren<T, V> {
 
 #[derive(Debug, Clone)]
 #[repr(C)]
+pub struct NameofExpressionChildren<T, V> {
+    pub nameof_keyword: Syntax<T, V>,
+    pub nameof_target: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
+#[repr(C)]
 pub struct FunctionCallExpressionChildren<T, V> {
     pub function_call_receiver: Syntax<T, V>,
     pub function_call_type_args: Syntax<T, V>,
@@ -7049,6 +7079,7 @@ pub enum SyntaxVariant<T, V> {
     ConditionalExpression(Box<ConditionalExpressionChildren<T, V>>),
     EvalExpression(Box<EvalExpressionChildren<T, V>>),
     IssetExpression(Box<IssetExpressionChildren<T, V>>),
+    NameofExpression(Box<NameofExpressionChildren<T, V>>),
     FunctionCallExpression(Box<FunctionCallExpressionChildren<T, V>>),
     FunctionPointerExpression(Box<FunctionPointerExpressionChildren<T, V>>),
     ParenthesizedExpression(Box<ParenthesizedExpressionChildren<T, V>>),
@@ -8230,6 +8261,14 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     1 => Some(&x.isset_left_paren),
                     2 => Some(&x.isset_argument_list),
                     3 => Some(&x.isset_right_paren),
+                        _ => None,
+                    }
+                })
+            },
+            NameofExpression(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.nameof_keyword),
+                    1 => Some(&x.nameof_target),
                         _ => None,
                     }
                 })

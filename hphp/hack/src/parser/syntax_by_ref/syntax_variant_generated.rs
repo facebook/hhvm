@@ -134,6 +134,7 @@ pub enum SyntaxVariant<'a, T, V> {
     ConditionalExpression(&'a ConditionalExpressionChildren<'a, T, V>),
     EvalExpression(&'a EvalExpressionChildren<'a, T, V>),
     IssetExpression(&'a IssetExpressionChildren<'a, T, V>),
+    NameofExpression(&'a NameofExpressionChildren<'a, T, V>),
     FunctionCallExpression(&'a FunctionCallExpressionChildren<'a, T, V>),
     FunctionPointerExpression(&'a FunctionPointerExpressionChildren<'a, T, V>),
     ParenthesizedExpression(&'a ParenthesizedExpressionChildren<'a, T, V>),
@@ -1081,6 +1082,12 @@ pub struct IssetExpressionChildren<'a, T, V> {
     pub left_paren: Syntax<'a, T, V>,
     pub argument_list: Syntax<'a, T, V>,
     pub right_paren: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct NameofExpressionChildren<'a, T, V> {
+    pub keyword: Syntax<'a, T, V>,
+    pub target: Syntax<'a, T, V>,
 }
 
 #[derive(Debug, Clone)]

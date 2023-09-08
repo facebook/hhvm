@@ -804,6 +804,10 @@ struct
         isset_argument_list: t;
         isset_right_paren: t;
       }
+    | NameofExpression of {
+        nameof_keyword: t;
+        nameof_target: t;
+      }
     | FunctionCallExpression of {
         function_call_receiver: t;
         function_call_type_args: t;

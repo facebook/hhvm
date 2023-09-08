@@ -398,6 +398,9 @@ where S: SmartConstructors<State = St>,
     fn make_isset_expression(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output) -> Self::Output {
         compose(SyntaxKind::IssetExpression, self.s.make_isset_expression(arg0.1, arg1.1, arg2.1, arg3.1))
     }
+    fn make_nameof_expression(&mut self, arg0 : Self::Output, arg1 : Self::Output) -> Self::Output {
+        compose(SyntaxKind::NameofExpression, self.s.make_nameof_expression(arg0.1, arg1.1))
+    }
     fn make_function_call_expression(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output) -> Self::Output {
         compose(SyntaxKind::FunctionCallExpression, self.s.make_function_call_expression(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1))
     }

@@ -1545,6 +1545,15 @@ let schema : schema_node list =
         ];
     };
     {
+      kind_name = "NameofExpression";
+      type_name = "nameof_expression";
+      func_name = "nameof_expression";
+      description = "nameof_expression";
+      prefix = "nameof";
+      aggregates = [Expression];
+      fields = [("keyword", Token); ("target", Aggregate Expression)];
+    };
+    {
       kind_name = "FunctionCallExpression";
       type_name = "function_call_expression";
       func_name = "function_call_expression";

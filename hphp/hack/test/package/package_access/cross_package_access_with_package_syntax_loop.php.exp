@@ -21,7 +21,7 @@ cross_package_access_with_package_syntax_loop.php--modules.php:3:12
      4 | new module b.b1 {}  // package pkg2
      5 | new module d {}     // package pkg4
 
-../PACKAGES.toml:11:11
+PACKAGES.toml:11:11
      9 | includes = ["pkg1", "default"]
     10 | 
 [4] 11 | [packages.pkg3]

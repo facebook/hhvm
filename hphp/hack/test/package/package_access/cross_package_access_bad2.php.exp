@@ -19,7 +19,7 @@ cross_package_access_bad2.php--modules.php:4:12
      3 | new module b.b1 {}  // package pkg2 (include pkg1)
 [3]  4 | new module c {}     // package pkg3 (include pkg2)
 
-../PACKAGES.toml:11:11
+PACKAGES.toml:11:11
      9 | includes = ["pkg1", "default"]
     10 | 
 [4] 11 | [packages.pkg3]

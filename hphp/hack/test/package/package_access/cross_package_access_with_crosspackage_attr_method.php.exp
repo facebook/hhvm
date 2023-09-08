@@ -21,7 +21,7 @@ cross_package_access_with_crosspackage_attr_method.php--modules.php:2:12
     3 | new module b.b1 {} // package pkg2
     4 | new module c {} // package pkg3
 
-../PACKAGES.toml:3:11
+PACKAGES.toml:3:11
     1 | [packages]
     2 | 
 [4] 3 | [packages.pkg1]
@@ -51,7 +51,7 @@ cross_package_access_with_crosspackage_attr_method.php--modules.php:2:12
      3 | new module b.b1 {} // package pkg2
      4 | new module c {} // package pkg3
 
-../PACKAGES.toml:3:11
+PACKAGES.toml:3:11
      1 | [packages]
      2 | 
 [4]  3 | [packages.pkg1]

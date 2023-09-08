@@ -19,7 +19,7 @@ cross_package_access_bad_soft.php--modules.php:4:12
      3 | new module b.b1 {}  // package pkg2 (include pkg1)
 [3]  4 | new module d.a {} // package pkg4 (soft include pkg2)
 
-../PACKAGES.toml:15:11
+PACKAGES.toml:15:11
     13 | includes = ["pkg2", "default"]
     14 | 
 [4] 15 | [packages.pkg4]
@@ -48,7 +48,7 @@ cross_package_access_bad_soft.php--modules.php:4:12
      3 | new module b.b1 {}  // package pkg2 (include pkg1)
 [3]  4 | new module d.a {} // package pkg4 (soft include pkg2)
 
-../PACKAGES.toml:15:11
+PACKAGES.toml:15:11
     13 | includes = ["pkg2", "default"]
     14 | 
 [4] 15 | [packages.pkg4]

@@ -446,7 +446,6 @@ let equal_errors errors1 errors2 =
 type diagnostic_errors = errors SMap.t [@@deriving eq, show]
 
 type global_typecheck_kind =
-  | Blocking
   | Interruptible
   | Remote_blocking of string
 [@@deriving eq, show]

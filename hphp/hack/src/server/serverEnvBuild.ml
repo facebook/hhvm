@@ -63,7 +63,6 @@ let make_env ~init_id ~deps_mode config : ServerEnv.env =
     full_check_status = Full_check_done;
     changed_files = Relative_path.Set.empty;
     prechecked_files = Prechecked_files_disabled;
-    can_interrupt = true;
     interrupt_handlers = (fun _ _ -> []);
     nonpersistent_client_pending_command_needs_full_check = None;
     why_needs_server_type_check = ("init", "");

@@ -238,9 +238,6 @@ type env = {
   full_check_status: full_check_status;
   prechecked_files: prechecked_files_status;
   changed_files: Relative_path.Set.t;
-  can_interrupt: bool;
-      (** Not every caller of rechecks expects that they can be interrupted,
-          so making it opt-in by setting this flag at call site *)
   interrupt_handlers:
     genv ->
     env ->

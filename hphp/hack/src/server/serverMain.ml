@@ -431,7 +431,6 @@ let rec recheck_until_no_changes_left stats genv env select_outcome :
     (stats, env)
   else
     let check_kind_str = "Full_check" in
-    let env = { env with can_interrupt = true } in
     let needed_full_init = env.init_env.why_needed_full_check in
     let old_errorl = Errors.get_error_list env.errorl in
 
@@ -454,7 +453,6 @@ let rec recheck_until_no_changes_left stats genv env select_outcome :
     (* END OF HEAVY WORK *)
 
     (* Final telemetry and cleanup... *)
-    let env = { env with can_interrupt = true } in
     begin
       match (needed_full_init, env.init_env.why_needed_full_check) with
       | (Some needed_full_init, None) ->
@@ -910,16 +908,13 @@ let setup_interrupts env client_provider =
   {
     env with
     interrupt_handlers =
-      (fun genv env ->
+      (fun genv _env ->
         let { ServerLocalConfig.interrupt_on_watchman; interrupt_on_client; _ }
             =
           genv.local_config
         in
         let handlers = [] in
         let handlers =
-          let interrupt_on_watchman =
-            interrupt_on_watchman && env.can_interrupt
-          in
           match ServerNotifier.async_reader_opt genv.notifier with
           | Some reader when interrupt_on_watchman ->
             (Buffered_line_reader.get_fd reader, watchman_interrupt_handler genv)
@@ -927,7 +922,7 @@ let setup_interrupts env client_provider =
           | _ -> handlers
         in
         let handlers =
-          let interrupt_on_client = interrupt_on_client && env.can_interrupt in
+          let interrupt_on_client = interrupt_on_client in
           match ClientProvider.priority_fd client_provider with
           | Some fd when interrupt_on_client ->
             (fd, priority_client_interrupt_handler genv client_provider)

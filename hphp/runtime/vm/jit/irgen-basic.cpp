@@ -502,6 +502,10 @@ void emitLazyClass(IRGS& env, const StringData* name) {
   push(env, cns(env, LazyClassData::create(name)));
 }
 
+void emitEnumClassLabel(IRGS& env, const StringData* name) {
+  push(env, cns(env, make_tv<KindOfEnumClassLabel>(name)));
+}
+
 void emitString(IRGS& env, const StringData* s) { push(env, cns(env, s)); }
 void emitInt(IRGS& env, int64_t val)            { push(env, cns(env, val)); }
 void emitDouble(IRGS& env, double val)          { push(env, cns(env, val)); }

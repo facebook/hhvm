@@ -670,6 +670,7 @@ descriptions:
   ArrLike - denotes array, vec, dict, or keyset
   Class - denotes class pointer type
   LazyClass - denotes lazy class type
+  EnumClassLabel - denotes enum class label type
 
 Multiple type annotations may be combined together using the "|" symbol. For
 example, the type annotation "Int|Dbl" means that a value is either integer or
@@ -822,6 +823,7 @@ Vec <scalar vec id>                  []  ->  [C:Vec]
 Dict <scalar dict id>                []  ->  [C:Dict]
 Keyset <scalar keyset id>            []  ->  [C:Keyset]
 LazyClass <litstr id>                []  ->  [C:LazyClass]
+EnumClassLabel <litstr id>           []  ->  [C:EnumClassLabel]
 
   Push immediate. Pushes %1 onto the stack.
 

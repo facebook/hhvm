@@ -1100,6 +1100,7 @@ void dce(Env& env, const bc::PopU2&)         {
 void dce(Env& env, const bc::Int&)           { pushRemovable(env); }
 void dce(Env& env, const bc::String&)        { pushRemovable(env); }
 void dce(Env& env, const bc::LazyClass&)     { pushRemovable(env); }
+void dce(Env& env, const bc::EnumClassLabel&){ pushRemovable(env); }
 void dce(Env& env, const bc::Dict&)          { pushRemovable(env); }
 void dce(Env& env, const bc::Vec&)           { pushRemovable(env); }
 void dce(Env& env, const bc::Keyset&)        { pushRemovable(env); }

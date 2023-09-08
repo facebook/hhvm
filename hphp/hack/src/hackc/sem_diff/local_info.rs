@@ -129,6 +129,7 @@ impl LocalInfo {
             | Opcode::Double(..)
             | Opcode::Dup
             | Opcode::Enter(..)
+            | Opcode::EnumClassLabel(..)
             | Opcode::Eq
             | Opcode::Eval
             | Opcode::Exit

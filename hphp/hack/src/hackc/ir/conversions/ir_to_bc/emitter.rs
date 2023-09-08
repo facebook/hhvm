@@ -728,6 +728,10 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
                 Constant::Bool(false) => Opcode::False,
                 Constant::Bool(true) => Opcode::True,
                 Constant::Dir => Opcode::Dir,
+                Constant::EnumClassLabel(v) => {
+                    let s = self.strings.lookup_ffi_str(*v);
+                    Opcode::EnumClassLabel(s)
+                }
                 Constant::Float(v) => Opcode::Double(*v),
                 Constant::File => Opcode::File,
                 Constant::FuncCred => Opcode::FuncCred,

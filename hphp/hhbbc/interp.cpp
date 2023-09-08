@@ -89,6 +89,7 @@ bool poppable(Op op) {
     case Op::NewDictArray:
     case Op::NewCol:
     case Op::LazyClass:
+    case Op::EnumClassLabel:
       return true;
     default:
       return false;
@@ -4281,6 +4282,11 @@ void in(ISS& env, const bc::ResolveClass& op) {
 void in(ISS& env, const bc::LazyClass& op) {
   effect_free(env);
   push(env, lazyclsval(op.str1));
+}
+
+void in(ISS& env, const bc::EnumClassLabel& op) {
+  effect_free(env);
+  push(env, enumclasslabelval(op.str1));
 }
 
 void in(ISS& env, const bc::FCallObjMethodD& op) {

@@ -282,6 +282,8 @@ enum OutTypeConstraints {
   OutClsMethLike,       // For ResolveRClsMeth* instructions
   OutLazyClass,         // For lazy classes
 
+  OutEnumClassLabel,    // For enum class labels
+
   OutNone,
 };
 

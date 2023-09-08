@@ -266,6 +266,7 @@ where
             | Opcode::Div
             | Opcode::Double(..)
             | Opcode::Dup
+            | Opcode::EnumClassLabel(..)
             | Opcode::Eq
             | Opcode::Eval
             | Opcode::Exit

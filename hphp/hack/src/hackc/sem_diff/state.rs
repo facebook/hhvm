@@ -311,6 +311,7 @@ impl<'arena, 'a> State<'arena, 'a> {
                 | ref opcode @ Opcode::Dict(_)
                 | ref opcode @ Opcode::Dir
                 | ref opcode @ Opcode::Double(_)
+                | ref opcode @ Opcode::EnumClassLabel(..)
                 | ref opcode @ Opcode::False
                 | ref opcode @ Opcode::File
                 | ref opcode @ Opcode::FuncCred
@@ -1287,6 +1288,7 @@ fn is_checkpoint_instr(instr: &NodeInstr<'_>) -> bool {
             | Opcode::Dict(..)
             | Opcode::Dir
             | Opcode::Double(..)
+            | Opcode::EnumClassLabel(..)
             | Opcode::False
             | Opcode::File
             | Opcode::FuncCred
@@ -1706,6 +1708,7 @@ fn clean_opcode<'arena>(opcode: &Opcode<'arena>) -> Opcode<'arena> {
         | Opcode::ConcatN(_)
         | Opcode::ContCheck(_)
         | Opcode::Double(_)
+        | Opcode::EnumClassLabel(_)
         | Opcode::FCallFunc(_)
         | Opcode::Fatal(_)
         | Opcode::IncDecG(_)

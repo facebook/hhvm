@@ -161,6 +161,7 @@ Optional<Type> interpOutputType(IRGS& env,
     case OutClsMeth: return TClsMeth;
     case OutClsMethLike: return TClsMethLike;
     case OutLazyClass: return TLazyCls;
+    case OutEnumClassLabel: return TEnumClassLabel;
   }
   not_reached();
 }

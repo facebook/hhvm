@@ -336,6 +336,11 @@ impl Display for FmtConstant<'_, '_> {
             Constant::Array(tv) => write!(f, "array({})", FmtTypedValue(tv, strings)),
             Constant::Bool(b) => write!(f, "{b}"),
             Constant::Dir => write!(f, "dir"),
+            Constant::EnumClassLabel(value) => write!(
+                f,
+                "enum_class_label({})",
+                FmtQuotedStringId(*value, strings)
+            ),
             Constant::Float(value) => FmtFloat(value.to_f64()).fmt(f),
             Constant::File => write!(f, "file"),
             Constant::FuncCred => write!(f, "func_cred"),

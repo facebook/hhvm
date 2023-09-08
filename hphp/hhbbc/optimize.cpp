@@ -211,6 +211,7 @@ bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
   case Op::Double:
   case Op::String:
   case Op::LazyClass:
+  case Op::EnumClassLabel:
   case Op::Dict:
   case Op::Vec:
   case Op::Keyset:
@@ -790,6 +791,8 @@ Bytecode gen_constant(const TypedValue& cell) {
       return bc::Keyset { cell.m_data.parr };
     case KindOfLazyClass:
       return bc::LazyClass { cell.m_data.plazyclass.name() };
+    case KindOfEnumClassLabel:
+      return bc::EnumClassLabel { cell.m_data.pstr };
 
     case KindOfResource:
     case KindOfObject:
@@ -798,7 +801,6 @@ Bytecode gen_constant(const TypedValue& cell) {
     case KindOfClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
-    case KindOfEnumClassLabel: //TODO(T162042839): Implement this
       always_assert(0 && "invalid constant in gen_constant");
   }
   not_reached();

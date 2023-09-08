@@ -19,6 +19,7 @@ pub enum Constant<'a> {
     Array(Arc<TypedValue>),
     Bool(bool),
     Dir,
+    EnumClassLabel(UnitBytesId),
     File,
     Float(FloatBits),
     FuncCred,

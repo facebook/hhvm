@@ -295,6 +295,9 @@ fn cmp_constant(
             cmp_typed_value((a, a_strings), (b, b_strings)).qualified("array")?
         }
         (Constant::Bool(a), Constant::Bool(b)) => cmp_eq(a, b).qualified("bool")?,
+        (Constant::EnumClassLabel(a), Constant::EnumClassLabel(b)) => {
+            cmp_id(*a, *b).qualified("enum_class_label")?
+        }
         (Constant::Float(a), Constant::Float(b)) => cmp_eq(a, b).qualified("float")?,
         (Constant::Int(a), Constant::Int(b)) => cmp_eq(a, b).qualified("int")?,
         (Constant::Named(a), Constant::Named(b)) => cmp_eq(a, b).qualified("named")?,

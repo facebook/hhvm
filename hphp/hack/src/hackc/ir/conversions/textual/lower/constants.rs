@@ -150,6 +150,7 @@ fn sort_and_filter_constants(
         match constant {
             Constant::Bool(..)
             | Constant::Dir
+            | Constant::EnumClassLabel(..)
             | Constant::Float(..)
             | Constant::File
             | Constant::FuncCred
@@ -196,7 +197,9 @@ fn write_constant(builder: &mut FuncBuilder<'_>, cid: ConstantId) -> (ValueId, b
         | Constant::Uninit => unreachable!(),
 
         // Insert a tombstone which will be turned into a 'copy' later.
-        Constant::Array(_) | Constant::String(_) => (builder.emit(Instr::tombstone()), true),
+        Constant::Array(_) | Constant::String(_) | Constant::EnumClassLabel(_) => {
+            (builder.emit(Instr::tombstone()), true)
+        }
 
         Constant::Named(name) => {
             let id = ir::GlobalId::new(ir::ConstId::from_hhbc(*name, &builder.strings).id);

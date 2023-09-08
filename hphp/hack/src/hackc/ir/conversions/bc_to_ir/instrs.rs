@@ -1183,6 +1183,10 @@ fn convert_opcode<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) -> boo
             let s1 = Constant::String(ctx.strings.intern_bytes(value.as_ref()));
             Action::Constant(s1)
         }
+        Opcode::EnumClassLabel(value) => {
+            let s1 = Constant::EnumClassLabel(ctx.strings.intern_bytes(value.as_ref()));
+            Action::Constant(s1)
+        }
     };
 
     match action {

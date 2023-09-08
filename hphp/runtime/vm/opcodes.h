@@ -175,6 +175,7 @@ namespace HPHP {
                                        ONE(CV),         ONE(CV),    NF) \
   O(ResolveClass,    ONE(SA),          NOV,             ONE(CV),    NF) \
   O(LazyClass,       ONE(SA),          NOV,             ONE(CV),    NF) \
+  O(EnumClassLabel,  ONE(SA),          NOV,             ONE(CV),    NF) \
   O(NewObj,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(NewObjD,         ONE(SA),          NOV,             ONE(CV),    NF) \
   O(NewObjS,         ONE(OA(SpecialClsRef)),                            \

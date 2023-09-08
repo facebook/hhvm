@@ -107,6 +107,7 @@ static const struct {
   { OpDouble,      {None,             Stack1,       OutDouble       }},
   { OpString,      {None,             Stack1,       OutStringImm    }},
   { OpLazyClass,   {None,             Stack1,       OutLazyClass    }},
+  { OpEnumClassLabel, {None,          Stack1,       OutEnumClassLabel }},
   { OpDict,        {None,             Stack1,       OutDictImm      }},
   { OpKeyset,      {None,             Stack1,       OutKeysetImm    }},
   { OpVec,         {None,             Stack1,       OutVecImm       }},
@@ -982,6 +983,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::ResolveRClsMethodS:
   case Op::ResolveClass:
   case Op::LazyClass:
+  case Op::EnumClassLabel:
   case Op::False:
   case Op::File:
   case Op::FuncCred:

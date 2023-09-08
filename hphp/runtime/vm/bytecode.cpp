@@ -2206,6 +2206,11 @@ OPTBLD_INLINE void iopLazyClass(Id id) {
   vmStack().pushLazyClass(lclass);
 }
 
+OPTBLD_INLINE void iopEnumClassLabel(Id id) {
+  auto const label = vmfp()->unit()->lookupLitstrId(id);
+  vmStack().pushEnumClassLabel(label);
+}
+
 OPTBLD_INLINE void iopClassGetC() {
   auto const cell = vmStack().topC();
   if (isStringType(cell->m_type)) {

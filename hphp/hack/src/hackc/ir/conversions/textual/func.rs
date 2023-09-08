@@ -690,6 +690,7 @@ fn write_copy(state: &mut FuncState<'_, '_, '_>, iid: InstrId, vid: ValueId) -> 
                 Constant::Bool(false) => Expr::Const(Const::False),
                 Constant::Bool(true) => Expr::Const(Const::True),
                 Constant::Dir => todo!(),
+                Constant::EnumClassLabel(..) => todo!(),
                 Constant::File => todo!(),
                 Constant::Float(f) => Expr::Const(Const::Float(*f)),
                 Constant::FuncCred => todo!(),
@@ -1177,6 +1178,7 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
                         let s = util::escaped_string(&s);
                         hack::expr_builtin(Builtin::String, [s])
                     }
+                    Constant::EnumClassLabel(..) => textual_todo! { textual::Expr::null() },
                     Constant::Array(..) => textual_todo! { textual::Expr::null() },
                     Constant::Dir => textual_todo! { textual::Expr::null() },
                     Constant::Float(f) => hack::expr_builtin(Builtin::Float, [f.to_f64()]),

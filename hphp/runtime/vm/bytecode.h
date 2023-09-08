@@ -373,6 +373,14 @@ public:
   }
 
   ALWAYS_INLINE
+  void pushEnumClassLabel(const StringData* s) {
+    assertx(s->isStatic()); // No need to call s->incRefCount().
+    assertx(m_top != m_elms);
+    m_top--;
+    *m_top = make_tv<KindOfEnumClassLabel>(s);
+  }
+
+  ALWAYS_INLINE
   void pushArrayLikeNoRc(ArrayData* a) {
     assertx(m_top != m_elms);
     m_top--;

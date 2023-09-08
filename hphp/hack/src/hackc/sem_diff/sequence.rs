@@ -222,6 +222,7 @@ fn is_cow_instr(instr: &NodeInstr<'_>) -> bool {
             Opcode::Dict(..)
             | Opcode::Dir
             | Opcode::Double(..)
+            | Opcode::EnumClassLabel(..)
             | Opcode::False
             | Opcode::File
             | Opcode::FuncCred

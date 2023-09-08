@@ -164,6 +164,8 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
 
 class type ['a] locl_type_visitor_type =
   object
+    method on_type : 'a -> locl_ty -> 'a
+
     method on_tany : 'a -> Reason.t -> 'a
 
     method on_tnonnull : 'a -> Reason.t -> 'a
@@ -175,8 +177,6 @@ class type ['a] locl_type_visitor_type =
     method on_tprim : 'a -> Reason.t -> Aast.tprim -> 'a
 
     method on_tvar : 'a -> Reason.t -> Ident.t -> 'a
-
-    method on_type : 'a -> locl_ty -> 'a
 
     method on_tfun : 'a -> Reason.t -> locl_fun_type -> 'a
 

@@ -17,6 +17,10 @@ val fresh_env : 'env -> 'env
 
 class type ['env] type_mapper_type =
   object
+    method on_type : 'env -> Typing_defs.locl_ty -> 'env * Typing_defs.locl_ty
+
+    method on_reason : 'env -> Typing_reason.t -> 'env * Typing_reason.t
+
     method on_tvar :
       'env -> Typing_reason.t -> int -> 'env * Typing_defs.locl_ty
 
@@ -117,8 +121,6 @@ class type ['env] type_mapper_type =
       Typing_reason.t ->
       Typing_defs.neg_type ->
       'env * Typing_defs.locl_ty
-
-    method on_type : 'env -> Typing_defs.locl_ty -> 'env * Typing_defs.locl_ty
 
     method on_locl_ty_list :
       'env -> Typing_defs.locl_ty list -> 'env * Typing_defs.locl_ty list

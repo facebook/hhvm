@@ -14,13 +14,17 @@ open Hh_prelude
 [@@@warning "+33"]
 
 open Common
-open Typing_defs
+open Typing_defs_core
 module Reason = Typing_reason
 
 let fresh_env env = env
 
 class type ['env] type_mapper_type =
   object
+    method on_type : 'env -> locl_ty -> 'env * locl_ty
+
+    method on_reason : 'env -> Reason.t -> 'env * Reason.t
+
     method on_tvar : 'env -> Reason.t -> int -> 'env * locl_ty
 
     method on_tnonnull : 'env -> Reason.t -> 'env * locl_ty
@@ -64,8 +68,6 @@ class type ['env] type_mapper_type =
     method on_taccess : 'env -> Reason.t -> locl_ty -> pos_id -> 'env * locl_ty
 
     method on_neg_type : 'env -> Reason.t -> neg_type -> 'env * locl_ty
-
-    method on_type : 'env -> locl_ty -> 'env * locl_ty
 
     method on_locl_ty_list : 'env -> locl_ty list -> 'env * locl_ty list
   end
@@ -124,8 +126,11 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
 
     method on_neg_type env r p = (env, mk (r, Tneg p))
 
+    method on_reason env r = (env, r)
+
     method on_type env ty =
       let (r, ty) = deref ty in
+      let (env, r) = this#on_reason env r in
       match ty with
       | Tvar n -> this#on_tvar env r n
       | Tnonnull -> this#on_tnonnull env r
@@ -175,7 +180,7 @@ class virtual ['env] tvar_expanding_type_mapper =
   object (this)
     method on_tvar (env, expand) r n =
       let (env, ty) = expand env r n in
-      if is_tyvar ty then
+      if Typing_defs.is_tyvar ty then
         ((env, expand), ty)
       else
         this#on_type (env, expand) ty
@@ -198,7 +203,7 @@ class virtual ['env] tvar_substituting_type_mapper =
         (r : Reason.t)
         (n : int) =
       let (env, ty) = expand env r n in
-      if is_tyvar ty then
+      if Typing_defs.is_tyvar ty then
         (env, ty)
       else
         let ((env, _expand, add), ty) = this#on_type (env, expand, add) ty in
@@ -236,14 +241,96 @@ class ['env] deep_type_mapper =
       let (env, ty) = this#on_type env ty in
       (env, mk (r, Toption ty))
 
-    method! on_tfun env r ft =
-      let on_param env param =
-        let (env, ty) = this#on_possibly_enforced_ty env param.fp_type in
-        (env, { param with fp_type = ty })
+    method private on_tparam env tparam =
+      let {
+        tp_variance;
+        tp_name;
+        tp_tparams;
+        tp_constraints;
+        tp_reified;
+        tp_user_attributes;
+      } =
+        tparam
       in
-      let (env, params) = List.map_env env ft.ft_params ~f:on_param in
-      let (env, ret) = this#on_possibly_enforced_ty env ft.ft_ret in
-      (env, mk (r, Tfun { ft with ft_params = params; ft_ret = ret }))
+      let (env, tp_tparams) = List.map_env env tp_tparams ~f:this#on_tparam in
+      let (env, tp_constraints) =
+        List.map_env env tp_constraints ~f:(fun env (cstr, ty) ->
+            let (env, ty) = this#on_type env ty in
+            (env, (cstr, ty)))
+      in
+      let tparam =
+        {
+          tp_variance;
+          tp_name;
+          tp_tparams;
+          tp_constraints;
+          tp_reified;
+          tp_user_attributes;
+        }
+      in
+      (env, tparam)
+
+    method private on_where_constraint env cstr =
+      let (ty1, kind, ty2) = cstr in
+      let (env, ty1) = this#on_type env ty1 in
+      let (env, ty2) = this#on_type env ty2 in
+      let cstr = (ty1, kind, ty2) in
+      (env, cstr)
+
+    method private on_param env param =
+      let { fp_pos; fp_name; fp_type; fp_flags } = param in
+      let (env, fp_type) = this#on_possibly_enforced_ty env fp_type in
+      let param = { fp_pos; fp_name; fp_type; fp_flags } in
+      (env, param)
+
+    method private on_capability env c =
+      match c with
+      | CapDefaults p -> (env, CapDefaults p)
+      | CapTy ty ->
+        let (env, ty) = this#on_type env ty in
+        (env, CapTy ty)
+
+    method private on_fun_implicit_params env p =
+      let { capability } = p in
+      let (env, capability) = this#on_capability env capability in
+      let p = { capability } in
+      (env, p)
+
+    method! on_tfun env r ft =
+      let {
+        ft_tparams;
+        ft_where_constraints;
+        ft_params;
+        ft_implicit_params;
+        ft_ret;
+        ft_flags;
+        ft_ifc_decl;
+        ft_cross_package;
+      } =
+        ft
+      in
+      let (env, ft_tparams) = List.map_env env ft_tparams ~f:this#on_tparam in
+      let (env, ft_where_constraints) =
+        List.map_env env ft_where_constraints ~f:this#on_where_constraint
+      in
+      let (env, ft_params) = List.map_env env ft_params ~f:this#on_param in
+      let (env, ft_implicit_params) =
+        this#on_fun_implicit_params env ft_implicit_params
+      in
+      let (env, ft_ret) = this#on_possibly_enforced_ty env ft_ret in
+      let ft =
+        {
+          ft_tparams;
+          ft_where_constraints;
+          ft_params;
+          ft_implicit_params;
+          ft_ret;
+          ft_flags;
+          ft_ifc_decl;
+          ft_cross_package;
+        }
+      in
+      (env, mk (r, Tfun ft))
 
     method! on_tnewtype env r x tyl cstr =
       let (env, tyl) = List.map_env env tyl ~f:this#on_type in
@@ -258,19 +345,34 @@ class ['env] deep_type_mapper =
       let (env, tyl) = this#on_locl_ty_list env tyl in
       (env, mk (r, Tclass (x, e, tyl)))
 
-    method! on_tshape
-        env r { s_origin = _; s_unknown_value = shape_kind; s_fields = fdm } =
-      let (env, fdm) = ShapeFieldMap.map_env this#on_type env fdm in
-      ( env,
-        mk
-          ( r,
-            Tshape
-              {
-                s_origin = Missing_origin;
-                s_unknown_value = shape_kind;
-                (* TODO(shapes) this#on_type env shape_kind? *)
-                s_fields = fdm;
-              } ) )
+    method private on_shape_field_type
+        env (_sfn : tshape_field_name) (sft : locl_phase shape_field_type) =
+      let { sft_optional; sft_ty } = sft in
+      let (env, sft_ty) = this#on_type env sft_ty in
+      let sft = { sft_optional; sft_ty } in
+      (env, sft)
+
+    method! on_tshape env r sh =
+      let { s_origin; s_unknown_value; s_fields } = sh in
+      let (env, s_unknown_value) = this#on_type env s_unknown_value in
+      let (env, s_fields) =
+        TShapeMap.map_env this#on_shape_field_type env s_fields
+      in
+      let sh = { s_origin; s_unknown_value; s_fields } in
+      (env, mk (r, Tshape sh))
+
+    method! on_tvec_or_dict env r ty1 ty2 =
+      let (env, ty1) = this#on_type env ty1 in
+      let (env, ty2) = this#on_type env ty2 in
+      (env, mk (r, Tvec_or_dict (ty1, ty2)))
+
+    method! on_taccess env r ty id =
+      let (env, ty) = this#on_type env ty in
+      (env, mk (r, Taccess (ty, id)))
+
+    method! on_tgeneric env r name args =
+      let (env, args) = this#on_locl_ty_list env args in
+      (env, mk (r, Tgeneric (name, args)))
 
     method private on_opt_type env x =
       match x with
@@ -279,7 +381,8 @@ class ['env] deep_type_mapper =
         let (env, x) = this#on_type env x in
         (env, Some x)
 
-    method private on_possibly_enforced_ty env x =
+    method private on_possibly_enforced_ty
+        env (x : locl_ty possibly_enforced_ty) =
       let (env, et_type) = this#on_type env x.et_type in
       (env, { x with et_type })
   end

@@ -59,7 +59,6 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | LINT_ALL _ -> false
   | FORMAT _ -> false
   | DUMP_FULL_FIDELITY_PARSE _ -> false
-  | OUTLINE _ -> false
   | RAGE -> false
   | CST_SEARCH _ -> false
   | CHECK_LIVENESS -> false

@@ -409,7 +409,6 @@ type _ t =
   | STATS : Stats.t t
   | FORMAT : ServerFormatTypes.action -> ServerFormatTypes.result t
   | DUMP_FULL_FIDELITY_PARSE : string -> string t
-  | OUTLINE : string -> Outline.outline t
   | RAGE : ServerRageTypes.result t
   | CST_SEARCH : cst_search_input -> (Hh_json.json, string) result t
   | NO_PRECHECKED_FILES : unit t

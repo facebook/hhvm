@@ -36,7 +36,6 @@ let debug_describe_t : type a. a t -> string = function
   | STATS -> "STATS"
   | FORMAT _ -> "FORMAT"
   | DUMP_FULL_FIDELITY_PARSE _ -> "DUMP_FULL_FIDELITY_PARSE"
-  | OUTLINE _ -> "OUTLINE"
   | RAGE -> "RAGE"
   | CST_SEARCH _ -> "CST_SEARCH"
   | NO_PRECHECKED_FILES -> "NO_PRECHECKED_FILES"

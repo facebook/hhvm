@@ -332,11 +332,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     in
     (env, ServerFormat.go ~content from to_ legacy_format_options)
   | DUMP_FULL_FIDELITY_PARSE file -> (env, FullFidelityParseService.go file)
-  | OUTLINE path ->
-    ( env,
-      ServerCommandTypes.FileName path
-      |> ServerFileSync.get_file_content
-      |> FileOutline.outline env.popt )
   | RAGE -> (env, ServerRage.go genv env)
   | CST_SEARCH { sort_results; input; files_to_search } -> begin
     try

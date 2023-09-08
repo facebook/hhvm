@@ -551,7 +551,7 @@ static xmlNodePtr master_to_xml_int(encodePtr encode, const Variant& data, int s
   bool add_type = false;
 
   /* Special handling of class SoapVar */
-  if (data.isObject() && data.toObject().instanceof(SoapVar::getClass())) {
+  if (data.isObject() && data.toObject().instanceof(SoapVar::classof())) {
     auto dobj = data.toObject().get();
     auto enc_stype = SoapVar::getEncSType(dobj);
     auto enc_ns = SoapVar::getEncNS(dobj);
@@ -2686,7 +2686,7 @@ static Variant guess_zval_convert(encodeType* type, xmlNodePtr data) {
   }
   ret = master_to_zval_int(enc, data);
   if (SOAP_GLOBAL(sdl) && type_name && enc->details.sdl_type) {
-    Object obj{SoapVar::getClass()};
+    Object obj{SoapVar::classof()};
     SoapVar::setEncType(obj.get(), enc->details.type);
     SoapVar::setEncValue(obj.get(), ret);
 
@@ -3292,7 +3292,7 @@ static encodePtr get_array_type(xmlNodePtr node, const Variant& array,
   ArrayIter iter(ht);
   for (i = 0;i < count;i++) {
     Variant tmp = iter.second();
-    if (tmp.isObject() && tmp.toObject().instanceof(SoapVar::getClass())) {
+    if (tmp.isObject() && tmp.toObject().instanceof(SoapVar::classof())) {
       auto svobj = tmp.toObject().get();
       cur_type = SoapVar::getEncType(svobj);
       auto enc_stype = SoapVar::getEncSType(svobj);

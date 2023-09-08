@@ -10,9 +10,8 @@
 
 namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
-extern const StaticString s_EncodingDetector;
 
-struct EncodingDetector : IntlError {
+struct EncodingDetector : IntlError, SystemLib::ClassLoader<"EncodingDetector"> {
   EncodingDetector() = default;
   EncodingDetector(const EncodingDetector&) = delete;
   EncodingDetector& operator=(const EncodingDetector& /*src*/) = delete;
@@ -21,7 +20,7 @@ struct EncodingDetector : IntlError {
   bool isValid() const { return true; }
 
   static EncodingDetector* Get(ObjectData* obj) {
-    return GetData<EncodingDetector>(obj, s_EncodingDetector);
+    return GetData<EncodingDetector>(obj, className());
   }
 
   const String& text() const { return m_text; }
@@ -44,9 +43,7 @@ struct EncodingDetector : IntlError {
 
 /////////////////////////////////////////////////////////////////////////////
 
-extern const StaticString s_EncodingMatch;
-
-struct EncodingMatch : IntlError {
+struct EncodingMatch : IntlError, SystemLib::ClassLoader<"EncodingMatch"> {
   EncodingMatch() {}
   EncodingMatch(const EncodingMatch&) = delete;
   EncodingMatch& operator=(const EncodingMatch& src) {
@@ -60,7 +57,7 @@ struct EncodingMatch : IntlError {
                             const std::shared_ptr<UCharsetDetector>& det,
                             const String& text,
                             const String& declaredEncoding) {
-    Object ret{SystemLib::classLoad(s_EncodingMatch.get(), c_EncodingMatch)};
+    Object ret{classof()};
     auto const data = Native::data<EncodingMatch>(ret);
     data->m_match = const_cast<UCharsetMatch*>(match);
     data->m_encodingDetector = det;
@@ -70,7 +67,7 @@ struct EncodingMatch : IntlError {
   }
 
   static EncodingMatch* Get(ObjectData* obj) {
-    return GetData<EncodingMatch>(obj, s_EncodingMatch);
+    return GetData<EncodingMatch>(obj, className());
   }
 
   bool isValid() const {
@@ -86,7 +83,6 @@ struct EncodingMatch : IntlError {
   // m_text and m_declaredEncoding are used by m_encodingDetector
   String m_text;
   String m_declaredEncoding;
-  static Class* c_EncodingMatch;
 };
 
 /////////////////////////////////////////////////////////////////////////////

@@ -24,9 +24,9 @@
 
 namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
-extern const StaticString s_IntlDateFormatter;
 
-struct IntlDateFormatter : IntlError {
+struct IntlDateFormatter : IntlError,
+                           SystemLib::ClassLoader<"IntlDateFormatter"> {
   IntlDateFormatter() {}
   IntlDateFormatter(const IntlDateFormatter&) = delete;
   IntlDateFormatter& operator=(const IntlDateFormatter& src) {
@@ -51,11 +51,10 @@ struct IntlDateFormatter : IntlError {
   }
 
   static Object newInstance() {
-    return Object{ SystemLib::classLoad(s_IntlDateFormatter.get(),
-                                        c_IntlDateFormatter) };
+    return Object{ classof() };
   }
   static IntlDateFormatter* Get(ObjectData* obj) {
-    return GetData<IntlDateFormatter>(obj, s_IntlDateFormatter);
+    return GetData<IntlDateFormatter>(obj, className());
   }
 
   // Zend seems to think casting UDateFormat* to icu::DateFormat*
@@ -75,8 +74,6 @@ struct IntlDateFormatter : IntlError {
   int64_t m_date_type;
   int64_t m_time_type;
   int64_t m_calendar;
-
-  static Class* c_IntlDateFormatter;
 };
 
 /////////////////////////////////////////////////////////////////////////////

@@ -379,9 +379,9 @@ SSATmp* emitClosureParentScope(IRGS& env, const Func* f, SSATmp* prologueCtx) {
 
 SSATmp* emitGeneratorThis(IRGS& env, const Func* f, SSATmp* prologueCtx) {
   assertx(f->isMethod() && !f->isStatic() && f->implCls() &&
-          (f->implCls() == AsyncGenerator::getClass() ||
-           f->implCls() == Generator::getClass()));
-  auto const isAsync = f->implCls()->classof(AsyncGenerator::getClass());
+          (f->implCls() == AsyncGenerator::classof() ||
+           f->implCls() == Generator::classof()));
+  auto const isAsync = f->implCls()->classof(AsyncGenerator::classof());
   auto const genObj = prologueCtx;
   return cond(
     env,

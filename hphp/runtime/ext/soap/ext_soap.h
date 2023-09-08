@@ -22,7 +22,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct SoapServer {
+struct SoapServer : SystemLib::ClassLoader<"SoapServer"> {
   SoapServer();
 
   int                        m_type;
@@ -39,13 +39,11 @@ struct SoapServer {
   int                        m_features;
   Array                      m_soap_headers;
   int                        m_send_errors;
-
-  static const StaticString  s_className;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct SoapClient {
+struct SoapClient : SystemLib::ClassLoader<"SoapClient"> {
   SoapClient();
 
   int                         m_soap_version;
@@ -86,8 +84,6 @@ struct SoapClient {
   Variant                     m_last_response_headers;
 
   Array                       m_stream_context_options;
-
-  static const StaticString   s_className;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -96,9 +92,7 @@ extern const StaticString
   s_enc_type, s_enc_value, s_enc_stype,
   s_enc_ns, s_enc_name, s_enc_namens;
 
-struct SoapVar {
-  static Class* getClass();
-
+struct SoapVar : SystemLib::ClassLoader<"SoapVar"> {
   static int64_t getEncType(ObjectData* obj) {
     auto enc_type = obj->o_get(s_enc_type, false);
     if (!enc_type.isInitialized()) {
@@ -149,36 +143,23 @@ struct SoapVar {
       return String();
     }
   }
-
-  static Class*               s_class;
-  static const StaticString   s_className;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct SoapParam {
-  static Class* getClass();
-
+struct SoapParam : SystemLib::ClassLoader<"SoapParam"> {
   String                      m_name;
   String                      m_data;
-
-  static Class*               s_class;
-  static const StaticString   s_className;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct SoapHeader {
-  static Class* getClass();
-
+struct SoapHeader : SystemLib::ClassLoader<"SoapHeader"> {
   String                      m_namespace;
   String                      m_name;
   Variant                     m_data;
   bool                        m_mustUnderstand;
   Variant                     m_actor;
-
-  static Class*               s_class;
-  static const StaticString   s_className;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

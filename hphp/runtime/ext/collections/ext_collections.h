@@ -22,13 +22,6 @@ namespace collections {
 
 
 #define DECLARE_COLLECTIONS_CLASS_NOCTOR(name)              \
-  static Class* s_cls;                                      \
-  static StaticString s_clsName;                            \
-                                                            \
-  static Class* classof() {                                 \
-    return SystemLib::classLoad(s_clsName.get(), s_cls);    \
-  }                                                         \
-                                                            \
   static void instanceDtor(ObjectData* obj, const Class*) { \
     assertx(obj->getVMClass() == c_##name::classof());      \
     auto coll = static_cast<c_##name*>(obj);                \

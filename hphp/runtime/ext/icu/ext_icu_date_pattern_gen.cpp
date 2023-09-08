@@ -7,8 +7,6 @@ namespace HPHP::Intl {
 
 const StaticString s_IntlDatePatternGenerator("IntlDatePatternGenerator");
 
-Class* IntlDatePatternGenerator::c_IntlDatePatternGenerator = nullptr;
-
 #define GENERATOR_GET(dest, src) \
   auto dest = IntlDatePatternGenerator::Get(src); \
   if (!dest) { \
@@ -374,8 +372,7 @@ void IntlExtension::initDatePatternGenerator() {
   HHVM_ME(IntlDatePatternGenerator, getErrorCode);
   HHVM_ME(IntlDatePatternGenerator, getErrorMessage);
 
-  auto gen = s_IntlDatePatternGenerator.get();
-  Native::registerNativeDataInfo<IntlDatePatternGenerator>(gen);
+  Native::registerNativeDataInfo<IntlDatePatternGenerator>();
 }
 
 //////////////////////////////////////////////////////////////////////////////

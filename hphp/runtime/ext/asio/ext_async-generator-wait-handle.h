@@ -47,8 +47,11 @@ namespace HPHP {
  */
 struct AsyncGenerator;
 
-struct c_AsyncGeneratorWaitHandle final : c_ResumableWaitHandle {
-  WAITHANDLE_CLASSOF(AsyncGeneratorWaitHandle);
+struct c_AsyncGeneratorWaitHandle final :
+    c_ResumableWaitHandle,
+    SystemLib::ClassLoader<"HH\\AsyncGeneratorWaitHandle"> {
+  using SystemLib::ClassLoader<"HH\\AsyncGeneratorWaitHandle">::classof;
+  using SystemLib::ClassLoader<"HH\\AsyncGeneratorWaitHandle">::className;
   WAITHANDLE_DTOR(AsyncGeneratorWaitHandle);
 
   c_AsyncGeneratorWaitHandle(AsyncGenerator* gen, c_WaitableWaitHandle* child);

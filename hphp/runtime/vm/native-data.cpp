@@ -51,12 +51,12 @@ size_t ndsize(size_t dataSize, size_t nMemoSlots) {
 
 size_t ndsize(const ObjectData* obj, const NativeDataInfo* ndi) {
   auto cls = obj->getVMClass();
-  if (cls == Generator::getClass()) {
+  if (cls == Generator::classof()) {
     assertx(!cls->hasMemoSlots());
     return Native::data<Generator>(obj)->resumable()->size() -
            sizeof(ObjectData);
   }
-  if (cls == AsyncGenerator::getClass()) {
+  if (cls == AsyncGenerator::classof()) {
     assertx(!cls->hasMemoSlots());
     return Native::data<AsyncGenerator>(obj)->resumable()->size() -
            sizeof(ObjectData);

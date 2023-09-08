@@ -28,7 +28,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // class DateTime
 
-struct DateTimeData {
+struct DateTimeData : SystemLib::ClassLoader<"DateTime"> {
   DateTimeData() {}
   DateTimeData(const DateTimeData&) = delete;
   DateTimeData& operator=(const DateTimeData& other) {
@@ -56,11 +56,8 @@ struct DateTimeData {
   static int compare(const ObjectData* left, const ObjectData* right);
   static Object wrap(req::ptr<DateTime> dt);
   static req::ptr<DateTime> unwrap(const Object& datetime);
-  static Class* getClass();
 
   req::ptr<DateTime> m_dt;
-  static Class* s_class;
-  static const StaticString s_className;
 };
 
 void HHVM_METHOD(DateTime, __construct,
@@ -70,7 +67,7 @@ void HHVM_METHOD(DateTime, __construct,
 ///////////////////////////////////////////////////////////////////////////////
 // class DateTimeZone
 
-struct DateTimeZoneData {
+struct DateTimeZoneData : SystemLib::ClassLoader<"DateTimeZone"> {
   DateTimeZoneData() {}
   DateTimeZoneData(const DateTimeZoneData&) = delete;
   DateTimeZoneData& operator=(const DateTimeZoneData& other) {
@@ -87,11 +84,8 @@ struct DateTimeZoneData {
 
   static Object wrap(req::ptr<TimeZone> tz);
   static req::ptr<TimeZone> unwrap(const Object& timezone);
-  static Class* getClass();
 
   req::ptr<TimeZone> m_tz;
-  static Class* s_class;
-  static const StaticString s_className;
 
   static const int64_t AFRICA = 1;
   static const int64_t AMERICA = 2;
@@ -115,7 +109,7 @@ void HHVM_METHOD(DateTimeZone, __construct,
 ///////////////////////////////////////////////////////////////////////////////
 // class DateInterval
 
-struct DateIntervalData {
+struct DateIntervalData : SystemLib::ClassLoader<"DateInterval"> {
   DateIntervalData() {}
   DateIntervalData(const DateIntervalData&) = delete;
   DateIntervalData& operator=(const DateIntervalData& other) {
@@ -126,11 +120,8 @@ struct DateIntervalData {
 
   static Object wrap(req::ptr<DateInterval> di);
   static req::ptr<DateInterval> unwrap(const Object& di);
-  static Class* getClass();
 
   req::ptr<DateInterval> m_di;
-  static Class* s_class;
-  static const StaticString s_className;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

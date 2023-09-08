@@ -34,8 +34,11 @@ struct ObjectData;
  * execution of PHP code that can be resumed once the result of awaited
  * WaitHandle becomes available.
  */
-struct c_ResumableWaitHandle : c_WaitableWaitHandle {
-  WAITHANDLE_CLASSOF(ResumableWaitHandle);
+struct c_ResumableWaitHandle :
+    c_WaitableWaitHandle,
+    SystemLib::ClassLoader<"HH\\ResumableWaitHandle"> {
+  using SystemLib::ClassLoader<"HH\\ResumableWaitHandle">::classof;
+  using SystemLib::ClassLoader<"HH\\ResumableWaitHandle">::className;
   WAITHANDLE_DTOR(ResumableWaitHandle);
 
   explicit c_ResumableWaitHandle(Class* cls, HeaderKind kind,

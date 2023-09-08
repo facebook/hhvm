@@ -22,8 +22,6 @@
 
 namespace HPHP {
 
-HPHP::Class* GMP::s_cls = nullptr;
-
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 static String mpzToString(mpz_t gmpData, const int64_t base) {
@@ -40,7 +38,7 @@ static String mpzToString(mpz_t gmpData, const int64_t base) {
 
 
 static Object mpzToGMPObject(mpz_t gmpData) {
-  Object ret(GMP::allocObject());
+  Object ret(GMPData::allocObject());
 
   auto data = Native::data<GMPData>(ret);
   data->setGMPMpz(gmpData);
@@ -113,7 +111,7 @@ static bool variantToGMPData(const char* const fnCaller,
 
   case KindOfObject: {
     Object gmpObject = data.toObject();
-    if (!gmpObject.instanceof(s_GMP_GMP)) {
+    if (!gmpObject.instanceof(GMPData::classof())) {
       raise_warning(cs_GMP_INVALID_OBJECT, fnCaller);
       return false;
     }
@@ -256,7 +254,7 @@ static void HHVM_FUNCTION(gmp_clrbit,
   }
 
   Object gmpObject = data.toObject();
-  if (!gmpObject.instanceof(s_GMP_GMP)) {
+  if (!gmpObject.instanceof(GMPData::classof())) {
     raise_warning(cs_GMP_INVALID_OBJECT, "gmp_clrbit");
     return;
   }
@@ -666,7 +664,7 @@ static int64_t HHVM_FUNCTION(gmp_intval,
   if (data.isArray()
       || data.isResource()
       || (data.isString() && data.toString().empty())
-      || (data.isObject() && !data.toObject().instanceof(s_GMP_GMP))
+      || (data.isObject() && !data.toObject().instanceof(GMPData::classof()))
       || !variantToGMPData("gmp_intval", gmpData, data)) {
     return data.toInt64();
   }
@@ -1126,7 +1124,7 @@ static void HHVM_FUNCTION(gmp_setbit,
   }
 
   Object gmpObject = data.toObject();
-  if (!gmpObject.instanceof(s_GMP_GMP)) {
+  if (!gmpObject.instanceof(GMPData::classof())) {
     raise_warning(cs_GMP_INVALID_OBJECT, "gmp_setbit");
     return;
   }
@@ -1454,7 +1452,7 @@ struct GMPExtension final : Extension {
     HHVM_FE(gmp_testbit);
     HHVM_FE(gmp_xor);
 
-    Native::registerNativeDataInfo<GMPData>(s_GMP_GMP.get());
+    Native::registerNativeDataInfo<GMPData>();
     HHVM_ME(GMP, serialize);
     HHVM_ME(GMP, unserialize);
     HHVM_ME(GMP, __debugInfo);

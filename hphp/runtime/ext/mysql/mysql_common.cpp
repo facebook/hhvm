@@ -605,11 +605,11 @@ Variant php_mysql_do_connect_with_ssl(
 
   if (!sslContextProvider.isNull()) {
     auto ctx = sslContextProvider.toObject();
-    if (!ctx.instanceof(MySSLContextProvider::s_className)) {
+    if (!ctx.instanceof(MySSLContextProvider::className())) {
        SystemLib::throwInvalidArgumentExceptionObject(
          folly::sformat(
            "Invalid argument. Expected {}, received {}",
-           MySSLContextProvider::s_className,
+           MySSLContextProvider::className(),
            ctx->getClassName().c_str()
          )
        );

@@ -9,9 +9,9 @@
 
 namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
-extern const StaticString s_IntlBreakIterator, s_IntlCodePointBreakIterator;
 
-struct IntlBreakIterator : IntlError {
+struct IntlBreakIterator : IntlError,
+                           SystemLib::ClassLoader<"IntlBreakIterator"> {
   IntlBreakIterator() {}
   IntlBreakIterator(const IntlBreakIterator&) = delete;
   IntlBreakIterator& operator=(const IntlBreakIterator& src) {
@@ -37,21 +37,11 @@ struct IntlBreakIterator : IntlError {
   }
 
   static IntlBreakIterator* Get(ObjectData* obj) {
-    return GetData<IntlBreakIterator>(obj, s_IntlBreakIterator);
+    return GetData<IntlBreakIterator>(obj, className());
   }
 
   static Object newInstance(icu::BreakIterator* bi = nullptr) {
-    Object obj{ SystemLib::classLoad(s_IntlBreakIterator.get(),
-                                     c_IntlBreakIterator) };
-    if (bi) {
-      Native::data<IntlBreakIterator>(obj)->setBreakIterator(bi);
-    }
-    return obj;
-  }
-
-  static Object newCodePointInstance(CodePointBreakIterator* bi = nullptr) {
-    Object obj{ SystemLib::classLoad(s_IntlCodePointBreakIterator.get(),
-                                     c_IntlCodePointBreakIterator) };
+    Object obj{ classof() };
     if (bi) {
       Native::data<IntlBreakIterator>(obj)->setBreakIterator(bi);
     }
@@ -102,9 +92,12 @@ struct IntlBreakIterator : IntlError {
   std::string m_text;
   UText *m_uText{nullptr};
   bool m_started{false};
+};
 
-  static Class* c_IntlBreakIterator;
-  static Class* c_IntlCodePointBreakIterator;
+struct IntlCodePointBreakIterator :
+  SystemLib::ClassLoader<"IntlCodePointBreakIterator"> {
+
+  static Object newInstance(CodePointBreakIterator* bi = nullptr);
 };
 
 

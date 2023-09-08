@@ -69,8 +69,6 @@ SrcKey getAsyncFrame(AsyncFrameId id) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-WAITHANDLE_CLASSOF_IMPL(AsyncFunctionWaitHandle)
-
 bool c_AsyncFunctionWaitHandle::hasTailFrames() const {
   return tailFrame(kNumTailFrames - 1) != kInvalidAsyncFrameId;
 }
@@ -369,7 +367,7 @@ Offset c_AsyncFunctionWaitHandle::getNextExecutionOffset() {
 
 void AsioExtension::initAsyncFunctionWaitHandle() {
   Native::registerClassExtraDataHandler(
-    c_AsyncFunctionWaitHandle::s_clsName,
+    c_AsyncFunctionWaitHandle::className(),
     finish_class<c_AsyncFunctionWaitHandle>);
 }
 

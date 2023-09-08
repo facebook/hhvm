@@ -67,11 +67,6 @@ struct DateGlobals {
 };
 RDS_LOCAL(DateGlobals, s_date_globals);
 
-#define IMPLEMENT_GET_CLASS(cls)                                               \
-  Class* cls::getClass() {                                                     \
-    return SystemLib::classLoad(s_className.get(), s_class);                   \
-  }                                                                            \
-
 ///////////////////////////////////////////////////////////////////////////////
 // constants
 
@@ -128,9 +123,6 @@ DateIntervalData* getDateIntervalData(ObjectData* this_) {
 ///////////////////////////////////////////////////////////////////////////////
 // DateTime
 
-Class* DateTimeData::s_class = nullptr;
-const StaticString DateTimeData::s_className("DateTime");
-
 void HHVM_METHOD(DateTime, __construct,
                  const String& time /*= "now"*/,
                  const Variant& timezone /*= uninit_variant*/) {
@@ -165,7 +157,7 @@ Variant HHVM_STATIC_METHOD(DateTime, createFromFormat,
     }
     tz = DateTimeZoneData::unwrap(obj_timezone);
   }
-  Object obj{DateTimeData::getClass()};
+  Object obj{DateTimeData::classof()};
   DateTimeData* data = Native::data<DateTimeData>(obj);
   const auto curr = (format.find("!") != String::npos) ? 0 : ::time(0);
   data->m_dt = req::make<DateTime>(curr, false);
@@ -332,7 +324,7 @@ Array HHVM_METHOD(DateTime, __sleep) {
 }
 
 void HHVM_METHOD(DateTime, __wakeup) {
-  Object dtz_obj{DateTimeZoneData::getClass()};
+  Object dtz_obj{DateTimeZoneData::classof()};
   HHVM_MN(DateTimeZone, __construct)(dtz_obj.get(),
                                      this_->o_get(s_timezone).toString());
   HHVM_MN(DateTime, __construct)(this_, this_->o_get(s_date).toString(),
@@ -364,7 +356,7 @@ Array DateTimeData::getDebugInfo() const {
 // DateTime helpers
 
 int64_t DateTimeData::getTimestamp(const Object& obj) {
-  if (LIKELY(obj.instanceof(getClass()))) {
+  if (LIKELY(obj.instanceof(classof()))) {
     return getDateTimeData(obj)->getTimestamp();
   }
   assertx(obj->instanceof(SystemLib::getDateTimeInterfaceClass()));
@@ -377,7 +369,7 @@ int64_t DateTimeData::getTimestamp(const ObjectData* od) {
 }
 
 int DateTimeData::compare(const Object& left, const Object &right) {
-  if (LIKELY(left.instanceof(getClass()) && right.instanceof(getClass()))) {
+  if (LIKELY(left.instanceof(classof()) && right.instanceof(classof()))) {
     auto const leftData = getDateTimeData(left);
     auto const rightData = getDateTimeData(right);
     return leftData->m_dt->compare(rightData->m_dt);
@@ -400,14 +392,14 @@ int DateTimeData::compare(const ObjectData* left, const ObjectData* right) {
 }
 
 Object DateTimeData::wrap(req::ptr<DateTime> dt) {
-  Object obj{getClass()};
+  Object obj{classof()};
   DateTimeData* data = Native::data<DateTimeData>(obj);
   data->m_dt = dt;
   return obj;
 }
 
 req::ptr<DateTime> DateTimeData::unwrap(const Object& datetime) {
-  if (LIKELY(datetime.instanceof(getClass()))) {
+  if (LIKELY(datetime.instanceof(classof()))) {
     DateTimeData* data = Native::data<DateTimeData>(datetime);
     return data->m_dt;
   }
@@ -425,13 +417,8 @@ req::ptr<DateTime> DateTimeData::unwrap(const Object& datetime) {
   return req::ptr<DateTime>();
 }
 
-IMPLEMENT_GET_CLASS(DateTimeData)
-
 ///////////////////////////////////////////////////////////////////////////////
 // DateTimeZone
-
-Class* DateTimeZoneData::s_class = nullptr;
-const StaticString DateTimeZoneData::s_className("DateTimeZone");
 
 void HHVM_METHOD(DateTimeZone, __construct,
                  const String& timezone) {
@@ -520,21 +507,19 @@ Variant HHVM_STATIC_METHOD(DateTimeZone, listIdentifiers,
 // DateTimeZone helpers
 
 Object DateTimeZoneData::wrap(req::ptr<TimeZone> tz) {
-  Object obj{getClass()};
+  Object obj{classof()};
   DateTimeZoneData* data = Native::data<DateTimeZoneData>(obj);
   data->m_tz = tz;
   return obj;
 }
 
 req::ptr<TimeZone> DateTimeZoneData::unwrap(const Object& timezone) {
-  if (timezone.instanceof(getClass())) {
+  if (timezone.instanceof(classof())) {
     DateTimeZoneData* data = Native::data<DateTimeZoneData>(timezone);
     return data->m_tz;
   }
   return req::ptr<TimeZone>();
 }
-
-IMPLEMENT_GET_CLASS(DateTimeZoneData)
 
 Array HHVM_METHOD(DateTimeZone, __debugInfo) {
   auto const data = getDateTimeZoneData(this_);
@@ -551,9 +536,6 @@ Array DateTimeZoneData::getDebugInfo() const {
 
 ///////////////////////////////////////////////////////////////////////////////
 // DateInterval
-
-Class* DateIntervalData::s_class = nullptr;
-const StaticString DateIntervalData::s_className("DateInterval");
 
 void HHVM_METHOD(DateInterval, __construct,
                  const String& interval_spec) {
@@ -627,22 +609,20 @@ String HHVM_METHOD(DateInterval, format,
 // DateInterval helpers
 
 Object DateIntervalData::wrap(req::ptr<DateInterval> di) {
-  Object obj{getClass()};
+  Object obj{classof()};
   DateIntervalData* data = Native::data<DateIntervalData>(obj);
   data->m_di = di;
   return obj;
 }
 
 req::ptr<DateInterval> DateIntervalData::unwrap(const Object& obj) {
-  if (obj.instanceof(getClass())) {
+  if (obj.instanceof(classof())) {
     DateIntervalData* data = Native::data<DateIntervalData>(obj);
     return data->m_di;
   }
 
   return req::ptr<DateInterval>();
 }
-
-IMPLEMENT_GET_CLASS(DateIntervalData)
 
 ///////////////////////////////////////////////////////////////////////////////
 // timestamp
@@ -851,7 +831,7 @@ Variant HHVM_FUNCTION(date_create,
     }
     tz = DateTimeZoneData::unwrap(obj_timezone);
   }
-  Object ret{DateTimeData::getClass()};
+  Object ret{DateTimeData::classof()};
   // Don't set the time here because it will throw if it is bad
   HHVM_MN(DateTime, __construct)(ret.get());
   if (str_time.empty()) {
@@ -957,8 +937,7 @@ static struct DateTimeExtension final : Extension {
     HHVM_STATIC_ME(DateTime, createFromFormat);
     HHVM_STATIC_ME(DateTime, getLastErrors);
 
-    Native::registerNativeDataInfo<DateTimeData>(
-      DateTimeData::s_className.get(), Native::NDIFlags::NO_SWEEP);
+    Native::registerNativeDataInfo<DateTimeData>(Native::NDIFlags::NO_SWEEP);
 
     HHVM_RC_STR_SAME(DATE_ATOM);
     HHVM_RCC_STR(DateTime, ATOM, DATE_ATOM);
@@ -1008,15 +987,16 @@ static struct DateTimeExtension final : Extension {
     HHVM_STATIC_ME(DateTimeZone, listIdentifiers);
 
     Native::registerNativeDataInfo<DateTimeZoneData>(
-      DateTimeZoneData::s_className.get(), Native::NDIFlags::NO_SWEEP);
+      Native::NDIFlags::NO_SWEEP);
 
     HHVM_ME(DateInterval, __construct);
     HHVM_ME(DateInterval, format);
     HHVM_STATIC_ME(DateInterval, createFromDateString);
-    Native::registerNativePropHandler<DateIntervalPropHandler>(s_DateInterval);
+    Native::registerNativePropHandler<DateIntervalPropHandler>(
+      DateIntervalData::className());
 
     Native::registerNativeDataInfo<DateIntervalData>(
-      DateIntervalData::s_className.get(), Native::NDIFlags::NO_SWEEP);
+      Native::NDIFlags::NO_SWEEP);
 
     HHVM_FE(checkdate);
     HHVM_FE(date_parse_from_format);

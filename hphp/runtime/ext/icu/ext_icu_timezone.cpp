@@ -24,8 +24,6 @@ namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
 const StaticString s_IntlTimeZone("IntlTimeZone");
 
-Class* IntlTimeZone::c_IntlTimeZone = nullptr;
-
 static bool ustring_from_char(icu::UnicodeString& ret,
                               const String& str,
                               UErrorCode &error) {
@@ -48,12 +46,12 @@ icu::TimeZone* IntlTimeZone::ParseArg(const Variant& arg,
   } else if (arg.isObject()) {
     auto objarg = arg.toObject();
     auto cls = objarg->getVMClass();
-    auto IntlTimeZone_Class = IntlTimeZone::getClass();
+    auto IntlTimeZone_Class = IntlTimeZone::classof();
     if (IntlTimeZone_Class &&
         ((cls == IntlTimeZone_Class) || cls->classof(IntlTimeZone_Class))) {
       return IntlTimeZone::Get(objarg.get())->timezone()->clone();
     }
-    if (objarg.instanceof(DateTimeZoneData::getClass())) {
+    if (objarg.instanceof(DateTimeZoneData::classof())) {
       auto* dtz = Native::data<DateTimeZoneData>(objarg);
       tzstr = dtz->getName();
     } else {
@@ -424,7 +422,7 @@ void IntlExtension::initTimeZone() {
  HHVM_STATIC_ME(IntlTimeZone, getUnknown);
 #endif // ICU 4.9
 
-  Native::registerNativeDataInfo<IntlTimeZone>(s_IntlTimeZone.get());
+  Native::registerNativeDataInfo<IntlTimeZone>();
 }
 
 //////////////////////////////////////////////////////////////////////////////

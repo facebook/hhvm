@@ -31,14 +31,7 @@ namespace HPHP {
 namespace {
 
 const StaticString
-  s_FQHSLLocale("HH\\Lib\\_Private\\_Locale\\Locale"),
   s_InvalidLocaleException("HH\\Lib\\Locale\\InvalidLocaleException");
-
-Class* s_HSLLocaleClass = nullptr;
-
-Class* getHSLLocale() {
-  return SystemLib::classLoad(s_FQHSLLocale.get(), s_HSLLocaleClass);
-}
 
 } // namespace
 
@@ -62,7 +55,7 @@ void HSLLocale::sweep() {
 }
 
 Object HSLLocale::newInstance(std::shared_ptr<Locale> loc) {
-  Object obj { getHSLLocale() };
+  Object obj { HSLLocale::classof() };
   auto* data = Native::data<HSLLocale>(obj);
   new (data) HSLLocale(loc);
   return obj;
@@ -92,7 +85,7 @@ HSLLocale* HSLLocale::fromObject(const Object& obj) {
     raise_typehint_error_without_first_frame(
       "Expected an HSL Locale, got null");
   }
-  if (!obj->instanceof(s_FQHSLLocale)) {
+  if (!obj->instanceof(HSLLocale::classof())) {
     raise_typehint_error_without_first_frame(
       folly::sformat(
         "Expected an HSL Locale, got instance of class '{}'",
@@ -185,7 +178,7 @@ struct LocaleExtension final : Extension {
   void moduleInit() override {
     // Remember to update the HHI :)
 
-    Native::registerNativeDataInfo<HSLLocale>(s_FQHSLLocale.get());
+    Native::registerNativeDataInfo<HSLLocale>();
     HHVM_NAMED_ME(HH\\Lib\\_Private\\_Locale\\Locale, __debugInfo, HHVM_MN(HSLLocale, __debugInfo));
 
     HHVM_FALIAS(HH\\Lib\\_Private\\_Locale\\get_c_locale, get_c_locale);

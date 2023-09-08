@@ -9,7 +9,7 @@ namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
 extern const StaticString s_Transliterator;
 
-struct Transliterator : IntlError {
+struct Transliterator : IntlError, SystemLib::ClassLoader<"Transliterator"> {
   Transliterator() {}
   Transliterator(const Transliterator&) = delete;
   Transliterator& operator=(const Transliterator& src) {
@@ -25,11 +25,11 @@ struct Transliterator : IntlError {
   }
 
   static Transliterator* Get(ObjectData* obj) {
-    return GetData<Transliterator>(obj, s_Transliterator);
+    return GetData<Transliterator>(obj, className());
   }
 
   static Object newInstance(icu::Transliterator* trans) {
-    Object obj{SystemLib::classLoad(s_Transliterator.get(), c_Transliterator)};
+    Object obj{ classof() };
     auto data = Native::data<Transliterator>(obj);
     data->setTransliterator(trans);
     return obj;
@@ -45,8 +45,6 @@ struct Transliterator : IntlError {
 
 private:
   icu::Transliterator* m_trans{nullptr};
-
-  static Class* c_Transliterator;
 };
 
 /////////////////////////////////////////////////////////////////////////////

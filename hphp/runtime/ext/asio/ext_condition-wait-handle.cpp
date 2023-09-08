@@ -48,8 +48,6 @@ namespace {
   }
 }
 
-WAITHANDLE_CLASSOF_IMPL(ConditionWaitHandle)
-
 void HHVM_STATIC_METHOD(ConditionWaitHandle, setOnCreateCallback,
                         const Variant& callback) {
   AsioSession::Get()->setOnConditionCreate(callback);
@@ -165,7 +163,7 @@ void AsioExtension::initConditionWaitHandle() {
   HHVM_MALIAS(HH\\ConditionWaitHandle, fail, ConditionWaitHandle, fail);
 
   Native::registerClassExtraDataHandler(
-    c_ConditionWaitHandle::s_clsName, finish_class<c_ConditionWaitHandle>);
+    c_ConditionWaitHandle::className(), finish_class<c_ConditionWaitHandle>);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -31,8 +31,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-WAITHANDLE_CLASSOF_IMPL(AwaitAllWaitHandle)
-
 req::ptr<c_AwaitAllWaitHandle> c_AwaitAllWaitHandle::Alloc(int32_t cnt) {
   auto size = c_AwaitAllWaitHandle::heapSize(cnt);
   auto mem = tl_heap->objMalloc(size);
@@ -223,7 +221,7 @@ void AsioExtension::initAwaitAllWaitHandle() {
 #undef AAWH_SME
 
   Native::registerClassExtraDataHandler(
-    c_AwaitAllWaitHandle::s_clsName, finish_class<c_AwaitAllWaitHandle>);
+    c_AwaitAllWaitHandle::className(), finish_class<c_AwaitAllWaitHandle>);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

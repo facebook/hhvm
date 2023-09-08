@@ -25,7 +25,7 @@ namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
 extern const StaticString s_NumberFormatter;
 
-struct NumberFormatter : IntlError {
+struct NumberFormatter : IntlError, SystemLib::ClassLoader<"NumberFormatter"> {
   NumberFormatter() {}
   NumberFormatter(const NumberFormatter&) = delete;
   NumberFormatter& operator=(const NumberFormatter& src) {
@@ -49,18 +49,16 @@ struct NumberFormatter : IntlError {
   }
 
   static Object newInstance() {
-    return Object{ SystemLib::classLoad(s_NumberFormatter.get(),
-                                        c_NumberFormatter) };
+    return Object{ classof() };
   }
   static NumberFormatter* Get(ObjectData* obj) {
-    return GetData<NumberFormatter>(obj, s_NumberFormatter);
+    return GetData<NumberFormatter>(obj, className());
   }
 
   UNumberFormat *formatter() const { return m_formatter; }
 
 private:
   UNumberFormat *m_formatter = nullptr;
-  static Class* c_NumberFormatter;
 };
 
 /////////////////////////////////////////////////////////////////////////////

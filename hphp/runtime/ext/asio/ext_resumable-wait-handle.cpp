@@ -29,8 +29,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-WAITHANDLE_CLASSOF_IMPL(ResumableWaitHandle)
-
 void HHVM_STATIC_METHOD(ResumableWaitHandle, setOnCreateCallback,
                         const Variant& callback) {
   AsioSession::Get()->setOnResumableCreate(callback);
@@ -82,7 +80,7 @@ void AsioExtension::initResumableWaitHandle() {
 #undef RWH_SME
 
   Native::registerClassExtraDataHandler(
-    c_ResumableWaitHandle::s_clsName, finish_class<c_ResumableWaitHandle>);
+    c_ResumableWaitHandle::className(), finish_class<c_ResumableWaitHandle>);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

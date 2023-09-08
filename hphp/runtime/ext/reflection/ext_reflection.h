@@ -24,13 +24,11 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct Reflection {
-  static Class* s_ReflectionExceptionClass;
-  static Class* s_ReflectionExtensionClass;
   [[noreturn]]
   static void ThrowReflectionExceptionObject(const Variant& message);
 };
 
-struct ReflectionFileHandle {
+struct ReflectionFileHandle : SystemLib::ClassLoader<"ReflectionFile"> {
   ReflectionFileHandle(): m_unit(nullptr) {}
   explicit ReflectionFileHandle(const Unit* unit): m_unit(unit) {};
   ReflectionFileHandle(const ReflectionFileHandle&) = delete;
@@ -60,7 +58,7 @@ struct ReflectionFileHandle {
 
 /* A ReflectionModuleHandle is a NativeData object wrapping a Module*
  * for the purposes of ReflectionModule. */
-struct ReflectionModuleHandle {
+struct ReflectionModuleHandle : SystemLib::ClassLoader<"ReflectionModule"> {
   ReflectionModuleHandle(): m_module(nullptr) {}
   explicit ReflectionModuleHandle(const Module* module): m_module(module) {}
   ReflectionModuleHandle(const ReflectionModuleHandle&) = delete;
@@ -90,7 +88,8 @@ struct ReflectionModuleHandle {
 
 /* A ReflectionFuncHandle is a NativeData object wrapping a Func*
  * for the purposes of ReflectionFunction and ReflectionMethod. */
-struct ReflectionFuncHandle {
+struct ReflectionFuncHandle :
+    SystemLib::ClassLoader<"ReflectionFunctionAbstract"> {
   ReflectionFuncHandle(): m_func(nullptr) {}
   explicit ReflectionFuncHandle(const Func* func): m_func(func) {};
   ReflectionFuncHandle(const ReflectionFuncHandle&) = delete;
@@ -120,7 +119,7 @@ struct ReflectionFuncHandle {
 
 /* A ReflectionClassHandle is a NativeData object wrapping a Class* for the
  * purposes of ReflectionClass. */
-struct ReflectionClassHandle {
+struct ReflectionClassHandle : SystemLib::ClassLoader<"ReflectionClass"> {
   ReflectionClassHandle(): m_cls(nullptr) {}
   explicit ReflectionClassHandle(const Class* cls): m_cls(cls) {};
   ReflectionClassHandle(const ReflectionClassHandle&) = delete;
@@ -162,7 +161,8 @@ struct ReflectionClassHandle {
 
 /* A ReflectionConstHandle is a NativeData object wrapping a Const*
  * for the purposes of ReflectionTypeConstant. */
-struct ReflectionConstHandle {
+struct ReflectionConstHandle :
+    SystemLib::ClassLoader<"ReflectionTypeConstant"> {
   ReflectionConstHandle(): m_const(nullptr), m_cls(nullptr) {}
   explicit ReflectionConstHandle(const Class::Const* cns, const Class* cls):
       m_const(cns), m_cls(cls) {};
@@ -203,7 +203,7 @@ struct ReflectionConstHandle {
  * A ReflectionPropHandle is a NativeData object that represents an instance,
  * static, or dynamic property for the purposes of ReflectionProperty.
  */
-struct ReflectionPropHandle {
+struct ReflectionPropHandle : SystemLib::ClassLoader<"ReflectionProperty"> {
   enum Type : uint8_t {
     Invalid  = 0,
     Instance = 1,
@@ -247,7 +247,8 @@ struct ReflectionPropHandle {
 
 /* A ReflectionTypeAliasHandle is a NativeData object wrapping a TypeAlias*
  * for the purposes of static ReflectionTypeAlias. */
-struct ReflectionTypeAliasHandle {
+struct ReflectionTypeAliasHandle :
+    SystemLib::ClassLoader<"ReflectionTypeAlias"> {
   ReflectionTypeAliasHandle(): m_req(nullptr) {}
   explicit ReflectionTypeAliasHandle(const TypeAlias* req): m_req(req) {};
 

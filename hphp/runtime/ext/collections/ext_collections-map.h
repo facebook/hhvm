@@ -239,7 +239,7 @@ private:
 
 /////////////////////////////////////////////////////////////////////////////
 
-struct c_Map : BaseMap {
+struct c_Map : BaseMap, SystemLib::ClassLoader<"HH\\Map"> {
   DECLARE_COLLECTIONS_CLASS(Map);
 
   explicit c_Map()
@@ -294,7 +294,7 @@ struct c_Map : BaseMap {
 
 /////////////////////////////////////////////////////////////////////////////
 
-struct c_ImmMap : BaseMap {
+struct c_ImmMap : BaseMap, SystemLib::ClassLoader<"HH\\ImmMap"> {
   DECLARE_COLLECTIONS_CLASS(ImmMap)
 
  public:
@@ -315,10 +315,7 @@ struct c_ImmMap : BaseMap {
 namespace collections {
 /////////////////////////////////////////////////////////////////////////////
 
-extern const StaticString
-  s_MapIterator;
-
-struct MapIterator {
+struct MapIterator : SystemLib::ClassLoader<"MapIterator"> {
   MapIterator() {}
   MapIterator(const MapIterator& src) = delete;
   MapIterator& operator=(const MapIterator& src) {
@@ -329,8 +326,7 @@ struct MapIterator {
   ~MapIterator() {}
 
   static Object newInstance() {
-    static Class* cls = nullptr;
-    return Object{SystemLib::classLoad(s_MapIterator.get(), cls)};
+    return Object{classof()};
   }
 
   void setMap(BaseMap* mp) {

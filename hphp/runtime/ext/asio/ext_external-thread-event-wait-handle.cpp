@@ -33,8 +33,6 @@ namespace {
   StaticString s_externalThreadEvent("<external-thread-event>");
 }
 
-WAITHANDLE_CLASSOF_IMPL(ExternalThreadEventWaitHandle)
-
 void HHVM_STATIC_METHOD(ExternalThreadEventWaitHandle, setOnCreateCallback,
                         const Variant& callback) {
   AsioSession::Get()->setOnExternalThreadEventCreate(callback);
@@ -288,7 +286,7 @@ void AsioExtension::initExternalThreadEventWaitHandle() {
 #undef ETEWH_SME
 
   Native::registerClassExtraDataHandler(
-    c_ExternalThreadEventWaitHandle::s_clsName,
+    c_ExternalThreadEventWaitHandle::className(),
     finish_class<c_ExternalThreadEventWaitHandle>);
 }
 

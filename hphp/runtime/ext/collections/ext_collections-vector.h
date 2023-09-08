@@ -356,8 +356,8 @@ private:
 /////////////////////////////////////////////////////////////////////////////
 // c_Vector
 
-struct c_Vector : BaseVector {
-  DECLARE_COLLECTIONS_CLASS(Vector);
+struct c_Vector : BaseVector, SystemLib::ClassLoader<"HH\\Vector"> {
+  DECLARE_COLLECTIONS_CLASS(Vector)
 
   explicit c_Vector()
     : BaseVector(c_Vector::classof(), HeaderKind::Vector) { }
@@ -456,7 +456,7 @@ private:
 /////////////////////////////////////////////////////////////////////////////
 // c_ImmVector
 
-struct c_ImmVector : BaseVector {
+struct c_ImmVector : BaseVector, SystemLib::ClassLoader<"HH\\ImmVector"> {
   DECLARE_COLLECTIONS_CLASS(ImmVector)
 
   explicit c_ImmVector()
@@ -473,10 +473,7 @@ namespace collections {
 /////////////////////////////////////////////////////////////////////////////
 // VectorIterator
 
-extern const StaticString
-  s_VectorIterator;
-
-struct VectorIterator {
+struct VectorIterator : SystemLib::ClassLoader<"VectorIterator"> {
   VectorIterator() {}
   VectorIterator(const VectorIterator& src) = delete;
   VectorIterator& operator=(const VectorIterator& src) {
@@ -487,8 +484,7 @@ struct VectorIterator {
   ~VectorIterator() {}
 
   static Object newInstance() {
-    static Class* cls = nullptr;
-    return Object{SystemLib::classLoad(s_VectorIterator.get(), cls)};
+    return Object{classof()};
   }
 
   void setVector(BaseVector* vec) {

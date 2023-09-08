@@ -30,8 +30,11 @@ namespace HPHP {
  * A wait handle that waits for a list of wait handles. The wait handle succeeds
  * with null once all given wait handles are finished (succeeded or failed).
  */
-struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
-  WAITHANDLE_CLASSOF(AwaitAllWaitHandle);
+struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle,
+    SystemLib::ClassLoader<"HH\\AwaitAllWaitHandle"> {
+  using SystemLib::ClassLoader<"HH\\AwaitAllWaitHandle">::classof;
+  using SystemLib::ClassLoader<"HH\\AwaitAllWaitHandle">::className;
+
   static void instanceDtor(ObjectData* obj, const Class*) {
     auto wh = wait_handle<c_AwaitAllWaitHandle>(obj);
     auto const sz = wh->heapSize();

@@ -731,11 +731,11 @@ void emitCreateCont(IRGS& env) {
 
 void emitContEnter(IRGS& env) {
   assertx(curClass(env));
-  assertx(curClass(env)->classof(AsyncGenerator::getClass()) ||
-          curClass(env)->classof(Generator::getClass()));
+  assertx(curClass(env)->classof(AsyncGenerator::classof()) ||
+          curClass(env)->classof(Generator::classof()));
 
   auto const callBCOffset = bcOff(env);
-  auto const isAsync = curClass(env)->classof(AsyncGenerator::getClass());
+  auto const isAsync = curClass(env)->classof(AsyncGenerator::classof());
   // Load generator's FP and resume address.
   auto const genObj = ldThis(env);
   auto const genFp  = gen(env, LdContActRec, IsAsyncData(isAsync), genObj);
@@ -780,22 +780,22 @@ void emitYieldK(IRGS& env) {
 
 void emitContCheck(IRGS& env, ContCheckOp subop) {
   assertx(curClass(env));
-  assertx(curClass(env)->classof(AsyncGenerator::getClass()) ||
-          curClass(env)->classof(Generator::getClass()));
+  assertx(curClass(env)->classof(AsyncGenerator::classof()) ||
+          curClass(env)->classof(Generator::classof()));
   auto const cont = ldThis(env);
   auto const checkStarted = subop == ContCheckOp::CheckStarted;
   gen(env, ContCheckNext,
-    IsAsyncData(curClass(env)->classof(AsyncGenerator::getClass())),
+    IsAsyncData(curClass(env)->classof(AsyncGenerator::classof())),
     makeExitSlow(env), cont, cns(env, checkStarted));
 }
 
 void emitContValid(IRGS& env) {
   assertx(curClass(env));
-  assertx(curClass(env)->classof(AsyncGenerator::getClass()) ||
-          curClass(env)->classof(Generator::getClass()));
+  assertx(curClass(env)->classof(AsyncGenerator::classof()) ||
+          curClass(env)->classof(Generator::classof()));
   auto const cont = ldThis(env);
   push(env, gen(env, ContValid,
-    IsAsyncData(curClass(env)->classof(AsyncGenerator::getClass())), cont));
+    IsAsyncData(curClass(env)->classof(AsyncGenerator::classof())), cont));
 }
 
 void emitContKey(IRGS& env) { PUNT(ContKey); }

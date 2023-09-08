@@ -24,9 +24,8 @@
 
 namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
-extern const StaticString s_IntlCalendar;
 
-struct IntlCalendar : IntlError {
+struct IntlCalendar : IntlError, SystemLib::ClassLoader<"IntlCalendar"> {
   IntlCalendar() {}
   IntlCalendar(const IntlCalendar&) = delete;
   IntlCalendar& operator=(const IntlCalendar& src) {
@@ -45,7 +44,7 @@ struct IntlCalendar : IntlError {
   }
 
   static Object newInstance(icu::Calendar *cal) {
-    Object ret{ SystemLib::classLoad(s_IntlCalendar.get(), c_IntlCalendar) };
+    Object ret{ classof() };
     if (cal) {
       Native::data<IntlCalendar>(ret)->setCalendar(cal);
     }
@@ -53,7 +52,7 @@ struct IntlCalendar : IntlError {
   }
 
   static IntlCalendar* Get(ObjectData* obj) {
-    return GetData<IntlCalendar>(obj, s_IntlCalendar);
+    return GetData<IntlCalendar>(obj, className());
   }
 
   bool isValid() const {
@@ -70,8 +69,6 @@ struct IntlCalendar : IntlError {
                                        int64_t &calType, bool &calOwned);
  protected:
   icu::Calendar *m_cal = nullptr;
-
-  static Class* c_IntlCalendar;
 };
 
 /////////////////////////////////////////////////////////////////////////////

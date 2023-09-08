@@ -29,8 +29,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-WAITHANDLE_CLASSOF_IMPL(ConcurrentWaitHandle)
-
 req::ptr<c_ConcurrentWaitHandle> c_ConcurrentWaitHandle::Alloc(int32_t cnt) {
   auto size = c_ConcurrentWaitHandle::heapSize(cnt);
   auto mem = tl_heap->objMalloc(size);
@@ -173,7 +171,7 @@ void AsioExtension::initConcurrentWaitHandle() {
 #undef CCWH_SME
 
   Native::registerClassExtraDataHandler(
-    c_ConcurrentWaitHandle::s_clsName, finish_class<c_ConcurrentWaitHandle>);
+    c_ConcurrentWaitHandle::className(), finish_class<c_ConcurrentWaitHandle>);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -27,10 +27,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace {
-const StaticString s_FunctionCredential("FunctionCredential");
-}
-
 // static
 ObjectData* FunctionCredential::newInstance(const Func* func) {
   assertx(func);
@@ -44,12 +40,6 @@ ObjectData* FunctionCredential::newInstance(const Func* func) {
 const FunctionCredential* FunctionCredential::fromObject(
     const ObjectData* obj) {
   return Native::data<FunctionCredential>(obj);
-}
-
-// static
-Class* FunctionCredential::classof() {
-  static Class* cls = nullptr;
-  return SystemLib::classLoad(s_FunctionCredential.get(), cls);
 }
 
 static TypedValue HHVM_METHOD(FunctionCredential, getClassName) {
@@ -80,8 +70,7 @@ struct FunctionCredentialExtension final : Extension {
     HHVM_ME(FunctionCredential, getFunctionName);
     HHVM_ME(FunctionCredential, getFilename);
 
-    Native::registerNativeDataInfo<FunctionCredential>(
-        s_FunctionCredential.get());
+    Native::registerNativeDataInfo<FunctionCredential>();
   }
 } s_functioncredential_extension;
 } // namespace

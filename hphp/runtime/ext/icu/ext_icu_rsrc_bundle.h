@@ -8,9 +8,8 @@
 
 namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
-extern const StaticString s_ResourceBundle;
 
-struct ResourceBundle : IntlError {
+struct ResourceBundle : IntlError, SystemLib::ClassLoader<"ResourceBundle"> {
   ResourceBundle() {}
   ResourceBundle(const ResourceBundle&) = delete;
   ResourceBundle& operator=(const ResourceBundle& src) {
@@ -26,11 +25,11 @@ struct ResourceBundle : IntlError {
   }
 
   static ResourceBundle* Get(ObjectData* obj) {
-    return GetData<ResourceBundle>(obj, s_ResourceBundle);
+    return GetData<ResourceBundle>(obj, className());
   }
 
   static Object newInstance(icu::ResourceBundle* bundle) {
-    Object obj{SystemLib::classLoad(s_ResourceBundle.get(), c_ResourceBundle)};
+    Object obj{ classof() };
     auto data = Native::data<ResourceBundle>(obj);
     data->setResource(bundle);
     return obj;
@@ -74,8 +73,6 @@ private:
   icu::ResourceBundle* m_rsrc{nullptr};
   bool m_isTable{false};
   int32_t m_iterIndex{0}, m_size{0};
-
-  static Class* c_ResourceBundle;
 };
 
 /////////////////////////////////////////////////////////////////////////////

@@ -14,13 +14,6 @@
 #include "hphp/runtime/vm/coeffects.h"
 
 namespace HPHP {
-/////////////////////////////////////////////////////////////////////////////
-
-Class* c_Map::s_cls;
-StaticString c_Map::s_clsName("HH\\Map");
-
-Class* c_ImmMap::s_cls;
-StaticString c_ImmMap::s_clsName("HH\\ImmMap");
 
 /////////////////////////////////////////////////////////////////////////////
 // BaseMap
@@ -360,10 +353,6 @@ c_ImmMap* c_ImmMap::Clone(ObjectData* obj) {
 }
 
 namespace collections {
-/////////////////////////////////////////////////////////////////////////////
-
-const StaticString
-  s_MapIterator("MapIterator");
 
 /////////////////////////////////////////////////////////////////////////////
 // MapIterator
@@ -397,10 +386,7 @@ void CollectionsExtension::initMap() {
   HHVM_ME(MapIterator, next);
   HHVM_ME(MapIterator, rewind);
 
-  Native::registerNativeDataInfo<MapIterator>(
-    s_MapIterator.get(),
-    Native::NDIFlags::NO_SWEEP
-  );
+  Native::registerNativeDataInfo<MapIterator>(Native::NDIFlags::NO_SWEEP);
 
   // BaseMap common
 
@@ -442,11 +428,11 @@ void CollectionsExtension::initMap() {
 
   HHVM_NAMED_ME(HH\\Map, toImmMap,      &c_Map::getImmutableCopy);
 
-  Native::registerNativePropHandler<CollectionPropHandler>(c_Map::s_clsName);
-  Native::registerNativePropHandler<CollectionPropHandler>(c_ImmMap::s_clsName);
+  Native::registerNativePropHandler<CollectionPropHandler>(c_Map::className());
+  Native::registerNativePropHandler<CollectionPropHandler>(c_ImmMap::className());
 
-  Native::registerClassExtraDataHandler(c_Map::s_clsName, finish_class<c_Map>);
-  Native::registerClassExtraDataHandler(c_ImmMap::s_clsName, finish_class<c_ImmMap>);
+  Native::registerClassExtraDataHandler(c_Map::className(), finish_class<c_Map>);
+  Native::registerClassExtraDataHandler(c_ImmMap::className(), finish_class<c_ImmMap>);
 }
 
 /////////////////////////////////////////////////////////////////////////////

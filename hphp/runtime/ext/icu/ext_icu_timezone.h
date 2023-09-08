@@ -23,9 +23,8 @@
 
 namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
-extern const StaticString s_IntlTimeZone;
 
-struct IntlTimeZone : IntlError {
+struct IntlTimeZone : IntlError, SystemLib::ClassLoader<"IntlTimeZone"> {
   IntlTimeZone() {}
   IntlTimeZone(const IntlTimeZone&) = delete;
   IntlTimeZone& operator=(const IntlTimeZone& src) {
@@ -36,12 +35,8 @@ struct IntlTimeZone : IntlError {
     setTimeZone(nullptr);
   }
 
-  static Class* getClass() {
-    return SystemLib::classLoad(s_IntlTimeZone.get(), c_IntlTimeZone);
-  }
-
   static Object newInstance(icu::TimeZone *tz = nullptr, bool owned = true) {
-    Object obj{ getClass() };
+    Object obj{ classof() };
     if (tz) {
       Native::data<IntlTimeZone>(obj)->setTimeZone(tz, owned);
     }
@@ -49,7 +44,7 @@ struct IntlTimeZone : IntlError {
   }
 
   static IntlTimeZone* Get(ObjectData* obj) {
-    return GetData<IntlTimeZone>(obj, s_IntlTimeZone);
+    return GetData<IntlTimeZone>(obj, className());
   }
 
   void setTimeZone(icu::TimeZone *tz, bool owned = true) {
@@ -85,8 +80,6 @@ struct IntlTimeZone : IntlError {
  private:
   icu::TimeZone *m_timezone = nullptr;
   bool m_owned = false;
-
-  static Class* c_IntlTimeZone;
 };
 
 /////////////////////////////////////////////////////////////////////////////

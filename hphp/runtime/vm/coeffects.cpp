@@ -300,10 +300,10 @@ RuntimeCoeffects emitClosureParentScope(const Func* f,
 RuntimeCoeffects emitGeneratorThis(const Func* f, void* prologueCtx) {
   assertx(prologueCtx);
   assertx(f->isMethod() && !f->isStatic() && f->implCls() &&
-          (f->implCls() == AsyncGenerator::getClass() ||
-           f->implCls() == Generator::getClass()));
+          (f->implCls() == AsyncGenerator::classof() ||
+           f->implCls() == Generator::classof()));
   auto const obj = reinterpret_cast<ObjectData*>(prologueCtx);
-  auto const gen = f->implCls() == AsyncGenerator::getClass()
+  auto const gen = f->implCls() == AsyncGenerator::classof()
     ? static_cast<BaseGenerator*>(AsyncGenerator::fromObject(obj))
     : static_cast<BaseGenerator*>(Generator::fromObject(obj));
   if (gen->getState() == BaseGenerator::State::Done) {

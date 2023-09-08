@@ -30,8 +30,11 @@ namespace HPHP {
  * A wait handle that waits for a list of wait handles. The wait handle succeeds
  * with null once all given wait handles are finished (succeeded or failed).
  */
-struct c_ConditionWaitHandle final : c_WaitableWaitHandle {
-  WAITHANDLE_CLASSOF(ConditionWaitHandle);
+struct c_ConditionWaitHandle final :
+    c_WaitableWaitHandle,
+    SystemLib::ClassLoader<"HH\\ConditionWaitHandle"> {
+  using SystemLib::ClassLoader<"HH\\ConditionWaitHandle">::classof;
+  using SystemLib::ClassLoader<"HH\\ConditionWaitHandle">::className;
   WAITHANDLE_DTOR(ConditionWaitHandle);
 
   explicit c_ConditionWaitHandle()

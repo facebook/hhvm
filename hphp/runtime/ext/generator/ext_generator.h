@@ -160,14 +160,13 @@ static_assert(offsetof(BaseGenerator, m_resumable) == 0,
 
 ///////////////////////////////////////////////////////////////////////////////
 // class Generator
-struct Generator final : BaseGenerator {
+struct Generator final : BaseGenerator, SystemLib::ClassLoader<"Generator"> {
   explicit Generator();
   ~Generator();
   Generator& operator=(const Generator& other);
 
   static ObjectData* Create(const ActRec* fp, size_t numSlots,
                             jit::TCA resumeAddr, Offset suspendOffset);
-  static Class* getClass();
   static constexpr ptrdiff_t objectOff() {
     return -(Native::dataOffset<Generator>());
   }
@@ -191,9 +190,6 @@ public:
   int64_t m_index;
   TypedValue m_key;
   TypedValue m_value;
-
-  static Class* s_class;
-  static const StaticString s_className;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

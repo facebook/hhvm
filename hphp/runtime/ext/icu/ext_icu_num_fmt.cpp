@@ -24,8 +24,6 @@ namespace HPHP::Intl {
 
 const StaticString s_NumberFormatter("NumberFormatter");
 
-Class* NumberFormatter::c_NumberFormatter = nullptr;
-
 /* workaround for ICU bug */
 #if U_ICU_VERSION_MAJOR_NUM == 3 && U_ICU_VERSION_MINOR_NUM < 8
 #define UNUM_ROUND_HALFEVEN UNUM_FOUND_HALFEVEN
@@ -588,7 +586,7 @@ void IntlExtension::initNumberFormatter() {
   HHVM_RCC_INT(NumberFormatter, TYPE_DOUBLE, k_UNUM_TYPE_DOUBLE);
   HHVM_RCC_INT(NumberFormatter, TYPE_CURRENCY, k_UNUM_TYPE_CURRENCY);
 
-  Native::registerNativeDataInfo<NumberFormatter>(s_NumberFormatter.get());
+  Native::registerNativeDataInfo<NumberFormatter>();
 }
 
 //////////////////////////////////////////////////////////////////////////////

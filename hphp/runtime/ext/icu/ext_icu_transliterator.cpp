@@ -3,8 +3,6 @@
 namespace HPHP::Intl {
 //////////////////////////////////////////////////////////////////////////////
 
-Class* Transliterator::c_Transliterator = nullptr;
-
 #define FETCH_TRANS(data, obj) \
   auto data = Transliterator::Get(obj); \
   if (!data) { \
@@ -170,7 +168,7 @@ void IntlExtension::initTransliterator() {
   HHVM_RCC_INT(Transliterator, FORWARD, UTRANS_FORWARD);
   HHVM_RCC_INT(Transliterator, REVERSE, UTRANS_REVERSE);
 
-  Native::registerNativeDataInfo<Transliterator>(s_Transliterator.get());
+  Native::registerNativeDataInfo<Transliterator>();
 }
 
 //////////////////////////////////////////////////////////////////////////////

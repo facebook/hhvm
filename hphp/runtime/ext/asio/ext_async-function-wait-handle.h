@@ -72,8 +72,12 @@ SrcKey getAsyncFrame(AsyncFrameId id);
  * execution. A dependency on another wait handle is set up by awaiting such
  * wait handle, giving control of the execution back to the asio framework.
  */
-struct c_AsyncFunctionWaitHandle final : c_ResumableWaitHandle {
-  WAITHANDLE_CLASSOF(AsyncFunctionWaitHandle);
+struct c_AsyncFunctionWaitHandle final :
+    c_ResumableWaitHandle,
+    SystemLib::ClassLoader<"HH\\AsyncFunctionWaitHandle"> {
+  using SystemLib::ClassLoader<"HH\\AsyncFunctionWaitHandle">::classof;
+  using SystemLib::ClassLoader<"HH\\AsyncFunctionWaitHandle">::className;
+
   static void instanceDtor(ObjectData* obj, const Class*) {
     auto wh = wait_handle<c_AsyncFunctionWaitHandle>(obj);
     Resumable::Destroy(wh->resumable()->size(), wh);

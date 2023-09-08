@@ -37,10 +37,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-WAITHANDLE_CLASSOF_IMPL(Awaitable)
-
-///////////////////////////////////////////////////////////////////////////////
-
 const StaticString s_result("<result>");
 const StaticString s_exception("<exception>");
 
@@ -127,7 +123,7 @@ void AsioExtension::initWaitHandle() {
 #undef WH_ME
 
   Native::registerClassExtraDataHandler(
-    c_Awaitable::s_clsName, finish_class<c_Awaitable>);
+    c_Awaitable::className(), finish_class<c_Awaitable>);
 }
 
 const StaticString

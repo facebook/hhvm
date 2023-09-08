@@ -24,18 +24,6 @@ namespace HPHP::thrift {
 
 const int64_t k_THRIFT_MARK_LEGACY_ARRAYS = 1LL << 0;
 
-const StaticString s_InteractionId("InteractionId");
-
-Class* InteractionId::s_cls = nullptr;
-Class* InteractionId::PhpClass() {
-  return SystemLib::classLoad(s_InteractionId.get(), s_cls);
-}
-
-Class* RpcOptions::c_RpcOptions = nullptr;
-Class* TClientBufferedStream::c_TClientBufferedStream = nullptr;
-Class* TClientSink::c_TClientSink = nullptr;
-
-
 Object HHVM_METHOD(
     TClientSink,
     genCreditsOrFinalResponse) {
@@ -341,7 +329,7 @@ static struct ThriftExtension final : Extension {
     HHVM_FE(thrift_protocol_read_compact);
     HHVM_FE(thrift_protocol_read_compact_struct);
 
-    Native::registerNativeDataInfo<RpcOptions>(s_RpcOptions.get());
+    Native::registerNativeDataInfo<RpcOptions>();
     HHVM_ME(RpcOptions, setChunkBufferSize);
     HHVM_ME(RpcOptions, setRoutingKey);
     HHVM_ME(RpcOptions, setShardId);
@@ -355,14 +343,13 @@ static struct ThriftExtension final : Extension {
     HHVM_ME(RpcOptions, setSerializedAuthProofs);
     HHVM_ME(RpcOptions, __toString);
 
-    Native::registerNativeDataInfo<InteractionId>(s_InteractionId.get());
+    Native::registerNativeDataInfo<InteractionId>();
 
     Native::registerNativeDataInfo<TClientBufferedStream>(
-      s_TClientBufferedStream.get(), Native::NDIFlags::NO_COPY);
+      Native::NDIFlags::NO_COPY);
     HHVM_ME(TClientBufferedStream, genNext);
 
-    Native::registerNativeDataInfo<TClientSink>(
-      s_TClientSink.get(), Native::NDIFlags::NO_COPY);
+    Native::registerNativeDataInfo<TClientSink>(Native::NDIFlags::NO_COPY);
     HHVM_ME(TClientSink, sendPayloadOrSinkComplete);
     HHVM_ME(TClientSink, genCreditsOrFinalResponse);
     HHVM_ME(TClientSink, sendClientException);

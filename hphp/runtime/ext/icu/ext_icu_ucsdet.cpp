@@ -5,8 +5,6 @@ namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
 // class EncodingDetector
 
-const StaticString s_EncodingDetector("EncodingDetector");
-
 #define FETCH_DET(dest, src) \
   auto dest = EncodingDetector::Get(src); \
   if (!dest) { \
@@ -96,9 +94,6 @@ static Array HHVM_METHOD(EncodingDetector, detectAll) {
 
 //////////////////////////////////////////////////////////////////////////////
 // class EncodingMatch
-
-const StaticString s_EncodingMatch("EncodingMatch");
-Class* EncodingMatch::c_EncodingMatch = nullptr;
 
 #define FETCH_MATCH(dest, src) \
   auto dest = EncodingMatch::Get(src); \
@@ -192,11 +187,8 @@ void IntlExtension::initUcsDet() {
   HHVM_ME(EncodingMatch, getLanguage);
   HHVM_ME(EncodingMatch, getUTF8);
 
-  Native::registerNativeDataInfo<EncodingDetector>(
-      s_EncodingDetector.get(),
-      Native::NDIFlags::NO_SWEEP
-  );
-  Native::registerNativeDataInfo<EncodingMatch>(s_EncodingMatch.get());
+  Native::registerNativeDataInfo<EncodingDetector>(Native::NDIFlags::NO_SWEEP);
+  Native::registerNativeDataInfo<EncodingMatch>();
 }
 
 //////////////////////////////////////////////////////////////////////////////

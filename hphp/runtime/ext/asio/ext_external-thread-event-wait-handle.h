@@ -31,8 +31,11 @@ namespace HPHP {
  * See asio-external-thread-event.h for more details.
  */
 struct AsioExternalThreadEvent;
-struct c_ExternalThreadEventWaitHandle final : c_WaitableWaitHandle {
-  WAITHANDLE_CLASSOF(ExternalThreadEventWaitHandle);
+struct c_ExternalThreadEventWaitHandle final :
+    c_WaitableWaitHandle,
+    SystemLib::ClassLoader<"HH\\ExternalThreadEventWaitHandle"> {
+  using SystemLib::ClassLoader<"HH\\ExternalThreadEventWaitHandle">::classof;
+  using SystemLib::ClassLoader<"HH\\ExternalThreadEventWaitHandle">::className;
   WAITHANDLE_DTOR(ExternalThreadEventWaitHandle);
   void sweep();
 

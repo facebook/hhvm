@@ -304,10 +304,10 @@ Type allocObjReturn(const IRInstruction* inst) {
         : TObj;
 
     case CreateGen:
-      return Type::ExactObj(Generator::getClass());
+      return Type::ExactObj(Generator::classof());
 
     case CreateAGen:
-      return Type::ExactObj(AsyncGenerator::getClass());
+      return Type::ExactObj(AsyncGenerator::classof());
 
     case CreateAFWH:
       return Type::ExactObj(c_AsyncFunctionWaitHandle::classof());

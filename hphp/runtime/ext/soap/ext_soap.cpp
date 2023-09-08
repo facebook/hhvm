@@ -48,11 +48,6 @@ namespace HPHP {
 
 const StaticString s___dorequest("__dorequest");
 
-#define IMPLEMENT_GET_CLASS(cls)                                               \
-Class* cls::getClass() {                                                       \
-  return SystemLib::classLoad(s_className.get(), s_class);                     \
-}                                                                              \
-
 ///////////////////////////////////////////////////////////////////////////////
 // helper classes for setting/resetting globals within a method call
 
@@ -236,7 +231,7 @@ static xmlNodePtr serialize_parameter(sdlParamPtr param, Variant value,
                                       xmlNodePtr parent) {
   if (!value.isNull() && value.isObject()) {
     Object obj_value = value.toObject();
-    if (obj_value.instanceof(SoapParam::getClass())) {
+    if (obj_value.instanceof(SoapParam::classof())) {
       SoapParam* p = Native::data<SoapParam>(obj_value);
       value = p->m_data;
       name = p->m_name.c_str();
@@ -389,7 +384,7 @@ static xmlDocPtr serialize_function_call(SoapClient *client,
   if (head) {
     for (ArrayIter iter(soap_headers); iter; ++iter) {
       Object obj_header = iter.second().toObject();
-      assertx(obj_header.instanceof(SoapHeader::getClass()));
+      assertx(obj_header.instanceof(SoapHeader::classof()));
       SoapHeader *header = Native::data<SoapHeader>(obj_header);
 
       xmlNodePtr h;
@@ -530,7 +525,7 @@ static bool do_request(ObjectData* obj_client, xmlDoc *request,
 static void verify_soap_headers_array(Array &headers) {
   for (ArrayIter iter(headers); iter; ++iter) {
     Variant tmp = iter.second();
-    if (!tmp.isObject() || !tmp.toObject().instanceof(SoapHeader::getClass())) {
+    if (!tmp.isObject() || !tmp.toObject().instanceof(SoapHeader::classof())) {
       throw SoapException("Invalid SOAP header");
     }
   }
@@ -1255,7 +1250,7 @@ static xmlDocPtr serialize_response_call(
 
       head = xmlNewChild(envelope, ns, BAD_CAST("Header"), nullptr);
       if (hdr_ret.isObject() &&
-          hdr_ret.toObject().instanceof(SoapHeader::getClass())) {
+          hdr_ret.toObject().instanceof(SoapHeader::classof())) {
         const SoapHeader *ht = Native::data<SoapHeader>(hdr_ret.toObject());
 
         string key;
@@ -1470,7 +1465,7 @@ static xmlDocPtr serialize_response_call(
           const char *hdr_name = h->function_name.data();
 
           if (h->retval.isObject() &&
-              h->retval.toObject().instanceof(SoapHeader::getClass())) {
+              h->retval.toObject().instanceof(SoapHeader::classof())) {
             const SoapHeader *ht = Native::data<SoapHeader>(
               h->retval.toObject());
             string key;
@@ -1886,8 +1881,6 @@ int64_t HHVM_FUNCTION(_soap_active_version) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // class SoapServer
-
-const StaticString SoapServer::s_className("SoapServer");
 
 SoapServer::SoapServer() :
     m_type(SOAP_FUNCTIONS),
@@ -2418,8 +2411,6 @@ void HHVM_METHOD(SoapServer, addSoapHeader,
 ///////////////////////////////////////////////////////////////////////////////
 // class SoapClient
 
-const StaticString SoapClient::s_className("SoapClient");
-
 SoapClient::SoapClient() :
     m_soap_version(SOAP_1_1),
     m_sdl(nullptr),
@@ -2602,7 +2593,7 @@ Variant HHVM_METHOD(SoapClient, soapcallImpl,
     verify_soap_headers_array(arr);
     soap_headers = input_headers;
   } else if (input_headers.isObject() &&
-             input_headers.toObject().instanceof(SoapHeader::getClass())) {
+             input_headers.toObject().instanceof(SoapHeader::classof())) {
     soap_headers = make_vec_array(input_headers);
   } else{
     raise_warning("Invalid SOAP header");
@@ -2983,7 +2974,7 @@ bool HHVM_METHOD(SoapClient, __setsoapheaders,
     verify_soap_headers_array(arr);
     data->m_default_headers = arr;
   } else if (headers.isObject() &&
-             headers.toObject().instanceof(SoapHeader::getClass())) {
+             headers.toObject().instanceof(SoapHeader::classof())) {
     data->m_default_headers = make_vec_array(headers);
   } else {
     raise_warning("Invalid SOAP header");
@@ -2994,18 +2985,13 @@ bool HHVM_METHOD(SoapClient, __setsoapheaders,
 ///////////////////////////////////////////////////////////////////////////////
 // class SoapVar
 
-Class* SoapVar::s_class = nullptr;
-
-IMPLEMENT_GET_CLASS(SoapVar)
-
 const StaticString
   s_enc_type("enc_type"),
   s_enc_value("enc_value"),
   s_enc_stype("enc_stype"),
   s_enc_ns("enc_ns"),
   s_enc_name("enc_name"),
-  s_enc_namens("enc_namens"),
-  SoapVar::s_className("SoapVar");
+  s_enc_namens("enc_namens");
 
 void HHVM_METHOD(SoapVar, __construct,
                  const Variant& data,
@@ -3045,11 +3031,6 @@ void HHVM_METHOD(SoapVar, __construct,
 ///////////////////////////////////////////////////////////////////////////////
 // class SoapParam
 
-Class* SoapParam::s_class = nullptr;
-const StaticString SoapParam::s_className("SoapParam");
-
-IMPLEMENT_GET_CLASS(SoapParam)
-
 void HHVM_METHOD(SoapParam, __construct,
                  const Variant& data,
                  const String& name) {
@@ -3064,11 +3045,6 @@ void HHVM_METHOD(SoapParam, __construct,
 
 ///////////////////////////////////////////////////////////////////////////////
 // class SoapHeader
-
-Class* SoapHeader::s_class = nullptr;
-const StaticString SoapHeader::s_className("SoapHeader");
-
-IMPLEMENT_GET_CLASS(SoapHeader)
 
 static const StaticString
   s_namespace("namespace"),
@@ -3129,8 +3105,7 @@ static struct SoapExtension final : Extension {
     HHVM_ME(SoapServer, setpersistence);
     HHVM_ME(SoapServer, fault);
     HHVM_ME(SoapServer, addSoapHeader);
-    Native::registerNativeDataInfo<SoapServer>(SoapServer::s_className.get(),
-                                               Native::NDIFlags::NO_SWEEP);
+    Native::registerNativeDataInfo<SoapServer>(Native::NDIFlags::NO_SWEEP);
 
     HHVM_ME(SoapClient, __construct);
     HHVM_ME(SoapClient, soapcallImpl);
@@ -3144,18 +3119,15 @@ static struct SoapExtension final : Extension {
     HHVM_ME(SoapClient, __setcookie);
     HHVM_ME(SoapClient, __setlocation);
     HHVM_ME(SoapClient, __setsoapheaders);
-    Native::registerNativeDataInfo<SoapClient>(SoapClient::s_className.get(),
-                                               Native::NDIFlags::NO_SWEEP);
+    Native::registerNativeDataInfo<SoapClient>(Native::NDIFlags::NO_SWEEP);
 
     HHVM_ME(SoapVar, __construct);
 
     HHVM_ME(SoapParam, __construct);
-    Native::registerNativeDataInfo<SoapParam>(SoapParam::s_className.get(),
-                                              Native::NDIFlags::NO_SWEEP);
+    Native::registerNativeDataInfo<SoapParam>(Native::NDIFlags::NO_SWEEP);
 
     HHVM_ME(SoapHeader, __construct);
-    Native::registerNativeDataInfo<SoapHeader>(SoapHeader::s_className.get(),
-                                               Native::NDIFlags::NO_SWEEP);
+    Native::registerNativeDataInfo<SoapHeader>(Native::NDIFlags::NO_SWEEP);
 
     HHVM_FE(use_soap_error_handler);
     HHVM_FE(is_soap_fault);

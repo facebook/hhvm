@@ -37,7 +37,7 @@ Object newDOMDocument(bool construct = true);
 ///////////////////////////////////////////////////////////////////////////////
 // class DOMNode
 
-struct DOMNode {
+struct DOMNode : SystemLib::ClassLoader<"DOMNode"> {
   ~DOMNode() {
     if (m_node && m_node->getCache()) {
       assertx(Native::data<DOMNode>(m_node->getCache()) == this);
@@ -87,7 +87,10 @@ Variant save_html_or_xml(DOMNode* obj, bool as_xml,
 ///////////////////////////////////////////////////////////////////////////////
 // class DOMElement
 
-struct DOMElement : DOMNode {
+struct DOMElement : DOMNode, SystemLib::ClassLoader<"DOMElement"> {
+  using SystemLib::ClassLoader<"DOMElement">::classof;
+  using SystemLib::ClassLoader<"DOMElement">::className;
+
   // Allow serialization, but no native data is actually serialized.
   Variant sleep() const { return init_null(); }
   void wakeup(const Variant&, ObjectData*) {}
@@ -116,7 +119,7 @@ struct DOMIterable {
 ///////////////////////////////////////////////////////////////////////////////
 // class DOMNodeIterator
 
-struct DOMNodeIterator {
+struct DOMNodeIterator : SystemLib::ClassLoader<"DOMNodeIterator"> {
   void reset_iterator();
   void set_iterator(ObjectData* o, DOMIterable* objmap);
   void setKeyIsNamed() { m_keyIsNamed = true; }
@@ -132,7 +135,7 @@ struct DOMNodeIterator {
 ///////////////////////////////////////////////////////////////////////////////
 // class DOMXPath
 
-struct DOMXPath {
+struct DOMXPath : SystemLib::ClassLoader<"DOMXPath"> {
   ~DOMXPath() { sweep(); }
   void sweep();
   xmlXPathContextPtr m_node {nullptr};

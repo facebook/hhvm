@@ -31,8 +31,6 @@ namespace {
   StaticString s_sleep("<sleep>");
 }
 
-WAITHANDLE_CLASSOF_IMPL(SleepWaitHandle)
-
 void HHVM_STATIC_METHOD(SleepWaitHandle, setOnCreateCallback,
                         const Variant& callback) {
   AsioSession::Get()->setOnSleepCreate(callback);
@@ -175,7 +173,7 @@ void AsioExtension::initSleepWaitHandle() {
 #undef SWH_SWE
 
   Native::registerClassExtraDataHandler(
-    c_SleepWaitHandle::s_clsName, finish_class<c_SleepWaitHandle>);
+    c_SleepWaitHandle::className(), finish_class<c_SleepWaitHandle>);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

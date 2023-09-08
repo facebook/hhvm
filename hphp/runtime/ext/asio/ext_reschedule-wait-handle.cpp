@@ -30,8 +30,6 @@ namespace {
   StaticString s_reschedule("<reschedule>");
 }
 
-WAITHANDLE_CLASSOF_IMPL(RescheduleWaitHandle)
-
 Object HHVM_STATIC_METHOD(RescheduleWaitHandle, create,
                           int64_t queue, int64_t priority) {
   if (UNLIKELY(
@@ -125,7 +123,7 @@ void AsioExtension::initRescheduleWaitHandle() {
                AsioContext::QUEUE_NO_PENDING_IO);
 
   Native::registerClassExtraDataHandler(
-    c_RescheduleWaitHandle::s_clsName, finish_class<c_RescheduleWaitHandle>);
+    c_RescheduleWaitHandle::className(), finish_class<c_RescheduleWaitHandle>);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

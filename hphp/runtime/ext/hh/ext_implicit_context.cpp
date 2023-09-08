@@ -41,7 +41,6 @@ namespace HPHP {
 
 namespace {
 
-Class* s_ImplicitContextDataClass = nullptr;
 const StaticString
   s_ImplicitContextDataClassName("HH\\ImplicitContext\\_Private\\ImplicitContextData"),
   s_ICInaccessibleMemoKey("%Inaccessible%"),
@@ -54,9 +53,11 @@ const StaticString
   s_ICStateInaccessible("INACCESSIBLE"),
   s_ICStateSoftInaccessible("SOFT_INACCESSIBLE");
 
+struct ImplicitContextLoader :
+  SystemLib::ClassLoader<"HH\\ImplicitContext\\_Private\\ImplicitContextData"> {};
+
 Object create_new_IC() {
-  auto obj = Object{ SystemLib::classLoad(s_ImplicitContextDataClassName.get(),
-                                          s_ImplicitContextDataClass) };
+  auto obj = Object{ ImplicitContextLoader::classof() };
   // PURPOSEFULLY LEAK MEMORY: When the data is stored/restored during the
   // suspend/resume routine, we should properly refcount the data but that is
   // expensive. Leak and let the GC take care of it.
@@ -340,7 +341,8 @@ Variant HHVM_FUNCTION(enter_zoned_with, const Variant& function) {
 static struct HHImplicitContext final : Extension {
   HHImplicitContext(): Extension("implicit_context", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) { }
   void moduleInit() override {
-    Native::registerNativeDataInfo<ImplicitContext>(s_ImplicitContextDataClassName.get());
+    Native::registerNativeDataInfo<ImplicitContext>(
+      ImplicitContextLoader::className().get());
 
     HHVM_NAMED_FE(HH\\ImplicitContext\\get_state_unsafe,
                   HHVM_FN(get_state_unsafe));

@@ -19,10 +19,6 @@
 namespace HPHP::Intl {
 //////////////////////////////////////////////////////////////////////////////
 
-const StaticString s_IntlIterator("IntlIterator");
-
-Class* IntlIterator::c_IntlIterator = nullptr;
-
 #define II_GET(dest, src, def) \
   auto dest = IntlIterator::Get(src); \
   if (!dest) { \
@@ -71,7 +67,7 @@ void IntlExtension::initIterator() {
   HHVM_ME(IntlIterator, rewind);
   HHVM_ME(IntlIterator, valid);
 
-  Native::registerNativeDataInfo<IntlIterator>(s_IntlIterator.get());
+  Native::registerNativeDataInfo<IntlIterator>();
 }
 
 //////////////////////////////////////////////////////////////////////////////

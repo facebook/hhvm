@@ -257,7 +257,7 @@ bool ObjectData::toBooleanImpl() const noexcept {
     return collections::toBool(this);
   }
 
-  if (instanceof(SimpleXMLElement_classof())) {
+  if (instanceof(SimpleXMLElementLoader::classof())) {
     // SimpleXMLElement is the only non-collection class that has custom bool
     // casting.
     if (RuntimeOption::EvalNoticeOnSimpleXMLBehavior) {
@@ -272,7 +272,7 @@ bool ObjectData::toBooleanImpl() const noexcept {
 
 int64_t ObjectData::toInt64() const {
   /* SimpleXMLElement is the only class that has proper custom num casting. */
-  if (LIKELY(!instanceof(SimpleXMLElement_classof()))) {
+  if (LIKELY(!instanceof(SimpleXMLElementLoader::classof()))) {
     throwObjToIntException(classname_cstr());
   }
   if (RuntimeOption::EvalNoticeOnSimpleXMLBehavior) {
@@ -283,7 +283,7 @@ int64_t ObjectData::toInt64() const {
 
 double ObjectData::toDouble() const {
   /* SimpleXMLElement is the only class that has proper custom num casting. */
-  if (LIKELY(!instanceof(SimpleXMLElement_classof()))) {
+  if (LIKELY(!instanceof(SimpleXMLElementLoader::classof()))) {
     throwObjToDoubleException(classname_cstr());
   }
   if (RuntimeOption::EvalNoticeOnSimpleXMLBehavior) {
@@ -317,13 +317,13 @@ Object ObjectData::iterableObject(bool& isIterable,
     }
     obj.reset(o);
   }
-  if (!isIterator() && obj->instanceof(SimpleXMLElement_classof())) {
+  if (!isIterator() && obj->instanceof(SimpleXMLElementLoader::classof())) {
     if (RuntimeOption::EvalNoticeOnSimpleXMLBehavior) {
       raise_notice("SimpleXMLElement used as iterator");
     }
     isIterable = true;
     return create_object(
-      s_SimpleXMLElementIterator,
+      SimpleXMLElementIteratorLoader::className(),
       make_vec_array(obj)
     );
   }
@@ -580,7 +580,7 @@ Array ObjectData::toArray(bool pubOnly /* = false */,
   } else if (UNLIKELY(m_cls->rtAttribute(Class::CallToImpl))) {
     // If we end up with other classes that need special behavior, turn the
     // assert into an if and add cases.
-    assertx(instanceof(SimpleXMLElement_classof()));
+    assertx(instanceof(SimpleXMLElementLoader::classof()));
     if (RuntimeOption::EvalNoticeOnSimpleXMLBehavior) {
       raise_notice("SimpleXMLElement to array cast");
     }
@@ -592,7 +592,7 @@ Array ObjectData::toArray(bool pubOnly /* = false */,
     not_reached();
   } else if (UNLIKELY(instanceof(c_Closure::classof()))) {
     return make_vec_array(Object(const_cast<ObjectData*>(this)));
-  } else if (UNLIKELY(instanceof(DateTimeData::getClass()))) {
+  } else if (UNLIKELY(instanceof(DateTimeData::classof()))) {
     return Native::data<DateTimeData>(this)->getDebugInfo();
   } else {
     auto ret = Array::CreateDict();
@@ -855,7 +855,7 @@ bool ObjectData::equal(const ObjectData& other) const {
     return DateTimeData::compare(this, &other) == 0;
   }
   if (getVMClass() != other.getVMClass()) return false;
-  if (UNLIKELY(instanceof(SimpleXMLElement_classof()))) {
+  if (UNLIKELY(instanceof(SimpleXMLElementLoader::classof()))) {
     if (RuntimeOption::EvalNoticeOnSimpleXMLBehavior) {
       raise_notice("SimpleXMLElement equality comparison");
     }
@@ -947,7 +947,7 @@ int64_t ObjectData::compare(const ObjectData& other) const {
     throwCmpBadTypesException(&lhs, &rhs);
     not_reached();
   }
-  if (UNLIKELY(instanceof(SimpleXMLElement_classof()))) {
+  if (UNLIKELY(instanceof(SimpleXMLElementLoader::classof()))) {
     if (RuntimeOption::EvalNoticeOnSimpleXMLBehavior) {
       raise_notice("SimpleXMLElement comparison");
     }

@@ -22,11 +22,9 @@
 
 namespace HPHP {
 
-struct FunctionCredential {
+struct FunctionCredential : SystemLib::ClassLoader<"FunctionCredential"> {
   static ObjectData* newInstance(const Func* func);
   static const FunctionCredential* fromObject(const ObjectData* obj);
-
-  static Class* classof();
 
   const Func* func() const {
     assertx(func_);

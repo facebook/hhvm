@@ -11,10 +11,6 @@
 #include "hphp/runtime/vm/native.h"
 
 namespace HPHP { namespace collections {
-/////////////////////////////////////////////////////////////////////////////
-
-const StaticString
-  s_PairIterator("PairIterator");
 
 /////////////////////////////////////////////////////////////////////////////
 // PairIterator
@@ -42,9 +38,6 @@ static void HHVM_METHOD(PairIterator, rewind) {
 /////////////////////////////////////////////////////////////////////////////
 // Pair
 }
-
-Class* c_Pair::s_cls;
-StaticString c_Pair::s_clsName("HH\\Pair");
 
 c_Pair::~c_Pair() {
   tvDecRefGen(&elm0);
@@ -121,10 +114,7 @@ void CollectionsExtension::initPair() {
   HHVM_ME(PairIterator, next);
   HHVM_ME(PairIterator, rewind);
 
-  Native::registerNativeDataInfo<PairIterator>(
-    s_PairIterator.get(),
-    Native::NDIFlags::NO_SWEEP
-  );
+  Native::registerNativeDataInfo<PairIterator>(Native::NDIFlags::NO_SWEEP);
 
   HHVM_NAMED_ME(HH\\Pair, values,         materialize<c_ImmVector>);
   HHVM_NAMED_ME(HH\\Pair, at,             &c_Pair::php_at);
@@ -139,9 +129,9 @@ void CollectionsExtension::initPair() {
   HHVM_NAMED_ME(HH\\Pair, toSet,          materialize<c_Set>);
   HHVM_NAMED_ME(HH\\Pair, toImmSet,       materialize<c_ImmSet>);
 
-  Native::registerNativePropHandler<CollectionPropHandler>(c_Pair::s_clsName);
+  Native::registerNativePropHandler<CollectionPropHandler>(c_Pair::className());
 
-  Native::registerClassExtraDataHandler(c_Pair::s_clsName, finish_class<c_Pair>);
+  Native::registerClassExtraDataHandler(c_Pair::className(), finish_class<c_Pair>);
 }
 
 /////////////////////////////////////////////////////////////////////////////

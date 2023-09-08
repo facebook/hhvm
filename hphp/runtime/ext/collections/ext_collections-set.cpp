@@ -12,13 +12,6 @@
 #include "hphp/runtime/vm/vm-regs.h"
 
 namespace HPHP {
-/////////////////////////////////////////////////////////////////////////////
-
-Class* c_Set::s_cls;
-StaticString c_Set::s_clsName("HH\\Set");
-
-Class* c_ImmSet::s_cls;
-StaticString c_ImmSet::s_clsName("HH\\ImmSet");
 
 /////////////////////////////////////////////////////////////////////////////
 // BaseSet
@@ -533,10 +526,6 @@ c_ImmSet* c_ImmSet::Clone(ObjectData* obj) {
 }
 
 namespace collections {
-/////////////////////////////////////////////////////////////////////////////
-
-const StaticString
-  s_SetIterator("SetIterator");
 
 /////////////////////////////////////////////////////////////////////////////
 // SetIterator
@@ -570,10 +559,7 @@ void CollectionsExtension::initSet() {
   HHVM_ME(SetIterator, next);
   HHVM_ME(SetIterator, rewind);
 
-  Native::registerNativeDataInfo<SetIterator>(
-    s_SetIterator.get(),
-    Native::NDIFlags::NO_SWEEP
-  );
+  Native::registerNativeDataInfo<SetIterator>(Native::NDIFlags::NO_SWEEP);
 
 #define BASE_ME(mn, impl) \
   HHVM_NAMED_ME(HH\\Set,    mn, impl); \
@@ -628,11 +614,11 @@ void CollectionsExtension::initSet() {
   HHVM_NAMED_ME(HH\\Set, reserve,  &c_Set::php_reserve);
   HHVM_NAMED_ME(HH\\Set, toImmSet, &c_Set::getImmutableCopy);
 
-  Native::registerNativePropHandler<CollectionPropHandler>(c_Set::s_clsName);
-  Native::registerNativePropHandler<CollectionPropHandler>(c_ImmSet::s_clsName);
+  Native::registerNativePropHandler<CollectionPropHandler>(c_Set::className());
+  Native::registerNativePropHandler<CollectionPropHandler>(c_ImmSet::className());
 
-  Native::registerClassExtraDataHandler(c_Set::s_clsName, finish_class<c_Set>);
-  Native::registerClassExtraDataHandler(c_ImmSet::s_clsName, finish_class<c_ImmSet>);
+  Native::registerClassExtraDataHandler(c_Set::className(), finish_class<c_Set>);
+  Native::registerClassExtraDataHandler(c_ImmSet::className(), finish_class<c_ImmSet>);
 }
 
 /////////////////////////////////////////////////////////////////////////////

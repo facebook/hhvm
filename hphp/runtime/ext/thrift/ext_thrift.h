@@ -99,13 +99,10 @@ Object HHVM_FUNCTION(
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct InteractionId {
+struct InteractionId : SystemLib::ClassLoader<"InteractionId"> {
   static Object newInstance() {
-    return Object{PhpClass()};
+    return Object{classof()};
   }
-
-  static Class* s_cls;
-  static Class* PhpClass();
 
   ~InteractionId() {
     sweep();
@@ -136,9 +133,7 @@ struct InteractionId {
 
 /////////////////////////////////////////////////////////////////////////////
 
-const StaticString s_RpcOptions("RpcOptions");
-
-struct RpcOptions {
+struct RpcOptions : SystemLib::ClassLoader<"RpcOptions"> {
   RpcOptions() {}
   RpcOptions& operator=(const RpcOptions& that_) {
     return *this;
@@ -150,12 +145,8 @@ struct RpcOptions {
 
   void close(bool /*sweeping*/ = false) {}
 
-  static Class* PhpClass() {
-    return SystemLib::classLoad(s_RpcOptions.get(), c_RpcOptions);
-  }
-
   static Object newInstance() {
-    return Object{PhpClass()};
+    return Object{classof()};
   }
 
   static RpcOptions* GetDataOrThrowException(ObjectData* object_) {
@@ -163,7 +154,7 @@ struct RpcOptions {
       throw_null_pointer_exception();
       not_reached();
     }
-    if (!object_->getVMClass()->classofNonIFace(PhpClass())) {
+    if (!object_->getVMClass()->classofNonIFace(classof())) {
       raise_error("RpcOptions expected");
       not_reached();
     }
@@ -173,7 +164,6 @@ struct RpcOptions {
   apache::thrift::RpcOptions rpcOptions;
 
  private:
-  static Class* c_RpcOptions;
   TYPE_SCAN_IGNORE_ALL;
 };
 
@@ -237,9 +227,7 @@ struct TClientStreamError {
   bool isEncoded_;
 };
 
-const StaticString s_TClientBufferedStream("TClientBufferedStream");
-
-struct TClientBufferedStream {
+struct TClientBufferedStream : SystemLib::ClassLoader<"TClientBufferedStream"> {
   TClientBufferedStream() = default;
   TClientBufferedStream(const TClientBufferedStream&) = delete;
   TClientBufferedStream& operator=(const TClientBufferedStream&) = delete;
@@ -305,13 +293,8 @@ struct TClientBufferedStream {
     return std::make_pair(std::move(bufferVec), std::move(error));
   }
 
-  static Class* PhpClass() {
-    return SystemLib::classLoad(s_TClientBufferedStream.get(),
-                                c_TClientBufferedStream);
-  }
-
   static Object newInstance() {
-    return Object{PhpClass()};
+    return Object{classof()};
   }
 
   static TClientBufferedStream* GetDataOrThrowException(ObjectData* object_) {
@@ -319,7 +302,7 @@ struct TClientBufferedStream {
       throw_null_pointer_exception();
       not_reached();
     }
-    if (!object_->getVMClass()->classofNonIFace(PhpClass())) {
+    if (!object_->getVMClass()->classofNonIFace(classof())) {
       raise_error("TClientBufferedStream expected");
       not_reached();
     }
@@ -336,8 +319,6 @@ struct TClientBufferedStream {
   int32_t outstanding_ = 0;
   size_t payloadDataSize_ = 0;
   static constexpr size_t kRequestCreditPayloadSize = 16384;
-
-  static Class* c_TClientBufferedStream;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -345,9 +326,7 @@ struct TClientBufferedStream {
 using TClientSinkCreditsOrFinalResponse =
     std::variant<uint64_t, std::unique_ptr<folly::IOBuf>, TClientStreamError>;
 
-const StaticString s_TClientSink("TClientSink");
-
-struct TClientSink {
+struct TClientSink : SystemLib::ClassLoader<"TClientSink"> {
   TClientSink() = default;
   TClientSink(const TClientSink&) = delete;
   TClientSink& operator=(const TClientSink&) = delete;
@@ -376,12 +355,8 @@ struct TClientSink {
     }
   }
 
-  static Class* PhpClass() {
-    return SystemLib::classLoad(s_TClientSink.get(), c_TClientSink);
-  }
-
   static Object newInstance() {
-    return Object{PhpClass()};
+    return Object{classof()};
   }
 
   static TClientSink* GetDataOrThrowException(ObjectData* object_) {
@@ -389,7 +364,7 @@ struct TClientSink {
       throw_null_pointer_exception();
       not_reached();
     }
-    if (!object_->getVMClass()->classofNonIFace(PhpClass())) {
+    if (!object_->getVMClass()->classofNonIFace(classof())) {
       raise_error("TClientSink expected");
       not_reached();
     }
@@ -429,7 +404,6 @@ struct TClientSink {
 
  public:
   apache::thrift::detail::ClientSinkBridge::Ptr sinkBridge_;
-  static Class* c_TClientSink;
 };
 } // namespace thrift
 

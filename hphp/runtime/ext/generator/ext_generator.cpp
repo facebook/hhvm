@@ -27,9 +27,6 @@
 
 namespace HPHP {
 
-Class* Generator::s_class = nullptr;
-const StaticString Generator::s_className("Generator");
-
 Generator::Generator()
   : m_index(-1LL)
   , m_key(make_tv<KindOfInt64>(-1LL))
@@ -82,7 +79,7 @@ ObjectData* Generator::Create(const ActRec* fp, size_t numSlots,
   assertx(fp->func()->isNonAsyncGenerator());
   const size_t frameSz = Resumable::getFrameSize(numSlots);
   const size_t genSz = genSize(sizeof(Generator), frameSz);
-  auto const obj = BaseGenerator::Alloc<Generator>(getClass(), genSz);
+  auto const obj = BaseGenerator::Alloc<Generator>(classof(), genSz);
   auto const genData = new (Native::data<Generator>(obj)) Generator();
   genData->resumable()->initialize<false>(fp,
                                           resumeAddr,
@@ -91,10 +88,6 @@ ObjectData* Generator::Create(const ActRec* fp, size_t numSlots,
                                           genSz);
   genData->setState(State::Created);
   return obj;
-}
-
-Class* Generator::getClass() {
-  return SystemLib::classLoad(s_className.get(), s_class);
 }
 
 void Generator::copyVars(const ActRec* srcFp) {
@@ -186,7 +179,6 @@ struct GeneratorExtension final : Extension {
     HHVM_ME(Generator, getOrigFuncName);
     HHVM_ME(Generator, getCalledClass);
     Native::registerNativeDataInfo<Generator>(
-      Generator::s_className.get(),
       Native::NDIFlags::NO_SWEEP | Native::NDIFlags::CTOR_THROWS);
   }
 };

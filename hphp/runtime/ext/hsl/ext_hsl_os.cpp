@@ -46,7 +46,6 @@ const StaticString
   s_resource("resource"),
   s_type("type"),
   s_ErrnoException("HH\\Lib\\_Private\\_OS\\ErrnoException"),
-  s_FQHSLFileDescriptor("HH\\Lib\\OS\\FileDescriptor"),
   s_HSL_sockaddr("HH\\Lib\\_Private\\_OS\\sockaddr"),
   s_HSL_sockaddr_in("HH\\Lib\\_Private\\_OS\\sockaddr_in"),
   s_HSL_sockaddr_in6("HH\\Lib\\_Private\\_OS\\sockaddr_in6"),
@@ -63,8 +62,6 @@ const Slot
   s_sin6_addr_idx { 3 },
   s_sin6_scope_id_idx { 4 },
   s_sun_path_idx { 1 };
-
-Class* s_FileDescriptorClass = nullptr;
 
 IMPLEMENT_REQUEST_LOCAL(std::set<int>, s_fds_to_close);
 
@@ -267,7 +264,8 @@ void native_sockaddr_from_hsl(const Object& object, sockaddr_storage& native, so
 
 } // namespace
 
-struct HSLFileDescriptor {
+struct HSLFileDescriptor :
+    SystemLib::ClassLoader<"HH\\Lib\\OS\\FileDescriptor"> {
   enum class Type {
     FD,
     RESOURCE
@@ -323,8 +321,7 @@ struct HSLFileDescriptor {
 
   template<class ...Args>
   static Object newInstance(Args&&... args) {
-    Object obj { SystemLib::classLoad(s_FQHSLFileDescriptor.get(),
-                                      s_FileDescriptorClass) };
+    Object obj { HSLFileDescriptor::classof() };
 
     auto* data = Native::data<HSLFileDescriptor>(obj);
     new (data) HSLFileDescriptor(args...);
@@ -336,7 +333,7 @@ struct HSLFileDescriptor {
       raise_typehint_error_without_first_frame(
         "Expected an HSL FileDescriptor, got null");
     }
-    if (!obj->instanceof(s_FQHSLFileDescriptor)) {
+    if (!obj->instanceof(HSLFileDescriptor::classof())) {
       raise_typehint_error_without_first_frame(
         folly::sformat(
           "Expected an HSL FileDescriptor, got instance of class '{}'",
@@ -1073,7 +1070,7 @@ struct OSExtension final : Extension {
   void moduleInit() override {
     // Remember to update the HHI :)
 
-    Native::registerNativeDataInfo<HSLFileDescriptor>(s_FQHSLFileDescriptor.get());
+    Native::registerNativeDataInfo<HSLFileDescriptor>();
     HHVM_NAMED_ME(HH\\Lib\\OS\\FileDescriptor, __debugInfo, HHVM_MN(HSLFileDescriptor, __debugInfo));
 
     // The preprocessor doesn't like "\" immediately before a ##

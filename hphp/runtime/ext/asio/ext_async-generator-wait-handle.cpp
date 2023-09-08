@@ -38,8 +38,6 @@ namespace {
   const StaticString s_asyncGenerator("<async-generator>");
 }
 
-WAITHANDLE_CLASSOF_IMPL(AsyncGeneratorWaitHandle)
-
 c_AsyncGeneratorWaitHandle::~c_AsyncGeneratorWaitHandle() {
   if (LIKELY(isFinished())) return;
   assertx(!isRunning());
@@ -245,7 +243,7 @@ void c_AsyncGeneratorWaitHandle::exitContext(context_idx_t ctx_idx) {
 
 void AsioExtension::initAsyncGeneratorWaitHandle() {
   Native::registerClassExtraDataHandler(
-    c_AsyncGeneratorWaitHandle::s_clsName,
+    c_AsyncGeneratorWaitHandle::className(),
     finish_class<c_AsyncGeneratorWaitHandle>);
 }
 

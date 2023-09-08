@@ -480,7 +480,7 @@ static void HHVM_METHOD(XSLTProcessor, importStylesheet,
     if (doc == nullptr) {
       raise_error("Unable to import stylesheet");
     }
-  } else if (stylesheet.instanceof(SimpleXMLElement_classof())) {
+  } else if (stylesheet.instanceof(SimpleXMLElementLoader::classof())) {
     auto ssNode = SimpleXMLElement_exportNode(stylesheet);
     // This doc will be freed by xsltFreeStylesheet.
     doc = xmlNewDoc((const xmlChar*)"1.0");

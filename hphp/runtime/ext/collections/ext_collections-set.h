@@ -264,7 +264,7 @@ private:
 /////////////////////////////////////////////////////////////////////////////
 // c_Set
 
-struct c_Set : BaseSet {
+struct c_Set : BaseSet, SystemLib::ClassLoader<"HH\\Set"> {
   DECLARE_COLLECTIONS_CLASS(Set)
 
  public:
@@ -334,7 +334,7 @@ struct c_Set : BaseSet {
 ///////////////////////////////////////////////////////////////////////////////
 // class ImmSet
 
-struct c_ImmSet : BaseSet {
+struct c_ImmSet : BaseSet, SystemLib::ClassLoader<"HH\\ImmSet"> {
   DECLARE_COLLECTIONS_CLASS(ImmSet)
 
   explicit c_ImmSet()
@@ -350,10 +350,7 @@ struct c_ImmSet : BaseSet {
 namespace collections {
 /////////////////////////////////////////////////////////////////////////////
 
-extern const StaticString
-  s_SetIterator;
-
-struct SetIterator {
+struct SetIterator : SystemLib::ClassLoader<"SetIterator"> {
   SetIterator() {}
   SetIterator(const SetIterator& src) = delete;
   SetIterator& operator=(const SetIterator& src) {
@@ -364,8 +361,7 @@ struct SetIterator {
   ~SetIterator() {}
 
   static Object newInstance() {
-    static Class* cls = nullptr;
-    return Object{SystemLib::classLoad(s_SetIterator.get(), cls)};
+    return Object{classof()};
   }
 
   void setSet(BaseSet* mp) {

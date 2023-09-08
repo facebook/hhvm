@@ -36,8 +36,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-WAITHANDLE_CLASSOF_IMPL(WaitableWaitHandle)
-
 // throws on context depth level overflows and cross-context cycles
 void c_WaitableWaitHandle::join() {
   VMRegAnchor _;

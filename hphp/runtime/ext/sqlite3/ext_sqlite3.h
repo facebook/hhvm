@@ -24,11 +24,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct SQLite3 {
+struct SQLite3 : SystemLib::ClassLoader<"SQLite3"> {
   SQLite3();
   ~SQLite3();
   void validate() const;
-  static Class *getClass();
 
   struct UserDefinedFunc {
     int argc;
@@ -40,8 +39,6 @@ struct SQLite3 {
 public:
   sqlite3 *m_raw_db;
   req::vector<req::shared_ptr<UserDefinedFunc>> m_udfs;
-  static Class *s_class;
-  static const StaticString s_className;
 };
 
 void HHVM_METHOD(SQLite3, open,
@@ -52,11 +49,10 @@ void HHVM_METHOD(SQLite3, open,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct SQLite3Stmt {
+struct SQLite3Stmt : SystemLib::ClassLoader<"SQLite3Stmt"> {
   SQLite3Stmt();
   ~SQLite3Stmt();
   void validate() const;
-  static Class *getClass();
 
   struct BoundParam {
     int type;
@@ -68,8 +64,6 @@ public:
   Object m_db;
   sqlite3_stmt *m_raw_stmt;
   req::vector<req::shared_ptr<BoundParam>> m_bound_params;
-  static Class *s_class;
-  static const StaticString s_className;
 };
 
 void HHVM_METHOD(SQLite3Stmt, __construct,
@@ -79,16 +73,13 @@ Variant HHVM_METHOD(SQLite3Stmt, execute);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct SQLite3Result {
+struct SQLite3Result : SystemLib::ClassLoader<"SQLite3Result"> {
   SQLite3Result();
   void validate() const;
-  static Class *getClass();
 
 public:
   Object m_stmt_obj;
   SQLite3Stmt *m_stmt; // XXX why not scanned?
-  static Class *s_class;
-  static const StaticString s_className;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -30,16 +30,6 @@ using std::vector;
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////////////
-// PHP Exceptions and Classes
-#define IMAGICK_IMPL_CLASS(CLS) \
-  HPHP::Class* CLS::s_cls = nullptr; \
-  HPHP::StaticString CLS::s_clsName(#CLS);
-
-IMAGE_MAGIC_CLASSES(IMAGICK_IMPL_CLASS)
-
-#undef IMAGICK_IMPL_CLASS
-
-//////////////////////////////////////////////////////////////////////////////
 // IO
 bool isMagickPseudoFormat(const String& path, char mode /* = '*' */) {
   static const vector<pair<string, string>> pseudoFormats = {

@@ -24,8 +24,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-WAITHANDLE_CLASSOF_IMPL(StaticWaitHandle)
-
 rds::Link<Object, rds::Mode::Normal> c_StaticWaitHandle::NullHandle;
 rds::Link<Object, rds::Mode::Normal> c_StaticWaitHandle::TrueHandle;
 rds::Link<Object, rds::Mode::Normal> c_StaticWaitHandle::FalseHandle;
@@ -83,7 +81,7 @@ void AsioExtension::initStaticWaitHandle() {
     rds::Mode::Normal, rds::LinkID{"StaticFalseWH"});
 
   Native::registerClassExtraDataHandler(
-    c_StaticWaitHandle::s_clsName, finish_class<c_StaticWaitHandle>);
+    c_StaticWaitHandle::className(), finish_class<c_StaticWaitHandle>);
 }
 
 void AsioExtension::requestInitSingletons() {

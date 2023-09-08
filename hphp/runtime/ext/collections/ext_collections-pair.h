@@ -16,7 +16,7 @@ void deepCopy(tv_lval);
 struct PairIterator;
 }
 
-struct c_Pair : c_Collection {
+struct c_Pair : c_Collection, SystemLib::ClassLoader<"HH\\Pair"> {
   DECLARE_COLLECTIONS_CLASS_NOCTOR(Pair);
 
   static ObjectData* instanceCtor(Class* /*cls*/) {
@@ -157,10 +157,7 @@ struct c_Pair : c_Collection {
 namespace collections {
 /////////////////////////////////////////////////////////////////////////////
 
-extern const StaticString
-  s_PairIterator, s_HH_Pair;
-
-struct PairIterator {
+struct PairIterator : SystemLib::ClassLoader<"PairIterator"> {
   PairIterator() {}
   PairIterator(const PairIterator& src) = delete;
   PairIterator& operator=(const PairIterator& src) {
@@ -171,8 +168,7 @@ struct PairIterator {
   ~PairIterator() {}
 
   static Object newInstance() {
-    static Class* cls = nullptr;
-    return Object{ SystemLib::classLoad(s_PairIterator.get(), cls) };
+    return Object{ classof() };
   }
 
   void setPair(c_Pair* pr) {

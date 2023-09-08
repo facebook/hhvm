@@ -71,28 +71,21 @@ struct ImagickExtension final : Extension {
   X(ImagickPixelIterator)
 
 #define IMAGICK_DEFINE_CLASS(CLS) \
-  class CLS { \
+  struct CLS : SystemLib::ClassLoader<#CLS> { \
    public: \
     static Object allocObject() { \
-      return Object{ getClass() }; \
-    } \
-    \
-    static Class* getClass() { \
-      return SystemLib::classLoad(s_clsName.get(), s_cls); \
+      return Object{ classof() }; \
     } \
     \
     static Object allocObject(const Variant& arg) { \
       Object ret = allocObject(); \
       tvDecRefGen(\
-        g_context->invokeFunc(getClass()->getCtor(), make_vec_array(arg), \
+        g_context->invokeFunc(classof()->getCtor(), make_vec_array(arg), \
                               ret.get()) \
       );\
       return ret; \
     } \
     \
-   private: \
-    static HPHP::Class* s_cls;                                  \
-    static HPHP::StaticString s_clsName;                        \
   };
 
 IMAGE_MAGIC_CLASSES(IMAGICK_DEFINE_CLASS)

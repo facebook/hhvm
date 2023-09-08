@@ -36,8 +36,6 @@ const StaticString
   s_tm_yday("tm_yday"),
   s_tm_isdst("tm_isdst");
 
-Class* IntlDateFormatter::c_IntlDateFormatter = nullptr;
-
 void IntlDateFormatter::setDateFormatter(const String& locale,
                                          int64_t datetype, int64_t timetype,
                                          const Variant& timezone, const Variant& calendar,
@@ -489,7 +487,7 @@ void IntlExtension::initDateFormatter() {
   HHVM_ME(IntlDateFormatter, setPattern);
   HHVM_ME(IntlDateFormatter, setTimezone);
 
-  Native::registerNativeDataInfo<IntlDateFormatter>(s_IntlDateFormatter.get());
+  Native::registerNativeDataInfo<IntlDateFormatter>();
 }
 
 //////////////////////////////////////////////////////////////////////////////

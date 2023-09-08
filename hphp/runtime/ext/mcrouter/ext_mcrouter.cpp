@@ -31,15 +31,11 @@ struct MCRouterResult;
 
 const StaticString
   s_MCRouter("MCRouter"),
-  s_MCRouterException("MCRouterException"),
-  s_MCRouterOptionException("MCRouterOptionException"),
   s_option("option"),
   s_error("error"),
   s_value("value"),
   s_cas("cas"),
   s_flags("flags");
-
-static Class* c_MCRouterException = nullptr;
 
 /**
  * Below are to maintain the compatibility during the migration
@@ -95,13 +91,19 @@ uint64_t getFlagsIfExist(Message& message) {
 }
 }
 
+namespace {
+struct MCRouterException : SystemLib::ClassLoader<"MCRouterException"> {};
+
+struct MCRouterOptionException :
+  SystemLib::ClassLoader<"MCRouterOptionException"> {};
+}
+
 [[noreturn]]
 static void mcr_throwException(const std::string& message,
                                mc_op_t op = mc_op_unknown,
                                carbon::Result result = compatibility::mc_res_unknown,
                                const std::string& key = "") {
-  auto cls = SystemLib::classLoad(s_MCRouterException.get(),
-                                  c_MCRouterException);
+  auto cls = MCRouterException::classof();
   Object obj{ cls };
   tvDecRefGen(
     g_context->invokeFunc(cls->getCtor(),
@@ -110,8 +112,6 @@ static void mcr_throwException(const std::string& message,
   );
   throw_object(obj);
 }
-
-static Class* c_MCRouterOptionException = nullptr;
 
 [[noreturn]]
 static void mcr_throwOptionException(
@@ -127,8 +127,7 @@ static void mcr_throwOptionException(
     errorArray.append(e);
   }
 
-  auto cls = SystemLib::classLoad(s_MCRouterOptionException.get(),
-                                  c_MCRouterOptionException);
+  auto cls = MCRouterOptionException::classof();
   Object obj{ cls };
   tvDecRefGen(
     g_context->invokeFunc(

@@ -26,8 +26,6 @@ const StaticString
   s_IntlCalendar("IntlCalendar"),
   s_IntlGregorianCalendar("IntlGregorianCalendar");
 
-Class* IntlCalendar::c_IntlCalendar = nullptr;
-
 const icu::Calendar*
 IntlCalendar::ParseArg(const Variant& cal, const icu::Locale &locale,
                        const String &funcname, IntlError* err,
@@ -863,7 +861,7 @@ void IntlExtension::initCalendar() {
   HHVM_ME(IntlGregorianCalendar, getGregorianChange);
   HHVM_ME(IntlGregorianCalendar, setGregorianChange);
 
-  Native::registerNativeDataInfo<IntlCalendar>(s_IntlCalendar.get());
+  Native::registerNativeDataInfo<IntlCalendar>();
 }
 
 /////////////////////////////////////////////////////////////////////////////

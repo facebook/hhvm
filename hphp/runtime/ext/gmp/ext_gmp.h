@@ -49,7 +49,6 @@ namespace HPHP {
 #define GMP_MIN_BASE -36
 
 // GMP class strings
-const StaticString s_GMP_GMP("GMP");
 const StaticString s_GMP_num("num");
 
 // Array indexes for division functions
@@ -90,9 +89,13 @@ const char* const cs_GMP_ERROR_EVEN_ROOT_NEGATIVE_NUMBER =
 ///////////////////////////////////////////////////////////////////////////////
 // classes
 
-struct GMPData {
+struct GMPData : SystemLib::ClassLoader<"GMP"> {
   ~GMPData() { close(); }
   GMPData&       operator=(const GMPData& source);
+
+  static Object allocObject() {
+    return Object{ classof() };
+  }
 
   void           close();
   void           setGMPMpz(const mpz_t data);
@@ -101,29 +104,6 @@ struct GMPData {
 private:
   bool           m_isInit{false};
   mpz_t          m_gmpMpz;
-};
-
-
-struct GMP {
-private:
-  static Class* getClass() {
-    return SystemLib::classLoad(s_GMP_GMP.get(), s_cls);
-  }
-
-public:
-  static Object allocObject() {
-    return Object{ getClass() };
-  }
-
-  static Object allocObject(const Variant& arg) {
-    Object ret = allocObject();
-    tvDecRefGen(
-      g_context->invokeFunc(getClass()->getCtor(), make_vec_array(arg), ret.get())
-    );
-    return ret;
-  }
-
-  static HPHP::Class* s_cls;
 };
 
 } /* namespace HPHP */

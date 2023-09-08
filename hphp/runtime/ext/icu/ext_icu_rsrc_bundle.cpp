@@ -11,9 +11,6 @@ namespace HPHP::Intl {
   }
 
 
-const StaticString s_ResourceBundle("ResourceBundle");
-Class* ResourceBundle::c_ResourceBundle = nullptr;
-
 static Variant extractValue(ResourceBundle* data,
                             const icu::ResourceBundle& bundle) {
 #define EXTRACT_ERR(type) \
@@ -254,7 +251,7 @@ void IntlExtension::initResourceBundle() {
   HHVM_ME(ResourceBundle, rewind);
   HHVM_ME(ResourceBundle, valid);
 
-  Native::registerNativeDataInfo<ResourceBundle>(s_ResourceBundle.get());
+  Native::registerNativeDataInfo<ResourceBundle>();
 }
 
 //////////////////////////////////////////////////////////////////////////////

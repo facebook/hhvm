@@ -7,9 +7,9 @@
 
 namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
-extern const StaticString s_IntlDatePatternGenerator;
 
-struct IntlDatePatternGenerator : IntlError {
+struct IntlDatePatternGenerator
+    : IntlError, SystemLib::ClassLoader<"IntlDatePatternGenerator"> {
   IntlDatePatternGenerator() {}
   IntlDatePatternGenerator(const IntlDatePatternGenerator&) = delete;
   IntlDatePatternGenerator& operator=(const IntlDatePatternGenerator& src)
@@ -22,8 +22,7 @@ struct IntlDatePatternGenerator : IntlError {
   static Object newInstance(
     std::unique_ptr<icu::DateTimePatternGenerator> generator
   ) {
-    Object ret{ SystemLib::classLoad(s_IntlDatePatternGenerator.get(),
-                                     c_IntlDatePatternGenerator) };
+    Object ret{ classof() };
     if (generator) {
       Native::data<IntlDatePatternGenerator>(ret)
         ->setGenerator(std::move(generator));
@@ -32,7 +31,7 @@ struct IntlDatePatternGenerator : IntlError {
   }
 
   static IntlDatePatternGenerator* Get(ObjectData* obj) {
-    return GetData<IntlDatePatternGenerator>(obj, s_IntlDatePatternGenerator);
+    return GetData<IntlDatePatternGenerator>(obj, className());
   }
 
   icu::DateTimePatternGenerator &generator() const {
@@ -45,8 +44,6 @@ struct IntlDatePatternGenerator : IntlError {
 
  private:
   std::unique_ptr<icu::DateTimePatternGenerator> m_generator;
-
-  static Class* c_IntlDatePatternGenerator;
 };
 
 /////////////////////////////////////////////////////////////////////////////

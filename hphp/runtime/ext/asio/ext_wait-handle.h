@@ -62,17 +62,6 @@ struct c_RescheduleWaitHandle;
 struct c_SleepWaitHandle;
 struct c_ExternalThreadEventWaitHandle;
 
-#define WAITHANDLE_CLASSOF_IMPL(cn) \
-  Class* c_##cn::s_cls; \
-  StaticString c_##cn::s_clsName("HH\\" #cn);
-
-#define WAITHANDLE_CLASSOF(cn) \
-  static Class* s_cls; \
-  static StaticString s_clsName; \
-  static Class* classof() { \
-    return SystemLib::classLoad(s_clsName.get(), s_cls); \
-  }
-
 #define WAITHANDLE_DTOR(cn) \
   static void instanceDtor(ObjectData* obj, const Class*) { \
     auto wh = wait_handle<c_##cn>(obj); \
@@ -87,8 +76,7 @@ T* wait_handle(const ObjectData* obj) {
   return static_cast<T*>(const_cast<ObjectData*>(obj));
 }
 
-struct c_Awaitable : ObjectData {
-  WAITHANDLE_CLASSOF(Awaitable);
+struct c_Awaitable : ObjectData, SystemLib::ClassLoader<"HH\\Awaitable"> {
   WAITHANDLE_DTOR(Awaitable);
 
   enum class Kind : uint8_t {
@@ -255,7 +243,7 @@ finish_class(Class* cls) {
   cls->allocExtraData();
   assertx(!cls->getNativeDataInfo());
 
-  if (cls->name()->same(c_Awaitable::s_clsName.get())) {
+  if (cls->name()->same(c_Awaitable::className().get())) {
     assertx(!cls->instanceCtor<false>());
     assertx(!cls->instanceCtor<true>());
     assertx(!cls->instanceDtor());

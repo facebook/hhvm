@@ -126,10 +126,7 @@ inline bool forgetStream(void* userData) {
 
 }
 
-static Class* s_LibXMLError_class = nullptr;
-
 const StaticString
-  s_LibXMLError("LibXMLError"),
   s_level("level"),
   s_code("code"),
   s_column("column"),
@@ -137,9 +134,7 @@ const StaticString
   s_file("file"),
   s_line("line");
 
-Class* getLibXMLError() {
-  return SystemLib::classLoad(s_LibXMLError.get(), s_LibXMLError_class);
-}
+struct LibXMLError : SystemLib::ClassLoader<"LibXMLError"> {};
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -646,7 +641,7 @@ static void libxml_error_handler(void* /*userData*/, xmlErrorPtr error) {
 }
 
 static Object create_libxmlerror(xmlError &error) {
-  Object ret{ getLibXMLError() };
+  Object ret{ LibXMLError::classof() };
   // Setting only public properties
   ret->setProp(nullctx, s_level.get(), make_tv<KindOfInt64>(error.level));
   ret->setProp(nullctx, s_code.get(), make_tv<KindOfInt64>(error.code));

@@ -110,8 +110,6 @@ const StaticString
   s___invoke("__invoke"),
   s_return_type("return_type"),
   s_accessible("accessible"),
-  s_reflectionexception("ReflectionException"),
-  s_reflectionextension("ReflectionExtension"),
   s_type_hint("type_hint"),
   s_type_hint_builtin("type_hint_builtin"),
   s_type_hint_nullable("type_hint_nullable"),
@@ -119,9 +117,6 @@ const StaticString
   s_is_soft("is_soft"),
   s_is_warn("is_warn"),
   s___construct("__construct");
-
-Class* Reflection::s_ReflectionExceptionClass = nullptr;
-Class* Reflection::s_ReflectionExtensionClass = nullptr;
 
 Class* get_cls(const Variant& class_or_object) {
   if (class_or_object.is(KindOfObject)) {
@@ -603,6 +598,8 @@ Array implTypeStructure(const Variant& cls_or_obj,
   return Array::attach(ad);
 }
 
+struct ReflectionException : SystemLib::ClassLoader<"ReflectionException"> {};
+
 } // namespace
 
 /*
@@ -634,8 +631,7 @@ String HHVM_FUNCTION(type_structure_classname,
 
 [[noreturn]]
 void Reflection::ThrowReflectionExceptionObject(const Variant& message) {
-  auto cls = SystemLib::classLoad(s_reflectionexception.get(),
-                                  s_ReflectionExceptionClass);
+  auto cls = ReflectionException::classof();
   Object inst { cls };
   tvDecRefGen(
     g_context->invokeFunc(cls->getCtor(),
@@ -648,8 +644,6 @@ void Reflection::ThrowReflectionExceptionObject(const Variant& message) {
 
 /////////////////////////////////////////////////////////////////////////////
 // class ReflectionFuncHandle
-
-const StaticString s_ReflectionFunctionAbstract("ReflectionFunctionAbstract");
 
 static TypedValue HHVM_METHOD(ReflectionFunctionAbstract, getFileName) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
@@ -1092,8 +1086,6 @@ static String HHVM_METHOD(ReflectionMethod, getDeclaringClassname) {
 
 // ------------------------- class ReflectionFile
 
-const StaticString s_ReflectionFile("ReflectionFile");
-
 // helper for __construct
 static String HHVM_METHOD(ReflectionFile, __init, const String& name) {
   if (name.isNull()) {
@@ -1136,8 +1128,6 @@ static Array HHVM_METHOD(ReflectionFile, getAttributesNamespaced) {
 }
 
 // ------------------------- class ReflectionModule
-
-const StaticString s_ReflectionModule("ReflectionModule");
 
 // helper for __construct
 static void HHVM_METHOD(ReflectionModule, __init, const String& name) {
@@ -1283,8 +1273,6 @@ static Variant HHVM_METHOD(ReflectionFunction, getClosureThisObject,
 
 /////////////////////////////////////////////////////////////////////////////
 // class ReflectionClass
-
-const StaticString s_ReflectionClass("ReflectionClass");
 
 // helper for __construct
 static String HHVM_METHOD(ReflectionClass, __init, const String& name) {
@@ -1840,9 +1828,13 @@ void ReflectionClassHandle::wakeup(const Variant& content, ObjectData* obj) {
   obj->setProp(nullctx, s_name.get(), result.asTypedValue());
 }
 
+namespace {
+  struct ReflectionExtensionLoader :
+    SystemLib::ClassLoader<"ReflectionExtension"> {};
+}
+
 static Variant reflection_extension_name_get(const Object& this_) {
-  auto cls = SystemLib::classLoad(s_reflectionextension.get(),
-                                  Reflection::s_ReflectionExtensionClass);
+  auto cls = ReflectionExtensionLoader::classof();
   auto const name = this_->getProp(
     MemberLookupContext(cls, cls->moduleName()),
     s___name.get()
@@ -1868,8 +1860,6 @@ struct reflection_extension_PropHandler :
 
 /////////////////////////////////////////////////////////////////////////////
 // class ReflectionTypeConstant
-
-const StaticString s_ReflectionTypeConstant("ReflectionTypeConstant");
 
 // helper for __construct
 static bool HHVM_METHOD(ReflectionTypeConstant, __init,
@@ -1948,8 +1938,6 @@ static String HHVM_METHOD(ReflectionTypeConstant, getClassname) {
 
 /////////////////////////////////////////////////////////////////////////////
 // class ReflectionProperty
-
-const StaticString s_ReflectionProperty("ReflectionProperty");
 
 static void HHVM_METHOD(ReflectionProperty, __construct,
                         const Variant& cls_or_obj, const String& prop_name) {
@@ -2252,8 +2240,6 @@ static bool HHVM_METHOD(ReflectionProperty, isReadonly) {
 /////////////////////////////////////////////////////////////////////////////
 // class ReflectionTypeAlias
 
-const StaticString s_ReflectionTypeAlias("ReflectionTypeAlias");
-
 // helper for __construct:
 // caller throws exception when return value is false
 static String HHVM_METHOD(ReflectionTypeAlias, __init, const String& name) {
@@ -2443,23 +2429,16 @@ struct ReflectionExtension final : Extension {
     HHVM_ME(ReflectionClass, getDynamicPropertyInfos);
     HHVM_ME(ReflectionClass, getConstructorName);
 
-    Native::registerNativeDataInfo<ReflectionFuncHandle>(
-      s_ReflectionFunctionAbstract.get());
-    Native::registerNativeDataInfo<ReflectionClassHandle>(
-      s_ReflectionClass.get());
-    Native::registerNativeDataInfo<ReflectionConstHandle>(
-      s_ReflectionTypeConstant.get());
-    Native::registerNativeDataInfo<ReflectionPropHandle>(
-      s_ReflectionProperty.get());
-    Native::registerNativeDataInfo<ReflectionFileHandle>(
-      s_ReflectionFile.get());
-    Native::registerNativeDataInfo<ReflectionModuleHandle>(
-      s_ReflectionModule.get());
-    Native::registerNativeDataInfo<ReflectionTypeAliasHandle>(
-      s_ReflectionTypeAlias.get(), Native::NO_SWEEP);
+    Native::registerNativeDataInfo<ReflectionFuncHandle>();
+    Native::registerNativeDataInfo<ReflectionClassHandle>();
+    Native::registerNativeDataInfo<ReflectionConstHandle>();
+    Native::registerNativeDataInfo<ReflectionPropHandle>();
+    Native::registerNativeDataInfo<ReflectionFileHandle>();
+    Native::registerNativeDataInfo<ReflectionModuleHandle>();
+    Native::registerNativeDataInfo<ReflectionTypeAliasHandle>(Native::NO_SWEEP);
 
-    Native::registerNativePropHandler
-      <reflection_extension_PropHandler>(s_reflectionextension);
+    Native::registerNativePropHandler<reflection_extension_PropHandler>(
+      ReflectionExtensionLoader::className());
   }
 
   std::vector<std::string> hackFiles() const {

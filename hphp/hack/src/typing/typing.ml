@@ -8134,7 +8134,16 @@ and class_get_inner
     let (env, ty) =
       Union.union_list env (get_reason cty) (List.map ~f:fst pairs)
     in
-    (env, (ty, []), rval_err)
+    (* Pick up the maximal number of type arguments to put in the TAST, so that
+       TAST checks such as the reified checks can check the type arguments
+       against the spec. *)
+    let tal =
+      List.map ~f:snd pairs
+      |> List.max_elt ~compare:(fun a b ->
+             Int.compare (List.length a) (List.length b))
+      |> Option.value ~default:[]
+    in
+    (env, (ty, tal), rval_err)
   | (_, Tintersection tyl) ->
     let (env, pairs, rval_err_opts) =
       TUtils.run_on_intersection_res env tyl ~f:(fun env ty ->

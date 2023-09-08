@@ -1356,9 +1356,10 @@ and obj_get_inner_union args env on_error id reason tys : internal_result =
   (* TODO: decide what to do about methods with differing generic arity.
    * See T55414751 *)
   let tal =
-    match resultl with
-    | [] -> []
-    | (_, tal) :: _ -> tal
+    List.map ~f:snd resultl
+    |> List.max_elt ~compare:(fun a b ->
+           Int.compare (List.length a) (List.length b))
+    |> Option.value ~default:[]
   in
   let tyl = List.map ~f:fst resultl in
   let (env, ty) = Union.union_list env reason tyl in

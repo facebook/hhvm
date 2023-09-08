@@ -1,0 +1,77 @@
+[(Class
+    { c_span = [3:1-5:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
+      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
+      c_name = ([3:7-8], "\\C"); c_tparams = []; c_extends = []; c_uses = []; 
+      c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = []; 
+      c_where_constraints = []; c_consts = []; c_typeconsts = []; c_vars = [];
+      c_methods =
+      [{ m_span = [4:3-49]; m_annotation = (); m_final = false; m_abstract = false; 
+         m_static = true; m_readonly_this = false; m_visibility = Public; 
+         m_name = ([4:26-29], "bar");
+         m_tparams =
+         [{ tp_variance = Invariant; tp_name = ([4:36-37], "T"); tp_parameters = [];
+            tp_constraints = [(Constraint_as, ([4:36-37], (Happly (([4:36-37], "\\HH\\supportdyn"), [([4:36-37], Hmixed)]))))]; 
+            tp_reified = Reified; tp_user_attributes = [] }
+           ];
+         m_where_constraints = []; m_params = []; m_ctxs = None; m_unsafe_ctxs = None; 
+         m_body = { fb_ast = [([Pos.none], Noop)] }; m_fun_kind = FSync; 
+         m_user_attributes = []; m_readonly_ret = None; m_ret = ((void), (Some ([4:42-46], (Hprim Tvoid)))); 
+         m_external = false; m_doc_comment = None }
+        ];
+      c_xhp_children = []; c_xhp_attrs = [];
+      c_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+        ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      c_user_attributes = [{ ua_name = ([3:7-8], "__SupportDynamicType"); ua_params = [] }]; 
+      c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+      c_emit_id = None; c_internal = false; c_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([7:10-13], "\\foo");
+       fd_fun =
+       { f_span = [7:1-51]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((~?classname<C>), (Some ([7:17-30], (Hoption ([7:18-30], (Happly (([7:18-27], "\\HH\\classname"), [([7:28-29], (Happly (([7:28-29], "\\C"), [])))])))))));
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+         f_body = { fb_ast = [([7:33-49], (Return (Some ((classname<C>), [7:40-48], (Class_const (((C), [7:40-41], (CI ([7:40-41], "\\C"))), ([7:43-48], "class")))))))] }; 
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([7:10-13], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([9:10-14], "\\main");
+       fd_fun =
+       { f_span = [9:1-14:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((void), (Some ([9:18-22], (Hprim Tvoid)))); 
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([10:3-14],
+             (Expr
+                ((~?classname<C>), [10:3-13],
+                 (Binop
+                    { bop = (Eq None); lhs = ((~?classname<C>), [10:3-5], (Lvar ([10:3-5], $c)));
+                      rhs = ((~?classname<C>), [10:8-13], (Call { func = (((function(): ~?classname<C>)), [10:8-11], (Id ([10:8-11], "\\foo"))); targs = []; args = []; unpacked_arg = None })) }))));
+             ([11:3-13:4],
+              (If (((bool), [11:7-20], (Is (((~?classname<C>), [11:7-9], (Lvar ([11:7-9], $c))), ([11:13-20], Hnonnull)))),
+                 [([11:3-13:4], (AssertEnv (Refinement, {$c})));
+                   ([12:5-20],
+                    (Expr
+                       ((void), [12:5-19],
+                        (Call
+                           { func = ((~(function<reify T>(): void)), [12:5-12], (Class_const (((~C), [12:5-7], (CIexpr ((~classname<C>), [12:5-7], (Lvar ([12:5-7], $c))))), ([12:9-12], "bar"))));
+                             targs = [((int), ([12:13-16], (Hprim Tint)))]; 
+                             args = []; unpacked_arg = None }))))
+                   ],
+                 [([11:3-13:4], (AssertEnv (Refinement, {$c}))); ([Pos.none], Noop)])))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([9:10-14], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

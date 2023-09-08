@@ -19,6 +19,8 @@
 #include <initializer_list>
 #include <memory>
 
+#include <folly/experimental/observer/Observer.h>
+
 #include <thrift/lib/cpp/EventHandlerBase.h>
 #include <thrift/lib/cpp2/async/MultiplexAsyncProcessor.h>
 #include <thrift/lib/cpp2/detail/EventHandlerRuntime.h>
@@ -45,8 +47,21 @@ EventHandlerRuntime::MethodNameSet methodNames(
   return methods;
 }
 
-class EventHandlerRuntimeTest : public testing::Test {
+class EventHandlerRuntimeTest : public testing::TestWithParam<bool> {
  public:
+  bool useThriftFlag() const { return GetParam(); }
+
+  void setClientMethodsToBypass(
+      EventHandlerRuntime::MethodNameSet bypassSets,
+      std::string_view bypassSetsAsFlag) {
+    if (useThriftFlag()) {
+      THRIFT_FLAG_SET_MOCK(
+          client_methods_bypass_eventhandlers, std::string{bypassSetsAsFlag});
+      folly::observer_detail::ObserverManager::waitForAllUpdates();
+    } else {
+      EventHandlerRuntime::setClientMethodsToBypass(std::move(bypassSets));
+    }
+  }
   class CountingEventHandler : public TProcessorEventHandler {
    private:
     void preRead(void* /* ctx */, const char* /* fn_name */) override {
@@ -101,8 +116,8 @@ class EventHandlerRuntimeTest : public testing::Test {
 };
 } // namespace
 
-TEST_F(EventHandlerRuntimeTest, MethodNames) {
-  EventHandlerRuntime::setClientMethodsToBypass(methodNames({}, {}));
+TEST_P(EventHandlerRuntimeTest, MethodNames) {
+  setClientMethodsToBypass(methodNames({}, {}), "");
   auto foo = makeClient<apache::thrift::test::Foo>();
   auto bar = makeClient<apache::thrift::test::Bar>();
 
@@ -110,7 +125,7 @@ TEST_F(EventHandlerRuntimeTest, MethodNames) {
   EXPECT_EQ(clientEvents->callCount, 1);
   EXPECT_EQ(serverEvents->callCount, 1);
 
-  EventHandlerRuntime::setClientMethodsToBypass(methodNames({}, {"Bar.bar1"}));
+  setClientMethodsToBypass(methodNames({}, {"Bar.bar1"}), "Bar.bar1");
 
   bar->sync_bar1();
   EXPECT_EQ(clientEvents->callCount, 1);
@@ -124,14 +139,14 @@ TEST_F(EventHandlerRuntimeTest, MethodNames) {
   EXPECT_EQ(clientEvents->callCount, 3);
   EXPECT_EQ(serverEvents->callCount, 4);
 
-  EventHandlerRuntime::setClientMethodsToBypass(
-      methodNames({}, {"Bar.bar1", "Foo.foo"}));
+  setClientMethodsToBypass(
+      methodNames({}, {"Bar.bar1", "Foo.foo"}), "Bar.bar1,Foo.foo");
 
   foo->sync_foo();
   EXPECT_EQ(clientEvents->callCount, 3);
   EXPECT_EQ(serverEvents->callCount, 5);
 
-  EventHandlerRuntime::setClientMethodsToBypass(methodNames({}, {}));
+  setClientMethodsToBypass(methodNames({}, {}), "");
 
   foo->sync_foo();
   EXPECT_EQ(clientEvents->callCount, 4);
@@ -142,8 +157,8 @@ TEST_F(EventHandlerRuntimeTest, MethodNames) {
   EXPECT_EQ(serverEvents->callCount, 7);
 }
 
-TEST_F(EventHandlerRuntimeTest, ServiceNames) {
-  EventHandlerRuntime::setClientMethodsToBypass(methodNames({}, {}));
+TEST_P(EventHandlerRuntimeTest, ServiceNames) {
+  setClientMethodsToBypass(methodNames({}, {}), "");
   auto foo = makeClient<apache::thrift::test::Foo>();
   auto bar = makeClient<apache::thrift::test::Bar>();
 
@@ -155,7 +170,7 @@ TEST_F(EventHandlerRuntimeTest, ServiceNames) {
   EXPECT_EQ(clientEvents->callCount, 2);
   EXPECT_EQ(serverEvents->callCount, 2);
 
-  EventHandlerRuntime::setClientMethodsToBypass(methodNames({"Bar"}, {}));
+  setClientMethodsToBypass(methodNames({"Bar"}, {}), "Bar.*");
 
   foo->sync_foo();
   EXPECT_EQ(clientEvents->callCount, 3);
@@ -169,8 +184,7 @@ TEST_F(EventHandlerRuntimeTest, ServiceNames) {
   EXPECT_EQ(clientEvents->callCount, 3);
   EXPECT_EQ(serverEvents->callCount, 5);
 
-  EventHandlerRuntime::setClientMethodsToBypass(
-      methodNames({"Bar", "Foo"}, {}));
+  setClientMethodsToBypass(methodNames({"Bar", "Foo"}, {}), "Bar.*,Foo.*");
 
   foo->sync_foo();
   EXPECT_EQ(clientEvents->callCount, 3);
@@ -184,8 +198,8 @@ TEST_F(EventHandlerRuntimeTest, ServiceNames) {
   EXPECT_EQ(clientEvents->callCount, 3);
   EXPECT_EQ(serverEvents->callCount, 8);
 
-  EventHandlerRuntime::setClientMethodsToBypass(
-      methodNames({"Foo"}, {"Bar.bar1"}));
+  setClientMethodsToBypass(
+      methodNames({"Foo"}, {"Bar.bar1"}), "Bar.bar1,Foo.*");
 
   foo->sync_foo();
   EXPECT_EQ(clientEvents->callCount, 3);
@@ -199,3 +213,8 @@ TEST_F(EventHandlerRuntimeTest, ServiceNames) {
   EXPECT_EQ(clientEvents->callCount, 4);
   EXPECT_EQ(serverEvents->callCount, 11);
 }
+
+INSTANTIATE_TEST_SUITE_P(
+    EventHandlerRuntimeTest,
+    EventHandlerRuntimeTest,
+    testing::Values(false, true));

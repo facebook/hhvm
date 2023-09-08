@@ -20,12 +20,35 @@
 #include <mutex>
 #include <optional>
 #include <type_traits>
+#include <unordered_set>
 
+#include <boost/algorithm/string.hpp>
+
+#include <folly/synchronization/DelayedInit.h>
 #include <folly/synchronization/Rcu.h>
 
 #include <thrift/lib/cpp2/util/AllocationColocator.h>
 
 using apache::thrift::util::AllocationColocator;
+/**
+ * This flag encodes a set of client method or service names.
+ *
+ * Each entry in the set is separate by a single comma, without surrounding
+ * whitespace.
+ *
+ * Each entry can be one of:
+ *   - Method name: a Thrift method name in the format
+ *     "<service_name>.<method_name>"
+ *   - Service name - a Thrift service name in the format "<service_name>.*"
+ *     (must end in ".*")
+ *
+ * For each service name, client methods targeting that service name will not
+ * invoke EventHandlerBase callbacks.
+ *
+ * For each method name, client methods targeting that method (in the contained
+ * service) will not invoke EventHandlerBase callbacks.
+ */
+THRIFT_FLAG_DEFINE_string(client_methods_bypass_eventhandlers, "");
 
 namespace apache::thrift::detail {
 
@@ -96,6 +119,32 @@ struct MethodNameStorageImpl {
 
 std::atomic<MethodNameStorageImpl*> globalClientMethodsToBypass{nullptr};
 static_assert(decltype(globalClientMethodsToBypass)::is_always_lock_free);
+
+void initializeGlobalClientMethodsFlagObserverOnce() {
+  static folly::DelayedInit<folly::observer::Observer<folly::Unit>> observer;
+  observer.try_emplace_with([] {
+    return folly::observer::makeObserver(
+        [flagObserver =
+             THRIFT_FLAG_OBSERVE(client_methods_bypass_eventhandlers)]() {
+          std::unordered_set<std::string> entries;
+          boost::split(entries, **flagObserver, boost::is_any_of(","));
+
+          EventHandlerRuntime::MethodNameSet bypassSets;
+          for (const auto& entry : entries) {
+            static constexpr std::string_view kServiceNameSuffix = ".*";
+            if (boost::algorithm::ends_with(entry, kServiceNameSuffix)) {
+              std::string_view nameWithSuffix = std::string_view{entry}.substr(
+                  0, entry.size() - kServiceNameSuffix.size());
+              bypassSets.serviceNames.emplace_back(nameWithSuffix);
+            } else {
+              bypassSets.methodNames.emplace_back(entry);
+            }
+          }
+          EventHandlerRuntime::setClientMethodsToBypass(std::move(bypassSets));
+          return folly::unit;
+        });
+  });
+}
 
 void removeEmptyNames(std::vector<std::string>& names) {
   names.erase(
@@ -187,6 +236,7 @@ void removeEmptyNames(std::vector<std::string>& names) {
 
 /* static */ bool EventHandlerRuntime::isClientMethodBypassed(
     std::string_view serviceName, std::string_view methodName) {
+  initializeGlobalClientMethodsFlagObserverOnce();
   std::scoped_lock<folly::rcu_domain> guard(folly::rcu_default_domain());
 
   const MethodNameStorageImpl* bypassSets =

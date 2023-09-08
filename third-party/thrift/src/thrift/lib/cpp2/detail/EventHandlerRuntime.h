@@ -22,6 +22,10 @@
 #include <type_traits>
 #include <vector>
 
+#include <thrift/lib/cpp2/Flags.h>
+
+THRIFT_FLAG_DECLARE_string(client_methods_bypass_eventhandlers);
+
 namespace apache::thrift::detail {
 
 /**

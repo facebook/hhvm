@@ -509,8 +509,6 @@ let main_loop_command_handler client result =
       nonpersistent_client_pending_command_needs_full_check =
         Some (finish_command_handling, reason, client);
     }
-  | ServerUtils.Needs_writes { env; finish_command_handling; reason = _ } ->
-    finish_command_handling env
 
 let generate_and_update_recheck_id env =
   let recheck_id = new_serve_iteration_id () in
@@ -891,9 +889,6 @@ let priority_client_interrupt_handler genv client_provider :
           failwith
             ("unexpected command needing full recheck in priority channel: "
             ^ reason)
-        | ServerUtils.Needs_writes { reason; _ } ->
-          failwith
-            ("unexpected command needing writes in priority channel: " ^ reason)
         | ServerUtils.Done env -> env)
     in
 

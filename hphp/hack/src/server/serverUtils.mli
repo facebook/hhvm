@@ -19,13 +19,6 @@ type 'env handle_command_result =
           (** Reason why this command needs full recheck (for logging/debugging purposes) *)
     }
       (** The command needs a full recheck to complete before it can finish being executed. *)
-  | Needs_writes of {
-      env: 'env;
-      finish_command_handling: 'env -> 'env;
-      reason: string;
-          (** Reason why this command needs writes (for logging/debugging purposes). *)
-    }
-      (** The command wants to modify global state, by modifying file contents. *)
 
 (** Wrap all the continuations inside result in provided try function *)
 val wrap :

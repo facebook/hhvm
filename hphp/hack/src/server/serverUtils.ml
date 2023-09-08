@@ -17,11 +17,6 @@ type 'env handle_command_result =
       finish_command_handling: 'env -> 'env;
       reason: string;
     }
-  | Needs_writes of {
-      env: 'env;
-      finish_command_handling: 'env -> 'env;
-      reason: string;
-    }
 
 let wrap ~try_ f env = try_ env (fun () -> f env)
 
@@ -29,12 +24,6 @@ let wrap ~try_ = function
   | Done env -> Done env
   | Needs_full_recheck cont ->
     Needs_full_recheck
-      {
-        cont with
-        finish_command_handling = wrap ~try_ cont.finish_command_handling;
-      }
-  | Needs_writes cont ->
-    Needs_writes
       {
         cont with
         finish_command_handling = wrap ~try_ cont.finish_command_handling;

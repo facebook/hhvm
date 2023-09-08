@@ -184,7 +184,7 @@ let handle
      The form is [FROM:CMD PHASE].
      FROM is the --from argument passed at the command-line, or "hh_client" in case of LSP requests.
      CMD is the "--type-at-pos" or similar command-line argument that gave rise to serverRpc, or something sensible for LSP.
-     PHASE is empty at the start, "done" once we've finished handling, "write" if Needs_writes, "check" if Needs_full_recheck. *)
+     PHASE is empty at the start, "done" once we've finished handling, "check" if Needs_full_recheck. *)
   let send_progress phase =
     ServerProgress.write
       ~include_in_logs:false
@@ -217,42 +217,7 @@ let handle
     r
   in
 
-  (* The sense of [command_needs_writes] is a little confusing.
-     Recall that for editor_open_files, hh_server deems that the IDE is the
-     source of truth for the contents of those files. Thus, the act of
-     opening/closing/editing an IDE file is equivalent to altering ("writing")
-     the content of the file.
-
-     With these IDE actions, in order to avoid races, we will have the
-     current typecheck stop [MultiThreadedCall.Cancel] before processing
-     the open/edit/close command. That way, in case the current typecheck
-     had previously read one version of the file contents, we'll be sure that
-     the same typecheck won't read the new version of the file contents.
-     Note that "cancel" in this context means cancel remaining fanout-typechecking
-     work in the current round of [ServerTypeCheck.type_check], but don't throw
-     away results from the files we've already typechecked; as soon as we've
-     cancelled and handled this command, then continue on to the next round
-     of [ServerTypeCheck.type_check] i.e. recalculate naming table and fanout
-     and then typecheck this new fanout.
-
-     (It's interesting to compare these to watchman, which does have races...
-     all that watchman allows us is to get a notification *after the fact* that
-     the file content has changed. The typecheck still gets cancelled, but it
-     might have read conflicting file contents prior to cancellation.) *)
-  let command_needs_writes (type a) (msg : a command) : bool =
-    match msg with
-    | Debug_DO_NOT_USE -> failwith "Debug_DO_NOT_USE"
-    | Rpc (_metadata, _) -> false
-  in
-  if command_needs_writes msg then begin
-    send_progress " write";
-    ServerUtils.Needs_writes
-      {
-        env;
-        finish_command_handling = handle_command;
-        reason = ServerCommandTypesUtils.debug_describe_cmd msg;
-      }
-  end else if full_recheck_needed then begin
+  if full_recheck_needed then begin
     send_progress " typechecking";
     ServerUtils.Needs_full_recheck
       { env; finish_command_handling = handle_command; reason = reason msg }

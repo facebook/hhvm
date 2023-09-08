@@ -470,8 +470,11 @@ let connect (env : env) : conn Lwt.t =
   let start_time = Unix.time () in
   let%lwt ({ channels = (_, oc); _ } as conn) = connect env start_time in
   HackEventLogger.client_established_connection start_time;
-  if env.do_post_handoff_handshake then
-    ServerCommandLwt.send_connection_type oc ServerCommandTypes.Non_persistent;
+  if env.do_post_handoff_handshake then begin
+    (* read by [ServerClientProvider.read_connection_type_from_channel] *)
+    Marshal.to_channel oc ServerCommandTypes.Non_persistent [];
+    Out_channel.flush oc
+  end;
   Lwt.return { conn with t_sent_connection_type = Unix.gettimeofday () }
 
 let rpc :

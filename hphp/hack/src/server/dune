@@ -551,7 +551,6 @@
   (modules
     client_command_handler
     serverCommand
-    serverCommandLwt
     serverEagerInit
     serverInit
     serverInitCommon

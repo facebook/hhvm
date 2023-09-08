@@ -204,6 +204,7 @@ let say_hello oc =
 
 let read_connection_type_from_channel (ic : Timeout.in_channel) :
     connection_type =
+  (* sent by [ClientConnection.connect] *)
   Timeout.with_timeout
     ~timeout:1
     ~on_timeout:(fun _ -> raise Read_command_timeout)

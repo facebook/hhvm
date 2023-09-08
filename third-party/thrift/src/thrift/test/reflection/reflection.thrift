@@ -606,6 +606,8 @@ struct hasBoxSimple {
 struct StructWithIOBuf {
   @cpp.Type{name = "std::unique_ptr<folly::IOBuf>"}
   1: binary buf;
+  @cpp.Type{name = "folly::IOBuf"}
+  2: binary bufInPlace;
 }
 
 struct struct_with_renamed_field {

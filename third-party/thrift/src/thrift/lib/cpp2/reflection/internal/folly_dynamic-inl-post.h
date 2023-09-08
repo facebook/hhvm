@@ -21,6 +21,7 @@
 #include <stdexcept>
 
 #include <folly/io/IOBuf.h>
+#include <folly/io/IOBufQueue.h>
 
 #include <fatal/type/enum.h>
 #include <fatal/type/search.h>
@@ -509,6 +510,15 @@ struct dynamic_converter_impl<type_class::binary> {
     out = folly::to<std::string>(input);
   }
 
+  static void to(
+      folly::dynamic& out, folly::IOBuf const& input, dynamic_format) {
+    folly::IOBufQueue q;
+    q.append(input);
+    std::string str;
+    q.appendToString(str);
+    out = std::move(str);
+  }
+
   static void from(
       std::string& out,
       const folly::dynamic& input,
@@ -523,6 +533,15 @@ struct dynamic_converter_impl<type_class::binary> {
       dynamic_format,
       format_adherence) {
     out = folly::IOBuf::copyBuffer(input.asString());
+  }
+
+  static void from(
+      folly::IOBuf& out,
+      const folly::dynamic& input,
+      dynamic_format,
+      format_adherence) {
+    out =
+        folly::IOBuf(folly::IOBuf::CopyBufferOp::COPY_BUFFER, input.asString());
   }
 
   template <typename T>

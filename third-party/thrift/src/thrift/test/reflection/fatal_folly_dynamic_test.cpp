@@ -664,11 +664,37 @@ TEST(fatal_folly_dynamic, map_from_empty_array) {
 }
 
 TEST(fatal_folly_dynamic, from_iobuf) {
-  folly::dynamic dyn = folly::dynamic::object("buf", "foo");
+  folly::dynamic dyn =
+      folly::dynamic::object("buf", "foo")("bufInPlace", "bar");
   auto obj =
       apache::thrift::from_dynamic<test_cpp2::cpp_reflection::StructWithIOBuf>(
           dyn, apache::thrift::dynamic_format::PORTABLE);
   EXPECT_EQ((*obj.buf())->moveToFbString(), "foo");
+  EXPECT_EQ(obj.bufInPlace()->moveToFbString(), "bar");
+
+  folly::dynamic dynEmpty = folly::dynamic::object();
+  auto objEmpty =
+      apache::thrift::from_dynamic<test_cpp2::cpp_reflection::StructWithIOBuf>(
+          dynEmpty, apache::thrift::dynamic_format::PORTABLE);
+  EXPECT_FALSE(*objEmpty.buf());
+  EXPECT_EQ(objEmpty.bufInPlace()->moveToFbString(), "");
+}
+
+TEST(fatal_folly_dynamic, to_iobuf) {
+  test_cpp2::cpp_reflection::StructWithIOBuf obj;
+  obj.buf() = folly::IOBuf::copyBuffer("foo");
+  obj.bufInPlace() = std::move(*folly::IOBuf::copyBuffer("bar"));
+
+  folly::dynamic dyn =
+      apache::thrift::to_dynamic(obj, apache::thrift::dynamic_format::PORTABLE);
+  EXPECT_EQ(dyn["buf"], "foo");
+  EXPECT_EQ(dyn["bufInPlace"], "bar");
+
+  test_cpp2::cpp_reflection::StructWithIOBuf objEmpty;
+  folly::dynamic dynEmpty = apache::thrift::to_dynamic(
+      objEmpty, apache::thrift::dynamic_format::PORTABLE);
+  EXPECT_TRUE(dynEmpty["buf"].isNull());
+  EXPECT_EQ(dynEmpty["bufInPlace"], "");
 }
 
 namespace {

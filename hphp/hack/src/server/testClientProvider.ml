@@ -81,7 +81,6 @@ type handoff = {
 }
 
 type select_outcome =
-  | Select_persistent
   | Select_new of handoff
   | Select_nothing
   | Select_exception of Exception.t

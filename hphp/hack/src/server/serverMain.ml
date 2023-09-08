@@ -339,12 +339,6 @@ let rec recheck_until_no_changes_left stats genv env select_outcome :
         `Async
       else
         `Skip
-    | ClientProvider.Select_persistent ->
-      (* Do not aggressively process any disk changes when there are pending persistent
-         client requests - some of them might be edits, and we don't want to
-         do analysis on mid-edit state of the world. (Nevertheless, [`Skip] still may
-         pick up updates...) *)
-      `Skip
   in
   let (env, updates, clock, updates_stale, query_telemetry) =
     query_notifier genv env query_kind start_time
@@ -558,9 +552,7 @@ let idle_if_no_client env waiting_client =
       { env with last_idle_job_time = t }
     else
       env
-  | ClientProvider.Select_new _
-  | ClientProvider.Select_persistent ->
-    env
+  | ClientProvider.Select_new _ -> env
 
 let log_recheck_end (stats : ServerEnv.RecheckLoopStats.t) ~errors =
   let telemetry =
@@ -667,8 +659,7 @@ let serve_one_iteration genv env client_provider =
       ServerProgress.write ~include_in_logs:false ~disposition "%s" msg
     | ClientProvider.Not_selecting_hg_updating ->
       ServerProgress.write ~include_in_logs:false "hg-transaction"
-    | ClientProvider.Select_new _
-    | ClientProvider.Select_persistent ->
+    | ClientProvider.Select_new _ ->
       ServerProgress.write ~include_in_logs:false "working"
   end;
   let env = idle_if_no_client env selected_client in
@@ -714,7 +705,6 @@ let serve_one_iteration genv env client_provider =
 
   let env =
     match selected_client with
-    | ClientProvider.Select_persistent
     | ClientProvider.Select_nothing
     | ClientProvider.Select_exception _
     | ClientProvider.Not_selecting_hg_updating ->
@@ -873,8 +863,6 @@ let priority_client_interrupt_handler genv client_provider :
     in
     let env =
       match select_outcome with
-      | ClientProvider.Select_persistent ->
-        failwith "should only be looking at new priority clients"
       | ClientProvider.Select_nothing ->
         (* This is possible because client might have gone away during
          * sleep_and_check. *)

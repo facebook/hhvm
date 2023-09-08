@@ -39,10 +39,6 @@ module type S = sig
       client from monitor process (connection hand-off). *)
   val sleep_and_check :
     t ->
-    ide_idle:
-      (* Whether the most recent message received from persistent client
-       * was IDE_IDLE *)
-      bool ->
     idle_gc_slice:int ->
     [ `Any | `Priority | `Force_dormant_start_only ] ->
     select_outcome

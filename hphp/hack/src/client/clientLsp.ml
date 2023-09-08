@@ -344,9 +344,8 @@ type event =
       an LSP response for it. *)
   | Tick
       (** Once a second, if no other events are pending, we synthesize a Tick
-      event. Handled in [handle_tick]. It does things like send IDE_IDLE if
-      needed to hh_server, see if there's a new errors.bin streaming-error file
-      to tail, and flush HackEventLogger telemetry. *)
+      event. Handled in [handle_tick]. It does things like see if there's a new
+      errors.bin streaming-error file to tail, and flush HackEventLogger telemetry. *)
 
 let event_to_string (event : event) : string =
   match event with

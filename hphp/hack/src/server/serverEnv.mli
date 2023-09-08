@@ -249,7 +249,6 @@ type env = {
           check for this condition.
 
           See test_naming_errors.ml and test_failed_naming.ml *)
-  ide_idle: bool;  (** Whether last received IDE command was IDE_IDLE *)
   last_command_time: float;
       (** Timestamp of last IDE file synchronization command *)
   last_notifier_check_time: float;

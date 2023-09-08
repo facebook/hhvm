@@ -93,7 +93,7 @@ let provider_from_file_descriptors _ = ()
 
 let provider_for_test _ = ()
 
-let sleep_and_check _ ~ide_idle:_ ~idle_gc_slice:_ _ =
+let sleep_and_check _ ~idle_gc_slice:_ _ =
   let client_opt = get_mocked_new_client_type () in
   match client_opt with
   | Some client -> Select_new { client; m2s_sequence_number = 0 }

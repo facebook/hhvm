@@ -116,11 +116,9 @@ let select ~idle_gc_slice fd_list timeout =
     retrieve channels to client from monitor process. *)
 let sleep_and_check
     ({ default_in_fd; priority_in_fd; force_dormant_start_only_in_fd } : t)
-    ~(ide_idle : bool)
     ~(idle_gc_slice : int)
     (kind : [< `Any | `Force_dormant_start_only | `Priority ]) : select_outcome
     =
-  ignore ide_idle;
   let t_sleep_and_check = Unix.gettimeofday () in
   let in_fds =
     [default_in_fd; priority_in_fd; force_dormant_start_only_in_fd]

@@ -16,7 +16,9 @@
 
 #include <thrift/compiler/lib/rust/util.h>
 
+#ifdef _WIN32
 #include <filesystem>
+#endif
 #include <fstream>
 #include <vector>
 

@@ -83,6 +83,7 @@ pub mod compile_ffi {
         optimize_reified_param_checks: bool,
         stress_shallow_decl_deps: bool,
         stress_folded_decl_deps: bool,
+        enable_native_enum_class_labels: bool,
     }
 
     struct ParserFlags {
@@ -313,6 +314,7 @@ impl compile_ffi::NativeEnv {
                 optimize_reified_param_checks: self.hhbc_flags.optimize_reified_param_checks,
                 stress_shallow_decl_deps: self.hhbc_flags.stress_shallow_decl_deps,
                 stress_folded_decl_deps: self.hhbc_flags.stress_folded_decl_deps,
+                enable_native_enum_class_labels: self.hhbc_flags.enable_native_enum_class_labels,
                 ..Default::default()
             },
             flags: EnvFlags {

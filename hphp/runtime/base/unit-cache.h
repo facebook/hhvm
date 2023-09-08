@@ -116,6 +116,7 @@ Unit* lookupSyslibUnit(StringData* path);
   R(EvalEmitMethCallerFuncPointers)             \
   R(EvalAssemblerMaxScalarSize)                 \
   R(EvalFoldLazyClassKeys)                      \
+  R(EvalEmitNativeEnumClassLabels)              \
   R(EvalEnableAbstractContextConstants)         \
   R(EvalTraitConstantInterfaceBehavior)         \
   R(EvalUnitCacheBreaker)                       \

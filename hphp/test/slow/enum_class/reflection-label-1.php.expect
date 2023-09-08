@@ -1,7 +1,7 @@
 dict(2) {
   ["__Memoize"]=>
   vec(1) {
-    resource(4) of type (OpaqueValue)
+    enum class label (#KeyedByIC)
   }
   ["MyAttr"]=>
   vec(2) {

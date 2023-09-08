@@ -56,6 +56,10 @@ pub fn hhbc_flags(config: &HhvmConfig) -> Result<HhbcFlags> {
         .get_bool("Hack.Lang.OptimizeReifiedParamChecks")?
         .unwrap_or(false);
 
+    flags.enable_native_enum_class_labels = config
+        .get_bool("Eval.EmitNativeEnumClassLabels")?
+        .unwrap_or(false);
+
     // ini might use hhvm.array_provenance
     // hdf might use Eval.ArrayProvenance
     // But super unclear here

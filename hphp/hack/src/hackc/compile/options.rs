@@ -119,6 +119,7 @@ pub struct HhbcFlags {
     pub optimize_reified_param_checks: bool,
     pub stress_shallow_decl_deps: bool,
     pub stress_folded_decl_deps: bool,
+    pub enable_native_enum_class_labels: bool,
 }
 
 impl Default for HhbcFlags {
@@ -136,6 +137,7 @@ impl Default for HhbcFlags {
             optimize_reified_param_checks: false,
             stress_shallow_decl_deps: false,
             stress_folded_decl_deps: false,
+            enable_native_enum_class_labels: false,
         }
     }
 }

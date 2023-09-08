@@ -963,16 +963,20 @@ static Array get_function_user_attributes(const Func* func) {
               sd->same(s_MakeICInaccessible.get()) ||
               sd->same(s_SoftMakeICInaccessible.get()) ||
               sd->same(s_Uncategorized.get())) {
-            auto const func = Func::load(s_systemlib_create_opaque_value.get());
-            assertx(func);
-            VecInit v(2);
-            // From ext_hh.php: __SystemLib\OpaqueValueId::EnumClassLabel
-            v.append(make_tv<KindOfInt64>(0));
-            v.append(tv);
-            args.append(g_context->invokeFunc(
-              func, v.toArray(), nullptr, nullptr,
-              RuntimeCoeffects::pure(), false /* dynamic */
-            ));
+            if (RO::EvalEmitNativeEnumClassLabels) {
+              args.append(make_tv<KindOfEnumClassLabel>(sd));
+            } else {
+              auto const func = Func::load(s_systemlib_create_opaque_value.get());
+              assertx(func);
+              VecInit v(2);
+              // From ext_hh.php: __SystemLib\OpaqueValueId::EnumClassLabel
+              v.append(make_tv<KindOfInt64>(0));
+              v.append(tv);
+              args.append(g_context->invokeFunc(
+                func, v.toArray(), nullptr, nullptr,
+                RuntimeCoeffects::pure(), false /* dynamic */
+              ));
+            }
           }
         }
       });

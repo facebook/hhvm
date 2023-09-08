@@ -1,0 +1,22 @@
+SAME
+bool(true)
+bool(false)
+bool(true)
+bool(false)
+
+DIFFERENT
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+
+OPPOSITE
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+
+FAIL
+
+Fatal error: Uncaught exception 'InvalidOperationException' with message 'Cannot use relational comparison operators (<, <=, >, >=, <=>) with enum class labels' in %s
+%A

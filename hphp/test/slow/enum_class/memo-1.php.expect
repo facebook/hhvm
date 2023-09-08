@@ -1,12 +1,12 @@
-resource(4) of type (OpaqueValue)
+enum class label (#KeyedByIC)
 string(9) "KeyedByIC"
-resource(4) of type (OpaqueValue)
+enum class label (#KeyedByIC)
 string(9) "KeyedByIC"
-resource(5) of type (OpaqueValue)
+enum class label (#MakeICInaccessible)
 string(18) "MakeICInaccessible"
-resource(5) of type (OpaqueValue)
+enum class label (#MakeICInaccessible)
 string(18) "MakeICInaccessible"
-resource(6) of type (OpaqueValue)
+enum class label (#SoftMakeICInaccessible)
 string(22) "SoftMakeICInaccessible"
-resource(6) of type (OpaqueValue)
+enum class label (#SoftMakeICInaccessible)
 string(22) "SoftMakeICInaccessible"

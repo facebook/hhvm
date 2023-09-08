@@ -6,11 +6,9 @@ mod local_config;
 
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
-use std::ops::Range;
 use std::path::Path;
 use std::path::PathBuf;
 use std::str::FromStr;
-use std::sync::Arc;
 
 use anyhow::Context;
 use anyhow::Result;
@@ -19,85 +17,12 @@ pub use local_config::LocalConfig;
 use oxidized::custom_error_config::CustomErrorConfig;
 use oxidized::decl_parser_options::DeclParserOptions;
 use oxidized::global_options::GlobalOptions;
-use oxidized::package::Package as OxidizedPackage;
-use oxidized::package::PosId as OxidizedPosId;
-use oxidized::package_info::PackageInfo as OxidizedPackageInfo;
-use oxidized::s_map::SMap;
 use package::PackageInfo;
-use rc_pos::Pos;
-use relative_path::Prefix;
-use relative_path::RelativePath;
 use sha1::Digest;
 use sha1::Sha1;
-use toml::Spanned;
 
 pub const FILE_PATH_RELATIVE_TO_ROOT: &str = ".hhconfig";
 pub const PACKAGE_FILE_PATH_RELATIVE_TO_ROOT: &str = "PACKAGES.toml";
-
-fn convert_package_info(info: PackageInfo) -> OxidizedPackageInfo {
-    // Convert IndexMap to SMap for existing_packages
-    let mut existing_packages = SMap::new();
-    let mut glob_to_package = SMap::new();
-    let filename = String::from(PACKAGE_FILE_PATH_RELATIVE_TO_ROOT);
-    let packages: Vec<OxidizedPackage> = package_info_to_vec(filename, info);
-    for package in packages {
-        let name: String = package.name.1.clone();
-        existing_packages.insert(name, package.clone());
-        for use_ in &package.uses {
-            glob_to_package.insert(use_.1.clone(), package.clone());
-        }
-    }
-    OxidizedPackageInfo {
-        glob_to_package,
-        existing_packages,
-    }
-}
-
-fn package_info_to_vec(filename: String, info: PackageInfo) -> Vec<OxidizedPackage> {
-    let pos_from_span = |span: (usize, usize)| {
-        let (start_offset, end_offset) = span;
-        let start_lnum = info.line_number(start_offset);
-        let start_bol = info.beginning_of_line(start_lnum);
-        let end_lnum = info.line_number(end_offset);
-        let end_bol = info.beginning_of_line(end_lnum);
-
-        Pos::from_lnum_bol_offset(
-            Arc::new(RelativePath::make(
-                Prefix::Dummy,
-                PathBuf::from(filename.clone()),
-            )),
-            (start_lnum, start_bol, start_offset),
-            (end_lnum, end_bol, end_offset),
-        )
-    };
-    let packages: Vec<OxidizedPackage> = info
-        .packages()
-        .iter()
-        .map(|(name, package)| {
-            let convert = |x: &Spanned<String>| -> OxidizedPosId {
-                let Range { start, end } = x.span();
-                let pos = pos_from_span((start, end));
-                let id = x.to_owned().into_inner();
-                OxidizedPosId(pos, id)
-            };
-            let convert_many = |xs: &Option<package::NameSet>| -> Vec<OxidizedPosId> {
-                xs.as_ref()
-                    .unwrap_or_default()
-                    .iter()
-                    .map(convert)
-                    .collect()
-            };
-
-            OxidizedPackage {
-                name: convert(name),
-                uses: convert_many(&package.uses),
-                includes: convert_many(&package.includes),
-                soft_includes: convert_many(&package.soft_includes),
-            }
-        })
-        .collect();
-    packages
-}
 
 /// For now, this struct only contains the parts of .hhconfig which
 /// have been needed in Rust tools.
@@ -294,7 +219,9 @@ impl HhConfig {
             Some("true") => true,
             _ => false,
         };
-        go.tco_package_info = convert_package_info(package_info);
+        // If there are errors, ignore them for the tcopt, the parser errors will be caught and
+        // sent separately.
+        go.tco_package_info = package_info.try_into().unwrap_or_default();
 
         for (key, mut value) in hhconfig {
             match key.as_str() {

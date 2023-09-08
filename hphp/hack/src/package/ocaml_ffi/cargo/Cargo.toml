@@ -12,9 +12,6 @@ doctest = false
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
-ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 ocamlrep_ocamlpool = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
+oxidized = { version = "0.0.0", path = "../../../oxidized" }
 package = { version = "0.0.0", path = "../../cargo" }
-rc_pos = { version = "0.0.0", path = "../../../utils/rust/pos" }
-relative_path = { version = "0.0.0", path = "../../../utils/rust/relative_path" }
-toml = "0.7.3"

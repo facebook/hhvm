@@ -25,6 +25,7 @@ itertools = "0.10.3"
 naming_types = { version = "0.0.0", path = "../naming/rust/naming_types" }
 no_pos_hash = { version = "0.0.0", path = "../utils/no_pos_hash" }
 ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
+package = { version = "0.0.0", path = "../package/cargo" }
 parser_core_types = { version = "0.0.0", path = "../parser/cargo/core_types" }
 rc_pos = { version = "0.0.0", path = "../utils/rust/pos" }
 relative_path = { version = "0.0.0", path = "../utils/rust/relative_path" }
@@ -32,6 +33,7 @@ rust_to_ocaml_attr = { version = "0.0.0", path = "../rust_to_ocaml/rust_to_ocaml
 serde = { version = "1.0.185", features = ["derive", "rc"] }
 serde_json = { version = "1.0.100", features = ["float_roundtrip", "unbounded_depth"] }
 thiserror = "1.0.43"
+toml = "0.7.3"
 
 [dev-dependencies]
 pretty_assertions = { version = "1.2", features = ["alloc"], default-features = false }

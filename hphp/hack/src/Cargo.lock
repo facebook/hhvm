@@ -2500,12 +2500,9 @@ dependencies = [
  "config_file",
  "oxidized",
  "package",
- "rc_pos",
- "relative_path",
  "serde",
  "serde_json",
  "sha1",
- "toml 0.7.3",
 ]
 
 [[package]]
@@ -3695,6 +3692,7 @@ dependencies = [
  "naming_types",
  "no_pos_hash",
  "ocamlrep",
+ "package",
  "parser_core_types",
  "pretty_assertions",
  "rc_pos",
@@ -3703,6 +3701,7 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror",
+ "toml 0.7.3",
 ]
 
 [[package]]
@@ -3753,12 +3752,9 @@ dependencies = [
 name = "package_ocaml_ffi"
 version = "0.0.0"
 dependencies = [
- "ocamlrep",
  "ocamlrep_ocamlpool",
+ "oxidized",
  "package",
- "rc_pos",
- "relative_path",
- "toml 0.7.3",
 ]
 
 [[package]]

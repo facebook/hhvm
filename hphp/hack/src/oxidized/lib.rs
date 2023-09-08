@@ -36,6 +36,7 @@ pub use manual::local_id;
 pub use manual::local_id_map::LocalIdMap;
 pub use manual::method_flags;
 pub use manual::namespace_env_impl;
+pub use manual::package_info_impl;
 pub use manual::prop_flags;
 pub use manual::s_map;
 pub use manual::s_set;

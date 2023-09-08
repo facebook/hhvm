@@ -240,7 +240,7 @@ let handle
   ClientProvider.track
     client
     ~key:Connection_tracker.Server_waiting_for_cmd
-    ~long_delay_okay:(ClientProvider.is_persistent client);
+    ~long_delay_okay:false;
 
   let msg = ClientProvider.read_client_msg client in
 
@@ -270,7 +270,7 @@ let handle
          "%s [%s]"
          (ServerCommandTypesUtils.debug_describe_cmd msg)
          (ClientProvider.priority_to_string client))
-    ~long_delay_okay:(ClientProvider.is_persistent client);
+    ~long_delay_okay:false;
   let env = { env with ServerEnv.remote = force_remote msg } in
   let full_recheck_needed = command_needs_full_check msg in
   let is_stale =

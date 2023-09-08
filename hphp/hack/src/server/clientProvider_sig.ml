@@ -49,11 +49,7 @@ module type S = sig
     [ `Any | `Priority | `Force_dormant_start_only ] ->
     select_outcome
 
-  val has_persistent_connection_request : client -> bool
-
   val priority_fd : t -> Unix.file_descr option
-
-  val get_client_fd : client -> Unix.file_descr option
 
   (** See explanation in Connection_tracker.track *)
   val track :
@@ -69,11 +65,7 @@ module type S = sig
 
   val send_response_to_client : client -> 'a -> unit
 
-  val client_has_message : client -> bool
-
   val read_client_msg : client -> 'a ServerCommandTypes.command
-
-  val is_persistent : client -> bool
 
   val priority_to_string : client -> string
 

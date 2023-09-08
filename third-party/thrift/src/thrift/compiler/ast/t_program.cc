@@ -31,6 +31,8 @@ namespace compiler {
 void t_program::add_definition(std::unique_ptr<t_named> definition) {
   assert(definition != nullptr);
 
+  scope_->add_definition(scope_name(*definition), definition.get());
+
   if (!definition->explicit_uri()) {
     // Resolve Thrift URI.
     if (auto* uri = definition->find_annotation_or_null("thrift.uri")) {

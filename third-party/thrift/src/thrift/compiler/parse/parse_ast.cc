@@ -627,7 +627,6 @@ class ast_builder : public parser_actions {
         &program_, fmt::to_string(name.str), find_base_service());
     set_attributes(*service, std::move(attrs), range);
     service->set_functions(std::move(functions));
-    scope_->add_definition(program_.scope_name(*service), service.get());
     add_definition(std::move(service));
   }
 
@@ -640,8 +639,6 @@ class ast_builder : public parser_actions {
         std::make_unique<t_interaction>(&program_, fmt::to_string(name.str));
     set_attributes(*interaction, std::move(attrs), range);
     interaction->set_functions(std::move(functions));
-    scope_->add_definition(
-        program_.scope_name(*interaction), interaction.get());
     add_definition(std::move(interaction));
   }
 
@@ -764,8 +761,6 @@ class ast_builder : public parser_actions {
             program_.scope_name(*typedef_node, value), &value);
       }
     }
-    scope_->add_definition(
-        program_.scope_name(*typedef_node), typedef_node.get());
     add_definition(std::move(typedef_node));
   }
 
@@ -778,8 +773,6 @@ class ast_builder : public parser_actions {
         std::make_unique<t_struct>(&program_, fmt::to_string(name.str));
     set_attributes(*struct_node, std::move(attrs), range);
     set_fields(*struct_node, std::move(fields));
-    scope_->add_definition(
-        program_.scope_name(*struct_node), struct_node.get());
     add_definition(std::move(struct_node));
   }
 
@@ -792,7 +785,6 @@ class ast_builder : public parser_actions {
         std::make_unique<t_union>(&program_, fmt::to_string(name.str));
     set_attributes(*union_node, std::move(attrs), range);
     set_fields(*union_node, std::move(fields));
-    scope_->add_definition(program_.scope_name(*union_node), union_node.get());
     add_definition(std::move(union_node));
   }
 
@@ -811,7 +803,6 @@ class ast_builder : public parser_actions {
     exception->set_kind(kind);
     exception->set_blame(blame);
     set_fields(*exception, std::move(fields));
-    scope_->add_definition(program_.scope_name(*exception), exception.get());
     add_definition(std::move(exception));
   }
 
@@ -859,7 +850,6 @@ class ast_builder : public parser_actions {
     set_attributes(*enum_node, std::move(attrs), range);
     enum_node->set_values(std::move(values));
 
-    scope_->add_definition(program_.scope_name(*enum_node), enum_node.get());
     // Register enum value names in scope.
     for (const auto& value : enum_node->consts()) {
       // TODO: Remove the ability to access unscoped enum values.
@@ -896,7 +886,6 @@ class ast_builder : public parser_actions {
     auto constant = std::make_unique<t_const>(
         &program_, std::move(type), fmt::to_string(name.str), std::move(value));
     set_attributes(*constant, std::move(attrs), range);
-    scope_->add_definition(program_.scope_name(*constant), constant.get());
     add_definition(std::move(constant));
   }
 

@@ -11,7 +11,7 @@ function nullable_class(?C $x): void {
   }
 }
 
-function nullable_class_not_null1(?C $x): void {
+function nullable_class_not_null(?C $x): void {
   if ($x is null) {
     return;
   }
@@ -24,7 +24,7 @@ function nullable_class_not_null1(?C $x): void {
   }
 }
 
-function nullable_class_not_null2(?C $x): void {
+function case_null_return(?C $x): void {
   switch ($x) {
     case null:
       return;

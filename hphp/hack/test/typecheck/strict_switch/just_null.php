@@ -15,3 +15,12 @@ function non_literal(null $x): void {
       return;
   }
 }
+
+function redundant_default(null $x): void {
+  switch ($x) {
+    case null:
+      return;
+    default:
+      return;
+  }
+}

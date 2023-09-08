@@ -547,11 +547,19 @@ TEST(CompilerTest, annotation_positions) {
   )");
 }
 
+TEST(CompilerTest, performs_in_interaction) {
+  check_compile(R"(
+    interaction J {}
+    interaction I {
+      performs J; # expected-error: cannot use 'performs' in an interaction
+    }
+  )");
+}
+
 TEST(CompilerTest, interactions) {
   check_compile(R"(
     interaction J {}
     interaction I {
-      performs J; # expected-error: Nested interactions are forbidden.
       J foo(); # expected-error: Nested interactions are forbidden: foo
     }
     service T {

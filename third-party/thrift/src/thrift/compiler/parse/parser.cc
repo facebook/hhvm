@@ -372,26 +372,25 @@ class parser {
 
   // interaction:
   //   attributes
-  //   "interaction" identifier "{" (function | performs)* "}"
+  //   "interaction" identifier "{" function* "}"
   //   [deprecated_annotations]
   void parse_interaction(
       source_location loc, std::unique_ptr<attributes> attrs) {
     auto range = range_tracker(loc, end_);
     expect_and_consume(tok::kw_interaction);
     auto name = parse_identifier();
-    auto functions = parse_interface_body();
+    auto functions = parse_interface_body(false);
     try_parse_deprecated_annotations(attrs);
     actions_.on_interaction(
         range, std::move(attrs), name, std::move(functions));
   }
 
-  node_list<t_function> parse_interface_body() {
+  node_list<t_function> parse_interface_body(bool allow_performs = true) {
     expect_and_consume('{');
     auto functions = node_list<t_function>();
     while (token_.kind != '}') {
       if (token_.kind != tok::kw_performs) {
         functions.emplace_back(parse_function());
-        try_parse_comma_or_semicolon();
         continue;
       }
       // Parse performs.
@@ -399,7 +398,12 @@ class parser {
       consume_token();
       auto interaction_name = parse_identifier();
       expect_and_consume(';');
-      functions.emplace_back(actions_.on_performs(range, interaction_name));
+      if (allow_performs) {
+        functions.emplace_back(actions_.on_performs(range, interaction_name));
+      } else {
+        diags_.error(
+            source_location(range), "cannot use 'performs' in an interaction");
+      }
     }
     expect_and_consume('}');
     return functions;
@@ -440,6 +444,13 @@ class parser {
 
     auto throws = try_parse_throws();
     try_parse_deprecated_annotations(attrs);
+    if (token_.kind == ';') {
+      consume_token();
+    }
+    if (token_.kind == ',') {
+      diags_.warning(token_.range.begin, "unexpected ','");
+      consume_token();
+    }
     return actions_.on_function(
         range,
         std::move(attrs),

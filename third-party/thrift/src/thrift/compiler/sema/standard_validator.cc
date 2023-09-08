@@ -866,11 +866,6 @@ void validate_oneway_function(diagnostic_context& ctx, const t_function& node) {
 void validate_interaction_nesting(
     diagnostic_context& ctx, const t_interaction& node) {
   for (auto* func : node.get_functions()) {
-    auto ret = func->return_type();
-    if (ret->is_service() &&
-        static_cast<const t_service*>(ret)->is_interaction()) {
-      ctx.error(*func, "Nested interactions are forbidden.");
-    }
     if (func->returned_interaction()) {
       ctx.error(*func, "Nested interactions are forbidden: {}", func->name());
     }

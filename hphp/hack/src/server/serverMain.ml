@@ -442,13 +442,6 @@ let rec recheck_until_no_changes_left stats genv env select_outcome :
       env
   in
   (* Same as above, but for persistent clients *)
-  let env =
-    match env.persistent_client_pending_command_needs_full_check with
-    | Some (_command, reason) when is_full_check_needed env.full_check_status ->
-      Hh_logger.log "Restarting full check due to %s" reason;
-      { env with full_check_status = Full_check_started }
-    | _ -> env
-  in
   let telemetry =
     Telemetry.duration telemetry ~key:"sorted_out_client" ~start_time
   in
@@ -525,18 +518,11 @@ let rec recheck_until_no_changes_left stats genv env select_outcome :
         ~start_time
         ~telemetry
     in
-    (* Avoid batching ide rechecks with disk rechecks - there might be
-     * other ide edits to process first and we want to give the main loop
-     * a chance to process them first.
-     * Similarly, if a recheck was interrupted because of arrival of command
+    (* If a recheck was interrupted because of arrival of command
      * that needs writes, break the recheck loop to give that command chance
      * to be handled in main loop.
      * Finally, tests have ability to opt-out of batching completely. *)
-    if
-      lazy_check
-      || Option.is_some env.pending_command_needs_writes
-      || !force_break_recheck_loop_for_test_ref
-    then
+    if lazy_check || !force_break_recheck_loop_for_test_ref then
       (stats, env)
     else
       recheck_until_no_changes_left stats genv env select_outcome
@@ -559,16 +545,6 @@ let main_loop_command_handler client_kind client result =
         env with
         nonpersistent_client_pending_command_needs_full_check =
           Some (finish_command_handling, reason, client);
-      }
-    | `Persistent ->
-      (* Persistent client will not send any further commands until previous one
-       * is handled. *)
-      assert (
-        Option.is_none env.persistent_client_pending_command_needs_full_check);
-      {
-        env with
-        persistent_client_pending_command_needs_full_check =
-          Some (finish_command_handling, reason);
       }
   end
   | ServerUtils.Needs_writes
@@ -825,17 +801,6 @@ let serve_one_iteration genv env client_provider =
           (Exception.to_string e);
         env
     end
-  in
-  let env =
-    match env.pending_command_needs_writes with
-    | Some f -> { (f env) with pending_command_needs_writes = None }
-    | None -> env
-  in
-  let env =
-    match env.persistent_client_pending_command_needs_full_check with
-    | Some (f, _reason) when is_full_check_done env.full_check_status ->
-      { (f env) with persistent_client_pending_command_needs_full_check = None }
-    | _ -> env
   in
   let env =
     match env.nonpersistent_client_pending_command_needs_full_check with

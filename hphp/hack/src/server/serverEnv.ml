@@ -250,16 +250,6 @@ type env = {
     env ->
     (Unix.file_descr * env MultiThreadedCall.interrupt_handler) list;
   remote: bool;  (** Whether we should force remote type checking or not *)
-  pending_command_needs_writes: (env -> env) option;
-      (** When persistent client sends a command that cannot be handled (due to
-          thread safety, e.g. opening, closing, editing files)
-          we put the continuation that finishes handling it here. *)
-  persistent_client_pending_command_needs_full_check:
-    ((env -> env) * string) option;
-      (** When the persistent client sends a command that cannot be immediately handled
-          (due to needing full check) we put the continuation that finishes handling
-          it here. The string specifies a reason why this command needs full
-          recheck (for logging/debugging purposes) *)
   nonpersistent_client_pending_command_needs_full_check:
     ((env -> env) * string * ClientProvider.client) option;
       [@opaque]

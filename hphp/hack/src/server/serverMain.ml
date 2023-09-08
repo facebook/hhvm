@@ -531,22 +531,18 @@ let new_serve_iteration_id () = Random_id.short_string ()
 
 (* This is safe to run only in the main loop, when workers are not doing
  * anything. *)
-let main_loop_command_handler client_kind client result =
+let main_loop_command_handler client result =
   match result with
   | ServerUtils.Done env -> env
   | ServerUtils.Needs_full_recheck { env; finish_command_handling; reason } ->
-  begin
-    match client_kind with
-    | `Non_persistent ->
-      (* We should not accept any new clients until this is cleared *)
-      assert (
-        Option.is_none env.nonpersistent_client_pending_command_needs_full_check);
-      {
-        env with
-        nonpersistent_client_pending_command_needs_full_check =
-          Some (finish_command_handling, reason, client);
-      }
-  end
+    (* We should not accept any new clients until this is cleared *)
+    assert (
+      Option.is_none env.nonpersistent_client_pending_command_needs_full_check);
+    {
+      env with
+      nonpersistent_client_pending_command_needs_full_check =
+        Some (finish_command_handling, reason, client);
+    }
   | ServerUtils.Needs_writes
       {
         env;
@@ -787,8 +783,7 @@ let serve_one_iteration genv env client_provider =
             genv
             env
             client
-            `Non_persistent
-          |> main_loop_command_handler `Non_persistent client
+          |> main_loop_command_handler client
         in
         HackEventLogger.handled_connection t_start_recheck;
         env
@@ -947,7 +942,6 @@ let priority_client_interrupt_handler genv client_provider :
              genv
              env
              client
-             `Non_persistent
          with
         | ServerUtils.Needs_full_recheck { reason; _ } ->
           failwith

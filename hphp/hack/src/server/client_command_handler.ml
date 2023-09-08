@@ -81,12 +81,10 @@ end = struct
     |> ServerUtils.wrap ~try_:(handle_client_command_try (fun x -> x) client)
 end
 
-let handle_client_command_or_persistent_connection genv env client client_kind :
+let handle_client_command_or_persistent_connection genv env client :
     ServerEnv.env ServerUtils.handle_command_result =
   ServerIdle.stamp_connection ();
-  match client_kind with
-  | `Non_persistent ->
-    Hh_logger.log
-      ~category:"clients"
-      "Handling non-persistent client command or persistent client connection.";
-    NonPersistent.handle_client_command_or_persistent_connection genv env client
+  Hh_logger.log
+    ~category:"clients"
+    "Handling non-persistent client command or persistent client connection.";
+  NonPersistent.handle_client_command_or_persistent_connection genv env client

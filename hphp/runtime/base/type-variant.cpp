@@ -339,6 +339,7 @@ DataType Variant::toNumeric(int64_t &ival, double &dval,
     case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
+    case KindOfEnumClassLabel:
       return m_type;
 
     case KindOfInt64:
@@ -381,6 +382,7 @@ bool Variant::isScalar() const noexcept {
     case KindOfFunc:
     case KindOfClass:
     case KindOfLazyClass:
+    case KindOfEnumClassLabel:
       return true;
   }
   not_reached();
@@ -434,6 +436,7 @@ static Variant::AllowedAsConstantValue isAllowedAsConstantValueImpl(TypedValue t
     case KindOfRFunc:
     case KindOfRClsMeth:
     case KindOfResource:
+    case KindOfEnumClassLabel:
       return Variant::AllowedAsConstantValue::NotAllowed;
   }
   not_reached();
@@ -466,6 +469,7 @@ bool Variant::toBooleanHelper() const {
     case KindOfRFunc:
       SystemLib::throwInvalidOperationExceptionObject("RFunc to bool conversion");
       return true;
+    case KindOfEnumClassLabel:
     case KindOfFunc:
     case KindOfClass:
     case KindOfClsMeth:
@@ -506,6 +510,10 @@ int64_t Variant::toInt64Helper(int base /* = 10 */) const {
     case KindOfRClsMeth:
       SystemLib::throwInvalidOperationExceptionObject(
         "RClsMeth to Int64 conversion");
+      return 1;
+    case KindOfEnumClassLabel:
+      SystemLib::throwInvalidOperationExceptionObject(
+        "EnumClassLabel to Int64 conversion");
       return 1;
   }
   not_reached();
@@ -552,6 +560,10 @@ Array Variant::toPHPArrayHelper() const {
       SystemLib::throwInvalidOperationExceptionObject(
         "RClsMeth to PHPArray conversion");
       return empty_dict_array();
+    case KindOfEnumClassLabel:
+      SystemLib::throwInvalidOperationExceptionObject(
+        "EnumClassLabel to PHPArray conversion");
+      return empty_dict_array();
   }
   not_reached();
 }
@@ -578,6 +590,7 @@ Resource Variant::toResourceHelper() const {
     case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
+    case KindOfEnumClassLabel:
       return Resource(req::make<DummyResource>());
 
     case KindOfResource:
@@ -623,6 +636,7 @@ void Variant::setEvalScalar() {
     case KindOfInt64:
     case KindOfDouble:
     case KindOfLazyClass:
+    case KindOfEnumClassLabel:
       return;
 
     case KindOfString:

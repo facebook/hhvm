@@ -86,6 +86,7 @@ size_t hashArrayPortion(const ArrayData* arr) {
         case KindOfPersistentVec:
         case KindOfPersistentDict:
         case KindOfPersistentKeyset:
+        case KindOfEnumClassLabel:
           hash = folly::hash::hash_combine(hash, v.m_data.num);
           break;
         case KindOfLazyClass:
@@ -818,6 +819,7 @@ std::string describeKeyValue(TypedValue tv) {
   case KindOfLazyClass:
   case KindOfClsMeth:
   case KindOfRClsMeth:
+  case KindOfEnumClassLabel:
     return "<invalid key type>";
   }
   not_reached();

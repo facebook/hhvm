@@ -433,6 +433,7 @@ NEVER_INLINE TypedValue ElemSlow(TypedValue base, key_type<keyType> key) {
     case KindOfRFunc:
     case KindOfRClsMeth:
     case KindOfFunc:
+    case KindOfEnumClassLabel:
       return ElemScalar();
     case KindOfClass:
       return ElemString<mode, keyType>(
@@ -735,6 +736,7 @@ tv_lval ElemD(tv_lval base, key_type<keyType> key) {
     case KindOfRClsMeth:
     case KindOfClass:
     case KindOfLazyClass:
+    case KindOfEnumClassLabel:
       return ElemDScalar();
     case KindOfPersistentString:
     case KindOfString:
@@ -955,6 +957,7 @@ tv_lval ElemU(tv_lval base, key_type<keyType> key) {
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
+    case KindOfEnumClassLabel:
       // Unset on scalar base never modifies the base, but the const_cast is
       // necessary to placate the type system.
       return const_cast<TypedValue*>(&immutable_uninit_base);
@@ -1054,6 +1057,7 @@ inline tv_lval NewElem(tv_lval base) {
     case KindOfRClsMeth:
     case KindOfClass:
     case KindOfLazyClass:
+    case KindOfEnumClassLabel:
       return NewElemInvalid();
     case KindOfPersistentString:
     case KindOfString:
@@ -1348,6 +1352,7 @@ StringData* SetElemSlow(tv_lval base, key_type<keyType> key,
     case KindOfRClsMeth:
     case KindOfClass:
     case KindOfLazyClass:
+    case KindOfEnumClassLabel:
       SetElemScalar<setResult>(value);
       return nullptr;
     case KindOfPersistentString:
@@ -1524,6 +1529,7 @@ inline void SetNewElem(tv_lval base, TypedValue* value) {
     case KindOfRClsMeth:
     case KindOfClass:
     case KindOfLazyClass:
+    case KindOfEnumClassLabel:
       return SetNewElemScalar<setResult>(value);
     case KindOfPersistentString:
     case KindOfString:
@@ -1629,6 +1635,7 @@ inline TypedValue SetOpElem(SetOpOp op, tv_lval base,
     case KindOfRClsMeth:
     case KindOfClass:
     case KindOfLazyClass:
+    case KindOfEnumClassLabel:
       return SetOpElemScalar();
 
     case KindOfPersistentString:
@@ -1696,6 +1703,7 @@ inline TypedValue SetOpNewElem(SetOpOp op, tv_lval base, TypedValue* rhs) {
     case KindOfRClsMeth:
     case KindOfClass:
     case KindOfLazyClass:
+    case KindOfEnumClassLabel:
       return SetOpNewElemScalar();
 
     case KindOfPersistentString:
@@ -1793,6 +1801,7 @@ inline TypedValue IncDecElem(IncDecOp op, tv_lval base, TypedValue key) {
     case KindOfRClsMeth:
     case KindOfClass:
     case KindOfLazyClass:
+    case KindOfEnumClassLabel:
       return IncDecElemScalar();
 
     case KindOfPersistentString:
@@ -1865,6 +1874,7 @@ inline TypedValue IncDecNewElem(IncDecOp op, tv_lval base) {
     case KindOfRClsMeth:
     case KindOfClass:
     case KindOfLazyClass:
+    case KindOfEnumClassLabel:
       return IncDecNewElemScalar();
 
     case KindOfPersistentString:
@@ -2036,6 +2046,7 @@ void UnsetElemSlow(tv_lval base, key_type<keyType> key) {
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
+    case KindOfEnumClassLabel:
       return; // Do nothing.
 
     case KindOfRFunc:
@@ -2210,6 +2221,7 @@ NEVER_INLINE bool IssetElemSlow(TypedValue base, key_type<keyType> key) {
     case KindOfRFunc:
     case KindOfRClsMeth:
     case KindOfFunc:
+    case KindOfEnumClassLabel:
       return false;
 
     case KindOfClass:
@@ -2309,6 +2321,7 @@ inline tv_lval nullSafeProp(TypedValue& tvRef,
     case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
+    case KindOfEnumClassLabel:
       return propPreNull<mode>(tvRef);
     case KindOfObject:
       return val(base).pobj->prop(&tvRef, ctx, key, op);
@@ -2365,6 +2378,7 @@ inline tv_lval Prop(TypedValue& tvRef, const MemberLookupContext& ctx,
     case KindOfFunc:
     case KindOfClass:
     case KindOfLazyClass:
+    case KindOfEnumClassLabel:
       return propPreNull<mode>(tvRef);
 
     case KindOfPersistentString:
@@ -2448,6 +2462,7 @@ inline void SetProp(MemberLookupContext& ctx, TypedValue base, key_type<keyType>
     case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
+    case KindOfEnumClassLabel:
       return SetPropNull();
 
     case KindOfPersistentString:
@@ -2506,6 +2521,7 @@ inline tv_lval SetOpProp(TypedValue& tvRef,
     case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
+    case KindOfEnumClassLabel:
       return SetOpPropNull(tvRef);
 
     case KindOfPersistentString:
@@ -2566,6 +2582,7 @@ inline TypedValue IncDecProp(
     case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
+    case KindOfEnumClassLabel:
       return IncDecPropNull();
 
     case KindOfPersistentString:

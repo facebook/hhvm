@@ -2516,6 +2516,7 @@ safe:
               case KindOfLazyClass:
               case KindOfClsMeth:
               case KindOfRClsMeth:
+              case KindOfEnumClassLabel:
                 if (!stmt->dbh->conn()->quoter(
                       param->parameter.toString(),
                       plc->quoted,

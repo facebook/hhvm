@@ -54,6 +54,7 @@ inline bool tvToBool(TypedValue cell) {
     case KindOfKeyset:        return !cell.m_data.parr->empty();
     case KindOfObject:        return cell.m_data.pobj->toBoolean();
     case KindOfResource:      return cell.m_data.pres->data()->o_toBoolean();
+    case KindOfEnumClassLabel:
     case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
@@ -100,6 +101,8 @@ inline int64_t tvToInt(TypedValue cell) {
     case KindOfClsMeth:
       throwInvalidClsMethToType("int");
     case KindOfRClsMeth:      raise_convert_rcls_meth_to_type("int"); break;
+    case KindOfEnumClassLabel:
+      raise_convert_ecl_to_type("int");
   }
   not_reached();
 }

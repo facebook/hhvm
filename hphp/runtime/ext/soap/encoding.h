@@ -277,6 +277,7 @@ inline int dataTypeToSoap(DataType dt) {
     case KindOfKeyset:
     case KindOfClsMeth: return SOAP_ENC_ARRAY_DT;
     case KindOfObject:  return SOAP_ENC_OBJECT;
+    case KindOfEnumClassLabel:
     case KindOfResource:
     case KindOfRFunc:
     case KindOfRClsMeth: return INVALID_TYPE;

@@ -329,6 +329,7 @@ void tvIncDecOp(Op op, tv_lval cell) {
     case KindOfClsMeth:
     case KindOfRClsMeth:
     case KindOfRFunc:
+    case KindOfEnumClassLabel:
       raiseIncDecInvalidType(cell);
       return;
   }
@@ -561,6 +562,7 @@ void tvBitNot(TypedValue& cell) {
     case KindOfClsMeth:
     case KindOfRClsMeth:
     case KindOfRFunc:
+    case KindOfEnumClassLabel:
       raise_error("Unsupported operand type for ~");
   }
 }

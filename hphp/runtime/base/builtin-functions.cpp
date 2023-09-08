@@ -102,6 +102,10 @@ const StaticString s_cmpWithOpaqueResource(
   "Cannot use relational comparison operators (<, <=, >, >=, <=>) with "
   "opaque values"
 );
+const StaticString s_cmpWithECL(
+  "Cannot use relational comparison operators (<, <=, >, >=, <=>) with "
+  "enum class labels"
+);
 const StaticString s_cmpWithNonArr(
   "Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare "
   "a PHP array with a non-array"
@@ -809,6 +813,10 @@ void throw_rfunc_compare_exception() {
 
 void throw_opaque_resource_compare_exception() {
   SystemLib::throwInvalidOperationExceptionObject(s_cmpWithOpaqueResource);
+}
+
+void throw_ecl_compare_exception() {
+  SystemLib::throwInvalidOperationExceptionObject(s_cmpWithECL);
 }
 
 void throw_keyset_compare_exception() {

@@ -99,6 +99,7 @@ TEST(Type, KnownDataType) {
     TRes,
     TBool,
     TLazyCls,
+    TEnumClassLabel,
     TUninit,
     TInitNull
   };
@@ -239,6 +240,7 @@ TEST(Type, ToString) {
   EXPECT_EQ("Keyset", TKeyset.toString());
 
   EXPECT_EQ("LazyCls", TLazyCls.toString());
+  EXPECT_EQ("EnumClassLabel", TEnumClassLabel.toString());
 
   auto const sub = Type::SubObj(SystemLib::getHH_IteratorClass());
   auto const exact = Type::ExactObj(SystemLib::getHH_IteratorClass());

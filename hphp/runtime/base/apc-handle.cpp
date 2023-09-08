@@ -147,6 +147,7 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
              APCString::MakeSerializedObject(apc_serialize(source, pure));
 
     case KindOfResource:
+    case KindOfEnumClassLabel:
       return APCArray::MakeSharedEmptyVec();
 
     case KindOfClsMeth:

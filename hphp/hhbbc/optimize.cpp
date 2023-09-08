@@ -798,6 +798,7 @@ Bytecode gen_constant(const TypedValue& cell) {
     case KindOfClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
+    case KindOfEnumClassLabel: //TODO(T162042839): Implement this
       always_assert(0 && "invalid constant in gen_constant");
   }
   not_reached();

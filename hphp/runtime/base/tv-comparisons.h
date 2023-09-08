@@ -21,6 +21,12 @@ namespace HPHP {
 
 struct ResourceData;
 
+struct ECLString { StringData* val; };
+
+inline bool operator==(const ECLString& lhs, const ECLString& rhs) {
+  return lhs.val == rhs.val;
+}
+
 /*
  * Returns whether arg1 is "the same as" arg2, in the sense of the === operator.
  */

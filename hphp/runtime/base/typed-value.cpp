@@ -73,6 +73,11 @@ void TypedValue::serde(BlobEncoder& encoder) const {
       encoder(m_data.dbl);
       break;
 
+    case KindOfEnumClassLabel:
+      encoder(KindOfEnumClassLabel);
+      encoder(static_cast<const StringData*>(m_data.pstr));
+      break;
+
     case KindOfPersistentString:
     case KindOfString: {
       encoder(KindOfPersistentString);
@@ -149,6 +154,14 @@ void TypedValue::serde(BlobDecoder& decoder,
     case KindOfDouble:
       decoder(m_data.dbl);
       break;
+
+    case KindOfEnumClassLabel: {
+      const StringData* s;
+      decoder(s); // Ignore makeStatic since ECL requires static string.
+      assertx(s->isStatic());
+      m_data.pstr = const_cast<StringData*>(s);
+      break;
+    }
 
     case KindOfPersistentString: {
       const StringData* s;

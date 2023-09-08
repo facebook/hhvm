@@ -862,6 +862,7 @@ std::string describe_actual_type(tv_rval val) {
       // against that.
       return pres ? pres->data()->o_getClassName().c_str() : "resource(null)";
     }
+    case KindOfEnumClassLabel: return "enum class label";
     case KindOfRFunc:         return "reified function";
     case KindOfFunc:          return "func";
     case KindOfClass:         return "class";
@@ -1181,6 +1182,7 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
         case KindOfKeyset:
         case KindOfClsMeth:
         case KindOfResource:
+        case KindOfEnumClassLabel:
         case KindOfNull:         return MK::None;
         case KindOfUninit:
         case KindOfRFunc:

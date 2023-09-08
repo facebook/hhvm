@@ -517,6 +517,13 @@ static std::string toStringElm(TypedValue tv) {
          << tv.m_data.pres->data()->o_getClassName().get()->data()
          << ")";
       continue;
+    case KindOfEnumClassLabel:
+      os << tv.m_data.pstr;
+      print_count();
+      os << ":EnumClassLabel("
+         << tv.m_data.pstr->data()
+         << ")";
+      continue;
     case KindOfRFunc: // TODO(T63348446) serialize the reified generics
       assertx(tv.m_data.prfunc->checkCount());
       os << tv.m_data.prfunc;

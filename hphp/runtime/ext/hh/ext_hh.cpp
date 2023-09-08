@@ -436,6 +436,7 @@ void serialize_memoize_tv(StringBuffer& sb, int depth, TypedValue tv) {
       serialize_memoize_rcls_meth(sb, depth, tv.m_data.prclsmeth);
       break;
 
+    case KindOfEnumClassLabel:
     case KindOfResource: {
       auto msg = folly::format(
         "Cannot Serialize unexpected type {}",
@@ -1333,6 +1334,7 @@ Class* getClass(TypedValue cls) {
     case KindOfRFunc:
     case KindOfClsMeth:
     case KindOfRClsMeth:
+    case KindOfEnumClassLabel:
       SystemLib::throwInvalidArgumentExceptionObject(
         folly::sformat(
           "Invalid argument type passed to reflection class constructor")

@@ -1691,6 +1691,34 @@ void VariableSerializer::serializeLazyClass(LazyClassData lcls) {
   }
 }
 
+void VariableSerializer::serializeEnumClassLabel(const StringData* label) {
+  switch (getType()) {
+    case Type::VarExport:
+    case Type::PHPOutput:
+    case Type::DebuggerDump:
+    case Type::PrintR:
+        m_buf->append("enum class label (#");
+        m_buf->append(label->data());
+        m_buf->append(")");
+      break;
+    case Type::VarDump:
+    case Type::DebugDump:
+        indent();
+        m_buf->append("enum class label (#");
+        m_buf->append(label->data());
+        m_buf->append(")\n");
+      break;
+    case Type::JSON:
+    case Type::Serialize:
+    case Type::DebuggerSerialize:
+    case Type::Internal:
+    case Type::APCSerialize:
+      SystemLib::throwInvalidOperationExceptionObject(
+        "Unable to serialize enum class labels"
+      );
+  }
+}
+
 void VariableSerializer::serializeClsMeth(
   ClsMethDataRef clsMeth, bool skipNestCheck /* = false */) {
   auto const clsName = clsMeth->getCls()->name();
@@ -1896,6 +1924,11 @@ void VariableSerializer::serializeVariant(tv_rval tv,
     case KindOfLazyClass:
       assertx(!isArrayKey);
       serializeLazyClass(val(tv).plazyclass);
+      return;
+
+    case KindOfEnumClassLabel:
+      assertx(!isArrayKey);
+      serializeEnumClassLabel(val(tv).pstr);
       return;
   }
   not_reached();

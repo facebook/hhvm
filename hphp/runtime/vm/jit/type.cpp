@@ -144,6 +144,9 @@ std::string Type::constValString() const {
       m_clsmethVal->getFunc()->fullName()->data() : "nullptr"
     ).str();
   }
+  if (*this <= TEnumClassLabel) {
+    return folly::format("EnumClassLabel({})", m_strVal->data()).str();
+  }
   if (*this <= TTCA) {
     auto name = getNativeFunctionName(m_tcaVal);
     const char* hphp = "HPHP::";
@@ -234,6 +237,9 @@ std::string Type::toString() const {
     }
     if (*this <= TLazyCls) {
       return folly::sformat("LazyCls={}", m_lclsVal.name()->data());
+    }
+    if (*this <= TEnumClassLabel) {
+      return folly::sformat("EnumClassLabel={}", m_strVal->data());
     }
     return folly::sformat("{}<{}>",
                           dropConstVal().toString(), constValString());
@@ -367,7 +373,9 @@ void Type::serialize(ProfDataSerializer& ser) const {
     if (t <= TCls)       return write_class(ser, t.m_clsVal);
     if (t <= TLazyCls)   return write_lclass(ser, t.m_lclsVal);
     if (t <= TFunc)      return write_func(ser, t.m_funcVal);
-    if (t <= TStaticStr) return write_string(ser, t.m_strVal);
+    if (t <= TStaticStr || t <= TEnumClassLabel) {
+      return write_string(ser, t.m_strVal);
+    }
     if (t < TArrLike) {
       return write_array(ser, t.m_arrVal);
     }
@@ -412,7 +420,7 @@ Type Type::deserialize(ProfDataDeserializer& ser) {
         t.m_funcVal = read_func(ser);
         return t;
       }
-      if (t <= TStaticStr) {
+      if (t <= TStaticStr || t <= TEnumClassLabel) {
         t.m_strVal = read_string(ser);
         return t;
       }
@@ -464,7 +472,9 @@ size_t Type::stableHash() const {
       if (t <= TCls) return t.m_clsVal->stableHash();
       if (t <= TLazyCls) return t.m_lclsVal.name()->hashStatic();
       if (t <= TFunc) return t.m_funcVal->stableHash();
-      if (t <= TStaticStr) return t.m_strVal->hashStatic();
+      if (t <= TStaticStr || t <= TEnumClassLabel) {
+        return t.m_strVal->hashStatic();
+      }
       if (t < TArrLike) {
         return internal_serialize(
           VarNR(const_cast<ArrayData*>(t.m_arrVal))
@@ -504,7 +514,7 @@ bool Type::checkValid() const {
   // NOTE: Be careful: the TFoo objects aren't all constructed yet in this
   // function, and we can't call operator<=, etc. because they call checkValid.
   auto constexpr kNonNullConstVals = kArrLike | kCls | kLazyCls |
-                                     kFunc | kStr;
+                                     kFunc | kStr | kEnumClassLabel;
   if (m_hasConstVal && ((m_bits & kNonNullConstVals) == m_bits)) {
     assert_flog(m_extra, "Null constant type: {}", m_bits.hexStr());
   }
@@ -554,6 +564,8 @@ Type::bits_t Type::bitsFromDataType(DataType outer) {
     case KindOfLazyClass        : return kLazyCls;
     case KindOfClsMeth          : return kClsMeth;
     case KindOfRClsMeth         : return kRClsMeth;
+
+    case KindOfEnumClassLabel   : return kEnumClassLabel;
   }
   not_reached();
 }
@@ -585,6 +597,7 @@ DataType Type::toDataType() const {
   if (*this <= TClsMeth)     return KindOfClsMeth;
   if (*this <= TRFunc)       return KindOfRFunc;
   if (*this <= TRClsMeth)    return KindOfRClsMeth;
+  if (*this <= TEnumClassLabel) return KindOfEnumClassLabel;
   always_assert_flog(false, "Bad Type {} in Type::toDataType()", *this);
 }
 
@@ -929,6 +942,7 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
     O(Func,            TFunc)
     O(LazyCls,         TLazyCls)
     O(ClsMeth,         TClsMeth)
+    //TODO(T162042839): Add enum class label
     O(ArrKey,          TInt | TStr)
     O(UncArrKey,       TInt | TPersistentStr)
     O(ArrKeyCompat,    TInt | TStr | TCls | TLazyCls)

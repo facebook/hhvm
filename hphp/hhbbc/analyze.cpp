@@ -1474,6 +1474,7 @@ ConstraintType type_from_constraint_impl(const TypeConstraint& tc,
               union_of(TStr, TCls, TLazyCls),
               TriBool::Yes
             };
+          case KindOfEnumClassLabel: //TODO(T162042839): Implement this
           case KindOfUninit:
           case KindOfRFunc:
           case KindOfFunc:

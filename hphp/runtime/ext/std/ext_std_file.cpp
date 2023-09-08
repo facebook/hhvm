@@ -708,6 +708,7 @@ Variant HHVM_FUNCTION(file_put_contents,
     }
     case KindOfRFunc:
     case KindOfRClsMeth:
+    case KindOfEnumClassLabel:
       raise_warning("Not a valid stream resource");
       return false;
   }

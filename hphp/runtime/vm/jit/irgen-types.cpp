@@ -147,7 +147,7 @@ SSATmp* implInstanceCheck(IRGS& env, SSATmp* src, const StringData* className,
     gen(env, ExtendsClass, ExtendsClassData{ knownCls }, objClass) : nullptr;
 }
 
-constexpr size_t kNumDataTypes = 17;
+constexpr size_t kNumDataTypes = 18;
 constexpr std::array<DataType, kNumDataTypes> computeDataTypes() {
   std::array<DataType, kNumDataTypes> result = {};
   size_t index = 0;

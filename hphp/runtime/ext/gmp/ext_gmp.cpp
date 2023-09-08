@@ -164,6 +164,7 @@ static bool variantToGMPData(const char* const fnCaller,
   case KindOfLazyClass:
   case KindOfClsMeth:
   case KindOfRClsMeth:
+  case KindOfEnumClassLabel:
     raise_warning(cs_GMP_INVALID_TYPE, fnCaller);
     return false;
   }

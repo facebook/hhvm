@@ -102,8 +102,9 @@ constexpr int8_t udt(size_t index, bool counted) {
   DT(Func,             udt(12, false), 0b01001100) \
   DT(Class,            udt(13, false), 0b01010010) \
   DT(LazyClass,        udt(14, false), 0b01010100) \
-  DT(Uninit,           udt(15, false), 0b01011000) \
-  DT(Null,             udt(16, false), 0b01100010)
+  DT(EnumClassLabel,   udt(15, false), 0b01011000) \
+  DT(Uninit,           udt(16, false), 0b01100010) \
+  DT(Null,             udt(17, false), 0b01100100)
 
 #define DT(name, value1, value2) static_assert(value1 == value2, "bad bitmask");
 DATATYPES
@@ -389,7 +390,8 @@ bool operator>=(DataType, DataType) = delete;
   case KindOfClsMeth:       \
   case KindOfFunc:          \
   case KindOfClass:         \
-  case KindOfLazyClass
+  case KindOfLazyClass:     \
+  case KindOfEnumClassLabel
 }
 
 ///////////////////////////////////////////////////////////////////////////////

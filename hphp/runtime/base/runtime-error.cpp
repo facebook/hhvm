@@ -165,6 +165,10 @@ void raise_convert_rcls_meth_to_type(const char* typeName) {
   raise_error("Cannot convert reified class meth pointer to %s", typeName);
 }
 
+void raise_convert_ecl_to_type(const char* typeName) {
+  raise_error("Cannot convert enum class label to %s", typeName);
+}
+
 void raise_use_of_specialized_array() {
   raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
 }

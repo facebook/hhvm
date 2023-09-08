@@ -698,6 +698,7 @@ bool StringData::isNumeric() const {
     case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
+    case KindOfEnumClassLabel:
       break;
   }
   not_reached();

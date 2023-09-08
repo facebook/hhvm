@@ -638,6 +638,7 @@ void staticStreamer(const TypedValue* tv, std::string& out) {
     case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
+    case KindOfEnumClassLabel:
       break;
   }
   not_reached();

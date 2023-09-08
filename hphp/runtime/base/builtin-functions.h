@@ -232,6 +232,7 @@ bool is_constructor_name(const char* func);
 [[noreturn]] void throw_rclsmeth_compare_exception();
 [[noreturn]] void throw_rfunc_compare_exception();
 [[noreturn]] void throw_opaque_resource_compare_exception();
+[[noreturn]] void throw_ecl_compare_exception();
 [[noreturn]] void throw_rec_non_rec_compare_exception();
 [[noreturn]] void throw_func_compare_exception();
 [[noreturn]] void throw_param_is_not_container();

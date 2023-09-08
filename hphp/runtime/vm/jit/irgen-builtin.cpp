@@ -870,6 +870,7 @@ SSATmp* opt_foldable(IRGS& env,
       case KindOfBoolean:
       case KindOfInt64:
       case KindOfDouble:
+      case KindOfEnumClassLabel:
         return cns(env, retVal);
       case KindOfPersistentString:
       case KindOfString:

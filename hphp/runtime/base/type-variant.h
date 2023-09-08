@@ -442,6 +442,13 @@ struct Variant : private TypedValue {
     m_type = KindOfPersistentString;
   }
 
+  enum class EnumClassLabelInit {};
+  explicit Variant(const StringData *s, EnumClassLabelInit) noexcept {
+    assertx(!s->isRefCounted());
+    m_data.pstr = const_cast<StringData*>(s);
+    m_type = KindOfEnumClassLabel;
+  }
+
   // These are prohibited, but declared just to prevent accidentally
   // calling the bool constructor just because we had a pointer to
   // const.
@@ -818,6 +825,7 @@ struct Variant : private TypedValue {
       case KindOfLazyClass:
       case KindOfClsMeth:
       case KindOfRClsMeth:
+      case KindOfEnumClassLabel:
         return false;
     }
     not_reached();

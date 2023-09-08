@@ -306,6 +306,7 @@ inline Optional<Type> Type::tryCns(TypedValue tv) {
       case KindOfBoolean:
       case KindOfInt64:
       case KindOfDouble:
+      case KindOfEnumClassLabel:
         return Type(tv.m_type);
 
       case KindOfPersistentString:

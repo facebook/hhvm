@@ -112,6 +112,8 @@ TypedValue createTestTypedValue() {
       auto lazy_cls = LazyClassData::create(StringData::MakeStatic("SpecialLazyClass"));
       return make_tv<DataType::LazyClass>(lazy_cls);
     }
+    case DataType::EnumClassLabel:
+      return make_tv<DataType::EnumClassLabel>(StringData::MakeStatic("label"));
     case DataType::Uninit:
       return make_tv<KindOfUninit>();
     case DataType::Null:

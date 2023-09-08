@@ -3353,6 +3353,7 @@ bool Class::compatibleTraitPropInit(const TypedValue& tv1,
     case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
+    case KindOfEnumClassLabel:
       return false;
   }
   not_reached();

@@ -115,6 +115,8 @@ typename Op::RetType tvRelOp(Op op, TypedValue c1, TypedValue c2) {
     case KindOfKeyset:       return op(c1.m_data.parr, c2.m_data.parr);
     case KindOfObject:       return op(c1.m_data.pobj, c2.m_data.pobj);
     case KindOfResource:     return op(c1.m_data.pres, c2.m_data.pres);
+    case KindOfEnumClassLabel: return op(ECLString{c1.m_data.pstr},
+                                         ECLString{c2.m_data.pstr});
     case KindOfRFunc:        return op(c1.m_data.prfunc, c2.m_data.prfunc);
     case KindOfFunc:         return op(c1.m_data.pfunc, c2.m_data.pfunc);
     case KindOfClsMeth:      return op(c1.m_data.pclsmeth, c2.m_data.pclsmeth);
@@ -236,6 +238,10 @@ struct CompareBase {
     throw_clsmeth_compare_exception();
   }
 
+  RetType operator()(ECLString c1, ECLString c2) const {
+    throw_ecl_compare_exception();
+  }
+
   bool operator()(TypedValue t, LazyClassData u) const {
     assertx(isStringOrClassish(t.type()));
     // this seems like an oversight?
@@ -320,6 +326,8 @@ bool tvSame(TypedValue c1, TypedValue c2) {
       return c1.m_data.pobj == c2.m_data.pobj;
     case KindOfResource:
      return c1.m_data.pres == c2.m_data.pres;
+    case KindOfEnumClassLabel:
+      return c1.m_data.pstr == c2.m_data.pstr;
     case KindOfClsMeth:
       return c1.m_data.pclsmeth == c2.m_data.pclsmeth;
     case KindOfRClsMeth:

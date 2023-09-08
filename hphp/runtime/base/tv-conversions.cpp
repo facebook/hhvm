@@ -133,6 +133,7 @@ enable_if_lval_t<T, void> tvCastToBooleanInPlace(T tv) {
       case KindOfFunc:
       case KindOfClass:
       case KindOfLazyClass:
+      case KindOfEnumClassLabel:
         b = true;
         continue;
     }
@@ -221,6 +222,9 @@ enable_if_lval_t<T, void> tvCastToDoubleInPlace(T tv) {
 
       case KindOfRClsMeth:
         raise_convert_rcls_meth_to_type("double");
+
+      case KindOfEnumClassLabel:
+        raise_convert_ecl_to_type("double");
     }
     not_reached();
   } while (0);
@@ -304,6 +308,9 @@ enable_if_lval_t<T, void> tvCastToInt64InPlace(T tv) {
 
       case KindOfRClsMeth:
         raise_convert_rcls_meth_to_type("int");
+
+      case KindOfEnumClassLabel:
+        raise_convert_ecl_to_type("int");
     }
     not_reached();
   } while (0);
@@ -368,13 +375,17 @@ double tvCastToDouble(TypedValue tv) {
 
     case KindOfRClsMeth:
       raise_convert_rcls_meth_to_type("double");
+
+    case KindOfEnumClassLabel:
+      raise_convert_ecl_to_type("double");
   }
   not_reached();
 }
 
 const StaticString
   s_1("1"),
-  s_scalar("scalar");
+  s_scalar("scalar"),
+  s_enumClassLabel("EnumClassLabel");
 
 template<typename T> enable_if_lval_t<T, void> tvCastToStringInPlace(
   T tv, const ConvNoticeLevel notice_level, const StringData* notice_reason) {
@@ -466,6 +477,9 @@ template<typename T> enable_if_lval_t<T, void> tvCastToStringInPlace(
 
     case KindOfRClsMeth:
       raise_convert_rcls_meth_to_type("string");
+
+    case KindOfEnumClassLabel:
+      return persistentString(s_enumClassLabel.get());
   }
   not_reached();
 }
@@ -568,6 +582,9 @@ StringData* tvCastToStringData(
 
     case KindOfRClsMeth:
       raise_convert_rcls_meth_to_type("string");
+
+    case KindOfEnumClassLabel:
+      return s_enumClassLabel.get();
   }
   not_reached();
 }
@@ -625,6 +642,9 @@ ArrayData* tvCastToArrayLikeData(TypedValue tv) {
 
     case KindOfRFunc:
       raise_convert_rfunc_to_type("array");
+
+    case KindOfEnumClassLabel:
+      raise_convert_ecl_to_type("array");
   }
   not_reached();
 }
@@ -708,6 +728,9 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
 
       case KindOfRFunc:
         raise_convert_rfunc_to_type("array");
+
+      case KindOfEnumClassLabel:
+        raise_convert_ecl_to_type("array");
     }
     not_reached();
   } while (0);
@@ -802,6 +825,9 @@ enable_if_lval_t<T, void> tvCastToVecInPlace(T tv) {
 
       case KindOfRClsMeth:
         raise_convert_rcls_meth_to_type("vec");
+
+      case KindOfEnumClassLabel:
+        raise_convert_ecl_to_type("vec");
     }
     not_reached();
   } while (0);
@@ -897,6 +923,9 @@ enable_if_lval_t<T, void> tvCastToDictInPlace(T tv) {
 
       case KindOfRClsMeth:
         raise_convert_rcls_meth_to_type("dict");
+
+      case KindOfEnumClassLabel:
+        raise_convert_ecl_to_type("dict");
     }
     not_reached();
   } while (0);
@@ -992,6 +1021,9 @@ enable_if_lval_t<T, void> tvCastToKeysetInPlace(T tv) {
 
       case KindOfRClsMeth:
         raise_convert_rcls_meth_to_type("keyset");
+
+      case KindOfEnumClassLabel:
+        raise_convert_ecl_to_type("keyset");
     }
     not_reached();
   } while (0);
@@ -1042,6 +1074,9 @@ ObjectData* tvCastToObjectData(TypedValue tv) {
 
     case KindOfRFunc:
       raise_convert_rfunc_to_type("object");
+
+    case KindOfEnumClassLabel:
+      raise_convert_ecl_to_type("object");
   }
   not_reached();
 }

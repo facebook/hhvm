@@ -325,6 +325,7 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
       case KindOfNull:
       case KindOfBoolean:
       case KindOfResource:
+      case KindOfEnumClassLabel:
         return AnnotAction::Fail;
       case KindOfObject:
         not_reached();

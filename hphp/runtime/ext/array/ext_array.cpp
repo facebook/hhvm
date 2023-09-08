@@ -426,6 +426,7 @@ bool HHVM_FUNCTION(array_key_exists,
     case KindOfResource:
     case KindOfRFunc:
     case KindOfFunc:
+    case KindOfEnumClassLabel:
       throwInvalidArrayKeyException(cell, ad);
 
     case KindOfClass:
@@ -769,6 +770,7 @@ TypedValue HHVM_FUNCTION(array_product,
       case KindOfLazyClass:
       case KindOfClsMeth:
       case KindOfRClsMeth:
+      case KindOfEnumClassLabel:
         continue;
     }
     not_reached();
@@ -1046,6 +1048,7 @@ TypedValue HHVM_FUNCTION(array_sum,
       case KindOfLazyClass:
       case KindOfClsMeth:
       case KindOfRClsMeth:
+      case KindOfEnumClassLabel:
         continue;
     }
     not_reached();
@@ -1234,6 +1237,7 @@ int64_t HHVM_FUNCTION(count,
     case KindOfRClsMeth:
     case KindOfClass:
     case KindOfLazyClass:
+    case KindOfEnumClassLabel:
       return 1;
 
     case KindOfPersistentVec:
@@ -2999,6 +3003,10 @@ TypedValue HHVM_FUNCTION(HH_array_key_cast, const Variant& input) {
     case KindOfRFunc:
       SystemLib::throwInvalidArgumentExceptionObject(
         "Reified functions cannot be cast to an array key"
+      );
+    case KindOfEnumClassLabel:
+      SystemLib::throwInvalidArgumentExceptionObject(
+        "Enum Class Labels cannot be cast to an array key"
       );
   }
   not_reached();

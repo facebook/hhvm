@@ -966,6 +966,7 @@ String HHVM_FUNCTION(chr, const Variant& ascii) {
     case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
+    case KindOfEnumClassLabel:
       return String::FromChar(0);
   }
 

@@ -110,6 +110,7 @@ void ConvertTvToUncounted(tv_lval source, const MakeUncountedEnv& env) {
     case KindOfBoolean:
     case KindOfInt64:
     case KindOfDouble:
+    case KindOfEnumClassLabel:
       break;
 
     // DataWalker excludes these cases when it analyzes a value.

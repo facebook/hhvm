@@ -264,6 +264,7 @@ std::pair<int, double> sizeOfArray(
         case KindOfLazyClass:
         case KindOfClsMeth:
         case KindOfRClsMeth:
+        case KindOfEnumClassLabel:
           always_assert(false);
       }
 

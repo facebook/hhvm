@@ -4317,6 +4317,7 @@ Type from_cell(TypedValue cell) {
   case KindOfClass:
   case KindOfClsMeth:
   case KindOfRClsMeth:
+  case KindOfEnumClassLabel: //TODO(T162042839): Implement this
     break;
   }
   always_assert(
@@ -4346,6 +4347,7 @@ Type from_DataType(DataType dt) {
   case KindOfLazyClass:  return TLazyCls;
   case KindOfClsMeth:  return TClsMeth;
   case KindOfRClsMeth: return TRClsMeth;
+  case KindOfEnumClassLabel: assertx(false); //TODO(T162042839): Implement this
   }
   always_assert(0 && "dt in from_DataType didn't satisfy preconditions");
 }

@@ -151,6 +151,7 @@ struct VariantControllerImpl {
         );
 
       case KindOfResource:
+      case KindOfEnumClassLabel:
         throw HPHP::serialize::SerializeError(
           "don't know how to serialize HPHP Variant");
       case KindOfRFunc:

@@ -107,6 +107,8 @@ Variant SSATmp::variantVal() const {
       return Variant{funcVal()};
     case KindOfClsMeth:
       return Variant{clsmethVal()};
+    case KindOfEnumClassLabel:
+      return Variant{strVal(), Variant::EnumClassLabelInit{}};
     case KindOfRClsMeth:
     case KindOfString:
     case KindOfVec:

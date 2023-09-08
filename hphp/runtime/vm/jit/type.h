@@ -209,10 +209,11 @@ constexpr bool operator>(PtrLocation a, PtrLocation b) {
   IRT(RFunc,           bits_t::bit<22>())                               \
   IRT(RClsMeth,        bits_t::bit<23>())                               \
   IRT(LazyCls,         bits_t::bit<24>())                               \
+  IRT(EnumClassLabel,  bits_t::bit<25>())                               \
 /**/
 
 #define UNCOUNTED_INIT_UNION \
-  kInitNull|kBool|kInt|kDbl|kPersistent|kFunc|kCls|kLazyCls|kClsMeth
+  kInitNull|kBool|kInt|kDbl|kPersistent|kFunc|kCls|kLazyCls|kClsMeth|kEnumClassLabel
 
 #define INIT_CELL_UNION \
   kUncountedInit|kStr|kArrLike|kObj|kRes|kRFunc|kRClsMeth

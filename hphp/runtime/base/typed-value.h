@@ -330,6 +330,7 @@ X(KindOfClass,        Class*);
 X(KindOfClsMeth,      ClsMethDataRef);
 X(KindOfRClsMeth,     RClsMethData*);
 X(KindOfLazyClass,    LazyClassData);
+X(KindOfEnumClassLabel, const StringData*);
 
 #undef X
 

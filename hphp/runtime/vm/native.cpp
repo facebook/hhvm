@@ -276,6 +276,7 @@ void callFunc(const Func* const func,
     case KindOfKeyset:
     case KindOfClsMeth:
     case KindOfObject:
+    case KindOfEnumClassLabel:
     case KindOfResource: {
       assertx(isBuiltinByRef(ret.m_type));
       if (func->isReturnByValue()) {
@@ -545,6 +546,7 @@ static Optional<TypedValue> builtinInValue(
   case KindOfUninit:
   case KindOfObject:
   case KindOfResource:
+  case KindOfEnumClassLabel:
   case KindOfRFunc:
   case KindOfFunc:
   case KindOfClass:
@@ -612,6 +614,7 @@ static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
     case KindOfClsMeth:      return ty == T::ClsMeth;
     case KindOfRClsMeth:     // TODO(T67037453)
     case KindOfLazyClass:    return false; // TODO (T68823958)
+    case KindOfEnumClassLabel: return false;
   }
   not_reached();
 }
@@ -644,6 +647,7 @@ static bool tcCheckNativeIO(
       case KindOfClsMeth:      return ty == T::ClsMethIO;
       case KindOfRClsMeth:     // TODO (T67037453)
       case KindOfLazyClass:    return false; // TODO (T68823958)
+      case KindOfEnumClassLabel: return false;
     }
     not_reached();
   };

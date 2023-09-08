@@ -78,9 +78,6 @@ let command_needs_full_check = function
   | Rpc (_metadata, x) -> rpc_command_needs_full_check x
   | Debug_DO_NOT_USE -> failwith "Debug_DO_NOT_USE"
 
-let is_edit : type a. a command -> bool = function
-  | _ -> false
-
 let use_priority_pipe (type result) (command : result ServerCommandTypes.t) :
     bool =
   match command with
@@ -253,26 +250,6 @@ let handle
       {
         env;
         finish_command_handling = handle_command;
-        recheck_restart_is_needed = not (is_edit msg);
-        (* What is [recheck_restart_is_needed] for? ...
-           IDE edits can come in quick succession and be immediately followed
-           by time sensitivie queries (like autocomplete). There is a constant cost
-           to stopping and resuming the global typechecking jobs, which leads to
-           flaky experience. Here we set the flag [recheck_restart_is_needed] to [false] for
-           Edit, meaning that after we've finished handling the edit then
-           [ServerMain.persistent_client_interrupt_handler] will stop the natural
-           full check from taking place (by setting [env.full_check_status = Full_check_needed]).
-           The flag only has effect in the "false" direction which stops the full check
-           from taking place; setting it to "true" won't force an already-stopped full check to resume.
-
-           So what does cause a full check to resume? There are two heuristics, both of them crummy,
-           aimed at making a decentishuser experience where (1) we don't resume so aggressively
-           that we pay the heavy cost of starting+stopping, (2) the user is rarely too perplexed
-           at why things don't seem to be proceeding.
-           * In [ServerMain.watchman_interrupt_handler], if a file on disk is modified, then
-             the typecheck will resume.
-           * In [ServerMain.recheck_until_no_changes_left], if it's been 5.0s or more since the last Edit,
-             then the typecheck will resume. *)
         reason = ServerCommandTypesUtils.debug_describe_cmd msg;
       }
   end else if full_recheck_needed then begin

@@ -22,9 +22,6 @@ type 'env handle_command_result =
   | Needs_writes of {
       env: 'env;
       finish_command_handling: 'env -> 'env;
-      recheck_restart_is_needed: bool;
-          (** Whether current recheck should be automatically
-              restarted after applying the writes. *)
       reason: string;
           (** Reason why this command needs writes (for logging/debugging purposes). *)
     }

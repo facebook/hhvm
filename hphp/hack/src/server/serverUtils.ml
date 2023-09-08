@@ -20,7 +20,6 @@ type 'env handle_command_result =
   | Needs_writes of {
       env: 'env;
       finish_command_handling: 'env -> 'env;
-      recheck_restart_is_needed: bool;
       reason: string;
     }
 

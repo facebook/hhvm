@@ -52,12 +52,14 @@ import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TStruct;
 import org.apache.thrift.transport.TTransportException;
 import org.reactivestreams.Publisher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public final class RSocketRpcClient implements RpcClient {
-
+  private static final Logger LOG = LoggerFactory.getLogger(RSocketRpcClient.class);
   private static final TStruct PARAMETERS_STRUCT = new TStruct();
 
   private final RSocket rsocket;
@@ -121,12 +123,7 @@ public final class RSocketRpcClient implements RpcClient {
                 if (isInternalError(t)) {
                   return Mono.just(getErrorFrame(t));
                 }
-                return Mono.just(
-                    rsocketPayloadToClientResponsePayload(
-                        payload,
-                        ByteBufPayload.create(
-                            getExceptionString(t, payload.getRequestRpcMetadata().getName())),
-                        protocolType));
+                return Mono.error(t);
               });
     } catch (Throwable t) {
       ReferenceCountUtil.safeRelease(rsocketPayload);
@@ -202,10 +199,14 @@ public final class RSocketRpcClient implements RpcClient {
       return rsocket
           .requestStream(rsocketPayload)
           .onErrorResume(
-              t ->
-                  Flux.just(
+              t -> {
+                if (isInternalError(t)) {
+                  return Flux.just(
                       ByteBufPayload.create(
-                          getExceptionString(t, payload.getRequestRpcMetadata().getName()))))
+                          getExceptionString(t, payload.getRequestRpcMetadata().getName())));
+                }
+                return Flux.error(t);
+              })
           .map(new StreamingResponseHandler<>(payload));
     } catch (Throwable t) {
       ReferenceCountUtil.safeRelease(rsocketPayload);
@@ -234,12 +235,16 @@ public final class RSocketRpcClient implements RpcClient {
 
                   return requestChannel
                       .onErrorResume(
-                          t ->
-                              Flux.just(
+                          t -> {
+                            if (isInternalError(t)) {
+                              return Flux.just(
                                   ByteBufPayload.create(
                                       getExceptionString(
                                           t,
-                                          clientRequestPayload.getRequestRpcMetadata().getName()))))
+                                          clientRequestPayload.getRequestRpcMetadata().getName())));
+                            }
+                            return Flux.error(t);
+                          })
                       .map(new StreamingResponseHandler<>(clientRequestPayload));
                 });
 

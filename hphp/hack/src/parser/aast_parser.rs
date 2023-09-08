@@ -156,7 +156,6 @@ impl<'src> AastParser {
             env.codegen,
             env.quick_mode,
             env.show_all_errors,
-            env.is_systemlib,
             mode,
             indexed_source_text,
             &env.parser_options,

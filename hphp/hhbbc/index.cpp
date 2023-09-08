@@ -14955,8 +14955,7 @@ ClsConstLookupResult Index::lookup_class_constant(Context ctx,
         auto const moduleName = unit->moduleName;
         auto const packageInfo = unit->packageInfo;
         if (auto const activeDeployment = packageInfo.getActiveDeployment()) {
-          if (moduleName && !moduleName->empty() &&
-              !packageInfo.moduleInDeployment(
+          if (!packageInfo.moduleInDeployment(
                 moduleName, *activeDeployment, DeployKind::Hard)) {
             mightThrow = true;
           }

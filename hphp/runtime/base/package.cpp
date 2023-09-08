@@ -259,7 +259,6 @@ bool PackageInfo::moduleInASoftPackage(const StringData* module) const {
 
 bool PackageInfo::outsideActiveDeployment(const StringData* module) const {
   if (!RO::EvalEnforceDeployment) return false;
-  if (!module || module->empty()) return false;
   if (auto const activeDeployment = getActiveDeployment()) {
     return !moduleInDeployment(module, *activeDeployment, DeployKind::Hard);
   }

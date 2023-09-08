@@ -189,7 +189,6 @@ pub struct Env<'a> {
     /// Hotfix until we can properly set up saved states to surface parse errors during
     /// typechecking properly.
     pub show_all_errors: bool,
-    is_systemlib: bool,
     file_mode: file_info::Mode,
     pub top_level_statements: bool, /* Whether we are (still) considering TLSs*/
 
@@ -217,7 +216,6 @@ impl<'a> Env<'a> {
         codegen: bool,
         quick_mode: bool,
         show_all_errors: bool,
-        is_systemlib: bool,
         mode: file_info::Mode,
         indexed_source_text: &'a IndexedSourceText<'a>,
         parser_options: &'a GlobalOptions,
@@ -229,7 +227,6 @@ impl<'a> Env<'a> {
             codegen,
             quick_mode,
             show_all_errors,
-            is_systemlib,
             file_mode: mode,
             top_level_statements: true,
             saw_yield: false,
@@ -6584,7 +6581,7 @@ fn p_program<'a>(node: S<'a>, env: &mut Env<'a>) -> ast::Program {
     }
     let mut program = vec![];
     post_process(env, acc, &mut program);
-    if !env.is_systemlib && env.codegen() {
+    if env.codegen() {
         insert_default_module_if_missing_module_membership(&mut program);
     }
     ast::Program(program)

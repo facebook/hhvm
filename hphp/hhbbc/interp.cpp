@@ -3528,7 +3528,6 @@ namespace {
 
 bool is_module_outside_active_deployment(const php::Unit* unit) {
   auto const moduleName = unit->moduleName;
-  if (!moduleName || moduleName->empty()) return false;
   auto const& packageInfo = unit->packageInfo;
   if (auto const activeDeployment = packageInfo.getActiveDeployment()) {
     return !packageInfo.moduleInDeployment(

@@ -14,23 +14,31 @@ module Value = struct
   type t =
     | Other  (** requires default case *)
     | Null
+    | Bool of bool
   [@@deriving ord, sexp, hash]
 
-  let universe = [Other; Null]
+  let bools = [Bool true; Bool false]
+
+  let universe = Other :: Null :: bools
 
   let finite_or_dynamic = function
     | Other -> false
-    | Null -> true
+    | Null
+    | Bool _ ->
+      true
 
   let to_json = function
     | Other -> Hh_json.string_ "other"
     | Null -> Hh_json.string_ "null"
+    | Bool bool -> bool |> Bool.to_string |> Hh_json.string_
 end
 
 module ValueSet = struct
   include Set.Make (Value)
 
   let universe = of_list Value.universe
+
+  let bools = of_list Value.bools
 
   let intersection_list value_sets =
     List.fold_right ~init:universe ~f:inter value_sets
@@ -51,8 +59,8 @@ let prim_to_values = function
   | Tnull
   | Tvoid ->
     ValueSet.singleton Value.Null
+  | Tbool -> ValueSet.bools
   | Tint
-  | Tbool
   | Tfloat
   | Tstring
   | Tresource
@@ -117,6 +125,8 @@ type case = (Tast.ty, Tast.saved_env) Aast.expr
 let case_to_value ((_, _, expr) : case) =
   match expr with
   | Null -> Value.Null
+  | True -> Value.Bool true
+  | False -> Value.Bool false
   | _ -> Value.Other
 
 (* Partition cases based on the kind of literal expression (and later, type) *)
@@ -137,7 +147,6 @@ let partition_cases (cases : (case * _) list) values =
   (partitions, unused_cases)
 
 module EnumErr = Typing_error.Primary.Enum
-module Case = EnumErr.Case
 
 let add_err env err =
   Typing_error_utils.add_typing_error ~env @@ Typing_error.enum err
@@ -152,22 +161,32 @@ let add_redundant_err env const_name = function
     @@ EnumErr.Enum_switch_redundant
          { const_name; first_pos; pos = redundant_pos }
 
+let opt_missing_case env case = function
+  | [] -> Some case
+  | [_] -> None
+  | _ :: _ :: _ as data ->
+    add_redundant_err env case data;
+    None
+
+let opt_cons opt ~tl:default =
+  Option.value_map opt ~f:(fun x -> x :: default) ~default
+
 let get_missing_cases env partitions =
   Hashtbl.fold partitions ~init:[] ~f:(fun ~key ~data missing_cases ->
-      match key with
-      | Value.Null -> begin
-        match data with
-        | [_] -> missing_cases
-        | [] -> Case.Null :: missing_cases
-        | _ :: _ :: _ ->
-          add_redundant_err env Case.Null data;
-          missing_cases
-      end
-      | Value.Other -> missing_cases)
+      opt_cons ~tl:missing_cases
+      @@
+      let open Value in
+      match (key : t) with
+      | Null -> opt_missing_case env EnumErr.Case.Null data
+      | Bool true -> opt_missing_case env EnumErr.Case.True data
+      | Bool false -> opt_missing_case env EnumErr.Case.False data
+      | Other -> None)
 
 let is_supported_literal : (Tast.ty, Tast.saved_env) Aast.expr_ -> bool =
   function
   | Null
+  | True
+  | False
   | Int _ ->
     true
   | _ -> false
@@ -213,7 +232,7 @@ let add_default_if_needed values missing_cases =
   (* write `exists ~f:(fun x -> not @@ finite_or_dynamic x)` instead of
      `forall ~f:finite` to ensure set is non-empty *)
   if ValueSet.exists ~f:(fun x -> not @@ Value.finite_or_dynamic x) values then
-    Case.Default :: missing_cases
+    EnumErr.Case.Default :: missing_cases
   else
     missing_cases
 

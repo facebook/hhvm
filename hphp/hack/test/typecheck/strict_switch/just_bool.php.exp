@@ -1,0 +1,14 @@
+File "just_bool.php", line 15, characters 11-12:
+`switch` statement nonexhaustive; at least the following cases are missing: `true` (Typing[4019])
+File "just_bool.php", line 46, characters 11-12:
+`switch` statement nonexhaustive; at least the following cases are missing: `true` (Typing[4019])
+File "just_bool.php", line 16, characters 10-11:
+Case in `switch` must be either an enum constant or a literal expression. (Typing[4020])
+File "just_bool.php", line 40, characters 10-14:
+Redundant `case` statement (Typing[4021])
+  File "just_bool.php", line 36, characters 10-14:
+  `false` already handled here
+File "just_bool.php", line 24, characters 11-12:
+All cases already covered; a redundant `default` case prevents detecting future errors. If your goal is to guard against invalid values for this type, do an `is` check before the switch. (Typing[4022])
+  File "just_bool.php", line 29, characters 5-12:
+  default declared here

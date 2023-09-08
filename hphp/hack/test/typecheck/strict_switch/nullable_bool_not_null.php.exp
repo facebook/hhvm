@@ -1,0 +1,2 @@
+File "nullable_bool_not_null.php", line 24, characters 11-12:
+`switch` statement nonexhaustive; at least the following cases are missing: `null` (Typing[4019])

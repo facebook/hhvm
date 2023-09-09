@@ -5198,7 +5198,7 @@ void verifyRetImpl(ISS& env, const TCVec& tcs,
       if (result.couldBe(BCls | BLazyCls)) {
         result = promote_classish(std::move(result));
         if (effectFree && (ts_flavor ||
-                           RO::EvalClassStringHintNotices ||
+                           RO::EvalClassStringHintNoticesSampleRate > 0 ||
                            !promote_classish(stackT).moreRefined(type.lower))) {
           effectFree = false;
         }
@@ -5672,7 +5672,7 @@ void in(ISS& env, const bc::InitProp& op) {
       if (RO::EvalCheckPropTypeHints == 0) return { t, true };
       auto const lookup = lookup_constraint(env.index, env.ctx, tc, t);
       if (t.moreRefined(lookup.lower)) return { t, true };
-      if (RO::EvalClassStringHintNotices) return { t, false };
+      if (RO::EvalClassStringHintNoticesSampleRate > 0) return { t, false };
       if (!t.couldBe(lookup.upper)) return { t, false };
       if (lookup.coerceClassToString != TriBool::Yes) return { t, false };
       auto promoted = promote_classish(t);

@@ -1,1 +1,1 @@
--vRuntime.Eval.ClassStringHintNotices=true
+-vRuntime.Eval.ClassStringHintNoticesSampleRate=1

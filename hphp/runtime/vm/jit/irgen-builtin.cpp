@@ -1573,7 +1573,7 @@ SSATmp* maybeCoerceValue(
     if (!val->type().maybe(TLazyCls | TCls)) return bail();
 
     auto castW = [&] (SSATmp* val){
-      if (RuntimeOption::EvalClassStringHintNotices) {
+      if (StructuredLog::coinflip(RO::EvalClassStringHintNoticesSampleRate)) {
         auto tcInfo = folly::sformat(
           "argument {} passed to {}()", id + 1, func->fullName());
         std::string msg;

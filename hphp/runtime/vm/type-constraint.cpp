@@ -1349,7 +1349,7 @@ bool TypeConstraint::tryCommonCoercions(tv_lval val, const Class* ctx,
 
   if ((isClassType(val.type()) || isLazyClassType(val.type())) &&
       checkStringCompatible()) {
-    if (RuntimeOption::EvalClassStringHintNotices) {
+    if (StructuredLog::coinflip(RO::EvalClassStringHintNoticesSampleRate)) {
       raise_notice(Strings::CLASS_TO_STRING_IMPLICIT, tcInfo().c_str());
     }
     val.val().pstr = isClassType(val.type()) ?

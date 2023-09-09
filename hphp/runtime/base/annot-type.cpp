@@ -217,11 +217,11 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
         ? AnnotAction::Pass : AnnotAction::Fail;
     case AnnotMetaType::ArrayKey:
       if (isClassType(dt)) {
-        return RuntimeOption::EvalClassStringHintNotices
+        return RuntimeOption::EvalClassStringHintNoticesSampleRate > 0
           ? AnnotAction::WarnClass : AnnotAction::ConvertClass;
       }
       if (isLazyClassType(dt)) {
-        return RuntimeOption::EvalClassStringHintNotices
+        return RuntimeOption::EvalClassStringHintNoticesSampleRate > 0
           ? AnnotAction::WarnLazyClass : AnnotAction::ConvertLazyClass;
       }
       return (isIntType(dt) || isStringType(dt))
@@ -263,11 +263,11 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
   assertx(metatype == AnnotMetaType::Precise ||
           metatype == AnnotMetaType::Unresolved);
   if (at == AnnotType::String && dt == KindOfClass) {
-    return RuntimeOption::EvalClassStringHintNotices
+    return RuntimeOption::EvalClassStringHintNoticesSampleRate > 0
       ? AnnotAction::WarnClass : AnnotAction::ConvertClass;
   }
   if (at == AnnotType::String && dt == KindOfLazyClass) {
-    return RuntimeOption::EvalClassStringHintNotices
+    return RuntimeOption::EvalClassStringHintNoticesSampleRate > 0
       ? AnnotAction::WarnLazyClass : AnnotAction::ConvertLazyClass;
   }
 
@@ -306,13 +306,13 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
           ? AnnotAction::Pass : AnnotAction::Fail;
       case KindOfClass:
         if (interface_supports_string(annotClsName)) {
-          return RuntimeOption::EvalClassStringHintNotices
+          return RuntimeOption::EvalClassStringHintNoticesSampleRate > 0
             ? AnnotAction::WarnClass : AnnotAction::ConvertClass;
         }
         return AnnotAction::Fail;
       case KindOfLazyClass:
         if (interface_supports_string(annotClsName)) {
-          return RuntimeOption::EvalClassStringHintNotices
+          return RuntimeOption::EvalClassStringHintNoticesSampleRate > 0
             ? AnnotAction::WarnLazyClass : AnnotAction::ConvertLazyClass;
         }
         return AnnotAction::Fail;

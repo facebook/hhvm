@@ -1,1 +1,1 @@
--vEval.CheckPropTypeHints=3 -vEval.ClassStringHintNotices=true
+-vEval.CheckPropTypeHints=3 -vEval.ClassStringHintNoticesSampleRate=1

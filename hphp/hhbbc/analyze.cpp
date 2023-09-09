@@ -1617,7 +1617,7 @@ std::tuple<Type, bool, bool> verify_param_type(const Index& index,
       assertx(lookup.upper.couldBe(BStr | BCls | BLazyCls));
       if (result.couldBe(BCls | BLazyCls)) {
         result = promote_classish(std::move(result));
-        if (effectFree && (RO::EvalClassStringHintNotices ||
+        if (effectFree && (RO::EvalClassStringHintNoticesSampleRate > 0 ||
                            !promote_classish(t).moreRefined(lookup.lower))) {
           effectFree = false;
         }

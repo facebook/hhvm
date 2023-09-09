@@ -373,7 +373,7 @@ void coerceFCallArgsImpl(int32_t numArgs, const Func* func, F args) {
         const_cast<StringData*>(val(tv).pclass->name()) :
         const_cast<StringData*>(val(tv).plazyclass.name());
       type(tv) = KindOfPersistentString;
-      if (RuntimeOption::EvalClassStringHintNotices) {
+      if (StructuredLog::coinflip(RO::EvalClassStringHintNoticesSampleRate)) {
         auto reason = folly::sformat(
           "argument {} passed to {}()", i+1, func->fullName());
         raise_notice(Strings::CLASS_TO_STRING_IMPLICIT, reason.c_str());

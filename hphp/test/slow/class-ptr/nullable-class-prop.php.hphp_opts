@@ -1,1 +1,1 @@
--vRuntime.Eval.CheckPropTypeHints=3 -vRuntime.Eval.ClassStringHintNotices=true
+-vRuntime.Eval.CheckPropTypeHints=3 -vRuntime.Eval.ClassStringHintNoticesSampleRate=1

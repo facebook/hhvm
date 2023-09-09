@@ -1,0 +1,2 @@
+Fatal error: Uncaught exception 'Exception' with message 'Type-hint of 'B::a' must be C1 (as in class A), not C2' in %s/prop-3.php:%d
+%A

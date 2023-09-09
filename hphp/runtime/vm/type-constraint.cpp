@@ -744,16 +744,19 @@ TypeConstraint::maybeInequivalentForProp(const TypeConstraint& other) const {
 
   if (isNullable() != other.isNullable()) return true;
 
-  if (isObject() && other.isObject()) return !clsName()->isame(other.clsName());
-
-  if (isObject() || isUnresolved()) {
-    // Type-hints with the same name should always be the same thing
-    // TODO: take advantage of clsName() if one of them is object
-    return
-      (!other.isObject() && !other.isUnresolved()) ||
-      !typeName()->isame(other.typeName());
+  // If one side is unresolved then the best we can do is check the typeName.
+  if (isUnresolved() || other.isUnresolved()) {
+    return !typeName()->isame(other.typeName());
   }
-  if (other.isObject() || other.isUnresolved()) return true;
+
+  if (isUnion() || other.isUnion()) {
+    // unions in property position must match nominally.
+    return !typeName()->isame(other.typeName());
+  }
+
+  if (isObject() && other.isObject()) return !clsName()->isame(other.clsName());
+  if (isObject() || other.isObject()) return true;
+
   return type() != other.type();
 }
 
@@ -765,8 +768,8 @@ bool TypeConstraint::equivalentForProp(const TypeConstraint& other) const {
 
   if (isObject() && other.isObject()) return clsName()->isame(other.clsName());
 
-  if ((isObject() || isUnresolved()) &&
-      (other.isObject() || other.isUnresolved()) &&
+  if ((isObject() || isUnresolved() || isUnion()) &&
+      (other.isObject() || other.isUnresolved() || isUnion()) &&
       isNullable() == other.isNullable() &&
       typeName()->isame(other.typeName())) {
     // We can avoid having to resolve the type-hint if they have the same name.
@@ -774,39 +777,39 @@ bool TypeConstraint::equivalentForProp(const TypeConstraint& other) const {
     return true;
   }
 
-  auto const resolve = [&] (const TypeConstraint& origTC) {
-    auto const resolved = origTC.resolvedWithAutoload();
-    std::vector<std::tuple<AnnotType, const StringData*, bool>> result;
+  auto resolved0 = resolvedWithAutoload();
+  auto resolved1 = other.resolvedWithAutoload();
 
-    for (auto const tc : eachTypeConstraintInUnion(resolved)) {
-      if (!tc.isCheckable()) {
-        result.emplace_back(AnnotType::Mixed, nullptr, false);
-        continue;
-      }
+  if (resolved0.isUnion() || resolved1.isUnion()) {
+    // unions in property position must match nominally.
+    return resolved0.typeName()->isame(other.typeName());
+  }
 
-      switch (tc.metaType()) {
-        case MetaType::This:
-        case MetaType::Number:
-        case MetaType::ArrayKey:
-        case MetaType::Nonnull:
-        case MetaType::VecOrDict:
-        case MetaType::ArrayLike:
-        case MetaType::Classname:
-        case MetaType::Precise:
-          result.emplace_back(tc.type(), tc.clsName(), tc.isNullable());
-          continue;
-        case MetaType::Nothing:
-        case MetaType::NoReturn:
-        case MetaType::Callable:
-        case MetaType::Mixed:
-        case MetaType::Unresolved:
-          always_assert(false);
-      }
+  auto const simplify = [&] (const TypeConstraint& tc) -> std::tuple<AnnotType, const StringData*, bool> {
+    if (!tc.isCheckable()) return { AnnotType::Mixed, nullptr, false };
+
+    switch (tc.metaType()) {
+      case MetaType::This:
+      case MetaType::Number:
+      case MetaType::ArrayKey:
+      case MetaType::Nonnull:
+      case MetaType::VecOrDict:
+      case MetaType::ArrayLike:
+      case MetaType::Classname:
+      case MetaType::Precise:
+        return { tc.type(), tc.clsName(), tc.isNullable() };
+      case MetaType::Nothing:
+      case MetaType::NoReturn:
+      case MetaType::Callable:
+      case MetaType::Mixed:
+      case MetaType::Unresolved:
+        always_assert(false);
     }
-    return result;
+
+    not_reached();
   };
 
-  return resolve(*this) == resolve(other);
+  return simplify(resolved0) == simplify(resolved1);
 }
 
 template <bool Assert, bool ForProp>

@@ -1574,10 +1574,14 @@ SSATmp* maybeCoerceValue(
 
     auto castW = [&] (SSATmp* val){
       if (RuntimeOption::EvalClassStringHintNotices) {
+        auto tcInfo = folly::sformat(
+          "argument {} passed to {}()", id + 1, func->fullName());
+        std::string msg;
+        string_printf(msg, Strings::CLASS_TO_STRING_IMPLICIT, tcInfo.c_str());
         gen(
           env,
           RaiseNotice,
-          cns(env, makeStaticString(Strings::CLASS_TO_STRING_IMPLICIT))
+          cns(env, makeStaticString(msg))
         );
       }
       return update(val);

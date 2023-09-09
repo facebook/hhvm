@@ -1,2 +1,3 @@
-Notice: Implicit Class to string conversion for type-hint in %s/nullable-class-prop.php on line 14
+
+Notice: Implicit Class to string conversion for property name in %s/test/slow/class-ptr/nullable-class-prop.php on line 14
 string(1) "A"

@@ -115,7 +115,7 @@ constexpr char FUNC_TO_STRING_IMPLICIT[] =
   "Implicit Func to string conversion for type-hint";
 constexpr char FUNC_TO_STRING[] = "Func to string conversion";
 constexpr char CLASS_TO_STRING_IMPLICIT[] =
-  "Implicit Class to string conversion for type-hint";
+  "Implicit Class to string conversion for %s";
 constexpr char CLASS_TO_STRING[] = "Class to string conversion";
 constexpr char CLASS_TO_MEMOKEY[] = "Class to memo key conversion";
 constexpr char CLASS_TO_CLASSNAME[] = "Class passed to classname type-hint";

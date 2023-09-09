@@ -912,8 +912,9 @@ bool TypeConstraint::checkStringCompatible() const {
   return false;
 }
 
+template <typename F>
 bool TypeConstraint::tryCommonCoercions(tv_lval val, const Class* ctx,
-                                        const Class* propDecl) const {
+                                        const Class* propDecl, F tcInfo) const {
   if (ctx && isThis() && val.type() == KindOfObject) {
     auto const cls = val.val().pobj->getVMClass();
     if (cls->preClass()->userAttributes().count(s___MockClass.get()) &&
@@ -925,7 +926,7 @@ bool TypeConstraint::tryCommonCoercions(tv_lval val, const Class* ctx,
   if ((isClassType(val.type()) || isLazyClassType(val.type())) &&
       checkStringCompatible()) {
     if (RuntimeOption::EvalClassStringHintNotices) {
-      raise_notice(Strings::CLASS_TO_STRING_IMPLICIT);
+      raise_notice(Strings::CLASS_TO_STRING_IMPLICIT, tcInfo().c_str());
     }
     val.val().pstr = isClassType(val.type()) ?
       const_cast<StringData*>(val.val().pclass->name()) :
@@ -973,7 +974,11 @@ void TypeConstraint::verifyOutParamFail(TypedValue* c,
                                         const Class* ctx,
                                         const Func* func,
                                         int paramNum) const {
-  if (tryCommonCoercions(c, ctx, nullptr)) return;
+  auto const tcInfo = [&] {
+    return folly::sformat("argument {} returned from {}() as an inout parameter",
+      paramNum+1, func->fullName());
+  };
+  if (tryCommonCoercions(c, ctx, nullptr, tcInfo)) return;
 
   std::string msg = folly::sformat(
       "Argument {} returned from {}() as an inout parameter must be {} "
@@ -1000,7 +1005,8 @@ void TypeConstraint::verifyPropFail(const Class* thisCls,
   assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
   assertx(validForProp());
 
-  if (tryCommonCoercions(val, thisCls, declCls)) return;
+  auto const tcInfo = [&]{ return folly::sformat("property {}", propName);};
+  if (tryCommonCoercions(val, thisCls, declCls, tcInfo)) return;
 
   raise_property_typehint_error(
     folly::sformat(
@@ -1030,7 +1036,14 @@ void TypeConstraint::validForPropFail(const Class* declCls,
 
 void TypeConstraint::verifyFail(tv_lval c, const Class* ctx, const Func* func,
                                 int id) const {
-  if (tryCommonCoercions(c, ctx, nullptr)) return;
+  auto const tcInfo = [&] {
+    if (id == ReturnId) {
+      return folly::sformat("return of {}()", func->fullName());
+    } else {
+      return folly::sformat("argument {} passed to {}()", id+1, func->fullName());
+    }
+  };
+  if (tryCommonCoercions(c, ctx, nullptr, tcInfo)) return;
 
   std::string name = displayName(func->cls());
   auto const givenType = describe_actual_type(c);

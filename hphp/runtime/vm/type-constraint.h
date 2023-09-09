@@ -437,8 +437,9 @@ private:
   // raise an error. Some of these cases are resolved by mutating val instead.
   //
   // If this method returns true, we don't need to raise the type error.
+  template <typename F>
   bool tryCommonCoercions(tv_lval val, const Class* ctx,
-                          const Class* propDecl) const;
+                          const Class* propDecl, F tcInfo) const;
 
   enum class CheckMode {
     Exact, // Do an exact check with autoloading

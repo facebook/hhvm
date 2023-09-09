@@ -1,7 +1,7 @@
 string(5) "hello"
 bool(true)
 int(5)
-notice(main): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for argument 1 passed to foo()
 string(3) "foo"
 bool(true)
 int(3)
@@ -14,12 +14,12 @@ notice(bar): Class to string conversion
 string(3) "bar"
 notice(bar): Class used in is_string
 bool(true)
-notice(%s): Implicit Class to string conversion for type-hint
+notice(%s): Implicit Class to string conversion for argument 1 passed to strlen()
 int(3)
-notice(baz): Implicit Class to string conversion for type-hint
-notice(baz): Implicit Class to string conversion for type-hint
-notice(baz): Implicit Class to string conversion for type-hint
-notice(baz): Implicit Class to string conversion for type-hint
+notice(baz): Implicit Class to string conversion for return of baz()
+notice(baz): Implicit Class to string conversion for return of baz()
+notice(baz): Implicit Class to string conversion for return of baz()
+notice(baz): Implicit Class to string conversion for return of baz()
 string(3) "baz"
 bool(true)
 bool(true)
@@ -31,87 +31,32 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-notice(Closure$main): Implicit Class to string conversion for type-hint
-notice(Closure$main#2): Implicit Class to string conversion for type-hint
-notice(main): Implicit Class to string conversion for type-hint
+notice(Closure$main): Implicit Class to string conversion for property a
+notice(Closure$main#2): Implicit Class to string conversion for property b
+notice(main): Implicit Class to string conversion for argument 1 passed to io()
 string(3) "foo"
 class(foo)
-notice(io): Implicit Class to string conversion for type-hint
-notice(io): Implicit Class to string conversion for type-hint
+notice(io): Implicit Class to string conversion for return of io()
+notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
-notice(main): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for argument 1 passed to io()
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 class(foo)
-notice(io): Implicit Class to string conversion for type-hint
-notice(io): Implicit Class to string conversion for type-hint
+notice(io): Implicit Class to string conversion for return of io()
+notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 string(5) "hello"
 bool(true)
 int(5)
-notice(main): Implicit Class to string conversion for type-hint
-string(3) "foo"
-bool(true)
-int(3)
-string(5) "hello"
-string(5) "hello"
-bool(true)
-int(5)
-class(bar)
-notice(bar): Class to string conversion
-string(3) "bar"
-notice(bar): Class used in is_string
-bool(true)
-notice(%s): Implicit Class to string conversion for type-hint
-int(3)
-notice(baz): Implicit Class to string conversion for type-hint
-notice(baz): Implicit Class to string conversion for type-hint
-notice(baz): Implicit Class to string conversion for type-hint
-notice(baz): Implicit Class to string conversion for type-hint
-string(3) "baz"
-bool(true)
-bool(true)
-string(3) "baz"
-notice(main): Class used in is_string
-notice(main): Class used in is_string
-notice(main): Class used in is_string
-class(buz)
-bool(true)
-bool(true)
-class(buz)
-notice(Closure$main): Implicit Class to string conversion for type-hint
-notice(Closure$main#2): Implicit Class to string conversion for type-hint
-notice(main): Implicit Class to string conversion for type-hint
-string(3) "foo"
-class(foo)
-notice(io): Implicit Class to string conversion for type-hint
-notice(io): Implicit Class to string conversion for type-hint
-string(3) "foo"
-string(3) "foo"
-string(3) "foo"
-string(3) "foo"
-notice(main): Implicit Class to string conversion for type-hint
-string(3) "foo"
-string(3) "foo"
-string(3) "foo"
-string(3) "foo"
-class(foo)
-notice(io): Implicit Class to string conversion for type-hint
-notice(io): Implicit Class to string conversion for type-hint
-string(3) "foo"
-string(3) "foo"
-string(3) "foo"
-string(5) "hello"
-bool(true)
-int(5)
-notice(main): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for argument 1 passed to foo()
 string(3) "foo"
 bool(true)
 int(3)
@@ -124,12 +69,12 @@ notice(bar): Class to string conversion
 string(3) "bar"
 notice(bar): Class used in is_string
 bool(true)
-notice(%s): Implicit Class to string conversion for type-hint
+notice(strlen): Implicit Class to string conversion for argument 1 passed to strlen()
 int(3)
-notice(baz): Implicit Class to string conversion for type-hint
-notice(baz): Implicit Class to string conversion for type-hint
-notice(baz): Implicit Class to string conversion for type-hint
-notice(baz): Implicit Class to string conversion for type-hint
+notice(baz): Implicit Class to string conversion for return of baz()
+notice(baz): Implicit Class to string conversion for return of baz()
+notice(baz): Implicit Class to string conversion for return of baz()
+notice(baz): Implicit Class to string conversion for return of baz()
 string(3) "baz"
 bool(true)
 bool(true)
@@ -141,87 +86,32 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-notice(Closure$main): Implicit Class to string conversion for type-hint
-notice(Closure$main#2): Implicit Class to string conversion for type-hint
-notice(main): Implicit Class to string conversion for type-hint
+notice(Closure$main): Implicit Class to string conversion for property a
+notice(Closure$main#2): Implicit Class to string conversion for property b
+notice(main): Implicit Class to string conversion for argument 1 passed to io()
 string(3) "foo"
 class(foo)
-notice(io): Implicit Class to string conversion for type-hint
-notice(io): Implicit Class to string conversion for type-hint
+notice(io): Implicit Class to string conversion for return of io()
+notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
-notice(main): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for argument 1 passed to io()
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 class(foo)
-notice(io): Implicit Class to string conversion for type-hint
-notice(io): Implicit Class to string conversion for type-hint
+notice(io): Implicit Class to string conversion for return of io()
+notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 string(5) "hello"
 bool(true)
 int(5)
-notice(main): Implicit Class to string conversion for type-hint
-string(3) "foo"
-bool(true)
-int(3)
-string(5) "hello"
-string(5) "hello"
-bool(true)
-int(5)
-class(bar)
-notice(bar): Class to string conversion
-string(3) "bar"
-notice(bar): Class used in is_string
-bool(true)
-notice(%s): Implicit Class to string conversion for type-hint
-int(3)
-notice(baz): Implicit Class to string conversion for type-hint
-notice(baz): Implicit Class to string conversion for type-hint
-notice(baz): Implicit Class to string conversion for type-hint
-notice(baz): Implicit Class to string conversion for type-hint
-string(3) "baz"
-bool(true)
-bool(true)
-string(3) "baz"
-notice(main): Class used in is_string
-notice(main): Class used in is_string
-notice(main): Class used in is_string
-class(buz)
-bool(true)
-bool(true)
-class(buz)
-notice(Closure$main): Implicit Class to string conversion for type-hint
-notice(Closure$main#2): Implicit Class to string conversion for type-hint
-notice(main): Implicit Class to string conversion for type-hint
-string(3) "foo"
-class(foo)
-notice(io): Implicit Class to string conversion for type-hint
-notice(io): Implicit Class to string conversion for type-hint
-string(3) "foo"
-string(3) "foo"
-string(3) "foo"
-string(3) "foo"
-notice(main): Implicit Class to string conversion for type-hint
-string(3) "foo"
-string(3) "foo"
-string(3) "foo"
-string(3) "foo"
-class(foo)
-notice(io): Implicit Class to string conversion for type-hint
-notice(io): Implicit Class to string conversion for type-hint
-string(3) "foo"
-string(3) "foo"
-string(3) "foo"
-string(5) "hello"
-bool(true)
-int(5)
-notice(main): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for argument 1 passed to foo()
 string(3) "foo"
 bool(true)
 int(3)
@@ -234,12 +124,12 @@ notice(bar): Class to string conversion
 string(3) "bar"
 notice(bar): Class used in is_string
 bool(true)
-notice(%s): Implicit Class to string conversion for type-hint
+notice(strlen): Implicit Class to string conversion for argument 1 passed to strlen()
 int(3)
-notice(baz): Implicit Class to string conversion for type-hint
-notice(baz): Implicit Class to string conversion for type-hint
-notice(baz): Implicit Class to string conversion for type-hint
-notice(baz): Implicit Class to string conversion for type-hint
+notice(baz): Implicit Class to string conversion for return of baz()
+notice(baz): Implicit Class to string conversion for return of baz()
+notice(baz): Implicit Class to string conversion for return of baz()
+notice(baz): Implicit Class to string conversion for return of baz()
 string(3) "baz"
 bool(true)
 bool(true)
@@ -251,87 +141,32 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-notice(Closure$main): Implicit Class to string conversion for type-hint
-notice(Closure$main#2): Implicit Class to string conversion for type-hint
-notice(main): Implicit Class to string conversion for type-hint
+notice(Closure$main): Implicit Class to string conversion for property a
+notice(Closure$main#2): Implicit Class to string conversion for property b
+notice(main): Implicit Class to string conversion for argument 1 passed to io()
 string(3) "foo"
 class(foo)
-notice(io): Implicit Class to string conversion for type-hint
-notice(io): Implicit Class to string conversion for type-hint
+notice(io): Implicit Class to string conversion for return of io()
+notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
-notice(main): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for argument 1 passed to io()
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 class(foo)
-notice(io): Implicit Class to string conversion for type-hint
-notice(io): Implicit Class to string conversion for type-hint
+notice(io): Implicit Class to string conversion for return of io()
+notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 string(5) "hello"
 bool(true)
 int(5)
-notice(main): Implicit Class to string conversion for type-hint
-string(3) "foo"
-bool(true)
-int(3)
-string(5) "hello"
-string(5) "hello"
-bool(true)
-int(5)
-class(bar)
-notice(bar): Class to string conversion
-string(3) "bar"
-notice(bar): Class used in is_string
-bool(true)
-notice(%s): Implicit Class to string conversion for type-hint
-int(3)
-notice(baz): Implicit Class to string conversion for type-hint
-notice(baz): Implicit Class to string conversion for type-hint
-notice(baz): Implicit Class to string conversion for type-hint
-notice(baz): Implicit Class to string conversion for type-hint
-string(3) "baz"
-bool(true)
-bool(true)
-string(3) "baz"
-notice(main): Class used in is_string
-notice(main): Class used in is_string
-notice(main): Class used in is_string
-class(buz)
-bool(true)
-bool(true)
-class(buz)
-notice(Closure$main): Implicit Class to string conversion for type-hint
-notice(Closure$main#2): Implicit Class to string conversion for type-hint
-notice(main): Implicit Class to string conversion for type-hint
-string(3) "foo"
-class(foo)
-notice(io): Implicit Class to string conversion for type-hint
-notice(io): Implicit Class to string conversion for type-hint
-string(3) "foo"
-string(3) "foo"
-string(3) "foo"
-string(3) "foo"
-notice(main): Implicit Class to string conversion for type-hint
-string(3) "foo"
-string(3) "foo"
-string(3) "foo"
-string(3) "foo"
-class(foo)
-notice(io): Implicit Class to string conversion for type-hint
-notice(io): Implicit Class to string conversion for type-hint
-string(3) "foo"
-string(3) "foo"
-string(3) "foo"
-string(5) "hello"
-bool(true)
-int(5)
-notice(main): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for argument 1 passed to foo()
 string(3) "foo"
 bool(true)
 int(3)
@@ -344,12 +179,12 @@ notice(bar): Class to string conversion
 string(3) "bar"
 notice(bar): Class used in is_string
 bool(true)
-notice(%s): Implicit Class to string conversion for type-hint
+notice(strlen): Implicit Class to string conversion for argument 1 passed to strlen()
 int(3)
-notice(baz): Implicit Class to string conversion for type-hint
-notice(baz): Implicit Class to string conversion for type-hint
-notice(baz): Implicit Class to string conversion for type-hint
-notice(baz): Implicit Class to string conversion for type-hint
+notice(baz): Implicit Class to string conversion for return of baz()
+notice(baz): Implicit Class to string conversion for return of baz()
+notice(baz): Implicit Class to string conversion for return of baz()
+notice(baz): Implicit Class to string conversion for return of baz()
 string(3) "baz"
 bool(true)
 bool(true)
@@ -361,87 +196,32 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-notice(Closure$main): Implicit Class to string conversion for type-hint
-notice(Closure$main#2): Implicit Class to string conversion for type-hint
-notice(main): Implicit Class to string conversion for type-hint
+notice(Closure$main): Implicit Class to string conversion for property a
+notice(Closure$main#2): Implicit Class to string conversion for property b
+notice(main): Implicit Class to string conversion for argument 1 passed to io()
 string(3) "foo"
 class(foo)
-notice(io): Implicit Class to string conversion for type-hint
-notice(io): Implicit Class to string conversion for type-hint
+notice(io): Implicit Class to string conversion for return of io()
+notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
-notice(main): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for argument 1 passed to io()
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 class(foo)
-notice(io): Implicit Class to string conversion for type-hint
-notice(io): Implicit Class to string conversion for type-hint
+notice(io): Implicit Class to string conversion for return of io()
+notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 string(5) "hello"
 bool(true)
 int(5)
-notice(main): Implicit Class to string conversion for type-hint
-string(3) "foo"
-bool(true)
-int(3)
-string(5) "hello"
-string(5) "hello"
-bool(true)
-int(5)
-class(bar)
-notice(bar): Class to string conversion
-string(3) "bar"
-notice(bar): Class used in is_string
-bool(true)
-notice(%s): Implicit Class to string conversion for type-hint
-int(3)
-notice(baz): Implicit Class to string conversion for type-hint
-notice(baz): Implicit Class to string conversion for type-hint
-notice(baz): Implicit Class to string conversion for type-hint
-notice(baz): Implicit Class to string conversion for type-hint
-string(3) "baz"
-bool(true)
-bool(true)
-string(3) "baz"
-notice(main): Class used in is_string
-notice(main): Class used in is_string
-notice(main): Class used in is_string
-class(buz)
-bool(true)
-bool(true)
-class(buz)
-notice(Closure$main): Implicit Class to string conversion for type-hint
-notice(Closure$main#2): Implicit Class to string conversion for type-hint
-notice(main): Implicit Class to string conversion for type-hint
-string(3) "foo"
-class(foo)
-notice(io): Implicit Class to string conversion for type-hint
-notice(io): Implicit Class to string conversion for type-hint
-string(3) "foo"
-string(3) "foo"
-string(3) "foo"
-string(3) "foo"
-notice(main): Implicit Class to string conversion for type-hint
-string(3) "foo"
-string(3) "foo"
-string(3) "foo"
-string(3) "foo"
-class(foo)
-notice(io): Implicit Class to string conversion for type-hint
-notice(io): Implicit Class to string conversion for type-hint
-string(3) "foo"
-string(3) "foo"
-string(3) "foo"
-string(5) "hello"
-bool(true)
-int(5)
-notice(main): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for argument 1 passed to foo()
 string(3) "foo"
 bool(true)
 int(3)
@@ -454,12 +234,12 @@ notice(bar): Class to string conversion
 string(3) "bar"
 notice(bar): Class used in is_string
 bool(true)
-notice(%s): Implicit Class to string conversion for type-hint
+notice(strlen): Implicit Class to string conversion for argument 1 passed to strlen()
 int(3)
-notice(baz): Implicit Class to string conversion for type-hint
-notice(baz): Implicit Class to string conversion for type-hint
-notice(baz): Implicit Class to string conversion for type-hint
-notice(baz): Implicit Class to string conversion for type-hint
+notice(baz): Implicit Class to string conversion for return of baz()
+notice(baz): Implicit Class to string conversion for return of baz()
+notice(baz): Implicit Class to string conversion for return of baz()
+notice(baz): Implicit Class to string conversion for return of baz()
 string(3) "baz"
 bool(true)
 bool(true)
@@ -471,32 +251,32 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-notice(Closure$main): Implicit Class to string conversion for type-hint
-notice(Closure$main#2): Implicit Class to string conversion for type-hint
-notice(main): Implicit Class to string conversion for type-hint
+notice(Closure$main): Implicit Class to string conversion for property a
+notice(Closure$main#2): Implicit Class to string conversion for property b
+notice(main): Implicit Class to string conversion for argument 1 passed to io()
 string(3) "foo"
 class(foo)
-notice(io): Implicit Class to string conversion for type-hint
-notice(io): Implicit Class to string conversion for type-hint
+notice(io): Implicit Class to string conversion for return of io()
+notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
-notice(main): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for argument 1 passed to io()
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 class(foo)
-notice(io): Implicit Class to string conversion for type-hint
-notice(io): Implicit Class to string conversion for type-hint
+notice(io): Implicit Class to string conversion for return of io()
+notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 string(5) "hello"
 bool(true)
 int(5)
-notice(main): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for argument 1 passed to foo()
 string(3) "foo"
 bool(true)
 int(3)
@@ -509,12 +289,12 @@ notice(bar): Class to string conversion
 string(3) "bar"
 notice(bar): Class used in is_string
 bool(true)
-notice(%s): Implicit Class to string conversion for type-hint
+notice(strlen): Implicit Class to string conversion for argument 1 passed to strlen()
 int(3)
-notice(baz): Implicit Class to string conversion for type-hint
-notice(baz): Implicit Class to string conversion for type-hint
-notice(baz): Implicit Class to string conversion for type-hint
-notice(baz): Implicit Class to string conversion for type-hint
+notice(baz): Implicit Class to string conversion for return of baz()
+notice(baz): Implicit Class to string conversion for return of baz()
+notice(baz): Implicit Class to string conversion for return of baz()
+notice(baz): Implicit Class to string conversion for return of baz()
 string(3) "baz"
 bool(true)
 bool(true)
@@ -526,25 +306,245 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-notice(Closure$main): Implicit Class to string conversion for type-hint
-notice(Closure$main#2): Implicit Class to string conversion for type-hint
-notice(main): Implicit Class to string conversion for type-hint
+notice(Closure$main): Implicit Class to string conversion for property a
+notice(Closure$main#2): Implicit Class to string conversion for property b
+notice(main): Implicit Class to string conversion for argument 1 passed to io()
 string(3) "foo"
 class(foo)
-notice(io): Implicit Class to string conversion for type-hint
-notice(io): Implicit Class to string conversion for type-hint
+notice(io): Implicit Class to string conversion for return of io()
+notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
-notice(main): Implicit Class to string conversion for type-hint
+notice(main): Implicit Class to string conversion for argument 1 passed to io()
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 class(foo)
-notice(io): Implicit Class to string conversion for type-hint
-notice(io): Implicit Class to string conversion for type-hint
+notice(io): Implicit Class to string conversion for return of io()
+notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(5) "hello"
+bool(true)
+int(5)
+notice(main): Implicit Class to string conversion for argument 1 passed to foo()
+string(3) "foo"
+bool(true)
+int(3)
+string(5) "hello"
+string(5) "hello"
+bool(true)
+int(5)
+class(bar)
+notice(bar): Class to string conversion
+string(3) "bar"
+notice(bar): Class used in is_string
+bool(true)
+notice(strlen): Implicit Class to string conversion for argument 1 passed to strlen()
+int(3)
+notice(baz): Implicit Class to string conversion for return of baz()
+notice(baz): Implicit Class to string conversion for return of baz()
+notice(baz): Implicit Class to string conversion for return of baz()
+notice(baz): Implicit Class to string conversion for return of baz()
+string(3) "baz"
+bool(true)
+bool(true)
+string(3) "baz"
+notice(main): Class used in is_string
+notice(main): Class used in is_string
+notice(main): Class used in is_string
+class(buz)
+bool(true)
+bool(true)
+class(buz)
+notice(Closure$main): Implicit Class to string conversion for property a
+notice(Closure$main#2): Implicit Class to string conversion for property b
+notice(main): Implicit Class to string conversion for argument 1 passed to io()
+string(3) "foo"
+class(foo)
+notice(io): Implicit Class to string conversion for return of io()
+notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+notice(main): Implicit Class to string conversion for argument 1 passed to io()
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+class(foo)
+notice(io): Implicit Class to string conversion for return of io()
+notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(5) "hello"
+bool(true)
+int(5)
+notice(main): Implicit Class to string conversion for argument 1 passed to foo()
+string(3) "foo"
+bool(true)
+int(3)
+string(5) "hello"
+string(5) "hello"
+bool(true)
+int(5)
+class(bar)
+notice(bar): Class to string conversion
+string(3) "bar"
+notice(bar): Class used in is_string
+bool(true)
+notice(strlen): Implicit Class to string conversion for argument 1 passed to strlen()
+int(3)
+notice(baz): Implicit Class to string conversion for return of baz()
+notice(baz): Implicit Class to string conversion for return of baz()
+notice(baz): Implicit Class to string conversion for return of baz()
+notice(baz): Implicit Class to string conversion for return of baz()
+string(3) "baz"
+bool(true)
+bool(true)
+string(3) "baz"
+notice(main): Class used in is_string
+notice(main): Class used in is_string
+notice(main): Class used in is_string
+class(buz)
+bool(true)
+bool(true)
+class(buz)
+notice(Closure$main): Implicit Class to string conversion for property a
+notice(Closure$main#2): Implicit Class to string conversion for property b
+notice(main): Implicit Class to string conversion for argument 1 passed to io()
+string(3) "foo"
+class(foo)
+notice(io): Implicit Class to string conversion for return of io()
+notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+notice(main): Implicit Class to string conversion for argument 1 passed to io()
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+class(foo)
+notice(io): Implicit Class to string conversion for return of io()
+notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(5) "hello"
+bool(true)
+int(5)
+notice(main): Implicit Class to string conversion for argument 1 passed to foo()
+string(3) "foo"
+bool(true)
+int(3)
+string(5) "hello"
+string(5) "hello"
+bool(true)
+int(5)
+class(bar)
+notice(bar): Class to string conversion
+string(3) "bar"
+notice(bar): Class used in is_string
+bool(true)
+notice(strlen): Implicit Class to string conversion for argument 1 passed to strlen()
+int(3)
+notice(baz): Implicit Class to string conversion for return of baz()
+notice(baz): Implicit Class to string conversion for return of baz()
+notice(baz): Implicit Class to string conversion for return of baz()
+notice(baz): Implicit Class to string conversion for return of baz()
+string(3) "baz"
+bool(true)
+bool(true)
+string(3) "baz"
+notice(main): Class used in is_string
+notice(main): Class used in is_string
+notice(main): Class used in is_string
+class(buz)
+bool(true)
+bool(true)
+class(buz)
+notice(Closure$main): Implicit Class to string conversion for property a
+notice(Closure$main#2): Implicit Class to string conversion for property b
+notice(main): Implicit Class to string conversion for argument 1 passed to io()
+string(3) "foo"
+class(foo)
+notice(io): Implicit Class to string conversion for return of io()
+notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+notice(main): Implicit Class to string conversion for argument 1 passed to io()
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+class(foo)
+notice(io): Implicit Class to string conversion for return of io()
+notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(5) "hello"
+bool(true)
+int(5)
+notice(main): Implicit Class to string conversion for argument 1 passed to foo()
+string(3) "foo"
+bool(true)
+int(3)
+string(5) "hello"
+string(5) "hello"
+bool(true)
+int(5)
+class(bar)
+notice(bar): Class to string conversion
+string(3) "bar"
+notice(bar): Class used in is_string
+bool(true)
+notice(strlen): Implicit Class to string conversion for argument 1 passed to strlen()
+int(3)
+notice(baz): Implicit Class to string conversion for return of baz()
+notice(baz): Implicit Class to string conversion for return of baz()
+notice(baz): Implicit Class to string conversion for return of baz()
+notice(baz): Implicit Class to string conversion for return of baz()
+string(3) "baz"
+bool(true)
+bool(true)
+string(3) "baz"
+notice(main): Class used in is_string
+notice(main): Class used in is_string
+notice(main): Class used in is_string
+class(buz)
+bool(true)
+bool(true)
+class(buz)
+notice(Closure$main): Implicit Class to string conversion for property a
+notice(Closure$main#2): Implicit Class to string conversion for property b
+notice(main): Implicit Class to string conversion for argument 1 passed to io()
+string(3) "foo"
+class(foo)
+notice(io): Implicit Class to string conversion for return of io()
+notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+notice(main): Implicit Class to string conversion for argument 1 passed to io()
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+class(foo)
+notice(io): Implicit Class to string conversion for return of io()
+notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"

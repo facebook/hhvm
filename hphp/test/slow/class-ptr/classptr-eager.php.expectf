@@ -6,14 +6,14 @@ int(100)
 int(10)
 int(24)
 
-Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/classptr-eager.php on line 38
+Notice: Implicit Class to string conversion for argument 1 passed to foo() in %s/test/slow/class-ptr/classptr-eager.php on line 38
 string(3) "Foo"
 
-Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/classptr-eager.php on line 26
+Notice: Implicit Class to string conversion for return of foo() in %s/test/slow/class-ptr/classptr-eager.php on line 26
 string(3) "Bar"
 
-Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/classptr-eager.php on line 39
+Notice: Implicit Class to string conversion for property f in %s/test/slow/class-ptr/classptr-eager.php on line 39
 
-Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/classptr-eager.php on line 39
+Notice: Implicit Class to string conversion for property f in %s/test/slow/class-ptr/classptr-eager.php on line 39
 string(3) "Bar"
 class(T)

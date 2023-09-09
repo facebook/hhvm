@@ -36,6 +36,8 @@
 
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
+#include "hphp/util/text-util.h"
+
 namespace HPHP::jit::irgen {
 
 namespace {
@@ -45,7 +47,6 @@ namespace {
 const StaticString
   s_StringishObject("StringishObject"),
   s_Awaitable("HH\\Awaitable"),
-  s_CLASS_TO_STRING_IMPLICIT(Strings::CLASS_TO_STRING_IMPLICIT),
   s_CLASS_TO_CLASSNAME(Strings::CLASS_TO_CLASSNAME);
 
 //////////////////////////////////////////////////////////////////////
@@ -173,6 +174,7 @@ constexpr std::array<DataType, kNumDataTypes> kDataTypes = computeDataTypes();
  * The lambda parameters are as follows:
  *
  * - GetVal:     Return the SSATmp of the value to test
+ * - GetTcInfo:  Return a string describing the origin of the type-constraint
  * - GetThisCls: Return the SSATmp of the the class of `this'
  * - SetVal:     Emit code to update the value with the coerced value.
  * - Fail:       Emit code to deal with the type check failing.
@@ -183,6 +185,7 @@ constexpr std::array<DataType, kNumDataTypes> kDataTypes = computeDataTypes();
  *               Call a runtime helper to do the check.
  */
 template <typename TGetVal,
+          typename TGetTcInfo,
           typename TGetThisCls,
           typename TSetVal,
           typename TFail,
@@ -193,6 +196,7 @@ void verifyTypeImpl(IRGS& env,
                     const TypeConstraint& tc,
                     bool onlyCheckNullability,
                     TGetVal getVal,
+                    TGetTcInfo getTcInfo,
                     TGetThisCls getThisCls,
                     TSetVal setVal,
                     TFail fail,
@@ -252,7 +256,10 @@ void verifyTypeImpl(IRGS& env,
         assertx(val->type() <= TCls);
         setVal(gen(env, LdClsName, val));
         if (result == AnnotAction::WarnClass) {
-          gen(env, RaiseNotice, cns(env, s_CLASS_TO_STRING_IMPLICIT.get()));
+          std::string msg;
+          string_printf(msg, Strings::CLASS_TO_STRING_IMPLICIT,
+            getTcInfo().c_str());
+          gen(env, RaiseNotice, cns(env, makeStaticString(msg)));
         }
         return;
 
@@ -261,7 +268,10 @@ void verifyTypeImpl(IRGS& env,
         assertx(val->type() <= TLazyCls);
         setVal(gen(env, LdLazyClsName, val));
         if (result == AnnotAction::WarnLazyClass) {
-          gen(env, RaiseNotice, cns(env, s_CLASS_TO_STRING_IMPLICIT.get()));
+          std::string msg;
+          string_printf(msg, Strings::CLASS_TO_STRING_IMPLICIT,
+            getTcInfo().c_str());
+          gen(env, RaiseNotice, cns(env, makeStaticString(msg)));
         }
         return;
 
@@ -1274,6 +1284,15 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
       [&] { // Get value to test
         return topC(env, BCSPRelOffset { ind }, DataTypeGeneric);
       },
+      [&] {
+        if (id == TypeConstraint::ReturnId) {
+          return folly::sformat("return of {}()", func->fullName());
+        } else {
+          return folly::sformat(
+            "argument {} returned from {}() as an inout parameter",
+            id+1, func->fullName());
+        }
+      },
       [&] { // Get the class representing `this' type
         return ldCtxCls(env);
       },
@@ -1355,6 +1374,10 @@ void verifyParamType(IRGS& env, const Func* func, int32_t id,
       false,
       [&] { // Get value to test
         return topC(env, offset, DataTypeGeneric);
+      },
+      [&] {
+        return folly::sformat(
+          "argument {} passed to {}()", id + 1, func->fullName());
       },
       [&] { // Get the class representing `this' type
         if (prologueCtx == nullptr) return ldCtxCls(env);
@@ -1485,6 +1508,13 @@ void verifyPropType(IRGS& env,
         // non-coercion case is handled without using the fallback.
         if (tc->mayCoerce()) env.irb->constrainValue(val, DataTypeSpecific);
         return val;
+      },
+      [&] {
+        if (name->hasConstVal(TStaticStr)) {
+          return folly::sformat("property {}", name->strVal());
+        } else {
+          return std::string("property");
+        }
       },
       [&] { // Get the class representing `this' type
         return cls;

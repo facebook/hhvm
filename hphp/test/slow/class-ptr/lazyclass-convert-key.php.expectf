@@ -118,5 +118,5 @@ dict(2) {
 Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 93
 int(3)
 
-Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/class-key-convert.inc on line 94
+Notice: Implicit Class to string conversion for argument 2 passed to HH\Shapes::idx() in %s/test/slow/class-ptr/class-key-convert.inc on line 94
 int(3)

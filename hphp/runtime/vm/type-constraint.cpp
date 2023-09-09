@@ -46,6 +46,7 @@ TRACE_SET_MOD(runtime);
 
 using ClassConstraint = TypeConstraint::ClassConstraint;
 using UnionConstraint = TypeConstraint::UnionConstraint;
+using UnionClassList = TypeConstraint::UnionClassList;
 using UnionTypeMask = TypeConstraint::UnionTypeMask;
 
 //////////////////////////////////////////////////////////////////////
@@ -169,17 +170,25 @@ TypeConstraint TypeConstraint::makeUnion(LowStringPtr typeName, folly::Range<con
         break;
       }
       case AnnotType::Object: {
-        not_implemented(); // TODO(T151885113)
+        assertx(tc.typeName());
+        classesVec.emplace_back(tc.m_u.single.class_);
+        preciseTypeMask |= kUnionTypeClass;
+        assertx(flags & TypeConstraintFlags::Resolved);
+        break;
       }
       case AnnotType::Unresolved: {
-        not_implemented(); // TODO(T151885113)
+        assertx(tc.typeName());
+        classesVec.emplace_back(tc.m_u.single.class_);
+        preciseTypeMask |= kUnionTypeClass;
+        assertx(!(flags & TypeConstraintFlags::Resolved));
+        break;
       }
     }
   }
 
-  auto classes = nullptr;
+  LowPtr<const UnionClassList> classes = nullptr;
   if (!classesVec.empty()) {
-    not_implemented(); // TODO(T151885113)
+      classes = UnionConstraint::allocObjects(std::move(classesVec));
   }
 
   return TypeConstraint{ flags, preciseTypeMask, typeName, classes };
@@ -236,6 +245,85 @@ void TypeConstraint::initSingle() {
   single.class_.init(single.type);
 }
 
+namespace {
+size_t stableHashVec(const std::vector<ClassConstraint>& v) {
+  size_t h = 0;
+  for (auto& c : v) {
+    h = folly::hash::hash_combine(h, c.stableHash());
+  }
+  return h;
+}
+} // anonymous namespace
+
+size_t UnionClassList::stableHash() const {
+  return stableHashVec(m_list);
+}
+
+namespace {
+struct UnionClassListHasher {
+  using is_transparent = void;
+  size_t operator()(LowPtr<const UnionClassList> s) const {
+    return s->stableHash();
+  }
+  size_t operator()(const UnionClassList &s) const {
+    return s.stableHash();
+  }
+  size_t operator()(const std::vector<ClassConstraint>& s) const {
+    return stableHashVec(s);
+  }
+};
+struct UnionClassListEq {
+  using is_transparent = void;
+  bool operator()(const UnionClassList& s1, LowPtr<const UnionClassList> s2) const {
+    return s1 == *s2;
+  }
+  bool operator()(LowPtr<const UnionClassList> s1, LowPtr<const UnionClassList> s2) const {
+    return *s1 == *s2;
+  }
+  bool operator()(const std::vector<ClassConstraint>& s1, LowPtr<const UnionClassList> s2) const {
+    return s1 == s2->m_list;
+  }
+};
+}
+
+LowPtr<const UnionClassList>
+UnionConstraint::allocObjects(std::vector<ClassConstraint> objects) {
+  struct Table {
+    hphp_fast_set<LowPtr<const UnionClassList>, UnionClassListHasher, UnionClassListEq> table;
+  };
+  static folly::Synchronized<Table> g_table;
+
+  std::sort(objects.begin(),
+            objects.end(),
+            [](const ClassConstraint& a, const ClassConstraint& b) {
+              return a.m_typeName < b.m_typeName;
+            });
+
+  {
+    auto rlock = g_table.rlock();
+    auto it = rlock->table.find(objects);
+    if (it != rlock->table.end()) {
+      return *it;
+    }
+  }
+
+  // release the lock and relock as writable.
+
+  auto wlock = g_table.wlock();
+
+  {
+    // ensure that the type wasn't created during the unlocked interval.
+    auto it = wlock->table.find(objects);
+    if (it != wlock->table.end()) {
+      return *it;
+    }
+  }
+
+  auto tc = static_new<const UnionClassList>(std::move(objects));
+  wlock->table.insert(tc);
+  return tc;
+}
+
 bool ClassConstraint::operator==(const ClassConstraint& o) const {
   // The named entity is defined based on the typeName() and is redundant to
   // include in the equality operation.
@@ -271,7 +359,9 @@ size_t UnionConstraint::stableHash() const {
   size_t typeNameHash = m_typeName->hashStatic();
   size_t classesHash = 0;
   if (m_classes) {
-    not_implemented(); // TODO(T151885113)
+    for (auto it : m_classes->m_list) {
+      classesHash = folly::hash::hash_combine(classesHash, it.stableHash());
+    }
   }
   return folly::hash::hash_combine(typeNameHash, classesHash, m_mask);
 }
@@ -475,7 +565,12 @@ std::string TypeConstraint::debugName() const {
   if (isUnion()) {
     std::string classes;
     if (auto pcls = m_u.union_.m_classes) {
-      not_implemented(); // TODO(T151885113)
+      for (auto& cls : pcls->m_list) {
+        if (!classes.empty()) classes.append(", ");
+        classes.append(folly::sformat("{{cls:{}, tn:{}}}",
+                                      show(cls.m_clsName),
+                                      show(cls.m_typeName)));
+      }
     }
 
     return folly::sformat(
@@ -793,16 +888,14 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
 }
 
 template <bool Assert>
-bool TypeConstraint::checkTypeAliasImpl(const Class* cls) const {
-  assertx(isUnresolved());
-
+bool TypeConstraint::checkTypeAliasImpl(const ClassConstraint& oc, const Class* cls) {
   // Look up the type alias (autoloading if necessary)
   // and fail if we can't find it
   auto const td = [&]{
     if (!Assert) {
-      return getTypeAliasWithAutoload(typeNamedType(), typeName());
+      return getTypeAliasWithAutoload(oc.m_namedType, oc.m_typeName);
     }
-    return typeNamedType()->getCachedTypeAlias();
+    return oc.m_namedType->getCachedTypeAlias();
   }();
   if (!td) return Assert;
 
@@ -839,9 +932,9 @@ bool TypeConstraint::checkTypeAliasImpl(const Class* cls) const {
 }
 
 template bool TypeConstraint::checkTypeAliasImpl<false>(
-    const Class* type) const;
+  const ClassConstraint& oc, const Class* type);
 template bool TypeConstraint::checkTypeAliasImpl<true>(
-    const Class* type) const;
+  const ClassConstraint& oc, const Class* type);
 
 template <TypeConstraint::CheckMode Mode>
 bool TypeConstraint::checkImpl(tv_rval val,
@@ -884,11 +977,16 @@ bool TypeConstraint::checkImpl(tv_rval val,
     if (isUnresolved()) {
       auto vmClass = val.val().pobj->getVMClass();
       if (isUnion()) {
-        not_implemented(); // TODO(T151885113)
+        for (auto oc : m_u.union_.m_classes->m_list) {
+          if (tryCls(oc.m_typeName, oc.m_namedType)) return true;
+          if (isPasses) continue;
+          if (checkTypeAliasImpl<isAssert>(oc, vmClass)) return true;
+        }
+        return false;
       } else {
         if (tryCls(typeName(), typeNamedType())) return true;
         if (isPasses) return false;
-        return checkTypeAliasImpl<isAssert>(vmClass);
+        return checkTypeAliasImpl<isAssert>(m_u.single.class_, vmClass);
       }
     }
 
@@ -934,38 +1032,40 @@ bool TypeConstraint::checkImpl(tv_rval val,
     not_reached();
   }
 
-  auto const name = isObject() ? clsName() : typeName();
-  auto const result = annotCompat(val.type(), m_u.single.type, name);
-  switch (result) {
-    case AnnotAction::Pass: return true;
-    case AnnotAction::Fail: break;
-    case AnnotAction::CallableCheck:
-      assertx(!isProp);
-      if (isAssert) return true;
-      if (!isPasses && is_callable(tvAsCVarRef(*val))) return true;
-      break;
-    case AnnotAction::Fallback:
-    case AnnotAction::FallbackCoerce:
-      assertx(isUnresolved());
-      if (!isPasses && checkNamedTypeNonObj<isAssert, isProp>(val)) return true;
-      break;
-    case AnnotAction::WarnClass:
-    case AnnotAction::ConvertClass:
-    case AnnotAction::WarnLazyClass:
-    case AnnotAction::ConvertLazyClass:
-      // verifyFail will handle the conversion/warning
-      break;
-    case AnnotAction::WarnClassname:
-      if (!isPasses) {
-        assertx(isClassType(val.type()) || isLazyClassType(val.type()));
-        assertx(RuntimeOption::EvalClassPassesClassname);
-        assertx(RuntimeOption::EvalClassnameNotices);
-        if (!isAssert) raise_notice(Strings::CLASS_TO_CLASSNAME);
-        return true;
-      }
-      break;
-    case AnnotAction::ObjectCheck:
-      not_reached();
+  for (auto tc : eachTypeConstraintInUnion(*this)) {
+    auto const name = tc.isObject() ? tc.clsName() : tc.typeName();
+    auto const result = annotCompat(val.type(), tc.m_u.single.type, name);
+    switch (result) {
+      case AnnotAction::Pass: return true;
+      case AnnotAction::Fail: break;
+      case AnnotAction::CallableCheck:
+        assertx(!isProp);
+        if (isAssert) return true;
+        if (!isPasses && is_callable(tvAsCVarRef(*val))) return true;
+        break;
+      case AnnotAction::Fallback:
+      case AnnotAction::FallbackCoerce:
+        assertx(tc.isUnresolved());
+        if (!isPasses && tc.checkNamedTypeNonObj<isAssert, isProp>(val)) return true;
+        break;
+      case AnnotAction::WarnClass:
+      case AnnotAction::ConvertClass:
+      case AnnotAction::WarnLazyClass:
+      case AnnotAction::ConvertLazyClass:
+        // verifyFail will handle the conversion/warning
+        break;
+      case AnnotAction::WarnClassname:
+        if (!isPasses) {
+          assertx(isClassType(val.type()) || isLazyClassType(val.type()));
+          assertx(RuntimeOption::EvalClassPassesClassname);
+          assertx(RuntimeOption::EvalClassnameNotices);
+          if (!isAssert) raise_notice(Strings::CLASS_TO_CLASSNAME);
+          return true;
+        }
+        break;
+      case AnnotAction::ObjectCheck:
+        not_reached();
+    }
   }
 
   return false;
@@ -1636,9 +1736,12 @@ void TcUnionPieceIterator::buildUnionTypeConstraint() {
       break;
     }
 
-    case TypeConstraint::kUnionTypeClass:
-      not_implemented(); // TODO(T151885113)
+    case TypeConstraint::kUnionTypeClass: {
+      bool resolved = (flags & TypeConstraintFlags::Resolved);
+      AnnotType type = resolved ? AnnotType::Object : AnnotType::Unresolved;
+      m_outTc = TypeConstraint{ type, flags, m_classes->m_list[m_nextClass] };
       break;
+    }
 
     default:
       not_reached();
@@ -1647,7 +1750,12 @@ void TcUnionPieceIterator::buildUnionTypeConstraint() {
 
 TcUnionPieceIterator& TcUnionPieceIterator::operator++() {
   if (m_mask == TypeConstraint::kUnionTypeClass) {
-    not_implemented(); // TODO(T151885113)
+    ++m_nextClass;
+    if (m_nextClass == m_classes->m_list.size()) {
+      // We're done so signal the end.
+      m_mask = 0;
+      m_nextClass = 0;
+    }
   } else {
     // turn off the lowest bit
     m_mask &= ~-m_mask;
@@ -1674,6 +1782,7 @@ TcUnionPieceIterator TcUnionPieceView::begin() const {
   TcUnionPieceIterator it;
   it.m_flags = m_tc.m_flags;
   it.m_classes = nullptr;
+  it.m_nextClass = 0;
 
   if (m_tc.isUnion()) {
     it.m_mask = m_tc.m_u.union_.m_mask;
@@ -1685,15 +1794,6 @@ TcUnionPieceIterator TcUnionPieceView::begin() const {
     }
 
     it.m_classes = m_tc.m_u.union_.m_classes;
-    it.m_outTc.m_flags = static_cast<TypeConstraintFlags>(
-      m_tc.m_flags & (
-        TypeConstraintFlags::Nullable |
-        TypeConstraintFlags::ExtendedHint |
-        TypeConstraintFlags::TypeVar |
-        TypeConstraintFlags::Soft |
-        TypeConstraintFlags::TypeConstant |
-        TypeConstraintFlags::DisplayNullable |
-        TypeConstraintFlags::UpperBound));
     it.buildUnionTypeConstraint();
   } else {
     it.m_outTc = m_tc;
@@ -1718,11 +1818,12 @@ TcUnionPieceIterator TcUnionPieceView::begin() const {
 TcUnionPieceIterator TcUnionPieceView::end() const {
   TcUnionPieceIterator it;
   it.m_mask = 0;
+  it.m_nextClass = 0;
   return it;
 }
 
 bool TcUnionPieceIterator::operator==(const TcUnionPieceIterator& o) const {
-  return m_mask == o.m_mask;
+  return (m_mask == o.m_mask) && (m_nextClass == o.m_nextClass);
 }
 
 }

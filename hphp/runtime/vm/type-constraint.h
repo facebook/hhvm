@@ -129,16 +129,21 @@ struct TypeConstraint {
   constexpr static UnionTypeMask kUnionTypeClass = 1 << 15;
 
   struct UnionClassList {
-    // TODO(T151885113)
+    std::vector<ClassConstraint> m_list;
+
+    explicit UnionClassList(std::vector<ClassConstraint> list) : m_list(std::move(list)) { }
 
     size_t stableHash() const;
-    bool operator==(const UnionClassList& o) const { not_implemented(); /* TODO(T151885113) */ }
+    bool operator==(const UnionClassList& o) const { return m_list == o.m_list; }
   };
 
   /// A UnionConstraint is used to represent a union of type
   /// constraints. Primitive types are stored as bitfields and classes are
   /// stored as an array of ClassConstraints.
   struct UnionConstraint {
+    // TypeConstaints are global objects (they're used and cached by the JIT) so
+    // thye must only point at persistant global objects. Use allocObjects() to
+    // uniquify/allocate.
     LowPtr<const UnionClassList> m_classes;
     LowStringPtr m_typeName;
     UnionTypeMask m_mask;
@@ -154,6 +159,8 @@ struct TypeConstraint {
 
     size_t stableHash() const;
     bool operator==(const UnionConstraint& o) const;
+
+    static LowPtr<const UnionClassList> allocObjects(std::vector<ClassConstraint> objects);
   };
 
   static_assert(CheckSize<UnionConstraint, use_lowptr ? 12 : 24>(), "");
@@ -211,20 +218,29 @@ struct TypeConstraint {
     if constexpr (SerDe::deserializing) {
       size_t sz;
       sd(sz);
-      LowPtr<const UnionClassList> classes = nullptr;
+      m_u.union_.m_classes = nullptr;
       if (sz) {
-        not_implemented(); // TODO(T151885113)
+        std::vector<ClassConstraint> classes;
+        classes.reserve(sz);
+        bool resolved = (m_flags & TypeConstraintFlags::Resolved) != 0;
+        for (size_t i = 0; i < sz; ++i) {
+          ClassConstraint oc;
+          oc.serdeHelper(sd, resolved);
+          oc.init(resolved ? AnnotType::Object : AnnotType::Unresolved);
+          classes.emplace_back(std::move(oc));
+        }
+        m_u.union_.m_classes = UnionConstraint::allocObjects(std::move(classes));
       }
-      m_u.union_.m_classes = classes;
       initUnion();
     } else {
       auto classes = m_u.union_.m_classes;
-      size_t sz = classes
-        ? [](){ not_implemented(); /* TODO(T151885113) */ return 0; }()
-        : 0;
+      size_t sz = classes ? classes->m_list.size() : 0;
       sd(sz);
       if (classes) {
-        not_implemented(); // TODO(T151885113)
+        bool resolved = (m_flags & TypeConstraintFlags::Resolved) != 0;
+        for (const ClassConstraint& oc : classes->m_list) {
+          oc.serdeHelper(sd, resolved);
+        }
       }
     }
   }
@@ -236,7 +252,7 @@ struct TypeConstraint {
       sd(m_u.single.type);
     }
     m_u.single.class_.serdeHelper(sd, resolved);
-    if (SerDe::deserializing) {
+    if constexpr (SerDe::deserializing) {
       initSingle();
     }
   }
@@ -408,7 +424,7 @@ struct TypeConstraint {
 
   bool isUnresolved() const {
     return isUnion()
-      ? /* FIXME: T151885113 */ false
+      ? ((m_flags & TypeConstraintFlags::Resolved) == 0)
       : (m_u.single.type == Type::Unresolved);
   }
 
@@ -510,7 +526,8 @@ struct TypeConstraint {
   bool alwaysPasses(DataType dt) const;
 
   bool checkTypeAliasObj(const Class* cls) const {
-    return checkTypeAliasImpl<false>(cls);
+    assertx(!isUnion());
+    return checkTypeAliasImpl<false>(m_u.single.class_, cls);
   }
 
   // NB: Can throw if the check fails.
@@ -611,7 +628,7 @@ private:
   template <bool, bool>
   bool checkNamedTypeNonObj(tv_rval val) const;
 
-  template <bool> bool checkTypeAliasImpl(const Class* type) const;
+  template <bool> static bool checkTypeAliasImpl(const ClassConstraint& oc, const Class* type);
 
   void verifyFail(tv_lval val,
                   const Class* ctx,
@@ -663,6 +680,7 @@ private:
   TypeConstraint m_outTc;
   LowPtr<const TypeConstraint::UnionClassList> m_classes;
   TypeConstraintFlags m_flags;
+  size_t m_nextClass;
   TypeConstraint::UnionTypeMask m_mask;
 
   void buildUnionTypeConstraint();

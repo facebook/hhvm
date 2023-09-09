@@ -1416,6 +1416,19 @@ ConstraintType type_from_constraint_impl(const TypeConstraint& tc,
       return C{ t, t };
     };
 
+    if (tc.isUnion()) {
+      auto range = eachTypeConstraintInUnion(tc);
+      auto it = range.begin();
+      auto c = type_from_constraint_impl(*it, candidate, resolve, self);
+      ++it;
+
+      for(; it != range.end(); ++it) {
+        auto c2 = type_from_constraint_impl(*it, candidate, resolve, self);
+        c = union_constraint(c, c2);
+      }
+      return c;
+    }
+
     switch (getAnnotMetaType(tc.type())) {
       case AnnotMetaType::Precise: {
         switch (getAnnotDataType(tc.type())) {
@@ -1651,6 +1664,15 @@ Type adjust_type_for_prop(const Index& index,
     if (ret.couldBe(BCls | BLazyCls)) ret |= TSStr;
   }
   return ret;
+}
+
+ConstraintType union_constraint(const ConstraintType& a, const ConstraintType& b) {
+  return ConstraintType {
+    intersection_of(a.lower, b.lower),
+    union_of(a.upper, b.upper),
+    a.coerceClassToString | b.coerceClassToString,
+    a.maybeMixed || b.maybeMixed,
+  };
 }
 
 //////////////////////////////////////////////////////////////////////

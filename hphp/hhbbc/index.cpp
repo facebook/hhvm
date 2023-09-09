@@ -8387,7 +8387,7 @@ private:
                          bool nullable,
                          ISStringSet* uses,
                          bool isProp,
-                         bool /*isUnion*/) {
+                         bool isUnion) {
     // Whatever it's an alias of isn't valid, so leave unresolved.
     if (tv.type == AnnotType::Unresolved) return false;
     if (isProp && !propSupportsAnnot(tv.type)) return false;
@@ -8401,6 +8401,9 @@ private:
       }
       return nullptr;
     }();
+    if (isUnion) {
+      tc = TypeConstraint{AnnotType::Unresolved, tc.flags(), TypeConstraint::ClassConstraint{value}};
+    }
     tc.resolveType(
       tv.type,
       nullable,
@@ -8422,17 +8425,43 @@ private:
 
     if (!tc.isUnresolved()) {
       // Any TC already resolved is assumed to be correct.
-      if (uses && tc.clsName()) uses->emplace(tc.clsName());
+      if (uses) {
+        for (auto& part : eachTypeConstraintInUnion(tc)) {
+          if (auto clsName = part.clsName()) {
+            uses->emplace(clsName);
+          }
+        }
+      }
       return;
     }
     auto const name = tc.typeName();
 
+    if (tc.isUnion()) {
+      // This is a union that contains unresolved names.
+      not_implemented(); // TODO(T151885113)
+    }
+
+    // This is an unresolved name that can resolve to either a single type or
+    // a union.
+
     // Is this name a type-alias or enum?
     if (auto const tm = index.typeMapping(name)) {
       if (tm->typeAndValueUnion.size() > 1) {
-        // TODO(T151885113): Support multiple constraints created by case types
-        // for param, return, upper bound and property type hints
-        always_assert(RO::EvalTreatCaseTypesAsMixed);
+        std::vector<TypeConstraint> members;
+        TypeConstraintFlags flags = tc.flags();
+        if (tm->nullable) {
+          flags |= TypeConstraintFlags::Nullable;
+        }
+        for (auto& tv : tm->typeAndValueUnion) {
+          TypeConstraint out = tc;
+          out.unresolve();
+          if (!resolveOne(out, tv, tm->firstEnum, tm->nullable, uses, isProp, true)) {
+            return;
+          }
+          members.emplace_back(std::move(out));
+        }
+        tc = TypeConstraint::makeUnion(name, members);
+        return;
       }
 
       // This unresolved name resolves to a single type.

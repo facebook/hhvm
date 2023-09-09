@@ -27,6 +27,7 @@
 #include <folly/gen/Base.h>
 #include <folly/gen/String.h>
 
+#include "hphp/hhbbc/analyze.h"
 #include "hphp/hhbbc/cfg.h"
 #include "hphp/hhbbc/class-util.h"
 #include "hphp/hhbbc/context.h"
@@ -812,6 +813,21 @@ std::string show(const ClsTypeConstLookupResult& r) {
     show(r.found),
     show(r.abstract)
   );
+}
+
+std::string show(const ConstraintType& t) {
+  const char* cts;
+  switch (t.coerceClassToString) {
+    case TriBool::Yes: cts = "yes"; break;
+    case TriBool::No: cts = "no"; break;
+    case TriBool::Maybe: cts = "maybe"; break;
+  }
+  return folly::sformat("ConstraintType{{lower:{}, upper:{}, coerceClassToString:{}, maybeMixed:{}}}",
+                        show(t.lower),
+                        show(t.upper),
+                        cts,
+                        t.maybeMixed ? "true" : "false"
+                       );
 }
 
 //////////////////////////////////////////////////////////////////////

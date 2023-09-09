@@ -447,6 +447,12 @@ type_from_constraint(const TypeConstraint& tc,
                      const std::function<res::Class(SString)>& resolve,
                      const std::function<Optional<Type>()>& self);
 
+/*
+ * Given two ConstraintTypes, compute and return the union.
+ */
+ConstraintType union_constraint(const ConstraintType& a, const ConstraintType& b);
+std::string show(const ConstraintType&);
+
 //////////////////////////////////////////////////////////////////////
 
 /*

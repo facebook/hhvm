@@ -55,9 +55,9 @@ struct TypeConstraint {
 
   static const int32_t ReturnId = -1;
 
-  /// An ObjectConstraint is used to represent object-specific (or
+  /// An ClassConstraint is used to represent class-specific (or
   /// enum-specific) information about a TypeConstraint.
-  struct ObjectConstraint {
+  struct ClassConstraint {
     /// Resolved class name. Only valid if this TypeConstraint represents a
     /// resolved object or enum.
     LowStringPtr m_clsName;
@@ -69,12 +69,12 @@ struct TypeConstraint {
     /// actual underlying implementation of that Class* for each request.
     LowPtr<const NamedType> m_namedType;
 
-    ObjectConstraint() = default;
-    explicit ObjectConstraint(LowStringPtr typeName)
-      : ObjectConstraint(nullptr, typeName, nullptr) {
+    ClassConstraint() = default;
+    explicit ClassConstraint(LowStringPtr typeName)
+      : ClassConstraint(nullptr, typeName, nullptr) {
       assertx(!typeName || typeName->isStatic());
     }
-    ObjectConstraint(LowStringPtr clsName,
+    ClassConstraint(LowStringPtr clsName,
                      LowStringPtr typeName,
                      LowPtr<const NamedType> namedType)
       : m_clsName(clsName)
@@ -86,7 +86,7 @@ struct TypeConstraint {
     }
 
     size_t stableHash() const;
-    bool operator==(const ObjectConstraint& o) const;
+    bool operator==(const ClassConstraint& o) const;
 
     template<class SerDe>
     void serdeHelper(SerDe& sd, bool resolved) {
@@ -107,14 +107,63 @@ struct TypeConstraint {
     void init(AnnotType type);
   };
 
-  static_assert(CheckSize<ObjectConstraint, use_lowptr ? 12 : 24>(), "");
+  static_assert(CheckSize<ClassConstraint, use_lowptr ? 12 : 24>(), "");
+
+  using UnionTypeMask = uint16_t;
+  // These are ordered such that the "simplest" ones (in terms of default value)
+  // are first.
+  constexpr static UnionTypeMask kUnionTypeBool      = 1 << 0;
+  constexpr static UnionTypeMask kUnionTypeInt       = 1 << 1;
+  constexpr static UnionTypeMask kUnionTypeFloat     = 1 << 2;
+  constexpr static UnionTypeMask kUnionTypeCallable  = 1 << 3;
+  constexpr static UnionTypeMask kUnionTypeResource  = 1 << 4;
+  constexpr static UnionTypeMask kUnionTypeThis      = 1 << 5;
+  constexpr static UnionTypeMask kUnionTypeString    = 1 << 6;
+  constexpr static UnionTypeMask kUnionTypeVec       = 1 << 7;
+  constexpr static UnionTypeMask kUnionTypeKeyset    = 1 << 8;
+  constexpr static UnionTypeMask kUnionTypeDict      = 1 << 9;
+  constexpr static UnionTypeMask kUnionTypeClassname = 1 << 10;
+  // Class should be the last flag because it indicates a list of classnames in
+  // the repr which we want to handle last and repeat until we're out of
+  // classes.
+  constexpr static UnionTypeMask kUnionTypeClass = 1 << 15;
+
+  struct UnionClassList {
+    // TODO(T151885113)
+
+    size_t stableHash() const;
+    bool operator==(const UnionClassList& o) const { not_implemented(); /* TODO(T151885113) */ }
+  };
+
+  /// A UnionConstraint is used to represent a union of type
+  /// constraints. Primitive types are stored as bitfields and classes are
+  /// stored as an array of ClassConstraints.
+  struct UnionConstraint {
+    LowPtr<const UnionClassList> m_classes;
+    LowStringPtr m_typeName;
+    UnionTypeMask m_mask;
+
+    UnionConstraint() = default;
+    UnionConstraint(UnionTypeMask mask,
+                    LowStringPtr typeName,
+                    LowPtr<const UnionClassList> classes)
+      : m_classes(classes)
+      , m_typeName(typeName)
+      , m_mask(mask)
+    { }
+
+    size_t stableHash() const;
+    bool operator==(const UnionConstraint& o) const;
+  };
+
+  static_assert(CheckSize<UnionConstraint, use_lowptr ? 12 : 24>(), "");
 
   TypeConstraint()
       : m_flags(NoFlags)
       , m_u {
           .single={
             .type=Type::Nothing,
-            .object=ObjectConstraint{nullptr}
+            .class_=ClassConstraint{nullptr}
           }
         } {
     init();
@@ -125,16 +174,59 @@ struct TypeConstraint {
       , m_u {
           .single={
             .type=Type::Nothing,
-            .object=ObjectConstraint{typeName}
+            .class_=ClassConstraint{typeName}
           }
         } {
     init();
   }
 
+  TypeConstraint(Type type, TypeConstraintFlags flags, ClassConstraint class_)
+    : m_flags(flags)
+      , m_u {
+          .single={
+            .type=type,
+            .class_=class_
+          }
+        } {
+  }
+
+  static TypeConstraint makeUnion(LowStringPtr typeName, folly::Range<const TypeConstraint*> tcs);
+
   template<class SerDe>
   void serde(SerDe& sd) {
     sd(m_flags);
-    serdeSingle(sd);
+    if (isUnion()) {
+      serdeUnion(sd);
+    } else {
+      serdeSingle(sd);
+    }
+  }
+
+  template<class SerDe>
+  void serdeUnion(SerDe& sd) {
+    sd(m_u.union_.m_mask);
+    sd(m_u.union_.m_typeName);
+
+    // m_classes
+    if constexpr (SerDe::deserializing) {
+      size_t sz;
+      sd(sz);
+      LowPtr<const UnionClassList> classes = nullptr;
+      if (sz) {
+        not_implemented(); // TODO(T151885113)
+      }
+      m_u.union_.m_classes = classes;
+      initUnion();
+    } else {
+      auto classes = m_u.union_.m_classes;
+      size_t sz = classes
+        ? [](){ not_implemented(); /* TODO(T151885113) */ return 0; }()
+        : 0;
+      sd(sz);
+      if (classes) {
+        not_implemented(); // TODO(T151885113)
+      }
+    }
   }
 
   template<class SerDe>
@@ -143,7 +235,7 @@ struct TypeConstraint {
     if (resolved) {
       sd(m_u.single.type);
     }
-    m_u.single.object.serdeHelper(sd, resolved);
+    m_u.single.class_.serdeHelper(sd, resolved);
     if (SerDe::deserializing) {
       initSingle();
     }
@@ -168,27 +260,61 @@ struct TypeConstraint {
    * all.  If this function returns false, it means the parameter type
    * verification would be a no-op.
    */
-  bool hasConstraint() const { return (bool)typeName(); }
+  bool hasConstraint() const {
+    if (isUnion()) return true;
+    switch (m_u.single.type) {
+      case AnnotType::Null:
+      case AnnotType::Bool:
+      case AnnotType::Int:
+      case AnnotType::Float:
+      case AnnotType::String:
+      case AnnotType::Resource:
+      case AnnotType::Dict:
+      case AnnotType::Vec:
+      case AnnotType::Keyset:
+      case AnnotType::Nonnull:
+      case AnnotType::Callable:
+      case AnnotType::Number:
+      case AnnotType::ArrayKey:
+      case AnnotType::This:
+      case AnnotType::VecOrDict:
+      case AnnotType::ArrayLike:
+      case AnnotType::NoReturn:
+      case AnnotType::Nothing:
+      case AnnotType::Classname:
+        return true;
+      case AnnotType::Object:
+      case AnnotType::Unresolved:
+        return (bool)m_u.single.class_.m_typeName;
+      case AnnotType::Mixed:
+        return false;
+    }
+    not_reached();
+  }
 
   /*
    * Read access to various members.
    */
   const StringData* clsName() const {
-    return m_u.single.object.m_clsName;
+    assertx(!isUnion());
+    return m_u.single.class_.m_clsName;
   }
   const StringData* typeName() const {
-    return m_u.single.object.m_typeName;
+    return isUnion()
+      ? m_u.union_.m_typeName
+      : m_u.single.class_.m_typeName;
   }
   const NamedType* clsNamedType() const {
     assertx(isObject());
-    return m_u.single.object.m_namedType;
+    return m_u.single.class_.m_namedType;
   }
   const NamedType* typeNamedType() const {
-    assertx(isUnresolved());
-    return m_u.single.object.m_namedType;
+    assertx(isUnresolved() && !isUnion());
+    return m_u.single.class_.m_namedType;
   }
   const NamedType* anyNamedType() const {
-    return m_u.single.object.m_namedType;
+    assertx(!isUnion());
+    return m_u.single.class_.m_namedType;
   }
   TypeConstraintFlags flags() const { return m_flags; }
 
@@ -196,20 +322,21 @@ struct TypeConstraint {
    * Access to the "meta type" for this TypeConstraint.
    */
   MetaType metaType() const {
+    assertx(!isUnion());
     return getAnnotMetaType(m_u.single.type);
   }
 
   /*
    * If this->isUnresolved(), resolve it using the autoloader.
    */
-  TinyVector<TypeConstraint> resolvedWithAutoload() const;
+  TypeConstraint resolvedWithAutoload() const;
 
   /*
    * Returns the underlying DataType for this TypeConstraint.
    */
   MaybeDataType underlyingDataType() const {
     if (!isPrecise()) return std::nullopt;
-    if (isObject() && interface_supports_non_objects(m_u.single.object.m_clsName)) {
+    if (isObject() && interface_supports_non_objects(m_u.single.class_.m_clsName)) {
       return std::nullopt;
     }
     return MaybeDataType(getAnnotDataType(m_u.single.type));
@@ -227,11 +354,12 @@ struct TypeConstraint {
    * type at runtime (because of a type-alias for example).
    */
   bool isCheckable() const {
-    return hasConstraint()
-        && !isMixed()
-        && !isTypeVar()
-        && !isTypeConstant()
-        && !(isUpperBound() && RuntimeOption::EvalEnforceGenericsUB == 0);
+    return (hasConstraint()
+            && !isMixed()
+            && !isTypeVar()
+            && !isTypeConstant()
+            && !(isUpperBound() && RuntimeOption::EvalEnforceGenericsUB == 0))
+      || isUnion();
   }
 
   /*
@@ -258,27 +386,41 @@ struct TypeConstraint {
   bool isTypeVar()  const { return m_flags & TypeVar; }
   bool isTypeConstant() const { return m_flags & TypeConstant; }
   bool isUpperBound() const { return m_flags & UpperBound; }
+  bool isUnion() const { return m_flags & Union; }
 
-  bool isPrecise()  const { return metaType() == MetaType::Precise; }
-  bool isMixed()    const { return m_u.single.type == Type::Mixed; }
-  bool isThis()     const { return m_u.single.type == Type::This; }
-  bool isCallable() const { return m_u.single.type == Type::Callable; }
-  bool isNumber()   const { return m_u.single.type == Type::Number; }
-  bool isNothing()  const { return m_u.single.type == Type::Nothing; }
-  bool isNoReturn() const { return m_u.single.type == Type::NoReturn; }
-  bool isArrayKey() const { return m_u.single.type == Type::ArrayKey; }
-  bool isDict()     const { return m_u.single.type == Type::Dict; }
-  bool isVec()      const { return m_u.single.type == Type::Vec; }
-  bool isKeyset()   const { return m_u.single.type == Type::Keyset; }
-  bool isObject()   const { return m_u.single.type == Type::Object; }
-  bool isInt()      const { return m_u.single.type == Type::Int; }
-  bool isString()   const { return m_u.single.type == Type::String; }
-  bool isArrayLike() const { return m_u.single.type == Type::ArrayLike; }
-  bool isVecOrDict() const { return m_u.single.type == Type::VecOrDict; }
-  bool isClassname() const { return m_u.single.type == Type::Classname; }
-  bool isUnresolved() const { return m_u.single.type == Type::Unresolved; }
+  bool isPrecise()  const { return !isUnion() && metaType() == MetaType::Precise; }
+  bool isMixed()    const { return !isUnion() && m_u.single.type == Type::Mixed; }
+  bool isThis()     const { return !isUnion() && m_u.single.type == Type::This; }
+  bool isCallable() const { return !isUnion() && m_u.single.type == Type::Callable; }
+  bool isNumber()   const { return !isUnion() && m_u.single.type == Type::Number; }
+  bool isNothing()  const { return !isUnion() && m_u.single.type == Type::Nothing; }
+  bool isNoReturn() const { return !isUnion() && m_u.single.type == Type::NoReturn; }
+  bool isArrayKey() const { return !isUnion() && m_u.single.type == Type::ArrayKey; }
+  bool isDict()     const { return !isUnion() && m_u.single.type == Type::Dict; }
+  bool isVec()      const { return !isUnion() && m_u.single.type == Type::Vec; }
+  bool isKeyset()   const { return !isUnion() && m_u.single.type == Type::Keyset; }
+  bool isObject()   const { return !isUnion() && m_u.single.type == Type::Object; }
+  bool isInt()      const { return !isUnion() && m_u.single.type == Type::Int; }
+  bool isString()   const { return !isUnion() && m_u.single.type == Type::String; }
+  bool isArrayLike() const { return !isUnion() && m_u.single.type == Type::ArrayLike; }
+  bool isVecOrDict() const { return !isUnion() && m_u.single.type == Type::VecOrDict; }
+  bool isClassname() const { return !isUnion() && m_u.single.type == Type::Classname; }
 
-  AnnotType type()  const { return m_u.single.type; }
+  bool isUnresolved() const {
+    return isUnion()
+      ? /* FIXME: T151885113 */ false
+      : (m_u.single.type == Type::Unresolved);
+  }
+
+  bool unionHasThis() const {
+    assertx(isUnion());
+    return m_u.union_.m_mask & kUnionTypeThis;
+  }
+
+  AnnotType type()  const {
+    assertx(!isUnion());
+    return m_u.single.type;
+  }
 
   bool validForProp() const;
 
@@ -286,9 +428,7 @@ struct TypeConstraint {
                             const StringData* propName) const;
 
   bool validForEnumBase() const {
-    auto const resolvedVec = resolvedWithAutoload();
-    if (resolvedVec.size() != 1) return false;
-    auto const resolved = resolvedVec[0];
+    auto const resolved = resolvedWithAutoload();
     return resolved.isInt() || resolved.isString() ||
            resolved.isArrayKey() || resolved.isClassname() ||
            resolved.isNothing();
@@ -301,6 +441,10 @@ struct TypeConstraint {
    */
   std::string displayName(const Class* context = nullptr,
                           bool extra = false) const;
+
+#ifndef NDEBUG
+  std::string debugName() const;
+#endif
 
   /*
    * Obtain an initial value suitable for this type-constraint. Where possible,
@@ -432,6 +576,18 @@ struct TypeConstraint {
 private:
   void init();
   void initSingle();
+  void initUnion();
+
+  TypeConstraint(TypeConstraintFlags flags,
+                 UnionTypeMask mask,
+                 LowStringPtr typeName,
+                 LowPtr<const UnionClassList> classes)
+    : m_flags(flags)
+    , m_u {
+        .union_={mask, typeName, classes}
+      } {
+    init();
+  }
 
   // There are a few cases where a type constraint does not pass, but we don't
   // raise an error. Some of these cases are resolved by mutating val instead.
@@ -481,13 +637,65 @@ private:
       // alias or enum and test for a different DataType (see annotCompat()
       // for details).
       Type type;
-      ObjectConstraint object;
+      ClassConstraint class_;
     } single;
+    UnionConstraint union_;
   } m_u;
 #pragma pack(pop)
+
+  friend struct TcUnionPieceIterator;
+  friend struct TcUnionPieceView;
 };
 
 static_assert(CheckSize<TypeConstraint, use_lowptr ? 16 : 32>(), "");
+
+/// This is an iterator for TypeConstraint - see eachTypeConstraintInUnion().
+struct TcUnionPieceIterator {
+  using difference_type = std::ptrdiff_t;
+  using value_type = TypeConstraint;
+  const TypeConstraint& operator*() const { return m_outTc; }
+  TcUnionPieceIterator& operator++();
+  TcUnionPieceIterator operator++(int);
+  bool operator==(const TcUnionPieceIterator&) const;
+  bool at_end() const;
+
+private:
+  TypeConstraint m_outTc;
+  LowPtr<const TypeConstraint::UnionClassList> m_classes;
+  TypeConstraintFlags m_flags;
+  TypeConstraint::UnionTypeMask m_mask;
+
+  void buildUnionTypeConstraint();
+
+  friend struct TcUnionPieceView;
+};
+static_assert(std::forward_iterator<TcUnionPieceIterator>);
+
+/// This is a "view" of a TypeConstraint which contains begin() and end()
+/// support. We could have TypeConstraint support begin() and end() directly but
+/// that seems somewhat non-intuitive what raw begin() and end() would mean.
+struct TcUnionPieceView {
+  enum class Kind { All, ClassesOnly };
+  TcUnionPieceView(const TypeConstraint& tc, Kind kind) : m_tc(tc), m_kind(kind) { }
+  TcUnionPieceIterator begin() const;
+  TcUnionPieceIterator end() const;
+private:
+  const TypeConstraint m_tc;
+  const Kind m_kind;
+};
+
+static_assert(std::ranges::input_range<TcUnionPieceView>);
+
+/// For a single TypeConstraint returns a view which iterates over the single
+/// TC.  For a union returns a view which iterates over the individual members
+/// of the union.
+inline TcUnionPieceView eachTypeConstraintInUnion(const TypeConstraint& tc) {
+  return TcUnionPieceView(tc, TcUnionPieceView::Kind::All);
+}
+// Like eachTypeConstraintInUnion() but only yields the classes.
+inline TcUnionPieceView eachClassTypeConstraintInUnion(const TypeConstraint& tc) {
+  return TcUnionPieceView(tc, TcUnionPieceView::Kind::ClassesOnly);
+}
 
 /// TypeIntersectionConstraintT is generally used for upper-bounds. It's
 /// templated so we can have a common implementation with different vector
@@ -599,4 +807,9 @@ inline bool setOpNeedsTypeCheck(const TypeConstraint& tc,
 // Add all flags in tc (except TypeVar) to ub.
 // FIXME: applying random flags such as Resolved is super sketchy
 void applyFlagsToUB(TypeConstraint& ub, const TypeConstraint& tc);
-}
+} // namespace HPHP
+
+template<> inline constexpr bool std::ranges::enable_borrowed_range<HPHP::TcUnionPieceView> = true;
+
+static_assert(std::ranges::borrowed_range<HPHP::TcUnionPieceView>);
+static_assert(std::ranges::viewable_range<HPHP::TcUnionPieceView>);

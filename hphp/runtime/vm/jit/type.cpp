@@ -1026,7 +1026,7 @@ Type typeFromTCImpl(const HPHP::TypeConstraint& tc,
     always_assert(false);
   };
 
-  auto base = [&]{
+  auto baseForTC = [&](const TypeConstraint& tc) {
     if (!tc.isObject() && !tc.isUnresolved()) return atToType(tc.type());
 
     if (tc.isObject()) {
@@ -1074,7 +1074,17 @@ Type typeFromTCImpl(const HPHP::TypeConstraint& tc,
 
     // It could be an alias to mixed so we might have refs
     return TCell;
-  }();
+  };
+
+  if (tc.isUnion()) {
+    auto ty = TBottom;
+    for (auto& innerTc : eachTypeConstraintInUnion(tc)) {
+      ty |= baseForTC(innerTc);
+    }
+    return ty;
+  }
+
+  Type base = baseForTC(tc);
   if (tc.isNullable()) base |= TInitNull;
   return base;
 }

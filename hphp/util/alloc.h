@@ -457,6 +457,12 @@ inline void static_try_free(void* ptr, size_t size) {
   return lower_sized_free(ptr, size);
 }
 
+template<typename T, typename... Args>
+inline LowPtr<T> static_new(Args&&... args) {
+  void* p = static_alloc(sizeof(T));
+  return new (p) T(std::forward<Args>(args)...);
+}
+
 using SwappableReadonlyArena = ReadOnlyArena<VMColdAllocator<char>, false, 8>;
 void setup_swappable_readonly_arena(uint32_t chunk_size);
 SwappableReadonlyArena* get_swappable_readonly_arena();

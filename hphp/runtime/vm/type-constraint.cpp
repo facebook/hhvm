@@ -44,17 +44,156 @@ namespace HPHP {
 
 TRACE_SET_MOD(runtime);
 
-using ObjectConstraint = TypeConstraint::ObjectConstraint;
+using ClassConstraint = TypeConstraint::ClassConstraint;
+using UnionConstraint = TypeConstraint::UnionConstraint;
+using UnionTypeMask = TypeConstraint::UnionTypeMask;
 
 //////////////////////////////////////////////////////////////////////
 
 const StaticString s___invoke("__invoke");
 
-void TypeConstraint::init() {
-  initSingle();
+TypeConstraint TypeConstraint::makeUnion(LowStringPtr typeName, folly::Range<const TypeConstraint*> tcs) {
+  assertx(typeName != nullptr);
+  if (tcs.empty()) {
+    return TypeConstraint{};
+  } else if (tcs.size() == 1) {
+    return TypeConstraint{tcs[0]};
+  }
+
+  TypeConstraintFlags flags = Union;
+  UnionTypeMask preciseTypeMask = 0;
+  std::vector<ClassConstraint> classesVec;
+  for (auto& tc : tcs) {
+    if (!tc.isCheckable()) {
+      // Canonicalization: If we contain a non-checkable member then we're not
+      // checkable so just return mixed.
+      return TypeConstraint{ AnnotType::Mixed, ExtendedHint | Resolved, ClassConstraint { typeName } };
+    }
+
+    // Copy over common flags.
+    flags |= (TypeConstraintFlags)(tc.m_flags & (Nullable | ExtendedHint | TypeVar | Soft | TypeConstant | DisplayNullable | UpperBound | Resolved));
+
+    switch (tc.type()) {
+      case AnnotType::Mixed: {
+        // Canonicalization: If we have a mixed then we're just mixed.
+        return TypeConstraint{ AnnotType::Mixed, ExtendedHint | Resolved, ClassConstraint { typeName } };
+      }
+      case AnnotType::Nonnull: {
+        // Canonicalization: If we have a nonnull then we're just nonnull -
+        // unless we also have a nullable in which case we're mixed.
+        bool hasNull = std::any_of(tcs.begin(), tcs.end(), [](auto& tc) { return tc.isNullable(); });
+        if (hasNull) {
+          return TypeConstraint{ AnnotType::Mixed, ExtendedHint | Resolved, ClassConstraint { typeName } };
+        } else {
+          return TypeConstraint{ AnnotType::Nonnull, ExtendedHint | Resolved, ClassConstraint { typeName } };
+        }
+      }
+      case AnnotType::Null: {
+        // Canonicalization: If we expect a null then just apply nullable. Note
+        // that this means we might end up with a simple nullable constraint
+        // (like `?int`) represented differently than `null | int`.
+        flags |= Nullable;
+        break;
+      }
+      case AnnotType::Nothing:
+      case AnnotType::NoReturn: {
+        // Canonicalization: Bottom adds nothing to our union. This can cause
+        // problems with canonical representations like `int | bottom` not
+        // returning the same as `int`.
+        break;
+      }
+
+      case AnnotType::Bool: {
+        preciseTypeMask |= kUnionTypeBool;
+        break;
+      }
+      case AnnotType::Int: {
+        preciseTypeMask |= kUnionTypeInt;
+        break;
+      }
+      case AnnotType::Float: {
+        preciseTypeMask |= kUnionTypeFloat;
+        break;
+      }
+      case AnnotType::String: {
+        preciseTypeMask |= kUnionTypeString;
+        break;
+      }
+      case AnnotType::Resource: {
+        preciseTypeMask |= kUnionTypeResource;
+        break;
+      }
+      case AnnotType::Dict: {
+        preciseTypeMask |= kUnionTypeDict;
+        break;
+      }
+      case AnnotType::Vec: {
+        preciseTypeMask |= kUnionTypeVec;
+        break;
+      }
+      case AnnotType::Keyset: {
+        preciseTypeMask |= kUnionTypeKeyset;
+        break;
+      }
+      case AnnotType::Callable: {
+        preciseTypeMask |= kUnionTypeCallable;
+        break;
+      }
+      case AnnotType::This: {
+        // Not currently possible to specify with case types - case types are
+        // defined at top-level where 'this' isn't legal. But we might as well
+        // support it minimally.
+        preciseTypeMask |= kUnionTypeThis;
+        break;
+      }
+      case AnnotType::VecOrDict: {
+        preciseTypeMask |= kUnionTypeDict | kUnionTypeVec;
+        break;
+      }
+
+      case AnnotType::Number: {
+        preciseTypeMask |= kUnionTypeInt | kUnionTypeFloat;
+        break;
+      }
+      case AnnotType::ArrayKey: {
+        preciseTypeMask |= kUnionTypeInt | kUnionTypeString;
+        break;
+      }
+
+      case AnnotType::ArrayLike: {
+        preciseTypeMask |= kUnionTypeDict | kUnionTypeVec | kUnionTypeKeyset;
+        break;
+      }
+      case AnnotType::Classname: {
+        preciseTypeMask |= kUnionTypeClassname;
+        break;
+      }
+      case AnnotType::Object: {
+        not_implemented(); // TODO(T151885113)
+      }
+      case AnnotType::Unresolved: {
+        not_implemented(); // TODO(T151885113)
+      }
+    }
+  }
+
+  auto classes = nullptr;
+  if (!classesVec.empty()) {
+    not_implemented(); // TODO(T151885113)
+  }
+
+  return TypeConstraint{ flags, preciseTypeMask, typeName, classes };
 }
 
-void ObjectConstraint::init(AnnotType const type) {
+void TypeConstraint::init() {
+  if (isUnion()) {
+    initUnion();
+  } else {
+    initSingle();
+  }
+}
+
+void ClassConstraint::init(AnnotType const type) {
   bool isObject = type == Type::Object;
   bool isUnresolved = type == Type::Unresolved;
   if (isObject) {
@@ -66,9 +205,14 @@ void ObjectConstraint::init(AnnotType const type) {
         this, m_namedType.get());
 }
 
+void TypeConstraint::initUnion() {
+  TRACE(5, "TypeConstraint: this %p union nullable %d\n",
+        this, isNullable());
+}
+
 void TypeConstraint::initSingle() {
   auto& single = m_u.single;
-  if (single.object.m_typeName == nullptr || isTypeVar() || isTypeConstant()) {
+  if (single.class_.m_typeName == nullptr || isTypeVar() || isTypeConstant()) {
     single.type = Type::Mixed;
     return;
   }
@@ -89,35 +233,62 @@ void TypeConstraint::initSingle() {
           this, typeName()->data());
     single.type = Type::Unresolved;
   }
-  single.object.init(single.type);
+  single.class_.init(single.type);
 }
 
-bool ObjectConstraint::operator==(const ObjectConstraint& o) const {
+bool ClassConstraint::operator==(const ClassConstraint& o) const {
   // The named entity is defined based on the typeName() and is redundant to
   // include in the equality operation.
   return m_clsName == o.m_clsName && m_typeName == o.m_typeName;
 }
 
+bool UnionConstraint::operator==(const UnionConstraint& o) const {
+  return
+    m_mask == o.m_mask &&
+    m_typeName == o.m_typeName &&
+    (m_classes != nullptr) == (o.m_classes != nullptr) &&
+    (m_classes == nullptr || *m_classes == *o.m_classes);
+}
+
 bool TypeConstraint::operator==(const TypeConstraint& o) const {
   if (m_flags != o.m_flags) return false;
+  if (isUnion()) {
+    return m_u.union_ == o.m_u.union_;
+  }
 
   auto& a = m_u.single;
   auto& b = o.m_u.single;
-  return a.type == b.type && a.object == b.object;
+  return a.type == b.type && a.class_ == b.class_;
 }
 
-size_t ObjectConstraint::stableHash() const {
+size_t ClassConstraint::stableHash() const {
   size_t clsHash = m_clsName ? m_clsName->hashStatic() : 0;
   size_t typeName = m_typeName ? m_typeName->hashStatic() : 0;
   return folly::hash::hash_combine(clsHash, typeName);
 }
 
+size_t UnionConstraint::stableHash() const {
+  size_t typeNameHash = m_typeName->hashStatic();
+  size_t classesHash = 0;
+  if (m_classes) {
+    not_implemented(); // TODO(T151885113)
+  }
+  return folly::hash::hash_combine(typeNameHash, classesHash, m_mask);
+}
+
 size_t TypeConstraint::stableHash() const {
-  return folly::hash::hash_combine(
-    std::hash<TypeConstraintFlags>()(m_flags),
-    std::hash<AnnotType>()(m_u.single.type),
-    m_u.single.object.stableHash()
-  );
+  if (isUnion()) {
+    return folly::hash::hash_combine(
+      std::hash<TypeConstraintFlags>()(m_flags),
+      m_u.union_.stableHash()
+    );
+  } else {
+    return folly::hash::hash_combine(
+      std::hash<TypeConstraintFlags>()(m_flags),
+      std::hash<AnnotType>()(m_u.single.type),
+      m_u.single.class_.stableHash()
+    );
+  }
 }
 
 std::string TypeConstraint::displayName(const Class* context /*= nullptr*/,
@@ -168,44 +339,169 @@ std::string TypeConstraint::displayName(const Class* context /*= nullptr*/,
   }
   name += str;
 
-  if (extra && m_flags & TypeConstraintFlags::Resolved) {
-    const char* str = nullptr;
-    switch (m_u.single.type) {
-      case AnnotType::Nothing:  str = "nothing"; break;
-      case AnnotType::NoReturn: str = "noreturn"; break;
-      case AnnotType::Null:     str = "null"; break;
-      case AnnotType::Bool:     str = "bool"; break;
-      case AnnotType::Int:      str = "int";  break;
-      case AnnotType::Float:    str = "float"; break;
-      case AnnotType::String:   str = "string"; break;
-      case AnnotType::Resource: str = "resource"; break;
-      case AnnotType::Dict:     str = "dict"; break;
-      case AnnotType::Vec:      str = "vec"; break;
-      case AnnotType::Keyset:   str = "keyset"; break;
-      case AnnotType::Number:   str = "num"; break;
-      case AnnotType::ArrayKey: str = "arraykey"; break;
-      case AnnotType::VecOrDict: str = "vec_or_dict"; break;
-      case AnnotType::ArrayLike: str = "AnyArray"; break;
-      case AnnotType::Nonnull:  str = "nonnull"; break;
-      case AnnotType::Classname: str = "classname"; break;
-      case AnnotType::Object:   str = clsName()->data(); break;
-      case AnnotType::This:
-      case AnnotType::Mixed:
-      case AnnotType::Callable:
-        break;
-      case AnnotType::Unresolved:
-        not_reached();
+  if (extra) {
+    if (isUnion()) {
+      name.push_back(' ');
+      name.push_back('(');
+      bool first = true;
+      for (auto& tc : eachTypeConstraintInUnion(*this)) {
+        if (!first) {
+          name.append(" | ");
+        }
+        name.append(tc.displayName(context, extra));
+        first = false;
+      }
+      name.push_back(')');
+    } else if (m_flags & TypeConstraintFlags::Resolved) {
+      str = nullptr;
+      switch (m_u.single.type) {
+        case AnnotType::Nothing:  str = "nothing"; break;
+        case AnnotType::NoReturn: str = "noreturn"; break;
+        case AnnotType::Null:     str = "null"; break;
+        case AnnotType::Bool:     str = "bool"; break;
+        case AnnotType::Int:      str = "int";  break;
+        case AnnotType::Float:    str = "float"; break;
+        case AnnotType::String:   str = "string"; break;
+        case AnnotType::Resource: str = "resource"; break;
+        case AnnotType::Dict:     str = "dict"; break;
+        case AnnotType::Vec:      str = "vec"; break;
+        case AnnotType::Keyset:   str = "keyset"; break;
+        case AnnotType::Number:   str = "num"; break;
+        case AnnotType::ArrayKey: str = "arraykey"; break;
+        case AnnotType::VecOrDict: str = "vec_or_dict"; break;
+        case AnnotType::ArrayLike: str = "AnyArray"; break;
+        case AnnotType::Nonnull:  str = "nonnull"; break;
+        case AnnotType::Classname: str = "classname"; break;
+        case AnnotType::Object:   str = clsName()->data(); break;
+        case AnnotType::This:
+        case AnnotType::Mixed:
+        case AnnotType::Callable:
+          break;
+        case AnnotType::Unresolved:
+          not_reached();
+      }
+      if (str) folly::format(&name, " ({})", str);
     }
-    if (str) folly::format(&name, " ({})", str);
   }
   return name;
 }
+
+#ifndef NDEBUG
+
+namespace {
+
+template<typename T>
+void bitName(std::string& out, T& value, T bit, const char* name, const char* sep = "|") {
+  if (value & bit) {
+    if (!out.empty()) out.append(sep);
+    out.append(name);
+    value = (T)(value & ~bit);
+  }
+};
+
+std::string showUnionTypeMask(UnionTypeMask mask) {
+  std::string res;
+  bitName(res, mask, TypeConstraint::kUnionTypeBool, "bool");
+  bitName(res, mask, TypeConstraint::kUnionTypeCallable, "callable");
+  bitName(res, mask, TypeConstraint::kUnionTypeDict, "dict");
+  bitName(res, mask, TypeConstraint::kUnionTypeFloat, "float");
+  bitName(res, mask, TypeConstraint::kUnionTypeInt, "int");
+  bitName(res, mask, TypeConstraint::kUnionTypeKeyset, "keyset");
+  bitName(res, mask, TypeConstraint::kUnionTypeResource, "resource");
+  bitName(res, mask, TypeConstraint::kUnionTypeString, "string");
+  bitName(res, mask, TypeConstraint::kUnionTypeThis, "this");
+  bitName(res, mask, TypeConstraint::kUnionTypeVec, "vec");
+  bitName(res, mask, TypeConstraint::kUnionTypeClass, "class");
+  bitName(res, mask, TypeConstraint::kUnionTypeClassname, "classname");
+  assertx(mask == 0);
+  return res;
+};
+
+std::string show(TypeConstraintFlags flags) {
+  std::string res;
+  bitName(res, flags, TypeConstraintFlags::Nullable, "Nullable");
+  bitName(res, flags, TypeConstraintFlags::ExtendedHint, "ExtendedHint");
+  bitName(res, flags, TypeConstraintFlags::TypeVar, "TypeVar");
+  bitName(res, flags, TypeConstraintFlags::Soft, "Soft");
+  bitName(res, flags, TypeConstraintFlags::TypeConstant, "TypeConstant");
+  bitName(res, flags, TypeConstraintFlags::Resolved, "Resolved");
+  bitName(res, flags, TypeConstraintFlags::DisplayNullable, "DisplayNullable");
+  bitName(res, flags, TypeConstraintFlags::UpperBound, "UpperBound");
+  bitName(res, flags, TypeConstraintFlags::Union, "Union");
+  assertx(flags == 0);
+  return res;
+}
+
+std::string show(const StringData* s) {
+  return s ? s->toCppString() : "<null>";
+}
+
+std::string show(AnnotType t) {
+  switch(t) {
+    case AnnotType::Null: return "Null";
+    case AnnotType::Bool: return "Bool";
+    case AnnotType::Int: return "Int";
+    case AnnotType::Float: return "Float";
+    case AnnotType::String: return "String";
+    case AnnotType::Object: return "Object";
+    case AnnotType::Resource: return "Resource";
+    case AnnotType::Dict: return "Dict";
+    case AnnotType::Vec: return "Vec";
+    case AnnotType::Keyset: return "Keyset";
+    case AnnotType::Mixed: return "Mixed";
+    case AnnotType::Nonnull: return "Nonnull";
+    case AnnotType::Callable: return "Callable";
+    case AnnotType::Number: return "Number";
+    case AnnotType::ArrayKey: return "ArrayKey";
+    case AnnotType::This: return "This";
+    case AnnotType::VecOrDict: return "VecOrDict";
+    case AnnotType::ArrayLike: return "ArrayLike";
+    case AnnotType::NoReturn: return "NoReturn";
+    case AnnotType::Nothing: return "Nothing";
+    case AnnotType::Classname: return "Classname";
+    case AnnotType::Unresolved: return "Unresolved";
+  }
+}
+
+} // anonymous namespace
+
+std::string TypeConstraint::debugName() const {
+  std::string name;
+
+
+  auto flags = show(m_flags);
+  auto tn = show(typeName());
+
+  if (isUnion()) {
+    std::string classes;
+    if (auto pcls = m_u.union_.m_classes) {
+      not_implemented(); // TODO(T151885113)
+    }
+
+    return folly::sformat(
+      "TypeConstraint{{flags:{}, typeName:{}, mask:{}, classes:[{}]}}",
+      flags,
+      tn,
+      showUnionTypeMask(m_u.union_.m_mask),
+      classes);
+  } else {
+    return folly::sformat(
+      "TypeConstraint{{flags:{}, type:{}, clsName:{}, typeName:{}}}",
+      flags,
+      show(m_u.single.type),
+      show(clsName()),
+      tn);
+  }
+}
+
+#endif // NDEBUG
 
 TypedValue TypeConstraint::defaultValue() const {
   // Nullable type-constraints should always default to null, as Hack
   // guarantees this.
   if (!isCheckable() || isNullable()) return make_tv<KindOfNull>();
-  return annotDefaultValue(m_u.single.type);
+  AnnotType annotType = (*eachTypeConstraintInUnion(*this).begin()).type();
+  return annotDefaultValue(annotType);
 }
 
 namespace {
@@ -268,25 +564,25 @@ getNamedTypeWithAutoload(const NamedType* ne,
 
 } // namespace
 
-TinyVector<TypeConstraint> TypeConstraint::resolvedWithAutoload() const {
+TypeConstraint TypeConstraint::resolvedWithAutoload() const {
   auto copy = *this;
 
   // Nothing to do if we are not unresolved.
-  if (!isUnresolved()) return {copy};
+  if (!isUnresolved()) return copy;
 
   auto const p = getNamedTypeWithAutoload(typeNamedType(), typeName());
 
   // Type alias.
   if (auto const ptd = boost::get<const TypeAlias*>(&p)) {
     auto const td = *ptd;
-    TinyVector<TypeConstraint> result;
+    std::vector<TypeConstraint> result;
     for (auto const& [type, klass] : td->typeAndClassUnion()) {
       auto copy = *this;
       auto const typeName = klass ? klass->name() : nullptr;
       copy.resolveType(type, td->nullable, typeName);
       result.push_back(copy);
     }
-    return result;
+    return makeUnion(typeName(), result);
   }
 
   // Enum.
@@ -297,13 +593,13 @@ TinyVector<TypeConstraint> TypeConstraint::resolvedWithAutoload() const {
         ? enumDataTypeToAnnotType(*cls->enumBaseTy())
         : AnnotType::ArrayKey;
       copy.resolveType(type, false, nullptr);
-      return {copy};
+      return copy;
     }
   }
 
   // Existing or non-existing class.
   copy.resolveType(AnnotType::Object, false, typeName());
-  return {copy};
+  return copy;
 }
 
 MaybeDataType TypeConstraint::underlyingDataTypeResolved() const {
@@ -312,10 +608,8 @@ MaybeDataType TypeConstraint::underlyingDataTypeResolved() const {
     !hasConstraint() || isTypeVar() || isTypeConstant(),
     isMixed()));
 
-  auto const resolved = resolvedWithAutoload();
-  // Used for enums only -- enums cannot use union types
-  if (resolved.size() != 1) return std::nullopt;
-  return resolved[0].isPrecise() ? resolved[0].underlyingDataType() : std::nullopt;
+  auto const tc = resolvedWithAutoload();
+  return tc.isPrecise() ? tc.underlyingDataType() : std::nullopt;
 }
 
 bool TypeConstraint::isMixedResolved() const {
@@ -324,7 +618,8 @@ bool TypeConstraint::isMixedResolved() const {
   // we know it cannot be mixed.
   if (!isUnresolved()) return false;
   auto const resolved = resolvedWithAutoload();
-  return std::any_of(resolved.begin(), resolved.end(),
+  auto each = eachTypeConstraintInUnion(resolved);
+  return std::ranges::any_of(each,
                      [](const TypeConstraint& tc) { return !tc.isCheckable(); });
 }
 
@@ -388,7 +683,7 @@ bool TypeConstraint::equivalentForProp(const TypeConstraint& other) const {
     auto const resolved = origTC.resolvedWithAutoload();
     std::vector<std::tuple<AnnotType, const StringData*, bool>> result;
 
-    for (auto const tc : resolved) {
+    for (auto const tc : eachTypeConstraintInUnion(resolved)) {
       if (!tc.isCheckable()) {
         result.emplace_back(AnnotType::Mixed, nullptr, false);
         continue;
@@ -587,9 +882,20 @@ bool TypeConstraint::checkImpl(tv_rval val,
     }
 
     if (isUnresolved()) {
-      if (tryCls(typeName(), typeNamedType())) return true;
-      if (isPasses) return false;
-      return checkTypeAliasImpl<isAssert>(val.val().pobj->getVMClass());
+      auto vmClass = val.val().pobj->getVMClass();
+      if (isUnion()) {
+        not_implemented(); // TODO(T151885113)
+      } else {
+        if (tryCls(typeName(), typeNamedType())) return true;
+        if (isPasses) return false;
+        return checkTypeAliasImpl<isAssert>(vmClass);
+      }
+    }
+
+    if (isUnion()) {
+      return std::ranges::any_of(eachTypeConstraintInUnion(*this), [&](const TypeConstraint& sub) {
+        return sub.checkImpl<Mode>(val, context);
+      });
     }
 
     // The constraint is resolved but it's not an object.
@@ -632,32 +938,37 @@ bool TypeConstraint::checkImpl(tv_rval val,
   auto const result = annotCompat(val.type(), m_u.single.type, name);
   switch (result) {
     case AnnotAction::Pass: return true;
-    case AnnotAction::Fail: return false;
+    case AnnotAction::Fail: break;
     case AnnotAction::CallableCheck:
       assertx(!isProp);
       if (isAssert) return true;
-      if (isPasses) return false;
-      return is_callable(tvAsCVarRef(*val));
+      if (!isPasses && is_callable(tvAsCVarRef(*val))) return true;
+      break;
     case AnnotAction::Fallback:
     case AnnotAction::FallbackCoerce:
       assertx(isUnresolved());
-      return !isPasses && checkNamedTypeNonObj<isAssert, isProp>(val);
+      if (!isPasses && checkNamedTypeNonObj<isAssert, isProp>(val)) return true;
+      break;
     case AnnotAction::WarnClass:
     case AnnotAction::ConvertClass:
     case AnnotAction::WarnLazyClass:
     case AnnotAction::ConvertLazyClass:
-      return false; // verifyFail will handle the conversion/warning
+      // verifyFail will handle the conversion/warning
+      break;
     case AnnotAction::WarnClassname:
-      if (isPasses)  return false;
-      assertx(isClassType(val.type()) || isLazyClassType(val.type()));
-      assertx(RuntimeOption::EvalClassPassesClassname);
-      assertx(RuntimeOption::EvalClassnameNotices);
-      if (!isAssert) raise_notice(Strings::CLASS_TO_CLASSNAME);
-      return true;
+      if (!isPasses) {
+        assertx(isClassType(val.type()) || isLazyClassType(val.type()));
+        assertx(RuntimeOption::EvalClassPassesClassname);
+        assertx(RuntimeOption::EvalClassnameNotices);
+        if (!isAssert) raise_notice(Strings::CLASS_TO_CLASSNAME);
+        return true;
+      }
+      break;
     case AnnotAction::ObjectCheck:
       not_reached();
   }
-  not_reached();
+
+  return false;
 }
 
 template bool TypeConstraint::checkImpl<TypeConstraint::CheckMode::Exact>(
@@ -730,7 +1041,9 @@ bool TypeConstraint::alwaysPasses(DataType dt) const {
   if (isNullable() && dt == KindOfNull) return true;
 
   auto const name = isObject() ? clsName() : typeName();
-  auto const result = annotCompat(dt, m_u.single.type, name);
+  auto const result = isUnion()
+    ? AnnotAction::Fallback
+    : annotCompat(dt, m_u.single.type, name);
   switch (result) {
     case AnnotAction::Pass:
       return true;
@@ -750,14 +1063,22 @@ bool TypeConstraint::alwaysPasses(DataType dt) const {
 }
 
 bool TypeConstraint::validForProp() const {
-  return propSupportsAnnot(m_u.single.type);
+  if (isUnion()) {
+    auto const r = eachTypeConstraintInUnion(*this);
+    return std::all_of(
+      std::begin(r), std::end(r),
+      [] (const TypeConstraint& tc) { return tc.validForProp(); }
+    );
+  } else {
+    return propSupportsAnnot(m_u.single.type);
+  }
 }
 
 void TypeConstraint::validForPropResolved(const Class* declCls,
                                           const StringData* propName) const {
   assertx(validForProp());
   if (!isUnresolved()) return;
-  auto const r = resolvedWithAutoload();
+  auto const r = eachTypeConstraintInUnion(resolvedWithAutoload());
   auto const b = std::all_of(
     std::begin(r), std::end(r),
     [] (const TypeConstraint& tc) { return tc.validForProp(); }
@@ -1103,7 +1424,7 @@ void TypeConstraint::verifyFail(tv_lval c, const Class* ctx, const Func* func,
       ).str()
     );
   } else {
-    auto cls = Class::lookup(typeName());
+    auto cls = isUnion() ? nullptr : Class::lookup(typeName());
     if (cls && isInterface(cls)) {
       auto const msg =
         folly::format(
@@ -1139,6 +1460,9 @@ void TypeConstraint::verifyFail(tv_lval c, const Class* ctx, const Func* func,
 void TypeConstraint::resolveType(AnnotType t,
                                  bool nullable,
                                  LowStringPtr clsName) {
+  if (isUnion()) {
+    not_implemented(); // TODO(T151885113)
+  }
   assertx(m_u.single.type == AnnotType::Unresolved);
   assertx(t != AnnotType::Unresolved);
   assertx(IMPLIES(t == AnnotType::Object, clsName != nullptr));
@@ -1148,13 +1472,16 @@ void TypeConstraint::resolveType(AnnotType t,
   if (nullable) flags |= TypeConstraintFlags::Nullable;
   m_flags = static_cast<TypeConstraintFlags>(flags);
   m_u.single.type = t;
-  m_u.single.object.m_clsName = clsName;
+  m_u.single.class_.m_clsName = clsName;
 }
 
 void TypeConstraint::unresolve() {
+  if (isUnion()) {
+    not_implemented(); // TODO(T151885113)
+  }
   m_flags = static_cast<TypeConstraintFlags>(m_flags & ~TypeConstraintFlags::Resolved);
   m_u.single.type = AnnotType::Unresolved;
-  m_u.single.object.m_clsName = nullptr;
+  m_u.single.class_.m_clsName = nullptr;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1254,4 +1581,148 @@ void applyFlagsToUB(TypeConstraint& ub, const TypeConstraint& tc) {
   auto const tcFlags = tc.flags() & ~TypeConstraintFlags::TypeVar;
   ub.addFlags(static_cast<TypeConstraintFlags>(tcFlags));
 }
+
+//////////////////////////////////////////////////////////////////////
+
+void TcUnionPieceIterator::buildUnionTypeConstraint() {
+  using CC = ClassConstraint;
+
+  auto flags = (TypeConstraintFlags)(m_flags & (Nullable | ExtendedHint | TypeVar | Soft | TypeConstant | DisplayNullable | UpperBound | Resolved));
+
+  // isolate the low bit
+  switch (m_mask & -m_mask) {
+    case TypeConstraint::kUnionTypeBool: {
+      m_outTc = TypeConstraint{ AnnotType::Bool, flags, CC{LAZY_STATIC_STRING(annotTypeName(AnnotType::Bool))} };
+      break;
+    }
+    case TypeConstraint::kUnionTypeCallable: {
+      m_outTc = TypeConstraint{ AnnotType::Callable, flags, CC{LAZY_STATIC_STRING(annotTypeName(AnnotType::Callable))} };
+      break;
+    }
+    case TypeConstraint::kUnionTypeDict: {
+      m_outTc = TypeConstraint{ AnnotType::Dict, flags, CC{LAZY_STATIC_STRING(annotTypeName(AnnotType::Dict))} };
+      break;
+    }
+    case TypeConstraint::kUnionTypeFloat: {
+      m_outTc = TypeConstraint{ AnnotType::Float, flags, CC{LAZY_STATIC_STRING(annotTypeName(AnnotType::Float))} };
+      break;
+    }
+    case TypeConstraint::kUnionTypeInt: {
+      m_outTc = TypeConstraint{ AnnotType::Int, flags, CC{LAZY_STATIC_STRING(annotTypeName(AnnotType::Int))} };
+      break;
+    }
+    case TypeConstraint::kUnionTypeKeyset: {
+      m_outTc = TypeConstraint{ AnnotType::Keyset, flags, CC{LAZY_STATIC_STRING(annotTypeName(AnnotType::Keyset))} };
+      break;
+    }
+    case TypeConstraint::kUnionTypeResource: {
+      m_outTc = TypeConstraint{ AnnotType::Resource, flags, CC{LAZY_STATIC_STRING(annotTypeName(AnnotType::Resource))} };
+      break;
+    }
+    case TypeConstraint::kUnionTypeString: {
+      m_outTc = TypeConstraint{ AnnotType::String, flags, CC{LAZY_STATIC_STRING(annotTypeName(AnnotType::String))} };
+      break;
+    }
+    case TypeConstraint::kUnionTypeThis: {
+      m_outTc = TypeConstraint{ AnnotType::This, flags, CC{LAZY_STATIC_STRING(annotTypeName(AnnotType::This))} };
+      break;
+    }
+    case TypeConstraint::kUnionTypeVec: {
+      m_outTc = TypeConstraint{ AnnotType::Vec, flags, CC{LAZY_STATIC_STRING(annotTypeName(AnnotType::Vec))} };
+      break;
+    }
+    case TypeConstraint::kUnionTypeClassname: {
+      m_outTc = TypeConstraint{ AnnotType::Classname, flags, CC{LAZY_STATIC_STRING(annotTypeName(AnnotType::Classname))} };
+      break;
+    }
+
+    case TypeConstraint::kUnionTypeClass:
+      not_implemented(); // TODO(T151885113)
+      break;
+
+    default:
+      not_reached();
+  }
+}
+
+TcUnionPieceIterator& TcUnionPieceIterator::operator++() {
+  if (m_mask == TypeConstraint::kUnionTypeClass) {
+    not_implemented(); // TODO(T151885113)
+  } else {
+    // turn off the lowest bit
+    m_mask &= ~-m_mask;
+  }
+
+  if (m_mask) {
+    buildUnionTypeConstraint();
+  }
+
+  return *this;
+}
+
+TcUnionPieceIterator TcUnionPieceIterator::operator++(int) {
+  auto tmp = *this;
+  this->operator++();
+  return tmp;
+}
+
+bool TcUnionPieceIterator::at_end() const {
+  return m_mask == 0;
+}
+
+TcUnionPieceIterator TcUnionPieceView::begin() const {
+  TcUnionPieceIterator it;
+  it.m_flags = m_tc.m_flags;
+  it.m_classes = nullptr;
+
+  if (m_tc.isUnion()) {
+    it.m_mask = m_tc.m_u.union_.m_mask;
+    switch (m_kind) {
+      case Kind::All: break;
+      case Kind::ClassesOnly: {
+        it.m_mask &= TypeConstraint::kUnionTypeClass;
+      }
+    }
+
+    it.m_classes = m_tc.m_u.union_.m_classes;
+    it.m_outTc.m_flags = static_cast<TypeConstraintFlags>(
+      m_tc.m_flags & (
+        TypeConstraintFlags::Nullable |
+        TypeConstraintFlags::ExtendedHint |
+        TypeConstraintFlags::TypeVar |
+        TypeConstraintFlags::Soft |
+        TypeConstraintFlags::TypeConstant |
+        TypeConstraintFlags::DisplayNullable |
+        TypeConstraintFlags::UpperBound));
+    it.buildUnionTypeConstraint();
+  } else {
+    it.m_outTc = m_tc;
+
+    // just need a single bit to indicate non-end.
+    it.m_mask = 1;
+
+    switch (m_kind) {
+      case Kind::All:
+        break;
+      case Kind::ClassesOnly:
+        if (m_tc.m_u.single.type != AnnotType::Object) {
+          // nothing to do
+          it.m_mask = 0;
+        }
+        break;
+    }
+  }
+  return it;
+}
+
+TcUnionPieceIterator TcUnionPieceView::end() const {
+  TcUnionPieceIterator it;
+  it.m_mask = 0;
+  return it;
+}
+
+bool TcUnionPieceIterator::operator==(const TcUnionPieceIterator& o) const {
+  return m_mask == o.m_mask;
+}
+
 }

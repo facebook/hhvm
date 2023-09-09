@@ -244,6 +244,7 @@ void verifyTypeImpl(IRGS& env,
         return;
 
       case AnnotAction::CallableCheck:
+        if (tc.isUnion()) not_implemented(); // TODO(T151885113)
         callable(val);
         return;
 
@@ -253,6 +254,7 @@ void verifyTypeImpl(IRGS& env,
 
       case AnnotAction::WarnClass:
       case AnnotAction::ConvertClass:
+        if (tc.isUnion()) not_implemented(); // TODO(T151885113)
         assertx(val->type() <= TCls);
         setVal(gen(env, LdClsName, val));
         if (result == AnnotAction::WarnClass) {
@@ -265,6 +267,7 @@ void verifyTypeImpl(IRGS& env,
 
       case AnnotAction::WarnLazyClass:
       case AnnotAction::ConvertLazyClass:
+        if (tc.isUnion()) not_implemented(); // TODO(T151885113)
         assertx(val->type() <= TLazyCls);
         setVal(gen(env, LdLazyClsName, val));
         if (result == AnnotAction::WarnLazyClass) {
@@ -276,6 +279,7 @@ void verifyTypeImpl(IRGS& env,
         return;
 
       case AnnotAction::WarnClassname:
+        if (tc.isUnion()) not_implemented(); // TODO(T151885113)
         assertx(val->type() <= TCls || val->type() <= TLazyCls);
         gen(env, RaiseNotice, cns(env, s_CLASS_TO_CLASSNAME.get()));
         return;
@@ -306,25 +310,56 @@ void verifyTypeImpl(IRGS& env,
     }
 
     // At this point, we know that val is a TObj and that tc is an Object.
-    assertx(tc.isObject() || tc.isUnresolved());
-    auto const clsName = tc.isObject() ? tc.clsName() : tc.typeName();
-    auto const checkCls = ldClassSafe(env, clsName);
-    auto const fastIsInstance = implInstanceCheck(env, val, clsName, checkCls);
-    if (fastIsInstance) {
-      ifThen(
-        env,
-        [&] (Block* taken) {
-          gen(env, JmpZero, taken, fastIsInstance);
-        },
-        [&] {
-          hint(env, Block::Hint::Unlikely);
-          genFail(val);
-        }
-      );
-      return;
-    }
+    if (tc.isUnion()) {
+      MultiCond mc{env};
+      if (tc.unionHasThis()) {
+        // Add a check for `this` as a union member.
+        mc.ifThen(
+          genCheckThis,
+          [&](SSATmp*) {
+            return cns(env, TBottom);
+          });
+      }
+      // Iterate through the matching classes.
+      for (auto& tc : eachClassTypeConstraintInUnion(tc)) {
+        assertx(tc.isObject() || tc.isUnresolved());
+        mc.ifThen(
+          [&](Block* taken) -> SSATmp* {
+            auto const clsName = tc.isObject() ? tc.clsName() : tc.typeName();
+            auto const isInstance = implInstanceOfD(env, val, clsName);
+            return gen(env, JmpZero, taken, isInstance);
+          },
+          [&](SSATmp*) {
+            return cns(env, TBottom);
+          });
+      }
 
-    verifyCls(val, checkCls);
+      mc.elseDo([&] {
+        genFail(val);
+        return cns(env, TBottom);
+      });
+    } else {
+      // Non-union:
+      assertx(tc.isObject() || tc.isUnresolved());
+      auto const clsName = tc.isObject() ? tc.clsName() : tc.typeName();
+      auto const checkCls = ldClassSafe(env, clsName);
+      auto const fastIsInstance = implInstanceCheck(env, val, clsName, checkCls);
+      if (fastIsInstance) {
+        ifThen(
+          env,
+          [&] (Block* taken) {
+            gen(env, JmpZero, taken, fastIsInstance);
+          },
+          [&] {
+            hint(env, Block::Hint::Unlikely);
+            genFail(val);
+          }
+               );
+        return;
+      }
+
+      verifyCls(val, checkCls);
+    }
   };
 
   auto const genericVal = getVal();
@@ -332,7 +367,8 @@ void verifyTypeImpl(IRGS& env,
   auto const genericValType = genericVal->type();
 
   // Given a DataType compute what AnnotAction to take.
-  auto const computeAction = [&](DataType dt) {
+  auto const computeAction = [&](DataType dt, const TypeConstraint& tc) -> AnnotAction {
+    assertx(!tc.isUnion());
     if (dt == KindOfNull && tc.isNullable()) return AnnotAction::Pass;
     auto const name = tc.isObject() ? tc.clsName() : tc.typeName();
     auto const action = annotCompat(dt, tc.type(), name);
@@ -362,11 +398,60 @@ void verifyTypeImpl(IRGS& env,
     return action;
   };
 
+  auto const computeUnionAction = [&computeAction](DataType dt, const TypeConstraint& tuc) -> AnnotAction {
+    if (tuc.isUnion()) {
+      AnnotAction fallbackAction = AnnotAction::Fail;
+      for (auto& tc : eachTypeConstraintInUnion(tuc)) {
+        auto const action = computeAction(dt, tc);
+        switch (action) {
+          case AnnotAction::Fail:
+            break;
+
+          case AnnotAction::Pass:
+            return AnnotAction::Pass;
+
+          case AnnotAction::ConvertClass:
+          case AnnotAction::ConvertLazyClass:
+            // We must have a classname and are checking a string. Unlike a
+            // non-union where we want to make the type more precise for a union
+            // just accept the string.
+            return AnnotAction::Pass;
+
+          case AnnotAction::FallbackCoerce:
+            // We never coerce a union - so always just treat it like a Fallback.
+          case AnnotAction::Fallback:
+            // We can't compute this statically - so we need to fall back to
+            // runtime evaluation.
+            fallbackAction = AnnotAction::Fallback;
+            // Continue to loop just in case we see a Pass later on.
+            break;
+
+          case AnnotAction::CallableCheck:
+          case AnnotAction::ObjectCheck:
+          case AnnotAction::WarnClass:
+          case AnnotAction::WarnClassname:
+          case AnnotAction::WarnLazyClass:
+            if (fallbackAction == AnnotAction::Fail) {
+              fallbackAction = action;
+            } else {
+              fallbackAction = AnnotAction::Fallback;
+            }
+            break;
+        }
+      }
+
+      return fallbackAction;
+    } else {
+      return computeAction(dt, tuc);
+    }
+  };
+
   if (genericValType.isKnownDataType()) {
     // The type is well-known statically. Compute and then perform an action
     // based on the static type.
     auto const dt = genericValType.toDataType();
-    return checkOneType(genericVal, computeAction(dt));
+    auto action = computeUnionAction(dt, tc);
+    return checkOneType(genericVal, action);
   }
 
   // Order matters here. When merging we always take the "largest" value.
@@ -379,7 +464,7 @@ void verifyTypeImpl(IRGS& env,
     for (auto const dt : kDataTypes) {
       auto const type = Type(dt);
       if (!genericValType.maybe(type)) continue;
-      auto const action = computeAction(dt);
+      auto const action = computeUnionAction(dt, tc);
       switch (action) {
         case AnnotAction::Fail:
           // We should never get this - we already determined that the types

@@ -326,15 +326,15 @@ struct CompareWith<
 template <class T, class Comp>
 FOLLY_MAYBE_UNUSED bool sortAndLexicographicalCompare(
     const T& lhs, const T& rhs, Comp&& comp) {
-  std::vector<const typename T::value_type*> l, r;
-  for (const auto& i : lhs) {
-    l.push_back(&i);
+  std::vector<decltype(lhs.begin())> l, r;
+  for (auto i = lhs.begin(); i != lhs.end(); ++i) {
+    l.push_back(i);
   }
-  for (const auto& i : rhs) {
-    r.push_back(&i);
+  for (auto i = rhs.begin(); i != rhs.end(); ++i) {
+    r.push_back(i);
   }
-  auto less = [&](const auto* lhsPtr, const auto* rhsPtr) {
-    return comp(*lhsPtr, *rhsPtr);
+  auto less = [&](const auto& lhsIter, const auto& rhsIter) {
+    return comp(*lhsIter, *rhsIter);
   };
   std::sort(l.begin(), l.end(), less);
   std::sort(r.begin(), r.end(), less);

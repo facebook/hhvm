@@ -29,8 +29,11 @@ namespace py.asyncio apache_thrift_asyncio.field_mask
 namespace go thrift.lib.thrift.field_mask
 namespace py thrift.lib.thrift.field_mask
 
+@cpp.Type{template = "::folly::F14FastMap"}
 typedef map<i16, Mask> FieldIdToMask
+@cpp.Type{template = "::folly::F14FastMap"}
 typedef map<i64, Mask> MapIdToMask
+@cpp.Type{template = "::folly::F14FastMap"}
 typedef map<string, Mask> MapStringToMask
 
 /**
@@ -79,13 +82,19 @@ typedef map<string, Mask> MapStringToMask
 // Inclusive fields should always be an even number.
 @cpp.ScopedEnumAsUnionType
 union Mask {
+  @cpp.Ref{type = cpp.RefType.Unique}
   1: FieldIdToMask excludes; // Fields that will be excluded.
+  @cpp.Ref{type = cpp.RefType.Unique}
   2: FieldIdToMask includes; // Fields that will be included.
 
+  @cpp.Ref{type = cpp.RefType.Unique}
   3: MapIdToMask excludes_map; // Map fields that will be excluded.
+  @cpp.Ref{type = cpp.RefType.Unique}
   4: MapIdToMask includes_map; // Map fields that will be included.
 
+  @cpp.Ref{type = cpp.RefType.Unique}
   5: MapStringToMask excludes_string_map; // String map fields that will be excluded.
+  @cpp.Ref{type = cpp.RefType.Unique}
   6: MapStringToMask includes_string_map; // String map fields that will be included.
 }
 

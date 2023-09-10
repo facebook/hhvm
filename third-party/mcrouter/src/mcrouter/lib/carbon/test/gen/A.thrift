@@ -26,7 +26,7 @@ namespace py3 carbon.test.A.thrift
 struct TestARequest {
   1: carbon.IOBufKey key
   2: bool dummy2
-  3: optional ticket_rep.TicketRep (cpp.type = "carbon::util::ThriftWrapperStruct<graphene::ticket::cpp2::TicketRep>") ticket
+  3: optional TicketRep_7884 ticket
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -58,3 +58,6 @@ struct TestAReply {
 ",
 cpp.virtual
 )
+
+// The following were automatically generated and may benefit from renaming.
+typedef ticket_rep.TicketRep (cpp.type = "carbon::util::ThriftWrapperStruct<graphene::ticket::cpp2::TicketRep>") TicketRep_7884

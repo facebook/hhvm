@@ -22,46 +22,46 @@ namespace cpp2 facebook.memcache.test.thrift
 namespace py3 facebook.memcache.test.thrift
 
 struct ManyFields {
-  1: binary (cpp.type = "folly::IOBuf") buf1
-  2: binary (cpp.type = "folly::IOBuf") buf2
-  3: binary (cpp.type = "folly::IOBuf") buf3
-  4: binary (cpp.type = "folly::IOBuf") buf4
-  5: binary (cpp.type = "folly::IOBuf") buf5
-  6: binary (cpp.type = "folly::IOBuf") buf6
-  7: binary (cpp.type = "folly::IOBuf") buf7
-  8: binary (cpp.type = "folly::IOBuf") buf8
-  9: binary (cpp.type = "folly::IOBuf") buf9
-  10: binary (cpp.type = "folly::IOBuf") buf10
-  11: binary (cpp.type = "folly::IOBuf") buf11
-  12: binary (cpp.type = "folly::IOBuf") buf12
-  13: binary (cpp.type = "folly::IOBuf") buf13
-  14: binary (cpp.type = "folly::IOBuf") buf14
-  15: binary (cpp.type = "folly::IOBuf") buf15
-  16: binary (cpp.type = "folly::IOBuf") buf16
-  17: binary (cpp.type = "folly::IOBuf") buf17
-  18: binary (cpp.type = "folly::IOBuf") buf18
-  19: binary (cpp.type = "folly::IOBuf") buf19
-  20: binary (cpp.type = "folly::IOBuf") buf20
-  21: binary (cpp.type = "folly::IOBuf") buf21
-  22: binary (cpp.type = "folly::IOBuf") buf22
-  23: binary (cpp.type = "folly::IOBuf") buf23
-  24: binary (cpp.type = "folly::IOBuf") buf24
-  25: binary (cpp.type = "folly::IOBuf") buf25
-  26: binary (cpp.type = "folly::IOBuf") buf26
-  27: binary (cpp.type = "folly::IOBuf") buf27
-  28: binary (cpp.type = "folly::IOBuf") buf28
-  29: binary (cpp.type = "folly::IOBuf") buf29
-  30: binary (cpp.type = "folly::IOBuf") buf30
-  31: binary (cpp.type = "folly::IOBuf") buf31
-  32: binary (cpp.type = "folly::IOBuf") buf32
-  33: binary (cpp.type = "folly::IOBuf") buf33
-  34: binary (cpp.type = "folly::IOBuf") buf34
-  35: binary (cpp.type = "folly::IOBuf") buf35
-  36: binary (cpp.type = "folly::IOBuf") buf36
-  37: binary (cpp.type = "folly::IOBuf") buf37
-  38: binary (cpp.type = "folly::IOBuf") buf38
-  39: binary (cpp.type = "folly::IOBuf") buf39
-  40: binary (cpp.type = "folly::IOBuf") buf40
+  1: binary_2265 buf1
+  2: binary_2265 buf2
+  3: binary_2265 buf3
+  4: binary_2265 buf4
+  5: binary_2265 buf5
+  6: binary_2265 buf6
+  7: binary_2265 buf7
+  8: binary_2265 buf8
+  9: binary_2265 buf9
+  10: binary_2265 buf10
+  11: binary_2265 buf11
+  12: binary_2265 buf12
+  13: binary_2265 buf13
+  14: binary_2265 buf14
+  15: binary_2265 buf15
+  16: binary_2265 buf16
+  17: binary_2265 buf17
+  18: binary_2265 buf18
+  19: binary_2265 buf19
+  20: binary_2265 buf20
+  21: binary_2265 buf21
+  22: binary_2265 buf22
+  23: binary_2265 buf23
+  24: binary_2265 buf24
+  25: binary_2265 buf25
+  26: binary_2265 buf26
+  27: binary_2265 buf27
+  28: binary_2265 buf28
+  29: binary_2265 buf29
+  30: binary_2265 buf30
+  31: binary_2265 buf31
+  32: binary_2265 buf32
+  33: binary_2265 buf33
+  34: binary_2265 buf34
+  35: binary_2265 buf35
+  36: binary_2265 buf36
+  37: binary_2265 buf37
+  38: binary_2265 buf38
+  39: binary_2265 buf39
+  40: binary_2265 buf40
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -76,8 +76,8 @@ struct ManyFields {
 ")
 struct McExpTestRequest {
   1: carbon.IOBufKey key
-  2: i64 (cpp.type = "uint64_t") flags
-  3: i64 (cpp.type = "uint64_t") deadlineMs
+  2: i64_5045 flags
+  3: i64_5045 deadlineMs
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -90,3 +90,7 @@ struct McExpTestRequest {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ")
+
+// The following were automatically generated and may benefit from renaming.
+typedef binary (cpp.type = "folly::IOBuf") binary_2265
+typedef i64 (cpp.type = "uint64_t") i64_5045

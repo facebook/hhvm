@@ -59,7 +59,7 @@ cpp.virtual
 )
 struct McVersionReply {
   1: carbon_result.Result result
-  2: binary (cpp.type = "folly::IOBuf") value
+  2: binary_5325 value
   3: string message
   4: i16 appSpecificErrorCode
 }(cpp.methods = "
@@ -247,3 +247,6 @@ struct GoAwayRequest {
 ",
 cpp.virtual
 )
+
+// The following were automatically generated and may benefit from renaming.
+typedef binary (cpp.type = "folly::IOBuf") binary_5325

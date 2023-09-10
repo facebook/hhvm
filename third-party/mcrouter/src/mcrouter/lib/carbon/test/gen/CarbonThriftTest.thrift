@@ -35,9 +35,9 @@ enum MyEnum {
 } (cpp.enum_type="int32_t")
 
 union TestUnionThrift {
-  1: i64 (cpp.type = "uint64_t") a
-  2: i32 (cpp.type = "uint32_t") b
-  3: i16 (cpp.type = "uint16_t") c
+  1: i64_3264 a
+  2: i32_7074 b
+  3: i16_2207 c
 }(cpp.methods = "
  public:
   template <class V>
@@ -146,19 +146,19 @@ struct DummyThriftRequest {
   4: i16 testInt16
   5: i32 testInt32
   6: i64 testInt64
-  7: byte (cpp.type = "uint8_t") testUInt8
-  8: i16 (cpp.type = "uint16_t") testUInt16
-  9: i32 (cpp.type = "uint32_t") testUInt32
-  10: i64 (cpp.type = "uint64_t") testUInt64
+  7: byte_9610 testUInt8
+  8: i16_2207 testUInt16
+  9: i32_7074 testUInt32
+  10: i64_3264 testUInt64
   11: float testFloat
   12: double testDouble
   13: string testShortString
   14: string testLongString
-  15: binary (cpp.type = "folly::IOBuf") testIobuf
+  15: binary_7390 testIobuf
   16: list<string> testList
   17: optional bool testOptionalKeywordBool
   18: optional string testOptionalKeywordString
-  19: optional binary (cpp.type = "folly::IOBuf") testOptionalKeywordIobuf
+  19: optional binary_7390 testOptionalKeywordIobuf
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -193,7 +193,7 @@ cpp.virtual
 struct CustomRequest {
   1: carbon.IOBufKey key
   2: byte testInt8
-  3: i64 (cpp.type = "Timestamp", cpp.indirection) timestamp
+  3: i64_7766 timestamp
   4: optional CustomAdapterTypeI64 customAdapterTypeI64
   5: CustomAdapterTypeBinary customAdapterTypeBinary
 }(cpp.methods = "
@@ -227,3 +227,11 @@ struct CustomReply {
 ",
 cpp.virtual
 )
+
+// The following were automatically generated and may benefit from renaming.
+typedef binary (cpp.type = "folly::IOBuf") binary_7390
+typedef byte (cpp.type = "uint8_t") byte_9610
+typedef i16 (cpp.type = "uint16_t") i16_2207
+typedef i32 (cpp.type = "uint32_t") i32_7074
+typedef i64 (cpp.type = "uint64_t") i64_3264
+typedef i64 (cpp.indirection = "1", cpp.type = "Timestamp") i64_7766

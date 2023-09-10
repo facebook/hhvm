@@ -29,13 +29,13 @@ enum EnumUInt32 {
 
 struct HelloRequest {
   1: carbon.IOBufKey key
-  2: i64 (cpp.type = "uint64_t") shardId
-  3: i64 (cpp.type = "uint64_t") deadlineMs
+  2: i64_6019 shardId
+  3: i64_6019 deadlineMs
   4: string message
   5: EnumUInt32 priority
-  6: i64 (cpp.type = "uint64_t") beforeLatencyUs
-  7: i64 (cpp.type = "uint64_t") afterLatencyUs
-  8: i32 (cpp.type = "uint32_t") clientVersion
+  6: i64_6019 beforeLatencyUs
+  7: i64_6019 afterLatencyUs
+  8: i32_3782 clientVersion
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -69,7 +69,7 @@ cpp.virtual
 )
 struct GoodbyeRequest {
   1: carbon.IOBufKey key
-  2: i64 (cpp.type = "uint64_t") shardId
+  2: i64_6019 shardId
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -101,3 +101,7 @@ struct GoodbyeReply {
 ",
 cpp.virtual
 )
+
+// The following were automatically generated and may benefit from renaming.
+typedef i32 (cpp.type = "uint32_t") i32_3782
+typedef i64 (cpp.type = "uint64_t") i64_6019

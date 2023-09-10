@@ -22,8 +22,8 @@ namespace cpp2 facebook.memcache.thrift
 namespace py3 facebook.memcache.thrift
 
 struct MemcacheRequestCommon {
-  1: optional i64 (cpp.type = "uint64_t") beforeLatencyUs
-  2: optional i64 (cpp.type = "uint64_t") afterLatencyUs
+  1: optional i64_8073 beforeLatencyUs
+  2: optional i64_8073 afterLatencyUs
   3: optional string bucketId
   4: optional i64 productId
 }(cpp.methods = "
@@ -39,7 +39,7 @@ struct MemcacheRequestCommon {
 
 ")
 struct MemcacheReplyCommon {
-  1: i32 (cpp.type = "uint32_t") replySourceBitMask
+  1: i32_133 replySourceBitMask
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -55,7 +55,7 @@ struct MemcacheReplyCommon {
 struct McGetRequest {
   -1: MemcacheRequestCommon memcacheRequestCommon (cpp.mixin)
   1: carbon.IOBufKey key
-  2: i64 (cpp.type = "uint64_t") flags
+  2: i64_8073 flags
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -73,8 +73,8 @@ cpp.virtual
 struct McGetReply {
   -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
   1: carbon_result.Result result
-  2: optional binary (cpp.type = "folly::IOBuf") value
-  3: i64 (cpp.type = "uint64_t") flags
+  2: optional binary_9388 value
+  3: i64_8073 flags
   4: string message
   5: i16 appSpecificErrorCode
 }(cpp.methods = "
@@ -95,8 +95,8 @@ struct McSetRequest {
   -1: MemcacheRequestCommon memcacheRequestCommon (cpp.mixin)
   1: carbon.IOBufKey key
   2: i32 exptime
-  3: i64 (cpp.type = "uint64_t") flags
-  4: binary (cpp.type = "folly::IOBuf") value
+  3: i64_8073 flags
+  4: binary_9388 value
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -114,8 +114,8 @@ cpp.virtual
 struct McSetReply {
   -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
   1: carbon_result.Result result
-  2: i64 (cpp.type = "uint64_t") flags
-  3: binary (cpp.type = "folly::IOBuf") value
+  2: i64_8073 flags
+  3: binary_9388 value
   4: string message
   5: i16 appSpecificErrorCode
 }(cpp.methods = "
@@ -135,10 +135,10 @@ cpp.virtual
 struct McDeleteRequest {
   -1: MemcacheRequestCommon memcacheRequestCommon (cpp.mixin)
   1: carbon.IOBufKey key
-  2: i64 (cpp.type = "uint64_t") flags
+  2: i64_8073 flags
   3: i32 exptime
-  4: binary (cpp.type = "folly::IOBuf") value
-  5: map<string, i64_8073> (cpp.type = "std::unordered_map<std::string, uint64_t>") attributes
+  4: binary_9388 value
+  5: map_string_i64_8499 attributes
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -156,8 +156,8 @@ cpp.virtual
 struct McDeleteReply {
   -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
   1: carbon_result.Result result
-  2: i64 (cpp.type = "uint64_t") flags
-  3: binary (cpp.type = "folly::IOBuf") value
+  2: i64_8073 flags
+  3: binary_9388 value
   4: string message
   5: i16 appSpecificErrorCode
 }(cpp.methods = "
@@ -177,7 +177,7 @@ cpp.virtual
 struct McLeaseGetRequest {
   -1: MemcacheRequestCommon memcacheRequestCommon (cpp.mixin)
   1: carbon.IOBufKey key
-  2: i64 (cpp.type = "uint64_t") flags
+  2: i64_8073 flags
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -196,8 +196,8 @@ struct McLeaseGetReply {
   -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
   1: carbon_result.Result result
   2: i64 leaseToken
-  3: optional binary (cpp.type = "folly::IOBuf") value
-  4: i64 (cpp.type = "uint64_t") flags
+  3: optional binary_9388 value
+  4: i64_8073 flags
   5: string message
   6: i16 appSpecificErrorCode
 }(cpp.methods = "
@@ -218,8 +218,8 @@ struct McLeaseSetRequest {
   -1: MemcacheRequestCommon memcacheRequestCommon (cpp.mixin)
   1: carbon.IOBufKey key
   2: i32 exptime
-  3: i64 (cpp.type = "uint64_t") flags
-  4: binary (cpp.type = "folly::IOBuf") value
+  3: i64_8073 flags
+  4: binary_9388 value
   5: i64 leaseToken
 }(cpp.methods = "
   template <class V>
@@ -258,8 +258,8 @@ struct McAddRequest {
   -1: MemcacheRequestCommon memcacheRequestCommon (cpp.mixin)
   1: carbon.IOBufKey key
   2: i32 exptime
-  3: i64 (cpp.type = "uint64_t") flags
-  4: binary (cpp.type = "folly::IOBuf") value
+  3: i64_8073 flags
+  4: binary_9388 value
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -297,8 +297,8 @@ struct McReplaceRequest {
   -1: MemcacheRequestCommon memcacheRequestCommon (cpp.mixin)
   1: carbon.IOBufKey key
   2: i32 exptime
-  3: i64 (cpp.type = "uint64_t") flags
-  4: binary (cpp.type = "folly::IOBuf") value
+  3: i64_8073 flags
+  4: binary_9388 value
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -335,7 +335,7 @@ cpp.virtual
 struct McGetsRequest {
   -1: MemcacheRequestCommon memcacheRequestCommon (cpp.mixin)
   1: carbon.IOBufKey key
-  2: i64 (cpp.type = "uint64_t") flags
+  2: i64_8073 flags
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -353,9 +353,9 @@ cpp.virtual
 struct McGetsReply {
   -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
   1: carbon_result.Result result
-  2: i64 (cpp.type = "uint64_t") casToken
-  3: optional binary (cpp.type = "folly::IOBuf") value
-  4: i64 (cpp.type = "uint64_t") flags
+  2: i64_8073 casToken
+  3: optional binary_9388 value
+  4: i64_8073 flags
   5: string message
   6: i16 appSpecificErrorCode
 }(cpp.methods = "
@@ -376,9 +376,9 @@ struct McCasRequest {
   -1: MemcacheRequestCommon memcacheRequestCommon (cpp.mixin)
   1: carbon.IOBufKey key
   2: i32 exptime
-  3: i64 (cpp.type = "uint64_t") flags
-  4: binary (cpp.type = "folly::IOBuf") value
-  5: i64 (cpp.type = "uint64_t") casToken
+  3: i64_8073 flags
+  4: binary_9388 value
+  5: i64_8073 casToken
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -532,8 +532,8 @@ struct McAppendRequest {
   -1: MemcacheRequestCommon memcacheRequestCommon (cpp.mixin)
   1: carbon.IOBufKey key
   2: i32 exptime
-  3: i64 (cpp.type = "uint64_t") flags
-  4: binary (cpp.type = "folly::IOBuf") value
+  3: i64_8073 flags
+  4: binary_9388 value
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -571,8 +571,8 @@ struct McPrependRequest {
   -1: MemcacheRequestCommon memcacheRequestCommon (cpp.mixin)
   1: carbon.IOBufKey key
   2: i32 exptime
-  3: i64 (cpp.type = "uint64_t") flags
-  4: binary (cpp.type = "folly::IOBuf") value
+  3: i64_8073 flags
+  4: binary_9388 value
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -737,8 +737,8 @@ cpp.virtual
 struct McGatReply {
   -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
   1: carbon_result.Result result
-  2: optional binary (cpp.type = "folly::IOBuf") value
-  3: i64 (cpp.type = "uint64_t") flags
+  2: optional binary_9388 value
+  3: i64_8073 flags
   4: string message
   5: i16 appSpecificErrorCode
 }(cpp.methods = "
@@ -776,9 +776,9 @@ cpp.virtual
 struct McGatsReply {
   -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
   1: carbon_result.Result result
-  2: i64 (cpp.type = "uint64_t") casToken
-  3: optional binary (cpp.type = "folly::IOBuf") value
-  4: i64 (cpp.type = "uint64_t") flags
+  2: i64_8073 casToken
+  3: optional binary_9388 value
+  4: i64_8073 flags
   5: string message
   6: i16 appSpecificErrorCode
 }(cpp.methods = "
@@ -797,4 +797,7 @@ cpp.virtual
 )
 
 // The following were automatically generated and may benefit from renaming.
+typedef binary (cpp.type = "folly::IOBuf") binary_9388
+typedef i32 (cpp.type = "uint32_t") i32_133
 typedef i64 (cpp.type = "uint64_t") i64_8073
+typedef map<string, i64_8073> (cpp.type = "std::unordered_map<std::string, uint64_t>") map_string_i64_8499

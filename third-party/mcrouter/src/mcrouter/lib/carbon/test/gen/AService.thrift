@@ -12,6 +12,7 @@
  *
  *  @generated
  */
+include "thrift/annotation/cpp.thrift"
 include "mcrouter/lib/network/gen/Common.thrift"
 include "mcrouter/lib/carbon/test/gen/A.thrift"
 include "mcrouter/lib/carbon/test/gen/B.thrift"
@@ -23,12 +24,15 @@ namespace cpp2 carbon.test.A.thrift
 namespace py3 carbon.test.A.thrift
 
 service A extends fb303.FacebookService {
-  TestAReply_4258 testA(1:TestARequest_1594 request) (thread = "eb")
-  McVersionReply_7593 mcVersion(1:McVersionRequest_7452 request) (thread = "eb")
+  A_TestAReply testA(1: A_TestARequest request) (thread = "eb")
+  Common_McVersionReply mcVersion(1: Common_McVersionRequest request) (thread = "eb")
 }
 
-// The following were automatically generated and may benefit from renaming.
-typedef Common.McVersionReply (cpp.type = "facebook::memcache::McVersionReply") McVersionReply_7593
-typedef Common.McVersionRequest (cpp.type = "facebook::memcache::McVersionRequest") McVersionRequest_7452
-typedef A.TestAReply (cpp.type = "carbon::test::A::TestAReply") TestAReply_4258
-typedef A.TestARequest (cpp.type = "carbon::test::A::TestARequest") TestARequest_1594
+@cpp.Type{name = "carbon::test::A::TestAReply"}
+typedef A.TestAReply A_TestAReply
+@cpp.Type{name = "carbon::test::A::TestARequest"}
+typedef A.TestARequest A_TestARequest
+@cpp.Type{name = "facebook::memcache::McVersionReply"}
+typedef Common.McVersionReply Common_McVersionReply
+@cpp.Type{name = "facebook::memcache::McVersionRequest"}
+typedef Common.McVersionRequest Common_McVersionRequest

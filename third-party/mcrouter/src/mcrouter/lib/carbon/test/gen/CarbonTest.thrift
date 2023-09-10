@@ -25,44 +25,44 @@ struct TestRequest {
   1: carbon.IOBufKey key
   2: bool dummy2
   3: bool testBool
-  4: byte (cpp.type = "uint8_t") testChar
+  4: byte_3708 testChar
   5: byte testInt8
   6: i16 testInt16
   7: i32 testInt32
   8: i64 testInt64
-  9: byte (cpp.type = "uint8_t") testUInt8
-  10: i16 (cpp.type = "uint16_t") testUInt16
-  11: i32 (cpp.type = "uint32_t") testUInt32
-  12: i64 (cpp.type = "uint64_t") testUInt64
+  9: byte_3708 testUInt8
+  10: i16_2823 testUInt16
+  11: i32_3323 testUInt32
+  12: i64_8825 testUInt64
   13: float testFloat
   14: double testDouble
   15: string testShortString
   16: string testLongString
-  17: binary (cpp.type = "folly::IOBuf") testIobuf
+  17: binary_6280 testIobuf
   19: list<string> testList
   20: optional string testOptionalString
-  21: optional binary (cpp.type = "folly::IOBuf") testOptionalIobuf
+  21: optional binary_6280 testOptionalIobuf
   22: bool dummy22
   23: bool dummy23
   24: list<list<i64_8825>> testNestedVec
-  25: map<string, string> (cpp.type = "std::unordered_map<std::string, std::string>") testUMap
-  26: map<double, double> (cpp.type = "std::map<double, double>") testMap
-  27: map<string, list<i16_2823>> (cpp.type = "std::map<std::string, std::vector<uint16_t>>") testComplexMap
-  28: set<string> (cpp.type = "std::unordered_set<std::string>") testUSet
-  29: set<i64_8825> (cpp.type = "std::set<uint64_t>") testSet
+  25: map_string_string_2289 testUMap
+  26: map_double_double_9250 testMap
+  27: map_string_list_i16_6841 testComplexMap
+  28: set_string_2198 testUSet
+  29: set_i64_9236 testSet
   30: optional bool testOptionalBool
   31: string dummy31
   32: list<binary_6280> testIOBufList
-  33: map<string, string> (cpp.type = "folly::F14FastMap<std::string, std::string>") testF14FastMap
-  34: map<string, string> (cpp.type = "folly::F14NodeMap<std::string, std::string>") testF14NodeMap
-  35: map<string, string> (cpp.type = "folly::F14ValueMap<std::string, std::string>") testF14ValueMap
-  36: map<string, string> (cpp.type = "folly::F14VectorMap<std::string, std::string>") testF14VectorMap
-  37: set<string> (cpp.type = "folly::F14FastSet<std::string>") testF14FastSet
-  38: set<string> (cpp.type = "folly::F14NodeSet<std::string>") testF14NodeSet
-  39: set<string> (cpp.type = "folly::F14ValueSet<std::string>") testF14ValueSet
-  40: set<string> (cpp.type = "folly::F14VectorSet<std::string>") testF14VectorSet
+  33: map_string_string_9252 testF14FastMap
+  34: map_string_string_8609 testF14NodeMap
+  35: map_string_string_2795 testF14ValueMap
+  36: map_string_string_5050 testF14VectorMap
+  37: set_string_263 testF14FastSet
+  38: set_string_5323 testF14NodeSet
+  39: set_string_3646 testF14ValueSet
+  40: set_string_3210 testF14VectorSet
   41: optional string testOptionalKeywordString
-  42: optional binary (cpp.type = "folly::IOBuf") testOptionalKeywordIobuf
+  42: optional binary_6280 testOptionalKeywordIobuf
   43: optional bool testOptionalKeywordBool
 }(cpp.methods = "
   template <class V>
@@ -145,9 +145,9 @@ struct TestOptionalBool {
 
 ")
 union TestUnion {
-  1: i64 (cpp.type = "uint64_t") a
-  2: i32 (cpp.type = "uint32_t") b
-  3: i16 (cpp.type = "uint16_t") c
+  1: i64_8825 a
+  2: i32_3323 b
+  3: i16_2823 c
 }(cpp.methods = "
  public:
   template <class V>
@@ -167,14 +167,14 @@ union TestUnion {
   void foreachMember(V&& v) const;
 ")
 struct TestF14Containers {
-  1: map<string, i64> (cpp.type = "folly::F14FastMap<std::string, int64_t>") fastMap
-  2: map<string, i64> (cpp.type = "folly::F14NodeMap<std::string, int64_t>") nodeMap
-  3: map<string, i64> (cpp.type = "folly::F14ValueMap<std::string, int64_t>") valueMap
-  4: map<string, i64> (cpp.type = "folly::F14VectorMap<std::string, int64_t>") vectorMap
-  5: set<i64> (cpp.type = "folly::F14FastSet<int64_t>") fastSet
-  6: set<i64> (cpp.type = "folly::F14FastSet<int64_t>") nodeSet
-  7: set<i64> (cpp.type = "folly::F14FastSet<int64_t>") valueSet
-  8: set<i64> (cpp.type = "folly::F14FastSet<int64_t>") vectorSet
+  1: map_string_i64_6755 fastMap
+  2: map_string_i64_4120 nodeMap
+  3: map_string_i64_8905 valueMap
+  4: map_string_i64_6223 vectorMap
+  5: set_i64_8387 fastSet
+  6: set_i64_8387 nodeSet
+  7: set_i64_8387 valueSet
+  8: set_i64_8387 vectorSet
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -188,14 +188,14 @@ struct TestF14Containers {
 
 ")
 struct TestStdContainers {
-  1: map<string, i64> (cpp.type = "std::unordered_map<std::string, int64_t>") fastMap
-  2: map<string, i64> (cpp.type = "std::unordered_map<std::string, int64_t>") nodeMap
-  3: map<string, i64> (cpp.type = "std::unordered_map<std::string, int64_t>") valueMap
-  4: map<string, i64> (cpp.type = "std::unordered_map<std::string, int64_t>") vectorMap
-  5: set<i64> (cpp.type = "std::unordered_set<int64_t>") fastSet
-  6: set<i64> (cpp.type = "std::unordered_set<int64_t>") nodeSet
-  7: set<i64> (cpp.type = "std::unordered_set<int64_t>") valueSet
-  8: set<i64> (cpp.type = "std::unordered_set<int64_t>") vectorSet
+  1: map_string_i64_8945 fastMap
+  2: map_string_i64_8945 nodeMap
+  3: map_string_i64_8945 valueMap
+  4: map_string_i64_8945 vectorMap
+  5: set_i64_3201 fastSet
+  6: set_i64_3201 nodeSet
+  7: set_i64_3201 valueSet
+  8: set_i64_3201 vectorSet
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -421,5 +421,27 @@ struct StructWithOptionalEnumInt8 {
 
 // The following were automatically generated and may benefit from renaming.
 typedef binary (cpp.type = "folly::IOBuf") binary_6280
+typedef byte (cpp.type = "uint8_t") byte_3708
 typedef i16 (cpp.type = "uint16_t") i16_2823
+typedef i32 (cpp.type = "uint32_t") i32_3323
 typedef i64 (cpp.type = "uint64_t") i64_8825
+typedef map<double, double> (cpp.type = "std::map<double, double>") map_double_double_9250
+typedef map<string, i64> (cpp.type = "folly::F14NodeMap<std::string, int64_t>") map_string_i64_4120
+typedef map<string, i64> (cpp.type = "folly::F14VectorMap<std::string, int64_t>") map_string_i64_6223
+typedef map<string, i64> (cpp.type = "folly::F14FastMap<std::string, int64_t>") map_string_i64_6755
+typedef map<string, i64> (cpp.type = "folly::F14ValueMap<std::string, int64_t>") map_string_i64_8905
+typedef map<string, i64> (cpp.type = "std::unordered_map<std::string, int64_t>") map_string_i64_8945
+typedef map<string, list<i16_2823>> (cpp.type = "std::map<std::string, std::vector<uint16_t>>") map_string_list_i16_6841
+typedef map<string, string> (cpp.type = "std::unordered_map<std::string, std::string>") map_string_string_2289
+typedef map<string, string> (cpp.type = "folly::F14ValueMap<std::string, std::string>") map_string_string_2795
+typedef map<string, string> (cpp.type = "folly::F14VectorMap<std::string, std::string>") map_string_string_5050
+typedef map<string, string> (cpp.type = "folly::F14NodeMap<std::string, std::string>") map_string_string_8609
+typedef map<string, string> (cpp.type = "folly::F14FastMap<std::string, std::string>") map_string_string_9252
+typedef set<i64> (cpp.type = "std::unordered_set<int64_t>") set_i64_3201
+typedef set<i64> (cpp.type = "folly::F14FastSet<int64_t>") set_i64_8387
+typedef set<i64_8825> (cpp.type = "std::set<uint64_t>") set_i64_9236
+typedef set<string> (cpp.type = "std::unordered_set<std::string>") set_string_2198
+typedef set<string> (cpp.type = "folly::F14FastSet<std::string>") set_string_263
+typedef set<string> (cpp.type = "folly::F14VectorSet<std::string>") set_string_3210
+typedef set<string> (cpp.type = "folly::F14ValueSet<std::string>") set_string_3646
+typedef set<string> (cpp.type = "folly::F14NodeSet<std::string>") set_string_5323

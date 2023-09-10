@@ -35,22 +35,21 @@ Object getObject1And4(int n) {
   while (n--) {
     boolList.push_back(asValueStruct<type::bool_t>(n % 2));
   }
-  obj[FieldId{1}].listValue_ref() = boolList;
-  obj[FieldId{2}].i32Value_ref() = 5;
+  obj[FieldId{1}].emplace_list(boolList);
+  obj[FieldId{2}].emplace_i32(5);
   return obj;
 }
 
 Object getPatchObj1And4(bool clear) {
   Value intPatch;
-  intPatch.objectValue_ref()
-      .ensure()[FieldId{static_cast<int16_t>(op::PatchOp::Assign)}] =
+  intPatch.ensure_object()[FieldId{static_cast<int16_t>(op::PatchOp::Assign)}] =
       asValueStruct<type::i32_t>(1);
   Value objPatch;
-  objPatch.objectValue_ref().ensure()[FieldId{2}] = intPatch;
+  objPatch.ensure_object()[FieldId{2}] = intPatch;
   if (clear) {
     Value listPatch;
-    listPatch.objectValue_ref()
-        .ensure()[FieldId{static_cast<int16_t>(op::PatchOp::Clear)}] =
+    listPatch
+        .ensure_object()[FieldId{static_cast<int16_t>(op::PatchOp::Clear)}] =
         asValueStruct<type::bool_t>(true);
     objPatch.objectValue_ref().ensure()[FieldId{1}] = listPatch;
   }
@@ -67,23 +66,21 @@ Object getObject2(int n) {
   while (n--) {
     boolList.push_back(asValueStruct<type::bool_t>(n % 2));
   }
-  obj[FieldId{1}].listValue_ref() = boolList;
-  obj[FieldId{2}].i32Value_ref() = 5;
+  obj[FieldId{1}].emplace_list(boolList);
+  obj[FieldId{2}].emplace_i32(5);
   return obj;
 }
 
 Object getPatchObj2() {
   Value intPatch;
-  intPatch.objectValue_ref()
-      .ensure()[FieldId{static_cast<int16_t>(op::PatchOp::Assign)}] =
+  intPatch.ensure_object()[FieldId{static_cast<int16_t>(op::PatchOp::Assign)}] =
       asValueStruct<type::i32_t>(1);
   Value listPatch;
-  listPatch.objectValue_ref()
-      .ensure()[FieldId{static_cast<int16_t>(op::PatchOp::Put)}]
-      .listValue_ref() = std::vector<Value>{asValueStruct<type::bool_t>(true)};
+  listPatch.ensure_object()[FieldId{static_cast<int16_t>(op::PatchOp::Put)}]
+      .emplace_list(std::vector<Value>{asValueStruct<type::bool_t>(true)});
   Value objPatch;
-  objPatch.objectValue_ref().ensure()[FieldId{1}] = listPatch;
-  objPatch.objectValue_ref().ensure()[FieldId{2}] = intPatch;
+  objPatch.ensure_object()[FieldId{1}] = listPatch;
+  objPatch.ensure_object()[FieldId{2}] = intPatch;
   Object patchObj;
   patchObj[FieldId{static_cast<int16_t>(op::PatchOp::PatchAfter)}] = objPatch;
   return patchObj;
@@ -93,19 +90,18 @@ Object getPatchObj2() {
 Object getObject3(int n) {
   Object obj;
   while (n--) {
-    obj[static_cast<FieldId>(n)].i32Value_ref() = n;
+    obj[static_cast<FieldId>(n)].emplace_i32(n);
   }
   return obj;
 }
 
 Object getPatchObj3(int n) {
   Value intPatch;
-  intPatch.objectValue_ref()
-      .ensure()[FieldId{static_cast<int16_t>(op::PatchOp::Add)}] =
+  intPatch.ensure_object()[FieldId{static_cast<int16_t>(op::PatchOp::Add)}] =
       asValueStruct<type::i32_t>(1);
   Value objPatch;
   while (n--) {
-    objPatch.objectValue_ref().ensure()[static_cast<FieldId>(n)] = intPatch;
+    objPatch.ensure_object()[static_cast<FieldId>(n)] = intPatch;
   }
   Object patchObj;
   patchObj[FieldId{static_cast<int16_t>(op::PatchOp::PatchAfter)}] = objPatch;
@@ -134,7 +130,7 @@ void init(int n) {
 void runOriginalApproach(
     std::unique_ptr<folly::IOBuf>& serialized, const Object& patchObj) {
   Value value;
-  value.objectValue_ref() = parseObject<CompactProtocolReader>(*serialized);
+  value.emplace_object(parseObject<CompactProtocolReader>(*serialized));
   protocol::applyPatch(patchObj, value);
   protocol::serializeObject<CompactProtocolWriter>(value.as_object());
 }

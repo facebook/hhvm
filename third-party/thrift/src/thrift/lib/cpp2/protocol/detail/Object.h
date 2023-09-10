@@ -61,23 +61,23 @@ struct ValueHelper {
   static void set(Value& result, T&& value) {
     if constexpr (false) {
     } else if constexpr (type::base_type_v<TT> == type::BaseType::Bool) {
-      result.boolValue_ref() = value;
+      result.emplace_bool(value);
     } else if constexpr (type::base_type_v<TT> == type::BaseType::Byte) {
-      result.byteValue_ref() = value;
+      result.emplace_byte(value);
     } else if constexpr (type::base_type_v<TT> == type::BaseType::I16) {
-      result.i16Value_ref() = value;
+      result.emplace_i16(value);
     } else if constexpr (type::base_type_v<TT> == type::BaseType::I32) {
-      result.i32Value_ref() = value;
+      result.emplace_i32(value);
     } else if constexpr (type::base_type_v<TT> == type::BaseType::I64) {
-      result.i64Value_ref() = value;
+      result.emplace_i64(value);
     } else if constexpr (type::base_type_v<TT> == type::BaseType::Enum) {
-      result.i32Value_ref() = static_cast<int32_t>(value);
+      result.emplace_i32(static_cast<int32_t>(value));
     } else if constexpr (type::base_type_v<TT> == type::BaseType::Float) {
-      result.floatValue_ref() = value;
+      result.emplace_float(value);
     } else if constexpr (type::base_type_v<TT> == type::BaseType::Double) {
-      result.doubleValue_ref() = value;
+      result.emplace_double(value);
     } else if constexpr (type::base_type_v<TT> == type::BaseType::String) {
-      result.stringValue_ref() = std::forward<T>(value);
+      result.emplace_string(std::forward<T>(value));
     } else {
       static_assert(folly::always_false<T>, "Unknown Type Tag.");
     }
@@ -87,15 +87,15 @@ struct ValueHelper {
 template <>
 struct ValueHelper<type::binary_t> {
   static void set(Value& result, folly::IOBuf value) {
-    result.binaryValue_ref() = std::move(value);
+    result.emplace_binary(std::move(value));
   }
   static void set(Value& result, std::string_view value) {
-    result.binaryValue_ref() =
-        folly::IOBuf{folly::IOBuf::COPY_BUFFER, value.data(), value.size()};
+    result.emplace_binary(
+        folly::IOBuf{folly::IOBuf::COPY_BUFFER, value.data(), value.size()});
   }
   static void set(Value& result, folly::ByteRange value) {
-    result.binaryValue_ref() =
-        folly::IOBuf{folly::IOBuf::COPY_BUFFER, value.data(), value.size()};
+    result.emplace_binary(
+        folly::IOBuf{folly::IOBuf::COPY_BUFFER, value.data(), value.size()});
   }
 };
 
@@ -103,7 +103,7 @@ template <typename V>
 struct ValueHelper<type::list<V>> {
   template <typename C>
   static void set(Value& result, C&& value) {
-    auto& result_list = result.listValue_ref().ensure();
+    auto& result_list = result.ensure_list();
     for (auto& elem : value) {
       ValueHelper<V>::set(result_list.emplace_back(), forward_elem<C>(elem));
     }
@@ -114,7 +114,7 @@ template <typename V>
 struct ValueHelper<type::set<V>> {
   template <typename C>
   static void set(Value& result, C&& value) {
-    auto& result_set = result.setValue_ref().ensure();
+    auto& result_set = result.ensure_set();
     for (auto& elem : value) {
       Value elem_val;
       ValueHelper<V>::set(elem_val, forward_elem<C>(elem));
@@ -127,7 +127,7 @@ template <typename K, typename V>
 struct ValueHelper<type::map<K, V>> {
   template <typename C>
   static void set(Value& result, C&& value) {
-    auto& result_map = result.mapValue_ref().ensure();
+    auto& result_map = result.ensure_map();
     for (auto& entry : value) {
       Value key;
       ValueHelper<K>::set(key, entry.first);
@@ -161,7 +161,7 @@ class ObjectWriter : public BaseObjectAdapter {
   }
 
   uint32_t writeStructBegin(const char* /*name*/) {
-    beginValue().objectValue_ref().ensure();
+    beginValue().ensure_object();
     return 0;
   }
   uint32_t writeStructEnd() { return endValue(Value::Type::objectValue); }
@@ -169,7 +169,7 @@ class ObjectWriter : public BaseObjectAdapter {
   uint32_t writeFieldBegin(
       const char* /*name*/, TType /*fieldType*/, int16_t fieldId) {
     auto result = cur(Value::Type::objectValue)
-                      .mutable_objectValue()
+                      .as_object()
                       .members()
                       ->emplace(fieldId, Value());
     assert(result.second);
@@ -193,7 +193,7 @@ class ObjectWriter : public BaseObjectAdapter {
     // insert elements from buffer into mapValue
     std::vector<Value> mapKeyAndValues = getBufferFromStack();
     assert(mapKeyAndValues.size() % 2 == 0);
-    auto& mapVal = cur().mapValue_ref().ensure();
+    auto& mapVal = cur().ensure_map();
     mapVal.reserve(mapKeyAndValues.size() / 2);
     for (size_t i = 0; i < mapKeyAndValues.size(); i += 2) {
       mapVal.emplace(
@@ -219,7 +219,7 @@ class ObjectWriter : public BaseObjectAdapter {
   uint32_t writeSetEnd() {
     // insert elements from buffer into setValue
     std::vector<Value> setValues = getBufferFromStack();
-    auto& setVal = cur().setValue_ref().ensure();
+    auto& setVal = cur().ensure_set();
     setVal.reserve(setValues.size());
     for (size_t i = 0; i < setValues.size(); i++) {
       setVal.emplace(std::move(setValues[i]));
@@ -321,7 +321,7 @@ class ObjectWriter : public BaseObjectAdapter {
   // Allocated temporary buffer in cur() and pushes buffer references on stack
   void allocBufferPushOnStack(size_t n) {
     // using listVal as temporary buffer
-    std::vector<Value>& listVal = beginValue().listValue_ref().ensure();
+    std::vector<Value>& listVal = beginValue().ensure_list();
     listVal.resize(n);
     for (auto itr = listVal.rbegin(); itr != listVal.rend(); ++itr) {
       cur_.push(&*itr);
@@ -330,7 +330,7 @@ class ObjectWriter : public BaseObjectAdapter {
 
   // Get temporary buffer from cur()
   std::vector<Value> getBufferFromStack() {
-    return std::move(*cur(Value::Type::listValue).listValue_ref());
+    return std::move(cur(Value::Type::listValue).as_list());
   }
 };
 
@@ -356,61 +356,61 @@ Value parseValue(Protocol& prot, TType arg_type, bool string_to_binary = true) {
     case protocol::T_BOOL: {
       bool boolv;
       prot.readBool(boolv);
-      result.boolValue_ref() = boolv;
+      result.emplace_bool(boolv);
       return result;
     }
     case protocol::T_BYTE: {
       int8_t bytev = 0;
       prot.readByte(bytev);
-      result.byteValue_ref() = bytev;
+      result.emplace_byte(bytev);
       return result;
     }
     case protocol::T_I16: {
       int16_t i16;
       prot.readI16(i16);
-      result.i16Value_ref() = i16;
+      result.emplace_i16(i16);
       return result;
     }
     case protocol::T_I32: {
       int32_t i32;
       prot.readI32(i32);
-      result.i32Value_ref() = i32;
+      result.emplace_i32(i32);
       return result;
     }
     case protocol::T_I64: {
       int64_t i64;
       prot.readI64(i64);
-      result.i64Value_ref() = i64;
+      result.emplace_i64(i64);
       return result;
     }
     case protocol::T_DOUBLE: {
       double dub;
       prot.readDouble(dub);
-      result.doubleValue_ref() = dub;
+      result.emplace_double(dub);
       return result;
     }
     case protocol::T_FLOAT: {
       float flt;
       prot.readFloat(flt);
-      result.floatValue_ref() = flt;
+      result.emplace_float(flt);
       return result;
     }
     case protocol::T_STRING: {
       if (string_to_binary) {
-        auto& binaryValue = result.binaryValue_ref().ensure();
+        auto& binaryValue = result.ensure_binary();
         prot.readBinary(binaryValue);
         return result;
       }
       std::string str;
       prot.readString(str);
-      result.stringValue_ref() = str;
+      result.emplace_string(str);
       return result;
     }
     case protocol::T_STRUCT: {
       std::string name;
       int16_t fid;
       TType ftype;
-      auto& objectValue = result.objectValue_ref().ensure();
+      auto& objectValue = result.ensure_object();
       prot.readStructBegin(name);
       while (true) {
         prot.readFieldBegin(name, ftype, fid);
@@ -427,7 +427,7 @@ Value parseValue(Protocol& prot, TType arg_type, bool string_to_binary = true) {
       TType keyType;
       TType valType;
       uint32_t size;
-      auto& mapValue = result.mapValue_ref().ensure();
+      auto& mapValue = result.ensure_map();
       prot.readMapBegin(keyType, valType, size);
       mapValue.reserve(size);
       for (uint32_t i = 0; i < size; i++) {
@@ -440,7 +440,7 @@ Value parseValue(Protocol& prot, TType arg_type, bool string_to_binary = true) {
     case protocol::T_SET: {
       TType elemType;
       uint32_t size;
-      auto& setValue = result.setValue_ref().ensure();
+      auto& setValue = result.ensure_set();
       prot.readSetBegin(elemType, size);
       setValue.reserve(size);
       for (uint32_t i = 0; i < size; i++) {
@@ -453,7 +453,7 @@ Value parseValue(Protocol& prot, TType arg_type, bool string_to_binary = true) {
       TType elemType;
       uint32_t size;
       prot.readListBegin(elemType, size);
-      auto& listValue = result.listValue_ref().ensure();
+      auto& listValue = result.ensure_list();
       listValue.reserve(size);
       for (uint32_t i = 0; i < size; i++) {
         listValue.push_back(parseValue(prot, elemType, string_to_binary));
@@ -527,7 +527,7 @@ MaskedDecodeResultValue parseValueWithMask(
   }
   switch (arg_type) {
     case protocol::T_STRUCT: {
-      auto& object = result.included.objectValue_ref().ensure();
+      auto& object = result.included.ensure_object();
       std::string name;
       int16_t fid;
       TType ftype;
@@ -561,7 +561,7 @@ MaskedDecodeResultValue parseValueWithMask(
       return result;
     }
     case protocol::T_MAP: {
-      auto& map = result.included.mapValue_ref().ensure();
+      auto& map = result.included.ensure_map();
       TType keyType;
       TType valType;
       uint32_t size;
@@ -624,8 +624,7 @@ MaskedDecodeResult parseObject(
           string_to_binary);
   protocolData.data() = std::move(parseValueResult.excluded);
   // Calling ensure as it is possible that the value is not set.
-  result.included =
-      std::move(parseValueResult.included.objectValue_ref().ensure());
+  result.included = std::move(parseValueResult.included.ensure_object());
   return result;
 }
 
@@ -648,40 +647,40 @@ template <class Protocol>
 void serializeValue(Protocol& prot, const Value& value) {
   switch (value.getType()) {
     case Value::Type::boolValue:
-      prot.writeBool(*value.boolValue_ref());
+      prot.writeBool(value.as_bool());
       return;
     case Value::Type::byteValue:
-      prot.writeByte(*value.byteValue_ref());
+      prot.writeByte(value.as_byte());
       return;
     case Value::Type::i16Value:
-      prot.writeI16(*value.i16Value_ref());
+      prot.writeI16(value.as_i16());
       return;
     case Value::Type::i32Value:
-      prot.writeI32(*value.i32Value_ref());
+      prot.writeI32(value.as_i32());
       return;
     case Value::Type::i64Value:
-      prot.writeI64(*value.i64Value_ref());
+      prot.writeI64(value.as_i64());
       return;
     case Value::Type::floatValue:
-      prot.writeFloat(*value.floatValue_ref());
+      prot.writeFloat(value.as_float());
       return;
     case Value::Type::doubleValue:
-      prot.writeDouble(*value.doubleValue_ref());
+      prot.writeDouble(value.as_double());
       return;
     case Value::Type::stringValue:
-      prot.writeString(*value.stringValue_ref());
+      prot.writeString(value.as_string());
       return;
     case Value::Type::binaryValue:
-      prot.writeBinary(*value.binaryValue_ref());
+      prot.writeBinary(value.as_binary());
       return;
     case Value::Type::listValue: {
       TType elemType = protocol::T_I64;
-      uint32_t size = value.listValue_ref()->size();
+      uint32_t size = value.as_list().size();
       if (size > 0) {
-        elemType = getTType(value.listValue_ref()->at(0));
+        elemType = getTType(value.as_list().at(0));
       }
       prot.writeListBegin(elemType, size);
-      for (const auto& val : *value.listValue_ref()) {
+      for (const auto& val : value.as_list()) {
         ensureSameType(val, elemType);
         serializeValue(prot, val);
       }
@@ -691,13 +690,13 @@ void serializeValue(Protocol& prot, const Value& value) {
     case Value::Type::mapValue: {
       TType keyType = protocol::T_STRING;
       TType valueType = protocol::T_I64;
-      uint32_t size = value.mapValue_ref()->size();
+      uint32_t size = value.as_map().size();
       if (size > 0) {
-        keyType = getTType(value.mapValue_ref()->begin()->first);
-        valueType = getTType(value.mapValue_ref()->begin()->second);
+        keyType = getTType(value.as_map().begin()->first);
+        valueType = getTType(value.as_map().begin()->second);
       }
       prot.writeMapBegin(keyType, valueType, size);
-      for (const auto& [key, val] : *value.mapValue_ref()) {
+      for (const auto& [key, val] : value.as_map()) {
         ensureSameType(key, keyType);
         ensureSameType(val, valueType);
         serializeValue(prot, key);
@@ -708,12 +707,12 @@ void serializeValue(Protocol& prot, const Value& value) {
     }
     case Value::Type::setValue: {
       TType elemType = protocol::T_I64;
-      uint32_t size = value.setValue_ref()->size();
+      uint32_t size = value.as_set().size();
       if (size > 0) {
-        elemType = getTType(*value.setValue_ref()->begin());
+        elemType = getTType(*value.as_set().begin());
       }
       prot.writeSetBegin(elemType, size);
-      for (const auto& val : *value.setValue_ref()) {
+      for (const auto& val : value.as_set()) {
         ensureSameType(val, elemType);
         serializeValue(prot, val);
       }
@@ -721,7 +720,7 @@ void serializeValue(Protocol& prot, const Value& value) {
       return;
     }
     case Value::Type::objectValue: {
-      serializeObject(prot, *value.objectValue_ref());
+      serializeObject(prot, value.as_object());
       return;
     }
     default: {
@@ -837,10 +836,10 @@ void serializeValue(
       TType valueType = protocol::T_I64;
 
       // compute size, keyType, and valueType
-      uint32_t size = value.mapValue_ref()->size();
+      uint32_t size = value.as_map().size();
       if (size > 0) {
-        keyType = getTType(value.mapValue_ref()->begin()->first);
-        valueType = getTType(value.mapValue_ref()->begin()->second);
+        keyType = getTType(value.as_map().begin()->first);
+        valueType = getTType(value.as_map().begin()->second);
       }
       for (auto& [keyValueId, nestedMaskedData] : *maskedData.values_ref()) {
         const Value& key = getByValueId(*protocolData.keys(), keyValueId);
@@ -850,7 +849,7 @@ void serializeValue(
           valueType = toTType(
               *getByValueId(*protocolData.values(), valueId).wireType());
         }
-        if (folly::get_ptr(*value.mapValue_ref(), key) == nullptr) {
+        if (folly::get_ptr(value.as_map(), key) == nullptr) {
           ++size;
         }
       }
@@ -869,16 +868,16 @@ void serializeValue(
         ensureSameType(key, keyType);
         serializeValue(prot, key);
         // no need to serialize the value
-        if (folly::get_ptr(*value.mapValue_ref(), key) == nullptr) {
+        if (folly::get_ptr(value.as_map(), key) == nullptr) {
           writeRawMapValue(prot, valueType, protocolData, nestedMaskedData);
           continue;
         }
         // recursively serialize value with maskedData
-        const Value& val = value.mapValue_ref()->at(key);
+        const Value& val = value.as_map().at(key);
         ensureSameType(val, valueType);
         serializeValue(prot, val, protocolData, nestedMaskedData);
       }
-      for (const auto& [key, val] : *value.mapValue_ref()) {
+      for (const auto& [key, val] : value.as_map()) {
         if (keys.find(key) != keys.end()) { // already serailized
           continue;
         }

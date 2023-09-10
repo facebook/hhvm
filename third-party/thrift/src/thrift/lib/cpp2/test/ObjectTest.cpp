@@ -753,12 +753,12 @@ void testParseObjectWithMask(bool testSerialize) {
   //     2: {1: "foo"}
   //     3: {5: {1: "foo"},
   //         6: true}3}
-  foo[FieldId{1}].stringValue_ref() = "foo";
-  bar[FieldId{5}].objectValue_ref() = foo;
-  bar[FieldId{6}].boolValue_ref() = true;
-  obj[FieldId{1}].i16Value_ref() = 3;
-  obj[FieldId{2}].objectValue_ref() = foo;
-  obj[FieldId{3}].objectValue_ref() = bar;
+  foo[FieldId{1}].emplace_string("foo");
+  bar[FieldId{5}].emplace_object(foo);
+  bar[FieldId{6}].emplace_bool(true);
+  obj[FieldId{1}].emplace_i16(3);
+  obj[FieldId{2}].emplace_object(foo);
+  obj[FieldId{3}].emplace_object(bar);
 
   // masks obj[2] and obj[3][6]
   Mask mask;
@@ -768,9 +768,8 @@ void testParseObjectWithMask(bool testSerialize) {
 
   // expected{2: {1: "foo"}
   //          3: {6: true}}
-  expected[FieldId{2}].objectValue_ref() = foo;
-  expected[FieldId{3}].objectValue_ref().emplace()[FieldId{6}].boolValue_ref() =
-      true;
+  expected[FieldId{2}].emplace_object(foo);
+  expected[FieldId{3}].ensure_object()[FieldId{6}].emplace_bool(true);
 
   // serialize the object and deserialize with mask
   auto serialized = protocol::serializeObject<protocol_writer_t<Protocol>>(obj);
@@ -824,11 +823,11 @@ void testSerializeObjectWithMask() {
   //         2: "bar"},
   //     2: 2,
   //     3: 3}
-  foo[FieldId{1}].stringValue_ref() = "foo";
-  foo[FieldId{2}].stringValue_ref() = "bar";
-  obj[FieldId{1}].objectValue_ref() = foo;
-  obj[FieldId{2}].i32Value_ref() = 2;
-  obj[FieldId{3}].i32Value_ref() = 3;
+  foo[FieldId{1}].emplace_string("foo");
+  foo[FieldId{2}].emplace_string("bar");
+  obj[FieldId{1}].emplace_object(foo);
+  obj[FieldId{2}].emplace_i32(2);
+  obj[FieldId{3}].emplace_i32(3);
 
   // masks obj[1][1] and obj[2]
   Mask mask;
@@ -844,9 +843,9 @@ void testSerializeObjectWithMask() {
     Object expected, bar;
     // expected{1: {1: "foo"},
     //          2: 2}
-    bar[FieldId{1}].stringValue_ref() = "foo";
-    expected[FieldId{1}].objectValue_ref() = bar;
-    expected[FieldId{2}].i32Value_ref() = 2;
+    bar[FieldId{1}].emplace_string("foo");
+    expected[FieldId{1}].emplace_object(bar);
+    expected[FieldId{2}].emplace_i32(2);
     EXPECT_EQ(result.included, expected);
   }
 
@@ -864,20 +863,20 @@ void testSerializeObjectWithMask() {
     Object modified, baz;
     // modified{1: {3: "baz"},
     //          4: 4}
-    baz[FieldId{3}].stringValue_ref() = "baz";
-    modified[FieldId{1}].objectValue_ref() = baz;
-    modified[FieldId{4}].i32Value_ref() = 4;
+    baz[FieldId{3}].emplace_string("baz");
+    modified[FieldId{1}].emplace_object(baz);
+    modified[FieldId{4}].emplace_i32(4);
 
     Object expected, bar;
     // expected{1: {2: "bar",
     //              3: "baz"},
     //          3: 3,
     //          4: 4}
-    bar[FieldId{2}].stringValue_ref() = "bar";
-    bar[FieldId{3}].stringValue_ref() = "baz";
-    expected[FieldId{1}].objectValue_ref() = bar;
-    expected[FieldId{3}].i32Value_ref() = 3;
-    expected[FieldId{4}].i32Value_ref() = 4;
+    bar[FieldId{2}].emplace_string("bar");
+    bar[FieldId{3}].emplace_string("baz");
+    expected[FieldId{1}].emplace_object(bar);
+    expected[FieldId{3}].emplace_i32(3);
+    expected[FieldId{4}].emplace_i32(4);
 
     auto reserialized = protocol::serializeObject<protocol_writer_t<Protocol>>(
         modified, result.excluded);
@@ -891,8 +890,8 @@ template <::apache::thrift::conformance::StandardProtocol Protocol>
 void testSerializeObjectWithMaskError() {
   Object obj, foo;
   // obj{1: {1: "foo"}}
-  foo[FieldId{1}].stringValue_ref() = "foo";
-  obj[FieldId{1}].objectValue_ref() = foo;
+  foo[FieldId{1}].emplace_string("foo");
+  obj[FieldId{1}].emplace_object(foo);
 
   {
     // MaskedData[1] is full, which should be fields.
@@ -1197,11 +1196,11 @@ void testParseObjectWithTwoMasks() {
   //     4: map{10: {"foo": 1,
   //                 "bar": 2},
   //            20: {"baz": 3}}}
-  foo[FieldId{1}].stringValue_ref() = "foo";
-  foo[FieldId{2}].stringValue_ref() = "bar";
-  obj[FieldId{1}].objectValue_ref() = foo;
-  obj[FieldId{2}].i32Value_ref() = 2;
-  obj[FieldId{3}].i32Value_ref() = 3;
+  foo[FieldId{1}].emplace_string("foo");
+  foo[FieldId{2}].emplace_string("bar");
+  obj[FieldId{1}].emplace_object(foo);
+  obj[FieldId{2}].emplace_i32(2);
+  obj[FieldId{3}].emplace_i32(3);
   obj[FieldId{4}] = asValueStruct<
       type::map<type::i16_t, type::map<type::string_t, type::i32_t>>>(
       {{10, {{"foo", 1}, {"bar", 2}}}, {20, {{"baz", 3}}}});
@@ -1261,9 +1260,9 @@ void testParseObjectWithTwoMasks() {
     //          2: 2,
     //          4: map{10: {"foo": 1},
     //                 20: {}}}
-    bar[FieldId{2}].stringValue_ref() = "bar";
-    expected[FieldId{1}].objectValue_ref() = bar;
-    expected[FieldId{2}].i32Value_ref() = 2;
+    bar[FieldId{2}].emplace_string("bar");
+    expected[FieldId{1}].emplace_object(bar);
+    expected[FieldId{2}].emplace_i32(2);
     expected[FieldId{4}] = asValueStruct<
         type::map<type::i16_t, type::map<type::string_t, type::i32_t>>>(
         {{10, {{"foo", 1}}}, {20, {}}});

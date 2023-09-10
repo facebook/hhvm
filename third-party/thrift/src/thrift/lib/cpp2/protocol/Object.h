@@ -124,7 +124,7 @@ std::unique_ptr<folly::IOBuf> serializeObject(
   folly::IOBufQueue queue(folly::IOBufQueue::cacheChainLength());
   prot.setOutput(&queue);
   Value val;
-  val.objectValue_ref() = obj;
+  val.emplace_object(obj);
   if (protocolData.data()->full_ref()) { // entire object is not parsed
     const EncodedValue& value = detail::getByValueId(
         *protocolData.values(), protocolData.data()->full_ref().value());

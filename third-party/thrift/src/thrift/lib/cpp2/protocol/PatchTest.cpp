@@ -162,18 +162,18 @@ class PatchTest : public testing::Test {
 
 TEST_F(PatchTest, Bool) {
   // Noop
-  EXPECT_TRUE(*apply(op::BoolPatch{}, true).boolValue_ref());
-  EXPECT_FALSE(*apply(op::BoolPatch{}, false).boolValue_ref());
+  EXPECT_TRUE(apply(op::BoolPatch{}, true).as_bool());
+  EXPECT_FALSE(apply(op::BoolPatch{}, false).as_bool());
 
   // Assign
-  EXPECT_TRUE(*apply(op::BoolPatch{} = true, true).boolValue_ref());
-  EXPECT_TRUE(*apply(op::BoolPatch{} = true, false).boolValue_ref());
-  EXPECT_FALSE(*apply(op::BoolPatch{} = false, true).boolValue_ref());
-  EXPECT_FALSE(*apply(op::BoolPatch{} = false, false).boolValue_ref());
+  EXPECT_TRUE(apply(op::BoolPatch{} = true, true).as_bool());
+  EXPECT_TRUE(apply(op::BoolPatch{} = true, false).as_bool());
+  EXPECT_FALSE(apply(op::BoolPatch{} = false, true).as_bool());
+  EXPECT_FALSE(apply(op::BoolPatch{} = false, false).as_bool());
 
   // Invert
-  EXPECT_TRUE(*apply(!op::BoolPatch{}, false).boolValue_ref());
-  EXPECT_FALSE(*apply(!op::BoolPatch{}, true).boolValue_ref());
+  EXPECT_TRUE(apply(!op::BoolPatch{}, false).as_bool());
+  EXPECT_FALSE(apply(!op::BoolPatch{}, true).as_bool());
 
   // Wrong patch provided
   EXPECT_THROW(apply(op::I16Patch{} += 1, true), std::runtime_error);
@@ -236,15 +236,15 @@ TEST_F(PatchTest, Binary) {
   auto binaryData = asValueStruct<type::binary_t>(toPatch);
   // Noop
   EXPECT_TRUE(folly::IOBufEqualTo{}(
-      toPatch, *apply(op::BinaryPatch{}, binaryData).binaryValue_ref()));
+      toPatch, apply(op::BinaryPatch{}, binaryData).as_binary()));
 
   // Assign
   EXPECT_TRUE(apply(op::BinaryPatch{} = folly::IOBuf(), binaryData)
-                  .binaryValue_ref()
-                  ->empty());
+                  .as_binary()
+                  .empty());
   EXPECT_TRUE(folly::IOBufEqualTo{}(
       patchValue,
-      *apply(op::BinaryPatch{} = patchValue, binaryData).binaryValue_ref()));
+      apply(op::BinaryPatch{} = patchValue, binaryData).as_binary()));
 
   // Append
   {
@@ -253,14 +253,14 @@ TEST_F(PatchTest, Binary) {
     std::string appended = data + patch;
     EXPECT_TRUE(folly::IOBufEqualTo{}(
         folly::IOBuf::wrapBufferAsValue(appended.data(), appended.size()),
-        *apply(binPatch, binaryData).binaryValue_ref()));
+        apply(binPatch, binaryData).as_binary()));
     EXPECT_TRUE(isMaskReadWriteOperation(binPatch.toObject()));
   }
   {
     op::BinaryPatch binPatch;
     binPatch.append("");
     EXPECT_TRUE(folly::IOBufEqualTo{}(
-        toPatch, *apply(binPatch, binaryData).binaryValue_ref()));
+        toPatch, apply(binPatch, binaryData).as_binary()));
     EXPECT_TRUE(isMaskNoop(binPatch.toObject()));
   }
 
@@ -271,14 +271,14 @@ TEST_F(PatchTest, Binary) {
     std::string appended = patch + data;
     EXPECT_TRUE(folly::IOBufEqualTo{}(
         folly::IOBuf::wrapBufferAsValue(appended.data(), appended.size()),
-        *apply(binPatch, binaryData).binaryValue_ref()));
+        apply(binPatch, binaryData).as_binary()));
     EXPECT_TRUE(isMaskReadWriteOperation(binPatch.toObject()));
   }
   {
     op::BinaryPatch binPatch;
     binPatch.prepend("");
     EXPECT_TRUE(folly::IOBufEqualTo{}(
-        toPatch, *apply(binPatch, binaryData).binaryValue_ref()));
+        toPatch, apply(binPatch, binaryData).as_binary()));
     EXPECT_TRUE(isMaskNoop(binPatch.toObject()));
   }
 
@@ -300,19 +300,18 @@ TEST_F(PatchTest, String) {
   std::string data = "test", patch = "best";
   auto stringData = asValueStruct<type::string_t>(data);
   // Noop
-  EXPECT_EQ(data, *apply(op::StringPatch{}, stringData).stringValue_ref());
+  EXPECT_EQ(data, apply(op::StringPatch{}, stringData).as_string());
   EXPECT_TRUE(isMaskNoop(op::StringPatch{}.toObject()));
 
   // Assign
-  EXPECT_EQ(
-      patch, *apply(op::StringPatch{} = patch, stringData).stringValue_ref());
+  EXPECT_EQ(patch, apply(op::StringPatch{} = patch, stringData).as_string());
   EXPECT_TRUE(isMaskWriteOperation((op::StringPatch{} = patch).toObject()));
 
   // Clear
   {
     op::StringPatch strPatch;
     strPatch.clear();
-    EXPECT_TRUE(apply(strPatch, stringData).stringValue_ref()->empty());
+    EXPECT_TRUE(apply(strPatch, stringData).as_string().empty());
     EXPECT_TRUE(isMaskWriteOperation(strPatch.toObject()));
   }
 
@@ -320,13 +319,13 @@ TEST_F(PatchTest, String) {
   {
     op::StringPatch strPatch;
     strPatch.append(patch);
-    EXPECT_EQ(data + patch, *apply(strPatch, stringData).stringValue_ref());
+    EXPECT_EQ(data + patch, apply(strPatch, stringData).as_string());
     EXPECT_TRUE(isMaskReadWriteOperation(strPatch.toObject()));
   }
   {
     op::StringPatch strPatch;
     strPatch.append("");
-    EXPECT_EQ(data, *apply(strPatch, stringData).stringValue_ref());
+    EXPECT_EQ(data, apply(strPatch, stringData).as_string());
     EXPECT_TRUE(isMaskNoop(op::StringPatch{}.toObject()));
   }
 
@@ -334,13 +333,13 @@ TEST_F(PatchTest, String) {
   {
     op::StringPatch strPatch;
     strPatch.prepend(patch);
-    EXPECT_EQ(patch + data, *apply(strPatch, stringData).stringValue_ref());
+    EXPECT_EQ(patch + data, apply(strPatch, stringData).as_string());
     EXPECT_TRUE(isMaskReadWriteOperation(strPatch.toObject()));
   }
   {
     op::StringPatch strPatch;
     strPatch.prepend("");
-    EXPECT_EQ(data, *apply(strPatch, stringData).stringValue_ref());
+    EXPECT_EQ(data, apply(strPatch, stringData).as_string());
     EXPECT_TRUE(isMaskNoop(op::StringPatch{}.toObject()));
   }
 
@@ -350,7 +349,7 @@ TEST_F(PatchTest, String) {
     strPatch.clear();
     strPatch.append(patch);
     strPatch.prepend(patch);
-    EXPECT_EQ(patch + patch, *apply(strPatch, stringData).stringValue_ref());
+    EXPECT_EQ(patch + patch, apply(strPatch, stringData).as_string());
     EXPECT_TRUE(isMaskReadWriteOperation(strPatch.toObject()));
   }
 
@@ -370,9 +369,7 @@ TEST_F(PatchTest, List) {
   auto emptySet = asValueStruct<type::set<type::binary_t>>({});
 
   auto expectNoop = [&](auto& patchObj) {
-    EXPECT_EQ(
-        *value.listValue_ref(),
-        *applyContainerPatch(patchObj, value).listValue_ref());
+    EXPECT_EQ(value.as_list(), applyContainerPatch(patchObj, value).as_list());
     EXPECT_TRUE(isMaskNoop(patchObj));
   };
 
@@ -386,8 +383,7 @@ TEST_F(PatchTest, List) {
   {
     Object patchObj = makePatch(op::PatchOp::Assign, patchValue);
     EXPECT_EQ(
-        *patchValue.listValue_ref(),
-        *applyContainerPatch(patchObj, value).listValue_ref());
+        patchValue.as_list(), applyContainerPatch(patchObj, value).as_list());
     EXPECT_TRUE(isMaskWriteOperation(patchObj));
   }
 
@@ -396,8 +392,7 @@ TEST_F(PatchTest, List) {
     Object patchObj =
         makePatch(op::PatchOp::Clear, asValueStruct<type::bool_t>(true));
     EXPECT_EQ(
-        std::vector<Value>{},
-        *applyContainerPatch(patchObj, value).listValue_ref());
+        std::vector<Value>{}, applyContainerPatch(patchObj, value).as_list());
     EXPECT_TRUE(isMaskWriteOperation(patchObj));
   }
   {
@@ -408,13 +403,11 @@ TEST_F(PatchTest, List) {
 
   // Prepend
   {
-    auto expected = *patchValue.listValue_ref();
+    auto expected = patchValue.as_list();
     expected.insert(
-        expected.end(),
-        value.listValue_ref()->begin(),
-        value.listValue_ref()->end());
+        expected.end(), value.as_list().begin(), value.as_list().end());
     Object patchObj = makePatch(op::PatchOp::Add, patchValue);
-    EXPECT_EQ(expected, *applyContainerPatch(patchObj, value).listValue_ref());
+    EXPECT_EQ(expected, applyContainerPatch(patchObj, value).as_list());
     EXPECT_TRUE(isMaskReadWriteOperation(patchObj));
   }
   {
@@ -424,13 +417,13 @@ TEST_F(PatchTest, List) {
 
   // Append
   {
-    auto expected = *value.listValue_ref();
+    auto expected = value.as_list();
     expected.insert(
         expected.end(),
-        patchValue.listValue_ref()->begin(),
-        patchValue.listValue_ref()->end());
+        patchValue.as_list().begin(),
+        patchValue.as_list().end());
     Object patchObj = makePatch(op::PatchOp::Put, patchValue);
-    EXPECT_EQ(expected, *applyContainerPatch(patchObj, value).listValue_ref());
+    EXPECT_EQ(expected, applyContainerPatch(patchObj, value).as_list());
     EXPECT_TRUE(isMaskReadWriteOperation(patchObj));
   }
   {
@@ -443,19 +436,17 @@ TEST_F(PatchTest, List) {
     Object patchObj = makePatch(
         op::PatchOp::Add,
         asValueStruct<type::set<type::binary_t>>(std::set{"test"}));
-    EXPECT_EQ(
-        *value.listValue_ref(),
-        *applyContainerPatch(patchObj, value).listValue_ref())
+    EXPECT_EQ(value.as_list(), applyContainerPatch(patchObj, value).as_list())
         << "Should insert nothing";
     EXPECT_TRUE(isMaskReadWriteOperation(patchObj));
   }
   {
-    auto expected = *value.listValue_ref();
+    auto expected = value.as_list();
     expected.insert(expected.begin(), asValueStruct<type::binary_t>("best"));
     Object patchObj = makePatch(
         op::PatchOp::Add,
         asValueStruct<type::set<type::binary_t>>(std::set{"best"}));
-    EXPECT_EQ(expected, *applyContainerPatch(patchObj, value).listValue_ref());
+    EXPECT_EQ(expected, applyContainerPatch(patchObj, value).as_list());
     EXPECT_TRUE(isMaskReadWriteOperation(patchObj));
   }
   {
@@ -489,9 +480,7 @@ TEST_F(PatchTest, Set) {
   auto emptySet = asValueStruct<type::set<type::binary_t>>({});
 
   auto expectNoop = [&](auto& patchObj) {
-    EXPECT_EQ(
-        *value.setValue_ref(),
-        *applyContainerPatch(patchObj, value).setValue_ref());
+    EXPECT_EQ(value.as_set(), applyContainerPatch(patchObj, value).as_set());
     EXPECT_TRUE(isMaskNoop(patchObj));
   };
 
@@ -505,8 +494,7 @@ TEST_F(PatchTest, Set) {
   {
     Object patchObj = makePatch(op::PatchOp::Assign, patchValue);
     EXPECT_EQ(
-        *patchValue.setValue_ref(),
-        *applyContainerPatch(patchObj, value).setValue_ref());
+        patchValue.as_set(), applyContainerPatch(patchObj, value).as_set());
     EXPECT_TRUE(isMaskWriteOperation(patchObj));
   }
 
@@ -514,7 +502,7 @@ TEST_F(PatchTest, Set) {
   {
     Object patchObj =
         makePatch(op::PatchOp::Clear, asValueStruct<type::bool_t>(true));
-    EXPECT_TRUE(applyContainerPatch(patchObj, value).setValue_ref()->empty());
+    EXPECT_TRUE(applyContainerPatch(patchObj, value).as_set().empty());
     EXPECT_TRUE(isMaskWriteOperation(patchObj));
   }
   {
@@ -525,11 +513,10 @@ TEST_F(PatchTest, Set) {
 
   // Put
   {
-    auto expected = *value.setValue_ref();
-    expected.insert(
-        patchValue.setValue_ref()->begin(), patchValue.setValue_ref()->end());
+    auto expected = value.as_set();
+    expected.insert(patchValue.as_set().begin(), patchValue.as_set().end());
     Object patchObj = makePatch(op::PatchOp::Put, patchValue);
-    EXPECT_EQ(expected, *applyContainerPatch(patchObj, value).setValue_ref());
+    EXPECT_EQ(expected, applyContainerPatch(patchObj, value).as_set());
     EXPECT_TRUE(isMaskReadWriteOperation(patchObj));
   }
   {
@@ -542,7 +529,7 @@ TEST_F(PatchTest, Set) {
     Object patchObj = makePatch(
         op::PatchOp::Remove,
         asValueStruct<type::set<type::binary_t>>({"test"}));
-    EXPECT_TRUE(applyContainerPatch(patchObj, value).setValue_ref()->empty());
+    EXPECT_TRUE(applyContainerPatch(patchObj, value).as_set().empty());
     // Both read and write mask are allMask, as RemovePatch can't be
     // distinguished between set, map, and struct.
     {
@@ -565,19 +552,17 @@ TEST_F(PatchTest, Set) {
   {
     Object patchObj = makePatch(
         op::PatchOp::Add, asValueStruct<type::set<type::binary_t>>({"test"}));
-    EXPECT_EQ(
-        *value.setValue_ref(),
-        *applyContainerPatch(patchObj, value).setValue_ref())
+    EXPECT_EQ(value.as_set(), applyContainerPatch(patchObj, value).as_set())
         << "Should insert nothing";
     EXPECT_TRUE(isMaskReadWriteOperation(patchObj));
   }
   {
-    auto expected = *value.setValue_ref();
+    auto expected = value.as_set();
     expected.insert(asValueStruct<type::binary_t>("best test"));
     Object patchObj = makePatch(
         op::PatchOp::Add,
         asValueStruct<type::set<type::binary_t>>({"best test"}));
-    auto patchResult = *applyContainerPatch(patchObj, value).setValue_ref();
+    auto patchResult = applyContainerPatch(patchObj, value).as_set();
     EXPECT_EQ(expected, patchResult);
     EXPECT_TRUE(isMaskReadWriteOperation(patchObj));
   }
@@ -599,9 +584,7 @@ TEST_F(PatchTest, Set) {
         asValueStruct<type::set<type::binary_t>>({"rest"}));
 
     auto expected = asValueStruct<type::set<type::binary_t>>({"best", "rest"});
-    EXPECT_EQ(
-        *expected.setValue_ref(),
-        *applyContainerPatch(patchObj, value).setValue_ref());
+    EXPECT_EQ(expected.as_set(), applyContainerPatch(patchObj, value).as_set());
     EXPECT_TRUE(isMaskReadWriteOperation(patchObj));
   }
 }
@@ -634,9 +617,7 @@ TEST_F(PatchTest, Map) {
       asValueStruct<type::map<type::binary_t, type::binary_t>>({});
 
   auto expectNoop = [&](auto&& patchObj) {
-    EXPECT_EQ(
-        *value.mapValue_ref(),
-        *applyContainerPatch(patchObj, value).mapValue_ref());
+    EXPECT_EQ(value.as_map(), applyContainerPatch(patchObj, value).as_map());
     EXPECT_TRUE(isMaskNoop(patchObj));
   };
 
@@ -683,8 +664,7 @@ TEST_F(PatchTest, Map) {
   {
     Object patchObj = makePatch(op::PatchOp::Assign, patchValue);
     EXPECT_EQ(
-        *patchValue.mapValue_ref(),
-        *applyContainerPatch(patchObj, value).mapValue_ref());
+        patchValue.as_map(), applyContainerPatch(patchObj, value).as_map());
     EXPECT_TRUE(isMaskWriteOperation(patchObj));
   }
 
@@ -692,7 +672,7 @@ TEST_F(PatchTest, Map) {
   {
     Object patchObj =
         makePatch(op::PatchOp::Clear, asValueStruct<type::bool_t>(true));
-    EXPECT_EQ(emptyMap, *applyContainerPatch(patchObj, value).mapValue_ref());
+    EXPECT_EQ(emptyMap, applyContainerPatch(patchObj, value).as_map());
     EXPECT_TRUE(isMaskWriteOperation(patchObj));
   }
   {
@@ -705,7 +685,7 @@ TEST_F(PatchTest, Map) {
   {
     Object patchObj = makePatch(
         op::PatchOp::Remove, asValueStruct<type::set<type::binary_t>>({"key"}));
-    EXPECT_EQ(emptyMap, *applyContainerPatch(patchObj, value).mapValue_ref());
+    EXPECT_EQ(emptyMap, applyContainerPatch(patchObj, value).as_map());
     {
       auto masks = extractMaskViewFromPatch(patchObj);
       EXPECT_TRUE(MaskRef{masks.read}.isAllMask());
@@ -728,14 +708,12 @@ TEST_F(PatchTest, Map) {
         op::PatchOp::EnsureStruct,
         asValueStruct<type::map<type::binary_t, type::binary_t>>(
             {{"key", "test 42"}}));
-    EXPECT_EQ(
-        *value.mapValue_ref(),
-        *applyContainerPatch(patchObj, value).mapValue_ref())
+    EXPECT_EQ(value.as_map(), applyContainerPatch(patchObj, value).as_map())
         << "Should insert nothing";
     checkMapMask(patchObj, {"key"});
   }
   {
-    auto expected = *value.mapValue_ref();
+    auto expected = value.as_map();
     expected.emplace(
         asValueStruct<type::binary_t>("new key"),
         asValueStruct<type::binary_t>("new value"));
@@ -743,7 +721,7 @@ TEST_F(PatchTest, Map) {
         op::PatchOp::EnsureStruct,
         asValueStruct<type::map<type::binary_t, type::binary_t>>(
             {{"new key", "new value"}}));
-    auto patchResult = *applyContainerPatch(patchObj, value).mapValue_ref();
+    auto patchResult = applyContainerPatch(patchObj, value).as_map();
     EXPECT_EQ(expected, patchResult);
     checkMapMask(patchObj, {"new key"});
   }
@@ -754,14 +732,14 @@ TEST_F(PatchTest, Map) {
 
   // Put
   {
-    auto expected = *value.mapValue_ref();
+    auto expected = value.as_map();
     expected[asValueStruct<type::binary_t>("key")] =
         asValueStruct<type::binary_t>("key updated value");
     Object patchObj = makePatch(
         op::PatchOp::Put,
         asValueStruct<type::map<type::binary_t, type::binary_t>>(
             {{"key", "key updated value"}}));
-    EXPECT_EQ(expected, *applyContainerPatch(patchObj, value).mapValue_ref());
+    EXPECT_EQ(expected, applyContainerPatch(patchObj, value).as_map());
     checkMapMask(patchObj, {"key"});
   }
   {
@@ -784,9 +762,7 @@ TEST_F(PatchTest, Map) {
         op::PatchOp::Put,
         expected);
 
-    EXPECT_EQ(
-        *expected.mapValue_ref(),
-        *applyContainerPatch(patchObj, value).mapValue_ref());
+    EXPECT_EQ(expected.as_map(), applyContainerPatch(patchObj, value).as_map());
   }
 
   // PatchPrior
@@ -796,18 +772,16 @@ TEST_F(PatchTest, Map) {
             {{"key", {"test"}}});
     auto elementPatchValue = asValueStruct<type::list<type::binary_t>>({"foo"});
     Value fieldPatchValue;
-    fieldPatchValue.objectValue_ref() =
-        makePatch(op::PatchOp::Put, elementPatchValue);
+    fieldPatchValue.emplace_object(
+        makePatch(op::PatchOp::Put, elementPatchValue));
     Value mapPatch;
-    mapPatch.mapValue_ref().ensure()[asValueStruct<type::binary_t>("key")] =
+    mapPatch.ensure_map()[asValueStruct<type::binary_t>("key")] =
         fieldPatchValue;
     auto patchObj = makePatch(op::PatchOp::PatchPrior, mapPatch);
     auto expected =
         asValueStruct<type::map<type::binary_t, type::list<type::binary_t>>>(
             {{"key", std::vector<std::string>{"test", "foo"}}});
-    EXPECT_EQ(
-        *expected.mapValue_ref(),
-        *applyContainerPatch(patchObj, value).mapValue_ref());
+    EXPECT_EQ(expected.as_map(), applyContainerPatch(patchObj, value).as_map());
 
     checkMapMask(patchObj, {"key"});
   }
@@ -822,10 +796,10 @@ TEST_F(PatchTest, Map) {
         asValueStruct<type::map<type::binary_t, type::list<type::binary_t>>>(
             {{"key", {"test"}}});
     Value fieldPatchValue;
-    fieldPatchValue.objectValue_ref() = makePatch(
-        op::PatchOp::Put, asValueStruct<type::list<type::binary_t>>({"foo"}));
+    fieldPatchValue.emplace_object(makePatch(
+        op::PatchOp::Put, asValueStruct<type::list<type::binary_t>>({"foo"})));
     Value mapPatch;
-    mapPatch.mapValue_ref().ensure()[asValueStruct<type::binary_t>("new key")] =
+    mapPatch.ensure_map()[asValueStruct<type::binary_t>("new key")] =
         fieldPatchValue;
 
     auto patchObj = patchAddOperation(
@@ -838,9 +812,7 @@ TEST_F(PatchTest, Map) {
         asValueStruct<type::map<type::binary_t, type::list<type::binary_t>>>(
             {{"key", std::vector<std::string>{"test"}},
              {"new key", std::vector<std::string>{"foo"}}});
-    EXPECT_EQ(
-        *expected.mapValue_ref(),
-        *applyContainerPatch(patchObj, value).mapValue_ref());
+    EXPECT_EQ(expected.as_map(), applyContainerPatch(patchObj, value).as_map());
     checkMapMask(patchObj, {"new key"});
   }
   {
@@ -995,8 +967,7 @@ TEST_F(PatchTest, Struct) {
 
   auto expectNoop = [&](auto&& patchObj) {
     EXPECT_EQ(
-        *value.objectValue_ref(),
-        *applyContainerPatch(patchObj, value).objectValue_ref());
+        value.as_object(), applyContainerPatch(patchObj, value).as_object());
     EXPECT_TRUE(isMaskNoop(patchObj));
   };
 
@@ -1010,8 +981,8 @@ TEST_F(PatchTest, Struct) {
   {
     Object patchObj = makePatch(op::PatchOp::Assign, patchValue);
     EXPECT_EQ(
-        *patchValue.objectValue_ref(),
-        *applyContainerPatch(patchObj, value).objectValue_ref());
+        patchValue.as_object(),
+        applyContainerPatch(patchObj, value).as_object());
     EXPECT_TRUE(isMaskWriteOperation(patchObj));
   }
 
@@ -1019,10 +990,8 @@ TEST_F(PatchTest, Struct) {
   {
     Object patchObj =
         makePatch(op::PatchOp::Clear, asValueStruct<type::bool_t>(true));
-    EXPECT_TRUE(applyContainerPatch(patchObj, value)
-                    .objectValue_ref()
-                    ->members()
-                    ->empty());
+    EXPECT_TRUE(
+        applyContainerPatch(patchObj, value).as_object().members()->empty());
     EXPECT_TRUE(isMaskWriteOperation(patchObj));
   }
   {
@@ -1034,10 +1003,10 @@ TEST_F(PatchTest, Struct) {
   // PatchPrior
   auto applyFieldPatchTest = [&](auto op, auto expected) {
     Value fieldPatchValue;
-    fieldPatchValue.objectValue_ref() =
-        makePatch(op, asValueStruct<type::list<type::i32_t>>({3, 2, 1}));
+    fieldPatchValue.emplace_object(
+        makePatch(op, asValueStruct<type::list<type::i32_t>>({3, 2, 1})));
     Value fieldPatch;
-    fieldPatch.objectValue_ref().ensure()[FieldId{1}] = fieldPatchValue;
+    fieldPatch.ensure_object()[FieldId{1}] = fieldPatchValue;
     Object patchObj = makePatch(op::PatchOp::PatchPrior, fieldPatch);
     EXPECT_EQ(
         expected,
@@ -1052,7 +1021,7 @@ TEST_F(PatchTest, Struct) {
   };
 
   applyFieldPatchTest(
-      op::PatchOp::Assign, patchValue.objectValue_ref().ensure()[FieldId{1}]);
+      op::PatchOp::Assign, patchValue.ensure_object()[FieldId{1}]);
 
   applyFieldPatchTest(
       op::PatchOp::Put,
@@ -1066,13 +1035,13 @@ TEST_F(PatchTest, Struct) {
     Value ensureValuePatch;
     Object ensureObject;
     ensureObject[FieldId{1}] = asValueStruct<type::list<type::i32_t>>({});
-    ensureValuePatch.objectValue_ref() = ensureObject;
+    ensureValuePatch.emplace_object(ensureObject);
 
     Value fieldPatchValue;
-    fieldPatchValue.objectValue_ref() = makePatch(
-        op::PatchOp::Put, asValueStruct<type::list<type::i32_t>>({42}));
+    fieldPatchValue.emplace_object(makePatch(
+        op::PatchOp::Put, asValueStruct<type::list<type::i32_t>>({42})));
     Value fieldPatch;
-    fieldPatch.objectValue_ref().ensure()[FieldId{1}] = fieldPatchValue;
+    fieldPatch.ensure_object()[FieldId{1}] = fieldPatchValue;
 
     Object patchObj = patchAddOperation(
         makePatch(op::PatchOp::PatchAfter, fieldPatch),
@@ -1103,7 +1072,7 @@ TEST_F(PatchTest, Struct) {
   }
   {
     Value fieldPatch;
-    fieldPatch.objectValue_ref().ensure();
+    fieldPatch.ensure_object();
     expectNoop(makePatch(op::PatchOp::PatchPrior, fieldPatch));
     expectNoop(makePatch(op::PatchOp::EnsureStruct, fieldPatch));
     expectNoop(makePatch(op::PatchOp::PatchAfter, fieldPatch));
@@ -1113,8 +1082,7 @@ TEST_F(PatchTest, Struct) {
     Object patchObj = makePatch(
         op::PatchOp::Remove, asValueStruct<type::list<type::i16_t>>({1}));
     EXPECT_EQ(
-        protocol::Object{},
-        *applyContainerPatch(patchObj, value).objectValue_ref());
+        protocol::Object{}, applyContainerPatch(patchObj, value).as_object());
     {
       auto masks = extractMaskViewFromPatch(patchObj);
       EXPECT_TRUE(MaskRef{masks.read}.isAllMask());
@@ -1136,8 +1104,7 @@ TEST_F(PatchTest, Struct) {
     Object patchObj = makePatch(
         op::PatchOp::Remove, asValueStruct<type::set<type::i16_t>>({1}));
     EXPECT_EQ(
-        protocol::Object{},
-        *applyContainerPatch(patchObj, value).objectValue_ref());
+        protocol::Object{}, applyContainerPatch(patchObj, value).as_object());
     {
       auto masks = extractMaskViewFromPatch(patchObj);
       EXPECT_TRUE(MaskRef{masks.read}.isAllMask());
@@ -1284,8 +1251,7 @@ TEST_F(PatchTest, Union) { // Should mostly behave like a struct
 
   auto expectNoop = [&](auto&& patchObj) {
     EXPECT_EQ(
-        *value.objectValue_ref(),
-        *applyContainerPatch(patchObj, value).objectValue_ref());
+        value.as_object(), applyContainerPatch(patchObj, value).as_object());
     EXPECT_TRUE(isMaskNoop(patchObj));
   };
 
@@ -1299,8 +1265,8 @@ TEST_F(PatchTest, Union) { // Should mostly behave like a struct
   {
     Object patchObj = makePatch(op::PatchOp::Assign, patchValue);
     EXPECT_EQ(
-        *patchValue.objectValue_ref(),
-        *applyContainerPatch(patchObj, value).objectValue_ref());
+        patchValue.as_object(),
+        applyContainerPatch(patchObj, value).as_object());
     EXPECT_TRUE(isMaskWriteOperation(patchObj));
   }
 
@@ -1308,10 +1274,8 @@ TEST_F(PatchTest, Union) { // Should mostly behave like a struct
   {
     Object patchObj =
         makePatch(op::PatchOp::Clear, asValueStruct<type::bool_t>(true));
-    EXPECT_TRUE(applyContainerPatch(patchObj, value)
-                    .objectValue_ref()
-                    ->members()
-                    ->empty());
+    EXPECT_TRUE(
+        applyContainerPatch(patchObj, value).as_object().members()->empty());
     EXPECT_TRUE(isMaskWriteOperation(patchObj));
   }
   {
@@ -1329,20 +1293,20 @@ TEST_F(PatchTest, Union) { // Should mostly behave like a struct
     Value ensureValuePatch;
     Object ensureObject;
     ensureObject[FieldId{2}] = asValueStruct<type::i32_t>(43);
-    ensureValuePatch.objectValue_ref() = ensureObject;
+    ensureValuePatch.emplace_object(ensureObject);
 
     Value fieldPatchValue;
-    fieldPatchValue.objectValue_ref() =
-        makePatch(op::PatchOp::Add, asValueStruct<type::i32_t>(1));
+    fieldPatchValue.emplace_object(
+        makePatch(op::PatchOp::Add, asValueStruct<type::i32_t>(1)));
     Value fieldPatch;
-    fieldPatch.objectValue_ref().ensure()[FieldId{2}] = fieldPatchValue;
+    fieldPatch.ensure_object()[FieldId{2}] = fieldPatchValue;
 
     Object patchObj = patchAddOperation(
         makePatch(op::PatchOp::PatchAfter, fieldPatch),
         op::PatchOp::EnsureUnion,
         ensureValuePatch);
 
-    auto obj = *applyContainerPatch(patchObj, sourceValue).objectValue_ref();
+    auto obj = applyContainerPatch(patchObj, sourceValue).as_object();
     EXPECT_TRUE(obj.members()->find(1) == obj.members()->end());
     auto fieldIt = obj.members()->find(2);
     EXPECT_TRUE(fieldIt != obj.members()->end());
@@ -1357,11 +1321,11 @@ TEST_F(PatchTest, Union) { // Should mostly behave like a struct
     Value ensureValuePatch;
     Object ensureObject;
     ensureObject[FieldId{1}] = asValueStruct<type::i32_t>(43);
-    ensureValuePatch.objectValue_ref() = ensureObject;
+    ensureValuePatch.emplace_object(ensureObject);
 
     Object patchObj = makePatch(op::PatchOp::EnsureUnion, ensureValuePatch);
 
-    auto obj = *applyContainerPatch(patchObj, sourceValue).objectValue_ref();
+    auto obj = applyContainerPatch(patchObj, sourceValue).as_object();
     auto fieldIt = obj.members()->find(1);
     EXPECT_TRUE(obj.members()->find(2) == obj.members()->end());
     EXPECT_TRUE(fieldIt != obj.members()->end());
@@ -1385,7 +1349,7 @@ TEST_F(PatchTest, Union) { // Should mostly behave like a struct
     Object ensureObject;
     ensureObject[FieldId{1}] = asValueStruct<type::i32_t>(43);
     ensureObject[FieldId{2}] = asValueStruct<type::i32_t>(43);
-    ensureValuePatch.objectValue_ref() = ensureObject;
+    ensureValuePatch.emplace_object(ensureObject);
     patchObj = makePatch(op::PatchOp::EnsureUnion, ensureValuePatch);
 
     EXPECT_THROW(
@@ -1398,26 +1362,25 @@ TEST_F(PatchTest, extractMaskViewFromPatchNested) {
   //               "key2": Patch{"a": BoolPatch = true,
   //                             "b": Patch{1: BytePatch - 1}}}
   Value fieldPatchValue;
-  fieldPatchValue.objectValue_ref() =
-      makePatch(op::PatchOp::Clear, asValueStruct<type::bool_t>(true));
+  fieldPatchValue.emplace_object(
+      makePatch(op::PatchOp::Clear, asValueStruct<type::bool_t>(true)));
   Value mapPatch;
-  mapPatch.mapValue_ref().ensure()[asValueStruct<type::binary_t>("key")] =
-      fieldPatchValue;
+  mapPatch.ensure_map()[asValueStruct<type::binary_t>("key")] = fieldPatchValue;
   Value fieldPatchValue2, bytePatchValue;
-  bytePatchValue.objectValue_ref() = (op::BytePatch{} - 1).toObject();
-  fieldPatchValue2.objectValue_ref().ensure()[FieldId{1}] = bytePatchValue;
+  bytePatchValue.emplace_object((op::BytePatch{} - 1).toObject());
+  fieldPatchValue2.ensure_object()[FieldId{1}] = bytePatchValue;
   Value objectPatchValue;
-  objectPatchValue.objectValue_ref() =
-      makePatch(op::PatchOp::PatchPrior, fieldPatchValue2);
+  objectPatchValue.emplace_object(
+      makePatch(op::PatchOp::PatchPrior, fieldPatchValue2));
   Value nestedPatchValue, boolPatchValue, fieldPatchValue3;
-  boolPatchValue.objectValue_ref() = (op::BoolPatch{} = true).toObject();
-  fieldPatchValue3.mapValue_ref().ensure()[asValueStruct<type::binary_t>("a")] =
+  boolPatchValue.emplace_object((op::BoolPatch{} = true).toObject());
+  fieldPatchValue3.ensure_map()[asValueStruct<type::binary_t>("a")] =
       boolPatchValue;
-  fieldPatchValue3.mapValue_ref().ensure()[asValueStruct<type::binary_t>("b")] =
+  fieldPatchValue3.ensure_map()[asValueStruct<type::binary_t>("b")] =
       objectPatchValue;
-  nestedPatchValue.objectValue_ref() =
-      makePatch(op::PatchOp::PatchPrior, fieldPatchValue3);
-  mapPatch.mapValue_ref().ensure()[asValueStruct<type::binary_t>("key2")] =
+  nestedPatchValue.emplace_object(
+      makePatch(op::PatchOp::PatchPrior, fieldPatchValue3));
+  mapPatch.ensure_map()[asValueStruct<type::binary_t>("key2")] =
       nestedPatchValue;
   auto patchObj = makePatch(op::PatchOp::PatchAfter, mapPatch);
 
@@ -1506,10 +1469,10 @@ TEST_F(PatchTest, extractMaskViewFromPatchNested) {
 TEST_F(PatchTest, extractMaskViewFromPatchEdgeCase) {
   // patch = Patch{1: Put{true}}
   Value boolPatch;
-  boolPatch.objectValue_ref() =
-      makePatch(op::PatchOp::Put, asValueStruct<type::bool_t>(true));
+  boolPatch.emplace_object(
+      makePatch(op::PatchOp::Put, asValueStruct<type::bool_t>(true)));
   Value objPatch;
-  objPatch.objectValue_ref().ensure()[FieldId{1}] = boolPatch;
+  objPatch.ensure_object()[FieldId{1}] = boolPatch;
   Object patchObj = makePatch(op::PatchOp::PatchAfter, objPatch);
   // Add noops (this should not make the extractedMask allMask).
   patchObj = patchAddOperation(
@@ -1533,10 +1496,10 @@ TEST_F(PatchTest, extractMaskViewFromPatchFieldPatch) {
   // Test the case when writeMask is allMask but needs to process FieldPatch.
   // patch = Clear, Patch{1: Put{true}}
   Value boolPatch;
-  boolPatch.objectValue_ref() =
-      makePatch(op::PatchOp::Put, asValueStruct<type::bool_t>(true));
+  boolPatch.emplace_object(
+      makePatch(op::PatchOp::Put, asValueStruct<type::bool_t>(true)));
   Value objPatch;
-  objPatch.objectValue_ref().ensure()[FieldId{1}] = boolPatch;
+  objPatch.ensure_object()[FieldId{1}] = boolPatch;
   Object patchObj = makePatch(op::PatchOp::PatchAfter, objPatch);
   patchObj = patchAddOperation(
       std::move(patchObj),
@@ -1561,16 +1524,15 @@ TEST_F(PatchTest, extractMaskFromPatchInvalidMapMaskKey) {
 TEST_F(PatchTest, ApplyPatchToSerializedData) {
   // patch = Patch{1: mapPatch{"key": Put{"foo"}}}
   Value fieldPatchValue;
-  fieldPatchValue.objectValue_ref() =
-      makePatch(op::PatchOp::Put, asValueStruct<type::binary_t>("foo"));
+  fieldPatchValue.emplace_object(
+      makePatch(op::PatchOp::Put, asValueStruct<type::binary_t>("foo")));
   Value mapPatchValue;
-  mapPatchValue.mapValue_ref().ensure()[asValueStruct<type::binary_t>("key")] =
+  mapPatchValue.ensure_map()[asValueStruct<type::binary_t>("key")] =
       fieldPatchValue;
   Value mapPatch;
-  mapPatch.objectValue_ref() =
-      makePatch(op::PatchOp::PatchAfter, mapPatchValue);
+  mapPatch.emplace_object(makePatch(op::PatchOp::PatchAfter, mapPatchValue));
   Value objPatch;
-  objPatch.objectValue_ref().ensure()[FieldId{1}] = mapPatch;
+  objPatch.ensure_object()[FieldId{1}] = mapPatch;
   Object patchObj = makePatch(op::PatchOp::PatchAfter, objPatch);
 
   // obj{1: map{"key": "string",
@@ -1579,9 +1541,9 @@ TEST_F(PatchTest, ApplyPatchToSerializedData) {
   Object obj;
   obj[FieldId{1}] = asValueStruct<type::map<type::binary_t, type::binary_t>>(
       {{"key", "string"}, {"foo", "bar"}});
-  obj[FieldId{2}].i32Value_ref() = 2;
+  obj[FieldId{2}].emplace_i32(2);
   Value value;
-  value.objectValue_ref() = obj;
+  value.emplace_object(obj);
 
   auto original = protocol::serializeObject<CompactProtocolWriter>(obj);
   auto serialized = applyPatchToSerializedData<type::StandardProtocol::Compact>(
@@ -1589,7 +1551,7 @@ TEST_F(PatchTest, ApplyPatchToSerializedData) {
   Object modifiedObj = parseObject<CompactProtocolReader>(*serialized);
   // Compare with directly applying the patch to entire object.
   applyPatch(patchObj, value);
-  EXPECT_EQ(modifiedObj, *value.objectValue_ref());
+  EXPECT_EQ(modifiedObj, value.as_object());
 }
 
 TEST_F(PatchTest, ApplyGeneratedPatchToSerializedData) {
@@ -1622,7 +1584,7 @@ TEST_F(PatchTest, ApplyGeneratedPatchToSerializedData) {
   Object modifiedObj = parseObject<CompactProtocolReader>(*serialized);
   // Compare with directly applying the patch to entire object.
   applyPatch(patchObject, valueObject);
-  EXPECT_EQ(modifiedObj, *valueObject.objectValue_ref());
+  EXPECT_EQ(modifiedObj, valueObject.as_object());
 }
 
 TEST(Patch, ManuallyConstruct) {

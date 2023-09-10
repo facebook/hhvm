@@ -42,12 +42,12 @@ bool containsId(const T& t, Id id) {
 
 // call clear based on the type of the value.
 void clear(MaskRef ref, Value& value) {
-  if (value.objectValue_ref()) {
-    ref.clear(value.objectValue_ref().value());
+  if (value.is_object()) {
+    ref.clear(value.as_object());
     return;
   }
-  if (value.mapValue_ref()) {
-    ref.clear(*value.mapValue_ref());
+  if (value.is_map()) {
+    ref.clear(value.as_map());
     return;
   }
   folly::throw_exception<std::runtime_error>(
@@ -70,12 +70,12 @@ void clear_impl(MaskRef ref, T& obj, Id id, Value& value) {
 
 // call copy based on the type of the value.
 void copy(MaskRef ref, const Value& src, Value& dst) {
-  if (src.objectValue_ref() && dst.objectValue_ref()) {
-    ref.copy(src.objectValue_ref().value(), dst.objectValue_ref().value());
+  if (src.is_object() && dst.is_object()) {
+    ref.copy(src.as_object(), dst.as_object());
     return;
   }
-  if (src.mapValue_ref() && dst.mapValue_ref()) {
-    ref.copy(src.mapValue_ref().value(), dst.mapValue_ref().value());
+  if (src.is_map() && dst.is_map()) {
+    ref.copy(src.as_map(), dst.as_map());
     return;
   }
   folly::throw_exception<std::runtime_error>(
@@ -115,17 +115,17 @@ void copy_impl(MaskRef ref, const T& src, T& dst, Id id) {
   }
   // Field only exists in src. Need to construct object/ map only if there's
   // a field to add.
-  if (src.at(id).objectValue_ref()) {
+  if (src.at(id).is_object()) {
     Object newObject;
-    ref.copy(src.at(id).objectValue_ref().value(), newObject);
+    ref.copy(src.at(id).as_object(), newObject);
     if (!newObject.empty()) {
       dst[id].ensure_object() = std::move(newObject);
     }
     return;
   }
-  if (src.at(id).mapValue_ref()) {
+  if (src.at(id).is_map()) {
     folly::F14FastMap<Value, Value> newMap;
-    ref.copy(src.at(id).mapValue_ref().value(), newMap);
+    ref.copy(src.at(id).as_map(), newMap);
     if (!newMap.empty()) {
       dst[id].ensure_map() = std::move(newMap);
     }

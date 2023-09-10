@@ -636,7 +636,7 @@ TEST(FieldMaskTest, SchemalessClear) {
   protocol::clear(mask, barObject);
 
   ASSERT_TRUE(barObject.contains(FieldId{1}));
-  protocol::Object& foo = barObject.at(FieldId{1}).objectValue_ref().value();
+  protocol::Object& foo = barObject.at(FieldId{1}).as_object();
   ASSERT_TRUE(foo.contains(FieldId{1}));
   ASSERT_TRUE(foo.at(FieldId{1}).objectValue_ref()->contains(FieldId{1}));
   EXPECT_EQ(foo.at(FieldId{1}).objectValue_ref()->at(FieldId{1}).as_i32(), 30);
@@ -940,7 +940,7 @@ TEST(FieldMaskTest, SchemalessCopyNestedRecursive) {
   //         2: 30},
   //     2: "40"}
   ASSERT_TRUE(dst.contains(FieldId{1}));
-  protocol::Object& nested = dst.at(FieldId{1}).objectValue_ref().value();
+  protocol::Object& nested = dst.at(FieldId{1}).as_object();
   ASSERT_TRUE(nested.contains(FieldId{1}));
   EXPECT_EQ(nested.at(FieldId{1}).as_i32(), 10);
   ASSERT_TRUE(nested.contains(FieldId{2}));
@@ -970,7 +970,7 @@ TEST(FieldMaskTest, SchemalessCopyNestedAddField) {
   testCopy(m1, barObject, dst1);
   // dst1 becomes dst1{1: {2: 20}, 2: "40"}
   ASSERT_TRUE(dst1.contains(FieldId{1}));
-  protocol::Object& nested = dst1.at(FieldId{1}).objectValue_ref().value();
+  protocol::Object& nested = dst1.at(FieldId{1}).as_object();
   ASSERT_TRUE(nested.contains(FieldId{2}));
   EXPECT_EQ(nested.at(FieldId{2}).as_i32(), 20);
   ASSERT_FALSE(nested.contains(FieldId{1}));
@@ -1016,7 +1016,7 @@ TEST(FieldMaskTest, SchemalessCopyNestedRemoveField) {
   testCopy(m, src, barObject);
   // bar becomes bar{1: foo{1: 10}} (doesn't delete foo object).
   ASSERT_TRUE(barObject.contains(FieldId{1}));
-  protocol::Object& nested = barObject.at(FieldId{1}).objectValue_ref().value();
+  protocol::Object& nested = barObject.at(FieldId{1}).as_object();
   ASSERT_TRUE(nested.contains(FieldId{1}));
   EXPECT_EQ(nested.at(FieldId{1}).as_i32(), 10);
   ASSERT_FALSE(nested.contains(FieldId{2}));

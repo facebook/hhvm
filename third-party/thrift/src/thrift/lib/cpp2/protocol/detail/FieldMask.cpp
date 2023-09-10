@@ -77,16 +77,16 @@ ArrayKey getArrayKeyFromValue(const Value& v) {
 
 MapId getMapIdFromValue(const Value& v) {
   if (v.is_byte()) {
-    return MapId{v.byteValue_ref().value()};
+    return MapId{v.as_byte()};
   }
   if (v.is_i16()) {
-    return MapId{v.i16Value_ref().value()};
+    return MapId{v.as_i16()};
   }
   if (v.is_i32()) {
-    return MapId{v.i32Value_ref().value()};
+    return MapId{v.as_i32()};
   }
   if (v.is_i64()) {
-    return MapId{v.i64Value_ref().value()};
+    return MapId{v.as_i64()};
   }
   folly::throw_exception<std::runtime_error>(
       "Value contains a non-integer key.");
@@ -94,10 +94,10 @@ MapId getMapIdFromValue(const Value& v) {
 
 std::string getStringFromValue(const Value& v) {
   if (v.is_binary()) {
-    return v.binaryValue_ref().value().to<std::string>();
+    return v.as_binary().to<std::string>();
   }
   if (v.is_string()) {
-    return v.stringValue_ref().value();
+    return v.as_string();
   }
   folly::throw_exception<std::runtime_error>(
       "Value contains a non-string key.");

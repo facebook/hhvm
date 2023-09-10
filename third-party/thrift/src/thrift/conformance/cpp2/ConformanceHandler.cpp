@@ -42,7 +42,7 @@ void ConformanceHandler::patch(
   auto value = AnyRegistry::generated().load<protocol::Value>(*req->value());
   auto patch = AnyRegistry::generated().load<protocol::Value>(*req->patch());
 
-  protocol::applyPatch(*patch.objectValue_ref(), value);
+  protocol::applyPatch(patch.as_object(), value);
 
   res.result() = AnyRegistry::generated().store(
       std::move(value), getProtocol(*req->value()));

@@ -145,7 +145,7 @@ template <class T>
   protocol::Value v;
   ::apache::thrift::protocol::detail::ObjectWriter writer{&v};
   t.write(&writer);
-  return std::move(*v.objectValue_ref());
+  return std::move(v.as_object());
 }
 
 template <class TT>

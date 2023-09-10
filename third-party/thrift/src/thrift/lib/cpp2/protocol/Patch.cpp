@@ -127,36 +127,36 @@ void ApplyPatch::operator()(const Object& patch, protocol::Value& value) const {
   // TODO(afuller): Consider using visitation instead.
   switch (value.getType()) {
     case Value::Type::boolValue:
-      return operator()(patch, *value.boolValue_ref());
+      return operator()(patch, value.as_bool());
     case Value::Type::byteValue:
-      return operator()(patch, *value.byteValue_ref());
+      return operator()(patch, value.as_byte());
     case Value::Type::i16Value:
-      return operator()(patch, *value.i16Value_ref());
+      return operator()(patch, value.as_i16());
     case Value::Type::i32Value:
-      return operator()(patch, *value.i32Value_ref());
+      return operator()(patch, value.as_i32());
     case Value::Type::i64Value:
-      return operator()(patch, *value.i64Value_ref());
+      return operator()(patch, value.as_i64());
     case Value::Type::floatValue:
-      return operator()(patch, *value.floatValue_ref());
+      return operator()(patch, value.as_float());
     case Value::Type::doubleValue:
-      return operator()(patch, *value.doubleValue_ref());
+      return operator()(patch, value.as_double());
     case Value::Type::stringValue: {
       auto binaryValue = folly::IOBuf::wrapBufferAsValue(
-          value.stringValue_ref()->data(), value.stringValue_ref()->size());
+          value.as_string().data(), value.as_string().size());
       operator()(patch, binaryValue);
-      value.stringValue_ref() = binaryValue.to<std::string>();
+      value.emplace_string(binaryValue.to<std::string>());
       return;
     }
     case Value::Type::binaryValue:
-      return operator()(patch, *value.binaryValue_ref());
+      return operator()(patch, value.as_binary());
     case Value::Type::listValue:
-      return operator()(patch, *value.listValue_ref());
+      return operator()(patch, value.as_list());
     case Value::Type::setValue:
-      return operator()(patch, *value.setValue_ref());
+      return operator()(patch, value.as_set());
     case Value::Type::mapValue:
-      return operator()(patch, *value.mapValue_ref());
+      return operator()(patch, value.as_map());
     case Value::Type::objectValue:
-      return operator()(patch, *value.objectValue_ref());
+      return operator()(patch, value.as_object());
     default:
       folly::throw_exception<std::runtime_error>(
           "Not Implemented type support.");
@@ -172,7 +172,7 @@ void ApplyPatch::operator()(const Object& patch, bool& value) const {
     return; // Ignore all other ops.
   }
   if (auto* clear = findOp(patch, PatchOp::Clear);
-      clear != nullptr && *clear->boolValue_ref()) {
+      clear != nullptr && clear->as_bool()) {
     value = false;
   }
   if (auto* invert = findOp(patch, PatchOp::Put)) { // Put is Invert for bool.
@@ -357,7 +357,7 @@ void ApplyPatch::operator()(
          *validated_map(patchFields, "patch/patchPrior")) {
       // Only patch values for fields that exist for now
       if (auto* field = folly::get_ptr(value, keyv)) {
-        applyPatch(*valv.objectValue_ref(), *field);
+        applyPatch(valv.as_object(), *field);
       }
     }
   };
@@ -424,7 +424,7 @@ void ApplyPatch::operator()(const Object& patch, Object& value) const {
     for (const auto& [id, field_value] : *obj->members()) {
       // Only patch values for fields that exist for now
       if (auto* field = folly::get_ptr(*value.members(), id)) {
-        applyPatch(*field_value.objectValue_ref(), *field);
+        applyPatch(field_value.as_object(), *field);
       }
     }
   };
@@ -627,7 +627,7 @@ ExtractedMasks extractMaskFromPatch(const protocol::Object& patch, bool view) {
   // Put is a read-write operation if not a map patch. Otherwise add keys to
   // mask.
   if (auto* value = findOp(patch, PatchOp::Put)) {
-    if (value->mapValue_ref()) {
+    if (value->is_map()) {
       insertFieldsToMask(masks, *value, false, view);
     } else if (!isIntrinsicDefault(*value)) {
       return {allMask(), allMask()};

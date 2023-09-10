@@ -289,7 +289,7 @@ protocol::Object setObjectMemeber(
 
 protocol::Value wrapObjectInValue(protocol::Object object) {
   protocol::Value result;
-  result.objectValue_ref() = object;
+  result.emplace_object(object);
   return result;
 }
 
@@ -613,7 +613,7 @@ Test createMapPatchTest(const AnyRegistry& registry, const Protocol& protocol) {
           (op::patch_type<TT>() = toValue<TT>(newValue)).toThrift());
       Container expected = {{key.value, newValue}};
       protocol::Value patchValue;
-      patchValue.mapValue_ref().ensure()[keyValue] = keyValuePatch;
+      patchValue.ensure_map()[keyValue] = keyValuePatch;
 
       auto& patchPriorCase = test.testCases()->emplace_back();
       patchPriorCase.name() = makeTestName(key, "patch_prior");

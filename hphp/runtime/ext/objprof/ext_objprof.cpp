@@ -120,7 +120,7 @@ std::pair<int, double> tvGetSize(TypedValue tv, ObjprofState& env);
 
 std::pair<int, double> getObjSize(
   const ObjectData* obj, ObjprofState& env,
-  std::unordered_map<ClassProp, ObjprofMetrics>* histogram
+  hphp_fast_map<ClassProp, ObjprofMetrics>* histogram
 );
 
 std::string pathString(const ObjprofStack& stack, const char* sep) {
@@ -175,7 +175,7 @@ bool isObjprofRoot(
  */
 std::pair<int, double> sizeOfArray(
   const ArrayData* ad, ObjprofState& env, Class* cls,
-  std::unordered_map<ClassProp, ObjprofMetrics>* histogram
+  hphp_fast_map<ClassProp, ObjprofMetrics>* histogram
 ) {
   auto ptr_begin = env.val_stack.begin();
   auto ptr_end = env.val_stack.end();
@@ -474,7 +474,7 @@ std::pair<int, double> tvGetSize(TypedValue tv, ObjprofState& env) {
 
 std::pair<int, double> getObjSize(
   const ObjectData* obj, ObjprofState& env,
-  std::unordered_map<ClassProp, ObjprofMetrics>* histogram
+  hphp_fast_map<ClassProp, ObjprofMetrics>* histogram
 ) {
   Class* cls = obj->getVMClass();
 
@@ -624,7 +624,7 @@ Array HHVM_FUNCTION(objprof_get_data,
   int64_t flags = ObjprofFlags::DEFAULT,
   const Array& exclude_list = Array()
 ) {
-  std::unordered_map<ClassProp, ObjprofMetrics> histogram;
+  hphp_fast_map<ClassProp, ObjprofMetrics> histogram;
   UNUSED auto objprof_props_mode = (flags & ObjprofFlags::PER_PROPERTY) != 0;
 
   // Create a set of std::strings from the exclude_list provided. This de-dups
@@ -699,7 +699,7 @@ Array HHVM_FUNCTION(objprof_get_paths,
   int64_t flags = ObjprofFlags::DEFAULT,
   const Array& exclude_list = Array()
 ) {
-  std::unordered_map<ClassProp, ObjprofMetrics> histogram;
+  hphp_fast_map<ClassProp, ObjprofMetrics> histogram;
   PathsToClass pathsToClass;
 
   // Create a set of std::strings from the exclude_list provided. This de-dups

@@ -882,11 +882,12 @@ string t_py_generator::render_fastproto_includes() {
          "  pass\n"
          "\n"
          /*
-    Given a sparse thrift_spec generate a full thrift_spec as expected by fastproto.
-    The old form is a tuple where every position is the same as the thrift field id.
-    The new form is just a tuple of the used field ids without all the None padding, but its cheaper bytecode wise.
-    There is a bug in python 3.10 that causes large tuples to use more memory and generate larger .pyc than <=3.9.
-    See: https://github.com/python/cpython/issues/109036
+    Given a sparse thrift_spec generate a full thrift_spec as expected by
+    fastproto. The old form is a tuple where every position is the same as the
+    thrift field id. The new form is just a tuple of the used field ids without
+    all the None padding, but its cheaper bytecode wise. There is a bug in
+    python 3.10 that causes large tuples to use more memory and generate larger
+    .pyc than <=3.9. See: https://github.com/python/cpython/issues/109036
           */
          "def __EXPAND_THRIFT_SPEC(spec):\n"
          "    next_id = 0\n"

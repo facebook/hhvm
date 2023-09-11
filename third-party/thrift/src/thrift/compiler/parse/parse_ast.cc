@@ -650,21 +650,28 @@ class ast_builder : public parser_actions {
       const identifier& name,
       t_field_list params,
       std::unique_ptr<t_throws> throws) override {
-    auto types = std::vector<t_type_ref>();
     auto return_name = ret.name.str;
+    const t_interaction* interaction = nullptr;
+    t_type_ref return_type = t_type_ref::from_ptr(ret.type);
     if (size_t size = return_name.size()) {
       // Handle an interaction or return type name.
-      types.push_back(
-          on_type({ret.name.loc, ret.name.loc + size}, ret.name.str, {}));
-    }
-    if (ret.type) {
-      types.push_back(t_type_ref::from_ptr(ret.type));
+      interaction = scope_->find_interaction(program_.scope_name(return_name));
+      if (interaction) {
+        // Do nothing.
+      } else if (ret.type) {
+        diags_.error(
+            ret.name.loc, "'{}' does not name an interaction", return_name);
+      } else {
+        return_type =
+            on_type({ret.name.loc, ret.name.loc + size}, return_name, {});
+      }
     }
     auto function = std::make_unique<t_function>(
         &program_,
-        std::move(types),
+        return_type,
         std::move(ret.sink_or_stream),
-        fmt::to_string(name.str));
+        fmt::to_string(name.str),
+        interaction);
     function->set_qualifier(qual);
     set_fields(function->params(), std::move(params));
     function->set_exceptions(std::move(throws));
@@ -728,15 +735,12 @@ class ast_builder : public parser_actions {
 
   std::unique_ptr<t_function> on_performs(
       source_range range, const identifier& interaction_name) override {
-    auto type = on_type(range, interaction_name.str, {});
-    std::string name = type.get_type()
-        ? "create" + fmt::to_string(interaction_name.str)
-        : "<interaction placeholder>";
-    auto function = std::make_unique<t_function>(
-        &program_, std::move(type), std::move(name));
-    function->set_src_range(range);
-    function->set_is_interaction_constructor();
-    return function;
+    auto ret = return_clause();
+    ret.name = interaction_name;
+    auto name = fmt::format("create{}", interaction_name.str);
+    auto fun = on_function(range, {}, {}, std::move(ret), {name, {}}, {}, {});
+    fun->set_is_interaction_constructor();
+    return fun;
   }
 
   std::unique_ptr<t_throws> on_throws(t_field_list exceptions) override {

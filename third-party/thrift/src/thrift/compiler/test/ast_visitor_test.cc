@@ -388,10 +388,11 @@ TEST(AstVisitorTest, Sink) {
 
   auto program = t_program("path/to/program.thrift");
   auto service = std::make_unique<t_service>(&program, "Service");
-  service->add_function(std::make_unique<t_function>(
-      &program, std::vector<t_type_ref>(), std::move(sink1), "f1"));
-  service->add_function(std::make_unique<t_function>(
-      &program, std::vector<t_type_ref>(), std::move(sink2), "f2"));
+  auto ret = t_type_ref();
+  service->add_function(
+      std::make_unique<t_function>(&program, ret, std::move(sink1), "f1"));
+  service->add_function(
+      std::make_unique<t_function>(&program, ret, std::move(sink2), "f2"));
   program.add_service(std::move(service));
 
   auto visitor = ast_visitor();
@@ -419,10 +420,11 @@ TEST(AstVisitorTest, StreamResponse) {
 
   auto program = t_program("path/to/program.thrift");
   auto service = std::make_unique<t_service>(&program, "Service");
-  service->add_function(std::make_unique<t_function>(
-      &program, std::vector<t_type_ref>(), std::move(stream1), "f1"));
-  service->add_function(std::make_unique<t_function>(
-      &program, std::vector<t_type_ref>(), std::move(stream2), "f2"));
+  auto ret = t_type_ref();
+  service->add_function(
+      std::make_unique<t_function>(&program, ret, std::move(stream1), "f1"));
+  service->add_function(
+      std::make_unique<t_function>(&program, ret, std::move(stream2), "f2"));
   program.add_service(std::move(service));
 
   auto visitor = ast_visitor();

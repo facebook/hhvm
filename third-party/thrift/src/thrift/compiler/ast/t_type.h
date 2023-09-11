@@ -183,8 +183,7 @@ class t_type : public t_named {
  * Type references are different from other references because they can be
  * annotated and unresolved.
  *
- * TODO(afuller): Make t_type_ref support an 'unresolved' state, where only the
- * ident is known, and remove placeholder typedefs.
+ * TODO: Make an unresolved reference directly representable in the AST.
  */
 class t_type_ref final {
  public:
@@ -232,9 +231,7 @@ class t_type_ref final {
   const t_type* type_ = nullptr;
   // The placeholder we have write access to, if we need to resolve the type
   // before derefing.
-  // Note: It is not thread safe to access this value if 'this' is const.
-  // TODO(afuller): Move all lazy type resolution logic here, and delete
-  // t_placeholder_typedef.
+  // Note: It is not thread safe to access this value if 'this' is const.s
   t_placeholder_typedef* unresolved_type_ = nullptr;
   explicit t_type_ref(
       const t_type& type, t_placeholder_typedef& unresolved_type)

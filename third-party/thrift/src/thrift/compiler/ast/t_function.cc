@@ -16,14 +16,30 @@
 
 #include <thrift/compiler/ast/t_function.h>
 
-#include <stdexcept>
-
+#include <thrift/compiler/ast/t_interaction.h>
 #include <thrift/compiler/ast/t_sink.h>
 #include <thrift/compiler/ast/t_stream.h>
 
 namespace apache {
 namespace thrift {
 namespace compiler {
+
+t_function::t_function(
+    t_program* program,
+    t_type_ref return_type,
+    std::unique_ptr<t_type> sink_or_stream,
+    std::string name,
+    const t_interaction* interaction)
+    : t_named(program, std::move(name)),
+      sink_or_stream_(std::move(sink_or_stream)),
+      paramlist_(std::make_unique<t_paramlist>(program)) {
+  if (interaction) {
+    return_types_.push_back(t_type_ref::from_ptr(interaction));
+  }
+  if (return_type) {
+    return_types_.push_back(return_type);
+  }
+}
 
 t_function::t_function(
     t_type_ref return_type,

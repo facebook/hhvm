@@ -33,6 +33,8 @@ namespace apache {
 namespace thrift {
 namespace compiler {
 
+class t_interaction;
+
 enum class t_function_qualifier {
   unspecified = 0,
   one_way,
@@ -61,13 +63,10 @@ class t_function final : public t_named {
 
   t_function(
       t_program* program,
-      std::vector<t_type_ref> return_types,
+      t_type_ref return_type,
       std::unique_ptr<t_type> sink_or_stream,
-      std::string name)
-      : t_named(program, std::move(name)),
-        return_types_(std::move(return_types)),
-        sink_or_stream_(std::move(sink_or_stream)),
-        paramlist_(std::make_unique<t_paramlist>(program)) {}
+      std::string name,
+      const t_interaction* interaction = nullptr);
 
   const t_type* return_type() const {
     return response_pos_ != -1 ? return_types_[response_pos_].get_type()

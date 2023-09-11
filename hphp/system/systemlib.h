@@ -214,7 +214,7 @@ struct StringLiteral {
 template<StringLiteral NAME>
 struct ClassLoader {
   static Class* classof() {
-    struct Class* cls = nullptr;
+    static Class* cls = nullptr;
     return SystemLib::classLoad(className().get(), cls);
   }
 

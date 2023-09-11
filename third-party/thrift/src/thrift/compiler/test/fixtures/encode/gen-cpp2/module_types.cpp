@@ -87,11 +87,7 @@ bool Foo::__fbthrift_is_empty() const {
 }
 
 bool Foo::operator==(FOLLY_MAYBE_UNUSED const Foo& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.field_ref() == rhs.field_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool Foo::operator<(FOLLY_MAYBE_UNUSED const Foo& rhs) const {
@@ -192,11 +188,7 @@ bool Bar::__fbthrift_is_empty() const {
 }
 
 bool Bar::operator==(FOLLY_MAYBE_UNUSED const Bar& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.list_field_ref() == rhs.list_field_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool Bar::operator<(FOLLY_MAYBE_UNUSED const Bar& rhs) const {
@@ -310,14 +302,7 @@ bool Baz::__fbthrift_is_empty() const {
 }
 
 bool Baz::operator==(FOLLY_MAYBE_UNUSED const Baz& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.list_field_ref() == rhs.list_field_ref())) {
-    return false;
-  }
-  if (!(lhs.nested_list_field_ref() == rhs.nested_list_field_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool Baz::operator<(FOLLY_MAYBE_UNUSED const Baz& rhs) const {
@@ -519,44 +504,7 @@ bool OpEncodeStruct::__fbthrift_is_empty() const {
 }
 
 bool OpEncodeStruct::operator==(FOLLY_MAYBE_UNUSED const OpEncodeStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.int_field_ref() == rhs.int_field_ref())) {
-    return false;
-  }
-  if (!(lhs.enum_field_ref() == rhs.enum_field_ref())) {
-    return false;
-  }
-  if (!(lhs.foo_field_ref() == rhs.foo_field_ref())) {
-    return false;
-  }
-  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::test::TemplatedTestAdapter>(lhs.__fbthrift_field_adapted_field, rhs.__fbthrift_field_adapted_field)) {
-    return false;
-  }
-  if (!(lhs.list_field_ref() == rhs.list_field_ref())) {
-    return false;
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.list_shared_ptr_field_ref(), rhs.list_shared_ptr_field_ref()))) {
-    return false;
-  }
-  if (!(lhs.list_cpp_type_field_ref() == rhs.list_cpp_type_field_ref())) {
-    return false;
-  }
-  if (!(lhs.set_field_ref() == rhs.set_field_ref())) {
-    return false;
-  }
-  if (!(lhs.map_field_ref() == rhs.map_field_ref())) {
-    return false;
-  }
-  if (!(lhs.nested_field_ref() == rhs.nested_field_ref())) {
-    return false;
-  }
-  if (!(lhs.bar_field_ref() == rhs.bar_field_ref())) {
-    return false;
-  }
-  if (::apache::thrift::adapt_detail::not_equal<::FieldAdapter>(lhs.__fbthrift_field_adapted_list_field, rhs.__fbthrift_field_adapted_list_field)) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool OpEncodeStruct::operator<(FOLLY_MAYBE_UNUSED const OpEncodeStruct& rhs) const {

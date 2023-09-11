@@ -83,11 +83,7 @@ bool InitialResponse::__fbthrift_is_empty() const {
 }
 
 bool InitialResponse::operator==(FOLLY_MAYBE_UNUSED const InitialResponse& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.content_ref() == rhs.content_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool InitialResponse::operator<(FOLLY_MAYBE_UNUSED const InitialResponse& rhs) const {
@@ -188,11 +184,7 @@ bool FinalResponse::__fbthrift_is_empty() const {
 }
 
 bool FinalResponse::operator==(FOLLY_MAYBE_UNUSED const FinalResponse& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.content_ref() == rhs.content_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool FinalResponse::operator<(FOLLY_MAYBE_UNUSED const FinalResponse& rhs) const {
@@ -293,11 +285,7 @@ bool SinkPayload::__fbthrift_is_empty() const {
 }
 
 bool SinkPayload::operator==(FOLLY_MAYBE_UNUSED const SinkPayload& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.content_ref() == rhs.content_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool SinkPayload::operator<(FOLLY_MAYBE_UNUSED const SinkPayload& rhs) const {
@@ -398,11 +386,7 @@ bool CompatibleWithKeywordSink::__fbthrift_is_empty() const {
 }
 
 bool CompatibleWithKeywordSink::operator==(FOLLY_MAYBE_UNUSED const CompatibleWithKeywordSink& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.sink_ref() == rhs.sink_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool CompatibleWithKeywordSink::operator<(FOLLY_MAYBE_UNUSED const CompatibleWithKeywordSink& rhs) const {
@@ -503,11 +487,7 @@ bool InitialException::__fbthrift_is_empty() const {
 }
 
 bool InitialException::operator==(FOLLY_MAYBE_UNUSED const InitialException& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.reason_ref() == rhs.reason_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool InitialException::operator<(FOLLY_MAYBE_UNUSED const InitialException& rhs) const {
@@ -608,11 +588,7 @@ bool SinkException1::__fbthrift_is_empty() const {
 }
 
 bool SinkException1::operator==(FOLLY_MAYBE_UNUSED const SinkException1& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.reason_ref() == rhs.reason_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool SinkException1::operator<(FOLLY_MAYBE_UNUSED const SinkException1& rhs) const {
@@ -714,11 +690,7 @@ bool SinkException2::__fbthrift_is_empty() const {
 }
 
 bool SinkException2::operator==(FOLLY_MAYBE_UNUSED const SinkException2& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.reason_ref() == rhs.reason_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool SinkException2::operator<(FOLLY_MAYBE_UNUSED const SinkException2& rhs) const {

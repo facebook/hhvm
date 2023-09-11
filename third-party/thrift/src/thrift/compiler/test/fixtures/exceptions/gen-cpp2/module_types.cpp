@@ -83,11 +83,7 @@ bool Fiery::__fbthrift_is_empty() const {
 }
 
 bool Fiery::operator==(FOLLY_MAYBE_UNUSED const Fiery& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.message_ref() == rhs.message_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool Fiery::operator<(FOLLY_MAYBE_UNUSED const Fiery& rhs) const {
@@ -191,11 +187,7 @@ bool Serious::__fbthrift_is_empty() const {
 }
 
 bool Serious::operator==(FOLLY_MAYBE_UNUSED const Serious& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.sonnet_ref() == rhs.sonnet_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool Serious::operator<(FOLLY_MAYBE_UNUSED const Serious& rhs) const {
@@ -305,14 +297,7 @@ bool ComplexFieldNames::__fbthrift_is_empty() const {
 }
 
 bool ComplexFieldNames::operator==(FOLLY_MAYBE_UNUSED const ComplexFieldNames& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.error_message_ref() == rhs.error_message_ref())) {
-    return false;
-  }
-  if (!(lhs.internal_error_message_ref() == rhs.internal_error_message_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool ComplexFieldNames::operator<(FOLLY_MAYBE_UNUSED const ComplexFieldNames& rhs) const {
@@ -426,14 +411,7 @@ bool CustomFieldNames::__fbthrift_is_empty() const {
 }
 
 bool CustomFieldNames::operator==(FOLLY_MAYBE_UNUSED const CustomFieldNames& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.error_message_ref() == rhs.error_message_ref())) {
-    return false;
-  }
-  if (!(lhs.internal_error_message_ref() == rhs.internal_error_message_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool CustomFieldNames::operator<(FOLLY_MAYBE_UNUSED const CustomFieldNames& rhs) const {
@@ -548,14 +526,7 @@ bool ExceptionWithPrimitiveField::__fbthrift_is_empty() const {
 }
 
 bool ExceptionWithPrimitiveField::operator==(FOLLY_MAYBE_UNUSED const ExceptionWithPrimitiveField& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.message_ref() == rhs.message_ref())) {
-    return false;
-  }
-  if (!(lhs.error_code_ref() == rhs.error_code_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool ExceptionWithPrimitiveField::operator<(FOLLY_MAYBE_UNUSED const ExceptionWithPrimitiveField& rhs) const {
@@ -666,14 +637,7 @@ bool ExceptionWithStructuredAnnotation::__fbthrift_is_empty() const {
 }
 
 bool ExceptionWithStructuredAnnotation::operator==(FOLLY_MAYBE_UNUSED const ExceptionWithStructuredAnnotation& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.message_field_ref() == rhs.message_field_ref())) {
-    return false;
-  }
-  if (!(lhs.error_code_ref() == rhs.error_code_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool ExceptionWithStructuredAnnotation::operator<(FOLLY_MAYBE_UNUSED const ExceptionWithStructuredAnnotation& rhs) const {
@@ -767,8 +731,7 @@ bool Banal::__fbthrift_is_empty() const {
 }
 
 bool Banal::operator==(FOLLY_MAYBE_UNUSED const Banal& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool Banal::operator<(FOLLY_MAYBE_UNUSED const Banal& rhs) const {

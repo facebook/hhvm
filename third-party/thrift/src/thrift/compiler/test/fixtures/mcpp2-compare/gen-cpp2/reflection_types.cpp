@@ -64,11 +64,7 @@ bool ReflectionStruct::__fbthrift_is_empty() const {
 }
 
 bool ReflectionStruct::operator==(FOLLY_MAYBE_UNUSED const ReflectionStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.fieldA_ref() == rhs.fieldA_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool ReflectionStruct::operator<(FOLLY_MAYBE_UNUSED const ReflectionStruct& rhs) const {

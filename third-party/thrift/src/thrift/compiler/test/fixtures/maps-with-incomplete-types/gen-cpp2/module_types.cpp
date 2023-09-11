@@ -83,11 +83,7 @@ bool A::__fbthrift_is_empty() const {
 }
 
 bool A::operator==(FOLLY_MAYBE_UNUSED const A& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.some_map_ref() == rhs.some_map_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 const std::unordered_map<::std::int32_t, ::apache::thrift::test::B>* A::get_some_map() const& {
@@ -169,11 +165,7 @@ bool B::__fbthrift_is_empty() const {
 }
 
 bool B::operator==(FOLLY_MAYBE_UNUSED const B& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.field_ref() == rhs.field_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool B::operator<(FOLLY_MAYBE_UNUSED const B& rhs) const {

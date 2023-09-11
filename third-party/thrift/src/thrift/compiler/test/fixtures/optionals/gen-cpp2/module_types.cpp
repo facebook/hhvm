@@ -92,20 +92,7 @@ bool Color::__fbthrift_is_empty() const {
 }
 
 bool Color::operator==(FOLLY_MAYBE_UNUSED const Color& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.red_ref() == rhs.red_ref())) {
-    return false;
-  }
-  if (!(lhs.green_ref() == rhs.green_ref())) {
-    return false;
-  }
-  if (!(lhs.blue_ref() == rhs.blue_ref())) {
-    return false;
-  }
-  if (!(lhs.alpha_ref() == rhs.alpha_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool Color::operator<(FOLLY_MAYBE_UNUSED const Color& rhs) const {
@@ -239,23 +226,7 @@ bool Vehicle::__fbthrift_is_empty() const {
 }
 
 bool Vehicle::operator==(FOLLY_MAYBE_UNUSED const Vehicle& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.color_ref() == rhs.color_ref())) {
-    return false;
-  }
-  if (!(lhs.licensePlate_ref() == rhs.licensePlate_ref())) {
-    return false;
-  }
-  if (!(lhs.description_ref() == rhs.description_ref())) {
-    return false;
-  }
-  if (!(lhs.name_ref() == rhs.name_ref())) {
-    return false;
-  }
-  if (!(lhs.hasAC_ref() == rhs.hasAC_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool Vehicle::operator<(FOLLY_MAYBE_UNUSED const Vehicle& rhs) const {
@@ -435,38 +406,7 @@ bool Person::__fbthrift_is_empty() const {
 }
 
 bool Person::operator==(FOLLY_MAYBE_UNUSED const Person& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.id_ref() == rhs.id_ref())) {
-    return false;
-  }
-  if (!(lhs.name_ref() == rhs.name_ref())) {
-    return false;
-  }
-  if (!(lhs.age_ref() == rhs.age_ref())) {
-    return false;
-  }
-  if (!(lhs.address_ref() == rhs.address_ref())) {
-    return false;
-  }
-  if (!(lhs.favoriteColor_ref() == rhs.favoriteColor_ref())) {
-    return false;
-  }
-  if (!(lhs.friends_ref() == rhs.friends_ref())) {
-    return false;
-  }
-  if (!(lhs.bestFriend_ref() == rhs.bestFriend_ref())) {
-    return false;
-  }
-  if (!(lhs.petNames_ref() == rhs.petNames_ref())) {
-    return false;
-  }
-  if (!(lhs.afraidOfAnimal_ref() == rhs.afraidOfAnimal_ref())) {
-    return false;
-  }
-  if (!(lhs.vehicles_ref() == rhs.vehicles_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool Person::operator<(FOLLY_MAYBE_UNUSED const Person& rhs) const {

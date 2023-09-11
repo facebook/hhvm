@@ -72,20 +72,7 @@ bool BasicTypes::__fbthrift_is_empty() const {
 }
 
 bool BasicTypes::operator==(FOLLY_MAYBE_UNUSED const BasicTypes& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.first_ref() == rhs.first_ref())) {
-    return false;
-  }
-  if (!(lhs.second_ref() == rhs.second_ref())) {
-    return false;
-  }
-  if (!(lhs.third_ref() == rhs.third_ref())) {
-    return false;
-  }
-  if (!(lhs.isTrue_ref() == rhs.isTrue_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool BasicTypes::operator<(FOLLY_MAYBE_UNUSED const BasicTypes& rhs) const {

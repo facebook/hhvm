@@ -15,7 +15,6 @@
  */
 
 #include <type_traits>
-#include <common/datastruct/hashtable/FBHashSet.h>
 #include <folly/portability/GTest.h>
 #include <folly/sorted_vector_types.h>
 #include <thrift/conformance/cpp2/internal/AnyStructSerializer.h>
@@ -548,8 +547,6 @@ void testDecodeContainers() {
   testDecode<Protocol, type::map<type::string_t, type::byte_t>>(
       folly::sorted_vector_map<std::string, int8_t>{
           {std::string("foo"), 1}, {std::string("foo"), 2}});
-  testDecode<Protocol, type::set<type::byte_t>>(
-      facebook::datastruct::FBHashSet<int8_t>{3, 1, 2});
 
   // Test if it skips when value type doesn't match.
   {

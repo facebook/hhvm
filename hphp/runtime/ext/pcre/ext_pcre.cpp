@@ -59,6 +59,11 @@ TypedValue HHVM_FUNCTION(preg_match,
                              nullptr, flags, offset));
 }
 
+Variant HHVM_FUNCTION(preg_get_error_message_if_invalid,
+                      const String& pattern) {
+  return preg_get_error_message_if_invalid(pattern);
+}
+
 TypedValue HHVM_FUNCTION(preg_match_with_error, StringArg pattern,
                          StringArg subject, Variant& error,
                          int64_t flags /* = 0 */, int64_t offset /* = 0 */) {
@@ -415,6 +420,7 @@ struct PcreExtension final : Extension {
     HHVM_FE(preg_grep);
     HHVM_FE(preg_grep_with_error);
     HHVM_FE(preg_match);
+    HHVM_FE(preg_get_error_message_if_invalid);
     HHVM_FE(preg_match_with_error);
     HHVM_FE(preg_match_with_matches);
     HHVM_FE(preg_match_with_matches_and_error);

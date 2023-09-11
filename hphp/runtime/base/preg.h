@@ -140,6 +140,8 @@ Variant preg_match_all(StringData* pattern, const StringData* subject,
                        Variant* matches = nullptr,
                        int flags = 0, int offset = 0);
 
+Variant preg_get_error_message_if_invalid(const String& pattern);
+
 Variant preg_replace_impl(const Variant& pattern, const Variant& replacement,
                           const Variant& subject, int limit, int64_t* count,
                           bool is_callable, bool is_filter);

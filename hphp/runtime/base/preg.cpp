@@ -713,9 +713,22 @@ static bool get_pcre_fullinfo(pcre_cache_entry* pce) {
   return true;
 }
 
+static void raise_warning_or_create_error_message(bool warn,
+                                                  StringData*& error_message,
+                                                  const std::string& msg) {
+  if (LIKELY(warn)) {
+    raise_warning(msg);
+  } else {
+    if (error_message) decRefStr(error_message); // decref old StringData
+    error_message = StringData::Make(msg);
+  }
+}
+
 static bool
 pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
-                              StringData* regex) {
+                              StringData* regex,
+                              bool warn,
+                              StringData*& error_message) {
   PCRECache::TempKeyCache tkc;
 
   /* Try to lookup the cached regex entry, and if successful, just pass
@@ -727,7 +740,8 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
   const char *p = regex->data();
   while (isspace((int)*(unsigned char *)p)) p++;
   if (*p == 0) {
-    raise_warning("Empty regular expression");
+    raise_warning_or_create_error_message(warn, error_message,
+                                          "Empty regular expression");
     return false;
   }
 
@@ -735,7 +749,8 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
      or a backslash. */
   char delimiter = *p++;
   if (isalnum((int)*(unsigned char *)&delimiter) || delimiter == '\\') {
-    raise_warning("Delimiter must not be alphanumeric or backslash");
+    raise_warning_or_create_error_message(warn, error_message,
+                                          "Delimiter must not be alphanumeric or backslash");
     return false;
   }
 
@@ -758,8 +773,9 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
       pp++;
     }
     if (*pp == 0) {
-      raise_warning("No ending delimiter '%c' found: [%s]", delimiter,
-                      regex->data());
+      std::string msg = folly::sformat("No ending delimiter '{}' found: [{}]",
+                                       delimiter, regex->data());
+      raise_warning_or_create_error_message(warn, error_message, msg);
       return false;
     }
   } else {
@@ -779,8 +795,9 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
       pp++;
     }
     if (*pp == 0) {
-      raise_warning("No ending matching delimiter '%c' found: [%s]",
-                      end_delimiter, regex->data());
+      std::string msg = folly::sformat("No ending matching delimiter '{}' found: [{}]",
+                                       end_delimiter, regex->data());
+      raise_warning_or_create_error_message(warn, error_message, msg);
       return false;
     }
   }
@@ -829,7 +846,9 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
       break;
 
     default:
-      raise_warning("Unknown modifier '%c': [%s]", pp[-1], regex->data());
+      std::string msg = folly::sformat("Unknown modifier '{}': [{}]",
+                                       pp[-1], regex->data());
+      raise_warning_or_create_error_message(warn, error_message, msg);
       return false;
     }
   }
@@ -837,7 +856,13 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
   /* We've reached a null byte, now check if we're actually at the end of the
      string.  If not this is a bad expression, and a potential security hole. */
   if (regex->size() != (pp - regex->data())) {
-    raise_error("Error: Null byte found in pattern");
+    if (warn) {
+      raise_error("Error: Null byte found in pattern");
+    } else {
+      if (error_message) decRefStr(error_message); // decref old StringData
+      error_message = makeStaticString("Null byte found in pattern");
+      return false;
+    }
   }
 
   /* Store the compiled pattern and extra info in the cache. */
@@ -877,7 +902,9 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
   int erroffset;
   pcre *re = pcre_compile(pattern, coptions, &error, &erroffset, 0);
   if (re == nullptr) {
-    raise_warning("Compilation failed: %s at offset %d", error, erroffset);
+    std::string msg = folly::sformat("Compilation failed: {} at offset {}",
+                                     error, erroffset);
+    raise_warning_or_create_error_message(warn, error_message, msg);
     return false;
   }
 
@@ -895,7 +922,7 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
           PCRE_EXTRA_MATCH_LIMIT_RECURSION;
         pcre_assign_jit_stack(extra, alloc_jit_stack, nullptr);
       }
-      if (error != nullptr) {
+      if (error != nullptr && warn) {
         try {
           raise_warning("Error while studying pattern");
         } catch (...) {
@@ -936,6 +963,18 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
   }
 
   return store_pcre_entry(literal_data, re, extra);
+}
+
+static bool
+pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
+                              StringData* regex) {
+  StringData* error_message = nullptr;
+  SCOPE_EXIT {
+    assertx(!error_message);
+    if (error_message) decRefStr(error_message);
+  };
+  bool result = pcre_get_compiled_regex_cache(accessor, regex, true, error_message);
+  return result;
 }
 
 static int* create_offset_array(const pcre_cache_entry* pce,
@@ -1351,6 +1390,25 @@ Variant preg_match_all(StringData* pattern, const StringData* subject,
                        Variant* matches /* = nullptr */,
                        int flags /* = 0 */, int offset /* = 0 */) {
   return preg_match_impl(pattern, subject, matches, flags, offset, true);
+}
+
+Variant preg_get_error_message_if_invalid(const String& pattern) {
+  PCRECache::Accessor accessor;
+  StringData* error_message = nullptr;
+  bool is_valid;
+  try {
+    is_valid = pcre_get_compiled_regex_cache(accessor, pattern.get(), false, error_message);
+  } catch (...) {
+    if (error_message) decRefStr(error_message);
+    throw;
+  }
+  if (is_valid) {
+    return null_string;
+  }
+  if (!error_message) {
+    error_message = makeStaticString("Failed to process regex for unknown reason");
+  }
+  return Variant { error_message };
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -601,11 +601,14 @@ struct EqualTo<type::adapted<Adapter, Tag>> {
         [](auto adapter) -> folly::void_t<decltype(adapter.equal(lhs, rhs))> {};
     if constexpr (folly::is_invocable_v<decltype(useAdapter), Adapter>) {
       return Adapter::equal(lhs, rhs);
-    }
-    if constexpr (folly::is_invocable_v<std::equal_to<>, const T&, const T&>) {
+    } else if constexpr (folly::is_invocable_v<
+                             std::equal_to<>,
+                             const T&,
+                             const T&>) {
       return lhs == rhs;
+    } else {
+      return EqualTo<Tag>{}(Adapter::toThrift(lhs), Adapter::toThrift(rhs));
     }
-    return EqualTo<Tag>{}(Adapter::toThrift(lhs), Adapter::toThrift(rhs));
   }
 };
 template <typename Adapter, typename Tag>
@@ -618,11 +621,12 @@ struct LessThan<type::adapted<Adapter, Tag>> {
         [](auto adapter) -> folly::void_t<decltype(adapter.less(lhs, rhs))> {};
     if constexpr (folly::is_invocable_v<decltype(useAdapter), Adapter>) {
       return Adapter::less(lhs, rhs);
-    }
-    if constexpr (folly::is_invocable_v<std::less<>, const T&, const T&>) {
+    } else if constexpr (folly::
+                             is_invocable_v<std::less<>, const T&, const T&>) {
       return lhs < rhs;
+    } else {
+      return LessThan<Tag>{}(Adapter::toThrift(lhs), Adapter::toThrift(rhs));
     }
-    return LessThan<Tag>{}(Adapter::toThrift(lhs), Adapter::toThrift(rhs));
   }
 };
 

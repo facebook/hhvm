@@ -312,8 +312,8 @@ class AllocationColocator<void> {
 
     template <typename T, typename... Args>
     decltype(auto) operator()(ObjectLocator<T>&& locator, Args&&... args) const
-        noexcept(noexcept(
-            this->object(std::move(locator), std::forward<Args>(args)...))) {
+        noexcept(noexcept(std::declval<Builder>().object(
+            std::move(locator), std::forward<Args>(args)...))) {
       return this->object(std::move(locator), std::forward<Args>(args)...);
     }
 

@@ -67,6 +67,7 @@ type rollout_flags = {
   ide_load_naming_table_on_disk: bool;
   ide_naming_table_update_threshold: int;
   use_compressed_dep_graph: bool;
+  use_old_decls_from_cas: bool;
   glean_v2: bool;
 }
 

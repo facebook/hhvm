@@ -40,7 +40,7 @@ const t_type* resolve_type(const t_type* type) {
 
 void match_type_with_const_value(
     diagnostic_context& ctx,
-    t_program& program,
+    const t_program& program,
     const t_type* long_type,
     t_const_value* value) {
   const t_type* type = resolve_type(long_type);
@@ -89,7 +89,7 @@ void match_type_with_const_value(
       // than resolving to the enum constant in the parser.
       // So we have to resolve the string to the enum constant here instead.
       auto str = value->get_string();
-      auto constant = program.scope()->find_constant(str);
+      const t_const* constant = program.scope()->find_constant(str);
       if (!constant) {
         auto full_str = program.name() + "." + str;
         constant = program.scope()->find_constant(full_str);
@@ -98,7 +98,7 @@ void match_type_with_const_value(
         throw std::runtime_error(
             std::string("type error: no matching constant: ") + str);
       }
-      auto value_copy = constant->get_value()->clone();
+      std::unique_ptr<t_const_value> value_copy = constant->value()->clone();
       value->assign(std::move(*value_copy));
     }
     if (enm->find_value(value->get_integer())) {
@@ -114,14 +114,19 @@ void match_type_with_const_value(
 static void match_annotation_types_with_const_values(
     diagnostic_context& ctx, mutator_context& mCtx, t_named& node) {
   for (t_const& tconst : node.structured_annotations()) {
-    if (tconst.get_type() && tconst.get_value()) {
-      match_type_with_const_value(
-          ctx, mCtx.program(), tconst.get_type(), tconst.get_value());
+    const t_type* const type = tconst.get_type();
+    if (type == nullptr) {
+      continue;
     }
+
+    t_const_value* const value = tconst.value();
+    if (value == nullptr) {
+      continue;
+    }
+
+    match_type_with_const_value(ctx, mCtx.program(), type, value);
   }
 }
-
-} // namespace
 
 // TODO(afuller): Instead of mutating the AST, readers should look for
 // the interaction level annotation and the validation logic should be moved to
@@ -438,14 +443,31 @@ void lower_type_annotations(
   }
 }
 
-template <typename Node>
-void const_type_to_const_value(
-    diagnostic_context& ctx, mutator_context& mCtx, Node& node) {
-  if (node.get_type() && node.get_value()) {
-    match_type_with_const_value(
-        ctx, mCtx.program(), node.get_type(), node.get_value());
+void maybe_match_type_with_const_value(
+    diagnostic_context& ctx,
+    mutator_context& mCtx,
+    const t_type* type,
+    t_const_value* value) {
+  if (type == nullptr || value == nullptr) {
+    return;
   }
+
+  match_type_with_const_value(ctx, mCtx.program(), type, value);
 }
+
+void const_to_const_value(
+    diagnostic_context& ctx, mutator_context& mCtx, t_const& const_node) {
+  maybe_match_type_with_const_value(
+      ctx, mCtx, const_node.get_type(), const_node.value());
+}
+
+void field_to_const_value(
+    diagnostic_context& ctx, mutator_context& mCtx, t_field& field_node) {
+  maybe_match_type_with_const_value(
+      ctx, mCtx, field_node.get_type(), field_node.get_value());
+}
+
+} // namespace
 
 ast_mutators standard_mutators() {
   ast_mutators mutators;
@@ -475,8 +497,8 @@ ast_mutators standard_mutators() {
     main.add_const_visitor(&generate_const_schema);
     main.add_enum_visitor(&generate_enum_schema);
     main.add_typedef_visitor(&generate_typedef_schema);
-    main.add_const_visitor(&const_type_to_const_value<t_const>);
-    main.add_field_visitor(&const_type_to_const_value<t_field>);
+    main.add_const_visitor(&const_to_const_value);
+    main.add_field_visitor(&field_to_const_value);
     main.add_definition_visitor(&match_annotation_types_with_const_values);
   }
 

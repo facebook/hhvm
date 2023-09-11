@@ -1110,7 +1110,7 @@ void t_go_generator::generate_enum(const t_enum* tenum) {
 void t_go_generator::generate_const(const t_const* tconst) {
   const t_type* type = tconst->get_type();
   string name = publicize(tconst->get_name());
-  t_const_value* value = tconst->get_value();
+  const t_const_value* value = tconst->value();
 
   if (type->is_base_type() || type->is_enum()) {
     indent(f_consts_) << "const " << name << " = "

@@ -297,7 +297,7 @@ void t_java_deprecated_generator::generate_consts(
         f_consts,
         tconst->get_name(),
         tconst->get_type(),
-        tconst->get_value(),
+        tconst->value(),
         false);
   }
   indent_down();

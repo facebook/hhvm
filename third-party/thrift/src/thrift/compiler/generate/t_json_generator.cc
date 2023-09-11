@@ -482,7 +482,7 @@ void t_json_generator::print_structured_annotations(
     }
     f_out_ << endl;
     indent(f_out_) << "\"" << type_name(annotation.get_type()) << "\" : ";
-    print_const_value(annotation.get_value());
+    print_const_value(annotation.value());
   }
   f_out_ << endl;
   indent_down();
@@ -608,7 +608,7 @@ void t_json_generator::generate_const(const t_const* tconst) {
   indent_up();
   print_lineno(*tconst);
   indent(f_out_) << "\"value\" : ";
-  print_const_value(tconst->get_value());
+  print_const_value(tconst->value());
   f_out_ << "," << endl;
   print_type(tconst->get_type());
   print_node_annotations(

@@ -432,7 +432,7 @@ mstch::node structured_annotations_node(
   // Note, duplicate annotations are not allowed per the Thrift spec.
   for (const t_const& annotation : named.structured_annotations()) {
     auto direct_annotation = std::make_shared<mstch_rust_value>(
-        annotation.get_value(),
+        annotation.value(),
         annotation.get_type(),
         depth,
         context,
@@ -1813,7 +1813,7 @@ class rust_mstch_const : public mstch_const {
         });
   }
   mstch::node rust_package() {
-    return get_import_name(const_->get_program(), options_);
+    return get_import_name(const_->program(), options_);
   }
   mstch::node rust_lazy() {
     if (type_has_transitive_adapter(const_->get_type(), true)) {
@@ -1827,12 +1827,7 @@ class rust_mstch_const : public mstch_const {
   mstch::node rust_typed_value() {
     unsigned depth = 0;
     return std::make_shared<mstch_rust_value>(
-        const_->get_value(),
-        const_->get_type(),
-        depth,
-        context_,
-        pos_,
-        options_);
+        const_->value(), const_->get_type(), depth, context_, pos_, options_);
   }
   mstch::node rust_has_docs() { return const_->has_doc(); }
   mstch::node rust_docs() { return quoted_rust_doc(const_); }

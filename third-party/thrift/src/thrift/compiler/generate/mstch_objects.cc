@@ -564,12 +564,12 @@ mstch::node mstch_const::type() {
 
 mstch::node mstch_const::value() {
   return context_.const_value_factory->make_mstch_object(
-      const_->get_value(), context_, pos_, const_, expected_type_);
+      const_->value(), context_, pos_, const_, expected_type_);
 }
 
 mstch::node mstch_const::program() {
   return context_.program_factory->make_mstch_object(
-      const_->get_program(), context_, pos_);
+      const_->program(), context_, pos_);
 }
 
 mstch::node mstch_const::field() {

@@ -359,7 +359,7 @@ void t_js_generator::generate_enum(const t_enum* tenum) {
 void t_js_generator::generate_const(const t_const* tconst) {
   const t_type* type = tconst->get_type();
   string name = tconst->get_name();
-  t_const_value* value = tconst->get_value();
+  const t_const_value* value = tconst->value();
 
   f_types_ << js_type_namespace(program_) << name << " = ";
   f_types_ << render_const_value(type, value) << ";" << endl;

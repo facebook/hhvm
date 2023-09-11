@@ -100,9 +100,9 @@ const t_named* t_scope::add_def(const t_named& node) {
 }
 
 void t_scope::add_enum_value(std::string name, const t_const* constant) {
-  assert(constant->get_value()->is_enum());
+  assert(constant->value()->is_enum());
   const std::string& enum_value_name =
-      constant->get_value()->get_enum_value()->get_name();
+      constant->value()->get_enum_value()->get_name();
   if (enum_value_name != "UNKNOWN" &&
       definitions_.find(name) != definitions_.end()) {
     redefined_enum_values_.insert(name);

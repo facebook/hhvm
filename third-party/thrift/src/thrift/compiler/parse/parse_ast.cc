@@ -911,7 +911,7 @@ class ast_builder : public parser_actions {
     auto name_str = fmt::to_string(name.str);
     if (const t_const* constant = find_const(name.loc, name_str)) {
       // Copy const_value to perform isolated mutations.
-      auto result = constant->get_value()->clone();
+      auto result = constant->value()->clone();
       // We only want to clone the value, while discarding all real type
       // information.
       result->set_ttype({});

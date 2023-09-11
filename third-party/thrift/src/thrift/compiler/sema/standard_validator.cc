@@ -601,16 +601,16 @@ void validate_field_default_value(
 void validate_structured_annotation(
     diagnostic_context& ctx, const t_named& node) {
   std::unordered_map<const t_type*, const t_const*> seen;
-  for (const auto& annot : node.structured_annotations()) {
-    auto result = seen.emplace(&annot.type().deref(), &annot);
-    if (!result.second) {
+  for (const t_const& annot : node.structured_annotations()) {
+    auto [it, inserted] = seen.emplace(&annot.type().deref(), &annot);
+    if (!inserted) {
       report_redef_error(
           ctx,
           "Structured annotation",
-          result.first->first->name(),
+          it->first->name(),
           node,
           annot,
-          *result.first->second);
+          *it->second);
     }
     validate_const_type_and_value(ctx, annot);
   }

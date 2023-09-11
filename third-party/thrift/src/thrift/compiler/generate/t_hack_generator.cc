@@ -1754,7 +1754,7 @@ void t_hack_generator::generate_enum(const t_enum* tenum) {
 void t_hack_generator::generate_const(const t_const* tconst) {
   const t_type* type = tconst->get_type();
   std::string name = tconst->name();
-  t_const_value* value = tconst->get_value();
+  const t_const_value* value = tconst->value();
 
   indent_up();
   generate_php_docstring(f_consts_, tconst);
@@ -4983,7 +4983,7 @@ std::string t_hack_generator::render_structured_annotations(
       indent(out) << "'" << hack_name(annotation.get_type()) << "' => "
                   << render_const_value_helper(
                          annotation.get_type(),
-                         annotation.get_value(),
+                         annotation.value(),
                          temp_var_initializations_out,
                          namer,
                          false, // immutable_collections

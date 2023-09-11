@@ -238,7 +238,7 @@ mstch::map t_mstch_generator::dump(const t_const& cnst) {
   mstch::map result{
       {"type", dump(*cnst.get_type())},
       {"name", cnst.get_name()},
-      {"value", dump(*cnst.get_value())},
+      {"value", dump(*cnst.value())},
   };
 
   mstch::map extension = extend_const(cnst);

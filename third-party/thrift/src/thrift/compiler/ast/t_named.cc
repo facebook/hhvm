@@ -44,7 +44,7 @@ t_named::t_named(const t_named& named)
 t_named::~t_named() = default;
 
 void t_named::add_structured_annotation(std::unique_ptr<t_const> annot) {
-  assert(!annot->type().empty());
+  assert(annot->get_type() != nullptr);
   structured_annotations_.emplace_back(std::move(annot));
 }
 

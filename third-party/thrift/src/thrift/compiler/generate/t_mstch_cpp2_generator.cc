@@ -2193,12 +2193,11 @@ class cpp_mstch_const : public mstch_const {
   mstch::node enum_value() {
     if (const_->get_type()->is_enum()) {
       const auto* enm = static_cast<const t_enum*>(const_->get_type());
-      const auto* enum_val =
-          enm->find_value(const_->get_value()->get_integer());
+      const auto* enum_val = enm->find_value(const_->value()->get_integer());
       if (enum_val) {
         return enum_val->get_name();
       } else {
-        return std::to_string(const_->get_value()->get_integer());
+        return std::to_string(const_->value()->get_integer());
       }
     }
     return mstch::node();

@@ -49,13 +49,7 @@ void RefUnion::readNoXfer(Protocol_* iprot) {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRING)) {
           this->set_field1();
           auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::string, RefUnion>>>();
-          if constexpr(::apache::thrift::adapt_detail::has_inplace_toThrift<::my::Adapter1, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::string, RefUnion>>::value) {
-            ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, ::my::Adapter1::toThrift(*ptr), _readState);
-          } else {
-            ::std::string tvalue;
-            ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, tvalue, _readState);
-            *ptr = ::apache::thrift::adapt_detail::fromThriftField<::my::Adapter1, 1>(::std::move(tvalue), *this);
-          }
+          ::apache::thrift::op::decode<::apache::thrift::op::get_field_tag<RefUnion, ::apache::thrift::field_id<1>>>(*iprot, *ptr, *this);
           value_.field1 = std::move(ptr);
           
         } else {
@@ -87,7 +81,7 @@ uint32_t RefUnion::serializedSize(Protocol_ const* prot_) const {
     {
       xfer += prot_->serializedFieldSize("field1", apache::thrift::protocol::T_STRING, 1);
       if (value_.field1) {
-        xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::string_t>, ::my::Adapter1>(*prot_, *value_.field1, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, ::my::Adapter1::toThrift(*value_.field1));});
+        xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::string_t>>(*prot_, *value_.field1);
       }
       break;
     }
@@ -106,7 +100,7 @@ uint32_t RefUnion::serializedSizeZC(Protocol_ const* prot_) const {
     {
       xfer += prot_->serializedFieldSize("field1", apache::thrift::protocol::T_STRING, 1);
       if (value_.field1) {
-        xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::string_t>, ::my::Adapter1>(*prot_, *value_.field1, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, ::my::Adapter1::toThrift(*value_.field1));});
+        xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::string_t>>(*prot_, *value_.field1);
       }
       break;
     }
@@ -126,7 +120,7 @@ uint32_t RefUnion::write(Protocol_* prot_) const {
       constexpr int16_t kPrevFieldId = 0;
       xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRING, 1, kPrevFieldId>(*prot_, "field1", false);
       if (value_.field1) {
-        xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::write(*prot_, ::my::Adapter1::toThrift(*value_.field1));
+        xfer += ::apache::thrift::op::encode<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::string_t>>(*prot_, *value_.field1);
       }
       xfer += prot_->writeFieldEnd();
       break;

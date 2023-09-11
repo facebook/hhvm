@@ -609,13 +609,7 @@ _readField_MyMapEnumAndInt:
   }
 _readField_MyCustomField:
   {
-    if constexpr(::apache::thrift::adapt_detail::has_inplace_toThrift<::CustomProtocolAdapter, ::some::valid::ns::CustomProtocolType>::value) {
-      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::folly::IOBuf>::readWithContext(*iprot, ::CustomProtocolAdapter::toThrift(this->__fbthrift_field_MyCustomField), _readState);
-    } else {
-      ::folly::IOBuf tvalue;
-      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::folly::IOBuf>::readWithContext(*iprot, tvalue, _readState);
-      this->__fbthrift_field_MyCustomField = ::apache::thrift::adapt_detail::fromThriftField<::CustomProtocolAdapter, 10>(::std::move(tvalue), *this);
-    }
+    ::apache::thrift::op::decode<::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>>(*iprot, this->__fbthrift_field_MyCustomField);
     
   }
  this->__isset.set(8, true);
@@ -629,13 +623,7 @@ _readField_MyCustomField:
   }
 _readField_MyOptCustomField:
   {
-    if constexpr(::apache::thrift::adapt_detail::has_inplace_toThrift<::CustomProtocolAdapter, ::some::valid::ns::CustomProtocolType>::value) {
-      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::folly::IOBuf>::readWithContext(*iprot, ::CustomProtocolAdapter::toThrift(this->__fbthrift_field_MyOptCustomField), _readState);
-    } else {
-      ::folly::IOBuf tvalue;
-      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::folly::IOBuf>::readWithContext(*iprot, tvalue, _readState);
-      this->__fbthrift_field_MyOptCustomField = ::apache::thrift::adapt_detail::fromThriftField<::CustomProtocolAdapter, 11>(::std::move(tvalue), *this);
-    }
+    ::apache::thrift::op::decode<::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>>(*iprot, this->__fbthrift_field_MyOptCustomField);
     
   }
  this->__isset.set(9, true);
@@ -804,11 +792,11 @@ uint32_t MyStruct::serializedSize(Protocol_ const* prot_) const {
   }
   if (!(this->__fbthrift_field_MyCustomField == ::some::valid::ns::CustomProtocolType())) {
     xfer += prot_->serializedFieldSize("MyCustomField", apache::thrift::protocol::T_STRING, 10);
-    xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>, ::CustomProtocolAdapter>(*prot_, this->__fbthrift_field_MyCustomField, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::folly::IOBuf>::serializedSize<false>(*prot_, ::CustomProtocolAdapter::toThrift(this->__fbthrift_field_MyCustomField));});
+    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>>(*prot_, this->__fbthrift_field_MyCustomField);
   }
   if (this->__isset.get(9)) {
     xfer += prot_->serializedFieldSize("MyOptCustomField", apache::thrift::protocol::T_STRING, 11);
-    xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>, ::CustomProtocolAdapter>(*prot_, this->__fbthrift_field_MyOptCustomField, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::folly::IOBuf>::serializedSize<false>(*prot_, ::CustomProtocolAdapter::toThrift(this->__fbthrift_field_MyOptCustomField));});
+    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>>(*prot_, this->__fbthrift_field_MyOptCustomField);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -856,11 +844,11 @@ uint32_t MyStruct::serializedSizeZC(Protocol_ const* prot_) const {
   }
   if (!(this->__fbthrift_field_MyCustomField == ::some::valid::ns::CustomProtocolType())) {
     xfer += prot_->serializedFieldSize("MyCustomField", apache::thrift::protocol::T_STRING, 10);
-    xfer += ::apache::thrift::adapt_detail::serializedSize<true, ::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>, ::CustomProtocolAdapter>(*prot_, this->__fbthrift_field_MyCustomField, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::folly::IOBuf>::serializedSize<true>(*prot_, ::CustomProtocolAdapter::toThrift(this->__fbthrift_field_MyCustomField));});
+    xfer += ::apache::thrift::op::serialized_size<true, ::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>>(*prot_, this->__fbthrift_field_MyCustomField);
   }
   if (this->__isset.get(9)) {
     xfer += prot_->serializedFieldSize("MyOptCustomField", apache::thrift::protocol::T_STRING, 11);
-    xfer += ::apache::thrift::adapt_detail::serializedSize<true, ::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>, ::CustomProtocolAdapter>(*prot_, this->__fbthrift_field_MyOptCustomField, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::folly::IOBuf>::serializedSize<true>(*prot_, ::CustomProtocolAdapter::toThrift(this->__fbthrift_field_MyOptCustomField));});
+    xfer += ::apache::thrift::op::serialized_size<true, ::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>>(*prot_, this->__fbthrift_field_MyOptCustomField);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -954,7 +942,7 @@ uint32_t MyStruct::write(Protocol_* prot_) const {
     constexpr int16_t kPrevFieldId = 9;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRING, 10, kPrevFieldId>(*prot_, "MyCustomField", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::folly::IOBuf>::write(*prot_, ::CustomProtocolAdapter::toThrift(this->__fbthrift_field_MyCustomField));
+    xfer += ::apache::thrift::op::encode<::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>>(*prot_, this->__fbthrift_field_MyCustomField);
     xfer += prot_->writeFieldEnd();
   } else {
     previousFieldHasValue = false;
@@ -963,7 +951,7 @@ uint32_t MyStruct::write(Protocol_* prot_) const {
     constexpr int16_t kPrevFieldId = 10;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRING, 11, kPrevFieldId>(*prot_, "MyOptCustomField", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::folly::IOBuf>::write(*prot_, ::CustomProtocolAdapter::toThrift(this->__fbthrift_field_MyOptCustomField));
+    xfer += ::apache::thrift::op::encode<::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>>(*prot_, this->__fbthrift_field_MyOptCustomField);
     xfer += prot_->writeFieldEnd();
   } else {
     previousFieldHasValue = false;
@@ -1489,13 +1477,7 @@ void ComplexUnion::readNoXfer(Protocol_* iprot) {
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRING)) {
           this->set_MyCustomField();
-          if constexpr(::apache::thrift::adapt_detail::has_inplace_toThrift<::CustomProtocolAdapter, ::some::valid::ns::CustomProtocolType>::value) {
-            ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::folly::IOBuf>::readWithContext(*iprot, ::CustomProtocolAdapter::toThrift(value_.MyCustomField), _readState);
-          } else {
-            ::folly::IOBuf tvalue;
-            ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::folly::IOBuf>::readWithContext(*iprot, tvalue, _readState);
-            value_.MyCustomField = ::apache::thrift::adapt_detail::fromThriftField<::CustomProtocolAdapter, 27>(::std::move(tvalue), *this);
-          }
+          ::apache::thrift::op::decode<::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>>(*iprot, value_.MyCustomField);
           
         } else {
           _readState.skip(iprot);
@@ -1697,7 +1679,7 @@ uint32_t ComplexUnion::serializedSize(Protocol_ const* prot_) const {
     case ComplexUnion::Type::MyCustomField:
     {
       xfer += prot_->serializedFieldSize("MyCustomField", apache::thrift::protocol::T_STRING, 27);
-      xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>, ::CustomProtocolAdapter>(*prot_, value_.MyCustomField, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::folly::IOBuf>::serializedSize<false>(*prot_, ::CustomProtocolAdapter::toThrift(value_.MyCustomField));});
+      xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>>(*prot_, value_.MyCustomField);
       break;
     }
     case ComplexUnion::Type::__EMPTY__:;
@@ -1886,7 +1868,7 @@ uint32_t ComplexUnion::serializedSizeZC(Protocol_ const* prot_) const {
     case ComplexUnion::Type::MyCustomField:
     {
       xfer += prot_->serializedFieldSize("MyCustomField", apache::thrift::protocol::T_STRING, 27);
-      xfer += ::apache::thrift::adapt_detail::serializedSize<true, ::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>, ::CustomProtocolAdapter>(*prot_, value_.MyCustomField, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::folly::IOBuf>::serializedSize<true>(*prot_, ::CustomProtocolAdapter::toThrift(value_.MyCustomField));});
+      xfer += ::apache::thrift::op::serialized_size<true, ::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>>(*prot_, value_.MyCustomField);
       break;
     }
     case ComplexUnion::Type::__EMPTY__:;
@@ -2132,7 +2114,7 @@ uint32_t ComplexUnion::write(Protocol_* prot_) const {
     {
       constexpr int16_t kPrevFieldId = 26;
       xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRING, 27, kPrevFieldId>(*prot_, "MyCustomField", false);
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::folly::IOBuf>::write(*prot_, ::CustomProtocolAdapter::toThrift(value_.MyCustomField));
+      xfer += ::apache::thrift::op::encode<::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>>(*prot_, value_.MyCustomField);
       xfer += prot_->writeFieldEnd();
       break;
     }
@@ -2413,13 +2395,7 @@ _readField_a_union_typedef_list:
   }
 _readField_MyCustomField:
   {
-    if constexpr(::apache::thrift::adapt_detail::has_inplace_toThrift<::CustomProtocolAdapter, ::some::valid::ns::CustomProtocolType>::value) {
-      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::folly::IOBuf>::readWithContext(*iprot, ::CustomProtocolAdapter::toThrift(this->__fbthrift_field_MyCustomField), _readState);
-    } else {
-      ::folly::IOBuf tvalue;
-      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::folly::IOBuf>::readWithContext(*iprot, tvalue, _readState);
-      this->__fbthrift_field_MyCustomField = ::apache::thrift::adapt_detail::fromThriftField<::CustomProtocolAdapter, 20>(::std::move(tvalue), *this);
-    }
+    ::apache::thrift::op::decode<::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>>(*iprot, this->__fbthrift_field_MyCustomField);
     
   }
  this->__isset.set(12, true);
@@ -2433,13 +2409,7 @@ _readField_MyCustomField:
   }
 _readField_MyOptCustomField:
   {
-    if constexpr(::apache::thrift::adapt_detail::has_inplace_toThrift<::CustomProtocolAdapter, ::some::valid::ns::CustomProtocolType>::value) {
-      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::folly::IOBuf>::readWithContext(*iprot, ::CustomProtocolAdapter::toThrift(this->__fbthrift_field_MyOptCustomField), _readState);
-    } else {
-      ::folly::IOBuf tvalue;
-      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::folly::IOBuf>::readWithContext(*iprot, tvalue, _readState);
-      this->__fbthrift_field_MyOptCustomField = ::apache::thrift::adapt_detail::fromThriftField<::CustomProtocolAdapter, 21>(::std::move(tvalue), *this);
-    }
+    ::apache::thrift::op::decode<::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>>(*iprot, this->__fbthrift_field_MyOptCustomField);
     
   }
  this->__isset.set(13, true);
@@ -2680,11 +2650,11 @@ uint32_t AnException::serializedSize(Protocol_ const* prot_) const {
   }
   if (!(this->__fbthrift_field_MyCustomField == ::some::valid::ns::CustomProtocolType())) {
     xfer += prot_->serializedFieldSize("MyCustomField", apache::thrift::protocol::T_STRING, 20);
-    xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>, ::CustomProtocolAdapter>(*prot_, this->__fbthrift_field_MyCustomField, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::folly::IOBuf>::serializedSize<false>(*prot_, ::CustomProtocolAdapter::toThrift(this->__fbthrift_field_MyCustomField));});
+    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>>(*prot_, this->__fbthrift_field_MyCustomField);
   }
   if (this->__isset.get(13)) {
     xfer += prot_->serializedFieldSize("MyOptCustomField", apache::thrift::protocol::T_STRING, 21);
-    xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>, ::CustomProtocolAdapter>(*prot_, this->__fbthrift_field_MyOptCustomField, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::folly::IOBuf>::serializedSize<false>(*prot_, ::CustomProtocolAdapter::toThrift(this->__fbthrift_field_MyOptCustomField));});
+    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>>(*prot_, this->__fbthrift_field_MyOptCustomField);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -2756,11 +2726,11 @@ uint32_t AnException::serializedSizeZC(Protocol_ const* prot_) const {
   }
   if (!(this->__fbthrift_field_MyCustomField == ::some::valid::ns::CustomProtocolType())) {
     xfer += prot_->serializedFieldSize("MyCustomField", apache::thrift::protocol::T_STRING, 20);
-    xfer += ::apache::thrift::adapt_detail::serializedSize<true, ::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>, ::CustomProtocolAdapter>(*prot_, this->__fbthrift_field_MyCustomField, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::folly::IOBuf>::serializedSize<true>(*prot_, ::CustomProtocolAdapter::toThrift(this->__fbthrift_field_MyCustomField));});
+    xfer += ::apache::thrift::op::serialized_size<true, ::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>>(*prot_, this->__fbthrift_field_MyCustomField);
   }
   if (this->__isset.get(13)) {
     xfer += prot_->serializedFieldSize("MyOptCustomField", apache::thrift::protocol::T_STRING, 21);
-    xfer += ::apache::thrift::adapt_detail::serializedSize<true, ::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>, ::CustomProtocolAdapter>(*prot_, this->__fbthrift_field_MyOptCustomField, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::folly::IOBuf>::serializedSize<true>(*prot_, ::CustomProtocolAdapter::toThrift(this->__fbthrift_field_MyOptCustomField));});
+    xfer += ::apache::thrift::op::serialized_size<true, ::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>>(*prot_, this->__fbthrift_field_MyOptCustomField);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -2902,7 +2872,7 @@ uint32_t AnException::write(Protocol_* prot_) const {
     constexpr int16_t kPrevFieldId = 19;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRING, 20, kPrevFieldId>(*prot_, "MyCustomField", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::folly::IOBuf>::write(*prot_, ::CustomProtocolAdapter::toThrift(this->__fbthrift_field_MyCustomField));
+    xfer += ::apache::thrift::op::encode<::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>>(*prot_, this->__fbthrift_field_MyCustomField);
     xfer += prot_->writeFieldEnd();
   } else {
     previousFieldHasValue = false;
@@ -2911,7 +2881,7 @@ uint32_t AnException::write(Protocol_* prot_) const {
     constexpr int16_t kPrevFieldId = 20;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRING, 21, kPrevFieldId>(*prot_, "MyOptCustomField", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::folly::IOBuf>::write(*prot_, ::CustomProtocolAdapter::toThrift(this->__fbthrift_field_MyOptCustomField));
+    xfer += ::apache::thrift::op::encode<::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>>(*prot_, this->__fbthrift_field_MyOptCustomField);
     xfer += prot_->writeFieldEnd();
   } else {
     previousFieldHasValue = false;

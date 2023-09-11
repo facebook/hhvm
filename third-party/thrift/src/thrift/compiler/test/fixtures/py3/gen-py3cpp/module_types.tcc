@@ -721,13 +721,7 @@ void HiddenTypeFieldsStruct::readNoXfer(Protocol_* iprot) {
 _readField_field1:
   {
     _readState.beforeSubobject(iprot);
-    if constexpr(::apache::thrift::adapt_detail::has_inplace_toThrift<Adapter, ::py3::simple::AdaptedTypeDef>::value) {
-      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::py3::simple::SimpleStruct>::readWithContext(*iprot, Adapter::toThrift(this->__fbthrift_field_field1), _readState);
-    } else {
-      ::py3::simple::SimpleStruct tvalue;
-      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::py3::simple::SimpleStruct>::readWithContext(*iprot, tvalue, _readState);
-      this->__fbthrift_field_field1 = ::apache::thrift::adapt_detail::fromThriftField<Adapter, 1>(::std::move(tvalue), *this);
-    }
+    ::apache::thrift::op::decode<::apache::thrift::type::adapted<Adapter, ::apache::thrift::type::struct_t<::py3::simple::SimpleStruct>>>(*iprot, this->__fbthrift_field_field1);
     _readState.afterSubobject(iprot);
     
   }
@@ -829,7 +823,7 @@ uint32_t HiddenTypeFieldsStruct::serializedSize(Protocol_ const* prot_) const {
   xfer += prot_->serializedStructSize("HiddenTypeFieldsStruct");
   {
     xfer += prot_->serializedFieldSize("field1", apache::thrift::protocol::T_STRUCT, 1);
-    xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::apache::thrift::type::adapted<Adapter, ::apache::thrift::type::struct_t<::py3::simple::SimpleStruct>>, Adapter>(*prot_, this->__fbthrift_field_field1, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::py3::simple::SimpleStruct>::serializedSize<false>(*prot_, Adapter::toThrift(this->__fbthrift_field_field1));});
+    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::adapted<Adapter, ::apache::thrift::type::struct_t<::py3::simple::SimpleStruct>>>(*prot_, this->__fbthrift_field_field1);
   }
   {
     xfer += prot_->serializedFieldSize("field2", apache::thrift::protocol::T_LIST, 2);
@@ -849,7 +843,7 @@ uint32_t HiddenTypeFieldsStruct::serializedSizeZC(Protocol_ const* prot_) const 
   xfer += prot_->serializedStructSize("HiddenTypeFieldsStruct");
   {
     xfer += prot_->serializedFieldSize("field1", apache::thrift::protocol::T_STRUCT, 1);
-    xfer += ::apache::thrift::adapt_detail::serializedSize<true, ::apache::thrift::type::adapted<Adapter, ::apache::thrift::type::struct_t<::py3::simple::SimpleStruct>>, Adapter>(*prot_, this->__fbthrift_field_field1, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::py3::simple::SimpleStruct>::serializedSize<true>(*prot_, Adapter::toThrift(this->__fbthrift_field_field1));});
+    xfer += ::apache::thrift::op::serialized_size<true, ::apache::thrift::type::adapted<Adapter, ::apache::thrift::type::struct_t<::py3::simple::SimpleStruct>>>(*prot_, this->__fbthrift_field_field1);
   }
   {
     xfer += prot_->serializedFieldSize("field2", apache::thrift::protocol::T_LIST, 2);
@@ -872,7 +866,7 @@ uint32_t HiddenTypeFieldsStruct::write(Protocol_* prot_) const {
     constexpr int16_t kPrevFieldId = 0;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 1, kPrevFieldId>(*prot_, "field1", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::py3::simple::SimpleStruct>::write(*prot_, Adapter::toThrift(this->__fbthrift_field_field1));
+    xfer += ::apache::thrift::op::encode<::apache::thrift::type::adapted<Adapter, ::apache::thrift::type::struct_t<::py3::simple::SimpleStruct>>>(*prot_, this->__fbthrift_field_field1);
     xfer += prot_->writeFieldEnd();
   }
   {

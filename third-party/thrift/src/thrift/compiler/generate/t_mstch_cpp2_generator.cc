@@ -898,11 +898,13 @@ bool needs_op_encode(const t_type& type) {
 // - A parent struct is annotated with `@cpp.UseOpEncode`
 // - A container has a key or element type marked with `@cpp.UseOpEncode`
 // - A container has an adapted key or element type.
+// - A field is adapted.
 bool needs_op_encode(const t_field& field, const t_struct& strct) {
   return (strct.program() &&
           strct.program()->inherit_annotation_or_null(
               strct, kCppUseOpEncodeUri)) ||
       strct.find_structured_annotation_or_null(kCppUseOpEncodeUri) ||
+      gen::cpp::type_resolver::find_first_adapter(field) ||
       check_container_needs_op_encode(*field.type());
 }
 

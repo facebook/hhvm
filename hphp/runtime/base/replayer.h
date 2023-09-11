@@ -44,6 +44,7 @@ struct Replayer {
   static Replayer& get();
   String init(const String& path);
   static bool onHasReceived();
+  static std::int64_t onProcessSleepEvents();
   static c_ExternalThreadEventWaitHandle* onReceiveSomeUntil();
   static c_ExternalThreadEventWaitHandle* onTryReceiveSome();
   void requestInit() const;
@@ -77,7 +78,6 @@ struct Replayer {
 
   Object makeWaitHandle(const NativeCall& call);
   template<typename T> static void nativeArg(const String& recordedArg, T arg);
-  c_ExternalThreadEventWaitHandle* onReceive(QueueCall::Method method);
   NativeCall popNativeCall(std::uintptr_t id);
   template<typename T> static T unserialize(const String& recordedValue);
 
@@ -99,13 +99,13 @@ struct Replayer {
     }
   }
 
+  std::deque<AsioEvent> m_asioEvents;
   HPHP::DebuggerHook* m_debuggerHook;
   std::unordered_map<std::string, std::string> m_files;
   bool m_inNativeCall;
   std::deque<NativeCall> m_nativeCalls;
   std::unordered_map<std::string, std::uintptr_t> m_nativeFuncNames;
   std::size_t m_nextThreadCreationOrder;
-  std::deque<QueueCall> m_queueCalls;
   Array m_serverGlobal;
   std::unordered_map<std::size_t, c_ExternalThreadEventWaitHandle*> m_threads;
 };

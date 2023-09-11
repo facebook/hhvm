@@ -93,6 +93,7 @@ constexpr bool shouldRecordReplay(std::string_view name) {
     name == "HH\\Lib\\_Private\\Native\\last" ||
     name == "chr" ||
     name == "count" ||
+    name == "get_class" ||
     name == "implode" ||
     name == "ord" ||
     name == "strlen"
@@ -134,9 +135,14 @@ struct NativeCall {
   std::uint8_t wh{0};
 };
 
-struct QueueCall {
-  enum class Method { HAS_RECEIVED, RECEIVE_SOME_UNTIL, TRY_RECEIVE_SOME };
-  Method method;
+struct AsioEvent {
+  enum class Type {
+    HAS_RECEIVED,
+    PROCESS_SLEEP_EVENTS,
+    RECEIVE_SOME_UNTIL,
+    TRY_RECEIVE_SOME,
+  };
+  Type type;
   Array value{Array::CreateVec()};
 };
 

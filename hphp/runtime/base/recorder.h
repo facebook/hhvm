@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <bit>
 #include <cstddef>
 #include <cstdint>
 #include <exception>
@@ -39,6 +40,7 @@ struct c_ExternalThreadEventWaitHandle;
 
 struct Recorder {
   static void onHasReceived(bool received);
+  static void onProcessSleepEvents(std::int64_t now);
   static void onReceiveSomeUntil(c_ExternalThreadEventWaitHandle* received);
   static void onTryReceiveSome(c_ExternalThreadEventWaitHandle* received);
   void requestExit();
@@ -78,7 +80,7 @@ struct Recorder {
   void onNativeCallExit();
   void onNativeCallReturn(const String& ret);
   void onNativeCallThrow(std::exception_ptr exc);
-  void onNativeCallWaitHandle(const ObjectData* object);
+  void onNativeCallWaitHandle(c_Awaitable* wh);
   void resolveWaitHandles();
   template<typename T> static String serialize(T value);
   Array toArray() const;
@@ -102,7 +104,7 @@ struct Recorder {
       onNativeCallThrow(exc);
       std::rethrow_exception(exc);
     } else {
-      const ObjectData* obj{nullptr};
+      ObjectData* obj{nullptr};
       if constexpr (std::is_same_v<R, Object>) {
         obj = ret.get();
       } else if constexpr (std::is_same_v<R, Variant>) {
@@ -111,7 +113,7 @@ struct Recorder {
         }
       }
       if (obj != nullptr && obj->isWaitHandle()) {
-        onNativeCallWaitHandle(obj);
+        onNativeCallWaitHandle(std::bit_cast<c_Awaitable*>(obj));
       } else {
         onNativeCallReturn(serialize(ret));
       }
@@ -121,11 +123,11 @@ struct Recorder {
     }
   }
 
+  req::vector<AsioEvent> m_asioEvents;
   bool m_enabled{false};
   req::vector<NativeCall> m_nativeCalls;
   std::size_t m_nextThreadCreationOrder;
   req::hash_map<c_Awaitable*, std::size_t> m_pendingWaitHandleToNativeCall;
-  req::vector<QueueCall> m_queueCalls;
   Array m_serverGlobal;
   req::hash_map<const c_ExternalThreadEventWaitHandle*, std::size_t> m_threads;
 };

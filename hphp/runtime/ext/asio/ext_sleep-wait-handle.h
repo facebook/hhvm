@@ -56,6 +56,7 @@ struct c_SleepWaitHandle final :
 
   AsioSession::TimePoint m_waketime;
   friend Object HHVM_STATIC_METHOD(SleepWaitHandle, create, int64_t usecs);
+  friend struct Replayer;
 
  public:
   static const int8_t STATE_WAITING = 2;

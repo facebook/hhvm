@@ -36,6 +36,8 @@
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/ext/asio/asio-external-thread-event.h"
 #include "hphp/runtime/ext/asio/asio-session.h"
+#include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_wait-handle.h"
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
@@ -51,8 +53,8 @@
 namespace HPHP {
 
 Replayer::~Replayer() {
+  always_assert_flog(m_asioEvents.empty(), "{}", m_asioEvents.size());
   always_assert_flog(m_nativeCalls.empty(), "{}", m_nativeCalls.size());
-  always_assert_flog(m_queueCalls.empty(), "{}", m_queueCalls.size());
 }
 
 String Replayer::file(const String& path) const {
@@ -78,6 +80,13 @@ String Replayer::init(const String& path) {
   // TODO Enable compiler ID assertion after replay completes successfully.
   // always_assert_flog(compilerId == HPHP::compilerId(), "{}", compilerId);
   m_serverGlobal = header[String{"serverGlobal"}].asCArrRef();
+  for (auto i{recording[String{"asioEvents"}].asCArrRef().begin()}; i; ++i) {
+    const auto event{i.second().asCArrRef()};
+    m_asioEvents.push_back(AsioEvent{
+      static_cast<AsioEvent::Type>(event[0].asInt64Val()),
+      event[1].asCArrRef(),
+    });
+  }
   for (auto i{recording[String{"files"}].asCArrRef().begin()}; i; ++i) {
     m_files[i.first().asCStrRef().data()] = i.second().asCStrRef().data();
   }
@@ -98,31 +107,57 @@ String Replayer::init(const String& path) {
       static_cast<std::uint8_t>(call[5].asInt64Val()),
     });
   }
-  for (auto i{recording[String{"queueCalls"}].asCArrRef().begin()}; i; ++i) {
-    const auto call{i.second().asCArrRef()};
-    m_queueCalls.push_back(QueueCall{
-      static_cast<QueueCall::Method>(call[0].asInt64Val()),
-      call[1].asCArrRef(),
-    });
-  }
   return header[String{"entryPoint"}].toString();
 }
 
 bool Replayer::onHasReceived() {
   auto& replayer{get()};
-  const auto call{std::move(replayer.m_queueCalls.front())};
-  replayer.m_queueCalls.pop_front();
-  always_assert(call.method == QueueCall::Method::HAS_RECEIVED);
-  always_assert(call.value.size() == 1);
-  return call.value[0].asBooleanVal();
+  const auto event{std::move(replayer.m_asioEvents.front())};
+  replayer.m_asioEvents.pop_front();
+  always_assert(event.type == AsioEvent::Type::HAS_RECEIVED);
+  always_assert(event.value.size() == 1);
+  return event.value[0].asBooleanVal();
+}
+
+std::int64_t Replayer::onProcessSleepEvents() {
+  auto& replayer{get()};
+  const auto event{std::move(replayer.m_asioEvents.front())};
+  replayer.m_asioEvents.pop_front();
+  always_assert(event.type == AsioEvent::Type::PROCESS_SLEEP_EVENTS);
+  always_assert(event.value.size() == 1);
+  return event.value[0].asInt64Val();
 }
 
 c_ExternalThreadEventWaitHandle* Replayer::onReceiveSomeUntil() {
-  return get().onReceive(QueueCall::Method::RECEIVE_SOME_UNTIL);
+  auto& replayer{get()};
+  const auto event{std::move(replayer.m_asioEvents.front())};
+  replayer.m_asioEvents.pop_front();
+  always_assert(event.type == AsioEvent::Type::RECEIVE_SOME_UNTIL);
+  c_ExternalThreadEventWaitHandle* received{nullptr};
+  for (std::int64_t i{event.value.size()}; i-- > 0;) {
+    const auto order{event.value[i].asInt64Val()};
+    const auto ptr{replayer.m_threads.at(order)};
+    const auto wh{ptr->asExternalThreadEvent()};
+    wh->setNextToProcess(received);
+    received = wh;
+  }
+  return received;
 }
 
 c_ExternalThreadEventWaitHandle* Replayer::onTryReceiveSome() {
-  return get().onReceive(QueueCall::Method::TRY_RECEIVE_SOME);
+  auto& replayer{get()};
+  const auto event{std::move(replayer.m_asioEvents.front())};
+  replayer.m_asioEvents.pop_front();
+  always_assert(event.type == AsioEvent::Type::TRY_RECEIVE_SOME);
+  c_ExternalThreadEventWaitHandle* received{nullptr};
+  for (std::int64_t i{event.value.size()}; i-- > 0;) {
+    const auto order{event.value[i].asInt64Val()};
+    const auto ptr{replayer.m_threads.at(order)};
+    const auto wh{ptr->asExternalThreadEvent()};
+    wh->setNextToProcess(received);
+    received = wh;
+  }
+  return received;
 }
 
 void Replayer::requestInit() const {
@@ -258,10 +293,10 @@ TypedValue Replayer::unserialize(const String& recordedValue) {
 
 Object Replayer::makeWaitHandle(const NativeCall& call) {
   Object exc;
-  TypedValue ret;
+  TypedValue ret{immutable_uninit_base};
   if (!call.exc.empty()) {
     exc = unserialize<Object>(call.exc);
-  } else {
+  } else if (!call.ret.empty()) {
     ret = unserialize<TypedValue>(call.ret);
   }
   const auto kind{call.wh - 1};
@@ -276,9 +311,14 @@ Object Replayer::makeWaitHandle(const NativeCall& call) {
       m_threads[m_nextThreadCreationOrder++] = wh;
       return Object{wh};
     }
-    case c_Awaitable::Kind::Sleep:
-      Object HHVM_STATIC_METHOD(SleepWaitHandle, create, std::int64_t);
-      return HHVM_STATIC_MN(SleepWaitHandle, create)(nullptr, 0);
+    case c_Awaitable::Kind::Sleep: {
+      always_assert(ret.m_type == DataType::Int64);
+      auto wh{req::make<c_SleepWaitHandle>()};
+      wh->initialize(0);
+      using TimePoint = AsioSession::TimePoint;
+      wh->m_waketime = TimePoint{TimePoint::duration{ret.m_data.num}};
+      return Object{wh};
+    }
     case c_Awaitable::Kind::Static:
       if (exc) {
         return Object{c_StaticWaitHandle::CreateFailed(exc.detach())};
@@ -457,19 +497,6 @@ void Replayer::nativeArg(const String& recordedArg, TypedValue arg) {
 template<>
 void Replayer::nativeArg(const String& recordedArg, Variant& arg) {
   arg = unserialize<Variant>(recordedArg);
-}
-
-c_ExternalThreadEventWaitHandle* Replayer::onReceive(QueueCall::Method method) {
-  const auto call{std::move(m_queueCalls.front())};
-  m_queueCalls.pop_front();
-  always_assert(call.method == method);
-  c_ExternalThreadEventWaitHandle* received{nullptr};
-  for (std::int64_t i{call.value.size()}; i-- > 0;) {
-    auto wh{m_threads.at(call.value[i].asInt64Val())};
-    wh->setNextToProcess(received);
-    received = wh;
-  }
-  return received;
 }
 
 NativeCall Replayer::popNativeCall(std::uintptr_t id) {

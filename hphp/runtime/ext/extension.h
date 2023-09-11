@@ -17,7 +17,6 @@
 
 #pragma once
 
-#include "hphp/runtime/base/debuggable.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/native-func-table.h"
@@ -57,7 +56,7 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct Extension : IDebuggable {
+struct Extension {
   static bool IsSystemlibPath(const std::string& path);
 
   // Look for "ext.{namehash}" in the binary and compile/merge it
@@ -72,7 +71,7 @@ public:
   explicit Extension(const char name[],
                      const char version[],
                      const char oncall[]);
-  ~Extension() override {}
+  virtual ~Extension() {}
 
   const char* getName() const { return m_name; }
   const char* getVersion() const { return m_version; }

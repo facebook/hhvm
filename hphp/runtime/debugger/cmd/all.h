@@ -44,7 +44,6 @@
 #include "hphp/runtime/debugger/cmd/cmd_shell.h"
 #include "hphp/runtime/debugger/cmd/cmd_interrupt.h"
 #include "hphp/runtime/debugger/cmd/cmd_example.h"
-#include "hphp/runtime/debugger/cmd/cmd_extension.h"
 #include "hphp/runtime/debugger/cmd/cmd_signal.h"
 #include "hphp/runtime/debugger/cmd/cmd_macro.h"
 #include "hphp/runtime/debugger/cmd/cmd_config.h"

@@ -33,10 +33,6 @@ namespace HPHP {
 struct mysqlExtension final : Extension {
   mysqlExtension() : Extension("mysql", "1.0", "mysql_gateway") {}
 
-  // implementing IDebuggable
-  virtual int debuggerSupport() override;
-  virtual void debuggerInfo(InfoVec &info) override;
-
   static bool ReadOnly;
 #ifdef HHVM_FACEBOOK
   static bool Localize;

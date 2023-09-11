@@ -852,20 +852,6 @@ int mysqlExtension::MaxRetryQueryOnFail = 1;
 std::string mysqlExtension::Socket = "";
 bool mysqlExtension::TypedResults = true;
 
-int mysqlExtension::debuggerSupport() {
-  return SupportInfo;
-}
-
-void mysqlExtension::debuggerInfo(InfoVec &info) {
-  auto count = MySQL::NumCachedConnections();
-  Add(info, "Persistent", FormatNumber("%" PRId64, count));
-  AddServerStats(info, "sql.conn"       );
-  AddServerStats(info, "sql.reconn_new" );
-  AddServerStats(info, "sql.reconn_ok"  );
-  AddServerStats(info, "sql.reconn_old" );
-  AddServerStats(info, "sql.query"      );
-}
-
 void mysqlExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
   Config::Bind(ReadOnly, ini, config, "MySQL.ReadOnly", false);
 #ifdef HHVM_FACEBOOK

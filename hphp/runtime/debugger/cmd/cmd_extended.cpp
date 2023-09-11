@@ -177,7 +177,6 @@ bool CmdExtended::onServer(DebuggerProxy& /*proxy*/) {
 const ExtendedCommandMap &CmdExtended::GetExtendedCommandMap() {
   static ExtendedCommandMap s_command_map = {
     { "ample"    , "CmdExample" },
-    { "tension"  , "CmdExtension" },
   };
   return s_command_map;
 }
@@ -186,8 +185,6 @@ DebuggerCommandPtr CmdExtended::CreateExtendedCommand(const std::string &cls) {
   std::shared_ptr<CmdExtended> ret;
   if (cls == "CmdExample") {
     ret = std::make_shared<CmdExample>();
-  } else if (cls == "CmdExtension") {
-    ret = std::make_shared<CmdExtension>();
   }
 
   if (ret) {

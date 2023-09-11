@@ -800,11 +800,31 @@ template <typename Container, typename... Args>
 using emplace_hint_t = decltype(FOLLY_DECLVAL(Container).emplace_hint(
     FOLLY_DECLVAL(Container).end(), FOLLY_DECLVAL(Args)...));
 template <typename Container, typename... Args>
-auto emplace_at_end(Container& container, Args&&... args) {
-  if constexpr (folly::is_detected_v<emplace_hint_t, Container&, Args&&...>) {
-    return container.emplace_hint(container.end(), std::forward<Args>(args)...);
+using emplace_t = decltype(FOLLY_DECLVAL(Container).emplace(
+    FOLLY_DECLVAL(Container).end(), FOLLY_DECLVAL(Args)...));
+template <typename Container, typename Key, typename Value>
+auto& emplace_at_end(Container& container, Key&& key, Value&& val) {
+  if constexpr (folly::is_detected_v<emplace_hint_t, Container&, Key, Value>) {
+    return container
+        .emplace_hint(
+            container.end(), std::forward<Key>(key), std::forward<Value>(val))
+        ->second;
+  } else if constexpr (folly::
+                           is_detected_v<emplace_t, Container&, Key, Value>) {
+    return container.emplace(std::forward<Key>(key), std::forward<Value>(val))
+        .first->second;
   } else {
-    return container.emplace(std::forward<Args>(args)...).first;
+    return container[std::forward<Key>(key)];
+  }
+}
+template <typename Container, typename Value>
+void emplace_at_end(Container& container, Value&& val) {
+  if constexpr (folly::is_detected_v<emplace_hint_t, Container&, Value>) {
+    container.emplace_hint(container.end(), std::forward<Value>(val));
+  } else if constexpr (folly::is_detected_v<emplace_t, Container&, Value>) {
+    container.emplace(std::forward<Value>(val));
+  } else {
+    container.insert(std::forward<Value>(val));
   }
 }
 
@@ -837,11 +857,10 @@ struct Decode<type::set<Tag>> {
     set = sorted ? Set(sorted_unique, std::move(tmp)) : Set(std::move(tmp));
   }
 
-  // Handles set without sorted_unique property but has emplace_hint implemented
+  // Handles set without sorted_unique property
   template <typename Set, typename Protocol>
   static std::enable_if_t<
-      !apache::thrift::detail::pm::sorted_unique_constructible_v<Set> &&
-      apache::thrift::detail::pm::set_emplace_hint_is_invocable_v<Set>>
+      !apache::thrift::detail::pm::sorted_unique_constructible_v<Set>>
   decode_known_length_set(Protocol& prot, Set& set, std::uint32_t set_size) {
     apache::thrift::detail::pm::reserve_if_possible(&set, set_size);
 
@@ -849,23 +868,7 @@ struct Decode<type::set<Tag>> {
       typename Set::value_type value =
           apache::thrift::detail::default_set_element(set);
       Decode<Tag>{}(prot, value);
-      set.emplace_hint(set.end(), std::move(value));
-    }
-  }
-
-  // Handles set without sorted_unique property or emplace_hint
-  template <typename Set, typename Protocol>
-  static std::enable_if_t<
-      !apache::thrift::detail::pm::sorted_unique_constructible_v<Set> &&
-      !apache::thrift::detail::pm::set_emplace_hint_is_invocable_v<Set>>
-  decode_known_length_set(Protocol& prot, Set& set, std::uint32_t set_size) {
-    apache::thrift::detail::pm::reserve_if_possible(&set, set_size);
-
-    for (auto i = set_size; i--;) {
-      typename Set::value_type value =
-          apache::thrift::detail::default_set_element(set);
-      Decode<Tag>{}(prot, value);
-      set.insert(std::move(value));
+      emplace_at_end(set, std::move(value));
     }
   }
 
@@ -875,11 +878,7 @@ struct Decode<type::set<Tag>> {
     auto consumeElem = [&] {
       typename SetType::value_type value;
       Decode<Tag>{}(prot, value);
-      folly::overload(
-          [&](auto& c, int) -> decltype(c.emplace(std::move(value)).first) {
-            return emplace_at_end(c, std::move(value));
-          },
-          [&](auto& c, ...) { return c.insert(std::move(value)); })(set, 0);
+      emplace_at_end(set, std::move(value));
     };
     TType t;
     uint32_t s;
@@ -934,11 +933,10 @@ struct Decode<type::map<Key, Value>> {
     map = sorted ? Map(sorted_unique, std::move(tmp)) : Map(std::move(tmp));
   }
 
-  // Handles map without sorted_unique property but has emplace_hint implemented
+  // Handles map without sorted_unique property.
   template <typename Map, typename Protocol>
   static std::enable_if_t<
-      !apache::thrift::detail::pm::sorted_unique_constructible_v<Map> &&
-      apache::thrift::detail::pm::map_emplace_hint_is_invocable_v<Map>>
+      !apache::thrift::detail::pm::sorted_unique_constructible_v<Map>>
   decode_known_length_map(Protocol& prot, Map& map, std::uint32_t map_size) {
     apache::thrift::detail::pm::reserve_if_possible(&map, map_size);
 
@@ -948,7 +946,7 @@ struct Decode<type::map<Key, Value>> {
           apache::thrift::detail::default_map_value(map);
       Decode<Key>{}(prot, key);
       Decode<Value>{}(prot, value);
-      map.emplace_hint(map.end(), std::move(key), std::move(value));
+      emplace_at_end(map, std::move(key), std::move(value));
     }
   }
 
@@ -958,18 +956,9 @@ struct Decode<type::map<Key, Value>> {
     auto consumeElem = [&] {
       typename MapType::key_type key;
       Decode<Key>{}(prot, key);
-      auto iter = folly::overload(
-          [&](auto& c, int) -> decltype(c.emplace(
-                                             std::move(key),
-                                             typename MapType::mapped_type{})
-                                            .first) {
-            return emplace_at_end(
-                c, std::move(key), typename MapType::mapped_type{});
-          },
-          [&](auto& c, ...) {
-            return c.insert(std::move(key), typename MapType::mapped_type{});
-          })(map, 0);
-      Decode<Value>{}(prot, iter->second);
+      auto& val =
+          emplace_at_end(map, std::move(key), typename MapType::mapped_type{});
+      Decode<Value>{}(prot, val);
     };
 
     TType keyType, valueType;

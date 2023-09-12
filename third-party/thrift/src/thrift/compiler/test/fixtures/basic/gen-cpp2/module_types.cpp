@@ -169,7 +169,35 @@ bool MyStruct::__fbthrift_is_empty() const {
 }
 
 bool MyStruct::operator==(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.MyIntField_ref() == rhs.MyIntField_ref())) {
+    return false;
+  }
+  if (!(lhs.MyStringField_ref() == rhs.MyStringField_ref())) {
+    return false;
+  }
+  if (!(lhs.MyDataField_ref() == rhs.MyDataField_ref())) {
+    return false;
+  }
+  if (!(lhs.myEnum_ref() == rhs.myEnum_ref())) {
+    return false;
+  }
+  if (!(lhs.oneway_ref() == rhs.oneway_ref())) {
+    return false;
+  }
+  if (!(lhs.readonly_ref() == rhs.readonly_ref())) {
+    return false;
+  }
+  if (!(lhs.idempotent_ref() == rhs.idempotent_ref())) {
+    return false;
+  }
+  if (!(lhs.floatSet_ref() == rhs.floatSet_ref())) {
+    return false;
+  }
+  if (!(lhs.no_hack_codegen_field_ref() == rhs.no_hack_codegen_field_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool MyStruct::operator<(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
@@ -276,7 +304,8 @@ bool MyDataItem::__fbthrift_is_empty() const {
 }
 
 bool MyDataItem::operator==(FOLLY_MAYBE_UNUSED const MyDataItem& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  return true;
 }
 
 bool MyDataItem::operator<(FOLLY_MAYBE_UNUSED const MyDataItem& rhs) const {
@@ -472,7 +501,11 @@ bool ReservedKeyword::__fbthrift_is_empty() const {
 }
 
 bool ReservedKeyword::operator==(FOLLY_MAYBE_UNUSED const ReservedKeyword& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.reserved_field_ref() == rhs.reserved_field_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool ReservedKeyword::operator<(FOLLY_MAYBE_UNUSED const ReservedKeyword& rhs) const {

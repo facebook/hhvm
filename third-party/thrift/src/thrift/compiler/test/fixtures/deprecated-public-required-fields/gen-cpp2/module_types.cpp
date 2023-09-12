@@ -62,7 +62,11 @@ bool Foo::__fbthrift_is_empty() const {
 }
 
 bool Foo::operator==(FOLLY_MAYBE_UNUSED const Foo& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.field_ref() == rhs.field_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool Foo::operator<(FOLLY_MAYBE_UNUSED const Foo& rhs) const {

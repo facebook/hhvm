@@ -67,7 +67,14 @@ bool Included::__fbthrift_is_empty() const {
 }
 
 bool Included::operator==(FOLLY_MAYBE_UNUSED const Included& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.MyIntField_ref() == rhs.MyIntField_ref())) {
+    return false;
+  }
+  if (!(lhs.MyTransitiveField_ref() == rhs.MyTransitiveField_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool Included::operator<(FOLLY_MAYBE_UNUSED const Included& rhs) const {

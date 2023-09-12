@@ -163,7 +163,32 @@ bool MyStruct::__fbthrift_is_empty() const {
 }
 
 bool MyStruct::operator==(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.inty_ref() == rhs.inty_ref())) {
+    return false;
+  }
+  if (!(lhs.stringy_ref() == rhs.stringy_ref())) {
+    return false;
+  }
+  if (!(lhs.myItemy_ref() == rhs.myItemy_ref())) {
+    return false;
+  }
+  if (!(lhs.myEnumy_ref() == rhs.myEnumy_ref())) {
+    return false;
+  }
+  if (!(lhs.boulet_ref() == rhs.boulet_ref())) {
+    return false;
+  }
+  if (!(lhs.floatListy_ref() == rhs.floatListy_ref())) {
+    return false;
+  }
+  if (!(lhs.strMappy_ref() == rhs.strMappy_ref())) {
+    return false;
+  }
+  if (!(lhs.intSetty_ref() == rhs.intSetty_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool MyStruct::operator<(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
@@ -309,7 +334,11 @@ bool MyDataItem::__fbthrift_is_empty() const {
 }
 
 bool MyDataItem::operator==(FOLLY_MAYBE_UNUSED const MyDataItem& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.s_ref() == rhs.s_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool MyDataItem::operator<(FOLLY_MAYBE_UNUSED const MyDataItem& rhs) const {
@@ -386,7 +415,8 @@ bool TransitiveDoubler::__fbthrift_is_empty() const {
 }
 
 bool TransitiveDoubler::operator==(FOLLY_MAYBE_UNUSED const TransitiveDoubler& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  return true;
 }
 
 bool TransitiveDoubler::operator<(FOLLY_MAYBE_UNUSED const TransitiveDoubler& rhs) const {
@@ -492,7 +522,14 @@ bool DoubledPair::__fbthrift_is_empty() const {
 }
 
 bool DoubledPair::operator==(FOLLY_MAYBE_UNUSED const DoubledPair& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.s_ref() == rhs.s_ref())) {
+    return false;
+  }
+  if (!(lhs.x_ref() == rhs.x_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool DoubledPair::operator<(FOLLY_MAYBE_UNUSED const DoubledPair& rhs) const {
@@ -614,7 +651,14 @@ bool StringPair::__fbthrift_is_empty() const {
 }
 
 bool StringPair::operator==(FOLLY_MAYBE_UNUSED const StringPair& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.normal_ref() == rhs.normal_ref())) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::thrift::test::lib::StringDoubler>(lhs.__fbthrift_field_doubled, rhs.__fbthrift_field_doubled)) {
+    return false;
+  }
+  return true;
 }
 
 bool StringPair::operator<(FOLLY_MAYBE_UNUSED const StringPair& rhs) const {
@@ -692,7 +736,8 @@ bool VapidStruct::__fbthrift_is_empty() const {
 }
 
 bool VapidStruct::operator==(FOLLY_MAYBE_UNUSED const VapidStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  return true;
 }
 
 bool VapidStruct::operator<(FOLLY_MAYBE_UNUSED const VapidStruct& rhs) const {
@@ -894,7 +939,56 @@ bool PrimitiveStruct::__fbthrift_is_empty() const {
 }
 
 bool PrimitiveStruct::operator==(FOLLY_MAYBE_UNUSED const PrimitiveStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.booly_ref() == rhs.booly_ref())) {
+    return false;
+  }
+  if (!(lhs.charry_ref() == rhs.charry_ref())) {
+    return false;
+  }
+  if (!(lhs.shortay_ref() == rhs.shortay_ref())) {
+    return false;
+  }
+  if (!(lhs.inty_ref() == rhs.inty_ref())) {
+    return false;
+  }
+  if (!(lhs.longy_ref() == rhs.longy_ref())) {
+    return false;
+  }
+  if (!(lhs.floaty_ref() == rhs.floaty_ref())) {
+    return false;
+  }
+  if ((!::apache::thrift::detail::pointer_equal(lhs.dubby_ref(), rhs.dubby_ref()))) {
+    return false;
+  }
+  if ((!::apache::thrift::detail::pointer_equal(lhs.stringy_ref(), rhs.stringy_ref()))) {
+    return false;
+  }
+  if ((!::apache::thrift::detail::pointer_equal(lhs.bytey_ref(), rhs.bytey_ref()))) {
+    return false;
+  }
+  if (!apache::thrift::StringTraits<folly::IOBuf>::isEqual(lhs.__fbthrift_field_buffy, rhs.__fbthrift_field_buffy)) {
+    return false;
+  }
+  if (!apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::isEqual(lhs.__fbthrift_field_pointbuffy, rhs.__fbthrift_field_pointbuffy)) {
+    return false;
+  }
+  if (!(lhs.patched_struct_ref() == rhs.patched_struct_ref())) {
+    return false;
+  }
+  if (!(lhs.empty_struct_ref() == rhs.empty_struct_ref())) {
+    return false;
+  }
+  if (!apache::thrift::StringTraits<folly::fbstring>::isEqual(lhs.__fbthrift_field_fbstring, rhs.__fbthrift_field_fbstring)) {
+    return false;
+  }
+  if (!(lhs.managed_string_view_ref() == rhs.managed_string_view_ref())) {
+    return false;
+  }
+  if (!(lhs.some_error_ref() == rhs.some_error_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool PrimitiveStruct::operator<(FOLLY_MAYBE_UNUSED const PrimitiveStruct& rhs) const {
@@ -1083,7 +1177,20 @@ bool AdaptedFields::__fbthrift_is_empty() const {
 }
 
 bool AdaptedFields::operator==(FOLLY_MAYBE_UNUSED const AdaptedFields& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ProtocolId>>(lhs.__fbthrift_field_adapted_int, rhs.__fbthrift_field_adapted_int)) {
+    return false;
+  }
+  if (!(lhs.list_adapted_int_ref() == rhs.list_adapted_int_ref())) {
+    return false;
+  }
+  if (!(lhs.set_adapted_int_ref() == rhs.set_adapted_int_ref())) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ValueId>>(lhs.__fbthrift_field_inline_adapted_int, rhs.__fbthrift_field_inline_adapted_int)) {
+    return false;
+  }
+  return true;
 }
 
 bool AdaptedFields::operator<(FOLLY_MAYBE_UNUSED const AdaptedFields& rhs) const {
@@ -1240,7 +1347,35 @@ bool ListStruct::__fbthrift_is_empty() const {
 }
 
 bool ListStruct::operator==(FOLLY_MAYBE_UNUSED const ListStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.boolz_ref() == rhs.boolz_ref())) {
+    return false;
+  }
+  if (!(lhs.intz_ref() == rhs.intz_ref())) {
+    return false;
+  }
+  if ((!::apache::thrift::detail::pointer_equal(lhs.stringz_ref(), rhs.stringz_ref()))) {
+    return false;
+  }
+  if (!(lhs.encoded_ref() == rhs.encoded_ref())) {
+    return false;
+  }
+  if (!(lhs.uidz_ref() == rhs.uidz_ref())) {
+    return false;
+  }
+  if (!(lhs.matrix_ref() == rhs.matrix_ref())) {
+    return false;
+  }
+  if (!(lhs.ucharz_ref() == rhs.ucharz_ref())) {
+    return false;
+  }
+  if (!(lhs.voxels_ref() == rhs.voxels_ref())) {
+    return false;
+  }
+  if (!(lhs.buf_ptrs_ref() == rhs.buf_ptrs_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool ListStruct::operator<(FOLLY_MAYBE_UNUSED const ListStruct& rhs) const {
@@ -1442,7 +1577,29 @@ bool SetStruct::__fbthrift_is_empty() const {
 }
 
 bool SetStruct::operator==(FOLLY_MAYBE_UNUSED const SetStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.enumz_ref() == rhs.enumz_ref())) {
+    return false;
+  }
+  if (!(lhs.intz_ref() == rhs.intz_ref())) {
+    return false;
+  }
+  if ((!::apache::thrift::detail::pointer_equal(lhs.binnaz_ref(), rhs.binnaz_ref()))) {
+    return false;
+  }
+  if (!(lhs.encoded_ref() == rhs.encoded_ref())) {
+    return false;
+  }
+  if (!(lhs.uidz_ref() == rhs.uidz_ref())) {
+    return false;
+  }
+  if (!(lhs.charz_ref() == rhs.charz_ref())) {
+    return false;
+  }
+  if (!(lhs.setz_ref() == rhs.setz_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool SetStruct::operator<(FOLLY_MAYBE_UNUSED const SetStruct& rhs) const {
@@ -1660,7 +1817,38 @@ bool MapStruct::__fbthrift_is_empty() const {
 }
 
 bool MapStruct::operator==(FOLLY_MAYBE_UNUSED const MapStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.enumz_ref() == rhs.enumz_ref())) {
+    return false;
+  }
+  if (!(lhs.intz_ref() == rhs.intz_ref())) {
+    return false;
+  }
+  if ((!::apache::thrift::detail::pointer_equal(lhs.binnaz_ref(), rhs.binnaz_ref()))) {
+    return false;
+  }
+  if (!(lhs.encoded_ref() == rhs.encoded_ref())) {
+    return false;
+  }
+  if (!(lhs.flotz_ref() == rhs.flotz_ref())) {
+    return false;
+  }
+  if (!(lhs.map_list_ref() == rhs.map_list_ref())) {
+    return false;
+  }
+  if (!(lhs.list_map_ref() == rhs.list_map_ref())) {
+    return false;
+  }
+  if (!(lhs.fast_list_map_ref() == rhs.fast_list_map_ref())) {
+    return false;
+  }
+  if (!(lhs.buf_map_ref() == rhs.buf_map_ref())) {
+    return false;
+  }
+  if (!(lhs.unsigned_list_map_ref() == rhs.unsigned_list_map_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool MapStruct::operator<(FOLLY_MAYBE_UNUSED const MapStruct& rhs) const {
@@ -1894,7 +2082,38 @@ bool ComposeStruct::__fbthrift_is_empty() const {
 }
 
 bool ComposeStruct::operator==(FOLLY_MAYBE_UNUSED const ComposeStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.enum__ref() == rhs.enum__ref())) {
+    return false;
+  }
+  if (!(lhs.renamed__ref() == rhs.renamed__ref())) {
+    return false;
+  }
+  if (!(lhs.primitive_ref() == rhs.primitive_ref())) {
+    return false;
+  }
+  if ((!::apache::thrift::detail::pointer_equal(lhs.aliased_ref(), rhs.aliased_ref()))) {
+    return false;
+  }
+  if (!(lhs.xenum_ref() == rhs.xenum_ref())) {
+    return false;
+  }
+  if (!(lhs.xstruct_ref() == rhs.xstruct_ref())) {
+    return false;
+  }
+  if (!(lhs.friends_ref() == rhs.friends_ref())) {
+    return false;
+  }
+  if (!(lhs.serial_struct_ref() == rhs.serial_struct_ref())) {
+    return false;
+  }
+  if (!(lhs.serial_union_ref() == rhs.serial_union_ref())) {
+    return false;
+  }
+  if (!(lhs.serial_error_ref() == rhs.serial_error_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool ComposeStruct::operator<(FOLLY_MAYBE_UNUSED const ComposeStruct& rhs) const {
@@ -2259,7 +2478,26 @@ bool MyStructPatchStruct::__fbthrift_is_empty() const {
 }
 
 bool MyStructPatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyStructPatchStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if ((!::apache::thrift::detail::pointer_equal(lhs.assign_ref(), rhs.assign_ref()))) {
+    return false;
+  }
+  if (!(lhs.clear_ref() == rhs.clear_ref())) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::python_capi::MyStructFieldPatchStruct>>(lhs.__fbthrift_field_patchPrior, rhs.__fbthrift_field_patchPrior)) {
+    return false;
+  }
+  if (!(lhs.ensure_ref() == rhs.ensure_ref())) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::python_capi::MyStructFieldPatchStruct>>(lhs.__fbthrift_field_patch, rhs.__fbthrift_field_patch)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::FieldIdListToSetAdapter>(lhs.__fbthrift_field_remove, rhs.__fbthrift_field_remove)) {
+    return false;
+  }
+  return true;
 }
 
 bool MyStructPatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyStructPatchStruct& rhs) const {
@@ -2381,7 +2619,14 @@ bool MyStructField4PatchStruct::__fbthrift_is_empty() const {
 }
 
 bool MyStructField4PatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyStructField4PatchStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.assign_ref() == rhs.assign_ref())) {
+    return false;
+  }
+  if (!(lhs.clear_ref() == rhs.clear_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool MyStructField4PatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyStructField4PatchStruct& rhs) const {
@@ -2502,7 +2747,20 @@ bool MyStructField6PatchStruct::__fbthrift_is_empty() const {
 }
 
 bool MyStructField6PatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyStructField6PatchStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.assign_ref() == rhs.assign_ref())) {
+    return false;
+  }
+  if (!(lhs.clear_ref() == rhs.clear_ref())) {
+    return false;
+  }
+  if (!(lhs.prepend_ref() == rhs.prepend_ref())) {
+    return false;
+  }
+  if (!(lhs.append_ref() == rhs.append_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool MyStructField6PatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyStructField6PatchStruct& rhs) const {
@@ -2667,7 +2925,29 @@ bool MyStructField7PatchStruct::__fbthrift_is_empty() const {
 }
 
 bool MyStructField7PatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyStructField7PatchStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.assign_ref() == rhs.assign_ref())) {
+    return false;
+  }
+  if (!(lhs.clear_ref() == rhs.clear_ref())) {
+    return false;
+  }
+  if (!(lhs.patchPrior_ref() == rhs.patchPrior_ref())) {
+    return false;
+  }
+  if (!(lhs.add_ref() == rhs.add_ref())) {
+    return false;
+  }
+  if (!(lhs.patch_ref() == rhs.patch_ref())) {
+    return false;
+  }
+  if (!(lhs.remove_ref() == rhs.remove_ref())) {
+    return false;
+  }
+  if (!(lhs.put_ref() == rhs.put_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool MyStructField7PatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyStructField7PatchStruct& rhs) const {
@@ -2853,7 +3133,20 @@ bool MyStructField8PatchStruct::__fbthrift_is_empty() const {
 }
 
 bool MyStructField8PatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyStructField8PatchStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.assign_ref() == rhs.assign_ref())) {
+    return false;
+  }
+  if (!(lhs.clear_ref() == rhs.clear_ref())) {
+    return false;
+  }
+  if (!(lhs.remove_ref() == rhs.remove_ref())) {
+    return false;
+  }
+  if (!(lhs.add_ref() == rhs.add_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool MyStructField8PatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyStructField8PatchStruct& rhs) const {
@@ -3067,7 +3360,32 @@ bool MyStructFieldPatchStruct::__fbthrift_is_empty() const {
 }
 
 bool MyStructFieldPatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyStructFieldPatchStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!::apache::thrift::op::equal<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I64PatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::I64PatchStruct>>>(*lhs.__fbthrift_field_inty, *rhs.__fbthrift_field_inty)) {
+    return false;
+  }
+  if (!::apache::thrift::op::equal<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>(*lhs.__fbthrift_field_stringy, *rhs.__fbthrift_field_stringy)) {
+    return false;
+  }
+  if (!::apache::thrift::op::equal<::apache::thrift::type::adapted<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::python_capi::MyDataItemPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::python_capi::MyDataItemPatchStruct>>>(*lhs.__fbthrift_field_myItemy, *rhs.__fbthrift_field_myItemy)) {
+    return false;
+  }
+  if (!::apache::thrift::op::equal<::apache::thrift::type::adapted<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::python_capi::MyStructField4PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::python_capi::MyStructField4PatchStruct>>>(*lhs.__fbthrift_field_myEnumy, *rhs.__fbthrift_field_myEnumy)) {
+    return false;
+  }
+  if (!::apache::thrift::op::equal<::apache::thrift::type::adapted<::apache::thrift::op::detail::BoolPatchAdapter<::apache::thrift::op::BoolPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::BoolPatchStruct>>>(*lhs.__fbthrift_field_booly, *rhs.__fbthrift_field_booly)) {
+    return false;
+  }
+  if (!::apache::thrift::op::equal<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::python_capi::MyStructField6PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::python_capi::MyStructField6PatchStruct>>>(*lhs.__fbthrift_field_floatListy, *rhs.__fbthrift_field_floatListy)) {
+    return false;
+  }
+  if (!::apache::thrift::op::equal<::apache::thrift::type::adapted<::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::python_capi::MyStructField7PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::python_capi::MyStructField7PatchStruct>>>(*lhs.__fbthrift_field_strMappy, *rhs.__fbthrift_field_strMappy)) {
+    return false;
+  }
+  if (!::apache::thrift::op::equal<::apache::thrift::type::adapted<::apache::thrift::op::detail::SetPatchAdapter<::test::fixtures::python_capi::MyStructField8PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::python_capi::MyStructField8PatchStruct>>>(*lhs.__fbthrift_field_intSetty, *rhs.__fbthrift_field_intSetty)) {
+    return false;
+  }
+  return true;
 }
 
 bool MyStructFieldPatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyStructFieldPatchStruct& rhs) const {
@@ -3266,7 +3584,32 @@ bool MyStructEnsureStruct::__fbthrift_is_empty() const {
 }
 
 bool MyStructEnsureStruct::operator==(FOLLY_MAYBE_UNUSED const MyStructEnsureStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.inty_ref() == rhs.inty_ref())) {
+    return false;
+  }
+  if (!(lhs.stringy_ref() == rhs.stringy_ref())) {
+    return false;
+  }
+  if ((!::apache::thrift::detail::pointer_equal(lhs.myItemy_ref(), rhs.myItemy_ref()))) {
+    return false;
+  }
+  if (!(lhs.myEnumy_ref() == rhs.myEnumy_ref())) {
+    return false;
+  }
+  if (!(lhs.booly_ref() == rhs.booly_ref())) {
+    return false;
+  }
+  if (!(lhs.floatListy_ref() == rhs.floatListy_ref())) {
+    return false;
+  }
+  if (!(lhs.strMappy_ref() == rhs.strMappy_ref())) {
+    return false;
+  }
+  if (!(lhs.intSetty_ref() == rhs.intSetty_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool MyStructEnsureStruct::operator<(FOLLY_MAYBE_UNUSED const MyStructEnsureStruct& rhs) const {
@@ -3456,7 +3799,26 @@ bool MyDataItemPatchStruct::__fbthrift_is_empty() const {
 }
 
 bool MyDataItemPatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyDataItemPatchStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if ((!::apache::thrift::detail::pointer_equal(lhs.assign_ref(), rhs.assign_ref()))) {
+    return false;
+  }
+  if (!(lhs.clear_ref() == rhs.clear_ref())) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::python_capi::MyDataItemFieldPatchStruct>>(lhs.__fbthrift_field_patchPrior, rhs.__fbthrift_field_patchPrior)) {
+    return false;
+  }
+  if (!(lhs.ensure_ref() == rhs.ensure_ref())) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::python_capi::MyDataItemFieldPatchStruct>>(lhs.__fbthrift_field_patch, rhs.__fbthrift_field_patch)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::FieldIdListToSetAdapter>(lhs.__fbthrift_field_remove, rhs.__fbthrift_field_remove)) {
+    return false;
+  }
+  return true;
 }
 
 bool MyDataItemPatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyDataItemPatchStruct& rhs) const {
@@ -3602,7 +3964,11 @@ bool MyDataItemFieldPatchStruct::__fbthrift_is_empty() const {
 }
 
 bool MyDataItemFieldPatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyDataItemFieldPatchStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!::apache::thrift::op::equal<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>(*lhs.__fbthrift_field_s, *rhs.__fbthrift_field_s)) {
+    return false;
+  }
+  return true;
 }
 
 bool MyDataItemFieldPatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyDataItemFieldPatchStruct& rhs) const {
@@ -3708,7 +4074,11 @@ bool MyDataItemEnsureStruct::__fbthrift_is_empty() const {
 }
 
 bool MyDataItemEnsureStruct::operator==(FOLLY_MAYBE_UNUSED const MyDataItemEnsureStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.s_ref() == rhs.s_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool MyDataItemEnsureStruct::operator<(FOLLY_MAYBE_UNUSED const MyDataItemEnsureStruct& rhs) const {

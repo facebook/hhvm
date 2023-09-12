@@ -131,7 +131,14 @@ bool MyAnnotation::__fbthrift_is_empty() const {
 }
 
 bool MyAnnotation::operator==(FOLLY_MAYBE_UNUSED const MyAnnotation& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.signature_ref() == rhs.signature_ref())) {
+    return false;
+  }
+  if (!(lhs.color_ref() == rhs.color_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool MyAnnotation::operator<(FOLLY_MAYBE_UNUSED const MyAnnotation& rhs) const {
@@ -352,7 +359,41 @@ bool Foo::__fbthrift_is_empty() const {
 }
 
 bool Foo::operator==(FOLLY_MAYBE_UNUSED const Foo& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter1>(lhs.__fbthrift_field_intField, rhs.__fbthrift_field_intField)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal_opt<::my::Adapter1>(lhs.optionalIntField_ref(), rhs.optionalIntField_ref())) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter1>(lhs.__fbthrift_field_intFieldWithDefault, rhs.__fbthrift_field_intFieldWithDefault)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter2>(lhs.__fbthrift_field_setField, rhs.__fbthrift_field_setField)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal_opt<::my::Adapter2>(lhs.optionalSetField_ref(), rhs.optionalSetField_ref())) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter3>(lhs.__fbthrift_field_mapField, rhs.__fbthrift_field_mapField)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal_opt<::my::Adapter3>(lhs.optionalMapField_ref(), rhs.optionalMapField_ref())) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter3>(lhs.__fbthrift_field_binaryField, rhs.__fbthrift_field_binaryField)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter1>(lhs.__fbthrift_field_longField, rhs.__fbthrift_field_longField)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter2>(lhs.__fbthrift_field_adaptedLongField, rhs.__fbthrift_field_adaptedLongField)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter1>(lhs.__fbthrift_field_doubleAdaptedField, rhs.__fbthrift_field_doubleAdaptedField)) {
+    return false;
+  }
+  return true;
 }
 
 bool Foo::operator<(FOLLY_MAYBE_UNUSED const Foo& rhs) const {
@@ -635,7 +676,29 @@ bool Bar::__fbthrift_is_empty() const {
 }
 
 bool Bar::operator==(FOLLY_MAYBE_UNUSED const Bar& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter1>(lhs.__fbthrift_field_structField, rhs.__fbthrift_field_structField)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal_opt<::my::Adapter1>(lhs.optionalStructField_ref(), rhs.optionalStructField_ref())) {
+    return false;
+  }
+  if (!(lhs.structListField_ref() == rhs.structListField_ref())) {
+    return false;
+  }
+  if (!(lhs.optionalStructListField_ref() == rhs.optionalStructListField_ref())) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter1>(lhs.__fbthrift_field_unionField, rhs.__fbthrift_field_unionField)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal_opt<::my::Adapter1>(lhs.optionalUnionField_ref(), rhs.optionalUnionField_ref())) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter>(lhs.__fbthrift_field_adaptedStructField, rhs.__fbthrift_field_adaptedStructField)) {
+    return false;
+  }
+  return true;
 }
 
 bool Bar::operator<(FOLLY_MAYBE_UNUSED const Bar& rhs) const {
@@ -770,7 +833,11 @@ bool DirectlyAdapted::__fbthrift_is_empty() const {
 }
 
 bool DirectlyAdapted::operator==(FOLLY_MAYBE_UNUSED const DirectlyAdapted& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.field_ref() == rhs.field_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool DirectlyAdapted::operator<(FOLLY_MAYBE_UNUSED const DirectlyAdapted& rhs) const {
@@ -854,7 +921,11 @@ bool IndependentDirectlyAdapted::__fbthrift_is_empty() const {
 }
 
 bool IndependentDirectlyAdapted::operator==(FOLLY_MAYBE_UNUSED const IndependentDirectlyAdapted& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.field_ref() == rhs.field_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool IndependentDirectlyAdapted::operator<(FOLLY_MAYBE_UNUSED const IndependentDirectlyAdapted& rhs) const {
@@ -996,7 +1067,20 @@ bool StructWithFieldAdapter::__fbthrift_is_empty() const {
 }
 
 bool StructWithFieldAdapter::operator==(FOLLY_MAYBE_UNUSED const StructWithFieldAdapter& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter1>(lhs.__fbthrift_field_field, rhs.__fbthrift_field_field)) {
+    return false;
+  }
+  if ((!::apache::thrift::detail::pointer_equal(lhs.shared_field_ref(), rhs.shared_field_ref()))) {
+    return false;
+  }
+  if ((!::apache::thrift::detail::pointer_equal(lhs.opt_shared_field_ref(), rhs.opt_shared_field_ref()))) {
+    return false;
+  }
+  if ((!::apache::thrift::detail::pointer_equal(lhs.opt_boxed_field_ref(), rhs.opt_boxed_field_ref()))) {
+    return false;
+  }
+  return true;
 }
 
 bool StructWithFieldAdapter::operator<(FOLLY_MAYBE_UNUSED const StructWithFieldAdapter& rhs) const {
@@ -1132,7 +1216,17 @@ bool TerseAdaptedFields::__fbthrift_is_empty() const {
 }
 
 bool TerseAdaptedFields::operator==(FOLLY_MAYBE_UNUSED const TerseAdaptedFields& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter1>(lhs.__fbthrift_field_int_field, rhs.__fbthrift_field_int_field)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter1>(lhs.__fbthrift_field_string_field, rhs.__fbthrift_field_string_field)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter1>(lhs.__fbthrift_field_set_field, rhs.__fbthrift_field_set_field)) {
+    return false;
+  }
+  return true;
 }
 
 bool TerseAdaptedFields::operator<(FOLLY_MAYBE_UNUSED const TerseAdaptedFields& rhs) const {
@@ -1239,7 +1333,11 @@ bool B::__fbthrift_is_empty() const {
 }
 
 bool B::operator==(FOLLY_MAYBE_UNUSED const B& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter>(lhs.__fbthrift_field_a, rhs.__fbthrift_field_a)) {
+    return false;
+  }
+  return true;
 }
 
 bool B::operator<(FOLLY_MAYBE_UNUSED const B& rhs) const {
@@ -1322,7 +1420,8 @@ bool A::__fbthrift_is_empty() const {
 }
 
 bool A::operator==(FOLLY_MAYBE_UNUSED const A& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  return true;
 }
 
 bool A::operator<(FOLLY_MAYBE_UNUSED const A& rhs) const {
@@ -1421,7 +1520,11 @@ bool Config::__fbthrift_is_empty() const {
 }
 
 bool Config::operator==(FOLLY_MAYBE_UNUSED const Config& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.path_ref() == rhs.path_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool Config::operator<(FOLLY_MAYBE_UNUSED const Config& rhs) const {
@@ -1542,7 +1645,14 @@ bool MyStruct::__fbthrift_is_empty() const {
 }
 
 bool MyStruct::operator==(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.field_ref() == rhs.field_ref())) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter2>(lhs.__fbthrift_field_set_string, rhs.__fbthrift_field_set_string)) {
+    return false;
+  }
+  return true;
 }
 
 bool MyStruct::operator<(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
@@ -1748,7 +1858,38 @@ bool AdaptTestStruct::__fbthrift_is_empty() const {
 }
 
 bool AdaptTestStruct::operator==(FOLLY_MAYBE_UNUSED const AdaptTestStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::test::AdaptTestMsAdapter>(lhs.__fbthrift_field_delay, rhs.__fbthrift_field_delay)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::test::CustomProtocolAdapter>(lhs.__fbthrift_field_custom, rhs.__fbthrift_field_custom)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::test::AdaptTestMsAdapter>(lhs.__fbthrift_field_timeout, rhs.__fbthrift_field_timeout)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::test::AdapterWithContext>(lhs.__fbthrift_field_data, rhs.__fbthrift_field_data)) {
+    return false;
+  }
+  if (!(lhs.meta_ref() == rhs.meta_ref())) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::IndirectionAdapter<::apache::thrift::test::IndirectionString>>(lhs.__fbthrift_field_indirectionString, rhs.__fbthrift_field_indirectionString)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::test::AdapterWithContext>(lhs.__fbthrift_field_string_data, rhs.__fbthrift_field_string_data)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::test::TemplatedTestAdapter>(lhs.__fbthrift_field_double_wrapped_bool, rhs.__fbthrift_field_double_wrapped_bool)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::test::AdapterWithContext>(lhs.__fbthrift_field_double_wrapped_integer, rhs.__fbthrift_field_double_wrapped_integer)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::test::AdapterWithContext>(lhs.__fbthrift_field_binary_data, rhs.__fbthrift_field_binary_data)) {
+    return false;
+  }
+  return true;
 }
 
 bool AdaptTestStruct::operator<(FOLLY_MAYBE_UNUSED const AdaptTestStruct& rhs) const {
@@ -2099,7 +2240,74 @@ bool AdaptTemplatedTestStruct::__fbthrift_is_empty() const {
 }
 
 bool AdaptTemplatedTestStruct::operator==(FOLLY_MAYBE_UNUSED const AdaptTemplatedTestStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::test::TemplatedTestAdapter>(lhs.__fbthrift_field_adaptedBool, rhs.__fbthrift_field_adaptedBool)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::test::TemplatedTestAdapter>(lhs.__fbthrift_field_adaptedByte, rhs.__fbthrift_field_adaptedByte)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::test::TemplatedTestAdapter>(lhs.__fbthrift_field_adaptedShort, rhs.__fbthrift_field_adaptedShort)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::test::TemplatedTestAdapter>(lhs.__fbthrift_field_adaptedInteger, rhs.__fbthrift_field_adaptedInteger)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::test::TemplatedTestAdapter>(lhs.__fbthrift_field_adaptedLong, rhs.__fbthrift_field_adaptedLong)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::test::TemplatedTestAdapter>(lhs.__fbthrift_field_adaptedDouble, rhs.__fbthrift_field_adaptedDouble)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::test::TemplatedTestAdapter>(lhs.__fbthrift_field_adaptedString, rhs.__fbthrift_field_adaptedString)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::test::TemplatedTestAdapter>(lhs.__fbthrift_field_adaptedList, rhs.__fbthrift_field_adaptedList)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::test::TemplatedTestAdapter>(lhs.__fbthrift_field_adaptedSet, rhs.__fbthrift_field_adaptedSet)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::test::TemplatedTestAdapter>(lhs.__fbthrift_field_adaptedMap, rhs.__fbthrift_field_adaptedMap)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::test::TemplatedTestAdapter>(lhs.__fbthrift_field_adaptedBoolDefault, rhs.__fbthrift_field_adaptedBoolDefault)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::test::TemplatedTestAdapter>(lhs.__fbthrift_field_adaptedByteDefault, rhs.__fbthrift_field_adaptedByteDefault)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::test::TemplatedTestAdapter>(lhs.__fbthrift_field_adaptedShortDefault, rhs.__fbthrift_field_adaptedShortDefault)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::test::TemplatedTestAdapter>(lhs.__fbthrift_field_adaptedIntegerDefault, rhs.__fbthrift_field_adaptedIntegerDefault)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::test::TemplatedTestAdapter>(lhs.__fbthrift_field_adaptedLongDefault, rhs.__fbthrift_field_adaptedLongDefault)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::test::TemplatedTestAdapter>(lhs.__fbthrift_field_adaptedDoubleDefault, rhs.__fbthrift_field_adaptedDoubleDefault)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::test::TemplatedTestAdapter>(lhs.__fbthrift_field_adaptedStringDefault, rhs.__fbthrift_field_adaptedStringDefault)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::StaticCastAdapter<::apache::thrift::test::basic::AdaptedEnum, ::apache::thrift::test::basic::ThriftAdaptedEnum>>(lhs.__fbthrift_field_adaptedEnum, rhs.__fbthrift_field_adaptedEnum)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::test::TemplatedTestAdapter>(lhs.__fbthrift_field_adaptedListDefault, rhs.__fbthrift_field_adaptedListDefault)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::test::TemplatedTestAdapter>(lhs.__fbthrift_field_adaptedSetDefault, rhs.__fbthrift_field_adaptedSetDefault)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::test::TemplatedTestAdapter>(lhs.__fbthrift_field_adaptedMapDefault, rhs.__fbthrift_field_adaptedMapDefault)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::test::TemplatedTestAdapter>(lhs.__fbthrift_field_doubleTypedefBool, rhs.__fbthrift_field_doubleTypedefBool)) {
+    return false;
+  }
+  return true;
 }
 
 bool AdaptTemplatedTestStruct::operator<(FOLLY_MAYBE_UNUSED const AdaptTemplatedTestStruct& rhs) const {
@@ -2215,7 +2423,11 @@ bool AdaptTemplatedNestedTestStruct::__fbthrift_is_empty() const {
 }
 
 bool AdaptTemplatedNestedTestStruct::operator==(FOLLY_MAYBE_UNUSED const AdaptTemplatedNestedTestStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.adaptedStruct_ref() == rhs.adaptedStruct_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool AdaptTemplatedNestedTestStruct::operator<(FOLLY_MAYBE_UNUSED const AdaptTemplatedNestedTestStruct& rhs) const {
@@ -2409,7 +2621,11 @@ bool ThriftAdaptedStruct::__fbthrift_is_empty() const {
 }
 
 bool ThriftAdaptedStruct::operator==(FOLLY_MAYBE_UNUSED const ThriftAdaptedStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.data_ref() == rhs.data_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool ThriftAdaptedStruct::operator<(FOLLY_MAYBE_UNUSED const ThriftAdaptedStruct& rhs) const {
@@ -2492,7 +2708,11 @@ bool DirectlyAdaptedStruct::__fbthrift_is_empty() const {
 }
 
 bool DirectlyAdaptedStruct::operator==(FOLLY_MAYBE_UNUSED const DirectlyAdaptedStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.data_ref() == rhs.data_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool DirectlyAdaptedStruct::operator<(FOLLY_MAYBE_UNUSED const DirectlyAdaptedStruct& rhs) const {
@@ -2627,7 +2847,20 @@ bool StructFieldAdaptedStruct::__fbthrift_is_empty() const {
 }
 
 bool StructFieldAdaptedStruct::operator==(FOLLY_MAYBE_UNUSED const StructFieldAdaptedStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::test::TemplatedTestAdapter>(lhs.__fbthrift_field_adaptedStruct, rhs.__fbthrift_field_adaptedStruct)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::test::TemplatedTestAdapter>(lhs.__fbthrift_field_adaptedTypedef, rhs.__fbthrift_field_adaptedTypedef)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::test::TemplatedTestAdapter>(lhs.__fbthrift_field_directlyAdapted, rhs.__fbthrift_field_directlyAdapted)) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::test::TemplatedTestAdapter>(lhs.__fbthrift_field_typedefOfAdapted, rhs.__fbthrift_field_typedefOfAdapted)) {
+    return false;
+  }
+  return true;
 }
 
 bool StructFieldAdaptedStruct::operator<(FOLLY_MAYBE_UNUSED const StructFieldAdaptedStruct& rhs) const {
@@ -2749,7 +2982,11 @@ bool CircularAdaptee::__fbthrift_is_empty() const {
 }
 
 bool CircularAdaptee::operator==(FOLLY_MAYBE_UNUSED const CircularAdaptee& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.field_ref() == rhs.field_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool CircularAdaptee::operator<(FOLLY_MAYBE_UNUSED const CircularAdaptee& rhs) const {
@@ -2872,7 +3109,11 @@ bool CircularStruct::__fbthrift_is_empty() const {
 }
 
 bool CircularStruct::operator==(FOLLY_MAYBE_UNUSED const CircularStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if ((!::apache::thrift::detail::pointer_equal(lhs.field_ref(), rhs.field_ref()))) {
+    return false;
+  }
+  return true;
 }
 
 bool CircularStruct::operator<(FOLLY_MAYBE_UNUSED const CircularStruct& rhs) const {
@@ -2987,7 +3228,11 @@ bool ReorderedStruct::__fbthrift_is_empty() const {
 }
 
 bool ReorderedStruct::operator==(FOLLY_MAYBE_UNUSED const ReorderedStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if ((!::apache::thrift::detail::pointer_equal(lhs.reordered_dependent_adapted_ref(), rhs.reordered_dependent_adapted_ref()))) {
+    return false;
+  }
+  return true;
 }
 
 bool ReorderedStruct::operator<(FOLLY_MAYBE_UNUSED const ReorderedStruct& rhs) const {
@@ -3070,7 +3315,8 @@ bool DeclaredAfterStruct::__fbthrift_is_empty() const {
 }
 
 bool DeclaredAfterStruct::operator==(FOLLY_MAYBE_UNUSED const DeclaredAfterStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  return true;
 }
 
 bool DeclaredAfterStruct::operator<(FOLLY_MAYBE_UNUSED const DeclaredAfterStruct& rhs) const {
@@ -3151,7 +3397,11 @@ bool UnderlyingRenamedStruct::__fbthrift_is_empty() const {
 }
 
 bool UnderlyingRenamedStruct::operator==(FOLLY_MAYBE_UNUSED const UnderlyingRenamedStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.data_ref() == rhs.data_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool UnderlyingRenamedStruct::operator<(FOLLY_MAYBE_UNUSED const UnderlyingRenamedStruct& rhs) const {
@@ -3233,7 +3483,11 @@ bool UnderlyingSameNamespaceStruct::__fbthrift_is_empty() const {
 }
 
 bool UnderlyingSameNamespaceStruct::operator==(FOLLY_MAYBE_UNUSED const UnderlyingSameNamespaceStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.data_ref() == rhs.data_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool UnderlyingSameNamespaceStruct::operator<(FOLLY_MAYBE_UNUSED const UnderlyingSameNamespaceStruct& rhs) const {
@@ -3311,7 +3565,8 @@ bool HeapAllocated::__fbthrift_is_empty() const {
 }
 
 bool HeapAllocated::operator==(FOLLY_MAYBE_UNUSED const HeapAllocated& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  return true;
 }
 
 bool HeapAllocated::operator<(FOLLY_MAYBE_UNUSED const HeapAllocated& rhs) const {
@@ -3404,7 +3659,11 @@ bool MoveOnly::__fbthrift_is_empty() const {
 }
 
 bool MoveOnly::operator==(FOLLY_MAYBE_UNUSED const MoveOnly& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::test::MoveOnlyAdapter>(lhs.__fbthrift_field_ptr, rhs.__fbthrift_field_ptr)) {
+    return false;
+  }
+  return true;
 }
 
 bool MoveOnly::operator<(FOLLY_MAYBE_UNUSED const MoveOnly& rhs) const {
@@ -3505,7 +3764,11 @@ bool AlsoMoveOnly::__fbthrift_is_empty() const {
 }
 
 bool AlsoMoveOnly::operator==(FOLLY_MAYBE_UNUSED const AlsoMoveOnly& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::test::MoveOnlyAdapter>(lhs.__fbthrift_field_ptr, rhs.__fbthrift_field_ptr)) {
+    return false;
+  }
+  return true;
 }
 
 bool AlsoMoveOnly::operator<(FOLLY_MAYBE_UNUSED const AlsoMoveOnly& rhs) const {
@@ -3582,7 +3845,8 @@ bool ApplyAdapter::__fbthrift_is_empty() const {
 }
 
 bool ApplyAdapter::operator==(FOLLY_MAYBE_UNUSED const ApplyAdapter& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  return true;
 }
 
 bool ApplyAdapter::operator<(FOLLY_MAYBE_UNUSED const ApplyAdapter& rhs) const {
@@ -3658,7 +3922,8 @@ bool TransitiveAdapted::__fbthrift_is_empty() const {
 }
 
 bool TransitiveAdapted::operator==(FOLLY_MAYBE_UNUSED const TransitiveAdapted& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  return true;
 }
 
 bool TransitiveAdapted::operator<(FOLLY_MAYBE_UNUSED const TransitiveAdapted& rhs) const {
@@ -3795,7 +4060,17 @@ bool CountingStruct::__fbthrift_is_empty() const {
 }
 
 bool CountingStruct::operator==(FOLLY_MAYBE_UNUSED const CountingStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (::apache::thrift::adapt_detail::not_equal_opt<::apache::thrift::test::CountingAdapter<false, int>>(lhs.regularInt_ref(), rhs.regularInt_ref())) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal_opt<::apache::thrift::test::CountingAdapter<true, int>>(lhs.countingInt_ref(), rhs.countingInt_ref())) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal_opt<::apache::thrift::test::CountingAdapter<false, std::string>>(lhs.regularString_ref(), rhs.regularString_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool CountingStruct::operator<(FOLLY_MAYBE_UNUSED const CountingStruct& rhs) const {
@@ -3898,7 +4173,11 @@ bool Person::__fbthrift_is_empty() const {
 }
 
 bool Person::operator==(FOLLY_MAYBE_UNUSED const Person& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.name_ref() == rhs.name_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool Person::operator<(FOLLY_MAYBE_UNUSED const Person& rhs) const {
@@ -3999,7 +4278,11 @@ bool Person2::__fbthrift_is_empty() const {
 }
 
 bool Person2::operator==(FOLLY_MAYBE_UNUSED const Person2& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.name_ref() == rhs.name_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool Person2::operator<(FOLLY_MAYBE_UNUSED const Person2& rhs) const {

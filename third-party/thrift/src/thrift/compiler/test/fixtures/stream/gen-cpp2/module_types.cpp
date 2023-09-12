@@ -72,7 +72,8 @@ bool FooStreamEx::__fbthrift_is_empty() const {
 }
 
 bool FooStreamEx::operator==(FOLLY_MAYBE_UNUSED const FooStreamEx& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  return true;
 }
 
 bool FooStreamEx::operator<(FOLLY_MAYBE_UNUSED const FooStreamEx& rhs) const {
@@ -157,7 +158,8 @@ bool FooEx::__fbthrift_is_empty() const {
 }
 
 bool FooEx::operator==(FOLLY_MAYBE_UNUSED const FooEx& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  return true;
 }
 
 bool FooEx::operator<(FOLLY_MAYBE_UNUSED const FooEx& rhs) const {
@@ -242,7 +244,8 @@ bool FooEx2::__fbthrift_is_empty() const {
 }
 
 bool FooEx2::operator==(FOLLY_MAYBE_UNUSED const FooEx2& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  return true;
 }
 
 bool FooEx2::operator<(FOLLY_MAYBE_UNUSED const FooEx2& rhs) const {

@@ -102,7 +102,11 @@ bool MyStructNestedAnnotation::__fbthrift_is_empty() const {
 }
 
 bool MyStructNestedAnnotation::operator==(FOLLY_MAYBE_UNUSED const MyStructNestedAnnotation& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.name_ref() == rhs.name_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool MyStructNestedAnnotation::operator<(FOLLY_MAYBE_UNUSED const MyStructNestedAnnotation& rhs) const {
@@ -290,7 +294,8 @@ bool YourException::__fbthrift_is_empty() const {
 }
 
 bool YourException::operator==(FOLLY_MAYBE_UNUSED const YourException& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  return true;
 }
 
 bool YourException::operator<(FOLLY_MAYBE_UNUSED const YourException& rhs) const {
@@ -454,7 +459,35 @@ bool YourStruct::__fbthrift_is_empty() const {
 }
 
 bool YourStruct::operator==(FOLLY_MAYBE_UNUSED const YourStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.majorVer_ref() == rhs.majorVer_ref())) {
+    return false;
+  }
+  if (!(lhs.package_ref() == rhs.package_ref())) {
+    return false;
+  }
+  if (!(lhs.annotation_with_quote_ref() == rhs.annotation_with_quote_ref())) {
+    return false;
+  }
+  if (!(lhs.class__ref() == rhs.class__ref())) {
+    return false;
+  }
+  if (!(lhs.annotation_with_trailing_comma_ref() == rhs.annotation_with_trailing_comma_ref())) {
+    return false;
+  }
+  if (!(lhs.empty_annotations_ref() == rhs.empty_annotations_ref())) {
+    return false;
+  }
+  if (!(lhs.my_enum_ref() == rhs.my_enum_ref())) {
+    return false;
+  }
+  if (!(lhs.cpp_type_annotation_ref() == rhs.cpp_type_annotation_ref())) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::StaticCast>(lhs.__fbthrift_field_my_union, rhs.__fbthrift_field_my_union)) {
+    return false;
+  }
+  return true;
 }
 
 bool YourStruct::operator<(FOLLY_MAYBE_UNUSED const YourStruct& rhs) const {
@@ -580,7 +613,14 @@ bool SecretStruct::__fbthrift_is_empty() const {
 }
 
 bool SecretStruct::operator==(FOLLY_MAYBE_UNUSED const SecretStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.id_ref() == rhs.id_ref())) {
+    return false;
+  }
+  if (!(lhs.password_ref() == rhs.password_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool SecretStruct::operator<(FOLLY_MAYBE_UNUSED const SecretStruct& rhs) const {

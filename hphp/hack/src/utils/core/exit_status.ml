@@ -9,7 +9,6 @@
 
 type t =
   | No_error
-  | Checkpoint_error
   | Input_error
   | Kill_error
   | No_server_running_should_retry
@@ -136,7 +135,6 @@ let exit_code = function
     6
   | Out_of_time -> 7
   | Out_of_retries -> 7
-  | Checkpoint_error -> 8
   | Build_id_mismatch -> 9
   | Monitor_connection_failure -> 9
   | Input_error -> 10

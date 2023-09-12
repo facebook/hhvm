@@ -9,7 +9,6 @@
 
 type t =
   | No_error
-  | Checkpoint_error
   | Input_error
   | Kill_error
   | No_server_running_should_retry

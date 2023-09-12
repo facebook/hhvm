@@ -23,7 +23,6 @@ namespace compiler {
 // The stages for standard mutators.
 enum class standard_mutator_stage {
   // Initializes and sanitizes various bits of the ast, including:
-  // - Thrift URIs (assign_uri).
   // - Function parameter qualifiers.
   initial,
 

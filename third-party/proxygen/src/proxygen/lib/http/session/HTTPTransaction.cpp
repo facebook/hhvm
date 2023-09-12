@@ -27,6 +27,7 @@ namespace {
 const int64_t kApproximateMTU = 1400;
 const std::chrono::seconds kRateLimitMaxDelay(10);
 const uint64_t kMaxBufferPerTxn = 65536;
+const uint64_t kMaxWTIngressBuf = 65536;
 
 using namespace proxygen;
 HTTPException stateMachineError(HTTPException::Direction dir, std::string msg) {
@@ -100,6 +101,7 @@ HTTPTransaction::HTTPTransaction(
       priorityFallback_(false),
       headRequest_(false),
       enableLastByteFlushedTracking_(false),
+      wtConnectStream_(false),
       egressHeadersDelivered_(false),
       has1xxResponse_(false),
       isDelegated_(false),
@@ -149,7 +151,42 @@ void HTTPTransaction::onDelayedDestroy(bool delayed) {
   }
   VLOG(4) << "destroying transaction " << *this;
   deleting_ = true;
+  // These loops are dicey for possible erasure from callbacks
+  for (auto ingressStreamIt = wtIngressStreams_.begin();
+       ingressStreamIt != wtIngressStreams_.end();) {
+    auto id = ingressStreamIt->first;
+    auto& stream = ingressStreamIt->second;
+    ingressStreamIt++;
+    // Deliver an error to the application if needed
+    if (stream.open()) {
+      VLOG(4) << "aborting WT ingress id=" << id;
+      stream.error(WebTransport::kInternalError);
+      transport_.stopReadingWebTransportIngress(id,
+                                                WebTransport::kInternalError);
+      // TODO: does the spec say how to handle this at the transport?  Eg: the
+      // peer must RESET any open write streams.
+    } else {
+      VLOG(4) << "WT ingress already complete for id=" << id;
+    }
+  }
+  wtIngressStreams_.clear();
+  for (auto egressStreamIt = wtEgressStreams_.begin();
+       egressStreamIt != wtEgressStreams_.end();) {
+    auto id = egressStreamIt->first;
+    auto& stream = egressStreamIt->second;
+    egressStreamIt++;
+    // Deliver an error to the application
+    stream.onStopSending(WebTransport::kInternalError);
+    // The handler may have run and reset this stream, removing it from
+    // wtEgressStreams_, otherwise we have to reset it.
+    if (wtEgressStreams_.find(id) != wtEgressStreams_.end()) {
+      resetWebTransportEgress(id,
+                              /*TODO: errorCode=*/WebTransport::kInternalError);
+    }
+  }
+  wtEgressStreams_.clear();
   if (handler_) {
+    // TODO: call onWebTransportSessionClose?
     handler_->detachTransaction();
     handler_ = nullptr;
   }
@@ -207,6 +244,7 @@ void HTTPTransaction::onIngressHeadersComplete(
   }
   if (msg->isRequest()) {
     headRequest_ = (msg->getMethod() == HTTPMethod::HEAD);
+    wtConnectStream_ = WebTransport::isConnectMessage(*msg);
   }
 
   if ((msg->isRequest() && msg->getMethod() != HTTPMethod::CONNECT) ||
@@ -896,6 +934,7 @@ void HTTPTransaction::sendHeadersWithOptionalEOM(const HTTPMessage& headers,
   }
   if (headers.isRequest()) {
     headRequest_ = (headers.getMethod() == HTTPMethod::HEAD);
+    wtConnectStream_ = WebTransport::isConnectMessage(headers);
   } else {
     has1xxResponse_ = headers.is1xxResponse();
   }
@@ -1425,6 +1464,64 @@ bool HTTPTransaction::sendDatagram(std::unique_ptr<folly::IOBuf> datagram) {
   return sent;
 }
 
+folly::Expected<WebTransport::BidiStreamHandle, WebTransport::ErrorCode>
+HTTPTransaction::newWebTransportBidiStream() {
+  auto id = transport_.newWebTransportBidiStream();
+  if (!id) {
+    return folly::makeUnexpected(
+        WebTransport::ErrorCode::STREAM_CREATION_ERROR);
+  }
+  auto ingressRes =
+      wtIngressStreams_.emplace(std::piecewise_construct,
+                                std::forward_as_tuple(*id),
+                                std::forward_as_tuple(*this, *id));
+  auto egressRes = wtEgressStreams_.emplace(std::piecewise_construct,
+                                            std::forward_as_tuple(*id),
+                                            std::forward_as_tuple(*this, *id));
+  return WebTransport::BidiStreamHandle(
+      {&ingressRes.first->second, &egressRes.first->second});
+}
+
+folly::Expected<WebTransport::StreamWriteHandle*, WebTransport::ErrorCode>
+HTTPTransaction::newWebTransportUniStream() {
+  auto id = transport_.newWebTransportUniStream();
+  if (!id) {
+    return folly::makeUnexpected(
+        WebTransport::ErrorCode::STREAM_CREATION_ERROR);
+  }
+  auto res = wtEgressStreams_.emplace(std::piecewise_construct,
+                                      std::forward_as_tuple(*id),
+                                      std::forward_as_tuple(*this, *id));
+  return &res.first->second;
+}
+
+folly::Expected<HTTPTransaction::Transport::FCState, WebTransport::ErrorCode>
+HTTPTransaction::sendWebTransportStreamData(HTTPCodec::StreamID id,
+                                            std::unique_ptr<folly::IOBuf> data,
+                                            bool eof) {
+  auto res = transport_.sendWebTransportStreamData(id, std::move(data), eof);
+  if (eof || res.hasError()) {
+    wtEgressStreams_.erase(id);
+  }
+  return res;
+}
+
+folly::Expected<folly::Unit, WebTransport::ErrorCode>
+HTTPTransaction::resetWebTransportEgress(HTTPCodec::StreamID id,
+                                         uint32_t errorCode) {
+  auto res = transport_.resetWebTransportEgress(id, errorCode);
+  wtEgressStreams_.erase(id);
+  return res;
+}
+
+folly::Expected<folly::Unit, WebTransport::ErrorCode>
+HTTPTransaction::stopReadingWebTransportIngress(HTTPCodec::StreamID id,
+                                                uint32_t errorCode) {
+  auto res = transport_.stopReadingWebTransportIngress(id, errorCode);
+  wtIngressStreams_.erase(id);
+  return res;
+}
+
 folly::Optional<HTTPTransaction::ConnectionToken>
 HTTPTransaction::getConnectionToken() const noexcept {
   return transport_.getConnectionToken();
@@ -1797,6 +1894,168 @@ void HTTPTransaction::onDatagram(
 
   if (handler_ && !isIngressComplete()) {
     handler_->onDatagram(std::move(datagram));
+  }
+}
+
+void HTTPTransaction::onWebTransportBidiStream(HTTPCodec::StreamID id) {
+  if (!handler_) {
+    transport_.resetWebTransportEgress(id, WebTransport::kInternalError);
+    transport_.stopReadingWebTransportIngress(id, WebTransport::kInternalError);
+    return;
+  }
+  auto ingRes = wtIngressStreams_.emplace(std::piecewise_construct,
+                                          std::forward_as_tuple(id),
+                                          std::forward_as_tuple(*this, id));
+
+  auto egRes = wtEgressStreams_.emplace(std::piecewise_construct,
+                                        std::forward_as_tuple(id),
+                                        std::forward_as_tuple(*this, id));
+  handler_->onWebTransportBidiStream(
+      id,
+      WebTransport::BidiStreamHandle(
+          {&ingRes.first->second, &egRes.first->second}));
+}
+
+void HTTPTransaction::onWebTransportUniStream(HTTPCodec::StreamID id) {
+  if (!handler_) {
+    LOG(ERROR) << "Handler not set";
+    transport_.stopReadingWebTransportIngress(id, WebTransport::kInternalError);
+    return;
+  }
+  auto ingRes = wtIngressStreams_.emplace(std::piecewise_construct,
+                                          std::forward_as_tuple(id),
+                                          std::forward_as_tuple(*this, id));
+
+  handler_->onWebTransportUniStream(id, &ingRes.first->second);
+}
+
+folly::Expected<folly::SemiFuture<folly::Unit>, WebTransport::ErrorCode>
+HTTPTransaction::TxnStreamWriteHandle::writeStreamData(
+    std::unique_ptr<folly::IOBuf> data, bool fin) {
+  CHECK(!writePromise_) << "Wait for previous write to complete";
+  if (stopSendingErrorCode_) {
+    return folly::makeSemiFuture<folly::Unit>(
+        folly::make_exception_wrapper<WebTransport::Exception>(
+            *stopSendingErrorCode_));
+  }
+  auto fcState = txn_.sendWebTransportStreamData(id_, std::move(data), fin);
+  if (fcState.hasError()) {
+    return folly::makeUnexpected(fcState.error());
+  }
+  if (*fcState == Transport::FCState::UNBLOCKED) {
+    return folly::makeSemiFuture(folly::unit);
+  } else {
+    auto contract = folly::makePromiseContract<folly::Unit>();
+    writePromise_.emplace(std::move(contract.first));
+    return std::move(contract.second);
+  }
+}
+
+void HTTPTransaction::TxnStreamWriteHandle::onStopSending(uint32_t errorCode) {
+  auto token = cancellationSource_.getToken();
+  if (writePromise_) {
+    writePromise_->setException(WebTransport::Exception(errorCode));
+    writePromise_.reset();
+  } else if (!stopSendingErrorCode_) {
+    stopSendingErrorCode_ = errorCode;
+    cancellationSource_.requestCancellation();
+  }
+}
+
+void HTTPTransaction::TxnStreamWriteHandle::onEgressReady() {
+  if (writePromise_) {
+    writePromise_->setValue();
+    writePromise_.reset();
+  }
+}
+
+HTTPTransaction::Transport::FCState
+HTTPTransaction::TxnStreamReadHandle::dataAvailable(
+    std::unique_ptr<folly::IOBuf> data, bool eof) {
+  VLOG(4)
+      << "dataAvailable buflen=" << (data ? data->computeChainDataLength() : 0)
+      << " eof=" << uint64_t(eof);
+  if (readPromise_) {
+    readPromise_->setValue(WebTransport::StreamData({std::move(data), eof}));
+    readPromise_.reset();
+    if (eof) {
+      txn_.wtIngressStreams_.erase(getID());
+    }
+  } else {
+    buf_.append(std::move(data));
+    eof_ = eof;
+  }
+  VLOG(4) << "dataAvailable buflen=" << buf_.chainLength();
+  return (eof || buf_.chainLength() < kMaxWTIngressBuf)
+             ? Transport::FCState::UNBLOCKED
+             : Transport::FCState::BLOCKED;
+}
+
+void HTTPTransaction::TxnStreamReadHandle::error(uint32_t error) {
+  cancellationSource_.requestCancellation();
+  if (readPromise_) {
+    readPromise_->setException(WebTransport::Exception(error));
+    readPromise_.reset();
+    txn_.wtIngressStreams_.erase(getID());
+  } else {
+    error_ = error;
+  }
+}
+
+void HTTPTransaction::onWebTransportStreamIngress(
+    HTTPCodec::StreamID id, std::unique_ptr<folly::IOBuf> data, bool eof) {
+  auto ingressStreamIt = wtIngressStreams_.find(id);
+  CHECK(ingressStreamIt != wtIngressStreams_.end());
+  auto fcState = ingressStreamIt->second.dataAvailable(std::move(data), eof);
+  if (fcState == Transport::FCState::BLOCKED) {
+    transport_.pauseWebTransportIngress(id);
+  }
+}
+
+void HTTPTransaction::onWebTransportStreamError(HTTPCodec::StreamID id,
+                                                uint32_t errorCode) {
+  auto ingressStreamIt = wtIngressStreams_.find(id);
+  CHECK(ingressStreamIt != wtIngressStreams_.end()) << id;
+  ingressStreamIt->second.error(errorCode);
+}
+
+bool HTTPTransaction::onWebTransportStopSending(HTTPCodec::StreamID id,
+                                                uint32_t errorCode) {
+  auto egressStreamIt = wtEgressStreams_.find(id);
+  if (egressStreamIt != wtEgressStreams_.end()) {
+    egressStreamIt->second.onStopSending(errorCode);
+    // Think hard if we have to reset the stream here...
+    return true;
+  }
+  return false;
+}
+
+void HTTPTransaction::onWebTransportEgressReady(HTTPCodec::StreamID id) {
+  auto wtStream = wtEgressStreams_.find(id);
+  CHECK(wtStream != wtEgressStreams_.end());
+  wtStream->second.onEgressReady();
+}
+
+folly::SemiFuture<WebTransport::StreamData>
+HTTPTransaction::TxnStreamReadHandle::readStreamData() {
+  CHECK(!readPromise_) << "One read at a time";
+  if (error_) {
+    auto ex = folly::make_exception_wrapper<WebTransport::Exception>(*error_);
+    txn_.wtIngressStreams_.erase(getID());
+    return folly::makeSemiFuture<WebTransport::StreamData>(std::move(ex));
+  } else if (buf_.empty() && !eof_) {
+    auto contract = folly::makePromiseContract<WebTransport::StreamData>();
+    readPromise_.emplace(std::move(contract.first));
+    return std::move(contract.second);
+  } else {
+    auto bufLen = buf_.chainLength();
+    WebTransport::StreamData streamData({buf_.move(), eof_});
+    if (eof_) {
+      txn_.wtIngressStreams_.erase(getID());
+    } else if (bufLen >= kMaxWTIngressBuf) {
+      txn_.transport_.resumeWebTransportIngress(getID());
+    }
+    return folly::makeFuture(std::move(streamData));
   }
 }
 

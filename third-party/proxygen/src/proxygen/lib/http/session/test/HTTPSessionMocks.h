@@ -204,6 +204,19 @@ class MockHTTPHandler
   }
   MOCK_METHOD(void, _onDatagram, (std::shared_ptr<folly::IOBuf>));
 
+  MOCK_METHOD(void,
+              onWebTransportBidiStream,
+              (HTTPCodec::StreamID, WebTransport::BidiStreamHandle),
+              (noexcept));
+  MOCK_METHOD(void,
+              onWebTransportUniStream,
+              (HTTPCodec::StreamID, WebTransport::StreamReadHandle*),
+              (noexcept));
+  MOCK_METHOD(void,
+              onWebTransportSessionClose,
+              (folly::Optional<uint32_t>),
+              (noexcept));
+
   void onChunkHeader(size_t length) noexcept override {
     _onChunkHeader(length);
   }

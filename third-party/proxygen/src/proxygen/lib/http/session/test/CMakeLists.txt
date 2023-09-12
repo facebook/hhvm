@@ -33,6 +33,7 @@ proxygen_add_test(TARGET SessionTests
     HTTP2PriorityQueueTest.cpp
     HTTPDefaultSessionCodecFactoryTest.cpp
     HTTPTransactionSMTest.cpp
+    HTTPTransactionWebTransportTest.cpp
   DEPENDS
     codectestutils
     sessiontestutils

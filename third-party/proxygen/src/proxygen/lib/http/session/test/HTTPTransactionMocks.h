@@ -223,6 +223,32 @@ class MockHTTPTransactionTransport : public HTTPTransaction::Transport {
         ->getDatagramSizeLimitNonConst();
   }
 
+  MOCK_METHOD((bool), supportsWebTransport, (), (const));
+  MOCK_METHOD((folly::Expected<HTTPCodec::StreamID, WebTransport::ErrorCode>),
+              newWebTransportBidiStream,
+              ());
+
+  MOCK_METHOD((folly::Expected<HTTPCodec::StreamID, WebTransport::ErrorCode>),
+              newWebTransportUniStream,
+              ());
+  MOCK_METHOD((folly::Expected<FCState, WebTransport::ErrorCode>),
+              sendWebTransportStreamData,
+              (HTTPCodec::StreamID, std::unique_ptr<folly::IOBuf>, bool));
+  MOCK_METHOD((folly::Expected<folly::Unit, WebTransport::ErrorCode>),
+              resetWebTransportEgress,
+              (HTTPCodec::StreamID, uint32_t));
+
+  MOCK_METHOD((folly::Expected<folly::Unit, WebTransport::ErrorCode>),
+              pauseWebTransportIngress,
+              (HTTPCodec::StreamID));
+
+  MOCK_METHOD((folly::Expected<folly::Unit, WebTransport::ErrorCode>),
+              resumeWebTransportIngress,
+              (HTTPCodec::StreamID));
+  MOCK_METHOD((folly::Expected<folly::Unit, WebTransport::ErrorCode>),
+              stopReadingWebTransportIngress,
+              (HTTPCodec::StreamID, uint32_t));
+
   MOCK_METHOD(void, trackEgressBodyOffset, (uint64_t, ByteEvent::EventFlags));
 
   MockHTTPCodec mockCodec_;

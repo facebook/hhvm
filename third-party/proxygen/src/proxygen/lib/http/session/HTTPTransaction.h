@@ -28,6 +28,7 @@
 #include <proxygen/lib/http/session/HTTPTransactionEgressSM.h>
 #include <proxygen/lib/http/session/HTTPTransactionIngressSM.h>
 #include <proxygen/lib/http/sink/FlowControlInfo.h>
+#include <proxygen/lib/http/webtransport/WebTransport.h>
 #include <proxygen/lib/utils/Time.h>
 #include <proxygen/lib/utils/TraceEvent.h>
 #include <proxygen/lib/utils/TraceEventObserver.h>
@@ -304,6 +305,49 @@ class HTTPTransactionHandler : public TraceEventObserver {
    * to decide whether to buffer/drop datagrams
    */
   virtual void onDatagram(std::unique_ptr<folly::IOBuf> /*datagram*/) noexcept {
+  }
+
+  /**
+   * Invoked when the peer initiates a new bidirectional WebTransport stream.
+   * This can only be invoked when the transaction has successfully negotiated
+   * WebTransport (CONNECT(webtransport) + 2xx).
+   *
+   * Once it is called the handler is responsible for disposing of the stream
+   * until the transaction detaches, at which point it will be automatically
+   * reset.
+   */
+  virtual void onWebTransportBidiStream(
+      HTTPCodec::StreamID /*id*/,
+      WebTransport::BidiStreamHandle /*stream*/) noexcept {
+  }
+
+  /**
+   * Invoked when the peer initiates a new unidirectional WebTransport stream.
+   * This can only be invoked when the transaction has successfully negotiated
+   * WebTransport (CONNECT(webtransport) + 2xx).
+   *
+   * Once it is called the handler is responsible for disposing of the stream
+   * until the transaction detaches, at which point it will be automatically
+   * abandoned.
+   */
+  virtual void onWebTransportUniStream(
+      HTTPCodec::StreamID /*id*/,
+      WebTransport::StreamReadHandle* /*stream*/) noexcept {
+  }
+
+  /**
+   * Invoked when the peer closes the WebTransport session.
+   * This can only be invoked when the transaction has successfully negotiated
+   * WebTransport (CONNECT(webtransport) + 2xx).
+   *
+   * Before this is called, all outstanding stream reads and writes will return
+   * an error, and all stream handles will be cancelled and invalidated.
+   *
+   * This will be called prior to detachTransaction.  An error code will be
+   * passed if the peer sent a DRAIN_WEBTRANSPORT_SESSION capsule.
+   */
+  virtual void onWebTransportSessionClose(
+      folly::Optional<uint32_t> /*error*/) noexcept {
   }
 
   virtual ~HTTPTransactionHandler() override {
@@ -599,6 +643,57 @@ class HTTPTransaction
     }
 
     virtual bool sendDatagram(std::unique_ptr<folly::IOBuf> /*datagram*/) {
+      LOG(FATAL) << __func__ << " not supported";
+      folly::assume_unreachable();
+    }
+
+    [[nodiscard]] virtual bool supportsWebTransport() const {
+      return false;
+    }
+
+    virtual folly::Expected<HTTPCodec::StreamID, WebTransport::ErrorCode>
+    newWebTransportBidiStream() {
+      LOG(FATAL) << __func__ << " not supported";
+      folly::assume_unreachable();
+    }
+
+    virtual folly::Expected<HTTPCodec::StreamID, WebTransport::ErrorCode>
+    newWebTransportUniStream() {
+      LOG(FATAL) << __func__ << " not supported";
+      folly::assume_unreachable();
+    }
+
+    enum class FCState { BLOCKED, UNBLOCKED };
+    virtual folly::Expected<FCState, WebTransport::ErrorCode>
+    sendWebTransportStreamData(HTTPCodec::StreamID /*id*/,
+                               std::unique_ptr<folly::IOBuf> /*data*/,
+                               bool /*eof*/) {
+      LOG(FATAL) << __func__ << " not supported";
+      folly::assume_unreachable();
+    }
+
+    virtual folly::Expected<folly::Unit, WebTransport::ErrorCode>
+    resetWebTransportEgress(HTTPCodec::StreamID /*id*/,
+                            uint32_t /*errorCode*/) {
+      LOG(FATAL) << __func__ << " not supported";
+      folly::assume_unreachable();
+    }
+
+    virtual folly::Expected<folly::Unit, WebTransport::ErrorCode>
+    pauseWebTransportIngress(HTTPCodec::StreamID /*id*/) {
+      LOG(FATAL) << __func__ << " not supported";
+      folly::assume_unreachable();
+    }
+
+    virtual folly::Expected<folly::Unit, WebTransport::ErrorCode>
+    resumeWebTransportIngress(HTTPCodec::StreamID /*id*/) {
+      LOG(FATAL) << __func__ << " not supported";
+      folly::assume_unreachable();
+    }
+
+    virtual folly::Expected<folly::Unit, WebTransport::ErrorCode>
+    stopReadingWebTransportIngress(HTTPCodec::StreamID /*id*/,
+                                   uint32_t /*errorCode*/) {
       LOG(FATAL) << __func__ << " not supported";
       folly::assume_unreachable();
     }
@@ -961,6 +1056,21 @@ class HTTPTransaction
    * to decide whether to buffer/drop datagrams
    */
   void onDatagram(std::unique_ptr<folly::IOBuf> datagram) noexcept;
+
+  // Calls from Transport
+  void onWebTransportBidiStream(HTTPCodec::StreamID id);
+
+  void onWebTransportUniStream(HTTPCodec::StreamID id);
+
+  void onWebTransportStreamIngress(HTTPCodec::StreamID id,
+                                   std::unique_ptr<folly::IOBuf> data,
+                                   bool eof);
+
+  void onWebTransportStreamError(HTTPCodec::StreamID id, uint32_t errorCode);
+
+  bool onWebTransportStopSending(HTTPCodec::StreamID id, uint32_t errorCode);
+
+  void onWebTransportEgressReady(HTTPCodec::StreamID id);
 
   /**
    * Invoked by the handlers that are interested in tracking
@@ -1556,6 +1666,14 @@ class HTTPTransaction
 
   folly::Optional<ConnectionToken> getConnectionToken() const noexcept;
 
+  bool isWebTransportConnectStream() {
+    return transport_.supportsWebTransport() && wtConnectStream_;
+  }
+
+  WebTransport* getWebTransport() {
+    return isWebTransportConnectStream() ? &webTransport_ : nullptr;
+  }
+
   static void setEgressBufferLimit(uint64_t limit) {
     egressBufferLimit_ = limit;
   }
@@ -1842,6 +1960,7 @@ class HTTPTransaction
   bool priorityFallback_ : 1;
   bool headRequest_ : 1;
   bool enableLastByteFlushedTracking_ : 1;
+  bool wtConnectStream_ : 1;
 
   // Prevents the application from calling skipBodyTo() before egress
   // headers have been delivered.
@@ -1877,6 +1996,185 @@ class HTTPTransaction
   uint64_t ingressBodyOffset_{0};
 
   bool setIngressTimeoutAfterEom_{false};
+
+  folly::Expected<Transport::FCState, WebTransport::ErrorCode>
+  sendWebTransportStreamData(HTTPCodec::StreamID id,
+                             std::unique_ptr<folly::IOBuf> data,
+                             bool eof);
+
+  folly::Expected<folly::Unit, WebTransport::ErrorCode> resetWebTransportEgress(
+      HTTPCodec::StreamID id, uint32_t errorCode);
+
+  folly::Expected<folly::Unit, WebTransport::ErrorCode>
+  stopReadingWebTransportIngress(HTTPCodec::StreamID id, uint32_t errorCode);
+
+  folly::Expected<WebTransport::BidiStreamHandle, WebTransport::ErrorCode>
+  newWebTransportBidiStream();
+
+  folly::Expected<WebTransport::StreamWriteHandle*, WebTransport::ErrorCode>
+  newWebTransportUniStream();
+
+  class TxnWebTransport : public WebTransport {
+   public:
+    explicit TxnWebTransport(HTTPTransaction& txn) : txn_(txn) {
+    }
+
+    ~TxnWebTransport() override = default;
+
+    folly::Expected<StreamWriteHandle*, WebTransport::ErrorCode>
+    createUniStream() override {
+      return txn_.newWebTransportUniStream();
+    }
+
+    folly::Expected<BidiStreamHandle, WebTransport::ErrorCode>
+    createBidiStream() override {
+      return txn_.newWebTransportBidiStream();
+    }
+    folly::SemiFuture<folly::Unit> awaitUniStreamCredit() override {
+      // TODO
+      return folly::makeFuture(folly::unit);
+    }
+    folly::SemiFuture<folly::Unit> awaitBidiStreamCredit() override {
+      // TODO
+      return folly::makeFuture(folly::unit);
+    }
+    folly::Expected<folly::SemiFuture<StreamData>, WebTransport::ErrorCode>
+    readStreamData(uint64_t id) override {
+      auto it = txn_.wtIngressStreams_.find(id);
+      if (it == txn_.wtIngressStreams_.end()) {
+        return folly::makeUnexpected(
+            WebTransport::ErrorCode::INVALID_STREAM_ID);
+      }
+      return it->second.readStreamData();
+    }
+    folly::Expected<folly::Unit, WebTransport::ErrorCode> stopSending(
+        uint64_t id, uint32_t error) override {
+      auto it = txn_.wtIngressStreams_.find(id);
+      if (it == txn_.wtIngressStreams_.end()) {
+        return folly::makeUnexpected(
+            WebTransport::ErrorCode::INVALID_STREAM_ID);
+      }
+      return it->second.stopSending(error);
+    }
+    folly::Expected<folly::SemiFuture<folly::Unit>, ErrorCode> writeStreamData(
+        uint64_t id, std::unique_ptr<folly::IOBuf> data, bool fin) override {
+      auto it = txn_.wtEgressStreams_.find(id);
+      if (it == txn_.wtEgressStreams_.end()) {
+        return folly::makeUnexpected(
+            WebTransport::ErrorCode::INVALID_STREAM_ID);
+      }
+      return it->second.writeStreamData(std::move(data), fin);
+    }
+    folly::Expected<folly::Unit, WebTransport::ErrorCode> resetStream(
+        uint64_t id, uint32_t error) override {
+      auto it = txn_.wtEgressStreams_.find(id);
+      if (it == txn_.wtEgressStreams_.end()) {
+        return folly::makeUnexpected(
+            WebTransport::ErrorCode::INVALID_STREAM_ID);
+      }
+      return it->second.resetStream(error);
+    }
+    folly::Expected<folly::Unit, WebTransport::ErrorCode> sendDatagram(
+        std::unique_ptr<folly::IOBuf> datagram) override {
+      if (!txn_.sendDatagram(std::move(datagram))) {
+        return folly::makeUnexpected(WebTransport::ErrorCode::SEND_ERROR);
+      }
+      return folly::unit;
+    }
+
+    folly::Expected<folly::Unit, WebTransport::ErrorCode> closeSession(
+        folly::Optional<uint32_t> /*error*/) override {
+      // TODO: serialize error in a CLOSE_WEBTRANSPORT_SESSION capsule
+      if (!txn_.isEgressEOMSeen()) {
+        txn_.sendEOM();
+      }
+      return folly::unit;
+    }
+
+   private:
+    HTTPTransaction& txn_;
+  };
+
+  class TxnStreamWriteHandle : public WebTransport::StreamWriteHandle {
+   public:
+    TxnStreamWriteHandle(HTTPTransaction& txn, HTTPCodec::StreamID id)
+        : txn_(txn), id_(id) {
+    }
+
+    ~TxnStreamWriteHandle() override {
+      cancellationSource_.requestCancellation();
+    }
+
+    folly::CancellationToken getCancelToken() override {
+      return cancellationSource_.getToken();
+    }
+
+    uint64_t getID() override {
+      return id_;
+    }
+
+    folly::Expected<folly::SemiFuture<folly::Unit>, WebTransport::ErrorCode>
+    writeStreamData(std::unique_ptr<folly::IOBuf> data, bool fin) override;
+
+    folly::Expected<folly::Unit, WebTransport::ErrorCode> resetStream(
+        uint32_t errorCode) override {
+      return txn_.resetWebTransportEgress(id_, errorCode);
+    }
+
+    void onStopSending(uint32_t errorCode);
+
+    void onEgressReady();
+
+   private:
+    HTTPTransaction& txn_;
+    HTTPCodec::StreamID id_;
+    folly::Optional<folly::Promise<folly::Unit>> writePromise_;
+    folly::CancellationSource cancellationSource_;
+  };
+
+  class TxnStreamReadHandle : public WebTransport::StreamReadHandle {
+   public:
+    TxnStreamReadHandle(HTTPTransaction& txn, HTTPCodec::StreamID id)
+        : txn_(txn), id_(id) {
+    }
+
+    ~TxnStreamReadHandle() override = default;
+
+    uint64_t getID() override {
+      return id_;
+    }
+
+    folly::CancellationToken getCancelToken() override {
+      return cancellationSource_.getToken();
+    }
+
+    folly::SemiFuture<WebTransport::StreamData> readStreamData() override;
+
+    folly::Expected<folly::Unit, WebTransport::ErrorCode> stopSending(
+        uint32_t error) override {
+      return txn_.stopReadingWebTransportIngress(id_, error);
+    }
+
+    Transport::FCState dataAvailable(std::unique_ptr<folly::IOBuf> data,
+                                     bool eof);
+    void error(uint32_t error);
+    [[nodiscard]] bool open() const {
+      return !eof_ && !error_;
+    }
+
+   private:
+    HTTPTransaction& txn_;
+    HTTPCodec::StreamID id_;
+    folly::Optional<folly::Promise<WebTransport::StreamData>> readPromise_;
+    folly::IOBufQueue buf_{folly::IOBufQueue::cacheChainLength()};
+    bool eof_{false};
+    folly::Optional<uint32_t> error_;
+    folly::CancellationSource cancellationSource_;
+  };
+
+  std::map<HTTPCodec::StreamID, TxnStreamWriteHandle> wtEgressStreams_;
+  std::map<HTTPCodec::StreamID, TxnStreamReadHandle> wtIngressStreams_;
+  TxnWebTransport webTransport_{*this};
 };
 
 /**

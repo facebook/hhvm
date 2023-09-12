@@ -178,8 +178,8 @@ A `Bar.field1` is a terse struct field, and the struct `Foo` is not emptiable an
 
 :::note
 
-The compiler option version `terse_writes` is effectively deprecated.
+The compiler option version `deprecated_terse_writes` is effectively deprecated.
 
 :::
 
-Thrift C++ had a compiler flag [terse_writes](../idl/field-qualifiers#terse-writes-compiler-option) that had a similar semantic to a terse field. However, the difference is that the compiler option version only support primitive and container types, and it skips serialization when a field is equal to the [custom default value](../idl/#default-values) instead of intrinsic default value. This makes it inconsistent and bug-prone, as the custom default can be changed and differ from binary to binary.
+Thrift C++ had a compiler flag [deprecated_terse_writes](../idl/field-qualifiers#terse-writes-compiler-option) that had a similar semantic to a terse field. However, the difference is that the compiler option version only support primitive and container types, and it skips serialization when a field is equal to the [custom default value](../idl/#default-values) instead of intrinsic default value. This makes it inconsistent and bug-prone, as the custom default can be changed and differ from binary to binary.

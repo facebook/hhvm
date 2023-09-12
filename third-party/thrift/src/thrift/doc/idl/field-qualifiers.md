@@ -45,11 +45,11 @@ NOTE: In thrift-py-deprecated, [**all** fields are nullable](https://www.interna
 
 :::caution
 
-The `terse_writes` compiler option is deprecated. Please use `@thrift.TerseWrite` instead. Note, `@thrift.TerseWrite` does not have same semantic with `terse_writes` option. It always compares with the [intrinsic default value](./#intrinsic-default-values), supports structured type, and it supports all V1 compatible languages as well.
+The `deprecated_terse_writes` compiler option is deprecated. Please use `@thrift.TerseWrite` instead. Note, `@thrift.TerseWrite` does not have same semantic with `deprecated_terse_writes` option. It always compares with the [intrinsic default value](./#intrinsic-default-values), supports structured type, and it supports all V1 compatible languages as well.
 
 :::
 
-Some of the space savings of `optional` fields can be obtained with `default` storage (not `optional`, not `required`) by passing the `terse_writes` option to the compiler. `terse_writes` will suppress serializing fields where the values are the same as their present default value, when doing that comparison is cheap (e.g. i32/i64, empty strings/list/map). This will lead to smaller output and lower deserialization cost - particularly when fields are sparsely used.
+Some of the space savings of `optional` fields can be obtained with `default` storage (not `optional`, not `required`) by passing the `deprecated_terse_writes` option to the compiler. `deprecated_terse_writes` will suppress serializing fields where the values are the same as their present default value, when doing that comparison is cheap (e.g. i32/i64, empty strings/list/map). This will lead to smaller output and lower deserialization cost - particularly when fields are sparsely used.
 
 ## Practical Recommendations
 
@@ -69,5 +69,5 @@ If structures are stored in a serialized form and modified over time, it is safe
 * In C++:
     * Deserializing does not un-set `optional` fields which are absent, so deserializing into a single target object multiple times will lead to leftover `optional` fields from prior deserializations.
     * Merging structures with Thrift's `merge()` function works well with `optional` fields, but it is not recommended for use with `default` fields:
-       * If `terse_writes` is enabled, default values *never* merge into (possibly overwriting) non-default values.
-       * If `terse_writes` is not enabled, default values *always* merge into (possibly overwriting) non-default values.
+       * If `deprecated_terse_writes` is enabled, default values *never* merge into (possibly overwriting) non-default values.
+       * If `deprecated_terse_writes` is not enabled, default values *always* merge into (possibly overwriting) non-default values.

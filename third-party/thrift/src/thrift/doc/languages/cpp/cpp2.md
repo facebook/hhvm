@@ -173,12 +173,6 @@ python framework automatically knows which file changes need to go in.
   they can be moved between threads without a copy. To disable this,
   use option `stack_arguments`.
 
-* Optional / Required by default are the same as before. Using option
-  `terse_writes` will make it behave more like the dynamic
-  languages: If the field is the same as the default value (or
-  nothing if no default value is set), then it won't ever be sent on
-  the wire.
-
 * Support for floats was added.
 
 ### Serialization using IOBufs

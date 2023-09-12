@@ -1873,12 +1873,10 @@ struct HandlerCallbackHelper<SinkConsumer<SinkElement, FinalResponse>>
 
 template <typename ChildType>
 void RequestTask<ChildType>::run() {
-  if (req_.requestContext()->getTimestamps().getSamplingStatus().isEnabled()) {
-    // Since this request was queued, reset the processBegin
-    // time to the actual start time, and not the queue time.
-    req_.requestContext()->getTimestamps().processBegin =
-        std::chrono::steady_clock::now();
-  }
+  // Since this request was queued, reset the processBegin
+  // time to the actual start time, and not the queue time.
+  req_.requestContext()->getTimestamps().processBegin =
+      std::chrono::steady_clock::now();
   if (!oneway_ && !req_.request()->getShouldStartProcessing()) {
     apache::thrift::HandlerCallbackBase::releaseRequest(
         apache::thrift::detail::ServerRequestHelper::request(std::move(req_)),

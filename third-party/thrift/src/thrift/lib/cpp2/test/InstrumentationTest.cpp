@@ -19,8 +19,10 @@
 #include <cstdlib>
 #include <optional>
 #include <random>
+#include <sstream>
 #include <thread>
 
+#include <folly/Format.h>
 #include <folly/ThreadLocal.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
 #include <folly/experimental/coro/BlockingWait.h>
@@ -1181,6 +1183,7 @@ void validateTimestamps(
     const server::TServerObserver::PreHandlerTimestamps& timestamps) {
   auto now = std::chrono::steady_clock::now();
   auto zero = std::chrono::steady_clock::time_point();
+
   if (expectTimestamps) {
     EXPECT_GT(timestamps.readEnd, started);
     EXPECT_GT(timestamps.processBegin, timestamps.readEnd);
@@ -1189,8 +1192,6 @@ void validateTimestamps(
     EXPECT_GT(timestamps.processDelayLatencyUsec().value(), 0);
   } else {
     EXPECT_EQ(timestamps.readEnd, zero);
-    EXPECT_EQ(timestamps.processBegin, timestamps.readEnd);
-    EXPECT_FALSE(timestamps.processDelayLatencyUsec().has_value());
   }
 }
 } // namespace

@@ -494,7 +494,7 @@ let rpc :
      cmd ->
   let t_ready_to_send_cmd = Unix.gettimeofday () in
   let metadata = { ServerCommandTypes.from; desc } in
-  Marshal.to_channel oc (ServerCommandTypes.Rpc (metadata, cmd)) [];
+  Marshal.to_channel oc (metadata, cmd) [];
   Out_channel.flush oc;
   let t_sent_cmd = Unix.gettimeofday () in
   let%lwt res =

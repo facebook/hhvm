@@ -425,7 +425,7 @@ type cmd_metadata = {
   desc: string;
 }
 
-type 'a command = Rpc of cmd_metadata * 'a t
+type 'a command = cmd_metadata * 'a t
 
 and streamed =
   | SHOW of string

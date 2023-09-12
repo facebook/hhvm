@@ -50,28 +50,26 @@ let debug_describe_t : type a. a t -> string = function
   | DEPS_OUT_BATCH _ -> "DEPS_OUT_BATCH"
   | DEPS_IN_BATCH _ -> "DEPS_IN_BATCH"
 
-let debug_describe_cmd : type a. a command -> string = function
-  | Rpc ({ ServerCommandTypes.from; _ }, rpc) ->
-    debug_describe_t rpc
-    ^
-    if String.equal from "" then
-      ""
-    else
-      " --from " ^ from
+let debug_describe_cmd (type a) (command : a command) : string =
+  let ({ ServerCommandTypes.from; _ }, rpc) = command in
+  debug_describe_t rpc
+  ^
+  if String.equal from "" then
+    ""
+  else
+    " --from " ^ from
 
 (** This returns a string that's shown "hh_server is busy [STATUS]".
 The intent is that users understand what command hh_server is currently busy with.
 For command-line commands, we show the "--" option that the user used, e.g. --type-at-pos.
 For IDE commands like hover, we show a description like "hover". *)
-let status_describe_cmd : type a. a command -> string =
- fun cmd ->
-  match cmd with
-  | Rpc ({ ServerCommandTypes.from; desc }, _rpc) ->
-    (if String.equal from "" then
-      ""
-    else
-      from ^ ":")
-    ^ desc
+let status_describe_cmd (type a) (command : a command) : string =
+  let ({ ServerCommandTypes.from; desc }, _rpc) = command in
+  (if String.equal from "" then
+    ""
+  else
+    from ^ ":")
+  ^ desc
 
 let debug_describe_message_type : type a. a message_type -> string = function
   | Hello -> "Hello"

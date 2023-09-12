@@ -118,7 +118,7 @@ let client_has_message _ = false
 
 let read_client_msg c =
   let metadata = { ServerCommandTypes.from = "test"; desc = "cmd" } in
-  Rpc (metadata, Utils.unsafe_opt (get_mocked_client_request c))
+  (metadata, Utils.unsafe_opt (get_mocked_client_request c))
 
 let get_channels _ = not_implemented ()
 

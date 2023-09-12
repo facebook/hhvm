@@ -71,14 +71,8 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | VERBOSE _ -> false
   | DEPS_IN_BATCH _ -> true
 
-let command_needs_full_check = function
-  | Rpc (_metadata, x) -> rpc_command_needs_full_check x
-
-let use_priority_pipe (type result) (command : result ServerCommandTypes.t) :
-    bool =
-  match command with
-  | _ when rpc_command_needs_full_check command -> false
-  | _ -> true
+let use_priority_pipe (type a) (command : a ServerCommandTypes.t) : bool =
+  not (rpc_command_needs_full_check command)
 
 let reason = ServerCommandTypesUtils.debug_describe_cmd
 
@@ -120,40 +114,39 @@ let actually_handle genv client msg full_recheck_needed ~is_stale env =
     ~key:Connection_tracker.Server_done_full_recheck
     ~long_delay_okay:true;
 
-  match msg with
-  | Rpc (_, cmd) ->
-    ClientProvider.ping client;
-    let t_start = Unix.gettimeofday () in
-    ClientProvider.track
-      client
-      ~key:Connection_tracker.Server_start_handle
-      ~time:t_start;
-    Sys_utils.start_gc_profiling ();
-    Full_fidelity_parser_profiling.start_profiling ();
+  let (_metadata, cmd) = msg in
+  ClientProvider.ping client;
+  let t_start = Unix.gettimeofday () in
+  ClientProvider.track
+    client
+    ~key:Connection_tracker.Server_start_handle
+    ~time:t_start;
+  Sys_utils.start_gc_profiling ();
+  Full_fidelity_parser_profiling.start_profiling ();
 
-    let (new_env, response) =
-      try ServerRpc.handle ~is_stale genv env cmd with
-      | exn ->
-        let e = Exception.wrap exn in
-        raise (Nonfatal_rpc_exception (e, env))
-    in
+  let (new_env, response) =
+    try ServerRpc.handle ~is_stale genv env cmd with
+    | exn ->
+      let e = Exception.wrap exn in
+      raise (Nonfatal_rpc_exception (e, env))
+  in
 
-    let parsed_files = Full_fidelity_parser_profiling.stop_profiling () in
-    ClientProvider.track
-      client
-      ~key:Connection_tracker.Server_end_handle
-      ~log:true;
-    let (major_gc_time, minor_gc_time) = Sys_utils.get_gc_time () in
-    HackEventLogger.handled_command
-      (ServerCommandTypesUtils.debug_describe_t cmd)
-      ~start_t:t_start
-      ~major_gc_time
-      ~minor_gc_time
-      ~parsed_files;
+  let parsed_files = Full_fidelity_parser_profiling.stop_profiling () in
+  ClientProvider.track
+    client
+    ~key:Connection_tracker.Server_end_handle
+    ~log:true;
+  let (major_gc_time, minor_gc_time) = Sys_utils.get_gc_time () in
+  HackEventLogger.handled_command
+    (ServerCommandTypesUtils.debug_describe_t cmd)
+    ~start_t:t_start
+    ~major_gc_time
+    ~minor_gc_time
+    ~parsed_files;
 
-    ClientProvider.send_response_to_client client response;
-    ClientProvider.shutdown_client client;
-    new_env
+  ClientProvider.send_response_to_client client response;
+  ClientProvider.shutdown_client client;
+  new_env
 
 let handle
     (genv : ServerEnv.genv)
@@ -200,7 +193,7 @@ let handle
          (ServerCommandTypesUtils.debug_describe_cmd msg)
          (ClientProvider.priority_to_string client))
     ~long_delay_okay:false;
-  let full_recheck_needed = command_needs_full_check msg in
+  let full_recheck_needed = rpc_command_needs_full_check (snd msg) in
   let is_stale =
     ServerEnv.(env.last_recheck_loop_stats.RecheckLoopStats.updates_stale)
   in

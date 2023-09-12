@@ -21,9 +21,9 @@
 #include <thrift/lib/cpp2/reflection/testing.h>
 #include <thrift/test/lazy_deserialization/MemberAccessor.h>
 #include <thrift/test/lazy_deserialization/common.h>
+#include <thrift/test/lazy_deserialization/gen-cpp2/deprecated_terse_writes_fatal_all.h>
 #include <thrift/test/lazy_deserialization/gen-cpp2/simple_constants.h>
 #include <thrift/test/lazy_deserialization/gen-cpp2/simple_fatal_all.h>
-#include <thrift/test/lazy_deserialization/gen-cpp2/terse_writes_fatal_all.h>
 
 namespace apache::thrift::test {
 

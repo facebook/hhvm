@@ -23,8 +23,8 @@
 #include <thrift/lib/cpp2/FieldRefTraits.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/protocol/detail/index.h>
+#include <thrift/test/lazy_deserialization/gen-cpp2/deprecated_terse_writes_types.h>
 #include <thrift/test/lazy_deserialization/gen-cpp2/simple_types.h>
-#include <thrift/test/lazy_deserialization/gen-cpp2/terse_writes_types.h>
 
 constexpr int kIterationCount = folly::kIsDebug ? 50'000 : 500'000;
 constexpr int kListMaxSize = 10;

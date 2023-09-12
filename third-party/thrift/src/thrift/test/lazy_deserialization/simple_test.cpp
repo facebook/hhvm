@@ -21,10 +21,10 @@
 #include <thrift/lib/cpp2/protocol/detail/index.h>
 #include <thrift/test/lazy_deserialization/MemberAccessor.h>
 #include <thrift/test/lazy_deserialization/common.h>
+#include <thrift/test/lazy_deserialization/gen-cpp2/deprecated_terse_writes_types.h>
+#include <thrift/test/lazy_deserialization/gen-cpp2/deprecated_terse_writes_types_custom_protocol.h>
 #include <thrift/test/lazy_deserialization/gen-cpp2/simple_types.h>
 #include <thrift/test/lazy_deserialization/gen-cpp2/simple_types_custom_protocol.h>
-#include <thrift/test/lazy_deserialization/gen-cpp2/terse_writes_types.h>
-#include <thrift/test/lazy_deserialization/gen-cpp2/terse_writes_types_custom_protocol.h>
 
 namespace apache::thrift::test {
 

@@ -38,7 +38,6 @@ import (
 	"thrift/conformance/serialization"
 	"thrift/lib/go/thrift"
 	"thrift/lib/thrift/protocol_detail"
-	"thrift/lib/thrift/type_rep"
 	"thrift/test/testset"
 	enum "thrift/test/testset/Enum"
 )
@@ -131,7 +130,6 @@ func main() {
 	registry := newTypeRegistry()
 	testset.RegisterTypes(registry)
 	enum.RegisterTypes(registry)
-	type_rep.RegisterTypes(registry)
 	protocol_detail.RegisterTypes(registry)
 
 	// Startup thrift server

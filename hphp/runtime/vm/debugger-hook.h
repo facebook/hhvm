@@ -52,6 +52,10 @@ inline bool disableJitAtAttach(RequestInjectionData& rid) {
     !rid.m_breakPointFilter.isNull();
 }
 
+inline bool disableJitForDebuggerCli() {
+  return RuntimeOption::EvalJitDisabledByVSDebug && is_any_cli_mode();
+}
+
 // Executes the passed code only if there is a debugger attached to the current
 // thread.
 #define DEBUGGER_ATTACHED_ONLY(code) do {                             \
@@ -120,7 +124,8 @@ struct DebuggerHook {
 
       s_numAttached++;
       ti->m_reqInjectionData.setDebuggerAttached(true);
-      if (disableJitAtAttach(ti->m_reqInjectionData) || is_any_cli_mode()) {
+      if (disableJitAtAttach(ti->m_reqInjectionData) ||
+          disableJitForDebuggerCli()) {
         ti->m_reqInjectionData.setJittingDisabled(true);
         rl_typeProfileLocals->forceInterpret = true;
         ti->m_reqInjectionData.updateJit();

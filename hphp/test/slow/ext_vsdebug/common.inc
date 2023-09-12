@@ -250,7 +250,10 @@ function vsDebugLaunch($scriptPath, $sendDefaultInit = true, $breakpoints = varr
      0 => varray["pipe", "r"], // stdin
      1 => varray["pipe", "w"], // stdout
      2 => varray["pipe", "w"]  // stderr
-  ];
+   ];
+
+  // When the client is run in jit mode, enable jit is the debugging hhvm as well.
+  $disable_jit = ini_get('hhvm.jit') ? 0 : 1;
 
   if (!\HH\global_get('USE_UNIX_SOCKET')) {
     // Grab an available port.
@@ -268,6 +271,9 @@ function vsDebugLaunch($scriptPath, $sendDefaultInit = true, $breakpoints = varr
       '-d', 'hhvm.hack.lang.look_for_typechecker=0',
       '--mode', 'vsdebug',
       '--vsDebugPort', (string) $port,
+      '-vEval.Jit=true',
+      '-vEval.JitDisabledByVSDebug='.$disable_jit,
+      '-vEval.JitPGO=false',
       $scriptPath,
     ];
   } else {
@@ -278,6 +284,9 @@ function vsDebugLaunch($scriptPath, $sendDefaultInit = true, $breakpoints = varr
       '-d', 'hhvm.hack.lang.look_for_typechecker=0',
       '--mode', 'vsdebug',
       '--vsDebugDomainSocketPath', $sockfile,
+      '-vEval.Jit=true',
+      '-vEval.JitDisabledByVSDebug='.$disable_jit,
+      '-vEval.JitPGO=false',
       $scriptPath,
     ];
   }

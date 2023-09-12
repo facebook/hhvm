@@ -124,6 +124,7 @@ let run_saved_state_future
     in
     let deptable_fn =
       if use_compressed_dep_graph then
+        let () = Hh_logger.log "Decompressing dep graph [run_saved_state]..." in
         let deptable_result =
           Depgraph_decompress_ffi.decompress
             ~compressed_dg_path:(Path.to_string compressed_dep_table_path)
@@ -337,6 +338,7 @@ let use_precomputed_state_exn
   let deptable_fn =
     if use_compressed_dep_graph && Option.is_some compressed_deptable_fn then
       let compressed_deptable_fn = Option.value_exn compressed_deptable_fn in
+      let () = Hh_logger.log "Decompressing dep graph [precomputed]..." in
       let deptable_result =
         Depgraph_decompress_ffi.decompress
           ~compressed_dg_path:compressed_deptable_fn

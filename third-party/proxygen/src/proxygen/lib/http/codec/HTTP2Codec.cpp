@@ -27,8 +27,6 @@ using std::string;
 
 namespace {
 const size_t kDefaultGrowth = 4000;
-constexpr auto kOkhttp = "okhttp/";
-constexpr int kOkhttpResetLogFreq = 1000;
 } // namespace
 
 namespace proxygen {
@@ -786,15 +784,9 @@ ErrorCode HTTP2Codec::parseRstStream(Cursor& cursor) {
   auto err = http2::parseRstStream(cursor, curHeader_, statusCode);
   RETURN_IF_ERROR(err);
   if (statusCode == ErrorCode::PROTOCOL_ERROR) {
-    auto errorMsg = folly::to<string>("RST_STREAM with code=",
-                                      getErrorCodeString(statusCode),
-                                      " for streamID=",
-                                      curHeader_.stream,
-                                      " user-agent=",
-                                      userAgent_);
-    int logFreq =
-        userAgent_.find(kOkhttp) == std::string::npos ? 1 : kOkhttpResetLogFreq;
-    VLOG_EVERY_N(2, logFreq) << errorMsg;
+    VLOG(3) << "RST_STREAM with code=" << getErrorCodeString(statusCode)
+            << " for streamID=" << curHeader_.stream
+            << " user-agent=" << userAgent_;
   }
   deliverCallbackIfAllowed(
       &HTTPCodec::Callback::onAbort, "onAbort", curHeader_.stream, statusCode);

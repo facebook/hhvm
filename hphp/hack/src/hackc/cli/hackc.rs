@@ -4,8 +4,6 @@
 
 mod asm;
 mod asm_ir;
-mod cmp_ir;
-mod cmp_unit;
 mod compile;
 mod crc;
 mod decls;

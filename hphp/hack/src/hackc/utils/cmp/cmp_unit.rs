@@ -3,13 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::fmt;
-
 use ffi::Maybe;
 use ffi::Slice;
 use ffi::Str;
-use hash::HashMap;
-use hash::HashSet;
 use hhbc::Attribute;
 use hhbc::Body;
 use hhbc::Class;
@@ -29,92 +25,15 @@ use hhbc::TypedValue;
 use hhbc::Typedef;
 use hhbc::Unit;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
-pub(crate) struct CmpError {
-    what: String,
-    loc: Option<String>,
-}
-
-impl CmpError {
-    pub fn error(what: String) -> Self {
-        CmpError { what, loc: None }
-    }
-}
-
-impl fmt::Display for CmpError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let loc = self.loc.as_ref().map_or("", String::as_str);
-        write!(f, "{}: {}", loc, self.what)
-    }
-}
-
-macro_rules! bail {
-    ($msg:literal $(,)?) => {
-        return Err(CmpError::error(format!($msg)))
-    };
-    ($err:expr $(,)?) => {
-        return Err(CmpError::error(format!($err)))
-    };
-    ($fmt:expr, $($arg:tt)*) => {
-        return Err(CmpError::error(format!($fmt, $($arg)*)))
-    };
-}
-
-pub(crate) trait CmpContext {
-    fn with_indexed<F: FnOnce() -> String>(self, f: F) -> Self;
-    fn indexed(self, idx: &str) -> Self;
-    fn qualified(self, name: &str) -> Self;
-    fn with_raw<F: FnOnce() -> String>(self, f: F) -> Self;
-}
-
-impl<T> CmpContext for Result<T, CmpError> {
-    fn with_raw<F>(self, f: F) -> Self
-    where
-        F: FnOnce() -> String,
-    {
-        match self {
-            Ok(_) => self,
-            Err(CmpError { what, loc: None }) => Err(CmpError {
-                what,
-                loc: Some(f()),
-            }),
-            Err(CmpError {
-                what,
-                loc: Some(loc),
-            }) => Err(CmpError {
-                what,
-                loc: Some(format!("{}{loc}", f())),
-            }),
-        }
-    }
-
-    fn with_indexed<F>(self, f: F) -> Self
-    where
-        F: FnOnce() -> String,
-    {
-        self.with_raw(|| format!("[\"{}\"]", f()))
-    }
-
-    fn indexed(self, idx: &str) -> Self {
-        self.with_indexed(|| idx.to_string())
-    }
-
-    fn qualified(self, name: &str) -> Self {
-        self.with_raw(|| format!(".{name}"))
-    }
-}
-
-pub(crate) type Result<T = (), E = CmpError> = std::result::Result<T, E>;
-
-pub(crate) trait MapName {
-    fn get_name(&self) -> String;
-}
-
-impl<T: MapName> MapName for &T {
-    fn get_name(&self) -> String {
-        T::get_name(self)
-    }
-}
+use crate::cmp_eq;
+use crate::cmp_map_t;
+use crate::cmp_option;
+use crate::cmp_set_t;
+use crate::cmp_slice;
+use crate::CmpContext;
+use crate::CmpError;
+use crate::MapName;
+use crate::Result;
 
 impl MapName for hhbc::Adata<'_> {
     fn get_name(&self) -> String {
@@ -186,113 +105,6 @@ impl MapName for hhbc::UpperBound<'_> {
     fn get_name(&self) -> String {
         self.name.unsafe_as_str().to_string()
     }
-}
-
-pub(crate) fn cmp_eq<Ta, Tb>(a: Ta, b: Tb) -> Result
-where
-    Ta: PartialEq<Tb> + fmt::Debug,
-    Tb: fmt::Debug,
-{
-    if a != b {
-        bail!("Mismatch {:?} vs {:?}", a, b);
-        //panic!("Mismatch {:?} vs {:?}", a, b);
-    }
-    Ok(())
-}
-
-pub(crate) fn cmp_map_t<'a, 'b, Ta: 'a, Tb: 'b, F>(
-    a: impl IntoIterator<Item = Ta>,
-    b: impl IntoIterator<Item = Tb>,
-    f_eq: F,
-) -> Result
-where
-    Ta: MapName + 'a + Copy,
-    Tb: MapName + 'b + Copy,
-    F: Fn(Ta, Tb) -> Result,
-{
-    let a_hash: HashMap<String, Ta> = a.into_iter().map(|t| (t.get_name(), t)).collect();
-    let b_hash: HashMap<String, Tb> = b.into_iter().map(|t| (t.get_name(), t)).collect();
-    let a_keys: HashSet<&String> = a_hash.keys().collect();
-    let b_keys: HashSet<&String> = b_hash.keys().collect();
-    for k in &a_keys & &b_keys {
-        f_eq(a_hash[k], b_hash[k]).with_indexed(|| k.to_string())?;
-    }
-
-    if let Some(k) = (&a_keys - &b_keys).into_iter().next() {
-        bail!("lhs has key {k} but rhs does not");
-    }
-
-    if let Some(k) = (&b_keys - &a_keys).into_iter().next() {
-        bail!("rhs has key {k} but lhs does not");
-    }
-
-    Ok(())
-}
-
-fn cmp_set_t<'a, T>(a: &'a [T], b: &'a [T]) -> Result
-where
-    T: std::hash::Hash + Eq + std::fmt::Debug,
-{
-    let a_keys: HashSet<&T> = a.iter().collect();
-    let b_keys: HashSet<&T> = b.iter().collect();
-
-    if let Some(k) = (&a_keys - &b_keys).into_iter().next() {
-        bail!("lhs has value {k:?} but rhs does not");
-    }
-
-    if let Some(k) = (&b_keys - &a_keys).into_iter().next() {
-        bail!("rhs has value {k:?} but lhs does not");
-    }
-
-    Ok(())
-}
-
-pub(crate) fn cmp_option<T, F>(a: Option<T>, b: Option<T>, f_eq: F) -> Result
-where
-    T: std::fmt::Debug + Copy,
-    F: FnOnce(T, T) -> Result,
-{
-    match (a, b) {
-        (None, None) => Ok(()),
-        (Some(a), None) => bail!("Some({a:?})\nNone"),
-        (None, Some(b)) => bail!("None\nSome({b:?})"),
-        (Some(lhs), Some(rhs)) => f_eq(lhs, rhs),
-    }
-}
-
-pub(crate) fn cmp_slice<'a, 'b, Ta, Tb, F>(
-    a: impl IntoIterator<Item = Ta>,
-    b: impl IntoIterator<Item = Tb>,
-    f_eq: F,
-) -> Result
-where
-    Ta: 'a + Copy,
-    Tb: 'b + Copy,
-    F: Fn(Ta, Tb) -> Result,
-{
-    let mut a = a.into_iter();
-    let mut b = b.into_iter();
-
-    let mut idx = 0;
-    loop {
-        match (a.next(), b.next()) {
-            (None, None) => break,
-            (Some(_), None) => {
-                let rest = 1 + a.count();
-                bail!("Length mismatch: lhs is longer ({} vs {})", idx + rest, idx);
-            }
-            (None, Some(_)) => {
-                let rest = 1 + b.count();
-                bail!("Length mismatch: rhs is longer ({} vs {})", idx, idx + rest);
-            }
-            (Some(av), Some(bv)) => {
-                f_eq(av, bv).with_indexed(|| idx.to_string())?;
-            }
-        }
-        idx += 1;
-    }
-
-    Ok(())
 }
 
 /// Currently, some includes aren't printed out. So this is like the cmp_slice without a length check.
@@ -725,7 +537,7 @@ fn cmp_static_coeffects(
     }
 }
 
-pub(crate) fn cmp_coeffects(a: &hhbc::Coeffects<'_>, b: &hhbc::Coeffects<'_>) -> Result {
+fn cmp_coeffects(a: &hhbc::Coeffects<'_>, b: &hhbc::Coeffects<'_>) -> Result {
     let hhbc::Coeffects {
         static_coeffects: a_sc,
         unenforced_static_coeffects: a_usc,
@@ -1081,6 +893,6 @@ fn cmp_unit(a_unit: &Unit<'_>, b_unit: &Unit<'_>) -> Result {
 
 /// Fancy version of `PartialEq::eq(a, b)` which also tries to report exactly
 /// where the mismatch occurred.
-pub(crate) fn cmp_hack_c_unit(a: &Unit<'_>, b: &Unit<'_>) -> Result {
+pub fn cmp_hack_c_unit(a: &Unit<'_>, b: &Unit<'_>) -> Result {
     cmp_unit(a, b).with_raw(|| "unit".to_string())
 }

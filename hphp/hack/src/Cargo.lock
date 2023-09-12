@@ -817,6 +817,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "cmp"
+version = "0.0.0"
+dependencies = [
+ "ffi",
+ "hash",
+ "hhbc",
+ "hhvm_types_ffi",
+ "ir",
+ "naming_special_names_rust",
+]
+
+[[package]]
 name = "codespan-reporting"
 version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2198,6 +2210,7 @@ dependencies = [
  "byte-unit",
  "bytecode_printer",
  "clap 4.3.11",
+ "cmp",
  "compile",
  "decl_parser",
  "decl_provider",
@@ -2205,7 +2218,6 @@ dependencies = [
  "elab",
  "env_logger 0.10.0",
  "facts",
- "ffi",
  "file_provider",
  "hackrs_test_utils",
  "hash",
@@ -2214,7 +2226,6 @@ dependencies = [
  "hhi",
  "hhvm_config",
  "hhvm_options",
- "hhvm_types_ffi",
  "ir",
  "ir_to_bc",
  "itertools 0.10.5",
@@ -2222,7 +2233,6 @@ dependencies = [
  "log",
  "multifile_rust",
  "naming_provider",
- "naming_special_names_rust",
  "once_cell",
  "options",
  "oxidized",

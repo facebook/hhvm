@@ -54,7 +54,7 @@ enum VerifyError {
     #[error("unable to read file: {0}")]
     ReadError(String),
     #[error("units mismatch: {0}")]
-    UnitMismatchError(crate::cmp_unit::CmpError),
+    UnitMismatchError(cmp::CmpError),
     #[error("semantic units mismatch: {0}")]
     SemanticUnitMismatchError(String),
 }
@@ -128,7 +128,7 @@ impl AssembleOpts {
         })?;
 
         let (result, verify_t) = Timing::time(path, || {
-            crate::cmp_unit::cmp_hack_c_unit(&pre_unit, &post_unit)
+            cmp::cmp_unit::cmp_hack_c_unit(&pre_unit, &post_unit)
         });
 
         let total_t = compile_profile.codegen_t
@@ -222,7 +222,7 @@ impl IrOpts {
                 };
                 VerifyError::AssembleError(err)
             })?;
-        crate::cmp_ir::cmp_ir(ir, &ir2)
+        cmp::cmp_ir::cmp_ir(ir, &ir2)
             .map_err(|err| VerifyError::IrUnitMismatchError(err.to_string()))
     }
 }

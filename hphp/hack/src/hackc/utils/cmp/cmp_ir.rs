@@ -21,28 +21,16 @@ use ir::unit::SymbolRefs;
 // in everything...
 use ir::*;
 
-use crate::cmp_unit::cmp_eq;
-use crate::cmp_unit::cmp_map_t;
-use crate::cmp_unit::cmp_option;
-use crate::cmp_unit::cmp_slice;
-use crate::cmp_unit::CmpContext;
-use crate::cmp_unit::CmpError;
-use crate::cmp_unit::MapName;
-use crate::cmp_unit::Result;
+use crate::cmp_eq;
+use crate::cmp_map_t;
+use crate::cmp_option;
+use crate::cmp_slice;
+use crate::CmpContext;
+use crate::CmpError;
+use crate::MapName;
+use crate::Result;
 
-macro_rules! bail {
-    ($msg:literal $(,)?) => {
-        return Err(CmpError::error(format!($msg)))
-    };
-    ($err:expr $(,)?) => {
-        return Err(CmpError::error(format!($err)))
-    };
-    ($fmt:expr, $($arg:tt)*) => {
-        return Err(CmpError::error(format!($fmt, $($arg)*)))
-    };
-}
-
-pub(crate) fn cmp_ir(a: &Unit<'_>, b: &Unit<'_>) -> Result {
+pub fn cmp_ir(a: &Unit<'_>, b: &Unit<'_>) -> Result {
     cmp_unit(a, b).with_raw(|| "unit".to_string())
 }
 
@@ -168,8 +156,12 @@ fn cmp_class(
         cmp_hack_constant,
     )
     .qualified("constants")?;
-    cmp_map_t(a_ctx_constants.iter(), b_ctx_constants, cmp_ctx_constant)
-        .qualified("ctx_constants")?;
+    cmp_map_t(
+        a_ctx_constants.iter(),
+        b_ctx_constants.iter(),
+        cmp_ctx_constant,
+    )
+    .qualified("ctx_constants")?;
     cmp_eq(a_doc_comment, b_doc_comment).qualified("doc_comment")?;
     cmp_option(
         a_enum_type.as_ref().map(|i| (i, a_strings)),
@@ -309,7 +301,25 @@ fn cmp_constant(
         | (Constant::Method, Constant::Method)
         | (Constant::Null, Constant::Null)
         | (Constant::Uninit, Constant::Uninit) => {}
-        _ => unreachable!(),
+
+        // these should never happen
+        (
+            Constant::Array(_)
+            | Constant::Bool(_)
+            | Constant::EnumClassLabel(_)
+            | Constant::Float(_)
+            | Constant::Int(_)
+            | Constant::Named(_)
+            | Constant::NewCol(_)
+            | Constant::String(_)
+            | Constant::Dir
+            | Constant::File
+            | Constant::FuncCred
+            | Constant::Method
+            | Constant::Null
+            | Constant::Uninit,
+            _,
+        ) => unreachable!(),
     }
 
     Ok(())
@@ -585,7 +595,16 @@ fn cmp_instr(
             (Instr::Terminator(a), Instr::Terminator(b)) => {
                 cmp_instr_terminator((a, a_strings), (b, b_strings)).qualified("terminator")
             }
-            _ => unreachable!(),
+
+            // these should never happen
+            (
+                Instr::Call(_)
+                | Instr::Hhbc(_)
+                | Instr::MemberOp(_)
+                | Instr::Special(_)
+                | Instr::Terminator(_),
+                _,
+            ) => unreachable!(),
         }
     }
 
@@ -716,16 +735,20 @@ fn cmp_instr_call(
             cmp_id(a_method.id, b_method.id).qualified("method")?;
         }
 
-        (CallDetail::FCallCtor, _)
-        | (CallDetail::FCallFunc, _)
-        | (CallDetail::FCallClsMethod {..}, _)
-        | (CallDetail::FCallClsMethodD {..}, _)
-        | (CallDetail::FCallClsMethodM {..}, _)
-        | (CallDetail::FCallClsMethodS {..}, _)
-        | (CallDetail::FCallClsMethodSD {..}, _)
-        | (CallDetail::FCallFuncD {..}, _)
-        | (CallDetail::FCallObjMethod {..}, _)
-        | (CallDetail::FCallObjMethodD {..}, _) => unreachable!(),
+        // these should never happen
+        (
+            CallDetail::FCallCtor
+            | CallDetail::FCallFunc
+            | CallDetail::FCallClsMethod {..}
+            | CallDetail::FCallClsMethodD {..}
+            | CallDetail::FCallClsMethodM {..}
+            | CallDetail::FCallClsMethodS {..}
+            | CallDetail::FCallClsMethodSD {..}
+            | CallDetail::FCallFuncD {..}
+            | CallDetail::FCallObjMethod {..}
+            | CallDetail::FCallObjMethodD {..},
+            _,
+        ) => unreachable!(),
     };
 
     Ok(())
@@ -987,44 +1010,47 @@ fn cmp_instr_hhbc(
         | (Hhbc::YieldK(_, _), _) => {}
 
         // these should never happen
-        (Hhbc::BareThis(..), _)
-        | (Hhbc::CGetS(..), _)
-        | (Hhbc::CheckProp(..), _)
-        | (Hhbc::ClsCns(..), _)
-        | (Hhbc::ClsCnsD(..), _)
-        | (Hhbc::CmpOp(..), _)
-        | (Hhbc::ColFromArray(..), _)
-        | (Hhbc::ContCheck(..), _)
-        | (Hhbc::IncDecL(..), _)
-        | (Hhbc::IncDecS(..), _)
-        | (Hhbc::IncludeEval(..), _)
-        | (Hhbc::InitProp(..), _)
-        | (Hhbc::InstanceOfD(..), _)
-        | (Hhbc::IsTypeC(..), _)
-        | (Hhbc::IsTypeL(..), _)
-        | (Hhbc::IsTypeStructC(..), _)
-        | (Hhbc::IterFree(..), _)
-        | (Hhbc::LazyClass(..), _)
-        | (Hhbc::NewDictArray(..), _)
-        | (Hhbc::NewObjD(..), _)
-        | (Hhbc::NewObjS(..), _)
-        | (Hhbc::NewStructDict(..), _)
-        | (Hhbc::OODeclExists(..), _)
-        | (Hhbc::ResolveClass(..), _)
-        | (Hhbc::ResolveClsMethod(..), _)
-        | (Hhbc::ResolveClsMethodD(..), _)
-        | (Hhbc::ResolveClsMethodS(..), _)
-        | (Hhbc::ResolveRClsMethod(..), _)
-        | (Hhbc::ResolveRClsMethodS(..), _)
-        | (Hhbc::ResolveFunc(..), _)
-        | (Hhbc::ResolveRClsMethodD(..), _)
-        | (Hhbc::ResolveRFunc(..), _)
-        | (Hhbc::ResolveMethCaller(..), _)
-        | (Hhbc::SetOpL(..), _)
-        | (Hhbc::SetOpG(..), _)
-        | (Hhbc::SetOpS(..), _)
-        | (Hhbc::SetS(..), _)
-        | (Hhbc::Silence(..), _) => unreachable!(),
+        (
+            Hhbc::BareThis(..)
+            | Hhbc::CGetS(..)
+            | Hhbc::CheckProp(..)
+            | Hhbc::ClsCns(..)
+            | Hhbc::ClsCnsD(..)
+            | Hhbc::CmpOp(..)
+            | Hhbc::ColFromArray(..)
+            | Hhbc::ContCheck(..)
+            | Hhbc::IncDecL(..)
+            | Hhbc::IncDecS(..)
+            | Hhbc::IncludeEval(..)
+            | Hhbc::InitProp(..)
+            | Hhbc::InstanceOfD(..)
+            | Hhbc::IsTypeC(..)
+            | Hhbc::IsTypeL(..)
+            | Hhbc::IsTypeStructC(..)
+            | Hhbc::IterFree(..)
+            | Hhbc::LazyClass(..)
+            | Hhbc::NewDictArray(..)
+            | Hhbc::NewObjD(..)
+            | Hhbc::NewObjS(..)
+            | Hhbc::NewStructDict(..)
+            | Hhbc::OODeclExists(..)
+            | Hhbc::ResolveClass(..)
+            | Hhbc::ResolveClsMethod(..)
+            | Hhbc::ResolveClsMethodD(..)
+            | Hhbc::ResolveClsMethodS(..)
+            | Hhbc::ResolveRClsMethod(..)
+            | Hhbc::ResolveRClsMethodS(..)
+            | Hhbc::ResolveFunc(..)
+            | Hhbc::ResolveRClsMethodD(..)
+            | Hhbc::ResolveRFunc(..)
+            | Hhbc::ResolveMethCaller(..)
+            | Hhbc::SetOpL(..)
+            | Hhbc::SetOpG(..)
+            | Hhbc::SetOpS(..)
+            | Hhbc::SetS(..)
+            | Hhbc::Silence(..),
+            _,
+        ) => unreachable!(),
     }
     Ok(())
 }
@@ -1102,12 +1128,16 @@ fn cmp_instr_member_op_base(
             cmp_id((a_prop.id, a_strings), (b_prop.id, b_strings)).qualified("prop")?;
         }
 
-        (BaseOp::BaseC { .. }, _)
-        | (BaseOp::BaseGC { .. }, _)
-        | (BaseOp::BaseH { .. }, _)
-        | (BaseOp::BaseL { .. }, _)
-        | (BaseOp::BaseSC { .. }, _)
-        | (BaseOp::BaseST { .. }, _) => unreachable!(),
+        // these should never happen
+        (
+            BaseOp::BaseC { .. }
+            | BaseOp::BaseGC { .. }
+            | BaseOp::BaseH { .. }
+            | BaseOp::BaseL { .. }
+            | BaseOp::BaseSC { .. }
+            | BaseOp::BaseST { .. },
+            _,
+        ) => unreachable!(),
     };
 
     Ok(())
@@ -1186,12 +1216,16 @@ fn cmp_instr_member_op_final(
             cmp_loc_id((*a_loc, a_func, a_strings), (*b_loc, b_func, b_strings)).qualified("loc")?;
         }
 
-        (FinalOp::IncDecM { .. }, _)
-        | (FinalOp::QueryM { .. }, _)
-        | (FinalOp::SetM { .. }, _)
-        | (FinalOp::SetRangeM { .. }, _)
-        | (FinalOp::SetOpM { .. }, _)
-        | (FinalOp::UnsetM { .. }, _) => unreachable!(),
+        // these should never happen
+        (
+            FinalOp::IncDecM { .. }
+            | FinalOp::QueryM { .. }
+            | FinalOp::SetM { .. }
+            | FinalOp::SetRangeM { .. }
+            | FinalOp::SetOpM { .. }
+            | FinalOp::UnsetM { .. },
+            _,
+        ) => unreachable!(),
     };
 
     Ok(())
@@ -1220,15 +1254,19 @@ fn cmp_member_key(
         | (MemberKey::PL, MemberKey::PL)
         | (MemberKey::W, MemberKey::W) => {}
 
-        (MemberKey::EC, _)
-        | (MemberKey::EI(..), _)
-        | (MemberKey::EL, _)
-        | (MemberKey::ET(..), _)
-        | (MemberKey::PC, _)
-        | (MemberKey::PL, _)
-        | (MemberKey::PT(..), _)
-        | (MemberKey::QT(..), _)
-        | (MemberKey::W, _) => unreachable!(),
+        // these should never happen
+        (
+            MemberKey::EC
+            | MemberKey::EI(..)
+            | MemberKey::EL
+            | MemberKey::ET(..)
+            | MemberKey::PC
+            | MemberKey::PL
+            | MemberKey::PT(..)
+            | MemberKey::QT(..)
+            | MemberKey::W,
+            _,
+        ) => unreachable!(),
     }
 
     Ok(())
@@ -1246,10 +1284,10 @@ fn cmp_instr_special(a: &Special, b: &Special) -> Result {
 
         (Special::IrToBc(_), _) | (Special::Tmp(_), _) | (Special::Textual(_), _) => todo!(),
 
-        (Special::Copy(..), _)
-        | (Special::Param, _)
-        | (Special::Select(..), _)
-        | (Special::Tombstone, _) => unreachable!(),
+        // these should never happen
+        (Special::Copy(..) | Special::Param | Special::Select(..) | Special::Tombstone, _) => {
+            unreachable!()
+        }
     }
 
     Ok(())
@@ -1311,13 +1349,17 @@ fn cmp_instr_terminator(
                 | (Terminator::ThrowAsTypeStructException(_, _), _)
                 | (Terminator::Unreachable, _) => {}
 
-            (Terminator::CallAsync(..), _)
-                | (Terminator::Fatal(..), _)
-                | (Terminator::IterInit(..), _)
-                | (Terminator::IterNext(..), _)
-                | (Terminator::JmpOp { .. }, _)
-                | (Terminator::Switch { .. }, _)
-                | (Terminator::SSwitch { .. }, _) => unreachable!(),
+            // these should never happen
+            (
+                Terminator::CallAsync(..)
+                | Terminator::Fatal(..)
+                | Terminator::IterInit(..)
+                | Terminator::IterNext(..)
+                | Terminator::JmpOp { .. }
+                | Terminator::Switch { .. }
+                | Terminator::SSwitch { .. },
+                _,
+            ) => unreachable!(),
         };
 
         Ok(())
@@ -1689,6 +1731,7 @@ fn cmp_base_ty(
         | (BaseType::VecOrDict, _)
         | (BaseType::Void, _) => Ok(()),
 
+        // these should never happen
         (BaseType::Class(_), _) => unreachable!(),
     }
 }
@@ -1741,16 +1784,20 @@ fn cmp_typed_value(
             .qualified("dict values")?;
         }
 
-        (TypedValue::Uninit, _)
-        | (TypedValue::Int(_), _)
-        | (TypedValue::Bool(_), _)
-        | (TypedValue::Float(_), _)
-        | (TypedValue::String(_), _)
-        | (TypedValue::LazyClass(_), _)
-        | (TypedValue::Null, _)
-        | (TypedValue::Vec(_), _)
-        | (TypedValue::Keyset(_), _)
-        | (TypedValue::Dict(_), _) => unreachable!(),
+        // these should never happen
+        (
+            TypedValue::Uninit
+            | TypedValue::Int(_)
+            | TypedValue::Bool(_)
+            | TypedValue::Float(_)
+            | TypedValue::String(_)
+            | TypedValue::LazyClass(_)
+            | TypedValue::Null
+            | TypedValue::Vec(_)
+            | TypedValue::Keyset(_)
+            | TypedValue::Dict(_),
+            _,
+        ) => unreachable!(),
     }
 
     Ok(())
@@ -1772,7 +1819,8 @@ fn cmp_array_key(
             cmp_id(*a, *b).qualified("lazy_class")?
         }
 
-        (ArrayKey::Int(_), _) | (ArrayKey::String(_), _) | (ArrayKey::LazyClass(_), _) => {
+        // these should never happen
+        (ArrayKey::Int(_) | ArrayKey::String(_) | ArrayKey::LazyClass(_), _) => {
             unreachable!()
         }
     }

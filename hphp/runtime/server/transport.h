@@ -519,6 +519,7 @@ protected:
   bool m_headerSent{};
   bool m_firstHeaderSet{};
   bool m_sendEnded{};
+  bool m_sendStarted{false};
   bool m_sendContentType{true};
   bool m_isSSL{};
   int m_responseCode{-1};

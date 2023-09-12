@@ -399,7 +399,6 @@ struct ProxygenTransport final
   // the slb due to impending server death
   bool m_reposting{false};
   bool m_shouldRepost{false};
-  bool m_sendStarted{false};
   bool m_egressError{false};
   std::unique_ptr<folly::IOBuf> m_currentBodyBuf;
   proxygen::HTTPMessage m_response;

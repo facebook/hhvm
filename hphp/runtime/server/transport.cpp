@@ -742,7 +742,10 @@ void Transport::sendRaw(const char *data, int size, int code /* = 200 */,
   }
 
   // Note: This API is used when `isStreamTransport()` to report request errors
-  // (such as 404).
+  // (such as 404) but if we already started sending then ignore this.
+  if (m_sendStarted && isStreamTransport()) {
+    return;
+  }
 
   if (!precompressed && RuntimeOption::ForceChunkedEncoding) {
     chunked = true;

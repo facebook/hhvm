@@ -110,7 +110,7 @@ fn sequentialise_stmt(
     if stmts.len() == 1 {
         *elem = stmts.remove(0)
     } else {
-        *elem = Stmt(pos.clone(), Stmt_::Block(Block(stmts)))
+        *elem = Stmt(pos.clone(), Stmt_::Block(Box::new((None, Block(stmts)))))
     }
 }
 

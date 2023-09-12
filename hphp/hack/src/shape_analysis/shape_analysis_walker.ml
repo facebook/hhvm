@@ -770,7 +770,7 @@ and stmt (env : env) ((pos, stmt) : T.stmt) : env =
         [Cont.Continue; Cont.Break; Cont.Next]
     in
     env
-  | A.Block statements -> block env statements
+  | A.Block (_, statements) -> block env statements
   | A.Noop
   | A.AssertEnv _
   | A.Markup _ ->

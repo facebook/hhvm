@@ -791,7 +791,10 @@ module Visitor_DEPRECATED = struct
         | Fallthrough -> this#on_fallthrough acc
         | Awaitall (el, b) -> this#on_awaitall acc el b
         | Declare_local (id, t, e) -> this#on_declare_local acc id t e
-        | Block b -> this#on_block acc b
+        | Block (Some lids, b) ->
+          let acc = List.fold_left lids ~init:acc ~f:this#on_lvar in
+          this#on_block acc b
+        | Block (None, b) -> this#on_block acc b
         | Markup s -> this#on_markup acc s
         | AssertEnv _ -> this#on_noop acc
 

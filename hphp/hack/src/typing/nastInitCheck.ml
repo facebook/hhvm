@@ -422,7 +422,7 @@ and stmt env acc st =
   | Noop -> acc
   | Declare_local (_, _, Some e) -> expr acc e
   | Declare_local (_, _, None) -> acc
-  | Block b -> block acc b
+  | Block (_, b) -> block acc b
   | Markup _ -> acc
   | AssertEnv _ -> acc
   | Match _ -> failwith "TODO(jakebailey): match statements"

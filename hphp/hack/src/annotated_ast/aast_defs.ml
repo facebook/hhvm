@@ -231,10 +231,12 @@ and ('ex, 'en) stmt_ =
        *     if ($foo) {} // the else is Noop here *)
   | Declare_local of lid * hint * ('ex, 'en) expr option
       (** Declare a local variable with the given type and optional initial value *)
-  | Block of ('ex, 'en) block
+  | Block of lid list option * ('ex, 'en) block
       (** Block, a list of statements in curly braces.
        *
-       *     { $foo = 42; } *)
+       *     { $foo = 42; }
+       * If present, the optional list of identifiers are those that are scoped to this
+       * Block, they will be unset upon exit to the block. *)
   | Markup of pstring
       [@transform.opaque]
       (** The mode tag at the beginning of a file.

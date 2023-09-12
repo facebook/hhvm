@@ -512,7 +512,7 @@ impl<'a> VisitorMut<'a> for TypedLocal {
                         let mut new_expr = Expr((), Pos::NONE, Expr_::Null);
                         std::mem::swap(expr, &mut new_expr);
                         let stmts = exprs_to_stmts(Some(new_expr), exprs);
-                        let mut block = Stmt_::Block(Block(stmts));
+                        let mut block = Stmt_::Block(Box::new((None, Block(stmts))));
                         std::mem::swap(stmt_, &mut block);
                     }
                 }
@@ -739,7 +739,7 @@ mod tests {
     fn build_program(stmts: Vec<Stmt>) -> Program {
         nast::Program(vec![Def::Stmt(Box::new(Stmt(
             Pos::NONE,
-            Stmt_::Block(Block(stmts)),
+            Stmt_::Block(Box::new((None, Block(stmts)))),
         )))])
     }
 
@@ -1044,46 +1044,55 @@ mod tests {
             ),
             Stmt(
                 Pos::NONE,
-                Stmt_::Block(Block(vec![
-                    Stmt(
-                        Pos::NONE,
-                        Stmt_::Expr(Box::new(Expr(
-                            (),
+                Stmt_::Block(Box::new((
+                    None,
+                    Block(vec![
+                        Stmt(
                             Pos::NONE,
-                            Expr_::Binop(Box::new(Binop {
-                                bop: Bop::Eq(Some(Box::new(Bop::Plus))),
-                                lhs: Expr(
-                                    (),
-                                    Pos::NONE,
-                                    Expr_::Lvar(Box::new(Lid(Pos::NONE, (0, "$x".to_string())))),
-                                ),
-                                rhs: Expr((), Pos::NONE, Expr_::Int("1".to_string())),
-                            })),
-                        ))),
-                    ),
-                    Stmt(
-                        Pos::NONE,
-                        Stmt_::Expr(Box::new(Expr(
-                            (),
-                            Pos::NONE,
-                            Expr_::As(Box::new((
-                                Expr(
-                                    (),
-                                    Pos::NONE,
-                                    Expr_::Lvar(Box::new(Lid(Pos::NONE, (0, "$x".to_string())))),
-                                ),
-                                Hint(
-                                    Pos::NONE,
-                                    Box::new(Hint_::Happly(
-                                        nast::Id(Pos::NONE, "t".to_string()),
-                                        vec![],
-                                    )),
-                                ),
-                                false,
+                            Stmt_::Expr(Box::new(Expr(
+                                (),
+                                Pos::NONE,
+                                Expr_::Binop(Box::new(Binop {
+                                    bop: Bop::Eq(Some(Box::new(Bop::Plus))),
+                                    lhs: Expr(
+                                        (),
+                                        Pos::NONE,
+                                        Expr_::Lvar(Box::new(Lid(
+                                            Pos::NONE,
+                                            (0, "$x".to_string()),
+                                        ))),
+                                    ),
+                                    rhs: Expr((), Pos::NONE, Expr_::Int("1".to_string())),
+                                })),
                             ))),
-                        ))),
-                    ),
-                ])),
+                        ),
+                        Stmt(
+                            Pos::NONE,
+                            Stmt_::Expr(Box::new(Expr(
+                                (),
+                                Pos::NONE,
+                                Expr_::As(Box::new((
+                                    Expr(
+                                        (),
+                                        Pos::NONE,
+                                        Expr_::Lvar(Box::new(Lid(
+                                            Pos::NONE,
+                                            (0, "$x".to_string()),
+                                        ))),
+                                    ),
+                                    Hint(
+                                        Pos::NONE,
+                                        Box::new(Hint_::Happly(
+                                            nast::Id(Pos::NONE, "t".to_string()),
+                                            vec![],
+                                        )),
+                                    ),
+                                    false,
+                                ))),
+                            ))),
+                        ),
+                    ]),
+                ))),
             ),
         ]);
         self::elaborate_program(&mut env, &mut orig, true);

@@ -722,9 +722,9 @@ impl<'decl> Infer<'decl> {
                     (st.clone(), ctx)
                 }
             }
-            Block(stmts) => {
+            Block(box (_, stmts)) => {
                 let (stmts, ctx) = self.infer_stmts_block(stmts, ctx, next_where);
-                (Block(stmts), ctx)
+                (Block(Box::new((None, stmts))), ctx)
             }
             Markup(_) => (st.clone(), ctx),
             AssertEnv(b) => (AssertEnv(b.clone()), ctx),

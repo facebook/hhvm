@@ -114,7 +114,7 @@ pub fn emit_stmt<'a, 'arena, 'decl>(
             _ => emit_expr::emit_ignored_expr(e, env, pos, e_),
         },
         a::Stmt_::Return(r_opt) => emit_return_(e, env, (**r_opt).as_ref(), pos),
-        a::Stmt_::Block(b) => emit_block(env, e, b),
+        a::Stmt_::Block(box (_, b)) => emit_block(env, e, b),
         a::Stmt_::If(f) => emit_if(e, env, pos, &f.0, &f.1, &f.2),
         a::Stmt_::While(x) => emit_while(e, env, &x.0, &x.1),
         a::Stmt_::Using(x) => emit_using(e, env, x),
@@ -1510,7 +1510,7 @@ pub fn emit_final_stmt<'a, 'arena, 'decl>(
 ) -> Result<InstrSeq<'arena>> {
     match &stmt.1 {
         a::Stmt_::Throw(_) | a::Stmt_::Return(_) | a::Stmt_::YieldBreak => emit_stmt(e, env, stmt),
-        a::Stmt_::Block(stmts) => emit_final_stmts(env, e, stmts),
+        a::Stmt_::Block(box (_, stmts)) => emit_final_stmts(env, e, stmts),
         _ => {
             let ret = emit_dropthrough_return(e, env)?;
             Ok(InstrSeq::gather(vec![emit_stmt(e, env, stmt)?, ret]))

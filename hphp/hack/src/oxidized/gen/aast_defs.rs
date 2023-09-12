@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2e1191d03a3599f2deeb278208fe984e>>
+// @generated SignedSource<<34bef1946e4207b9dad1fa6f977816a2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -253,7 +253,10 @@ pub enum Stmt_<Ex, En> {
     /// Block, a list of statements in curly braces.
     ///
     ///     { $foo = 42; }
-    Block(Block<Ex, En>),
+    /// If present, the optional list of identifiers are those that are scoped to this
+    /// Block, they will be unset upon exit to the block.
+    #[rust_to_ocaml(inline_tuple)]
+    Block(Box<(Option<Vec<Lid>>, Block<Ex, En>)>),
     /// The mode tag at the beginning of a file.
     /// TODO: this really belongs in def.
     ///

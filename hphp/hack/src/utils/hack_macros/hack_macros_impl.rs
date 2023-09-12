@@ -1434,28 +1434,31 @@ mod tests {
                 #[allow(clippy::redundant_clone)]
                 let __hygienic_tmp = Stmt(
                     __hygienic_pos.clone(),
-                    Stmt_::Block(Block(vec![
-                        Stmt(
-                            __hygienic_pos.clone(),
-                            Stmt_::Expr(Box::new(Expr(
-                                (),
+                    Stmt_::Block(Box::new((
+                        None,
+                        Block(vec![
+                            Stmt(
                                 __hygienic_pos.clone(),
-                                Expr_::Id(Box::new(Id(__hygienic_pos.clone(), "a".to_owned()))),
-                            ))),
-                        ),
-                        {
-                            let tmp: Stmt = b;
-                            tmp
-                        },
-                        Stmt(
-                            __hygienic_pos.clone(),
-                            Stmt_::Expr(Box::new(Expr(
-                                (),
+                                Stmt_::Expr(Box::new(Expr(
+                                    (),
+                                    __hygienic_pos.clone(),
+                                    Expr_::Id(Box::new(Id(__hygienic_pos.clone(), "a".to_owned()))),
+                                ))),
+                            ),
+                            {
+                                let tmp: Stmt = b;
+                                tmp
+                            },
+                            Stmt(
                                 __hygienic_pos.clone(),
-                                Expr_::Id(Box::new(Id(__hygienic_pos.clone(), "c".to_owned()))),
-                            ))),
-                        ),
-                    ])),
+                                Stmt_::Expr(Box::new(Expr(
+                                    (),
+                                    __hygienic_pos.clone(),
+                                    Expr_::Id(Box::new(Id(__hygienic_pos.clone(), "c".to_owned()))),
+                                ))),
+                            ),
+                        ]),
+                    ))),
                 );
                 __hygienic_tmp
             }),
@@ -1509,13 +1512,13 @@ mod tests {
                     #[allow(clippy::redundant_clone)]
                     let __hygienic_tmp = Stmt(
                         __hygienic_pos.clone(),
-                        Stmt_::Block(Block(
+                        Stmt_::Block(Box::new ((None, Block(
                             std::iter::empty()
                                 .chain(#before.into_iter())
                                 .chain(c.into_iter())
                                 .chain(#after.into_iter())
                                 .collect::<Vec<_>>(),
-                        )),
+                        )))),
                     );
                     __hygienic_tmp
                 })

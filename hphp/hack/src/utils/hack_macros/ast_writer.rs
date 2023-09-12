@@ -515,9 +515,8 @@ impl ser::Serializer for AstWriter {
             | ("Expr_", "Shape")
             | ("Expr_", "String")
             | ("Expr_", "String2")
-            | ("Expr_", "Tuple")
-            | ("Stmt_", "Block") => inner,
-            ("Expr_", _) | ("Stmt_", _) => box_stream(inner, span),
+            | ("Expr_", "Tuple") => inner,
+            ("Stmt_", "Block") | ("Expr_", _) | ("Stmt_", _) => box_stream(inner, span),
             _ => inner,
         };
         s.push_paren_group(inner);

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7cf908a0a8fef6eaa43de34a93c20664>>
+// @generated SignedSource<<b171bfced70898a9e85d9e552390a8be>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -320,8 +320,11 @@ pub enum Stmt_<'a, Ex, En> {
     /// Block, a list of statements in curly braces.
     ///
     ///     { $foo = 42; }
+    /// If present, the optional list of identifiers are those that are scoped to this
+    /// Block, they will be unset upon exit to the block.
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Block(&'a Block<'a, Ex, En>),
+    #[rust_to_ocaml(inline_tuple)]
+    Block(&'a (Option<&'a [&'a Lid<'a>]>, &'a Block<'a, Ex, En>)),
     /// The mode tag at the beginning of a file.
     /// TODO: this really belongs in def.
     ///

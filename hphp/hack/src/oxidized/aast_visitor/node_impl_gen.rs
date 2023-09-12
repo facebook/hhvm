@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6e0fca1a4e5337d8a6a4f923ea6e3bbb>>
+// @generated SignedSource<<0313e27f642d5b4a37e11851378bac2c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2063,6 +2063,15 @@ impl<P: Params> Node<P> for Stmt_<P::Ex, P::En> {
         }
         #[inline]
         fn helper9<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
+            a: &'node Box<(Option<Vec<Lid>>, Block<Ex, En>)>,
+            c: &mut P::Context,
+            v: &mut dyn Visitor<'node, Params = P>,
+        ) -> Result<(), P::Error> {
+            a.0.accept(c, v)?;
+            a.1.accept(c, v)
+        }
+        #[inline]
+        fn helper10<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
             a: &'node Box<(EnvAnnot, LocalIdMap<(Pos, Ex)>)>,
             c: &mut P::Context,
             v: &mut dyn Visitor<'node, Params = P>,
@@ -2090,9 +2099,9 @@ impl<P: Params> Node<P> for Stmt_<P::Ex, P::En> {
             Stmt_::Try(a) => helper7(a, c, v),
             Stmt_::Noop => Ok(()),
             Stmt_::DeclareLocal(a) => helper8(a, c, v),
-            Stmt_::Block(a0) => a0.accept(c, v),
+            Stmt_::Block(a) => helper9(a, c, v),
             Stmt_::Markup(a0) => a0.accept(c, v),
-            Stmt_::AssertEnv(a) => helper9(a, c, v),
+            Stmt_::AssertEnv(a) => helper10(a, c, v),
         }
     }
 }

@@ -458,7 +458,7 @@ let assert_env_stmt ~pos ~at annotation_kind env_map_opt stmt =
       | `Start -> [mk_assert env_map; stmt]
       | `End -> [stmt; mk_assert env_map]
     in
-    Aast.Block blk
+    Aast.Block (None, blk)
   | None -> stmt
 
 let set_tcopt_unstable_features env { fa_user_attributes; _ } =
@@ -2601,7 +2601,7 @@ and block env stl =
         (* Accumulate statements in reverse order *)
         let stl =
           match st with
-          | (_, Aast.Block stl') -> List.rev stl' @ stl
+          | (_, Aast.Block (_, stl')) -> List.rev stl' @ stl
           | _ -> st :: stl
         in
         (env, stl))

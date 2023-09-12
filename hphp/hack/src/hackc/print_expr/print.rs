@@ -810,7 +810,9 @@ fn print_block(
 ) -> Result<()> {
     match block {
         [] | [ast::Stmt(_, ast::Stmt_::Noop)] => Ok(()),
-        [ast::Stmt(_, ast::Stmt_::Block(b))] if b.len() == 1 => print_block_(ctx, w, env, b),
+        [ast::Stmt(_, ast::Stmt_::Block(box (_, b)))] if b.len() == 1 => {
+            print_block_(ctx, w, env, b)
+        }
         [_, _, ..] => print_block_(ctx, w, env, block),
         [stmt] => print_statement(ctx, w, env, stmt),
     }
@@ -875,7 +877,7 @@ fn print_statement(
             };
             Ok(())
         }
-        S_::Block(block) => print_block_(ctx, w, env, block),
+        S_::Block(box (_, block)) => print_block_(ctx, w, env, block),
         S_::Noop => Ok(()),
         /* TODO(T29869930) */
         _ => w.write_all(b"TODO Unimplemented NYI: Default value printing"),

@@ -11,7 +11,7 @@ open Hh_prelude
 let rec concat_blocks stmts =
   match stmts with
   | [] -> []
-  | (_, Aast.Block b) :: rest -> concat_blocks (b @ rest)
+  | (_, Aast.Block (_, b)) :: rest -> concat_blocks (b @ rest)
   | next :: rest ->
     let rest = concat_blocks rest in
     next :: rest

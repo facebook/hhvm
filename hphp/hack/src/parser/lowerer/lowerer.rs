@@ -2768,7 +2768,7 @@ fn handle_loop_body<'a>(pos: Pos, node: S<'a>, env: &mut Env<'a>) -> Result<ast:
     } else {
         blk
     };
-    Ok(ast::Stmt::new(pos, ast::Stmt_::mk_block(body)))
+    Ok(ast::Stmt::new(pos, ast::Stmt_::mk_block(None, body)))
 }
 
 fn is_simple_assignment_await_expression<'a>(node: S<'a>) -> bool {
@@ -3074,7 +3074,7 @@ fn p_concurrent_stmt<'a>(
     let (lifted_awaits, Stmt(stmt_pos, stmt)) =
         with_new_concurrent_scope(env, |e| p_stmt(&c.statement, e))?;
     let stmt = match stmt {
-        S_::Block(stmts) => {
+        S_::Block(box (_, stmts)) => {
             use ast::Bop::Eq;
             /* Reuse tmp vars from lifted_awaits, this is safe because there will
              * always be more awaits with tmp vars than statements with assignments. */
@@ -3189,7 +3189,7 @@ fn p_concurrent_stmt<'a>(
                 }
             }
             body_stmts.append(&mut assign_stmts);
-            new(stmt_pos, S_::mk_block(ast::Block(body_stmts)))
+            new(stmt_pos, S_::mk_block(None, ast::Block(body_stmts)))
         }
         _ => missing_syntax("block in concurrent", &c.keyword, env)?,
     };
@@ -4480,7 +4480,7 @@ fn p_fun_pos<'a>(node: S<'a>, env: &Env<'_>) -> Pos {
 
 fn p_block<'a>(remove_noop: bool, node: S<'a>, env: &mut Env<'a>) -> Result<ast::Block> {
     let ast::Stmt(p, stmt_) = p_stmt(node, env)?;
-    if let ast::Stmt_::Block(blk) = stmt_ {
+    if let ast::Stmt_::Block(box (_, blk)) = stmt_ {
         if remove_noop && blk.len() == 1 && blk[0].1.is_noop() {
             return Ok(Default::default());
         }
@@ -4496,7 +4496,7 @@ fn p_finally_block<'a>(
     env: &mut Env<'a>,
 ) -> Result<ast::FinallyBlock> {
     let ast::Stmt(p, stmt_) = p_stmt(node, env)?;
-    if let ast::Stmt_::Block(blk) = stmt_ {
+    if let ast::Stmt_::Block(box (_, blk)) = stmt_ {
         if remove_noop && blk.len() == 1 && blk[0].1.is_noop() {
             return Ok(Default::default());
         }

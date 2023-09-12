@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<882cd6bc03356d847900c351f3bfe650>>
+// @generated SignedSource<<f6917d70968db7cc0463fd59f76a87d7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -78,8 +78,8 @@ impl<Ex, En> Stmt_<Ex, En> {
     pub fn mk_declare_local(p0: Lid, p1: Hint, p2: Option<Expr<Ex, En>>) -> Self {
         Stmt_::DeclareLocal(Box::new((p0, p1, p2)))
     }
-    pub fn mk_block(p0: Block<Ex, En>) -> Self {
-        Stmt_::Block(p0)
+    pub fn mk_block(p0: Option<Vec<Lid>>, p1: Block<Ex, En>) -> Self {
+        Stmt_::Block(Box::new((p0, p1)))
     }
     pub fn mk_markup(p0: Pstring) -> Self {
         Stmt_::Markup(Box::new(p0))
@@ -316,9 +316,9 @@ impl<Ex, En> Stmt_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_block(&self) -> Option<&Block<Ex, En>> {
+    pub fn as_block(&self) -> Option<(&Option<Vec<Lid>>, &Block<Ex, En>)> {
         match self {
-            Stmt_::Block(p0) => Some(p0),
+            Stmt_::Block(p0) => Some((&p0.0, &p0.1)),
             _ => None,
         }
     }
@@ -445,9 +445,9 @@ impl<Ex, En> Stmt_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_block_mut(&mut self) -> Option<&mut Block<Ex, En>> {
+    pub fn as_block_mut(&mut self) -> Option<(&mut Option<Vec<Lid>>, &mut Block<Ex, En>)> {
         match self {
-            Stmt_::Block(p0) => Some(p0),
+            Stmt_::Block(p0) => Some((&mut p0.0, &mut p0.1)),
             _ => None,
         }
     }
@@ -556,9 +556,9 @@ impl<Ex, En> Stmt_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_block_into(self) -> Option<Block<Ex, En>> {
+    pub fn as_block_into(self) -> Option<(Option<Vec<Lid>>, Block<Ex, En>)> {
         match self {
-            Stmt_::Block(p0) => Some(p0),
+            Stmt_::Block(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,
         }
     }

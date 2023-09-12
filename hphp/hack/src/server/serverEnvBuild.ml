@@ -59,7 +59,6 @@ let make_env ~init_id ~deps_mode config : ServerEnv.env =
     clock = None;
     needs_phase2_redecl = Relative_path.Set.empty;
     needs_recheck = Relative_path.Set.empty;
-    full_recheck_on_file_changes = Not_paused;
     full_check_status = Full_check_done;
     changed_files = Relative_path.Set.empty;
     prechecked_files = Prechecked_files_disabled;

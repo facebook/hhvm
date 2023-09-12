@@ -363,15 +363,12 @@ let rec recheck_until_no_changes_left stats genv env select_outcome :
     if Relative_path.Set.is_empty updates then
       env
     else
-      let disk_needs_parsing =
-        Relative_path.Set.union updates env.disk_needs_parsing
-      in
-      match env.full_recheck_on_file_changes with
-      | Paused _ ->
-        let () = Hh_logger.log "Skipping full check due to `hh --pause`" in
-        { env with disk_needs_parsing; full_check_status = Full_check_needed }
-      | _ ->
-        { env with disk_needs_parsing; full_check_status = Full_check_started }
+      {
+        env with
+        disk_needs_parsing =
+          Relative_path.Set.union updates env.disk_needs_parsing;
+        full_check_status = Full_check_started;
+      }
   in
   let telemetry = Telemetry.duration telemetry ~key:"got_updates" ~start_time in
 
@@ -871,38 +868,7 @@ let priority_client_interrupt_handler genv client_provider :
         | ServerUtils.Done env -> env)
     in
 
-    (* Global rechecks in response to file changes can be paused.
-       Here, we check if the user requested global rechecks to be paused during
-       the current recheck (the one that we're in the middle of). The above call
-       to `handle_connection` could have resulted in this state change if
-       the RPC was `PAUSE true`.
-
-       If the state did change to `Paused` during the current recheck,
-       we should cancel the current recheck.
-
-       Note that `PAUSE false`, which resumes global rechecks in response to
-       file changes, requires a full recheck by policy - see ServerCommand's
-       `rpc_command_needs_full_check`. Commands that require a full recheck
-       do not use `priority pipe`, so they don't end up handled here.
-       Such commands don't interrupt MultiWorker calls, by design.
-
-       The effect of `PAUSE true` during a recheck is that the recheck will be
-       canceled, while the result of `PAUSE false` is that the client will wait
-       for the recheck to be finished. *)
-    let decision =
-      match (env.full_recheck_on_file_changes, env.init_env.recheck_id) with
-      | ( Paused { paused_recheck_id = Some paused_recheck_id; _ },
-          Some recheck_id )
-        when String.equal paused_recheck_id recheck_id ->
-        MultiThreadedCall.Cancel
-          {
-            MultiThreadedCall.user_message = "Pause via 'hh --pause'";
-            log_message = "";
-            timestamp = Unix.gettimeofday ();
-          }
-      | _ -> MultiThreadedCall.Continue
-    in
-    (env, decision)
+    (env, MultiThreadedCall.Continue)
 
 let setup_interrupts env client_provider =
   {

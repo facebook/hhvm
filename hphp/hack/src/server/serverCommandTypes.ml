@@ -413,7 +413,6 @@ type _ t =
   | IDENTIFY_TYPES : labelled_file * int * int -> (Pos.absolute * string) list t
   | EXTRACT_STANDALONE : Extract_standalone.target -> string t
   | CONCATENATE_ALL : string list -> string t
-  | PAUSE : bool -> unit t
   | VERBOSE : bool -> unit t
   | DEPS_OUT_BATCH : (string * int * int) list -> string list t
   | DEPS_IN_BATCH :

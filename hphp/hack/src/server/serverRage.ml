@@ -11,27 +11,14 @@ open Hh_prelude
 
 let go (_genv : ServerEnv.genv) (env : ServerEnv.env) : ServerRageTypes.result =
   let open ServerRageTypes in
-  (* include PIDs that we know *)
-  let pids_data =
+  let data =
     Printf.sprintf
-      "hh_server pid=%d ppid=%d\n"
+      "hh_server pid=%d ppid=%d\ndisk_needs_parsing: %s\n"
       (Unix.getpid ())
       (Unix.getppid ())
-  in
-
-  (* is it paused? *)
-  let paused_data =
-    Printf.sprintf
-      "\n%s... disk_needs_parsing:\n%s\n"
-      (match env.ServerEnv.full_recheck_on_file_changes with
-      | ServerEnv.Not_paused -> "hh"
-      | ServerEnv.Paused _ -> "hh --pause"
-      | ServerEnv.Resumed -> "hh --resume")
       (Relative_path.Set.elements env.ServerEnv.disk_needs_parsing
       |> List.map ~f:Relative_path.to_absolute
-      |> String.concat ~sep:"\n")
+      |> String.concat ~sep:" ")
   in
 
-  (* that's it! *)
-  let data = Printf.sprintf "PIDS\n%s\n\nPAUSED\n%s\n" pids_data paused_data in
   [{ title = "status"; data }]

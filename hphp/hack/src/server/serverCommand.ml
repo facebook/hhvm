@@ -68,9 +68,6 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | IDENTIFY_TYPES _ -> false
   | EXTRACT_STANDALONE _ -> false
   | CONCATENATE_ALL _ -> true
-  | PAUSE true -> false
-  (* when you unpause, then it will catch up *)
-  | PAUSE false -> true
   | VERBOSE _ -> false
   | DEPS_IN_BATCH _ -> true
 

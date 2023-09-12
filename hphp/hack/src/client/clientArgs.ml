@@ -562,9 +562,6 @@ let parse_check_args cmd ~from_default =
       Common_argspecs.prechecked prechecked;
       Common_argspecs.no_prechecked prechecked;
       Common_argspecs.with_mini_state mini_state;
-      ( "--pause",
-        Arg.Unit (fun () -> set_mode (MODE_PAUSE true)),
-        " (mode) pause recheck-on-file-change [EXPERIMENTAL]" );
       ( "--profile-log",
         Arg.Unit (fun () -> config := ("profile_log", "true") :: !config),
         " enable profile logging" );
@@ -604,9 +601,6 @@ let parse_check_args cmd ~from_default =
         Arg.Unit (fun () -> set_mode MODE_REMOVE_DEAD_UNSAFE_CASTS),
         " (mode) remove dead UNSAFE_CASTS (first do hh_client restart --no-load)"
       );
-      ( "--resume",
-        Arg.Unit (fun () -> set_mode (MODE_PAUSE false)),
-        " (mode) resume recheck-on-file-change [EXPERIMENTAL]" );
       ( "--retries",
         Arg.Int (fun n -> timeout := Some (float_of_int (max 5 n))),
         " (deprecated) same as --timeout" );

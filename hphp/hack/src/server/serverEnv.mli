@@ -83,67 +83,6 @@ type init_env = {
           saved state. This value will be None in the case of full init *)
 }
 
-type paused_env = { paused_recheck_id: string option }
-
-(** Global rechecks in response to file changes can be paused. If the user
-    changes the state to `Paused` during an ongoing recheck, we should cancel
-    that recheck.
-
-    The effect of the `PAUSE true` RPC during a recheck is that the recheck will
-    be canceled, while the result of `PAUSE false` is that the client will wait
-    for the recheck to be finished.
-
-    NOTE:
-    Interrupt handlers are currently set up and used during type checking.
-    MultiWorker executor (MultiThreadedCall) selects worker file descriptors as
-    well as some input channels from clients. If a client is sending an RPC over
-    such a channel, the executor will call that channel's designated handler.
-
-    `ServerMain` sets up a few of these handlers, and the one we're interested in
-    for this change is the __priority__ client interrupt handler. This handler is
-    only listening to RPCs sent over the priority channel. The client decides
-    which RPCs are sent over the priority channel vs. the default channel.
-
-    In the priority client interrupt handler, we actually handle the RPC that
-    the client is sending. We then return the updated environment to
-    the MultiWorker executor, along with the decision on whether it should
-    continue executing or cancel. We examine the environment after handling
-    the RPC to check whether the user paused file changes-driven global rechecks
-    during the *current* recheck. If that is the case, then the current recheck
-    will be canceled.
-
-    The reason we care about whether it's the current recheck that's paused or
-    some other one is because global rechecks can still happen even if
-    *file changes-driven* global rechecks are paused. This is because the user
-    can explicitly request a full recheck by running an `hh_client` command that
-    *requires* a full recheck. There are a number of such commands, but the most
-    obvious one is just `hh` (defaults to `hh check`).
-
-    It is possible to immediately set the server into paused mode AND cancel
-    the current recheck. There are two cases the user might wish to do this in:
-      1) The user notices that some change they made is taking a while to
-        recheck, so they want to cancel the recheck because they want to make
-        further changes
-      2) While the server is in the paused state, the user explicitly starts
-        a full recheck, but then decides that they want to cancel it
-
-    In both cases, running `hh --pause` on the command line should stop
-    the recheck if it's in the middle of the type checking phase.
-
-    Note that interrupts are only getting set up for the type checking phase,
-    so if the server is in the middle of, say, the redecl phase, it's not going
-    to be interrupted until it gets to the type checking itself. In some cases,
-    redecling can be very costly. For example, if we redecl using the folded decl
-    approach, adding `extends ISomeInterface` to `IBaseInterface` that has many
-    descendants (implementers and their descendants) requires redeclaring all
-    the descendants of `IBaseInterface`. However, redecling using the shallow
-    decl approach should be considerably less costly, therefore it may not be
-    worth it to support interrupting redecling. *)
-type full_recheck_on_file_changes =
-  | Not_paused
-  | Paused of paused_env
-  | Resumed
-
 type full_check_status =
   | Full_check_needed
       (** Some updates have not been fully processed. We get into this state every
@@ -276,11 +215,6 @@ type env = {
       The first of the two strings is a user-facing message, and the second is additional
       information for logs. *)
   init_env: init_env;
-  full_recheck_on_file_changes: full_recheck_on_file_changes;
-      (** Set by `hh --pause` or `hh --resume`. Indicates whether full/global recheck
-          should be triggered on file changes. If paused, it would still be triggered
-          by commands that require a full recheck, such as STATUS, i.e., `hh`
-          on the command line. *)
   full_check_status: full_check_status;
   prechecked_files: prechecked_files_status;
   changed_files: Relative_path.Set.t;

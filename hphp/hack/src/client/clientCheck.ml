@@ -898,18 +898,6 @@ let main_internal
     else
       List.iter responses ~f:(Printf.printf "%s\n");
     Lwt.return (Exit_status.No_error, telemetry)
-  | MODE_PAUSE pause ->
-    let%lwt ((), telemetry) = rpc args @@ Rpc.PAUSE pause in
-    if pause then (
-      print_endline
-        "Paused the automatic triggering of full checks upon file changes.";
-      print_endline "To manually trigger a full check, do `hh check`.";
-      print_endline "***PAUSE MODE CURRENTLY GETS RESET UPON REBASES.***";
-      print_endline "***PAUSE MODE IS EXPERIMENTAL. USE AT YOUR OWN RISK.***"
-    ) else
-      print_endline
-        "Resumed the automatic triggering of full checks upon file changes.";
-    Lwt.return (Exit_status.No_error, telemetry)
   | MODE_VERBOSE verbose ->
     let%lwt ((), telemetry) = rpc args @@ Rpc.VERBOSE verbose in
     Lwt.return (Exit_status.No_error, telemetry)

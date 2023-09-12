@@ -375,18 +375,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       Hh_logger.Level.set_min_level
         genv.local_config.ServerLocalConfig.min_log_level;
     (env, ())
-  | PAUSE pause ->
-    let env =
-      if pause then
-        {
-          env with
-          full_recheck_on_file_changes =
-            Paused { paused_recheck_id = env.init_env.recheck_id };
-        }
-      else
-        { env with full_recheck_on_file_changes = Resumed }
-    in
-    (env, ())
   | DEPS_OUT_BATCH positions ->
     let ctx = Provider_utils.ctx_from_server_env env in
     (env, ServerDepsOutBatch.go ctx positions)

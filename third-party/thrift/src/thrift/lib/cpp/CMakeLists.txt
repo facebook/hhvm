@@ -92,6 +92,7 @@ add_library(
   async/THttpAsyncChannel.cpp
   async/TUnframedAsyncChannel.cpp
   server/TServerObserver.cpp
+  ../cpp2/detail/EventHandlerRuntime.cpp
 )
 if (
   CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR

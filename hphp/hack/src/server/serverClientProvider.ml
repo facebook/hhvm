@@ -23,19 +23,37 @@ type t = {
       (** Force formant start only pipe, used to perform the --force-dormant-start command. *)
 }
 
+(** Priorities are used so that some hh commands can be treated more urgently than others...
+When the monitor creates the server in ServerController.ml, it creates three FDs,
+[Priority_high / ServerController.Priority], and
+[Priority_default / ServerController.Default], and
+[Priority_dormant / ServerController.Force_dormant_start_only].
+
+In [ClientConnect.connect], it decides which of the three to request:
+"hh --force-dormant-start" will use the last one, and anything which doesn't require
+a full typecheck (e.g. --type-at-pos) will use priority, and anything which does
+require a full typecheck (e.g. hh status) will use default. The monitor,
+when it performs handshake, looks at the request and dispatches to one of
+the three FDs.
+
+In [ServerMain.serve_one_iteration], it decides which of the three FDs to poll
+for incoming requests. For instance if it's in the middle of a typecheck then
+it's willing to listen for priority requests (so it can interrupt the current
+typecheck to handle thenm) but not for default requests. And if we're "dormant"
+e.g. in the middle of a rebase, then it's only willing to listen to Priority_dormant
+requests. *)
 type priority =
   | Priority_high
   | Priority_default
   | Priority_dormant
 
-(** This is hh_client. There can be multiple non-persistent clients. *)
-type client =
-  | Non_persistent_client of {
-      ic: Timeout.in_channel;
-      oc: Out_channel.t;
-      priority: priority;
-      mutable tracker: Connection_tracker.t;
-    }
+(** This is an instance of hh_client calling clientConnect.rpc *)
+type client = {
+  ic: Timeout.in_channel;
+  oc: Out_channel.t;
+  priority: priority;
+  mutable tracker: Connection_tracker.t;
+}
 
 type handoff = {
   client: client;
@@ -91,13 +109,12 @@ let accept_client
   in
   {
     client =
-      Non_persistent_client
-        {
-          ic = Timeout.in_channel_of_descr socket;
-          oc = Unix.out_channel_of_descr socket;
-          priority;
-          tracker;
-        };
+      {
+        ic = Timeout.in_channel_of_descr socket;
+        oc = Unix.out_channel_of_descr socket;
+        priority;
+        tracker;
+      };
     m2s_sequence_number;
   }
 
@@ -175,16 +192,14 @@ let sleep_and_check
 let priority_fd { priority_in_fd; _ } = Some priority_in_fd
 
 let track ~key ?time ?log ?msg ?long_delay_okay client =
-  match client with
-  | Non_persistent_client client ->
-    client.tracker <-
-      Connection_tracker.track
-        client.tracker
-        ~key
-        ?time
-        ?log
-        ?msg
-        ?long_delay_okay
+  client.tracker <-
+    Connection_tracker.track
+      client.tracker
+      ~key
+      ?time
+      ?log
+      ?msg
+      ?long_delay_okay
 
 let say_hello oc =
   let fd = Unix.descr_of_out_channel oc in
@@ -207,72 +222,58 @@ let read_connection_type_from_channel (ic : Timeout.in_channel) :
 [@@@warning "-52"]
 
 let read_connection_type (client : client) : connection_type =
-  match client with
-  | Non_persistent_client client -> begin
-    try
-      say_hello client.oc;
-      client.tracker <-
-        Connection_tracker.(track client.tracker ~key:Server_sent_hello);
-      let connection_type : connection_type =
-        read_connection_type_from_channel client.ic
-      in
-      client.tracker <-
-        Connection_tracker.(
-          track client.tracker ~key:Server_got_connection_type);
-      connection_type
-    with
-    | Sys_error "Connection reset by peer"
-    | Unix.Unix_error (Unix.EPIPE, "write", _) ->
-      raise Client_went_away
-  end
+  try
+    say_hello client.oc;
+    client.tracker <-
+      Connection_tracker.(track client.tracker ~key:Server_sent_hello);
+    let connection_type : connection_type =
+      read_connection_type_from_channel client.ic
+    in
+    client.tracker <-
+      Connection_tracker.(track client.tracker ~key:Server_got_connection_type);
+    connection_type
+  with
+  | Sys_error "Connection reset by peer"
+  | Unix.Unix_error (Unix.EPIPE, "write", _) ->
+    raise Client_went_away
 
 (* CARE! scope of warning suppression should be only read_connection_type *)
 [@@@warning "+52"]
 
 let send_response_to_client client response =
-  let (fd, tracker) =
-    match client with
-    | Non_persistent_client { oc; tracker; _ } ->
-      (Unix.descr_of_out_channel oc, tracker)
-  in
   let (_ : int) =
     Marshal_tools.to_fd_with_preamble
-      fd
-      (ServerCommandTypes.Response (response, tracker))
+      (Unix.descr_of_out_channel client.oc)
+      (ServerCommandTypes.Response (response, client.tracker))
   in
   ()
 
-let read_client_msg = function
-  | Non_persistent_client { ic; _ } ->
-    (try
-       Timeout.with_timeout
-         ~timeout:1
-         ~on_timeout:(fun _ -> raise Read_command_timeout)
-         ~do_:(fun timeout -> Timeout.input_value ~timeout ic)
-     with
-    | End_of_file -> raise Client_went_away)
+let read_client_msg client =
+  try
+    Timeout.with_timeout
+      ~timeout:1
+      ~on_timeout:(fun _ -> raise Read_command_timeout)
+      ~do_:(fun timeout -> Timeout.input_value ~timeout client.ic)
+  with
+  | End_of_file -> raise Client_went_away
 
-let get_channels = function
-  | Non_persistent_client { ic; oc; _ } -> (ic, oc)
+let get_channels client = (client.ic, client.oc)
 
 let priority_to_string (client : client) : string =
-  match client with
-  | Non_persistent_client { priority = Priority_high; _ } -> "high"
-  | Non_persistent_client { priority = Priority_default; _ } -> "default"
-  | Non_persistent_client { priority = Priority_dormant; _ } -> "dormant"
+  match client.priority with
+  | Priority_high -> "high"
+  | Priority_default -> "default"
+  | Priority_dormant -> "dormant"
 
-let shutdown_client client =
-  let (ic, oc) =
-    match client with
-    | Non_persistent_client { ic; oc; _ } -> (ic, oc)
+let shutdown_client client = ServerUtils.shutdown_client (client.ic, client.oc)
+
+let ping client =
+  let (_ : int) =
+    try
+      Marshal_tools.to_fd_with_preamble
+        (Unix.descr_of_out_channel client.oc)
+        ServerCommandTypes.Ping
+    with
+    | _ -> raise Client_went_away
   in
-  ServerUtils.shutdown_client (ic, oc)
-
-let ping = function
-  | Non_persistent_client { oc; _ } ->
-    let fd = Unix.descr_of_out_channel oc in
-    let (_ : int) =
-      try Marshal_tools.to_fd_with_preamble fd ServerCommandTypes.Ping with
-      | _ -> raise Client_went_away
-    in
-    ()
+  ()

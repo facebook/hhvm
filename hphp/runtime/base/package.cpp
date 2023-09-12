@@ -23,10 +23,7 @@
 #include <re2/re2.h>
 #include "hphp/util/trace.h"
 
-//TODO(T146965521) Until Rust FFI symbol redefinition problem can be resolved
-#ifdef HHVM_FACEBOOK
 #include "hphp/hack/src/package/ffi_bridge/package_ffi.rs.h"
-#endif
 
 #include <folly/dynamic.h>
 #include <folly/json.h>
@@ -54,8 +51,6 @@ PackageInfo PackageInfo::fromFile(const std::filesystem::path& path) {
   PackageMap packages;
   DeploymentMap deployments;
 
-//TODO(T146965521) Until Rust FFI symbol redefinition problem can be resolved
-#ifdef HHVM_FACEBOOK
   std::string packages_toml{
     std::istreambuf_iterator<char>(file),
     std::istreambuf_iterator<char>()
@@ -95,7 +90,6 @@ PackageInfo PackageInfo::fromFile(const std::filesystem::path& path) {
                           std::move(domains),
                         });
   }
-#endif
 
   return PackageInfo(packages, deployments);
 }

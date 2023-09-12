@@ -15,14 +15,17 @@ module Value = struct
     | Other  (** requires default case *)
     | Null
     | Bool of bool
+    | Int
   [@@deriving ord, sexp, hash]
 
   let bools = [Bool true; Bool false]
 
-  let universe = Other :: Null :: bools
+  let universe = Other :: Null :: Int :: bools
 
   let finite_or_dynamic = function
-    | Other -> false
+    | Other
+    | Int ->
+      false
     | Null
     | Bool _ ->
       true
@@ -31,6 +34,7 @@ module Value = struct
     | Other -> Hh_json.string_ "other"
     | Null -> Hh_json.string_ "null"
     | Bool bool -> bool |> Bool.to_string |> Hh_json.string_
+    | Int -> Hh_json.string_ "int"
 end
 
 module ValueSet = struct
@@ -60,13 +64,13 @@ let prim_to_values = function
   | Tvoid ->
     ValueSet.singleton Value.Null
   | Tbool -> ValueSet.bools
-  | Tint
+  | Tint -> ValueSet.singleton Value.Int
   | Tfloat
   | Tstring
   | Tresource
-  | Tnum
-  | Tarraykey ->
-    ValueSet.singleton Value.Other
+  | Tnum ->
+    ValueSet.of_list Value.[Int; Other]
+  | Tarraykey -> ValueSet.singleton Value.Other
 
 (* Symbolically evaluate the values corresponding to a given type; the result is
    essentially in disjunctive normal form, so that cases can be partitioned
@@ -122,12 +126,19 @@ type case = (Tast.ty, Tast.saved_env) Aast.expr
 (* design choice: could check for cases of type null rather than the null
    literal expression. Ultimately we think case branches should only allow
    literals or class constants, and so disregard non-literal expressions *)
-let case_to_value ((_, _, expr) : case) =
-  match expr with
-  | Null -> Value.Null
-  | True -> Value.Bool true
-  | False -> Value.Bool false
-  | _ -> Value.Other
+let expr_to_value_literal :
+    (Tast.ty, Tast.saved_env) Aast.expr_ -> Value.t * string = function
+  | Null -> (Value.Null, "null")
+  | True -> (Value.Bool true, "true")
+  | False -> (Value.Bool false, "false")
+  (* missing: support for class constants *)
+  | Int literal -> (Value.Int, literal)
+  | _ -> (Value.Other, "default")
+
+let case_to_value ((_, _, expr) : case) = expr |> expr_to_value_literal |> fst
+
+let is_supported_literal expr =
+  expr |> expr_to_value_literal |> snd |> String.(( <> ) "default")
 
 (* Partition cases based on the kind of literal expression (and later, type) *)
 let partition_cases (cases : (case * _) list) values =
@@ -151,45 +162,56 @@ module EnumErr = Typing_error.Primary.Enum
 let add_err env err =
   Typing_error_utils.add_typing_error ~env @@ Typing_error.enum err
 
-let add_redundant_err env const_name = function
-  | []
-  | [_] ->
-    assert false
-  | (_, redundant_pos, _) :: (_ :: _ as tl) ->
-    let (_, first_pos, _) = List.last_exn tl in
-    add_err env
-    @@ EnumErr.Enum_switch_redundant
-         { const_name; first_pos; pos = redundant_pos }
-
-let opt_missing_case env case = function
-  | [] -> Some case
-  | [_] -> None
-  | _ :: _ :: _ as data ->
-    add_redundant_err env case data;
-    None
-
-let opt_cons opt ~tl:default =
-  Option.value_map opt ~f:(fun x -> x :: default) ~default
-
 let get_missing_cases env partitions =
+  let case_to_literal ((_, _, expr) : case) =
+    expr |> expr_to_value_literal |> snd
+  in
+
+  let opt_missing_case env err_case = function
+    | [] -> Some err_case
+    | _ :: _ as cases ->
+      (* map from literals to case positions *)
+      Hashtbl.group
+        (module String)
+        cases
+        ~get_key:case_to_literal
+        ~get_data:(fun case -> [case])
+        ~combine:( @ )
+      |> Hashtbl.iteri ~f:(fun ~key:literal ~data:cases ->
+             match cases with
+             | [] ->
+               (* ~get_data never produces an empty list;
+                  ~combine preserves non-emptiness *)
+               assert false
+             | [_] -> ()
+             | (_, redundant_pos, expr) :: (_ :: _ as tl) ->
+               if is_supported_literal expr then
+                 let const_name =
+                   let open EnumErr.Case in
+                   match err_case with
+                   | Int None -> Int (Some literal)
+                   | _ -> err_case
+                 in
+                 let (_, first_pos, _) = List.last_exn tl in
+                 add_err env
+                 @@ EnumErr.Enum_switch_redundant
+                      { const_name; first_pos; pos = redundant_pos });
+      None
+  in
+
+  let opt_cons opt ~tl:default =
+    Option.value_map opt ~f:(fun x -> x :: default) ~default
+  in
+
   Hashtbl.fold partitions ~init:[] ~f:(fun ~key ~data missing_cases ->
       opt_cons ~tl:missing_cases
       @@
       let open Value in
       match (key : t) with
       | Null -> opt_missing_case env EnumErr.Case.Null data
-      | Bool true -> opt_missing_case env EnumErr.Case.True data
-      | Bool false -> opt_missing_case env EnumErr.Case.False data
+      | Bool bool -> opt_missing_case env EnumErr.Case.(Bool bool) data
+      | Int -> opt_missing_case env (EnumErr.Case.Int None) data
       | Other -> None)
-
-let is_supported_literal : (Tast.ty, Tast.saved_env) Aast.expr_ -> bool =
-  function
-  | Null
-  | True
-  | False
-  | Int _ ->
-    true
-  | _ -> false
 
 let error_unused_cases env expected unused_cases =
   let expected = lazy (Typing_print.full_strip_ns env expected) in

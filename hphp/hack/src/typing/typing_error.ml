@@ -79,16 +79,18 @@ module Primary = struct
         | Default
         | Null
         | Label of string
-        | True
-        | False
+        | Bool of bool
+        | Int of string option
       [@@deriving eq, show]
 
       let to_user_string = function
         | Default -> "default"
         | Null -> "null"
         | Label str -> str
-        | True -> "true"
-        | False -> "false"
+        | Bool true -> "true"
+        | Bool false -> "false"
+        | Int None -> "int"
+        | Int (Some num) -> num
     end
 
     type t =

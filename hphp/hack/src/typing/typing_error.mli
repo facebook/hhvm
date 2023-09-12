@@ -78,8 +78,8 @@ module Primary : sig
         | Default
         | Null
         | Label of string
-        | True
-        | False
+        | Bool of bool
+        | Int of string option
       [@@deriving eq, show]
 
       val to_user_string : t -> string

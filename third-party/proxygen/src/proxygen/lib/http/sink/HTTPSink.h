@@ -10,7 +10,6 @@
 
 #include <folly/CppAttributes.h>
 #include <proxygen/lib/http/HTTPMessage.h>
-#include <proxygen/lib/http/session/HTTPTransaction.h>
 #include <proxygen/lib/http/sink/FlowControlInfo.h>
 
 namespace folly {
@@ -40,7 +39,6 @@ class HTTPSink {
  public:
   virtual ~HTTPSink() = default;
 
-  [[nodiscard]] virtual HTTPTransaction* FOLLY_NULLABLE getHTTPTxn() const = 0;
   [[nodiscard]] virtual folly::Optional<HTTPCodec::StreamID> getStreamID()
       const = 0;
   [[nodiscard]] virtual CodecProtocol getCodecProtocol() const = 0;

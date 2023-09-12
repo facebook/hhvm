@@ -32,9 +32,6 @@ class HTTPTransactionSink : public HTTPSink {
     }
   }
   ~HTTPTransactionSink() override = default;
-  [[nodiscard]] HTTPTransaction* FOLLY_NULLABLE getHTTPTxn() const override {
-    return httpTransaction_;
-  }
   [[nodiscard]] folly::Optional<HTTPCodec::StreamID> getStreamID()
       const override {
     return httpTransaction_->getID();

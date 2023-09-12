@@ -33,7 +33,6 @@
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/protocol/SimpleJSONProtocol.h>
 #include <thrift/lib/thrift/gen-cpp2/ast_types_custom_protocol.h>
-#include <thrift/lib/thrift/gen-cpp2/ast_visitation.h>
 
 namespace apache {
 namespace thrift {

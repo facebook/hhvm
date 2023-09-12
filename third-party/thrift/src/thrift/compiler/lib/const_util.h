@@ -26,7 +26,7 @@
 #include <thrift/compiler/ast/t_enum.h>
 #include <thrift/compiler/ast/t_service.h>
 #include <thrift/compiler/ast/t_structured.h>
-#include <thrift/lib/cpp2/visitation/for_each.h>
+#include <thrift/lib/cpp2/op/Get.h>
 #include <thrift/lib/thrift/gen-cpp2/protocol_types.h>
 
 namespace apache {
@@ -34,7 +34,6 @@ namespace thrift {
 namespace compiler {
 
 // Assigns a t_const_value to a concrete Thrift type.
-// Must include generated _visitation.h header for that type.
 
 inline void hydrate_const(bool& out, const t_const_value& val) {
   out = val.get_bool();
@@ -92,17 +91,19 @@ template <typename T>
 std::enable_if_t<is_thrift_class_v<T>> hydrate_const(
     T& out, const t_const_value& val) {
   assert(val.get_type() == t_const_value::t_const_value_type::CV_MAP);
-  std::unordered_map<std::string, t_const_value*> map;
+  std::unordered_map<std::string_view, t_const_value*> map;
   for (const auto& pair : val.get_map()) {
     map[pair.first->get_string()] = pair.second;
   }
 
-  for_each_field(out, [&](const metadata::ThriftField& meta, auto field_ref) {
-    if (!map.count(*meta.name())) {
+  op::for_each_ordinal<T>([&](auto id) {
+    using Id = decltype(id);
+    auto name = op::get_name_v<T, Id>;
+    if (!map.count(name)) {
       return;
     }
 
-    hydrate_const(field_ref.ensure(), *map.at(*meta.name()));
+    hydrate_const(op::get<Id>(out).ensure(), *map.at(name));
   });
 }
 template <typename T>

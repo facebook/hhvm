@@ -1444,6 +1444,7 @@ private:
         return;
       case KindOfRClsMeth:
         assertx(m_data.prclsmeth->checkCount());
+        return;
       case KindOfObject:
         assertx(m_data.pobj->checkCount());
         return;

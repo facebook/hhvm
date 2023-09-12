@@ -2253,13 +2253,19 @@ void t_mstch_rust_generator::fill_validator_list(validator_list& l) const {
 THRIFT_REGISTER_GENERATOR(
     mstch_rust,
     "Rust",
-    "    serde:               Derive serde Serialize/Deserialize traits for types\n"
-    "    noserver:            Don't emit server code\n"
-    "    include_prefix=:     Set program:include_prefix.\n"
-    "    lib_include_srcs=:   Additional Rust source files to include in lib crate, `:` separated\n"
-    "    types_include_srcs=: Additional Rust source files to include in types crate, `:` separated\n"
+    "    serde:           Derive serde Serialize/Deserialize traits for types\n"
+    "    noserver:        Don't emit server code\n"
+    "    default_enum_zero:\n"
+    "                     Default enum value is zero, conforming to the thrift spec\n"
+    "    deprecated_optional_with_default_is_some:\n"
+    "                     Optionals with defaults initialized to `Some`. Deprecated, to be removed in future versions\n"
+    "    include_prefix=: Set program:include_prefix.\n"
+    "    lib_include_srcs=:\n"
+    "                     Additional Rust source files to include in lib crate, `:` separated\n"
+    "    types_include_srcs=:\n"
+    "                     Additional Rust source files to include in types crate, `:` separated\n"
     "    cratemap=map:    Mapping file from services to crate names\n"
-    "    types_crate=:        Name that the main crate uses to refer to its dependency on the types crate\n");
+    "    types_crate=:    Name that the main crate uses to refer to its dependency on the types crate\n");
 } // namespace rust
 } // namespace compiler
 } // namespace thrift

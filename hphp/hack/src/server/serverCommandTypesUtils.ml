@@ -58,7 +58,6 @@ let debug_describe_cmd : type a. a command -> string = function
       ""
     else
       " --from " ^ from
-  | Debug_DO_NOT_USE -> failwith "Debug_DO_NOT_USE"
 
 (** This returns a string that's shown "hh_server is busy [STATUS]".
 The intent is that users understand what command hh_server is currently busy with.
@@ -73,7 +72,6 @@ let status_describe_cmd : type a. a command -> string =
     else
       from ^ ":")
     ^ desc
-  | Debug_DO_NOT_USE -> failwith "Debug_DO_NOT_USE"
 
 let debug_describe_message_type : type a. a message_type -> string = function
   | Hello -> "Hello"

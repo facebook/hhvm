@@ -425,11 +425,7 @@ type cmd_metadata = {
   desc: string;
 }
 
-type 'a command =
-  | Rpc of cmd_metadata * 'a t
-  | Debug_DO_NOT_USE
-      (** this unused constructor is part of the binary protocol
-      between client and server; removing it would alter the protocol. *)
+type 'a command = Rpc of cmd_metadata * 'a t
 
 and streamed =
   | SHOW of string

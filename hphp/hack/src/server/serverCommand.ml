@@ -73,7 +73,6 @@ let rpc_command_needs_full_check : type a. a t -> bool =
 
 let command_needs_full_check = function
   | Rpc (_metadata, x) -> rpc_command_needs_full_check x
-  | Debug_DO_NOT_USE -> failwith "Debug_DO_NOT_USE"
 
 let use_priority_pipe (type result) (command : result ServerCommandTypes.t) :
     bool =
@@ -155,7 +154,6 @@ let actually_handle genv client msg full_recheck_needed ~is_stale env =
     ClientProvider.send_response_to_client client response;
     ClientProvider.shutdown_client client;
     new_env
-  | Debug_DO_NOT_USE -> failwith "Debug_DO_NOT_USE"
 
 let handle
     (genv : ServerEnv.genv)

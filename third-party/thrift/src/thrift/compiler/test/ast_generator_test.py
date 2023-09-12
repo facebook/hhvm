@@ -274,7 +274,8 @@ class AstGeneratorTest(unittest.TestCase):
         annot = ast.values[annot_id - 1]
         # If standard library is not loaded this will have mapValue instead of objectValue
         self.assertEqual(
-            annot.objectValue.members[1].objectValue.members[3].stringValue, "foo.Annot"
+            annot.objectValue.members[1].objectValue.members[3].stringValue,
+            b"foo.Annot",
         )
         self.assertEqual(
             annot.objectValue.type, "facebook.com/thrift/type/StructuredAnnotation"
@@ -284,5 +285,6 @@ class AstGeneratorTest(unittest.TestCase):
         annot_id = next(iter(ast.definitions[1].structDef.fields[0].attrs.annotations))
         annot = ast.values[annot_id - 1]
         self.assertEqual(
-            annot.objectValue.members[1].objectValue.members[3].stringValue, "foo.Annot"
+            annot.objectValue.members[1].objectValue.members[3].stringValue,
+            b"foo.Annot",
         )

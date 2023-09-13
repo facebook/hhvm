@@ -719,16 +719,16 @@ std::unique_ptr<t_const_value> wrap_with_protocol_value(
   ret->set_ttype(ttype);
   switch (value.get_type()) {
     case t_const_value::CV_BOOL:
-      ret->add_map(val("boolValue"), val(value.get_bool()));
+      ret->add_map(val("boolValue"), value.clone());
       break;
     case t_const_value::CV_INTEGER:
-      ret->add_map(val("i64Value"), val(value.get_integer()));
+      ret->add_map(val("i64Value"), value.clone());
       break;
     case t_const_value::CV_DOUBLE:
-      ret->add_map(val("doubleValue"), val(value.get_double()));
+      ret->add_map(val("doubleValue"), value.clone());
       break;
     case t_const_value::CV_STRING:
-      ret->add_map(val("stringValue"), val(value.get_string()));
+      ret->add_map(val("stringValue"), value.clone());
       break;
     case t_const_value::CV_MAP: {
       auto map = val();

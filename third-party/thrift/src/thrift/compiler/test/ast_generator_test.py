@@ -270,7 +270,7 @@ class AstGeneratorTest(unittest.TestCase):
         )
 
         ast = self.run_thrift("foo.thrift")
-        annot_id = next(iter(ast.definitions[1].structDef.attrs.annotations))
+        annot_id = next(iter(ast.definitions[1].structDef.attrs.structuredAnnotations))
         annot = ast.values[annot_id - 1]
         # If standard library is not loaded this will have mapValue instead of objectValue
         self.assertEqual(
@@ -282,7 +282,9 @@ class AstGeneratorTest(unittest.TestCase):
         )
 
         # Field annot
-        annot_id = next(iter(ast.definitions[1].structDef.fields[0].attrs.annotations))
+        annot_id = next(
+            iter(ast.definitions[1].structDef.fields[0].attrs.structuredAnnotations)
+        )
         annot = ast.values[annot_id - 1]
         self.assertEqual(
             annot.objectValue.members[1].objectValue.members[3].stringValue,

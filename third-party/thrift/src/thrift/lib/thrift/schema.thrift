@@ -143,7 +143,7 @@ struct DefinitionAttrs {
   /**
    * The annotations associated with this definition.
    */
-  3: AnnotationIds annotations;
+  3: AnnotationIds structuredAnnotations;
 
   /**
    * DEPRECATED!

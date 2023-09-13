@@ -376,7 +376,7 @@ TEST(SchemaTest, Typedef) {
 TEST(SchemaTest, Annotations) {
   apache::thrift::type::Struct schema = schema_constants::schemaAnnotated();
   bool found = false;
-  for (auto id : *schema.annotations()) {
+  for (auto id : *schema.structuredAnnotations()) {
     const auto& annot = schema_constants::getValue(id)
                             .as<apache::thrift::type::struct_t<
                                 apache::thrift::type::StructuredAnnotation>>();

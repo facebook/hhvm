@@ -115,7 +115,7 @@ void schematizer::add_definition(
       annots->add_list(val(id));
     }
 
-    definition->add_map(val("annotations"), std::move(annots));
+    definition->add_map(val("structuredAnnotations"), std::move(annots));
   }
 
   const auto& unstructured = node.annotations();

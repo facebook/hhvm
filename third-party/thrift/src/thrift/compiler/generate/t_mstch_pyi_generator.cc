@@ -306,7 +306,7 @@ class pyi_mstch_program : public mstch_program {
     }
 
     for (const auto* constant : mstch_program::program_->consts()) {
-      const auto* const_type = constant->get_type();
+      const auto* const_type = constant->type();
       this->add_containers(visited, const_type);
     }
 

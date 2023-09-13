@@ -583,7 +583,7 @@ void validate_enum_value(diagnostic_context& ctx, const t_enum_value& node) {
 
 void validate_const_type_and_value(
     diagnostic_context& ctx, const t_const& node) {
-  check_const_rec(ctx, node, &node.type().deref(), node.value());
+  check_const_rec(ctx, node, node.type(), node.value());
   ctx.check(
       !node.find_structured_annotation_or_null(kCppAdapterUri) ||
           has_experimental_annotation(ctx, node),
@@ -602,7 +602,7 @@ void validate_structured_annotation(
     diagnostic_context& ctx, const t_named& node) {
   std::unordered_map<const t_type*, const t_const*> seen;
   for (const t_const& annot : node.structured_annotations()) {
-    auto [it, inserted] = seen.emplace(&annot.type().deref(), &annot);
+    auto [it, inserted] = seen.emplace(annot.type(), &annot);
     if (!inserted) {
       report_redef_error(
           ctx,
@@ -1083,9 +1083,29 @@ void validate_cpp_type_annotation(diagnostic_context& ctx, const Node& node) {
   }
 }
 
+bool owns_annotations_type(const t_type* type) {
+  if (type->annotations().empty()) {
+    return false;
+  }
+  if (dynamic_cast<const t_container*>(type)) {
+    return true;
+  }
+  if (dynamic_cast<const t_base_type*>(type)) {
+    return true;
+  }
+  if (auto t = dynamic_cast<const t_typedef*>(type)) {
+    return t->typedef_kind() != t_typedef::kind::defined;
+  }
+  return false;
+}
+
+bool owns_annotations(t_type_ref type) {
+  return owns_annotations_type(type.get_type());
+}
+
 struct ValidateAnnotationPositions {
   void operator()(diagnostic_context& ctx, const t_const& node) {
-    if (owns_annotations(node.type())) {
+    if (owns_annotations_type(node.type())) {
       err(ctx);
     }
   }
@@ -1143,22 +1163,6 @@ struct ValidateAnnotationPositions {
   static void err(diagnostic_context& ctx) {
     ctx.error(
         "Annotations are not allowed in this position. Extract the type into a named typedef instead.");
-  }
-  static bool owns_annotations(t_type_ref type) {
-    auto ptr = type.get_type();
-    if (ptr->annotations().empty()) {
-      return false;
-    }
-    if (dynamic_cast<const t_container*>(ptr)) {
-      return true;
-    }
-    if (dynamic_cast<const t_base_type*>(ptr)) {
-      return true;
-    }
-    if (auto t = dynamic_cast<const t_typedef*>(ptr)) {
-      return t->typedef_kind() != t_typedef::kind::defined;
-    }
-    return false;
   }
 };
 

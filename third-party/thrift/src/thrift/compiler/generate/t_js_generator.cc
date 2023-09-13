@@ -357,7 +357,7 @@ void t_js_generator::generate_enum(const t_enum* tenum) {
  * Generate a constant value
  */
 void t_js_generator::generate_const(const t_const* tconst) {
-  const t_type* type = tconst->get_type();
+  const t_type* type = tconst->type();
   string name = tconst->get_name();
   const t_const_value* value = tconst->value();
 

@@ -481,7 +481,7 @@ void t_json_generator::print_structured_annotations(
       f_out_ << ",";
     }
     f_out_ << endl;
-    indent(f_out_) << "\"" << type_name(annotation.get_type()) << "\" : ";
+    indent(f_out_) << "\"" << type_name(annotation.type()) << "\" : ";
     print_const_value(annotation.value());
   }
   f_out_ << endl;
@@ -610,7 +610,7 @@ void t_json_generator::generate_const(const t_const* tconst) {
   indent(f_out_) << "\"value\" : ";
   print_const_value(tconst->value());
   f_out_ << "," << endl;
-  print_type(tconst->get_type());
+  print_type(tconst->type());
   print_node_annotations(
       *tconst,
       /*add_heading_comma=*/true,

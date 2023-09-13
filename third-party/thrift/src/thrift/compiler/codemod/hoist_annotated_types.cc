@@ -177,7 +177,7 @@ class hoist_annotated_types {
   }
 
   void visit_const(const t_const& c) {
-    if (auto type = c.type(); needs_replacement(type)) {
+    if (auto type = c.type_ref(); needs_replacement(type)) {
       auto range = c.src_range();
       auto annotations_end_offset = range.begin.offset();
       for (const auto& [k, v] : type.get_type()->annotations()) {

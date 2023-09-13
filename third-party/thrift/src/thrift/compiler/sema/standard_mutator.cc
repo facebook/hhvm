@@ -114,7 +114,7 @@ void match_type_with_const_value(
 static void match_annotation_types_with_const_values(
     diagnostic_context& ctx, mutator_context& mCtx, t_named& node) {
   for (t_const& tconst : node.structured_annotations()) {
-    const t_type* const type = tconst.get_type();
+    const t_type* const type = tconst.type();
     if (type == nullptr) {
       continue;
     }
@@ -458,7 +458,7 @@ void maybe_match_type_with_const_value(
 void const_to_const_value(
     diagnostic_context& ctx, mutator_context& mCtx, t_const& const_node) {
   maybe_match_type_with_const_value(
-      ctx, mCtx, const_node.get_type(), const_node.value());
+      ctx, mCtx, const_node.type(), const_node.value());
 }
 
 void field_to_const_value(

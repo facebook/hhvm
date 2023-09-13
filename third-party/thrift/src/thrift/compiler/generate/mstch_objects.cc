@@ -367,7 +367,7 @@ mstch::node mstch_const_value::const_struct() {
         context_,
         mstch_element_position(i, size),
         current_const_,
-        constants[i]->get_type(),
+        constants[i]->type(),
         fields[i]));
   }
   return a;
@@ -559,7 +559,7 @@ mstch::node mstch_typedef::type() {
 
 mstch::node mstch_const::type() {
   return context_.type_factory->make_mstch_object(
-      const_->get_type(), context_, pos_);
+      const_->type(), context_, pos_);
 }
 
 mstch::node mstch_const::value() {
@@ -620,7 +620,7 @@ mstch::node mstch_program::constants() {
         context_,
         mstch_element_position(i, size),
         container[i],
-        container[i]->get_type(),
+        container[i]->type(),
         nullptr));
   }
   return a;
@@ -635,7 +635,7 @@ mstch::node mstch_program::interned_values() {
         context_,
         mstch_element_position(i, size),
         container[i].get(),
-        container[i]->get_type(),
+        container[i]->type(),
         nullptr));
   }
   return a;

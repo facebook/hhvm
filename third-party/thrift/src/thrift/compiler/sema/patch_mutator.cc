@@ -572,7 +572,7 @@ t_struct& patch_generator::gen_patch(
   gen.assign(type);
   gen.clear();
 
-  if (annot.get_type()->uri() == kAssignOnlyPatchUri) {
+  if (annot.type()->uri() == kAssignOnlyPatchUri) {
     gen.set_adapter("AssignPatchAdapter");
     return gen;
   }

@@ -294,11 +294,7 @@ void t_java_deprecated_generator::generate_consts(
   indent_up();
   for (const auto* tconst : consts) {
     print_const_value(
-        f_consts,
-        tconst->get_name(),
-        tconst->get_type(),
-        tconst->value(),
-        false);
+        f_consts, tconst->get_name(), tconst->type(), tconst->value(), false);
   }
   indent_down();
   indent(f_consts) << "}" << endl;

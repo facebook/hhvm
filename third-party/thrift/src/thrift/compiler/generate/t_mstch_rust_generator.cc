@@ -432,15 +432,10 @@ mstch::node structured_annotations_node(
   // Note, duplicate annotations are not allowed per the Thrift spec.
   for (const t_const& annotation : named.structured_annotations()) {
     auto direct_annotation = std::make_shared<mstch_rust_value>(
-        annotation.value(),
-        annotation.get_type(),
-        depth,
-        context,
-        pos,
-        options);
+        annotation.value(), annotation.type(), depth, context, pos, options);
 
     mstch::node transitive;
-    const t_type* annotation_type = annotation.get_type();
+    const t_type* annotation_type = annotation.type();
     if ((*annotation_type).find_structured_annotation_or_null(kTransitiveUri)) {
       transitive = context.type_factory->make_mstch_object(
           annotation_type, context, pos);
@@ -752,7 +747,7 @@ class rust_mstch_program : public mstch_program {
 
   mstch::node rust_has_const_tests() {
     for (const t_const* c : program_->consts()) {
-      if (type_has_transitive_adapter(c->get_type(), true)) {
+      if (type_has_transitive_adapter(c->type(), true)) {
         return true;
       }
     }
@@ -763,7 +758,7 @@ class rust_mstch_program : public mstch_program {
     mstch::array consts;
 
     for (const t_const* c : program_->consts()) {
-      if (type_has_transitive_adapter(c->get_type(), true)) {
+      if (type_has_transitive_adapter(c->type(), true)) {
         consts.push_back(c->name());
       }
     }
@@ -1816,18 +1811,18 @@ class rust_mstch_const : public mstch_const {
     return get_import_name(const_->program(), options_);
   }
   mstch::node rust_lazy() {
-    if (type_has_transitive_adapter(const_->get_type(), true)) {
+    if (type_has_transitive_adapter(const_->type(), true)) {
       return true;
     }
 
-    auto type = const_->get_type()->get_true_type();
+    auto type = const_->type()->get_true_type();
     return type->is_list() || type->is_map() || type->is_set() ||
         type->is_struct();
   }
   mstch::node rust_typed_value() {
     unsigned depth = 0;
     return std::make_shared<mstch_rust_value>(
-        const_->value(), const_->get_type(), depth, context_, pos_, options_);
+        const_->value(), const_->type(), depth, context_, pos_, options_);
   }
   mstch::node rust_has_docs() { return const_->has_doc(); }
   mstch::node rust_docs() { return quoted_rust_doc(const_); }

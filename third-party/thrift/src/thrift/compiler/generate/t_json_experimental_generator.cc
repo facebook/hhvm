@@ -407,11 +407,11 @@ class json_experimental_const_value : public mstch_const_value {
   }
 
   mstch::node get_type_name() {
-    return current_const_->get_type()->get_true_type()->get_full_name();
+    return current_const_->type()->get_true_type()->get_full_name();
   }
 
   mstch::node get_qualified_name() {
-    return current_const_->get_type()->get_true_type()->get_scoped_name();
+    return current_const_->type()->get_true_type()->get_scoped_name();
   }
   mstch::node string_value_any() { return to_json(const_value_); }
 

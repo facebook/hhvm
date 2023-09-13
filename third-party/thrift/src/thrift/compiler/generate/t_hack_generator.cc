@@ -1752,7 +1752,7 @@ void t_hack_generator::generate_enum(const t_enum* tenum) {
  * Generate a constant value
  */
 void t_hack_generator::generate_const(const t_const* tconst) {
-  const t_type* type = tconst->get_type();
+  const t_type* type = tconst->type();
   std::string name = tconst->name();
   const t_const_value* value = tconst->value();
 
@@ -4980,9 +4980,9 @@ std::string t_hack_generator::render_structured_annotations(
     out << "\n";
     indent_up();
     for (const auto& annotation : annotations) {
-      indent(out) << "'" << hack_name(annotation.get_type()) << "' => "
+      indent(out) << "'" << hack_name(annotation.type()) << "' => "
                   << render_const_value_helper(
-                         annotation.get_type(),
+                         annotation.type(),
                          annotation.value(),
                          temp_var_initializations_out,
                          namer,
@@ -6456,7 +6456,7 @@ void t_hack_generator::generate_php_docstring(
   }
   indent(out) << " * "
               << "Original thrift constant:-\n";
-  indent(out) << " * " << tconst->get_type()->get_full_name() << " "
+  indent(out) << " * " << tconst->type()->get_full_name() << " "
               << tconst->name() << "\n";
   // no value because it could have characters that mess up the comment
   indent(out) << " */\n";

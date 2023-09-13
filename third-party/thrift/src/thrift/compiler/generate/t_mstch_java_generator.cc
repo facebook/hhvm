@@ -1114,22 +1114,22 @@ class mstch_java_const : public mstch_const {
   mstch::node java_ignore_constant() {
     // we have to ignore constants if they are enums that we handled as ints, as
     // we don't have the constant values to work with.
-    if (const_->get_type()->is_map()) {
-      t_map* map = (t_map*)const_->get_type();
+    if (const_->type()->is_map()) {
+      t_map* map = (t_map*)const_->type();
       if (map->get_key_type()->is_enum()) {
         return map->get_key_type()->has_annotation(
             "java.swift.skip_enum_name_map");
       }
     }
-    if (const_->get_type()->is_list()) {
-      t_list* list = (t_list*)const_->get_type();
+    if (const_->type()->is_list()) {
+      t_list* list = (t_list*)const_->type();
       if (list->get_elem_type()->is_enum()) {
         return list->get_elem_type()->has_annotation(
             "java.swift.skip_enum_name_map");
       }
     }
-    if (const_->get_type()->is_set()) {
-      t_set* set = (t_set*)const_->get_type();
+    if (const_->type()->is_set()) {
+      t_set* set = (t_set*)const_->type();
       if (set->get_elem_type()->is_enum()) {
         return set->get_elem_type()->has_annotation(
             "java.swift.skip_enum_name_map");

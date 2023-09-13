@@ -296,7 +296,7 @@ class python_mstch_program : public mstch_program {
 
   void visit_types_for_constants() {
     for (const auto& constant : program_->consts()) {
-      visit_type(constant->get_type());
+      visit_type(constant->type());
     }
   }
 

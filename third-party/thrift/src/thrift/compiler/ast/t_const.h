@@ -41,18 +41,18 @@ class t_const final : public t_named {
   /**
    * Constructor for t_const
    *
-   * @param program - An entire thrift program
-   * @param type    - A thrift type
-   * @param name    - The name of the constant variable
-   * @param value   - The constant value
+   * @param program  - An entire thrift program
+   * @param type_ref - A thrift type
+   * @param name     - The name of the constant variable
+   * @param value    - The constant value
    */
   t_const(
       const t_program* program,
-      t_type_ref type,
+      t_type_ref type_ref,
       std::string name,
       std::unique_ptr<t_const_value> value)
       : t_named(program, std::move(name)),
-        type_(std::move(type)),
+        type_ref_(std::move(type_ref)),
         value_(std::move(value)) {
     // value->get_owner() is set when rhs is referencing another constant.
     if (value_ && value_->get_owner() == nullptr) {
@@ -60,7 +60,9 @@ class t_const final : public t_named {
     }
   }
 
-  const t_type_ref& type() const { return type_; }
+  const t_type* type() const { return type_ref_.get_type(); }
+
+  t_type_ref type_ref() const { return type_ref_; }
 
   const t_const_value* value() const { return value_.get(); }
   t_const_value* value() { return value_.get(); }
@@ -71,7 +73,7 @@ class t_const final : public t_named {
       const char* key) const;
 
  private:
-  t_type_ref type_;
+  t_type_ref type_ref_;
 
   std::unique_ptr<t_const_value> value_;
 
@@ -91,10 +93,8 @@ class t_const final : public t_named {
 
   std::unique_ptr<t_const> clone() const {
     return std::make_unique<t_const>(
-        program(), get_type(), name(), value_->clone());
+        program(), type(), name(), value_->clone());
   }
-
-  const t_type* get_type() const { return type_.get_type(); }
 };
 
 } // namespace compiler

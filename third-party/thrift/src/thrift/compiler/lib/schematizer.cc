@@ -645,7 +645,7 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_const& node) {
   schema->add_map(val("type"), gen_type(*node.type(), program));
 
   std::unique_ptr<t_const_value> clone = node.value()->clone();
-  clone->set_ttype(node.type());
+  clone->set_ttype(node.type_ref());
   auto id = intern_value_(std::move(clone), const_cast<t_program*>(program));
   schema->add_map(val("value"), val(id));
 

@@ -2195,8 +2195,8 @@ class cpp_mstch_const : public mstch_const {
         });
   }
   mstch::node enum_value() {
-    if (const_->get_type()->is_enum()) {
-      const auto* enm = static_cast<const t_enum*>(const_->get_type());
+    if (const_->type()->is_enum()) {
+      const auto* enm = static_cast<const t_enum*>(const_->type());
       const auto* enum_val = enm->find_value(const_->value()->get_integer());
       if (enum_val) {
         return enum_val->get_name();
@@ -2234,10 +2234,9 @@ class cpp_mstch_const : public mstch_const {
         &*anno->type(), context_, pos_, cpp_context_));
   }
   mstch::node outline_init() {
-    return resolves_to_container_or_struct(
-               const_->get_type()->get_true_type()) ||
+    return resolves_to_container_or_struct(const_->type()->get_true_type()) ||
         cpp_context_->resolver().find_structured_adapter_annotation(*const_) ||
-        cpp_context_->resolver().find_first_adapter(*const_->get_type());
+        cpp_context_->resolver().find_first_adapter(*const_->type());
   }
 
  private:
@@ -2281,7 +2280,7 @@ class cpp_mstch_const_value : public mstch_const_value {
 
   bool same_type_as_expected() const override {
     return const_value_->get_owner() &&
-        same_types(expected_type_, const_value_->get_owner()->get_type());
+        same_types(expected_type_, const_value_->get_owner()->type());
   }
 };
 

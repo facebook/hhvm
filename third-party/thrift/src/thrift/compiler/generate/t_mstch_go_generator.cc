@@ -259,7 +259,7 @@ class mstch_go_const : public mstch_const {
   // const definition (e.g for structs, maps, or lists which cannot be const in
   // go)
   mstch::node go_is_var() {
-    auto real_type = const_->get_type()->get_true_type();
+    auto real_type = const_->type()->get_true_type();
     return real_type->is_list() || real_type->is_map() || real_type->is_set() ||
         go::is_type_go_struct(real_type);
   }

@@ -523,7 +523,7 @@ void t_cocoa_generator::generate_consts(std::vector<t_const*> consts) {
   // getter method for each constant defined.
   for (const auto* tconst : consts) {
     std::string name = tconst->name();
-    const t_type* type = tconst->get_type();
+    const t_type* type = tconst->type();
     const_interface << "+ (" << type_name(type) << ") " << name << ";"
                     << std::endl;
   }
@@ -536,7 +536,7 @@ void t_cocoa_generator::generate_consts(std::vector<t_const*> consts) {
   // static variables in the .m hold all constant values
   for (const auto* tconst : consts) {
     std::string name = tconst->name();
-    const t_type* type = tconst->get_type();
+    const t_type* type = tconst->type();
     f_impl_ << "static " << type_name(type) << " " << cocoa_prefix_ << name;
     if (!type->is_container() && !type->is_struct()) {
       f_impl_ << " = " << render_const_value(f_impl_, type, tconst->value());
@@ -551,19 +551,18 @@ void t_cocoa_generator::generate_consts(std::vector<t_const*> consts) {
   // when the class is initialized
   bool should_have_initialize =
       std::any_of(consts.begin(), consts.end(), [](const t_const* c) {
-        return c->get_type()->is_container() || c->get_type()->is_struct();
+        return c->type()->is_container() || c->type()->is_struct();
       });
   if (should_have_initialize) {
     f_impl_ << "+ (void) initialize ";
     scope_up(f_impl_);
 
     for (const auto* tconst : consts) {
-      if (tconst->get_type()->is_container() ||
-          tconst->get_type()->is_struct()) {
+      if (tconst->type()->is_container() || tconst->type()->is_struct()) {
         print_const_value(
             f_impl_,
             cocoa_prefix_ + tconst->name(),
-            tconst->get_type(),
+            tconst->type(),
             tconst->value(),
             false,
             false);
@@ -576,7 +575,7 @@ void t_cocoa_generator::generate_consts(std::vector<t_const*> consts) {
   // getter method for each constant
   for (const auto* tconst : consts) {
     std::string name = tconst->name();
-    const t_type* type = tconst->get_type();
+    const t_type* type = tconst->type();
     f_impl_ << "+ (" << type_name(type) << ") " << name;
     scope_up(f_impl_);
     indent(f_impl_) << "return " << cocoa_prefix_ << name << ";" << std::endl;

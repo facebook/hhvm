@@ -56,13 +56,13 @@ struct allowed_scopes {
   std::unordered_set<std::type_index> types;
 
   explicit allowed_scopes(node_metadata_cache& cache, const t_const& annot) {
-    for (const auto& meta_annot : annot.get_type()->structured_annotations()) {
-      if (is_transitive_annotation(*meta_annot.get_type())) {
+    for (const auto& meta_annot : annot.type()->structured_annotations()) {
+      if (is_transitive_annotation(*meta_annot.type())) {
         const auto& transitive_scopes =
             cache.get<allowed_scopes>(meta_annot).types;
         types.insert(transitive_scopes.begin(), transitive_scopes.end());
       }
-      auto itr = uri_map().find(meta_annot.get_type()->uri());
+      auto itr = uri_map().find(meta_annot.type()->uri());
       if (itr != uri_map().end()) {
         types.emplace(itr->second);
       }

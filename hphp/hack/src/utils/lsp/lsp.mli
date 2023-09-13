@@ -401,7 +401,6 @@ module Initialize : sig
     skipLspServerOnTypeFormatting: bool;
         (** `true` iff formatting is to be done on the LSP client,
           * rather than provided by the LSP server.
-          * TODO(T155870670): remove this field
         *)
   }
 

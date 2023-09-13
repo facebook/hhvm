@@ -3777,7 +3777,7 @@ let do_initialize (local_config : ServerLocalConfig.t) : Initialize.result =
           documentFormattingProvider = true;
           documentRangeFormattingProvider = true;
           documentOnTypeFormattingProvider =
-            (* TODO(T155870670) always set to `None` *)
+            (* the Code@FB client always sets this to `true`, but non-Code@FB clients are likely to use `false` *)
             Option.some_if
               (not
                  initialize_params.initializationOptions

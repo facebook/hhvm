@@ -59,7 +59,7 @@ type candidate = {
   placeholder_name: string;
   selection_kind: selection_kind;
   params: var_tys;
-      (** The paramaters for the method we extract, along with their types. *)
+      (** The parameters for the method we extract, along with their types. *)
   return: var_tys;
       (** The returns for the method we extract, along with their types.
   We simulate multiple returns using tuple types and `list()`

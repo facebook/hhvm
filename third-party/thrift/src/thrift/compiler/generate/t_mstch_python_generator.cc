@@ -159,7 +159,6 @@ class python_mstch_program : public mstch_program {
     visit_types_for_objects();
     visit_types_for_constants();
     visit_types_for_typedefs();
-    visit_types_for_mixin_fields();
     visit_types_for_adapters();
   }
 
@@ -303,14 +302,6 @@ class python_mstch_program : public mstch_program {
   void visit_types_for_typedefs() {
     for (const auto typedef_def : program_->typedefs()) {
       visit_type(typedef_def->get_type());
-    }
-  }
-
-  void visit_types_for_mixin_fields() {
-    for (const auto& strct : program_->structs()) {
-      for (const auto& m : cpp2::get_mixins_and_members(*strct)) {
-        visit_type(m.member->get_type());
-      }
     }
   }
 

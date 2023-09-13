@@ -74,36 +74,43 @@ module Primary = struct
   end
 
   module Enum = struct
-    module Case = struct
+    module Const = struct
       type t =
-        | Default
         | Null
-        | Label of string
+        | Label of {
+            class_: string;
+            const: string;
+          }
         | Bool of bool
         | Int of string option
-      [@@deriving eq, show]
+      [@@deriving eq, show, hash, sexp, ord]
 
       let to_user_string = function
-        | Default -> "default"
         | Null -> "null"
-        | Label str -> str
+        (* you need the class field for distinguish identically named constants
+           from different classes in hash, eq, and ord but for printing, we just
+           show only const namae instead *)
+        | Label { class_ = _; const } -> const
         | Bool true -> "true"
         | Bool false -> "false"
         | Int None -> "int"
         | Int (Some num) -> num
+
+      let opt_to_user_string =
+        Option.value_map ~default:"default" ~f:to_user_string
     end
 
     type t =
       | Enum_switch_redundant of {
           pos: Pos.t;
           first_pos: Pos.t;
-          const_name: Case.t;
+          const_name: Const.t;
         }
       | Enum_switch_nonexhaustive of {
           pos: Pos.t;
           kind: string option;
           decl_pos: Pos_or_decl.t;
-          missing: Case.t list;
+          missing: Const.t option list;
         }
       | Enum_switch_redundant_default of {
           pos: Pos.t;

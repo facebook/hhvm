@@ -9,6 +9,13 @@
 open Hh_prelude
 open Aast
 open Typing_defs
+module EnumErr = Typing_error.Primary.Enum
+
+type literal = EnumErr.Const.t
+
+type ast_case = (Tast.ty, Tast.saved_env) Aast.expr
+
+type case = Pos.t * literal
 
 module Value = struct
   type t =
@@ -35,6 +42,44 @@ module Value = struct
     | Null -> Hh_json.string_ "null"
     | Bool bool -> bool |> Bool.to_string |> Hh_json.string_
     | Int -> Hh_json.string_ "int"
+
+  let to_literal : t -> literal option =
+    let open EnumErr.Const in
+    function
+    | Null -> Some Null
+    | Bool b -> Some (Bool b)
+    | Int -> Some (Int None)
+    | Other -> None
+
+  type value = t
+
+  (* design choice: could check for cases of type null rather than the null
+     literal expression. Ultimately we think case branches should only allow
+     literals or class constants, and so disregard non-literal expressions *)
+  let and_literal_of_ast_case env ((ty, _, expr) : ast_case) :
+      t * literal option =
+    let open EnumErr.Const in
+    match expr with
+    | Null -> (Null, Some Null)
+    | True -> (Bool true, Some (Bool true))
+    | False -> (Bool false, Some (Bool false))
+    | Int literal -> (Int, Some (Int (Some literal)))
+    | Class_const ((_, _, CI (_, class_)), (_, const)) ->
+      let is_sub env mk_ty ty =
+        Typing_subtype.is_sub_type env ty (mk_ty Reason.Rnone)
+      in
+
+      let value : value =
+        (* necessary to check this to partition class constants correctly
+           according to type *)
+        if is_sub env Typing_make_type.int ty then
+          Int
+        else
+          Other
+      in
+
+      (value, Some (Label { class_; const }))
+    | _ -> (Other, None)
 end
 
 module ValueSet = struct
@@ -112,102 +157,67 @@ let rec symbolic_dnf_values env ty : ValueSet.t =
   | Tunapplied_alias _ ->
     Typing_defs.error_Tunapplied_alias_in_illegal_context ()
 
-let key_present_data_consed table ~key ~data =
-  Hashtbl.find_and_call
-    table
-    key
-    ~if_found:(fun _ ->
-      Hashtbl.add_multi table ~key ~data;
-      true)
-    ~if_not_found:(fun _ -> false)
-
-type case = (Tast.ty, Tast.saved_env) Aast.expr
-
-(* design choice: could check for cases of type null rather than the null
-   literal expression. Ultimately we think case branches should only allow
-   literals or class constants, and so disregard non-literal expressions *)
-let case_to_value_literal env ((ty, _, expr) : case) =
-  match expr with
-  | Null -> (Value.Null, "null")
-  | True -> (Value.Bool true, "true")
-  | False -> (Value.Bool false, "false")
-  | Int literal -> (Value.Int, literal)
-  | Class_const ((_, _, CI (_, class_)), (_, const)) ->
-    let is_sub env mk_ty ty =
-      Typing_subtype.is_sub_type env ty (mk_ty Reason.Rnone)
-    in
-
-    let value =
-      (* necessary to check this to partition class constants correctly
-         according to type *)
-      if is_sub env Typing_make_type.int ty then
-        Value.Int
-      else
-        Value.Other
-    in
-
-    (value, Utils.strip_ns @@ class_ ^ "::" ^ const)
-  | _ -> (Value.Other, "default")
-
-let case_to_value env case = case |> case_to_value_literal env |> fst
-
-let is_supported_literal env case =
-  case |> case_to_value_literal env |> snd |> String.(( <> ) "default")
-
 (* Partition cases based on the kind of literal expression (and later, type) *)
-let partition_cases env (cases : (case * _) list) values =
-  let partitions : (Value.t, case list) Hashtbl.t =
+let partition_cases env (cases : (ast_case * _) list) values =
+  let partitions : (Value.t, literal * case list) Hashtbl.t =
     let tbl = Hashtbl.create (module Value) in
-    ValueSet.iter values ~f:(fun key -> Hashtbl.add_exn tbl ~key ~data:[]);
+
+    ValueSet.iter values ~f:(fun key ->
+        Option.iter (Value.to_literal key) ~f:(fun if_missing ->
+            Hashtbl.add_exn tbl ~key ~data:(if_missing, [])));
     tbl
   in
+
+  let key_present_data_consed table ~key ~data =
+    Hashtbl.find_and_call
+      table
+      key
+      ~if_found:(fun (if_missing, rest) ->
+        Hashtbl.set table ~key ~data:(if_missing, data :: rest);
+        true)
+      ~if_not_found:(fun _ -> false)
+  in
+
   let unused_cases =
-    List.fold_left cases ~init:[] ~f:(fun unused (case, _) ->
-        let key = case_to_value env case in
-        if key_present_data_consed partitions ~key ~data:case then
-          unused
-        else
-          case :: unused)
+    List.fold_left cases ~init:[] ~f:(fun unused (((ty, pos, _) as case), _) ->
+        let (key, lit) = Value.and_literal_of_ast_case env case in
+        match lit with
+        | None -> (ty, pos, None) :: unused
+        | Some lit ->
+          if key_present_data_consed partitions ~key ~data:(pos, lit) then
+            unused
+          else
+            (ty, pos, Some lit) :: unused)
   in
   (partitions, unused_cases)
-
-module EnumErr = Typing_error.Primary.Enum
 
 let add_err env err =
   Typing_error_utils.add_typing_error ~env @@ Typing_error.enum err
 
 let get_missing_cases env partitions =
-  let case_to_literal env case = case |> case_to_value_literal env |> snd in
-
-  let opt_missing_case env err_case = function
-    | [] -> Some err_case
+  let opt_missing env missing = function
+    | [] -> Some missing
     | _ :: _ as cases ->
-      (* map from literals to case positions *)
+      (* construct a map from literals to case positions... *)
       Hashtbl.group
-        (module String)
+        (module EnumErr.Const)
         cases
-        ~get_key:(case_to_literal env)
-        ~get_data:(fun case -> [case])
+        ~get_key:snd
+        ~get_data:(fun (pos, _) -> [pos])
         ~combine:( @ )
-      |> Hashtbl.iteri ~f:(fun ~key:literal ~data:cases ->
-             match cases with
+      (* ...to perform a redundant case check *)
+      |> Hashtbl.iteri ~f:(fun ~key:const_name ~data:positions ->
+             match positions with
              | [] ->
                (* ~get_data never produces an empty list;
                   ~combine preserves non-emptiness *)
                assert false
              | [_] -> ()
-             | ((_, redundant_pos, _) as case) :: (_ :: _ as tl) ->
-               if is_supported_literal env case then
-                 let const_name =
-                   let open EnumErr.Case in
-                   match err_case with
-                   | Int None -> Int (Some literal)
-                   | _ -> err_case
-                 in
-                 let (_, first_pos, _) = List.last_exn tl in
-                 add_err env
-                 @@ EnumErr.Enum_switch_redundant
-                      { const_name; first_pos; pos = redundant_pos });
+             | redundant_pos :: (_ :: _ as tl) ->
+               let first_pos = List.last_exn tl in
+               add_err env
+               @@ EnumErr.Enum_switch_redundant
+                    { const_name; first_pos; pos = redundant_pos });
       None
   in
 
@@ -215,36 +225,32 @@ let get_missing_cases env partitions =
     Option.value_map opt ~f:(fun x -> x :: default) ~default
   in
 
-  Hashtbl.fold partitions ~init:[] ~f:(fun ~key ~data missing_cases ->
-      opt_cons ~tl:missing_cases
-      @@
-      let open Value in
-      match (key : t) with
-      | Null -> opt_missing_case env EnumErr.Case.Null data
-      | Bool bool -> opt_missing_case env EnumErr.Case.(Bool bool) data
-      | Int -> opt_missing_case env (EnumErr.Case.Int None) data
-      | Other -> None)
+  Hashtbl.fold
+    partitions
+    ~init:[]
+    ~f:(fun ~key:_ ~data:(if_missing, cases) acc ->
+      opt_cons (opt_missing env if_missing cases) ~tl:acc)
 
 let error_unused_cases env expected unused_cases =
   let expected = lazy (Typing_print.full_strip_ns env expected) in
-  List.iter unused_cases ~f:(fun ((ty, pos, _) as case) ->
+  List.iter unused_cases ~f:(fun (ty, pos, lit) ->
       add_err env
       @@
-      if is_supported_literal env case then
+      match lit with
+      | None -> EnumErr.Enum_switch_not_const pos
+      | Some _ ->
         EnumErr.Enum_switch_wrong_class
           {
             pos;
             kind = "";
             expected = Lazy.force expected;
             actual = Typing_print.full_strip_ns env ty;
-          }
-      else
-        EnumErr.Enum_switch_not_const pos)
+          })
 
-type default = (Tast.ty, Tast.saved_env) Aast.default_case
+type ast_default = (Tast.ty, Tast.saved_env) Aast.default_case
 
 let check_default
-    env pos (opt_default_case : default option) needs_default missing =
+    env pos (opt_default_case : ast_default option) needs_default missing =
   match (opt_default_case, needs_default) with
   | (None, false)
   | (Some _, true) ->
@@ -266,9 +272,9 @@ let add_default_if_needed values missing_cases =
   (* write `exists ~f:(fun x -> not @@ finite_or_dynamic x)` instead of
      `forall ~f:finite` to ensure set is non-empty *)
   if ValueSet.exists ~f:(fun x -> not @@ Value.finite_or_dynamic x) values then
-    EnumErr.Case.Default :: missing_cases
+    None :: List.map ~f:Option.some missing_cases
   else
-    missing_cases
+    List.map ~f:Option.some missing_cases
 
 (* The algorithm below works as follows:
    1. Partition the case list into buckets for each (non-dynamic) element of the computed set.

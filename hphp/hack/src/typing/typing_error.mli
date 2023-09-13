@@ -73,29 +73,33 @@ module Primary : sig
   end
 
   module Enum : sig
-    module Case : sig
+    module Const : sig
       type t =
-        | Default
         | Null
-        | Label of string
+        | Label of {
+            class_: string;
+            const: string;
+          }
         | Bool of bool
         | Int of string option
-      [@@deriving eq, show]
+      [@@deriving eq, show, hash, sexp, ord]
 
       val to_user_string : t -> string
+
+      val opt_to_user_string : t option -> string
     end
 
     type t =
       | Enum_switch_redundant of {
           pos: Pos.t;
           first_pos: Pos.t;
-          const_name: Case.t;
+          const_name: Const.t;
         }
       | Enum_switch_nonexhaustive of {
           pos: Pos.t;
           kind: string option;
           decl_pos: Pos_or_decl.t;
-          missing: Case.t list;
+          missing: Const.t option list;
         }
       | Enum_switch_redundant_default of {
           pos: Pos.t;

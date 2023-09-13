@@ -51,7 +51,7 @@
     error_codes
     user_error)
  (preprocess
-  (pps ppx_deriving.std)))
+  (pps ppx_deriving.std ppx_sexp_conv ppx_hash)))
 
 (library
   (name typing_error_utils)

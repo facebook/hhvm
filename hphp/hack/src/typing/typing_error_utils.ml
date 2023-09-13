@@ -526,7 +526,7 @@ module Eval_primary = struct
 
     let enum_switch_redundant pos first_pos const_name =
       let const_name =
-        Typing_error.Primary.Enum.Case.(to_user_string const_name)
+        Typing_error.Primary.Enum.Const.(to_user_string const_name)
       in
       let claim = lazy (pos, "Redundant `case` statement")
       and reason =
@@ -539,13 +539,14 @@ module Eval_primary = struct
       (Error_code.EnumSwitchRedundant, claim, reason, [])
 
     let enum_switch_nonexhaustive pos kind decl_pos missing =
-      let open Typing_error.Primary.Enum.Case in
+      let open Typing_error.Primary.Enum.Const in
       let claim =
         lazy
           ( pos,
             "`switch` statement nonexhaustive; at least the following cases are missing: "
             ^ (List.map
-                 ~f:(fun x -> x |> to_user_string |> Markdown_lite.md_codify)
+                 ~f:(fun x ->
+                   x |> opt_to_user_string |> Markdown_lite.md_codify)
                  missing
               |> String.concat ~sep:", ") )
       and reason =
@@ -554,7 +555,7 @@ module Eval_primary = struct
             match kind with
             | Some kind -> [(decl_pos, kind ^ " declared here")]
             | None ->
-              if List.exists missing ~f:(equal Default) then
+              if List.exists missing ~f:Option.is_none then
                 [
                   ( decl_pos,
                     "only unions and intersections of bool, null and enums can be switched on without a default"

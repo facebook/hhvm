@@ -82,7 +82,11 @@ let get_constant env tc kind (seen, has_default) case =
             enum
             @@ Primary.Enum.(
                  Enum_switch_redundant
-                   { const_name = Case.Label const; first_pos = old_pos; pos }));
+                   {
+                     const_name = Const.(Label { class_ = cls; const });
+                     first_pos = old_pos;
+                     pos;
+                   }));
 
         (seen, has_default)
   in
@@ -136,6 +140,7 @@ let check_enum_exhaustiveness
         first_n_unhandled (n - 1) (id :: acc) rest
   in
   let unhandled = first_n_unhandled 10 [] @@ Cls.consts tc in
+  let class_ = Cls.name tc in
   let all_cases_handled = List.is_empty unhandled in
   let enum_err_opt =
     let open Typing_error in
@@ -147,7 +152,10 @@ let check_enum_exhaustiveness
             {
               pos;
               kind = Some str_kind;
-              missing = List.map ~f:(fun x -> Case.Label x) unhandled;
+              missing =
+                List.map
+                  ~f:(fun x -> Const.(Some (Label { class_; const = x })))
+                  unhandled;
               decl_pos = Cls.pos tc;
             })
     | (true, true, false) ->

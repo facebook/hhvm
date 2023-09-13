@@ -112,6 +112,9 @@ class add_package {
       if (!has_ns("hack") && !has_ns("php")) {
         content += "namespace hack \"\"\n";
       }
+      if (!has_ns("py3")) {
+        content += "namespace py3 \"\"\n";
+      }
 
       if (prog_.namespaces().empty()) {
         content += "\n";

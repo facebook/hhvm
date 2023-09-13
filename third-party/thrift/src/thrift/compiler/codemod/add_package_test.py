@@ -83,6 +83,7 @@ class ThriftPackage(unittest.TestCase):
 
                 namespace cpp2 "cpp2"
                 namespace hack ""
+                namespace py3 ""
 
                 struct S {
                 }
@@ -104,6 +105,7 @@ class ThriftPackage(unittest.TestCase):
                 package "meta.com/thrift/annotation"
 
                 namespace hack ""
+                namespace py3 ""
                 namespace cpp2 "thrift.annotation"
 
                 include "bar.thrift"
@@ -116,6 +118,7 @@ class ThriftPackage(unittest.TestCase):
             """\
                 namespace cpp2 "thrift.annotation"
                 namespace php "thrift.annotation"
+                namespace py3 "thrift.annotation.foo"
 
                 include "bar.thrift"
                 struct foo {}
@@ -126,6 +129,7 @@ class ThriftPackage(unittest.TestCase):
 
                 namespace cpp2 "thrift.annotation"
                 namespace php "thrift.annotation"
+                namespace py3 "thrift.annotation.foo"
 
                 include "bar.thrift"
                 struct foo {}

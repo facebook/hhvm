@@ -18,6 +18,8 @@ public final class Constants {
     public static final com.facebook.thrift.type.Schema SCHEMA_PRIMITIVES_SERVICE = new com.facebook.thrift.type.Schema.Builder().setDefinitions(ImmutableList.<com.facebook.thrift.type.Definition>builder()
         .add(com.facebook.thrift.type.Definition.fromServiceDef(new com.facebook.thrift.type.Service.Builder().setAttrs(new com.facebook.thrift.type.DefinitionAttrs.Builder().setName("PrimitivesService").setStructuredAnnotations(ImmutableSet.<Long>builder()
         .add(1L)
+        .build()).setAnnotations(ImmutableMap.<String, com.facebook.thrift.type.Annotation>builder()
+        .put("facebook.com/thrift/annotation/GenerateRuntimeSchema", new com.facebook.thrift.type.Annotation.Builder().build())
         .build()).build()).setFunctions(ImmutableList.<com.facebook.thrift.type.Function>builder()
         .add(new com.facebook.thrift.type.Function.Builder().setAttrs(new com.facebook.thrift.type.DefinitionAttrs.Builder().setName("init").build()).setQualifier(com.facebook.thrift.type.FunctionQualifier.UNSPECIFIED).setReturnType(new com.facebook.thrift.type_swift.TypeStruct.Builder().setName(com.facebook.thrift.standard_type.TypeName.fromI64Type(com.facebook.thrift.standard_type.Void.UNUSED)).build()).setReturnTypes(ImmutableList.<com.facebook.thrift.type.ReturnType>builder()
         .add(com.facebook.thrift.type.ReturnType.fromThriftType(new com.facebook.thrift.type_swift.TypeStruct.Builder().setName(com.facebook.thrift.standard_type.TypeName.fromI64Type(com.facebook.thrift.standard_type.Void.UNUSED)).build()))

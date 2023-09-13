@@ -36,7 +36,8 @@ namespace compiler {
 // Assigns a t_const_value to a concrete Thrift type.
 
 inline void hydrate_const(bool& out, const t_const_value& val) {
-  out = val.get_bool();
+  out = val.get_type() == t_const_value::CV_BOOL ? val.get_bool()
+                                                 : val.get_integer();
 }
 template <typename T>
 std::enable_if_t<std::is_integral_v<T>> hydrate_const(
@@ -53,6 +54,9 @@ inline void hydrate_const(std::string& out, const t_const_value& val) {
 }
 inline void hydrate_const(folly::fbstring& out, const t_const_value& val) {
   out = val.get_string();
+}
+inline void hydrate_const(folly::IOBuf& out, const t_const_value& val) {
+  out = folly::IOBuf(folly::IOBuf::CopyBufferOp{}, val.get_string());
 }
 template <typename T> // list
 folly::void_t<decltype(std::declval<T>().emplace_back())> hydrate_const(
@@ -88,6 +92,14 @@ std::enable_if_t<std::is_enum_v<T>> hydrate_const(
   out = static_cast<T>(val.get_integer());
 }
 template <typename T>
+decltype(auto) ensure(std::unique_ptr<T>& t) {
+  return t ? *t : *(t = std::make_unique<T>()); // cpp.ref
+}
+template <typename T>
+decltype(auto) ensure(T t) {
+  return t.ensure(); // *field_ref
+}
+template <typename T>
 std::enable_if_t<is_thrift_class_v<T>> hydrate_const(
     T& out, const t_const_value& val) {
   assert(val.get_type() == t_const_value::t_const_value_type::CV_MAP);
@@ -102,14 +114,24 @@ std::enable_if_t<is_thrift_class_v<T>> hydrate_const(
     if (!map.count(name)) {
       return;
     }
-
-    hydrate_const(op::get<Id>(out).ensure(), *map.at(name));
+    hydrate_const(ensure(op::get<Id>(out)), *map.at(name));
   });
 }
+
 template <typename T>
 folly::void_t<decltype(std::declval<T>().toThrift())> hydrate_const(
     T& out, const t_const_value& val) {
   hydrate_const(out.toThrift(), val);
+}
+void hydrate_const(protocol::Value& out, const t_const_value& val) {
+  typename protocol::Value::__fbthrift_cpp2_type inner;
+  hydrate_const(inner, val);
+  out = protocol::Value(inner);
+}
+void hydrate_const(protocol::Object& out, const t_const_value& val) {
+  typename protocol::Object::__fbthrift_cpp2_type inner;
+  hydrate_const(inner, val);
+  out = protocol::Object(inner);
 }
 
 // Assigns a t_const_value to a Value.

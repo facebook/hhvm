@@ -55,6 +55,13 @@ typedef set<id.ValueId> AnnotationIds (py3.hidden)
 /**
  * An instance of an annotation, applied to some definition.
  */
+struct Annotation {
+  1: map<string, protocol.Value> fields;
+} (py3.hidden)
+
+/**
+ * An instance of an annotation, applied to some definition.
+ */
 struct StructuredAnnotation {
   1: standard.TypeUri type;
   2: map<string, protocol.Value> fields;
@@ -141,13 +148,18 @@ struct DefinitionAttrs {
   2: standard.Uri uri;
 
   /**
-   * The annotations associated with this definition.
+   * DEPRECATED! Prefer `structuredAnnotations`.
+   * The structured annotations associated with this definition.
    */
   3: AnnotationIds structuredAnnotations;
 
   /**
-   * DEPRECATED!
-   * The unstructured annotations associated with this definition.
+   * The structured annotations associated with this definition.
+   */
+  8: map<standard.Uri, Annotation> annotations;
+
+  /**
+   * The unstructured annotations (deprecated) associated with this definition.
    */
   4: map<string, string> unstructuredAnnotations;
 

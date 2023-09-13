@@ -47,6 +47,15 @@ std::unique_ptr<t_const_value> mapval() {
   ret->set_map();
   return ret;
 }
+std::string uri_or_name(const t_named& node) {
+  if (!node.uri().empty()) {
+    return node.uri();
+  }
+  if (node.program()) {
+    return node.program()->scope_name(node);
+  }
+  return node.name();
+}
 } // namespace
 
 t_type_ref schematizer::stdType(std::string_view uri) {
@@ -86,18 +95,12 @@ void schematizer::add_definition(
 
   auto structured = node.structured_annotations();
   if (!structured.empty()) {
-    auto annots = val();
-    annots->set_list();
+    auto annots = mapval();
+    auto structured_annots = val();
+    structured_annots->set_list();
 
     for (const auto& item : structured) {
-      auto annot = val();
-      static const std::string kStructuredAnnotationSchemaUri =
-          "facebook.com/thrift/type/StructuredAnnotation";
-      auto structured_annotation_ttype =
-          stdType(kStructuredAnnotationSchemaUri);
-      annot->set_ttype(structured_annotation_ttype);
-      annot->set_map();
-      annot->add_map(val("type"), typeUri(*item.type()));
+      auto annot = mapval();
       if (!item.value()->is_empty()) {
         static const std::string kProtocolValueUri =
             "facebook.com/thrift/protocol/Value";
@@ -111,11 +114,24 @@ void schematizer::add_definition(
         }
         annot->add_map(val("fields"), std::move(fields));
       };
-      auto id = intern_value(std::move(annot), const_cast<t_program*>(program));
-      annots->add_list(val(id));
+
+      // Double write to deprecated externed path. (T161963504)
+      auto structured_annot = annot->clone();
+      structured_annot->set_ttype(
+          stdType("facebook.com/thrift/type/StructuredAnnotation"));
+      structured_annot->add_map(val("type"), typeUri(*item.type()));
+
+      auto id = intern_value(
+          std::move(structured_annot), const_cast<t_program*>(program));
+      structured_annots->add_list(val(id));
+
+      annot->set_ttype(stdType("facebook.com/thrift/type/Annotation"));
+      annots->add_map(val(uri_or_name(*item.type())), std::move(annot));
     }
 
-    definition->add_map(val("structuredAnnotations"), std::move(annots));
+    definition->add_map(
+        val("structuredAnnotations"), std::move(structured_annots));
+    definition->add_map(val("annotations"), std::move(annots));
   }
 
   const auto& unstructured = node.annotations();

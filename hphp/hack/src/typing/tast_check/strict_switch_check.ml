@@ -126,22 +126,36 @@ type case = (Tast.ty, Tast.saved_env) Aast.expr
 (* design choice: could check for cases of type null rather than the null
    literal expression. Ultimately we think case branches should only allow
    literals or class constants, and so disregard non-literal expressions *)
-let expr_to_value_literal :
-    (Tast.ty, Tast.saved_env) Aast.expr_ -> Value.t * string = function
+let case_to_value_literal env ((ty, _, expr) : case) =
+  match expr with
   | Null -> (Value.Null, "null")
   | True -> (Value.Bool true, "true")
   | False -> (Value.Bool false, "false")
-  (* missing: support for class constants *)
   | Int literal -> (Value.Int, literal)
+  | Class_const ((_, _, CI (_, class_)), (_, const)) ->
+    let is_sub env mk_ty ty =
+      Typing_subtype.is_sub_type env ty (mk_ty Reason.Rnone)
+    in
+
+    let value =
+      (* necessary to check this to partition class constants correctly
+         according to type *)
+      if is_sub env Typing_make_type.int ty then
+        Value.Int
+      else
+        Value.Other
+    in
+
+    (value, Utils.strip_ns @@ class_ ^ "::" ^ const)
   | _ -> (Value.Other, "default")
 
-let case_to_value ((_, _, expr) : case) = expr |> expr_to_value_literal |> fst
+let case_to_value env case = case |> case_to_value_literal env |> fst
 
-let is_supported_literal expr =
-  expr |> expr_to_value_literal |> snd |> String.(( <> ) "default")
+let is_supported_literal env case =
+  case |> case_to_value_literal env |> snd |> String.(( <> ) "default")
 
 (* Partition cases based on the kind of literal expression (and later, type) *)
-let partition_cases (cases : (case * _) list) values =
+let partition_cases env (cases : (case * _) list) values =
   let partitions : (Value.t, case list) Hashtbl.t =
     let tbl = Hashtbl.create (module Value) in
     ValueSet.iter values ~f:(fun key -> Hashtbl.add_exn tbl ~key ~data:[]);
@@ -149,7 +163,7 @@ let partition_cases (cases : (case * _) list) values =
   in
   let unused_cases =
     List.fold_left cases ~init:[] ~f:(fun unused (case, _) ->
-        let key = case_to_value case in
+        let key = case_to_value env case in
         if key_present_data_consed partitions ~key ~data:case then
           unused
         else
@@ -163,9 +177,7 @@ let add_err env err =
   Typing_error_utils.add_typing_error ~env @@ Typing_error.enum err
 
 let get_missing_cases env partitions =
-  let case_to_literal ((_, _, expr) : case) =
-    expr |> expr_to_value_literal |> snd
-  in
+  let case_to_literal env case = case |> case_to_value_literal env |> snd in
 
   let opt_missing_case env err_case = function
     | [] -> Some err_case
@@ -174,7 +186,7 @@ let get_missing_cases env partitions =
       Hashtbl.group
         (module String)
         cases
-        ~get_key:case_to_literal
+        ~get_key:(case_to_literal env)
         ~get_data:(fun case -> [case])
         ~combine:( @ )
       |> Hashtbl.iteri ~f:(fun ~key:literal ~data:cases ->
@@ -184,8 +196,8 @@ let get_missing_cases env partitions =
                   ~combine preserves non-emptiness *)
                assert false
              | [_] -> ()
-             | (_, redundant_pos, expr) :: (_ :: _ as tl) ->
-               if is_supported_literal expr then
+             | ((_, redundant_pos, _) as case) :: (_ :: _ as tl) ->
+               if is_supported_literal env case then
                  let const_name =
                    let open EnumErr.Case in
                    match err_case with
@@ -215,10 +227,10 @@ let get_missing_cases env partitions =
 
 let error_unused_cases env expected unused_cases =
   let expected = lazy (Typing_print.full_strip_ns env expected) in
-  List.iter unused_cases ~f:(fun (ty, pos, expr) ->
+  List.iter unused_cases ~f:(fun ((ty, pos, _) as case) ->
       add_err env
       @@
-      if is_supported_literal expr then
+      if is_supported_literal env case then
         EnumErr.Enum_switch_wrong_class
           {
             pos;
@@ -270,8 +282,8 @@ let add_default_if_needed values missing_cases =
      c. There are missing cases for finite values.
    4. Otherwise a default is redundant. *)
 let check_cases_against_values env pos expected values cases opt_default_case =
-  let (partitions, unused_cases) = partition_cases cases values in
   let typing_env = Tast_env.tast_env_as_typing_env env in
+  let (partitions, unused_cases) = partition_cases typing_env cases values in
   error_unused_cases typing_env expected unused_cases;
   let missing_cases =
     get_missing_cases typing_env partitions |> add_default_if_needed values

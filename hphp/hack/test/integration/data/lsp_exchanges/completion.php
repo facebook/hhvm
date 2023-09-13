@@ -30,3 +30,11 @@ function testing_area_for_lambdas(): void {
   $mylambda = ($n) ==> $n * 5;
 
 }
+
+function test_sig_function(string $foo): void {
+
+}
+
+function test_call_signature(): void {
+  test_sig_function("");
+}

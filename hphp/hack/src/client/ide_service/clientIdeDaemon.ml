@@ -533,9 +533,15 @@ let update_file_ctx (istate : istate) (document : ClientIdeMessage.document) :
 
 let get_signature (ctx : Provider_context.t) (name : string) : 'string =
   let tast_env = Tast_env.empty ctx in
-  match Tast_env.get_fun tast_env name with
+  match Tast_env.get_fun tast_env (Utils.add_ns name) with
   | None -> None
-  | Some fe -> Some (Tast_env.print_decl_ty tast_env fe.Typing_defs.fe_type)
+  | Some fe ->
+    Some
+      (String_utils.rstrip
+         (String_utils.lstrip
+            (Tast_env.print_decl_ty tast_env fe.Typing_defs.fe_type)
+            "(")
+         ")")
 
 (** We avoid showing typing errors if there are parsing errors. *)
 let get_user_facing_errors

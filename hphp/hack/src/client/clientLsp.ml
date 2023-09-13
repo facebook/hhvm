@@ -2256,7 +2256,11 @@ let do_resolve_local
               ranking_detail
             |> docblock_to_markdown
           in
-          Lwt.return { params with Completion.documentation }
+          (match raw_docblock.ClientIdeMessage.Completion_resolve.signature with
+          | None -> Lwt.return { params with Completion.documentation }
+          | Some signature ->
+            Lwt.return
+              { params with Completion.documentation; detail = Some signature })
         (* If that fails, next try using symbol *)
       with
       | _ ->
@@ -2275,7 +2279,11 @@ let do_resolve_local
           docblock_to_markdown
             raw_docblock.ClientIdeMessage.Completion_resolve.docblock
         in
-        Lwt.return { params with Completion.documentation }
+        (match raw_docblock.ClientIdeMessage.Completion_resolve.signature with
+        | None -> Lwt.return { params with Completion.documentation }
+        | Some signature ->
+          Lwt.return
+            { params with Completion.documentation; detail = Some signature })
     in
     Lwt.return result
 

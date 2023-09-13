@@ -81,6 +81,8 @@ class t_ast_generator : public t_generator {
           throw std::runtime_error(
               fmt::format("Unknown protocol `{}`", pair.second));
         }
+      } else if (pair.first == "include_generated") {
+        include_generated_ = true;
       } else if (pair.first == "ast") {
       } else {
         throw std::runtime_error(
@@ -107,6 +109,7 @@ class t_ast_generator : public t_generator {
 
   std::ofstream f_out_;
   ast_protocol protocol_;
+  bool include_generated_{false};
 };
 
 void t_ast_generator::generate_program() {
@@ -135,9 +138,7 @@ void t_ast_generator::generate_program() {
                      .definitions()
                      .ensure();
     for (auto& def : program->definitions()) {
-      // Thrift schematizer does not schematize generated definitions.
-      // TODO: Support schematize generated definitions.
-      if (def.generated()) {
+      if (def.generated() && !include_generated_) {
         continue;
       }
       defs.push_back(definition_index.at(&def));
@@ -239,7 +240,7 @@ void t_ast_generator::generate_program() {
 
 #define THRIFT_ADD_VISITOR(kind)                                     \
   visitor.add_##kind##_visitor([&](const t_##kind& node) {           \
-    if (node.generated()) {                                          \
+    if (node.generated() && !include_generated_) {                   \
       return;                                                        \
     }                                                                \
     auto& definitions = *ast.definitions();                          \

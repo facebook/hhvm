@@ -79,7 +79,7 @@ t_field_id getNormalizedFieldId(const t_field& field) {
 
 // A fluent function to set the doc string on a given node.
 t_field& doc(std::string txt, t_field& node) {
-  node.set_doc(std::move(txt) + "\n", {});
+  node.set_doc(std::move(txt) + "\n", node.src_range());
   return node;
 }
 

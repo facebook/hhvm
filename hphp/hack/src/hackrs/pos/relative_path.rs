@@ -32,11 +32,15 @@ impl RelativePath {
         Self::from_bytes(prefix, suffix)
     }
 
-    pub const fn empty() -> Self {
+    pub const fn new_empty(prefix: Prefix) -> Self {
         Self {
-            prefix: Prefix::Dummy,
+            prefix,
             suffix: Bytes::EMPTY,
         }
+    }
+
+    pub const fn empty() -> Self {
+        Self::new_empty(Prefix::Dummy)
     }
 
     pub fn is_empty(&self) -> bool {
@@ -64,12 +68,29 @@ impl RelativePath {
 
     pub fn to_absolute(&self, ctx: &RelativePathCtx) -> PathBuf {
         let mut buf = ctx.prefix_path(self.prefix).to_owned();
-        buf.push(OsStr::from_bytes(self.suffix.as_bytes()));
+        buf.push(self.path());
         buf
     }
 
-    pub fn suffix_buf(&self) -> PathBuf {
-        PathBuf::from(OsStr::from_bytes(self.suffix.as_bytes()))
+    /// Access the (relative) suffix as a Path
+    pub fn path(self) -> &'static Path {
+        Path::new(OsStr::from_bytes(self.suffix.as_bytes()))
+    }
+
+    pub fn suffix_buf(self) -> PathBuf {
+        self.path().to_path_buf()
+    }
+
+    pub fn join(&self, filename: impl AsRef<Path>) -> Self {
+        Self::new(self.prefix, self.path().join(filename))
+    }
+
+    /// Like std::path::Path::parent(), but preserves prefix.
+    /// parent("") -> None
+    /// parent("a") -> Some("")
+    /// parent("a/b") -> Some("a")
+    pub fn parent(self) -> Option<Self> {
+        Some(Self::new(self.prefix, self.path().parent()?))
     }
 }
 
@@ -105,6 +126,12 @@ impl From<RelativePath> for relative_path::RelativePath {
     }
 }
 
+impl From<relative_path::RelativePath> for RelativePath {
+    fn from(path: relative_path::RelativePath) -> Self {
+        Self::new(path.prefix(), path.path())
+    }
+}
+
 impl From<&relative_path::RelativePath> for RelativePath {
     fn from(path: &relative_path::RelativePath) -> Self {
         Self::new(path.prefix(), path.path())
@@ -119,11 +146,6 @@ impl From<&oxidized_by_ref::relative_path::RelativePath<'_>> for RelativePath {
 
 impl fmt::Debug for RelativePath {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "{}|{}",
-            self.prefix,
-            Path::new(OsStr::from_bytes(self.suffix.as_bytes())).display()
-        )
+        write!(f, "{}|{}", self.prefix, self.path().display())
     }
 }

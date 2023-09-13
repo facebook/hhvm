@@ -13,7 +13,7 @@ uses = ["a"]
 uses = ["b.*"]
 
 [packages.baz]
-uses = ["x.*", "y.*"]
+uses = ["b.c.*", "x.*", "y.*"]
 
 [packages.bat]
 uses = ["b.c", "c.d", "y.z"]
@@ -25,10 +25,10 @@ packages = ["everything"]
 
 [deployments.two]
 packages = ["nothing"]
+soft_packages=["baz"]
 
 [deployments.three]
 packages = ["foo", "bar"]
-soft_packages=["baz"]
 
 [deployments.four]
 packages = ["bat"]

@@ -167,18 +167,42 @@ bool PackageInfo::isPackageInActiveDeployment(const StringData* package) const {
 
 namespace {
 
-bool moduleNameMatchesPattern(const std::string& moduleName,
-                              const std::string& pattern) {
-  if (pattern.empty()) return false;
-  if (pattern == "*") return true;
+enum class MatchKind {
+  NoMatch,
+  // When the glob does not match the module
+  PrefixMatch,
+  // When the glob prefix equals some prefix of module
+  // e.g. glob = foo.bar.*
+  //      module = foo.bar.baz
+  PartialMatch,
+  // When the glob prefix equals module
+  // e.g. glob = foo.bar.*
+  //      module = foo.bar
+  ExactMatch,
+  // When the glob equals module
+  // e.g. glob = foo.bar
+  //      module = foo.bar
+};
+
+MatchKind moduleNameMatchesPattern(const std::string& moduleName,
+                                   const std::string& pattern) {
+  if (pattern.empty()) return MatchKind::NoMatch;
+  if (pattern == "*") return MatchKind::PrefixMatch;
   auto size = pattern.size();
   if (size > 2 && pattern[size-1] == '*' && pattern[size-2] == '.') {
-    if (moduleName.size() <= size - 1) return false;
+    // Check if moduleName matches size - 2 length prefix of pattern
+    if (pattern.compare(0, size - 2, moduleName) == 0) {
+      return MatchKind::PartialMatch;
+    }
+    if (moduleName.size() <= size - 1) return MatchKind::NoMatch;
     // Check if size - 1 length prefix of moduleName matches pattern
-    return moduleName.compare(0, size - 1, pattern, 0, size - 1) == 0;
+    if (moduleName.compare(0, size - 1, pattern, 0, size - 1) == 0) {
+      return MatchKind::PrefixMatch;
+    }
   }
   // Looking for an exact match
-  return moduleName == pattern;
+  if (moduleName == pattern) return MatchKind::ExactMatch;
+  return MatchKind::NoMatch;
 }
 
 } // namespace
@@ -190,24 +214,35 @@ std::string PackageInfo::findPackageInRange(const std::string& moduleName,
   if (start >= end) return "";
   size_t mid = start + (end - start) / 2;
   auto const& glob = m_globToPackage[mid].first;
+  auto const match = moduleNameMatchesPattern(moduleName, glob);
 
-  // impossible to match against globs that are lexicographically larger
-  if (glob > moduleName) {
+  if (match ==  MatchKind::NoMatch) {
+    // attempt to find a more specific glob match in the upper half first
+    auto const package = findPackageInRange(moduleName, mid + 1, end);
+    if (!package.empty()) return package;
+    // fall back to finding a match in the lower half
     return findPackageInRange(moduleName, start, mid);
   }
 
-  if (moduleNameMatchesPattern(moduleName, glob)) {
-    auto const& currentMatch = m_globToPackage[mid].second;
+  auto const& currentMatchedPackage = m_globToPackage[mid].second;
+  if (match == MatchKind::ExactMatch) return currentMatchedPackage;
+  if (match == MatchKind::PrefixMatch) {
     // prioritize a more specific glob match if one exists
-    auto const nextMatch = findPackageInRange(moduleName, mid + 1, end);
-    if (!nextMatch.empty()) return nextMatch;
-    return currentMatch;
+    auto const nextMatchedPackage = findPackageInRange(moduleName, mid + 1, end);
+    if (!nextMatchedPackage.empty()) return nextMatchedPackage;
+    return currentMatchedPackage;
   }
-  // attempt to find a glob match in the upper half first
-  auto const match = findPackageInRange(moduleName, mid + 1, end);
-  if (!match.empty()) return match;
-  // fall back to finding a match in the lower half
-  return findPackageInRange(moduleName, start, mid);
+
+  assertx(match == MatchKind::PartialMatch);
+  // check whether the glob immediately before "<moduleName>.*" could
+  // be an exact match, and if so, return it instead
+  if (mid - 1 >= 0) {
+    auto const& prev = m_globToPackage[mid - 1];
+    if (moduleNameMatchesPattern(moduleName, prev.first) == MatchKind::ExactMatch) {
+      return prev.second;
+    }
+  }
+  return currentMatchedPackage;
 }
 
 std::string PackageInfo::getPackageForModule(const StringData* module) const {

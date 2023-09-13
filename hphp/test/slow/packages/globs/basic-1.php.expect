@@ -4,11 +4,11 @@ Module x.c is NOT in Deployment one
 Module t.a.x is in Deployment one
 Module a is NOT in Deployment two
 Module b.c is NOT in Deployment two
-Module x.c is NOT in Deployment two
+Module x.c is in Deployment two
 Module t.a.x is NOT in Deployment two
 Module a is in Deployment three
 Module b.c is NOT in Deployment three
-Module x.c is in Deployment three
+Module x.c is NOT in Deployment three
 Module t.a.x is NOT in Deployment three
 Module a is NOT in Deployment four
 Module b.c is in Deployment four

@@ -66,7 +66,7 @@ impl Options {
         self.hhbc.log_extern_compiler_perf
     }
     pub fn function_is_renamable(&self, func: &BStr) -> bool {
-        let stripped_func = string_utils::strip_ns_bstr(func);
+        let stripped_func = string_utils::strip_global_ns_bstr(func);
         match self.hhvm.jit_enable_rename_function {
             JitEnableRenameFunction::Enable => true,
             JitEnableRenameFunction::RestrictedEnable => {
@@ -76,7 +76,7 @@ impl Options {
         }
     }
     pub fn function_is_interceptable(&self, func: &BStr) -> bool {
-        let stripped_func = string_utils::strip_ns_bstr(func);
+        let stripped_func = string_utils::strip_global_ns_bstr(func);
         !self
             .hhvm
             .non_interceptable_functions

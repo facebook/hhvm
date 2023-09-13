@@ -1,4 +1,4 @@
-vec(16) {
+vec(17) {
   string(5) "<?hh
 "
   string(1) "
@@ -29,6 +29,8 @@ vec(16) {
 "
   string(52) "  fb_rename_function("HH\Lib\Vec\map", "test_map");
 "
+  string(59) "  fb_rename_function("HH\Lib\Vec\map_async", "test_map1");
+"
   string(2) "}
 "
 }
@@ -39,4 +41,4 @@ vec(2) {
 "
 }
 
-Fatal error: fb_rename_function must be explicitly enabled for HH\Lib\Vec\map (when Eval.JitEnableRenameFunction=2 by adding it to option Eval.RenamableFunctions) in %s/systemlib_rename_function.php on line %d
+Fatal error: fb_rename_function must be explicitly enabled for HH\Lib\Vec\map_async (when Eval.JitEnableRenameFunction=2 by adding it to option Eval.RenamableFunctions) in %s/systemlib_rename_function.php on line %d

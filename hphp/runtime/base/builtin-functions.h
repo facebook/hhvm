@@ -354,5 +354,7 @@ Variant require(const String& file, bool once, const char* currentDir,
 
 bool function_exists(const String& function_name);
 
+bool is_generated(const StringData* name);
+
 ///////////////////////////////////////////////////////////////////////////////
 }

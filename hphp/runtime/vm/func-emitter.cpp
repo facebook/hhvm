@@ -212,18 +212,12 @@ const StaticString
   s_SoftInternal("__SoftInternal");
 
 Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
-  auto const isGenerated = [&]() -> bool {
-    auto slice = name->slice();
-    auto ns_pos = slice.rfind('\\');
-    return isdigit(slice.data()[ns_pos+1]);
-  }();
-
   auto attrs = this->attrs;
   assertx(IMPLIES(attrs & AttrIsMethCaller && RO::RepoAuthoritative,
     attrs & AttrPersistent));
 
   DEBUG_ONLY auto persistent = ue().isASystemLib() &&
-    (!RO::funcIsRenamable(name) || preClass || isGenerated);
+    (!RO::funcIsRenamable(name) || preClass);
 
   assertx(IMPLIES(!RO::RepoAuthoritative && attrs & AttrPersistent, persistent));
   assertx(IMPLIES(!RO::RepoAuthoritative && !(attrs & AttrPersistent), !persistent));
@@ -403,7 +397,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     f->shared()->m_allFlags.m_hasReturnWithMultiUBs = true;
   }
   f->shared()->m_originalFilename = originalFullName;
-  f->shared()->m_allFlags.m_isGenerated = isGenerated;
+  f->shared()->m_allFlags.m_isGenerated = HPHP::is_generated(name);
   f->shared()->m_repoReturnType = repoReturnType;
   f->shared()->m_repoAwaitedReturnType = repoAwaitedReturnType;
   f->shared()->m_allFlags.m_isMemoizeWrapper = isMemoizeWrapper;

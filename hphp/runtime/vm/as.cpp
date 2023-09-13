@@ -2353,7 +2353,7 @@ void parse_function(AsmState& as) {
   }
   auto const sname = makeStaticString(name);
   assertx(IMPLIES(as.ue->isASystemLib(),
-    (attrs & AttrPersistent) != RO::funcIsRenamable(sname)));
+    bool(attrs & AttrPersistent) != RO::funcIsRenamable(sname)));
 
   as.fe = as.ue->newFuncEmitter(sname);
   as.fe->init(line0, line1, attrs, nullptr);

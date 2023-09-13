@@ -1155,6 +1155,7 @@ Optional<std::filesystem::path> RuntimeOption::GetHomePath(
 }
 
 bool RuntimeOption::funcIsRenamable(const StringData* name) {
+  if (HPHP::is_generated(name)) return false;
   if (RO::EvalJitEnableRenameFunction == 0) return false;
   if (RO::EvalJitEnableRenameFunction == 2) {
     return RO::RenamableFunctions.find(name->data()) !=

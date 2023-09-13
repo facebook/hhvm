@@ -1371,6 +1371,12 @@ bool function_exists(const String& function_name) {
   return f != nullptr;
 }
 
+bool is_generated(const StringData* name) {
+  auto slice = name->slice();
+  auto ns_pos = slice.rfind('\\');
+  return isdigit(slice.data()[ns_pos+1]);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // debugger and code coverage instrumentation
 

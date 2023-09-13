@@ -1,3 +1,4 @@
 -vEval.JitEnableRenameFunction=2
 -vEval.RenamableFunctions.*=file
 -vEval.RenamableFunctions.*=test_file
+-vEval.RenamableFunctions.*=HH\\Lib\\Vec\\map

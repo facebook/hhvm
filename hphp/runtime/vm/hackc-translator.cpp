@@ -1190,8 +1190,9 @@ void translateFunction(TranslationState& ts, const hhbc::Function& f) {
   assertx(IMPLIES(ts.isSystemLib, attrs & AttrBuiltin));
 
   auto const name = toStaticString(f.name._0);
+  SCOPE_ASSERT_DETAIL("translate function") {return name->data();};
   assertx(IMPLIES(ts.isSystemLib,
-    (attrs & AttrPersistent) != RO::funcIsRenamable(name)));
+    bool(attrs & AttrPersistent) != RO::funcIsRenamable(name)));
 
   ts.fe = ts.ue->newFuncEmitter(name);
   ts.fe->init(f.span.line_begin, f.span.line_end, attrs, nullptr);

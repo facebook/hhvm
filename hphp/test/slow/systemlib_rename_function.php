@@ -13,4 +13,5 @@ function main(): void {
   var_dump(file(__FILE__));
 
   fb_rename_function("HH\Lib\Vec\map", "test_map");
+  fb_rename_function("HH\Lib\Vec\map_async", "test_map1");
 }

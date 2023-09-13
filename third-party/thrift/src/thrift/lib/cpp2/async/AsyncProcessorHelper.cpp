@@ -36,7 +36,9 @@ namespace apache::thrift {
   // Since this request was queued, reset the processBegin
   // time to the actual start time, and not the queue time.
   auto ctx = serverRequest.requestContext();
-  ctx->getTimestamps().processBegin = std::chrono::steady_clock::now();
+  if (ctx->getTimestamps().getSamplingStatus().isEnabled()) {
+    ctx->getTimestamps().processBegin = std::chrono::steady_clock::now();
+  }
 
   auto ap = detail::ServerRequestHelper::asyncProcessor(serverRequest);
   const AsyncProcessorFactory::MethodMetadata& metadata =

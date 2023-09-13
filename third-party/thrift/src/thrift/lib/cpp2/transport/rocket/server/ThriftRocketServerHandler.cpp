@@ -584,8 +584,10 @@ void ThriftRocketServerHandler::handleRequestCommon(
   auto* cpp2ReqCtx = request->getRequestContext();
   auto& timestamps = cpp2ReqCtx->getTimestamps();
   timestamps.setStatus(samplingStatus);
-  timestamps.readEnd = readEnd;
-  timestamps.processBegin = std::chrono::steady_clock::now();
+  if (UNLIKELY(samplingStatus.isEnabled())) {
+    timestamps.readEnd = readEnd;
+    timestamps.processBegin = std::chrono::steady_clock::now();
+  }
 
   if (kTempKillswitch__EnableFdPassing && tryFds.hasValue()) {
     cpp2ReqCtx->getHeader()->fds.dcheckEmpty() =

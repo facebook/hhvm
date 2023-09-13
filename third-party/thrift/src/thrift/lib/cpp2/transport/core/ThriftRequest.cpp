@@ -200,7 +200,9 @@ void ThriftRequestCore::sendReply(
     // ThriftServerRequestResponse::sendThriftResponse).
     // TODO: refactor to move response compression to CPU thread.
     auto& timestamps = getTimestamps();
-    timestamps.processEnd = std::chrono::steady_clock::now();
+    if (UNLIKELY(timestamps.getSamplingStatus().isEnabled())) {
+      timestamps.processEnd = std::chrono::steady_clock::now();
+    }
     auto* observer = serverConfigs_.getObserver();
     if (!isOneway()) {
       auto metadata = makeResponseRpcMetadata(
@@ -234,7 +236,9 @@ void ThriftRequestCore::sendException(
     // ThriftServerRequestResponse::sendThriftResponse).
     // TODO: refactor to move response compression to CPU thread.
     auto& timestamps = getTimestamps();
-    timestamps.processEnd = std::chrono::steady_clock::now();
+    if (UNLIKELY(timestamps.getSamplingStatus().isEnabled())) {
+      timestamps.processEnd = std::chrono::steady_clock::now();
+    }
     auto* observer = serverConfigs_.getObserver();
     if (!isOneway()) {
       auto metadata = makeResponseRpcMetadata(

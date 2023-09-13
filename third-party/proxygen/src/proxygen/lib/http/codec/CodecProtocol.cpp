@@ -79,7 +79,7 @@ extern bool isHTTP2CodecProtocol(CodecProtocol protocol) {
 }
 
 extern bool isHQCodecProtocol(CodecProtocol protocol) {
-  return protocol == CodecProtocol::HQ;
+  return protocol == CodecProtocol::HQ || protocol == CodecProtocol::HTTP_3;
 }
 
 extern bool isHTTPBinaryCodecProtocol(CodecProtocol protocol) {

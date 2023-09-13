@@ -192,7 +192,7 @@ class Acceptor : public folly::AsyncServerSocket::AcceptCallback,
   }
 
   /**
-   * Time after drainAllConnections() or acceptStopped() during which
+   * Time after startDrainingAllConnections() or acceptStopped() during which
    * new requests on connections owned by the downstream
    * ConnectionManager will be processed normally.
    */
@@ -253,10 +253,11 @@ class Acceptor : public folly::AsyncServerSocket::AcceptCallback,
       TransportInfo& tinfo) noexcept;
 
   /**
-   * Drains all open connections of their outstanding transactions. When
-   * a connection's transaction count reaches zero, the connection closes.
+   * Starts draining all open connections of their outstanding transactions
+   * asynchronously. When a connection's transaction count reaches zero, the
+   * connection closes.
    */
-  virtual void drainAllConnections();
+  virtual void startDrainingAllConnections();
 
   /**
    * Drain defined percentage of connections.
@@ -539,6 +540,11 @@ class Acceptor : public folly::AsyncServerSocket::AcceptCallback,
   folly::AsyncTransport::UniquePtr transformTransport(
       folly::AsyncTransport::UniquePtr sock);
 
+  void transitionToDrained() {
+    state_ = State::kDone;
+    onConnectionsDrained();
+  }
+
   TLSTicketKeySeeds ticketSecrets_;
   std::shared_ptr<fizz::server::CertManager> fizzCertManager_{nullptr};
 
@@ -546,7 +552,7 @@ class Acceptor : public folly::AsyncServerSocket::AcceptCallback,
   Acceptor(Acceptor const&) = delete;
   Acceptor& operator=(Acceptor const&) = delete;
 
-  void checkDrained();
+  void checkIfDrained();
 
   State state_{State::kInit};
   uint64_t numPendingSSLConns_{0};

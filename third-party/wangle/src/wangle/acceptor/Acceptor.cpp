@@ -249,7 +249,7 @@ void Acceptor::setTLSTicketSecrets(
   }
 }
 
-void Acceptor::drainAllConnections() {
+void Acceptor::startDrainingAllConnections() {
   if (downstreamConnectionManager_) {
     downstreamConnectionManager_->initiateGracefulShutdown(
         gracefulShutdownTimeout_);
@@ -507,7 +507,7 @@ void Acceptor::sslConnectionReady(
   connectionReady(
       std::move(sock), clientAddr, nextProtocol, secureTransportType, tinfo);
   if (state_ == State::kDraining) {
-    checkDrained();
+    checkIfDrained();
   }
 }
 
@@ -515,7 +515,7 @@ void Acceptor::sslConnectionError(const folly::exception_wrapper&) {
   CHECK(numPendingSSLConns_ > 0);
   --numPendingSSLConns_;
   if (state_ == State::kDraining) {
-    checkDrained();
+    checkIfDrained();
   }
 }
 
@@ -531,27 +531,27 @@ void Acceptor::acceptError(const std::exception& ex) noexcept {
 void Acceptor::acceptStopped() noexcept {
   VLOG(3) << "Acceptor " << this << " acceptStopped()";
   // Drain the open client connections
-  drainAllConnections();
+  startDrainingAllConnections();
 
   // If we haven't yet finished draining, begin doing so by marking ourselves
-  // as in the draining state. We must be sure to hit checkDrained() here, as
+  // as in the draining state. We must be sure to hit checkIfDrained() here, as
   // if we're completely idle, we can should consider ourself drained
   // immediately (as there is no outstanding work to complete to cause us to
   // re-evaluate this).
   if (state_ != State::kDone) {
     state_ = State::kDraining;
-    checkDrained();
+    checkIfDrained();
   }
 }
 
 void Acceptor::onEmpty(const ConnectionManager&) {
   VLOG(3) << "Acceptor=" << this << " onEmpty()";
   if (state_ == State::kDraining) {
-    checkDrained();
+    checkIfDrained();
   }
 }
 
-void Acceptor::checkDrained() {
+void Acceptor::checkIfDrained() {
   CHECK(state_ == State::kDraining);
   if (forceShutdownInProgress_ || !downstreamConnectionManager_ ||
       (downstreamConnectionManager_->getNumConnections() != 0) ||
@@ -563,10 +563,7 @@ void Acceptor::checkDrained() {
           << base_;
 
   downstreamConnectionManager_.reset();
-
-  state_ = State::kDone;
-
-  onConnectionsDrained();
+  transitionToDrained();
 }
 
 void Acceptor::drainConnections(double pctToDrain) {
@@ -605,8 +602,7 @@ void Acceptor::dropAllConnections() {
   }
   CHECK(numPendingSSLConns_ == 0);
 
-  state_ = State::kDone;
-  onConnectionsDrained();
+  transitionToDrained();
 }
 
 void Acceptor::dropConnections(double pctToDrop) {

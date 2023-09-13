@@ -153,7 +153,7 @@ void FastCGIServer::stop() {
       // Gracefully drain any incomplete requests. We cannot go offline until
       // they are finished as we own their dispatcher and event base.
       if (m_acceptor) {
-        m_acceptor->drainAllConnections();
+        m_acceptor->startDrainingAllConnections();
       }
 
       std::chrono::seconds s(RuntimeOption::ServerGracefulShutdownWait);

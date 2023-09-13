@@ -59,7 +59,9 @@ namespace thrift {
  * @author: Marcelo Juchem <marcelo@fb.com>
  */
 template <typename TC, typename OutputStream, typename T>
-void pretty_print(
+[[deprecated(
+    "Use facebook::thrift::pretty_print supporting adapters and not requiring old reflection")]] void
+pretty_print(
     OutputStream&& out,
     T&& what,
     std::string indentation = "  ",
@@ -69,7 +71,9 @@ void pretty_print(
   impl::print(indenter, std::forward<T>(what));
 }
 template <typename OutputStream, typename T>
-void pretty_print(
+[[deprecated(
+    "Use facebook::thrift::pretty_print supporting adapters and not requiring old reflection")]] void
+pretty_print(
     OutputStream&& out,
     T&& what,
     std::string indentation = "  ",
@@ -93,13 +97,19 @@ void pretty_print(
  * @author: Marcelo Juchem <marcelo@fb.com>
  */
 template <typename TC, typename... Args>
-std::string pretty_string(Args&&... args) {
+[[deprecated(
+    "Use facebook::thrift::pretty_srting supporting adapters and not requiring old reflection")]] std::
+    string
+    pretty_string(Args&&... args) {
   std::ostringstream out;
   pretty_print<TC>(out, std::forward<Args>(args)...);
   return out.str();
 }
 template <typename... Args>
-std::string pretty_string(Args&&... args) {
+[[deprecated(
+    "Use facebook::thrift::pretty_srting supporting adapters and not requiring old reflection")]] std::
+    string
+    pretty_string(Args&&... args) {
   std::ostringstream out;
   pretty_print(out, std::forward<Args>(args)...);
   return out.str();

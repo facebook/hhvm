@@ -68,12 +68,16 @@ namespace thrift {
  * @author: Marcelo Juchem <marcelo@fb.com>
  */
 template <typename TC, typename T, typename Callback>
-bool debug_equals(
+[[deprecated(
+    "Use facebook::thrift::debug_thrift_data_difference supporting adapters and not requiring old reflection")]] bool
+debug_equals(
     T const& lhs, T const& rhs, Callback&& callback, std::string path = "$") {
   return apache::thrift::detail::debug_equals<TC>(path, lhs, rhs, callback);
 }
 template <typename T, typename Callback>
-bool debug_equals(
+[[deprecated(
+    "Use facebook::thrift::debug_thrift_data_difference supporting adapters and not requiring old reflection")]] bool
+debug_equals(
     T const& lhs, T const& rhs, Callback&& callback, std::string path = "$") {
   using TC = type_class_of_thrift_class_enum_t<T>;
   return apache::thrift::detail::debug_equals<TC>(path, lhs, rhs, callback);

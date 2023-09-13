@@ -22,10 +22,10 @@
 namespace apache::thrift::compiler {
 
 TEST(PackageGeneratorTest, file_path) {
-  std::string path = "/foo/bar/baz.thrift";
+  std::string path = "/foo/Bar123FOO/Baz.thrift";
   EXPECT_EQ(
       codemod::package_name_generator::from_file_path(path),
-      "meta.com/foo/bar/baz");
+      "meta.com/foo/bar123_foo/baz");
   path = "baz.thrift";
   EXPECT_EQ(
       codemod::package_name_generator::from_file_path(path), "meta.com/baz");
@@ -36,8 +36,8 @@ TEST(PackageGeneratorTest, file_path) {
 }
 
 TEST(PackageGeneratorTest, namespace) {
-  codemod::package_name_generator gen("cpp2", "test.foo.bar");
-  EXPECT_EQ(gen.generate("apache.org"), "apache.org/test/foo/bar");
+  codemod::package_name_generator gen("cpp2", "test.BarFOO.BarBazB");
+  EXPECT_EQ(gen.generate("apache.org"), "apache.org/test/bar_foo/bar_baz_b");
 
   codemod::package_name_generator gen_with_domain("cpp2", "facebook.foo.bar");
   EXPECT_EQ(gen_with_domain.generate("apache.org"), "facebook.com/foo/bar");
@@ -60,7 +60,7 @@ TEST(PackageGeneratorTest, common_package) {
   EXPECT_EQ(get_common_pkg(), "");
 
   // Common Package with no domain in common namespaces
-  namespaces["python"] = "foo.bar.baz";
+  namespaces["python"] = "foo.bar.BAZ";
   EXPECT_EQ(get_common_pkg(), "meta.com/foo/bar/baz");
 
   /*

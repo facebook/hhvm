@@ -45,6 +45,12 @@ class package_name_generator {
       std::vector<std::string> path, std::vector<std::string> domain = {})
       : path_(std::move(path)), domain_(std::move(domain)) {}
 
+  explicit package_name_generator(std::string file_path) {
+    std::vector<std::string> identifiers;
+    split(identifiers, file_path, boost::algorithm::is_any_of("/"));
+    create_path_and_domain(std::move(identifiers));
+  }
+
   const std::vector<std::string>& get_path_components() const { return path_; }
 
   std::string generate(
@@ -73,10 +79,10 @@ class package_name_generator {
       slash++;
     }
     if (dot != std::string::npos && slash < dot) {
-      return from_path_and_domain(
-          path.substr(slash, dot - slash), kDefaultDomain);
+      return package_name_generator(path.substr(slash, dot - slash))
+          .generate(kDefaultDomain);
     }
-    return from_path_and_domain(path, kDefaultDomain);
+    return package_name_generator(path).generate(kDefaultDomain);
   }
 
   static std::string from_path_and_domain(
@@ -157,8 +163,37 @@ class package_name_generator {
     return fmt::to_string(fmt::join(path.begin(), path.end(), "/"));
   }
 
+  std::string to_snake_case(std::string input) {
+    // FOObar => _FOO_bar
+    re2::RE2 initials("[A-Z]{2,}");
+
+    re2::RE2::GlobalReplace(&input, initials, "_\\0_");
+
+    // FooBar => _Foo_Bar
+    re2::RE2 pascal_case("[A-Z]([a-z0-9]+|$)");
+    re2::RE2::GlobalReplace(&input, pascal_case, "_\\0");
+
+    // _FOO_bar => FOO_bar
+    if (input.find_first_of('_') == 0) {
+      input = input.substr(1);
+    }
+
+    auto last_idx = input.length() - 1;
+    // Foo_BAR_ => Foo_BAR
+    if (input.find_last_of('_') == last_idx) {
+      input = input.substr(0, last_idx);
+    }
+    // Foo_BAR => foo_bar
+    std::transform(input.begin(), input.end(), input.begin(), ::tolower);
+    return input;
+  }
+
   void create_path_and_domain(std::vector<std::string> identifiers) {
     path_ = identifiers;
+    // Convert all characters to lowercase
+    for (auto& identifier : path_) {
+      identifier = to_snake_case(identifier);
+    }
     // Check if any potential domain name is present
     auto iter =
         std::find_if(path_.begin(), path_.end(), [&](const std::string& str) {

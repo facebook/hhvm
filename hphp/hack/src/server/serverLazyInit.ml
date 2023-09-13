@@ -1107,15 +1107,6 @@ let post_saved_state_initialization
     "Number of files with errors: %d"
     (Relative_path.Set.cardinal old_errors);
 
-  (* Load and parse PACKAGES.toml if it exists at the root. *)
-  let (errors, package_info) = PackageConfig.load_and_parse () in
-  let tcopt =
-    { env.ServerEnv.tcopt with GlobalOptions.tco_package_info = package_info }
-  in
-  let env =
-    ServerEnv.{ env with tcopt; errorl = Errors.merge env.errorl errors }
-  in
-
   (***********************************************************
     INVARIANTS.
     These might help make sense of the rest of the function. *)

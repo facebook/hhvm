@@ -27,7 +27,7 @@ namespace compiler {
 t_function::t_function(
     t_program* program,
     t_type_ref return_type,
-    std::unique_ptr<t_type> sink_or_stream,
+    std::unique_ptr<t_node> sink_or_stream,
     std::string name,
     const t_interaction* interaction)
     : t_named(program, std::move(name)),
@@ -39,6 +39,7 @@ t_function::t_function(
   if (return_type) {
     return_types_.push_back(return_type);
   }
+  assert(!sink_or_stream_ || sink() || stream());
 }
 
 t_function::t_function(

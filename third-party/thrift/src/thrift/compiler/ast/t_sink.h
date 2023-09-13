@@ -17,7 +17,6 @@
 #pragma once
 
 #include <memory>
-#include <string>
 #include <utility>
 
 #include <thrift/compiler/ast/t_throws.h>
@@ -33,7 +32,7 @@ namespace compiler {
  * Exceptions throw during the stream or instead of the final response can also
  * be specified.
  */
-class t_sink : public t_type {
+class t_sink : public t_node {
  public:
   explicit t_sink(t_type_ref elem_type, t_type_ref final_response_type)
       : elem_type_(std::move(elem_type)),
@@ -67,15 +66,6 @@ class t_sink : public t_type {
     first_response_type_ = std::move(first_response);
   }
   const t_type_ref& first_response_type() const { return first_response_type_; }
-
-  std::string get_full_name() const override {
-    std::string result = "sink<" + elem_type_->get_full_name() + ", " +
-        final_response_type_->get_full_name() + ">";
-    if (!first_response_type_.empty()) {
-      result += ", " + first_response_type_->get_full_name();
-    }
-    return result;
-  }
 
  private:
   t_type_ref elem_type_;
@@ -112,8 +102,6 @@ class t_sink : public t_type {
   const t_type* get_final_response_type() const {
     return final_response_type().get_type();
   }
-
-  type get_type_value() const override { return type::t_sink; }
 };
 
 } // namespace compiler

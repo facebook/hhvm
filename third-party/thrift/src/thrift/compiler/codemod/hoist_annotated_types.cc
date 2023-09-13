@@ -146,9 +146,9 @@ class hoist_annotated_types {
       }
     }
 
-    auto fix_by_hand = [&](const t_type& t) {
+    auto fix_by_hand = [&](const t_node& n) {
       // These are annoying to print and zbgs doesn't find any instances.
-      auto range = t.src_range();
+      auto range = n.src_range();
       fm_.add(
           {range.begin.offset(),
            range.end.offset(),

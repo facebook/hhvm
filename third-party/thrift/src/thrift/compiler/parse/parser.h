@@ -68,7 +68,7 @@ struct type_throws_spec {
 struct return_clause {
   identifier name; // An interaction or type name.
   const t_type* type;
-  std::unique_ptr<t_type> sink_or_stream;
+  std::unique_ptr<t_node> sink_or_stream;
 };
 
 enum class sign { plus, minus };

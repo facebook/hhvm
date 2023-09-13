@@ -117,7 +117,6 @@ TEST(TType, TypeName) {
   EXPECT_EQ(t_type::type_name(t_type::type::t_service), "service");
   EXPECT_EQ(t_type::type_name(t_type::type::t_program), "program");
   EXPECT_EQ(t_type::type_name(t_type::type::t_float), "float");
-  EXPECT_EQ(t_type::type_name(t_type::type::t_sink), "sink");
   EXPECT_EQ(t_type::type_name(t_type::type::t_stream), "stream");
   EXPECT_EQ(t_type::type_name(t_type::type::t_binary), "binary");
 }

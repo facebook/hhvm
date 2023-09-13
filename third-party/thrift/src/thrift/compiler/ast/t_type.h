@@ -113,7 +113,6 @@ class t_type : public t_named {
     t_enum = 8,
     t_struct = 12,
     t_service = 13,
-    t_sink = 16,
     t_stream = 17,
     t_program = 14,
   };

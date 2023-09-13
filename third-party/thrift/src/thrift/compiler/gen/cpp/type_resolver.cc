@@ -106,7 +106,7 @@ const std::string& type_resolver::get_return_type(const t_function& fun) {
 
   type_resolve_fn resolve_fn = &type_resolver::get_native_type;
   if (const t_sink* sink = fun.sink()) {
-    return detail::get_or_gen(type_cache_, sink, [=]() {
+    return detail::get_or_gen(sink_cache_, sink, [=]() {
       if (!sink->first_response_type().empty()) {
         return detail::gen_template_type(
             "::apache::thrift::ResponseAndSinkConsumer",

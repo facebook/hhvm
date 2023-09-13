@@ -64,7 +64,7 @@ class t_function final : public t_named {
   t_function(
       t_program* program,
       t_type_ref return_type,
-      std::unique_ptr<t_type> sink_or_stream,
+      std::unique_ptr<t_node> sink_or_stream,
       std::string name,
       const t_interaction* interaction = nullptr);
 
@@ -78,8 +78,8 @@ class t_function final : public t_named {
   }
   bool has_return_type() const { return response_pos_ != -1; }
 
-  t_type* sink_or_stream() { return sink_or_stream_.get(); }
-  const t_type* sink_or_stream() const { return sink_or_stream_.get(); }
+  t_node* sink_or_stream() { return sink_or_stream_.get(); }
+  const t_node* sink_or_stream() const { return sink_or_stream_.get(); }
 
   const t_sink* sink() const {
     return dynamic_cast<const t_sink*>(sink_or_stream_.get());
@@ -127,7 +127,7 @@ class t_function final : public t_named {
 
  private:
   std::vector<t_type_ref> return_types_;
-  std::unique_ptr<t_type> sink_or_stream_;
+  std::unique_ptr<t_node> sink_or_stream_;
   std::unique_ptr<t_paramlist> paramlist_;
   std::unique_ptr<t_throws> exceptions_;
   t_function_qualifier qualifier_{t_function_qualifier::unspecified};

@@ -355,6 +355,9 @@ class py3_mstch_program : public mstch_program {
 
   void visit_types_for_mixin_fields() {
     for (const auto* strct : program_->structs()) {
+      if (is_hidden(*strct)) {
+        continue;
+      }
       for (const auto& m : cpp2::get_mixins_and_members(*strct)) {
         visit_type(m.member->get_type());
       }

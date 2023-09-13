@@ -6,6 +6,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include "common/base/ReserveUtils.h"
 #include <proxygen/lib/http/codec/compress/experimental/simulator/CompressionUtils.h>
 
 #include <proxygen/lib/http/HeaderConstants.h>
@@ -111,7 +112,7 @@ std::vector<compress::Header> prepareMessageForCompression(
         if (code == HTTP_HEADER_COOKIE) {
           vector<folly::StringPiece> cookiePieces;
           folly::split(';', value, cookiePieces);
-          cookies.reserve(cookies.size() + cookiePieces.size());
+          facebook::memory::reserveExtra(cookies, cookiePieces.size());
           for (auto cookie : cookiePieces) {
             cookies.push_back(ltrimWhitespace(cookie).str());
             allHeaders.emplace_back(code, name, cookies.back());

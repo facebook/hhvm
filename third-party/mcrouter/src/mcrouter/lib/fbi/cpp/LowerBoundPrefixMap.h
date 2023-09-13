@@ -216,10 +216,11 @@ class LowerBoundPrefixMap {
   using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
   // construction
-  LowerBoundPrefixMap() = default;
-
   explicit LowerBoundPrefixMap(
       std::vector<std::pair<std::string, T>> prefix2value);
+
+  LowerBoundPrefixMap()
+      : LowerBoundPrefixMap(std::vector<std::pair<std::string, T>>{}) {}
 
   class Builder {
    public:

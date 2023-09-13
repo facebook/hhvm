@@ -133,19 +133,19 @@ final class DictTransformTest extends HackTest {
     expect(Dict\fill_keys($keys, $value))->toEqual($expected);
   }
 
-  public static function provideTestFlatten(): varray<mixed> {
-    return varray[
-      tuple(
-        darray[],
-        dict[],
-      ),
-      tuple(
-        varray[
-          darray[
+  public static function provideTestFlatten(): dict<
+    string,
+    (Traversable<KeyedContainer<arraykey, mixed>>, dict<arraykey, mixed>),
+  > {
+    return dict[
+      'all empty' => tuple(dict[], dict[]),
+      'flatten multiple' => tuple(
+        vec[
+          dict[
             'one' => 'one',
             'two' => 'two',
           ],
-          darray[
+          dict[
             'three' => 'three',
             'one' => 3,
           ],
@@ -160,18 +160,35 @@ final class DictTransformTest extends HackTest {
           'four' => null,
         ],
       ),
-      tuple(
-        varray[
-          HackLibTestTraversables::getKeyedIterator(darray[
+      'flatten multiple (first empty)' => tuple(
+        vec[
+          dict[],
+          dict[
+            'three' => 'three',
+            'one' => 3,
+          ],
+          Map {
+            'four' => null,
+          },
+        ],
+        dict[
+          'three' => 'three',
+          'one' => 3,
+          'four' => null,
+        ],
+      ),
+      'various KeyedContainer types' => tuple(
+        vec[
+          dict[
             'foo' => 'foo',
             'bar' => 'bar',
-            'baz' => varray[1, 2, 3],
-          ]),
+            'baz' => vec[1, 2, 3],
+          ],
           dict[
             'bar' => 'barbar',
           ],
           Vector {'I should feel bad for doing this', 'But yolo'},
-          darray[
+          dict[
             1 => 'gross array behavior',
           ],
           Set {'bloop'},
@@ -179,19 +196,19 @@ final class DictTransformTest extends HackTest {
         dict[
           'foo' => 'foo',
           'bar' => 'barbar',
-          'baz' => varray[1, 2, 3],
+          'baz' => vec[1, 2, 3],
           0 => 'I should feel bad for doing this',
           1 => 'gross array behavior',
           'bloop' => 'bloop',
         ],
       ),
-      tuple(
-        HackLibTestTraversables::getIterator(varray[
+      'various KeyedContainer types #2' => tuple(
+        vec[
           vec['zero'],
-          darray[1 => 'one'],
+          dict[1 => 'one'],
           dict[2 => 'two'],
           Map {3 => 'three'},
-        ]),
+        ],
         dict[
           0 => 'zero',
           1 => 'one',
@@ -203,9 +220,9 @@ final class DictTransformTest extends HackTest {
   }
 
   <<DataProvider('provideTestFlatten')>>
-  public function testFlatten<Tk as arraykey, Tv>(
-    Traversable<KeyedContainer<Tk, Tv>> $traversables,
-    dict<Tk, Tv> $expected,
+  public function testFlatten(
+    Traversable<KeyedContainer<arraykey, mixed>> $traversables,
+    dict<arraykey, mixed> $expected,
   ): void {
     expect(Dict\flatten($traversables))->toEqual($expected);
   }

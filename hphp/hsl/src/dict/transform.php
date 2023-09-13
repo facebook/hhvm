@@ -75,12 +75,16 @@ function count_values<Tv as arraykey>(
  */
 <<__NoAutoLikes>>
 function flatten<Tk as arraykey, Tv>(
-  Traversable<KeyedContainer<Tk, Tv>> $traversables,
+  Traversable<KeyedContainer<Tk, Tv>> $keyed_containers,
 )[]: dict<Tk, Tv> {
   $result = dict[];
-  foreach ($traversables as $traversable) {
-    foreach ($traversable as $key => $value) {
-      $result[$key] = $value;
+  foreach ($keyed_containers as $keyed_container) {
+    if (!$result) {
+      $result = dict($keyed_container);
+    } else {
+      foreach ($keyed_container as $key => $value) {
+        $result[$key] = $value;
+      }
     }
   }
   return $result;

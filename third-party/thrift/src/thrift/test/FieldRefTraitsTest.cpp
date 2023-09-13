@@ -37,6 +37,8 @@ using InternBox = std::remove_reference_t<decltype(
     cpp2::StructuredAnnotation{}.intern_box_field())>;
 using TerseInternBox = std::remove_reference_t<decltype(
     terse_write::CppRefTerseStruct{}.intern_boxed_field())>;
+using Terse =
+    std::remove_reference_t<decltype(terse_write::MyStruct{}.field1())>;
 
 static_assert(is_field_ref_v<Unqualified>);
 static_assert(!is_field_ref_v<Optional>);
@@ -47,6 +49,7 @@ static_assert(!is_field_ref_v<Unique>);
 static_assert(!is_field_ref_v<Shared>);
 static_assert(!is_field_ref_v<InternBox>);
 static_assert(!is_field_ref_v<TerseInternBox>);
+static_assert(!is_field_ref_v<Terse>);
 
 static_assert(!is_optional_field_ref_v<Unqualified>);
 static_assert(is_optional_field_ref_v<Optional>);
@@ -57,6 +60,7 @@ static_assert(!is_optional_field_ref_v<Unique>);
 static_assert(!is_optional_field_ref_v<Shared>);
 static_assert(!is_optional_field_ref_v<InternBox>);
 static_assert(!is_optional_field_ref_v<TerseInternBox>);
+static_assert(!is_optional_field_ref_v<Terse>);
 
 static_assert(!is_required_field_ref_v<Unqualified>);
 static_assert(!is_required_field_ref_v<Optional>);
@@ -67,6 +71,7 @@ static_assert(!is_required_field_ref_v<Unique>);
 static_assert(!is_required_field_ref_v<Shared>);
 static_assert(!is_required_field_ref_v<InternBox>);
 static_assert(!is_required_field_ref_v<TerseInternBox>);
+static_assert(!is_required_field_ref_v<Terse>);
 
 static_assert(!is_optional_boxed_field_ref_v<Unqualified>);
 static_assert(!is_optional_boxed_field_ref_v<Optional>);
@@ -77,6 +82,7 @@ static_assert(!is_optional_boxed_field_ref_v<Unique>);
 static_assert(!is_optional_boxed_field_ref_v<Shared>);
 static_assert(!is_optional_boxed_field_ref_v<InternBox>);
 static_assert(!is_optional_boxed_field_ref_v<TerseInternBox>);
+static_assert(!is_optional_boxed_field_ref_v<Terse>);
 
 static_assert(!is_union_field_ref_v<Unqualified>);
 static_assert(!is_union_field_ref_v<Optional>);
@@ -87,6 +93,7 @@ static_assert(!is_union_field_ref_v<Unique>);
 static_assert(!is_union_field_ref_v<Shared>);
 static_assert(!is_union_field_ref_v<InternBox>);
 static_assert(!is_union_field_ref_v<TerseInternBox>);
+static_assert(!is_union_field_ref_v<Terse>);
 
 static_assert(!is_intern_boxed_field_ref_v<Unqualified>);
 static_assert(!is_intern_boxed_field_ref_v<Optional>);
@@ -97,6 +104,7 @@ static_assert(!is_intern_boxed_field_ref_v<Unique>);
 static_assert(!is_intern_boxed_field_ref_v<Shared>);
 static_assert(is_intern_boxed_field_ref_v<InternBox>);
 static_assert(!is_intern_boxed_field_ref_v<TerseInternBox>);
+static_assert(!is_intern_boxed_field_ref_v<Terse>);
 
 static_assert(!is_terse_intern_boxed_field_ref_v<Unqualified>);
 static_assert(!is_terse_intern_boxed_field_ref_v<Optional>);
@@ -107,6 +115,18 @@ static_assert(!is_terse_intern_boxed_field_ref_v<Unique>);
 static_assert(!is_terse_intern_boxed_field_ref_v<Shared>);
 static_assert(!is_terse_intern_boxed_field_ref_v<InternBox>);
 static_assert(is_terse_intern_boxed_field_ref_v<TerseInternBox>);
+static_assert(!is_terse_intern_boxed_field_ref_v<Terse>);
+
+static_assert(!is_terse_field_ref_v<Unqualified>);
+static_assert(!is_terse_field_ref_v<Optional>);
+static_assert(!is_terse_field_ref_v<Required>);
+static_assert(!is_terse_field_ref_v<Box>);
+static_assert(!is_terse_field_ref_v<Union>);
+static_assert(!is_terse_field_ref_v<Unique>);
+static_assert(!is_terse_field_ref_v<Shared>);
+static_assert(!is_terse_field_ref_v<InternBox>);
+static_assert(!is_terse_field_ref_v<TerseInternBox>);
+static_assert(is_terse_field_ref_v<Terse>);
 
 static_assert(!is_unique_ptr_v<Unqualified>);
 static_assert(!is_unique_ptr_v<Optional>);
@@ -117,6 +137,7 @@ static_assert(is_unique_ptr_v<Unique>);
 static_assert(!is_unique_ptr_v<Shared>);
 static_assert(!is_unique_ptr_v<InternBox>);
 static_assert(!is_unique_ptr_v<TerseInternBox>);
+static_assert(!is_unique_ptr_v<Terse>);
 
 static_assert(!is_shared_ptr_v<Unqualified>);
 static_assert(!is_shared_ptr_v<Optional>);
@@ -127,6 +148,7 @@ static_assert(!is_shared_ptr_v<Unique>);
 static_assert(is_shared_ptr_v<Shared>);
 static_assert(!is_shared_ptr_v<InternBox>);
 static_assert(!is_shared_ptr_v<TerseInternBox>);
+static_assert(!is_shared_ptr_v<Terse>);
 
 static_assert(!is_shared_or_unique_ptr_v<Unqualified>);
 static_assert(!is_shared_or_unique_ptr_v<Optional>);
@@ -137,6 +159,7 @@ static_assert(is_shared_or_unique_ptr_v<Unique>);
 static_assert(is_shared_or_unique_ptr_v<Shared>);
 static_assert(!is_shared_or_unique_ptr_v<InternBox>);
 static_assert(!is_shared_or_unique_ptr_v<TerseInternBox>);
+static_assert(!is_shared_or_unique_ptr_v<Terse>);
 
 } // namespace
 } // namespace apache::thrift::test::testset

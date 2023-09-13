@@ -35,6 +35,8 @@ template <class T>
 class intern_boxed_field_ref;
 template <class T>
 class terse_intern_boxed_field_ref;
+template <class T>
+class terse_field_ref;
 
 namespace detail {
 template <class T>
@@ -71,6 +73,11 @@ FOLLY_INLINE_VARIABLE constexpr bool is_terse_intern_boxed_field_ref_v = false;
 template <class T>
 FOLLY_INLINE_VARIABLE constexpr bool
     is_terse_intern_boxed_field_ref_v<terse_intern_boxed_field_ref<T>> = true;
+template <class T>
+FOLLY_INLINE_VARIABLE constexpr bool is_terse_field_ref_v = false;
+template <class T>
+FOLLY_INLINE_VARIABLE constexpr bool is_terse_field_ref_v<terse_field_ref<T>> =
+    true;
 template <class T>
 FOLLY_INLINE_VARIABLE constexpr bool is_unique_ptr_v = false;
 template <class T, class D>

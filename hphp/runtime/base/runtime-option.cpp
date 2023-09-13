@@ -2993,6 +2993,7 @@ ServiceData::CounterCallback s_build_info([](ServiceData::CounterMap& counters) 
   counters.emplace("admin.build.rev", folly::to<int64_t>(pieces.at(2)));
 
   std::tm t{};
+  t.tm_isdst = -1;
   std::istringstream ss{std::move(pieces.at(3))};
   ss >> std::get_time(&t, "%Y%m%d%H%M%S");
   if (!ss.fail()) {

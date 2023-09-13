@@ -198,5 +198,10 @@ TEST(LowerBoundPrefixMapTest, OverrideValues) {
   }
 }
 
+TEST(LowerBoundPrefixMapTest, EmptyMap) {
+  LowerBoundPrefixMap<int> lbMap;
+  ASSERT_EQ(lbMap.findPrefix("a"), lbMap.end());
+}
+
 } // namespace
 } // namespace facebook::memcache

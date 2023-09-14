@@ -296,7 +296,6 @@ fn print_expr(
         ctx: &Context<'_>,
         w: &mut dyn Write,
         env: &ExprEnv<'_, '_>,
-        is_array_get: bool,
         e_: &ast::Expr_,
     ) -> Result<Option<()>> {
         match e_.as_class_const() {
@@ -306,11 +305,7 @@ fn print_expr(
             )) if is_class(s2) && !(is_self(&id.1) || is_parent(&id.1) || is_static(&id.1)) => {
                 Ok(Some({
                     let s1 = get_class_name_from_id(ctx, env.codegen_env, false, false, &id.1);
-                    if is_array_get {
-                        print_expr_id(w, env, s1.as_ref())?
-                    } else {
-                        print_expr_string(w, s1.as_bytes())?
-                    }
+                    print_expr_string(w, s1.as_bytes())?
                 }))
             }
             _ => Ok(None),
@@ -501,7 +496,7 @@ fn print_expr(
         }
         Expr_::ClassConst(cc) => {
             if let Some(e1) = (cc.0).2.as_ciexpr() {
-                handle_possible_colon_colon_class_expr(ctx, w, env, false, expr)?.map_or_else(
+                handle_possible_colon_colon_class_expr(ctx, w, env, expr)?.map_or_else(
                     || {
                         let s2 = &(cc.1).1;
                         match e1.2.as_id() {
@@ -552,11 +547,7 @@ fn print_expr(
         Expr_::ArrayGet(ag) => {
             print_expr(ctx, w, env, &ag.0)?;
             write::square(w, |w| {
-                write::option(w, &ag.1, |w, e: &ast::Expr| {
-                    handle_possible_colon_colon_class_expr(ctx, w, env, true, &e.2)
-                        .transpose()
-                        .unwrap_or_else(|| print_expr(ctx, w, env, e))
-                })
+                write::option(w, &ag.1, |w, e: &ast::Expr| print_expr(ctx, w, env, e))
             })
         }
         Expr_::String2(ss) => write::concat_by(w, " . ", ss, |w, s| print_expr(ctx, w, env, s)),

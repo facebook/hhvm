@@ -2878,6 +2878,12 @@ size_t HQSession::HQStreamTransportBase::sendAbortImpl(HTTP3::ErrorCode code,
   if (hasStreamId()) {
     session_.abortStream(getStreamDirection(), getStreamId(), code);
   }
+  // Like abortIngress, but not safe to clear readBuf_, because we may be
+  // parsing it.  If we are, then abortIngress will be called at the end of
+  // processReadData.  If not, then the STOP_SENDING we emit will trigger a peer
+  // RST_STREAM (eventually), which will clear the readBuf_.
+  ingressError_ = true;
+  codecFilterChain->setParserPaused(true);
 
   if (hasEgressStreamId()) {
     abortEgress(true);

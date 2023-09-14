@@ -16,14 +16,20 @@ import folly.iobuf as _fbthrift_iobuf
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
+class _fbthrift_compatible_with_EmptyEnum:
+    pass
 
-class EmptyEnum(_fbthrift_python_types.Enum, int):
+
+class EmptyEnum(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_EmptyEnum):
     def _to_python(self) -> EmptyEnum: ...
     def _to_py3(self) -> "module.types.EmptyEnum": ...  # type: ignore
     def _to_py_deprecated(self) -> int: ...
 
+class _fbthrift_compatible_with_City:
+    pass
 
-class City(_fbthrift_python_types.Enum, int):
+
+class City(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_City):
     NYC: City = ...
     MPK: City = ...
     SEA: City = ...
@@ -32,8 +38,11 @@ class City(_fbthrift_python_types.Enum, int):
     def _to_py3(self) -> "module.types.City": ...  # type: ignore
     def _to_py_deprecated(self) -> int: ...
 
+class _fbthrift_compatible_with_Company:
+    pass
 
-class Company(_fbthrift_python_types.Enum, int):
+
+class Company(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_Company):
     FACEBOOK: Company = ...
     WHATSAPP: Company = ...
     OCULUS: Company = ...
@@ -43,7 +52,11 @@ class Company(_fbthrift_python_types.Enum, int):
     def _to_py_deprecated(self) -> int: ...
 
 
-class Internship(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_Internship:
+    pass
+
+
+class Internship(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Internship):
     weeks: _typing.Final[int] = ...
     title: _typing.Final[str] = ...
     employer: _typing.Final[_typing.Optional[Company]] = ...
@@ -53,7 +66,7 @@ class Internship(_fbthrift_python_types.Struct):
         self, *,
         weeks: _typing.Optional[int]=...,
         title: _typing.Optional[str]=...,
-        employer: _typing.Optional[Company]=...,
+        employer: _typing.Optional[_fbthrift_compatible_with_Company]=...,
         compensation: _typing.Optional[float]=...,
         school: _typing.Optional[str]=...
     ) -> None: ...
@@ -62,7 +75,7 @@ class Internship(_fbthrift_python_types.Struct):
         self, *,
         weeks: _typing.Optional[int]=...,
         title: _typing.Optional[str]=...,
-        employer: _typing.Optional[Company]=...,
+        employer: _typing.Optional[_fbthrift_compatible_with_Company]=...,
         compensation: _typing.Optional[float]=...,
         school: _typing.Optional[str]=...
     ) -> _typing.Self: ...
@@ -72,7 +85,11 @@ class Internship(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.Internship": ...  # type: ignore
 
 
-class Range(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_Range:
+    pass
+
+
+class Range(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Range):
     min: _typing.Final[int] = ...
     max: _typing.Final[int] = ...
     def __init__(
@@ -92,7 +109,11 @@ class Range(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.Range": ...  # type: ignore
 
 
-class struct1(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_struct1:
+    pass
+
+
+class struct1(_fbthrift_python_types.Struct, _fbthrift_compatible_with_struct1):
     a: _typing.Final[int] = ...
     b: _typing.Final[str] = ...
     def __init__(
@@ -112,7 +133,11 @@ class struct1(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.struct1": ...  # type: ignore
 
 
-class struct2(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_struct2:
+    pass
+
+
+class struct2(_fbthrift_python_types.Struct, _fbthrift_compatible_with_struct2):
     a: _typing.Final[int] = ...
     b: _typing.Final[str] = ...
     c: _typing.Final[struct1] = ...
@@ -121,7 +146,7 @@ class struct2(_fbthrift_python_types.Struct):
         self, *,
         a: _typing.Optional[int]=...,
         b: _typing.Optional[str]=...,
-        c: _typing.Optional[struct1]=...,
+        c: _typing.Optional[_fbthrift_compatible_with_struct1]=...,
         d: _typing.Optional[_typing.Sequence[int]]=...
     ) -> None: ...
 
@@ -129,7 +154,7 @@ class struct2(_fbthrift_python_types.Struct):
         self, *,
         a: _typing.Optional[int]=...,
         b: _typing.Optional[str]=...,
-        c: _typing.Optional[struct1]=...,
+        c: _typing.Optional[_fbthrift_compatible_with_struct1]=...,
         d: _typing.Optional[_typing.Sequence[int]]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, struct1, _typing.Sequence[int]]]]: ...
@@ -138,7 +163,11 @@ class struct2(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.struct2": ...  # type: ignore
 
 
-class struct3(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_struct3:
+    pass
+
+
+class struct3(_fbthrift_python_types.Struct, _fbthrift_compatible_with_struct3):
     a: _typing.Final[str] = ...
     b: _typing.Final[int] = ...
     c: _typing.Final[struct2] = ...
@@ -146,14 +175,14 @@ class struct3(_fbthrift_python_types.Struct):
         self, *,
         a: _typing.Optional[str]=...,
         b: _typing.Optional[int]=...,
-        c: _typing.Optional[struct2]=...
+        c: _typing.Optional[_fbthrift_compatible_with_struct2]=...
     ) -> None: ...
 
     def __call__(
         self, *,
         a: _typing.Optional[str]=...,
         b: _typing.Optional[int]=...,
-        c: _typing.Optional[struct2]=...
+        c: _typing.Optional[_fbthrift_compatible_with_struct2]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, int, struct2]]]: ...
     def _to_python(self) -> _typing.Self: ...
@@ -161,7 +190,11 @@ class struct3(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.struct3": ...  # type: ignore
 
 
-class struct4(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_struct4:
+    pass
+
+
+class struct4(_fbthrift_python_types.Struct, _fbthrift_compatible_with_struct4):
     a: _typing.Final[int] = ...
     b: _typing.Final[_typing.Optional[float]] = ...
     c: _typing.Final[_typing.Optional[int]] = ...
@@ -184,7 +217,11 @@ class struct4(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.struct4": ...  # type: ignore
 
 
-class union1(_fbthrift_python_types.Union):
+class _fbthrift_compatible_with_union1:
+    pass
+
+
+class union1(_fbthrift_python_types.Union, _fbthrift_compatible_with_union1):
     i: _typing.Final[int] = ...
     d: _typing.Final[float] = ...
     def __init__(
@@ -209,7 +246,11 @@ class union1(_fbthrift_python_types.Union):
     def _to_py_deprecated(self) -> "module.ttypes.union1": ...  # type: ignore
 
 
-class union2(_fbthrift_python_types.Union):
+class _fbthrift_compatible_with_union2:
+    pass
+
+
+class union2(_fbthrift_python_types.Union, _fbthrift_compatible_with_union2):
     i: _typing.Final[int] = ...
     d: _typing.Final[float] = ...
     s: _typing.Final[struct1] = ...
@@ -218,8 +259,8 @@ class union2(_fbthrift_python_types.Union):
         self, *,
         i: _typing.Optional[int]=...,
         d: _typing.Optional[float]=...,
-        s: _typing.Optional[struct1]=...,
-        u: _typing.Optional[union1]=...
+        s: _typing.Optional[_fbthrift_compatible_with_struct1]=...,
+        u: _typing.Optional[_fbthrift_compatible_with_union1]=...
     ) -> None: ...
 
 

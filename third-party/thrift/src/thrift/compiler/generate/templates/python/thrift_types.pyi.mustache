@@ -39,10 +39,14 @@ import {{module_path}}
 {{/program:adapter_type_hint_modules}}
 {{#program:enums}}
 
+class _fbthrift_compatible_with_{{enum:name}}:
+    pass
+
 
 class {{enum:name}}(_fbthrift_python_types.{{!
         }}{{#enum:flags?}}Flag{{/enum:flags?}}{{!
-        }}{{^enum:flags?}}Enum, int{{/enum:flags?}}):
+        }}{{^enum:flags?}}Enum, int{{/enum:flags?}}{{!
+        }}, _fbthrift_compatible_with_{{enum:name}}):
     {{#enum:values}}
     {{enum_value:py_name}}: {{enum:name}} = ...
     {{/enum:values}}
@@ -55,12 +59,17 @@ class {{enum:name}}(_fbthrift_python_types.{{!
 {{#program:structs}}
 
 
+class _fbthrift_compatible_with_{{> structs/unadapted_name}}:
+    pass
+
+
 class {{> structs/unadapted_name}}({{!
         }}{{#struct:union?}}_fbthrift_python_types.Union{{/struct:union?}}{{!
         }}{{^struct:union?}}{{!
         }}{{#struct:exception?}}_fbthrift_python_exceptions.GeneratedError{{/struct:exception?}}{{!
         }}{{^struct:exception?}}_fbthrift_python_types.Struct{{/struct:exception?}}{{!
         }}{{/struct:union?}}{{!
+        }}, _fbthrift_compatible_with_{{> structs/unadapted_name}}{{!
         }}):
     {{#struct:fields_ordered_by_id}}
     {{field:py_name}}: _typing.Final[{{#field:optional?}}_typing.Optional[{{/field:optional?}}{{!
@@ -69,13 +78,13 @@ class {{> structs/unadapted_name}}({{!
     {{/struct:fields_ordered_by_id}}
     def __init__(
         self,{{#struct:fields?}} *{{/struct:fields?}}{{#struct:fields_ordered_by_id}},
-        {{field:py_name}}: _typing.Optional[{{> fields/adapted_type}}]=...{{/struct:fields_ordered_by_id}}
+        {{field:py_name}}: _typing.Optional[{{> fields/compatible_adapted_type}}]=...{{/struct:fields_ordered_by_id}}
     ) -> None: ...
 
     {{#struct:plain?}}
     def __call__(
         self,{{#struct:fields?}} *{{/struct:fields?}}{{#struct:fields_ordered_by_id}},
-        {{field:py_name}}: _typing.Optional[{{> fields/adapted_type}}]=...{{/struct:fields_ordered_by_id}}
+        {{field:py_name}}: _typing.Optional[{{> fields/compatible_adapted_type}}]=...{{/struct:fields_ordered_by_id}}
     ) -> _typing.Self: ...
     {{/struct:plain?}}
     {{#struct:union?}}

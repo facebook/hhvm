@@ -15,7 +15,11 @@ import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
-class Fields(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_Fields:
+    pass
+
+
+class Fields(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Fields):
     injected_field: _typing.Final[str] = ...
     injected_structured_annotation_field: _typing.Final[_typing.Optional[str]] = ...
     injected_unstructured_annotation_field: _typing.Final[_typing.Optional[str]] = ...

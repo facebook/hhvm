@@ -15,7 +15,11 @@ import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
-class Mixin1(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_Mixin1:
+    pass
+
+
+class Mixin1(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Mixin1):
     field1: _typing.Final[str] = ...
     def __init__(
         self, *,
@@ -32,18 +36,22 @@ class Mixin1(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.Mixin1": ...  # type: ignore
 
 
-class Mixin2(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_Mixin2:
+    pass
+
+
+class Mixin2(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Mixin2):
     m1: _typing.Final[Mixin1] = ...
     field2: _typing.Final[_typing.Optional[str]] = ...
     def __init__(
         self, *,
-        m1: _typing.Optional[Mixin1]=...,
+        m1: _typing.Optional[_fbthrift_compatible_with_Mixin1]=...,
         field2: _typing.Optional[str]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        m1: _typing.Optional[Mixin1]=...,
+        m1: _typing.Optional[_fbthrift_compatible_with_Mixin1]=...,
         field2: _typing.Optional[str]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[Mixin1, str]]]: ...
@@ -52,7 +60,11 @@ class Mixin2(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.Mixin2": ...  # type: ignore
 
 
-class Mixin3Base(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_Mixin3Base:
+    pass
+
+
+class Mixin3Base(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Mixin3Base):
     field3: _typing.Final[str] = ...
     def __init__(
         self, *,
@@ -69,22 +81,26 @@ class Mixin3Base(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.Mixin3Base": ...  # type: ignore
 
 
-class Foo(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_Foo:
+    pass
+
+
+class Foo(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Foo):
     field4: _typing.Final[str] = ...
     m2: _typing.Final[Mixin2] = ...
     m3: _typing.Final[Mixin3Base] = ...
     def __init__(
         self, *,
         field4: _typing.Optional[str]=...,
-        m2: _typing.Optional[Mixin2]=...,
-        m3: _typing.Optional[Mixin3Base]=...
+        m2: _typing.Optional[_fbthrift_compatible_with_Mixin2]=...,
+        m3: _typing.Optional[_fbthrift_compatible_with_Mixin3Base]=...
     ) -> None: ...
 
     def __call__(
         self, *,
         field4: _typing.Optional[str]=...,
-        m2: _typing.Optional[Mixin2]=...,
-        m3: _typing.Optional[Mixin3Base]=...
+        m2: _typing.Optional[_fbthrift_compatible_with_Mixin2]=...,
+        m3: _typing.Optional[_fbthrift_compatible_with_Mixin3Base]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, Mixin2, Mixin3Base]]]: ...
     def _to_python(self) -> _typing.Self: ...

@@ -15,7 +15,11 @@ import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
-class Fiery(_fbthrift_python_exceptions.GeneratedError):
+class _fbthrift_compatible_with_Fiery:
+    pass
+
+
+class Fiery(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_Fiery):
     message: _typing.Final[str] = ...
     def __init__(
         self, *,
@@ -28,7 +32,11 @@ class Fiery(_fbthrift_python_exceptions.GeneratedError):
     def _to_py_deprecated(self) -> "module.ttypes.Fiery": ...  # type: ignore
 
 
-class Serious(_fbthrift_python_exceptions.GeneratedError):
+class _fbthrift_compatible_with_Serious:
+    pass
+
+
+class Serious(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_Serious):
     sonnet: _typing.Final[_typing.Optional[str]] = ...
     def __init__(
         self, *,
@@ -41,7 +49,11 @@ class Serious(_fbthrift_python_exceptions.GeneratedError):
     def _to_py_deprecated(self) -> "module.ttypes.Serious": ...  # type: ignore
 
 
-class ComplexFieldNames(_fbthrift_python_exceptions.GeneratedError):
+class _fbthrift_compatible_with_ComplexFieldNames:
+    pass
+
+
+class ComplexFieldNames(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_ComplexFieldNames):
     error_message: _typing.Final[str] = ...
     internal_error_message: _typing.Final[str] = ...
     def __init__(
@@ -56,7 +68,11 @@ class ComplexFieldNames(_fbthrift_python_exceptions.GeneratedError):
     def _to_py_deprecated(self) -> "module.ttypes.ComplexFieldNames": ...  # type: ignore
 
 
-class CustomFieldNames(_fbthrift_python_exceptions.GeneratedError):
+class _fbthrift_compatible_with_CustomFieldNames:
+    pass
+
+
+class CustomFieldNames(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_CustomFieldNames):
     error_message: _typing.Final[str] = ...
     internal_error_message: _typing.Final[str] = ...
     def __init__(
@@ -71,7 +87,11 @@ class CustomFieldNames(_fbthrift_python_exceptions.GeneratedError):
     def _to_py_deprecated(self) -> "module.ttypes.CustomFieldNames": ...  # type: ignore
 
 
-class ExceptionWithPrimitiveField(_fbthrift_python_exceptions.GeneratedError):
+class _fbthrift_compatible_with_ExceptionWithPrimitiveField:
+    pass
+
+
+class ExceptionWithPrimitiveField(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_ExceptionWithPrimitiveField):
     message: _typing.Final[str] = ...
     error_code: _typing.Final[int] = ...
     def __init__(
@@ -86,7 +106,11 @@ class ExceptionWithPrimitiveField(_fbthrift_python_exceptions.GeneratedError):
     def _to_py_deprecated(self) -> "module.ttypes.ExceptionWithPrimitiveField": ...  # type: ignore
 
 
-class ExceptionWithStructuredAnnotation(_fbthrift_python_exceptions.GeneratedError):
+class _fbthrift_compatible_with_ExceptionWithStructuredAnnotation:
+    pass
+
+
+class ExceptionWithStructuredAnnotation(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_ExceptionWithStructuredAnnotation):
     message_field: _typing.Final[str] = ...
     error_code: _typing.Final[int] = ...
     def __init__(
@@ -101,7 +125,11 @@ class ExceptionWithStructuredAnnotation(_fbthrift_python_exceptions.GeneratedErr
     def _to_py_deprecated(self) -> "module.ttypes.ExceptionWithStructuredAnnotation": ...  # type: ignore
 
 
-class Banal(_fbthrift_python_exceptions.GeneratedError):
+class _fbthrift_compatible_with_Banal:
+    pass
+
+
+class Banal(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_Banal):
     def __init__(
         self,
     ) -> None: ...

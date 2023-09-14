@@ -16,16 +16,22 @@ import folly.iobuf as _fbthrift_iobuf
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
+class _fbthrift_compatible_with_MyEnum:
+    pass
 
-class MyEnum(_fbthrift_python_types.Enum, int):
+
+class MyEnum(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_MyEnum):
     MyValue1: MyEnum = ...
     MyValue2: MyEnum = ...
     def _to_python(self) -> MyEnum: ...
     def _to_py3(self) -> "test.fixtures.basic.module.types.MyEnum": ...  # type: ignore
     def _to_py_deprecated(self) -> int: ...
 
+class _fbthrift_compatible_with_HackEnum:
+    pass
 
-class HackEnum(_fbthrift_python_types.Enum, int):
+
+class HackEnum(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_HackEnum):
     Value1: HackEnum = ...
     Value2: HackEnum = ...
     def _to_python(self) -> HackEnum: ...
@@ -33,7 +39,11 @@ class HackEnum(_fbthrift_python_types.Enum, int):
     def _to_py_deprecated(self) -> int: ...
 
 
-class MyStruct(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_MyStruct:
+    pass
+
+
+class MyStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStruct):
     MyIntField: _typing.Final[int] = ...
     MyStringField: _typing.Final[str] = ...
     MyDataField: _typing.Final[MyDataItem] = ...
@@ -47,8 +57,8 @@ class MyStruct(_fbthrift_python_types.Struct):
         self, *,
         MyIntField: _typing.Optional[int]=...,
         MyStringField: _typing.Optional[str]=...,
-        MyDataField: _typing.Optional[MyDataItem]=...,
-        myEnum: _typing.Optional[MyEnum]=...,
+        MyDataField: _typing.Optional[_fbthrift_compatible_with_MyDataItem]=...,
+        myEnum: _typing.Optional[_fbthrift_compatible_with_MyEnum]=...,
         oneway: _typing.Optional[bool]=...,
         readonly: _typing.Optional[bool]=...,
         idempotent: _typing.Optional[bool]=...,
@@ -60,8 +70,8 @@ class MyStruct(_fbthrift_python_types.Struct):
         self, *,
         MyIntField: _typing.Optional[int]=...,
         MyStringField: _typing.Optional[str]=...,
-        MyDataField: _typing.Optional[MyDataItem]=...,
-        myEnum: _typing.Optional[MyEnum]=...,
+        MyDataField: _typing.Optional[_fbthrift_compatible_with_MyDataItem]=...,
+        myEnum: _typing.Optional[_fbthrift_compatible_with_MyEnum]=...,
         oneway: _typing.Optional[bool]=...,
         readonly: _typing.Optional[bool]=...,
         idempotent: _typing.Optional[bool]=...,
@@ -74,7 +84,11 @@ class MyStruct(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.MyStruct": ...  # type: ignore
 
 
-class MyDataItem(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_MyDataItem:
+    pass
+
+
+class MyDataItem(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyDataItem):
     def __init__(
         self,
     ) -> None: ...
@@ -88,16 +102,20 @@ class MyDataItem(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.MyDataItem": ...  # type: ignore
 
 
-class MyUnion(_fbthrift_python_types.Union):
+class _fbthrift_compatible_with_MyUnion:
+    pass
+
+
+class MyUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_MyUnion):
     myEnum: _typing.Final[MyEnum] = ...
     myStruct: _typing.Final[MyStruct] = ...
     myDataItem: _typing.Final[MyDataItem] = ...
     floatSet: _typing.Final[_typing.AbstractSet[float]] = ...
     def __init__(
         self, *,
-        myEnum: _typing.Optional[MyEnum]=...,
-        myStruct: _typing.Optional[MyStruct]=...,
-        myDataItem: _typing.Optional[MyDataItem]=...,
+        myEnum: _typing.Optional[_fbthrift_compatible_with_MyEnum]=...,
+        myStruct: _typing.Optional[_fbthrift_compatible_with_MyStruct]=...,
+        myDataItem: _typing.Optional[_fbthrift_compatible_with_MyDataItem]=...,
         floatSet: _typing.Optional[_typing.AbstractSet[float]]=...
     ) -> None: ...
 
@@ -119,7 +137,11 @@ class MyUnion(_fbthrift_python_types.Union):
     def _to_py_deprecated(self) -> "module.ttypes.MyUnion": ...  # type: ignore
 
 
-class ReservedKeyword(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_ReservedKeyword:
+    pass
+
+
+class ReservedKeyword(_fbthrift_python_types.Struct, _fbthrift_compatible_with_ReservedKeyword):
     reserved_field: _typing.Final[int] = ...
     def __init__(
         self, *,
@@ -136,7 +158,11 @@ class ReservedKeyword(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.ReservedKeyword": ...  # type: ignore
 
 
-class UnionToBeRenamed(_fbthrift_python_types.Union):
+class _fbthrift_compatible_with_UnionToBeRenamed:
+    pass
+
+
+class UnionToBeRenamed(_fbthrift_python_types.Union, _fbthrift_compatible_with_UnionToBeRenamed):
     reserved_field: _typing.Final[int] = ...
     def __init__(
         self, *,

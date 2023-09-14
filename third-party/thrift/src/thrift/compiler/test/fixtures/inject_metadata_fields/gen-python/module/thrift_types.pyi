@@ -17,7 +17,11 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 import foo.thrift_types
 
 
-class Fields(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_Fields:
+    pass
+
+
+class Fields(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Fields):
     injected_field: _typing.Final[str] = ...
     def __init__(
         self, *,
@@ -34,7 +38,11 @@ class Fields(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.Fields": ...  # type: ignore
 
 
-class FieldsInjectedToEmptyStruct(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_FieldsInjectedToEmptyStruct:
+    pass
+
+
+class FieldsInjectedToEmptyStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_FieldsInjectedToEmptyStruct):
     injected_field: _typing.Final[str] = ...
     def __init__(
         self, *,
@@ -51,7 +59,11 @@ class FieldsInjectedToEmptyStruct(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.FieldsInjectedToEmptyStruct": ...  # type: ignore
 
 
-class FieldsInjectedToStruct(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_FieldsInjectedToStruct:
+    pass
+
+
+class FieldsInjectedToStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_FieldsInjectedToStruct):
     injected_field: _typing.Final[str] = ...
     string_field: _typing.Final[str] = ...
     def __init__(
@@ -71,7 +83,11 @@ class FieldsInjectedToStruct(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.FieldsInjectedToStruct": ...  # type: ignore
 
 
-class FieldsInjectedWithIncludedStruct(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_FieldsInjectedWithIncludedStruct:
+    pass
+
+
+class FieldsInjectedWithIncludedStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_FieldsInjectedWithIncludedStruct):
     injected_unstructured_annotation_field: _typing.Final[_typing.Optional[str]] = ...
     injected_structured_annotation_field: _typing.Final[_typing.Optional[str]] = ...
     injected_field: _typing.Final[str] = ...

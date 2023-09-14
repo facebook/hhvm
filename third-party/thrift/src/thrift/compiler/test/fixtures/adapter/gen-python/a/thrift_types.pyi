@@ -22,7 +22,11 @@ import typeshed_three
 import typeshed_one
 
 
-class MyStruct(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_MyStruct:
+    pass
+
+
+class MyStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStruct):
     a: _typing.Final[typeshed_one.AdapterOneType[b.thrift_types.B]] = ...
     b: _typing.Final[typeshed_three.AdapterThreeType[c.thrift_types.C1]] = ...
     c: _typing.Final[typeshed_two.AdapterTwoType[c.thrift_types.C2]] = ...

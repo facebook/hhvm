@@ -15,7 +15,11 @@ import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
-class HsFoo(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_HsFoo:
+    pass
+
+
+class HsFoo(_fbthrift_python_types.Struct, _fbthrift_compatible_with_HsFoo):
     MyInt: _typing.Final[int] = ...
     def __init__(
         self, *,

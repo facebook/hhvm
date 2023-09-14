@@ -20,15 +20,22 @@ import apache.thrift.op.patch.thrift_types
 
 import apache.thrift.type.standard.thrift_types
 
+class _fbthrift_compatible_with_MyEnum:
+    pass
 
-class MyEnum(_fbthrift_python_types.Enum, int):
+
+class MyEnum(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_MyEnum):
     MyValue0: MyEnum = ...
     def _to_python(self) -> MyEnum: ...
     def _to_py3(self) -> "test.fixtures.patch.module.types.MyEnum": ...  # type: ignore
     def _to_py_deprecated(self) -> int: ...
 
 
-class MyData(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_MyData:
+    pass
+
+
+class MyData(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyData):
     data1: _typing.Final[str] = ...
     data2: _typing.Final[int] = ...
     def __init__(
@@ -48,7 +55,11 @@ class MyData(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.MyData": ...  # type: ignore
 
 
-class MyDataWithCustomDefault(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_MyDataWithCustomDefault:
+    pass
+
+
+class MyDataWithCustomDefault(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyDataWithCustomDefault):
     data1: _typing.Final[str] = ...
     data2: _typing.Final[int] = ...
     def __init__(
@@ -68,7 +79,11 @@ class MyDataWithCustomDefault(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.MyDataWithCustomDefault": ...  # type: ignore
 
 
-class InnerUnion(_fbthrift_python_types.Union):
+class _fbthrift_compatible_with_InnerUnion:
+    pass
+
+
+class InnerUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_InnerUnion):
     innerOption: _typing.Final[bytes] = ...
     def __init__(
         self, *,
@@ -90,7 +105,11 @@ class InnerUnion(_fbthrift_python_types.Union):
     def _to_py_deprecated(self) -> "module.ttypes.InnerUnion": ...  # type: ignore
 
 
-class MyUnion(_fbthrift_python_types.Union):
+class _fbthrift_compatible_with_MyUnion:
+    pass
+
+
+class MyUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_MyUnion):
     option1: _typing.Final[str] = ...
     option2: _typing.Final[int] = ...
     option3: _typing.Final[InnerUnion] = ...
@@ -98,7 +117,7 @@ class MyUnion(_fbthrift_python_types.Union):
         self, *,
         option1: _typing.Optional[str]=...,
         option2: _typing.Optional[int]=...,
-        option3: _typing.Optional[InnerUnion]=...
+        option3: _typing.Optional[_fbthrift_compatible_with_InnerUnion]=...
     ) -> None: ...
 
 
@@ -118,7 +137,11 @@ class MyUnion(_fbthrift_python_types.Union):
     def _to_py_deprecated(self) -> "module.ttypes.MyUnion": ...  # type: ignore
 
 
-class MyStruct(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_MyStruct:
+    pass
+
+
+class MyStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStruct):
     structWithCustomDefault: _typing.Final[MyDataWithCustomDefault] = ...
     i32WithCustomDefault: _typing.Final[int] = ...
     mapMap: _typing.Final[_typing.Mapping[str, _typing.Mapping[str, int]]] = ...
@@ -154,16 +177,16 @@ class MyStruct(_fbthrift_python_types.Struct):
     structWithFieldCustomDefault: _typing.Final[MyData] = ...
     def __init__(
         self, *,
-        structWithCustomDefault: _typing.Optional[MyDataWithCustomDefault]=...,
+        structWithCustomDefault: _typing.Optional[_fbthrift_compatible_with_MyDataWithCustomDefault]=...,
         i32WithCustomDefault: _typing.Optional[int]=...,
         mapMap: _typing.Optional[_typing.Mapping[str, _typing.Mapping[str, int]]]=...,
         listMap: _typing.Optional[_typing.Sequence[_typing.Mapping[str, int]]]=...,
         optMapVal: _typing.Optional[_typing.Mapping[str, str]]=...,
         optSetVal: _typing.Optional[_typing.AbstractSet[str]]=...,
         optListVal: _typing.Optional[_typing.Sequence[int]]=...,
-        optLateStructVal: _typing.Optional[LateDefStruct]=...,
-        optStructVal: _typing.Optional[MyData]=...,
-        optEnumVal: _typing.Optional[MyEnum]=...,
+        optLateStructVal: _typing.Optional[_fbthrift_compatible_with_LateDefStruct]=...,
+        optStructVal: _typing.Optional[_fbthrift_compatible_with_MyData]=...,
+        optEnumVal: _typing.Optional[_fbthrift_compatible_with_MyEnum]=...,
         optBinaryVal: _typing.Optional[_fbthrift_iobuf.IOBuf]=...,
         optStringVal: _typing.Optional[str]=...,
         optDoubleVal: _typing.Optional[float]=...,
@@ -173,10 +196,10 @@ class MyStruct(_fbthrift_python_types.Struct):
         optI16Val: _typing.Optional[int]=...,
         optByteVal: _typing.Optional[int]=...,
         optBoolVal: _typing.Optional[bool]=...,
-        lateStructVal: _typing.Optional[LateDefStruct]=...,
-        unionVal: _typing.Optional[MyUnion]=...,
-        structVal: _typing.Optional[MyData]=...,
-        enumVal: _typing.Optional[MyEnum]=...,
+        lateStructVal: _typing.Optional[_fbthrift_compatible_with_LateDefStruct]=...,
+        unionVal: _typing.Optional[_fbthrift_compatible_with_MyUnion]=...,
+        structVal: _typing.Optional[_fbthrift_compatible_with_MyData]=...,
+        enumVal: _typing.Optional[_fbthrift_compatible_with_MyEnum]=...,
         binaryVal: _typing.Optional[_fbthrift_iobuf.IOBuf]=...,
         stringVal: _typing.Optional[str]=...,
         doubleVal: _typing.Optional[float]=...,
@@ -186,21 +209,21 @@ class MyStruct(_fbthrift_python_types.Struct):
         i16Val: _typing.Optional[int]=...,
         byteVal: _typing.Optional[int]=...,
         boolVal: _typing.Optional[bool]=...,
-        structWithFieldCustomDefault: _typing.Optional[MyData]=...
+        structWithFieldCustomDefault: _typing.Optional[_fbthrift_compatible_with_MyData]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        structWithCustomDefault: _typing.Optional[MyDataWithCustomDefault]=...,
+        structWithCustomDefault: _typing.Optional[_fbthrift_compatible_with_MyDataWithCustomDefault]=...,
         i32WithCustomDefault: _typing.Optional[int]=...,
         mapMap: _typing.Optional[_typing.Mapping[str, _typing.Mapping[str, int]]]=...,
         listMap: _typing.Optional[_typing.Sequence[_typing.Mapping[str, int]]]=...,
         optMapVal: _typing.Optional[_typing.Mapping[str, str]]=...,
         optSetVal: _typing.Optional[_typing.AbstractSet[str]]=...,
         optListVal: _typing.Optional[_typing.Sequence[int]]=...,
-        optLateStructVal: _typing.Optional[LateDefStruct]=...,
-        optStructVal: _typing.Optional[MyData]=...,
-        optEnumVal: _typing.Optional[MyEnum]=...,
+        optLateStructVal: _typing.Optional[_fbthrift_compatible_with_LateDefStruct]=...,
+        optStructVal: _typing.Optional[_fbthrift_compatible_with_MyData]=...,
+        optEnumVal: _typing.Optional[_fbthrift_compatible_with_MyEnum]=...,
         optBinaryVal: _typing.Optional[_fbthrift_iobuf.IOBuf]=...,
         optStringVal: _typing.Optional[str]=...,
         optDoubleVal: _typing.Optional[float]=...,
@@ -210,10 +233,10 @@ class MyStruct(_fbthrift_python_types.Struct):
         optI16Val: _typing.Optional[int]=...,
         optByteVal: _typing.Optional[int]=...,
         optBoolVal: _typing.Optional[bool]=...,
-        lateStructVal: _typing.Optional[LateDefStruct]=...,
-        unionVal: _typing.Optional[MyUnion]=...,
-        structVal: _typing.Optional[MyData]=...,
-        enumVal: _typing.Optional[MyEnum]=...,
+        lateStructVal: _typing.Optional[_fbthrift_compatible_with_LateDefStruct]=...,
+        unionVal: _typing.Optional[_fbthrift_compatible_with_MyUnion]=...,
+        structVal: _typing.Optional[_fbthrift_compatible_with_MyData]=...,
+        enumVal: _typing.Optional[_fbthrift_compatible_with_MyEnum]=...,
         binaryVal: _typing.Optional[_fbthrift_iobuf.IOBuf]=...,
         stringVal: _typing.Optional[str]=...,
         doubleVal: _typing.Optional[float]=...,
@@ -223,7 +246,7 @@ class MyStruct(_fbthrift_python_types.Struct):
         i16Val: _typing.Optional[int]=...,
         byteVal: _typing.Optional[int]=...,
         boolVal: _typing.Optional[bool]=...,
-        structWithFieldCustomDefault: _typing.Optional[MyData]=...
+        structWithFieldCustomDefault: _typing.Optional[_fbthrift_compatible_with_MyData]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[MyDataWithCustomDefault, int, _typing.Mapping[str, _typing.Mapping[str, int]], _typing.Sequence[_typing.Mapping[str, int]], _typing.Mapping[str, str], _typing.AbstractSet[str], _typing.Sequence[int], LateDefStruct, MyData, MyEnum, _fbthrift_iobuf.IOBuf, str, float, float, int, int, int, int, bool, LateDefStruct, MyUnion, MyData, MyEnum, _fbthrift_iobuf.IOBuf, str, float, float, int, int, int, int, bool, MyData]]]: ...
     def _to_python(self) -> _typing.Self: ...
@@ -231,7 +254,11 @@ class MyStruct(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.MyStruct": ...  # type: ignore
 
 
-class LateDefStruct(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_LateDefStruct:
+    pass
+
+
+class LateDefStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_LateDefStruct):
     def __init__(
         self,
     ) -> None: ...
@@ -245,16 +272,20 @@ class LateDefStruct(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.LateDefStruct": ...  # type: ignore
 
 
-class Recursive(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_Recursive:
+    pass
+
+
+class Recursive(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Recursive):
     nodes: _typing.Final[_typing.Mapping[str, Recursive]] = ...
     def __init__(
         self, *,
-        nodes: _typing.Optional[_typing.Mapping[str, Recursive]]=...
+        nodes: _typing.Optional[_typing.Mapping[str, _fbthrift_compatible_with_Recursive]]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        nodes: _typing.Optional[_typing.Mapping[str, Recursive]]=...
+        nodes: _typing.Optional[_typing.Mapping[str, _fbthrift_compatible_with_Recursive]]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_typing.Mapping[str, Recursive]]]]: ...
     def _to_python(self) -> _typing.Self: ...
@@ -262,16 +293,20 @@ class Recursive(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.Recursive": ...  # type: ignore
 
 
-class Bar(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_Bar:
+    pass
+
+
+class Bar(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Bar):
     loop: _typing.Final[Loop] = ...
     def __init__(
         self, *,
-        loop: _typing.Optional[Loop]=...
+        loop: _typing.Optional[_fbthrift_compatible_with_Loop]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        loop: _typing.Optional[Loop]=...
+        loop: _typing.Optional[_fbthrift_compatible_with_Loop]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[Loop]]]: ...
     def _to_python(self) -> _typing.Self: ...
@@ -279,16 +314,20 @@ class Bar(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.Bar": ...  # type: ignore
 
 
-class Loop(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_Loop:
+    pass
+
+
+class Loop(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Loop):
     bar: _typing.Final[Bar] = ...
     def __init__(
         self, *,
-        bar: _typing.Optional[Bar]=...
+        bar: _typing.Optional[_fbthrift_compatible_with_Bar]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        bar: _typing.Optional[Bar]=...
+        bar: _typing.Optional[_fbthrift_compatible_with_Bar]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[Bar]]]: ...
     def _to_python(self) -> _typing.Self: ...
@@ -296,7 +335,11 @@ class Loop(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.Loop": ...  # type: ignore
 
 
-class MyDataPatch(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_MyDataPatch:
+    pass
+
+
+class MyDataPatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyDataPatch):
     assign: _typing.Final[_typing.Optional[MyData]] = ...
     clear: _typing.Final[bool] = ...
     patchPrior: _typing.Final[MyDataFieldPatch] = ...
@@ -305,21 +348,21 @@ class MyDataPatch(_fbthrift_python_types.Struct):
     remove: _typing.Final[_typing.Sequence[int]] = ...
     def __init__(
         self, *,
-        assign: _typing.Optional[MyData]=...,
+        assign: _typing.Optional[_fbthrift_compatible_with_MyData]=...,
         clear: _typing.Optional[bool]=...,
-        patchPrior: _typing.Optional[MyDataFieldPatch]=...,
-        ensure: _typing.Optional[MyDataEnsureStruct]=...,
-        patch: _typing.Optional[MyDataFieldPatch]=...,
+        patchPrior: _typing.Optional[_fbthrift_compatible_with_MyDataFieldPatch]=...,
+        ensure: _typing.Optional[_fbthrift_compatible_with_MyDataEnsureStruct]=...,
+        patch: _typing.Optional[_fbthrift_compatible_with_MyDataFieldPatch]=...,
         remove: _typing.Optional[_typing.Sequence[int]]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        assign: _typing.Optional[MyData]=...,
+        assign: _typing.Optional[_fbthrift_compatible_with_MyData]=...,
         clear: _typing.Optional[bool]=...,
-        patchPrior: _typing.Optional[MyDataFieldPatch]=...,
-        ensure: _typing.Optional[MyDataEnsureStruct]=...,
-        patch: _typing.Optional[MyDataFieldPatch]=...,
+        patchPrior: _typing.Optional[_fbthrift_compatible_with_MyDataFieldPatch]=...,
+        ensure: _typing.Optional[_fbthrift_compatible_with_MyDataEnsureStruct]=...,
+        patch: _typing.Optional[_fbthrift_compatible_with_MyDataFieldPatch]=...,
         remove: _typing.Optional[_typing.Sequence[int]]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[MyData, bool, MyDataFieldPatch, MyDataEnsureStruct, MyDataFieldPatch, _typing.Sequence[int]]]]: ...
@@ -328,19 +371,23 @@ class MyDataPatch(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.MyDataPatch": ...  # type: ignore
 
 
-class MyDataFieldPatch(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_MyDataFieldPatch:
+    pass
+
+
+class MyDataFieldPatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyDataFieldPatch):
     data1: _typing.Final[apache.thrift.op.patch.thrift_types.StringPatch] = ...
     data2: _typing.Final[apache.thrift.op.patch.thrift_types.I32Patch] = ...
     def __init__(
         self, *,
-        data1: _typing.Optional[apache.thrift.op.patch.thrift_types.StringPatch]=...,
-        data2: _typing.Optional[apache.thrift.op.patch.thrift_types.I32Patch]=...
+        data1: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_StringPatch]=...,
+        data2: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_I32Patch]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        data1: _typing.Optional[apache.thrift.op.patch.thrift_types.StringPatch]=...,
-        data2: _typing.Optional[apache.thrift.op.patch.thrift_types.I32Patch]=...
+        data1: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_StringPatch]=...,
+        data2: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_I32Patch]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[apache.thrift.op.patch.thrift_types.StringPatch, apache.thrift.op.patch.thrift_types.I32Patch]]]: ...
     def _to_python(self) -> _typing.Self: ...
@@ -348,7 +395,11 @@ class MyDataFieldPatch(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.MyDataFieldPatch": ...  # type: ignore
 
 
-class MyDataEnsureStruct(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_MyDataEnsureStruct:
+    pass
+
+
+class MyDataEnsureStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyDataEnsureStruct):
     data1: _typing.Final[_typing.Optional[str]] = ...
     data2: _typing.Final[_typing.Optional[int]] = ...
     def __init__(
@@ -368,7 +419,11 @@ class MyDataEnsureStruct(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.MyDataEnsureStruct": ...  # type: ignore
 
 
-class MyDataWithCustomDefaultPatch(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_MyDataWithCustomDefaultPatch:
+    pass
+
+
+class MyDataWithCustomDefaultPatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyDataWithCustomDefaultPatch):
     assign: _typing.Final[_typing.Optional[MyDataWithCustomDefault]] = ...
     clear: _typing.Final[bool] = ...
     patchPrior: _typing.Final[MyDataWithCustomDefaultFieldPatch] = ...
@@ -377,21 +432,21 @@ class MyDataWithCustomDefaultPatch(_fbthrift_python_types.Struct):
     remove: _typing.Final[_typing.Sequence[int]] = ...
     def __init__(
         self, *,
-        assign: _typing.Optional[MyDataWithCustomDefault]=...,
+        assign: _typing.Optional[_fbthrift_compatible_with_MyDataWithCustomDefault]=...,
         clear: _typing.Optional[bool]=...,
-        patchPrior: _typing.Optional[MyDataWithCustomDefaultFieldPatch]=...,
-        ensure: _typing.Optional[MyDataWithCustomDefaultEnsureStruct]=...,
-        patch: _typing.Optional[MyDataWithCustomDefaultFieldPatch]=...,
+        patchPrior: _typing.Optional[_fbthrift_compatible_with_MyDataWithCustomDefaultFieldPatch]=...,
+        ensure: _typing.Optional[_fbthrift_compatible_with_MyDataWithCustomDefaultEnsureStruct]=...,
+        patch: _typing.Optional[_fbthrift_compatible_with_MyDataWithCustomDefaultFieldPatch]=...,
         remove: _typing.Optional[_typing.Sequence[int]]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        assign: _typing.Optional[MyDataWithCustomDefault]=...,
+        assign: _typing.Optional[_fbthrift_compatible_with_MyDataWithCustomDefault]=...,
         clear: _typing.Optional[bool]=...,
-        patchPrior: _typing.Optional[MyDataWithCustomDefaultFieldPatch]=...,
-        ensure: _typing.Optional[MyDataWithCustomDefaultEnsureStruct]=...,
-        patch: _typing.Optional[MyDataWithCustomDefaultFieldPatch]=...,
+        patchPrior: _typing.Optional[_fbthrift_compatible_with_MyDataWithCustomDefaultFieldPatch]=...,
+        ensure: _typing.Optional[_fbthrift_compatible_with_MyDataWithCustomDefaultEnsureStruct]=...,
+        patch: _typing.Optional[_fbthrift_compatible_with_MyDataWithCustomDefaultFieldPatch]=...,
         remove: _typing.Optional[_typing.Sequence[int]]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[MyDataWithCustomDefault, bool, MyDataWithCustomDefaultFieldPatch, MyDataWithCustomDefaultEnsureStruct, MyDataWithCustomDefaultFieldPatch, _typing.Sequence[int]]]]: ...
@@ -400,19 +455,23 @@ class MyDataWithCustomDefaultPatch(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.MyDataWithCustomDefaultPatch": ...  # type: ignore
 
 
-class MyDataWithCustomDefaultFieldPatch(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_MyDataWithCustomDefaultFieldPatch:
+    pass
+
+
+class MyDataWithCustomDefaultFieldPatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyDataWithCustomDefaultFieldPatch):
     data1: _typing.Final[apache.thrift.op.patch.thrift_types.StringPatch] = ...
     data2: _typing.Final[apache.thrift.op.patch.thrift_types.I32Patch] = ...
     def __init__(
         self, *,
-        data1: _typing.Optional[apache.thrift.op.patch.thrift_types.StringPatch]=...,
-        data2: _typing.Optional[apache.thrift.op.patch.thrift_types.I32Patch]=...
+        data1: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_StringPatch]=...,
+        data2: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_I32Patch]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        data1: _typing.Optional[apache.thrift.op.patch.thrift_types.StringPatch]=...,
-        data2: _typing.Optional[apache.thrift.op.patch.thrift_types.I32Patch]=...
+        data1: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_StringPatch]=...,
+        data2: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_I32Patch]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[apache.thrift.op.patch.thrift_types.StringPatch, apache.thrift.op.patch.thrift_types.I32Patch]]]: ...
     def _to_python(self) -> _typing.Self: ...
@@ -420,7 +479,11 @@ class MyDataWithCustomDefaultFieldPatch(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.MyDataWithCustomDefaultFieldPatch": ...  # type: ignore
 
 
-class MyDataWithCustomDefaultEnsureStruct(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_MyDataWithCustomDefaultEnsureStruct:
+    pass
+
+
+class MyDataWithCustomDefaultEnsureStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyDataWithCustomDefaultEnsureStruct):
     data1: _typing.Final[_typing.Optional[str]] = ...
     data2: _typing.Final[_typing.Optional[int]] = ...
     def __init__(
@@ -440,7 +503,11 @@ class MyDataWithCustomDefaultEnsureStruct(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.MyDataWithCustomDefaultEnsureStruct": ...  # type: ignore
 
 
-class InnerUnionPatch(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_InnerUnionPatch:
+    pass
+
+
+class InnerUnionPatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_InnerUnionPatch):
     assign: _typing.Final[_typing.Optional[InnerUnion]] = ...
     clear: _typing.Final[bool] = ...
     patchPrior: _typing.Final[InnerUnionFieldPatch] = ...
@@ -448,20 +515,20 @@ class InnerUnionPatch(_fbthrift_python_types.Struct):
     patch: _typing.Final[InnerUnionFieldPatch] = ...
     def __init__(
         self, *,
-        assign: _typing.Optional[InnerUnion]=...,
+        assign: _typing.Optional[_fbthrift_compatible_with_InnerUnion]=...,
         clear: _typing.Optional[bool]=...,
-        patchPrior: _typing.Optional[InnerUnionFieldPatch]=...,
-        ensure: _typing.Optional[InnerUnion]=...,
-        patch: _typing.Optional[InnerUnionFieldPatch]=...
+        patchPrior: _typing.Optional[_fbthrift_compatible_with_InnerUnionFieldPatch]=...,
+        ensure: _typing.Optional[_fbthrift_compatible_with_InnerUnion]=...,
+        patch: _typing.Optional[_fbthrift_compatible_with_InnerUnionFieldPatch]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        assign: _typing.Optional[InnerUnion]=...,
+        assign: _typing.Optional[_fbthrift_compatible_with_InnerUnion]=...,
         clear: _typing.Optional[bool]=...,
-        patchPrior: _typing.Optional[InnerUnionFieldPatch]=...,
-        ensure: _typing.Optional[InnerUnion]=...,
-        patch: _typing.Optional[InnerUnionFieldPatch]=...
+        patchPrior: _typing.Optional[_fbthrift_compatible_with_InnerUnionFieldPatch]=...,
+        ensure: _typing.Optional[_fbthrift_compatible_with_InnerUnion]=...,
+        patch: _typing.Optional[_fbthrift_compatible_with_InnerUnionFieldPatch]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[InnerUnion, bool, InnerUnionFieldPatch, InnerUnion, InnerUnionFieldPatch]]]: ...
     def _to_python(self) -> _typing.Self: ...
@@ -469,16 +536,20 @@ class InnerUnionPatch(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.InnerUnionPatch": ...  # type: ignore
 
 
-class InnerUnionFieldPatch(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_InnerUnionFieldPatch:
+    pass
+
+
+class InnerUnionFieldPatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_InnerUnionFieldPatch):
     innerOption: _typing.Final[apache.thrift.op.patch.thrift_types.BinaryPatch] = ...
     def __init__(
         self, *,
-        innerOption: _typing.Optional[apache.thrift.op.patch.thrift_types.BinaryPatch]=...
+        innerOption: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_BinaryPatch]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        innerOption: _typing.Optional[apache.thrift.op.patch.thrift_types.BinaryPatch]=...
+        innerOption: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_BinaryPatch]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[apache.thrift.op.patch.thrift_types.BinaryPatch]]]: ...
     def _to_python(self) -> _typing.Self: ...
@@ -486,7 +557,11 @@ class InnerUnionFieldPatch(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.InnerUnionFieldPatch": ...  # type: ignore
 
 
-class MyUnionPatch(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_MyUnionPatch:
+    pass
+
+
+class MyUnionPatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyUnionPatch):
     assign: _typing.Final[_typing.Optional[MyUnion]] = ...
     clear: _typing.Final[bool] = ...
     patchPrior: _typing.Final[MyUnionFieldPatch] = ...
@@ -494,20 +569,20 @@ class MyUnionPatch(_fbthrift_python_types.Struct):
     patch: _typing.Final[MyUnionFieldPatch] = ...
     def __init__(
         self, *,
-        assign: _typing.Optional[MyUnion]=...,
+        assign: _typing.Optional[_fbthrift_compatible_with_MyUnion]=...,
         clear: _typing.Optional[bool]=...,
-        patchPrior: _typing.Optional[MyUnionFieldPatch]=...,
-        ensure: _typing.Optional[MyUnion]=...,
-        patch: _typing.Optional[MyUnionFieldPatch]=...
+        patchPrior: _typing.Optional[_fbthrift_compatible_with_MyUnionFieldPatch]=...,
+        ensure: _typing.Optional[_fbthrift_compatible_with_MyUnion]=...,
+        patch: _typing.Optional[_fbthrift_compatible_with_MyUnionFieldPatch]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        assign: _typing.Optional[MyUnion]=...,
+        assign: _typing.Optional[_fbthrift_compatible_with_MyUnion]=...,
         clear: _typing.Optional[bool]=...,
-        patchPrior: _typing.Optional[MyUnionFieldPatch]=...,
-        ensure: _typing.Optional[MyUnion]=...,
-        patch: _typing.Optional[MyUnionFieldPatch]=...
+        patchPrior: _typing.Optional[_fbthrift_compatible_with_MyUnionFieldPatch]=...,
+        ensure: _typing.Optional[_fbthrift_compatible_with_MyUnion]=...,
+        patch: _typing.Optional[_fbthrift_compatible_with_MyUnionFieldPatch]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[MyUnion, bool, MyUnionFieldPatch, MyUnion, MyUnionFieldPatch]]]: ...
     def _to_python(self) -> _typing.Self: ...
@@ -515,22 +590,26 @@ class MyUnionPatch(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.MyUnionPatch": ...  # type: ignore
 
 
-class MyUnionFieldPatch(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_MyUnionFieldPatch:
+    pass
+
+
+class MyUnionFieldPatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyUnionFieldPatch):
     option1: _typing.Final[apache.thrift.op.patch.thrift_types.StringPatch] = ...
     option2: _typing.Final[apache.thrift.op.patch.thrift_types.I32Patch] = ...
     option3: _typing.Final[InnerUnionPatch] = ...
     def __init__(
         self, *,
-        option1: _typing.Optional[apache.thrift.op.patch.thrift_types.StringPatch]=...,
-        option2: _typing.Optional[apache.thrift.op.patch.thrift_types.I32Patch]=...,
-        option3: _typing.Optional[InnerUnionPatch]=...
+        option1: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_StringPatch]=...,
+        option2: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_I32Patch]=...,
+        option3: _typing.Optional[_fbthrift_compatible_with_InnerUnionPatch]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        option1: _typing.Optional[apache.thrift.op.patch.thrift_types.StringPatch]=...,
-        option2: _typing.Optional[apache.thrift.op.patch.thrift_types.I32Patch]=...,
-        option3: _typing.Optional[InnerUnionPatch]=...
+        option1: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_StringPatch]=...,
+        option2: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_I32Patch]=...,
+        option3: _typing.Optional[_fbthrift_compatible_with_InnerUnionPatch]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[apache.thrift.op.patch.thrift_types.StringPatch, apache.thrift.op.patch.thrift_types.I32Patch, InnerUnionPatch]]]: ...
     def _to_python(self) -> _typing.Self: ...
@@ -538,7 +617,11 @@ class MyUnionFieldPatch(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.MyUnionFieldPatch": ...  # type: ignore
 
 
-class MyStructPatch(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_MyStructPatch:
+    pass
+
+
+class MyStructPatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStructPatch):
     assign: _typing.Final[_typing.Optional[MyStruct]] = ...
     clear: _typing.Final[bool] = ...
     patchPrior: _typing.Final[MyStructFieldPatch] = ...
@@ -547,21 +630,21 @@ class MyStructPatch(_fbthrift_python_types.Struct):
     remove: _typing.Final[_typing.Sequence[int]] = ...
     def __init__(
         self, *,
-        assign: _typing.Optional[MyStruct]=...,
+        assign: _typing.Optional[_fbthrift_compatible_with_MyStruct]=...,
         clear: _typing.Optional[bool]=...,
-        patchPrior: _typing.Optional[MyStructFieldPatch]=...,
-        ensure: _typing.Optional[MyStructEnsureStruct]=...,
-        patch: _typing.Optional[MyStructFieldPatch]=...,
+        patchPrior: _typing.Optional[_fbthrift_compatible_with_MyStructFieldPatch]=...,
+        ensure: _typing.Optional[_fbthrift_compatible_with_MyStructEnsureStruct]=...,
+        patch: _typing.Optional[_fbthrift_compatible_with_MyStructFieldPatch]=...,
         remove: _typing.Optional[_typing.Sequence[int]]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        assign: _typing.Optional[MyStruct]=...,
+        assign: _typing.Optional[_fbthrift_compatible_with_MyStruct]=...,
         clear: _typing.Optional[bool]=...,
-        patchPrior: _typing.Optional[MyStructFieldPatch]=...,
-        ensure: _typing.Optional[MyStructEnsureStruct]=...,
-        patch: _typing.Optional[MyStructFieldPatch]=...,
+        patchPrior: _typing.Optional[_fbthrift_compatible_with_MyStructFieldPatch]=...,
+        ensure: _typing.Optional[_fbthrift_compatible_with_MyStructEnsureStruct]=...,
+        patch: _typing.Optional[_fbthrift_compatible_with_MyStructFieldPatch]=...,
         remove: _typing.Optional[_typing.Sequence[int]]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[MyStruct, bool, MyStructFieldPatch, MyStructEnsureStruct, MyStructFieldPatch, _typing.Sequence[int]]]]: ...
@@ -570,18 +653,22 @@ class MyStructPatch(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.MyStructPatch": ...  # type: ignore
 
 
-class MyStructField10Patch(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_MyStructField10Patch:
+    pass
+
+
+class MyStructField10Patch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStructField10Patch):
     assign: _typing.Final[_typing.Optional[MyEnum]] = ...
     clear: _typing.Final[bool] = ...
     def __init__(
         self, *,
-        assign: _typing.Optional[MyEnum]=...,
+        assign: _typing.Optional[_fbthrift_compatible_with_MyEnum]=...,
         clear: _typing.Optional[bool]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        assign: _typing.Optional[MyEnum]=...,
+        assign: _typing.Optional[_fbthrift_compatible_with_MyEnum]=...,
         clear: _typing.Optional[bool]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[MyEnum, bool]]]: ...
@@ -590,18 +677,22 @@ class MyStructField10Patch(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.MyStructField10Patch": ...  # type: ignore
 
 
-class MyStructField23Patch(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_MyStructField23Patch:
+    pass
+
+
+class MyStructField23Patch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStructField23Patch):
     assign: _typing.Final[_typing.Optional[MyEnum]] = ...
     clear: _typing.Final[bool] = ...
     def __init__(
         self, *,
-        assign: _typing.Optional[MyEnum]=...,
+        assign: _typing.Optional[_fbthrift_compatible_with_MyEnum]=...,
         clear: _typing.Optional[bool]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        assign: _typing.Optional[MyEnum]=...,
+        assign: _typing.Optional[_fbthrift_compatible_with_MyEnum]=...,
         clear: _typing.Optional[bool]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[MyEnum, bool]]]: ...
@@ -610,7 +701,11 @@ class MyStructField23Patch(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.MyStructField23Patch": ...  # type: ignore
 
 
-class MyStructField26Patch(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_MyStructField26Patch:
+    pass
+
+
+class MyStructField26Patch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStructField26Patch):
     assign: _typing.Final[_typing.Optional[_typing.Sequence[int]]] = ...
     clear: _typing.Final[bool] = ...
     prepend: _typing.Final[_typing.Sequence[int]] = ...
@@ -636,7 +731,11 @@ class MyStructField26Patch(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.MyStructField26Patch": ...  # type: ignore
 
 
-class MyStructField27Patch(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_MyStructField27Patch:
+    pass
+
+
+class MyStructField27Patch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStructField27Patch):
     assign: _typing.Final[_typing.Optional[_typing.AbstractSet[str]]] = ...
     clear: _typing.Final[bool] = ...
     remove: _typing.Final[_typing.AbstractSet[str]] = ...
@@ -662,7 +761,11 @@ class MyStructField27Patch(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.MyStructField27Patch": ...  # type: ignore
 
 
-class MyStructField28Patch(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_MyStructField28Patch:
+    pass
+
+
+class MyStructField28Patch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStructField28Patch):
     assign: _typing.Final[_typing.Optional[_typing.Mapping[str, str]]] = ...
     clear: _typing.Final[bool] = ...
     patchPrior: _typing.Final[_typing.Mapping[str, apache.thrift.op.patch.thrift_types.StringPatch]] = ...
@@ -674,9 +777,9 @@ class MyStructField28Patch(_fbthrift_python_types.Struct):
         self, *,
         assign: _typing.Optional[_typing.Mapping[str, str]]=...,
         clear: _typing.Optional[bool]=...,
-        patchPrior: _typing.Optional[_typing.Mapping[str, apache.thrift.op.patch.thrift_types.StringPatch]]=...,
+        patchPrior: _typing.Optional[_typing.Mapping[str, apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_StringPatch]]=...,
         add: _typing.Optional[_typing.Mapping[str, str]]=...,
-        patch: _typing.Optional[_typing.Mapping[str, apache.thrift.op.patch.thrift_types.StringPatch]]=...,
+        patch: _typing.Optional[_typing.Mapping[str, apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_StringPatch]]=...,
         remove: _typing.Optional[_typing.AbstractSet[str]]=...,
         put: _typing.Optional[_typing.Mapping[str, str]]=...
     ) -> None: ...
@@ -685,9 +788,9 @@ class MyStructField28Patch(_fbthrift_python_types.Struct):
         self, *,
         assign: _typing.Optional[_typing.Mapping[str, str]]=...,
         clear: _typing.Optional[bool]=...,
-        patchPrior: _typing.Optional[_typing.Mapping[str, apache.thrift.op.patch.thrift_types.StringPatch]]=...,
+        patchPrior: _typing.Optional[_typing.Mapping[str, apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_StringPatch]]=...,
         add: _typing.Optional[_typing.Mapping[str, str]]=...,
-        patch: _typing.Optional[_typing.Mapping[str, apache.thrift.op.patch.thrift_types.StringPatch]]=...,
+        patch: _typing.Optional[_typing.Mapping[str, apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_StringPatch]]=...,
         remove: _typing.Optional[_typing.AbstractSet[str]]=...,
         put: _typing.Optional[_typing.Mapping[str, str]]=...
     ) -> _typing.Self: ...
@@ -697,7 +800,11 @@ class MyStructField28Patch(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.MyStructField28Patch": ...  # type: ignore
 
 
-class MyStructField29Patch(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_MyStructField29Patch:
+    pass
+
+
+class MyStructField29Patch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStructField29Patch):
     assign: _typing.Final[_typing.Optional[_typing.Sequence[_typing.Mapping[str, int]]]] = ...
     clear: _typing.Final[bool] = ...
     prepend: _typing.Final[_typing.Sequence[_typing.Mapping[str, int]]] = ...
@@ -723,7 +830,11 @@ class MyStructField29Patch(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.MyStructField29Patch": ...  # type: ignore
 
 
-class MyStructField30Patch(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_MyStructField30Patch:
+    pass
+
+
+class MyStructField30Patch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStructField30Patch):
     assign: _typing.Final[_typing.Optional[_typing.Mapping[str, _typing.Mapping[str, int]]]] = ...
     clear: _typing.Final[bool] = ...
     patchPrior: _typing.Final[_typing.Mapping[str, MyStructField30Patch1]] = ...
@@ -735,9 +846,9 @@ class MyStructField30Patch(_fbthrift_python_types.Struct):
         self, *,
         assign: _typing.Optional[_typing.Mapping[str, _typing.Mapping[str, int]]]=...,
         clear: _typing.Optional[bool]=...,
-        patchPrior: _typing.Optional[_typing.Mapping[str, MyStructField30Patch1]]=...,
+        patchPrior: _typing.Optional[_typing.Mapping[str, _fbthrift_compatible_with_MyStructField30Patch1]]=...,
         add: _typing.Optional[_typing.Mapping[str, _typing.Mapping[str, int]]]=...,
-        patch: _typing.Optional[_typing.Mapping[str, MyStructField30Patch1]]=...,
+        patch: _typing.Optional[_typing.Mapping[str, _fbthrift_compatible_with_MyStructField30Patch1]]=...,
         remove: _typing.Optional[_typing.AbstractSet[str]]=...,
         put: _typing.Optional[_typing.Mapping[str, _typing.Mapping[str, int]]]=...
     ) -> None: ...
@@ -746,9 +857,9 @@ class MyStructField30Patch(_fbthrift_python_types.Struct):
         self, *,
         assign: _typing.Optional[_typing.Mapping[str, _typing.Mapping[str, int]]]=...,
         clear: _typing.Optional[bool]=...,
-        patchPrior: _typing.Optional[_typing.Mapping[str, MyStructField30Patch1]]=...,
+        patchPrior: _typing.Optional[_typing.Mapping[str, _fbthrift_compatible_with_MyStructField30Patch1]]=...,
         add: _typing.Optional[_typing.Mapping[str, _typing.Mapping[str, int]]]=...,
-        patch: _typing.Optional[_typing.Mapping[str, MyStructField30Patch1]]=...,
+        patch: _typing.Optional[_typing.Mapping[str, _fbthrift_compatible_with_MyStructField30Patch1]]=...,
         remove: _typing.Optional[_typing.AbstractSet[str]]=...,
         put: _typing.Optional[_typing.Mapping[str, _typing.Mapping[str, int]]]=...
     ) -> _typing.Self: ...
@@ -758,7 +869,11 @@ class MyStructField30Patch(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.MyStructField30Patch": ...  # type: ignore
 
 
-class MyStructField30Patch1(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_MyStructField30Patch1:
+    pass
+
+
+class MyStructField30Patch1(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStructField30Patch1):
     assign: _typing.Final[_typing.Optional[_typing.Mapping[str, int]]] = ...
     clear: _typing.Final[bool] = ...
     patchPrior: _typing.Final[_typing.Mapping[str, apache.thrift.op.patch.thrift_types.I32Patch]] = ...
@@ -770,9 +885,9 @@ class MyStructField30Patch1(_fbthrift_python_types.Struct):
         self, *,
         assign: _typing.Optional[_typing.Mapping[str, int]]=...,
         clear: _typing.Optional[bool]=...,
-        patchPrior: _typing.Optional[_typing.Mapping[str, apache.thrift.op.patch.thrift_types.I32Patch]]=...,
+        patchPrior: _typing.Optional[_typing.Mapping[str, apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_I32Patch]]=...,
         add: _typing.Optional[_typing.Mapping[str, int]]=...,
-        patch: _typing.Optional[_typing.Mapping[str, apache.thrift.op.patch.thrift_types.I32Patch]]=...,
+        patch: _typing.Optional[_typing.Mapping[str, apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_I32Patch]]=...,
         remove: _typing.Optional[_typing.AbstractSet[str]]=...,
         put: _typing.Optional[_typing.Mapping[str, int]]=...
     ) -> None: ...
@@ -781,9 +896,9 @@ class MyStructField30Patch1(_fbthrift_python_types.Struct):
         self, *,
         assign: _typing.Optional[_typing.Mapping[str, int]]=...,
         clear: _typing.Optional[bool]=...,
-        patchPrior: _typing.Optional[_typing.Mapping[str, apache.thrift.op.patch.thrift_types.I32Patch]]=...,
+        patchPrior: _typing.Optional[_typing.Mapping[str, apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_I32Patch]]=...,
         add: _typing.Optional[_typing.Mapping[str, int]]=...,
-        patch: _typing.Optional[_typing.Mapping[str, apache.thrift.op.patch.thrift_types.I32Patch]]=...,
+        patch: _typing.Optional[_typing.Mapping[str, apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_I32Patch]]=...,
         remove: _typing.Optional[_typing.AbstractSet[str]]=...,
         put: _typing.Optional[_typing.Mapping[str, int]]=...
     ) -> _typing.Self: ...
@@ -793,7 +908,11 @@ class MyStructField30Patch1(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.MyStructField30Patch1": ...  # type: ignore
 
 
-class MyStructFieldPatch(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_MyStructFieldPatch:
+    pass
+
+
+class MyStructFieldPatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStructFieldPatch):
     structWithCustomDefault: _typing.Final[MyDataWithCustomDefaultPatch] = ...
     i32WithCustomDefault: _typing.Final[apache.thrift.op.patch.thrift_types.I32Patch] = ...
     mapMap: _typing.Final[MyStructField30Patch] = ...
@@ -829,76 +948,76 @@ class MyStructFieldPatch(_fbthrift_python_types.Struct):
     structWithFieldCustomDefault: _typing.Final[MyDataPatch] = ...
     def __init__(
         self, *,
-        structWithCustomDefault: _typing.Optional[MyDataWithCustomDefaultPatch]=...,
-        i32WithCustomDefault: _typing.Optional[apache.thrift.op.patch.thrift_types.I32Patch]=...,
-        mapMap: _typing.Optional[MyStructField30Patch]=...,
-        listMap: _typing.Optional[MyStructField29Patch]=...,
-        optMapVal: _typing.Optional[MyStructField28Patch]=...,
-        optSetVal: _typing.Optional[MyStructField27Patch]=...,
-        optListVal: _typing.Optional[MyStructField26Patch]=...,
-        optLateStructVal: _typing.Optional[LateDefStructPatch]=...,
-        optStructVal: _typing.Optional[MyDataPatch]=...,
-        optEnumVal: _typing.Optional[MyStructField23Patch]=...,
-        optBinaryVal: _typing.Optional[apache.thrift.op.patch.thrift_types.BinaryPatch]=...,
-        optStringVal: _typing.Optional[apache.thrift.op.patch.thrift_types.StringPatch]=...,
-        optDoubleVal: _typing.Optional[apache.thrift.op.patch.thrift_types.DoublePatch]=...,
-        optFloatVal: _typing.Optional[apache.thrift.op.patch.thrift_types.FloatPatch]=...,
-        optI64Val: _typing.Optional[apache.thrift.op.patch.thrift_types.I64Patch]=...,
-        optI32Val: _typing.Optional[apache.thrift.op.patch.thrift_types.I32Patch]=...,
-        optI16Val: _typing.Optional[apache.thrift.op.patch.thrift_types.I16Patch]=...,
-        optByteVal: _typing.Optional[apache.thrift.op.patch.thrift_types.BytePatch]=...,
-        optBoolVal: _typing.Optional[apache.thrift.op.patch.thrift_types.BoolPatch]=...,
-        lateStructVal: _typing.Optional[LateDefStructPatch]=...,
-        unionVal: _typing.Optional[MyUnionPatch]=...,
-        structVal: _typing.Optional[MyDataPatch]=...,
-        enumVal: _typing.Optional[MyStructField10Patch]=...,
-        binaryVal: _typing.Optional[apache.thrift.op.patch.thrift_types.BinaryPatch]=...,
-        stringVal: _typing.Optional[apache.thrift.op.patch.thrift_types.StringPatch]=...,
-        doubleVal: _typing.Optional[apache.thrift.op.patch.thrift_types.DoublePatch]=...,
-        floatVal: _typing.Optional[apache.thrift.op.patch.thrift_types.FloatPatch]=...,
-        i64Val: _typing.Optional[apache.thrift.op.patch.thrift_types.I64Patch]=...,
-        i32Val: _typing.Optional[apache.thrift.op.patch.thrift_types.I32Patch]=...,
-        i16Val: _typing.Optional[apache.thrift.op.patch.thrift_types.I16Patch]=...,
-        byteVal: _typing.Optional[apache.thrift.op.patch.thrift_types.BytePatch]=...,
-        boolVal: _typing.Optional[apache.thrift.op.patch.thrift_types.BoolPatch]=...,
-        structWithFieldCustomDefault: _typing.Optional[MyDataPatch]=...
+        structWithCustomDefault: _typing.Optional[_fbthrift_compatible_with_MyDataWithCustomDefaultPatch]=...,
+        i32WithCustomDefault: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_I32Patch]=...,
+        mapMap: _typing.Optional[_fbthrift_compatible_with_MyStructField30Patch]=...,
+        listMap: _typing.Optional[_fbthrift_compatible_with_MyStructField29Patch]=...,
+        optMapVal: _typing.Optional[_fbthrift_compatible_with_MyStructField28Patch]=...,
+        optSetVal: _typing.Optional[_fbthrift_compatible_with_MyStructField27Patch]=...,
+        optListVal: _typing.Optional[_fbthrift_compatible_with_MyStructField26Patch]=...,
+        optLateStructVal: _typing.Optional[_fbthrift_compatible_with_LateDefStructPatch]=...,
+        optStructVal: _typing.Optional[_fbthrift_compatible_with_MyDataPatch]=...,
+        optEnumVal: _typing.Optional[_fbthrift_compatible_with_MyStructField23Patch]=...,
+        optBinaryVal: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_BinaryPatch]=...,
+        optStringVal: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_StringPatch]=...,
+        optDoubleVal: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_DoublePatch]=...,
+        optFloatVal: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_FloatPatch]=...,
+        optI64Val: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_I64Patch]=...,
+        optI32Val: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_I32Patch]=...,
+        optI16Val: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_I16Patch]=...,
+        optByteVal: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_BytePatch]=...,
+        optBoolVal: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_BoolPatch]=...,
+        lateStructVal: _typing.Optional[_fbthrift_compatible_with_LateDefStructPatch]=...,
+        unionVal: _typing.Optional[_fbthrift_compatible_with_MyUnionPatch]=...,
+        structVal: _typing.Optional[_fbthrift_compatible_with_MyDataPatch]=...,
+        enumVal: _typing.Optional[_fbthrift_compatible_with_MyStructField10Patch]=...,
+        binaryVal: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_BinaryPatch]=...,
+        stringVal: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_StringPatch]=...,
+        doubleVal: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_DoublePatch]=...,
+        floatVal: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_FloatPatch]=...,
+        i64Val: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_I64Patch]=...,
+        i32Val: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_I32Patch]=...,
+        i16Val: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_I16Patch]=...,
+        byteVal: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_BytePatch]=...,
+        boolVal: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_BoolPatch]=...,
+        structWithFieldCustomDefault: _typing.Optional[_fbthrift_compatible_with_MyDataPatch]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        structWithCustomDefault: _typing.Optional[MyDataWithCustomDefaultPatch]=...,
-        i32WithCustomDefault: _typing.Optional[apache.thrift.op.patch.thrift_types.I32Patch]=...,
-        mapMap: _typing.Optional[MyStructField30Patch]=...,
-        listMap: _typing.Optional[MyStructField29Patch]=...,
-        optMapVal: _typing.Optional[MyStructField28Patch]=...,
-        optSetVal: _typing.Optional[MyStructField27Patch]=...,
-        optListVal: _typing.Optional[MyStructField26Patch]=...,
-        optLateStructVal: _typing.Optional[LateDefStructPatch]=...,
-        optStructVal: _typing.Optional[MyDataPatch]=...,
-        optEnumVal: _typing.Optional[MyStructField23Patch]=...,
-        optBinaryVal: _typing.Optional[apache.thrift.op.patch.thrift_types.BinaryPatch]=...,
-        optStringVal: _typing.Optional[apache.thrift.op.patch.thrift_types.StringPatch]=...,
-        optDoubleVal: _typing.Optional[apache.thrift.op.patch.thrift_types.DoublePatch]=...,
-        optFloatVal: _typing.Optional[apache.thrift.op.patch.thrift_types.FloatPatch]=...,
-        optI64Val: _typing.Optional[apache.thrift.op.patch.thrift_types.I64Patch]=...,
-        optI32Val: _typing.Optional[apache.thrift.op.patch.thrift_types.I32Patch]=...,
-        optI16Val: _typing.Optional[apache.thrift.op.patch.thrift_types.I16Patch]=...,
-        optByteVal: _typing.Optional[apache.thrift.op.patch.thrift_types.BytePatch]=...,
-        optBoolVal: _typing.Optional[apache.thrift.op.patch.thrift_types.BoolPatch]=...,
-        lateStructVal: _typing.Optional[LateDefStructPatch]=...,
-        unionVal: _typing.Optional[MyUnionPatch]=...,
-        structVal: _typing.Optional[MyDataPatch]=...,
-        enumVal: _typing.Optional[MyStructField10Patch]=...,
-        binaryVal: _typing.Optional[apache.thrift.op.patch.thrift_types.BinaryPatch]=...,
-        stringVal: _typing.Optional[apache.thrift.op.patch.thrift_types.StringPatch]=...,
-        doubleVal: _typing.Optional[apache.thrift.op.patch.thrift_types.DoublePatch]=...,
-        floatVal: _typing.Optional[apache.thrift.op.patch.thrift_types.FloatPatch]=...,
-        i64Val: _typing.Optional[apache.thrift.op.patch.thrift_types.I64Patch]=...,
-        i32Val: _typing.Optional[apache.thrift.op.patch.thrift_types.I32Patch]=...,
-        i16Val: _typing.Optional[apache.thrift.op.patch.thrift_types.I16Patch]=...,
-        byteVal: _typing.Optional[apache.thrift.op.patch.thrift_types.BytePatch]=...,
-        boolVal: _typing.Optional[apache.thrift.op.patch.thrift_types.BoolPatch]=...,
-        structWithFieldCustomDefault: _typing.Optional[MyDataPatch]=...
+        structWithCustomDefault: _typing.Optional[_fbthrift_compatible_with_MyDataWithCustomDefaultPatch]=...,
+        i32WithCustomDefault: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_I32Patch]=...,
+        mapMap: _typing.Optional[_fbthrift_compatible_with_MyStructField30Patch]=...,
+        listMap: _typing.Optional[_fbthrift_compatible_with_MyStructField29Patch]=...,
+        optMapVal: _typing.Optional[_fbthrift_compatible_with_MyStructField28Patch]=...,
+        optSetVal: _typing.Optional[_fbthrift_compatible_with_MyStructField27Patch]=...,
+        optListVal: _typing.Optional[_fbthrift_compatible_with_MyStructField26Patch]=...,
+        optLateStructVal: _typing.Optional[_fbthrift_compatible_with_LateDefStructPatch]=...,
+        optStructVal: _typing.Optional[_fbthrift_compatible_with_MyDataPatch]=...,
+        optEnumVal: _typing.Optional[_fbthrift_compatible_with_MyStructField23Patch]=...,
+        optBinaryVal: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_BinaryPatch]=...,
+        optStringVal: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_StringPatch]=...,
+        optDoubleVal: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_DoublePatch]=...,
+        optFloatVal: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_FloatPatch]=...,
+        optI64Val: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_I64Patch]=...,
+        optI32Val: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_I32Patch]=...,
+        optI16Val: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_I16Patch]=...,
+        optByteVal: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_BytePatch]=...,
+        optBoolVal: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_BoolPatch]=...,
+        lateStructVal: _typing.Optional[_fbthrift_compatible_with_LateDefStructPatch]=...,
+        unionVal: _typing.Optional[_fbthrift_compatible_with_MyUnionPatch]=...,
+        structVal: _typing.Optional[_fbthrift_compatible_with_MyDataPatch]=...,
+        enumVal: _typing.Optional[_fbthrift_compatible_with_MyStructField10Patch]=...,
+        binaryVal: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_BinaryPatch]=...,
+        stringVal: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_StringPatch]=...,
+        doubleVal: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_DoublePatch]=...,
+        floatVal: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_FloatPatch]=...,
+        i64Val: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_I64Patch]=...,
+        i32Val: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_I32Patch]=...,
+        i16Val: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_I16Patch]=...,
+        byteVal: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_BytePatch]=...,
+        boolVal: _typing.Optional[apache.thrift.op.patch.thrift_types._fbthrift_compatible_with_BoolPatch]=...,
+        structWithFieldCustomDefault: _typing.Optional[_fbthrift_compatible_with_MyDataPatch]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[MyDataWithCustomDefaultPatch, apache.thrift.op.patch.thrift_types.I32Patch, MyStructField30Patch, MyStructField29Patch, MyStructField28Patch, MyStructField27Patch, MyStructField26Patch, LateDefStructPatch, MyDataPatch, MyStructField23Patch, apache.thrift.op.patch.thrift_types.BinaryPatch, apache.thrift.op.patch.thrift_types.StringPatch, apache.thrift.op.patch.thrift_types.DoublePatch, apache.thrift.op.patch.thrift_types.FloatPatch, apache.thrift.op.patch.thrift_types.I64Patch, apache.thrift.op.patch.thrift_types.I32Patch, apache.thrift.op.patch.thrift_types.I16Patch, apache.thrift.op.patch.thrift_types.BytePatch, apache.thrift.op.patch.thrift_types.BoolPatch, LateDefStructPatch, MyUnionPatch, MyDataPatch, MyStructField10Patch, apache.thrift.op.patch.thrift_types.BinaryPatch, apache.thrift.op.patch.thrift_types.StringPatch, apache.thrift.op.patch.thrift_types.DoublePatch, apache.thrift.op.patch.thrift_types.FloatPatch, apache.thrift.op.patch.thrift_types.I64Patch, apache.thrift.op.patch.thrift_types.I32Patch, apache.thrift.op.patch.thrift_types.I16Patch, apache.thrift.op.patch.thrift_types.BytePatch, apache.thrift.op.patch.thrift_types.BoolPatch, MyDataPatch]]]: ...
     def _to_python(self) -> _typing.Self: ...
@@ -906,7 +1025,11 @@ class MyStructFieldPatch(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.MyStructFieldPatch": ...  # type: ignore
 
 
-class MyStructEnsureStruct(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_MyStructEnsureStruct:
+    pass
+
+
+class MyStructEnsureStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStructEnsureStruct):
     structWithCustomDefault: _typing.Final[_typing.Optional[MyDataWithCustomDefault]] = ...
     i32WithCustomDefault: _typing.Final[_typing.Optional[int]] = ...
     mapMap: _typing.Final[_typing.Optional[_typing.Mapping[str, _typing.Mapping[str, int]]]] = ...
@@ -942,16 +1065,16 @@ class MyStructEnsureStruct(_fbthrift_python_types.Struct):
     structWithFieldCustomDefault: _typing.Final[_typing.Optional[MyData]] = ...
     def __init__(
         self, *,
-        structWithCustomDefault: _typing.Optional[MyDataWithCustomDefault]=...,
+        structWithCustomDefault: _typing.Optional[_fbthrift_compatible_with_MyDataWithCustomDefault]=...,
         i32WithCustomDefault: _typing.Optional[int]=...,
         mapMap: _typing.Optional[_typing.Mapping[str, _typing.Mapping[str, int]]]=...,
         listMap: _typing.Optional[_typing.Sequence[_typing.Mapping[str, int]]]=...,
         optMapVal: _typing.Optional[_typing.Mapping[str, str]]=...,
         optSetVal: _typing.Optional[_typing.AbstractSet[str]]=...,
         optListVal: _typing.Optional[_typing.Sequence[int]]=...,
-        optLateStructVal: _typing.Optional[LateDefStruct]=...,
-        optStructVal: _typing.Optional[MyData]=...,
-        optEnumVal: _typing.Optional[MyEnum]=...,
+        optLateStructVal: _typing.Optional[_fbthrift_compatible_with_LateDefStruct]=...,
+        optStructVal: _typing.Optional[_fbthrift_compatible_with_MyData]=...,
+        optEnumVal: _typing.Optional[_fbthrift_compatible_with_MyEnum]=...,
         optBinaryVal: _typing.Optional[_fbthrift_iobuf.IOBuf]=...,
         optStringVal: _typing.Optional[str]=...,
         optDoubleVal: _typing.Optional[float]=...,
@@ -961,10 +1084,10 @@ class MyStructEnsureStruct(_fbthrift_python_types.Struct):
         optI16Val: _typing.Optional[int]=...,
         optByteVal: _typing.Optional[int]=...,
         optBoolVal: _typing.Optional[bool]=...,
-        lateStructVal: _typing.Optional[LateDefStruct]=...,
-        unionVal: _typing.Optional[MyUnion]=...,
-        structVal: _typing.Optional[MyData]=...,
-        enumVal: _typing.Optional[MyEnum]=...,
+        lateStructVal: _typing.Optional[_fbthrift_compatible_with_LateDefStruct]=...,
+        unionVal: _typing.Optional[_fbthrift_compatible_with_MyUnion]=...,
+        structVal: _typing.Optional[_fbthrift_compatible_with_MyData]=...,
+        enumVal: _typing.Optional[_fbthrift_compatible_with_MyEnum]=...,
         binaryVal: _typing.Optional[_fbthrift_iobuf.IOBuf]=...,
         stringVal: _typing.Optional[str]=...,
         doubleVal: _typing.Optional[float]=...,
@@ -974,21 +1097,21 @@ class MyStructEnsureStruct(_fbthrift_python_types.Struct):
         i16Val: _typing.Optional[int]=...,
         byteVal: _typing.Optional[int]=...,
         boolVal: _typing.Optional[bool]=...,
-        structWithFieldCustomDefault: _typing.Optional[MyData]=...
+        structWithFieldCustomDefault: _typing.Optional[_fbthrift_compatible_with_MyData]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        structWithCustomDefault: _typing.Optional[MyDataWithCustomDefault]=...,
+        structWithCustomDefault: _typing.Optional[_fbthrift_compatible_with_MyDataWithCustomDefault]=...,
         i32WithCustomDefault: _typing.Optional[int]=...,
         mapMap: _typing.Optional[_typing.Mapping[str, _typing.Mapping[str, int]]]=...,
         listMap: _typing.Optional[_typing.Sequence[_typing.Mapping[str, int]]]=...,
         optMapVal: _typing.Optional[_typing.Mapping[str, str]]=...,
         optSetVal: _typing.Optional[_typing.AbstractSet[str]]=...,
         optListVal: _typing.Optional[_typing.Sequence[int]]=...,
-        optLateStructVal: _typing.Optional[LateDefStruct]=...,
-        optStructVal: _typing.Optional[MyData]=...,
-        optEnumVal: _typing.Optional[MyEnum]=...,
+        optLateStructVal: _typing.Optional[_fbthrift_compatible_with_LateDefStruct]=...,
+        optStructVal: _typing.Optional[_fbthrift_compatible_with_MyData]=...,
+        optEnumVal: _typing.Optional[_fbthrift_compatible_with_MyEnum]=...,
         optBinaryVal: _typing.Optional[_fbthrift_iobuf.IOBuf]=...,
         optStringVal: _typing.Optional[str]=...,
         optDoubleVal: _typing.Optional[float]=...,
@@ -998,10 +1121,10 @@ class MyStructEnsureStruct(_fbthrift_python_types.Struct):
         optI16Val: _typing.Optional[int]=...,
         optByteVal: _typing.Optional[int]=...,
         optBoolVal: _typing.Optional[bool]=...,
-        lateStructVal: _typing.Optional[LateDefStruct]=...,
-        unionVal: _typing.Optional[MyUnion]=...,
-        structVal: _typing.Optional[MyData]=...,
-        enumVal: _typing.Optional[MyEnum]=...,
+        lateStructVal: _typing.Optional[_fbthrift_compatible_with_LateDefStruct]=...,
+        unionVal: _typing.Optional[_fbthrift_compatible_with_MyUnion]=...,
+        structVal: _typing.Optional[_fbthrift_compatible_with_MyData]=...,
+        enumVal: _typing.Optional[_fbthrift_compatible_with_MyEnum]=...,
         binaryVal: _typing.Optional[_fbthrift_iobuf.IOBuf]=...,
         stringVal: _typing.Optional[str]=...,
         doubleVal: _typing.Optional[float]=...,
@@ -1011,7 +1134,7 @@ class MyStructEnsureStruct(_fbthrift_python_types.Struct):
         i16Val: _typing.Optional[int]=...,
         byteVal: _typing.Optional[int]=...,
         boolVal: _typing.Optional[bool]=...,
-        structWithFieldCustomDefault: _typing.Optional[MyData]=...
+        structWithFieldCustomDefault: _typing.Optional[_fbthrift_compatible_with_MyData]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[MyDataWithCustomDefault, int, _typing.Mapping[str, _typing.Mapping[str, int]], _typing.Sequence[_typing.Mapping[str, int]], _typing.Mapping[str, str], _typing.AbstractSet[str], _typing.Sequence[int], LateDefStruct, MyData, MyEnum, _fbthrift_iobuf.IOBuf, str, float, float, int, int, int, int, bool, LateDefStruct, MyUnion, MyData, MyEnum, _fbthrift_iobuf.IOBuf, str, float, float, int, int, int, int, bool, MyData]]]: ...
     def _to_python(self) -> _typing.Self: ...
@@ -1019,7 +1142,11 @@ class MyStructEnsureStruct(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.MyStructEnsureStruct": ...  # type: ignore
 
 
-class LateDefStructPatch(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_LateDefStructPatch:
+    pass
+
+
+class LateDefStructPatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_LateDefStructPatch):
     assign: _typing.Final[_typing.Optional[LateDefStruct]] = ...
     clear: _typing.Final[bool] = ...
     patchPrior: _typing.Final[LateDefStructFieldPatch] = ...
@@ -1028,21 +1155,21 @@ class LateDefStructPatch(_fbthrift_python_types.Struct):
     remove: _typing.Final[_typing.Sequence[int]] = ...
     def __init__(
         self, *,
-        assign: _typing.Optional[LateDefStruct]=...,
+        assign: _typing.Optional[_fbthrift_compatible_with_LateDefStruct]=...,
         clear: _typing.Optional[bool]=...,
-        patchPrior: _typing.Optional[LateDefStructFieldPatch]=...,
-        ensure: _typing.Optional[LateDefStructEnsureStruct]=...,
-        patch: _typing.Optional[LateDefStructFieldPatch]=...,
+        patchPrior: _typing.Optional[_fbthrift_compatible_with_LateDefStructFieldPatch]=...,
+        ensure: _typing.Optional[_fbthrift_compatible_with_LateDefStructEnsureStruct]=...,
+        patch: _typing.Optional[_fbthrift_compatible_with_LateDefStructFieldPatch]=...,
         remove: _typing.Optional[_typing.Sequence[int]]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        assign: _typing.Optional[LateDefStruct]=...,
+        assign: _typing.Optional[_fbthrift_compatible_with_LateDefStruct]=...,
         clear: _typing.Optional[bool]=...,
-        patchPrior: _typing.Optional[LateDefStructFieldPatch]=...,
-        ensure: _typing.Optional[LateDefStructEnsureStruct]=...,
-        patch: _typing.Optional[LateDefStructFieldPatch]=...,
+        patchPrior: _typing.Optional[_fbthrift_compatible_with_LateDefStructFieldPatch]=...,
+        ensure: _typing.Optional[_fbthrift_compatible_with_LateDefStructEnsureStruct]=...,
+        patch: _typing.Optional[_fbthrift_compatible_with_LateDefStructFieldPatch]=...,
         remove: _typing.Optional[_typing.Sequence[int]]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[LateDefStruct, bool, LateDefStructFieldPatch, LateDefStructEnsureStruct, LateDefStructFieldPatch, _typing.Sequence[int]]]]: ...
@@ -1051,7 +1178,11 @@ class LateDefStructPatch(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.LateDefStructPatch": ...  # type: ignore
 
 
-class LateDefStructFieldPatch(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_LateDefStructFieldPatch:
+    pass
+
+
+class LateDefStructFieldPatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_LateDefStructFieldPatch):
     def __init__(
         self,
     ) -> None: ...
@@ -1065,7 +1196,11 @@ class LateDefStructFieldPatch(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.LateDefStructFieldPatch": ...  # type: ignore
 
 
-class LateDefStructEnsureStruct(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_LateDefStructEnsureStruct:
+    pass
+
+
+class LateDefStructEnsureStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_LateDefStructEnsureStruct):
     def __init__(
         self,
     ) -> None: ...
@@ -1079,7 +1214,11 @@ class LateDefStructEnsureStruct(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.LateDefStructEnsureStruct": ...  # type: ignore
 
 
-class RecursivePatch(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_RecursivePatch:
+    pass
+
+
+class RecursivePatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_RecursivePatch):
     assign: _typing.Final[_typing.Optional[Recursive]] = ...
     clear: _typing.Final[bool] = ...
     patchPrior: _typing.Final[RecursiveFieldPatch] = ...
@@ -1088,21 +1227,21 @@ class RecursivePatch(_fbthrift_python_types.Struct):
     remove: _typing.Final[_typing.Sequence[int]] = ...
     def __init__(
         self, *,
-        assign: _typing.Optional[Recursive]=...,
+        assign: _typing.Optional[_fbthrift_compatible_with_Recursive]=...,
         clear: _typing.Optional[bool]=...,
-        patchPrior: _typing.Optional[RecursiveFieldPatch]=...,
-        ensure: _typing.Optional[RecursiveEnsureStruct]=...,
-        patch: _typing.Optional[RecursiveFieldPatch]=...,
+        patchPrior: _typing.Optional[_fbthrift_compatible_with_RecursiveFieldPatch]=...,
+        ensure: _typing.Optional[_fbthrift_compatible_with_RecursiveEnsureStruct]=...,
+        patch: _typing.Optional[_fbthrift_compatible_with_RecursiveFieldPatch]=...,
         remove: _typing.Optional[_typing.Sequence[int]]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        assign: _typing.Optional[Recursive]=...,
+        assign: _typing.Optional[_fbthrift_compatible_with_Recursive]=...,
         clear: _typing.Optional[bool]=...,
-        patchPrior: _typing.Optional[RecursiveFieldPatch]=...,
-        ensure: _typing.Optional[RecursiveEnsureStruct]=...,
-        patch: _typing.Optional[RecursiveFieldPatch]=...,
+        patchPrior: _typing.Optional[_fbthrift_compatible_with_RecursiveFieldPatch]=...,
+        ensure: _typing.Optional[_fbthrift_compatible_with_RecursiveEnsureStruct]=...,
+        patch: _typing.Optional[_fbthrift_compatible_with_RecursiveFieldPatch]=...,
         remove: _typing.Optional[_typing.Sequence[int]]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[Recursive, bool, RecursiveFieldPatch, RecursiveEnsureStruct, RecursiveFieldPatch, _typing.Sequence[int]]]]: ...
@@ -1111,18 +1250,22 @@ class RecursivePatch(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.RecursivePatch": ...  # type: ignore
 
 
-class RecursiveField1Patch(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_RecursiveField1Patch:
+    pass
+
+
+class RecursiveField1Patch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_RecursiveField1Patch):
     assign: _typing.Final[_typing.Optional[_typing.Mapping[str, Recursive]]] = ...
     clear: _typing.Final[bool] = ...
     def __init__(
         self, *,
-        assign: _typing.Optional[_typing.Mapping[str, Recursive]]=...,
+        assign: _typing.Optional[_typing.Mapping[str, _fbthrift_compatible_with_Recursive]]=...,
         clear: _typing.Optional[bool]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        assign: _typing.Optional[_typing.Mapping[str, Recursive]]=...,
+        assign: _typing.Optional[_typing.Mapping[str, _fbthrift_compatible_with_Recursive]]=...,
         clear: _typing.Optional[bool]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_typing.Mapping[str, Recursive], bool]]]: ...
@@ -1131,16 +1274,20 @@ class RecursiveField1Patch(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.RecursiveField1Patch": ...  # type: ignore
 
 
-class RecursiveFieldPatch(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_RecursiveFieldPatch:
+    pass
+
+
+class RecursiveFieldPatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_RecursiveFieldPatch):
     nodes: _typing.Final[RecursiveField1Patch] = ...
     def __init__(
         self, *,
-        nodes: _typing.Optional[RecursiveField1Patch]=...
+        nodes: _typing.Optional[_fbthrift_compatible_with_RecursiveField1Patch]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        nodes: _typing.Optional[RecursiveField1Patch]=...
+        nodes: _typing.Optional[_fbthrift_compatible_with_RecursiveField1Patch]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[RecursiveField1Patch]]]: ...
     def _to_python(self) -> _typing.Self: ...
@@ -1148,16 +1295,20 @@ class RecursiveFieldPatch(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.RecursiveFieldPatch": ...  # type: ignore
 
 
-class RecursiveEnsureStruct(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_RecursiveEnsureStruct:
+    pass
+
+
+class RecursiveEnsureStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_RecursiveEnsureStruct):
     nodes: _typing.Final[_typing.Optional[_typing.Mapping[str, Recursive]]] = ...
     def __init__(
         self, *,
-        nodes: _typing.Optional[_typing.Mapping[str, Recursive]]=...
+        nodes: _typing.Optional[_typing.Mapping[str, _fbthrift_compatible_with_Recursive]]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        nodes: _typing.Optional[_typing.Mapping[str, Recursive]]=...
+        nodes: _typing.Optional[_typing.Mapping[str, _fbthrift_compatible_with_Recursive]]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_typing.Mapping[str, Recursive]]]]: ...
     def _to_python(self) -> _typing.Self: ...
@@ -1165,7 +1316,11 @@ class RecursiveEnsureStruct(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.RecursiveEnsureStruct": ...  # type: ignore
 
 
-class BarPatch(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_BarPatch:
+    pass
+
+
+class BarPatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_BarPatch):
     assign: _typing.Final[_typing.Optional[Bar]] = ...
     clear: _typing.Final[bool] = ...
     patchPrior: _typing.Final[BarFieldPatch] = ...
@@ -1174,21 +1329,21 @@ class BarPatch(_fbthrift_python_types.Struct):
     remove: _typing.Final[_typing.Sequence[int]] = ...
     def __init__(
         self, *,
-        assign: _typing.Optional[Bar]=...,
+        assign: _typing.Optional[_fbthrift_compatible_with_Bar]=...,
         clear: _typing.Optional[bool]=...,
-        patchPrior: _typing.Optional[BarFieldPatch]=...,
-        ensure: _typing.Optional[BarEnsureStruct]=...,
-        patch: _typing.Optional[BarFieldPatch]=...,
+        patchPrior: _typing.Optional[_fbthrift_compatible_with_BarFieldPatch]=...,
+        ensure: _typing.Optional[_fbthrift_compatible_with_BarEnsureStruct]=...,
+        patch: _typing.Optional[_fbthrift_compatible_with_BarFieldPatch]=...,
         remove: _typing.Optional[_typing.Sequence[int]]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        assign: _typing.Optional[Bar]=...,
+        assign: _typing.Optional[_fbthrift_compatible_with_Bar]=...,
         clear: _typing.Optional[bool]=...,
-        patchPrior: _typing.Optional[BarFieldPatch]=...,
-        ensure: _typing.Optional[BarEnsureStruct]=...,
-        patch: _typing.Optional[BarFieldPatch]=...,
+        patchPrior: _typing.Optional[_fbthrift_compatible_with_BarFieldPatch]=...,
+        ensure: _typing.Optional[_fbthrift_compatible_with_BarEnsureStruct]=...,
+        patch: _typing.Optional[_fbthrift_compatible_with_BarFieldPatch]=...,
         remove: _typing.Optional[_typing.Sequence[int]]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[Bar, bool, BarFieldPatch, BarEnsureStruct, BarFieldPatch, _typing.Sequence[int]]]]: ...
@@ -1197,16 +1352,20 @@ class BarPatch(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.BarPatch": ...  # type: ignore
 
 
-class BarFieldPatch(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_BarFieldPatch:
+    pass
+
+
+class BarFieldPatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_BarFieldPatch):
     loop: _typing.Final[LoopPatch] = ...
     def __init__(
         self, *,
-        loop: _typing.Optional[LoopPatch]=...
+        loop: _typing.Optional[_fbthrift_compatible_with_LoopPatch]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        loop: _typing.Optional[LoopPatch]=...
+        loop: _typing.Optional[_fbthrift_compatible_with_LoopPatch]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[LoopPatch]]]: ...
     def _to_python(self) -> _typing.Self: ...
@@ -1214,16 +1373,20 @@ class BarFieldPatch(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.BarFieldPatch": ...  # type: ignore
 
 
-class BarEnsureStruct(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_BarEnsureStruct:
+    pass
+
+
+class BarEnsureStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_BarEnsureStruct):
     loop: _typing.Final[_typing.Optional[Loop]] = ...
     def __init__(
         self, *,
-        loop: _typing.Optional[Loop]=...
+        loop: _typing.Optional[_fbthrift_compatible_with_Loop]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        loop: _typing.Optional[Loop]=...
+        loop: _typing.Optional[_fbthrift_compatible_with_Loop]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[Loop]]]: ...
     def _to_python(self) -> _typing.Self: ...
@@ -1231,18 +1394,22 @@ class BarEnsureStruct(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.BarEnsureStruct": ...  # type: ignore
 
 
-class LoopPatch(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_LoopPatch:
+    pass
+
+
+class LoopPatch(_fbthrift_python_types.Struct, _fbthrift_compatible_with_LoopPatch):
     assign: _typing.Final[_typing.Optional[Loop]] = ...
     clear: _typing.Final[bool] = ...
     def __init__(
         self, *,
-        assign: _typing.Optional[Loop]=...,
+        assign: _typing.Optional[_fbthrift_compatible_with_Loop]=...,
         clear: _typing.Optional[bool]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        assign: _typing.Optional[Loop]=...,
+        assign: _typing.Optional[_fbthrift_compatible_with_Loop]=...,
         clear: _typing.Optional[bool]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[Loop, bool]]]: ...

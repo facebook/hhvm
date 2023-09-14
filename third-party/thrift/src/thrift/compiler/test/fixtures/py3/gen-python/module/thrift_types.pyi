@@ -18,8 +18,11 @@ import folly.iobuf as _fbthrift_iobuf
 import fbcode.thrift.python.types as _fbthrift_python_types
 import fbcode.thrift.python.exceptions as _fbthrift_python_exceptions
 
+class _fbthrift_compatible_with_AnEnum:
+    pass
 
-class AnEnum(_fbthrift_python_types.Enum, int):
+
+class AnEnum(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_AnEnum):
     NOTSET: AnEnum = ...
     ONE: AnEnum = ...
     TWO: AnEnum = ...
@@ -29,8 +32,11 @@ class AnEnum(_fbthrift_python_types.Enum, int):
     def _to_py3(self) -> "module.types.AnEnum": ...  # type: ignore
     def _to_py_deprecated(self) -> int: ...
 
+class _fbthrift_compatible_with_AnEnumRenamed:
+    pass
 
-class AnEnumRenamed(_fbthrift_python_types.Enum, int):
+
+class AnEnumRenamed(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_AnEnumRenamed):
     name_: AnEnumRenamed = ...
     value_: AnEnumRenamed = ...
     renamed_: AnEnumRenamed = ...
@@ -38,8 +44,11 @@ class AnEnumRenamed(_fbthrift_python_types.Enum, int):
     def _to_py3(self) -> "module.types.AnEnumRenamed": ...  # type: ignore
     def _to_py_deprecated(self) -> int: ...
 
+class _fbthrift_compatible_with_Flags:
+    pass
 
-class Flags(_fbthrift_python_types.Flag):
+
+class Flags(_fbthrift_python_types.Flag, _fbthrift_compatible_with_Flags):
     flag_A: Flags = ...
     flag_B: Flags = ...
     flag_C: Flags = ...
@@ -49,7 +58,11 @@ class Flags(_fbthrift_python_types.Flag):
     def _to_py_deprecated(self) -> int: ...
 
 
-class SimpleException(_fbthrift_python_exceptions.GeneratedError):
+class _fbthrift_compatible_with_SimpleException:
+    pass
+
+
+class SimpleException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_SimpleException):
     err_code: _typing.Final[int] = ...
     def __init__(
         self, *,
@@ -62,7 +75,11 @@ class SimpleException(_fbthrift_python_exceptions.GeneratedError):
     def _to_py_deprecated(self) -> "module.ttypes.SimpleException": ...  # type: ignore
 
 
-class OptionalRefStruct(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_OptionalRefStruct:
+    pass
+
+
+class OptionalRefStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_OptionalRefStruct):
     optional_blob: _typing.Final[_typing.Optional[_fbthrift_iobuf.IOBuf]] = ...
     def __init__(
         self, *,
@@ -79,7 +96,11 @@ class OptionalRefStruct(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.OptionalRefStruct": ...  # type: ignore
 
 
-class SimpleStruct(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_SimpleStruct:
+    pass
+
+
+class SimpleStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_SimpleStruct):
     is_on: _typing.Final[bool] = ...
     tiny_int: _typing.Final[int] = ...
     small_int: _typing.Final[int] = ...
@@ -117,22 +138,26 @@ class SimpleStruct(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.SimpleStruct": ...  # type: ignore
 
 
-class HiddenTypeFieldsStruct(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_HiddenTypeFieldsStruct:
+    pass
+
+
+class HiddenTypeFieldsStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_HiddenTypeFieldsStruct):
     field1: _typing.Final[SimpleStruct] = ...
     field2: _typing.Final[_typing.Sequence[SimpleStruct]] = ...
     field3: _typing.Final[_typing.Mapping[int, SimpleStruct]] = ...
     def __init__(
         self, *,
-        field1: _typing.Optional[SimpleStruct]=...,
-        field2: _typing.Optional[_typing.Sequence[SimpleStruct]]=...,
-        field3: _typing.Optional[_typing.Mapping[int, SimpleStruct]]=...
+        field1: _typing.Optional[_fbthrift_compatible_with_SimpleStruct]=...,
+        field2: _typing.Optional[_typing.Sequence[_fbthrift_compatible_with_SimpleStruct]]=...,
+        field3: _typing.Optional[_typing.Mapping[int, _fbthrift_compatible_with_SimpleStruct]]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        field1: _typing.Optional[SimpleStruct]=...,
-        field2: _typing.Optional[_typing.Sequence[SimpleStruct]]=...,
-        field3: _typing.Optional[_typing.Mapping[int, SimpleStruct]]=...
+        field1: _typing.Optional[_fbthrift_compatible_with_SimpleStruct]=...,
+        field2: _typing.Optional[_typing.Sequence[_fbthrift_compatible_with_SimpleStruct]]=...,
+        field3: _typing.Optional[_typing.Mapping[int, _fbthrift_compatible_with_SimpleStruct]]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[SimpleStruct, _typing.Sequence[SimpleStruct], _typing.Mapping[int, SimpleStruct]]]]: ...
     def _to_python(self) -> _typing.Self: ...
@@ -140,7 +165,11 @@ class HiddenTypeFieldsStruct(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.HiddenTypeFieldsStruct": ...  # type: ignore
 
 
-class AdaptedUnion(_fbthrift_python_types.Union):
+class _fbthrift_compatible_with_AdaptedUnion:
+    pass
+
+
+class AdaptedUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_AdaptedUnion):
     best: _typing.Final[int] = ...
     def __init__(
         self, *,
@@ -162,7 +191,11 @@ class AdaptedUnion(_fbthrift_python_types.Union):
     def _to_py_deprecated(self) -> "module.ttypes.AdaptedUnion": ...  # type: ignore
 
 
-class HiddenException(_fbthrift_python_exceptions.GeneratedError):
+class _fbthrift_compatible_with_HiddenException:
+    pass
+
+
+class HiddenException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_HiddenException):
     test: _typing.Final[int] = ...
     def __init__(
         self, *,
@@ -175,7 +208,11 @@ class HiddenException(_fbthrift_python_exceptions.GeneratedError):
     def _to_py_deprecated(self) -> "module.ttypes.HiddenException": ...  # type: ignore
 
 
-class ComplexStruct(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_ComplexStruct:
+    pass
+
+
+class ComplexStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_ComplexStruct):
     structOne: _typing.Final[SimpleStruct] = ...
     structTwo: _typing.Final[SimpleStruct] = ...
     an_integer: _typing.Final[int] = ...
@@ -187,11 +224,11 @@ class ComplexStruct(_fbthrift_python_types.Struct):
     bytes_with_cpp_type: _typing.Final[bytes] = ...
     def __init__(
         self, *,
-        structOne: _typing.Optional[SimpleStruct]=...,
-        structTwo: _typing.Optional[SimpleStruct]=...,
+        structOne: _typing.Optional[_fbthrift_compatible_with_SimpleStruct]=...,
+        structTwo: _typing.Optional[_fbthrift_compatible_with_SimpleStruct]=...,
         an_integer: _typing.Optional[int]=...,
         name: _typing.Optional[str]=...,
-        an_enum: _typing.Optional[AnEnum]=...,
+        an_enum: _typing.Optional[_fbthrift_compatible_with_AnEnum]=...,
         some_bytes: _typing.Optional[bytes]=...,
         sender: _typing.Optional[str]=...,
         cdef_: _typing.Optional[str]=...,
@@ -200,11 +237,11 @@ class ComplexStruct(_fbthrift_python_types.Struct):
 
     def __call__(
         self, *,
-        structOne: _typing.Optional[SimpleStruct]=...,
-        structTwo: _typing.Optional[SimpleStruct]=...,
+        structOne: _typing.Optional[_fbthrift_compatible_with_SimpleStruct]=...,
+        structTwo: _typing.Optional[_fbthrift_compatible_with_SimpleStruct]=...,
         an_integer: _typing.Optional[int]=...,
         name: _typing.Optional[str]=...,
-        an_enum: _typing.Optional[AnEnum]=...,
+        an_enum: _typing.Optional[_fbthrift_compatible_with_AnEnum]=...,
         some_bytes: _typing.Optional[bytes]=...,
         sender: _typing.Optional[str]=...,
         cdef_: _typing.Optional[str]=...,
@@ -216,7 +253,11 @@ class ComplexStruct(_fbthrift_python_types.Struct):
     def _to_py_deprecated(self) -> "module.ttypes.ComplexStruct": ...  # type: ignore
 
 
-class BinaryUnion(_fbthrift_python_types.Union):
+class _fbthrift_compatible_with_BinaryUnion:
+    pass
+
+
+class BinaryUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_BinaryUnion):
     iobuf_val: _typing.Final[_fbthrift_iobuf.IOBuf] = ...
     def __init__(
         self, *,
@@ -238,16 +279,20 @@ class BinaryUnion(_fbthrift_python_types.Union):
     def _to_py_deprecated(self) -> "module.ttypes.BinaryUnion": ...  # type: ignore
 
 
-class BinaryUnionStruct(_fbthrift_python_types.Struct):
+class _fbthrift_compatible_with_BinaryUnionStruct:
+    pass
+
+
+class BinaryUnionStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_BinaryUnionStruct):
     u: _typing.Final[BinaryUnion] = ...
     def __init__(
         self, *,
-        u: _typing.Optional[BinaryUnion]=...
+        u: _typing.Optional[_fbthrift_compatible_with_BinaryUnion]=...
     ) -> None: ...
 
     def __call__(
         self, *,
-        u: _typing.Optional[BinaryUnion]=...
+        u: _typing.Optional[_fbthrift_compatible_with_BinaryUnion]=...
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[BinaryUnion]]]: ...
     def _to_python(self) -> _typing.Self: ...

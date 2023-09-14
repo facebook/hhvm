@@ -55,6 +55,8 @@ struct go_codegen_data {
       {"thrift", 0},
       {"context", 0},
       {"fmt", 0},
+      {"strings", 0},
+      {"sync", 0},
   };
   // Records field names for every struct in the program.
   // This is needed to resolve some edge case name collisions.

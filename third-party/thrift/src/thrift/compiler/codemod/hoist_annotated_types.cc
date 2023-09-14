@@ -201,7 +201,9 @@ class hoist_annotated_types {
       auto type_begin_offset = range.begin.offset();
       auto old_content = fm_.old_content();
       while (type_begin_offset < range.end.offset() &&
-             old_content[type_begin_offset - 1] != ':') {
+             (!isdigit(old_content[type_begin_offset - 2]) ||
+              old_content[type_begin_offset - 1] != ':' ||
+              !isspace(old_content[type_begin_offset]))) {
         type_begin_offset++;
       }
       if (f.qualifier() == t_field_qualifier::optional) {

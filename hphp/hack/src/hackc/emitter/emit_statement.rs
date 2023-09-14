@@ -401,18 +401,19 @@ fn emit_awaitall_multi<'a, 'arena, 'decl>(
 ) -> Result<InstrSeq<'arena>> {
     scope::with_unnamed_locals(e, |e| {
         let mut instrs = vec![];
-        let mut locals: Vec<Local> = vec![];
-        for (lvar, expr) in el.iter() {
-            let local = match lvar {
+        let locals: Vec<_> = el
+            .iter()
+            .map(|(lvar, _)| match lvar {
                 None => e.local_gen_mut().get_unnamed(),
                 Some(ast::Lid(_, id)) => e
                     .local_gen_mut()
                     .init_unnamed_for_tempname(local_id::get_name(id))
                     .to_owned(),
-            };
+            })
+            .collect();
+        for (local, (_, expr)) in locals.iter().zip(el) {
             instrs.push(emit_expr::emit_expr(e, env, expr)?);
-            instrs.push(instr::pop_l(local));
-            locals.push(local);
+            instrs.push(instr::pop_l(*local));
         }
 
         let load_args = InstrSeq::gather(instrs);

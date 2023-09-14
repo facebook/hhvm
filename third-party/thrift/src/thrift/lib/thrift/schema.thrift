@@ -148,7 +148,7 @@ struct DefinitionAttrs {
   2: standard.Uri uri;
 
   /**
-   * DEPRECATED! Prefer `structuredAnnotations`.
+   * DEPRECATED! Prefer `annotations`.
    * The structured annotations associated with this definition.
    */
   3: AnnotationIds structuredAnnotations;

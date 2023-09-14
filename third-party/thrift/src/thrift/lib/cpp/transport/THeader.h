@@ -395,6 +395,11 @@ class THeader final {
     return std::move(c_.routingData_);
   }
 
+  const std::optional<LoggingContext>& loggingContext() const {
+    return c_.loggingContext_;
+  }
+  std::optional<LoggingContext>& loggingContext() { return c_.loggingContext_; }
+
   folly::SocketFds fds; // No accessor, since this type **is** the API.
 
   // 0 and 16th bits must be 0 to differentiate from framed & unframed
@@ -463,7 +468,7 @@ class THeader final {
   static constexpr std::string_view ID_VERSION = "1";
 
   // IMPORTANT: Anything not in this sub-struct must be copied explicitly by
-  // `copyOrDfatalIfReceived` to support sending shadow requests.
+  // `copyOrDfatalIfReceived`.
   struct TriviallyCopiable {
     explicit TriviallyCopiable(int options);
 
@@ -508,6 +513,10 @@ class THeader final {
     folly::Optional<int64_t> serverLoad_;
 
     std::optional<ProxiedPayloadMetadata> proxiedPayloadMetadata_;
+
+    // We make this field optional to differentiate SR calls v.s raw thrift
+    // calls. This field will always be set by SR.
+    std::optional<LoggingContext> loggingContext_;
   };
 
   // Supports `copyOrDfatalIfReceived`.

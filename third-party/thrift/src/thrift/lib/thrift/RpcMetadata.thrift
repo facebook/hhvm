@@ -139,6 +139,11 @@ struct FdMetadata {
   2: optional i32 numFds; // Linux currently limits this to SCM_MAX_FD (253).
 }
 
+struct LoggingContext {
+  1: i64 logSampleRatio = 0;
+  2: i64 logErrorSampleRatio = 0;
+}
+
 struct RequestRpcMetadata {
   // The protocol using which the request payload has been serialized. MUST be
   // set.
@@ -197,6 +202,8 @@ struct RequestRpcMetadata {
   // 21: Deprecated
   @thrift.Box
   22: optional FdMetadata fdMetadata;
+  // store client logging metadata such as log sampling ratios, request id, etc. MAY be set.
+  23: optional LoggingContext loggingContext;
 }
 
 struct ErrorClassification {

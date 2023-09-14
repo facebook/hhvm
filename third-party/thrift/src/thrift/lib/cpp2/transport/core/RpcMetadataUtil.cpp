@@ -104,6 +104,10 @@ RequestRpcMetadata makeRequestRpcMetadata(
     }
   }
 
+  if (const auto& loggingContext = header.loggingContext()) {
+    metadata.loggingContext() = *loggingContext;
+  }
+
   return metadata;
 }
 

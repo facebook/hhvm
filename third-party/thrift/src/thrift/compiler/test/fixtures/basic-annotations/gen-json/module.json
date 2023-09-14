@@ -3,17 +3,17 @@
   "thrift_module" : "module",
   "constants" : {
     "myStruct" : {
-      "lineno" : 67,
+      "lineno" : 66,
       "value" : { "major" : 42, "package" : "package", "my_enum" : 2 },
       "type_enum" : "STRUCT",
       "spec_args" : "MyStruct",
       "source_range" : {
         "begin" : {
-          "line" : 67,
+          "line" : 66,
           "column" : 1
         },
         "end" : {
-          "line" : 71,
+          "line" : 70,
           "column" : 3
         }
       }
@@ -64,7 +64,7 @@
   },
   "typedefs" : {
     "AwesomeStruct" : {
-      "lineno" : 63,
+      "lineno" : 62,
       "type_enum" : "STRUCT",
       "spec_args" : "MyStruct",
       "structured_annotations" : {
@@ -72,17 +72,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 63,
+          "line" : 62,
           "column" : 1
         },
         "end" : {
-          "line" : 64,
+          "line" : 63,
           "column" : 31
         }
       }
     },
     "FantasticStruct" : {
-      "lineno" : 65,
+      "lineno" : 64,
       "type_enum" : "STRUCT",
       "spec_args" : "MyStruct",
       "annotations" : {
@@ -90,11 +90,11 @@
           "value" : "BrilliantStruct",
           "source_range" : {
             "begin" : {
-              "line" : 65,
+              "line" : 64,
               "column" : 35
             },
             "end" : {
-              "line" : 65,
+              "line" : 64,
               "column" : 62
             }
           }
@@ -102,11 +102,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 65,
+          "line" : 64,
           "column" : 1
         },
         "end" : {
-          "line" : 65,
+          "line" : 64,
           "column" : 63
         }
       }
@@ -236,20 +236,6 @@
           }
         }
 ,
-        "cpp.internal.deprecated._data.method" : {
-          "value" : "1",
-          "source_range" : {
-            "begin" : {
-              "line" : 58,
-              "column" : 3
-            },
-            "end" : {
-              "line" : 58,
-              "column" : 39
-            }
-          }
-        }
-,
         "cpp.name" : {
           "value" : "YourStruct",
           "source_range" : {
@@ -268,11 +254,11 @@
           "value" : "\\SomeClass(\\AnotherClass::class)",
           "source_range" : {
             "begin" : {
-              "line" : 60,
+              "line" : 59,
               "column" : 3
             },
             "end" : {
-              "line" : 60,
+              "line" : 59,
               "column" : 55
             }
           }
@@ -282,11 +268,11 @@
           "value" : "facebook.com/thrift/compiler/test/fixtures/basic-annotations/src/module/MyStruct",
           "source_range" : {
             "begin" : {
-              "line" : 59,
+              "line" : 58,
               "column" : 3
             },
             "end" : {
-              "line" : 59,
+              "line" : 58,
               "column" : 98
             }
           }
@@ -531,13 +517,13 @@
           "column" : 1
         },
         "end" : {
-          "line" : 61,
+          "line" : 60,
           "column" : 2
         }
       }
     },
     "SecretStruct" : {
-      "lineno" : 97,
+      "lineno" : 96,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -547,11 +533,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 98,
+              "line" : 97,
               "column" : 3
             },
             "end" : {
-              "line" : 98,
+              "line" : 97,
               "column" : 13
             }
           }
@@ -565,11 +551,11 @@
               "value" : "1",
               "source_range" : {
                 "begin" : {
-                  "line" : 99,
+                  "line" : 98,
                   "column" : 23
                 },
                 "end" : {
-                  "line" : 99,
+                  "line" : 98,
                   "column" : 37
                 }
               }
@@ -577,11 +563,11 @@
           },
           "source_range" : {
             "begin" : {
-              "line" : 99,
+              "line" : 98,
               "column" : 3
             },
             "end" : {
-              "line" : 99,
+              "line" : 98,
               "column" : 39
             }
           }
@@ -589,11 +575,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 97,
+          "line" : 96,
           "column" : 1
         },
         "end" : {
-          "line" : 100,
+          "line" : 99,
           "column" : 2
         }
       }
@@ -601,7 +587,7 @@
   },
   "services" : {
     "MyService" : {
-      "lineno" : 73,
+      "lineno" : 72,
       "functions" : {
         "MyService.ping" : {
           "return_type" : {
@@ -614,11 +600,11 @@
           ],
           "source_range" : {
             "begin" : {
-              "line" : 74,
+              "line" : 73,
               "column" : 3
             },
             "end" : {
-              "line" : 74,
+              "line" : 73,
               "column" : 48
             }
           }
@@ -632,11 +618,11 @@
           "throws" : [],
           "source_range" : {
             "begin" : {
-              "line" : 75,
+              "line" : 74,
               "column" : 3
             },
             "end" : {
-              "line" : 75,
+              "line" : 74,
               "column" : 26
             }
           }
@@ -656,11 +642,11 @@
           "throws" : [],
           "source_range" : {
             "begin" : {
-              "line" : 76,
+              "line" : 75,
               "column" : 3
             },
             "end" : {
-              "line" : 76,
+              "line" : 75,
               "column" : 31
             }
           }
@@ -683,11 +669,11 @@
           },
           "source_range" : {
             "begin" : {
-              "line" : 77,
+              "line" : 76,
               "column" : 3
             },
             "end" : {
-              "line" : 78,
+              "line" : 77,
               "column" : 33
             }
           }
@@ -715,11 +701,11 @@
           "throws" : [],
           "source_range" : {
             "begin" : {
-              "line" : 79,
+              "line" : 78,
               "column" : 3
             },
             "end" : {
-              "line" : 83,
+              "line" : 82,
               "column" : 5
             }
           }
@@ -744,11 +730,11 @@
                   "value" : "dataStr",
                   "source_range" : {
                     "begin" : {
-                      "line" : 84,
+                      "line" : 83,
                       "column" : 54
                     },
                     "end" : {
-                      "line" : 84,
+                      "line" : 83,
                       "column" : 74
                     }
                   }
@@ -759,11 +745,11 @@
           "throws" : [],
           "source_range" : {
             "begin" : {
-              "line" : 84,
+              "line" : 83,
               "column" : 3
             },
             "end" : {
-              "line" : 84,
+              "line" : 83,
               "column" : 77
             }
           }
@@ -780,11 +766,11 @@
               "value" : "cppDoNothing",
               "source_range" : {
                 "begin" : {
-                  "line" : 85,
+                  "line" : 84,
                   "column" : 21
                 },
                 "end" : {
-                  "line" : 85,
+                  "line" : 84,
                   "column" : 46
                 }
               }
@@ -794,11 +780,11 @@
               "value" : "GoDoNothing",
               "source_range" : {
                 "begin" : {
-                  "line" : 85,
+                  "line" : 84,
                   "column" : 48
                 },
                 "end" : {
-                  "line" : 85,
+                  "line" : 84,
                   "column" : 71
                 }
               }
@@ -806,11 +792,11 @@
           },
           "source_range" : {
             "begin" : {
-              "line" : 85,
+              "line" : 84,
               "column" : 3
             },
             "end" : {
-              "line" : 85,
+              "line" : 84,
               "column" : 73
             }
           }
@@ -818,28 +804,28 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 73,
+          "line" : 72,
           "column" : 1
         },
         "end" : {
-          "line" : 86,
+          "line" : 85,
           "column" : 2
         }
       }
 
     },
     "MyServicePrioParent" : {
-      "lineno" : 88,
+      "lineno" : 87,
       "annotations" : {
         "priority" : {
           "value" : "HIGH",
           "source_range" : {
             "begin" : {
-              "line" : 91,
+              "line" : 90,
               "column" : 4
             },
             "end" : {
-              "line" : 91,
+              "line" : 90,
               "column" : 21
             }
           }
@@ -858,11 +844,11 @@
               "value" : "IMPORTANT",
               "source_range" : {
                 "begin" : {
-                  "line" : 89,
+                  "line" : 88,
                   "column" : 16
                 },
                 "end" : {
-                  "line" : 89,
+                  "line" : 88,
                   "column" : 38
                 }
               }
@@ -870,11 +856,11 @@
           },
           "source_range" : {
             "begin" : {
-              "line" : 89,
+              "line" : 88,
               "column" : 3
             },
             "end" : {
-              "line" : 89,
+              "line" : 88,
               "column" : 40
             }
           }
@@ -891,11 +877,11 @@
               "value" : "HIGH_IMPORTANT",
               "source_range" : {
                 "begin" : {
-                  "line" : 90,
+                  "line" : 89,
                   "column" : 16
                 },
                 "end" : {
-                  "line" : 90,
+                  "line" : 89,
                   "column" : 43
                 }
               }
@@ -903,11 +889,11 @@
           },
           "source_range" : {
             "begin" : {
-              "line" : 90,
+              "line" : 89,
               "column" : 3
             },
             "end" : {
-              "line" : 90,
+              "line" : 89,
               "column" : 45
             }
           }
@@ -915,11 +901,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 88,
+          "line" : 87,
           "column" : 1
         },
         "end" : {
-          "line" : 91,
+          "line" : 90,
           "column" : 22
         }
       }
@@ -930,7 +916,7 @@
         "type_enum" : "SERVICE",
         "spec_args" : "MyServicePrioParent"
       },
-      "lineno" : 93,
+      "lineno" : 92,
       "functions" : {
         "MyServicePrioChild.pang" : {
           "return_type" : {
@@ -944,11 +930,11 @@
               "value" : "BEST_EFFORT",
               "source_range" : {
                 "begin" : {
-                  "line" : 94,
+                  "line" : 93,
                   "column" : 16
                 },
                 "end" : {
-                  "line" : 94,
+                  "line" : 93,
                   "column" : 40
                 }
               }
@@ -956,11 +942,11 @@
           },
           "source_range" : {
             "begin" : {
-              "line" : 94,
+              "line" : 93,
               "column" : 3
             },
             "end" : {
-              "line" : 94,
+              "line" : 93,
               "column" : 42
             }
           }
@@ -968,28 +954,28 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 93,
+          "line" : 92,
           "column" : 1
         },
         "end" : {
-          "line" : 95,
+          "line" : 94,
           "column" : 2
         }
       }
 
     },
     "BadService" : {
-      "lineno" : 106,
+      "lineno" : 105,
       "annotations" : {
         "cpp.name" : {
           "value" : "GoodService",
           "source_range" : {
             "begin" : {
-              "line" : 109,
+              "line" : 108,
               "column" : 4
             },
             "end" : {
-              "line" : 109,
+              "line" : 108,
               "column" : 28
             }
           }
@@ -1005,11 +991,11 @@
           "throws" : [],
           "source_range" : {
             "begin" : {
-              "line" : 107,
+              "line" : 106,
               "column" : 3
             },
             "end" : {
-              "line" : 107,
+              "line" : 106,
               "column" : 27
             }
           }
@@ -1023,11 +1009,11 @@
           "throws" : [],
           "source_range" : {
             "begin" : {
-              "line" : 108,
+              "line" : 107,
               "column" : 3
             },
             "end" : {
-              "line" : 108,
+              "line" : 107,
               "column" : 13
             }
           }
@@ -1035,18 +1021,18 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 106,
+          "line" : 105,
           "column" : 1
         },
         "end" : {
-          "line" : 109,
+          "line" : 108,
           "column" : 29
         }
       }
 
     },
     "FooBarBazService" : {
-      "lineno" : 111,
+      "lineno" : 110,
       "functions" : {
         "FooBarBazService.foo" : {
           "return_type" : {
@@ -1060,11 +1046,11 @@
           },
           "source_range" : {
             "begin" : {
-              "line" : 112,
+              "line" : 111,
               "column" : 3
             },
             "end" : {
-              "line" : 113,
+              "line" : 112,
               "column" : 14
             }
           }
@@ -1081,11 +1067,11 @@
               "value" : "BarNonStructured",
               "source_range" : {
                 "begin" : {
-                  "line" : 114,
+                  "line" : 113,
                   "column" : 15
                 },
                 "end" : {
-                  "line" : 114,
+                  "line" : 113,
                   "column" : 43
                 }
               }
@@ -1093,11 +1079,11 @@
           },
           "source_range" : {
             "begin" : {
-              "line" : 114,
+              "line" : 113,
               "column" : 3
             },
             "end" : {
-              "line" : 114,
+              "line" : 113,
               "column" : 45
             }
           }
@@ -1111,11 +1097,11 @@
           "throws" : [],
           "source_range" : {
             "begin" : {
-              "line" : 115,
+              "line" : 114,
               "column" : 3
             },
             "end" : {
-              "line" : 115,
+              "line" : 114,
               "column" : 14
             }
           }
@@ -1123,11 +1109,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 111,
+          "line" : 110,
           "column" : 1
         },
         "end" : {
-          "line" : 116,
+          "line" : 115,
           "column" : 2
         }
       }

@@ -68,7 +68,6 @@ bool is_annotation_blacklisted_in_fatal(const std::string& key) {
       "cpp2.ref_type",
       "cpp2.template",
       "cpp2.type",
-      "cpp.internal.deprecated._data.method",
   };
   return black_list.find(key) != black_list.end();
 }
@@ -1177,7 +1176,6 @@ class cpp_mstch_struct : public mstch_struct {
              &cpp_mstch_struct::get_num_union_members},
             {"struct:cpp_allocator", &cpp_mstch_struct::cpp_allocator},
             {"struct:cpp_allocator_via", &cpp_mstch_struct::cpp_allocator_via},
-            {"struct:cpp_data_method?", &cpp_mstch_struct::cpp_data_method},
             {"struct:cpp_frozen2_exclude?",
              &cpp_mstch_struct::cpp_frozen2_exclude},
             {"struct:has_non_optional_and_non_terse_field?",
@@ -1351,9 +1349,6 @@ class cpp_mstch_struct : public mstch_struct {
   }
   mstch::node cpp_allocator() {
     return struct_->get_annotation("cpp.allocator");
-  }
-  mstch::node cpp_data_method() {
-    return struct_->has_annotation("cpp.internal.deprecated._data.method");
   }
   mstch::node cpp_frozen2_exclude() {
     // TODO(dokwon): Fix frozen2 compatibility with adapter.

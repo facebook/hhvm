@@ -666,16 +666,6 @@ TEST_F(StructTest, BasicIndirection) {
   EXPECT_EQ(obj.raw, obj2.raw);
 }
 
-TEST_F(StructTest, CppDataMethod) {
-  CppDataMethod obj;
-  obj.foo() = 10;
-  EXPECT_EQ(obj._data().foo(), 10);
-  obj._data().foo() = 20;
-  EXPECT_EQ(obj._data().foo(), 20);
-  EXPECT_EQ(std::as_const(obj)._data().foo(), 20);
-  EXPECT_EQ(std::move(obj)._data().foo(), 20);
-}
-
 TEST_F(StructTest, EmptiableOptionalFieldsStruct) {
   EmptiableOptionalFieldsStruct obj;
   EXPECT_TRUE(apache::thrift::empty(obj));

@@ -55,7 +55,6 @@ struct MyStruct {
 } (
   cpp.name = "YourStruct",
   android.generate_builder,
-  cpp.internal.deprecated._data.method,
   thrift.uri = "facebook.com/thrift/compiler/test/fixtures/basic-annotations/src/module/MyStruct",
   hack.attributes = "\SomeClass(\AnotherClass::class)",
 )

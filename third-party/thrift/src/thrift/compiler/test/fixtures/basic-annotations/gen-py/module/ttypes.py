@@ -798,7 +798,6 @@ MyStruct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 
 MyStruct.thrift_struct_annotations = {
   "android.generate_builder": "1",
-  "cpp.internal.deprecated._data.method": "1",
   "cpp.name": "YourStruct",
   "hack.attributes": "\\SomeClass(\\AnotherClass::class)",
   "thrift.uri": "facebook.com/thrift/compiler/test/fixtures/basic-annotations/src/module/MyStruct",

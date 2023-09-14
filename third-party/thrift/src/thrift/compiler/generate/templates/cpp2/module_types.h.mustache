@@ -142,14 +142,6 @@ class <%#struct:exception?%>FOLLY_EXPORT <%/struct:exception?%><%struct:cpp_unde
 <%/struct:cpp_allocator_via%>
 <%/struct:cpp_allocator%>
 
-<%#struct:cpp_data_method?%>
- public:
-  <%struct:cpp_underlying_name%>& _data() & { return *this; }
-  <%struct:cpp_underlying_name%>&& _data() && { return std::move(*this); }
-  const <%struct:cpp_underlying_name%>& _data() const& { return *this; }
-  const <%struct:cpp_underlying_name%>&& _data() const&& { return std::move(*this); }
-
-<%/struct:cpp_data_method?%>
  public:
 <%#struct:union?%>
 <% > module_types_h/union_enum%>

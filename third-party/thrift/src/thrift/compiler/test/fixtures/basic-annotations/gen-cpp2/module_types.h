@@ -387,12 +387,6 @@ class YourStruct final  {
 
 
  public:
-  YourStruct& _data() & { return *this; }
-  YourStruct&& _data() && { return std::move(*this); }
-  const YourStruct& _data() const& { return *this; }
-  const YourStruct&& _data() const&& { return std::move(*this); }
-
- public:
 
   YourStruct();
 

@@ -19,6 +19,7 @@ use std::io::Cursor;
 use anyhow::anyhow;
 use anyhow::bail;
 use anyhow::Context;
+use anyhow::Result;
 use bufsize::SizeCounter;
 use bytes::buf::Writer;
 use bytes::Buf;
@@ -46,7 +47,6 @@ use crate::serialize::Serialize;
 use crate::thrift_protocol::MessageType;
 use crate::thrift_protocol::ProtocolID;
 use crate::ttype::TType;
-use crate::Result;
 
 #[phantom]
 #[derive(Copy, Clone)]

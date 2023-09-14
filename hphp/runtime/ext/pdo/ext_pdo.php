@@ -169,9 +169,8 @@ class PDO {
   public function exec(string $query): mixed;
 
   /* Returns the ID of the last inserted row, or the last value from a sequence
-   * object, depending on the underlying driver. For example, PDO_PGSQL()
-   * requires you to specify the name of a sequence object for the name
-   * parameter.  This method may not return a meaningful or consistent result
+   * object, depending on the underlying driver.
+   * This method may not return a meaningful or consistent result
    * across different PDO drivers, because the underlying database may not even
    * support the notion of auto-increment fields or sequences.
    * @param string $seqname - Name of the sequence object from which the ID

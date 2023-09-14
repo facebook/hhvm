@@ -24,9 +24,6 @@
 #ifdef ENABLE_EXTENSION_PDO_MYSQL
 #include "hphp/runtime/ext/pdo_mysql/pdo_mysql.h"
 #endif
-#ifdef ENABLE_EXTENSION_PGSQL
-#include "hphp/runtime/ext/pgsql/pdo_pgsql.h"
-#endif
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/zend-string.h"
@@ -43,9 +40,6 @@ static PDOSqlite s_sqlite_driver;
 #endif
 #ifdef ENABLE_EXTENSION_PDO_MYSQL
 static PDOMySql s_mysql_driver;
-#endif
-#ifdef ENABLE_EXTENSION_PGSQL
-static PDOPgSql s_pgsql_driver;
 #endif
 
 const StaticString s_general_error_code("HY000");

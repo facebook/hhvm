@@ -916,31 +916,6 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(fbmysqlclient)
     MYSQL_SOCKET_SEARCH()
     HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DPHP_MYSQL_UNIX_SOCK_ADDR=\"${MYSQL_UNIX_SOCK_ADDR}\"")
-  elseif (${libraryName} STREQUAL "pgsql")
-    FIND_PATH(PGSQL_INCLUDE_DIR NAMES libpq-fe.h
-      PATHS
-        /usr/include
-        /usr/include/postgresql
-        /usr/include/pgsql
-        /usr/local/include
-        /usr/local/include/postgresql
-        /usr/local/include/pgsql
-      )
-    FIND_LIBRARY(PGSQL_LIBRARY NAMES pq
-      PATHS
-        /lib
-        /usr/lib
-        /usr/local/lib
-    )
-    IF (NOT PGSQL_INCLUDE_DIR OR NOT PGSQL_LIBRARY)
-      HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${dependencyName})
-      return()
-    endif()
-
-    if(${addPaths})
-      HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${PGSQL_INCLUDE_DIR})
-      HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${PGSQL_LIBRARY})
-    endif()
   elseif (${libraryName} STREQUAL "png")
     find_package(LibPng ${requiredVersion})
     if (NOT LIBPNG_INCLUDE_DIRS OR NOT LIBPNG_LIBRARIES)

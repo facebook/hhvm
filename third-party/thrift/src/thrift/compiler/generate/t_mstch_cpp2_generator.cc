@@ -450,16 +450,18 @@ class cpp_mstch_program : public mstch_program {
   }
   mstch::node fatal_languages() {
     mstch::array a;
-    size_t size = program_->namespaces().size();
-    size_t idx = 0;
     for (const auto& pair : program_->namespaces()) {
-      a.push_back(mstch::map{
-          {"language:safe_name", get_fatal_string_short_id(pair.first)},
-          {"language:safe_namespace",
-           get_fatal_namespace_name_short_id(pair.first, pair.second)},
-          {"last?", idx == size - 1},
-      });
-      ++idx;
+      if (!pair.second.empty()) {
+        a.push_back(mstch::map{
+            {"language:safe_name", get_fatal_string_short_id(pair.first)},
+            {"language:safe_namespace",
+             get_fatal_namespace_name_short_id(pair.first, pair.second)},
+            {"last?", false},
+        });
+      }
+    }
+    if (!a.empty()) {
+      boost::get<mstch::map>(a.back())["last?"] = true;
     }
     return mstch::map{{"fatal_languages:items", a}};
   }
@@ -483,10 +485,12 @@ class cpp_mstch_program : public mstch_program {
     unique_names.emplace(get_fatal_string_short_id(program_), program_->name());
     // languages and namespaces
     for (const auto& pair : program_->namespaces()) {
-      unique_names.emplace(get_fatal_string_short_id(pair.first), pair.first);
-      unique_names.emplace(
-          get_fatal_namespace_name_short_id(pair.first, pair.second),
-          get_fatal_namespace(pair.first, pair.second));
+      if (!pair.second.empty()) {
+        unique_names.emplace(get_fatal_string_short_id(pair.first), pair.first);
+        unique_names.emplace(
+            get_fatal_namespace_name_short_id(pair.first, pair.second),
+            get_fatal_namespace(pair.first, pair.second));
+      }
     }
     // enums
     for (const auto* enm : program_->enums()) {

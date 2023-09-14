@@ -17,6 +17,7 @@
 cpp_include "thrift/test/reflection/fatal_legacy_reflection_types.h"
 
 namespace cpp2 apache.thrift.test
+namespace hack ""
 
 include "thrift/annotation/cpp.thrift"
 

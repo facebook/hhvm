@@ -152,8 +152,7 @@ struct ProxygenTransportTest : ProxygenTransportBasicTest {
   uint64_t pushResource(Array& promiseHeaders, Array& responseHeaders,
                         uint8_t pri, bool eom = false) {
     m_txn.enablePush();
-    EXPECT_CALL(m_txn.mockCodec_, getProtocol())
-      .WillRepeatedly(Return(proxygen::CodecProtocol::HTTP_2));
+    m_txn.setupCodec(proxygen::CodecProtocol::HTTP_2);
     EXPECT_TRUE(m_transport->supportsServerPush());
     auto id = m_transport->pushResource("foo", "/bar", pri, promiseHeaders,
                                         responseHeaders,  nullptr, 0, eom);

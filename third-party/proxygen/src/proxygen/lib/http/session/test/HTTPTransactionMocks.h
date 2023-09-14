@@ -293,7 +293,7 @@ class MockHTTPTransaction : public HTTPTransaction {
     EXPECT_CALL(mockTransport_, getPeerAddressNonConst())
         .WillRepeatedly(testing::ReturnRef(defaultAddress_));
     EXPECT_CALL(mockTransport_, getCodecNonConst())
-        .WillRepeatedly(testing::ReturnRef(mockCodec_));
+        .WillRepeatedly(testing::ReturnRef(mockTransport_.mockCodec_));
     EXPECT_CALL(mockTransport_, getSetupTransportInfoNonConst())
         .WillRepeatedly(testing::ReturnRef(setupTransportInfo_));
     EXPECT_CALL(mockTransport_, getUnderlyingTransportNonConst())
@@ -410,19 +410,18 @@ class MockHTTPTransaction : public HTTPTransaction {
   MOCK_METHOD(void, updateAndSendPriority, (HTTPPriority));
   MOCK_METHOD((bool), addBufferMeta, (), (noexcept));
   void enablePush() {
-    EXPECT_CALL(mockCodec_, supportsPushTransactions())
+    EXPECT_CALL(mockTransport_.mockCodec_, supportsPushTransactions())
         .WillRepeatedly(testing::Return(true));
   }
 
   void setupCodec(CodecProtocol protocol) {
-    EXPECT_CALL(mockCodec_, getProtocol())
+    EXPECT_CALL(mockTransport_.mockCodec_, getProtocol())
         .WillRepeatedly(testing::Return(protocol));
   }
   testing::NiceMock<MockHTTPTransactionTransport> mockTransport_;
   testing::NiceMock<folly::test::MockAsyncTransport> mockAsyncTransport_;
   testing::NiceMock<MockAsyncTransportCertificate> mockPeerCertificate_;
   const folly::SocketAddress defaultAddress_;
-  MockHTTPCodec mockCodec_;
   wangle::TransportInfo setupTransportInfo_;
 };
 

@@ -2068,8 +2068,80 @@ void HHVM_FUNCTION(sodium_crypto_secretstream_xchacha20poly1305_rekey,
 }
 
 const StaticString s_crypto_core_ed25519_scalar_size(
-  "scalars must be crypto_core_ed25519_SCALARBYTES bytes"
+  "Ed25519 scalars must be SODIUM_CRYPTO_CORE_ED25519_SCALARBYTES bytes in length"
 );
+
+static void validateEd25519Size(const String& x) {
+  if (
+    x.size() != crypto_core_ed25519_BYTES
+  ) {
+    throwSodiumException(
+     "Ed25519 elements must be SODIUM_CRYPTO_CORE_ED25519_BYTES bytes in length"
+    );
+  }
+}
+
+bool HHVM_FUNCTION(sodium_crypto_core_ed25519_is_valid_point,
+                     const String& y) {
+  validateEd25519Size(y);
+  int r = crypto_core_ed25519_is_valid_point(
+    reinterpret_cast<const unsigned char*>(y.data()));
+  // libsodium docs: "returns 1 on success, and 0 if the checks didn't pass."
+  return r == 1;
+};
+
+String HHVM_FUNCTION(sodium_crypto_core_ed25519_add,
+                     const String& x,
+                     const String& y) {
+  validateEd25519Size(x);
+  validateEd25519Size(y);
+  String r(crypto_core_ed25519_BYTES, ReserveString);
+  crypto_core_ed25519_add(
+    reinterpret_cast<unsigned char*>(r.mutableData()),
+    reinterpret_cast<const unsigned char*>(x.data()),
+    reinterpret_cast<const unsigned char*>(y.data())
+  );
+  r.setSize(crypto_core_ed25519_BYTES);
+  return r;
+}
+
+String HHVM_FUNCTION(sodium_crypto_core_ed25519_sub,
+                     const String& x,
+                     const String& y) {
+  validateEd25519Size(x);
+  validateEd25519Size(y);
+  String r(crypto_core_ed25519_BYTES, ReserveString);
+  crypto_core_ed25519_sub(
+    reinterpret_cast<unsigned char*>(r.mutableData()),
+    reinterpret_cast<const unsigned char*>(x.data()),
+    reinterpret_cast<const unsigned char*>(y.data())
+  );
+  r.setSize(crypto_core_ed25519_BYTES);
+  return r;
+}
+
+String HHVM_FUNCTION(sodium_crypto_scalarmult_ed25519_noclamp,
+                     const String& n,
+                     const String& p) {
+  if (n.size() != crypto_core_ed25519_SCALARBYTES) {
+    throwSodiumException(s_crypto_core_ed25519_scalar_size);
+  }
+  validateEd25519Size(p);
+  String r(crypto_core_ed25519_BYTES, ReserveString);
+  int rc = crypto_scalarmult_ed25519_noclamp(
+    reinterpret_cast<unsigned char*>(r.mutableData()),
+    reinterpret_cast<const unsigned char*>(n.data()),
+    reinterpret_cast<const unsigned char*>(p.data())
+  );
+  if (rc != 0) {
+    throwSodiumException(
+      "Invalid Ed25519 point. Points must be in compressed y coordinate form, in the main subgroup, and not have small order."
+    );
+  }
+  r.setSize(crypto_core_ed25519_BYTES);
+  return r;
+}
+
 
 String HHVM_FUNCTION(sodium_crypto_core_ed25519_scalar_add,
                      const String& x,
@@ -2437,9 +2509,13 @@ struct SodiumExtension final : Extension {
       SODIUM_CRYPTO_CORE_ED25519_BYTES,
       crypto_core_ed25519_BYTES
     );
+    HHVM_FE(sodium_crypto_core_ed25519_is_valid_point);
+    HHVM_FE(sodium_crypto_core_ed25519_add);
+    HHVM_FE(sodium_crypto_core_ed25519_sub);
     HHVM_FE(sodium_crypto_core_ed25519_scalar_reduce);
     HHVM_FE(sodium_crypto_core_ed25519_scalar_mul);
     HHVM_FE(sodium_crypto_core_ed25519_scalar_add);
+    HHVM_FE(sodium_crypto_scalarmult_ed25519_noclamp);
     HHVM_FE(sodium_crypto_scalarmult_ed25519_base);
     HHVM_FE(sodium_crypto_scalarmult_ed25519_base_noclamp);
   }

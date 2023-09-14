@@ -568,6 +568,18 @@ function sodium_crypto_secretstream_xchacha20poly1305_rekey(inout mixed $state):
 ///// Ed25519 primitives.
 
 <<__Native>>
+function sodium_crypto_core_ed25519_is_valid_point(string $point): bool;
+
+<<__Native>>
+function sodium_crypto_core_ed25519_add(string $point_a, string $point_b): string;
+
+<<__Native>>
+function sodium_crypto_core_ed25519_sub(string $point_a, string $point_b): string;
+
+<<__Native>>
+function sodium_crypto_scalarmult_ed25519_noclamp(string $scalar, string $point): string;
+
+<<__Native>>
 function sodium_crypto_core_ed25519_scalar_reduce(string $scalar): string;
 
 <<__Native>>

@@ -271,6 +271,18 @@ function sodium_crypto_sign_ed25519_sk_to_curve25519(string $eddsakey): string;
 ///// Ed25519 primitives.
 
 <<__PHPStdLib>>
+function sodium_crypto_core_ed25519_is_valid_point(string $point): bool;
+
+<<__PHPStdLib>>
+function sodium_crypto_core_ed25519_add(string $point_a, string $point_b): string;
+
+<<__PHPStdLib>>
+function sodium_crypto_core_ed25519_sub(string $point_a, string $point_b): string;
+
+<<__PHPStdLib>>
+function sodium_crypto_scalarmult_ed25519_noclamp(string $scalar, string $point): string;
+
+<<__PHPStdLib>>
 function sodium_crypto_core_ed25519_scalar_reduce(string $scalar): string;
 
 <<__PHPStdLib>>

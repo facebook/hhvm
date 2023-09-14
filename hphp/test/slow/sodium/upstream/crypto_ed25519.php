@@ -49,4 +49,17 @@ try {
 } catch (SodiumException $ex) {
   var_dump(true);
 }
+var_dump(sodium_crypto_core_ed25519_is_valid_point($ed25519_base));
+var_dump(!sodium_crypto_core_ed25519_is_valid_point($one));
+$base_plus_base = sodium_crypto_core_ed25519_add($ed25519_base, $ed25519_base);
+$base_times_two = sodium_crypto_scalarmult_ed25519_base_noclamp($two);
+var_dump($base_plus_base === $base_times_two);
+var_dump(sodium_crypto_core_ed25519_sub($base_plus_base, $ed25519_base) === $ed25519_base);
+var_dump(sodium_crypto_scalarmult_ed25519_noclamp($one, $ed25519_base) === $ed25519_base);
+var_dump(sodium_crypto_scalarmult_ed25519_noclamp($two, $ed25519_base) === $base_times_two);
+try {
+  $_ = sodium_crypto_scalarmult_ed25519_noclamp($one, $one);
+} catch (SodiumException $ex) {
+  var_dump(true);
+}
 }

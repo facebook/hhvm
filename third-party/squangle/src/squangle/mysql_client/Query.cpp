@@ -30,6 +30,9 @@ typedef std::pair<folly::fbstring, QueryArgument> ArgPair;
 QueryArgument::QueryArgument(folly::StringPiece val)
     : value_(folly::fbstring(val.data(), val.size())) {}
 
+QueryArgument::QueryArgument(std::string_view val)
+    : value_(folly::fbstring(val.data(), val.size())) {}
+
 QueryArgument::QueryArgument(char const* val) : value_(folly::fbstring(val)) {}
 
 QueryArgument::QueryArgument(const std::string& string_value)

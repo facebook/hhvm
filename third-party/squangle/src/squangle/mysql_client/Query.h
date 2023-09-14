@@ -407,6 +407,7 @@ class QueryArgument {
 
  public:
   /* implicit */ QueryArgument(folly::StringPiece val);
+  /* implicit */ QueryArgument(std::string_view val);
   /* implicit */ QueryArgument(char const* val);
   /* implicit */ QueryArgument(const std::string& string_value);
   /* implicit */ QueryArgument(const folly::fbstring& val);

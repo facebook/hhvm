@@ -38,18 +38,22 @@ import thrift.py3.stream
 import {{#includeNamespace}}{{value}}.{{/includeNamespace}}types as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}types
 {{/hasTypes?}}
 {{/program:includeNamespaces}}
+{{#program:intercompatible?}}
+import {{> common/python_types_module_path}}
+{{/program:intercompatible?}}
 
 
 __property__ = property
 
 
 {{#program:enums}}
-class {{enum:name}}(thrift.py3.types.{{^enum:flags?}}Enum{{/enum:flags?}}{{#enum:flags?}}Flag{{/enum:flags?}}):
+class {{enum:name}}(thrift.py3.types.{{^enum:flags?}}Enum{{/enum:flags?}}{{#enum:flags?}}Flag{{/enum:flags?}}{{!
+}}{{#program:intercompatible?}}, {{> common/python_types_module_path}}._fbthrift_compatible_with_{{enum:name}}{{/program:intercompatible?}}):
     {{#enum:values}}
     {{enum_value:py_name}}: {{enum:name}} = ...
     {{/enum:values}}
     {{!TODO: accommodate root_module_prefix}}
-    def _to_python(self) -> "{{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_types.{{enum:name}}": ...   # type: ignore
+    def _to_python(self) -> "{{> common/python_types_module_path}}.{{enum:name}}": ...   # type: ignore
     def _to_py3(self) -> {{enum:name}}: ...
     def _to_py_deprecated(self) -> int: ...
 
@@ -60,7 +64,8 @@ class {{enum:name}}(thrift.py3.types.{{^enum:flags?}}Enum{{/enum:flags?}}{{#enum
 _{{struct:name}}ValueType = _typing.Union[None, {{#struct:py3_fields}}{{^first?}}, {{/first?}}{{#field:type}}{{> types/pep484_type}}{{/field:type}}{{/struct:py3_fields}}]
 
 {{/struct:union?}}
-class {{struct:name}}({{> types/python_struct_class}}, _typing.Hashable):
+class {{struct:name}}({{> types/python_struct_class}}, _typing.Hashable{{!
+}}{{#program:intercompatible?}}, {{> common/python_types_module_path}}._fbthrift_compatible_with_{{struct:name}}{{/program:intercompatible?}}):
     class __fbthrift_IsSet:
     {{#struct:py3_fields}}
         {{#field:has_ref_accessor?}}
@@ -79,13 +84,13 @@ class {{struct:name}}({{> types/python_struct_class}}, _typing.Hashable):
     {{/struct:fields_and_mixin_fields}}
     def __init__(
         self, {{#struct:py3_fields?}}*{{/struct:py3_fields?}}{{#struct:py3_fields}},
-        {{field:py_name}}: _typing.Optional[{{#field:type}}{{> types/pep484_type}}{{/field:type}}]=None{{/struct:py3_fields}}
+        {{field:py_name}}: _typing.Optional[{{#field:type}}{{> types/compatible_pep484_type}}{{/field:type}}]=None{{/struct:py3_fields}}
     ) -> None: ...
 
     {{#struct:plain?}}
     def __call__(
         self, {{#struct:py3_fields?}}*{{/struct:py3_fields?}}{{#struct:py3_fields}},
-        {{field:py_name}}: _typing.Union[{{#field:type}}{{> types/pep484_type}}{{/field:type}}, '__NotSet', None]=NOTSET{{/struct:py3_fields}}
+        {{field:py_name}}: _typing.Union[{{#field:type}}{{> types/compatible_pep484_type}}{{/field:type}}, '__NotSet', None]=NOTSET{{/struct:py3_fields}}
     ) -> {{struct:name}}: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['{{struct:name}}'], bytes]]: ...
@@ -117,10 +122,10 @@ class {{struct:name}}({{> types/python_struct_class}}, _typing.Hashable):
 
     {{#program:python_capi_converter?}}
     @staticmethod
-    def from_python(obj: "{{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_types.{{struct:name}}") -> _typing.Self: ...   # type: ignore
+    def from_python(obj: "{{> common/python_types_module_path}}.{{struct:name}}") -> _typing.Self: ...   # type: ignore
     {{/program:python_capi_converter?}}
     {{!TODO: accommodate root_module_prefix}}
-    def _to_python(self) -> "{{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_types.{{struct:name}}": ...   # type: ignore
+    def _to_python(self) -> "{{> common/python_types_module_path}}.{{struct:name}}": ...   # type: ignore
     def _to_py3(self) -> {{struct:name}}: ...
     def _to_py_deprecated(self) -> "{{program:py_deprecated_module_path}}.ttypes.{{struct:name}}": ...   # type: ignore
 

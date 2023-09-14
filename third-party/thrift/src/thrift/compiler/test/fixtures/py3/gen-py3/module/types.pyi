@@ -14,12 +14,13 @@ from typing_extensions import Final
 
 import sys
 import itertools
+import module.thrift_types
 
 
 __property__ = property
 
 
-class AnEnum(thrift.py3.types.Enum):
+class AnEnum(thrift.py3.types.Enum, module.thrift_types._fbthrift_compatible_with_AnEnum):
     NOTSET: AnEnum = ...
     ONE: AnEnum = ...
     TWO: AnEnum = ...
@@ -30,7 +31,7 @@ class AnEnum(thrift.py3.types.Enum):
     def _to_py_deprecated(self) -> int: ...
 
 
-class AnEnumRenamed(thrift.py3.types.Enum):
+class AnEnumRenamed(thrift.py3.types.Enum, module.thrift_types._fbthrift_compatible_with_AnEnumRenamed):
     name_: AnEnumRenamed = ...
     value_: AnEnumRenamed = ...
     renamed_: AnEnumRenamed = ...
@@ -39,7 +40,7 @@ class AnEnumRenamed(thrift.py3.types.Enum):
     def _to_py_deprecated(self) -> int: ...
 
 
-class Flags(thrift.py3.types.Flag):
+class Flags(thrift.py3.types.Flag, module.thrift_types._fbthrift_compatible_with_Flags):
     flag_A: Flags = ...
     flag_B: Flags = ...
     flag_C: Flags = ...
@@ -49,7 +50,7 @@ class Flags(thrift.py3.types.Flag):
     def _to_py_deprecated(self) -> int: ...
 
 
-class SimpleException(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
+class SimpleException(thrift.py3.exceptions.GeneratedError, _typing.Hashable, module.thrift_types._fbthrift_compatible_with_SimpleException):
     class __fbthrift_IsSet:
         err_code: bool
         pass
@@ -73,7 +74,7 @@ class SimpleException(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
     def _to_py3(self) -> SimpleException: ...
     def _to_py_deprecated(self) -> "module.ttypes.SimpleException": ...   # type: ignore
 
-class OptionalRefStruct(thrift.py3.types.Struct, _typing.Hashable):
+class OptionalRefStruct(thrift.py3.types.Struct, _typing.Hashable, module.thrift_types._fbthrift_compatible_with_OptionalRefStruct):
     class __fbthrift_IsSet:
         optional_blob: bool
         pass
@@ -103,7 +104,7 @@ class OptionalRefStruct(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py3(self) -> OptionalRefStruct: ...
     def _to_py_deprecated(self) -> "module.ttypes.OptionalRefStruct": ...   # type: ignore
 
-class SimpleStruct(thrift.py3.types.Struct, _typing.Hashable):
+class SimpleStruct(thrift.py3.types.Struct, _typing.Hashable, module.thrift_types._fbthrift_compatible_with_SimpleStruct):
     class __fbthrift_IsSet:
         is_on: bool
         tiny_int: bool
@@ -163,7 +164,7 @@ class SimpleStruct(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py3(self) -> SimpleStruct: ...
     def _to_py_deprecated(self) -> "module.ttypes.SimpleStruct": ...   # type: ignore
 
-class HiddenTypeFieldsStruct(thrift.py3.types.Struct, _typing.Hashable):
+class HiddenTypeFieldsStruct(thrift.py3.types.Struct, _typing.Hashable, module.thrift_types._fbthrift_compatible_with_HiddenTypeFieldsStruct):
     class __fbthrift_IsSet:
         pass
 
@@ -184,7 +185,7 @@ class HiddenTypeFieldsStruct(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py3(self) -> HiddenTypeFieldsStruct: ...
     def _to_py_deprecated(self) -> "module.ttypes.HiddenTypeFieldsStruct": ...   # type: ignore
 
-class ComplexStruct(thrift.py3.types.Struct, _typing.Hashable):
+class ComplexStruct(thrift.py3.types.Struct, _typing.Hashable, module.thrift_types._fbthrift_compatible_with_ComplexStruct):
     class __fbthrift_IsSet:
         structOne: bool
         structTwo: bool
@@ -217,11 +218,11 @@ class ComplexStruct(thrift.py3.types.Struct, _typing.Hashable):
 
     def __init__(
         self, *,
-        structOne: _typing.Optional[SimpleStruct]=None,
-        structTwo: _typing.Optional[SimpleStruct]=None,
+        structOne: _typing.Optional[module.thrift_types._fbthrift_compatible_with_SimpleStruct]=None,
+        structTwo: _typing.Optional[module.thrift_types._fbthrift_compatible_with_SimpleStruct]=None,
         an_integer: _typing.Optional[int]=None,
         name: _typing.Optional[str]=None,
-        an_enum: _typing.Optional[AnEnum]=None,
+        an_enum: _typing.Optional[module.thrift_types._fbthrift_compatible_with_AnEnum]=None,
         some_bytes: _typing.Optional[bytes]=None,
         sender: _typing.Optional[str]=None,
         cdef_: _typing.Optional[str]=None,
@@ -230,11 +231,11 @@ class ComplexStruct(thrift.py3.types.Struct, _typing.Hashable):
 
     def __call__(
         self, *,
-        structOne: _typing.Union[SimpleStruct, '__NotSet', None]=NOTSET,
-        structTwo: _typing.Union[SimpleStruct, '__NotSet', None]=NOTSET,
+        structOne: _typing.Union[module.thrift_types._fbthrift_compatible_with_SimpleStruct, '__NotSet', None]=NOTSET,
+        structTwo: _typing.Union[module.thrift_types._fbthrift_compatible_with_SimpleStruct, '__NotSet', None]=NOTSET,
         an_integer: _typing.Union[int, '__NotSet', None]=NOTSET,
         name: _typing.Union[str, '__NotSet', None]=NOTSET,
-        an_enum: _typing.Union[AnEnum, '__NotSet', None]=NOTSET,
+        an_enum: _typing.Union[module.thrift_types._fbthrift_compatible_with_AnEnum, '__NotSet', None]=NOTSET,
         some_bytes: _typing.Union[bytes, '__NotSet', None]=NOTSET,
         sender: _typing.Union[str, '__NotSet', None]=NOTSET,
         cdef_: _typing.Union[str, '__NotSet', None]=NOTSET,
@@ -256,7 +257,7 @@ class ComplexStruct(thrift.py3.types.Struct, _typing.Hashable):
 
 _BinaryUnionValueType = _typing.Union[None, _fbthrift_iobuf.IOBuf]
 
-class BinaryUnion(thrift.py3.types.Union, _typing.Hashable):
+class BinaryUnion(thrift.py3.types.Union, _typing.Hashable, module.thrift_types._fbthrift_compatible_with_BinaryUnion):
     class __fbthrift_IsSet:
         iobuf_val: bool
         pass
@@ -291,7 +292,7 @@ class BinaryUnion(thrift.py3.types.Union, _typing.Hashable):
     def _to_py3(self) -> BinaryUnion: ...
     def _to_py_deprecated(self) -> "module.ttypes.BinaryUnion": ...   # type: ignore
 
-class BinaryUnionStruct(thrift.py3.types.Struct, _typing.Hashable):
+class BinaryUnionStruct(thrift.py3.types.Struct, _typing.Hashable, module.thrift_types._fbthrift_compatible_with_BinaryUnionStruct):
     class __fbthrift_IsSet:
         u: bool
         pass
@@ -300,12 +301,12 @@ class BinaryUnionStruct(thrift.py3.types.Struct, _typing.Hashable):
 
     def __init__(
         self, *,
-        u: _typing.Optional[BinaryUnion]=None
+        u: _typing.Optional[module.thrift_types._fbthrift_compatible_with_BinaryUnion]=None
     ) -> None: ...
 
     def __call__(
         self, *,
-        u: _typing.Union[BinaryUnion, '__NotSet', None]=NOTSET
+        u: _typing.Union[module.thrift_types._fbthrift_compatible_with_BinaryUnion, '__NotSet', None]=NOTSET
     ) -> BinaryUnionStruct: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['BinaryUnionStruct'], bytes]]: ...

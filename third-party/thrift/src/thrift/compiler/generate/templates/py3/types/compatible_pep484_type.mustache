@@ -1,0 +1,50 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+This is for pep 484 typing
+
+This is useful for typing call paterns since it allows python container types OR
+thrift-py3 specific container types.
+
+}}{{#program:intercompatible?}}{{!
+}}{{#type:bool?}}bool{{/type:bool?}}{{!
+}}{{#type:byte?}}int{{/type:byte?}}{{!
+}}{{#type:i16?}}int{{/type:i16?}}{{!
+}}{{#type:i32?}}int{{/type:i32?}}{{!
+}}{{#type:i64?}}int{{/type:i64?}}{{!
+}}{{#type:double?}}float{{/type:double?}}{{!
+}}{{#type:float?}}float{{/type:float?}}{{!
+}}{{#type:string?}}str{{/type:string?}}{{!
+}}{{#type:binary?}}{{!
+}}{{#type:iobufWrapper?}}_fbthrift_iobuf.IOBuf{{/type:iobufWrapper?}}{{!
+  }}{{^type:iobufWrapper?}}bytes{{/type:iobufWrapper?}}{{!
+}}{{/type:binary?}}{{!
+}}{{#type:struct}}{{!
+  }}{{> common/python_types_module_path}}._fbthrift_compatible_with_{{struct:name}}{{!
+}}{{/type:struct}}{{!
+}}{{#type:container?}}{{!
+  }}{{> types/compatible_pep484_containers}}{{!
+}}{{/type:container?}}{{!
+}}{{#type:void?}}None{{/type:void?}}{{!
+}}{{#type:enum}}{{!
+  }}{{> common/python_types_module_path}}._fbthrift_compatible_with_{{enum:name}}{{!
+}}{{/type:enum}}{{!
+}}{{/program:intercompatible?}}{{!
+}}{{^program:intercompatible?}}{{!
+}}{{> types/pep484_type}}{{!
+}}{{/program:intercompatible?}}

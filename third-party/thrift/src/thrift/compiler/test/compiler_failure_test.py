@@ -472,59 +472,6 @@ class CompilerFailureTest(unittest.TestCase):
             ),
         )
 
-    def test_cpp_coroutine_mixin_stack_arguments(self):
-        write_file(
-            "foo.thrift",
-            textwrap.dedent(
-                """\
-                service SumService {
-                    i32 sum(1: i32 num1, 2: i32 num2) (cpp.coroutine);
-                }
-                """
-            ),
-        )
-
-        GEN = "mstch_cpp2:stack_arguments"
-
-        ret, out, err = self.run_thrift("foo.thrift", gen=GEN)
-
-        self.assertEqual(ret, 0)
-
-        write_file(
-            "foo.thrift",
-            textwrap.dedent(
-                """\
-                service SumService {
-                    i32 sum(1: i32 num1, 2: string str) (cpp.coroutine);
-                }
-                """
-            ),
-        )
-
-        ret, out, err = self.run_thrift("foo.thrift", gen=GEN)
-
-        self.assertEqual(ret, 1)
-        self.assertEqual(
-            err,
-            "[ERROR:foo.thrift:2] `SumService.sum` use of "
-            "cpp.coroutine and stack_arguments together is disallowed.\n",
-        )
-
-        write_file(
-            "foo.thrift",
-            textwrap.dedent(
-                """\
-                service SumService {
-                    i32 sum(1: i32 num1, 2: i32 num2);
-                }
-                """
-            ),
-        )
-
-        ret, out, err = self.run_thrift("foo.thrift", gen=GEN)
-
-        self.assertEqual(ret, 0)
-
     def test_optional_mixin_field(self):
         write_file(
             "foo.thrift",

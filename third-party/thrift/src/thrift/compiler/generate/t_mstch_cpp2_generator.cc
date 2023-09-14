@@ -2680,51 +2680,6 @@ bool annotation_validator::visit(t_struct* s) {
   return true;
 }
 
-class service_method_validator : public validator {
- public:
-  explicit service_method_validator(
-      const std::map<std::string, std::string>& options)
-      : options_(options) {}
-
-  using validator::visit;
-  /**
-   * Make sure there is no 'cpp.coroutine' annotation set when
-   * 'stack_arguments' is turned on.
-   */
-  bool visit(t_service* service) override;
-
- private:
-  const std::map<std::string, std::string>& options_;
-};
-
-bool service_method_validator::visit(t_service* service) {
-  auto suppress_key = "cpp.coroutine_stack_arguments_broken_suppress_error";
-  for (const auto& func : service->functions()) {
-    if (!func.has_annotation(suppress_key) &&
-        func.has_annotation("cpp.coroutine") &&
-        cpp2::is_stack_arguments(options_, func)) {
-      // when cpp.coroutine and stack_arguments are both on, return failure if
-      // this function has complex types (including string and binary).
-      const auto& params = func.get_paramlist()->fields();
-      bool ok =
-          std::all_of(params.begin(), params.end(), [](const auto& param) {
-            auto type = param.type()->get_true_type();
-            return type->is_base_type() && !type->is_string_or_binary();
-          });
-
-      if (!ok) {
-        report_error(
-            func,
-            "`{}.{}` use of cpp.coroutine and stack_arguments together is "
-            "disallowed.",
-            service->name(),
-            func.name());
-      }
-    }
-  }
-  return true;
-}
-
 class splits_validator : public validator {
  public:
   explicit splits_validator(
@@ -2808,7 +2763,6 @@ class lazy_field_validator : public validator {
 void t_mstch_cpp2_generator::fill_validator_list(
     validator_list& validators) const {
   validators.add<annotation_validator>(options());
-  validators.add<service_method_validator>(options());
   validators.add<splits_validator>(
       get_split_count(options()), client_name_to_split_count_);
   validators.add<lazy_field_validator>();

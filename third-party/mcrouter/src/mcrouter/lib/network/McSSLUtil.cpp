@@ -174,8 +174,10 @@ folly::AsyncTransportWrapper::UniquePtr McSSLUtil::moveToPlaintext(
   SSL_shutdown(ssl);
 
   // fallback to plaintext
-  auto [selfCert, peerCert] = dropCertificateX509Payload(sock);
-
+  auto selfCert =
+      folly::ssl::BasicTransportCertificate::create(sock.getSelfCertificate());
+  auto peerCert =
+      folly::ssl::BasicTransportCertificate::create(sock.getPeerCertificate());
   auto evb = sock.getEventBase();
   auto zcId = sock.getZeroCopyBufId();
   auto fd = sock.detachNetworkSocket();
@@ -198,20 +200,12 @@ folly::AsyncTransportWrapper::UniquePtr McSSLUtil::moveToKtls(
   return nullptr;
 }
 
-std::tuple<
-    std::unique_ptr<folly::ssl::BasicTransportCertificate>,
-    std::unique_ptr<folly::ssl::BasicTransportCertificate>>
-McSSLUtil::dropCertificateX509Payload(folly::AsyncSSLSocket& sock) noexcept {
+void McSSLUtil::dropCertificateX509Payload(
+    folly::AsyncSSLSocket& sock) noexcept {
   folly::SharedMutex::ReadHolder rh(getMutex());
   auto& func = getDropCertificateX509PayloadFuncRef();
   if (func) {
-    return func(sock);
-  } else {
-    return {
-        folly::ssl::BasicTransportCertificate::create(
-            sock.getSelfCertificate()),
-        folly::ssl::BasicTransportCertificate::create(
-            sock.getPeerCertificate())};
+    func(sock);
   }
 }
 

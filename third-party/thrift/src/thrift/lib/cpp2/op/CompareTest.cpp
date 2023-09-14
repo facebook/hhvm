@@ -340,5 +340,12 @@ TEST(CompareTest, MapIOBufCompare) {
   EXPECT_FALSE(equalTo(lhs, rhs));
 }
 
+TEST(CompareTest, Nan) {
+  test::OneOfEach value;
+  value.myDouble() = NAN;
+  EXPECT_FALSE(detail::StructEquality{}(value, value));
+  EXPECT_FALSE(detail::StructLessThan{}(value, value));
+}
+
 } // namespace
 } // namespace apache::thrift::op

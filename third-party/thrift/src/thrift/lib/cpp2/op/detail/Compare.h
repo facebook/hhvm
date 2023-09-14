@@ -645,7 +645,7 @@ struct StructLessThan {
       const auto* lhsValue = getValueOrNull(get<Ord>(lhs));
       const auto* rhsValue = getValueOrNull(get<Ord>(rhs));
 
-      if (lhsValue == rhsValue) {
+      if (lhsValue == nullptr && rhsValue == nullptr) {
         return;
       }
 
@@ -687,7 +687,7 @@ struct StructEquality {
       const auto* lhsValue = getValueOrNull(get<Ord>(lhs));
       const auto* rhsValue = getValueOrNull(get<Ord>(rhs));
 
-      if (lhsValue == rhsValue) {
+      if (lhsValue == nullptr && rhsValue == nullptr) {
         return;
       }
 

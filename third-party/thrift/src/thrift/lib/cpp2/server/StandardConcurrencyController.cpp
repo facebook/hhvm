@@ -25,12 +25,12 @@ std::unique_ptr<ConcurrencyControllerInterface>
 makeStandardConcurrencyController(
     RequestPileInterface& pile, folly::Executor& ex) {
   if (FLAGS_thrift_use_token_bucket_concurrency_controller) {
-    VLOG(4)
+    LOG(INFO)
         << "Flag is set to use TokenBucketConcurrencyController as a stanard concurrency controller";
     return std::make_unique<TokenBucketConcurrencyController>(pile, ex);
   }
 
-  VLOG(4)
+  LOG(INFO)
       << "ParallelConcurrencyController will be used as a standard concurrency controller";
   return std::make_unique<ParallelConcurrencyController>(pile, ex);
 }

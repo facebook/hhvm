@@ -201,7 +201,7 @@ void CPUConcurrencyController::schedule(std::shared_ptr<const Config> config) {
     return;
   }
 
-  VLOG(4) << "Enabling CPUConcurrencyController: " << config->describe();
+  LOG(INFO) << "Enabling CPUConcurrencyController: " << config->describe();
   thriftServerConfig_.setMaxRequests(
       activeRequestsLimit_.getObserver(),
       apache::thrift::AttributeSource::OVERRIDE_INTERNAL);

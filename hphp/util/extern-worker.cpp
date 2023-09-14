@@ -1230,6 +1230,9 @@ SubprocessImpl::doSubprocess(const RequestId& requestId,
     env.emplace_back(folly::sformat("TRACE={}", trace));
     env.emplace_back(folly::sformat("HPHP_TRACE_FILE={}", fullPath.c_str()));
   }
+  if (auto const asan_options = getenv("ASAN_OPTIONS")) {
+    env.emplace_back(folly::sformat("ASAN_OPTIONS={}", asan_options));
+  }
 
   FTRACE(
     4, "{} executing subprocess for '{}'{}(input size: {})\n",

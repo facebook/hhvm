@@ -207,8 +207,11 @@ McSSLUtil::dropCertificateX509Payload(folly::AsyncSSLSocket& sock) noexcept {
   if (func) {
     return func(sock);
   } else {
-    return {folly::ssl::BasicTransportCertificate::create(sock.getSelfCertificate()),
-      folly::ssl::BasicTransportCertificate::create(sock.getPeerCertificate())};
+    return {
+        folly::ssl::BasicTransportCertificate::create(
+            sock.getSelfCertificate()),
+        folly::ssl::BasicTransportCertificate::create(
+            sock.getPeerCertificate())};
   }
 }
 

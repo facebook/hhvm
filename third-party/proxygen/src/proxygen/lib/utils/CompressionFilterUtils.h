@@ -36,7 +36,7 @@ class CompressionFilterUtils {
     uint32_t minimumCompressionSize;
     StreamCompressorFactory compressorFactory;
     std::string headerEncoding;
-    const std::set<std::string> compressibleContentTypes;
+    std::set<std::string> compressibleContentTypes;
   };
 
   static folly::Optional<FilterParams> getFilterParams(

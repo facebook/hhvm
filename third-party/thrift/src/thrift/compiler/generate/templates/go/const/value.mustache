@@ -22,7 +22,10 @@
   are rendered as struct pointers. Callers are responsible for dereferencing
   appropriately if needed.
 
-  const/value.mustache and common/default_value.mustache have complete type partity.
+  The following templates have complete type parity:
+    * const/value.mustache
+    * common/natural_default_value.mustache
+    * common/go_zero_value.mustache
 
 }}
 {{#type:typedef?}}{{!

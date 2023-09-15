@@ -36,7 +36,7 @@ func (x *{{struct:go_name}}) Get{{field:go_name}}() {{#field:type}}{{#type:struc
         return nil
         {{/type:struct?}}
         {{^type:struct?}}
-        return {{#field:type}}{{> common/default_value}}{{/field:type}}
+        return {{#field:type}}{{> common/natural_default_value}}{{/field:type}}
         {{/type:struct?}}
         {{/field:type}}
         {{/field:value}}

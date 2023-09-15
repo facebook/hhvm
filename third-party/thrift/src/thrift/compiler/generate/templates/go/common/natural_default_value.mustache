@@ -16,20 +16,26 @@
 
 }}{{!
 
-  This template defines a Thrift default value for a given type.
-  Default values are based on Thrift specification.
+  This template defines a Thrift natural default value for a given type.
+
+  Natural default values are values assigned to Thrift fields/variables
+  by default in the abscence of explicit user-provided default values.
+  Natural default values are based on Thrift specification.
 
   All type values are rendered as "concrete" values, except for structs - which
   are rendered as struct pointers. Callers are responsible for dereferencing
   appropriately if needed.
 
-  const/value.mustache and common/default_value.mustache have complete type partity.
+  The following templates have complete type parity:
+    * const/value.mustache
+    * common/natural_default_value.mustache
+    * common/go_zero_value.mustache
 
 }}{{#type:typedef?}}{{!
   }}{{#type:typedef}}{{!
     }}{{#typedef:placeholder?}}{{
       }}{{#type:typedef_type}}{{
-        }}{{> common/default_value}}{{!
+        }}{{> common/natural_default_value}}{{!
       }}{{/type:typedef_type}}{{
     }}{{/typedef:placeholder?}}{{
     }}{{^typedef:placeholder?}}{{

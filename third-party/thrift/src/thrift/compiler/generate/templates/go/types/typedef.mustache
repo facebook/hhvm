@@ -25,7 +25,7 @@ type {{typedef:go_name}} {{!
 
 {{#typedef:type}}
 func {{typedef:go_qualified_new_func}}() {{#type:struct?}}*{{/type:struct?}}{{typedef:go_name}} {
-  return {{> common/default_value}}
+  return {{> common/natural_default_value}}
 }
 {{/typedef:type}}
 

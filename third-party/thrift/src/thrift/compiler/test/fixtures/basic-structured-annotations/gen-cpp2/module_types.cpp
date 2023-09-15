@@ -113,14 +113,7 @@ bool structured_annotation_inline::__fbthrift_is_empty() const {
 }
 
 bool structured_annotation_inline::operator==(FOLLY_MAYBE_UNUSED const structured_annotation_inline& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.count_ref() == rhs.count_ref())) {
-    return false;
-  }
-  if (!(lhs.name_ref() == rhs.name_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool structured_annotation_inline::operator<(FOLLY_MAYBE_UNUSED const structured_annotation_inline& rhs) const {
@@ -223,11 +216,7 @@ bool structured_annotation_with_default::__fbthrift_is_empty() const {
 }
 
 bool structured_annotation_with_default::operator==(FOLLY_MAYBE_UNUSED const structured_annotation_with_default& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.name_ref() == rhs.name_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool structured_annotation_with_default::operator<(FOLLY_MAYBE_UNUSED const structured_annotation_with_default& rhs) const {
@@ -349,17 +338,7 @@ bool structured_annotation_recursive::__fbthrift_is_empty() const {
 }
 
 bool structured_annotation_recursive::operator==(FOLLY_MAYBE_UNUSED const structured_annotation_recursive& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.name_ref() == rhs.name_ref())) {
-    return false;
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.recurse_ref(), rhs.recurse_ref()))) {
-    return false;
-  }
-  if (!(lhs.forward_ref() == rhs.forward_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool structured_annotation_recursive::operator<(FOLLY_MAYBE_UNUSED const structured_annotation_recursive& rhs) const {
@@ -463,11 +442,7 @@ bool structured_annotation_forward::__fbthrift_is_empty() const {
 }
 
 bool structured_annotation_forward::operator==(FOLLY_MAYBE_UNUSED const structured_annotation_forward& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.count_ref() == rhs.count_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool structured_annotation_forward::operator<(FOLLY_MAYBE_UNUSED const structured_annotation_forward& rhs) const {
@@ -573,14 +548,7 @@ bool structured_annotation_nested::__fbthrift_is_empty() const {
 }
 
 bool structured_annotation_nested::operator==(FOLLY_MAYBE_UNUSED const structured_annotation_nested& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.name_ref() == rhs.name_ref())) {
-    return false;
-  }
-  if (!(lhs.nest_ref() == rhs.nest_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool structured_annotation_nested::operator<(FOLLY_MAYBE_UNUSED const structured_annotation_nested& rhs) const {
@@ -713,20 +681,7 @@ bool MyStruct::__fbthrift_is_empty() const {
 }
 
 bool MyStruct::operator==(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.annotated_field_ref() == rhs.annotated_field_ref())) {
-    return false;
-  }
-  if (!(lhs.annotated_type_ref() == rhs.annotated_type_ref())) {
-    return false;
-  }
-  if (!(lhs.annotated_recursive_ref() == rhs.annotated_recursive_ref())) {
-    return false;
-  }
-  if (!(lhs.annotated_nested_ref() == rhs.annotated_nested_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool MyStruct::operator<(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
@@ -830,11 +785,7 @@ bool MyException::__fbthrift_is_empty() const {
 }
 
 bool MyException::operator==(FOLLY_MAYBE_UNUSED const MyException& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.context_ref() == rhs.context_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool MyException::operator<(FOLLY_MAYBE_UNUSED const MyException& rhs) const {

@@ -510,14 +510,7 @@ bool structA::__fbthrift_is_empty() const {
 }
 
 bool structA::operator==(FOLLY_MAYBE_UNUSED const structA& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.a_ref() == rhs.a_ref())) {
-    return false;
-  }
-  if (!(lhs.b_ref() == rhs.b_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool structA::operator<(FOLLY_MAYBE_UNUSED const structA& rhs) const {
@@ -732,14 +725,7 @@ bool structB::__fbthrift_is_empty() const {
 }
 
 bool structB::operator==(FOLLY_MAYBE_UNUSED const structB& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.c_ref() == rhs.c_ref())) {
-    return false;
-  }
-  if (!(lhs.d_ref() == rhs.d_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool structB::operator<(FOLLY_MAYBE_UNUSED const structB& rhs) const {
@@ -994,98 +980,7 @@ bool structC::__fbthrift_is_empty() const {
 }
 
 bool structC::operator==(FOLLY_MAYBE_UNUSED const structC& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.a_ref() == rhs.a_ref())) {
-    return false;
-  }
-  if (!(lhs.b_ref() == rhs.b_ref())) {
-    return false;
-  }
-  if (!(lhs.c_ref() == rhs.c_ref())) {
-    return false;
-  }
-  if (!(lhs.d_ref() == rhs.d_ref())) {
-    return false;
-  }
-  if (!(lhs.e_ref() == rhs.e_ref())) {
-    return false;
-  }
-  if (!(lhs.f_ref() == rhs.f_ref())) {
-    return false;
-  }
-  if (!(lhs.g_ref() == rhs.g_ref())) {
-    return false;
-  }
-  if (!(lhs.h_ref() == rhs.h_ref())) {
-    return false;
-  }
-  if (!(lhs.i_ref() == rhs.i_ref())) {
-    return false;
-  }
-  if (!(lhs.j_ref() == rhs.j_ref())) {
-    return false;
-  }
-  if (!(lhs.j1_ref() == rhs.j1_ref())) {
-    return false;
-  }
-  if (!(lhs.j2_ref() == rhs.j2_ref())) {
-    return false;
-  }
-  if (!(lhs.j3_ref() == rhs.j3_ref())) {
-    return false;
-  }
-  if (!(lhs.k_ref() == rhs.k_ref())) {
-    return false;
-  }
-  if (!(lhs.k1_ref() == rhs.k1_ref())) {
-    return false;
-  }
-  if (!(lhs.k2_ref() == rhs.k2_ref())) {
-    return false;
-  }
-  if (!(lhs.k3_ref() == rhs.k3_ref())) {
-    return false;
-  }
-  if (!(lhs.l_ref() == rhs.l_ref())) {
-    return false;
-  }
-  if (!(lhs.l1_ref() == rhs.l1_ref())) {
-    return false;
-  }
-  if (!(lhs.l2_ref() == rhs.l2_ref())) {
-    return false;
-  }
-  if (!(lhs.l3_ref() == rhs.l3_ref())) {
-    return false;
-  }
-  if (!(lhs.m1_ref() == rhs.m1_ref())) {
-    return false;
-  }
-  if (!(lhs.m2_ref() == rhs.m2_ref())) {
-    return false;
-  }
-  if (!(lhs.m3_ref() == rhs.m3_ref())) {
-    return false;
-  }
-  if (!(lhs.n1_ref() == rhs.n1_ref())) {
-    return false;
-  }
-  if (!(lhs.n2_ref() == rhs.n2_ref())) {
-    return false;
-  }
-  if (!(lhs.n3_ref() == rhs.n3_ref())) {
-    return false;
-  }
-  if (!(lhs.o1_ref() == rhs.o1_ref())) {
-    return false;
-  }
-  if (!(lhs.o2_ref() == rhs.o2_ref())) {
-    return false;
-  }
-  if (!(lhs.o3_ref() == rhs.o3_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool structC::operator<(FOLLY_MAYBE_UNUSED const structC& rhs) const {
@@ -1586,26 +1481,7 @@ bool struct1::__fbthrift_is_empty() const {
 }
 
 bool struct1::operator==(FOLLY_MAYBE_UNUSED const struct1& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.field0_ref() == rhs.field0_ref())) {
-    return false;
-  }
-  if (!(lhs.field1_ref() == rhs.field1_ref())) {
-    return false;
-  }
-  if (!(lhs.field2_ref() == rhs.field2_ref())) {
-    return false;
-  }
-  if (!(lhs.field3_ref() == rhs.field3_ref())) {
-    return false;
-  }
-  if (!(lhs.field4_ref() == rhs.field4_ref())) {
-    return false;
-  }
-  if (!(lhs.field5_ref() == rhs.field5_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool struct1::operator<(FOLLY_MAYBE_UNUSED const struct1& rhs) const {
@@ -1787,29 +1663,7 @@ bool struct2::__fbthrift_is_empty() const {
 }
 
 bool struct2::operator==(FOLLY_MAYBE_UNUSED const struct2& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.fieldA_ref() == rhs.fieldA_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldB_ref() == rhs.fieldB_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldC_ref() == rhs.fieldC_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldD_ref() == rhs.fieldD_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldE_ref() == rhs.fieldE_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldF_ref() == rhs.fieldF_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldG_ref() == rhs.fieldG_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool struct2::operator<(FOLLY_MAYBE_UNUSED const struct2& rhs) const {
@@ -2064,62 +1918,7 @@ bool struct3::__fbthrift_is_empty() const {
 }
 
 bool struct3::operator==(FOLLY_MAYBE_UNUSED const struct3& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.fieldA_ref() == rhs.fieldA_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldB_ref() == rhs.fieldB_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldC_ref() == rhs.fieldC_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldD_ref() == rhs.fieldD_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldE_ref() == rhs.fieldE_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldF_ref() == rhs.fieldF_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldG_ref() == rhs.fieldG_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldH_ref() == rhs.fieldH_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldI_ref() == rhs.fieldI_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldJ_ref() == rhs.fieldJ_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldK_ref() == rhs.fieldK_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldL_ref() == rhs.fieldL_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldM_ref() == rhs.fieldM_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldN_ref() == rhs.fieldN_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldO_ref() == rhs.fieldO_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldP_ref() == rhs.fieldP_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldQ_ref() == rhs.fieldQ_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldR_ref() == rhs.fieldR_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool struct3::operator<(FOLLY_MAYBE_UNUSED const struct3& rhs) const {
@@ -2477,20 +2276,7 @@ bool struct4::__fbthrift_is_empty() const {
 }
 
 bool struct4::operator==(FOLLY_MAYBE_UNUSED const struct4& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.field0_ref() == rhs.field0_ref())) {
-    return false;
-  }
-  if (!(lhs.field1_ref() == rhs.field1_ref())) {
-    return false;
-  }
-  if (!(lhs.field2_ref() == rhs.field2_ref())) {
-    return false;
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.field3_ref(), rhs.field3_ref()))) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool struct4::operator<(FOLLY_MAYBE_UNUSED const struct4& rhs) const {
@@ -2630,23 +2416,7 @@ bool struct5::__fbthrift_is_empty() const {
 }
 
 bool struct5::operator==(FOLLY_MAYBE_UNUSED const struct5& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.field0_ref() == rhs.field0_ref())) {
-    return false;
-  }
-  if (!(lhs.field1_ref() == rhs.field1_ref())) {
-    return false;
-  }
-  if (!(lhs.field2_ref() == rhs.field2_ref())) {
-    return false;
-  }
-  if (!(lhs.field3_ref() == rhs.field3_ref())) {
-    return false;
-  }
-  if (!(lhs.field4_ref() == rhs.field4_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool struct5::operator<(FOLLY_MAYBE_UNUSED const struct5& rhs) const {
@@ -2791,11 +2561,7 @@ bool struct_binary::__fbthrift_is_empty() const {
 }
 
 bool struct_binary::operator==(FOLLY_MAYBE_UNUSED const struct_binary& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.__fbthrift_field_bi, rhs.__fbthrift_field_bi)) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool struct_binary::operator<(FOLLY_MAYBE_UNUSED const struct_binary& rhs) const {
@@ -2883,17 +2649,7 @@ bool dep_A_struct::__fbthrift_is_empty() const {
 }
 
 bool dep_A_struct::operator==(FOLLY_MAYBE_UNUSED const dep_A_struct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.b_ref() == rhs.b_ref())) {
-    return false;
-  }
-  if (!(lhs.c_ref() == rhs.c_ref())) {
-    return false;
-  }
-  if (!(lhs.i_a_ref() == rhs.i_a_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool dep_A_struct::operator<(FOLLY_MAYBE_UNUSED const dep_A_struct& rhs) const {
@@ -3017,17 +2773,7 @@ bool dep_B_struct::__fbthrift_is_empty() const {
 }
 
 bool dep_B_struct::operator==(FOLLY_MAYBE_UNUSED const dep_B_struct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.b_ref() == rhs.b_ref())) {
-    return false;
-  }
-  if (!(lhs.c_ref() == rhs.c_ref())) {
-    return false;
-  }
-  if (!(lhs.i_a_ref() == rhs.i_a_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool dep_B_struct::operator<(FOLLY_MAYBE_UNUSED const dep_B_struct& rhs) const {
@@ -3145,11 +2891,7 @@ bool annotated::__fbthrift_is_empty() const {
 }
 
 bool annotated::operator==(FOLLY_MAYBE_UNUSED const annotated& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.a_ref() == rhs.a_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool annotated::operator<(FOLLY_MAYBE_UNUSED const annotated& rhs) const {
@@ -3547,92 +3289,7 @@ bool struct_with_special_names::__fbthrift_is_empty() const {
 }
 
 bool struct_with_special_names::operator==(FOLLY_MAYBE_UNUSED const struct_with_special_names& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.get_ref() == rhs.get_ref())) {
-    return false;
-  }
-  if (!(lhs.getter_ref() == rhs.getter_ref())) {
-    return false;
-  }
-  if (!(lhs.lists_ref() == rhs.lists_ref())) {
-    return false;
-  }
-  if (!(lhs.maps_ref() == rhs.maps_ref())) {
-    return false;
-  }
-  if (!(lhs.name_ref() == rhs.name_ref())) {
-    return false;
-  }
-  if (!(lhs.name_to_value_ref() == rhs.name_to_value_ref())) {
-    return false;
-  }
-  if (!(lhs.names_ref() == rhs.names_ref())) {
-    return false;
-  }
-  if (!(lhs.prefix_tree_ref() == rhs.prefix_tree_ref())) {
-    return false;
-  }
-  if (!(lhs.sets_ref() == rhs.sets_ref())) {
-    return false;
-  }
-  if (!(lhs.setter_ref() == rhs.setter_ref())) {
-    return false;
-  }
-  if (!(lhs.str_ref() == rhs.str_ref())) {
-    return false;
-  }
-  if (!(lhs.strings_ref() == rhs.strings_ref())) {
-    return false;
-  }
-  if (!(lhs.type_ref() == rhs.type_ref())) {
-    return false;
-  }
-  if (!(lhs.value_ref() == rhs.value_ref())) {
-    return false;
-  }
-  if (!(lhs.value_to_name_ref() == rhs.value_to_name_ref())) {
-    return false;
-  }
-  if (!(lhs.values_ref() == rhs.values_ref())) {
-    return false;
-  }
-  if (!(lhs.id_ref() == rhs.id_ref())) {
-    return false;
-  }
-  if (!(lhs.ids_ref() == rhs.ids_ref())) {
-    return false;
-  }
-  if (!(lhs.descriptor_ref() == rhs.descriptor_ref())) {
-    return false;
-  }
-  if (!(lhs.descriptors_ref() == rhs.descriptors_ref())) {
-    return false;
-  }
-  if (!(lhs.key_ref() == rhs.key_ref())) {
-    return false;
-  }
-  if (!(lhs.keys_ref() == rhs.keys_ref())) {
-    return false;
-  }
-  if (!(lhs.annotation_ref() == rhs.annotation_ref())) {
-    return false;
-  }
-  if (!(lhs.annotations_ref() == rhs.annotations_ref())) {
-    return false;
-  }
-  if (!(lhs.member_ref() == rhs.member_ref())) {
-    return false;
-  }
-  if (!(lhs.members_ref() == rhs.members_ref())) {
-    return false;
-  }
-  if (!(lhs.field_ref() == rhs.field_ref())) {
-    return false;
-  }
-  if (!(lhs.fields_ref() == rhs.fields_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool struct_with_special_names::operator<(FOLLY_MAYBE_UNUSED const struct_with_special_names& rhs) const {
@@ -3869,23 +3526,7 @@ bool struct_with_indirections::__fbthrift_is_empty() const {
 }
 
 bool struct_with_indirections::operator==(FOLLY_MAYBE_UNUSED const struct_with_indirections& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.real_ref() == rhs.real_ref())) {
-    return false;
-  }
-  if (!(lhs.fake_ref() == rhs.fake_ref())) {
-    return false;
-  }
-  if (!(lhs.number_ref() == rhs.number_ref())) {
-    return false;
-  }
-  if (!(lhs.result_ref() == rhs.result_ref())) {
-    return false;
-  }
-  if (!(lhs.phrase_ref() == rhs.phrase_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool struct_with_indirections::operator<(FOLLY_MAYBE_UNUSED const struct_with_indirections& rhs) const {
@@ -3980,11 +3621,7 @@ bool StructWithFieldAdapter::__fbthrift_is_empty() const {
 }
 
 bool StructWithFieldAdapter::operator==(FOLLY_MAYBE_UNUSED const StructWithFieldAdapter& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter1>(lhs.__fbthrift_field_field, rhs.__fbthrift_field_field)) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool StructWithFieldAdapter::operator<(FOLLY_MAYBE_UNUSED const StructWithFieldAdapter& rhs) const {

@@ -98,20 +98,7 @@ bool Foo::__fbthrift_is_empty() const {
 }
 
 bool Foo::operator==(FOLLY_MAYBE_UNUSED const Foo& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.field1_ref() == rhs.field1_ref())) {
-    return false;
-  }
-  if (!(lhs.field2_ref() == rhs.field2_ref())) {
-    return false;
-  }
-  if (!(lhs.field3_ref() == rhs.field3_ref())) {
-    return false;
-  }
-  if (!(lhs.field4_ref() == rhs.field4_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool Foo::operator<(FOLLY_MAYBE_UNUSED const Foo& rhs) const {
@@ -401,24 +388,7 @@ bool LazyFoo::__fbthrift_is_empty() const {
 }
 
 bool LazyFoo::operator==(FOLLY_MAYBE_UNUSED const LazyFoo& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.field1_ref() == rhs.field1_ref())) {
-    return false;
-  }
-  if (!(lhs.field2_ref() == rhs.field2_ref())) {
-    return false;
-  }
-  lhs.field3_ref();
-  rhs.field3_ref();
-  if (!(lhs.field3_ref() == rhs.field3_ref())) {
-    return false;
-  }
-  lhs.field4_ref();
-  rhs.field4_ref();
-  if (!(lhs.field4_ref() == rhs.field4_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool LazyFoo::operator<(FOLLY_MAYBE_UNUSED const LazyFoo& rhs) const {
@@ -574,20 +544,7 @@ bool OptionalFoo::__fbthrift_is_empty() const {
 }
 
 bool OptionalFoo::operator==(FOLLY_MAYBE_UNUSED const OptionalFoo& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.field1_ref() == rhs.field1_ref())) {
-    return false;
-  }
-  if (!(lhs.field2_ref() == rhs.field2_ref())) {
-    return false;
-  }
-  if (!(lhs.field3_ref() == rhs.field3_ref())) {
-    return false;
-  }
-  if (!(lhs.field4_ref() == rhs.field4_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool OptionalFoo::operator<(FOLLY_MAYBE_UNUSED const OptionalFoo& rhs) const {
@@ -878,24 +835,7 @@ bool OptionalLazyFoo::__fbthrift_is_empty() const {
 }
 
 bool OptionalLazyFoo::operator==(FOLLY_MAYBE_UNUSED const OptionalLazyFoo& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.field1_ref() == rhs.field1_ref())) {
-    return false;
-  }
-  if (!(lhs.field2_ref() == rhs.field2_ref())) {
-    return false;
-  }
-  lhs.field3_ref();
-  rhs.field3_ref();
-  if (!(lhs.field3_ref() == rhs.field3_ref())) {
-    return false;
-  }
-  lhs.field4_ref();
-  rhs.field4_ref();
-  if (!(lhs.field4_ref() == rhs.field4_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool OptionalLazyFoo::operator<(FOLLY_MAYBE_UNUSED const OptionalLazyFoo& rhs) const {
@@ -1275,28 +1215,7 @@ bool LazyCppRef::__fbthrift_is_empty() const {
 }
 
 bool LazyCppRef::operator==(FOLLY_MAYBE_UNUSED const LazyCppRef& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  lhs.field1_ref();
-  rhs.field1_ref();
-  if ((!::apache::thrift::detail::pointer_equal(lhs.field1_ref(), rhs.field1_ref()))) {
-    return false;
-  }
-  lhs.field2_ref();
-  rhs.field2_ref();
-  if ((!::apache::thrift::detail::pointer_equal(lhs.field2_ref(), rhs.field2_ref()))) {
-    return false;
-  }
-  lhs.field3_ref();
-  rhs.field3_ref();
-  if ((!::apache::thrift::detail::pointer_equal(lhs.field3_ref(), rhs.field3_ref()))) {
-    return false;
-  }
-  lhs.field4_ref();
-  rhs.field4_ref();
-  if ((!::apache::thrift::detail::pointer_equal(lhs.field4_ref(), rhs.field4_ref()))) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool LazyCppRef::operator<(FOLLY_MAYBE_UNUSED const LazyCppRef& rhs) const {
@@ -1449,26 +1368,7 @@ bool IndexedFoo::__fbthrift_is_empty() const {
 }
 
 bool IndexedFoo::operator==(FOLLY_MAYBE_UNUSED const IndexedFoo& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.serialized_data_size_ref() == rhs.serialized_data_size_ref())) {
-    return false;
-  }
-  if (!(lhs.field1_ref() == rhs.field1_ref())) {
-    return false;
-  }
-  if (!(lhs.field2_ref() == rhs.field2_ref())) {
-    return false;
-  }
-  if (!(lhs.field3_ref() == rhs.field3_ref())) {
-    return false;
-  }
-  if (!(lhs.field4_ref() == rhs.field4_ref())) {
-    return false;
-  }
-  if (!(lhs.field_id_to_size_ref() == rhs.field_id_to_size_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool IndexedFoo::operator<(FOLLY_MAYBE_UNUSED const IndexedFoo& rhs) const {
@@ -1655,26 +1555,7 @@ bool OptionalIndexedFoo::__fbthrift_is_empty() const {
 }
 
 bool OptionalIndexedFoo::operator==(FOLLY_MAYBE_UNUSED const OptionalIndexedFoo& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.serialized_data_size_ref() == rhs.serialized_data_size_ref())) {
-    return false;
-  }
-  if (!(lhs.field1_ref() == rhs.field1_ref())) {
-    return false;
-  }
-  if (!(lhs.field2_ref() == rhs.field2_ref())) {
-    return false;
-  }
-  if (!(lhs.field3_ref() == rhs.field3_ref())) {
-    return false;
-  }
-  if (!(lhs.field4_ref() == rhs.field4_ref())) {
-    return false;
-  }
-  if (!(lhs.field_id_to_size_ref() == rhs.field_id_to_size_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool OptionalIndexedFoo::operator<(FOLLY_MAYBE_UNUSED const OptionalIndexedFoo& rhs) const {
@@ -1811,8 +1692,7 @@ bool Empty::__fbthrift_is_empty() const {
 }
 
 bool Empty::operator==(FOLLY_MAYBE_UNUSED const Empty& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool Empty::operator<(FOLLY_MAYBE_UNUSED const Empty& rhs) const {

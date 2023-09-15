@@ -86,14 +86,7 @@ bool SmallStruct::__fbthrift_is_empty() const {
 }
 
 bool SmallStruct::operator==(FOLLY_MAYBE_UNUSED const SmallStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.small_A_ref() == rhs.small_A_ref())) {
-    return false;
-  }
-  if (!(lhs.small_B_ref() == rhs.small_B_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool SmallStruct::operator<(FOLLY_MAYBE_UNUSED const SmallStruct& rhs) const {
@@ -352,74 +345,7 @@ bool containerStruct::__fbthrift_is_empty() const {
 }
 
 bool containerStruct::operator==(FOLLY_MAYBE_UNUSED const containerStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.fieldA_ref() == rhs.fieldA_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldB_ref() == rhs.fieldB_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldC_ref() == rhs.fieldC_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldD_ref() == rhs.fieldD_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldE_ref() == rhs.fieldE_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldF_ref() == rhs.fieldF_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldG_ref() == rhs.fieldG_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldH_ref() == rhs.fieldH_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldI_ref() == rhs.fieldI_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldJ_ref() == rhs.fieldJ_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldK_ref() == rhs.fieldK_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldL_ref() == rhs.fieldL_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldM_ref() == rhs.fieldM_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldN_ref() == rhs.fieldN_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldO_ref() == rhs.fieldO_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldP_ref() == rhs.fieldP_ref())) {
-    return false;
-  }
-  if (!(lhs.fieldQ_ref() == rhs.fieldQ_ref())) {
-    return false;
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.fieldR_ref(), rhs.fieldR_ref()))) {
-    return false;
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.fieldS_ref(), rhs.fieldS_ref()))) {
-    return false;
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.fieldT_ref(), rhs.fieldT_ref()))) {
-    return false;
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.fieldU_ref(), rhs.fieldU_ref()))) {
-    return false;
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.fieldX_ref(), rhs.fieldX_ref()))) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool containerStruct::operator<(FOLLY_MAYBE_UNUSED const containerStruct& rhs) const {

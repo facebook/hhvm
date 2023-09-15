@@ -78,8 +78,7 @@ bool MyStruct::__fbthrift_is_empty() const {
 }
 
 bool MyStruct::operator==(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool MyStruct::operator<(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
@@ -260,50 +259,7 @@ bool EmptiableStruct::__fbthrift_is_empty() const {
 }
 
 bool EmptiableStruct::operator==(FOLLY_MAYBE_UNUSED const EmptiableStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.bool_field_ref() == rhs.bool_field_ref())) {
-    return false;
-  }
-  if (!(lhs.byte_field_ref() == rhs.byte_field_ref())) {
-    return false;
-  }
-  if (!(lhs.short_field_ref() == rhs.short_field_ref())) {
-    return false;
-  }
-  if (!(lhs.int_field_ref() == rhs.int_field_ref())) {
-    return false;
-  }
-  if (!(lhs.long_field_ref() == rhs.long_field_ref())) {
-    return false;
-  }
-  if (!(lhs.float_field_ref() == rhs.float_field_ref())) {
-    return false;
-  }
-  if (!(lhs.double_field_ref() == rhs.double_field_ref())) {
-    return false;
-  }
-  if (!(lhs.string_field_ref() == rhs.string_field_ref())) {
-    return false;
-  }
-  if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.__fbthrift_field_binary_field, rhs.__fbthrift_field_binary_field)) {
-    return false;
-  }
-  if (!(lhs.enum_field_ref() == rhs.enum_field_ref())) {
-    return false;
-  }
-  if (!(lhs.list_field_ref() == rhs.list_field_ref())) {
-    return false;
-  }
-  if (!(lhs.set_field_ref() == rhs.set_field_ref())) {
-    return false;
-  }
-  if (!(lhs.map_field_ref() == rhs.map_field_ref())) {
-    return false;
-  }
-  if (!(lhs.struct_field_ref() == rhs.struct_field_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool EmptiableStruct::operator<(FOLLY_MAYBE_UNUSED const EmptiableStruct& rhs) const {
@@ -566,50 +522,7 @@ bool NotEmptiableStruct::__fbthrift_is_empty() const {
 }
 
 bool NotEmptiableStruct::operator==(FOLLY_MAYBE_UNUSED const NotEmptiableStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.bool_field_ref() == rhs.bool_field_ref())) {
-    return false;
-  }
-  if (!(lhs.byte_field_ref() == rhs.byte_field_ref())) {
-    return false;
-  }
-  if (!(lhs.short_field_ref() == rhs.short_field_ref())) {
-    return false;
-  }
-  if (!(lhs.int_field_ref() == rhs.int_field_ref())) {
-    return false;
-  }
-  if (!(lhs.long_field_ref() == rhs.long_field_ref())) {
-    return false;
-  }
-  if (!(lhs.float_field_ref() == rhs.float_field_ref())) {
-    return false;
-  }
-  if (!(lhs.double_field_ref() == rhs.double_field_ref())) {
-    return false;
-  }
-  if (!(lhs.string_field_ref() == rhs.string_field_ref())) {
-    return false;
-  }
-  if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.__fbthrift_field_binary_field, rhs.__fbthrift_field_binary_field)) {
-    return false;
-  }
-  if (!(lhs.enum_field_ref() == rhs.enum_field_ref())) {
-    return false;
-  }
-  if (!(lhs.list_field_ref() == rhs.list_field_ref())) {
-    return false;
-  }
-  if (!(lhs.set_field_ref() == rhs.set_field_ref())) {
-    return false;
-  }
-  if (!(lhs.map_field_ref() == rhs.map_field_ref())) {
-    return false;
-  }
-  if (!(lhs.struct_field_ref() == rhs.struct_field_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool NotEmptiableStruct::operator<(FOLLY_MAYBE_UNUSED const NotEmptiableStruct& rhs) const {

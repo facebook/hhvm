@@ -82,14 +82,7 @@ bool Struct::__fbthrift_is_empty() const {
 }
 
 bool Struct::operator==(FOLLY_MAYBE_UNUSED const Struct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.first_ref() == rhs.first_ref())) {
-    return false;
-  }
-  if (!(lhs.second_ref() == rhs.second_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool Struct::operator<(FOLLY_MAYBE_UNUSED const Struct& rhs) const {
@@ -221,14 +214,7 @@ bool BigStruct::__fbthrift_is_empty() const {
 }
 
 bool BigStruct::operator==(FOLLY_MAYBE_UNUSED const BigStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.s_ref() == rhs.s_ref())) {
-    return false;
-  }
-  if (!(lhs.id_ref() == rhs.id_ref())) {
-    return false;
-  }
-  return true;
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
 bool BigStruct::operator<(FOLLY_MAYBE_UNUSED const BigStruct& rhs) const {

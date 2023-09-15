@@ -1,0 +1,8 @@
+Warning: json_encode(): type is unsupported, encoded as false in %s on line 15
+bool(false)
+vec(0) {
+}
+
+Fatal error: Uncaught exception 'InvalidArgumentException' with message 'Cannot Serialize unexpected type Resource' in %s:11
+Stack trace:
+%A

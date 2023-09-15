@@ -349,11 +349,6 @@ let main_internal
     in
     print_endline pretty_printed_dependencies;
     Lwt.return (Exit_status.No_error, telemetry)
-  | MODE_CONCATENATE_ALL ->
-    let paths = filter_real_paths args.paths in
-    let%lwt (single_file, telemetry) = rpc args @@ Rpc.CONCATENATE_ALL paths in
-    print_endline single_file;
-    Lwt.return (Exit_status.No_error, telemetry)
   | MODE_IDENTIFY_SYMBOL arg ->
     if not args.output_json then begin
       Printf.eprintf "Must use --json\n%!";

@@ -367,7 +367,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
   | EXTRACT_STANDALONE target ->
     let ctx = Provider_utils.ctx_from_server_env env in
     (env, ServerExtractStandalone.go ctx target)
-  | CONCATENATE_ALL paths -> (env, ServerConcatenateAll.go genv env paths)
   | VERBOSE verbose ->
     if verbose then
       Hh_logger.Level.set_min_level Hh_logger.Level.Debug

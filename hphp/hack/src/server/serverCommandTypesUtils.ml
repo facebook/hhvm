@@ -45,7 +45,6 @@ let debug_describe_t : type a. a t -> string = function
   | FILE_DEPENDENTS _ -> "FILE_DEPENDENTS"
   | IDENTIFY_TYPES _ -> "IDENTIFY_TYPES"
   | EXTRACT_STANDALONE _ -> "EXTRACT_STANDALONE"
-  | CONCATENATE_ALL _ -> "CONCATENATE_ALL"
   | VERBOSE _ -> "VERBOSE"
   | DEPS_OUT_BATCH _ -> "DEPS_OUT_BATCH"
   | DEPS_IN_BATCH _ -> "DEPS_IN_BATCH"

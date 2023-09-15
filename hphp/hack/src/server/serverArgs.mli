@@ -31,8 +31,6 @@ val ai_mode : options -> Ai_options.t option
 
 val check_mode : options -> bool
 
-val concatenate_prefix : options -> string option
-
 val config : options -> (string * string) list
 
 val custom_hhi_path : options -> string option

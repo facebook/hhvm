@@ -326,10 +326,6 @@ let parse_check_args cmd ~from_default =
         Arg.String (fun name -> set_mode (MODE_EXTRACT_STANDALONE name)),
         " extract a given function / method together with its dependencies as a standalone file. Usage: --extract-standalone Classname::methodName or function_name"
       );
-      ( "--concatenate-all",
-        Arg.Unit (fun () -> set_mode MODE_CONCATENATE_ALL),
-        "(mode) create a single file containing all Hack code in the specified prefix"
-      );
       ( "--file-dependents",
         Arg.Unit
           (fun () ->
@@ -752,7 +748,6 @@ let parse_check_args cmd ~from_default =
   let (root, paths) =
     match (mode, args) with
     | (MODE_LINT, _)
-    | (MODE_CONCATENATE_ALL, _)
     | (MODE_FILE_LEVEL_DEPENDENCIES, _) ->
       (Wwwroot.interpret_command_line_root_parameter [], args)
     | (_, _) -> (Wwwroot.interpret_command_line_root_parameter args, [])

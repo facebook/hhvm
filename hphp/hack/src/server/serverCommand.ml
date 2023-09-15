@@ -67,7 +67,6 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | FILE_DEPENDENTS _ -> true
   | IDENTIFY_TYPES _ -> false
   | EXTRACT_STANDALONE _ -> false
-  | CONCATENATE_ALL _ -> true
   | VERBOSE _ -> false
   | DEPS_IN_BATCH _ -> true
 

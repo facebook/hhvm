@@ -1317,17 +1317,8 @@ let run_once options config local_config =
         Some save_result
   in
   (* Finish up by generating the output and the exit code *)
-  match ServerArgs.concatenate_prefix genv.options with
-  | Some prefix ->
-    let prefix =
-      Relative_path.from_root ~suffix:prefix |> Relative_path.to_absolute
-    in
-    let text = ServerConcatenateAll.go genv env [prefix] in
-    print_endline text;
-    Exit.exit Exit_status.No_error
-  | _ ->
-    Hh_logger.log "Running in check mode";
-    Program.run_once_and_exit genv env save_state_results
+  Hh_logger.log "Running in check mode";
+  Program.run_once_and_exit genv env save_state_results
 
 (*
  * The server monitor will pass client connections to this process

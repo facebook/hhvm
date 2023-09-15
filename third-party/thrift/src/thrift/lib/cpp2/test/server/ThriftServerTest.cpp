@@ -94,6 +94,9 @@ using std::string;
 
 THRIFT_FLAG_DECLARE_bool(server_rocket_upgrade_enabled);
 DECLARE_int32(thrift_cpp2_protocol_reader_string_limit);
+namespace {
+constexpr auto kForcedQueueTimeout = 10ms /*ms*/;
+} // namespace
 
 std::unique_ptr<HTTP2RoutingHandler> createHTTP2RoutingHandler(
     ThriftServer& server) {
@@ -1858,7 +1861,7 @@ TEST_P(OverloadTest, Test) {
   if (errorType == ErrorType::Overload) {
     // Thrift is overloaded on max requests
     runner.getThriftServer().setMaxRequests(1);
-    runner.getThriftServer().setQueueTimeout(10ms);
+    runner.getThriftServer().setQueueTimeout(kForcedQueueTimeout);
     auto handler = dynamic_cast<BlockInterface*>(
         runner.getThriftServer().getProcessorFactory().get());
     client->semifuture_voidResponse();
@@ -1880,7 +1883,7 @@ TEST_P(OverloadTest, Test) {
     FAIL() << "Expected that the service call throws TApplicationException";
   } catch (const apache::thrift::TApplicationException& ex) {
     EXPECT_EQ(getShedError(), ex.getType());
-    EXPECT_EQ(getShedMessage(), ex.getMessage());
+    EXPECT_TRUE(ex.getMessage().find(getShedMessage()) != std::string::npos);
 
     validateErrorHeaders(rpcOptions);
 

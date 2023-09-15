@@ -253,7 +253,9 @@ class ThriftRequestCore : public ResponseChannelRequest {
       sendErrorWrappedInternal(
           TApplicationException(
               TApplicationException::TApplicationExceptionType::TIMEOUT,
-              "Queue Timeout"),
+              fmt::format(
+                  "Load Shedding Due to Queue Timeout: {} ms",
+                  queueTimeoutUsed_.count())),
           kServerQueueTimeoutErrorCode,
           {},
           {});

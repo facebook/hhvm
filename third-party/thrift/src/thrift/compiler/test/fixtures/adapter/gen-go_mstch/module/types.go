@@ -6461,7 +6461,9 @@ func (x *AdaptTemplatedTestStruct) GetAdaptedListDefaultNonCompat() []int64 {
 
 func (x *AdaptTemplatedTestStruct) GetAdaptedListDefault() []int64 {
     if !x.IsSetAdaptedListDefault() {
-        return NewAdaptTemplatedTestStruct().AdaptedListDefault
+        return []int64{
+    1,
+}
     }
 
     return x.AdaptedListDefault
@@ -6473,7 +6475,9 @@ func (x *AdaptTemplatedTestStruct) GetAdaptedSetDefaultNonCompat() []int64 {
 
 func (x *AdaptTemplatedTestStruct) GetAdaptedSetDefault() []int64 {
     if !x.IsSetAdaptedSetDefault() {
-        return NewAdaptTemplatedTestStruct().AdaptedSetDefault
+        return []int64{
+    1,
+}
     }
 
     return x.AdaptedSetDefault
@@ -6485,7 +6489,9 @@ func (x *AdaptTemplatedTestStruct) GetAdaptedMapDefaultNonCompat() map[int64]int
 
 func (x *AdaptTemplatedTestStruct) GetAdaptedMapDefault() map[int64]int64 {
     if !x.IsSetAdaptedMapDefault() {
-        return NewAdaptTemplatedTestStruct().AdaptedMapDefault
+        return map[int64]int64{
+    1: 1,
+}
     }
 
     return x.AdaptedMapDefault

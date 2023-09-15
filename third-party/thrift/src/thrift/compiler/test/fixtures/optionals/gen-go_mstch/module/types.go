@@ -545,7 +545,7 @@ func (x *Vehicle) GetHasACNonCompat() *bool {
 
 func (x *Vehicle) GetHasAC() bool {
     if !x.IsSetHasAC() {
-        return *NewVehicle().HasAC
+        return false
     }
 
     return *x.HasAC

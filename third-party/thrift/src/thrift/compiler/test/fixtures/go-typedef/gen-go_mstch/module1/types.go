@@ -281,7 +281,7 @@ func (x *Automobile) GetFirstPlateNonCompat() *Plate {
 
 func (x *Automobile) GetFirstPlate() Plate {
     if !x.IsSetFirstPlate() {
-        return *NewAutomobile().FirstPlate
+        return "0000"
     }
 
     return *x.FirstPlate

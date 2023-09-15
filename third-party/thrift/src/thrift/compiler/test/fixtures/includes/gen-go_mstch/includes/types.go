@@ -101,7 +101,7 @@ func (x *Included) GetMyTransitiveFieldNonCompat() *transitive.Foo {
 
 func (x *Included) GetMyTransitiveField() *transitive.Foo {
     if !x.IsSetMyTransitiveField() {
-        return NewIncluded().MyTransitiveField
+        return nil
     }
 
     return x.MyTransitiveField

@@ -1509,7 +1509,7 @@ func (x *MyStruct) GetStructWithFieldCustomDefaultNonCompat() *MyData {
 
 func (x *MyStruct) GetStructWithFieldCustomDefault() *MyData {
     if !x.IsSetStructWithFieldCustomDefault() {
-        return NewMyStruct().StructWithFieldCustomDefault
+        return nil
     }
 
     return x.StructWithFieldCustomDefault

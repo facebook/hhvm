@@ -27,19 +27,14 @@ func (x *{{struct:go_name}}) Get{{field:go_name}}{{#program:compat_getters?}}Non
 func (x *{{struct:go_name}}) Get{{field:go_name}}() {{#field:type}}{{#type:struct?}}*{{/type:struct?}}{{> common/type}}{{/field:type}} {
     {{#field:nilable?}}
     if !x.IsSet{{field:go_name}}() {
-        {{#field:value}}
-        return {{#field:non_struct_pointer?}}*{{/field:non_struct_pointer?}}{{struct:go_qualified_new_func}}().{{field:go_name}}
-        {{/field:value}}
-        {{^field:value}}
         {{#field:type}}
         {{#type:struct?}}
         return nil
         {{/type:struct?}}
         {{^type:struct?}}
-        return {{#field:type}}{{> common/natural_default_value}}{{/field:type}}
+        return {{> types/field_default_value}}
         {{/type:struct?}}
         {{/field:type}}
-        {{/field:value}}
     }
 
     {{/field:nilable?}}

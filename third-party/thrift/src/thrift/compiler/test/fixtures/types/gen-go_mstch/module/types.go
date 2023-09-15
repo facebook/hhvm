@@ -2354,7 +2354,7 @@ func (x *TrivialNestedWithDefault) GetNNonCompat() *TrivialNumeric {
 
 func (x *TrivialNestedWithDefault) GetN() *TrivialNumeric {
     if !x.IsSetN() {
-        return NewTrivialNestedWithDefault().N
+        return nil
     }
 
     return x.N
@@ -2904,7 +2904,7 @@ func (x *ComplexNestedWithDefault) GetNNonCompat() *ComplexString {
 
 func (x *ComplexNestedWithDefault) GetN() *ComplexString {
     if !x.IsSetN() {
-        return NewComplexNestedWithDefault().N
+        return nil
     }
 
     return x.N

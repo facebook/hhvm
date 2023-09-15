@@ -5905,7 +5905,7 @@ func (x *TerseStructWithCustomDefault) GetBinaryFieldNonCompat() []byte {
 
 func (x *TerseStructWithCustomDefault) GetBinaryField() []byte {
     if !x.IsSetBinaryField() {
-        return NewTerseStructWithCustomDefault().BinaryField
+        return []byte("8")
     }
 
     return x.BinaryField
@@ -5925,7 +5925,9 @@ func (x *TerseStructWithCustomDefault) GetListFieldNonCompat() []int16 {
 
 func (x *TerseStructWithCustomDefault) GetListField() []int16 {
     if !x.IsSetListField() {
-        return NewTerseStructWithCustomDefault().ListField
+        return []int16{
+    1,
+}
     }
 
     return x.ListField
@@ -5937,7 +5939,9 @@ func (x *TerseStructWithCustomDefault) GetSetFieldNonCompat() []int16 {
 
 func (x *TerseStructWithCustomDefault) GetSetField() []int16 {
     if !x.IsSetSetField() {
-        return NewTerseStructWithCustomDefault().SetField
+        return []int16{
+    1,
+}
     }
 
     return x.SetField
@@ -5949,7 +5953,9 @@ func (x *TerseStructWithCustomDefault) GetMapFieldNonCompat() map[int16]int16 {
 
 func (x *TerseStructWithCustomDefault) GetMapField() map[int16]int16 {
     if !x.IsSetMapField() {
-        return NewTerseStructWithCustomDefault().MapField
+        return map[int16]int16{
+    1: 1,
+}
     }
 
     return x.MapField

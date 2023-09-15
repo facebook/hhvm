@@ -44,16 +44,6 @@ class codegen_data {
   // fields (to make the migration easier)
   bool compat_setters = true;
 
-  // Key: package name according to Thrift.
-  // Value: package name to use in generated code.
-  std::map<std::string, std::string> go_package_map;
-  std::map<std::string, int32_t> go_package_name_collisions = {
-      {"thrift", 0},
-      {"context", 0},
-      {"fmt", 0},
-      {"strings", 0},
-      {"sync", 0},
-  };
   // Records field names for every struct in the program.
   // This is needed to resolve some edge case name collisions.
   std::map<std::string, std::set<std::string>> struct_to_field_names = {};
@@ -63,8 +53,32 @@ class codegen_data {
   // Mapping of service name to a vector of req/resp structs for that service.
   std::map<std::string, std::vector<t_struct*>> service_to_req_resp_structs =
       {};
+
+  void set_current_program(const t_program* program);
+
+  void compute_go_package_aliases();
+  void compute_struct_to_field_names();
+  void compute_service_to_req_resp_structs();
+
+  std::string get_go_package_alias(const t_program* program);
+  std::string go_package_alias_prefix(const t_program* program);
+
+ private:
+  std::string make_go_package_name_unique(const std::string& name);
+
   // The current program being generated.
-  const t_program* current_program;
+  const t_program* current_program_;
+  // Key: package name according to Thrift.
+  // Value: package name to use in generated code.
+  std::map<std::string, std::string> go_package_map_;
+  // A map for keeping track and resolving package name collisions.
+  std::map<std::string, int32_t> go_package_name_collisions_ = {
+      {"thrift", 0},
+      {"context", 0},
+      {"fmt", 0},
+      {"strings", 0},
+      {"sync", 0},
+  };
 };
 
 // Name of the field of the response helper struct where
@@ -86,9 +100,6 @@ std::string munge_ident(
 std::string quote(const std::string& data);
 
 std::string snakecase(const std::string& name);
-
-std::string make_unique_name(
-    std::map<std::string, int32_t>& name_collisions, const std::string& name);
 
 bool is_func_go_supported(const t_function* func);
 bool is_go_reserved_word(const std::string& value);

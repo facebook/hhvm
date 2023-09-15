@@ -42,30 +42,6 @@ std::string doc_comment(const t_named* named_node) {
   return out.str();
 }
 
-std::string get_go_package_alias(
-    const t_program* program, const go::codegen_data& options) {
-  if (program == options.current_program) {
-    return "";
-  }
-
-  auto package = go::get_go_package_name(program, options.package_override);
-  auto iter = options.go_package_map.find(package);
-  if (iter != options.go_package_map.end()) {
-    return iter->second;
-  }
-  throw std::runtime_error("unable to determine Go package alias");
-}
-
-std::string go_package_alias_prefix(
-    const t_program* program, const go::codegen_data& options) {
-  auto alias = get_go_package_alias(program, options);
-  if (alias == "") {
-    return "";
-  } else {
-    return alias + ".";
-  }
-}
-
 class t_mstch_go_generator : public t_mstch_generator {
  public:
   using t_mstch_generator::t_mstch_generator;
@@ -76,9 +52,7 @@ class t_mstch_go_generator : public t_mstch_generator {
 
  private:
   void set_mstch_factories();
-  void set_go_package_aliases();
-  void set_struct_to_field_names();
-  void set_service_to_req_resp_structs();
+
   go::codegen_data data_;
 };
 
@@ -141,7 +115,7 @@ class mstch_go_program : public mstch_program {
   }
   mstch::node thrift_lib_import() { return data_.thrift_lib_import; }
   mstch::node go_package_alias() {
-    return get_go_package_alias(program_, data_);
+    return data_.get_go_package_alias(program_);
   }
 
  private:
@@ -166,7 +140,7 @@ class mstch_go_enum : public mstch_enum {
 
   mstch::node go_name() { return go::munge_ident(enum_->name()); }
   mstch::node go_qualified_name() {
-    auto prefix = go_package_alias_prefix(enum_->program(), data_);
+    auto prefix = data_.go_package_alias_prefix(enum_->program());
     auto name = go::munge_ident(enum_->name());
     return prefix + name;
   }
@@ -226,7 +200,7 @@ class mstch_go_const : public mstch_const {
         go::is_type_go_struct(real_type);
   }
   mstch::node go_qualified_name() {
-    auto prefix = go_package_alias_prefix(const_->program(), data_);
+    auto prefix = data_.go_package_alias_prefix(const_->program());
     auto name = go::munge_ident(const_->name());
     return prefix + name;
   }
@@ -438,11 +412,11 @@ class mstch_go_struct : public mstch_struct {
 
   mstch::node go_name() { return go_name_(); }
   mstch::node go_qualified_name() {
-    auto prefix = go_package_alias_prefix(struct_->program(), data_);
+    auto prefix = data_.go_package_alias_prefix(struct_->program());
     return prefix + go_name_();
   }
   mstch::node go_qualified_new_func() {
-    auto prefix = go_package_alias_prefix(struct_->program(), data_);
+    auto prefix = data_.go_package_alias_prefix(struct_->program());
     return prefix + go_new_func_();
   }
   mstch::node is_req_resp_struct() {
@@ -515,12 +489,12 @@ class mstch_go_service : public mstch_service {
 
   mstch::node go_name() { return go::munge_ident(service_->name()); }
   mstch::node go_qualified_name() {
-    auto prefix = go_package_alias_prefix(service_->program(), data_);
+    auto prefix = data_.go_package_alias_prefix(service_->program());
     auto name = go::munge_ident(service_->name());
     return prefix + name;
   }
   mstch::node go_package_alias_prefix_() {
-    return go_package_alias_prefix(service_->program(), data_);
+    return data_.go_package_alias_prefix(service_->program());
   }
 
   mstch::node req_resp_structs() {
@@ -632,22 +606,22 @@ class mstch_go_typedef : public mstch_typedef {
         nullptr;
   }
   mstch::node go_qualified_name() {
-    auto prefix = go_package_alias_prefix(typedef_->program(), data_);
+    auto prefix = data_.go_package_alias_prefix(typedef_->program());
     auto name = go_name_();
     return prefix + name;
   }
   mstch::node go_qualified_new_func() {
-    auto prefix = go_package_alias_prefix(typedef_->program(), data_);
+    auto prefix = data_.go_package_alias_prefix(typedef_->program());
     auto name = go_name_();
     return prefix + "New" + name;
   }
   mstch::node go_qualified_write_func() {
-    auto prefix = go_package_alias_prefix(typedef_->program(), data_);
+    auto prefix = data_.go_package_alias_prefix(typedef_->program());
     auto name = go_name_();
     return prefix + "Write" + name;
   }
   mstch::node go_qualified_read_func() {
-    auto prefix = go_package_alias_prefix(typedef_->program(), data_);
+    auto prefix = data_.go_package_alias_prefix(typedef_->program());
     auto name = go_name_();
     return prefix + "Read" + name;
   }
@@ -677,10 +651,13 @@ class mstch_go_typedef : public mstch_typedef {
 void t_mstch_go_generator::generate_program() {
   out_dir_base_ = "gen-go_mstch";
   set_mstch_factories();
-  set_go_package_aliases();
-  set_struct_to_field_names();
-  set_service_to_req_resp_structs();
-  data_.current_program = program_;
+
+  const t_program* program = get_program();
+
+  data_.set_current_program(program);
+  data_.compute_go_package_aliases();
+  data_.compute_struct_to_field_names();
+  data_.compute_service_to_req_resp_structs();
 
   if (auto thrift_lib_import = get_option("thrift_import")) {
     data_.thrift_lib_import = *thrift_lib_import;
@@ -689,7 +666,6 @@ void t_mstch_go_generator::generate_program() {
     data_.package_override = *package_override;
   }
 
-  const auto* program = get_program();
   const auto& prog = cached_program(program);
   auto package_dir = boost::filesystem::path{
       go::get_go_package_dir(program, data_.package_override)};
@@ -716,46 +692,6 @@ void t_mstch_go_generator::set_mstch_factories() {
   mstch_context_.add<mstch_go_const_value>(&data_);
 }
 
-void t_mstch_go_generator::set_go_package_aliases() {
-  auto program = get_program();
-  auto includes = program->get_includes_for_codegen();
-
-  // Prevent collisions with *this* program's package name
-  auto pkg_name = go::get_go_package_base_name(program, data_.package_override);
-  data_.go_package_name_collisions[pkg_name] = 0;
-
-  for (auto include : includes) {
-    auto package = go::get_go_package_name(include);
-    auto package_base_name = go::get_go_package_base_name(include);
-    auto unique_package_name = go::make_unique_name(
-        data_.go_package_name_collisions,
-        go::munge_ident(package_base_name, /*exported*/ false));
-
-    data_.go_package_map.emplace(package, unique_package_name);
-  }
-}
-
-void t_mstch_go_generator::set_struct_to_field_names() {
-  auto program = get_program();
-  for (auto struct_ : program->structs()) {
-    data_.struct_to_field_names[struct_->name()] =
-        go::get_struct_go_field_names(struct_);
-  }
-}
-
-void t_mstch_go_generator::set_service_to_req_resp_structs() {
-  auto program = get_program();
-  for (auto service : program->services()) {
-    std::vector<t_struct*> req_resp_structs =
-        go::get_service_req_resp_structs(service);
-    data_.service_to_req_resp_structs[service->name()] = req_resp_structs;
-    for (auto struct_ : req_resp_structs) {
-      data_.req_resp_struct_names.insert(struct_->name());
-      data_.struct_to_field_names[struct_->name()] =
-          go::get_struct_go_field_names(struct_);
-    }
-  }
-}
 } // namespace
 
 THRIFT_REGISTER_GENERATOR(mstch_go, "Go", "");

@@ -95,6 +95,87 @@ static const std::set<std::string> reserved_field_names = {
     "String",
 };
 
+void codegen_data::set_current_program(const t_program* program) {
+  current_program_ = program;
+
+  // Prevent collisions with *this* program's package name
+  auto pkg_name = go::get_go_package_base_name(program, package_override);
+  go_package_name_collisions_[pkg_name] = 0;
+}
+
+std::string codegen_data::make_go_package_name_unique(const std::string& name) {
+  // Uses go_package_name_collisions_ map to keep track of name collisions in
+  // order to uniquify package names. When a collision is detected, i.e. package
+  // or program with the same name - an incrementing numeric suffix is added.
+  auto unique_name = name;
+  if (is_go_reserved_word(name)) {
+    // Emplaces only if not already in map.
+    go_package_name_collisions_.try_emplace(name, 0);
+  }
+  auto iter = go_package_name_collisions_.find(name);
+  if (iter == go_package_name_collisions_.end()) {
+    go_package_name_collisions_[name] = 0;
+  } else {
+    auto numSuffix = iter->second;
+    unique_name = name + std::to_string(numSuffix);
+    go_package_name_collisions_[name] = numSuffix + 1;
+  }
+  return unique_name;
+}
+
+void codegen_data::compute_go_package_aliases() {
+  for (auto include : current_program_->get_includes_for_codegen()) {
+    auto package = go::get_go_package_name(include);
+    auto package_base_name = go::get_go_package_base_name(include);
+    auto unique_package_name = make_go_package_name_unique(
+        go::munge_ident(package_base_name, /*exported*/ false));
+
+    go_package_map_.emplace(package, unique_package_name);
+  }
+}
+
+void codegen_data::compute_struct_to_field_names() {
+  for (auto struct_ : current_program_->structs()) {
+    struct_to_field_names[struct_->name()] =
+        go::get_struct_go_field_names(struct_);
+  }
+}
+
+void codegen_data::compute_service_to_req_resp_structs() {
+  for (auto service : current_program_->services()) {
+    std::vector<t_struct*> req_resp_structs =
+        go::get_service_req_resp_structs(service);
+    service_to_req_resp_structs[service->name()] = req_resp_structs;
+    for (auto struct_ : req_resp_structs) {
+      req_resp_struct_names.insert(struct_->name());
+      struct_to_field_names[struct_->name()] =
+          go::get_struct_go_field_names(struct_);
+    }
+  }
+}
+
+std::string codegen_data::get_go_package_alias(const t_program* program) {
+  if (program == current_program_) {
+    return "";
+  }
+
+  auto package = go::get_go_package_name(program, package_override);
+  auto iter = go_package_map_.find(package);
+  if (iter != go_package_map_.end()) {
+    return iter->second;
+  }
+  throw std::runtime_error("unable to determine Go package alias");
+}
+
+std::string codegen_data::go_package_alias_prefix(const t_program* program) {
+  auto alias = get_go_package_alias(program);
+  if (alias == "") {
+    return "";
+  } else {
+    return alias + ".";
+  }
+}
+
 std::string get_go_package_name(
     const t_program* program, std::string name_override) {
   if (!name_override.empty()) {
@@ -270,28 +351,6 @@ std::string snakecase(const std::string& name) {
   }
 
   return snake.str();
-}
-
-std::string make_unique_name(
-    std::map<std::string, int32_t>& name_collisions, const std::string& name) {
-  // Uses name_collisions map provided by the caller to keep track of name
-  // collisions in order to uniquify names. When a collision is detected,
-  // i.e. package or program with the same name - an incrementing numeric
-  // suffix is added.
-  auto unique_name = name;
-  if (is_go_reserved_word(name)) {
-    // Emplaces only if not already in map.
-    name_collisions.try_emplace(name, 0);
-  }
-  auto iter = name_collisions.find(name);
-  if (iter == name_collisions.end()) {
-    name_collisions[name] = 0;
-  } else {
-    auto numSuffix = iter->second;
-    unique_name = name + std::to_string(numSuffix);
-    name_collisions[name] = numSuffix + 1;
-  }
-  return unique_name;
 }
 
 bool is_func_go_supported(const t_function* func) {

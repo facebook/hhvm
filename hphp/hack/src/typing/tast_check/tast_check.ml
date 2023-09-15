@@ -43,6 +43,9 @@ let visitor ctx =
     else
       Some handler
   in
+  let enable_strict_switch =
+    TypecheckerOptions.tco_enable_strict_switch tcopt
+  in
   let handlers =
     irregular_handlers
     @ List.filter_map
@@ -55,10 +58,13 @@ let visitor ctx =
           Some Tautology_check.handler;
           Some Enforceable_hint_check.handler;
           Some Const_write_check.handler;
-          (if TypecheckerOptions.tco_enable_strict_switch tcopt then
+          (if enable_strict_switch then
             Some Strict_switch_check.handler
           else
             Some Switch_check.handler);
+          Option.some_if
+            enable_strict_switch
+            Strict_switch_int_literal_check.handler;
           Some Void_return_check.handler;
           Some Rvalue_check.handler;
           Some Callconv_check.handler;

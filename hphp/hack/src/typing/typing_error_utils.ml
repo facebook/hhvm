@@ -599,6 +599,26 @@ module Eval_primary = struct
       in
       (Error_code.EnumSwitchWrongClass, claim, lazy [], [])
 
+    let enum_switch_inconsistent_int_literal_format expected exp_pos actual pos
+        =
+      let claim =
+        lazy
+          ( pos,
+            "This int literal is in "
+            ^ Markdown_lite.md_codify actual
+            ^ ", but was expecting it to be in "
+            ^ Markdown_lite.md_codify expected )
+      in
+      let reason =
+        lazy
+          [
+            ( Pos_or_decl.of_raw_pos exp_pos,
+              "All int literals in this switch must be written in the same base as the first one"
+            );
+          ]
+      in
+      (Error_code.EnumSwitchWrongClass, claim, reason, [])
+
     let enum_class_label_unknown
         pos label_name enum_name decl_pos most_similar ty_pos =
       let enum_name = Markdown_lite.md_codify (Render.strip_ns enum_name) in
@@ -712,6 +732,13 @@ module Eval_primary = struct
       | Enum_switch_not_const pos -> enum_switch_not_const pos
       | Enum_switch_wrong_class { pos; kind; expected; actual } ->
         enum_switch_wrong_class pos kind expected actual
+      | Enum_switch_inconsistent_int_literal_format
+          { expected; actual; expected_pos; pos } ->
+        enum_switch_inconsistent_int_literal_format
+          expected
+          expected_pos
+          actual
+          pos
       | Enum_class_label_unknown
           { pos; label_name; enum_name; decl_pos; most_similar; ty_pos } ->
         enum_class_label_unknown

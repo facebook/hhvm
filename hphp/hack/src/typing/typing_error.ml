@@ -96,6 +96,15 @@ module Primary = struct
         | Int None -> "int"
         | Int (Some num) -> num
 
+      let if_int lit ~then_ ~else_ =
+        match lit with
+        | Int (Some num) -> then_ num
+        | Int None
+        | Null
+        | Label _
+        | Bool _ ->
+          else_
+
       let opt_to_user_string =
         Option.value_map ~default:"default" ~f:to_user_string
     end
@@ -123,6 +132,12 @@ module Primary = struct
           kind: string;
           expected: string;
           actual: string;
+        }
+      | Enum_switch_inconsistent_int_literal_format of {
+          expected_pos: Pos.t;
+          expected: string;
+          actual: string;
+          pos: Pos.t;
         }
       | Enum_type_bad of {
           pos: Pos.t;

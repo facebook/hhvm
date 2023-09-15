@@ -86,6 +86,8 @@ module Primary : sig
 
       val to_user_string : t -> string
 
+      val if_int : t -> then_:(string -> 'a) -> else_:'a -> 'a
+
       val opt_to_user_string : t option -> string
     end
 
@@ -112,6 +114,12 @@ module Primary : sig
           kind: string;
           expected: string;
           actual: string;
+        }
+      | Enum_switch_inconsistent_int_literal_format of {
+          expected_pos: Pos.t;
+          expected: string;
+          actual: string;
+          pos: Pos.t;
         }
       | Enum_type_bad of {
           pos: Pos.t;

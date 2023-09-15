@@ -63,7 +63,11 @@ module Value = struct
     | Null -> (Null, Some Null)
     | True -> (Bool true, Some (Bool true))
     | False -> (Bool false, Some (Bool false))
-    | Int literal -> (Int, Some (Int (Some literal)))
+    | Int literal ->
+      (* we rely on the fact that there are no underscores in the string literal,
+         so that "1_0_0", "100" and "10_0" are considered the same *)
+      assert (not @@ String.contains literal '_');
+      (Int, Some (Int (Some literal)))
     | Class_const ((_, _, CI (_, class_)), (_, const)) ->
       let is_sub env mk_ty ty =
         Typing_subtype.is_sub_type env ty (mk_ty Reason.Rnone)
@@ -205,7 +209,11 @@ let get_missing_cases env partitions =
         ~get_key:snd
         ~get_data:(fun (pos, _) -> [pos])
         ~combine:( @ )
-      (* ...to perform a redundant case check *)
+      (* ...to perform a redundant case check. This relies on the
+         `Strict_switch_int_literal_check` to ensure that all integer literals
+         are in the same format (hex, bin, oct, dec). Otherwise int literals
+         could represent the same value (e.g. "0b10" and "2") but not be caught
+         as redundant. *)
       |> Hashtbl.iteri ~f:(fun ~key:const_name ~data:positions ->
              match positions with
              | [] ->

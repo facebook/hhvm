@@ -1,0 +1,32 @@
+File "int_format.php", line 31, characters 10-20:
+Redundant `case` statement (Typing[4021])
+  File "int_format.php", line 27, characters 10-20:
+  `709138457` already handled here
+File "int_format.php", line 7, characters 10-12:
+This int literal is in `binary`, but was expecting it to be in `decimal` (Typing[4023])
+  File "int_format.php", line 5, characters 10-10:
+  All int literals in this switch must be written in the same base as the first one
+File "int_format.php", line 18, characters 10-12:
+This int literal is in `hexadecimal`, but was expecting it to be in `decimal` (Typing[4023])
+  File "int_format.php", line 16, characters 10-10:
+  All int literals in this switch must be written in the same base as the first one
+File "int_format.php", line 29, characters 10-12:
+This int literal is in `octal`, but was expecting it to be in `decimal` (Typing[4023])
+  File "int_format.php", line 27, characters 10-20:
+  All int literals in this switch must be written in the same base as the first one
+File "int_format.php", line 42, characters 10-10:
+This int literal is in `decimal`, but was expecting it to be in `binary` (Typing[4023])
+  File "int_format.php", line 40, characters 10-12:
+  All int literals in this switch must be written in the same base as the first one
+File "int_format.php", line 53, characters 10-13:
+This int literal is in `binary`, but was expecting it to be in `octal` (Typing[4023])
+  File "int_format.php", line 51, characters 10-11:
+  All int literals in this switch must be written in the same base as the first one
+File "int_format.php", line 64, characters 10-13:
+This int literal is in `hexadecimal`, but was expecting it to be in `octal` (Typing[4023])
+  File "int_format.php", line 62, characters 10-18:
+  All int literals in this switch must be written in the same base as the first one
+File "int_format.php", line 75, characters 10-14:
+This int literal is in `binary`, but was expecting it to be in `hexadecimal` (Typing[4023])
+  File "int_format.php", line 73, characters 10-13:
+  All int literals in this switch must be written in the same base as the first one

@@ -291,7 +291,15 @@ MCROUTER_OPTION_DOUBLE(
     1.0,
     "core-multiplier",
     no_short,
-    "When > 0, number of proxies used will be num-proxies * core-multiplier")
+    "When > 0, number of proxies used will be std::hardware_concurrency * core-multiplier")
+
+MCROUTER_OPTION_INTEGER(
+    size_t,
+    core_multiplier_threshold,
+    0,
+    "core-multiplier-threshold",
+    no_short,
+    "core-mutiplier logic is applied if the number of cores  >= core_multiplier_threshold")
 
 #ifdef ADDITIONAL_STANDALONE_OPTIONS_FILE
 #include ADDITIONAL_STANDALONE_OPTIONS_FILE

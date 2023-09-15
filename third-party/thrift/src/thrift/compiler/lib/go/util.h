@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <set>
 #include <string>
 
 #include <thrift/compiler/ast/t_program.h>
@@ -24,6 +25,47 @@ namespace apache {
 namespace thrift {
 namespace compiler {
 namespace go {
+
+class codegen_data {
+ public:
+  // the import path for the supporting library
+  std::string thrift_lib_import =
+      "github.com/facebook/fbthrift/thrift/lib/go/thrift";
+  // package name override (otherwise inferred from thrift file by default)
+  std::string package_override;
+
+  // whether to generate code compatible with the old Go generator
+  // (to make the migration easier)
+  bool compat = true;
+  // whether to generate "legacy" getters which do not properly support optional
+  // fields (to make the migration easier)
+  bool compat_getters = true;
+  // whether to generate "legacy" setters which do not properly support optional
+  // fields (to make the migration easier)
+  bool compat_setters = true;
+
+  // Key: package name according to Thrift.
+  // Value: package name to use in generated code.
+  std::map<std::string, std::string> go_package_map;
+  std::map<std::string, int32_t> go_package_name_collisions = {
+      {"thrift", 0},
+      {"context", 0},
+      {"fmt", 0},
+      {"strings", 0},
+      {"sync", 0},
+  };
+  // Records field names for every struct in the program.
+  // This is needed to resolve some edge case name collisions.
+  std::map<std::string, std::set<std::string>> struct_to_field_names = {};
+  // Req/Resp structs are internal and must be unexported (i.e. lowercase)
+  // This set will help us track these srtucts by name.
+  std::set<std::string> req_resp_struct_names;
+  // Mapping of service name to a vector of req/resp structs for that service.
+  std::map<std::string, std::vector<t_struct*>> service_to_req_resp_structs =
+      {};
+  // The current program being generated.
+  const t_program* current_program;
+};
 
 // Name of the field of the response helper struct where
 // the return value is stored (if function call is not void).

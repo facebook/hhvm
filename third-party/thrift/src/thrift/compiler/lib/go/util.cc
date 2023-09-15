@@ -15,8 +15,6 @@
  */
 
 #include <cctype>
-#include <set>
-#include <string>
 #include <boost/algorithm/string.hpp>
 #include <thrift/compiler/lib/go/util.h>
 

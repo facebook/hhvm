@@ -31,46 +31,6 @@ namespace compiler {
 
 namespace {
 
-struct go_codegen_data {
-  // the import path for the supporting library
-  std::string thrift_lib_import =
-      "github.com/facebook/fbthrift/thrift/lib/go/thrift";
-  // package name override (otherwise inferred from thrift file by default)
-  std::string package_override;
-
-  // whether to generate code compatible with the old Go generator
-  // (to make the migration easier)
-  bool compat = true;
-  // whether to generate "legacy" getters which do not properly support optional
-  // fields (to make the migration easier)
-  bool compat_getters = true;
-  // whether to generate "legacy" setters which do not properly support optional
-  // fields (to make the migration easier)
-  bool compat_setters = true;
-
-  // Key: package name according to Thrift.
-  // Value: package name to use in generated code.
-  std::map<std::string, std::string> go_package_map;
-  std::map<std::string, int32_t> go_package_name_collisions = {
-      {"thrift", 0},
-      {"context", 0},
-      {"fmt", 0},
-      {"strings", 0},
-      {"sync", 0},
-  };
-  // Records field names for every struct in the program.
-  // This is needed to resolve some edge case name collisions.
-  std::map<std::string, std::set<std::string>> struct_to_field_names = {};
-  // Req/Resp structs are internal and must be unexported (i.e. lowercase)
-  // This set will help us track these srtucts by name.
-  std::set<std::string> req_resp_struct_names;
-  // Mapping of service name to a vector of req/resp structs for that service.
-  std::map<std::string, std::vector<t_struct*>> service_to_req_resp_structs =
-      {};
-  // The current program being generated.
-  const t_program* current_program;
-};
-
 std::string doc_comment(const t_named* named_node) {
   std::istringstream in(named_node->doc());
 
@@ -83,7 +43,7 @@ std::string doc_comment(const t_named* named_node) {
 }
 
 std::string get_go_package_alias(
-    const t_program* program, const go_codegen_data& options) {
+    const t_program* program, const go::codegen_data& options) {
   if (program == options.current_program) {
     return "";
   }
@@ -97,7 +57,7 @@ std::string get_go_package_alias(
 }
 
 std::string go_package_alias_prefix(
-    const t_program* program, const go_codegen_data& options) {
+    const t_program* program, const go::codegen_data& options) {
   auto alias = get_go_package_alias(program, options);
   if (alias == "") {
     return "";
@@ -119,7 +79,7 @@ class t_mstch_go_generator : public t_mstch_generator {
   void set_go_package_aliases();
   void set_struct_to_field_names();
   void set_service_to_req_resp_structs();
-  go_codegen_data data_;
+  go::codegen_data data_;
 };
 
 class mstch_go_program : public mstch_program {
@@ -128,7 +88,7 @@ class mstch_go_program : public mstch_program {
       const t_program* p,
       mstch_context& ctx,
       mstch_element_position pos,
-      go_codegen_data* data)
+      go::codegen_data* data)
       : mstch_program(p, ctx, pos), data_(*data) {
     register_methods(
         this,
@@ -185,7 +145,7 @@ class mstch_go_program : public mstch_program {
   }
 
  private:
-  go_codegen_data& data_;
+  go::codegen_data& data_;
 };
 
 class mstch_go_enum : public mstch_enum {
@@ -194,7 +154,7 @@ class mstch_go_enum : public mstch_enum {
       const t_enum* e,
       mstch_context& ctx,
       mstch_element_position pos,
-      go_codegen_data* data)
+      go::codegen_data* data)
       : mstch_enum(e, ctx, pos), data_(*data) {
     register_methods(
         this,
@@ -212,7 +172,7 @@ class mstch_go_enum : public mstch_enum {
   }
 
  private:
-  go_codegen_data& data_;
+  go::codegen_data& data_;
 };
 
 class mstch_go_enum_value : public mstch_enum_value {
@@ -221,14 +181,14 @@ class mstch_go_enum_value : public mstch_enum_value {
       const t_enum_value* v,
       mstch_context& ctx,
       mstch_element_position pos,
-      go_codegen_data* data)
+      go::codegen_data* data)
       : mstch_enum_value(v, ctx, pos), data_(*data) {
     (void)data_;
     register_methods(this, {});
   }
 
  private:
-  go_codegen_data& data_;
+  go::codegen_data& data_;
 };
 
 class mstch_go_const : public mstch_const {
@@ -240,7 +200,7 @@ class mstch_go_const : public mstch_const {
       const t_const* current_const,
       const t_type* expected_type,
       const t_field* field,
-      go_codegen_data* data)
+      go::codegen_data* data)
       : mstch_const(c, ctx, pos, current_const, expected_type, field),
         data_(*data) {
     register_methods(
@@ -272,7 +232,7 @@ class mstch_go_const : public mstch_const {
   }
 
  private:
-  go_codegen_data& data_;
+  go::codegen_data& data_;
 };
 
 class mstch_go_const_value : public mstch_const_value {
@@ -283,7 +243,7 @@ class mstch_go_const_value : public mstch_const_value {
       mstch_element_position pos,
       const t_const* current_const,
       const t_type* expected_type,
-      go_codegen_data* data)
+      go::codegen_data* data)
       : mstch_const_value(cv, ctx, pos, current_const, expected_type),
         data_(*data) {
     (void)data_;
@@ -300,7 +260,7 @@ class mstch_go_const_value : public mstch_const_value {
   bool same_type_as_expected() const override { return true; }
 
  private:
-  go_codegen_data& data_;
+  go::codegen_data& data_;
 };
 
 class mstch_go_field : public mstch_field {
@@ -310,7 +270,7 @@ class mstch_go_field : public mstch_field {
       mstch_context& ctx,
       mstch_element_position pos,
       const field_generator_context* field_context,
-      go_codegen_data* data)
+      go::codegen_data* data)
       : mstch_field(f, ctx, pos, field_context), data_(*data) {
     (void)data_;
     register_methods(
@@ -414,7 +374,7 @@ class mstch_go_field : public mstch_field {
   }
 
  private:
-  go_codegen_data& data_;
+  go::codegen_data& data_;
 
   bool is_pointer_() {
     // Whether this field is a pointer '*' in a Go struct definition:
@@ -460,7 +420,7 @@ class mstch_go_struct : public mstch_struct {
       const t_struct* s,
       mstch_context& ctx,
       mstch_element_position pos,
-      go_codegen_data* data)
+      go::codegen_data* data)
       : mstch_struct(s, ctx, pos), data_(*data) {
     register_methods(
         this,
@@ -504,7 +464,7 @@ class mstch_go_struct : public mstch_struct {
   }
 
  private:
-  go_codegen_data& data_;
+  go::codegen_data& data_;
 
   std::string go_name_() {
     auto name = struct_->name();
@@ -540,7 +500,7 @@ class mstch_go_service : public mstch_service {
       const t_service* s,
       mstch_context& ctx,
       mstch_element_position pos,
-      go_codegen_data* data)
+      go::codegen_data* data)
       : mstch_service(s, ctx, pos), data_(*data) {
     register_methods(
         this,
@@ -575,7 +535,7 @@ class mstch_go_service : public mstch_service {
   }
 
  private:
-  go_codegen_data& data_;
+  go::codegen_data& data_;
 };
 
 class mstch_go_function : public mstch_function {
@@ -584,7 +544,7 @@ class mstch_go_function : public mstch_function {
       const t_function* f,
       mstch_context& ctx,
       mstch_element_position pos,
-      go_codegen_data* data)
+      go::codegen_data* data)
       : mstch_function(f, ctx, pos), data_(*data) {
     (void)data_;
     register_methods(
@@ -618,7 +578,7 @@ class mstch_go_function : public mstch_function {
   }
 
  private:
-  go_codegen_data& data_;
+  go::codegen_data& data_;
 };
 
 class mstch_go_type : public mstch_type {
@@ -627,7 +587,7 @@ class mstch_go_type : public mstch_type {
       const t_type* t,
       mstch_context& ctx,
       mstch_element_position pos,
-      go_codegen_data* data)
+      go::codegen_data* data)
       : mstch_type(t, ctx, pos), data_(*data) {
     (void)data_;
     register_methods(
@@ -640,7 +600,7 @@ class mstch_go_type : public mstch_type {
   mstch::node is_go_comparable() { return go::is_type_go_comparable(type_); }
 
  private:
-  go_codegen_data& data_;
+  go::codegen_data& data_;
 };
 
 class mstch_go_typedef : public mstch_typedef {
@@ -649,7 +609,7 @@ class mstch_go_typedef : public mstch_typedef {
       const t_typedef* t,
       mstch_context& ctx,
       mstch_element_position pos,
-      go_codegen_data* data)
+      go::codegen_data* data)
       : mstch_typedef(t, ctx, pos), data_(*data) {
     register_methods(
         this,
@@ -703,7 +663,7 @@ class mstch_go_typedef : public mstch_typedef {
   }
 
  private:
-  go_codegen_data& data_;
+  go::codegen_data& data_;
 
   std::string go_name_() {
     auto name_override = go::get_go_name_annotation(typedef_);

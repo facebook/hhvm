@@ -70,6 +70,7 @@ let get_constant env tc kind (seen, has_default) case =
                  kind;
                  expected = strip_ns (Cls.name tc);
                  actual = strip_ns cls;
+                 expected_pos = None;
                });
       (seen, has_default)
     ) else

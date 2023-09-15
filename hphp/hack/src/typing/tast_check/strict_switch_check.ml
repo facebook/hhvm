@@ -239,8 +239,8 @@ let get_missing_cases env partitions =
     ~f:(fun ~key:_ ~data:(if_missing, cases) acc ->
       opt_cons (opt_missing env if_missing cases) ~tl:acc)
 
-let error_unused_cases env expected unused_cases =
-  let expected = lazy (Typing_print.full_strip_ns env expected) in
+let error_unused_cases env expected_ty unused_cases =
+  let expected = lazy (Typing_print.full_strip_ns env expected_ty) in
   List.iter unused_cases ~f:(fun (ty, pos, lit) ->
       add_err env
       @@
@@ -253,6 +253,7 @@ let error_unused_cases env expected unused_cases =
             kind = "";
             expected = Lazy.force expected;
             actual = Typing_print.full_strip_ns env ty;
+            expected_pos = expected_ty |> Typing_defs.get_pos |> Option.some;
           })
 
 type ast_default = (Tast.ty, Tast.saved_env) Aast.default_case

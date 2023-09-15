@@ -114,6 +114,7 @@ module Primary : sig
           kind: string;
           expected: string;
           actual: string;
+          expected_pos: Pos_or_decl.t option;
         }
       | Enum_switch_inconsistent_int_literal_format of {
           expected_pos: Pos.t;

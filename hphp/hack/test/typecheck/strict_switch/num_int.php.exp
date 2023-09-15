@@ -6,5 +6,9 @@ File "num_int.php", line 7, characters 10-12:
 Case in `switch` must be either an enum constant or a literal expression. (Typing[4020])
 File "num_int.php", line 16, characters 10-13:
 Switching on `num` but using constant from `null` (Typing[4023])
+  File "num_int.php", line 14, characters 22-24:
+  expecting `num` based on this
 File "num_int.php", line 25, characters 10-13:
 Switching on `num` but using constant from `bool` (Typing[4023])
+  File "num_int.php", line 21, characters 24-26:
+  expecting `num` based on this

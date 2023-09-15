@@ -20,27 +20,27 @@ var _ = strings.Split
 type PersonID = int64
 
 func NewPersonID() PersonID {
-  return 0
+    return 0
 }
 
 func WritePersonID(item PersonID, p thrift.Protocol) error {
-  if err := p.WriteI64(item); err != nil {
+    if err := p.WriteI64(item); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadPersonID(p thrift.Protocol) (PersonID, error) {
-  var decodeResult PersonID
-  decodeErr := func() error {
-    result, err := p.ReadI64()
+    var decodeResult PersonID
+    decodeErr := func() error {
+        result, err := p.ReadI64()
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type Animal int32

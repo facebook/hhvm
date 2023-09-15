@@ -22,80 +22,80 @@ var _ = strings.Split
 type TBinary = []byte
 
 func NewTBinary() TBinary {
-  return []byte("")
+    return []byte("")
 }
 
 func WriteTBinary(item TBinary, p thrift.Protocol) error {
-  if err := p.WriteBinary(item); err != nil {
+    if err := p.WriteBinary(item); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadTBinary(p thrift.Protocol) (TBinary, error) {
-  var decodeResult TBinary
-  decodeErr := func() error {
-    result, err := p.ReadBinary()
+    var decodeResult TBinary
+    decodeErr := func() error {
+        result, err := p.ReadBinary()
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type IntTypedef = int32
 
 func NewIntTypedef() IntTypedef {
-  return 0
+    return 0
 }
 
 func WriteIntTypedef(item IntTypedef, p thrift.Protocol) error {
-  if err := p.WriteI32(item); err != nil {
+    if err := p.WriteI32(item); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadIntTypedef(p thrift.Protocol) (IntTypedef, error) {
-  var decodeResult IntTypedef
-  decodeErr := func() error {
-    result, err := p.ReadI32()
+    var decodeResult IntTypedef
+    decodeErr := func() error {
+        result, err := p.ReadI32()
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type UintTypedef = IntTypedef
 
 func NewUintTypedef() UintTypedef {
-  return NewIntTypedef()
+    return NewIntTypedef()
 }
 
 func WriteUintTypedef(item UintTypedef, p thrift.Protocol) error {
-  err := WriteIntTypedef(item, p)
+    err := WriteIntTypedef(item, p)
 if err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadUintTypedef(p thrift.Protocol) (UintTypedef, error) {
-  var decodeResult UintTypedef
-  decodeErr := func() error {
-    result, err := ReadIntTypedef(p)
+    var decodeResult UintTypedef
+    decodeErr := func() error {
+        result, err := ReadIntTypedef(p)
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type HasBitwiseOps int32

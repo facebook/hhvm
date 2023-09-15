@@ -20,11 +20,11 @@ var _ = strings.Split
 type ContainerTypedef = map[int16]string
 
 func NewContainerTypedef() ContainerTypedef {
-  return nil
+    return nil
 }
 
 func WriteContainerTypedef(item ContainerTypedef, p thrift.Protocol) error {
-  if err := p.WriteMapBegin(thrift.I16, thrift.STRING, len(item)); err != nil {
+    if err := p.WriteMapBegin(thrift.I16, thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
 for k, v := range item {
@@ -45,13 +45,13 @@ for k, v := range item {
 if err := p.WriteMapEnd(); err != nil {
     return thrift.PrependError("error writing map end: ", err)
 }
-  return nil
+    return nil
 }
 
 func ReadContainerTypedef(p thrift.Protocol) (ContainerTypedef, error) {
-  var decodeResult ContainerTypedef
-  decodeErr := func() error {
-    _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
+    var decodeResult ContainerTypedef
+    decodeErr := func() error {
+        _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
 if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
 }
@@ -83,10 +83,10 @@ if err := p.ReadMapEnd(); err != nil {
     return thrift.PrependError("error reading map end: ", err)
 }
 result := mapResult
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type ComplexUnion struct {

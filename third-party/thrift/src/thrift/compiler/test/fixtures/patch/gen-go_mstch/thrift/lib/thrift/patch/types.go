@@ -24,38 +24,38 @@ var _ = strings.Split
 type FieldId = id.FieldId
 
 func NewFieldId() FieldId {
-  return id.NewFieldId()
+    return id.NewFieldId()
 }
 
 func WriteFieldId(item FieldId, p thrift.Protocol) error {
-  err := id.WriteFieldId(item, p)
+    err := id.WriteFieldId(item, p)
 if err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadFieldId(p thrift.Protocol) (FieldId, error) {
-  var decodeResult FieldId
-  decodeErr := func() error {
-    result, err := id.ReadFieldId(p)
+    var decodeResult FieldId
+    decodeErr := func() error {
+        result, err := id.ReadFieldId(p)
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type FieldIdList = []int16
 
 func NewFieldIdList() FieldIdList {
-  return nil
+    return nil
 }
 
 func WriteFieldIdList(item FieldIdList, p thrift.Protocol) error {
-  if err := p.WriteListBegin(thrift.I16, len(item)); err != nil {
+    if err := p.WriteListBegin(thrift.I16, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
 for _, v := range item {
@@ -69,13 +69,13 @@ for _, v := range item {
 if err := p.WriteListEnd(); err != nil {
     return thrift.PrependError("error writing list end: ", err)
 }
-  return nil
+    return nil
 }
 
 func ReadFieldIdList(p thrift.Protocol) (FieldIdList, error) {
-  var decodeResult FieldIdList
-  decodeErr := func() error {
-    _ /* elemType */, size, err := p.ReadListBegin()
+    var decodeResult FieldIdList
+    decodeErr := func() error {
+        _ /* elemType */, size, err := p.ReadListBegin()
 if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
 }
@@ -97,10 +97,10 @@ if err := p.ReadListEnd(); err != nil {
     return thrift.PrependError("error reading list end: ", err)
 }
 result := listResult
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type PatchOp int32

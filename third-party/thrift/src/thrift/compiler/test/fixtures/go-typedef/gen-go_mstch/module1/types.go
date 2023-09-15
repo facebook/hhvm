@@ -22,89 +22,89 @@ var _ = strings.Split
 type Plate = string
 
 func NewPlate() Plate {
-  return ""
+    return ""
 }
 
 func WritePlate(item Plate, p thrift.Protocol) error {
-  if err := p.WriteString(item); err != nil {
+    if err := p.WriteString(item); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadPlate(p thrift.Protocol) (Plate, error) {
-  var decodeResult Plate
-  decodeErr := func() error {
-    result, err := p.ReadString()
+    var decodeResult Plate
+    decodeErr := func() error {
+        result, err := p.ReadString()
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type State string
 
 func NewState() State {
-  return ""
+    return ""
 }
 
 func WriteState(item State, p thrift.Protocol) error {
-  if err := p.WriteString(item); err != nil {
+    if err := p.WriteString(item); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadState(p thrift.Protocol) (State, error) {
-  var decodeResult State
-  decodeErr := func() error {
-    result, err := p.ReadString()
+    var decodeResult State
+    decodeErr := func() error {
+        result, err := p.ReadString()
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type Year = int32
 
 func NewYear() Year {
-  return 0
+    return 0
 }
 
 func WriteYear(item Year, p thrift.Protocol) error {
-  if err := p.WriteI32(item); err != nil {
+    if err := p.WriteI32(item); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadYear(p thrift.Protocol) (Year, error) {
-  var decodeResult Year
-  decodeErr := func() error {
-    result, err := p.ReadI32()
+    var decodeResult Year
+    decodeErr := func() error {
+        result, err := p.ReadI32()
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type Drivers = []string
 
 func NewDrivers() Drivers {
-  return nil
+    return nil
 }
 
 func WriteDrivers(item Drivers, p thrift.Protocol) error {
-  if err := p.WriteListBegin(thrift.STRING, len(item)); err != nil {
+    if err := p.WriteListBegin(thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
 for _, v := range item {
@@ -118,13 +118,13 @@ for _, v := range item {
 if err := p.WriteListEnd(); err != nil {
     return thrift.PrependError("error writing list end: ", err)
 }
-  return nil
+    return nil
 }
 
 func ReadDrivers(p thrift.Protocol) (Drivers, error) {
-  var decodeResult Drivers
-  decodeErr := func() error {
-    _ /* elemType */, size, err := p.ReadListBegin()
+    var decodeResult Drivers
+    decodeErr := func() error {
+        _ /* elemType */, size, err := p.ReadListBegin()
 if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
 }
@@ -146,91 +146,91 @@ if err := p.ReadListEnd(); err != nil {
     return thrift.PrependError("error reading list end: ", err)
 }
 result := listResult
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type Accessory = module0.Accessory
 
 func NewAccessory() *Accessory {
-  return module0.NewAccessory()
+    return module0.NewAccessory()
 }
 
 func WriteAccessory(item *Accessory, p thrift.Protocol) error {
-  if err := item.Write(p); err != nil {
+    if err := item.Write(p); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadAccessory(p thrift.Protocol) (Accessory, error) {
-  var decodeResult Accessory
-  decodeErr := func() error {
-    result := *module0.NewAccessory()
+    var decodeResult Accessory
+    decodeErr := func() error {
+        result := *module0.NewAccessory()
 err := result.Read(p)
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type CarPartName = module0.PartName
 
 func NewCarPartName() *CarPartName {
-  return module0.NewPartName()
+    return module0.NewPartName()
 }
 
 func WriteCarPartName(item *CarPartName, p thrift.Protocol) error {
-  if err := item.Write(p); err != nil {
+    if err := item.Write(p); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadCarPartName(p thrift.Protocol) (CarPartName, error) {
-  var decodeResult CarPartName
-  decodeErr := func() error {
-    result := *module0.NewPartName()
+    var decodeResult CarPartName
+    decodeErr := func() error {
+        result := *module0.NewPartName()
 err := result.Read(p)
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type Car = Automobile
 
 func NewCar() *Car {
-  return NewAutomobile()
+    return NewAutomobile()
 }
 
 func WriteCar(item *Car, p thrift.Protocol) error {
-  if err := item.Write(p); err != nil {
+    if err := item.Write(p); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadCar(p thrift.Protocol) (Car, error) {
-  var decodeResult Car
-  decodeErr := func() error {
-    result := *NewAutomobile()
+    var decodeResult Car
+    decodeErr := func() error {
+        result := *NewAutomobile()
 err := result.Read(p)
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type Automobile struct {

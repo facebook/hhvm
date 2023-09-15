@@ -20,90 +20,90 @@ var _ = strings.Split
 type MyCompany = Company
 
 func NewMyCompany() MyCompany {
-  return 0
+    return 0
 }
 
 func WriteMyCompany(item MyCompany, p thrift.Protocol) error {
-  if err := p.WriteI32(int32(item)); err != nil {
+    if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadMyCompany(p thrift.Protocol) (MyCompany, error) {
-  var decodeResult MyCompany
-  decodeErr := func() error {
-    enumResult, err := p.ReadI32()
+    var decodeResult MyCompany
+    decodeErr := func() error {
+        enumResult, err := p.ReadI32()
 if err != nil {
     return err
 }
 result := Company(enumResult)
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type MyStringIdentifier = string
 
 func NewMyStringIdentifier() MyStringIdentifier {
-  return ""
+    return ""
 }
 
 func WriteMyStringIdentifier(item MyStringIdentifier, p thrift.Protocol) error {
-  if err := p.WriteString(item); err != nil {
+    if err := p.WriteString(item); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadMyStringIdentifier(p thrift.Protocol) (MyStringIdentifier, error) {
-  var decodeResult MyStringIdentifier
-  decodeErr := func() error {
-    result, err := p.ReadString()
+    var decodeResult MyStringIdentifier
+    decodeErr := func() error {
+        result, err := p.ReadString()
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type MyIntIdentifier = int32
 
 func NewMyIntIdentifier() MyIntIdentifier {
-  return 0
+    return 0
 }
 
 func WriteMyIntIdentifier(item MyIntIdentifier, p thrift.Protocol) error {
-  if err := p.WriteI32(item); err != nil {
+    if err := p.WriteI32(item); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadMyIntIdentifier(p thrift.Protocol) (MyIntIdentifier, error) {
-  var decodeResult MyIntIdentifier
-  decodeErr := func() error {
-    result, err := p.ReadI32()
+    var decodeResult MyIntIdentifier
+    decodeErr := func() error {
+        result, err := p.ReadI32()
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type MyMapIdentifier = map[string]string
 
 func NewMyMapIdentifier() MyMapIdentifier {
-  return nil
+    return nil
 }
 
 func WriteMyMapIdentifier(item MyMapIdentifier, p thrift.Protocol) error {
-  if err := p.WriteMapBegin(thrift.STRING, thrift.STRING, len(item)); err != nil {
+    if err := p.WriteMapBegin(thrift.STRING, thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
 for k, v := range item {
@@ -124,13 +124,13 @@ for k, v := range item {
 if err := p.WriteMapEnd(); err != nil {
     return thrift.PrependError("error writing map end: ", err)
 }
-  return nil
+    return nil
 }
 
 func ReadMyMapIdentifier(p thrift.Protocol) (MyMapIdentifier, error) {
-  var decodeResult MyMapIdentifier
-  decodeErr := func() error {
-    _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
+    var decodeResult MyMapIdentifier
+    decodeErr := func() error {
+        _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
 if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
 }
@@ -162,10 +162,10 @@ if err := p.ReadMapEnd(); err != nil {
     return thrift.PrependError("error reading map end: ", err)
 }
 result := mapResult
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type EmptyEnum int32

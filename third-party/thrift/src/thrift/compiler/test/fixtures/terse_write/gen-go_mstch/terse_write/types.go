@@ -20,27 +20,27 @@ var _ = strings.Split
 type MyInteger = int32
 
 func NewMyInteger() MyInteger {
-  return 0
+    return 0
 }
 
 func WriteMyInteger(item MyInteger, p thrift.Protocol) error {
-  if err := p.WriteI32(item); err != nil {
+    if err := p.WriteI32(item); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadMyInteger(p thrift.Protocol) (MyInteger, error) {
-  var decodeResult MyInteger
-  decodeErr := func() error {
-    result, err := p.ReadI32()
+    var decodeResult MyInteger
+    decodeErr := func() error {
+        result, err := p.ReadI32()
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type MyEnum int32

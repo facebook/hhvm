@@ -20,79 +20,79 @@ var _ = strings.Split
 type ByteString = []byte
 
 func NewByteString() ByteString {
-  return []byte("")
+    return []byte("")
 }
 
 func WriteByteString(item ByteString, p thrift.Protocol) error {
-  if err := p.WriteBinary(item); err != nil {
+    if err := p.WriteBinary(item); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadByteString(p thrift.Protocol) (ByteString, error) {
-  var decodeResult ByteString
-  decodeErr := func() error {
-    result, err := p.ReadBinary()
+    var decodeResult ByteString
+    decodeErr := func() error {
+        result, err := p.ReadBinary()
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type ByteBuffer = []byte
 
 func NewByteBuffer() ByteBuffer {
-  return []byte("")
+    return []byte("")
 }
 
 func WriteByteBuffer(item ByteBuffer, p thrift.Protocol) error {
-  if err := p.WriteBinary(item); err != nil {
+    if err := p.WriteBinary(item); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadByteBuffer(p thrift.Protocol) (ByteBuffer, error) {
-  var decodeResult ByteBuffer
-  decodeErr := func() error {
-    result, err := p.ReadBinary()
+    var decodeResult ByteBuffer
+    decodeErr := func() error {
+        result, err := p.ReadBinary()
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type Uri = string
 
 func NewUri() Uri {
-  return ""
+    return ""
 }
 
 func WriteUri(item Uri, p thrift.Protocol) error {
-  if err := p.WriteString(item); err != nil {
+    if err := p.WriteString(item); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadUri(p thrift.Protocol) (Uri, error) {
-  var decodeResult Uri
-  decodeErr := func() error {
-    result, err := p.ReadString()
+    var decodeResult Uri
+    decodeErr := func() error {
+        result, err := p.ReadString()
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type Void int32

@@ -20,214 +20,214 @@ var _ = strings.Split
 type FieldId = int16
 
 func NewFieldId() FieldId {
-  return 0
+    return 0
 }
 
 func WriteFieldId(item FieldId, p thrift.Protocol) error {
-  if err := p.WriteI16(item); err != nil {
+    if err := p.WriteI16(item); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadFieldId(p thrift.Protocol) (FieldId, error) {
-  var decodeResult FieldId
-  decodeErr := func() error {
-    result, err := p.ReadI16()
+    var decodeResult FieldId
+    decodeErr := func() error {
+        result, err := p.ReadI16()
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type ExternId = int64
 
 func NewExternId() ExternId {
-  return 0
+    return 0
 }
 
 func WriteExternId(item ExternId, p thrift.Protocol) error {
-  if err := p.WriteI64(item); err != nil {
+    if err := p.WriteI64(item); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadExternId(p thrift.Protocol) (ExternId, error) {
-  var decodeResult ExternId
-  decodeErr := func() error {
-    result, err := p.ReadI64()
+    var decodeResult ExternId
+    decodeErr := func() error {
+        result, err := p.ReadI64()
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type ValueId = ExternId
 
 func NewValueId() ValueId {
-  return NewExternId()
+    return NewExternId()
 }
 
 func WriteValueId(item ValueId, p thrift.Protocol) error {
-  err := WriteExternId(item, p)
+    err := WriteExternId(item, p)
 if err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadValueId(p thrift.Protocol) (ValueId, error) {
-  var decodeResult ValueId
-  decodeErr := func() error {
-    result, err := ReadExternId(p)
+    var decodeResult ValueId
+    decodeErr := func() error {
+        result, err := ReadExternId(p)
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type ProtocolId = ExternId
 
 func NewProtocolId() ProtocolId {
-  return NewExternId()
+    return NewExternId()
 }
 
 func WriteProtocolId(item ProtocolId, p thrift.Protocol) error {
-  err := WriteExternId(item, p)
+    err := WriteExternId(item, p)
 if err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadProtocolId(p thrift.Protocol) (ProtocolId, error) {
-  var decodeResult ProtocolId
-  decodeErr := func() error {
-    result, err := ReadExternId(p)
+    var decodeResult ProtocolId
+    decodeErr := func() error {
+        result, err := ReadExternId(p)
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type TypeId = ExternId
 
 func NewTypeId() TypeId {
-  return NewExternId()
+    return NewExternId()
 }
 
 func WriteTypeId(item TypeId, p thrift.Protocol) error {
-  err := WriteExternId(item, p)
+    err := WriteExternId(item, p)
 if err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadTypeId(p thrift.Protocol) (TypeId, error) {
-  var decodeResult TypeId
-  decodeErr := func() error {
-    result, err := ReadExternId(p)
+    var decodeResult TypeId
+    decodeErr := func() error {
+        result, err := ReadExternId(p)
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type DefinitionId = ExternId
 
 func NewDefinitionId() DefinitionId {
-  return NewExternId()
+    return NewExternId()
 }
 
 func WriteDefinitionId(item DefinitionId, p thrift.Protocol) error {
-  err := WriteExternId(item, p)
+    err := WriteExternId(item, p)
 if err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadDefinitionId(p thrift.Protocol) (DefinitionId, error) {
-  var decodeResult DefinitionId
-  decodeErr := func() error {
-    result, err := ReadExternId(p)
+    var decodeResult DefinitionId
+    decodeErr := func() error {
+        result, err := ReadExternId(p)
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type ProgramId = ExternId
 
 func NewProgramId() ProgramId {
-  return NewExternId()
+    return NewExternId()
 }
 
 func WriteProgramId(item ProgramId, p thrift.Protocol) error {
-  err := WriteExternId(item, p)
+    err := WriteExternId(item, p)
 if err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadProgramId(p thrift.Protocol) (ProgramId, error) {
-  var decodeResult ProgramId
-  decodeErr := func() error {
-    result, err := ReadExternId(p)
+    var decodeResult ProgramId
+    decodeErr := func() error {
+        result, err := ReadExternId(p)
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type SourceId = ExternId
 
 func NewSourceId() SourceId {
-  return NewExternId()
+    return NewExternId()
 }
 
 func WriteSourceId(item SourceId, p thrift.Protocol) error {
-  err := WriteExternId(item, p)
+    err := WriteExternId(item, p)
 if err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadSourceId(p thrift.Protocol) (SourceId, error) {
-  var decodeResult SourceId
-  decodeErr := func() error {
-    result, err := ReadExternId(p)
+    var decodeResult SourceId
+    decodeErr := func() error {
+        result, err := ReadExternId(p)
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 

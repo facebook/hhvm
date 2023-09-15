@@ -20,11 +20,11 @@ var _ = strings.Split
 type SetWithAdapter = []string
 
 func NewSetWithAdapter() SetWithAdapter {
-  return nil
+    return nil
 }
 
 func WriteSetWithAdapter(item SetWithAdapter, p thrift.Protocol) error {
-  if err := p.WriteSetBegin(thrift.STRING, len(item)); err != nil {
+    if err := p.WriteSetBegin(thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing set begin: ", err)
 }
 for _, v := range item {
@@ -38,13 +38,13 @@ for _, v := range item {
 if err := p.WriteSetEnd(); err != nil {
     return thrift.PrependError("error writing set end: ", err)
 }
-  return nil
+    return nil
 }
 
 func ReadSetWithAdapter(p thrift.Protocol) (SetWithAdapter, error) {
-  var decodeResult SetWithAdapter
-  decodeErr := func() error {
-    _ /* elemType */, size, err := p.ReadSetBegin()
+    var decodeResult SetWithAdapter
+    decodeErr := func() error {
+        _ /* elemType */, size, err := p.ReadSetBegin()
 if err != nil {
     return thrift.PrependError("error reading set begin: ", err)
 }
@@ -66,46 +66,46 @@ if err := p.ReadSetEnd(); err != nil {
     return thrift.PrependError("error reading set end: ", err)
 }
 result := setResult
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type StringWithAdapter = string
 
 func NewStringWithAdapter() StringWithAdapter {
-  return ""
+    return ""
 }
 
 func WriteStringWithAdapter(item StringWithAdapter, p thrift.Protocol) error {
-  if err := p.WriteString(item); err != nil {
+    if err := p.WriteString(item); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadStringWithAdapter(p thrift.Protocol) (StringWithAdapter, error) {
-  var decodeResult StringWithAdapter
-  decodeErr := func() error {
-    result, err := p.ReadString()
+    var decodeResult StringWithAdapter
+    decodeErr := func() error {
+        result, err := p.ReadString()
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type ListWithElemAdapter = []StringWithAdapter
 
 func NewListWithElemAdapter() ListWithElemAdapter {
-  return nil
+    return nil
 }
 
 func WriteListWithElemAdapter(item ListWithElemAdapter, p thrift.Protocol) error {
-  if err := p.WriteListBegin(thrift.STRING, len(item)); err != nil {
+    if err := p.WriteListBegin(thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
 for _, v := range item {
@@ -120,13 +120,13 @@ if err != nil {
 if err := p.WriteListEnd(); err != nil {
     return thrift.PrependError("error writing list end: ", err)
 }
-  return nil
+    return nil
 }
 
 func ReadListWithElemAdapter(p thrift.Protocol) (ListWithElemAdapter, error) {
-  var decodeResult ListWithElemAdapter
-  decodeErr := func() error {
-    _ /* elemType */, size, err := p.ReadListBegin()
+    var decodeResult ListWithElemAdapter
+    decodeErr := func() error {
+        _ /* elemType */, size, err := p.ReadListBegin()
 if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
 }
@@ -148,754 +148,754 @@ if err := p.ReadListEnd(); err != nil {
     return thrift.PrependError("error reading list end: ", err)
 }
 result := listResult
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type ListWithElemAdapterWithAdapter = ListWithElemAdapter
 
 func NewListWithElemAdapterWithAdapter() ListWithElemAdapterWithAdapter {
-  return NewListWithElemAdapter()
+    return NewListWithElemAdapter()
 }
 
 func WriteListWithElemAdapterWithAdapter(item ListWithElemAdapterWithAdapter, p thrift.Protocol) error {
-  err := WriteListWithElemAdapter(item, p)
+    err := WriteListWithElemAdapter(item, p)
 if err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadListWithElemAdapterWithAdapter(p thrift.Protocol) (ListWithElemAdapterWithAdapter, error) {
-  var decodeResult ListWithElemAdapterWithAdapter
-  decodeErr := func() error {
-    result, err := ReadListWithElemAdapter(p)
+    var decodeResult ListWithElemAdapterWithAdapter
+    decodeErr := func() error {
+        result, err := ReadListWithElemAdapter(p)
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type MyI64 = int64
 
 func NewMyI64() MyI64 {
-  return 0
+    return 0
 }
 
 func WriteMyI64(item MyI64, p thrift.Protocol) error {
-  if err := p.WriteI64(item); err != nil {
+    if err := p.WriteI64(item); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadMyI64(p thrift.Protocol) (MyI64, error) {
-  var decodeResult MyI64
-  decodeErr := func() error {
-    result, err := p.ReadI64()
+    var decodeResult MyI64
+    decodeErr := func() error {
+        result, err := p.ReadI64()
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type DoubleTypedefI64 = MyI64
 
 func NewDoubleTypedefI64() DoubleTypedefI64 {
-  return NewMyI64()
+    return NewMyI64()
 }
 
 func WriteDoubleTypedefI64(item DoubleTypedefI64, p thrift.Protocol) error {
-  err := WriteMyI64(item, p)
+    err := WriteMyI64(item, p)
 if err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadDoubleTypedefI64(p thrift.Protocol) (DoubleTypedefI64, error) {
-  var decodeResult DoubleTypedefI64
-  decodeErr := func() error {
-    result, err := ReadMyI64(p)
+    var decodeResult DoubleTypedefI64
+    decodeErr := func() error {
+        result, err := ReadMyI64(p)
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type MyI32 = int32
 
 func NewMyI32() MyI32 {
-  return 0
+    return 0
 }
 
 func WriteMyI32(item MyI32, p thrift.Protocol) error {
-  if err := p.WriteI32(item); err != nil {
+    if err := p.WriteI32(item); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadMyI32(p thrift.Protocol) (MyI32, error) {
-  var decodeResult MyI32
-  decodeErr := func() error {
-    result, err := p.ReadI32()
+    var decodeResult MyI32
+    decodeErr := func() error {
+        result, err := p.ReadI32()
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type FooWithAdapter = Foo
 
 func NewFooWithAdapter() *FooWithAdapter {
-  return NewFoo()
+    return NewFoo()
 }
 
 func WriteFooWithAdapter(item *FooWithAdapter, p thrift.Protocol) error {
-  if err := item.Write(p); err != nil {
+    if err := item.Write(p); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadFooWithAdapter(p thrift.Protocol) (FooWithAdapter, error) {
-  var decodeResult FooWithAdapter
-  decodeErr := func() error {
-    result := *NewFoo()
+    var decodeResult FooWithAdapter
+    decodeErr := func() error {
+        result := *NewFoo()
 err := result.Read(p)
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type StructWithAdapter = Bar
 
 func NewStructWithAdapter() *StructWithAdapter {
-  return NewBar()
+    return NewBar()
 }
 
 func WriteStructWithAdapter(item *StructWithAdapter, p thrift.Protocol) error {
-  if err := item.Write(p); err != nil {
+    if err := item.Write(p); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadStructWithAdapter(p thrift.Protocol) (StructWithAdapter, error) {
-  var decodeResult StructWithAdapter
-  decodeErr := func() error {
-    result := *NewBar()
+    var decodeResult StructWithAdapter
+    decodeErr := func() error {
+        result := *NewBar()
 err := result.Read(p)
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type UnionWithAdapter = Baz
 
 func NewUnionWithAdapter() *UnionWithAdapter {
-  return NewBaz()
+    return NewBaz()
 }
 
 func WriteUnionWithAdapter(item *UnionWithAdapter, p thrift.Protocol) error {
-  if err := item.Write(p); err != nil {
+    if err := item.Write(p); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadUnionWithAdapter(p thrift.Protocol) (UnionWithAdapter, error) {
-  var decodeResult UnionWithAdapter
-  decodeErr := func() error {
-    result := *NewBaz()
+    var decodeResult UnionWithAdapter
+    decodeErr := func() error {
+        result := *NewBaz()
 err := result.Read(p)
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type AdaptedA = A
 
 func NewAdaptedA() *AdaptedA {
-  return NewA()
+    return NewA()
 }
 
 func WriteAdaptedA(item *AdaptedA, p thrift.Protocol) error {
-  if err := item.Write(p); err != nil {
+    if err := item.Write(p); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadAdaptedA(p thrift.Protocol) (AdaptedA, error) {
-  var decodeResult AdaptedA
-  decodeErr := func() error {
-    result := *NewA()
+    var decodeResult AdaptedA
+    decodeErr := func() error {
+        result := *NewA()
 err := result.Read(p)
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type DurationMs = int64
 
 func NewDurationMs() DurationMs {
-  return 0
+    return 0
 }
 
 func WriteDurationMs(item DurationMs, p thrift.Protocol) error {
-  if err := p.WriteI64(item); err != nil {
+    if err := p.WriteI64(item); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadDurationMs(p thrift.Protocol) (DurationMs, error) {
-  var decodeResult DurationMs
-  decodeErr := func() error {
-    result, err := p.ReadI64()
+    var decodeResult DurationMs
+    decodeErr := func() error {
+        result, err := p.ReadI64()
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type AdaptedBool = bool
 
 func NewAdaptedBool() AdaptedBool {
-  return false
+    return false
 }
 
 func WriteAdaptedBool(item AdaptedBool, p thrift.Protocol) error {
-  if err := p.WriteBool(item); err != nil {
+    if err := p.WriteBool(item); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadAdaptedBool(p thrift.Protocol) (AdaptedBool, error) {
-  var decodeResult AdaptedBool
-  decodeErr := func() error {
-    result, err := p.ReadBool()
+    var decodeResult AdaptedBool
+    decodeErr := func() error {
+        result, err := p.ReadBool()
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type AdaptedByte = int8
 
 func NewAdaptedByte() AdaptedByte {
-  return 0
+    return 0
 }
 
 func WriteAdaptedByte(item AdaptedByte, p thrift.Protocol) error {
-  if err := p.WriteByte(byte(item)); err != nil {
+    if err := p.WriteByte(byte(item)); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadAdaptedByte(p thrift.Protocol) (AdaptedByte, error) {
-  var decodeResult AdaptedByte
-  decodeErr := func() error {
-    resultByte, err := p.ReadByte()
+    var decodeResult AdaptedByte
+    decodeErr := func() error {
+        resultByte, err := p.ReadByte()
 result := int8(resultByte)
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type AdaptedShort = int16
 
 func NewAdaptedShort() AdaptedShort {
-  return 0
+    return 0
 }
 
 func WriteAdaptedShort(item AdaptedShort, p thrift.Protocol) error {
-  if err := p.WriteI16(item); err != nil {
+    if err := p.WriteI16(item); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadAdaptedShort(p thrift.Protocol) (AdaptedShort, error) {
-  var decodeResult AdaptedShort
-  decodeErr := func() error {
-    result, err := p.ReadI16()
+    var decodeResult AdaptedShort
+    decodeErr := func() error {
+        result, err := p.ReadI16()
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type AdaptedInteger = int32
 
 func NewAdaptedInteger() AdaptedInteger {
-  return 0
+    return 0
 }
 
 func WriteAdaptedInteger(item AdaptedInteger, p thrift.Protocol) error {
-  if err := p.WriteI32(item); err != nil {
+    if err := p.WriteI32(item); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadAdaptedInteger(p thrift.Protocol) (AdaptedInteger, error) {
-  var decodeResult AdaptedInteger
-  decodeErr := func() error {
-    result, err := p.ReadI32()
+    var decodeResult AdaptedInteger
+    decodeErr := func() error {
+        result, err := p.ReadI32()
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type AdaptedLong = int64
 
 func NewAdaptedLong() AdaptedLong {
-  return 0
+    return 0
 }
 
 func WriteAdaptedLong(item AdaptedLong, p thrift.Protocol) error {
-  if err := p.WriteI64(item); err != nil {
+    if err := p.WriteI64(item); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadAdaptedLong(p thrift.Protocol) (AdaptedLong, error) {
-  var decodeResult AdaptedLong
-  decodeErr := func() error {
-    result, err := p.ReadI64()
+    var decodeResult AdaptedLong
+    decodeErr := func() error {
+        result, err := p.ReadI64()
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type AdaptedDouble = float64
 
 func NewAdaptedDouble() AdaptedDouble {
-  return 0.0
+    return 0.0
 }
 
 func WriteAdaptedDouble(item AdaptedDouble, p thrift.Protocol) error {
-  if err := p.WriteDouble(item); err != nil {
+    if err := p.WriteDouble(item); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadAdaptedDouble(p thrift.Protocol) (AdaptedDouble, error) {
-  var decodeResult AdaptedDouble
-  decodeErr := func() error {
-    result, err := p.ReadDouble()
+    var decodeResult AdaptedDouble
+    decodeErr := func() error {
+        result, err := p.ReadDouble()
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type AdaptedString = string
 
 func NewAdaptedString() AdaptedString {
-  return ""
+    return ""
 }
 
 func WriteAdaptedString(item AdaptedString, p thrift.Protocol) error {
-  if err := p.WriteString(item); err != nil {
+    if err := p.WriteString(item); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadAdaptedString(p thrift.Protocol) (AdaptedString, error) {
-  var decodeResult AdaptedString
-  decodeErr := func() error {
-    result, err := p.ReadString()
+    var decodeResult AdaptedString
+    decodeErr := func() error {
+        result, err := p.ReadString()
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type DoubleTypedefBool = AdaptedBool
 
 func NewDoubleTypedefBool() DoubleTypedefBool {
-  return NewAdaptedBool()
+    return NewAdaptedBool()
 }
 
 func WriteDoubleTypedefBool(item DoubleTypedefBool, p thrift.Protocol) error {
-  err := WriteAdaptedBool(item, p)
+    err := WriteAdaptedBool(item, p)
 if err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadDoubleTypedefBool(p thrift.Protocol) (DoubleTypedefBool, error) {
-  var decodeResult DoubleTypedefBool
-  decodeErr := func() error {
-    result, err := ReadAdaptedBool(p)
+    var decodeResult DoubleTypedefBool
+    decodeErr := func() error {
+        result, err := ReadAdaptedBool(p)
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type CustomProtocolType = []byte
 
 func NewCustomProtocolType() CustomProtocolType {
-  return []byte("")
+    return []byte("")
 }
 
 func WriteCustomProtocolType(item CustomProtocolType, p thrift.Protocol) error {
-  if err := p.WriteBinary(item); err != nil {
+    if err := p.WriteBinary(item); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadCustomProtocolType(p thrift.Protocol) (CustomProtocolType, error) {
-  var decodeResult CustomProtocolType
-  decodeErr := func() error {
-    result, err := p.ReadBinary()
+    var decodeResult CustomProtocolType
+    decodeErr := func() error {
+        result, err := p.ReadBinary()
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type IndirectionString = string
 
 func NewIndirectionString() IndirectionString {
-  return ""
+    return ""
 }
 
 func WriteIndirectionString(item IndirectionString, p thrift.Protocol) error {
-  if err := p.WriteString(item); err != nil {
+    if err := p.WriteString(item); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadIndirectionString(p thrift.Protocol) (IndirectionString, error) {
-  var decodeResult IndirectionString
-  decodeErr := func() error {
-    result, err := p.ReadString()
+    var decodeResult IndirectionString
+    decodeErr := func() error {
+        result, err := p.ReadString()
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type AdaptedEnum = ThriftAdaptedEnum
 
 func NewAdaptedEnum() AdaptedEnum {
-  return 0
+    return 0
 }
 
 func WriteAdaptedEnum(item AdaptedEnum, p thrift.Protocol) error {
-  if err := p.WriteI32(int32(item)); err != nil {
+    if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadAdaptedEnum(p thrift.Protocol) (AdaptedEnum, error) {
-  var decodeResult AdaptedEnum
-  decodeErr := func() error {
-    enumResult, err := p.ReadI32()
+    var decodeResult AdaptedEnum
+    decodeErr := func() error {
+        enumResult, err := p.ReadI32()
 if err != nil {
     return err
 }
 result := ThriftAdaptedEnum(enumResult)
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type AdaptedTypedef = AdaptedStruct
 
 func NewAdaptedTypedef() *AdaptedTypedef {
-  return NewAdaptedStruct()
+    return NewAdaptedStruct()
 }
 
 func WriteAdaptedTypedef(item *AdaptedTypedef, p thrift.Protocol) error {
-  if err := item.Write(p); err != nil {
+    if err := item.Write(p); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadAdaptedTypedef(p thrift.Protocol) (AdaptedTypedef, error) {
-  var decodeResult AdaptedTypedef
-  decodeErr := func() error {
-    result := *NewAdaptedStruct()
+    var decodeResult AdaptedTypedef
+    decodeErr := func() error {
+        result := *NewAdaptedStruct()
 err := result.Read(p)
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type TypedefOfDirect = DirectlyAdaptedStruct
 
 func NewTypedefOfDirect() *TypedefOfDirect {
-  return NewDirectlyAdaptedStruct()
+    return NewDirectlyAdaptedStruct()
 }
 
 func WriteTypedefOfDirect(item *TypedefOfDirect, p thrift.Protocol) error {
-  if err := item.Write(p); err != nil {
+    if err := item.Write(p); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadTypedefOfDirect(p thrift.Protocol) (TypedefOfDirect, error) {
-  var decodeResult TypedefOfDirect
-  decodeErr := func() error {
-    result := *NewDirectlyAdaptedStruct()
+    var decodeResult TypedefOfDirect
+    decodeErr := func() error {
+        result := *NewDirectlyAdaptedStruct()
 err := result.Read(p)
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type AdaptedCircularAdaptee = CircularAdaptee
 
 func NewAdaptedCircularAdaptee() *AdaptedCircularAdaptee {
-  return NewCircularAdaptee()
+    return NewCircularAdaptee()
 }
 
 func WriteAdaptedCircularAdaptee(item *AdaptedCircularAdaptee, p thrift.Protocol) error {
-  if err := item.Write(p); err != nil {
+    if err := item.Write(p); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadAdaptedCircularAdaptee(p thrift.Protocol) (AdaptedCircularAdaptee, error) {
-  var decodeResult AdaptedCircularAdaptee
-  decodeErr := func() error {
-    result := *NewCircularAdaptee()
+    var decodeResult AdaptedCircularAdaptee
+    decodeErr := func() error {
+        result := *NewCircularAdaptee()
 err := result.Read(p)
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type CountingInt = int64
 
 func NewCountingInt() CountingInt {
-  return 0
+    return 0
 }
 
 func WriteCountingInt(item CountingInt, p thrift.Protocol) error {
-  if err := p.WriteI64(item); err != nil {
+    if err := p.WriteI64(item); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadCountingInt(p thrift.Protocol) (CountingInt, error) {
-  var decodeResult CountingInt
-  decodeErr := func() error {
-    result, err := p.ReadI64()
+    var decodeResult CountingInt
+    decodeErr := func() error {
+        result, err := p.ReadI64()
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type FooWithAdapter_9317 = FooWithAdapter
 
 func NewFooWithAdapter_9317() *FooWithAdapter_9317 {
-  return NewFooWithAdapter()
+    return NewFooWithAdapter()
 }
 
 func WriteFooWithAdapter_9317(item *FooWithAdapter_9317, p thrift.Protocol) error {
-  err := WriteFooWithAdapter(item, p)
+    err := WriteFooWithAdapter(item, p)
 if err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadFooWithAdapter_9317(p thrift.Protocol) (FooWithAdapter_9317, error) {
-  var decodeResult FooWithAdapter_9317
-  decodeErr := func() error {
-    result, err := ReadFooWithAdapter(p)
+    var decodeResult FooWithAdapter_9317
+    decodeErr := func() error {
+        result, err := ReadFooWithAdapter(p)
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type ListWithElemAdapterWithAdapter_2312 = ListWithElemAdapterWithAdapter
 
 func NewListWithElemAdapterWithAdapter_2312() ListWithElemAdapterWithAdapter_2312 {
-  return NewListWithElemAdapterWithAdapter()
+    return NewListWithElemAdapterWithAdapter()
 }
 
 func WriteListWithElemAdapterWithAdapter_2312(item ListWithElemAdapterWithAdapter_2312, p thrift.Protocol) error {
-  err := WriteListWithElemAdapterWithAdapter(item, p)
+    err := WriteListWithElemAdapterWithAdapter(item, p)
 if err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadListWithElemAdapterWithAdapter_2312(p thrift.Protocol) (ListWithElemAdapterWithAdapter_2312, error) {
-  var decodeResult ListWithElemAdapterWithAdapter_2312
-  decodeErr := func() error {
-    result, err := ReadListWithElemAdapterWithAdapter(p)
+    var decodeResult ListWithElemAdapterWithAdapter_2312
+    decodeErr := func() error {
+        result, err := ReadListWithElemAdapterWithAdapter(p)
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type MyI32_4873 = MyI32
 
 func NewMyI32_4873() MyI32_4873 {
-  return NewMyI32()
+    return NewMyI32()
 }
 
 func WriteMyI32_4873(item MyI32_4873, p thrift.Protocol) error {
-  err := WriteMyI32(item, p)
+    err := WriteMyI32(item, p)
 if err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadMyI32_4873(p thrift.Protocol) (MyI32_4873, error) {
-  var decodeResult MyI32_4873
-  decodeErr := func() error {
-    result, err := ReadMyI32(p)
+    var decodeResult MyI32_4873
+    decodeErr := func() error {
+        result, err := ReadMyI32(p)
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type StringWithAdapter_7208 = StringWithAdapter
 
 func NewStringWithAdapter_7208() StringWithAdapter_7208 {
-  return NewStringWithAdapter()
+    return NewStringWithAdapter()
 }
 
 func WriteStringWithAdapter_7208(item StringWithAdapter_7208, p thrift.Protocol) error {
-  err := WriteStringWithAdapter(item, p)
+    err := WriteStringWithAdapter(item, p)
 if err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadStringWithAdapter_7208(p thrift.Protocol) (StringWithAdapter_7208, error) {
-  var decodeResult StringWithAdapter_7208
-  decodeErr := func() error {
-    result, err := ReadStringWithAdapter(p)
+    var decodeResult StringWithAdapter_7208
+    decodeErr := func() error {
+        result, err := ReadStringWithAdapter(p)
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type Color int32

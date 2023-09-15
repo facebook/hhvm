@@ -20,55 +20,55 @@ var _ = strings.Split
 type IncredibleStruct = MyStruct
 
 func NewIncredibleStruct() *IncredibleStruct {
-  return NewMyStruct()
+    return NewMyStruct()
 }
 
 func WriteIncredibleStruct(item *IncredibleStruct, p thrift.Protocol) error {
-  if err := item.Write(p); err != nil {
+    if err := item.Write(p); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadIncredibleStruct(p thrift.Protocol) (IncredibleStruct, error) {
-  var decodeResult IncredibleStruct
-  decodeErr := func() error {
-    result := *NewMyStruct()
+    var decodeResult IncredibleStruct
+    decodeErr := func() error {
+        result := *NewMyStruct()
 err := result.Read(p)
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type BrilliantStruct = MyStruct
 
 func NewBrilliantStruct() *BrilliantStruct {
-  return NewMyStruct()
+    return NewMyStruct()
 }
 
 func WriteBrilliantStruct(item *BrilliantStruct, p thrift.Protocol) error {
-  if err := item.Write(p); err != nil {
+    if err := item.Write(p); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadBrilliantStruct(p thrift.Protocol) (BrilliantStruct, error) {
-  var decodeResult BrilliantStruct
-  decodeErr := func() error {
-    result := *NewMyStruct()
+    var decodeResult BrilliantStruct
+    decodeErr := func() error {
+        result := *NewMyStruct()
 err := result.Read(p)
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type MyEnum int32

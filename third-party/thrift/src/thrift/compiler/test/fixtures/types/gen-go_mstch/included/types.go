@@ -20,11 +20,11 @@ var _ = strings.Split
 type SomeMap = map[int32]string
 
 func NewSomeMap() SomeMap {
-  return nil
+    return nil
 }
 
 func WriteSomeMap(item SomeMap, p thrift.Protocol) error {
-  if err := p.WriteMapBegin(thrift.I32, thrift.STRING, len(item)); err != nil {
+    if err := p.WriteMapBegin(thrift.I32, thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
 for k, v := range item {
@@ -45,13 +45,13 @@ for k, v := range item {
 if err := p.WriteMapEnd(); err != nil {
     return thrift.PrependError("error writing map end: ", err)
 }
-  return nil
+    return nil
 }
 
 func ReadSomeMap(p thrift.Protocol) (SomeMap, error) {
-  var decodeResult SomeMap
-  decodeErr := func() error {
-    _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
+    var decodeResult SomeMap
+    decodeErr := func() error {
+        _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
 if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
 }
@@ -83,20 +83,20 @@ if err := p.ReadMapEnd(); err != nil {
     return thrift.PrependError("error reading map end: ", err)
 }
 result := mapResult
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type SomeListOfTypeMap = []SomeMap
 
 func NewSomeListOfTypeMap() SomeListOfTypeMap {
-  return nil
+    return nil
 }
 
 func WriteSomeListOfTypeMap(item SomeListOfTypeMap, p thrift.Protocol) error {
-  if err := p.WriteListBegin(thrift.MAP, len(item)); err != nil {
+    if err := p.WriteListBegin(thrift.MAP, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
 for _, v := range item {
@@ -111,13 +111,13 @@ if err != nil {
 if err := p.WriteListEnd(); err != nil {
     return thrift.PrependError("error writing list end: ", err)
 }
-  return nil
+    return nil
 }
 
 func ReadSomeListOfTypeMap(p thrift.Protocol) (SomeListOfTypeMap, error) {
-  var decodeResult SomeListOfTypeMap
-  decodeErr := func() error {
-    _ /* elemType */, size, err := p.ReadListBegin()
+    var decodeResult SomeListOfTypeMap
+    decodeErr := func() error {
+        _ /* elemType */, size, err := p.ReadListBegin()
 if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
 }
@@ -139,9 +139,9 @@ if err := p.ReadListEnd(); err != nil {
     return thrift.PrependError("error reading list end: ", err)
 }
 result := listResult
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 

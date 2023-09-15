@@ -20,53 +20,53 @@ var _ = strings.Split
 type Lanyard = string
 
 func NewLanyard() Lanyard {
-  return ""
+    return ""
 }
 
 func WriteLanyard(item Lanyard, p thrift.Protocol) error {
-  if err := p.WriteString(item); err != nil {
+    if err := p.WriteString(item); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadLanyard(p thrift.Protocol) (Lanyard, error) {
-  var decodeResult Lanyard
-  decodeErr := func() error {
-    result, err := p.ReadString()
+    var decodeResult Lanyard
+    decodeErr := func() error {
+        result, err := p.ReadString()
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type Number = int32
 
 func NewNumber() Number {
-  return 0
+    return 0
 }
 
 func WriteNumber(item Number, p thrift.Protocol) error {
-  if err := p.WriteI32(item); err != nil {
+    if err := p.WriteI32(item); err != nil {
     return err
 }
-  return nil
+    return nil
 }
 
 func ReadNumber(p thrift.Protocol) (Number, error) {
-  var decodeResult Number
-  decodeErr := func() error {
-    result, err := p.ReadI32()
+    var decodeResult Number
+    decodeErr := func() error {
+        result, err := p.ReadI32()
 if err != nil {
     return err
 }
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
 }
 
 type B int32

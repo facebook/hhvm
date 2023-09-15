@@ -3,6 +3,6 @@ bool(false)
 vec(0) {
 }
 
-Fatal error: Uncaught exception 'InvalidArgumentException' with message 'Cannot Serialize unexpected type Resource' in %s:11
+Fatal error: Uncaught exception 'InvalidArgumentException' with message 'Cannot Serialize unexpected type EnumClassLabel' in %s:11
 Stack trace:
 %A

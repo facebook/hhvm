@@ -78,6 +78,7 @@ public:
   bool isClass()     const { return isClassType(getType()); }
   bool isLazyClass() const { return isLazyClassType(getType()); }
   bool isClsMeth()   const { return isClsMethType(getType()); }
+  bool isEnumClassLabel() const { return isEnumClassLabelType(getType()); }
 
   bool isPrimitive() const { return !isRefcountedType(type(m_val)); }
 
@@ -795,6 +796,9 @@ struct Variant : private TypedValue {
   }
   bool isClsMeth() const {
     return isClsMethType(getType());
+  }
+  bool isEnumClassLabel() const {
+    return getType() == KindOfEnumClassLabel;
   }
 
   bool isNumeric(bool checkString = false) const noexcept;

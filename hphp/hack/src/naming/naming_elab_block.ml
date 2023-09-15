@@ -27,5 +27,6 @@ let pass =
       {
         id with
         on_ty_block = Some on_block;
+        on_ty_finally_block = Some on_block;
         on_ty_using_stmt = Some on_using_stmt;
       }

@@ -6,6 +6,7 @@
 use std::collections::VecDeque;
 
 use nast::Block;
+use nast::FinallyBlock;
 use nast::Stmt;
 use nast::Stmt_;
 use nast::UsingStmt;
@@ -27,6 +28,20 @@ impl Pass for ElabBlockPass {
         Continue(())
     }
 
+    fn on_ty_finally_block_top_down(
+        &mut self,
+        _: &Env,
+        elem: &mut FinallyBlock,
+    ) -> ControlFlow<()> {
+        let mut q: VecDeque<_> = elem.drain(0..).collect();
+        while let Some(Stmt(pos, stmt_)) = q.pop_front() {
+            match stmt_ {
+                Stmt_::Block(box (_, xs)) => xs.into_iter().rev().for_each(|x| q.push_front(x)),
+                _ => elem.push(Stmt(pos, stmt_)),
+            }
+        }
+        Continue(())
+    }
     fn on_ty_using_stmt_top_down(&mut self, _: &Env, elem: &mut UsingStmt) -> ControlFlow<()> {
         elem.is_block_scoped = false;
         Continue(())

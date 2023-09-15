@@ -130,7 +130,7 @@ func (c *FooServiceChannelClient) SimpleRPC(ctx context.Context) (error) {
 }
 
 func (c *FooServiceClient) SimpleRPC() (error) {
-    return c.chClient.SimpleRPC(context.TODO())
+    return c.chClient.SimpleRPC(nil)
 }
 
 
@@ -520,7 +520,7 @@ func (c *FB303ServiceChannelClient) SimpleRPC(ctx context.Context, intParameter 
 }
 
 func (c *FB303ServiceClient) SimpleRPC(intParameter int32) (*ReservedKeyword, error) {
-    return c.chClient.SimpleRPC(context.TODO(), intParameter)
+    return c.chClient.SimpleRPC(nil, intParameter)
 }
 
 
@@ -1095,7 +1095,7 @@ func (c *MyServiceChannelClient) Ping(ctx context.Context) (error) {
 }
 
 func (c *MyServiceClient) Ping() (error) {
-    return c.chClient.Ping(context.TODO())
+    return c.chClient.Ping(nil)
 }
 
 
@@ -1111,7 +1111,7 @@ func (c *MyServiceChannelClient) GetRandomData(ctx context.Context) (string, err
 }
 
 func (c *MyServiceClient) GetRandomData() (string, error) {
-    return c.chClient.GetRandomData(context.TODO())
+    return c.chClient.GetRandomData(nil)
 }
 
 
@@ -1128,7 +1128,7 @@ func (c *MyServiceChannelClient) Sink(ctx context.Context, sink int64) (error) {
 }
 
 func (c *MyServiceClient) Sink(sink int64) (error) {
-    return c.chClient.Sink(context.TODO(), sink)
+    return c.chClient.Sink(nil, sink)
 }
 
 
@@ -1146,7 +1146,7 @@ func (c *MyServiceChannelClient) PutDataById(ctx context.Context, id int64, data
 }
 
 func (c *MyServiceClient) PutDataById(id int64, data string) (error) {
-    return c.chClient.PutDataById(context.TODO(), id, data)
+    return c.chClient.PutDataById(nil, id, data)
 }
 
 
@@ -1163,7 +1163,7 @@ func (c *MyServiceChannelClient) HasDataById(ctx context.Context, id int64) (boo
 }
 
 func (c *MyServiceClient) HasDataById(id int64) (bool, error) {
-    return c.chClient.HasDataById(context.TODO(), id)
+    return c.chClient.HasDataById(nil, id)
 }
 
 
@@ -1180,7 +1180,7 @@ func (c *MyServiceChannelClient) GetDataById(ctx context.Context, id int64) (str
 }
 
 func (c *MyServiceClient) GetDataById(id int64) (string, error) {
-    return c.chClient.GetDataById(context.TODO(), id)
+    return c.chClient.GetDataById(nil, id)
 }
 
 
@@ -1197,7 +1197,7 @@ func (c *MyServiceChannelClient) DeleteDataById(ctx context.Context, id int64) (
 }
 
 func (c *MyServiceClient) DeleteDataById(id int64) (error) {
-    return c.chClient.DeleteDataById(context.TODO(), id)
+    return c.chClient.DeleteDataById(nil, id)
 }
 
 
@@ -1210,7 +1210,7 @@ func (c *MyServiceChannelClient) LobDataById(ctx context.Context, id int64, data
 }
 
 func (c *MyServiceClient) LobDataById(id int64, data string) (error) {
-    return c.chClient.LobDataById(context.TODO(), id, data)
+    return c.chClient.LobDataById(nil, id, data)
 }
 
 
@@ -1226,7 +1226,7 @@ func (c *MyServiceChannelClient) InvalidReturnForHack(ctx context.Context) ([]fl
 }
 
 func (c *MyServiceClient) InvalidReturnForHack() ([]float32, error) {
-    return c.chClient.InvalidReturnForHack(context.TODO())
+    return c.chClient.InvalidReturnForHack(nil)
 }
 
 
@@ -1242,7 +1242,7 @@ func (c *MyServiceChannelClient) RpcSkippedCodegen(ctx context.Context) (error) 
 }
 
 func (c *MyServiceClient) RpcSkippedCodegen() (error) {
-    return c.chClient.RpcSkippedCodegen(context.TODO())
+    return c.chClient.RpcSkippedCodegen(nil)
 }
 
 
@@ -4633,7 +4633,7 @@ func (c *DbMixedStackArgumentsChannelClient) GetDataByKey0(ctx context.Context, 
 }
 
 func (c *DbMixedStackArgumentsClient) GetDataByKey0(key string) ([]byte, error) {
-    return c.chClient.GetDataByKey0(context.TODO(), key)
+    return c.chClient.GetDataByKey0(nil, key)
 }
 
 
@@ -4650,7 +4650,7 @@ func (c *DbMixedStackArgumentsChannelClient) GetDataByKey1(ctx context.Context, 
 }
 
 func (c *DbMixedStackArgumentsClient) GetDataByKey1(key string) ([]byte, error) {
-    return c.chClient.GetDataByKey1(context.TODO(), key)
+    return c.chClient.GetDataByKey1(nil, key)
 }
 
 

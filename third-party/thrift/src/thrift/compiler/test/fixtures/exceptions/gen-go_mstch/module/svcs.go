@@ -136,7 +136,7 @@ func (c *RaiserChannelClient) DoBland(ctx context.Context) (error) {
 }
 
 func (c *RaiserClient) DoBland() (error) {
-    return c.chClient.DoBland(context.TODO())
+    return c.chClient.DoBland(nil)
 }
 
 
@@ -158,7 +158,7 @@ func (c *RaiserChannelClient) DoRaise(ctx context.Context) (error) {
 }
 
 func (c *RaiserClient) DoRaise() (error) {
-    return c.chClient.DoRaise(context.TODO())
+    return c.chClient.DoRaise(nil)
 }
 
 
@@ -174,7 +174,7 @@ func (c *RaiserChannelClient) Get200(ctx context.Context) (string, error) {
 }
 
 func (c *RaiserClient) Get200() (string, error) {
-    return c.chClient.Get200(context.TODO())
+    return c.chClient.Get200(nil)
 }
 
 
@@ -196,7 +196,7 @@ func (c *RaiserChannelClient) Get500(ctx context.Context) (string, error) {
 }
 
 func (c *RaiserClient) Get500() (string, error) {
-    return c.chClient.Get500(context.TODO())
+    return c.chClient.Get500(nil)
 }
 
 

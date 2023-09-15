@@ -159,7 +159,7 @@ func (c *GetEntityChannelClient) GetEntity(ctx context.Context, r *GetEntityRequ
 }
 
 func (c *GetEntityClient) GetEntity(r *GetEntityRequest) (*GetEntityResponse, error) {
-    return c.chClient.GetEntity(context.TODO(), r)
+    return c.chClient.GetEntity(nil, r)
 }
 
 
@@ -175,7 +175,7 @@ func (c *GetEntityChannelClient) GetBool(ctx context.Context) (bool, error) {
 }
 
 func (c *GetEntityClient) GetBool() (bool, error) {
-    return c.chClient.GetBool(context.TODO())
+    return c.chClient.GetBool(nil)
 }
 
 
@@ -191,7 +191,7 @@ func (c *GetEntityChannelClient) GetByte(ctx context.Context) (int8, error) {
 }
 
 func (c *GetEntityClient) GetByte() (int8, error) {
-    return c.chClient.GetByte(context.TODO())
+    return c.chClient.GetByte(nil)
 }
 
 
@@ -207,7 +207,7 @@ func (c *GetEntityChannelClient) GetI16(ctx context.Context) (int16, error) {
 }
 
 func (c *GetEntityClient) GetI16() (int16, error) {
-    return c.chClient.GetI16(context.TODO())
+    return c.chClient.GetI16(nil)
 }
 
 
@@ -223,7 +223,7 @@ func (c *GetEntityChannelClient) GetI32(ctx context.Context) (int32, error) {
 }
 
 func (c *GetEntityClient) GetI32() (int32, error) {
-    return c.chClient.GetI32(context.TODO())
+    return c.chClient.GetI32(nil)
 }
 
 
@@ -239,7 +239,7 @@ func (c *GetEntityChannelClient) GetI64(ctx context.Context) (int64, error) {
 }
 
 func (c *GetEntityClient) GetI64() (int64, error) {
-    return c.chClient.GetI64(context.TODO())
+    return c.chClient.GetI64(nil)
 }
 
 
@@ -255,7 +255,7 @@ func (c *GetEntityChannelClient) GetDouble(ctx context.Context) (float64, error)
 }
 
 func (c *GetEntityClient) GetDouble() (float64, error) {
-    return c.chClient.GetDouble(context.TODO())
+    return c.chClient.GetDouble(nil)
 }
 
 
@@ -271,7 +271,7 @@ func (c *GetEntityChannelClient) GetString(ctx context.Context) (string, error) 
 }
 
 func (c *GetEntityClient) GetString() (string, error) {
-    return c.chClient.GetString(context.TODO())
+    return c.chClient.GetString(nil)
 }
 
 
@@ -287,7 +287,7 @@ func (c *GetEntityChannelClient) GetBinary(ctx context.Context) ([]byte, error) 
 }
 
 func (c *GetEntityClient) GetBinary() ([]byte, error) {
-    return c.chClient.GetBinary(context.TODO())
+    return c.chClient.GetBinary(nil)
 }
 
 
@@ -303,7 +303,7 @@ func (c *GetEntityChannelClient) GetMap(ctx context.Context) (map[string]string,
 }
 
 func (c *GetEntityClient) GetMap() (map[string]string, error) {
-    return c.chClient.GetMap(context.TODO())
+    return c.chClient.GetMap(nil)
 }
 
 
@@ -319,7 +319,7 @@ func (c *GetEntityChannelClient) GetSet(ctx context.Context) ([]string, error) {
 }
 
 func (c *GetEntityClient) GetSet() ([]string, error) {
-    return c.chClient.GetSet(context.TODO())
+    return c.chClient.GetSet(nil)
 }
 
 
@@ -335,7 +335,7 @@ func (c *GetEntityChannelClient) GetList(ctx context.Context) ([]string, error) 
 }
 
 func (c *GetEntityClient) GetList() ([]string, error) {
-    return c.chClient.GetList(context.TODO())
+    return c.chClient.GetList(nil)
 }
 
 
@@ -354,7 +354,7 @@ func (c *GetEntityChannelClient) GetLegacyStuff(ctx context.Context, numPos int6
 }
 
 func (c *GetEntityClient) GetLegacyStuff(numPos int64, numNeg1 int64, numNeg2 int64) (int32, error) {
-    return c.chClient.GetLegacyStuff(context.TODO(), numPos, numNeg1, numNeg2)
+    return c.chClient.GetLegacyStuff(nil, numPos, numNeg1, numNeg2)
 }
 
 
@@ -371,7 +371,7 @@ func (c *GetEntityChannelClient) GetCtxCollision(ctx1 context.Context, ctx int64
 }
 
 func (c *GetEntityClient) GetCtxCollision(ctx int64) (int32, error) {
-    return c.chClient.GetCtxCollision(context.TODO(), ctx)
+    return c.chClient.GetCtxCollision(nil, ctx)
 }
 
 
@@ -389,7 +389,7 @@ func (c *GetEntityChannelClient) GetCtx1Collision(ctx2 context.Context, ctx int6
 }
 
 func (c *GetEntityClient) GetCtx1Collision(ctx int64, ctx1 int64) (int32, error) {
-    return c.chClient.GetCtx1Collision(context.TODO(), ctx, ctx1)
+    return c.chClient.GetCtx1Collision(nil, ctx, ctx1)
 }
 
 

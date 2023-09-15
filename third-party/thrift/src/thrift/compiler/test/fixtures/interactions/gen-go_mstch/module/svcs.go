@@ -130,7 +130,7 @@ func (c *MyServiceChannelClient) Foo(ctx context.Context) (error) {
 }
 
 func (c *MyServiceClient) Foo() (error) {
-    return c.chClient.Foo(context.TODO())
+    return c.chClient.Foo(nil)
 }
 
 

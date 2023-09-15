@@ -187,25 +187,33 @@ class structure_annotations {
           }
         }
         to_remove.emplace_back(name, data);
-        to_add.insert(fmt::format(
-            "@hack.Attributes{{attributes = [{}]}}", fmt::join(attrs, ", ")));
-        fm_.add_include("thrift/annotation/hack.thrift");
+        if (!node.find_structured_annotation_or_null(kHackAttributeUri)) {
+          to_add.insert(fmt::format(
+              "@hack.Attributes{{attributes = [{}]}}", fmt::join(attrs, ", ")));
+          fm_.add_include("thrift/annotation/hack.thrift");
+        }
       }
 
       // python
       if (name == "py3.hidden") {
         to_remove.emplace_back(name, data);
-        to_add.insert("@python.Py3Hidden");
-        fm_.add_include("thrift/annotation/python.thrift");
+        if (!node.find_structured_annotation_or_null(kPythonPy3HiddenUri)) {
+          to_add.insert("@python.Py3Hidden");
+          fm_.add_include("thrift/annotation/python.thrift");
+        }
       }
       if (name == "py3.name") {
         to_remove.emplace_back(name, data);
-        to_add.insert(fmt::format("@python.Name{{name = \"{}\"}}", data.value));
-        fm_.add_include("thrift/annotation/python.thrift");
+        if (!node.find_structured_annotation_or_null(kPythonNameUri)) {
+          to_add.insert(
+              fmt::format("@python.Name{{name = \"{}\"}}", data.value));
+          fm_.add_include("thrift/annotation/python.thrift");
+        }
       }
       if (name == "py3.flags") {
         to_remove.emplace_back(name, data);
-        if (dynamic_cast<const t_enum*>(&node)) {
+        if (dynamic_cast<const t_enum*>(&node) &&
+            !node.find_structured_annotation_or_null(kPythonFlagsUri)) {
           to_add.insert("@python.Flags");
           fm_.add_include("thrift/annotation/python.thrift");
         }

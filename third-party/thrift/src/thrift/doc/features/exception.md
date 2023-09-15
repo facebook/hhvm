@@ -68,7 +68,7 @@ permanent client exception UnSupportedType {...}
 
 ## RPC Idempotency
 
-**RPC idempotency** determines the retryability of the RPC method using reserved function qualifier keywords `readonly` and `idempotent`. A *readonly* method has no meaningful side effects, so it can be called any time. A *idempotent* method can be immediately retried after a transient failure. Please refer to the [schema](https://github.com/facebook/fbthrift/blob/main/thrift/lib/thrift/schema.thrift) and the [interface definition](../idl/interfaces.md) for more detail and syntax.
+**RPC idempotency** determines the retryability of the RPC method using reserved function qualifier keywords `readonly` and `idempotent`. A *readonly* method has no meaningful side effects, so it can be called any time. A *idempotent* method can be immediately retried after a transient failure. Please refer to the [schema](https://github.com/facebook/fbthrift/blob/main/thrift/lib/thrift/schema.thrift) and the [IDL reference](/idl/index.md#services) for more detail and syntax.
 
 ### Example
 

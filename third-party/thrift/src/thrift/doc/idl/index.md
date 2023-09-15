@@ -583,13 +583,10 @@ base_service_name  ::=  maybe_qualified_id
 function_qualifier ::=  "oneway" | "idempotent" | "readonly"
 
 return_clause ::=
-    return_type
-  | interaction_name ["," return_type]
+    return_type ["," (sink | stream)]
+  | interaction_name ["," return_type] ["," (sink | stream)]
 
-return_type ::=
-    type
-  | "void"
-  | [initial_response_type ","] (sink | stream)
+return_type ::= type | "void"
 
 initial_response_type ::=  type
 
@@ -630,15 +627,21 @@ service Search {
 }
 ```
 
-Each service has a set of functions. Each function has a name, which must be unique within the service, and takes a list of parameters. It can return normally with a result if the result type is not `void` or it can throw one of the listed application exceptions. In addition, the function can throw a Thrift system exception if there was some underlying problem with the RPC itself.
+A **service** is an interface for RPC defined in Thrift. Each service has a set of functions. Each function has a name, which must be unique within the service, and takes a list of parameters. It can return normally with a result if the result type is not `void` or it can throw one of the listed application exceptions. In addition, the function can throw a Thrift system exception if there was some underlying problem with the RPC itself.
 
 The parameters in the `throws` clause must have exception types. If a functions throws one of the exceptions given in this clause, then all of the members of this exception will be serialized and sent over the wire. For other undeclared exceptions only the message will be serialized and they will appear on the client side as `TApplicationException`.
 
 Function parameters are similar to struct fields except that they don't take field qualifiers, meaning that **parameters cannot be optional**. The proper way to achieve this is to use a struct type parameter, which itself then may contain an `optional` field.
 
-Functions support the following idempotency qualifiers: `readonly` and `idempotent`. See [Errors and Exceptions](/features/exception.md) for information how to use them for automatic retries.
+Functions support the following **function qualifiers**:
 
-Functions that use the `oneway` reserved word (oneway functions) are "fire and forget". It means that the client sends the function parameters to the server, but does not wait or expect a result. Therefore oneway functions must use `void` as the return type and must not have a `throws` clause.
+- `oneway`: the client does not expect response back from server,
+- `idempotent`: safe to retry immediately after a transient failure,
+- `readonly`: always safe to retry.
+
+See [Errors and Exceptions](/features/exception.md) for more information how to use  `readonly` and `idempotent` qualifiers for automatic retries.
+
+Functions that use the `oneway` qualifier (oneway functions) are "fire and forget". It means that the client sends the function parameters to the server, but does not wait or expect a result. Therefore oneway functions must use `void` as the return type and must not have a `throws` clause.
 
 ```thrift
 service Logger {
@@ -661,11 +664,11 @@ New parameters could be added to a method, but it is better to define an input s
 
 #### Streaming
 
-A function containing `stream<T>` in its declaration establises a server-to-client stream when called. `T` is a stream element type.
+A function containing `stream<T>` in its declaration establises a server-to-client stream when called. A **stream** is a communication abstraction between a client and server, where a server acts as the producer and the client acts as the consumer. It allows the controlled flow of ordered messages from the server to the client. All messages in the stream have the same payload object type `T` also known as the stream element type. The function may also return an initial response specified in the IDL. The client can choose to cancel the stream at any time. The server can terminate the stream by sending an exception.
 
-A function containing `sink<T, U>` in its declaration establishes a client-to-server stream. `T` is a stream element type and `U` is a final response type.
+A function containing `sink<T, U>` in its declaration establishes a client-to-server stream. A **sink** is similar to a stream, but the client acts as the producer and the server acts as the consumer. It allows the flow of ordered messages of type `T` from the client to the server. It may initially return an initial response specified in the IDL, and it always returns a final response of type `U`. The client will wait for a final response back from the server marking the completion of the sink. The client can terminate the sink by sending an exception to the server. The server can also terminate the sink by sending an exception while consuming payloads. The exception acts as the termination of the sink.
 
-Both `sink` and `stream` may be preceded by an initial response type. Omitting the initial response type is equivalent to specifying `void`.
+Both `sink` and `stream` may be preceded by a return type which specifies the initial response type. The initial response type cannot be `void` but can be omitted. Each response type can optionally have a list of declared exceptions associated with it.
 
 Example:
 
@@ -695,10 +698,12 @@ Refer to [Thrift Streaming](/fb/features/streaming/index.md) for more informatio
 
 ### Interactions
 
+An interaction definition introduces a named interaction into your program and has the following form:
+
 ```grammar
 interaction ::=
   [annotations]
-  "interaction" identifier ["extends" maybe_qualified_id] "{"
+  "interaction" identifier "{"
     function*
   "}"
 ```

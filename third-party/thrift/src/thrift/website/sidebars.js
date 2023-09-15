@@ -85,7 +85,6 @@ module.exports = {
         'idl/annotations',
         'idl/structured-annotations',
         'idl/standard-thrift-annotation-library',
-        'idl/interfaces',
         'idl/mixins',
       ],
     },

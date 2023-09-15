@@ -412,7 +412,7 @@ class parser {
   // function:
   //   attributes [function_qualifier]
   //   return_clause identifier "(" (parameter [","])* ")" [throws]
-  //   [deprecated_annotations]
+  //   [deprecated_annotations] [";"]
   //
   // function_qualifier: "oneway" | "idempotent" | "readonly"
   std::unique_ptr<t_function> parse_function() {

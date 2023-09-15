@@ -846,23 +846,6 @@ void validate_exception_php_annotations(
   }
 }
 
-void validate_oneway_function(diagnostic_context& ctx, const t_function& node) {
-  if (!node.is_oneway()) {
-    return;
-  }
-
-  ctx.check(
-      node.return_type() && node.return_type()->is_void() &&
-          !node.returned_interaction(),
-      "Oneway methods must have void return type: {}",
-      node.name());
-
-  ctx.check(
-      t_throws::is_null_or_empty(node.exceptions()),
-      "Oneway methods can't throw exceptions: {}",
-      node.name());
-}
-
 void validate_interaction_nesting(
     diagnostic_context& ctx, const t_interaction& node) {
   for (auto* func : node.get_functions()) {
@@ -1190,7 +1173,6 @@ ast_validator standard_validator() {
   validator.add_service_visitor(&validate_performs);
   validator.add_interaction_visitor(&validate_interaction_nesting);
   validator.add_throws_visitor(&validate_throws_exceptions);
-  validator.add_function_visitor(&validate_oneway_function);
   validator.add_function_visitor(&validate_function_priority_annotation);
   validator.add_function_visitor(ValidateAnnotationPositions{});
 

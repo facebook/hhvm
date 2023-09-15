@@ -221,7 +221,7 @@ mstch::map t_mstch_generator::dump(const t_function& function) {
   auto exceptions = get_elems(function.exceptions());
   mstch::map result{
       {"name", function.get_name()},
-      {"oneway?", function.qualifier() == t_function_qualifier::one_way},
+      {"oneway?", function.qualifier() == t_function_qualifier::oneway},
       {"return_type", dump(*function.return_type())},
       {"exceptions", dump_elems(exceptions)},
       {"exceptions?", !exceptions.empty()},

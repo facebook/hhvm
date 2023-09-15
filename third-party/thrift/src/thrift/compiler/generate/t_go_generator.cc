@@ -2186,7 +2186,7 @@ void t_go_generator::generate_service_helpers(const t_service* tservice) {
  * @param tfunction The function
  */
 void t_go_generator::generate_go_function_helpers(const t_function* tfunction) {
-  if (tfunction->qualifier() != t_function_qualifier::one_way) {
+  if (tfunction->qualifier() != t_function_qualifier::oneway) {
     t_struct result(program_, tfunction->get_name() + "_result");
     auto success =
         std::make_unique<t_field>(tfunction->return_type(), "success", 0);
@@ -2261,7 +2261,7 @@ void t_go_generator::generate_service_client_method(
   /*
   f_service_ <<
     indent() << "p.SeqId += 1" << endl;
-  if ((*f_iter)->qualifier() != t_function_qualifier::one_way) {
+  if ((*f_iter)->qualifier() != t_function_qualifier::oneway) {
     f_service_ <<
       indent() << "d := defer.Deferred()" << endl <<
       indent() << "p.Reqs[p.SeqId] = d" << endl;
@@ -2277,7 +2277,7 @@ void t_go_generator::generate_service_client_method(
 
   f_service_ << indent() << "if err != nil { return }" << endl;
 
-  if (func->qualifier() != t_function_qualifier::one_way) {
+  if (func->qualifier() != t_function_qualifier::oneway) {
     f_service_ << indent() << "return p.recv" << funname << "()" << endl;
   } else {
     f_service_ << indent() << "return" << endl;
@@ -2286,7 +2286,7 @@ void t_go_generator::generate_service_client_method(
   indent_down();
   f_service_ << indent() << "}" << endl << endl;
 
-  if (func->qualifier() != t_function_qualifier::one_way) {
+  if (func->qualifier() != t_function_qualifier::oneway) {
     generate_service_client_recv_method(clientTypeName, func);
   }
 }
@@ -2308,7 +2308,7 @@ void t_go_generator::generate_service_client_channel_call(
   auto methodName = func->get_name();
   auto result_type_name = publicize(func->get_name() + "_result", true);
   auto argsType = publicize(methodName + "_args", true);
-  auto isOneway = func->qualifier() == t_function_qualifier::one_way;
+  auto isOneway = func->qualifier() == t_function_qualifier::oneway;
   auto returnsVoid = func->return_type()->is_void();
 
   auto arg_struct = func->get_paramlist();
@@ -2360,7 +2360,7 @@ void t_go_generator::generate_service_client_send_msg_call(
     const t_function* func) {
   auto methodName = func->get_name();
   auto argsType = publicize(methodName + "_args", true);
-  auto messageType = func->qualifier() == t_function_qualifier::one_way
+  auto messageType = func->qualifier() == t_function_qualifier::oneway
       ? "thrift.ONEWAY"
       : "thrift.CALL";
 
@@ -2890,7 +2890,7 @@ void t_go_generator::generate_struct_error_result_fn(
   string argsname = publicize(tfunction->get_name() + "_args", true);
   string resultname = publicize(tfunction->get_name() + "_result", true);
 
-  if (tfunction->is_oneway()) {
+  if (tfunction->qualifier() == t_function_qualifier::oneway) {
     return;
   }
 
@@ -2993,12 +2993,12 @@ void t_go_generator::generate_run_function(
     indent(f_service_) << "args := argStruct.(*" << argsname << ")" << endl;
   }
 
-  if (tfunction->qualifier() != t_function_qualifier::one_way) {
+  if (tfunction->qualifier() != t_function_qualifier::oneway) {
     indent(f_service_) << "var __result " << resultname << endl;
   }
   indent(f_service_) << "if ";
 
-  if (tfunction->qualifier() != t_function_qualifier::one_way) {
+  if (tfunction->qualifier() != t_function_qualifier::oneway) {
     if (!tfunction->return_type()->is_void()) {
       f_service_ << "retval, ";
     }
@@ -3052,7 +3052,7 @@ void t_go_generator::generate_run_function(
 
   bool need_reference = type_need_reference(tfunction->return_type());
 
-  if (tfunction->qualifier() != t_function_qualifier::one_way &&
+  if (tfunction->qualifier() != t_function_qualifier::oneway &&
       !tfunction->return_type()->is_void()) {
     f_service_ << " else {"
                << endl; // make sure we set Success retval only on success
@@ -3068,7 +3068,7 @@ void t_go_generator::generate_run_function(
     f_service_ << endl;
   }
 
-  if (tfunction->qualifier() != t_function_qualifier::one_way) {
+  if (tfunction->qualifier() != t_function_qualifier::oneway) {
     indent(f_service_) << "return &__result, nil" << endl;
   } else {
     indent(f_service_) << "return nil, nil" << endl;

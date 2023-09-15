@@ -666,6 +666,16 @@ class ast_builder : public parser_actions {
             on_type({ret.name.loc, ret.name.loc + size}, return_name, {});
       }
     }
+
+    if (qual == t_function_qualifier::oneway) {
+      if ((ret.type && !ret.type->is_void()) || interaction) {
+        diags_.error(range.begin, "oneway function must return 'void'");
+      }
+      if (throws && throws->has_fields()) {
+        diags_.error(range.begin, "oneway function can't throw exceptions");
+      }
+    }
+
     auto function = std::make_unique<t_function>(
         &program_,
         return_type,

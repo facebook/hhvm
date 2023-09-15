@@ -211,16 +211,19 @@ TEST(CompilerTest, oneway_exception) {
 
     service MyService {
       oneway void foo();
-      oneway void baz() throws (1: A ex); # expected-error: Oneway methods can't throw exceptions: baz
+      oneway void baz() throws (1: A ex); # expected-error: oneway function can't throw exceptions
     }
   )");
 }
 
 TEST(CompilerTest, oneway_return) {
   check_compile(R"(
-    service MyService {
+    interaction I {}
+
+    service S {
       oneway void foo();
-      oneway string bar(); # expected-error: Oneway methods must have void return type: bar
+      oneway string bar(); # expected-error: oneway function must return 'void'
+      oneway I baz();      # expected-error: oneway function must return 'void'
     }
   )");
 }

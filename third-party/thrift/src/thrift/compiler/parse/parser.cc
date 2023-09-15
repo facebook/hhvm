@@ -423,7 +423,7 @@ class parser {
     auto qual = t_function_qualifier();
     switch (token_.kind) {
       case tok::kw_oneway:
-        qual = t_function_qualifier::one_way;
+        qual = t_function_qualifier::oneway;
         consume_token();
         break;
       case tok::kw_idempotent:
@@ -431,7 +431,7 @@ class parser {
         consume_token();
         break;
       case tok::kw_readonly:
-        qual = t_function_qualifier::read_only;
+        qual = t_function_qualifier::readonly;
         consume_token();
         break;
       default:

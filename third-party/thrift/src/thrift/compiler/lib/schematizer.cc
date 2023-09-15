@@ -528,13 +528,13 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
 
     add_qualifier(func_qualifier_enum, *func_schema, [&] {
       switch (func.qualifier()) {
-        case t_function_qualifier::unspecified:
+        case t_function_qualifier::none:
           return 0;
-        case t_function_qualifier::one_way:
+        case t_function_qualifier::oneway:
           return 1;
         case t_function_qualifier::idempotent:
           return 2;
-        case t_function_qualifier::read_only:
+        case t_function_qualifier::readonly:
           return 3;
       }
       assert(false);

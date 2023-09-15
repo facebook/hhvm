@@ -1662,7 +1662,7 @@ void t_cocoa_generator::generate_cocoa_service_helpers(
 
 std::string t_cocoa_generator::function_result_helper_struct_type(
     const t_function* tfunction) {
-  if (tfunction->qualifier() == t_function_qualifier::one_way) {
+  if (tfunction->qualifier() == t_function_qualifier::oneway) {
     return capitalize(tfunction->name());
   } else {
     return capitalize(tfunction->name()) + "_result";
@@ -1680,7 +1680,7 @@ std::string t_cocoa_generator::function_args_helper_struct_type(
  * @param tfunction The function
  */
 void t_cocoa_generator::generate_function_helpers(const t_function* tfunction) {
-  if (tfunction->qualifier() == t_function_qualifier::one_way) {
+  if (tfunction->qualifier() == t_function_qualifier::oneway) {
     return;
   }
 
@@ -1867,7 +1867,7 @@ void t_cocoa_generator::generate_cocoa_service_client_implementation(
     scope_down(out);
     out << std::endl;
 
-    if (function->qualifier() != t_function_qualifier::one_way) {
+    if (function->qualifier() != t_function_qualifier::oneway) {
       const t_throws* exceptions = function->exceptions();
       t_function recv_function(
           function->return_type(),
@@ -1957,7 +1957,7 @@ void t_cocoa_generator::generate_cocoa_service_client_implementation(
     }
     out << "];" << std::endl;
 
-    if (function->qualifier() != t_function_qualifier::one_way) {
+    if (function->qualifier() != t_function_qualifier::oneway) {
       out << indent();
       if (!function->return_type()->is_void()) {
         out << "return ";
@@ -2108,7 +2108,7 @@ void t_cocoa_generator::generate_cocoa_service_server_implementation(
     out << indent() << "[inProtocol readMessageEnd];" << std::endl;
 
     // prepare the result if not oneway
-    if (function->qualifier() != t_function_qualifier::one_way) {
+    if (function->qualifier() != t_function_qualifier::oneway) {
       std::string resulttype =
           cocoa_prefix_ + function_result_helper_struct_type(function);
       out << indent() << resulttype << " * result = [[" << resulttype
@@ -2138,7 +2138,7 @@ void t_cocoa_generator::generate_cocoa_service_server_implementation(
     out << ";" << std::endl;
 
     // write out the result if not oneway
-    if (function->qualifier() != t_function_qualifier::one_way) {
+    if (function->qualifier() != t_function_qualifier::oneway) {
       out << indent() << "[outProtocol writeMessageBeginWithName: @\""
           << funname << "\"" << std::endl;
       out << indent()

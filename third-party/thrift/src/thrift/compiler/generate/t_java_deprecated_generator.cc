@@ -2556,7 +2556,7 @@ void t_java_deprecated_generator::generate_service_client(
     }
     f_service_ << ");" << endl;
 
-    if ((*f_iter)->qualifier() != t_function_qualifier::one_way) {
+    if ((*f_iter)->qualifier() != t_function_qualifier::oneway) {
       f_service_ << indent();
       if (!(*f_iter)->return_type()->is_void()) {
         f_service_ << "return ";
@@ -2597,7 +2597,7 @@ void t_java_deprecated_generator::generate_service_client(
 
     string bytes = tmp("_bytes");
 
-    string flush = (*f_iter)->qualifier() == t_function_qualifier::one_way
+    string flush = (*f_iter)->qualifier() == t_function_qualifier::oneway
         ? "onewayFlush"
         : "flush";
     f_service_ << indent() << "args.write(oprot_);" << endl
@@ -2611,7 +2611,7 @@ void t_java_deprecated_generator::generate_service_client(
     f_service_ << endl;
 
     // Generate recv function only if not a oneway function
-    if ((*f_iter)->qualifier() != t_function_qualifier::one_way) {
+    if ((*f_iter)->qualifier() != t_function_qualifier::oneway) {
       string resultname = (*f_iter)->get_name() + "_result";
 
       const t_throws* exceptions = (*f_iter)->exceptions();
@@ -2803,7 +2803,7 @@ void t_java_deprecated_generator::generate_service_async_client(
                        << protocol_factory_symbol << ", " << transport_symbol
                        << ", " << result_handler_symbol << ", "
                        << ((*f_iter)->qualifier() ==
-                                   t_function_qualifier::one_way
+                                   t_function_qualifier::oneway
                                ? "true"
                                : "false")
                        << ");" << endl;
@@ -2865,7 +2865,7 @@ void t_java_deprecated_generator::generate_service_async_client(
         << "TProtocol prot = "
            "super.client.getProtocolFactory().getProtocol(memoryTransport);"
         << endl;
-    if ((*f_iter)->qualifier() != t_function_qualifier::one_way) {
+    if ((*f_iter)->qualifier() != t_function_qualifier::oneway) {
       indent(f_service_);
       if (!ret_type->is_void()) {
         f_service_ << "return ";
@@ -3032,7 +3032,7 @@ void t_java_deprecated_generator::generate_service_server(
  */
 void t_java_deprecated_generator::generate_function_helpers(
     const t_function* tfunction) {
-  if (tfunction->qualifier() == t_function_qualifier::one_way) {
+  if (tfunction->qualifier() == t_function_qualifier::oneway) {
     return;
   }
 
@@ -3088,7 +3088,7 @@ void t_java_deprecated_generator::generate_process_function(
              << pservice_fn_name << ", args);" << endl;
 
   // Declare result for non oneway function
-  if (tfunction->qualifier() != t_function_qualifier::one_way) {
+  if (tfunction->qualifier() != t_function_qualifier::oneway) {
     f_service_ << indent() << resultname << " result = new " << resultname
                << "();" << endl;
   }
@@ -3106,7 +3106,7 @@ void t_java_deprecated_generator::generate_process_function(
   vector<t_field*>::const_iterator f_iter;
 
   f_service_ << indent();
-  if (tfunction->qualifier() != t_function_qualifier::one_way &&
+  if (tfunction->qualifier() != t_function_qualifier::oneway &&
       !tfunction->return_type()->is_void()) {
     f_service_ << "result.success = ";
   }
@@ -3123,14 +3123,14 @@ void t_java_deprecated_generator::generate_process_function(
   f_service_ << ");" << endl;
 
   // Set isset on success field
-  if (tfunction->qualifier() != t_function_qualifier::one_way &&
+  if (tfunction->qualifier() != t_function_qualifier::oneway &&
       !tfunction->return_type()->is_void() &&
       !type_can_be_null(tfunction->return_type())) {
     f_service_ << indent() << "result.set" << get_cap_name("success")
                << get_cap_name("isSet") << "(true);" << endl;
   }
 
-  if (tfunction->qualifier() != t_function_qualifier::one_way &&
+  if (tfunction->qualifier() != t_function_qualifier::oneway &&
       !exceptions.empty()) {
     string pservice_func_name =
         "\"" + tservice->get_name() + "." + tfunction->get_name() + "\"";
@@ -3141,7 +3141,7 @@ void t_java_deprecated_generator::generate_process_function(
     for (const t_field& x : exceptions) {
       f_service_ << " catch (" << type_name(x.get_type(), false, false) << " "
                  << x.get_name() << ") {" << endl;
-      if (tfunction->qualifier() != t_function_qualifier::one_way) {
+      if (tfunction->qualifier() != t_function_qualifier::oneway) {
         indent_up();
         f_service_ << indent() << "result." << x.get_name() << " = "
                    << x.get_name() << ";" << endl
@@ -3182,7 +3182,7 @@ void t_java_deprecated_generator::generate_process_function(
   }
 
   // Shortcut out here for oneway functions
-  if (tfunction->qualifier() == t_function_qualifier::one_way) {
+  if (tfunction->qualifier() == t_function_qualifier::oneway) {
     f_service_ << indent() << "return;" << endl;
     scope_down(f_service_);
 

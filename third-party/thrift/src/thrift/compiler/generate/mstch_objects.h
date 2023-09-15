@@ -659,7 +659,7 @@ class mstch_function : public mstch_base {
 
   mstch::node name() { return function_->get_name(); }
   mstch::node oneway() {
-    return function_->qualifier() == t_function_qualifier::one_way;
+    return function_->qualifier() == t_function_qualifier::oneway;
   }
   mstch::node has_exceptions() {
     return !get_elems(function_->exceptions()).empty();
@@ -690,11 +690,11 @@ class mstch_function : public mstch_base {
   mstch::node qualifier() {
     auto q = function_->qualifier();
     switch (q) {
-      case t_function_qualifier::one_way:
+      case t_function_qualifier::oneway:
         return std::string("OneWay");
       case t_function_qualifier::idempotent:
         return std::string("Idempotent");
-      case t_function_qualifier::read_only:
+      case t_function_qualifier::readonly:
         return std::string("ReadOnly");
       default:
         return std::string("Unspecified");

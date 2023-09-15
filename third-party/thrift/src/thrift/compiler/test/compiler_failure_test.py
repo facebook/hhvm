@@ -1157,30 +1157,6 @@ class CompilerFailureTest(unittest.TestCase):
             "[ERROR:foo.thrift:16] `@thrift.TerseWrite` cannot be applied to union fields (in `TerseUnion`).\n",
         )
 
-    def test_interaction_oneway_factory(self):
-        write_file(
-            "foo.thrift",
-            textwrap.dedent(
-                """\
-                interaction I {
-                    void foo();
-                }
-
-                service S {
-                    oneway I foo();
-                }
-                """
-            ),
-        )
-
-        ret, out, err = self.run_thrift("foo.thrift")
-
-        self.assertEqual(ret, 1)
-        self.assertEqual(
-            err,
-            "[ERROR:foo.thrift:6] Oneway methods must have void return type: foo\n",
-        )
-
     # Time complexity of for_each_transitive_field should be O(1)
     def test_time_complexity_of_for_each_transitive_field(self):
         write_file(

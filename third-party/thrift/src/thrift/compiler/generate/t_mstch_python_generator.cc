@@ -551,7 +551,7 @@ class python_mstch_function : public mstch_function {
   }
 
   mstch::node regular_response_type() {
-    if (function_->is_oneway()) {
+    if (function_->qualifier() == t_function_qualifier::oneway) {
       return {};
     }
     const t_type* rettype = function_->return_type()->get_true_type();

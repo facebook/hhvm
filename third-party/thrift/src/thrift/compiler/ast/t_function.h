@@ -36,14 +36,14 @@ namespace compiler {
 class t_interaction;
 
 enum class t_function_qualifier {
-  unspecified = 0,
-  one_way,
+  none,
+  oneway,
   idempotent,
-  read_only,
+  readonly,
 };
 
 /**
- * A thrift function declaration.
+ * A Thrift function declaration.
  */
 class t_function final : public t_named {
  public:
@@ -106,10 +106,12 @@ class t_function final : public t_named {
   }
 
   // old syntax only
-  bool is_interaction_constructor() const { return isInteractionConstructor_; }
-  void set_is_interaction_constructor() { isInteractionConstructor_ = true; }
-  bool is_interaction_member() const { return isInteractionMember_; }
-  void set_is_interaction_member() { isInteractionMember_ = true; }
+  bool is_interaction_constructor() const {
+    return is_interaction_constructor_;
+  }
+  void set_is_interaction_constructor() { is_interaction_constructor_ = true; }
+  bool is_interaction_member() const { return is_interaction_member_; }
+  void set_is_interaction_member() { is_interaction_member_ = true; }
 
   // new syntax only
   const t_type_ref& returned_interaction() const {
@@ -130,11 +132,11 @@ class t_function final : public t_named {
   std::unique_ptr<t_node> sink_or_stream_;
   std::unique_ptr<t_paramlist> paramlist_;
   std::unique_ptr<t_throws> exceptions_;
-  t_function_qualifier qualifier_{t_function_qualifier::unspecified};
-  int8_t returned_interaction_pos_{-1};
-  int8_t response_pos_{-1};
-  bool isInteractionConstructor_{false};
-  bool isInteractionMember_{false};
+  t_function_qualifier qualifier_ = t_function_qualifier::none;
+  int8_t returned_interaction_pos_ = -1;
+  int8_t response_pos_ = -1;
+  bool is_interaction_constructor_ = false;
+  bool is_interaction_member_ = false;
 
   // TODO(afuller): Delete everything below here. It is only provided for
   // backwards compatibility.
@@ -159,7 +161,6 @@ class t_function final : public t_named {
       t_function_qualifier qualifier = {});
 
   t_paramlist* get_paramlist() const { return paramlist_.get(); }
-  bool is_oneway() const { return qualifier_ == t_function_qualifier::one_way; }
 };
 
 } // namespace compiler

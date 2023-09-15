@@ -40,7 +40,7 @@ struct Serializer {
 
   template <typename T>
   static void warn_unless(folly::tag_t<T>, const char* which, std::false_type) {
-    FB_LOG_ONCE(ERROR)
+    FB_LOG_ONCE(WARNING)
         << "Thrift serialization is only defined for structs and unions, not"
         << " containers thereof. Attempting to " << which
         << " a value of type `" << folly::pretty_name<T>() << "`.";

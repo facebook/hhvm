@@ -18,26 +18,18 @@ var _ = strings.Split
 
 
 type Foo struct {
-    Field1 int32 `thrift:"field1,3" json:"field1" db:"field1"`
     Field2 int32 `thrift:"field2,1" json:"field2" db:"field2"`
     Field3 int32 `thrift:"field3,2" json:"field3" db:"field3"`
+    Field1 int32 `thrift:"field1,3" json:"field1" db:"field1"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Foo{}
 
 func NewFoo() *Foo {
     return (&Foo{}).
-        SetField1NonCompat(0).
         SetField2NonCompat(0).
-        SetField3NonCompat(0)
-}
-
-func (x *Foo) GetField1NonCompat() int32 {
-    return x.Field1
-}
-
-func (x *Foo) GetField1() int32 {
-    return x.Field1
+        SetField3NonCompat(0).
+        SetField1NonCompat(0)
 }
 
 func (x *Foo) GetField2NonCompat() int32 {
@@ -56,14 +48,12 @@ func (x *Foo) GetField3() int32 {
     return x.Field3
 }
 
-func (x *Foo) SetField1NonCompat(value int32) *Foo {
-    x.Field1 = value
-    return x
+func (x *Foo) GetField1NonCompat() int32 {
+    return x.Field1
 }
 
-func (x *Foo) SetField1(value int32) *Foo {
-    x.Field1 = value
-    return x
+func (x *Foo) GetField1() int32 {
+    return x.Field1
 }
 
 func (x *Foo) SetField2NonCompat(value int32) *Foo {
@@ -86,20 +76,14 @@ func (x *Foo) SetField3(value int32) *Foo {
     return x
 }
 
-func (x *Foo) writeField3(p thrift.Protocol) error {  // Field1
-    if err := p.WriteFieldBegin("field1", thrift.I32, 3); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetField1NonCompat()
-    if err := p.WriteI32(item); err != nil {
-    return err
+func (x *Foo) SetField1NonCompat(value int32) *Foo {
+    x.Field1 = value
+    return x
 }
 
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
+func (x *Foo) SetField1(value int32) *Foo {
+    x.Field1 = value
+    return x
 }
 
 func (x *Foo) writeField1(p thrift.Protocol) error {  // Field2
@@ -134,13 +118,19 @@ func (x *Foo) writeField2(p thrift.Protocol) error {  // Field3
     return nil
 }
 
-func (x *Foo) readField3(p thrift.Protocol) error {  // Field1
-    result, err := p.ReadI32()
-if err != nil {
+func (x *Foo) writeField3(p thrift.Protocol) error {  // Field1
+    if err := p.WriteFieldBegin("field1", thrift.I32, 3); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetField1NonCompat()
+    if err := p.WriteI32(item); err != nil {
     return err
 }
 
-    x.SetField1NonCompat(result)
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
     return nil
 }
 
@@ -164,8 +154,14 @@ if err != nil {
     return nil
 }
 
-func (x *Foo) toString3() string {  // Field1
-    return fmt.Sprintf("%v", x.GetField1NonCompat())
+func (x *Foo) readField3(p thrift.Protocol) error {  // Field1
+    result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+
+    x.SetField1NonCompat(result)
+    return nil
 }
 
 func (x *Foo) toString1() string {  // Field2
@@ -174,6 +170,10 @@ func (x *Foo) toString1() string {  // Field2
 
 func (x *Foo) toString2() string {  // Field3
     return fmt.Sprintf("%v", x.GetField3NonCompat())
+}
+
+func (x *Foo) toString3() string {  // Field1
+    return fmt.Sprintf("%v", x.GetField1NonCompat())
 }
 
 
@@ -188,11 +188,6 @@ func NewFooBuilder() *FooBuilder {
     }
 }
 
-func (x *FooBuilder) Field1(value int32) *FooBuilder {
-    x.obj.Field1 = value
-    return x
-}
-
 func (x *FooBuilder) Field2(value int32) *FooBuilder {
     x.obj.Field2 = value
     return x
@@ -200,6 +195,11 @@ func (x *FooBuilder) Field2(value int32) *FooBuilder {
 
 func (x *FooBuilder) Field3(value int32) *FooBuilder {
     x.obj.Field3 = value
+    return x
+}
+
+func (x *FooBuilder) Field1(value int32) *FooBuilder {
+    x.obj.Field1 = value
     return x
 }
 
@@ -213,15 +213,15 @@ func (x *Foo) Write(p thrift.Protocol) error {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
-    if err := x.writeField3(p); err != nil {
-        return err
-    }
-
     if err := x.writeField1(p); err != nil {
         return err
     }
 
     if err := x.writeField2(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField3(p); err != nil {
         return err
     }
 
@@ -251,17 +251,6 @@ func (x *Foo) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 3:  // field1
-            expectedType := thrift.Type(thrift.I32)
-            if wireType == expectedType {
-                if err := x.readField3(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
-            }
         case 1:  // field2
             expectedType := thrift.Type(thrift.I32)
             if wireType == expectedType {
@@ -277,6 +266,17 @@ func (x *Foo) Read(p thrift.Protocol) error {
             expectedType := thrift.Type(thrift.I32)
             if wireType == expectedType {
                 if err := x.readField2(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
+        case 3:  // field1
+            expectedType := thrift.Type(thrift.I32)
+            if wireType == expectedType {
+                if err := x.readField3(p); err != nil {
                    return err
                 }
             } else {
@@ -319,26 +319,18 @@ func (x *Foo) String() string {
 }
 
 type Foo2 struct {
-    Field1 int32 `thrift:"field1,3" json:"field1" db:"field1"`
     Field2 int32 `thrift:"field2,1" json:"field2" db:"field2"`
     Field3 int32 `thrift:"field3,2" json:"field3" db:"field3"`
+    Field1 int32 `thrift:"field1,3" json:"field1" db:"field1"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Foo2{}
 
 func NewFoo2() *Foo2 {
     return (&Foo2{}).
-        SetField1NonCompat(0).
         SetField2NonCompat(0).
-        SetField3NonCompat(0)
-}
-
-func (x *Foo2) GetField1NonCompat() int32 {
-    return x.Field1
-}
-
-func (x *Foo2) GetField1() int32 {
-    return x.Field1
+        SetField3NonCompat(0).
+        SetField1NonCompat(0)
 }
 
 func (x *Foo2) GetField2NonCompat() int32 {
@@ -357,14 +349,12 @@ func (x *Foo2) GetField3() int32 {
     return x.Field3
 }
 
-func (x *Foo2) SetField1NonCompat(value int32) *Foo2 {
-    x.Field1 = value
-    return x
+func (x *Foo2) GetField1NonCompat() int32 {
+    return x.Field1
 }
 
-func (x *Foo2) SetField1(value int32) *Foo2 {
-    x.Field1 = value
-    return x
+func (x *Foo2) GetField1() int32 {
+    return x.Field1
 }
 
 func (x *Foo2) SetField2NonCompat(value int32) *Foo2 {
@@ -387,20 +377,14 @@ func (x *Foo2) SetField3(value int32) *Foo2 {
     return x
 }
 
-func (x *Foo2) writeField3(p thrift.Protocol) error {  // Field1
-    if err := p.WriteFieldBegin("field1", thrift.I32, 3); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetField1NonCompat()
-    if err := p.WriteI32(item); err != nil {
-    return err
+func (x *Foo2) SetField1NonCompat(value int32) *Foo2 {
+    x.Field1 = value
+    return x
 }
 
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
+func (x *Foo2) SetField1(value int32) *Foo2 {
+    x.Field1 = value
+    return x
 }
 
 func (x *Foo2) writeField1(p thrift.Protocol) error {  // Field2
@@ -435,13 +419,19 @@ func (x *Foo2) writeField2(p thrift.Protocol) error {  // Field3
     return nil
 }
 
-func (x *Foo2) readField3(p thrift.Protocol) error {  // Field1
-    result, err := p.ReadI32()
-if err != nil {
+func (x *Foo2) writeField3(p thrift.Protocol) error {  // Field1
+    if err := p.WriteFieldBegin("field1", thrift.I32, 3); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetField1NonCompat()
+    if err := p.WriteI32(item); err != nil {
     return err
 }
 
-    x.SetField1NonCompat(result)
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
     return nil
 }
 
@@ -465,8 +455,14 @@ if err != nil {
     return nil
 }
 
-func (x *Foo2) toString3() string {  // Field1
-    return fmt.Sprintf("%v", x.GetField1NonCompat())
+func (x *Foo2) readField3(p thrift.Protocol) error {  // Field1
+    result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+
+    x.SetField1NonCompat(result)
+    return nil
 }
 
 func (x *Foo2) toString1() string {  // Field2
@@ -475,6 +471,10 @@ func (x *Foo2) toString1() string {  // Field2
 
 func (x *Foo2) toString2() string {  // Field3
     return fmt.Sprintf("%v", x.GetField3NonCompat())
+}
+
+func (x *Foo2) toString3() string {  // Field1
+    return fmt.Sprintf("%v", x.GetField1NonCompat())
 }
 
 
@@ -489,11 +489,6 @@ func NewFoo2Builder() *Foo2Builder {
     }
 }
 
-func (x *Foo2Builder) Field1(value int32) *Foo2Builder {
-    x.obj.Field1 = value
-    return x
-}
-
 func (x *Foo2Builder) Field2(value int32) *Foo2Builder {
     x.obj.Field2 = value
     return x
@@ -501,6 +496,11 @@ func (x *Foo2Builder) Field2(value int32) *Foo2Builder {
 
 func (x *Foo2Builder) Field3(value int32) *Foo2Builder {
     x.obj.Field3 = value
+    return x
+}
+
+func (x *Foo2Builder) Field1(value int32) *Foo2Builder {
+    x.obj.Field1 = value
     return x
 }
 
@@ -514,15 +514,15 @@ func (x *Foo2) Write(p thrift.Protocol) error {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
-    if err := x.writeField3(p); err != nil {
-        return err
-    }
-
     if err := x.writeField1(p); err != nil {
         return err
     }
 
     if err := x.writeField2(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField3(p); err != nil {
         return err
     }
 
@@ -552,17 +552,6 @@ func (x *Foo2) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 3:  // field1
-            expectedType := thrift.Type(thrift.I32)
-            if wireType == expectedType {
-                if err := x.readField3(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
-            }
         case 1:  // field2
             expectedType := thrift.Type(thrift.I32)
             if wireType == expectedType {
@@ -578,6 +567,17 @@ func (x *Foo2) Read(p thrift.Protocol) error {
             expectedType := thrift.Type(thrift.I32)
             if wireType == expectedType {
                 if err := x.readField2(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
+        case 3:  // field1
+            expectedType := thrift.Type(thrift.I32)
+            if wireType == expectedType {
+                if err := x.readField3(p); err != nil {
                    return err
                 }
             } else {
@@ -611,9 +611,9 @@ func (x *Foo2) String() string {
     var sb strings.Builder
 
     sb.WriteString("Foo2({")
-    sb.WriteString(fmt.Sprintf("Field1:%s ", x.toString3()))
     sb.WriteString(fmt.Sprintf("Field2:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("Field3:%s", x.toString2()))
+    sb.WriteString(fmt.Sprintf("Field3:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("Field1:%s", x.toString3()))
     sb.WriteString("})")
 
     return sb.String()

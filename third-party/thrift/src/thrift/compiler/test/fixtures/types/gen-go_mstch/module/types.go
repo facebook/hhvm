@@ -526,7 +526,6 @@ func (x *DecoratedStruct) String() string {
 }
 
 type ContainerStruct struct {
-    FieldA []int32 `thrift:"fieldA,12" json:"fieldA" db:"fieldA"`
     FieldB []int32 `thrift:"fieldB,2" json:"fieldB" db:"fieldB"`
     FieldC []int32 `thrift:"fieldC,3" json:"fieldC" db:"fieldC"`
     FieldD []int32 `thrift:"fieldD,4" json:"fieldD" db:"fieldD"`
@@ -534,32 +533,21 @@ type ContainerStruct struct {
     FieldF []int32 `thrift:"fieldF,6" json:"fieldF" db:"fieldF"`
     FieldG map[int32]string `thrift:"fieldG,7" json:"fieldG" db:"fieldG"`
     FieldH included.SomeMap `thrift:"fieldH,8" json:"fieldH" db:"fieldH"`
+    FieldA []int32 `thrift:"fieldA,12" json:"fieldA" db:"fieldA"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &ContainerStruct{}
 
 func NewContainerStruct() *ContainerStruct {
     return (&ContainerStruct{}).
-        SetFieldANonCompat(nil).
         SetFieldBNonCompat(nil).
         SetFieldCNonCompat(nil).
         SetFieldDNonCompat(nil).
         SetFieldENonCompat(nil).
         SetFieldFNonCompat(nil).
         SetFieldGNonCompat(nil).
-        SetFieldHNonCompat(included.NewSomeMap())
-}
-
-func (x *ContainerStruct) GetFieldANonCompat() []int32 {
-    return x.FieldA
-}
-
-func (x *ContainerStruct) GetFieldA() []int32 {
-    if !x.IsSetFieldA() {
-        return nil
-    }
-
-    return x.FieldA
+        SetFieldHNonCompat(included.NewSomeMap()).
+        SetFieldANonCompat(nil)
 }
 
 func (x *ContainerStruct) GetFieldBNonCompat() []int32 {
@@ -646,14 +634,16 @@ func (x *ContainerStruct) GetFieldH() included.SomeMap {
     return x.FieldH
 }
 
-func (x *ContainerStruct) SetFieldANonCompat(value []int32) *ContainerStruct {
-    x.FieldA = value
-    return x
+func (x *ContainerStruct) GetFieldANonCompat() []int32 {
+    return x.FieldA
 }
 
-func (x *ContainerStruct) SetFieldA(value []int32) *ContainerStruct {
-    x.FieldA = value
-    return x
+func (x *ContainerStruct) GetFieldA() []int32 {
+    if !x.IsSetFieldA() {
+        return nil
+    }
+
+    return x.FieldA
 }
 
 func (x *ContainerStruct) SetFieldBNonCompat(value []int32) *ContainerStruct {
@@ -726,8 +716,14 @@ func (x *ContainerStruct) SetFieldH(value included.SomeMap) *ContainerStruct {
     return x
 }
 
-func (x *ContainerStruct) IsSetFieldA() bool {
-    return x.FieldA != nil
+func (x *ContainerStruct) SetFieldANonCompat(value []int32) *ContainerStruct {
+    x.FieldA = value
+    return x
+}
+
+func (x *ContainerStruct) SetFieldA(value []int32) *ContainerStruct {
+    x.FieldA = value
+    return x
 }
 
 func (x *ContainerStruct) IsSetFieldB() bool {
@@ -758,35 +754,8 @@ func (x *ContainerStruct) IsSetFieldH() bool {
     return x.FieldH != nil
 }
 
-func (x *ContainerStruct) writeField12(p thrift.Protocol) error {  // FieldA
-    if !x.IsSetFieldA() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("fieldA", thrift.LIST, 12); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetFieldANonCompat()
-    if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
-    return thrift.PrependError("error writing list begin: ", err)
-}
-for _, v := range item {
-    {
-        item := v
-        if err := p.WriteI32(item); err != nil {
-    return err
-}
-    }
-}
-if err := p.WriteListEnd(); err != nil {
-    return thrift.PrependError("error writing list end: ", err)
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
+func (x *ContainerStruct) IsSetFieldA() bool {
+    return x.FieldA != nil
 }
 
 func (x *ContainerStruct) writeField2(p thrift.Protocol) error {  // FieldB
@@ -1003,31 +972,34 @@ if err != nil {
     return nil
 }
 
-func (x *ContainerStruct) readField12(p thrift.Protocol) error {  // FieldA
-    _ /* elemType */, size, err := p.ReadListBegin()
-if err != nil {
-    return thrift.PrependError("error reading list begin: ", err)
-}
+func (x *ContainerStruct) writeField12(p thrift.Protocol) error {  // FieldA
+    if !x.IsSetFieldA() {
+        return nil
+    }
 
-listResult := make([]int32, 0, size)
-for i := 0; i < size; i++ {
-    var elem int32
+    if err := p.WriteFieldBegin("fieldA", thrift.LIST, 12); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetFieldANonCompat()
+    if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
+    return thrift.PrependError("error writing list begin: ", err)
+}
+for _, v := range item {
     {
-        result, err := p.ReadI32()
-if err != nil {
+        item := v
+        if err := p.WriteI32(item); err != nil {
     return err
 }
-        elem = result
     }
-    listResult = append(listResult, elem)
+}
+if err := p.WriteListEnd(); err != nil {
+    return thrift.PrependError("error writing list end: ", err)
 }
 
-if err := p.ReadListEnd(); err != nil {
-    return thrift.PrependError("error reading list end: ", err)
-}
-result := listResult
-
-    x.SetFieldANonCompat(result)
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
     return nil
 }
 
@@ -1219,8 +1191,32 @@ if err != nil {
     return nil
 }
 
-func (x *ContainerStruct) toString12() string {  // FieldA
-    return fmt.Sprintf("%v", x.GetFieldANonCompat())
+func (x *ContainerStruct) readField12(p thrift.Protocol) error {  // FieldA
+    _ /* elemType */, size, err := p.ReadListBegin()
+if err != nil {
+    return thrift.PrependError("error reading list begin: ", err)
+}
+
+listResult := make([]int32, 0, size)
+for i := 0; i < size; i++ {
+    var elem int32
+    {
+        result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+        elem = result
+    }
+    listResult = append(listResult, elem)
+}
+
+if err := p.ReadListEnd(); err != nil {
+    return thrift.PrependError("error reading list end: ", err)
+}
+result := listResult
+
+    x.SetFieldANonCompat(result)
+    return nil
 }
 
 func (x *ContainerStruct) toString2() string {  // FieldB
@@ -1251,6 +1247,10 @@ func (x *ContainerStruct) toString8() string {  // FieldH
     return fmt.Sprintf("%v", x.GetFieldHNonCompat())
 }
 
+func (x *ContainerStruct) toString12() string {  // FieldA
+    return fmt.Sprintf("%v", x.GetFieldANonCompat())
+}
+
 
 // Deprecated: Use ContainerStruct.Set* methods instead or set the fields directly.
 type ContainerStructBuilder struct {
@@ -1261,11 +1261,6 @@ func NewContainerStructBuilder() *ContainerStructBuilder {
     return &ContainerStructBuilder{
         obj: NewContainerStruct(),
     }
-}
-
-func (x *ContainerStructBuilder) FieldA(value []int32) *ContainerStructBuilder {
-    x.obj.FieldA = value
-    return x
 }
 
 func (x *ContainerStructBuilder) FieldB(value []int32) *ContainerStructBuilder {
@@ -1303,6 +1298,11 @@ func (x *ContainerStructBuilder) FieldH(value included.SomeMap) *ContainerStruct
     return x
 }
 
+func (x *ContainerStructBuilder) FieldA(value []int32) *ContainerStructBuilder {
+    x.obj.FieldA = value
+    return x
+}
+
 func (x *ContainerStructBuilder) Emit() *ContainerStruct {
     var objCopy ContainerStruct = *x.obj
     return &objCopy
@@ -1311,10 +1311,6 @@ func (x *ContainerStructBuilder) Emit() *ContainerStruct {
 func (x *ContainerStruct) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("ContainerStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
-    }
-
-    if err := x.writeField12(p); err != nil {
-        return err
     }
 
     if err := x.writeField2(p); err != nil {
@@ -1345,6 +1341,10 @@ func (x *ContainerStruct) Write(p thrift.Protocol) error {
         return err
     }
 
+    if err := x.writeField12(p); err != nil {
+        return err
+    }
+
     if err := p.WriteFieldStop(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
     }
@@ -1371,17 +1371,6 @@ func (x *ContainerStruct) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 12:  // fieldA
-            expectedType := thrift.Type(thrift.LIST)
-            if wireType == expectedType {
-                if err := x.readField12(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
-            }
         case 2:  // fieldB
             expectedType := thrift.Type(thrift.LIST)
             if wireType == expectedType {
@@ -1459,6 +1448,17 @@ func (x *ContainerStruct) Read(p thrift.Protocol) error {
                     return err
                 }
             }
+        case 12:  // fieldA
+            expectedType := thrift.Type(thrift.LIST)
+            if wireType == expectedType {
+                if err := x.readField12(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
         default:
             if err := p.Skip(wireType); err != nil {
                 return err
@@ -1485,14 +1485,14 @@ func (x *ContainerStruct) String() string {
     var sb strings.Builder
 
     sb.WriteString("ContainerStruct({")
-    sb.WriteString(fmt.Sprintf("FieldA:%s ", x.toString12()))
     sb.WriteString(fmt.Sprintf("FieldB:%s ", x.toString2()))
     sb.WriteString(fmt.Sprintf("FieldC:%s ", x.toString3()))
     sb.WriteString(fmt.Sprintf("FieldD:%s ", x.toString4()))
     sb.WriteString(fmt.Sprintf("FieldE:%s ", x.toString5()))
     sb.WriteString(fmt.Sprintf("FieldF:%s ", x.toString6()))
     sb.WriteString(fmt.Sprintf("FieldG:%s ", x.toString7()))
-    sb.WriteString(fmt.Sprintf("FieldH:%s", x.toString8()))
+    sb.WriteString(fmt.Sprintf("FieldH:%s ", x.toString8()))
+    sb.WriteString(fmt.Sprintf("FieldA:%s", x.toString12()))
     sb.WriteString("})")
 
     return sb.String()

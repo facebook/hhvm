@@ -29,13 +29,13 @@ func {{struct:go_qualified_new_func}}Builder() *{{struct:go_name}}Builder {
         obj: {{struct:go_qualified_new_func}}(),
     }
 }
-{{#struct:fields}}
+{{#struct:fields_sorted}}
 
 func (x *{{struct:go_name}}Builder) {{field:go_name}}(value {{> types/field_type}}) *{{struct:go_name}}Builder {
     x.obj.{{field:go_name}} = value
     return x
 }
-{{/struct:fields}}
+{{/struct:fields_sorted}}
 
 func (x *{{struct:go_name}}Builder) Emit() *{{struct:go_name}} {
     {{! Create a shallow copy of our 'obj' to let Emit() issue a new object on every call }}

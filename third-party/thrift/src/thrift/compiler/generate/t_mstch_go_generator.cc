@@ -407,6 +407,7 @@ class mstch_go_struct : public mstch_struct {
             {"struct:req_resp?", &mstch_go_struct::is_req_resp_struct},
             {"struct:resp?", &mstch_go_struct::is_resp_struct},
             {"struct:req?", &mstch_go_struct::is_req_struct},
+            {"struct:fields_sorted", &mstch_go_struct::fields_sorted},
         });
   }
 
@@ -435,6 +436,9 @@ class mstch_go_struct : public mstch_struct {
   }
   mstch::node go_public_req_name() {
     return boost::algorithm::erase_first_copy(struct_->name(), "req") + "Args";
+  }
+  mstch::node fields_sorted() {
+    return make_mstch_fields(struct_->get_sorted_members());
   }
 
  private:

@@ -23,67 +23,67 @@
 
   Get method.
 
-}}{{#struct:fields}}
+}}{{#struct:fields_sorted}}
 {{> types/field_method_get}}
 
-{{/struct:fields}}{{!
+{{/struct:fields_sorted}}{{!
 
   Set method.
 
-}}{{#struct:fields}}
+}}{{#struct:fields_sorted}}
 {{> types/field_method_set}}
 
-{{/struct:fields}}{{!
+{{/struct:fields_sorted}}{{!
 
   IsSet method.
 
-}}{{#struct:fields}}
+}}{{#struct:fields_sorted}}
 {{#field:nilable?}}
 {{> types/field_method_is_set}}
 
 {{/field:nilable?}}
-{{/struct:fields}}{{!
+{{/struct:fields_sorted}}{{!
 
   writeField method.
 
-}}{{#struct:fields}}
+}}{{#struct:fields_sorted}}
 {{> types/field_method_write}}
 
-{{/struct:fields}}{{!
+{{/struct:fields_sorted}}{{!
 
   readField method.
 
-}}{{#struct:fields}}
+}}{{#struct:fields_sorted}}
 {{> types/field_method_read}}
 
-{{/struct:fields}}{{!
+{{/struct:fields_sorted}}{{!
 
   toString method.
 
-}}{{#struct:fields}}
+}}{{#struct:fields_sorted}}
 {{> types/field_method_to_string}}
 
-{{/struct:fields}}{{!
+{{/struct:fields_sorted}}{{!
 
   DefaultGet method.
 
-}}{{#struct:fields}}
+}}{{#struct:fields_sorted}}
 {{#field:pointer?}}
 {{> types/field_method_default_get}}
 
 {{/field:pointer?}}
-{{/struct:fields}}{{!
+{{/struct:fields_sorted}}{{!
 
   countSetFields method.
 
 }}{{#struct:union?}}
 func (x *{{struct:go_name}}) countSetFields() int {
     count := int(0)
-    {{#struct:fields}}
+    {{#struct:fields_sorted}}
     if (x.IsSet{{field:go_name}}()) {
         count++
     }
-    {{/struct:fields}}
+    {{/struct:fields_sorted}}
     return count
 }
 

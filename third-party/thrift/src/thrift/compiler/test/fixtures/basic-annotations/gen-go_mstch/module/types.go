@@ -482,8 +482,8 @@ func (x *MyException) Error() string {
 }
 
 type MyStruct struct {
-    MajorVer int64 `thrift:"major,2" json:"major" db:"major"`
     PackageName string `thrift:"package,1" tag:"some_package"`
+    MajorVer int64 `thrift:"major,2" json:"major" db:"major"`
     AnnotationWithQuote string `thrift:"annotation_with_quote,3" tag:"somevalue"`
     Class_ string `thrift:"class_,4" json:"class_" db:"class_"`
     AnnotationWithTrailingComma string `thrift:"annotation_with_trailing_comma,5" json:"annotation_with_trailing_comma" db:"annotation_with_trailing_comma"`
@@ -497,8 +497,8 @@ var _ thrift.Struct = &MyStruct{}
 
 func NewMyStruct() *MyStruct {
     return (&MyStruct{}).
-        SetMajorVerNonCompat(0).
         SetPackageNameNonCompat("").
+        SetMajorVerNonCompat(0).
         SetAnnotationWithQuoteNonCompat("").
         SetClass_NonCompat("").
         SetAnnotationWithTrailingCommaNonCompat("").
@@ -508,20 +508,20 @@ func NewMyStruct() *MyStruct {
         SetMyUnionNonCompat(*NewMyUnion())
 }
 
-func (x *MyStruct) GetMajorVerNonCompat() int64 {
-    return x.MajorVer
-}
-
-func (x *MyStruct) GetMajorVer() int64 {
-    return x.MajorVer
-}
-
 func (x *MyStruct) GetPackageNameNonCompat() string {
     return x.PackageName
 }
 
 func (x *MyStruct) GetPackageName() string {
     return x.PackageName
+}
+
+func (x *MyStruct) GetMajorVerNonCompat() int64 {
+    return x.MajorVer
+}
+
+func (x *MyStruct) GetMajorVer() int64 {
+    return x.MajorVer
 }
 
 func (x *MyStruct) GetAnnotationWithQuoteNonCompat() string {
@@ -588,16 +588,6 @@ func (x *MyStruct) GetMyUnion() *MyUnion {
     return x.MyUnion
 }
 
-func (x *MyStruct) SetMajorVerNonCompat(value int64) *MyStruct {
-    x.MajorVer = value
-    return x
-}
-
-func (x *MyStruct) SetMajorVer(value int64) *MyStruct {
-    x.MajorVer = value
-    return x
-}
-
 func (x *MyStruct) SetPackageNameNonCompat(value string) *MyStruct {
     x.PackageName = value
     return x
@@ -605,6 +595,16 @@ func (x *MyStruct) SetPackageNameNonCompat(value string) *MyStruct {
 
 func (x *MyStruct) SetPackageName(value string) *MyStruct {
     x.PackageName = value
+    return x
+}
+
+func (x *MyStruct) SetMajorVerNonCompat(value int64) *MyStruct {
+    x.MajorVer = value
+    return x
+}
+
+func (x *MyStruct) SetMajorVer(value int64) *MyStruct {
+    x.MajorVer = value
     return x
 }
 
@@ -686,13 +686,13 @@ func (x *MyStruct) IsSetMyUnion() bool {
     return x.MyUnion != nil
 }
 
-func (x *MyStruct) writeField2(p thrift.Protocol) error {  // MajorVer
-    if err := p.WriteFieldBegin("major", thrift.I64, 2); err != nil {
+func (x *MyStruct) writeField1(p thrift.Protocol) error {  // PackageName
+    if err := p.WriteFieldBegin("package", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMajorVerNonCompat()
-    if err := p.WriteI64(item); err != nil {
+    item := x.GetPackageNameNonCompat()
+    if err := p.WriteString(item); err != nil {
     return err
 }
 
@@ -702,13 +702,13 @@ func (x *MyStruct) writeField2(p thrift.Protocol) error {  // MajorVer
     return nil
 }
 
-func (x *MyStruct) writeField1(p thrift.Protocol) error {  // PackageName
-    if err := p.WriteFieldBegin("package", thrift.STRING, 1); err != nil {
+func (x *MyStruct) writeField2(p thrift.Protocol) error {  // MajorVer
+    if err := p.WriteFieldBegin("major", thrift.I64, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPackageNameNonCompat()
-    if err := p.WriteString(item); err != nil {
+    item := x.GetMajorVerNonCompat()
+    if err := p.WriteI64(item); err != nil {
     return err
 }
 
@@ -849,16 +849,6 @@ func (x *MyStruct) writeField9(p thrift.Protocol) error {  // MyUnion
     return nil
 }
 
-func (x *MyStruct) readField2(p thrift.Protocol) error {  // MajorVer
-    result, err := p.ReadI64()
-if err != nil {
-    return err
-}
-
-    x.SetMajorVerNonCompat(result)
-    return nil
-}
-
 func (x *MyStruct) readField1(p thrift.Protocol) error {  // PackageName
     result, err := p.ReadString()
 if err != nil {
@@ -866,6 +856,16 @@ if err != nil {
 }
 
     x.SetPackageNameNonCompat(result)
+    return nil
+}
+
+func (x *MyStruct) readField2(p thrift.Protocol) error {  // MajorVer
+    result, err := p.ReadI64()
+if err != nil {
+    return err
+}
+
+    x.SetMajorVerNonCompat(result)
     return nil
 }
 
@@ -959,12 +959,12 @@ if err != nil {
     return nil
 }
 
-func (x *MyStruct) toString2() string {  // MajorVer
-    return fmt.Sprintf("%v", x.GetMajorVerNonCompat())
-}
-
 func (x *MyStruct) toString1() string {  // PackageName
     return fmt.Sprintf("%v", x.GetPackageNameNonCompat())
+}
+
+func (x *MyStruct) toString2() string {  // MajorVer
+    return fmt.Sprintf("%v", x.GetMajorVerNonCompat())
 }
 
 func (x *MyStruct) toString3() string {  // AnnotationWithQuote
@@ -1018,13 +1018,13 @@ func NewMyStructBuilder() *MyStructBuilder {
     }
 }
 
-func (x *MyStructBuilder) MajorVer(value int64) *MyStructBuilder {
-    x.obj.MajorVer = value
+func (x *MyStructBuilder) PackageName(value string) *MyStructBuilder {
+    x.obj.PackageName = value
     return x
 }
 
-func (x *MyStructBuilder) PackageName(value string) *MyStructBuilder {
-    x.obj.PackageName = value
+func (x *MyStructBuilder) MajorVer(value int64) *MyStructBuilder {
+    x.obj.MajorVer = value
     return x
 }
 
@@ -1073,11 +1073,11 @@ func (x *MyStruct) Write(p thrift.Protocol) error {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
-    if err := x.writeField2(p); err != nil {
+    if err := x.writeField1(p); err != nil {
         return err
     }
 
-    if err := x.writeField1(p); err != nil {
+    if err := x.writeField2(p); err != nil {
         return err
     }
 
@@ -1135,10 +1135,10 @@ func (x *MyStruct) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 2:  // major
-            expectedType := thrift.Type(thrift.I64)
+        case 1:  // package
+            expectedType := thrift.Type(thrift.STRING)
             if wireType == expectedType {
-                if err := x.readField2(p); err != nil {
+                if err := x.readField1(p); err != nil {
                    return err
                 }
             } else {
@@ -1146,10 +1146,10 @@ func (x *MyStruct) Read(p thrift.Protocol) error {
                     return err
                 }
             }
-        case 1:  // package
-            expectedType := thrift.Type(thrift.STRING)
+        case 2:  // major
+            expectedType := thrift.Type(thrift.I64)
             if wireType == expectedType {
-                if err := x.readField1(p); err != nil {
+                if err := x.readField2(p); err != nil {
                    return err
                 }
             } else {
@@ -1260,8 +1260,8 @@ func (x *MyStruct) String() string {
     var sb strings.Builder
 
     sb.WriteString("MyStruct({")
-    sb.WriteString(fmt.Sprintf("MajorVer:%s ", x.toString2()))
     sb.WriteString(fmt.Sprintf("PackageName:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("MajorVer:%s ", x.toString2()))
     sb.WriteString(fmt.Sprintf("AnnotationWithQuote:%s ", x.toString3()))
     sb.WriteString(fmt.Sprintf("Class_:%s ", x.toString4()))
     sb.WriteString(fmt.Sprintf("AnnotationWithTrailingComma:%s ", x.toString5()))

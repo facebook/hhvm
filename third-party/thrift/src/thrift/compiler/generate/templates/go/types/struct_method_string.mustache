@@ -31,9 +31,9 @@ func (x *{{struct:go_name}}) String() string {
     var sb strings.Builder
 
     sb.WriteString("{{struct:go_name}}({")
-    {{#struct:fields_in_serialization_order}}
+    {{#struct:fields_sorted}}
     sb.WriteString(fmt.Sprintf("{{field:go_name}}:%s{{^last?}} {{/last?}}", x.toString{{field:key_str}}()))
-    {{/struct:fields_in_serialization_order}}
+    {{/struct:fields_sorted}}
     sb.WriteString("})")
 
     return sb.String()

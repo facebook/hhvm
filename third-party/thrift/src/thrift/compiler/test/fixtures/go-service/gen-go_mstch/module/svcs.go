@@ -3690,9 +3690,9 @@ func (x *respGetEntityGetList) String() string {
     return sb.String()
 }
 type reqGetEntityGetLegacyStuff struct {
-    NumPos int64 `thrift:"numPos,1" json:"numPos" db:"numPos"`
-    NumNeg1 int64 `thrift:"numNeg1,-1" json:"numNeg1" db:"numNeg1"`
     NumNeg2 int64 `thrift:"numNeg2,-2" json:"numNeg2" db:"numNeg2"`
+    NumNeg1 int64 `thrift:"numNeg1,-1" json:"numNeg1" db:"numNeg1"`
+    NumPos int64 `thrift:"numPos,1" json:"numPos" db:"numPos"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetLegacyStuff{}
@@ -3701,25 +3701,9 @@ type GetEntityGetLegacyStuffArgs = reqGetEntityGetLegacyStuff
 
 func newReqGetEntityGetLegacyStuff() *reqGetEntityGetLegacyStuff {
     return (&reqGetEntityGetLegacyStuff{}).
-        SetNumPosNonCompat(0).
+        SetNumNeg2NonCompat(0).
         SetNumNeg1NonCompat(0).
-        SetNumNeg2NonCompat(0)
-}
-
-func (x *reqGetEntityGetLegacyStuff) GetNumPosNonCompat() int64 {
-    return x.NumPos
-}
-
-func (x *reqGetEntityGetLegacyStuff) GetNumPos() int64 {
-    return x.NumPos
-}
-
-func (x *reqGetEntityGetLegacyStuff) GetNumNeg1NonCompat() int64 {
-    return x.NumNeg1
-}
-
-func (x *reqGetEntityGetLegacyStuff) GetNumNeg1() int64 {
-    return x.NumNeg1
+        SetNumPosNonCompat(0)
 }
 
 func (x *reqGetEntityGetLegacyStuff) GetNumNeg2NonCompat() int64 {
@@ -3730,13 +3714,29 @@ func (x *reqGetEntityGetLegacyStuff) GetNumNeg2() int64 {
     return x.NumNeg2
 }
 
-func (x *reqGetEntityGetLegacyStuff) SetNumPosNonCompat(value int64) *reqGetEntityGetLegacyStuff {
-    x.NumPos = value
+func (x *reqGetEntityGetLegacyStuff) GetNumNeg1NonCompat() int64 {
+    return x.NumNeg1
+}
+
+func (x *reqGetEntityGetLegacyStuff) GetNumNeg1() int64 {
+    return x.NumNeg1
+}
+
+func (x *reqGetEntityGetLegacyStuff) GetNumPosNonCompat() int64 {
+    return x.NumPos
+}
+
+func (x *reqGetEntityGetLegacyStuff) GetNumPos() int64 {
+    return x.NumPos
+}
+
+func (x *reqGetEntityGetLegacyStuff) SetNumNeg2NonCompat(value int64) *reqGetEntityGetLegacyStuff {
+    x.NumNeg2 = value
     return x
 }
 
-func (x *reqGetEntityGetLegacyStuff) SetNumPos(value int64) *reqGetEntityGetLegacyStuff {
-    x.NumPos = value
+func (x *reqGetEntityGetLegacyStuff) SetNumNeg2(value int64) *reqGetEntityGetLegacyStuff {
+    x.NumNeg2 = value
     return x
 }
 
@@ -3750,22 +3750,22 @@ func (x *reqGetEntityGetLegacyStuff) SetNumNeg1(value int64) *reqGetEntityGetLeg
     return x
 }
 
-func (x *reqGetEntityGetLegacyStuff) SetNumNeg2NonCompat(value int64) *reqGetEntityGetLegacyStuff {
-    x.NumNeg2 = value
+func (x *reqGetEntityGetLegacyStuff) SetNumPosNonCompat(value int64) *reqGetEntityGetLegacyStuff {
+    x.NumPos = value
     return x
 }
 
-func (x *reqGetEntityGetLegacyStuff) SetNumNeg2(value int64) *reqGetEntityGetLegacyStuff {
-    x.NumNeg2 = value
+func (x *reqGetEntityGetLegacyStuff) SetNumPos(value int64) *reqGetEntityGetLegacyStuff {
+    x.NumPos = value
     return x
 }
 
-func (x *reqGetEntityGetLegacyStuff) writeField1(p thrift.Protocol) error {  // NumPos
-    if err := p.WriteFieldBegin("numPos", thrift.I64, 1); err != nil {
+func (x *reqGetEntityGetLegacyStuff) writeField_2(p thrift.Protocol) error {  // NumNeg2
+    if err := p.WriteFieldBegin("numNeg2", thrift.I64, -2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetNumPosNonCompat()
+    item := x.GetNumNeg2NonCompat()
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -3792,12 +3792,12 @@ func (x *reqGetEntityGetLegacyStuff) writeField_1(p thrift.Protocol) error {  //
     return nil
 }
 
-func (x *reqGetEntityGetLegacyStuff) writeField_2(p thrift.Protocol) error {  // NumNeg2
-    if err := p.WriteFieldBegin("numNeg2", thrift.I64, -2); err != nil {
+func (x *reqGetEntityGetLegacyStuff) writeField1(p thrift.Protocol) error {  // NumPos
+    if err := p.WriteFieldBegin("numPos", thrift.I64, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetNumNeg2NonCompat()
+    item := x.GetNumPosNonCompat()
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -3805,26 +3805,6 @@ func (x *reqGetEntityGetLegacyStuff) writeField_2(p thrift.Protocol) error {  //
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
     }
-    return nil
-}
-
-func (x *reqGetEntityGetLegacyStuff) readField1(p thrift.Protocol) error {  // NumPos
-    result, err := p.ReadI64()
-if err != nil {
-    return err
-}
-
-    x.SetNumPosNonCompat(result)
-    return nil
-}
-
-func (x *reqGetEntityGetLegacyStuff) readField_1(p thrift.Protocol) error {  // NumNeg1
-    result, err := p.ReadI64()
-if err != nil {
-    return err
-}
-
-    x.SetNumNeg1NonCompat(result)
     return nil
 }
 
@@ -3838,16 +3818,36 @@ if err != nil {
     return nil
 }
 
-func (x *reqGetEntityGetLegacyStuff) toString1() string {  // NumPos
-    return fmt.Sprintf("%v", x.GetNumPosNonCompat())
+func (x *reqGetEntityGetLegacyStuff) readField_1(p thrift.Protocol) error {  // NumNeg1
+    result, err := p.ReadI64()
+if err != nil {
+    return err
+}
+
+    x.SetNumNeg1NonCompat(result)
+    return nil
+}
+
+func (x *reqGetEntityGetLegacyStuff) readField1(p thrift.Protocol) error {  // NumPos
+    result, err := p.ReadI64()
+if err != nil {
+    return err
+}
+
+    x.SetNumPosNonCompat(result)
+    return nil
+}
+
+func (x *reqGetEntityGetLegacyStuff) toString_2() string {  // NumNeg2
+    return fmt.Sprintf("%v", x.GetNumNeg2NonCompat())
 }
 
 func (x *reqGetEntityGetLegacyStuff) toString_1() string {  // NumNeg1
     return fmt.Sprintf("%v", x.GetNumNeg1NonCompat())
 }
 
-func (x *reqGetEntityGetLegacyStuff) toString_2() string {  // NumNeg2
-    return fmt.Sprintf("%v", x.GetNumNeg2NonCompat())
+func (x *reqGetEntityGetLegacyStuff) toString1() string {  // NumPos
+    return fmt.Sprintf("%v", x.GetNumPosNonCompat())
 }
 
 
@@ -3862,8 +3862,8 @@ func newReqGetEntityGetLegacyStuffBuilder() *reqGetEntityGetLegacyStuffBuilder {
     }
 }
 
-func (x *reqGetEntityGetLegacyStuffBuilder) NumPos(value int64) *reqGetEntityGetLegacyStuffBuilder {
-    x.obj.NumPos = value
+func (x *reqGetEntityGetLegacyStuffBuilder) NumNeg2(value int64) *reqGetEntityGetLegacyStuffBuilder {
+    x.obj.NumNeg2 = value
     return x
 }
 
@@ -3872,8 +3872,8 @@ func (x *reqGetEntityGetLegacyStuffBuilder) NumNeg1(value int64) *reqGetEntityGe
     return x
 }
 
-func (x *reqGetEntityGetLegacyStuffBuilder) NumNeg2(value int64) *reqGetEntityGetLegacyStuffBuilder {
-    x.obj.NumNeg2 = value
+func (x *reqGetEntityGetLegacyStuffBuilder) NumPos(value int64) *reqGetEntityGetLegacyStuffBuilder {
+    x.obj.NumPos = value
     return x
 }
 
@@ -3887,7 +3887,7 @@ func (x *reqGetEntityGetLegacyStuff) Write(p thrift.Protocol) error {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
-    if err := x.writeField1(p); err != nil {
+    if err := x.writeField_2(p); err != nil {
         return err
     }
 
@@ -3895,7 +3895,7 @@ func (x *reqGetEntityGetLegacyStuff) Write(p thrift.Protocol) error {
         return err
     }
 
-    if err := x.writeField_2(p); err != nil {
+    if err := x.writeField1(p); err != nil {
         return err
     }
 
@@ -3925,10 +3925,10 @@ func (x *reqGetEntityGetLegacyStuff) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 1:  // numPos
+        case -2:  // numNeg2
             expectedType := thrift.Type(thrift.I64)
             if wireType == expectedType {
-                if err := x.readField1(p); err != nil {
+                if err := x.readField_2(p); err != nil {
                    return err
                 }
             } else {
@@ -3947,10 +3947,10 @@ func (x *reqGetEntityGetLegacyStuff) Read(p thrift.Protocol) error {
                     return err
                 }
             }
-        case -2:  // numNeg2
+        case 1:  // numPos
             expectedType := thrift.Type(thrift.I64)
             if wireType == expectedType {
-                if err := x.readField_2(p); err != nil {
+                if err := x.readField1(p); err != nil {
                    return err
                 }
             } else {
@@ -3984,9 +3984,9 @@ func (x *reqGetEntityGetLegacyStuff) String() string {
     var sb strings.Builder
 
     sb.WriteString("reqGetEntityGetLegacyStuff({")
-    sb.WriteString(fmt.Sprintf("NumPos:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("NumNeg2:%s ", x.toString_2()))
     sb.WriteString(fmt.Sprintf("NumNeg1:%s ", x.toString_1()))
-    sb.WriteString(fmt.Sprintf("NumNeg2:%s", x.toString_2()))
+    sb.WriteString(fmt.Sprintf("NumPos:%s", x.toString1()))
     sb.WriteString("})")
 
     return sb.String()

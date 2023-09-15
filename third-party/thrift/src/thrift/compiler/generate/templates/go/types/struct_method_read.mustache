@@ -35,7 +35,7 @@ func (x *{{struct:go_name}}) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        {{#struct:fields}}
+        {{#struct:fields_sorted}}
         case {{field:key}}:  // {{field:name}}
             {{#field:type}}
             expectedType := thrift.Type({{> common/ttype}})
@@ -49,7 +49,7 @@ func (x *{{struct:go_name}}) Read(p thrift.Protocol) error {
                 }
             }
             {{/field:type}}
-        {{/struct:fields}}
+        {{/struct:fields_sorted}}
         default:
             if err := p.Skip(wireType); err != nil {
                 return err

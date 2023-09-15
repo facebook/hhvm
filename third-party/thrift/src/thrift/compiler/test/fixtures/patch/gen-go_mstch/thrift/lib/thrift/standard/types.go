@@ -595,13 +595,13 @@ type TypeName struct {
     StringType *Void `thrift:"stringType,8" json:"stringType,omitempty" db:"stringType"`
     BinaryType *Void `thrift:"binaryType,9" json:"binaryType,omitempty" db:"binaryType"`
     EnumType *TypeUri `thrift:"enumType,10" json:"enumType,omitempty" db:"enumType"`
-    TypedefType *TypeUri `thrift:"typedefType,17" json:"typedefType,omitempty" db:"typedefType"`
     StructType *TypeUri `thrift:"structType,11" json:"structType,omitempty" db:"structType"`
     UnionType *TypeUri `thrift:"unionType,12" json:"unionType,omitempty" db:"unionType"`
     ExceptionType *TypeUri `thrift:"exceptionType,13" json:"exceptionType,omitempty" db:"exceptionType"`
     ListType *Void `thrift:"listType,14" json:"listType,omitempty" db:"listType"`
     SetType *Void `thrift:"setType,15" json:"setType,omitempty" db:"setType"`
     MapType *Void `thrift:"mapType,16" json:"mapType,omitempty" db:"mapType"`
+    TypedefType *TypeUri `thrift:"typedefType,17" json:"typedefType,omitempty" db:"typedefType"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &TypeName{}
@@ -730,18 +730,6 @@ func (x *TypeName) GetEnumType() *TypeUri {
     return x.EnumType
 }
 
-func (x *TypeName) GetTypedefTypeNonCompat() *TypeUri {
-    return x.TypedefType
-}
-
-func (x *TypeName) GetTypedefType() *TypeUri {
-    if !x.IsSetTypedefType() {
-        return nil
-    }
-
-    return x.TypedefType
-}
-
 func (x *TypeName) GetStructTypeNonCompat() *TypeUri {
     return x.StructType
 }
@@ -812,6 +800,18 @@ func (x *TypeName) GetMapType() Void {
     }
 
     return *x.MapType
+}
+
+func (x *TypeName) GetTypedefTypeNonCompat() *TypeUri {
+    return x.TypedefType
+}
+
+func (x *TypeName) GetTypedefType() *TypeUri {
+    if !x.IsSetTypedefType() {
+        return nil
+    }
+
+    return x.TypedefType
 }
 
 func (x *TypeName) SetBoolTypeNonCompat(value Void) *TypeName {
@@ -914,16 +914,6 @@ func (x *TypeName) SetEnumType(value *TypeUri) *TypeName {
     return x
 }
 
-func (x *TypeName) SetTypedefTypeNonCompat(value TypeUri) *TypeName {
-    x.TypedefType = &value
-    return x
-}
-
-func (x *TypeName) SetTypedefType(value *TypeUri) *TypeName {
-    x.TypedefType = value
-    return x
-}
-
 func (x *TypeName) SetStructTypeNonCompat(value TypeUri) *TypeName {
     x.StructType = &value
     return x
@@ -984,6 +974,16 @@ func (x *TypeName) SetMapType(value *Void) *TypeName {
     return x
 }
 
+func (x *TypeName) SetTypedefTypeNonCompat(value TypeUri) *TypeName {
+    x.TypedefType = &value
+    return x
+}
+
+func (x *TypeName) SetTypedefType(value *TypeUri) *TypeName {
+    x.TypedefType = value
+    return x
+}
+
 func (x *TypeName) IsSetBoolType() bool {
     return x.BoolType != nil
 }
@@ -1024,10 +1024,6 @@ func (x *TypeName) IsSetEnumType() bool {
     return x.EnumType != nil
 }
 
-func (x *TypeName) IsSetTypedefType() bool {
-    return x.TypedefType != nil
-}
-
 func (x *TypeName) IsSetStructType() bool {
     return x.StructType != nil
 }
@@ -1050,6 +1046,10 @@ func (x *TypeName) IsSetSetType() bool {
 
 func (x *TypeName) IsSetMapType() bool {
     return x.MapType != nil
+}
+
+func (x *TypeName) IsSetTypedefType() bool {
+    return x.TypedefType != nil
 }
 
 func (x *TypeName) writeField1(p thrift.Protocol) error {  // BoolType
@@ -1252,26 +1252,6 @@ func (x *TypeName) writeField10(p thrift.Protocol) error {  // EnumType
     return nil
 }
 
-func (x *TypeName) writeField17(p thrift.Protocol) error {  // TypedefType
-    if !x.IsSetTypedefType() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("typedefType", thrift.STRUCT, 17); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetTypedefTypeNonCompat()
-    if err := item.Write(p); err != nil {
-    return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
 func (x *TypeName) writeField11(p thrift.Protocol) error {  // StructType
     if !x.IsSetStructType() {
         return nil
@@ -1392,6 +1372,26 @@ func (x *TypeName) writeField16(p thrift.Protocol) error {  // MapType
     return nil
 }
 
+func (x *TypeName) writeField17(p thrift.Protocol) error {  // TypedefType
+    if !x.IsSetTypedefType() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("typedefType", thrift.STRUCT, 17); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetTypedefTypeNonCompat()
+    if err := item.Write(p); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
 func (x *TypeName) readField1(p thrift.Protocol) error {  // BoolType
     enumResult, err := p.ReadI32()
 if err != nil {
@@ -1502,17 +1502,6 @@ if err != nil {
     return nil
 }
 
-func (x *TypeName) readField17(p thrift.Protocol) error {  // TypedefType
-    result := *NewTypeUri()
-err := result.Read(p)
-if err != nil {
-    return err
-}
-
-    x.SetTypedefTypeNonCompat(result)
-    return nil
-}
-
 func (x *TypeName) readField11(p thrift.Protocol) error {  // StructType
     result := *NewTypeUri()
 err := result.Read(p)
@@ -1576,6 +1565,17 @@ if err != nil {
 result := Void(enumResult)
 
     x.SetMapTypeNonCompat(result)
+    return nil
+}
+
+func (x *TypeName) readField17(p thrift.Protocol) error {  // TypedefType
+    result := *NewTypeUri()
+err := result.Read(p)
+if err != nil {
+    return err
+}
+
+    x.SetTypedefTypeNonCompat(result)
     return nil
 }
 
@@ -1646,10 +1646,6 @@ func (x *TypeName) toString10() string {  // EnumType
     return fmt.Sprintf("%v", x.GetEnumTypeNonCompat())
 }
 
-func (x *TypeName) toString17() string {  // TypedefType
-    return fmt.Sprintf("%v", x.GetTypedefTypeNonCompat())
-}
-
 func (x *TypeName) toString11() string {  // StructType
     return fmt.Sprintf("%v", x.GetStructTypeNonCompat())
 }
@@ -1681,6 +1677,10 @@ func (x *TypeName) toString16() string {  // MapType
         return fmt.Sprintf("%v", *x.GetMapTypeNonCompat())
     }
     return fmt.Sprintf("%v", x.GetMapTypeNonCompat())
+}
+
+func (x *TypeName) toString17() string {  // TypedefType
+    return fmt.Sprintf("%v", x.GetTypedefTypeNonCompat())
 }
 
 // Deprecated: Use NewTypeName().GetBoolType() instead.
@@ -1719,17 +1719,6 @@ func (x *TypeName) DefaultGetEnumType() *TypeUri {
         return NewTypeUri()
     }
     return x.EnumType
-}
-
-// Deprecated: Use NewTypeName().GetTypedefType() instead.
-var TypeName_TypedefType_DEFAULT = NewTypeName().GetTypedefType()
-
-// Deprecated: Use NewTypeName().GetTypedefType() instead.
-func (x *TypeName) DefaultGetTypedefType() *TypeUri {
-    if !x.IsSetTypedefType() {
-        return NewTypeUri()
-    }
-    return x.TypedefType
 }
 
 // Deprecated: Use NewTypeName().GetStructType() instead.
@@ -1774,6 +1763,17 @@ var TypeName_SetType_DEFAULT = NewTypeName().GetSetType()
 // Deprecated: Use NewTypeName().GetMapType() instead.
 var TypeName_MapType_DEFAULT = NewTypeName().GetMapType()
 
+// Deprecated: Use NewTypeName().GetTypedefType() instead.
+var TypeName_TypedefType_DEFAULT = NewTypeName().GetTypedefType()
+
+// Deprecated: Use NewTypeName().GetTypedefType() instead.
+func (x *TypeName) DefaultGetTypedefType() *TypeUri {
+    if !x.IsSetTypedefType() {
+        return NewTypeUri()
+    }
+    return x.TypedefType
+}
+
 func (x *TypeName) countSetFields() int {
     count := int(0)
     if (x.IsSetBoolType()) {
@@ -1806,9 +1806,6 @@ func (x *TypeName) countSetFields() int {
     if (x.IsSetEnumType()) {
         count++
     }
-    if (x.IsSetTypedefType()) {
-        count++
-    }
     if (x.IsSetStructType()) {
         count++
     }
@@ -1825,6 +1822,9 @@ func (x *TypeName) countSetFields() int {
         count++
     }
     if (x.IsSetMapType()) {
+        count++
+    }
+    if (x.IsSetTypedefType()) {
         count++
     }
     return count
@@ -1896,11 +1896,6 @@ func (x *TypeNameBuilder) EnumType(value *TypeUri) *TypeNameBuilder {
     return x
 }
 
-func (x *TypeNameBuilder) TypedefType(value *TypeUri) *TypeNameBuilder {
-    x.obj.TypedefType = value
-    return x
-}
-
 func (x *TypeNameBuilder) StructType(value *TypeUri) *TypeNameBuilder {
     x.obj.StructType = value
     return x
@@ -1928,6 +1923,11 @@ func (x *TypeNameBuilder) SetType(value *Void) *TypeNameBuilder {
 
 func (x *TypeNameBuilder) MapType(value *Void) *TypeNameBuilder {
     x.obj.MapType = value
+    return x
+}
+
+func (x *TypeNameBuilder) TypedefType(value *TypeUri) *TypeNameBuilder {
+    x.obj.TypedefType = value
     return x
 }
 
@@ -1984,10 +1984,6 @@ func (x *TypeName) Write(p thrift.Protocol) error {
         return err
     }
 
-    if err := x.writeField17(p); err != nil {
-        return err
-    }
-
     if err := x.writeField11(p); err != nil {
         return err
     }
@@ -2009,6 +2005,10 @@ func (x *TypeName) Write(p thrift.Protocol) error {
     }
 
     if err := x.writeField16(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField17(p); err != nil {
         return err
     }
 
@@ -2148,17 +2148,6 @@ func (x *TypeName) Read(p thrift.Protocol) error {
                     return err
                 }
             }
-        case 17:  // typedefType
-            expectedType := thrift.Type(thrift.STRUCT)
-            if wireType == expectedType {
-                if err := x.readField17(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
-            }
         case 11:  // structType
             expectedType := thrift.Type(thrift.STRUCT)
             if wireType == expectedType {
@@ -2225,6 +2214,17 @@ func (x *TypeName) Read(p thrift.Protocol) error {
                     return err
                 }
             }
+        case 17:  // typedefType
+            expectedType := thrift.Type(thrift.STRUCT)
+            if wireType == expectedType {
+                if err := x.readField17(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
         default:
             if err := p.Skip(wireType); err != nil {
                 return err
@@ -2261,13 +2261,13 @@ func (x *TypeName) String() string {
     sb.WriteString(fmt.Sprintf("StringType:%s ", x.toString8()))
     sb.WriteString(fmt.Sprintf("BinaryType:%s ", x.toString9()))
     sb.WriteString(fmt.Sprintf("EnumType:%s ", x.toString10()))
-    sb.WriteString(fmt.Sprintf("TypedefType:%s ", x.toString17()))
     sb.WriteString(fmt.Sprintf("StructType:%s ", x.toString11()))
     sb.WriteString(fmt.Sprintf("UnionType:%s ", x.toString12()))
     sb.WriteString(fmt.Sprintf("ExceptionType:%s ", x.toString13()))
     sb.WriteString(fmt.Sprintf("ListType:%s ", x.toString14()))
     sb.WriteString(fmt.Sprintf("SetType:%s ", x.toString15()))
-    sb.WriteString(fmt.Sprintf("MapType:%s", x.toString16()))
+    sb.WriteString(fmt.Sprintf("MapType:%s ", x.toString16()))
+    sb.WriteString(fmt.Sprintf("TypedefType:%s", x.toString17()))
     sb.WriteString("})")
 
     return sb.String()

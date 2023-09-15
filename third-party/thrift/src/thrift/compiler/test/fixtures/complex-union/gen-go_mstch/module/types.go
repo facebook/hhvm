@@ -91,9 +91,9 @@ result := mapResult
 
 type ComplexUnion struct {
     IntValue *int64 `thrift:"intValue,1" json:"intValue,omitempty" db:"intValue"`
-    StringValue *string `thrift:"stringValue,5" json:"stringValue,omitempty" db:"stringValue"`
     IntListValue []int64 `thrift:"intListValue,2" json:"intListValue,omitempty" db:"intListValue"`
     StringListValue []string `thrift:"stringListValue,3" json:"stringListValue,omitempty" db:"stringListValue"`
+    StringValue *string `thrift:"stringValue,5" json:"stringValue,omitempty" db:"stringValue"`
     TypedefValue ContainerTypedef `thrift:"typedefValue,9" json:"typedefValue,omitempty" db:"typedefValue"`
     StringRef *string `thrift:"stringRef,14" json:"stringRef,omitempty" db:"stringRef"`
 }
@@ -114,18 +114,6 @@ func (x *ComplexUnion) GetIntValue() int64 {
     }
 
     return *x.IntValue
-}
-
-func (x *ComplexUnion) GetStringValueNonCompat() *string {
-    return x.StringValue
-}
-
-func (x *ComplexUnion) GetStringValue() string {
-    if !x.IsSetStringValue() {
-        return ""
-    }
-
-    return *x.StringValue
 }
 
 func (x *ComplexUnion) GetIntListValueNonCompat() []int64 {
@@ -150,6 +138,18 @@ func (x *ComplexUnion) GetStringListValue() []string {
     }
 
     return x.StringListValue
+}
+
+func (x *ComplexUnion) GetStringValueNonCompat() *string {
+    return x.StringValue
+}
+
+func (x *ComplexUnion) GetStringValue() string {
+    if !x.IsSetStringValue() {
+        return ""
+    }
+
+    return *x.StringValue
 }
 
 func (x *ComplexUnion) GetTypedefValueNonCompat() ContainerTypedef {
@@ -186,16 +186,6 @@ func (x *ComplexUnion) SetIntValue(value *int64) *ComplexUnion {
     return x
 }
 
-func (x *ComplexUnion) SetStringValueNonCompat(value string) *ComplexUnion {
-    x.StringValue = &value
-    return x
-}
-
-func (x *ComplexUnion) SetStringValue(value *string) *ComplexUnion {
-    x.StringValue = value
-    return x
-}
-
 func (x *ComplexUnion) SetIntListValueNonCompat(value []int64) *ComplexUnion {
     x.IntListValue = value
     return x
@@ -213,6 +203,16 @@ func (x *ComplexUnion) SetStringListValueNonCompat(value []string) *ComplexUnion
 
 func (x *ComplexUnion) SetStringListValue(value []string) *ComplexUnion {
     x.StringListValue = value
+    return x
+}
+
+func (x *ComplexUnion) SetStringValueNonCompat(value string) *ComplexUnion {
+    x.StringValue = &value
+    return x
+}
+
+func (x *ComplexUnion) SetStringValue(value *string) *ComplexUnion {
+    x.StringValue = value
     return x
 }
 
@@ -240,16 +240,16 @@ func (x *ComplexUnion) IsSetIntValue() bool {
     return x.IntValue != nil
 }
 
-func (x *ComplexUnion) IsSetStringValue() bool {
-    return x.StringValue != nil
-}
-
 func (x *ComplexUnion) IsSetIntListValue() bool {
     return x.IntListValue != nil
 }
 
 func (x *ComplexUnion) IsSetStringListValue() bool {
     return x.StringListValue != nil
+}
+
+func (x *ComplexUnion) IsSetStringValue() bool {
+    return x.StringValue != nil
 }
 
 func (x *ComplexUnion) IsSetTypedefValue() bool {
@@ -271,26 +271,6 @@ func (x *ComplexUnion) writeField1(p thrift.Protocol) error {  // IntValue
 
     item := *x.GetIntValueNonCompat()
     if err := p.WriteI64(item); err != nil {
-    return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *ComplexUnion) writeField5(p thrift.Protocol) error {  // StringValue
-    if !x.IsSetStringValue() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("stringValue", thrift.STRING, 5); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := *x.GetStringValueNonCompat()
-    if err := p.WriteString(item); err != nil {
     return err
 }
 
@@ -362,6 +342,26 @@ if err := p.WriteListEnd(); err != nil {
     return nil
 }
 
+func (x *ComplexUnion) writeField5(p thrift.Protocol) error {  // StringValue
+    if !x.IsSetStringValue() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("stringValue", thrift.STRING, 5); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := *x.GetStringValueNonCompat()
+    if err := p.WriteString(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
 func (x *ComplexUnion) writeField9(p thrift.Protocol) error {  // TypedefValue
     if !x.IsSetTypedefValue() {
         return nil
@@ -410,16 +410,6 @@ if err != nil {
 }
 
     x.SetIntValueNonCompat(result)
-    return nil
-}
-
-func (x *ComplexUnion) readField5(p thrift.Protocol) error {  // StringValue
-    result, err := p.ReadString()
-if err != nil {
-    return err
-}
-
-    x.SetStringValueNonCompat(result)
     return nil
 }
 
@@ -479,6 +469,16 @@ result := listResult
     return nil
 }
 
+func (x *ComplexUnion) readField5(p thrift.Protocol) error {  // StringValue
+    result, err := p.ReadString()
+if err != nil {
+    return err
+}
+
+    x.SetStringValueNonCompat(result)
+    return nil
+}
+
 func (x *ComplexUnion) readField9(p thrift.Protocol) error {  // TypedefValue
     result, err := ReadContainerTypedef(p)
 if err != nil {
@@ -506,19 +506,19 @@ func (x *ComplexUnion) toString1() string {  // IntValue
     return fmt.Sprintf("%v", x.GetIntValueNonCompat())
 }
 
-func (x *ComplexUnion) toString5() string {  // StringValue
-    if x.IsSetStringValue() {
-        return fmt.Sprintf("%v", *x.GetStringValueNonCompat())
-    }
-    return fmt.Sprintf("%v", x.GetStringValueNonCompat())
-}
-
 func (x *ComplexUnion) toString2() string {  // IntListValue
     return fmt.Sprintf("%v", x.GetIntListValueNonCompat())
 }
 
 func (x *ComplexUnion) toString3() string {  // StringListValue
     return fmt.Sprintf("%v", x.GetStringListValueNonCompat())
+}
+
+func (x *ComplexUnion) toString5() string {  // StringValue
+    if x.IsSetStringValue() {
+        return fmt.Sprintf("%v", *x.GetStringValueNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetStringValueNonCompat())
 }
 
 func (x *ComplexUnion) toString9() string {  // TypedefValue
@@ -546,13 +546,13 @@ func (x *ComplexUnion) countSetFields() int {
     if (x.IsSetIntValue()) {
         count++
     }
-    if (x.IsSetStringValue()) {
-        count++
-    }
     if (x.IsSetIntListValue()) {
         count++
     }
     if (x.IsSetStringListValue()) {
+        count++
+    }
+    if (x.IsSetStringValue()) {
         count++
     }
     if (x.IsSetTypedefValue()) {
@@ -585,11 +585,6 @@ func (x *ComplexUnionBuilder) IntValue(value *int64) *ComplexUnionBuilder {
     return x
 }
 
-func (x *ComplexUnionBuilder) StringValue(value *string) *ComplexUnionBuilder {
-    x.obj.StringValue = value
-    return x
-}
-
 func (x *ComplexUnionBuilder) IntListValue(value []int64) *ComplexUnionBuilder {
     x.obj.IntListValue = value
     return x
@@ -597,6 +592,11 @@ func (x *ComplexUnionBuilder) IntListValue(value []int64) *ComplexUnionBuilder {
 
 func (x *ComplexUnionBuilder) StringListValue(value []string) *ComplexUnionBuilder {
     x.obj.StringListValue = value
+    return x
+}
+
+func (x *ComplexUnionBuilder) StringValue(value *string) *ComplexUnionBuilder {
+    x.obj.StringValue = value
     return x
 }
 
@@ -627,15 +627,15 @@ func (x *ComplexUnion) Write(p thrift.Protocol) error {
         return err
     }
 
-    if err := x.writeField5(p); err != nil {
-        return err
-    }
-
     if err := x.writeField2(p); err != nil {
         return err
     }
 
     if err := x.writeField3(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField5(p); err != nil {
         return err
     }
 
@@ -684,17 +684,6 @@ func (x *ComplexUnion) Read(p thrift.Protocol) error {
                     return err
                 }
             }
-        case 5:  // stringValue
-            expectedType := thrift.Type(thrift.STRING)
-            if wireType == expectedType {
-                if err := x.readField5(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
-            }
         case 2:  // intListValue
             expectedType := thrift.Type(thrift.LIST)
             if wireType == expectedType {
@@ -710,6 +699,17 @@ func (x *ComplexUnion) Read(p thrift.Protocol) error {
             expectedType := thrift.Type(thrift.LIST)
             if wireType == expectedType {
                 if err := x.readField3(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
+        case 5:  // stringValue
+            expectedType := thrift.Type(thrift.STRING)
+            if wireType == expectedType {
+                if err := x.readField5(p); err != nil {
                    return err
                 }
             } else {
@@ -766,9 +766,9 @@ func (x *ComplexUnion) String() string {
 
     sb.WriteString("ComplexUnion({")
     sb.WriteString(fmt.Sprintf("IntValue:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("StringValue:%s ", x.toString5()))
     sb.WriteString(fmt.Sprintf("IntListValue:%s ", x.toString2()))
     sb.WriteString(fmt.Sprintf("StringListValue:%s ", x.toString3()))
+    sb.WriteString(fmt.Sprintf("StringValue:%s ", x.toString5()))
     sb.WriteString(fmt.Sprintf("TypedefValue:%s ", x.toString9()))
     sb.WriteString(fmt.Sprintf("StringRef:%s", x.toString14()))
     sb.WriteString("})")

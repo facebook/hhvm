@@ -3177,7 +3177,6 @@ type FieldLevelTerseStruct struct {
     TerseSetField []int16 `thrift:"terse_set_field,12" json:"terse_set_field" db:"terse_set_field"`
     TerseMapField map[int16]int16 `thrift:"terse_map_field,13" json:"terse_map_field" db:"terse_map_field"`
     TerseStructField *MyStruct `thrift:"terse_struct_field,14" json:"terse_struct_field" db:"terse_struct_field"`
-    TerseUnionField *MyUnion `thrift:"terse_union_field,29" json:"terse_union_field" db:"terse_union_field"`
     BoolField bool `thrift:"bool_field,15" json:"bool_field" db:"bool_field"`
     ByteField int8 `thrift:"byte_field,16" json:"byte_field" db:"byte_field"`
     ShortField int16 `thrift:"short_field,17" json:"short_field" db:"short_field"`
@@ -3192,6 +3191,7 @@ type FieldLevelTerseStruct struct {
     SetField []int16 `thrift:"set_field,26" json:"set_field" db:"set_field"`
     MapField map[int16]int16 `thrift:"map_field,27" json:"map_field" db:"map_field"`
     StructField *MyStruct `thrift:"struct_field,28" json:"struct_field" db:"struct_field"`
+    TerseUnionField *MyUnion `thrift:"terse_union_field,29" json:"terse_union_field" db:"terse_union_field"`
     UnionField *MyUnion `thrift:"union_field,30" json:"union_field" db:"union_field"`
 }
 // Compile time interface enforcer
@@ -3213,7 +3213,6 @@ func NewFieldLevelTerseStruct() *FieldLevelTerseStruct {
         SetTerseSetFieldNonCompat(nil).
         SetTerseMapFieldNonCompat(nil).
         SetTerseStructFieldNonCompat(*NewMyStruct()).
-        SetTerseUnionFieldNonCompat(*NewMyUnion()).
         SetBoolFieldNonCompat(false).
         SetByteFieldNonCompat(0).
         SetShortFieldNonCompat(0).
@@ -3228,6 +3227,7 @@ func NewFieldLevelTerseStruct() *FieldLevelTerseStruct {
         SetSetFieldNonCompat(nil).
         SetMapFieldNonCompat(nil).
         SetStructFieldNonCompat(*NewMyStruct()).
+        SetTerseUnionFieldNonCompat(*NewMyUnion()).
         SetUnionFieldNonCompat(*NewMyUnion())
 }
 
@@ -3363,18 +3363,6 @@ func (x *FieldLevelTerseStruct) GetTerseStructField() *MyStruct {
     return x.TerseStructField
 }
 
-func (x *FieldLevelTerseStruct) GetTerseUnionFieldNonCompat() *MyUnion {
-    return x.TerseUnionField
-}
-
-func (x *FieldLevelTerseStruct) GetTerseUnionField() *MyUnion {
-    if !x.IsSetTerseUnionField() {
-        return nil
-    }
-
-    return x.TerseUnionField
-}
-
 func (x *FieldLevelTerseStruct) GetBoolFieldNonCompat() bool {
     return x.BoolField
 }
@@ -3505,6 +3493,18 @@ func (x *FieldLevelTerseStruct) GetStructField() *MyStruct {
     }
 
     return x.StructField
+}
+
+func (x *FieldLevelTerseStruct) GetTerseUnionFieldNonCompat() *MyUnion {
+    return x.TerseUnionField
+}
+
+func (x *FieldLevelTerseStruct) GetTerseUnionField() *MyUnion {
+    if !x.IsSetTerseUnionField() {
+        return nil
+    }
+
+    return x.TerseUnionField
 }
 
 func (x *FieldLevelTerseStruct) GetUnionFieldNonCompat() *MyUnion {
@@ -3659,16 +3659,6 @@ func (x *FieldLevelTerseStruct) SetTerseStructField(value *MyStruct) *FieldLevel
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetTerseUnionFieldNonCompat(value MyUnion) *FieldLevelTerseStruct {
-    x.TerseUnionField = &value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetTerseUnionField(value *MyUnion) *FieldLevelTerseStruct {
-    x.TerseUnionField = value
-    return x
-}
-
 func (x *FieldLevelTerseStruct) SetBoolFieldNonCompat(value bool) *FieldLevelTerseStruct {
     x.BoolField = value
     return x
@@ -3809,6 +3799,16 @@ func (x *FieldLevelTerseStruct) SetStructField(value *MyStruct) *FieldLevelTerse
     return x
 }
 
+func (x *FieldLevelTerseStruct) SetTerseUnionFieldNonCompat(value MyUnion) *FieldLevelTerseStruct {
+    x.TerseUnionField = &value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetTerseUnionField(value *MyUnion) *FieldLevelTerseStruct {
+    x.TerseUnionField = value
+    return x
+}
+
 func (x *FieldLevelTerseStruct) SetUnionFieldNonCompat(value MyUnion) *FieldLevelTerseStruct {
     x.UnionField = &value
     return x
@@ -3839,10 +3839,6 @@ func (x *FieldLevelTerseStruct) IsSetTerseStructField() bool {
     return x.TerseStructField != nil
 }
 
-func (x *FieldLevelTerseStruct) IsSetTerseUnionField() bool {
-    return x.TerseUnionField != nil
-}
-
 func (x *FieldLevelTerseStruct) IsSetBinaryField() bool {
     return x.BinaryField != nil
 }
@@ -3861,6 +3857,10 @@ func (x *FieldLevelTerseStruct) IsSetMapField() bool {
 
 func (x *FieldLevelTerseStruct) IsSetStructField() bool {
     return x.StructField != nil
+}
+
+func (x *FieldLevelTerseStruct) IsSetTerseUnionField() bool {
+    return x.TerseUnionField != nil
 }
 
 func (x *FieldLevelTerseStruct) IsSetUnionField() bool {
@@ -4141,26 +4141,6 @@ func (x *FieldLevelTerseStruct) writeField14(p thrift.Protocol) error {  // Ters
     }
 
     item := x.GetTerseStructFieldNonCompat()
-    if err := item.Write(p); err != nil {
-    return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *FieldLevelTerseStruct) writeField29(p thrift.Protocol) error {  // TerseUnionField
-    if !x.IsSetTerseUnionField() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("terse_union_field", thrift.STRUCT, 29); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetTerseUnionFieldNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -4455,6 +4435,26 @@ func (x *FieldLevelTerseStruct) writeField28(p thrift.Protocol) error {  // Stru
     return nil
 }
 
+func (x *FieldLevelTerseStruct) writeField29(p thrift.Protocol) error {  // TerseUnionField
+    if !x.IsSetTerseUnionField() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("terse_union_field", thrift.STRUCT, 29); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetTerseUnionFieldNonCompat()
+    if err := item.Write(p); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
 func (x *FieldLevelTerseStruct) writeField30(p thrift.Protocol) error {  // UnionField
     if !x.IsSetUnionField() {
         return nil
@@ -4682,17 +4682,6 @@ if err != nil {
     return nil
 }
 
-func (x *FieldLevelTerseStruct) readField29(p thrift.Protocol) error {  // TerseUnionField
-    result := *NewMyUnion()
-err := result.Read(p)
-if err != nil {
-    return err
-}
-
-    x.SetTerseUnionFieldNonCompat(result)
-    return nil
-}
-
 func (x *FieldLevelTerseStruct) readField15(p thrift.Protocol) error {  // BoolField
     result, err := p.ReadBool()
 if err != nil {
@@ -4900,6 +4889,17 @@ if err != nil {
     return nil
 }
 
+func (x *FieldLevelTerseStruct) readField29(p thrift.Protocol) error {  // TerseUnionField
+    result := *NewMyUnion()
+err := result.Read(p)
+if err != nil {
+    return err
+}
+
+    x.SetTerseUnionFieldNonCompat(result)
+    return nil
+}
+
 func (x *FieldLevelTerseStruct) readField30(p thrift.Protocol) error {  // UnionField
     result := *NewMyUnion()
 err := result.Read(p)
@@ -4967,10 +4967,6 @@ func (x *FieldLevelTerseStruct) toString14() string {  // TerseStructField
     return fmt.Sprintf("%v", x.GetTerseStructFieldNonCompat())
 }
 
-func (x *FieldLevelTerseStruct) toString29() string {  // TerseUnionField
-    return fmt.Sprintf("%v", x.GetTerseUnionFieldNonCompat())
-}
-
 func (x *FieldLevelTerseStruct) toString15() string {  // BoolField
     return fmt.Sprintf("%v", x.GetBoolFieldNonCompat())
 }
@@ -5027,6 +5023,10 @@ func (x *FieldLevelTerseStruct) toString28() string {  // StructField
     return fmt.Sprintf("%v", x.GetStructFieldNonCompat())
 }
 
+func (x *FieldLevelTerseStruct) toString29() string {  // TerseUnionField
+    return fmt.Sprintf("%v", x.GetTerseUnionFieldNonCompat())
+}
+
 func (x *FieldLevelTerseStruct) toString30() string {  // UnionField
     return fmt.Sprintf("%v", x.GetUnionFieldNonCompat())
 }
@@ -5042,17 +5042,6 @@ func (x *FieldLevelTerseStruct) DefaultGetTerseStructField() *MyStruct {
     return x.TerseStructField
 }
 
-// Deprecated: Use NewFieldLevelTerseStruct().GetTerseUnionField() instead.
-var FieldLevelTerseStruct_TerseUnionField_DEFAULT = NewFieldLevelTerseStruct().GetTerseUnionField()
-
-// Deprecated: Use NewFieldLevelTerseStruct().GetTerseUnionField() instead.
-func (x *FieldLevelTerseStruct) DefaultGetTerseUnionField() *MyUnion {
-    if !x.IsSetTerseUnionField() {
-        return NewMyUnion()
-    }
-    return x.TerseUnionField
-}
-
 // Deprecated: Use NewFieldLevelTerseStruct().GetStructField() instead.
 var FieldLevelTerseStruct_StructField_DEFAULT = NewFieldLevelTerseStruct().GetStructField()
 
@@ -5062,6 +5051,17 @@ func (x *FieldLevelTerseStruct) DefaultGetStructField() *MyStruct {
         return NewMyStruct()
     }
     return x.StructField
+}
+
+// Deprecated: Use NewFieldLevelTerseStruct().GetTerseUnionField() instead.
+var FieldLevelTerseStruct_TerseUnionField_DEFAULT = NewFieldLevelTerseStruct().GetTerseUnionField()
+
+// Deprecated: Use NewFieldLevelTerseStruct().GetTerseUnionField() instead.
+func (x *FieldLevelTerseStruct) DefaultGetTerseUnionField() *MyUnion {
+    if !x.IsSetTerseUnionField() {
+        return NewMyUnion()
+    }
+    return x.TerseUnionField
 }
 
 // Deprecated: Use NewFieldLevelTerseStruct().GetUnionField() instead.
@@ -5157,11 +5157,6 @@ func (x *FieldLevelTerseStructBuilder) TerseStructField(value *MyStruct) *FieldL
     return x
 }
 
-func (x *FieldLevelTerseStructBuilder) TerseUnionField(value *MyUnion) *FieldLevelTerseStructBuilder {
-    x.obj.TerseUnionField = value
-    return x
-}
-
 func (x *FieldLevelTerseStructBuilder) BoolField(value bool) *FieldLevelTerseStructBuilder {
     x.obj.BoolField = value
     return x
@@ -5229,6 +5224,11 @@ func (x *FieldLevelTerseStructBuilder) MapField(value map[int16]int16) *FieldLev
 
 func (x *FieldLevelTerseStructBuilder) StructField(value *MyStruct) *FieldLevelTerseStructBuilder {
     x.obj.StructField = value
+    return x
+}
+
+func (x *FieldLevelTerseStructBuilder) TerseUnionField(value *MyUnion) *FieldLevelTerseStructBuilder {
+    x.obj.TerseUnionField = value
     return x
 }
 
@@ -5303,10 +5303,6 @@ func (x *FieldLevelTerseStruct) Write(p thrift.Protocol) error {
         return err
     }
 
-    if err := x.writeField29(p); err != nil {
-        return err
-    }
-
     if err := x.writeField15(p); err != nil {
         return err
     }
@@ -5360,6 +5356,10 @@ func (x *FieldLevelTerseStruct) Write(p thrift.Protocol) error {
     }
 
     if err := x.writeField28(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField29(p); err != nil {
         return err
     }
 
@@ -5547,17 +5547,6 @@ func (x *FieldLevelTerseStruct) Read(p thrift.Protocol) error {
                     return err
                 }
             }
-        case 29:  // terse_union_field
-            expectedType := thrift.Type(thrift.STRUCT)
-            if wireType == expectedType {
-                if err := x.readField29(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
-            }
         case 15:  // bool_field
             expectedType := thrift.Type(thrift.BOOL)
             if wireType == expectedType {
@@ -5712,6 +5701,17 @@ func (x *FieldLevelTerseStruct) Read(p thrift.Protocol) error {
                     return err
                 }
             }
+        case 29:  // terse_union_field
+            expectedType := thrift.Type(thrift.STRUCT)
+            if wireType == expectedType {
+                if err := x.readField29(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
         case 30:  // union_field
             expectedType := thrift.Type(thrift.STRUCT)
             if wireType == expectedType {
@@ -5763,7 +5763,6 @@ func (x *FieldLevelTerseStruct) String() string {
     sb.WriteString(fmt.Sprintf("TerseSetField:%s ", x.toString12()))
     sb.WriteString(fmt.Sprintf("TerseMapField:%s ", x.toString13()))
     sb.WriteString(fmt.Sprintf("TerseStructField:%s ", x.toString14()))
-    sb.WriteString(fmt.Sprintf("TerseUnionField:%s ", x.toString29()))
     sb.WriteString(fmt.Sprintf("BoolField:%s ", x.toString15()))
     sb.WriteString(fmt.Sprintf("ByteField:%s ", x.toString16()))
     sb.WriteString(fmt.Sprintf("ShortField:%s ", x.toString17()))
@@ -5778,6 +5777,7 @@ func (x *FieldLevelTerseStruct) String() string {
     sb.WriteString(fmt.Sprintf("SetField:%s ", x.toString26()))
     sb.WriteString(fmt.Sprintf("MapField:%s ", x.toString27()))
     sb.WriteString(fmt.Sprintf("StructField:%s ", x.toString28()))
+    sb.WriteString(fmt.Sprintf("TerseUnionField:%s ", x.toString29()))
     sb.WriteString(fmt.Sprintf("UnionField:%s", x.toString30()))
     sb.WriteString("})")
 

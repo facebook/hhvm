@@ -22,7 +22,7 @@
 func {{struct:go_qualified_new_func}}() *{{struct:go_name}} {
     return (&{{struct:go_name}}{}){{!
       }}{{^struct:union?}}{{!
-      }}{{#struct:fields}}{{!
+      }}{{#struct:fields_sorted}}{{!
 
         // Fields with given default values.
         }}{{#field:value}}.
@@ -47,7 +47,7 @@ func {{struct:go_qualified_new_func}}() *{{struct:go_name}} {
         }}){{/field:optional?}}{{!
         }}{{/field:value}}{{!
 
-      }}{{/struct:fields}}{{!
+      }}{{/struct:fields_sorted}}{{!
       }}{{/struct:union?}}
 }
 {{!newline}}

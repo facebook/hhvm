@@ -1096,38 +1096,38 @@ func (x *MyUnion) String() string {
 }
 
 type MyStruct struct {
-    BoolVal bool `thrift:"boolVal,-1" json:"boolVal" db:"boolVal"`
-    ByteVal int8 `thrift:"byteVal,-2" json:"byteVal" db:"byteVal"`
-    I16Val int16 `thrift:"i16Val,-3" json:"i16Val" db:"i16Val"`
-    I32Val int32 `thrift:"i32Val,-4" json:"i32Val" db:"i32Val"`
-    I64Val int64 `thrift:"i64Val,-5" json:"i64Val" db:"i64Val"`
-    FloatVal float32 `thrift:"floatVal,-6" json:"floatVal" db:"floatVal"`
-    DoubleVal float64 `thrift:"doubleVal,-7" json:"doubleVal" db:"doubleVal"`
-    StringVal string `thrift:"stringVal,-8" json:"stringVal" db:"stringVal"`
-    BinaryVal []byte `thrift:"binaryVal,-9" json:"binaryVal" db:"binaryVal"`
-    EnumVal MyEnum `thrift:"enumVal,-10" json:"enumVal" db:"enumVal"`
-    StructVal *MyData `thrift:"structVal,-11" json:"structVal" db:"structVal"`
-    UnionVal *MyUnion `thrift:"unionVal,-12" json:"unionVal" db:"unionVal"`
-    LateStructVal *LateDefStruct `thrift:"lateStructVal,-13" json:"lateStructVal" db:"lateStructVal"`
-    OptBoolVal *bool `thrift:"optBoolVal,-14,optional" json:"optBoolVal,omitempty" db:"optBoolVal"`
-    OptByteVal *int8 `thrift:"optByteVal,-15,optional" json:"optByteVal,omitempty" db:"optByteVal"`
-    OptI16Val *int16 `thrift:"optI16Val,-16,optional" json:"optI16Val,omitempty" db:"optI16Val"`
-    OptI32Val *int32 `thrift:"optI32Val,-17,optional" json:"optI32Val,omitempty" db:"optI32Val"`
-    OptI64Val *int64 `thrift:"optI64Val,-18,optional" json:"optI64Val,omitempty" db:"optI64Val"`
-    OptFloatVal *float32 `thrift:"optFloatVal,-19,optional" json:"optFloatVal,omitempty" db:"optFloatVal"`
-    OptDoubleVal *float64 `thrift:"optDoubleVal,-20,optional" json:"optDoubleVal,omitempty" db:"optDoubleVal"`
-    OptStringVal *string `thrift:"optStringVal,-21,optional" json:"optStringVal,omitempty" db:"optStringVal"`
-    OptBinaryVal []byte `thrift:"optBinaryVal,-22,optional" json:"optBinaryVal,omitempty" db:"optBinaryVal"`
-    OptEnumVal *MyEnum `thrift:"optEnumVal,-23,optional" json:"optEnumVal,omitempty" db:"optEnumVal"`
-    OptStructVal *MyData `thrift:"optStructVal,-24,optional" json:"optStructVal,omitempty" db:"optStructVal"`
-    OptLateStructVal *LateDefStruct `thrift:"optLateStructVal,-25,optional" json:"optLateStructVal,omitempty" db:"optLateStructVal"`
-    OptListVal []int16 `thrift:"optListVal,-26,optional" json:"optListVal,omitempty" db:"optListVal"`
-    OptSetVal []string `thrift:"optSetVal,-27,optional" json:"optSetVal,omitempty" db:"optSetVal"`
-    OptMapVal map[string]string `thrift:"optMapVal,-28,optional" json:"optMapVal,omitempty" db:"optMapVal"`
-    ListMap []map[string]int32 `thrift:"listMap,-29" json:"listMap" db:"listMap"`
-    MapMap map[string]map[string]int32 `thrift:"mapMap,-30" json:"mapMap" db:"mapMap"`
-    I32WithCustomDefault int32 `thrift:"i32WithCustomDefault,-31" json:"i32WithCustomDefault" db:"i32WithCustomDefault"`
     StructWithCustomDefault *MyDataWithCustomDefault `thrift:"structWithCustomDefault,-32" json:"structWithCustomDefault" db:"structWithCustomDefault"`
+    I32WithCustomDefault int32 `thrift:"i32WithCustomDefault,-31" json:"i32WithCustomDefault" db:"i32WithCustomDefault"`
+    MapMap map[string]map[string]int32 `thrift:"mapMap,-30" json:"mapMap" db:"mapMap"`
+    ListMap []map[string]int32 `thrift:"listMap,-29" json:"listMap" db:"listMap"`
+    OptMapVal map[string]string `thrift:"optMapVal,-28,optional" json:"optMapVal,omitempty" db:"optMapVal"`
+    OptSetVal []string `thrift:"optSetVal,-27,optional" json:"optSetVal,omitempty" db:"optSetVal"`
+    OptListVal []int16 `thrift:"optListVal,-26,optional" json:"optListVal,omitempty" db:"optListVal"`
+    OptLateStructVal *LateDefStruct `thrift:"optLateStructVal,-25,optional" json:"optLateStructVal,omitempty" db:"optLateStructVal"`
+    OptStructVal *MyData `thrift:"optStructVal,-24,optional" json:"optStructVal,omitempty" db:"optStructVal"`
+    OptEnumVal *MyEnum `thrift:"optEnumVal,-23,optional" json:"optEnumVal,omitempty" db:"optEnumVal"`
+    OptBinaryVal []byte `thrift:"optBinaryVal,-22,optional" json:"optBinaryVal,omitempty" db:"optBinaryVal"`
+    OptStringVal *string `thrift:"optStringVal,-21,optional" json:"optStringVal,omitempty" db:"optStringVal"`
+    OptDoubleVal *float64 `thrift:"optDoubleVal,-20,optional" json:"optDoubleVal,omitempty" db:"optDoubleVal"`
+    OptFloatVal *float32 `thrift:"optFloatVal,-19,optional" json:"optFloatVal,omitempty" db:"optFloatVal"`
+    OptI64Val *int64 `thrift:"optI64Val,-18,optional" json:"optI64Val,omitempty" db:"optI64Val"`
+    OptI32Val *int32 `thrift:"optI32Val,-17,optional" json:"optI32Val,omitempty" db:"optI32Val"`
+    OptI16Val *int16 `thrift:"optI16Val,-16,optional" json:"optI16Val,omitempty" db:"optI16Val"`
+    OptByteVal *int8 `thrift:"optByteVal,-15,optional" json:"optByteVal,omitempty" db:"optByteVal"`
+    OptBoolVal *bool `thrift:"optBoolVal,-14,optional" json:"optBoolVal,omitempty" db:"optBoolVal"`
+    LateStructVal *LateDefStruct `thrift:"lateStructVal,-13" json:"lateStructVal" db:"lateStructVal"`
+    UnionVal *MyUnion `thrift:"unionVal,-12" json:"unionVal" db:"unionVal"`
+    StructVal *MyData `thrift:"structVal,-11" json:"structVal" db:"structVal"`
+    EnumVal MyEnum `thrift:"enumVal,-10" json:"enumVal" db:"enumVal"`
+    BinaryVal []byte `thrift:"binaryVal,-9" json:"binaryVal" db:"binaryVal"`
+    StringVal string `thrift:"stringVal,-8" json:"stringVal" db:"stringVal"`
+    DoubleVal float64 `thrift:"doubleVal,-7" json:"doubleVal" db:"doubleVal"`
+    FloatVal float32 `thrift:"floatVal,-6" json:"floatVal" db:"floatVal"`
+    I64Val int64 `thrift:"i64Val,-5" json:"i64Val" db:"i64Val"`
+    I32Val int32 `thrift:"i32Val,-4" json:"i32Val" db:"i32Val"`
+    I16Val int16 `thrift:"i16Val,-3" json:"i16Val" db:"i16Val"`
+    ByteVal int8 `thrift:"byteVal,-2" json:"byteVal" db:"byteVal"`
+    BoolVal bool `thrift:"boolVal,-1" json:"boolVal" db:"boolVal"`
     StructWithFieldCustomDefault *MyData `thrift:"structWithFieldCustomDefault,1" json:"structWithFieldCustomDefault" db:"structWithFieldCustomDefault"`
 }
 // Compile time interface enforcer
@@ -1135,360 +1135,28 @@ var _ thrift.Struct = &MyStruct{}
 
 func NewMyStruct() *MyStruct {
     return (&MyStruct{}).
-        SetBoolValNonCompat(false).
-        SetByteValNonCompat(0).
-        SetI16ValNonCompat(0).
-        SetI32ValNonCompat(0).
-        SetI64ValNonCompat(0).
-        SetFloatValNonCompat(0.0).
-        SetDoubleValNonCompat(0.0).
-        SetStringValNonCompat("").
-        SetBinaryValNonCompat([]byte("")).
-        SetEnumValNonCompat(0).
-        SetStructValNonCompat(*NewMyData()).
-        SetUnionValNonCompat(*NewMyUnion()).
-        SetLateStructValNonCompat(*NewLateDefStruct()).
-        SetListMapNonCompat(nil).
-        SetMapMapNonCompat(nil).
-        SetI32WithCustomDefaultNonCompat(1).
         SetStructWithCustomDefaultNonCompat(*NewMyDataWithCustomDefault()).
+        SetI32WithCustomDefaultNonCompat(1).
+        SetMapMapNonCompat(nil).
+        SetListMapNonCompat(nil).
+        SetLateStructValNonCompat(*NewLateDefStruct()).
+        SetUnionValNonCompat(*NewMyUnion()).
+        SetStructValNonCompat(*NewMyData()).
+        SetEnumValNonCompat(0).
+        SetBinaryValNonCompat([]byte("")).
+        SetStringValNonCompat("").
+        SetDoubleValNonCompat(0.0).
+        SetFloatValNonCompat(0.0).
+        SetI64ValNonCompat(0).
+        SetI32ValNonCompat(0).
+        SetI16ValNonCompat(0).
+        SetByteValNonCompat(0).
+        SetBoolValNonCompat(false).
         SetStructWithFieldCustomDefaultNonCompat(
               *NewMyData().
     SetData1NonCompat("1").
     SetData2NonCompat(2),
           )
-}
-
-func (x *MyStruct) GetBoolValNonCompat() bool {
-    return x.BoolVal
-}
-
-func (x *MyStruct) GetBoolVal() bool {
-    return x.BoolVal
-}
-
-func (x *MyStruct) GetByteValNonCompat() int8 {
-    return x.ByteVal
-}
-
-func (x *MyStruct) GetByteVal() int8 {
-    return x.ByteVal
-}
-
-func (x *MyStruct) GetI16ValNonCompat() int16 {
-    return x.I16Val
-}
-
-func (x *MyStruct) GetI16Val() int16 {
-    return x.I16Val
-}
-
-func (x *MyStruct) GetI32ValNonCompat() int32 {
-    return x.I32Val
-}
-
-func (x *MyStruct) GetI32Val() int32 {
-    return x.I32Val
-}
-
-func (x *MyStruct) GetI64ValNonCompat() int64 {
-    return x.I64Val
-}
-
-func (x *MyStruct) GetI64Val() int64 {
-    return x.I64Val
-}
-
-func (x *MyStruct) GetFloatValNonCompat() float32 {
-    return x.FloatVal
-}
-
-func (x *MyStruct) GetFloatVal() float32 {
-    return x.FloatVal
-}
-
-func (x *MyStruct) GetDoubleValNonCompat() float64 {
-    return x.DoubleVal
-}
-
-func (x *MyStruct) GetDoubleVal() float64 {
-    return x.DoubleVal
-}
-
-func (x *MyStruct) GetStringValNonCompat() string {
-    return x.StringVal
-}
-
-func (x *MyStruct) GetStringVal() string {
-    return x.StringVal
-}
-
-func (x *MyStruct) GetBinaryValNonCompat() []byte {
-    return x.BinaryVal
-}
-
-func (x *MyStruct) GetBinaryVal() []byte {
-    if !x.IsSetBinaryVal() {
-        return []byte("")
-    }
-
-    return x.BinaryVal
-}
-
-func (x *MyStruct) GetEnumValNonCompat() MyEnum {
-    return x.EnumVal
-}
-
-func (x *MyStruct) GetEnumVal() MyEnum {
-    return x.EnumVal
-}
-
-func (x *MyStruct) GetStructValNonCompat() *MyData {
-    return x.StructVal
-}
-
-func (x *MyStruct) GetStructVal() *MyData {
-    if !x.IsSetStructVal() {
-        return nil
-    }
-
-    return x.StructVal
-}
-
-func (x *MyStruct) GetUnionValNonCompat() *MyUnion {
-    return x.UnionVal
-}
-
-func (x *MyStruct) GetUnionVal() *MyUnion {
-    if !x.IsSetUnionVal() {
-        return nil
-    }
-
-    return x.UnionVal
-}
-
-func (x *MyStruct) GetLateStructValNonCompat() *LateDefStruct {
-    return x.LateStructVal
-}
-
-func (x *MyStruct) GetLateStructVal() *LateDefStruct {
-    if !x.IsSetLateStructVal() {
-        return nil
-    }
-
-    return x.LateStructVal
-}
-
-func (x *MyStruct) GetOptBoolValNonCompat() *bool {
-    return x.OptBoolVal
-}
-
-func (x *MyStruct) GetOptBoolVal() bool {
-    if !x.IsSetOptBoolVal() {
-        return false
-    }
-
-    return *x.OptBoolVal
-}
-
-func (x *MyStruct) GetOptByteValNonCompat() *int8 {
-    return x.OptByteVal
-}
-
-func (x *MyStruct) GetOptByteVal() int8 {
-    if !x.IsSetOptByteVal() {
-        return 0
-    }
-
-    return *x.OptByteVal
-}
-
-func (x *MyStruct) GetOptI16ValNonCompat() *int16 {
-    return x.OptI16Val
-}
-
-func (x *MyStruct) GetOptI16Val() int16 {
-    if !x.IsSetOptI16Val() {
-        return 0
-    }
-
-    return *x.OptI16Val
-}
-
-func (x *MyStruct) GetOptI32ValNonCompat() *int32 {
-    return x.OptI32Val
-}
-
-func (x *MyStruct) GetOptI32Val() int32 {
-    if !x.IsSetOptI32Val() {
-        return 0
-    }
-
-    return *x.OptI32Val
-}
-
-func (x *MyStruct) GetOptI64ValNonCompat() *int64 {
-    return x.OptI64Val
-}
-
-func (x *MyStruct) GetOptI64Val() int64 {
-    if !x.IsSetOptI64Val() {
-        return 0
-    }
-
-    return *x.OptI64Val
-}
-
-func (x *MyStruct) GetOptFloatValNonCompat() *float32 {
-    return x.OptFloatVal
-}
-
-func (x *MyStruct) GetOptFloatVal() float32 {
-    if !x.IsSetOptFloatVal() {
-        return 0.0
-    }
-
-    return *x.OptFloatVal
-}
-
-func (x *MyStruct) GetOptDoubleValNonCompat() *float64 {
-    return x.OptDoubleVal
-}
-
-func (x *MyStruct) GetOptDoubleVal() float64 {
-    if !x.IsSetOptDoubleVal() {
-        return 0.0
-    }
-
-    return *x.OptDoubleVal
-}
-
-func (x *MyStruct) GetOptStringValNonCompat() *string {
-    return x.OptStringVal
-}
-
-func (x *MyStruct) GetOptStringVal() string {
-    if !x.IsSetOptStringVal() {
-        return ""
-    }
-
-    return *x.OptStringVal
-}
-
-func (x *MyStruct) GetOptBinaryValNonCompat() []byte {
-    return x.OptBinaryVal
-}
-
-func (x *MyStruct) GetOptBinaryVal() []byte {
-    if !x.IsSetOptBinaryVal() {
-        return []byte("")
-    }
-
-    return x.OptBinaryVal
-}
-
-func (x *MyStruct) GetOptEnumValNonCompat() *MyEnum {
-    return x.OptEnumVal
-}
-
-func (x *MyStruct) GetOptEnumVal() MyEnum {
-    if !x.IsSetOptEnumVal() {
-        return 0
-    }
-
-    return *x.OptEnumVal
-}
-
-func (x *MyStruct) GetOptStructValNonCompat() *MyData {
-    return x.OptStructVal
-}
-
-func (x *MyStruct) GetOptStructVal() *MyData {
-    if !x.IsSetOptStructVal() {
-        return nil
-    }
-
-    return x.OptStructVal
-}
-
-func (x *MyStruct) GetOptLateStructValNonCompat() *LateDefStruct {
-    return x.OptLateStructVal
-}
-
-func (x *MyStruct) GetOptLateStructVal() *LateDefStruct {
-    if !x.IsSetOptLateStructVal() {
-        return nil
-    }
-
-    return x.OptLateStructVal
-}
-
-func (x *MyStruct) GetOptListValNonCompat() []int16 {
-    return x.OptListVal
-}
-
-func (x *MyStruct) GetOptListVal() []int16 {
-    if !x.IsSetOptListVal() {
-        return nil
-    }
-
-    return x.OptListVal
-}
-
-func (x *MyStruct) GetOptSetValNonCompat() []string {
-    return x.OptSetVal
-}
-
-func (x *MyStruct) GetOptSetVal() []string {
-    if !x.IsSetOptSetVal() {
-        return nil
-    }
-
-    return x.OptSetVal
-}
-
-func (x *MyStruct) GetOptMapValNonCompat() map[string]string {
-    return x.OptMapVal
-}
-
-func (x *MyStruct) GetOptMapVal() map[string]string {
-    if !x.IsSetOptMapVal() {
-        return nil
-    }
-
-    return x.OptMapVal
-}
-
-func (x *MyStruct) GetListMapNonCompat() []map[string]int32 {
-    return x.ListMap
-}
-
-func (x *MyStruct) GetListMap() []map[string]int32 {
-    if !x.IsSetListMap() {
-        return nil
-    }
-
-    return x.ListMap
-}
-
-func (x *MyStruct) GetMapMapNonCompat() map[string]map[string]int32 {
-    return x.MapMap
-}
-
-func (x *MyStruct) GetMapMap() map[string]map[string]int32 {
-    if !x.IsSetMapMap() {
-        return nil
-    }
-
-    return x.MapMap
-}
-
-func (x *MyStruct) GetI32WithCustomDefaultNonCompat() int32 {
-    return x.I32WithCustomDefault
-}
-
-func (x *MyStruct) GetI32WithCustomDefault() int32 {
-    return x.I32WithCustomDefault
 }
 
 func (x *MyStruct) GetStructWithCustomDefaultNonCompat() *MyDataWithCustomDefault {
@@ -1503,6 +1171,338 @@ func (x *MyStruct) GetStructWithCustomDefault() *MyDataWithCustomDefault {
     return x.StructWithCustomDefault
 }
 
+func (x *MyStruct) GetI32WithCustomDefaultNonCompat() int32 {
+    return x.I32WithCustomDefault
+}
+
+func (x *MyStruct) GetI32WithCustomDefault() int32 {
+    return x.I32WithCustomDefault
+}
+
+func (x *MyStruct) GetMapMapNonCompat() map[string]map[string]int32 {
+    return x.MapMap
+}
+
+func (x *MyStruct) GetMapMap() map[string]map[string]int32 {
+    if !x.IsSetMapMap() {
+        return nil
+    }
+
+    return x.MapMap
+}
+
+func (x *MyStruct) GetListMapNonCompat() []map[string]int32 {
+    return x.ListMap
+}
+
+func (x *MyStruct) GetListMap() []map[string]int32 {
+    if !x.IsSetListMap() {
+        return nil
+    }
+
+    return x.ListMap
+}
+
+func (x *MyStruct) GetOptMapValNonCompat() map[string]string {
+    return x.OptMapVal
+}
+
+func (x *MyStruct) GetOptMapVal() map[string]string {
+    if !x.IsSetOptMapVal() {
+        return nil
+    }
+
+    return x.OptMapVal
+}
+
+func (x *MyStruct) GetOptSetValNonCompat() []string {
+    return x.OptSetVal
+}
+
+func (x *MyStruct) GetOptSetVal() []string {
+    if !x.IsSetOptSetVal() {
+        return nil
+    }
+
+    return x.OptSetVal
+}
+
+func (x *MyStruct) GetOptListValNonCompat() []int16 {
+    return x.OptListVal
+}
+
+func (x *MyStruct) GetOptListVal() []int16 {
+    if !x.IsSetOptListVal() {
+        return nil
+    }
+
+    return x.OptListVal
+}
+
+func (x *MyStruct) GetOptLateStructValNonCompat() *LateDefStruct {
+    return x.OptLateStructVal
+}
+
+func (x *MyStruct) GetOptLateStructVal() *LateDefStruct {
+    if !x.IsSetOptLateStructVal() {
+        return nil
+    }
+
+    return x.OptLateStructVal
+}
+
+func (x *MyStruct) GetOptStructValNonCompat() *MyData {
+    return x.OptStructVal
+}
+
+func (x *MyStruct) GetOptStructVal() *MyData {
+    if !x.IsSetOptStructVal() {
+        return nil
+    }
+
+    return x.OptStructVal
+}
+
+func (x *MyStruct) GetOptEnumValNonCompat() *MyEnum {
+    return x.OptEnumVal
+}
+
+func (x *MyStruct) GetOptEnumVal() MyEnum {
+    if !x.IsSetOptEnumVal() {
+        return 0
+    }
+
+    return *x.OptEnumVal
+}
+
+func (x *MyStruct) GetOptBinaryValNonCompat() []byte {
+    return x.OptBinaryVal
+}
+
+func (x *MyStruct) GetOptBinaryVal() []byte {
+    if !x.IsSetOptBinaryVal() {
+        return []byte("")
+    }
+
+    return x.OptBinaryVal
+}
+
+func (x *MyStruct) GetOptStringValNonCompat() *string {
+    return x.OptStringVal
+}
+
+func (x *MyStruct) GetOptStringVal() string {
+    if !x.IsSetOptStringVal() {
+        return ""
+    }
+
+    return *x.OptStringVal
+}
+
+func (x *MyStruct) GetOptDoubleValNonCompat() *float64 {
+    return x.OptDoubleVal
+}
+
+func (x *MyStruct) GetOptDoubleVal() float64 {
+    if !x.IsSetOptDoubleVal() {
+        return 0.0
+    }
+
+    return *x.OptDoubleVal
+}
+
+func (x *MyStruct) GetOptFloatValNonCompat() *float32 {
+    return x.OptFloatVal
+}
+
+func (x *MyStruct) GetOptFloatVal() float32 {
+    if !x.IsSetOptFloatVal() {
+        return 0.0
+    }
+
+    return *x.OptFloatVal
+}
+
+func (x *MyStruct) GetOptI64ValNonCompat() *int64 {
+    return x.OptI64Val
+}
+
+func (x *MyStruct) GetOptI64Val() int64 {
+    if !x.IsSetOptI64Val() {
+        return 0
+    }
+
+    return *x.OptI64Val
+}
+
+func (x *MyStruct) GetOptI32ValNonCompat() *int32 {
+    return x.OptI32Val
+}
+
+func (x *MyStruct) GetOptI32Val() int32 {
+    if !x.IsSetOptI32Val() {
+        return 0
+    }
+
+    return *x.OptI32Val
+}
+
+func (x *MyStruct) GetOptI16ValNonCompat() *int16 {
+    return x.OptI16Val
+}
+
+func (x *MyStruct) GetOptI16Val() int16 {
+    if !x.IsSetOptI16Val() {
+        return 0
+    }
+
+    return *x.OptI16Val
+}
+
+func (x *MyStruct) GetOptByteValNonCompat() *int8 {
+    return x.OptByteVal
+}
+
+func (x *MyStruct) GetOptByteVal() int8 {
+    if !x.IsSetOptByteVal() {
+        return 0
+    }
+
+    return *x.OptByteVal
+}
+
+func (x *MyStruct) GetOptBoolValNonCompat() *bool {
+    return x.OptBoolVal
+}
+
+func (x *MyStruct) GetOptBoolVal() bool {
+    if !x.IsSetOptBoolVal() {
+        return false
+    }
+
+    return *x.OptBoolVal
+}
+
+func (x *MyStruct) GetLateStructValNonCompat() *LateDefStruct {
+    return x.LateStructVal
+}
+
+func (x *MyStruct) GetLateStructVal() *LateDefStruct {
+    if !x.IsSetLateStructVal() {
+        return nil
+    }
+
+    return x.LateStructVal
+}
+
+func (x *MyStruct) GetUnionValNonCompat() *MyUnion {
+    return x.UnionVal
+}
+
+func (x *MyStruct) GetUnionVal() *MyUnion {
+    if !x.IsSetUnionVal() {
+        return nil
+    }
+
+    return x.UnionVal
+}
+
+func (x *MyStruct) GetStructValNonCompat() *MyData {
+    return x.StructVal
+}
+
+func (x *MyStruct) GetStructVal() *MyData {
+    if !x.IsSetStructVal() {
+        return nil
+    }
+
+    return x.StructVal
+}
+
+func (x *MyStruct) GetEnumValNonCompat() MyEnum {
+    return x.EnumVal
+}
+
+func (x *MyStruct) GetEnumVal() MyEnum {
+    return x.EnumVal
+}
+
+func (x *MyStruct) GetBinaryValNonCompat() []byte {
+    return x.BinaryVal
+}
+
+func (x *MyStruct) GetBinaryVal() []byte {
+    if !x.IsSetBinaryVal() {
+        return []byte("")
+    }
+
+    return x.BinaryVal
+}
+
+func (x *MyStruct) GetStringValNonCompat() string {
+    return x.StringVal
+}
+
+func (x *MyStruct) GetStringVal() string {
+    return x.StringVal
+}
+
+func (x *MyStruct) GetDoubleValNonCompat() float64 {
+    return x.DoubleVal
+}
+
+func (x *MyStruct) GetDoubleVal() float64 {
+    return x.DoubleVal
+}
+
+func (x *MyStruct) GetFloatValNonCompat() float32 {
+    return x.FloatVal
+}
+
+func (x *MyStruct) GetFloatVal() float32 {
+    return x.FloatVal
+}
+
+func (x *MyStruct) GetI64ValNonCompat() int64 {
+    return x.I64Val
+}
+
+func (x *MyStruct) GetI64Val() int64 {
+    return x.I64Val
+}
+
+func (x *MyStruct) GetI32ValNonCompat() int32 {
+    return x.I32Val
+}
+
+func (x *MyStruct) GetI32Val() int32 {
+    return x.I32Val
+}
+
+func (x *MyStruct) GetI16ValNonCompat() int16 {
+    return x.I16Val
+}
+
+func (x *MyStruct) GetI16Val() int16 {
+    return x.I16Val
+}
+
+func (x *MyStruct) GetByteValNonCompat() int8 {
+    return x.ByteVal
+}
+
+func (x *MyStruct) GetByteVal() int8 {
+    return x.ByteVal
+}
+
+func (x *MyStruct) GetBoolValNonCompat() bool {
+    return x.BoolVal
+}
+
+func (x *MyStruct) GetBoolVal() bool {
+    return x.BoolVal
+}
+
 func (x *MyStruct) GetStructWithFieldCustomDefaultNonCompat() *MyData {
     return x.StructWithFieldCustomDefault
 }
@@ -1515,303 +1515,13 @@ func (x *MyStruct) GetStructWithFieldCustomDefault() *MyData {
     return x.StructWithFieldCustomDefault
 }
 
-func (x *MyStruct) SetBoolValNonCompat(value bool) *MyStruct {
-    x.BoolVal = value
+func (x *MyStruct) SetStructWithCustomDefaultNonCompat(value MyDataWithCustomDefault) *MyStruct {
+    x.StructWithCustomDefault = &value
     return x
 }
 
-func (x *MyStruct) SetBoolVal(value bool) *MyStruct {
-    x.BoolVal = value
-    return x
-}
-
-func (x *MyStruct) SetByteValNonCompat(value int8) *MyStruct {
-    x.ByteVal = value
-    return x
-}
-
-func (x *MyStruct) SetByteVal(value int8) *MyStruct {
-    x.ByteVal = value
-    return x
-}
-
-func (x *MyStruct) SetI16ValNonCompat(value int16) *MyStruct {
-    x.I16Val = value
-    return x
-}
-
-func (x *MyStruct) SetI16Val(value int16) *MyStruct {
-    x.I16Val = value
-    return x
-}
-
-func (x *MyStruct) SetI32ValNonCompat(value int32) *MyStruct {
-    x.I32Val = value
-    return x
-}
-
-func (x *MyStruct) SetI32Val(value int32) *MyStruct {
-    x.I32Val = value
-    return x
-}
-
-func (x *MyStruct) SetI64ValNonCompat(value int64) *MyStruct {
-    x.I64Val = value
-    return x
-}
-
-func (x *MyStruct) SetI64Val(value int64) *MyStruct {
-    x.I64Val = value
-    return x
-}
-
-func (x *MyStruct) SetFloatValNonCompat(value float32) *MyStruct {
-    x.FloatVal = value
-    return x
-}
-
-func (x *MyStruct) SetFloatVal(value float32) *MyStruct {
-    x.FloatVal = value
-    return x
-}
-
-func (x *MyStruct) SetDoubleValNonCompat(value float64) *MyStruct {
-    x.DoubleVal = value
-    return x
-}
-
-func (x *MyStruct) SetDoubleVal(value float64) *MyStruct {
-    x.DoubleVal = value
-    return x
-}
-
-func (x *MyStruct) SetStringValNonCompat(value string) *MyStruct {
-    x.StringVal = value
-    return x
-}
-
-func (x *MyStruct) SetStringVal(value string) *MyStruct {
-    x.StringVal = value
-    return x
-}
-
-func (x *MyStruct) SetBinaryValNonCompat(value []byte) *MyStruct {
-    x.BinaryVal = value
-    return x
-}
-
-func (x *MyStruct) SetBinaryVal(value []byte) *MyStruct {
-    x.BinaryVal = value
-    return x
-}
-
-func (x *MyStruct) SetEnumValNonCompat(value MyEnum) *MyStruct {
-    x.EnumVal = value
-    return x
-}
-
-func (x *MyStruct) SetEnumVal(value MyEnum) *MyStruct {
-    x.EnumVal = value
-    return x
-}
-
-func (x *MyStruct) SetStructValNonCompat(value MyData) *MyStruct {
-    x.StructVal = &value
-    return x
-}
-
-func (x *MyStruct) SetStructVal(value *MyData) *MyStruct {
-    x.StructVal = value
-    return x
-}
-
-func (x *MyStruct) SetUnionValNonCompat(value MyUnion) *MyStruct {
-    x.UnionVal = &value
-    return x
-}
-
-func (x *MyStruct) SetUnionVal(value *MyUnion) *MyStruct {
-    x.UnionVal = value
-    return x
-}
-
-func (x *MyStruct) SetLateStructValNonCompat(value LateDefStruct) *MyStruct {
-    x.LateStructVal = &value
-    return x
-}
-
-func (x *MyStruct) SetLateStructVal(value *LateDefStruct) *MyStruct {
-    x.LateStructVal = value
-    return x
-}
-
-func (x *MyStruct) SetOptBoolValNonCompat(value bool) *MyStruct {
-    x.OptBoolVal = &value
-    return x
-}
-
-func (x *MyStruct) SetOptBoolVal(value *bool) *MyStruct {
-    x.OptBoolVal = value
-    return x
-}
-
-func (x *MyStruct) SetOptByteValNonCompat(value int8) *MyStruct {
-    x.OptByteVal = &value
-    return x
-}
-
-func (x *MyStruct) SetOptByteVal(value *int8) *MyStruct {
-    x.OptByteVal = value
-    return x
-}
-
-func (x *MyStruct) SetOptI16ValNonCompat(value int16) *MyStruct {
-    x.OptI16Val = &value
-    return x
-}
-
-func (x *MyStruct) SetOptI16Val(value *int16) *MyStruct {
-    x.OptI16Val = value
-    return x
-}
-
-func (x *MyStruct) SetOptI32ValNonCompat(value int32) *MyStruct {
-    x.OptI32Val = &value
-    return x
-}
-
-func (x *MyStruct) SetOptI32Val(value *int32) *MyStruct {
-    x.OptI32Val = value
-    return x
-}
-
-func (x *MyStruct) SetOptI64ValNonCompat(value int64) *MyStruct {
-    x.OptI64Val = &value
-    return x
-}
-
-func (x *MyStruct) SetOptI64Val(value *int64) *MyStruct {
-    x.OptI64Val = value
-    return x
-}
-
-func (x *MyStruct) SetOptFloatValNonCompat(value float32) *MyStruct {
-    x.OptFloatVal = &value
-    return x
-}
-
-func (x *MyStruct) SetOptFloatVal(value *float32) *MyStruct {
-    x.OptFloatVal = value
-    return x
-}
-
-func (x *MyStruct) SetOptDoubleValNonCompat(value float64) *MyStruct {
-    x.OptDoubleVal = &value
-    return x
-}
-
-func (x *MyStruct) SetOptDoubleVal(value *float64) *MyStruct {
-    x.OptDoubleVal = value
-    return x
-}
-
-func (x *MyStruct) SetOptStringValNonCompat(value string) *MyStruct {
-    x.OptStringVal = &value
-    return x
-}
-
-func (x *MyStruct) SetOptStringVal(value *string) *MyStruct {
-    x.OptStringVal = value
-    return x
-}
-
-func (x *MyStruct) SetOptBinaryValNonCompat(value []byte) *MyStruct {
-    x.OptBinaryVal = value
-    return x
-}
-
-func (x *MyStruct) SetOptBinaryVal(value []byte) *MyStruct {
-    x.OptBinaryVal = value
-    return x
-}
-
-func (x *MyStruct) SetOptEnumValNonCompat(value MyEnum) *MyStruct {
-    x.OptEnumVal = &value
-    return x
-}
-
-func (x *MyStruct) SetOptEnumVal(value *MyEnum) *MyStruct {
-    x.OptEnumVal = value
-    return x
-}
-
-func (x *MyStruct) SetOptStructValNonCompat(value MyData) *MyStruct {
-    x.OptStructVal = &value
-    return x
-}
-
-func (x *MyStruct) SetOptStructVal(value *MyData) *MyStruct {
-    x.OptStructVal = value
-    return x
-}
-
-func (x *MyStruct) SetOptLateStructValNonCompat(value LateDefStruct) *MyStruct {
-    x.OptLateStructVal = &value
-    return x
-}
-
-func (x *MyStruct) SetOptLateStructVal(value *LateDefStruct) *MyStruct {
-    x.OptLateStructVal = value
-    return x
-}
-
-func (x *MyStruct) SetOptListValNonCompat(value []int16) *MyStruct {
-    x.OptListVal = value
-    return x
-}
-
-func (x *MyStruct) SetOptListVal(value []int16) *MyStruct {
-    x.OptListVal = value
-    return x
-}
-
-func (x *MyStruct) SetOptSetValNonCompat(value []string) *MyStruct {
-    x.OptSetVal = value
-    return x
-}
-
-func (x *MyStruct) SetOptSetVal(value []string) *MyStruct {
-    x.OptSetVal = value
-    return x
-}
-
-func (x *MyStruct) SetOptMapValNonCompat(value map[string]string) *MyStruct {
-    x.OptMapVal = value
-    return x
-}
-
-func (x *MyStruct) SetOptMapVal(value map[string]string) *MyStruct {
-    x.OptMapVal = value
-    return x
-}
-
-func (x *MyStruct) SetListMapNonCompat(value []map[string]int32) *MyStruct {
-    x.ListMap = value
-    return x
-}
-
-func (x *MyStruct) SetListMap(value []map[string]int32) *MyStruct {
-    x.ListMap = value
-    return x
-}
-
-func (x *MyStruct) SetMapMapNonCompat(value map[string]map[string]int32) *MyStruct {
-    x.MapMap = value
-    return x
-}
-
-func (x *MyStruct) SetMapMap(value map[string]map[string]int32) *MyStruct {
-    x.MapMap = value
+func (x *MyStruct) SetStructWithCustomDefault(value *MyDataWithCustomDefault) *MyStruct {
+    x.StructWithCustomDefault = value
     return x
 }
 
@@ -1825,13 +1535,303 @@ func (x *MyStruct) SetI32WithCustomDefault(value int32) *MyStruct {
     return x
 }
 
-func (x *MyStruct) SetStructWithCustomDefaultNonCompat(value MyDataWithCustomDefault) *MyStruct {
-    x.StructWithCustomDefault = &value
+func (x *MyStruct) SetMapMapNonCompat(value map[string]map[string]int32) *MyStruct {
+    x.MapMap = value
     return x
 }
 
-func (x *MyStruct) SetStructWithCustomDefault(value *MyDataWithCustomDefault) *MyStruct {
-    x.StructWithCustomDefault = value
+func (x *MyStruct) SetMapMap(value map[string]map[string]int32) *MyStruct {
+    x.MapMap = value
+    return x
+}
+
+func (x *MyStruct) SetListMapNonCompat(value []map[string]int32) *MyStruct {
+    x.ListMap = value
+    return x
+}
+
+func (x *MyStruct) SetListMap(value []map[string]int32) *MyStruct {
+    x.ListMap = value
+    return x
+}
+
+func (x *MyStruct) SetOptMapValNonCompat(value map[string]string) *MyStruct {
+    x.OptMapVal = value
+    return x
+}
+
+func (x *MyStruct) SetOptMapVal(value map[string]string) *MyStruct {
+    x.OptMapVal = value
+    return x
+}
+
+func (x *MyStruct) SetOptSetValNonCompat(value []string) *MyStruct {
+    x.OptSetVal = value
+    return x
+}
+
+func (x *MyStruct) SetOptSetVal(value []string) *MyStruct {
+    x.OptSetVal = value
+    return x
+}
+
+func (x *MyStruct) SetOptListValNonCompat(value []int16) *MyStruct {
+    x.OptListVal = value
+    return x
+}
+
+func (x *MyStruct) SetOptListVal(value []int16) *MyStruct {
+    x.OptListVal = value
+    return x
+}
+
+func (x *MyStruct) SetOptLateStructValNonCompat(value LateDefStruct) *MyStruct {
+    x.OptLateStructVal = &value
+    return x
+}
+
+func (x *MyStruct) SetOptLateStructVal(value *LateDefStruct) *MyStruct {
+    x.OptLateStructVal = value
+    return x
+}
+
+func (x *MyStruct) SetOptStructValNonCompat(value MyData) *MyStruct {
+    x.OptStructVal = &value
+    return x
+}
+
+func (x *MyStruct) SetOptStructVal(value *MyData) *MyStruct {
+    x.OptStructVal = value
+    return x
+}
+
+func (x *MyStruct) SetOptEnumValNonCompat(value MyEnum) *MyStruct {
+    x.OptEnumVal = &value
+    return x
+}
+
+func (x *MyStruct) SetOptEnumVal(value *MyEnum) *MyStruct {
+    x.OptEnumVal = value
+    return x
+}
+
+func (x *MyStruct) SetOptBinaryValNonCompat(value []byte) *MyStruct {
+    x.OptBinaryVal = value
+    return x
+}
+
+func (x *MyStruct) SetOptBinaryVal(value []byte) *MyStruct {
+    x.OptBinaryVal = value
+    return x
+}
+
+func (x *MyStruct) SetOptStringValNonCompat(value string) *MyStruct {
+    x.OptStringVal = &value
+    return x
+}
+
+func (x *MyStruct) SetOptStringVal(value *string) *MyStruct {
+    x.OptStringVal = value
+    return x
+}
+
+func (x *MyStruct) SetOptDoubleValNonCompat(value float64) *MyStruct {
+    x.OptDoubleVal = &value
+    return x
+}
+
+func (x *MyStruct) SetOptDoubleVal(value *float64) *MyStruct {
+    x.OptDoubleVal = value
+    return x
+}
+
+func (x *MyStruct) SetOptFloatValNonCompat(value float32) *MyStruct {
+    x.OptFloatVal = &value
+    return x
+}
+
+func (x *MyStruct) SetOptFloatVal(value *float32) *MyStruct {
+    x.OptFloatVal = value
+    return x
+}
+
+func (x *MyStruct) SetOptI64ValNonCompat(value int64) *MyStruct {
+    x.OptI64Val = &value
+    return x
+}
+
+func (x *MyStruct) SetOptI64Val(value *int64) *MyStruct {
+    x.OptI64Val = value
+    return x
+}
+
+func (x *MyStruct) SetOptI32ValNonCompat(value int32) *MyStruct {
+    x.OptI32Val = &value
+    return x
+}
+
+func (x *MyStruct) SetOptI32Val(value *int32) *MyStruct {
+    x.OptI32Val = value
+    return x
+}
+
+func (x *MyStruct) SetOptI16ValNonCompat(value int16) *MyStruct {
+    x.OptI16Val = &value
+    return x
+}
+
+func (x *MyStruct) SetOptI16Val(value *int16) *MyStruct {
+    x.OptI16Val = value
+    return x
+}
+
+func (x *MyStruct) SetOptByteValNonCompat(value int8) *MyStruct {
+    x.OptByteVal = &value
+    return x
+}
+
+func (x *MyStruct) SetOptByteVal(value *int8) *MyStruct {
+    x.OptByteVal = value
+    return x
+}
+
+func (x *MyStruct) SetOptBoolValNonCompat(value bool) *MyStruct {
+    x.OptBoolVal = &value
+    return x
+}
+
+func (x *MyStruct) SetOptBoolVal(value *bool) *MyStruct {
+    x.OptBoolVal = value
+    return x
+}
+
+func (x *MyStruct) SetLateStructValNonCompat(value LateDefStruct) *MyStruct {
+    x.LateStructVal = &value
+    return x
+}
+
+func (x *MyStruct) SetLateStructVal(value *LateDefStruct) *MyStruct {
+    x.LateStructVal = value
+    return x
+}
+
+func (x *MyStruct) SetUnionValNonCompat(value MyUnion) *MyStruct {
+    x.UnionVal = &value
+    return x
+}
+
+func (x *MyStruct) SetUnionVal(value *MyUnion) *MyStruct {
+    x.UnionVal = value
+    return x
+}
+
+func (x *MyStruct) SetStructValNonCompat(value MyData) *MyStruct {
+    x.StructVal = &value
+    return x
+}
+
+func (x *MyStruct) SetStructVal(value *MyData) *MyStruct {
+    x.StructVal = value
+    return x
+}
+
+func (x *MyStruct) SetEnumValNonCompat(value MyEnum) *MyStruct {
+    x.EnumVal = value
+    return x
+}
+
+func (x *MyStruct) SetEnumVal(value MyEnum) *MyStruct {
+    x.EnumVal = value
+    return x
+}
+
+func (x *MyStruct) SetBinaryValNonCompat(value []byte) *MyStruct {
+    x.BinaryVal = value
+    return x
+}
+
+func (x *MyStruct) SetBinaryVal(value []byte) *MyStruct {
+    x.BinaryVal = value
+    return x
+}
+
+func (x *MyStruct) SetStringValNonCompat(value string) *MyStruct {
+    x.StringVal = value
+    return x
+}
+
+func (x *MyStruct) SetStringVal(value string) *MyStruct {
+    x.StringVal = value
+    return x
+}
+
+func (x *MyStruct) SetDoubleValNonCompat(value float64) *MyStruct {
+    x.DoubleVal = value
+    return x
+}
+
+func (x *MyStruct) SetDoubleVal(value float64) *MyStruct {
+    x.DoubleVal = value
+    return x
+}
+
+func (x *MyStruct) SetFloatValNonCompat(value float32) *MyStruct {
+    x.FloatVal = value
+    return x
+}
+
+func (x *MyStruct) SetFloatVal(value float32) *MyStruct {
+    x.FloatVal = value
+    return x
+}
+
+func (x *MyStruct) SetI64ValNonCompat(value int64) *MyStruct {
+    x.I64Val = value
+    return x
+}
+
+func (x *MyStruct) SetI64Val(value int64) *MyStruct {
+    x.I64Val = value
+    return x
+}
+
+func (x *MyStruct) SetI32ValNonCompat(value int32) *MyStruct {
+    x.I32Val = value
+    return x
+}
+
+func (x *MyStruct) SetI32Val(value int32) *MyStruct {
+    x.I32Val = value
+    return x
+}
+
+func (x *MyStruct) SetI16ValNonCompat(value int16) *MyStruct {
+    x.I16Val = value
+    return x
+}
+
+func (x *MyStruct) SetI16Val(value int16) *MyStruct {
+    x.I16Val = value
+    return x
+}
+
+func (x *MyStruct) SetByteValNonCompat(value int8) *MyStruct {
+    x.ByteVal = value
+    return x
+}
+
+func (x *MyStruct) SetByteVal(value int8) *MyStruct {
+    x.ByteVal = value
+    return x
+}
+
+func (x *MyStruct) SetBoolValNonCompat(value bool) *MyStruct {
+    x.BoolVal = value
+    return x
+}
+
+func (x *MyStruct) SetBoolVal(value bool) *MyStruct {
+    x.BoolVal = value
     return x
 }
 
@@ -1845,105 +1845,109 @@ func (x *MyStruct) SetStructWithFieldCustomDefault(value *MyData) *MyStruct {
     return x
 }
 
-func (x *MyStruct) IsSetBinaryVal() bool {
-    return x.BinaryVal != nil
-}
-
-func (x *MyStruct) IsSetStructVal() bool {
-    return x.StructVal != nil
-}
-
-func (x *MyStruct) IsSetUnionVal() bool {
-    return x.UnionVal != nil
-}
-
-func (x *MyStruct) IsSetLateStructVal() bool {
-    return x.LateStructVal != nil
-}
-
-func (x *MyStruct) IsSetOptBoolVal() bool {
-    return x.OptBoolVal != nil
-}
-
-func (x *MyStruct) IsSetOptByteVal() bool {
-    return x.OptByteVal != nil
-}
-
-func (x *MyStruct) IsSetOptI16Val() bool {
-    return x.OptI16Val != nil
-}
-
-func (x *MyStruct) IsSetOptI32Val() bool {
-    return x.OptI32Val != nil
-}
-
-func (x *MyStruct) IsSetOptI64Val() bool {
-    return x.OptI64Val != nil
-}
-
-func (x *MyStruct) IsSetOptFloatVal() bool {
-    return x.OptFloatVal != nil
-}
-
-func (x *MyStruct) IsSetOptDoubleVal() bool {
-    return x.OptDoubleVal != nil
-}
-
-func (x *MyStruct) IsSetOptStringVal() bool {
-    return x.OptStringVal != nil
-}
-
-func (x *MyStruct) IsSetOptBinaryVal() bool {
-    return x.OptBinaryVal != nil
-}
-
-func (x *MyStruct) IsSetOptEnumVal() bool {
-    return x.OptEnumVal != nil
-}
-
-func (x *MyStruct) IsSetOptStructVal() bool {
-    return x.OptStructVal != nil
-}
-
-func (x *MyStruct) IsSetOptLateStructVal() bool {
-    return x.OptLateStructVal != nil
-}
-
-func (x *MyStruct) IsSetOptListVal() bool {
-    return x.OptListVal != nil
-}
-
-func (x *MyStruct) IsSetOptSetVal() bool {
-    return x.OptSetVal != nil
-}
-
-func (x *MyStruct) IsSetOptMapVal() bool {
-    return x.OptMapVal != nil
-}
-
-func (x *MyStruct) IsSetListMap() bool {
-    return x.ListMap != nil
+func (x *MyStruct) IsSetStructWithCustomDefault() bool {
+    return x.StructWithCustomDefault != nil
 }
 
 func (x *MyStruct) IsSetMapMap() bool {
     return x.MapMap != nil
 }
 
-func (x *MyStruct) IsSetStructWithCustomDefault() bool {
-    return x.StructWithCustomDefault != nil
+func (x *MyStruct) IsSetListMap() bool {
+    return x.ListMap != nil
+}
+
+func (x *MyStruct) IsSetOptMapVal() bool {
+    return x.OptMapVal != nil
+}
+
+func (x *MyStruct) IsSetOptSetVal() bool {
+    return x.OptSetVal != nil
+}
+
+func (x *MyStruct) IsSetOptListVal() bool {
+    return x.OptListVal != nil
+}
+
+func (x *MyStruct) IsSetOptLateStructVal() bool {
+    return x.OptLateStructVal != nil
+}
+
+func (x *MyStruct) IsSetOptStructVal() bool {
+    return x.OptStructVal != nil
+}
+
+func (x *MyStruct) IsSetOptEnumVal() bool {
+    return x.OptEnumVal != nil
+}
+
+func (x *MyStruct) IsSetOptBinaryVal() bool {
+    return x.OptBinaryVal != nil
+}
+
+func (x *MyStruct) IsSetOptStringVal() bool {
+    return x.OptStringVal != nil
+}
+
+func (x *MyStruct) IsSetOptDoubleVal() bool {
+    return x.OptDoubleVal != nil
+}
+
+func (x *MyStruct) IsSetOptFloatVal() bool {
+    return x.OptFloatVal != nil
+}
+
+func (x *MyStruct) IsSetOptI64Val() bool {
+    return x.OptI64Val != nil
+}
+
+func (x *MyStruct) IsSetOptI32Val() bool {
+    return x.OptI32Val != nil
+}
+
+func (x *MyStruct) IsSetOptI16Val() bool {
+    return x.OptI16Val != nil
+}
+
+func (x *MyStruct) IsSetOptByteVal() bool {
+    return x.OptByteVal != nil
+}
+
+func (x *MyStruct) IsSetOptBoolVal() bool {
+    return x.OptBoolVal != nil
+}
+
+func (x *MyStruct) IsSetLateStructVal() bool {
+    return x.LateStructVal != nil
+}
+
+func (x *MyStruct) IsSetUnionVal() bool {
+    return x.UnionVal != nil
+}
+
+func (x *MyStruct) IsSetStructVal() bool {
+    return x.StructVal != nil
+}
+
+func (x *MyStruct) IsSetBinaryVal() bool {
+    return x.BinaryVal != nil
 }
 
 func (x *MyStruct) IsSetStructWithFieldCustomDefault() bool {
     return x.StructWithFieldCustomDefault != nil
 }
 
-func (x *MyStruct) writeField_1(p thrift.Protocol) error {  // BoolVal
-    if err := p.WriteFieldBegin("boolVal", thrift.BOOL, -1); err != nil {
+func (x *MyStruct) writeField_32(p thrift.Protocol) error {  // StructWithCustomDefault
+    if !x.IsSetStructWithCustomDefault() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("structWithCustomDefault", thrift.STRUCT, -32); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetBoolValNonCompat()
-    if err := p.WriteBool(item); err != nil {
+    item := x.GetStructWithCustomDefaultNonCompat()
+    if err := item.Write(p); err != nil {
     return err
 }
 
@@ -1953,595 +1957,14 @@ func (x *MyStruct) writeField_1(p thrift.Protocol) error {  // BoolVal
     return nil
 }
 
-func (x *MyStruct) writeField_2(p thrift.Protocol) error {  // ByteVal
-    if err := p.WriteFieldBegin("byteVal", thrift.BYTE, -2); err != nil {
+func (x *MyStruct) writeField_31(p thrift.Protocol) error {  // I32WithCustomDefault
+    if err := p.WriteFieldBegin("i32WithCustomDefault", thrift.I32, -31); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetByteValNonCompat()
-    if err := p.WriteByte(byte(item)); err != nil {
-    return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *MyStruct) writeField_3(p thrift.Protocol) error {  // I16Val
-    if err := p.WriteFieldBegin("i16Val", thrift.I16, -3); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetI16ValNonCompat()
-    if err := p.WriteI16(item); err != nil {
-    return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *MyStruct) writeField_4(p thrift.Protocol) error {  // I32Val
-    if err := p.WriteFieldBegin("i32Val", thrift.I32, -4); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetI32ValNonCompat()
+    item := x.GetI32WithCustomDefaultNonCompat()
     if err := p.WriteI32(item); err != nil {
     return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *MyStruct) writeField_5(p thrift.Protocol) error {  // I64Val
-    if err := p.WriteFieldBegin("i64Val", thrift.I64, -5); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetI64ValNonCompat()
-    if err := p.WriteI64(item); err != nil {
-    return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *MyStruct) writeField_6(p thrift.Protocol) error {  // FloatVal
-    if err := p.WriteFieldBegin("floatVal", thrift.FLOAT, -6); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetFloatValNonCompat()
-    if err := p.WriteFloat(item); err != nil {
-    return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *MyStruct) writeField_7(p thrift.Protocol) error {  // DoubleVal
-    if err := p.WriteFieldBegin("doubleVal", thrift.DOUBLE, -7); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetDoubleValNonCompat()
-    if err := p.WriteDouble(item); err != nil {
-    return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *MyStruct) writeField_8(p thrift.Protocol) error {  // StringVal
-    if err := p.WriteFieldBegin("stringVal", thrift.STRING, -8); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetStringValNonCompat()
-    if err := p.WriteString(item); err != nil {
-    return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *MyStruct) writeField_9(p thrift.Protocol) error {  // BinaryVal
-    if !x.IsSetBinaryVal() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("binaryVal", thrift.STRING, -9); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetBinaryValNonCompat()
-    if err := p.WriteBinary(item); err != nil {
-    return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *MyStruct) writeField_10(p thrift.Protocol) error {  // EnumVal
-    if err := p.WriteFieldBegin("enumVal", thrift.I32, -10); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetEnumValNonCompat()
-    if err := p.WriteI32(int32(item)); err != nil {
-    return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *MyStruct) writeField_11(p thrift.Protocol) error {  // StructVal
-    if !x.IsSetStructVal() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("structVal", thrift.STRUCT, -11); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetStructValNonCompat()
-    if err := item.Write(p); err != nil {
-    return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *MyStruct) writeField_12(p thrift.Protocol) error {  // UnionVal
-    if !x.IsSetUnionVal() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("unionVal", thrift.STRUCT, -12); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetUnionValNonCompat()
-    if err := item.Write(p); err != nil {
-    return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *MyStruct) writeField_13(p thrift.Protocol) error {  // LateStructVal
-    if !x.IsSetLateStructVal() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("lateStructVal", thrift.STRUCT, -13); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetLateStructValNonCompat()
-    if err := item.Write(p); err != nil {
-    return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *MyStruct) writeField_14(p thrift.Protocol) error {  // OptBoolVal
-    if !x.IsSetOptBoolVal() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("optBoolVal", thrift.BOOL, -14); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := *x.GetOptBoolValNonCompat()
-    if err := p.WriteBool(item); err != nil {
-    return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *MyStruct) writeField_15(p thrift.Protocol) error {  // OptByteVal
-    if !x.IsSetOptByteVal() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("optByteVal", thrift.BYTE, -15); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := *x.GetOptByteValNonCompat()
-    if err := p.WriteByte(byte(item)); err != nil {
-    return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *MyStruct) writeField_16(p thrift.Protocol) error {  // OptI16Val
-    if !x.IsSetOptI16Val() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("optI16Val", thrift.I16, -16); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := *x.GetOptI16ValNonCompat()
-    if err := p.WriteI16(item); err != nil {
-    return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *MyStruct) writeField_17(p thrift.Protocol) error {  // OptI32Val
-    if !x.IsSetOptI32Val() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("optI32Val", thrift.I32, -17); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := *x.GetOptI32ValNonCompat()
-    if err := p.WriteI32(item); err != nil {
-    return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *MyStruct) writeField_18(p thrift.Protocol) error {  // OptI64Val
-    if !x.IsSetOptI64Val() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("optI64Val", thrift.I64, -18); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := *x.GetOptI64ValNonCompat()
-    if err := p.WriteI64(item); err != nil {
-    return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *MyStruct) writeField_19(p thrift.Protocol) error {  // OptFloatVal
-    if !x.IsSetOptFloatVal() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("optFloatVal", thrift.FLOAT, -19); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := *x.GetOptFloatValNonCompat()
-    if err := p.WriteFloat(item); err != nil {
-    return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *MyStruct) writeField_20(p thrift.Protocol) error {  // OptDoubleVal
-    if !x.IsSetOptDoubleVal() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("optDoubleVal", thrift.DOUBLE, -20); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := *x.GetOptDoubleValNonCompat()
-    if err := p.WriteDouble(item); err != nil {
-    return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *MyStruct) writeField_21(p thrift.Protocol) error {  // OptStringVal
-    if !x.IsSetOptStringVal() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("optStringVal", thrift.STRING, -21); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := *x.GetOptStringValNonCompat()
-    if err := p.WriteString(item); err != nil {
-    return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *MyStruct) writeField_22(p thrift.Protocol) error {  // OptBinaryVal
-    if !x.IsSetOptBinaryVal() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("optBinaryVal", thrift.STRING, -22); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetOptBinaryValNonCompat()
-    if err := p.WriteBinary(item); err != nil {
-    return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *MyStruct) writeField_23(p thrift.Protocol) error {  // OptEnumVal
-    if !x.IsSetOptEnumVal() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("optEnumVal", thrift.I32, -23); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := *x.GetOptEnumValNonCompat()
-    if err := p.WriteI32(int32(item)); err != nil {
-    return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *MyStruct) writeField_24(p thrift.Protocol) error {  // OptStructVal
-    if !x.IsSetOptStructVal() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("optStructVal", thrift.STRUCT, -24); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetOptStructValNonCompat()
-    if err := item.Write(p); err != nil {
-    return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *MyStruct) writeField_25(p thrift.Protocol) error {  // OptLateStructVal
-    if !x.IsSetOptLateStructVal() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("optLateStructVal", thrift.STRUCT, -25); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetOptLateStructValNonCompat()
-    if err := item.Write(p); err != nil {
-    return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *MyStruct) writeField_26(p thrift.Protocol) error {  // OptListVal
-    if !x.IsSetOptListVal() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("optListVal", thrift.LIST, -26); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetOptListValNonCompat()
-    if err := p.WriteListBegin(thrift.I16, len(item)); err != nil {
-    return thrift.PrependError("error writing list begin: ", err)
-}
-for _, v := range item {
-    {
-        item := v
-        if err := p.WriteI16(item); err != nil {
-    return err
-}
-    }
-}
-if err := p.WriteListEnd(); err != nil {
-    return thrift.PrependError("error writing list end: ", err)
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *MyStruct) writeField_27(p thrift.Protocol) error {  // OptSetVal
-    if !x.IsSetOptSetVal() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("optSetVal", thrift.SET, -27); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetOptSetValNonCompat()
-    if err := p.WriteSetBegin(thrift.STRING, len(item)); err != nil {
-    return thrift.PrependError("error writing set begin: ", err)
-}
-for _, v := range item {
-    {
-        item := v
-        if err := p.WriteString(item); err != nil {
-    return err
-}
-    }
-}
-if err := p.WriteSetEnd(); err != nil {
-    return thrift.PrependError("error writing set end: ", err)
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *MyStruct) writeField_28(p thrift.Protocol) error {  // OptMapVal
-    if !x.IsSetOptMapVal() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("optMapVal", thrift.MAP, -28); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetOptMapValNonCompat()
-    if err := p.WriteMapBegin(thrift.STRING, thrift.STRING, len(item)); err != nil {
-    return thrift.PrependError("error writing map begin: ", err)
-}
-for k, v := range item {
-    {
-        item := k
-        if err := p.WriteString(item); err != nil {
-    return err
-}
-    }
-
-    {
-        item := v
-        if err := p.WriteString(item); err != nil {
-    return err
-}
-    }
-}
-if err := p.WriteMapEnd(); err != nil {
-    return thrift.PrependError("error writing map end: ", err)
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *MyStruct) writeField_29(p thrift.Protocol) error {  // ListMap
-    if !x.IsSetListMap() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("listMap", thrift.LIST, -29); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetListMapNonCompat()
-    if err := p.WriteListBegin(thrift.MAP, len(item)); err != nil {
-    return thrift.PrependError("error writing list begin: ", err)
-}
-for _, v := range item {
-    {
-        item := v
-        if err := p.WriteMapBegin(thrift.STRING, thrift.I32, len(item)); err != nil {
-    return thrift.PrependError("error writing map begin: ", err)
-}
-for k, v := range item {
-    {
-        item := k
-        if err := p.WriteString(item); err != nil {
-    return err
-}
-    }
-
-    {
-        item := v
-        if err := p.WriteI32(item); err != nil {
-    return err
-}
-    }
-}
-if err := p.WriteMapEnd(); err != nil {
-    return thrift.PrependError("error writing map end: ", err)
-}
-    }
-}
-if err := p.WriteListEnd(); err != nil {
-    return thrift.PrependError("error writing list end: ", err)
 }
 
     if err := p.WriteFieldEnd(); err != nil {
@@ -2606,12 +2029,325 @@ if err := p.WriteMapEnd(); err != nil {
     return nil
 }
 
-func (x *MyStruct) writeField_31(p thrift.Protocol) error {  // I32WithCustomDefault
-    if err := p.WriteFieldBegin("i32WithCustomDefault", thrift.I32, -31); err != nil {
+func (x *MyStruct) writeField_29(p thrift.Protocol) error {  // ListMap
+    if !x.IsSetListMap() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("listMap", thrift.LIST, -29); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetI32WithCustomDefaultNonCompat()
+    item := x.GetListMapNonCompat()
+    if err := p.WriteListBegin(thrift.MAP, len(item)); err != nil {
+    return thrift.PrependError("error writing list begin: ", err)
+}
+for _, v := range item {
+    {
+        item := v
+        if err := p.WriteMapBegin(thrift.STRING, thrift.I32, len(item)); err != nil {
+    return thrift.PrependError("error writing map begin: ", err)
+}
+for k, v := range item {
+    {
+        item := k
+        if err := p.WriteString(item); err != nil {
+    return err
+}
+    }
+
+    {
+        item := v
+        if err := p.WriteI32(item); err != nil {
+    return err
+}
+    }
+}
+if err := p.WriteMapEnd(); err != nil {
+    return thrift.PrependError("error writing map end: ", err)
+}
+    }
+}
+if err := p.WriteListEnd(); err != nil {
+    return thrift.PrependError("error writing list end: ", err)
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyStruct) writeField_28(p thrift.Protocol) error {  // OptMapVal
+    if !x.IsSetOptMapVal() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("optMapVal", thrift.MAP, -28); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetOptMapValNonCompat()
+    if err := p.WriteMapBegin(thrift.STRING, thrift.STRING, len(item)); err != nil {
+    return thrift.PrependError("error writing map begin: ", err)
+}
+for k, v := range item {
+    {
+        item := k
+        if err := p.WriteString(item); err != nil {
+    return err
+}
+    }
+
+    {
+        item := v
+        if err := p.WriteString(item); err != nil {
+    return err
+}
+    }
+}
+if err := p.WriteMapEnd(); err != nil {
+    return thrift.PrependError("error writing map end: ", err)
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyStruct) writeField_27(p thrift.Protocol) error {  // OptSetVal
+    if !x.IsSetOptSetVal() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("optSetVal", thrift.SET, -27); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetOptSetValNonCompat()
+    if err := p.WriteSetBegin(thrift.STRING, len(item)); err != nil {
+    return thrift.PrependError("error writing set begin: ", err)
+}
+for _, v := range item {
+    {
+        item := v
+        if err := p.WriteString(item); err != nil {
+    return err
+}
+    }
+}
+if err := p.WriteSetEnd(); err != nil {
+    return thrift.PrependError("error writing set end: ", err)
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyStruct) writeField_26(p thrift.Protocol) error {  // OptListVal
+    if !x.IsSetOptListVal() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("optListVal", thrift.LIST, -26); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetOptListValNonCompat()
+    if err := p.WriteListBegin(thrift.I16, len(item)); err != nil {
+    return thrift.PrependError("error writing list begin: ", err)
+}
+for _, v := range item {
+    {
+        item := v
+        if err := p.WriteI16(item); err != nil {
+    return err
+}
+    }
+}
+if err := p.WriteListEnd(); err != nil {
+    return thrift.PrependError("error writing list end: ", err)
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyStruct) writeField_25(p thrift.Protocol) error {  // OptLateStructVal
+    if !x.IsSetOptLateStructVal() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("optLateStructVal", thrift.STRUCT, -25); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetOptLateStructValNonCompat()
+    if err := item.Write(p); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyStruct) writeField_24(p thrift.Protocol) error {  // OptStructVal
+    if !x.IsSetOptStructVal() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("optStructVal", thrift.STRUCT, -24); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetOptStructValNonCompat()
+    if err := item.Write(p); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyStruct) writeField_23(p thrift.Protocol) error {  // OptEnumVal
+    if !x.IsSetOptEnumVal() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("optEnumVal", thrift.I32, -23); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := *x.GetOptEnumValNonCompat()
+    if err := p.WriteI32(int32(item)); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyStruct) writeField_22(p thrift.Protocol) error {  // OptBinaryVal
+    if !x.IsSetOptBinaryVal() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("optBinaryVal", thrift.STRING, -22); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetOptBinaryValNonCompat()
+    if err := p.WriteBinary(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyStruct) writeField_21(p thrift.Protocol) error {  // OptStringVal
+    if !x.IsSetOptStringVal() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("optStringVal", thrift.STRING, -21); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := *x.GetOptStringValNonCompat()
+    if err := p.WriteString(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyStruct) writeField_20(p thrift.Protocol) error {  // OptDoubleVal
+    if !x.IsSetOptDoubleVal() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("optDoubleVal", thrift.DOUBLE, -20); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := *x.GetOptDoubleValNonCompat()
+    if err := p.WriteDouble(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyStruct) writeField_19(p thrift.Protocol) error {  // OptFloatVal
+    if !x.IsSetOptFloatVal() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("optFloatVal", thrift.FLOAT, -19); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := *x.GetOptFloatValNonCompat()
+    if err := p.WriteFloat(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyStruct) writeField_18(p thrift.Protocol) error {  // OptI64Val
+    if !x.IsSetOptI64Val() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("optI64Val", thrift.I64, -18); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := *x.GetOptI64ValNonCompat()
+    if err := p.WriteI64(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyStruct) writeField_17(p thrift.Protocol) error {  // OptI32Val
+    if !x.IsSetOptI32Val() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("optI32Val", thrift.I32, -17); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := *x.GetOptI32ValNonCompat()
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -2622,17 +2358,281 @@ func (x *MyStruct) writeField_31(p thrift.Protocol) error {  // I32WithCustomDef
     return nil
 }
 
-func (x *MyStruct) writeField_32(p thrift.Protocol) error {  // StructWithCustomDefault
-    if !x.IsSetStructWithCustomDefault() {
+func (x *MyStruct) writeField_16(p thrift.Protocol) error {  // OptI16Val
+    if !x.IsSetOptI16Val() {
         return nil
     }
 
-    if err := p.WriteFieldBegin("structWithCustomDefault", thrift.STRUCT, -32); err != nil {
+    if err := p.WriteFieldBegin("optI16Val", thrift.I16, -16); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetStructWithCustomDefaultNonCompat()
+    item := *x.GetOptI16ValNonCompat()
+    if err := p.WriteI16(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyStruct) writeField_15(p thrift.Protocol) error {  // OptByteVal
+    if !x.IsSetOptByteVal() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("optByteVal", thrift.BYTE, -15); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := *x.GetOptByteValNonCompat()
+    if err := p.WriteByte(byte(item)); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyStruct) writeField_14(p thrift.Protocol) error {  // OptBoolVal
+    if !x.IsSetOptBoolVal() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("optBoolVal", thrift.BOOL, -14); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := *x.GetOptBoolValNonCompat()
+    if err := p.WriteBool(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyStruct) writeField_13(p thrift.Protocol) error {  // LateStructVal
+    if !x.IsSetLateStructVal() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("lateStructVal", thrift.STRUCT, -13); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetLateStructValNonCompat()
     if err := item.Write(p); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyStruct) writeField_12(p thrift.Protocol) error {  // UnionVal
+    if !x.IsSetUnionVal() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("unionVal", thrift.STRUCT, -12); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetUnionValNonCompat()
+    if err := item.Write(p); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyStruct) writeField_11(p thrift.Protocol) error {  // StructVal
+    if !x.IsSetStructVal() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("structVal", thrift.STRUCT, -11); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetStructValNonCompat()
+    if err := item.Write(p); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyStruct) writeField_10(p thrift.Protocol) error {  // EnumVal
+    if err := p.WriteFieldBegin("enumVal", thrift.I32, -10); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetEnumValNonCompat()
+    if err := p.WriteI32(int32(item)); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyStruct) writeField_9(p thrift.Protocol) error {  // BinaryVal
+    if !x.IsSetBinaryVal() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("binaryVal", thrift.STRING, -9); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetBinaryValNonCompat()
+    if err := p.WriteBinary(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyStruct) writeField_8(p thrift.Protocol) error {  // StringVal
+    if err := p.WriteFieldBegin("stringVal", thrift.STRING, -8); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetStringValNonCompat()
+    if err := p.WriteString(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyStruct) writeField_7(p thrift.Protocol) error {  // DoubleVal
+    if err := p.WriteFieldBegin("doubleVal", thrift.DOUBLE, -7); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetDoubleValNonCompat()
+    if err := p.WriteDouble(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyStruct) writeField_6(p thrift.Protocol) error {  // FloatVal
+    if err := p.WriteFieldBegin("floatVal", thrift.FLOAT, -6); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetFloatValNonCompat()
+    if err := p.WriteFloat(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyStruct) writeField_5(p thrift.Protocol) error {  // I64Val
+    if err := p.WriteFieldBegin("i64Val", thrift.I64, -5); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetI64ValNonCompat()
+    if err := p.WriteI64(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyStruct) writeField_4(p thrift.Protocol) error {  // I32Val
+    if err := p.WriteFieldBegin("i32Val", thrift.I32, -4); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetI32ValNonCompat()
+    if err := p.WriteI32(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyStruct) writeField_3(p thrift.Protocol) error {  // I16Val
+    if err := p.WriteFieldBegin("i16Val", thrift.I16, -3); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetI16ValNonCompat()
+    if err := p.WriteI16(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyStruct) writeField_2(p thrift.Protocol) error {  // ByteVal
+    if err := p.WriteFieldBegin("byteVal", thrift.BYTE, -2); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetByteValNonCompat()
+    if err := p.WriteByte(byte(item)); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *MyStruct) writeField_1(p thrift.Protocol) error {  // BoolVal
+    if err := p.WriteFieldBegin("boolVal", thrift.BOOL, -1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetBoolValNonCompat()
+    if err := p.WriteBool(item); err != nil {
     return err
 }
 
@@ -2662,412 +2662,24 @@ func (x *MyStruct) writeField1(p thrift.Protocol) error {  // StructWithFieldCus
     return nil
 }
 
-func (x *MyStruct) readField_1(p thrift.Protocol) error {  // BoolVal
-    result, err := p.ReadBool()
+func (x *MyStruct) readField_32(p thrift.Protocol) error {  // StructWithCustomDefault
+    result := *NewMyDataWithCustomDefault()
+err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.SetBoolValNonCompat(result)
+    x.SetStructWithCustomDefaultNonCompat(result)
     return nil
 }
 
-func (x *MyStruct) readField_2(p thrift.Protocol) error {  // ByteVal
-    resultByte, err := p.ReadByte()
-result := int8(resultByte)
-if err != nil {
-    return err
-}
-
-    x.SetByteValNonCompat(result)
-    return nil
-}
-
-func (x *MyStruct) readField_3(p thrift.Protocol) error {  // I16Val
-    result, err := p.ReadI16()
-if err != nil {
-    return err
-}
-
-    x.SetI16ValNonCompat(result)
-    return nil
-}
-
-func (x *MyStruct) readField_4(p thrift.Protocol) error {  // I32Val
+func (x *MyStruct) readField_31(p thrift.Protocol) error {  // I32WithCustomDefault
     result, err := p.ReadI32()
 if err != nil {
     return err
 }
 
-    x.SetI32ValNonCompat(result)
-    return nil
-}
-
-func (x *MyStruct) readField_5(p thrift.Protocol) error {  // I64Val
-    result, err := p.ReadI64()
-if err != nil {
-    return err
-}
-
-    x.SetI64ValNonCompat(result)
-    return nil
-}
-
-func (x *MyStruct) readField_6(p thrift.Protocol) error {  // FloatVal
-    result, err := p.ReadFloat()
-if err != nil {
-    return err
-}
-
-    x.SetFloatValNonCompat(result)
-    return nil
-}
-
-func (x *MyStruct) readField_7(p thrift.Protocol) error {  // DoubleVal
-    result, err := p.ReadDouble()
-if err != nil {
-    return err
-}
-
-    x.SetDoubleValNonCompat(result)
-    return nil
-}
-
-func (x *MyStruct) readField_8(p thrift.Protocol) error {  // StringVal
-    result, err := p.ReadString()
-if err != nil {
-    return err
-}
-
-    x.SetStringValNonCompat(result)
-    return nil
-}
-
-func (x *MyStruct) readField_9(p thrift.Protocol) error {  // BinaryVal
-    result, err := p.ReadBinary()
-if err != nil {
-    return err
-}
-
-    x.SetBinaryValNonCompat(result)
-    return nil
-}
-
-func (x *MyStruct) readField_10(p thrift.Protocol) error {  // EnumVal
-    enumResult, err := p.ReadI32()
-if err != nil {
-    return err
-}
-result := MyEnum(enumResult)
-
-    x.SetEnumValNonCompat(result)
-    return nil
-}
-
-func (x *MyStruct) readField_11(p thrift.Protocol) error {  // StructVal
-    result := *NewMyData()
-err := result.Read(p)
-if err != nil {
-    return err
-}
-
-    x.SetStructValNonCompat(result)
-    return nil
-}
-
-func (x *MyStruct) readField_12(p thrift.Protocol) error {  // UnionVal
-    result := *NewMyUnion()
-err := result.Read(p)
-if err != nil {
-    return err
-}
-
-    x.SetUnionValNonCompat(result)
-    return nil
-}
-
-func (x *MyStruct) readField_13(p thrift.Protocol) error {  // LateStructVal
-    result := *NewLateDefStruct()
-err := result.Read(p)
-if err != nil {
-    return err
-}
-
-    x.SetLateStructValNonCompat(result)
-    return nil
-}
-
-func (x *MyStruct) readField_14(p thrift.Protocol) error {  // OptBoolVal
-    result, err := p.ReadBool()
-if err != nil {
-    return err
-}
-
-    x.SetOptBoolValNonCompat(result)
-    return nil
-}
-
-func (x *MyStruct) readField_15(p thrift.Protocol) error {  // OptByteVal
-    resultByte, err := p.ReadByte()
-result := int8(resultByte)
-if err != nil {
-    return err
-}
-
-    x.SetOptByteValNonCompat(result)
-    return nil
-}
-
-func (x *MyStruct) readField_16(p thrift.Protocol) error {  // OptI16Val
-    result, err := p.ReadI16()
-if err != nil {
-    return err
-}
-
-    x.SetOptI16ValNonCompat(result)
-    return nil
-}
-
-func (x *MyStruct) readField_17(p thrift.Protocol) error {  // OptI32Val
-    result, err := p.ReadI32()
-if err != nil {
-    return err
-}
-
-    x.SetOptI32ValNonCompat(result)
-    return nil
-}
-
-func (x *MyStruct) readField_18(p thrift.Protocol) error {  // OptI64Val
-    result, err := p.ReadI64()
-if err != nil {
-    return err
-}
-
-    x.SetOptI64ValNonCompat(result)
-    return nil
-}
-
-func (x *MyStruct) readField_19(p thrift.Protocol) error {  // OptFloatVal
-    result, err := p.ReadFloat()
-if err != nil {
-    return err
-}
-
-    x.SetOptFloatValNonCompat(result)
-    return nil
-}
-
-func (x *MyStruct) readField_20(p thrift.Protocol) error {  // OptDoubleVal
-    result, err := p.ReadDouble()
-if err != nil {
-    return err
-}
-
-    x.SetOptDoubleValNonCompat(result)
-    return nil
-}
-
-func (x *MyStruct) readField_21(p thrift.Protocol) error {  // OptStringVal
-    result, err := p.ReadString()
-if err != nil {
-    return err
-}
-
-    x.SetOptStringValNonCompat(result)
-    return nil
-}
-
-func (x *MyStruct) readField_22(p thrift.Protocol) error {  // OptBinaryVal
-    result, err := p.ReadBinary()
-if err != nil {
-    return err
-}
-
-    x.SetOptBinaryValNonCompat(result)
-    return nil
-}
-
-func (x *MyStruct) readField_23(p thrift.Protocol) error {  // OptEnumVal
-    enumResult, err := p.ReadI32()
-if err != nil {
-    return err
-}
-result := MyEnum(enumResult)
-
-    x.SetOptEnumValNonCompat(result)
-    return nil
-}
-
-func (x *MyStruct) readField_24(p thrift.Protocol) error {  // OptStructVal
-    result := *NewMyData()
-err := result.Read(p)
-if err != nil {
-    return err
-}
-
-    x.SetOptStructValNonCompat(result)
-    return nil
-}
-
-func (x *MyStruct) readField_25(p thrift.Protocol) error {  // OptLateStructVal
-    result := *NewLateDefStruct()
-err := result.Read(p)
-if err != nil {
-    return err
-}
-
-    x.SetOptLateStructValNonCompat(result)
-    return nil
-}
-
-func (x *MyStruct) readField_26(p thrift.Protocol) error {  // OptListVal
-    _ /* elemType */, size, err := p.ReadListBegin()
-if err != nil {
-    return thrift.PrependError("error reading list begin: ", err)
-}
-
-listResult := make([]int16, 0, size)
-for i := 0; i < size; i++ {
-    var elem int16
-    {
-        result, err := p.ReadI16()
-if err != nil {
-    return err
-}
-        elem = result
-    }
-    listResult = append(listResult, elem)
-}
-
-if err := p.ReadListEnd(); err != nil {
-    return thrift.PrependError("error reading list end: ", err)
-}
-result := listResult
-
-    x.SetOptListValNonCompat(result)
-    return nil
-}
-
-func (x *MyStruct) readField_27(p thrift.Protocol) error {  // OptSetVal
-    _ /* elemType */, size, err := p.ReadSetBegin()
-if err != nil {
-    return thrift.PrependError("error reading set begin: ", err)
-}
-
-setResult := make([]string, 0, size)
-for i := 0; i < size; i++ {
-    var elem string
-    {
-        result, err := p.ReadString()
-if err != nil {
-    return err
-}
-        elem = result
-    }
-    setResult = append(setResult, elem)
-}
-
-if err := p.ReadSetEnd(); err != nil {
-    return thrift.PrependError("error reading set end: ", err)
-}
-result := setResult
-
-    x.SetOptSetValNonCompat(result)
-    return nil
-}
-
-func (x *MyStruct) readField_28(p thrift.Protocol) error {  // OptMapVal
-    _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
-if err != nil {
-    return thrift.PrependError("error reading map begin: ", err)
-}
-
-mapResult := make(map[string]string, size)
-for i := 0; i < size; i++ {
-    var key string
-    {
-        result, err := p.ReadString()
-if err != nil {
-    return err
-}
-        key = result
-    }
-
-    var value string
-    {
-        result, err := p.ReadString()
-if err != nil {
-    return err
-}
-        value = result
-    }
-
-    mapResult[key] = value
-}
-
-if err := p.ReadMapEnd(); err != nil {
-    return thrift.PrependError("error reading map end: ", err)
-}
-result := mapResult
-
-    x.SetOptMapValNonCompat(result)
-    return nil
-}
-
-func (x *MyStruct) readField_29(p thrift.Protocol) error {  // ListMap
-    _ /* elemType */, size, err := p.ReadListBegin()
-if err != nil {
-    return thrift.PrependError("error reading list begin: ", err)
-}
-
-listResult := make([]map[string]int32, 0, size)
-for i := 0; i < size; i++ {
-    var elem map[string]int32
-    {
-        _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
-if err != nil {
-    return thrift.PrependError("error reading map begin: ", err)
-}
-
-mapResult := make(map[string]int32, size)
-for i := 0; i < size; i++ {
-    var key string
-    {
-        result, err := p.ReadString()
-if err != nil {
-    return err
-}
-        key = result
-    }
-
-    var value int32
-    {
-        result, err := p.ReadI32()
-if err != nil {
-    return err
-}
-        value = result
-    }
-
-    mapResult[key] = value
-}
-
-if err := p.ReadMapEnd(); err != nil {
-    return thrift.PrependError("error reading map end: ", err)
-}
-result := mapResult
-        elem = result
-    }
-    listResult = append(listResult, elem)
-}
-
-if err := p.ReadListEnd(); err != nil {
-    return thrift.PrependError("error reading list end: ", err)
-}
-result := listResult
-
-    x.SetListMapNonCompat(result)
+    x.SetI32WithCustomDefaultNonCompat(result)
     return nil
 }
 
@@ -3137,24 +2749,412 @@ result := mapResult
     return nil
 }
 
-func (x *MyStruct) readField_31(p thrift.Protocol) error {  // I32WithCustomDefault
-    result, err := p.ReadI32()
+func (x *MyStruct) readField_29(p thrift.Protocol) error {  // ListMap
+    _ /* elemType */, size, err := p.ReadListBegin()
+if err != nil {
+    return thrift.PrependError("error reading list begin: ", err)
+}
+
+listResult := make([]map[string]int32, 0, size)
+for i := 0; i < size; i++ {
+    var elem map[string]int32
+    {
+        _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
+if err != nil {
+    return thrift.PrependError("error reading map begin: ", err)
+}
+
+mapResult := make(map[string]int32, size)
+for i := 0; i < size; i++ {
+    var key string
+    {
+        result, err := p.ReadString()
 if err != nil {
     return err
 }
+        key = result
+    }
 
-    x.SetI32WithCustomDefaultNonCompat(result)
+    var value int32
+    {
+        result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+        value = result
+    }
+
+    mapResult[key] = value
+}
+
+if err := p.ReadMapEnd(); err != nil {
+    return thrift.PrependError("error reading map end: ", err)
+}
+result := mapResult
+        elem = result
+    }
+    listResult = append(listResult, elem)
+}
+
+if err := p.ReadListEnd(); err != nil {
+    return thrift.PrependError("error reading list end: ", err)
+}
+result := listResult
+
+    x.SetListMapNonCompat(result)
     return nil
 }
 
-func (x *MyStruct) readField_32(p thrift.Protocol) error {  // StructWithCustomDefault
-    result := *NewMyDataWithCustomDefault()
+func (x *MyStruct) readField_28(p thrift.Protocol) error {  // OptMapVal
+    _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
+if err != nil {
+    return thrift.PrependError("error reading map begin: ", err)
+}
+
+mapResult := make(map[string]string, size)
+for i := 0; i < size; i++ {
+    var key string
+    {
+        result, err := p.ReadString()
+if err != nil {
+    return err
+}
+        key = result
+    }
+
+    var value string
+    {
+        result, err := p.ReadString()
+if err != nil {
+    return err
+}
+        value = result
+    }
+
+    mapResult[key] = value
+}
+
+if err := p.ReadMapEnd(); err != nil {
+    return thrift.PrependError("error reading map end: ", err)
+}
+result := mapResult
+
+    x.SetOptMapValNonCompat(result)
+    return nil
+}
+
+func (x *MyStruct) readField_27(p thrift.Protocol) error {  // OptSetVal
+    _ /* elemType */, size, err := p.ReadSetBegin()
+if err != nil {
+    return thrift.PrependError("error reading set begin: ", err)
+}
+
+setResult := make([]string, 0, size)
+for i := 0; i < size; i++ {
+    var elem string
+    {
+        result, err := p.ReadString()
+if err != nil {
+    return err
+}
+        elem = result
+    }
+    setResult = append(setResult, elem)
+}
+
+if err := p.ReadSetEnd(); err != nil {
+    return thrift.PrependError("error reading set end: ", err)
+}
+result := setResult
+
+    x.SetOptSetValNonCompat(result)
+    return nil
+}
+
+func (x *MyStruct) readField_26(p thrift.Protocol) error {  // OptListVal
+    _ /* elemType */, size, err := p.ReadListBegin()
+if err != nil {
+    return thrift.PrependError("error reading list begin: ", err)
+}
+
+listResult := make([]int16, 0, size)
+for i := 0; i < size; i++ {
+    var elem int16
+    {
+        result, err := p.ReadI16()
+if err != nil {
+    return err
+}
+        elem = result
+    }
+    listResult = append(listResult, elem)
+}
+
+if err := p.ReadListEnd(); err != nil {
+    return thrift.PrependError("error reading list end: ", err)
+}
+result := listResult
+
+    x.SetOptListValNonCompat(result)
+    return nil
+}
+
+func (x *MyStruct) readField_25(p thrift.Protocol) error {  // OptLateStructVal
+    result := *NewLateDefStruct()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.SetStructWithCustomDefaultNonCompat(result)
+    x.SetOptLateStructValNonCompat(result)
+    return nil
+}
+
+func (x *MyStruct) readField_24(p thrift.Protocol) error {  // OptStructVal
+    result := *NewMyData()
+err := result.Read(p)
+if err != nil {
+    return err
+}
+
+    x.SetOptStructValNonCompat(result)
+    return nil
+}
+
+func (x *MyStruct) readField_23(p thrift.Protocol) error {  // OptEnumVal
+    enumResult, err := p.ReadI32()
+if err != nil {
+    return err
+}
+result := MyEnum(enumResult)
+
+    x.SetOptEnumValNonCompat(result)
+    return nil
+}
+
+func (x *MyStruct) readField_22(p thrift.Protocol) error {  // OptBinaryVal
+    result, err := p.ReadBinary()
+if err != nil {
+    return err
+}
+
+    x.SetOptBinaryValNonCompat(result)
+    return nil
+}
+
+func (x *MyStruct) readField_21(p thrift.Protocol) error {  // OptStringVal
+    result, err := p.ReadString()
+if err != nil {
+    return err
+}
+
+    x.SetOptStringValNonCompat(result)
+    return nil
+}
+
+func (x *MyStruct) readField_20(p thrift.Protocol) error {  // OptDoubleVal
+    result, err := p.ReadDouble()
+if err != nil {
+    return err
+}
+
+    x.SetOptDoubleValNonCompat(result)
+    return nil
+}
+
+func (x *MyStruct) readField_19(p thrift.Protocol) error {  // OptFloatVal
+    result, err := p.ReadFloat()
+if err != nil {
+    return err
+}
+
+    x.SetOptFloatValNonCompat(result)
+    return nil
+}
+
+func (x *MyStruct) readField_18(p thrift.Protocol) error {  // OptI64Val
+    result, err := p.ReadI64()
+if err != nil {
+    return err
+}
+
+    x.SetOptI64ValNonCompat(result)
+    return nil
+}
+
+func (x *MyStruct) readField_17(p thrift.Protocol) error {  // OptI32Val
+    result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+
+    x.SetOptI32ValNonCompat(result)
+    return nil
+}
+
+func (x *MyStruct) readField_16(p thrift.Protocol) error {  // OptI16Val
+    result, err := p.ReadI16()
+if err != nil {
+    return err
+}
+
+    x.SetOptI16ValNonCompat(result)
+    return nil
+}
+
+func (x *MyStruct) readField_15(p thrift.Protocol) error {  // OptByteVal
+    resultByte, err := p.ReadByte()
+result := int8(resultByte)
+if err != nil {
+    return err
+}
+
+    x.SetOptByteValNonCompat(result)
+    return nil
+}
+
+func (x *MyStruct) readField_14(p thrift.Protocol) error {  // OptBoolVal
+    result, err := p.ReadBool()
+if err != nil {
+    return err
+}
+
+    x.SetOptBoolValNonCompat(result)
+    return nil
+}
+
+func (x *MyStruct) readField_13(p thrift.Protocol) error {  // LateStructVal
+    result := *NewLateDefStruct()
+err := result.Read(p)
+if err != nil {
+    return err
+}
+
+    x.SetLateStructValNonCompat(result)
+    return nil
+}
+
+func (x *MyStruct) readField_12(p thrift.Protocol) error {  // UnionVal
+    result := *NewMyUnion()
+err := result.Read(p)
+if err != nil {
+    return err
+}
+
+    x.SetUnionValNonCompat(result)
+    return nil
+}
+
+func (x *MyStruct) readField_11(p thrift.Protocol) error {  // StructVal
+    result := *NewMyData()
+err := result.Read(p)
+if err != nil {
+    return err
+}
+
+    x.SetStructValNonCompat(result)
+    return nil
+}
+
+func (x *MyStruct) readField_10(p thrift.Protocol) error {  // EnumVal
+    enumResult, err := p.ReadI32()
+if err != nil {
+    return err
+}
+result := MyEnum(enumResult)
+
+    x.SetEnumValNonCompat(result)
+    return nil
+}
+
+func (x *MyStruct) readField_9(p thrift.Protocol) error {  // BinaryVal
+    result, err := p.ReadBinary()
+if err != nil {
+    return err
+}
+
+    x.SetBinaryValNonCompat(result)
+    return nil
+}
+
+func (x *MyStruct) readField_8(p thrift.Protocol) error {  // StringVal
+    result, err := p.ReadString()
+if err != nil {
+    return err
+}
+
+    x.SetStringValNonCompat(result)
+    return nil
+}
+
+func (x *MyStruct) readField_7(p thrift.Protocol) error {  // DoubleVal
+    result, err := p.ReadDouble()
+if err != nil {
+    return err
+}
+
+    x.SetDoubleValNonCompat(result)
+    return nil
+}
+
+func (x *MyStruct) readField_6(p thrift.Protocol) error {  // FloatVal
+    result, err := p.ReadFloat()
+if err != nil {
+    return err
+}
+
+    x.SetFloatValNonCompat(result)
+    return nil
+}
+
+func (x *MyStruct) readField_5(p thrift.Protocol) error {  // I64Val
+    result, err := p.ReadI64()
+if err != nil {
+    return err
+}
+
+    x.SetI64ValNonCompat(result)
+    return nil
+}
+
+func (x *MyStruct) readField_4(p thrift.Protocol) error {  // I32Val
+    result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+
+    x.SetI32ValNonCompat(result)
+    return nil
+}
+
+func (x *MyStruct) readField_3(p thrift.Protocol) error {  // I16Val
+    result, err := p.ReadI16()
+if err != nil {
+    return err
+}
+
+    x.SetI16ValNonCompat(result)
+    return nil
+}
+
+func (x *MyStruct) readField_2(p thrift.Protocol) error {  // ByteVal
+    resultByte, err := p.ReadByte()
+result := int8(resultByte)
+if err != nil {
+    return err
+}
+
+    x.SetByteValNonCompat(result)
+    return nil
+}
+
+func (x *MyStruct) readField_1(p thrift.Protocol) error {  // BoolVal
+    result, err := p.ReadBool()
+if err != nil {
+    return err
+}
+
+    x.SetBoolValNonCompat(result)
     return nil
 }
 
@@ -3169,116 +3169,40 @@ if err != nil {
     return nil
 }
 
-func (x *MyStruct) toString_1() string {  // BoolVal
-    return fmt.Sprintf("%v", x.GetBoolValNonCompat())
+func (x *MyStruct) toString_32() string {  // StructWithCustomDefault
+    return fmt.Sprintf("%v", x.GetStructWithCustomDefaultNonCompat())
 }
 
-func (x *MyStruct) toString_2() string {  // ByteVal
-    return fmt.Sprintf("%v", x.GetByteValNonCompat())
+func (x *MyStruct) toString_31() string {  // I32WithCustomDefault
+    return fmt.Sprintf("%v", x.GetI32WithCustomDefaultNonCompat())
 }
 
-func (x *MyStruct) toString_3() string {  // I16Val
-    return fmt.Sprintf("%v", x.GetI16ValNonCompat())
+func (x *MyStruct) toString_30() string {  // MapMap
+    return fmt.Sprintf("%v", x.GetMapMapNonCompat())
 }
 
-func (x *MyStruct) toString_4() string {  // I32Val
-    return fmt.Sprintf("%v", x.GetI32ValNonCompat())
+func (x *MyStruct) toString_29() string {  // ListMap
+    return fmt.Sprintf("%v", x.GetListMapNonCompat())
 }
 
-func (x *MyStruct) toString_5() string {  // I64Val
-    return fmt.Sprintf("%v", x.GetI64ValNonCompat())
+func (x *MyStruct) toString_28() string {  // OptMapVal
+    return fmt.Sprintf("%v", x.GetOptMapValNonCompat())
 }
 
-func (x *MyStruct) toString_6() string {  // FloatVal
-    return fmt.Sprintf("%v", x.GetFloatValNonCompat())
+func (x *MyStruct) toString_27() string {  // OptSetVal
+    return fmt.Sprintf("%v", x.GetOptSetValNonCompat())
 }
 
-func (x *MyStruct) toString_7() string {  // DoubleVal
-    return fmt.Sprintf("%v", x.GetDoubleValNonCompat())
+func (x *MyStruct) toString_26() string {  // OptListVal
+    return fmt.Sprintf("%v", x.GetOptListValNonCompat())
 }
 
-func (x *MyStruct) toString_8() string {  // StringVal
-    return fmt.Sprintf("%v", x.GetStringValNonCompat())
+func (x *MyStruct) toString_25() string {  // OptLateStructVal
+    return fmt.Sprintf("%v", x.GetOptLateStructValNonCompat())
 }
 
-func (x *MyStruct) toString_9() string {  // BinaryVal
-    return fmt.Sprintf("%v", x.GetBinaryValNonCompat())
-}
-
-func (x *MyStruct) toString_10() string {  // EnumVal
-    return fmt.Sprintf("%v", x.GetEnumValNonCompat())
-}
-
-func (x *MyStruct) toString_11() string {  // StructVal
-    return fmt.Sprintf("%v", x.GetStructValNonCompat())
-}
-
-func (x *MyStruct) toString_12() string {  // UnionVal
-    return fmt.Sprintf("%v", x.GetUnionValNonCompat())
-}
-
-func (x *MyStruct) toString_13() string {  // LateStructVal
-    return fmt.Sprintf("%v", x.GetLateStructValNonCompat())
-}
-
-func (x *MyStruct) toString_14() string {  // OptBoolVal
-    if x.IsSetOptBoolVal() {
-        return fmt.Sprintf("%v", *x.GetOptBoolValNonCompat())
-    }
-    return fmt.Sprintf("%v", x.GetOptBoolValNonCompat())
-}
-
-func (x *MyStruct) toString_15() string {  // OptByteVal
-    if x.IsSetOptByteVal() {
-        return fmt.Sprintf("%v", *x.GetOptByteValNonCompat())
-    }
-    return fmt.Sprintf("%v", x.GetOptByteValNonCompat())
-}
-
-func (x *MyStruct) toString_16() string {  // OptI16Val
-    if x.IsSetOptI16Val() {
-        return fmt.Sprintf("%v", *x.GetOptI16ValNonCompat())
-    }
-    return fmt.Sprintf("%v", x.GetOptI16ValNonCompat())
-}
-
-func (x *MyStruct) toString_17() string {  // OptI32Val
-    if x.IsSetOptI32Val() {
-        return fmt.Sprintf("%v", *x.GetOptI32ValNonCompat())
-    }
-    return fmt.Sprintf("%v", x.GetOptI32ValNonCompat())
-}
-
-func (x *MyStruct) toString_18() string {  // OptI64Val
-    if x.IsSetOptI64Val() {
-        return fmt.Sprintf("%v", *x.GetOptI64ValNonCompat())
-    }
-    return fmt.Sprintf("%v", x.GetOptI64ValNonCompat())
-}
-
-func (x *MyStruct) toString_19() string {  // OptFloatVal
-    if x.IsSetOptFloatVal() {
-        return fmt.Sprintf("%v", *x.GetOptFloatValNonCompat())
-    }
-    return fmt.Sprintf("%v", x.GetOptFloatValNonCompat())
-}
-
-func (x *MyStruct) toString_20() string {  // OptDoubleVal
-    if x.IsSetOptDoubleVal() {
-        return fmt.Sprintf("%v", *x.GetOptDoubleValNonCompat())
-    }
-    return fmt.Sprintf("%v", x.GetOptDoubleValNonCompat())
-}
-
-func (x *MyStruct) toString_21() string {  // OptStringVal
-    if x.IsSetOptStringVal() {
-        return fmt.Sprintf("%v", *x.GetOptStringValNonCompat())
-    }
-    return fmt.Sprintf("%v", x.GetOptStringValNonCompat())
-}
-
-func (x *MyStruct) toString_22() string {  // OptBinaryVal
-    return fmt.Sprintf("%v", x.GetOptBinaryValNonCompat())
+func (x *MyStruct) toString_24() string {  // OptStructVal
+    return fmt.Sprintf("%v", x.GetOptStructValNonCompat())
 }
 
 func (x *MyStruct) toString_23() string {  // OptEnumVal
@@ -3288,115 +3212,131 @@ func (x *MyStruct) toString_23() string {  // OptEnumVal
     return fmt.Sprintf("%v", x.GetOptEnumValNonCompat())
 }
 
-func (x *MyStruct) toString_24() string {  // OptStructVal
-    return fmt.Sprintf("%v", x.GetOptStructValNonCompat())
+func (x *MyStruct) toString_22() string {  // OptBinaryVal
+    return fmt.Sprintf("%v", x.GetOptBinaryValNonCompat())
 }
 
-func (x *MyStruct) toString_25() string {  // OptLateStructVal
-    return fmt.Sprintf("%v", x.GetOptLateStructValNonCompat())
+func (x *MyStruct) toString_21() string {  // OptStringVal
+    if x.IsSetOptStringVal() {
+        return fmt.Sprintf("%v", *x.GetOptStringValNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetOptStringValNonCompat())
 }
 
-func (x *MyStruct) toString_26() string {  // OptListVal
-    return fmt.Sprintf("%v", x.GetOptListValNonCompat())
+func (x *MyStruct) toString_20() string {  // OptDoubleVal
+    if x.IsSetOptDoubleVal() {
+        return fmt.Sprintf("%v", *x.GetOptDoubleValNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetOptDoubleValNonCompat())
 }
 
-func (x *MyStruct) toString_27() string {  // OptSetVal
-    return fmt.Sprintf("%v", x.GetOptSetValNonCompat())
+func (x *MyStruct) toString_19() string {  // OptFloatVal
+    if x.IsSetOptFloatVal() {
+        return fmt.Sprintf("%v", *x.GetOptFloatValNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetOptFloatValNonCompat())
 }
 
-func (x *MyStruct) toString_28() string {  // OptMapVal
-    return fmt.Sprintf("%v", x.GetOptMapValNonCompat())
+func (x *MyStruct) toString_18() string {  // OptI64Val
+    if x.IsSetOptI64Val() {
+        return fmt.Sprintf("%v", *x.GetOptI64ValNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetOptI64ValNonCompat())
 }
 
-func (x *MyStruct) toString_29() string {  // ListMap
-    return fmt.Sprintf("%v", x.GetListMapNonCompat())
+func (x *MyStruct) toString_17() string {  // OptI32Val
+    if x.IsSetOptI32Val() {
+        return fmt.Sprintf("%v", *x.GetOptI32ValNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetOptI32ValNonCompat())
 }
 
-func (x *MyStruct) toString_30() string {  // MapMap
-    return fmt.Sprintf("%v", x.GetMapMapNonCompat())
+func (x *MyStruct) toString_16() string {  // OptI16Val
+    if x.IsSetOptI16Val() {
+        return fmt.Sprintf("%v", *x.GetOptI16ValNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetOptI16ValNonCompat())
 }
 
-func (x *MyStruct) toString_31() string {  // I32WithCustomDefault
-    return fmt.Sprintf("%v", x.GetI32WithCustomDefaultNonCompat())
+func (x *MyStruct) toString_15() string {  // OptByteVal
+    if x.IsSetOptByteVal() {
+        return fmt.Sprintf("%v", *x.GetOptByteValNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetOptByteValNonCompat())
 }
 
-func (x *MyStruct) toString_32() string {  // StructWithCustomDefault
-    return fmt.Sprintf("%v", x.GetStructWithCustomDefaultNonCompat())
+func (x *MyStruct) toString_14() string {  // OptBoolVal
+    if x.IsSetOptBoolVal() {
+        return fmt.Sprintf("%v", *x.GetOptBoolValNonCompat())
+    }
+    return fmt.Sprintf("%v", x.GetOptBoolValNonCompat())
+}
+
+func (x *MyStruct) toString_13() string {  // LateStructVal
+    return fmt.Sprintf("%v", x.GetLateStructValNonCompat())
+}
+
+func (x *MyStruct) toString_12() string {  // UnionVal
+    return fmt.Sprintf("%v", x.GetUnionValNonCompat())
+}
+
+func (x *MyStruct) toString_11() string {  // StructVal
+    return fmt.Sprintf("%v", x.GetStructValNonCompat())
+}
+
+func (x *MyStruct) toString_10() string {  // EnumVal
+    return fmt.Sprintf("%v", x.GetEnumValNonCompat())
+}
+
+func (x *MyStruct) toString_9() string {  // BinaryVal
+    return fmt.Sprintf("%v", x.GetBinaryValNonCompat())
+}
+
+func (x *MyStruct) toString_8() string {  // StringVal
+    return fmt.Sprintf("%v", x.GetStringValNonCompat())
+}
+
+func (x *MyStruct) toString_7() string {  // DoubleVal
+    return fmt.Sprintf("%v", x.GetDoubleValNonCompat())
+}
+
+func (x *MyStruct) toString_6() string {  // FloatVal
+    return fmt.Sprintf("%v", x.GetFloatValNonCompat())
+}
+
+func (x *MyStruct) toString_5() string {  // I64Val
+    return fmt.Sprintf("%v", x.GetI64ValNonCompat())
+}
+
+func (x *MyStruct) toString_4() string {  // I32Val
+    return fmt.Sprintf("%v", x.GetI32ValNonCompat())
+}
+
+func (x *MyStruct) toString_3() string {  // I16Val
+    return fmt.Sprintf("%v", x.GetI16ValNonCompat())
+}
+
+func (x *MyStruct) toString_2() string {  // ByteVal
+    return fmt.Sprintf("%v", x.GetByteValNonCompat())
+}
+
+func (x *MyStruct) toString_1() string {  // BoolVal
+    return fmt.Sprintf("%v", x.GetBoolValNonCompat())
 }
 
 func (x *MyStruct) toString1() string {  // StructWithFieldCustomDefault
     return fmt.Sprintf("%v", x.GetStructWithFieldCustomDefaultNonCompat())
 }
 
-// Deprecated: Use NewMyStruct().GetStructVal() instead.
-var MyStruct_StructVal_DEFAULT = NewMyStruct().GetStructVal()
+// Deprecated: Use NewMyStruct().GetStructWithCustomDefault() instead.
+var MyStruct_StructWithCustomDefault_DEFAULT = NewMyStruct().GetStructWithCustomDefault()
 
-// Deprecated: Use NewMyStruct().GetStructVal() instead.
-func (x *MyStruct) DefaultGetStructVal() *MyData {
-    if !x.IsSetStructVal() {
-        return NewMyData()
+// Deprecated: Use NewMyStruct().GetStructWithCustomDefault() instead.
+func (x *MyStruct) DefaultGetStructWithCustomDefault() *MyDataWithCustomDefault {
+    if !x.IsSetStructWithCustomDefault() {
+        return NewMyDataWithCustomDefault()
     }
-    return x.StructVal
-}
-
-// Deprecated: Use NewMyStruct().GetUnionVal() instead.
-var MyStruct_UnionVal_DEFAULT = NewMyStruct().GetUnionVal()
-
-// Deprecated: Use NewMyStruct().GetUnionVal() instead.
-func (x *MyStruct) DefaultGetUnionVal() *MyUnion {
-    if !x.IsSetUnionVal() {
-        return NewMyUnion()
-    }
-    return x.UnionVal
-}
-
-// Deprecated: Use NewMyStruct().GetLateStructVal() instead.
-var MyStruct_LateStructVal_DEFAULT = NewMyStruct().GetLateStructVal()
-
-// Deprecated: Use NewMyStruct().GetLateStructVal() instead.
-func (x *MyStruct) DefaultGetLateStructVal() *LateDefStruct {
-    if !x.IsSetLateStructVal() {
-        return NewLateDefStruct()
-    }
-    return x.LateStructVal
-}
-
-// Deprecated: Use NewMyStruct().GetOptBoolVal() instead.
-var MyStruct_OptBoolVal_DEFAULT = NewMyStruct().GetOptBoolVal()
-
-// Deprecated: Use NewMyStruct().GetOptByteVal() instead.
-var MyStruct_OptByteVal_DEFAULT = NewMyStruct().GetOptByteVal()
-
-// Deprecated: Use NewMyStruct().GetOptI16Val() instead.
-var MyStruct_OptI16Val_DEFAULT = NewMyStruct().GetOptI16Val()
-
-// Deprecated: Use NewMyStruct().GetOptI32Val() instead.
-var MyStruct_OptI32Val_DEFAULT = NewMyStruct().GetOptI32Val()
-
-// Deprecated: Use NewMyStruct().GetOptI64Val() instead.
-var MyStruct_OptI64Val_DEFAULT = NewMyStruct().GetOptI64Val()
-
-// Deprecated: Use NewMyStruct().GetOptFloatVal() instead.
-var MyStruct_OptFloatVal_DEFAULT = NewMyStruct().GetOptFloatVal()
-
-// Deprecated: Use NewMyStruct().GetOptDoubleVal() instead.
-var MyStruct_OptDoubleVal_DEFAULT = NewMyStruct().GetOptDoubleVal()
-
-// Deprecated: Use NewMyStruct().GetOptStringVal() instead.
-var MyStruct_OptStringVal_DEFAULT = NewMyStruct().GetOptStringVal()
-
-// Deprecated: Use NewMyStruct().GetOptEnumVal() instead.
-var MyStruct_OptEnumVal_DEFAULT = NewMyStruct().GetOptEnumVal()
-
-// Deprecated: Use NewMyStruct().GetOptStructVal() instead.
-var MyStruct_OptStructVal_DEFAULT = NewMyStruct().GetOptStructVal()
-
-// Deprecated: Use NewMyStruct().GetOptStructVal() instead.
-func (x *MyStruct) DefaultGetOptStructVal() *MyData {
-    if !x.IsSetOptStructVal() {
-        return NewMyData()
-    }
-    return x.OptStructVal
+    return x.StructWithCustomDefault
 }
 
 // Deprecated: Use NewMyStruct().GetOptLateStructVal() instead.
@@ -3410,15 +3350,75 @@ func (x *MyStruct) DefaultGetOptLateStructVal() *LateDefStruct {
     return x.OptLateStructVal
 }
 
-// Deprecated: Use NewMyStruct().GetStructWithCustomDefault() instead.
-var MyStruct_StructWithCustomDefault_DEFAULT = NewMyStruct().GetStructWithCustomDefault()
+// Deprecated: Use NewMyStruct().GetOptStructVal() instead.
+var MyStruct_OptStructVal_DEFAULT = NewMyStruct().GetOptStructVal()
 
-// Deprecated: Use NewMyStruct().GetStructWithCustomDefault() instead.
-func (x *MyStruct) DefaultGetStructWithCustomDefault() *MyDataWithCustomDefault {
-    if !x.IsSetStructWithCustomDefault() {
-        return NewMyDataWithCustomDefault()
+// Deprecated: Use NewMyStruct().GetOptStructVal() instead.
+func (x *MyStruct) DefaultGetOptStructVal() *MyData {
+    if !x.IsSetOptStructVal() {
+        return NewMyData()
     }
-    return x.StructWithCustomDefault
+    return x.OptStructVal
+}
+
+// Deprecated: Use NewMyStruct().GetOptEnumVal() instead.
+var MyStruct_OptEnumVal_DEFAULT = NewMyStruct().GetOptEnumVal()
+
+// Deprecated: Use NewMyStruct().GetOptStringVal() instead.
+var MyStruct_OptStringVal_DEFAULT = NewMyStruct().GetOptStringVal()
+
+// Deprecated: Use NewMyStruct().GetOptDoubleVal() instead.
+var MyStruct_OptDoubleVal_DEFAULT = NewMyStruct().GetOptDoubleVal()
+
+// Deprecated: Use NewMyStruct().GetOptFloatVal() instead.
+var MyStruct_OptFloatVal_DEFAULT = NewMyStruct().GetOptFloatVal()
+
+// Deprecated: Use NewMyStruct().GetOptI64Val() instead.
+var MyStruct_OptI64Val_DEFAULT = NewMyStruct().GetOptI64Val()
+
+// Deprecated: Use NewMyStruct().GetOptI32Val() instead.
+var MyStruct_OptI32Val_DEFAULT = NewMyStruct().GetOptI32Val()
+
+// Deprecated: Use NewMyStruct().GetOptI16Val() instead.
+var MyStruct_OptI16Val_DEFAULT = NewMyStruct().GetOptI16Val()
+
+// Deprecated: Use NewMyStruct().GetOptByteVal() instead.
+var MyStruct_OptByteVal_DEFAULT = NewMyStruct().GetOptByteVal()
+
+// Deprecated: Use NewMyStruct().GetOptBoolVal() instead.
+var MyStruct_OptBoolVal_DEFAULT = NewMyStruct().GetOptBoolVal()
+
+// Deprecated: Use NewMyStruct().GetLateStructVal() instead.
+var MyStruct_LateStructVal_DEFAULT = NewMyStruct().GetLateStructVal()
+
+// Deprecated: Use NewMyStruct().GetLateStructVal() instead.
+func (x *MyStruct) DefaultGetLateStructVal() *LateDefStruct {
+    if !x.IsSetLateStructVal() {
+        return NewLateDefStruct()
+    }
+    return x.LateStructVal
+}
+
+// Deprecated: Use NewMyStruct().GetUnionVal() instead.
+var MyStruct_UnionVal_DEFAULT = NewMyStruct().GetUnionVal()
+
+// Deprecated: Use NewMyStruct().GetUnionVal() instead.
+func (x *MyStruct) DefaultGetUnionVal() *MyUnion {
+    if !x.IsSetUnionVal() {
+        return NewMyUnion()
+    }
+    return x.UnionVal
+}
+
+// Deprecated: Use NewMyStruct().GetStructVal() instead.
+var MyStruct_StructVal_DEFAULT = NewMyStruct().GetStructVal()
+
+// Deprecated: Use NewMyStruct().GetStructVal() instead.
+func (x *MyStruct) DefaultGetStructVal() *MyData {
+    if !x.IsSetStructVal() {
+        return NewMyData()
+    }
+    return x.StructVal
 }
 
 // Deprecated: Use NewMyStruct().GetStructWithFieldCustomDefault() instead.
@@ -3444,153 +3444,8 @@ func NewMyStructBuilder() *MyStructBuilder {
     }
 }
 
-func (x *MyStructBuilder) BoolVal(value bool) *MyStructBuilder {
-    x.obj.BoolVal = value
-    return x
-}
-
-func (x *MyStructBuilder) ByteVal(value int8) *MyStructBuilder {
-    x.obj.ByteVal = value
-    return x
-}
-
-func (x *MyStructBuilder) I16Val(value int16) *MyStructBuilder {
-    x.obj.I16Val = value
-    return x
-}
-
-func (x *MyStructBuilder) I32Val(value int32) *MyStructBuilder {
-    x.obj.I32Val = value
-    return x
-}
-
-func (x *MyStructBuilder) I64Val(value int64) *MyStructBuilder {
-    x.obj.I64Val = value
-    return x
-}
-
-func (x *MyStructBuilder) FloatVal(value float32) *MyStructBuilder {
-    x.obj.FloatVal = value
-    return x
-}
-
-func (x *MyStructBuilder) DoubleVal(value float64) *MyStructBuilder {
-    x.obj.DoubleVal = value
-    return x
-}
-
-func (x *MyStructBuilder) StringVal(value string) *MyStructBuilder {
-    x.obj.StringVal = value
-    return x
-}
-
-func (x *MyStructBuilder) BinaryVal(value []byte) *MyStructBuilder {
-    x.obj.BinaryVal = value
-    return x
-}
-
-func (x *MyStructBuilder) EnumVal(value MyEnum) *MyStructBuilder {
-    x.obj.EnumVal = value
-    return x
-}
-
-func (x *MyStructBuilder) StructVal(value *MyData) *MyStructBuilder {
-    x.obj.StructVal = value
-    return x
-}
-
-func (x *MyStructBuilder) UnionVal(value *MyUnion) *MyStructBuilder {
-    x.obj.UnionVal = value
-    return x
-}
-
-func (x *MyStructBuilder) LateStructVal(value *LateDefStruct) *MyStructBuilder {
-    x.obj.LateStructVal = value
-    return x
-}
-
-func (x *MyStructBuilder) OptBoolVal(value *bool) *MyStructBuilder {
-    x.obj.OptBoolVal = value
-    return x
-}
-
-func (x *MyStructBuilder) OptByteVal(value *int8) *MyStructBuilder {
-    x.obj.OptByteVal = value
-    return x
-}
-
-func (x *MyStructBuilder) OptI16Val(value *int16) *MyStructBuilder {
-    x.obj.OptI16Val = value
-    return x
-}
-
-func (x *MyStructBuilder) OptI32Val(value *int32) *MyStructBuilder {
-    x.obj.OptI32Val = value
-    return x
-}
-
-func (x *MyStructBuilder) OptI64Val(value *int64) *MyStructBuilder {
-    x.obj.OptI64Val = value
-    return x
-}
-
-func (x *MyStructBuilder) OptFloatVal(value *float32) *MyStructBuilder {
-    x.obj.OptFloatVal = value
-    return x
-}
-
-func (x *MyStructBuilder) OptDoubleVal(value *float64) *MyStructBuilder {
-    x.obj.OptDoubleVal = value
-    return x
-}
-
-func (x *MyStructBuilder) OptStringVal(value *string) *MyStructBuilder {
-    x.obj.OptStringVal = value
-    return x
-}
-
-func (x *MyStructBuilder) OptBinaryVal(value []byte) *MyStructBuilder {
-    x.obj.OptBinaryVal = value
-    return x
-}
-
-func (x *MyStructBuilder) OptEnumVal(value *MyEnum) *MyStructBuilder {
-    x.obj.OptEnumVal = value
-    return x
-}
-
-func (x *MyStructBuilder) OptStructVal(value *MyData) *MyStructBuilder {
-    x.obj.OptStructVal = value
-    return x
-}
-
-func (x *MyStructBuilder) OptLateStructVal(value *LateDefStruct) *MyStructBuilder {
-    x.obj.OptLateStructVal = value
-    return x
-}
-
-func (x *MyStructBuilder) OptListVal(value []int16) *MyStructBuilder {
-    x.obj.OptListVal = value
-    return x
-}
-
-func (x *MyStructBuilder) OptSetVal(value []string) *MyStructBuilder {
-    x.obj.OptSetVal = value
-    return x
-}
-
-func (x *MyStructBuilder) OptMapVal(value map[string]string) *MyStructBuilder {
-    x.obj.OptMapVal = value
-    return x
-}
-
-func (x *MyStructBuilder) ListMap(value []map[string]int32) *MyStructBuilder {
-    x.obj.ListMap = value
-    return x
-}
-
-func (x *MyStructBuilder) MapMap(value map[string]map[string]int32) *MyStructBuilder {
-    x.obj.MapMap = value
+func (x *MyStructBuilder) StructWithCustomDefault(value *MyDataWithCustomDefault) *MyStructBuilder {
+    x.obj.StructWithCustomDefault = value
     return x
 }
 
@@ -3599,8 +3454,153 @@ func (x *MyStructBuilder) I32WithCustomDefault(value int32) *MyStructBuilder {
     return x
 }
 
-func (x *MyStructBuilder) StructWithCustomDefault(value *MyDataWithCustomDefault) *MyStructBuilder {
-    x.obj.StructWithCustomDefault = value
+func (x *MyStructBuilder) MapMap(value map[string]map[string]int32) *MyStructBuilder {
+    x.obj.MapMap = value
+    return x
+}
+
+func (x *MyStructBuilder) ListMap(value []map[string]int32) *MyStructBuilder {
+    x.obj.ListMap = value
+    return x
+}
+
+func (x *MyStructBuilder) OptMapVal(value map[string]string) *MyStructBuilder {
+    x.obj.OptMapVal = value
+    return x
+}
+
+func (x *MyStructBuilder) OptSetVal(value []string) *MyStructBuilder {
+    x.obj.OptSetVal = value
+    return x
+}
+
+func (x *MyStructBuilder) OptListVal(value []int16) *MyStructBuilder {
+    x.obj.OptListVal = value
+    return x
+}
+
+func (x *MyStructBuilder) OptLateStructVal(value *LateDefStruct) *MyStructBuilder {
+    x.obj.OptLateStructVal = value
+    return x
+}
+
+func (x *MyStructBuilder) OptStructVal(value *MyData) *MyStructBuilder {
+    x.obj.OptStructVal = value
+    return x
+}
+
+func (x *MyStructBuilder) OptEnumVal(value *MyEnum) *MyStructBuilder {
+    x.obj.OptEnumVal = value
+    return x
+}
+
+func (x *MyStructBuilder) OptBinaryVal(value []byte) *MyStructBuilder {
+    x.obj.OptBinaryVal = value
+    return x
+}
+
+func (x *MyStructBuilder) OptStringVal(value *string) *MyStructBuilder {
+    x.obj.OptStringVal = value
+    return x
+}
+
+func (x *MyStructBuilder) OptDoubleVal(value *float64) *MyStructBuilder {
+    x.obj.OptDoubleVal = value
+    return x
+}
+
+func (x *MyStructBuilder) OptFloatVal(value *float32) *MyStructBuilder {
+    x.obj.OptFloatVal = value
+    return x
+}
+
+func (x *MyStructBuilder) OptI64Val(value *int64) *MyStructBuilder {
+    x.obj.OptI64Val = value
+    return x
+}
+
+func (x *MyStructBuilder) OptI32Val(value *int32) *MyStructBuilder {
+    x.obj.OptI32Val = value
+    return x
+}
+
+func (x *MyStructBuilder) OptI16Val(value *int16) *MyStructBuilder {
+    x.obj.OptI16Val = value
+    return x
+}
+
+func (x *MyStructBuilder) OptByteVal(value *int8) *MyStructBuilder {
+    x.obj.OptByteVal = value
+    return x
+}
+
+func (x *MyStructBuilder) OptBoolVal(value *bool) *MyStructBuilder {
+    x.obj.OptBoolVal = value
+    return x
+}
+
+func (x *MyStructBuilder) LateStructVal(value *LateDefStruct) *MyStructBuilder {
+    x.obj.LateStructVal = value
+    return x
+}
+
+func (x *MyStructBuilder) UnionVal(value *MyUnion) *MyStructBuilder {
+    x.obj.UnionVal = value
+    return x
+}
+
+func (x *MyStructBuilder) StructVal(value *MyData) *MyStructBuilder {
+    x.obj.StructVal = value
+    return x
+}
+
+func (x *MyStructBuilder) EnumVal(value MyEnum) *MyStructBuilder {
+    x.obj.EnumVal = value
+    return x
+}
+
+func (x *MyStructBuilder) BinaryVal(value []byte) *MyStructBuilder {
+    x.obj.BinaryVal = value
+    return x
+}
+
+func (x *MyStructBuilder) StringVal(value string) *MyStructBuilder {
+    x.obj.StringVal = value
+    return x
+}
+
+func (x *MyStructBuilder) DoubleVal(value float64) *MyStructBuilder {
+    x.obj.DoubleVal = value
+    return x
+}
+
+func (x *MyStructBuilder) FloatVal(value float32) *MyStructBuilder {
+    x.obj.FloatVal = value
+    return x
+}
+
+func (x *MyStructBuilder) I64Val(value int64) *MyStructBuilder {
+    x.obj.I64Val = value
+    return x
+}
+
+func (x *MyStructBuilder) I32Val(value int32) *MyStructBuilder {
+    x.obj.I32Val = value
+    return x
+}
+
+func (x *MyStructBuilder) I16Val(value int16) *MyStructBuilder {
+    x.obj.I16Val = value
+    return x
+}
+
+func (x *MyStructBuilder) ByteVal(value int8) *MyStructBuilder {
+    x.obj.ByteVal = value
+    return x
+}
+
+func (x *MyStructBuilder) BoolVal(value bool) *MyStructBuilder {
+    x.obj.BoolVal = value
     return x
 }
 
@@ -3619,123 +3619,7 @@ func (x *MyStruct) Write(p thrift.Protocol) error {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
-    if err := x.writeField_1(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField_2(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField_3(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField_4(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField_5(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField_6(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField_7(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField_8(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField_9(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField_10(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField_11(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField_12(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField_13(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField_14(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField_15(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField_16(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField_17(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField_18(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField_19(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField_20(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField_21(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField_22(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField_23(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField_24(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField_25(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField_26(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField_27(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField_28(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField_29(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField_30(p); err != nil {
+    if err := x.writeField_32(p); err != nil {
         return err
     }
 
@@ -3743,7 +3627,123 @@ func (x *MyStruct) Write(p thrift.Protocol) error {
         return err
     }
 
-    if err := x.writeField_32(p); err != nil {
+    if err := x.writeField_30(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField_29(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField_28(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField_27(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField_26(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField_25(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField_24(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField_23(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField_22(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField_21(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField_20(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField_19(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField_18(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField_17(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField_16(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField_15(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField_14(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField_13(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField_12(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField_11(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField_10(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField_9(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField_8(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField_7(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField_6(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField_5(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField_4(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField_3(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField_2(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField_1(p); err != nil {
         return err
     }
 
@@ -3777,329 +3777,10 @@ func (x *MyStruct) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case -1:  // boolVal
-            expectedType := thrift.Type(thrift.BOOL)
-            if wireType == expectedType {
-                if err := x.readField_1(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
-            }
-        case -2:  // byteVal
-            expectedType := thrift.Type(thrift.BYTE)
-            if wireType == expectedType {
-                if err := x.readField_2(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
-            }
-        case -3:  // i16Val
-            expectedType := thrift.Type(thrift.I16)
-            if wireType == expectedType {
-                if err := x.readField_3(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
-            }
-        case -4:  // i32Val
-            expectedType := thrift.Type(thrift.I32)
-            if wireType == expectedType {
-                if err := x.readField_4(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
-            }
-        case -5:  // i64Val
-            expectedType := thrift.Type(thrift.I64)
-            if wireType == expectedType {
-                if err := x.readField_5(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
-            }
-        case -6:  // floatVal
-            expectedType := thrift.Type(thrift.FLOAT)
-            if wireType == expectedType {
-                if err := x.readField_6(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
-            }
-        case -7:  // doubleVal
-            expectedType := thrift.Type(thrift.DOUBLE)
-            if wireType == expectedType {
-                if err := x.readField_7(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
-            }
-        case -8:  // stringVal
-            expectedType := thrift.Type(thrift.STRING)
-            if wireType == expectedType {
-                if err := x.readField_8(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
-            }
-        case -9:  // binaryVal
-            expectedType := thrift.Type(thrift.STRING)
-            if wireType == expectedType {
-                if err := x.readField_9(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
-            }
-        case -10:  // enumVal
-            expectedType := thrift.Type(thrift.I32)
-            if wireType == expectedType {
-                if err := x.readField_10(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
-            }
-        case -11:  // structVal
+        case -32:  // structWithCustomDefault
             expectedType := thrift.Type(thrift.STRUCT)
             if wireType == expectedType {
-                if err := x.readField_11(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
-            }
-        case -12:  // unionVal
-            expectedType := thrift.Type(thrift.STRUCT)
-            if wireType == expectedType {
-                if err := x.readField_12(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
-            }
-        case -13:  // lateStructVal
-            expectedType := thrift.Type(thrift.STRUCT)
-            if wireType == expectedType {
-                if err := x.readField_13(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
-            }
-        case -14:  // optBoolVal
-            expectedType := thrift.Type(thrift.BOOL)
-            if wireType == expectedType {
-                if err := x.readField_14(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
-            }
-        case -15:  // optByteVal
-            expectedType := thrift.Type(thrift.BYTE)
-            if wireType == expectedType {
-                if err := x.readField_15(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
-            }
-        case -16:  // optI16Val
-            expectedType := thrift.Type(thrift.I16)
-            if wireType == expectedType {
-                if err := x.readField_16(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
-            }
-        case -17:  // optI32Val
-            expectedType := thrift.Type(thrift.I32)
-            if wireType == expectedType {
-                if err := x.readField_17(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
-            }
-        case -18:  // optI64Val
-            expectedType := thrift.Type(thrift.I64)
-            if wireType == expectedType {
-                if err := x.readField_18(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
-            }
-        case -19:  // optFloatVal
-            expectedType := thrift.Type(thrift.FLOAT)
-            if wireType == expectedType {
-                if err := x.readField_19(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
-            }
-        case -20:  // optDoubleVal
-            expectedType := thrift.Type(thrift.DOUBLE)
-            if wireType == expectedType {
-                if err := x.readField_20(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
-            }
-        case -21:  // optStringVal
-            expectedType := thrift.Type(thrift.STRING)
-            if wireType == expectedType {
-                if err := x.readField_21(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
-            }
-        case -22:  // optBinaryVal
-            expectedType := thrift.Type(thrift.STRING)
-            if wireType == expectedType {
-                if err := x.readField_22(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
-            }
-        case -23:  // optEnumVal
-            expectedType := thrift.Type(thrift.I32)
-            if wireType == expectedType {
-                if err := x.readField_23(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
-            }
-        case -24:  // optStructVal
-            expectedType := thrift.Type(thrift.STRUCT)
-            if wireType == expectedType {
-                if err := x.readField_24(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
-            }
-        case -25:  // optLateStructVal
-            expectedType := thrift.Type(thrift.STRUCT)
-            if wireType == expectedType {
-                if err := x.readField_25(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
-            }
-        case -26:  // optListVal
-            expectedType := thrift.Type(thrift.LIST)
-            if wireType == expectedType {
-                if err := x.readField_26(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
-            }
-        case -27:  // optSetVal
-            expectedType := thrift.Type(thrift.SET)
-            if wireType == expectedType {
-                if err := x.readField_27(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
-            }
-        case -28:  // optMapVal
-            expectedType := thrift.Type(thrift.MAP)
-            if wireType == expectedType {
-                if err := x.readField_28(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
-            }
-        case -29:  // listMap
-            expectedType := thrift.Type(thrift.LIST)
-            if wireType == expectedType {
-                if err := x.readField_29(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
-            }
-        case -30:  // mapMap
-            expectedType := thrift.Type(thrift.MAP)
-            if wireType == expectedType {
-                if err := x.readField_30(p); err != nil {
+                if err := x.readField_32(p); err != nil {
                    return err
                 }
             } else {
@@ -4118,10 +3799,329 @@ func (x *MyStruct) Read(p thrift.Protocol) error {
                     return err
                 }
             }
-        case -32:  // structWithCustomDefault
+        case -30:  // mapMap
+            expectedType := thrift.Type(thrift.MAP)
+            if wireType == expectedType {
+                if err := x.readField_30(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
+        case -29:  // listMap
+            expectedType := thrift.Type(thrift.LIST)
+            if wireType == expectedType {
+                if err := x.readField_29(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
+        case -28:  // optMapVal
+            expectedType := thrift.Type(thrift.MAP)
+            if wireType == expectedType {
+                if err := x.readField_28(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
+        case -27:  // optSetVal
+            expectedType := thrift.Type(thrift.SET)
+            if wireType == expectedType {
+                if err := x.readField_27(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
+        case -26:  // optListVal
+            expectedType := thrift.Type(thrift.LIST)
+            if wireType == expectedType {
+                if err := x.readField_26(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
+        case -25:  // optLateStructVal
             expectedType := thrift.Type(thrift.STRUCT)
             if wireType == expectedType {
-                if err := x.readField_32(p); err != nil {
+                if err := x.readField_25(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
+        case -24:  // optStructVal
+            expectedType := thrift.Type(thrift.STRUCT)
+            if wireType == expectedType {
+                if err := x.readField_24(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
+        case -23:  // optEnumVal
+            expectedType := thrift.Type(thrift.I32)
+            if wireType == expectedType {
+                if err := x.readField_23(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
+        case -22:  // optBinaryVal
+            expectedType := thrift.Type(thrift.STRING)
+            if wireType == expectedType {
+                if err := x.readField_22(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
+        case -21:  // optStringVal
+            expectedType := thrift.Type(thrift.STRING)
+            if wireType == expectedType {
+                if err := x.readField_21(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
+        case -20:  // optDoubleVal
+            expectedType := thrift.Type(thrift.DOUBLE)
+            if wireType == expectedType {
+                if err := x.readField_20(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
+        case -19:  // optFloatVal
+            expectedType := thrift.Type(thrift.FLOAT)
+            if wireType == expectedType {
+                if err := x.readField_19(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
+        case -18:  // optI64Val
+            expectedType := thrift.Type(thrift.I64)
+            if wireType == expectedType {
+                if err := x.readField_18(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
+        case -17:  // optI32Val
+            expectedType := thrift.Type(thrift.I32)
+            if wireType == expectedType {
+                if err := x.readField_17(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
+        case -16:  // optI16Val
+            expectedType := thrift.Type(thrift.I16)
+            if wireType == expectedType {
+                if err := x.readField_16(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
+        case -15:  // optByteVal
+            expectedType := thrift.Type(thrift.BYTE)
+            if wireType == expectedType {
+                if err := x.readField_15(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
+        case -14:  // optBoolVal
+            expectedType := thrift.Type(thrift.BOOL)
+            if wireType == expectedType {
+                if err := x.readField_14(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
+        case -13:  // lateStructVal
+            expectedType := thrift.Type(thrift.STRUCT)
+            if wireType == expectedType {
+                if err := x.readField_13(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
+        case -12:  // unionVal
+            expectedType := thrift.Type(thrift.STRUCT)
+            if wireType == expectedType {
+                if err := x.readField_12(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
+        case -11:  // structVal
+            expectedType := thrift.Type(thrift.STRUCT)
+            if wireType == expectedType {
+                if err := x.readField_11(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
+        case -10:  // enumVal
+            expectedType := thrift.Type(thrift.I32)
+            if wireType == expectedType {
+                if err := x.readField_10(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
+        case -9:  // binaryVal
+            expectedType := thrift.Type(thrift.STRING)
+            if wireType == expectedType {
+                if err := x.readField_9(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
+        case -8:  // stringVal
+            expectedType := thrift.Type(thrift.STRING)
+            if wireType == expectedType {
+                if err := x.readField_8(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
+        case -7:  // doubleVal
+            expectedType := thrift.Type(thrift.DOUBLE)
+            if wireType == expectedType {
+                if err := x.readField_7(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
+        case -6:  // floatVal
+            expectedType := thrift.Type(thrift.FLOAT)
+            if wireType == expectedType {
+                if err := x.readField_6(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
+        case -5:  // i64Val
+            expectedType := thrift.Type(thrift.I64)
+            if wireType == expectedType {
+                if err := x.readField_5(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
+        case -4:  // i32Val
+            expectedType := thrift.Type(thrift.I32)
+            if wireType == expectedType {
+                if err := x.readField_4(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
+        case -3:  // i16Val
+            expectedType := thrift.Type(thrift.I16)
+            if wireType == expectedType {
+                if err := x.readField_3(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
+        case -2:  // byteVal
+            expectedType := thrift.Type(thrift.BYTE)
+            if wireType == expectedType {
+                if err := x.readField_2(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
+        case -1:  // boolVal
+            expectedType := thrift.Type(thrift.BOOL)
+            if wireType == expectedType {
+                if err := x.readField_1(p); err != nil {
                    return err
                 }
             } else {
@@ -4166,38 +4166,38 @@ func (x *MyStruct) String() string {
     var sb strings.Builder
 
     sb.WriteString("MyStruct({")
-    sb.WriteString(fmt.Sprintf("BoolVal:%s ", x.toString_1()))
-    sb.WriteString(fmt.Sprintf("ByteVal:%s ", x.toString_2()))
-    sb.WriteString(fmt.Sprintf("I16Val:%s ", x.toString_3()))
-    sb.WriteString(fmt.Sprintf("I32Val:%s ", x.toString_4()))
-    sb.WriteString(fmt.Sprintf("I64Val:%s ", x.toString_5()))
-    sb.WriteString(fmt.Sprintf("FloatVal:%s ", x.toString_6()))
-    sb.WriteString(fmt.Sprintf("DoubleVal:%s ", x.toString_7()))
-    sb.WriteString(fmt.Sprintf("StringVal:%s ", x.toString_8()))
-    sb.WriteString(fmt.Sprintf("BinaryVal:%s ", x.toString_9()))
-    sb.WriteString(fmt.Sprintf("EnumVal:%s ", x.toString_10()))
-    sb.WriteString(fmt.Sprintf("StructVal:%s ", x.toString_11()))
-    sb.WriteString(fmt.Sprintf("UnionVal:%s ", x.toString_12()))
-    sb.WriteString(fmt.Sprintf("LateStructVal:%s ", x.toString_13()))
-    sb.WriteString(fmt.Sprintf("OptBoolVal:%s ", x.toString_14()))
-    sb.WriteString(fmt.Sprintf("OptByteVal:%s ", x.toString_15()))
-    sb.WriteString(fmt.Sprintf("OptI16Val:%s ", x.toString_16()))
-    sb.WriteString(fmt.Sprintf("OptI32Val:%s ", x.toString_17()))
-    sb.WriteString(fmt.Sprintf("OptI64Val:%s ", x.toString_18()))
-    sb.WriteString(fmt.Sprintf("OptFloatVal:%s ", x.toString_19()))
-    sb.WriteString(fmt.Sprintf("OptDoubleVal:%s ", x.toString_20()))
-    sb.WriteString(fmt.Sprintf("OptStringVal:%s ", x.toString_21()))
-    sb.WriteString(fmt.Sprintf("OptBinaryVal:%s ", x.toString_22()))
-    sb.WriteString(fmt.Sprintf("OptEnumVal:%s ", x.toString_23()))
-    sb.WriteString(fmt.Sprintf("OptStructVal:%s ", x.toString_24()))
-    sb.WriteString(fmt.Sprintf("OptLateStructVal:%s ", x.toString_25()))
-    sb.WriteString(fmt.Sprintf("OptListVal:%s ", x.toString_26()))
-    sb.WriteString(fmt.Sprintf("OptSetVal:%s ", x.toString_27()))
-    sb.WriteString(fmt.Sprintf("OptMapVal:%s ", x.toString_28()))
-    sb.WriteString(fmt.Sprintf("ListMap:%s ", x.toString_29()))
-    sb.WriteString(fmt.Sprintf("MapMap:%s ", x.toString_30()))
-    sb.WriteString(fmt.Sprintf("I32WithCustomDefault:%s ", x.toString_31()))
     sb.WriteString(fmt.Sprintf("StructWithCustomDefault:%s ", x.toString_32()))
+    sb.WriteString(fmt.Sprintf("I32WithCustomDefault:%s ", x.toString_31()))
+    sb.WriteString(fmt.Sprintf("MapMap:%s ", x.toString_30()))
+    sb.WriteString(fmt.Sprintf("ListMap:%s ", x.toString_29()))
+    sb.WriteString(fmt.Sprintf("OptMapVal:%s ", x.toString_28()))
+    sb.WriteString(fmt.Sprintf("OptSetVal:%s ", x.toString_27()))
+    sb.WriteString(fmt.Sprintf("OptListVal:%s ", x.toString_26()))
+    sb.WriteString(fmt.Sprintf("OptLateStructVal:%s ", x.toString_25()))
+    sb.WriteString(fmt.Sprintf("OptStructVal:%s ", x.toString_24()))
+    sb.WriteString(fmt.Sprintf("OptEnumVal:%s ", x.toString_23()))
+    sb.WriteString(fmt.Sprintf("OptBinaryVal:%s ", x.toString_22()))
+    sb.WriteString(fmt.Sprintf("OptStringVal:%s ", x.toString_21()))
+    sb.WriteString(fmt.Sprintf("OptDoubleVal:%s ", x.toString_20()))
+    sb.WriteString(fmt.Sprintf("OptFloatVal:%s ", x.toString_19()))
+    sb.WriteString(fmt.Sprintf("OptI64Val:%s ", x.toString_18()))
+    sb.WriteString(fmt.Sprintf("OptI32Val:%s ", x.toString_17()))
+    sb.WriteString(fmt.Sprintf("OptI16Val:%s ", x.toString_16()))
+    sb.WriteString(fmt.Sprintf("OptByteVal:%s ", x.toString_15()))
+    sb.WriteString(fmt.Sprintf("OptBoolVal:%s ", x.toString_14()))
+    sb.WriteString(fmt.Sprintf("LateStructVal:%s ", x.toString_13()))
+    sb.WriteString(fmt.Sprintf("UnionVal:%s ", x.toString_12()))
+    sb.WriteString(fmt.Sprintf("StructVal:%s ", x.toString_11()))
+    sb.WriteString(fmt.Sprintf("EnumVal:%s ", x.toString_10()))
+    sb.WriteString(fmt.Sprintf("BinaryVal:%s ", x.toString_9()))
+    sb.WriteString(fmt.Sprintf("StringVal:%s ", x.toString_8()))
+    sb.WriteString(fmt.Sprintf("DoubleVal:%s ", x.toString_7()))
+    sb.WriteString(fmt.Sprintf("FloatVal:%s ", x.toString_6()))
+    sb.WriteString(fmt.Sprintf("I64Val:%s ", x.toString_5()))
+    sb.WriteString(fmt.Sprintf("I32Val:%s ", x.toString_4()))
+    sb.WriteString(fmt.Sprintf("I16Val:%s ", x.toString_3()))
+    sb.WriteString(fmt.Sprintf("ByteVal:%s ", x.toString_2()))
+    sb.WriteString(fmt.Sprintf("BoolVal:%s ", x.toString_1()))
     sb.WriteString(fmt.Sprintf("StructWithFieldCustomDefault:%s", x.toString1()))
     sb.WriteString("})")
 

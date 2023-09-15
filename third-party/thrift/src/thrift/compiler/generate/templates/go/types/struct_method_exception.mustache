@@ -21,13 +21,13 @@
 
 }}
 func (x *{{struct:go_name}}) Exception() thrift.WritableException {
-    {{#struct:fields}}
+    {{#struct:fields_sorted}}
     {{^field:retval?}}
     if x.{{field:go_name}} != nil {
         return x.{{field:go_name}}
     }
     {{/field:retval?}}
-    {{/struct:fields}}
+    {{/struct:fields_sorted}}
     return nil
 }
 {{!newline}}

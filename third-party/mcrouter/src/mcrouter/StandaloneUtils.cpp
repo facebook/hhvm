@@ -461,7 +461,11 @@ void setupStandaloneMcrouter(
       standaloneOptions.updateFromDict(standaloneOptionsDict);
 
   if (standaloneOptions.core_multiplier > 0) {
-    libmcrouterOptions.num_proxies *= standaloneOptions.core_multiplier;
+    auto c = std::thread::hardware_concurrency();
+    if (!standaloneOptions.core_multiplier_threshold ||
+        c >= standaloneOptions.core_multiplier_threshold) {
+      libmcrouterOptions.num_proxies = c * standaloneOptions.core_multiplier;
+    }
   }
 
   if (libmcrouterOptions.enable_failure_logging) {

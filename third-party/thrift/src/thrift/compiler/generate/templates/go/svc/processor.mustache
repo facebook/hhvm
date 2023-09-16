@@ -170,7 +170,7 @@ func (p *{{> svc/proc_func_name}}) RunContext(ctx context.Context, reqStruct thr
     }
 
     {{^function:void?}}
-    result.Value = retval
+    result.{{function:retval_field_name}} = retval
     {{/function:void?}}
     {{#function:oneway?}}
     return nil, nil

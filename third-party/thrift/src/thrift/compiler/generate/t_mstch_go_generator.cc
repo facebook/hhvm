@@ -531,6 +531,8 @@ class mstch_go_function : public mstch_function {
             {"function:go_name", &mstch_go_function::go_name},
             {"function:go_supported?", &mstch_go_function::is_go_supported},
             {"function:ctx_arg_name", &mstch_go_function::ctx_arg_name},
+            {"function:retval_field_name",
+             &mstch_go_function::retval_field_name},
         });
   }
   mstch::node go_name() { return go::get_go_func_name(function_); }
@@ -553,6 +555,11 @@ class mstch_go_function : public mstch_function {
       ctx_name = std::string("ctx") + std::to_string(++current_num);
     }
     return ctx_name;
+  }
+
+  mstch::node retval_field_name() {
+    // Field name for the return value.
+    return go::munge_ident(go::DEFAULT_RETVAL_FIELD_NAME, /*exported*/ true);
   }
 
  private:

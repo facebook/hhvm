@@ -152,7 +152,7 @@ func (c *{{service:go_name}}ChannelClient) {{> svc/func_signature}} {
         return {{^function:void?}}{{#function:return_type}}{{> common/go_zero_value}}{{/function:return_type}}, {{/function:void?}}out.{{field:go_name}}
     }{{/function:exceptions}}{{!
     }}{{/function:exceptions?}}
-    return {{^function:void?}}out.Value, {{/function:void?}}nil
+    return {{^function:void?}}out.{{function:retval_field_name}}, {{/function:void?}}nil
     {{/function:oneway?}}
 }
 

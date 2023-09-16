@@ -29,8 +29,12 @@ type {{struct:go_name}} struct {
 var _ thrift.Struct = &{{struct:go_name}}{}
 {{#struct:resp?}}
 var _ thrift.WritableResult = &{{struct:go_name}}{}
+
+{{! TODO: resp struct is an internal implementation detail. Can we unexport it? }}
+type {{struct:go_public_resp_name}} = {{struct:go_name}}
 {{/struct:resp?}}{{!
 }}{{#struct:req?}}
 
+{{! TODO: req struct is an internal implementation detail. Can we unexport it? }}
 type {{struct:go_public_req_name}} = {{struct:go_name}}
 {{/struct:req?}}

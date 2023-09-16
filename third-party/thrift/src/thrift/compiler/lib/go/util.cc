@@ -25,7 +25,7 @@ namespace go {
 
 // Name of the field of the response helper struct where
 // the return value is stored (if function call is not void).
-const std::string DEFAULT_RETVAL_FIELD_NAME = "value";
+const std::string DEFAULT_RETVAL_FIELD_NAME = "success";
 
 // keywords
 // https://go.dev/ref/spec#Keywords

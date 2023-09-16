@@ -229,6 +229,8 @@ type respMyServiceFoo struct {
 var _ thrift.Struct = &respMyServiceFoo{}
 var _ thrift.WritableResult = &respMyServiceFoo{}
 
+type MyServiceFooResult = respMyServiceFoo
+
 func newRespMyServiceFoo() *respMyServiceFoo {
     return (&respMyServiceFoo{})
 }

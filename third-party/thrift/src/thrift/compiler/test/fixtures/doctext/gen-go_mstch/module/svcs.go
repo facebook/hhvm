@@ -149,7 +149,7 @@ func (c *CChannelClient) Thing(ctx context.Context, a int32, b string, c []int32
     } else if out.Bang != nil {
         return "", out.Bang
     }
-    return out.Value, nil
+    return out.Success, nil
 }
 
 func (c *CClient) Thing(a int32, b string, c []int32) (string, error) {
@@ -251,6 +251,8 @@ type respCF struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &respCF{}
 var _ thrift.WritableResult = &respCF{}
+
+type CFResult = respCF
 
 func newRespCF() *respCF {
     return (&respCF{})
@@ -682,24 +684,26 @@ func (x *reqCThing) String() string {
     return sb.String()
 }
 type respCThing struct {
-    Value string `thrift:"value,0" json:"value" db:"value"`
+    Success string `thrift:"success,0" json:"success" db:"success"`
     Bang *Bang `thrift:"bang,1,optional" json:"bang,omitempty" db:"bang"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respCThing{}
 var _ thrift.WritableResult = &respCThing{}
 
+type CThingResult = respCThing
+
 func newRespCThing() *respCThing {
     return (&respCThing{}).
-        SetValueNonCompat("")
+        SetSuccessNonCompat("")
 }
 
-func (x *respCThing) GetValueNonCompat() string {
-    return x.Value
+func (x *respCThing) GetSuccessNonCompat() string {
+    return x.Success
 }
 
-func (x *respCThing) GetValue() string {
-    return x.Value
+func (x *respCThing) GetSuccess() string {
+    return x.Success
 }
 
 func (x *respCThing) GetBangNonCompat() *Bang {
@@ -714,13 +718,13 @@ func (x *respCThing) GetBang() *Bang {
     return x.Bang
 }
 
-func (x *respCThing) SetValueNonCompat(value string) *respCThing {
-    x.Value = value
+func (x *respCThing) SetSuccessNonCompat(value string) *respCThing {
+    x.Success = value
     return x
 }
 
-func (x *respCThing) SetValue(value string) *respCThing {
-    x.Value = value
+func (x *respCThing) SetSuccess(value string) *respCThing {
+    x.Success = value
     return x
 }
 
@@ -738,12 +742,12 @@ func (x *respCThing) IsSetBang() bool {
     return x.Bang != nil
 }
 
-func (x *respCThing) writeField0(p thrift.Protocol) error {  // Value
-    if err := p.WriteFieldBegin("value", thrift.STRING, 0); err != nil {
+func (x *respCThing) writeField0(p thrift.Protocol) error {  // Success
+    if err := p.WriteFieldBegin("success", thrift.STRING, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValueNonCompat()
+    item := x.GetSuccessNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -774,13 +778,13 @@ func (x *respCThing) writeField1(p thrift.Protocol) error {  // Bang
     return nil
 }
 
-func (x *respCThing) readField0(p thrift.Protocol) error {  // Value
+func (x *respCThing) readField0(p thrift.Protocol) error {  // Success
     result, err := p.ReadString()
 if err != nil {
     return err
 }
 
-    x.SetValueNonCompat(result)
+    x.SetSuccessNonCompat(result)
     return nil
 }
 
@@ -795,8 +799,8 @@ if err != nil {
     return nil
 }
 
-func (x *respCThing) toString0() string {  // Value
-    return fmt.Sprintf("%v", x.GetValueNonCompat())
+func (x *respCThing) toString0() string {  // Success
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
 
 func (x *respCThing) toString1() string {  // Bang
@@ -826,8 +830,8 @@ func newRespCThingBuilder() *respCThingBuilder {
     }
 }
 
-func (x *respCThingBuilder) Value(value string) *respCThingBuilder {
-    x.obj.Value = value
+func (x *respCThingBuilder) Success(value string) *respCThingBuilder {
+    x.obj.Success = value
     return x
 }
 
@@ -887,7 +891,7 @@ func (x *respCThing) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 0:  // value
+        case 0:  // success
             expectedType := thrift.Type(thrift.STRING)
             if wireType == expectedType {
                 if err := x.readField0(p); err != nil {
@@ -935,7 +939,7 @@ func (x *respCThing) String() string {
     var sb strings.Builder
 
     sb.WriteString("respCThing({")
-    sb.WriteString(fmt.Sprintf("Value:%s ", x.toString0()))
+    sb.WriteString(fmt.Sprintf("Success:%s ", x.toString0()))
     sb.WriteString(fmt.Sprintf("Bang:%s", x.toString1()))
     sb.WriteString("})")
 
@@ -1095,7 +1099,7 @@ func (p *procFuncCThing) RunContext(ctx context.Context, reqStruct thrift.Struct
         }
     }
 
-    result.Value = retval
+    result.Success = retval
     return result, nil
 }
 

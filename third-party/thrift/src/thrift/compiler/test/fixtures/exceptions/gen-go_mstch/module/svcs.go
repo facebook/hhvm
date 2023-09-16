@@ -170,7 +170,7 @@ func (c *RaiserChannelClient) Get200(ctx context.Context) (string, error) {
     if err != nil {
         return "", err
     }
-    return out.Value, nil
+    return out.Success, nil
 }
 
 func (c *RaiserClient) Get200() (string, error) {
@@ -192,7 +192,7 @@ func (c *RaiserChannelClient) Get500(ctx context.Context) (string, error) {
     } else if out.S != nil {
         return "", out.S
     }
-    return out.Value, nil
+    return out.Success, nil
 }
 
 func (c *RaiserClient) Get500() (string, error) {
@@ -294,6 +294,8 @@ type respRaiserDoBland struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &respRaiserDoBland{}
 var _ thrift.WritableResult = &respRaiserDoBland{}
+
+type RaiserDoBlandResult = respRaiserDoBland
 
 func newRespRaiserDoBland() *respRaiserDoBland {
     return (&respRaiserDoBland{})
@@ -478,6 +480,8 @@ type respRaiserDoRaise struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &respRaiserDoRaise{}
 var _ thrift.WritableResult = &respRaiserDoRaise{}
+
+type RaiserDoRaiseResult = respRaiserDoRaise
 
 func newRespRaiserDoRaise() *respRaiserDoRaise {
     return (&respRaiserDoRaise{})
@@ -943,41 +947,43 @@ func (x *reqRaiserGet200) String() string {
     return sb.String()
 }
 type respRaiserGet200 struct {
-    Value string `thrift:"value,0" json:"value" db:"value"`
+    Success string `thrift:"success,0" json:"success" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respRaiserGet200{}
 var _ thrift.WritableResult = &respRaiserGet200{}
 
+type RaiserGet200Result = respRaiserGet200
+
 func newRespRaiserGet200() *respRaiserGet200 {
     return (&respRaiserGet200{}).
-        SetValueNonCompat("")
+        SetSuccessNonCompat("")
 }
 
-func (x *respRaiserGet200) GetValueNonCompat() string {
-    return x.Value
+func (x *respRaiserGet200) GetSuccessNonCompat() string {
+    return x.Success
 }
 
-func (x *respRaiserGet200) GetValue() string {
-    return x.Value
+func (x *respRaiserGet200) GetSuccess() string {
+    return x.Success
 }
 
-func (x *respRaiserGet200) SetValueNonCompat(value string) *respRaiserGet200 {
-    x.Value = value
+func (x *respRaiserGet200) SetSuccessNonCompat(value string) *respRaiserGet200 {
+    x.Success = value
     return x
 }
 
-func (x *respRaiserGet200) SetValue(value string) *respRaiserGet200 {
-    x.Value = value
+func (x *respRaiserGet200) SetSuccess(value string) *respRaiserGet200 {
+    x.Success = value
     return x
 }
 
-func (x *respRaiserGet200) writeField0(p thrift.Protocol) error {  // Value
-    if err := p.WriteFieldBegin("value", thrift.STRING, 0); err != nil {
+func (x *respRaiserGet200) writeField0(p thrift.Protocol) error {  // Success
+    if err := p.WriteFieldBegin("success", thrift.STRING, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValueNonCompat()
+    item := x.GetSuccessNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -988,18 +994,18 @@ func (x *respRaiserGet200) writeField0(p thrift.Protocol) error {  // Value
     return nil
 }
 
-func (x *respRaiserGet200) readField0(p thrift.Protocol) error {  // Value
+func (x *respRaiserGet200) readField0(p thrift.Protocol) error {  // Success
     result, err := p.ReadString()
 if err != nil {
     return err
 }
 
-    x.SetValueNonCompat(result)
+    x.SetSuccessNonCompat(result)
     return nil
 }
 
-func (x *respRaiserGet200) toString0() string {  // Value
-    return fmt.Sprintf("%v", x.GetValueNonCompat())
+func (x *respRaiserGet200) toString0() string {  // Success
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
 
 
@@ -1014,8 +1020,8 @@ func newRespRaiserGet200Builder() *respRaiserGet200Builder {
     }
 }
 
-func (x *respRaiserGet200Builder) Value(value string) *respRaiserGet200Builder {
-    x.obj.Value = value
+func (x *respRaiserGet200Builder) Success(value string) *respRaiserGet200Builder {
+    x.obj.Success = value
     return x
 }
 
@@ -1063,7 +1069,7 @@ func (x *respRaiserGet200) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 0:  // value
+        case 0:  // success
             expectedType := thrift.Type(thrift.STRING)
             if wireType == expectedType {
                 if err := x.readField0(p); err != nil {
@@ -1100,7 +1106,7 @@ func (x *respRaiserGet200) String() string {
     var sb strings.Builder
 
     sb.WriteString("respRaiserGet200({")
-    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
     sb.WriteString("})")
 
     return sb.String()
@@ -1195,7 +1201,7 @@ func (x *reqRaiserGet500) String() string {
     return sb.String()
 }
 type respRaiserGet500 struct {
-    Value string `thrift:"value,0" json:"value" db:"value"`
+    Success string `thrift:"success,0" json:"success" db:"success"`
     F *Fiery `thrift:"f,1,optional" json:"f,omitempty" db:"f"`
     B *Banal `thrift:"b,2,optional" json:"b,omitempty" db:"b"`
     S *Serious `thrift:"s,3,optional" json:"s,omitempty" db:"s"`
@@ -1204,17 +1210,19 @@ type respRaiserGet500 struct {
 var _ thrift.Struct = &respRaiserGet500{}
 var _ thrift.WritableResult = &respRaiserGet500{}
 
+type RaiserGet500Result = respRaiserGet500
+
 func newRespRaiserGet500() *respRaiserGet500 {
     return (&respRaiserGet500{}).
-        SetValueNonCompat("")
+        SetSuccessNonCompat("")
 }
 
-func (x *respRaiserGet500) GetValueNonCompat() string {
-    return x.Value
+func (x *respRaiserGet500) GetSuccessNonCompat() string {
+    return x.Success
 }
 
-func (x *respRaiserGet500) GetValue() string {
-    return x.Value
+func (x *respRaiserGet500) GetSuccess() string {
+    return x.Success
 }
 
 func (x *respRaiserGet500) GetFNonCompat() *Fiery {
@@ -1253,13 +1261,13 @@ func (x *respRaiserGet500) GetS() *Serious {
     return x.S
 }
 
-func (x *respRaiserGet500) SetValueNonCompat(value string) *respRaiserGet500 {
-    x.Value = value
+func (x *respRaiserGet500) SetSuccessNonCompat(value string) *respRaiserGet500 {
+    x.Success = value
     return x
 }
 
-func (x *respRaiserGet500) SetValue(value string) *respRaiserGet500 {
-    x.Value = value
+func (x *respRaiserGet500) SetSuccess(value string) *respRaiserGet500 {
+    x.Success = value
     return x
 }
 
@@ -1305,12 +1313,12 @@ func (x *respRaiserGet500) IsSetS() bool {
     return x.S != nil
 }
 
-func (x *respRaiserGet500) writeField0(p thrift.Protocol) error {  // Value
-    if err := p.WriteFieldBegin("value", thrift.STRING, 0); err != nil {
+func (x *respRaiserGet500) writeField0(p thrift.Protocol) error {  // Success
+    if err := p.WriteFieldBegin("success", thrift.STRING, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValueNonCompat()
+    item := x.GetSuccessNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -1381,13 +1389,13 @@ func (x *respRaiserGet500) writeField3(p thrift.Protocol) error {  // S
     return nil
 }
 
-func (x *respRaiserGet500) readField0(p thrift.Protocol) error {  // Value
+func (x *respRaiserGet500) readField0(p thrift.Protocol) error {  // Success
     result, err := p.ReadString()
 if err != nil {
     return err
 }
 
-    x.SetValueNonCompat(result)
+    x.SetSuccessNonCompat(result)
     return nil
 }
 
@@ -1424,8 +1432,8 @@ if err != nil {
     return nil
 }
 
-func (x *respRaiserGet500) toString0() string {  // Value
-    return fmt.Sprintf("%v", x.GetValueNonCompat())
+func (x *respRaiserGet500) toString0() string {  // Success
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
 
 func (x *respRaiserGet500) toString1() string {  // F
@@ -1485,8 +1493,8 @@ func newRespRaiserGet500Builder() *respRaiserGet500Builder {
     }
 }
 
-func (x *respRaiserGet500Builder) Value(value string) *respRaiserGet500Builder {
-    x.obj.Value = value
+func (x *respRaiserGet500Builder) Success(value string) *respRaiserGet500Builder {
+    x.obj.Success = value
     return x
 }
 
@@ -1570,7 +1578,7 @@ func (x *respRaiserGet500) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 0:  // value
+        case 0:  // success
             expectedType := thrift.Type(thrift.STRING)
             if wireType == expectedType {
                 if err := x.readField0(p); err != nil {
@@ -1640,7 +1648,7 @@ func (x *respRaiserGet500) String() string {
     var sb strings.Builder
 
     sb.WriteString("respRaiserGet500({")
-    sb.WriteString(fmt.Sprintf("Value:%s ", x.toString0()))
+    sb.WriteString(fmt.Sprintf("Success:%s ", x.toString0()))
     sb.WriteString(fmt.Sprintf("F:%s ", x.toString1()))
     sb.WriteString(fmt.Sprintf("B:%s ", x.toString2()))
     sb.WriteString(fmt.Sprintf("S:%s", x.toString3()))
@@ -1867,7 +1875,7 @@ func (p *procFuncRaiserGet200) RunContext(ctx context.Context, reqStruct thrift.
         return x, x
     }
 
-    result.Value = retval
+    result.Success = retval
     return result, nil
 }
 
@@ -1939,7 +1947,7 @@ func (p *procFuncRaiserGet500) RunContext(ctx context.Context, reqStruct thrift.
         }
     }
 
-    result.Value = retval
+    result.Success = retval
     return result, nil
 }
 

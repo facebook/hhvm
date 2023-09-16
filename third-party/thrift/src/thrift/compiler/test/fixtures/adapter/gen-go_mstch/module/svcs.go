@@ -129,7 +129,7 @@ func (c *ServiceChannelClient) Func(ctx context.Context, arg1 StringWithAdapter_
     if err != nil {
         return 0, err
     }
-    return out.Value, nil
+    return out.Success, nil
 }
 
 func (c *ServiceClient) Func(arg1 StringWithAdapter_7208, arg2 string, arg3 *Foo) (MyI32_4873, error) {
@@ -465,41 +465,43 @@ func (x *reqServiceFunc) String() string {
     return sb.String()
 }
 type respServiceFunc struct {
-    Value MyI32_4873 `thrift:"value,0" json:"value" db:"value"`
+    Success MyI32_4873 `thrift:"success,0" json:"success" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respServiceFunc{}
 var _ thrift.WritableResult = &respServiceFunc{}
 
+type ServiceFuncResult = respServiceFunc
+
 func newRespServiceFunc() *respServiceFunc {
     return (&respServiceFunc{}).
-        SetValueNonCompat(NewMyI32_4873())
+        SetSuccessNonCompat(NewMyI32_4873())
 }
 
-func (x *respServiceFunc) GetValueNonCompat() MyI32_4873 {
-    return x.Value
+func (x *respServiceFunc) GetSuccessNonCompat() MyI32_4873 {
+    return x.Success
 }
 
-func (x *respServiceFunc) GetValue() MyI32_4873 {
-    return x.Value
+func (x *respServiceFunc) GetSuccess() MyI32_4873 {
+    return x.Success
 }
 
-func (x *respServiceFunc) SetValueNonCompat(value MyI32_4873) *respServiceFunc {
-    x.Value = value
+func (x *respServiceFunc) SetSuccessNonCompat(value MyI32_4873) *respServiceFunc {
+    x.Success = value
     return x
 }
 
-func (x *respServiceFunc) SetValue(value MyI32_4873) *respServiceFunc {
-    x.Value = value
+func (x *respServiceFunc) SetSuccess(value MyI32_4873) *respServiceFunc {
+    x.Success = value
     return x
 }
 
-func (x *respServiceFunc) writeField0(p thrift.Protocol) error {  // Value
-    if err := p.WriteFieldBegin("value", thrift.I32, 0); err != nil {
+func (x *respServiceFunc) writeField0(p thrift.Protocol) error {  // Success
+    if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValueNonCompat()
+    item := x.GetSuccessNonCompat()
     err := WriteMyI32_4873(item, p)
 if err != nil {
     return err
@@ -511,18 +513,18 @@ if err != nil {
     return nil
 }
 
-func (x *respServiceFunc) readField0(p thrift.Protocol) error {  // Value
+func (x *respServiceFunc) readField0(p thrift.Protocol) error {  // Success
     result, err := ReadMyI32_4873(p)
 if err != nil {
     return err
 }
 
-    x.SetValueNonCompat(result)
+    x.SetSuccessNonCompat(result)
     return nil
 }
 
-func (x *respServiceFunc) toString0() string {  // Value
-    return fmt.Sprintf("%v", x.GetValueNonCompat())
+func (x *respServiceFunc) toString0() string {  // Success
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
 
 
@@ -537,8 +539,8 @@ func newRespServiceFuncBuilder() *respServiceFuncBuilder {
     }
 }
 
-func (x *respServiceFuncBuilder) Value(value MyI32_4873) *respServiceFuncBuilder {
-    x.obj.Value = value
+func (x *respServiceFuncBuilder) Success(value MyI32_4873) *respServiceFuncBuilder {
+    x.obj.Success = value
     return x
 }
 
@@ -586,7 +588,7 @@ func (x *respServiceFunc) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 0:  // value
+        case 0:  // success
             expectedType := thrift.Type(thrift.I32)
             if wireType == expectedType {
                 if err := x.readField0(p); err != nil {
@@ -623,7 +625,7 @@ func (x *respServiceFunc) String() string {
     var sb strings.Builder
 
     sb.WriteString("respServiceFunc({")
-    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
     sb.WriteString("})")
 
     return sb.String()
@@ -721,7 +723,7 @@ func (p *procFuncServiceFunc) RunContext(ctx context.Context, reqStruct thrift.S
         return x, x
     }
 
-    result.Value = retval
+    result.Success = retval
     return result, nil
 }
 
@@ -832,7 +834,7 @@ func (c *AdapterServiceChannelClient) Count(ctx context.Context) (*CountingStruc
     if err != nil {
         return nil, err
     }
-    return out.Value, nil
+    return out.Success, nil
 }
 
 func (c *AdapterServiceClient) Count() (*CountingStruct, error) {
@@ -849,7 +851,7 @@ func (c *AdapterServiceChannelClient) AdaptedTypes(ctx context.Context, arg *Hea
     if err != nil {
         return nil, err
     }
-    return out.Value, nil
+    return out.Success, nil
 }
 
 func (c *AdapterServiceClient) AdaptedTypes(arg *HeapAllocated) (*HeapAllocated, error) {
@@ -947,53 +949,55 @@ func (x *reqAdapterServiceCount) String() string {
     return sb.String()
 }
 type respAdapterServiceCount struct {
-    Value *CountingStruct `thrift:"value,0" json:"value" db:"value"`
+    Success *CountingStruct `thrift:"success,0" json:"success" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respAdapterServiceCount{}
 var _ thrift.WritableResult = &respAdapterServiceCount{}
 
+type AdapterServiceCountResult = respAdapterServiceCount
+
 func newRespAdapterServiceCount() *respAdapterServiceCount {
     return (&respAdapterServiceCount{}).
-        SetValueNonCompat(*NewCountingStruct())
+        SetSuccessNonCompat(*NewCountingStruct())
 }
 
-func (x *respAdapterServiceCount) GetValueNonCompat() *CountingStruct {
-    return x.Value
+func (x *respAdapterServiceCount) GetSuccessNonCompat() *CountingStruct {
+    return x.Success
 }
 
-func (x *respAdapterServiceCount) GetValue() *CountingStruct {
-    if !x.IsSetValue() {
+func (x *respAdapterServiceCount) GetSuccess() *CountingStruct {
+    if !x.IsSetSuccess() {
         return nil
     }
 
-    return x.Value
+    return x.Success
 }
 
-func (x *respAdapterServiceCount) SetValueNonCompat(value CountingStruct) *respAdapterServiceCount {
-    x.Value = &value
+func (x *respAdapterServiceCount) SetSuccessNonCompat(value CountingStruct) *respAdapterServiceCount {
+    x.Success = &value
     return x
 }
 
-func (x *respAdapterServiceCount) SetValue(value *CountingStruct) *respAdapterServiceCount {
-    x.Value = value
+func (x *respAdapterServiceCount) SetSuccess(value *CountingStruct) *respAdapterServiceCount {
+    x.Success = value
     return x
 }
 
-func (x *respAdapterServiceCount) IsSetValue() bool {
-    return x.Value != nil
+func (x *respAdapterServiceCount) IsSetSuccess() bool {
+    return x.Success != nil
 }
 
-func (x *respAdapterServiceCount) writeField0(p thrift.Protocol) error {  // Value
-    if !x.IsSetValue() {
+func (x *respAdapterServiceCount) writeField0(p thrift.Protocol) error {  // Success
+    if !x.IsSetSuccess() {
         return nil
     }
 
-    if err := p.WriteFieldBegin("value", thrift.STRUCT, 0); err != nil {
+    if err := p.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValueNonCompat()
+    item := x.GetSuccessNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -1004,30 +1008,30 @@ func (x *respAdapterServiceCount) writeField0(p thrift.Protocol) error {  // Val
     return nil
 }
 
-func (x *respAdapterServiceCount) readField0(p thrift.Protocol) error {  // Value
+func (x *respAdapterServiceCount) readField0(p thrift.Protocol) error {  // Success
     result := *NewCountingStruct()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.SetValueNonCompat(result)
+    x.SetSuccessNonCompat(result)
     return nil
 }
 
-func (x *respAdapterServiceCount) toString0() string {  // Value
-    return fmt.Sprintf("%v", x.GetValueNonCompat())
+func (x *respAdapterServiceCount) toString0() string {  // Success
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
 
-// Deprecated: Use newRespAdapterServiceCount().GetValue() instead.
-var respAdapterServiceCount_Value_DEFAULT = newRespAdapterServiceCount().GetValue()
+// Deprecated: Use newRespAdapterServiceCount().GetSuccess() instead.
+var respAdapterServiceCount_Success_DEFAULT = newRespAdapterServiceCount().GetSuccess()
 
-// Deprecated: Use newRespAdapterServiceCount().GetValue() instead.
-func (x *respAdapterServiceCount) DefaultGetValue() *CountingStruct {
-    if !x.IsSetValue() {
+// Deprecated: Use newRespAdapterServiceCount().GetSuccess() instead.
+func (x *respAdapterServiceCount) DefaultGetSuccess() *CountingStruct {
+    if !x.IsSetSuccess() {
         return NewCountingStruct()
     }
-    return x.Value
+    return x.Success
 }
 
 
@@ -1042,8 +1046,8 @@ func newRespAdapterServiceCountBuilder() *respAdapterServiceCountBuilder {
     }
 }
 
-func (x *respAdapterServiceCountBuilder) Value(value *CountingStruct) *respAdapterServiceCountBuilder {
-    x.obj.Value = value
+func (x *respAdapterServiceCountBuilder) Success(value *CountingStruct) *respAdapterServiceCountBuilder {
+    x.obj.Success = value
     return x
 }
 
@@ -1091,7 +1095,7 @@ func (x *respAdapterServiceCount) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 0:  // value
+        case 0:  // success
             expectedType := thrift.Type(thrift.STRUCT)
             if wireType == expectedType {
                 if err := x.readField0(p); err != nil {
@@ -1128,7 +1132,7 @@ func (x *respAdapterServiceCount) String() string {
     var sb strings.Builder
 
     sb.WriteString("respAdapterServiceCount({")
-    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
     sb.WriteString("})")
 
     return sb.String()
@@ -1318,53 +1322,55 @@ func (x *reqAdapterServiceAdaptedTypes) String() string {
     return sb.String()
 }
 type respAdapterServiceAdaptedTypes struct {
-    Value *HeapAllocated `thrift:"value,0" json:"value" db:"value"`
+    Success *HeapAllocated `thrift:"success,0" json:"success" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respAdapterServiceAdaptedTypes{}
 var _ thrift.WritableResult = &respAdapterServiceAdaptedTypes{}
 
+type AdapterServiceAdaptedTypesResult = respAdapterServiceAdaptedTypes
+
 func newRespAdapterServiceAdaptedTypes() *respAdapterServiceAdaptedTypes {
     return (&respAdapterServiceAdaptedTypes{}).
-        SetValueNonCompat(*NewHeapAllocated())
+        SetSuccessNonCompat(*NewHeapAllocated())
 }
 
-func (x *respAdapterServiceAdaptedTypes) GetValueNonCompat() *HeapAllocated {
-    return x.Value
+func (x *respAdapterServiceAdaptedTypes) GetSuccessNonCompat() *HeapAllocated {
+    return x.Success
 }
 
-func (x *respAdapterServiceAdaptedTypes) GetValue() *HeapAllocated {
-    if !x.IsSetValue() {
+func (x *respAdapterServiceAdaptedTypes) GetSuccess() *HeapAllocated {
+    if !x.IsSetSuccess() {
         return nil
     }
 
-    return x.Value
+    return x.Success
 }
 
-func (x *respAdapterServiceAdaptedTypes) SetValueNonCompat(value HeapAllocated) *respAdapterServiceAdaptedTypes {
-    x.Value = &value
+func (x *respAdapterServiceAdaptedTypes) SetSuccessNonCompat(value HeapAllocated) *respAdapterServiceAdaptedTypes {
+    x.Success = &value
     return x
 }
 
-func (x *respAdapterServiceAdaptedTypes) SetValue(value *HeapAllocated) *respAdapterServiceAdaptedTypes {
-    x.Value = value
+func (x *respAdapterServiceAdaptedTypes) SetSuccess(value *HeapAllocated) *respAdapterServiceAdaptedTypes {
+    x.Success = value
     return x
 }
 
-func (x *respAdapterServiceAdaptedTypes) IsSetValue() bool {
-    return x.Value != nil
+func (x *respAdapterServiceAdaptedTypes) IsSetSuccess() bool {
+    return x.Success != nil
 }
 
-func (x *respAdapterServiceAdaptedTypes) writeField0(p thrift.Protocol) error {  // Value
-    if !x.IsSetValue() {
+func (x *respAdapterServiceAdaptedTypes) writeField0(p thrift.Protocol) error {  // Success
+    if !x.IsSetSuccess() {
         return nil
     }
 
-    if err := p.WriteFieldBegin("value", thrift.STRUCT, 0); err != nil {
+    if err := p.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValueNonCompat()
+    item := x.GetSuccessNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -1375,30 +1381,30 @@ func (x *respAdapterServiceAdaptedTypes) writeField0(p thrift.Protocol) error { 
     return nil
 }
 
-func (x *respAdapterServiceAdaptedTypes) readField0(p thrift.Protocol) error {  // Value
+func (x *respAdapterServiceAdaptedTypes) readField0(p thrift.Protocol) error {  // Success
     result := *NewHeapAllocated()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.SetValueNonCompat(result)
+    x.SetSuccessNonCompat(result)
     return nil
 }
 
-func (x *respAdapterServiceAdaptedTypes) toString0() string {  // Value
-    return fmt.Sprintf("%v", x.GetValueNonCompat())
+func (x *respAdapterServiceAdaptedTypes) toString0() string {  // Success
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
 
-// Deprecated: Use newRespAdapterServiceAdaptedTypes().GetValue() instead.
-var respAdapterServiceAdaptedTypes_Value_DEFAULT = newRespAdapterServiceAdaptedTypes().GetValue()
+// Deprecated: Use newRespAdapterServiceAdaptedTypes().GetSuccess() instead.
+var respAdapterServiceAdaptedTypes_Success_DEFAULT = newRespAdapterServiceAdaptedTypes().GetSuccess()
 
-// Deprecated: Use newRespAdapterServiceAdaptedTypes().GetValue() instead.
-func (x *respAdapterServiceAdaptedTypes) DefaultGetValue() *HeapAllocated {
-    if !x.IsSetValue() {
+// Deprecated: Use newRespAdapterServiceAdaptedTypes().GetSuccess() instead.
+func (x *respAdapterServiceAdaptedTypes) DefaultGetSuccess() *HeapAllocated {
+    if !x.IsSetSuccess() {
         return NewHeapAllocated()
     }
-    return x.Value
+    return x.Success
 }
 
 
@@ -1413,8 +1419,8 @@ func newRespAdapterServiceAdaptedTypesBuilder() *respAdapterServiceAdaptedTypesB
     }
 }
 
-func (x *respAdapterServiceAdaptedTypesBuilder) Value(value *HeapAllocated) *respAdapterServiceAdaptedTypesBuilder {
-    x.obj.Value = value
+func (x *respAdapterServiceAdaptedTypesBuilder) Success(value *HeapAllocated) *respAdapterServiceAdaptedTypesBuilder {
+    x.obj.Success = value
     return x
 }
 
@@ -1462,7 +1468,7 @@ func (x *respAdapterServiceAdaptedTypes) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 0:  // value
+        case 0:  // success
             expectedType := thrift.Type(thrift.STRUCT)
             if wireType == expectedType {
                 if err := x.readField0(p); err != nil {
@@ -1499,7 +1505,7 @@ func (x *respAdapterServiceAdaptedTypes) String() string {
     var sb strings.Builder
 
     sb.WriteString("respAdapterServiceAdaptedTypes({")
-    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
     sb.WriteString("})")
 
     return sb.String()
@@ -1598,7 +1604,7 @@ func (p *procFuncAdapterServiceCount) RunContext(ctx context.Context, reqStruct 
         return x, x
     }
 
-    result.Value = retval
+    result.Success = retval
     return result, nil
 }
 
@@ -1650,7 +1656,7 @@ func (p *procFuncAdapterServiceAdaptedTypes) RunContext(ctx context.Context, req
         return x, x
     }
 
-    result.Value = retval
+    result.Success = retval
     return result, nil
 }
 

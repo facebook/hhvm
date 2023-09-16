@@ -127,7 +127,7 @@ func (c *TestServiceChannelClient) Init(ctx context.Context, int1 int64) (int64,
     if err != nil {
         return 0, err
     }
-    return out.Value, nil
+    return out.Success, nil
 }
 
 func (c *TestServiceClient) Init(int1 int64) (int64, error) {
@@ -296,41 +296,43 @@ func (x *reqTestServiceInit) String() string {
     return sb.String()
 }
 type respTestServiceInit struct {
-    Value int64 `thrift:"value,0" json:"value" db:"value"`
+    Success int64 `thrift:"success,0" json:"success" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respTestServiceInit{}
 var _ thrift.WritableResult = &respTestServiceInit{}
 
+type TestServiceInitResult = respTestServiceInit
+
 func newRespTestServiceInit() *respTestServiceInit {
     return (&respTestServiceInit{}).
-        SetValueNonCompat(0)
+        SetSuccessNonCompat(0)
 }
 
-func (x *respTestServiceInit) GetValueNonCompat() int64 {
-    return x.Value
+func (x *respTestServiceInit) GetSuccessNonCompat() int64 {
+    return x.Success
 }
 
-func (x *respTestServiceInit) GetValue() int64 {
-    return x.Value
+func (x *respTestServiceInit) GetSuccess() int64 {
+    return x.Success
 }
 
-func (x *respTestServiceInit) SetValueNonCompat(value int64) *respTestServiceInit {
-    x.Value = value
+func (x *respTestServiceInit) SetSuccessNonCompat(value int64) *respTestServiceInit {
+    x.Success = value
     return x
 }
 
-func (x *respTestServiceInit) SetValue(value int64) *respTestServiceInit {
-    x.Value = value
+func (x *respTestServiceInit) SetSuccess(value int64) *respTestServiceInit {
+    x.Success = value
     return x
 }
 
-func (x *respTestServiceInit) writeField0(p thrift.Protocol) error {  // Value
-    if err := p.WriteFieldBegin("value", thrift.I64, 0); err != nil {
+func (x *respTestServiceInit) writeField0(p thrift.Protocol) error {  // Success
+    if err := p.WriteFieldBegin("success", thrift.I64, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValueNonCompat()
+    item := x.GetSuccessNonCompat()
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -341,18 +343,18 @@ func (x *respTestServiceInit) writeField0(p thrift.Protocol) error {  // Value
     return nil
 }
 
-func (x *respTestServiceInit) readField0(p thrift.Protocol) error {  // Value
+func (x *respTestServiceInit) readField0(p thrift.Protocol) error {  // Success
     result, err := p.ReadI64()
 if err != nil {
     return err
 }
 
-    x.SetValueNonCompat(result)
+    x.SetSuccessNonCompat(result)
     return nil
 }
 
-func (x *respTestServiceInit) toString0() string {  // Value
-    return fmt.Sprintf("%v", x.GetValueNonCompat())
+func (x *respTestServiceInit) toString0() string {  // Success
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
 
 
@@ -367,8 +369,8 @@ func newRespTestServiceInitBuilder() *respTestServiceInitBuilder {
     }
 }
 
-func (x *respTestServiceInitBuilder) Value(value int64) *respTestServiceInitBuilder {
-    x.obj.Value = value
+func (x *respTestServiceInitBuilder) Success(value int64) *respTestServiceInitBuilder {
+    x.obj.Success = value
     return x
 }
 
@@ -416,7 +418,7 @@ func (x *respTestServiceInit) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 0:  // value
+        case 0:  // success
             expectedType := thrift.Type(thrift.I64)
             if wireType == expectedType {
                 if err := x.readField0(p); err != nil {
@@ -453,7 +455,7 @@ func (x *respTestServiceInit) String() string {
     var sb strings.Builder
 
     sb.WriteString("respTestServiceInit({")
-    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
     sb.WriteString("})")
 
     return sb.String()
@@ -551,7 +553,7 @@ func (p *procFuncTestServiceInit) RunContext(ctx context.Context, reqStruct thri
         return x, x
     }
 
-    result.Value = retval
+    result.Success = retval
     return result, nil
 }
 

@@ -229,6 +229,8 @@ type respFooServiceSimpleRPC struct {
 var _ thrift.Struct = &respFooServiceSimpleRPC{}
 var _ thrift.WritableResult = &respFooServiceSimpleRPC{}
 
+type FooServiceSimpleRPCResult = respFooServiceSimpleRPC
+
 func newRespFooServiceSimpleRPC() *respFooServiceSimpleRPC {
     return (&respFooServiceSimpleRPC{})
 }
@@ -516,7 +518,7 @@ func (c *FB303ServiceChannelClient) SimpleRPC(ctx context.Context, intParameter 
     if err != nil {
         return nil, err
     }
-    return out.Value, nil
+    return out.Success, nil
 }
 
 func (c *FB303ServiceClient) SimpleRPC(intParameter int32) (*ReservedKeyword, error) {
@@ -685,53 +687,55 @@ func (x *reqFB303ServiceSimpleRPC) String() string {
     return sb.String()
 }
 type respFB303ServiceSimpleRPC struct {
-    Value *ReservedKeyword `thrift:"value,0" json:"value" db:"value"`
+    Success *ReservedKeyword `thrift:"success,0" json:"success" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respFB303ServiceSimpleRPC{}
 var _ thrift.WritableResult = &respFB303ServiceSimpleRPC{}
 
+type FB303ServiceSimpleRPCResult = respFB303ServiceSimpleRPC
+
 func newRespFB303ServiceSimpleRPC() *respFB303ServiceSimpleRPC {
     return (&respFB303ServiceSimpleRPC{}).
-        SetValueNonCompat(*NewReservedKeyword())
+        SetSuccessNonCompat(*NewReservedKeyword())
 }
 
-func (x *respFB303ServiceSimpleRPC) GetValueNonCompat() *ReservedKeyword {
-    return x.Value
+func (x *respFB303ServiceSimpleRPC) GetSuccessNonCompat() *ReservedKeyword {
+    return x.Success
 }
 
-func (x *respFB303ServiceSimpleRPC) GetValue() *ReservedKeyword {
-    if !x.IsSetValue() {
+func (x *respFB303ServiceSimpleRPC) GetSuccess() *ReservedKeyword {
+    if !x.IsSetSuccess() {
         return nil
     }
 
-    return x.Value
+    return x.Success
 }
 
-func (x *respFB303ServiceSimpleRPC) SetValueNonCompat(value ReservedKeyword) *respFB303ServiceSimpleRPC {
-    x.Value = &value
+func (x *respFB303ServiceSimpleRPC) SetSuccessNonCompat(value ReservedKeyword) *respFB303ServiceSimpleRPC {
+    x.Success = &value
     return x
 }
 
-func (x *respFB303ServiceSimpleRPC) SetValue(value *ReservedKeyword) *respFB303ServiceSimpleRPC {
-    x.Value = value
+func (x *respFB303ServiceSimpleRPC) SetSuccess(value *ReservedKeyword) *respFB303ServiceSimpleRPC {
+    x.Success = value
     return x
 }
 
-func (x *respFB303ServiceSimpleRPC) IsSetValue() bool {
-    return x.Value != nil
+func (x *respFB303ServiceSimpleRPC) IsSetSuccess() bool {
+    return x.Success != nil
 }
 
-func (x *respFB303ServiceSimpleRPC) writeField0(p thrift.Protocol) error {  // Value
-    if !x.IsSetValue() {
+func (x *respFB303ServiceSimpleRPC) writeField0(p thrift.Protocol) error {  // Success
+    if !x.IsSetSuccess() {
         return nil
     }
 
-    if err := p.WriteFieldBegin("value", thrift.STRUCT, 0); err != nil {
+    if err := p.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValueNonCompat()
+    item := x.GetSuccessNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -742,30 +746,30 @@ func (x *respFB303ServiceSimpleRPC) writeField0(p thrift.Protocol) error {  // V
     return nil
 }
 
-func (x *respFB303ServiceSimpleRPC) readField0(p thrift.Protocol) error {  // Value
+func (x *respFB303ServiceSimpleRPC) readField0(p thrift.Protocol) error {  // Success
     result := *NewReservedKeyword()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.SetValueNonCompat(result)
+    x.SetSuccessNonCompat(result)
     return nil
 }
 
-func (x *respFB303ServiceSimpleRPC) toString0() string {  // Value
-    return fmt.Sprintf("%v", x.GetValueNonCompat())
+func (x *respFB303ServiceSimpleRPC) toString0() string {  // Success
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
 
-// Deprecated: Use newRespFB303ServiceSimpleRPC().GetValue() instead.
-var respFB303ServiceSimpleRPC_Value_DEFAULT = newRespFB303ServiceSimpleRPC().GetValue()
+// Deprecated: Use newRespFB303ServiceSimpleRPC().GetSuccess() instead.
+var respFB303ServiceSimpleRPC_Success_DEFAULT = newRespFB303ServiceSimpleRPC().GetSuccess()
 
-// Deprecated: Use newRespFB303ServiceSimpleRPC().GetValue() instead.
-func (x *respFB303ServiceSimpleRPC) DefaultGetValue() *ReservedKeyword {
-    if !x.IsSetValue() {
+// Deprecated: Use newRespFB303ServiceSimpleRPC().GetSuccess() instead.
+func (x *respFB303ServiceSimpleRPC) DefaultGetSuccess() *ReservedKeyword {
+    if !x.IsSetSuccess() {
         return NewReservedKeyword()
     }
-    return x.Value
+    return x.Success
 }
 
 
@@ -780,8 +784,8 @@ func newRespFB303ServiceSimpleRPCBuilder() *respFB303ServiceSimpleRPCBuilder {
     }
 }
 
-func (x *respFB303ServiceSimpleRPCBuilder) Value(value *ReservedKeyword) *respFB303ServiceSimpleRPCBuilder {
-    x.obj.Value = value
+func (x *respFB303ServiceSimpleRPCBuilder) Success(value *ReservedKeyword) *respFB303ServiceSimpleRPCBuilder {
+    x.obj.Success = value
     return x
 }
 
@@ -829,7 +833,7 @@ func (x *respFB303ServiceSimpleRPC) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 0:  // value
+        case 0:  // success
             expectedType := thrift.Type(thrift.STRUCT)
             if wireType == expectedType {
                 if err := x.readField0(p); err != nil {
@@ -866,7 +870,7 @@ func (x *respFB303ServiceSimpleRPC) String() string {
     var sb strings.Builder
 
     sb.WriteString("respFB303ServiceSimpleRPC({")
-    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
     sb.WriteString("})")
 
     return sb.String()
@@ -964,7 +968,7 @@ func (p *procFuncFB303ServiceSimpleRPC) RunContext(ctx context.Context, reqStruc
         return x, x
     }
 
-    result.Value = retval
+    result.Success = retval
     return result, nil
 }
 
@@ -1107,7 +1111,7 @@ func (c *MyServiceChannelClient) GetRandomData(ctx context.Context) (string, err
     if err != nil {
         return "", err
     }
-    return out.Value, nil
+    return out.Success, nil
 }
 
 func (c *MyServiceClient) GetRandomData() (string, error) {
@@ -1159,7 +1163,7 @@ func (c *MyServiceChannelClient) HasDataById(ctx context.Context, id int64) (boo
     if err != nil {
         return false, err
     }
-    return out.Value, nil
+    return out.Success, nil
 }
 
 func (c *MyServiceClient) HasDataById(id int64) (bool, error) {
@@ -1176,7 +1180,7 @@ func (c *MyServiceChannelClient) GetDataById(ctx context.Context, id int64) (str
     if err != nil {
         return "", err
     }
-    return out.Value, nil
+    return out.Success, nil
 }
 
 func (c *MyServiceClient) GetDataById(id int64) (string, error) {
@@ -1222,7 +1226,7 @@ func (c *MyServiceChannelClient) InvalidReturnForHack(ctx context.Context) ([]fl
     if err != nil {
         return nil, err
     }
-    return out.Value, nil
+    return out.Success, nil
 }
 
 func (c *MyServiceClient) InvalidReturnForHack() ([]float32, error) {
@@ -1340,6 +1344,8 @@ type respMyServicePing struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServicePing{}
 var _ thrift.WritableResult = &respMyServicePing{}
+
+type MyServicePingResult = respMyServicePing
 
 func newRespMyServicePing() *respMyServicePing {
     return (&respMyServicePing{})
@@ -1517,41 +1523,43 @@ func (x *reqMyServiceGetRandomData) String() string {
     return sb.String()
 }
 type respMyServiceGetRandomData struct {
-    Value string `thrift:"value,0" json:"value" db:"value"`
+    Success string `thrift:"success,0" json:"success" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServiceGetRandomData{}
 var _ thrift.WritableResult = &respMyServiceGetRandomData{}
 
+type MyServiceGetRandomDataResult = respMyServiceGetRandomData
+
 func newRespMyServiceGetRandomData() *respMyServiceGetRandomData {
     return (&respMyServiceGetRandomData{}).
-        SetValueNonCompat("")
+        SetSuccessNonCompat("")
 }
 
-func (x *respMyServiceGetRandomData) GetValueNonCompat() string {
-    return x.Value
+func (x *respMyServiceGetRandomData) GetSuccessNonCompat() string {
+    return x.Success
 }
 
-func (x *respMyServiceGetRandomData) GetValue() string {
-    return x.Value
+func (x *respMyServiceGetRandomData) GetSuccess() string {
+    return x.Success
 }
 
-func (x *respMyServiceGetRandomData) SetValueNonCompat(value string) *respMyServiceGetRandomData {
-    x.Value = value
+func (x *respMyServiceGetRandomData) SetSuccessNonCompat(value string) *respMyServiceGetRandomData {
+    x.Success = value
     return x
 }
 
-func (x *respMyServiceGetRandomData) SetValue(value string) *respMyServiceGetRandomData {
-    x.Value = value
+func (x *respMyServiceGetRandomData) SetSuccess(value string) *respMyServiceGetRandomData {
+    x.Success = value
     return x
 }
 
-func (x *respMyServiceGetRandomData) writeField0(p thrift.Protocol) error {  // Value
-    if err := p.WriteFieldBegin("value", thrift.STRING, 0); err != nil {
+func (x *respMyServiceGetRandomData) writeField0(p thrift.Protocol) error {  // Success
+    if err := p.WriteFieldBegin("success", thrift.STRING, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValueNonCompat()
+    item := x.GetSuccessNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -1562,18 +1570,18 @@ func (x *respMyServiceGetRandomData) writeField0(p thrift.Protocol) error {  // 
     return nil
 }
 
-func (x *respMyServiceGetRandomData) readField0(p thrift.Protocol) error {  // Value
+func (x *respMyServiceGetRandomData) readField0(p thrift.Protocol) error {  // Success
     result, err := p.ReadString()
 if err != nil {
     return err
 }
 
-    x.SetValueNonCompat(result)
+    x.SetSuccessNonCompat(result)
     return nil
 }
 
-func (x *respMyServiceGetRandomData) toString0() string {  // Value
-    return fmt.Sprintf("%v", x.GetValueNonCompat())
+func (x *respMyServiceGetRandomData) toString0() string {  // Success
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
 
 
@@ -1588,8 +1596,8 @@ func newRespMyServiceGetRandomDataBuilder() *respMyServiceGetRandomDataBuilder {
     }
 }
 
-func (x *respMyServiceGetRandomDataBuilder) Value(value string) *respMyServiceGetRandomDataBuilder {
-    x.obj.Value = value
+func (x *respMyServiceGetRandomDataBuilder) Success(value string) *respMyServiceGetRandomDataBuilder {
+    x.obj.Success = value
     return x
 }
 
@@ -1637,7 +1645,7 @@ func (x *respMyServiceGetRandomData) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 0:  // value
+        case 0:  // success
             expectedType := thrift.Type(thrift.STRING)
             if wireType == expectedType {
                 if err := x.readField0(p); err != nil {
@@ -1674,7 +1682,7 @@ func (x *respMyServiceGetRandomData) String() string {
     var sb strings.Builder
 
     sb.WriteString("respMyServiceGetRandomData({")
-    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
     sb.WriteString("})")
 
     return sb.String()
@@ -1844,6 +1852,8 @@ type respMyServiceSink struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServiceSink{}
 var _ thrift.WritableResult = &respMyServiceSink{}
+
+type MyServiceSinkResult = respMyServiceSink
 
 func newRespMyServiceSink() *respMyServiceSink {
     return (&respMyServiceSink{})
@@ -2168,6 +2178,8 @@ type respMyServicePutDataById struct {
 var _ thrift.Struct = &respMyServicePutDataById{}
 var _ thrift.WritableResult = &respMyServicePutDataById{}
 
+type MyServicePutDataByIdResult = respMyServicePutDataById
+
 func newRespMyServicePutDataById() *respMyServicePutDataById {
     return (&respMyServicePutDataById{})
 }
@@ -2415,41 +2427,43 @@ func (x *reqMyServiceHasDataById) String() string {
     return sb.String()
 }
 type respMyServiceHasDataById struct {
-    Value bool `thrift:"value,0" json:"value" db:"value"`
+    Success bool `thrift:"success,0" json:"success" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServiceHasDataById{}
 var _ thrift.WritableResult = &respMyServiceHasDataById{}
 
+type MyServiceHasDataByIdResult = respMyServiceHasDataById
+
 func newRespMyServiceHasDataById() *respMyServiceHasDataById {
     return (&respMyServiceHasDataById{}).
-        SetValueNonCompat(false)
+        SetSuccessNonCompat(false)
 }
 
-func (x *respMyServiceHasDataById) GetValueNonCompat() bool {
-    return x.Value
+func (x *respMyServiceHasDataById) GetSuccessNonCompat() bool {
+    return x.Success
 }
 
-func (x *respMyServiceHasDataById) GetValue() bool {
-    return x.Value
+func (x *respMyServiceHasDataById) GetSuccess() bool {
+    return x.Success
 }
 
-func (x *respMyServiceHasDataById) SetValueNonCompat(value bool) *respMyServiceHasDataById {
-    x.Value = value
+func (x *respMyServiceHasDataById) SetSuccessNonCompat(value bool) *respMyServiceHasDataById {
+    x.Success = value
     return x
 }
 
-func (x *respMyServiceHasDataById) SetValue(value bool) *respMyServiceHasDataById {
-    x.Value = value
+func (x *respMyServiceHasDataById) SetSuccess(value bool) *respMyServiceHasDataById {
+    x.Success = value
     return x
 }
 
-func (x *respMyServiceHasDataById) writeField0(p thrift.Protocol) error {  // Value
-    if err := p.WriteFieldBegin("value", thrift.BOOL, 0); err != nil {
+func (x *respMyServiceHasDataById) writeField0(p thrift.Protocol) error {  // Success
+    if err := p.WriteFieldBegin("success", thrift.BOOL, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValueNonCompat()
+    item := x.GetSuccessNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -2460,18 +2474,18 @@ func (x *respMyServiceHasDataById) writeField0(p thrift.Protocol) error {  // Va
     return nil
 }
 
-func (x *respMyServiceHasDataById) readField0(p thrift.Protocol) error {  // Value
+func (x *respMyServiceHasDataById) readField0(p thrift.Protocol) error {  // Success
     result, err := p.ReadBool()
 if err != nil {
     return err
 }
 
-    x.SetValueNonCompat(result)
+    x.SetSuccessNonCompat(result)
     return nil
 }
 
-func (x *respMyServiceHasDataById) toString0() string {  // Value
-    return fmt.Sprintf("%v", x.GetValueNonCompat())
+func (x *respMyServiceHasDataById) toString0() string {  // Success
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
 
 
@@ -2486,8 +2500,8 @@ func newRespMyServiceHasDataByIdBuilder() *respMyServiceHasDataByIdBuilder {
     }
 }
 
-func (x *respMyServiceHasDataByIdBuilder) Value(value bool) *respMyServiceHasDataByIdBuilder {
-    x.obj.Value = value
+func (x *respMyServiceHasDataByIdBuilder) Success(value bool) *respMyServiceHasDataByIdBuilder {
+    x.obj.Success = value
     return x
 }
 
@@ -2535,7 +2549,7 @@ func (x *respMyServiceHasDataById) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 0:  // value
+        case 0:  // success
             expectedType := thrift.Type(thrift.BOOL)
             if wireType == expectedType {
                 if err := x.readField0(p); err != nil {
@@ -2572,7 +2586,7 @@ func (x *respMyServiceHasDataById) String() string {
     var sb strings.Builder
 
     sb.WriteString("respMyServiceHasDataById({")
-    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
     sb.WriteString("})")
 
     return sb.String()
@@ -2738,41 +2752,43 @@ func (x *reqMyServiceGetDataById) String() string {
     return sb.String()
 }
 type respMyServiceGetDataById struct {
-    Value string `thrift:"value,0" json:"value" db:"value"`
+    Success string `thrift:"success,0" json:"success" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServiceGetDataById{}
 var _ thrift.WritableResult = &respMyServiceGetDataById{}
 
+type MyServiceGetDataByIdResult = respMyServiceGetDataById
+
 func newRespMyServiceGetDataById() *respMyServiceGetDataById {
     return (&respMyServiceGetDataById{}).
-        SetValueNonCompat("")
+        SetSuccessNonCompat("")
 }
 
-func (x *respMyServiceGetDataById) GetValueNonCompat() string {
-    return x.Value
+func (x *respMyServiceGetDataById) GetSuccessNonCompat() string {
+    return x.Success
 }
 
-func (x *respMyServiceGetDataById) GetValue() string {
-    return x.Value
+func (x *respMyServiceGetDataById) GetSuccess() string {
+    return x.Success
 }
 
-func (x *respMyServiceGetDataById) SetValueNonCompat(value string) *respMyServiceGetDataById {
-    x.Value = value
+func (x *respMyServiceGetDataById) SetSuccessNonCompat(value string) *respMyServiceGetDataById {
+    x.Success = value
     return x
 }
 
-func (x *respMyServiceGetDataById) SetValue(value string) *respMyServiceGetDataById {
-    x.Value = value
+func (x *respMyServiceGetDataById) SetSuccess(value string) *respMyServiceGetDataById {
+    x.Success = value
     return x
 }
 
-func (x *respMyServiceGetDataById) writeField0(p thrift.Protocol) error {  // Value
-    if err := p.WriteFieldBegin("value", thrift.STRING, 0); err != nil {
+func (x *respMyServiceGetDataById) writeField0(p thrift.Protocol) error {  // Success
+    if err := p.WriteFieldBegin("success", thrift.STRING, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValueNonCompat()
+    item := x.GetSuccessNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -2783,18 +2799,18 @@ func (x *respMyServiceGetDataById) writeField0(p thrift.Protocol) error {  // Va
     return nil
 }
 
-func (x *respMyServiceGetDataById) readField0(p thrift.Protocol) error {  // Value
+func (x *respMyServiceGetDataById) readField0(p thrift.Protocol) error {  // Success
     result, err := p.ReadString()
 if err != nil {
     return err
 }
 
-    x.SetValueNonCompat(result)
+    x.SetSuccessNonCompat(result)
     return nil
 }
 
-func (x *respMyServiceGetDataById) toString0() string {  // Value
-    return fmt.Sprintf("%v", x.GetValueNonCompat())
+func (x *respMyServiceGetDataById) toString0() string {  // Success
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
 
 
@@ -2809,8 +2825,8 @@ func newRespMyServiceGetDataByIdBuilder() *respMyServiceGetDataByIdBuilder {
     }
 }
 
-func (x *respMyServiceGetDataByIdBuilder) Value(value string) *respMyServiceGetDataByIdBuilder {
-    x.obj.Value = value
+func (x *respMyServiceGetDataByIdBuilder) Success(value string) *respMyServiceGetDataByIdBuilder {
+    x.obj.Success = value
     return x
 }
 
@@ -2858,7 +2874,7 @@ func (x *respMyServiceGetDataById) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 0:  // value
+        case 0:  // success
             expectedType := thrift.Type(thrift.STRING)
             if wireType == expectedType {
                 if err := x.readField0(p); err != nil {
@@ -2895,7 +2911,7 @@ func (x *respMyServiceGetDataById) String() string {
     var sb strings.Builder
 
     sb.WriteString("respMyServiceGetDataById({")
-    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
     sb.WriteString("})")
 
     return sb.String()
@@ -3065,6 +3081,8 @@ type respMyServiceDeleteDataById struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServiceDeleteDataById{}
 var _ thrift.WritableResult = &respMyServiceDeleteDataById{}
+
+type MyServiceDeleteDataByIdResult = respMyServiceDeleteDataById
 
 func newRespMyServiceDeleteDataById() *respMyServiceDeleteDataById {
     return (&respMyServiceDeleteDataById{})
@@ -3389,6 +3407,8 @@ type respMyServiceLobDataById struct {
 var _ thrift.Struct = &respMyServiceLobDataById{}
 var _ thrift.WritableResult = &respMyServiceLobDataById{}
 
+type MyServiceLobDataByIdResult = respMyServiceLobDataById
+
 func newRespMyServiceLobDataById() *respMyServiceLobDataById {
     return (&respMyServiceLobDataById{})
 }
@@ -3565,53 +3585,55 @@ func (x *reqMyServiceInvalidReturnForHack) String() string {
     return sb.String()
 }
 type respMyServiceInvalidReturnForHack struct {
-    Value []float32 `thrift:"value,0" json:"value" db:"value"`
+    Success []float32 `thrift:"success,0" json:"success" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServiceInvalidReturnForHack{}
 var _ thrift.WritableResult = &respMyServiceInvalidReturnForHack{}
 
+type MyServiceInvalidReturnForHackResult = respMyServiceInvalidReturnForHack
+
 func newRespMyServiceInvalidReturnForHack() *respMyServiceInvalidReturnForHack {
     return (&respMyServiceInvalidReturnForHack{}).
-        SetValueNonCompat(nil)
+        SetSuccessNonCompat(nil)
 }
 
-func (x *respMyServiceInvalidReturnForHack) GetValueNonCompat() []float32 {
-    return x.Value
+func (x *respMyServiceInvalidReturnForHack) GetSuccessNonCompat() []float32 {
+    return x.Success
 }
 
-func (x *respMyServiceInvalidReturnForHack) GetValue() []float32 {
-    if !x.IsSetValue() {
+func (x *respMyServiceInvalidReturnForHack) GetSuccess() []float32 {
+    if !x.IsSetSuccess() {
         return nil
     }
 
-    return x.Value
+    return x.Success
 }
 
-func (x *respMyServiceInvalidReturnForHack) SetValueNonCompat(value []float32) *respMyServiceInvalidReturnForHack {
-    x.Value = value
+func (x *respMyServiceInvalidReturnForHack) SetSuccessNonCompat(value []float32) *respMyServiceInvalidReturnForHack {
+    x.Success = value
     return x
 }
 
-func (x *respMyServiceInvalidReturnForHack) SetValue(value []float32) *respMyServiceInvalidReturnForHack {
-    x.Value = value
+func (x *respMyServiceInvalidReturnForHack) SetSuccess(value []float32) *respMyServiceInvalidReturnForHack {
+    x.Success = value
     return x
 }
 
-func (x *respMyServiceInvalidReturnForHack) IsSetValue() bool {
-    return x.Value != nil
+func (x *respMyServiceInvalidReturnForHack) IsSetSuccess() bool {
+    return x.Success != nil
 }
 
-func (x *respMyServiceInvalidReturnForHack) writeField0(p thrift.Protocol) error {  // Value
-    if !x.IsSetValue() {
+func (x *respMyServiceInvalidReturnForHack) writeField0(p thrift.Protocol) error {  // Success
+    if !x.IsSetSuccess() {
         return nil
     }
 
-    if err := p.WriteFieldBegin("value", thrift.SET, 0); err != nil {
+    if err := p.WriteFieldBegin("success", thrift.SET, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValueNonCompat()
+    item := x.GetSuccessNonCompat()
     if err := p.WriteSetBegin(thrift.FLOAT, len(item)); err != nil {
     return thrift.PrependError("error writing set begin: ", err)
 }
@@ -3633,7 +3655,7 @@ if err := p.WriteSetEnd(); err != nil {
     return nil
 }
 
-func (x *respMyServiceInvalidReturnForHack) readField0(p thrift.Protocol) error {  // Value
+func (x *respMyServiceInvalidReturnForHack) readField0(p thrift.Protocol) error {  // Success
     _ /* elemType */, size, err := p.ReadSetBegin()
 if err != nil {
     return thrift.PrependError("error reading set begin: ", err)
@@ -3657,12 +3679,12 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetValueNonCompat(result)
+    x.SetSuccessNonCompat(result)
     return nil
 }
 
-func (x *respMyServiceInvalidReturnForHack) toString0() string {  // Value
-    return fmt.Sprintf("%v", x.GetValueNonCompat())
+func (x *respMyServiceInvalidReturnForHack) toString0() string {  // Success
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
 
 
@@ -3677,8 +3699,8 @@ func newRespMyServiceInvalidReturnForHackBuilder() *respMyServiceInvalidReturnFo
     }
 }
 
-func (x *respMyServiceInvalidReturnForHackBuilder) Value(value []float32) *respMyServiceInvalidReturnForHackBuilder {
-    x.obj.Value = value
+func (x *respMyServiceInvalidReturnForHackBuilder) Success(value []float32) *respMyServiceInvalidReturnForHackBuilder {
+    x.obj.Success = value
     return x
 }
 
@@ -3726,7 +3748,7 @@ func (x *respMyServiceInvalidReturnForHack) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 0:  // value
+        case 0:  // success
             expectedType := thrift.Type(thrift.SET)
             if wireType == expectedType {
                 if err := x.readField0(p); err != nil {
@@ -3763,7 +3785,7 @@ func (x *respMyServiceInvalidReturnForHack) String() string {
     var sb strings.Builder
 
     sb.WriteString("respMyServiceInvalidReturnForHack({")
-    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
     sb.WriteString("})")
 
     return sb.String()
@@ -3862,6 +3884,8 @@ type respMyServiceRpcSkippedCodegen struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServiceRpcSkippedCodegen{}
 var _ thrift.WritableResult = &respMyServiceRpcSkippedCodegen{}
+
+type MyServiceRpcSkippedCodegenResult = respMyServiceRpcSkippedCodegen
 
 func newRespMyServiceRpcSkippedCodegen() *respMyServiceRpcSkippedCodegen {
     return (&respMyServiceRpcSkippedCodegen{})
@@ -4109,7 +4133,7 @@ func (p *procFuncMyServiceGetRandomData) RunContext(ctx context.Context, reqStru
         return x, x
     }
 
-    result.Value = retval
+    result.Success = retval
     return result, nil
 }
 
@@ -4263,7 +4287,7 @@ func (p *procFuncMyServiceHasDataById) RunContext(ctx context.Context, reqStruct
         return x, x
     }
 
-    result.Value = retval
+    result.Success = retval
     return result, nil
 }
 
@@ -4315,7 +4339,7 @@ func (p *procFuncMyServiceGetDataById) RunContext(ctx context.Context, reqStruct
         return x, x
     }
 
-    result.Value = retval
+    result.Success = retval
     return result, nil
 }
 
@@ -4467,7 +4491,7 @@ func (p *procFuncMyServiceInvalidReturnForHack) RunContext(ctx context.Context, 
         return x, x
     }
 
-    result.Value = retval
+    result.Success = retval
     return result, nil
 }
 
@@ -4629,7 +4653,7 @@ func (c *DbMixedStackArgumentsChannelClient) GetDataByKey0(ctx context.Context, 
     if err != nil {
         return nil, err
     }
-    return out.Value, nil
+    return out.Success, nil
 }
 
 func (c *DbMixedStackArgumentsClient) GetDataByKey0(key string) ([]byte, error) {
@@ -4646,7 +4670,7 @@ func (c *DbMixedStackArgumentsChannelClient) GetDataByKey1(ctx context.Context, 
     if err != nil {
         return nil, err
     }
-    return out.Value, nil
+    return out.Success, nil
 }
 
 func (c *DbMixedStackArgumentsClient) GetDataByKey1(key string) ([]byte, error) {
@@ -4815,53 +4839,55 @@ func (x *reqDbMixedStackArgumentsGetDataByKey0) String() string {
     return sb.String()
 }
 type respDbMixedStackArgumentsGetDataByKey0 struct {
-    Value []byte `thrift:"value,0" json:"value" db:"value"`
+    Success []byte `thrift:"success,0" json:"success" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respDbMixedStackArgumentsGetDataByKey0{}
 var _ thrift.WritableResult = &respDbMixedStackArgumentsGetDataByKey0{}
 
+type DbMixedStackArgumentsGetDataByKey0Result = respDbMixedStackArgumentsGetDataByKey0
+
 func newRespDbMixedStackArgumentsGetDataByKey0() *respDbMixedStackArgumentsGetDataByKey0 {
     return (&respDbMixedStackArgumentsGetDataByKey0{}).
-        SetValueNonCompat([]byte(""))
+        SetSuccessNonCompat([]byte(""))
 }
 
-func (x *respDbMixedStackArgumentsGetDataByKey0) GetValueNonCompat() []byte {
-    return x.Value
+func (x *respDbMixedStackArgumentsGetDataByKey0) GetSuccessNonCompat() []byte {
+    return x.Success
 }
 
-func (x *respDbMixedStackArgumentsGetDataByKey0) GetValue() []byte {
-    if !x.IsSetValue() {
+func (x *respDbMixedStackArgumentsGetDataByKey0) GetSuccess() []byte {
+    if !x.IsSetSuccess() {
         return []byte("")
     }
 
-    return x.Value
+    return x.Success
 }
 
-func (x *respDbMixedStackArgumentsGetDataByKey0) SetValueNonCompat(value []byte) *respDbMixedStackArgumentsGetDataByKey0 {
-    x.Value = value
+func (x *respDbMixedStackArgumentsGetDataByKey0) SetSuccessNonCompat(value []byte) *respDbMixedStackArgumentsGetDataByKey0 {
+    x.Success = value
     return x
 }
 
-func (x *respDbMixedStackArgumentsGetDataByKey0) SetValue(value []byte) *respDbMixedStackArgumentsGetDataByKey0 {
-    x.Value = value
+func (x *respDbMixedStackArgumentsGetDataByKey0) SetSuccess(value []byte) *respDbMixedStackArgumentsGetDataByKey0 {
+    x.Success = value
     return x
 }
 
-func (x *respDbMixedStackArgumentsGetDataByKey0) IsSetValue() bool {
-    return x.Value != nil
+func (x *respDbMixedStackArgumentsGetDataByKey0) IsSetSuccess() bool {
+    return x.Success != nil
 }
 
-func (x *respDbMixedStackArgumentsGetDataByKey0) writeField0(p thrift.Protocol) error {  // Value
-    if !x.IsSetValue() {
+func (x *respDbMixedStackArgumentsGetDataByKey0) writeField0(p thrift.Protocol) error {  // Success
+    if !x.IsSetSuccess() {
         return nil
     }
 
-    if err := p.WriteFieldBegin("value", thrift.STRING, 0); err != nil {
+    if err := p.WriteFieldBegin("success", thrift.STRING, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValueNonCompat()
+    item := x.GetSuccessNonCompat()
     if err := p.WriteBinary(item); err != nil {
     return err
 }
@@ -4872,18 +4898,18 @@ func (x *respDbMixedStackArgumentsGetDataByKey0) writeField0(p thrift.Protocol) 
     return nil
 }
 
-func (x *respDbMixedStackArgumentsGetDataByKey0) readField0(p thrift.Protocol) error {  // Value
+func (x *respDbMixedStackArgumentsGetDataByKey0) readField0(p thrift.Protocol) error {  // Success
     result, err := p.ReadBinary()
 if err != nil {
     return err
 }
 
-    x.SetValueNonCompat(result)
+    x.SetSuccessNonCompat(result)
     return nil
 }
 
-func (x *respDbMixedStackArgumentsGetDataByKey0) toString0() string {  // Value
-    return fmt.Sprintf("%v", x.GetValueNonCompat())
+func (x *respDbMixedStackArgumentsGetDataByKey0) toString0() string {  // Success
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
 
 
@@ -4898,8 +4924,8 @@ func newRespDbMixedStackArgumentsGetDataByKey0Builder() *respDbMixedStackArgumen
     }
 }
 
-func (x *respDbMixedStackArgumentsGetDataByKey0Builder) Value(value []byte) *respDbMixedStackArgumentsGetDataByKey0Builder {
-    x.obj.Value = value
+func (x *respDbMixedStackArgumentsGetDataByKey0Builder) Success(value []byte) *respDbMixedStackArgumentsGetDataByKey0Builder {
+    x.obj.Success = value
     return x
 }
 
@@ -4947,7 +4973,7 @@ func (x *respDbMixedStackArgumentsGetDataByKey0) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 0:  // value
+        case 0:  // success
             expectedType := thrift.Type(thrift.STRING)
             if wireType == expectedType {
                 if err := x.readField0(p); err != nil {
@@ -4984,7 +5010,7 @@ func (x *respDbMixedStackArgumentsGetDataByKey0) String() string {
     var sb strings.Builder
 
     sb.WriteString("respDbMixedStackArgumentsGetDataByKey0({")
-    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
     sb.WriteString("})")
 
     return sb.String()
@@ -5150,53 +5176,55 @@ func (x *reqDbMixedStackArgumentsGetDataByKey1) String() string {
     return sb.String()
 }
 type respDbMixedStackArgumentsGetDataByKey1 struct {
-    Value []byte `thrift:"value,0" json:"value" db:"value"`
+    Success []byte `thrift:"success,0" json:"success" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respDbMixedStackArgumentsGetDataByKey1{}
 var _ thrift.WritableResult = &respDbMixedStackArgumentsGetDataByKey1{}
 
+type DbMixedStackArgumentsGetDataByKey1Result = respDbMixedStackArgumentsGetDataByKey1
+
 func newRespDbMixedStackArgumentsGetDataByKey1() *respDbMixedStackArgumentsGetDataByKey1 {
     return (&respDbMixedStackArgumentsGetDataByKey1{}).
-        SetValueNonCompat([]byte(""))
+        SetSuccessNonCompat([]byte(""))
 }
 
-func (x *respDbMixedStackArgumentsGetDataByKey1) GetValueNonCompat() []byte {
-    return x.Value
+func (x *respDbMixedStackArgumentsGetDataByKey1) GetSuccessNonCompat() []byte {
+    return x.Success
 }
 
-func (x *respDbMixedStackArgumentsGetDataByKey1) GetValue() []byte {
-    if !x.IsSetValue() {
+func (x *respDbMixedStackArgumentsGetDataByKey1) GetSuccess() []byte {
+    if !x.IsSetSuccess() {
         return []byte("")
     }
 
-    return x.Value
+    return x.Success
 }
 
-func (x *respDbMixedStackArgumentsGetDataByKey1) SetValueNonCompat(value []byte) *respDbMixedStackArgumentsGetDataByKey1 {
-    x.Value = value
+func (x *respDbMixedStackArgumentsGetDataByKey1) SetSuccessNonCompat(value []byte) *respDbMixedStackArgumentsGetDataByKey1 {
+    x.Success = value
     return x
 }
 
-func (x *respDbMixedStackArgumentsGetDataByKey1) SetValue(value []byte) *respDbMixedStackArgumentsGetDataByKey1 {
-    x.Value = value
+func (x *respDbMixedStackArgumentsGetDataByKey1) SetSuccess(value []byte) *respDbMixedStackArgumentsGetDataByKey1 {
+    x.Success = value
     return x
 }
 
-func (x *respDbMixedStackArgumentsGetDataByKey1) IsSetValue() bool {
-    return x.Value != nil
+func (x *respDbMixedStackArgumentsGetDataByKey1) IsSetSuccess() bool {
+    return x.Success != nil
 }
 
-func (x *respDbMixedStackArgumentsGetDataByKey1) writeField0(p thrift.Protocol) error {  // Value
-    if !x.IsSetValue() {
+func (x *respDbMixedStackArgumentsGetDataByKey1) writeField0(p thrift.Protocol) error {  // Success
+    if !x.IsSetSuccess() {
         return nil
     }
 
-    if err := p.WriteFieldBegin("value", thrift.STRING, 0); err != nil {
+    if err := p.WriteFieldBegin("success", thrift.STRING, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValueNonCompat()
+    item := x.GetSuccessNonCompat()
     if err := p.WriteBinary(item); err != nil {
     return err
 }
@@ -5207,18 +5235,18 @@ func (x *respDbMixedStackArgumentsGetDataByKey1) writeField0(p thrift.Protocol) 
     return nil
 }
 
-func (x *respDbMixedStackArgumentsGetDataByKey1) readField0(p thrift.Protocol) error {  // Value
+func (x *respDbMixedStackArgumentsGetDataByKey1) readField0(p thrift.Protocol) error {  // Success
     result, err := p.ReadBinary()
 if err != nil {
     return err
 }
 
-    x.SetValueNonCompat(result)
+    x.SetSuccessNonCompat(result)
     return nil
 }
 
-func (x *respDbMixedStackArgumentsGetDataByKey1) toString0() string {  // Value
-    return fmt.Sprintf("%v", x.GetValueNonCompat())
+func (x *respDbMixedStackArgumentsGetDataByKey1) toString0() string {  // Success
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
 
 
@@ -5233,8 +5261,8 @@ func newRespDbMixedStackArgumentsGetDataByKey1Builder() *respDbMixedStackArgumen
     }
 }
 
-func (x *respDbMixedStackArgumentsGetDataByKey1Builder) Value(value []byte) *respDbMixedStackArgumentsGetDataByKey1Builder {
-    x.obj.Value = value
+func (x *respDbMixedStackArgumentsGetDataByKey1Builder) Success(value []byte) *respDbMixedStackArgumentsGetDataByKey1Builder {
+    x.obj.Success = value
     return x
 }
 
@@ -5282,7 +5310,7 @@ func (x *respDbMixedStackArgumentsGetDataByKey1) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 0:  // value
+        case 0:  // success
             expectedType := thrift.Type(thrift.STRING)
             if wireType == expectedType {
                 if err := x.readField0(p); err != nil {
@@ -5319,7 +5347,7 @@ func (x *respDbMixedStackArgumentsGetDataByKey1) String() string {
     var sb strings.Builder
 
     sb.WriteString("respDbMixedStackArgumentsGetDataByKey1({")
-    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
     sb.WriteString("})")
 
     return sb.String()
@@ -5419,7 +5447,7 @@ func (p *procFuncDbMixedStackArgumentsGetDataByKey0) RunContext(ctx context.Cont
         return x, x
     }
 
-    result.Value = retval
+    result.Success = retval
     return result, nil
 }
 
@@ -5471,7 +5499,7 @@ func (p *procFuncDbMixedStackArgumentsGetDataByKey1) RunContext(ctx context.Cont
         return x, x
     }
 
-    result.Value = retval
+    result.Success = retval
     return result, nil
 }
 

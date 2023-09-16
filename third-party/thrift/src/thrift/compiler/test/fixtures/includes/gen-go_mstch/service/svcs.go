@@ -445,6 +445,8 @@ type respMyServiceQuery struct {
 var _ thrift.Struct = &respMyServiceQuery{}
 var _ thrift.WritableResult = &respMyServiceQuery{}
 
+type MyServiceQueryResult = respMyServiceQuery
+
 func newRespMyServiceQuery() *respMyServiceQuery {
     return (&respMyServiceQuery{})
 }
@@ -815,6 +817,8 @@ type respMyServiceHasArgDocs struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServiceHasArgDocs{}
 var _ thrift.WritableResult = &respMyServiceHasArgDocs{}
+
+type MyServiceHasArgDocsResult = respMyServiceHasArgDocs
 
 func newRespMyServiceHasArgDocs() *respMyServiceHasArgDocs {
     return (&respMyServiceHasArgDocs{})

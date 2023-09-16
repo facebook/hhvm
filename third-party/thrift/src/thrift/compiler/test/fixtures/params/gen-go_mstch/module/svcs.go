@@ -464,6 +464,8 @@ type respNestedContainersMapList struct {
 var _ thrift.Struct = &respNestedContainersMapList{}
 var _ thrift.WritableResult = &respNestedContainersMapList{}
 
+type NestedContainersMapListResult = respNestedContainersMapList
+
 func newRespNestedContainersMapList() *respNestedContainersMapList {
     return (&respNestedContainersMapList{})
 }
@@ -802,6 +804,8 @@ type respNestedContainersMapSet struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &respNestedContainersMapSet{}
 var _ thrift.WritableResult = &respNestedContainersMapSet{}
+
+type NestedContainersMapSetResult = respNestedContainersMapSet
 
 func newRespNestedContainersMapSet() *respNestedContainersMapSet {
     return (&respNestedContainersMapSet{})
@@ -1142,6 +1146,8 @@ type respNestedContainersListMap struct {
 var _ thrift.Struct = &respNestedContainersListMap{}
 var _ thrift.WritableResult = &respNestedContainersListMap{}
 
+type NestedContainersListMapResult = respNestedContainersListMap
+
 func newRespNestedContainersListMap() *respNestedContainersListMap {
     return (&respNestedContainersListMap{})
 }
@@ -1463,6 +1469,8 @@ type respNestedContainersListSet struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &respNestedContainersListSet{}
 var _ thrift.WritableResult = &respNestedContainersListSet{}
+
+type NestedContainersListSetResult = respNestedContainersListSet
 
 func newRespNestedContainersListSet() *respNestedContainersListSet {
     return (&respNestedContainersListSet{})
@@ -1906,6 +1914,8 @@ type respNestedContainersTurtles struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &respNestedContainersTurtles{}
 var _ thrift.WritableResult = &respNestedContainersTurtles{}
+
+type NestedContainersTurtlesResult = respNestedContainersTurtles
 
 func newRespNestedContainersTurtles() *respNestedContainersTurtles {
     return (&respNestedContainersTurtles{})

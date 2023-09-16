@@ -229,6 +229,8 @@ type respMyRootDoRoot struct {
 var _ thrift.Struct = &respMyRootDoRoot{}
 var _ thrift.WritableResult = &respMyRootDoRoot{}
 
+type MyRootDoRootResult = respMyRootDoRoot
+
 func newRespMyRootDoRoot() *respMyRootDoRoot {
     return (&respMyRootDoRoot{})
 }
@@ -627,6 +629,8 @@ type respMyNodeDoMid struct {
 var _ thrift.Struct = &respMyNodeDoMid{}
 var _ thrift.WritableResult = &respMyNodeDoMid{}
 
+type MyNodeDoMidResult = respMyNodeDoMid
+
 func newRespMyNodeDoMid() *respMyNodeDoMid {
     return (&respMyNodeDoMid{})
 }
@@ -999,6 +1003,8 @@ type respMyLeafDoLeaf struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyLeafDoLeaf{}
 var _ thrift.WritableResult = &respMyLeafDoLeaf{}
+
+type MyLeafDoLeafResult = respMyLeafDoLeaf
 
 func newRespMyLeafDoLeaf() *respMyLeafDoLeaf {
     return (&respMyLeafDoLeaf{})

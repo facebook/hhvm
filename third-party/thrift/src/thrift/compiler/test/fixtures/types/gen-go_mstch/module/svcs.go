@@ -131,7 +131,7 @@ func (c *SomeServiceChannelClient) BounceMap(ctx context.Context, m included.Som
     if err != nil {
         return nil, err
     }
-    return out.Value, nil
+    return out.Success, nil
 }
 
 func (c *SomeServiceClient) BounceMap(m included.SomeMap) (included.SomeMap, error) {
@@ -148,7 +148,7 @@ func (c *SomeServiceChannelClient) BinaryKeyedMap(ctx context.Context, r []int64
     if err != nil {
         return nil, err
     }
-    return out.Value, nil
+    return out.Success, nil
 }
 
 func (c *SomeServiceClient) BinaryKeyedMap(r []int64) (map[*TBinary]int64, error) {
@@ -330,53 +330,55 @@ func (x *reqSomeServiceBounceMap) String() string {
     return sb.String()
 }
 type respSomeServiceBounceMap struct {
-    Value included.SomeMap `thrift:"value,0" json:"value" db:"value"`
+    Success included.SomeMap `thrift:"success,0" json:"success" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respSomeServiceBounceMap{}
 var _ thrift.WritableResult = &respSomeServiceBounceMap{}
 
+type SomeServiceBounceMapResult = respSomeServiceBounceMap
+
 func newRespSomeServiceBounceMap() *respSomeServiceBounceMap {
     return (&respSomeServiceBounceMap{}).
-        SetValueNonCompat(included.NewSomeMap())
+        SetSuccessNonCompat(included.NewSomeMap())
 }
 
-func (x *respSomeServiceBounceMap) GetValueNonCompat() included.SomeMap {
-    return x.Value
+func (x *respSomeServiceBounceMap) GetSuccessNonCompat() included.SomeMap {
+    return x.Success
 }
 
-func (x *respSomeServiceBounceMap) GetValue() included.SomeMap {
-    if !x.IsSetValue() {
+func (x *respSomeServiceBounceMap) GetSuccess() included.SomeMap {
+    if !x.IsSetSuccess() {
         return included.NewSomeMap()
     }
 
-    return x.Value
+    return x.Success
 }
 
-func (x *respSomeServiceBounceMap) SetValueNonCompat(value included.SomeMap) *respSomeServiceBounceMap {
-    x.Value = value
+func (x *respSomeServiceBounceMap) SetSuccessNonCompat(value included.SomeMap) *respSomeServiceBounceMap {
+    x.Success = value
     return x
 }
 
-func (x *respSomeServiceBounceMap) SetValue(value included.SomeMap) *respSomeServiceBounceMap {
-    x.Value = value
+func (x *respSomeServiceBounceMap) SetSuccess(value included.SomeMap) *respSomeServiceBounceMap {
+    x.Success = value
     return x
 }
 
-func (x *respSomeServiceBounceMap) IsSetValue() bool {
-    return x.Value != nil
+func (x *respSomeServiceBounceMap) IsSetSuccess() bool {
+    return x.Success != nil
 }
 
-func (x *respSomeServiceBounceMap) writeField0(p thrift.Protocol) error {  // Value
-    if !x.IsSetValue() {
+func (x *respSomeServiceBounceMap) writeField0(p thrift.Protocol) error {  // Success
+    if !x.IsSetSuccess() {
         return nil
     }
 
-    if err := p.WriteFieldBegin("value", thrift.MAP, 0); err != nil {
+    if err := p.WriteFieldBegin("success", thrift.MAP, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValueNonCompat()
+    item := x.GetSuccessNonCompat()
     err := included.WriteSomeMap(item, p)
 if err != nil {
     return err
@@ -388,18 +390,18 @@ if err != nil {
     return nil
 }
 
-func (x *respSomeServiceBounceMap) readField0(p thrift.Protocol) error {  // Value
+func (x *respSomeServiceBounceMap) readField0(p thrift.Protocol) error {  // Success
     result, err := included.ReadSomeMap(p)
 if err != nil {
     return err
 }
 
-    x.SetValueNonCompat(result)
+    x.SetSuccessNonCompat(result)
     return nil
 }
 
-func (x *respSomeServiceBounceMap) toString0() string {  // Value
-    return fmt.Sprintf("%v", x.GetValueNonCompat())
+func (x *respSomeServiceBounceMap) toString0() string {  // Success
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
 
 
@@ -414,8 +416,8 @@ func newRespSomeServiceBounceMapBuilder() *respSomeServiceBounceMapBuilder {
     }
 }
 
-func (x *respSomeServiceBounceMapBuilder) Value(value included.SomeMap) *respSomeServiceBounceMapBuilder {
-    x.obj.Value = value
+func (x *respSomeServiceBounceMapBuilder) Success(value included.SomeMap) *respSomeServiceBounceMapBuilder {
+    x.obj.Success = value
     return x
 }
 
@@ -463,7 +465,7 @@ func (x *respSomeServiceBounceMap) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 0:  // value
+        case 0:  // success
             expectedType := thrift.Type(thrift.MAP)
             if wireType == expectedType {
                 if err := x.readField0(p); err != nil {
@@ -500,7 +502,7 @@ func (x *respSomeServiceBounceMap) String() string {
     var sb strings.Builder
 
     sb.WriteString("respSomeServiceBounceMap({")
-    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
     sb.WriteString("})")
 
     return sb.String()
@@ -707,53 +709,55 @@ func (x *reqSomeServiceBinaryKeyedMap) String() string {
     return sb.String()
 }
 type respSomeServiceBinaryKeyedMap struct {
-    Value map[*TBinary]int64 `thrift:"value,0" json:"value" db:"value"`
+    Success map[*TBinary]int64 `thrift:"success,0" json:"success" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respSomeServiceBinaryKeyedMap{}
 var _ thrift.WritableResult = &respSomeServiceBinaryKeyedMap{}
 
+type SomeServiceBinaryKeyedMapResult = respSomeServiceBinaryKeyedMap
+
 func newRespSomeServiceBinaryKeyedMap() *respSomeServiceBinaryKeyedMap {
     return (&respSomeServiceBinaryKeyedMap{}).
-        SetValueNonCompat(nil)
+        SetSuccessNonCompat(nil)
 }
 
-func (x *respSomeServiceBinaryKeyedMap) GetValueNonCompat() map[*TBinary]int64 {
-    return x.Value
+func (x *respSomeServiceBinaryKeyedMap) GetSuccessNonCompat() map[*TBinary]int64 {
+    return x.Success
 }
 
-func (x *respSomeServiceBinaryKeyedMap) GetValue() map[*TBinary]int64 {
-    if !x.IsSetValue() {
+func (x *respSomeServiceBinaryKeyedMap) GetSuccess() map[*TBinary]int64 {
+    if !x.IsSetSuccess() {
         return nil
     }
 
-    return x.Value
+    return x.Success
 }
 
-func (x *respSomeServiceBinaryKeyedMap) SetValueNonCompat(value map[*TBinary]int64) *respSomeServiceBinaryKeyedMap {
-    x.Value = value
+func (x *respSomeServiceBinaryKeyedMap) SetSuccessNonCompat(value map[*TBinary]int64) *respSomeServiceBinaryKeyedMap {
+    x.Success = value
     return x
 }
 
-func (x *respSomeServiceBinaryKeyedMap) SetValue(value map[*TBinary]int64) *respSomeServiceBinaryKeyedMap {
-    x.Value = value
+func (x *respSomeServiceBinaryKeyedMap) SetSuccess(value map[*TBinary]int64) *respSomeServiceBinaryKeyedMap {
+    x.Success = value
     return x
 }
 
-func (x *respSomeServiceBinaryKeyedMap) IsSetValue() bool {
-    return x.Value != nil
+func (x *respSomeServiceBinaryKeyedMap) IsSetSuccess() bool {
+    return x.Success != nil
 }
 
-func (x *respSomeServiceBinaryKeyedMap) writeField0(p thrift.Protocol) error {  // Value
-    if !x.IsSetValue() {
+func (x *respSomeServiceBinaryKeyedMap) writeField0(p thrift.Protocol) error {  // Success
+    if !x.IsSetSuccess() {
         return nil
     }
 
-    if err := p.WriteFieldBegin("value", thrift.MAP, 0); err != nil {
+    if err := p.WriteFieldBegin("success", thrift.MAP, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValueNonCompat()
+    item := x.GetSuccessNonCompat()
     if err := p.WriteMapBegin(thrift.STRING, thrift.I64, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -783,7 +787,7 @@ if err := p.WriteMapEnd(); err != nil {
     return nil
 }
 
-func (x *respSomeServiceBinaryKeyedMap) readField0(p thrift.Protocol) error {  // Value
+func (x *respSomeServiceBinaryKeyedMap) readField0(p thrift.Protocol) error {  // Success
     _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
 if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
@@ -817,12 +821,12 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetValueNonCompat(result)
+    x.SetSuccessNonCompat(result)
     return nil
 }
 
-func (x *respSomeServiceBinaryKeyedMap) toString0() string {  // Value
-    return fmt.Sprintf("%v", x.GetValueNonCompat())
+func (x *respSomeServiceBinaryKeyedMap) toString0() string {  // Success
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
 
 
@@ -837,8 +841,8 @@ func newRespSomeServiceBinaryKeyedMapBuilder() *respSomeServiceBinaryKeyedMapBui
     }
 }
 
-func (x *respSomeServiceBinaryKeyedMapBuilder) Value(value map[*TBinary]int64) *respSomeServiceBinaryKeyedMapBuilder {
-    x.obj.Value = value
+func (x *respSomeServiceBinaryKeyedMapBuilder) Success(value map[*TBinary]int64) *respSomeServiceBinaryKeyedMapBuilder {
+    x.obj.Success = value
     return x
 }
 
@@ -886,7 +890,7 @@ func (x *respSomeServiceBinaryKeyedMap) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 0:  // value
+        case 0:  // success
             expectedType := thrift.Type(thrift.MAP)
             if wireType == expectedType {
                 if err := x.readField0(p); err != nil {
@@ -923,7 +927,7 @@ func (x *respSomeServiceBinaryKeyedMap) String() string {
     var sb strings.Builder
 
     sb.WriteString("respSomeServiceBinaryKeyedMap({")
-    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
     sb.WriteString("})")
 
     return sb.String()
@@ -1023,7 +1027,7 @@ func (p *procFuncSomeServiceBounceMap) RunContext(ctx context.Context, reqStruct
         return x, x
     }
 
-    result.Value = retval
+    result.Success = retval
     return result, nil
 }
 
@@ -1075,7 +1079,7 @@ func (p *procFuncSomeServiceBinaryKeyedMap) RunContext(ctx context.Context, reqS
         return x, x
     }
 
-    result.Value = retval
+    result.Success = retval
     return result, nil
 }
 

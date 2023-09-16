@@ -156,7 +156,7 @@ func (c *MyServiceChannelClient) GetRandomData(ctx context.Context) (string, err
     if err != nil {
         return "", err
     }
-    return out.Value, nil
+    return out.Success, nil
 }
 
 func (c *MyServiceClient) GetRandomData() (string, error) {
@@ -173,7 +173,7 @@ func (c *MyServiceChannelClient) HasDataById(ctx context.Context, id int64) (boo
     if err != nil {
         return false, err
     }
-    return out.Value, nil
+    return out.Success, nil
 }
 
 func (c *MyServiceClient) HasDataById(id int64) (bool, error) {
@@ -190,7 +190,7 @@ func (c *MyServiceChannelClient) GoGetDataById(ctx context.Context, id int64) (s
     if err != nil {
         return "", err
     }
-    return out.Value, nil
+    return out.Success, nil
 }
 
 func (c *MyServiceClient) GoGetDataById(id int64) (string, error) {
@@ -340,6 +340,8 @@ type respMyServicePing struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServicePing{}
 var _ thrift.WritableResult = &respMyServicePing{}
+
+type MyServicePingResult = respMyServicePing
 
 func newRespMyServicePing() *respMyServicePing {
     return (&respMyServicePing{})
@@ -613,41 +615,43 @@ func (x *reqMyServiceGetRandomData) String() string {
     return sb.String()
 }
 type respMyServiceGetRandomData struct {
-    Value string `thrift:"value,0" json:"value" db:"value"`
+    Success string `thrift:"success,0" json:"success" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServiceGetRandomData{}
 var _ thrift.WritableResult = &respMyServiceGetRandomData{}
 
+type MyServiceGetRandomDataResult = respMyServiceGetRandomData
+
 func newRespMyServiceGetRandomData() *respMyServiceGetRandomData {
     return (&respMyServiceGetRandomData{}).
-        SetValueNonCompat("")
+        SetSuccessNonCompat("")
 }
 
-func (x *respMyServiceGetRandomData) GetValueNonCompat() string {
-    return x.Value
+func (x *respMyServiceGetRandomData) GetSuccessNonCompat() string {
+    return x.Success
 }
 
-func (x *respMyServiceGetRandomData) GetValue() string {
-    return x.Value
+func (x *respMyServiceGetRandomData) GetSuccess() string {
+    return x.Success
 }
 
-func (x *respMyServiceGetRandomData) SetValueNonCompat(value string) *respMyServiceGetRandomData {
-    x.Value = value
+func (x *respMyServiceGetRandomData) SetSuccessNonCompat(value string) *respMyServiceGetRandomData {
+    x.Success = value
     return x
 }
 
-func (x *respMyServiceGetRandomData) SetValue(value string) *respMyServiceGetRandomData {
-    x.Value = value
+func (x *respMyServiceGetRandomData) SetSuccess(value string) *respMyServiceGetRandomData {
+    x.Success = value
     return x
 }
 
-func (x *respMyServiceGetRandomData) writeField0(p thrift.Protocol) error {  // Value
-    if err := p.WriteFieldBegin("value", thrift.STRING, 0); err != nil {
+func (x *respMyServiceGetRandomData) writeField0(p thrift.Protocol) error {  // Success
+    if err := p.WriteFieldBegin("success", thrift.STRING, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValueNonCompat()
+    item := x.GetSuccessNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -658,18 +662,18 @@ func (x *respMyServiceGetRandomData) writeField0(p thrift.Protocol) error {  // 
     return nil
 }
 
-func (x *respMyServiceGetRandomData) readField0(p thrift.Protocol) error {  // Value
+func (x *respMyServiceGetRandomData) readField0(p thrift.Protocol) error {  // Success
     result, err := p.ReadString()
 if err != nil {
     return err
 }
 
-    x.SetValueNonCompat(result)
+    x.SetSuccessNonCompat(result)
     return nil
 }
 
-func (x *respMyServiceGetRandomData) toString0() string {  // Value
-    return fmt.Sprintf("%v", x.GetValueNonCompat())
+func (x *respMyServiceGetRandomData) toString0() string {  // Success
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
 
 
@@ -684,8 +688,8 @@ func newRespMyServiceGetRandomDataBuilder() *respMyServiceGetRandomDataBuilder {
     }
 }
 
-func (x *respMyServiceGetRandomDataBuilder) Value(value string) *respMyServiceGetRandomDataBuilder {
-    x.obj.Value = value
+func (x *respMyServiceGetRandomDataBuilder) Success(value string) *respMyServiceGetRandomDataBuilder {
+    x.obj.Success = value
     return x
 }
 
@@ -733,7 +737,7 @@ func (x *respMyServiceGetRandomData) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 0:  // value
+        case 0:  // success
             expectedType := thrift.Type(thrift.STRING)
             if wireType == expectedType {
                 if err := x.readField0(p); err != nil {
@@ -770,7 +774,7 @@ func (x *respMyServiceGetRandomData) String() string {
     var sb strings.Builder
 
     sb.WriteString("respMyServiceGetRandomData({")
-    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
     sb.WriteString("})")
 
     return sb.String()
@@ -936,41 +940,43 @@ func (x *reqMyServiceHasDataById) String() string {
     return sb.String()
 }
 type respMyServiceHasDataById struct {
-    Value bool `thrift:"value,0" json:"value" db:"value"`
+    Success bool `thrift:"success,0" json:"success" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServiceHasDataById{}
 var _ thrift.WritableResult = &respMyServiceHasDataById{}
 
+type MyServiceHasDataByIdResult = respMyServiceHasDataById
+
 func newRespMyServiceHasDataById() *respMyServiceHasDataById {
     return (&respMyServiceHasDataById{}).
-        SetValueNonCompat(false)
+        SetSuccessNonCompat(false)
 }
 
-func (x *respMyServiceHasDataById) GetValueNonCompat() bool {
-    return x.Value
+func (x *respMyServiceHasDataById) GetSuccessNonCompat() bool {
+    return x.Success
 }
 
-func (x *respMyServiceHasDataById) GetValue() bool {
-    return x.Value
+func (x *respMyServiceHasDataById) GetSuccess() bool {
+    return x.Success
 }
 
-func (x *respMyServiceHasDataById) SetValueNonCompat(value bool) *respMyServiceHasDataById {
-    x.Value = value
+func (x *respMyServiceHasDataById) SetSuccessNonCompat(value bool) *respMyServiceHasDataById {
+    x.Success = value
     return x
 }
 
-func (x *respMyServiceHasDataById) SetValue(value bool) *respMyServiceHasDataById {
-    x.Value = value
+func (x *respMyServiceHasDataById) SetSuccess(value bool) *respMyServiceHasDataById {
+    x.Success = value
     return x
 }
 
-func (x *respMyServiceHasDataById) writeField0(p thrift.Protocol) error {  // Value
-    if err := p.WriteFieldBegin("value", thrift.BOOL, 0); err != nil {
+func (x *respMyServiceHasDataById) writeField0(p thrift.Protocol) error {  // Success
+    if err := p.WriteFieldBegin("success", thrift.BOOL, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValueNonCompat()
+    item := x.GetSuccessNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -981,18 +987,18 @@ func (x *respMyServiceHasDataById) writeField0(p thrift.Protocol) error {  // Va
     return nil
 }
 
-func (x *respMyServiceHasDataById) readField0(p thrift.Protocol) error {  // Value
+func (x *respMyServiceHasDataById) readField0(p thrift.Protocol) error {  // Success
     result, err := p.ReadBool()
 if err != nil {
     return err
 }
 
-    x.SetValueNonCompat(result)
+    x.SetSuccessNonCompat(result)
     return nil
 }
 
-func (x *respMyServiceHasDataById) toString0() string {  // Value
-    return fmt.Sprintf("%v", x.GetValueNonCompat())
+func (x *respMyServiceHasDataById) toString0() string {  // Success
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
 
 
@@ -1007,8 +1013,8 @@ func newRespMyServiceHasDataByIdBuilder() *respMyServiceHasDataByIdBuilder {
     }
 }
 
-func (x *respMyServiceHasDataByIdBuilder) Value(value bool) *respMyServiceHasDataByIdBuilder {
-    x.obj.Value = value
+func (x *respMyServiceHasDataByIdBuilder) Success(value bool) *respMyServiceHasDataByIdBuilder {
+    x.obj.Success = value
     return x
 }
 
@@ -1056,7 +1062,7 @@ func (x *respMyServiceHasDataById) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 0:  // value
+        case 0:  // success
             expectedType := thrift.Type(thrift.BOOL)
             if wireType == expectedType {
                 if err := x.readField0(p); err != nil {
@@ -1093,7 +1099,7 @@ func (x *respMyServiceHasDataById) String() string {
     var sb strings.Builder
 
     sb.WriteString("respMyServiceHasDataById({")
-    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
     sb.WriteString("})")
 
     return sb.String()
@@ -1259,41 +1265,43 @@ func (x *reqMyServiceGoGetDataById) String() string {
     return sb.String()
 }
 type respMyServiceGoGetDataById struct {
-    Value string `thrift:"value,0" json:"value" db:"value"`
+    Success string `thrift:"success,0" json:"success" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServiceGoGetDataById{}
 var _ thrift.WritableResult = &respMyServiceGoGetDataById{}
 
+type MyServiceGoGetDataByIdResult = respMyServiceGoGetDataById
+
 func newRespMyServiceGoGetDataById() *respMyServiceGoGetDataById {
     return (&respMyServiceGoGetDataById{}).
-        SetValueNonCompat("")
+        SetSuccessNonCompat("")
 }
 
-func (x *respMyServiceGoGetDataById) GetValueNonCompat() string {
-    return x.Value
+func (x *respMyServiceGoGetDataById) GetSuccessNonCompat() string {
+    return x.Success
 }
 
-func (x *respMyServiceGoGetDataById) GetValue() string {
-    return x.Value
+func (x *respMyServiceGoGetDataById) GetSuccess() string {
+    return x.Success
 }
 
-func (x *respMyServiceGoGetDataById) SetValueNonCompat(value string) *respMyServiceGoGetDataById {
-    x.Value = value
+func (x *respMyServiceGoGetDataById) SetSuccessNonCompat(value string) *respMyServiceGoGetDataById {
+    x.Success = value
     return x
 }
 
-func (x *respMyServiceGoGetDataById) SetValue(value string) *respMyServiceGoGetDataById {
-    x.Value = value
+func (x *respMyServiceGoGetDataById) SetSuccess(value string) *respMyServiceGoGetDataById {
+    x.Success = value
     return x
 }
 
-func (x *respMyServiceGoGetDataById) writeField0(p thrift.Protocol) error {  // Value
-    if err := p.WriteFieldBegin("value", thrift.STRING, 0); err != nil {
+func (x *respMyServiceGoGetDataById) writeField0(p thrift.Protocol) error {  // Success
+    if err := p.WriteFieldBegin("success", thrift.STRING, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValueNonCompat()
+    item := x.GetSuccessNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -1304,18 +1312,18 @@ func (x *respMyServiceGoGetDataById) writeField0(p thrift.Protocol) error {  // 
     return nil
 }
 
-func (x *respMyServiceGoGetDataById) readField0(p thrift.Protocol) error {  // Value
+func (x *respMyServiceGoGetDataById) readField0(p thrift.Protocol) error {  // Success
     result, err := p.ReadString()
 if err != nil {
     return err
 }
 
-    x.SetValueNonCompat(result)
+    x.SetSuccessNonCompat(result)
     return nil
 }
 
-func (x *respMyServiceGoGetDataById) toString0() string {  // Value
-    return fmt.Sprintf("%v", x.GetValueNonCompat())
+func (x *respMyServiceGoGetDataById) toString0() string {  // Success
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
 
 
@@ -1330,8 +1338,8 @@ func newRespMyServiceGoGetDataByIdBuilder() *respMyServiceGoGetDataByIdBuilder {
     }
 }
 
-func (x *respMyServiceGoGetDataByIdBuilder) Value(value string) *respMyServiceGoGetDataByIdBuilder {
-    x.obj.Value = value
+func (x *respMyServiceGoGetDataByIdBuilder) Success(value string) *respMyServiceGoGetDataByIdBuilder {
+    x.obj.Success = value
     return x
 }
 
@@ -1379,7 +1387,7 @@ func (x *respMyServiceGoGetDataById) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 0:  // value
+        case 0:  // success
             expectedType := thrift.Type(thrift.STRING)
             if wireType == expectedType {
                 if err := x.readField0(p); err != nil {
@@ -1416,7 +1424,7 @@ func (x *respMyServiceGoGetDataById) String() string {
     var sb strings.Builder
 
     sb.WriteString("respMyServiceGoGetDataById({")
-    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
     sb.WriteString("})")
 
     return sb.String()
@@ -1657,6 +1665,8 @@ type respMyServicePutDataById struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServicePutDataById{}
 var _ thrift.WritableResult = &respMyServicePutDataById{}
+
+type MyServicePutDataByIdResult = respMyServicePutDataById
 
 func newRespMyServicePutDataById() *respMyServicePutDataById {
     return (&respMyServicePutDataById{})
@@ -1981,6 +1991,8 @@ type respMyServiceLobDataById struct {
 var _ thrift.Struct = &respMyServiceLobDataById{}
 var _ thrift.WritableResult = &respMyServiceLobDataById{}
 
+type MyServiceLobDataByIdResult = respMyServiceLobDataById
+
 func newRespMyServiceLobDataById() *respMyServiceLobDataById {
     return (&respMyServiceLobDataById{})
 }
@@ -2161,6 +2173,8 @@ type respMyServiceGoDoNothing struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServiceGoDoNothing{}
 var _ thrift.WritableResult = &respMyServiceGoDoNothing{}
+
+type MyServiceGoDoNothingResult = respMyServiceGoDoNothing
 
 func newRespMyServiceGoDoNothing() *respMyServiceGoDoNothing {
     return (&respMyServiceGoDoNothing{})
@@ -2411,7 +2425,7 @@ func (p *procFuncMyServiceGetRandomData) RunContext(ctx context.Context, reqStru
         return x, x
     }
 
-    result.Value = retval
+    result.Success = retval
     return result, nil
 }
 
@@ -2463,7 +2477,7 @@ func (p *procFuncMyServiceHasDataById) RunContext(ctx context.Context, reqStruct
         return x, x
     }
 
-    result.Value = retval
+    result.Success = retval
     return result, nil
 }
 
@@ -2515,7 +2529,7 @@ func (p *procFuncMyServiceGoGetDataById) RunContext(ctx context.Context, reqStru
         return x, x
     }
 
-    result.Value = retval
+    result.Success = retval
     return result, nil
 }
 
@@ -2896,6 +2910,8 @@ type respMyServicePrioParentPing struct {
 var _ thrift.Struct = &respMyServicePrioParentPing{}
 var _ thrift.WritableResult = &respMyServicePrioParentPing{}
 
+type MyServicePrioParentPingResult = respMyServicePrioParentPing
+
 func newRespMyServicePrioParentPing() *respMyServicePrioParentPing {
     return (&respMyServicePrioParentPing{})
 }
@@ -3076,6 +3092,8 @@ type respMyServicePrioParentPong struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServicePrioParentPong{}
 var _ thrift.WritableResult = &respMyServicePrioParentPong{}
+
+type MyServicePrioParentPongResult = respMyServicePrioParentPong
 
 func newRespMyServicePrioParentPong() *respMyServicePrioParentPong {
     return (&respMyServicePrioParentPong{})
@@ -3527,6 +3545,8 @@ type respMyServicePrioChildPang struct {
 var _ thrift.Struct = &respMyServicePrioChildPang{}
 var _ thrift.WritableResult = &respMyServicePrioChildPang{}
 
+type MyServicePrioChildPangResult = respMyServicePrioChildPang
+
 func newRespMyServicePrioChildPang() *respMyServicePrioChildPang {
     return (&respMyServicePrioChildPang{})
 }
@@ -3788,7 +3808,7 @@ func (c *BadServiceChannelClient) Bar(ctx context.Context) (int32, error) {
     if err != nil {
         return 0, err
     }
-    return out.Value, nil
+    return out.Success, nil
 }
 
 func (c *BadServiceClient) Bar() (int32, error) {
@@ -3886,41 +3906,43 @@ func (x *reqBadServiceBar) String() string {
     return sb.String()
 }
 type respBadServiceBar struct {
-    Value int32 `thrift:"value,0" json:"value" db:"value"`
+    Success int32 `thrift:"success,0" json:"success" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respBadServiceBar{}
 var _ thrift.WritableResult = &respBadServiceBar{}
 
+type BadServiceBarResult = respBadServiceBar
+
 func newRespBadServiceBar() *respBadServiceBar {
     return (&respBadServiceBar{}).
-        SetValueNonCompat(0)
+        SetSuccessNonCompat(0)
 }
 
-func (x *respBadServiceBar) GetValueNonCompat() int32 {
-    return x.Value
+func (x *respBadServiceBar) GetSuccessNonCompat() int32 {
+    return x.Success
 }
 
-func (x *respBadServiceBar) GetValue() int32 {
-    return x.Value
+func (x *respBadServiceBar) GetSuccess() int32 {
+    return x.Success
 }
 
-func (x *respBadServiceBar) SetValueNonCompat(value int32) *respBadServiceBar {
-    x.Value = value
+func (x *respBadServiceBar) SetSuccessNonCompat(value int32) *respBadServiceBar {
+    x.Success = value
     return x
 }
 
-func (x *respBadServiceBar) SetValue(value int32) *respBadServiceBar {
-    x.Value = value
+func (x *respBadServiceBar) SetSuccess(value int32) *respBadServiceBar {
+    x.Success = value
     return x
 }
 
-func (x *respBadServiceBar) writeField0(p thrift.Protocol) error {  // Value
-    if err := p.WriteFieldBegin("value", thrift.I32, 0); err != nil {
+func (x *respBadServiceBar) writeField0(p thrift.Protocol) error {  // Success
+    if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValueNonCompat()
+    item := x.GetSuccessNonCompat()
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -3931,18 +3953,18 @@ func (x *respBadServiceBar) writeField0(p thrift.Protocol) error {  // Value
     return nil
 }
 
-func (x *respBadServiceBar) readField0(p thrift.Protocol) error {  // Value
+func (x *respBadServiceBar) readField0(p thrift.Protocol) error {  // Success
     result, err := p.ReadI32()
 if err != nil {
     return err
 }
 
-    x.SetValueNonCompat(result)
+    x.SetSuccessNonCompat(result)
     return nil
 }
 
-func (x *respBadServiceBar) toString0() string {  // Value
-    return fmt.Sprintf("%v", x.GetValueNonCompat())
+func (x *respBadServiceBar) toString0() string {  // Success
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
 
 
@@ -3957,8 +3979,8 @@ func newRespBadServiceBarBuilder() *respBadServiceBarBuilder {
     }
 }
 
-func (x *respBadServiceBarBuilder) Value(value int32) *respBadServiceBarBuilder {
-    x.obj.Value = value
+func (x *respBadServiceBarBuilder) Success(value int32) *respBadServiceBarBuilder {
+    x.obj.Success = value
     return x
 }
 
@@ -4006,7 +4028,7 @@ func (x *respBadServiceBar) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 0:  // value
+        case 0:  // success
             expectedType := thrift.Type(thrift.I32)
             if wireType == expectedType {
                 if err := x.readField0(p); err != nil {
@@ -4043,7 +4065,7 @@ func (x *respBadServiceBar) String() string {
     var sb strings.Builder
 
     sb.WriteString("respBadServiceBar({")
-    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
     sb.WriteString("})")
 
     return sb.String()
@@ -4140,7 +4162,7 @@ func (p *procFuncBadServiceBar) RunContext(ctx context.Context, reqStruct thrift
         return x, x
     }
 
-    result.Value = retval
+    result.Success = retval
     return result, nil
 }
 
@@ -4388,6 +4410,8 @@ type respFooBarBazServiceFooStructured struct {
 var _ thrift.Struct = &respFooBarBazServiceFooStructured{}
 var _ thrift.WritableResult = &respFooBarBazServiceFooStructured{}
 
+type FooBarBazServiceFooStructuredResult = respFooBarBazServiceFooStructured
+
 func newRespFooBarBazServiceFooStructured() *respFooBarBazServiceFooStructured {
     return (&respFooBarBazServiceFooStructured{})
 }
@@ -4569,6 +4593,8 @@ type respFooBarBazServiceBarNonStructured struct {
 var _ thrift.Struct = &respFooBarBazServiceBarNonStructured{}
 var _ thrift.WritableResult = &respFooBarBazServiceBarNonStructured{}
 
+type FooBarBazServiceBarNonStructuredResult = respFooBarBazServiceBarNonStructured
+
 func newRespFooBarBazServiceBarNonStructured() *respFooBarBazServiceBarNonStructured {
     return (&respFooBarBazServiceBarNonStructured{})
 }
@@ -4749,6 +4775,8 @@ type respFooBarBazServiceBaz struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &respFooBarBazServiceBaz{}
 var _ thrift.WritableResult = &respFooBarBazServiceBaz{}
+
+type FooBarBazServiceBazResult = respFooBarBazServiceBaz
 
 func newRespFooBarBazServiceBaz() *respFooBarBazServiceBaz {
     return (&respFooBarBazServiceBaz{})

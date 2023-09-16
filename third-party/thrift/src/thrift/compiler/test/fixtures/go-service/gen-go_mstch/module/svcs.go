@@ -155,7 +155,7 @@ func (c *GetEntityChannelClient) GetEntity(ctx context.Context, r *GetEntityRequ
     if err != nil {
         return nil, err
     }
-    return out.Value, nil
+    return out.Success, nil
 }
 
 func (c *GetEntityClient) GetEntity(r *GetEntityRequest) (*GetEntityResponse, error) {
@@ -171,7 +171,7 @@ func (c *GetEntityChannelClient) GetBool(ctx context.Context) (bool, error) {
     if err != nil {
         return false, err
     }
-    return out.Value, nil
+    return out.Success, nil
 }
 
 func (c *GetEntityClient) GetBool() (bool, error) {
@@ -187,7 +187,7 @@ func (c *GetEntityChannelClient) GetByte(ctx context.Context) (int8, error) {
     if err != nil {
         return 0, err
     }
-    return out.Value, nil
+    return out.Success, nil
 }
 
 func (c *GetEntityClient) GetByte() (int8, error) {
@@ -203,7 +203,7 @@ func (c *GetEntityChannelClient) GetI16(ctx context.Context) (int16, error) {
     if err != nil {
         return 0, err
     }
-    return out.Value, nil
+    return out.Success, nil
 }
 
 func (c *GetEntityClient) GetI16() (int16, error) {
@@ -219,7 +219,7 @@ func (c *GetEntityChannelClient) GetI32(ctx context.Context) (int32, error) {
     if err != nil {
         return 0, err
     }
-    return out.Value, nil
+    return out.Success, nil
 }
 
 func (c *GetEntityClient) GetI32() (int32, error) {
@@ -235,7 +235,7 @@ func (c *GetEntityChannelClient) GetI64(ctx context.Context) (int64, error) {
     if err != nil {
         return 0, err
     }
-    return out.Value, nil
+    return out.Success, nil
 }
 
 func (c *GetEntityClient) GetI64() (int64, error) {
@@ -251,7 +251,7 @@ func (c *GetEntityChannelClient) GetDouble(ctx context.Context) (float64, error)
     if err != nil {
         return 0.0, err
     }
-    return out.Value, nil
+    return out.Success, nil
 }
 
 func (c *GetEntityClient) GetDouble() (float64, error) {
@@ -267,7 +267,7 @@ func (c *GetEntityChannelClient) GetString(ctx context.Context) (string, error) 
     if err != nil {
         return "", err
     }
-    return out.Value, nil
+    return out.Success, nil
 }
 
 func (c *GetEntityClient) GetString() (string, error) {
@@ -283,7 +283,7 @@ func (c *GetEntityChannelClient) GetBinary(ctx context.Context) ([]byte, error) 
     if err != nil {
         return nil, err
     }
-    return out.Value, nil
+    return out.Success, nil
 }
 
 func (c *GetEntityClient) GetBinary() ([]byte, error) {
@@ -299,7 +299,7 @@ func (c *GetEntityChannelClient) GetMap(ctx context.Context) (map[string]string,
     if err != nil {
         return nil, err
     }
-    return out.Value, nil
+    return out.Success, nil
 }
 
 func (c *GetEntityClient) GetMap() (map[string]string, error) {
@@ -315,7 +315,7 @@ func (c *GetEntityChannelClient) GetSet(ctx context.Context) ([]string, error) {
     if err != nil {
         return nil, err
     }
-    return out.Value, nil
+    return out.Success, nil
 }
 
 func (c *GetEntityClient) GetSet() ([]string, error) {
@@ -331,7 +331,7 @@ func (c *GetEntityChannelClient) GetList(ctx context.Context) ([]string, error) 
     if err != nil {
         return nil, err
     }
-    return out.Value, nil
+    return out.Success, nil
 }
 
 func (c *GetEntityClient) GetList() ([]string, error) {
@@ -350,7 +350,7 @@ func (c *GetEntityChannelClient) GetLegacyStuff(ctx context.Context, numPos int6
     if err != nil {
         return 0, err
     }
-    return out.Value, nil
+    return out.Success, nil
 }
 
 func (c *GetEntityClient) GetLegacyStuff(numPos int64, numNeg1 int64, numNeg2 int64) (int32, error) {
@@ -367,7 +367,7 @@ func (c *GetEntityChannelClient) GetCtxCollision(ctx1 context.Context, ctx int64
     if err != nil {
         return 0, err
     }
-    return out.Value, nil
+    return out.Success, nil
 }
 
 func (c *GetEntityClient) GetCtxCollision(ctx int64) (int32, error) {
@@ -385,7 +385,7 @@ func (c *GetEntityChannelClient) GetCtx1Collision(ctx2 context.Context, ctx int6
     if err != nil {
         return 0, err
     }
-    return out.Value, nil
+    return out.Success, nil
 }
 
 func (c *GetEntityClient) GetCtx1Collision(ctx int64, ctx1 int64) (int32, error) {
@@ -578,53 +578,55 @@ func (x *reqGetEntityGetEntity) String() string {
     return sb.String()
 }
 type respGetEntityGetEntity struct {
-    Value *GetEntityResponse `thrift:"value,0" json:"value" db:"value"`
+    Success *GetEntityResponse `thrift:"success,0" json:"success" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetEntity{}
 var _ thrift.WritableResult = &respGetEntityGetEntity{}
 
+type GetEntityGetEntityResult = respGetEntityGetEntity
+
 func newRespGetEntityGetEntity() *respGetEntityGetEntity {
     return (&respGetEntityGetEntity{}).
-        SetValueNonCompat(*NewGetEntityResponse())
+        SetSuccessNonCompat(*NewGetEntityResponse())
 }
 
-func (x *respGetEntityGetEntity) GetValueNonCompat() *GetEntityResponse {
-    return x.Value
+func (x *respGetEntityGetEntity) GetSuccessNonCompat() *GetEntityResponse {
+    return x.Success
 }
 
-func (x *respGetEntityGetEntity) GetValue() *GetEntityResponse {
-    if !x.IsSetValue() {
+func (x *respGetEntityGetEntity) GetSuccess() *GetEntityResponse {
+    if !x.IsSetSuccess() {
         return nil
     }
 
-    return x.Value
+    return x.Success
 }
 
-func (x *respGetEntityGetEntity) SetValueNonCompat(value GetEntityResponse) *respGetEntityGetEntity {
-    x.Value = &value
+func (x *respGetEntityGetEntity) SetSuccessNonCompat(value GetEntityResponse) *respGetEntityGetEntity {
+    x.Success = &value
     return x
 }
 
-func (x *respGetEntityGetEntity) SetValue(value *GetEntityResponse) *respGetEntityGetEntity {
-    x.Value = value
+func (x *respGetEntityGetEntity) SetSuccess(value *GetEntityResponse) *respGetEntityGetEntity {
+    x.Success = value
     return x
 }
 
-func (x *respGetEntityGetEntity) IsSetValue() bool {
-    return x.Value != nil
+func (x *respGetEntityGetEntity) IsSetSuccess() bool {
+    return x.Success != nil
 }
 
-func (x *respGetEntityGetEntity) writeField0(p thrift.Protocol) error {  // Value
-    if !x.IsSetValue() {
+func (x *respGetEntityGetEntity) writeField0(p thrift.Protocol) error {  // Success
+    if !x.IsSetSuccess() {
         return nil
     }
 
-    if err := p.WriteFieldBegin("value", thrift.STRUCT, 0); err != nil {
+    if err := p.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValueNonCompat()
+    item := x.GetSuccessNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -635,30 +637,30 @@ func (x *respGetEntityGetEntity) writeField0(p thrift.Protocol) error {  // Valu
     return nil
 }
 
-func (x *respGetEntityGetEntity) readField0(p thrift.Protocol) error {  // Value
+func (x *respGetEntityGetEntity) readField0(p thrift.Protocol) error {  // Success
     result := *NewGetEntityResponse()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.SetValueNonCompat(result)
+    x.SetSuccessNonCompat(result)
     return nil
 }
 
-func (x *respGetEntityGetEntity) toString0() string {  // Value
-    return fmt.Sprintf("%v", x.GetValueNonCompat())
+func (x *respGetEntityGetEntity) toString0() string {  // Success
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
 
-// Deprecated: Use newRespGetEntityGetEntity().GetValue() instead.
-var respGetEntityGetEntity_Value_DEFAULT = newRespGetEntityGetEntity().GetValue()
+// Deprecated: Use newRespGetEntityGetEntity().GetSuccess() instead.
+var respGetEntityGetEntity_Success_DEFAULT = newRespGetEntityGetEntity().GetSuccess()
 
-// Deprecated: Use newRespGetEntityGetEntity().GetValue() instead.
-func (x *respGetEntityGetEntity) DefaultGetValue() *GetEntityResponse {
-    if !x.IsSetValue() {
+// Deprecated: Use newRespGetEntityGetEntity().GetSuccess() instead.
+func (x *respGetEntityGetEntity) DefaultGetSuccess() *GetEntityResponse {
+    if !x.IsSetSuccess() {
         return NewGetEntityResponse()
     }
-    return x.Value
+    return x.Success
 }
 
 
@@ -673,8 +675,8 @@ func newRespGetEntityGetEntityBuilder() *respGetEntityGetEntityBuilder {
     }
 }
 
-func (x *respGetEntityGetEntityBuilder) Value(value *GetEntityResponse) *respGetEntityGetEntityBuilder {
-    x.obj.Value = value
+func (x *respGetEntityGetEntityBuilder) Success(value *GetEntityResponse) *respGetEntityGetEntityBuilder {
+    x.obj.Success = value
     return x
 }
 
@@ -722,7 +724,7 @@ func (x *respGetEntityGetEntity) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 0:  // value
+        case 0:  // success
             expectedType := thrift.Type(thrift.STRUCT)
             if wireType == expectedType {
                 if err := x.readField0(p); err != nil {
@@ -759,7 +761,7 @@ func (x *respGetEntityGetEntity) String() string {
     var sb strings.Builder
 
     sb.WriteString("respGetEntityGetEntity({")
-    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
     sb.WriteString("})")
 
     return sb.String()
@@ -854,41 +856,43 @@ func (x *reqGetEntityGetBool) String() string {
     return sb.String()
 }
 type respGetEntityGetBool struct {
-    Value bool `thrift:"value,0" json:"value" db:"value"`
+    Success bool `thrift:"success,0" json:"success" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetBool{}
 var _ thrift.WritableResult = &respGetEntityGetBool{}
 
+type GetEntityGetBoolResult = respGetEntityGetBool
+
 func newRespGetEntityGetBool() *respGetEntityGetBool {
     return (&respGetEntityGetBool{}).
-        SetValueNonCompat(false)
+        SetSuccessNonCompat(false)
 }
 
-func (x *respGetEntityGetBool) GetValueNonCompat() bool {
-    return x.Value
+func (x *respGetEntityGetBool) GetSuccessNonCompat() bool {
+    return x.Success
 }
 
-func (x *respGetEntityGetBool) GetValue() bool {
-    return x.Value
+func (x *respGetEntityGetBool) GetSuccess() bool {
+    return x.Success
 }
 
-func (x *respGetEntityGetBool) SetValueNonCompat(value bool) *respGetEntityGetBool {
-    x.Value = value
+func (x *respGetEntityGetBool) SetSuccessNonCompat(value bool) *respGetEntityGetBool {
+    x.Success = value
     return x
 }
 
-func (x *respGetEntityGetBool) SetValue(value bool) *respGetEntityGetBool {
-    x.Value = value
+func (x *respGetEntityGetBool) SetSuccess(value bool) *respGetEntityGetBool {
+    x.Success = value
     return x
 }
 
-func (x *respGetEntityGetBool) writeField0(p thrift.Protocol) error {  // Value
-    if err := p.WriteFieldBegin("value", thrift.BOOL, 0); err != nil {
+func (x *respGetEntityGetBool) writeField0(p thrift.Protocol) error {  // Success
+    if err := p.WriteFieldBegin("success", thrift.BOOL, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValueNonCompat()
+    item := x.GetSuccessNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -899,18 +903,18 @@ func (x *respGetEntityGetBool) writeField0(p thrift.Protocol) error {  // Value
     return nil
 }
 
-func (x *respGetEntityGetBool) readField0(p thrift.Protocol) error {  // Value
+func (x *respGetEntityGetBool) readField0(p thrift.Protocol) error {  // Success
     result, err := p.ReadBool()
 if err != nil {
     return err
 }
 
-    x.SetValueNonCompat(result)
+    x.SetSuccessNonCompat(result)
     return nil
 }
 
-func (x *respGetEntityGetBool) toString0() string {  // Value
-    return fmt.Sprintf("%v", x.GetValueNonCompat())
+func (x *respGetEntityGetBool) toString0() string {  // Success
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
 
 
@@ -925,8 +929,8 @@ func newRespGetEntityGetBoolBuilder() *respGetEntityGetBoolBuilder {
     }
 }
 
-func (x *respGetEntityGetBoolBuilder) Value(value bool) *respGetEntityGetBoolBuilder {
-    x.obj.Value = value
+func (x *respGetEntityGetBoolBuilder) Success(value bool) *respGetEntityGetBoolBuilder {
+    x.obj.Success = value
     return x
 }
 
@@ -974,7 +978,7 @@ func (x *respGetEntityGetBool) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 0:  // value
+        case 0:  // success
             expectedType := thrift.Type(thrift.BOOL)
             if wireType == expectedType {
                 if err := x.readField0(p); err != nil {
@@ -1011,7 +1015,7 @@ func (x *respGetEntityGetBool) String() string {
     var sb strings.Builder
 
     sb.WriteString("respGetEntityGetBool({")
-    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
     sb.WriteString("})")
 
     return sb.String()
@@ -1106,41 +1110,43 @@ func (x *reqGetEntityGetByte) String() string {
     return sb.String()
 }
 type respGetEntityGetByte struct {
-    Value int8 `thrift:"value,0" json:"value" db:"value"`
+    Success int8 `thrift:"success,0" json:"success" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetByte{}
 var _ thrift.WritableResult = &respGetEntityGetByte{}
 
+type GetEntityGetByteResult = respGetEntityGetByte
+
 func newRespGetEntityGetByte() *respGetEntityGetByte {
     return (&respGetEntityGetByte{}).
-        SetValueNonCompat(0)
+        SetSuccessNonCompat(0)
 }
 
-func (x *respGetEntityGetByte) GetValueNonCompat() int8 {
-    return x.Value
+func (x *respGetEntityGetByte) GetSuccessNonCompat() int8 {
+    return x.Success
 }
 
-func (x *respGetEntityGetByte) GetValue() int8 {
-    return x.Value
+func (x *respGetEntityGetByte) GetSuccess() int8 {
+    return x.Success
 }
 
-func (x *respGetEntityGetByte) SetValueNonCompat(value int8) *respGetEntityGetByte {
-    x.Value = value
+func (x *respGetEntityGetByte) SetSuccessNonCompat(value int8) *respGetEntityGetByte {
+    x.Success = value
     return x
 }
 
-func (x *respGetEntityGetByte) SetValue(value int8) *respGetEntityGetByte {
-    x.Value = value
+func (x *respGetEntityGetByte) SetSuccess(value int8) *respGetEntityGetByte {
+    x.Success = value
     return x
 }
 
-func (x *respGetEntityGetByte) writeField0(p thrift.Protocol) error {  // Value
-    if err := p.WriteFieldBegin("value", thrift.BYTE, 0); err != nil {
+func (x *respGetEntityGetByte) writeField0(p thrift.Protocol) error {  // Success
+    if err := p.WriteFieldBegin("success", thrift.BYTE, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValueNonCompat()
+    item := x.GetSuccessNonCompat()
     if err := p.WriteByte(byte(item)); err != nil {
     return err
 }
@@ -1151,19 +1157,19 @@ func (x *respGetEntityGetByte) writeField0(p thrift.Protocol) error {  // Value
     return nil
 }
 
-func (x *respGetEntityGetByte) readField0(p thrift.Protocol) error {  // Value
+func (x *respGetEntityGetByte) readField0(p thrift.Protocol) error {  // Success
     resultByte, err := p.ReadByte()
 result := int8(resultByte)
 if err != nil {
     return err
 }
 
-    x.SetValueNonCompat(result)
+    x.SetSuccessNonCompat(result)
     return nil
 }
 
-func (x *respGetEntityGetByte) toString0() string {  // Value
-    return fmt.Sprintf("%v", x.GetValueNonCompat())
+func (x *respGetEntityGetByte) toString0() string {  // Success
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
 
 
@@ -1178,8 +1184,8 @@ func newRespGetEntityGetByteBuilder() *respGetEntityGetByteBuilder {
     }
 }
 
-func (x *respGetEntityGetByteBuilder) Value(value int8) *respGetEntityGetByteBuilder {
-    x.obj.Value = value
+func (x *respGetEntityGetByteBuilder) Success(value int8) *respGetEntityGetByteBuilder {
+    x.obj.Success = value
     return x
 }
 
@@ -1227,7 +1233,7 @@ func (x *respGetEntityGetByte) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 0:  // value
+        case 0:  // success
             expectedType := thrift.Type(thrift.BYTE)
             if wireType == expectedType {
                 if err := x.readField0(p); err != nil {
@@ -1264,7 +1270,7 @@ func (x *respGetEntityGetByte) String() string {
     var sb strings.Builder
 
     sb.WriteString("respGetEntityGetByte({")
-    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
     sb.WriteString("})")
 
     return sb.String()
@@ -1359,41 +1365,43 @@ func (x *reqGetEntityGetI16) String() string {
     return sb.String()
 }
 type respGetEntityGetI16 struct {
-    Value int16 `thrift:"value,0" json:"value" db:"value"`
+    Success int16 `thrift:"success,0" json:"success" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetI16{}
 var _ thrift.WritableResult = &respGetEntityGetI16{}
 
+type GetEntityGetI16Result = respGetEntityGetI16
+
 func newRespGetEntityGetI16() *respGetEntityGetI16 {
     return (&respGetEntityGetI16{}).
-        SetValueNonCompat(0)
+        SetSuccessNonCompat(0)
 }
 
-func (x *respGetEntityGetI16) GetValueNonCompat() int16 {
-    return x.Value
+func (x *respGetEntityGetI16) GetSuccessNonCompat() int16 {
+    return x.Success
 }
 
-func (x *respGetEntityGetI16) GetValue() int16 {
-    return x.Value
+func (x *respGetEntityGetI16) GetSuccess() int16 {
+    return x.Success
 }
 
-func (x *respGetEntityGetI16) SetValueNonCompat(value int16) *respGetEntityGetI16 {
-    x.Value = value
+func (x *respGetEntityGetI16) SetSuccessNonCompat(value int16) *respGetEntityGetI16 {
+    x.Success = value
     return x
 }
 
-func (x *respGetEntityGetI16) SetValue(value int16) *respGetEntityGetI16 {
-    x.Value = value
+func (x *respGetEntityGetI16) SetSuccess(value int16) *respGetEntityGetI16 {
+    x.Success = value
     return x
 }
 
-func (x *respGetEntityGetI16) writeField0(p thrift.Protocol) error {  // Value
-    if err := p.WriteFieldBegin("value", thrift.I16, 0); err != nil {
+func (x *respGetEntityGetI16) writeField0(p thrift.Protocol) error {  // Success
+    if err := p.WriteFieldBegin("success", thrift.I16, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValueNonCompat()
+    item := x.GetSuccessNonCompat()
     if err := p.WriteI16(item); err != nil {
     return err
 }
@@ -1404,18 +1412,18 @@ func (x *respGetEntityGetI16) writeField0(p thrift.Protocol) error {  // Value
     return nil
 }
 
-func (x *respGetEntityGetI16) readField0(p thrift.Protocol) error {  // Value
+func (x *respGetEntityGetI16) readField0(p thrift.Protocol) error {  // Success
     result, err := p.ReadI16()
 if err != nil {
     return err
 }
 
-    x.SetValueNonCompat(result)
+    x.SetSuccessNonCompat(result)
     return nil
 }
 
-func (x *respGetEntityGetI16) toString0() string {  // Value
-    return fmt.Sprintf("%v", x.GetValueNonCompat())
+func (x *respGetEntityGetI16) toString0() string {  // Success
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
 
 
@@ -1430,8 +1438,8 @@ func newRespGetEntityGetI16Builder() *respGetEntityGetI16Builder {
     }
 }
 
-func (x *respGetEntityGetI16Builder) Value(value int16) *respGetEntityGetI16Builder {
-    x.obj.Value = value
+func (x *respGetEntityGetI16Builder) Success(value int16) *respGetEntityGetI16Builder {
+    x.obj.Success = value
     return x
 }
 
@@ -1479,7 +1487,7 @@ func (x *respGetEntityGetI16) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 0:  // value
+        case 0:  // success
             expectedType := thrift.Type(thrift.I16)
             if wireType == expectedType {
                 if err := x.readField0(p); err != nil {
@@ -1516,7 +1524,7 @@ func (x *respGetEntityGetI16) String() string {
     var sb strings.Builder
 
     sb.WriteString("respGetEntityGetI16({")
-    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
     sb.WriteString("})")
 
     return sb.String()
@@ -1611,41 +1619,43 @@ func (x *reqGetEntityGetI32) String() string {
     return sb.String()
 }
 type respGetEntityGetI32 struct {
-    Value int32 `thrift:"value,0" json:"value" db:"value"`
+    Success int32 `thrift:"success,0" json:"success" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetI32{}
 var _ thrift.WritableResult = &respGetEntityGetI32{}
 
+type GetEntityGetI32Result = respGetEntityGetI32
+
 func newRespGetEntityGetI32() *respGetEntityGetI32 {
     return (&respGetEntityGetI32{}).
-        SetValueNonCompat(0)
+        SetSuccessNonCompat(0)
 }
 
-func (x *respGetEntityGetI32) GetValueNonCompat() int32 {
-    return x.Value
+func (x *respGetEntityGetI32) GetSuccessNonCompat() int32 {
+    return x.Success
 }
 
-func (x *respGetEntityGetI32) GetValue() int32 {
-    return x.Value
+func (x *respGetEntityGetI32) GetSuccess() int32 {
+    return x.Success
 }
 
-func (x *respGetEntityGetI32) SetValueNonCompat(value int32) *respGetEntityGetI32 {
-    x.Value = value
+func (x *respGetEntityGetI32) SetSuccessNonCompat(value int32) *respGetEntityGetI32 {
+    x.Success = value
     return x
 }
 
-func (x *respGetEntityGetI32) SetValue(value int32) *respGetEntityGetI32 {
-    x.Value = value
+func (x *respGetEntityGetI32) SetSuccess(value int32) *respGetEntityGetI32 {
+    x.Success = value
     return x
 }
 
-func (x *respGetEntityGetI32) writeField0(p thrift.Protocol) error {  // Value
-    if err := p.WriteFieldBegin("value", thrift.I32, 0); err != nil {
+func (x *respGetEntityGetI32) writeField0(p thrift.Protocol) error {  // Success
+    if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValueNonCompat()
+    item := x.GetSuccessNonCompat()
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -1656,18 +1666,18 @@ func (x *respGetEntityGetI32) writeField0(p thrift.Protocol) error {  // Value
     return nil
 }
 
-func (x *respGetEntityGetI32) readField0(p thrift.Protocol) error {  // Value
+func (x *respGetEntityGetI32) readField0(p thrift.Protocol) error {  // Success
     result, err := p.ReadI32()
 if err != nil {
     return err
 }
 
-    x.SetValueNonCompat(result)
+    x.SetSuccessNonCompat(result)
     return nil
 }
 
-func (x *respGetEntityGetI32) toString0() string {  // Value
-    return fmt.Sprintf("%v", x.GetValueNonCompat())
+func (x *respGetEntityGetI32) toString0() string {  // Success
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
 
 
@@ -1682,8 +1692,8 @@ func newRespGetEntityGetI32Builder() *respGetEntityGetI32Builder {
     }
 }
 
-func (x *respGetEntityGetI32Builder) Value(value int32) *respGetEntityGetI32Builder {
-    x.obj.Value = value
+func (x *respGetEntityGetI32Builder) Success(value int32) *respGetEntityGetI32Builder {
+    x.obj.Success = value
     return x
 }
 
@@ -1731,7 +1741,7 @@ func (x *respGetEntityGetI32) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 0:  // value
+        case 0:  // success
             expectedType := thrift.Type(thrift.I32)
             if wireType == expectedType {
                 if err := x.readField0(p); err != nil {
@@ -1768,7 +1778,7 @@ func (x *respGetEntityGetI32) String() string {
     var sb strings.Builder
 
     sb.WriteString("respGetEntityGetI32({")
-    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
     sb.WriteString("})")
 
     return sb.String()
@@ -1863,41 +1873,43 @@ func (x *reqGetEntityGetI64) String() string {
     return sb.String()
 }
 type respGetEntityGetI64 struct {
-    Value int64 `thrift:"value,0" json:"value" db:"value"`
+    Success int64 `thrift:"success,0" json:"success" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetI64{}
 var _ thrift.WritableResult = &respGetEntityGetI64{}
 
+type GetEntityGetI64Result = respGetEntityGetI64
+
 func newRespGetEntityGetI64() *respGetEntityGetI64 {
     return (&respGetEntityGetI64{}).
-        SetValueNonCompat(0)
+        SetSuccessNonCompat(0)
 }
 
-func (x *respGetEntityGetI64) GetValueNonCompat() int64 {
-    return x.Value
+func (x *respGetEntityGetI64) GetSuccessNonCompat() int64 {
+    return x.Success
 }
 
-func (x *respGetEntityGetI64) GetValue() int64 {
-    return x.Value
+func (x *respGetEntityGetI64) GetSuccess() int64 {
+    return x.Success
 }
 
-func (x *respGetEntityGetI64) SetValueNonCompat(value int64) *respGetEntityGetI64 {
-    x.Value = value
+func (x *respGetEntityGetI64) SetSuccessNonCompat(value int64) *respGetEntityGetI64 {
+    x.Success = value
     return x
 }
 
-func (x *respGetEntityGetI64) SetValue(value int64) *respGetEntityGetI64 {
-    x.Value = value
+func (x *respGetEntityGetI64) SetSuccess(value int64) *respGetEntityGetI64 {
+    x.Success = value
     return x
 }
 
-func (x *respGetEntityGetI64) writeField0(p thrift.Protocol) error {  // Value
-    if err := p.WriteFieldBegin("value", thrift.I64, 0); err != nil {
+func (x *respGetEntityGetI64) writeField0(p thrift.Protocol) error {  // Success
+    if err := p.WriteFieldBegin("success", thrift.I64, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValueNonCompat()
+    item := x.GetSuccessNonCompat()
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -1908,18 +1920,18 @@ func (x *respGetEntityGetI64) writeField0(p thrift.Protocol) error {  // Value
     return nil
 }
 
-func (x *respGetEntityGetI64) readField0(p thrift.Protocol) error {  // Value
+func (x *respGetEntityGetI64) readField0(p thrift.Protocol) error {  // Success
     result, err := p.ReadI64()
 if err != nil {
     return err
 }
 
-    x.SetValueNonCompat(result)
+    x.SetSuccessNonCompat(result)
     return nil
 }
 
-func (x *respGetEntityGetI64) toString0() string {  // Value
-    return fmt.Sprintf("%v", x.GetValueNonCompat())
+func (x *respGetEntityGetI64) toString0() string {  // Success
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
 
 
@@ -1934,8 +1946,8 @@ func newRespGetEntityGetI64Builder() *respGetEntityGetI64Builder {
     }
 }
 
-func (x *respGetEntityGetI64Builder) Value(value int64) *respGetEntityGetI64Builder {
-    x.obj.Value = value
+func (x *respGetEntityGetI64Builder) Success(value int64) *respGetEntityGetI64Builder {
+    x.obj.Success = value
     return x
 }
 
@@ -1983,7 +1995,7 @@ func (x *respGetEntityGetI64) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 0:  // value
+        case 0:  // success
             expectedType := thrift.Type(thrift.I64)
             if wireType == expectedType {
                 if err := x.readField0(p); err != nil {
@@ -2020,7 +2032,7 @@ func (x *respGetEntityGetI64) String() string {
     var sb strings.Builder
 
     sb.WriteString("respGetEntityGetI64({")
-    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
     sb.WriteString("})")
 
     return sb.String()
@@ -2115,41 +2127,43 @@ func (x *reqGetEntityGetDouble) String() string {
     return sb.String()
 }
 type respGetEntityGetDouble struct {
-    Value float64 `thrift:"value,0" json:"value" db:"value"`
+    Success float64 `thrift:"success,0" json:"success" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetDouble{}
 var _ thrift.WritableResult = &respGetEntityGetDouble{}
 
+type GetEntityGetDoubleResult = respGetEntityGetDouble
+
 func newRespGetEntityGetDouble() *respGetEntityGetDouble {
     return (&respGetEntityGetDouble{}).
-        SetValueNonCompat(0.0)
+        SetSuccessNonCompat(0.0)
 }
 
-func (x *respGetEntityGetDouble) GetValueNonCompat() float64 {
-    return x.Value
+func (x *respGetEntityGetDouble) GetSuccessNonCompat() float64 {
+    return x.Success
 }
 
-func (x *respGetEntityGetDouble) GetValue() float64 {
-    return x.Value
+func (x *respGetEntityGetDouble) GetSuccess() float64 {
+    return x.Success
 }
 
-func (x *respGetEntityGetDouble) SetValueNonCompat(value float64) *respGetEntityGetDouble {
-    x.Value = value
+func (x *respGetEntityGetDouble) SetSuccessNonCompat(value float64) *respGetEntityGetDouble {
+    x.Success = value
     return x
 }
 
-func (x *respGetEntityGetDouble) SetValue(value float64) *respGetEntityGetDouble {
-    x.Value = value
+func (x *respGetEntityGetDouble) SetSuccess(value float64) *respGetEntityGetDouble {
+    x.Success = value
     return x
 }
 
-func (x *respGetEntityGetDouble) writeField0(p thrift.Protocol) error {  // Value
-    if err := p.WriteFieldBegin("value", thrift.DOUBLE, 0); err != nil {
+func (x *respGetEntityGetDouble) writeField0(p thrift.Protocol) error {  // Success
+    if err := p.WriteFieldBegin("success", thrift.DOUBLE, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValueNonCompat()
+    item := x.GetSuccessNonCompat()
     if err := p.WriteDouble(item); err != nil {
     return err
 }
@@ -2160,18 +2174,18 @@ func (x *respGetEntityGetDouble) writeField0(p thrift.Protocol) error {  // Valu
     return nil
 }
 
-func (x *respGetEntityGetDouble) readField0(p thrift.Protocol) error {  // Value
+func (x *respGetEntityGetDouble) readField0(p thrift.Protocol) error {  // Success
     result, err := p.ReadDouble()
 if err != nil {
     return err
 }
 
-    x.SetValueNonCompat(result)
+    x.SetSuccessNonCompat(result)
     return nil
 }
 
-func (x *respGetEntityGetDouble) toString0() string {  // Value
-    return fmt.Sprintf("%v", x.GetValueNonCompat())
+func (x *respGetEntityGetDouble) toString0() string {  // Success
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
 
 
@@ -2186,8 +2200,8 @@ func newRespGetEntityGetDoubleBuilder() *respGetEntityGetDoubleBuilder {
     }
 }
 
-func (x *respGetEntityGetDoubleBuilder) Value(value float64) *respGetEntityGetDoubleBuilder {
-    x.obj.Value = value
+func (x *respGetEntityGetDoubleBuilder) Success(value float64) *respGetEntityGetDoubleBuilder {
+    x.obj.Success = value
     return x
 }
 
@@ -2235,7 +2249,7 @@ func (x *respGetEntityGetDouble) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 0:  // value
+        case 0:  // success
             expectedType := thrift.Type(thrift.DOUBLE)
             if wireType == expectedType {
                 if err := x.readField0(p); err != nil {
@@ -2272,7 +2286,7 @@ func (x *respGetEntityGetDouble) String() string {
     var sb strings.Builder
 
     sb.WriteString("respGetEntityGetDouble({")
-    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
     sb.WriteString("})")
 
     return sb.String()
@@ -2367,41 +2381,43 @@ func (x *reqGetEntityGetString) String() string {
     return sb.String()
 }
 type respGetEntityGetString struct {
-    Value string `thrift:"value,0" json:"value" db:"value"`
+    Success string `thrift:"success,0" json:"success" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetString{}
 var _ thrift.WritableResult = &respGetEntityGetString{}
 
+type GetEntityGetStringResult = respGetEntityGetString
+
 func newRespGetEntityGetString() *respGetEntityGetString {
     return (&respGetEntityGetString{}).
-        SetValueNonCompat("")
+        SetSuccessNonCompat("")
 }
 
-func (x *respGetEntityGetString) GetValueNonCompat() string {
-    return x.Value
+func (x *respGetEntityGetString) GetSuccessNonCompat() string {
+    return x.Success
 }
 
-func (x *respGetEntityGetString) GetValue() string {
-    return x.Value
+func (x *respGetEntityGetString) GetSuccess() string {
+    return x.Success
 }
 
-func (x *respGetEntityGetString) SetValueNonCompat(value string) *respGetEntityGetString {
-    x.Value = value
+func (x *respGetEntityGetString) SetSuccessNonCompat(value string) *respGetEntityGetString {
+    x.Success = value
     return x
 }
 
-func (x *respGetEntityGetString) SetValue(value string) *respGetEntityGetString {
-    x.Value = value
+func (x *respGetEntityGetString) SetSuccess(value string) *respGetEntityGetString {
+    x.Success = value
     return x
 }
 
-func (x *respGetEntityGetString) writeField0(p thrift.Protocol) error {  // Value
-    if err := p.WriteFieldBegin("value", thrift.STRING, 0); err != nil {
+func (x *respGetEntityGetString) writeField0(p thrift.Protocol) error {  // Success
+    if err := p.WriteFieldBegin("success", thrift.STRING, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValueNonCompat()
+    item := x.GetSuccessNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -2412,18 +2428,18 @@ func (x *respGetEntityGetString) writeField0(p thrift.Protocol) error {  // Valu
     return nil
 }
 
-func (x *respGetEntityGetString) readField0(p thrift.Protocol) error {  // Value
+func (x *respGetEntityGetString) readField0(p thrift.Protocol) error {  // Success
     result, err := p.ReadString()
 if err != nil {
     return err
 }
 
-    x.SetValueNonCompat(result)
+    x.SetSuccessNonCompat(result)
     return nil
 }
 
-func (x *respGetEntityGetString) toString0() string {  // Value
-    return fmt.Sprintf("%v", x.GetValueNonCompat())
+func (x *respGetEntityGetString) toString0() string {  // Success
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
 
 
@@ -2438,8 +2454,8 @@ func newRespGetEntityGetStringBuilder() *respGetEntityGetStringBuilder {
     }
 }
 
-func (x *respGetEntityGetStringBuilder) Value(value string) *respGetEntityGetStringBuilder {
-    x.obj.Value = value
+func (x *respGetEntityGetStringBuilder) Success(value string) *respGetEntityGetStringBuilder {
+    x.obj.Success = value
     return x
 }
 
@@ -2487,7 +2503,7 @@ func (x *respGetEntityGetString) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 0:  // value
+        case 0:  // success
             expectedType := thrift.Type(thrift.STRING)
             if wireType == expectedType {
                 if err := x.readField0(p); err != nil {
@@ -2524,7 +2540,7 @@ func (x *respGetEntityGetString) String() string {
     var sb strings.Builder
 
     sb.WriteString("respGetEntityGetString({")
-    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
     sb.WriteString("})")
 
     return sb.String()
@@ -2619,53 +2635,55 @@ func (x *reqGetEntityGetBinary) String() string {
     return sb.String()
 }
 type respGetEntityGetBinary struct {
-    Value []byte `thrift:"value,0" json:"value" db:"value"`
+    Success []byte `thrift:"success,0" json:"success" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetBinary{}
 var _ thrift.WritableResult = &respGetEntityGetBinary{}
 
+type GetEntityGetBinaryResult = respGetEntityGetBinary
+
 func newRespGetEntityGetBinary() *respGetEntityGetBinary {
     return (&respGetEntityGetBinary{}).
-        SetValueNonCompat([]byte(""))
+        SetSuccessNonCompat([]byte(""))
 }
 
-func (x *respGetEntityGetBinary) GetValueNonCompat() []byte {
-    return x.Value
+func (x *respGetEntityGetBinary) GetSuccessNonCompat() []byte {
+    return x.Success
 }
 
-func (x *respGetEntityGetBinary) GetValue() []byte {
-    if !x.IsSetValue() {
+func (x *respGetEntityGetBinary) GetSuccess() []byte {
+    if !x.IsSetSuccess() {
         return []byte("")
     }
 
-    return x.Value
+    return x.Success
 }
 
-func (x *respGetEntityGetBinary) SetValueNonCompat(value []byte) *respGetEntityGetBinary {
-    x.Value = value
+func (x *respGetEntityGetBinary) SetSuccessNonCompat(value []byte) *respGetEntityGetBinary {
+    x.Success = value
     return x
 }
 
-func (x *respGetEntityGetBinary) SetValue(value []byte) *respGetEntityGetBinary {
-    x.Value = value
+func (x *respGetEntityGetBinary) SetSuccess(value []byte) *respGetEntityGetBinary {
+    x.Success = value
     return x
 }
 
-func (x *respGetEntityGetBinary) IsSetValue() bool {
-    return x.Value != nil
+func (x *respGetEntityGetBinary) IsSetSuccess() bool {
+    return x.Success != nil
 }
 
-func (x *respGetEntityGetBinary) writeField0(p thrift.Protocol) error {  // Value
-    if !x.IsSetValue() {
+func (x *respGetEntityGetBinary) writeField0(p thrift.Protocol) error {  // Success
+    if !x.IsSetSuccess() {
         return nil
     }
 
-    if err := p.WriteFieldBegin("value", thrift.STRING, 0); err != nil {
+    if err := p.WriteFieldBegin("success", thrift.STRING, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValueNonCompat()
+    item := x.GetSuccessNonCompat()
     if err := p.WriteBinary(item); err != nil {
     return err
 }
@@ -2676,18 +2694,18 @@ func (x *respGetEntityGetBinary) writeField0(p thrift.Protocol) error {  // Valu
     return nil
 }
 
-func (x *respGetEntityGetBinary) readField0(p thrift.Protocol) error {  // Value
+func (x *respGetEntityGetBinary) readField0(p thrift.Protocol) error {  // Success
     result, err := p.ReadBinary()
 if err != nil {
     return err
 }
 
-    x.SetValueNonCompat(result)
+    x.SetSuccessNonCompat(result)
     return nil
 }
 
-func (x *respGetEntityGetBinary) toString0() string {  // Value
-    return fmt.Sprintf("%v", x.GetValueNonCompat())
+func (x *respGetEntityGetBinary) toString0() string {  // Success
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
 
 
@@ -2702,8 +2720,8 @@ func newRespGetEntityGetBinaryBuilder() *respGetEntityGetBinaryBuilder {
     }
 }
 
-func (x *respGetEntityGetBinaryBuilder) Value(value []byte) *respGetEntityGetBinaryBuilder {
-    x.obj.Value = value
+func (x *respGetEntityGetBinaryBuilder) Success(value []byte) *respGetEntityGetBinaryBuilder {
+    x.obj.Success = value
     return x
 }
 
@@ -2751,7 +2769,7 @@ func (x *respGetEntityGetBinary) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 0:  // value
+        case 0:  // success
             expectedType := thrift.Type(thrift.STRING)
             if wireType == expectedType {
                 if err := x.readField0(p); err != nil {
@@ -2788,7 +2806,7 @@ func (x *respGetEntityGetBinary) String() string {
     var sb strings.Builder
 
     sb.WriteString("respGetEntityGetBinary({")
-    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
     sb.WriteString("})")
 
     return sb.String()
@@ -2883,53 +2901,55 @@ func (x *reqGetEntityGetMap) String() string {
     return sb.String()
 }
 type respGetEntityGetMap struct {
-    Value map[string]string `thrift:"value,0" json:"value" db:"value"`
+    Success map[string]string `thrift:"success,0" json:"success" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetMap{}
 var _ thrift.WritableResult = &respGetEntityGetMap{}
 
+type GetEntityGetMapResult = respGetEntityGetMap
+
 func newRespGetEntityGetMap() *respGetEntityGetMap {
     return (&respGetEntityGetMap{}).
-        SetValueNonCompat(nil)
+        SetSuccessNonCompat(nil)
 }
 
-func (x *respGetEntityGetMap) GetValueNonCompat() map[string]string {
-    return x.Value
+func (x *respGetEntityGetMap) GetSuccessNonCompat() map[string]string {
+    return x.Success
 }
 
-func (x *respGetEntityGetMap) GetValue() map[string]string {
-    if !x.IsSetValue() {
+func (x *respGetEntityGetMap) GetSuccess() map[string]string {
+    if !x.IsSetSuccess() {
         return nil
     }
 
-    return x.Value
+    return x.Success
 }
 
-func (x *respGetEntityGetMap) SetValueNonCompat(value map[string]string) *respGetEntityGetMap {
-    x.Value = value
+func (x *respGetEntityGetMap) SetSuccessNonCompat(value map[string]string) *respGetEntityGetMap {
+    x.Success = value
     return x
 }
 
-func (x *respGetEntityGetMap) SetValue(value map[string]string) *respGetEntityGetMap {
-    x.Value = value
+func (x *respGetEntityGetMap) SetSuccess(value map[string]string) *respGetEntityGetMap {
+    x.Success = value
     return x
 }
 
-func (x *respGetEntityGetMap) IsSetValue() bool {
-    return x.Value != nil
+func (x *respGetEntityGetMap) IsSetSuccess() bool {
+    return x.Success != nil
 }
 
-func (x *respGetEntityGetMap) writeField0(p thrift.Protocol) error {  // Value
-    if !x.IsSetValue() {
+func (x *respGetEntityGetMap) writeField0(p thrift.Protocol) error {  // Success
+    if !x.IsSetSuccess() {
         return nil
     }
 
-    if err := p.WriteFieldBegin("value", thrift.MAP, 0); err != nil {
+    if err := p.WriteFieldBegin("success", thrift.MAP, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValueNonCompat()
+    item := x.GetSuccessNonCompat()
     if err := p.WriteMapBegin(thrift.STRING, thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -2958,7 +2978,7 @@ if err := p.WriteMapEnd(); err != nil {
     return nil
 }
 
-func (x *respGetEntityGetMap) readField0(p thrift.Protocol) error {  // Value
+func (x *respGetEntityGetMap) readField0(p thrift.Protocol) error {  // Success
     _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
 if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
@@ -2992,12 +3012,12 @@ if err := p.ReadMapEnd(); err != nil {
 }
 result := mapResult
 
-    x.SetValueNonCompat(result)
+    x.SetSuccessNonCompat(result)
     return nil
 }
 
-func (x *respGetEntityGetMap) toString0() string {  // Value
-    return fmt.Sprintf("%v", x.GetValueNonCompat())
+func (x *respGetEntityGetMap) toString0() string {  // Success
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
 
 
@@ -3012,8 +3032,8 @@ func newRespGetEntityGetMapBuilder() *respGetEntityGetMapBuilder {
     }
 }
 
-func (x *respGetEntityGetMapBuilder) Value(value map[string]string) *respGetEntityGetMapBuilder {
-    x.obj.Value = value
+func (x *respGetEntityGetMapBuilder) Success(value map[string]string) *respGetEntityGetMapBuilder {
+    x.obj.Success = value
     return x
 }
 
@@ -3061,7 +3081,7 @@ func (x *respGetEntityGetMap) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 0:  // value
+        case 0:  // success
             expectedType := thrift.Type(thrift.MAP)
             if wireType == expectedType {
                 if err := x.readField0(p); err != nil {
@@ -3098,7 +3118,7 @@ func (x *respGetEntityGetMap) String() string {
     var sb strings.Builder
 
     sb.WriteString("respGetEntityGetMap({")
-    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
     sb.WriteString("})")
 
     return sb.String()
@@ -3193,53 +3213,55 @@ func (x *reqGetEntityGetSet) String() string {
     return sb.String()
 }
 type respGetEntityGetSet struct {
-    Value []string `thrift:"value,0" json:"value" db:"value"`
+    Success []string `thrift:"success,0" json:"success" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetSet{}
 var _ thrift.WritableResult = &respGetEntityGetSet{}
 
+type GetEntityGetSetResult = respGetEntityGetSet
+
 func newRespGetEntityGetSet() *respGetEntityGetSet {
     return (&respGetEntityGetSet{}).
-        SetValueNonCompat(nil)
+        SetSuccessNonCompat(nil)
 }
 
-func (x *respGetEntityGetSet) GetValueNonCompat() []string {
-    return x.Value
+func (x *respGetEntityGetSet) GetSuccessNonCompat() []string {
+    return x.Success
 }
 
-func (x *respGetEntityGetSet) GetValue() []string {
-    if !x.IsSetValue() {
+func (x *respGetEntityGetSet) GetSuccess() []string {
+    if !x.IsSetSuccess() {
         return nil
     }
 
-    return x.Value
+    return x.Success
 }
 
-func (x *respGetEntityGetSet) SetValueNonCompat(value []string) *respGetEntityGetSet {
-    x.Value = value
+func (x *respGetEntityGetSet) SetSuccessNonCompat(value []string) *respGetEntityGetSet {
+    x.Success = value
     return x
 }
 
-func (x *respGetEntityGetSet) SetValue(value []string) *respGetEntityGetSet {
-    x.Value = value
+func (x *respGetEntityGetSet) SetSuccess(value []string) *respGetEntityGetSet {
+    x.Success = value
     return x
 }
 
-func (x *respGetEntityGetSet) IsSetValue() bool {
-    return x.Value != nil
+func (x *respGetEntityGetSet) IsSetSuccess() bool {
+    return x.Success != nil
 }
 
-func (x *respGetEntityGetSet) writeField0(p thrift.Protocol) error {  // Value
-    if !x.IsSetValue() {
+func (x *respGetEntityGetSet) writeField0(p thrift.Protocol) error {  // Success
+    if !x.IsSetSuccess() {
         return nil
     }
 
-    if err := p.WriteFieldBegin("value", thrift.SET, 0); err != nil {
+    if err := p.WriteFieldBegin("success", thrift.SET, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValueNonCompat()
+    item := x.GetSuccessNonCompat()
     if err := p.WriteSetBegin(thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing set begin: ", err)
 }
@@ -3261,7 +3283,7 @@ if err := p.WriteSetEnd(); err != nil {
     return nil
 }
 
-func (x *respGetEntityGetSet) readField0(p thrift.Protocol) error {  // Value
+func (x *respGetEntityGetSet) readField0(p thrift.Protocol) error {  // Success
     _ /* elemType */, size, err := p.ReadSetBegin()
 if err != nil {
     return thrift.PrependError("error reading set begin: ", err)
@@ -3285,12 +3307,12 @@ if err := p.ReadSetEnd(); err != nil {
 }
 result := setResult
 
-    x.SetValueNonCompat(result)
+    x.SetSuccessNonCompat(result)
     return nil
 }
 
-func (x *respGetEntityGetSet) toString0() string {  // Value
-    return fmt.Sprintf("%v", x.GetValueNonCompat())
+func (x *respGetEntityGetSet) toString0() string {  // Success
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
 
 
@@ -3305,8 +3327,8 @@ func newRespGetEntityGetSetBuilder() *respGetEntityGetSetBuilder {
     }
 }
 
-func (x *respGetEntityGetSetBuilder) Value(value []string) *respGetEntityGetSetBuilder {
-    x.obj.Value = value
+func (x *respGetEntityGetSetBuilder) Success(value []string) *respGetEntityGetSetBuilder {
+    x.obj.Success = value
     return x
 }
 
@@ -3354,7 +3376,7 @@ func (x *respGetEntityGetSet) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 0:  // value
+        case 0:  // success
             expectedType := thrift.Type(thrift.SET)
             if wireType == expectedType {
                 if err := x.readField0(p); err != nil {
@@ -3391,7 +3413,7 @@ func (x *respGetEntityGetSet) String() string {
     var sb strings.Builder
 
     sb.WriteString("respGetEntityGetSet({")
-    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
     sb.WriteString("})")
 
     return sb.String()
@@ -3486,53 +3508,55 @@ func (x *reqGetEntityGetList) String() string {
     return sb.String()
 }
 type respGetEntityGetList struct {
-    Value []string `thrift:"value,0" json:"value" db:"value"`
+    Success []string `thrift:"success,0" json:"success" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetList{}
 var _ thrift.WritableResult = &respGetEntityGetList{}
 
+type GetEntityGetListResult = respGetEntityGetList
+
 func newRespGetEntityGetList() *respGetEntityGetList {
     return (&respGetEntityGetList{}).
-        SetValueNonCompat(nil)
+        SetSuccessNonCompat(nil)
 }
 
-func (x *respGetEntityGetList) GetValueNonCompat() []string {
-    return x.Value
+func (x *respGetEntityGetList) GetSuccessNonCompat() []string {
+    return x.Success
 }
 
-func (x *respGetEntityGetList) GetValue() []string {
-    if !x.IsSetValue() {
+func (x *respGetEntityGetList) GetSuccess() []string {
+    if !x.IsSetSuccess() {
         return nil
     }
 
-    return x.Value
+    return x.Success
 }
 
-func (x *respGetEntityGetList) SetValueNonCompat(value []string) *respGetEntityGetList {
-    x.Value = value
+func (x *respGetEntityGetList) SetSuccessNonCompat(value []string) *respGetEntityGetList {
+    x.Success = value
     return x
 }
 
-func (x *respGetEntityGetList) SetValue(value []string) *respGetEntityGetList {
-    x.Value = value
+func (x *respGetEntityGetList) SetSuccess(value []string) *respGetEntityGetList {
+    x.Success = value
     return x
 }
 
-func (x *respGetEntityGetList) IsSetValue() bool {
-    return x.Value != nil
+func (x *respGetEntityGetList) IsSetSuccess() bool {
+    return x.Success != nil
 }
 
-func (x *respGetEntityGetList) writeField0(p thrift.Protocol) error {  // Value
-    if !x.IsSetValue() {
+func (x *respGetEntityGetList) writeField0(p thrift.Protocol) error {  // Success
+    if !x.IsSetSuccess() {
         return nil
     }
 
-    if err := p.WriteFieldBegin("value", thrift.LIST, 0); err != nil {
+    if err := p.WriteFieldBegin("success", thrift.LIST, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValueNonCompat()
+    item := x.GetSuccessNonCompat()
     if err := p.WriteListBegin(thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -3554,7 +3578,7 @@ if err := p.WriteListEnd(); err != nil {
     return nil
 }
 
-func (x *respGetEntityGetList) readField0(p thrift.Protocol) error {  // Value
+func (x *respGetEntityGetList) readField0(p thrift.Protocol) error {  // Success
     _ /* elemType */, size, err := p.ReadListBegin()
 if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -3578,12 +3602,12 @@ if err := p.ReadListEnd(); err != nil {
 }
 result := listResult
 
-    x.SetValueNonCompat(result)
+    x.SetSuccessNonCompat(result)
     return nil
 }
 
-func (x *respGetEntityGetList) toString0() string {  // Value
-    return fmt.Sprintf("%v", x.GetValueNonCompat())
+func (x *respGetEntityGetList) toString0() string {  // Success
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
 
 
@@ -3598,8 +3622,8 @@ func newRespGetEntityGetListBuilder() *respGetEntityGetListBuilder {
     }
 }
 
-func (x *respGetEntityGetListBuilder) Value(value []string) *respGetEntityGetListBuilder {
-    x.obj.Value = value
+func (x *respGetEntityGetListBuilder) Success(value []string) *respGetEntityGetListBuilder {
+    x.obj.Success = value
     return x
 }
 
@@ -3647,7 +3671,7 @@ func (x *respGetEntityGetList) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 0:  // value
+        case 0:  // success
             expectedType := thrift.Type(thrift.LIST)
             if wireType == expectedType {
                 if err := x.readField0(p); err != nil {
@@ -3684,7 +3708,7 @@ func (x *respGetEntityGetList) String() string {
     var sb strings.Builder
 
     sb.WriteString("respGetEntityGetList({")
-    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
     sb.WriteString("})")
 
     return sb.String()
@@ -3992,41 +4016,43 @@ func (x *reqGetEntityGetLegacyStuff) String() string {
     return sb.String()
 }
 type respGetEntityGetLegacyStuff struct {
-    Value int32 `thrift:"value,0" json:"value" db:"value"`
+    Success int32 `thrift:"success,0" json:"success" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetLegacyStuff{}
 var _ thrift.WritableResult = &respGetEntityGetLegacyStuff{}
 
+type GetEntityGetLegacyStuffResult = respGetEntityGetLegacyStuff
+
 func newRespGetEntityGetLegacyStuff() *respGetEntityGetLegacyStuff {
     return (&respGetEntityGetLegacyStuff{}).
-        SetValueNonCompat(0)
+        SetSuccessNonCompat(0)
 }
 
-func (x *respGetEntityGetLegacyStuff) GetValueNonCompat() int32 {
-    return x.Value
+func (x *respGetEntityGetLegacyStuff) GetSuccessNonCompat() int32 {
+    return x.Success
 }
 
-func (x *respGetEntityGetLegacyStuff) GetValue() int32 {
-    return x.Value
+func (x *respGetEntityGetLegacyStuff) GetSuccess() int32 {
+    return x.Success
 }
 
-func (x *respGetEntityGetLegacyStuff) SetValueNonCompat(value int32) *respGetEntityGetLegacyStuff {
-    x.Value = value
+func (x *respGetEntityGetLegacyStuff) SetSuccessNonCompat(value int32) *respGetEntityGetLegacyStuff {
+    x.Success = value
     return x
 }
 
-func (x *respGetEntityGetLegacyStuff) SetValue(value int32) *respGetEntityGetLegacyStuff {
-    x.Value = value
+func (x *respGetEntityGetLegacyStuff) SetSuccess(value int32) *respGetEntityGetLegacyStuff {
+    x.Success = value
     return x
 }
 
-func (x *respGetEntityGetLegacyStuff) writeField0(p thrift.Protocol) error {  // Value
-    if err := p.WriteFieldBegin("value", thrift.I32, 0); err != nil {
+func (x *respGetEntityGetLegacyStuff) writeField0(p thrift.Protocol) error {  // Success
+    if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValueNonCompat()
+    item := x.GetSuccessNonCompat()
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -4037,18 +4063,18 @@ func (x *respGetEntityGetLegacyStuff) writeField0(p thrift.Protocol) error {  //
     return nil
 }
 
-func (x *respGetEntityGetLegacyStuff) readField0(p thrift.Protocol) error {  // Value
+func (x *respGetEntityGetLegacyStuff) readField0(p thrift.Protocol) error {  // Success
     result, err := p.ReadI32()
 if err != nil {
     return err
 }
 
-    x.SetValueNonCompat(result)
+    x.SetSuccessNonCompat(result)
     return nil
 }
 
-func (x *respGetEntityGetLegacyStuff) toString0() string {  // Value
-    return fmt.Sprintf("%v", x.GetValueNonCompat())
+func (x *respGetEntityGetLegacyStuff) toString0() string {  // Success
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
 
 
@@ -4063,8 +4089,8 @@ func newRespGetEntityGetLegacyStuffBuilder() *respGetEntityGetLegacyStuffBuilder
     }
 }
 
-func (x *respGetEntityGetLegacyStuffBuilder) Value(value int32) *respGetEntityGetLegacyStuffBuilder {
-    x.obj.Value = value
+func (x *respGetEntityGetLegacyStuffBuilder) Success(value int32) *respGetEntityGetLegacyStuffBuilder {
+    x.obj.Success = value
     return x
 }
 
@@ -4112,7 +4138,7 @@ func (x *respGetEntityGetLegacyStuff) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 0:  // value
+        case 0:  // success
             expectedType := thrift.Type(thrift.I32)
             if wireType == expectedType {
                 if err := x.readField0(p); err != nil {
@@ -4149,7 +4175,7 @@ func (x *respGetEntityGetLegacyStuff) String() string {
     var sb strings.Builder
 
     sb.WriteString("respGetEntityGetLegacyStuff({")
-    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
     sb.WriteString("})")
 
     return sb.String()
@@ -4315,41 +4341,43 @@ func (x *reqGetEntityGetCtxCollision) String() string {
     return sb.String()
 }
 type respGetEntityGetCtxCollision struct {
-    Value int32 `thrift:"value,0" json:"value" db:"value"`
+    Success int32 `thrift:"success,0" json:"success" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetCtxCollision{}
 var _ thrift.WritableResult = &respGetEntityGetCtxCollision{}
 
+type GetEntityGetCtxCollisionResult = respGetEntityGetCtxCollision
+
 func newRespGetEntityGetCtxCollision() *respGetEntityGetCtxCollision {
     return (&respGetEntityGetCtxCollision{}).
-        SetValueNonCompat(0)
+        SetSuccessNonCompat(0)
 }
 
-func (x *respGetEntityGetCtxCollision) GetValueNonCompat() int32 {
-    return x.Value
+func (x *respGetEntityGetCtxCollision) GetSuccessNonCompat() int32 {
+    return x.Success
 }
 
-func (x *respGetEntityGetCtxCollision) GetValue() int32 {
-    return x.Value
+func (x *respGetEntityGetCtxCollision) GetSuccess() int32 {
+    return x.Success
 }
 
-func (x *respGetEntityGetCtxCollision) SetValueNonCompat(value int32) *respGetEntityGetCtxCollision {
-    x.Value = value
+func (x *respGetEntityGetCtxCollision) SetSuccessNonCompat(value int32) *respGetEntityGetCtxCollision {
+    x.Success = value
     return x
 }
 
-func (x *respGetEntityGetCtxCollision) SetValue(value int32) *respGetEntityGetCtxCollision {
-    x.Value = value
+func (x *respGetEntityGetCtxCollision) SetSuccess(value int32) *respGetEntityGetCtxCollision {
+    x.Success = value
     return x
 }
 
-func (x *respGetEntityGetCtxCollision) writeField0(p thrift.Protocol) error {  // Value
-    if err := p.WriteFieldBegin("value", thrift.I32, 0); err != nil {
+func (x *respGetEntityGetCtxCollision) writeField0(p thrift.Protocol) error {  // Success
+    if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValueNonCompat()
+    item := x.GetSuccessNonCompat()
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -4360,18 +4388,18 @@ func (x *respGetEntityGetCtxCollision) writeField0(p thrift.Protocol) error {  /
     return nil
 }
 
-func (x *respGetEntityGetCtxCollision) readField0(p thrift.Protocol) error {  // Value
+func (x *respGetEntityGetCtxCollision) readField0(p thrift.Protocol) error {  // Success
     result, err := p.ReadI32()
 if err != nil {
     return err
 }
 
-    x.SetValueNonCompat(result)
+    x.SetSuccessNonCompat(result)
     return nil
 }
 
-func (x *respGetEntityGetCtxCollision) toString0() string {  // Value
-    return fmt.Sprintf("%v", x.GetValueNonCompat())
+func (x *respGetEntityGetCtxCollision) toString0() string {  // Success
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
 
 
@@ -4386,8 +4414,8 @@ func newRespGetEntityGetCtxCollisionBuilder() *respGetEntityGetCtxCollisionBuild
     }
 }
 
-func (x *respGetEntityGetCtxCollisionBuilder) Value(value int32) *respGetEntityGetCtxCollisionBuilder {
-    x.obj.Value = value
+func (x *respGetEntityGetCtxCollisionBuilder) Success(value int32) *respGetEntityGetCtxCollisionBuilder {
+    x.obj.Success = value
     return x
 }
 
@@ -4435,7 +4463,7 @@ func (x *respGetEntityGetCtxCollision) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 0:  // value
+        case 0:  // success
             expectedType := thrift.Type(thrift.I32)
             if wireType == expectedType {
                 if err := x.readField0(p); err != nil {
@@ -4472,7 +4500,7 @@ func (x *respGetEntityGetCtxCollision) String() string {
     var sb strings.Builder
 
     sb.WriteString("respGetEntityGetCtxCollision({")
-    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
     sb.WriteString("})")
 
     return sb.String()
@@ -4709,41 +4737,43 @@ func (x *reqGetEntityGetCtx1Collision) String() string {
     return sb.String()
 }
 type respGetEntityGetCtx1Collision struct {
-    Value int32 `thrift:"value,0" json:"value" db:"value"`
+    Success int32 `thrift:"success,0" json:"success" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetCtx1Collision{}
 var _ thrift.WritableResult = &respGetEntityGetCtx1Collision{}
 
+type GetEntityGetCtx1CollisionResult = respGetEntityGetCtx1Collision
+
 func newRespGetEntityGetCtx1Collision() *respGetEntityGetCtx1Collision {
     return (&respGetEntityGetCtx1Collision{}).
-        SetValueNonCompat(0)
+        SetSuccessNonCompat(0)
 }
 
-func (x *respGetEntityGetCtx1Collision) GetValueNonCompat() int32 {
-    return x.Value
+func (x *respGetEntityGetCtx1Collision) GetSuccessNonCompat() int32 {
+    return x.Success
 }
 
-func (x *respGetEntityGetCtx1Collision) GetValue() int32 {
-    return x.Value
+func (x *respGetEntityGetCtx1Collision) GetSuccess() int32 {
+    return x.Success
 }
 
-func (x *respGetEntityGetCtx1Collision) SetValueNonCompat(value int32) *respGetEntityGetCtx1Collision {
-    x.Value = value
+func (x *respGetEntityGetCtx1Collision) SetSuccessNonCompat(value int32) *respGetEntityGetCtx1Collision {
+    x.Success = value
     return x
 }
 
-func (x *respGetEntityGetCtx1Collision) SetValue(value int32) *respGetEntityGetCtx1Collision {
-    x.Value = value
+func (x *respGetEntityGetCtx1Collision) SetSuccess(value int32) *respGetEntityGetCtx1Collision {
+    x.Success = value
     return x
 }
 
-func (x *respGetEntityGetCtx1Collision) writeField0(p thrift.Protocol) error {  // Value
-    if err := p.WriteFieldBegin("value", thrift.I32, 0); err != nil {
+func (x *respGetEntityGetCtx1Collision) writeField0(p thrift.Protocol) error {  // Success
+    if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValueNonCompat()
+    item := x.GetSuccessNonCompat()
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -4754,18 +4784,18 @@ func (x *respGetEntityGetCtx1Collision) writeField0(p thrift.Protocol) error {  
     return nil
 }
 
-func (x *respGetEntityGetCtx1Collision) readField0(p thrift.Protocol) error {  // Value
+func (x *respGetEntityGetCtx1Collision) readField0(p thrift.Protocol) error {  // Success
     result, err := p.ReadI32()
 if err != nil {
     return err
 }
 
-    x.SetValueNonCompat(result)
+    x.SetSuccessNonCompat(result)
     return nil
 }
 
-func (x *respGetEntityGetCtx1Collision) toString0() string {  // Value
-    return fmt.Sprintf("%v", x.GetValueNonCompat())
+func (x *respGetEntityGetCtx1Collision) toString0() string {  // Success
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
 
 
@@ -4780,8 +4810,8 @@ func newRespGetEntityGetCtx1CollisionBuilder() *respGetEntityGetCtx1CollisionBui
     }
 }
 
-func (x *respGetEntityGetCtx1CollisionBuilder) Value(value int32) *respGetEntityGetCtx1CollisionBuilder {
-    x.obj.Value = value
+func (x *respGetEntityGetCtx1CollisionBuilder) Success(value int32) *respGetEntityGetCtx1CollisionBuilder {
+    x.obj.Success = value
     return x
 }
 
@@ -4829,7 +4859,7 @@ func (x *respGetEntityGetCtx1Collision) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 0:  // value
+        case 0:  // success
             expectedType := thrift.Type(thrift.I32)
             if wireType == expectedType {
                 if err := x.readField0(p); err != nil {
@@ -4866,7 +4896,7 @@ func (x *respGetEntityGetCtx1Collision) String() string {
     var sb strings.Builder
 
     sb.WriteString("respGetEntityGetCtx1Collision({")
-    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
     sb.WriteString("})")
 
     return sb.String()
@@ -4992,7 +5022,7 @@ func (p *procFuncGetEntityGetEntity) RunContext(ctx context.Context, reqStruct t
         return x, x
     }
 
-    result.Value = retval
+    result.Success = retval
     return result, nil
 }
 
@@ -5043,7 +5073,7 @@ func (p *procFuncGetEntityGetBool) RunContext(ctx context.Context, reqStruct thr
         return x, x
     }
 
-    result.Value = retval
+    result.Success = retval
     return result, nil
 }
 
@@ -5094,7 +5124,7 @@ func (p *procFuncGetEntityGetByte) RunContext(ctx context.Context, reqStruct thr
         return x, x
     }
 
-    result.Value = retval
+    result.Success = retval
     return result, nil
 }
 
@@ -5145,7 +5175,7 @@ func (p *procFuncGetEntityGetI16) RunContext(ctx context.Context, reqStruct thri
         return x, x
     }
 
-    result.Value = retval
+    result.Success = retval
     return result, nil
 }
 
@@ -5196,7 +5226,7 @@ func (p *procFuncGetEntityGetI32) RunContext(ctx context.Context, reqStruct thri
         return x, x
     }
 
-    result.Value = retval
+    result.Success = retval
     return result, nil
 }
 
@@ -5247,7 +5277,7 @@ func (p *procFuncGetEntityGetI64) RunContext(ctx context.Context, reqStruct thri
         return x, x
     }
 
-    result.Value = retval
+    result.Success = retval
     return result, nil
 }
 
@@ -5298,7 +5328,7 @@ func (p *procFuncGetEntityGetDouble) RunContext(ctx context.Context, reqStruct t
         return x, x
     }
 
-    result.Value = retval
+    result.Success = retval
     return result, nil
 }
 
@@ -5349,7 +5379,7 @@ func (p *procFuncGetEntityGetString) RunContext(ctx context.Context, reqStruct t
         return x, x
     }
 
-    result.Value = retval
+    result.Success = retval
     return result, nil
 }
 
@@ -5400,7 +5430,7 @@ func (p *procFuncGetEntityGetBinary) RunContext(ctx context.Context, reqStruct t
         return x, x
     }
 
-    result.Value = retval
+    result.Success = retval
     return result, nil
 }
 
@@ -5451,7 +5481,7 @@ func (p *procFuncGetEntityGetMap) RunContext(ctx context.Context, reqStruct thri
         return x, x
     }
 
-    result.Value = retval
+    result.Success = retval
     return result, nil
 }
 
@@ -5502,7 +5532,7 @@ func (p *procFuncGetEntityGetSet) RunContext(ctx context.Context, reqStruct thri
         return x, x
     }
 
-    result.Value = retval
+    result.Success = retval
     return result, nil
 }
 
@@ -5553,7 +5583,7 @@ func (p *procFuncGetEntityGetList) RunContext(ctx context.Context, reqStruct thr
         return x, x
     }
 
-    result.Value = retval
+    result.Success = retval
     return result, nil
 }
 
@@ -5605,7 +5635,7 @@ func (p *procFuncGetEntityGetLegacyStuff) RunContext(ctx context.Context, reqStr
         return x, x
     }
 
-    result.Value = retval
+    result.Success = retval
     return result, nil
 }
 
@@ -5657,7 +5687,7 @@ func (p *procFuncGetEntityGetCtxCollision) RunContext(ctx context.Context, reqSt
         return x, x
     }
 
-    result.Value = retval
+    result.Success = retval
     return result, nil
 }
 
@@ -5709,7 +5739,7 @@ func (p *procFuncGetEntityGetCtx1Collision) RunContext(ctx context.Context, reqS
         return x, x
     }
 
-    result.Value = retval
+    result.Success = retval
     return result, nil
 }
 

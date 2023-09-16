@@ -133,7 +133,7 @@ func (c *FinderChannelClient) ByPlate(ctx context.Context, plate Plate) (*Automo
     if err != nil {
         return nil, err
     }
-    return out.Value, nil
+    return out.Success, nil
 }
 
 func (c *FinderClient) ByPlate(plate Plate) (*Automobile, error) {
@@ -150,7 +150,7 @@ func (c *FinderChannelClient) AliasByPlate(ctx context.Context, plate Plate) (*C
     if err != nil {
         return nil, err
     }
-    return out.Value, nil
+    return out.Success, nil
 }
 
 func (c *FinderClient) AliasByPlate(plate Plate) (*Car, error) {
@@ -167,7 +167,7 @@ func (c *FinderChannelClient) PreviousPlate(ctx context.Context, plate Plate) (P
     if err != nil {
         return "", err
     }
-    return out.Value, nil
+    return out.Success, nil
 }
 
 func (c *FinderClient) PreviousPlate(plate Plate) (Plate, error) {
@@ -337,53 +337,55 @@ func (x *reqFinderByPlate) String() string {
     return sb.String()
 }
 type respFinderByPlate struct {
-    Value *Automobile `thrift:"value,0" json:"value" db:"value"`
+    Success *Automobile `thrift:"success,0" json:"success" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respFinderByPlate{}
 var _ thrift.WritableResult = &respFinderByPlate{}
 
+type FinderByPlateResult = respFinderByPlate
+
 func newRespFinderByPlate() *respFinderByPlate {
     return (&respFinderByPlate{}).
-        SetValueNonCompat(*NewAutomobile())
+        SetSuccessNonCompat(*NewAutomobile())
 }
 
-func (x *respFinderByPlate) GetValueNonCompat() *Automobile {
-    return x.Value
+func (x *respFinderByPlate) GetSuccessNonCompat() *Automobile {
+    return x.Success
 }
 
-func (x *respFinderByPlate) GetValue() *Automobile {
-    if !x.IsSetValue() {
+func (x *respFinderByPlate) GetSuccess() *Automobile {
+    if !x.IsSetSuccess() {
         return nil
     }
 
-    return x.Value
+    return x.Success
 }
 
-func (x *respFinderByPlate) SetValueNonCompat(value Automobile) *respFinderByPlate {
-    x.Value = &value
+func (x *respFinderByPlate) SetSuccessNonCompat(value Automobile) *respFinderByPlate {
+    x.Success = &value
     return x
 }
 
-func (x *respFinderByPlate) SetValue(value *Automobile) *respFinderByPlate {
-    x.Value = value
+func (x *respFinderByPlate) SetSuccess(value *Automobile) *respFinderByPlate {
+    x.Success = value
     return x
 }
 
-func (x *respFinderByPlate) IsSetValue() bool {
-    return x.Value != nil
+func (x *respFinderByPlate) IsSetSuccess() bool {
+    return x.Success != nil
 }
 
-func (x *respFinderByPlate) writeField0(p thrift.Protocol) error {  // Value
-    if !x.IsSetValue() {
+func (x *respFinderByPlate) writeField0(p thrift.Protocol) error {  // Success
+    if !x.IsSetSuccess() {
         return nil
     }
 
-    if err := p.WriteFieldBegin("value", thrift.STRUCT, 0); err != nil {
+    if err := p.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValueNonCompat()
+    item := x.GetSuccessNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -394,30 +396,30 @@ func (x *respFinderByPlate) writeField0(p thrift.Protocol) error {  // Value
     return nil
 }
 
-func (x *respFinderByPlate) readField0(p thrift.Protocol) error {  // Value
+func (x *respFinderByPlate) readField0(p thrift.Protocol) error {  // Success
     result := *NewAutomobile()
 err := result.Read(p)
 if err != nil {
     return err
 }
 
-    x.SetValueNonCompat(result)
+    x.SetSuccessNonCompat(result)
     return nil
 }
 
-func (x *respFinderByPlate) toString0() string {  // Value
-    return fmt.Sprintf("%v", x.GetValueNonCompat())
+func (x *respFinderByPlate) toString0() string {  // Success
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
 
-// Deprecated: Use newRespFinderByPlate().GetValue() instead.
-var respFinderByPlate_Value_DEFAULT = newRespFinderByPlate().GetValue()
+// Deprecated: Use newRespFinderByPlate().GetSuccess() instead.
+var respFinderByPlate_Success_DEFAULT = newRespFinderByPlate().GetSuccess()
 
-// Deprecated: Use newRespFinderByPlate().GetValue() instead.
-func (x *respFinderByPlate) DefaultGetValue() *Automobile {
-    if !x.IsSetValue() {
+// Deprecated: Use newRespFinderByPlate().GetSuccess() instead.
+func (x *respFinderByPlate) DefaultGetSuccess() *Automobile {
+    if !x.IsSetSuccess() {
         return NewAutomobile()
     }
-    return x.Value
+    return x.Success
 }
 
 
@@ -432,8 +434,8 @@ func newRespFinderByPlateBuilder() *respFinderByPlateBuilder {
     }
 }
 
-func (x *respFinderByPlateBuilder) Value(value *Automobile) *respFinderByPlateBuilder {
-    x.obj.Value = value
+func (x *respFinderByPlateBuilder) Success(value *Automobile) *respFinderByPlateBuilder {
+    x.obj.Success = value
     return x
 }
 
@@ -481,7 +483,7 @@ func (x *respFinderByPlate) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 0:  // value
+        case 0:  // success
             expectedType := thrift.Type(thrift.STRUCT)
             if wireType == expectedType {
                 if err := x.readField0(p); err != nil {
@@ -518,7 +520,7 @@ func (x *respFinderByPlate) String() string {
     var sb strings.Builder
 
     sb.WriteString("respFinderByPlate({")
-    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
     sb.WriteString("})")
 
     return sb.String()
@@ -685,53 +687,55 @@ func (x *reqFinderAliasByPlate) String() string {
     return sb.String()
 }
 type respFinderAliasByPlate struct {
-    Value *Car `thrift:"value,0" json:"value" db:"value"`
+    Success *Car `thrift:"success,0" json:"success" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respFinderAliasByPlate{}
 var _ thrift.WritableResult = &respFinderAliasByPlate{}
 
+type FinderAliasByPlateResult = respFinderAliasByPlate
+
 func newRespFinderAliasByPlate() *respFinderAliasByPlate {
     return (&respFinderAliasByPlate{}).
-        SetValueNonCompat(*NewCar())
+        SetSuccessNonCompat(*NewCar())
 }
 
-func (x *respFinderAliasByPlate) GetValueNonCompat() *Car {
-    return x.Value
+func (x *respFinderAliasByPlate) GetSuccessNonCompat() *Car {
+    return x.Success
 }
 
-func (x *respFinderAliasByPlate) GetValue() *Car {
-    if !x.IsSetValue() {
+func (x *respFinderAliasByPlate) GetSuccess() *Car {
+    if !x.IsSetSuccess() {
         return nil
     }
 
-    return x.Value
+    return x.Success
 }
 
-func (x *respFinderAliasByPlate) SetValueNonCompat(value Car) *respFinderAliasByPlate {
-    x.Value = &value
+func (x *respFinderAliasByPlate) SetSuccessNonCompat(value Car) *respFinderAliasByPlate {
+    x.Success = &value
     return x
 }
 
-func (x *respFinderAliasByPlate) SetValue(value *Car) *respFinderAliasByPlate {
-    x.Value = value
+func (x *respFinderAliasByPlate) SetSuccess(value *Car) *respFinderAliasByPlate {
+    x.Success = value
     return x
 }
 
-func (x *respFinderAliasByPlate) IsSetValue() bool {
-    return x.Value != nil
+func (x *respFinderAliasByPlate) IsSetSuccess() bool {
+    return x.Success != nil
 }
 
-func (x *respFinderAliasByPlate) writeField0(p thrift.Protocol) error {  // Value
-    if !x.IsSetValue() {
+func (x *respFinderAliasByPlate) writeField0(p thrift.Protocol) error {  // Success
+    if !x.IsSetSuccess() {
         return nil
     }
 
-    if err := p.WriteFieldBegin("value", thrift.STRUCT, 0); err != nil {
+    if err := p.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValueNonCompat()
+    item := x.GetSuccessNonCompat()
     err := WriteCar(item, p)
 if err != nil {
     return err
@@ -743,29 +747,29 @@ if err != nil {
     return nil
 }
 
-func (x *respFinderAliasByPlate) readField0(p thrift.Protocol) error {  // Value
+func (x *respFinderAliasByPlate) readField0(p thrift.Protocol) error {  // Success
     result, err := ReadCar(p)
 if err != nil {
     return err
 }
 
-    x.SetValueNonCompat(result)
+    x.SetSuccessNonCompat(result)
     return nil
 }
 
-func (x *respFinderAliasByPlate) toString0() string {  // Value
-    return fmt.Sprintf("%v", x.GetValueNonCompat())
+func (x *respFinderAliasByPlate) toString0() string {  // Success
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
 
-// Deprecated: Use newRespFinderAliasByPlate().GetValue() instead.
-var respFinderAliasByPlate_Value_DEFAULT = newRespFinderAliasByPlate().GetValue()
+// Deprecated: Use newRespFinderAliasByPlate().GetSuccess() instead.
+var respFinderAliasByPlate_Success_DEFAULT = newRespFinderAliasByPlate().GetSuccess()
 
-// Deprecated: Use newRespFinderAliasByPlate().GetValue() instead.
-func (x *respFinderAliasByPlate) DefaultGetValue() *Car {
-    if !x.IsSetValue() {
+// Deprecated: Use newRespFinderAliasByPlate().GetSuccess() instead.
+func (x *respFinderAliasByPlate) DefaultGetSuccess() *Car {
+    if !x.IsSetSuccess() {
         return NewCar()
     }
-    return x.Value
+    return x.Success
 }
 
 
@@ -780,8 +784,8 @@ func newRespFinderAliasByPlateBuilder() *respFinderAliasByPlateBuilder {
     }
 }
 
-func (x *respFinderAliasByPlateBuilder) Value(value *Car) *respFinderAliasByPlateBuilder {
-    x.obj.Value = value
+func (x *respFinderAliasByPlateBuilder) Success(value *Car) *respFinderAliasByPlateBuilder {
+    x.obj.Success = value
     return x
 }
 
@@ -829,7 +833,7 @@ func (x *respFinderAliasByPlate) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 0:  // value
+        case 0:  // success
             expectedType := thrift.Type(thrift.STRUCT)
             if wireType == expectedType {
                 if err := x.readField0(p); err != nil {
@@ -866,7 +870,7 @@ func (x *respFinderAliasByPlate) String() string {
     var sb strings.Builder
 
     sb.WriteString("respFinderAliasByPlate({")
-    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
     sb.WriteString("})")
 
     return sb.String()
@@ -1033,41 +1037,43 @@ func (x *reqFinderPreviousPlate) String() string {
     return sb.String()
 }
 type respFinderPreviousPlate struct {
-    Value Plate `thrift:"value,0" json:"value" db:"value"`
+    Success Plate `thrift:"success,0" json:"success" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respFinderPreviousPlate{}
 var _ thrift.WritableResult = &respFinderPreviousPlate{}
 
+type FinderPreviousPlateResult = respFinderPreviousPlate
+
 func newRespFinderPreviousPlate() *respFinderPreviousPlate {
     return (&respFinderPreviousPlate{}).
-        SetValueNonCompat(NewPlate())
+        SetSuccessNonCompat(NewPlate())
 }
 
-func (x *respFinderPreviousPlate) GetValueNonCompat() Plate {
-    return x.Value
+func (x *respFinderPreviousPlate) GetSuccessNonCompat() Plate {
+    return x.Success
 }
 
-func (x *respFinderPreviousPlate) GetValue() Plate {
-    return x.Value
+func (x *respFinderPreviousPlate) GetSuccess() Plate {
+    return x.Success
 }
 
-func (x *respFinderPreviousPlate) SetValueNonCompat(value Plate) *respFinderPreviousPlate {
-    x.Value = value
+func (x *respFinderPreviousPlate) SetSuccessNonCompat(value Plate) *respFinderPreviousPlate {
+    x.Success = value
     return x
 }
 
-func (x *respFinderPreviousPlate) SetValue(value Plate) *respFinderPreviousPlate {
-    x.Value = value
+func (x *respFinderPreviousPlate) SetSuccess(value Plate) *respFinderPreviousPlate {
+    x.Success = value
     return x
 }
 
-func (x *respFinderPreviousPlate) writeField0(p thrift.Protocol) error {  // Value
-    if err := p.WriteFieldBegin("value", thrift.STRING, 0); err != nil {
+func (x *respFinderPreviousPlate) writeField0(p thrift.Protocol) error {  // Success
+    if err := p.WriteFieldBegin("success", thrift.STRING, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValueNonCompat()
+    item := x.GetSuccessNonCompat()
     err := WritePlate(item, p)
 if err != nil {
     return err
@@ -1079,18 +1085,18 @@ if err != nil {
     return nil
 }
 
-func (x *respFinderPreviousPlate) readField0(p thrift.Protocol) error {  // Value
+func (x *respFinderPreviousPlate) readField0(p thrift.Protocol) error {  // Success
     result, err := ReadPlate(p)
 if err != nil {
     return err
 }
 
-    x.SetValueNonCompat(result)
+    x.SetSuccessNonCompat(result)
     return nil
 }
 
-func (x *respFinderPreviousPlate) toString0() string {  // Value
-    return fmt.Sprintf("%v", x.GetValueNonCompat())
+func (x *respFinderPreviousPlate) toString0() string {  // Success
+    return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
 
 
@@ -1105,8 +1111,8 @@ func newRespFinderPreviousPlateBuilder() *respFinderPreviousPlateBuilder {
     }
 }
 
-func (x *respFinderPreviousPlateBuilder) Value(value Plate) *respFinderPreviousPlateBuilder {
-    x.obj.Value = value
+func (x *respFinderPreviousPlateBuilder) Success(value Plate) *respFinderPreviousPlateBuilder {
+    x.obj.Success = value
     return x
 }
 
@@ -1154,7 +1160,7 @@ func (x *respFinderPreviousPlate) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 0:  // value
+        case 0:  // success
             expectedType := thrift.Type(thrift.STRING)
             if wireType == expectedType {
                 if err := x.readField0(p); err != nil {
@@ -1191,7 +1197,7 @@ func (x *respFinderPreviousPlate) String() string {
     var sb strings.Builder
 
     sb.WriteString("respFinderPreviousPlate({")
-    sb.WriteString(fmt.Sprintf("Value:%s", x.toString0()))
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
     sb.WriteString("})")
 
     return sb.String()
@@ -1293,7 +1299,7 @@ func (p *procFuncFinderByPlate) RunContext(ctx context.Context, reqStruct thrift
         return x, x
     }
 
-    result.Value = retval
+    result.Success = retval
     return result, nil
 }
 
@@ -1345,7 +1351,7 @@ func (p *procFuncFinderAliasByPlate) RunContext(ctx context.Context, reqStruct t
         return x, x
     }
 
-    result.Value = retval
+    result.Success = retval
     return result, nil
 }
 
@@ -1397,7 +1403,7 @@ func (p *procFuncFinderPreviousPlate) RunContext(ctx context.Context, reqStruct 
         return x, x
     }
 
-    result.Value = retval
+    result.Success = retval
     return result, nil
 }
 

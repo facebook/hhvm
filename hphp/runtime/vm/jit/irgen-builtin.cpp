@@ -149,6 +149,7 @@ jit::vector<SSATmp*> tokenize(
     return result;
   }
 
+  result.reserve(tokens.size());
   size_t argIdx = 0;
   for (auto const* token : tokens) {
     if (!token) {

@@ -12,6 +12,7 @@ namespace cpp2 facebook.eden
 namespace java com.facebook.eden.thrift
 namespace py facebook.eden
 namespace py3 eden.fs.service
+namespace hack edenfs.service
 
 /**
  * API style guide.

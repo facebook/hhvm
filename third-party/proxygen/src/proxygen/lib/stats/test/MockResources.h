@@ -52,6 +52,8 @@ class MockResources : public Resources {
 
     data.setCpuStats(
         params.cpuUtilRatio,
+        std::vector<double>(params.numCpuCores, params.cpuUtilRatio),
+        80,
         params.cpuSoftIrqUtilRatio,
         std::vector<double>(params.numCpuCores, params.cpuSoftIrqUtilRatio));
     uint64_t totalMemBytes = 100;

@@ -12,6 +12,14 @@ proxygen_add_test(TARGET PeriodicStatsTest
     testmain
 )
 
+proxygen_add_test(TARGET ResourceDataTest
+  SOURCES
+    ResourceDataTest.cpp
+  DEPENDS
+    proxygen
+    testmain
+)
+
 proxygen_add_test(TARGET ResourceStatsTest
   SOURCES
     ResourceStatsTest.cpp

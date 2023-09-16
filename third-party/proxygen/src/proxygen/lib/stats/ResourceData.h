@@ -9,6 +9,8 @@
 #pragma once
 
 #include <chrono>
+#include <folly/logging/xlog.h>
+#include <glog/stl_logging.h>
 #include <stdint.h>
 #include <vector>
 
@@ -47,6 +49,43 @@ struct ResourceData : public PeriodicStatsDataBase {
    */
   double getCpuPctUtil(bool normalized = true) const {
     return getPctFromRatio(getCpuRatioUtil(normalized));
+  }
+
+  /**
+   * Gets the cpu utilization ratio (0-1.0 over last update interval),
+   * aggregated over all cores using a configured quantile.
+   * Utilized = non-idle and non-iowait
+   *
+   * Cgroup CPU utilization might be significantly off during peak utilization
+   * i.e. way above 100% due to CPU throttling, pass `normalized` as false if
+   * you want to see values above 100, for example if you aggregate values over
+   * some window.
+   */
+  [[nodiscard]] double getCpuUtilPercentileRatio(bool normalized = true) const {
+    return normalized ? std::min(1.0, cpuRatioUtilPercentile_)
+                      : cpuRatioUtilPercentile_;
+  }
+
+  /**
+   * Gets the cpu percentage utilization (0-100 over last update interval),
+   * aggregated over all cores using a configured quantile.
+   * Utilized = non-idle and non-iowait
+   *
+   * Cgroup CPU utilization might be significantly off during peak utilization
+   * i.e. way above 100% due to CPU throttling, pass `normalized` as false if
+   * you want to see values above 100, for example if you aggregate values over
+   * some window.
+   */
+  [[nodiscard]] double getCpuUtilPercentile(bool normalized = true) const {
+    return getPctFromRatio(getCpuUtilPercentileRatio(normalized));
+  }
+
+  /**
+   * Gets the quantile configured for producing the aggregation from
+   * getCpuUtilPercentile().
+   */
+  [[nodiscard]] double getCpuUtilPercentileConfigured() const {
+    return cpuUtilPercentileConfigured_;
   }
 
   /**
@@ -289,11 +328,39 @@ struct ResourceData : public PeriodicStatsDataBase {
            pressureUdpMemLimit_ != 0 && minUdpMemLimit_ != 0;
   }
 
-  void setCpuStats(double cpuRatioUtil,
-                   double cpuSoftIrqRatioUtil,
+  // Nearest rank, inclusive on upper boundary
+  static double computePercentile(std::vector<double>& sortedValues,
+                                  double percentile) {
+    size_t size = sortedValues.size();
+    if (size == 0) {
+      if (percentile < 0 || percentile > 100) {
+        XLOG(ERR) << "Invalid percentile " << percentile;
+      }
+
+      return 0.0;
+    }
+
+    // p100 is the largest value, as well as p(N-1/N)
+    size_t index =
+        std::min((size_t)((double)size * percentile / 100.0), size - 1);
+    XLOG(DBG4) << "index=" << index << ", percentile=" << percentile
+               << "values=" << sortedValues;
+
+    return sortedValues[index];
+  }
+
+  void setCpuStats(double cpuUsageRatio,
+                   std::vector<double>&& cpuCoreUsageRatios,
+                   double cpuUtilPercentileConfigured,
+                   double cpuSoftIrqUsageRatio,
                    std::vector<double>&& softIrqCpuCoreRatioUtils) {
-    cpuRatioUtil_ = cpuRatioUtil;
-    cpuSoftIrqRatioUtil_ = cpuSoftIrqRatioUtil;
+    cpuRatioUtil_ = cpuUsageRatio;
+    cpuCoreUsageRatios_ = std::move(cpuCoreUsageRatios);
+    std::sort(cpuCoreUsageRatios_.begin(), cpuCoreUsageRatios_.end());
+    cpuUtilPercentileConfigured_ = cpuUtilPercentileConfigured;
+    cpuRatioUtilPercentile_ =
+        computePercentile(cpuCoreUsageRatios_, cpuUtilPercentileConfigured_);
+    cpuSoftIrqRatioUtil_ = cpuSoftIrqUsageRatio;
     softIrqCpuCoreRatioUtils_ = softIrqCpuCoreRatioUtils;
   }
 
@@ -360,6 +427,9 @@ struct ResourceData : public PeriodicStatsDataBase {
 
   // Resource utilization metrics
   double cpuRatioUtil_{0};
+  std::vector<double> cpuCoreUsageRatios_;
+  double cpuRatioUtilPercentile_{0};
+  double cpuUtilPercentileConfigured_{61};
   double cpuSoftIrqRatioUtil_{0};
   std::vector<double> softIrqCpuCoreRatioUtils_;
   uint64_t usedMemBytes_{0};

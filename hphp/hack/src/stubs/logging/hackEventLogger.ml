@@ -507,8 +507,6 @@ let worker_exception _ = ()
 
 (* Typing service events. *)
 
-let hulk_type_check_end _ _ ~start_t:_ = ()
-
 module ProfileTypeCheck = struct
   type stats = unit
 

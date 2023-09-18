@@ -116,3 +116,26 @@ union IncludePatchUnion {
 struct Strings {
   1: list<string> strings;
 }
+
+@patch.AssignOnlyPatch
+struct AssignOnly {
+  1: i32 field;
+}
+
+struct Def {
+  1: i32 field;
+}
+
+struct Opt {
+  1: optional i32 field;
+}
+
+union Union {
+  1: i32 field;
+}
+
+struct Ter {
+  @thrift.Experimental
+  @thrift.TerseWrite
+  1: i32 field;
+}

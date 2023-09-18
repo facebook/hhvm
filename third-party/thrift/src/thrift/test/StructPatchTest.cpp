@@ -1185,5 +1185,196 @@ TEST(PatchTest, StructRemoveSerialization) {
       std::unordered_set{static_cast<FieldId>(3)});
 }
 
+TEST(PatchDiscrepancy, AssignOnly) {
+  AssignOnly foo;
+  foo.field() = 1;
+  auto dynFoo = protocol::asValueStruct<type::infer_tag<AssignOnly>>(foo);
+
+  // Create a patch with ClearOp
+  protocol::Object dynPatch;
+  dynPatch[static_cast<FieldId>(op::PatchOp::Clear)].emplace_bool() = true;
+
+  // Convert dynamic patch to static patch
+  protocol::Value patchValue;
+  patchValue.emplace_object() = dynPatch;
+  auto patch =
+      protocol::fromValueStruct<type::infer_tag<AssignOnlyPatch>>(patchValue);
+
+  // Apply patch statically
+  // ClearOp is ignored in AssignOnlyPatch. Otherwise d.field() should be 0.
+  patch.apply(foo);
+  EXPECT_EQ(foo.field(), 1);
+
+  // Apply patch dynamically
+  protocol::applyPatch(dynPatch, dynFoo);
+  EXPECT_FALSE(dynFoo.as_object().contains(FieldId{1}));
+}
+
+TEST(PatchDiscrepancy, ClearOptionalFieldInPatchPrior) {
+  Opt foo;
+  foo.field() = 10;
+  auto dynFoo = protocol::asValueStruct<type::struct_t<Opt>>(foo);
+
+  OptPatch patch;
+  patch.patchIfSet<ident::field>().clear();
+  patch.ensure<ident::field>(1);
+
+  // Apply patch statically
+  patch.apply(foo);
+  EXPECT_EQ(foo.field(), 1);
+
+  // Apply patch dynamically
+  // In dynamic patch, patch.patchIfSet<ident::field>().clear() will set the
+  // field to intrinsic default rather than removing it. Thus `ensure` will not
+  // be applied to field that already has value.
+  protocol::applyPatch(patch.toObject(), dynFoo);
+  EXPECT_EQ(dynFoo.as_object()[FieldId{1}].as_i32(), 0);
+}
+
+TEST(PatchDiscrepancy, ClearUnionFieldInPatchPrior) {
+  Union foo;
+  foo.field_ref() = 10;
+  auto dynFoo = protocol::asValueStruct<type::union_t<Union>>(foo);
+
+  UnionPatch patch;
+  patch.patchIfSet<ident::field>().clear();
+  patch.ensure<ident::field>(1);
+
+  // Apply patch statically
+  patch.apply(foo);
+  EXPECT_EQ(foo.field_ref(), 0);
+
+  // Apply patch dynamically
+  protocol::applyPatch(patch.toObject(), dynFoo);
+  EXPECT_EQ(dynFoo.as_object()[FieldId{1}].as_i32(), 0);
+}
+
+TEST(PatchDiscrepancy, PatchUnqualifiedField) {
+  Def foo;
+  foo.field() = 0;
+  auto dynFoo = protocol::asValueStruct<type::infer_tag<Def>>(foo);
+
+  DefPatch patch;
+  patch.clear();
+  patch.patchIfSet<ident::field>() += 1;
+
+  // Apply patch statically
+  patch.apply(foo);
+  EXPECT_EQ(foo.field(), 1);
+
+  // Apply patch dynamically
+  // ClearOp will set the whole struct to intrinsic default.
+  // In static patch, non-optional field still have value after ClearOp, but in
+  // dynamic patch, all fields are removed.
+  protocol::applyPatch(patch.toObject(), dynFoo);
+  EXPECT_FALSE(dynFoo.as_object().contains(FieldId{1}));
+}
+
+TEST(PatchDiscrepancy, PatchTerseField) {
+  Ter foo;
+  foo.field() = 0;
+
+  // We can't use protocol::asValueStruct, we need to do an actual serialization
+  // to ensure terse field is not set in dynamic Foo.
+  auto iobuf = *CompactSerializer::serialize<folly::IOBufQueue>(foo).move();
+  protocol::Value dynFoo;
+  dynFoo.emplace_object() = protocol::parseObject<CompactProtocolReader>(iobuf);
+
+  protocol::asValueStruct<type::infer_tag<Ter>>(foo);
+
+  TerPatch patch;
+  patch.patchIfSet<ident::field>() += 1;
+
+  // Apply patch statically
+  patch.apply(foo);
+  EXPECT_EQ(foo.field(), 1);
+
+  // Apply patch dynamically
+  // Similar to the case above, though in this case since we don't serialize
+  // terse field when it's intrinsic default, it won't exist in dynFoo.
+  protocol::applyPatch(patch.toObject(), dynFoo);
+  EXPECT_FALSE(dynFoo.as_object().contains(FieldId{1}));
+}
+
+TEST(PatchDiscrepancy, PatchOptionalField) {
+  Opt foo;
+  foo.field() = 0;
+  auto dynFoo = protocol::asValueStruct<type::infer_tag<Opt>>(foo);
+
+  OptPatch patch;
+  patch.clear();
+  patch.patchIfSet<ident::field>() += 1;
+
+  // Apply patch statically
+  patch.apply(foo);
+  EXPECT_FALSE(foo.field().has_value());
+
+  // Apply patch dynamically
+  protocol::applyPatch(patch.toObject(), dynFoo);
+  EXPECT_FALSE(dynFoo.as_object().contains(FieldId{1}));
+}
+
+TEST(PatchDiscrepancy, EnsureUnqualifiedField) {
+  Def foo;
+  foo.field() = 0;
+  auto dynFoo = protocol::asValueStruct<type::infer_tag<Def>>(foo);
+
+  DefPatch patch;
+  patch.clear();
+  patch.ensure<ident::field>(1);
+
+  // Apply patch statically
+  patch.apply(foo);
+  EXPECT_EQ(foo.field(), 0);
+
+  // Apply patch dynamically
+  // EnsureOp will be applied in dynamic patch, but not static patch.
+  protocol::applyPatch(patch.toObject(), dynFoo);
+  EXPECT_EQ(dynFoo.as_object()[FieldId{1}].as_i32(), 1);
+}
+
+TEST(PatchDiscrepancy, EnsureTerseField) {
+  Ter foo;
+  foo.field() = 0;
+
+  // We can't use protocol::asValueStruct, we need to do an actual serialization
+  // to ensure terse field is not set in dynamic Foo.
+  auto iobuf = *CompactSerializer::serialize<folly::IOBufQueue>(foo).move();
+  protocol::Value dynFoo;
+  dynFoo.emplace_object() = protocol::parseObject<CompactProtocolReader>(iobuf);
+
+  protocol::asValueStruct<type::infer_tag<Ter>>(foo);
+
+  TerPatch patch;
+  patch.ensure<ident::field>(1);
+
+  // Apply patch statically
+  patch.apply(foo);
+  EXPECT_EQ(foo.field(), 0);
+
+  // Apply patch dynamically
+  // Similar to the case above
+  protocol::applyPatch(patch.toObject(), dynFoo);
+  EXPECT_EQ(dynFoo.as_object()[FieldId{1}].as_i32(), 1);
+}
+
+TEST(PatchDiscrepancy, EnsureUnionField) {
+  Union foo;
+  foo.field_ref() = 0;
+  auto dynFoo = protocol::asValueStruct<type::infer_tag<Union>>(foo);
+
+  UnionPatch patch;
+  patch.clear();
+  patch.ensure<ident::field>(1);
+
+  // Apply patch statically
+  patch.apply(foo);
+  EXPECT_EQ(foo.field_ref(), 1);
+
+  // Apply patch dynamically
+  protocol::applyPatch(patch.toObject(), dynFoo);
+  EXPECT_EQ(dynFoo.as_object()[FieldId{1}].as_i32(), 1);
+}
+
 } // namespace
 } // namespace apache::thrift

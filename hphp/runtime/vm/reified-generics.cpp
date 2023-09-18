@@ -48,7 +48,11 @@ ArrayData* addToTypeReifiedGenericsTable(
   // Same key should never result in different values.
   // If this assertion fires, there's a high chance that two different type
   // structure mangle to the same name and they should not.
-  assertx(tsList->same(generics));
+  assert_flog(tsList->same(generics),
+              "reified ts mismatch\nname: {}\ntsList: {}\ngenerics: {}\n",
+              name,
+              [&](){ std::string s; staticArrayStreamer(tsList, s); return s; }(),
+              [&](){ std::string s; staticArrayStreamer(generics, s); return s; }());
   decRefArr(tsList);
   return generics;
 }

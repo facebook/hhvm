@@ -7,9 +7,7 @@
  *
  *)
 
-type t = int [@@deriving eq, hash]
-
-val compare : t -> t -> int
+type t = int [@@deriving eq, hash, ord, show]
 
 val track_names : bool ref
 
@@ -17,19 +15,7 @@ val tmp : unit -> t
 
 val to_string : t -> string
 
-val debug : ?normalize:(int -> int) -> t -> string
-
-val get_name : t -> string
-
-val set_name : t -> string -> unit
-
 val make : string -> t
-
-val pp : Format.formatter -> t -> unit
-
-val not_equal : t -> t -> bool
-
-val from_string_hash : string -> t
 
 val is_immutable : int -> bool
 

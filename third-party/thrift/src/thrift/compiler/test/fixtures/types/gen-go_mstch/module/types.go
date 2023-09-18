@@ -727,35 +727,35 @@ func (x *ContainerStruct) SetFieldA(value []int32) *ContainerStruct {
 }
 
 func (x *ContainerStruct) IsSetFieldB() bool {
-    return x.FieldB != nil
+    return x != nil && x.FieldB != nil
 }
 
 func (x *ContainerStruct) IsSetFieldC() bool {
-    return x.FieldC != nil
+    return x != nil && x.FieldC != nil
 }
 
 func (x *ContainerStruct) IsSetFieldD() bool {
-    return x.FieldD != nil
+    return x != nil && x.FieldD != nil
 }
 
 func (x *ContainerStruct) IsSetFieldE() bool {
-    return x.FieldE != nil
+    return x != nil && x.FieldE != nil
 }
 
 func (x *ContainerStruct) IsSetFieldF() bool {
-    return x.FieldF != nil
+    return x != nil && x.FieldF != nil
 }
 
 func (x *ContainerStruct) IsSetFieldG() bool {
-    return x.FieldG != nil
+    return x != nil && x.FieldG != nil
 }
 
 func (x *ContainerStruct) IsSetFieldH() bool {
-    return x.FieldH != nil
+    return x != nil && x.FieldH != nil
 }
 
 func (x *ContainerStruct) IsSetFieldA() bool {
-    return x.FieldA != nil
+    return x != nil && x.FieldA != nil
 }
 
 func (x *ContainerStruct) writeField2(p thrift.Protocol) error {  // FieldB
@@ -1532,7 +1532,7 @@ func (x *CppTypeStruct) SetFieldA(value []int32) *CppTypeStruct {
 }
 
 func (x *CppTypeStruct) IsSetFieldA() bool {
-    return x.FieldA != nil
+    return x != nil && x.FieldA != nil
 }
 
 func (x *CppTypeStruct) writeField1(p thrift.Protocol) error {  // FieldA
@@ -2381,7 +2381,7 @@ func (x *TrivialNestedWithDefault) SetN(value *TrivialNumeric) *TrivialNestedWit
 }
 
 func (x *TrivialNestedWithDefault) IsSetN() bool {
-    return x.N != nil
+    return x != nil && x.N != nil
 }
 
 func (x *TrivialNestedWithDefault) writeField1(p thrift.Protocol) error {  // Z
@@ -2635,7 +2635,7 @@ func (x *ComplexString) SetB(value map[string]int32) *ComplexString {
 }
 
 func (x *ComplexString) IsSetB() bool {
-    return x.B != nil
+    return x != nil && x.B != nil
 }
 
 func (x *ComplexString) writeField1(p thrift.Protocol) error {  // A
@@ -2931,7 +2931,7 @@ func (x *ComplexNestedWithDefault) SetN(value *ComplexString) *ComplexNestedWith
 }
 
 func (x *ComplexNestedWithDefault) IsSetN() bool {
-    return x.N != nil
+    return x != nil && x.N != nil
 }
 
 func (x *ComplexNestedWithDefault) writeField1(p thrift.Protocol) error {  // Z
@@ -4115,7 +4115,7 @@ func (x *MyStruct) SetData(value *MyDataItem) *MyStruct {
 }
 
 func (x *MyStruct) IsSetData() bool {
-    return x.Data != nil
+    return x != nil && x.Data != nil
 }
 
 func (x *MyStruct) writeField1(p thrift.Protocol) error {  // MyIntField
@@ -4722,11 +4722,11 @@ func (x *AnnotatedTypes) SetListField(value included.SomeListOfTypeMap) *Annotat
 }
 
 func (x *AnnotatedTypes) IsSetBinaryField() bool {
-    return x.BinaryField != nil
+    return x != nil && x.BinaryField != nil
 }
 
 func (x *AnnotatedTypes) IsSetListField() bool {
-    return x.ListField != nil
+    return x != nil && x.ListField != nil
 }
 
 func (x *AnnotatedTypes) writeField1(p thrift.Protocol) error {  // BinaryField
@@ -4976,11 +4976,11 @@ func (x *ForwardUsageRoot) SetForwardUsageByRef(value *ForwardUsageByRef) *Forwa
 }
 
 func (x *ForwardUsageRoot) IsSetForwardUsageStruct() bool {
-    return x.ForwardUsageStruct != nil
+    return x != nil && x.ForwardUsageStruct != nil
 }
 
 func (x *ForwardUsageRoot) IsSetForwardUsageByRef() bool {
-    return x.ForwardUsageByRef != nil
+    return x != nil && x.ForwardUsageByRef != nil
 }
 
 func (x *ForwardUsageRoot) writeField1(p thrift.Protocol) error {  // ForwardUsageStruct
@@ -5229,7 +5229,7 @@ func (x *ForwardUsageStruct) SetFoo(value *ForwardUsageRoot) *ForwardUsageStruct
 }
 
 func (x *ForwardUsageStruct) IsSetFoo() bool {
-    return x.Foo != nil
+    return x != nil && x.Foo != nil
 }
 
 func (x *ForwardUsageStruct) writeField1(p thrift.Protocol) error {  // Foo
@@ -5411,7 +5411,7 @@ func (x *ForwardUsageByRef) SetFoo(value *ForwardUsageRoot) *ForwardUsageByRef {
 }
 
 func (x *ForwardUsageByRef) IsSetFoo() bool {
-    return x.Foo != nil
+    return x != nil && x.Foo != nil
 }
 
 func (x *ForwardUsageByRef) writeField1(p thrift.Protocol) error {  // Foo
@@ -5593,7 +5593,7 @@ func (x *IncompleteMap) SetField(value map[int32]*IncompleteMapDep) *IncompleteM
 }
 
 func (x *IncompleteMap) IsSetField() bool {
-    return x.Field != nil
+    return x != nil && x.Field != nil
 }
 
 func (x *IncompleteMap) writeField1(p thrift.Protocol) error {  // Field
@@ -5898,7 +5898,7 @@ func (x *CompleteMap) SetField(value map[int32]*CompleteMapDep) *CompleteMap {
 }
 
 func (x *CompleteMap) IsSetField() bool {
-    return x.Field != nil
+    return x != nil && x.Field != nil
 }
 
 func (x *CompleteMap) writeField1(p thrift.Protocol) error {  // Field
@@ -6203,7 +6203,7 @@ func (x *IncompleteList) SetField(value []*IncompleteListDep) *IncompleteList {
 }
 
 func (x *IncompleteList) IsSetField() bool {
-    return x.Field != nil
+    return x != nil && x.Field != nil
 }
 
 func (x *IncompleteList) writeField1(p thrift.Protocol) error {  // Field
@@ -6491,7 +6491,7 @@ func (x *CompleteList) SetField(value []*CompleteListDep) *CompleteList {
 }
 
 func (x *CompleteList) IsSetField() bool {
-    return x.Field != nil
+    return x != nil && x.Field != nil
 }
 
 func (x *CompleteList) writeField1(p thrift.Protocol) error {  // Field
@@ -6779,7 +6779,7 @@ func (x *AdaptedList) SetField(value []*AdaptedListDep) *AdaptedList {
 }
 
 func (x *AdaptedList) IsSetField() bool {
-    return x.Field != nil
+    return x != nil && x.Field != nil
 }
 
 func (x *AdaptedList) writeField1(p thrift.Protocol) error {  // Field
@@ -6980,7 +6980,7 @@ func (x *AdaptedListDep) SetField(value *AdaptedList) *AdaptedListDep {
 }
 
 func (x *AdaptedListDep) IsSetField() bool {
-    return x.Field != nil
+    return x != nil && x.Field != nil
 }
 
 func (x *AdaptedListDep) writeField1(p thrift.Protocol) error {  // Field
@@ -7162,7 +7162,7 @@ func (x *DependentAdaptedList) SetField(value []*DependentAdaptedListDep) *Depen
 }
 
 func (x *DependentAdaptedList) IsSetField() bool {
-    return x.Field != nil
+    return x != nil && x.Field != nil
 }
 
 func (x *DependentAdaptedList) writeField1(p thrift.Protocol) error {  // Field
@@ -7362,7 +7362,7 @@ func (x *DependentAdaptedListDep) SetField(value *int16) *DependentAdaptedListDe
 }
 
 func (x *DependentAdaptedListDep) IsSetField() bool {
-    return x.Field != nil
+    return x != nil && x.Field != nil
 }
 
 func (x *DependentAdaptedListDep) writeField1(p thrift.Protocol) error {  // Field
@@ -7667,15 +7667,15 @@ func (x *AllocatorAware) SetAaShared(value int32) *AllocatorAware {
 }
 
 func (x *AllocatorAware) IsSetAaList() bool {
-    return x.AaList != nil
+    return x != nil && x.AaList != nil
 }
 
 func (x *AllocatorAware) IsSetAaSet() bool {
-    return x.AaSet != nil
+    return x != nil && x.AaSet != nil
 }
 
 func (x *AllocatorAware) IsSetAaMap() bool {
-    return x.AaMap != nil
+    return x != nil && x.AaMap != nil
 }
 
 func (x *AllocatorAware) writeField1(p thrift.Protocol) error {  // AaList
@@ -8283,7 +8283,7 @@ func (x *AllocatorAware2) SetBoxField(value *int32) *AllocatorAware2 {
 }
 
 func (x *AllocatorAware2) IsSetBoxField() bool {
-    return x.BoxField != nil
+    return x != nil && x.BoxField != nil
 }
 
 func (x *AllocatorAware2) writeField1(p thrift.Protocol) error {  // NotAContainer

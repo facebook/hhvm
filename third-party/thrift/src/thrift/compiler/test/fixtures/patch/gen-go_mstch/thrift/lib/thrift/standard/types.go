@@ -294,15 +294,15 @@ func (x *TypeUri) SetScopedName(value *string) *TypeUri {
 }
 
 func (x *TypeUri) IsSetUri() bool {
-    return x.Uri != nil
+    return x != nil && x.Uri != nil
 }
 
 func (x *TypeUri) IsSetTypeHashPrefixSha2_256() bool {
-    return x.TypeHashPrefixSha2_256 != nil
+    return x != nil && x.TypeHashPrefixSha2_256 != nil
 }
 
 func (x *TypeUri) IsSetScopedName() bool {
-    return x.ScopedName != nil
+    return x != nil && x.ScopedName != nil
 }
 
 func (x *TypeUri) writeField1(p thrift.Protocol) error {  // Uri
@@ -985,71 +985,71 @@ func (x *TypeName) SetTypedefType(value *TypeUri) *TypeName {
 }
 
 func (x *TypeName) IsSetBoolType() bool {
-    return x.BoolType != nil
+    return x != nil && x.BoolType != nil
 }
 
 func (x *TypeName) IsSetByteType() bool {
-    return x.ByteType != nil
+    return x != nil && x.ByteType != nil
 }
 
 func (x *TypeName) IsSetI16Type() bool {
-    return x.I16Type != nil
+    return x != nil && x.I16Type != nil
 }
 
 func (x *TypeName) IsSetI32Type() bool {
-    return x.I32Type != nil
+    return x != nil && x.I32Type != nil
 }
 
 func (x *TypeName) IsSetI64Type() bool {
-    return x.I64Type != nil
+    return x != nil && x.I64Type != nil
 }
 
 func (x *TypeName) IsSetFloatType() bool {
-    return x.FloatType != nil
+    return x != nil && x.FloatType != nil
 }
 
 func (x *TypeName) IsSetDoubleType() bool {
-    return x.DoubleType != nil
+    return x != nil && x.DoubleType != nil
 }
 
 func (x *TypeName) IsSetStringType() bool {
-    return x.StringType != nil
+    return x != nil && x.StringType != nil
 }
 
 func (x *TypeName) IsSetBinaryType() bool {
-    return x.BinaryType != nil
+    return x != nil && x.BinaryType != nil
 }
 
 func (x *TypeName) IsSetEnumType() bool {
-    return x.EnumType != nil
+    return x != nil && x.EnumType != nil
 }
 
 func (x *TypeName) IsSetStructType() bool {
-    return x.StructType != nil
+    return x != nil && x.StructType != nil
 }
 
 func (x *TypeName) IsSetUnionType() bool {
-    return x.UnionType != nil
+    return x != nil && x.UnionType != nil
 }
 
 func (x *TypeName) IsSetExceptionType() bool {
-    return x.ExceptionType != nil
+    return x != nil && x.ExceptionType != nil
 }
 
 func (x *TypeName) IsSetListType() bool {
-    return x.ListType != nil
+    return x != nil && x.ListType != nil
 }
 
 func (x *TypeName) IsSetSetType() bool {
-    return x.SetType != nil
+    return x != nil && x.SetType != nil
 }
 
 func (x *TypeName) IsSetMapType() bool {
-    return x.MapType != nil
+    return x != nil && x.MapType != nil
 }
 
 func (x *TypeName) IsSetTypedefType() bool {
-    return x.TypedefType != nil
+    return x != nil && x.TypedefType != nil
 }
 
 func (x *TypeName) writeField1(p thrift.Protocol) error {  // BoolType

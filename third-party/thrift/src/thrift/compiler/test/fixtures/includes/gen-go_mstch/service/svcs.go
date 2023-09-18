@@ -220,11 +220,11 @@ func (x *reqMyServiceQuery) SetI(value *includes.Included) *reqMyServiceQuery {
 }
 
 func (x *reqMyServiceQuery) IsSetS() bool {
-    return x.S != nil
+    return x != nil && x.S != nil
 }
 
 func (x *reqMyServiceQuery) IsSetI() bool {
-    return x.I != nil
+    return x != nil && x.I != nil
 }
 
 func (x *reqMyServiceQuery) writeField1(p thrift.Protocol) error {  // S
@@ -593,11 +593,11 @@ func (x *reqMyServiceHasArgDocs) SetI(value *includes.Included) *reqMyServiceHas
 }
 
 func (x *reqMyServiceHasArgDocs) IsSetS() bool {
-    return x.S != nil
+    return x != nil && x.S != nil
 }
 
 func (x *reqMyServiceHasArgDocs) IsSetI() bool {
-    return x.I != nil
+    return x != nil && x.I != nil
 }
 
 func (x *reqMyServiceHasArgDocs) writeField1(p thrift.Protocol) error {  // S

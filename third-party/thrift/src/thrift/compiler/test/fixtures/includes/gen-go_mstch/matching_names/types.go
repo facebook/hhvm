@@ -53,7 +53,7 @@ func (x *IncludesAlso) SetAlso(value *includesAlso.Also) *IncludesAlso {
 }
 
 func (x *IncludesAlso) IsSetAlso() bool {
-    return x.Also != nil
+    return x != nil && x.Also != nil
 }
 
 func (x *IncludesAlso) writeField1(p thrift.Protocol) error {  // Also

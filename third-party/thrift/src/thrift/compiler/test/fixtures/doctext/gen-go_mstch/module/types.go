@@ -334,11 +334,11 @@ func (x *U) SetS(value *string) *U {
 }
 
 func (x *U) IsSetI() bool {
-    return x.I != nil
+    return x != nil && x.I != nil
 }
 
 func (x *U) IsSetS() bool {
-    return x.S != nil
+    return x != nil && x.S != nil
 }
 
 func (x *U) writeField1(p thrift.Protocol) error {  // I

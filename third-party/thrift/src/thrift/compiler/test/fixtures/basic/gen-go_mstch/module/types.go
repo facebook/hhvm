@@ -325,11 +325,11 @@ func (x *MyStruct) SetNoHackCodegenField(value string) *MyStruct {
 }
 
 func (x *MyStruct) IsSetMyDataField() bool {
-    return x.MyDataField != nil
+    return x != nil && x.MyDataField != nil
 }
 
 func (x *MyStruct) IsSetFloatSet() bool {
-    return x.FloatSet != nil
+    return x != nil && x.FloatSet != nil
 }
 
 func (x *MyStruct) writeField1(p thrift.Protocol) error {  // MyIntField
@@ -1110,19 +1110,19 @@ func (x *MyUnion) SetFloatSet(value []float32) *MyUnion {
 }
 
 func (x *MyUnion) IsSetMyEnum() bool {
-    return x.MyEnum != nil
+    return x != nil && x.MyEnum != nil
 }
 
 func (x *MyUnion) IsSetMyStruct() bool {
-    return x.MyStruct != nil
+    return x != nil && x.MyStruct != nil
 }
 
 func (x *MyUnion) IsSetMyDataItem() bool {
-    return x.MyDataItem != nil
+    return x != nil && x.MyDataItem != nil
 }
 
 func (x *MyUnion) IsSetFloatSet() bool {
-    return x.FloatSet != nil
+    return x != nil && x.FloatSet != nil
 }
 
 func (x *MyUnion) writeField1(p thrift.Protocol) error {  // MyEnum
@@ -1700,7 +1700,7 @@ func (x *UnionToBeRenamed) SetReservedField(value *int32) *UnionToBeRenamed {
 }
 
 func (x *UnionToBeRenamed) IsSetReservedField() bool {
-    return x.ReservedField != nil
+    return x != nil && x.ReservedField != nil
 }
 
 func (x *UnionToBeRenamed) writeField1(p thrift.Protocol) error {  // ReservedField

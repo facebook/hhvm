@@ -1502,27 +1502,27 @@ func (x *Foo) SetDoubleAdaptedField(value DoubleTypedefI64) *Foo {
 }
 
 func (x *Foo) IsSetOptionalIntField() bool {
-    return x.OptionalIntField != nil
+    return x != nil && x.OptionalIntField != nil
 }
 
 func (x *Foo) IsSetSetField() bool {
-    return x.SetField != nil
+    return x != nil && x.SetField != nil
 }
 
 func (x *Foo) IsSetOptionalSetField() bool {
-    return x.OptionalSetField != nil
+    return x != nil && x.OptionalSetField != nil
 }
 
 func (x *Foo) IsSetMapField() bool {
-    return x.MapField != nil
+    return x != nil && x.MapField != nil
 }
 
 func (x *Foo) IsSetOptionalMapField() bool {
-    return x.OptionalMapField != nil
+    return x != nil && x.OptionalMapField != nil
 }
 
 func (x *Foo) IsSetBinaryField() bool {
-    return x.BinaryField != nil
+    return x != nil && x.BinaryField != nil
 }
 
 func (x *Foo) writeField1(p thrift.Protocol) error {  // IntField
@@ -2419,23 +2419,23 @@ func (x *Baz) SetLongField(value *MyI64) *Baz {
 }
 
 func (x *Baz) IsSetIntField() bool {
-    return x.IntField != nil
+    return x != nil && x.IntField != nil
 }
 
 func (x *Baz) IsSetSetField() bool {
-    return x.SetField != nil
+    return x != nil && x.SetField != nil
 }
 
 func (x *Baz) IsSetMapField() bool {
-    return x.MapField != nil
+    return x != nil && x.MapField != nil
 }
 
 func (x *Baz) IsSetBinaryField() bool {
-    return x.BinaryField != nil
+    return x != nil && x.BinaryField != nil
 }
 
 func (x *Baz) IsSetLongField() bool {
-    return x.LongField != nil
+    return x != nil && x.LongField != nil
 }
 
 func (x *Baz) writeField1(p thrift.Protocol) error {  // IntField
@@ -3055,31 +3055,31 @@ func (x *Bar) SetAdaptedStructField(value *DirectlyAdapted) *Bar {
 }
 
 func (x *Bar) IsSetStructField() bool {
-    return x.StructField != nil
+    return x != nil && x.StructField != nil
 }
 
 func (x *Bar) IsSetOptionalStructField() bool {
-    return x.OptionalStructField != nil
+    return x != nil && x.OptionalStructField != nil
 }
 
 func (x *Bar) IsSetStructListField() bool {
-    return x.StructListField != nil
+    return x != nil && x.StructListField != nil
 }
 
 func (x *Bar) IsSetOptionalStructListField() bool {
-    return x.OptionalStructListField != nil
+    return x != nil && x.OptionalStructListField != nil
 }
 
 func (x *Bar) IsSetUnionField() bool {
-    return x.UnionField != nil
+    return x != nil && x.UnionField != nil
 }
 
 func (x *Bar) IsSetOptionalUnionField() bool {
-    return x.OptionalUnionField != nil
+    return x != nil && x.OptionalUnionField != nil
 }
 
 func (x *Bar) IsSetAdaptedStructField() bool {
-    return x.AdaptedStructField != nil
+    return x != nil && x.AdaptedStructField != nil
 }
 
 func (x *Bar) writeField1(p thrift.Protocol) error {  // StructField
@@ -4080,11 +4080,11 @@ func (x *StructWithFieldAdapter) SetOptBoxedField(value *int32) *StructWithField
 }
 
 func (x *StructWithFieldAdapter) IsSetOptSharedField() bool {
-    return x.OptSharedField != nil
+    return x != nil && x.OptSharedField != nil
 }
 
 func (x *StructWithFieldAdapter) IsSetOptBoxedField() bool {
-    return x.OptBoxedField != nil
+    return x != nil && x.OptBoxedField != nil
 }
 
 func (x *StructWithFieldAdapter) writeField1(p thrift.Protocol) error {  // Field
@@ -4464,7 +4464,7 @@ func (x *TerseAdaptedFields) SetSetField(value []int32) *TerseAdaptedFields {
 }
 
 func (x *TerseAdaptedFields) IsSetSetField() bool {
-    return x.SetField != nil
+    return x != nil && x.SetField != nil
 }
 
 func (x *TerseAdaptedFields) writeField1(p thrift.Protocol) error {  // IntField
@@ -4766,7 +4766,7 @@ func (x *B) SetA(value *AdaptedA) *B {
 }
 
 func (x *B) IsSetA() bool {
-    return x.A != nil
+    return x != nil && x.A != nil
 }
 
 func (x *B) writeField1(p thrift.Protocol) error {  // A
@@ -5216,7 +5216,7 @@ func (x *MyStruct) SetSetString(value SetWithAdapter) *MyStruct {
 }
 
 func (x *MyStruct) IsSetSetString() bool {
-    return x.SetString != nil
+    return x != nil && x.SetString != nil
 }
 
 func (x *MyStruct) writeField1(p thrift.Protocol) error {  // Field
@@ -5623,11 +5623,11 @@ func (x *AdaptTestStruct) SetBinaryData(value []byte) *AdaptTestStruct {
 }
 
 func (x *AdaptTestStruct) IsSetCustom() bool {
-    return x.Custom != nil
+    return x != nil && x.Custom != nil
 }
 
 func (x *AdaptTestStruct) IsSetBinaryData() bool {
-    return x.BinaryData != nil
+    return x != nil && x.BinaryData != nil
 }
 
 func (x *AdaptTestStruct) writeField1(p thrift.Protocol) error {  // Delay
@@ -6726,27 +6726,27 @@ func (x *AdaptTemplatedTestStruct) SetDoubleTypedefBool(value DoubleTypedefBool)
 }
 
 func (x *AdaptTemplatedTestStruct) IsSetAdaptedList() bool {
-    return x.AdaptedList != nil
+    return x != nil && x.AdaptedList != nil
 }
 
 func (x *AdaptTemplatedTestStruct) IsSetAdaptedSet() bool {
-    return x.AdaptedSet != nil
+    return x != nil && x.AdaptedSet != nil
 }
 
 func (x *AdaptTemplatedTestStruct) IsSetAdaptedMap() bool {
-    return x.AdaptedMap != nil
+    return x != nil && x.AdaptedMap != nil
 }
 
 func (x *AdaptTemplatedTestStruct) IsSetAdaptedListDefault() bool {
-    return x.AdaptedListDefault != nil
+    return x != nil && x.AdaptedListDefault != nil
 }
 
 func (x *AdaptTemplatedTestStruct) IsSetAdaptedSetDefault() bool {
-    return x.AdaptedSetDefault != nil
+    return x != nil && x.AdaptedSetDefault != nil
 }
 
 func (x *AdaptTemplatedTestStruct) IsSetAdaptedMapDefault() bool {
-    return x.AdaptedMapDefault != nil
+    return x != nil && x.AdaptedMapDefault != nil
 }
 
 func (x *AdaptTemplatedTestStruct) writeField1(p thrift.Protocol) error {  // AdaptedBool
@@ -8232,7 +8232,7 @@ func (x *AdaptTemplatedNestedTestStruct) SetAdaptedStruct(value *AdaptTemplatedT
 }
 
 func (x *AdaptTemplatedNestedTestStruct) IsSetAdaptedStruct() bool {
-    return x.AdaptedStruct != nil
+    return x != nil && x.AdaptedStruct != nil
 }
 
 func (x *AdaptTemplatedNestedTestStruct) writeField1(p thrift.Protocol) error {  // AdaptedStruct
@@ -8437,11 +8437,11 @@ func (x *AdaptTestUnion) SetCustom(value CustomProtocolType) *AdaptTestUnion {
 }
 
 func (x *AdaptTestUnion) IsSetDelay() bool {
-    return x.Delay != nil
+    return x != nil && x.Delay != nil
 }
 
 func (x *AdaptTestUnion) IsSetCustom() bool {
-    return x.Custom != nil
+    return x != nil && x.Custom != nil
 }
 
 func (x *AdaptTestUnion) writeField1(p thrift.Protocol) error {  // Delay
@@ -9083,19 +9083,19 @@ func (x *StructFieldAdaptedStruct) SetTypedefOfAdapted(value *TypedefOfDirect) *
 }
 
 func (x *StructFieldAdaptedStruct) IsSetAdaptedStruct() bool {
-    return x.AdaptedStruct != nil
+    return x != nil && x.AdaptedStruct != nil
 }
 
 func (x *StructFieldAdaptedStruct) IsSetAdaptedTypedef() bool {
-    return x.AdaptedTypedef != nil
+    return x != nil && x.AdaptedTypedef != nil
 }
 
 func (x *StructFieldAdaptedStruct) IsSetDirectlyAdapted() bool {
-    return x.DirectlyAdapted != nil
+    return x != nil && x.DirectlyAdapted != nil
 }
 
 func (x *StructFieldAdaptedStruct) IsSetTypedefOfAdapted() bool {
-    return x.TypedefOfAdapted != nil
+    return x != nil && x.TypedefOfAdapted != nil
 }
 
 func (x *StructFieldAdaptedStruct) writeField1(p thrift.Protocol) error {  // AdaptedStruct
@@ -9479,7 +9479,7 @@ func (x *CircularAdaptee) SetField(value *CircularStruct) *CircularAdaptee {
 }
 
 func (x *CircularAdaptee) IsSetField() bool {
-    return x.Field != nil
+    return x != nil && x.Field != nil
 }
 
 func (x *CircularAdaptee) writeField1(p thrift.Protocol) error {  // Field
@@ -9661,7 +9661,7 @@ func (x *CircularStruct) SetField(value *AdaptedCircularAdaptee) *CircularStruct
 }
 
 func (x *CircularStruct) IsSetField() bool {
-    return x.Field != nil
+    return x != nil && x.Field != nil
 }
 
 func (x *CircularStruct) writeField1(p thrift.Protocol) error {  // Field
@@ -9844,7 +9844,7 @@ func (x *ReorderedStruct) SetReorderedDependentAdapted(value *DeclaredAfterStruc
 }
 
 func (x *ReorderedStruct) IsSetReorderedDependentAdapted() bool {
-    return x.ReorderedDependentAdapted != nil
+    return x != nil && x.ReorderedDependentAdapted != nil
 }
 
 func (x *ReorderedStruct) writeField1(p thrift.Protocol) error {  // ReorderedDependentAdapted
@@ -10521,7 +10521,7 @@ func (x *MoveOnly) SetPtr(value *HeapAllocated) *MoveOnly {
 }
 
 func (x *MoveOnly) IsSetPtr() bool {
-    return x.Ptr != nil
+    return x != nil && x.Ptr != nil
 }
 
 func (x *MoveOnly) writeField1(p thrift.Protocol) error {  // Ptr
@@ -11084,15 +11084,15 @@ func (x *CountingStruct) SetRegularString(value *string) *CountingStruct {
 }
 
 func (x *CountingStruct) IsSetRegularInt() bool {
-    return x.RegularInt != nil
+    return x != nil && x.RegularInt != nil
 }
 
 func (x *CountingStruct) IsSetCountingInt() bool {
-    return x.CountingInt != nil
+    return x != nil && x.CountingInt != nil
 }
 
 func (x *CountingStruct) IsSetRegularString() bool {
-    return x.RegularString != nil
+    return x != nil && x.RegularString != nil
 }
 
 func (x *CountingStruct) writeField1(p thrift.Protocol) error {  // RegularInt

@@ -602,23 +602,23 @@ func (x *Vehicle) SetHasAC(value bool) *Vehicle {
 }
 
 func (x *Vehicle) IsSetColor() bool {
-    return x.Color != nil
+    return x != nil && x.Color != nil
 }
 
 func (x *Vehicle) IsSetLicensePlate() bool {
-    return x.LicensePlate != nil
+    return x != nil && x.LicensePlate != nil
 }
 
 func (x *Vehicle) IsSetDescription() bool {
-    return x.Description != nil
+    return x != nil && x.Description != nil
 }
 
 func (x *Vehicle) IsSetName() bool {
-    return x.Name != nil
+    return x != nil && x.Name != nil
 }
 
 func (x *Vehicle) IsSetHasAC() bool {
-    return x.HasAC != nil
+    return x != nil && x.HasAC != nil
 }
 
 func (x *Vehicle) writeField1(p thrift.Protocol) error {  // Color
@@ -1245,35 +1245,35 @@ func (x *Person) SetVehicles(value []*Vehicle) *Person {
 }
 
 func (x *Person) IsSetAge() bool {
-    return x.Age != nil
+    return x != nil && x.Age != nil
 }
 
 func (x *Person) IsSetAddress() bool {
-    return x.Address != nil
+    return x != nil && x.Address != nil
 }
 
 func (x *Person) IsSetFavoriteColor() bool {
-    return x.FavoriteColor != nil
+    return x != nil && x.FavoriteColor != nil
 }
 
 func (x *Person) IsSetFriends() bool {
-    return x.Friends != nil
+    return x != nil && x.Friends != nil
 }
 
 func (x *Person) IsSetBestFriend() bool {
-    return x.BestFriend != nil
+    return x != nil && x.BestFriend != nil
 }
 
 func (x *Person) IsSetPetNames() bool {
-    return x.PetNames != nil
+    return x != nil && x.PetNames != nil
 }
 
 func (x *Person) IsSetAfraidOfAnimal() bool {
-    return x.AfraidOfAnimal != nil
+    return x != nil && x.AfraidOfAnimal != nil
 }
 
 func (x *Person) IsSetVehicles() bool {
-    return x.Vehicles != nil
+    return x != nil && x.Vehicles != nil
 }
 
 func (x *Person) writeField1(p thrift.Protocol) error {  // Id

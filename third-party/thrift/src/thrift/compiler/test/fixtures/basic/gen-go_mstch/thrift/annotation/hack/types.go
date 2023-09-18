@@ -1059,7 +1059,7 @@ func (x *UnionEnumAttributes) SetAttributes(value []string) *UnionEnumAttributes
 }
 
 func (x *UnionEnumAttributes) IsSetAttributes() bool {
-    return x.Attributes != nil
+    return x != nil && x.Attributes != nil
 }
 
 func (x *UnionEnumAttributes) writeField1(p thrift.Protocol) error {  // Attributes
@@ -1418,7 +1418,7 @@ func (x *Attributes) SetAttributes(value []string) *Attributes {
 }
 
 func (x *Attributes) IsSetAttributes() bool {
-    return x.Attributes != nil
+    return x != nil && x.Attributes != nil
 }
 
 func (x *Attributes) writeField1(p thrift.Protocol) error {  // Attributes

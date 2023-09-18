@@ -247,7 +247,7 @@ func (x *reqNestedContainersMapList) SetFoo(value map[int32][]int32) *reqNestedC
 }
 
 func (x *reqNestedContainersMapList) IsSetFoo() bool {
-    return x.Foo != nil
+    return x != nil && x.Foo != nil
 }
 
 func (x *reqNestedContainersMapList) writeField1(p thrift.Protocol) error {  // Foo
@@ -588,7 +588,7 @@ func (x *reqNestedContainersMapSet) SetFoo(value map[int32][]int32) *reqNestedCo
 }
 
 func (x *reqNestedContainersMapSet) IsSetFoo() bool {
-    return x.Foo != nil
+    return x != nil && x.Foo != nil
 }
 
 func (x *reqNestedContainersMapSet) writeField1(p thrift.Protocol) error {  // Foo
@@ -929,7 +929,7 @@ func (x *reqNestedContainersListMap) SetFoo(value []map[int32]int32) *reqNestedC
 }
 
 func (x *reqNestedContainersListMap) IsSetFoo() bool {
-    return x.Foo != nil
+    return x != nil && x.Foo != nil
 }
 
 func (x *reqNestedContainersListMap) writeField1(p thrift.Protocol) error {  // Foo
@@ -1270,7 +1270,7 @@ func (x *reqNestedContainersListSet) SetFoo(value [][]int32) *reqNestedContainer
 }
 
 func (x *reqNestedContainersListSet) IsSetFoo() bool {
-    return x.Foo != nil
+    return x != nil && x.Foo != nil
 }
 
 func (x *reqNestedContainersListSet) writeField1(p thrift.Protocol) error {  // Foo
@@ -1594,7 +1594,7 @@ func (x *reqNestedContainersTurtles) SetFoo(value [][]map[int32]map[int32][]int3
 }
 
 func (x *reqNestedContainersTurtles) IsSetFoo() bool {
-    return x.Foo != nil
+    return x != nil && x.Foo != nil
 }
 
 func (x *reqNestedContainersTurtles) writeField1(p thrift.Protocol) error {  // Foo

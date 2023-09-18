@@ -373,7 +373,7 @@ func (x *respFinderByPlate) SetSuccess(value *Automobile) *respFinderByPlate {
 }
 
 func (x *respFinderByPlate) IsSetSuccess() bool {
-    return x.Success != nil
+    return x != nil && x.Success != nil
 }
 
 func (x *respFinderByPlate) writeField0(p thrift.Protocol) error {  // Success
@@ -723,7 +723,7 @@ func (x *respFinderAliasByPlate) SetSuccess(value *Car) *respFinderAliasByPlate 
 }
 
 func (x *respFinderAliasByPlate) IsSetSuccess() bool {
-    return x.Success != nil
+    return x != nil && x.Success != nil
 }
 
 func (x *respFinderAliasByPlate) writeField0(p thrift.Protocol) error {  // Success

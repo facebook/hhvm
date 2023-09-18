@@ -370,7 +370,7 @@ func (x *respMyServicePing) SetMyExcept(value *MyException) *respMyServicePing {
 }
 
 func (x *respMyServicePing) IsSetMyExcept() bool {
-    return x.MyExcept != nil
+    return x != nil && x.MyExcept != nil
 }
 
 func (x *respMyServicePing) writeField1(p thrift.Protocol) error {  // MyExcept

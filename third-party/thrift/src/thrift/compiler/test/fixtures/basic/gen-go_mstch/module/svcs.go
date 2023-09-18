@@ -723,7 +723,7 @@ func (x *respFB303ServiceSimpleRPC) SetSuccess(value *ReservedKeyword) *respFB30
 }
 
 func (x *respFB303ServiceSimpleRPC) IsSetSuccess() bool {
-    return x.Success != nil
+    return x != nil && x.Success != nil
 }
 
 func (x *respFB303ServiceSimpleRPC) writeField0(p thrift.Protocol) error {  // Success
@@ -3621,7 +3621,7 @@ func (x *respMyServiceInvalidReturnForHack) SetSuccess(value []float32) *respMyS
 }
 
 func (x *respMyServiceInvalidReturnForHack) IsSetSuccess() bool {
-    return x.Success != nil
+    return x != nil && x.Success != nil
 }
 
 func (x *respMyServiceInvalidReturnForHack) writeField0(p thrift.Protocol) error {  // Success
@@ -4875,7 +4875,7 @@ func (x *respDbMixedStackArgumentsGetDataByKey0) SetSuccess(value []byte) *respD
 }
 
 func (x *respDbMixedStackArgumentsGetDataByKey0) IsSetSuccess() bool {
-    return x.Success != nil
+    return x != nil && x.Success != nil
 }
 
 func (x *respDbMixedStackArgumentsGetDataByKey0) writeField0(p thrift.Protocol) error {  // Success
@@ -5212,7 +5212,7 @@ func (x *respDbMixedStackArgumentsGetDataByKey1) SetSuccess(value []byte) *respD
 }
 
 func (x *respDbMixedStackArgumentsGetDataByKey1) IsSetSuccess() bool {
-    return x.Success != nil
+    return x != nil && x.Success != nil
 }
 
 func (x *respDbMixedStackArgumentsGetDataByKey1) writeField0(p thrift.Protocol) error {  // Success

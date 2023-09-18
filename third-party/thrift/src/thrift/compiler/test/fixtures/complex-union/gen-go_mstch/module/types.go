@@ -237,27 +237,27 @@ func (x *ComplexUnion) SetStringRef(value *string) *ComplexUnion {
 }
 
 func (x *ComplexUnion) IsSetIntValue() bool {
-    return x.IntValue != nil
+    return x != nil && x.IntValue != nil
 }
 
 func (x *ComplexUnion) IsSetIntListValue() bool {
-    return x.IntListValue != nil
+    return x != nil && x.IntListValue != nil
 }
 
 func (x *ComplexUnion) IsSetStringListValue() bool {
-    return x.StringListValue != nil
+    return x != nil && x.StringListValue != nil
 }
 
 func (x *ComplexUnion) IsSetStringValue() bool {
-    return x.StringValue != nil
+    return x != nil && x.StringValue != nil
 }
 
 func (x *ComplexUnion) IsSetTypedefValue() bool {
-    return x.TypedefValue != nil
+    return x != nil && x.TypedefValue != nil
 }
 
 func (x *ComplexUnion) IsSetStringRef() bool {
-    return x.StringRef != nil
+    return x != nil && x.StringRef != nil
 }
 
 func (x *ComplexUnion) writeField1(p thrift.Protocol) error {  // IntValue
@@ -832,11 +832,11 @@ func (x *ListUnion) SetStringListValue(value []string) *ListUnion {
 }
 
 func (x *ListUnion) IsSetIntListValue() bool {
-    return x.IntListValue != nil
+    return x != nil && x.IntListValue != nil
 }
 
 func (x *ListUnion) IsSetStringListValue() bool {
-    return x.StringListValue != nil
+    return x != nil && x.StringListValue != nil
 }
 
 func (x *ListUnion) writeField2(p thrift.Protocol) error {  // IntListValue
@@ -1160,11 +1160,11 @@ func (x *DataUnion) SetStringData(value *string) *DataUnion {
 }
 
 func (x *DataUnion) IsSetBinaryData() bool {
-    return x.BinaryData != nil
+    return x != nil && x.BinaryData != nil
 }
 
 func (x *DataUnion) IsSetStringData() bool {
-    return x.StringData != nil
+    return x != nil && x.StringData != nil
 }
 
 func (x *DataUnion) writeField1(p thrift.Protocol) error {  // BinaryData
@@ -1454,7 +1454,7 @@ func (x *Val) SetTypedefValue(value ContainerTypedef) *Val {
 }
 
 func (x *Val) IsSetTypedefValue() bool {
-    return x.TypedefValue != nil
+    return x != nil && x.TypedefValue != nil
 }
 
 func (x *Val) writeField1(p thrift.Protocol) error {  // StrVal
@@ -1750,11 +1750,11 @@ func (x *ValUnion) SetV2(value *Val) *ValUnion {
 }
 
 func (x *ValUnion) IsSetV1() bool {
-    return x.V1 != nil
+    return x != nil && x.V1 != nil
 }
 
 func (x *ValUnion) IsSetV2() bool {
-    return x.V2 != nil
+    return x != nil && x.V2 != nil
 }
 
 func (x *ValUnion) writeField1(p thrift.Protocol) error {  // V1
@@ -2044,11 +2044,11 @@ func (x *VirtualComplexUnion) SetThingTwo(value *string) *VirtualComplexUnion {
 }
 
 func (x *VirtualComplexUnion) IsSetThingOne() bool {
-    return x.ThingOne != nil
+    return x != nil && x.ThingOne != nil
 }
 
 func (x *VirtualComplexUnion) IsSetThingTwo() bool {
-    return x.ThingTwo != nil
+    return x != nil && x.ThingTwo != nil
 }
 
 func (x *VirtualComplexUnion) writeField1(p thrift.Protocol) error {  // ThingOne
@@ -2462,7 +2462,7 @@ func (x *NonCopyableUnion) SetS(value *NonCopyableStruct) *NonCopyableUnion {
 }
 
 func (x *NonCopyableUnion) IsSetS() bool {
-    return x.S != nil
+    return x != nil && x.S != nil
 }
 
 func (x *NonCopyableUnion) writeField1(p thrift.Protocol) error {  // S

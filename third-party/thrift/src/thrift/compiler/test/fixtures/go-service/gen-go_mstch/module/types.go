@@ -413,11 +413,11 @@ func (x *NonComparableStruct) SetBaz(value map[*NonComparableStruct]int64) *NonC
 }
 
 func (x *NonComparableStruct) IsSetBar() bool {
-    return x.Bar != nil
+    return x != nil && x.Bar != nil
 }
 
 func (x *NonComparableStruct) IsSetBaz() bool {
-    return x.Baz != nil
+    return x != nil && x.Baz != nil
 }
 
 func (x *NonComparableStruct) writeField1(p thrift.Protocol) error {  // Foo

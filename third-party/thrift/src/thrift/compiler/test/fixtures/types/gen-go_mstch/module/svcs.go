@@ -192,7 +192,7 @@ func (x *reqSomeServiceBounceMap) SetM(value included.SomeMap) *reqSomeServiceBo
 }
 
 func (x *reqSomeServiceBounceMap) IsSetM() bool {
-    return x.M != nil
+    return x != nil && x.M != nil
 }
 
 func (x *reqSomeServiceBounceMap) writeField1(p thrift.Protocol) error {  // M
@@ -366,7 +366,7 @@ func (x *respSomeServiceBounceMap) SetSuccess(value included.SomeMap) *respSomeS
 }
 
 func (x *respSomeServiceBounceMap) IsSetSuccess() bool {
-    return x.Success != nil
+    return x != nil && x.Success != nil
 }
 
 func (x *respSomeServiceBounceMap) writeField0(p thrift.Protocol) error {  // Success
@@ -543,7 +543,7 @@ func (x *reqSomeServiceBinaryKeyedMap) SetR(value []int64) *reqSomeServiceBinary
 }
 
 func (x *reqSomeServiceBinaryKeyedMap) IsSetR() bool {
-    return x.R != nil
+    return x != nil && x.R != nil
 }
 
 func (x *reqSomeServiceBinaryKeyedMap) writeField1(p thrift.Protocol) error {  // R
@@ -745,7 +745,7 @@ func (x *respSomeServiceBinaryKeyedMap) SetSuccess(value map[*TBinary]int64) *re
 }
 
 func (x *respSomeServiceBinaryKeyedMap) IsSetSuccess() bool {
-    return x.Success != nil
+    return x != nil && x.Success != nil
 }
 
 func (x *respSomeServiceBinaryKeyedMap) writeField0(p thrift.Protocol) error {  // Success

@@ -93,11 +93,11 @@ func (x *Fields) SetInjectedUnstructuredAnnotationField(value *string) *Fields {
 }
 
 func (x *Fields) IsSetInjectedStructuredAnnotationField() bool {
-    return x.InjectedStructuredAnnotationField != nil
+    return x != nil && x.InjectedStructuredAnnotationField != nil
 }
 
 func (x *Fields) IsSetInjectedUnstructuredAnnotationField() bool {
-    return x.InjectedUnstructuredAnnotationField != nil
+    return x != nil && x.InjectedUnstructuredAnnotationField != nil
 }
 
 func (x *Fields) writeField100(p thrift.Protocol) error {  // InjectedField

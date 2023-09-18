@@ -212,7 +212,7 @@ func (x *Serious) SetSonnet(value *string) *Serious {
 }
 
 func (x *Serious) IsSetSonnet() bool {
-    return x.Sonnet != nil
+    return x != nil && x.Sonnet != nil
 }
 
 func (x *Serious) writeField1(p thrift.Protocol) error {  // Sonnet

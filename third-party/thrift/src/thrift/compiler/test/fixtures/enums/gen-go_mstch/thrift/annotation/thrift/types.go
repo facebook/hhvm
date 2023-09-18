@@ -163,11 +163,11 @@ func (x *ReserveIds) SetIdRanges(value map[int32]int32) *ReserveIds {
 }
 
 func (x *ReserveIds) IsSetIds() bool {
-    return x.Ids != nil
+    return x != nil && x.Ids != nil
 }
 
 func (x *ReserveIds) IsSetIdRanges() bool {
-    return x.IdRanges != nil
+    return x != nil && x.IdRanges != nil
 }
 
 func (x *ReserveIds) writeField1(p thrift.Protocol) error {  // Ids

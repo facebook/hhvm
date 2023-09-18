@@ -20,6 +20,6 @@
 
 }}
 func (x *{{struct:go_name}}) IsSet{{field:go_name}}() bool {
-    return x.{{field:go_name}} != nil
+    return x != nil && x.{{field:go_name}} != nil
 }
 {{! new line }}

@@ -581,7 +581,7 @@ func (x *SomeStruct) SetTags(value []int32) *SomeStruct {
 }
 
 func (x *SomeStruct) IsSetTags() bool {
-    return x.Tags != nil
+    return x != nil && x.Tags != nil
 }
 
 func (x *SomeStruct) writeField1(p thrift.Protocol) error {  // Reasonable

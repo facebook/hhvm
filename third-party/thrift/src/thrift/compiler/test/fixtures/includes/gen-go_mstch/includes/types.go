@@ -128,7 +128,7 @@ func (x *Included) SetMyTransitiveField(value *transitive.Foo) *Included {
 }
 
 func (x *Included) IsSetMyTransitiveField() bool {
-    return x.MyTransitiveField != nil
+    return x != nil && x.MyTransitiveField != nil
 }
 
 func (x *Included) writeField1(p thrift.Protocol) error {  // MyIntField

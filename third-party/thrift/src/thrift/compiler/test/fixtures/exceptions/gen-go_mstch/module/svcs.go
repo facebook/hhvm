@@ -554,15 +554,15 @@ func (x *respRaiserDoRaise) SetS(value *Serious) *respRaiserDoRaise {
 }
 
 func (x *respRaiserDoRaise) IsSetB() bool {
-    return x.B != nil
+    return x != nil && x.B != nil
 }
 
 func (x *respRaiserDoRaise) IsSetF() bool {
-    return x.F != nil
+    return x != nil && x.F != nil
 }
 
 func (x *respRaiserDoRaise) IsSetS() bool {
-    return x.S != nil
+    return x != nil && x.S != nil
 }
 
 func (x *respRaiserDoRaise) writeField1(p thrift.Protocol) error {  // B
@@ -1302,15 +1302,15 @@ func (x *respRaiserGet500) SetS(value *Serious) *respRaiserGet500 {
 }
 
 func (x *respRaiserGet500) IsSetF() bool {
-    return x.F != nil
+    return x != nil && x.F != nil
 }
 
 func (x *respRaiserGet500) IsSetB() bool {
-    return x.B != nil
+    return x != nil && x.B != nil
 }
 
 func (x *respRaiserGet500) IsSetS() bool {
-    return x.S != nil
+    return x != nil && x.S != nil
 }
 
 func (x *respRaiserGet500) writeField0(p thrift.Protocol) error {  // Success

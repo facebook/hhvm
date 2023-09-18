@@ -462,15 +462,15 @@ func (x *Internship) SetSchool(value *string) *Internship {
 }
 
 func (x *Internship) IsSetEmployer() bool {
-    return x.Employer != nil
+    return x != nil && x.Employer != nil
 }
 
 func (x *Internship) IsSetCompensation() bool {
-    return x.Compensation != nil
+    return x != nil && x.Compensation != nil
 }
 
 func (x *Internship) IsSetSchool() bool {
-    return x.School != nil
+    return x != nil && x.School != nil
 }
 
 func (x *Internship) writeField1(p thrift.Protocol) error {  // Weeks
@@ -1396,11 +1396,11 @@ func (x *Struct2) SetD(value []int32) *Struct2 {
 }
 
 func (x *Struct2) IsSetC() bool {
-    return x.C != nil
+    return x != nil && x.C != nil
 }
 
 func (x *Struct2) IsSetD() bool {
-    return x.D != nil
+    return x != nil && x.D != nil
 }
 
 func (x *Struct2) writeField1(p thrift.Protocol) error {  // A
@@ -1809,7 +1809,7 @@ func (x *Struct3) SetC(value *Struct2) *Struct3 {
 }
 
 func (x *Struct3) IsSetC() bool {
-    return x.C != nil
+    return x != nil && x.C != nil
 }
 
 func (x *Struct3) writeField1(p thrift.Protocol) error {  // A
@@ -2136,11 +2136,11 @@ func (x *Struct4) SetC(value *int8) *Struct4 {
 }
 
 func (x *Struct4) IsSetB() bool {
-    return x.B != nil
+    return x != nil && x.B != nil
 }
 
 func (x *Struct4) IsSetC() bool {
-    return x.C != nil
+    return x != nil && x.C != nil
 }
 
 func (x *Struct4) writeField1(p thrift.Protocol) error {  // A
@@ -2452,11 +2452,11 @@ func (x *Union1) SetD(value *float64) *Union1 {
 }
 
 func (x *Union1) IsSetI() bool {
-    return x.I != nil
+    return x != nil && x.I != nil
 }
 
 func (x *Union1) IsSetD() bool {
-    return x.D != nil
+    return x != nil && x.D != nil
 }
 
 func (x *Union1) writeField1(p thrift.Protocol) error {  // I
@@ -2780,19 +2780,19 @@ func (x *Union2) SetU(value *Union1) *Union2 {
 }
 
 func (x *Union2) IsSetI() bool {
-    return x.I != nil
+    return x != nil && x.I != nil
 }
 
 func (x *Union2) IsSetD() bool {
-    return x.D != nil
+    return x != nil && x.D != nil
 }
 
 func (x *Union2) IsSetS() bool {
-    return x.S != nil
+    return x != nil && x.S != nil
 }
 
 func (x *Union2) IsSetU() bool {
-    return x.U != nil
+    return x != nil && x.U != nil
 }
 
 func (x *Union2) writeField1(p thrift.Protocol) error {  // I

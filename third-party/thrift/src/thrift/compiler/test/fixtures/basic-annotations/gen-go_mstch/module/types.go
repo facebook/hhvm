@@ -679,11 +679,11 @@ func (x *MyStruct) SetMyUnion(value *MyUnion) *MyStruct {
 }
 
 func (x *MyStruct) IsSetCppTypeAnnotation() bool {
-    return x.CppTypeAnnotation != nil
+    return x != nil && x.CppTypeAnnotation != nil
 }
 
 func (x *MyStruct) IsSetMyUnion() bool {
-    return x.MyUnion != nil
+    return x != nil && x.MyUnion != nil
 }
 
 func (x *MyStruct) writeField1(p thrift.Protocol) error {  // PackageName

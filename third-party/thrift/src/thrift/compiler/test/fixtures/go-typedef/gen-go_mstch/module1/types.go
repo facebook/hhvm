@@ -402,23 +402,23 @@ func (x *Automobile) SetPartNames(value map[int32]*CarPartName) *Automobile {
 }
 
 func (x *Automobile) IsSetPreviousPlate() bool {
-    return x.PreviousPlate != nil
+    return x != nil && x.PreviousPlate != nil
 }
 
 func (x *Automobile) IsSetFirstPlate() bool {
-    return x.FirstPlate != nil
+    return x != nil && x.FirstPlate != nil
 }
 
 func (x *Automobile) IsSetDrivers() bool {
-    return x.Drivers != nil
+    return x != nil && x.Drivers != nil
 }
 
 func (x *Automobile) IsSetAccessories() bool {
-    return x.Accessories != nil
+    return x != nil && x.Accessories != nil
 }
 
 func (x *Automobile) IsSetPartNames() bool {
-    return x.PartNames != nil
+    return x != nil && x.PartNames != nil
 }
 
 func (x *Automobile) writeField1(p thrift.Protocol) error {  // Plate
@@ -1235,7 +1235,7 @@ func (x *MapContainer) SetMapval(value map[MapKey]string) *MapContainer {
 }
 
 func (x *MapContainer) IsSetMapval() bool {
-    return x.Mapval != nil
+    return x != nil && x.Mapval != nil
 }
 
 func (x *MapContainer) writeField1(p thrift.Protocol) error {  // Mapval
@@ -1477,11 +1477,11 @@ func (x *Pair) SetCar(value *Car) *Pair {
 }
 
 func (x *Pair) IsSetAutomobile() bool {
-    return x.Automobile != nil
+    return x != nil && x.Automobile != nil
 }
 
 func (x *Pair) IsSetCar() bool {
-    return x.Car != nil
+    return x != nil && x.Car != nil
 }
 
 func (x *Pair) writeField1(p thrift.Protocol) error {  // Automobile
@@ -1755,11 +1755,11 @@ func (x *Collection) SetCars(value []*Car) *Collection {
 }
 
 func (x *Collection) IsSetAutomobiles() bool {
-    return x.Automobiles != nil
+    return x != nil && x.Automobiles != nil
 }
 
 func (x *Collection) IsSetCars() bool {
-    return x.Cars != nil
+    return x != nil && x.Cars != nil
 }
 
 func (x *Collection) writeField1(p thrift.Protocol) error {  // Automobiles

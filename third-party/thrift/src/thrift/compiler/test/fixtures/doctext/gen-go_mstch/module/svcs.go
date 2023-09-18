@@ -416,7 +416,7 @@ func (x *reqCThing) SetC(value []int32) *reqCThing {
 }
 
 func (x *reqCThing) IsSetC() bool {
-    return x.C != nil
+    return x != nil && x.C != nil
 }
 
 func (x *reqCThing) writeField1(p thrift.Protocol) error {  // A
@@ -739,7 +739,7 @@ func (x *respCThing) SetBang(value *Bang) *respCThing {
 }
 
 func (x *respCThing) IsSetBang() bool {
-    return x.Bang != nil
+    return x != nil && x.Bang != nil
 }
 
 func (x *respCThing) writeField0(p thrift.Protocol) error {  // Success

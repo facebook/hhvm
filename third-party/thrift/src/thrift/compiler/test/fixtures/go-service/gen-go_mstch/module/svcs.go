@@ -429,7 +429,7 @@ func (x *reqGetEntityGetEntity) SetR(value *GetEntityRequest) *reqGetEntityGetEn
 }
 
 func (x *reqGetEntityGetEntity) IsSetR() bool {
-    return x.R != nil
+    return x != nil && x.R != nil
 }
 
 func (x *reqGetEntityGetEntity) writeField1(p thrift.Protocol) error {  // R
@@ -614,7 +614,7 @@ func (x *respGetEntityGetEntity) SetSuccess(value *GetEntityResponse) *respGetEn
 }
 
 func (x *respGetEntityGetEntity) IsSetSuccess() bool {
-    return x.Success != nil
+    return x != nil && x.Success != nil
 }
 
 func (x *respGetEntityGetEntity) writeField0(p thrift.Protocol) error {  // Success
@@ -2671,7 +2671,7 @@ func (x *respGetEntityGetBinary) SetSuccess(value []byte) *respGetEntityGetBinar
 }
 
 func (x *respGetEntityGetBinary) IsSetSuccess() bool {
-    return x.Success != nil
+    return x != nil && x.Success != nil
 }
 
 func (x *respGetEntityGetBinary) writeField0(p thrift.Protocol) error {  // Success
@@ -2937,7 +2937,7 @@ func (x *respGetEntityGetMap) SetSuccess(value map[string]string) *respGetEntity
 }
 
 func (x *respGetEntityGetMap) IsSetSuccess() bool {
-    return x.Success != nil
+    return x != nil && x.Success != nil
 }
 
 func (x *respGetEntityGetMap) writeField0(p thrift.Protocol) error {  // Success
@@ -3249,7 +3249,7 @@ func (x *respGetEntityGetSet) SetSuccess(value []string) *respGetEntityGetSet {
 }
 
 func (x *respGetEntityGetSet) IsSetSuccess() bool {
-    return x.Success != nil
+    return x != nil && x.Success != nil
 }
 
 func (x *respGetEntityGetSet) writeField0(p thrift.Protocol) error {  // Success
@@ -3544,7 +3544,7 @@ func (x *respGetEntityGetList) SetSuccess(value []string) *respGetEntityGetList 
 }
 
 func (x *respGetEntityGetList) IsSetSuccess() bool {
-    return x.Success != nil
+    return x != nil && x.Success != nil
 }
 
 func (x *respGetEntityGetList) writeField0(p thrift.Protocol) error {  // Success

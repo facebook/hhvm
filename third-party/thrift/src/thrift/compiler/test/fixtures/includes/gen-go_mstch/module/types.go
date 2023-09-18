@@ -99,11 +99,11 @@ func (x *MyStruct) SetMyIncludedInt(value includes.IncludedInt64) *MyStruct {
 }
 
 func (x *MyStruct) IsSetMyIncludedField() bool {
-    return x.MyIncludedField != nil
+    return x != nil && x.MyIncludedField != nil
 }
 
 func (x *MyStruct) IsSetMyOtherIncludedField() bool {
-    return x.MyOtherIncludedField != nil
+    return x != nil && x.MyOtherIncludedField != nil
 }
 
 func (x *MyStruct) writeField1(p thrift.Protocol) error {  // MyIncludedField

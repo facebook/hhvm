@@ -564,7 +564,7 @@ func (x *InnerUnion) SetInnerOption(value []byte) *InnerUnion {
 }
 
 func (x *InnerUnion) IsSetInnerOption() bool {
-    return x.InnerOption != nil
+    return x != nil && x.InnerOption != nil
 }
 
 func (x *InnerUnion) writeField1(p thrift.Protocol) error {  // InnerOption
@@ -795,15 +795,15 @@ func (x *MyUnion) SetOption3(value *InnerUnion) *MyUnion {
 }
 
 func (x *MyUnion) IsSetOption1() bool {
-    return x.Option1 != nil
+    return x != nil && x.Option1 != nil
 }
 
 func (x *MyUnion) IsSetOption2() bool {
-    return x.Option2 != nil
+    return x != nil && x.Option2 != nil
 }
 
 func (x *MyUnion) IsSetOption3() bool {
-    return x.Option3 != nil
+    return x != nil && x.Option3 != nil
 }
 
 func (x *MyUnion) writeField1(p thrift.Protocol) error {  // Option1
@@ -1846,95 +1846,95 @@ func (x *MyStruct) SetStructWithFieldCustomDefault(value *MyData) *MyStruct {
 }
 
 func (x *MyStruct) IsSetStructWithCustomDefault() bool {
-    return x.StructWithCustomDefault != nil
+    return x != nil && x.StructWithCustomDefault != nil
 }
 
 func (x *MyStruct) IsSetMapMap() bool {
-    return x.MapMap != nil
+    return x != nil && x.MapMap != nil
 }
 
 func (x *MyStruct) IsSetListMap() bool {
-    return x.ListMap != nil
+    return x != nil && x.ListMap != nil
 }
 
 func (x *MyStruct) IsSetOptMapVal() bool {
-    return x.OptMapVal != nil
+    return x != nil && x.OptMapVal != nil
 }
 
 func (x *MyStruct) IsSetOptSetVal() bool {
-    return x.OptSetVal != nil
+    return x != nil && x.OptSetVal != nil
 }
 
 func (x *MyStruct) IsSetOptListVal() bool {
-    return x.OptListVal != nil
+    return x != nil && x.OptListVal != nil
 }
 
 func (x *MyStruct) IsSetOptLateStructVal() bool {
-    return x.OptLateStructVal != nil
+    return x != nil && x.OptLateStructVal != nil
 }
 
 func (x *MyStruct) IsSetOptStructVal() bool {
-    return x.OptStructVal != nil
+    return x != nil && x.OptStructVal != nil
 }
 
 func (x *MyStruct) IsSetOptEnumVal() bool {
-    return x.OptEnumVal != nil
+    return x != nil && x.OptEnumVal != nil
 }
 
 func (x *MyStruct) IsSetOptBinaryVal() bool {
-    return x.OptBinaryVal != nil
+    return x != nil && x.OptBinaryVal != nil
 }
 
 func (x *MyStruct) IsSetOptStringVal() bool {
-    return x.OptStringVal != nil
+    return x != nil && x.OptStringVal != nil
 }
 
 func (x *MyStruct) IsSetOptDoubleVal() bool {
-    return x.OptDoubleVal != nil
+    return x != nil && x.OptDoubleVal != nil
 }
 
 func (x *MyStruct) IsSetOptFloatVal() bool {
-    return x.OptFloatVal != nil
+    return x != nil && x.OptFloatVal != nil
 }
 
 func (x *MyStruct) IsSetOptI64Val() bool {
-    return x.OptI64Val != nil
+    return x != nil && x.OptI64Val != nil
 }
 
 func (x *MyStruct) IsSetOptI32Val() bool {
-    return x.OptI32Val != nil
+    return x != nil && x.OptI32Val != nil
 }
 
 func (x *MyStruct) IsSetOptI16Val() bool {
-    return x.OptI16Val != nil
+    return x != nil && x.OptI16Val != nil
 }
 
 func (x *MyStruct) IsSetOptByteVal() bool {
-    return x.OptByteVal != nil
+    return x != nil && x.OptByteVal != nil
 }
 
 func (x *MyStruct) IsSetOptBoolVal() bool {
-    return x.OptBoolVal != nil
+    return x != nil && x.OptBoolVal != nil
 }
 
 func (x *MyStruct) IsSetLateStructVal() bool {
-    return x.LateStructVal != nil
+    return x != nil && x.LateStructVal != nil
 }
 
 func (x *MyStruct) IsSetUnionVal() bool {
-    return x.UnionVal != nil
+    return x != nil && x.UnionVal != nil
 }
 
 func (x *MyStruct) IsSetStructVal() bool {
-    return x.StructVal != nil
+    return x != nil && x.StructVal != nil
 }
 
 func (x *MyStruct) IsSetBinaryVal() bool {
-    return x.BinaryVal != nil
+    return x != nil && x.BinaryVal != nil
 }
 
 func (x *MyStruct) IsSetStructWithFieldCustomDefault() bool {
-    return x.StructWithFieldCustomDefault != nil
+    return x != nil && x.StructWithFieldCustomDefault != nil
 }
 
 func (x *MyStruct) writeField_32(p thrift.Protocol) error {  // StructWithCustomDefault
@@ -4326,7 +4326,7 @@ func (x *Recursive) SetNodes(value map[string]*Recursive) *Recursive {
 }
 
 func (x *Recursive) IsSetNodes() bool {
-    return x.Nodes != nil
+    return x != nil && x.Nodes != nil
 }
 
 func (x *Recursive) writeField_1(p thrift.Protocol) error {  // Nodes
@@ -4544,7 +4544,7 @@ func (x *Bar) SetLoop(value *Loop) *Bar {
 }
 
 func (x *Bar) IsSetLoop() bool {
-    return x.Loop != nil
+    return x != nil && x.Loop != nil
 }
 
 func (x *Bar) writeField_1(p thrift.Protocol) error {  // Loop
@@ -4727,7 +4727,7 @@ func (x *Loop) SetBar(value *Bar) *Loop {
 }
 
 func (x *Loop) IsSetBar() bool {
-    return x.Bar != nil
+    return x != nil && x.Bar != nil
 }
 
 func (x *Loop) writeField_1(p thrift.Protocol) error {  // Bar
@@ -5025,23 +5025,23 @@ func (x *MyDataPatch) SetRemove(value patch.FieldIdList) *MyDataPatch {
 }
 
 func (x *MyDataPatch) IsSetAssign() bool {
-    return x.Assign != nil
+    return x != nil && x.Assign != nil
 }
 
 func (x *MyDataPatch) IsSetPatchPrior() bool {
-    return x.PatchPrior != nil
+    return x != nil && x.PatchPrior != nil
 }
 
 func (x *MyDataPatch) IsSetEnsure() bool {
-    return x.Ensure != nil
+    return x != nil && x.Ensure != nil
 }
 
 func (x *MyDataPatch) IsSetPatch() bool {
-    return x.Patch != nil
+    return x != nil && x.Patch != nil
 }
 
 func (x *MyDataPatch) IsSetRemove() bool {
-    return x.Remove != nil
+    return x != nil && x.Remove != nil
 }
 
 func (x *MyDataPatch) writeField1(p thrift.Protocol) error {  // Assign
@@ -5556,11 +5556,11 @@ func (x *MyDataFieldPatch) SetData2(value *patch.I32Patch) *MyDataFieldPatch {
 }
 
 func (x *MyDataFieldPatch) IsSetData1() bool {
-    return x.Data1 != nil
+    return x != nil && x.Data1 != nil
 }
 
 func (x *MyDataFieldPatch) IsSetData2() bool {
-    return x.Data2 != nil
+    return x != nil && x.Data2 != nil
 }
 
 func (x *MyDataFieldPatch) writeField1(p thrift.Protocol) error {  // Data1
@@ -5832,11 +5832,11 @@ func (x *MyDataEnsureStruct) SetData2(value *int32) *MyDataEnsureStruct {
 }
 
 func (x *MyDataEnsureStruct) IsSetData1() bool {
-    return x.Data1 != nil
+    return x != nil && x.Data1 != nil
 }
 
 func (x *MyDataEnsureStruct) IsSetData2() bool {
-    return x.Data2 != nil
+    return x != nil && x.Data2 != nil
 }
 
 func (x *MyDataEnsureStruct) writeField1(p thrift.Protocol) error {  // Data1
@@ -6189,23 +6189,23 @@ func (x *MyDataWithCustomDefaultPatch) SetRemove(value patch.FieldIdList) *MyDat
 }
 
 func (x *MyDataWithCustomDefaultPatch) IsSetAssign() bool {
-    return x.Assign != nil
+    return x != nil && x.Assign != nil
 }
 
 func (x *MyDataWithCustomDefaultPatch) IsSetPatchPrior() bool {
-    return x.PatchPrior != nil
+    return x != nil && x.PatchPrior != nil
 }
 
 func (x *MyDataWithCustomDefaultPatch) IsSetEnsure() bool {
-    return x.Ensure != nil
+    return x != nil && x.Ensure != nil
 }
 
 func (x *MyDataWithCustomDefaultPatch) IsSetPatch() bool {
-    return x.Patch != nil
+    return x != nil && x.Patch != nil
 }
 
 func (x *MyDataWithCustomDefaultPatch) IsSetRemove() bool {
-    return x.Remove != nil
+    return x != nil && x.Remove != nil
 }
 
 func (x *MyDataWithCustomDefaultPatch) writeField1(p thrift.Protocol) error {  // Assign
@@ -6720,11 +6720,11 @@ func (x *MyDataWithCustomDefaultFieldPatch) SetData2(value *patch.I32Patch) *MyD
 }
 
 func (x *MyDataWithCustomDefaultFieldPatch) IsSetData1() bool {
-    return x.Data1 != nil
+    return x != nil && x.Data1 != nil
 }
 
 func (x *MyDataWithCustomDefaultFieldPatch) IsSetData2() bool {
-    return x.Data2 != nil
+    return x != nil && x.Data2 != nil
 }
 
 func (x *MyDataWithCustomDefaultFieldPatch) writeField1(p thrift.Protocol) error {  // Data1
@@ -6996,11 +6996,11 @@ func (x *MyDataWithCustomDefaultEnsureStruct) SetData2(value *int32) *MyDataWith
 }
 
 func (x *MyDataWithCustomDefaultEnsureStruct) IsSetData1() bool {
-    return x.Data1 != nil
+    return x != nil && x.Data1 != nil
 }
 
 func (x *MyDataWithCustomDefaultEnsureStruct) IsSetData2() bool {
-    return x.Data2 != nil
+    return x != nil && x.Data2 != nil
 }
 
 func (x *MyDataWithCustomDefaultEnsureStruct) writeField1(p thrift.Protocol) error {  // Data1
@@ -7329,19 +7329,19 @@ func (x *InnerUnionPatch) SetPatch(value *InnerUnionFieldPatch) *InnerUnionPatch
 }
 
 func (x *InnerUnionPatch) IsSetAssign() bool {
-    return x.Assign != nil
+    return x != nil && x.Assign != nil
 }
 
 func (x *InnerUnionPatch) IsSetPatchPrior() bool {
-    return x.PatchPrior != nil
+    return x != nil && x.PatchPrior != nil
 }
 
 func (x *InnerUnionPatch) IsSetEnsure() bool {
-    return x.Ensure != nil
+    return x != nil && x.Ensure != nil
 }
 
 func (x *InnerUnionPatch) IsSetPatch() bool {
-    return x.Patch != nil
+    return x != nil && x.Patch != nil
 }
 
 func (x *InnerUnionPatch) writeField1(p thrift.Protocol) error {  // Assign
@@ -7776,7 +7776,7 @@ func (x *InnerUnionFieldPatch) SetInnerOption(value *patch.BinaryPatch) *InnerUn
 }
 
 func (x *InnerUnionFieldPatch) IsSetInnerOption() bool {
-    return x.InnerOption != nil
+    return x != nil && x.InnerOption != nil
 }
 
 func (x *InnerUnionFieldPatch) writeField1(p thrift.Protocol) error {  // InnerOption
@@ -8050,19 +8050,19 @@ func (x *MyUnionPatch) SetPatch(value *MyUnionFieldPatch) *MyUnionPatch {
 }
 
 func (x *MyUnionPatch) IsSetAssign() bool {
-    return x.Assign != nil
+    return x != nil && x.Assign != nil
 }
 
 func (x *MyUnionPatch) IsSetPatchPrior() bool {
-    return x.PatchPrior != nil
+    return x != nil && x.PatchPrior != nil
 }
 
 func (x *MyUnionPatch) IsSetEnsure() bool {
-    return x.Ensure != nil
+    return x != nil && x.Ensure != nil
 }
 
 func (x *MyUnionPatch) IsSetPatch() bool {
-    return x.Patch != nil
+    return x != nil && x.Patch != nil
 }
 
 func (x *MyUnionPatch) writeField1(p thrift.Protocol) error {  // Assign
@@ -8545,15 +8545,15 @@ func (x *MyUnionFieldPatch) SetOption3(value *InnerUnionPatch) *MyUnionFieldPatc
 }
 
 func (x *MyUnionFieldPatch) IsSetOption1() bool {
-    return x.Option1 != nil
+    return x != nil && x.Option1 != nil
 }
 
 func (x *MyUnionFieldPatch) IsSetOption2() bool {
-    return x.Option2 != nil
+    return x != nil && x.Option2 != nil
 }
 
 func (x *MyUnionFieldPatch) IsSetOption3() bool {
-    return x.Option3 != nil
+    return x != nil && x.Option3 != nil
 }
 
 func (x *MyUnionFieldPatch) writeField1(p thrift.Protocol) error {  // Option1
@@ -8985,23 +8985,23 @@ func (x *MyStructPatch) SetRemove(value patch.FieldIdList) *MyStructPatch {
 }
 
 func (x *MyStructPatch) IsSetAssign() bool {
-    return x.Assign != nil
+    return x != nil && x.Assign != nil
 }
 
 func (x *MyStructPatch) IsSetPatchPrior() bool {
-    return x.PatchPrior != nil
+    return x != nil && x.PatchPrior != nil
 }
 
 func (x *MyStructPatch) IsSetEnsure() bool {
-    return x.Ensure != nil
+    return x != nil && x.Ensure != nil
 }
 
 func (x *MyStructPatch) IsSetPatch() bool {
-    return x.Patch != nil
+    return x != nil && x.Patch != nil
 }
 
 func (x *MyStructPatch) IsSetRemove() bool {
-    return x.Remove != nil
+    return x != nil && x.Remove != nil
 }
 
 func (x *MyStructPatch) writeField1(p thrift.Protocol) error {  // Assign
@@ -9511,7 +9511,7 @@ func (x *MyStructField10Patch) SetClear(value bool) *MyStructField10Patch {
 }
 
 func (x *MyStructField10Patch) IsSetAssign() bool {
-    return x.Assign != nil
+    return x != nil && x.Assign != nil
 }
 
 func (x *MyStructField10Patch) writeField1(p thrift.Protocol) error {  // Assign
@@ -9759,7 +9759,7 @@ func (x *MyStructField23Patch) SetClear(value bool) *MyStructField23Patch {
 }
 
 func (x *MyStructField23Patch) IsSetAssign() bool {
-    return x.Assign != nil
+    return x != nil && x.Assign != nil
 }
 
 func (x *MyStructField23Patch) writeField1(p thrift.Protocol) error {  // Assign
@@ -10055,15 +10055,15 @@ func (x *MyStructField26Patch) SetAppend(value []int16) *MyStructField26Patch {
 }
 
 func (x *MyStructField26Patch) IsSetAssign() bool {
-    return x.Assign != nil
+    return x != nil && x.Assign != nil
 }
 
 func (x *MyStructField26Patch) IsSetPrepend() bool {
-    return x.Prepend != nil
+    return x != nil && x.Prepend != nil
 }
 
 func (x *MyStructField26Patch) IsSetAppend() bool {
-    return x.Append != nil
+    return x != nil && x.Append != nil
 }
 
 func (x *MyStructField26Patch) writeField1(p thrift.Protocol) error {  // Assign
@@ -10549,15 +10549,15 @@ func (x *MyStructField27Patch) SetAdd(value []string) *MyStructField27Patch {
 }
 
 func (x *MyStructField27Patch) IsSetAssign() bool {
-    return x.Assign != nil
+    return x != nil && x.Assign != nil
 }
 
 func (x *MyStructField27Patch) IsSetRemove() bool {
-    return x.Remove != nil
+    return x != nil && x.Remove != nil
 }
 
 func (x *MyStructField27Patch) IsSetAdd() bool {
-    return x.Add != nil
+    return x != nil && x.Add != nil
 }
 
 func (x *MyStructField27Patch) writeField1(p thrift.Protocol) error {  // Assign
@@ -11115,27 +11115,27 @@ func (x *MyStructField28Patch) SetPut(value map[string]string) *MyStructField28P
 }
 
 func (x *MyStructField28Patch) IsSetAssign() bool {
-    return x.Assign != nil
+    return x != nil && x.Assign != nil
 }
 
 func (x *MyStructField28Patch) IsSetPatchPrior() bool {
-    return x.PatchPrior != nil
+    return x != nil && x.PatchPrior != nil
 }
 
 func (x *MyStructField28Patch) IsSetAdd() bool {
-    return x.Add != nil
+    return x != nil && x.Add != nil
 }
 
 func (x *MyStructField28Patch) IsSetPatch() bool {
-    return x.Patch != nil
+    return x != nil && x.Patch != nil
 }
 
 func (x *MyStructField28Patch) IsSetRemove() bool {
-    return x.Remove != nil
+    return x != nil && x.Remove != nil
 }
 
 func (x *MyStructField28Patch) IsSetPut() bool {
-    return x.Put != nil
+    return x != nil && x.Put != nil
 }
 
 func (x *MyStructField28Patch) writeField1(p thrift.Protocol) error {  // Assign
@@ -11960,15 +11960,15 @@ func (x *MyStructField29Patch) SetAppend(value []map[string]int32) *MyStructFiel
 }
 
 func (x *MyStructField29Patch) IsSetAssign() bool {
-    return x.Assign != nil
+    return x != nil && x.Assign != nil
 }
 
 func (x *MyStructField29Patch) IsSetPrepend() bool {
-    return x.Prepend != nil
+    return x != nil && x.Prepend != nil
 }
 
 func (x *MyStructField29Patch) IsSetAppend() bool {
-    return x.Append != nil
+    return x != nil && x.Append != nil
 }
 
 func (x *MyStructField29Patch) writeField1(p thrift.Protocol) error {  // Assign
@@ -12664,27 +12664,27 @@ func (x *MyStructField30Patch) SetPut(value map[string]map[string]int32) *MyStru
 }
 
 func (x *MyStructField30Patch) IsSetAssign() bool {
-    return x.Assign != nil
+    return x != nil && x.Assign != nil
 }
 
 func (x *MyStructField30Patch) IsSetPatchPrior() bool {
-    return x.PatchPrior != nil
+    return x != nil && x.PatchPrior != nil
 }
 
 func (x *MyStructField30Patch) IsSetAdd() bool {
-    return x.Add != nil
+    return x != nil && x.Add != nil
 }
 
 func (x *MyStructField30Patch) IsSetPatch() bool {
-    return x.Patch != nil
+    return x != nil && x.Patch != nil
 }
 
 func (x *MyStructField30Patch) IsSetRemove() bool {
-    return x.Remove != nil
+    return x != nil && x.Remove != nil
 }
 
 func (x *MyStructField30Patch) IsSetPut() bool {
-    return x.Put != nil
+    return x != nil && x.Put != nil
 }
 
 func (x *MyStructField30Patch) writeField1(p thrift.Protocol) error {  // Assign
@@ -13719,27 +13719,27 @@ func (x *MyStructField30Patch1) SetPut(value map[string]int32) *MyStructField30P
 }
 
 func (x *MyStructField30Patch1) IsSetAssign() bool {
-    return x.Assign != nil
+    return x != nil && x.Assign != nil
 }
 
 func (x *MyStructField30Patch1) IsSetPatchPrior() bool {
-    return x.PatchPrior != nil
+    return x != nil && x.PatchPrior != nil
 }
 
 func (x *MyStructField30Patch1) IsSetAdd() bool {
-    return x.Add != nil
+    return x != nil && x.Add != nil
 }
 
 func (x *MyStructField30Patch1) IsSetPatch() bool {
-    return x.Patch != nil
+    return x != nil && x.Patch != nil
 }
 
 func (x *MyStructField30Patch1) IsSetRemove() bool {
-    return x.Remove != nil
+    return x != nil && x.Remove != nil
 }
 
 func (x *MyStructField30Patch1) IsSetPut() bool {
-    return x.Put != nil
+    return x != nil && x.Put != nil
 }
 
 func (x *MyStructField30Patch1) writeField1(p thrift.Protocol) error {  // Assign
@@ -15265,135 +15265,135 @@ func (x *MyStructFieldPatch) SetStructWithFieldCustomDefault(value *MyDataPatch)
 }
 
 func (x *MyStructFieldPatch) IsSetStructWithCustomDefault() bool {
-    return x.StructWithCustomDefault != nil
+    return x != nil && x.StructWithCustomDefault != nil
 }
 
 func (x *MyStructFieldPatch) IsSetI32WithCustomDefault() bool {
-    return x.I32WithCustomDefault != nil
+    return x != nil && x.I32WithCustomDefault != nil
 }
 
 func (x *MyStructFieldPatch) IsSetMapMap() bool {
-    return x.MapMap != nil
+    return x != nil && x.MapMap != nil
 }
 
 func (x *MyStructFieldPatch) IsSetListMap() bool {
-    return x.ListMap != nil
+    return x != nil && x.ListMap != nil
 }
 
 func (x *MyStructFieldPatch) IsSetOptMapVal() bool {
-    return x.OptMapVal != nil
+    return x != nil && x.OptMapVal != nil
 }
 
 func (x *MyStructFieldPatch) IsSetOptSetVal() bool {
-    return x.OptSetVal != nil
+    return x != nil && x.OptSetVal != nil
 }
 
 func (x *MyStructFieldPatch) IsSetOptListVal() bool {
-    return x.OptListVal != nil
+    return x != nil && x.OptListVal != nil
 }
 
 func (x *MyStructFieldPatch) IsSetOptLateStructVal() bool {
-    return x.OptLateStructVal != nil
+    return x != nil && x.OptLateStructVal != nil
 }
 
 func (x *MyStructFieldPatch) IsSetOptStructVal() bool {
-    return x.OptStructVal != nil
+    return x != nil && x.OptStructVal != nil
 }
 
 func (x *MyStructFieldPatch) IsSetOptEnumVal() bool {
-    return x.OptEnumVal != nil
+    return x != nil && x.OptEnumVal != nil
 }
 
 func (x *MyStructFieldPatch) IsSetOptBinaryVal() bool {
-    return x.OptBinaryVal != nil
+    return x != nil && x.OptBinaryVal != nil
 }
 
 func (x *MyStructFieldPatch) IsSetOptStringVal() bool {
-    return x.OptStringVal != nil
+    return x != nil && x.OptStringVal != nil
 }
 
 func (x *MyStructFieldPatch) IsSetOptDoubleVal() bool {
-    return x.OptDoubleVal != nil
+    return x != nil && x.OptDoubleVal != nil
 }
 
 func (x *MyStructFieldPatch) IsSetOptFloatVal() bool {
-    return x.OptFloatVal != nil
+    return x != nil && x.OptFloatVal != nil
 }
 
 func (x *MyStructFieldPatch) IsSetOptI64Val() bool {
-    return x.OptI64Val != nil
+    return x != nil && x.OptI64Val != nil
 }
 
 func (x *MyStructFieldPatch) IsSetOptI32Val() bool {
-    return x.OptI32Val != nil
+    return x != nil && x.OptI32Val != nil
 }
 
 func (x *MyStructFieldPatch) IsSetOptI16Val() bool {
-    return x.OptI16Val != nil
+    return x != nil && x.OptI16Val != nil
 }
 
 func (x *MyStructFieldPatch) IsSetOptByteVal() bool {
-    return x.OptByteVal != nil
+    return x != nil && x.OptByteVal != nil
 }
 
 func (x *MyStructFieldPatch) IsSetOptBoolVal() bool {
-    return x.OptBoolVal != nil
+    return x != nil && x.OptBoolVal != nil
 }
 
 func (x *MyStructFieldPatch) IsSetLateStructVal() bool {
-    return x.LateStructVal != nil
+    return x != nil && x.LateStructVal != nil
 }
 
 func (x *MyStructFieldPatch) IsSetUnionVal() bool {
-    return x.UnionVal != nil
+    return x != nil && x.UnionVal != nil
 }
 
 func (x *MyStructFieldPatch) IsSetStructVal() bool {
-    return x.StructVal != nil
+    return x != nil && x.StructVal != nil
 }
 
 func (x *MyStructFieldPatch) IsSetEnumVal() bool {
-    return x.EnumVal != nil
+    return x != nil && x.EnumVal != nil
 }
 
 func (x *MyStructFieldPatch) IsSetBinaryVal() bool {
-    return x.BinaryVal != nil
+    return x != nil && x.BinaryVal != nil
 }
 
 func (x *MyStructFieldPatch) IsSetStringVal() bool {
-    return x.StringVal != nil
+    return x != nil && x.StringVal != nil
 }
 
 func (x *MyStructFieldPatch) IsSetDoubleVal() bool {
-    return x.DoubleVal != nil
+    return x != nil && x.DoubleVal != nil
 }
 
 func (x *MyStructFieldPatch) IsSetFloatVal() bool {
-    return x.FloatVal != nil
+    return x != nil && x.FloatVal != nil
 }
 
 func (x *MyStructFieldPatch) IsSetI64Val() bool {
-    return x.I64Val != nil
+    return x != nil && x.I64Val != nil
 }
 
 func (x *MyStructFieldPatch) IsSetI32Val() bool {
-    return x.I32Val != nil
+    return x != nil && x.I32Val != nil
 }
 
 func (x *MyStructFieldPatch) IsSetI16Val() bool {
-    return x.I16Val != nil
+    return x != nil && x.I16Val != nil
 }
 
 func (x *MyStructFieldPatch) IsSetByteVal() bool {
-    return x.ByteVal != nil
+    return x != nil && x.ByteVal != nil
 }
 
 func (x *MyStructFieldPatch) IsSetBoolVal() bool {
-    return x.BoolVal != nil
+    return x != nil && x.BoolVal != nil
 }
 
 func (x *MyStructFieldPatch) IsSetStructWithFieldCustomDefault() bool {
-    return x.StructWithFieldCustomDefault != nil
+    return x != nil && x.StructWithFieldCustomDefault != nil
 }
 
 func (x *MyStructFieldPatch) writeField_32(p thrift.Protocol) error {  // StructWithCustomDefault
@@ -18455,135 +18455,135 @@ func (x *MyStructEnsureStruct) SetStructWithFieldCustomDefault(value *MyData) *M
 }
 
 func (x *MyStructEnsureStruct) IsSetStructWithCustomDefault() bool {
-    return x.StructWithCustomDefault != nil
+    return x != nil && x.StructWithCustomDefault != nil
 }
 
 func (x *MyStructEnsureStruct) IsSetI32WithCustomDefault() bool {
-    return x.I32WithCustomDefault != nil
+    return x != nil && x.I32WithCustomDefault != nil
 }
 
 func (x *MyStructEnsureStruct) IsSetMapMap() bool {
-    return x.MapMap != nil
+    return x != nil && x.MapMap != nil
 }
 
 func (x *MyStructEnsureStruct) IsSetListMap() bool {
-    return x.ListMap != nil
+    return x != nil && x.ListMap != nil
 }
 
 func (x *MyStructEnsureStruct) IsSetOptMapVal() bool {
-    return x.OptMapVal != nil
+    return x != nil && x.OptMapVal != nil
 }
 
 func (x *MyStructEnsureStruct) IsSetOptSetVal() bool {
-    return x.OptSetVal != nil
+    return x != nil && x.OptSetVal != nil
 }
 
 func (x *MyStructEnsureStruct) IsSetOptListVal() bool {
-    return x.OptListVal != nil
+    return x != nil && x.OptListVal != nil
 }
 
 func (x *MyStructEnsureStruct) IsSetOptLateStructVal() bool {
-    return x.OptLateStructVal != nil
+    return x != nil && x.OptLateStructVal != nil
 }
 
 func (x *MyStructEnsureStruct) IsSetOptStructVal() bool {
-    return x.OptStructVal != nil
+    return x != nil && x.OptStructVal != nil
 }
 
 func (x *MyStructEnsureStruct) IsSetOptEnumVal() bool {
-    return x.OptEnumVal != nil
+    return x != nil && x.OptEnumVal != nil
 }
 
 func (x *MyStructEnsureStruct) IsSetOptBinaryVal() bool {
-    return x.OptBinaryVal != nil
+    return x != nil && x.OptBinaryVal != nil
 }
 
 func (x *MyStructEnsureStruct) IsSetOptStringVal() bool {
-    return x.OptStringVal != nil
+    return x != nil && x.OptStringVal != nil
 }
 
 func (x *MyStructEnsureStruct) IsSetOptDoubleVal() bool {
-    return x.OptDoubleVal != nil
+    return x != nil && x.OptDoubleVal != nil
 }
 
 func (x *MyStructEnsureStruct) IsSetOptFloatVal() bool {
-    return x.OptFloatVal != nil
+    return x != nil && x.OptFloatVal != nil
 }
 
 func (x *MyStructEnsureStruct) IsSetOptI64Val() bool {
-    return x.OptI64Val != nil
+    return x != nil && x.OptI64Val != nil
 }
 
 func (x *MyStructEnsureStruct) IsSetOptI32Val() bool {
-    return x.OptI32Val != nil
+    return x != nil && x.OptI32Val != nil
 }
 
 func (x *MyStructEnsureStruct) IsSetOptI16Val() bool {
-    return x.OptI16Val != nil
+    return x != nil && x.OptI16Val != nil
 }
 
 func (x *MyStructEnsureStruct) IsSetOptByteVal() bool {
-    return x.OptByteVal != nil
+    return x != nil && x.OptByteVal != nil
 }
 
 func (x *MyStructEnsureStruct) IsSetOptBoolVal() bool {
-    return x.OptBoolVal != nil
+    return x != nil && x.OptBoolVal != nil
 }
 
 func (x *MyStructEnsureStruct) IsSetLateStructVal() bool {
-    return x.LateStructVal != nil
+    return x != nil && x.LateStructVal != nil
 }
 
 func (x *MyStructEnsureStruct) IsSetUnionVal() bool {
-    return x.UnionVal != nil
+    return x != nil && x.UnionVal != nil
 }
 
 func (x *MyStructEnsureStruct) IsSetStructVal() bool {
-    return x.StructVal != nil
+    return x != nil && x.StructVal != nil
 }
 
 func (x *MyStructEnsureStruct) IsSetEnumVal() bool {
-    return x.EnumVal != nil
+    return x != nil && x.EnumVal != nil
 }
 
 func (x *MyStructEnsureStruct) IsSetBinaryVal() bool {
-    return x.BinaryVal != nil
+    return x != nil && x.BinaryVal != nil
 }
 
 func (x *MyStructEnsureStruct) IsSetStringVal() bool {
-    return x.StringVal != nil
+    return x != nil && x.StringVal != nil
 }
 
 func (x *MyStructEnsureStruct) IsSetDoubleVal() bool {
-    return x.DoubleVal != nil
+    return x != nil && x.DoubleVal != nil
 }
 
 func (x *MyStructEnsureStruct) IsSetFloatVal() bool {
-    return x.FloatVal != nil
+    return x != nil && x.FloatVal != nil
 }
 
 func (x *MyStructEnsureStruct) IsSetI64Val() bool {
-    return x.I64Val != nil
+    return x != nil && x.I64Val != nil
 }
 
 func (x *MyStructEnsureStruct) IsSetI32Val() bool {
-    return x.I32Val != nil
+    return x != nil && x.I32Val != nil
 }
 
 func (x *MyStructEnsureStruct) IsSetI16Val() bool {
-    return x.I16Val != nil
+    return x != nil && x.I16Val != nil
 }
 
 func (x *MyStructEnsureStruct) IsSetByteVal() bool {
-    return x.ByteVal != nil
+    return x != nil && x.ByteVal != nil
 }
 
 func (x *MyStructEnsureStruct) IsSetBoolVal() bool {
-    return x.BoolVal != nil
+    return x != nil && x.BoolVal != nil
 }
 
 func (x *MyStructEnsureStruct) IsSetStructWithFieldCustomDefault() bool {
-    return x.StructWithFieldCustomDefault != nil
+    return x != nil && x.StructWithFieldCustomDefault != nil
 }
 
 func (x *MyStructEnsureStruct) writeField_32(p thrift.Protocol) error {  // StructWithCustomDefault
@@ -21102,23 +21102,23 @@ func (x *LateDefStructPatch) SetRemove(value patch.FieldIdList) *LateDefStructPa
 }
 
 func (x *LateDefStructPatch) IsSetAssign() bool {
-    return x.Assign != nil
+    return x != nil && x.Assign != nil
 }
 
 func (x *LateDefStructPatch) IsSetPatchPrior() bool {
-    return x.PatchPrior != nil
+    return x != nil && x.PatchPrior != nil
 }
 
 func (x *LateDefStructPatch) IsSetEnsure() bool {
-    return x.Ensure != nil
+    return x != nil && x.Ensure != nil
 }
 
 func (x *LateDefStructPatch) IsSetPatch() bool {
-    return x.Patch != nil
+    return x != nil && x.Patch != nil
 }
 
 func (x *LateDefStructPatch) IsSetRemove() bool {
-    return x.Remove != nil
+    return x != nil && x.Remove != nil
 }
 
 func (x *LateDefStructPatch) writeField1(p thrift.Protocol) error {  // Assign
@@ -21900,23 +21900,23 @@ func (x *RecursivePatch) SetRemove(value patch.FieldIdList) *RecursivePatch {
 }
 
 func (x *RecursivePatch) IsSetAssign() bool {
-    return x.Assign != nil
+    return x != nil && x.Assign != nil
 }
 
 func (x *RecursivePatch) IsSetPatchPrior() bool {
-    return x.PatchPrior != nil
+    return x != nil && x.PatchPrior != nil
 }
 
 func (x *RecursivePatch) IsSetEnsure() bool {
-    return x.Ensure != nil
+    return x != nil && x.Ensure != nil
 }
 
 func (x *RecursivePatch) IsSetPatch() bool {
-    return x.Patch != nil
+    return x != nil && x.Patch != nil
 }
 
 func (x *RecursivePatch) IsSetRemove() bool {
-    return x.Remove != nil
+    return x != nil && x.Remove != nil
 }
 
 func (x *RecursivePatch) writeField1(p thrift.Protocol) error {  // Assign
@@ -22426,7 +22426,7 @@ func (x *RecursiveField1Patch) SetClear(value bool) *RecursiveField1Patch {
 }
 
 func (x *RecursiveField1Patch) IsSetAssign() bool {
-    return x.Assign != nil
+    return x != nil && x.Assign != nil
 }
 
 func (x *RecursiveField1Patch) writeField1(p thrift.Protocol) error {  // Assign
@@ -22695,7 +22695,7 @@ func (x *RecursiveFieldPatch) SetNodes(value *RecursiveField1Patch) *RecursiveFi
 }
 
 func (x *RecursiveFieldPatch) IsSetNodes() bool {
-    return x.Nodes != nil
+    return x != nil && x.Nodes != nil
 }
 
 func (x *RecursiveFieldPatch) writeField_1(p thrift.Protocol) error {  // Nodes
@@ -22877,7 +22877,7 @@ func (x *RecursiveEnsureStruct) SetNodes(value map[string]*Recursive) *Recursive
 }
 
 func (x *RecursiveEnsureStruct) IsSetNodes() bool {
-    return x.Nodes != nil
+    return x != nil && x.Nodes != nil
 }
 
 func (x *RecursiveEnsureStruct) writeField_1(p thrift.Protocol) error {  // Nodes
@@ -23210,23 +23210,23 @@ func (x *BarPatch) SetRemove(value patch.FieldIdList) *BarPatch {
 }
 
 func (x *BarPatch) IsSetAssign() bool {
-    return x.Assign != nil
+    return x != nil && x.Assign != nil
 }
 
 func (x *BarPatch) IsSetPatchPrior() bool {
-    return x.PatchPrior != nil
+    return x != nil && x.PatchPrior != nil
 }
 
 func (x *BarPatch) IsSetEnsure() bool {
-    return x.Ensure != nil
+    return x != nil && x.Ensure != nil
 }
 
 func (x *BarPatch) IsSetPatch() bool {
-    return x.Patch != nil
+    return x != nil && x.Patch != nil
 }
 
 func (x *BarPatch) IsSetRemove() bool {
-    return x.Remove != nil
+    return x != nil && x.Remove != nil
 }
 
 func (x *BarPatch) writeField1(p thrift.Protocol) error {  // Assign
@@ -23717,7 +23717,7 @@ func (x *BarFieldPatch) SetLoop(value *LoopPatch) *BarFieldPatch {
 }
 
 func (x *BarFieldPatch) IsSetLoop() bool {
-    return x.Loop != nil
+    return x != nil && x.Loop != nil
 }
 
 func (x *BarFieldPatch) writeField_1(p thrift.Protocol) error {  // Loop
@@ -23899,7 +23899,7 @@ func (x *BarEnsureStruct) SetLoop(value *Loop) *BarEnsureStruct {
 }
 
 func (x *BarEnsureStruct) IsSetLoop() bool {
-    return x.Loop != nil
+    return x != nil && x.Loop != nil
 }
 
 func (x *BarEnsureStruct) writeField_1(p thrift.Protocol) error {  // Loop
@@ -24101,7 +24101,7 @@ func (x *LoopPatch) SetClear(value bool) *LoopPatch {
 }
 
 func (x *LoopPatch) IsSetAssign() bool {
-    return x.Assign != nil
+    return x != nil && x.Assign != nil
 }
 
 func (x *LoopPatch) writeField1(p thrift.Protocol) error {  // Assign

@@ -213,7 +213,7 @@ func (x *reqServiceFunc) SetArg3(value *Foo) *reqServiceFunc {
 }
 
 func (x *reqServiceFunc) IsSetArg3() bool {
-    return x.Arg3 != nil
+    return x != nil && x.Arg3 != nil
 }
 
 func (x *reqServiceFunc) writeField1(p thrift.Protocol) error {  // Arg1
@@ -985,7 +985,7 @@ func (x *respAdapterServiceCount) SetSuccess(value *CountingStruct) *respAdapter
 }
 
 func (x *respAdapterServiceCount) IsSetSuccess() bool {
-    return x.Success != nil
+    return x != nil && x.Success != nil
 }
 
 func (x *respAdapterServiceCount) writeField0(p thrift.Protocol) error {  // Success
@@ -1173,7 +1173,7 @@ func (x *reqAdapterServiceAdaptedTypes) SetArg(value *HeapAllocated) *reqAdapter
 }
 
 func (x *reqAdapterServiceAdaptedTypes) IsSetArg() bool {
-    return x.Arg != nil
+    return x != nil && x.Arg != nil
 }
 
 func (x *reqAdapterServiceAdaptedTypes) writeField1(p thrift.Protocol) error {  // Arg
@@ -1358,7 +1358,7 @@ func (x *respAdapterServiceAdaptedTypes) SetSuccess(value *HeapAllocated) *respA
 }
 
 func (x *respAdapterServiceAdaptedTypes) IsSetSuccess() bool {
-    return x.Success != nil
+    return x != nil && x.Success != nil
 }
 
 func (x *respAdapterServiceAdaptedTypes) writeField0(p thrift.Protocol) error {  // Success

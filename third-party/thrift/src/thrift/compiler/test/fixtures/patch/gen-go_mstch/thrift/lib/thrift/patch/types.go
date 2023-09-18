@@ -447,7 +447,7 @@ func (x *BoolPatch) SetInvert(value bool) *BoolPatch {
 }
 
 func (x *BoolPatch) IsSetAssign() bool {
-    return x.Assign != nil
+    return x != nil && x.Assign != nil
 }
 
 func (x *BoolPatch) writeField1(p thrift.Protocol) error {  // Assign
@@ -765,7 +765,7 @@ func (x *BytePatch) SetAdd(value int8) *BytePatch {
 }
 
 func (x *BytePatch) IsSetAssign() bool {
-    return x.Assign != nil
+    return x != nil && x.Assign != nil
 }
 
 func (x *BytePatch) writeField1(p thrift.Protocol) error {  // Assign
@@ -1085,7 +1085,7 @@ func (x *I16Patch) SetAdd(value int16) *I16Patch {
 }
 
 func (x *I16Patch) IsSetAssign() bool {
-    return x.Assign != nil
+    return x != nil && x.Assign != nil
 }
 
 func (x *I16Patch) writeField1(p thrift.Protocol) error {  // Assign
@@ -1403,7 +1403,7 @@ func (x *I32Patch) SetAdd(value int32) *I32Patch {
 }
 
 func (x *I32Patch) IsSetAssign() bool {
-    return x.Assign != nil
+    return x != nil && x.Assign != nil
 }
 
 func (x *I32Patch) writeField1(p thrift.Protocol) error {  // Assign
@@ -1721,7 +1721,7 @@ func (x *I64Patch) SetAdd(value int64) *I64Patch {
 }
 
 func (x *I64Patch) IsSetAssign() bool {
-    return x.Assign != nil
+    return x != nil && x.Assign != nil
 }
 
 func (x *I64Patch) writeField1(p thrift.Protocol) error {  // Assign
@@ -2039,7 +2039,7 @@ func (x *FloatPatch) SetAdd(value float32) *FloatPatch {
 }
 
 func (x *FloatPatch) IsSetAssign() bool {
-    return x.Assign != nil
+    return x != nil && x.Assign != nil
 }
 
 func (x *FloatPatch) writeField1(p thrift.Protocol) error {  // Assign
@@ -2357,7 +2357,7 @@ func (x *DoublePatch) SetAdd(value float64) *DoublePatch {
 }
 
 func (x *DoublePatch) IsSetAssign() bool {
-    return x.Assign != nil
+    return x != nil && x.Assign != nil
 }
 
 func (x *DoublePatch) writeField1(p thrift.Protocol) error {  // Assign
@@ -2695,7 +2695,7 @@ func (x *StringPatch) SetAppend(value string) *StringPatch {
 }
 
 func (x *StringPatch) IsSetAssign() bool {
-    return x.Assign != nil
+    return x != nil && x.Assign != nil
 }
 
 func (x *StringPatch) writeField1(p thrift.Protocol) error {  // Assign
@@ -3092,15 +3092,15 @@ func (x *BinaryPatch) SetAppend(value standard.ByteBuffer) *BinaryPatch {
 }
 
 func (x *BinaryPatch) IsSetAssign() bool {
-    return x.Assign != nil
+    return x != nil && x.Assign != nil
 }
 
 func (x *BinaryPatch) IsSetPrepend() bool {
-    return x.Prepend != nil
+    return x != nil && x.Prepend != nil
 }
 
 func (x *BinaryPatch) IsSetAppend() bool {
-    return x.Append != nil
+    return x != nil && x.Append != nil
 }
 
 func (x *BinaryPatch) writeField1(p thrift.Protocol) error {  // Assign

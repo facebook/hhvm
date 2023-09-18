@@ -210,7 +210,7 @@ func (x *Derive) SetDerives(value []string) *Derive {
 }
 
 func (x *Derive) IsSetDerives() bool {
-    return x.Derives != nil
+    return x != nil && x.Derives != nil
 }
 
 func (x *Derive) writeField1(p thrift.Protocol) error {  // Derives

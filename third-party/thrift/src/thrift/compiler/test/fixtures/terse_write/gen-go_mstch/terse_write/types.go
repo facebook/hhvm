@@ -518,59 +518,59 @@ func (x *MyUnion) SetStructField(value *MyStruct) *MyUnion {
 }
 
 func (x *MyUnion) IsSetBoolField() bool {
-    return x.BoolField != nil
+    return x != nil && x.BoolField != nil
 }
 
 func (x *MyUnion) IsSetByteField() bool {
-    return x.ByteField != nil
+    return x != nil && x.ByteField != nil
 }
 
 func (x *MyUnion) IsSetShortField() bool {
-    return x.ShortField != nil
+    return x != nil && x.ShortField != nil
 }
 
 func (x *MyUnion) IsSetIntField() bool {
-    return x.IntField != nil
+    return x != nil && x.IntField != nil
 }
 
 func (x *MyUnion) IsSetLongField() bool {
-    return x.LongField != nil
+    return x != nil && x.LongField != nil
 }
 
 func (x *MyUnion) IsSetFloatField() bool {
-    return x.FloatField != nil
+    return x != nil && x.FloatField != nil
 }
 
 func (x *MyUnion) IsSetDoubleField() bool {
-    return x.DoubleField != nil
+    return x != nil && x.DoubleField != nil
 }
 
 func (x *MyUnion) IsSetStringField() bool {
-    return x.StringField != nil
+    return x != nil && x.StringField != nil
 }
 
 func (x *MyUnion) IsSetBinaryField() bool {
-    return x.BinaryField != nil
+    return x != nil && x.BinaryField != nil
 }
 
 func (x *MyUnion) IsSetEnumField() bool {
-    return x.EnumField != nil
+    return x != nil && x.EnumField != nil
 }
 
 func (x *MyUnion) IsSetListField() bool {
-    return x.ListField != nil
+    return x != nil && x.ListField != nil
 }
 
 func (x *MyUnion) IsSetSetField() bool {
-    return x.SetField != nil
+    return x != nil && x.SetField != nil
 }
 
 func (x *MyUnion) IsSetMapField() bool {
-    return x.MapField != nil
+    return x != nil && x.MapField != nil
 }
 
 func (x *MyUnion) IsSetStructField() bool {
-    return x.StructField != nil
+    return x != nil && x.StructField != nil
 }
 
 func (x *MyUnion) writeField1(p thrift.Protocol) error {  // BoolField
@@ -2141,27 +2141,27 @@ func (x *StructLevelTerseStruct) SetUnionField(value *MyUnion) *StructLevelTerse
 }
 
 func (x *StructLevelTerseStruct) IsSetBinaryField() bool {
-    return x.BinaryField != nil
+    return x != nil && x.BinaryField != nil
 }
 
 func (x *StructLevelTerseStruct) IsSetListField() bool {
-    return x.ListField != nil
+    return x != nil && x.ListField != nil
 }
 
 func (x *StructLevelTerseStruct) IsSetSetField() bool {
-    return x.SetField != nil
+    return x != nil && x.SetField != nil
 }
 
 func (x *StructLevelTerseStruct) IsSetMapField() bool {
-    return x.MapField != nil
+    return x != nil && x.MapField != nil
 }
 
 func (x *StructLevelTerseStruct) IsSetStructField() bool {
-    return x.StructField != nil
+    return x != nil && x.StructField != nil
 }
 
 func (x *StructLevelTerseStruct) IsSetUnionField() bool {
-    return x.UnionField != nil
+    return x != nil && x.UnionField != nil
 }
 
 func (x *StructLevelTerseStruct) writeField1(p thrift.Protocol) error {  // BoolField
@@ -3820,51 +3820,51 @@ func (x *FieldLevelTerseStruct) SetUnionField(value *MyUnion) *FieldLevelTerseSt
 }
 
 func (x *FieldLevelTerseStruct) IsSetTerseBinaryField() bool {
-    return x.TerseBinaryField != nil
+    return x != nil && x.TerseBinaryField != nil
 }
 
 func (x *FieldLevelTerseStruct) IsSetTerseListField() bool {
-    return x.TerseListField != nil
+    return x != nil && x.TerseListField != nil
 }
 
 func (x *FieldLevelTerseStruct) IsSetTerseSetField() bool {
-    return x.TerseSetField != nil
+    return x != nil && x.TerseSetField != nil
 }
 
 func (x *FieldLevelTerseStruct) IsSetTerseMapField() bool {
-    return x.TerseMapField != nil
+    return x != nil && x.TerseMapField != nil
 }
 
 func (x *FieldLevelTerseStruct) IsSetTerseStructField() bool {
-    return x.TerseStructField != nil
+    return x != nil && x.TerseStructField != nil
 }
 
 func (x *FieldLevelTerseStruct) IsSetBinaryField() bool {
-    return x.BinaryField != nil
+    return x != nil && x.BinaryField != nil
 }
 
 func (x *FieldLevelTerseStruct) IsSetListField() bool {
-    return x.ListField != nil
+    return x != nil && x.ListField != nil
 }
 
 func (x *FieldLevelTerseStruct) IsSetSetField() bool {
-    return x.SetField != nil
+    return x != nil && x.SetField != nil
 }
 
 func (x *FieldLevelTerseStruct) IsSetMapField() bool {
-    return x.MapField != nil
+    return x != nil && x.MapField != nil
 }
 
 func (x *FieldLevelTerseStruct) IsSetStructField() bool {
-    return x.StructField != nil
+    return x != nil && x.StructField != nil
 }
 
 func (x *FieldLevelTerseStruct) IsSetTerseUnionField() bool {
-    return x.TerseUnionField != nil
+    return x != nil && x.TerseUnionField != nil
 }
 
 func (x *FieldLevelTerseStruct) IsSetUnionField() bool {
-    return x.UnionField != nil
+    return x != nil && x.UnionField != nil
 }
 
 func (x *FieldLevelTerseStruct) writeField1(p thrift.Protocol) error {  // TerseBoolField
@@ -6114,23 +6114,23 @@ func (x *TerseStructWithCustomDefault) SetStructField(value *MyStructWithCustomD
 }
 
 func (x *TerseStructWithCustomDefault) IsSetBinaryField() bool {
-    return x.BinaryField != nil
+    return x != nil && x.BinaryField != nil
 }
 
 func (x *TerseStructWithCustomDefault) IsSetListField() bool {
-    return x.ListField != nil
+    return x != nil && x.ListField != nil
 }
 
 func (x *TerseStructWithCustomDefault) IsSetSetField() bool {
-    return x.SetField != nil
+    return x != nil && x.SetField != nil
 }
 
 func (x *TerseStructWithCustomDefault) IsSetMapField() bool {
-    return x.MapField != nil
+    return x != nil && x.MapField != nil
 }
 
 func (x *TerseStructWithCustomDefault) IsSetStructField() bool {
-    return x.StructField != nil
+    return x != nil && x.StructField != nil
 }
 
 func (x *TerseStructWithCustomDefault) writeField1(p thrift.Protocol) error {  // BoolField

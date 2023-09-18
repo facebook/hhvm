@@ -26,6 +26,7 @@ type mode =
           (** only applies to [glean_only]; skips actually running the glean query *)
     }
   | Findrefs_glean of { dry_run: bool }
+  | Resolve of { is_manually_invoked: bool }
 
 type options = {
   files: string list;
@@ -162,6 +163,10 @@ let parse_options () =
         Arg.String (fun s -> naming_table := Some s),
         " Naming table, to typecheck undefined symbols; needs --root."
         ^ " (Hint: buck2 run //hphp/hack/src/hh_naming_table_builder)" );
+      ( "--resolve",
+        Arg.Unit (set_mode (Resolve { is_manually_invoked = false })),
+        " Produce what is returned from Completion_resolve requests - including signature and docblock"
+      );
       ( "--root",
         Arg.String (fun s -> root := Some s),
         " Root for where to typecheck undefined symbols; needs --naming-table"
@@ -548,6 +553,12 @@ let handle_autocomplete ctx sienv naming_table ~is_manually_invoked filename =
                 Printf.printf "  %s\n" line)
           | None -> ()))
 
+(** This handles "--resolve" which for now, just autocomplete and shows the results.
+Next this will also fetch the signature and docblock, AKA whatever is already done
+in ClientIdeDaemon in response to Completion_resolve requests. *)
+let handle_resolve ctx sienv naming_table ~is_manually_invoked filename =
+  handle_autocomplete ctx sienv naming_table ~is_manually_invoked filename
+
 (** This handles --search, --search-glean, --search-show-glean.
 The filename be a single file or a multifile,
 and accepts both <?hh files that define symbols, and newline-separated
@@ -653,6 +664,8 @@ let handle_mode mode filenames ctx (sienv : SearchUtils.si_env) naming_table =
   | Autocomplete { is_manually_invoked } ->
     handle_autocomplete ctx sienv naming_table ~is_manually_invoked filename
   | Findrefs_glean { dry_run } -> handle_findrefs_glean sienv ~dry_run filename
+  | Resolve { is_manually_invoked } ->
+    handle_resolve ctx sienv naming_table ~is_manually_invoked filename
 
 (*****************************************************************************)
 (* Main entry point *)

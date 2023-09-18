@@ -531,18 +531,6 @@ let update_file_ctx (istate : istate) (document : ClientIdeMessage.document) :
   let ctx = make_singleton_ctx istate.icommon entry in
   ({ istate with iopen_files }, ctx, entry, published_errors)
 
-let get_signature (ctx : Provider_context.t) (name : string) : 'string =
-  let tast_env = Tast_env.empty ctx in
-  match Tast_env.get_fun tast_env (Utils.add_ns name) with
-  | None -> None
-  | Some fe ->
-    Some
-      (String_utils.rstrip
-         (String_utils.lstrip
-            (Tast_env.print_decl_ty tast_env fe.Typing_defs.fe_type)
-            "(")
-         ")")
-
 (** We avoid showing typing errors if there are parsing errors. *)
 let get_user_facing_errors
     ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) : Errors.t =
@@ -1083,7 +1071,7 @@ let handle_request
     HackEventLogger.completion_call ~method_name:"Completion_resolve";
     let ctx = make_empty_ctx istate.icommon in
     let result = ServerDocblockAt.go_docblock_for_symbol ~ctx ~symbol ~kind in
-    let signature = get_signature ctx symbol in
+    let signature = ServerAutoComplete.get_signature ctx symbol in
     (Initialized istate, Ok Completion_resolve.{ docblock = result; signature })
   (* Autocomplete docblock resolve *)
   | ( Initialized istate,
@@ -1104,7 +1092,7 @@ let handle_request
           ServerDocblockAt.go_docblock_ctx ~ctx ~entry ~line ~column ~kind)
     in
     let (Full_name s) = fullname in
-    let signature = get_signature ctx s in
+    let signature = ServerAutoComplete.get_signature ctx s in
     (Initialized istate, Ok Completion_resolve.{ docblock = result; signature })
   (* Document highlighting *)
   | (Initialized istate, Document_highlight (document, { line; column })) ->

@@ -30,3 +30,5 @@ val get_autocomplete_context :
   pos:File_content.position ->
   is_manually_invoked:bool ->
   AutocompleteTypes.legacy_autocomplete_context
+
+val get_signature : Provider_context.t -> string -> string option

@@ -27,6 +27,18 @@ let context_after_quote = Str.regexp ".*['\"]$"
 let context_after_open_curly_brace_without_equals_regex =
   Str.regexp ".*[^=][ ]*{$"
 
+let get_signature (ctx : Provider_context.t) (name : string) : string option =
+  let tast_env = Tast_env.empty ctx in
+  match Tast_env.get_fun tast_env (Utils.add_ns name) with
+  | None -> None
+  | Some fe ->
+    Some
+      (String_utils.rstrip
+         (String_utils.lstrip
+            (Tast_env.print_decl_ty tast_env fe.Typing_defs.fe_type)
+            "(")
+         ")")
+
 let get_autocomplete_context
     ~(file_content : string)
     ~(pos : File_content.position)

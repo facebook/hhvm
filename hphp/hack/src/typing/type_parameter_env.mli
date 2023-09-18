@@ -13,7 +13,7 @@ type tparam_bounds = Typing_set.t
 
 type tparam_info = Typing_kinding_defs.kind
 
-type t
+type t [@@deriving hash]
 
 val empty : t
 

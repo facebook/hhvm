@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1c72b3e9cd571f1c5601e290720fd784>>
+// @generated SignedSource<<06410ba8c19b16532214676430a9fd9b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -24,6 +24,7 @@ pub type TparamName = String;
 
 pub type TparamBounds = ty_set::TySet;
 
+#[rust_to_ocaml(attr = "deriving hash")]
 pub type TparamInfo = typing_kinding_defs::Kind;
 
 #[derive(
@@ -40,6 +41,7 @@ pub type TparamInfo = typing_kinding_defs::Kind;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving hash")]
 #[repr(C)]
 pub struct TypeParameterEnv {
     /// The position indicates where the type parameter was defined.

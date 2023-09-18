@@ -46,7 +46,7 @@ type fun_tast_info = {
   has_readonly: bool;
       (** True if there are leaves of the function's imaginary CFG without a return statement *)
 }
-[@@deriving show]
+[@@deriving hash, show]
 
 type check_status =
   | COnce  (** The definition is checked only once. *)
@@ -59,7 +59,7 @@ type check_status =
       (** The definition is checked twice and this is the check under dynamic
           assumptions that is using the dynamic type for parameters and return.
           *)
-[@@deriving show]
+[@@deriving hash, show]
 
 let is_under_dynamic_assumptions = function
   | COnce
@@ -68,19 +68,19 @@ let is_under_dynamic_assumptions = function
   | CUnderDynamicAssumptions -> true
 
 type saved_env = {
-  tcopt: TypecheckerOptions.t; [@opaque]
-  inference_env: Typing_inference_env.t;
+  tcopt: TypecheckerOptions.t; [@opaque] [@hash.ignore]
+  inference_env: Typing_inference_env.t; [@hash.ignore]
   tpenv: Type_parameter_env.t;
   fun_tast_info: fun_tast_info option;
   checked: check_status;
       (** Indicates how many types the callable was checked and under what
           assumptions. *)
 }
-[@@deriving show]
+[@@deriving hash, show]
 
 type program = (ty, saved_env) Aast.program [@@deriving show]
 
-type def = (ty, (saved_env[@hash.ignore])) Aast.def [@@deriving hash]
+type def = (ty, saved_env) Aast.def [@@deriving hash]
 
 type def_with_dynamic = def Tast_with_dynamic.t [@@deriving hash]
 

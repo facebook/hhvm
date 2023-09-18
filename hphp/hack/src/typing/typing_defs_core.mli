@@ -9,7 +9,7 @@
 
 module Reason = Typing_reason
 
-type pos_id = Reason.pos_id [@@deriving eq, ord, show]
+type pos_id = Reason.pos_id [@@deriving eq, ord, hash, show]
 
 type ce_visibility =
   | Vpublic

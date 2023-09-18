@@ -4,7 +4,7 @@ open Typing_defs
 module TySet = Typing_set
 module SN = Naming_special_names
 
-type tparam_bounds = TySet.t
+type tparam_bounds = TySet.t [@@deriving hash]
 
 type kind = {
   lower_bounds: tparam_bounds;
@@ -16,7 +16,7 @@ type kind = {
   parameters: named_kind list;
 }
 
-and named_kind = pos_id * kind
+and named_kind = pos_id * kind [@@deriving hash]
 
 let dummy_name = (Pos_or_decl.none, "")
 

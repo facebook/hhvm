@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bfb0ae80ac5ee059398102d4205ee7d6>>
+// @generated SignedSource<<364cc97f7d2ad56a3fd333437ef4b47e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -39,7 +39,7 @@ pub type DeclTy = typing_defs::Ty;
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving show")]
+#[rust_to_ocaml(attr = "deriving (hash, show)")]
 #[rust_to_ocaml(prefix = "has_")]
 #[repr(C)]
 pub struct FunTastInfo {
@@ -64,7 +64,7 @@ pub struct FunTastInfo {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving show")]
+#[rust_to_ocaml(attr = "deriving (hash, show)")]
 #[repr(u8)]
 pub enum CheckStatus {
     /// The definition is checked only once.
@@ -90,11 +90,13 @@ arena_deserializer::impl_deserialize_in_arena!(CheckStatus);
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving show")]
+#[rust_to_ocaml(attr = "deriving (hash, show)")]
 #[repr(C)]
 pub struct SavedEnv {
     #[rust_to_ocaml(attr = "opaque")]
+    #[rust_to_ocaml(attr = "hash.ignore")]
     pub tcopt: typechecker_options::TypecheckerOptions,
+    #[rust_to_ocaml(attr = "hash.ignore")]
     pub inference_env: typing_inference_env::TypingInferenceEnv,
     pub tpenv: type_parameter_env::TypeParameterEnv,
     pub fun_tast_info: Option<FunTastInfo>,

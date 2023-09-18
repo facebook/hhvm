@@ -26,7 +26,7 @@ let empty_bounds = TySet.empty
 
 let singleton_bound ty = TySet.singleton ty
 
-type tparam_info = Typing_kinding_defs.kind
+type tparam_info = Typing_kinding_defs.kind [@@deriving hash]
 
 let tparam_info_size tpinfo =
   TySet.cardinal tpinfo.lower_bounds + TySet.cardinal tpinfo.upper_bounds
@@ -38,6 +38,7 @@ type t = {
           (i.e., without a source location that defines it) *)
   consistent: bool;
 }
+[@@deriving hash]
 
 let empty = { tparams = SMap.empty; consistent = true }
 

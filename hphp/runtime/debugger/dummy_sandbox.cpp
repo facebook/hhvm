@@ -85,11 +85,11 @@ void DummySandbox::run() {
       DSandboxInfo sandbox = m_proxy->getSandbox();
       std::string msg;
       if (sandbox.valid()) {
-        SourceRootInfo sri(sandbox.m_user, sandbox.m_name);
+        SourceRootInfo::WithRoot sri(sandbox.m_user, sandbox.m_name);
         if (sandbox.m_path.empty()) {
-          sandbox.m_path = sri.path();
+          sandbox.m_path = SourceRootInfo::GetCurrentSourceRoot();
         }
-        if (!sri.sandboxOn()) {
+        if (!SourceRootInfo::SandboxOn()) {
           msg = "Invalid sandbox was specified. "
             "PHP files may not be loaded properly.\n";
         } else {
@@ -97,7 +97,8 @@ void DummySandbox::run() {
           forceToDict(server);
           Array arr = server.asArrRef();
           server.unset();
-          php_global_set(s__SERVER, sri.setServerVariables(std::move(arr)));
+          php_global_set(s__SERVER,
+                         SourceRootInfo::SetServerVariables(std::move(arr)));
         }
         Debugger::RegisterSandbox(sandbox);
         g_context->setSandboxId(sandbox.id());

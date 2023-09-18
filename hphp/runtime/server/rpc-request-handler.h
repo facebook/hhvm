@@ -23,7 +23,6 @@
 
 namespace HPHP {
 
-struct SourceRootInfo;
 struct RequestURI;
 struct Transport;
 ///////////////////////////////////////////////////////////////////////////////
@@ -66,11 +65,9 @@ private:
   void initState();
   bool needReset() const;
 
-  bool executePHPFunction(Transport *transport,
-                          SourceRootInfo &sourceRootInfo);
+  bool executePHPFunction(Transport *transport);
 
-  std::string getSourceFilename(const std::string &path,
-                                SourceRootInfo &sourceRootInfo);
+  std::string getSourceFilename(const std::string &path);
 
   static THREAD_LOCAL(AccessLog::ThreadData, s_accessLogThreadData);
   static AccessLog s_accessLog;

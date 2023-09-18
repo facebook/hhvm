@@ -29,8 +29,7 @@ HPHP::s_ini_setting
 HPHP::s_json_parser
 HPHP::StackTraceLog::s_logData
 HPHP::s_date_globals
-HPHP::SourceRootInfo::s_path
-HPHP::SourceRootInfo::s_phproot
+HPHP::SourceRootInfo::tl_info
 HPHP::HardwareCounter::s_counter
 HPHP::tl_libxml_trees
 HPHP::AssertDetailImpl::s_head

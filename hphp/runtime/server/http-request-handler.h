@@ -24,7 +24,6 @@
 
 namespace HPHP {
 
-struct SourceRootInfo;
 struct RequestURI;
 
 namespace ServiceData {
@@ -58,7 +57,6 @@ public:
 private:
   bool m_pathTranslation;
   ServiceData::ExportedTimeSeries* m_requestTimedOutOnQueue;
-  Optional<SourceRootInfo> m_sourceRootInfo;
 
   bool handleFileRequest(Transport *transport, const String& translated,
                          const std::string& path, const char* ext);
@@ -67,8 +65,7 @@ private:
                          time_t mtime, bool compressed,
                          const std::string &cmd,
                          const char *ext);
-  bool executePHPRequest(Transport *transport, RequestURI &reqURI,
-                         SourceRootInfo &sourceRootInfo);
+  bool executePHPRequest(Transport *transport, RequestURI &reqURI);
 
   static THREAD_LOCAL(AccessLog::ThreadData, s_accessLogThreadData);
   static AccessLog s_accessLog;

@@ -1135,11 +1135,11 @@ ObjectData* ExecutionContext::getThis() {
 namespace {
 const RepoOptions& getRepoOptionsForDebuggerEval() {
   const auto root = SourceRootInfo::GetCurrentSourceRoot();
-  if (root.size() == 0) {
+  if (root.empty()) {
     return RepoOptions::defaults();
   }
 
-  const auto dummyPath = fmt::format("{}/$$eval$$.php", root);
+  const auto dummyPath = fmt::format("{}/$$eval$$.php", root.native());
   return RepoOptions::forFile(dummyPath.data());
 }
 } // namespace

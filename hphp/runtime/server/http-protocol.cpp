@@ -207,8 +207,7 @@ static void StartRequest(Array& server) {
  * overwrite what when name happens to be the same.
  */
 void HttpProtocol::PrepareSystemVariables(Transport *transport,
-                                          const RequestURI &r,
-                                          const SourceRootInfo &sri) {
+                                          const RequestURI &r) {
   auto const vhost = VirtualHost::GetCurrent();
   auto const emptyArr = empty_dict_array();
   php_global_set(s__SERVER, emptyArr);
@@ -281,7 +280,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
 
   // Server
   StartRequest(SERVERarr);
-  PrepareServerVariable(SERVERarr, transport, r, sri, vhost);
+  PrepareServerVariable(SERVERarr, transport, r, vhost);
 
   // Request
   PrepareRequestVariables(REQUESTarr,
@@ -705,7 +704,6 @@ static void CopyPathInfo(Array& server,
 void HttpProtocol::PrepareServerVariable(Array& server,
                                          Transport *transport,
                                          const RequestURI &r,
-                                         const SourceRootInfo &sri,
                                          const VirtualHost *vhost) {
   // $_SERVER
 
@@ -749,7 +747,7 @@ void HttpProtocol::PrepareServerVariable(Array& server,
     String str(kv.second);
     server.set(arrkey, make_tv<KindOfString>(str.get()), true);
   }
-  server = sri.setServerVariables(std::move(server));
+  server = SourceRootInfo::SetServerVariables(std::move(server));
 
   const char *threadType = transport->getThreadTypeName();
   server.set(s_THREAD_TYPE, threadType);

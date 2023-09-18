@@ -1773,7 +1773,9 @@ static int execute_program_impl(int argc, char** argv) {
 
     auto const file = [] (std::string file) -> std::string {
       if (!FileUtil::isAbsolutePath(file)) {
-        return SourceRootInfo::GetCurrentSourceRoot() + std::move(file);
+        return (
+          SourceRootInfo::GetCurrentSourceRoot() / std::move(file)
+        ).native();
       }
       return file;
     }(po.file.empty() ? po.args[0] : po.file);
@@ -1990,7 +1992,7 @@ static int execute_program_impl(int argc, char** argv) {
     try {
       auto const file = [&] {
         if (!FileUtil::isAbsolutePath(po.lint)) {
-          return SourceRootInfo::GetCurrentSourceRoot() + po.lint;
+          return (SourceRootInfo::GetCurrentSourceRoot() / po.lint).native();
         }
         return po.lint;
       }();

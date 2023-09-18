@@ -23,7 +23,6 @@ namespace HPHP {
 
 struct Array;
 struct RequestURI;
-struct SourceRootInfo;
 struct StringBuffer;
 struct Variant;
 struct VirtualHost;
@@ -31,8 +30,7 @@ struct VirtualHost;
 struct HttpProtocol {
   static const VirtualHost *GetVirtualHost(Transport *transport);
   static void PrepareSystemVariables(Transport *transport,
-                                     const RequestURI &r,
-                                     const SourceRootInfo &sri);
+                                     const RequestURI &r);
   static void PrepareRequestVariables(Array& request,
                                       const Array& get,
                                       const Array& post,
@@ -49,7 +47,6 @@ struct HttpProtocol {
   static void PrepareServerVariable(Array& server,
                                     Transport *transport,
                                     const RequestURI &r,
-                                    const SourceRootInfo &sri,
                                     const VirtualHost *vhost);
 
   static bool ProxyRequest(Transport *transport, bool force,

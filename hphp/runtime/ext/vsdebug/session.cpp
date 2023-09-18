@@ -245,17 +245,17 @@ void DebuggerSession::runDummy() {
 
   // Setup sandbox variables for dummy request context.
   if (!m_sandboxUser.empty()) {
-    SourceRootInfo sourceRootInfo(m_sandboxUser, m_sandboxName);
+    SourceRootInfo::WithRoot sri(m_sandboxUser, m_sandboxName);
     auto server = php_global_exchange(s__SERVER, init_null());
     forceToDict(server);
     Array arr = server.asArrRef();
     server.unset();
     php_global_set(
       s__SERVER,
-      sourceRootInfo.setServerVariables(std::move(arr))
+      SourceRootInfo::SetServerVariables(std::move(arr))
     );
 
-    g_context->setSandboxId(sourceRootInfo.getSandboxInfo().id());
+    g_context->setSandboxId(SourceRootInfo::GetSandboxInfo().id());
   }
 
   if (!m_dummyStartupDoc.empty()) {

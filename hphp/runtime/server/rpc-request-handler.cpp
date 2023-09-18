@@ -145,7 +145,7 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
   };
 
   // resolve source root
-  SourceRootInfo sourceRootInfo(transport);
+  SourceRootInfo::WithRoot sri(transport);
 
   // set thread type
   if (m_serverInfo->getType() == SatelliteServer::Type::KindOfXboxServer) {
@@ -159,11 +159,11 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
     cli_invoke(
       std::move(m_cli).value(),
       [&] (const std::string& prelude) {
-        ret = executePHPFunction(transport, sourceRootInfo);
+        ret = executePHPFunction(transport);
       }
     );
   } else {
-    ret = executePHPFunction(transport, sourceRootInfo);
+    ret = executePHPFunction(transport);
   }
   GetAccessLog().log(transport, vhost);
   /*
@@ -193,13 +193,12 @@ const StaticString
   s_HPHP_RPC("HPHP_RPC"),
   s__ENV("_ENV");
 
-bool RPCRequestHandler::executePHPFunction(Transport *transport,
-                                           SourceRootInfo &sourceRootInfo) {
+bool RPCRequestHandler::executePHPFunction(Transport *transport) {
   std::string rpcFunc = transport->getCommand();
   {
     ServerStatsHelper ssh("input");
     RequestURI reqURI(rpcFunc);
-    HttpProtocol::PrepareSystemVariables(transport, reqURI, sourceRootInfo);
+    HttpProtocol::PrepareSystemVariables(transport, reqURI);
     auto env = php_global(s__ENV);
     env.asArrRef().set(s_HPHP_RPC, 1);
     php_global_set(s__ENV, std::move(env));
@@ -229,7 +228,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
     reqInitDoc = (std::string)canonicalize_path(reqInitDoc, "", 0);
   }
   if (!reqInitDoc.empty()) {
-    reqInitDoc = getSourceFilename(reqInitDoc, sourceRootInfo);
+    reqInitDoc = getSourceFilename(reqInitDoc);
   }
 
   bool ret = true;
@@ -271,7 +270,6 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
   }
 
   params.reset();
-  sourceRootInfo.clear();
 
   transport->onSendEnd();
   ServerStats::LogPage(rpcFunc, code);
@@ -288,12 +286,11 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
   return !error;
 }
 
-std::string RPCRequestHandler::getSourceFilename(const std::string &path,
-                                            SourceRootInfo &sourceRootInfo) {
+std::string RPCRequestHandler::getSourceFilename(const std::string &path) {
   if (path.empty() || path[0] == '/') return path;
   // If it is not a sandbox, sourceRoot will be the same as
   // RuntimeOption::SourceRoot.
-  std::string sourceRoot = sourceRootInfo.path();
+  std::string sourceRoot = SourceRootInfo::GetCurrentSourceRoot();
   if (sourceRoot.empty()) {
     return Process::GetCurrentDirectory() + "/" + path;
   }

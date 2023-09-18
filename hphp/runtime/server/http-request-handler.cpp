@@ -219,7 +219,7 @@ void HttpRequestHandler::teardownRequest(Transport* transport) noexcept {
   // HPHP logs may need to access data in ServerStats, so we have to clear the
   // hashtable after writing the log entry.
   ServerStats::Reset();
-  m_sourceRootInfo.reset();
+  SourceRootInfo::ResetLogging();
 
   if (is_hphp_session_initialized()) {
     hphp_session_exit(transport);
@@ -279,10 +279,8 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
                             vhost->getName().c_str());
 
   // resolve source root
-  always_assert(!m_sourceRootInfo.has_value());
-  m_sourceRootInfo.emplace(transport);
-  if (m_sourceRootInfo->error()) {
-    m_sourceRootInfo->handleError(transport);
+  if (!SourceRootInfo::Init(transport)) {
+    transport->sendString("Sandbox not found", 200);
     return;
   }
 
@@ -290,7 +288,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
   string pathTranslation = m_pathTranslation ?
     vhost->getPathTranslation().c_str() : "";
   RequestURI reqURI(vhost, transport, pathTranslation,
-                    m_sourceRootInfo->path());
+                    SourceRootInfo::GetCurrentSourceRoot());
   if (reqURI.done()) {
     return; // already handled with redirection or 404
   }
@@ -363,7 +361,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
 
   bool ret = false;
   try {
-    ret = executePHPRequest(transport, reqURI, m_sourceRootInfo.value());
+    ret = executePHPRequest(transport, reqURI);
   } catch (...) {
     string emsg;
     string response;
@@ -403,8 +401,7 @@ void HttpRequestHandler::abortRequest(Transport* transport) {
 }
 
 bool HttpRequestHandler::executePHPRequest(Transport *transport,
-                                           RequestURI &reqURI,
-                                           SourceRootInfo &sourceRootInfo) {
+                                           RequestURI &reqURI) {
   tracing::Request _{
     "http-request",
     reqURI.originalURL().c_str(),
@@ -437,15 +434,14 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
   string file = reqURI.absolutePath().c_str();
   {
     ServerStatsHelper ssh("input");
-    HttpProtocol::PrepareSystemVariables(transport, reqURI, sourceRootInfo);
+    HttpProtocol::PrepareSystemVariables(transport, reqURI);
 
     if (RuntimeOption::EnableHphpdDebugger) {
-      Eval::DSandboxInfo sInfo = sourceRootInfo.getSandboxInfo();
+      Eval::DSandboxInfo sInfo = SourceRootInfo::GetSandboxInfo();
       Eval::Debugger::RegisterSandbox(sInfo);
       context->setSandboxId(sInfo.id());
     }
     reqURI.clear();
-    sourceRootInfo.clear();
   }
 
   int code;

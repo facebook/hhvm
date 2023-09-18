@@ -191,36 +191,6 @@ class virtual ['env] tvar_expanding_type_mapper =
           ('env * ('env -> Reason.t -> int -> 'env * locl_ty)) * locl_ty
   end
 
-(* Mixin that maps across the type inside the typevar, and then changes
- * its value to the result. *)
-class virtual ['env] tvar_substituting_type_mapper =
-  object (this)
-    method on_tvar
-        ((env, expand, add) :
-          'env
-          * ('env -> Reason.t -> int -> 'env * locl_ty)
-          * ('env -> int -> locl_ty -> 'env))
-        (r : Reason.t)
-        (n : int) =
-      let (env, ty) = expand env r n in
-      if Typing_defs.is_tyvar ty then
-        (env, ty)
-      else
-        let ((env, _expand, add), ty) = this#on_type (env, expand, add) ty in
-        let env = add env n ty in
-        (env, ty)
-
-    method virtual on_type
-        : 'env
-          * ('env -> Reason.t -> int -> 'env * locl_ty)
-          * ('env -> int -> locl_ty -> 'env) ->
-          locl_ty ->
-          ('env
-          * ('env -> Reason.t -> int -> 'env * locl_ty)
-          * ('env -> int -> locl_ty -> 'env))
-          * locl_ty
-  end
-
 (* Implementation of type_mapper that recursively visits everything in the
  * type.
  * NOTE: by default it doesn't to anything to Tvars. Include one of the mixins

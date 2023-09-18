@@ -53,22 +53,6 @@ class virtual tvar_expanding_type_mapper =
     method virtual on_type : env -> locl_ty -> result
   end
 
-(* Mixin that maps across the type inside the typevar, and then changes
- * its value to the result. *)
-class virtual tvar_substituting_type_mapper =
-  object (this)
-    method on_tvar (env : env) (r : Reason.t) n =
-      let (env, ty) = Env.get_type env r n in
-      if is_tyvar ty then
-        (env, ty)
-      else
-        let (env, ty) = this#on_type env ty in
-        let env = Env.add env n ty in
-        (env, ty)
-
-    method virtual on_type : env -> locl_ty -> result
-  end
-
 (** Type mapper which only maps types under combinations of unions, options and intersections. *)
 class union_inter_type_mapper =
   object

@@ -173,29 +173,6 @@ class virtual ['env] tvar_expanding_type_mapper :
       * Typing_defs.locl_ty
   end
 
-(* Mixin that maps across the type inside the typevar, and then changes
- * its value to the result. *)
-class virtual ['env] tvar_substituting_type_mapper :
-  object
-    method on_tvar :
-      'env
-      * ('env -> Typing_reason.t -> int -> 'env * Typing_defs.locl_ty)
-      * ('env -> int -> Typing_defs.locl_ty -> 'env) ->
-      Typing_reason.t ->
-      int ->
-      'env * Typing_defs.locl_ty
-
-    method virtual on_type :
-      'env
-      * ('env -> Typing_reason.t -> int -> 'env * Typing_defs.locl_ty)
-      * ('env -> int -> Typing_defs.locl_ty -> 'env) ->
-      Typing_defs.locl_ty ->
-      ('env
-      * ('env -> Typing_reason.t -> int -> 'env * Typing_defs.locl_ty)
-      * ('env -> int -> Typing_defs.locl_ty -> 'env))
-      * Typing_defs.locl_ty
-  end
-
 (* Implementation of type_mapper that recursively visits everything in the
  * type.
  * NOTE: by default it doesn't do anything to Tvars. Include one of the mixins

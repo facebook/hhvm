@@ -21,6 +21,8 @@
 #include <folly/dynamic.h>
 #include <thrift/lib/cpp/protocol/TProtocolException.h>
 #include <thrift/lib/cpp/protocol/TType.h>
+#include <thrift/lib/cpp2/op/Encode.h>
+#include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/detail/Object.h>
 #include <thrift/lib/thrift/gen-cpp2/protocol_types.h>
 
@@ -151,6 +153,22 @@ template <class Protocol, typename Tag>
 Value parseValue(const folly::IOBuf& buf, bool string_to_binary = true) {
   return parseValue<Protocol>(
       buf, type::detail::getBaseType(Tag{}), string_to_binary);
+}
+
+/// Convert protocol::Value to native thrift value.
+template <class Tag>
+auto fromValueStruct(const protocol::Value& v) {
+  // TODO: Use always-on reflection to optimize the performance.
+  return detail::deserializeBinaryProtocol<Tag>(
+      serializeValue<BinaryProtocolWriter>(v).get());
+}
+
+/// Convert protocol::Object to native thrift value.
+template <class Tag>
+auto fromObjectStruct(const protocol::Object& o) {
+  // TODO: Use always-on reflection to optimize the performance.
+  return detail::deserializeBinaryProtocol<Tag>(
+      serializeObject<BinaryProtocolWriter>(o).get());
 }
 
 // Returns whether the protocol::Value/ Object is its intrinsic default.

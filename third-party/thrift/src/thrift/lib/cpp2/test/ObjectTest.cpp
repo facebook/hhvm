@@ -1355,5 +1355,63 @@ TEST(ToAnyTest, simple) {
   // TODO(dokwon): Enable this when we wrap Thrift Any with Adapter.
   // EXPECT_EQ(any, toAny<CompactSerializer::ProtocolWriter>(value));
 }
+
+TEST(ObjectTest, FromValueStruct) {
+  Value value;
+  value.emplace_bool() = true;
+  EXPECT_TRUE(fromValueStruct<type::bool_t>(value));
+  value.emplace_byte() = 10;
+  EXPECT_EQ(fromValueStruct<type::byte_t>(value), 10);
+  value.emplace_i16() = 20;
+  EXPECT_EQ(fromValueStruct<type::i16_t>(value), 20);
+  value.emplace_i32() = 30;
+  EXPECT_EQ(fromValueStruct<type::i32_t>(value), 30);
+  value.emplace_i64() = 40;
+  EXPECT_EQ(fromValueStruct<type::i64_t>(value), 40);
+  value.emplace_float() = 50;
+  EXPECT_EQ(fromValueStruct<type::float_t>(value), 50);
+  value.emplace_double() = 60;
+  EXPECT_EQ(fromValueStruct<type::double_t>(value), 60);
+
+  Value v1;
+  v1.emplace_i32() = 10;
+  Value v2;
+  v2.emplace_i32() = 20;
+  Value v3;
+  v3.emplace_i32() = 30;
+  Value v4;
+  v4.emplace_i32() = 40;
+
+  // List
+  value.emplace_list() = {v1, v3, v2, v4};
+  EXPECT_EQ(
+      fromValueStruct<type::list<type::i32_t>>(value),
+      (std::vector<std::int32_t>{10, 30, 20, 40}));
+
+  // Set
+  value.emplace_set() = {v1, v3, v2, v4};
+  EXPECT_EQ(
+      fromValueStruct<type::set<type::i32_t>>(value),
+      (std::set<std::int32_t>{10, 20, 30, 40}));
+
+  // Map
+  value.emplace_map() = {{v1, v3}, {v2, v4}};
+  EXPECT_EQ(
+      (fromValueStruct<type::map<type::i32_t, type::i32_t>>(value)),
+      (std::map<std::int32_t, std::int32_t>{{10, 30}, {20, 40}}));
+
+  // Struct
+  using facebook::thrift::lib::test::Bar;
+  using Tag = type::struct_t<Bar>;
+
+  Bar bar;
+  bar.field_3() = {"foo", "bar", "baz"};
+  bar.field_4()->field_1() = 42;
+  bar.field_4()->field_2() = "Everything";
+
+  EXPECT_EQ(fromValueStruct<Tag>(asValueStruct<Tag>(bar)), bar);
+  EXPECT_EQ(fromObjectStruct<Tag>(asValueStruct<Tag>(bar).as_object()), bar);
+}
+
 } // namespace
 } // namespace apache::thrift::protocol

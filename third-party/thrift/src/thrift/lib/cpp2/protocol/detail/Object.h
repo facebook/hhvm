@@ -909,5 +909,14 @@ type::AnyData toAny(
   return type::AnyData{data};
 }
 
+template <class Tag>
+auto deserializeBinaryProtocol(folly::IOBuf* buf) {
+  BinaryProtocolReader reader;
+  reader.setInput(buf);
+  type::native_type<Tag> t;
+  op::decode<Tag>(reader, t);
+  return t;
+}
+
 } // namespace detail
 } // namespace apache::thrift::protocol

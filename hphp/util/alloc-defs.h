@@ -18,6 +18,7 @@
 #include <cstddef>
 
 #include <folly/CPortability.h>
+#include "folly/memory/detail/MallocImpl.h"
 #include "hphp/util/low-ptr-def.h"
 
 #if FOLLY_SANITIZE

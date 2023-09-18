@@ -70,7 +70,7 @@ bool createFromCommonRoot(Info* info, const String& sandboxName) {
 
   if (!sroot.empty() && sroot.back() != '/') sroot += '/';
   if (!sname.empty() && sname.back() != '/') sname += '/';
-  info->path = fs::path(sroot + sname);
+  info->path = fs::weakly_canonical(fs::path(sroot + sname)) / "";
 
   String logPath = logsRoot + "/" + sandboxName + "_error.log";
   String accessLogPath = logsRoot + "/" + sandboxName + "_access.log";
@@ -126,8 +126,9 @@ bool createFromUserConfig(Info* info) {
   else if (sp.empty()) return false;
   else if (sp.back() != '/') sp += '/';
 
-  if (sp.front() == '/') info->path = fs::path(sp);
-  else                   info->path = *maybeHomePath / sp;
+  if (sp.front() == '/') info->path = fs::weakly_canonical(sp);
+  else                   info->path = fs::weakly_canonical(*maybeHomePath / sp);
+  info->path /= "";
 
   if (!lp.empty()) {
     if (lp.front() != '/') lp = (*maybeHomePath / lp).native();
@@ -190,7 +191,7 @@ bool Init(Transport* transport) {
     info->sandbox = "default";
     // The transport take precedence over the config file
     if (documentRoot.back() != '/') documentRoot += '/';
-    info->path = documentRoot;
+    info->path = fs::weakly_canonical(documentRoot) / "";
     info->hasDocRoot = true;
     return true;
   }

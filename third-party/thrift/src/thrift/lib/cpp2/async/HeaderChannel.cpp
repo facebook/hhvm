@@ -51,9 +51,14 @@ void HeaderChannel::addRpcOptionHeaders(
     if (auto clientId = header->clientId()) {
       header->setHeader(transport::THeader::kClientId, std::move(*clientId));
     }
+
     if (auto serviceTraceMeta = header->serviceTraceMeta()) {
       header->setHeader(
           transport::THeader::kServiceTraceMeta, std::move(*serviceTraceMeta));
+    }
+
+    if (auto tenantId = header->tenantId()) {
+      header->setHeader(transport::THeader::kTenantId, std::move(*tenantId));
     }
   }
 }

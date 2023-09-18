@@ -370,6 +370,7 @@ class THeader final {
 
   const folly::Optional<std::string>& clientId() const;
   const folly::Optional<std::string>& serviceTraceMeta() const;
+  const folly::Optional<std::string>& tenantId() const;
 
   void setHttpClientParser(
       std::shared_ptr<apache::thrift::util::THttpClientParser>);
@@ -380,6 +381,7 @@ class THeader final {
   void setProcessDelay(std::chrono::milliseconds timeQueued);
   void setCallPriority(apache::thrift::concurrency::PRIORITY priority);
   void setClientId(const std::string& clientId);
+  void setTenantId(const std::string& tenantId);
   void setServiceTraceMeta(const std::string& serviceTraceMeta);
 
   // Utility method for converting TRANSFORMS enum to string
@@ -419,6 +421,7 @@ class THeader final {
   static constexpr std::string_view QUERY_LOAD_HEADER = "load";
   static constexpr std::string_view kClientId = "client_id";
   static constexpr std::string_view kServiceTraceMeta = "service_trace_meta";
+  static constexpr std::string_view kTenantId = "tenant_id";
   static constexpr std::string_view CLIENT_METADATA_HEADER = "client_metadata";
 
  private:
@@ -502,6 +505,7 @@ class THeader final {
     folly::Optional<apache::thrift::concurrency::PRIORITY> priority_;
     folly::Optional<std::string> clientId_;
     folly::Optional<std::string> serviceTraceMeta_;
+    folly::Optional<std::string> tenantId_;
 
     bool allowBigFrames_;
     folly::Optional<CompressionConfig> compressionConfig_;

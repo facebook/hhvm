@@ -1053,6 +1053,11 @@ folly::Optional<std::chrono::milliseconds> THeader::getProcessDelay() const {
 const folly::Optional<std::string>& THeader::clientId() const {
   return c_.clientId_;
 }
+
+const folly::Optional<std::string>& THeader::tenantId() const {
+  return c_.tenantId_;
+}
+
 const folly::Optional<std::string>& THeader::serviceTraceMeta() const {
   return c_.serviceTraceMeta_;
 }
@@ -1085,6 +1090,11 @@ void THeader::setCallPriority(apache::thrift::concurrency::PRIORITY priority) {
 void THeader::setClientId(const std::string& clientId) {
   c_.clientId_ = clientId;
 }
+
+void THeader::setTenantId(const std::string& tenantId) {
+  c_.tenantId_ = tenantId;
+}
+
 void THeader::setServiceTraceMeta(const std::string& serviceTraceMeta) {
   c_.serviceTraceMeta_ = serviceTraceMeta;
 }

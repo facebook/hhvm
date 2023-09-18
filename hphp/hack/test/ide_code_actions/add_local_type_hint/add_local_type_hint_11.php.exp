@@ -1,0 +1,32 @@
+Code actions available:
+------------------------------------------
+Add local type hint for $the_variable (CodeActionKind: refactor) SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"let $the_variable : vec<int> ",
+          "range":{"end":{"character":30,"line":5},"start":{"character":17,"line":5}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Add local type hint for $the_variable"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+<<file:__EnableUnstableFeatures('typed_local_variables')>>
+
+function f() : void {
+  // convert to `let $the_variable: vec<int> = vec[1];`
+  /*range-start*/let $the_variable : vec<int> /*range-end*/ = vec[1];
+}
+

@@ -1,0 +1,42 @@
+Code actions available:
+------------------------------------------
+Extract into method (CodeActionKind: refactor) SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"  private function ${0:method0}(): _ {\n    $x = vec[1];\n    return $x;\n  }\n\n",
+          "range":{"end":{"character":0,"line":3},"start":{"character":0,"line":3}}
+        },
+        {
+          "newText":"$x = $this->${0:method0}();",
+          "range":{"end":{"character":31,"line":4},"start":{"character":19,"line":4}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Extract into method"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+class A {
+  private function ${0:method0}(): _ {
+    $x = vec[1];
+    return $x;
+  }
+
+  public function foo(): void {
+    /*range-start*/$x = $this->${0:method0}();/*range-end*/
+    var_dump($x);
+  }
+}
+

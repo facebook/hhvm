@@ -1,6 +1,8 @@
-//// modules.php
+//// module_x.php
 <?hh
 new module x {}    // default package
+//// modules_a.php
+<?hh
 new module a {}    // pkg1
 
 //// a.php

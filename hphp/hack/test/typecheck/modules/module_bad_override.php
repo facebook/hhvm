@@ -1,8 +1,9 @@
-//// decls.php
+//// module_A.php
 <?hh
-
-
 new module A {}
+
+//// module_D.php
+<?hh
 new module D {}
 
 //// A.php

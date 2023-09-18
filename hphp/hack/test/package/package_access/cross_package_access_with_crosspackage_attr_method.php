@@ -1,8 +1,13 @@
-//// modules.php
+//// module_a.php
 <?hh
 new module a {} // package pkg1
+//// module_b.php
+<?hh
 new module b.b1 {} // package pkg2
+//// module_c.php
+<?hh
 new module c {} // package pkg3
+
 //// b.php
 <?hh
 module b.b1;

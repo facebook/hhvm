@@ -1,0 +1,2 @@
+File "multiple_module_declarations.php", line 3, characters 12-14:
+You cannot declare more than one module within a file (Parsing[1002])

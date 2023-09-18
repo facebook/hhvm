@@ -14,10 +14,9 @@ cross_package_access_bad2.php--a.php:3:14
      2 | module a;
 [2]  3 | public class A {}
 
-cross_package_access_bad2.php--modules.php:4:12
-     2 | new module a {}     // package pkg1
-     3 | new module b.b1 {}  // package pkg2 (include pkg1)
-[3]  4 | new module c {}     // package pkg3 (include pkg2)
+cross_package_access_bad2.php--module_c.php:2:12
+     1 | <?hh
+[3]  2 | new module c {}     // package pkg3 (include pkg2)
 
 PACKAGES.toml:11:11
      9 | includes = ["pkg1", "default"]

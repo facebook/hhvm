@@ -1,10 +1,15 @@
-//// modules.php
+//// module_a.php
 <?hh
-
-
 new module a {}
+
+//// module_A.php
+<?hh
 new module A {}
+
+//// module_B.php
+<?hh
 new module B {}
+
 //// a.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.

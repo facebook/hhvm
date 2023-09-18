@@ -10,8 +10,11 @@ new module foo {}
 Modules do not share a namespace with other symbols. Module names can contain periods `.` to help delineate between directories or logical units. Periods in module names do not currently have any semantic meaning.
 
 ```hack
+//// module_foo.hack
 new module foo {}
+//// module_foobar.hack
 new module foo.bar {}
+//// module_foobartest.hack
 new module foo.bar.test {}
 ```
 

@@ -1,12 +1,11 @@
-//// modules.php
+//// module_foo.php
 <?hh
-
-
-
 namespace A {
   new module foo {}
 }
 
+//// module_bar.php
+<?hh
 namespace {
   new module bar {}
 }

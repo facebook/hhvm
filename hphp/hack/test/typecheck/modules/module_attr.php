@@ -1,9 +1,13 @@
-//// modules.php
+//// module_here.php
 <?hh
-
-
 new module here {}
+
+//// module_there.php
+<?hh
 new module there {}
+
+//// module_another.php
+<?hh
 new module another {}
 
 //// here.php

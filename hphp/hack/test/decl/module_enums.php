@@ -1,8 +1,8 @@
-//// modules.php
+//// module_X.php
 <?hh
-
-
 new module X {}
+//// module_Y.php
+<?hh
 new module Y {}
 
 //// X.php

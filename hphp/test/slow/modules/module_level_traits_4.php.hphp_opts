@@ -1,4 +1,6 @@
---inputs=__DIR__/module_level_traits_modules.inc
+--inputs=__DIR__/module_level_traits_module_a.inc
+--inputs=__DIR__/module_level_traits_module_b.inc
+--inputs=__DIR__/module_level_traits_module_c.inc
 --inputs=__DIR__/module_level_traits_4.inc0
 --inputs=__DIR__/module_level_traits_4.inc1
 --inputs=__DIR__/module_level_traits_4.inc2

@@ -14,10 +14,9 @@ cross_package_access_bad_soft.php--a.php:3:14
      2 | module a;
 [2]  3 | public class A {}
 
-cross_package_access_bad_soft.php--modules.php:4:12
-     2 | new module a {}     // package pkg1
-     3 | new module b.b1 {}  // package pkg2 (include pkg1)
-[3]  4 | new module d.a {} // package pkg4 (soft include pkg2)
+cross_package_access_bad_soft.php--module_c.php:2:12
+     1 | <?hh
+[3]  2 | new module d.a {} // package pkg4 (soft include pkg2)
 
 PACKAGES.toml:15:11
     13 | includes = ["pkg2", "default"]
@@ -43,10 +42,9 @@ cross_package_access_bad_soft.php--b.php:3:14
      2 | module b.b1;
 [2]  3 | public class B1 {}
 
-cross_package_access_bad_soft.php--modules.php:4:12
-     2 | new module a {}     // package pkg1
-     3 | new module b.b1 {}  // package pkg2 (include pkg1)
-[3]  4 | new module d.a {} // package pkg4 (soft include pkg2)
+cross_package_access_bad_soft.php--module_c.php:2:12
+     1 | <?hh
+[3]  2 | new module d.a {} // package pkg4 (soft include pkg2)
 
 PACKAGES.toml:15:11
     13 | includes = ["pkg2", "default"]

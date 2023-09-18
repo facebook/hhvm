@@ -15,11 +15,9 @@ cross_package_access_with_package_syntax_if_nested.php--d.php:3:17
      2 | module d;
 [2]  3 | public function f4(): void {}
 
-cross_package_access_with_package_syntax_if_nested.php--modules.php:3:12
+cross_package_access_with_package_syntax_if_nested.php--module_c.php:2:12
      1 | <?hh
-     2 | new module a {}     // package pkg1
-[3]  3 | new module c {}     // package pkg3 (include pkg2)
-     4 | new module d {}     // package pkg4
+[3]  2 | new module c {}     // package pkg3 (include pkg2)
 
 PACKAGES.toml:11:11
      9 | includes = ["pkg1", "default"]

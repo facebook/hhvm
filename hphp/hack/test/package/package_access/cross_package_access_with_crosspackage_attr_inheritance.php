@@ -1,7 +1,10 @@
-//// modules.php
+//// module_a.php
 <?hh
 new module a {}     // package pkg1
-new module b.b1 {} // package pkg2
+//// module_b.php
+<?hh
+new module b.b1 {}  // package pkg2
+
 //// a.php
 <?hh
 <<file:__EnableUnstableFeatures('package')>>

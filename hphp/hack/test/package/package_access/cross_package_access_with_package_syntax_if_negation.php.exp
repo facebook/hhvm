@@ -15,10 +15,9 @@ cross_package_access_with_package_syntax_if_negation.php--a.php:3:17
      2 | module a;
 [2]  3 | public function f1(): void {}
 
-cross_package_access_with_package_syntax_if_negation.php--modules.php:3:12
+cross_package_access_with_package_syntax_if_negation.php--module_c.php:2:12
      1 | <?hh
-     2 | new module a {}     // package pkg1
-[3]  3 | new module c {}     // package pkg3 (include pkg2)
+[3]  2 | new module c {}     // package pkg3 (include pkg2)
 
 PACKAGES.toml:11:11
      9 | includes = ["pkg1", "default"]
@@ -43,10 +42,9 @@ cross_package_access_with_package_syntax_if_negation.php--a.php:3:17
      2 | module a;
 [2]  3 | public function f1(): void {}
 
-cross_package_access_with_package_syntax_if_negation.php--modules.php:3:12
+cross_package_access_with_package_syntax_if_negation.php--module_c.php:2:12
      1 | <?hh
-     2 | new module a {}     // package pkg1
-[3]  3 | new module c {}     // package pkg3 (include pkg2)
+[3]  2 | new module c {}     // package pkg3 (include pkg2)
 
 PACKAGES.toml:11:11
      9 | includes = ["pkg1", "default"]

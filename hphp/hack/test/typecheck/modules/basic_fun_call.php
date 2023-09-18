@@ -1,8 +1,9 @@
-//// modules.php
+//// moduleA.php
 <?hh
-
-
 new module A {}
+
+//// moduleB.php
+<?hh
 new module B {}
 
 //// A.php

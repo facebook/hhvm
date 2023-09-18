@@ -36,6 +36,7 @@ impl Checker {
 */
 fn check_module_declaration_first(checker: &mut Checker, program: &aast::Program<(), ()>) {
     let mut past_first_def = false;
+    let mut past_module_def = false;
     let mut module_membership = None;
     for def in program {
         match def {
@@ -58,7 +59,11 @@ fn check_module_declaration_first(checker: &mut Checker, program: &aast::Program
                     }
                     _ => {}
                 }
+                if past_module_def {
+                    checker.add_error(&m.name.0, syntax_error::multiple_module_declarations_per_file);
+                }
                 past_first_def = true;
+                past_module_def = true;
             }
             aast::Def::Fun(_)
             | aast::Def::Class(_)

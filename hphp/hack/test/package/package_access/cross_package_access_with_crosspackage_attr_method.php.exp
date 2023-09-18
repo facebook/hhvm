@@ -15,11 +15,9 @@ cross_package_access_with_crosspackage_attr_method.php--b.php:3:10
     2 | module b.b1;
 [2] 3 | function pkg2_call(): void {}
 
-cross_package_access_with_crosspackage_attr_method.php--modules.php:2:12
+cross_package_access_with_crosspackage_attr_method.php--module_a.php:2:12
     1 | <?hh
 [3] 2 | new module a {} // package pkg1
-    3 | new module b.b1 {} // package pkg2
-    4 | new module c {} // package pkg3
 
 PACKAGES.toml:3:11
     1 | [packages]
@@ -45,11 +43,9 @@ cross_package_access_with_crosspackage_attr_method.php--b.php:3:10
      2 | module b.b1;
 [2]  3 | function pkg2_call(): void {}
 
-cross_package_access_with_crosspackage_attr_method.php--modules.php:2:12
+cross_package_access_with_crosspackage_attr_method.php--module_a.php:2:12
      1 | <?hh
 [3]  2 | new module a {} // package pkg1
-     3 | new module b.b1 {} // package pkg2
-     4 | new module c {} // package pkg3
 
 PACKAGES.toml:3:11
      1 | [packages]

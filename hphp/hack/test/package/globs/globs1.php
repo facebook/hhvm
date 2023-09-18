@@ -1,7 +1,11 @@
-//// modules.php
+//// module_foo.php
 <?hh
 new module foo {}         // package pkg3
+//// module_foobar.php
+<?hh
 new module foo.bar {}     // package pkg1
+//// module_foobarbaz.php
+<?hh
 new module foo.bar.baz {} // package pkg2
 
 //// foo.php

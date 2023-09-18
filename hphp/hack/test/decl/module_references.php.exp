@@ -1,33 +1,52 @@
+File root|module_references.php--modules.php
 [("a.b",
   (Shallow_decl_defs.Module
-     { Typing_defs.mdt_pos = [5:12-15]; mdt_exports = None;
-       mdt_imports = None }));
-  ("a.c",
-   (Shallow_decl_defs.Module
-      { Typing_defs.mdt_pos = [8:12-15]; mdt_exports = None;
-        mdt_imports = None }));
-  ("z.c",
-   (Shallow_decl_defs.Module
-      { Typing_defs.mdt_pos = [11:12-15]; mdt_exports = None;
-        mdt_imports = None }));
-  ("a",
-   (Shallow_decl_defs.Module
-      { Typing_defs.mdt_pos = [14:12-13]; mdt_exports = (Some []);
-        mdt_imports = (Some []) }));
-  ("b",
-   (Shallow_decl_defs.Module
-      { Typing_defs.mdt_pos = [21:12-13]; mdt_exports = (Some []);
-        mdt_imports = None }));
-  ("c",
-   (Shallow_decl_defs.Module
-      { Typing_defs.mdt_pos = [26:12-13]; mdt_exports = None;
-        mdt_imports = (Some []) }));
-  ("z",
-   (Shallow_decl_defs.Module
-      { Typing_defs.mdt_pos = [31:12-13];
-        mdt_exports = (Some [(Typing_defs.MRPrefix "z")]);
-        mdt_imports =
-        (Some [(Typing_defs.MRPrefix "a"); (Typing_defs.MRExact "z.c");
-                Typing_defs.MRGlobal])
-        }))
+     { Typing_defs.mdt_pos = [4:12-15]; mdt_exports = None;
+       mdt_imports = None }))
+  ]
+
+File root|module_references.php--modules.php
+[("a.c",
+  (Shallow_decl_defs.Module
+     { Typing_defs.mdt_pos = [3:12-15]; mdt_exports = None;
+       mdt_imports = None }))
+  ]
+
+File root|module_references.php--modules.php
+[("z.c",
+  (Shallow_decl_defs.Module
+     { Typing_defs.mdt_pos = [3:12-15]; mdt_exports = None;
+       mdt_imports = None }))
+  ]
+
+File root|module_references.php--modules.php
+[("a",
+  (Shallow_decl_defs.Module
+     { Typing_defs.mdt_pos = [3:12-13]; mdt_exports = (Some []);
+       mdt_imports = (Some []) }))
+  ]
+
+File root|module_references.php--modules.php
+[("b",
+  (Shallow_decl_defs.Module
+     { Typing_defs.mdt_pos = [3:12-13]; mdt_exports = (Some []);
+       mdt_imports = None }))
+  ]
+
+File root|module_references.php--modules.php
+[("c",
+  (Shallow_decl_defs.Module
+     { Typing_defs.mdt_pos = [3:12-13]; mdt_exports = None;
+       mdt_imports = (Some []) }))
+  ]
+
+File root|module_references.php--modules.php
+[("z",
+  (Shallow_decl_defs.Module
+     { Typing_defs.mdt_pos = [3:12-13];
+       mdt_exports = (Some [(Typing_defs.MRPrefix "z")]);
+       mdt_imports =
+       (Some [(Typing_defs.MRPrefix "a"); (Typing_defs.MRExact "z.c");
+               Typing_defs.MRGlobal])
+       }))
   ]

@@ -1,48 +1,45 @@
 [(Module
-    { md_annotation = (); md_name = ([5:12-15], "a.b"); md_user_attributes = [];
+    { md_annotation = (); md_name = ([4:12-15], "a.b"); md_user_attributes = [];
       md_file_attributes =
-      [{ fa_user_attributes = [{ ua_name = ([3:8-32], "__EnableUnstableFeatures"); ua_params = [((string), [3:33-52], (String "module_references"))] }];
+      [{ fa_user_attributes = [{ ua_name = ([2:8-32], "__EnableUnstableFeatures"); ua_params = [((string), [2:33-52], (String "module_references"))] }];
          fa_namespace =
          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
            ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
          }
         ];
-      md_span = [5:1-6:2]; md_mode = Mstrict; md_doc_comment = None; 
-      md_exports = None; md_imports = None });
-  (Module
-     { md_annotation = (); md_name = ([8:12-15], "a.c"); md_user_attributes = [];
-       md_file_attributes =
-       [{ fa_user_attributes = [{ ua_name = ([3:8-32], "__EnableUnstableFeatures"); ua_params = [((string), [3:33-52], (String "module_references"))] }];
-          fa_namespace =
-          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
-            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-            ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
-          }
-         ];
-       md_span = [8:1-9:2]; md_mode = Mstrict; md_doc_comment = None; 
-       md_exports = None; md_imports = None });
-  (Module
-     { md_annotation = (); md_name = ([11:12-15], "z.c"); md_user_attributes = [];
-       md_file_attributes =
-       [{ fa_user_attributes = [{ ua_name = ([3:8-32], "__EnableUnstableFeatures"); ua_params = [((string), [3:33-52], (String "module_references"))] }];
-          fa_namespace =
-          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
-            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-            ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
-          }
-         ];
-       md_span = [11:1-12:2]; md_mode = Mstrict; md_doc_comment = None; 
-       md_exports = None; md_imports = None });
-  (Module
-     { md_annotation = (); md_name = ([14:12-13], "z"); md_user_attributes = [];
-       md_file_attributes =
-       [{ fa_user_attributes = [{ ua_name = ([3:8-32], "__EnableUnstableFeatures"); ua_params = [((string), [3:33-52], (String "module_references"))] }];
-          fa_namespace =
-          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
-            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-            ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
-          }
-         ];
-       md_span = [14:1-23:2]; md_mode = Mstrict; md_doc_comment = None; 
-       md_exports = (Some [(MDNamePrefix ([21:5-8], "a"))]); md_imports = (Some [(MDNamePrefix ([16:5-8], "a")); (MDNameExact ([17:5-11], "z.c")); (MDNameGlobal [18:5-11])]) })
+      md_span = [4:1-5:2]; md_mode = Mstrict; md_doc_comment = None; 
+      md_exports = None; md_imports = None })[(Module
+    { md_annotation = (); md_name = ([3:12-15], "a.c"); md_user_attributes = [];
+      md_file_attributes =
+      [{ fa_user_attributes = [{ ua_name = ([2:8-32], "__EnableUnstableFeatures"); ua_params = [((string), [2:33-52], (String "module_references"))] }];
+         fa_namespace =
+         { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+           ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+           ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
+         }
+        ];
+      md_span = [3:1-4:2]; md_mode = Mstrict; md_doc_comment = None; 
+      md_exports = None; md_imports = None })[(Module
+    { md_annotation = (); md_name = ([3:12-13], "z"); md_user_attributes = [];
+      md_file_attributes =
+      [{ fa_user_attributes = [{ ua_name = ([2:8-32], "__EnableUnstableFeatures"); ua_params = [((string), [2:33-52], (String "module_references"))] }];
+         fa_namespace =
+         { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+           ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+           ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
+         }
+        ];
+      md_span = [3:1-12:2]; md_mode = Mstrict; md_doc_comment = None; 
+      md_exports = (Some [(MDNamePrefix ([10:5-8], "a"))]); md_imports = (Some [(MDNamePrefix ([5:5-8], "a")); (MDNameExact ([6:5-11], "z.c")); (MDNameGlobal [7:5-11])]) })[(Module
+    { md_annotation = (); md_name = ([3:12-15], "z.c"); md_user_attributes = [];
+      md_file_attributes =
+      [{ fa_user_attributes = [{ ua_name = ([2:8-32], "__EnableUnstableFeatures"); ua_params = [((string), [2:33-52], (String "module_references"))] }];
+         fa_namespace =
+         { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+           ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+           ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
+         }
+        ];
+      md_span = [3:1-4:2]; md_mode = Mstrict; md_doc_comment = None; 
+      md_exports = None; md_imports = None })

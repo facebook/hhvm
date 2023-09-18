@@ -1,9 +1,11 @@
-//// modules.php
+//// module_here.php
 <?hh
-
-
 new module here {}
+
+//// module_there.php
+<?hh
 new module there {}
+
 //// here.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.

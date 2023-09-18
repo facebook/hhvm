@@ -1,8 +1,11 @@
-//// modules.php
+//// module_here.php
 <?hh
-
 new module here {}
+//// module_there.php
+<?hh
 new module there {}
+//// module_elsewhere.php
+<?hh
 new module elsewhere {}
 
 //// here.php

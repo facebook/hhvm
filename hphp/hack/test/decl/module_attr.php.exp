@@ -1,16 +1,22 @@
-File root|module_attr.php--modules.php
+File root|module_attr.php--module_here.php
 [("here",
   (Shallow_decl_defs.Module
-     { Typing_defs.mdt_pos = [3:12-16]; mdt_exports = None;
-       mdt_imports = None }));
-  ("there",
-   (Shallow_decl_defs.Module
-      { Typing_defs.mdt_pos = [4:12-17]; mdt_exports = None;
-        mdt_imports = None }));
-  ("elsewhere",
-   (Shallow_decl_defs.Module
-      { Typing_defs.mdt_pos = [5:12-21]; mdt_exports = None;
-        mdt_imports = None }))
+     { Typing_defs.mdt_pos = [2:12-16]; mdt_exports = None;
+       mdt_imports = None }))
+  ]
+
+File root|module_attr.php--module_there.php
+[("there",
+  (Shallow_decl_defs.Module
+     { Typing_defs.mdt_pos = [2:12-17]; mdt_exports = None;
+       mdt_imports = None }))
+  ]
+
+File root|module_attr.php--module_elsewhere.php
+[("elsewhere",
+  (Shallow_decl_defs.Module
+     { Typing_defs.mdt_pos = [2:12-21]; mdt_exports = None;
+       mdt_imports = None }))
   ]
 
 File root|module_attr.php--here.php

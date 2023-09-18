@@ -74,6 +74,10 @@ class McThriftContext {
     return underlying_->getConnectionContext()->getHeader();
   }
 
+  apache::thrift::HandlerCallback<Reply>& getThriftHandlerCallback() {
+    return *underlying_;
+  }
+
  private:
   std::unique_ptr<apache::thrift::HandlerCallback<Reply>> underlying_;
 };

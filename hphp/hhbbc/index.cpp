@@ -12028,9 +12028,7 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
 
     assertx(actions.size() == toProcess.size());
     std::vector<SString> roots;
-    std::vector<SString> markProcessed;
     roots.reserve(actions.size());
-    markProcessed.reserve(actions.size());
     // Clear the list of classes to process. It will be repopulated
     // with any classes marked as Defer or Splits.
     toProcess.clear();
@@ -12059,7 +12057,6 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
         },
         [&] (Root r) {
           roots.emplace_back(r.cls);
-          markProcessed.emplace_back(r.cls);
         },
         [&] (const Split& s) {
           auto& meta = subclassMeta.meta.at(s.cls);
@@ -12068,7 +12065,6 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
           auto& splits = const_cast<std::vector<Split::Data>&>(s.splits);
           for (auto& [name, deps, ptr] : splits) {
             roots.emplace_back(name);
-            markProcessed.emplace_back(name);
             splitDeps.emplace(name, std::move(deps));
             splitPtrs.emplace(name, std::move(ptr));
           }
@@ -12109,6 +12105,9 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
       }
     );
 
+    std::vector<SString> markProcessed;
+    markProcessed.reserve(actions.size());
+
     // The output of assign_hierarchical_work is just buckets with the
     // names. We need to map those to classes or edge nodes and put
     // them in the correct data structure in the output. If there's a
@@ -12133,9 +12132,9 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
       auto& bucket = out.buckets.back().back();
       // Separate out any of the "roots" which are actually leafs.
       for (auto const cls : w.classes) {
+        markProcessed.emplace_back(cls);
         if (leafs.count(cls)) {
           bucket.leafs.emplace_back(cls);
-          markProcessed.emplace_back(cls);
         } else {
           add(cls, bucket.classes, bucket.splits, bucket.edges);
         }

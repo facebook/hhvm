@@ -43,6 +43,9 @@ let union_by_names x y =
     module_tast_hashes = SMap.union x.module_tast_hashes y.module_tast_hashes;
   }
 
+let hash_tasts_by_file : Tast.by_names Relative_path.Map.t -> t =
+  Relative_path.Map.map ~f:hash_tasts
+
 let error_while_hashing
     { Tast.fun_tasts; class_tasts; typedef_tasts; gconst_tasts; module_tasts } :
     by_names =

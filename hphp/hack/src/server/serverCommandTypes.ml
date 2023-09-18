@@ -344,7 +344,9 @@ type _ t =
       file_names: file_input list;
       max_errors: int option;
     }
-      -> (Errors.finalized_error list * int) t
+      -> ((Errors.finalized_error list * int)
+         * Tast.program Tast_with_dynamic.t Relative_path.Map.t)
+         t
   | INFER_TYPE : file_input * int * int -> InferAtPosService.result t
   | INFER_TYPE_BATCH :
       (string * int * int * (int * int) option) list

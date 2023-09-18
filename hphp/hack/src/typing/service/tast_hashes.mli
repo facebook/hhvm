@@ -22,3 +22,5 @@ val finalize :
   recheck_id:string option ->
   t ->
   unit
+
+val hash_tasts_by_file : Tast.by_names Relative_path.Map.t -> t

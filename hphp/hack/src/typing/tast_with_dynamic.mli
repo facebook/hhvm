@@ -9,7 +9,7 @@ type 'a t = {
   under_normal_assumptions: 'a;
   under_dynamic_assumptions: 'a option;
 }
-[@@deriving eq, hash]
+[@@deriving eq, hash, show]
 
 val mk_without_dynamic : 'a -> 'a t
 

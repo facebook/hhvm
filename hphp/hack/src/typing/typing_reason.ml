@@ -988,3 +988,126 @@ let compare : type phase. phase t_ -> phase t_ -> int =
     Pos_or_decl.compare (to_raw_pos r1) (to_raw_pos r2)
 
 let none = Rnone
+
+module Visitor = struct
+  class map =
+    object (this)
+      method on_reason r =
+        match r with
+        | Rtype_access (r, l) ->
+          Rtype_access
+            ( this#on_reason r,
+              List.map l ~f:(fun (r, x) -> (this#on_reason r, this#on_lazy x))
+            )
+        | Rtypeconst (r1, x, s, r2) ->
+          Rtypeconst (this#on_reason r1, x, this#on_lazy s, this#on_reason r2)
+        | Rarith_ret_float (x, r, z) -> Rarith_ret_float (x, this#on_reason r, z)
+        | Rarith_ret_num (x, r, z) -> Rarith_ret_num (x, this#on_reason r, z)
+        | Rlost_info (x, r, z) -> Rlost_info (x, this#on_reason r, z)
+        | Rformat (x, y, r) -> Rformat (x, y, this#on_reason r)
+        | Rinstantiate (r1, x, r2) ->
+          Rinstantiate (this#on_reason r1, x, this#on_reason r2)
+        | Rexpr_dep_type (r, y, z) -> Rexpr_dep_type (this#on_reason r, y, z)
+        | Rcontravariant_generic (x, y) ->
+          Rcontravariant_generic (this#on_reason x, y)
+        | Rinvariant_generic (r, y) -> Rinvariant_generic (this#on_reason r, y)
+        | Rlambda_param (x, r) -> Rlambda_param (x, this#on_reason r)
+        | Rdynamic_coercion r -> Rdynamic_coercion (this#on_reason r)
+        | Rdynamic_partial_enforcement (x, y, r) ->
+          Rdynamic_partial_enforcement (x, y, this#on_reason r)
+        | Rrigid_tvar_escape (x, y, z, r) ->
+          Rrigid_tvar_escape (x, y, z, this#on_reason r)
+        | Ropaque_type_from_module (x, y, r) ->
+          Ropaque_type_from_module (x, y, this#on_reason r)
+        | Rnone -> Rnone
+        | Rinvalid -> Rinvalid
+        | Rwitness x -> Rwitness x
+        | Rwitness_from_decl x -> Rwitness_from_decl x
+        | Ridx_vector x -> Ridx_vector x
+        | Ridx_vector_from_decl x -> Ridx_vector_from_decl x
+        | Rforeach x -> Rforeach x
+        | Rasyncforeach x -> Rasyncforeach x
+        | Rarith x -> Rarith x
+        | Rarith_ret x -> Rarith_ret x
+        | Rarith_ret_int x -> Rarith_ret_int x
+        | Rarith_dynamic x -> Rarith_dynamic x
+        | Rbitwise_dynamic x -> Rbitwise_dynamic x
+        | Rincdec_dynamic x -> Rincdec_dynamic x
+        | Rcomp x -> Rcomp x
+        | Rconcat_ret x -> Rconcat_ret x
+        | Rlogic_ret x -> Rlogic_ret x
+        | Rbitwise x -> Rbitwise x
+        | Rbitwise_ret x -> Rbitwise_ret x
+        | Rno_return x -> Rno_return x
+        | Rno_return_async x -> Rno_return_async x
+        | Rhint x -> Rhint x
+        | Rthrow x -> Rthrow x
+        | Rplaceholder x -> Rplaceholder x
+        | Rret_div x -> Rret_div x
+        | Ryield_gen x -> Ryield_gen x
+        | Ryield_asyncgen x -> Ryield_asyncgen x
+        | Ryield_asyncnull x -> Ryield_asyncnull x
+        | Ryield_send x -> Ryield_send x
+        | Runknown_class x -> Runknown_class x
+        | Rvar_param x -> Rvar_param x
+        | Rvar_param_from_decl x -> Rvar_param_from_decl x
+        | Rnullsafe_op x -> Rnullsafe_op x
+        | Rtconst_no_cstr x -> Rtconst_no_cstr x
+        | Ris x -> Ris x
+        | Ras x -> Ras x
+        | Requal x -> Requal x
+        | Rvarray_or_darray_key x -> Rvarray_or_darray_key x
+        | Rvec_or_dict_key x -> Rvec_or_dict_key x
+        | Rusing x -> Rusing x
+        | Rdynamic_prop x -> Rdynamic_prop x
+        | Rdynamic_call x -> Rdynamic_call x
+        | Rdynamic_construct x -> Rdynamic_construct x
+        | Ridx_dict x -> Ridx_dict x
+        | Rset_element x -> Rset_element x
+        | Rregex x -> Rregex x
+        | Rtype_variable x -> Rtype_variable x
+        | Rsolve_fail x -> Rsolve_fail x
+        | Rshape_literal x -> Rshape_literal x
+        | Renforceable x -> Renforceable x
+        | Rdestructure x -> Rdestructure x
+        | Rkey_value_collection_key x -> Rkey_value_collection_key x
+        | Rglobal_class_prop x -> Rglobal_class_prop x
+        | Rglobal_fun_param x -> Rglobal_fun_param x
+        | Rglobal_fun_ret x -> Rglobal_fun_ret x
+        | Rsplice x -> Rsplice x
+        | Ret_boolean x -> Ret_boolean x
+        | Rdefault_capability x -> Rdefault_capability x
+        | Rconcat_operand x -> Rconcat_operand x
+        | Rinterp_operand x -> Rinterp_operand x
+        | Rsupport_dynamic_type x -> Rsupport_dynamic_type x
+        | Rmissing_class x -> Rmissing_class x
+        | Rinout_param x -> Rinout_param x
+        | Rtype_variable_error x -> Rtype_variable_error x
+        | Ridx (x, y) -> Ridx (x, y)
+        | Rret_fun_kind (x, y) -> Rret_fun_kind (x, y)
+        | Rret_fun_kind_from_decl (x, y) -> Rret_fun_kind_from_decl (x, y)
+        | Rpredicated (x, y) -> Rpredicated (x, y)
+        | Rmissing_optional_field (x, y) -> Rmissing_optional_field (x, y)
+        | Runset_field (x, y) -> Runset_field (x, y)
+        | Rimplicit_upper_bound (x, y) -> Rimplicit_upper_bound (x, y)
+        | Rcstr_on_generics (x, y) -> Rcstr_on_generics (x, y)
+        | Rshape (x, y) -> Rshape (x, y)
+        | Rclass_class (x, y) -> Rclass_class (x, y)
+        | Runpack_param (x, y, z) -> Runpack_param (x, y, z)
+        | Rtype_variable_generics (x, y, z) -> Rtype_variable_generics (x, y, z)
+        | Rglobal_type_variable_generics (x, y, z) ->
+          Rglobal_type_variable_generics (x, y, z)
+
+      method on_lazy l = l
+    end
+end
+
+let force_lazy_values r =
+  let visitor =
+    object
+      inherit Visitor.map
+
+      method! on_lazy l = Lazy.force l |> Lazy.from_val
+    end
+  in
+  visitor#on_reason r

@@ -11,7 +11,7 @@ type 'a t = {
   under_normal_assumptions: 'a;
   under_dynamic_assumptions: 'a option;
 }
-[@@deriving eq, hash]
+[@@deriving eq, hash, show]
 
 let mk_without_dynamic under_normal_assumptions =
   { under_normal_assumptions; under_dynamic_assumptions = None }

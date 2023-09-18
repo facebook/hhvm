@@ -158,6 +158,50 @@ let empty_by_names =
     module_tasts = SMap.empty;
   }
 
+let program_by_names program =
+  Hh_prelude.List.fold program ~init:empty_by_names ~f:(fun acc def ->
+      match def with
+      | Fun f ->
+        {
+          acc with
+          fun_tasts =
+            SMap.add
+              (snd f.fd_name)
+              (Tast_with_dynamic.mk_without_dynamic def)
+              acc.fun_tasts;
+        }
+      | Class c ->
+        {
+          acc with
+          class_tasts =
+            SMap.add
+              (snd c.c_name)
+              (Tast_with_dynamic.mk_without_dynamic def)
+              acc.class_tasts;
+        }
+      | Typedef td ->
+        {
+          acc with
+          typedef_tasts = SMap.add (snd td.t_name) def acc.typedef_tasts;
+        }
+      | Constant c ->
+        {
+          acc with
+          gconst_tasts = SMap.add (snd c.cst_name) def acc.gconst_tasts;
+        }
+      | Module m ->
+        {
+          acc with
+          module_tasts = SMap.add (snd m.md_name) def acc.module_tasts;
+        }
+      | Stmt _
+      | Namespace _
+      | NamespaceUse _
+      | SetNamespaceEnv _
+      | FileAttributes _
+      | SetModule _ ->
+        acc)
+
 let tasts_as_list
     ({ fun_tasts; class_tasts; typedef_tasts; gconst_tasts; module_tasts } :
       by_names) : def Tast_with_dynamic.t list =
@@ -238,3 +282,41 @@ let to_nast p = nast_converter#on_program () p
 let to_nast_expr (tast : expr) : Nast.expr = nast_converter#on_expr () tast
 
 let to_nast_class_id_ cid = nast_converter#on_class_id_ () cid
+
+let force_lazy_values_ty (ty : Typing_defs_core.locl_ty) :
+    Typing_defs_core.locl_ty =
+  let visitor =
+    object
+      inherit [unit] Type_mapper_generic.deep_type_mapper
+
+      method! on_reason () r = ((), Typing_reason.force_lazy_values r)
+    end
+  in
+  let ((), ty) = visitor#on_type () ty in
+  ty
+
+(** Force any lazy value in the TAST. This is useful to serialize the TAST,
+  for example prior to returning over RPC or storing in the shared heap. *)
+let force_lazy_values (program : program) =
+  let visitor =
+    object
+      inherit [_] Aast.map
+
+      method on_'ex _env ty = force_lazy_values_ty ty
+
+      method on_'en _env (saved_env : saved_env) = saved_env
+    end
+  in
+  visitor#on_program () program
+
+let force_lazy_values x =
+  let { Tast_with_dynamic.under_normal_assumptions; under_dynamic_assumptions }
+      =
+    x
+  in
+  {
+    Tast_with_dynamic.under_normal_assumptions =
+      force_lazy_values under_normal_assumptions;
+    under_dynamic_assumptions =
+      Option.map under_dynamic_assumptions ~f:force_lazy_values;
+  }

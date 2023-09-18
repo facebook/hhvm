@@ -688,12 +688,25 @@ let main_internal
       | _ -> ServerCommandTypes.FileName (expand_path filename)
     in
     let file_inputs = List.map ~f:file_input filenames in
-    let%lwt ((error_list, dropped_count), telemetry) =
+    let%lwt (((error_list, dropped_count), tasts), telemetry) =
       rpc
         args
         (Rpc.STATUS_SINGLE
            { file_names = file_inputs; max_errors = args.max_errors })
     in
+    if local_config.ServerLocalConfig.dump_tast_hashes then (
+      Printf.printf "TAST hashes:\n\n";
+      Relative_path.Map.map tasts ~f:(fun tast ->
+          Tast.program_by_names tast.Tast_with_dynamic.under_normal_assumptions)
+      |> Tast_hashes.hash_tasts_by_file
+      |> Tast_hashes.yojson_of_t
+      |> Yojson.Safe.pretty_to_channel Stdlib.stdout;
+      Printf.printf
+        "\n\n\nTASTs:\n\n%s\n%!"
+        (Relative_path.Map.show (Tast_with_dynamic.pp Tast.pp_program) tasts);
+      ()
+    );
+
     let status =
       {
         error_list;

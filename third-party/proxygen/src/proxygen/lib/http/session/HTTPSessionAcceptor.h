@@ -100,8 +100,8 @@ class HTTPSessionAcceptor
    * override this function to provide their own more sophisticated
    * controller here.
    */
-  virtual HTTPSessionController* getController() {
-    return &simpleController_;
+  virtual std::shared_ptr<HTTPSessionController> getController() {
+    return simpleController_;
   }
 
   HTTPSessionStats* downstreamSessionStats_{nullptr};
@@ -136,7 +136,7 @@ class HTTPSessionAcceptor
 
   std::shared_ptr<HTTPCodecFactory> codecFactory_{};
 
-  SimpleController simpleController_;
+  std::shared_ptr<SimpleController> simpleController_;
 
   HTTPSession::InfoCallback* sessionInfoCb_{nullptr};
 

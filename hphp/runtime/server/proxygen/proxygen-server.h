@@ -73,19 +73,18 @@ struct HPHPSessionAcceptor : proxygen::HTTPSessionAcceptor {
 #endif
     proxygen::ProxygenError error) override;
 
-  proxygen::HTTPSessionController* getController() override {
+  std::shared_ptr<proxygen::HTTPSessionController> getController() override {
     return m_controllerPtr;
   }
 
-  void setController(proxygen::HTTPSessionController* controller) {
+  void setController(std::shared_ptr<proxygen::HTTPSessionController> controller) {
     m_controllerPtr = controller;
   }
 
  private:
   ProxygenServer *m_server;
   HPHPWorkerThread *m_worker;
-  proxygen::SimpleController m_simpleController{this};
-  proxygen::HTTPSessionController* m_controllerPtr{&m_simpleController};
+  std::shared_ptr<proxygen::HTTPSessionController> m_controllerPtr;
 };
 
 using ResponseMessageQueue = folly::NotificationQueue<ResponseMessage>;
@@ -310,4 +309,3 @@ struct ProxygenTransportTraits {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

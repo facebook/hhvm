@@ -1,0 +1,19 @@
+Warning: Accessing class A outside the active deployment is not allowed in %s/call-soft-1.php on line 11
+
+Warning: Accessing class A outside the active deployment is not allowed in %s/call-soft-1.php on line 13
+string(4) "in b"
+
+Warning: Accessing class A outside the active deployment is not allowed in %s/call-soft-1.php on line 14
+string(4) "in b"
+
+Warning: Accessing class A outside the active deployment is not allowed in %s/call-soft-1.php on line 16
+string(4) "in b"
+
+Warning: Accessing class A outside the active deployment is not allowed in %s/call-soft-1.php on line 17
+string(4) "in b"
+
+Warning: Calling function f outside the active deployment is not allowed in %s/call-soft-1.php on line 19
+string(4) "in f"
+
+Warning: Calling function f outside the active deployment is not allowed in %s/call-soft-1.php on line 20
+string(4) "in f"

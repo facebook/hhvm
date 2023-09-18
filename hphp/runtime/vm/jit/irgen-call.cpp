@@ -2001,7 +2001,6 @@ void emitFCallClsMethod(IRGS& env, FCallArgs fca, const StringData* clsHint,
     op == IsLogAsDynamicCallOp::DontLogAsDynamicCall &&
     !RO::EvalLogKnownMethodsAsDynamicCalls;
 
-  emitModuleBoundaryCheck(env, cls, false);
   fcallClsMethodCommon(env, fca, clsHint, cls, methName, false,
                        true, suppressDynCallCheck,
                        2);

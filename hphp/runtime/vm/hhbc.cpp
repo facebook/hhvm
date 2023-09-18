@@ -621,7 +621,10 @@ void staticStreamer(const TypedValue* tv, std::string& out) {
                                        tv->m_data.pstr->size()));
       return;
     case KindOfLazyClass:
-      out += tv->m_data.plazyclass.name()->data();
+      folly::format(&out, "{}::class", tv->m_data.plazyclass.name());
+      return;
+    case KindOfEnumClassLabel:
+      folly::format(&out, "#{}", tv->m_data.pstr);
       return;
     case KindOfPersistentVec:
     case KindOfVec:
@@ -638,7 +641,6 @@ void staticStreamer(const TypedValue* tv, std::string& out) {
     case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
-    case KindOfEnumClassLabel:
       break;
   }
   not_reached();

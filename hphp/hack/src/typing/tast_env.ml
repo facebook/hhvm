@@ -243,12 +243,7 @@ let restore_saved_env env saved_env =
   {
     env with
     Env.decl_env;
-    Env.genv =
-      {
-        env.Env.genv with
-        Env.tcopt = saved_env.Tast.tcopt;
-        Env.condition_types = saved_env.Tast.condition_types;
-      };
+    Env.genv = { env.Env.genv with Env.tcopt = saved_env.Tast.tcopt };
     Env.inference_env =
       Typing_inference_env.simple_merge
         env.Env.inference_env

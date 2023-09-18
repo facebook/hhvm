@@ -524,10 +524,6 @@ val in_try : env -> (env -> env * 'a) -> env * 'a
 
 val save : TPEnv.t -> env -> Tast.saved_env
 
-val set_condition_type : env -> SMap.key -> Typing_defs.decl_ty -> env
-
-val get_condition_type : env -> SMap.key -> Typing_defs.decl_ty option
-
 val add_subtype_prop : env -> Typing_logic.subtype_prop -> env
 
 val set_tyvar_variance_i :

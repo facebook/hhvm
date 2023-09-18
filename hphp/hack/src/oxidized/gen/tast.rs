@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2537c375f61a4ae9338b381b0392ceb7>>
+// @generated SignedSource<<bfb0ae80ac5ee059398102d4205ee7d6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -97,7 +97,6 @@ pub struct SavedEnv {
     pub tcopt: typechecker_options::TypecheckerOptions,
     pub inference_env: typing_inference_env::TypingInferenceEnv,
     pub tpenv: type_parameter_env::TypeParameterEnv,
-    pub condition_types: s_map::SMap<Ty>,
     pub fun_tast_info: Option<FunTastInfo>,
     /// Indicates how many types the callable was checked and under what
     /// assumptions.

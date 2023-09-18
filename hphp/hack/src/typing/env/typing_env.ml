@@ -539,15 +539,6 @@ let set_env_callable_pos env callable_pos =
 let set_fun_tast_info env fun_tast_info =
   { env with fun_tast_info = Some fun_tast_info }
 
-let set_condition_type env n ty =
-  {
-    env with
-    genv =
-      { env.genv with condition_types = SMap.add n ty env.genv.condition_types };
-  }
-
-let get_condition_type env n = SMap.find_opt n env.genv.condition_types
-
 let fun_is_constructor env = env.genv.fun_is_ctor
 
 let set_fun_is_constructor env is_ctor =
@@ -1473,7 +1464,6 @@ let save local_tpenv env =
     Tast.tcopt = get_tcopt env;
     Tast.inference_env = env.inference_env;
     Tast.tpenv = TPEnv.union local_tpenv env.tpenv;
-    Tast.condition_types = env.genv.condition_types;
     Tast.fun_tast_info = env.fun_tast_info;
     Tast.checked = env.checked;
   }

@@ -73,11 +73,6 @@ and genv = {
   return: Typing_env_return_info.t;
   params: (locl_ty * Pos.t * locl_ty option) Local_id.Map.t;
       (** For each function/method parameter, its type, position, and inout "return" type. *)
-  condition_types: decl_ty SMap.t;
-      (** condition types associated with parameters.
-          For every mayberx parameter that has condition type we create
-          fresh type parameter (see: make_local_param_ty) and store mapping
-          fresh type name -> condition type in env so it can be retrieved later *)
   parent: (string * decl_ty) option;
       (** Identifier and type of the parent class if it exists *)
   self: (string * locl_ty) option;

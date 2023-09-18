@@ -78,7 +78,6 @@ and genv = {
   readonly: bool;
   return: Typing_env_return_info.t;
   params: (locl_ty * Pos.t * locl_ty option) Local_id.Map.t;
-  condition_types: decl_ty SMap.t;
   parent: (string * decl_ty) option;
   self: (string * locl_ty) option;
   static: bool;
@@ -128,7 +127,6 @@ let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
             return_disposable = false;
           };
         params = Local_id.Map.empty;
-        condition_types = SMap.empty;
         self = None;
         static = false;
         val_kind = Other;

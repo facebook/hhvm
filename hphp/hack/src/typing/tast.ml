@@ -71,7 +71,6 @@ type saved_env = {
   tcopt: TypecheckerOptions.t; [@opaque]
   inference_env: Typing_inference_env.t;
   tpenv: Type_parameter_env.t;
-  condition_types: decl_ty SMap.t;
   fun_tast_info: fun_tast_info option;
   checked: check_status;
       (** Indicates how many types the callable was checked and under what
@@ -228,7 +227,6 @@ let empty_saved_env tcopt : saved_env =
     tcopt;
     inference_env = Typing_inference_env.empty_inference_env;
     tpenv = Type_parameter_env.empty;
-    condition_types = SMap.empty;
     fun_tast_info = None;
     checked = COnce;
   }

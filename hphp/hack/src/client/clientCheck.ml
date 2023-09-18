@@ -692,9 +692,16 @@ let main_internal
       rpc
         args
         (Rpc.STATUS_SINGLE
-           { file_names = file_inputs; max_errors = args.max_errors })
+           {
+             file_names = file_inputs;
+             max_errors = args.max_errors;
+             return_expanded_tast =
+               local_config.ServerLocalConfig.dump_tast_hashes;
+           })
     in
-    if local_config.ServerLocalConfig.dump_tast_hashes then (
+    (match tasts with
+    | None -> ()
+    | Some tasts ->
       Printf.printf "TAST hashes:\n\n";
       Relative_path.Map.map tasts ~f:(fun tast ->
           Tast.program_by_names tast.Tast_with_dynamic.under_normal_assumptions)
@@ -704,8 +711,7 @@ let main_internal
       Printf.printf
         "\n\n\nTASTs:\n\n%s\n%!"
         (Relative_path.Map.show (Tast_with_dynamic.pp Tast.pp_program) tasts);
-      ()
-    );
+      ());
 
     let status =
       {

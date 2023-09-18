@@ -320,15 +320,3 @@ let force_lazy_values (program : program) =
     end
   in
   visitor#on_program () program
-
-let force_lazy_values x =
-  let { Tast_with_dynamic.under_normal_assumptions; under_dynamic_assumptions }
-      =
-    x
-  in
-  {
-    Tast_with_dynamic.under_normal_assumptions =
-      force_lazy_values under_normal_assumptions;
-    under_dynamic_assumptions =
-      Option.map under_dynamic_assumptions ~f:force_lazy_values;
-  }

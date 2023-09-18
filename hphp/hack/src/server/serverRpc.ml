@@ -61,12 +61,24 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     ( env,
       { Server_status.liveness; error_list; dropped_count; last_recheck_stats }
     )
-  | STATUS_SINGLE { file_names; max_errors } ->
+  | STATUS_SINGLE { file_names; max_errors; return_expanded_tast } ->
     let ctx = Provider_utils.ctx_from_server_env env in
     let (errors, tasts) = ServerStatusSingle.go file_names ctx in
     let errors = take_max_errors errors max_errors in
     (* Unforced lazy values are closures which make serialization over RPC fail. *)
-    let tasts = Relative_path.Map.map tasts ~f:Tast.force_lazy_values in
+    let tasts =
+      if return_expanded_tast then
+        Some
+          (Relative_path.Map.map
+             tasts
+             ~f:
+               (Tast_with_dynamic.map ~f:(fun tast ->
+                    tast
+                    |> Tast_expand.expand_program ctx
+                    |> Tast.force_lazy_values)))
+      else
+        None
+    in
     (env, (errors, tasts))
   | INFER_TYPE (file_input, line, column) ->
     let path =

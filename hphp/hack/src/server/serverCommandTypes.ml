@@ -343,9 +343,10 @@ type _ t =
   | STATUS_SINGLE : {
       file_names: file_input list;
       max_errors: int option;
+      return_expanded_tast: bool;
     }
       -> ((Errors.finalized_error list * int)
-         * Tast.program Tast_with_dynamic.t Relative_path.Map.t)
+         * Tast.program Tast_with_dynamic.t Relative_path.Map.t option)
          t
   | INFER_TYPE : file_input * int * int -> InferAtPosService.result t
   | INFER_TYPE_BATCH :

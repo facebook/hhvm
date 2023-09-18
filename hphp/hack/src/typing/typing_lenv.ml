@@ -70,10 +70,10 @@ let union
       Pos.none
   in
   let eid =
-    if Ident.equal eid1 eid2 then
+    if Ident_provider.Ident.equal eid1 eid2 then
       eid1
     else
-      Ident.tmp ()
+      Env.make_ident env
   in
   match bound_ty with
   | None ->

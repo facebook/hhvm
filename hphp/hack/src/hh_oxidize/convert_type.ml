@@ -35,10 +35,11 @@ let rec is_copy ty =
        || String.equal ty "std::cell::RefCell")
        && is_copy (List.hd_exn targs)
 
-(* A list of (<module>, <ty1>, <ty2>) tuples where we need to add indirection.
-   In the definition of <module>::<ty1>, instances of <ty2> need to be boxed
-   (for instances of mutual recursion where we would otherwise define types of
-   infinite size). *)
+(** A list of (<module>, <ty1>, <ty2>) tuples where we need to add indirection,
+  i.e. add a reference.
+  In the definition of <module>::<ty1>, instances of <ty2> need to be boxed
+  (for instances of mutual recursion where we would otherwise define types of
+  infinite size). *)
 let add_indirection_between () =
   [
     ("typing_defs_core", "ConstraintType", "ConstraintType_");
@@ -138,6 +139,9 @@ let rec core_type ?(seen_indirection = false) (ct : core_type) : Rust_type.t =
       rust_simple_type "std::path::PathBuf"
   | Ptyp_constr ({ txt = Ldot (Lident "Hash", "hash_value"); _ }, []) ->
     (* Hash.hash_value *)
+    rust_type "isize" [] []
+  | Ptyp_constr
+      ({ txt = Ldot (Ldot (Lident "Ident_provider", "Ident"), "t"); _ }, []) ->
     rust_type "isize" [] []
   | Ptyp_constr (id, args) ->
     let id =

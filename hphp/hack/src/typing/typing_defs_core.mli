@@ -142,7 +142,7 @@ type dependent_type =
    *  The expression $x would have a reference Ident.t
    *  The expression $x->foo() would have a different one
    *)
-  | DTexpr of Ident.t
+  | DTexpr of Ident_provider.Ident.t
 [@@deriving eq, ord, show]
 
 type user_attribute_param =

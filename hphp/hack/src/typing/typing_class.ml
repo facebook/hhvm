@@ -153,7 +153,7 @@ let method_def ~is_disposable env cls m =
   in
   let initial_env = env in
   (* reset the expression dependent display ids for each method body *)
-  Reason.expr_display_id_map := IMap.empty;
+  Reason.reset_expr_display_id_map ();
   let pos = fst m.m_name in
   let env = Env.open_tyvars env (fst m.m_name) in
   let env = Env.reinitialize_locals env in

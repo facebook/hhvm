@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5df09e7bcd3abfa6a016e00669296eb0>>
+// @generated SignedSource<<972d3570ea7384cde1831dcc1d2b1197>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -225,7 +225,7 @@ pub use oxidized::typing_defs_core::ConsistentKind;
 #[rust_to_ocaml(attr = "deriving (eq, hash, ord, show)")]
 #[repr(C, u8)]
 pub enum DependentType {
-    DTexpr(ident::Ident),
+    DTexpr(isize),
 }
 impl TrivialDrop for DependentType {}
 arena_deserializer::impl_deserialize_in_arena!(DependentType);

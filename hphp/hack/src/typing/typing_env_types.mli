@@ -34,6 +34,7 @@ type expr_tree_env = {
 }
 
 type env = {
+  ident_provider: Ident_provider.t;
   fresh_typarams: SSet.t;
   lenv: local_env;
   genv: genv;

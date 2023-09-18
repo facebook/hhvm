@@ -14,7 +14,7 @@ open Typing_defs
    * then they refer to the same late bound type, and thus have compatible
    * 'this' types.
 *)
-type expression_id = Ident.t [@@deriving eq, show]
+type expression_id = Ident_provider.Ident.t [@@deriving eq, show]
 
 type local = {
   (* The type of the local *)

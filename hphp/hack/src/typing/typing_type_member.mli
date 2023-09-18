@@ -33,7 +33,7 @@ type type_member =
     (meant to represent the concrete class type of the object that
     will be the receiver when the method is invoked). *)
 type unknown_concrete_class_kind =
-  | EDT of Ident.t
+  | EDT of Ident_provider.Ident.t
   | This
 
 (** Lookups a type member in a class definition, or in the exact

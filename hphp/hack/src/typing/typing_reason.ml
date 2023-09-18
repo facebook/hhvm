@@ -21,7 +21,7 @@ type arg_position =
 [@@deriving eq, hash]
 
 type expr_dep_type_reason =
-  | ERexpr of int
+  | ERexpr of Ident_provider.Ident.t
   | ERstatic
   | ERclass of string
   | ERparent of string
@@ -214,6 +214,25 @@ let arg_pos_str ap =
   | Aonly -> "only"
   | Afirst -> "first"
   | Asecond -> "second"
+
+(* This is a mapping from internal expression ids to a standardized int.
+ * Used for outputting cleaner error messages to users
+ *)
+let expr_display_id_map = ref Ident_provider.Ident.Map.empty
+
+let reset_expr_display_id_map () =
+  expr_display_id_map := Ident_provider.Ident.Map.empty
+
+let get_expr_display_id id =
+  let map = !expr_display_id_map in
+  match Ident_provider.Ident.Map.find_opt id map with
+  | Some n -> n
+  | None ->
+    let n = Ident_provider.Ident.Map.cardinal map + 1 in
+    expr_display_id_map := Ident_provider.Ident.Map.add id n map;
+    n
+
+let get_expr_display_id_map () = !expr_display_id_map
 
 (* Translate a reason to a (pos, string) list, suitable for error_l. This
  * previously returned a string, however the need to return multiple lines with
@@ -733,22 +752,6 @@ and to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
   | Rdynamic_partial_enforcement (p, _, _) -> p
   | Ropaque_type_from_module (p, _, _) -> p
   | Rmissing_class p -> Pos_or_decl.of_raw_pos p
-
-(* This is a mapping from internal expression ids to a standardized int.
- * Used for outputting cleaner error messages to users
- *)
-and expr_display_id_map = ref IMap.empty
-
-and get_expr_display_id id =
-  let map = !expr_display_id_map in
-  match IMap.find_opt id map with
-  | Some n -> n
-  | None ->
-    let n = IMap.cardinal map + 1 in
-    expr_display_id_map := IMap.add id n map;
-    n
-
-and get_expr_display_id_map () = !expr_display_id_map
 
 and expr_dep_type_reason_string = function
   | ERexpr id ->

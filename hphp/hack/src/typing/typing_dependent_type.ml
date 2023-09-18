@@ -18,10 +18,10 @@ module ExprDepTy = struct
   type dep =
     | Dep_This
     | Dep_Cls of string
-    | Dep_Expr of Ident.t
+    | Dep_Expr of Ident_provider.Ident.t
 
-  let new_ () =
-    let eid = Ident.tmp () in
+  let new_ env =
+    let eid = Env.make_ident env in
     (Reason.ERexpr eid, Dep_Expr eid)
 
   (* Convert a class_id into a "dependent kind" (dep). This later informs the make_with_dep_kind function
@@ -35,13 +35,13 @@ module ExprDepTy = struct
         (match Env.get_parent_id env with
         | Some cls -> (pos, Reason.ERparent cls, Dep_Cls cls)
         | None ->
-          let (ereason, dep) = new_ () in
+          let (ereason, dep) = new_ env in
           (pos, ereason, dep))
       | N.CIself ->
         (match Env.get_self_id env with
         | Some cls -> (pos, Reason.ERself cls, Dep_Cls cls)
         | None ->
-          let (ereason, dep) = new_ () in
+          let (ereason, dep) = new_ env in
           (pos, ereason, dep))
       | N.CI (p, cls) ->
         (Pos_or_decl.of_raw_pos p, Reason.ERclass cls, Dep_Cls cls)
@@ -57,14 +57,14 @@ module ExprDepTy = struct
         let (ereason, dep) =
           match Env.get_local_expr_id env x with
           | Some eid -> (Reason.ERexpr eid, Dep_Expr eid)
-          | None -> new_ ()
+          | None -> new_ env
         in
         (Pos_or_decl.of_raw_pos p, ereason, dep)
       (* If all else fails we generate a new identifier for our expression
        * dependent type.
        *)
       | N.CIexpr (_, p, _) ->
-        let (ereason, dep) = new_ () in
+        let (ereason, dep) = new_ env in
         (Pos_or_decl.of_raw_pos p, ereason, dep)
     in
     (Reason.Rexpr_dep_type (reason, pos, expr_dep_reason), dep)
@@ -92,7 +92,8 @@ module ExprDepTy = struct
     let (r_dep_ty, dep_ty) = dep_kind in
     let apply env ty =
       match dep_ty with
-      | Dep_Cls _ -> (env, mk (r_dep_ty, Tdependent (DTexpr (Ident.tmp ()), ty)))
+      | Dep_Cls _ ->
+        (env, mk (r_dep_ty, Tdependent (DTexpr (Env.make_ident env), ty)))
       | Dep_This -> (env, ty)
       | Dep_Expr id -> (env, mk (r_dep_ty, Tdependent (DTexpr id, ty)))
     in

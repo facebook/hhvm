@@ -33,9 +33,3 @@ let make name =
   let res = hh_counter_next () in
   if !track_names then set_name res name;
   res
-
-let immutable_mask = 1 lsl 62
-
-let is_immutable i = i land immutable_mask <> 0
-
-let make_immutable i = i lor immutable_mask

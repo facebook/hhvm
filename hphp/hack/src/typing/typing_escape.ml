@@ -47,7 +47,7 @@ module TySet = Typing_set
 
 type rigid_tvar =
   | Rtv_tparam of string
-  | Rtv_dependent of Ident.t
+  | Rtv_dependent of Ident_provider.Ident.t
 
 (********************************************************************)
 (* Eliminating rigid type variables *)
@@ -580,7 +580,7 @@ let refresh_env_and_type ~remove:(types, remove) ~pos env ty =
 
 type snapshot = {
   tpmap: (Pos_or_decl.t * Typing_kinding_defs.kind) SMap.t;
-  nextid: int;
+  nextid: Ident_provider.Ident.t;
       (* nextid is used to detect if an expression-dependent type is fresh
          or not; we snapshot it at some time and all ids larger than the
          snapshot were allocated after the snapshot time *)
@@ -591,7 +591,7 @@ type escaping_rigid_tvars = string list * remove_map
 let snapshot_env env =
   let gtp = Type_parameter_env.get_tparams (Env.get_global_tpenv env) in
   let ltp = Type_parameter_env.get_tparams (Env.get_tpenv env) in
-  { tpmap = SMap.union gtp ltp; nextid = Ident.tmp () }
+  { tpmap = SMap.union gtp ltp; nextid = Env.make_ident env }
 
 let escaping_from_snapshot snap env =
   let is_global tp =
@@ -599,7 +599,9 @@ let escaping_from_snapshot snap env =
     String.length tp > 6 && String.(sub ~pos:0 ~len:6 tp = "this::")
   in
   let eidmap =
-    let inverse_map m = IMap.fold (fun k v -> IMap.add v k) m IMap.empty in
+    let inverse_map m =
+      Ident_provider.Ident.Map.fold (fun k v -> IMap.add v k) m IMap.empty
+    in
     inverse_map (Reason.get_expr_display_id_map ())
   in
   let { nextid; _ } = snap in
@@ -615,7 +617,7 @@ let escaping_from_snapshot snap env =
     && String.(sub ~pos:0 ~len:6 tp = "<expr#")
     &&
     match IMap.find_opt (atoi tp 6 0) eidmap with
-    | Some id -> id < nextid
+    | Some id -> Ident_provider.Ident.compare id nextid < 0
     | None -> false
   in
   let tpmap =
@@ -646,7 +648,7 @@ let escaping_from_snapshot snap env =
           lower_bounds = TySet.empty;
         }
       in
-      if id > nextid then
+      if Ident_provider.Ident.compare id nextid > 0 then
         Some empty_info
       else
         None )

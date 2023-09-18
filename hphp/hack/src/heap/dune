@@ -18,7 +18,7 @@
 (library
  (name heap_ident)
  (wrapped false)
- (modules ident)
+ (modules ident ident_provider)
  (libraries collections utils_core)
  (preprocess
   (pps ppx_deriving.std ppx_hash visitors.ppx)))

@@ -7,7 +7,7 @@
  *
  *)
 
-type expression_id = Ident.t [@@deriving eq, show]
+type expression_id = Ident_provider.Ident.t [@@deriving eq, show]
 
 type local = {
   ty: Typing_defs.locl_ty;

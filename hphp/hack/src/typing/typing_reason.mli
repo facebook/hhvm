@@ -15,7 +15,7 @@ type arg_position =
 [@@deriving eq]
 
 type expr_dep_type_reason =
-  | ERexpr of int
+  | ERexpr of Ident_provider.Ident.t
   | ERstatic
   | ERclass of string
   | ERparent of string
@@ -184,11 +184,11 @@ val to_string : string -> 'phase t_ -> (Pos_or_decl.t * string) list
 
 val to_pos : 'phase t_ -> Pos_or_decl.t
 
-val expr_display_id_map : int IMap.t ref
+val reset_expr_display_id_map : unit -> unit
 
-val get_expr_display_id : int -> int
+val get_expr_display_id : Ident_provider.Ident.t -> int
 
-val get_expr_display_id_map : unit -> int IMap.t
+val get_expr_display_id_map : unit -> int Ident_provider.Ident.Map.t
 
 val to_constructor_string : 'phase t_ -> string
 

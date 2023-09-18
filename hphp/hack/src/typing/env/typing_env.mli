@@ -571,3 +571,5 @@ module Log : sig
     Ident.t ->
     Hh_json.json
 end
+
+val make_ident : env -> Ident_provider.Ident.t

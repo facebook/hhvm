@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<81c31c27f343f2346da69ae759110c41>>
+// @generated SignedSource<<28eae49c7d4402a2792709c2d7e82dbc>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -306,7 +306,7 @@ arena_deserializer::impl_deserialize_in_arena!(ConsistentKind);
 #[rust_to_ocaml(attr = "deriving (eq, hash, ord, show)")]
 #[repr(C, u8)]
 pub enum DependentType {
-    DTexpr(ident::Ident),
+    DTexpr(isize),
 }
 
 #[derive(

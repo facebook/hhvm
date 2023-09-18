@@ -1070,6 +1070,8 @@ let set_local_ env x ty =
   let per_cont_env = LEnvC.add_to_cont C.Next x ty env.lenv.per_cont_env in
   { env with lenv = { env.lenv with per_cont_env } }
 
+let make_ident env = Ident_provider.provide env.ident_provider
+
 (* We maintain 2 states for a local: the type
  * that the local currently has, and an expression_id generated from
  * the last assignment to this local.
@@ -1085,12 +1087,12 @@ let set_local ?(immutable = false) ~is_defined ~bound_ty env x new_type pos =
   | Some next_cont ->
     let expr_id =
       match LID.Map.find_opt x next_cont.LEnvC.local_types with
-      | None -> Ident.tmp ()
+      | None -> make_ident env
       | Some local -> local.Typing_local_types.eid
     in
     let expr_id =
       if immutable then
-        Ident.make_immutable expr_id
+        Ident_provider.Ident.make_immutable expr_id
       else
         expr_id
     in
@@ -1190,7 +1192,7 @@ let local_undefined_error ~env p x ctx =
     Errors.add_error (Naming_error.to_user_error error)
   | None -> ()
 
-let get_local_in_ctx ~undefined_err_fun x ctx_opt =
+let get_local_in_ctx ~undefined_err_fun env x ctx_opt =
   let not_found_is_ok x ctx = Fake.is_valid ctx.LEnvC.fake_members x in
   match ctx_opt with
   | None ->
@@ -1203,7 +1205,7 @@ let get_local_in_ctx ~undefined_err_fun x ctx_opt =
           defined = false;
           bound_ty = None;
           pos = Pos.none;
-          eid = 0;
+          eid = make_ident env;
         }
   | Some ctx ->
     let lcl = LID.Map.find_opt x ctx.LEnvC.local_types in
@@ -1224,8 +1226,8 @@ let get_local_in_ctx ~undefined_err_fun x ctx_opt =
     end;
     lcl
 
-let get_local_ty_in_ctx ~undefined_err_fun x ctx_opt =
-  match get_local_in_ctx ~undefined_err_fun x ctx_opt with
+let get_local_ty_in_ctx ~undefined_err_fun env x ctx_opt =
+  match get_local_in_ctx ~undefined_err_fun env x ctx_opt with
   | None ->
     ( false,
       Typing_local_types.
@@ -1234,7 +1236,7 @@ let get_local_ty_in_ctx ~undefined_err_fun x ctx_opt =
           defined = false;
           bound_ty = None;
           pos = Pos.none;
-          eid = 0;
+          eid = make_ident env;
         } )
   | Some local ->
     let open Typing_local_types in
@@ -1249,7 +1251,7 @@ let get_local_ty_in_ctx ~undefined_err_fun x ctx_opt =
 let get_local_in_next_continuation ?error_if_undef_at_pos:p env x =
   let undefined_err_fun = local_undefined_error ~env p in
   let next_cont = next_cont_opt env in
-  get_local_ty_in_ctx ~undefined_err_fun x next_cont
+  get_local_ty_in_ctx ~undefined_err_fun env x next_cont
 
 let get_local_ ?error_if_undef_at_pos:p env x =
   get_local_in_next_continuation ?error_if_undef_at_pos:p env x
@@ -1268,7 +1270,7 @@ let get_locals ?(quiet = false) env plids =
       let undefined_err_fun =
         local_undefined_error ~env error_if_undef_at_pos
       in
-      match get_local_in_ctx ~undefined_err_fun lid next_cont with
+      match get_local_in_ctx ~undefined_err_fun env lid next_cont with
       | None -> locals
       | Some ty_eid -> LID.Map.add lid ty_eid locals)
 
@@ -1296,7 +1298,7 @@ let set_local_expr_id env x new_eid =
       let local = { ty; defined; bound_ty; pos; eid = new_eid } in
       let per_cont_env = LEnvC.add_to_cont C.Next x local per_cont_env in
       let env = { env with lenv = { env.lenv with per_cont_env } } in
-      if Ident.is_immutable eid then
+      if Ident_provider.Ident.is_immutable eid then
         Error (env, Typing_error.(primary @@ Primary.Immutable_local pos))
       else
         Ok env

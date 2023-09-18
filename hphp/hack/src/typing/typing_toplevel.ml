@@ -69,7 +69,7 @@ let fun_def ctx fd : Tast.fun_def Tast_with_dynamic.t option =
   let env = EnvFromDef.fun_env ~origin:Decl_counters.TopLevel ctx fd in
   with_timeout env fd.fd_name @@ fun env ->
   (* reset the expression dependent display ids for each function body *)
-  Reason.expr_display_id_map := IMap.empty;
+  Reason.reset_expr_display_id_map ();
   let pos = fst fd.fd_name in
   let env = Env.open_tyvars env (fst fd.fd_name) in
   let env = Env.set_env_callable_pos env pos in

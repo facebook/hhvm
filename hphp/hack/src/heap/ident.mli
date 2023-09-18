@@ -16,7 +16,3 @@ val tmp : unit -> t
 val to_string : t -> string
 
 val make : string -> t
-
-val is_immutable : int -> bool
-
-val make_immutable : int -> int

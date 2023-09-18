@@ -68,8 +68,8 @@ let get_constant env tc kind (seen, has_default) case =
                {
                  pos;
                  kind;
-                 expected = strip_ns (Cls.name tc);
-                 actual = strip_ns cls;
+                 expected = lazy (strip_ns (Cls.name tc));
+                 actual = lazy (strip_ns cls);
                  expected_pos = None;
                });
       (seen, has_default)

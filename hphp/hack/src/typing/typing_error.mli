@@ -112,8 +112,8 @@ module Primary : sig
       | Enum_switch_wrong_class of {
           pos: Pos.t;
           kind: string;
-          expected: string;
-          actual: string;
+          expected: string lazy_t;
+          actual: string lazy_t;
           expected_pos: Pos_or_decl.t option;
         }
       | Enum_switch_inconsistent_int_literal_format of {

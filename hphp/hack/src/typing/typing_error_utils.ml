@@ -588,20 +588,21 @@ module Eval_primary = struct
       (Error_code.EnumSwitchNotConst, claim, lazy [], [])
 
     let enum_switch_wrong_class pos kind expected actual exp_pos =
-      let expected = Markdown_lite.md_codify expected in
+      let expected = Lazy.map ~f:Markdown_lite.md_codify expected in
       let claim =
-        lazy
-          ( pos,
-            "Switching on "
-            ^ kind
-            ^ expected
-            ^ " but using constant from "
-            ^ Markdown_lite.md_codify actual )
+        Lazy.bind expected ~f:(fun expected ->
+            Lazy.map actual ~f:(fun actual ->
+                ( pos,
+                  "Switching on "
+                  ^ kind
+                  ^ expected
+                  ^ " but using constant from "
+                  ^ Markdown_lite.md_codify actual )))
       in
       let reason =
-        lazy
-          (Option.value_map exp_pos ~default:[] ~f:(fun exp_pos ->
-               [(exp_pos, "expecting " ^ expected ^ " based on this")]))
+        Lazy.map expected ~f:(fun expected ->
+            Option.value_map exp_pos ~default:[] ~f:(fun exp_pos ->
+                [(exp_pos, "expecting " ^ expected ^ " based on this")]))
       in
       (Error_code.EnumSwitchWrongClass, claim, reason, [])
 

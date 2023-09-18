@@ -6,6 +6,7 @@
   collections
   provider_context
   relative_path
+  tast_env
   typing_ast)
  (preprocess (pps ppx_yojson_conv)))
 

@@ -129,4 +129,6 @@ let expander =
   end
 
 (* Replace all types in a program AST by their expansions *)
-let expand_program tast = expander#go tast
+let expand_program ctx tast = expander#go ctx tast
+
+let expand_def ctx def = expander#go_def ctx def

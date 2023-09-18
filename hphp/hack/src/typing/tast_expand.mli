@@ -14,3 +14,5 @@ val expand_ty :
   Typing_defs.locl_ty
 
 val expand_program : Provider_context.t -> Tast.def list -> Tast.def list
+
+val expand_def : Provider_context.t -> Tast.def -> Tast.def

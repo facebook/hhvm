@@ -158,6 +158,18 @@ let empty_by_names =
     module_tasts = SMap.empty;
   }
 
+let map_by_names (x : by_names) ~(f : def -> def) : by_names =
+  let { fun_tasts; class_tasts; typedef_tasts; gconst_tasts; module_tasts } =
+    x
+  in
+  {
+    fun_tasts = SMap.map (Tast_with_dynamic.map ~f) fun_tasts;
+    class_tasts = SMap.map (Tast_with_dynamic.map ~f) class_tasts;
+    typedef_tasts = SMap.map f typedef_tasts;
+    gconst_tasts = SMap.map f gconst_tasts;
+    module_tasts = SMap.map f module_tasts;
+  }
+
 let program_by_names program =
   Hh_prelude.List.fold program ~init:empty_by_names ~f:(fun acc def ->
       match def with

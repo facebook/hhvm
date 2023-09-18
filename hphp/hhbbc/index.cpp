@@ -11820,6 +11820,7 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
   };
   ISStringToOneT<std::unique_ptr<DepData>> splitDeps;
   ISStringToOneT<std::unique_ptr<BuildSubclassListJob::Split>> splitPtrs;
+  ISStringSet leafs;
 
   // Keep creating rounds until all of the classes are assigned to a
   // bucket in a round.
@@ -12028,11 +12029,10 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
     assertx(actions.size() == toProcess.size());
     std::vector<SString> roots;
     std::vector<SString> markProcessed;
-    ISStringSet leafs;
     roots.reserve(actions.size());
     markProcessed.reserve(actions.size());
     // Clear the list of classes to process. It will be repopulated
-    // with any classes marked as Defer.
+    // with any classes marked as Defer or Splits.
     toProcess.clear();
 
     for (auto const& action : actions) {
@@ -12040,13 +12040,14 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
         action,
         [&] (Defer d) { toProcess.emplace_back(d.cls); },
         [&] (Leaf l) {
+          if (round > 0) return;
+
           // Leafs have some special handling. Generally they're just
           // deps, but they need to be examined for name-only
           // entries. We only want this done for a leaf in one
           // specific job (as a dep they can appear in multiple
           // jobs). We'll use the dep promotion machinery to
           // selectively promote these to roots in a certain job.
-          toProcess.emplace_back(l.cls);
           leafs.emplace(l.cls);
           auto const& meta = subclassMeta.meta.at(l.cls);
           // If the leaf has no parent either, it will never be a dep,
@@ -12159,13 +12160,8 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
     // because we'd check it when building the buckets.
     processed.insert(begin(markProcessed), end(markProcessed));
 
-    toProcess.erase(
-      std::remove_if(
-        begin(toProcess), end(toProcess),
-        [&] (SString c) { return processed.count(c); }
-      ),
-      end(toProcess)
-    );
+    assertx(std::none_of(begin(toProcess), end(toProcess),
+      [&] (SString c) { return processed.count(c); }));
   }
 
   // Keep all split nodes created in the output

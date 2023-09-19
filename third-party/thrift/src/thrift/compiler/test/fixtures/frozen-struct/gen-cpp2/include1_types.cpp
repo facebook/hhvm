@@ -93,14 +93,7 @@ bool IncludedA::operator==(FOLLY_MAYBE_UNUSED const IncludedA& rhs) const {
 }
 
 bool IncludedA::operator<(FOLLY_MAYBE_UNUSED const IncludedA& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.i32Field_ref() == rhs.i32Field_ref())) {
-    return lhs.i32Field_ref() < rhs.i32Field_ref();
-  }
-  if (!(lhs.strField_ref() == rhs.strField_ref())) {
-    return lhs.strField_ref() < rhs.strField_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 

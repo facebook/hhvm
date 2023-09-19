@@ -96,20 +96,7 @@ bool Color::operator==(FOLLY_MAYBE_UNUSED const Color& rhs) const {
 }
 
 bool Color::operator<(FOLLY_MAYBE_UNUSED const Color& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.red_ref() == rhs.red_ref())) {
-    return lhs.red_ref() < rhs.red_ref();
-  }
-  if (!(lhs.green_ref() == rhs.green_ref())) {
-    return lhs.green_ref() < rhs.green_ref();
-  }
-  if (!(lhs.blue_ref() == rhs.blue_ref())) {
-    return lhs.blue_ref() < rhs.blue_ref();
-  }
-  if (!(lhs.alpha_ref() == rhs.alpha_ref())) {
-    return lhs.alpha_ref() < rhs.alpha_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -230,23 +217,7 @@ bool Vehicle::operator==(FOLLY_MAYBE_UNUSED const Vehicle& rhs) const {
 }
 
 bool Vehicle::operator<(FOLLY_MAYBE_UNUSED const Vehicle& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.color_ref() == rhs.color_ref())) {
-    return lhs.color_ref() < rhs.color_ref();
-  }
-  if (!(lhs.licensePlate_ref() == rhs.licensePlate_ref())) {
-    return lhs.licensePlate_ref() < rhs.licensePlate_ref();
-  }
-  if (!(lhs.description_ref() == rhs.description_ref())) {
-    return lhs.description_ref() < rhs.description_ref();
-  }
-  if (!(lhs.name_ref() == rhs.name_ref())) {
-    return lhs.name_ref() < rhs.name_ref();
-  }
-  if (!(lhs.hasAC_ref() == rhs.hasAC_ref())) {
-    return lhs.hasAC_ref() < rhs.hasAC_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::cpp2::Color& Vehicle::get_color() const& {
@@ -410,38 +381,7 @@ bool Person::operator==(FOLLY_MAYBE_UNUSED const Person& rhs) const {
 }
 
 bool Person::operator<(FOLLY_MAYBE_UNUSED const Person& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.id_ref() == rhs.id_ref())) {
-    return lhs.id_ref() < rhs.id_ref();
-  }
-  if (!(lhs.name_ref() == rhs.name_ref())) {
-    return lhs.name_ref() < rhs.name_ref();
-  }
-  if (!(lhs.age_ref() == rhs.age_ref())) {
-    return lhs.age_ref() < rhs.age_ref();
-  }
-  if (!(lhs.address_ref() == rhs.address_ref())) {
-    return lhs.address_ref() < rhs.address_ref();
-  }
-  if (!(lhs.favoriteColor_ref() == rhs.favoriteColor_ref())) {
-    return lhs.favoriteColor_ref() < rhs.favoriteColor_ref();
-  }
-  if (!(lhs.friends_ref() == rhs.friends_ref())) {
-    return lhs.friends_ref() < rhs.friends_ref();
-  }
-  if (!(lhs.bestFriend_ref() == rhs.bestFriend_ref())) {
-    return lhs.bestFriend_ref() < rhs.bestFriend_ref();
-  }
-  if (!(lhs.petNames_ref() == rhs.petNames_ref())) {
-    return lhs.petNames_ref() < rhs.petNames_ref();
-  }
-  if (!(lhs.afraidOfAnimal_ref() == rhs.afraidOfAnimal_ref())) {
-    return lhs.afraidOfAnimal_ref() < rhs.afraidOfAnimal_ref();
-  }
-  if (!(lhs.vehicles_ref() == rhs.vehicles_ref())) {
-    return lhs.vehicles_ref() < rhs.vehicles_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::cpp2::Color* Person::get_favoriteColor() const& {

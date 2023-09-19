@@ -74,17 +74,7 @@ bool Foo::operator==(FOLLY_MAYBE_UNUSED const Foo& rhs) const {
 }
 
 bool Foo::operator<(FOLLY_MAYBE_UNUSED const Foo& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.field1_ref() == rhs.field1_ref())) {
-    return lhs.field1_ref() < rhs.field1_ref();
-  }
-  if (!(lhs.field2_ref() == rhs.field2_ref())) {
-    return lhs.field2_ref() < rhs.field2_ref();
-  }
-  if (!(lhs.field3_ref() == rhs.field3_ref())) {
-    return lhs.field3_ref() < rhs.field3_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -170,17 +160,7 @@ bool Foo2::operator==(FOLLY_MAYBE_UNUSED const Foo2& rhs) const {
 }
 
 bool Foo2::operator<(FOLLY_MAYBE_UNUSED const Foo2& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.field1_ref() == rhs.field1_ref())) {
-    return lhs.field1_ref() < rhs.field1_ref();
-  }
-  if (!(lhs.field2_ref() == rhs.field2_ref())) {
-    return lhs.field2_ref() < rhs.field2_ref();
-  }
-  if (!(lhs.field3_ref() == rhs.field3_ref())) {
-    return lhs.field3_ref() < rhs.field3_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 

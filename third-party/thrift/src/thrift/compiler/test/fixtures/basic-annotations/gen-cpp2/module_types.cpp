@@ -106,11 +106,7 @@ bool MyStructNestedAnnotation::operator==(FOLLY_MAYBE_UNUSED const MyStructNeste
 }
 
 bool MyStructNestedAnnotation::operator<(FOLLY_MAYBE_UNUSED const MyStructNestedAnnotation& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.name_ref() == rhs.name_ref())) {
-    return lhs.name_ref() < rhs.name_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -294,8 +290,7 @@ bool YourException::operator==(FOLLY_MAYBE_UNUSED const YourException& rhs) cons
 }
 
 bool YourException::operator<(FOLLY_MAYBE_UNUSED const YourException& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -584,14 +579,7 @@ bool SecretStruct::operator==(FOLLY_MAYBE_UNUSED const SecretStruct& rhs) const 
 }
 
 bool SecretStruct::operator<(FOLLY_MAYBE_UNUSED const SecretStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.id_ref() == rhs.id_ref())) {
-    return lhs.id_ref() < rhs.id_ref();
-  }
-  if (!(lhs.password_ref() == rhs.password_ref())) {
-    return lhs.password_ref() < rhs.password_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 

@@ -105,20 +105,7 @@ bool TerseFoo::operator==(FOLLY_MAYBE_UNUSED const TerseFoo& rhs) const {
 }
 
 bool TerseFoo::operator<(FOLLY_MAYBE_UNUSED const TerseFoo& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.field1_ref() == rhs.field1_ref())) {
-    return lhs.field1_ref() < rhs.field1_ref();
-  }
-  if (!(lhs.field2_ref() == rhs.field2_ref())) {
-    return lhs.field2_ref() < rhs.field2_ref();
-  }
-  if (!(lhs.field3_ref() == rhs.field3_ref())) {
-    return lhs.field3_ref() < rhs.field3_ref();
-  }
-  if (!(lhs.field4_ref() == rhs.field4_ref())) {
-    return lhs.field4_ref() < rhs.field4_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::std::vector<double>& TerseFoo::get_field1() const& {
@@ -396,24 +383,7 @@ bool TerseLazyFoo::operator==(FOLLY_MAYBE_UNUSED const TerseLazyFoo& rhs) const 
 }
 
 bool TerseLazyFoo::operator<(FOLLY_MAYBE_UNUSED const TerseLazyFoo& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.field1_ref() == rhs.field1_ref())) {
-    return lhs.field1_ref() < rhs.field1_ref();
-  }
-  if (!(lhs.field2_ref() == rhs.field2_ref())) {
-    return lhs.field2_ref() < rhs.field2_ref();
-  }
-  lhs.field3_ref();
-  rhs.field3_ref();
-  if (!(lhs.field3_ref() == rhs.field3_ref())) {
-    return lhs.field3_ref() < rhs.field3_ref();
-  }
-  lhs.field4_ref();
-  rhs.field4_ref();
-  if (!(lhs.field4_ref() == rhs.field4_ref())) {
-    return lhs.field4_ref() < rhs.field4_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::std::vector<double>& TerseLazyFoo::get_field1() const& {
@@ -552,20 +522,7 @@ bool TerseOptionalFoo::operator==(FOLLY_MAYBE_UNUSED const TerseOptionalFoo& rhs
 }
 
 bool TerseOptionalFoo::operator<(FOLLY_MAYBE_UNUSED const TerseOptionalFoo& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.field1_ref() == rhs.field1_ref())) {
-    return lhs.field1_ref() < rhs.field1_ref();
-  }
-  if (!(lhs.field2_ref() == rhs.field2_ref())) {
-    return lhs.field2_ref() < rhs.field2_ref();
-  }
-  if (!(lhs.field3_ref() == rhs.field3_ref())) {
-    return lhs.field3_ref() < rhs.field3_ref();
-  }
-  if (!(lhs.field4_ref() == rhs.field4_ref())) {
-    return lhs.field4_ref() < rhs.field4_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::std::vector<double>* TerseOptionalFoo::get_field1() const& {
@@ -843,24 +800,7 @@ bool TerseOptionalLazyFoo::operator==(FOLLY_MAYBE_UNUSED const TerseOptionalLazy
 }
 
 bool TerseOptionalLazyFoo::operator<(FOLLY_MAYBE_UNUSED const TerseOptionalLazyFoo& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.field1_ref() == rhs.field1_ref())) {
-    return lhs.field1_ref() < rhs.field1_ref();
-  }
-  if (!(lhs.field2_ref() == rhs.field2_ref())) {
-    return lhs.field2_ref() < rhs.field2_ref();
-  }
-  lhs.field3_ref();
-  rhs.field3_ref();
-  if (!(lhs.field3_ref() == rhs.field3_ref())) {
-    return lhs.field3_ref() < rhs.field3_ref();
-  }
-  lhs.field4_ref();
-  rhs.field4_ref();
-  if (!(lhs.field4_ref() == rhs.field4_ref())) {
-    return lhs.field4_ref() < rhs.field4_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::std::vector<double>* TerseOptionalLazyFoo::get_field1() const& {

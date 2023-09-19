@@ -86,14 +86,7 @@ bool Struct::operator==(FOLLY_MAYBE_UNUSED const Struct& rhs) const {
 }
 
 bool Struct::operator<(FOLLY_MAYBE_UNUSED const Struct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.first_ref() == rhs.first_ref())) {
-    return lhs.first_ref() < rhs.first_ref();
-  }
-  if (!(lhs.second_ref() == rhs.second_ref())) {
-    return lhs.second_ref() < rhs.second_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::module0::Struct& Struct::get_first() const& {
@@ -218,14 +211,7 @@ bool BigStruct::operator==(FOLLY_MAYBE_UNUSED const BigStruct& rhs) const {
 }
 
 bool BigStruct::operator<(FOLLY_MAYBE_UNUSED const BigStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.s_ref() == rhs.s_ref())) {
-    return lhs.s_ref() < rhs.s_ref();
-  }
-  if (!(lhs.id_ref() == rhs.id_ref())) {
-    return lhs.id_ref() < rhs.id_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::module2::Struct& BigStruct::get_s() const& {

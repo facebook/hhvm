@@ -122,20 +122,7 @@ bool MyStruct::operator==(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
 }
 
 bool MyStruct::operator<(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.MyIntField_ref() == rhs.MyIntField_ref())) {
-    return lhs.MyIntField_ref() < rhs.MyIntField_ref();
-  }
-  if (!(lhs.MyStringField_ref() == rhs.MyStringField_ref())) {
-    return lhs.MyStringField_ref() < rhs.MyStringField_ref();
-  }
-  if (!(lhs.MyDataField_ref() == rhs.MyDataField_ref())) {
-    return lhs.MyDataField_ref() < rhs.MyDataField_ref();
-  }
-  if (!(lhs.myEnum_ref() == rhs.myEnum_ref())) {
-    return lhs.myEnum_ref() < rhs.myEnum_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::cpp2::MyDataItem& MyStruct::get_MyDataField() const& {
@@ -225,8 +212,7 @@ bool MyDataItem::operator==(FOLLY_MAYBE_UNUSED const MyDataItem& rhs) const {
 }
 
 bool MyDataItem::operator<(FOLLY_MAYBE_UNUSED const MyDataItem& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 

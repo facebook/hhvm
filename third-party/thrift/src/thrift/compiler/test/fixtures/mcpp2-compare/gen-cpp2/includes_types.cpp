@@ -87,11 +87,7 @@ bool AStruct::operator==(FOLLY_MAYBE_UNUSED const AStruct& rhs) const {
 }
 
 bool AStruct::operator<(FOLLY_MAYBE_UNUSED const AStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.FieldA_ref() == rhs.FieldA_ref())) {
-    return lhs.FieldA_ref() < rhs.FieldA_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -189,11 +185,7 @@ bool AStructB::operator==(FOLLY_MAYBE_UNUSED const AStructB& rhs) const {
 }
 
 bool AStructB::operator<(FOLLY_MAYBE_UNUSED const AStructB& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if ((!::apache::thrift::detail::pointer_equal(lhs.FieldA_ref(), rhs.FieldA_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.FieldA_ref(), rhs.FieldA_ref());
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 

@@ -66,11 +66,7 @@ bool Foo::operator==(FOLLY_MAYBE_UNUSED const Foo& rhs) const {
 }
 
 bool Foo::operator<(FOLLY_MAYBE_UNUSED const Foo& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.bar_ref() == rhs.bar_ref())) {
-    return lhs.bar_ref() < rhs.bar_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 

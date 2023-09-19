@@ -63,8 +63,7 @@ bool Empty::operator==(FOLLY_MAYBE_UNUSED const Empty& rhs) const {
 }
 
 bool Empty::operator<(FOLLY_MAYBE_UNUSED const Empty& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 

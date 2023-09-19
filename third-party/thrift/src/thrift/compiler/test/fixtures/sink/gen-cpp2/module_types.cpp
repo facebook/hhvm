@@ -87,11 +87,7 @@ bool InitialResponse::operator==(FOLLY_MAYBE_UNUSED const InitialResponse& rhs) 
 }
 
 bool InitialResponse::operator<(FOLLY_MAYBE_UNUSED const InitialResponse& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.content_ref() == rhs.content_ref())) {
-    return lhs.content_ref() < rhs.content_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -188,11 +184,7 @@ bool FinalResponse::operator==(FOLLY_MAYBE_UNUSED const FinalResponse& rhs) cons
 }
 
 bool FinalResponse::operator<(FOLLY_MAYBE_UNUSED const FinalResponse& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.content_ref() == rhs.content_ref())) {
-    return lhs.content_ref() < rhs.content_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -289,11 +281,7 @@ bool SinkPayload::operator==(FOLLY_MAYBE_UNUSED const SinkPayload& rhs) const {
 }
 
 bool SinkPayload::operator<(FOLLY_MAYBE_UNUSED const SinkPayload& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.content_ref() == rhs.content_ref())) {
-    return lhs.content_ref() < rhs.content_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -390,11 +378,7 @@ bool CompatibleWithKeywordSink::operator==(FOLLY_MAYBE_UNUSED const CompatibleWi
 }
 
 bool CompatibleWithKeywordSink::operator<(FOLLY_MAYBE_UNUSED const CompatibleWithKeywordSink& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.sink_ref() == rhs.sink_ref())) {
-    return lhs.sink_ref() < rhs.sink_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -491,11 +475,7 @@ bool InitialException::operator==(FOLLY_MAYBE_UNUSED const InitialException& rhs
 }
 
 bool InitialException::operator<(FOLLY_MAYBE_UNUSED const InitialException& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.reason_ref() == rhs.reason_ref())) {
-    return lhs.reason_ref() < rhs.reason_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -592,11 +572,7 @@ bool SinkException1::operator==(FOLLY_MAYBE_UNUSED const SinkException1& rhs) co
 }
 
 bool SinkException1::operator<(FOLLY_MAYBE_UNUSED const SinkException1& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.reason_ref() == rhs.reason_ref())) {
-    return lhs.reason_ref() < rhs.reason_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -694,11 +670,7 @@ bool SinkException2::operator==(FOLLY_MAYBE_UNUSED const SinkException2& rhs) co
 }
 
 bool SinkException2::operator<(FOLLY_MAYBE_UNUSED const SinkException2& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.reason_ref() == rhs.reason_ref())) {
-    return lhs.reason_ref() < rhs.reason_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 

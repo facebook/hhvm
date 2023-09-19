@@ -389,35 +389,7 @@ bool MyField::operator==(FOLLY_MAYBE_UNUSED const MyField& rhs) const {
 }
 
 bool MyField::operator<(FOLLY_MAYBE_UNUSED const MyField& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if ((!::apache::thrift::detail::pointer_equal(lhs.opt_value_ref(), rhs.opt_value_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.opt_value_ref(), rhs.opt_value_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.value_ref(), rhs.value_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.value_ref(), rhs.value_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.req_value_ref(), rhs.req_value_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.req_value_ref(), rhs.req_value_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.opt_enum_value_ref(), rhs.opt_enum_value_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.opt_enum_value_ref(), rhs.opt_enum_value_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.enum_value_ref(), rhs.enum_value_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.enum_value_ref(), rhs.enum_value_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.req_enum_value_ref(), rhs.req_enum_value_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.req_enum_value_ref(), rhs.req_enum_value_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.opt_str_value_ref(), rhs.opt_str_value_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.opt_str_value_ref(), rhs.opt_str_value_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.str_value_ref(), rhs.str_value_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.str_value_ref(), rhs.str_value_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.req_str_value_ref(), rhs.req_str_value_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.req_str_value_ref(), rhs.req_str_value_ref());
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -540,17 +512,7 @@ bool MyStruct::operator==(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
 }
 
 bool MyStruct::operator<(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if ((!::apache::thrift::detail::pointer_equal(lhs.opt_ref_ref(), rhs.opt_ref_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.opt_ref_ref(), rhs.opt_ref_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.ref_ref(), rhs.ref_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.ref_ref(), rhs.ref_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.req_ref_ref(), rhs.req_ref_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.req_ref_ref(), rhs.req_ref_ref());
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -689,17 +651,7 @@ bool StructWithUnion::operator==(FOLLY_MAYBE_UNUSED const StructWithUnion& rhs) 
 }
 
 bool StructWithUnion::operator<(FOLLY_MAYBE_UNUSED const StructWithUnion& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if ((!::apache::thrift::detail::pointer_equal(lhs.u_ref(), rhs.u_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.u_ref(), rhs.u_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.aDouble_ref(), rhs.aDouble_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.aDouble_ref(), rhs.aDouble_ref());
-  }
-  if (!(lhs.f_ref() == rhs.f_ref())) {
-    return lhs.f_ref() < rhs.f_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::cpp2::MyField& StructWithUnion::get_f() const& {
@@ -818,11 +770,7 @@ bool RecursiveStruct::operator==(FOLLY_MAYBE_UNUSED const RecursiveStruct& rhs) 
 }
 
 bool RecursiveStruct::operator<(FOLLY_MAYBE_UNUSED const RecursiveStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.mes_ref() == rhs.mes_ref())) {
-    return lhs.mes_ref() < rhs.mes_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::std::vector<::cpp2::RecursiveStruct>* RecursiveStruct::get_mes() const& {
@@ -966,26 +914,7 @@ bool StructWithContainers::operator==(FOLLY_MAYBE_UNUSED const StructWithContain
 }
 
 bool StructWithContainers::operator<(FOLLY_MAYBE_UNUSED const StructWithContainers& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if ((!::apache::thrift::detail::pointer_equal(lhs.list_ref_ref(), rhs.list_ref_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.list_ref_ref(), rhs.list_ref_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.set_ref_ref(), rhs.set_ref_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.set_ref_ref(), rhs.set_ref_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.map_ref_ref(), rhs.map_ref_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.map_ref_ref(), rhs.map_ref_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.list_ref_unique_ref(), rhs.list_ref_unique_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.list_ref_unique_ref(), rhs.list_ref_unique_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.set_ref_shared_ref(), rhs.set_ref_shared_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.set_ref_shared_ref(), rhs.set_ref_shared_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.list_ref_shared_const_ref(), rhs.list_ref_shared_const_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.list_ref_shared_const_ref(), rhs.list_ref_shared_const_ref());
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -1092,17 +1021,7 @@ bool StructWithSharedConst::operator==(FOLLY_MAYBE_UNUSED const StructWithShared
 }
 
 bool StructWithSharedConst::operator<(FOLLY_MAYBE_UNUSED const StructWithSharedConst& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if ((!::apache::thrift::detail::pointer_equal(lhs.opt_shared_const_ref(), rhs.opt_shared_const_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.opt_shared_const_ref(), rhs.opt_shared_const_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.shared_const_ref(), rhs.shared_const_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.shared_const_ref(), rhs.shared_const_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.req_shared_const_ref(), rhs.req_shared_const_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.req_shared_const_ref(), rhs.req_shared_const_ref());
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -1194,8 +1113,7 @@ bool Empty::operator==(FOLLY_MAYBE_UNUSED const Empty& rhs) const {
 }
 
 bool Empty::operator<(FOLLY_MAYBE_UNUSED const Empty& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -1306,17 +1224,7 @@ bool StructWithRef::operator==(FOLLY_MAYBE_UNUSED const StructWithRef& rhs) cons
 }
 
 bool StructWithRef::operator<(FOLLY_MAYBE_UNUSED const StructWithRef& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if ((!::apache::thrift::detail::pointer_equal(lhs.def_field_ref(), rhs.def_field_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.def_field_ref(), rhs.def_field_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.opt_field_ref(), rhs.opt_field_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.opt_field_ref(), rhs.opt_field_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.req_field_ref(), rhs.req_field_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.req_field_ref(), rhs.req_field_ref());
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -1438,17 +1346,7 @@ bool StructWithBox::operator==(FOLLY_MAYBE_UNUSED const StructWithBox& rhs) cons
 }
 
 bool StructWithBox::operator<(FOLLY_MAYBE_UNUSED const StructWithBox& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if ((!::apache::thrift::detail::pointer_equal(lhs.a_ref(), rhs.a_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.a_ref(), rhs.a_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.b_ref(), rhs.b_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.b_ref(), rhs.b_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.c_ref(), rhs.c_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.c_ref(), rhs.c_ref());
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -1558,14 +1456,7 @@ bool StructWithInternBox::operator==(FOLLY_MAYBE_UNUSED const StructWithInternBo
 }
 
 bool StructWithInternBox::operator<(FOLLY_MAYBE_UNUSED const StructWithInternBox& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!::apache::thrift::op::equal<::apache::thrift::type::struct_t<::cpp2::Empty>>(*lhs.__fbthrift_field_field1, *rhs.__fbthrift_field_field1)) {
-    return ::apache::thrift::op::less<::apache::thrift::type::struct_t<::cpp2::Empty>>(*lhs.__fbthrift_field_field1, *rhs.__fbthrift_field_field1);
-  }
-  if (!::apache::thrift::op::equal<::apache::thrift::type::struct_t<::cpp2::MyField>>(*lhs.__fbthrift_field_field2, *rhs.__fbthrift_field_field2)) {
-    return ::apache::thrift::op::less<::apache::thrift::type::struct_t<::cpp2::MyField>>(*lhs.__fbthrift_field_field2, *rhs.__fbthrift_field_field2);
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -1678,14 +1569,7 @@ bool StructWithTerseInternBox::operator==(FOLLY_MAYBE_UNUSED const StructWithTer
 }
 
 bool StructWithTerseInternBox::operator<(FOLLY_MAYBE_UNUSED const StructWithTerseInternBox& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!::apache::thrift::op::equal<::apache::thrift::type::struct_t<::cpp2::Empty>>(*lhs.__fbthrift_field_field1, *rhs.__fbthrift_field_field1)) {
-    return ::apache::thrift::op::less<::apache::thrift::type::struct_t<::cpp2::Empty>>(*lhs.__fbthrift_field_field1, *rhs.__fbthrift_field_field1);
-  }
-  if (!::apache::thrift::op::equal<::apache::thrift::type::struct_t<::cpp2::MyField>>(*lhs.__fbthrift_field_field2, *rhs.__fbthrift_field_field2)) {
-    return ::apache::thrift::op::less<::apache::thrift::type::struct_t<::cpp2::MyField>>(*lhs.__fbthrift_field_field2, *rhs.__fbthrift_field_field2);
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -1816,14 +1700,7 @@ bool AdaptedStructWithInternBox::operator==(FOLLY_MAYBE_UNUSED const AdaptedStru
 }
 
 bool AdaptedStructWithInternBox::operator<(FOLLY_MAYBE_UNUSED const AdaptedStructWithInternBox& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!::apache::thrift::op::equal<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::cpp2::Empty>>>(*lhs.__fbthrift_field_field1, *rhs.__fbthrift_field_field1)) {
-    return ::apache::thrift::op::less<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::cpp2::Empty>>>(*lhs.__fbthrift_field_field1, *rhs.__fbthrift_field_field1);
-  }
-  if (!::apache::thrift::op::equal<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::cpp2::MyField>>>(*lhs.__fbthrift_field_field2, *rhs.__fbthrift_field_field2)) {
-    return ::apache::thrift::op::less<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::cpp2::MyField>>>(*lhs.__fbthrift_field_field2, *rhs.__fbthrift_field_field2);
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -1951,14 +1828,7 @@ bool AdaptedStructWithTerseInternBox::operator==(FOLLY_MAYBE_UNUSED const Adapte
 }
 
 bool AdaptedStructWithTerseInternBox::operator<(FOLLY_MAYBE_UNUSED const AdaptedStructWithTerseInternBox& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!::apache::thrift::op::equal<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::cpp2::Empty>>>(*lhs.__fbthrift_field_field1, *rhs.__fbthrift_field_field1)) {
-    return ::apache::thrift::op::less<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::cpp2::Empty>>>(*lhs.__fbthrift_field_field1, *rhs.__fbthrift_field_field1);
-  }
-  if (!::apache::thrift::op::equal<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::cpp2::MyField>>>(*lhs.__fbthrift_field_field2, *rhs.__fbthrift_field_field2)) {
-    return ::apache::thrift::op::less<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::cpp2::MyField>>>(*lhs.__fbthrift_field_field2, *rhs.__fbthrift_field_field2);
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -2083,17 +1953,7 @@ bool StructWithRefTypeUnique::operator==(FOLLY_MAYBE_UNUSED const StructWithRefT
 }
 
 bool StructWithRefTypeUnique::operator<(FOLLY_MAYBE_UNUSED const StructWithRefTypeUnique& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if ((!::apache::thrift::detail::pointer_equal(lhs.def_field_ref(), rhs.def_field_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.def_field_ref(), rhs.def_field_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.opt_field_ref(), rhs.opt_field_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.opt_field_ref(), rhs.opt_field_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.req_field_ref(), rhs.req_field_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.req_field_ref(), rhs.req_field_ref());
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -2212,17 +2072,7 @@ bool StructWithRefTypeShared::operator==(FOLLY_MAYBE_UNUSED const StructWithRefT
 }
 
 bool StructWithRefTypeShared::operator<(FOLLY_MAYBE_UNUSED const StructWithRefTypeShared& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if ((!::apache::thrift::detail::pointer_equal(lhs.def_field_ref(), rhs.def_field_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.def_field_ref(), rhs.def_field_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.opt_field_ref(), rhs.opt_field_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.opt_field_ref(), rhs.opt_field_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.req_field_ref(), rhs.req_field_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.req_field_ref(), rhs.req_field_ref());
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -2341,17 +2191,7 @@ bool StructWithRefTypeSharedConst::operator==(FOLLY_MAYBE_UNUSED const StructWit
 }
 
 bool StructWithRefTypeSharedConst::operator<(FOLLY_MAYBE_UNUSED const StructWithRefTypeSharedConst& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if ((!::apache::thrift::detail::pointer_equal(lhs.def_field_ref(), rhs.def_field_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.def_field_ref(), rhs.def_field_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.opt_field_ref(), rhs.opt_field_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.opt_field_ref(), rhs.opt_field_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.req_field_ref(), rhs.req_field_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.req_field_ref(), rhs.req_field_ref());
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -2472,11 +2312,7 @@ bool StructWithRefAndAnnotCppNoexceptMoveCtor::operator==(FOLLY_MAYBE_UNUSED con
 }
 
 bool StructWithRefAndAnnotCppNoexceptMoveCtor::operator<(FOLLY_MAYBE_UNUSED const StructWithRefAndAnnotCppNoexceptMoveCtor& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if ((!::apache::thrift::detail::pointer_equal(lhs.def_field_ref(), rhs.def_field_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.def_field_ref(), rhs.def_field_ref());
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -2609,23 +2445,7 @@ bool StructWithString::operator==(FOLLY_MAYBE_UNUSED const StructWithString& rhs
 }
 
 bool StructWithString::operator<(FOLLY_MAYBE_UNUSED const StructWithString& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if ((!::apache::thrift::detail::pointer_equal(lhs.def_unique_string_ref_ref(), rhs.def_unique_string_ref_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.def_unique_string_ref_ref(), rhs.def_unique_string_ref_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.def_shared_string_ref_ref(), rhs.def_shared_string_ref_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.def_shared_string_ref_ref(), rhs.def_shared_string_ref_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.def_shared_string_const_ref_ref(), rhs.def_shared_string_const_ref_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.def_shared_string_const_ref_ref(), rhs.def_shared_string_const_ref_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.unique_string_ref_ref(), rhs.unique_string_ref_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.unique_string_ref_ref(), rhs.unique_string_ref_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.shared_string_ref_ref(), rhs.shared_string_ref_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.shared_string_ref_ref(), rhs.shared_string_ref_ref());
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 

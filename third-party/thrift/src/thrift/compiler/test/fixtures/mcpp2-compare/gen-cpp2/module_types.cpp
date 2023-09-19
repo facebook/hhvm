@@ -139,8 +139,7 @@ bool Empty::operator==(FOLLY_MAYBE_UNUSED const Empty& rhs) const {
 }
 
 bool Empty::operator<(FOLLY_MAYBE_UNUSED const Empty& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -298,11 +297,7 @@ bool ASimpleStructNoexcept::operator==(FOLLY_MAYBE_UNUSED const ASimpleStructNoe
 }
 
 bool ASimpleStructNoexcept::operator<(FOLLY_MAYBE_UNUSED const ASimpleStructNoexcept& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.boolField_ref() == rhs.boolField_ref())) {
-    return lhs.boolField_ref() < rhs.boolField_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -485,41 +480,7 @@ bool MyStruct::operator==(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
 }
 
 bool MyStruct::operator<(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.MyBoolField_ref() == rhs.MyBoolField_ref())) {
-    return lhs.MyBoolField_ref() < rhs.MyBoolField_ref();
-  }
-  if (!(lhs.MyIntField_ref() == rhs.MyIntField_ref())) {
-    return lhs.MyIntField_ref() < rhs.MyIntField_ref();
-  }
-  if (!(lhs.MyStringField_ref() == rhs.MyStringField_ref())) {
-    return lhs.MyStringField_ref() < rhs.MyStringField_ref();
-  }
-  if (!(lhs.MyStringField2_ref() == rhs.MyStringField2_ref())) {
-    return lhs.MyStringField2_ref() < rhs.MyStringField2_ref();
-  }
-  if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.__fbthrift_field_MyBinaryField, rhs.__fbthrift_field_MyBinaryField)) {
-    return apache::thrift::StringTraits<std::string>::isLess(lhs.__fbthrift_field_MyBinaryField, rhs.__fbthrift_field_MyBinaryField);
-  }
-  if (lhs.MyBinaryField2_ref().has_value() != rhs.MyBinaryField2_ref().has_value() || (lhs.MyBinaryField2_ref().has_value() && !apache::thrift::StringTraits<std::string>::isEqual(lhs.__fbthrift_field_MyBinaryField2, rhs.__fbthrift_field_MyBinaryField2))) {
-    return !lhs.MyBinaryField2_ref().has_value() || (rhs.MyBinaryField2_ref().has_value() && apache::thrift::StringTraits<std::string>::isLess(lhs.__fbthrift_field_MyBinaryField2, rhs.__fbthrift_field_MyBinaryField2));
-  }
-  if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.__fbthrift_field_MyBinaryField3, rhs.__fbthrift_field_MyBinaryField3)) {
-    return apache::thrift::StringTraits<std::string>::isLess(lhs.__fbthrift_field_MyBinaryField3, rhs.__fbthrift_field_MyBinaryField3);
-  }
-  if (!(lhs.MyBinaryListField4_ref() == rhs.MyBinaryListField4_ref())) {
-    return lhs.MyBinaryListField4_ref() < rhs.MyBinaryListField4_ref();
-  }
-  if (!(lhs.MyMapEnumAndInt_ref() == rhs.MyMapEnumAndInt_ref())) {
-    return lhs.MyMapEnumAndInt_ref() < rhs.MyMapEnumAndInt_ref();
-  }
-  if (::apache::thrift::adapt_detail::not_equal<::CustomProtocolAdapter>(lhs.__fbthrift_field_MyCustomField, rhs.__fbthrift_field_MyCustomField)) {
-    return ::apache::thrift::adapt_detail::less<::CustomProtocolAdapter>(lhs.__fbthrift_field_MyCustomField, rhs.__fbthrift_field_MyCustomField);
-  }
-  if (::apache::thrift::adapt_detail::not_equal_opt<::CustomProtocolAdapter>(lhs.MyOptCustomField_ref(), rhs.MyOptCustomField_ref())) {
-    return ::apache::thrift::adapt_detail::neq_less_opt<::CustomProtocolAdapter>(lhs.MyOptCustomField_ref(), rhs.MyOptCustomField_ref());
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::std::vector<::std::string>& MyStruct::get_MyBinaryListField4() const& {
@@ -1193,59 +1154,7 @@ bool AnException::operator==(FOLLY_MAYBE_UNUSED const AnException& rhs) const {
 }
 
 bool AnException::operator<(FOLLY_MAYBE_UNUSED const AnException& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.code_ref() == rhs.code_ref())) {
-    return lhs.code_ref() < rhs.code_ref();
-  }
-  if (!(lhs.req_code_ref() == rhs.req_code_ref())) {
-    return lhs.req_code_ref() < rhs.req_code_ref();
-  }
-  if (!(lhs.message2_ref() == rhs.message2_ref())) {
-    return lhs.message2_ref() < rhs.message2_ref();
-  }
-  if (!(lhs.req_message_ref() == rhs.req_message_ref())) {
-    return lhs.req_message_ref() < rhs.req_message_ref();
-  }
-  if (!(lhs.exception_list_ref() == rhs.exception_list_ref())) {
-    return lhs.exception_list_ref() < rhs.exception_list_ref();
-  }
-  if (!(lhs.exception_set_ref() == rhs.exception_set_ref())) {
-    return lhs.exception_set_ref() < rhs.exception_set_ref();
-  }
-  if (!(lhs.exception_map_ref() == rhs.exception_map_ref())) {
-    return lhs.exception_map_ref() < rhs.exception_map_ref();
-  }
-  if (!(lhs.req_exception_map_ref() == rhs.req_exception_map_ref())) {
-    return lhs.req_exception_map_ref() < rhs.req_exception_map_ref();
-  }
-  if (!(lhs.enum_field_ref() == rhs.enum_field_ref())) {
-    return lhs.enum_field_ref() < rhs.enum_field_ref();
-  }
-  if (!(lhs.enum_container_ref() == rhs.enum_container_ref())) {
-    return lhs.enum_container_ref() < rhs.enum_container_ref();
-  }
-  if (!(lhs.a_struct_ref() == rhs.a_struct_ref())) {
-    return lhs.a_struct_ref() < rhs.a_struct_ref();
-  }
-  if (!(lhs.a_set_struct_ref() == rhs.a_set_struct_ref())) {
-    return lhs.a_set_struct_ref() < rhs.a_set_struct_ref();
-  }
-  if (!(lhs.a_union_list_ref() == rhs.a_union_list_ref())) {
-    return lhs.a_union_list_ref() < rhs.a_union_list_ref();
-  }
-  if (!(lhs.union_typedef_ref() == rhs.union_typedef_ref())) {
-    return lhs.union_typedef_ref() < rhs.union_typedef_ref();
-  }
-  if (!(lhs.a_union_typedef_list_ref() == rhs.a_union_typedef_list_ref())) {
-    return lhs.a_union_typedef_list_ref() < rhs.a_union_typedef_list_ref();
-  }
-  if (::apache::thrift::adapt_detail::not_equal<::CustomProtocolAdapter>(lhs.__fbthrift_field_MyCustomField, rhs.__fbthrift_field_MyCustomField)) {
-    return ::apache::thrift::adapt_detail::less<::CustomProtocolAdapter>(lhs.__fbthrift_field_MyCustomField, rhs.__fbthrift_field_MyCustomField);
-  }
-  if (::apache::thrift::adapt_detail::not_equal_opt<::CustomProtocolAdapter>(lhs.MyOptCustomField_ref(), rhs.MyOptCustomField_ref())) {
-    return ::apache::thrift::adapt_detail::neq_less_opt<::CustomProtocolAdapter>(lhs.MyOptCustomField_ref(), rhs.MyOptCustomField_ref());
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::std::vector<::std::int32_t>& AnException::get_exception_list() const& {
@@ -1477,17 +1386,7 @@ bool AnotherException::operator==(FOLLY_MAYBE_UNUSED const AnotherException& rhs
 }
 
 bool AnotherException::operator<(FOLLY_MAYBE_UNUSED const AnotherException& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.code_ref() == rhs.code_ref())) {
-    return lhs.code_ref() < rhs.code_ref();
-  }
-  if (!(lhs.req_code_ref() == rhs.req_code_ref())) {
-    return lhs.req_code_ref() < rhs.req_code_ref();
-  }
-  if (!(lhs.message_ref() == rhs.message_ref())) {
-    return lhs.message_ref() < rhs.message_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -1753,146 +1652,7 @@ bool containerStruct::operator==(FOLLY_MAYBE_UNUSED const containerStruct& rhs) 
 }
 
 bool containerStruct::operator<(FOLLY_MAYBE_UNUSED const containerStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.fieldA_ref() == rhs.fieldA_ref())) {
-    return lhs.fieldA_ref() < rhs.fieldA_ref();
-  }
-  if (!(lhs.req_fieldA_ref() == rhs.req_fieldA_ref())) {
-    return lhs.req_fieldA_ref() < rhs.req_fieldA_ref();
-  }
-  if (!(lhs.opt_fieldA_ref() == rhs.opt_fieldA_ref())) {
-    return lhs.opt_fieldA_ref() < rhs.opt_fieldA_ref();
-  }
-  if (!(lhs.fieldB_ref() == rhs.fieldB_ref())) {
-    return lhs.fieldB_ref() < rhs.fieldB_ref();
-  }
-  if (!(lhs.req_fieldB_ref() == rhs.req_fieldB_ref())) {
-    return lhs.req_fieldB_ref() < rhs.req_fieldB_ref();
-  }
-  if (!(lhs.opt_fieldB_ref() == rhs.opt_fieldB_ref())) {
-    return lhs.opt_fieldB_ref() < rhs.opt_fieldB_ref();
-  }
-  if (!(lhs.fieldC_ref() == rhs.fieldC_ref())) {
-    return lhs.fieldC_ref() < rhs.fieldC_ref();
-  }
-  if (!(lhs.req_fieldC_ref() == rhs.req_fieldC_ref())) {
-    return lhs.req_fieldC_ref() < rhs.req_fieldC_ref();
-  }
-  if (!(lhs.opt_fieldC_ref() == rhs.opt_fieldC_ref())) {
-    return lhs.opt_fieldC_ref() < rhs.opt_fieldC_ref();
-  }
-  if (!(lhs.fieldD_ref() == rhs.fieldD_ref())) {
-    return lhs.fieldD_ref() < rhs.fieldD_ref();
-  }
-  if (!(lhs.fieldE_ref() == rhs.fieldE_ref())) {
-    return lhs.fieldE_ref() < rhs.fieldE_ref();
-  }
-  if (!(lhs.req_fieldE_ref() == rhs.req_fieldE_ref())) {
-    return lhs.req_fieldE_ref() < rhs.req_fieldE_ref();
-  }
-  if (!(lhs.opt_fieldE_ref() == rhs.opt_fieldE_ref())) {
-    return lhs.opt_fieldE_ref() < rhs.opt_fieldE_ref();
-  }
-  if (!(lhs.fieldF_ref() == rhs.fieldF_ref())) {
-    return lhs.fieldF_ref() < rhs.fieldF_ref();
-  }
-  if (!(lhs.fieldG_ref() == rhs.fieldG_ref())) {
-    return lhs.fieldG_ref() < rhs.fieldG_ref();
-  }
-  if (!(lhs.fieldH_ref() == rhs.fieldH_ref())) {
-    return lhs.fieldH_ref() < rhs.fieldH_ref();
-  }
-  if (!(lhs.fieldI_ref() == rhs.fieldI_ref())) {
-    return lhs.fieldI_ref() < rhs.fieldI_ref();
-  }
-  if (!(lhs.fieldJ_ref() == rhs.fieldJ_ref())) {
-    return lhs.fieldJ_ref() < rhs.fieldJ_ref();
-  }
-  if (!(lhs.fieldK_ref() == rhs.fieldK_ref())) {
-    return lhs.fieldK_ref() < rhs.fieldK_ref();
-  }
-  if (!(lhs.fieldL_ref() == rhs.fieldL_ref())) {
-    return lhs.fieldL_ref() < rhs.fieldL_ref();
-  }
-  if (!(lhs.fieldM_ref() == rhs.fieldM_ref())) {
-    return lhs.fieldM_ref() < rhs.fieldM_ref();
-  }
-  if (!(lhs.fieldN_ref() == rhs.fieldN_ref())) {
-    return lhs.fieldN_ref() < rhs.fieldN_ref();
-  }
-  if (!(lhs.fieldO_ref() == rhs.fieldO_ref())) {
-    return lhs.fieldO_ref() < rhs.fieldO_ref();
-  }
-  if (!(lhs.fieldP_ref() == rhs.fieldP_ref())) {
-    return lhs.fieldP_ref() < rhs.fieldP_ref();
-  }
-  if (!(lhs.fieldQ_ref() == rhs.fieldQ_ref())) {
-    return lhs.fieldQ_ref() < rhs.fieldQ_ref();
-  }
-  if (!(lhs.fieldR_ref() == rhs.fieldR_ref())) {
-    return lhs.fieldR_ref() < rhs.fieldR_ref();
-  }
-  if (!(lhs.req_fieldR_ref() == rhs.req_fieldR_ref())) {
-    return lhs.req_fieldR_ref() < rhs.req_fieldR_ref();
-  }
-  if (!(lhs.opt_fieldR_ref() == rhs.opt_fieldR_ref())) {
-    return lhs.opt_fieldR_ref() < rhs.opt_fieldR_ref();
-  }
-  if (!(lhs.fieldS_ref() == rhs.fieldS_ref())) {
-    return lhs.fieldS_ref() < rhs.fieldS_ref();
-  }
-  if (!(lhs.fieldT_ref() == rhs.fieldT_ref())) {
-    return lhs.fieldT_ref() < rhs.fieldT_ref();
-  }
-  if (!(lhs.fieldU_ref() == rhs.fieldU_ref())) {
-    return lhs.fieldU_ref() < rhs.fieldU_ref();
-  }
-  if (!(lhs.fieldV_ref() == rhs.fieldV_ref())) {
-    return lhs.fieldV_ref() < rhs.fieldV_ref();
-  }
-  if (!(lhs.req_fieldV_ref() == rhs.req_fieldV_ref())) {
-    return lhs.req_fieldV_ref() < rhs.req_fieldV_ref();
-  }
-  if (!(lhs.opt_fieldV_ref() == rhs.opt_fieldV_ref())) {
-    return lhs.opt_fieldV_ref() < rhs.opt_fieldV_ref();
-  }
-  if (!(lhs.fieldW_ref() == rhs.fieldW_ref())) {
-    return lhs.fieldW_ref() < rhs.fieldW_ref();
-  }
-  if (!(lhs.fieldX_ref() == rhs.fieldX_ref())) {
-    return lhs.fieldX_ref() < rhs.fieldX_ref();
-  }
-  if (!(lhs.req_fieldX_ref() == rhs.req_fieldX_ref())) {
-    return lhs.req_fieldX_ref() < rhs.req_fieldX_ref();
-  }
-  if (!(lhs.opt_fieldX_ref() == rhs.opt_fieldX_ref())) {
-    return lhs.opt_fieldX_ref() < rhs.opt_fieldX_ref();
-  }
-  if (!(lhs.fieldY_ref() == rhs.fieldY_ref())) {
-    return lhs.fieldY_ref() < rhs.fieldY_ref();
-  }
-  if (!(lhs.fieldZ_ref() == rhs.fieldZ_ref())) {
-    return lhs.fieldZ_ref() < rhs.fieldZ_ref();
-  }
-  if (!(lhs.fieldAA_ref() == rhs.fieldAA_ref())) {
-    return lhs.fieldAA_ref() < rhs.fieldAA_ref();
-  }
-  if (!(lhs.fieldAB_ref() == rhs.fieldAB_ref())) {
-    return lhs.fieldAB_ref() < rhs.fieldAB_ref();
-  }
-  if (!(lhs.fieldAC_ref() == rhs.fieldAC_ref())) {
-    return lhs.fieldAC_ref() < rhs.fieldAC_ref();
-  }
-  if (!(lhs.fieldAD_ref() == rhs.fieldAD_ref())) {
-    return lhs.fieldAD_ref() < rhs.fieldAD_ref();
-  }
-  if (!(lhs.fieldAE_ref() == rhs.fieldAE_ref())) {
-    return lhs.fieldAE_ref() < rhs.fieldAE_ref();
-  }
-  if (!(lhs.fieldSD_ref() == rhs.fieldSD_ref())) {
-    return lhs.fieldSD_ref() < rhs.fieldSD_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::std::map<::std::string, bool>& containerStruct::get_fieldB() const& {
@@ -2358,20 +2118,7 @@ bool MyIncludedStruct::operator==(FOLLY_MAYBE_UNUSED const MyIncludedStruct& rhs
 }
 
 bool MyIncludedStruct::operator<(FOLLY_MAYBE_UNUSED const MyIncludedStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.MyIncludedInt_ref() == rhs.MyIncludedInt_ref())) {
-    return lhs.MyIncludedInt_ref() < rhs.MyIncludedInt_ref();
-  }
-  if (!(lhs.MyIncludedStruct_ref() == rhs.MyIncludedStruct_ref())) {
-    return lhs.MyIncludedStruct_ref() < rhs.MyIncludedStruct_ref();
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.ARefField_ref(), rhs.ARefField_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.ARefField_ref(), rhs.ARefField_ref());
-  }
-  if (!(lhs.ARequiredField_ref() == rhs.ARequiredField_ref())) {
-    return lhs.ARequiredField_ref() < rhs.ARequiredField_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::some::valid::ns::AStruct& MyIncludedStruct::get_MyIncludedStruct() const& {
@@ -2983,14 +2730,7 @@ bool ComplexContainerStruct::operator==(FOLLY_MAYBE_UNUSED const ComplexContaine
 }
 
 bool ComplexContainerStruct::operator<(FOLLY_MAYBE_UNUSED const ComplexContainerStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.map_of_iobufs_ref() == rhs.map_of_iobufs_ref())) {
-    return lhs.map_of_iobufs_ref() < rhs.map_of_iobufs_ref();
-  }
-  if (!(lhs.map_of_iobuf_ptrs_ref() == rhs.map_of_iobuf_ptrs_ref())) {
-    return lhs.map_of_iobuf_ptrs_ref() < rhs.map_of_iobuf_ptrs_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::std::map<::std::string, ::some::valid::ns::IOBuf>& ComplexContainerStruct::get_map_of_iobufs() const& {
@@ -3093,14 +2833,7 @@ bool FloatStruct::operator==(FOLLY_MAYBE_UNUSED const FloatStruct& rhs) const {
 }
 
 bool FloatStruct::operator<(FOLLY_MAYBE_UNUSED const FloatStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.floatField_ref() == rhs.floatField_ref())) {
-    return lhs.floatField_ref() < rhs.floatField_ref();
-  }
-  if (!(lhs.doubleField_ref() == rhs.doubleField_ref())) {
-    return lhs.doubleField_ref() < rhs.doubleField_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -3290,11 +3023,7 @@ bool AllRequiredNoExceptMoveCtrStruct::operator==(FOLLY_MAYBE_UNUSED const AllRe
 }
 
 bool AllRequiredNoExceptMoveCtrStruct::operator<(FOLLY_MAYBE_UNUSED const AllRequiredNoExceptMoveCtrStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.intField_ref() == rhs.intField_ref())) {
-    return lhs.intField_ref() < rhs.intField_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 

@@ -166,23 +166,7 @@ bool Internship::operator==(FOLLY_MAYBE_UNUSED const Internship& rhs) const {
 }
 
 bool Internship::operator<(FOLLY_MAYBE_UNUSED const Internship& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.weeks_ref() == rhs.weeks_ref())) {
-    return lhs.weeks_ref() < rhs.weeks_ref();
-  }
-  if (!(lhs.title_ref() == rhs.title_ref())) {
-    return lhs.title_ref() < rhs.title_ref();
-  }
-  if (!(lhs.employer_ref() == rhs.employer_ref())) {
-    return lhs.employer_ref() < rhs.employer_ref();
-  }
-  if (!(lhs.compensation_ref() == rhs.compensation_ref())) {
-    return lhs.compensation_ref() < rhs.compensation_ref();
-  }
-  if (!(lhs.school_ref() == rhs.school_ref())) {
-    return lhs.school_ref() < rhs.school_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -264,14 +248,7 @@ bool Range::operator==(FOLLY_MAYBE_UNUSED const Range& rhs) const {
 }
 
 bool Range::operator<(FOLLY_MAYBE_UNUSED const Range& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.min_ref() == rhs.min_ref())) {
-    return lhs.min_ref() < rhs.min_ref();
-  }
-  if (!(lhs.max_ref() == rhs.max_ref())) {
-    return lhs.max_ref() < rhs.max_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -375,14 +352,7 @@ bool struct1::operator==(FOLLY_MAYBE_UNUSED const struct1& rhs) const {
 }
 
 bool struct1::operator<(FOLLY_MAYBE_UNUSED const struct1& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.a_ref() == rhs.a_ref())) {
-    return lhs.a_ref() < rhs.a_ref();
-  }
-  if (!(lhs.b_ref() == rhs.b_ref())) {
-    return lhs.b_ref() < rhs.b_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -496,20 +466,7 @@ bool struct2::operator==(FOLLY_MAYBE_UNUSED const struct2& rhs) const {
 }
 
 bool struct2::operator<(FOLLY_MAYBE_UNUSED const struct2& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.a_ref() == rhs.a_ref())) {
-    return lhs.a_ref() < rhs.a_ref();
-  }
-  if (!(lhs.b_ref() == rhs.b_ref())) {
-    return lhs.b_ref() < rhs.b_ref();
-  }
-  if (!(lhs.c_ref() == rhs.c_ref())) {
-    return lhs.c_ref() < rhs.c_ref();
-  }
-  if (!(lhs.d_ref() == rhs.d_ref())) {
-    return lhs.d_ref() < rhs.d_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::cpp2::struct1& struct2::get_c() const& {
@@ -642,17 +599,7 @@ bool struct3::operator==(FOLLY_MAYBE_UNUSED const struct3& rhs) const {
 }
 
 bool struct3::operator<(FOLLY_MAYBE_UNUSED const struct3& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.a_ref() == rhs.a_ref())) {
-    return lhs.a_ref() < rhs.a_ref();
-  }
-  if (!(lhs.b_ref() == rhs.b_ref())) {
-    return lhs.b_ref() < rhs.b_ref();
-  }
-  if (!(lhs.c_ref() == rhs.c_ref())) {
-    return lhs.c_ref() < rhs.c_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::cpp2::struct2& struct3::get_c() const& {
@@ -769,17 +716,7 @@ bool struct4::operator==(FOLLY_MAYBE_UNUSED const struct4& rhs) const {
 }
 
 bool struct4::operator<(FOLLY_MAYBE_UNUSED const struct4& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.a_ref() == rhs.a_ref())) {
-    return lhs.a_ref() < rhs.a_ref();
-  }
-  if (!(lhs.b_ref() == rhs.b_ref())) {
-    return lhs.b_ref() < rhs.b_ref();
-  }
-  if (!(lhs.c_ref() == rhs.c_ref())) {
-    return lhs.c_ref() < rhs.c_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 

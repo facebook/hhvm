@@ -87,11 +87,7 @@ bool A::operator==(FOLLY_MAYBE_UNUSED const A& rhs) const {
 }
 
 bool A::operator<(FOLLY_MAYBE_UNUSED const A& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.useless_field_ref() == rhs.useless_field_ref())) {
-    return lhs.useless_field_ref() < rhs.useless_field_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -293,11 +289,7 @@ bool Bang::operator==(FOLLY_MAYBE_UNUSED const Bang& rhs) const {
 }
 
 bool Bang::operator<(FOLLY_MAYBE_UNUSED const Bang& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.message_ref() == rhs.message_ref())) {
-    return lhs.message_ref() < rhs.message_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 

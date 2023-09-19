@@ -434,17 +434,7 @@ bool Val::operator==(FOLLY_MAYBE_UNUSED const Val& rhs) const {
 }
 
 bool Val::operator<(FOLLY_MAYBE_UNUSED const Val& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.strVal_ref() == rhs.strVal_ref())) {
-    return lhs.strVal_ref() < rhs.strVal_ref();
-  }
-  if (!(lhs.intVal_ref() == rhs.intVal_ref())) {
-    return lhs.intVal_ref() < rhs.intVal_ref();
-  }
-  if (!(lhs.typedefValue_ref() == rhs.typedefValue_ref())) {
-    return lhs.typedefValue_ref() < rhs.typedefValue_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::cpp2::containerTypedef& Val::get_typedefValue() const& {
@@ -754,11 +744,7 @@ bool NonCopyableStruct::operator==(FOLLY_MAYBE_UNUSED const NonCopyableStruct& r
 }
 
 bool NonCopyableStruct::operator<(FOLLY_MAYBE_UNUSED const NonCopyableStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.num_ref() == rhs.num_ref())) {
-    return lhs.num_ref() < rhs.num_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 

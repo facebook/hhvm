@@ -183,23 +183,7 @@ bool TrivialTypesStruct::operator==(FOLLY_MAYBE_UNUSED const TrivialTypesStruct&
 }
 
 bool TrivialTypesStruct::operator<(FOLLY_MAYBE_UNUSED const TrivialTypesStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.fieldA_ref() == rhs.fieldA_ref())) {
-    return lhs.fieldA_ref() < rhs.fieldA_ref();
-  }
-  if (!(lhs.fieldB_ref() == rhs.fieldB_ref())) {
-    return lhs.fieldB_ref() < rhs.fieldB_ref();
-  }
-  if (lhs.fieldC_ref().has_value() != rhs.fieldC_ref().has_value() || (lhs.fieldC_ref().has_value() && !apache::thrift::StringTraits<std::string>::isEqual(lhs.__fbthrift_field_fieldC, rhs.__fbthrift_field_fieldC))) {
-    return !lhs.fieldC_ref().has_value() || (rhs.fieldC_ref().has_value() && apache::thrift::StringTraits<std::string>::isLess(lhs.__fbthrift_field_fieldC, rhs.__fbthrift_field_fieldC));
-  }
-  if (lhs.fieldD_ref().has_value() != rhs.fieldD_ref().has_value() || (lhs.fieldD_ref().has_value() && !apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::isEqual(lhs.__fbthrift_field_fieldD, rhs.__fbthrift_field_fieldD))) {
-    return !lhs.fieldD_ref().has_value() || (rhs.fieldD_ref().has_value() && apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::isLess(lhs.__fbthrift_field_fieldD, rhs.__fbthrift_field_fieldD));
-  }
-  if (!(lhs.fieldE_ref() == rhs.fieldE_ref())) {
-    return lhs.fieldE_ref() < rhs.fieldE_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 

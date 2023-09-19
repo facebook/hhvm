@@ -76,20 +76,7 @@ bool BasicTypes::operator==(FOLLY_MAYBE_UNUSED const BasicTypes& rhs) const {
 }
 
 bool BasicTypes::operator<(FOLLY_MAYBE_UNUSED const BasicTypes& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.first_ref() == rhs.first_ref())) {
-    return lhs.first_ref() < rhs.first_ref();
-  }
-  if (!(lhs.second_ref() == rhs.second_ref())) {
-    return lhs.second_ref() < rhs.second_ref();
-  }
-  if (!(lhs.third_ref() == rhs.third_ref())) {
-    return lhs.third_ref() < rhs.third_ref();
-  }
-  if (!(lhs.isTrue_ref() == rhs.isTrue_ref())) {
-    return lhs.isTrue_ref() < rhs.isTrue_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 

@@ -124,20 +124,7 @@ bool MyStructFloatFieldThrowExp::operator==(FOLLY_MAYBE_UNUSED const MyStructFlo
 }
 
 bool MyStructFloatFieldThrowExp::operator<(FOLLY_MAYBE_UNUSED const MyStructFloatFieldThrowExp& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.myLongField_ref() == rhs.myLongField_ref())) {
-    return lhs.myLongField_ref() < rhs.myLongField_ref();
-  }
-  if (!(lhs.MyByteField_ref() == rhs.MyByteField_ref())) {
-    return lhs.MyByteField_ref() < rhs.MyByteField_ref();
-  }
-  if (!(lhs.myStringField_ref() == rhs.myStringField_ref())) {
-    return lhs.myStringField_ref() < rhs.myStringField_ref();
-  }
-  if (!(lhs.myFloatField_ref() == rhs.myFloatField_ref())) {
-    return lhs.myFloatField_ref() < rhs.myFloatField_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -243,14 +230,7 @@ bool MyStructMapFloatThrowExp::operator==(FOLLY_MAYBE_UNUSED const MyStructMapFl
 }
 
 bool MyStructMapFloatThrowExp::operator<(FOLLY_MAYBE_UNUSED const MyStructMapFloatThrowExp& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.myLongField_ref() == rhs.myLongField_ref())) {
-    return lhs.myLongField_ref() < rhs.myLongField_ref();
-  }
-  if (!(lhs.mapListOfFloats_ref() == rhs.mapListOfFloats_ref())) {
-    return lhs.mapListOfFloats_ref() < rhs.mapListOfFloats_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::std::map<::std::int32_t, ::std::vector<::std::vector<::cpp2::floatTypedef>>>& MyStructMapFloatThrowExp::get_mapListOfFloats() const& {
@@ -497,92 +477,7 @@ bool MyStruct::operator==(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
 }
 
 bool MyStruct::operator<(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.MyIntField_ref() == rhs.MyIntField_ref())) {
-    return lhs.MyIntField_ref() < rhs.MyIntField_ref();
-  }
-  if (!(lhs.MyStringField_ref() == rhs.MyStringField_ref())) {
-    return lhs.MyStringField_ref() < rhs.MyStringField_ref();
-  }
-  if (!(lhs.MyDataField_ref() == rhs.MyDataField_ref())) {
-    return lhs.MyDataField_ref() < rhs.MyDataField_ref();
-  }
-  if (!(lhs.myEnum_ref() == rhs.myEnum_ref())) {
-    return lhs.myEnum_ref() < rhs.myEnum_ref();
-  }
-  if (!(lhs.MyBoolField_ref() == rhs.MyBoolField_ref())) {
-    return lhs.MyBoolField_ref() < rhs.MyBoolField_ref();
-  }
-  if (!(lhs.MyByteField_ref() == rhs.MyByteField_ref())) {
-    return lhs.MyByteField_ref() < rhs.MyByteField_ref();
-  }
-  if (!(lhs.MyShortField_ref() == rhs.MyShortField_ref())) {
-    return lhs.MyShortField_ref() < rhs.MyShortField_ref();
-  }
-  if (!(lhs.MyLongField_ref() == rhs.MyLongField_ref())) {
-    return lhs.MyLongField_ref() < rhs.MyLongField_ref();
-  }
-  if (!(lhs.MyDoubleField_ref() == rhs.MyDoubleField_ref())) {
-    return lhs.MyDoubleField_ref() < rhs.MyDoubleField_ref();
-  }
-  if (!(lhs.lDouble_ref() == rhs.lDouble_ref())) {
-    return lhs.lDouble_ref() < rhs.lDouble_ref();
-  }
-  if (!(lhs.lShort_ref() == rhs.lShort_ref())) {
-    return lhs.lShort_ref() < rhs.lShort_ref();
-  }
-  if (!(lhs.lInteger_ref() == rhs.lInteger_ref())) {
-    return lhs.lInteger_ref() < rhs.lInteger_ref();
-  }
-  if (!(lhs.lLong_ref() == rhs.lLong_ref())) {
-    return lhs.lLong_ref() < rhs.lLong_ref();
-  }
-  if (!(lhs.lString_ref() == rhs.lString_ref())) {
-    return lhs.lString_ref() < rhs.lString_ref();
-  }
-  if (!(lhs.lBool_ref() == rhs.lBool_ref())) {
-    return lhs.lBool_ref() < rhs.lBool_ref();
-  }
-  if (!(lhs.lByte_ref() == rhs.lByte_ref())) {
-    return lhs.lByte_ref() < rhs.lByte_ref();
-  }
-  if (!(lhs.mShortString_ref() == rhs.mShortString_ref())) {
-    return lhs.mShortString_ref() < rhs.mShortString_ref();
-  }
-  if (!(lhs.mIntegerString_ref() == rhs.mIntegerString_ref())) {
-    return lhs.mIntegerString_ref() < rhs.mIntegerString_ref();
-  }
-  if (!(lhs.mStringMyStruct_ref() == rhs.mStringMyStruct_ref())) {
-    return lhs.mStringMyStruct_ref() < rhs.mStringMyStruct_ref();
-  }
-  if (!(lhs.mStringBool_ref() == rhs.mStringBool_ref())) {
-    return lhs.mStringBool_ref() < rhs.mStringBool_ref();
-  }
-  if (!(lhs.mIntegerInteger_ref() == rhs.mIntegerInteger_ref())) {
-    return lhs.mIntegerInteger_ref() < rhs.mIntegerInteger_ref();
-  }
-  if (!(lhs.mIntegerBool_ref() == rhs.mIntegerBool_ref())) {
-    return lhs.mIntegerBool_ref() < rhs.mIntegerBool_ref();
-  }
-  if (!(lhs.sShort_ref() == rhs.sShort_ref())) {
-    return lhs.sShort_ref() < rhs.sShort_ref();
-  }
-  if (!(lhs.sMyStruct_ref() == rhs.sMyStruct_ref())) {
-    return lhs.sMyStruct_ref() < rhs.sMyStruct_ref();
-  }
-  if (!(lhs.sLong_ref() == rhs.sLong_ref())) {
-    return lhs.sLong_ref() < rhs.sLong_ref();
-  }
-  if (!(lhs.sString_ref() == rhs.sString_ref())) {
-    return lhs.sString_ref() < rhs.sString_ref();
-  }
-  if (!(lhs.sByte_ref() == rhs.sByte_ref())) {
-    return lhs.sByte_ref() < rhs.sByte_ref();
-  }
-  if (!(lhs.mListList_ref() == rhs.mListList_ref())) {
-    return lhs.mListList_ref() < rhs.mListList_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::cpp2::MyDataItem& MyStruct::get_MyDataField() const& {
@@ -879,14 +774,7 @@ bool SimpleStruct::operator==(FOLLY_MAYBE_UNUSED const SimpleStruct& rhs) const 
 }
 
 bool SimpleStruct::operator<(FOLLY_MAYBE_UNUSED const SimpleStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.age_ref() == rhs.age_ref())) {
-    return lhs.age_ref() < rhs.age_ref();
-  }
-  if (!(lhs.name_ref() == rhs.name_ref())) {
-    return lhs.name_ref() < rhs.name_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -1128,74 +1016,7 @@ bool defaultStruct::operator==(FOLLY_MAYBE_UNUSED const defaultStruct& rhs) cons
 }
 
 bool defaultStruct::operator<(FOLLY_MAYBE_UNUSED const defaultStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.myLongDFset_ref() == rhs.myLongDFset_ref())) {
-    return lhs.myLongDFset_ref() < rhs.myLongDFset_ref();
-  }
-  if (!(lhs.myLongDF_ref() == rhs.myLongDF_ref())) {
-    return lhs.myLongDF_ref() < rhs.myLongDF_ref();
-  }
-  if (!(lhs.portDFset_ref() == rhs.portDFset_ref())) {
-    return lhs.portDFset_ref() < rhs.portDFset_ref();
-  }
-  if (!(lhs.portNum_ref() == rhs.portNum_ref())) {
-    return lhs.portNum_ref() < rhs.portNum_ref();
-  }
-  if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.__fbthrift_field_myBinaryDFset, rhs.__fbthrift_field_myBinaryDFset)) {
-    return apache::thrift::StringTraits<std::string>::isLess(lhs.__fbthrift_field_myBinaryDFset, rhs.__fbthrift_field_myBinaryDFset);
-  }
-  if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.__fbthrift_field_myBinary, rhs.__fbthrift_field_myBinary)) {
-    return apache::thrift::StringTraits<std::string>::isLess(lhs.__fbthrift_field_myBinary, rhs.__fbthrift_field_myBinary);
-  }
-  if (!(lhs.myByteDFSet_ref() == rhs.myByteDFSet_ref())) {
-    return lhs.myByteDFSet_ref() < rhs.myByteDFSet_ref();
-  }
-  if (!(lhs.myByte_ref() == rhs.myByte_ref())) {
-    return lhs.myByte_ref() < rhs.myByte_ref();
-  }
-  if (!(lhs.myDoubleDFset_ref() == rhs.myDoubleDFset_ref())) {
-    return lhs.myDoubleDFset_ref() < rhs.myDoubleDFset_ref();
-  }
-  if (!(lhs.myDoubleDFZero_ref() == rhs.myDoubleDFZero_ref())) {
-    return lhs.myDoubleDFZero_ref() < rhs.myDoubleDFZero_ref();
-  }
-  if (!(lhs.myDouble_ref() == rhs.myDouble_ref())) {
-    return lhs.myDouble_ref() < rhs.myDouble_ref();
-  }
-  if (!(lhs.field3_ref() == rhs.field3_ref())) {
-    return lhs.field3_ref() < rhs.field3_ref();
-  }
-  if (!(lhs.myList_ref() == rhs.myList_ref())) {
-    return lhs.myList_ref() < rhs.myList_ref();
-  }
-  if (!(lhs.mySet_ref() == rhs.mySet_ref())) {
-    return lhs.mySet_ref() < rhs.mySet_ref();
-  }
-  if (!(lhs.simpleStruct_ref() == rhs.simpleStruct_ref())) {
-    return lhs.simpleStruct_ref() < rhs.simpleStruct_ref();
-  }
-  if (!(lhs.listStructDFset_ref() == rhs.listStructDFset_ref())) {
-    return lhs.listStructDFset_ref() < rhs.listStructDFset_ref();
-  }
-  if (!(lhs.myUnion_ref() == rhs.myUnion_ref())) {
-    return lhs.myUnion_ref() < rhs.myUnion_ref();
-  }
-  if (!(lhs.listUnionDFset_ref() == rhs.listUnionDFset_ref())) {
-    return lhs.listUnionDFset_ref() < rhs.listUnionDFset_ref();
-  }
-  if (!(lhs.mapNestlistStructDfSet_ref() == rhs.mapNestlistStructDfSet_ref())) {
-    return lhs.mapNestlistStructDfSet_ref() < rhs.mapNestlistStructDfSet_ref();
-  }
-  if (!(lhs.mapJavaTypeDFset_ref() == rhs.mapJavaTypeDFset_ref())) {
-    return lhs.mapJavaTypeDFset_ref() < rhs.mapJavaTypeDFset_ref();
-  }
-  if (!(lhs.emptyMap_ref() == rhs.emptyMap_ref())) {
-    return lhs.emptyMap_ref() < rhs.emptyMap_ref();
-  }
-  if (!(lhs.enumMapDFset_ref() == rhs.enumMapDFset_ref())) {
-    return lhs.enumMapDFset_ref() < rhs.enumMapDFset_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::std::map<::std::int32_t, ::std::string>& defaultStruct::get_field3() const& {
@@ -1467,35 +1288,7 @@ bool MyStructTypeDef::operator==(FOLLY_MAYBE_UNUSED const MyStructTypeDef& rhs) 
 }
 
 bool MyStructTypeDef::operator<(FOLLY_MAYBE_UNUSED const MyStructTypeDef& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.myLongField_ref() == rhs.myLongField_ref())) {
-    return lhs.myLongField_ref() < rhs.myLongField_ref();
-  }
-  if (!(lhs.myLongTypeDef_ref() == rhs.myLongTypeDef_ref())) {
-    return lhs.myLongTypeDef_ref() < rhs.myLongTypeDef_ref();
-  }
-  if (!(lhs.myStringField_ref() == rhs.myStringField_ref())) {
-    return lhs.myStringField_ref() < rhs.myStringField_ref();
-  }
-  if (!(lhs.myStringTypedef_ref() == rhs.myStringTypedef_ref())) {
-    return lhs.myStringTypedef_ref() < rhs.myStringTypedef_ref();
-  }
-  if (!(lhs.myMapField_ref() == rhs.myMapField_ref())) {
-    return lhs.myMapField_ref() < rhs.myMapField_ref();
-  }
-  if (!(lhs.myMapTypedef_ref() == rhs.myMapTypedef_ref())) {
-    return lhs.myMapTypedef_ref() < rhs.myMapTypedef_ref();
-  }
-  if (!(lhs.myListField_ref() == rhs.myListField_ref())) {
-    return lhs.myListField_ref() < rhs.myListField_ref();
-  }
-  if (!(lhs.myListTypedef_ref() == rhs.myListTypedef_ref())) {
-    return lhs.myListTypedef_ref() < rhs.myListTypedef_ref();
-  }
-  if (!(lhs.myMapListOfTypeDef_ref() == rhs.myMapListOfTypeDef_ref())) {
-    return lhs.myMapListOfTypeDef_ref() < rhs.myMapListOfTypeDef_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::std::map<::std::int16_t, ::std::string>& MyStructTypeDef::get_myMapField() const& {
@@ -1616,8 +1409,7 @@ bool MyDataItem::operator==(FOLLY_MAYBE_UNUSED const MyDataItem& rhs) const {
 }
 
 bool MyDataItem::operator<(FOLLY_MAYBE_UNUSED const MyDataItem& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -2067,62 +1859,7 @@ bool ComplexNestedStruct::operator==(FOLLY_MAYBE_UNUSED const ComplexNestedStruc
 }
 
 bool ComplexNestedStruct::operator<(FOLLY_MAYBE_UNUSED const ComplexNestedStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.setOfSetOfInt_ref() == rhs.setOfSetOfInt_ref())) {
-    return lhs.setOfSetOfInt_ref() < rhs.setOfSetOfInt_ref();
-  }
-  if (!(lhs.listofListOfListOfListOfEnum_ref() == rhs.listofListOfListOfListOfEnum_ref())) {
-    return lhs.listofListOfListOfListOfEnum_ref() < rhs.listofListOfListOfListOfEnum_ref();
-  }
-  if (!(lhs.listOfListOfMyStruct_ref() == rhs.listOfListOfMyStruct_ref())) {
-    return lhs.listOfListOfMyStruct_ref() < rhs.listOfListOfMyStruct_ref();
-  }
-  if (!(lhs.setOfListOfListOfLong_ref() == rhs.setOfListOfListOfLong_ref())) {
-    return lhs.setOfListOfListOfLong_ref() < rhs.setOfListOfListOfLong_ref();
-  }
-  if (!(lhs.setOfSetOfsetOfLong_ref() == rhs.setOfSetOfsetOfLong_ref())) {
-    return lhs.setOfSetOfsetOfLong_ref() < rhs.setOfSetOfsetOfLong_ref();
-  }
-  if (!(lhs.mapStructListOfListOfLong_ref() == rhs.mapStructListOfListOfLong_ref())) {
-    return lhs.mapStructListOfListOfLong_ref() < rhs.mapStructListOfListOfLong_ref();
-  }
-  if (!(lhs.mKeyStructValInt_ref() == rhs.mKeyStructValInt_ref())) {
-    return lhs.mKeyStructValInt_ref() < rhs.mKeyStructValInt_ref();
-  }
-  if (!(lhs.listOfMapKeyIntValInt_ref() == rhs.listOfMapKeyIntValInt_ref())) {
-    return lhs.listOfMapKeyIntValInt_ref() < rhs.listOfMapKeyIntValInt_ref();
-  }
-  if (!(lhs.listOfMapKeyStrValList_ref() == rhs.listOfMapKeyStrValList_ref())) {
-    return lhs.listOfMapKeyStrValList_ref() < rhs.listOfMapKeyStrValList_ref();
-  }
-  if (!(lhs.mapKeySetValLong_ref() == rhs.mapKeySetValLong_ref())) {
-    return lhs.mapKeySetValLong_ref() < rhs.mapKeySetValLong_ref();
-  }
-  if (!(lhs.mapKeyListValLong_ref() == rhs.mapKeyListValLong_ref())) {
-    return lhs.mapKeyListValLong_ref() < rhs.mapKeyListValLong_ref();
-  }
-  if (!(lhs.mapKeyMapValMap_ref() == rhs.mapKeyMapValMap_ref())) {
-    return lhs.mapKeyMapValMap_ref() < rhs.mapKeyMapValMap_ref();
-  }
-  if (!(lhs.mapKeySetValMap_ref() == rhs.mapKeySetValMap_ref())) {
-    return lhs.mapKeySetValMap_ref() < rhs.mapKeySetValMap_ref();
-  }
-  if (!(lhs.NestedMaps_ref() == rhs.NestedMaps_ref())) {
-    return lhs.NestedMaps_ref() < rhs.NestedMaps_ref();
-  }
-  if (!(lhs.mapKeyIntValList_ref() == rhs.mapKeyIntValList_ref())) {
-    return lhs.mapKeyIntValList_ref() < rhs.mapKeyIntValList_ref();
-  }
-  if (!(lhs.mapKeyIntValSet_ref() == rhs.mapKeyIntValSet_ref())) {
-    return lhs.mapKeyIntValSet_ref() < rhs.mapKeyIntValSet_ref();
-  }
-  if (!(lhs.mapKeySetValInt_ref() == rhs.mapKeySetValInt_ref())) {
-    return lhs.mapKeySetValInt_ref() < rhs.mapKeySetValInt_ref();
-  }
-  if (!(lhs.mapKeyListValSet_ref() == rhs.mapKeyListValSet_ref())) {
-    return lhs.mapKeyListValSet_ref() < rhs.mapKeyListValSet_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::std::set<::std::set<::std::int32_t>>& ComplexNestedStruct::get_setOfSetOfInt() const& {
@@ -2426,20 +2163,7 @@ bool TypeRemapped::operator==(FOLLY_MAYBE_UNUSED const TypeRemapped& rhs) const 
 }
 
 bool TypeRemapped::operator<(FOLLY_MAYBE_UNUSED const TypeRemapped& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.lsMap_ref() == rhs.lsMap_ref())) {
-    return lhs.lsMap_ref() < rhs.lsMap_ref();
-  }
-  if (!(lhs.ioMap_ref() == rhs.ioMap_ref())) {
-    return lhs.ioMap_ref() < rhs.ioMap_ref();
-  }
-  if (!(lhs.BigInteger_ref() == rhs.BigInteger_ref())) {
-    return lhs.BigInteger_ref() < rhs.BigInteger_ref();
-  }
-  if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.__fbthrift_field_binaryTestBuffer, rhs.__fbthrift_field_binaryTestBuffer)) {
-    return apache::thrift::StringTraits<std::string>::isLess(lhs.__fbthrift_field_binaryTestBuffer, rhs.__fbthrift_field_binaryTestBuffer);
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::std::map<::std::int64_t, ::std::string>& TypeRemapped::get_lsMap() const& {
@@ -2544,8 +2268,7 @@ bool emptyXcep::operator==(FOLLY_MAYBE_UNUSED const emptyXcep& rhs) const {
 }
 
 bool emptyXcep::operator<(FOLLY_MAYBE_UNUSED const emptyXcep& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -2641,14 +2364,7 @@ bool reqXcep::operator==(FOLLY_MAYBE_UNUSED const reqXcep& rhs) const {
 }
 
 bool reqXcep::operator<(FOLLY_MAYBE_UNUSED const reqXcep& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.message_ref() == rhs.message_ref())) {
-    return lhs.message_ref() < rhs.message_ref();
-  }
-  if (!(lhs.errorCode_ref() == rhs.errorCode_ref())) {
-    return lhs.errorCode_ref() < rhs.errorCode_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -2752,14 +2468,7 @@ bool optXcep::operator==(FOLLY_MAYBE_UNUSED const optXcep& rhs) const {
 }
 
 bool optXcep::operator<(FOLLY_MAYBE_UNUSED const optXcep& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.message_ref() == rhs.message_ref())) {
-    return lhs.message_ref() < rhs.message_ref();
-  }
-  if (!(lhs.errorCode_ref() == rhs.errorCode_ref())) {
-    return lhs.errorCode_ref() < rhs.errorCode_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -2883,26 +2592,7 @@ bool complexException::operator==(FOLLY_MAYBE_UNUSED const complexException& rhs
 }
 
 bool complexException::operator<(FOLLY_MAYBE_UNUSED const complexException& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.message_ref() == rhs.message_ref())) {
-    return lhs.message_ref() < rhs.message_ref();
-  }
-  if (!(lhs.listStrings_ref() == rhs.listStrings_ref())) {
-    return lhs.listStrings_ref() < rhs.listStrings_ref();
-  }
-  if (!(lhs.errorEnum_ref() == rhs.errorEnum_ref())) {
-    return lhs.errorEnum_ref() < rhs.errorEnum_ref();
-  }
-  if (!(lhs.unionError_ref() == rhs.unionError_ref())) {
-    return lhs.unionError_ref() < rhs.unionError_ref();
-  }
-  if (!(lhs.structError_ref() == rhs.structError_ref())) {
-    return lhs.structError_ref() < rhs.structError_ref();
-  }
-  if (!(lhs.lsMap_ref() == rhs.lsMap_ref())) {
-    return lhs.lsMap_ref() < rhs.lsMap_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::std::vector<::std::string>& complexException::get_listStrings() const& {

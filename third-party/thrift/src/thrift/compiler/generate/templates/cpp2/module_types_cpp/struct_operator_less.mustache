@@ -16,21 +16,5 @@
 
 %>
 bool <%struct:cpp_underlying_name%>::operator<(FOLLY_MAYBE_UNUSED const <%struct:cpp_underlying_name%>& rhs) const {
-<%#struct:thrift_uri%>
-<%! TODO(ytj): Optimize union less than comparison %>
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
-<%/struct:thrift_uri%>
-<%^struct:thrift_uri%>
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-<%#struct:fields%><%#field:type%>
-<%#field:lazy?%>
-  lhs.<%field:cpp_name%>_ref();
-  rhs.<%field:cpp_name%>_ref();
-<%/field:lazy?%>
-  if (<% > field/neq%>) {
-    return <% > field/neq_less %>;
-  }
-<%/field:type%><%/struct:fields%>
-  return false;
-<%/struct:thrift_uri%>
 }

@@ -76,8 +76,7 @@ bool FooStreamEx::operator==(FOLLY_MAYBE_UNUSED const FooStreamEx& rhs) const {
 }
 
 bool FooStreamEx::operator<(FOLLY_MAYBE_UNUSED const FooStreamEx& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -161,8 +160,7 @@ bool FooEx::operator==(FOLLY_MAYBE_UNUSED const FooEx& rhs) const {
 }
 
 bool FooEx::operator<(FOLLY_MAYBE_UNUSED const FooEx& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -246,8 +244,7 @@ bool FooEx2::operator==(FOLLY_MAYBE_UNUSED const FooEx2& rhs) const {
 }
 
 bool FooEx2::operator<(FOLLY_MAYBE_UNUSED const FooEx2& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 

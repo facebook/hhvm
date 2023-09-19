@@ -102,20 +102,7 @@ bool Foo::operator==(FOLLY_MAYBE_UNUSED const Foo& rhs) const {
 }
 
 bool Foo::operator<(FOLLY_MAYBE_UNUSED const Foo& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.field1_ref() == rhs.field1_ref())) {
-    return lhs.field1_ref() < rhs.field1_ref();
-  }
-  if (!(lhs.field2_ref() == rhs.field2_ref())) {
-    return lhs.field2_ref() < rhs.field2_ref();
-  }
-  if (!(lhs.field3_ref() == rhs.field3_ref())) {
-    return lhs.field3_ref() < rhs.field3_ref();
-  }
-  if (!(lhs.field4_ref() == rhs.field4_ref())) {
-    return lhs.field4_ref() < rhs.field4_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::std::vector<double>& Foo::get_field1() const& {
@@ -392,24 +379,7 @@ bool LazyFoo::operator==(FOLLY_MAYBE_UNUSED const LazyFoo& rhs) const {
 }
 
 bool LazyFoo::operator<(FOLLY_MAYBE_UNUSED const LazyFoo& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.field1_ref() == rhs.field1_ref())) {
-    return lhs.field1_ref() < rhs.field1_ref();
-  }
-  if (!(lhs.field2_ref() == rhs.field2_ref())) {
-    return lhs.field2_ref() < rhs.field2_ref();
-  }
-  lhs.field3_ref();
-  rhs.field3_ref();
-  if (!(lhs.field3_ref() == rhs.field3_ref())) {
-    return lhs.field3_ref() < rhs.field3_ref();
-  }
-  lhs.field4_ref();
-  rhs.field4_ref();
-  if (!(lhs.field4_ref() == rhs.field4_ref())) {
-    return lhs.field4_ref() < rhs.field4_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::std::vector<double>& LazyFoo::get_field1() const& {
@@ -548,20 +518,7 @@ bool OptionalFoo::operator==(FOLLY_MAYBE_UNUSED const OptionalFoo& rhs) const {
 }
 
 bool OptionalFoo::operator<(FOLLY_MAYBE_UNUSED const OptionalFoo& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.field1_ref() == rhs.field1_ref())) {
-    return lhs.field1_ref() < rhs.field1_ref();
-  }
-  if (!(lhs.field2_ref() == rhs.field2_ref())) {
-    return lhs.field2_ref() < rhs.field2_ref();
-  }
-  if (!(lhs.field3_ref() == rhs.field3_ref())) {
-    return lhs.field3_ref() < rhs.field3_ref();
-  }
-  if (!(lhs.field4_ref() == rhs.field4_ref())) {
-    return lhs.field4_ref() < rhs.field4_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::std::vector<double>* OptionalFoo::get_field1() const& {
@@ -839,24 +796,7 @@ bool OptionalLazyFoo::operator==(FOLLY_MAYBE_UNUSED const OptionalLazyFoo& rhs) 
 }
 
 bool OptionalLazyFoo::operator<(FOLLY_MAYBE_UNUSED const OptionalLazyFoo& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.field1_ref() == rhs.field1_ref())) {
-    return lhs.field1_ref() < rhs.field1_ref();
-  }
-  if (!(lhs.field2_ref() == rhs.field2_ref())) {
-    return lhs.field2_ref() < rhs.field2_ref();
-  }
-  lhs.field3_ref();
-  rhs.field3_ref();
-  if (!(lhs.field3_ref() == rhs.field3_ref())) {
-    return lhs.field3_ref() < rhs.field3_ref();
-  }
-  lhs.field4_ref();
-  rhs.field4_ref();
-  if (!(lhs.field4_ref() == rhs.field4_ref())) {
-    return lhs.field4_ref() < rhs.field4_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::std::vector<double>* OptionalLazyFoo::get_field1() const& {
@@ -1219,28 +1159,7 @@ bool LazyCppRef::operator==(FOLLY_MAYBE_UNUSED const LazyCppRef& rhs) const {
 }
 
 bool LazyCppRef::operator<(FOLLY_MAYBE_UNUSED const LazyCppRef& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  lhs.field1_ref();
-  rhs.field1_ref();
-  if ((!::apache::thrift::detail::pointer_equal(lhs.field1_ref(), rhs.field1_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.field1_ref(), rhs.field1_ref());
-  }
-  lhs.field2_ref();
-  rhs.field2_ref();
-  if ((!::apache::thrift::detail::pointer_equal(lhs.field2_ref(), rhs.field2_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.field2_ref(), rhs.field2_ref());
-  }
-  lhs.field3_ref();
-  rhs.field3_ref();
-  if ((!::apache::thrift::detail::pointer_equal(lhs.field3_ref(), rhs.field3_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.field3_ref(), rhs.field3_ref());
-  }
-  lhs.field4_ref();
-  rhs.field4_ref();
-  if ((!::apache::thrift::detail::pointer_equal(lhs.field4_ref(), rhs.field4_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.field4_ref(), rhs.field4_ref());
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -1372,26 +1291,7 @@ bool IndexedFoo::operator==(FOLLY_MAYBE_UNUSED const IndexedFoo& rhs) const {
 }
 
 bool IndexedFoo::operator<(FOLLY_MAYBE_UNUSED const IndexedFoo& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.serialized_data_size_ref() == rhs.serialized_data_size_ref())) {
-    return lhs.serialized_data_size_ref() < rhs.serialized_data_size_ref();
-  }
-  if (!(lhs.field1_ref() == rhs.field1_ref())) {
-    return lhs.field1_ref() < rhs.field1_ref();
-  }
-  if (!(lhs.field2_ref() == rhs.field2_ref())) {
-    return lhs.field2_ref() < rhs.field2_ref();
-  }
-  if (!(lhs.field3_ref() == rhs.field3_ref())) {
-    return lhs.field3_ref() < rhs.field3_ref();
-  }
-  if (!(lhs.field4_ref() == rhs.field4_ref())) {
-    return lhs.field4_ref() < rhs.field4_ref();
-  }
-  if (!(lhs.field_id_to_size_ref() == rhs.field_id_to_size_ref())) {
-    return lhs.field_id_to_size_ref() < rhs.field_id_to_size_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::std::vector<double>& IndexedFoo::get_field1() const& {
@@ -1559,26 +1459,7 @@ bool OptionalIndexedFoo::operator==(FOLLY_MAYBE_UNUSED const OptionalIndexedFoo&
 }
 
 bool OptionalIndexedFoo::operator<(FOLLY_MAYBE_UNUSED const OptionalIndexedFoo& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.serialized_data_size_ref() == rhs.serialized_data_size_ref())) {
-    return lhs.serialized_data_size_ref() < rhs.serialized_data_size_ref();
-  }
-  if (!(lhs.field1_ref() == rhs.field1_ref())) {
-    return lhs.field1_ref() < rhs.field1_ref();
-  }
-  if (!(lhs.field2_ref() == rhs.field2_ref())) {
-    return lhs.field2_ref() < rhs.field2_ref();
-  }
-  if (!(lhs.field3_ref() == rhs.field3_ref())) {
-    return lhs.field3_ref() < rhs.field3_ref();
-  }
-  if (!(lhs.field4_ref() == rhs.field4_ref())) {
-    return lhs.field4_ref() < rhs.field4_ref();
-  }
-  if (!(lhs.field_id_to_size_ref() == rhs.field_id_to_size_ref())) {
-    return lhs.field_id_to_size_ref() < rhs.field_id_to_size_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::std::vector<double>* OptionalIndexedFoo::get_field1() const& {
@@ -1696,8 +1577,7 @@ bool Empty::operator==(FOLLY_MAYBE_UNUSED const Empty& rhs) const {
 }
 
 bool Empty::operator<(FOLLY_MAYBE_UNUSED const Empty& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 

@@ -71,14 +71,7 @@ bool Included::operator==(FOLLY_MAYBE_UNUSED const Included& rhs) const {
 }
 
 bool Included::operator<(FOLLY_MAYBE_UNUSED const Included& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.MyIntField_ref() == rhs.MyIntField_ref())) {
-    return lhs.MyIntField_ref() < rhs.MyIntField_ref();
-  }
-  if (!(lhs.MyTransitiveField_ref() == rhs.MyTransitiveField_ref())) {
-    return lhs.MyTransitiveField_ref() < rhs.MyTransitiveField_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::cpp2::Foo& Included::get_MyTransitiveField() const& {

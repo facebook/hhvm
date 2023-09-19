@@ -514,14 +514,7 @@ bool structA::operator==(FOLLY_MAYBE_UNUSED const structA& rhs) const {
 }
 
 bool structA::operator<(FOLLY_MAYBE_UNUSED const structA& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.a_ref() == rhs.a_ref())) {
-    return lhs.a_ref() < rhs.a_ref();
-  }
-  if (!(lhs.b_ref() == rhs.b_ref())) {
-    return lhs.b_ref() < rhs.b_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -729,14 +722,7 @@ bool structB::operator==(FOLLY_MAYBE_UNUSED const structB& rhs) const {
 }
 
 bool structB::operator<(FOLLY_MAYBE_UNUSED const structB& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.c_ref() == rhs.c_ref())) {
-    return lhs.c_ref() < rhs.c_ref();
-  }
-  if (!(lhs.d_ref() == rhs.d_ref())) {
-    return lhs.d_ref() < rhs.d_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -984,98 +970,7 @@ bool structC::operator==(FOLLY_MAYBE_UNUSED const structC& rhs) const {
 }
 
 bool structC::operator<(FOLLY_MAYBE_UNUSED const structC& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.a_ref() == rhs.a_ref())) {
-    return lhs.a_ref() < rhs.a_ref();
-  }
-  if (!(lhs.b_ref() == rhs.b_ref())) {
-    return lhs.b_ref() < rhs.b_ref();
-  }
-  if (!(lhs.c_ref() == rhs.c_ref())) {
-    return lhs.c_ref() < rhs.c_ref();
-  }
-  if (!(lhs.d_ref() == rhs.d_ref())) {
-    return lhs.d_ref() < rhs.d_ref();
-  }
-  if (!(lhs.e_ref() == rhs.e_ref())) {
-    return lhs.e_ref() < rhs.e_ref();
-  }
-  if (!(lhs.f_ref() == rhs.f_ref())) {
-    return lhs.f_ref() < rhs.f_ref();
-  }
-  if (!(lhs.g_ref() == rhs.g_ref())) {
-    return lhs.g_ref() < rhs.g_ref();
-  }
-  if (!(lhs.h_ref() == rhs.h_ref())) {
-    return lhs.h_ref() < rhs.h_ref();
-  }
-  if (!(lhs.i_ref() == rhs.i_ref())) {
-    return lhs.i_ref() < rhs.i_ref();
-  }
-  if (!(lhs.j_ref() == rhs.j_ref())) {
-    return lhs.j_ref() < rhs.j_ref();
-  }
-  if (!(lhs.j1_ref() == rhs.j1_ref())) {
-    return lhs.j1_ref() < rhs.j1_ref();
-  }
-  if (!(lhs.j2_ref() == rhs.j2_ref())) {
-    return lhs.j2_ref() < rhs.j2_ref();
-  }
-  if (!(lhs.j3_ref() == rhs.j3_ref())) {
-    return lhs.j3_ref() < rhs.j3_ref();
-  }
-  if (!(lhs.k_ref() == rhs.k_ref())) {
-    return lhs.k_ref() < rhs.k_ref();
-  }
-  if (!(lhs.k1_ref() == rhs.k1_ref())) {
-    return lhs.k1_ref() < rhs.k1_ref();
-  }
-  if (!(lhs.k2_ref() == rhs.k2_ref())) {
-    return lhs.k2_ref() < rhs.k2_ref();
-  }
-  if (!(lhs.k3_ref() == rhs.k3_ref())) {
-    return lhs.k3_ref() < rhs.k3_ref();
-  }
-  if (!(lhs.l_ref() == rhs.l_ref())) {
-    return lhs.l_ref() < rhs.l_ref();
-  }
-  if (!(lhs.l1_ref() == rhs.l1_ref())) {
-    return lhs.l1_ref() < rhs.l1_ref();
-  }
-  if (!(lhs.l2_ref() == rhs.l2_ref())) {
-    return lhs.l2_ref() < rhs.l2_ref();
-  }
-  if (!(lhs.l3_ref() == rhs.l3_ref())) {
-    return lhs.l3_ref() < rhs.l3_ref();
-  }
-  if (!(lhs.m1_ref() == rhs.m1_ref())) {
-    return lhs.m1_ref() < rhs.m1_ref();
-  }
-  if (!(lhs.m2_ref() == rhs.m2_ref())) {
-    return lhs.m2_ref() < rhs.m2_ref();
-  }
-  if (!(lhs.m3_ref() == rhs.m3_ref())) {
-    return lhs.m3_ref() < rhs.m3_ref();
-  }
-  if (!(lhs.n1_ref() == rhs.n1_ref())) {
-    return lhs.n1_ref() < rhs.n1_ref();
-  }
-  if (!(lhs.n2_ref() == rhs.n2_ref())) {
-    return lhs.n2_ref() < rhs.n2_ref();
-  }
-  if (!(lhs.n3_ref() == rhs.n3_ref())) {
-    return lhs.n3_ref() < rhs.n3_ref();
-  }
-  if (!(lhs.o1_ref() == rhs.o1_ref())) {
-    return lhs.o1_ref() < rhs.o1_ref();
-  }
-  if (!(lhs.o2_ref() == rhs.o2_ref())) {
-    return lhs.o2_ref() < rhs.o2_ref();
-  }
-  if (!(lhs.o3_ref() == rhs.o3_ref())) {
-    return lhs.o3_ref() < rhs.o3_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::test_cpp2::cpp_reflection::union1& structC::get_g() const& {
@@ -1485,26 +1380,7 @@ bool struct1::operator==(FOLLY_MAYBE_UNUSED const struct1& rhs) const {
 }
 
 bool struct1::operator<(FOLLY_MAYBE_UNUSED const struct1& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.field0_ref() == rhs.field0_ref())) {
-    return lhs.field0_ref() < rhs.field0_ref();
-  }
-  if (!(lhs.field1_ref() == rhs.field1_ref())) {
-    return lhs.field1_ref() < rhs.field1_ref();
-  }
-  if (!(lhs.field2_ref() == rhs.field2_ref())) {
-    return lhs.field2_ref() < rhs.field2_ref();
-  }
-  if (!(lhs.field3_ref() == rhs.field3_ref())) {
-    return lhs.field3_ref() < rhs.field3_ref();
-  }
-  if (!(lhs.field4_ref() == rhs.field4_ref())) {
-    return lhs.field4_ref() < rhs.field4_ref();
-  }
-  if (!(lhs.field5_ref() == rhs.field5_ref())) {
-    return lhs.field5_ref() < rhs.field5_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::test_cpp2::cpp_reflection::union1* struct1::get_field4() const& {
@@ -1667,29 +1543,7 @@ bool struct2::operator==(FOLLY_MAYBE_UNUSED const struct2& rhs) const {
 }
 
 bool struct2::operator<(FOLLY_MAYBE_UNUSED const struct2& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.fieldA_ref() == rhs.fieldA_ref())) {
-    return lhs.fieldA_ref() < rhs.fieldA_ref();
-  }
-  if (!(lhs.fieldB_ref() == rhs.fieldB_ref())) {
-    return lhs.fieldB_ref() < rhs.fieldB_ref();
-  }
-  if (!(lhs.fieldC_ref() == rhs.fieldC_ref())) {
-    return lhs.fieldC_ref() < rhs.fieldC_ref();
-  }
-  if (!(lhs.fieldD_ref() == rhs.fieldD_ref())) {
-    return lhs.fieldD_ref() < rhs.fieldD_ref();
-  }
-  if (!(lhs.fieldE_ref() == rhs.fieldE_ref())) {
-    return lhs.fieldE_ref() < rhs.fieldE_ref();
-  }
-  if (!(lhs.fieldF_ref() == rhs.fieldF_ref())) {
-    return lhs.fieldF_ref() < rhs.fieldF_ref();
-  }
-  if (!(lhs.fieldG_ref() == rhs.fieldG_ref())) {
-    return lhs.fieldG_ref() < rhs.fieldG_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::test_cpp2::cpp_reflection::union1& struct2::get_fieldE() const& {
@@ -1922,62 +1776,7 @@ bool struct3::operator==(FOLLY_MAYBE_UNUSED const struct3& rhs) const {
 }
 
 bool struct3::operator<(FOLLY_MAYBE_UNUSED const struct3& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.fieldA_ref() == rhs.fieldA_ref())) {
-    return lhs.fieldA_ref() < rhs.fieldA_ref();
-  }
-  if (!(lhs.fieldB_ref() == rhs.fieldB_ref())) {
-    return lhs.fieldB_ref() < rhs.fieldB_ref();
-  }
-  if (!(lhs.fieldC_ref() == rhs.fieldC_ref())) {
-    return lhs.fieldC_ref() < rhs.fieldC_ref();
-  }
-  if (!(lhs.fieldD_ref() == rhs.fieldD_ref())) {
-    return lhs.fieldD_ref() < rhs.fieldD_ref();
-  }
-  if (!(lhs.fieldE_ref() == rhs.fieldE_ref())) {
-    return lhs.fieldE_ref() < rhs.fieldE_ref();
-  }
-  if (!(lhs.fieldF_ref() == rhs.fieldF_ref())) {
-    return lhs.fieldF_ref() < rhs.fieldF_ref();
-  }
-  if (!(lhs.fieldG_ref() == rhs.fieldG_ref())) {
-    return lhs.fieldG_ref() < rhs.fieldG_ref();
-  }
-  if (!(lhs.fieldH_ref() == rhs.fieldH_ref())) {
-    return lhs.fieldH_ref() < rhs.fieldH_ref();
-  }
-  if (!(lhs.fieldI_ref() == rhs.fieldI_ref())) {
-    return lhs.fieldI_ref() < rhs.fieldI_ref();
-  }
-  if (!(lhs.fieldJ_ref() == rhs.fieldJ_ref())) {
-    return lhs.fieldJ_ref() < rhs.fieldJ_ref();
-  }
-  if (!(lhs.fieldK_ref() == rhs.fieldK_ref())) {
-    return lhs.fieldK_ref() < rhs.fieldK_ref();
-  }
-  if (!(lhs.fieldL_ref() == rhs.fieldL_ref())) {
-    return lhs.fieldL_ref() < rhs.fieldL_ref();
-  }
-  if (!(lhs.fieldM_ref() == rhs.fieldM_ref())) {
-    return lhs.fieldM_ref() < rhs.fieldM_ref();
-  }
-  if (!(lhs.fieldN_ref() == rhs.fieldN_ref())) {
-    return lhs.fieldN_ref() < rhs.fieldN_ref();
-  }
-  if (!(lhs.fieldO_ref() == rhs.fieldO_ref())) {
-    return lhs.fieldO_ref() < rhs.fieldO_ref();
-  }
-  if (!(lhs.fieldP_ref() == rhs.fieldP_ref())) {
-    return lhs.fieldP_ref() < rhs.fieldP_ref();
-  }
-  if (!(lhs.fieldQ_ref() == rhs.fieldQ_ref())) {
-    return lhs.fieldQ_ref() < rhs.fieldQ_ref();
-  }
-  if (!(lhs.fieldR_ref() == rhs.fieldR_ref())) {
-    return lhs.fieldR_ref() < rhs.fieldR_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::test_cpp2::cpp_reflection::union1& struct3::get_fieldE() const& {
@@ -2280,20 +2079,7 @@ bool struct4::operator==(FOLLY_MAYBE_UNUSED const struct4& rhs) const {
 }
 
 bool struct4::operator<(FOLLY_MAYBE_UNUSED const struct4& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.field0_ref() == rhs.field0_ref())) {
-    return lhs.field0_ref() < rhs.field0_ref();
-  }
-  if (!(lhs.field1_ref() == rhs.field1_ref())) {
-    return lhs.field1_ref() < rhs.field1_ref();
-  }
-  if (!(lhs.field2_ref() == rhs.field2_ref())) {
-    return lhs.field2_ref() < rhs.field2_ref();
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.field3_ref(), rhs.field3_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.field3_ref(), rhs.field3_ref());
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -2420,23 +2206,7 @@ bool struct5::operator==(FOLLY_MAYBE_UNUSED const struct5& rhs) const {
 }
 
 bool struct5::operator<(FOLLY_MAYBE_UNUSED const struct5& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.field0_ref() == rhs.field0_ref())) {
-    return lhs.field0_ref() < rhs.field0_ref();
-  }
-  if (!(lhs.field1_ref() == rhs.field1_ref())) {
-    return lhs.field1_ref() < rhs.field1_ref();
-  }
-  if (!(lhs.field2_ref() == rhs.field2_ref())) {
-    return lhs.field2_ref() < rhs.field2_ref();
-  }
-  if (!(lhs.field3_ref() == rhs.field3_ref())) {
-    return lhs.field3_ref() < rhs.field3_ref();
-  }
-  if (!(lhs.field4_ref() == rhs.field4_ref())) {
-    return lhs.field4_ref() < rhs.field4_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::test_cpp2::cpp_reflection::structA& struct5::get_field3() const& {
@@ -2565,11 +2335,7 @@ bool struct_binary::operator==(FOLLY_MAYBE_UNUSED const struct_binary& rhs) cons
 }
 
 bool struct_binary::operator<(FOLLY_MAYBE_UNUSED const struct_binary& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.__fbthrift_field_bi, rhs.__fbthrift_field_bi)) {
-    return apache::thrift::StringTraits<std::string>::isLess(lhs.__fbthrift_field_bi, rhs.__fbthrift_field_bi);
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -2653,17 +2419,7 @@ bool dep_A_struct::operator==(FOLLY_MAYBE_UNUSED const dep_A_struct& rhs) const 
 }
 
 bool dep_A_struct::operator<(FOLLY_MAYBE_UNUSED const dep_A_struct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.b_ref() == rhs.b_ref())) {
-    return lhs.b_ref() < rhs.b_ref();
-  }
-  if (!(lhs.c_ref() == rhs.c_ref())) {
-    return lhs.c_ref() < rhs.c_ref();
-  }
-  if (!(lhs.i_a_ref() == rhs.i_a_ref())) {
-    return lhs.i_a_ref() < rhs.i_a_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::test_cpp2::cpp_reflection::dep_B_struct& dep_A_struct::get_b() const& {
@@ -2777,17 +2533,7 @@ bool dep_B_struct::operator==(FOLLY_MAYBE_UNUSED const dep_B_struct& rhs) const 
 }
 
 bool dep_B_struct::operator<(FOLLY_MAYBE_UNUSED const dep_B_struct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.b_ref() == rhs.b_ref())) {
-    return lhs.b_ref() < rhs.b_ref();
-  }
-  if (!(lhs.c_ref() == rhs.c_ref())) {
-    return lhs.c_ref() < rhs.c_ref();
-  }
-  if (!(lhs.i_a_ref() == rhs.i_a_ref())) {
-    return lhs.i_a_ref() < rhs.i_a_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::test_cpp2::cpp_reflection::dep_B_struct& dep_B_struct::get_b() const& {
@@ -2895,11 +2641,7 @@ bool annotated::operator==(FOLLY_MAYBE_UNUSED const annotated& rhs) const {
 }
 
 bool annotated::operator<(FOLLY_MAYBE_UNUSED const annotated& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.a_ref() == rhs.a_ref())) {
-    return lhs.a_ref() < rhs.a_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -3293,92 +3035,7 @@ bool struct_with_special_names::operator==(FOLLY_MAYBE_UNUSED const struct_with_
 }
 
 bool struct_with_special_names::operator<(FOLLY_MAYBE_UNUSED const struct_with_special_names& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.get_ref() == rhs.get_ref())) {
-    return lhs.get_ref() < rhs.get_ref();
-  }
-  if (!(lhs.getter_ref() == rhs.getter_ref())) {
-    return lhs.getter_ref() < rhs.getter_ref();
-  }
-  if (!(lhs.lists_ref() == rhs.lists_ref())) {
-    return lhs.lists_ref() < rhs.lists_ref();
-  }
-  if (!(lhs.maps_ref() == rhs.maps_ref())) {
-    return lhs.maps_ref() < rhs.maps_ref();
-  }
-  if (!(lhs.name_ref() == rhs.name_ref())) {
-    return lhs.name_ref() < rhs.name_ref();
-  }
-  if (!(lhs.name_to_value_ref() == rhs.name_to_value_ref())) {
-    return lhs.name_to_value_ref() < rhs.name_to_value_ref();
-  }
-  if (!(lhs.names_ref() == rhs.names_ref())) {
-    return lhs.names_ref() < rhs.names_ref();
-  }
-  if (!(lhs.prefix_tree_ref() == rhs.prefix_tree_ref())) {
-    return lhs.prefix_tree_ref() < rhs.prefix_tree_ref();
-  }
-  if (!(lhs.sets_ref() == rhs.sets_ref())) {
-    return lhs.sets_ref() < rhs.sets_ref();
-  }
-  if (!(lhs.setter_ref() == rhs.setter_ref())) {
-    return lhs.setter_ref() < rhs.setter_ref();
-  }
-  if (!(lhs.str_ref() == rhs.str_ref())) {
-    return lhs.str_ref() < rhs.str_ref();
-  }
-  if (!(lhs.strings_ref() == rhs.strings_ref())) {
-    return lhs.strings_ref() < rhs.strings_ref();
-  }
-  if (!(lhs.type_ref() == rhs.type_ref())) {
-    return lhs.type_ref() < rhs.type_ref();
-  }
-  if (!(lhs.value_ref() == rhs.value_ref())) {
-    return lhs.value_ref() < rhs.value_ref();
-  }
-  if (!(lhs.value_to_name_ref() == rhs.value_to_name_ref())) {
-    return lhs.value_to_name_ref() < rhs.value_to_name_ref();
-  }
-  if (!(lhs.values_ref() == rhs.values_ref())) {
-    return lhs.values_ref() < rhs.values_ref();
-  }
-  if (!(lhs.id_ref() == rhs.id_ref())) {
-    return lhs.id_ref() < rhs.id_ref();
-  }
-  if (!(lhs.ids_ref() == rhs.ids_ref())) {
-    return lhs.ids_ref() < rhs.ids_ref();
-  }
-  if (!(lhs.descriptor_ref() == rhs.descriptor_ref())) {
-    return lhs.descriptor_ref() < rhs.descriptor_ref();
-  }
-  if (!(lhs.descriptors_ref() == rhs.descriptors_ref())) {
-    return lhs.descriptors_ref() < rhs.descriptors_ref();
-  }
-  if (!(lhs.key_ref() == rhs.key_ref())) {
-    return lhs.key_ref() < rhs.key_ref();
-  }
-  if (!(lhs.keys_ref() == rhs.keys_ref())) {
-    return lhs.keys_ref() < rhs.keys_ref();
-  }
-  if (!(lhs.annotation_ref() == rhs.annotation_ref())) {
-    return lhs.annotation_ref() < rhs.annotation_ref();
-  }
-  if (!(lhs.annotations_ref() == rhs.annotations_ref())) {
-    return lhs.annotations_ref() < rhs.annotations_ref();
-  }
-  if (!(lhs.member_ref() == rhs.member_ref())) {
-    return lhs.member_ref() < rhs.member_ref();
-  }
-  if (!(lhs.members_ref() == rhs.members_ref())) {
-    return lhs.members_ref() < rhs.members_ref();
-  }
-  if (!(lhs.field_ref() == rhs.field_ref())) {
-    return lhs.field_ref() < rhs.field_ref();
-  }
-  if (!(lhs.fields_ref() == rhs.fields_ref())) {
-    return lhs.fields_ref() < rhs.fields_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -3526,23 +3183,7 @@ bool struct_with_indirections::operator==(FOLLY_MAYBE_UNUSED const struct_with_i
 }
 
 bool struct_with_indirections::operator<(FOLLY_MAYBE_UNUSED const struct_with_indirections& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.real_ref() == rhs.real_ref())) {
-    return lhs.real_ref() < rhs.real_ref();
-  }
-  if (!(lhs.fake_ref() == rhs.fake_ref())) {
-    return lhs.fake_ref() < rhs.fake_ref();
-  }
-  if (!(lhs.number_ref() == rhs.number_ref())) {
-    return lhs.number_ref() < rhs.number_ref();
-  }
-  if (!(lhs.result_ref() == rhs.result_ref())) {
-    return lhs.result_ref() < rhs.result_ref();
-  }
-  if (!(lhs.phrase_ref() == rhs.phrase_ref())) {
-    return lhs.phrase_ref() < rhs.phrase_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 

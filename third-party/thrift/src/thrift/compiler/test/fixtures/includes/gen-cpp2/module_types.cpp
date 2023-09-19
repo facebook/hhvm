@@ -91,17 +91,7 @@ bool MyStruct::operator==(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
 }
 
 bool MyStruct::operator<(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.MyIncludedField_ref() == rhs.MyIncludedField_ref())) {
-    return lhs.MyIncludedField_ref() < rhs.MyIncludedField_ref();
-  }
-  if (!(lhs.MyOtherIncludedField_ref() == rhs.MyOtherIncludedField_ref())) {
-    return lhs.MyOtherIncludedField_ref() < rhs.MyOtherIncludedField_ref();
-  }
-  if (!(lhs.MyIncludedInt_ref() == rhs.MyIncludedInt_ref())) {
-    return lhs.MyIncludedInt_ref() < rhs.MyIncludedInt_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::cpp2::Included& MyStruct::get_MyIncludedField() const& {

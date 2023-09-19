@@ -98,14 +98,7 @@ bool Foo::operator==(FOLLY_MAYBE_UNUSED const Foo& rhs) const {
 }
 
 bool Foo::operator<(FOLLY_MAYBE_UNUSED const Foo& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if ((!::apache::thrift::detail::pointer_equal(lhs.foo_ref(), rhs.foo_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.foo_ref(), rhs.foo_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.bar_ref(), rhs.bar_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.bar_ref(), rhs.bar_ref());
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 

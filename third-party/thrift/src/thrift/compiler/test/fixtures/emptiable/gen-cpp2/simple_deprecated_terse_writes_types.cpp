@@ -82,8 +82,7 @@ bool MyStruct::operator==(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
 }
 
 bool MyStruct::operator<(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -263,50 +262,7 @@ bool EmptiableStruct::operator==(FOLLY_MAYBE_UNUSED const EmptiableStruct& rhs) 
 }
 
 bool EmptiableStruct::operator<(FOLLY_MAYBE_UNUSED const EmptiableStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.bool_field_ref() == rhs.bool_field_ref())) {
-    return lhs.bool_field_ref() < rhs.bool_field_ref();
-  }
-  if (!(lhs.byte_field_ref() == rhs.byte_field_ref())) {
-    return lhs.byte_field_ref() < rhs.byte_field_ref();
-  }
-  if (!(lhs.short_field_ref() == rhs.short_field_ref())) {
-    return lhs.short_field_ref() < rhs.short_field_ref();
-  }
-  if (!(lhs.int_field_ref() == rhs.int_field_ref())) {
-    return lhs.int_field_ref() < rhs.int_field_ref();
-  }
-  if (!(lhs.long_field_ref() == rhs.long_field_ref())) {
-    return lhs.long_field_ref() < rhs.long_field_ref();
-  }
-  if (!(lhs.float_field_ref() == rhs.float_field_ref())) {
-    return lhs.float_field_ref() < rhs.float_field_ref();
-  }
-  if (!(lhs.double_field_ref() == rhs.double_field_ref())) {
-    return lhs.double_field_ref() < rhs.double_field_ref();
-  }
-  if (!(lhs.string_field_ref() == rhs.string_field_ref())) {
-    return lhs.string_field_ref() < rhs.string_field_ref();
-  }
-  if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.__fbthrift_field_binary_field, rhs.__fbthrift_field_binary_field)) {
-    return apache::thrift::StringTraits<std::string>::isLess(lhs.__fbthrift_field_binary_field, rhs.__fbthrift_field_binary_field);
-  }
-  if (!(lhs.enum_field_ref() == rhs.enum_field_ref())) {
-    return lhs.enum_field_ref() < rhs.enum_field_ref();
-  }
-  if (!(lhs.list_field_ref() == rhs.list_field_ref())) {
-    return lhs.list_field_ref() < rhs.list_field_ref();
-  }
-  if (!(lhs.set_field_ref() == rhs.set_field_ref())) {
-    return lhs.set_field_ref() < rhs.set_field_ref();
-  }
-  if (!(lhs.map_field_ref() == rhs.map_field_ref())) {
-    return lhs.map_field_ref() < rhs.map_field_ref();
-  }
-  if (!(lhs.struct_field_ref() == rhs.struct_field_ref())) {
-    return lhs.struct_field_ref() < rhs.struct_field_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::std::vector<::std::int16_t>& EmptiableStruct::get_list_field() const& {
@@ -526,50 +482,7 @@ bool NotEmptiableStruct::operator==(FOLLY_MAYBE_UNUSED const NotEmptiableStruct&
 }
 
 bool NotEmptiableStruct::operator<(FOLLY_MAYBE_UNUSED const NotEmptiableStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.bool_field_ref() == rhs.bool_field_ref())) {
-    return lhs.bool_field_ref() < rhs.bool_field_ref();
-  }
-  if (!(lhs.byte_field_ref() == rhs.byte_field_ref())) {
-    return lhs.byte_field_ref() < rhs.byte_field_ref();
-  }
-  if (!(lhs.short_field_ref() == rhs.short_field_ref())) {
-    return lhs.short_field_ref() < rhs.short_field_ref();
-  }
-  if (!(lhs.int_field_ref() == rhs.int_field_ref())) {
-    return lhs.int_field_ref() < rhs.int_field_ref();
-  }
-  if (!(lhs.long_field_ref() == rhs.long_field_ref())) {
-    return lhs.long_field_ref() < rhs.long_field_ref();
-  }
-  if (!(lhs.float_field_ref() == rhs.float_field_ref())) {
-    return lhs.float_field_ref() < rhs.float_field_ref();
-  }
-  if (!(lhs.double_field_ref() == rhs.double_field_ref())) {
-    return lhs.double_field_ref() < rhs.double_field_ref();
-  }
-  if (!(lhs.string_field_ref() == rhs.string_field_ref())) {
-    return lhs.string_field_ref() < rhs.string_field_ref();
-  }
-  if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.__fbthrift_field_binary_field, rhs.__fbthrift_field_binary_field)) {
-    return apache::thrift::StringTraits<std::string>::isLess(lhs.__fbthrift_field_binary_field, rhs.__fbthrift_field_binary_field);
-  }
-  if (!(lhs.enum_field_ref() == rhs.enum_field_ref())) {
-    return lhs.enum_field_ref() < rhs.enum_field_ref();
-  }
-  if (!(lhs.list_field_ref() == rhs.list_field_ref())) {
-    return lhs.list_field_ref() < rhs.list_field_ref();
-  }
-  if (!(lhs.set_field_ref() == rhs.set_field_ref())) {
-    return lhs.set_field_ref() < rhs.set_field_ref();
-  }
-  if (!(lhs.map_field_ref() == rhs.map_field_ref())) {
-    return lhs.map_field_ref() < rhs.map_field_ref();
-  }
-  if (!(lhs.struct_field_ref() == rhs.struct_field_ref())) {
-    return lhs.struct_field_ref() < rhs.struct_field_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::std::vector<::std::int16_t>& NotEmptiableStruct::get_list_field() const& {

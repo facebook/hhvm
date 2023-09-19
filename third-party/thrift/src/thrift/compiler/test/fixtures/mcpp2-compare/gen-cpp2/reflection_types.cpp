@@ -68,11 +68,7 @@ bool ReflectionStruct::operator==(FOLLY_MAYBE_UNUSED const ReflectionStruct& rhs
 }
 
 bool ReflectionStruct::operator<(FOLLY_MAYBE_UNUSED const ReflectionStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.fieldA_ref() == rhs.fieldA_ref())) {
-    return lhs.fieldA_ref() < rhs.fieldA_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 

@@ -128,14 +128,7 @@ bool MyStruct::operator==(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
 }
 
 bool MyStruct::operator<(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.myEnum_ref() == rhs.myEnum_ref())) {
-    return lhs.myEnum_ref() < rhs.myEnum_ref();
-  }
-  if (!(lhs.myBigEnum_ref() == rhs.myBigEnum_ref())) {
-    return lhs.myBigEnum_ref() < rhs.myBigEnum_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 

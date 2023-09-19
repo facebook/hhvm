@@ -68,11 +68,7 @@ bool MyStruct::operator==(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
 }
 
 bool MyStruct::operator<(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.OtherStructField_ref() == rhs.OtherStructField_ref())) {
-    return lhs.OtherStructField_ref() < rhs.OtherStructField_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::matching_module_name::OtherStruct& MyStruct::get_OtherStructField() const& {

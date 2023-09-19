@@ -132,26 +132,7 @@ bool ModuleA::operator==(FOLLY_MAYBE_UNUSED const ModuleA& rhs) const {
 }
 
 bool ModuleA::operator<(FOLLY_MAYBE_UNUSED const ModuleA& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.i32Field_ref() == rhs.i32Field_ref())) {
-    return lhs.i32Field_ref() < rhs.i32Field_ref();
-  }
-  if (!(lhs.strField_ref() == rhs.strField_ref())) {
-    return lhs.strField_ref() < rhs.strField_ref();
-  }
-  if (!(lhs.listField_ref() == rhs.listField_ref())) {
-    return lhs.listField_ref() < rhs.listField_ref();
-  }
-  if (!(lhs.mapField_ref() == rhs.mapField_ref())) {
-    return lhs.mapField_ref() < rhs.mapField_ref();
-  }
-  if (!(lhs.inclAField_ref() == rhs.inclAField_ref())) {
-    return lhs.inclAField_ref() < rhs.inclAField_ref();
-  }
-  if (!(lhs.inclBField_ref() == rhs.inclBField_ref())) {
-    return lhs.inclBField_ref() < rhs.inclBField_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::std::vector<::std::int16_t>& ModuleA::get_listField() const& {
@@ -281,14 +262,7 @@ bool ModuleB::operator==(FOLLY_MAYBE_UNUSED const ModuleB& rhs) const {
 }
 
 bool ModuleB::operator<(FOLLY_MAYBE_UNUSED const ModuleB& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.i32Field_ref() == rhs.i32Field_ref())) {
-    return lhs.i32Field_ref() < rhs.i32Field_ref();
-  }
-  if (!(lhs.inclEnumB_ref() == rhs.inclEnumB_ref())) {
-    return lhs.inclEnumB_ref() < rhs.inclEnumB_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -368,11 +342,7 @@ bool DirectlyAdapted::operator==(FOLLY_MAYBE_UNUSED const DirectlyAdapted& rhs) 
 }
 
 bool DirectlyAdapted::operator<(FOLLY_MAYBE_UNUSED const DirectlyAdapted& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.field_ref() == rhs.field_ref())) {
-    return lhs.field_ref() < rhs.field_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -484,23 +454,7 @@ bool CppRef::operator==(FOLLY_MAYBE_UNUSED const CppRef& rhs) const {
 }
 
 bool CppRef::operator<(FOLLY_MAYBE_UNUSED const CppRef& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if ((!::apache::thrift::detail::pointer_equal(lhs.shared_field_ref(), rhs.shared_field_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.shared_field_ref(), rhs.shared_field_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.shared_const_field_ref(), rhs.shared_const_field_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.shared_const_field_ref(), rhs.shared_const_field_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.opt_shared_field_ref(), rhs.opt_shared_field_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.opt_shared_field_ref(), rhs.opt_shared_field_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.opt_shared_const_field_ref(), rhs.opt_shared_const_field_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.opt_shared_const_field_ref(), rhs.opt_shared_const_field_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.boxed_field_ref(), rhs.boxed_field_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.boxed_field_ref(), rhs.boxed_field_ref());
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 

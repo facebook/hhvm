@@ -145,11 +145,7 @@ bool SimpleException::operator==(FOLLY_MAYBE_UNUSED const SimpleException& rhs) 
 }
 
 bool SimpleException::operator<(FOLLY_MAYBE_UNUSED const SimpleException& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.err_code_ref() == rhs.err_code_ref())) {
-    return lhs.err_code_ref() < rhs.err_code_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -256,11 +252,7 @@ bool OptionalRefStruct::operator==(FOLLY_MAYBE_UNUSED const OptionalRefStruct& r
 }
 
 bool OptionalRefStruct::operator<(FOLLY_MAYBE_UNUSED const OptionalRefStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (lhs.optional_blob_ref().has_value() != rhs.optional_blob_ref().has_value() || (lhs.optional_blob_ref().has_value() && !apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::isEqual(lhs.__fbthrift_field_optional_blob, rhs.__fbthrift_field_optional_blob))) {
-    return !lhs.optional_blob_ref().has_value() || (rhs.optional_blob_ref().has_value() && apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::isLess(lhs.__fbthrift_field_optional_blob, rhs.__fbthrift_field_optional_blob));
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -386,32 +378,7 @@ bool SimpleStruct::operator==(FOLLY_MAYBE_UNUSED const SimpleStruct& rhs) const 
 }
 
 bool SimpleStruct::operator<(FOLLY_MAYBE_UNUSED const SimpleStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.is_on_ref() == rhs.is_on_ref())) {
-    return lhs.is_on_ref() < rhs.is_on_ref();
-  }
-  if (!(lhs.tiny_int_ref() == rhs.tiny_int_ref())) {
-    return lhs.tiny_int_ref() < rhs.tiny_int_ref();
-  }
-  if (!(lhs.small_int_ref() == rhs.small_int_ref())) {
-    return lhs.small_int_ref() < rhs.small_int_ref();
-  }
-  if (!(lhs.nice_sized_int_ref() == rhs.nice_sized_int_ref())) {
-    return lhs.nice_sized_int_ref() < rhs.nice_sized_int_ref();
-  }
-  if (!(lhs.big_int_ref() == rhs.big_int_ref())) {
-    return lhs.big_int_ref() < rhs.big_int_ref();
-  }
-  if (!(lhs.real_ref() == rhs.real_ref())) {
-    return lhs.real_ref() < rhs.real_ref();
-  }
-  if (!(lhs.smaller_real_ref() == rhs.smaller_real_ref())) {
-    return lhs.smaller_real_ref() < rhs.smaller_real_ref();
-  }
-  if (!(lhs.hidden_field_ref() == rhs.hidden_field_ref())) {
-    return lhs.hidden_field_ref() < rhs.hidden_field_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -760,11 +727,7 @@ bool HiddenException::operator==(FOLLY_MAYBE_UNUSED const HiddenException& rhs) 
 }
 
 bool HiddenException::operator<(FOLLY_MAYBE_UNUSED const HiddenException& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.test_ref() == rhs.test_ref())) {
-    return lhs.test_ref() < rhs.test_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -903,35 +866,7 @@ bool ComplexStruct::operator==(FOLLY_MAYBE_UNUSED const ComplexStruct& rhs) cons
 }
 
 bool ComplexStruct::operator<(FOLLY_MAYBE_UNUSED const ComplexStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.structOne_ref() == rhs.structOne_ref())) {
-    return lhs.structOne_ref() < rhs.structOne_ref();
-  }
-  if (!(lhs.structTwo_ref() == rhs.structTwo_ref())) {
-    return lhs.structTwo_ref() < rhs.structTwo_ref();
-  }
-  if (!(lhs.an_integer_ref() == rhs.an_integer_ref())) {
-    return lhs.an_integer_ref() < rhs.an_integer_ref();
-  }
-  if (!(lhs.name_ref() == rhs.name_ref())) {
-    return lhs.name_ref() < rhs.name_ref();
-  }
-  if (!(lhs.an_enum_ref() == rhs.an_enum_ref())) {
-    return lhs.an_enum_ref() < rhs.an_enum_ref();
-  }
-  if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.__fbthrift_field_some_bytes, rhs.__fbthrift_field_some_bytes)) {
-    return apache::thrift::StringTraits<std::string>::isLess(lhs.__fbthrift_field_some_bytes, rhs.__fbthrift_field_some_bytes);
-  }
-  if (!(lhs.from_ref() == rhs.from_ref())) {
-    return lhs.from_ref() < rhs.from_ref();
-  }
-  if (!(lhs.cdef_ref() == rhs.cdef_ref())) {
-    return lhs.cdef_ref() < rhs.cdef_ref();
-  }
-  if (!apache::thrift::StringTraits<foo::Bar>::isEqual(lhs.__fbthrift_field_bytes_with_cpp_type, rhs.__fbthrift_field_bytes_with_cpp_type)) {
-    return apache::thrift::StringTraits<foo::Bar>::isLess(lhs.__fbthrift_field_bytes_with_cpp_type, rhs.__fbthrift_field_bytes_with_cpp_type);
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::py3::simple::SimpleStruct& ComplexStruct::get_structOne() const& {

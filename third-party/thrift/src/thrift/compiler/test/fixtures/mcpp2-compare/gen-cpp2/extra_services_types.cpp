@@ -161,47 +161,7 @@ bool containerStruct2::operator==(FOLLY_MAYBE_UNUSED const containerStruct2& rhs
 }
 
 bool containerStruct2::operator<(FOLLY_MAYBE_UNUSED const containerStruct2& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.fieldA_ref() == rhs.fieldA_ref())) {
-    return lhs.fieldA_ref() < rhs.fieldA_ref();
-  }
-  if (!(lhs.req_fieldA_ref() == rhs.req_fieldA_ref())) {
-    return lhs.req_fieldA_ref() < rhs.req_fieldA_ref();
-  }
-  if (!(lhs.opt_fieldA_ref() == rhs.opt_fieldA_ref())) {
-    return lhs.opt_fieldA_ref() < rhs.opt_fieldA_ref();
-  }
-  if (!(lhs.fieldB_ref() == rhs.fieldB_ref())) {
-    return lhs.fieldB_ref() < rhs.fieldB_ref();
-  }
-  if (!(lhs.req_fieldB_ref() == rhs.req_fieldB_ref())) {
-    return lhs.req_fieldB_ref() < rhs.req_fieldB_ref();
-  }
-  if (!(lhs.opt_fieldB_ref() == rhs.opt_fieldB_ref())) {
-    return lhs.opt_fieldB_ref() < rhs.opt_fieldB_ref();
-  }
-  if (!(lhs.fieldC_ref() == rhs.fieldC_ref())) {
-    return lhs.fieldC_ref() < rhs.fieldC_ref();
-  }
-  if (!(lhs.req_fieldC_ref() == rhs.req_fieldC_ref())) {
-    return lhs.req_fieldC_ref() < rhs.req_fieldC_ref();
-  }
-  if (!(lhs.opt_fieldC_ref() == rhs.opt_fieldC_ref())) {
-    return lhs.opt_fieldC_ref() < rhs.opt_fieldC_ref();
-  }
-  if (!(lhs.fieldD_ref() == rhs.fieldD_ref())) {
-    return lhs.fieldD_ref() < rhs.fieldD_ref();
-  }
-  if (!(lhs.fieldE_ref() == rhs.fieldE_ref())) {
-    return lhs.fieldE_ref() < rhs.fieldE_ref();
-  }
-  if (!(lhs.req_fieldE_ref() == rhs.req_fieldE_ref())) {
-    return lhs.req_fieldE_ref() < rhs.req_fieldE_ref();
-  }
-  if (!(lhs.opt_fieldE_ref() == rhs.opt_fieldE_ref())) {
-    return lhs.opt_fieldE_ref() < rhs.opt_fieldE_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::std::map<::std::string, bool>& containerStruct2::get_fieldB() const& {

@@ -87,11 +87,7 @@ bool Mixin1::operator==(FOLLY_MAYBE_UNUSED const Mixin1& rhs) const {
 }
 
 bool Mixin1::operator<(FOLLY_MAYBE_UNUSED const Mixin1& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.field1_ref() == rhs.field1_ref())) {
-    return lhs.field1_ref() < rhs.field1_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -193,14 +189,7 @@ bool Mixin2::operator==(FOLLY_MAYBE_UNUSED const Mixin2& rhs) const {
 }
 
 bool Mixin2::operator<(FOLLY_MAYBE_UNUSED const Mixin2& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.m1_ref() == rhs.m1_ref())) {
-    return lhs.m1_ref() < rhs.m1_ref();
-  }
-  if (!(lhs.field2_ref() == rhs.field2_ref())) {
-    return lhs.field2_ref() < rhs.field2_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::cpp2::Mixin1& Mixin2::get_m1() const& {
@@ -312,11 +301,7 @@ bool Mixin3Base::operator==(FOLLY_MAYBE_UNUSED const Mixin3Base& rhs) const {
 }
 
 bool Mixin3Base::operator<(FOLLY_MAYBE_UNUSED const Mixin3Base& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.field3_ref() == rhs.field3_ref())) {
-    return lhs.field3_ref() < rhs.field3_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -423,17 +408,7 @@ bool Foo::operator==(FOLLY_MAYBE_UNUSED const Foo& rhs) const {
 }
 
 bool Foo::operator<(FOLLY_MAYBE_UNUSED const Foo& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.field4_ref() == rhs.field4_ref())) {
-    return lhs.field4_ref() < rhs.field4_ref();
-  }
-  if (!(lhs.m2_ref() == rhs.m2_ref())) {
-    return lhs.m2_ref() < rhs.m2_ref();
-  }
-  if (!(lhs.m3_ref() == rhs.m3_ref())) {
-    return lhs.m3_ref() < rhs.m3_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::cpp2::Mixin2& Foo::get_m2() const& {

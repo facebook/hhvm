@@ -106,11 +106,7 @@ bool CustomException::operator==(FOLLY_MAYBE_UNUSED const CustomException& rhs) 
 }
 
 bool CustomException::operator<(FOLLY_MAYBE_UNUSED const CustomException& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.name_ref() == rhs.name_ref())) {
-    return lhs.name_ref() < rhs.name_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 

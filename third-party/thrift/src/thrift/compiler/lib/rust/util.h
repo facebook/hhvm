@@ -41,7 +41,7 @@ std::string camelcase(const std::string& name);
 std::string quote(const std::string& data, bool do_backslash);
 
 const std::string typedef_rust_name(const t_typedef* t);
-const std::string struct_rust_name(const t_structured* strct);
+const std::string struct_rust_name(const t_struct* strct);
 
 } // namespace rust
 } // namespace compiler

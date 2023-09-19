@@ -757,7 +757,7 @@ class py3_mstch_type : public mstch_type {
 class py3_mstch_struct : public mstch_struct {
  public:
   py3_mstch_struct(
-      const t_structured* s, mstch_context& ctx, mstch_element_position pos)
+      const t_struct* s, mstch_context& ctx, mstch_element_position pos)
       : mstch_struct(s, ctx, pos) {
     register_methods(
         this,
@@ -920,7 +920,7 @@ class py3_mstch_field : public mstch_field {
       return false;
     }
 
-    const t_structured* parentStruct = mstch_field::field_context_->strct;
+    const t_struct* parentStruct = mstch_field::field_context_->strct;
     return generate_legacy_api(*parentStruct);
   }
 

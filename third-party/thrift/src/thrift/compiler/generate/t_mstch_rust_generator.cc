@@ -1079,7 +1079,7 @@ class rust_mstch_function_factory {
 class rust_mstch_struct : public mstch_struct {
  public:
   rust_mstch_struct(
-      const t_structured* s,
+      const t_struct* s,
       mstch_context& ctx,
       mstch_element_position pos,
       const rust_codegen_options* options)

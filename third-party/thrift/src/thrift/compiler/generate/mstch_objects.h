@@ -51,7 +51,7 @@ struct mstch_element_position {
 };
 
 struct field_generator_context {
-  const t_structured* strct = nullptr;
+  const t_struct* strct = nullptr;
   const t_field* serialization_prev = nullptr;
   const t_field* serialization_next = nullptr;
   int isset_index = -1;
@@ -102,7 +102,7 @@ using mstch_interaction_factory =
 using mstch_function_factory = mstch_factory<t_function>;
 using mstch_type_factory = mstch_factory<t_type>;
 using mstch_typedef_factory = mstch_factory<t_typedef>;
-using mstch_struct_factory = mstch_factory<t_structured>;
+using mstch_struct_factory = mstch_factory<t_struct>;
 using mstch_field_factory =
     mstch_factory<t_field, const field_generator_context*>;
 using mstch_enum_factory = mstch_factory<t_enum>;
@@ -205,7 +205,7 @@ class mstch_factories {
   auto& get(t_function*) { return function_factory; }
   auto& get(t_type*) { return type_factory; }
   auto& get(t_typedef*) { return typedef_factory; }
-  auto& get(t_structured*) { return struct_factory; }
+  auto& get(t_struct*) { return struct_factory; }
   auto& get(t_field*) { return field_factory; }
   auto& get(t_enum*) { return enum_factory; }
   auto& get(t_enum_value*) { return enum_value_factory; }
@@ -889,10 +889,10 @@ class mstch_typedef : public mstch_base {
 
 class mstch_struct : public mstch_base {
  public:
-  using ast_type = t_structured;
+  using ast_type = t_struct;
 
   mstch_struct(
-      const t_structured* s, mstch_context& ctx, mstch_element_position pos)
+      const t_struct* s, mstch_context& ctx, mstch_element_position pos)
       : mstch_base(ctx, pos), struct_(s) {
     register_methods(
         this,
@@ -985,7 +985,7 @@ class mstch_struct : public mstch_base {
   }
 
  protected:
-  const t_structured* struct_;
+  const t_struct* struct_;
   // Although mstch_fields can be generated in a different order than the IDL
   // order, field_generator_context should be always computed in the IDL order,
   // as the context does not change by reordering. Without the map, each

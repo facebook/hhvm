@@ -213,7 +213,7 @@ class json_experimental_function : public mstch_function {
 class json_experimental_struct : public mstch_struct {
  public:
   json_experimental_struct(
-      const t_structured* s,
+      const t_struct* s,
       mstch_context& ctx,
       mstch_element_position pos,
       source_manager* sm)

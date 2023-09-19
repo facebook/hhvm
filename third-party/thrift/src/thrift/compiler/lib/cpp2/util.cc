@@ -503,7 +503,7 @@ bool has_ref_annotation(const t_field& field) {
 }
 
 static void get_mixins_and_members_impl(
-    const t_structured& strct,
+    const t_struct& strct,
     const t_field* top_level_mixin,
     std::vector<mixin_member>& out) {
   for (const auto& member : strct.fields()) {
@@ -525,7 +525,7 @@ static void get_mixins_and_members_impl(
   }
 }
 
-std::vector<mixin_member> get_mixins_and_members(const t_structured& strct) {
+std::vector<mixin_member> get_mixins_and_members(const t_struct& strct) {
   std::vector<mixin_member> ret;
   get_mixins_and_members_impl(strct, nullptr, ret);
   return ret;

@@ -391,7 +391,7 @@ class mstch_go_field : public mstch_field {
 class mstch_go_struct : public mstch_struct {
  public:
   mstch_go_struct(
-      const t_structured* s,
+      const t_struct* s,
       mstch_context& ctx,
       mstch_element_position pos,
       go::codegen_data* data)

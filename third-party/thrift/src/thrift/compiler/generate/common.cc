@@ -106,7 +106,7 @@ bool generate_legacy_api(const t_program& p) {
   return p.find_structured_annotation_or_null(kNoLegacyUri) == nullptr;
 }
 
-bool generate_legacy_api(const t_structured& s) {
+bool generate_legacy_api(const t_struct& s) {
   return s.program()->inherit_annotation_or_null(s, kNoLegacyUri) == nullptr;
 }
 

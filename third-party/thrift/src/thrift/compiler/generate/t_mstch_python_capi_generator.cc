@@ -438,7 +438,7 @@ class python_capi_mstch_program : public mstch_program {
 class python_capi_mstch_struct : public mstch_struct {
  public:
   python_capi_mstch_struct(
-      const t_structured* s, mstch_context& ctx, mstch_element_position pos)
+      const t_struct* s, mstch_context& ctx, mstch_element_position pos)
       : mstch_struct(s, ctx, pos) {
     register_methods(
         this,

@@ -675,7 +675,10 @@ folly::Optional<uint32_t> HandlerCallbackBase::checksumIfNeeded(
   folly::Optional<uint32_t> crc32c;
   if (req_->isReplyChecksumNeeded() && response.buffer &&
       !response.buffer->empty()) {
-    LOG(ERROR) << "Checksum calculation disabled";
+    static folly::once_flag once;
+    folly::call_once(once, [] {
+      LOG(WARNING) << "WARNING: Response checksum not implemented";
+    });
   }
   return crc32c;
 }
@@ -685,7 +688,10 @@ folly::Optional<uint32_t> HandlerCallbackBase::checksumIfNeeded(
   folly::Optional<uint32_t> crc32c;
   if (req_->isReplyChecksumNeeded() && response.buffer &&
       !response.buffer->empty()) {
-    LOG(ERROR) << "Checksum calculation disabled";
+    static folly::once_flag once;
+    folly::call_once(once, [] {
+      LOG(WARNING) << "WARNING: Response checksum not implemented";
+    });
   }
   return crc32c;
 }

@@ -102,6 +102,7 @@ if __name__ == "__main__":
             "--like-type-hints",
             "--config",
             "pessimise_builtins=true",
+            "--force-allow-builtins-in-custom-hhi-path-FLAKEY",
         ]
         + ["--custom-hhi-path", pessimised_hhi_path]
         + pessimised_files

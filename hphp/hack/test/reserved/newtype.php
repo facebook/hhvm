@@ -1,7 +1,7 @@
 //// Foo.php
 <?hh
 // RUN: %hackc compile %s | FileCheck %s
-// RUN: { %hh_single_type_check --error-format plain --custom-hhi-path %empty_directory %s 2>&1 || true; } | FileCheck %s
+// RUN: { %hh_single_type_check --error-format plain --custom-hhi-path %empty_directory --no-builtins %s 2>&1 || true; } | FileCheck %s
 
 newtype Foo = int;
 // CHECK-NOT: .fatal

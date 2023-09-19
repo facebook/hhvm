@@ -304,6 +304,7 @@ let parse_options () =
   let enforce_sealed_subclasses = ref false in
   let everything_sdt = ref false in
   let custom_hhi_path = ref None in
+  let force_allow_builtins_in_custom_hhi_path = ref false in
   let explicit_consistent_constructors = ref 0 in
   let require_types_class_consts = ref 0 in
   let type_printer_fuel =
@@ -757,6 +758,9 @@ let parse_options () =
       ( "--custom-hhi-path",
         Arg.String (fun s -> custom_hhi_path := Some s),
         " Use custom hhis" );
+      ( "--force-allow-builtins-in-custom-hhi-path-FLAKEY",
+        Arg.Set force_allow_builtins_in_custom_hhi_path,
+        " (FLAKEY) allow builtins to be written into the custom hhi path" );
       ( "--explicit-consistent-constructors",
         Arg.Int (( := ) explicit_consistent_constructors),
         " Raise an error for <<__ConsistentConstruct>> without an explicit constructor; 1 for traits, 2 for all "
@@ -860,6 +864,14 @@ let parse_options () =
 
   if Option.is_some !naming_table && Option.is_none !root then
     failwith "--naming-table needs --root";
+
+  (* Unless --no-builtins, then well write into the supplied directory, which would be bad. *)
+  if
+    Option.is_some !custom_hhi_path
+    && (not !no_builtins)
+    && not !force_allow_builtins_in_custom_hhi_path
+  then
+    failwith "--custom-hhi-path needs --no-builtins";
 
   (* --root implies certain things... *)
   let root =

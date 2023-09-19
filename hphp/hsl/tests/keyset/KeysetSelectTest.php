@@ -14,19 +14,41 @@ use type HH\__Private\MiniTest\{DataProvider, HackTest};
 
 final class KeysetSelectTest extends HackTest {
 
-  public static function provideTestDiff(): varray<mixed> {
-    return varray[
-      tuple(varray[], varray[], varray[], keyset[]),
-      tuple(vec[1, 3, 5, 7], dict[], varray[], keyset[1, 3, 5, 7]),
-      tuple(
+  public static function provideTestDiff(): dict<string, (
+    Traversable<arraykey>,
+    Traversable<arraykey>,
+    Container<Container<arraykey>>,
+    keyset<arraykey>,
+  )> {
+    return dict[
+      'all empty' => tuple(vec[], vec[], vec[], keyset[]),
+      'only first non-empty' =>
+        tuple(vec[1, 3, 5, 7], dict[], vec[], keyset[1, 3, 5, 7]),
+      'all keys removed' =>
+        tuple(keyset[2], vec[2, 3], vec[vec[2, 3, 4]], keyset[]),
+      'various types for arguments' => tuple(
         new Vector(Vec\range(0, 20)),
         Set {1, 3, 5},
-        varray[
+        vec[
           Map {'foo' => 7, 'bar' => 9},
-          HackLibTestTraversables::getIterator(Vec\range(11, 30)),
+          Vec\range(11, 30),
         ],
         keyset[0, 2, 4, 6, 8, 10],
       ),
+      'iterators' => tuple(
+        HackLibTestTraversables::getIterator(vec[1, 2, 3, 4, 5]),
+        HackLibTestTraversables::getIterator(vec[1]),
+        vec[vec[5]],
+        keyset[2, 3, 4],
+      ),
+      'none removed, different key types #1' =>
+        tuple(keyset[2], vec['2'], vec[], keyset[2]),
+      'none removed, different key types #2' =>
+        tuple(keyset['2'], vec[2], vec[], keyset['2']),
+      'only exact item removed #1' =>
+        tuple(keyset['2', 2], vec[2], vec[], keyset['2']),
+      'only exact item removed, #2' =>
+        tuple(keyset['2', 2], vec['2'], vec[], keyset[2]),
     ];
   }
 

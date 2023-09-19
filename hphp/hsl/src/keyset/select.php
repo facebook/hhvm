@@ -18,23 +18,41 @@ use namespace HH\Lib\C;
  *
  * Time complexity: O(n + m), where n is size of `$first` and m is the combined
  * size of `$second` plus all the `...$rest`
- * Space complexity: O(n + m), where n is size of `$first` and m is the combined
- * size of `$second` plus all the `...$rest` -- note that this is bigger than
- * O(n)
+ * Space complexity: O(n), where n is size of `$first`
  */
 function diff<Tv1 as arraykey, Tv2 as arraykey>(
   Traversable<Tv1> $first,
   Traversable<Tv2> $second,
   Container<Tv2> ...$rest
 )[]: keyset<Tv1> {
-  if (!$first) {
-    return keyset[];
+  if (!$first is keyset<_>) {
+    $first = keyset($first);
   }
-  if (!$second && !$rest) {
-    return keyset($first);
+  if (C\is_empty($first)) { // nothing to remove, so return early.
+    return $first;
   }
-  $union = !$rest ? keyset($second) : union($second, ...$rest);
-  return filter($first, $value ==> !C\contains_key($union, $value));
+  foreach ($second as $value) {
+    if (C\contains_key($first, $value)) {
+      unset($first[HH\FIXME\UNSAFE_CAST<Tv2, Tv1>(
+        $value,
+        '$value is type Tv1 because it\'s in $first',
+      )]);
+    }
+  }
+  foreach ($rest as $container) {
+    if (C\is_empty($first)) { // nothing to remove, so return early.
+      return $first;
+    }
+    foreach ($container as $value) {
+      if (C\contains_key($first, $value)) {
+        unset($first[HH\FIXME\UNSAFE_CAST<Tv2, Tv1>(
+          $value,
+          '$value is type Tv1 because it\'s in $first',
+        )]);
+      }
+    }
+  }
+  return $first;
 }
 /**
  * Returns a new keyset containing all except the first `$n` elements of

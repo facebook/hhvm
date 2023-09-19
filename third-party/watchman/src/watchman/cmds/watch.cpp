@@ -191,6 +191,17 @@ bool find_project_root(
   return false;
 }
 
+void check_no_watchman(w_string resolved_root) {
+  // check if .nowatchman exists under the resolved path
+  auto no_watchman_path = w_string::pathCat({resolved_root, ".nowatchman"});
+  if (w_path_exists(no_watchman_path.c_str())) {
+    CommandValidationError::throwf(
+        "resolve_projpath: the repository is configured to not enable watchman. "
+        "Found .nowatchman at {}",
+        no_watchman_path);
+  }
+}
+
 // For watch-project, take a root path string and resolve the
 // containing project directory, then update the args to reflect
 // that path.
@@ -235,6 +246,7 @@ static w_string resolve_projpath(
   if (find_project_root(*root_files, resolvedpiece, relpiece)) {
     relpath = relpiece.asWString();
     resolved = resolvedpiece.asWString();
+    check_no_watchman(resolved);
     args[1] = w_string_to_json(resolved);
     return resolved;
   }

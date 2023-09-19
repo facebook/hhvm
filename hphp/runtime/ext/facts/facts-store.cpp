@@ -1070,7 +1070,6 @@ struct FactsStoreImpl final
 
       auto& path = pathData.m_path;
       auto pathStr = Path{path};
-
       auto sha1hex = pathData.m_hash;
 
       // Watchman is sending us all the files in the repo, regardless of
@@ -1078,7 +1077,7 @@ struct FactsStoreImpl final
       // sending us SHA1 hashes, so compare these to determine which
       // files have actually changed.
       bool sha1HexMatches = [&]() {
-        if (!pathData.m_hash.has_value()) {
+        if (!sha1hex.has_value()) {
           return false;
         }
         auto const it = allPaths.find(pathStr);

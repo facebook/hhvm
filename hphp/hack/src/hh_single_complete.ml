@@ -567,8 +567,10 @@ let handle_resolve ctx sienv naming_table ~is_manually_invoked filename =
   in
   let show_file_titles =
     match files_with_token with
-    | [] -> false
-    | _ :: _ -> true
+    | []
+    | [_] ->
+      false
+    | _ -> true
   in
   List.iter files_with_token ~f:(fun (path, contents) ->
       let sienv_ref = ref sienv in

@@ -18,13 +18,15 @@ package com.facebook.thrift.client;
 
 import com.facebook.thrift.payload.ClientRequestPayload;
 import com.facebook.thrift.payload.ClientResponsePayload;
-import io.rsocket.Closeable;
 import org.apache.thrift.ClientPushMetadata;
 import org.reactivestreams.Publisher;
+import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-public interface RpcClient extends Closeable {
+public interface RpcClient extends Disposable {
+  Mono<Void> onClose();
+
   default <T> Mono<ClientResponsePayload<T>> singleRequestSingleResponse(
       ClientRequestPayload<T> payload, RpcOptions options) {
     return Mono.error(new UnsupportedOperationException());

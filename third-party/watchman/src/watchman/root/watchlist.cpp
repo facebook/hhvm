@@ -36,13 +36,6 @@ bool Root::removeFromWatched() {
   return false;
 }
 
-// Given a filename, walk the current set of watches.
-// If a watch is a prefix match for filename then we consider it to
-// be an enclosing watch and we'll return the root path and the relative
-// path to filename.
-// Returns NULL if there were no matches.
-// If multiple watches have the same prefix, it is undefined which one will
-// match.
 bool findEnclosingRoot(
     const w_string& fileName,
     w_string_piece& prefix,

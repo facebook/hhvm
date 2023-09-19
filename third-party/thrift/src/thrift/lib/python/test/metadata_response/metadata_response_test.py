@@ -105,7 +105,7 @@ class TestServer:
         await self.serve_task
 
 
-class MetadataResponseTest(unittest.TestCase):
+class MetadataResponseTest(unittest.IsolatedAsyncioTestCase):
     """
     These are tests where a client and server talk to each other
     """

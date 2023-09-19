@@ -124,7 +124,7 @@ class TestServer:
         await self.serve_task
 
 
-class ClientServerTests(unittest.TestCase):
+class ClientServerTests(unittest.IsolatedAsyncioTestCase):
     """
     These are tests where a client and server talk to each other
     """
@@ -388,7 +388,7 @@ class StackHandler(StackServiceInterface):
             raise Exception("WRONG")
 
 
-class ClientStackServerTests(unittest.TestCase):
+class ClientStackServerTests(unittest.IsolatedAsyncioTestCase):
     """
     These are tests where a client and server(stack_arguments) talk to each other
     """

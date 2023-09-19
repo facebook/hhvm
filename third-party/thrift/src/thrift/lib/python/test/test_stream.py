@@ -99,7 +99,7 @@ class TestServer:
         await self.serve_task
 
 
-class StreamClientTest(unittest.TestCase):
+class StreamClientTest(unittest.IsolatedAsyncioTestCase):
     async def test_return_stream(self) -> None:
         async with TestServer(ip="::1") as sa:
             ip, port = sa.ip, sa.port

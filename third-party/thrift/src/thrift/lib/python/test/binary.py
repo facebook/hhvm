@@ -114,7 +114,7 @@ class TestServer:
         await self.serve_task
 
 
-class ClientBinaryServerTests(unittest.TestCase):
+class ClientBinaryServerTests(unittest.IsolatedAsyncioTestCase):
     async def test_send_recv(self) -> None:
         async with TestServer(handler=BinaryHandler(self), ip="::1") as sa:
             ip, port = sa.ip, sa.port

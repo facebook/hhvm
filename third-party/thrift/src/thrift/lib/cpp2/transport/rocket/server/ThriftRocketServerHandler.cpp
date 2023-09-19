@@ -367,10 +367,8 @@ void ThriftRocketServerHandler::handleRequestCommon(
     Payload&& payload, F&& makeRequest, RpcKind expectedKind) {
   // setup request sampling for counters and stats
   auto samplingStatus = shouldSample();
-  std::chrono::steady_clock::time_point readEnd;
-  if (UNLIKELY(samplingStatus.isEnabled())) {
-    readEnd = std::chrono::steady_clock::now();
-  }
+  std::chrono::steady_clock::time_point readEnd{
+      std::chrono::steady_clock::now()};
 
   rocket::Payload debugPayload = payload.clone();
   auto requestPayloadTry =
@@ -584,10 +582,8 @@ void ThriftRocketServerHandler::handleRequestCommon(
   auto* cpp2ReqCtx = request->getRequestContext();
   auto& timestamps = cpp2ReqCtx->getTimestamps();
   timestamps.setStatus(samplingStatus);
-  if (UNLIKELY(samplingStatus.isEnabled())) {
-    timestamps.readEnd = readEnd;
-    timestamps.processBegin = std::chrono::steady_clock::now();
-  }
+  timestamps.readEnd = readEnd;
+  timestamps.processBegin = std::chrono::steady_clock::now();
 
   if (kTempKillswitch__EnableFdPassing && tryFds.hasValue()) {
     cpp2ReqCtx->getHeader()->fds.dcheckEmpty() =

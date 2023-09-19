@@ -312,10 +312,8 @@ void Cpp2Connection::killRequest(
 void Cpp2Connection::requestReceived(
     unique_ptr<HeaderServerChannel::HeaderRequest>&& hreq) {
   auto& samplingStatus = hreq->getSamplingStatus();
-  std::chrono::steady_clock::time_point readEnd;
-  if (samplingStatus.isEnabled()) {
-    readEnd = std::chrono::steady_clock::now();
-  }
+  std::chrono::steady_clock::time_point readEnd{
+      std::chrono::steady_clock::now()};
 
   folly::call_once(clientInfoFlag_, [&] {
     if (const auto& m = hreq->getHeader()->extractClientMetadata()) {
@@ -578,20 +576,18 @@ void Cpp2Connection::requestReceived(
       std::move(methodName));
 
   server->incActiveRequests();
-  if (samplingStatus.isEnabled()) {
-    // Expensive operations; happens only when sampling is enabled
-    auto& timestamps = t2r->getTimestamps();
-    timestamps.setStatus(samplingStatus);
-    timestamps.readEnd = readEnd;
-    timestamps.processBegin = std::chrono::steady_clock::now();
-    if (samplingStatus.isEnabledByServer() && observer) {
-      if (threadManager_) {
-        observer->queuedRequests(threadManager_->pendingUpstreamTaskCount());
-      } else if (!server->resourcePoolSet().empty()) {
-        observer->queuedRequests(server->resourcePoolSet().numQueued());
-      }
-      observer->activeRequests(server->getActiveRequests());
+  // Expensive operations; happens only when sampling is enabled
+  auto& timestamps = t2r->getTimestamps();
+  timestamps.setStatus(samplingStatus);
+  timestamps.readEnd = readEnd;
+  timestamps.processBegin = std::chrono::steady_clock::now();
+  if (samplingStatus.isEnabledByServer() && observer) {
+    if (threadManager_) {
+      observer->queuedRequests(threadManager_->pendingUpstreamTaskCount());
+    } else if (!server->resourcePoolSet().empty()) {
+      observer->queuedRequests(server->resourcePoolSet().numQueued());
     }
+    observer->activeRequests(server->getActiveRequests());
   }
 
   activeRequests_.insert(t2r.get());
@@ -831,13 +827,11 @@ void Cpp2Connection::Cpp2Request::markProcessEnd(
     transport::THeader::StringToStringMap* newHeaders) {
   auto& timestamps = getTimestamps();
   auto& samplingStatus = timestamps.getSamplingStatus();
-  if (samplingStatus.isEnabled()) {
-    timestamps.processEnd = std::chrono::steady_clock::now();
-    if (samplingStatus.isEnabledByClient()) {
-      // Latency headers are set after processEnd itself. Can't be
-      // done after write, since headers transform happens during write.
-      setLatencyHeaders(timestamps, newHeaders);
-    }
+  timestamps.processEnd = std::chrono::steady_clock::now();
+  if (samplingStatus.isEnabledByClient()) {
+    // Latency headers are set after processEnd itself. Can't be
+    // done after write, since headers transform happens during write.
+    setLatencyHeaders(timestamps, newHeaders);
   }
 }
 

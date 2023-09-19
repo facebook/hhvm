@@ -134,12 +134,25 @@ class MockResponseChannelRequest : public ResponseChannelRequest {
 
 namespace {
 
-ServerRequest getRequest(AsyncProcessor* ap, folly::EventBase*) {
-  static Cpp2RequestContext ctx = Cpp2RequestContext(nullptr);
+class Cpp2RequestContextStorage {
+ public:
+  Cpp2RequestContext* makeContext() {
+    auto context = std::make_unique<Cpp2RequestContext>(nullptr);
+    auto* rawPtr = context.get();
+    contexts_.push_back(std::move(context));
+    return rawPtr;
+  }
+
+ private:
+  std::vector<std::unique_ptr<Cpp2RequestContext>> contexts_;
+};
+
+ServerRequest getRequest(
+    AsyncProcessor* ap, Cpp2RequestContext* context, folly::EventBase*) {
   ServerRequest req(
       ResponseChannelRequest::UniquePtr(new MockResponseChannelRequest),
       SerializedCompressedRequest(std::unique_ptr<folly::IOBuf>{}),
-      &ctx, /* ctx  */
+      context,
       static_cast<protocol::PROTOCOL_TYPES>(0),
       nullptr, /* requestContext  */
       ap,
@@ -287,8 +300,9 @@ TEST_P(ParallelConcurrencyControllerTest, NormalCases) {
 
   ResourcePoolMock pool(holder.pile.get(), holder.controller.get());
 
-  pool.enqueue(getRequest(blockingAP.get(), &eb));
-  pool.enqueue(getRequest(endingAP.get(), &eb));
+  Cpp2RequestContextStorage contextStorage;
+  pool.enqueue(getRequest(blockingAP.get(), contextStorage.makeContext(), &eb));
+  pool.enqueue(getRequest(endingAP.get(), contextStorage.makeContext(), &eb));
 
   EXPECT_EQ(holder.controller->requestCount(), 2);
   baton1.post();
@@ -319,9 +333,10 @@ TEST_P(ParallelConcurrencyControllerTest, LimitedTasks) {
 
   ResourcePoolMock pool(holder.pile.get(), holder.controller.get());
 
-  pool.enqueue(getRequest(blockingAP.get(), &eb));
-  pool.enqueue(getRequest(blockingAP.get(), &eb));
-  pool.enqueue(getRequest(endingAP.get(), &eb));
+  Cpp2RequestContextStorage contextStorage;
+  pool.enqueue(getRequest(blockingAP.get(), contextStorage.makeContext(), &eb));
+  pool.enqueue(getRequest(blockingAP.get(), contextStorage.makeContext(), &eb));
+  pool.enqueue(getRequest(endingAP.get(), contextStorage.makeContext(), &eb));
 
   EXPECT_EQ(holder.controller->requestCount(), 2);
 
@@ -401,17 +416,18 @@ TEST(ParallelConcurrencyControllerTest, DifferentOrdering1) {
   auto mockAP2 = getEdgeTaskAP(latch, baton2, controller);
   auto mockAP3 = getEdgeTaskAP(latch, baton3, controller);
 
+  Cpp2RequestContextStorage contextStorage;
   // one scenario is right after one task finishes
   // we push another task into the queue
-  pool.enqueue(getRequest(mockAP1.get(), &eb));
-  pool.enqueue(getRequest(mockAP2.get(), &eb));
+  pool.enqueue(getRequest(mockAP1.get(), contextStorage.makeContext(), &eb));
+  pool.enqueue(getRequest(mockAP2.get(), contextStorage.makeContext(), &eb));
 
   EXPECT_EQ(controller.requestCount(), 2);
 
   // one task will finish immediately and another task is pushed
   // This shouldn't be causing any idle thread
   baton1.post();
-  pool.enqueue(getRequest(mockAP3.get(), &eb));
+  pool.enqueue(getRequest(mockAP3.get(), contextStorage.makeContext(), &eb));
 
   baton2.post();
   baton3.post();
@@ -442,15 +458,16 @@ TEST(ParallelConcurrencyControllerTest, DifferentOrdering2) {
   auto mockAP2 = getEdgeTaskAP(latch, baton2, controller);
   auto mockAP3 = getEdgeTaskAP(latch, baton3, controller);
 
+  Cpp2RequestContextStorage contextStorage;
   // another scenario is right before one task finishes
   // we push another task into the queue
-  pool.enqueue(getRequest(mockAP1.get(), &eb));
-  pool.enqueue(getRequest(mockAP2.get(), &eb));
+  pool.enqueue(getRequest(mockAP1.get(), contextStorage.makeContext(), &eb));
+  pool.enqueue(getRequest(mockAP2.get(), contextStorage.makeContext(), &eb));
 
   EXPECT_EQ(controller.requestCount(), 2);
 
   // one task will finish immediately and another task is pushed
-  pool.enqueue(getRequest(mockAP3.get(), &eb));
+  pool.enqueue(getRequest(mockAP3.get(), contextStorage.makeContext(), &eb));
   baton1.post();
   baton2.post();
   baton3.post();

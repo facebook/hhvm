@@ -106,7 +106,6 @@ UniquePyObjectPtr getDefaultValue(
           case detail::StringFieldType::IOBufPtr:
           case detail::StringFieldType::IOBufObj:
             auto buf = create_IOBuf(folly::IOBuf::create(0));
-            Py_INCREF(buf);
             value = UniquePyObjectPtr(buf);
             emplace = false;
             break;
@@ -135,11 +134,12 @@ UniquePyObjectPtr getDefaultValue(
     }
     if (emplace) {
       defaultValueMap->emplace(typeInfo, value.get());
+      Py_INCREF(value.get());
     }
   } else {
     value = UniquePyObjectPtr(defaultValueFound->second);
+    Py_INCREF(value.get());
   }
-  Py_INCREF(value.get());
   return value;
 }
 
@@ -299,7 +299,6 @@ detail::OptionalThriftValue getIOBuf(
 void setIOBuf(void* object, const folly::IOBuf& value) {
   ensureImportOrThrow();
   const auto buf = create_IOBuf(value.clone());
-  Py_INCREF(buf);
   UniquePyObjectPtr iobufObj{buf};
   if (!buf) {
     THRIFT_PY3_CHECK_ERROR();

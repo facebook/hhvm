@@ -553,11 +553,58 @@ let handle_autocomplete ctx sienv naming_table ~is_manually_invoked filename =
                 Printf.printf "  %s\n" line)
           | None -> ()))
 
-(** This handles "--resolve" which for now, just autocomplete and shows the results.
-Next this will also fetch the signature and docblock, AKA whatever is already done
+(** This handles "--resolve" which for now, just autocomplete and shows the results
+and the signature (next up - docblock!), AKA whatever is already done
 in ClientIdeDaemon in response to Completion_resolve requests. *)
 let handle_resolve ctx sienv naming_table ~is_manually_invoked filename =
-  handle_autocomplete ctx sienv naming_table ~is_manually_invoked filename
+  let files_contents = Multifile.file_to_file_list filename in
+  let files_with_token =
+    files_contents
+    |> List.filter ~f:(fun (_path, contents) ->
+           String.is_substring
+             contents
+             ~substring:AutocompleteTypes.autocomplete_token)
+  in
+  let show_file_titles =
+    match files_with_token with
+    | [] -> false
+    | _ :: _ -> true
+  in
+  List.iter files_with_token ~f:(fun (path, contents) ->
+      let sienv_ref = ref sienv in
+      let result =
+        do_auto332
+          ~ctx
+          ~is_manually_invoked
+          ~sienv_ref
+          ~naming_table
+          path
+          contents
+      in
+      if show_file_titles then
+        Printf.printf "//// %s\n" (Multifile.short_suffix path);
+      List.iter result.Utils.With_complete_flag.value ~f:(fun r ->
+          let open AutocompleteTypes in
+          Printf.printf
+            "%s\n"
+            (Option.value
+               ~default:"none"
+               (ServerAutoComplete.get_signature ctx r.res_fullname));
+          Printf.printf "%s\n" r.res_fullname;
+          Printf.printf "%s\n" r.res_label;
+          List.iter r.res_additional_edits ~f:(fun (s, _) ->
+              Printf.printf "  INSERT %s\n" s);
+          Printf.printf
+            "  INSERT %s\n"
+            (match r.res_insert_text with
+            | InsertLiterally s -> s
+            | InsertAsSnippet { snippet; _ } -> snippet);
+          Printf.printf "  %s\n" r.res_detail;
+          match r.res_documentation with
+          | Some doc ->
+            List.iter (String.split_lines doc) ~f:(fun line ->
+                Printf.printf "  %s\n" line)
+          | None -> ()))
 
 (** This handles --search, --search-glean, --search-show-glean.
 The filename be a single file or a multifile,

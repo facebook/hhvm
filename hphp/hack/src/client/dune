@@ -24,6 +24,7 @@
   nuclide_rpc_message_printer
   pos
   rage
+  redeclarations
   server
   server_command_types
   server_monitor

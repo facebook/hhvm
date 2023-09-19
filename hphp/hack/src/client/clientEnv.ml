@@ -52,6 +52,7 @@ type client_mode =
   | MODE_RENAME of rename_mode * string * string
   | MODE_REMOVE_DEAD_FIXMES of int list
   | MODE_REMOVE_DEAD_UNSAFE_CASTS
+  | MODE_REWRITE_DECLARATIONS
   | MODE_REWRITE_LAMBDA_PARAMETERS of string list
   | MODE_SAVE_NAMING of string
   | MODE_SAVE_STATE of string

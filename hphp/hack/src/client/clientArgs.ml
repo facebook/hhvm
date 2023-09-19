@@ -601,6 +601,14 @@ let parse_check_args cmd ~from_default =
         Arg.Int (fun n -> timeout := Some (float_of_int (max 5 n))),
         " (deprecated) same as --timeout" );
       ("--retry-if-init", Arg.Bool (fun _ -> ()), " (deprecated and ignored)");
+      ( "--rewrite-declarations",
+        Arg.Unit (fun () -> set_mode MODE_REWRITE_DECLARATIONS),
+        {|Rewrite Hack source code to allow redeclarations.
+For example in `function foo(): void {} function foo(): void{}` we
+rewrite to the function names to something like `foo_1` and `foo_2`.
+This is helpful for notebooks.
+|}
+      );
       ( "--rewrite-lambda-parameters",
         Arg.Rest
           begin

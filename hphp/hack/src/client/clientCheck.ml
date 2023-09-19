@@ -848,6 +848,9 @@ let main_internal
       ~strategy:csdt_strategy
       ~log_remotely:csdt_log_remotely
       ~tag:csdt_tag
+  | MODE_REWRITE_DECLARATIONS ->
+    DeclarationsRewriter.start ();
+    Lwt.return (Exit_status.No_error, Telemetry.create ())
   | MODE_REWRITE_LAMBDA_PARAMETERS files ->
     let%lwt conn = connect args in
     let%lwt (patches, telemetry) =

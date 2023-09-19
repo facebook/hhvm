@@ -20,7 +20,12 @@
 
 }}
 // Deprecated: Use {{struct:go_qualified_new_func}}().Get{{field:go_name}}() instead.
+{{^struct:resp?}}
 var {{struct:go_name}}_{{field:go_name}}_DEFAULT = {{struct:go_qualified_new_func}}().Get{{field:go_name}}()
+{{/struct:resp?}}
+{{#struct:resp?}}
+var {{struct:go_public_resp_name}}_{{field:go_name}}_DEFAULT = {{struct:go_qualified_new_func}}().Get{{field:go_name}}()
+{{/struct:resp?}}
 {{#field:type}}
 {{#type:struct?}}
 

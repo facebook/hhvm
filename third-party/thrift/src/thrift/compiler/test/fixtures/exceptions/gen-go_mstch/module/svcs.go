@@ -671,7 +671,7 @@ func (x *respRaiserDoRaise) toString3() string {  // S
 }
 
 // Deprecated: Use newRespRaiserDoRaise().GetB() instead.
-var respRaiserDoRaise_B_DEFAULT = newRespRaiserDoRaise().GetB()
+var RaiserDoRaiseResult_B_DEFAULT = newRespRaiserDoRaise().GetB()
 
 // Deprecated: Use newRespRaiserDoRaise().GetB() instead.
 func (x *respRaiserDoRaise) DefaultGetB() *Banal {
@@ -682,7 +682,7 @@ func (x *respRaiserDoRaise) DefaultGetB() *Banal {
 }
 
 // Deprecated: Use newRespRaiserDoRaise().GetF() instead.
-var respRaiserDoRaise_F_DEFAULT = newRespRaiserDoRaise().GetF()
+var RaiserDoRaiseResult_F_DEFAULT = newRespRaiserDoRaise().GetF()
 
 // Deprecated: Use newRespRaiserDoRaise().GetF() instead.
 func (x *respRaiserDoRaise) DefaultGetF() *Fiery {
@@ -693,7 +693,7 @@ func (x *respRaiserDoRaise) DefaultGetF() *Fiery {
 }
 
 // Deprecated: Use newRespRaiserDoRaise().GetS() instead.
-var respRaiserDoRaise_S_DEFAULT = newRespRaiserDoRaise().GetS()
+var RaiserDoRaiseResult_S_DEFAULT = newRespRaiserDoRaise().GetS()
 
 // Deprecated: Use newRespRaiserDoRaise().GetS() instead.
 func (x *respRaiserDoRaise) DefaultGetS() *Serious {
@@ -1449,7 +1449,7 @@ func (x *respRaiserGet500) toString3() string {  // S
 }
 
 // Deprecated: Use newRespRaiserGet500().GetF() instead.
-var respRaiserGet500_F_DEFAULT = newRespRaiserGet500().GetF()
+var RaiserGet500Result_F_DEFAULT = newRespRaiserGet500().GetF()
 
 // Deprecated: Use newRespRaiserGet500().GetF() instead.
 func (x *respRaiserGet500) DefaultGetF() *Fiery {
@@ -1460,7 +1460,7 @@ func (x *respRaiserGet500) DefaultGetF() *Fiery {
 }
 
 // Deprecated: Use newRespRaiserGet500().GetB() instead.
-var respRaiserGet500_B_DEFAULT = newRespRaiserGet500().GetB()
+var RaiserGet500Result_B_DEFAULT = newRespRaiserGet500().GetB()
 
 // Deprecated: Use newRespRaiserGet500().GetB() instead.
 func (x *respRaiserGet500) DefaultGetB() *Banal {
@@ -1471,7 +1471,7 @@ func (x *respRaiserGet500) DefaultGetB() *Banal {
 }
 
 // Deprecated: Use newRespRaiserGet500().GetS() instead.
-var respRaiserGet500_S_DEFAULT = newRespRaiserGet500().GetS()
+var RaiserGet500Result_S_DEFAULT = newRespRaiserGet500().GetS()
 
 // Deprecated: Use newRespRaiserGet500().GetS() instead.
 func (x *respRaiserGet500) DefaultGetS() *Serious {

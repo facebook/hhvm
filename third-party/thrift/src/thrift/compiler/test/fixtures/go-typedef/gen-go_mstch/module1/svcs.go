@@ -412,7 +412,7 @@ func (x *respFinderByPlate) toString0() string {  // Success
 }
 
 // Deprecated: Use newRespFinderByPlate().GetSuccess() instead.
-var respFinderByPlate_Success_DEFAULT = newRespFinderByPlate().GetSuccess()
+var FinderByPlateResult_Success_DEFAULT = newRespFinderByPlate().GetSuccess()
 
 // Deprecated: Use newRespFinderByPlate().GetSuccess() instead.
 func (x *respFinderByPlate) DefaultGetSuccess() *Automobile {
@@ -762,7 +762,7 @@ func (x *respFinderAliasByPlate) toString0() string {  // Success
 }
 
 // Deprecated: Use newRespFinderAliasByPlate().GetSuccess() instead.
-var respFinderAliasByPlate_Success_DEFAULT = newRespFinderAliasByPlate().GetSuccess()
+var FinderAliasByPlateResult_Success_DEFAULT = newRespFinderAliasByPlate().GetSuccess()
 
 // Deprecated: Use newRespFinderAliasByPlate().GetSuccess() instead.
 func (x *respFinderAliasByPlate) DefaultGetSuccess() *Car {

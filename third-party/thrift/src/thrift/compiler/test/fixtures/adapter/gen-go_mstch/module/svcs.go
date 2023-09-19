@@ -1024,7 +1024,7 @@ func (x *respAdapterServiceCount) toString0() string {  // Success
 }
 
 // Deprecated: Use newRespAdapterServiceCount().GetSuccess() instead.
-var respAdapterServiceCount_Success_DEFAULT = newRespAdapterServiceCount().GetSuccess()
+var AdapterServiceCountResult_Success_DEFAULT = newRespAdapterServiceCount().GetSuccess()
 
 // Deprecated: Use newRespAdapterServiceCount().GetSuccess() instead.
 func (x *respAdapterServiceCount) DefaultGetSuccess() *CountingStruct {
@@ -1397,7 +1397,7 @@ func (x *respAdapterServiceAdaptedTypes) toString0() string {  // Success
 }
 
 // Deprecated: Use newRespAdapterServiceAdaptedTypes().GetSuccess() instead.
-var respAdapterServiceAdaptedTypes_Success_DEFAULT = newRespAdapterServiceAdaptedTypes().GetSuccess()
+var AdapterServiceAdaptedTypesResult_Success_DEFAULT = newRespAdapterServiceAdaptedTypes().GetSuccess()
 
 // Deprecated: Use newRespAdapterServiceAdaptedTypes().GetSuccess() instead.
 func (x *respAdapterServiceAdaptedTypes) DefaultGetSuccess() *HeapAllocated {

@@ -653,7 +653,7 @@ func (x *respGetEntityGetEntity) toString0() string {  // Success
 }
 
 // Deprecated: Use newRespGetEntityGetEntity().GetSuccess() instead.
-var respGetEntityGetEntity_Success_DEFAULT = newRespGetEntityGetEntity().GetSuccess()
+var GetEntityGetEntityResult_Success_DEFAULT = newRespGetEntityGetEntity().GetSuccess()
 
 // Deprecated: Use newRespGetEntityGetEntity().GetSuccess() instead.
 func (x *respGetEntityGetEntity) DefaultGetSuccess() *GetEntityResponse {

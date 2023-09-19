@@ -16,6 +16,7 @@
 #pragma once
 
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/attr.h"
 
 #include "hphp/hhbbc/misc.h"
 
@@ -45,6 +46,7 @@ bool is_collection(res::Class);
  * Returns whether a php::Class is the base class for all closures.
  */
 bool is_closure_base(const php::Class&);
+bool is_closure_base(SString);
 
 /*
  * Returns whether a php::Class is a closure.
@@ -109,6 +111,7 @@ bool is_used_trait(const php::Class& cls);
  * cannot be instantiated (but can be interacted with statically).
  */
 bool is_regular_class(const php::Class&);
+bool is_regular_class(Attr);
 
 Type get_type_of_reified_list(const UserAttributeMap& ua);
 

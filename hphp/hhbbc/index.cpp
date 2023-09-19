@@ -37,6 +37,7 @@
 #include <folly/MapUtil.h>
 #include <folly/Memory.h>
 #include <folly/Range.h>
+#include <folly/SharedMutex.h>
 #include <folly/String.h>
 #include <folly/concurrency/ConcurrentHashMap.h>
 
@@ -81,6 +82,10 @@ TRACE_SET_MOD(hhbbc_index);
 //////////////////////////////////////////////////////////////////////
 
 using namespace extern_worker;
+
+//////////////////////////////////////////////////////////////////////
+
+struct ClassInfo2;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -1098,6 +1103,1187 @@ struct FuncFamilyEntry {
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * ClassGraph is an abstraction for representing a subset of the
+ * complete class hierarchy in a program. Every instance of ClassGraph
+ * "points" into the hierarchy at a specific class. From an instance,
+ * all (transitive) parents are known, and all (transitive) children
+ * may be known.
+ *
+ * Using a ClassGraph, one can obtain relevant information about the
+ * class hierarchy, or perform operations between two classes (union
+ * or intersection, for example), without having the ClassInfo
+ * available.
+ *
+ * One advantage of ClassGraph is that it is self
+ * contained. Serializing an instance of ClassGraph will serialize all
+ * information needed about the hierarchy. This means that an
+ * extern-worker job does not need to retrieve additional metadata
+ * before using it.
+ */
+struct ClassGraph {
+  // Default constructed instances are not usable for anything (needed
+  // for serialization). Use the below factory functions to actually
+  // create them.
+  ClassGraph() = default;
+
+  // Retrieve the name of this class.
+  SString name() const;
+  // Retrieve an optional ClassInfo2 associated with this class. A
+  // ClassGraph is not guaranteed to have a ClassInfo2, but if it
+  // does, this can be used to save a name -> info lookup.
+  ClassInfo2* cinfo() const;
+
+  // A "missing" ClassGraph is a special variant which represents a
+  // class about which nothing is known. The class might not even
+  // exist. The only valid thing to do with such a class is query its
+  // name.
+  bool isMissing() const;
+  // A class might or might not have complete knowledge about its
+  // children. If this returns true, you can perform any of the below
+  // queries on it. If not, you can only perform queries related to
+  // the parents (non-missing classes always have complete parent
+  // information).
+  bool hasCompleteChildren() const;
+
+  // Whether this class is an interface.
+  bool isInterface() const;
+  // Whether this class is mocked (has a direct child which is a mock
+  // class).
+  bool isMocked() const;
+  // Whether this class or any children are mocked.
+  bool isSubMocked() const;
+  // Whether any children are regular (not this class).
+  bool hasRegularSubclass() const;
+  // Whether any children are non-regular (not this class).
+  bool hasNonRegularSubclass() const;
+
+  // Retrieve all base classes of this class, including this
+  // class. The ordering is from top-most class to this one (so this
+  // one will be the last element). The returned classes may not have
+  // complete child info, even if this class does.
+  std::vector<ClassGraph> bases() const;
+
+  // Retrieve all interfaces implemented by this class, either
+  // directly, or by transitive parents. This includes this class if
+  // it is an interface. The ordering is alphabetical. Like bases(),
+  // the returned classes may not have complete child info, even if
+  // this class does.
+  std::vector<ClassGraph> interfaces() const;
+
+  // The combined set of all interfaces implemented by any
+  // non-interface, non-trait, non-enum child classes of this
+  // class. The ordering is alphabetical. This is only valid to call
+  // if hasCompleteChildren() is true. The returned classes may not
+  // have complete child information.
+  std::vector<ClassGraph> subRegInterfaces() const;
+
+  // Retrieve all children of this class (including this class
+  // itself). The difference between subclasses() and children() is
+  // that subclasses() doesn't recurse through traits, while
+  // children() does. In other words, subclasses() represents the set
+  // of classes which have a "is-a" relationship with this class,
+  // while children() is just classes linked by inheritance
+  // tree. These are only valid to call if hasCompleteChildren() is
+  // true. All returned classes will also have complete child
+  // information.
+  std::vector<ClassGraph> subclasses() const;
+  std::vector<ClassGraph> children() const;
+
+  // Retrieve the interfaces implemented by this class directly.
+  std::vector<ClassGraph> declInterfaces() const {
+    return directParents(FlagInterface);
+  }
+  // Retrieve the set of non-flattened traits used by this class
+  // directly. Any traits flattened into this class will not appear.
+  std::vector<ClassGraph> usedTraits() const {
+    return directParents(FlagTrait);
+  }
+
+  // Used when building ClassGraphs initially.
+  void setCompleteChildren();
+  void setIsMockClass();
+
+  void setBase(ClassGraph);
+  void addParent(ClassGraph);
+  void flattenTraitInto(ClassGraph);
+
+  void reset();
+
+  // ClassGraphs are ordered by their name alphabetically.
+  bool operator==(ClassGraph h) const { return this_ == h.this_; }
+  bool operator!=(ClassGraph h) const { return this_ != h.this_; }
+  bool operator<(ClassGraph h) const;
+
+  // Create a new ClassGraph corresponding to the given php::Class,
+  // and store an optional ClassInfo2 along with it. This function
+  // will assert if a ClassGraph with the php::Class' name already
+  // exists.
+  static ClassGraph create(const php::Class&,
+                           ClassInfo2* cinfo = nullptr);
+  // Retrieve a ClassGraph with the given name, asserting if one
+  // doesn't exist.
+  static ClassGraph get(SString);
+
+  // Before using ClassGraph, it must be initialized (particularly
+  // before deserializing any). initConcurrent() must be used if any
+  // deserialization with be performed in multiple threads
+  // concurrently.
+  static void init(bool setChildrenComplete = true);
+  static void initConcurrent();
+  // If initConcurrent() was used, this must be used when
+  // deserialization is done and perform querying any ClassGraphs.
+  static void stopConcurrent();
+  // Called to clean up memory used by ClassGraph framework.
+  static void destroy();
+
+  template <typename SerDe> void serde(SerDe&, ClassInfo2*);
+
+  // When serializing multiple ClassGraphs, this can be declared
+  // before serializing any of them, to allow for the serialization to
+  // share common state and take up less space.
+  struct ScopedSerdeState;
+
+private:
+  struct Node;
+  struct SerdeState;
+  struct Table;
+
+  using Visited = hphp_fast_set<Node*>;
+
+  enum Flags : std::uint8_t {
+    FlagNone      = 0,
+    FlagInterface = (1 << 0),
+    FlagTrait     = (1 << 1),
+    FlagAbstract  = (1 << 2),
+    FlagEnum      = (1 << 3),
+    FlagMockClass = (1 << 4),
+    FlagWait      = (1 << 5),
+    FlagChildren  = (1 << 6),
+    FlagMissing   = (1 << 7)
+  };
+
+  // Iterating through parents or children can result in one of three
+  // different outcomes:
+  enum class Action {
+    Continue, // Keep iterating into any children/parents
+    Stop, // Stop iteration entirely
+    Skip // Continue iteration, but skip over any children/parents of
+         // this class
+  };
+
+  static Table& table();
+
+  std::vector<ClassGraph> directParents(Flags) const;
+
+  template <typename F>
+  static Action forEachParent(Node&, const F&, Visited&);
+  template <typename F>
+  static Action forEachParent(Node& n, const F& f) {
+    Visited v;
+    return forEachParent(n, f, v);
+  }
+
+  template <typename F>
+  static Action forEachChild(Node&, const F&, Visited&);
+  template <typename F>
+  static Action forEachChild(Node& n, const F& f) {
+    Visited v;
+    return forEachChild(n, f, v);
+  }
+
+  struct LockedSerdeImpl;
+  struct UnlockedSerdeImpl;
+
+  static std::vector<Node*> sort(const hphp_fast_set<Node*>&);
+
+  template <typename SerDe> static void encodeName(SerDe&, SString);
+  template <typename SerDe> static SString decodeName(SerDe&);
+
+  template <typename SerDe, typename Impl> void serdeImpl(SerDe&,
+                                                          const Impl&,
+                                                          ClassInfo2*);
+  template <typename SerDe, typename Impl>
+  static void deserBlock(SerDe&, const Impl&);
+  template <typename SerDe> static size_t serDownward(SerDe&, Node&);
+  template <typename SerDe> static bool serUpward(SerDe&, Node&);
+
+  static std::unique_ptr<Table> g_table;
+  static __thread SerdeState* tl_serde_state;
+
+  explicit ClassGraph(Node* n) : this_{n} {}
+
+  Node* this_{nullptr};
+};
+
+std::unique_ptr<ClassGraph::Table> ClassGraph::g_table{nullptr};
+__thread ClassGraph::SerdeState* ClassGraph::tl_serde_state{nullptr};
+
+// Node on the graph:
+struct ClassGraph::Node {
+  // The flags are stored along with any ClassInfo to save memory.
+  using CIAndFlags = CompactTaggedPtr<ClassInfo2, Flags>;
+
+  SString name{nullptr};
+  // Atomic because they might be manipulated from multiple threads
+  // during deserialization.
+  std::atomic<CIAndFlags::Opaque> ci{CIAndFlags{}.getOpaque()};
+  // Direct (not transitive) parents and children of this node.
+  hphp_fast_set<Node*> parents;
+  hphp_fast_set<Node*> children;
+
+  Flags flags() const { return CIAndFlags{ci.load()}.tag(); }
+  ClassInfo2* cinfo() const { return CIAndFlags{ci.load()}.ptr(); }
+
+  bool isBase() const { return !(flags() & (FlagInterface | FlagTrait)); }
+  bool isRegular() const {
+    return !(flags() & (FlagInterface | FlagTrait | FlagAbstract | FlagEnum));
+  }
+
+  // NB: These aren't thread-safe, so don't use them during concurrent
+  // deserialization.
+  void setFlags(Flags f) {
+    CIAndFlags old{ci.load()};
+    old.set((Flags)(old.tag() | f), old.ptr());
+    ci.store(old.getOpaque());
+  }
+  void setCInfo(ClassInfo2& c) {
+    CIAndFlags old{ci.load()};
+    assertx(!old.ptr() || old.ptr() == &c);
+    old.set(old.tag(), &c);
+    ci.store(old.getOpaque());
+  }
+};
+
+struct ClassGraph::SerdeState {
+  hphp_fast_set<Node*> upward;
+  hphp_fast_set<Node*> downward;
+
+  std::vector<SString> strings;
+  std::vector<SString> newStrings;
+  SStringToOneT<size_t> strToIdx;
+};
+
+struct ClassGraph::Table {
+  // Node map to ensure pointer stability.
+  ISStringToOneNodeT<Node> nodes;
+  struct Locking {
+    folly::SharedMutex table;
+    std::array<std::mutex, 2048> nodes;
+  };
+  // If present, we're doing concurrent deserialization.
+  Optional<Locking> locking;
+  bool deserChildrenComplete{true};
+};
+
+struct ClassGraph::ScopedSerdeState {
+  ScopedSerdeState() {
+    // If there's no SerdeState active, make one active, otherwise do
+    // nothing.
+    if (tl_serde_state) return;
+    s.emplace();
+    tl_serde_state = s.get_pointer();
+  }
+
+  ~ScopedSerdeState() {
+    if (!s.has_value()) return;
+    assertx(tl_serde_state == s.get_pointer());
+    tl_serde_state = nullptr;
+  }
+
+  ScopedSerdeState(const ScopedSerdeState&) = delete;
+  ScopedSerdeState(ScopedSerdeState&&) = delete;
+  ScopedSerdeState& operator=(const ScopedSerdeState&) = delete;
+  ScopedSerdeState& operator=(ScopedSerdeState&&) = delete;
+private:
+  Optional<SerdeState> s;
+};
+
+SString ClassGraph::name() const {
+  assertx(this_);
+  return this_->name;
+}
+
+ClassInfo2* ClassGraph::cinfo() const {
+  assertx(this_);
+  return this_->cinfo();
+}
+
+bool ClassGraph::isMissing() const {
+  assertx(this_);
+  return this_->flags() & FlagMissing;
+}
+
+bool ClassGraph::hasCompleteChildren() const {
+  assertx(this_);
+  return this_->flags() & FlagChildren;
+}
+
+bool ClassGraph::isInterface() const {
+  assertx(this_);
+  assertx(!isMissing());
+  return this_->flags() & FlagInterface;
+}
+
+void ClassGraph::setCompleteChildren() {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(!isMissing());
+
+  // Complete children is transitive, so mark every child as having
+  // complete children as well.
+  forEachChild(
+    *this_,
+    [&] (Node& c) {
+      // Stop if we hit the flag already set, since all children
+      // beyond this should already have it set.
+      if (c.flags() & FlagChildren) return Action::Skip;
+      c.setFlags(FlagChildren);
+      return Action::Continue;
+    }
+  );
+}
+
+void ClassGraph::setIsMockClass() {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(!isMissing());
+  this_->setFlags(FlagMockClass);
+}
+
+void ClassGraph::setBase(ClassGraph b) {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(b.this_);
+  assertx(!isMissing());
+  assertx(!b.isMissing());
+  assertx(b.this_->isBase());
+  this_->parents.emplace(b.this_);
+  if (!is_closure_base(b.name())) {
+    b.this_->children.emplace(this_);
+  }
+}
+
+void ClassGraph::addParent(ClassGraph p) {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(p.this_);
+  assertx(!isMissing());
+  assertx(!p.isMissing());
+  assertx(!p.this_->isBase());
+  assertx(!is_closure_base(p.name()));
+  this_->parents.emplace(p.this_);
+  p.this_->children.emplace(this_);
+}
+
+void ClassGraph::flattenTraitInto(ClassGraph t) {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(t.this_);
+  assertx(t.this_->flags() & FlagTrait);
+  assertx(!isMissing());
+  assertx(!t.isMissing());
+
+  // Remove this trait as a parent, and move all of it's parents into
+  // this class.
+  always_assert(this_->parents.erase(t.this_));
+  always_assert(t.this_->children.erase(this_));
+  for (auto const p : t.this_->parents) {
+    this_->parents.emplace(p);
+    p->children.emplace(this_);
+  }
+}
+
+void ClassGraph::reset() {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(this_->children.empty());
+  assertx(!isMissing());
+  for (auto const parent : this_->parents) {
+    always_assert(parent->children.erase(this_));
+  }
+  this_->parents.clear();
+  this_->ci.store(Node::CIAndFlags::Opaque{});
+  this_ = nullptr;
+}
+
+bool ClassGraph::operator<(ClassGraph h) const {
+  return string_data_lti{}(this_->name, h.this_->name);
+}
+
+std::vector<ClassGraph> ClassGraph::bases() const {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(!isMissing());
+
+  std::vector<ClassGraph> out;
+  auto current = this_;
+  do {
+    out.emplace_back(ClassGraph{ current });
+    auto const& parents = current->parents;
+    current = nullptr;
+    // There should be at most one base on the parent list. Verify
+    // this in debug builds.
+    for (auto const p : parents) {
+      if (p->isBase()) {
+        assertx(!current);
+        current = p;
+        if (!debug) break;
+      }
+    }
+  } while (current);
+
+  std::reverse(begin(out), end(out));
+  return out;
+}
+
+std::vector<ClassGraph> ClassGraph::interfaces() const {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(!isMissing());
+
+  std::vector<ClassGraph> out;
+  forEachParent(
+    *this_,
+    [&] (Node& p) {
+      if (p.flags() & FlagInterface) out.emplace_back(ClassGraph{ &p });
+      return Action::Continue;
+    }
+  );
+
+  std::sort(begin(out), end(out));
+  return out;
+}
+
+std::vector<ClassGraph> ClassGraph::subRegInterfaces() const {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(hasCompleteChildren());
+  assertx(!isMissing());
+
+  std::vector<ClassGraph> out;
+  Visited visited;
+  forEachChild(
+    *this_,
+    [&] (Node& c) {
+      if (!(c.flags() & (FlagInterface | FlagTrait | FlagEnum))) {
+        forEachParent(
+          c,
+          [&] (Node& p) {
+            if (p.flags() & FlagInterface) {
+              out.emplace_back(ClassGraph{ &p });
+            }
+            return Action::Continue;
+          },
+          visited
+        );
+      }
+      return Action::Continue;
+    }
+  );
+
+  std::sort(begin(out), end(out));
+  return out;
+}
+
+bool ClassGraph::isMocked() const {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(hasCompleteChildren());
+  assertx(!isMissing());
+  for (auto const child : this_->children) {
+    if (child->flags() & FlagMockClass) return true;
+  }
+  return false;
+}
+
+bool ClassGraph::isSubMocked() const {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(hasCompleteChildren());
+  assertx(!isMissing());
+  auto const action = forEachChild(
+    *this_,
+    [&] (Node& c) {
+      return ((c.flags() & FlagMockClass) && &c != this_)
+        ? Action::Stop
+        : Action::Continue;
+    }
+  );
+  return action == Action::Stop;
+}
+
+bool ClassGraph::hasRegularSubclass() const {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(hasCompleteChildren());
+  assertx(!isMissing());
+  auto const action = forEachChild(
+    *this_,
+    [&] (Node& c) {
+      return (c.isRegular() && &c != this_)
+        ? Action::Stop
+        : Action::Continue;
+    }
+  );
+  return action == Action::Stop;
+}
+
+bool ClassGraph::hasNonRegularSubclass() const {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(hasCompleteChildren());
+  assertx(!isMissing());
+  auto const action = forEachChild(
+    *this_,
+    [&] (Node& c) {
+      return (!c.isRegular() && &c != this_)
+        ? Action::Stop
+        : Action::Continue;
+    }
+  );
+  return action == Action::Stop;
+}
+
+std::vector<ClassGraph> ClassGraph::subclasses() const {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(hasCompleteChildren());
+  assertx(!isMissing());
+
+  std::vector<ClassGraph> out;
+  forEachChild(
+    *this_,
+    [&] (Node& c) {
+      out.emplace_back(ClassGraph{ &c });
+      // Stop on a trait.
+      return (c.flags() & FlagTrait)
+        ? Action::Skip
+        : Action::Continue;
+    }
+  );
+  std::sort(begin(out), end(out));
+  return out;
+}
+
+std::vector<ClassGraph> ClassGraph::children() const {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(hasCompleteChildren());
+  assertx(!isMissing());
+
+  std::vector<ClassGraph> out;
+  forEachChild(
+    *this_,
+    [&] (Node& c) {
+      out.emplace_back(ClassGraph{ &c });
+      return Action::Continue;
+    }
+  );
+  std::sort(begin(out), end(out));
+  return out;
+}
+
+std::vector<ClassGraph> ClassGraph::directParents(Flags flags) const {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(!isMissing());
+
+  std::vector<ClassGraph> out;
+  out.reserve(this_->parents.size());
+  for (auto const p : this_->parents) {
+    if (!(p->flags() & flags)) continue;
+    out.emplace_back(ClassGraph { p });
+  }
+  std::sort(begin(out), end(out));
+  return out;
+}
+
+template <typename F>
+ClassGraph::Action ClassGraph::forEachParent(Node& n,
+                                             const F& f,
+                                             Visited& v) {
+  if (!v.emplace(&n).second) return Action::Skip;
+  auto const action = f(n);
+  if (action != Action::Continue) return action;
+  for (auto const parent : n.parents) {
+    if (forEachParent(*parent, f, v) == Action::Stop) return Action::Stop;
+  }
+  return Action::Continue;
+}
+
+template <typename F>
+ClassGraph::Action
+ClassGraph::forEachChild(Node& n, const F& f, Visited& v) {
+  if (!v.emplace(&n).second) return Action::Skip;
+  auto const action = f(n);
+  if (action != Action::Continue) return action;
+  for (auto const child : n.children) {
+    if (forEachChild(*child, f, v) == Action::Stop) return Action::Stop;
+  }
+  return Action::Continue;
+}
+
+ClassGraph ClassGraph::create(const php::Class& cls, ClassInfo2* cinfo) {
+  assertx(!table().locking);
+
+  auto const& [n, emplaced] = table().nodes.try_emplace(cls.name);
+  always_assert_flog(
+    emplaced,
+    "Attempting to create already existing ClassGraph node '{}'",
+    cls.name
+  );
+  assertx(!n->second.name);
+  assertx(n->second.flags() == FlagNone);
+  assertx(!n->second.cinfo());
+  n->second.name = cls.name;
+  if (cinfo) n->second.setCInfo(*cinfo);
+
+  auto f = FlagNone;
+  if (cls.attrs & AttrInterface)              f = Flags(f | FlagInterface);
+  if (cls.attrs & AttrTrait)                  f = Flags(f | FlagTrait);
+  if (cls.attrs & AttrAbstract)               f = Flags(f | FlagAbstract);
+  if (cls.attrs & (AttrEnum | AttrEnumClass)) f = Flags(f | FlagEnum);
+  n->second.setFlags(f);
+
+  return ClassGraph{ &n->second };
+}
+
+ClassGraph ClassGraph::get(SString name) {
+  assertx(!table().locking);
+  auto n = folly::get_ptr(table().nodes, name);
+  always_assert_flog(
+    n,
+    "Attempting to retrieve missing ClassGraph node '{}'",
+    name
+  );
+  assertx(n->name->isame(name));
+  return ClassGraph{ n };
+}
+
+void ClassGraph::init(bool setChildrenComplete) {
+  always_assert(!g_table);
+  g_table = std::make_unique<Table>();
+  g_table->deserChildrenComplete = setChildrenComplete;
+}
+
+void ClassGraph::initConcurrent() {
+  always_assert(!g_table);
+  g_table = std::make_unique<Table>();
+  g_table->locking.emplace();
+}
+
+void ClassGraph::stopConcurrent() {
+  always_assert(g_table);
+  g_table->locking.reset();
+}
+
+void ClassGraph::destroy() {
+  g_table.reset();
+}
+
+ClassGraph::Table& ClassGraph::table() {
+  always_assert_flog(
+    g_table,
+    "Attempting to access ClassGraph node table when one isn't active!"
+  );
+  return *g_table;
+}
+
+// Abstractions for whether we're deserializing concurrently or
+// not. This separates out the locking logic and let's us avoid any
+// runtime checks (except one) during deserializing to see if we need
+// to lock.
+
+// Non-concurrent implementation. This just modifies the fields
+// without any locking.
+struct ClassGraph::UnlockedSerdeImpl {
+  std::pair<Node*, bool> create(SString name) const {
+    auto& n = table().nodes[name];
+    if (n.name) {
+      assertx(n.name->isame(name));
+      return std::make_pair(&n, false);
+    }
+    n.name = name;
+    return std::make_pair(&n, true);
+  }
+  Node& get(SString name) const {
+    auto n = folly::get_ptr(table().nodes, name);
+    always_assert_flog(
+      n,
+      "Attempting to retrieve missing ClassGraph node '{}'",
+      name
+    );
+    assertx(n->name->isame(name));
+    return *n;
+  }
+  template <typename F> void lock(Node&, const F& f) const { f(); }
+  void signal(Node& n, Flags f) const {
+    assertx(n.flags() == FlagNone);
+    assertx(!(f & FlagWait));
+    n.setFlags(f);
+  }
+  void setCInfo(Node& n, ClassInfo2& cinfo) const { n.setCInfo(cinfo); }
+  bool setFlagChildren(Node& n) const {
+    if (n.flags() & FlagChildren) return false;
+    n.setFlags(FlagChildren);
+    return true;
+  }
+  void setNotMissing(Node& n, Flags flags) const {
+    assertx(!(flags & (FlagMissing | FlagWait | FlagChildren)));
+    assertx(n.flags() == FlagMissing);
+    n.ci.store(Node::CIAndFlags{flags, n.cinfo()}.getOpaque());
+  }
+};
+
+// Concurrent implementation. The node table is guarded by a RWLock
+// and the individual nodes are guarded by an array of locks. The hash
+// of the node's address determines the lock to use. In addition,
+// FlagWait is used to tell threads that the node is being created and
+// one must wait for the flag to be reset.
+struct ClassGraph::LockedSerdeImpl {
+  std::pair<Node*, bool> create(SString name) const {
+    // Called when we find an existing node. We cannot safely return
+    // this node until FlagWait is cleared.
+    auto const wait = [&] (Node& n) {
+      assertx(n.name->isame(name));
+      while (true) {
+        Node::CIAndFlags f{n.ci.load()};
+        if (!(f.tag() & FlagWait)) return std::make_pair(&n, false);
+        // Still set, wait for it to change and then check again.
+        n.ci.wait(f.getOpaque());
+      }
+    };
+
+    auto& t = table();
+
+    // First access the table with a read lock and see if the node
+    // already exists.
+    {
+      auto const n = [&] {
+        folly::SharedMutex::ReadHolder _{t.locking->table};
+        return folly::get_ptr(t.nodes, name);
+      }();
+      // It already exists, wait on FlagWait and then return.
+      if (n) return wait(*n);
+    }
+
+    // It didn't, we need to create it:
+    folly::SharedMutex::WriteHolder _{t.locking->table};
+    // We now have exlusive access to the table. Check for the node
+    // again, as someone else might have created it in the meantime.
+    if (auto const n = folly::get_ptr(t.nodes, name)) {
+      // If someone did, wait on FlagWait and then return. Drop the
+      // write lock before waiting to avoid deadlock.
+      _.unlock();
+      return wait(*n);
+    }
+
+    // Node still isn't present. Create one now.
+    auto [it, emplaced] = t.nodes.try_emplace(name);
+    always_assert(emplaced);
+    auto& n = it->second;
+    assertx(!n.name);
+    assertx(!(n.flags() & FlagWait));
+    n.name = name;
+    // Set FlagWait, this will ensure that any other thread who
+    // retrieves this node (after we drop the write lock) will block
+    // until we're done deserializing it and it's children.
+    n.setFlags(FlagWait);
+    return std::make_pair(&n, true);
+  }
+  Node& get(SString name) const {
+    auto& t = table();
+    folly::SharedMutex::ReadHolder _{t.locking->table};
+    auto n = folly::get_ptr(t.nodes, name);
+    always_assert_flog(
+      n,
+      "Attempting to retrieve missing ClassGraph node '{}'",
+      name
+    );
+    assertx(n->name->isame(name));
+    // FlagWait shouldn't be set here because we shouldn't call get()
+    // until a node and all of it's dependents are created.
+    assertx(!(n->flags() & FlagWait));
+    return *n;
+  }
+  // Lock a node by using the lock it hashes to and execute f() while
+  // holding the lock.
+  template <typename F> void lock(Node& n, const F& f) const {
+    auto& t = table();
+    auto& lock = t.locking->nodes[
+      pointer_hash<Node>{}(&n) % t.locking->nodes.size()
+    ];
+    lock.lock();
+    SCOPE_EXIT { lock.unlock(); };
+    f();
+  }
+  // Signal that a node (and all of it's dependents) is done being
+  // deserialized. This clears FlagWait and wakes up any threads
+  // waiting on the flag. In addition, it sets the node's flags to the
+  // provided flags.
+  void signal(Node& n, Flags other) const {
+    assertx(!(other & FlagWait));
+    while (true) {
+      auto old = n.ci.load();
+      Node::CIAndFlags f{old};
+      assertx(f.tag() == FlagWait);
+      // Use CAS to set the flag
+      f.set(other, f.ptr());
+      if (n.ci.compare_exchange_strong(old, f.getOpaque())) break;
+    }
+    // Wake up any other threads.
+    n.ci.notify_all();
+  }
+  // Set a ClassInfo2 on this node, using CAS to detect concurrent
+  // modifications.
+  void setCInfo(Node& n, ClassInfo2& c) const {
+    while (true) {
+      auto old = n.ci.load();
+      Node::CIAndFlags f{old};
+      assertx(!f.ptr() || f.ptr() == &c);
+      f.set(f.tag(), &c);
+      if (n.ci.compare_exchange_strong(old, f.getOpaque())) break;
+    }
+  }
+  // Set FlagChildren on this node, using CAS to detect concurrent
+  // modifications.
+  bool setFlagChildren(Node& n) const {
+    while (true) {
+      auto old = n.ci.load();
+      Node::CIAndFlags f{old};
+      if (f.tag() & FlagChildren) return false;
+      f.set((Flags)(f.tag() | FlagChildren), f.ptr());
+      if (n.ci.compare_exchange_strong(old, f.getOpaque())) return true;
+    }
+  }
+  // Clear FlagMissing on this node, using CAS to detect concurrent
+  // modifications. This is used when we've previously deserialized
+  // this node as "missing" but now we've deserialized a non-missing
+  // version of the same node. We want to turn this node into a
+  // non-missing one.
+  void setNotMissing(Node& n, Flags flags) const {
+    assertx(!(flags & (FlagMissing | FlagWait | FlagChildren)));
+    while (true) {
+      auto old = n.ci.load();
+      Node::CIAndFlags f{old};
+      assertx(!(f.tag() & FlagWait));
+      if (!(f.tag() & FlagMissing)) {
+        // If FlagMissing is gone, another thread got to it before we
+        // did.
+        assertx(f.tag() == flags);
+        break;
+      }
+      // In a missing class, FlagMissing is the only valid flag.
+      assertx(f.tag() == FlagMissing);
+      f.set(flags, f.ptr());
+      if (n.ci.compare_exchange_strong(old, f.getOpaque())) break;
+    }
+  }
+};
+
+template <typename SerDe> void ClassGraph::serde(SerDe& sd,
+                                                 ClassInfo2* cinfo) {
+  // Serialization/deserialization entry point. If we're operating
+  // concurrently, use one Impl, otherwise, use the other.
+  if (SerDe::deserializing && table().locking) {
+    serdeImpl(sd, LockedSerdeImpl{}, cinfo);
+  } else {
+    serdeImpl(sd, UnlockedSerdeImpl{}, cinfo);
+  }
+}
+
+template <typename SerDe, typename Impl>
+void ClassGraph::serdeImpl(SerDe& sd,
+                           const Impl& impl,
+                           ClassInfo2* cinfo) {
+  // Allocate SerdeState if someone else hasn't already.
+  ScopedSerdeState _;
+
+  // Along with all of the nodes, we also encode a string table. Since
+  // names are used to link the nodes of the graph, this provides
+  // space savings, as we can use table indices instead of the
+  // string. We can't we just use the standard static string table
+  // encoding for this? That only works if you're guaranteed to
+  // deserialization all of the data (the ids are reconstructed on the
+  // fly). However, for ClassGraph, we might skip over parts of the
+  // encoded data (if we know that data has already been deserialized
+  // by someone else). By using an explicit table, we can use compact
+  // encoding without having to traverse all of the encoded data.
+  sd.alternate(
+    [&] {
+      if constexpr (SerDe::deserializing) {
+        // Deserializing:
+
+        // First ensure that all nodes reachable by this node are
+        // deserialized. This will skip over subsets of the data which
+        // already exist.
+        sd.readWithLazyCount([&] { deserBlock(sd, impl); });
+
+        // Then obtain a pointer to the node that ClassGraph points
+        // to.
+        if (auto const name = decodeName(sd)) {
+          this_ = &impl.get(name);
+          if (cinfo) impl.setCInfo(*this_, *cinfo);
+
+          // If this node was marked as having complete children (and
+          // we're not ignoring that), mark this node and all of it's
+          // transitive children as also having complete children.
+          bool complete;
+          sd(complete);
+          if (complete && table().deserChildrenComplete) {
+            assertx(!isMissing());
+            forEachChild(
+              *this_,
+              [&] (Node& c) {
+                assertx(!(c.flags() & FlagMissing));
+                // Stop recursing if the node has the flag already
+                // set.
+                return impl.setFlagChildren(c)
+                  ? Action::Continue
+                  : Action::Skip;
+              }
+            );
+          }
+        } else {
+          this_ = nullptr;
+        }
+      } else {
+        // Serializing:
+
+        // Serialize all of the nodes reachable by this node (parents,
+        // children, and parents of children) and encode how many.
+        sd.lazyCount(
+          [&] () -> size_t {
+            if (!this_) return 0;
+            return serDownward(sd, *this_);
+          }
+        );
+        // Encode the "entry-point" into the graph represented by this
+        // ClassGraph.
+        if (this_) {
+          encodeName(sd, this_->name);
+          // Record whether this node has complete children, so we can
+          // reconstruct that when deserializing.
+          sd(hasCompleteChildren());
+        } else {
+          encodeName(sd, nullptr);
+        }
+      }
+    },
+    [&] {
+      // When serializing, we write this out last. When deserializing,
+      // we read it first.
+      assertx(tl_serde_state);
+      sd(tl_serde_state->newStrings);
+      tl_serde_state->strings.insert(
+        end(tl_serde_state->strings),
+        begin(tl_serde_state->newStrings),
+        end(tl_serde_state->newStrings)
+      );
+      tl_serde_state->newStrings.clear();
+    }
+  );
+}
+
+// Serialize a string using the string table.
+template <typename SerDe>
+void ClassGraph::encodeName(SerDe& sd, SString s) {
+  assertx(tl_serde_state);
+  if (auto const idx = folly::get_ptr(tl_serde_state->strToIdx, s)) {
+    sd(*idx);
+    return;
+  }
+  auto const idx =
+    tl_serde_state->strings.size() + tl_serde_state->newStrings.size();
+  tl_serde_state->newStrings.emplace_back(s);
+  tl_serde_state->strToIdx.emplace(s, idx);
+  sd(idx);
+}
+
+// Deserialize a string using the string table.
+template <typename SerDe>
+SString ClassGraph::decodeName(SerDe& sd) {
+  assertx(tl_serde_state);
+  size_t idx;
+  sd(idx);
+  always_assert(idx < tl_serde_state->strings.size());
+  return tl_serde_state->strings[idx];
+}
+
+// Sort a hphp_fast_set of nodes to a vector. Used to ensure
+// deterministic serialization of graph edges.
+std::vector<ClassGraph::Node*> ClassGraph::sort(const hphp_fast_set<Node*>& v) {
+  std::vector<Node*> sorted{begin(v), end(v)};
+  std::sort(
+    begin(sorted), end(sorted),
+    [] (const Node* a, const Node* b) {
+      assertx(a->name);
+      assertx(b->name);
+      return string_data_lti{}(a->name, b->name);
+    }
+  );
+  return sorted;
+}
+
+// Deserialize a node, along with any other nodes it depends on.
+template <typename SerDe, typename Impl>
+void ClassGraph::deserBlock(SerDe& sd, const Impl& impl) {
+  // First get the name for this node.
+  auto const name = decodeName(sd);
+
+  // Try to create it:
+  auto const [node, created] = impl.create(name);
+  if (!created && !(node->flags() & FlagMissing)) {
+    // It already existed and is not a special "missing" node. The
+    // fact that this node already exists guarantees that all of it's
+    // dependent nodes also exist, so we don't need to go any
+    // further. Skip past that data.
+    sd.skipWithSize32();
+    return;
+  }
+
+  // Otherwise we created it, or it's a "missing" node:
+
+  // Encode all of the following with a size block so it can easily be
+  // skipped over.
+  sd.withSize32(
+    [&, node=node, created=created] {
+      // Deserialize dependent nodes (this might short-circuit if any
+      // dependents already exist).
+      sd.readWithLazyCount([&] { deserBlock(sd, impl); });
+
+      // At this point all dependent nodes are guaranteed to exist.
+
+      // Read the parent links. The children links are not encoded as
+      // they can be inferred from the parent links.
+      std::vector<SString> parents;
+      {
+        size_t size;
+        sd(size);
+        parents.reserve(size);
+        for (size_t i = 0; i < size; ++i) {
+          parents.emplace_back(decodeName(sd));
+        }
+      }
+
+      // For each parent, register this node as a child. Lock the
+      // appropriate node if we're concurrent deserializing.
+      for (auto const parent : parents) {
+        // This should always succeed because all dependents should
+        // exist.
+        auto& parentNode = impl.get(parent);
+        impl.lock(
+          *node,
+          [&, node=node] { node->parents.emplace(&parentNode); }
+        );
+        impl.lock(
+          parentNode,
+          [&, node=node] { parentNode.children.emplace(node); }
+        );
+      }
+
+      Flags flags;
+      sd(flags);
+      // These flags are never encoded and only exist at runtime.
+      assertx(!(flags & (FlagWait | FlagChildren)));
+      // If this is a "missing" node, it shouldn't have any links
+      // (because we shouldn't know anything about it).
+      assertx(IMPLIES(flags & FlagMissing, parents.empty()));
+
+      if (created) {
+        // If we created this node, we need to clear FlagWait and
+        // simultaneously set the node's flags to what we decoded.
+        impl.signal(*node, flags);
+      } else if (!(flags & FlagMissing)) {
+        // Otherwise the node was existing, but "missing". If the node
+        // we deserialized is not missing, then we can clear
+        // FlagMissing and simultaneously set it to the decoded flags.
+        impl.setNotMissing(*node, flags);
+      }
+      // Otherwise the existing node was "missing" and so was the
+      // decoded one. Nothing to do because they're already
+      // equivalent.
+    }
+  );
+}
+
+// Walk downward through a node's children until we hit a leaf. At
+// that point, we call serUpward on the leaf, which will serialize it
+// and all of it's parents (which should include all nodes traversed
+// here). Return the number of nodes serialized.
+template <typename SerDe>
+size_t ClassGraph::serDownward(SerDe& sd, Node& n) {
+  assertx(!table().locking);
+  assertx(tl_serde_state);
+  if (!tl_serde_state->downward.emplace(&n).second) return 0;
+  if (n.children.empty()) return serUpward(sd, n);
+
+  size_t count = 0;
+  for (auto const child : sort(n.children)) {
+    count += serDownward(sd, *child);
+  }
+  return count;
+}
+
+// Serialize the given node, along with all of it's parents. Return
+// true if anything was serialized.
+template <typename SerDe>
+bool ClassGraph::serUpward(SerDe& sd, Node& n) {
+  assertx(!table().locking);
+  assertx(tl_serde_state);
+  // If we've already serialized this node, no need to serialize it
+  // again.
+  if (!tl_serde_state->upward.emplace(&n).second) return false;
+
+  assertx(n.name);
+  assertx(IMPLIES(n.flags() & FlagMissing, n.parents.empty()));
+  assertx(IMPLIES(n.flags() & FlagMissing, n.flags() == FlagMissing));
+  // Encode the name before the parent nodes. During deserialization
+  // this lets us detect if this node has already been deserialized
+  // and let's us skip over it.
+  encodeName(sd, n.name);
+
+  // Encode within a size block so we can easily skip over when
+  // deserializing.
+  sd.withSize32(
+    [&] {
+      // Sort the parents into a deterministic order.
+      auto const sorted = sort(n.parents);
+
+      // Recursively serialize all parents of this node. This ensures
+      // that when deserializing, the parents will be available before
+      // deserializing this node.
+      sd.lazyCount(
+        [&] {
+          size_t count = 0;
+          for (auto const parent : sorted) {
+            count += serUpward(sd, *parent);
+          }
+          return count;
+        }
+      );
+
+      // Record the names of the parents, to restore the links when
+      // deserializing.
+      sd(sorted.size());
+      for (auto const p : sorted) {
+        assertx(p->name);
+        encodeName(sd, p->name);
+      }
+      // Shouldn't have any FlagWait when serializing.
+      assertx(!(n.flags() & FlagWait));
+      // FlagChildren is only set at runtime, it shouldn't be
+      // serialized.
+      sd((Flags)(n.flags() & ~FlagChildren));
+    }
+  );
+
+  return true;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1118,23 +2304,10 @@ struct ClassInfo {
   ClassInfo* parent = nullptr;
 
   /*
-   * A vector of the declared interfaces class info structures.  This is in
-   * declaration order mirroring the php::Class interfaceNames vector, and does
-   * not include inherited interfaces.
-   */
-  CompactVector<const ClassInfo*> declInterfaces;
-
-  /*
    * A (case-insensitive) map from interface names supported by this class to
    * their ClassInfo structures, flattened across the hierarchy.
    */
   ISStringToOneT<const ClassInfo*> implInterfaces;
-
-  /*
-   * A vector of the included enums, in class order, mirroring the
-   * php::Class includedEnums vector.
-   */
-  CompactVector<const ClassInfo*> includedEnums;
 
   struct ConstIndex {
     const php::Const& operator*() const {
@@ -1166,8 +2339,9 @@ struct ClassInfo {
   CompactVector<ClsConstInfo> clsConstTypes;
 
   /*
-   * A vector of the used traits, in class order, mirroring the
-   * php::Class usedTraitNames vector.
+   * The traits used by this class, which *haven't* been flattened
+   * into it. If the class is AttrNoExpandTrait, this will always be
+   * empty.
    */
   CompactVector<const ClassInfo*> usedTraits;
 
@@ -1419,33 +2593,6 @@ struct ClassInfo2 {
   LSString parent{nullptr};
 
   /*
-   * A vector of the declared interfaces names. This does not include
-   * inherited interfaces. Any traits flattened into this class will
-   * have it's declInterfaces added to this. The interfaces are in no
-   * particular order.
-   */
-  CompactVector<SString> declInterfaces;
-
-  /*
-   * A (case-insensitive) set of interface names implemented by this
-   * class, flattened across the hierarchy.
-   */
-  ISStringSet implInterfaces;
-
-  /*
-   * A (case-insensitive) set of interface names implemented by this
-   * class, or any of its subclasses. If this is folly::none, then
-   * subImplInterfaces is the same as implInterfaces.
-   */
-  Optional<ISStringSet> subImplInterfaces;
-
-  /*
-   * A vector of the included enums names, in class order, mirroring
-   * the php::Class includedEnums vector.
-   */
-  CompactVector<SString> includedEnums;
-
-  /*
    * Represents a class constant, pointing to where the constant was
    * originally declared (the class name and it's position in the
    * class' constant table).
@@ -1464,12 +2611,6 @@ struct ClassInfo2 {
    * inheritance hierarchy.
    */
   SStringToOneT<ConstIndex> clsConstants;
-
-  /*
-   * A vector of the used traits name, in class order, mirroring the
-   * php::Class usedTraitNames vector.
-   */
-  CompactVector<SString> usedTraits;
 
   /*
    * A list of extra properties supplied by this class's used traits.
@@ -1499,31 +2640,11 @@ struct ClassInfo2 {
   SStringSet missingMethods;
 
   /*
-   * For classes (abstract and non-abstract), these are the names of
-   * the subclasses of this class, including the class itself.
-   *
-   * For interfaces, this is the list of names of classes that
-   * implement this interface, including the interface itself.
-   *
-   * For traits, this is the list of names of classes that use the
-   * trait where the trait wasn't flattened into the class (including
-   * the trait itself). Note that unlike the other cases, a class
-   * being on a trait's subclass list does *not* imply a "is-a"
-   * relationship at runtime. You usually want to avoid iterating the
-   * subclass list of a trait.
-   *
-   * The elements in this vector are sorted by name.
+   * ClassGraph representing this class. This ClassGraph is guaranteed
+   * to have hasCompleteChildren() be true (except if this is the
+   * Closure base class).
    */
-  CompactVector<SString> subclassList;
-
-  /*
-   * A vector of names that encodes the inheritance hierarchy, unless
-   * if this class is an interface.
-   *
-   * This is the list of base classes for this class in inheritance
-   * order.
-   */
-  CompactVector<SString> baseList;
+  ClassGraph classGraph;
 
   /*
    * Set of "extra" methods for this class. These are methods which
@@ -1620,22 +2741,6 @@ struct ClassInfo2 {
   bool initialNoReifiedInit{false};
 
   /*
-   * Whether is_mock_class() is true for this class.
-   */
-  bool isMockClass{false};
-
-  /*
-   * Whether this class is mocked (has a direct subclass for which
-   * is_mock_class() is true).
-   */
-  bool isMocked{false};
-  /*
-   * Whether isMocked is true for this class, or any of its
-   * subclasses.
-   */
-  bool isSubMocked{false};
-
-  /*
    * Whether is_regular_class() is true for this class.
    */
   bool isRegularClass{false};
@@ -1652,17 +2757,11 @@ struct ClassInfo2 {
     ScopedStringDataIndexer _;
     sd(name)
       (parent)
-      (declInterfaces)
-      (implInterfaces, string_data_lti{})
-      (subImplInterfaces, string_data_lti{})
       (clsConstants, string_data_lt{})
-      (includedEnums)
-      (usedTraits)
       (traitProps)
       (methods, string_data_lt{})
       (missingMethods, string_data_lt{})
-      (subclassList)
-      (baseList)
+      (classGraph, this)
       (extraMethods, std::less<MethRef>{})
       (closures)
       (methodFamilies, string_data_lt{})
@@ -1675,9 +2774,6 @@ struct ClassInfo2 {
       (hasReifiedGeneric)
       (subHasReifiedGeneric)
       (initialNoReifiedInit)
-      (isMockClass)
-      (isMocked)
-      (isSubMocked)
       (isRegularClass)
       (hasRegularSubclass)
       (hasNonRegularSubclass)
@@ -4539,11 +5635,28 @@ struct CheckClassInfoInvariantsJob {
   static std::string name() { return "hhbbc-check-cinfo-invariants"; }
   static void init(const Config& config) {
     process_init(config.o, config.gd, false);
+    ClassGraph::init();
   }
-  static void fini() {}
+  static void fini() { ClassGraph::destroy(); }
 
   static bool run(std::unique_ptr<ClassInfo2> cinfo,
                   std::unique_ptr<php::Class> cls) {
+    SCOPE_ASSERT_DETAIL("class") { return cls->name->toCppString(); };
+
+    // ClassGraph stored in a ClassInfo should not be missing, always
+    // have the ClassInfo stored, and have complete children
+    // information.
+    always_assert(!cinfo->classGraph.isMissing());
+    always_assert(cinfo->classGraph.name()->isame(cinfo->name));
+    always_assert(cinfo->classGraph.cinfo() == cinfo.get());
+    if (is_closure_base(cinfo->name)) {
+      // The closure base class is special. We don't store it's
+      // children information because it's too large.
+      always_assert(!cinfo->classGraph.hasCompleteChildren());
+    } else {
+      always_assert(cinfo->classGraph.hasCompleteChildren());
+    }
+
     // AttrNoOverride is a superset of AttrNoOverrideRegular
     always_assert(
       IMPLIES(!(cls->attrs & AttrNoOverrideRegular),
@@ -4557,12 +5670,33 @@ struct CheckClassInfoInvariantsJob {
       always_assert(!cinfo->hasNonRegularSubclass);
     } else if (cls->attrs & AttrNoOverrideRegular) {
       always_assert(!cinfo->hasRegularSubclass);
+      always_assert(cinfo->hasNonRegularSubclass);
     }
 
-    if (cls->attrs & AttrNoMock) {
-      always_assert(!cinfo->isMocked);
-      always_assert(!cinfo->isSubMocked);
+    // Make sure the information stored on the ClassInfo matches that
+    // which the ClassGraph reports.
+    if (!is_closure_base(cinfo->name)) {
+      always_assert(
+        cinfo->hasRegularSubclass ==
+        cinfo->classGraph.hasRegularSubclass()
+      );
+      always_assert(
+        cinfo->hasNonRegularSubclass ==
+        cinfo->classGraph.hasNonRegularSubclass()
+      );
+
+      if (cls->attrs & AttrNoMock) {
+        always_assert(!cinfo->classGraph.isMocked());
+        always_assert(!cinfo->classGraph.isSubMocked());
+      } else {
+        always_assert(cinfo->classGraph.isSubMocked());
+      }
     }
+
+    always_assert(
+      bool(cls->attrs & AttrNoExpandTrait) ==
+      cinfo->classGraph.usedTraits().empty()
+    );
 
     for (auto const& [name, mte] : cinfo->methods) {
       // Interface method tables should only contain its own methods.
@@ -4625,35 +5759,38 @@ struct CheckClassInfoInvariantsJob {
       }
     }
 
-    // The subclassList is non-empty, contains this ClassInfo, and
-    // contains only unique elements.
-    if (!cinfo->name->isame(s_Closure.get())) {
-      always_assert(!cinfo->subclassList.empty());
+    if (is_closure_name(cinfo->name)) {
+      // Closures have no children.
+      auto const subclasses = cinfo->classGraph.children();
+      always_assert(subclasses.size() == 1);
+      always_assert(subclasses[0].name()->isame(cinfo->name));
+    } else if (!is_closure_base(cinfo->name)) {
+      // Otherwise subclassList is non-empty, contains this ClassInfo, and
+      // contains only unique elements.
+      auto const subclasses = cinfo->classGraph.children();
       always_assert(
         std::find_if(
-          begin(cinfo->subclassList),
-          end(cinfo->subclassList),
-          [&] (SString s) { return s->isame(cinfo->name); }
-        ) != end(cinfo->subclassList)
+          begin(subclasses),
+          end(subclasses),
+          [&] (ClassGraph g) { return g.name()->isame(cinfo->name); }
+        ) != end(subclasses)
       );
-      auto cpy = cinfo->subclassList;
-      std::sort(begin(cpy), end(cpy), string_data_lti{});
-      cpy.erase(
-        std::unique(begin(cpy), end(cpy), string_data_isame{}),
-        end(cpy)
-      );
-      always_assert(cpy.size() == cinfo->subclassList.size());
-    } else if (is_closure_name(cinfo->name)) {
-      always_assert(cinfo->subclassList.size() == 2);
-      always_assert(cinfo->subclassList[0]->isame(s_Closure.get()));
-      always_assert(cinfo->subclassList[1]->isame(cinfo->name));
-    } else {
-      always_assert(cinfo->subclassList.empty());
+      auto cpy = subclasses;
+      std::sort(begin(cpy), end(cpy));
+      cpy.erase(std::unique(begin(cpy), end(cpy)), end(cpy));
+      always_assert(cpy.size() == subclasses.size());
     }
 
     // The baseList is non-empty, and the last element is this class.
-    always_assert(!cinfo->baseList.empty());
-    always_assert(cinfo->baseList.back()->isame(cinfo->name));
+    auto const bases = cinfo->classGraph.bases();
+    always_assert(!bases.empty());
+    always_assert(cinfo->classGraph == bases.back());
+    if (is_closure_base(cinfo->name)) {
+      always_assert(bases.size() == 1);
+    } else if (is_closure_name(cinfo->name)) {
+      always_assert(bases.size() == 2);
+      always_assert(bases[0].name()->isame(s_Closure.get()));
+    }
 
     return true;
   }
@@ -4839,6 +5976,12 @@ void check_local_invariants(const IndexData& index, const ClassInfo* cinfo) {
     always_assert(!cinfo->isMocked);
     always_assert(!cinfo->isSubMocked);
   }
+
+  // An AttrNoExpand class shouldn't have any used traits.
+  always_assert(
+    bool(cinfo->cls->attrs & AttrNoExpandTrait) ==
+    cinfo->usedTraits.empty()
+  );
 
   for (size_t idx = 0; idx < cinfo->cls->methods.size(); ++idx) {
     // Each method in a class has an entry in its ClassInfo method
@@ -5067,8 +6210,8 @@ void check_local_invariants(const IndexData& index, const ClassInfo* cinfo) {
 
   // The subclassList is non-empty, contains this ClassInfo, and
   // contains only unique elements.
+  always_assert(!cinfo->subclassList.empty());
   if (!is_closure_base(*cinfo->cls)) {
-    always_assert(!cinfo->subclassList.empty());
     always_assert(
       std::find(
         begin(cinfo->subclassList),
@@ -5085,7 +6228,8 @@ void check_local_invariants(const IndexData& index, const ClassInfo* cinfo) {
     always_assert(is_closure_base(*cinfo->subclassList[0]->cls));
     always_assert(cinfo->subclassList[1] == cinfo);
   } else {
-    always_assert(cinfo->subclassList.empty());
+    always_assert(cinfo->subclassList.size() == 1);
+    always_assert(cinfo->subclassList[0] == cinfo);
   }
 
   // The baseList is non-empty, and the last element is this class.
@@ -5304,9 +6448,8 @@ template<typename F> auto
 visit_parent_cinfo(const ClassInfo* cinfo, F fun) -> decltype(fun(cinfo)) {
   for (auto ci = cinfo; ci != nullptr; ci = ci->parent) {
     if (auto const ret = fun(ci)) return ret;
-    if (ci->cls->attrs & AttrNoExpandTrait) continue;
-    for (auto ct : ci->usedTraits) {
-      if (auto const ret = visit_parent_cinfo(ct, fun)) {
+    for (auto const trait : ci->usedTraits) {
+      if (auto const ret = visit_parent_cinfo(trait, fun)) {
         return ret;
       }
     }
@@ -6101,8 +7244,9 @@ struct FlattenJob {
   static std::string name() { return "hhbbc-flatten"; }
   static void init(const Config& config) {
     process_init(config.o, config.gd, false);
+    ClassGraph::init();
   }
-  static void fini() {}
+  static void fini() { ClassGraph::destroy(); }
 
   /*
    * Metadata representing results of flattening. This is information
@@ -6139,6 +7283,7 @@ struct FlattenJob {
     std::vector<ISStringSet> classTypeUses;
     std::vector<ISStringSet> funcTypeUses;
     template <typename SerDe> void serde(SerDe& sd) {
+      ScopedStringDataIndexer _;
       sd(uninstantiable, string_data_lti{})
         (newClosures)
         (parents)
@@ -6794,9 +7939,19 @@ private:
     cinfo->hasReifiedGeneric = cls.userAttributes.count(s___Reified.get());
     cinfo->subHasReifiedGeneric = cinfo->hasReifiedGeneric;
     cinfo->initialNoReifiedInit = cls.attrs & AttrNoReifiedInit;
-    cinfo->isMockClass = is_mock_class(&cls);
     cinfo->isRegularClass = is_regular_class(cls);
 
+    // Create a ClassGraph for this class. If we decide to not keep
+    // the ClassInfo, reset the ClassGraph to keep it from ending up
+    // in the graph.
+    cinfo->classGraph = ClassGraph::create(cls, cinfo.get());
+    auto success = false;
+    SCOPE_EXIT { if (!success) cinfo->classGraph.reset(); };
+
+    if (is_mock_class(&cls)) cinfo->classGraph.setIsMockClass();
+
+    // Assume the class isn't overridden. This is true for leafs and
+    // non-leafs will get updated when we build subclass information.
     if (!is_closure_base(cls)) {
       attribute_setter(cls.attrs, true, AttrNoOverride);
       attribute_setter(cls.attrs, true, AttrNoOverrideRegular);
@@ -6833,19 +7988,17 @@ private:
                cls.name, cls.parentName);
         return nullptr;
       }
-      if (!enforce_sealing(*cinfo, parent)) return nullptr;
+      if (!enforce_sealing(*cinfo, cls, parent)) return nullptr;
 
       cinfo->parent = cls.parentName;
-      cinfo->baseList = parentInfo.baseList;
-      cinfo->implInterfaces = parentInfo.implInterfaces;
       cinfo->hasConstProp |= parentInfo.hasConstProp;
       cinfo->hasReifiedParent |= parentInfo.hasReifiedParent;
 
       state.m_parents.emplace_back(&parent);
+      cinfo->classGraph.setBase(parentInfo.classGraph);
     } else if (!cinfo->hasReifiedGeneric) {
       attribute_setter(cls.attrs, true, AttrNoReifiedInit);
     }
-    cinfo->baseList.emplace_back(cls.name);
 
     for (auto const iname : cls.interfaceNames) {
       assertx(!is_closure(cls));
@@ -6868,16 +8021,12 @@ private:
                cls.name, iname);
         return nullptr;
       }
-      if (!enforce_sealing(*cinfo, iface)) return nullptr;
+      if (!enforce_sealing(*cinfo, cls, iface)) return nullptr;
 
-      cinfo->declInterfaces.emplace_back(iname);
-      cinfo->implInterfaces.insert(
-        ifaceInfo.implInterfaces.begin(),
-        ifaceInfo.implInterfaces.end()
-      );
       cinfo->hasReifiedParent |= ifaceInfo.hasReifiedParent;
 
       state.m_parents.emplace_back(&iface);
+      cinfo->classGraph.addParent(ifaceInfo.classGraph);
     }
 
     for (auto const ename : cls.includedEnumNames) {
@@ -6903,20 +8052,21 @@ private:
                wantAttr & AttrEnumClass ? " class" : "");
         return nullptr;
       }
-      if (!enforce_sealing(*cinfo, e)) return nullptr;
+      if (!enforce_sealing(*cinfo, cls, e)) return nullptr;
 
-      cinfo->includedEnums.emplace_back(ename);
-      cinfo->implInterfaces.insert(
-        einfo.implInterfaces.begin(),
-        einfo.implInterfaces.end()
-      );
+      for (auto const iface : einfo.classGraph.declInterfaces()) {
+        cinfo->classGraph.addParent(iface);
+      }
     }
 
-    auto clsHasModuleLevelTrait = cls.userAttributes.count(s___ModuleLevelTrait.get());
-    if (clsHasModuleLevelTrait && (!(cls.attrs & AttrTrait) || (cls.attrs & AttrInternal))) {
+    auto const clsHasModuleLevelTrait =
+      cls.userAttributes.count(s___ModuleLevelTrait.get());
+    if (clsHasModuleLevelTrait &&
+        (!(cls.attrs & AttrTrait) || (cls.attrs & AttrInternal))) {
       ITRACE(2,
              "Making class-info failed for `{}' because "
-             "attribute <<__ModuleLevelTrait>> can only be specified on public traits\n",
+             "attribute <<__ModuleLevelTrait>> can only be "
+             "specified on public traits\n",
              cls.name);
       return nullptr;
     }
@@ -6934,10 +8084,12 @@ private:
       auto const& trait = index.cls(tname);
       auto const& traitInfo = index.classInfo(tname);
 
-      if (clsHasModuleLevelTrait && !(trait.userAttributes.count(s___ModuleLevelTrait.get()))) {
+      if (clsHasModuleLevelTrait &&
+          !(trait.userAttributes.count(s___ModuleLevelTrait.get()))) {
         ITRACE(2,
                "Making class-info failed for `{}' because "
-               "it has attribute <<__ModuleLevelTrait>> but uses trait {} which doesn't\n",
+               "it has attribute <<__ModuleLevelTrait>> but "
+               "uses trait {} which doesn't\n",
                cls.name, trait.name);
         return nullptr;
       }
@@ -6950,17 +8102,13 @@ private:
                cls.name, tname);
         return nullptr;
       }
-      if (!enforce_sealing(*cinfo, trait)) return nullptr;
+      if (!enforce_sealing(*cinfo, cls, trait)) return nullptr;
 
-      cinfo->usedTraits.emplace_back(tname);
-      cinfo->implInterfaces.insert(
-        traitInfo.implInterfaces.begin(),
-        traitInfo.implInterfaces.end()
-      );
       cinfo->hasConstProp |= traitInfo.hasConstProp;
       cinfo->hasReifiedParent |= traitInfo.hasReifiedParent;
 
       state.m_parents.emplace_back(&trait);
+      cinfo->classGraph.addParent(traitInfo.classGraph);
     }
 
     if (cls.attrs & AttrEnum) {
@@ -6981,27 +8129,6 @@ private:
         return nullptr;
       }
     }
-
-    if (cls.attrs & AttrInterface) cinfo->implInterfaces.emplace(cls.name);
-
-    if (cls.attrs & (AttrInterface | AttrTrait | AttrEnum | AttrEnumClass)) {
-      cinfo->subImplInterfaces.emplace();
-    }
-
-    // One can specify implementing the same interface multiple
-    // times. It's easier if we ensure the list is unique.
-    std::sort(
-      begin(cinfo->declInterfaces),
-      end(cinfo->declInterfaces),
-      string_data_lti{}
-    );
-    cinfo->declInterfaces.erase(
-      std::unique(
-        begin(cinfo->declInterfaces), end(cinfo->declInterfaces),
-        [&] (SString a, SString b) { return a->isame(b); }
-      ),
-      end(cinfo->declInterfaces)
-    );
 
     if (!build_methods(index, cls, *cinfo, state))    return nullptr;
     if (!build_properties(index, cls, *cinfo, state)) return nullptr;
@@ -7037,9 +8164,6 @@ private:
       )
     );
 
-    if (!is_closure_base(cls)) {
-      cinfo->subclassList.emplace_back(cls.name);
-    }
     cinfo->subHasConstProp = cinfo->hasConstProp;
 
     // All methods are originally not overridden (we'll update this as
@@ -7076,8 +8200,8 @@ private:
       always_assert(!cinfo->hasReifiedGeneric);
       always_assert(!cinfo->subHasReifiedGeneric);
       always_assert(!cinfo->initialNoReifiedInit);
-      always_assert(!cinfo->isMockClass);
       always_assert(cinfo->isRegularClass);
+      always_assert(!is_mock_class(&cls));
     }
 
     ITRACE(2, "new class-info: {}\n", cls.name);
@@ -7085,19 +8209,20 @@ private:
       if (cinfo->parent) {
         ITRACE(3, "           parent: {}\n", cinfo->parent);
       }
-      for (auto const DEBUG_ONLY base : cinfo->baseList) {
-        ITRACE(3, "             base: {}\n", base);
+      auto const cg = cinfo->classGraph;
+      for (auto const DEBUG_ONLY base : cg.bases()) {
+        ITRACE(3, "             base: {}\n", base.name());
       }
-      for (auto const DEBUG_ONLY iface : cinfo->declInterfaces) {
+      for (auto const DEBUG_ONLY iface : cls.interfaceNames) {
         ITRACE(3, "  decl implements: {}\n", iface);
       }
-      for (auto const DEBUG_ONLY iface : cinfo->implInterfaces) {
-        ITRACE(3, "       implements: {}\n", iface);
+      for (auto const DEBUG_ONLY iface : cg.interfaces()) {
+        ITRACE(3, "       implements: {}\n", iface.name());
       }
-      for (auto const DEBUG_ONLY e : cinfo->includedEnums) {
+      for (auto const DEBUG_ONLY e : cls.includedEnumNames) {
         ITRACE(3, "             enum: {}\n", e);
       }
-      for (auto const DEBUG_ONLY trait : cinfo->usedTraits) {
+      for (auto const DEBUG_ONLY trait : cls.usedTraitNames) {
         ITRACE(3, "             uses: {}\n", trait);
       }
       for (auto const DEBUG_ONLY closure : cinfo->closures) {
@@ -7105,12 +8230,20 @@ private:
       }
     }
 
+    // We're going to use this ClassInfo.
+    success = true;
+    // This is a lie, but needed if this class ends up being a
+    // leaf. If not, we'll load it in BuildSubclassListJob ignoring
+    // the flags, then set it again when we know all the children are
+    // present.
+    if (!is_closure_base(cls)) cinfo->classGraph.setCompleteChildren();
     return cinfo;
   }
 
   static bool enforce_sealing(const ClassInfo2& cinfo,
+                              const php::Class& cls,
                               const php::Class& parent) {
-    if (cinfo.isMockClass) return true;
+    if (is_mock_class(&cls)) return true;
     if (!(parent.attrs & AttrSealed)) return true;
     auto const it = parent.userAttributes.find(s___Sealed.get());
     assertx(it != parent.userAttributes.end());
@@ -7148,17 +8281,17 @@ private:
       state.m_propIndices = parentState.m_propIndices;
     }
 
-    for (auto const iface : cinfo.declInterfaces) {
+    for (auto const iface : cls.interfaceNames) {
       if (!merge_properties(cinfo, state, index.state(iface))) {
         return false;
       }
     }
-    for (auto const trait : cinfo.usedTraits) {
+    for (auto const trait : cls.usedTraitNames) {
       if (!merge_properties(cinfo, state, index.state(trait))) {
         return false;
       }
     }
-    for (auto const e : cinfo.includedEnums) {
+    for (auto const e : cls.includedEnumNames) {
       if (!merge_properties(cinfo, state, index.state(e))) {
         return false;
       }
@@ -7166,9 +8299,11 @@ private:
 
     if (cls.attrs & AttrInterface) return true;
 
-    auto clsHasModuleLevelTrait = cls.userAttributes.count(s___ModuleLevelTrait.get());
+    auto const clsHasModuleLevelTrait =
+      cls.userAttributes.count(s___ModuleLevelTrait.get());
     for (auto const& p : cls.properties) {
-      if (!add_property(cinfo, state, p.name, p, cinfo.name, false, clsHasModuleLevelTrait)) {
+      if (!add_property(cinfo, state, p.name, p, cinfo.name,
+                        false, clsHasModuleLevelTrait)) {
         return false;
       }
     }
@@ -7179,7 +8314,7 @@ private:
     // doesn't seem worth it.
     if (cls.attrs & AttrNoExpandTrait) return true;
 
-    for (auto const traitName : cinfo.usedTraits) {
+    for (auto const traitName : cls.usedTraitNames) {
       auto const& trait = index.cls(traitName);
       auto const& traitInfo = index.classInfo(traitName);
       for (auto const& p : trait.properties) {
@@ -7288,7 +8423,7 @@ private:
       state.m_cnsFromTrait = index.state(cls.parentName).m_cnsFromTrait;
     }
 
-    for (auto const iname : cinfo.declInterfaces) {
+    for (auto const iname : cls.interfaceNames) {
       auto const& iface = index.classInfo(iname);
       auto const& ifaceState = index.state(iname);
       for (auto const& [cnsName, cnsIdx] : iface.clsConstants) {
@@ -7315,7 +8450,7 @@ private:
     };
 
     auto const addTraitConstants = [&] {
-      for (auto const tname : cinfo.usedTraits) {
+      for (auto const tname : cls.usedTraitNames) {
         auto const& trait = index.classInfo(tname);
         for (auto const& [cnsName, cnsIdx] : trait.clsConstants) {
           auto const added = add_constant(
@@ -7338,7 +8473,7 @@ private:
       if (!addTraitConstants()) return false;
     }
 
-    for (auto const ename : cinfo.includedEnums) {
+    for (auto const ename : cls.includedEnumNames) {
       auto const& e = index.classInfo(ename);
       for (auto const& [cnsName, cnsIdx] : e.clsConstants) {
         auto const added = add_constant(
@@ -7365,7 +8500,7 @@ private:
         state.m_traitCns.back().isFromTrait = true;
       }
     };
-    for (auto const tname : cinfo.usedTraits) {
+    for (auto const tname : cls.usedTraitNames) {
       auto const& trait      = index.cls(tname);
       auto const& traitState = index.state(tname);
       for (auto const& c : trait.constants)       addTraitConst(c);
@@ -7500,7 +8635,8 @@ private:
           !existing.isAbstract &&
           (existingCnsCls.attrs & AttrInterface) &&
           !((cnsCls.attrs & AttrInterface) && fromTrait)) {
-        for (auto const iface : cinfo.declInterfaces) {
+        auto const& cls = index.cls(cinfo.name);
+        for (auto const iface : cls.interfaceNames) {
           if (existingIdx.cls->isame(iface)) {
             ITRACE(
               2,
@@ -7576,7 +8712,7 @@ private:
     // Since interface methods are not inherited, any methods in
     // interfaces this class implements are automatically missing.
     assertx(cinfo.methods.empty());
-    for (auto const iname : cinfo.declInterfaces) {
+    for (auto const iname : cls.interfaceNames) {
       auto const& iface = index.classInfo(iname);
       for (auto const& [name, _] : iface.methods) {
         if (is_special_method_name(name)) continue;
@@ -7592,7 +8728,7 @@ private:
     // get inherited by their implementations.
     if (cls.attrs & AttrInterface) {
       assertx(!cls.parentName);
-      assertx(cinfo.usedTraits.empty());
+      assertx(cls.usedTraitNames.empty());
       uint32_t idx = cinfo.methods.size();
       assertx(!idx);
       for (auto const& m : cls.methods) {
@@ -7685,14 +8821,16 @@ private:
     }
 
     auto idx = cinfo.methods.size();
-    auto clsHasModuleLevelTrait = cls.userAttributes.count(s___ModuleLevelTrait.get());
+    auto const clsHasModuleLevelTrait =
+      cls.userAttributes.count(s___ModuleLevelTrait.get());
 
     // Now add our methods.
     for (auto const& m : cls.methods) {
       if (clsHasModuleLevelTrait && (m->attrs & AttrInternal)) {
         ITRACE(2,
             "Adding methods failed for `{}' because "
-            "method `{}' is internal and public traits cannot define internal methods\n",
+            "method `{}' is internal and public traits "
+            "cannot define internal methods\n",
             cls.name, m->name);
         return false;
       }
@@ -7735,7 +8873,7 @@ private:
 
     try {
       TMIData tmid;
-      for (auto const tname : cinfo.usedTraits) {
+      for (auto const tname : cls.usedTraitNames) {
         auto const& tcls = index.cls(tname);
         auto const& t = index.classInfo(tname);
         std::vector<std::pair<SString, const MethTabEntry*>>
@@ -8016,7 +9154,7 @@ private:
       return append_func(cloned.get(), f);
     };
 
-    for (auto const tname : cinfo.usedTraits) {
+    for (auto const tname : cls.usedTraitNames) {
       auto const& trait = index.classInfo(tname);
       auto const it = trait.methods.find(name);
       if (it == trait.methods.end()) continue;
@@ -8083,7 +9221,7 @@ private:
                                                 State& state) {
     if (cls.attrs & AttrNoExpandTrait) return {};
     if (cls.usedTraitNames.empty()) {
-      assertx(cinfo.usedTraits.empty());
+      cls.attrs |= AttrNoExpandTrait;
       return {};
     }
 
@@ -8093,10 +9231,10 @@ private:
     assertx(!is_closure(cls));
 
     auto traitHasConstProp = cls.hasConstProp;
-    for (auto const tname : cinfo.usedTraits) {
+    for (auto const tname : cls.usedTraitNames) {
       auto const& trait = index.cls(tname);
       auto const& tinfo = index.classInfo(tname);
-      if (tinfo.usedTraits.size() && !(trait.attrs & AttrNoExpandTrait)) {
+      if (!(trait.attrs & AttrNoExpandTrait)) {
         ITRACE(4, "Not flattening {} because of {}\n", cls.name, trait.name);
         return {};
       }
@@ -8205,26 +9343,10 @@ private:
 
     // A class should inherit any declared interfaces of any traits
     // that are flattened into it.
-    for (auto const tname : cinfo.usedTraits) {
+    for (auto const tname : cls.usedTraitNames) {
       auto const& tinfo = index.classInfo(tname);
-      cinfo.declInterfaces.insert(
-        end(cinfo.declInterfaces),
-        begin(tinfo.declInterfaces),
-        end(tinfo.declInterfaces)
-      );
+      cinfo.classGraph.flattenTraitInto(tinfo.classGraph);
     }
-    std::sort(
-      begin(cinfo.declInterfaces),
-      end(cinfo.declInterfaces),
-      string_data_lti{}
-    );
-    cinfo.declInterfaces.erase(
-      std::unique(
-        begin(cinfo.declInterfaces), end(cinfo.declInterfaces),
-        [&] (SString a, SString b) { return a->isame(b); }
-      ),
-      end(cinfo.declInterfaces)
-    );
 
     // If we flatten the traits into us, they're no longer actual
     // parents.
@@ -8237,7 +9359,7 @@ private:
       end(state.m_parents)
     );
 
-    for (auto const tname : cinfo.usedTraits) {
+    for (auto const tname : cls.usedTraitNames) {
       auto const& traitState = index.state(tname);
       state.m_parents.insert(
         end(state.m_parents),
@@ -8346,8 +9468,8 @@ private:
           if (parentInfo.methods.count(name)) return false;
           if (parentInfo.missingMethods.count(name)) return false;
         }
-        for (auto const iname : cinfo.declInterfaces) {
-          auto const& iface = index.classInfo(iname);
+        for (auto const iname : cinfo.classGraph.interfaces()) {
+          auto const& iface = index.classInfo(iname.name());
           if (iface.methods.count(name)) return false;
           if (iface.missingMethods.count(name)) return false;
         }
@@ -8370,7 +9492,7 @@ private:
       cls.requirements.end()
     };
 
-    for (auto const tname : cinfo.usedTraits) {
+    for (auto const tname : cls.usedTraitNames) {
       auto const& trait = index.cls(tname);
       for (auto const& req : trait.requirements) {
         if (reqs.emplace(req).second) cls.requirements.emplace_back(req);
@@ -8675,11 +9797,11 @@ private:
         // need not be considered.
         if (prop.attrs & (AttrStatic | AttrPrivate)) return true;
 
-        for (auto const base : cinfo.baseList) {
-          if (base->isame(cls.name)) continue;
+        for (auto const base : cinfo.classGraph.bases()) {
+          if (base.name()->isame(cls.name)) continue;
 
-          auto& baseCInfo = index.classInfo(base);
-          auto& baseCls = index.cls(base);
+          auto& baseCInfo = index.classInfo(base.name());
+          auto& baseCls = index.cls(base.name());
 
           auto const parentProp = [&] () -> php::Prop* {
             for (auto& p : baseCls.properties) {
@@ -8696,7 +9818,12 @@ private:
           // This property's type-constraint might not have been
           // resolved (if the parent is not on the output list for
           // this job), so do so here.
-          update_type_constraint(index, parentProp->typeConstraint, true, nullptr);
+          update_type_constraint(
+            index,
+            parentProp->typeConstraint,
+            true,
+            nullptr
+          );
 
           // This check is safe, but conservative. It might miss a few
           // rare cases, but it's sufficient and doesn't require class
@@ -8825,8 +9952,9 @@ struct MissingClassFixupJob {
 static std::string name() { return "hhbbc-flatten-missing"; }
   static void init(const Config& config) {
     process_init(config.o, config.gd, false);
+    ClassGraph::init();
   }
-  static void fini() {}
+  static void fini() { ClassGraph::destroy(); }
 
   using Output = Multi<
     Variadic<std::unique_ptr<php::Class>>,
@@ -10024,19 +11152,13 @@ struct BuildSubclassListJob {
   static std::string name() { return "hhbbc-build-subclass"; }
   static void init(const Config& config) {
     process_init(config.o, config.gd, false);
+    ClassGraph::init(false);
   }
-  static void fini() {}
+  static void fini() { ClassGraph::destroy(); }
 
   // Aggregated data for some group of classes. The data can either
   // come from a split node, or inferred from a group of classes.
   struct Data {
-    // All of the classes comprising this data.
-    ISStringSet subclasses;
-
-    // All of the interfaces implemented by the classes comprising
-    // this data.
-    ISStringSet implInterfaces;
-
     // Information about all of the methods with a particular name
     // between all of the classes in this Data.
     struct MethInfo {
@@ -10081,15 +11203,8 @@ struct BuildSubclassListJob {
     // initial values).
     SStringSet propsWithImplicitNullable;
 
-    // The classes for whom isMocked would be true due to one of the
-    // classes making up this Data. The classes in this set may not
-    // necessarily be also part of this Data.
-    ISStringSet mockedClasses;
-
     bool hasConstProp{false};
     bool hasReifiedGeneric{false};
-
-    bool isSubMocked{false};
 
     bool hasRegularClass{false};
     bool hasNonRegularClass{false};
@@ -10097,14 +11212,10 @@ struct BuildSubclassListJob {
     bool hasNonRegularSubclass{false};
 
     template <typename SerDe> void serde(SerDe& sd) {
-      sd(subclasses, string_data_lti{})
-        (implInterfaces, string_data_lti{})
-        (methods, string_data_lt{})
+      sd(methods, string_data_lt{})
         (propsWithImplicitNullable, string_data_lt{})
-        (mockedClasses, string_data_lti{})
         (hasConstProp)
         (hasReifiedGeneric)
-        (isSubMocked)
         (hasRegularClass)
         (hasNonRegularClass)
         (hasRegularSubclass)
@@ -10117,14 +11228,22 @@ struct BuildSubclassListJob {
   // class' children.
   struct Split {
     Split() = default;
-    explicit Split(SString name) : name{name} {}
+    Split(SString name, SString cls) : name{name}, cls{cls} {}
 
     SString name;
+    SString cls;
+    // ClassGraph for the class this split contributes to. NB: Since
+    // this split only represents a subset of the class' children, it
+    // should *not* hasCompleteChildren().
+    ClassGraph classGraph;
     CompactVector<SString> children;
     Data data;
 
     template <typename SerDe> void serde(SerDe& sd) {
+      ScopedStringDataIndexer _;
       sd(name)
+        (cls)
+        (classGraph, nullptr)
         (children)
         (data)
         ;
@@ -10163,6 +11282,7 @@ struct BuildSubclassListJob {
     std::vector<InterfaceConflicts> interfaces;
 
     template <typename SerDe> void serde(SerDe& sd) {
+      ScopedStringDataIndexer _;
       sd(funcFamilyDeps, std::less<FuncFamily2::Id>{})
         (newFuncFamilyIds)
         (nameOnly)
@@ -10200,6 +11320,7 @@ struct BuildSubclassListJob {
         index.classInfos.emplace(cinfo->name, cinfo.get()).second
       );
       index.top.emplace(cinfo->name);
+      cinfo->classGraph.setCompleteChildren();
     }
     for (auto& cinfo : deps.vals) {
       always_assert(
@@ -10218,6 +11339,7 @@ struct BuildSubclassListJob {
       index.top.emplace(split->name);
     }
     for (auto& split : splitDeps.vals) {
+      assertx(split->children.empty());
       always_assert(
         index.splits.emplace(split->name, split.get()).second
       );
@@ -10249,16 +11371,15 @@ struct BuildSubclassListJob {
       for (auto const& cinfo : classes.vals) {
         auto const& cls = index.cls(cinfo->name);
         if (!(cls.attrs & AttrInterface)) continue;
-        assertx(cinfo->subImplInterfaces);
 
         meta.interfaces.emplace_back(InterfaceConflicts{cinfo->name});
 
         auto& back = meta.interfaces.back();
-        back.usage = cinfo->subclassList.size();
+        back.usage = cinfo->classGraph.children().size();
 
-        for (auto const iface : *cinfo->subImplInterfaces) {
-          if (iface->isame(cinfo->name)) continue;
-          back.conflicts.emplace_back(iface);
+        for (auto const iface : cinfo->classGraph.subRegInterfaces()) {
+          if (iface.name()->isame(cinfo->name)) continue;
+          back.conflicts.emplace_back(iface.name());
         }
         std::sort(
           begin(back.conflicts),
@@ -10621,20 +11742,13 @@ protected:
       index.children[parent].emplace(child->name);
     };
 
-    // For the purposes of this algorithm, the only parents we care
-    // about are the parent class, the declared interfaces (not
-    // implemented interfaces), and if traits aren't flattened, the
-    // used traits.
     for (auto const [name, cinfo] : index.classInfos) {
       if (cinfo->parent) onParent(cinfo->parent, cinfo);
-      for (auto const iface : cinfo->declInterfaces) {
-        onParent(iface, cinfo);
+      for (auto const iface : cinfo->classGraph.declInterfaces()) {
+        onParent(iface.name(), cinfo);
       }
-      auto const& cls = index.cls(cinfo->name);
-      if (!(cls.attrs & AttrNoExpandTrait)) {
-        for (auto const trait : cinfo->usedTraits) {
-          onParent(trait, cinfo);
-        }
+      for (auto const trait : cinfo->classGraph.usedTraits()) {
+        onParent(trait.name(), cinfo);
       }
     }
 
@@ -10662,6 +11776,7 @@ protected:
                   index.splits.count(child));
           children.emplace(child);
         }
+        split->children.clear();
       } else {
         index.children[name].emplace(name);
       }
@@ -10809,8 +11924,7 @@ protected:
   // name "clsname".
   static Data build_data(LocalIndex& index, SString clsname, SString top) {
     // Does this name represent a class?
-    if (auto const cinfo =
-        folly::get_default(index.classInfos, clsname, nullptr)) {
+    if (auto const cinfo = folly::get_default(index.classInfos, clsname)) {
       // It's a class. We need to build a Data from what's in the
       // ClassInfo. If the ClassInfo hasn't been processed already
       // (it's a leaf or its the first round), the data will reflect
@@ -10818,24 +11932,6 @@ protected:
       // (it's a dependencies and it's past the first round), it will
       // reflect any subclasses of that ClassInfo as well.
       Data data;
-
-      assertx(!cinfo->subclassList.empty());
-      data.subclasses.insert(
-        begin(cinfo->subclassList),
-        end(cinfo->subclassList)
-      );
-
-      if (cinfo->subImplInterfaces) {
-        data.implInterfaces.insert(
-          begin(*cinfo->subImplInterfaces),
-          end(*cinfo->subImplInterfaces)
-        );
-      } else {
-        data.implInterfaces.insert(
-          begin(cinfo->implInterfaces),
-          end(cinfo->implInterfaces)
-        );
-      }
 
       // Use the method family table to build initial MethInfos (if
       // the ClassInfo hasn't been processed this will be empty).
@@ -10849,11 +11945,6 @@ protected:
       auto const& cls = index.cls(cinfo->name);
 
       if (debug) {
-        if (cls.attrs &
-            (AttrInterface | AttrTrait | AttrEnum | AttrEnumClass)) {
-          always_assert(cinfo->subImplInterfaces.has_value());
-        }
-
         for (auto const& [name, mte] : cinfo->methods) {
           if (is_special_method_name(name)) continue;
 
@@ -10884,22 +11975,6 @@ protected:
 
       data.hasConstProp = cinfo->subHasConstProp;
       data.hasReifiedGeneric = cinfo->subHasReifiedGeneric;
-
-      // If this is a mock class, any direct parent of this class
-      // should be marked as mocked.
-      if (cinfo->isMockClass) {
-        if (cinfo->parent) data.mockedClasses.emplace(cinfo->parent);
-        for (auto const iface : cinfo->declInterfaces) {
-          data.mockedClasses.emplace(iface);
-        }
-        if (!(cls.attrs & AttrNoExpandTrait)) {
-          for (auto const trait : cinfo->usedTraits) {
-            data.mockedClasses.emplace(trait);
-          }
-        }
-      }
-      data.isSubMocked = cinfo->isMocked || cinfo->isSubMocked;
-
       data.hasRegularClass =
         cinfo->hasRegularSubclass || cinfo->isRegularClass;
       data.hasNonRegularClass =
@@ -10931,9 +12006,9 @@ protected:
     // A split cannot be both a root and a dependency due to how we
     // set up the buckets.
     assertx(!index.top.count(clsname));
-    auto const split = index.splits.at(clsname);
-    assertx(!split->data.subclasses.empty());
-    assertx(split->data.hasRegularClass || split->data.hasNonRegularClass);
+    auto const split = folly::get_default(index.splits, clsname);
+    always_assert(split != nullptr);
+    assertx(split->children.empty());
     // Split already contains the Data, so nothing to do but return
     // it.
     return split->data;
@@ -10941,8 +12016,6 @@ protected:
 
   // Obtain a Data for the given class/split named "top".
   static Data aggregate_data(LocalIndex& index, SString top) {
-    Data data;
-
     auto const& children = [&] () -> const ISStringSet& {
       auto const it = index.children.find(top);
       always_assert(it != end(index.children));
@@ -10953,6 +12026,7 @@ protected:
     // For each child of the class/split (for classes this includes
     // the top class itself), we create a Data, then union it together
     // with the rest.
+    Data data;
     auto first = true;
     for (auto const child : children) {
       auto childData = build_data(index, child, top);
@@ -10964,16 +12038,6 @@ protected:
         first = false;
         continue;
       }
-
-      data.subclasses.insert(
-        begin(childData.subclasses),
-        end(childData.subclasses)
-      );
-
-      data.implInterfaces.insert(
-        begin(childData.implInterfaces),
-        end(childData.implInterfaces)
-      );
 
       // Combine MethInfos for each method name:
       folly::erase_if(
@@ -11085,21 +12149,16 @@ protected:
         end(childData.propsWithImplicitNullable)
       );
 
-      data.mockedClasses.insert(
-        begin(childData.mockedClasses),
-        end(childData.mockedClasses)
-      );
-
       // The rest are booleans which can just be unioned together.
       data.hasConstProp |= childData.hasConstProp;
       data.hasReifiedGeneric |= childData.hasReifiedGeneric;
-      data.isSubMocked |= childData.isSubMocked;
       data.hasRegularClass |= childData.hasRegularClass;
       data.hasNonRegularClass |= childData.hasNonRegularClass;
       data.hasRegularSubclass |= childData.hasRegularSubclass;
       data.hasNonRegularSubclass |= childData.hasNonRegularSubclass;
     }
 
+    index.children.erase(top);
     return data;
   }
 
@@ -11331,18 +12390,16 @@ protected:
       // for it.
       auto data = aggregate_data(index, cinfo->name);
 
-      auto& cls = index.cls(cinfo->name);
-
       // These are just copied directly from Data.
       cinfo->subHasConstProp = data.hasConstProp;
       cinfo->subHasReifiedGeneric = data.hasReifiedGeneric;
       cinfo->hasRegularSubclass = data.hasRegularSubclass;
       cinfo->hasNonRegularSubclass = data.hasNonRegularSubclass;
 
+      auto& cls = index.cls(cinfo->name);
+
       // This class is mocked if its on the mocked classes list.
-      cinfo->isMocked = data.mockedClasses.count(cinfo->name) > 0;
-      cinfo->isSubMocked = data.isSubMocked || cinfo->isMocked;
-      attribute_setter(cls.attrs, !cinfo->isSubMocked, AttrNoMock);
+      attribute_setter(cls.attrs, !cinfo->classGraph.isSubMocked(), AttrNoMock);
 
       // We can use whether we saw regular/non-regular subclasses to
       // infer if this class is overridden.
@@ -11366,9 +12423,12 @@ protected:
 
       attribute_setter(
         cls.attrs,
-        cinfo->initialNoReifiedInit ||
-        (!cinfo->parent &&
-         (!data.hasReifiedGeneric || (cls.attrs & AttrInterface))),
+        [&] {
+          if (cinfo->initialNoReifiedInit) return true;
+          if (cinfo->parent) return false;
+          if (cls.attrs & AttrInterface) return true;
+          return !data.hasReifiedGeneric;
+        }(),
         AttrNoReifiedInit
       );
 
@@ -11565,35 +12625,6 @@ protected:
         );
       }
 
-      // Flatten classes sets up the subclass list to just contain this
-      // class (as if it was a leaf). Since we're updating this class
-      // (and we're the only ones who should be doing so), we're
-      // expecting the subclass list to reflect that.
-      assertx(cinfo->subclassList.size() == 1);
-      assertx(cinfo->subclassList[0]->isame(cinfo->name));
-
-      // Update the list with what we computed. We need to sort the
-      // list to maintain a deterministic order.
-      cinfo->subclassList.clear();
-      cinfo->subclassList.reserve(data.subclasses.size());
-      for (auto const s : data.subclasses) {
-        cinfo->subclassList.emplace_back(s);
-      }
-      std::sort(
-        begin(cinfo->subclassList),
-        end(cinfo->subclassList),
-        string_data_lti{}
-      );
-      assertx(!cinfo->subclassList.empty());
-
-      assertx(
-        IMPLIES(cinfo->subImplInterfaces, cinfo->subImplInterfaces->empty())
-      );
-      if (cinfo->subImplInterfaces ||
-          cinfo->implInterfaces != data.implInterfaces) {
-        cinfo->subImplInterfaces = std::move(data.implInterfaces);
-      }
-
       for (auto& prop : cls.properties) {
         if (bool(prop.attrs & AttrNoImplicitNullable) &&
             !(prop.attrs & (AttrStatic | AttrPrivate))) {
@@ -11630,8 +12661,9 @@ protected:
     // the fields should be their default settings.
     for (auto& split : splits) {
       assertx(index.top.count(split->name));
-      assertx(!split->children.empty());
+      assertx(split->children.empty());
       split->data = aggregate_data(index, split->name);
+      split->classGraph = ClassGraph::get(split->cls);
     }
   }
 };
@@ -11647,6 +12679,7 @@ struct AggregateNameOnlyJob: public BuildSubclassListJob {
     std::vector<std::vector<FuncFamily2::Id>> newFuncFamilyIds;
     std::vector<FuncFamilyEntry> nameOnly;
     template <typename SerDe> void serde(SerDe& sd) {
+      ScopedStringDataIndexer _;
       sd(newFuncFamilyIds)
         (nameOnly)
         ;
@@ -11989,7 +13022,7 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
             );
 
             auto deps = std::make_unique<DepData>();
-            auto split = std::make_unique<BuildSubclassListJob::Split>(name);
+            auto split = std::make_unique<BuildSubclassListJob::Split>(name, cls);
 
             for (auto const child : buckets[i]) {
               split->children.emplace_back(child);
@@ -12893,8 +13926,9 @@ struct AggregateJob {
   static std::string name() { return "hhbbc-aggregate"; }
   static void init(const Config& config) {
     process_init(config.o, config.gd, false);
+    ClassGraph::init();
   }
-  static void fini() {}
+  static void fini() { ClassGraph::destroy(); }
 
   struct Bundle {
     std::vector<std::unique_ptr<php::Class>> classes;
@@ -13055,12 +14089,6 @@ void make_class_infos_local(
     return it->second;
   };
 
-  auto const vec = [&] (auto const& src, auto& dst) {
-    dst.reserve(src.size());
-    for (auto const s : src) dst.emplace_back(get(s));
-    dst.shrink_to_fit();
-  };
-
   struct FFState {
     explicit FFState(std::unique_ptr<FuncFamily2> ff) : m_ff{std::move(ff)} {}
     std::unique_ptr<FuncFamily2> m_ff;
@@ -13182,20 +14210,33 @@ void make_class_infos_local(
     remote,
     [&] (std::unique_ptr<ClassInfo2>& rcinfo) {
       auto const cinfo = get(rcinfo->name);
-      if (rcinfo->parent) {
-        cinfo->parent = get(rcinfo->parent);
+      if (rcinfo->parent) cinfo->parent = get(rcinfo->parent);
+
+      {
+        auto const bases = rcinfo->classGraph.bases();
+        cinfo->baseList.reserve(bases.size());
+        for (auto const base : bases) {
+          cinfo->baseList.emplace_back(get(base.name()));
+        }
+        cinfo->baseList.shrink_to_fit();
       }
 
-      vec(rcinfo->declInterfaces, cinfo->declInterfaces);
-      vec(rcinfo->includedEnums, cinfo->includedEnums);
-      vec(rcinfo->usedTraits, cinfo->usedTraits);
-      vec(rcinfo->baseList, cinfo->baseList);
-
+      if (!(cinfo->cls->attrs & AttrNoExpandTrait)) {
+        auto const traits = rcinfo->classGraph.usedTraits();
+        cinfo->usedTraits.reserve(traits.size());
+        for (auto const trait : traits) {
+          cinfo->usedTraits.emplace_back(get(trait.name()));
+        }
+        cinfo->usedTraits.shrink_to_fit();
+      }
       cinfo->traitProps = std::move(rcinfo->traitProps);
 
-      cinfo->implInterfaces.reserve(rcinfo->implInterfaces.size());
-      for (auto const iface : rcinfo->implInterfaces) {
-        cinfo->implInterfaces.emplace(iface, get(iface));
+      {
+        auto const ifaces = rcinfo->classGraph.interfaces();
+        cinfo->implInterfaces.reserve(ifaces.size());
+        for (auto const iface : ifaces) {
+          cinfo->implInterfaces.emplace(iface.name(), get(iface.name()));
+        }
       }
 
       cinfo->clsConstants.reserve(rcinfo->clsConstants.size());
@@ -13235,20 +14276,27 @@ void make_class_infos_local(
         cinfo->methods.shrink_to_fit();
       }
 
-      for (auto const sub : rcinfo->subclassList) {
-        cinfo->subclassList.emplace_back(get(sub));
+      if (!is_closure_base(*cinfo->cls)) {
+        for (auto const sub : rcinfo->classGraph.children()) {
+          cinfo->subclassList.emplace_back(get(sub.name()));
+        }
+      } else {
+        cinfo->subclassList.emplace_back(cinfo);
       }
+      // children() returns sorted by name, but we want sorted by
+      // pointer here.
       std::sort(begin(cinfo->subclassList), end(cinfo->subclassList));
+      cinfo->subclassList.shrink_to_fit();
 
       cinfo->hasBadRedeclareProp = rcinfo->hasBadRedeclareProp;
       cinfo->hasBadInitialPropValues = rcinfo->hasBadInitialPropValues;
       cinfo->hasConstProp = rcinfo->hasConstProp;
       cinfo->hasReifiedParent = rcinfo->hasReifiedParent;
       cinfo->subHasConstProp = rcinfo->subHasConstProp;
-      cinfo->isMocked = rcinfo->isMocked;
-      cinfo->isSubMocked = rcinfo->isSubMocked;
       cinfo->hasRegularSubclass = rcinfo->hasRegularSubclass;
       cinfo->hasNonRegularSubclass = rcinfo->hasNonRegularSubclass;
+      cinfo->isSubMocked = !(cinfo->cls->attrs & AttrNoMock);
+      cinfo->isMocked = cinfo->isSubMocked && rcinfo->classGraph.isMocked();
 
       auto const noOverride = [&] (SString name) {
         if (auto const mte = folly::get_ptr(cinfo->methods, name)) {
@@ -13272,7 +14320,7 @@ void make_class_infos_local(
         auto expanded = false;
         if (!cinfo->methods.count(name)) {
           if (!(cinfo->cls->attrs & (AttrAbstract|AttrInterface))) continue;
-          if (!rcinfo->hasRegularSubclass) continue;
+          if (!cinfo->hasRegularSubclass) continue;
           if (entry.m_regularIncomplete || entry.m_privateAncestor) continue;
           if (name == s_construct.get()) continue;
           expanded = true;
@@ -13896,6 +14944,9 @@ void make_local(IndexData& index) {
     HPHP_CORO_RETURN_VOID;
   };
 
+  // We're going to load ClassGraphs concurrently.
+  ClassGraph::initConcurrent();
+
   coro::wait(coro::collectRange(
     from(buckets)
       | move
@@ -13904,6 +14955,9 @@ void make_local(IndexData& index) {
         })
       | as<std::vector>()
   ));
+
+  // Deserialization done.
+  ClassGraph::stopConcurrent();
 
   // We've used any refs we need. Free them now to save memory.
   decltype(index.unitRefs){}.swap(index.unitRefs);
@@ -13977,6 +15031,9 @@ void make_local(IndexData& index) {
     std::move(remoteClassInfos),
     std::move(remoteFuncFamilies)
   );
+
+  // Done with any ClassGraphs. Destroy them now to free up memory.
+  ClassGraph::destroy();
 
   // Any classes in the FuncInfo return types are unresolved. Now that
   // the index is completely built, we can resolve them to resolved

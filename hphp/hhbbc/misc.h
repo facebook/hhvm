@@ -212,6 +212,26 @@ template<class T> using ISStringToOneT =
 template<class T> using SStringToOneT = hphp_fast_map<SString, T>;
 
 /*
+ * One-to-one case sensitive map, where the keys are static strings
+ * and the values are some T.
+ *
+ * Elements are stable under insert/erase.
+ */
+template<typename T> using ISStringToOneNodeT =
+  hphp_hash_map<SString, T, string_data_hash, string_data_isame>;
+
+/*
+ * One-to-one case sensitive map, where the keys are static strings
+ * and the values are some T.
+ *
+ * Elements are stable under insert/erase.
+ *
+ * Static strings are always uniquely defined by their pointer, so
+ * pointer hashing/comparison is sufficient.
+ */
+template<typename T> using SStringToOneNodeT = hphp_hash_map<SString, T>;
+
+/*
  * One-to-one case sensitive concurrent map, where the keys are static
  * strings and the values are some T.
  *

@@ -382,7 +382,7 @@ struct BlobEncoder {
    * BlobDecoder::skipSize or BlobDecoder::peekSize can later read.
    */
   template <typename F>
-  BlobEncoder& withSize(F f) {
+  BlobEncoder& withSize(const F& f) {
     uint64_t start = m_blob.size();
     m_blob.resize(start + sizeof(uint64_t));
     // The size is stored before the data, but we don't know it yet,
@@ -399,7 +399,7 @@ struct BlobEncoder {
 
   /* Like withSize, but uses 32-bit size */
   template <typename F>
-  BlobEncoder& withSize32(F f) {
+  BlobEncoder& withSize32(const F& f) {
     uint64_t start = m_blob.size();
     m_blob.resize(start + sizeof(uint32_t));
     // The size is stored before the data, but we don't know it yet,
@@ -434,7 +434,7 @@ struct BlobEncoder {
    * BlobDecoder::readWithLazyCount.
    */
   template <typename F>
-  BlobEncoder& lazyCount(F f) {
+  BlobEncoder& lazyCount(const F& f) {
     uint64_t start = m_blob.size();
     m_blob.resize(start + sizeof(uint32_t));
     std::memset(&m_blob[start], 0, sizeof(uint32_t));
@@ -449,8 +449,8 @@ struct BlobEncoder {
   // BlobDecoder::alternate, where the data will be decoded in
   // opposite order.
   template <typename F1, typename F2>
-  BlobEncoder& alternate(F1 f1, F2 f2) {
-    withSize(std::move(f1));
+  BlobEncoder& alternate(const F1& f1, const F2& f2) {
+    withSize(f1);
     f2();
     return *this;
   }
@@ -834,7 +834,7 @@ struct BlobDecoder {
    * BlobEncoder::withSize.
    */
   template <typename F>
-  BlobDecoder& withSize(F f) {
+  BlobDecoder& withSize(const F& f) {
     // Since we're going to read the data anyways, we don't actually
     // need the size, but we'll assert if it doesn't match what we
     // decode.
@@ -850,7 +850,7 @@ struct BlobDecoder {
   }
 
   template <typename F>
-  BlobDecoder& withSize32(F f) {
+  BlobDecoder& withSize32(const F& f) {
     // Since we're going to read the data anyways, we don't actually
     // need the size, but we'll assert if it doesn't match what we
     // decode.
@@ -918,7 +918,7 @@ struct BlobDecoder {
    * called N times, where N is the encoded list size.
    */
   template <typename F>
-  BlobDecoder& readWithLazyCount(F f) {
+  BlobDecoder& readWithLazyCount(const F& f) {
     assertx(remaining() >= sizeof(uint32_t));
     uint32_t count;
     std::copy(m_p, m_p + sizeof(uint32_t), (unsigned char*)&count);
@@ -934,7 +934,7 @@ struct BlobDecoder {
   // to after f2. The end result is that the data blocks are decoded
   // in the opposite order as they were encoded.
   template <typename F1, typename F2>
-  BlobDecoder& alternate(F1 f1, F2 f2) {
+  BlobDecoder& alternate(const F1& f1, const F2& f2) {
     auto const start = advanced();
     // Skip over f1
     skipWithSize();
@@ -945,7 +945,7 @@ struct BlobDecoder {
     // Move back to f1
     retreat(end - start);
     // Decode f1
-    withSize(std::move(f1));
+    withSize(f1);
     auto const middle = advanced();
     assertx(end >= middle);
     // Advance past f2

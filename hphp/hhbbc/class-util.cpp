@@ -89,6 +89,10 @@ bool is_noflatten_trait(const php::Class* cls) {
   return cls->userAttributes.count(s_NoFlatten.get());
 }
 
+bool is_closure_base(SString name) {
+  return name->isame(s_Closure.get());
+}
+
 bool is_closure_base(const php::Class& c) {
   return c.name->isame(s_Closure.get());
 }
@@ -111,11 +115,15 @@ bool is_used_trait(const php::Class& c) {
     (c.attrs & (AttrTrait | AttrNoOverride)) == AttrTrait;
 }
 
-bool is_regular_class(const php::Class& c) {
+bool is_regular_class(Attr attrs) {
   return
-    !(c.attrs & (AttrInterface | AttrTrait |
-                 AttrAbstract | AttrEnum |
-                 AttrEnumClass));
+    !(attrs & (AttrInterface | AttrTrait |
+               AttrAbstract | AttrEnum |
+               AttrEnumClass));
+}
+
+bool is_regular_class(const php::Class& c) {
+  return is_regular_class(c.attrs);
 }
 
 //////////////////////////////////////////////////////////////////////

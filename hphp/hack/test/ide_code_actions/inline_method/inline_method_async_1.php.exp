@@ -16,11 +16,11 @@ JSON for selected code action:
           "range":{"end":{"character":5,"line":6},"start":{"character":0,"line":3}}
         },
         {
-          "newText":"$param_a = \"hello \";\n        $z = $param_a;\n        res = $z;\n        ",
+          "newText":"$param_a = \"hello \";\n        $z = $param_a;\n        $res = $z;\n        ",
           "range":{"end":{"character":8,"line":9},"start":{"character":8,"line":9}}
         },
         {
-          "newText":"res",
+          "newText":"$res",
           "range":{"end":{"character":73,"line":9},"start":{"character":19,"line":9}}
         }
       ]
@@ -40,8 +40,8 @@ class A {
         echo "test\n";
         $param_a = "hello ";
         $z = $param_a;
-        res = $z;
-        $s = await res;
+        $res = $z;
+        $s = await $res;
         echo $s . "\n";
     }
 }

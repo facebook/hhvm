@@ -10,7 +10,7 @@ module T = Inline_method_types
 
 (** We convert a `return` in the inlined method to a variable assignment.
  *  This is the name for the variable, modulo renaming for hygiene *)
-let return_var_raw_name = "res"
+let return_var_raw_name = "$res"
 
 let pos_of_block block =
   let open Option.Let_syntax in

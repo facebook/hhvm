@@ -16,11 +16,11 @@ JSON for selected code action:
           "range":{"end":{"character":3,"line":7},"start":{"character":0,"line":3}}
         },
         {
-          "newText":"$x_ = \"world\";\n    $z__ = $x_;\n    $y = $x_.\"\\n\";\n    res = $y;\n    ",
+          "newText":"$x_ = \"world\";\n    $z__ = $x_;\n    $y = $x_.\"\\n\";\n    $res = $y;\n    ",
           "range":{"end":{"character":4,"line":11},"start":{"character":4,"line":11}}
         },
         {
-          "newText":"res",
+          "newText":"$res",
           "range":{"end":{"character":68,"line":11},"start":{"character":15,"line":11}}
         }
       ]
@@ -42,8 +42,8 @@ class A {
     $x_ = "world";
     $z__ = $x_;
     $y = $x_."\n";
-    res = $y;
-    "hello " . res;
+    $res = $y;
+    "hello " . $res;
     $z_ = 2;
   }
 }

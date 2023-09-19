@@ -1,4 +1,4 @@
-File "mixed_not_null.php", line 9, characters 10-13:
+File "mixed_not_null.php", line 11, characters 10-13:
 Switching on `nonnull` but using constant from `null` (Typing[4023])
-  File "mixed_not_null.php", line 4, characters 13-16:
+  File "mixed_not_null.php", line 6, characters 13-16:
   expecting `nonnull` based on this

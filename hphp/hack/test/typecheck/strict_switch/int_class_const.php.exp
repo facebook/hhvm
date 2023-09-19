@@ -1,12 +1,12 @@
-File "int_class_const.php", line 33, characters 10-13:
+File "int_class_const.php", line 36, characters 10-13:
 Redundant `case` statement (Typing[4021])
-  File "int_class_const.php", line 31, characters 10-13:
+  File "int_class_const.php", line 34, characters 10-13:
   `B` already handled here
-File "int_class_const.php", line 46, characters 10-13:
+File "int_class_const.php", line 50, characters 10-13:
 Redundant `case` statement (Typing[4021])
-  File "int_class_const.php", line 44, characters 10-13:
+  File "int_class_const.php", line 48, characters 10-13:
   `A` already handled here
-File "int_class_const.php", line 66, characters 10-13:
+File "int_class_const.php", line 71, characters 10-13:
 Switching on `int` but using constant from `G` (Typing[4023])
-  File "int_class_const.php", line 64, characters 38-40:
+  File "int_class_const.php", line 69, characters 38-40:
   expecting `int` based on this

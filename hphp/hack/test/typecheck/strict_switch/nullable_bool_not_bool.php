@@ -1,5 +1,7 @@
 <?hh
 
+<<file: __EnableUnstableFeatures('strict_switch')>>
+<<__StrictSwitch>>
 function nullable_bool_not_bool(?bool $x): void {
   if ($x is bool) {
     return;
@@ -11,6 +13,7 @@ function nullable_bool_not_bool(?bool $x): void {
   }
 }
 
+<<__StrictSwitch>>
 function case_true_false_return(?bool $x): void {
   switch ($x) {
     case true:

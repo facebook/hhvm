@@ -1,5 +1,7 @@
 <?hh
 
+<<file: __EnableUnstableFeatures('strict_switch')>>
+<<__StrictSwitch>>
 function just_bool(bool $x): void {
   switch ($x) {
     case true:
@@ -9,6 +11,7 @@ function just_bool(bool $x): void {
   }
 }
 
+<<__StrictSwitch>>
 function non_literal(bool $x): void {
   $y = true;
 
@@ -20,6 +23,7 @@ function non_literal(bool $x): void {
   }
 }
 
+<<__StrictSwitch>>
 function redundant_default(bool $x): void {
   switch ($x) {
     case true:
@@ -31,6 +35,7 @@ function redundant_default(bool $x): void {
   }
 }
 
+<<__StrictSwitch>>
 function redundant_false(bool $x): void {
   switch ($x) {
     case false:
@@ -42,6 +47,7 @@ function redundant_false(bool $x): void {
   }
 }
 
+<<__StrictSwitch>>
 function missing_true(bool $x): void {
   switch ($x) {
     case false:

@@ -1,5 +1,6 @@
 <?hh
 
+<<file: __EnableUnstableFeatures('strict_switch')>>
 function dec_0_first(int $x): void {
   switch ($x) {
     case 0:
@@ -11,6 +12,7 @@ function dec_0_first(int $x): void {
   }
 }
 
+<<__StrictSwitch>>
 function dec_7_first(int $x): void {
   switch ($x) {
     case 7:
@@ -22,6 +24,7 @@ function dec_7_first(int $x): void {
   }
 }
 
+<<__StrictSwitch>>
 function dec_709_13_8457_first(int $x): void {
   switch ($x) {
     case 709_13_8457:
@@ -35,6 +38,7 @@ function dec_709_13_8457_first(int $x): void {
   }
 }
 
+<<__StrictSwitch>>
 function bin_first(int $x): void {
   switch ($x) {
     case 0b0:
@@ -46,6 +50,7 @@ function bin_first(int $x): void {
   }
 }
 
+<<__StrictSwitch>>
 function oct_first(int $x): void {
   switch ($x) {
     case 00:
@@ -57,6 +62,7 @@ function oct_first(int $x): void {
   }
 }
 
+<<__StrictSwitch>>
 function oct_first_0762534(int $x): void {
   switch ($x) {
     case 07_625_34:
@@ -68,6 +74,7 @@ function oct_first_0762534(int $x): void {
   }
 }
 
+<<__StrictSwitch>>
 function hex_first(int $x): void {
   switch ($x) {
     case 0xBC:

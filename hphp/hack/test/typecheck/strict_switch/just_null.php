@@ -1,5 +1,7 @@
 <?hh
 
+<<file: __EnableUnstableFeatures('strict_switch')>>
+<<__StrictSwitch>>
 function just_null(null $x): void {
   switch ($x) {
     case null:
@@ -7,6 +9,7 @@ function just_null(null $x): void {
   }
 }
 
+<<__StrictSwitch>>
 function non_literal(null $x): void {
   $y = null;
 
@@ -16,6 +19,7 @@ function non_literal(null $x): void {
   }
 }
 
+<<__StrictSwitch>>
 function redundant_default(null $x): void {
   switch ($x) {
     case null:

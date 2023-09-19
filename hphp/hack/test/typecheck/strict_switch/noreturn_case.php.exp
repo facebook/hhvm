@@ -1,4 +1,4 @@
-File "noreturn_case.php", line 7, characters 14-14:
+File "noreturn_case.php", line 9, characters 14-14:
 Switching on `nothing` but using constant from `int` (Typing[4023])
-  File "noreturn_case.php", line 5, characters 15-20:
+  File "noreturn_case.php", line 7, characters 15-20:
   expecting `nothing` based on this

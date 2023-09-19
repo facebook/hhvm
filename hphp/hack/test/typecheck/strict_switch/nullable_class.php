@@ -1,7 +1,9 @@
 <?hh
 
+<<file: __EnableUnstableFeatures('strict_switch')>>
 class C {}
 
+<<__StrictSwitch>>
 function nullable_class(?C $x): void {
   switch ($x) {
     case null:
@@ -11,6 +13,7 @@ function nullable_class(?C $x): void {
   }
 }
 
+<<__StrictSwitch>>
 function nullable_class_not_null(?C $x): void {
   if ($x is null) {
     return;
@@ -24,6 +27,7 @@ function nullable_class_not_null(?C $x): void {
   }
 }
 
+<<__StrictSwitch>>
 function case_null_return(?C $x): void {
   switch ($x) {
     case null:
@@ -43,6 +47,7 @@ function case_null_return(?C $x): void {
   }
 }
 
+<<__StrictSwitch>>
 function nullable_class_not_class(?C $x): void {
   if ($x is C) {
     return;

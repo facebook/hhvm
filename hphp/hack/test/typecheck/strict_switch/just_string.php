@@ -1,5 +1,7 @@
 <?hh
 
+<<file: __EnableUnstableFeatures('strict_switch')>>
+<<__StrictSwitch>>
 function just_string(string $x): void {
   switch ($x) {
     case "":
@@ -9,6 +11,7 @@ function just_string(string $x): void {
   }
 }
 
+<<__StrictSwitch>>
 function redundant_special_string(string $x): void {
   switch ($x) {
     case '"':
@@ -20,6 +23,7 @@ function redundant_special_string(string $x): void {
   }
 }
 
+<<__StrictSwitch>>
 function non_literal(string $x): void {
   $y = "";
 
@@ -31,6 +35,7 @@ function non_literal(string $x): void {
   }
 }
 
+<<__StrictSwitch>>
 function missing_default(string $x): void {
   switch ($x) {
     case "":
@@ -38,6 +43,7 @@ function missing_default(string $x): void {
   }
 }
 
+<<__StrictSwitch>>
 function redundant_literal(string $x): void {
   switch ($x) {
     case "":

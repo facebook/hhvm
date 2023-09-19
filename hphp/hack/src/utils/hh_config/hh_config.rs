@@ -409,9 +409,6 @@ impl HhConfig {
                 "log_exhaustivity_check" => {
                     go.tco_log_exhaustivity_check = parse_json(&value)?;
                 }
-                "enable_strict_switch" => {
-                    go.tco_enable_strict_switch = parse_json(&value)?;
-                }
                 "dump_tast_hashes" => {
                     go.dump_tast_hashes = parse_json(&value)?;
                 }

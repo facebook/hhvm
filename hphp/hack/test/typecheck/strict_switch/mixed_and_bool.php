@@ -1,5 +1,7 @@
 <?hh
 
+<<file: __EnableUnstableFeatures('strict_switch')>>
+<<__StrictSwitch>>
 function mixed_with_bool_case(mixed $x): void {
   switch ($x) {
     case true:
@@ -9,6 +11,7 @@ function mixed_with_bool_case(mixed $x): void {
   }
 }
 
+<<__StrictSwitch>>
 function mixed_only_bool(mixed $x): void {
   switch ($x) {
     case false:

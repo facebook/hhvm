@@ -1,2 +1,2 @@
-File "nullable_bool.php", line 26, characters 11-12:
+File "nullable_bool.php", line 30, characters 11-12:
 `switch` statement nonexhaustive; at least the following cases are missing: `false` (Typing[4019])

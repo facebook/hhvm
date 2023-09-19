@@ -1,7 +1,9 @@
 <?hh
 
+<<file: __EnableUnstableFeatures('strict_switch')>>
 class C {}
 
+<<__StrictSwitch>>
 function mixed_not_class1(mixed $x): void {
   if ($x is C) {
     return;
@@ -13,6 +15,7 @@ function mixed_not_class1(mixed $x): void {
   }
 }
 
+<<__StrictSwitch>>
 function mixed_not_class2(mixed $x): void {
   if ($x is C) {
     return;

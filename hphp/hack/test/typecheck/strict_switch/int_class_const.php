@@ -1,10 +1,12 @@
 <?hh
 
+<<file: __EnableUnstableFeatures('strict_switch')>>
 class C {
   const int X = 1;
 }
 
 // class consts are not integer literals but should be bucketed in the same way
+<<__StrictSwitch>>
 function int_class_const(int $x) : void {
   switch ($x) {
     case C::X:
@@ -24,6 +26,7 @@ enum F: int as int {
   B = 1;
 }
 
+<<__StrictSwitch>>
 function redundant_class_const(int $x): void {
   switch ($x) {
     case E::A:
@@ -37,6 +40,7 @@ function redundant_class_const(int $x): void {
   }
 }
 
+<<__StrictSwitch>>
 function multiple_class_const(int $x): void {
   switch ($x) {
     // We don't store enum values in the typed AST and so cannot see that
@@ -61,6 +65,7 @@ enum G: int {
 }
 
 
+<<__StrictSwitch>>
 function not_transparent_class_const(int $x): void {
   switch ($x) {
     case G::A:

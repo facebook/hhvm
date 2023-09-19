@@ -53,11 +53,14 @@ void t_program::add_definition(std::unique_ptr<t_named> definition) {
 
   // Index the node.
   if (auto* node = dynamic_cast<t_exception*>(definition.get())) {
-    objects_.push_back(node);
+    structured_definitions_.push_back(node);
     exceptions_.push_back(node);
+  } else if (auto* node = dynamic_cast<t_union*>(definition.get())) {
+    structured_definitions_.push_back(node);
+    structs_and_unions_.push_back(node);
   } else if (auto* node = dynamic_cast<t_struct*>(definition.get())) {
-    objects_.push_back(node);
-    structs_.push_back(node);
+    structured_definitions_.push_back(node);
+    structs_and_unions_.push_back(node);
   } else if (auto* node = dynamic_cast<t_interaction*>(definition.get())) {
     interactions_.push_back(node);
   } else if (auto* node = dynamic_cast<t_service*>(definition.get())) {

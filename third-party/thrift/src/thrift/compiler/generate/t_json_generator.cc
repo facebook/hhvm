@@ -181,11 +181,11 @@ void t_json_generator::generate_program() {
     indent(f_out_) << "}";
   }
 
-  if (!program_->objects().empty()) {
+  if (!program_->structured_definitions().empty()) {
     f_out_ << "," << endl << indent() << "\"structs\" : {" << endl;
     indent_up();
     // Generate structs and exceptions in declared order
-    auto objects = program_->objects();
+    auto objects = program_->structured_definitions();
     for (auto o_iter = objects.begin(); o_iter != objects.end(); ++o_iter) {
       if (o_iter != objects.begin()) {
         f_out_ << "," << endl;

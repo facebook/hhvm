@@ -455,7 +455,8 @@ TEST_F(UtilTest, simple_struct_dependency_graph) {
   )");
 
   std::vector<const t_type*> objects(
-      program->objects().begin(), program->objects().end());
+      program->structured_definitions().begin(),
+      program->structured_definitions().end());
   auto edges = cpp2::gen_dependency_graph(program.get(), objects);
 
   // We should really define some sort of "EXPECT_GRAPH_ISOMORPHIC" primitive,
@@ -501,7 +502,8 @@ TEST_F(UtilTest, struct_dependency_graph_with_bad_type) {
   )");
 
   std::vector<const t_type*> objects(
-      program->objects().begin(), program->objects().end());
+      program->structured_definitions().begin(),
+      program->structured_definitions().end());
   auto edges = cpp2::gen_dependency_graph(program.get(), objects);
 
   // We should really define some sort of "EXPECT_GRAPH_ISOMORPHIC" primitive,
@@ -556,7 +558,8 @@ TEST_F(UtilTest, structs_and_typedefs_dependency_graph) {
   )");
 
   std::vector<const t_type*> objects(
-      program->objects().begin(), program->objects().end());
+      program->structured_definitions().begin(),
+      program->structured_definitions().end());
   objects.insert(
       objects.end(), program->typedefs().begin(), program->typedefs().end());
   auto edges = cpp2::gen_dependency_graph(program.get(), objects);

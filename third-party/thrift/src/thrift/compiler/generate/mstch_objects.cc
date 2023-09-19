@@ -578,7 +578,7 @@ mstch::node mstch_const::field() {
 }
 
 mstch::node mstch_program::has_thrift_uris() {
-  for (const auto& strct : program_->structs()) {
+  for (const auto& strct : program_->structs_and_unions()) {
     if (!strct->uri().empty()) {
       return true;
     }
@@ -589,7 +589,10 @@ mstch::node mstch_program::has_thrift_uris() {
 mstch::node mstch_program::structs() {
   std::string id = program_->name() + get_program_namespace(program_);
   return make_mstch_array_cached(
-      program_->objects(), *context_.struct_factory, context_.struct_cache, id);
+      program_->structured_definitions(),
+      *context_.struct_factory,
+      context_.struct_cache,
+      id);
 }
 
 mstch::node mstch_program::enums() {

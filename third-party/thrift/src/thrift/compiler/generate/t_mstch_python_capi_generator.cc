@@ -298,7 +298,8 @@ class python_capi_mstch_program : public mstch_program {
   }
 
   mstch::node has_types() {
-    return program_->objects().size() > 0 || program_->enums().size() > 0;
+    return program_->structured_definitions().size() > 0 ||
+        program_->enums().size() > 0;
   }
 
   mstch::node capi_includes() {
@@ -343,10 +344,11 @@ class python_capi_mstch_program : public mstch_program {
 
   bool check_has_marshal_types() {
     if (has_option("marshal_python_capi") &&
-        (!program_->structs().empty() || !program_->exceptions().empty())) {
+        (!program_->structs_and_unions().empty() ||
+         !program_->exceptions().empty())) {
       return true;
     }
-    for (const t_struct* s : program_->objects()) {
+    for (const t_struct* s : program_->structured_definitions()) {
       if (marshal_capi_override_annotation(*s)) {
         return true;
       }
@@ -357,7 +359,7 @@ class python_capi_mstch_program : public mstch_program {
   void gather_capi_includes() {
     for (const t_program* included_program :
          program_->get_includes_for_codegen()) {
-      if (included_program->objects().empty() &&
+      if (included_program->structured_definitions().empty() &&
           included_program->enums().empty() &&
           included_program->typedefs().empty()) {
         continue;
@@ -385,7 +387,7 @@ class python_capi_mstch_program : public mstch_program {
 
   // visit structs and exceptions
   void visit_types_for_objects() {
-    for (const auto& object : program_->objects()) {
+    for (const t_struct* object : program_->structured_definitions()) {
       for (auto&& field : object->fields()) {
         visit_type(field.get_type());
       }

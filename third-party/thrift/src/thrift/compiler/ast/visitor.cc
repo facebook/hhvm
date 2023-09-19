@@ -91,7 +91,7 @@ void visitor::recurse(t_program* const program) {
   for (auto* const tenum : program->enums()) {
     visit_and_recurse(tenum);
   }
-  for (auto* tstruct : program->structs()) {
+  for (auto* tstruct : program->structs_and_unions()) {
     visit_and_recurse(tstruct);
   }
   for (auto* texception : program->exceptions()) {

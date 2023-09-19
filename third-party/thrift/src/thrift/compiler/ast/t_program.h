@@ -44,6 +44,7 @@
 #include <thrift/compiler/ast/t_stream.h>
 #include <thrift/compiler/ast/t_struct.h>
 #include <thrift/compiler/ast/t_typedef.h>
+#include <thrift/compiler/ast/t_union.h>
 
 namespace apache {
 namespace thrift {
@@ -127,9 +128,16 @@ class t_program : public t_named {
   const std::vector<t_typedef*>& typedefs() const { return typedefs_; }
   const std::vector<t_enum*>& enums() const { return enums_; }
   const std::vector<t_const*>& consts() const { return consts_; }
-  const std::vector<t_struct*>& structs() const { return structs_; }
+
+  const std::vector<t_struct*>& structs_and_unions() const {
+    return structs_and_unions_;
+  }
+
   const std::vector<t_exception*>& exceptions() const { return exceptions_; }
-  const std::vector<t_struct*>& objects() const { return objects_; }
+
+  const std::vector<t_struct*>& structured_definitions() const {
+    return structured_definitions_;
+  }
   const std::vector<t_service*>& services() const { return services_; }
   const std::vector<t_interaction*>& interactions() const {
     return interactions_;
@@ -286,12 +294,20 @@ class t_program : public t_named {
   std::vector<t_typedef*> typedefs_;
   std::vector<t_enum*> enums_;
   std::vector<t_const*> consts_;
-  std::vector<t_struct*> structs_;
+
+  // This includes both structs and unions (but no other derived type of
+  // t_struct, i.e. no exceptions, t_paramlist, etc.).
+  std::vector<t_struct*> structs_and_unions_;
+
   std::vector<t_exception*> exceptions_;
+
+  // t_structs + t_unions + t_exceptions
+  // TODO(aristidis): (2023-09-13): Hold t_structured instead of t_struct
+  std::vector<t_struct*> structured_definitions_;
+
   std::vector<t_service*> services_;
   std::vector<t_include*> includes_;
   std::vector<t_interaction*> interactions_;
-  std::vector<t_struct*> objects_; // structs_ + exceptions_
   node_list<t_const> intern_list_;
 
   std::string path_; // initialized in ctor init-list

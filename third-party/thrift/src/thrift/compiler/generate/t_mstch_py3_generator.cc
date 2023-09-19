@@ -64,7 +64,7 @@ bool has_types(const t_program* program) {
   assert(program != nullptr);
 
   return !(
-      program->objects().empty() && program->enums().empty() &&
+      program->structured_definitions().empty() && program->enums().empty() &&
       program->typedefs().empty() && program->consts().empty());
 }
 
@@ -323,7 +323,7 @@ class py3_mstch_program : public mstch_program {
   }
 
   void visit_types_for_objects() {
-    for (auto* object : program_->objects()) {
+    for (t_struct* object : program_->structured_definitions()) {
       if (is_hidden(*object)) {
         continue;
       }
@@ -354,7 +354,7 @@ class py3_mstch_program : public mstch_program {
   }
 
   void visit_types_for_mixin_fields() {
-    for (const auto* strct : program_->structs()) {
+    for (const auto* strct : program_->structs_and_unions()) {
       if (is_hidden(*strct)) {
         continue;
       }

@@ -135,7 +135,7 @@ void codegen_data::compute_go_package_aliases() {
 }
 
 void codegen_data::compute_struct_to_field_names() {
-  for (auto struct_ : current_program_->structs()) {
+  for (t_struct* struct_ : current_program_->structs_and_unions()) {
     struct_to_field_names[struct_->name()] =
         go::get_struct_go_field_names(struct_);
   }

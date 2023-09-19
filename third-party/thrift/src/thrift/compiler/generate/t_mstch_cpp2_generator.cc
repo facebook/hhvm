@@ -356,7 +356,7 @@ class cpp_mstch_program : public mstch_program {
   }
   std::vector<std::string> get_fatal_union_names() {
     std::vector<std::string> result;
-    for (const auto* obj : program_->objects()) {
+    for (const t_struct* obj : program_->structured_definitions()) {
       if (obj->is_union()) {
         result.push_back(get_fatal_string_short_id(obj));
       }
@@ -365,7 +365,7 @@ class cpp_mstch_program : public mstch_program {
   }
   std::vector<std::string> get_fatal_struct_names() {
     std::vector<std::string> result;
-    for (const auto* obj : program_->objects()) {
+    for (const t_struct* obj : program_->structured_definitions()) {
       if (!obj->is_union() &&
           !gen::cpp::type_resolver::find_first_adapter(*obj)) {
         result.push_back(get_fatal_string_short_id(obj));
@@ -422,8 +422,8 @@ class cpp_mstch_program : public mstch_program {
   }
   mstch::node cpp_declare_hash() {
     bool cpp_declare_in_structs = std::any_of(
-        program_->structs().begin(),
-        program_->structs().end(),
+        program_->structs_and_unions().begin(),
+        program_->structs_and_unions().end(),
         [](const auto* strct) {
           return strct->has_annotation(
               {"cpp.declare_hash", "cpp2.declare_hash"});
@@ -501,7 +501,7 @@ class cpp_mstch_program : public mstch_program {
       }
     }
     // structs, unions and exceptions
-    for (const auto* obj : program_->objects()) {
+    for (const t_struct* obj : program_->structured_definitions()) {
       if (obj->is_union()) {
         // When generating <program_name>_fatal_union.h, we will generate
         // <union_name>_Type_enum_traits
@@ -545,13 +545,14 @@ class cpp_mstch_program : public mstch_program {
   mstch::node fatal_data_member() {
     std::unordered_set<std::string> fields;
     std::vector<const std::string*> ordered_fields;
-    for (const t_struct* s : program_->objects()) {
-      if (!s->is_union()) {
-        for (const t_field& f : s->fields()) {
-          auto result = fields.insert(cpp2::get_name(&f));
-          if (result.second) {
-            ordered_fields.push_back(&*result.first);
-          }
+    for (const t_struct* s : program_->structured_definitions()) {
+      if (s->is_union()) {
+        continue;
+      }
+      for (const t_field& f : s->fields()) {
+        auto result = fields.insert(cpp2::get_name(&f));
+        if (result.second) {
+          ordered_fields.push_back(&*result.first);
         }
       }
     }
@@ -569,11 +570,15 @@ class cpp_mstch_program : public mstch_program {
     // As in other parts of this codebase, structs includes unions and
     // exceptions.
     std::vector<const t_type*> nodes;
-    nodes.reserve(program_->objects().size() + program_->typedefs().size());
+    nodes.reserve(
+        program_->structured_definitions().size() +
+        program_->typedefs().size());
     nodes.insert(
         nodes.end(), program_->typedefs().begin(), program_->typedefs().end());
     nodes.insert(
-        nodes.end(), program_->objects().begin(), program_->objects().end());
+        nodes.end(),
+        program_->structured_definitions().begin(),
+        program_->structured_definitions().end());
     auto deps = cpp2::gen_dependency_graph(program_, nodes);
     auto sorted = cpp2::topological_sort<const t_type*>(
         nodes.begin(), nodes.end(), deps, true);
@@ -605,7 +610,7 @@ class cpp_mstch_program : public mstch_program {
   mstch::node split_structs() {
     std::string id = program_->name() + get_program_namespace(program_);
     return make_mstch_array_cached(
-        split_id_ ? *split_structs_ : program_->objects(),
+        split_id_ ? *split_structs_ : program_->structured_definitions(),
         *context_.struct_factory,
         context_.struct_cache,
         id);
@@ -2405,9 +2410,10 @@ void t_mstch_cpp2_generator::generate_structs(const t_program* program) {
 
   if (int split_count = get_split_count(options())) {
     auto digit = std::to_string(split_count - 1).size();
-    auto shards = cpp2::lpt_split(program->objects(), split_count, [](auto t) {
-      return t->fields().size();
-    });
+    auto shards = cpp2::lpt_split(
+        program->structured_definitions(), split_count, [](auto t) {
+          return t->fields().size();
+        });
     for (int split_id = 0; split_id < split_count; ++split_id) {
       auto s = std::to_string(split_id);
       s = std::string(digit - s.size(), '0') + s;
@@ -2693,7 +2699,7 @@ class splits_validator : public validator {
   bool visit(t_program* program) override {
     program_ = program;
     validate_type_cpp_splits(
-        program->objects().size() + program->enums().size());
+        program->structured_definitions().size() + program->enums().size());
     validate_client_cpp_splits(program->services());
     return true;
   }

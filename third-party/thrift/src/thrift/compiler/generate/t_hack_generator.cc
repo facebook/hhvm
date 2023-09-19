@@ -1491,9 +1491,9 @@ void t_hack_generator::init_generator() {
               << "CONSTANTS implements \\IThriftConstants {\n";
   }
 
-  if (!program_->structs().empty()) {
+  if (!program_->structs_and_unions().empty()) {
     bool codegen_file_open = false;
-    for (const auto* tstruct : program_->structs()) {
+    for (const auto* tstruct : program_->structs_and_unions()) {
       auto [wrapper, name, ns] = find_hack_wrapper(tstruct, false);
       if (wrapper) {
         if (!codegen_file_open) {

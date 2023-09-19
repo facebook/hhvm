@@ -223,7 +223,7 @@ class python_mstch_program : public mstch_program {
     for (const t_program* included_program :
          program_->get_includes_for_codegen()) {
       bool has_types =
-          !(included_program->objects().empty() &&
+          !(included_program->structured_definitions().empty() &&
             included_program->enums().empty() &&
             included_program->typedefs().empty() &&
             included_program->consts().empty());
@@ -286,7 +286,7 @@ class python_mstch_program : public mstch_program {
   }
 
   void visit_types_for_objects() {
-    for (const auto& object : program_->objects()) {
+    for (const t_struct* object : program_->structured_definitions()) {
       for (auto&& field : object->fields()) {
         visit_type(field.get_type());
       }
@@ -306,7 +306,7 @@ class python_mstch_program : public mstch_program {
   }
 
   void visit_types_for_adapters() {
-    for (const auto& strct : program_->structs()) {
+    for (const auto& strct : program_->structs_and_unions()) {
       if (auto annotation = find_structured_adapter_annotation(*strct)) {
         extract_module_and_insert_to(
             get_annotation_property(annotation, "name"), adapter_modules_);

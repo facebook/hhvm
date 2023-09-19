@@ -47,10 +47,11 @@ void t_concat_generator::generate_program() {
     generate_enum(tenum);
   }
 
-  auto objects = program_->objects();
+  const std::vector<t_struct*>& structured_definitions =
+      program_->structured_definitions();
 
   // Generate forward declarations. Typedefs may use these
-  for (const auto* object : objects) {
+  for (const t_struct* object : structured_definitions) {
     generate_forward_declaration(object);
   }
 
@@ -60,9 +61,9 @@ void t_concat_generator::generate_program() {
   }
 
   // Validate unions
-  for (const auto* object : objects) {
+  for (const t_structured* object : structured_definitions) {
     if (object->is_union()) {
-      validate_union_members(object);
+      validate_union_members(dynamic_cast<const t_union&>(*object));
     }
   }
 
@@ -71,7 +72,7 @@ void t_concat_generator::generate_program() {
   generate_consts(consts);
 
   // Generate structs, exceptions, and unions in declared order
-  for (const auto* object : objects) {
+  for (const t_struct* object : structured_definitions) {
     if (object->is_exception()) {
       generate_xception(object);
     } else {
@@ -170,12 +171,12 @@ std::string t_concat_generator::generate_structural_id(
   return structural_id;
 }
 
-void t_concat_generator::validate_union_members(const t_struct* tstruct) {
-  for (const auto& field : tstruct->fields()) {
+void t_concat_generator::validate_union_members(const t_union& union_node) {
+  for (const auto& field : union_node.fields()) {
     if (field.get_req() == t_field::e_req::required ||
         field.get_req() == t_field::e_req::optional) {
       throw std::runtime_error(
-          "compiler error: Union field " + tstruct->get_name() + "." +
+          "compiler error: Union field " + union_node.get_name() + "." +
           field.name() + " cannot be required or optional");
     }
   }

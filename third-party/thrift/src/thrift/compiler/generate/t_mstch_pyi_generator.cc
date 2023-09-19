@@ -72,7 +72,7 @@ bool has_types(const t_program* program) {
   assert(program != nullptr);
 
   return !(
-      program->objects().empty() && program->enums().empty() &&
+      program->structured_definitions().empty() && program->enums().empty() &&
       program->typedefs().empty() && program->consts().empty());
 }
 
@@ -157,7 +157,7 @@ std::set<std::string> get_distinct_adapters(const t_program* program) {
     }
   };
 
-  for (const auto* strct : program->structs()) {
+  for (const auto* strct : program->structs_and_unions()) {
     for (const auto* type : collect_types(strct)) {
       add_adapter(type);
     }
@@ -299,7 +299,8 @@ class pyi_mstch_program : public mstch_program {
       }
     }
 
-    for (const auto* object : mstch_program::program_->objects()) {
+    for (const t_struct* object :
+         mstch_program::program_->structured_definitions()) {
       for (const auto& field : object->fields()) {
         this->add_containers(visited, field.get_type());
       }

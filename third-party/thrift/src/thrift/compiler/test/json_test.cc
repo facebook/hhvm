@@ -67,7 +67,7 @@ TEST(JsonTest, to_json_t_const_value) {
     struct MyStruct{}
   )");
 
-  const std::vector<t_struct*>& structs = program->structs();
+  const std::vector<t_struct*>& structs = program->structs_and_unions();
   EXPECT_EQ(structs.size(), 3);
 
   const t_struct* my_struct = structs[2];

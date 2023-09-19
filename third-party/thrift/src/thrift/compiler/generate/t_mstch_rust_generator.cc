@@ -524,8 +524,9 @@ class rust_mstch_program : public mstch_program {
         "deprecated_optional_with_default_is_some");
   }
   mstch::node rust_has_types() {
-    return !program_->structs().empty() || !program_->enums().empty() ||
-        !program_->typedefs().empty() || !program_->xceptions().empty();
+    return !program_->structs_and_unions().empty() ||
+        !program_->enums().empty() || !program_->typedefs().empty() ||
+        !program_->xceptions().empty();
   }
 
   mstch::node rust_types() {
@@ -537,11 +538,11 @@ class rust_mstch_program : public mstch_program {
   }
 
   mstch::node rust_structs_or_enums() {
-    return !program_->structs().empty() || !program_->enums().empty() ||
-        !program_->xceptions().empty();
+    return !program_->structs_and_unions().empty() ||
+        !program_->enums().empty() || !program_->xceptions().empty();
   }
   mstch::node rust_nonexhaustive_structs() {
-    for (auto& strct : program_->structs()) {
+    for (auto& strct : program_->structs_and_unions()) {
       // The is_union is because `union` are also in this collection.
       if (!strct->is_union() && !strct->has_annotation("rust.exhaustive")) {
         return true;
@@ -585,7 +586,7 @@ class rust_mstch_program : public mstch_program {
   }
   template <typename F>
   void foreach_type(F&& f) const {
-    for (const auto* strct : program_->structs()) {
+    for (const auto* strct : program_->structs_and_unions()) {
       for (const auto& field : strct->fields()) {
         f(field.get_type());
       }
@@ -658,7 +659,7 @@ class rust_mstch_program : public mstch_program {
   mstch::node rust_lib_include_srcs() { return options_.lib_include_srcs; }
   mstch::node rust_types_include_srcs() { return options_.types_include_srcs; }
   mstch::node rust_has_default_tests() {
-    for (const t_struct* strct : program_->structs()) {
+    for (const t_struct* strct : program_->structs_and_unions()) {
       for (const t_field& field : strct->fields()) {
         if (node_has_adapter(field) ||
             type_has_transitive_adapter(field.get_type(), true)) {
@@ -672,7 +673,7 @@ class rust_mstch_program : public mstch_program {
   mstch::node rust_structs_for_default_test() {
     mstch::array strcts;
 
-    for (const t_struct* strct : program_->structs()) {
+    for (const t_struct* strct : program_->structs_and_unions()) {
       for (const t_field& field : strct->fields()) {
         if (node_has_adapter(field) ||
             type_has_transitive_adapter(field.get_type(), true)) {
@@ -687,7 +688,7 @@ class rust_mstch_program : public mstch_program {
   }
 
   mstch::node rust_has_adapted_structs() {
-    for (const t_struct* strct : program_->structs()) {
+    for (const t_struct* strct : program_->structs_and_unions()) {
       if (node_has_adapter(*strct)) {
         return true;
       }
@@ -699,7 +700,7 @@ class rust_mstch_program : public mstch_program {
   mstch::node rust_adapted_structs() {
     mstch::array strcts;
 
-    for (const t_struct* strct : program_->structs()) {
+    for (const t_struct* strct : program_->structs_and_unions()) {
       if (node_has_adapter(*strct)) {
         strcts.push_back(
             context_.struct_factory->make_mstch_object(strct, context_, pos_));
@@ -710,7 +711,7 @@ class rust_mstch_program : public mstch_program {
   }
 
   mstch::node rust_has_adapters() {
-    for (const t_struct* strct : program_->structs()) {
+    for (const t_struct* strct : program_->structs_and_unions()) {
       if (node_has_adapter(*strct)) {
         return true;
       }
@@ -728,7 +729,7 @@ class rust_mstch_program : public mstch_program {
   mstch::node rust_adapters() {
     mstch::array types_with_direct_adapters;
 
-    for (const t_struct* strct : program_->structs()) {
+    for (const t_struct* strct : program_->structs_and_unions()) {
       if (node_has_adapter(*strct)) {
         types_with_direct_adapters.push_back(
             context_.type_factory->make_mstch_object(strct, context_, pos_));

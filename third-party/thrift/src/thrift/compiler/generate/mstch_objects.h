@@ -460,7 +460,8 @@ class mstch_program : public mstch_base {
   mstch::node include_prefix() { return program_->include_prefix(); }
   mstch::node has_enums() { return !program_->enums().empty(); }
   mstch::node has_structs() {
-    return !program_->structs().empty() || !program_->xceptions().empty();
+    return !program_->structs_and_unions().empty() ||
+        !program_->xceptions().empty();
   }
   mstch::node has_services() { return !program_->services().empty(); }
   mstch::node has_typedefs() { return !program_->typedefs().empty(); }
@@ -468,7 +469,7 @@ class mstch_program : public mstch_base {
     return !program_->consts().empty() || context_.options.count("interning");
   }
   mstch::node has_unions() {
-    auto& structs = program_->structs();
+    auto& structs = program_->structs_and_unions();
     return std::any_of(
         structs.cbegin(), structs.cend(), std::mem_fn(&t_struct::is_union));
   }

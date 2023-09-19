@@ -805,7 +805,7 @@ string t_py_generator::render_ttype_declarations(const char* delimiter) {
     out << ", " << delimiter << rename_reserved_keywords(en->get_name())
         << delimiter;
   }
-  for (const auto& object : program_->objects()) {
+  for (const t_struct* object : program_->structured_definitions()) {
     out << ", " << delimiter << rename_reserved_keywords(object->get_name())
         << delimiter;
   }
@@ -842,7 +842,7 @@ string t_py_generator::render_includes() {
   }
 
   set<string> modules;
-  for (const auto* strct : program_->structs()) {
+  for (const auto* strct : program_->structs_and_unions()) {
     for (const auto* t : collect_types(strct)) {
       if (const auto* adapter = get_py_adapter(t)) {
         modules.emplace(adapter->substr(0, adapter->find_last_of('.')));

@@ -1347,7 +1347,7 @@ void t_mstch_java_generator::generate_program() {
       *mstch_context_.struct_factory,
       mstch_context_.struct_cache,
       get_program(),
-      get_program()->objects(),
+      get_program()->structured_definitions(),
       "Object");
   generate_rpc_interfaces();
   generate_services();

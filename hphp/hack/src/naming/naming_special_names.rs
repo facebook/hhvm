@@ -327,6 +327,8 @@ pub mod user_attributes {
 
     pub const MODULE_LEVEL_TRAIT: &str = "__ModuleLevelTrait";
 
+    pub const STRICT_SWITCH: &str = "__StrictSwitch";
+
     pub fn is_memoized(name: &str) -> bool {
         name == MEMOIZE || name == MEMOIZE_LSB
     }

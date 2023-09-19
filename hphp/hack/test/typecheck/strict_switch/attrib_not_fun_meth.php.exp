@@ -1,0 +1,2 @@
+File "attrib_not_fun_meth.php", line 5, characters 3-16:
+The `__StrictSwitch` attribute cannot be used on a class. (Typing[4231])

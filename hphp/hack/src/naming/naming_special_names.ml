@@ -368,6 +368,8 @@ module UserAttributes = struct
 
   let uaModuleLevelTrait = "__ModuleLevelTrait"
 
+  let uaStrictSwitch = "__StrictSwitch"
+
   type attr_info = {
     contexts: string list;
     doc: string;
@@ -767,6 +769,13 @@ module UserAttributes = struct
               autocomplete = true;
               doc =
                 "Enables access to elements from other package(s), requires `<<file:__EnableUnstableFeatures('package')>>`";
+            } );
+          ( uaStrictSwitch,
+            {
+              contexts = [fn; mthd];
+              autocomplete = true;
+              doc =
+                "Enables strict switch checking for all switches in function or method.";
             } );
         ])
 

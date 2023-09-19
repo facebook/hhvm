@@ -34,3 +34,7 @@ __ReturnDisposable
   INSERT __ReturnDisposable
   built-in attribute
   Allows a function/method to return a value that implements `IDisposable` or `IAsyncDisposable`. The function must return a fresh disposable value by either instantiating a class or  returning a value from another method/function marked `__ReturnDisposable`.
+__StrictSwitch
+  INSERT __StrictSwitch
+  built-in attribute
+  Enables strict switch checking for all switches in function or method.

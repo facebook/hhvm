@@ -109,6 +109,7 @@ pub enum UnstableFeatures {
     TypedLocalVariables,
     PipeAwait,
     MatchStatements,
+    StrictSwitch,
 }
 impl UnstableFeatures {
     // Preview features are allowed to run in prod. This function decides
@@ -140,6 +141,7 @@ impl UnstableFeatures {
             UnstableFeatures::TypedLocalVariables => Unstable,
             UnstableFeatures::PipeAwait => Unstable,
             UnstableFeatures::MatchStatements => Unstable,
+            UnstableFeatures::StrictSwitch => Unstable,
         }
     }
 }
@@ -5642,6 +5644,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         attributes.for_each(|attr| match attr.trim() {
             sn::user_attributes::MODULE_LEVEL_TRAIT => {
                 self.check_can_use_feature(node, &UnstableFeatures::ModuleLevelTraits)
+            }
+            sn::user_attributes::STRICT_SWITCH => {
+                self.check_can_use_feature(node, &UnstableFeatures::StrictSwitch)
             }
             _ => {}
         });

@@ -391,9 +391,27 @@ let handler =
   object
     inherit Tast_visitor.handler_base
 
+    val mutable strict_switch_function_or_method = false
+
+    method! at_fun_ _env (f : Tast.fun_) =
+      strict_switch_function_or_method <-
+        Naming_attributes.mem
+          Naming_special_names.UserAttributes.uaStrictSwitch
+          f.f_user_attributes
+
+    method! at_method_ _env (m : Tast.method_) =
+      strict_switch_function_or_method <-
+        Naming_attributes.mem
+          Naming_special_names.UserAttributes.uaStrictSwitch
+          m.m_user_attributes
+
     method! at_stmt env x =
       match snd x with
       | Switch ((scrutinee_ty, scrutinee_pos, _), casel, dfl) ->
-        check_exhaustiveness env scrutinee_pos scrutinee_ty (casel, dfl)
+        if strict_switch_function_or_method then (
+          Strict_switch_int_literal_check.handler#at_stmt env x;
+          Strict_switch_check.handler#at_stmt env x
+        ) else
+          check_exhaustiveness env scrutinee_pos scrutinee_ty (casel, dfl)
       | _ -> ()
   end

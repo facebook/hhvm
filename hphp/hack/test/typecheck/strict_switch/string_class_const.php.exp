@@ -1,0 +1,12 @@
+File "string_class_const.php", line 33, characters 10-13:
+Redundant `case` statement (Typing[4021])
+  File "string_class_const.php", line 31, characters 10-13:
+  `B` already handled here
+File "string_class_const.php", line 46, characters 10-13:
+Redundant `case` statement (Typing[4021])
+  File "string_class_const.php", line 44, characters 10-13:
+  `A` already handled here
+File "string_class_const.php", line 66, characters 10-13:
+Switching on `string` but using constant from `G` (Typing[4023])
+  File "string_class_const.php", line 64, characters 38-43:
+  expecting `string` based on this

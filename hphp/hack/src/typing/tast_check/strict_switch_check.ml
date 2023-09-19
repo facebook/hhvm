@@ -23,15 +23,17 @@ module Value = struct
     | Null
     | Bool of bool
     | Int
+    | String
   [@@deriving ord, sexp, hash]
 
   let bools = [Bool true; Bool false]
 
-  let universe = Other :: Null :: Int :: bools
+  let universe = Other :: Null :: Int :: String :: bools
 
   let finite_or_dynamic = function
     | Other
-    | Int ->
+    | Int
+    | String ->
       false
     | Null
     | Bool _ ->
@@ -42,6 +44,7 @@ module Value = struct
     | Null -> Hh_json.string_ "null"
     | Bool bool -> bool |> Bool.to_string |> Hh_json.string_
     | Int -> Hh_json.string_ "int"
+    | String -> Hh_json.string_ "string"
 
   let to_literal : t -> literal option =
     let open EnumErr.Const in
@@ -49,6 +52,7 @@ module Value = struct
     | Null -> Some Null
     | Bool b -> Some (Bool b)
     | Int -> Some (Int None)
+    | String -> Some (String None)
     | Other -> None
 
   type value = t
@@ -68,16 +72,19 @@ module Value = struct
          so that "1_0_0", "100" and "10_0" are considered the same *)
       assert (not @@ String.contains literal '_');
       (Int, Some (Int (Some literal)))
+    | String literal -> (String, Some (String (Some literal)))
     | Class_const ((_, _, CI (_, class_)), (_, const)) ->
-      let is_sub env mk_ty ty =
+      let is_sub env ty mk_ty =
         Typing_subtype.is_sub_type env ty (mk_ty Reason.Rnone)
       in
 
       let value : value =
         (* necessary to check this to partition class constants correctly
            according to type *)
-        if is_sub env Typing_make_type.int ty then
+        if is_sub env ty Typing_make_type.int then
           Int
+        else if is_sub env ty Typing_make_type.string then
+          String
         else
           Other
       in
@@ -114,12 +121,14 @@ let prim_to_values = function
     ValueSet.singleton Value.Null
   | Tbool -> ValueSet.bools
   | Tint -> ValueSet.singleton Value.Int
+  | Tnum -> ValueSet.of_list Value.[Int; Other]
+  | Tstring -> ValueSet.singleton Value.String
+  (* arraykey is the supertype of strings, ints, and all enums,
+     so this overapproximates "all enums" with Value.Other for now *)
+  | Tarraykey -> ValueSet.of_list Value.[Int; String; Other]
   | Tfloat
-  | Tstring
-  | Tresource
-  | Tnum ->
-    ValueSet.of_list Value.[Int; Other]
-  | Tarraykey -> ValueSet.singleton Value.Other
+  | Tresource ->
+    ValueSet.singleton Value.Other
 
 (* Symbolically evaluate the values corresponding to a given type; the result is
    essentially in disjunctive normal form, so that cases can be partitioned

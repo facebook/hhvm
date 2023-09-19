@@ -83,6 +83,7 @@ module Primary = struct
           }
         | Bool of bool
         | Int of string option
+        | String of string option
       [@@deriving eq, show, hash, sexp, ord]
 
       let to_user_string = function
@@ -95,6 +96,8 @@ module Primary = struct
         | Bool false -> "false"
         | Int None -> "int"
         | Int (Some num) -> num
+        | String None -> "string"
+        | String (Some str) -> str
 
       let if_int lit ~then_ ~else_ =
         match lit with
@@ -102,7 +105,8 @@ module Primary = struct
         | Int None
         | Null
         | Label _
-        | Bool _ ->
+        | Bool _
+        | String _ ->
           else_
 
       let opt_to_user_string =

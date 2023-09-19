@@ -82,6 +82,7 @@ module Primary : sig
           }
         | Bool of bool
         | Int of string option
+        | String of string option
       [@@deriving eq, show, hash, sexp, ord]
 
       val to_user_string : t -> string

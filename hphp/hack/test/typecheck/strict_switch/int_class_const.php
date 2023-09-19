@@ -5,7 +5,7 @@ class C {
 }
 
 // class consts are not integer literals but should be bucketed in the same way
-function just_int_class_const(int $x) : void {
+function int_class_const(int $x) : void {
   switch ($x) {
     case C::X:
       return;

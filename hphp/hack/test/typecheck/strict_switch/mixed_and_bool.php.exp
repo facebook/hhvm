@@ -1,4 +1,4 @@
 File "mixed_and_bool.php", line 13, characters 11-12:
-`switch` statement nonexhaustive; at least the following cases are missing: `default`, `int`, `true`, `null` (Typing[4019])
+`switch` statement nonexhaustive; at least the following cases are missing: `default`, `int`, `true`, `null`, `string` (Typing[4019])
   File "mixed_and_bool.php", line 13, characters 11-12:
   only unions and intersections of bool, null and enums can be switched on without a default

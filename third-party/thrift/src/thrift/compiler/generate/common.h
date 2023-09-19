@@ -50,7 +50,7 @@ std::unordered_set<const t_type*> collect_types(const t_struct* strct);
  * Return whether to generate legacy apis
  */
 bool generate_legacy_api(const t_program&);
-bool generate_legacy_api(const t_struct&);
+bool generate_legacy_api(const t_structured&);
 bool generate_legacy_api(const t_enum&);
 bool generate_legacy_api(const t_service&);
 

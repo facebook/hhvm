@@ -689,7 +689,7 @@ class python_mstch_typedef : public mstch_typedef {
 class python_mstch_struct : public mstch_struct {
  public:
   python_mstch_struct(
-      const t_struct* s, mstch_context& ctx, mstch_element_position pos)
+      const t_structured* s, mstch_context& ctx, mstch_element_position pos)
       : mstch_struct(s, ctx, pos),
         adapter_annotation_(find_structured_adapter_annotation(*s)) {
     register_methods(

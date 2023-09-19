@@ -241,7 +241,7 @@ const std::string typedef_rust_name(const t_typedef* t) {
   return t->get_annotation("rust.name");
 }
 
-const std::string struct_rust_name(const t_struct* strct) {
+const std::string struct_rust_name(const t_structured* strct) {
   if (!strct->has_annotation("rust.name")) {
     return mangle_type(strct->get_name());
   }

@@ -188,6 +188,13 @@ void t_ast_generator::generate_program() {
         assert(def.name() == value.name());
         set_source_range(value, *def.attrs(), node.program());
       }
+    } else if constexpr (std::is_base_of_v<t_interface, Node>) {
+      int i = 0;
+      for (const auto& function : node.functions()) {
+        auto& def = parent_def.functions()[i++];
+        assert(def.name() == function.name());
+        set_source_range(function, *def.attrs(), node.program());
+      }
     }
   };
 

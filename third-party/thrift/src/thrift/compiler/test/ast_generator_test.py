@@ -155,6 +155,9 @@ class AstGeneratorTest(unittest.TestCase):
         )
         self.assertEqual(func.streamOrSink, ReturnType())
         self.assertEqual(func.interactionType.uri, TypeUri())
+        srcRange = func.attrs.sourceRange
+        self.assertEqual(srcRange.programId, 1)
+        self.assertEqual(srcRange.beginLine, 5)
 
         func = serviceDef.functions[1]
         self.assertEqual(func.attrs.name, "bar")

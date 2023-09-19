@@ -40,7 +40,11 @@ where
         e.local_gen_mut().counter = local_counter;
         Ok(wrap_inner_in_try_catch(
             e.label_gen_mut(),
-            (before, inner, after),
+            (
+                before,
+                inner,
+                InstrSeq::gather(vec![after, unset_locals.clone()]),
+            ),
             unset_locals,
         ))
     }

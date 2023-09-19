@@ -181,7 +181,7 @@ fn emit_binop<'a, 'arena, 'decl>(
                         Ok((
                             InstrSeq::gather(vec![awaited_instrs, instr::pop_l(temp)]),
                             InstrSeq::gather(vec![init, assign]),
-                            instr::unset_l(temp),
+                            instr::empty(),
                         ))
                     })
                 } else {
@@ -375,19 +375,19 @@ fn emit_awaitall_single<'a, 'arena, 'decl>(
 ) -> Result<InstrSeq<'arena>> {
     scope::with_unnamed_locals(e, |e| {
         let load_arg = emit_expr::emit_await(e, env, pos, expr)?;
-        let (load, unset) = match lval {
-            None => (instr::pop_c(), instr::empty()),
+        let load = match lval {
+            None => instr::pop_c(),
             Some(ast::Lid(_, id)) => {
                 let l = e
                     .local_gen_mut()
                     .init_unnamed_for_tempname(local_id::get_name(id));
-                (instr::pop_l(*l), instr::unset_l(*l))
+                instr::pop_l(*l)
             }
         };
         Ok((
             InstrSeq::gather(vec![load_arg, load]),
             emit_stmts(e, env, block)?,
-            unset,
+            instr::empty(),
         ))
     })
 }
@@ -417,7 +417,6 @@ fn emit_awaitall_multi<'a, 'arena, 'decl>(
         }
 
         let load_args = InstrSeq::gather(instrs);
-        let unset_locals = InstrSeq::gather(locals.iter().map(|l| instr::unset_l(*l)).collect());
         let mut instrs = vec![];
         for l in locals.iter() {
             instrs.push({
@@ -449,7 +448,7 @@ fn emit_awaitall_multi<'a, 'arena, 'decl>(
                 block_instrs,
             ]),
             // after
-            unset_locals,
+            instr::empty(),
         ))
     })
 }
@@ -1087,7 +1086,7 @@ fn emit_foreach_await<'a, 'arena, 'decl>(
             instr::pop_c(),
             instr::label(exit_label),
         ]);
-        let iter_done = instr::unset_l(iter_temp_local);
+        let iter_done = instr::empty();
         Ok((iter_init, iterate, iter_done))
     })
 }
@@ -1346,7 +1345,7 @@ fn emit_foreach_await_lvalue_storage<'a, 'arena, 'decl>(
             if keep_on_stack {
                 instr::push_l(local)
             } else {
-                instr::unset_l(local)
+                instr::empty()
             },
         ))
     })

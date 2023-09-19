@@ -3864,12 +3864,6 @@ fn emit_new_obj_reified_instrs<'a, 'b, 'arena, 'decl>(
             }
         };
 
-        let unset_locals = InstrSeq::gather(vec![
-            instr::unset_l(class_local),
-            instr::unset_l(ts_local),
-            instr::unset_l(obj_local),
-        ]);
-
         Ok((
             instr::empty(),
             InstrSeq::gather(vec![
@@ -3878,7 +3872,7 @@ fn emit_new_obj_reified_instrs<'a, 'b, 'arena, 'decl>(
                 instr::label(end_label),
                 instr::c_get_l(obj_local),
             ]),
-            unset_locals,
+            instr::empty(),
         ))
     })
 }
@@ -5031,7 +5025,7 @@ fn emit_pipe<'a, 'arena, 'decl>(
         Ok((
             InstrSeq::gather(vec![lhs_instrs, instr::pop_l(local)]),
             rhs_instrs,
-            instr::unset_l(local),
+            instr::empty(),
         ))
     })
 }

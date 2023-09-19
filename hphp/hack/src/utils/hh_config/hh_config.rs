@@ -112,8 +112,18 @@ impl HhConfig {
         );
         hhconfig.apply_overrides(overrides);
         let hh_conf_path = hh_conf_path.as_ref();
+
+        // We don't try to gracefully handle the case where the /etc/hh.conf
+        // (or overridden path) does not exist on disk.
+        //
+        // There is no benefit: if someone makes a mistake with machine
+        // configurations, we rather have everything blow up in our face fast
+        // and tell us plainly what is going wrong than doing something "intelligent"
+        // and falling back to some default configuration, which is bound to lead to
+        // symptoms that are difficult to debug.
         let mut hh_conf = ConfigFile::from_file(hh_conf_path)
             .with_context(|| hh_conf_path.display().to_string())?;
+
         hh_conf.apply_overrides(overrides);
         let custom_error_config =
             CustomErrorConfig::from_str(&custom_error_contents).unwrap_or_default();

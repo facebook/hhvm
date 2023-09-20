@@ -132,6 +132,10 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
     }
   };
 
+  template <class Id>
+  static constexpr bool is_optional_or_union_field_v =
+      is_optional_type<get_field_ref<T, Id>>::value || is_thrift_union_v<T>;
+
  public:
   using Base::Base;
   using Base::operator=;
@@ -175,9 +179,19 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
   void ensure() {
     maybeEnsure<Id>();
   }
+  // TODO: Removing this API for non-optional field
   /// Same as `ensure()` method, except uses the provided default value.
   template <typename Id, typename U = FieldType<Id>>
   void ensure(U&& defaultVal) {
+    if constexpr (!is_optional_or_union_field_v<Id>) {
+      // Even for non-optional field, we might want to ensure field in case
+      // the field doesn't exist in dynamic value. (e.g., Terse field with
+      // default value. Without ensuring it first, we will not be able to patch
+      // such field at all). However in this case it must always be intrinsic
+      // default to match static patch's behavior.
+      return ensure<Id>();
+    }
+
     if (maybeEnsure<Id>()) {
       getEnsure<Id>(data_) = std::forward<U>(defaultVal);
     }

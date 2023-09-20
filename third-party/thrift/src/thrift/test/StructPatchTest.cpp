@@ -1328,9 +1328,8 @@ TEST(PatchDiscrepancy, EnsureUnqualifiedField) {
   EXPECT_EQ(foo.field(), 0);
 
   // Apply patch dynamically
-  // EnsureOp will be applied in dynamic patch, but not static patch.
   protocol::applyPatch(patch.toObject(), dynFoo);
-  EXPECT_EQ(dynFoo.as_object()[FieldId{1}].as_i32(), 1);
+  EXPECT_EQ(dynFoo.as_object()[FieldId{1}].as_i32(), 0);
 }
 
 TEST(PatchDiscrepancy, EnsureTerseField) {
@@ -1353,9 +1352,8 @@ TEST(PatchDiscrepancy, EnsureTerseField) {
   EXPECT_EQ(foo.field(), 0);
 
   // Apply patch dynamically
-  // Similar to the case above
   protocol::applyPatch(patch.toObject(), dynFoo);
-  EXPECT_EQ(dynFoo.as_object()[FieldId{1}].as_i32(), 1);
+  EXPECT_EQ(dynFoo.as_object()[FieldId{1}].as_i32(), 0);
 }
 
 TEST(PatchDiscrepancy, EnsureUnionField) {

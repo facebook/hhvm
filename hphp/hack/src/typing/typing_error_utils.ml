@@ -145,6 +145,11 @@ module Common = struct
          let stack =
            Exception.get_current_callstack_string 99 |> Exception.clean_stack
          in
+         Hh_logger.log
+           "TYPE_CHECK_PRIMARY_POSITION_BUG in %s\n%s\n%s"
+           (Relative_path.to_absolute current_file)
+           (String.concat message ~sep:"\n")
+           stack;
          HackEventLogger.type_check_primary_position_bug
            ~current_file
            ~message

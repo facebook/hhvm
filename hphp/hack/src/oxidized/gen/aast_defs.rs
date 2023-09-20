@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<34bef1946e4207b9dad1fa6f977816a2>>
+// @generated SignedSource<<5c33c0eb722888e69313857583a47877>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -158,7 +158,7 @@ pub enum Stmt_<Ex, En> {
     ///       await h();
     ///     }
     #[rust_to_ocaml(inline_tuple)]
-    Awaitall(Box<(Vec<(Option<Lid>, Expr<Ex, En>)>, Block<Ex, En>)>),
+    Awaitall(Box<(Vec<(Lid, Expr<Ex, En>)>, Block<Ex, En>)>),
     /// If statement.
     ///
     ///     if ($foo) { ... } else { ... }

@@ -38,16 +38,16 @@
          { fb_ast =
            [([12:3-13],
              (Awaitall (
-                [((Some ([15:16-27], __tmp$2)),
+                [(([15:16-27], __tmp$3),
                   ((Awaitable<string>), [15:16-27], (Call { func = (((function(): Awaitable<string>)), [15:16-25], (Id ([15:16-25], "\\genString"))); targs = []; args = []; unpacked_arg = None })));
-                  (None,
+                  (([14:11-22], __tmp$2),
                    ((Awaitable<string>), [14:11-22], (Call { func = (((function(): Awaitable<string>)), [14:11-20], (Id ([14:11-20], "\\genString"))); targs = []; args = []; unpacked_arg = None })));
-                  ((Some ([13:16-24], __tmp$1)),
+                  (([13:16-24], __tmp$1),
                    ((Awaitable<int>), [13:16-24], (Call { func = (((function(): Awaitable<int>)), [13:16-22], (Id ([13:16-22], "\\genInt"))); targs = []; args = []; unpacked_arg = None })))
                   ],
                 [([14:5-23], (Expr ((null), [14:5-22], Null)));
                   ([13:5-25], (Expr ((int), [13:5-24], (Binop { bop = (Eq None); lhs = ((int), [13:5-7], (Lvar ([13:5-7], $a))); rhs = ((int), [13:10-24], (Lvar ([13:10-24], __tmp$1))) }))));
-                  ([15:5-28], (Expr ((string), [15:5-27], (Binop { bop = (Eq None); lhs = ((string), [15:5-7], (Lvar ([15:5-7], $c))); rhs = ((string), [15:10-27], (Lvar ([15:10-27], __tmp$2))) }))))
+                  ([15:5-28], (Expr ((string), [15:5-27], (Binop { bop = (Eq None); lhs = ((string), [15:5-7], (Lvar ([15:5-7], $c))); rhs = ((string), [15:10-27], (Lvar ([15:10-27], __tmp$3))) }))))
                   ]
                 )))
              ]

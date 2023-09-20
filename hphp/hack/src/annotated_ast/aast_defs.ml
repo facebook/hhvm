@@ -135,7 +135,7 @@ and ('ex, 'en) stmt_ =
        *     yield break; *)
   | Awaitall of
       (* Temporaries assigned when running awaits. *)
-      (lid option * ('ex, 'en) expr) list
+      (lid * ('ex, 'en) expr) list
       * (* Block assigning temporary to relevant locals. *)
       ('ex, 'en) block
       (** Concurrent block. All the await expressions are awaited at the

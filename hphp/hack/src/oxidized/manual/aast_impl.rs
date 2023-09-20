@@ -257,6 +257,10 @@ impl<Ex, En> Stmt<Ex, En> {
         false
     }
 
+    pub fn is_null_expr(&self) -> bool {
+        matches!(&self.1.as_expr(), Some(Expr(_, _, Expr_::Null)))
+    }
+
     pub fn is_declare_local_stmt(&self) -> bool {
         if let Stmt(_, Stmt_::DeclareLocal(_)) = self {
             true

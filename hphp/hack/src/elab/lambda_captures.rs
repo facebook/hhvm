@@ -147,10 +147,8 @@ impl<'ast> VisitorMut<'ast> for Visitor {
         //       await bar();
         //     }
         if let nast::Stmt_::Awaitall(box (el, _)) = s {
-            for (lid_opt, _) in el {
-                if let Some(lid) = lid_opt {
-                    self.add_local_def(lid.clone())
-                }
+            for (lid, _) in el {
+                self.add_local_def(lid.clone())
             }
         }
         s.recurse(env, self.object())

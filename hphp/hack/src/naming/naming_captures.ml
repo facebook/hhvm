@@ -105,11 +105,7 @@ let visitor =
            $x = await foo();
            await bar();
          } *)
-      List.iter el ~f:(fun (e, _) ->
-          match e with
-          | Some lv -> vars := add_local_def !vars lv
-          | None -> ());
-
+      List.iter el ~f:(fun (lv, _) -> vars := add_local_def !vars lv);
       super#on_Awaitall () s el block
 
     method! on_catch () (c_name, lv, block) =

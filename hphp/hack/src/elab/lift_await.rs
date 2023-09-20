@@ -75,12 +75,12 @@ impl<'a> VisitorMut<'a> for ContainsAwait {
     }
 }
 
+/// Lift await will lift awaits out of expressions into Awaitall statements.
+/// It uses tmp_var_counter to allocate temporary variables, and replace_dd
+/// to update the $$ variable on the right of |> when it has to sequentialise
+/// |> expressions.
 #[derive(Debug, Clone, Default)]
 struct LiftAwait {
-    // Lift await will lift awaits out of expressions into Awaitall statements.
-    // It uses tmp_var_counter to allocate temporary variables, and replace_dd
-    // to update the $$ variable on the right of |> when it has to sequentialise
-    // |> expressions.
     tmp_var_counter: isize,
     replace_dd: Option<nast::Expr_>,
 }
@@ -89,12 +89,10 @@ fn sequentialise(pos: Pos, con: Vec<(Lid, nast::Expr)>, seq: Vec<nast::Stmt>) ->
     if con.is_empty() {
         seq
     } else {
-        let con = con
-            .into_iter()
-            .map(|(lid, expr)| (Some(lid), expr))
-            .collect();
+        let ids = Some(con.iter().map(|(lid, _)| lid.clone()).collect());
         let awaitall = Stmt_::Awaitall(Box::new((con, Block(seq))));
-        vec![Stmt(pos, awaitall)]
+        let block = Stmt_::Block(Box::new((ids, Block(vec![Stmt(pos.clone(), awaitall)]))));
+        vec![Stmt(pos, block)]
     }
 }
 
@@ -525,6 +523,19 @@ mod tests {
         Expr((), Pos::NONE, Expr_::Lvar(Box::new(lid)))
     }
 
+    fn mk_awaitall(con: Vec<(Lid, Expr)>, body: Block) -> Stmt {
+        Stmt(
+            Pos::NONE,
+            Stmt_::Block(Box::new((
+                Some(con.iter().map(|(id, _)| id.clone()).collect()),
+                Block(vec![Stmt(
+                    Pos::NONE,
+                    Stmt_::Awaitall(Box::new((con, body))),
+                )]),
+            ))),
+        )
+    }
+
     #[test]
     fn no_await1() {
         let mut env = Env::default();
@@ -575,12 +586,9 @@ mod tests {
         let mut env = Env::default();
         let mut orig = build_program(hack_stmt!("await $x + $y;"));
         let tmp = (0, "__tmp$_lift_await0".to_string());
-        let awaitall = Stmt(
-            Pos::NONE,
-            Stmt_::Awaitall(Box::new((
-                vec![(Some(Lid(Pos::NONE, tmp.clone())), hack_expr!("$x"))],
-                Block(hack_stmts!("#{lvar(tmp)} + $y;")),
-            ))),
+        let awaitall = mk_awaitall(
+            vec![(Lid(Pos::NONE, tmp.clone()), hack_expr!("$x"))],
+            Block(hack_stmts!("#{lvar(tmp)} + $y;")),
         );
         let res = build_program(awaitall);
         self::elaborate_program(&mut env, &mut orig);
@@ -595,19 +603,16 @@ mod tests {
         let tmp1 = (0, "__tmp$_lift_await1".to_string());
         let tmp2 = (0, "__tmp$_lift_await2".to_string());
         let tmp3 = (0, "__tmp$_lift_await3".to_string());
-        let awaitall = Stmt(
-            Pos::NONE,
-            Stmt_::Awaitall(Box::new((
-                vec![
-                    (Some(Lid(Pos::NONE, tmp0.clone())), hack_expr!("$x0")),
-                    (Some(Lid(Pos::NONE, tmp1.clone())), hack_expr!("$x1")),
-                    (Some(Lid(Pos::NONE, tmp2.clone())), hack_expr!("$x2")),
-                    (Some(Lid(Pos::NONE, tmp3.clone())), hack_expr!("$x3")),
-                ],
-                Block(hack_stmts!(
-                    "#{lvar(tmp0)} * #{lvar(tmp1)} + #{lvar(tmp2)} * #{lvar(tmp3)};"
-                )),
-            ))),
+        let awaitall = mk_awaitall(
+            vec![
+                (Lid(Pos::NONE, tmp0.clone()), hack_expr!("$x0")),
+                (Lid(Pos::NONE, tmp1.clone()), hack_expr!("$x1")),
+                (Lid(Pos::NONE, tmp2.clone()), hack_expr!("$x2")),
+                (Lid(Pos::NONE, tmp3.clone()), hack_expr!("$x3")),
+            ],
+            Block(hack_stmts!(
+                "#{lvar(tmp0)} * #{lvar(tmp1)} + #{lvar(tmp2)} * #{lvar(tmp3)};"
+            )),
         );
         let res = build_program(awaitall);
         self::elaborate_program(&mut env, &mut orig);
@@ -619,12 +624,9 @@ mod tests {
         let mut env = Env::default();
         let mut orig = build_program(hack_stmt!("await $x |> $$;"));
         let tmp = (0, "__tmp$_lift_await0".to_string());
-        let awaitall = Stmt(
-            Pos::NONE,
-            Stmt_::Awaitall(Box::new((
-                vec![(Some(Lid(Pos::NONE, tmp.clone())), hack_expr!("$x"))],
-                Block(hack_stmts!("#{lvar(tmp)} |> $$;")),
-            ))),
+        let awaitall = mk_awaitall(
+            vec![(Lid(Pos::NONE, tmp.clone()), hack_expr!("$x"))],
+            Block(hack_stmts!("#{lvar(tmp)} |> $$;")),
         );
         let res = build_program(awaitall);
         self::elaborate_program(&mut env, &mut orig);
@@ -637,15 +639,12 @@ mod tests {
         let mut orig = build_program(hack_stmt!("(await $x1 + await $x2) |> $$;"));
         let tmp0 = (0, "__tmp$_lift_await0".to_string());
         let tmp1 = (0, "__tmp$_lift_await1".to_string());
-        let awaitall = Stmt(
-            Pos::NONE,
-            Stmt_::Awaitall(Box::new((
-                vec![
-                    (Some(Lid(Pos::NONE, tmp0.clone())), hack_expr!("$x1")),
-                    (Some(Lid(Pos::NONE, tmp1.clone())), hack_expr!("$x2")),
-                ],
-                Block(hack_stmts!("#{lvar(tmp0)} + #{lvar(tmp1)} |> $$;")),
-            ))),
+        let awaitall = mk_awaitall(
+            vec![
+                (Lid(Pos::NONE, tmp0.clone()), hack_expr!("$x1")),
+                (Lid(Pos::NONE, tmp1.clone()), hack_expr!("$x2")),
+            ],
+            Block(hack_stmts!("#{lvar(tmp0)} + #{lvar(tmp1)} |> $$;")),
         );
         let res = build_program(awaitall);
         self::elaborate_program(&mut env, &mut orig);
@@ -660,12 +659,9 @@ mod tests {
         let tmp1 = mk_lid("__tmp$_lift_await1");
         let tmp1_lvar = mk_lvar(tmp1.clone());
         let tmp2 = mk_lvar(mk_lid("$__lift_await__tmp$2"));
-        let awaitall = Stmt(
-            Pos::NONE,
-            Stmt_::Awaitall(Box::new((
-                vec![(Some(tmp1), tmp0.clone())],
-                Block(hack_stmts!("#{clone(tmp2)} = #tmp1_lvar;")),
-            ))),
+        let awaitall = mk_awaitall(
+            vec![(tmp1, tmp0.clone())],
+            Block(hack_stmts!("#{clone(tmp2)} = #tmp1_lvar;")),
         );
         let stmt = Stmt(Pos::NONE, Stmt_::Expr(Box::new(tmp2)));
         let res = build_program(hack_stmt!("{ #tmp0 = $x; #awaitall; #stmt; }"));
@@ -683,19 +679,13 @@ mod tests {
         let tmp2 = mk_lid("__tmp$_lift_await2");
         let tmp2_lvar = mk_lvar(tmp2.clone());
         let tmp3 = mk_lvar(mk_lid("$__lift_await__tmp$3"));
-        let awaitall1 = Stmt(
-            Pos::NONE,
-            Stmt_::Awaitall(Box::new((
-                vec![(Some(tmp0), hack_expr!("$x"))],
-                Block(hack_stmts!("#{clone(tmp1)} = #tmp0_lvar;")),
-            ))),
+        let awaitall1 = mk_awaitall(
+            vec![(tmp0, hack_expr!("$x"))],
+            Block(hack_stmts!("#{clone(tmp1)} = #tmp0_lvar;")),
         );
-        let awaitall2 = Stmt(
-            Pos::NONE,
-            Stmt_::Awaitall(Box::new((
-                vec![(Some(tmp2), tmp1)],
-                Block(hack_stmts!("#{clone(tmp3)} = #tmp2_lvar;")),
-            ))),
+        let awaitall2 = mk_awaitall(
+            vec![(tmp2, tmp1)],
+            Block(hack_stmts!("#{clone(tmp3)} = #tmp2_lvar;")),
         );
         let stmt = Stmt(Pos::NONE, Stmt_::Expr(Box::new(tmp3)));
         let res = build_program(hack_stmt!("{ #awaitall1; #awaitall2; #stmt; }"));
@@ -719,26 +709,17 @@ mod tests {
         let tmp5 = mk_lid("__tmp$_lift_await5");
         let tmp5_lvar = mk_lvar(tmp5.clone());
         let tmp6 = mk_lvar(mk_lid("$__lift_await__tmp$6"));
-        let awaitall1 = Stmt(
-            Pos::NONE,
-            Stmt_::Awaitall(Box::new((
-                vec![(Some(tmp0), hack_expr!("$x"))],
-                Block(hack_stmts!("#{clone(tmp1)} = #tmp0_lvar + 1;")),
-            ))),
+        let awaitall1 = mk_awaitall(
+            vec![(tmp0, hack_expr!("$x"))],
+            Block(hack_stmts!("#{clone(tmp1)} = #tmp0_lvar + 1;")),
         );
-        let awaitall2 = Stmt(
-            Pos::NONE,
-            Stmt_::Awaitall(Box::new((
-                vec![(Some(tmp2), tmp1)],
-                Block(hack_stmts!("#{clone(tmp3)} = #tmp2_lvar + 2;")),
-            ))),
+        let awaitall2 = mk_awaitall(
+            vec![(tmp2, tmp1)],
+            Block(hack_stmts!("#{clone(tmp3)} = #tmp2_lvar + 2;")),
         );
-        let awaitall3 = Stmt(
-            Pos::NONE,
-            Stmt_::Awaitall(Box::new((
-                vec![(Some(tmp5), tmp4.clone())],
-                Block(hack_stmts!("#{clone(tmp6)} = #tmp5_lvar + 3;")),
-            ))),
+        let awaitall3 = mk_awaitall(
+            vec![(tmp5, tmp4.clone())],
+            Block(hack_stmts!("#{clone(tmp6)} = #tmp5_lvar + 3;")),
         );
         let stmt = Stmt(Pos::NONE, Stmt_::Expr(Box::new(tmp6)));
         let res = build_program(hack_stmt!(
@@ -764,26 +745,17 @@ mod tests {
         let tmp4_lvar = mk_lvar(tmp4.clone());
         let tmp5 = mk_lvar(mk_lid("$__lift_await__tmp$5"));
         let tmp6 = mk_lvar(mk_lid("$__lift_await__tmp$6"));
-        let awaitall1 = Stmt(
-            Pos::NONE,
-            Stmt_::Awaitall(Box::new((
-                vec![(Some(tmp0), hack_expr!("$x"))],
-                Block(hack_stmts!("#{clone(tmp1)} = #{clone(tmp0_lvar)} + 1;")),
-            ))),
+        let awaitall1 = mk_awaitall(
+            vec![(tmp0, hack_expr!("$x"))],
+            Block(hack_stmts!("#{clone(tmp1)} = #{clone(tmp0_lvar)} + 1;")),
         );
-        let awaitall2 = Stmt(
-            Pos::NONE,
-            Stmt_::Awaitall(Box::new((
-                vec![(Some(tmp2), tmp1)],
-                Block(hack_stmts!("#{clone(tmp3)} = #{clone(tmp2_lvar)} + 2;")),
-            ))),
+        let awaitall2 = mk_awaitall(
+            vec![(tmp2, tmp1)],
+            Block(hack_stmts!("#{clone(tmp3)} = #{clone(tmp2_lvar)} + 2;")),
         );
-        let awaitall3 = Stmt(
-            Pos::NONE,
-            Stmt_::Awaitall(Box::new((
-                vec![(Some(tmp4), tmp3)],
-                Block(hack_stmts!("#{clone(tmp5)} = #{clone(tmp4_lvar)} + 3;")),
-            ))),
+        let awaitall3 = mk_awaitall(
+            vec![(tmp4, tmp3)],
+            Block(hack_stmts!("#{clone(tmp5)} = #{clone(tmp4_lvar)} + 3;")),
         );
         let stmt = Stmt(Pos::NONE, Stmt_::Expr(Box::new(tmp6.clone())));
         let res = build_program(hack_stmt!(
@@ -809,24 +781,15 @@ mod tests {
         let tmp4 = mk_lid("__tmp$_lift_await4");
         let tmp4_lvar = mk_lvar(tmp4.clone());
         let tmp5 = mk_lvar(mk_lid("$__lift_await__tmp$5"));
-        let awaitall1 = Stmt(
-            Pos::NONE,
-            Stmt_::Awaitall(Box::new((
-                vec![
-                    (Some(tmp0), hack_expr!("$x")),
-                    (Some(tmp1), hack_expr!("$y")),
-                ],
-                Block(hack_stmts!(
-                    "#{clone(tmp2)} = #{clone(tmp0_lvar)} + #{clone(tmp1_lvar)};"
-                )),
-            ))),
+        let awaitall1 = mk_awaitall(
+            vec![(tmp0, hack_expr!("$x")), (tmp1, hack_expr!("$y"))],
+            Block(hack_stmts!(
+                "#{clone(tmp2)} = #{clone(tmp0_lvar)} + #{clone(tmp1_lvar)};"
+            )),
         );
-        let awaitall2 = Stmt(
-            Pos::NONE,
-            Stmt_::Awaitall(Box::new((
-                vec![(Some(tmp3), tmp2.clone()), (Some(tmp4), tmp2)],
-                Block(hack_stmts!("#{clone(tmp5)} = #tmp3_lvar + #tmp4_lvar;")),
-            ))),
+        let awaitall2 = mk_awaitall(
+            vec![(tmp3, tmp2.clone()), (tmp4, tmp2)],
+            Block(hack_stmts!("#{clone(tmp5)} = #tmp3_lvar + #tmp4_lvar;")),
         );
         let stmt = Stmt(Pos::NONE, Stmt_::Expr(Box::new(tmp5)));
         let res = build_program(hack_stmt!("{ #awaitall1; #awaitall2; #stmt; }"));
@@ -846,27 +809,18 @@ mod tests {
         let tmp3 = mk_lid("__tmp$_lift_await3");
         let tmp3_lvar = mk_lvar(tmp3.clone());
         let tmp4 = mk_lvar(mk_lid("$__lift_await__tmp$4"));
-        let awaitall1 = Stmt(
-            Pos::NONE,
-            Stmt_::Awaitall(Box::new((
-                vec![(Some(tmp1), hack_expr!("$y"))],
-                Block(hack_stmts!("#{clone(tmp2)} = #{clone(tmp1_lvar)};")),
-            ))),
+        let awaitall1 = mk_awaitall(
+            vec![(tmp1, hack_expr!("$y"))],
+            Block(hack_stmts!("#{clone(tmp2)} = #{clone(tmp1_lvar)};")),
         );
-        let awaitall2 = Stmt(
-            Pos::NONE,
-            Stmt_::Awaitall(Box::new((
-                vec![(Some(tmp3), tmp2)],
-                Block(hack_stmts!("#{clone(tmp4)} = #{clone(tmp3_lvar)};")),
-            ))),
+        let awaitall2 = mk_awaitall(
+            vec![(tmp3, tmp2)],
+            Block(hack_stmts!("#{clone(tmp4)} = #{clone(tmp3_lvar)};")),
         );
         let _stmt = Stmt(Pos::NONE, Stmt_::Expr(Box::new(tmp4.clone())));
-        let awaitall3 = Stmt(
-            Pos::NONE,
-            Stmt_::Awaitall(Box::new((
-                vec![(Some(tmp0), hack_expr!("$x"))],
-                Block(hack_stmts!("#awaitall1; #awaitall2; #tmp0_lvar + #tmp4;")),
-            ))),
+        let awaitall3 = mk_awaitall(
+            vec![(tmp0, hack_expr!("$x"))],
+            Block(hack_stmts!("#awaitall1; #awaitall2; #tmp0_lvar + #tmp4;")),
         );
         let res = build_program(hack_stmt!("#awaitall3;"));
         self::elaborate_program(&mut env, &mut orig);

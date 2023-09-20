@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b171bfced70898a9e85d9e552390a8be>>
+// @generated SignedSource<<8039c93f2e76a801231f88880a49e6db>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -188,7 +188,7 @@ pub enum Stmt_<'a, Ex, En> {
     #[rust_to_ocaml(inline_tuple)]
     Awaitall(
         &'a (
-            &'a [(Option<&'a Lid<'a>>, &'a Expr<'a, Ex, En>)],
+            &'a [(&'a Lid<'a>, &'a Expr<'a, Ex, En>)],
             &'a Block<'a, Ex, En>,
         ),
     ),

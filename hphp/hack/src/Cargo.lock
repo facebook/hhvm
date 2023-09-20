@@ -4677,6 +4677,7 @@ dependencies = [
  "error",
  "hhbc",
  "instruction_sequence",
+ "oxidized",
 ]
 
 [[package]]

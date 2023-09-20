@@ -226,16 +226,14 @@ See [selection region]
       (match stmt_ with
       | Aast.Awaitall (tmp_var_block_pairs, _) ->
         tmp_var_block_pairs
-        |> List.iter ~f:(function
-               | (Some (_, tmp_lid), _) ->
-                 let name = Local_id.get_name tmp_lid in
-                 region :=
-                   Region.
-                     {
-                       !region with
-                       defined = Scopes.set_defined !region.defined name;
-                     }
-               | _ -> ())
+        |> List.iter ~f:(function ((_, tmp_lid), _) ->
+               let name = Local_id.get_name tmp_lid in
+               region :=
+                 Region.
+                   {
+                     !region with
+                     defined = Scopes.set_defined !region.defined name;
+                   })
       | Aast.Foreach (_, as_, _) ->
         let (iterator_kind, is_async) =
           Aast.(

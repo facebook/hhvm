@@ -1,0 +1,6 @@
+File "await_error.php", line 7, characters 13-14:
+Invalid argument (Typing[4411])
+  File "await_error.php", line 7, characters 13-14:
+  This expression is readonly
+  File "await_error.php", line 3, characters 22-23:
+  It is incompatible with this parameter, which is mutable

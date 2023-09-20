@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f6917d70968db7cc0463fd59f76a87d7>>
+// @generated SignedSource<<37999f22710ff75daa4028659dff0164>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -33,7 +33,7 @@ impl<Ex, En> Stmt_<Ex, En> {
     pub fn mk_yield_break() -> Self {
         Stmt_::YieldBreak
     }
-    pub fn mk_awaitall(p0: Vec<(Option<Lid>, Expr<Ex, En>)>, p1: Block<Ex, En>) -> Self {
+    pub fn mk_awaitall(p0: Vec<(Lid, Expr<Ex, En>)>, p1: Block<Ex, En>) -> Self {
         Stmt_::Awaitall(Box::new((p0, p1)))
     }
     pub fn mk_if(p0: Expr<Ex, En>, p1: Block<Ex, En>, p2: Block<Ex, En>) -> Self {
@@ -237,7 +237,7 @@ impl<Ex, En> Stmt_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_awaitall(&self) -> Option<(&Vec<(Option<Lid>, Expr<Ex, En>)>, &Block<Ex, En>)> {
+    pub fn as_awaitall(&self) -> Option<(&Vec<(Lid, Expr<Ex, En>)>, &Block<Ex, En>)> {
         match self {
             Stmt_::Awaitall(p0) => Some((&p0.0, &p0.1)),
             _ => None,
@@ -354,7 +354,7 @@ impl<Ex, En> Stmt_<Ex, En> {
     }
     pub fn as_awaitall_mut(
         &mut self,
-    ) -> Option<(&mut Vec<(Option<Lid>, Expr<Ex, En>)>, &mut Block<Ex, En>)> {
+    ) -> Option<(&mut Vec<(Lid, Expr<Ex, En>)>, &mut Block<Ex, En>)> {
         match self {
             Stmt_::Awaitall(p0) => Some((&mut p0.0, &mut p0.1)),
             _ => None,
@@ -481,7 +481,7 @@ impl<Ex, En> Stmt_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_awaitall_into(self) -> Option<(Vec<(Option<Lid>, Expr<Ex, En>)>, Block<Ex, En>)> {
+    pub fn as_awaitall_into(self) -> Option<(Vec<(Lid, Expr<Ex, En>)>, Block<Ex, En>)> {
         match self {
             Stmt_::Awaitall(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,

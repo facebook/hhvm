@@ -444,7 +444,7 @@ module Visitor_DEPRECATED = struct
 
       method on_return : 'a -> expr option -> 'a
 
-      method on_awaitall : 'a -> (id option * expr) list -> block -> 'a
+      method on_awaitall : 'a -> (id * expr) list -> block -> 'a
 
       method on_stmt : 'a -> stmt -> 'a
 
@@ -648,11 +648,7 @@ module Visitor_DEPRECATED = struct
         let acc =
           List.fold_left
             ~f:(fun acc (x, y) ->
-              let acc =
-                match x with
-                | Some x -> this#on_lvar acc x
-                | None -> acc
-              in
+              let acc = this#on_lvar acc x in
               let acc = this#on_expr acc y in
               acc)
             ~init:acc

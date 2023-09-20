@@ -597,20 +597,13 @@ impl<'decl> Infer<'decl> {
             },
             YieldBreak => (YieldBreak, ctx),
             Awaitall(box (assigns, block)) => {
-                let lid_opts: Vec<Option<ast::Lid>> = assigns
-                    .iter()
-                    .map(|(lid_opt, _)| lid_opt)
-                    .cloned()
-                    .collect();
+                let lids: Vec<ast::Lid> = assigns.iter().map(|(lid, _)| lid).cloned().collect();
                 let assigns_exprs: Vec<_> =
                     assigns.iter().map(|(_, assign)| assign).cloned().collect();
                 let (assigns_exprs, _assigns_tys, ctx) =
                     self.infer_exprs(&assigns_exprs, ctx, next_where);
                 let (block, ctx) = self.infer_stmts_block(block, ctx, next_where);
-                let assigns: Vec<_> = lid_opts
-                    .into_iter()
-                    .zip(assigns_exprs.into_iter())
-                    .collect();
+                let assigns: Vec<_> = lids.into_iter().zip(assigns_exprs.into_iter()).collect();
                 let await_all = Awaitall(Box::new((assigns, block)));
                 (await_all, ctx)
             }
@@ -722,9 +715,9 @@ impl<'decl> Infer<'decl> {
                     (st.clone(), ctx)
                 }
             }
-            Block(box (_, stmts)) => {
+            Block(box (vars, stmts)) => {
                 let (stmts, ctx) = self.infer_stmts_block(stmts, ctx, next_where);
-                (Block(Box::new((None, stmts))), ctx)
+                (Block(Box::new((vars.clone(), stmts))), ctx)
             }
             Markup(_) => (st.clone(), ctx),
             AssertEnv(b) => (AssertEnv(b.clone()), ctx),

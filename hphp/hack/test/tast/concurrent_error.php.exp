@@ -35,7 +35,7 @@ Errors:
          { fb_ast =
            [([8:3-13],
              (Awaitall (
-                [((Some ([9:17-26], __tmp$1)),
+                [(([9:17-26], __tmp$1),
                   ((Awaitable<int>), [9:17-26], (Call { func = (((function(): Awaitable<int>)), [9:17-24], (Id ([9:17-24], "\\gen_int"))); targs = []; args = []; unpacked_arg = None })))],
                 [([9:5-27], (Expr ((int), [9:5-26], (Binop { bop = (Eq None); lhs = ((int), [9:5-8], (Lvar ([9:5-8], $v1))); rhs = ((int), [9:11-26], (Lvar ([9:11-26], __tmp$1))) }))));
                   ([10:5-21],

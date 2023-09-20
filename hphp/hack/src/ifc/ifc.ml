@@ -1603,15 +1603,12 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
     Env.close_stmt env K.Next
   | A.Awaitall (el, b) ->
     let (env, out) =
-      List.fold_left el ~init:(env, KMap.empty) ~f:(fun (env, out) (lvar, e) ->
+      List.fold_left el ~init:(env, KMap.empty) ~f:(fun (env, out) (lid, e) ->
           let expr = expr_ ~pos renv in
           let (env, ety) = expr (Env.prep_expr env) e in
           let env =
-            match lvar with
-            | Some lid ->
-              let (pty, p, _) = e in
-              assign ~expr ~pos renv env (pty, p, A.Lvar lid) ety
-            | None -> env
+            let (pty, p, _) = e in
+            assign ~expr ~pos renv env (pty, p, A.Lvar lid) ety
           in
           let (env, ethrow) = Env.close_expr env in
           (env, Env.merge_out out ethrow))

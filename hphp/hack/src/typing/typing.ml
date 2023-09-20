@@ -3134,14 +3134,11 @@ and stmt_ env pos st =
           let (env, ty2) =
             Async.overload_extract_from_awaitable env ~p:pos2 ty2
           in
-          match e1 with
-          | Some e1 ->
-            let pos = fst e1 in
-            let (env, _, _, ty_mismatch_opt) =
-              assign pos env ((), pos, Lvar e1) pos2 ty2
-            in
-            (env, (Some e1, hole_on_ty_mismatch ~ty_mismatch_opt te2) :: tel)
-          | None -> (env, (None, te2) :: tel))
+          let pos = fst e1 in
+          let (env, _, _, ty_mismatch_opt) =
+            assign pos env ((), pos, Lvar e1) pos2 ty2
+          in
+          (env, (e1, hole_on_ty_mismatch ~ty_mismatch_opt te2) :: tel))
     in
     let (env, b) = block env b in
     (env, Aast.Awaitall (el, b))
@@ -3182,7 +3179,8 @@ and stmt_ env pos st =
   | Block _
   | Markup _ ->
     failwith
-      "Unexpected nodes in AST. These nodes should have been removed in naming."
+      ("Unexpected nodes in AST. These nodes should have been removed in naming. "
+      ^ Pos.string_no_file pos)
 
 and finally_w_cont fb env ctx =
   (* The only locals in scope are the ones from the current continuation *)

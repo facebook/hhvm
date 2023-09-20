@@ -108,6 +108,25 @@ pub fn rewrite_program<'p, 'arena, 'emitter, 'decl>(
     Ok(())
 }
 
+fn update_awaitall(stmts: &mut [Stmt], return_val: &ast::LocalId) {
+    match stmts.last_mut() {
+        Some(Stmt(_, Stmt_::Block(box (_, ast::Block(stmts))))) => {
+            update_awaitall(stmts, return_val);
+        }
+        Some(Stmt(_, Stmt_::Awaitall(box (_, block)))) => match block.last_mut() {
+            Some(s) => match s {
+                Stmt(_, Stmt_::Expr(box Expr(_, p, e))) => {
+                    let e_inner = Expr((), std::mem::take(p), std::mem::replace(e, Expr_::False));
+                    *s = hack_stmt!("#{lvar(clone(return_val))} = #e_inner;");
+                }
+                _ => {}
+            },
+            _ => {}
+        },
+        _ => {}
+    }
+}
+
 /// The function we emit for debugger takes all variables used in the block of
 /// code as parameters to the function created and returns the updated version
 /// of these variables as a vector, placing the result of executing this function
@@ -189,19 +208,7 @@ fn extract_debugger_main(
         stmts.push(hack_stmt!(pos = p, "#{lvar(clone(return_val))} = #e;"));
     }
 
-    match stmts.last_mut() {
-        Some(Stmt(_, Stmt_::Awaitall(box (_, block)))) => match block.last_mut() {
-            Some(s) => match s {
-                Stmt(_, Stmt_::Expr(box Expr(_, p, e))) => {
-                    let e_inner = Expr((), std::mem::take(p), std::mem::replace(e, Expr_::False));
-                    *s = hack_stmt!("#{lvar(clone(return_val))} = #e_inner;");
-                }
-                _ => {}
-            },
-            _ => {}
-        },
-        _ => {}
-    }
+    update_awaitall(&mut stmts, &return_val);
 
     let p = || Pos::NONE;
     let mut unsets: ast::Block = vars

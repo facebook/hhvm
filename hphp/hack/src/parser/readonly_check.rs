@@ -918,12 +918,11 @@ impl<'ast> VisitorMut<'ast> for Checker {
                 let (assignments, block) = &mut **a;
                 for i in assignments {
                     // if there's a temp local
-                    if let Some(lid) = &i.0 {
-                        let var_name = local_id::get_name(&lid.1).to_string();
-                        let rhs_rty = rty_expr(context, &i.1);
-                        context.add_local(&var_name, rhs_rty);
-                        i.recurse(context, self.object())?;
-                    }
+                    let lid = &i.0;
+                    let var_name = local_id::get_name(&lid.1).to_string();
+                    let rhs_rty = rty_expr(context, &i.1);
+                    context.add_local(&var_name, rhs_rty);
+                    i.recurse(context, self.object())?;
                 }
                 block.recurse(context, self.object())
             }

@@ -88,7 +88,7 @@ pub enum LiftedAwaitKind {
     LiftedFromConcurrent,
 }
 
-type LiftedAwaitExprs = Vec<(Option<ast::Lid>, ast::Expr)>;
+type LiftedAwaitExprs = Vec<(ast::Lid, ast::Expr)>;
 
 #[derive(Debug, Clone)]
 pub struct LiftedAwaits {
@@ -2796,9 +2796,12 @@ fn with_new_nonconcurrent_scope<'a, F, R>(env: &mut Env<'a>, f: F) -> R
 where
     F: FnOnce(&mut Env<'a>) -> R,
 {
+    let saved_lift_awaits = env.lift_awaits;
+    env.lift_awaits = false;
     let saved_lifted_awaits = env.lifted_awaits.take();
     let result = f(env);
     env.lifted_awaits = saved_lifted_awaits;
+    env.lift_awaits = saved_lift_awaits;
     result
 }
 
@@ -2926,19 +2929,16 @@ fn lift_await<'a>(
             Expr_::mk_await(expr)
         }
         (Some(_), _) => {
+            let name = env.make_tmp_var_name();
+            let lid = ast::Lid::new(parent_pos, name.clone());
+            let await_lid = ast::Lid::new(expr.1.clone(), name);
+            let await_ = (await_lid, expr);
+            if let Some(aw) = env.lifted_awaits.as_mut() {
+                aw.awaits.push(await_)
+            }
             if location != AsStatement {
-                let name = env.make_tmp_var_name();
-                let lid = ast::Lid::new(parent_pos, name.clone());
-                let await_lid = ast::Lid::new(expr.1.clone(), name);
-                let await_ = (Some(await_lid), expr);
-                if let Some(aw) = env.lifted_awaits.as_mut() {
-                    aw.awaits.push(await_)
-                }
                 Expr_::mk_lvar(lid)
             } else {
-                if let Some(aw) = env.lifted_awaits.as_mut() {
-                    aw.awaits.push((None, expr))
-                }
                 Expr_::Null
             }
         }
@@ -3073,18 +3073,23 @@ fn p_concurrent_stmt<'a>(
 
     let (lifted_awaits, Stmt(stmt_pos, stmt)) =
         with_new_concurrent_scope(env, |e| p_stmt(&c.statement, e))?;
+    let scope = lifted_awaits
+        .iter()
+        .map(|lifted_await| lifted_await.0.clone())
+        .collect();
     let stmt = match stmt {
         S_::Block(box (_, stmts)) => {
             use ast::Bop::Eq;
             /* Reuse tmp vars from lifted_awaits, this is safe because there will
              * always be more awaits with tmp vars than statements with assignments. */
-            let mut tmp_vars = lifted_awaits
-                .iter()
-                .filter_map(|lifted_await| lifted_await.0.as_ref().map(|x| &x.1));
+            let mut tmp_vars = lifted_awaits.iter().map(|lifted_await| &lifted_await.0.1);
             let mut body_stmts = vec![];
             let mut assign_stmts = vec![];
             for n in stmts.into_iter() {
                 if !n.is_assign_expr() && !n.is_declare_local_stmt() {
+                    if n.is_null_expr() {
+                        tmp_vars.next();
+                    }
                     body_stmts.push(n);
                     continue;
                 }
@@ -3193,9 +3198,13 @@ fn p_concurrent_stmt<'a>(
         }
         _ => missing_syntax("block in concurrent", &c.keyword, env)?,
     };
+    let awaitall_stmt = new(
+        keyword_pos.clone(),
+        S_::mk_awaitall(lifted_awaits, ast::Block(vec![stmt])),
+    );
     Ok(new(
         keyword_pos,
-        S_::mk_awaitall(lifted_awaits, ast::Block(vec![stmt])),
+        S_::mk_block(Some(scope), aast::Block(vec![awaitall_stmt])),
     ))
 }
 

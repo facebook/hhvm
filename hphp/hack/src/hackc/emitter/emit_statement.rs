@@ -99,6 +99,12 @@ fn set_bytes_kind(name: &str) -> Option<SetRange> {
     })
 }
 
+fn is_single_await_all_block(lids: &[a::Lid], stmts: &[ast::Stmt]) -> bool {
+    matches!((lids, stmts),
+        ([lid], [a::Stmt(_, a::Stmt_::Awaitall(box (inits, _)))]) if inits.len() == 1 && &inits[0].0 == lid
+    )
+}
+
 pub fn emit_stmt<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
@@ -114,7 +120,12 @@ pub fn emit_stmt<'a, 'arena, 'decl>(
             _ => emit_expr::emit_ignored_expr(e, env, pos, e_),
         },
         a::Stmt_::Return(r_opt) => emit_return_(e, env, (**r_opt).as_ref(), pos),
-        a::Stmt_::Block(box (_, b)) => emit_block(env, e, b),
+        a::Stmt_::Block(box (Some(lids), a::Block(block)))
+            if is_single_await_all_block(lids, block) =>
+        {
+            emit_block_awaitall_single(e, env, block)
+        }
+        a::Stmt_::Block(box (lids, b)) => emit_block_with_temps(env, e, lids, b),
         a::Stmt_::If(f) => emit_if(e, env, pos, &f.0, &f.1, &f.2),
         a::Stmt_::While(x) => emit_while(e, env, &x.0, &x.1),
         a::Stmt_::Using(x) => emit_using(e, env, x),
@@ -355,13 +366,40 @@ fn emit_awaitall<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
-    el: &[(Option<ast::Lid>, ast::Expr)],
+    el: &[(ast::Lid, ast::Expr)],
     block: &[ast::Stmt],
 ) -> Result<InstrSeq<'arena>> {
     match el {
         [] => Ok(instr::empty()),
-        [(lvar, expr)] => emit_awaitall_single(e, env, pos, lvar.as_ref(), expr, block),
+        [(lvar, expr)] => emit_awaitall_single(e, env, pos, lvar, expr, block),
         _ => emit_awaitall_multi(e, env, pos, el, block),
+    }
+}
+
+// We don't have to special case this, but we do in order to make it bytecode
+// preserving. Here we don't put the rhs of the single await inside of the
+// with_unnamed_temps which is what the Block would otherwise cause. We could
+// make this more uniform in the future.
+fn emit_block_awaitall_single<'a, 'arena, 'decl>(
+    e: &mut Emitter<'arena, 'decl>,
+    env: &mut Env<'a, 'arena>,
+    block: &[ast::Stmt],
+) -> Result<InstrSeq<'arena>> {
+    match block {
+        [a::Stmt(pos, a::Stmt_::Awaitall(box (init, block)))] => {
+            let (lval, expr) = &init[0];
+            let lvals = vec![lval.clone()];
+            let a::Lid(_, id) = lval;
+            let load_arg = emit_expr::emit_await(e, env, pos, expr)?;
+            let mut load = instr::nop();
+            let body = scope::with_unnamed_temps(e, &lvals, |e| {
+                load = instr::pop_l(e.local_gen().get_unnamed_for_tempname(&id.1).clone());
+                let body = emit_stmts(e, env, block)?;
+                Ok(InstrSeq::gather(vec![body]))
+            })?;
+            Ok(InstrSeq::gather(vec![load_arg, load, body]))
+        }
+        _ => panic!(),
     }
 }
 
@@ -369,88 +407,59 @@ fn emit_awaitall_single<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
-    lval: Option<&ast::Lid>,
+    lval: &ast::Lid,
     expr: &ast::Expr,
     block: &[ast::Stmt],
 ) -> Result<InstrSeq<'arena>> {
-    scope::with_unnamed_locals(e, |e| {
-        let load_arg = emit_expr::emit_await(e, env, pos, expr)?;
-        let load = match lval {
-            None => instr::pop_c(),
-            Some(ast::Lid(_, id)) => {
-                let l = e
-                    .local_gen_mut()
-                    .init_unnamed_for_tempname(local_id::get_name(id));
-                instr::pop_l(*l)
-            }
-        };
-        Ok((
-            InstrSeq::gather(vec![load_arg, load]),
-            emit_stmts(e, env, block)?,
-            instr::empty(),
-        ))
-    })
+    let load_arg = emit_expr::emit_await(e, env, pos, expr)?;
+    let load = instr::pop_l(e.local_gen().get_unnamed_for_tempname(&lval.1.1).clone());
+    let body = emit_stmts(e, env, block)?;
+    Ok(InstrSeq::gather(vec![load_arg, load, body]))
 }
 
 fn emit_awaitall_multi<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
-    el: &[(Option<ast::Lid>, ast::Expr)],
+    el: &[(ast::Lid, ast::Expr)],
     block: &[ast::Stmt],
 ) -> Result<InstrSeq<'arena>> {
-    scope::with_unnamed_locals(e, |e| {
-        let mut instrs = vec![];
-        let locals: Vec<_> = el
-            .iter()
-            .map(|(lvar, _)| match lvar {
-                None => e.local_gen_mut().get_unnamed(),
-                Some(ast::Lid(_, id)) => e
-                    .local_gen_mut()
-                    .init_unnamed_for_tempname(local_id::get_name(id))
-                    .to_owned(),
-            })
-            .collect();
-        for (local, (_, expr)) in locals.iter().zip(el) {
-            instrs.push(emit_expr::emit_expr(e, env, expr)?);
-            instrs.push(instr::pop_l(*local));
-        }
+    let mut instrs = vec![];
+    let mut locals = vec![];
+    for (lvar, expr) in el.iter() {
+        let local = e.local_gen().get_unnamed_for_tempname(&lvar.1.1).clone();
+        instrs.push(emit_expr::emit_expr(e, env, expr)?);
+        instrs.push(instr::pop_l(local));
+        locals.push(local);
+    }
 
-        let load_args = InstrSeq::gather(instrs);
-        let mut instrs = vec![];
-        for l in locals.iter() {
-            instrs.push({
-                let label_done = e.label_gen_mut().next_regular();
-                InstrSeq::gather(vec![
-                    instr::push_l(*l),
-                    instr::dup(),
-                    instr::is_type_c(IsTypeOp::Null),
-                    instr::jmp_nz(label_done),
-                    instr::wh_result(),
-                    instr::label(label_done),
-                    instr::pop_l(*l),
-                ])
-            });
-        }
-
-        let unpack = InstrSeq::gather(instrs);
-        let await_all = InstrSeq::gather(vec![instr::await_all_list(locals), instr::pop_c()]);
-        let block_instrs = emit_stmts(e, env, block)?;
-        Ok((
-            // before
-            instr::empty(),
-            // inner
+    let load_args = InstrSeq::gather(instrs);
+    let mut instrs = vec![];
+    for l in locals.iter() {
+        instrs.push({
+            let label_done = e.label_gen_mut().next_regular();
             InstrSeq::gather(vec![
-                load_args,
-                emit_pos(pos),
-                await_all,
-                unpack,
-                block_instrs,
-            ]),
-            // after
-            instr::empty(),
-        ))
-    })
+                instr::push_l(*l),
+                instr::dup(),
+                instr::is_type_c(IsTypeOp::Null),
+                instr::jmp_nz(label_done),
+                instr::wh_result(),
+                instr::label(label_done),
+                instr::pop_l(*l),
+            ])
+        });
+    }
+
+    let unpack = InstrSeq::gather(instrs);
+    let await_all = InstrSeq::gather(vec![instr::await_all_list(locals), instr::pop_c()]);
+    let block_instrs = emit_stmts(e, env, block)?;
+    Ok(InstrSeq::gather(vec![
+        load_args,
+        emit_pos(pos),
+        await_all,
+        unpack,
+        block_instrs,
+    ]))
 }
 
 fn emit_using<'a, 'arena, 'decl>(
@@ -1363,6 +1372,19 @@ fn emit_stmts<'a, 'arena, 'decl>(
     ))
 }
 
+fn emit_block_with_temps<'a, 'arena, 'decl>(
+    env: &mut Env<'a, 'arena>,
+    emitter: &mut Emitter<'arena, 'decl>,
+    lids: &Option<Vec<ast::Lid>>,
+    block: &[ast::Stmt],
+) -> Result<InstrSeq<'arena>> {
+    if let Some(lids) = lids {
+        scope::with_unnamed_temps(emitter, lids, |e| emit_stmts(e, env, block))
+    } else {
+        emit_stmts(emitter, env, block)
+    }
+}
+
 fn emit_block<'a, 'arena, 'decl>(
     env: &mut Env<'a, 'arena>,
     emitter: &mut Emitter<'arena, 'decl>,
@@ -1510,7 +1532,7 @@ pub fn emit_final_stmt<'a, 'arena, 'decl>(
 ) -> Result<InstrSeq<'arena>> {
     match &stmt.1 {
         a::Stmt_::Throw(_) | a::Stmt_::Return(_) | a::Stmt_::YieldBreak => emit_stmt(e, env, stmt),
-        a::Stmt_::Block(box (_, stmts)) => emit_final_stmts(env, e, stmts),
+        a::Stmt_::Block(box (None, stmts)) => emit_final_stmts(env, e, stmts),
         _ => {
             let ret = emit_dropthrough_return(e, env)?;
             Ok(InstrSeq::gather(vec![emit_stmt(e, env, stmt)?, ret]))

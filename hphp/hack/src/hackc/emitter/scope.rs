@@ -13,6 +13,40 @@ use hhbc::Opcode;
 use hhbc::Pseudo;
 use instruction_sequence::instr;
 use instruction_sequence::InstrSeq;
+use oxidized::ast::Lid;
+use oxidized::local_id;
+
+/// Run emit () in a new unnamed temporary scope, to produce an instruction
+/// blocks. If emit () registered any unnamed locals, the block will unset these
+/// temporaries at the end, and also be wrapped in a try/catch that will unset
+/// these unnamed locals upon exception.
+pub fn with_unnamed_temps<'arena, 'decl, F>(
+    e: &mut Emitter<'arena, 'decl>,
+    lids: &[Lid],
+    emit: F,
+) -> Result<InstrSeq<'arena>>
+where
+    F: FnOnce(&mut Emitter<'arena, 'decl>) -> Result<InstrSeq<'arena>>,
+{
+    let local_counter = e.local_gen().counter;
+    e.local_gen_mut().dedicated.temp_map.push();
+    for lid in lids {
+        e.local_gen_mut()
+            .init_unnamed_for_tempname(local_id::get_name(&lid.1));
+    }
+    let instrs = emit(e)?;
+    e.local_gen_mut().dedicated.temp_map.pop();
+    if local_counter == e.local_gen().counter {
+        return Ok(instrs);
+    }
+    let unset_locals = unset_unnamed_locals(local_counter.next, e.local_gen().counter.next);
+    e.local_gen_mut().counter = local_counter;
+    Ok(wrap_inner_in_try_catch(
+        e.label_gen_mut(),
+        (instr::empty(), instrs, unset_locals.clone()),
+        unset_locals,
+    ))
+}
 
 /// Run emit () in a new unnamed local scope, which produces three instruction
 /// blocks -- before, inner, after. If emit () registered any unnamed locals, the

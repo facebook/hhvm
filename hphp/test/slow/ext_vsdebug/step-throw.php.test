@@ -1,0 +1,21 @@
+<?hh
+
+class MyException extends Exception {}
+
+function bar() {
+  throw new MyException();
+}
+
+function foo() {
+  bar();
+  echo "Skipped\n";
+}
+
+<<__EntryPoint>> function main() {
+  try {
+    foo();
+  } catch (MyException $e) {
+    echo "Caught\n";
+  }
+}
+

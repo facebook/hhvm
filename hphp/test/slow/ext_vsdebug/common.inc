@@ -245,6 +245,61 @@ function setBreakpoints($breakpoints, $verify = true) {
   }
 }
 
+function stepCommand($cmd) :mixed{
+  $seq = sendVsCommand(darray[
+    "command" => $cmd,
+    "type" => "request",
+    "arguments" => darray["threadId" => 1]]);
+  $msg = json_decode(getNextVsDebugMessage(), true);
+  checkObjEqualRecursively($msg, darray[
+    "type" => "response",
+    "command" => $cmd,
+    "request_seq" => $seq,
+    "success" => true]);
+
+  $msg = json_decode(getNextVsDebugMessage(), true);
+  checkObjEqualRecursively($msg, darray[
+    "type" => "event",
+    "event" => "continued",
+    "body" => darray[
+        "threadId" => 1
+    ]]);
+}
+
+function verifyStopLine($frames, $line, $file) :mixed{
+  $msg = json_decode(getNextVsDebugMessage(), true);
+  checkObjEqualRecursively($msg, darray[
+    "type" => "event",
+    "event" => "stopped",
+    "body" => darray[
+        "threadId" => 1
+    ]]);
+
+  $seq = sendVsCommand(darray[
+    "command" => "stackTrace",
+    "type" => "request",
+    "arguments" => darray[
+      "threadId" => 1
+    ]]);
+
+  $msg = json_decode(getNextVsDebugMessage(), true);
+  checkObjEqualRecursively($msg, darray[
+    "type" => "response",
+    "command" => "stackTrace",
+    "request_seq" => $seq,
+    "success" => true,
+    "body" => darray[
+        "totalFrames" => $frames,
+        "stackFrames" => varray[
+          darray[
+            "source" => darray["path" => $file, "name" => str_replace(".test", "", basename($file))],
+            "line" => $line,
+          ]
+        ]
+      ]
+    ]);
+}
+
 function vsDebugLaunch($scriptPath, $sendDefaultInit = true, $breakpoints = varray[]) {
   $descriptorspec = darray[
      0 => varray["pipe", "r"], // stdin

@@ -2,62 +2,7 @@
 abstract final class ExtVsdebugStep {
   public static $path;
 }
-function verifyStopLine($frames, $line) :mixed{
 
-
-  $msg = json_decode(getNextVsDebugMessage(), true);
-  checkObjEqualRecursively($msg, darray[
-    "type" => "event",
-    "event" => "stopped",
-    "body" => darray[
-        "threadId" => 1
-    ]]);
-
-  $seq = sendVsCommand(darray[
-    "command" => "stackTrace",
-    "type" => "request",
-    "arguments" => darray[
-      "threadId" => 1
-    ]]);
-
-  $msg = json_decode(getNextVsDebugMessage(), true);
-  checkObjEqualRecursively($msg, darray[
-    "type" => "response",
-    "command" => "stackTrace",
-    "request_seq" => $seq,
-    "success" => true,
-    "body" => darray[
-        "totalFrames" => $frames,
-        "stackFrames" => varray[
-          darray[
-            "source" => darray["path" => ExtVsdebugStep::$path, "name" => str_replace(".test", "", basename(ExtVsdebugStep::$path))],
-            "line" => $line,
-          ]
-        ]
-      ]
-    ]);
-}
-
-function stepCommand($cmd) :mixed{
-  $seq = sendVsCommand(darray[
-    "command" => $cmd,
-    "type" => "request",
-    "arguments" => darray["threadId" => 1]]);
-  $msg = json_decode(getNextVsDebugMessage(), true);
-  checkObjEqualRecursively($msg, darray[
-    "type" => "response",
-    "command" => $cmd,
-    "request_seq" => $seq,
-    "success" => true]);
-
-  $msg = json_decode(getNextVsDebugMessage(), true);
-  checkObjEqualRecursively($msg, darray[
-    "type" => "event",
-    "event" => "continued",
-    "body" => darray[
-        "threadId" => 1
-    ]]);
-}
 <<__EntryPoint>> function main() :mixed{
 require(__DIR__ . '/common.inc');
 
@@ -67,8 +12,7 @@ $breakpoints = varray[
    darray[
      "path" => __FILE__ . ".test",
      "breakpoints" => varray[
-       darray["line" => 9, "calibratedLine" => 9, "condition" => ""],
-       darray["line" => 13, "calibratedLine" => 13, "condition" => ""],
+       darray["line" => 17, "calibratedLine" => 17, "condition" => ""],
      ]]
    ];
 
@@ -83,64 +27,61 @@ verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[0]);
 // Step over.
 stepCommand("next");
 checkForOutput($testProcess, "hello world 1\n", "stdout");
-verifyStopLine(1, 10);
+verifyStopLine(1, 18, __FILE__.".test");
 
 // Step in
 stepCommand("stepIn");
-verifyStopLine(2, 4);
+verifyStopLine(2, 11, __FILE__.".test");
 
 // Step over.
 stepCommand("next");
-verifyStopLine(2, 5);
+verifyStopLine(2, 12, __FILE__.".test");
 
 // Step out.
 stepCommand("stepOut");
-verifyStopLine(1, 11);
+verifyStopLine(1, 18, __FILE__.".test");
 
 // Step over function.
 stepCommand("next");
-verifyStopLine(1, 12);
+verifyStopLine(1, 19, __FILE__.".test");
+stepCommand("next");
+verifyStopLine(1, 20, __FILE__.".test");
 
-// Continue to location hits bp on the way to the target line.
-$seq = sendVsCommand(darray[
-  "command" => "fb_continueToLocation",
-  "type" => "request",
-  "seq" => 5,
-  "arguments" =>
-    darray[
-      "threadId" => 1,
-      "source" => darray["path" => ExtVsdebugStep::$path],
-      "line" => 15
-    ]]);
-$msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, darray[
-  "type" => "event",
-  "event" => "output",
-  "body" => darray[
-      "category" => "info",
-  ]]);
-
-$msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, darray[
-  "type" => "response",
-  "command" => "fb_continueToLocation",
-  "request_seq" => $seq]);
-
-$msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, darray[
-  "type" => "event",
-  "event" => "continued"]);
-
-checkForOutput($testProcess, "hello world 2\n", "stdout");
-verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[1]);
-
-// Resume and exit.
+// Set breakpoint in baz
+$breakpoints = vec[
+  dict[
+    "path" => __FILE__.".test",
+    "breakpoints" => vec[
+      dict["line" => 4, "calibratedLine" => 4, "condition" => ""],
+    ],
+  ],
+];
+setBreakpoints($breakpoints);
 resumeTarget();
 
+// Hit breakpoint on baz
+verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[0]);
 
-checkForOutput($testProcess, "hello world 3\n", "stdout");
-checkForOutput($testProcess, "hello world 4\n", "stdout");
-checkForOutput($testProcess, "hello world 5\n", "stdout");
+// Set breakpoint on main after returning from the current function
+$breakpoints = vec[
+  dict[
+    "path" => __FILE__.".test",
+    "breakpoints" => vec[
+      dict["line" => 21, "calibratedLine" => 21, "condition" => ""],
+    ],
+  ],
+];
+setBreakpoints($breakpoints);
+
+// Step out to bar where no breakpoint was set
+stepCommand("stepOut");
+verifyStopLine(3, 7, __FILE__.".test");
+resumeTarget();
+
+verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[0]);
+resumeTarget();
+
+checkForOutput($testProcess, "hello world 15\n", "stdout");
 vsDebugCleanup($testProcess);
 
 echo "OK!\n";

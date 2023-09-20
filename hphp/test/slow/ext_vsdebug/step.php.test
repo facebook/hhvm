@@ -1,16 +1,22 @@
 <?hh
 
+function baz() {
+  return 1;
+}
+function bar() {
+  $x = 1 + baz();
+  return $x;
+}
 function foo() {
   $x = 1;
   $y = 2;
-  $z = 3;
+  $z = bar();
+  return $x + $y + $z;
 }
 <<__EntryPoint>> function main() {
 echo "hello world 1\n";
-foo();
-foo();
-echo "hello world 2\n";
-echo "hello world 3\n";
-echo "hello world 4\n";
-echo "hello world 5\n";
+$a = foo();
+$b = foo();
+$c = foo();
+echo "hello world ".($a + $b + $c)."\n";
 }

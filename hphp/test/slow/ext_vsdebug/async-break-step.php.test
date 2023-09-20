@@ -1,0 +1,24 @@
+<?hh
+
+async function foo() {
+  await RescheduleWaitHandle::create(1, 10);
+  echo "foo\n";
+}
+
+async function bar() {
+  await RescheduleWaitHandle::create(1, 0);
+  echo "bar\n";
+}
+
+async function submain1() {
+  $a = foo();
+  $b = bar();
+  await $a;
+  await $b;
+}
+
+<<__EntryPoint>>
+async function main() {
+  await submain1();
+  echo "Done\n";
+}

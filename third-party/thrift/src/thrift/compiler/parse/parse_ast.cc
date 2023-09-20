@@ -203,23 +203,6 @@ class parsing_terminator : public std::runtime_error {
 using include_handler = std::function<t_program*(
     source_range range, const std::string& include_name, const t_program& p)>;
 
-// Finds the path for the given include filename.
-std::string find_include_file(
-    source_location loc,
-    const std::string& filename,
-    const t_program& program,
-    const std::vector<std::string>& search_paths,
-    diagnostics_engine& diags) {
-  auto path_or_error =
-      source_manager::find_include_file(filename, program.path(), search_paths);
-  if (path_or_error.index() == 0) {
-    return std::get<0>(path_or_error);
-  }
-
-  diags.error(loc, "{}", std::get<1>(path_or_error));
-  end_parsing();
-}
-
 // A semantic analyzer and AST builder for a single Thrift program.
 class ast_builder : public parser_actions {
  private:
@@ -1057,17 +1040,17 @@ std::unique_ptr<t_program_bundle> parse_ast(
                                    const std::string& include_name,
                                    const t_program& parent) {
     std::string include_path;
-    try {
-      include_path = find_include_file(
-          range.begin, include_name, parent, params.incl_searchpath, diags);
-    } catch (...) {
+    auto path_or_error = sm.find_include_file(
+        include_name, parent.path(), params.incl_searchpath);
+    if (path_or_error.index() == 1) {
+      diags.error(range.begin, "{}", std::get<1>(path_or_error));
       if (!params.allow_missing_includes) {
-        throw;
+        end_parsing();
       }
       include_path = include_name;
+    } else {
+      include_path = std::get<0>(path_or_error);
     }
-    // Should have thrown an exception if not found.
-    assert(!include_path.empty());
 
     // Skip already parsed files.
     if (auto program = programs->find_program(include_path)) {

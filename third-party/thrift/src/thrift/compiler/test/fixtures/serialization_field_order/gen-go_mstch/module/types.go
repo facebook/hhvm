@@ -289,10 +289,10 @@ func (x *Foo) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -590,10 +590,10 @@ func (x *Foo2) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {

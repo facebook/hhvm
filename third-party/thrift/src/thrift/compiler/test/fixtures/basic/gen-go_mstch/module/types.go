@@ -885,10 +885,10 @@ func (x *MyStruct) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -982,10 +982,10 @@ func (x *MyDataItem) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -1478,10 +1478,10 @@ func (x *MyUnion) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -1640,10 +1640,10 @@ func (x *ReservedKeyword) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -1831,10 +1831,10 @@ func (x *UnionToBeRenamed) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {

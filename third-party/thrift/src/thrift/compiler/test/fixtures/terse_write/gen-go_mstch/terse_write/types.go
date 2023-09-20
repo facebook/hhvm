@@ -160,10 +160,10 @@ func (x *MyStruct) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -1608,10 +1608,10 @@ func (x *MyUnion) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -1780,10 +1780,10 @@ func (x *MyStructWithCustomDefault) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -3121,10 +3121,10 @@ func (x *StructLevelTerseStruct) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -5728,10 +5728,10 @@ func (x *FieldLevelTerseStruct) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -7024,10 +7024,10 @@ func (x *TerseStructWithCustomDefault) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -7338,10 +7338,10 @@ func (x *AdaptedFields) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -7499,10 +7499,10 @@ func (x *WrappedFields) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -7658,10 +7658,10 @@ func (x *TerseException) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {

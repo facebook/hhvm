@@ -323,10 +323,10 @@ func (x *Fields) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {

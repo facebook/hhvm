@@ -551,10 +551,10 @@ func (x *reqGetEntityGetEntity) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -740,10 +740,10 @@ func (x *respGetEntityGetEntity) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -830,10 +830,10 @@ func (x *reqGetEntityGetBool) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -994,10 +994,10 @@ func (x *respGetEntityGetBool) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -1084,10 +1084,10 @@ func (x *reqGetEntityGetByte) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -1249,10 +1249,10 @@ func (x *respGetEntityGetByte) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -1339,10 +1339,10 @@ func (x *reqGetEntityGetI16) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -1503,10 +1503,10 @@ func (x *respGetEntityGetI16) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -1593,10 +1593,10 @@ func (x *reqGetEntityGetI32) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -1757,10 +1757,10 @@ func (x *respGetEntityGetI32) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -1847,10 +1847,10 @@ func (x *reqGetEntityGetI64) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -2011,10 +2011,10 @@ func (x *respGetEntityGetI64) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -2101,10 +2101,10 @@ func (x *reqGetEntityGetDouble) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -2265,10 +2265,10 @@ func (x *respGetEntityGetDouble) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -2355,10 +2355,10 @@ func (x *reqGetEntityGetString) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -2519,10 +2519,10 @@ func (x *respGetEntityGetString) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -2609,10 +2609,10 @@ func (x *reqGetEntityGetBinary) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -2785,10 +2785,10 @@ func (x *respGetEntityGetBinary) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -2875,10 +2875,10 @@ func (x *reqGetEntityGetMap) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -3097,10 +3097,10 @@ func (x *respGetEntityGetMap) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -3187,10 +3187,10 @@ func (x *reqGetEntityGetSet) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -3392,10 +3392,10 @@ func (x *respGetEntityGetSet) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -3482,10 +3482,10 @@ func (x *reqGetEntityGetList) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -3687,10 +3687,10 @@ func (x *respGetEntityGetList) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -3987,10 +3987,10 @@ func (x *reqGetEntityGetLegacyStuff) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -4154,10 +4154,10 @@ func (x *respGetEntityGetLegacyStuff) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -4314,10 +4314,10 @@ func (x *reqGetEntityGetCtxCollision) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -4479,10 +4479,10 @@ func (x *respGetEntityGetCtxCollision) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -4709,10 +4709,10 @@ func (x *reqGetEntityGetCtx1Collision) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {
@@ -4875,10 +4875,10 @@ func (x *respGetEntityGetCtx1Collision) Read(p thrift.Protocol) error {
                 return err
             }
         }
-    }
 
-    if err := p.ReadFieldEnd(); err != nil {
-        return err
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
     }
 
     if err := p.ReadStructEnd(); err != nil {

@@ -1,4 +1,4 @@
 File "xhp_cvar_arity.php", line 7, characters 5-10:
 Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "collections/Vector.hhi", line 45, characters 15-20:
+  File "collections/Vector.hhi", line 48, characters 15-20:
   Definition is here

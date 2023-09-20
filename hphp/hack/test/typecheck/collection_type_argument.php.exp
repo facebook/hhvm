@@ -30,11 +30,11 @@ Some type arguments violate their constraints (Typing[4323])
   But got `bool`
 File "collection_type_argument.php", line 31, characters 3-19:
 Some type arguments violate their constraints (Typing[4323])
-  File "collections/Map.hhi", line 54, characters 19-20:
+  File "collections/Map.hhi", line 57, characters 19-20:
   `Tk` is a constrained type parameter
-  File "collections/Map.hhi", line 54, characters 25-32:
+  File "collections/Map.hhi", line 57, characters 25-32:
   This type constraint is violated
-  File "collections/Map.hhi", line 54, characters 25-32:
+  File "collections/Map.hhi", line 57, characters 25-32:
   Expected `arraykey`
   File "collection_type_argument.php", line 31, characters 7-10:
   But got `bool`

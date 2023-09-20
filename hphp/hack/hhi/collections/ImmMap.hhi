@@ -18,6 +18,8 @@
 namespace HH {
 
   /**
+   * **Prefer `dict` over `ImmMap`**.
+   *
    * `ImmMap` is an immutable `Map`. HHVM provides a native implementation for
    * this class. The PHP class definition below is not actually used at run time;
    * it is simply provided for the typechecker and for developer reference.

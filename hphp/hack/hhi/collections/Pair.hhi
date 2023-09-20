@@ -18,6 +18,8 @@
 namespace HH {
 
   /**
+   * **Prefer tuples over `Pair`**. Example: `tuple(1, 2)`.
+   *
    * `Pair` is an immutable, fixed-size collection with exactly two elements
    * (possibly of different types). HHVM provides a native implementation for
    * this class.  The Hack class definition below is not actually used at run

@@ -4,6 +4,8 @@
 namespace {
 
   /**
+   * **Prefer Hack arrays (`vec`, `dict`, `shape`, `keyset`) over collection types (`Vector`, `Map`, etc.)**.
+   *
    * The base interface implemented for a collection type so that base information
    * such as count and its items are available. Every concrete class indirectly
    * implements this interface.

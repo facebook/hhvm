@@ -4,11 +4,11 @@ Typing error (Typing[4110])
   Expected `num` because this is used in an arithmetic operation
   File "foreach_vector.php", line 18, characters 19-21:
   But got `Foo`
-  File "collections/Vector.hhi", line 45, characters 52-53:
+  File "collections/Vector.hhi", line 48, characters 52-53:
     via this generic `Tv`
-  File "collections/interfaces.hhi", line 571, characters 25-26:
+  File "collections/interfaces.hhi", line 573, characters 25-26:
     via this generic `Tv`
-  File "collections/interfaces.hhi", line 302, characters 27-28:
+  File "collections/interfaces.hhi", line 304, characters 27-28:
     via this generic `Tv`
   File "interfaces.hhi", line 115, characters 23-24:
     via this generic `Tv`

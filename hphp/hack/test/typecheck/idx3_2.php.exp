@@ -4,9 +4,9 @@ Invalid return type (Typing[4110])
   Expected `string`
   File "idx3_2.php", line 3, characters 27-29:
   But got `int`
-  File "collections/Map.hhi", line 55, characters 32-33:
+  File "collections/Map.hhi", line 58, characters 32-33:
     via this generic `Tv`
-  File "collections/interfaces.hhi", line 1106, characters 26-27:
+  File "collections/interfaces.hhi", line 1108, characters 26-27:
     via this generic `Tv`
-  File "collections/interfaces.hhi", line 840, characters 26-27:
+  File "collections/interfaces.hhi", line 842, characters 26-27:
     via this generic `Tv`

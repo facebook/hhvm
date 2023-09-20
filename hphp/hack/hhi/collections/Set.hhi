@@ -18,6 +18,9 @@
 namespace HH {
 
   /**
+   * **Prefer `keyeset` over `Set`**. If you need reference semantics,
+   * you can wrap the `keyset` in a `Ref`.
+   *
    * `Set` is an ordered set-style collection. HHVM provides a native
    * implementation for this class. The PHP class definition below is not
    * actually used at run time; it is simply provided for the typechecker and

@@ -4,5 +4,5 @@ Invalid argument (Typing[4110])
   Expected `int`
   File "map_lambda_bad_pos.php", line 4, characters 19-24:
   But got `string`
-  File "collections/Map.hhi", line 203, characters 17-18:
+  File "collections/Map.hhi", line 206, characters 17-18:
     via this generic `Tk`

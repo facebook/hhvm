@@ -2,7 +2,7 @@ File "union_fun.bad.php", line 6, characters 16-17:
 Invalid argument (Typing[4110])
   File "union_fun.bad.php", line 6, characters 11-13:
   Expected `int`
-  File "collections/Set.hhi", line 196, characters 25-26:
+  File "collections/Set.hhi", line 199, characters 25-26:
     via this generic `Tu`
   File "union_fun.bad.php", line 5, characters 39-41:
   But got `Awaitable<int>` (result of an `async` function)
@@ -10,7 +10,7 @@ File "union_fun.bad.php", line 6, characters 16-17:
 Invalid argument (Typing[4110])
   File "union_fun.bad.php", line 6, characters 11-13:
   Expected `int`
-  File "collections/Vector.hhi", line 185, characters 47-48:
+  File "collections/Vector.hhi", line 188, characters 47-48:
     via this generic `Tu`
   File "union_fun.bad.php", line 5, characters 39-41:
   But got `Awaitable<int>` (result of an `async` function)
@@ -18,7 +18,7 @@ File "union_fun.bad.php", line 7, characters 16-66:
 Invalid argument (Typing[4110])
   File "union_fun.bad.php", line 7, characters 11-13:
   Expected `int`
-  File "collections/Set.hhi", line 196, characters 25-26:
+  File "collections/Set.hhi", line 199, characters 25-26:
     via this generic `Tu`
   File "union_fun.bad.php", line 7, characters 48-50:
   But got `Awaitable<int>` (result of an `async` function)
@@ -26,7 +26,7 @@ File "union_fun.bad.php", line 7, characters 16-66:
 Invalid argument (Typing[4110])
   File "union_fun.bad.php", line 7, characters 11-13:
   Expected `int`
-  File "collections/Vector.hhi", line 185, characters 47-48:
+  File "collections/Vector.hhi", line 188, characters 47-48:
     via this generic `Tu`
   File "union_fun.bad.php", line 7, characters 48-50:
   But got `Awaitable<int>` (result of an `async` function)

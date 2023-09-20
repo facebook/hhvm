@@ -1,6 +1,6 @@
 File "pair-literal-3.php", line 11, characters 15-39:
 Wrong number of type arguments (expected 2, got 3) (Typing[4101])
-  File "collections/Pair.hhi", line 45, characters 15-18:
+  File "collections/Pair.hhi", line 47, characters 15-18:
   Definition is here
 File "pair-literal-3.php", line 12, characters 17-17:
 Incompatible pair values (Typing[4110])

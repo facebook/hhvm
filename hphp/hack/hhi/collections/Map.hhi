@@ -18,6 +18,9 @@
 namespace HH {
 
   /**
+   * **Prefer `dict` over `Map`**. If you need reference semantics,
+   * you can wrap the `dict` in an `Ref`.
+   *
    * `Map` is an ordered dictionary-style collection. HHVM provides a native
    * implementation for this class. The PHP class definition below is not
    * actually used at run time; it is simply provided for the typechecker and for

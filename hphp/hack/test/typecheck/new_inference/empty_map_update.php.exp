@@ -2,11 +2,11 @@ File "empty_map_update.php", line 11, characters 3-15:
 Invalid assignment (Typing[4110])
   File "empty_map_update.php", line 5, characters 8-13:
   Expected `nothing` because type parameter `Tv` of `HH\Map` could not be determined. Please add explicit type parameters to the invocation of `HH\Map`
-  File "collections/Map.hhi", line 55, characters 32-33:
+  File "collections/Map.hhi", line 58, characters 32-33:
     via this generic `Tv`
-  File "collections/interfaces.hhi", line 1106, characters 26-27:
+  File "collections/interfaces.hhi", line 1108, characters 26-27:
     via this generic `Tv`
-  File "collections/interfaces.hhi", line 840, characters 26-27:
+  File "collections/interfaces.hhi", line 842, characters 26-27:
     via this generic `Tv`
   File "empty_map_update.php", line 4, characters 32-46:
   But got `Map<string, int>`

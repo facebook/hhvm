@@ -2,7 +2,7 @@ File "map_corner_case.php", line 24, characters 5-17:
 Invalid assignment (Typing[4110])
   File "map_corner_case.php", line 13, characters 27-32:
   Expected `nothing` because type parameter `Tv` of `HH\Map` could not be determined. Please add explicit type parameters to the invocation of `HH\Map`
-  File "collections/Map.hhi", line 441, characters 36-37:
+  File "collections/Map.hhi", line 444, characters 36-37:
     via this generic `Tv`
   File "map_corner_case.php", line 14, characters 27-32:
   But got `Map<(arraykey & _), _>`
@@ -10,7 +10,7 @@ File "map_corner_case.php", line 25, characters 5-17:
 Invalid assignment (Typing[4110])
   File "map_corner_case.php", line 5, characters 14-19:
   Expected `nothing` because type parameter `Tv` of `HH\Map` could not be determined. Please add explicit type parameters to the invocation of `HH\Map`
-  File "collections/Map.hhi", line 441, characters 36-37:
+  File "collections/Map.hhi", line 444, characters 36-37:
     via this generic `Tv`
   File "map_corner_case.php", line 13, characters 27-32:
   But got `Map<(arraykey & _), nothing>`
@@ -18,7 +18,7 @@ File "map_corner_case.php", line 25, characters 5-17:
 Invalid assignment (Typing[4110])
   File "map_corner_case.php", line 12, characters 27-32:
   Expected `nothing` because type parameter `Tv` of `HH\Map` could not be determined. Please add explicit type parameters to the invocation of `HH\Map`
-  File "collections/Map.hhi", line 441, characters 36-37:
+  File "collections/Map.hhi", line 444, characters 36-37:
     via this generic `Tv`
   File "map_corner_case.php", line 13, characters 27-32:
   But got `Map<(arraykey & _), nothing>`

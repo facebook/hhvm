@@ -4,7 +4,7 @@ Invalid argument (Typing[4110])
   Expected `string`
   File "bad_contra_constraint_2.php", line 19, characters 20-24:
   But got `mixed`
-  File "collections/interfaces.hhi", line 840, characters 26-27:
+  File "collections/interfaces.hhi", line 842, characters 26-27:
     via this generic `Tv`
   File "interfaces.hhi", line 115, characters 49-50:
     via this generic `Tv`

@@ -4,7 +4,7 @@ Hack arrays are value types for storing iterable data. The types
 available are [`vec`](/hack/arrays-and-collections/vec-keyset-and-dict#vec), [`dict`](/hack/arrays-and-collections/vec-keyset-and-dict#dict) and [`keyset`](/hack/arrays-and-collections/vec-keyset-and-dict#keyset). **When in doubt, use Hack
 arrays**.
 
-Collections are object types for storing iterable data. The types
+Hack collections are **deprecated** object types for storing iterable data. The types
 available include `Vector`, `Map`, `Set`, `Pair` and helper
 interfaces.
 

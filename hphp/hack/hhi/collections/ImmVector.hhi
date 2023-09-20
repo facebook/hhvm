@@ -18,6 +18,8 @@
 namespace HH {
 
   /**
+   * **Prefer `vec` over `ImmVector`**.
+   *
    * `ImmVector` is an immutable `Vector`. HHVM provides a native implementation
    * for this class. The PHP class definition below is not actually used at run
    * time; it is simply provided for the typechecker and for developer reference.

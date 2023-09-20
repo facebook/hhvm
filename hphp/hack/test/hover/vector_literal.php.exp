@@ -1,4 +1,7 @@
 final class Vector
+**Prefer `vec` over `Vector`**. If you need reference semantics,
+you can wrap the `vec` in a `Ref`.
+
 `Vector` is a stack-like collection. HHVM provides a native implementation
 for this class. The PHP class definition below is not actually used at run
 time; it is simply provided for the typechecker and for developer reference.

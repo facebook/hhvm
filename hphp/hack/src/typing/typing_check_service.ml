@@ -193,7 +193,7 @@ let process_file
         {
           file_errors;
           deferred_decls = [];
-          file_map_reduce_data = Map_reduce.map ctx fn tasts;
+          file_map_reduce_data = Map_reduce.map ctx fn tasts file_errors;
         }
       | Error () ->
         let deferred_decls =

@@ -13,7 +13,8 @@ module type MapReducer = sig
 
   val is_enabled : TypecheckerOptions.t -> bool
 
-  val map : Provider_context.t -> Relative_path.t -> Tast.by_names -> t
+  val map :
+    Provider_context.t -> Relative_path.t -> Tast.by_names -> Errors.t -> t
 
   val reduce : t -> t -> t
 
@@ -116,7 +117,7 @@ type t = map_reducer_result MRMap.t
 
 let empty = MRMap.empty
 
-let map ctx path tasts =
+let map ctx path tasts errors =
   let tcopt = Provider_context.get_tcopt ctx in
   let results =
     List.filter_map all_map_reducers ~f:(fun (is_enabled, mr) ->
@@ -124,7 +125,7 @@ let map ctx path tasts =
           match type_for mr with
           | TypeForAny typed_mr ->
             let (module MR) = implementation_for typed_mr in
-            Some (mr, MapReducerResult (typed_mr, MR.map ctx path tasts))
+            Some (mr, MapReducerResult (typed_mr, MR.map ctx path tasts errors))
         else
           None)
   in

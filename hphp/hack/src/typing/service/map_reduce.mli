@@ -19,7 +19,8 @@ module type MapReducer = sig
   (** A map function that takes in a TAST and produces the intermediate data.
 
   Note that we don't make guarantees about the uniqueness of the file path. *)
-  val map : Provider_context.t -> Relative_path.t -> Tast.by_names -> t
+  val map :
+    Provider_context.t -> Relative_path.t -> Tast.by_names -> Errors.t -> t
 
   (** Reduce two intermediate data elements. *)
   val reduce : t -> t -> t
@@ -40,7 +41,8 @@ type t
 val empty : t
 
 (** Take in a TAST and analyze it. *)
-val map : Provider_context.t -> Relative_path.t -> Tast.by_names -> t
+val map :
+  Provider_context.t -> Relative_path.t -> Tast.by_names -> Errors.t -> t
 
 (** Reduce two analysis into one. *)
 val reduce : t -> t -> t

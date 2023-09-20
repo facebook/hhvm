@@ -2472,7 +2472,7 @@ let handle_mode
     print_errors_if_present (parse_errors @ Errors.get_sorted_error_list errors);
     let mapped =
       Relative_path.Map.elements tasts
-      |> List.map ~f:(fun (fn, tasts) -> Map_reduce.map ctx fn tasts)
+      |> List.map ~f:(fun (fn, tasts) -> Map_reduce.map ctx fn tasts errors)
     in
     let reduced =
       List.fold mapped ~init:Map_reduce.empty ~f:Map_reduce.reduce

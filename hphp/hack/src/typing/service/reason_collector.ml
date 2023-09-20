@@ -278,8 +278,10 @@ let is_enabled tcopt =
   |> Option.value ~default:false
 
 let map
-    (ctx : Provider_context.t) (_path : Relative_path.t) (tasts : Tast.by_names)
-    : t =
+    (ctx : Provider_context.t)
+    (_path : Relative_path.t)
+    (tasts : Tast.by_names)
+    _errors : t =
   Tast.tasts_as_list tasts
   |> List.map ~f:(fun t -> t.Tast_with_dynamic.under_normal_assumptions)
   |> collect_reasons ctx

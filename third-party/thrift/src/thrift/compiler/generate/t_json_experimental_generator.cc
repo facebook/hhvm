@@ -44,10 +44,13 @@ int get_lineno(const t_node& node, source_manager& sm) {
 
 std::string get_filepath(
     const t_node& node, source_manager& sm, std::string compiler_path) {
-  auto path = boost::filesystem::path(
-      resolved_location(node.src_range().begin, sm).file_name());
+  std::string path = resolved_location(node.src_range().begin, sm).file_name();
+  if (auto full_path = sm.found_include_file(path)) {
+    path = std::move(*full_path);
+  }
   return boost::filesystem::relative(
-             boost::filesystem::canonical(path), compiler_path)
+             boost::filesystem::canonical(boost::filesystem::path(path)),
+             compiler_path)
       .generic_string();
 }
 

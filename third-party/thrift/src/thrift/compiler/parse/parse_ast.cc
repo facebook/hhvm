@@ -991,7 +991,7 @@ class ast_builder : public parser_actions {
   // Parses a single .thrift file and populates program_ with the parsed AST.
   void parse_file(source_manager& sm, source_location loc) {
     const std::string& path = program_.path();
-    boost::optional<source> src = sm.get_file(path);
+    auto src = sm.get_file(path);
     if (!src) {
       diags_.error(loc, "failed to open file: {}", path);
       end_parsing();
@@ -1037,19 +1037,15 @@ std::unique_ptr<t_program_bundle> parse_ast(
   include_params.allow_neg_field_keys = true;
 
   include_handler on_include = [&](source_range range,
-                                   const std::string& include_name,
+                                   const std::string& include_path,
                                    const t_program& parent) {
-    std::string include_path;
-    auto path_or_error = sm.find_include_file(
-        include_name, parent.path(), params.incl_searchpath);
-    if (path_or_error.index() == 1) {
-      diags.error(range.begin, "{}", std::get<1>(path_or_error));
+    auto found_or_error = sm.find_include_file(
+        include_path, parent.path(), params.incl_searchpath);
+    if (found_or_error.index() == 1) {
+      diags.error(range.begin, "{}", std::get<1>(found_or_error));
       if (!params.allow_missing_includes) {
         end_parsing();
       }
-      include_path = include_name;
-    } else {
-      include_path = std::get<0>(path_or_error);
     }
 
     // Skip already parsed files.

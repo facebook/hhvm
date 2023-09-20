@@ -20,12 +20,11 @@
 
 #include <cstdint>
 #include <deque>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <variant>
 #include <vector>
-
-#include <boost/optional.hpp>
 
 namespace apache {
 namespace thrift {
@@ -112,6 +111,9 @@ class source_manager {
 
   std::unordered_map<std::string, source> file_source_map_;
 
+  // Maps from filepaths present in the AST to filepaths on disk.
+  std::unordered_map<std::string, std::string> found_includes_;
+
   const source_info* get_source(uint_least32_t source_id) const {
     return source_id > 0 && source_id <= sources_.size()
         ? &sources_[source_id - 1]
@@ -127,7 +129,8 @@ class source_manager {
   // The file can be a real file or a virtual one previously registered with
   // add_virtual_file.
   // Returns an empty optional if opening or reading the file fails.
-  boost::optional<source> get_file(const std::string& file_name);
+  // Makes use of the result of previous calls to find_include_file.
+  std::optional<source> get_file(const std::string& file_name);
 
   // Adds a virtual file with the specified name and content.
   source add_virtual_file(const std::string& file_name, const std::string& src);
@@ -143,11 +146,15 @@ class source_manager {
   const char* get_text(source_location loc) const;
 
   // Locates a filename among the include paths.
+  // The resolved path is made available to get_file.
   using path_or_error = std::variant<std::string, std::string>;
-  static path_or_error find_include_file(
+  path_or_error find_include_file(
       const std::string& filename,
       const std::string& program_path,
       const std::vector<std::string>& search_paths);
+  // Queries for a file previously found by find_include_file.
+  std::optional<std::string> found_include_file(
+      const std::string& filename) const;
 };
 
 } // namespace compiler

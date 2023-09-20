@@ -87,14 +87,22 @@ source source_manager::add_source(
   return {source_location(sources_.size(), 0), sv};
 }
 
-boost::optional<source> source_manager::get_file(const std::string& file_name) {
+std::optional<source> source_manager::get_file(const std::string& file_name) {
   if (auto source = file_source_map_.find(file_name);
       source != file_source_map_.end()) {
     return source->second;
   }
 
+  std::string_view path;
+  if (auto itr = found_includes_.find(file_name);
+      itr != found_includes_.end()) {
+    path = itr->second;
+  } else {
+    path = file_name;
+  }
+
   // Read the file.
-  auto f = file(file_name.c_str(), "rb");
+  auto f = file(path.data(), "rb");
   if (!f) {
     return {};
   }
@@ -155,14 +163,22 @@ resolved_location::resolved_location(
 
 source_manager::path_or_error source_manager::find_include_file(
     const std::string& filename,
-    const std::string& program_path,
+    const std::string& parent_path,
     const std::vector<std::string>& search_paths) {
+  if (auto itr = found_includes_.find(filename); itr != found_includes_.end()) {
+    return source_manager::path_or_error{std::in_place_index<0>, itr->second};
+  }
+
+  auto found = [&](std::string path) {
+    found_includes_[filename] = path;
+    return source_manager::path_or_error{
+        std::in_place_index<0>, std::move(path)};
+  };
   // Absolute path? Just try that.
   boost::filesystem::path path(filename);
   if (path.has_root_directory()) {
     try {
-      return source_manager::path_or_error{
-          std::in_place_index<0>, boost::filesystem::canonical(path).string()};
+      return found(boost::filesystem::canonical(path).string());
     } catch (const boost::filesystem::filesystem_error& e) {
       return source_manager::path_or_error{
           std::in_place_index<1>,
@@ -174,7 +190,11 @@ source_manager::path_or_error source_manager::find_include_file(
   // Relative path, start searching
   // new search path with current dir global
   std::vector<std::string> sp = search_paths;
-  auto dir = boost::filesystem::path(program_path).parent_path().string();
+  auto itr = found_includes_.find(parent_path);
+  const std::string& resolved_parent_path =
+      itr != found_includes_.end() ? itr->second : parent_path;
+  auto dir =
+      boost::filesystem::path(resolved_parent_path).parent_path().string();
   dir = dir.empty() ? "." : dir;
   sp.insert(sp.begin(), std::move(dir));
   // Iterate through paths.
@@ -185,8 +205,7 @@ source_manager::path_or_error source_manager::find_include_file(
       sfilename = boost::filesystem::path(*(it)) / filename;
     }
     if (boost::filesystem::exists(sfilename)) {
-      return source_manager::path_or_error{
-          std::in_place_index<0>, sfilename.string()};
+      return found(sfilename.string());
     }
 #ifdef _WIN32
     // On Windows, handle files found at potentially long paths.
@@ -196,8 +215,7 @@ source_manager::path_or_error source_manager::find_include_file(
             .lexically_normal()
             .string();
     if (boost::filesystem::exists(sfilename)) {
-      return source_manager::path_or_error{
-          std::in_place_index<0>, sfilename.string()};
+      return found(sfilename.string());
     }
 #endif
   }
@@ -205,6 +223,14 @@ source_manager::path_or_error source_manager::find_include_file(
   return source_manager::path_or_error{
       std::in_place_index<1>,
       fmt::format("Could not find include file {}", filename)};
+}
+
+std::optional<std::string> source_manager::found_include_file(
+    const std::string& filename) const {
+  if (auto itr = found_includes_.find(filename); itr != found_includes_.end()) {
+    return itr->second;
+  }
+  return {};
 }
 
 } // namespace compiler

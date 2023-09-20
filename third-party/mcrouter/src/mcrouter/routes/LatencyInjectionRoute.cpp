@@ -8,13 +8,17 @@
 #include "mcrouter/routes/LatencyInjectionRoute.h"
 
 #include <folly/Singleton.h>
+#include <folly/futures/HeapTimekeeper.h>
 
 namespace facebook::memcache::mcrouter {
 
 namespace {
-folly::Singleton<folly::ThreadWheelTimekeeperHighRes>
+
+struct McrouterTimekeeperTag {};
+folly::Singleton<folly::HeapTimekeeper, McrouterTimekeeperTag>
     timekeeperHighResSingleton_;
-}
+
+} // namespace
 
 namespace detail {
 folly::ReadMostlySharedPtr<folly::Timekeeper> getTimekeeperHighResSingleton() {

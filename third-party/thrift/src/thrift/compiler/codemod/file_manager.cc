@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <string>
 #include <fmt/core.h>
 #include <folly/FileUtil.h>
 
@@ -162,6 +163,23 @@ size_t file_manager::get_namespace_offset() const {
     return to_offset(program_->definitions().front().src_range().begin);
   }
   return 0;
+}
+
+void file_manager::remove_namespace(std::string language) {
+  if (!program_->namespaces().empty() &&
+      program_->namespaces().find(language) != program_->namespaces().end()) {
+    // get offsets for the namespace statement
+    auto ns_stmt = fmt::format("namespace {} ", language);
+    auto begin_offset = old_content_.find(ns_stmt, 0);
+    size_t end_offset = old_content_.length();
+    if (begin_offset != std::string::npos) {
+      end_offset = old_content_.find("\n", begin_offset);
+      if (end_offset < old_content_.length()) {
+        end_offset++;
+      }
+    }
+    add({begin_offset, end_offset, ""});
+  }
 }
 } // namespace codemod
 } // namespace compiler

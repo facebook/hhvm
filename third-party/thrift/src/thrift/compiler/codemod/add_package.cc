@@ -87,7 +87,7 @@ class add_package {
     return gen.get_longest_package();
   }
 
-  std::string get_replacement_content(const std::string& pkg) const {
+  std::string get_replacement_content(const std::string& pkg) {
     auto content = fmt::format("package \"{}\"\n\n", pkg);
 
     /*
@@ -107,7 +107,13 @@ class add_package {
       };
 
       if (!has_ns("cpp2")) {
-        content += "namespace cpp2 \"cpp2\"\n";
+        if (!has_ns("cpp")) {
+          content += "namespace cpp2 \"cpp2\"\n";
+        } else {
+          fm_.remove_namespace("cpp");
+          content += fmt::format(
+              "namespace cpp2 \"{}.cpp2\"\n", prog_.namespaces().at("cpp"));
+        }
       }
       if (!has_ns("hack") && !has_ns("php")) {
         content += "namespace hack \"\"\n";

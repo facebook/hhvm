@@ -228,3 +228,45 @@ class ThriftPackage(unittest.TestCase):
                 namespace cpp2 "meta.thrift_test.cpp2.annotation"
                 """,
         )
+
+    def test_cpp2_namespace(self):
+        self.write_and_test(
+            "foo.thrift",
+            """\
+                namespace cpp "thrift.annotation"
+                namespace py3  "thrift.annotation"
+
+                struct foo {}
+
+                """,
+            """\
+                package "meta.com/thrift/annotation"
+
+                namespace cpp2 "thrift.annotation.cpp2"
+                namespace hack ""
+                namespace py3  "thrift.annotation"
+
+                struct foo {}
+                """,
+        )
+
+        self.write_and_test(
+            "foo.thrift",
+            """\
+                namespace hack "thrift.annotation"
+                namespace cpp "thrift.annotation"
+                namespace py3  "thrift.annotation"
+
+                struct foo {}
+
+                """,
+            """\
+                package "meta.com/thrift/annotation"
+
+                namespace cpp2 "thrift.annotation.cpp2"
+                namespace hack "thrift.annotation"
+                namespace py3  "thrift.annotation"
+
+                struct foo {}
+                """,
+        )

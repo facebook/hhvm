@@ -188,7 +188,7 @@ std::string mangle_field_name(const std::string& name) {
   return "__fbthrift_field_" + name;
 }
 
-bool should_mangle_field_storage_name_in_struct(const t_struct& s) {
+bool should_mangle_field_storage_name_in_struct(const t_structured& s) {
   // We don't mangle field name if cpp.methods exist
   return !s.has_annotation({"cpp.methods", "cpp2.methods"});
 }
@@ -907,7 +907,7 @@ bool needs_op_encode(const t_type& type) {
 // - A container has a key or element type marked with `@cpp.UseOpEncode`
 // - A container has an adapted key or element type.
 // - A field is adapted.
-bool needs_op_encode(const t_field& field, const t_struct& strct) {
+bool needs_op_encode(const t_field& field, const t_structured& strct) {
   return (strct.program() &&
           strct.program()->inherit_annotation_or_null(
               strct, kCppUseOpEncodeUri)) ||
@@ -1123,7 +1123,7 @@ class cpp_mstch_typedef : public mstch_typedef {
 class cpp_mstch_struct : public mstch_struct {
  public:
   cpp_mstch_struct(
-      const t_struct* s,
+      const t_structured* s,
       mstch_context& ctx,
       mstch_element_position pos,
       std::shared_ptr<cpp2_generator_context> cpp_ctx)

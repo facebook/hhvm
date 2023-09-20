@@ -157,9 +157,9 @@ class is_eligible_for_constexpr {
 // performed transitively in a depth-first order and interrupted if f returns
 // false.
 template <typename F>
-void for_each_transitive_field(const t_struct* s, F f) {
+void for_each_transitive_field(const t_structured* s, F f) {
   struct field_info {
-    const t_struct* owner;
+    const t_structured* owner;
     size_t index;
   };
   std::unordered_set<const t_field*> seen;
@@ -198,7 +198,7 @@ bool is_stack_arguments(
 
 bool is_mixin(const t_field& field);
 
-inline const t_const* packed_isset(const t_struct& s) {
+inline const t_const* packed_isset(const t_structured& s) {
   return s.find_structured_annotation_or_null(kCppPackIssetUri);
 }
 
@@ -223,7 +223,7 @@ struct mixin_member {
  *
  * this returns {{.mixin="f1", .member="m1"}, {.mixin="f2", .member="m2"}}
  */
-std::vector<mixin_member> get_mixins_and_members(const t_struct& strct);
+std::vector<mixin_member> get_mixins_and_members(const t_structured& strct);
 
 //  get_gen_type_class
 //  get_gen_type_class_with_indirection

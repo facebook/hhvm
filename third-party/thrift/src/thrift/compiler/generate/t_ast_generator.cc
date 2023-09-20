@@ -224,6 +224,8 @@ void t_ast_generator::generate_program() {
       populate_defs(include);
     }
 
+    // Double write to deprecated externed path. (T161963504)
+    // The new path is populated in the Program struct by the schematizer.
     cpp2::SourceInfo info;
     info.fileName() = program.path();
 

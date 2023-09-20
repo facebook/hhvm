@@ -694,6 +694,29 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_program& node) {
   schema->set_map();
   add_definition(*schema, node, &node, intern_value_);
 
+  schema->add_map(val("path"), val(node.path()));
+
+  if (!node.language_includes().empty()) {
+    auto langs = mapval();
+    for (const auto& [lang, incs] : node.language_includes()) {
+      auto includes = val();
+      includes->set_list();
+      for (const auto& inc : incs) {
+        includes->add_list(val(inc));
+      }
+      langs->add_map(val(lang), std::move(includes));
+    }
+    schema->add_map(val("languageIncludes"), std::move(langs));
+  }
+
+  if (!node.namespaces().empty()) {
+    auto langs = mapval();
+    for (const auto& [lang, langNamespace] : node.namespaces()) {
+      langs->add_map(val(lang), val(langNamespace));
+    }
+    schema->add_map(val("namespaces"), std::move(langs));
+  }
+
   // The remaining fields are intern IDs and have to be stiched in by the
   // caller.
 

@@ -57,6 +57,7 @@ struct Ast {
   4: schema.DefinitionList definitions;
 
   /**
+   * DEPRECATED! Get the information from the Program struct.
    * Information about the files holding the thrift definitions.
    */
   5: map<id.ProgramId, SourceInfo> sources;

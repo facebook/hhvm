@@ -631,6 +631,23 @@ struct Program {
   // TODO(afuller): Fix type resolution order bugs in the parser to make this
   // comment true in all cases.
   4: DefinitionIds definitions;
+
+  /**
+   * The raw path used to identify this program's file to the compiler.
+   */
+  5: string path;
+
+  /**
+   * Per-language include statements.
+   * The key is the beginning of the *_include keyword ("cpp", "hs").
+   */
+  6: map<string, list<string>> languageIncludes;
+
+  /**
+   * Per-language namespace.
+   * The key matches the IDL ("cpp2", "java.swift").
+   */
+  7: map<string, string> namespaces;
 } (py3.hidden)
 
 /** A list of programs, accessible by `ProgramId`. */

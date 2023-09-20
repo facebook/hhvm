@@ -243,14 +243,22 @@ class AstGeneratorTest(unittest.TestCase):
                 """
                 package "test.dev/foo"
                 namespace cpp2 facebook.foo
+                include "bar.thrift"
+                cpp_include "yarpl/Flowable.h"
                 """
             ),
         )
+        write_file("bar.thrift", "")
 
         ast = self.run_thrift("foo.thrift")
         program = ast.programs[0]
         self.assertEqual(program.attrs.name, "foo")
         self.assertEqual(program.attrs.uri, "test.dev/foo")
+        self.assertEqual(program.path, "foo.thrift")
+        self.assertEqual(program.languageIncludes, {"cpp": ["yarpl/Flowable.h"]})
+        self.assertEqual(program.namespaces, {"cpp2": "facebook.foo"})
+        self.assertEqual(program.includes, [2])
+
         self.assertEqual(ast.sources[1].fileName, "foo.thrift")
         self.assertEqual(
             ast.values[ast.sources[1].namespaces["cpp2"] - 1].stringValue,

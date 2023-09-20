@@ -218,83 +218,89 @@ class PythonAsyncProcessor : public apache::thrift::GeneratedAsyncProcessorBase,
          req = std::move(req),
          ctxStack = std::move(ctxStack),
          serializedRequest = std::move(serializedRequest)]() mutable {
-          if (req && req->getShouldStartProcessing()) {
-            if constexpr (
-                kind == apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE) {
-              auto callback =
-                  std::make_unique<apache::thrift::HandlerCallbackBase>(
-                      std::move(req),
-                      std::move(ctxStack),
-                      nullptr,
-                      eb,
-                      tm,
-                      ctx);
-              auto [promise, future] =
-                  folly::makePromiseContract<folly::Unit>();
-              handlePythonServerCallbackOneway(
-                  prot.protocolType(),
-                  ctx,
-                  std::move(promise),
-                  std::move(serializedRequest),
-                  kind);
-              std::move(future)
-                  .via(this->executor)
-                  .thenTry([callback = std::move(callback)](auto&& /* t */) {});
-            } else if constexpr (
-                kind ==
-                apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE) {
-              auto callback = std::make_unique<apache::thrift::HandlerCallback<
-                  ::apache::thrift::ResponseAndServerStream<
-                      std::unique_ptr<::folly::IOBuf>,
-                      std::unique_ptr<::folly::IOBuf>>>>(
-                  std::move(req),
-                  std::move(ctxStack),
-                  detail::return_streaming<ProtocolIn_, ProtocolOut_>,
-                  detail::throw_wrapped<ProtocolIn_, ProtocolOut_>,
-                  ctx->getProtoSeqId(),
-                  eb,
-                  tm,
-                  ctx);
-              auto [promise, future] = folly::makePromiseContract<
-                  ::apache::thrift::ResponseAndServerStream<
-                      std::unique_ptr<::folly::IOBuf>,
-                      std::unique_ptr<::folly::IOBuf>>>();
-              handlePythonServerCallbackStreaming(
-                  prot.protocolType(),
-                  ctx,
-                  std::move(promise),
-                  std::move(serializedRequest),
-                  kind);
-              std::move(future)
-                  .via(this->executor)
-                  .thenTry([callback = std::move(callback)](auto&& t) {
-                    callback->complete(std::move(t));
-                  });
-            } else {
-              auto callback = std::make_unique<apache::thrift::HandlerCallback<
-                  std::unique_ptr<::folly::IOBuf>>>(
-                  std::move(req),
-                  std::move(ctxStack),
-                  detail::return_serialized<ProtocolIn_, ProtocolOut_>,
-                  detail::throw_wrapped<ProtocolIn_, ProtocolOut_>,
-                  ctx->getProtoSeqId(),
-                  eb,
-                  tm,
-                  ctx);
-              auto [promise, future] =
-                  folly::makePromiseContract<std::unique_ptr<folly::IOBuf>>();
-              handlePythonServerCallback(
-                  prot.protocolType(),
-                  ctx,
-                  std::move(promise),
-                  std::move(serializedRequest),
-                  kind);
-              std::move(future)
-                  .via(this->executor)
-                  .thenTry([callback = std::move(callback)](auto&& t) {
-                    callback->complete(std::move(t));
-                  });
+          if (!req) {
+            return;
+          }
+
+          if (!req->getShouldStartProcessing()) {
+            // Ensure request is moved into HandlerCallback, so that request is
+            // always destroyed on its EventBase thread
+            if (eb) {
+              apache::thrift::HandlerCallbackBase::releaseRequest(
+                  std::move(req), eb);
             }
+            return;
+          }
+
+          if constexpr (
+              kind == apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE) {
+            auto callback =
+                std::make_unique<apache::thrift::HandlerCallbackBase>(
+                    std::move(req), std::move(ctxStack), nullptr, eb, tm, ctx);
+            auto [promise, future] = folly::makePromiseContract<folly::Unit>();
+            handlePythonServerCallbackOneway(
+                prot.protocolType(),
+                ctx,
+                std::move(promise),
+                std::move(serializedRequest),
+                kind);
+            std::move(future)
+                .via(this->executor)
+                .thenTry([callback = std::move(callback)](auto&& /* t */) {});
+          } else if constexpr (
+              kind ==
+              apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE) {
+            auto callback = std::make_unique<apache::thrift::HandlerCallback<
+                ::apache::thrift::ResponseAndServerStream<
+                    std::unique_ptr<::folly::IOBuf>,
+                    std::unique_ptr<::folly::IOBuf>>>>(
+                std::move(req),
+                std::move(ctxStack),
+                detail::return_streaming<ProtocolIn_, ProtocolOut_>,
+                detail::throw_wrapped<ProtocolIn_, ProtocolOut_>,
+                ctx->getProtoSeqId(),
+                eb,
+                tm,
+                ctx);
+            auto [promise, future] = folly::makePromiseContract<
+                ::apache::thrift::ResponseAndServerStream<
+                    std::unique_ptr<::folly::IOBuf>,
+                    std::unique_ptr<::folly::IOBuf>>>();
+            handlePythonServerCallbackStreaming(
+                prot.protocolType(),
+                ctx,
+                std::move(promise),
+                std::move(serializedRequest),
+                kind);
+            std::move(future)
+                .via(this->executor)
+                .thenTry([callback = std::move(callback)](auto&& t) {
+                  callback->complete(std::move(t));
+                });
+          } else {
+            auto callback = std::make_unique<apache::thrift::HandlerCallback<
+                std::unique_ptr<::folly::IOBuf>>>(
+                std::move(req),
+                std::move(ctxStack),
+                detail::return_serialized<ProtocolIn_, ProtocolOut_>,
+                detail::throw_wrapped<ProtocolIn_, ProtocolOut_>,
+                ctx->getProtoSeqId(),
+                eb,
+                tm,
+                ctx);
+            auto [promise, future] =
+                folly::makePromiseContract<std::unique_ptr<folly::IOBuf>>();
+            handlePythonServerCallback(
+                prot.protocolType(),
+                ctx,
+                std::move(promise),
+                std::move(serializedRequest),
+                kind);
+            std::move(future)
+                .via(this->executor)
+                .thenTry([callback = std::move(callback)](auto&& t) {
+                  callback->complete(std::move(t));
+                });
           }
         });
   }

@@ -85,13 +85,24 @@ struct LiftAwait {
     replace_dd: Option<nast::Expr_>,
 }
 
-fn sequentialise(pos: Pos, con: Vec<(Lid, nast::Expr)>, seq: Vec<nast::Stmt>) -> Vec<nast::Stmt> {
-    if con.is_empty() {
+fn sequentialise(
+    pos: Pos,
+    con: Vec<(Lid, nast::Expr)>,
+    seq: Vec<nast::Stmt>,
+    mut tmps: Vec<Lid>,
+) -> Vec<nast::Stmt> {
+    if con.is_empty() && tmps.is_empty() {
         seq
+    } else if con.is_empty() {
+        let block = Stmt_::Block(Box::new((Some(tmps), Block(seq))));
+        vec![Stmt(pos, block)]
     } else {
-        let ids = Some(con.iter().map(|(lid, _)| lid.clone()).collect());
+        tmps.extend(con.iter().map(|(lid, _)| lid.clone()));
         let awaitall = Stmt_::Awaitall(Box::new((con, Block(seq))));
-        let block = Stmt_::Block(Box::new((ids, Block(vec![Stmt(pos.clone(), awaitall)]))));
+        let block = Stmt_::Block(Box::new((
+            Some(tmps),
+            Block(vec![Stmt(pos.clone(), awaitall)]),
+        )));
         vec![Stmt(pos, block)]
     }
 }
@@ -102,9 +113,10 @@ fn sequentialise_stmt(
     stmt: Stmt_,
     con: Vec<(Lid, nast::Expr)>,
     mut seq: Vec<nast::Stmt>,
+    tmps: Vec<Lid>,
 ) {
     seq.push(Stmt(pos.clone(), stmt));
-    let mut stmts = sequentialise(pos.clone(), con, seq);
+    let mut stmts = sequentialise(pos.clone(), con, seq, tmps);
     if stmts.len() == 1 {
         *elem = stmts.remove(0)
     } else {
@@ -115,15 +127,7 @@ fn sequentialise_stmt(
 impl LiftAwait {
     fn gen_tmp_local(&mut self) -> LocalId {
         let name = special_idents::TMP_VAR_PREFIX.to_string()
-            + "_lift_await"
-            + &self.tmp_var_counter.to_string();
-        self.tmp_var_counter += 1;
-        (0, name)
-    }
-
-    fn gen_nontmp_local(&mut self) -> LocalId {
-        let name = "$__lift_await".to_string()
-            + special_idents::TMP_VAR_PREFIX
+            + "lift_await"
             + &self.tmp_var_counter.to_string();
         self.tmp_var_counter += 1;
         (0, name)
@@ -135,30 +139,37 @@ impl LiftAwait {
         pos: &Pos,
         con: &mut Vec<(Lid, nast::Expr)>,
         seq: &mut Vec<nast::Stmt>,
+        tmps: &mut Vec<Lid>,
     ) {
         match e {
             Expr_::Pipe(box (_, expr1, expr2)) => {
                 let mut con1 = vec![];
                 let mut seq1 = vec![];
-                self.extract_await(expr1, &mut con1, &mut seq1);
+                let mut tmps1 = vec![];
+                self.extract_await(expr1, &mut con1, &mut seq1, &mut tmps1);
                 if !ContainsAwait::default().check(expr2) {
                     con.append(&mut con1);
-                    seq.append(&mut seq1)
+                    seq.append(&mut seq1);
+                    tmps.append(&mut tmps1);
                 } else {
-                    let tmp1 = self.gen_nontmp_local();
+                    let tmp1 = self.gen_tmp_local();
                     let mut replace = Some(Expr_::Lvar(Box::new(Lid(pos.clone(), tmp1.clone()))));
                     std::mem::swap(&mut replace, &mut self.replace_dd);
                     let mut con2 = vec![];
                     let mut seq2 = vec![];
-                    self.extract_await(expr2, &mut con2, &mut seq2);
+                    let mut tmps2 = vec![];
+                    self.extract_await(expr2, &mut con2, &mut seq2, &mut tmps2);
                     std::mem::swap(&mut replace, &mut self.replace_dd);
                     let mut lhs = Expr((), Pos::NONE, Expr_::Null);
                     let mut rhs = lhs.clone();
                     std::mem::swap(&mut lhs, expr1);
                     std::mem::swap(&mut rhs, expr2);
-                    seq1.push(hack_stmt!(pos = pos.clone(), "#{lvar(tmp1)} = #lhs;"));
-                    let mut stmts1 = sequentialise(pos.clone(), con1, seq1);
-                    let tmp2 = self.gen_nontmp_local();
+                    seq1.push(hack_stmt!(
+                        pos = pos.clone(),
+                        "#{lvar(clone(tmp1))} = #lhs;"
+                    ));
+                    let mut stmts1 = sequentialise(pos.clone(), con1, seq1, tmps1);
+                    let tmp2 = self.gen_tmp_local();
                     // the rhs might have variables assigned in con2, and those get unset at the
                     // end of the awaitall, so we need to assign the rhs to a temporary that
                     // won't get unset.
@@ -166,11 +177,20 @@ impl LiftAwait {
                         pos = pos.clone(),
                         "#{lvar(clone(tmp2))} = #rhs;"
                     ));
-                    let mut stmts2 = sequentialise(pos.clone(), con2, seq2);
-                    let mut lvar = Expr_::Lvar(Box::new(Lid(pos.clone(), tmp2)));
+                    let mut stmts2 = sequentialise(pos.clone(), con2, seq2, tmps2);
+                    let lid = Lid(pos.clone(), tmp2);
+                    let mut lvar = Expr_::Lvar(Box::new(lid.clone()));
+                    tmps.push(lid);
                     std::mem::swap(&mut lvar, e);
                     stmts1.append(&mut stmts2);
-                    seq.append(&mut stmts1)
+                    let block = Stmt(
+                        pos.clone(),
+                        Stmt_::Block(Box::new((
+                            Some(vec![Lid(pos.clone(), tmp1)]),
+                            Block(stmts1),
+                        ))),
+                    );
+                    seq.append(&mut vec![block])
                 }
             }
             _ => panic!(),
@@ -179,12 +199,13 @@ impl LiftAwait {
 
     // extract_await(e, &mut con, &mut seq) transforms e by pulling awaits out into con' and
     // turning |> (with await on the rhs) into seq', such that it should be run as Awaitall (con') {seq'; e}.
-    // It then appends con' and seq' to con and seq.
+    // It then appends con' and seq' to con and seq. It also appends any escaping temporaries to tmps.
     fn extract_await(
         &mut self,
         expr: &mut nast::Expr,
         con: &mut Vec<(Lid, nast::Expr)>,
         seq: &mut Vec<nast::Stmt>,
+        tmps: &mut Vec<Lid>,
     ) {
         let Expr((), pos, e) = expr;
         match e {
@@ -234,7 +255,7 @@ impl LiftAwait {
         | Expr_::Yield(box Afield::AFvalue(expr))
         | Expr_::ETSplice(box expr)
         | Expr_::Unop(box (_, expr)) => {
-            self.extract_await(expr, con, seq)
+            self.extract_await(expr, con, seq, tmps)
         }
 
         // Expressions with exactly two sub-expressions that we can lift an await out of
@@ -247,22 +268,22 @@ impl LiftAwait {
             // If the operator is || or &&, there are syntactic restrictions that
             // there is no await on the rhs, and so it is safe to traverse it here
             // just to replace $$
-            self.extract_await(expr1, con, seq);
-            self.extract_await(expr2, con, seq)
+            self.extract_await(expr1, con, seq, tmps);
+            self.extract_await(expr2, con, seq, tmps)
         }
 
         // Expressions with lists of sub-expressions that we can lift an await out of
         // and run concurrently
         Expr_::KeyValCollection(box (_, _, args)) => {
             for nast::Field(arg_k, arg_v) in args {
-                self.extract_await(arg_k, con, seq);
-                self.extract_await(arg_v, con, seq)
+                self.extract_await(arg_k, con, seq, tmps);
+                self.extract_await(arg_v, con, seq, tmps)
             }
         }
         Expr_::Darray(box (_, args)) => {
             for (arg_k, arg_v) in args {
-                self.extract_await(arg_k, con, seq);
-                self.extract_await(arg_v, con, seq)
+                self.extract_await(arg_k, con, seq, tmps);
+                self.extract_await(arg_v, con, seq, tmps)
             }
         }
         Expr_::Tuple(args)
@@ -270,27 +291,27 @@ impl LiftAwait {
         | Expr_::ValCollection(box(_, _, args))
         | Expr_::Varray(box (_, args)) => {
             for arg in args {
-                self.extract_await(arg, con, seq)
+                self.extract_await(arg, con, seq, tmps)
             }
         }
         Expr_::Shape(fields) => {
             for (_, expr) in fields {
-                self.extract_await(expr, con, seq)
+                self.extract_await(expr, con, seq, tmps)
             }
         }
         Expr_::Call(box nast::CallExpr { func, targs: _, args, unpacked_arg }) => {
-            self.extract_await(func, con, seq);
+            self.extract_await(func, con, seq, tmps);
             for (_, arg) in args {
-                self.extract_await(arg, con, seq)
+                self.extract_await(arg, con, seq, tmps)
             }
             for unpack in unpacked_arg {
-                self.extract_await(unpack, con, seq)
+                self.extract_await(unpack, con, seq, tmps)
             }
         }
         Expr_::New(box (nast::ClassId(_, _, cid), _, args, unpacked_arg, _)) => {
             match cid {
                 ClassId_::CIexpr(expr) => {
-                    self.extract_await(expr, con, seq)
+                    self.extract_await(expr, con, seq, tmps)
                 }
                 ClassId_::CIparent
                 | ClassId_::CIself
@@ -298,10 +319,10 @@ impl LiftAwait {
                 | ClassId_::CI(_) => {}
             }
             for arg in args {
-                self.extract_await(arg, con, seq)
+                self.extract_await(arg, con, seq, tmps)
             }
             for unpack in unpacked_arg {
-                self.extract_await(unpack, con, seq)
+                self.extract_await(unpack, con, seq, tmps)
             }
         }
         Expr_::Xml(box (_, attrs, exprs)) => {
@@ -309,22 +330,22 @@ impl LiftAwait {
                 match attr {
                 XhpAttribute::XhpSpread(expr)
                 | XhpAttribute::XhpSimple(nast::XhpSimple{expr, ..}) =>
-                    self.extract_await(expr, con, seq),
+                    self.extract_await(expr, con, seq, tmps),
                 }
             }
             for expr in exprs {
-                self.extract_await(expr, con, seq);
+                self.extract_await(expr, con, seq, tmps);
             }
         }
         Expr_::Collection(box (_, _, afields)) => {
             for afield in afields {
                 match afield {
                     Afield::AFvalue(expr) =>{
-                        self.extract_await(expr, con, seq);
+                        self.extract_await(expr, con, seq, tmps);
                     }
                     Afield::AFkvalue(expr1, expr2) => {
-                        self.extract_await(expr1, con, seq);
-                        self.extract_await(expr2, con, seq)
+                        self.extract_await(expr1, con, seq, tmps);
+                        self.extract_await(expr2, con, seq, tmps)
                     }
                 }
             }
@@ -337,7 +358,7 @@ impl LiftAwait {
             if self.replace_dd.is_some() {
                 // There's no await in an await (syntactic restriction), so we just
                 // need to get the $$ replacement.
-                self.extract_await(&mut awaited_expr, con, seq);
+                self.extract_await(&mut awaited_expr, con, seq, tmps);
             }
             let tmp = Lid(pos.clone(), self.gen_tmp_local());
             let lvar = Expr_::Lvar(Box::new(tmp.clone()));
@@ -346,27 +367,27 @@ impl LiftAwait {
         }
         // Seq
         Expr_::Pipe(box(_, _, _)) => {
-          self.do_pipe(e, pos, con, seq);
+          self.do_pipe(e, pos, con, seq, tmps);
         }
         Expr_::Eif(box (cond, t, f)) => {
-            self.extract_await(cond, con, seq);
+            self.extract_await(cond, con, seq, tmps);
             if self.replace_dd.is_some() {
                 // Relying on syntactic checks that there are no await in t or f,
                 // but still need to traverse in case there is $$
                 for expr in t {
-                    self.extract_await(expr, con, seq)
+                    self.extract_await(expr, con, seq, tmps)
                 }
-                self.extract_await(f, con, seq)
+                self.extract_await(f, con, seq, tmps)
             }
         }
 
         Expr_::ExpressionTree(box nast::ExpressionTree{ hint:_, splices, function_pointers:_, virtualized_expr:_, runtime_expr, dollardollar_pos:_ }) => {
             for stmt in splices {
                 if let Stmt(_, Stmt_::Expr(box Expr((), _, Expr_::Binop(box nast::Binop{ bop:Bop::Eq(None), lhs:_, rhs:expr})))) = stmt {
-                    self.extract_await(expr, con, seq)
+                    self.extract_await(expr, con, seq, tmps)
                 }
             }
-            self.extract_await(runtime_expr, con, seq)
+            self.extract_await(runtime_expr, con, seq, tmps)
         }
 
         // lvalues: shouldn't contain await or $$
@@ -386,28 +407,29 @@ impl<'a> VisitorMut<'a> for LiftAwait {
         let Stmt(pos, mut stmt_) = std::mem::replace(elem, Stmt(Pos::NONE, Stmt_::Noop));
         let mut con = vec![];
         let mut seq = vec![];
+        let mut tmps = vec![];
         match &mut stmt_ {
             Stmt_::Expr(expr) if is_assign_await(expr) => {
                 expr.accept(env, self.object())?;
-                sequentialise_stmt(&pos, elem, stmt_, vec![], vec![]);
+                sequentialise_stmt(&pos, elem, stmt_, vec![], vec![], vec![]);
                 Ok(())
             }
             Stmt_::Expr(box expr) | Stmt_::Return(box Some(expr)) => {
                 expr.accept(env, self.object())?;
                 if !is_await(expr) {
-                    self.extract_await(expr, &mut con, &mut seq);
+                    self.extract_await(expr, &mut con, &mut seq, &mut tmps);
                 }
-                sequentialise_stmt(&pos, elem, stmt_, con, seq);
+                sequentialise_stmt(&pos, elem, stmt_, con, seq, tmps);
                 Ok(())
             }
             Stmt_::Throw(box expr) => {
                 expr.accept(env, self.object())?;
-                self.extract_await(expr, &mut con, &mut seq);
-                sequentialise_stmt(&pos, elem, stmt_, con, seq);
+                self.extract_await(expr, &mut con, &mut seq, &mut tmps);
+                sequentialise_stmt(&pos, elem, stmt_, con, seq, tmps);
                 Ok(())
             }
             Stmt_::Return(box None) => {
-                sequentialise_stmt(&pos, elem, stmt_, vec![], vec![]);
+                sequentialise_stmt(&pos, elem, stmt_, vec![], vec![], vec![]);
                 Ok(())
             }
             Stmt_::Using(box nast::UsingStmt {
@@ -419,47 +441,47 @@ impl<'a> VisitorMut<'a> for LiftAwait {
                 for expr in exprs {
                     expr.accept(env, self.object())?;
                     if !is_await(expr) && !is_assign_await(expr) {
-                        self.extract_await(expr, &mut con, &mut seq);
+                        self.extract_await(expr, &mut con, &mut seq, &mut tmps);
                     }
                 }
                 block.accept(env, self.object())?;
-                sequentialise_stmt(&pos, elem, stmt_, con, seq);
+                sequentialise_stmt(&pos, elem, stmt_, con, seq, tmps);
                 Ok(())
             }
             Stmt_::If(box (expr, b1, b2)) => {
                 expr.accept(env, self.object())?;
-                self.extract_await(expr, &mut con, &mut seq);
+                self.extract_await(expr, &mut con, &mut seq, &mut tmps);
                 b1.accept(env, self.object())?;
                 b2.accept(env, self.object())?;
-                sequentialise_stmt(&pos, elem, stmt_, con, seq);
+                sequentialise_stmt(&pos, elem, stmt_, con, seq, tmps);
                 Ok(())
             }
             Stmt_::For(box (init_exprs, test, update, block)) => {
                 for expr in init_exprs {
                     expr.accept(env, self.object())?;
-                    self.extract_await(expr, &mut con, &mut seq);
+                    self.extract_await(expr, &mut con, &mut seq, &mut tmps);
                 }
                 // No await in the test or update positions (parse error)
                 test.accept(env, self.object())?;
                 update.accept(env, self.object())?;
                 block.accept(env, self.object())?;
-                sequentialise_stmt(&pos, elem, stmt_, con, seq);
+                sequentialise_stmt(&pos, elem, stmt_, con, seq, tmps);
                 Ok(())
             }
             Stmt_::Switch(box (case, block, default)) => {
                 case.accept(env, self.object())?;
-                self.extract_await(case, &mut con, &mut seq);
+                self.extract_await(case, &mut con, &mut seq, &mut tmps);
                 block.accept(env, self.object())?;
                 default.accept(env, self.object())?;
-                sequentialise_stmt(&pos, elem, stmt_, con, seq);
+                sequentialise_stmt(&pos, elem, stmt_, con, seq, tmps);
                 Ok(())
             }
             Stmt_::Foreach(box (expr, as_expr, block)) => {
                 expr.accept(env, self.object())?;
-                self.extract_await(expr, &mut con, &mut seq);
+                self.extract_await(expr, &mut con, &mut seq, &mut tmps);
                 as_expr.accept(env, self.object())?;
                 block.accept(env, self.object())?;
-                sequentialise_stmt(&pos, elem, stmt_, con, seq);
+                sequentialise_stmt(&pos, elem, stmt_, con, seq, tmps);
                 Ok(())
             }
             Stmt_::DeclareLocal(_) => todo!(), // elaborate typed locals before lifting awaits
@@ -523,17 +545,25 @@ mod tests {
         Expr((), Pos::NONE, Expr_::Lvar(Box::new(lid)))
     }
 
-    fn mk_awaitall(con: Vec<(Lid, Expr)>, body: Block) -> Stmt {
+    fn mk_awaitall2(tmps: Vec<Lid>, con: Vec<(Lid, Expr)>, body: Block) -> Stmt {
         Stmt(
             Pos::NONE,
             Stmt_::Block(Box::new((
-                Some(con.iter().map(|(id, _)| id.clone()).collect()),
+                Some(tmps),
                 Block(vec![Stmt(
                     Pos::NONE,
                     Stmt_::Awaitall(Box::new((con, body))),
                 )]),
             ))),
         )
+    }
+
+    fn mk_awaitall(con: Vec<(Lid, Expr)>, body: Block) -> Stmt {
+        mk_awaitall2(con.iter().map(|(id, _)| id.clone()).collect(), con, body)
+    }
+
+    fn mk_block(lids: Vec<Lid>, body: Vec<Stmt>) -> Stmt {
+        Stmt(Pos::NONE, Stmt_::Block(Box::new((Some(lids), Block(body)))))
     }
 
     #[test]
@@ -585,7 +615,7 @@ mod tests {
     fn test_con1() {
         let mut env = Env::default();
         let mut orig = build_program(hack_stmt!("await $x + $y;"));
-        let tmp = (0, "__tmp$_lift_await0".to_string());
+        let tmp = (0, "__tmp$lift_await0".to_string());
         let awaitall = mk_awaitall(
             vec![(Lid(Pos::NONE, tmp.clone()), hack_expr!("$x"))],
             Block(hack_stmts!("#{lvar(tmp)} + $y;")),
@@ -599,10 +629,10 @@ mod tests {
     fn test_con2() {
         let mut env = Env::default();
         let mut orig = build_program(hack_stmt!("await $x0 * await $x1 + await $x2 * await $x3;"));
-        let tmp0 = (0, "__tmp$_lift_await0".to_string());
-        let tmp1 = (0, "__tmp$_lift_await1".to_string());
-        let tmp2 = (0, "__tmp$_lift_await2".to_string());
-        let tmp3 = (0, "__tmp$_lift_await3".to_string());
+        let tmp0 = (0, "__tmp$lift_await0".to_string());
+        let tmp1 = (0, "__tmp$lift_await1".to_string());
+        let tmp2 = (0, "__tmp$lift_await2".to_string());
+        let tmp3 = (0, "__tmp$lift_await3".to_string());
         let awaitall = mk_awaitall(
             vec![
                 (Lid(Pos::NONE, tmp0.clone()), hack_expr!("$x0")),
@@ -623,7 +653,7 @@ mod tests {
     fn test_seq_left1() {
         let mut env = Env::default();
         let mut orig = build_program(hack_stmt!("await $x |> $$;"));
-        let tmp = (0, "__tmp$_lift_await0".to_string());
+        let tmp = (0, "__tmp$lift_await0".to_string());
         let awaitall = mk_awaitall(
             vec![(Lid(Pos::NONE, tmp.clone()), hack_expr!("$x"))],
             Block(hack_stmts!("#{lvar(tmp)} |> $$;")),
@@ -637,8 +667,8 @@ mod tests {
     fn test_seq_left2() {
         let mut env = Env::default();
         let mut orig = build_program(hack_stmt!("(await $x1 + await $x2) |> $$;"));
-        let tmp0 = (0, "__tmp$_lift_await0".to_string());
-        let tmp1 = (0, "__tmp$_lift_await1".to_string());
+        let tmp0 = (0, "__tmp$lift_await0".to_string());
+        let tmp1 = (0, "__tmp$lift_await1".to_string());
         let awaitall = mk_awaitall(
             vec![
                 (Lid(Pos::NONE, tmp0.clone()), hack_expr!("$x1")),
@@ -655,16 +685,19 @@ mod tests {
     fn test_seq_right() {
         let mut env = Env::default();
         let mut orig = build_program(hack_stmt!("$x |> await $$;"));
-        let tmp0 = mk_lvar(mk_lid("$__lift_await__tmp$0"));
-        let tmp1 = mk_lid("__tmp$_lift_await1");
+        let tmp0 = mk_lid("__tmp$lift_await0");
+        let tmp0_lvar = mk_lvar(tmp0.clone());
+        let tmp1 = mk_lid("__tmp$lift_await1");
         let tmp1_lvar = mk_lvar(tmp1.clone());
-        let tmp2 = mk_lvar(mk_lid("$__lift_await__tmp$2"));
+        let tmp2 = mk_lid("__tmp$lift_await2");
+        let tmp2_lvar = mk_lvar(tmp2.clone());
         let awaitall = mk_awaitall(
-            vec![(tmp1, tmp0.clone())],
-            Block(hack_stmts!("#{clone(tmp2)} = #tmp1_lvar;")),
+            vec![(tmp1, tmp0_lvar.clone())],
+            Block(hack_stmts!("#{clone(tmp2_lvar)} = #tmp1_lvar;")),
         );
-        let stmt = Stmt(Pos::NONE, Stmt_::Expr(Box::new(tmp2)));
-        let res = build_program(hack_stmt!("{ #tmp0 = $x; #awaitall; #stmt; }"));
+        let stmt = Stmt(Pos::NONE, Stmt_::Expr(Box::new(tmp2_lvar)));
+        let b1 = mk_block(vec![tmp0], hack_stmts!("#tmp0_lvar = $x; #awaitall;"));
+        let res = build_program(mk_block(vec![tmp2], hack_stmts!("#b1; #stmt;")));
         self::elaborate_program(&mut env, &mut orig);
         assert_eq!(orig, res);
     }
@@ -673,22 +706,25 @@ mod tests {
     fn test_seq_both() {
         let mut env = Env::default();
         let mut orig = build_program(hack_stmt!("await $x |> await $$;"));
-        let tmp0 = mk_lid("__tmp$_lift_await0");
+        let tmp0 = mk_lid("__tmp$lift_await0");
         let tmp0_lvar = mk_lvar(tmp0.clone());
-        let tmp1 = mk_lvar(mk_lid("$__lift_await__tmp$1"));
-        let tmp2 = mk_lid("__tmp$_lift_await2");
+        let tmp1 = mk_lid("__tmp$lift_await1");
+        let tmp1_lvar = mk_lvar(tmp1.clone());
+        let tmp2 = mk_lid("__tmp$lift_await2");
         let tmp2_lvar = mk_lvar(tmp2.clone());
-        let tmp3 = mk_lvar(mk_lid("$__lift_await__tmp$3"));
+        let tmp3 = mk_lid("__tmp$lift_await3");
+        let tmp3_lvar = mk_lvar(tmp3.clone());
         let awaitall1 = mk_awaitall(
             vec![(tmp0, hack_expr!("$x"))],
-            Block(hack_stmts!("#{clone(tmp1)} = #tmp0_lvar;")),
+            Block(hack_stmts!("#{clone(tmp1_lvar)} = #tmp0_lvar;")),
         );
         let awaitall2 = mk_awaitall(
-            vec![(tmp2, tmp1)],
-            Block(hack_stmts!("#{clone(tmp3)} = #tmp2_lvar;")),
+            vec![(tmp2, tmp1_lvar)],
+            Block(hack_stmts!("#{clone(tmp3_lvar)} = #tmp2_lvar;")),
         );
-        let stmt = Stmt(Pos::NONE, Stmt_::Expr(Box::new(tmp3)));
-        let res = build_program(hack_stmt!("{ #awaitall1; #awaitall2; #stmt; }"));
+        let stmt = Stmt(Pos::NONE, Stmt_::Expr(Box::new(tmp3_lvar)));
+        let b1 = mk_block(vec![tmp1], hack_stmts!("#awaitall1; #awaitall2;"));
+        let res = build_program(mk_block(vec![tmp3], hack_stmts!("#b1; #stmt;")));
         self::elaborate_program(&mut env, &mut orig);
         assert_eq!(orig, res);
     }
@@ -699,32 +735,40 @@ mod tests {
         let mut orig = build_program(hack_stmt!(
             "(await $x + 1 |> await $$ + 2) |> await $$ + 3;"
         ));
-        let tmp0 = mk_lid("__tmp$_lift_await0");
+        let tmp0 = mk_lid("__tmp$lift_await0");
         let tmp0_lvar = mk_lvar(tmp0.clone());
-        let tmp1 = mk_lvar(mk_lid("$__lift_await__tmp$1"));
-        let tmp2 = mk_lid("__tmp$_lift_await2");
+        let tmp1 = mk_lid("__tmp$lift_await1");
+        let tmp1_lvar = mk_lvar(tmp1.clone());
+        let tmp2 = mk_lid("__tmp$lift_await2");
         let tmp2_lvar = mk_lvar(tmp2.clone());
-        let tmp3 = mk_lvar(mk_lid("$__lift_await__tmp$3"));
-        let tmp4 = mk_lvar(mk_lid("$__lift_await__tmp$4"));
-        let tmp5 = mk_lid("__tmp$_lift_await5");
+        let tmp3 = mk_lid("__tmp$lift_await3");
+        let tmp3_lvar = mk_lvar(tmp3.clone());
+        let tmp4 = mk_lid("__tmp$lift_await4");
+        let tmp4_lvar = mk_lvar(tmp4.clone());
+        let tmp5 = mk_lid("__tmp$lift_await5");
         let tmp5_lvar = mk_lvar(tmp5.clone());
-        let tmp6 = mk_lvar(mk_lid("$__lift_await__tmp$6"));
+        let tmp6 = mk_lid("__tmp$lift_await6");
+        let tmp6_lvar = mk_lvar(tmp6.clone());
         let awaitall1 = mk_awaitall(
             vec![(tmp0, hack_expr!("$x"))],
-            Block(hack_stmts!("#{clone(tmp1)} = #tmp0_lvar + 1;")),
+            Block(hack_stmts!("#{clone(tmp1_lvar)} = #tmp0_lvar + 1;")),
         );
         let awaitall2 = mk_awaitall(
-            vec![(tmp2, tmp1)],
-            Block(hack_stmts!("#{clone(tmp3)} = #tmp2_lvar + 2;")),
+            vec![(tmp2, tmp1_lvar)],
+            Block(hack_stmts!("#{clone(tmp3_lvar)} = #tmp2_lvar + 2;")),
+        );
+        let b1 = mk_block(vec![tmp1], hack_stmts!("#awaitall1; #awaitall2;"));
+        let b2 = mk_block(
+            vec![tmp3],
+            hack_stmts!("#b1; #{clone(tmp4_lvar)} = #tmp3_lvar;"),
         );
         let awaitall3 = mk_awaitall(
-            vec![(tmp5, tmp4.clone())],
-            Block(hack_stmts!("#{clone(tmp6)} = #tmp5_lvar + 3;")),
+            vec![(tmp5, tmp4_lvar)],
+            Block(hack_stmts!("#{clone(tmp6_lvar)} = #tmp5_lvar + 3;")),
         );
-        let stmt = Stmt(Pos::NONE, Stmt_::Expr(Box::new(tmp6)));
-        let res = build_program(hack_stmt!(
-            "{ #awaitall1; #awaitall2; #tmp4 = #tmp3; #awaitall3; #stmt; }"
-        ));
+        let b3 = mk_block(vec![tmp4], hack_stmts!("#b2; #awaitall3;"));
+        let stmt = Stmt(Pos::NONE, Stmt_::Expr(Box::new(tmp6_lvar)));
+        let res = build_program(mk_block(vec![tmp6], hack_stmts!("#b3; #stmt;")));
         self::elaborate_program(&mut env, &mut orig);
         assert_eq!(orig, res);
     }
@@ -735,32 +779,43 @@ mod tests {
         let mut orig = build_program(hack_stmt!(
             "await $x + 1 |> (await $$ + 2 |> await $$ + 3);"
         ));
-        let tmp0 = mk_lid("__tmp$_lift_await0");
+        let tmp0 = mk_lid("__tmp$lift_await0");
         let tmp0_lvar = mk_lvar(tmp0.clone());
-        let tmp1 = mk_lvar(mk_lid("$__lift_await__tmp$1"));
-        let tmp2 = mk_lid("__tmp$_lift_await2");
+        let tmp1 = mk_lid("__tmp$lift_await1");
+        let tmp1_lvar = mk_lvar(tmp1.clone());
+        let tmp2 = mk_lid("__tmp$lift_await2");
         let tmp2_lvar = mk_lvar(tmp2.clone());
-        let tmp3 = mk_lvar(mk_lid("$__lift_await__tmp$3"));
-        let tmp4 = mk_lid("__tmp$_lift_await4");
+        let tmp3 = mk_lid("__tmp$lift_await3");
+        let tmp3_lvar = mk_lvar(tmp3.clone());
+        let tmp4 = mk_lid("__tmp$lift_await4");
         let tmp4_lvar = mk_lvar(tmp4.clone());
-        let tmp5 = mk_lvar(mk_lid("$__lift_await__tmp$5"));
-        let tmp6 = mk_lvar(mk_lid("$__lift_await__tmp$6"));
+        let tmp5 = mk_lid("__tmp$lift_await5");
+        let tmp5_lvar = mk_lvar(tmp5.clone());
+        let tmp6 = mk_lid("__tmp$lift_await6");
+        let tmp6_lvar = mk_lvar(tmp6.clone());
         let awaitall1 = mk_awaitall(
             vec![(tmp0, hack_expr!("$x"))],
-            Block(hack_stmts!("#{clone(tmp1)} = #{clone(tmp0_lvar)} + 1;")),
+            Block(hack_stmts!(
+                "#{clone(tmp1_lvar)} = #{clone(tmp0_lvar)} + 1;"
+            )),
         );
         let awaitall2 = mk_awaitall(
-            vec![(tmp2, tmp1)],
-            Block(hack_stmts!("#{clone(tmp3)} = #{clone(tmp2_lvar)} + 2;")),
+            vec![(tmp2, tmp1_lvar)],
+            Block(hack_stmts!(
+                "#{clone(tmp3_lvar)} = #{clone(tmp2_lvar)} + 2;"
+            )),
         );
         let awaitall3 = mk_awaitall(
-            vec![(tmp4, tmp3)],
-            Block(hack_stmts!("#{clone(tmp5)} = #{clone(tmp4_lvar)} + 3;")),
+            vec![(tmp4, tmp3_lvar)],
+            Block(hack_stmts!(
+                "#{clone(tmp5_lvar)} = #{clone(tmp4_lvar)} + 3;"
+            )),
         );
-        let stmt = Stmt(Pos::NONE, Stmt_::Expr(Box::new(tmp6.clone())));
-        let res = build_program(hack_stmt!(
-            "{ #awaitall1; #awaitall2; #awaitall3; #tmp6 = #tmp5; #stmt; }"
-        ));
+        let b1 = mk_block(vec![tmp3], hack_stmts!("#awaitall2; #awaitall3;"));
+        let stmt = Stmt(Pos::NONE, Stmt_::Expr(Box::new(tmp6_lvar.clone())));
+        let b2 = mk_block(vec![tmp5], hack_stmts!("#b1; #tmp6_lvar = #tmp5_lvar;"));
+        let b3 = mk_block(vec![tmp1], hack_stmts!("#awaitall1; #b2;"));
+        let res = build_program(mk_block(vec![tmp6], hack_stmts!("#b3; #stmt;")));
         self::elaborate_program(&mut env, &mut orig);
         assert_eq!(orig, res);
     }
@@ -771,28 +826,33 @@ mod tests {
         let mut orig = build_program(hack_stmt!(
             "(await $x + await $y) |> (await $$ + await $$);"
         ));
-        let tmp0 = mk_lid("__tmp$_lift_await0");
+        let tmp0 = mk_lid("__tmp$lift_await0");
         let tmp0_lvar = mk_lvar(tmp0.clone());
-        let tmp1 = mk_lid("__tmp$_lift_await1");
+        let tmp1 = mk_lid("__tmp$lift_await1");
         let tmp1_lvar = mk_lvar(tmp1.clone());
-        let tmp2 = mk_lvar(mk_lid("$__lift_await__tmp$2"));
-        let tmp3 = mk_lid("__tmp$_lift_await3");
+        let tmp2 = mk_lid("__tmp$lift_await2");
+        let tmp2_lvar = mk_lvar(tmp2.clone());
+        let tmp3 = mk_lid("__tmp$lift_await3");
         let tmp3_lvar = mk_lvar(tmp3.clone());
-        let tmp4 = mk_lid("__tmp$_lift_await4");
+        let tmp4 = mk_lid("__tmp$lift_await4");
         let tmp4_lvar = mk_lvar(tmp4.clone());
-        let tmp5 = mk_lvar(mk_lid("$__lift_await__tmp$5"));
+        let tmp5 = mk_lid("__tmp$lift_await5");
+        let tmp5_lvar = mk_lvar(tmp5.clone());
         let awaitall1 = mk_awaitall(
             vec![(tmp0, hack_expr!("$x")), (tmp1, hack_expr!("$y"))],
             Block(hack_stmts!(
-                "#{clone(tmp2)} = #{clone(tmp0_lvar)} + #{clone(tmp1_lvar)};"
+                "#{clone(tmp2_lvar)} = #{clone(tmp0_lvar)} + #{clone(tmp1_lvar)};"
             )),
         );
         let awaitall2 = mk_awaitall(
-            vec![(tmp3, tmp2.clone()), (tmp4, tmp2)],
-            Block(hack_stmts!("#{clone(tmp5)} = #tmp3_lvar + #tmp4_lvar;")),
+            vec![(tmp3, tmp2_lvar.clone()), (tmp4, tmp2_lvar)],
+            Block(hack_stmts!(
+                "#{clone(tmp5_lvar)} = #tmp3_lvar + #tmp4_lvar;"
+            )),
         );
-        let stmt = Stmt(Pos::NONE, Stmt_::Expr(Box::new(tmp5)));
-        let res = build_program(hack_stmt!("{ #awaitall1; #awaitall2; #stmt; }"));
+        let b1 = mk_block(vec![tmp2], hack_stmts!("#awaitall1; #awaitall2;"));
+        let stmt = Stmt(Pos::NONE, Stmt_::Expr(Box::new(tmp5_lvar)));
+        let res = build_program(mk_block(vec![tmp5], hack_stmts!("#b1; #stmt;")));
         self::elaborate_program(&mut env, &mut orig);
         assert_eq!(orig, res);
     }
@@ -801,26 +861,30 @@ mod tests {
     fn test_con_of_seq() {
         let mut env = Env::default();
         let mut orig = build_program(hack_stmt!("await $x + (await $y |> await $$);"));
-        let tmp0 = mk_lid("__tmp$_lift_await0");
+        let tmp0 = mk_lid("__tmp$lift_await0");
         let tmp0_lvar = mk_lvar(tmp0.clone());
-        let tmp1 = mk_lid("__tmp$_lift_await1");
+        let tmp1 = mk_lid("__tmp$lift_await1");
         let tmp1_lvar = mk_lvar(tmp1.clone());
-        let tmp2 = mk_lvar(mk_lid("$__lift_await__tmp$2"));
-        let tmp3 = mk_lid("__tmp$_lift_await3");
+        let tmp2 = mk_lid("__tmp$lift_await2");
+        let tmp2_lvar = mk_lvar(tmp2.clone());
+        let tmp3 = mk_lid("__tmp$lift_await3");
         let tmp3_lvar = mk_lvar(tmp3.clone());
-        let tmp4 = mk_lvar(mk_lid("$__lift_await__tmp$4"));
+        let tmp4 = mk_lid("__tmp$lift_await4");
+        let tmp4_lvar = mk_lvar(tmp4.clone());
         let awaitall1 = mk_awaitall(
             vec![(tmp1, hack_expr!("$y"))],
-            Block(hack_stmts!("#{clone(tmp2)} = #{clone(tmp1_lvar)};")),
+            Block(hack_stmts!("#{clone(tmp2_lvar)} = #{clone(tmp1_lvar)};")),
         );
         let awaitall2 = mk_awaitall(
-            vec![(tmp3, tmp2)],
-            Block(hack_stmts!("#{clone(tmp4)} = #{clone(tmp3_lvar)};")),
+            vec![(tmp3, tmp2_lvar)],
+            Block(hack_stmts!("#{clone(tmp4_lvar)} = #{clone(tmp3_lvar)};")),
         );
-        let _stmt = Stmt(Pos::NONE, Stmt_::Expr(Box::new(tmp4.clone())));
-        let awaitall3 = mk_awaitall(
+        let _stmt = Stmt(Pos::NONE, Stmt_::Expr(Box::new(tmp4_lvar.clone())));
+        let b1 = mk_block(vec![tmp2], hack_stmts!("#awaitall1; #awaitall2;"));
+        let awaitall3 = mk_awaitall2(
+            vec![tmp4, tmp0.clone()],
             vec![(tmp0, hack_expr!("$x"))],
-            Block(hack_stmts!("#awaitall1; #awaitall2; #tmp0_lvar + #tmp4;")),
+            Block(hack_stmts!("#b1; #tmp0_lvar + #tmp4_lvar;")),
         );
         let res = build_program(hack_stmt!("#awaitall3;"));
         self::elaborate_program(&mut env, &mut orig);

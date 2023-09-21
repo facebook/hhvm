@@ -467,7 +467,7 @@ mstch::node mstch_function::return_type() {
 }
 
 mstch::node mstch_function::arg_list() {
-  return make_mstch_fields(function_->get_paramlist()->get_members());
+  return make_mstch_fields(function_->params().get_members());
 }
 
 mstch::node mstch_function::exceptions() {

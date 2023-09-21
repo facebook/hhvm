@@ -301,7 +301,7 @@ class t_go_generator : public t_concat_generator {
       const t_function* tfunction,
       std::string prefix = "",
       bool useContext = false);
-  std::string argument_list(const t_struct* tstruct);
+  std::string argument_list(const t_paramlist& tparamlist);
   std::string type_to_enum(const t_type* ttype);
   std::string type_to_go_type(const t_type* ttype);
   std::string type_to_go_type_with_opt(
@@ -2174,8 +2174,8 @@ void t_go_generator::generate_service_helpers(const t_service* tservice) {
   f_service_ << "// HELPER FUNCTIONS AND STRUCTURES" << endl << endl;
 
   for (auto func : functions) {
-    const t_struct* ts = func->get_paramlist();
-    generate_go_struct_definition(f_service_, ts, false, false, true);
+    const t_structured& ts = func->params();
+    generate_go_struct_definition(f_service_, &ts, false, false, true);
     generate_go_function_helpers(func);
   }
 }
@@ -2311,8 +2311,8 @@ void t_go_generator::generate_service_client_channel_call(
   auto isOneway = func->qualifier() == t_function_qualifier::oneway;
   auto returnsVoid = func->return_type()->is_void();
 
-  auto arg_struct = func->get_paramlist();
-  const auto& fields = arg_struct->get_members();
+  const t_structured& arg_struct = func->params();
+  const auto& fields = arg_struct.get_members();
 
   // Initialize request struct
   f_service_ << indent() << "args := " << argsType << "{" << endl;
@@ -2364,8 +2364,8 @@ void t_go_generator::generate_service_client_send_msg_call(
       ? "thrift.ONEWAY"
       : "thrift.CALL";
 
-  auto arg_struct = func->get_paramlist();
-  const auto& fields = arg_struct->get_members();
+  const t_structured& arg_struct = func->params();
+  const auto& fields = arg_struct.get_members();
 
   // If there are no fields in the struct, don't bother initializing anything
   if (fields.size() == 0) {
@@ -2987,8 +2987,8 @@ void t_go_generator::generate_run_function(
   f_service_ << " (thrift.WritableStruct, thrift.ApplicationException) {"
              << endl;
   indent_up();
-  const t_struct* arg_struct = tfunction->get_paramlist();
-  const std::vector<t_field*>& fields = arg_struct->get_members();
+  const t_structured& arg_struct = tfunction->params();
+  const std::vector<t_field*>& fields = arg_struct.get_members();
   if (!fields.empty()) {
     indent(f_service_) << "args := argStruct.(*" << argsname << ")" << endl;
   }
@@ -3644,8 +3644,7 @@ void t_go_generator::generate_go_docstring(
  */
 void t_go_generator::generate_go_docstring(
     ofstream& out, const t_function* tfunction) {
-  generate_go_docstring(
-      out, tfunction, tfunction->get_paramlist(), "Parameters");
+  generate_go_docstring(out, tfunction, &tfunction->params(), "Parameters");
 }
 
 /**
@@ -3753,7 +3752,7 @@ string t_go_generator::function_signature(
     const t_function* tfunction, string prefix) {
   // TODO(mcslee): Nitpicky, no ',' if argument_list is empty
   return publicize(prefix + tfunction->get_name()) + "(" +
-      argument_list(tfunction->get_paramlist()) + ")";
+      argument_list(tfunction->params()) + ")";
 }
 
 /**
@@ -3765,7 +3764,7 @@ string t_go_generator::function_signature(
 string t_go_generator::function_signature_if(
     const t_function* tfunction, string prefix, bool useContext) {
   string signature = publicize(prefix + get_func_name(tfunction)) + "(";
-  string args = argument_list(tfunction->get_paramlist());
+  string args = argument_list(tfunction->params());
   if (useContext) {
     signature += "ctx context.Context";
     signature += args.length() > 0 ? ", " : "";
@@ -3785,9 +3784,9 @@ string t_go_generator::function_signature_if(
 /**
  * Renders a field list
  */
-string t_go_generator::argument_list(const t_struct* tstruct) {
+string t_go_generator::argument_list(const t_paramlist& tparamlist) {
   string result = "";
-  const vector<t_field*>& fields = tstruct->get_members();
+  const vector<t_field*>& fields = tparamlist.get_members();
   vector<t_field*>::const_iterator f_iter;
   bool first = true;
 

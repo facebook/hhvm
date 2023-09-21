@@ -753,7 +753,7 @@ class mstch_function : public mstch_base {
  protected:
   const t_function* function_;
 
-  bool has_args_() { return function_->get_paramlist()->has_fields(); }
+  bool has_args_() { return function_->params().has_fields(); }
 
   mstch::node make_exceptions(const t_throws* exceptions) {
     return exceptions ? make_mstch_fields(exceptions->get_members())

@@ -159,8 +159,6 @@ class t_function final : public t_named {
       std::string name,
       std::unique_ptr<t_paramlist> paramlist,
       t_function_qualifier qualifier = {});
-
-  t_paramlist* get_paramlist() const { return paramlist_.get(); }
 };
 
 } // namespace compiler

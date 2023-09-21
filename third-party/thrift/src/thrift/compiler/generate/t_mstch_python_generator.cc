@@ -254,7 +254,7 @@ class python_mstch_program : public mstch_program {
 
   void visit_type_single_service(const t_service* service) {
     for (const auto& function : service->functions()) {
-      for (const auto& field : function.get_paramlist()->fields()) {
+      for (const auto& field : function.params().fields()) {
         visit_type(field.get_type());
       }
       for (const t_field& field : get_elems(function.exceptions())) {

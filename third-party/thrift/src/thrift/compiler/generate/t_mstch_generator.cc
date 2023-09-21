@@ -226,7 +226,7 @@ mstch::map t_mstch_generator::dump(const t_function& function) {
       {"exceptions", dump_elems(exceptions)},
       {"exceptions?", !exceptions.empty()},
       {"annotations", dump_elems(function.annotations())},
-      {"args", dump_elems(function.get_paramlist()->fields())},
+      {"args", dump_elems(function.params().fields())},
   };
 
   mstch::map extension = extend_function(function);

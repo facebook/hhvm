@@ -156,7 +156,7 @@ class t_js_generator : public t_concat_generator {
       std::string prefix = "",
       bool include_callback = false);
   std::string argument_list(
-      const t_struct* tstruct, bool include_callback = false);
+      const t_paramlist& tparamlist, bool include_callback = false);
   std::string type_to_enum(const t_type* ttype);
 
   std::string autogen_comment() {
@@ -857,8 +857,8 @@ void t_js_generator::generate_process_function(
              << indent() << "input.readMessageEnd();" << endl;
 
   // Generate the function call
-  const t_struct* arg_struct = tfunction->get_paramlist();
-  const std::vector<t_field*>& fields = arg_struct->get_members();
+  const t_paramlist& arg_struct = tfunction->params();
+  const std::vector<t_field*>& fields = arg_struct.get_members();
   vector<t_field*>::const_iterator f_iter;
 
   f_service_ << indent() << "this._handler." << tfunction->get_name() << "(";
@@ -915,8 +915,8 @@ void t_js_generator::generate_service_helpers(const t_service* tservice) {
   f_service_ << "//HELPER FUNCTIONS AND STRUCTURES" << endl << endl;
   std::string prefix = service_name_ + "_";
   for (f_iter = functions.begin(); f_iter != functions.end(); ++f_iter) {
-    const t_struct* ts = (*f_iter)->get_paramlist();
-    generate_js_struct_definition(f_service_, ts, false, false, prefix);
+    const t_paramlist& ts = (*f_iter)->params();
+    generate_js_struct_definition(f_service_, &ts, false, false, prefix);
     generate_js_function_helpers(*f_iter);
   }
 }
@@ -1008,8 +1008,8 @@ void t_js_generator::generate_service_client(const t_service* tservice) {
   vector<t_function*> functions = tservice->get_functions();
   vector<t_function*>::const_iterator f_iter;
   for (f_iter = functions.begin(); f_iter != functions.end(); ++f_iter) {
-    const t_struct* arg_struct = (*f_iter)->get_paramlist();
-    const vector<t_field*>& fields = arg_struct->get_members();
+    const t_paramlist& arg_struct = (*f_iter)->params();
+    const vector<t_field*>& fields = arg_struct.get_members();
     vector<t_field*>::const_iterator fld_iter;
     string funname = (*f_iter)->get_name();
     string arglist = argument_list(arg_struct);
@@ -1693,7 +1693,7 @@ string t_js_generator::function_signature(
 
   str = prefix + tfunction->get_name() + " = function(";
 
-  str += argument_list(tfunction->get_paramlist(), include_callback);
+  str += argument_list(tfunction->params(), include_callback);
 
   str += ")";
   return str;
@@ -1703,10 +1703,10 @@ string t_js_generator::function_signature(
  * Renders a field list
  */
 string t_js_generator::argument_list(
-    const t_struct* tstruct, bool include_callback) {
+    const t_paramlist& tparamlist, bool include_callback) {
   string result = "";
 
-  const vector<t_field*>& fields = tstruct->get_members();
+  const vector<t_field*>& fields = tparamlist.get_members();
   vector<t_field*>::const_iterator f_iter;
   bool first = true;
   for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {

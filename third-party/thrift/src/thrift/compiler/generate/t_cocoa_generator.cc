@@ -229,7 +229,7 @@ class t_cocoa_generator : public t_concat_generator {
   std::string declare_field(const t_field* tfield);
   std::string declare_property(const t_field* tfield);
   std::string function_signature(const t_function* tfunction);
-  std::string argument_list(const t_struct* tstruct);
+  std::string argument_list(const t_paramlist& tparamlist);
   std::string type_to_enum(const t_type* ttype);
   std::string format_string_for_type(const t_type* type);
   std::string call_field_setter(
@@ -1653,9 +1653,9 @@ void t_cocoa_generator::generate_cocoa_service_helpers(
   std::vector<t_function*> functions = tservice->get_functions();
   std::vector<t_function*>::iterator f_iter;
   for (f_iter = functions.begin(); f_iter != functions.end(); ++f_iter) {
-    const t_struct* ts = (*f_iter)->get_paramlist();
-    generate_cocoa_struct_interface(f_impl_, ts, false);
-    generate_cocoa_struct_implementation(f_impl_, ts, false, false);
+    const t_paramlist& ts = (*f_iter)->params();
+    generate_cocoa_struct_interface(f_impl_, &ts, false);
+    generate_cocoa_struct_implementation(f_impl_, &ts, false, false);
     generate_function_helpers(*f_iter);
   }
 }
@@ -1818,7 +1818,7 @@ void t_cocoa_generator::generate_cocoa_service_client_implementation(
     t_function send_function(
         &t_base_type::t_void(),
         std::string("send_") + function->name(),
-        t_struct::clone_DO_NOT_USE(function->get_paramlist()));
+        t_struct::clone_DO_NOT_USE(&function->params()));
 
     std::string argsname = function->name() + "_args";
 
@@ -1836,7 +1836,7 @@ void t_cocoa_generator::generate_cocoa_service_client_implementation(
         << "\"];" << std::endl;
 
     // write out function parameters
-    for (const auto& param : function->get_paramlist()->fields()) {
+    for (const auto& param : function->params().fields()) {
       const std::string& fieldName = param.name();
       if (type_can_be_null(param.get_type())) {
         out << indent() << "if (" << fieldName << " != nil)";
@@ -1945,7 +1945,7 @@ void t_cocoa_generator::generate_cocoa_service_client_implementation(
 
     // Declare the function arguments
     bool first = true;
-    for (const auto& param : function->get_paramlist()->fields()) {
+    for (const auto& param : function->params().fields()) {
       const std::string& fieldName = param.name();
       out << " ";
       if (first) {
@@ -2122,7 +2122,7 @@ void t_cocoa_generator::generate_cocoa_service_server_implementation(
     }
     out << "[mService " << funname;
     bool first = true;
-    for (const auto& param : function->get_paramlist()->fields()) {
+    for (const auto& param : function->params().fields()) {
       const std::string& fieldName = param.name();
       if (first) {
         first = false;
@@ -2947,7 +2947,7 @@ std::string t_cocoa_generator::declare_property(const t_field* tfield) {
 std::string t_cocoa_generator::function_signature(const t_function* tfunction) {
   const t_type* ttype = tfunction->return_type();
   std::string result = "(" + type_name(ttype) + ") " + tfunction->name() +
-      argument_list(tfunction->get_paramlist());
+      argument_list(tfunction->params());
   return result;
 }
 
@@ -2955,11 +2955,11 @@ std::string t_cocoa_generator::function_signature(const t_function* tfunction) {
  * Renders a colon separated list of types and names, suitable for an
  * objective-c parameter list
  */
-std::string t_cocoa_generator::argument_list(const t_struct* tstruct) {
+std::string t_cocoa_generator::argument_list(const t_paramlist& tparamlist) {
   std::string result = "";
 
   bool first = true;
-  for (const auto& field : tstruct->fields()) {
+  for (const auto& field : tparamlist.fields()) {
     std::string argPrefix = "";
     if (first) {
       first = false;

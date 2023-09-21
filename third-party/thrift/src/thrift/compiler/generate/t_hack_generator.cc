@@ -572,7 +572,7 @@ class t_hack_generator : public t_concat_generator {
       std::string more_tail_parameters = "",
       std::string typehint = "");
   std::string argument_list(
-      const t_struct* tstruct,
+      const t_paramlist& tparamlist,
       std::string more_tail_parameters = "",
       bool typehints = true,
       bool force_nullable = false);
@@ -2450,10 +2450,10 @@ std::unique_ptr<t_const_value> t_hack_generator::function_to_tmeta(
   tmeta_ThriftFunction->add_map(
       std::make_unique<t_const_value>("return_type"), std::move(return_tmeta));
 
-  if (function->get_paramlist()->has_fields()) {
+  if (function->params().has_fields()) {
     auto arguments = std::make_unique<t_const_value>();
     arguments->set_list();
-    for (const auto& field : function->get_paramlist()->fields()) {
+    for (const auto& field : function->params().fields()) {
       arguments->add_list(field_to_tmeta(&field));
     }
     tmeta_ThriftFunction->add_map(
@@ -5267,9 +5267,9 @@ void t_hack_generator::_generate_args(
   const std::string& argsname = generate_function_helper_name(
       tservice, tfunction, PhpFunctionNameSuffix::ARGS);
 
-  const t_struct* params_struct = tfunction->get_paramlist();
-  const auto& fields = params_struct->fields();
-  bool is_async = is_async_struct(params_struct);
+  const t_paramlist& params_struct = tfunction->params();
+  const auto& fields = params_struct.fields();
+  bool is_async = is_async_struct(&params_struct);
   out << indent() << "$args = " << argsname;
   if (is_async) {
     out << "::withDefaultValues();\n";
@@ -5798,7 +5798,7 @@ void t_hack_generator::generate_process_function(
   f_service_ << (async ? "await " : "") << "$this->handler->"
              << find_hack_name(tfunction) << "(";
   auto delim = "";
-  for (const auto& param : tfunction->get_paramlist()->fields()) {
+  for (const auto& param : tfunction->params().fields()) {
     f_service_ << delim << "$args->" << param.name();
     delim = ", ";
   }
@@ -6120,11 +6120,11 @@ void t_hack_generator::generate_php_struct_definition_result_helpers(
 
 void t_hack_generator::generate_php_function_args_helpers(
     const t_function* tfunction, const std::string& prefix) {
-  const t_struct* params = tfunction->get_paramlist();
+  const t_paramlist& params = tfunction->params();
   std::string params_name =
-      prefix + "_" + find_hack_name(tfunction, params->name());
+      prefix + "_" + find_hack_name(tfunction, params.name());
   generate_php_struct_definition(
-      f_service_, params, ThriftStructType::ARGS, params_name);
+      f_service_, &params, ThriftStructType::ARGS, params_name);
 }
 
 /**
@@ -6304,7 +6304,7 @@ void t_hack_generator::generate_php_docstring(
   int start_pos = get_indent_size() + find_hack_name(tfunction).size() + 1;
 
   // Parameters.
-  generate_php_docstring_args(out, start_pos, tfunction->get_paramlist());
+  generate_php_docstring_args(out, start_pos, &tfunction->params());
   out << ")";
 
   // Exceptions.
@@ -6834,8 +6834,7 @@ void t_hack_generator::generate_service_interface(
     if (nullable_everything_) {
       const std::string& funname = find_hack_name(function);
       indent(f_service_) << fqlfr << " function " << funname << "("
-                         << argument_list(
-                                function->get_paramlist(), "", true, true)
+                         << argument_list(function->params(), "", true, true)
                          << "): " << return_typehint << ";\n";
     } else {
       indent(f_service_) << fqlfr << " function "
@@ -6907,7 +6906,7 @@ void t_hack_generator::_generate_current_seq_id(
                 << "(";
 
     auto delim = "";
-    for (const auto& param : tfunction->get_paramlist()->fields()) {
+    for (const auto& param : tfunction->params().fields()) {
       out << delim << "$" << param.name();
       delim = ", ";
     }
@@ -6928,7 +6927,7 @@ void t_hack_generator::_generate_sendImpl(
 
   if (nullable_everything_) {
     indent(out) << "protected function sendImpl_" << funname << "("
-                << argument_list(tfunction->get_paramlist(), "", true, true)
+                << argument_list(tfunction->params(), "", true, true)
                 << "): int {\n";
   } else {
     indent(out) << "protected function sendImpl_"
@@ -7215,7 +7214,7 @@ void t_hack_generator::_generate_service_client_child_fn(
                       : "public")
               << " async function " << funname << "("
               << argument_list(
-                     tfunction->get_paramlist(), "", true, nullable_everything_)
+                     tfunction->params(), "", true, nullable_everything_)
               << "): Awaitable<" + return_typehint + "> {\n";
 
   indent_up();
@@ -7281,7 +7280,7 @@ void t_hack_generator::_generate_service_client_stream_child_fn(
   generate_php_docstring(out, tfunction);
   indent(out) << "public async function " << funname << "("
               << argument_list(
-                     tfunction->get_paramlist(), "", true, nullable_everything_)
+                     tfunction->params(), "", true, nullable_everything_)
               << "): Awaitable<" + return_typehint + "> {\n";
 
   indent_up();
@@ -7343,7 +7342,7 @@ void t_hack_generator::_generate_service_client_sink_child_fn(
   generate_php_docstring(out, tfunction);
   indent(out) << "public async function " << funname << "("
               << argument_list(
-                     tfunction->get_paramlist(), "", true, nullable_everything_)
+                     tfunction->params(), "", true, nullable_everything_)
               << "): Awaitable<" + return_typehint + "> {\n";
 
   indent_up();
@@ -7477,7 +7476,7 @@ std::string t_hack_generator::function_signature(
   }
 
   return find_hack_name(tfunction) + "(" +
-      argument_list(tfunction->get_paramlist(), more_tail_parameters) +
+      argument_list(tfunction->params(), more_tail_parameters) +
       "): " + typehint;
 }
 
@@ -7485,13 +7484,13 @@ std::string t_hack_generator::function_signature(
  * Renders a field list
  */
 std::string t_hack_generator::argument_list(
-    const t_struct* tstruct,
+    const t_paramlist& tparamlist,
     std::string more_tail_parameters,
     bool typehints,
     bool force_nullable) {
   std::string result = "";
   auto delim = "";
-  for (const auto& field : tstruct->fields()) {
+  for (const auto& field : tparamlist.fields()) {
     result += delim;
     delim = ", ";
     if (typehints) {

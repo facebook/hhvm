@@ -1182,7 +1182,7 @@ void py3_mstch_program::visit_type_single_service(const t_service* service) {
       continue;
     }
 
-    for (const auto& field : function.get_paramlist()->fields()) {
+    for (const auto& field : function.params().fields()) {
       visit_type(field.get_type());
     }
     const t_stream_response* stream = function.stream();

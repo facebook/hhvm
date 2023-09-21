@@ -275,7 +275,7 @@ class t_py_generator : public t_concat_generator {
       const t_function* tfunction, std::string prefix = "");
   std::string function_signature_if(
       const t_function* tfunction, bool with_context, std::string prefix = "");
-  std::string argument_list(const t_struct* tstruct);
+  std::string argument_list(const t_paramlist& tparamlist);
   std::string type_to_enum(const t_type* ttype);
   std::string type_to_spec_args(const t_type* ttype);
   std::string get_real_py_module(const t_program* program);
@@ -2133,9 +2133,9 @@ void t_py_generator::generate_service_helpers(const t_service* tservice) {
   f_service_ << "# HELPER FUNCTIONS AND STRUCTURES" << endl << endl;
 
   for (auto f_iter = functions.begin(); f_iter != functions.end(); ++f_iter) {
-    const t_struct* ts = (*f_iter)->get_paramlist();
-    generate_py_struct_definition(f_service_, ts, false);
-    generate_py_thrift_spec(f_service_, ts, false);
+    const t_paramlist& ts = (*f_iter)->params();
+    generate_py_struct_definition(f_service_, &ts, false);
+    generate_py_thrift_spec(f_service_, &ts, false);
     generate_py_function_helpers(*f_iter);
   }
 }
@@ -2248,8 +2248,7 @@ void t_py_generator::generate_service_interface(
         indent_up();
         f_service_ << indent() << "fut.set_result(self."
                    << (*f_iter)->get_name() << "(";
-        const vector<t_field*>& fields =
-            (*f_iter)->get_paramlist()->get_members();
+        const vector<t_field*>& fields = (*f_iter)->params().get_members();
         for (auto it = fields.begin(); it != fields.end(); ++it) {
           f_service_ << rename_reserved_keywords((*it)->get_name()) << ",";
         }
@@ -2436,8 +2435,8 @@ void t_py_generator::generate_service_client(const t_service* tservice) {
   const auto& functions = get_functions(tservice);
   vector<t_function*>::const_iterator f_iter;
   for (f_iter = functions.begin(); f_iter != functions.end(); ++f_iter) {
-    const t_struct* arg_struct = (*f_iter)->get_paramlist();
-    const vector<t_field*>& fields = arg_struct->get_members();
+    const t_paramlist& arg_struct = (*f_iter)->params();
+    const vector<t_field*>& fields = arg_struct.get_members();
     vector<t_field*>::const_iterator fld_iter;
     string funname = rename_reserved_keywords((*f_iter)->get_name());
     string argsname = (*f_iter)->get_name() + "_args";
@@ -2731,7 +2730,7 @@ void t_py_generator::generate_service_remote(const t_service* tservice) {
       }
 
       f_remote << "[";
-      const vector<t_field*>& args = fn->get_paramlist()->get_members();
+      const vector<t_field*>& args = fn->params().get_members();
       bool first = true;
       for (vector<t_field*>::const_iterator it = args.begin(); it != args.end();
            ++it) {
@@ -2965,8 +2964,8 @@ void t_py_generator::generate_process_function(
   }
 
   if (gen_asyncio_) {
-    const t_struct* arg_struct = tfunction->get_paramlist();
-    const std::vector<t_field*>& fields = arg_struct->get_members();
+    const t_paramlist& arg_struct = tfunction->params();
+    const std::vector<t_field*>& fields = arg_struct.get_members();
     vector<t_field*>::const_iterator f_iter;
 
     string handler =
@@ -3025,8 +3024,8 @@ void t_py_generator::generate_process_function(
     indent_up();
 
     // Generate the function call
-    const t_struct* arg_struct = tfunction->get_paramlist();
-    const std::vector<t_field*>& fields = arg_struct->get_members();
+    const t_paramlist& arg_struct = tfunction->params();
+    const std::vector<t_field*>& fields = arg_struct.get_members();
     vector<t_field*>::const_iterator f_iter;
 
     string handler = (future ? "self._handler.future_" : "self._handler.") +
@@ -3532,8 +3531,7 @@ void t_py_generator::generate_python_docstring(
  */
 void t_py_generator::generate_python_docstring(
     ofstream& out, const t_function* tfunction) {
-  generate_python_docstring(
-      out, tfunction, tfunction->get_paramlist(), "Parameters");
+  generate_python_docstring(out, tfunction, &tfunction->params(), "Parameters");
 }
 
 /**
@@ -3628,7 +3626,7 @@ string t_py_generator::function_signature(
     const t_function* tfunction, string prefix) {
   // TODO(mcslee): Nitpicky, no ',' if argument_list is empty
   return prefix + rename_reserved_keywords(tfunction->get_name()) + "(self, " +
-      argument_list(tfunction->get_paramlist()) + ")";
+      argument_list(tfunction->params()) + ")";
 }
 
 /**
@@ -3646,17 +3644,17 @@ string t_py_generator::function_signature_if(
   if (with_context) {
     signature += "handler_ctx, ";
   }
-  signature += argument_list(tfunction->get_paramlist()) + ")";
+  signature += argument_list(tfunction->params()) + ")";
   return signature;
 }
 
 /**
  * Renders a field list
  */
-string t_py_generator::argument_list(const t_struct* tstruct) {
+string t_py_generator::argument_list(const t_paramlist& tparamlist) {
   string result = "";
 
-  const vector<t_field*>& fields = tstruct->get_members();
+  const vector<t_field*>& fields = tparamlist.get_members();
   vector<t_field*>::const_iterator f_iter;
   bool first = true;
   for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {

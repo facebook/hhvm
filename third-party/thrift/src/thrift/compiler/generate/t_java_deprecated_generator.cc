@@ -2455,10 +2455,10 @@ void t_java_deprecated_generator::generate_service_helpers(
     if (!can_generate_method(*f_iter)) {
       continue;
     }
-    const t_struct* ts = (*f_iter)->get_paramlist();
+    const t_paramlist& ts = (*f_iter)->params();
     StructGenParams params;
     params.in_class = true;
-    generate_java_struct_definition(f_service_, ts, params);
+    generate_java_struct_definition(f_service_, &ts, params);
     generate_function_helpers(*f_iter);
   }
 }
@@ -2544,10 +2544,10 @@ void t_java_deprecated_generator::generate_service_client(
                << indent() << "send_" << funname << "(";
 
     // Get the struct of function call params
-    const t_struct* arg_struct = (*f_iter)->get_paramlist();
+    const t_paramlist& arg_struct = (*f_iter)->params();
 
     // Declare the function arguments
-    const vector<t_field*>& fields = arg_struct->get_members();
+    const vector<t_field*>& fields = arg_struct.get_members();
     vector<t_field*>::const_iterator fld_iter;
     bool first = true;
     for (fld_iter = fields.begin(); fld_iter != fields.end(); ++fld_iter) {
@@ -2574,7 +2574,7 @@ void t_java_deprecated_generator::generate_service_client(
     t_function send_function(
         &t_base_type::t_void(),
         string("send_") + (*f_iter)->get_name(),
-        t_struct::clone_DO_NOT_USE((*f_iter)->get_paramlist()));
+        t_struct::clone_DO_NOT_USE(&(*f_iter)->params()));
 
     string argsname = (*f_iter)->get_name() + "_args";
 
@@ -2750,9 +2750,9 @@ void t_java_deprecated_generator::generate_service_async_client(
     }
     string funname = (*f_iter)->get_name();
     const t_type* ret_type = (*f_iter)->return_type();
-    const t_struct* arg_struct = (*f_iter)->get_paramlist();
+    const t_paramlist& arg_struct = (*f_iter)->params();
     string funclassname = funname + "_call";
-    const vector<t_field*>& fields = arg_struct->get_members();
+    const vector<t_field*>& fields = arg_struct.get_members();
     vector<t_field*>::const_iterator fld_iter;
     string args_name = (*f_iter)->get_name() + "_args";
     string result_name = (*f_iter)->get_name() + "_result";
@@ -3105,8 +3105,8 @@ void t_java_deprecated_generator::generate_process_function(
   }
 
   // Generate the function call
-  const t_struct* arg_struct = tfunction->get_paramlist();
-  const std::vector<t_field*>& fields = arg_struct->get_members();
+  const t_paramlist& arg_struct = tfunction->params();
+  const std::vector<t_field*>& fields = arg_struct.get_members();
   vector<t_field*>::const_iterator f_iter;
 
   f_service_ << indent();
@@ -3782,7 +3782,7 @@ string t_java_deprecated_generator::function_signature(
     const t_function* tfunction, string prefix) {
   const t_type* ttype = tfunction->return_type();
   std::string result = type_name(ttype) + " " + prefix + tfunction->get_name() +
-      "(" + argument_list(tfunction->get_paramlist()) + ") throws ";
+      "(" + argument_list(tfunction->params()) + ") throws ";
   for (const t_field& x : get_elems(tfunction->exceptions())) {
     result += type_name(x.get_type(), false, false) + ", ";
   }
@@ -3814,8 +3814,8 @@ string t_java_deprecated_generator::async_function_call_arglist(
     bool /*use_base_method*/,
     bool include_types) {
   std::string arglist = "";
-  if (tfunc->get_paramlist()->get_members().size() > 0) {
-    arglist = argument_list(tfunc->get_paramlist(), include_types) + ", ";
+  if (tfunc->params().get_members().size() > 0) {
+    arglist = argument_list(tfunc->params(), include_types) + ", ";
   }
 
   if (include_types) {
@@ -3830,10 +3830,10 @@ string t_java_deprecated_generator::async_function_call_arglist(
  * Renders a comma separated field list, with type names
  */
 string t_java_deprecated_generator::argument_list(
-    const t_struct* tstruct, bool include_types) {
+    const t_paramlist& tparamlist, bool include_types) {
   string result = "";
 
-  const vector<t_field*>& fields = tstruct->get_members();
+  const vector<t_field*>& fields = tparamlist.get_members();
   vector<t_field*>::const_iterator f_iter;
   bool first = true;
   for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {
@@ -3852,11 +3852,11 @@ string t_java_deprecated_generator::argument_list(
 
 string t_java_deprecated_generator::async_argument_list(
     const t_function* /*tfunct*/,
-    const t_struct* tstruct,
+    const t_paramlist& tparamlist,
     string result_handler_symbol,
     bool include_types) {
   string result = "";
-  const vector<t_field*>& fields = tstruct->get_members();
+  const vector<t_field*>& fields = tparamlist.get_members();
   vector<t_field*>::const_iterator f_iter;
   bool first = true;
   for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {
@@ -3988,7 +3988,7 @@ void t_java_deprecated_generator::generate_java_doc(
   if (tfunction->has_doc()) {
     stringstream ss;
     ss << tfunction->doc();
-    const vector<t_field*>& fields = tfunction->get_paramlist()->get_members();
+    const vector<t_field*>& fields = tfunction->params().get_members();
     vector<t_field*>::const_iterator p_iter;
     for (p_iter = fields.begin(); p_iter != fields.end(); ++p_iter) {
       const t_field* p = *p_iter;

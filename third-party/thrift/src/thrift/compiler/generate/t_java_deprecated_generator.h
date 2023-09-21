@@ -252,7 +252,8 @@ class t_java_deprecated_generator : public t_concat_generator {
       std::string result_handler_symbol,
       bool use_base_method = false,
       std::string prefix = "");
-  std::string argument_list(const t_struct* tstruct, bool include_types = true);
+  std::string argument_list(
+      const t_paramlist& tparamlist, bool include_types = true);
   std::string async_function_call_arglist(
       const t_function* tfunc,
       std::string result_handler_symbol,
@@ -260,7 +261,7 @@ class t_java_deprecated_generator : public t_concat_generator {
       bool include_types = true);
   std::string async_argument_list(
       const t_function* tfunct,
-      const t_struct* tstruct,
+      const t_paramlist& tparamlist,
       std::string result_handler_symbol,
       bool include_types = false);
   std::string type_to_enum(const t_type* ttype);

@@ -523,7 +523,7 @@ class cpp_mstch_program : public mstch_program {
           get_fatal_string_short_id(service), service->get_name());
       for (const auto* f : service->get_functions()) {
         unique_names.emplace(get_fatal_string_short_id(f), f->get_name());
-        for (const auto& p : f->get_paramlist()->fields()) {
+        for (const auto& p : f->params().fields()) {
           unique_names.emplace(get_fatal_string_short_id(&p), p.name());
         }
       }

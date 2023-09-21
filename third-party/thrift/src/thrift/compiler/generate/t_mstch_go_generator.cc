@@ -564,7 +564,7 @@ class mstch_go_function : public mstch_function {
     // signature. "ctx" by default, "ctx<num>" in case of name collisions with
     // other function arguments. The name is guaranteed not to collide.
     std::set<std::string> arg_names;
-    auto& members = function_->get_paramlist()->get_members();
+    auto& members = function_->params().get_members();
     for (auto& member : members) {
       arg_names.insert(go::munge_ident(member->name(), /*exported*/ false));
     }

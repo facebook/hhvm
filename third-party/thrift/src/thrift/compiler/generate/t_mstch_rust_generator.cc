@@ -593,7 +593,7 @@ class rust_mstch_program : public mstch_program {
     }
     for (const auto* service : program_->services()) {
       for (const auto& function : service->functions()) {
-        for (const auto& param : function.get_paramlist()->fields()) {
+        for (const auto& param : function.params().fields()) {
           f(param.get_type());
         }
         f(function.return_type());
@@ -956,7 +956,7 @@ class rust_mstch_function : public mstch_function {
     return make_mstch_fields(unique_exceptions);
   }
   mstch::node rust_args_by_name() {
-    auto params = function_->get_paramlist()->fields().copy();
+    auto params = function_->params().fields().copy();
     std::sort(params.begin(), params.end(), [](auto a, auto b) {
       return a->get_name() < b->get_name();
     });

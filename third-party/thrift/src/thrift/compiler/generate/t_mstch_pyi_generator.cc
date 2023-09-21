@@ -290,7 +290,7 @@ class pyi_mstch_program : public mstch_program {
 
     for (const auto* service : mstch_program::program_->services()) {
       for (const auto& function : service->functions()) {
-        for (const auto& param : function.get_paramlist()->fields()) {
+        for (const auto& param : function.params().fields()) {
           this->add_containers(visited, param.get_type());
         }
 

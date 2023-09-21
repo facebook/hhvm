@@ -45,7 +45,11 @@ inline Transport* ExecutionContext::getTransport() {
 // based on runtime options.
 inline std::shared_ptr<stream_transport::StreamTransport>
 ExecutionContext::getServerStreamTransport() const {
-  return m_transport->getStreamTransport();
+  if (m_transport) {
+    return m_transport->getStreamTransport();
+  } else {
+    return nullptr;
+  }
 }
 
 inline rqtrace::Trace* ExecutionContext::getRequestTrace() {

@@ -88,7 +88,8 @@ class ThriftRocketServerHandler : public RocketServerHandler {
       RocketSinkClientCallback* clientCallback) final;
   void connectionClosing() final;
 
-  apache::thrift::server::TServerObserver::SamplingStatus shouldSample();
+  apache::thrift::server::TServerObserver::SamplingStatus shouldSample(
+      const transport::THeader& header);
 
   void requestComplete() final;
 

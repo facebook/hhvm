@@ -107,13 +107,18 @@ ThriftRocketServerHandler::~ThriftRocketServerHandler() {
 }
 
 apache::thrift::server::TServerObserver::SamplingStatus
-ThriftRocketServerHandler::shouldSample() {
+ThriftRocketServerHandler::shouldSample(const transport::THeader& header) {
   bool isServerSamplingEnabled =
       (sampleRate_ > 0) && ((sample_++ % sampleRate_) == 0);
 
-  // TODO: determine isClientSamplingEnabled by "client_logging_enabled" header
+  int64_t logSampleRatio = 0;
+  int64_t logErrorSampleRatio = 0;
+  if (const auto& loggingContext = header.loggingContext()) {
+    logSampleRatio = *loggingContext->logSampleRatio();
+    logErrorSampleRatio = *loggingContext->logErrorSampleRatio();
+  }
   return apache::thrift::server::TServerObserver::SamplingStatus(
-      isServerSamplingEnabled, false);
+      isServerSamplingEnabled, logSampleRatio, logErrorSampleRatio);
 }
 
 void ThriftRocketServerHandler::handleSetupFrame(
@@ -365,10 +370,8 @@ void ThriftRocketServerHandler::connectionClosing() {
 template <class F>
 void ThriftRocketServerHandler::handleRequestCommon(
     Payload&& payload, F&& makeRequest, RpcKind expectedKind) {
-  // setup request sampling for counters and stats
-  auto samplingStatus = shouldSample();
-  std::chrono::steady_clock::time_point readEnd{
-      std::chrono::steady_clock::now()};
+  std::chrono::steady_clock::time_point readEnd =
+      std::chrono::steady_clock::now();
 
   rocket::Payload debugPayload = payload.clone();
   auto requestPayloadTry =
@@ -581,6 +584,7 @@ void ThriftRocketServerHandler::handleRequestCommon(
 
   auto* cpp2ReqCtx = request->getRequestContext();
   auto& timestamps = cpp2ReqCtx->getTimestamps();
+  auto samplingStatus = shouldSample(request->getTHeader());
   timestamps.setStatus(samplingStatus);
   timestamps.readEnd = readEnd;
   timestamps.processBegin = std::chrono::steady_clock::now();

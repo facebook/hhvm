@@ -370,10 +370,21 @@ TServerObserver::SamplingStatus HeaderServerChannel::shouldSample(
     const apache::thrift::transport::THeader* header) const {
   bool isServerSamplingEnabled =
       (sampleRate_ > 0) && ((sample_++ % sampleRate_) == 0);
-  bool isClientSamplingEnabled =
+
+  if (auto loggingContext = header->loggingContext()) {
+    auto clientLogSampleRatio = *loggingContext->logSampleRatio();
+    auto clientLogErrorSampleRatio = *loggingContext->logErrorSampleRatio();
+    if (clientLogSampleRatio > 0 || clientLogErrorSampleRatio > 0) {
+      return SamplingStatus(
+          isServerSamplingEnabled,
+          clientLogSampleRatio,
+          clientLogErrorSampleRatio);
+    }
+  }
+  bool isClientSamplingEnabledLegacy =
       header->getHeaders().find(kClientLoggingHeader.str()) !=
       header->getHeaders().end();
-  return SamplingStatus(isServerSamplingEnabled, isClientSamplingEnabled);
+  return SamplingStatus(isServerSamplingEnabled, isClientSamplingEnabledLegacy);
 }
 
 // Interface from MessageChannel::RecvCallback

@@ -39,13 +39,26 @@ class TServerObserver {
 
   class SamplingStatus {
    public:
-    SamplingStatus() noexcept : SamplingStatus(false, false) {}
+    SamplingStatus() noexcept : SamplingStatus(false, 0, 0) {}
     SamplingStatus(
         bool isServerSamplingEnabled, bool isClientSamplingEnabled) noexcept
         : isServerSamplingEnabled_(isServerSamplingEnabled),
-          isClientSamplingEnabled_(isClientSamplingEnabled) {}
+          isClientSamplingEnabled_(isClientSamplingEnabled),
+          clientLogSampleRatio_(0),
+          clientLogErrorSampleRatio_(0) {}
+    SamplingStatus(
+        bool isServerSamplingEnabled,
+        int64_t clientLogSampleRatio,
+        int64_t clientLogErrorSampleRatio) noexcept
+        : isServerSamplingEnabled_(isServerSamplingEnabled),
+          isClientSamplingEnabled_(
+              clientLogSampleRatio > 0 || clientLogErrorSampleRatio > 0),
+          clientLogSampleRatio_(std::max(int64_t{0}, clientLogSampleRatio)),
+          clientLogErrorSampleRatio_(
+              std::max(int64_t{0}, clientLogErrorSampleRatio)) {}
+
     bool isEnabled() const {
-      return isServerSamplingEnabled_ || isClientSamplingEnabled_;
+      return isEnabledByServer() || isEnabledByClient();
     }
     bool isEnabledByServer() const { return isServerSamplingEnabled_; }
     bool isEnabledByClient() const { return isClientSamplingEnabled_; }
@@ -53,6 +66,8 @@ class TServerObserver {
    private:
     bool isServerSamplingEnabled_;
     bool isClientSamplingEnabled_;
+    int64_t clientLogSampleRatio_;
+    int64_t clientLogErrorSampleRatio_;
   };
 
   class PreHandlerTimestamps {

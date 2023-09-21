@@ -100,6 +100,9 @@ ThriftRequestCore::ThriftRequestCore(
     header_.setReadHeader(
         transport::THeader::kServiceTraceMeta, std::move(*serviceTraceMeta));
   }
+  if (auto loggingContext = metadata.loggingContext_ref()) {
+    header_.loggingContext() = std::move(*loggingContext);
+  }
 
   // Store client's compression configs (if client explicitly requested
   // compression codec and size limit, use these settings to compress
@@ -124,9 +127,7 @@ ThriftRequestCore::RequestTimestampSample::RequestTimestampSample(
     MessageChannel::SendCallback* chainedCallback)
     : timestamps_(timestamps),
       observer_(observer),
-      chainedCallback_(chainedCallback) {
-  DCHECK(observer != nullptr);
-}
+      chainedCallback_(chainedCallback) {}
 
 void ThriftRequestCore::RequestTimestampSample::sendQueued() {
   timestamps_.writeBegin = std::chrono::steady_clock::now();
@@ -166,7 +167,7 @@ MessageChannel::SendCallbackPtr ThriftRequestCore::prepareSendCallback(
   // sendReply/sendError are responsible for cleaning up their own callbacks.
   auto& timestamps = getTimestamps();
   if (stateMachine_.getStartedProcessing() &&
-      timestamps.getSamplingStatus().isEnabledByServer()) {
+      timestamps.getSamplingStatus().isEnabled()) {
     auto chainedCallback = cbPtr.release();
     return MessageChannel::SendCallbackPtr(
         new ThriftRequestCore::RequestTimestampSample(

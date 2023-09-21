@@ -1057,7 +1057,7 @@ fn convert_opcode<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) -> boo
         Opcode::LIterInit => todo!(),
         Opcode::LIterNext => todo!(),
         Opcode::LateBoundCls => simple!(Hhbc::LateBoundCls),
-        Opcode::LazyClass => simple!(Hhbc::LazyClass),
+        Opcode::LazyClass => simple!(Constant::LazyClass),
         Opcode::LazyClassFromClass => simple!(Hhbc::LazyClassFromClass),
         Opcode::LockObj => simple!(Hhbc::LockObj),
         Opcode::Lt => simple!(Hhbc::CmpOp, CmpOp::Lt),

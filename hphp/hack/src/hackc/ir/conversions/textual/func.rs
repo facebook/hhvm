@@ -699,7 +699,7 @@ fn write_copy(state: &mut FuncState<'_, '_, '_>, iid: InstrId, vid: ValueId) -> 
                 Constant::Named(..) => todo!(),
                 Constant::NewCol(..) => todo!(),
                 Constant::Null => Expr::Const(Const::Null),
-                Constant::String(s) => {
+                Constant::String(s) | Constant::LazyClass(ClassId { id: s }) => {
                     let s = util::escaped_string(&state.strings.lookup_bytes(*s));
                     hack::expr_builtin(Builtin::String, [Expr::Const(Const::String(s))])
                 }
@@ -1173,7 +1173,7 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
                     Constant::Bool(true) => hack::expr_builtin(Builtin::Bool, [true]),
                     Constant::Int(i) => hack::expr_builtin(Builtin::Int, [*i]),
                     Constant::Null => textual::Expr::null(),
-                    Constant::String(s) => {
+                    Constant::String(s) | Constant::LazyClass(ClassId { id: s }) => {
                         let s = self.strings.lookup_bstr(*s);
                         let s = util::escaped_string(&s);
                         hack::expr_builtin(Builtin::String, [s])

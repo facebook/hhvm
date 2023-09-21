@@ -1373,7 +1373,6 @@ impl FunctionParser<'_, '_> {
             "iterator" => self.parse_iterator(tok, loc)?,
             "jmp" => self.parse_jmp(tok, loc)?,
             "late_bound_cls" => I::Hhbc(H::LateBoundCls(loc)),
-            "lazy_class" => I::Hhbc(H::LazyClass(parse_class_id(tok)?, loc)),
             "lazy_class_from_class" => I::Hhbc(H::LazyClassFromClass(self.vid(tok)?, loc)),
             "lock_obj" => I::Hhbc(H::LockObj(self.vid(tok)?, loc)),
             "memo_get" => self.parse_memo_get(tok, mnemonic, loc)?,

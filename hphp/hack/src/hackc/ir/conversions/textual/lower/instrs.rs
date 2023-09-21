@@ -661,11 +661,6 @@ impl TransformInstr for LowerInstrs<'_> {
                 },
                 FuncInfo::Function(_) => unreachable!(),
             },
-            Instr::Hhbc(Hhbc::LazyClass(clsid, _)) => {
-                // Treat a lazy class as a simple string.
-                let c = builder.emit_constant(Constant::String(clsid.id));
-                Instr::copy(c)
-            }
             Instr::Hhbc(Hhbc::LockObj(obj, loc)) => {
                 builder.emit_hhbc_builtin(hack::Hhbc::LockObj, &[obj], loc);
                 Instr::copy(obj)

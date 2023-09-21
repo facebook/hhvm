@@ -345,6 +345,9 @@ impl Display for FmtConstant<'_, '_> {
             Constant::File => write!(f, "file"),
             Constant::FuncCred => write!(f, "func_cred"),
             Constant::Int(value) => write!(f, "{}", value),
+            Constant::LazyClass(cid) => {
+                write!(f, "lazy_class({})", FmtIdentifierId(cid.id, strings))
+            }
             Constant::Method => write!(f, "method"),
             Constant::Named(name) => write!(f, "constant({})", FmtIdentifier(name.as_bytes())),
             Constant::NewCol(k) => write!(f, "new_col({:?})", k),

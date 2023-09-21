@@ -43,7 +43,7 @@ enum VerifyError {
     CompileError(String),
     #[error("i/o error: {0}")]
     IoError(String),
-    #[error("units mismatch: {0}")]
+    #[error("ir units mismatch: {0}")]
     IrUnitMismatchError(String),
     #[error("multifile error: {0}")]
     MultifileError(String),

@@ -40,7 +40,7 @@ pub struct Opts {
     no_builtins: bool,
 
     /// (DEPRECATED) Attempt to keep going instead of panicking on unimplemented code. This is the
-    /// default now and can be reversed via `no_keep_going` flag.
+    /// default now and can be reversed via `--fail-fast` flag.
     #[clap(long)]
     keep_going: bool,
 

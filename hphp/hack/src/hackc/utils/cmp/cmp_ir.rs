@@ -292,6 +292,9 @@ fn cmp_constant(
         }
         (Constant::Float(a), Constant::Float(b)) => cmp_eq(a, b).qualified("float")?,
         (Constant::Int(a), Constant::Int(b)) => cmp_eq(a, b).qualified("int")?,
+        (Constant::LazyClass(a), Constant::LazyClass(b)) => {
+            cmp_id(a.id, b.id).qualified("lazy_class")?
+        }
         (Constant::Named(a), Constant::Named(b)) => cmp_eq(a, b).qualified("named")?,
         (Constant::NewCol(a), Constant::NewCol(b)) => cmp_eq(a, b).qualified("new_col")?,
         (Constant::String(a), Constant::String(b)) => cmp_id(*a, *b).qualified("string")?,
@@ -309,6 +312,7 @@ fn cmp_constant(
             | Constant::EnumClassLabel(_)
             | Constant::Float(_)
             | Constant::Int(_)
+            | Constant::LazyClass(_)
             | Constant::Named(_)
             | Constant::NewCol(_)
             | Constant::String(_)
@@ -843,9 +847,6 @@ fn cmp_instr_hhbc(
         (Hhbc::IterFree(x0, _), Hhbc::IterFree(x1, _)) => {
             cmp_eq(x0, x1).qualified("IterFree param x")?;
         }
-        (Hhbc::LazyClass(x0, _), Hhbc::LazyClass(x1, _)) => {
-            cmp_id(x0.id, x1.id).qualified("LazyClass param x")?;
-        }
         (Hhbc::NewDictArray(x0, _), Hhbc::NewDictArray(x1, _)) => {
             cmp_eq(x0, x1).qualified("NewDictArray param x")?;
         }
@@ -1028,7 +1029,6 @@ fn cmp_instr_hhbc(
             | Hhbc::IsTypeL(..)
             | Hhbc::IsTypeStructC(..)
             | Hhbc::IterFree(..)
-            | Hhbc::LazyClass(..)
             | Hhbc::NewDictArray(..)
             | Hhbc::NewObjD(..)
             | Hhbc::NewObjS(..)

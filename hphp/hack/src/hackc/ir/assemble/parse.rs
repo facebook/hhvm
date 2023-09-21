@@ -332,6 +332,10 @@ pub(crate) fn parse_constant<'a>(
             "file" => Constant::File,
             "func_cred" => Constant::FuncCred,
             "inf" => Constant::Float(FloatBits(f64::INFINITY)),
+            "lazy_class" => {
+                parse!(tokenizer, "(" <value:parse_class_id> ")");
+                Constant::LazyClass(value)
+            }
             "method" => Constant::Method,
             "new_col" => {
                 parse!(tokenizer, "(" <kind:id> ")");

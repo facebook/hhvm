@@ -1004,9 +1004,6 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func<'_>, hhbc: &
         Hhbc::LateBoundCls(_) => {
             write!(w, "late_bound_cls")?;
         }
-        Hhbc::LazyClass(clsid, _) => {
-            write!(w, "lazy_class {}", FmtIdentifierId(clsid.id, ctx.strings))?;
-        }
         Hhbc::LazyClassFromClass(vid, _) => {
             write!(
                 w,

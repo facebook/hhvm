@@ -633,10 +633,6 @@ func (x *SomeStruct) writeField3(p thrift.Protocol) error {  // Questionable
 }
 
 func (x *SomeStruct) writeField4(p thrift.Protocol) error {  // Tags
-    if !x.IsSetTags() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("tags", thrift.SET, 4); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }

@@ -452,10 +452,6 @@ func (x *reqCThing) writeField2(p thrift.Protocol) error {  // B
 }
 
 func (x *reqCThing) writeField3(p thrift.Protocol) error {  // C
-    if !x.IsSetC() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("c", thrift.SET, 3); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }

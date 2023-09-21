@@ -449,10 +449,6 @@ func (x *MyStruct) writeField7(p thrift.Protocol) error {  // Idempotent
 }
 
 func (x *MyStruct) writeField8(p thrift.Protocol) error {  // FloatSet
-    if !x.IsSetFloatSet() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("floatSet", thrift.SET, 8); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }

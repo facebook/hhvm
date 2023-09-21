@@ -196,10 +196,6 @@ func (x *reqSomeServiceBounceMap) IsSetM() bool {
 }
 
 func (x *reqSomeServiceBounceMap) writeField1(p thrift.Protocol) error {  // M
-    if !x.IsSetM() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("m", thrift.MAP, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -370,10 +366,6 @@ func (x *respSomeServiceBounceMap) IsSetSuccess() bool {
 }
 
 func (x *respSomeServiceBounceMap) writeField0(p thrift.Protocol) error {  // Success
-    if !x.IsSetSuccess() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("success", thrift.MAP, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -547,10 +539,6 @@ func (x *reqSomeServiceBinaryKeyedMap) IsSetR() bool {
 }
 
 func (x *reqSomeServiceBinaryKeyedMap) writeField1(p thrift.Protocol) error {  // R
-    if !x.IsSetR() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("r", thrift.LIST, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -749,10 +737,6 @@ func (x *respSomeServiceBinaryKeyedMap) IsSetSuccess() bool {
 }
 
 func (x *respSomeServiceBinaryKeyedMap) writeField0(p thrift.Protocol) error {  // Success
-    if !x.IsSetSuccess() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("success", thrift.MAP, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }

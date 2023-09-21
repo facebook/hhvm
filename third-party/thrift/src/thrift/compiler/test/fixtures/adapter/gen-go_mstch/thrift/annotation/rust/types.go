@@ -214,10 +214,6 @@ func (x *Derive) IsSetDerives() bool {
 }
 
 func (x *Derive) writeField1(p thrift.Protocol) error {  // Derives
-    if !x.IsSetDerives() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("derives", thrift.LIST, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }

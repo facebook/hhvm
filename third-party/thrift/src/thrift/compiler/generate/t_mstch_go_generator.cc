@@ -261,6 +261,8 @@ class mstch_go_field : public mstch_field {
             {"field:compat_setter_value_op",
              &mstch_go_field::compat_setter_value_op},
             {"field:nilable?", &mstch_go_field::is_nilable},
+            {"field:must_be_set_to_serialize?",
+             &mstch_go_field::must_be_set_to_serialize},
             {"field:key_str", &mstch_go_field::key_str},
             {"field:go_tag?", &mstch_go_field::has_go_tag},
             {"field:go_tag", &mstch_go_field::go_tag},
@@ -302,6 +304,18 @@ class mstch_go_field : public mstch_field {
     auto real_type = field_->type()->get_true_type();
     return go::is_type_go_struct(real_type) || is_inside_union_() ||
         is_optional_() || go::is_type_nilable(real_type);
+  }
+  mstch::node must_be_set_to_serialize() {
+    // Whether the field must be set (non-nil) in order to serialize:
+    //  * Struct type fields must be set (to avoid nil pointer dereference)
+    //  * Fields inside a union must be set (that's the point of a union)
+    //  * Optional fields must be set ("unset" optional fields must not be
+    //  serailized as per Thrift-spec)
+    //  * Binary type fields must be set (thrift/lib/go/thrift can't handle nil
+    //  byte values - to be fixed soon)
+    auto real_type = field_->type()->get_true_type();
+    return go::is_type_go_struct(real_type) || is_inside_union_() ||
+        is_optional_() || real_type->is_binary();
   }
   mstch::node is_non_struct_pointer() {
     // Whether this field is a non-struct pointer.

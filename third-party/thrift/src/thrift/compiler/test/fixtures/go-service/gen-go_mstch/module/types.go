@@ -437,10 +437,6 @@ func (x *NonComparableStruct) writeField1(p thrift.Protocol) error {  // Foo
 }
 
 func (x *NonComparableStruct) writeField2(p thrift.Protocol) error {  // Bar
-    if !x.IsSetBar() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("bar", thrift.LIST, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -468,10 +464,6 @@ if err := p.WriteListEnd(); err != nil {
 }
 
 func (x *NonComparableStruct) writeField3(p thrift.Protocol) error {  // Baz
-    if !x.IsSetBaz() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("baz", thrift.MAP, 3); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }

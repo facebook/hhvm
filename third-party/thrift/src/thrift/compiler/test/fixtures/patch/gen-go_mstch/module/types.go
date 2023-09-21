@@ -1974,10 +1974,6 @@ func (x *MyStruct) writeField_31(p thrift.Protocol) error {  // I32WithCustomDef
 }
 
 func (x *MyStruct) writeField_30(p thrift.Protocol) error {  // MapMap
-    if !x.IsSetMapMap() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("mapMap", thrift.MAP, -30); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -2030,10 +2026,6 @@ if err := p.WriteMapEnd(); err != nil {
 }
 
 func (x *MyStruct) writeField_29(p thrift.Protocol) error {  // ListMap
-    if !x.IsSetListMap() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("listMap", thrift.LIST, -29); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -4330,10 +4322,6 @@ func (x *Recursive) IsSetNodes() bool {
 }
 
 func (x *Recursive) writeField_1(p thrift.Protocol) error {  // Nodes
-    if !x.IsSetNodes() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("nodes", thrift.MAP, -1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -5141,10 +5129,6 @@ func (x *MyDataPatch) writeField6(p thrift.Protocol) error {  // Patch
 }
 
 func (x *MyDataPatch) writeField7(p thrift.Protocol) error {  // Remove
-    if !x.IsSetRemove() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("remove", thrift.LIST, 7); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -6305,10 +6289,6 @@ func (x *MyDataWithCustomDefaultPatch) writeField6(p thrift.Protocol) error {  /
 }
 
 func (x *MyDataWithCustomDefaultPatch) writeField7(p thrift.Protocol) error {  // Remove
-    if !x.IsSetRemove() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("remove", thrift.LIST, 7); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -9101,10 +9081,6 @@ func (x *MyStructPatch) writeField6(p thrift.Protocol) error {  // Patch
 }
 
 func (x *MyStructPatch) writeField7(p thrift.Protocol) error {  // Remove
-    if !x.IsSetRemove() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("remove", thrift.LIST, 7); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -10114,10 +10090,6 @@ func (x *MyStructField26Patch) writeField2(p thrift.Protocol) error {  // Clear
 }
 
 func (x *MyStructField26Patch) writeField8(p thrift.Protocol) error {  // Prepend
-    if !x.IsSetPrepend() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("prepend", thrift.LIST, 8); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -10145,10 +10117,6 @@ if err := p.WriteListEnd(); err != nil {
 }
 
 func (x *MyStructField26Patch) writeField9(p thrift.Protocol) error {  // Append
-    if !x.IsSetAppend() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("append", thrift.LIST, 9); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -10608,10 +10576,6 @@ func (x *MyStructField27Patch) writeField2(p thrift.Protocol) error {  // Clear
 }
 
 func (x *MyStructField27Patch) writeField7(p thrift.Protocol) error {  // Remove
-    if !x.IsSetRemove() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("remove", thrift.SET, 7); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -10639,10 +10603,6 @@ if err := p.WriteSetEnd(); err != nil {
 }
 
 func (x *MyStructField27Patch) writeField8(p thrift.Protocol) error {  // Add
-    if !x.IsSetAdd() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("add", thrift.SET, 8); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -11193,10 +11153,6 @@ func (x *MyStructField28Patch) writeField2(p thrift.Protocol) error {  // Clear
 }
 
 func (x *MyStructField28Patch) writeField3(p thrift.Protocol) error {  // PatchPrior
-    if !x.IsSetPatchPrior() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("patchPrior", thrift.MAP, 3); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -11231,10 +11187,6 @@ if err := p.WriteMapEnd(); err != nil {
 }
 
 func (x *MyStructField28Patch) writeField5(p thrift.Protocol) error {  // Add
-    if !x.IsSetAdd() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("add", thrift.MAP, 5); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -11269,10 +11221,6 @@ if err := p.WriteMapEnd(); err != nil {
 }
 
 func (x *MyStructField28Patch) writeField6(p thrift.Protocol) error {  // Patch
-    if !x.IsSetPatch() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("patch", thrift.MAP, 6); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -11307,10 +11255,6 @@ if err := p.WriteMapEnd(); err != nil {
 }
 
 func (x *MyStructField28Patch) writeField7(p thrift.Protocol) error {  // Remove
-    if !x.IsSetRemove() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("remove", thrift.SET, 7); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -11338,10 +11282,6 @@ if err := p.WriteSetEnd(); err != nil {
 }
 
 func (x *MyStructField28Patch) writeField9(p thrift.Protocol) error {  // Put
-    if !x.IsSetPut() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("put", thrift.MAP, 9); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -12037,10 +11977,6 @@ func (x *MyStructField29Patch) writeField2(p thrift.Protocol) error {  // Clear
 }
 
 func (x *MyStructField29Patch) writeField8(p thrift.Protocol) error {  // Prepend
-    if !x.IsSetPrepend() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("prepend", thrift.LIST, 8); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -12086,10 +12022,6 @@ if err := p.WriteListEnd(); err != nil {
 }
 
 func (x *MyStructField29Patch) writeField9(p thrift.Protocol) error {  // Append
-    if !x.IsSetAppend() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("append", thrift.LIST, 9); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -12760,10 +12692,6 @@ func (x *MyStructField30Patch) writeField2(p thrift.Protocol) error {  // Clear
 }
 
 func (x *MyStructField30Patch) writeField3(p thrift.Protocol) error {  // PatchPrior
-    if !x.IsSetPatchPrior() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("patchPrior", thrift.MAP, 3); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -12798,10 +12726,6 @@ if err := p.WriteMapEnd(); err != nil {
 }
 
 func (x *MyStructField30Patch) writeField5(p thrift.Protocol) error {  // Add
-    if !x.IsSetAdd() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("add", thrift.MAP, 5); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -12854,10 +12778,6 @@ if err := p.WriteMapEnd(); err != nil {
 }
 
 func (x *MyStructField30Patch) writeField6(p thrift.Protocol) error {  // Patch
-    if !x.IsSetPatch() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("patch", thrift.MAP, 6); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -12892,10 +12812,6 @@ if err := p.WriteMapEnd(); err != nil {
 }
 
 func (x *MyStructField30Patch) writeField7(p thrift.Protocol) error {  // Remove
-    if !x.IsSetRemove() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("remove", thrift.SET, 7); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -12923,10 +12839,6 @@ if err := p.WriteSetEnd(); err != nil {
 }
 
 func (x *MyStructField30Patch) writeField9(p thrift.Protocol) error {  // Put
-    if !x.IsSetPut() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("put", thrift.MAP, 9); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -13797,10 +13709,6 @@ func (x *MyStructField30Patch1) writeField2(p thrift.Protocol) error {  // Clear
 }
 
 func (x *MyStructField30Patch1) writeField3(p thrift.Protocol) error {  // PatchPrior
-    if !x.IsSetPatchPrior() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("patchPrior", thrift.MAP, 3); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -13835,10 +13743,6 @@ if err := p.WriteMapEnd(); err != nil {
 }
 
 func (x *MyStructField30Patch1) writeField5(p thrift.Protocol) error {  // Add
-    if !x.IsSetAdd() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("add", thrift.MAP, 5); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -13873,10 +13777,6 @@ if err := p.WriteMapEnd(); err != nil {
 }
 
 func (x *MyStructField30Patch1) writeField6(p thrift.Protocol) error {  // Patch
-    if !x.IsSetPatch() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("patch", thrift.MAP, 6); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -13911,10 +13811,6 @@ if err := p.WriteMapEnd(); err != nil {
 }
 
 func (x *MyStructField30Patch1) writeField7(p thrift.Protocol) error {  // Remove
-    if !x.IsSetRemove() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("remove", thrift.SET, 7); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -13942,10 +13838,6 @@ if err := p.WriteSetEnd(); err != nil {
 }
 
 func (x *MyStructField30Patch1) writeField9(p thrift.Protocol) error {  // Put
-    if !x.IsSetPut() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("put", thrift.MAP, 9); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -21218,10 +21110,6 @@ func (x *LateDefStructPatch) writeField6(p thrift.Protocol) error {  // Patch
 }
 
 func (x *LateDefStructPatch) writeField7(p thrift.Protocol) error {  // Remove
-    if !x.IsSetRemove() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("remove", thrift.LIST, 7); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -22016,10 +21904,6 @@ func (x *RecursivePatch) writeField6(p thrift.Protocol) error {  // Patch
 }
 
 func (x *RecursivePatch) writeField7(p thrift.Protocol) error {  // Remove
-    if !x.IsSetRemove() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("remove", thrift.LIST, 7); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -23326,10 +23210,6 @@ func (x *BarPatch) writeField6(p thrift.Protocol) error {  // Patch
 }
 
 func (x *BarPatch) writeField7(p thrift.Protocol) error {  // Remove
-    if !x.IsSetRemove() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("remove", thrift.LIST, 7); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }

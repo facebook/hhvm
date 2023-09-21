@@ -171,10 +171,6 @@ func (x *ReserveIds) IsSetIdRanges() bool {
 }
 
 func (x *ReserveIds) writeField1(p thrift.Protocol) error {  // Ids
-    if !x.IsSetIds() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("ids", thrift.LIST, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -202,10 +198,6 @@ if err := p.WriteListEnd(); err != nil {
 }
 
 func (x *ReserveIds) writeField2(p thrift.Protocol) error {  // IdRanges
-    if !x.IsSetIdRanges() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("id_ranges", thrift.MAP, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }

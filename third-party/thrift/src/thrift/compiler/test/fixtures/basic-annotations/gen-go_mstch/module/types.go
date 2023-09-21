@@ -799,10 +799,6 @@ func (x *MyStruct) writeField7(p thrift.Protocol) error {  // MyEnum
 }
 
 func (x *MyStruct) writeField8(p thrift.Protocol) error {  // CppTypeAnnotation
-    if !x.IsSetCppTypeAnnotation() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("cpp_type_annotation", thrift.LIST, 8); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }

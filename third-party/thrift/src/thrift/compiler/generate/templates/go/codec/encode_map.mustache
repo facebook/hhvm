@@ -18,6 +18,8 @@
 
   This file defines the encoding/write function for a map type.
 
+  NOTE: `item` is allowed to be a `nil` map!
+
 }}
 if err := p.WriteMapBegin({{!
   }}{{#type:key_type}}{{> common/ttype}}{{/type:key_type}}, {{!

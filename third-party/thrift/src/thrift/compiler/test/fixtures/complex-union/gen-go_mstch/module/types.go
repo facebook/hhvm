@@ -1490,10 +1490,6 @@ func (x *Val) writeField2(p thrift.Protocol) error {  // IntVal
 }
 
 func (x *Val) writeField9(p thrift.Protocol) error {  // TypedefValue
-    if !x.IsSetTypedefValue() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("typedefValue", thrift.MAP, 9); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }

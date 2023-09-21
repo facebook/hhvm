@@ -498,10 +498,6 @@ if err != nil {
 }
 
 func (x *Automobile) writeField5(p thrift.Protocol) error {  // Drivers
-    if !x.IsSetDrivers() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("drivers", thrift.LIST, 5); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -519,10 +515,6 @@ if err != nil {
 }
 
 func (x *Automobile) writeField6(p thrift.Protocol) error {  // Accessories
-    if !x.IsSetAccessories() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("Accessories", thrift.LIST, 6); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -551,10 +543,6 @@ if err := p.WriteListEnd(); err != nil {
 }
 
 func (x *Automobile) writeField7(p thrift.Protocol) error {  // PartNames
-    if !x.IsSetPartNames() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("PartNames", thrift.MAP, 7); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -1239,10 +1227,6 @@ func (x *MapContainer) IsSetMapval() bool {
 }
 
 func (x *MapContainer) writeField1(p thrift.Protocol) error {  // Mapval
-    if !x.IsSetMapval() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("mapval", thrift.MAP, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -1763,10 +1747,6 @@ func (x *Collection) IsSetCars() bool {
 }
 
 func (x *Collection) writeField1(p thrift.Protocol) error {  // Automobiles
-    if !x.IsSetAutomobiles() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("automobiles", thrift.LIST, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -1794,10 +1774,6 @@ if err := p.WriteListEnd(); err != nil {
 }
 
 func (x *Collection) writeField2(p thrift.Protocol) error {  // Cars
-    if !x.IsSetCars() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("cars", thrift.LIST, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }

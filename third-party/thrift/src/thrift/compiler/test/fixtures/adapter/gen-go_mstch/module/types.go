@@ -1578,10 +1578,6 @@ func (x *Foo) writeField3(p thrift.Protocol) error {  // IntFieldWithDefault
 }
 
 func (x *Foo) writeField4(p thrift.Protocol) error {  // SetField
-    if !x.IsSetSetField() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("setField", thrift.SET, 4); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -1620,10 +1616,6 @@ if err != nil {
 }
 
 func (x *Foo) writeField6(p thrift.Protocol) error {  // MapField
-    if !x.IsSetMapField() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("mapField", thrift.MAP, 6); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -3123,10 +3115,6 @@ func (x *Bar) writeField2(p thrift.Protocol) error {  // OptionalStructField
 }
 
 func (x *Bar) writeField3(p thrift.Protocol) error {  // StructListField
-    if !x.IsSetStructListField() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("structListField", thrift.LIST, 3); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -4500,10 +4488,6 @@ func (x *TerseAdaptedFields) writeField2(p thrift.Protocol) error {  // StringFi
 }
 
 func (x *TerseAdaptedFields) writeField3(p thrift.Protocol) error {  // SetField
-    if !x.IsSetSetField() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("set_field", thrift.SET, 3); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -5236,10 +5220,6 @@ func (x *MyStruct) writeField1(p thrift.Protocol) error {  // Field
 }
 
 func (x *MyStruct) writeField2(p thrift.Protocol) error {  // SetString
-    if !x.IsSetSetString() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("set_string", thrift.SET, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -6869,10 +6849,6 @@ if err != nil {
 }
 
 func (x *AdaptTemplatedTestStruct) writeField8(p thrift.Protocol) error {  // AdaptedList
-    if !x.IsSetAdaptedList() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("adaptedList", thrift.LIST, 8); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -6900,10 +6876,6 @@ if err := p.WriteListEnd(); err != nil {
 }
 
 func (x *AdaptTemplatedTestStruct) writeField9(p thrift.Protocol) error {  // AdaptedSet
-    if !x.IsSetAdaptedSet() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("adaptedSet", thrift.SET, 9); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -6931,10 +6903,6 @@ if err := p.WriteSetEnd(); err != nil {
 }
 
 func (x *AdaptTemplatedTestStruct) writeField10(p thrift.Protocol) error {  // AdaptedMap
-    if !x.IsSetAdaptedMap() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("adaptedMap", thrift.MAP, 10); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -7105,10 +7073,6 @@ if err != nil {
 }
 
 func (x *AdaptTemplatedTestStruct) writeField19(p thrift.Protocol) error {  // AdaptedListDefault
-    if !x.IsSetAdaptedListDefault() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("adaptedListDefault", thrift.LIST, 19); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -7136,10 +7100,6 @@ if err := p.WriteListEnd(); err != nil {
 }
 
 func (x *AdaptTemplatedTestStruct) writeField20(p thrift.Protocol) error {  // AdaptedSetDefault
-    if !x.IsSetAdaptedSetDefault() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("adaptedSetDefault", thrift.SET, 20); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -7167,10 +7127,6 @@ if err := p.WriteSetEnd(); err != nil {
 }
 
 func (x *AdaptTemplatedTestStruct) writeField21(p thrift.Protocol) error {  // AdaptedMapDefault
-    if !x.IsSetAdaptedMapDefault() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("adaptedMapDefault", thrift.MAP, 21); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }

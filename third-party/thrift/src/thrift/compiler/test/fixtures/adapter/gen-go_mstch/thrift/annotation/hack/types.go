@@ -1063,10 +1063,6 @@ func (x *UnionEnumAttributes) IsSetAttributes() bool {
 }
 
 func (x *UnionEnumAttributes) writeField1(p thrift.Protocol) error {  // Attributes
-    if !x.IsSetAttributes() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("attributes", thrift.LIST, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -1422,10 +1418,6 @@ func (x *Attributes) IsSetAttributes() bool {
 }
 
 func (x *Attributes) writeField1(p thrift.Protocol) error {  // Attributes
-    if !x.IsSetAttributes() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("attributes", thrift.LIST, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }

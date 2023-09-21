@@ -759,10 +759,6 @@ func (x *ContainerStruct) IsSetFieldA() bool {
 }
 
 func (x *ContainerStruct) writeField2(p thrift.Protocol) error {  // FieldB
-    if !x.IsSetFieldB() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("fieldB", thrift.LIST, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -790,10 +786,6 @@ if err := p.WriteListEnd(); err != nil {
 }
 
 func (x *ContainerStruct) writeField3(p thrift.Protocol) error {  // FieldC
-    if !x.IsSetFieldC() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("fieldC", thrift.LIST, 3); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -821,10 +813,6 @@ if err := p.WriteListEnd(); err != nil {
 }
 
 func (x *ContainerStruct) writeField4(p thrift.Protocol) error {  // FieldD
-    if !x.IsSetFieldD() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("fieldD", thrift.LIST, 4); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -852,10 +840,6 @@ if err := p.WriteListEnd(); err != nil {
 }
 
 func (x *ContainerStruct) writeField5(p thrift.Protocol) error {  // FieldE
-    if !x.IsSetFieldE() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("fieldE", thrift.LIST, 5); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -883,10 +867,6 @@ if err := p.WriteListEnd(); err != nil {
 }
 
 func (x *ContainerStruct) writeField6(p thrift.Protocol) error {  // FieldF
-    if !x.IsSetFieldF() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("fieldF", thrift.SET, 6); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -914,10 +894,6 @@ if err := p.WriteSetEnd(); err != nil {
 }
 
 func (x *ContainerStruct) writeField7(p thrift.Protocol) error {  // FieldG
-    if !x.IsSetFieldG() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("fieldG", thrift.MAP, 7); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -952,10 +928,6 @@ if err := p.WriteMapEnd(); err != nil {
 }
 
 func (x *ContainerStruct) writeField8(p thrift.Protocol) error {  // FieldH
-    if !x.IsSetFieldH() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("fieldH", thrift.MAP, 8); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -973,10 +945,6 @@ if err != nil {
 }
 
 func (x *ContainerStruct) writeField12(p thrift.Protocol) error {  // FieldA
-    if !x.IsSetFieldA() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("fieldA", thrift.LIST, 12); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -1536,10 +1504,6 @@ func (x *CppTypeStruct) IsSetFieldA() bool {
 }
 
 func (x *CppTypeStruct) writeField1(p thrift.Protocol) error {  // FieldA
-    if !x.IsSetFieldA() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("fieldA", thrift.LIST, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -2655,10 +2619,6 @@ func (x *ComplexString) writeField1(p thrift.Protocol) error {  // A
 }
 
 func (x *ComplexString) writeField2(p thrift.Protocol) error {  // B
-    if !x.IsSetB() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("b", thrift.MAP, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -4751,10 +4711,6 @@ if err != nil {
 }
 
 func (x *AnnotatedTypes) writeField2(p thrift.Protocol) error {  // ListField
-    if !x.IsSetListField() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("list_field", thrift.LIST, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -7679,10 +7635,6 @@ func (x *AllocatorAware) IsSetAaMap() bool {
 }
 
 func (x *AllocatorAware) writeField1(p thrift.Protocol) error {  // AaList
-    if !x.IsSetAaList() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("aa_list", thrift.LIST, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -7710,10 +7662,6 @@ if err := p.WriteListEnd(); err != nil {
 }
 
 func (x *AllocatorAware) writeField2(p thrift.Protocol) error {  // AaSet
-    if !x.IsSetAaSet() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("aa_set", thrift.SET, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -7741,10 +7689,6 @@ if err := p.WriteSetEnd(); err != nil {
 }
 
 func (x *AllocatorAware) writeField3(p thrift.Protocol) error {  // AaMap
-    if !x.IsSetAaMap() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("aa_map", thrift.MAP, 3); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }

@@ -2329,10 +2329,6 @@ func (x *StructLevelTerseStruct) writeField10(p thrift.Protocol) error {  // Enu
 }
 
 func (x *StructLevelTerseStruct) writeField11(p thrift.Protocol) error {  // ListField
-    if !x.IsSetListField() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("list_field", thrift.LIST, 11); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -2360,10 +2356,6 @@ if err := p.WriteListEnd(); err != nil {
 }
 
 func (x *StructLevelTerseStruct) writeField12(p thrift.Protocol) error {  // SetField
-    if !x.IsSetSetField() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("set_field", thrift.SET, 12); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -2391,10 +2383,6 @@ if err := p.WriteSetEnd(); err != nil {
 }
 
 func (x *StructLevelTerseStruct) writeField13(p thrift.Protocol) error {  // MapField
-    if !x.IsSetMapField() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("map_field", thrift.MAP, 13); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -4032,10 +4020,6 @@ func (x *FieldLevelTerseStruct) writeField10(p thrift.Protocol) error {  // Ters
 }
 
 func (x *FieldLevelTerseStruct) writeField11(p thrift.Protocol) error {  // TerseListField
-    if !x.IsSetTerseListField() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("terse_list_field", thrift.LIST, 11); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -4063,10 +4047,6 @@ if err := p.WriteListEnd(); err != nil {
 }
 
 func (x *FieldLevelTerseStruct) writeField12(p thrift.Protocol) error {  // TerseSetField
-    if !x.IsSetTerseSetField() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("terse_set_field", thrift.SET, 12); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -4094,10 +4074,6 @@ if err := p.WriteSetEnd(); err != nil {
 }
 
 func (x *FieldLevelTerseStruct) writeField13(p thrift.Protocol) error {  // TerseMapField
-    if !x.IsSetTerseMapField() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("terse_map_field", thrift.MAP, 13); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -4316,10 +4292,6 @@ func (x *FieldLevelTerseStruct) writeField24(p thrift.Protocol) error {  // Enum
 }
 
 func (x *FieldLevelTerseStruct) writeField25(p thrift.Protocol) error {  // ListField
-    if !x.IsSetListField() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("list_field", thrift.LIST, 25); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -4347,10 +4319,6 @@ if err := p.WriteListEnd(); err != nil {
 }
 
 func (x *FieldLevelTerseStruct) writeField26(p thrift.Protocol) error {  // SetField
-    if !x.IsSetSetField() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("set_field", thrift.SET, 26); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -4378,10 +4346,6 @@ if err := p.WriteSetEnd(); err != nil {
 }
 
 func (x *FieldLevelTerseStruct) writeField27(p thrift.Protocol) error {  // MapField
-    if !x.IsSetMapField() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("map_field", thrift.MAP, 27); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -6298,10 +6262,6 @@ func (x *TerseStructWithCustomDefault) writeField10(p thrift.Protocol) error {  
 }
 
 func (x *TerseStructWithCustomDefault) writeField11(p thrift.Protocol) error {  // ListField
-    if !x.IsSetListField() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("list_field", thrift.LIST, 11); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -6329,10 +6289,6 @@ if err := p.WriteListEnd(); err != nil {
 }
 
 func (x *TerseStructWithCustomDefault) writeField12(p thrift.Protocol) error {  // SetField
-    if !x.IsSetSetField() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("set_field", thrift.SET, 12); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -6360,10 +6316,6 @@ if err := p.WriteSetEnd(); err != nil {
 }
 
 func (x *TerseStructWithCustomDefault) writeField13(p thrift.Protocol) error {  // MapField
-    if !x.IsSetMapField() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("map_field", thrift.MAP, 13); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }

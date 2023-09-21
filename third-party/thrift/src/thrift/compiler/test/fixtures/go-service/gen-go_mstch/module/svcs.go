@@ -2941,10 +2941,6 @@ func (x *respGetEntityGetMap) IsSetSuccess() bool {
 }
 
 func (x *respGetEntityGetMap) writeField0(p thrift.Protocol) error {  // Success
-    if !x.IsSetSuccess() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("success", thrift.MAP, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -3253,10 +3249,6 @@ func (x *respGetEntityGetSet) IsSetSuccess() bool {
 }
 
 func (x *respGetEntityGetSet) writeField0(p thrift.Protocol) error {  // Success
-    if !x.IsSetSuccess() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("success", thrift.SET, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -3548,10 +3540,6 @@ func (x *respGetEntityGetList) IsSetSuccess() bool {
 }
 
 func (x *respGetEntityGetList) writeField0(p thrift.Protocol) error {  // Success
-    if !x.IsSetSuccess() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("success", thrift.LIST, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }

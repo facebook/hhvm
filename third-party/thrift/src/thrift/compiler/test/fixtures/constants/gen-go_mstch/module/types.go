@@ -1456,10 +1456,6 @@ func (x *Struct2) writeField3(p thrift.Protocol) error {  // C
 }
 
 func (x *Struct2) writeField4(p thrift.Protocol) error {  // D
-    if !x.IsSetD() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("d", thrift.LIST, 4); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }

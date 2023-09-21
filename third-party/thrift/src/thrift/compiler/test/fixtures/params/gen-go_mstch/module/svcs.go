@@ -251,10 +251,6 @@ func (x *reqNestedContainersMapList) IsSetFoo() bool {
 }
 
 func (x *reqNestedContainersMapList) writeField1(p thrift.Protocol) error {  // Foo
-    if !x.IsSetFoo() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("foo", thrift.MAP, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -592,10 +588,6 @@ func (x *reqNestedContainersMapSet) IsSetFoo() bool {
 }
 
 func (x *reqNestedContainersMapSet) writeField1(p thrift.Protocol) error {  // Foo
-    if !x.IsSetFoo() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("foo", thrift.MAP, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -933,10 +925,6 @@ func (x *reqNestedContainersListMap) IsSetFoo() bool {
 }
 
 func (x *reqNestedContainersListMap) writeField1(p thrift.Protocol) error {  // Foo
-    if !x.IsSetFoo() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("foo", thrift.LIST, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -1274,10 +1262,6 @@ func (x *reqNestedContainersListSet) IsSetFoo() bool {
 }
 
 func (x *reqNestedContainersListSet) writeField1(p thrift.Protocol) error {  // Foo
-    if !x.IsSetFoo() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("foo", thrift.LIST, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -1598,10 +1582,6 @@ func (x *reqNestedContainersTurtles) IsSetFoo() bool {
 }
 
 func (x *reqNestedContainersTurtles) writeField1(p thrift.Protocol) error {  // Foo
-    if !x.IsSetFoo() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("foo", thrift.LIST, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }

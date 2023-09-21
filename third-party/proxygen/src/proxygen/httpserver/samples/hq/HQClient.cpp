@@ -53,7 +53,7 @@ int HQClient::start() {
   evb_.loopForever();
   if (params_.migrateClient) {
     quicClient_->onNetworkSwitch(
-        std::make_unique<quic::QuicAsyncUDPSocketWrapper>(&evb_));
+        std::make_unique<quic::QuicAsyncUDPSocketWrapperImpl>(&evb_));
     sendRequests(true, quicClient_->getNumOpenableBidirectionalStreams());
   }
   evb_.loop();
@@ -259,7 +259,7 @@ void HQClient::connectError(const quic::QuicError& error) {
 }
 
 void HQClient::initializeQuicClient() {
-  auto sock = std::make_unique<quic::QuicAsyncUDPSocketWrapper>(&evb_);
+  auto sock = std::make_unique<quic::QuicAsyncUDPSocketWrapperImpl>(&evb_);
   auto client = std::make_shared<quic::QuicClientTransport>(
       &evb_,
       std::move(sock),

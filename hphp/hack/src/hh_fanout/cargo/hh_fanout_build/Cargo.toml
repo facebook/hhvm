@@ -11,7 +11,7 @@ test = false
 doctest = false
 
 [dependencies]
-bytemuck = { version = "1.12.3", features = ["derive"] }
+bytemuck = { version = "1.12.3", features = ["derive", "min_const_generics"] }
 dashmap = { version = "5.4", features = ["rayon", "serde"] }
 dep_graph_delta = { version = "0.0.0", path = "../../../deps" }
 depgraph_compress = { version = "0.0.0", path = "../../../depgraph/depgraph_compress/cargo/depgraph_compress" }

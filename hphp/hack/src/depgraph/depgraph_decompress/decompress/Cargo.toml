@@ -9,7 +9,7 @@ edition = "2021"
 path = "lib.rs"
 
 [dependencies]
-bytemuck = { version = "1.12.3", features = ["derive"] }
+bytemuck = { version = "1.12.3", features = ["derive", "min_const_generics"] }
 depgraph_reader = { version = "0.0.0", path = "../../cargo/depgraph_reader" }
 memmap2 = "0.5.10"
 rayon = "1.2"

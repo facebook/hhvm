@@ -11,7 +11,7 @@ crate-type = ["lib", "staticlib"]
 
 [dependencies]
 balanced_partition = { version = "0.0.0", path = "../../../balanced_partition/cargo/balanced_partition" }
-bytemuck = { version = "1.12.3", features = ["derive"] }
+bytemuck = { version = "1.12.3", features = ["derive", "min_const_generics"] }
 depgraph_reader = { version = "0.0.0", path = "../../../cargo/depgraph_reader" }
 depgraph_writer = { version = "0.0.0", path = "../../../cargo/depgraph_writer" }
 hash = { version = "0.0.0", path = "../../../../utils/hash" }

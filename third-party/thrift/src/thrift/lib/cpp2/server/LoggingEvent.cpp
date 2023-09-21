@@ -47,6 +47,10 @@ class DefaultLoggingEventRegistry : public LoggingEventRegistry {
     static auto* handler = new ServerTrackerHandler();
     return *handler;
   }
+  RequestEventHandler& getRequestEventHandler(std::string_view) const override {
+    static auto* handler = new RequestEventHandler();
+    return *handler;
+  }
 };
 } // namespace
 

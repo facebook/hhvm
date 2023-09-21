@@ -35,6 +35,7 @@ using apache::thrift::ApplicationEventHandler;
 using apache::thrift::ConnectionEventHandler;
 using apache::thrift::ConnectionLoggingContext;
 using apache::thrift::LoggingEventRegistry;
+using apache::thrift::RequestEventHandler;
 using apache::thrift::ServerEventHandler;
 using apache::thrift::ServerTrackerHandler;
 using apache::thrift::ThriftServer;
@@ -115,6 +116,12 @@ class TestEventRegistry : public LoggingEventRegistry {
   ServerTrackerHandler& getServerTrackerHandler(
       std::string_view key) const override {
     return *serverTrackerMap_.at(key).get();
+  }
+
+  RequestEventHandler& getRequestEventHandler(
+      std::string_view /* key */) const override {
+    static auto* handler = new RequestEventHandler();
+    return *handler;
   }
 
  private:

@@ -120,6 +120,13 @@ class ServerTrackerHandler {
   virtual ~ServerTrackerHandler() {}
 };
 
+class RequestEventHandler : public LoggingEventHandler {
+ public:
+  virtual void log() {}
+  virtual void logSampled(SamplingRate /* presampledRate */) {}
+  virtual ~RequestEventHandler() override {}
+};
+
 class LoggingEventRegistry {
  public:
   virtual ServerEventHandler& getServerEventHandler(
@@ -130,6 +137,8 @@ class LoggingEventRegistry {
       std::string_view eventKey) const = 0;
   virtual ServerTrackerHandler& getServerTrackerHandler(
       std::string_view trackerKey) const = 0;
+  virtual RequestEventHandler& getRequestEventHandler(
+      std::string_view eventKey) const = 0;
 
   virtual ~LoggingEventRegistry() {}
 };

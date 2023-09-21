@@ -54,9 +54,9 @@ struct ahm_string_data_isame {
  * NamedType represents a user-defined type that may map to different objects
  * in different requests.
  *
- * Classes and typedefs are in the same namespace when we're naming types, but
- * different namespaces at sites that allocate classes.  If a typedef is
- * defined for a given name, we'll cache it in each request at m_cachedTypedef.
+ * Classes and type aliases are in the same namespace when we're naming types,
+ * but different namespaces at sites that allocate classes. If a type alias is
+ * defined for a given name, we cache it in each request at m_cachedTypeAlias.
  * Classes are always cached at m_cachedClass.
  */
 struct NamedType {

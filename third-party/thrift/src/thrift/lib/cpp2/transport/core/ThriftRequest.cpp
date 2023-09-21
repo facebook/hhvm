@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
+#include <thrift/lib/cpp2/server/LoggingEvent.h>
 #include <thrift/lib/cpp2/transport/core/ThriftRequest.h>
 
 #include <thrift/lib/cpp2/GeneratedCodeHelper.h>
 
 THRIFT_FLAG_DEFINE_int64(queue_time_logging_threshold_ms, 5);
+THRIFT_FLAG_DEFINE_bool(enable_request_event_logging, true);
 
 namespace apache {
 namespace thrift {
@@ -39,6 +41,21 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
   return nullptr;
 }
 } // namespace detail
+
+namespace {
+RequestLoggingContext buildRequestLoggingContext(
+    const ResponseRpcMetadata& metadata,
+    const server::TServerObserver::CallTimestamps& timestamps) {
+  RequestLoggingContext requestLoggingContext;
+  requestLoggingContext.timestamps = timestamps;
+  if (auto payloadMetadata = metadata.payloadMetadata()) {
+    if (auto exceptionMetadata = payloadMetadata->exceptionMetadata_ref()) {
+      requestLoggingContext.exceptionMetaData = *exceptionMetadata;
+    }
+  }
+  return requestLoggingContext;
+}
+} // namespace
 
 ThriftRequestCore::ThriftRequestCore(
     server::ServerConfigs& serverConfigs,
@@ -121,46 +138,65 @@ bool ThriftRequestCore::includeInRecentRequestsCount(
   return util::includeInRecentRequestsCount(methodName);
 }
 
-ThriftRequestCore::RequestTimestampSample::RequestTimestampSample(
-    server::TServerObserver::CallTimestamps& timestamps,
+ThriftRequestCore::LogRequestSampleCallback::LogRequestSampleCallback(
+    const ResponseRpcMetadata& metadata,
+    const server::TServerObserver::CallTimestamps& timestamps,
     server::TServerObserver* observer,
     MessageChannel::SendCallback* chainedCallback)
-    : timestamps_(timestamps),
+    : requestLoggingContext_(buildRequestLoggingContext(metadata, timestamps)),
       observer_(observer),
       chainedCallback_(chainedCallback) {}
 
-void ThriftRequestCore::RequestTimestampSample::sendQueued() {
-  timestamps_.writeBegin = std::chrono::steady_clock::now();
+void ThriftRequestCore::LogRequestSampleCallback::sendQueued() {
+  requestLoggingContext_.timestamps.writeBegin =
+      std::chrono::steady_clock::now();
   if (chainedCallback_ != nullptr) {
     chainedCallback_->sendQueued();
   }
 }
 
-void ThriftRequestCore::RequestTimestampSample::messageSent() {
+void ThriftRequestCore::LogRequestSampleCallback::messageSent() {
   SCOPE_EXIT { delete this; };
-  timestamps_.writeEnd = std::chrono::steady_clock::now();
+  requestLoggingContext_.timestamps.writeEnd = std::chrono::steady_clock::now();
   if (chainedCallback_ != nullptr) {
     chainedCallback_->messageSent();
   }
 }
 
-void ThriftRequestCore::RequestTimestampSample::messageSendError(
+void ThriftRequestCore::LogRequestSampleCallback::messageSendError(
     folly::exception_wrapper&& e) {
   SCOPE_EXIT { delete this; };
-  timestamps_.writeEnd = std::chrono::steady_clock::now();
+  requestLoggingContext_.timestamps.writeEnd = std::chrono::steady_clock::now();
   if (chainedCallback_ != nullptr) {
     chainedCallback_->messageSendError(std::move(e));
   }
 }
 
-ThriftRequestCore::RequestTimestampSample::~RequestTimestampSample() {
-  if (observer_) {
-    observer_->callCompleted(timestamps_);
+ThriftRequestCore::LogRequestSampleCallback::~LogRequestSampleCallback() {
+  const auto& samplingStatus =
+      requestLoggingContext_.timestamps.getSamplingStatus();
+
+  if (samplingStatus.isEnabledByServer() && observer_) {
+    observer_->callCompleted(requestLoggingContext_.timestamps);
+  }
+
+  if (THRIFT_FLAG(enable_request_event_logging) &&
+      samplingStatus.isEnabledByClient()) {
+    const bool error = requestLoggingContext_.exceptionMetaData.has_value();
+    if (auto samplingRatio = error
+            ? samplingStatus.getClientLogErrorSampleRatio()
+            : samplingStatus.getClientLogSampleRatio()) {
+      auto& handler = getLoggingEventRegistry().getRequestEventHandler(
+          error ? "error" : "success");
+      handler.logSampled(samplingRatio, requestLoggingContext_);
+    }
   }
 }
 
-MessageChannel::SendCallbackPtr ThriftRequestCore::prepareSendCallback(
-    MessageChannel::SendCallbackPtr&& cb, server::TServerObserver* observer) {
+MessageChannel::SendCallbackPtr ThriftRequestCore::createRequestLoggingCallback(
+    MessageChannel::SendCallbackPtr&& cb,
+    const ResponseRpcMetadata& metadata,
+    server::TServerObserver* observer) {
   auto cbPtr = std::move(cb);
   // If we are sampling this call, wrap it with a RequestTimestampSample,
   // which also implements MessageChannel::SendCallback. Callers of
@@ -170,8 +206,8 @@ MessageChannel::SendCallbackPtr ThriftRequestCore::prepareSendCallback(
       timestamps.getSamplingStatus().isEnabled()) {
     auto chainedCallback = cbPtr.release();
     return MessageChannel::SendCallbackPtr(
-        new ThriftRequestCore::RequestTimestampSample(
-            timestamps, observer, chainedCallback));
+        new ThriftRequestCore::LogRequestSampleCallback(
+            metadata, timestamps, observer, chainedCallback));
   }
   return cbPtr;
 }
@@ -181,7 +217,6 @@ void ThriftRequestCore::sendReplyInternal(
     std::unique_ptr<folly::IOBuf> buf,
     MessageChannel::SendCallbackPtr cb) {
   if (checkResponseSize(*buf)) {
-    cb = prepareSendCallback(std::move(cb), serverConfigs_.getObserver());
     sendThriftResponse(std::move(metadata), std::move(buf), std::move(cb));
   } else {
     sendResponseTooBigEx();

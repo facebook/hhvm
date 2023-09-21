@@ -40,6 +40,7 @@
 #include <thrift/lib/cpp2/async/Sink.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
+#include <thrift/lib/cpp2/server/LoggingEvent.h>
 #include <thrift/lib/cpp2/server/ServerConfigs.h>
 #include <thrift/lib/cpp2/transport/core/RequestStateMachine.h>
 #include <thrift/lib/cpp2/transport/core/ThriftChannelIf.h>
@@ -107,21 +108,22 @@ class ThriftRequestCore : public ResponseChannelRequest {
     return compressionConfig_;
   }
 
-  // RequestTimestampSample is a wrapper for sampled requests
-  class RequestTimestampSample : public MessageChannel::SendCallback {
+  // LogRequestSampleCallback is a wrapper for sampled requests
+  class LogRequestSampleCallback : public MessageChannel::SendCallback {
    public:
-    RequestTimestampSample(
-        server::TServerObserver::CallTimestamps& timestamps,
+    LogRequestSampleCallback(
+        const ResponseRpcMetadata& metadata,
+        const server::TServerObserver::CallTimestamps& timestamps,
         server::TServerObserver* observer,
         MessageChannel::SendCallback* chainedCallback = nullptr);
 
     void sendQueued() override;
     void messageSent() override;
     void messageSendError(folly::exception_wrapper&& e) override;
-    ~RequestTimestampSample() override;
+    ~LogRequestSampleCallback() override;
 
    private:
-    server::TServerObserver::CallTimestamps timestamps_;
+    RequestLoggingContext requestLoggingContext_;
     server::TServerObserver* observer_;
     MessageChannel::SendCallback* chainedCallback_;
   };
@@ -347,12 +349,13 @@ class ThriftRequestCore : public ResponseChannelRequest {
       transport::THeader::StringToStringMap&& writeHeaders,
       std::optional<ProxiedPayloadMetadata> proxiedPayloadMetadata);
 
+  MessageChannel::SendCallbackPtr createRequestLoggingCallback(
+      MessageChannel::SendCallbackPtr&& sendCallback,
+      const ResponseRpcMetadata& metadata,
+      server::TServerObserver* observer);
+
  private:
   static bool includeInRecentRequestsCount(const std::string_view);
-
-  MessageChannel::SendCallbackPtr prepareSendCallback(
-      MessageChannel::SendCallbackPtr&& sendCallback,
-      server::TServerObserver* observer);
 
   void sendReplyInternal(
       ResponseRpcMetadata&& metadata,

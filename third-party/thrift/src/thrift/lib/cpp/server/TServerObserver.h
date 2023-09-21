@@ -63,6 +63,11 @@ class TServerObserver {
     bool isEnabledByServer() const { return isServerSamplingEnabled_; }
     bool isEnabledByClient() const { return isClientSamplingEnabled_; }
 
+    int64_t getClientLogSampleRatio() const { return clientLogSampleRatio_; }
+    int64_t getClientLogErrorSampleRatio() const {
+      return clientLogErrorSampleRatio_;
+    }
+
    private:
     bool isServerSamplingEnabled_;
     bool isClientSamplingEnabled_;
@@ -95,7 +100,7 @@ class TServerObserver {
 
     void setStatus(const SamplingStatus& status) { status_ = status; }
 
-    const SamplingStatus getSamplingStatus() const { return status_; }
+    const SamplingStatus& getSamplingStatus() const { return status_; }
 
    private:
     SamplingStatus status_;

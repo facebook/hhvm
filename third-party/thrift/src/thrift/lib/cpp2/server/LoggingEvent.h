@@ -24,6 +24,7 @@
 #include <folly/Function.h>
 #include <folly/dynamic.h>
 #include <folly/io/async/AsyncTransport.h>
+#include <thrift/lib/cpp/server/TServerObserver.h>
 #include <thrift/lib/cpp2/PluggableFunction.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
@@ -120,10 +121,15 @@ class ServerTrackerHandler {
   virtual ~ServerTrackerHandler() {}
 };
 
+struct RequestLoggingContext {
+  server::TServerObserver::CallTimestamps timestamps;
+  std::optional<PayloadExceptionMetadataBase> exceptionMetaData;
+};
+
 class RequestEventHandler : public LoggingEventHandler {
  public:
-  virtual void log() {}
-  virtual void logSampled(SamplingRate /* presampledRate */) {}
+  virtual void log(const RequestLoggingContext&) {}
+  virtual void logSampled(SamplingRate, const RequestLoggingContext&) {}
   virtual ~RequestEventHandler() override {}
 };
 

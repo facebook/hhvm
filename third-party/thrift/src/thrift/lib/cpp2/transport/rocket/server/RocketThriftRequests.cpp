@@ -459,8 +459,14 @@ void ThriftServerRequestResponse::sendThriftResponse(
     ResponseRpcMetadata&& metadata,
     std::unique_ptr<folly::IOBuf> data,
     apache::thrift::MessageChannel::SendCallbackPtr cb) noexcept {
-  if (auto error = processFirstResponse(
-          metadata, data, getProtoId(), version_, getCompressionConfig())) {
+  auto error = processFirstResponse(
+      metadata, data, getProtoId(), version_, getCompressionConfig());
+  // When creating request logging callback, we need to access payload metadata
+  // which is populated in the processFirstResponse, so
+  // createRequestLoggingCallback must happen after processFirstResponse.
+  cb = createRequestLoggingCallback(
+      std::move(cb), metadata, serverConfigs_.getObserver());
+  if (error) {
     error.handle(
         [&](RocketException& ex) {
           context_.sendError(std::move(ex), std::move(cb));

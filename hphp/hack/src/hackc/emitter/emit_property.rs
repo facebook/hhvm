@@ -129,7 +129,7 @@ pub fn from_ast<'ast, 'arena, 'decl>(
                 _ => false,
             };
             let deep_init = !args.is_static && expr_requires_deep_init(e, true);
-            match constant_folder::expr_to_typed_value(emitter, e) {
+            match constant_folder::expr_to_typed_value(emitter, &env.scope, e) {
                 Ok(tv) if !(deep_init || is_collection_map) => (Some(tv), None, Attr::AttrNone),
                 _ => {
                     let label = emitter.label_gen_mut().next_regular();

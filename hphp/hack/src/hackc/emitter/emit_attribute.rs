@@ -45,7 +45,13 @@ pub fn from_ast<'arena, 'decl>(
         })
         .collect();
 
-    let arguments = constant_folder::literals_from_exprs(&mut arguments, e).map_err(|err| {
+    let arguments = constant_folder::literals_from_exprs(
+        &mut arguments,
+        // T88847409 likely need to track scope for folding closure param attribute args
+        &ast_scope::Scope::default(),
+        e,
+    )
+    .map_err(|err| {
         assert_eq!(
             err,
             constant_folder::Error::UserDefinedConstant,

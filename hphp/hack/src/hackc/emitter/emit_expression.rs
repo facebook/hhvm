@@ -1026,7 +1026,7 @@ fn emit_vec_collection<'a, 'arena, 'decl>(
     pos: &Pos,
     fields: &[ast::Afield],
 ) -> Result<InstrSeq<'arena>> {
-    match constant_folder::vec_to_typed_value(e, fields) {
+    match constant_folder::vec_to_typed_value(e, &env.scope, fields) {
         Ok(tv) => {
             let instr = emit_adata::typed_value_into_instr(e, tv)?;
             emit_static_collection(env, None, pos, instr)
@@ -1129,7 +1129,7 @@ fn emit_collection<'a, 'arena, 'decl>(
     transform_to_collection: Option<CollectionType>,
 ) -> Result<InstrSeq<'arena>> {
     let pos = &expr.1;
-    match constant_folder::expr_to_typed_value_(e, expr, true /*allow_map*/) {
+    match constant_folder::expr_to_typed_value_(e, &env.scope, expr, true /*allow_map*/) {
         Ok(tv) => {
             let instr = emit_adata::typed_value_into_instr(e, tv)?;
             emit_static_collection(env, transform_to_collection, pos, instr)
@@ -1328,6 +1328,7 @@ fn non_numeric(s: &str) -> bool {
 
 fn is_struct_init<'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
+    env: &Env<'_, 'arena>,
     fields: &[ast::Afield],
     allow_numerics: bool,
 ) -> Result<bool> {
@@ -1337,7 +1338,7 @@ fn is_struct_init<'arena, 'decl>(
         if let ast::Afield::AFkvalue(key, _) = f {
             // TODO(hrust): if key is String, don't clone and call fold_expr
             let mut key = key.clone();
-            constant_folder::fold_expr(&mut key, e)
+            constant_folder::fold_expr(&mut key, &env.scope, e)
                 .map_err(|e| Error::unrecoverable(format!("{}", e)))?;
             if let ast::Expr(_, _, ast::Expr_::String(s)) = key {
                 are_all_keys_non_numeric_strings = are_all_keys_non_numeric_strings
@@ -1393,7 +1394,7 @@ fn emit_struct_array<
                 )),
                 _ => {
                     let mut k = k.clone();
-                    constant_folder::fold_expr(&mut k, e)
+                    constant_folder::fold_expr(&mut k, &env.scope, e)
                         .map_err(|e| Error::unrecoverable(format!("{}", e)))?;
                     match k {
                         Expr(_, _, Expr_::String(s)) => Ok((
@@ -1433,7 +1434,7 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
     let pos = &expr.1;
     let count = fields.len() as u32;
     let emit_dict = |e: &mut Emitter<'arena, 'decl>| {
-        if is_struct_init(e, fields, true)? {
+        if is_struct_init(e, env, fields, true)? {
             emit_struct_array(e, env, pos, fields, |alloc, _, x| {
                 Ok(instr::new_struct_dict(alloc, x))
             })
@@ -1443,7 +1444,7 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
         }
     };
     let emit_collection_helper = |e: &mut Emitter<'arena, 'decl>, ctype| {
-        if is_struct_init(e, fields, true)? {
+        if is_struct_init(e, env, fields, true)? {
             Ok(InstrSeq::gather(vec![
                 emit_struct_array(e, env, pos, fields, |alloc, _, x| {
                     Ok(instr::new_struct_dict(alloc, x))
@@ -1501,7 +1502,7 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
             Ok(instrs?)
         }
         Expr_::Darray(_) => {
-            if is_struct_init(e, fields, false /* allow_numerics */)? {
+            if is_struct_init(e, env, fields, false /* allow_numerics */)? {
                 let instrs = emit_struct_array(e, env, pos, fields, |alloc, _, arg| {
                     let instr = instr::new_struct_dict(alloc, arg);
                     Ok(emit_pos_then(pos, instr))
@@ -2022,7 +2023,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                     if fcall_args.num_args == 0 =>
                 {
                     let cexpr =
-                        ClassExpr::class_id_to_class_expr(e, false, false, &env.scope, &new_exp.0);
+                        ClassExpr::class_id_to_class_expr(e, &env.scope, false, false, &new_exp.0);
                     match &cexpr {
                         ClassExpr::Id(ast_defs::Id(_, name))
                             if string_utils::strip_global_ns(name) == "ReflectionClass" =>
@@ -2088,7 +2089,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
         }
         Expr_::ClassConst(cls_const) => {
             let (cid, (_, id)) = &**cls_const;
-            let mut cexpr = ClassExpr::class_id_to_class_expr(e, false, false, &env.scope, cid);
+            let mut cexpr = ClassExpr::class_id_to_class_expr(e, &env.scope, false, false, cid);
             if let ClassExpr::Id(ast_defs::Id(_, name)) = &cexpr {
                 if let Some(reified_var_cexpr) = get_reified_var_cexpr(e, env, pos, name)? {
                     cexpr = reified_var_cexpr;
@@ -2159,7 +2160,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
         Expr_::ClassGet(c) if c.as_ref().2 == ast::PropOrMethod::IsMethod => {
             // Case Foo::bar(...).
             let (cid, cls_get_expr, _) = &**c;
-            let mut cexpr = ClassExpr::class_id_to_class_expr(e, false, false, &env.scope, cid);
+            let mut cexpr = ClassExpr::class_id_to_class_expr(e, &env.scope, false, false, cid);
             if let ClassExpr::Id(ast_defs::Id(_, name)) = &cexpr {
                 if let Some(reified_var_cexpr) = get_reified_var_cexpr(e, env, pos, name)? {
                     cexpr = reified_var_cexpr;
@@ -2856,7 +2857,7 @@ fn emit_class_meth_native<'a, 'arena, 'decl>(
     targs: &[ast::Targ],
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
-    let mut cexpr = ClassExpr::class_id_to_class_expr(e, false, true, &env.scope, cid);
+    let mut cexpr = ClassExpr::class_id_to_class_expr(e, &env.scope, false, true, cid);
     if let ClassExpr::Id(ast_defs::Id(_, name)) = &cexpr {
         if let Some(reified_var_cexpr) = get_reified_var_cexpr(e, env, pos, name)? {
             cexpr = reified_var_cexpr;
@@ -3096,11 +3097,11 @@ fn emit_lvar<'a, 'arena, 'decl>(
 
 fn emit_lit<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
-    _env: &Env<'a, 'arena>,
+    env: &Env<'a, 'arena>,
     pos: &Pos,
     expression: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
-    let tv = constant_folder::expr_to_typed_value(emitter, expression)
+    let tv = constant_folder::expr_to_typed_value(emitter, &env.scope, expression)
         .map_err(|_| Error::unrecoverable("expr_to_typed_value failed"))?;
     Ok(emit_pos_then(
         pos,
@@ -3584,7 +3585,7 @@ fn emit_new<'a, 'arena, 'decl>(
         _ => true,
     };
     use HasGenericsOp as H;
-    let cexpr = ClassExpr::class_id_to_class_expr(e, false, resolve_self, &env.scope, cid);
+    let cexpr = ClassExpr::class_id_to_class_expr(e, &env.scope, false, resolve_self, cid);
     let (cexpr, has_generics) = match &cexpr {
         ClassExpr::Id(ast_defs::Id(_, name)) => match emit_reified_type_opt(e, env, pos, name)? {
             Some(instrs) => {
@@ -4384,7 +4385,7 @@ fn get_elem_member_key<'a, 'arena, 'decl>(
                 instr::empty(),
             )),
             // Special case for literal integer
-            Expr_::Int(s) => match constant_folder::expr_to_typed_value(e, elem_expr) {
+            Expr_::Int(s) => match constant_folder::expr_to_typed_value(e, &env.scope, elem_expr) {
                 Ok(TypedValue::Int(i)) => Ok((MemberKey::EI(i, ReadonlyOp::Any), instr::empty())),
                 _ => Err(Error::unrecoverable(format!(
                     "{} is not a valid integer index",
@@ -4482,7 +4483,7 @@ fn emit_class_get<'a, 'arena, 'decl>(
     prop: &ast::ClassGetExpr,
     readonly_op: ReadonlyOp,
 ) -> Result<InstrSeq<'arena>> {
-    let cexpr = ClassExpr::class_id_to_class_expr(e, false, false, &env.scope, cid);
+    let cexpr = ClassExpr::class_id_to_class_expr(e, &env.scope, false, false, cid);
     let (cexpr_seq1, cexpr_seq2) = emit_class_expr(e, env, cexpr, prop)?;
     Ok(InstrSeq::gather(vec![
         cexpr_seq1,
@@ -4591,7 +4592,7 @@ fn emit_class_const<'a, 'arena, 'decl>(
     id: &ast_defs::Pstring,
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
-    let mut cexpr = ClassExpr::class_id_to_class_expr(e, false, true, &env.scope, cid);
+    let mut cexpr = ClassExpr::class_id_to_class_expr(e, &env.scope, false, true, cid);
     if let ClassExpr::Id(ast_defs::Id(_, name)) = &cexpr {
         if let Some(reified_var_cexpr) = get_reified_var_cexpr(e, env, pos, name)? {
             cexpr = reified_var_cexpr;
@@ -5699,7 +5700,7 @@ fn emit_base_<'a, 'arena, 'decl>(
         }
         Expr_::ClassGet(x) => {
             let (cid, prop, _) = &**x;
-            let cexpr = ClassExpr::class_id_to_class_expr(e, false, false, &env.scope, cid);
+            let cexpr = ClassExpr::class_id_to_class_expr(e, &env.scope, false, false, cid);
             let (cexpr_begin, cexpr_end) = emit_class_expr(e, env, cexpr, prop)?;
             Ok(emit_default(
                 e,
@@ -6274,7 +6275,7 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena, 'decl>(
             }
             Expr_::ClassGet(x) if x.as_ref().2 == ast::PropOrMethod::IsProp => {
                 let (cid, prop, _) = &**x;
-                let cexpr = ClassExpr::class_id_to_class_expr(e, false, false, &env.scope, cid);
+                let cexpr = ClassExpr::class_id_to_class_expr(e, &env.scope, false, false, cid);
                 let final_instr_ = emit_final_static_op(alloc, cid, prop, op)?;
                 let final_instr = emit_pos_then(pos, final_instr_);
                 let (cexpr_seq1, cexpr_seq2) = emit_class_expr(e, env, cexpr, prop)?;
@@ -6606,135 +6607,137 @@ pub fn emit_jmpnz<'a, 'arena, 'decl>(
 ) -> Result<EmitJmpResult<'arena>> {
     let ast::Expr(_, pos, expr_) = expr;
     let opt = optimize_null_checks(e);
-    Ok(match constant_folder::expr_to_typed_value(e, expr) {
-        Ok(tv) => {
-            if constant_folder::cast_to_bool(tv) {
-                EmitJmpResult {
-                    instrs: emit_pos_then(pos, instr::jmp(label)),
-                    is_fallthrough: false,
-                    is_label_used: true,
-                }
-            } else {
-                EmitJmpResult {
-                    instrs: emit_pos_then(pos, instr::empty()),
-                    is_fallthrough: true,
-                    is_label_used: false,
-                }
-            }
-        }
-        Err(_) => {
-            use ast::Expr_;
-            use ast_defs::Uop;
-            match expr_ {
-                Expr_::Unop(uo) if uo.0 == Uop::Unot => emit_jmpz(e, env, &uo.1, label)?,
-                Expr_::Binop(bo) if bo.bop.is_barbar() => {
-                    let r1 = emit_jmpnz(e, env, &bo.lhs, label)?;
-                    if r1.is_fallthrough {
-                        let r2 = emit_jmpnz(e, env, &bo.rhs, label)?;
-                        EmitJmpResult {
-                            instrs: emit_pos_then(
-                                pos,
-                                InstrSeq::gather(vec![r1.instrs, r2.instrs]),
-                            ),
-                            is_fallthrough: r2.is_fallthrough,
-                            is_label_used: r1.is_label_used || r2.is_label_used,
-                        }
-                    } else {
-                        r1
-                    }
-                }
-                Expr_::Binop(bo) if bo.bop.is_ampamp() => {
-                    let skip_label = e.label_gen_mut().next_regular();
-                    let r1 = emit_jmpz(e, env, &bo.lhs, skip_label)?;
-                    if !r1.is_fallthrough {
-                        EmitJmpResult {
-                            instrs: emit_pos_then(
-                                pos,
-                                InstrSeq::gather(if r1.is_label_used {
-                                    vec![r1.instrs, instr::label(skip_label)]
-                                } else {
-                                    vec![r1.instrs]
-                                }),
-                            ),
-                            is_fallthrough: r1.is_label_used,
-                            is_label_used: false,
-                        }
-                    } else {
-                        let r2 = emit_jmpnz(e, env, &bo.rhs, label)?;
-                        EmitJmpResult {
-                            instrs: emit_pos_then(
-                                pos,
-                                InstrSeq::gather(if r1.is_label_used {
-                                    vec![r1.instrs, r2.instrs, instr::label(skip_label)]
-                                } else {
-                                    vec![r1.instrs, r2.instrs]
-                                }),
-                            ),
-                            is_fallthrough: r2.is_fallthrough || r1.is_label_used,
-                            is_label_used: r2.is_label_used,
-                        }
-                    }
-                }
-                Expr_::Binop(bo)
-                    if bo.bop.is_eqeqeq()
-                        && ((bo.lhs).2.is_null() || (bo.rhs).2.is_null())
-                        && opt =>
-                {
-                    let is_null = emit_is_null(
-                        e,
-                        env,
-                        if (bo.lhs).2.is_null() {
-                            &bo.rhs
-                        } else {
-                            &bo.lhs
-                        },
-                    )?;
+    Ok(
+        match constant_folder::expr_to_typed_value(e, &env.scope, expr) {
+            Ok(tv) => {
+                if constant_folder::cast_to_bool(tv) {
                     EmitJmpResult {
-                        instrs: emit_pos_then(
-                            pos,
-                            InstrSeq::gather(vec![is_null, instr::jmp_nz(label)]),
-                        ),
-                        is_fallthrough: true,
+                        instrs: emit_pos_then(pos, instr::jmp(label)),
+                        is_fallthrough: false,
                         is_label_used: true,
                     }
-                }
-                Expr_::Binop(bo)
-                    if bo.bop.is_diff2()
-                        && ((bo.lhs).2.is_null() || (bo.rhs).2.is_null())
-                        && opt =>
-                {
-                    let is_null = emit_is_null(
-                        e,
-                        env,
-                        if (bo.lhs).2.is_null() {
-                            &bo.rhs
-                        } else {
-                            &bo.lhs
-                        },
-                    )?;
+                } else {
                     EmitJmpResult {
-                        instrs: emit_pos_then(
-                            pos,
-                            InstrSeq::gather(vec![is_null, instr::jmp_z(label)]),
-                        ),
+                        instrs: emit_pos_then(pos, instr::empty()),
                         is_fallthrough: true,
-                        is_label_used: true,
-                    }
-                }
-                _ => {
-                    let instr = emit_expr(e, env, expr)?;
-                    EmitJmpResult {
-                        instrs: emit_pos_then(
-                            pos,
-                            InstrSeq::gather(vec![instr, instr::jmp_nz(label)]),
-                        ),
-                        is_fallthrough: true,
-                        is_label_used: true,
+                        is_label_used: false,
                     }
                 }
             }
-        }
-    })
+            Err(_) => {
+                use ast::Expr_;
+                use ast_defs::Uop;
+                match expr_ {
+                    Expr_::Unop(uo) if uo.0 == Uop::Unot => emit_jmpz(e, env, &uo.1, label)?,
+                    Expr_::Binop(bo) if bo.bop.is_barbar() => {
+                        let r1 = emit_jmpnz(e, env, &bo.lhs, label)?;
+                        if r1.is_fallthrough {
+                            let r2 = emit_jmpnz(e, env, &bo.rhs, label)?;
+                            EmitJmpResult {
+                                instrs: emit_pos_then(
+                                    pos,
+                                    InstrSeq::gather(vec![r1.instrs, r2.instrs]),
+                                ),
+                                is_fallthrough: r2.is_fallthrough,
+                                is_label_used: r1.is_label_used || r2.is_label_used,
+                            }
+                        } else {
+                            r1
+                        }
+                    }
+                    Expr_::Binop(bo) if bo.bop.is_ampamp() => {
+                        let skip_label = e.label_gen_mut().next_regular();
+                        let r1 = emit_jmpz(e, env, &bo.lhs, skip_label)?;
+                        if !r1.is_fallthrough {
+                            EmitJmpResult {
+                                instrs: emit_pos_then(
+                                    pos,
+                                    InstrSeq::gather(if r1.is_label_used {
+                                        vec![r1.instrs, instr::label(skip_label)]
+                                    } else {
+                                        vec![r1.instrs]
+                                    }),
+                                ),
+                                is_fallthrough: r1.is_label_used,
+                                is_label_used: false,
+                            }
+                        } else {
+                            let r2 = emit_jmpnz(e, env, &bo.rhs, label)?;
+                            EmitJmpResult {
+                                instrs: emit_pos_then(
+                                    pos,
+                                    InstrSeq::gather(if r1.is_label_used {
+                                        vec![r1.instrs, r2.instrs, instr::label(skip_label)]
+                                    } else {
+                                        vec![r1.instrs, r2.instrs]
+                                    }),
+                                ),
+                                is_fallthrough: r2.is_fallthrough || r1.is_label_used,
+                                is_label_used: r2.is_label_used,
+                            }
+                        }
+                    }
+                    Expr_::Binop(bo)
+                        if bo.bop.is_eqeqeq()
+                            && ((bo.lhs).2.is_null() || (bo.rhs).2.is_null())
+                            && opt =>
+                    {
+                        let is_null = emit_is_null(
+                            e,
+                            env,
+                            if (bo.lhs).2.is_null() {
+                                &bo.rhs
+                            } else {
+                                &bo.lhs
+                            },
+                        )?;
+                        EmitJmpResult {
+                            instrs: emit_pos_then(
+                                pos,
+                                InstrSeq::gather(vec![is_null, instr::jmp_nz(label)]),
+                            ),
+                            is_fallthrough: true,
+                            is_label_used: true,
+                        }
+                    }
+                    Expr_::Binop(bo)
+                        if bo.bop.is_diff2()
+                            && ((bo.lhs).2.is_null() || (bo.rhs).2.is_null())
+                            && opt =>
+                    {
+                        let is_null = emit_is_null(
+                            e,
+                            env,
+                            if (bo.lhs).2.is_null() {
+                                &bo.rhs
+                            } else {
+                                &bo.lhs
+                            },
+                        )?;
+                        EmitJmpResult {
+                            instrs: emit_pos_then(
+                                pos,
+                                InstrSeq::gather(vec![is_null, instr::jmp_z(label)]),
+                            ),
+                            is_fallthrough: true,
+                            is_label_used: true,
+                        }
+                    }
+                    _ => {
+                        let instr = emit_expr(e, env, expr)?;
+                        EmitJmpResult {
+                            instrs: emit_pos_then(
+                                pos,
+                                InstrSeq::gather(vec![instr, instr::jmp_nz(label)]),
+                            ),
+                            is_fallthrough: true,
+                            is_label_used: true,
+                        }
+                    }
+                }
+            }
+        },
+    )
 }
 
 pub fn emit_jmpz<'a, 'arena, 'decl>(
@@ -6745,137 +6748,139 @@ pub fn emit_jmpz<'a, 'arena, 'decl>(
 ) -> Result<EmitJmpResult<'arena>> {
     let ast::Expr(_, pos, expr_) = expr;
     let opt = optimize_null_checks(e);
-    Ok(match constant_folder::expr_to_typed_value(e, expr) {
-        Ok(v) => {
-            if constant_folder::cast_to_bool(v) {
-                EmitJmpResult {
-                    instrs: emit_pos_then(pos, instr::empty()),
-                    is_fallthrough: true,
-                    is_label_used: false,
-                }
-            } else {
-                EmitJmpResult {
-                    instrs: emit_pos_then(pos, instr::jmp(label)),
-                    is_fallthrough: false,
-                    is_label_used: true,
-                }
-            }
-        }
-        Err(_) => {
-            use ast::Expr_;
-            use ast_defs::Uop;
-            match expr_ {
-                Expr_::Unop(uo) if uo.0 == Uop::Unot => emit_jmpnz(e, env, &uo.1, label)?,
-                Expr_::Binop(bo) if bo.bop.is_barbar() => {
-                    let skip_label = e.label_gen_mut().next_regular();
-                    let r1 = emit_jmpnz(e, env, &bo.lhs, skip_label)?;
-                    if !r1.is_fallthrough {
-                        EmitJmpResult {
-                            instrs: emit_pos_then(
-                                pos,
-                                InstrSeq::gather(if r1.is_label_used {
-                                    vec![r1.instrs, instr::label(skip_label)]
-                                } else {
-                                    vec![r1.instrs]
-                                }),
-                            ),
-                            is_fallthrough: r1.is_label_used,
-                            is_label_used: false,
-                        }
-                    } else {
-                        let r2 = emit_jmpz(e, env, &bo.rhs, label)?;
-                        EmitJmpResult {
-                            instrs: emit_pos_then(
-                                pos,
-                                InstrSeq::gather(if r1.is_label_used {
-                                    vec![r1.instrs, r2.instrs, instr::label(skip_label)]
-                                } else {
-                                    vec![r1.instrs, r2.instrs]
-                                }),
-                            ),
-                            is_fallthrough: r2.is_fallthrough || r1.is_label_used,
-                            is_label_used: r2.is_label_used,
-                        }
-                    }
-                }
-                Expr_::Binop(bo) if bo.bop.is_ampamp() => {
-                    let r1 = emit_jmpz(e, env, &bo.lhs, label)?;
-                    if r1.is_fallthrough {
-                        let r2 = emit_jmpz(e, env, &bo.rhs, label)?;
-                        EmitJmpResult {
-                            instrs: emit_pos_then(
-                                pos,
-                                InstrSeq::gather(vec![r1.instrs, r2.instrs]),
-                            ),
-                            is_fallthrough: r2.is_fallthrough,
-                            is_label_used: r1.is_label_used || r2.is_label_used,
-                        }
-                    } else {
-                        EmitJmpResult {
-                            instrs: emit_pos_then(pos, r1.instrs),
-                            is_fallthrough: false,
-                            is_label_used: r1.is_label_used,
-                        }
-                    }
-                }
-                Expr_::Binop(bo)
-                    if bo.bop.is_eqeqeq()
-                        && ((bo.lhs).2.is_null() || (bo.rhs).2.is_null())
-                        && opt =>
-                {
-                    let is_null = emit_is_null(
-                        e,
-                        env,
-                        if (bo.lhs).2.is_null() {
-                            &bo.rhs
-                        } else {
-                            &bo.lhs
-                        },
-                    )?;
+    Ok(
+        match constant_folder::expr_to_typed_value(e, &env.scope, expr) {
+            Ok(v) => {
+                if constant_folder::cast_to_bool(v) {
                     EmitJmpResult {
-                        instrs: emit_pos_then(
-                            pos,
-                            InstrSeq::gather(vec![is_null, instr::jmp_z(label)]),
-                        ),
+                        instrs: emit_pos_then(pos, instr::empty()),
                         is_fallthrough: true,
-                        is_label_used: true,
+                        is_label_used: false,
                     }
-                }
-                Expr_::Binop(bo)
-                    if bo.bop.is_diff2()
-                        && ((bo.lhs).2.is_null() || (bo.rhs).2.is_null())
-                        && opt =>
-                {
-                    let is_null = emit_is_null(
-                        e,
-                        env,
-                        if (bo.lhs).2.is_null() {
-                            &bo.rhs
-                        } else {
-                            &bo.lhs
-                        },
-                    )?;
+                } else {
                     EmitJmpResult {
-                        instrs: emit_pos_then(
-                            pos,
-                            InstrSeq::gather(vec![is_null, instr::jmp_nz(label)]),
-                        ),
-                        is_fallthrough: true,
-                        is_label_used: true,
-                    }
-                }
-                _ => {
-                    let instr = emit_expr(e, env, expr)?;
-                    EmitJmpResult {
-                        instrs: emit_pos_then(
-                            pos,
-                            InstrSeq::gather(vec![instr, instr::jmp_z(label)]),
-                        ),
-                        is_fallthrough: true,
+                        instrs: emit_pos_then(pos, instr::jmp(label)),
+                        is_fallthrough: false,
                         is_label_used: true,
                     }
                 }
             }
-        }
-    })
+            Err(_) => {
+                use ast::Expr_;
+                use ast_defs::Uop;
+                match expr_ {
+                    Expr_::Unop(uo) if uo.0 == Uop::Unot => emit_jmpnz(e, env, &uo.1, label)?,
+                    Expr_::Binop(bo) if bo.bop.is_barbar() => {
+                        let skip_label = e.label_gen_mut().next_regular();
+                        let r1 = emit_jmpnz(e, env, &bo.lhs, skip_label)?;
+                        if !r1.is_fallthrough {
+                            EmitJmpResult {
+                                instrs: emit_pos_then(
+                                    pos,
+                                    InstrSeq::gather(if r1.is_label_used {
+                                        vec![r1.instrs, instr::label(skip_label)]
+                                    } else {
+                                        vec![r1.instrs]
+                                    }),
+                                ),
+                                is_fallthrough: r1.is_label_used,
+                                is_label_used: false,
+                            }
+                        } else {
+                            let r2 = emit_jmpz(e, env, &bo.rhs, label)?;
+                            EmitJmpResult {
+                                instrs: emit_pos_then(
+                                    pos,
+                                    InstrSeq::gather(if r1.is_label_used {
+                                        vec![r1.instrs, r2.instrs, instr::label(skip_label)]
+                                    } else {
+                                        vec![r1.instrs, r2.instrs]
+                                    }),
+                                ),
+                                is_fallthrough: r2.is_fallthrough || r1.is_label_used,
+                                is_label_used: r2.is_label_used,
+                            }
+                        }
+                    }
+                    Expr_::Binop(bo) if bo.bop.is_ampamp() => {
+                        let r1 = emit_jmpz(e, env, &bo.lhs, label)?;
+                        if r1.is_fallthrough {
+                            let r2 = emit_jmpz(e, env, &bo.rhs, label)?;
+                            EmitJmpResult {
+                                instrs: emit_pos_then(
+                                    pos,
+                                    InstrSeq::gather(vec![r1.instrs, r2.instrs]),
+                                ),
+                                is_fallthrough: r2.is_fallthrough,
+                                is_label_used: r1.is_label_used || r2.is_label_used,
+                            }
+                        } else {
+                            EmitJmpResult {
+                                instrs: emit_pos_then(pos, r1.instrs),
+                                is_fallthrough: false,
+                                is_label_used: r1.is_label_used,
+                            }
+                        }
+                    }
+                    Expr_::Binop(bo)
+                        if bo.bop.is_eqeqeq()
+                            && ((bo.lhs).2.is_null() || (bo.rhs).2.is_null())
+                            && opt =>
+                    {
+                        let is_null = emit_is_null(
+                            e,
+                            env,
+                            if (bo.lhs).2.is_null() {
+                                &bo.rhs
+                            } else {
+                                &bo.lhs
+                            },
+                        )?;
+                        EmitJmpResult {
+                            instrs: emit_pos_then(
+                                pos,
+                                InstrSeq::gather(vec![is_null, instr::jmp_z(label)]),
+                            ),
+                            is_fallthrough: true,
+                            is_label_used: true,
+                        }
+                    }
+                    Expr_::Binop(bo)
+                        if bo.bop.is_diff2()
+                            && ((bo.lhs).2.is_null() || (bo.rhs).2.is_null())
+                            && opt =>
+                    {
+                        let is_null = emit_is_null(
+                            e,
+                            env,
+                            if (bo.lhs).2.is_null() {
+                                &bo.rhs
+                            } else {
+                                &bo.lhs
+                            },
+                        )?;
+                        EmitJmpResult {
+                            instrs: emit_pos_then(
+                                pos,
+                                InstrSeq::gather(vec![is_null, instr::jmp_nz(label)]),
+                            ),
+                            is_fallthrough: true,
+                            is_label_used: true,
+                        }
+                    }
+                    _ => {
+                        let instr = emit_expr(e, env, expr)?;
+                        EmitJmpResult {
+                            instrs: emit_pos_then(
+                                pos,
+                                InstrSeq::gather(vec![instr, instr::jmp_z(label)]),
+                            ),
+                            is_fallthrough: true,
+                            is_label_used: true,
+                        }
+                    }
+                }
+            }
+        },
+    )
 }

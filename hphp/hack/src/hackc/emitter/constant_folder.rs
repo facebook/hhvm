@@ -5,6 +5,8 @@
 use std::collections::hash_map::RandomState;
 use std::fmt;
 
+use ast_scope::Scope;
+use ast_scope::ScopeItem;
 use env::emitter::Emitter;
 use env::ClassExpr;
 use ffi::Str;
@@ -95,17 +97,12 @@ fn try_type_intlike(s: &str) -> Option<i64> {
 
 fn class_const_to_typed_value<'arena, 'decl>(
     emitter: &Emitter<'arena, 'decl>,
+    scope: &Scope<'_, 'arena>,
     cid: &ast::ClassId,
     id: &ast::Pstring,
 ) -> Result<TypedValue<'arena>, Error> {
     if id.1 == members::M_CLASS {
-        let cexpr = ClassExpr::class_id_to_class_expr(
-            emitter,
-            false,
-            true,
-            &ast_scope::Scope::default(),
-            cid,
-        );
+        let cexpr = ClassExpr::class_id_to_class_expr(emitter, scope, false, true, cid);
         if let ClassExpr::Id(ast_defs::Id(_, cname)) = cexpr {
             let classid =
                 hhbc::ClassName::from_ast_name_and_mangle(emitter.alloc, cname).as_ffi_str();
@@ -117,12 +114,13 @@ fn class_const_to_typed_value<'arena, 'decl>(
 
 fn varray_to_typed_value<'arena, 'decl>(
     emitter: &Emitter<'arena, 'decl>,
+    scope: &Scope<'_, 'arena>,
     fields: &[ast::Expr],
 ) -> Result<TypedValue<'arena>, Error> {
     let tv_fields = emitter.alloc.alloc_slice_fill_iter(
         fields
             .iter()
-            .map(|x| expr_to_typed_value(emitter, x))
+            .map(|x| expr_to_typed_value(emitter, scope, x))
             .collect::<Result<Vec<_>, _>>()?
             .into_iter(),
     );
@@ -131,6 +129,7 @@ fn varray_to_typed_value<'arena, 'decl>(
 
 fn darray_to_typed_value<'arena, 'decl>(
     emitter: &Emitter<'arena, 'decl>,
+    scope: &Scope<'_, 'arena>,
     fields: &[(ast::Expr, ast::Expr)],
 ) -> Result<TypedValue<'arena>, Error> {
     //TODO: Improve. It's a bit silly having to use a std::vector::Vec
@@ -139,8 +138,8 @@ fn darray_to_typed_value<'arena, 'decl>(
         .iter()
         .map(|(k, v)| {
             Ok((
-                key_expr_to_typed_value(emitter, k)?,
-                expr_to_typed_value(emitter, v)?,
+                key_expr_to_typed_value(emitter, scope, k)?,
+                expr_to_typed_value(emitter, scope, v)?,
             ))
         })
         .collect::<Result<_, Error>>()?;
@@ -151,10 +150,11 @@ fn darray_to_typed_value<'arena, 'decl>(
 
 fn set_afield_to_typed_value_pair<'arena, 'decl>(
     e: &Emitter<'arena, 'decl>,
+    scope: &Scope<'_, 'arena>,
     afield: &ast::Afield,
 ) -> Result<(TypedValue<'arena>, TypedValue<'arena>), Error> {
     match afield {
-        ast::Afield::AFvalue(v) => set_afield_value_to_typed_value_pair(e, v),
+        ast::Afield::AFvalue(v) => set_afield_value_to_typed_value_pair(e, scope, v),
         _ => Err(Error::unrecoverable(
             "set_afield_to_typed_value_pair: unexpected key=>value",
         )),
@@ -163,41 +163,45 @@ fn set_afield_to_typed_value_pair<'arena, 'decl>(
 
 fn set_afield_value_to_typed_value_pair<'arena, 'decl>(
     e: &Emitter<'arena, 'decl>,
+    scope: &Scope<'_, 'arena>,
     v: &ast::Expr,
 ) -> Result<(TypedValue<'arena>, TypedValue<'arena>), Error> {
-    let tv = key_expr_to_typed_value(e, v)?;
+    let tv = key_expr_to_typed_value(e, scope, v)?;
     Ok((tv.clone(), tv))
 }
 
 fn afield_to_typed_value_pair<'arena, 'decl>(
     emitter: &Emitter<'arena, 'decl>,
+    scope: &Scope<'_, 'arena>,
     afield: &ast::Afield,
 ) -> Result<(TypedValue<'arena>, TypedValue<'arena>), Error> {
     match afield {
         ast::Afield::AFvalue(_) => Err(Error::unrecoverable(
             "afield_to_typed_value_pair: unexpected value",
         )),
-        ast::Afield::AFkvalue(key, value) => kv_to_typed_value_pair(emitter, key, value),
+        ast::Afield::AFkvalue(key, value) => kv_to_typed_value_pair(emitter, scope, key, value),
     }
 }
 
 fn kv_to_typed_value_pair<'arena, 'decl>(
     emitter: &Emitter<'arena, 'decl>,
+    scope: &Scope<'_, 'arena>,
     key: &ast::Expr,
     value: &ast::Expr,
 ) -> Result<(TypedValue<'arena>, TypedValue<'arena>), Error> {
     Ok((
-        key_expr_to_typed_value(emitter, key)?,
-        expr_to_typed_value(emitter, value)?,
+        key_expr_to_typed_value(emitter, scope, key)?,
+        expr_to_typed_value(emitter, scope, value)?,
     ))
 }
 
 fn value_afield_to_typed_value<'arena, 'decl>(
     emitter: &Emitter<'arena, 'decl>,
+    scope: &Scope<'_, 'arena>,
     afield: &ast::Afield,
 ) -> Result<TypedValue<'arena>, Error> {
     match afield {
-        ast::Afield::AFvalue(e) => expr_to_typed_value(emitter, e),
+        ast::Afield::AFvalue(e) => expr_to_typed_value(emitter, scope, e),
         ast::Afield::AFkvalue(_, _) => Err(Error::unrecoverable(
             "value_afield_to_typed_value: unexpected key=>value",
         )),
@@ -206,9 +210,10 @@ fn value_afield_to_typed_value<'arena, 'decl>(
 
 fn key_expr_to_typed_value<'arena, 'decl>(
     emitter: &Emitter<'arena, 'decl>,
+    scope: &Scope<'_, 'arena>,
     expr: &ast::Expr,
 ) -> Result<TypedValue<'arena>, Error> {
-    let tv = expr_to_typed_value(emitter, expr)?;
+    let tv = expr_to_typed_value(emitter, scope, expr)?;
     let fold_lc = emitter.options().hhbc.fold_lazy_class_keys;
     match tv {
         TypedValue::Int(_) | TypedValue::String(_) => Ok(tv),
@@ -219,9 +224,10 @@ fn key_expr_to_typed_value<'arena, 'decl>(
 
 fn keyset_value_afield_to_typed_value<'arena, 'decl>(
     emitter: &Emitter<'arena, 'decl>,
+    scope: &Scope<'_, 'arena>,
     afield: &ast::Afield,
 ) -> Result<TypedValue<'arena>, Error> {
-    let tv = value_afield_to_typed_value(emitter, afield)?;
+    let tv = value_afield_to_typed_value(emitter, scope, afield)?;
     let fold_lc = emitter.options().hhbc.fold_lazy_class_keys;
     match tv {
         TypedValue::Int(_) | TypedValue::String(_) => Ok(tv),
@@ -232,6 +238,7 @@ fn keyset_value_afield_to_typed_value<'arena, 'decl>(
 
 fn shape_to_typed_value<'arena, 'decl>(
     emitter: &Emitter<'arena, 'decl>,
+    scope: &Scope<'_, 'arena>,
     fields: &[(ast::ShapeFieldName, ast::Expr)],
 ) -> Result<TypedValue<'arena>, Error> {
     let a = emitter.alloc.alloc_slice_fill_iter(
@@ -263,12 +270,13 @@ fn shape_to_typed_value<'arena, 'decl>(
                     ast_defs::ShapeFieldName::SFclassConst(class_id, id) => {
                         class_const_to_typed_value(
                             emitter,
+                            scope,
                             &ast::ClassId((), Pos::NONE, ast::ClassId_::CI(class_id.clone())),
                             id,
                         )?
                     }
                 };
-                let value = expr_to_typed_value(emitter, expr)?;
+                let value = expr_to_typed_value(emitter, scope, expr)?;
                 Ok(DictEntry { key, value })
             })
             .collect::<Result<Vec<_>, _>>()?
@@ -279,13 +287,14 @@ fn shape_to_typed_value<'arena, 'decl>(
 
 pub fn vec_to_typed_value<'arena, 'decl>(
     e: &Emitter<'arena, 'decl>,
+    scope: &Scope<'_, 'arena>,
     fields: &[ast::Afield],
 ) -> Result<TypedValue<'arena>, Error> {
     //TODO: Improve. It's a bit silly having to use a std::vector::Vec
     // here.
     let tv_fields: Result<Vec<TypedValue<'arena>>, Error> = fields
         .iter()
-        .map(|f| value_afield_to_typed_value(e, f))
+        .map(|f| value_afield_to_typed_value(e, scope, f))
         .collect();
     let fields = e.alloc.alloc_slice_fill_iter(tv_fields?.into_iter());
     Ok(TypedValue::vec(fields))
@@ -293,13 +302,15 @@ pub fn vec_to_typed_value<'arena, 'decl>(
 
 pub fn expr_to_typed_value<'arena, 'decl>(
     e: &Emitter<'arena, 'decl>,
+    scope: &Scope<'_, 'arena>,
     expr: &ast::Expr,
 ) -> Result<TypedValue<'arena>, Error> {
-    expr_to_typed_value_(e, expr, false /*allow_maps*/)
+    expr_to_typed_value_(e, scope, expr, false /*allow_maps*/)
 }
 
 pub fn expr_to_typed_value_<'arena, 'decl>(
     emitter: &Emitter<'arena, 'decl>,
+    scope: &Scope<'_, 'arena>,
     expr: &ast::Expr,
     allow_maps: bool,
 ) -> Result<TypedValue<'arena>, Error> {
@@ -314,15 +325,15 @@ pub fn expr_to_typed_value_<'arena, 'decl>(
             Expr_::String(s) => string_expr_to_typed_value(emitter, s),
             Expr_::Float(s) => float_expr_to_typed_value(emitter, s),
 
-            Expr_::Varray(fields) => varray_to_typed_value(emitter, &fields.1),
-            Expr_::Darray(fields) => darray_to_typed_value(emitter, &fields.1),
+            Expr_::Varray(fields) => varray_to_typed_value(emitter, scope, &fields.1),
+            Expr_::Darray(fields) => darray_to_typed_value(emitter, scope, &fields.1),
 
             Expr_::Id(id) if id.1 == math::NAN => Ok(TypedValue::float(std::f64::NAN)),
             Expr_::Id(id) if id.1 == math::INF => Ok(TypedValue::float(std::f64::INFINITY)),
             Expr_::Id(_) => Err(Error::UserDefinedConstant),
 
             Expr_::Collection(x) if x.0.name().eq("keyset") => {
-                keyset_expr_to_typed_value(emitter, x)
+                keyset_expr_to_typed_value(emitter, scope, x)
             }
             Expr_::Collection(x)
                 if x.0.name().eq("dict")
@@ -330,38 +341,38 @@ pub fn expr_to_typed_value_<'arena, 'decl>(
                         && (string_utils::cmp(&(x.0).1, "Map", false, true)
                             || string_utils::cmp(&(x.0).1, "ImmMap", false, true)) =>
             {
-                dict_expr_to_typed_value(emitter, x)
+                dict_expr_to_typed_value(emitter, scope, x)
             }
             Expr_::Collection(x)
                 if allow_maps
                     && (string_utils::cmp(&(x.0).1, "Set", false, true)
                         || string_utils::cmp(&(x.0).1, "ImmSet", false, true)) =>
             {
-                set_expr_to_typed_value(emitter, x)
+                set_expr_to_typed_value(emitter, scope, x)
             }
-            Expr_::Tuple(x) => tuple_expr_to_typed_value(emitter, x),
+            Expr_::Tuple(x) => tuple_expr_to_typed_value(emitter, scope, x),
             Expr_::ValCollection(x)
                 if x.0.1 == ast::VcKind::Vec || x.0.1 == ast::VcKind::Vector =>
             {
-                valcollection_vec_expr_to_typed_value(emitter, x)
+                valcollection_vec_expr_to_typed_value(emitter, scope, x)
             }
             Expr_::ValCollection(x) if x.0.1 == ast::VcKind::Keyset => {
-                valcollection_keyset_expr_to_typed_value(emitter, x)
+                valcollection_keyset_expr_to_typed_value(emitter, scope, x)
             }
             Expr_::ValCollection(x)
                 if x.0.1 == ast::VcKind::Set || x.0.1 == ast::VcKind::ImmSet =>
             {
-                valcollection_set_expr_to_typed_value(emitter, x)
+                valcollection_set_expr_to_typed_value(emitter, scope, x)
             }
-            Expr_::KeyValCollection(x) => keyvalcollection_expr_to_typed_value(emitter, x),
-            Expr_::Shape(fields) => shape_to_typed_value(emitter, fields),
-            Expr_::ClassConst(x) => class_const_to_typed_value(emitter, &x.0, &x.1),
+            Expr_::KeyValCollection(x) => keyvalcollection_expr_to_typed_value(emitter, scope, x),
+            Expr_::Shape(fields) => shape_to_typed_value(emitter, scope, fields),
+            Expr_::ClassConst(x) => class_const_to_typed_value(emitter, scope, &x.0, &x.1),
 
             Expr_::ClassGet(_) => Err(Error::UserDefinedConstant),
             ast::Expr_::As(x) if (x.1).1.is_hlike() => {
-                expr_to_typed_value_(emitter, &x.0, allow_maps)
+                expr_to_typed_value_(emitter, scope, &x.0, allow_maps)
             }
-            Expr_::Upcast(e) => expr_to_typed_value(emitter, &e.0),
+            Expr_::Upcast(e) => expr_to_typed_value(emitter, scope, &e.0),
             _ => Err(Error::NotLiteral),
         }
     })
@@ -369,12 +380,13 @@ pub fn expr_to_typed_value_<'arena, 'decl>(
 
 fn valcollection_keyset_expr_to_typed_value<'arena, 'decl>(
     emitter: &Emitter<'arena, 'decl>,
+    scope: &Scope<'_, 'arena>,
     x: &((Pos, ast::VcKind), Option<ast::Targ>, Vec<ast::Expr>),
 ) -> Result<TypedValue<'arena>, Error> {
     let keys = emitter.alloc.alloc_slice_fill_iter(
         x.2.iter()
             .map(|e| {
-                expr_to_typed_value(emitter, e).and_then(|tv| match tv {
+                expr_to_typed_value(emitter, scope, e).and_then(|tv| match tv {
                     TypedValue::Int(_) | TypedValue::String(_) => Ok(tv),
                     TypedValue::LazyClass(_) if emitter.options().hhbc.fold_lazy_class_keys => {
                         Ok(tv)
@@ -393,6 +405,7 @@ fn valcollection_keyset_expr_to_typed_value<'arena, 'decl>(
 
 fn keyvalcollection_expr_to_typed_value<'arena, 'decl>(
     emitter: &Emitter<'arena, 'decl>,
+    scope: &Scope<'_, 'arena>,
     x: &(
         (Pos, ast::KvcKind),
         Option<(ast::Targ, ast::Targ)>,
@@ -403,7 +416,7 @@ fn keyvalcollection_expr_to_typed_value<'arena, 'decl>(
         .alloc
         .alloc_slice_fill_iter(update_duplicates_in_map(
             x.2.iter()
-                .map(|e| kv_to_typed_value_pair(emitter, &e.0, &e.1))
+                .map(|e| kv_to_typed_value_pair(emitter, scope, &e.0, &e.1))
                 .collect::<Result<Vec<_>, _>>()?,
         ));
     Ok(TypedValue::dict(values))
@@ -411,13 +424,14 @@ fn keyvalcollection_expr_to_typed_value<'arena, 'decl>(
 
 fn valcollection_set_expr_to_typed_value<'arena, 'decl>(
     emitter: &Emitter<'arena, 'decl>,
+    scope: &Scope<'_, 'arena>,
     x: &((Pos, ast::VcKind), Option<ast::Targ>, Vec<ast::Expr>),
 ) -> Result<TypedValue<'arena>, Error> {
     let values = emitter
         .alloc
         .alloc_slice_fill_iter(update_duplicates_in_map(
             x.2.iter()
-                .map(|e| set_afield_value_to_typed_value_pair(emitter, e))
+                .map(|e| set_afield_value_to_typed_value_pair(emitter, scope, e))
                 .collect::<Result<Vec<_>, _>>()?,
         ));
     Ok(TypedValue::dict(values))
@@ -425,11 +439,12 @@ fn valcollection_set_expr_to_typed_value<'arena, 'decl>(
 
 fn valcollection_vec_expr_to_typed_value<'arena, 'decl>(
     emitter: &Emitter<'arena, 'decl>,
+    scope: &Scope<'_, 'arena>,
     x: &((Pos, ast::VcKind), Option<ast::Targ>, Vec<ast::Expr>),
 ) -> Result<TypedValue<'arena>, Error> {
     let v: Vec<_> =
         x.2.iter()
-            .map(|e| expr_to_typed_value(emitter, e))
+            .map(|e| expr_to_typed_value(emitter, scope, e))
             .collect::<Result<_, _>>()?;
     Ok(TypedValue::vec(
         emitter.alloc.alloc_slice_fill_iter(v.into_iter()),
@@ -438,11 +453,12 @@ fn valcollection_vec_expr_to_typed_value<'arena, 'decl>(
 
 fn tuple_expr_to_typed_value<'arena, 'decl>(
     emitter: &Emitter<'arena, 'decl>,
+    scope: &Scope<'_, 'arena>,
     x: &[ast::Expr],
 ) -> Result<TypedValue<'arena>, Error> {
     let v: Vec<_> = x
         .iter()
-        .map(|e| expr_to_typed_value(emitter, e))
+        .map(|e| expr_to_typed_value(emitter, scope, e))
         .collect::<Result<_, _>>()?;
     Ok(TypedValue::vec(
         emitter.alloc.alloc_slice_fill_iter(v.into_iter()),
@@ -451,6 +467,7 @@ fn tuple_expr_to_typed_value<'arena, 'decl>(
 
 fn set_expr_to_typed_value<'arena, 'decl>(
     emitter: &Emitter<'arena, 'decl>,
+    scope: &Scope<'_, 'arena>,
     x: &(
         ast::ClassName,
         Option<ast::CollectionTarg>,
@@ -461,7 +478,7 @@ fn set_expr_to_typed_value<'arena, 'decl>(
         .alloc
         .alloc_slice_fill_iter(update_duplicates_in_map(
             x.2.iter()
-                .map(|x| set_afield_to_typed_value_pair(emitter, x))
+                .map(|x| set_afield_to_typed_value_pair(emitter, scope, x))
                 .collect::<Result<_, _>>()?,
         ));
     Ok(TypedValue::dict(values))
@@ -469,6 +486,7 @@ fn set_expr_to_typed_value<'arena, 'decl>(
 
 fn dict_expr_to_typed_value<'arena, 'decl>(
     emitter: &Emitter<'arena, 'decl>,
+    scope: &Scope<'_, 'arena>,
     x: &(
         ast::ClassName,
         Option<ast::CollectionTarg>,
@@ -479,7 +497,7 @@ fn dict_expr_to_typed_value<'arena, 'decl>(
         .alloc
         .alloc_slice_fill_iter(update_duplicates_in_map(
             x.2.iter()
-                .map(|x| afield_to_typed_value_pair(emitter, x))
+                .map(|x| afield_to_typed_value_pair(emitter, scope, x))
                 .collect::<Result<_, _>>()?,
         ));
     Ok(TypedValue::dict(values))
@@ -487,6 +505,7 @@ fn dict_expr_to_typed_value<'arena, 'decl>(
 
 fn keyset_expr_to_typed_value<'arena, 'decl>(
     emitter: &Emitter<'arena, 'decl>,
+    scope: &Scope<'_, 'arena>,
     x: &(
         ast::ClassName,
         Option<ast::CollectionTarg>,
@@ -495,7 +514,7 @@ fn keyset_expr_to_typed_value<'arena, 'decl>(
 ) -> Result<TypedValue<'arena>, Error> {
     let keys = emitter.alloc.alloc_slice_fill_iter(
         x.2.iter()
-            .map(|x| keyset_value_afield_to_typed_value(emitter, x))
+            .map(|x| keyset_value_afield_to_typed_value(emitter, scope, x))
             .collect::<Result<Vec<_>, _>>()?
             .into_iter()
             .unique()
@@ -634,13 +653,25 @@ fn value_to_expr_<'arena>(v: TypedValue<'arena>) -> Result<ast::Expr_, Error> {
     }
 }
 
+struct FolderVisitorMut<'a, 'arena, 'decl> {
+    emitter: &'a Emitter<'arena, 'decl>,
+    scope: &'a mut Scope<'a, 'arena>,
+}
+
+impl<'a, 'arena, 'decl> FolderVisitorMut<'a, 'arena, 'decl> {
+    fn new(emitter: &'a Emitter<'arena, 'decl>, scope: &'a mut Scope<'a, 'arena>) -> Self {
+        Self { emitter, scope }
+    }
+}
+
 struct FolderVisitor<'a, 'arena, 'decl> {
     emitter: &'a Emitter<'arena, 'decl>,
+    scope: &'a Scope<'a, 'arena>,
 }
 
 impl<'a, 'arena, 'decl> FolderVisitor<'a, 'arena, 'decl> {
-    fn new(emitter: &'a Emitter<'arena, 'decl>) -> Self {
-        Self { emitter }
+    fn new(emitter: &'a Emitter<'arena, 'decl>, scope: &'a Scope<'a, 'arena>) -> Self {
+        Self { emitter, scope }
     }
 }
 
@@ -654,17 +685,17 @@ impl<'ast, 'decl> VisitorMut<'ast> for FolderVisitor<'_, '_, 'decl> {
     fn visit_expr_(&mut self, c: &mut (), p: &mut ast::Expr_) -> Result<(), Error> {
         p.recurse(c, self.object())?;
         let new_p = match p {
-            ast::Expr_::Cast(e) => expr_to_typed_value(self.emitter, &e.1)
+            ast::Expr_::Cast(e) => expr_to_typed_value(self.emitter, self.scope, &e.1)
                 .and_then(|v| cast_value(self.emitter.alloc, &(e.0).1, v))
                 .map(value_to_expr_)
                 .ok(),
-            ast::Expr_::Unop(e) => expr_to_typed_value(self.emitter, &e.1)
+            ast::Expr_::Unop(e) => expr_to_typed_value(self.emitter, self.scope, &e.1)
                 .and_then(|v| unop_on_value(&e.0, v))
                 .map(value_to_expr_)
                 .ok(),
-            ast::Expr_::Binop(binop) => expr_to_typed_value(self.emitter, &binop.lhs)
+            ast::Expr_::Binop(binop) => expr_to_typed_value(self.emitter, self.scope, &binop.lhs)
                 .and_then(|v1| {
-                    expr_to_typed_value(self.emitter, &binop.rhs).and_then(|v2| {
+                    expr_to_typed_value(self.emitter, self.scope, &binop.rhs).and_then(|v2| {
                         binop_on_values(self.emitter.alloc, &binop.bop, v1, v2).map(value_to_expr_)
                     })
                 })
@@ -678,30 +709,73 @@ impl<'ast, 'decl> VisitorMut<'ast> for FolderVisitor<'_, '_, 'decl> {
     }
 }
 
-pub fn fold_expr<'arena, 'decl>(
+impl<'ast, 'decl> VisitorMut<'ast> for FolderVisitorMut<'_, '_, 'decl> {
+    type Params = AstParams<(), Error>;
+
+    fn object(&mut self) -> &mut dyn VisitorMut<'ast, Params = Self::Params> {
+        self
+    }
+    fn visit_expr(&mut self, _c: &mut (), expr: &mut ast::Expr) -> Result<(), Error> {
+        visit_mut(
+            &mut FolderVisitor::new(self.emitter, self.scope),
+            &mut (),
+            expr,
+        )
+    }
+    fn visit_fun_def(&mut self, c: &mut (), fd: &mut ast::FunDef) -> Result<(), Error> {
+        self.scope
+            .push_item(ScopeItem::Function(ast_scope::Fun::new_rc(fd)));
+        fd.recurse(c, self.object())?;
+        self.scope.pop_item();
+        Ok(())
+    }
+    fn visit_method_(&mut self, c: &mut (), m: &mut ast::Method_) -> Result<(), Error> {
+        self.scope
+            .push_item(ScopeItem::Method(ast_scope::Method::new_rc(m)));
+        // TODO(T88847409) May need different handling for closures
+        m.recurse(c, self.object())?;
+        self.scope.pop_item();
+        Ok(())
+    }
+    fn visit_class_(&mut self, c: &mut (), cls: &mut ast::Class_) -> Result<(), Error> {
+        self.scope
+            .push_item(ScopeItem::Class(ast_scope::Class::new_rc(cls)));
+        cls.recurse(c, self.object())?;
+        self.scope.pop_item();
+        Ok(())
+    }
+}
+
+pub fn fold_expr<'a, 'arena: 'a, 'decl: 'a>(
     expr: &mut ast::Expr,
-    e: &mut Emitter<'arena, 'decl>,
+    scope: &'a Scope<'a, 'arena>,
+    e: &'a mut Emitter<'arena, 'decl>,
 ) -> Result<(), Error> {
-    visit_mut(&mut FolderVisitor::new(e), &mut (), expr)
+    visit_mut(&mut FolderVisitor::new(e, scope), &mut (), expr)
 }
 
 pub fn fold_program<'arena, 'decl>(
     p: &mut ast::Program,
     e: &mut Emitter<'arena, 'decl>,
 ) -> Result<(), Error> {
-    visit_mut(&mut FolderVisitor::new(e), &mut (), p)
+    visit_mut(
+        &mut FolderVisitorMut::new(e, &mut ast_scope::Scope::default()),
+        &mut (),
+        p,
+    )
 }
 
 pub fn literals_from_exprs<'arena, 'decl>(
     exprs: &mut [ast::Expr],
+    scope: &Scope<'_, 'arena>,
     e: &mut Emitter<'arena, 'decl>,
 ) -> Result<Vec<TypedValue<'arena>>, Error> {
     for expr in exprs.iter_mut() {
-        fold_expr(expr, e)?;
+        fold_expr(expr, scope, e)?;
     }
     let ret = exprs
         .iter()
-        .map(|expr| expr_to_typed_value_(e, expr, false))
+        .map(|expr| expr_to_typed_value_(e, scope, expr, false))
         .collect();
     if let Err(Error::NotLiteral) = ret {
         Err(Error::unrecoverable("literals_from_exprs: not literal"))

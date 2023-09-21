@@ -38,6 +38,14 @@ impl<'a, 'arena> Scope<'a, 'arena> {
         self.items.push(s)
     }
 
+    pub fn pop_item(&mut self) -> Option<ScopeItem<'a, 'arena>> {
+        let s = self.items.pop();
+        if let Some(ScopeItem::Class(_)) = &s {
+            self.class_cache = None;
+        }
+        s
+    }
+
     pub fn items(&self) -> &[ScopeItem<'a, 'arena>] {
         &self.items
     }

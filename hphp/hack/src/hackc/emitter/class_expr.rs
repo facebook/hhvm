@@ -85,9 +85,9 @@ impl<'arena> ClassExpr<'arena> {
 
     fn expr_to_class_expr<'a, 'decl>(
         emitter: &Emitter<'arena, 'decl>,
+        scope: &Scope<'a, 'arena>,
         check_traits: bool,
         resolve_self: bool,
-        scope: &Scope<'a, 'arena>,
         expr: ast::Expr,
     ) -> Self {
         if let Some(cd) = scope.get_class() {
@@ -148,9 +148,9 @@ impl<'arena> ClassExpr<'arena> {
 
     pub fn class_id_to_class_expr<'a, 'decl>(
         emitter: &Emitter<'arena, 'decl>,
+        scope: &Scope<'a, 'arena>,
         check_traits: bool,
         resolve_self: bool,
-        scope: &Scope<'a, 'arena>,
         cid: &ast::ClassId,
     ) -> Self {
         let ClassId(_, annot, cid_) = cid;
@@ -161,7 +161,7 @@ impl<'arena> ClassExpr<'arena> {
             ClassId_::CIstatic => return Self::Special(SpecialClsRef::LateBoundCls),
             ClassId_::CIself => return Self::Special(SpecialClsRef::SelfCls),
         };
-        Self::expr_to_class_expr(emitter, check_traits, resolve_self, scope, expr)
+        Self::expr_to_class_expr(emitter, scope, check_traits, resolve_self, expr)
     }
 
     pub fn get_reified_tparam<'a>(

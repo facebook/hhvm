@@ -40,10 +40,11 @@ struct Watcher {
   struct ResultFile {
     std::filesystem::path m_path;
     bool m_exists{false};
-    Optional<std::string> m_hash;
+    Optional<std::string> m_watcher_hash;
 
     bool operator==(const ResultFile& o) const {
-      return m_path == o.m_path && m_exists == o.m_exists && m_hash == o.m_hash;
+      return m_path == o.m_path && m_exists == o.m_exists &&
+          m_watcher_hash == o.m_watcher_hash;
     }
   };
 

@@ -42,7 +42,7 @@ TEST(StaticWatcherTest, sinceAndClockAndFilesArePassedThrough) {
   EXPECT_THAT(
       result.m_files,
       ElementsAre(Watcher::ResultFile{
-          .m_path = "a.hck", .m_exists = true, .m_hash = {}}));
+          .m_path = "a.hck", .m_exists = true, .m_watcher_hash = {}}));
 }
 
 TEST(StaticWatcherTest, incrementsClock) {
@@ -55,7 +55,7 @@ TEST(StaticWatcherTest, incrementsClock) {
   EXPECT_THAT(
       result.m_files,
       ElementsAre(Watcher::ResultFile{
-          .m_path = "a.hck", .m_exists = true, .m_hash = {}}));
+          .m_path = "a.hck", .m_exists = true, .m_watcher_hash = {}}));
 }
 
 } // namespace

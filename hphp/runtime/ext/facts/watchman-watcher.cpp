@@ -94,7 +94,7 @@ Watcher::Results parseWatchmanResults(
         alteredPaths.push_back(
             {.m_path = std::move(path),
              .m_exists = true,
-             .m_hash = getSha1Hash(pathData)});
+             .m_watcher_hash = getSha1Hash(pathData)});
       } else {
         alteredPaths.push_back({.m_path = std::move(path), .m_exists = false});
       }

@@ -44,7 +44,7 @@ struct StaticWatcher : public Watcher {
     resultFiles.reserve(m_paths.size());
     for (auto const& path : m_paths) {
       resultFiles.push_back(
-          ResultFile{.m_path = path, .m_exists = true, .m_hash = {}});
+          ResultFile{.m_path = path, .m_exists = true, .m_watcher_hash = {}});
     }
     auto newClock = [](const auto& lastClockStr) -> Clock {
       if (lastClockStr.empty()) {

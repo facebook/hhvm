@@ -901,7 +901,7 @@ struct FactsStoreImpl final
                   XLOG(ERR) << msg;
                   throw UpdateExc{msg};
                 }
-                return update(std::move(results.value()));
+                return updateWithDelta(std::move(results.value()));
               }));
     }
     return updateFuture->getFuture()
@@ -938,7 +938,7 @@ struct FactsStoreImpl final
         .semi();
   }
 
-  folly::SemiFuture<folly::Unit> update(Watcher::Results&& results) {
+  folly::SemiFuture<folly::Unit> updateWithDelta(Watcher::Results&& results) {
     if (m_closing) {
       throw UpdateExc{"Shutting down"};
     }
@@ -1070,7 +1070,7 @@ struct FactsStoreImpl final
 
       auto& path = pathData.m_path;
       auto pathStr = Path{path};
-      auto sha1hex = pathData.m_hash;
+      auto sha1hex = pathData.m_watcher_hash;
 
       // Watchman is sending us all the files in the repo, regardless of
       // whether we've seen the same file before. Watchman is also
@@ -1123,7 +1123,8 @@ struct FactsStoreImpl final
       if (!pathData.m_exists) {
         deletedPaths.push_back(std::move(pathData.m_path));
       } else {
-        alteredPaths.push_back({std::move(pathData.m_path), pathData.m_hash});
+        alteredPaths.push_back(
+            {std::move(pathData.m_path), std::move(pathData.m_watcher_hash)});
       }
     }
     return {std::move(alteredPaths), std::move(deletedPaths)};

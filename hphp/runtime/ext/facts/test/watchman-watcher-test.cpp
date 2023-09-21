@@ -88,7 +88,9 @@ TEST(WatchmanWatcherTest, filesAndExistenceArePassedThrough) {
       results.m_files,
       ElementsAre(
           Watcher::ResultFile{
-              .m_path = "a.hck", .m_exists = true, .m_hash = "faceb00c"},
+              .m_path = "a.hck",
+              .m_exists = true,
+              .m_watcher_hash = "faceb00c"},
           Watcher::ResultFile{.m_path = "b.hck", .m_exists = false}));
 }
 

@@ -1960,7 +1960,10 @@ ExecutionContext::evalPHPDebugger(StringData* code, int frame) {
     raise_error("Syntax error");
     return {true, init_null_variant, "Syntax error"};
   }
-
+  auto const file = unit->filepath()->data();
+  if (!m_requestOptions) {
+    onLoadWithOptions(file, RepoOptions::forFile(file));
+  }
   return evalPHPDebugger(unit, frame);
 }
 

@@ -3595,7 +3595,7 @@ type MyServiceInvalidReturnForHackResult = respMyServiceInvalidReturnForHack
 
 func newRespMyServiceInvalidReturnForHack() *respMyServiceInvalidReturnForHack {
     return (&respMyServiceInvalidReturnForHack{}).
-        SetSuccessNonCompat(nil)
+        SetSuccessNonCompat(make([]float32, 0))
 }
 
 func (x *respMyServiceInvalidReturnForHack) GetSuccessNonCompat() []float32 {
@@ -3604,7 +3604,7 @@ func (x *respMyServiceInvalidReturnForHack) GetSuccessNonCompat() []float32 {
 
 func (x *respMyServiceInvalidReturnForHack) GetSuccess() []float32 {
     if !x.IsSetSuccess() {
-        return nil
+        return make([]float32, 0)
     }
 
     return x.Success

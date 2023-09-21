@@ -354,7 +354,7 @@ func newReqCThing() *reqCThing {
     return (&reqCThing{}).
         SetANonCompat(0).
         SetBNonCompat("").
-        SetCNonCompat(nil)
+        SetCNonCompat(make([]int32, 0))
 }
 
 func (x *reqCThing) GetANonCompat() int32 {
@@ -379,7 +379,7 @@ func (x *reqCThing) GetCNonCompat() []int32 {
 
 func (x *reqCThing) GetC() []int32 {
     if !x.IsSetC() {
-        return nil
+        return make([]int32, 0)
     }
 
     return x.C

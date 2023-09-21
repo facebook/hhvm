@@ -517,7 +517,7 @@ type SomeServiceBinaryKeyedMapArgs = reqSomeServiceBinaryKeyedMap
 
 func newReqSomeServiceBinaryKeyedMap() *reqSomeServiceBinaryKeyedMap {
     return (&reqSomeServiceBinaryKeyedMap{}).
-        SetRNonCompat(nil)
+        SetRNonCompat(make([]int64, 0))
 }
 
 func (x *reqSomeServiceBinaryKeyedMap) GetRNonCompat() []int64 {
@@ -526,7 +526,7 @@ func (x *reqSomeServiceBinaryKeyedMap) GetRNonCompat() []int64 {
 
 func (x *reqSomeServiceBinaryKeyedMap) GetR() []int64 {
     if !x.IsSetR() {
-        return nil
+        return make([]int64, 0)
     }
 
     return x.R
@@ -719,7 +719,7 @@ type SomeServiceBinaryKeyedMapResult = respSomeServiceBinaryKeyedMap
 
 func newRespSomeServiceBinaryKeyedMap() *respSomeServiceBinaryKeyedMap {
     return (&respSomeServiceBinaryKeyedMap{}).
-        SetSuccessNonCompat(nil)
+        SetSuccessNonCompat(make(map[*TBinary]int64))
 }
 
 func (x *respSomeServiceBinaryKeyedMap) GetSuccessNonCompat() map[*TBinary]int64 {
@@ -728,7 +728,7 @@ func (x *respSomeServiceBinaryKeyedMap) GetSuccessNonCompat() map[*TBinary]int64
 
 func (x *respSomeServiceBinaryKeyedMap) GetSuccess() map[*TBinary]int64 {
     if !x.IsSetSuccess() {
-        return nil
+        return make(map[*TBinary]int64)
     }
 
     return x.Success

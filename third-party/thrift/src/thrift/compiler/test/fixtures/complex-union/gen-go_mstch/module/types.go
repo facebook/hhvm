@@ -20,7 +20,7 @@ var _ = strings.Split
 type ContainerTypedef = map[int16]string
 
 func NewContainerTypedef() ContainerTypedef {
-    return nil
+    return make(map[int16]string)
 }
 
 func WriteContainerTypedef(item ContainerTypedef, p thrift.Protocol) error {
@@ -122,7 +122,7 @@ func (x *ComplexUnion) GetIntListValueNonCompat() []int64 {
 
 func (x *ComplexUnion) GetIntListValue() []int64 {
     if !x.IsSetIntListValue() {
-        return nil
+        return make([]int64, 0)
     }
 
     return x.IntListValue
@@ -134,7 +134,7 @@ func (x *ComplexUnion) GetStringListValueNonCompat() []string {
 
 func (x *ComplexUnion) GetStringListValue() []string {
     if !x.IsSetStringListValue() {
-        return nil
+        return make([]string, 0)
     }
 
     return x.StringListValue
@@ -793,7 +793,7 @@ func (x *ListUnion) GetIntListValueNonCompat() []int64 {
 
 func (x *ListUnion) GetIntListValue() []int64 {
     if !x.IsSetIntListValue() {
-        return nil
+        return make([]int64, 0)
     }
 
     return x.IntListValue
@@ -805,7 +805,7 @@ func (x *ListUnion) GetStringListValueNonCompat() []string {
 
 func (x *ListUnion) GetStringListValue() []string {
     if !x.IsSetStringListValue() {
-        return nil
+        return make([]string, 0)
     }
 
     return x.StringListValue

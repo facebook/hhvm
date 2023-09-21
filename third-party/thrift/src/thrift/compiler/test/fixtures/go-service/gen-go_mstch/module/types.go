@@ -346,8 +346,8 @@ var _ thrift.Struct = &NonComparableStruct{}
 func NewNonComparableStruct() *NonComparableStruct {
     return (&NonComparableStruct{}).
         SetFooNonCompat("").
-        SetBarNonCompat(nil).
-        SetBazNonCompat(nil)
+        SetBarNonCompat(make([]string, 0)).
+        SetBazNonCompat(make(map[*NonComparableStruct]int64))
 }
 
 func (x *NonComparableStruct) GetFooNonCompat() string {
@@ -364,7 +364,7 @@ func (x *NonComparableStruct) GetBarNonCompat() []string {
 
 func (x *NonComparableStruct) GetBar() []string {
     if !x.IsSetBar() {
-        return nil
+        return make([]string, 0)
     }
 
     return x.Bar
@@ -376,7 +376,7 @@ func (x *NonComparableStruct) GetBazNonCompat() map[*NonComparableStruct]int64 {
 
 func (x *NonComparableStruct) GetBaz() map[*NonComparableStruct]int64 {
     if !x.IsSetBaz() {
-        return nil
+        return make(map[*NonComparableStruct]int64)
     }
 
     return x.Baz

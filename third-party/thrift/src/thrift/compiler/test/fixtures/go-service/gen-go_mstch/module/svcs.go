@@ -2911,7 +2911,7 @@ type GetEntityGetMapResult = respGetEntityGetMap
 
 func newRespGetEntityGetMap() *respGetEntityGetMap {
     return (&respGetEntityGetMap{}).
-        SetSuccessNonCompat(nil)
+        SetSuccessNonCompat(make(map[string]string))
 }
 
 func (x *respGetEntityGetMap) GetSuccessNonCompat() map[string]string {
@@ -2920,7 +2920,7 @@ func (x *respGetEntityGetMap) GetSuccessNonCompat() map[string]string {
 
 func (x *respGetEntityGetMap) GetSuccess() map[string]string {
     if !x.IsSetSuccess() {
-        return nil
+        return make(map[string]string)
     }
 
     return x.Success
@@ -3223,7 +3223,7 @@ type GetEntityGetSetResult = respGetEntityGetSet
 
 func newRespGetEntityGetSet() *respGetEntityGetSet {
     return (&respGetEntityGetSet{}).
-        SetSuccessNonCompat(nil)
+        SetSuccessNonCompat(make([]string, 0))
 }
 
 func (x *respGetEntityGetSet) GetSuccessNonCompat() []string {
@@ -3232,7 +3232,7 @@ func (x *respGetEntityGetSet) GetSuccessNonCompat() []string {
 
 func (x *respGetEntityGetSet) GetSuccess() []string {
     if !x.IsSetSuccess() {
-        return nil
+        return make([]string, 0)
     }
 
     return x.Success
@@ -3518,7 +3518,7 @@ type GetEntityGetListResult = respGetEntityGetList
 
 func newRespGetEntityGetList() *respGetEntityGetList {
     return (&respGetEntityGetList{}).
-        SetSuccessNonCompat(nil)
+        SetSuccessNonCompat(make([]string, 0))
 }
 
 func (x *respGetEntityGetList) GetSuccessNonCompat() []string {
@@ -3527,7 +3527,7 @@ func (x *respGetEntityGetList) GetSuccessNonCompat() []string {
 
 func (x *respGetEntityGetList) GetSuccess() []string {
     if !x.IsSetSuccess() {
-        return nil
+        return make([]string, 0)
     }
 
     return x.Success

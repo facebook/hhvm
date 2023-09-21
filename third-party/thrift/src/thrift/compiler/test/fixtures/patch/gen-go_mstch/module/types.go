@@ -1137,8 +1137,8 @@ func NewMyStruct() *MyStruct {
     return (&MyStruct{}).
         SetStructWithCustomDefaultNonCompat(*NewMyDataWithCustomDefault()).
         SetI32WithCustomDefaultNonCompat(1).
-        SetMapMapNonCompat(nil).
-        SetListMapNonCompat(nil).
+        SetMapMapNonCompat(make(map[string]map[string]int32)).
+        SetListMapNonCompat(make([]map[string]int32, 0)).
         SetLateStructValNonCompat(*NewLateDefStruct()).
         SetUnionValNonCompat(*NewMyUnion()).
         SetStructValNonCompat(*NewMyData()).
@@ -1185,7 +1185,7 @@ func (x *MyStruct) GetMapMapNonCompat() map[string]map[string]int32 {
 
 func (x *MyStruct) GetMapMap() map[string]map[string]int32 {
     if !x.IsSetMapMap() {
-        return nil
+        return make(map[string]map[string]int32)
     }
 
     return x.MapMap
@@ -1197,7 +1197,7 @@ func (x *MyStruct) GetListMapNonCompat() []map[string]int32 {
 
 func (x *MyStruct) GetListMap() []map[string]int32 {
     if !x.IsSetListMap() {
-        return nil
+        return make([]map[string]int32, 0)
     }
 
     return x.ListMap
@@ -1209,7 +1209,7 @@ func (x *MyStruct) GetOptMapValNonCompat() map[string]string {
 
 func (x *MyStruct) GetOptMapVal() map[string]string {
     if !x.IsSetOptMapVal() {
-        return nil
+        return make(map[string]string)
     }
 
     return x.OptMapVal
@@ -1221,7 +1221,7 @@ func (x *MyStruct) GetOptSetValNonCompat() []string {
 
 func (x *MyStruct) GetOptSetVal() []string {
     if !x.IsSetOptSetVal() {
-        return nil
+        return make([]string, 0)
     }
 
     return x.OptSetVal
@@ -1233,7 +1233,7 @@ func (x *MyStruct) GetOptListValNonCompat() []int16 {
 
 func (x *MyStruct) GetOptListVal() []int16 {
     if !x.IsSetOptListVal() {
-        return nil
+        return make([]int16, 0)
     }
 
     return x.OptListVal
@@ -4300,7 +4300,7 @@ var _ thrift.Struct = &Recursive{}
 
 func NewRecursive() *Recursive {
     return (&Recursive{}).
-        SetNodesNonCompat(nil)
+        SetNodesNonCompat(make(map[string]*Recursive))
 }
 
 func (x *Recursive) GetNodesNonCompat() map[string]*Recursive {
@@ -4309,7 +4309,7 @@ func (x *Recursive) GetNodesNonCompat() map[string]*Recursive {
 
 func (x *Recursive) GetNodes() map[string]*Recursive {
     if !x.IsSetNodes() {
-        return nil
+        return make(map[string]*Recursive)
     }
 
     return x.Nodes
@@ -9966,8 +9966,8 @@ var _ thrift.Struct = &MyStructField26Patch{}
 func NewMyStructField26Patch() *MyStructField26Patch {
     return (&MyStructField26Patch{}).
         SetClearNonCompat(false).
-        SetPrependNonCompat(nil).
-        SetAppendNonCompat(nil)
+        SetPrependNonCompat(make([]int16, 0)).
+        SetAppendNonCompat(make([]int16, 0))
 }
 
 func (x *MyStructField26Patch) GetAssignNonCompat() []int16 {
@@ -9976,7 +9976,7 @@ func (x *MyStructField26Patch) GetAssignNonCompat() []int16 {
 
 func (x *MyStructField26Patch) GetAssign() []int16 {
     if !x.IsSetAssign() {
-        return nil
+        return make([]int16, 0)
     }
 
     return x.Assign
@@ -9996,7 +9996,7 @@ func (x *MyStructField26Patch) GetPrependNonCompat() []int16 {
 
 func (x *MyStructField26Patch) GetPrepend() []int16 {
     if !x.IsSetPrepend() {
-        return nil
+        return make([]int16, 0)
     }
 
     return x.Prepend
@@ -10008,7 +10008,7 @@ func (x *MyStructField26Patch) GetAppendNonCompat() []int16 {
 
 func (x *MyStructField26Patch) GetAppend() []int16 {
     if !x.IsSetAppend() {
-        return nil
+        return make([]int16, 0)
     }
 
     return x.Append
@@ -10460,8 +10460,8 @@ var _ thrift.Struct = &MyStructField27Patch{}
 func NewMyStructField27Patch() *MyStructField27Patch {
     return (&MyStructField27Patch{}).
         SetClearNonCompat(false).
-        SetRemoveNonCompat(nil).
-        SetAddNonCompat(nil)
+        SetRemoveNonCompat(make([]string, 0)).
+        SetAddNonCompat(make([]string, 0))
 }
 
 func (x *MyStructField27Patch) GetAssignNonCompat() []string {
@@ -10470,7 +10470,7 @@ func (x *MyStructField27Patch) GetAssignNonCompat() []string {
 
 func (x *MyStructField27Patch) GetAssign() []string {
     if !x.IsSetAssign() {
-        return nil
+        return make([]string, 0)
     }
 
     return x.Assign
@@ -10490,7 +10490,7 @@ func (x *MyStructField27Patch) GetRemoveNonCompat() []string {
 
 func (x *MyStructField27Patch) GetRemove() []string {
     if !x.IsSetRemove() {
-        return nil
+        return make([]string, 0)
     }
 
     return x.Remove
@@ -10502,7 +10502,7 @@ func (x *MyStructField27Patch) GetAddNonCompat() []string {
 
 func (x *MyStructField27Patch) GetAdd() []string {
     if !x.IsSetAdd() {
-        return nil
+        return make([]string, 0)
     }
 
     return x.Add
@@ -10957,11 +10957,11 @@ var _ thrift.Struct = &MyStructField28Patch{}
 func NewMyStructField28Patch() *MyStructField28Patch {
     return (&MyStructField28Patch{}).
         SetClearNonCompat(false).
-        SetPatchPriorNonCompat(nil).
-        SetAddNonCompat(nil).
-        SetPatchNonCompat(nil).
-        SetRemoveNonCompat(nil).
-        SetPutNonCompat(nil)
+        SetPatchPriorNonCompat(make(map[string]*patch.StringPatch)).
+        SetAddNonCompat(make(map[string]string)).
+        SetPatchNonCompat(make(map[string]*patch.StringPatch)).
+        SetRemoveNonCompat(make([]string, 0)).
+        SetPutNonCompat(make(map[string]string))
 }
 
 func (x *MyStructField28Patch) GetAssignNonCompat() map[string]string {
@@ -10970,7 +10970,7 @@ func (x *MyStructField28Patch) GetAssignNonCompat() map[string]string {
 
 func (x *MyStructField28Patch) GetAssign() map[string]string {
     if !x.IsSetAssign() {
-        return nil
+        return make(map[string]string)
     }
 
     return x.Assign
@@ -10990,7 +10990,7 @@ func (x *MyStructField28Patch) GetPatchPriorNonCompat() map[string]*patch.String
 
 func (x *MyStructField28Patch) GetPatchPrior() map[string]*patch.StringPatch {
     if !x.IsSetPatchPrior() {
-        return nil
+        return make(map[string]*patch.StringPatch)
     }
 
     return x.PatchPrior
@@ -11002,7 +11002,7 @@ func (x *MyStructField28Patch) GetAddNonCompat() map[string]string {
 
 func (x *MyStructField28Patch) GetAdd() map[string]string {
     if !x.IsSetAdd() {
-        return nil
+        return make(map[string]string)
     }
 
     return x.Add
@@ -11014,7 +11014,7 @@ func (x *MyStructField28Patch) GetPatchNonCompat() map[string]*patch.StringPatch
 
 func (x *MyStructField28Patch) GetPatch() map[string]*patch.StringPatch {
     if !x.IsSetPatch() {
-        return nil
+        return make(map[string]*patch.StringPatch)
     }
 
     return x.Patch
@@ -11026,7 +11026,7 @@ func (x *MyStructField28Patch) GetRemoveNonCompat() []string {
 
 func (x *MyStructField28Patch) GetRemove() []string {
     if !x.IsSetRemove() {
-        return nil
+        return make([]string, 0)
     }
 
     return x.Remove
@@ -11038,7 +11038,7 @@ func (x *MyStructField28Patch) GetPutNonCompat() map[string]string {
 
 func (x *MyStructField28Patch) GetPut() map[string]string {
     if !x.IsSetPut() {
-        return nil
+        return make(map[string]string)
     }
 
     return x.Put
@@ -11871,8 +11871,8 @@ var _ thrift.Struct = &MyStructField29Patch{}
 func NewMyStructField29Patch() *MyStructField29Patch {
     return (&MyStructField29Patch{}).
         SetClearNonCompat(false).
-        SetPrependNonCompat(nil).
-        SetAppendNonCompat(nil)
+        SetPrependNonCompat(make([]map[string]int32, 0)).
+        SetAppendNonCompat(make([]map[string]int32, 0))
 }
 
 func (x *MyStructField29Patch) GetAssignNonCompat() []map[string]int32 {
@@ -11881,7 +11881,7 @@ func (x *MyStructField29Patch) GetAssignNonCompat() []map[string]int32 {
 
 func (x *MyStructField29Patch) GetAssign() []map[string]int32 {
     if !x.IsSetAssign() {
-        return nil
+        return make([]map[string]int32, 0)
     }
 
     return x.Assign
@@ -11901,7 +11901,7 @@ func (x *MyStructField29Patch) GetPrependNonCompat() []map[string]int32 {
 
 func (x *MyStructField29Patch) GetPrepend() []map[string]int32 {
     if !x.IsSetPrepend() {
-        return nil
+        return make([]map[string]int32, 0)
     }
 
     return x.Prepend
@@ -11913,7 +11913,7 @@ func (x *MyStructField29Patch) GetAppendNonCompat() []map[string]int32 {
 
 func (x *MyStructField29Patch) GetAppend() []map[string]int32 {
     if !x.IsSetAppend() {
-        return nil
+        return make([]map[string]int32, 0)
     }
 
     return x.Append
@@ -12506,11 +12506,11 @@ var _ thrift.Struct = &MyStructField30Patch{}
 func NewMyStructField30Patch() *MyStructField30Patch {
     return (&MyStructField30Patch{}).
         SetClearNonCompat(false).
-        SetPatchPriorNonCompat(nil).
-        SetAddNonCompat(nil).
-        SetPatchNonCompat(nil).
-        SetRemoveNonCompat(nil).
-        SetPutNonCompat(nil)
+        SetPatchPriorNonCompat(make(map[string]*MyStructField30Patch1)).
+        SetAddNonCompat(make(map[string]map[string]int32)).
+        SetPatchNonCompat(make(map[string]*MyStructField30Patch1)).
+        SetRemoveNonCompat(make([]string, 0)).
+        SetPutNonCompat(make(map[string]map[string]int32))
 }
 
 func (x *MyStructField30Patch) GetAssignNonCompat() map[string]map[string]int32 {
@@ -12519,7 +12519,7 @@ func (x *MyStructField30Patch) GetAssignNonCompat() map[string]map[string]int32 
 
 func (x *MyStructField30Patch) GetAssign() map[string]map[string]int32 {
     if !x.IsSetAssign() {
-        return nil
+        return make(map[string]map[string]int32)
     }
 
     return x.Assign
@@ -12539,7 +12539,7 @@ func (x *MyStructField30Patch) GetPatchPriorNonCompat() map[string]*MyStructFiel
 
 func (x *MyStructField30Patch) GetPatchPrior() map[string]*MyStructField30Patch1 {
     if !x.IsSetPatchPrior() {
-        return nil
+        return make(map[string]*MyStructField30Patch1)
     }
 
     return x.PatchPrior
@@ -12551,7 +12551,7 @@ func (x *MyStructField30Patch) GetAddNonCompat() map[string]map[string]int32 {
 
 func (x *MyStructField30Patch) GetAdd() map[string]map[string]int32 {
     if !x.IsSetAdd() {
-        return nil
+        return make(map[string]map[string]int32)
     }
 
     return x.Add
@@ -12563,7 +12563,7 @@ func (x *MyStructField30Patch) GetPatchNonCompat() map[string]*MyStructField30Pa
 
 func (x *MyStructField30Patch) GetPatch() map[string]*MyStructField30Patch1 {
     if !x.IsSetPatch() {
-        return nil
+        return make(map[string]*MyStructField30Patch1)
     }
 
     return x.Patch
@@ -12575,7 +12575,7 @@ func (x *MyStructField30Patch) GetRemoveNonCompat() []string {
 
 func (x *MyStructField30Patch) GetRemove() []string {
     if !x.IsSetRemove() {
-        return nil
+        return make([]string, 0)
     }
 
     return x.Remove
@@ -12587,7 +12587,7 @@ func (x *MyStructField30Patch) GetPutNonCompat() map[string]map[string]int32 {
 
 func (x *MyStructField30Patch) GetPut() map[string]map[string]int32 {
     if !x.IsSetPut() {
-        return nil
+        return make(map[string]map[string]int32)
     }
 
     return x.Put
@@ -13561,11 +13561,11 @@ var _ thrift.Struct = &MyStructField30Patch1{}
 func NewMyStructField30Patch1() *MyStructField30Patch1 {
     return (&MyStructField30Patch1{}).
         SetClearNonCompat(false).
-        SetPatchPriorNonCompat(nil).
-        SetAddNonCompat(nil).
-        SetPatchNonCompat(nil).
-        SetRemoveNonCompat(nil).
-        SetPutNonCompat(nil)
+        SetPatchPriorNonCompat(make(map[string]*patch.I32Patch)).
+        SetAddNonCompat(make(map[string]int32)).
+        SetPatchNonCompat(make(map[string]*patch.I32Patch)).
+        SetRemoveNonCompat(make([]string, 0)).
+        SetPutNonCompat(make(map[string]int32))
 }
 
 func (x *MyStructField30Patch1) GetAssignNonCompat() map[string]int32 {
@@ -13574,7 +13574,7 @@ func (x *MyStructField30Patch1) GetAssignNonCompat() map[string]int32 {
 
 func (x *MyStructField30Patch1) GetAssign() map[string]int32 {
     if !x.IsSetAssign() {
-        return nil
+        return make(map[string]int32)
     }
 
     return x.Assign
@@ -13594,7 +13594,7 @@ func (x *MyStructField30Patch1) GetPatchPriorNonCompat() map[string]*patch.I32Pa
 
 func (x *MyStructField30Patch1) GetPatchPrior() map[string]*patch.I32Patch {
     if !x.IsSetPatchPrior() {
-        return nil
+        return make(map[string]*patch.I32Patch)
     }
 
     return x.PatchPrior
@@ -13606,7 +13606,7 @@ func (x *MyStructField30Patch1) GetAddNonCompat() map[string]int32 {
 
 func (x *MyStructField30Patch1) GetAdd() map[string]int32 {
     if !x.IsSetAdd() {
-        return nil
+        return make(map[string]int32)
     }
 
     return x.Add
@@ -13618,7 +13618,7 @@ func (x *MyStructField30Patch1) GetPatchNonCompat() map[string]*patch.I32Patch {
 
 func (x *MyStructField30Patch1) GetPatch() map[string]*patch.I32Patch {
     if !x.IsSetPatch() {
-        return nil
+        return make(map[string]*patch.I32Patch)
     }
 
     return x.Patch
@@ -13630,7 +13630,7 @@ func (x *MyStructField30Patch1) GetRemoveNonCompat() []string {
 
 func (x *MyStructField30Patch1) GetRemove() []string {
     if !x.IsSetRemove() {
-        return nil
+        return make([]string, 0)
     }
 
     return x.Remove
@@ -13642,7 +13642,7 @@ func (x *MyStructField30Patch1) GetPutNonCompat() map[string]int32 {
 
 func (x *MyStructField30Patch1) GetPut() map[string]int32 {
     if !x.IsSetPut() {
-        return nil
+        return make(map[string]int32)
     }
 
     return x.Put
@@ -17758,7 +17758,7 @@ func (x *MyStructEnsureStruct) GetMapMapNonCompat() map[string]map[string]int32 
 
 func (x *MyStructEnsureStruct) GetMapMap() map[string]map[string]int32 {
     if !x.IsSetMapMap() {
-        return nil
+        return make(map[string]map[string]int32)
     }
 
     return x.MapMap
@@ -17770,7 +17770,7 @@ func (x *MyStructEnsureStruct) GetListMapNonCompat() []map[string]int32 {
 
 func (x *MyStructEnsureStruct) GetListMap() []map[string]int32 {
     if !x.IsSetListMap() {
-        return nil
+        return make([]map[string]int32, 0)
     }
 
     return x.ListMap
@@ -17782,7 +17782,7 @@ func (x *MyStructEnsureStruct) GetOptMapValNonCompat() map[string]string {
 
 func (x *MyStructEnsureStruct) GetOptMapVal() map[string]string {
     if !x.IsSetOptMapVal() {
-        return nil
+        return make(map[string]string)
     }
 
     return x.OptMapVal
@@ -17794,7 +17794,7 @@ func (x *MyStructEnsureStruct) GetOptSetValNonCompat() []string {
 
 func (x *MyStructEnsureStruct) GetOptSetVal() []string {
     if !x.IsSetOptSetVal() {
-        return nil
+        return make([]string, 0)
     }
 
     return x.OptSetVal
@@ -17806,7 +17806,7 @@ func (x *MyStructEnsureStruct) GetOptListValNonCompat() []int16 {
 
 func (x *MyStructEnsureStruct) GetOptListVal() []int16 {
     if !x.IsSetOptListVal() {
-        return nil
+        return make([]int16, 0)
     }
 
     return x.OptListVal
@@ -22391,7 +22391,7 @@ func (x *RecursiveField1Patch) GetAssignNonCompat() map[string]*Recursive {
 
 func (x *RecursiveField1Patch) GetAssign() map[string]*Recursive {
     if !x.IsSetAssign() {
-        return nil
+        return make(map[string]*Recursive)
     }
 
     return x.Assign
@@ -22860,7 +22860,7 @@ func (x *RecursiveEnsureStruct) GetNodesNonCompat() map[string]*Recursive {
 
 func (x *RecursiveEnsureStruct) GetNodes() map[string]*Recursive {
     if !x.IsSetNodes() {
-        return nil
+        return make(map[string]*Recursive)
     }
 
     return x.Nodes

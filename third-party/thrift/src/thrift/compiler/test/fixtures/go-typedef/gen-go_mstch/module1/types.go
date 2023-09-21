@@ -100,7 +100,7 @@ if err != nil {
 type Drivers = []string
 
 func NewDrivers() Drivers {
-    return nil
+    return make([]string, 0)
 }
 
 func WriteDrivers(item Drivers, p thrift.Protocol) error {
@@ -251,8 +251,8 @@ func NewAutomobile() *Automobile {
         SetFirstPlateNonCompat("0000").
         SetYearNonCompat(NewYear()).
         SetDriversNonCompat(NewDrivers()).
-        SetAccessoriesNonCompat(nil).
-        SetPartNamesNonCompat(nil)
+        SetAccessoriesNonCompat(make([]*Accessory, 0)).
+        SetPartNamesNonCompat(make(map[int32]*CarPartName))
 }
 
 func (x *Automobile) GetPlateNonCompat() Plate {
@@ -313,7 +313,7 @@ func (x *Automobile) GetAccessoriesNonCompat() []*Accessory {
 
 func (x *Automobile) GetAccessories() []*Accessory {
     if !x.IsSetAccessories() {
-        return nil
+        return make([]*Accessory, 0)
     }
 
     return x.Accessories
@@ -325,7 +325,7 @@ func (x *Automobile) GetPartNamesNonCompat() map[int32]*CarPartName {
 
 func (x *Automobile) GetPartNames() map[int32]*CarPartName {
     if !x.IsSetPartNames() {
-        return nil
+        return make(map[int32]*CarPartName)
     }
 
     return x.PartNames
@@ -1209,7 +1209,7 @@ var _ thrift.Struct = &MapContainer{}
 
 func NewMapContainer() *MapContainer {
     return (&MapContainer{}).
-        SetMapvalNonCompat(nil)
+        SetMapvalNonCompat(make(map[MapKey]string))
 }
 
 func (x *MapContainer) GetMapvalNonCompat() map[MapKey]string {
@@ -1218,7 +1218,7 @@ func (x *MapContainer) GetMapvalNonCompat() map[MapKey]string {
 
 func (x *MapContainer) GetMapval() map[MapKey]string {
     if !x.IsSetMapval() {
-        return nil
+        return make(map[MapKey]string)
     }
 
     return x.Mapval
@@ -1706,8 +1706,8 @@ var _ thrift.Struct = &Collection{}
 
 func NewCollection() *Collection {
     return (&Collection{}).
-        SetAutomobilesNonCompat(nil).
-        SetCarsNonCompat(nil)
+        SetAutomobilesNonCompat(make([]*Automobile, 0)).
+        SetCarsNonCompat(make([]*Car, 0))
 }
 
 func (x *Collection) GetAutomobilesNonCompat() []*Automobile {
@@ -1716,7 +1716,7 @@ func (x *Collection) GetAutomobilesNonCompat() []*Automobile {
 
 func (x *Collection) GetAutomobiles() []*Automobile {
     if !x.IsSetAutomobiles() {
-        return nil
+        return make([]*Automobile, 0)
     }
 
     return x.Automobiles
@@ -1728,7 +1728,7 @@ func (x *Collection) GetCarsNonCompat() []*Car {
 
 func (x *Collection) GetCars() []*Car {
     if !x.IsSetCars() {
-        return nil
+        return make([]*Car, 0)
     }
 
     return x.Cars

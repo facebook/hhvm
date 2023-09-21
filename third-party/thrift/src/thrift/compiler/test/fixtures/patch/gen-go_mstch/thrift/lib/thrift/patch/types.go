@@ -51,7 +51,7 @@ if err != nil {
 type FieldIdList = []int16
 
 func NewFieldIdList() FieldIdList {
-    return nil
+    return make([]int16, 0)
 }
 
 func WriteFieldIdList(item FieldIdList, p thrift.Protocol) error {

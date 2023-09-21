@@ -1033,7 +1033,7 @@ var _ thrift.Struct = &UnionEnumAttributes{}
 
 func NewUnionEnumAttributes() *UnionEnumAttributes {
     return (&UnionEnumAttributes{}).
-        SetAttributesNonCompat(nil)
+        SetAttributesNonCompat(make([]string, 0))
 }
 
 func (x *UnionEnumAttributes) GetAttributesNonCompat() []string {
@@ -1042,7 +1042,7 @@ func (x *UnionEnumAttributes) GetAttributesNonCompat() []string {
 
 func (x *UnionEnumAttributes) GetAttributes() []string {
     if !x.IsSetAttributes() {
-        return nil
+        return make([]string, 0)
     }
 
     return x.Attributes
@@ -1392,7 +1392,7 @@ var _ thrift.Struct = &Attributes{}
 
 func NewAttributes() *Attributes {
     return (&Attributes{}).
-        SetAttributesNonCompat(nil)
+        SetAttributesNonCompat(make([]string, 0))
 }
 
 func (x *Attributes) GetAttributesNonCompat() []string {
@@ -1401,7 +1401,7 @@ func (x *Attributes) GetAttributesNonCompat() []string {
 
 func (x *Attributes) GetAttributes() []string {
     if !x.IsSetAttributes() {
-        return nil
+        return make([]string, 0)
     }
 
     return x.Attributes

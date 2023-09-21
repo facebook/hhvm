@@ -1090,7 +1090,7 @@ func (x *Person) GetFriendsNonCompat() []PersonID {
 
 func (x *Person) GetFriends() []PersonID {
     if !x.IsSetFriends() {
-        return nil
+        return make([]PersonID, 0)
     }
 
     return x.Friends
@@ -1114,7 +1114,7 @@ func (x *Person) GetPetNamesNonCompat() map[Animal]string {
 
 func (x *Person) GetPetNames() map[Animal]string {
     if !x.IsSetPetNames() {
-        return nil
+        return make(map[Animal]string)
     }
 
     return x.PetNames
@@ -1138,7 +1138,7 @@ func (x *Person) GetVehiclesNonCompat() []*Vehicle {
 
 func (x *Person) GetVehicles() []*Vehicle {
     if !x.IsSetVehicles() {
-        return nil
+        return make([]*Vehicle, 0)
     }
 
     return x.Vehicles

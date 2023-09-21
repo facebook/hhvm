@@ -135,7 +135,7 @@ class t_program : public t_named {
 
   const std::vector<t_exception*>& exceptions() const { return exceptions_; }
 
-  const std::vector<t_struct*>& structured_definitions() const {
+  const std::vector<t_structured*>& structured_definitions() const {
     return structured_definitions_;
   }
   const std::vector<t_service*>& services() const { return services_; }
@@ -302,8 +302,7 @@ class t_program : public t_named {
   std::vector<t_exception*> exceptions_;
 
   // t_structs + t_unions + t_exceptions
-  // TODO(aristidis): (2023-09-13): Hold t_structured instead of t_struct
-  std::vector<t_struct*> structured_definitions_;
+  std::vector<t_structured*> structured_definitions_;
 
   std::vector<t_service*> services_;
   std::vector<t_include*> includes_;

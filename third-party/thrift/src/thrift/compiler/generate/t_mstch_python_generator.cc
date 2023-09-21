@@ -286,7 +286,7 @@ class python_mstch_program : public mstch_program {
   }
 
   void visit_types_for_objects() {
-    for (const t_struct* object : program_->structured_definitions()) {
+    for (const t_structured* object : program_->structured_definitions()) {
       for (auto&& field : object->fields()) {
         visit_type(field.get_type());
       }

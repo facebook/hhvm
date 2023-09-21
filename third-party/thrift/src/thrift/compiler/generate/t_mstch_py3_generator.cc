@@ -323,7 +323,7 @@ class py3_mstch_program : public mstch_program {
   }
 
   void visit_types_for_objects() {
-    for (t_struct* object : program_->structured_definitions()) {
+    for (t_structured* object : program_->structured_definitions()) {
       if (is_hidden(*object)) {
         continue;
       }
@@ -391,7 +391,7 @@ class py3_mstch_program : public mstch_program {
       uniqueFunctionsByReturnType_;
   std::map<std::string, const t_type*> streamTypes_;
   std::map<std::string, const t_type*> streamExceptions_;
-  std::vector<const t_struct*> objects_;
+  std::vector<const t_structured*> objects_;
   std::vector<const t_typedef*> typedefs_;
 
   // Functions with a stream and an initial response.

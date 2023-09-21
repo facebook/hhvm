@@ -44,7 +44,7 @@ void strip_cpp_comments_and_newlines(std::string& s);
  * return all types used in the struct, including types container elements,
  * but not including fields of nested structs
  */
-std::unordered_set<const t_type*> collect_types(const t_struct* strct);
+std::unordered_set<const t_type*> collect_types(const t_structured* strct);
 
 /**
  * Return whether to generate legacy apis

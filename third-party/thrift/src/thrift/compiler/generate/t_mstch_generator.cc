@@ -76,7 +76,7 @@ mstch::map t_mstch_generator::dump(const t_program& program) {
   return prepend_prefix("program", std::move(extension));
 }
 
-mstch::map t_mstch_generator::dump(const t_struct& strct, bool shallow) {
+mstch::map t_mstch_generator::dump(const t_structured& strct, bool shallow) {
   mstch::map result{
       {"name", strct.get_name()},
       {"fields?", strct.has_fields()},
@@ -355,7 +355,7 @@ mstch::map t_mstch_generator::extend_program(const t_program&) {
   return {};
 }
 
-mstch::map t_mstch_generator::extend_struct(const t_struct&) {
+mstch::map t_mstch_generator::extend_struct(const t_structured&) {
   return {};
 }
 

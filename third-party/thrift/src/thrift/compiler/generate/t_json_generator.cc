@@ -59,9 +59,9 @@ class t_json_generator : public t_concat_generator {
   void generate_enum(const t_enum* tenum) override;
   void generate_const(const t_const* tconst) override;
   void generate_consts(vector<t_const*> consts) override;
-  void generate_struct(const t_struct* tstruct) override;
+  void generate_struct(const t_structured* tstruct) override;
   void generate_service(const t_service* tservice) override;
-  void generate_xception(const t_struct* txception) override;
+  void generate_xception(const t_structured* txception) override;
 
   void print_type(const t_type* ttype);
   void print_name(const string& name);
@@ -626,7 +626,7 @@ void t_json_generator::generate_const(const t_const* tconst) {
  *
  * @param tstruct The struct definition
  */
-void t_json_generator::generate_struct(const t_struct* tstruct) {
+void t_json_generator::generate_struct(const t_structured* tstruct) {
   const string& name = tstruct->get_name();
   indent(f_out_) << "\"" << name << "\" : {" << endl;
   indent_up();
@@ -681,7 +681,7 @@ void t_json_generator::generate_struct(const t_struct* tstruct) {
  *
  * @param exception The struct definition
  */
-void t_json_generator::generate_xception(const t_struct* exception) {
+void t_json_generator::generate_xception(const t_structured* exception) {
   generate_struct(exception);
 }
 

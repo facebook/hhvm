@@ -82,8 +82,8 @@ class t_cocoa_generator : public t_concat_generator {
   void generate_typedef(const t_typedef* ttypedef) override;
   void generate_enum(const t_enum* tenum) override;
   void generate_enum_from_string_function(const t_enum* tenum);
-  void generate_struct(const t_struct* tstruct) override;
-  void generate_xception(const t_struct* txception) override;
+  void generate_struct(const t_structured* tstruct) override;
+  void generate_xception(const t_structured* txception) override;
   void generate_service(const t_service* tservice) override;
 
   void print_const_value(
@@ -101,46 +101,48 @@ class t_cocoa_generator : public t_concat_generator {
 
   void generate_cocoa_struct(const t_struct* tstruct, bool is_exception);
   void generate_cocoa_struct_interface(
-      std::ofstream& out, const t_struct* tstruct, bool is_exception = false);
+      std::ofstream& out,
+      const t_structured* tstruct,
+      bool is_exception = false);
   void generate_cocoa_struct_implementation(
       std::ofstream& out,
-      const t_struct* tstruct,
+      const t_structured* tstruct,
       bool is_exception = false,
       bool is_result = false);
   void generate_cocoa_struct_initializer_signature(
-      std::ofstream& out, const t_struct* tstruct);
+      std::ofstream& out, const t_structured* tstruct);
   void generate_cocoa_struct_init_with_coder_method(
-      std::ofstream& out, const t_struct* tstruct, bool is_exception);
+      std::ofstream& out, const t_structured* tstruct, bool is_exception);
   void generate_cocoa_struct_encode_with_coder_method(
-      std::ofstream& out, const t_struct* tstruct, bool is_exception);
+      std::ofstream& out, const t_structured* tstruct, bool is_exception);
   void generate_cocoa_struct_hash_method(std::ofstream& out);
   void generate_cocoa_struct_is_equal_method(
-      std::ofstream& out, const t_struct* tstruct, bool is_exception);
+      std::ofstream& out, const t_structured* tstruct, bool is_exception);
   void generate_cocoa_struct_field_accessor_declarations(
       std::ofstream& out,
-      const t_struct* tstruct,
+      const t_structured* tstruct,
       bool is_declare_getter,
       bool is_declare_setter,
       bool is_declare_isset_getter,
       bool is_exception);
   void generate_cocoa_struct_field_accessor_implementations(
-      std::ofstream& out, const t_struct* tstruct, bool is_exception);
+      std::ofstream& out, const t_structured* tstruct, bool is_exception);
   void generate_cocoa_struct_reader(
-      std::ofstream& out, const t_struct* tstruct);
+      std::ofstream& out, const t_structured* tstruct);
   void generate_cocoa_struct_result_writer(
-      std::ofstream& out, const t_struct* tstruct);
+      std::ofstream& out, const t_structured* tstruct);
   void generate_cocoa_struct_writer(
-      std::ofstream& out, const t_struct* tstruct);
+      std::ofstream& out, const t_structured* tstruct);
   void generate_cocoa_struct_validator(
-      std::ofstream& out, const t_struct* tstruct);
+      std::ofstream& out, const t_structured* tstruct);
   void generate_cocoa_struct_description(
-      std::ofstream& out, const t_struct* tstruct);
+      std::ofstream& out, const t_structured* tstruct);
   void generate_cocoa_struct_toDict(
-      std::ofstream& out, const t_struct* tstruct);
+      std::ofstream& out, const t_structured* tstruct);
   void generate_cocoa_struct_makeImmutable(
-      std::ofstream& out, const t_struct* tstruct);
+      std::ofstream& out, const t_structured* tstruct);
   void generate_cocoa_struct_mutableCopyWithZone(
-      std::ofstream& out, const t_struct* tstruct);
+      std::ofstream& out, const t_structured* tstruct);
 
   std::string function_result_helper_struct_type(const t_function* tfunction);
   std::string function_args_helper_struct_type(const t_function* tfunction);
@@ -174,9 +176,7 @@ class t_cocoa_generator : public t_concat_generator {
       std::ofstream& out, const t_field* tfield, const std::string& fieldName);
 
   void generate_deserialize_struct(
-      std::ofstream& out,
-      const t_struct* tstruct,
-      const std::string& fieldName);
+      std::ofstream& out, const t_type* tstruct, const std::string& fieldName);
 
   void generate_deserialize_container(
       std::ofstream& out, const t_type* ttype, const std::string& fieldName);
@@ -591,7 +591,7 @@ void t_cocoa_generator::generate_consts(std::vector<t_const*> consts) {
  *
  * @param tstruct The struct definition
  */
-void t_cocoa_generator::generate_struct(const t_struct* tstruct) {
+void t_cocoa_generator::generate_struct(const t_structured* tstruct) {
   generate_cocoa_struct_interface(f_header_, tstruct, false);
   generate_cocoa_struct_implementation(f_impl_, tstruct, false);
 }
@@ -601,7 +601,7 @@ void t_cocoa_generator::generate_struct(const t_struct* tstruct) {
  *
  * @param tstruct The struct definition
  */
-void t_cocoa_generator::generate_xception(const t_struct* txception) {
+void t_cocoa_generator::generate_xception(const t_structured* txception) {
   generate_cocoa_struct_interface(f_header_, txception, true);
   generate_cocoa_struct_implementation(f_impl_, txception, true);
 }
@@ -612,7 +612,7 @@ void t_cocoa_generator::generate_xception(const t_struct* txception) {
  * @param tstruct The struct definition
  */
 void t_cocoa_generator::generate_cocoa_struct_interface(
-    std::ofstream& out, const t_struct* tstruct, bool is_exception) {
+    std::ofstream& out, const t_structured* tstruct, bool is_exception) {
   out << "@interface " << cocoa_prefix_ << tstruct->name() << " : ";
 
   if (is_exception) {
@@ -688,7 +688,7 @@ void t_cocoa_generator::generate_cocoa_struct_interface(
  * each field.
  */
 void t_cocoa_generator::generate_cocoa_struct_initializer_signature(
-    std::ofstream& out, const t_struct* tstruct) {
+    std::ofstream& out, const t_structured* tstruct) {
   indent(out) << "- (id) initWith";
   bool first = true;
   for (const auto& field : tstruct->fields()) {
@@ -714,7 +714,7 @@ void t_cocoa_generator::generate_cocoa_struct_initializer_signature(
  */
 void t_cocoa_generator::generate_cocoa_struct_field_accessor_declarations(
     std::ofstream& out,
-    const t_struct* tstruct,
+    const t_structured* tstruct,
     bool is_declare_getter,
     bool is_declare_setter,
     bool is_declare_isset_getter,
@@ -746,7 +746,7 @@ void t_cocoa_generator::generate_cocoa_struct_field_accessor_declarations(
  * the NSCoding protocol
  */
 void t_cocoa_generator::generate_cocoa_struct_init_with_coder_method(
-    std::ofstream& out, const t_struct* tstruct, bool is_exception) {
+    std::ofstream& out, const t_structured* tstruct, bool is_exception) {
   indent(out) << "- (id) initWithCoder: (NSCoder *) decoder" << std::endl;
   scope_up(out);
   if (is_exception) {
@@ -816,7 +816,7 @@ void t_cocoa_generator::generate_cocoa_struct_init_with_coder_method(
  * the NSCoding protocol
  */
 void t_cocoa_generator::generate_cocoa_struct_encode_with_coder_method(
-    std::ofstream& out, const t_struct* tstruct, bool is_exception) {
+    std::ofstream& out, const t_structured* tstruct, bool is_exception) {
   indent(out) << "- (void) encodeWithCoder: (NSCoder *) encoder" << std::endl;
   scope_up(out);
   if (is_exception) {
@@ -898,7 +898,7 @@ void t_cocoa_generator::generate_cocoa_struct_hash_method(std::ofstream& out) {
  * Generate the isEqual method for this struct
  */
 void t_cocoa_generator::generate_cocoa_struct_is_equal_method(
-    std::ofstream& out, const t_struct* tstruct, bool is_exception) {
+    std::ofstream& out, const t_structured* tstruct, bool is_exception) {
   indent(out) << "- (BOOL) isEqual: (id) anObject" << std::endl;
   scope_up(out);
 
@@ -940,7 +940,7 @@ void t_cocoa_generator::generate_cocoa_struct_is_equal_method(
  */
 void t_cocoa_generator::generate_cocoa_struct_implementation(
     std::ofstream& out,
-    const t_struct* tstruct,
+    const t_structured* tstruct,
     bool is_exception,
     bool is_result) {
   indent(out) << "@implementation " << cocoa_prefix_ << tstruct->name()
@@ -1070,7 +1070,7 @@ void t_cocoa_generator::generate_cocoa_struct_implementation(
  * @param tstruct The struct definition
  */
 void t_cocoa_generator::generate_cocoa_struct_reader(
-    std::ofstream& out, const t_struct* tstruct) {
+    std::ofstream& out, const t_structured* tstruct) {
   out << "- (void) read: (id <TProtocol>) inProtocol" << std::endl;
   scope_up(out);
 
@@ -1176,7 +1176,7 @@ void t_cocoa_generator::generate_cocoa_struct_reader(
  * @param tstruct The struct definition
  */
 void t_cocoa_generator::generate_cocoa_struct_writer(
-    std::ofstream& out, const t_struct* tstruct) {
+    std::ofstream& out, const t_structured* tstruct) {
   out << indent() << "- (void) write: (id <TProtocol>) outProtocol {"
       << std::endl;
   indent_up();
@@ -1227,7 +1227,7 @@ void t_cocoa_generator::generate_cocoa_struct_writer(
  * @param tstruct The struct definition
  */
 void t_cocoa_generator::generate_cocoa_struct_result_writer(
-    std::ofstream& out, const t_struct* tstruct) {
+    std::ofstream& out, const t_structured* tstruct) {
   out << indent() << "- (void) write: (id <TProtocol>) outProtocol {"
       << std::endl;
   indent_up();
@@ -1291,7 +1291,7 @@ void t_cocoa_generator::generate_cocoa_struct_result_writer(
  * @param tstruct The struct definition
  */
 void t_cocoa_generator::generate_cocoa_struct_validator(
-    std::ofstream& out, const t_struct* tstruct) {
+    std::ofstream& out, const t_structured* tstruct) {
   out << indent() << "- (void) validate {" << std::endl;
   indent_up();
 
@@ -1322,7 +1322,7 @@ void t_cocoa_generator::generate_cocoa_struct_validator(
  * @param tstruct The struct definition
  */
 void t_cocoa_generator::generate_cocoa_struct_field_accessor_implementations(
-    std::ofstream& out, const t_struct* tstruct, bool is_exception) {
+    std::ofstream& out, const t_structured* tstruct, bool is_exception) {
   (void)is_exception;
   for (const auto& field : tstruct->fields()) {
     const t_type* type = field.type()->get_true_type();
@@ -1394,7 +1394,7 @@ void t_cocoa_generator::generate_cocoa_struct_field_accessor_implementations(
  * @param tstruct The struct definition
  */
 void t_cocoa_generator::generate_cocoa_struct_description(
-    std::ofstream& out, const t_struct* /*tstruct*/) {
+    std::ofstream& out, const t_structured* /*tstruct*/) {
   out << indent() << "- (NSString *) description {" << std::endl;
   indent_up();
   indent(out) << "return [[self toDict] description];" << std::endl;
@@ -1406,7 +1406,7 @@ void t_cocoa_generator::generate_cocoa_struct_description(
  * Recursively call [makeImmutable] on all the fields
  */
 void t_cocoa_generator::generate_cocoa_struct_makeImmutable(
-    std::ofstream& out, const t_struct* tstruct) {
+    std::ofstream& out, const t_structured* tstruct) {
   out << indent() << "- (BOOL) makeImmutable {" << std::endl;
   indent_up();
   out << indent() << "const BOOL wasImmutable = [self isImmutable];"
@@ -1488,7 +1488,7 @@ void t_cocoa_generator::generate_cocoa_struct_makeImmutable(
  *
  */
 void t_cocoa_generator::generate_cocoa_struct_toDict(
-    std::ofstream& out, const t_struct* tstruct) {
+    std::ofstream& out, const t_structured* tstruct) {
   out << indent() << "- (NSDictionary *) toDict {" << std::endl;
   indent_up();
 
@@ -1580,7 +1580,7 @@ void t_cocoa_generator::generate_cocoa_struct_toDict(
  *
  */
 void t_cocoa_generator::generate_cocoa_struct_mutableCopyWithZone(
-    std::ofstream& out, const t_struct* tstruct) {
+    std::ofstream& out, const t_structured* tstruct) {
   out << indent() << "- (id) mutableCopyWithZone:(NSZone *)zone {" << std::endl;
   indent_up();
   out << indent() << cocoa_prefix_ << tstruct->name()
@@ -2187,7 +2187,7 @@ void t_cocoa_generator::generate_deserialize_field(
   }
 
   if (type->is_struct() || type->is_exception()) {
-    generate_deserialize_struct(out, (t_struct*)type, fieldName);
+    generate_deserialize_struct(out, type, fieldName);
   } else if (type->is_container()) {
     generate_deserialize_container(out, type, fieldName);
   } else if (type->is_base_type() || type->is_enum()) {
@@ -2246,7 +2246,7 @@ void t_cocoa_generator::generate_deserialize_field(
  * read:
  */
 void t_cocoa_generator::generate_deserialize_struct(
-    std::ofstream& out, const t_struct* tstruct, const std::string& fieldName) {
+    std::ofstream& out, const t_type* tstruct, const std::string& fieldName) {
   indent(out) << type_name(tstruct) << fieldName << " = [["
               << type_name(tstruct, true) << " alloc] init];" << std::endl;
   indent(out) << "[" << fieldName << " read: inProtocol];" << std::endl;

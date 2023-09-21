@@ -286,7 +286,7 @@ class cpp_mstch_program : public mstch_program {
       mstch_context& ctx,
       mstch_element_position pos,
       boost::optional<int32_t> split_id = boost::none,
-      boost::optional<std::vector<t_struct*>> split_structs = boost::none)
+      boost::optional<std::vector<t_structured*>> split_structs = boost::none)
       : mstch_program(program, ctx, pos),
         split_id_(split_id),
         split_structs_(split_structs) {
@@ -356,7 +356,7 @@ class cpp_mstch_program : public mstch_program {
   }
   std::vector<std::string> get_fatal_union_names() {
     std::vector<std::string> result;
-    for (const t_struct* obj : program_->structured_definitions()) {
+    for (const t_structured* obj : program_->structured_definitions()) {
       if (obj->is_union()) {
         result.push_back(get_fatal_string_short_id(obj));
       }
@@ -365,7 +365,7 @@ class cpp_mstch_program : public mstch_program {
   }
   std::vector<std::string> get_fatal_struct_names() {
     std::vector<std::string> result;
-    for (const t_struct* obj : program_->structured_definitions()) {
+    for (const t_structured* obj : program_->structured_definitions()) {
       if (!obj->is_union() &&
           !gen::cpp::type_resolver::find_first_adapter(*obj)) {
         result.push_back(get_fatal_string_short_id(obj));
@@ -501,7 +501,7 @@ class cpp_mstch_program : public mstch_program {
       }
     }
     // structs, unions and exceptions
-    for (const t_struct* obj : program_->structured_definitions()) {
+    for (const t_structured* obj : program_->structured_definitions()) {
       if (obj->is_union()) {
         // When generating <program_name>_fatal_union.h, we will generate
         // <union_name>_Type_enum_traits
@@ -545,7 +545,7 @@ class cpp_mstch_program : public mstch_program {
   mstch::node fatal_data_member() {
     std::unordered_set<std::string> fields;
     std::vector<const std::string*> ordered_fields;
-    for (const t_struct* s : program_->structured_definitions()) {
+    for (const t_structured* s : program_->structured_definitions()) {
       if (s->is_union()) {
         continue;
       }
@@ -637,7 +637,7 @@ class cpp_mstch_program : public mstch_program {
 
  private:
   const boost::optional<int32_t> split_id_;
-  const boost::optional<std::vector<t_struct*>> split_structs_;
+  const boost::optional<std::vector<t_structured*>> split_structs_;
   boost::optional<std::vector<t_enum*>> split_enums_;
 };
 

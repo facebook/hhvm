@@ -92,7 +92,7 @@ void visit_type(const t_type* type, F&& visitor) {
 
 } // namespace
 
-std::unordered_set<const t_type*> collect_types(const t_struct* strct) {
+std::unordered_set<const t_type*> collect_types(const t_structured* strct) {
   std::unordered_set<const t_type*> types;
   for (const auto& field : strct->fields()) {
     visit_type(&field.type().deref(), [&](const t_type* type) {

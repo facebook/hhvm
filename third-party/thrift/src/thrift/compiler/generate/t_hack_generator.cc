@@ -144,8 +144,8 @@ class t_hack_generator : public t_concat_generator {
   void generate_typedef(const t_typedef* ttypedef) override;
   void generate_enum(const t_enum* tenum) override;
   void generate_const(const t_const* tconst) override;
-  void generate_struct(const t_struct* tstruct) override;
-  void generate_xception(const t_struct* txception) override;
+  void generate_struct(const t_structured* tstruct) override;
+  void generate_xception(const t_structured* txception) override;
   void generate_service(const t_service* tservice) override;
 
   std::string render_const_value(
@@ -191,7 +191,7 @@ class t_hack_generator : public t_concat_generator {
   std::unique_ptr<t_const_value> service_to_tmeta(const t_service* service);
   std::unique_ptr<t_const_value> enum_to_tmeta(const t_enum* tenum);
   std::unique_ptr<t_const_value> struct_to_tmeta(
-      const t_struct* tstruct, bool is_exception);
+      const t_structured* tstruct, bool is_exception);
 
   void append_to_t_enum(
       t_enum* tenum, t_program* program, ThriftPrimitiveType value);
@@ -235,21 +235,21 @@ class t_hack_generator : public t_concat_generator {
     EMPTY,
   };
 
-  bool is_async_struct(const t_struct* tstruct);
+  bool is_async_struct(const t_structured* tstruct);
 
   // Only use this to determine if struct uses IThriftShapishAsyncStruct
-  bool is_async_shapish_struct(const t_struct* tstruct);
+  bool is_async_shapish_struct(const t_structured* tstruct);
   bool is_async_type(const t_type* type, bool check_nested_structs);
   bool is_async_field(const t_field& field, bool check_nested_structs);
 
   void generate_php_struct_definition(
       std::ofstream& out,
-      const t_struct* tstruct,
+      const t_structured* tstruct,
       ThriftStructType type = ThriftStructType::STRUCT,
       const std::string& name = "");
   void _generate_php_struct_definition(
       std::ofstream& out,
-      const t_struct* tstruct,
+      const t_structured* tstruct,
       ThriftStructType type,
       const std::string& name);
   void generate_php_function_result_helpers(
@@ -275,14 +275,14 @@ class t_hack_generator : public t_concat_generator {
       const t_function* tfunction);
 
   void generate_php_union_enum(
-      std::ofstream& out, const t_struct* tstruct, const std::string& name);
+      std::ofstream& out, const t_structured* tstruct, const std::string& name);
   void generate_php_union_methods(
       std::ofstream& out,
-      const t_struct* tstruct,
+      const t_structured* tstruct,
       const std::string& struct_hack_name_with_ns);
   void generate_php_struct_fields(
       std::ofstream& out,
-      const t_struct* tstruct,
+      const t_structured* tstruct,
       const std::string& struct_hack_name_with_ns,
       ThriftStructType type = ThriftStructType::STRUCT);
 
@@ -296,7 +296,7 @@ class t_hack_generator : public t_concat_generator {
       const std::string& struct_class_name);
   void generate_php_struct_methods(
       std::ofstream& out,
-      const t_struct* tstruct,
+      const t_structured* tstruct,
       ThriftStructType type,
       const std::string& struct_hack_name,
       bool is_async_struct,
@@ -304,36 +304,36 @@ class t_hack_generator : public t_concat_generator {
       const std::string& struct_hack_name_with_ns);
   void generate_php_struct_constructor(
       std::ofstream& out,
-      const t_struct* tstruct,
+      const t_structured* tstruct,
       ThriftStructType type,
       const std::string& struct_hack_name_with_ns);
   void generate_php_struct_default_constructor(
       std::ofstream& out,
-      const t_struct* tstruct,
+      const t_structured* tstruct,
       ThriftStructType type,
       const std::string& struct_hack_name_with_ns);
   void generate_php_struct_withDefaultValues_method(std::ofstream& out);
 
   void generate_php_struct_clear_terse_fields(
       std::ofstream& out,
-      const t_struct* tstruct,
+      const t_structured* tstruct,
       ThriftStructType type,
       const std::string& struct_hack_name_with_ns);
   void generate_php_struct_constructor_field_assignment(
       std::ofstream& out,
       const t_field& field,
-      const t_struct* tstruct,
+      const t_structured* tstruct,
       ThriftStructType type,
       const std::string& name = "",
       bool is_default_assignment = false,
       bool skip_custom_default = false);
   void generate_php_struct_metadata_method(
-      std::ofstream& out, const t_struct* tstruct);
+      std::ofstream& out, const t_structured* tstruct);
   void generate_php_struct_structured_annotations_method(
-      std::ofstream& out, const t_struct* tstruct);
+      std::ofstream& out, const t_structured* tstruct);
   void generate_php_struct_shape_spec(
       std::ofstream& out,
-      const t_struct* tstruct,
+      const t_structured* tstruct,
       bool is_constructor_shape = false);
   void generate_php_struct_shape_collection_value_lambda(
       std::ostream& out, t_name_generator& namer, const t_type* t);
@@ -350,12 +350,12 @@ class t_hack_generator : public t_concat_generator {
   void generate_shape_from_hack_array_lambda(
       std::ostream& out, t_name_generator& namer, const t_type* t);
   void generate_php_struct_from_shape(
-      std::ofstream& out, const t_struct* tstruct);
+      std::ofstream& out, const t_structured* tstruct);
   void generate_php_struct_from_map(
-      std::ofstream& out, const t_struct* tstruct);
+      std::ofstream& out, const t_structured* tstruct);
   void generate_php_struct_async_struct_creation_method(
       std::ofstream& out,
-      const t_struct* tstruct,
+      const t_structured* tstruct,
       const std::string& struct_hack_name_with_ns,
       ThriftAsyncStructCreationMethod method_type);
   void generate_php_struct_async_struct_creation_method_header(
@@ -364,7 +364,7 @@ class t_hack_generator : public t_concat_generator {
       std::ofstream& out);
   void generate_php_struct_async_struct_creation_method_field_assignment(
       std::ofstream& out,
-      const t_struct* tstruct,
+      const t_structured* tstruct,
       const t_field& tfield,
       const std::string& field_ref,
       const std::string& struct_hack_name_with_ns,
@@ -381,14 +381,14 @@ class t_hack_generator : public t_concat_generator {
       bool uses_thrift_only_methods = false);
 
   bool type_has_nested_struct(const t_type* t);
-  bool field_is_nullable(const t_struct* tstruct, const t_field* field);
+  bool field_is_nullable(const t_structured* tstruct, const t_field* field);
   void generate_php_struct_shape_methods(
-      std::ofstream& out, const t_struct* tstruct);
+      std::ofstream& out, const t_structured* tstruct);
   void generate_php_struct_stringifyMapKeys_method(std::ofstream& out);
 
   void generate_php_struct_async_shape_methods(
       std::ofstream& out,
-      const t_struct* tstruct,
+      const t_structured* tstruct,
       const std::string& struct_hack_name_with_ns);
   bool generate_php_struct_async_toShape_method_helper(
       std::ostream& out,
@@ -399,7 +399,7 @@ class t_hack_generator : public t_concat_generator {
   void generate_hack_attributes(
       std::ofstream& out, const t_named* type, bool include_user_defined);
   void generate_adapter_type_checks(
-      std::ofstream& out, const t_struct* tstruct);
+      std::ofstream& out, const t_structured* tstruct);
 
   void generate_php_type_spec(
       std::ofstream& out, const t_type* t, uint32_t depth);
@@ -408,13 +408,14 @@ class t_hack_generator : public t_concat_generator {
       const std::string& field_name,
       const t_type* t,
       uint32_t depth);
-  void generate_php_struct_spec(std::ofstream& out, const t_struct* tstruct);
+  void generate_php_struct_spec(
+      std::ofstream& out, const t_structured* tstruct);
   void generate_php_struct_struct_trait(
       std::ofstream& out,
-      const t_struct* tstruct,
+      const t_structured* tstruct,
       const std::string& struct_hack_ref);
   void generate_php_structural_id(
-      std::ofstream& out, const t_struct* tstruct, bool asFunction);
+      std::ofstream& out, const t_structured* tstruct, bool asFunction);
   bool is_valid_hack_type(const t_type* type);
   bool skip_codegen(const t_field* tfield);
   bool skip_codegen(const t_function* tfunction);
@@ -533,11 +534,12 @@ class t_hack_generator : public t_concat_generator {
       const std::string& value,
       const std::string& prefix_thrift);
 
-  void generate_json_reader(std::ofstream& out, const t_struct* tstruct);
+  void generate_json_reader(std::ofstream& out, const t_structured* tstruct);
 
   void generate_instance_key(std::ofstream& out);
 
-  void generate_exception_method(std::ofstream& out, const t_struct* tstruct);
+  void generate_exception_method(
+      std::ofstream& out, const t_structured* tstruct);
 
   /**
    * Helper rendering functions
@@ -625,7 +627,9 @@ class t_hack_generator : public t_concat_generator {
   }
 
   std::string union_field_to_enum(
-      const t_struct* tstruct, const t_field* tfield, const std::string& name) {
+      const t_structured* tstruct,
+      const t_field* tfield,
+      const std::string& name) {
     // If null is passed,  it refer to empty;
     if (tfield) {
       return union_enum_name(name, tstruct->program()) + "::" + tfield->name();
@@ -764,7 +768,7 @@ class t_hack_generator : public t_concat_generator {
     return default_name;
   }
 
-  const std::string find_union_enum_attributes(const t_struct& tstruct) {
+  const std::string find_union_enum_attributes(const t_structured& tstruct) {
     if (const auto annotation = tstruct.find_structured_annotation_or_null(
             kHackUnionEnumAttributesUri)) {
       for (const auto& item : annotation->value()->get_map()) {
@@ -813,7 +817,7 @@ class t_hack_generator : public t_concat_generator {
   }
 
   std::pair<bool, const std::string> find_hack_struct_trait(
-      const t_struct* tstruct) const {
+      const t_structured* tstruct) const {
     if (const auto annotation =
             tstruct->find_structured_annotation_or_null(kHackStructTraitUri)) {
       for (const auto& item : annotation->value()->get_map()) {
@@ -826,7 +830,7 @@ class t_hack_generator : public t_concat_generator {
     return std::make_pair(false, "");
   }
 
-  bool has_hack_struct_as_trait(const t_struct* tstruct) const {
+  bool has_hack_struct_as_trait(const t_structured* tstruct) const {
     const auto annotation =
         tstruct->find_structured_annotation_or_null(kHackStructAsTraitUri);
     return annotation != nullptr;
@@ -837,7 +841,7 @@ class t_hack_generator : public t_concat_generator {
         nullptr;
   }
 
-  std::string find_exception_message(const t_struct* tstruct) {
+  std::string find_exception_message(const t_structured* tstruct) {
     const auto& value = tstruct->get_annotation("message");
     if (value != "") {
       return value;
@@ -958,7 +962,9 @@ class t_hack_generator : public t_concat_generator {
   void generate_php_docstring(std::ofstream& out, const t_function* tfunction);
   void generate_php_docstring(std::ofstream& out, const t_field* tfield);
   void generate_php_docstring(
-      std::ofstream& out, const t_struct* tstruct, bool is_exception = false);
+      std::ofstream& out,
+      const t_structured* tstruct,
+      bool is_exception = false);
   void generate_php_docstring_args(
       std::ofstream& out, int start_pos, const t_struct* arg_list);
   void generate_php_docstring_stream_exceptions(
@@ -1399,7 +1405,7 @@ void t_hack_generator::generate_json_map_element(
 }
 
 void t_hack_generator::generate_json_reader(
-    std::ofstream& out, const t_struct* tstruct) {
+    std::ofstream& out, const t_structured* tstruct) {
   if (!json_) {
     return;
   }
@@ -2538,7 +2544,7 @@ std::unique_ptr<t_const_value> t_hack_generator::enum_to_tmeta(
 }
 
 std::unique_ptr<t_const_value> t_hack_generator::struct_to_tmeta(
-    const t_struct* tstruct, bool is_exception) {
+    const t_structured* tstruct, bool is_exception) {
   auto tmeta = std::make_unique<t_const_value>();
   tmeta->set_map();
 
@@ -2794,7 +2800,7 @@ const t_type* t_hack_generator::tmeta_ThriftMetadata_type() {
 /**
  * Make a struct
  */
-void t_hack_generator::generate_struct(const t_struct* tstruct) {
+void t_hack_generator::generate_struct(const t_structured* tstruct) {
   auto [wrapper, name, ns] = find_hack_wrapper(tstruct, false);
   if (wrapper) {
     // For wrapped typedef, typehint is generated in nested ns.
@@ -2893,7 +2899,7 @@ bool t_hack_generator::skip_codegen(const t_function* tfunction) {
  *
  * @param txception The struct definition
  */
-void t_hack_generator::generate_xception(const t_struct* txception) {
+void t_hack_generator::generate_xception(const t_structured* txception) {
   generate_php_struct_definition(
       f_types_, txception, ThriftStructType::EXCEPTION);
 }
@@ -3018,7 +3024,7 @@ void t_hack_generator::generate_php_type_spec_shape_elt_helper(
  * type information to generalize serialization routines.
  */
 void t_hack_generator::generate_php_struct_spec(
-    std::ofstream& out, const t_struct* tstruct) {
+    std::ofstream& out, const t_structured* tstruct) {
   indent(out) << "const \\ThriftStructTypes::TSpec SPEC = dict[\n";
   indent_up();
   const auto fields =
@@ -3070,7 +3076,7 @@ void t_hack_generator::generate_php_struct_spec(
 }
 
 void t_hack_generator::generate_php_struct_struct_trait(
-    std::ofstream& out, const t_struct* tstruct, const std::string& name) {
+    std::ofstream& out, const t_structured* tstruct, const std::string& name) {
   std::string traitName;
   auto struct_trait = find_hack_struct_trait(tstruct);
   if (struct_trait.first) {
@@ -3090,7 +3096,9 @@ void t_hack_generator::generate_php_struct_struct_trait(
 }
 
 void t_hack_generator::generate_php_struct_shape_spec(
-    std::ofstream& out, const t_struct* tstruct, bool is_constructor_shape) {
+    std::ofstream& out,
+    const t_structured* tstruct,
+    bool is_constructor_shape) {
   indent(out) << "const type "
               << (is_constructor_shape ? "TConstructorShape" : "TShape")
               << " = shape(\n";
@@ -3371,7 +3379,7 @@ bool t_hack_generator::type_has_nested_struct(const t_type* t) {
  * Determine whether a field should be marked nullable.
  */
 bool t_hack_generator::field_is_nullable(
-    const t_struct* tstruct, const t_field* field) {
+    const t_structured* tstruct, const t_field* field) {
   std::string dval = "";
   const t_type* t = field->type()->get_true_type();
   if (field->default_value() != nullptr &&
@@ -3403,7 +3411,7 @@ void t_hack_generator::generate_php_struct_stringifyMapKeys_method(
 }
 
 void t_hack_generator::generate_php_struct_shape_methods(
-    std::ofstream& out, const t_struct* tstruct) {
+    std::ofstream& out, const t_structured* tstruct) {
   generate_php_struct_stringifyMapKeys_method(out);
 
   indent(out)
@@ -3846,7 +3854,7 @@ bool t_hack_generator::generate_php_struct_async_toShape_method_helper(
 
 void t_hack_generator::generate_php_struct_async_shape_methods(
     std::ofstream& out,
-    const t_struct* tstruct,
+    const t_structured* tstruct,
     const std::string& struct_hack_name_with_ns) {
   generate_php_struct_stringifyMapKeys_method(out);
   generate_php_struct_async_struct_creation_method_header(
@@ -3959,7 +3967,7 @@ void t_hack_generator::generate_php_struct_async_shape_methods(
  * for information about the structural ID.
  */
 void t_hack_generator::generate_php_structural_id(
-    std::ofstream& out, const t_struct* tstruct, bool asFunction) {
+    std::ofstream& out, const t_structured* tstruct, bool asFunction) {
   if (asFunction) {
     indent(out) << "static function getStructuralID()[]: int {\n";
     indent_up();
@@ -3972,7 +3980,7 @@ void t_hack_generator::generate_php_structural_id(
   }
 }
 
-bool t_hack_generator::is_async_struct(const t_struct* tstruct) {
+bool t_hack_generator::is_async_struct(const t_structured* tstruct) {
   for (const auto& field : tstruct->fields()) {
     if (!skip_codegen(&field)) {
       if (is_async_field(field, false)) {
@@ -3983,7 +3991,7 @@ bool t_hack_generator::is_async_struct(const t_struct* tstruct) {
   return false;
 }
 
-bool t_hack_generator::is_async_shapish_struct(const t_struct* tstruct) {
+bool t_hack_generator::is_async_shapish_struct(const t_structured* tstruct) {
   std::string parent_struct_name = hack_name(tstruct);
   switch (struct_async_type_[parent_struct_name]) {
     case ThriftShapishStructType::ASYNC:
@@ -4051,7 +4059,7 @@ bool t_hack_generator::is_async_type(
 
 void t_hack_generator::generate_php_struct_definition(
     std::ofstream& out,
-    const t_struct* tstruct,
+    const t_structured* tstruct,
     ThriftStructType type,
     const std::string& name) {
   const std::string& real_name = !name.empty() ? name : find_hack_name(tstruct);
@@ -4064,7 +4072,7 @@ void t_hack_generator::generate_php_struct_definition(
 
 void t_hack_generator::generate_php_union_methods(
     std::ofstream& out,
-    const t_struct* tstruct,
+    const t_structured* tstruct,
     const std::string& struct_hack_name_with_ns) {
   auto enumName = union_enum_name(struct_hack_name_with_ns);
 
@@ -4159,7 +4167,7 @@ void t_hack_generator::generate_php_union_methods(
 
 void t_hack_generator::generate_php_struct_fields(
     std::ofstream& out,
-    const t_struct* tstruct,
+    const t_structured* tstruct,
     const std::string& struct_hack_name_with_ns,
     ThriftStructType type) {
   for (const t_field& field : tstruct->fields()) {
@@ -4335,7 +4343,7 @@ void t_hack_generator::generate_php_struct_field_methods(
 
 void t_hack_generator::generate_php_struct_methods(
     std::ofstream& out,
-    const t_struct* tstruct,
+    const t_structured* tstruct,
     ThriftStructType type,
     const std::string& struct_hack_name,
     bool is_async_struct,
@@ -4422,7 +4430,7 @@ void t_hack_generator::generate_php_struct_methods(
 }
 
 void t_hack_generator::generate_exception_method(
-    std::ofstream& out, const t_struct* tstruct) {
+    std::ofstream& out, const t_structured* tstruct) {
   const auto& fields = tstruct->fields();
   if (fields.size() == 0 ||
       (fields.size() == 1 && fields[0].name() == "success")) {
@@ -4447,7 +4455,7 @@ void t_hack_generator::generate_exception_method(
 void t_hack_generator::generate_php_struct_constructor_field_assignment(
     std::ofstream& out,
     const t_field& field,
-    const t_struct* tstruct,
+    const t_structured* tstruct,
     ThriftStructType type,
     const std::string& struct_hack_name_with_ns,
     bool is_default_assignment,
@@ -4557,7 +4565,7 @@ void t_hack_generator::generate_php_struct_constructor_field_assignment(
 
 void t_hack_generator::generate_php_struct_constructor(
     std::ofstream& out,
-    const t_struct* tstruct,
+    const t_structured* tstruct,
     ThriftStructType type,
     const std::string& struct_hack_name_with_ns) {
   out << indent() << "public function __construct(";
@@ -4613,7 +4621,7 @@ void t_hack_generator::generate_php_struct_withDefaultValues_method(
 
 void t_hack_generator::generate_php_struct_default_constructor(
     std::ofstream& out,
-    const t_struct* tstruct,
+    const t_structured* tstruct,
     ThriftStructType type,
     const std::string& struct_hack_name_with_ns) {
   out << indent() << "public function __construct()[] {\n";
@@ -4650,7 +4658,7 @@ void t_hack_generator::generate_php_struct_default_constructor(
 
 void t_hack_generator::generate_php_struct_clear_terse_fields(
     std::ofstream& out,
-    const t_struct* tstruct,
+    const t_structured* tstruct,
     ThriftStructType type,
     const std::string& struct_hack_name_with_ns) {
   out << indent()
@@ -4668,7 +4676,7 @@ void t_hack_generator::generate_php_struct_clear_terse_fields(
 }
 
 void t_hack_generator::generate_php_struct_metadata_method(
-    std::ofstream& out, const t_struct* tstruct) {
+    std::ofstream& out, const t_structured* tstruct) {
   bool is_exception = tstruct->is_exception();
   // Metadata
   out << indent() << "public static function get"
@@ -4692,7 +4700,7 @@ void t_hack_generator::generate_php_struct_metadata_method(
 }
 
 void t_hack_generator::generate_php_struct_structured_annotations_method(
-    std::ofstream& out, const t_struct* tstruct) {
+    std::ofstream& out, const t_structured* tstruct) {
   indent(out)
       << "public static function getAllStructuredAnnotations()[write_props]: "
          "\\TStructAnnotations {\n";
@@ -4747,7 +4755,7 @@ void t_hack_generator::generate_php_struct_structured_annotations_method(
 }
 
 void t_hack_generator::generate_php_union_enum(
-    std::ofstream& out, const t_struct* tstruct, const std::string& name) {
+    std::ofstream& out, const t_structured* tstruct, const std::string& name) {
   // Generate enum class with this pattern
   // enum <UnionName>Enum: int {
   //   __EMPTY__ = 0;
@@ -5035,7 +5043,7 @@ void t_hack_generator::generate_hack_attributes(
 }
 
 void t_hack_generator::generate_adapter_type_checks(
-    std::ofstream& out, const t_struct* tstruct) {
+    std::ofstream& out, const t_structured* tstruct) {
   // Adapter name -> original type of the field that the adapter is for.
   std::set<std::pair<std::string, std::string>> adapter_types_;
   for (const auto* t : collect_types(tstruct)) {
@@ -5077,7 +5085,7 @@ void t_hack_generator::generate_adapter_type_checks(
  */
 void t_hack_generator::_generate_php_struct_definition(
     std::ofstream& out,
-    const t_struct* tstruct,
+    const t_structured* tstruct,
     ThriftStructType type,
     const std::string& name) {
   bool generateAsTrait = has_hack_struct_as_trait(tstruct);
@@ -5203,7 +5211,7 @@ void t_hack_generator::_generate_php_struct_definition(
 }
 
 void t_hack_generator::generate_php_struct_from_shape(
-    std::ofstream& out, const t_struct* tstruct) {
+    std::ofstream& out, const t_structured* tstruct) {
   out << indent() << "public static function fromShape"
       << "(self::TConstructorShape $shape)[]: this {\n";
   indent_up();
@@ -5223,7 +5231,7 @@ void t_hack_generator::generate_php_struct_from_shape(
 }
 
 void t_hack_generator::generate_php_struct_from_map(
-    std::ofstream& out, const t_struct* tstruct) {
+    std::ofstream& out, const t_structured* tstruct) {
   out << indent() << "public static function fromMap_DEPRECATED(";
   if (strict_types_) {
     // Generate constructor from Map
@@ -5348,7 +5356,7 @@ void t_hack_generator::generate_php_struct_async_struct_creation_method_footer(
 void t_hack_generator::
     generate_php_struct_async_struct_creation_method_field_assignment(
         std::ofstream& out,
-        const t_struct* tstruct,
+        const t_structured* tstruct,
         const t_field& field,
         const std::string& field_ref,
         const std::string& struct_hack_name_with_ns,
@@ -5438,7 +5446,7 @@ void t_hack_generator::
 
 void t_hack_generator::generate_php_struct_async_struct_creation_method(
     std::ofstream& out,
-    const t_struct* tstruct,
+    const t_structured* tstruct,
     const std::string& struct_hack_name_with_ns,
     ThriftAsyncStructCreationMethod method_type) {
   generate_php_struct_async_struct_creation_method_header(out, method_type);
@@ -6354,7 +6362,7 @@ void t_hack_generator::generate_php_docstring(
  * Name
  */
 void t_hack_generator::generate_php_docstring(
-    std::ofstream& out, const t_struct* tstruct, bool is_exception) {
+    std::ofstream& out, const t_structured* tstruct, bool is_exception) {
   indent(out) << "/**\n";
   // Copy the doc.
   if (tstruct->has_doc()) {

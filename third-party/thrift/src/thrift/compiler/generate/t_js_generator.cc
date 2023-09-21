@@ -60,8 +60,8 @@ class t_js_generator : public t_concat_generator {
   void generate_typedef(const t_typedef* ttypedef) override;
   void generate_enum(const t_enum* tenum) override;
   void generate_const(const t_const* tconst) override;
-  void generate_struct(const t_struct* tstruct) override;
-  void generate_xception(const t_struct* txception) override;
+  void generate_struct(const t_structured* tstruct) override;
+  void generate_xception(const t_structured* txception) override;
   void generate_service(const t_service* tservice) override;
 
   std::string render_recv_throw(std::string var);
@@ -73,17 +73,17 @@ class t_js_generator : public t_concat_generator {
   /**
    * Structs!
    */
-  void generate_js_struct(const t_struct* tstruct, bool is_exception);
+  void generate_js_struct(const t_structured* tstruct, bool is_exception);
   void generate_js_struct_definition(
       std::ofstream& out,
-      const t_struct* tstruct,
+      const t_structured* tstruct,
       bool is_exception = false,
       bool is_exported = true,
       const std::string& namePrefix = "");
   void generate_js_struct_reader(
-      std::ofstream& out, const t_struct* tstruct, const std::string& name);
+      std::ofstream& out, const t_structured* tstruct, const std::string& name);
   void generate_js_struct_writer(
-      std::ofstream& out, const t_struct* tstruct, const std::string& name);
+      std::ofstream& out, const t_structured* tstruct, const std::string& name);
   void generate_js_function_helpers(const t_function* tfunction);
 
   /**
@@ -475,8 +475,8 @@ string t_js_generator::render_const_value(
 /**
  * Make a struct
  */
-void t_js_generator::generate_struct(const t_struct* tstruct) {
-  generate_js_struct(tstruct, false);
+void t_js_generator::generate_struct(const t_structured* tstruct) {
+  generate_js_struct(tstruct, false /* is_exception */);
 }
 
 /**
@@ -485,15 +485,15 @@ void t_js_generator::generate_struct(const t_struct* tstruct) {
  *
  * @param txception The struct definition
  */
-void t_js_generator::generate_xception(const t_struct* txception) {
-  generate_js_struct(txception, true);
+void t_js_generator::generate_xception(const t_structured* txception) {
+  generate_js_struct(txception, true /* is_exception */);
 }
 
 /**
  * Structs can be normal or exceptions.
  */
 void t_js_generator::generate_js_struct(
-    const t_struct* tstruct, bool is_exception) {
+    const t_structured* tstruct, bool is_exception) {
   generate_js_struct_definition(f_types_, tstruct, is_exception);
 }
 
@@ -506,7 +506,7 @@ void t_js_generator::generate_js_struct(
  */
 void t_js_generator::generate_js_struct_definition(
     ofstream& out,
-    const t_struct* tstruct,
+    const t_structured* tstruct,
     bool is_exception,
     bool is_exported,
     const std::string& name_prefix) {
@@ -608,7 +608,7 @@ void t_js_generator::generate_js_struct_definition(
  * Generates the read() method for a struct
  */
 void t_js_generator::generate_js_struct_reader(
-    ofstream& out, const t_struct* tstruct, const std::string& name) {
+    ofstream& out, const t_structured* tstruct, const std::string& name) {
   const vector<t_field*>& fields = tstruct->get_members();
   vector<t_field*>::const_iterator f_iter;
 
@@ -688,7 +688,7 @@ void t_js_generator::generate_js_struct_reader(
  * Generates the write() method for a struct
  */
 void t_js_generator::generate_js_struct_writer(
-    ofstream& out, const t_struct* tstruct, const std::string& name) {
+    ofstream& out, const t_structured* tstruct, const std::string& name) {
   const vector<t_field*>& fields = tstruct->get_members();
   vector<t_field*>::const_iterator f_iter;
 

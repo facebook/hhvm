@@ -114,8 +114,8 @@ class t_go_generator : public t_concat_generator {
   void generate_typedef(const t_typedef* ttypedef) override;
   void generate_enum(const t_enum* tenum) override;
   void generate_const(const t_const* tconst) override;
-  void generate_struct(const t_struct* tstruct) override;
-  void generate_xception(const t_struct* txception) override;
+  void generate_struct(const t_structured* tstruct) override;
+  void generate_xception(const t_structured* txception) override;
   void generate_service(const t_service* tservice) override;
 
   std::string render_const_value(
@@ -128,45 +128,45 @@ class t_go_generator : public t_concat_generator {
    * Struct generation code
    */
 
-  void generate_go_struct(const t_struct* tstruct, bool is_exception);
+  void generate_go_struct(const t_structured* tstruct, bool is_exception);
   void generate_go_struct_definition(
       std::ofstream& out,
-      const t_struct* tstruct,
+      const t_structured* tstruct,
       bool is_exception = false,
       bool is_result = false,
       bool is_args = false);
   void generate_go_struct_initializer(
       std::ofstream& out,
-      const t_struct* tstruct,
+      const t_structured* tstruct,
       bool is_args_or_result = false);
   void generate_isset_helpers(
       std::ofstream& out,
-      const t_struct* tstruct,
+      const t_structured* tstruct,
       const string& tstruct_name,
       bool is_result = false);
   void generate_go_struct_builder(
       std::ofstream& out,
-      const t_struct* tstruct,
+      const t_structured* tstruct,
       const string& tstruct_name,
       bool is_result = false);
   void generate_go_struct_setters(
       std::ofstream& out,
-      const t_struct* tstruct,
+      const t_structured* tstruct,
       const string& tstruct_name,
       bool is_result = false);
   void generate_countsetfields_helper(
       std::ofstream& out,
-      const t_struct* tstruct,
+      const t_structured* tstruct,
       const string& tstruct_name,
       bool is_result = false);
   void generate_go_struct_reader(
       std::ofstream& out,
-      const t_struct* tstruct,
+      const t_structured* tstruct,
       const string& tstruct_name,
       bool is_result = false);
   void generate_go_struct_writer(
       std::ofstream& out,
-      const t_struct* tstruct,
+      const t_structured* tstruct,
       const string& tstruct_name,
       bool is_result = false,
       bool uses_countsetfields = false);
@@ -353,7 +353,7 @@ class t_go_generator : public t_concat_generator {
   std::set<std::string> commonInitialisms;
   std::unordered_set<std::string> protectedMethods;
 
-  void generate_go_docstring(std::ofstream& out, const t_struct* tstruct);
+  void generate_go_docstring(std::ofstream& out, const t_structured* tstruct);
 
   void generate_go_docstring(std::ofstream& out, const t_function* tfunction);
 
@@ -362,7 +362,7 @@ class t_go_generator : public t_concat_generator {
   void generate_go_docstring(
       std::ofstream& out,
       const t_named* named_node,
-      const t_struct* tstruct,
+      const t_structured* tstruct,
       const char* subheader);
 
   std::string camelcase(const std::string& value) const;
@@ -1311,8 +1311,8 @@ string t_go_generator::render_const_value(
 /**
  * Generates a go struct
  */
-void t_go_generator::generate_struct(const t_struct* tstruct) {
-  generate_go_struct(tstruct, false);
+void t_go_generator::generate_struct(const t_structured* tstruct) {
+  generate_go_struct(tstruct, false /* is_exception */);
 }
 
 /**
@@ -1321,15 +1321,15 @@ void t_go_generator::generate_struct(const t_struct* tstruct) {
  *
  * @param txception The struct definition
  */
-void t_go_generator::generate_xception(const t_struct* txception) {
-  generate_go_struct(txception, true);
+void t_go_generator::generate_xception(const t_structured* txception) {
+  generate_go_struct(txception, true /* is_exception */);
 }
 
 /**
  * Generates a go struct
  */
 void t_go_generator::generate_go_struct(
-    const t_struct* tstruct, bool is_exception) {
+    const t_structured* tstruct, bool is_exception) {
   generate_go_struct_definition(f_types_, tstruct, is_exception);
 }
 
@@ -1344,7 +1344,7 @@ void t_go_generator::get_publicized_name_and_def_value(
 }
 
 void t_go_generator::generate_go_struct_initializer(
-    ofstream& out, const t_struct* tstruct, bool is_args_or_result) {
+    ofstream& out, const t_structured* tstruct, bool is_args_or_result) {
   out << publicize(type_name(tstruct), is_args_or_result) << "{";
   indent_up();
   const vector<t_field*>& members = tstruct->get_members();
@@ -1404,7 +1404,7 @@ void t_go_generator::generate_go_struct_initializer(
  */
 void t_go_generator::generate_go_struct_definition(
     ofstream& out,
-    const t_struct* tstruct,
+    const t_structured* tstruct,
     bool is_exception,
     bool is_result,
     bool is_args) {
@@ -1642,7 +1642,7 @@ void t_go_generator::generate_go_struct_definition(
  */
 void t_go_generator::generate_isset_helpers(
     ofstream& out,
-    const t_struct* tstruct,
+    const t_structured* tstruct,
     const string& tstruct_name,
     bool is_result) {
   (void)is_result;
@@ -1685,7 +1685,7 @@ void t_go_generator::generate_isset_helpers(
  */
 void t_go_generator::generate_go_struct_builder(
     ofstream& out,
-    const t_struct* tstruct,
+    const t_structured* tstruct,
     const string& tstruct_name,
     bool is_result) {
   (void)is_result;
@@ -1776,7 +1776,7 @@ void t_go_generator::generate_go_struct_builder(
  */
 void t_go_generator::generate_go_struct_setters(
     ofstream& out,
-    const t_struct* tstruct,
+    const t_structured* tstruct,
     const string& tstruct_name,
     bool is_result) {
   (void)is_result;
@@ -1833,7 +1833,7 @@ void t_go_generator::generate_go_struct_setters(
  */
 void t_go_generator::generate_countsetfields_helper(
     ofstream& out,
-    const t_struct* tstruct,
+    const t_structured* tstruct,
     const string& tstruct_name,
     bool is_result) {
   (void)is_result;
@@ -1870,7 +1870,7 @@ void t_go_generator::generate_countsetfields_helper(
  */
 void t_go_generator::generate_go_struct_reader(
     ofstream& out,
-    const t_struct* tstruct,
+    const t_structured* tstruct,
     const string& tstruct_name,
     bool is_result) {
   (void)is_result;
@@ -2026,7 +2026,7 @@ void t_go_generator::generate_go_struct_reader(
 
 void t_go_generator::generate_go_struct_writer(
     ofstream& out,
-    const t_struct* tstruct,
+    const t_structured* tstruct,
     const string& tstruct_name,
     bool is_result,
     bool uses_countsetfields) {
@@ -3635,7 +3635,7 @@ void t_go_generator::generate_serialize_list_element(
  * Generates the docstring for a given struct.
  */
 void t_go_generator::generate_go_docstring(
-    ofstream& out, const t_struct* tstruct) {
+    ofstream& out, const t_structured* tstruct) {
   generate_go_docstring(out, tstruct, tstruct, "Attributes");
 }
 
@@ -3654,7 +3654,7 @@ void t_go_generator::generate_go_docstring(
 void t_go_generator::generate_go_docstring(
     ofstream& out,
     const t_named* named_node,
-    const t_struct* tstruct,
+    const t_structured* tstruct,
     const char* subheader) {
   bool has_doc = false;
   stringstream ss;

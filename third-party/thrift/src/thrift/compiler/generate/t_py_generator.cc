@@ -114,9 +114,9 @@ class t_py_generator : public t_concat_generator {
   void generate_typedef(const t_typedef* ttypedef) override;
   void generate_enum(const t_enum* tenum) override;
   void generate_const(const t_const* tconst) override;
-  void generate_struct(const t_struct* tstruct) override;
-  void generate_forward_declaration(const t_struct* tstruct) override;
-  void generate_xception(const t_struct* txception) override;
+  void generate_struct(const t_structured* tstruct) override;
+  void generate_forward_declaration(const t_structured* tstruct) override;
+  void generate_xception(const t_structured* txception) override;
   void generate_service(const t_service* tservice) override;
 
   std::string render_const_value(
@@ -126,24 +126,26 @@ class t_py_generator : public t_concat_generator {
    * Struct generation code
    */
 
-  void generate_py_struct(const t_struct* tstruct, bool is_exception);
+  void generate_py_struct(const t_structured* tstruct, bool is_exception);
   void generate_py_thrift_spec(
-      std::ofstream& out, const t_struct* tstruct, bool is_exception);
+      std::ofstream& out, const t_structured* tstruct, bool is_exception);
   void generate_py_annotation_dict(
       std::ofstream& out,
       const std::map<std::string, annotation_value>& fields);
-  void generate_py_annotations(std::ofstream& out, const t_struct* tstruct);
-  void generate_py_union(std::ofstream& out, const t_struct* tstruct);
+  void generate_py_annotations(std::ofstream& out, const t_structured* tstruct);
+  void generate_py_union(std::ofstream& out, const t_structured* tstruct);
   void generate_py_struct_definition(
       std::ofstream& out,
-      const t_struct* tstruct,
+      const t_structured* tstruct,
       bool is_exception = false,
       bool is_result = false);
-  void generate_py_struct_reader(std::ofstream& out, const t_struct* tstruct);
-  void generate_py_struct_writer(std::ofstream& out, const t_struct* tstruct);
+  void generate_py_struct_reader(
+      std::ofstream& out, const t_structured* tstruct);
+  void generate_py_struct_writer(
+      std::ofstream& out, const t_structured* tstruct);
   void generate_py_function_helpers(const t_function* tfunction);
   void generate_py_converter_helpers(
-      std::ofstream& out, const t_struct* tstruct);
+      std::ofstream& out, const t_structured* tstruct);
 
   /**
    * Service-level generation functions
@@ -250,10 +252,11 @@ class t_py_generator : public t_concat_generator {
       const string& parsed_key,
       const string& string_key);
 
-  void generate_json_reader(std::ofstream& out, const t_struct* tstruct);
+  void generate_json_reader(std::ofstream& out, const t_structured* tstruct);
 
-  void generate_fastproto_read(std::ofstream& out, const t_struct* tstruct);
-  void generate_fastproto_write(std::ofstream& out, const t_struct* tstruct);
+  void generate_fastproto_read(std::ofstream& out, const t_structured* tstruct);
+  void generate_fastproto_write(
+      std::ofstream& out, const t_structured* tstruct);
 
   /**
    * Helper rendering functions
@@ -265,7 +268,8 @@ class t_py_generator : public t_concat_generator {
   std::string rename_reserved_keywords(const std::string& value);
   std::string render_includes();
   std::string render_fastproto_includes();
-  std::string declare_argument(const t_struct* tstruct, const t_field* tfield);
+  std::string declare_argument(
+      const t_structured* tstruct, const t_field* tfield);
   std::string render_field_default_value(const t_field* tfield);
   std::string type_name(const t_type* ttype);
   std::string function_signature(
@@ -343,9 +347,10 @@ class t_py_generator : public t_concat_generator {
   std::map<std::string, const std::vector<t_function*>> func_map_;
 
   void generate_json_reader_fn_signature(ofstream& out);
-  static int32_t get_thrift_spec_key(const t_struct*, const t_field*);
+  static int32_t get_thrift_spec_key(const t_structured*, const t_field*);
 
-  void generate_python_docstring(std::ofstream& out, const t_struct* tstruct);
+  void generate_python_docstring(
+      std::ofstream& out, const t_structured* tstruct);
 
   void generate_python_docstring(
       std::ofstream& out, const t_function* tfunction);
@@ -353,7 +358,7 @@ class t_py_generator : public t_concat_generator {
   void generate_python_docstring(
       std::ofstream& out,
       const t_named* named_node,
-      const t_struct* tstruct,
+      const t_structured* tstruct,
       const char* subheader);
 
   void generate_python_docstring(std::ofstream& out, const t_named* named_node);
@@ -699,7 +704,7 @@ void t_py_generator::generate_json_reader_fn_signature(ofstream& out) {
 }
 
 void t_py_generator::generate_json_reader(
-    ofstream& out, const t_struct* tstruct) {
+    ofstream& out, const t_structured* tstruct) {
   if (!gen_json_) {
     return;
   }
@@ -805,7 +810,7 @@ string t_py_generator::render_ttype_declarations(const char* delimiter) {
     out << ", " << delimiter << rename_reserved_keywords(en->get_name())
         << delimiter;
   }
-  for (const t_struct* object : program_->structured_definitions()) {
+  for (const t_structured* object : program_->structured_definitions()) {
     out << ", " << delimiter << rename_reserved_keywords(object->get_name())
         << delimiter;
   }
@@ -1215,7 +1220,7 @@ string t_py_generator::render_const_value(
   return out.str();
 }
 
-void t_py_generator::generate_forward_declaration(const t_struct* tstruct) {
+void t_py_generator::generate_forward_declaration(const t_structured* tstruct) {
   if (!tstruct->is_union()) {
     generate_py_struct(tstruct, tstruct->is_exception());
   } else {
@@ -1226,8 +1231,8 @@ void t_py_generator::generate_forward_declaration(const t_struct* tstruct) {
 /**
  * Generates a python struct
  */
-void t_py_generator::generate_struct(const t_struct* tstruct) {
-  generate_py_thrift_spec(f_types_, tstruct, false);
+void t_py_generator::generate_struct(const t_structured* tstruct) {
+  generate_py_thrift_spec(f_types_, tstruct, false /* is_exception */);
 }
 
 /**
@@ -1236,15 +1241,15 @@ void t_py_generator::generate_struct(const t_struct* tstruct) {
  *
  * @param txception The struct definition
  */
-void t_py_generator::generate_xception(const t_struct* txception) {
-  generate_py_thrift_spec(f_types_, txception, true);
+void t_py_generator::generate_xception(const t_structured* txception) {
+  generate_py_thrift_spec(f_types_, txception, true /* is_exception */);
 }
 
 /**
  * Generates a python struct
  */
 void t_py_generator::generate_py_struct(
-    const t_struct* tstruct, bool is_exception) {
+    const t_structured* tstruct, bool is_exception) {
   generate_py_struct_definition(f_types_, tstruct, is_exception);
   generate_py_converter_helpers(f_types_, tstruct);
 }
@@ -1253,7 +1258,8 @@ void t_py_generator::generate_py_struct(
  * Generates a python union definition. We just keep a variable `value`
  * which holds the current value and to know type we use instanceof.
  */
-void t_py_generator::generate_py_union(ofstream& out, const t_struct* tstruct) {
+void t_py_generator::generate_py_union(
+    ofstream& out, const t_structured* tstruct) {
   const vector<t_field*>& members = tstruct->get_members();
   const vector<t_field*>& sorted_members = tstruct->get_sorted_members();
 
@@ -1463,7 +1469,7 @@ void t_py_generator::generate_py_union(ofstream& out, const t_struct* tstruct) {
 }
 
 void t_py_generator::generate_py_thrift_spec(
-    ofstream& out, const t_struct* tstruct, bool /*is_exception*/) {
+    ofstream& out, const t_structured* tstruct, bool /*is_exception*/) {
   const vector<t_field*>& members = tstruct->get_members();
   const vector<t_field*>& sorted_members = tstruct->get_sorted_members();
   vector<t_field*>::const_iterator m_iter;
@@ -1606,7 +1612,7 @@ void t_py_generator::generate_py_annotation_dict(
 }
 
 void t_py_generator::generate_py_annotations(
-    std::ofstream& out, const t_struct* tstruct) {
+    std::ofstream& out, const t_structured* tstruct) {
   const vector<t_field*>& sorted_members = tstruct->get_sorted_members();
   vector<t_field*>::const_iterator m_iter;
 
@@ -1640,7 +1646,7 @@ void t_py_generator::generate_py_annotations(
  */
 void t_py_generator::generate_py_struct_definition(
     ofstream& out,
-    const t_struct* tstruct,
+    const t_structured* tstruct,
     bool is_exception,
     bool /*is_result*/) {
   const vector<t_field*>& members = tstruct->get_members();
@@ -1855,7 +1861,7 @@ void t_py_generator::generate_py_struct_definition(
 }
 
 void t_py_generator::generate_fastproto_write(
-    ofstream& out, const t_struct* tstruct) {
+    ofstream& out, const t_structured* tstruct) {
   indent(out)
       << "if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) "
          "or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and "
@@ -1892,7 +1898,7 @@ void t_py_generator::generate_fastproto_write(
 }
 
 void t_py_generator::generate_fastproto_read(
-    ofstream& out, const t_struct* tstruct) {
+    ofstream& out, const t_structured* tstruct) {
   indent(out)
       << "if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) "
          "or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and "
@@ -1934,7 +1940,7 @@ void t_py_generator::generate_fastproto_read(
  * Generates the read method for a struct
  */
 void t_py_generator::generate_py_struct_reader(
-    ofstream& out, const t_struct* tstruct) {
+    ofstream& out, const t_structured* tstruct) {
   const vector<t_field*>& fields = tstruct->get_members();
   vector<t_field*>::const_iterator f_iter;
 
@@ -1997,7 +2003,7 @@ void t_py_generator::generate_py_struct_reader(
 }
 
 void t_py_generator::generate_py_struct_writer(
-    ofstream& out, const t_struct* tstruct) {
+    ofstream& out, const t_structured* tstruct) {
   string name = tstruct->get_name();
   const vector<t_field*>& fields = tstruct->get_sorted_members();
   vector<t_field*>::const_iterator f_iter;
@@ -2159,7 +2165,7 @@ void t_py_generator::generate_py_function_helpers(const t_function* tfunction) {
 }
 
 void t_py_generator::generate_py_converter_helpers(
-    std::ofstream& out, const t_struct* tstruct) {
+    std::ofstream& out, const t_structured* tstruct) {
   indent_up();
   // TODO: accommodate root_module_prefix
   auto python_namespace = get_py3_namespace_with_name_and_prefix(program_, "");
@@ -3518,7 +3524,7 @@ void t_py_generator::generate_serialize_list_element(
  * Generates the docstring for a given struct.
  */
 void t_py_generator::generate_python_docstring(
-    ofstream& out, const t_struct* tstruct) {
+    ofstream& out, const t_structured* tstruct) {
   generate_python_docstring(out, tstruct, tstruct, "Attributes");
 }
 
@@ -3537,7 +3543,7 @@ void t_py_generator::generate_python_docstring(
 void t_py_generator::generate_python_docstring(
     ofstream& out,
     const t_named* named_node,
-    const t_struct* tstruct,
+    const t_structured* tstruct,
     const char* subheader) {
   bool has_doc = false;
   stringstream ss;
@@ -3587,7 +3593,7 @@ void t_py_generator::generate_python_docstring(
  * @param tfield The field
  */
 string t_py_generator::declare_argument(
-    const t_struct* tstruct, const t_field* tfield) {
+    const t_structured* tstruct, const t_field* tfield) {
   std::ostringstream result;
   result << rename_reserved_keywords(tfield->get_name()) << "=";
   if (tfield->get_value() != nullptr) {
@@ -3802,7 +3808,7 @@ const std::vector<t_function*>& t_py_generator::get_functions(
 }
 
 int32_t t_py_generator::get_thrift_spec_key(
-    const t_struct* s, const t_field* f) {
+    const t_structured* s, const t_field* f) {
   // If struct contains negative ids, e.g. for following struct
   //
   // struct NegativeId {

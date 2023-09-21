@@ -85,7 +85,7 @@ string t_java_deprecated_generator::java_package() {
  * @return String indicating the parent class for the generated struct
  */
 boost::optional<string> t_java_deprecated_generator::java_struct_parent_class(
-    const t_struct* /* unused */, StructGenParams params) {
+    const t_structured* /* unused */, StructGenParams params) {
   return boost::make_optional(params.is_exception, std::string("Exception"));
 }
 
@@ -507,11 +507,11 @@ string t_java_deprecated_generator::render_const_value(
  *
  * @param tstruct The struct definition
  */
-void t_java_deprecated_generator::generate_struct(const t_struct* tstruct) {
+void t_java_deprecated_generator::generate_struct(const t_structured* tstruct) {
   if (tstruct->is_union()) {
     generate_java_union(tstruct);
   } else {
-    generate_java_struct(tstruct, false);
+    generate_java_struct(tstruct, false /* is_exception */);
   }
 }
 
@@ -520,8 +520,9 @@ void t_java_deprecated_generator::generate_struct(const t_struct* tstruct) {
  *
  * @param tstruct The struct definition
  */
-void t_java_deprecated_generator::generate_xception(const t_struct* txception) {
-  generate_java_struct(txception, true);
+void t_java_deprecated_generator::generate_xception(
+    const t_structured* txception) {
+  generate_java_struct(txception, true /* is_exception */);
 }
 
 /**
@@ -530,7 +531,7 @@ void t_java_deprecated_generator::generate_xception(const t_struct* txception) {
  * @param tstruct The struct definition
  */
 void t_java_deprecated_generator::generate_java_struct(
-    const t_struct* tstruct, bool is_exception) {
+    const t_structured* tstruct, bool is_exception) {
   // Make output file
   string f_struct_name =
       get_package_dir() + "/" + (tstruct->get_name()) + ".java";
@@ -555,7 +556,8 @@ void t_java_deprecated_generator::generate_java_struct(
  *
  * @param tstruct The struct definition
  */
-void t_java_deprecated_generator::generate_java_union(const t_struct* tstruct) {
+void t_java_deprecated_generator::generate_java_union(
+    const t_structured* tstruct) {
   // Make output file
   string f_struct_name =
       get_package_dir() + "/" + (tstruct->get_name()) + ".java";
@@ -625,7 +627,7 @@ void t_java_deprecated_generator::generate_java_union(const t_struct* tstruct) {
 }
 
 void t_java_deprecated_generator::generate_union_constructor(
-    ofstream& out, const t_struct* tstruct) {
+    ofstream& out, const t_structured* tstruct) {
   indent(out) << "public " << type_name(tstruct) << "() {" << endl;
   indent(out) << "  super();" << endl;
   indent(out) << "}" << endl << endl;
@@ -661,7 +663,7 @@ void t_java_deprecated_generator::generate_union_constructor(
 }
 
 void t_java_deprecated_generator::generate_union_getters_and_setters(
-    ofstream& out, const t_struct* tstruct) {
+    ofstream& out, const t_structured* tstruct) {
   const vector<t_field*>& members = tstruct->get_members();
   vector<t_field*>::const_iterator m_iter;
 
@@ -723,7 +725,7 @@ void t_java_deprecated_generator::generate_union_getters_and_setters(
 }
 
 void t_java_deprecated_generator::generate_union_abstract_methods(
-    ofstream& out, const t_struct* tstruct) {
+    ofstream& out, const t_structured* tstruct) {
   if (!generate_immutable_structs_) {
     // immutable structs use generic `checkType` (defined in parent class
     // `TUnion`)
@@ -749,7 +751,7 @@ void t_java_deprecated_generator::generate_union_abstract_methods(
 }
 
 void t_java_deprecated_generator::generate_check_type(
-    ofstream& out, const t_struct* tstruct) {
+    ofstream& out, const t_structured* tstruct) {
   indent(out) << "@Override" << endl;
   indent(out) << "protected void checkType(short setField, Object __value) "
                  "throws ClassCastException {"
@@ -798,7 +800,7 @@ void t_java_deprecated_generator::generate_check_type(
  * @param tstruct The struct definition
  */
 void t_java_deprecated_generator::generate_union_reader(
-    ofstream& out, const t_struct* tstruct) {
+    ofstream& out, const t_structured* tstruct) {
   indent(out) << "@Override" << endl;
   indent(out) << "public void read(TProtocol iprot) throws TException {"
               << endl;
@@ -866,7 +868,7 @@ void t_java_deprecated_generator::generate_union_reader(
 }
 
 void t_java_deprecated_generator::generate_read_value(
-    ofstream& out, const t_struct* tstruct) {
+    ofstream& out, const t_structured* tstruct) {
   indent(out) << "@Override" << endl;
   indent(out) << "protected Object readValue(TProtocol iprot, TField __field) "
                  "throws TException {"
@@ -908,7 +910,7 @@ void t_java_deprecated_generator::generate_read_value(
 }
 
 void t_java_deprecated_generator::generate_write_value(
-    ofstream& out, const t_struct* tstruct) {
+    ofstream& out, const t_structured* tstruct) {
   indent(out) << "@Override" << endl;
   indent(out) << "protected void writeValue(TProtocol oprot, short setField, "
                  "Object __value) throws TException {"
@@ -950,7 +952,7 @@ void t_java_deprecated_generator::generate_write_value(
 }
 
 void t_java_deprecated_generator::generate_get_field_desc(
-    ofstream& out, const t_struct* tstruct) {
+    ofstream& out, const t_structured* tstruct) {
   indent(out) << "@Override" << endl;
   indent(out) << "protected TField getFieldDesc(int setField) {" << endl;
   indent_up();
@@ -981,7 +983,7 @@ void t_java_deprecated_generator::generate_get_field_desc(
 }
 
 void t_java_deprecated_generator::generate_get_struct_desc(
-    ofstream& out, const t_struct* /*tstruct*/) {
+    ofstream& out, const t_structured* /*tstruct*/) {
   indent(out) << "@Override" << endl;
   indent(out) << "protected TStruct getStructDesc() {" << endl;
   indent(out) << "  return STRUCT_DESC;" << endl;
@@ -989,7 +991,7 @@ void t_java_deprecated_generator::generate_get_struct_desc(
 }
 
 void t_java_deprecated_generator::generate_union_comparisons(
-    ofstream& out, const t_struct* tstruct) {
+    ofstream& out, const t_structured* tstruct) {
   // equality
   indent(out) << "public boolean equals(Object other) {" << endl;
   indent(out) << "  if (other instanceof " << tstruct->get_name() << ") {"
@@ -1024,7 +1026,7 @@ void t_java_deprecated_generator::generate_union_comparisons(
 }
 
 void t_java_deprecated_generator::generate_union_hashcode(
-    ofstream& out, const t_struct* /*tstruct*/) {
+    ofstream& out, const t_structured* /*tstruct*/) {
   indent(out) << "@Override" << endl;
   indent(out) << "public int hashCode() {" << endl;
   indent(out) << "  return Arrays.deepHashCode(new Object[] {"
@@ -1037,7 +1039,9 @@ void t_java_deprecated_generator::generate_union_hashcode(
  * the constructor should take as parameters to initialize the struct.
  */
 void t_java_deprecated_generator::generate_java_constructor(
-    ofstream& out, const t_struct* tstruct, const vector<t_field*>& fields) {
+    ofstream& out,
+    const t_structured* tstruct,
+    const vector<t_field*>& fields) {
   vector<t_field*>::const_iterator m_iter;
   indent(out) << "public " << tstruct->get_name() << "(";
   if (!fields.empty()) {
@@ -1080,7 +1084,7 @@ void t_java_deprecated_generator::generate_java_constructor(
  */
 void t_java_deprecated_generator::generate_java_constructor_using_builder(
     ofstream& out,
-    const t_struct* tstruct,
+    const t_structured* tstruct,
     const vector<t_field*>& fields,
     uint32_t bitset_size,
     bool useDefaultConstructor) {
@@ -1201,7 +1205,7 @@ void t_java_deprecated_generator::generate_java_constructor_using_builder(
  * @param is_result    If this is a result it needs a different writer
  */
 void t_java_deprecated_generator::generate_java_struct_definition(
-    ofstream& out, const t_struct* tstruct, StructGenParams params) {
+    ofstream& out, const t_structured* tstruct, StructGenParams params) {
   generate_java_doc(out, tstruct);
 
   bool is_final = tstruct->has_annotation("final");
@@ -1416,7 +1420,7 @@ void t_java_deprecated_generator::generate_java_struct_definition(
 }
 
 void t_java_deprecated_generator::construct_constant_fields(
-    ofstream& out, const t_struct* tstruct) {
+    ofstream& out, const t_structured* tstruct) {
   auto& members = tstruct->get_members();
   for (auto m_iter = members.begin(); m_iter != members.end(); ++m_iter) {
     const t_type* t = (*m_iter)->get_type()->get_true_type();
@@ -1438,7 +1442,7 @@ void t_java_deprecated_generator::construct_constant_fields(
  * @param tstruct The struct definition
  */
 void t_java_deprecated_generator::generate_java_struct_equality(
-    ofstream& out, const t_struct* tstruct) {
+    ofstream& out, const t_structured* tstruct) {
   out << indent() << "@Override" << endl
       << indent() << "public boolean equals(Object _that) {" << endl;
   indent_up();
@@ -1504,7 +1508,7 @@ void t_java_deprecated_generator::generate_java_struct_equality(
 }
 
 void t_java_deprecated_generator::generate_java_struct_compare_to(
-    ofstream& out, const t_struct* tstruct) {
+    ofstream& out, const t_structured* tstruct) {
   indent(out) << "@Override" << endl;
   indent(out) << "public int compareTo(" << type_name(tstruct) << " other) {"
               << endl;
@@ -1554,7 +1558,7 @@ void t_java_deprecated_generator::generate_java_struct_compare_to(
  * @param tstruct The struct definition
  */
 void t_java_deprecated_generator::generate_java_struct_reader(
-    ofstream& out, const t_struct* tstruct) {
+    ofstream& out, const t_structured* tstruct) {
   if (generate_immutable_structs_) {
     out << indent()
         << "// This is required to satisfy the TBase interface, but can't be "
@@ -1707,7 +1711,7 @@ void t_java_deprecated_generator::generate_java_struct_reader(
 // generates java method to perform various checks
 // (e.g. check that all required fields are set)
 void t_java_deprecated_generator::generate_java_validator(
-    ofstream& out, const t_struct* tstruct) {
+    ofstream& out, const t_structured* tstruct) {
   indent(out) << "public void validate() throws TException {" << endl;
   indent_up();
 
@@ -1742,7 +1746,7 @@ void t_java_deprecated_generator::generate_java_validator(
  * @param tstruct The struct definition
  */
 void t_java_deprecated_generator::generate_java_struct_writer(
-    ofstream& out, const t_struct* tstruct) {
+    ofstream& out, const t_structured* tstruct) {
   out << indent() << "public void write(TProtocol oprot) throws TException {"
       << endl;
   indent_up();
@@ -1804,7 +1808,7 @@ void t_java_deprecated_generator::generate_java_struct_writer(
  * @param tstruct The struct definition
  */
 void t_java_deprecated_generator::generate_java_struct_result_writer(
-    ofstream& out, const t_struct* tstruct) {
+    ofstream& out, const t_structured* tstruct) {
   out << indent() << "public void write(TProtocol oprot) throws TException {"
       << endl;
   indent_up();
@@ -1889,7 +1893,7 @@ void t_java_deprecated_generator::generate_reflection_setters(
 }
 
 void t_java_deprecated_generator::generate_generic_field_getters_setters(
-    std::ofstream& out, const t_struct* tstruct) {
+    std::ofstream& out, const t_structured* tstruct) {
   std::ostringstream getter_stream;
   std::ostringstream setter_stream;
 
@@ -1977,7 +1981,7 @@ std::string t_java_deprecated_generator::get_simple_getter_name(
  * @param tstruct The struct definition
  */
 void t_java_deprecated_generator::generate_java_bean_boilerplate(
-    ofstream& out, const t_struct* tstruct, bool gen_immutable) {
+    ofstream& out, const t_structured* tstruct, bool gen_immutable) {
   const vector<t_field*>& fields = tstruct->get_members();
   vector<t_field*>::const_iterator f_iter;
   for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {
@@ -2067,7 +2071,7 @@ void t_java_deprecated_generator::generate_java_bean_boilerplate(
 }
 
 void t_java_deprecated_generator::generate_default_toString(
-    ofstream& out, const t_struct* /*tstruct*/) {
+    ofstream& out, const t_structured* /*tstruct*/) {
   out << indent() << "@Override" << endl
       << indent() << "public String toString() {" << endl;
   indent_up();
@@ -2082,7 +2086,7 @@ void t_java_deprecated_generator::generate_default_toString(
  * @param tstruct The struct definition
  */
 void t_java_deprecated_generator::generate_java_struct_tostring(
-    ofstream& out, const t_struct* tstruct) {
+    ofstream& out, const t_structured* tstruct) {
   generate_default_toString(out, tstruct);
   out << indent() << "@Override" << endl;
   out << indent() << "public String toString(int indent, boolean prettyPrint) {"
@@ -2214,7 +2218,7 @@ void t_java_deprecated_generator::generate_java_struct_tostring(
  * @param tstruct The struct definition
  */
 void t_java_deprecated_generator::generate_java_meta_data_map(
-    ofstream& out, const t_struct* tstruct) {
+    ofstream& out, const t_structured* tstruct) {
   const vector<t_field*>& fields = tstruct->get_members();
   vector<t_field*>::const_iterator f_iter;
 
@@ -4043,13 +4047,13 @@ std::string t_java_deprecated_generator::get_enum_class_name(
 }
 
 void t_java_deprecated_generator::generate_struct_desc(
-    ofstream& out, const t_struct* tstruct) {
+    ofstream& out, const t_structured* tstruct) {
   indent(out) << "private static final TStruct STRUCT_DESC = new TStruct(\""
               << tstruct->get_name() << "\");" << endl;
 }
 
 void t_java_deprecated_generator::generate_field_descs(
-    ofstream& out, const t_struct* tstruct) {
+    ofstream& out, const t_structured* tstruct) {
   const vector<t_field*>& members = tstruct->get_members();
   vector<t_field*>::const_iterator m_iter;
 
@@ -4067,7 +4071,7 @@ void t_java_deprecated_generator::generate_field_descs(
 }
 
 void t_java_deprecated_generator::generate_field_name_constants(
-    ofstream& out, const t_struct* tstruct) {
+    ofstream& out, const t_structured* tstruct) {
   // Members are public for -java, private for -javabean
   const vector<t_field*>& members = tstruct->get_members();
   vector<t_field*>::const_iterator m_iter;
@@ -4155,7 +4159,7 @@ bool t_java_deprecated_generator::type_has_naked_binary(const t_type* type) {
 }
 
 bool t_java_deprecated_generator::struct_has_naked_binary_fields(
-    const t_struct* tstruct) {
+    const t_structured* tstruct) {
   const vector<t_field*>& members = tstruct->get_members();
   vector<t_field*>::const_iterator m_iter;
 
@@ -4167,7 +4171,7 @@ bool t_java_deprecated_generator::struct_has_naked_binary_fields(
   return false;
 }
 
-bool t_java_deprecated_generator::has_bit_vector(const t_struct* tstruct) {
+bool t_java_deprecated_generator::has_bit_vector(const t_structured* tstruct) {
   const vector<t_field*>& members = tstruct->get_members();
   vector<t_field*>::const_iterator m_iter;
 

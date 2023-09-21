@@ -134,7 +134,7 @@ class t_mstch_generator : public t_generator {
    * of the Thrift AST into maps that can be passed into mstch.
    */
   mstch::map dump(const t_program&);
-  mstch::map dump(const t_struct&, bool shallow = false);
+  mstch::map dump(const t_structured&, bool shallow = false);
   mstch::map dump(const t_field&, int32_t index = 0);
   mstch::map dump(const t_type&);
   mstch::map dump(const t_enum&);
@@ -156,7 +156,7 @@ class t_mstch_generator : public t_generator {
    * dump has run, and can modify the maps in whichever ways necessary.
    */
   virtual mstch::map extend_program(const t_program&);
-  virtual mstch::map extend_struct(const t_struct&);
+  virtual mstch::map extend_struct(const t_structured&);
   virtual mstch::map extend_field(const t_field&);
   virtual mstch::map extend_type(const t_type&);
   virtual mstch::map extend_enum(const t_enum&);

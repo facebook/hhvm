@@ -348,7 +348,7 @@ class python_capi_mstch_program : public mstch_program {
          !program_->exceptions().empty())) {
       return true;
     }
-    for (const t_struct* s : program_->structured_definitions()) {
+    for (const t_structured* s : program_->structured_definitions()) {
       if (marshal_capi_override_annotation(*s)) {
         return true;
       }
@@ -387,7 +387,7 @@ class python_capi_mstch_program : public mstch_program {
 
   // visit structs and exceptions
   void visit_types_for_objects() {
-    for (const t_struct* object : program_->structured_definitions()) {
+    for (const t_structured* object : program_->structured_definitions()) {
       for (auto&& field : object->fields()) {
         visit_type(field.get_type());
       }

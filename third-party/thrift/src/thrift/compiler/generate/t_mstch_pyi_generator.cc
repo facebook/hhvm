@@ -299,7 +299,7 @@ class pyi_mstch_program : public mstch_program {
       }
     }
 
-    for (const t_struct* object :
+    for (const t_structured* object :
          mstch_program::program_->structured_definitions()) {
       for (const auto& field : object->fields()) {
         this->add_containers(visited, field.get_type());

@@ -76,10 +76,10 @@ class t_concat_generator : public t_generator {
   virtual void generate_enum(const t_enum* tenum) = 0;
   virtual void generate_const(const t_const* /*tconst*/) {}
   // TODO(aristidis): (2023-09-13) Change t_struct to t_structured
-  virtual void generate_forward_declaration(const t_struct* /*tstruct*/) {}
-  virtual void generate_struct(const t_struct* tstruct) = 0;
+  virtual void generate_forward_declaration(const t_structured* /*tstruct*/) {}
+  virtual void generate_struct(const t_structured* tstruct) = 0;
   virtual void generate_service(const t_service* tservice) = 0;
-  virtual void generate_xception(const t_struct* txception) {
+  virtual void generate_xception(const t_structured* txception) {
     // By default exceptions are the same as structs
     generate_struct(txception);
   }
@@ -144,7 +144,7 @@ class t_concat_generator : public t_generator {
    * two structures having same fields properties will have the same
    * structural ID.
    */
-  std::string generate_structural_id(const t_struct* t_struct);
+  std::string generate_structural_id(const t_structured* t_struct);
 
   /**
    * Creates a unique temporary variable name, which is just "name" with a

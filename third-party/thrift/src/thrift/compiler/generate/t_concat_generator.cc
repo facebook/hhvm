@@ -47,11 +47,11 @@ void t_concat_generator::generate_program() {
     generate_enum(tenum);
   }
 
-  const std::vector<t_struct*>& structured_definitions =
+  const std::vector<t_structured*>& structured_definitions =
       program_->structured_definitions();
 
   // Generate forward declarations. Typedefs may use these
-  for (const t_struct* object : structured_definitions) {
+  for (const t_structured* object : structured_definitions) {
     generate_forward_declaration(object);
   }
 
@@ -72,7 +72,7 @@ void t_concat_generator::generate_program() {
   generate_consts(consts);
 
   // Generate structs, exceptions, and unions in declared order
-  for (const t_struct* object : structured_definitions) {
+  for (const t_structured* object : structured_definitions) {
     if (object->is_exception()) {
       generate_xception(object);
     } else {
@@ -131,7 +131,7 @@ void t_concat_generator::generate_docstring_comment(
 }
 
 std::string t_concat_generator::generate_structural_id(
-    const t_struct* tstruct) {
+    const t_structured* tstruct) {
   // Generate a string that contains all the members' information:
   // key, name, type and req.
   vector<std::string> fields_str;

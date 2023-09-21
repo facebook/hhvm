@@ -61,11 +61,11 @@ class t_java_deprecated_generator : public t_concat_generator {
 
   void generate_typedef(const t_typedef* ttypedef) override;
   void generate_enum(const t_enum* tenum) override;
-  void generate_struct(const t_struct* tstruct) override;
+  void generate_struct(const t_structured* tstruct) override;
   void generate_union(const t_struct* tunion);
-  void generate_xception(const t_struct* txception) override;
+  void generate_xception(const t_structured* txception) override;
   void generate_service(const t_service* tservice) override;
-  void generate_default_toString(std::ofstream&, const t_struct*);
+  void generate_default_toString(std::ofstream&, const t_structured*);
   void generate_toString_prettyprint(std::ofstream&);
 
   virtual void print_const_value(
@@ -85,33 +85,37 @@ class t_java_deprecated_generator : public t_concat_generator {
    * Service-level generation functions
    */
 
-  void generate_java_struct(const t_struct* tstruct, bool is_exception);
+  void generate_java_struct(const t_structured* tstruct, bool is_exception);
 
   void generate_java_constructor(
       std::ofstream& out,
-      const t_struct* tstruct,
+      const t_structured* tstruct,
       const std::vector<t_field*>& fields);
   void generate_java_constructor_using_builder(
       std::ofstream& out,
-      const t_struct* tstruct,
+      const t_structured* tstruct,
       const std::vector<t_field*>& fields,
       uint32_t bitset_size,
       bool useDefaultConstructor);
   void generate_java_struct_definition(
-      std::ofstream& out, const t_struct* tstruct, StructGenParams params);
-  void construct_constant_fields(std::ofstream& out, const t_struct* tstruct);
+      std::ofstream& out, const t_structured* tstruct, StructGenParams params);
+  void construct_constant_fields(
+      std::ofstream& out, const t_structured* tstruct);
   void generate_java_struct_equality(
-      std::ofstream& out, const t_struct* tstruct);
+      std::ofstream& out, const t_structured* tstruct);
   void generate_java_struct_compare_to(
-      std::ofstream& out, const t_struct* tstruct);
-  void generate_java_struct_reader(std::ofstream& out, const t_struct* tstruct);
-  void generate_java_validator(std::ofstream& out, const t_struct* tstruct);
+      std::ofstream& out, const t_structured* tstruct);
+  void generate_java_struct_reader(
+      std::ofstream& out, const t_structured* tstruct);
+  void generate_java_validator(std::ofstream& out, const t_structured* tstruct);
   void generate_java_struct_result_writer(
-      std::ofstream& out, const t_struct* tstruct);
-  void generate_java_struct_writer(std::ofstream& out, const t_struct* tstruct);
+      std::ofstream& out, const t_structured* tstruct);
+  void generate_java_struct_writer(
+      std::ofstream& out, const t_structured* tstruct);
   void generate_java_struct_tostring(
-      std::ofstream& out, const t_struct* tstruct);
-  void generate_java_meta_data_map(std::ofstream& out, const t_struct* tstruct);
+      std::ofstream& out, const t_structured* tstruct);
+  void generate_java_meta_data_map(
+      std::ofstream& out, const t_structured* tstruct);
   void generate_field_value_meta_data(std::ofstream& out, const t_type* type);
   std::string get_java_type_string(const t_type* type);
   void generate_reflection_setters(
@@ -125,9 +129,9 @@ class t_java_deprecated_generator : public t_concat_generator {
       std::string field_name,
       std::string cap_name);
   void generate_generic_field_getters_setters(
-      std::ofstream& out, const t_struct* tstruct);
+      std::ofstream& out, const t_structured* tstruct);
   void generate_java_bean_boilerplate(
-      std::ofstream& out, const t_struct* tstruct, bool gen_immutable);
+      std::ofstream& out, const t_structured* tstruct, bool gen_immutable);
   std::string get_simple_getter_name(const t_field* field);
 
   void generate_function_helpers(const t_function* tfunction);
@@ -148,22 +152,25 @@ class t_java_deprecated_generator : public t_concat_generator {
   void generate_process_function(
       const t_service* tservice, const t_function* tfunction);
 
-  void generate_java_union(const t_struct* tstruct);
-  void generate_union_constructor(std::ofstream& out, const t_struct* tstruct);
+  void generate_java_union(const t_structured* tstruct);
+  void generate_union_constructor(
+      std::ofstream& out, const t_structured* tstruct);
   void generate_union_getters_and_setters(
-      std::ofstream& out, const t_struct* tstruct);
+      std::ofstream& out, const t_structured* tstruct);
   void generate_union_abstract_methods(
-      std::ofstream& out, const t_struct* tstruct);
-  void generate_check_type(std::ofstream& out, const t_struct* tstruct);
-  void generate_union_reader(std::ofstream& out, const t_struct* tstruct);
-  void generate_read_value(std::ofstream& out, const t_struct* tstruct);
-  void generate_write_value(std::ofstream& out, const t_struct* tstruct);
-  void generate_get_field_desc(std::ofstream& out, const t_struct* tstruct);
-  void generate_get_struct_desc(std::ofstream& out, const t_struct* tstruct);
+      std::ofstream& out, const t_structured* tstruct);
+  void generate_check_type(std::ofstream& out, const t_structured* tstruct);
+  void generate_union_reader(std::ofstream& out, const t_structured* tstruct);
+  void generate_read_value(std::ofstream& out, const t_structured* tstruct);
+  void generate_write_value(std::ofstream& out, const t_structured* tstruct);
+  void generate_get_field_desc(std::ofstream& out, const t_structured* tstruct);
+  void generate_get_struct_desc(
+      std::ofstream& out, const t_structured* tstruct);
   void generate_get_field_name(std::ofstream& out, const t_struct* tstruct);
 
-  void generate_union_comparisons(std::ofstream& out, const t_struct* tstruct);
-  void generate_union_hashcode(std::ofstream& out, const t_struct* tstruct);
+  void generate_union_comparisons(
+      std::ofstream& out, const t_structured* tstruct);
+  void generate_union_hashcode(std::ofstream& out, const t_structured* tstruct);
 
   /**
    * Serialization constructs
@@ -211,9 +218,9 @@ class t_java_deprecated_generator : public t_concat_generator {
       const t_struct* tstruct, std::vector<const t_type*>* enclosing);
 
   bool type_has_naked_binary(const t_type* type);
-  bool struct_has_naked_binary_fields(const t_struct* tstruct);
+  bool struct_has_naked_binary_fields(const t_structured* tstruct);
 
-  virtual bool has_bit_vector(const t_struct* tstruct);
+  virtual bool has_bit_vector(const t_structured* tstruct);
 
   /**
    * Helper rendering functions
@@ -229,7 +236,7 @@ class t_java_deprecated_generator : public t_concat_generator {
   std::string java_suppress_warnings_struct();
   std::string java_suppress_warnings_service();
   virtual boost::optional<std::string> java_struct_parent_class(
-      const t_struct* tstruct, StructGenParams params);
+      const t_structured* tstruct, StructGenParams params);
 
   virtual std::string type_name(
       const t_type* ttype,
@@ -258,10 +265,10 @@ class t_java_deprecated_generator : public t_concat_generator {
       bool include_types = false);
   std::string type_to_enum(const t_type* ttype);
   std::string get_enum_class_name(const t_type* type);
-  void generate_struct_desc(std::ofstream& out, const t_struct* tstruct);
-  void generate_field_descs(std::ofstream& out, const t_struct* tstruct);
+  void generate_struct_desc(std::ofstream& out, const t_structured* tstruct);
+  void generate_field_descs(std::ofstream& out, const t_structured* tstruct);
   void generate_field_name_constants(
-      std::ofstream& out, const t_struct* tstruct);
+      std::ofstream& out, const t_structured* tstruct);
 
   virtual const std::string& get_package_dir() { return package_dir_; }
 

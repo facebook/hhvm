@@ -457,9 +457,6 @@ TEST_F(PatchTest, List) {
 
 TEST_F(PatchTest, GeneratedListPatch) {
   ListPatch patch;
-  patch.prepend({3, 4});
-  patch.emplace_front(2);
-  patch.push_front(1);
   using Vec = ListPatch::value_type;
   Vec actual{5, 6};
   patch.append({7, 8});
@@ -467,11 +464,10 @@ TEST_F(PatchTest, GeneratedListPatch) {
   patch.push_back(10);
 
   auto patched = applyGeneratedPatch<type::list<type::i16_t>>(actual, patch);
-  EXPECT_EQ(patched, (Vec{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}));
+  EXPECT_EQ(patched, (Vec{5, 6, 7, 8, 9, 10}));
 
   patched = applyGeneratedPatch<type::list<type::i16_t>>(patched, patch);
-  EXPECT_EQ(
-      patched, (Vec{1, 2, 3, 4, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 7, 8, 9, 10}));
+  EXPECT_EQ(patched, (Vec{5, 6, 7, 8, 9, 10, 7, 8, 9, 10}));
 }
 
 TEST_F(PatchTest, Set) {

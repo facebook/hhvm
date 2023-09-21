@@ -95,27 +95,6 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
     assignOr(*data_.append()).push_back(std::forward<U>(val));
   }
 
-  /// Prepends a list.
-  template <typename C = T>
-  void prepend(C&& lhs) {
-    auto& rhs = assignOr(*data_.prepend());
-    rhs.insert(rhs.begin(), lhs.begin(), lhs.end());
-  }
-  /// Emplaces and prepends a new element.
-  template <typename... Args>
-  void emplace_front(Args&&... args) {
-    // TODO(afuller): Switch prepend to a std::forward_list.
-    auto& prepend = assignOr(*data_.prepend());
-    prepend.emplace(prepend.begin(), std::forward<Args>(args)...);
-  }
-  /// Prepends the given element value.
-  template <typename U = typename T::value_type>
-  void push_front(U&& val) {
-    // TODO(afuller): Switch prepend to a std::forward_list.
-    auto& prepend = assignOr(*data_.prepend());
-    prepend.insert(prepend.begin(), std::forward<U>(val));
-  }
-
   /// @copybrief AssignPatch::customVisit
   ///
   /// Users should provide a visitor with the following methods
@@ -171,6 +150,13 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
   using Base::assignOr;
   using Base::data_;
   using Base::hasAssign;
+
+  /// Prepends a list.
+  template <typename C = T>
+  void prepend(C&& lhs) {
+    auto& rhs = assignOr(*data_.prepend());
+    rhs.insert(rhs.begin(), lhs.begin(), lhs.end());
+  }
 };
 
 /// Patch for a Thrift set.

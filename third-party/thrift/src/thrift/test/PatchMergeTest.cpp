@@ -269,8 +269,6 @@ TEST(PatchMergeTest, ListPatch) {
   ops.push_back([](auto& patch) { patch = {0}; });
   ops.push_back([](auto& patch) { patch = {10}; });
   ops.push_back([](auto& patch) { patch.clear(); });
-  ops.push_back([](auto& patch) { patch.push_front(0); });
-  ops.push_back([](auto& patch) { patch.push_front(10); });
   ops.push_back([](auto& patch) { patch.push_back(0); });
   ops.push_back([](auto& patch) { patch.push_back(10); });
   pickMultipleOpsAndTest(ops, {{}, {0}}, 4);

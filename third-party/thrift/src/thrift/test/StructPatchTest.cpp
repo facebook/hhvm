@@ -405,34 +405,22 @@ TEST(StructPatchTest, OptionalFields) {
 
 TEST(StructPatchTest, ListPatch) {
   ListPatch patch;
-  patch.prepend({3, 4});
-  patch.emplace_front(2);
-  patch.push_front(1);
   ListPatch::value_type actual{5, 6};
   patch.append({7, 8});
   patch.emplace_back(9);
   patch.push_back(10);
   test::expectPatch(
-      patch,
-      actual,
-      {1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
-      {1, 2, 3, 4, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 7, 8, 9, 10});
+      patch, actual, {5, 6, 7, 8, 9, 10}, {5, 6, 7, 8, 9, 10, 7, 8, 9, 10});
 }
 
 TEST(StructPatchTest, ListDequePatch) {
   ListDequePatch patch;
-  patch.prepend({3, 4});
-  patch.emplace_front(2);
-  patch.push_front(1);
   ListDequePatch::value_type actual{5, 6};
   patch.append({7, 8});
   patch.emplace_back(9);
   patch.push_back(10);
   test::expectPatch(
-      patch,
-      actual,
-      {1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
-      {1, 2, 3, 4, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 7, 8, 9, 10});
+      patch, actual, {5, 6, 7, 8, 9, 10}, {5, 6, 7, 8, 9, 10, 7, 8, 9, 10});
 }
 
 TEST(StructPatchTest, SetPatch) {

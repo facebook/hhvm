@@ -80,7 +80,6 @@ void benchmarkMerge() {
 struct GenListPatch {
   ListPatch operator()() {
     ListPatch p;
-    p.push_front(randInt());
     p.push_back(randInt());
     return p;
   }
@@ -96,7 +95,6 @@ BENCHMARK(MergeListPatch) {
 struct GenListDequePatch {
   ListDequePatch operator()() {
     ListDequePatch p;
-    p.push_front(randInt());
     p.push_back(randInt());
     return p;
   }
@@ -245,7 +243,6 @@ BENCHMARK(MergeComplexPatch) {
 struct GenListLongStringPatch {
   ListStringPatch operator()() {
     ListStringPatch p;
-    p.push_front(randLongStr());
     p.push_back(randLongStr());
     return p;
   }

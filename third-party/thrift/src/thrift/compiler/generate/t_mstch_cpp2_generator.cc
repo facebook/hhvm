@@ -424,7 +424,7 @@ class cpp_mstch_program : public mstch_program {
     bool cpp_declare_in_structs = std::any_of(
         program_->structs_and_unions().begin(),
         program_->structs_and_unions().end(),
-        [](const auto* strct) {
+        [](const t_structured* strct) {
           return strct->has_annotation(
               {"cpp.declare_hash", "cpp2.declare_hash"});
         });
@@ -2657,13 +2657,13 @@ class annotation_validator : public validator {
   /**
    * Make sure there is no incompatible annotation.
    */
-  bool visit(t_struct* s) override;
+  bool visit(t_structured* s) override;
 
  private:
   const std::map<std::string, std::string>& options_;
 };
 
-bool annotation_validator::visit(t_struct* s) {
+bool annotation_validator::visit(t_structured* s) {
   if (cpp2::packed_isset(*s)) {
     if (options_.count("tablebased") != 0) {
       report_error(

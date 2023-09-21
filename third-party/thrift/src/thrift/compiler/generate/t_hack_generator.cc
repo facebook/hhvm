@@ -1499,7 +1499,7 @@ void t_hack_generator::init_generator() {
 
   if (!program_->structs_and_unions().empty()) {
     bool codegen_file_open = false;
-    for (const auto* tstruct : program_->structs_and_unions()) {
+    for (const t_structured* tstruct : program_->structs_and_unions()) {
       auto [wrapper, name, ns] = find_hack_wrapper(tstruct, false);
       if (wrapper) {
         if (!codegen_file_open) {

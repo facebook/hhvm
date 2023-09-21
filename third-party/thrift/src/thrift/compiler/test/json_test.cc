@@ -67,10 +67,10 @@ TEST(JsonTest, to_json_t_const_value) {
     struct MyStruct{}
   )");
 
-  const std::vector<t_struct*>& structs = program->structs_and_unions();
+  const std::vector<t_structured*>& structs = program->structs_and_unions();
   EXPECT_EQ(structs.size(), 3);
 
-  const t_struct* my_struct = structs[2];
+  const t_structured* my_struct = structs[2];
   auto annotations = my_struct->structured_annotations();
   EXPECT_EQ(annotations.size(), 1);
 

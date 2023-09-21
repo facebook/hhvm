@@ -112,7 +112,7 @@ bool is_type_go_comparable(
 std::string get_go_field_name(const t_field* field);
 std::string get_go_func_name(const t_function* func);
 
-std::set<std::string> get_struct_go_field_names(const t_struct* struct_);
+std::set<std::string> get_struct_go_field_names(const t_structured* tstruct);
 
 std::vector<t_struct*> get_service_req_resp_structs(const t_service* service);
 

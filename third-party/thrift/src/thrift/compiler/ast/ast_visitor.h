@@ -136,12 +136,16 @@ class basic_ast_visitor {
     // TODO(afuller): Split structs and unions in t_program accessors.
     // Note: Loop must be resilient to visitor causing push_back calls.
     for (size_t i = 0; i < node.structs_and_unions().size(); ++i) {
-      auto* struct_or_union = node.structs_and_unions()[i];
+      t_structured* struct_or_union = node.structs_and_unions()[i];
       if (auto* tunion = ast_detail::as<t_union>(struct_or_union)) {
         this->operator()(args..., *tunion);
-      } else {
-        this->operator()(args..., *struct_or_union);
+        continue;
       }
+
+      // if node is not a union, then it must be a struct
+      auto* tstruct = ast_detail::as<t_struct>(struct_or_union);
+      assert(tstruct != nullptr);
+      this->operator()(args..., *tstruct);
     }
     visit_children_ptrs(node.exceptions(), args...);
     visit_children_ptrs(node.typedefs(), args...);

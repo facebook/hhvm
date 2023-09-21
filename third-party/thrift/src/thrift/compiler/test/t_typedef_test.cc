@@ -17,7 +17,7 @@
 #include <folly/portability/GTest.h>
 
 #include <thrift/compiler/ast/t_field.h>
-#include <thrift/compiler/ast/t_struct.h>
+#include <thrift/compiler/ast/t_structured.h>
 #include <thrift/compiler/ast/t_type.h>
 #include <thrift/compiler/diagnostic.h>
 #include <thrift/compiler/parse/parse_ast.h>
@@ -39,11 +39,11 @@ TEST(TypedefTest, bad_true_type) {
   auto programs = parse_ast(source_mgr, diags, "test.thrift", {});
   auto program = programs->root_program();
 
-  const std::vector<t_struct*>& structs = program->structs_and_unions();
+  const std::vector<t_structured*>& structs = program->structs_and_unions();
 
   EXPECT_EQ(structs.size(), 1);
 
-  const t_struct* my_struct = structs[0];
+  const t_structured* my_struct = structs[0];
 
   // Control case
   const t_field* first_field = my_struct->get_field_by_id(1);
@@ -156,7 +156,7 @@ TEST(TypedefTest, enum_values_as_consts) {
     }
   )");
 
-  const std::vector<t_struct*>& structs = program->structs_and_unions();
+  const std::vector<t_structured*>& structs = program->structs_and_unions();
   ASSERT_EQ(structs.size(), 1);
   const t_field* my_first_enum = structs[0]->get_field_by_id(1);
   ASSERT_NE(my_first_enum, nullptr);

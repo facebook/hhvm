@@ -24,7 +24,7 @@
 #include <thrift/compiler/ast/t_field.h>
 #include <thrift/compiler/ast/t_program.h>
 #include <thrift/compiler/ast/t_service.h>
-#include <thrift/compiler/ast/t_struct.h>
+#include <thrift/compiler/ast/t_structured.h>
 
 namespace apache {
 namespace thrift {
@@ -56,7 +56,7 @@ class visitor {
   virtual bool visit(t_program* program);
   virtual bool visit(t_service* service);
   virtual bool visit(t_enum* tenum);
-  virtual bool visit(t_struct* tstruct);
+  virtual bool visit(t_structured* tstruct);
   virtual bool visit(t_field* tfield);
   virtual bool visit(t_const* tconst);
 
@@ -71,14 +71,14 @@ class visitor {
   virtual void visit_and_recurse(t_program* program);
   virtual void visit_and_recurse(t_service* service);
   virtual void visit_and_recurse(t_enum* tenum);
-  virtual void visit_and_recurse(t_struct* tstruct);
+  virtual void visit_and_recurse(t_structured* tstruct);
   virtual void visit_and_recurse(t_field* tfield);
   virtual void visit_and_recurse(t_const* tconst);
 
   void recurse(t_program* program);
   void recurse(t_service* service);
   void recurse(t_enum* tenum);
-  void recurse(t_struct* tstruct);
+  void recurse(t_structured* tstruct);
   void recurse(t_field* tfield);
   void recurse(t_const* tconst);
 };
@@ -102,7 +102,7 @@ class interleaved_visitor : public visitor {
   void visit_and_recurse(t_program* program) override;
   void visit_and_recurse(t_service* service) override;
   void visit_and_recurse(t_enum* tenum) override;
-  void visit_and_recurse(t_struct* tstruct) override;
+  void visit_and_recurse(t_structured* tstruct) override;
   void visit_and_recurse(t_field* tfield) override;
   void visit_and_recurse(t_const* tconst) override;
 

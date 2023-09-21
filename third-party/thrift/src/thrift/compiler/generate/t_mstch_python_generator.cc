@@ -306,7 +306,7 @@ class python_mstch_program : public mstch_program {
   }
 
   void visit_types_for_adapters() {
-    for (const auto& strct : program_->structs_and_unions()) {
+    for (const t_structured* strct : program_->structs_and_unions()) {
       if (auto annotation = find_structured_adapter_annotation(*strct)) {
         extract_module_and_insert_to(
             get_annotation_property(annotation, "name"), adapter_modules_);
@@ -864,7 +864,7 @@ class enum_member_union_field_names_validator : virtual public validator {
     return true;
   }
 
-  bool visit(t_struct* s) override {
+  bool visit(t_structured* s) override {
     if (!s->is_union()) {
       return false;
     }

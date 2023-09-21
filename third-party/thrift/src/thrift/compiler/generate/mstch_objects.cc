@@ -578,7 +578,7 @@ mstch::node mstch_const::field() {
 }
 
 mstch::node mstch_program::has_thrift_uris() {
-  for (const auto& strct : program_->structs_and_unions()) {
+  for (const t_structured* strct : program_->structs_and_unions()) {
     if (!strct->uri().empty()) {
       return true;
     }

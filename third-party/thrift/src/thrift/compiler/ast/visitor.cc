@@ -36,7 +36,7 @@ bool visitor::visit(t_enum* const /* tenum */) {
   return true;
 }
 
-bool visitor::visit(t_struct* const /* tstruct */) {
+bool visitor::visit(t_structured* const /* tstruct */) {
   return true;
 }
 
@@ -66,7 +66,7 @@ void visitor::visit_and_recurse(t_enum* const tenum) {
   }
 }
 
-void visitor::visit_and_recurse(t_struct* const tstruct) {
+void visitor::visit_and_recurse(t_structured* const tstruct) {
   if (visit(tstruct)) {
     recurse(tstruct);
   }
@@ -85,19 +85,19 @@ void visitor::visit_and_recurse(t_const* const tconst) {
 }
 
 void visitor::recurse(t_program* const program) {
-  for (auto* const service : program->services()) {
+  for (t_service* const service : program->services()) {
     visit_and_recurse(service);
   }
-  for (auto* const tenum : program->enums()) {
+  for (t_enum* const tenum : program->enums()) {
     visit_and_recurse(tenum);
   }
-  for (auto* tstruct : program->structs_and_unions()) {
+  for (t_structured* const tstruct : program->structs_and_unions()) {
     visit_and_recurse(tstruct);
   }
-  for (auto* texception : program->exceptions()) {
+  for (t_exception* const texception : program->exceptions()) {
     visit_and_recurse(texception);
   }
-  for (auto* tconst : program->consts()) {
+  for (t_const* const tconst : program->consts()) {
     visit_and_recurse(tconst);
   }
 }
@@ -110,7 +110,7 @@ void visitor::recurse(t_enum* const /* tenum */) {
   // partial implementation - that's the end of the line for now
 }
 
-void visitor::recurse(t_struct* const tstruct) {
+void visitor::recurse(t_structured* const tstruct) {
   for (auto* tfield : tstruct->get_members()) {
     visit_and_recurse(tfield);
   }
@@ -139,7 +139,7 @@ void interleaved_visitor::visit_and_recurse(t_enum* const tenum) {
   visit_and_recurse_gen(tenum);
 }
 
-void interleaved_visitor::visit_and_recurse(t_struct* const tstruct) {
+void interleaved_visitor::visit_and_recurse(t_structured* const tstruct) {
   visit_and_recurse_gen(tstruct);
 }
 

@@ -135,7 +135,7 @@ void codegen_data::compute_go_package_aliases() {
 }
 
 void codegen_data::compute_struct_to_field_names() {
-  for (t_struct* struct_ : current_program_->structs_and_unions()) {
+  for (t_structured* struct_ : current_program_->structs_and_unions()) {
     struct_to_field_names[struct_->name()] =
         go::get_struct_go_field_names(struct_);
   }
@@ -436,10 +436,10 @@ std::string get_go_field_name(const t_field* field) {
   return name;
 }
 
-std::set<std::string> get_struct_go_field_names(const t_struct* struct_) {
+std::set<std::string> get_struct_go_field_names(const t_structured* tstruct) {
   // Returns a set of Go field names from the given struct.
   std::set<std::string> field_names;
-  for (const t_field& field : struct_->fields()) {
+  for (const t_field& field : tstruct->fields()) {
     field_names.insert(go::get_go_field_name(&field));
   }
   return field_names;

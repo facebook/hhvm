@@ -354,7 +354,7 @@ class py3_mstch_program : public mstch_program {
   }
 
   void visit_types_for_mixin_fields() {
-    for (const auto* strct : program_->structs_and_unions()) {
+    for (const t_structured* strct : program_->structs_and_unions()) {
       if (is_hidden(*strct)) {
         continue;
       }
@@ -1145,7 +1145,7 @@ class enum_member_union_field_names_validator : virtual public validator {
     return true;
   }
 
-  bool visit(t_struct* s) override {
+  bool visit(t_structured* s) override {
     if (!s->is_union()) {
       return false;
     }

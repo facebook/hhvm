@@ -129,7 +129,7 @@ class t_program : public t_named {
   const std::vector<t_enum*>& enums() const { return enums_; }
   const std::vector<t_const*>& consts() const { return consts_; }
 
-  const std::vector<t_struct*>& structs_and_unions() const {
+  const std::vector<t_structured*>& structs_and_unions() const {
     return structs_and_unions_;
   }
 
@@ -297,7 +297,7 @@ class t_program : public t_named {
 
   // This includes both structs and unions (but no other derived type of
   // t_struct, i.e. no exceptions, t_paramlist, etc.).
-  std::vector<t_struct*> structs_and_unions_;
+  std::vector<t_structured*> structs_and_unions_;
 
   std::vector<t_exception*> exceptions_;
 

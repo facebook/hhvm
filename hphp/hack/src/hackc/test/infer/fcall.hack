@@ -146,6 +146,7 @@ function fcall_nullsafe(?C $c): void {
 // CHECK:   n5 = $builtins.hhbc_throw(n4)
 // CHECK:   unreachable
 // CHECK: #b3:
+// CHECK:   store &$0 <- null: *HackMixed
 // CHECK:   ret null
 // CHECK: }
 function fcall_class_meth(): void {
@@ -171,6 +172,7 @@ function fcall_class_meth(): void {
 // CHECK:   n4 = $builtins.hhbc_throw(n3)
 // CHECK:   unreachable
 // CHECK: #b3:
+// CHECK:   store &$0 <- null: *HackMixed
 // CHECK:   ret null
 // CHECK: }
 function fcall_func_invoke(): void {
@@ -213,6 +215,7 @@ function fcall_splat(): void {
 // CHECK:   n5 = $builtins.hhbc_throw(n4)
 // CHECK:   unreachable
 // CHECK: #b3:
+// CHECK:   store &$0 <- null: *HackMixed
 // CHECK:   ret null
 // CHECK: }
 function fcall_meth_caller(C $b): void {

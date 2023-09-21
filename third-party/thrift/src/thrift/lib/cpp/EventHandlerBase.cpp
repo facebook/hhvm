@@ -59,13 +59,6 @@ EventHandlerBase::getEventHandlers() const {
 TProcessorBase::TProcessorBase() {
   RLock lock{getRWMutex()};
 
-  for (auto factory : getFactories()) {
-    auto handler = factory->getEventHandler();
-    if (handler) {
-      addEventHandler(handler);
-    }
-  }
-
   for (const auto& handler : getHandlers()) {
     addNotNullEventHandler(handler);
   }
@@ -94,36 +87,11 @@ void TProcessorBase::removeProcessorEventHandler(
       getHandlers().end());
 }
 
-void TProcessorBase::addProcessorEventHandlerFactory(
-    std::shared_ptr<TProcessorEventHandlerFactory> factory) {
-  WLock lock{getRWMutex()};
-  assert(
-      find(getFactories().begin(), getFactories().end(), factory) ==
-      getFactories().end());
-  getFactories().push_back(factory);
-}
-
-void TProcessorBase::removeProcessorEventHandlerFactory(
-    std::shared_ptr<TProcessorEventHandlerFactory> factory) {
-  WLock lock{getRWMutex()};
-  assert(
-      find(getFactories().begin(), getFactories().end(), factory) !=
-      getFactories().end());
-  getFactories().erase(
-      remove(getFactories().begin(), getFactories().end(), factory),
-      getFactories().end());
-}
-
 RWMutex& TProcessorBase::getRWMutex() {
   static auto* mutex = new RWMutex{};
   return *mutex;
 }
 
-vector<shared_ptr<TProcessorEventHandlerFactory>>&
-TProcessorBase::getFactories() {
-  static vector<shared_ptr<TProcessorEventHandlerFactory>> factories;
-  return factories;
-}
 vector<folly::not_null_shared_ptr<TProcessorEventHandler>>&
 TProcessorBase::getHandlers() {
   static vector<folly::not_null_shared_ptr<TProcessorEventHandler>> handlers;
@@ -141,9 +109,8 @@ TClientBase::TClientBase(Options options) {
   // handler, and attach the handlers
   RLock lock{getRWMutex()};
 
-  auto& factories = getFactories();
   auto& handlers = getHandlers();
-  size_t capacity = factories.size() + handlers.size();
+  size_t capacity = handlers.size();
 
   if (capacity != 0) {
     // Initialize the handlers_ in the ctor to be owner of vector object.
@@ -151,13 +118,6 @@ TClientBase::TClientBase(Options options) {
         std::vector<std::shared_ptr<TProcessorEventHandler>>>();
     // production data suggests reserving capacity here.
     handlers_->reserve(capacity);
-
-    for (const auto& factory : factories) {
-      auto handler = factory->getEventHandler();
-      if (handler) {
-        addEventHandler(handler);
-      }
-    }
 
     for (const auto& handler : handlers) {
       addNotNullEventHandler(handler);
@@ -187,34 +147,12 @@ void TClientBase::removeClientEventHandler(
       remove(getHandlers().begin(), getHandlers().end(), handler),
       getHandlers().end());
 }
-void TClientBase::addClientEventHandlerFactory(
-    std::shared_ptr<TProcessorEventHandlerFactory> factory) {
-  WLock lock{getRWMutex()};
-  assert(
-      find(getFactories().begin(), getFactories().end(), factory) ==
-      getFactories().end());
-  getFactories().push_back(factory);
-}
-
-void TClientBase::removeClientEventHandlerFactory(
-    std::shared_ptr<TProcessorEventHandlerFactory> factory) {
-  WLock lock{getRWMutex()};
-  assert(
-      find(getFactories().begin(), getFactories().end(), factory) !=
-      getFactories().end());
-  getFactories().erase(
-      remove(getFactories().begin(), getFactories().end(), factory),
-      getFactories().end());
-}
 
 RWMutex& TClientBase::getRWMutex() {
   static auto* mutex = new RWMutex{};
   return *mutex;
 }
-vector<shared_ptr<TProcessorEventHandlerFactory>>& TClientBase::getFactories() {
-  static vector<shared_ptr<TProcessorEventHandlerFactory>> factories;
-  return factories;
-}
+
 vector<folly::not_null_shared_ptr<TProcessorEventHandler>>&
 TClientBase::getHandlers() {
   static vector<folly::not_null_shared_ptr<TProcessorEventHandler>> handlers;

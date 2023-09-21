@@ -47,18 +47,6 @@ class EventHandler : public TProcessorEventHandler {
   }
 };
 
-class EventHandlerFactory : public TProcessorEventHandlerFactory {
- public:
-  explicit EventHandlerFactory(std::shared_ptr<EventHandler> handler)
-      : handler_(std::move(handler)) {}
-  std::shared_ptr<TProcessorEventHandler> getEventHandler() override {
-    return handler_;
-  }
-
- private:
-  std::shared_ptr<EventHandler> handler_;
-};
-
 template <class E>
 exception_ptr to_eptr(const E& e) {
   try {
@@ -163,33 +151,4 @@ TEST_F(TProcessorEventHandlerTest, registrationActivity) {
   EXPECT_EQ(count(), 1);
   TProcessorBase::removeProcessorEventHandler(h2);
   EXPECT_EQ(count(), 0);
-}
-
-TEST_F(TProcessorEventHandlerTest, registerMultipleProcessorHandlerAndFactory) {
-  auto h1 = std::make_shared<EventHandler>();
-  auto h2 = std::make_shared<EventHandler>();
-  auto hf1 = std::make_shared<EventHandler>();
-  auto hf2 = std::make_shared<EventHandler>();
-  auto f1 = std::make_shared<EventHandlerFactory>(hf1);
-  auto f2 = std::make_shared<EventHandlerFactory>(hf2);
-
-  auto size = []() { return TProcessorTester().getEventHandlers().size(); };
-
-  EXPECT_EQ(size(), 0);
-  TProcessorBase::addProcessorEventHandler(h1);
-  EXPECT_EQ(size(), 1);
-  TProcessorBase::addProcessorEventHandler(h2);
-  EXPECT_EQ(size(), 2);
-  TProcessorBase::addProcessorEventHandlerFactory(f1);
-  EXPECT_EQ(size(), 3);
-  TProcessorBase::addProcessorEventHandlerFactory(f2);
-  EXPECT_EQ(size(), 4);
-  TProcessorBase::removeProcessorEventHandler(h1);
-  EXPECT_EQ(size(), 3);
-  TProcessorBase::removeProcessorEventHandlerFactory(f2);
-  EXPECT_EQ(size(), 2);
-  TProcessorBase::removeProcessorEventHandlerFactory(f1);
-  EXPECT_EQ(size(), 1);
-  TProcessorBase::removeProcessorEventHandler(h2);
-  EXPECT_EQ(size(), 0);
 }

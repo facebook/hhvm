@@ -30,14 +30,7 @@ TEST(ClientTest, ReadHeaderAvailableToEventProcessor) {
     }
   };
 
-  struct EventHandlerFactory : TProcessorEventHandlerFactory {
-    std::shared_ptr<TProcessorEventHandler> getEventHandler() override {
-      return std::make_shared<EventHandler>();
-    }
-  };
-
-  TClientBase::addClientEventHandlerFactory(
-      std::make_shared<EventHandlerFactory>());
+  TClientBase::addClientEventHandler(std::make_shared<EventHandler>());
 
   struct Handler : apache::thrift::ServiceHandler<test::HandlerGeneric> {
     void get_string(std::string&) override {

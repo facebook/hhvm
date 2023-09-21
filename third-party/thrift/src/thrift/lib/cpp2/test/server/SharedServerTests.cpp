@@ -379,16 +379,9 @@ TEST_P(SharedServerTests, FreeCallbackTest) {
 }
 
 namespace {
-class TestServerEventHandler
-    : public server::TServerEventHandler,
-      public TProcessorEventHandler,
-      public TProcessorEventHandlerFactory,
-      public std::enable_shared_from_this<TestServerEventHandler> {
+class TestServerEventHandler : public server::TServerEventHandler,
+                               public TProcessorEventHandler {
  public:
-  std::shared_ptr<TProcessorEventHandler> getEventHandler() override {
-    return shared_from_this();
-  }
-
   void check() { EXPECT_EQ(8, count); }
   void preServe(const folly::SocketAddress*) override { EXPECT_EQ(0, count++); }
   void newConnection(TConnectionContext*) override { EXPECT_EQ(1, count++); }
@@ -417,7 +410,7 @@ class TestServerEventHandler
 
 TEST_P(SharedServerTests, CallbackOrderingTest) {
   auto serverHandler = std::make_shared<TestServerEventHandler>();
-  TProcessorBase::addProcessorEventHandlerFactory(serverHandler);
+  TProcessorBase::addProcessorEventHandler(serverHandler);
   serverFactory->setServerEventHandler(serverHandler);
 
   init();
@@ -429,7 +422,7 @@ TEST_P(SharedServerTests, CallbackOrderingTest) {
   base->tryRunAfterDelay([&]() { base->terminateLoopSoon(); }, 500);
   base->loopForever();
   serverHandler->check();
-  TProcessorBase::removeProcessorEventHandlerFactory(serverHandler);
+  TProcessorBase::removeProcessorEventHandler(serverHandler);
 }
 
 using testing::Combine;

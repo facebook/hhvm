@@ -56,12 +56,6 @@ class EventHandlerBase {
       handlers_;
 };
 
-class TProcessorEventHandlerFactory {
- public:
-  virtual ~TProcessorEventHandlerFactory() = default;
-  virtual std::shared_ptr<TProcessorEventHandler> getEventHandler() = 0;
-};
-
 /**
  * Base class for all thrift processors. Used to automatically attach event
  * handlers to processors at creation time.
@@ -76,12 +70,6 @@ class TProcessorBase : public EventHandlerBase {
   static void removeProcessorEventHandler(
       std::shared_ptr<TProcessorEventHandler> handler);
 
-  static void addProcessorEventHandlerFactory(
-      std::shared_ptr<TProcessorEventHandlerFactory> factory);
-
-  static void removeProcessorEventHandlerFactory(
-      std::shared_ptr<TProcessorEventHandlerFactory> factory);
-
  protected:
   ~TProcessorBase() override = default;
 
@@ -90,8 +78,6 @@ class TProcessorBase : public EventHandlerBase {
 
   static std::vector<folly::not_null_shared_ptr<TProcessorEventHandler>>&
   getHandlers();
-  static std::vector<std::shared_ptr<TProcessorEventHandlerFactory>>&
-  getFactories();
 };
 
 /**
@@ -122,19 +108,11 @@ class TClientBase : public EventHandlerBase {
   static void removeClientEventHandler(
       std::shared_ptr<TProcessorEventHandler> handler);
 
-  static void addClientEventHandlerFactory(
-      std::shared_ptr<TProcessorEventHandlerFactory> factory);
-
-  static void removeClientEventHandlerFactory(
-      std::shared_ptr<TProcessorEventHandlerFactory> factory);
-
  private:
   static folly::SharedMutex& getRWMutex();
 
   static std::vector<folly::not_null_shared_ptr<TProcessorEventHandler>>&
   getHandlers();
-  static std::vector<std::shared_ptr<TProcessorEventHandlerFactory>>&
-  getFactories();
 };
 
 } // namespace thrift

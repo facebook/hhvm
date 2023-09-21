@@ -61,7 +61,7 @@ void HQConnector::connect(
         quicTransportStatsCallback) {
 
   DCHECK(!isBusy());
-  auto sock = std::make_unique<folly::AsyncUDPSocket>(eventBase);
+  auto sock = std::make_unique<quic::QuicAsyncUDPSocketWrapper>(eventBase);
   auto quicClient = quic::QuicClientTransport::newClient(
       eventBase,
       std::move(sock),

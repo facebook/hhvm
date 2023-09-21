@@ -154,7 +154,7 @@ folly::AsyncTransport::UniquePtr createQuicSocket(
       .shouldUseRecvmmsgForBatchRecv = true,
   };
 
-  auto sock = std::make_unique<folly::AsyncUDPSocket>(evb);
+  auto sock = std::make_unique<quic::QuicAsyncUDPSocketWrapper>(evb);
   constexpr size_t kBufSize = 4 * 1024 * 1024;
   sock->setRcvBuf(kBufSize);
   sock->setSndBuf(kBufSize);

@@ -192,7 +192,7 @@ void H3DatagramAsyncSocket::startClient() {
     transportSettings.datagramConfig.readBufSize = rcvBufPkts_;
   }
   if (!upstreamSession_) {
-    auto sock = std::make_unique<folly::AsyncUDPSocket>(evb_);
+    auto sock = std::make_unique<quic::QuicAsyncUDPSocketWrapper>(evb_);
     auto fizzClientContext =
         quic::FizzClientQuicHandshakeContext::Builder()
             .setFizzClientContext(createFizzClientContext())

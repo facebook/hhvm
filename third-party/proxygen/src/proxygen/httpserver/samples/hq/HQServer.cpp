@@ -39,7 +39,7 @@ class HQServerTransportFactory : public quic::QuicServerTransportFactory {
   // Creates new quic server transport
   quic::QuicServerTransport::Ptr make(
       folly::EventBase* evb,
-      std::unique_ptr<folly::AsyncUDPSocket> socket,
+      std::unique_ptr<quic::QuicAsyncUDPSocketWrapper> socket,
       const folly::SocketAddress& /* peerAddr */,
       quic::QuicVersion quicVersion,
       std::shared_ptr<const fizz::server::FizzServerContext> ctx) noexcept
@@ -208,7 +208,7 @@ HQServerTransportFactory::HQServerTransportFactory(
 
 QuicServerTransport::Ptr HQServerTransportFactory::make(
     folly::EventBase* evb,
-    std::unique_ptr<folly::AsyncUDPSocket> socket,
+    std::unique_ptr<quic::QuicAsyncUDPSocketWrapper> socket,
     const folly::SocketAddress& /* peerAddr */,
     quic::QuicVersion,
     std::shared_ptr<const FizzServerContext> ctx) noexcept {

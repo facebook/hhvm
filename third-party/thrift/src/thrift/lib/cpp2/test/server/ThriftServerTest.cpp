@@ -3300,7 +3300,7 @@ TEST(ThriftServer, PooledRocketSyncChannel) {
 
 static std::shared_ptr<quic::QuicClientTransport> makeQuicClient(
     folly::EventBase& evb, folly::SocketAddress&& peerAddr) {
-  auto sock = std::make_unique<folly::AsyncUDPSocket>(&evb);
+  auto sock = std::make_unique<quic::QuicAsyncUDPSocketWrapper>(&evb);
   auto ctx = std::make_shared<fizz::client::FizzClientContext>();
   ctx->setSupportedAlpns({"rs"});
   auto verifier = fizz::DefaultCertificateVerifier::createFromCAFiles(

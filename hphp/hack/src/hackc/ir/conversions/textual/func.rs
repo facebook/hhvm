@@ -695,11 +695,12 @@ fn write_copy(state: &mut FuncState<'_, '_, '_>, iid: InstrId, vid: ValueId) -> 
                 Constant::Float(f) => Expr::Const(Const::Float(*f)),
                 Constant::FuncCred => todo!(),
                 Constant::Int(i) => hack::expr_builtin(Builtin::Int, [Expr::Const(Const::Int(*i))]),
+                Constant::LazyClass(_cid) => todo!(),
                 Constant::Method => todo!(),
                 Constant::Named(..) => todo!(),
                 Constant::NewCol(..) => todo!(),
                 Constant::Null => Expr::Const(Const::Null),
-                Constant::String(s) | Constant::LazyClass(ClassId { id: s }) => {
+                Constant::String(s) => {
                     let s = util::escaped_string(&state.strings.lookup_bytes(*s));
                     hack::expr_builtin(Builtin::String, [Expr::Const(Const::String(s))])
                 }
@@ -1172,8 +1173,12 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
                     Constant::Bool(false) => hack::expr_builtin(Builtin::Bool, [false]),
                     Constant::Bool(true) => hack::expr_builtin(Builtin::Bool, [true]),
                     Constant::Int(i) => hack::expr_builtin(Builtin::Int, [*i]),
+                    Constant::LazyClass(cid) => {
+                        let ty = TypeName::Class(*cid);
+                        textual::Expr::Const(textual::Const::LazyClass(ty))
+                    }
                     Constant::Null => textual::Expr::null(),
-                    Constant::String(s) | Constant::LazyClass(ClassId { id: s }) => {
+                    Constant::String(s) => {
                         let s = self.strings.lookup_bstr(*s);
                         let s = util::escaped_string(&s);
                         hack::expr_builtin(Builtin::String, [s])

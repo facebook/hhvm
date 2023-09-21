@@ -220,7 +220,7 @@ impl<'a> TextualFile<'a> {
             // Special case - for a true value just emit the key.
             if !matches!(v, Const::True) {
                 self.w.write_all(b"=")?;
-                write!(self.w, "{}", FmtConst(v))?;
+                write!(self.w, "{}", FmtConst(v, &self.strings))?;
             }
             self.w.write_all(b" ")?;
         }
@@ -693,6 +693,9 @@ pub(crate) enum Const {
     False,
     Float(FloatBits),
     Int(i64),
+    /// A LazyClass represents a class that we know the name of but don't
+    /// necessarily know is a real class. It's created via C::class.
+    LazyClass(TypeName),
     Null,
     String(AsciiString),
     True,
@@ -728,19 +731,20 @@ impl From<i64> for Const {
     }
 }
 
-struct FmtConst<'a>(&'a Const);
+struct FmtConst<'a>(&'a Const, &'a StringInterner);
 
 impl fmt::Display for FmtConst<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let FmtConst(const_) = *self;
+        let FmtConst(const_, strings) = *self;
         match const_ {
             Const::False => f.write_str("false"),
             Const::Float(d) => write!(f, "{:?}", d.to_f64()),
             Const::Int(i) => i.fmt(f),
+            Const::LazyClass(ref s) => write!(f, "__sil_get_lazy_class(<{}>)", s.display(strings)),
             Const::Null => f.write_str("null"),
             Const::String(ref s) => {
                 // String should already be escaped...
-                write!(f, "\"{}\"", s)
+                write!(f, "\"{s}\"")
             }
             Const::True => f.write_str("true"),
         }
@@ -1010,7 +1014,7 @@ impl FuncBuilder<'_, '_> {
             Expr::Call(ref target, ref params) => {
                 self.write_call_expr(target, params)?;
             }
-            Expr::Const(ref c) => write!(self.txf.w, "{}", FmtConst(c))?,
+            Expr::Const(ref c) => write!(self.txf.w, "{}", FmtConst(c, &self.txf.strings))?,
             Expr::Deref(ref var) => {
                 self.txf.w.write_all(b"&")?;
                 self.write_expr(var)?;

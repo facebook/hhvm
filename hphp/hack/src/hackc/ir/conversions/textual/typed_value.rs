@@ -14,6 +14,7 @@ use textual::Const;
 use textual::Expr;
 
 use crate::hack;
+use crate::mangle::TypeName;
 use crate::textual;
 use crate::util;
 
@@ -24,7 +25,8 @@ pub(crate) fn typed_value_expr(tv: &TypedValue, strings: &StringInterner) -> Exp
         TypedValue::Bool(false) => hack::expr_builtin(Builtin::Bool, [Expr::Const(Const::False)]),
         TypedValue::Bool(true) => hack::expr_builtin(Builtin::Bool, [Expr::Const(Const::True)]),
         TypedValue::Float(f) => hack::expr_builtin(Builtin::Float, [Expr::Const(Const::Float(f))]),
-        TypedValue::String(s) | TypedValue::LazyClass(ClassId { id: s }) => {
+        TypedValue::LazyClass(cid) => Expr::Const(Const::LazyClass(TypeName::Class(cid))),
+        TypedValue::String(s) => {
             let s = util::escaped_string(&strings.lookup_bytes(s));
             hack::expr_builtin(Builtin::String, [Expr::Const(Const::String(s))])
         }

@@ -9,7 +9,6 @@ use ir::instr::Terminator;
 use ir::newtype::ConstantIdSet;
 use ir::BlockId;
 use ir::BlockIdSet;
-use ir::ClassId;
 use ir::Constant;
 use ir::ConstantId;
 use ir::Func;
@@ -156,6 +155,7 @@ fn sort_and_filter_constants(
             | Constant::File
             | Constant::FuncCred
             | Constant::Int(..)
+            | Constant::LazyClass(_)
             | Constant::Method
             | Constant::NewCol(..)
             | Constant::Null
@@ -167,7 +167,7 @@ fn sort_and_filter_constants(
             Constant::Named(..) => {
                 result.push(cid);
             }
-            Constant::String(s) | Constant::LazyClass(ClassId { id: s }) => {
+            Constant::String(s) => {
                 // If the string is short then just keep it inline. This makes
                 // it easier to visually read the output but may be more work
                 // for infer (because it's a call)...
@@ -192,16 +192,16 @@ fn write_constant(builder: &mut FuncBuilder<'_>, cid: ConstantId) -> (ValueId, b
         | Constant::File
         | Constant::FuncCred
         | Constant::Int(..)
+        | Constant::LazyClass(_)
         | Constant::Method
         | Constant::NewCol(..)
         | Constant::Null
         | Constant::Uninit => unreachable!(),
 
         // Insert a tombstone which will be turned into a 'copy' later.
-        Constant::Array(_)
-        | Constant::LazyClass(_)
-        | Constant::String(_)
-        | Constant::EnumClassLabel(_) => (builder.emit(Instr::tombstone()), true),
+        Constant::Array(_) | Constant::String(_) | Constant::EnumClassLabel(_) => {
+            (builder.emit(Instr::tombstone()), true)
+        }
 
         Constant::Named(name) => {
             let id = ir::GlobalId::new(ir::ConstId::from_hhbc(*name, &builder.strings).id);

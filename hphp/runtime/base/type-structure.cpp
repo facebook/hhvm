@@ -321,6 +321,20 @@ std::string fullName(const Array& arr, TypeStructure::TSDisplayType type) {
       auto const alias = tvAsVariant(tv).asCStrRef();
       name += alias.toCppString() + ':';
     }
+
+    tv = arr.lookup(s_typevar_types);
+    if (tv.is_init()) {
+      name += "typevar_types[";
+      auto const types = tvAsVariant(tv).asCArrRef();
+      bool first = true;
+      for (ArrayIter iter(types); iter; ++iter, first=false) {
+        auto key = iter.first();
+        auto value = iter.second();
+        if (!first) name += ",";
+        name += key.asCStrRef().toCppString() + ":" + fullName(value.asCArrRef(), type);
+      }
+      name += "]:";
+    }
   }
 
   assertx(arr.exists(s_kind));

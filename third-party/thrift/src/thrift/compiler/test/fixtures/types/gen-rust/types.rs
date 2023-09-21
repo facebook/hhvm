@@ -470,6 +470,7 @@ impl ::fbthrift::ThriftEnum for has_bitwise_ops {
     }
 }
 
+#[allow(clippy::derivable_impls)]
 impl ::std::default::Default for has_bitwise_ops {
     fn default() -> Self {
         Self(::std::primitive::i32::MIN)
@@ -592,6 +593,7 @@ impl ::fbthrift::ThriftEnum for is_unscoped {
     }
 }
 
+#[allow(clippy::derivable_impls)]
 impl ::std::default::Default for is_unscoped {
     fn default() -> Self {
         Self(::std::primitive::i32::MIN)
@@ -708,6 +710,7 @@ impl ::fbthrift::ThriftEnum for MyForwardRefEnum {
     }
 }
 
+#[allow(clippy::derivable_impls)]
 impl ::std::default::Default for MyForwardRefEnum {
     fn default() -> Self {
         Self(::std::primitive::i32::MIN)

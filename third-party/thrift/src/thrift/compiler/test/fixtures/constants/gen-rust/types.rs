@@ -136,6 +136,7 @@ impl ::fbthrift::ThriftEnum for EmptyEnum {
     }
 }
 
+#[allow(clippy::derivable_impls)]
 impl ::std::default::Default for EmptyEnum {
     fn default() -> Self {
         Self(::std::primitive::i32::MIN)
@@ -250,6 +251,7 @@ impl ::fbthrift::ThriftEnum for City {
     }
 }
 
+#[allow(clippy::derivable_impls)]
 impl ::std::default::Default for City {
     fn default() -> Self {
         Self(::std::primitive::i32::MIN)
@@ -372,6 +374,7 @@ impl ::fbthrift::ThriftEnum for Company {
     }
 }
 
+#[allow(clippy::derivable_impls)]
 impl ::std::default::Default for Company {
     fn default() -> Self {
         Self(::std::primitive::i32::MIN)

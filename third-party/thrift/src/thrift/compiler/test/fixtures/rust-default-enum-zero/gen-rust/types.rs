@@ -43,6 +43,7 @@ impl ::fbthrift::ThriftEnum for MyEnum {
     }
 }
 
+#[allow(clippy::derivable_impls)]
 impl ::std::default::Default for MyEnum {
     fn default() -> Self {
         Self(0)

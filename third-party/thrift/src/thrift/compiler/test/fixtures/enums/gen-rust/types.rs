@@ -75,6 +75,7 @@ impl ::fbthrift::ThriftEnum for Metasyntactic {
     }
 }
 
+#[allow(clippy::derivable_impls)]
 impl ::std::default::Default for Metasyntactic {
     fn default() -> Self {
         Self(::std::primitive::i32::MIN)
@@ -211,6 +212,7 @@ impl ::fbthrift::ThriftEnum for MyEnum1 {
     }
 }
 
+#[allow(clippy::derivable_impls)]
 impl ::std::default::Default for MyEnum1 {
     fn default() -> Self {
         Self(::std::primitive::i32::MIN)
@@ -339,6 +341,7 @@ impl ::fbthrift::ThriftEnum for MyEnum2 {
     }
 }
 
+#[allow(clippy::derivable_impls)]
 impl ::std::default::Default for MyEnum2 {
     fn default() -> Self {
         Self(::std::primitive::i32::MIN)
@@ -473,6 +476,7 @@ impl ::fbthrift::ThriftEnum for MyEnum3 {
     }
 }
 
+#[allow(clippy::derivable_impls)]
 impl ::std::default::Default for MyEnum3 {
     fn default() -> Self {
         Self(::std::primitive::i32::MIN)
@@ -605,6 +609,7 @@ impl ::fbthrift::ThriftEnum for MyEnum4 {
     }
 }
 
+#[allow(clippy::derivable_impls)]
 impl ::std::default::Default for MyEnum4 {
     fn default() -> Self {
         Self(::std::primitive::i32::MIN)
@@ -729,6 +734,7 @@ impl ::fbthrift::ThriftEnum for MyBitmaskEnum1 {
     }
 }
 
+#[allow(clippy::derivable_impls)]
 impl ::std::default::Default for MyBitmaskEnum1 {
     fn default() -> Self {
         Self(::std::primitive::i32::MIN)
@@ -851,6 +857,7 @@ impl ::fbthrift::ThriftEnum for MyBitmaskEnum2 {
     }
 }
 
+#[allow(clippy::derivable_impls)]
 impl ::std::default::Default for MyBitmaskEnum2 {
     fn default() -> Self {
         Self(::std::primitive::i32::MIN)

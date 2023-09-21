@@ -288,6 +288,7 @@ impl ::fbthrift::ThriftEnum for MyEnum {
     }
 }
 
+#[allow(clippy::derivable_impls)]
 impl ::std::default::Default for MyEnum {
     fn default() -> Self {
         Self(::std::primitive::i32::MIN)
@@ -398,6 +399,7 @@ impl ::fbthrift::ThriftEnum for TypedEnum {
     }
 }
 
+#[allow(clippy::derivable_impls)]
 impl ::std::default::Default for TypedEnum {
     fn default() -> Self {
         Self(::std::primitive::i32::MIN)

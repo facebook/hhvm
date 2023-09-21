@@ -61,6 +61,7 @@ impl ::fbthrift::ThriftEnum for {{enum:rust_name}} {
     }
 }
 
+#[allow(clippy::derivable_impls)]
 impl ::std::default::Default for {{enum:rust_name}} {
     fn default() -> Self {
         {{#program:default_enum_zero?}}

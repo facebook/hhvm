@@ -393,10 +393,6 @@ class HTTPSessionBase : public wangle::ManagedConnection {
     return transportInfo_;
   }
 
-  virtual void onNetworkSwitch(
-      std::unique_ptr<folly::AsyncUDPSocket>) noexcept {
-  }
-
   /**
    * If the connection is closed by remote end
    */

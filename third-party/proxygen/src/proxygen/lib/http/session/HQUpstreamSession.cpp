@@ -162,13 +162,6 @@ void HQUpstreamSession::detachThreadLocals(bool) {
   }
 }
 
-void HQUpstreamSession::onNetworkSwitch(
-    std::unique_ptr<folly::AsyncUDPSocket> newSock) noexcept {
-  if (sock_) {
-    sock_->onNetworkSwitch(std::move(newSock));
-  }
-}
-
 bool HQUpstreamSession::tryBindIngressStreamToTxn(
     quic::StreamId streamId,
     hq::PushId pushId,

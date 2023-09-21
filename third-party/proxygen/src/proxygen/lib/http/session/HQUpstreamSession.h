@@ -82,9 +82,6 @@ class HQUpstreamSession : public HQSession {
 
   void detachThreadLocals(bool) override;
 
-  void onNetworkSwitch(
-      std::unique_ptr<folly::AsyncUDPSocket>) noexcept override;
-
   /**
    * Returns true iff a new outgoing transaction can be made on this session
    */

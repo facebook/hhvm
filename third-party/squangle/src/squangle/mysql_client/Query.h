@@ -116,6 +116,15 @@ class QueryOptions {
     return attributes_;
   }
 
+  bool operator==(const QueryOptions& other) const {
+    return attributes_ == other.attributes_;
+  }
+
+  std::size_t hashValue() const {
+    return folly::hash::commutative_hash_combine_range(
+        attributes_.begin(), attributes_.end());
+  }
+
  protected:
   QueryAttributes attributes_;
 };
@@ -608,6 +617,16 @@ inline std::ostream& operator<<(
     const facebook::common::mysql_client::Query& query) {
   return os << query.renderInsecure();
 }
+} // namespace std
+
+namespace std {
+template <>
+struct hash<facebook::common::mysql_client::QueryOptions> {
+  std::size_t operator()(
+      const facebook::common::mysql_client::QueryOptions& opt) const {
+    return opt.hashValue();
+  }
+};
 } // namespace std
 
 #endif // COMMON_ASYNC_MYSQL_QUERY_H

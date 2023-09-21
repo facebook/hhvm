@@ -1,0 +1,82 @@
+File "case_type_wellformed.php", line 16, characters 11-19:
+Cyclic type definition (Typing[4014])
+  File "case_type_wellformed.php", line 16, characters 28-36:
+  Cyclic use is here
+File "case_type_wellformed.php", line 7, characters 20-23:
+Illegal usage of a covariant type parameter (Typing[4120])
+  File "case_type_wellformed.php", line 6, characters 48-51:
+  This is where the parameter was declared as covariant `+`
+  File "case_type_wellformed.php", line 7, characters 20-23:
+  This position is contravariant (-) because it is the composition of (-)(+)(+)
+The rest of the error messages decomposes the inference of the variance.
+Check out this link if you don't understand what this is about:
+http://en.wikipedia.org/wiki/Covariance_and_contravariance_(computer_science)
+  File "case_type_wellformed.php", line 7, characters 20-23:
+  (-) Function parameters are contravariant
+  File "case_type_wellformed.php", line 7, characters 5-30:
+  (+) This type parameter was declared as covariant (+) (cf 'HH\supportdyn')
+  File "case_type_wellformed.php", line 7, characters 3-50:
+  (+) Aliased types are covariant
+File "case_type_wellformed.php", line 8, characters 10-12:
+Illegal usage of a contravariant type parameter (Typing[4121])
+  File "case_type_wellformed.php", line 6, characters 30-32:
+  This is where the parameter was declared as contravariant `-`
+  File "case_type_wellformed.php", line 8, characters 10-12:
+  This position is covariant (+) because it is the composition of (+)(+)
+The rest of the error messages decomposes the inference of the variance.
+Check out this link if you don't understand what this is about:
+http://en.wikipedia.org/wiki/Covariance_and_contravariance_(computer_science)
+  File "case_type_wellformed.php", line 8, characters 10-12:
+  (+) This type parameter was declared as covariant (+) (cf 'HH\dict')
+  File "case_type_wellformed.php", line 7, characters 3-50:
+  (+) Aliased types are covariant
+File "case_type_wellformed.php", line 4, characters 40-48:
+Some type arguments violate their constraints (Typing[4323])
+  File "hackarray.hhi", line 43, characters 50-50:
+  `T` is a constrained type parameter
+  File "hackarray.hhi", line 43, characters 55-62:
+  This type constraint is violated
+  File "hackarray.hhi", line 43, characters 55-62:
+  Expected `arraykey`
+  File "case_type_wellformed.php", line 4, characters 47-47:
+  But got `T`
+File "case_type_wellformed.php", line 4, characters 52-63:
+Some type arguments violate their constraints (Typing[4323])
+  File "hackarray.hhi", line 33, characters 24-25:
+  `Tk` is a constrained type parameter
+  File "hackarray.hhi", line 33, characters 30-37:
+  This type constraint is violated
+  File "hackarray.hhi", line 33, characters 30-37:
+  Expected `arraykey`
+  File "case_type_wellformed.php", line 4, characters 57-57:
+  But got `T`
+File "case_type_wellformed.php", line 11, characters 11-26:
+Invalid constraint on `newtype` (Typing[4332])
+  File "case_type_wellformed.php", line 11, characters 31-33:
+  Expected `num`
+  File "case_type_wellformed.php", line 11, characters 51-54:
+  But got `bool`
+File "case_type_wellformed.php", line 14, characters 11-31:
+Invalid constraint on `newtype` (Typing[4332])
+  File "case_type_wellformed.php", line 14, characters 46-54:
+  Expected `Stringish`
+  File "case_type_wellformed.php", line 14, characters 77-79:
+  But got `int`
+File "case_type_wellformed.php", line 14, characters 11-31:
+Invalid constraint on `newtype` (Typing[4332])
+  File "case_type_wellformed.php", line 14, characters 46-54:
+  Expected `Stringish`
+  File "case_type_wellformed.php", line 14, characters 83-86:
+  But got `bool`
+File "case_type_wellformed.php", line 14, characters 11-31:
+Invalid constraint on `newtype` (Typing[4332])
+  File "case_type_wellformed.php", line 14, characters 57-64:
+  Expected `arraykey`
+  File "case_type_wellformed.php", line 14, characters 83-86:
+  But got `bool`
+File "case_type_wellformed.php", line 6, characters 11-27:
+Invalid case type declaration. More than one variant of `VarianceIsChecked` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_wellformed.php", line 7, characters 5-30:
+  This is the type `(function(Tin, Tout): ~int)`, which includes **dicts** because a function could be any value at runtime
+  File "case_type_wellformed.php", line 8, characters 5-19:
+  It overlaps with `dict<Tin, Tout>`, which also includes **dicts**

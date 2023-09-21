@@ -534,7 +534,12 @@ module DataType = struct
           else
             DataTypeReason.newtype ~trail
         in
-        let trail = trail_f (get_reason as_ty) name in
+        let trail =
+          if String.equal name Naming_special_names.Classes.cSupportDyn then
+            trail
+          else
+            trail_f (get_reason as_ty) name
+        in
         fromTy ~trail env as_ty
     end
     | Tunapplied_alias _ ->

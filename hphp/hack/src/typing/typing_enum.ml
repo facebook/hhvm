@@ -101,16 +101,37 @@ let enum_check_type env (pos : Pos_or_decl.t) ur ty_interface ty _on_error =
   let ty_arraykey =
     MakeType.arraykey (Reason.Rimplicit_upper_bound (pos, "arraykey"))
   in
-  let rec is_valid_base lty =
-    Typing_utils.is_tyvar_error env lty
+  (* Enforcement of case types for enum/enum classes is wonky.
+   * Forbid for now until we can more thoroughly audit the behavior *)
+  let check_if_case_type env ty =
+    match get_node ty with
+    | Tnewtype (name, _, _) ->
+      (match Typing_env.get_typedef env name with
+      | Some { td_vis = Aast.CaseType; td_pos; _ } ->
+        Typing_error_utils.add_typing_error ~env
+        @@ Typing_error.(
+             enum
+             @@ Primary.Enum.Enum_type_bad_case_type
+                  {
+                    pos = Pos_or_decl.unsafe_to_raw_pos pos;
+                    ty_name = lazy (Typing_print.full_strip_ns env ty);
+                    case_type_decl_pos = td_pos;
+                  })
+      | _ -> ())
+    | _ -> ()
+  in
+  let rec is_valid_base ty =
+    Typing_utils.is_tyvar_error env ty
     ||
-    match get_node lty with
+    match get_node ty with
     | Tprim _
     | Tnonnull ->
       true
     | Toption lty -> is_valid_base lty
     | Ttuple ltys -> List.for_all ~f:is_valid_base ltys
-    | Tnewtype (_, ltys, lty) -> List.for_all ~f:is_valid_base (lty :: ltys)
+    | Tnewtype (_, ltys, lty) ->
+      check_if_case_type env ty;
+      List.for_all ~f:is_valid_base (lty :: ltys)
     | Tclass (_, _, ltys) -> List.for_all ~f:is_valid_base ltys
     | Tunion [ty1; ty2] when is_dynamic ty1 && sd env -> is_valid_base ty2
     | Tunion [ty1; ty2] when is_dynamic ty2 && sd env -> is_valid_base ty1
@@ -146,6 +167,7 @@ let enum_check_type env (pos : Pos_or_decl.t) ur ty_interface ty _on_error =
                   }));
       (env, None)
     | None ->
+      check_if_case_type env ty;
       let callback =
         let open Typing_error in
         Callback.always
@@ -167,24 +189,6 @@ let enum_check_type env (pos : Pos_or_decl.t) ur ty_interface ty _on_error =
         ty_arraykey
         callback
   in
-  let ty_base = Option.value ~default:ty ty_interface in
-  (* Enforcement of case types for enum/enum classes is wonky.
-   * Forbid for now until we can more thoroughly audit the behavior *)
-  (match get_node ty_base with
-  | Tnewtype (name, _, _) ->
-    (match Typing_env.get_typedef env name with
-    | Some { td_vis = Aast.CaseType; td_pos; _ } ->
-      Typing_error_utils.add_typing_error ~env
-      @@ Typing_error.(
-           enum
-           @@ Primary.Enum.Enum_type_bad_case_type
-                {
-                  pos = Pos_or_decl.unsafe_to_raw_pos pos;
-                  ty_name = lazy (Typing_print.full_strip_ns env ty_base);
-                  case_type_decl_pos = td_pos;
-                })
-    | _ -> ())
-  | _ -> ());
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
   env
 

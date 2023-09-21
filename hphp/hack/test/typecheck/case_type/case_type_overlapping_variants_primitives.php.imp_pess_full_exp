@@ -1,0 +1,570 @@
+File "case_type_overlapping_variants_primitives.php", line 46, characters 5-8:
+You can only use the `void` type as the return type of a function or method (Naming[2063])
+File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
+Invalid case type declaration. More than one variant of `StringData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 5, characters 5-9:
+  This is the type `mixed`, which includes **strings**
+  File "case_type_overlapping_variants_primitives.php", line 8, characters 5-20:
+  It overlaps with `classname<mixed>`, which also includes **strings**
+  File "classname.hhi", line 19, characters 28-38:
+    via the constraint on the newtype `classname`
+  File "classname.hhi", line 12, characters 27-32:
+    via the constraint on the newtype `typename`
+File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
+Invalid case type declaration. More than one variant of `StringData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 5, characters 5-9:
+  This is the type `mixed`, which includes **strings**
+  File "case_type_overlapping_variants_primitives.php", line 10, characters 5-10:
+  It overlaps with `string`, which also includes **strings**
+File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
+Invalid case type declaration. More than one variant of `StringData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 6, characters 5-11:
+  This is the type `nonnull`, which includes **dicts**
+  File "case_type_overlapping_variants_primitives.php", line 5, characters 5-9:
+  It overlaps with `mixed`, which also includes **dicts**
+File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
+Invalid case type declaration. More than one variant of `StringData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 6, characters 5-11:
+  This is the type `nonnull`, which includes **strings**
+  File "case_type_overlapping_variants_primitives.php", line 8, characters 5-20:
+  It overlaps with `classname<mixed>`, which also includes **strings**
+  File "classname.hhi", line 19, characters 28-38:
+    via the constraint on the newtype `classname`
+  File "classname.hhi", line 12, characters 27-32:
+    via the constraint on the newtype `typename`
+File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
+Invalid case type declaration. More than one variant of `StringData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 6, characters 5-11:
+  This is the type `nonnull`, which includes **strings**
+  File "case_type_overlapping_variants_primitives.php", line 10, characters 5-10:
+  It overlaps with `string`, which also includes **strings**
+File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
+Invalid case type declaration. More than one variant of `StringData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 7, characters 5-21:
+  This is the type `(function(): ~void)`, which includes **dicts** because a function could be any value at runtime
+  File "case_type_overlapping_variants_primitives.php", line 5, characters 5-9:
+  It overlaps with `mixed`, which also includes **dicts**
+File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
+Invalid case type declaration. More than one variant of `StringData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 7, characters 5-21:
+  This is the type `(function(): ~void)`, which includes **dicts** because a function could be any value at runtime
+  File "case_type_overlapping_variants_primitives.php", line 6, characters 5-11:
+  It overlaps with `nonnull`, which also includes **dicts**
+File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
+Invalid case type declaration. More than one variant of `StringData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 7, characters 5-21:
+  This is the type `(function(): ~void)`, which includes **strings** because a function could be any value at runtime
+  File "case_type_overlapping_variants_primitives.php", line 8, characters 5-20:
+  It overlaps with `classname<mixed>`, which also includes **strings**
+  File "classname.hhi", line 19, characters 28-38:
+    via the constraint on the newtype `classname`
+  File "classname.hhi", line 12, characters 27-32:
+    via the constraint on the newtype `typename`
+File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
+Invalid case type declaration. More than one variant of `StringData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 7, characters 5-21:
+  This is the type `(function(): ~void)`, which includes **strings** because a function could be any value at runtime
+  File "case_type_overlapping_variants_primitives.php", line 10, characters 5-10:
+  It overlaps with `string`, which also includes **strings**
+File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
+Invalid case type declaration. More than one variant of `StringData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 8, characters 5-20:
+  This is the type `classname<mixed>`, which includes **strings**
+  File "classname.hhi", line 19, characters 28-38:
+    via the constraint on the newtype `classname`
+  File "classname.hhi", line 12, characters 27-32:
+    via the constraint on the newtype `typename`
+  File "case_type_overlapping_variants_primitives.php", line 10, characters 5-10:
+  It overlaps with `string`, which also includes **strings**
+File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
+Invalid case type declaration. More than one variant of `StringData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 9, characters 5-12:
+  This is the type `arraykey`, which includes **strings** because arraykeys are ints or strings
+  File "case_type_overlapping_variants_primitives.php", line 5, characters 5-9:
+  It overlaps with `mixed`, which also includes **strings**
+File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
+Invalid case type declaration. More than one variant of `StringData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 9, characters 5-12:
+  This is the type `arraykey`, which includes **strings** because arraykeys are ints or strings
+  File "case_type_overlapping_variants_primitives.php", line 6, characters 5-11:
+  It overlaps with `nonnull`, which also includes **strings**
+File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
+Invalid case type declaration. More than one variant of `StringData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 9, characters 5-12:
+  This is the type `arraykey`, which includes **strings** because arraykeys are ints or strings
+  File "case_type_overlapping_variants_primitives.php", line 7, characters 5-21:
+  It overlaps with `(function(): ~void)`, which also includes **strings** because a function could be any value at runtime
+File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
+Invalid case type declaration. More than one variant of `StringData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 9, characters 5-12:
+  This is the type `arraykey`, which includes **strings** because arraykeys are ints or strings
+  File "case_type_overlapping_variants_primitives.php", line 8, characters 5-20:
+  It overlaps with `classname<mixed>`, which also includes **strings**
+  File "classname.hhi", line 19, characters 28-38:
+    via the constraint on the newtype `classname`
+  File "classname.hhi", line 12, characters 27-32:
+    via the constraint on the newtype `typename`
+File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
+Invalid case type declaration. More than one variant of `StringData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 9, characters 5-12:
+  This is the type `arraykey`, which includes **strings** because arraykeys are ints or strings
+  File "case_type_overlapping_variants_primitives.php", line 10, characters 5-10:
+  It overlaps with `string`, which also includes **strings**
+File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
+Invalid case type declaration. More than one variant of `StringData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 11, characters 5-6:
+  This is the type `?T`, which includes **strings**
+  File "case_type_overlapping_variants_primitives.php", line 4, characters 27-32:
+    via this constraint on the generic `T`
+  File "case_type_overlapping_variants_primitives.php", line 5, characters 5-9:
+  It overlaps with `mixed`, which also includes **strings**
+File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
+Invalid case type declaration. More than one variant of `StringData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 11, characters 5-6:
+  This is the type `?T`, which includes **strings**
+  File "case_type_overlapping_variants_primitives.php", line 4, characters 27-32:
+    via this constraint on the generic `T`
+  File "case_type_overlapping_variants_primitives.php", line 6, characters 5-11:
+  It overlaps with `nonnull`, which also includes **strings**
+File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
+Invalid case type declaration. More than one variant of `StringData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 11, characters 5-6:
+  This is the type `?T`, which includes **strings**
+  File "case_type_overlapping_variants_primitives.php", line 4, characters 27-32:
+    via this constraint on the generic `T`
+  File "case_type_overlapping_variants_primitives.php", line 8, characters 5-20:
+  It overlaps with `classname<mixed>`, which also includes **strings**
+  File "classname.hhi", line 19, characters 28-38:
+    via the constraint on the newtype `classname`
+  File "classname.hhi", line 12, characters 27-32:
+    via the constraint on the newtype `typename`
+File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
+Invalid case type declaration. More than one variant of `StringData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 11, characters 5-6:
+  This is the type `?T`, which includes **strings**
+  File "case_type_overlapping_variants_primitives.php", line 4, characters 27-32:
+    via this constraint on the generic `T`
+  File "case_type_overlapping_variants_primitives.php", line 9, characters 5-12:
+  It overlaps with `arraykey`, which also includes **strings** because arraykeys are ints or strings
+File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
+Invalid case type declaration. More than one variant of `StringData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 11, characters 5-6:
+  This is the type `?T`, which includes **strings**
+  File "case_type_overlapping_variants_primitives.php", line 4, characters 27-32:
+    via this constraint on the generic `T`
+  File "case_type_overlapping_variants_primitives.php", line 10, characters 5-10:
+  It overlaps with `string`, which also includes **strings**
+File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
+Invalid case type declaration. More than one variant of `StringData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 11, characters 5-6:
+  This is the type `?T`, which includes **the value null** because it is a nullable type
+  File "case_type_overlapping_variants_primitives.php", line 7, characters 5-21:
+  It overlaps with `(function(): ~void)`, which also includes **the value null** because a function could be any value at runtime
+File "case_type_overlapping_variants_primitives.php", line 13, characters 11-22:
+Invalid case type declaration. More than one variant of `ResourceData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 15, characters 5-11:
+  This is the type `nonnull`, which includes **dicts**
+  File "case_type_overlapping_variants_primitives.php", line 14, characters 5-9:
+  It overlaps with `mixed`, which also includes **dicts**
+File "case_type_overlapping_variants_primitives.php", line 13, characters 11-22:
+Invalid case type declaration. More than one variant of `ResourceData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 16, characters 5-21:
+  This is the type `(function(): ~void)`, which includes **dicts** because a function could be any value at runtime
+  File "case_type_overlapping_variants_primitives.php", line 14, characters 5-9:
+  It overlaps with `mixed`, which also includes **dicts**
+File "case_type_overlapping_variants_primitives.php", line 13, characters 11-22:
+Invalid case type declaration. More than one variant of `ResourceData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 16, characters 5-21:
+  This is the type `(function(): ~void)`, which includes **dicts** because a function could be any value at runtime
+  File "case_type_overlapping_variants_primitives.php", line 15, characters 5-11:
+  It overlaps with `nonnull`, which also includes **dicts**
+File "case_type_overlapping_variants_primitives.php", line 13, characters 11-22:
+Invalid case type declaration. More than one variant of `ResourceData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 17, characters 5-6:
+  This is the type `?T`, which includes **resources**
+  File "case_type_overlapping_variants_primitives.php", line 13, characters 29-36:
+    via this constraint on the generic `T`
+  File "case_type_overlapping_variants_primitives.php", line 14, characters 5-9:
+  It overlaps with `mixed`, which also includes **resources**
+File "case_type_overlapping_variants_primitives.php", line 13, characters 11-22:
+Invalid case type declaration. More than one variant of `ResourceData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 17, characters 5-6:
+  This is the type `?T`, which includes **resources**
+  File "case_type_overlapping_variants_primitives.php", line 13, characters 29-36:
+    via this constraint on the generic `T`
+  File "case_type_overlapping_variants_primitives.php", line 15, characters 5-11:
+  It overlaps with `nonnull`, which also includes **resources**
+File "case_type_overlapping_variants_primitives.php", line 13, characters 11-22:
+Invalid case type declaration. More than one variant of `ResourceData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 17, characters 5-6:
+  This is the type `?T`, which includes **the value null** because it is a nullable type
+  File "case_type_overlapping_variants_primitives.php", line 16, characters 5-21:
+  It overlaps with `(function(): ~void)`, which also includes **the value null** because a function could be any value at runtime
+File "case_type_overlapping_variants_primitives.php", line 19, characters 11-18:
+Invalid case type declaration. More than one variant of `BoolData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 20, characters 5-9:
+  This is the type `mixed`, which includes **booleans**
+  File "case_type_overlapping_variants_primitives.php", line 23, characters 5-8:
+  It overlaps with `bool`, which also includes **booleans**
+File "case_type_overlapping_variants_primitives.php", line 19, characters 11-18:
+Invalid case type declaration. More than one variant of `BoolData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 21, characters 5-11:
+  This is the type `nonnull`, which includes **booleans**
+  File "case_type_overlapping_variants_primitives.php", line 23, characters 5-8:
+  It overlaps with `bool`, which also includes **booleans**
+File "case_type_overlapping_variants_primitives.php", line 19, characters 11-18:
+Invalid case type declaration. More than one variant of `BoolData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 21, characters 5-11:
+  This is the type `nonnull`, which includes **dicts**
+  File "case_type_overlapping_variants_primitives.php", line 20, characters 5-9:
+  It overlaps with `mixed`, which also includes **dicts**
+File "case_type_overlapping_variants_primitives.php", line 19, characters 11-18:
+Invalid case type declaration. More than one variant of `BoolData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 22, characters 5-21:
+  This is the type `(function(): ~void)`, which includes **booleans** because a function could be any value at runtime
+  File "case_type_overlapping_variants_primitives.php", line 23, characters 5-8:
+  It overlaps with `bool`, which also includes **booleans**
+File "case_type_overlapping_variants_primitives.php", line 19, characters 11-18:
+Invalid case type declaration. More than one variant of `BoolData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 22, characters 5-21:
+  This is the type `(function(): ~void)`, which includes **dicts** because a function could be any value at runtime
+  File "case_type_overlapping_variants_primitives.php", line 20, characters 5-9:
+  It overlaps with `mixed`, which also includes **dicts**
+File "case_type_overlapping_variants_primitives.php", line 19, characters 11-18:
+Invalid case type declaration. More than one variant of `BoolData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 22, characters 5-21:
+  This is the type `(function(): ~void)`, which includes **dicts** because a function could be any value at runtime
+  File "case_type_overlapping_variants_primitives.php", line 21, characters 5-11:
+  It overlaps with `nonnull`, which also includes **dicts**
+File "case_type_overlapping_variants_primitives.php", line 19, characters 11-18:
+Invalid case type declaration. More than one variant of `BoolData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 24, characters 5-6:
+  This is the type `?T`, which includes **booleans**
+  File "case_type_overlapping_variants_primitives.php", line 19, characters 25-28:
+    via this constraint on the generic `T`
+  File "case_type_overlapping_variants_primitives.php", line 20, characters 5-9:
+  It overlaps with `mixed`, which also includes **booleans**
+File "case_type_overlapping_variants_primitives.php", line 19, characters 11-18:
+Invalid case type declaration. More than one variant of `BoolData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 24, characters 5-6:
+  This is the type `?T`, which includes **booleans**
+  File "case_type_overlapping_variants_primitives.php", line 19, characters 25-28:
+    via this constraint on the generic `T`
+  File "case_type_overlapping_variants_primitives.php", line 21, characters 5-11:
+  It overlaps with `nonnull`, which also includes **booleans**
+File "case_type_overlapping_variants_primitives.php", line 19, characters 11-18:
+Invalid case type declaration. More than one variant of `BoolData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 24, characters 5-6:
+  This is the type `?T`, which includes **booleans**
+  File "case_type_overlapping_variants_primitives.php", line 19, characters 25-28:
+    via this constraint on the generic `T`
+  File "case_type_overlapping_variants_primitives.php", line 23, characters 5-8:
+  It overlaps with `bool`, which also includes **booleans**
+File "case_type_overlapping_variants_primitives.php", line 19, characters 11-18:
+Invalid case type declaration. More than one variant of `BoolData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 24, characters 5-6:
+  This is the type `?T`, which includes **the value null** because it is a nullable type
+  File "case_type_overlapping_variants_primitives.php", line 22, characters 5-21:
+  It overlaps with `(function(): ~void)`, which also includes **the value null** because a function could be any value at runtime
+File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
+Invalid case type declaration. More than one variant of `IntData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 27, characters 5-9:
+  This is the type `mixed`, which includes **ints**
+  File "case_type_overlapping_variants_primitives.php", line 32, characters 5-7:
+  It overlaps with `int`, which also includes **ints**
+File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
+Invalid case type declaration. More than one variant of `IntData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 28, characters 5-11:
+  This is the type `nonnull`, which includes **dicts**
+  File "case_type_overlapping_variants_primitives.php", line 27, characters 5-9:
+  It overlaps with `mixed`, which also includes **dicts**
+File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
+Invalid case type declaration. More than one variant of `IntData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 28, characters 5-11:
+  This is the type `nonnull`, which includes **ints**
+  File "case_type_overlapping_variants_primitives.php", line 32, characters 5-7:
+  It overlaps with `int`, which also includes **ints**
+File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
+Invalid case type declaration. More than one variant of `IntData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 29, characters 5-21:
+  This is the type `(function(): ~void)`, which includes **dicts** because a function could be any value at runtime
+  File "case_type_overlapping_variants_primitives.php", line 27, characters 5-9:
+  It overlaps with `mixed`, which also includes **dicts**
+File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
+Invalid case type declaration. More than one variant of `IntData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 29, characters 5-21:
+  This is the type `(function(): ~void)`, which includes **dicts** because a function could be any value at runtime
+  File "case_type_overlapping_variants_primitives.php", line 28, characters 5-11:
+  It overlaps with `nonnull`, which also includes **dicts**
+File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
+Invalid case type declaration. More than one variant of `IntData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 29, characters 5-21:
+  This is the type `(function(): ~void)`, which includes **ints** because a function could be any value at runtime
+  File "case_type_overlapping_variants_primitives.php", line 32, characters 5-7:
+  It overlaps with `int`, which also includes **ints**
+File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
+Invalid case type declaration. More than one variant of `IntData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 30, characters 5-7:
+  This is the type `num`, which includes **ints** because nums are ints or floats
+  File "case_type_overlapping_variants_primitives.php", line 27, characters 5-9:
+  It overlaps with `mixed`, which also includes **ints**
+File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
+Invalid case type declaration. More than one variant of `IntData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 30, characters 5-7:
+  This is the type `num`, which includes **ints** because nums are ints or floats
+  File "case_type_overlapping_variants_primitives.php", line 28, characters 5-11:
+  It overlaps with `nonnull`, which also includes **ints**
+File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
+Invalid case type declaration. More than one variant of `IntData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 30, characters 5-7:
+  This is the type `num`, which includes **ints** because nums are ints or floats
+  File "case_type_overlapping_variants_primitives.php", line 29, characters 5-21:
+  It overlaps with `(function(): ~void)`, which also includes **ints** because a function could be any value at runtime
+File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
+Invalid case type declaration. More than one variant of `IntData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 30, characters 5-7:
+  This is the type `num`, which includes **ints** because nums are ints or floats
+  File "case_type_overlapping_variants_primitives.php", line 32, characters 5-7:
+  It overlaps with `int`, which also includes **ints**
+File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
+Invalid case type declaration. More than one variant of `IntData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 31, characters 5-12:
+  This is the type `arraykey`, which includes **ints** because arraykeys are ints or strings
+  File "case_type_overlapping_variants_primitives.php", line 30, characters 5-7:
+  It overlaps with `num`, which also includes **ints** because nums are ints or floats
+File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
+Invalid case type declaration. More than one variant of `IntData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 31, characters 5-12:
+  This is the type `arraykey`, which includes **ints** because arraykeys are ints or strings
+  File "case_type_overlapping_variants_primitives.php", line 32, characters 5-7:
+  It overlaps with `int`, which also includes **ints**
+File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
+Invalid case type declaration. More than one variant of `IntData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 31, characters 5-12:
+  This is the type `arraykey`, which includes **strings** because arraykeys are ints or strings
+  File "case_type_overlapping_variants_primitives.php", line 27, characters 5-9:
+  It overlaps with `mixed`, which also includes **strings**
+File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
+Invalid case type declaration. More than one variant of `IntData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 31, characters 5-12:
+  This is the type `arraykey`, which includes **strings** because arraykeys are ints or strings
+  File "case_type_overlapping_variants_primitives.php", line 28, characters 5-11:
+  It overlaps with `nonnull`, which also includes **strings**
+File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
+Invalid case type declaration. More than one variant of `IntData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 31, characters 5-12:
+  This is the type `arraykey`, which includes **strings** because arraykeys are ints or strings
+  File "case_type_overlapping_variants_primitives.php", line 29, characters 5-21:
+  It overlaps with `(function(): ~void)`, which also includes **strings** because a function could be any value at runtime
+File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
+Invalid case type declaration. More than one variant of `IntData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 33, characters 5-6:
+  This is the type `?T`, which includes **ints**
+  File "case_type_overlapping_variants_primitives.php", line 26, characters 24-26:
+    via this constraint on the generic `T`
+  File "case_type_overlapping_variants_primitives.php", line 27, characters 5-9:
+  It overlaps with `mixed`, which also includes **ints**
+File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
+Invalid case type declaration. More than one variant of `IntData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 33, characters 5-6:
+  This is the type `?T`, which includes **ints**
+  File "case_type_overlapping_variants_primitives.php", line 26, characters 24-26:
+    via this constraint on the generic `T`
+  File "case_type_overlapping_variants_primitives.php", line 28, characters 5-11:
+  It overlaps with `nonnull`, which also includes **ints**
+File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
+Invalid case type declaration. More than one variant of `IntData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 33, characters 5-6:
+  This is the type `?T`, which includes **ints**
+  File "case_type_overlapping_variants_primitives.php", line 26, characters 24-26:
+    via this constraint on the generic `T`
+  File "case_type_overlapping_variants_primitives.php", line 30, characters 5-7:
+  It overlaps with `num`, which also includes **ints** because nums are ints or floats
+File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
+Invalid case type declaration. More than one variant of `IntData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 33, characters 5-6:
+  This is the type `?T`, which includes **ints**
+  File "case_type_overlapping_variants_primitives.php", line 26, characters 24-26:
+    via this constraint on the generic `T`
+  File "case_type_overlapping_variants_primitives.php", line 31, characters 5-12:
+  It overlaps with `arraykey`, which also includes **ints** because arraykeys are ints or strings
+File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
+Invalid case type declaration. More than one variant of `IntData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 33, characters 5-6:
+  This is the type `?T`, which includes **ints**
+  File "case_type_overlapping_variants_primitives.php", line 26, characters 24-26:
+    via this constraint on the generic `T`
+  File "case_type_overlapping_variants_primitives.php", line 32, characters 5-7:
+  It overlaps with `int`, which also includes **ints**
+File "case_type_overlapping_variants_primitives.php", line 26, characters 11-17:
+Invalid case type declaration. More than one variant of `IntData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 33, characters 5-6:
+  This is the type `?T`, which includes **the value null** because it is a nullable type
+  File "case_type_overlapping_variants_primitives.php", line 29, characters 5-21:
+  It overlaps with `(function(): ~void)`, which also includes **the value null** because a function could be any value at runtime
+File "case_type_overlapping_variants_primitives.php", line 35, characters 11-19:
+Invalid case type declaration. More than one variant of `FloatData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 36, characters 5-9:
+  This is the type `mixed`, which includes **floats**
+  File "case_type_overlapping_variants_primitives.php", line 40, characters 5-9:
+  It overlaps with `float`, which also includes **floats**
+File "case_type_overlapping_variants_primitives.php", line 35, characters 11-19:
+Invalid case type declaration. More than one variant of `FloatData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 37, characters 5-11:
+  This is the type `nonnull`, which includes **dicts**
+  File "case_type_overlapping_variants_primitives.php", line 36, characters 5-9:
+  It overlaps with `mixed`, which also includes **dicts**
+File "case_type_overlapping_variants_primitives.php", line 35, characters 11-19:
+Invalid case type declaration. More than one variant of `FloatData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 37, characters 5-11:
+  This is the type `nonnull`, which includes **floats**
+  File "case_type_overlapping_variants_primitives.php", line 40, characters 5-9:
+  It overlaps with `float`, which also includes **floats**
+File "case_type_overlapping_variants_primitives.php", line 35, characters 11-19:
+Invalid case type declaration. More than one variant of `FloatData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 38, characters 5-21:
+  This is the type `(function(): ~void)`, which includes **dicts** because a function could be any value at runtime
+  File "case_type_overlapping_variants_primitives.php", line 36, characters 5-9:
+  It overlaps with `mixed`, which also includes **dicts**
+File "case_type_overlapping_variants_primitives.php", line 35, characters 11-19:
+Invalid case type declaration. More than one variant of `FloatData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 38, characters 5-21:
+  This is the type `(function(): ~void)`, which includes **dicts** because a function could be any value at runtime
+  File "case_type_overlapping_variants_primitives.php", line 37, characters 5-11:
+  It overlaps with `nonnull`, which also includes **dicts**
+File "case_type_overlapping_variants_primitives.php", line 35, characters 11-19:
+Invalid case type declaration. More than one variant of `FloatData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 38, characters 5-21:
+  This is the type `(function(): ~void)`, which includes **floats** because a function could be any value at runtime
+  File "case_type_overlapping_variants_primitives.php", line 40, characters 5-9:
+  It overlaps with `float`, which also includes **floats**
+File "case_type_overlapping_variants_primitives.php", line 35, characters 11-19:
+Invalid case type declaration. More than one variant of `FloatData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 39, characters 5-7:
+  This is the type `num`, which includes **floats** because nums are ints or floats
+  File "case_type_overlapping_variants_primitives.php", line 40, characters 5-9:
+  It overlaps with `float`, which also includes **floats**
+File "case_type_overlapping_variants_primitives.php", line 35, characters 11-19:
+Invalid case type declaration. More than one variant of `FloatData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 39, characters 5-7:
+  This is the type `num`, which includes **ints** because nums are ints or floats
+  File "case_type_overlapping_variants_primitives.php", line 36, characters 5-9:
+  It overlaps with `mixed`, which also includes **ints**
+File "case_type_overlapping_variants_primitives.php", line 35, characters 11-19:
+Invalid case type declaration. More than one variant of `FloatData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 39, characters 5-7:
+  This is the type `num`, which includes **ints** because nums are ints or floats
+  File "case_type_overlapping_variants_primitives.php", line 37, characters 5-11:
+  It overlaps with `nonnull`, which also includes **ints**
+File "case_type_overlapping_variants_primitives.php", line 35, characters 11-19:
+Invalid case type declaration. More than one variant of `FloatData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 39, characters 5-7:
+  This is the type `num`, which includes **ints** because nums are ints or floats
+  File "case_type_overlapping_variants_primitives.php", line 38, characters 5-21:
+  It overlaps with `(function(): ~void)`, which also includes **ints** because a function could be any value at runtime
+File "case_type_overlapping_variants_primitives.php", line 35, characters 11-19:
+Invalid case type declaration. More than one variant of `FloatData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 41, characters 5-6:
+  This is the type `?T`, which includes **floats**
+  File "case_type_overlapping_variants_primitives.php", line 35, characters 26-30:
+    via this constraint on the generic `T`
+  File "case_type_overlapping_variants_primitives.php", line 36, characters 5-9:
+  It overlaps with `mixed`, which also includes **floats**
+File "case_type_overlapping_variants_primitives.php", line 35, characters 11-19:
+Invalid case type declaration. More than one variant of `FloatData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 41, characters 5-6:
+  This is the type `?T`, which includes **floats**
+  File "case_type_overlapping_variants_primitives.php", line 35, characters 26-30:
+    via this constraint on the generic `T`
+  File "case_type_overlapping_variants_primitives.php", line 37, characters 5-11:
+  It overlaps with `nonnull`, which also includes **floats**
+File "case_type_overlapping_variants_primitives.php", line 35, characters 11-19:
+Invalid case type declaration. More than one variant of `FloatData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 41, characters 5-6:
+  This is the type `?T`, which includes **floats**
+  File "case_type_overlapping_variants_primitives.php", line 35, characters 26-30:
+    via this constraint on the generic `T`
+  File "case_type_overlapping_variants_primitives.php", line 39, characters 5-7:
+  It overlaps with `num`, which also includes **floats** because nums are ints or floats
+File "case_type_overlapping_variants_primitives.php", line 35, characters 11-19:
+Invalid case type declaration. More than one variant of `FloatData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 41, characters 5-6:
+  This is the type `?T`, which includes **floats**
+  File "case_type_overlapping_variants_primitives.php", line 35, characters 26-30:
+    via this constraint on the generic `T`
+  File "case_type_overlapping_variants_primitives.php", line 40, characters 5-9:
+  It overlaps with `float`, which also includes **floats**
+File "case_type_overlapping_variants_primitives.php", line 35, characters 11-19:
+Invalid case type declaration. More than one variant of `FloatData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 41, characters 5-6:
+  This is the type `?T`, which includes **the value null** because it is a nullable type
+  File "case_type_overlapping_variants_primitives.php", line 38, characters 5-21:
+  It overlaps with `(function(): ~void)`, which also includes **the value null** because a function could be any value at runtime
+File "case_type_overlapping_variants_primitives.php", line 43, characters 11-18:
+Invalid case type declaration. More than one variant of `NullData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 44, characters 5-9:
+  This is the type `mixed`, which includes **the value null** because it is a nullable type
+  File "case_type_overlapping_variants_primitives.php", line 47, characters 5-8:
+  It overlaps with `null`, which also includes **the value null**
+File "case_type_overlapping_variants_primitives.php", line 43, characters 11-18:
+Invalid case type declaration. More than one variant of `NullData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 44, characters 5-9:
+  This is the type `mixed`, which includes **the value null** because it is a nullable type
+  File "case_type_overlapping_variants_primitives.php", line 48, characters 5-5:
+  It overlaps with `T`, which also includes **the value null**
+  File "case_type_overlapping_variants_primitives.php", line 43, characters 25-28:
+    via this constraint on the generic `T`
+File "case_type_overlapping_variants_primitives.php", line 43, characters 11-18:
+Invalid case type declaration. More than one variant of `NullData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 45, characters 5-9:
+  This is the type `?bool`, which includes **booleans**
+  File "case_type_overlapping_variants_primitives.php", line 44, characters 5-9:
+  It overlaps with `mixed`, which also includes **booleans**
+File "case_type_overlapping_variants_primitives.php", line 43, characters 11-18:
+Invalid case type declaration. More than one variant of `NullData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 45, characters 5-9:
+  This is the type `?bool`, which includes **the value null** because it is a nullable type
+  File "case_type_overlapping_variants_primitives.php", line 47, characters 5-8:
+  It overlaps with `null`, which also includes **the value null**
+File "case_type_overlapping_variants_primitives.php", line 43, characters 11-18:
+Invalid case type declaration. More than one variant of `NullData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 45, characters 5-9:
+  This is the type `?bool`, which includes **the value null** because it is a nullable type
+  File "case_type_overlapping_variants_primitives.php", line 48, characters 5-5:
+  It overlaps with `T`, which also includes **the value null**
+  File "case_type_overlapping_variants_primitives.php", line 43, characters 25-28:
+    via this constraint on the generic `T`
+File "case_type_overlapping_variants_primitives.php", line 43, characters 11-18:
+Invalid case type declaration. More than one variant of `NullData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 46, characters 5-8:
+  This is the type `_`, which includes **booleans**
+  File "case_type_overlapping_variants_primitives.php", line 45, characters 5-9:
+  It overlaps with `?bool`, which also includes **booleans**
+File "case_type_overlapping_variants_primitives.php", line 43, characters 11-18:
+Invalid case type declaration. More than one variant of `NullData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 46, characters 5-8:
+  This is the type `_`, which includes **dicts**
+  File "case_type_overlapping_variants_primitives.php", line 44, characters 5-9:
+  It overlaps with `mixed`, which also includes **dicts**
+File "case_type_overlapping_variants_primitives.php", line 43, characters 11-18:
+Invalid case type declaration. More than one variant of `NullData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 46, characters 5-8:
+  This is the type `_`, which includes **the value null**
+  File "case_type_overlapping_variants_primitives.php", line 47, characters 5-8:
+  It overlaps with `null`, which also includes **the value null**
+File "case_type_overlapping_variants_primitives.php", line 43, characters 11-18:
+Invalid case type declaration. More than one variant of `NullData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 46, characters 5-8:
+  This is the type `_`, which includes **the value null**
+  File "case_type_overlapping_variants_primitives.php", line 48, characters 5-5:
+  It overlaps with `T`, which also includes **the value null**
+  File "case_type_overlapping_variants_primitives.php", line 43, characters 25-28:
+    via this constraint on the generic `T`
+File "case_type_overlapping_variants_primitives.php", line 43, characters 11-18:
+Invalid case type declaration. More than one variant of `NullData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 47, characters 5-8:
+  This is the type `null`, which includes **the value null**
+  File "case_type_overlapping_variants_primitives.php", line 48, characters 5-5:
+  It overlaps with `T`, which also includes **the value null**
+  File "case_type_overlapping_variants_primitives.php", line 43, characters 25-28:
+    via this constraint on the generic `T`

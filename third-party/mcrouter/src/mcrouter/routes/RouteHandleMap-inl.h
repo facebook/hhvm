@@ -27,6 +27,7 @@ namespace facebook {
 namespace memcache {
 namespace mcrouter {
 
+constexpr std::string_view kBroadcastPrefix = "/*/*/";
 constexpr const char* kFallbackCluster = "fallback";
 
 namespace detail {
@@ -140,7 +141,7 @@ void RouteHandleMap<RouteHandleIf>::foreachRoutePolicy(
     return;
   }
 
-  bool selectAll = (prefix == "/*/*/");
+  bool selectAll = (prefix == kBroadcastPrefix);
   for (const auto& it : byRoute_) {
     if (it.first != defaultRoute_.str() &&
         (selectAll || match_pattern_route(prefix, it.first))) {
@@ -204,7 +205,7 @@ RouteHandleMap<RouteHandleIf>::getTargetsForKeyFast(
   if (LIKELY(prefix.empty())) {
     // empty prefix => route to default route
     result = &defaultRouteMap_->getTargetsForKey(key);
-  } else if (prefix == "/*/*/") {
+  } else if (prefix == kBroadcastPrefix) {
     // route to all routes
     result = &allRoutes_->getTargetsForKey(key);
   } else {

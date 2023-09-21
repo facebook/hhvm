@@ -35,12 +35,14 @@ class RootRoute {
 
   RootRoute(
       ProxyBase& proxy,
-      const RouteSelectorMap<RouteHandleIf>& routeSelectors)
+      const RouteSelectorMap<RouteHandleIf>& routeSelectors,
+      bool disableBroadcastDeleteRpc = false)
       : opts_(proxy.getRouterOptions()),
         rhMap_(
             routeSelectors,
             opts_.default_route,
-            opts_.send_invalid_route_to_default) {}
+            opts_.send_invalid_route_to_default),
+        disableBroadcastDeleteRpc_(disableBroadcastDeleteRpc) {}
 
   template <class Request>
   bool traverse(
@@ -93,6 +95,7 @@ class RootRoute {
  private:
   const McrouterOptions& opts_;
   RouteHandleMap<RouteHandleIf> rhMap_;
+  bool disableBroadcastDeleteRpc_;
 
   template <class Request>
   ReplyT<Request> routeImpl(
@@ -148,10 +151,19 @@ class RootRoute {
   ReplyT<Request> doRoute(
       const std::vector<std::shared_ptr<RouteHandleIf>>& rh,
       const Request& req) const {
-    if (LIKELY(rh.size() == 1)) {
+    if (FOLLY_LIKELY(rh.size() == 1)) {
       return rh[0]->route(req);
     }
     if (!rh.empty()) {
+      // Broadcast delete via Distribution, route only
+      // to the first (local) route handle
+      if constexpr (folly::IsOneOf<Request, McDeleteRequest>::value) {
+        if (disableBroadcastDeleteRpc_ &&
+            req.key_ref()->routingPrefix() == kBroadcastPrefix) {
+          return rh[0]->route(req);
+        }
+      }
+
       auto reqCopy = std::make_shared<const Request>(req);
       for (size_t i = 1, e = rh.size(); i < e; ++i) {
         auto r = rh[i];

@@ -107,7 +107,15 @@ ProxyConfig<RouterInfo>::ProxyConfig(
     partialConfigs_ = provider.releasePartialConfigs();
   }
   accessPoints_ = provider.releaseAccessPoints();
-  proxyRoute_ = std::make_shared<ProxyRoute<RouterInfo>>(proxy, routeSelectors);
+  bool disableBroadcastDeleteRpc = false;
+  if (auto* jDisableBroadcastDeleteRpc =
+          json.get_ptr("disable_broadcast_delete_rpc")) {
+    disableBroadcastDeleteRpc =
+        parseBool(*jDisableBroadcastDeleteRpc, "disable_broadcast_delete_rpc");
+  }
+
+  proxyRoute_ = std::make_shared<ProxyRoute<RouterInfo>>(
+      proxy, routeSelectors, disableBroadcastDeleteRpc);
   serviceInfo_ = std::make_shared<ServiceInfo<RouterInfo>>(proxy, *this);
 }
 

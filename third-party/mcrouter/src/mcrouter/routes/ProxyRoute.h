@@ -43,7 +43,8 @@ class ProxyRoute {
   ProxyRoute(
       Proxy<RouterInfo>& proxy,
       const RouteSelectorMap<typename RouterInfo::RouteHandleIf>&
-          routeSelectors);
+          routeSelectors,
+      bool disableBroadcastDeleteRpc = false);
 
   template <class Request>
   bool traverse(

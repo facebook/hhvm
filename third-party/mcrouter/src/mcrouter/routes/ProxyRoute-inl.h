@@ -41,11 +41,13 @@ typename RouterInfo::RouteHandlePtr wrapWithBigValueRoute(
 template <class RouterInfo>
 ProxyRoute<RouterInfo>::ProxyRoute(
     Proxy<RouterInfo>& proxy,
-    const RouteSelectorMap<typename RouterInfo::RouteHandleIf>& routeSelectors)
+    const RouteSelectorMap<typename RouterInfo::RouteHandleIf>& routeSelectors,
+    bool disableBroadcastDeleteRpc)
     : proxy_(proxy),
       root_(makeRouteHandle<typename RouterInfo::RouteHandleIf, RootRoute>(
           proxy_,
-          routeSelectors)) {
+          routeSelectors,
+          disableBroadcastDeleteRpc)) {
   if (proxy_.getRouterOptions().big_value_split_threshold != 0) {
     root_ = detail::wrapWithBigValueRoute<RouterInfo>(
         std::move(root_), proxy_.getRouterOptions());

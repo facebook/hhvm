@@ -146,7 +146,7 @@ class t_mstch_generator : public t_generator {
   mstch::map dump(const t_const_value&);
   mstch::map dump(const std::map<t_const_value*, t_const_value*>::value_type&);
 
-  using annotation = std::pair<std::string, annotation_value>;
+  using annotation = std::pair<std::string, deprecated_annotation_value>;
   mstch::map dump(const annotation&);
   mstch::map dump(const std::string&);
 

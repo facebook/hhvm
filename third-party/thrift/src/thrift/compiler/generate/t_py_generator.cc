@@ -130,8 +130,7 @@ class t_py_generator : public t_concat_generator {
   void generate_py_thrift_spec(
       std::ofstream& out, const t_structured* tstruct, bool is_exception);
   void generate_py_annotation_dict(
-      std::ofstream& out,
-      const std::map<std::string, annotation_value>& fields);
+      std::ofstream& out, const deprecated_annotation_map& fields);
   void generate_py_annotations(std::ofstream& out, const t_structured* tstruct);
   void generate_py_union(std::ofstream& out, const t_structured* tstruct);
   void generate_py_struct_definition(
@@ -1602,7 +1601,7 @@ void t_py_generator::generate_py_thrift_spec(
 }
 
 void t_py_generator::generate_py_annotation_dict(
-    std::ofstream& out, const std::map<std::string, annotation_value>& fields) {
+    std::ofstream& out, const deprecated_annotation_map& fields) {
   indent_up();
   for (auto a_iter = fields.begin(); a_iter != fields.end(); ++a_iter) {
     indent(out) << render_string(a_iter->first) << ": "

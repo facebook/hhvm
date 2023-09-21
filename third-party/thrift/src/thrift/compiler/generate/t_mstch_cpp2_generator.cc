@@ -117,7 +117,7 @@ bool same_types(const t_type* a, const t_type* b) {
 }
 
 std::vector<t_annotation> get_fatal_annotations(
-    std::map<std::string, annotation_value> annotations) {
+    deprecated_annotation_map annotations) {
   std::vector<t_annotation> fatal_annotations;
   for (const auto& iter : annotations) {
     if (is_annotation_blacklisted_in_fatal(iter.first)) {

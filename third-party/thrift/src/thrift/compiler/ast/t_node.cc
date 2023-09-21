@@ -22,9 +22,10 @@ namespace compiler {
 
 const std::string t_node::kEmptyString;
 
-const std::string* t_node::find_annotation_or_null(alias_span name) const {
-  for (const auto& alias : name) {
-    auto itr = annotations_.find(alias);
+const std::string* t_node::find_annotation_or_null(
+    const std::vector<std::string_view>& names) const {
+  for (std::string_view name : names) {
+    auto itr = annotations_.find(name);
     if (itr != annotations_.end()) {
       return &itr->second.value;
     }

@@ -49,7 +49,7 @@ struct comment {
 };
 
 struct deprecated_annotations {
-  std::map<std::string, annotation_value> strings;
+  deprecated_annotation_map strings;
   source_location loc;
 };
 

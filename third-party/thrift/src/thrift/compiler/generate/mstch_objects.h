@@ -1479,7 +1479,7 @@ class mstch_deprecated_annotation : public mstch_base {
 
  protected:
   const std::string key_;
-  const annotation_value val_;
+  const deprecated_annotation_value val_;
 };
 
 } // namespace compiler

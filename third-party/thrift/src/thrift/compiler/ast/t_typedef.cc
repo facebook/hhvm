@@ -23,10 +23,10 @@ namespace thrift {
 namespace compiler {
 
 const std::string* t_typedef::get_first_annotation_or_null(
-    const t_type* type, alias_span name) {
+    const t_type* type, const std::vector<std::string_view>& names) {
   const std::string* result = nullptr;
-  find_type_if(type, [&result, name](const t_type* type) {
-    return (result = type->find_annotation_or_null(name)) != nullptr;
+  find_type_if(type, [&result, &names](const t_type* type) {
+    return (result = type->find_annotation_or_null(names)) != nullptr;
   });
   return result;
 }

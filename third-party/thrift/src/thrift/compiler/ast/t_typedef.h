@@ -19,7 +19,6 @@
 #include <memory>
 #include <string>
 
-#include <thrift/compiler/ast/alias_span.h>
 #include <thrift/compiler/ast/t_const.h>
 #include <thrift/compiler/ast/t_type.h>
 
@@ -61,15 +60,17 @@ class t_typedef : public t_type {
   // Finds the first matching annoation in the typedef's type hierarchy.
   // Return null if not found.
   static const std::string* get_first_annotation_or_null(
-      const t_type* type, alias_span name);
+      const t_type* type, const std::vector<std::string_view>& names);
 
   // Finds the first matching annoation in the typedef's type hierarchy.
   // Return default_value or "" if not found.
   template <typename D = const std::string*>
   static auto get_first_annotation(
-      const t_type* type, alias_span name, D&& default_value = nullptr) {
+      const t_type* type,
+      const std::vector<std::string_view>& names,
+      D&& default_value = nullptr) {
     return annotation_or(
-        get_first_annotation_or_null(type, name),
+        get_first_annotation_or_null(type, names),
         std::forward<D>(default_value));
   }
 

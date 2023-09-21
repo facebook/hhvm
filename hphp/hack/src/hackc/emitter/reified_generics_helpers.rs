@@ -5,6 +5,7 @@
 
 use decl_provider::TypeDecl;
 use env::emitter::Emitter;
+use env::ClassExpr;
 use env::Env;
 use error::Result;
 use hash::HashSet;
@@ -16,7 +17,6 @@ use oxidized::ast_defs::Id;
 use oxidized::pos::Pos;
 
 use crate::emit_expression::emit_reified_arg;
-use crate::emit_expression::is_reified_tparam;
 
 #[derive(Debug, Clone)]
 pub enum ReificationLevel {
@@ -69,9 +69,7 @@ pub(crate) fn has_reified_type_constraint<'a, 'arena>(
     }
     match &*h.1 {
         Hint_::Happly(Id(_, id), hs) => {
-            if is_reified_tparam(env, true, id).is_some()
-                || is_reified_tparam(env, false, id).is_some()
-            {
+            if ClassExpr::is_reified_tparam(&env.scope, id) {
                 ReificationLevel::Definitely
             } else if hs.is_empty() || is_all_erased(env, hs.iter()) {
                 ReificationLevel::Not
@@ -257,9 +255,7 @@ pub(crate) fn happly_decl_has_reified_generics<'a, 'arena, 'decl>(
         Hint_::Happly(Id(_, id), _) => {
             // If the parameter itself is a reified type parameter, then we want to do the
             // tparam check
-            if is_reified_tparam(env, true, id).is_some()
-                || is_reified_tparam(env, false, id).is_some()
-            {
+            if ClassExpr::is_reified_tparam(&env.scope, id) {
                 return true;
             }
             // If the parameter is an erased type parameter, then no check is necessary

@@ -78,6 +78,7 @@ use oxidized::local_id;
 use oxidized::pos::Pos;
 use regex::Regex;
 use serde_json::json;
+use string_utils::reified::ReifiedTparam;
 
 use super::TypeRefinementInHint;
 use crate::emit_adata;
@@ -809,15 +810,13 @@ fn emit_lambda<'a, 'arena, 'decl>(
         InstrSeq::gather(
             ids.iter()
                 .map(|ast::CaptureLid(_, ast::Lid(pos, id))| {
-                    match string_utils::reified::is_captured_generic(local_id::get_name(id)) {
-                        Some((is_fun, i)) => {
+                    match string_utils::reified::get_captured_generic(local_id::get_name(id)) {
+                        Some(i) => {
                             if is_in_lambda {
-                                let name = string_utils::reified::reified_generic_captured_name(
-                                    is_fun, i as usize,
-                                );
+                                let name = string_utils::reified::reified_generic_captured_name(i);
                                 Ok(instr::c_get_l(e.named_local(name.as_str().into())))
                             } else {
-                                emit_reified_generic_instrs(e, &Pos::NONE, is_fun, i as usize)
+                                Ok(emit_reified_generic_instrs(e, &Pos::NONE, i))
                             }
                         }
                         None => Ok({
@@ -985,9 +984,7 @@ fn emit_shape<'a, 'arena, 'decl>(
             SF::SFlitInt(s) => ast::Expr_::mk_int(s.1.clone()),
             SF::SFlitStr(s) => ast::Expr_::mk_string(s.1.clone()),
             SF::SFclassConst(id, p) => {
-                if is_reified_tparam(env, true, &id.1).is_some()
-                    || is_reified_tparam(env, false, &id.1).is_some()
-                {
+                if ClassExpr::is_reified_tparam(&env.scope, &id.1) {
                     return Err(Error::fatal_parse(
                         &id.0,
                         "Reified generics cannot be used in shape keys",
@@ -3422,36 +3419,35 @@ fn emit_call_expr<'a, 'arena, 'decl>(
 pub fn emit_reified_generic_instrs<'arena>(
     e: &Emitter<'arena, '_>,
     pos: &Pos,
-    is_fun: bool,
-    index: usize,
-) -> Result<InstrSeq<'arena>> {
-    let base = if is_fun {
-        instr::base_l(
-            e.named_local(string_utils::reified::GENERICS_LOCAL_NAME.into()),
-            MOpMode::Warn,
-            ReadonlyOp::Any,
+    index: ReifiedTparam,
+) -> InstrSeq<'arena> {
+    fn q<'arena>(i: usize) -> InstrSeq<'arena> {
+        instr::query_m(
+            0,
+            QueryMOp::CGet,
+            MemberKey::EI(i.try_into().unwrap(), ReadonlyOp::Any),
         )
-    } else {
-        InstrSeq::gather(vec![
+    }
+    let seq = match index {
+        ReifiedTparam::Fun(i) => InstrSeq::gather(vec![
+            instr::base_l(
+                e.named_local(string_utils::reified::GENERICS_LOCAL_NAME.into()),
+                MOpMode::Warn,
+                ReadonlyOp::Any,
+            ),
+            q(i),
+        ]),
+        ReifiedTparam::Class(i) => InstrSeq::gather(vec![
             instr::check_this(),
             instr::base_h(),
             instr::dim_warn_pt(
                 hhbc::PropName::from_raw_string(e.alloc, string_utils::reified::PROP_NAME),
                 ReadonlyOp::Any,
             ),
-        ])
-    };
-    Ok(emit_pos_then(
-        pos,
-        InstrSeq::gather(vec![
-            base,
-            instr::query_m(
-                0,
-                QueryMOp::CGet,
-                MemberKey::EI(index.try_into().unwrap(), ReadonlyOp::Any),
-            ),
+            q(i),
         ]),
-    ))
+    };
+    emit_pos_then(pos, seq)
 }
 
 fn emit_reified_type<'a, 'arena>(
@@ -3471,10 +3467,10 @@ fn emit_reified_type_opt<'a, 'arena>(
     name: &str,
 ) -> Result<Option<InstrSeq<'arena>>> {
     let is_in_lambda = env.scope.is_in_lambda();
-    let cget_instr = |is_fun, i| {
+    let cget_instr = |i| {
         instr::c_get_l(
             e.named_local(
-                string_utils::reified::reified_generic_captured_name(is_fun, i)
+                string_utils::reified::reified_generic_captured_name(i)
                     .as_str()
                     .into(),
             ),
@@ -3493,21 +3489,18 @@ fn emit_reified_type_opt<'a, 'arena>(
             Ok(())
         }
     };
-    let emit = |(i, is_soft), is_fun| {
-        check(is_soft)?;
-        Ok(Some(if is_in_lambda {
-            cget_instr(is_fun, i)
-        } else {
-            emit_reified_generic_instrs(e, pos, is_fun, i)?
-        }))
+    let result = match ClassExpr::get_reified_tparam(&env.scope, name) {
+        Some((i, is_soft)) => {
+            check(is_soft)?;
+            Some(if is_in_lambda {
+                cget_instr(i)
+            } else {
+                emit_reified_generic_instrs(e, pos, i)
+            })
+        }
+        None => None,
     };
-    match is_reified_tparam(env, true, name) {
-        Some((i, is_soft)) => emit((i, is_soft), true),
-        None => match is_reified_tparam(env, false, name) {
-            Some((i, is_soft)) => emit((i, is_soft), false),
-            None => Ok(None),
-        },
-    }
+    Ok(result)
 }
 
 fn emit_known_class_id<'arena, 'decl>(
@@ -5194,30 +5187,6 @@ pub fn emit_set_range_expr<'a, 'arena, 'decl>(
             kind.op,
         ))),
     ]))
-}
-
-pub fn is_reified_tparam<'a, 'arena>(
-    env: &Env<'a, 'arena>,
-    is_fun: bool,
-    name: &str,
-) -> Option<(usize, bool)> {
-    let is = |tparams: &[ast::Tparam]| {
-        use ast::ReifyKind;
-        tparams.iter().enumerate().find_map(|(i, tp)| {
-            if (tp.reified == ReifyKind::Reified || tp.reified == ReifyKind::SoftReified)
-                && tp.name.1 == name
-            {
-                Some((i, is_soft(&tp.user_attributes)))
-            } else {
-                None
-            }
-        })
-    };
-    if is_fun {
-        is(env.scope.get_fun_tparams())
-    } else {
-        is(env.scope.get_class_tparams())
-    }
 }
 
 /// Emit code for a base expression `expr` that forms part of

@@ -9,9 +9,11 @@ use hhbc::SpecialClsRef;
 use hhbc_string_utils as string_utils;
 use instruction_sequence::InstrSeq;
 use naming_special_names_rust::classes;
+use naming_special_names_rust::user_attributes;
 use oxidized::aast::*;
 use oxidized::ast;
 use oxidized::ast_defs;
+use string_utils::reified::ReifiedTparam;
 
 use crate::emitter::Emitter;
 
@@ -160,5 +162,31 @@ impl<'arena> ClassExpr<'arena> {
             ClassId_::CIself => return Self::Special(SpecialClsRef::SelfCls),
         };
         Self::expr_to_class_expr(emitter, check_traits, resolve_self, scope, expr)
+    }
+
+    pub fn get_reified_tparam<'a>(
+        scope: &Scope<'a, 'arena>,
+        name: &str,
+    ) -> Option<(ReifiedTparam, bool)> {
+        fn soft(tp: &ast::Tparam) -> bool {
+            tp.user_attributes
+                .iter()
+                .any(|ua| user_attributes::is_soft(&ua.name.1))
+        }
+        let reified = |(_, tp): &(usize, &ast::Tparam)| {
+            matches!(tp.reified, ReifyKind::Reified | ReifyKind::SoftReified) && tp.name.1 == name
+        };
+
+        if let Some((i, tp)) = scope.get_fun_tparams().iter().enumerate().find(reified) {
+            return Some((ReifiedTparam::Fun(i), soft(tp)));
+        }
+        if let Some((i, tp)) = scope.get_class_tparams().iter().enumerate().find(reified) {
+            return Some((ReifiedTparam::Class(i), soft(tp)));
+        }
+        None
+    }
+
+    pub fn is_reified_tparam<'a>(scope: &Scope<'a, 'arena>, name: &str) -> bool {
+        Self::get_reified_tparam(scope, name).is_some()
     }
 }

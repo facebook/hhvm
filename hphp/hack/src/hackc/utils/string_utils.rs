@@ -333,14 +333,23 @@ pub mod closures {
 }
 
 pub mod reified {
+    #[derive(Debug, PartialEq, Eq)]
+    pub enum ReifiedTparam {
+        Fun(usize),
+        Class(usize),
+    }
+
     pub static PROP_NAME: &str = "86reified_prop";
     pub static INIT_METH_NAME: &str = "86reifiedinit";
     pub static INIT_METH_PARAM_NAME: &str = "$__typestructures";
     pub static GENERICS_LOCAL_NAME: &str = "$0ReifiedGenerics";
     pub static CAPTURED_PREFIX: &str = "$__captured$reifiedgeneric$";
 
-    pub fn reified_generic_captured_name(is_fun: bool, i: usize) -> String {
-        let type_ = if is_fun { "function" } else { "class" };
+    pub fn reified_generic_captured_name(i: ReifiedTparam) -> String {
+        let (type_, i) = match i {
+            ReifiedTparam::Fun(i) => ("function", i),
+            ReifiedTparam::Class(i) => ("class", i),
+        };
         // to_string() due to T52404885
         format!("$__captured$reifiedgeneric${}${}", type_, i)
     }
@@ -358,7 +367,7 @@ pub mod reified {
         )
     }
 
-    pub fn is_captured_generic(id: &str) -> Option<(bool, u32)> {
+    pub fn get_captured_generic(id: &str) -> Option<ReifiedTparam> {
         if id.starts_with(CAPTURED_PREFIX) {
             if let [name, i] = id
                 .trim_start_matches(CAPTURED_PREFIX)
@@ -366,14 +375,10 @@ pub mod reified {
                 .collect::<Vec<_>>()
                 .as_slice()
             {
-                let is_captured = match *name {
-                    "function" => true,
-                    "class" => false,
+                return match *name {
+                    "function" => i.parse().map_or(None, |i| Some(ReifiedTparam::Fun(i))),
+                    "class" => i.parse().map_or(None, |i| Some(ReifiedTparam::Class(i))),
                     _ => return None,
-                };
-                let captured_id = i.parse();
-                if let Ok(captured) = captured_id {
-                    return Some((is_captured, captured));
                 };
             }
         };
@@ -876,16 +881,16 @@ mod string_utils_tests {
         #[test]
         fn test_is_captured_generic() {
             assert_eq!(
-                reified::is_captured_generic("$__captured$reifiedgeneric$function$1"),
-                Some((true, 1))
+                reified::get_captured_generic("$__captured$reifiedgeneric$function$1"),
+                Some(reified::ReifiedTparam::Fun(1))
             );
             assert_eq!(
-                reified::is_captured_generic("$__captured$reifiedgeneric$class$1"),
-                Some((false, 1))
+                reified::get_captured_generic("$__captured$reifiedgeneric$class$1"),
+                Some(reified::ReifiedTparam::Class(1))
             );
-            assert_eq!(reified::is_captured_generic("function$1"), None);
+            assert_eq!(reified::get_captured_generic("function$1"), None);
             assert_eq!(
-                reified::is_captured_generic("$__captured$reifiedgeneric$function1"),
+                reified::get_captured_generic("$__captured$reifiedgeneric$function1"),
                 None
             );
         }

@@ -236,6 +236,18 @@ function fcall_cls_method(classname<D> $a): void {
   $a::static_fcall_self();
 }
 
+// TEST-CHECK-BAL: define $root.fcall_readonly
+// CHECK: define $root.fcall_readonly($this: *void) : *void {
+// CHECK: #b0:
+// CHECK:   n0 = $root.g(null)
+// CHECK: // TODO: readonly call params: 0
+// CHECK:   n1 = $root.readonly_param(null, n0)
+// CHECK:   ret null
+// CHECK: }
+function fcall_readonly(): void {
+  readonly_param(readonly g());
+}
+
 // TEST-CHECK-BAL: type C$static_sb$curry
 // CHECK: type C$static_sb$curry = .kind="class" .final {
 // CHECK:   this: .private *C$static

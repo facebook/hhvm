@@ -847,7 +847,12 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
         }
     }
 
-    assert!(readonly.as_ref().map_or(true, |ro| ro.is_empty()));
+    if let Some(readonly) = readonly.as_ref() {
+        textual_todo! {
+            let params = readonly.iter().map(|idx| idx.to_string()).join(", ");
+            state.fb.comment(&format!("TODO: readonly call params: {params}"))?;
+        }
+    }
 
     if num_rets >= 2 {
         textual_todo! {

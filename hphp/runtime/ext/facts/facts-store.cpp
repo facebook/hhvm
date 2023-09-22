@@ -1020,12 +1020,19 @@ struct FactsStoreImpl final
     // file, but with nonempty facts
     for (auto i = 0; i < alteredPathsAndHashes.size(); ++i) {
       auto const& fileFacts = facts.at(i);
-      auto const& pathAndHash = alteredPathsAndHashes[i];
-      if (pathAndHash.m_hash == kEmptyFileSha1Hash && !fileFacts.isEmpty()) {
+      // We cannot trust pathAndHash.m_hash, the authoritative hash for these
+      // facts is fileFacts.m_sha1hex which was computed from the file contents
+      // that were used to derive these facts.
+      //
+      // If a race occurs between watchman notifying us of changes to disk and
+      // further writes occurring the hash we have from watchman may be stale.
+      // The hash written to memcache and used to key the in memory facts map
+      // will be fileFacts.m_sha1hex.
+      if (fileFacts.m_sha1hex == kEmptyFileSha1Hash && !fileFacts.isEmpty()) {
         throw FactsExtractionExc{folly::sformat(
             "{} has a SHA1 hash corresponding to an empty file ('{}'), "
             "but we are attempting to assign it non-empty facts: `{}`",
-            pathAndHash.m_path.native(),
+            fileFacts.m_sha1hex,
             kEmptyFileSha1Hash,
             json_from_facts(fileFacts))};
       }
@@ -1042,6 +1049,8 @@ struct FactsStoreImpl final
     m_map.update(
         lastClock,
         newClock,
+        // See comment above for why we no longer trust the hashes from this set
+        // of paths.
         removeHashes(std::move(alteredPathsAndHashes)),
         std::move(deletedPaths),
         std::move(facts));

@@ -218,13 +218,15 @@ func (p *JSONProtocol) WriteBinary(v []byte) error {
 	if _, e := p.write(JSON_QUOTE_BYTES); e != nil {
 		return NewProtocolException(e)
 	}
-	writer := base64.NewEncoder(base64.StdEncoding, p.writer)
-	if _, e := writer.Write(v); e != nil {
-		p.writer.Reset(p.trans) // THRIFT-3735
-		return NewProtocolException(e)
-	}
-	if e := writer.Close(); e != nil {
-		return NewProtocolException(e)
+	if len(v) > 0 {
+		writer := base64.NewEncoder(base64.StdEncoding, p.writer)
+		if _, e := writer.Write(v); e != nil {
+			p.writer.Reset(p.trans) // THRIFT-3735
+			return NewProtocolException(e)
+		}
+		if e := writer.Close(); e != nil {
+			return NewProtocolException(e)
+		}
 	}
 	if _, e := p.write(JSON_QUOTE_BYTES); e != nil {
 		return NewProtocolException(e)

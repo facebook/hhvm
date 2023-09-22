@@ -225,11 +225,13 @@ func (p *BinaryProtocol) WriteString(value string) error {
 }
 
 func (p *BinaryProtocol) WriteBinary(value []byte) error {
-	e := p.WriteI32(int32(len(value)))
-	if e != nil {
-		return e
+	err := p.WriteI32(int32(len(value)))
+	if err != nil {
+		return err
 	}
-	_, err := p.writer.Write(value)
+	if len(value) > 0 {
+		_, err = p.writer.Write(value)
+	}
 	return NewProtocolException(err)
 }
 

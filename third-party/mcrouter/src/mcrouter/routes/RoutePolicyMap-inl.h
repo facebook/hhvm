@@ -50,7 +50,13 @@ std::vector<std::shared_ptr<RouteHandleIf>> overrideItems(
 template <class RouteHandleIf>
 RoutePolicyMap<RouteHandleIf>::RoutePolicyMap(
     const std::vector<std::shared_ptr<PrefixSelectorRoute<RouteHandleIf>>>&
-        clusters) {
+        clusters,
+    bool useV2) {
+  if (useV2) {
+    v2_ = RoutePolicyMapV2<RouteHandleIf>(clusters);
+    return;
+  }
+
   // wildcards of all clusters
   std::vector<std::shared_ptr<RouteHandleIf>> wildcards;
   wildcards.reserve(clusters.size());
@@ -90,9 +96,84 @@ RoutePolicyMap<RouteHandleIf>::RoutePolicyMap(
 template <class RouteHandleIf>
 const std::vector<std::shared_ptr<RouteHandleIf>>&
 RoutePolicyMap<RouteHandleIf>::getTargetsForKey(folly::StringPiece key) const {
+  // empty means not initialized - i.e. the flag was not enabled.
+  if (!v2_.empty()) {
+    return v2_.getTargetsForKey(key);
+  }
   auto result = ut_.findPrefix(key);
   return result == ut_.end() ? emptyV_ : result->second;
 }
+
+template <class RouteHandleIf>
+RoutePolicyMapV2<RouteHandleIf>::RoutePolicyMapV2(
+    const std::vector<SharedClusterPtr>& clusters) {
+  typename LBRouteMap::Builder builder;
+
+  // not enough but it's not a problem, we will avoid at least some
+  // reallocations.
+  builder.reserve(clusters.size() + 1);
+  builder.insert({"", populateWildCards(clusters)});
+
+  // Combining routes for each key
+  folly::F14FastSet<std::string_view> seen;
+  for (const auto& cluster : clusters) {
+    for (const auto& [key, _] : cluster->policies) {
+      if (seen.insert(key).second) {
+        builder.insert({key, populateRoutesForKey(key, clusters)});
+      }
+    }
+  }
+
+  ut_ = std::move(builder).build();
+}
+
+template <class RouteHandleIf>
+// static
+auto RoutePolicyMapV2<RouteHandleIf>::populateWildCards(
+    const std::vector<SharedClusterPtr>& clusters)
+    -> std::vector<SharedRoutePtr> {
+  std::vector<SharedRoutePtr> res;
+  res.reserve(clusters.size());
+
+  folly::F14FastSet<const RouteHandleIf*> seen;
+  for (const auto& cluster : clusters) {
+    const SharedRoutePtr& ptr = cluster->wildcard;
+    if (ptr && seen.insert(ptr.get()).second) {
+      res.push_back(cluster->wildcard);
+    }
+  }
+
+  // This code is cold but the vector stays around for a while
+  res.shrink_to_fit();
+  return res;
+}
+
+template <class RouteHandleIf>
+// static
+auto RoutePolicyMapV2<RouteHandleIf>::populateRoutesForKey(
+    std::string_view key,
+    const std::vector<SharedClusterPtr>& clusters)
+    -> std::vector<SharedRoutePtr> {
+  std::vector<std::shared_ptr<RouteHandleIf>> res;
+  res.reserve(clusters.size());
+
+  folly::F14FastSet<const RouteHandleIf*> seen;
+  seen.reserve(clusters.size());
+
+  for (const auto& cluster : clusters) {
+    auto found = cluster->policies.findPrefix(key);
+    const SharedRoutePtr& ptr =
+        found == cluster->policies.end() ? cluster->wildcard : found->second;
+    if (ptr && seen.insert(ptr.get()).second) {
+      res.push_back(ptr);
+    }
+  }
+
+  // This code is cold but the vector stays around for a while
+  res.shrink_to_fit();
+  return res;
+}
+
 } // namespace mcrouter
 } // namespace memcache
 } // namespace facebook

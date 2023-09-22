@@ -41,7 +41,8 @@ class RootRoute {
         rhMap_(
             routeSelectors,
             opts_.default_route,
-            opts_.send_invalid_route_to_default),
+            opts_.send_invalid_route_to_default,
+            opts_.enable_route_policy_v2),
         disableBroadcastDeleteRpc_(disableBroadcastDeleteRpc) {}
 
   template <class Request>

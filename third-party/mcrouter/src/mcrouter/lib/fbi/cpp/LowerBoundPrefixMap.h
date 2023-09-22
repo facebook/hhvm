@@ -8,16 +8,15 @@
 #pragma once
 
 #include <folly/CPortability.h>
+#include <folly/Range.h>
 #include <folly/container/Iterator.h>
 #include <folly/lang/Bits.h>
 #include <folly/sorted_vector_types.h>
 
 #include <algorithm>
-#include <compare>
 #include <iosfwd>
 #include <limits>
 #include <optional>
-#include <span>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -45,8 +44,38 @@ class SmallPrefix {
     data_ = folly::Endian::swap(data_);
   }
 
-  bool operator==(const SmallPrefix&) const = default;
-  auto operator<=>(const SmallPrefix&) const = default;
+  // default operator== and operator<=> are ok here
+  // but not everything is C++20.
+
+  FOLLY_ALWAYS_INLINE
+  friend bool operator==(const SmallPrefix& x, const SmallPrefix& y) {
+    return x.data_ == y.data_;
+  }
+
+  FOLLY_ALWAYS_INLINE
+  friend bool operator!=(const SmallPrefix& x, const SmallPrefix& y) {
+    return !(x == y);
+  }
+
+  FOLLY_ALWAYS_INLINE
+  friend bool operator<(const SmallPrefix& x, const SmallPrefix& y) {
+    return x.data_ < y.data_;
+  }
+
+  FOLLY_ALWAYS_INLINE
+  friend bool operator<=(const SmallPrefix& x, const SmallPrefix& y) {
+    return !(y < x);
+  }
+
+  FOLLY_ALWAYS_INLINE
+  friend bool operator>=(const SmallPrefix& x, const SmallPrefix& y) {
+    return !(x < y);
+  }
+
+  FOLLY_ALWAYS_INLINE
+  friend bool operator>(const SmallPrefix& x, const SmallPrefix& y) {
+    return y < x;
+  }
 
   friend std::ostream& operator<<(std::ostream& os, const SmallPrefix& self);
 
@@ -72,7 +101,7 @@ class SmallPrefix {
 struct LowerBoundPrefixMapCommon {
   LowerBoundPrefixMapCommon() = default;
   explicit LowerBoundPrefixMapCommon(
-      std::span<const std::string_view> sortedUniquePrefixes);
+      const std::vector<std::string_view>& sortedUniquePrefixes);
 
   // returns 1 based indexes, 0 if not found.
   std::uint32_t findPrefix(std::string_view query) const noexcept;
@@ -298,8 +327,7 @@ LowerBoundPrefixMap<T>::LowerBoundPrefixMap(
       prefix2value.rend(),
       [](const auto& x, const auto& y) { return x.first == y.first; });
 
-  std::span<std::pair<std::string, T>> sortedUnique{
-      rend.base(), prefix2value.end()};
+  folly::Range sortedUnique{rend.base(), prefix2value.end()};
 
   std::vector<std::string_view> sortedPrefixes;
   sortedPrefixes.reserve(sortedUnique.size());

@@ -56,12 +56,14 @@ using UniqueVectorMap = std::unordered_map<
 template <class RouteHandleIf>
 std::shared_ptr<RoutePolicyMap<RouteHandleIf>> makePolicyMap(
     UniqueVectorMap<RouteHandleIf>& uniqueVectors,
-    const RouteSelectorVector<RouteHandleIf>& v) {
+    const RouteSelectorVector<RouteHandleIf>& v,
+    bool enableRoutePolicyV2) {
   auto it = uniqueVectors.find(v);
   if (it != uniqueVectors.end()) {
     return it->second;
   }
-  return uniqueVectors[v] = std::make_shared<RoutePolicyMap<RouteHandleIf>>(v);
+  return uniqueVectors[v] = std::make_shared<RoutePolicyMap<RouteHandleIf>>(
+             v, enableRoutePolicyV2);
 }
 
 } // namespace detail
@@ -70,9 +72,11 @@ template <class RouteHandleIf>
 RouteHandleMap<RouteHandleIf>::RouteHandleMap(
     const RouteSelectorMap<RouteHandleIf>& routeSelectors,
     const RoutingPrefix& defaultRoute,
-    bool sendInvalidRouteToDefault)
+    bool sendInvalidRouteToDefault,
+    bool enableRoutePolicyV2)
     : defaultRoute_(defaultRoute),
-      sendInvalidRouteToDefault_(sendInvalidRouteToDefault) {
+      sendInvalidRouteToDefault_(sendInvalidRouteToDefault),
+      enableRoutePolicyV2_(enableRoutePolicyV2) {
   checkLogic(
       routeSelectors.find(defaultRoute_) != routeSelectors.end(),
       "invalid default route: {}",
@@ -111,12 +115,16 @@ RouteHandleMap<RouteHandleIf>::RouteHandleMap(
 
   // create corresponding RoutePolicyMaps
   detail::UniqueVectorMap<RouteHandleIf> uniqueVectors;
-  allRoutes_ = makePolicyMap(uniqueVectors, allRoutes);
+  allRoutes_ = makePolicyMap(uniqueVectors, allRoutes, enableRoutePolicyV2_);
   for (const auto& it : byRegion) {
-    byRegion_.emplace(it.first, makePolicyMap(uniqueVectors, it.second));
+    byRegion_.emplace(
+        it.first,
+        makePolicyMap(uniqueVectors, it.second, enableRoutePolicyV2_));
   }
   for (const auto& it : byRoute) {
-    byRoute_.emplace(it.first, makePolicyMap(uniqueVectors, it.second));
+    byRoute_.emplace(
+        it.first,
+        makePolicyMap(uniqueVectors, it.second, enableRoutePolicyV2_));
   }
 
   assert(byRoute_.find(defaultRoute_) != byRoute_.end());

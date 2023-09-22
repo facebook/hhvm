@@ -8,10 +8,13 @@
 #pragma once
 
 #include <memory>
+#include <string_view>
 #include <vector>
 
 #include <folly/Range.h>
+#include <folly/container/F14Set.h>
 
+#include "mcrouter/lib/fbi/cpp/LowerBoundPrefixMap.h"
 #include "mcrouter/lib/fbi/cpp/Trie.h"
 
 namespace facebook {
@@ -45,11 +48,48 @@ class PrefixSelectorRoute;
  *    Complexity is O(min(longest key prefix in config, key length))
  */
 template <class RouteHandleIf>
+class RoutePolicyMapV2 {
+ public:
+  using SharedRoutePtr = std::shared_ptr<RouteHandleIf>;
+  using SharedClusterPtr = std::shared_ptr<PrefixSelectorRoute<RouteHandleIf>>;
+
+  RoutePolicyMapV2() = default;
+  explicit RoutePolicyMapV2(const std::vector<SharedClusterPtr>& clusters);
+
+  // NOTE: change to span when the migration is over
+  const std::vector<SharedRoutePtr>& getTargetsForKey(
+      std::string_view key) const {
+    // has to be there by construction
+    auto found = ut_.findPrefix(key);
+    // RoutePolicyMap always has wildcard which matches everything.
+    CHECK(found != ut_.end());
+    return found->value();
+  }
+
+  bool empty() const {
+    return ut_.empty();
+  }
+
+ private:
+  static std::vector<SharedRoutePtr> populateWildCards(
+      const std::vector<SharedClusterPtr>& clusters);
+
+  static std::vector<SharedRoutePtr> populateRoutesForKey(
+      std::string_view key,
+      const std::vector<SharedClusterPtr>& clusters);
+
+  using LBRouteMap = LowerBoundPrefixMap<std::vector<SharedRoutePtr>>;
+
+  LBRouteMap ut_;
+};
+
+template <class RouteHandleIf>
 class RoutePolicyMap {
  public:
   explicit RoutePolicyMap(
       const std::vector<std::shared_ptr<PrefixSelectorRoute<RouteHandleIf>>>&
-          clusters);
+          clusters,
+      bool useV2);
 
   /**
    * @return vector of route handles that a request with given key should be
@@ -59,6 +99,7 @@ class RoutePolicyMap {
       folly::StringPiece key) const;
 
  private:
+  RoutePolicyMapV2<RouteHandleIf> v2_;
   const std::vector<std::shared_ptr<RouteHandleIf>> emptyV_;
   /**
    * This Trie contains targets for each key prefix. It is built like this:
@@ -68,6 +109,7 @@ class RoutePolicyMap {
    */
   Trie<std::vector<std::shared_ptr<RouteHandleIf>>> ut_;
 };
+
 } // namespace mcrouter
 } // namespace memcache
 } // namespace facebook

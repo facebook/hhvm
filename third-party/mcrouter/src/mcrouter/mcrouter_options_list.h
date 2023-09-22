@@ -924,6 +924,14 @@ MCROUTER_OPTION_INTEGER(
     no_short,
     "1 in S non-error connection samples will be logged")
 
+MCROUTER_OPTION_TOGGLE(
+    enable_route_policy_v2,
+    false,
+    "enable-route-policy-v2",
+    no_short,
+    "Enable Route Policy V2")
+
+
 #ifdef ADDITIONAL_OPTIONS_FILE
 #include ADDITIONAL_OPTIONS_FILE
 #endif

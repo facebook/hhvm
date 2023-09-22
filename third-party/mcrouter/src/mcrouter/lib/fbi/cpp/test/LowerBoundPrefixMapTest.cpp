@@ -201,6 +201,8 @@ TEST(LowerBoundPrefixMapTest, OverrideValues) {
 TEST(LowerBoundPrefixMapTest, EmptyMap) {
   LowerBoundPrefixMap<int> lbMap;
   ASSERT_EQ(lbMap.findPrefix("a"), lbMap.end());
+  ASSERT_EQ(lbMap.size(), 0);
+  ASSERT_TRUE(lbMap.empty());
 }
 
 } // namespace

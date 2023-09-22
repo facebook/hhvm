@@ -25,7 +25,7 @@ std::ostream& operator<<(std::ostream& os, const SmallPrefix& self) {
 }
 
 LowerBoundPrefixMapCommon::LowerBoundPrefixMapCommon(
-    std::span<const std::string_view> sortedUniquePrefixes) {
+    const std::vector<std::string_view>& sortedUniquePrefixes) {
   smallPrefixes_.reserve(sortedUniquePrefixes.size() + 1);
   markers_.reserve(sortedUniquePrefixes.size() + 1);
   previousPrefix_.reserve(sortedUniquePrefixes.size());

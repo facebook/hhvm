@@ -85,6 +85,7 @@ using ServerFactoryPtr = std::shared_ptr<ServerFactory>;
  * requests.
  */
 struct RequestHandler {
+  explicit RequestHandler() {}
   explicit RequestHandler(int timeout) : m_timeout(timeout) {}
   virtual ~RequestHandler() {}
 

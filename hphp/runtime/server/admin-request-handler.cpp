@@ -53,7 +53,7 @@
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/server/memory-stats.h"
 #include "hphp/runtime/server/pagelet-server.h"
-#include "hphp/runtime/server/rpc-request-handler.h"
+#include "hphp/runtime/server/xbox-request-handler.h"
 #include "hphp/runtime/server/server-stats.h"
 
 #include "hphp/util/alloc.h"
@@ -595,7 +595,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       Logger::FlushAll();
       HttpRequestHandler::GetAccessLog().flushAllWriters();
       AdminRequestHandler::GetAccessLog().flushAllWriters();
-      RPCRequestHandler::GetAccessLog().flushAllWriters();
+      XboxRequestHandler::GetAccessLog().flushAllWriters();
       break;
     }
     if (cmd == "set-log-level") {

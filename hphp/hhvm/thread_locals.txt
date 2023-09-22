@@ -39,7 +39,7 @@ HPHP::local_arena_flags
 HPHP::local_arena_tcache
 HPHP::tl_static_arena
 HPHP::ImagickExtension::s_ini_setting
-HPHP::RPCRequestHandler::s_accessLogThreadData
+HPHP::XboxRequestHandler::s_accessLogThreadData
 HPHP::HttpRequestHandler::s_accessLogThreadData
 HPHP::AdminRequestHandler::s_accessLogThreadData
 HPHP::s_file_session_data

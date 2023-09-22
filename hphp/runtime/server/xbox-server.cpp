@@ -18,7 +18,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/server/rpc-request-handler.h"
+#include "hphp/runtime/server/xbox-request-handler.h"
 #include "hphp/runtime/server/satellite-server.h"
 #include "hphp/runtime/server/job-queue-vm-stack.h"
 #include "hphp/runtime/server/server-task-event.h"
@@ -106,15 +106,6 @@ String XboxTransport::getResults(int &code, int timeout_ms /* = 0 */) {
 
 static THREAD_LOCAL(std::shared_ptr<XboxServerInfo>, s_xbox_server_info);
 static THREAD_LOCAL(std::string, s_xbox_prev_req_init_doc);
-
-struct XboxRequestHandler : RPCRequestHandler {
-  XboxRequestHandler() : RPCRequestHandler(
-    (*s_xbox_server_info)->getTimeoutSeconds().count(), Info) {}
-  static bool Info;
-};
-
-bool XboxRequestHandler::Info = false;
-
 static THREAD_LOCAL(XboxRequestHandler, s_xbox_request_handler);
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -147,7 +138,8 @@ private:
     if (!*s_xbox_server_info) {
       *s_xbox_server_info = std::make_shared<XboxServerInfo>();
     }
-    if (RuntimeOption::XboxServerLogInfo) XboxRequestHandler::Info = true;
+
+    s_xbox_request_handler->setLogInfo(RuntimeOption::XboxServerLogInfo);
     s_xbox_request_handler->setServerInfo(*s_xbox_server_info);
     return s_xbox_request_handler.get();
   }

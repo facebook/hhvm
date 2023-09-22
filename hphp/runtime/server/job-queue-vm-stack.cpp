@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/server/rpc-request-handler.h"
+#include "hphp/runtime/server/xbox-request-handler.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
@@ -28,10 +28,10 @@ namespace HPHP {
 
 void JobQueueDropVMStack::dropCache() {
   if (vmStack().isAllocated()) {
-    // For RPCRequestHandler threads, the ExecutionContext can stay
+    // For XboxRequestHandler threads, the ExecutionContext can stay
     // alive across requests, but its always ok to kill it between
     // requests, so do so now
-    RPCRequestHandler::cleanupState();
+    XboxRequestHandler::cleanupState();
   }
 
   tl_heap->flush();

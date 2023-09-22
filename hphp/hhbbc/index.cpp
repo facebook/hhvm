@@ -12774,6 +12774,9 @@ Job<AggregateNameOnlyJob> s_aggregateNameOnlyJob;
 struct SubclassWork {
   ISStringToOneT<std::unique_ptr<BuildSubclassListJob::Split>> allSplits;
   struct Bucket {
+    size_t cost() const {
+      return classes.size() + deps.size() + splits.size() + splitDeps.size();
+    }
     std::vector<SString> classes;
     std::vector<SString> deps;
     std::vector<SString> splits;
@@ -13187,6 +13190,14 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
       );
       std::sort(begin(bucket.leafs), end(bucket.leafs), string_data_lti{});
     }
+
+    std::sort(
+      begin(out.buckets.back()), end(out.buckets.back()),
+      [] (const SubclassWork::Bucket& a,
+          const SubclassWork::Bucket& b) {
+            return a.cost() > b.cost();
+      }
+    );
 
     // Update the processed set. We have to defer that until here
     // because we'd check it when building the buckets.

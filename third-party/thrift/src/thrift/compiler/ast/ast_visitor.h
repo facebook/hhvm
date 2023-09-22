@@ -40,6 +40,7 @@
 #include <thrift/compiler/ast/t_sink.h>
 #include <thrift/compiler/ast/t_stream.h>
 #include <thrift/compiler/ast/t_struct.h>
+#include <thrift/compiler/ast/t_structured.h>
 #include <thrift/compiler/ast/t_typedef.h>
 #include <thrift/compiler/ast/t_union.h>
 
@@ -97,7 +98,7 @@ class basic_ast_visitor {
   // Does not include other t_structured nodes like t_paramlist.
   template <typename V>
   void add_structured_definition_visitor(V&& visitor) {
-    add_struct_visitor(visitor);
+    add_structured_visitor(visitor);
     add_union_visitor(visitor);
     add_exception_visitor(std::forward<V>(visitor));
   }
@@ -218,9 +219,11 @@ class basic_ast_visitor {
   }
 
   // Types
-  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T_(struct) {
-    assert(typeid(node) == typeid(struct_type)); // Must actually be a struct.
-    begin_visit(struct_visitors_, node, args...);
+  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T_(structured) {
+    // Must actually be a struct.
+    // REVERT(aristidis)
+    // assert(typeid(node) == typeid(structured_type));
+    begin_visit(structured_visitors_, node, args...);
     visit_children(node.fields(), args...);
     end_visit(node, args...);
   }

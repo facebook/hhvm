@@ -18,7 +18,7 @@
 
 #include <thrift/compiler/ast/ast_visitor.h>
 #include <thrift/compiler/ast/t_program_bundle.h>
-#include <thrift/compiler/ast/t_struct.h>
+#include <thrift/compiler/ast/t_structured.h>
 #include <thrift/compiler/codemod/file_manager.h>
 #include <thrift/compiler/compiler.h>
 
@@ -26,7 +26,7 @@ using namespace apache::thrift::compiler;
 
 // Removes cpp.noexcept_move annotation.
 static void remove_cpp_noexcept_move(
-    codemod::file_manager& fm, const t_struct& node) {
+    codemod::file_manager& fm, const t_structured& node) {
   for (const auto& annotation : node.annotations()) {
     if (annotation.first == "cpp.noexcept_move") {
       fm.remove(annotation);
@@ -48,7 +48,7 @@ int main(int argc, char** argv) {
   codemod::file_manager fm(source_mgr, *program);
 
   const_ast_visitor visitor;
-  visitor.add_struct_visitor(
+  visitor.add_structured_visitor(
       folly::partial(remove_cpp_noexcept_move, std::ref(fm)));
   visitor.add_union_visitor(
       folly::partial(remove_cpp_noexcept_move, std::ref(fm)));

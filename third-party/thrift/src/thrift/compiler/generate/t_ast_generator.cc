@@ -263,13 +263,28 @@ void t_ast_generator::generate_program() {
   })
   THRIFT_ADD_VISITOR(service);
   THRIFT_ADD_VISITOR(interaction);
-  THRIFT_ADD_VISITOR(struct);
   THRIFT_ADD_VISITOR(union);
   THRIFT_ADD_VISITOR(exception);
   THRIFT_ADD_VISITOR(typedef);
   THRIFT_ADD_VISITOR(enum);
   THRIFT_ADD_VISITOR(const);
 #undef THRIFT_ADD_VISITOR
+
+  // t_structured is special, because the corresponding field in the AST thrift
+  // is called "structDef", not "structuredDef" (for historical reasons).
+  visitor.add_structured_visitor([&](const t_structured& node) {
+    if (node.generated() && !include_generated_) {
+      return;
+    }
+    auto& definitions = *ast.definitions();
+    auto pos = definitions.size();
+    definition_index[&node] =
+        positionToId<apache::thrift::type::DefinitionId>(pos);
+    auto& def = definitions.emplace_back().structDef_ref().ensure();
+    hydrate_const(def, *schema_source.gen_schema(node));
+    set_source_range(node, *def.attrs());
+    set_child_source_ranges(node, def);
+  });
   visitor(*program_);
   populate_defs(program_);
 

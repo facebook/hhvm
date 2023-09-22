@@ -66,7 +66,7 @@ void match_type_with_const_value(
     }
   }
   if (type->is_struct()) {
-    auto* struct_type = dynamic_cast<const t_struct*>(type);
+    auto* struct_type = dynamic_cast<const t_structured*>(type);
     for (auto map_val : value->get_map()) {
       auto name = map_val.first->get_string();
       auto tfield = struct_type->get_field_by_name(name);
@@ -170,7 +170,7 @@ void mutate_terse_write_annotation_structured(
 }
 
 void mutate_inject_metadata_fields(
-    diagnostic_context& ctx, mutator_context&, t_struct& node) {
+    diagnostic_context& ctx, mutator_context&, t_structured& node) {
   // TODO(dokwon): Currently field injection doesn't work for structs used as
   // transitive annotations. Skipping as a workaround.
   if (is_transitive_annotation(node)) {
@@ -207,7 +207,7 @@ void mutate_inject_metadata_fields(
     return;
   }
 
-  const auto* structured = dynamic_cast<const t_struct*>(ttype);
+  const auto* structured = dynamic_cast<const t_structured*>(ttype);
   // We only allow injecting fields from a struct type.
   if (structured == nullptr || ttype->is_union() || ttype->is_exception() ||
       ttype->is_paramlist()) {
@@ -334,8 +334,8 @@ void generate_runtime_schema(
 }
 
 void generate_struct_schema(
-    diagnostic_context& ctx, mutator_context& mCtx, t_struct& node) {
-  generate_runtime_schema<t_struct&>(
+    diagnostic_context& ctx, mutator_context& mCtx, t_structured& node) {
+  generate_runtime_schema<t_structured&>(
       ctx, mCtx, true, "facebook.com/thrift/type/Struct", node, [&]() {
         return schematizer(mCtx.bundle).gen_schema(node);
       });
@@ -487,10 +487,10 @@ ast_mutators standard_mutators() {
 
   {
     auto& main = mutators[standard_mutator_stage::main];
-    main.add_struct_visitor(&mutate_terse_write_annotation_structured);
+    main.add_structured_visitor(&mutate_terse_write_annotation_structured);
     main.add_exception_visitor(&mutate_terse_write_annotation_structured);
-    main.add_struct_visitor(&mutate_inject_metadata_fields);
-    main.add_struct_visitor(&generate_struct_schema);
+    main.add_structured_visitor(&mutate_inject_metadata_fields);
+    main.add_structured_visitor(&generate_struct_schema);
     main.add_union_visitor(&generate_union_schema);
     main.add_exception_visitor(&generate_exception_schema);
     main.add_service_visitor(&generate_service_schema);

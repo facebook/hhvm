@@ -312,7 +312,7 @@ struct PatchGen : StructGen {
 // Generates a patch representation for any struct with the @patch.GeneratePatch
 // annotation.
 void generate_struct_patch(
-    diagnostic_context& ctx, mutator_context& mctx, t_struct& node) {
+    diagnostic_context& ctx, mutator_context& mctx, t_structured& node) {
   if (auto* annot =
           ctx.program().inherit_annotation_or_null(node, kGeneratePatchUri)) {
     // Add a 'field patch' and 'struct patch' using it.
@@ -335,7 +335,7 @@ void generate_union_patch(
 
 void add_patch_mutators(ast_mutators& mutators) {
   auto& mutator = mutators[standard_mutator_stage::plugin];
-  mutator.add_struct_visitor(&generate_struct_patch);
+  mutator.add_structured_visitor(&generate_struct_patch);
   mutator.add_union_visitor(&generate_union_patch);
 }
 
@@ -418,7 +418,7 @@ t_struct& patch_generator::add_union_patch(
 }
 
 t_struct& patch_generator::add_struct_patch(
-    const t_const& annot, t_struct& value_type) {
+    const t_const& annot, t_structured& value_type) {
   PatchGen gen{
       {annot, gen_suffix_struct(annot, value_type, "Patch"), program_}};
   gen.assign(value_type);

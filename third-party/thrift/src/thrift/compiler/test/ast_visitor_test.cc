@@ -48,7 +48,7 @@ class MockAstVisitor {
   MOCK_METHOD(void, visit_sink, (const t_sink*));
   MOCK_METHOD(void, visit_stream_response, (const t_stream_response*));
 
-  MOCK_METHOD(void, visit_struct, (const t_struct*));
+  MOCK_METHOD(void, visit_structured, (const t_structured*));
   MOCK_METHOD(void, visit_union, (const t_union*));
   MOCK_METHOD(void, visit_exception, (const t_exception*));
   MOCK_METHOD(void, visit_field, (const t_field*));
@@ -92,8 +92,8 @@ class MockAstVisitor {
       visit_stream_response(&node);
     });
 
-    visitor.add_struct_visitor(
-        [this](const t_struct& node) { visit_struct(&node); });
+    visitor.add_structured_visitor(
+        [this](const t_structured& node) { visit_structured(&node); });
     visitor.add_union_visitor(
         [this](const t_union& node) { visit_union(&node); });
     visitor.add_exception_visitor(
@@ -129,7 +129,7 @@ class OverloadedVisitor {
   void operator()(const t_function& node) { mock_->visit_function(&node); }
   void operator()(const t_throws& node) { mock_->visit_throws(&node); }
 
-  void operator()(const t_struct& node) { mock_->visit_struct(&node); }
+  void operator()(const t_structured& node) { mock_->visit_structured(&node); }
   void operator()(const t_union& node) { mock_->visit_union(&node); }
   void operator()(const t_exception& node) { mock_->visit_exception(&node); }
   void operator()(const t_field& node) { mock_->visit_field(&node); }
@@ -265,12 +265,12 @@ TYPED_TEST(AstVisitorTest, Struct) {
   EXPECT_CALL(this->overload_mock_, visit_field(field.get()));
   tstruct->append(std::move(field));
 
-  EXPECT_CALL(this->mock_, visit_struct(tstruct.get()));
+  EXPECT_CALL(this->mock_, visit_structured(tstruct.get()));
   // Matches: structured_definition, root definition, definition.
   EXPECT_CALL(this->mock_, visit_structured_definition(tstruct.get()));
   EXPECT_CALL(this->mock_, visit_root_definition(tstruct.get()));
   EXPECT_CALL(this->mock_, visit_definition(tstruct.get()));
-  EXPECT_CALL(this->overload_mock_, visit_struct(tstruct.get())).Times(3);
+  EXPECT_CALL(this->overload_mock_, visit_structured(tstruct.get())).Times(3);
   this->program_.add_struct(std::move(tstruct));
 }
 

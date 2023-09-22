@@ -8,6 +8,7 @@ use std::io::Result;
 use std::io::Write;
 use std::write;
 
+use ast_scope::Scope;
 use bstr::BString;
 use bstr::ByteSlice;
 use core_utils_rust::add_ns;
@@ -39,17 +40,13 @@ use crate::context::Context;
 use crate::write;
 use crate::write::Error;
 
-#[derive(Default, Debug, Clone, Eq, PartialEq)]
-#[repr(C)]
-pub struct HhasBodyEnv<'a> {
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct HhasBodyEnv<'a, 'arena> {
     pub is_namespaced: bool,
-    pub class_info: Option<(hhbc::ClassishKind, &'a str)>,
-    pub parent_name: Option<&'a str>,
+    pub scope: &'a Scope<'a, 'arena>,
 }
 
-pub struct ExprEnv<'arena, 'e> {
-    pub codegen_env: Option<&'e HhasBodyEnv<'arena>>,
-}
+pub type ExprEnv<'arena, 'e> = Option<&'e HhasBodyEnv<'e, 'arena>>;
 
 fn print_key_value(
     ctx: &Context<'_>,
@@ -229,7 +226,7 @@ fn print_expr(
     ast::Expr(_, _, expr): &ast::Expr,
 ) -> Result<()> {
     fn adjust_id<'a>(env: &ExprEnv<'_, '_>, id: &'a str) -> Cow<'a, str> {
-        match env.codegen_env {
+        match env {
             Some(env) => {
                 if env.is_namespaced
                     && id
@@ -264,13 +261,13 @@ fn print_expr(
     }
     fn get_class_name_from_id<'e>(
         ctx: &Context<'_>,
-        env: Option<&'e HhasBodyEnv<'_>>,
+        env: &ExprEnv<'_, 'e>,
         should_format: bool,
         is_class_constant: bool,
         id: &'e str,
     ) -> Cow<'e, str> {
         if id == classes::SELF || id == classes::PARENT || id == classes::STATIC {
-            let name = ctx.special_class_resolver.resolve(env, id);
+            let name = ctx.special_class_resolver.resolve(env.map(|e| e.scope), id);
             return fmt_class_name(is_class_constant, name);
         }
         fn get<'a>(should_format: bool, is_class_constant: bool, id: &'a str) -> Cow<'a, str> {
@@ -304,7 +301,7 @@ fn print_expr(
                 (_, s2),
             )) if is_class(s2) && !(is_self(&id.1) || is_parent(&id.1) || is_static(&id.1)) => {
                 Ok(Some({
-                    let s1 = get_class_name_from_id(ctx, env.codegen_env, false, false, &id.1);
+                    let s1 = get_class_name_from_id(ctx, env, false, false, &id.1);
                     print_expr_string(w, s1.as_bytes())?
                 }))
             }
@@ -476,9 +473,7 @@ fn print_expr(
                 ast::ClassId_::CIexpr(e) => match e.as_id() {
                     Some(id) => w.write_all(
                         get_class_name_from_id(
-                            ctx,
-                            env.codegen_env,
-                            true,  /* should_format */
+                            ctx, env, true,  /* should_format */
                             false, /* is_class_constant */
                             &id.1,
                         )
@@ -501,8 +496,7 @@ fn print_expr(
                         let s2 = &(cc.1).1;
                         match e1.2.as_id() {
                             Some(ast_defs::Id(_, s1)) => {
-                                let s1 =
-                                    get_class_name_from_id(ctx, env.codegen_env, true, true, s1);
+                                let s1 = get_class_name_from_id(ctx, env, true, true, s1);
                                 write::concat_str_by(w, "::", [&s1.into(), s2])
                             }
                             _ => {
@@ -619,9 +613,7 @@ fn print_expr(
                         ast::ClassId_::CIexpr(e) => match e.as_id() {
                             Some(id) => w.write_all(
                                 get_class_name_from_id(
-                                    ctx,
-                                    env.codegen_env,
-                                    true,  /* should_format */
+                                    ctx, env, true,  /* should_format */
                                     false, /* is_class_constant */
                                     &id.1,
                                 )
@@ -671,7 +663,7 @@ fn print_expr(
         }
         Expr_::EnumClassLabel(ecl) => match &ecl.0 {
             Some(ast_defs::Id(_, s1)) => {
-                let s1 = get_class_name_from_id(ctx, env.codegen_env, true, true, s1);
+                let s1 = get_class_name_from_id(ctx, env, true, true, s1);
                 write::concat_str_by(w, "#", [&s1.into(), &ecl.1])
             }
             None => {
@@ -745,9 +737,6 @@ fn print_xml(
             }
             _ => return Err(syntax_error().into()),
         }
-    };
-    let env = ExprEnv {
-        codegen_env: env.codegen_env,
     };
     write!(w, "new {}", mangle(id.into()))?;
     write::paren(w, |w| {
@@ -964,7 +953,7 @@ fn print_import_flavor(w: &mut dyn Write, flavor: &ast::ImportFlavor) -> Result<
 pub fn expr_to_string_lossy(mut ctx: Context<'_>, expr: &ast::Expr) -> String {
     ctx.dump_lambdas = true;
 
-    let env = ExprEnv { codegen_env: None };
+    let env = None;
     let mut escaped_src = Vec::new();
     print_expr(&ctx, &mut escaped_src, &env, expr).expect("Printing failed");
 

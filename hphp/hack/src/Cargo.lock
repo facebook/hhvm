@@ -4051,6 +4051,7 @@ name = "print_expr"
 version = "0.0.0"
 dependencies = [
  "anyhow",
+ "ast_scope",
  "bstr 1.6.0",
  "bumpalo",
  "core_utils_rust",

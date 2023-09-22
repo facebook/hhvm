@@ -10,7 +10,6 @@ use bitflags::bitflags;
 use emit_pos::emit_pos;
 use emit_statement::emit_final_stmts;
 use env::emitter::Emitter;
-use env::ClassExpr;
 use env::Env;
 use error::Error;
 use error::Result;
@@ -381,35 +380,21 @@ pub fn make_body<'a, 'arena, 'decl>(
     } else {
         emitter.iterator().count()
     };
-    let body_env = if let Some(env) = opt_env {
+    let body_env = opt_env.map(|env| {
         let is_namespaced = env.namespace.name.is_none();
-        if let Some(cd) = env.scope.get_class() {
-            Some(HhasBodyEnv {
-                is_namespaced,
-                class_info: Some((cd.get_kind().into(), cd.get_name_str())),
-                parent_name: ClassExpr::get_parent_class_name(cd),
-            })
-        } else {
-            Some(HhasBodyEnv {
-                is_namespaced,
-                class_info: None,
-                parent_name: None,
-            })
+        HhasBodyEnv {
+            is_namespaced,
+            scope: &env.scope,
         }
-    } else {
-        None
-    };
+    });
 
     // Pretty-print the DV initializer expression as a Hack source code string,
     // to make it available for reflection.
     params.iter_mut().for_each(|(p, default_value)| {
         p.default_value = Maybe::from(default_value.as_ref().map(|(label, expr)| {
             use print_expr::Context;
-            use print_expr::ExprEnv;
             let ctx = Context::new(emitter);
-            let expr_env = ExprEnv {
-                codegen_env: body_env.as_ref(),
-            };
+            let expr_env = body_env.as_ref();
             let mut buf = Vec::new();
             let expr = print_expr::print_expr(&ctx, &mut buf, &expr_env, expr).map_or_else(
                 |e| Str::new_str(alloc, &e.to_string()),

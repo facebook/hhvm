@@ -5,8 +5,8 @@
 
 use std::borrow::Cow;
 
-use crate::HhasBodyEnv;
+use ast_scope::Scope;
 
 pub trait SpecialClassResolver {
-    fn resolve<'a>(&self, env: Option<&'a HhasBodyEnv<'_>>, id: &'a str) -> Cow<'a, str>;
+    fn resolve<'a>(&self, scope_opt: Option<&'a Scope<'a, '_>>, id: &'a str) -> Cow<'a, str>;
 }

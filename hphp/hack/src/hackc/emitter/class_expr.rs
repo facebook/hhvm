@@ -26,13 +26,15 @@ pub enum ClassExpr<'arena> {
 }
 
 impl<'arena> ClassExpr<'arena> {
-    fn get_original_class_name<'decl>(
-        emitter: &Emitter<'arena, 'decl>,
+    fn get_original_class_name(
+        emitter: &Emitter<'_, '_>,
+        scope: &Scope<'_, '_>,
         check_traits: bool,
         resolve_self: bool,
-        opt_class_info: Option<(ClassishKind, &str)>,
     ) -> Option<String> {
-        if let Some((kind, class_name)) = opt_class_info {
+        if let Some(cd) = scope.get_class() {
+            let kind = ClassishKind::from(cd.get_kind());
+            let class_name = cd.get_name_str();
             if (kind != ClassishKind::Trait || check_traits) && resolve_self {
                 if string_utils::closures::unmangle_closure(class_name).is_none() {
                     return Some(class_name.to_string());
@@ -58,20 +60,21 @@ impl<'arena> ClassExpr<'arena> {
         None
     }
 
-    fn get_original_parent_class_name<'decl>(
-        emitter: &Emitter<'arena, 'decl>,
+    fn get_original_parent_class_name(
+        emitter: &Emitter<'_, '_>,
+        scope: &Scope<'_, '_>,
         check_traits: bool,
         resolve_self: bool,
-        opt_class_info: Option<(ClassishKind, &str)>,
-        opt_parent_name: Option<String>,
     ) -> Option<String> {
-        if let Some((kind, class_name)) = opt_class_info {
+        if let Some(cd) = scope.get_class() {
+            let kind = ClassishKind::from(cd.get_kind());
+            let class_name = cd.get_name_str();
             if kind == ClassishKind::Interface {
                 return Some(classes::PARENT.to_string());
             };
             if (kind != ClassishKind::Trait || check_traits) && resolve_self {
                 if string_utils::closures::unmangle_closure(class_name).is_none() {
-                    return opt_parent_name;
+                    return Self::get_parent_class_name(cd).map(String::from);
                 } else if let Some(c) = emitter
                     .global_state()
                     .get_closure_enclosing_class(class_name)
@@ -83,33 +86,11 @@ impl<'arena> ClassExpr<'arena> {
         None
     }
 
-    fn expr_to_class_expr<'a, 'decl>(
-        emitter: &Emitter<'arena, 'decl>,
-        scope: &Scope<'a, 'arena>,
+    pub fn expr_to_class_expr(
+        emitter: &Emitter<'_, '_>,
+        scope: &Scope<'_, '_>,
         check_traits: bool,
         resolve_self: bool,
-        expr: ast::Expr,
-    ) -> Self {
-        if let Some(cd) = scope.get_class() {
-            Self::expr_to_class_expr_(
-                emitter,
-                check_traits,
-                resolve_self,
-                Some((ClassishKind::from(cd.get_kind()), cd.get_name_str())),
-                Self::get_parent_class_name(cd).map(String::from),
-                expr,
-            )
-        } else {
-            Self::expr_to_class_expr_(emitter, check_traits, resolve_self, None, None, expr)
-        }
-    }
-
-    pub fn expr_to_class_expr_<'decl>(
-        emitter: &Emitter<'arena, 'decl>,
-        check_traits: bool,
-        resolve_self: bool,
-        opt_class_info: Option<(ClassishKind, &str)>,
-        opt_parent_name: Option<String>,
         expr: ast::Expr,
     ) -> Self {
         match expr.2 {
@@ -120,21 +101,16 @@ impl<'arena> ClassExpr<'arena> {
                 } else if string_utils::is_parent(&id) {
                     match Self::get_original_parent_class_name(
                         emitter,
+                        scope,
                         check_traits,
                         resolve_self,
-                        opt_class_info,
-                        opt_parent_name,
                     ) {
                         Some(name) => Self::Id(ast_defs::Id(pos, name)),
                         None => Self::Special(SpecialClsRef::ParentCls),
                     }
                 } else if string_utils::is_self(&id) {
-                    match Self::get_original_class_name(
-                        emitter,
-                        check_traits,
-                        resolve_self,
-                        opt_class_info,
-                    ) {
+                    match Self::get_original_class_name(emitter, scope, check_traits, resolve_self)
+                    {
                         Some(name) => Self::Id(ast_defs::Id(pos, name)),
                         None => Self::Special(SpecialClsRef::SelfCls),
                     }

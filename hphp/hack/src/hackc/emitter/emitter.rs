@@ -10,6 +10,7 @@ use std::os::unix::ffi::OsStrExt;
 use std::path::Path;
 use std::sync::Arc;
 
+use ast_scope::Scope;
 use decl_provider::DeclProvider;
 use decl_provider::MemoProvider;
 use ffi::Slice;
@@ -27,7 +28,6 @@ use options::Options;
 use oxidized::ast;
 use oxidized::ast_defs;
 use oxidized::pos::Pos;
-use print_expr::HhasBodyEnv;
 use relative_path::RelativePath;
 use statement_state::StatementState;
 
@@ -238,33 +238,18 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
 }
 
 impl<'arena, 'decl> print_expr::SpecialClassResolver for Emitter<'arena, 'decl> {
-    fn resolve<'a>(&self, env: Option<&'a HhasBodyEnv<'_>>, id: &'a str) -> Cow<'a, str> {
-        let class_expr = match env {
-            None => ClassExpr::expr_to_class_expr_(
-                self,
-                true,
-                true,
-                None,
-                None,
-                ast::Expr(
-                    (),
-                    Pos::NONE,
-                    ast::Expr_::mk_id(ast_defs::Id(Pos::NONE, id.into())),
-                ),
+    fn resolve<'a>(&self, scope_opt: Option<&'a Scope<'_, '_>>, id: &'a str) -> Cow<'a, str> {
+        let class_expr = ClassExpr::expr_to_class_expr(
+            self,
+            scope_opt.unwrap_or(&ast_scope::Scope::default()),
+            true,
+            true,
+            ast::Expr(
+                (),
+                Pos::NONE,
+                ast::Expr_::mk_id(ast_defs::Id(Pos::NONE, id.into())),
             ),
-            Some(body_env) => ClassExpr::expr_to_class_expr_(
-                self,
-                true,
-                true,
-                body_env.class_info.as_ref().map(|(k, s)| (k.clone(), *s)),
-                body_env.parent_name.clone().map(|s| s.to_owned()),
-                ast::Expr(
-                    (),
-                    Pos::NONE,
-                    ast::Expr_::mk_id(ast_defs::Id(Pos::NONE, id.into())),
-                ),
-            ),
-        };
+        );
         match class_expr {
             ClassExpr::Id(ast_defs::Id(_, name)) => Cow::Owned(name),
             _ => Cow::Borrowed(id),

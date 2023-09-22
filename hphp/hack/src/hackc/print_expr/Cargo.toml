@@ -10,6 +10,7 @@ path = "lib.rs"
 
 [dependencies]
 anyhow = "1.0.71"
+ast_scope = { version = "0.0.0", path = "../emitter/cargo/ast_scope" }
 bstr = { version = "1.4.0", features = ["serde", "std", "unicode"] }
 bumpalo = { version = "3.11.1", features = ["collections"] }
 core_utils_rust = { version = "0.0.0", path = "../../utils/core" }

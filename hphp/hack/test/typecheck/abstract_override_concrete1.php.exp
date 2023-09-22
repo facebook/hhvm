@@ -1,0 +1,4 @@
+File "abstract_override_concrete1.php", line 16, characters 28-30:
+Cannot re-declare this method as abstract (Typing[4142])
+  File "abstract_override_concrete1.php", line 10, characters 19-21:
+  Previously defined here

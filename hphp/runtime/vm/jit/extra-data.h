@@ -2604,14 +2604,30 @@ struct EndCatchData : IRExtraData {
   };
   enum class FrameMode { Phplogue, Stublogue };
   enum class Teardown  { NA, None, Full, OnlyThis };
+  enum class VMSPSyncMode {NA, Sync, DonotSync};
 
   explicit EndCatchData(IRSPRelOffset offset, CatchMode mode,
-                        FrameMode stublogue, Teardown teardown)
+                        FrameMode stublogue, Teardown teardown,
+                        VMSPSyncMode syncVMSP)
     : offset{offset}
     , mode{mode}
     , stublogue{stublogue}
     , teardown{teardown}
+    , syncVMSP{syncVMSP}
     {}
+
+  std::string syncVMSPToString(VMSPSyncMode mode) const {
+    switch (mode) {
+      case VMSPSyncMode::NA:
+        return "NA";
+      case VMSPSyncMode::Sync:
+        return "Sync";
+      case VMSPSyncMode::DonotSync:
+        return "DonotSync";
+      default:
+        always_assert(false);
+    }
+  }
 
   std::string show() const {
     return folly::to<std::string>(
@@ -2621,7 +2637,9 @@ struct EndCatchData : IRExtraData {
       stublogue == FrameMode::Stublogue ? "Stublogue" : "Phplogue", ",",
       teardown == Teardown::NA ? "NA" :
         teardown == Teardown::None ? "None" :
-          teardown == Teardown::Full ? "Full" : "OnlyThis");
+          teardown == Teardown::Full ? "Full" : "OnlyThis", ",",
+      syncVMSPToString(syncVMSP)
+    );
   }
 
   size_t stableHash() const {
@@ -2629,19 +2647,21 @@ struct EndCatchData : IRExtraData {
       std::hash<int32_t>()(offset.offset),
       std::hash<CatchMode>()(mode),
       std::hash<FrameMode>()(stublogue),
-      std::hash<Teardown>()(teardown)
+      std::hash<Teardown>()(teardown),
+      std::hash<VMSPSyncMode>()(syncVMSP)
     );
   }
 
   bool equals(const EndCatchData& o) const {
     return offset == o.offset && mode == o.mode && stublogue == o.stublogue &&
-           teardown == o.teardown;
+           teardown == o.teardown && syncVMSP == o.syncVMSP;
   }
 
   IRSPRelOffset offset;
   CatchMode mode;
   FrameMode stublogue;
   Teardown teardown;
+  VMSPSyncMode syncVMSP;
 };
 
 struct EnterTCUnwindData : IRExtraData {

@@ -392,6 +392,7 @@ struct UniqueStubs {
    * load vmfp and vmsp and jump there.  Otherwise, we call _Unwind_Resume.
    */
   TCA resumeCPPUnwind;
+  TCA endCatchSyncVMSPHelper;
   TCA endCatchSkipTeardownHelper;
   TCA endCatchTeardownThisHelper;
   TCA endCatchHelper;

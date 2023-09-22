@@ -1191,7 +1191,8 @@ void optimize_end_catch(Global& env, IRInstruction& inst,
     newOffset,
     original->mode,
     original->stublogue,
-    teardownMode
+    teardownMode,
+    EndCatchData::VMSPSyncMode::Sync
   };
   auto iter = block->iteratorTo(&inst)--;
   block->insert(iter++, bcSP);

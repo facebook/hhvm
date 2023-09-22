@@ -570,16 +570,14 @@ void implEndCatchBlock(IRGS& env, const RegionDesc& calleeRegion) {
     }
   }
 
-  // Tell the unwinder that we have popped stuff from the stack.
-  auto const spOff = spOffBCFromIRSP(env);
-  auto const bcSP = gen(env, LoadBCSP, IRSPRelOffsetData { spOff }, sp(env));
-  gen(env, StVMSP, bcSP);
-
   auto const data = EndCatchData {
     spOffBCFromIRSP(env),
     EndCatchData::CatchMode::UnwindOnly,
     EndCatchData::FrameMode::Phplogue,
-    EndCatchData::Teardown::Full
+    EndCatchData::Teardown::Full,
+    /* Tell unwinder to first sync the VM stack pointer since we have popped
+     * items off the stack */
+    EndCatchData::VMSPSyncMode::Sync
   };
   gen(env, EndCatch, data, fp(env), sp(env));
 }

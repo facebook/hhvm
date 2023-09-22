@@ -916,12 +916,19 @@ Block* create_catch_block(
   }
 
   auto const stublogue = env.irb->fs().stublogue();
+  auto const teardown = stublogue
+    ? EndCatchData::Teardown::NA
+    : EndCatchData::Teardown::Full;
+  auto const syncVMSP = teardown == EndCatchData::Teardown::NA
+    ? EndCatchData::VMSPSyncMode::NA
+    : EndCatchData::VMSPSyncMode::DonotSync;
   auto const data = EndCatchData {
     spOffBCFromIRSP(env),
     mode,
     stublogue ?
       EndCatchData::FrameMode::Stublogue : EndCatchData::FrameMode::Phplogue,
-    stublogue ? EndCatchData::Teardown::NA : EndCatchData::Teardown::Full
+    teardown,
+    syncVMSP
   };
   gen(env, EndCatch, data, fp(env), sp(env));
   return catchBlock;

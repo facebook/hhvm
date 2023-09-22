@@ -60,6 +60,7 @@ void cgEndCatch(IRLS& env, const IRInstruction* inst) {
   auto const data = inst->extra<EndCatch>();
   if (data->stublogue == EndCatchData::FrameMode::Stublogue) {
     assertx(data->teardown == EndCatchData::Teardown::NA);
+    assertx(data->syncVMSP == EndCatchData::VMSPSyncMode::NA);
     assertx(inst->marker().prologue());
 
     // The caller is allowed to optimize away writes to the space reserved for
@@ -83,18 +84,31 @@ void cgEndCatch(IRLS& env, const IRInstruction* inst) {
   auto const helper = [&]() -> TCA {
     switch (data->teardown) {
       case EndCatchData::Teardown::None:
+        assertx(data->syncVMSP == EndCatchData::VMSPSyncMode::DonotSync);
         return tc::ustubs().endCatchSkipTeardownHelper;
       case EndCatchData::Teardown::OnlyThis:
+        assertx(data->syncVMSP == EndCatchData::VMSPSyncMode::DonotSync);
         return tc::ustubs().endCatchTeardownThisHelper;
       case EndCatchData::Teardown::Full:
-        return tc::ustubs().endCatchHelper;
+        return data->syncVMSP == EndCatchData::VMSPSyncMode::Sync
+          ? tc::ustubs().endCatchSyncVMSPHelper
+          : tc::ustubs().endCatchHelper;
       case EndCatchData::Teardown::NA:
         always_assert(false && "Stublogue should not be emitting vasm");
     }
     not_reached();
   }();
 
-  // endCatch*Helpers only expect vm_regs_no_sp() to be alive.
+  if (data->syncVMSP == EndCatchData::VMSPSyncMode::Sync) {
+    auto const ssp = v.makeReg();
+    auto const sp = srcLoc(env, inst, 1).reg();
+    auto const offset = data->offset.offset;
+    v << lea{sp[cellsToBytes(offset)], ssp};
+    v << syncvmsp{ssp};
+    v << jmpi{helper, vm_regs_with_sp()};
+    return;
+  }
+
   v << jmpi{helper, vm_regs_no_sp()};
 }
 

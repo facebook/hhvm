@@ -1,4 +1,18 @@
-File "abstract_override_concrete1.php", line 16, characters 28-30:
+File "abstract_override_concrete1.php", line 31, characters 26-26:
+Some members in class `B` are incompatible with those declared in type `C` (Typing[4113])
+  File "abstract_override_concrete1.php", line 10, characters 20-23:
+  This member visibility is: `private`
+  File "abstract_override_concrete1.php", line 24, characters 19-22:
+  `public` was expected
+File "abstract_override_concrete1.php", line 38, characters 20-23:
+This member visibility is: `private` (Typing[4113])
+  File "abstract_override_concrete1.php", line 26, characters 19-22:
+  `public` was expected
+File "abstract_override_concrete1.php", line 34, characters 23-24:
+Cannot re-declare this type constant as abstract (Typing[4142])
+  File "abstract_override_concrete1.php", line 18, characters 23-24:
+  Previously defined here
+File "abstract_override_concrete1.php", line 36, characters 28-30:
 Cannot re-declare this method as abstract (Typing[4142])
-  File "abstract_override_concrete1.php", line 10, characters 19-21:
+  File "abstract_override_concrete1.php", line 22, characters 19-21:
   Previously defined here

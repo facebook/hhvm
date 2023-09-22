@@ -601,6 +601,7 @@ let from_xhp_attr_use env c (parents : Decl_store.class_entries SMap.t) acc uses
   let inherited = from_class_xhp_attrs_only parents uses in
   add_inherited env c inherited acc
 
+(** Inherits constants and type constants from an interface. *)
 let from_interface_constants
     env c (parents : Decl_store.class_entries SMap.t) acc impls =
   let inherited = from_class_constants_only parents impls in
@@ -680,8 +681,8 @@ end = struct
     ]
 
   let fold (t : t) ~init ~(f : parent_kind -> 'acc -> parent -> 'acc) =
-    List.fold_left t ~init ~f:(fun acc (parent_kind, parents) ->
-        List.fold_left ~init:acc ~f:(f parent_kind) parents)
+    List.fold t ~init ~f:(fun acc (parent_kind, parents) ->
+        List.fold ~init:acc ~f:(f parent_kind) parents)
 
   let rev : t -> t = List.rev_map ~f:(Tuple2.map_snd ~f:List.rev)
 

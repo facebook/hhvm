@@ -678,8 +678,8 @@ let check_prop_const_mismatch env parent_class_elt class_elt on_error =
                parent_is_const = get_ce_const parent_class_elt;
              })
 
-let check_abstract_overrides_concrete env member_kind parent_class_elt class_elt
-    =
+let check_abstract_overrides_concrete
+    env member_kind parent_class_elt class_elt on_error =
   if (not (get_ce_abstract parent_class_elt)) && get_ce_abstract class_elt then
     (* It is valid for abstract class to extend a concrete class, but it cannot
      * redefine already concrete members as abstract.
@@ -687,7 +687,7 @@ let check_abstract_overrides_concrete env member_kind parent_class_elt class_elt
     Typing_error_utils.add_typing_error
       ~env
       Typing_error.(
-        assert_in_current_decl ~ctx:(Env.get_current_decl_and_file env)
+        apply_reasons ~on_error
         @@ Secondary.Abstract_concrete_override
              {
                pos = Lazy.force class_elt.ce_pos;
@@ -940,7 +940,12 @@ let check_override
   check_xhp_attr_required env parent_class_elt class_elt on_error;
   check_class_elt_visibility env parent_class_elt class_elt on_error;
   check_prop_const_mismatch env parent_class_elt class_elt on_error;
-  check_abstract_overrides_concrete env member_kind parent_class_elt class_elt;
+  check_abstract_overrides_concrete
+    env
+    member_kind
+    parent_class_elt
+    class_elt
+    on_error;
 
   let (lazy pos) = class_elt.ce_pos in
   let (lazy parent_pos) = parent_class_elt.ce_pos in
@@ -1720,7 +1725,7 @@ let tconst_subsumption
     Typing_error_utils.add_typing_error
       ~env
       Typing_error.(
-        assert_in_current_decl ~ctx:(Env.get_current_decl_and_file env)
+        apply_reasons ~on_error
         @@ Secondary.Abstract_concrete_override
              { pos; parent_pos; kind = `typeconst });
     env
@@ -1932,6 +1937,15 @@ let check_typeconst_override
     check_abstract_typeconst_in_concrete_class env (class_pos, class_) tconst;
     env
   ) else
+    (* If the class element is defined in the class that we're checking, then
+     * don't wrap with the extra
+     * "Class ... does not correctly implement all required members" message *)
+    let on_error =
+      if String.equal tconst.ttc_origin (Cls.name class_) then
+        Env.unify_error_assert_primary_pos_in_current_decl env
+      else
+        on_error
+    in
     let tconst_check parent_tconst tconst () =
       let parent_tconst_enforceable =
         (* We know that this typeconst exists in the parent (else we would not
@@ -2039,9 +2053,11 @@ let filter_privates_and_synthethized
   let keep class_elt = not (eliminate class_elt) in
   List.filter members ~f:(fun (_name, class_elt) -> keep class_elt)
 
-let make_parent_member_map
-    ((parent_name_pos, _parent_name), parent_tparaml, parent_class) :
+let make_parent_member_map parent :
     ParentClassElt.parent * class_elt MemberNameMap.t MemberKindMap.t =
+  let ((parent_name_pos, _parent_name), parent_tparaml, parent_class) =
+    parent
+  in
   let psubst = Inst.make_subst (Cls.tparams parent_class) parent_tparaml in
   let member_map =
     make_all_members ~parent_class

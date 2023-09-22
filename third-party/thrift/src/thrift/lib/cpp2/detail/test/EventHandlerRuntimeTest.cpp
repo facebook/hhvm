@@ -16,6 +16,8 @@
 
 #include <folly/portability/GTest.h>
 
+#include <folly/synchronization/Rcu.h>
+
 #include <initializer_list>
 #include <memory>
 
@@ -85,6 +87,7 @@ class EventHandlerRuntimeTest : public testing::Test {
   }
 
   void TearDown() override {
+    folly::rcu_synchronize();
     apache::thrift::TProcessorBase::removeProcessorEventHandler(serverEvents);
     apache::thrift::TClientBase::removeClientEventHandler(clientEvents);
   }

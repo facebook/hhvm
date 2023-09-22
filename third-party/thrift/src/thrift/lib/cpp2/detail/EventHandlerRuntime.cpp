@@ -27,8 +27,6 @@
 
 using apache::thrift::util::AllocationColocator;
 
-namespace apache::thrift::detail {
-
 /**
  * Here's how isClientMethodBypassed's implementation works:
  *
@@ -75,23 +73,8 @@ struct InlineNameList {
 };
 
 struct MethodNameStorageImpl {
-  // We store the deleter inline because AllocationColocator<T>::Ptr is not
-  // valid to be placed into std::atomic since it's not copyable. This lets us
-  // put a raw pointer into the atomic and still delete at the right time.
-  std::optional<AllocationColocator<MethodNameStorageImpl>::Deleter> deleter;
-
   InlineNameList serviceNames;
   InlineNameList methodNames;
-
-  ~MethodNameStorageImpl() noexcept {
-    static_assert(std::is_trivially_destructible_v<InlineNameList>);
-    // Because all fields are trivially destructible, we can free the memory
-    // before their object lifetimes end. Trivial destructors imply that
-    // the free'd memory will not be accessed.
-    if (deleter.has_value()) {
-      (*std::exchange(deleter, std::nullopt))(this);
-    }
-  }
 };
 
 std::atomic<MethodNameStorageImpl*> globalClientMethodsToBypass{nullptr};
@@ -107,6 +90,14 @@ void removeEmptyNames(std::vector<std::string>& names) {
 }
 
 } // namespace
+
+namespace std {
+template <>
+struct default_delete<MethodNameStorageImpl>
+    : AllocationColocator<MethodNameStorageImpl>::Deleter {};
+} // namespace std
+
+namespace apache::thrift::detail {
 
 /* static */ void EventHandlerRuntime::setClientMethodsToBypass(
     MethodNameSet bypassSets) {
@@ -181,7 +172,8 @@ void removeEmptyNames(std::vector<std::string>& names) {
         return storage;
       });
 
-  storage->deleter = std::move(storage.get_deleter());
+  // We are okay to throw away the custom deleter because there is a
+  // specialization of std::default_delete that will invoke it.
   setMethodNameStorageImpl(storage.release());
 }
 

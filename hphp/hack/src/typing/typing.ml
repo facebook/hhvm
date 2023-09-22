@@ -6707,6 +6707,9 @@ and new_object
 
 and attributes_check_def env kind attrs =
   let new_object attr_pos env attr_cid params =
+    (* We'd like the class id's position here to be the use position of the attribute
+       instead of the decl position of the class *)
+    let (_decl_pos, cid_) = attr_cid in
     let (env, _, _, _, _, _, _, _) =
       new_object
         ~expected:None
@@ -6715,7 +6718,7 @@ and attributes_check_def env kind attrs =
         ~is_using_clause:false
         attr_pos
         env
-        ((), attr_pos, Aast.CI (Positioned.unsafe_to_raw_positioned attr_cid))
+        ((), attr_pos, Aast.CI (attr_pos, cid_))
         []
         (List.map ~f:(fun e -> (Ast_defs.Pnormal, e)) params)
         (* list of attr parameter literals *)

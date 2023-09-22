@@ -605,8 +605,7 @@ class RocketClientChannel::SingleRequestSingleResponseCallback final
         return;
       }
       const auto& metadata = response->metadata;
-      if (kTempKillswitch__EnableFdPassing &&
-          metadata.fdMetadata().has_value()) {
+      if (metadata.fdMetadata().has_value()) {
         const auto& fdMetadata = *metadata.fdMetadata();
         tryFds = rocket::popReceivedFdsFromSocket(
             transport,
@@ -625,8 +624,7 @@ class RocketClientChannel::SingleRequestSingleResponseCallback final
 
       // Precedes `processFirstResponse` to promptly close the FDs on error.
       const auto& metadata = response->metadata;
-      if (kTempKillswitch__EnableFdPassing &&
-          metadata.fdMetadata().has_value()) {
+      if (metadata.fdMetadata().has_value()) {
         const auto& fdMetadata = *metadata.fdMetadata();
         tryFds = rocket::popReceivedFdsFromSocket(
             transport,
@@ -642,7 +640,7 @@ class RocketClientChannel::SingleRequestSingleResponseCallback final
     }
 
     // Both `if` and `else` set this -- share the error handling.
-    if (kTempKillswitch__EnableFdPassing && tryFds.hasException()) {
+    if (tryFds.hasException()) {
       cb_.release()->onResponseError(std::move(tryFds.exception()));
       return;
     }
@@ -652,7 +650,7 @@ class RocketClientChannel::SingleRequestSingleResponseCallback final
 
     auto tHeader = std::make_unique<transport::THeader>();
     tHeader->setClientType(THRIFT_ROCKET_CLIENT_TYPE);
-    if (kTempKillswitch__EnableFdPassing && tryFds.hasValue()) {
+    if (tryFds.hasValue()) {
       tHeader->fds = std::move(tryFds->dcheckReceivedOrEmpty());
     }
 

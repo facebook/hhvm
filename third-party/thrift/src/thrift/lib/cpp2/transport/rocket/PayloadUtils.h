@@ -137,7 +137,7 @@ rocket::Payload packWithFds(
         serializedPayload, *compress);
   }
   auto numFds = fds.size();
-  if (kTempKillswitch__EnableFdPassing && numFds) {
+  if (numFds) {
     FdMetadata fdMetadata;
 
     // The kernel maximum is actually much lower (at least on Linux, and
@@ -177,7 +177,7 @@ rocket::Payload packWithFds(
   }
   auto ret = apache::thrift::rocket::detail::makePayload(
       *metadata, std::move(serializedPayload));
-  if (kTempKillswitch__EnableFdPassing && numFds) {
+  if (numFds) {
     ret.fds = std::move(fds.dcheckToSendOrEmpty());
   }
   return ret;

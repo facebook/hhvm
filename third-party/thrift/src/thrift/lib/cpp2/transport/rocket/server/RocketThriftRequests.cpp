@@ -477,9 +477,7 @@ void ThriftServerRequestResponse::sendThriftResponse(
   auto payload = packWithFds(
       &metadata,
       std::move(data),
-      kTempKillswitch__EnableFdPassing
-          ? std::move(getRequestContext()->getHeader()->fds)
-          : folly::SocketFds{},
+      std::move(getRequestContext()->getHeader()->fds),
       context_.connection().getRawSocket());
   context_.sendPayload(
       std::move(payload), Flags().next(true).complete(true), std::move(cb));
@@ -627,10 +625,8 @@ bool ThriftServerRequestStream::sendStreamThriftResponse(
   stream->resetClientCallback(*clientCallback_);
   clientCallback_->setProtoId(getProtoId());
   auto payload = FirstResponsePayload{std::move(data), std::move(metadata)};
-  if (kTempKillswitch__EnableFdPassing) {
-    payload.fds =
-        std::move(getRequestContext()->getHeader()->fds.dcheckToSendOrEmpty());
-  }
+  payload.fds =
+      std::move(getRequestContext()->getHeader()->fds.dcheckToSendOrEmpty());
   return clientCallback_->onFirstResponse(
       std::move(payload), nullptr /* evb */, stream.release());
 }
@@ -652,10 +648,8 @@ void ThriftServerRequestStream::sendStreamThriftResponse(
   clientCallback_->setProtoId(getProtoId());
   auto payload = apache::thrift::FirstResponsePayload{
       std::move(data), std::move(metadata)};
-  if (kTempKillswitch__EnableFdPassing) {
-    payload.fds =
-        std::move(getRequestContext()->getHeader()->fds.dcheckToSendOrEmpty());
-  }
+  payload.fds =
+      std::move(getRequestContext()->getHeader()->fds.dcheckToSendOrEmpty());
   stream(std::move(payload), clientCallback_, &evb_);
 }
 

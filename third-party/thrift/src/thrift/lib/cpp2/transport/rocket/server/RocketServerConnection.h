@@ -437,7 +437,7 @@ class RocketServerConnection final
       // We want the FDs to arrive no later than the last byte of `data`.
       // By attaching the FDs after growing `bufferedWrites_`, it
       // means that `fds` are associated with `[prev offset, offset)`.
-      if (kTempKillswitch__EnableFdPassing && !fds.empty()) {
+      if (!fds.empty()) {
         fdsAndOffsets_.emplace_back(
             std::move(fds),
             // This is costly, but the alternatives are all bad:
@@ -487,7 +487,7 @@ class RocketServerConnection final
       bufferedWritesCount_ = 0;
       totalBytesBuffered_ = 0;
       earlyFlushRequested_ = false;
-      if (!kTempKillswitch__EnableFdPassing || fdsAndOffsets_.empty()) {
+      if (fdsAndOffsets_.empty()) {
         // Fast path: no FDs, write as one batch.
         connection_.flushWrites(
             std::move(bufferedWrites_),

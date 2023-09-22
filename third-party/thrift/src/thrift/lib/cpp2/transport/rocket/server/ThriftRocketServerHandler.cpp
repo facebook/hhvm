@@ -407,7 +407,7 @@ void ThriftRocketServerHandler::handleRequestCommon(
   // class -- see in `~ThriftRocketServerHandler` and the comment in
   // `handleRequestResponseFrame` for evidence.
   folly::Try<folly::SocketFds> tryFds;
-  if (kTempKillswitch__EnableFdPassing && metadata.fdMetadata().has_value()) {
+  if (metadata.fdMetadata().has_value()) {
     const auto& fdMetadata = *metadata.fdMetadata();
     tryFds = popReceivedFdsFromSocket(
         transport_,
@@ -589,7 +589,7 @@ void ThriftRocketServerHandler::handleRequestCommon(
   timestamps.readEnd = readEnd;
   timestamps.processBegin = std::chrono::steady_clock::now();
 
-  if (kTempKillswitch__EnableFdPassing && tryFds.hasValue()) {
+  if (tryFds.hasValue()) {
     cpp2ReqCtx->getHeader()->fds.dcheckEmpty() =
         std::move(tryFds->dcheckReceivedOrEmpty());
   }

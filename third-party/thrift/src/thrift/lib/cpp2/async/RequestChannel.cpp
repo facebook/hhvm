@@ -178,9 +178,7 @@ class RequestClientCallbackWrapper
       ClientBridgePtr clientBridge) override {
     auto tHeader = std::make_unique<transport::THeader>();
     tHeader->setClientType(THRIFT_ROCKET_CLIENT_TYPE);
-    if (kTempKillswitch__EnableFdPassing) {
-      tHeader->fds = std::move(firstResponse.fds.dcheckReceivedOrEmpty());
-    }
+    tHeader->fds = std::move(firstResponse.fds.dcheckReceivedOrEmpty());
     if (auto tfmr = firstResponse.metadata.frameworkMetadata_ref()) {
       detail::ingestFrameworkMetadataFromResponse(std::move(*tfmr));
     }

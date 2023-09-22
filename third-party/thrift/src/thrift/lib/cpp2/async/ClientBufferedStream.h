@@ -268,12 +268,10 @@ class ClientBufferedStream {
               // `T` in the variant.  Otherwise -- if the payload had either
               // custom metadata, or FDs, we pass back `RichPayloadReceived`.
               if (payload->metadata.otherMetadata().has_value() ||
-                  (kTempKillswitch__EnableFdPassing && !payload->fds.empty())) {
+                  !payload->fds.empty()) {
                 RichPayloadReceived ret;
                 ret.metadata = std::move(payload->metadata);
-                if (kTempKillswitch__EnableFdPassing) {
-                  ret.fds = std::move(payload->fds.dcheckReceivedOrEmpty());
-                }
+                ret.fds = std::move(payload->fds.dcheckReceivedOrEmpty());
                 ret.payload = *decode(std::move(payload));
                 queue.pop();
                 co_yield std::move(ret);

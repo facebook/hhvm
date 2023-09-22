@@ -63,9 +63,7 @@ struct StreamPayload {
     if (oth.payload) {
       payload = oth.payload->clone();
     }
-    if (kTempKillswitch__EnableFdPassing) {
-      fds.cloneToSendFromOrDfatal(oth.fds);
-    }
+    fds.cloneToSendFromOrDfatal(oth.fds);
   }
 
   StreamPayload(StreamPayload&&) = default;
@@ -76,9 +74,7 @@ struct StreamPayload {
     }
     metadata = oth.metadata;
     isOrderedHeader = oth.isOrderedHeader;
-    if (kTempKillswitch__EnableFdPassing) {
-      fds.cloneToSendFromOrDfatal(oth.fds);
-    }
+    fds.cloneToSendFromOrDfatal(oth.fds);
     return *this;
   }
 
@@ -160,7 +156,7 @@ folly::Try<StreamPayload> encodeMessageVariant(
       [&](RichPayloadToSend<T>&& val) {
         auto ret = (*encode)(std::move(val.payload));
         ret->metadata.otherMetadata() = std::move(val.metadata);
-        if (kTempKillswitch__EnableFdPassing && !val.fdsToSend.empty()) {
+        if (!val.fdsToSend.empty()) {
           ret->fds = folly::SocketFds(std::move(val.fdsToSend));
         }
         return ret;

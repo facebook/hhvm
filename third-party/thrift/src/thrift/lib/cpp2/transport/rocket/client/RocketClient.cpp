@@ -373,7 +373,7 @@ StreamChannelStatusResponse RocketClient::handleFirstResponse(
   //   -> RequestClientCallbackWrapper::onFirstResponse
   //      populates THeader
   const auto& metadata = firstResponse->metadata;
-  if (kTempKillswitch__EnableFdPassing && metadata.fdMetadata().has_value()) {
+  if (metadata.fdMetadata().has_value()) {
     const auto& fdMetadata = *metadata.fdMetadata();
     auto tryFds = popReceivedFdsFromSocket(
         getTransportWrapper(),
@@ -427,7 +427,7 @@ StreamChannelStatusResponse RocketClient::handleStreamResponse(
     //   -> feeds into `toAsyncGeneratorImpl` via the inline `ReadyCallback`
     //      if the user calls `toAsyncGeneratorWithHeader`
     const auto metadata = streamPayload->metadata;
-    if (kTempKillswitch__EnableFdPassing && metadata.fdMetadata().has_value()) {
+    if (metadata.fdMetadata().has_value()) {
       const auto& fdMetadata = *metadata.fdMetadata();
       auto tryFds = popReceivedFdsFromSocket(
           getTransportWrapper(),
@@ -1154,7 +1154,7 @@ void RocketClient::writeScheduledRequestsToSocket() noexcept {
       } else {
         buf->prependChain(std::move(reqBuf));
       }
-      if (!kTempKillswitch__EnableFdPassing || LIKELY(req.fds.empty())) {
+      if (LIKELY(req.fds.empty())) {
         return; // Fast path: no FDs, no batch splitting.
       }
 

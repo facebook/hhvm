@@ -28,6 +28,19 @@ func TestReadWriteBinaryProtocol(t *testing.T) {
 	ReadWriteProtocolTest(t, NewBinaryProtocolFactoryDefault())
 }
 
+func TestWriteBinaryEmptyBinaryProtocol(t *testing.T) {
+	m := NewMyTestStruct()
+	m.Bin = nil
+	s := NewDeserializer()
+	f := NewBinaryProtocolFactoryDefault()
+	s.Protocol = f.GetProtocol(s.Transport)
+	transport := s.Transport.(*MemoryBuffer)
+	transport.Buffer = bytes.NewBuffer([]byte(nil))
+	if err := m.Write(s.Protocol); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestSkipUnknownTypeBinaryProtocol(t *testing.T) {
 	var m MyTestStruct
 	d := NewDeserializer()

@@ -44,8 +44,13 @@ let fix_by_running_hh = "Try running `hh` at the command-line."
 
 type incoming_metadata = {
   timestamp: float;  (** time this message arrived at stdin *)
+  activity_id: string;
+      (** comes from VSCode for the user-initiated action, which might include several LSP requests. Might
+      be "_" for LSP requests/notifications that weren't initiated by VSCode-tracked actions. *)
+  tracking_suffix: string;
+      (** additional unique key, since [activity_id] might be shared between several LSP messages, or empty. *)
   tracking_id: string;
-      (** a unique random string of our own creation, which we can use for logging *)
+      (** This is just [activity_id].[tracking_suffix]. Is handy to keep it in one place. *)
 }
 
 type errors_from =
@@ -705,13 +710,18 @@ let get_next_event
     | `Message { Jsonrpc.json; timestamp } -> begin
       try
         let message = Lsp_fmt.parse_lsp json get_outstanding_request_exn in
+        let activity_key = Jget.obj_opt (Some json) "activityKey" in
+        let activity_id = Jget.string_d activity_key "id" ~default:"_" in
         let rnd = Random_id.short_string () in
-        let tracking_id =
+        let tracking_suffix =
           match message with
           | RequestMessage (id, _) -> rnd ^ "." ^ Lsp_fmt.id_to_string id
           | _ -> rnd
         in
-        Lwt.return (Client_message ({ tracking_id; timestamp }, message))
+        let tracking_id = activity_id ^ "." ^ tracking_suffix in
+        Lwt.return
+          (Client_message
+             ({ tracking_id; activity_id; tracking_suffix; timestamp }, message))
       with
       | e ->
         let e = Exception.wrap e in
@@ -1624,7 +1634,10 @@ let log_response_if_necessary
   in
   match to_log with
   | None -> ()
-  | Some ({ timestamp; tracking_id }, start_handle_time, message) ->
+  | Some
+      ( { timestamp; activity_id; tracking_suffix = _; tracking_id = _ },
+        start_handle_time,
+        message ) ->
     let (kind, method_) = get_message_kind_and_method_for_logging message in
     HackEventLogger.client_lsp_method_handled
       ~root:(get_root_opt ())
@@ -1633,7 +1646,7 @@ let log_response_if_necessary
       ~path_opt:(get_filename_in_message_for_logging message)
       ~result_count
       ~result_extra_telemetry
-      ~tracking_id
+      ~activity_id
       ~start_queue_time:timestamp
       ~start_hh_server_state:""
       ~start_handle_time
@@ -1678,7 +1691,7 @@ let hack_log_error
       ~method_
       ~kind
       ~path_opt:(get_filename_in_message_for_logging message)
-      ~tracking_id:metadata.tracking_id
+      ~activity_id:metadata.activity_id
       ~start_queue_time:metadata.timestamp
       ~start_hh_server_state:""
       ~start_handle_time:unblocked_time

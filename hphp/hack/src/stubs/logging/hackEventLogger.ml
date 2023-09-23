@@ -202,7 +202,7 @@ let client_lsp_method_handled
     ~path_opt:_
     ~result_count:_
     ~result_extra_telemetry:_
-    ~tracking_id:_
+    ~activity_id:_
     ~start_queue_time:_
     ~start_hh_server_state:_
     ~start_handle_time:_
@@ -214,7 +214,7 @@ let client_lsp_method_exception
     ~method_:_
     ~kind:_
     ~path_opt:_
-    ~tracking_id:_
+    ~activity_id:_
     ~start_queue_time:_
     ~start_hh_server_state:_
     ~start_handle_time:_

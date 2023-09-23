@@ -125,6 +125,8 @@ libmcrouter_a_SOURCES = \
   fbi/cpp/TypeList.h \
   fbi/cpp/globals.cpp \
   fbi/cpp/globals.h \
+  fbi/cpp/LowerBoundPrefixMap.cpp \
+  fbi/cpp/LowerBoundPrefixMap.h \
   fbi/cpp/ParsingUtil.cpp \
   fbi/cpp/ParsingUtil.h \
   fbi/cpp/util.cpp \

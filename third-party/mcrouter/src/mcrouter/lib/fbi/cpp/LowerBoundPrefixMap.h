@@ -133,8 +133,7 @@ struct LowerBoundPrefixMapCommon {
 
   std::string_view str(std::uint32_t i) const {
     const char* f = chars_.data() + markers_[i];
-    const char* l = chars_.data() + markers_[i + 1];
-    return std::string_view{f, l};
+    return std::string_view{f, markers_[i + 1] - markers_[i]};
   }
 };
 

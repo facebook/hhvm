@@ -10,13 +10,21 @@
 #include <cstring>
 #include <numeric>
 #include <ostream>
-#include <span>
 #include <stdexcept>
 
 #include <folly/CPortability.h>
 #include <folly/Likely.h>
 
 namespace facebook::memcache::detail {
+namespace {
+
+// .starts_with is not avaliable before C++20 and this needs to compile with an
+// older standard
+bool std_string_view_starts_with(std::string_view what, std::string_view with) {
+  return what.substr(0, with.size()) == with;
+}
+
+} // namespace
 
 std::ostream& operator<<(std::ostream& os, const SmallPrefix& self) {
   std::uint64_t correctOrder = folly::Endian::swap(self.data_);
@@ -32,12 +40,10 @@ LowerBoundPrefixMapCommon::LowerBoundPrefixMapCommon(
 
   // total size
   {
-    std::size_t size = std::transform_reduce(
-        sortedUniquePrefixes.begin(),
-        sortedUniquePrefixes.end(),
-        std::size_t{0},
-        std::plus<>{},
-        [](const auto& x) { return x.size(); });
+    std::size_t size = 0;
+    for (const auto& p : sortedUniquePrefixes) {
+      size += p.size();
+    }
     if (size >= std::numeric_limits<std::uint32_t>::max()) {
       throw std::runtime_error(
           "too many chars for LowerBoundPrefixMap: " + std::to_string(size));
@@ -105,7 +111,7 @@ std::uint32_t LowerBoundPrefixMapCommon::findPrefix(
                  }) -
       markers_.begin();
 
-  while (cur != 0 && !query.starts_with(str(cur - 1))) {
+  while (cur != 0 && !std_string_view_starts_with(query, str(cur - 1))) {
     cur = previousPrefix_[cur - 1];
   }
 

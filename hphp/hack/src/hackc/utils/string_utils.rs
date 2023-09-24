@@ -378,7 +378,7 @@ pub mod reified {
                 return match *name {
                     "function" => i.parse().map_or(None, |i| Some(ReifiedTparam::Fun(i))),
                     "class" => i.parse().map_or(None, |i| Some(ReifiedTparam::Class(i))),
-                    _ => return None,
+                    _ => None,
                 };
             }
         };

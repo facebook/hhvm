@@ -4307,16 +4307,17 @@ fn emit_array_get_<'a, 'arena, 'decl>(
     }
 }
 
-fn is_special_class_constant_accessed_with_class_id(cname: &ast::ClassId_, id: &str) -> bool {
-    let is_self_parent_or_static = match cname {
-        ast::ClassId_::CIexpr(ast::Expr(_, _, ast::Expr_::Id(id))) => {
-            string_utils::is_self(&id.1)
-                || string_utils::is_parent(&id.1)
-                || string_utils::is_static(&id.1)
-        }
-        _ => false,
-    };
-    string_utils::is_class(id) && !is_self_parent_or_static
+fn is_special_class_constant_accessed_with_class_id(
+    e: &Emitter<'_, '_>,
+    env: &Env<'_, '_>,
+    cname: &ast::ClassId,
+    id: &str,
+) -> bool {
+    if !string_utils::is_class(id) {
+        return false;
+    }
+    let expr = ClassExpr::class_id_to_class_expr(e, &env.scope, false, false, cname);
+    matches!(expr, ClassExpr::Id(_))
 }
 
 fn emit_elem<'a, 'arena, 'decl>(
@@ -4346,7 +4347,7 @@ fn emit_elem<'a, 'arena, 'decl>(
                 }
             }
             ast::Expr_::ClassConst(x)
-                if is_special_class_constant_accessed_with_class_id(&(x.0).2, &(x.1).1) =>
+                if is_special_class_constant_accessed_with_class_id(e, env, &(x.0), &(x.1).1) =>
             {
                 (instr::empty(), 0)
             }
@@ -4402,7 +4403,7 @@ fn get_elem_member_key<'a, 'arena, 'decl>(
             }
             // Special case for class name
             Expr_::ClassConst(x)
-                if is_special_class_constant_accessed_with_class_id(&(x.0).2, &(x.1).1) =>
+                if is_special_class_constant_accessed_with_class_id(e, env, &(x.0), &(x.1).1) =>
             {
                 let cname = match (&(x.0).2, env.scope.get_class()) {
                     (CI_::CIself, Some(cd)) => string_utils::strip_global_ns(cd.get_name_str()),

@@ -81,6 +81,7 @@ struct GenListPatch {
   ListPatch operator()() {
     ListPatch p;
     p.push_back(randInt());
+
     return p;
   }
 };
@@ -175,27 +176,19 @@ void patchIfSetOptionalFields(MyStructPatch& result) {
 }
 
 void ensureNonOptionalFields(MyStructPatch& result) {
-  result.ensure<ident::boolVal>(true);
-  result.ensure<ident::byteVal>(1);
-  result.ensure<ident::i16Val>(2);
-  result.ensure<ident::i32Val>(3);
-  result.ensure<ident::i64Val>(4);
-  result.ensure<ident::floatVal>(5);
-  result.ensure<ident::doubleVal>(6);
-  result.ensure<ident::stringVal>("7");
-  result.ensure<ident::binaryVal>(folly::IOBuf::wrapBufferAsValue("8", 1));
-  result.ensure<ident::enumVal>(MyEnum::MyValue9);
-  result.ensure<ident::structVal>([] {
-    MyData data;
-    data.data1() = "10";
-    return data;
-  }());
-  result.ensure<ident::unionVal>([] {
-    MyUnion u;
-    u.option1_ref() = "11";
-    return u;
-  }());
-  result.ensure<ident::longList>({12});
+  result.ensure<ident::boolVal>();
+  result.ensure<ident::byteVal>();
+  result.ensure<ident::i16Val>();
+  result.ensure<ident::i32Val>();
+  result.ensure<ident::i64Val>();
+  result.ensure<ident::floatVal>();
+  result.ensure<ident::doubleVal>();
+  result.ensure<ident::stringVal>();
+  result.ensure<ident::binaryVal>();
+  result.ensure<ident::enumVal>();
+  result.ensure<ident::structVal>();
+  result.ensure<ident::unionVal>();
+  result.ensure<ident::longList>();
 }
 
 void ensureOptionalFields(MyStructPatch& result) {

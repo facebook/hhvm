@@ -947,7 +947,7 @@ struct is_terse_intern_boxed_field_ref<terse_intern_boxed_field_ref<T>>
 TEST(StructPatchTest, EnsureStruct) {
   MyDataPatch patch;
 
-  patch.ensure<ident::data1>("10");
+  patch.ensure<ident::data1>();
   patch.ensure<ident::data3>("20");
 
   MyData data;
@@ -986,7 +986,7 @@ TEST(StructPatchTest, EnsureStructValPatchable) {
   EXPECT_EQ(foo.structVal(), data);
 
   // Ensure will be no-op since data2 is non-optional field
-  patch.patchIfSet<ident::structVal>().ensure<ident::data2>(42);
+  patch.patchIfSet<ident::structVal>().ensure<ident::data2>();
   patch.apply(foo);
   EXPECT_EQ(foo.structVal(), data);
 }
@@ -1040,7 +1040,7 @@ TEST(StructPatchTest, EnsureOptStructValPatchable) {
   patch.apply(foo);
   EXPECT_EQ(foo.optStructVal(), data);
 
-  patch.patchIfSet<ident::optStructVal>().ensure<ident::data2>(42);
+  patch.patchIfSet<ident::optStructVal>().ensure<ident::data2>();
   patch.apply(foo);
   EXPECT_EQ(foo.optStructVal(), data);
 }
@@ -1309,7 +1309,7 @@ TEST(PatchDiscrepancy, EnsureUnqualifiedField) {
 
   DefPatch patch;
   patch.clear();
-  patch.ensure<ident::field>(1);
+  patch.ensure<ident::field>();
 
   // Apply patch statically
   patch.apply(foo);
@@ -1333,7 +1333,7 @@ TEST(PatchDiscrepancy, EnsureTerseField) {
   protocol::asValueStruct<type::infer_tag<Ter>>(foo);
 
   TerPatch patch;
-  patch.ensure<ident::field>(1);
+  patch.ensure<ident::field>();
 
   // Apply patch statically
   patch.apply(foo);

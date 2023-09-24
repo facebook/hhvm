@@ -334,8 +334,6 @@ TEST(PatchMergeTest, StructPatch) {
   ops.push_back(
       [](MyStructPatch& patch) { (patch.ensure<ident::stringVal>()); });
   ops.push_back(
-      [](MyStructPatch& patch) { (patch.ensure<ident::stringVal>("10")); });
-  ops.push_back(
       [](MyStructPatch& patch) { (patch.ensure<ident::optStringVal>()); });
   ops.push_back(
       [](MyStructPatch& patch) { (patch.ensure<ident::optStringVal>("10")); });

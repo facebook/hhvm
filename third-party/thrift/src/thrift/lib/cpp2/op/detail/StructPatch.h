@@ -124,6 +124,11 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
       patch.apply(op::get<Id>(v));
     }
 
+    template <class>
+    void ensure() {
+      // For non-optional field, ensure is no-op
+    }
+
     template <class Id, class Field>
     void ensure(const Field& def) {
       if (isAbsent(op::get<Id>(v))) {
@@ -177,21 +182,15 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
   /// Ensures the given field is set, and return the associated patch object.
   template <typename Id>
   void ensure() {
+    // Ensuring non-optional field to intrinsic default is allowed since we
+    // might want to ensure field in case the field doesn't exist in dynamic
+    // value. (e.g., Terse field with default value. Without ensuring it first,
+    // we will not be able to patch such field at all).
     maybeEnsure<Id>();
   }
-  // TODO: Removing this API for non-optional field
   /// Same as `ensure()` method, except uses the provided default value.
   template <typename Id, typename U = FieldType<Id>>
-  void ensure(U&& defaultVal) {
-    if constexpr (!is_optional_or_union_field_v<Id>) {
-      // Even for non-optional field, we might want to ensure field in case
-      // the field doesn't exist in dynamic value. (e.g., Terse field with
-      // default value. Without ensuring it first, we will not be able to patch
-      // such field at all). However in this case it must always be intrinsic
-      // default to match static patch's behavior.
-      return ensure<Id>();
-    }
-
+  std::enable_if_t<is_optional_or_union_field_v<Id>> ensure(U&& defaultVal) {
     if (maybeEnsure<Id>()) {
       getEnsure<Id>(data_) = std::forward<U>(defaultVal);
     }
@@ -261,7 +260,10 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
             folly::remove_cvref_t<decltype(BaseEnsurePatch{}.patch<Id>())>;
 
         v.template patchIfSet<Id>(FieldPatchType{});
-        v.template ensure<Id>(FieldType<Id>{});
+        v.template ensure<Id>();
+        if constexpr (is_optional_or_union_field_v<Id>) {
+          v.template ensure<Id>(FieldType<Id>{});
+        }
         v.template patchIfSet<Id>(FieldPatchType{});
       });
     }
@@ -274,8 +276,13 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
 
     // TODO: Optimize ensure for UnionPatch
     for_each_field_id<T>([&](auto id) {
-      if (auto p = op::get<>(id, *data_.ensure())) {
-        std::forward<Visitor>(v).template ensure<decltype(id)>(*p);
+      using Id = decltype(id);
+      if (auto p = op::get<Id>(*data_.ensure())) {
+        if constexpr (is_optional_or_union_field_v<Id>) {
+          std::forward<Visitor>(v).template ensure<Id>(*p);
+        } else {
+          std::forward<Visitor>(v).template ensure<Id>();
+        }
       }
     });
 

@@ -2194,6 +2194,7 @@ void HQSession::HQStreamTransportBase::initIngress(const std::string& where) {
 HTTPTransaction* FOLLY_NULLABLE
 HQSession::newTransaction(HTTPTransaction::Handler* handler) {
   VLOG(4) << __func__ << " sess=" << *this;
+  setStreamLimitExceeded(false);
 
   if (drainState_ == DrainState::CLOSE_SENT ||
       drainState_ == DrainState::FIRST_GOAWAY ||
@@ -2210,6 +2211,7 @@ HQSession::newTransaction(HTTPTransaction::Handler* handler) {
   auto quicStreamId = sock_->createBidirectionalStream();
   if (!quicStreamId) {
     VLOG(2) << __func__ << " failed to create new stream: " << this;
+    setStreamLimitExceeded(true);
     return nullptr;
   }
 

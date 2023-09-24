@@ -360,6 +360,10 @@ class HTTPSessionBase : public wangle::ManagedConnection {
     return transactionSeqNo_;
   }
 
+  [[nodiscard]] bool getStreamLimitExceeded() const {
+    return streamLimitExceeded_;
+  }
+
   [[nodiscard]] std::chrono::seconds getLatestIdleTime() const /*override*/ {
     DCHECK_GT(transactionSeqNo_, 0u)
         << "No idle time for the first transaction";
@@ -629,6 +633,10 @@ class HTTPSessionBase : public wangle::ManagedConnection {
     ++transactionSeqNo_;
   }
 
+  void setStreamLimitExceeded(bool streamLimitExceeded) {
+    streamLimitExceeded_ = streamLimitExceeded;
+  }
+
   void onNewOutgoingStream(uint32_t outgoingStreams) {
     if (outgoingStreams > historicalMaxOutgoingStreams_) {
       historicalMaxOutgoingStreams_ = outgoingStreams;
@@ -823,6 +831,11 @@ class HTTPSessionBase : public wangle::ManagedConnection {
    * Indicates whether Ex Headers is supported in HTTPSession
    */
   bool exHeadersEnabled_ : 1;
+
+  /**
+   * Indicates whether quic stream ID limit is exceeded.
+   */
+  bool streamLimitExceeded_{false};
 };
 
 } // namespace proxygen

@@ -27,6 +27,8 @@ struct SourceInfo {
   // A source file name. It can include directory components and/or be a
   // virtual file name that doesn't have a correspondent entry in the system's
   // directory structure.
+  // Preserves the legacy behavior of sometimes leaking resolved relative paths.
+  // The unmodified path is available inside schema.Program.
   1: string fileName;
 
   /**

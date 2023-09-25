@@ -10,7 +10,7 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"  private function ${0:method0}(_ $z): _ {\n    $x = $z;\n    return $x;\n  }\n\n",
+          "newText":"  private function ${0:method0}((bool | string) $z): (bool | string) {\n    $x = $z;\n    return $x;\n  }\n\n",
           "range":{"end":{"character":0,"line":4},"start":{"character":0,"line":4}}
         },
         {
@@ -30,7 +30,7 @@ Applied edit for code action:
 
 
 class Klass {
-  private function ${0:method0}(_ $z): _ {
+  private function ${0:method0}((bool | string) $z): (bool | string) {
     $x = $z;
     return $x;
   }

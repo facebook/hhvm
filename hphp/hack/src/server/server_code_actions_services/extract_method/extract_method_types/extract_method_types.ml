@@ -11,20 +11,11 @@ type iterator_kind =
   | Iterator
   | KeyedIterator
 
-type ty_string = Ty of string
-
-type var_tys = ty_string String.Map.t
+type var_tys = Code_action_types.Type_string.t String.Map.t
 
 type selection_kind =
-  | SelectionKindExpression of ty_string
+  | SelectionKindExpression of Code_action_types.Type_string.t
   | SelectionKindStatement
-
-let ty_string_of_ty env locl_ty =
-  if Typing_defs.is_denotable locl_ty then
-    let env = Tast_env.tast_env_as_typing_env env in
-    Ty (Typing_print.full env locl_ty)
-  else
-    Ty "_"
 
 type candidate = {
   pos: Pos.t;

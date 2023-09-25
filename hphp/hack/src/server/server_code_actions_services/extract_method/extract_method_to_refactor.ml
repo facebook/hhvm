@@ -35,7 +35,7 @@ let indent ~(indent_amount : int) (s : string) : string =
   |> String.concat ~sep:"\n"
 
 let return_type_string_of_candidate
-    ~(return : (string * T.ty_string) list)
+    ~(return : (string * Code_action_types.Type_string.t) list)
     T.{ selection_kind; is_async; iterator_kind; _ } =
   let wrap_return_type =
     match (is_async, iterator_kind) with
@@ -47,23 +47,24 @@ let return_type_string_of_candidate
     | (false, None) -> Fn.id
   in
   match selection_kind with
-  | T.SelectionKindExpression (T.Ty return_type_string) ->
-    wrap_return_type return_type_string
+  | T.SelectionKindExpression type_string ->
+    wrap_return_type (Code_action_types.Type_string.to_string type_string)
   | T.SelectionKindStatement ->
     wrap_return_type
     @@
     (match return with
     | [] -> "void"
-    | [(_, T.Ty s)] -> s
+    | [(_, type_string)] -> Code_action_types.Type_string.to_string type_string
     | _ ->
       return
-      |> List.map ~f:(fun (_, T.Ty s) -> s)
+      |> List.map ~f:(fun (_, type_string) ->
+             Code_action_types.Type_string.to_string type_string)
       |> String.concat ~sep:", "
       |> Format.sprintf "(%s)")
 
 let body_string_of_candidate
     ~source_text
-    ~(return : (string * T.ty_string) list)
+    ~(return : (string * Code_action_types.Type_string.t) list)
     T.{ selection_kind; pos; iterator_kind; method_pos; _ } =
   let raw_body_string =
     let (first_line, first_col) = Pos.line_column pos in
@@ -100,8 +101,8 @@ let body_string_of_candidate
 
 let method_string_of_candidate
     ~source_text
-    ~(params : (string * T.ty_string) list)
-    ~(return : (string * T.ty_string) list)
+    ~(params : (string * Code_action_types.Type_string.t) list)
+    ~(return : (string * Code_action_types.Type_string.t) list)
     ~(snippet : string)
     (T.{ method_is_static; is_async; method_pos; _ } as candidate) =
   let return_type_string = return_type_string_of_candidate ~return candidate in
@@ -128,8 +129,11 @@ let method_string_of_candidate
   in
   let params_string =
     params
-    |> List.map ~f:(fun (name, T.Ty shown_ty) ->
-           Format.sprintf "%s %s" shown_ty name)
+    |> List.map ~f:(fun (name, type_string) ->
+           Format.sprintf
+             "%s %s"
+             (Code_action_types.Type_string.to_string type_string)
+             name)
     |> String.concat ~sep:", "
   in
   (* we format as a function before adding modifiers, since a function is hackfmt-able (a valid top-level form) *)
@@ -154,8 +158,8 @@ let method_string_of_candidate
   |> add_suffix
 
 let method_call_string_of_candidate
-    ~(params : (string * T.ty_string) list)
-    ~(return : (string * T.ty_string) list)
+    ~(params : (string * Code_action_types.Type_string.t) list)
+    ~(return : (string * Code_action_types.Type_string.t) list)
     ~(snippet : string)
     T.
       {

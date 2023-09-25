@@ -248,7 +248,7 @@ See [selection region]
       | _ -> ());
       let acc = super#on_stmt env stmt in
       let ty = Typing_make_type.void Typing_reason.Rnone in
-      make acc pos (T.ty_string_of_ty env ty)
+      make acc pos (Code_action_types.Type_string.of_locl_ty env ty)
 
     method! on_fun_ env fun_ =
       let open Aast_defs in
@@ -266,7 +266,7 @@ See [selection region]
 
     method! on_expr env expr =
       let (ty, pos, expr_) = expr in
-      let ty_string = T.ty_string_of_ty env ty in
+      let ty_string = Code_action_types.Type_string.of_locl_ty env ty in
       if Pos.overlaps selection pos then
         expr_positions_overlapping_selection :=
           pos :: !expr_positions_overlapping_selection;

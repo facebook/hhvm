@@ -10,7 +10,7 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"  private function ${0:method0}(int $param1, _ $param2): void {\n    $param1 = $param1;\n    $z = $param2;\n  }\n\n",
+          "newText":"  private function ${0:method0}(int $param1, Foo<string> $param2): void {\n    $param1 = $param1;\n    $z = $param2;\n  }\n\n",
           "range":{"end":{"character":0,"line":7},"start":{"character":0,"line":7}}
         },
         {
@@ -33,7 +33,7 @@ class Foo<T> {
 }
 
 class Klass {
-  private function ${0:method0}(int $param1, _ $param2): void {
+  private function ${0:method0}(int $param1, Foo<string> $param2): void {
     $param1 = $param1;
     $z = $param2;
   }

@@ -10,7 +10,7 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"  private function ${0:method0}(): (_, _) {\n  concurrent {\n          $x = await gen_int();\n          $y = await gen_int();\n      return tuple($x, $y);\n  }\n\n",
+          "newText":"  private function ${0:method0}(): (int, int) {\n  concurrent {\n          $x = await gen_int();\n          $y = await gen_int();\n      return tuple($x, $y);\n  }\n\n",
           "range":{"end":{"character":0,"line":7},"start":{"character":0,"line":7}}
         },
         {
@@ -33,7 +33,7 @@ async function gen_int(): Awaitable<int> {
 }
 
 class Klass {
-  private function ${0:method0}(): (_, _) {
+  private function ${0:method0}(): (int, int) {
   concurrent {
           $x = await gen_int();
           $y = await gen_int();

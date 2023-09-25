@@ -10,7 +10,7 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"  private function ${0:method0}(\\HH\\Awaitable<void> $awaitable, int $n): int {\n    $x = $n * 2;\n    $y = $awaitable;\n    return $x;\n  }\n\n",
+          "newText":"  private function ${0:method0}(Awaitable<void> $awaitable, int $n): int {\n    $x = $n * 2;\n    $y = $awaitable;\n    return $x;\n  }\n\n",
           "range":{"end":{"character":0,"line":5},"start":{"character":0,"line":5}}
         },
         {
@@ -31,7 +31,7 @@ Applied edit for code action:
 async function genVoid(): Awaitable<void> {}
 
 class Klass {
-  private function ${0:method0}(\HH\Awaitable<void> $awaitable, int $n): int {
+  private function ${0:method0}(Awaitable<void> $awaitable, int $n): int {
     $x = $n * 2;
     $y = $awaitable;
     return $x;

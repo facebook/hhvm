@@ -10,7 +10,7 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"  private function ${0:method0}(): (int, _) {\n    $return1 = 100;\n    $local = 500 + $return1;\n    $return2 = new Foo($local);\n    return tuple($return1, $return2);\n  }\n\n",
+          "newText":"  private function ${0:method0}(): (int, Foo<int>) {\n    $return1 = 100;\n    $local = 500 + $return1;\n    $return2 = new Foo($local);\n    return tuple($return1, $return2);\n  }\n\n",
           "range":{"end":{"character":0,"line":7},"start":{"character":0,"line":7}}
         },
         {
@@ -33,7 +33,7 @@ class Foo<T> {
 }
 
 class Klass {
-  private function ${0:method0}(): (int, _) {
+  private function ${0:method0}(): (int, Foo<int>) {
     $return1 = 100;
     $local = 500 + $return1;
     $return2 = new Foo($local);

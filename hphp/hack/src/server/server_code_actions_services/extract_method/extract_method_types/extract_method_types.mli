@@ -11,12 +11,8 @@ type iterator_kind =
   | Iterator
   | KeyedIterator
 
-type ty_string = Ty of string
-
-val ty_string_of_ty : Tast_env.t -> Typing_defs.locl_ty -> ty_string
-
 type selection_kind =
-  | SelectionKindExpression of ty_string
+  | SelectionKindExpression of Code_action_types.Type_string.t
       (**
       Examples of expression selections:
 
@@ -52,7 +48,7 @@ type selection_kind =
         is something like `list($x, $y) = $this->placeholder();`
       *)
 
-type var_tys = ty_string String.Map.t
+type var_tys = Code_action_types.Type_string.t String.Map.t
 
 type candidate = {
   pos: Pos.t;

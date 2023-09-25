@@ -10,7 +10,7 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"  private function ${0:method0}(): _ {\n    $x = vec[1];\n    return $x;\n  }\n\n",
+          "newText":"  private function ${0:method0}(): vec<int> {\n    $x = vec[1];\n    return $x;\n  }\n\n",
           "range":{"end":{"character":0,"line":3},"start":{"character":0,"line":3}}
         },
         {
@@ -29,7 +29,7 @@ Applied edit for code action:
 <?hh
 
 class A {
-  private function ${0:method0}(): _ {
+  private function ${0:method0}(): vec<int> {
     $x = vec[1];
     return $x;
   }

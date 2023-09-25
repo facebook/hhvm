@@ -11,12 +11,10 @@ import (
     "sync"
 
     module0 "module0"
-
-    "thrift/lib/go/thrift"
+    thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
 
 var _ = module0.GoUnusedProtection__
-
 // (needed to ensure safety because of naive import list construction)
 var _ = context.Background
 var _ = fmt.Printf

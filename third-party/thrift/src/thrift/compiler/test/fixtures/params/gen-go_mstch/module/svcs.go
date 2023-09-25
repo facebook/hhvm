@@ -10,10 +10,8 @@ import (
     "strings"
     "sync"
 
-
-    "thrift/lib/go/thrift"
+    thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
-
 
 // (needed to ensure safety because of naive import list construction)
 var _ = context.Background

@@ -14,7 +14,6 @@ import (
 
 var _ = standard.GoUnusedProtection__
 var _ = id.GoUnusedProtection__
-
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = thrift.ZERO

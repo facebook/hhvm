@@ -27,12 +27,10 @@ import (
     {{#program:thrift_imports}}
     {{program:go_package_alias}} "{{program:go_import_path}}"
     {{/program:thrift_imports}}
-
-    "thrift/lib/go/thrift"
+    thrift "{{program:thrift_lib_import}}"
 )
 
 {{> common/unused_imports_protection}}
-
 // (needed to ensure safety because of naive import list construction)
 var _ = context.Background
 var _ = fmt.Printf

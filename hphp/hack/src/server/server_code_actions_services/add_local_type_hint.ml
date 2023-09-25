@@ -2,7 +2,7 @@ open Hh_prelude
 
 type candidate = {
   lhs_var: string;
-  lhs_type: string;
+  lhs_type_string: Code_action_types.Type_string.t;
   lhs_pos: Pos.t;
 }
 
@@ -60,11 +60,11 @@ let find_candidate ~(selection : Pos.t) ~entry ctx : candidate option =
                     rhs = (_, rhs_pos, _);
                   } )
             when should_offer_refactor ~selection ~lhs_pos ~rhs_pos ->
-            let tenv = Tast_env.tast_env_as_typing_env env in
             Some
               {
                 lhs_var = Local_id.get_name lid;
-                lhs_type = Typing_print.full_strip_ns tenv lvar_ty;
+                lhs_type_string =
+                  Code_action_types.Type_string.of_locl_ty env lvar_ty;
                 lhs_pos = lid_pos;
               }
           | _ -> super#on_stmt env stmt
@@ -74,13 +74,18 @@ let find_candidate ~(selection : Pos.t) ~entry ctx : candidate option =
   in
   visitor#go ctx tast.Tast_with_dynamic.under_normal_assumptions
 
-let edit_of_candidate ~path { lhs_var; lhs_type; lhs_pos } : Lsp.WorkspaceEdit.t
-    =
+let edit_of_candidate ~path { lhs_var; lhs_type_string; lhs_pos } :
+    Lsp.WorkspaceEdit.t =
   let edit =
     let range =
       Lsp_helpers.hack_pos_to_lsp_range ~equal:Relative_path.equal lhs_pos
     in
-    let text = Printf.sprintf "let %s : %s " lhs_var lhs_type in
+    let text =
+      Printf.sprintf
+        "let %s : %s "
+        lhs_var
+        (Code_action_types.Type_string.to_string lhs_type_string)
+    in
     Lsp.TextEdit.{ range; newText = text }
   in
   let changes = SMap.singleton (Relative_path.to_absolute path) [edit] in

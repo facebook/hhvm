@@ -28,7 +28,12 @@ type FooService interface {
     SimpleRPC(ctx context.Context) (error)
 }
 
-// Deprecated: Use FooService instead.
+type FooServiceChannelClientInterface interface {
+    thrift.ClientInterface
+    FooService
+}
+
+// Deprecated: Migrate to ChannelClient and use FooServiceChannelClientInterface instead.
 type FooServiceClientInterface interface {
     thrift.ClientInterface
     SimpleRPC() (error)
@@ -38,7 +43,7 @@ type FooServiceChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ FooService = &FooServiceChannelClient{}
+var _ FooServiceChannelClientInterface = &FooServiceChannelClient{}
 
 func NewFooServiceChannelClient(channel thrift.RequestChannel) *FooServiceChannelClient {
     return &FooServiceChannelClient{
@@ -419,7 +424,12 @@ type FB303Service interface {
     SimpleRPC(ctx context.Context, intParameter int32) (*ReservedKeyword, error)
 }
 
-// Deprecated: Use FB303Service instead.
+type FB303ServiceChannelClientInterface interface {
+    thrift.ClientInterface
+    FB303Service
+}
+
+// Deprecated: Migrate to ChannelClient and use FB303ServiceChannelClientInterface instead.
 type FB303ServiceClientInterface interface {
     thrift.ClientInterface
     SimpleRPC(intParameter int32) (*ReservedKeyword, error)
@@ -429,7 +439,7 @@ type FB303ServiceChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ FB303Service = &FB303ServiceChannelClient{}
+var _ FB303ServiceChannelClientInterface = &FB303ServiceChannelClient{}
 
 func NewFB303ServiceChannelClient(channel thrift.RequestChannel) *FB303ServiceChannelClient {
     return &FB303ServiceChannelClient{
@@ -988,7 +998,12 @@ type MyService interface {
     RpcSkippedCodegen(ctx context.Context) (error)
 }
 
-// Deprecated: Use MyService instead.
+type MyServiceChannelClientInterface interface {
+    thrift.ClientInterface
+    MyService
+}
+
+// Deprecated: Migrate to ChannelClient and use MyServiceChannelClientInterface instead.
 type MyServiceClientInterface interface {
     thrift.ClientInterface
     Ping() (error)
@@ -1007,7 +1022,7 @@ type MyServiceChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyService = &MyServiceChannelClient{}
+var _ MyServiceChannelClientInterface = &MyServiceChannelClient{}
 
 func NewMyServiceChannelClient(channel thrift.RequestChannel) *MyServiceChannelClient {
     return &MyServiceChannelClient{
@@ -4549,7 +4564,12 @@ type DbMixedStackArguments interface {
     GetDataByKey1(ctx context.Context, key string) ([]byte, error)
 }
 
-// Deprecated: Use DbMixedStackArguments instead.
+type DbMixedStackArgumentsChannelClientInterface interface {
+    thrift.ClientInterface
+    DbMixedStackArguments
+}
+
+// Deprecated: Migrate to ChannelClient and use DbMixedStackArgumentsChannelClientInterface instead.
 type DbMixedStackArgumentsClientInterface interface {
     thrift.ClientInterface
     GetDataByKey0(key string) ([]byte, error)
@@ -4560,7 +4580,7 @@ type DbMixedStackArgumentsChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ DbMixedStackArguments = &DbMixedStackArgumentsChannelClient{}
+var _ DbMixedStackArgumentsChannelClientInterface = &DbMixedStackArgumentsChannelClient{}
 
 func NewDbMixedStackArgumentsChannelClient(channel thrift.RequestChannel) *DbMixedStackArgumentsChannelClient {
     return &DbMixedStackArgumentsChannelClient{

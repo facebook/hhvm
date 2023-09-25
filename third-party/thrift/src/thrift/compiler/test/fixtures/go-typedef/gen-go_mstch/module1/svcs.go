@@ -32,7 +32,12 @@ type Finder interface {
     PreviousPlate(ctx context.Context, plate Plate) (Plate, error)
 }
 
-// Deprecated: Use Finder instead.
+type FinderChannelClientInterface interface {
+    thrift.ClientInterface
+    Finder
+}
+
+// Deprecated: Migrate to ChannelClient and use FinderChannelClientInterface instead.
 type FinderClientInterface interface {
     thrift.ClientInterface
     ByPlate(plate Plate) (*Automobile, error)
@@ -44,7 +49,7 @@ type FinderChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ Finder = &FinderChannelClient{}
+var _ FinderChannelClientInterface = &FinderChannelClient{}
 
 func NewFinderChannelClient(channel thrift.RequestChannel) *FinderChannelClient {
     return &FinderChannelClient{

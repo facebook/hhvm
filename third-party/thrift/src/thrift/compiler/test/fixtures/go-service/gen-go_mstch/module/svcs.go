@@ -42,7 +42,12 @@ type GetEntity interface {
     GetCtx1Collision(ctx2 context.Context, ctx int64, ctx1 int64) (int32, error)
 }
 
-// Deprecated: Use GetEntity instead.
+type GetEntityChannelClientInterface interface {
+    thrift.ClientInterface
+    GetEntity
+}
+
+// Deprecated: Migrate to ChannelClient and use GetEntityChannelClientInterface instead.
 type GetEntityClientInterface interface {
     thrift.ClientInterface
     GetEntity(r *GetEntityRequest) (*GetEntityResponse, error)
@@ -66,7 +71,7 @@ type GetEntityChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ GetEntity = &GetEntityChannelClient{}
+var _ GetEntityChannelClientInterface = &GetEntityChannelClient{}
 
 func NewGetEntityChannelClient(channel thrift.RequestChannel) *GetEntityChannelClient {
     return &GetEntityChannelClient{

@@ -34,7 +34,12 @@ type MyService interface {
     GoDoNothing(ctx context.Context) (error)
 }
 
-// Deprecated: Use MyService instead.
+type MyServiceChannelClientInterface interface {
+    thrift.ClientInterface
+    MyService
+}
+
+// Deprecated: Migrate to ChannelClient and use MyServiceChannelClientInterface instead.
 type MyServiceClientInterface interface {
     thrift.ClientInterface
     Ping() (error)
@@ -50,7 +55,7 @@ type MyServiceChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyService = &MyServiceChannelClient{}
+var _ MyServiceChannelClientInterface = &MyServiceChannelClient{}
 
 func NewMyServiceChannelClient(channel thrift.RequestChannel) *MyServiceChannelClient {
     return &MyServiceChannelClient{
@@ -2692,7 +2697,12 @@ type MyServicePrioParent interface {
     Pong(ctx context.Context) (error)
 }
 
-// Deprecated: Use MyServicePrioParent instead.
+type MyServicePrioParentChannelClientInterface interface {
+    thrift.ClientInterface
+    MyServicePrioParent
+}
+
+// Deprecated: Migrate to ChannelClient and use MyServicePrioParentChannelClientInterface instead.
 type MyServicePrioParentClientInterface interface {
     thrift.ClientInterface
     Ping() (error)
@@ -2703,7 +2713,7 @@ type MyServicePrioParentChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyServicePrioParent = &MyServicePrioParentChannelClient{}
+var _ MyServicePrioParentChannelClientInterface = &MyServicePrioParentChannelClient{}
 
 func NewMyServicePrioParentChannelClient(channel thrift.RequestChannel) *MyServicePrioParentChannelClient {
     return &MyServicePrioParentChannelClient{
@@ -3338,7 +3348,12 @@ type MyServicePrioChild interface {
     Pang(ctx context.Context) (error)
 }
 
-// Deprecated: Use MyServicePrioChild instead.
+type MyServicePrioChildChannelClientInterface interface {
+    thrift.ClientInterface
+    MyServicePrioChild
+}
+
+// Deprecated: Migrate to ChannelClient and use MyServicePrioChildChannelClientInterface instead.
 type MyServicePrioChildClientInterface interface {
     thrift.ClientInterface
     Pang() (error)
@@ -3350,7 +3365,7 @@ type MyServicePrioChildChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyServicePrioChild = &MyServicePrioChildChannelClient{}
+var _ MyServicePrioChildChannelClientInterface = &MyServicePrioChildChannelClient{}
 
 func NewMyServicePrioChildChannelClient(channel thrift.RequestChannel) *MyServicePrioChildChannelClient {
     return &MyServicePrioChildChannelClient{
@@ -3710,7 +3725,12 @@ type BadService interface {
     Bar(ctx context.Context) (int32, error)
 }
 
-// Deprecated: Use BadService instead.
+type BadServiceChannelClientInterface interface {
+    thrift.ClientInterface
+    BadService
+}
+
+// Deprecated: Migrate to ChannelClient and use BadServiceChannelClientInterface instead.
 type BadServiceClientInterface interface {
     thrift.ClientInterface
     Bar() (int32, error)
@@ -3720,7 +3740,7 @@ type BadServiceChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ BadService = &BadServiceChannelClient{}
+var _ BadServiceChannelClientInterface = &BadServiceChannelClient{}
 
 func NewBadServiceChannelClient(channel thrift.RequestChannel) *BadServiceChannelClient {
     return &BadServiceChannelClient{
@@ -4175,7 +4195,12 @@ type FooBarBazService interface {
     Baz(ctx context.Context) (error)
 }
 
-// Deprecated: Use FooBarBazService instead.
+type FooBarBazServiceChannelClientInterface interface {
+    thrift.ClientInterface
+    FooBarBazService
+}
+
+// Deprecated: Migrate to ChannelClient and use FooBarBazServiceChannelClientInterface instead.
 type FooBarBazServiceClientInterface interface {
     thrift.ClientInterface
     FooStructured() (error)
@@ -4187,7 +4212,7 @@ type FooBarBazServiceChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ FooBarBazService = &FooBarBazServiceChannelClient{}
+var _ FooBarBazServiceChannelClientInterface = &FooBarBazServiceChannelClient{}
 
 func NewFooBarBazServiceChannelClient(channel thrift.RequestChannel) *FooBarBazServiceChannelClient {
     return &FooBarBazServiceChannelClient{

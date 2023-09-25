@@ -32,7 +32,12 @@ type NestedContainers interface {
     Turtles(ctx context.Context, foo [][]map[int32]map[int32][]int32) (error)
 }
 
-// Deprecated: Use NestedContainers instead.
+type NestedContainersChannelClientInterface interface {
+    thrift.ClientInterface
+    NestedContainers
+}
+
+// Deprecated: Migrate to ChannelClient and use NestedContainersChannelClientInterface instead.
 type NestedContainersClientInterface interface {
     thrift.ClientInterface
     MapList(foo map[int32][]int32) (error)
@@ -46,7 +51,7 @@ type NestedContainersChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ NestedContainers = &NestedContainersChannelClient{}
+var _ NestedContainersChannelClientInterface = &NestedContainersChannelClient{}
 
 func NewNestedContainersChannelClient(channel thrift.RequestChannel) *NestedContainersChannelClient {
     return &NestedContainersChannelClient{

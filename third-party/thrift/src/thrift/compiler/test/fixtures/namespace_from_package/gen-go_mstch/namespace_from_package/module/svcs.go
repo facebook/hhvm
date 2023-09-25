@@ -28,7 +28,12 @@ type TestService interface {
     Init(ctx context.Context, int1 int64) (int64, error)
 }
 
-// Deprecated: Use TestService instead.
+type TestServiceChannelClientInterface interface {
+    thrift.ClientInterface
+    TestService
+}
+
+// Deprecated: Migrate to ChannelClient and use TestServiceChannelClientInterface instead.
 type TestServiceClientInterface interface {
     thrift.ClientInterface
     Init(int1 int64) (int64, error)
@@ -38,7 +43,7 @@ type TestServiceChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ TestService = &TestServiceChannelClient{}
+var _ TestServiceChannelClientInterface = &TestServiceChannelClient{}
 
 func NewTestServiceChannelClient(channel thrift.RequestChannel) *TestServiceChannelClient {
     return &TestServiceChannelClient{

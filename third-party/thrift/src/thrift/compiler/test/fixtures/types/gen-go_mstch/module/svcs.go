@@ -31,7 +31,12 @@ type SomeService interface {
     BinaryKeyedMap(ctx context.Context, r []int64) (map[*TBinary]int64, error)
 }
 
-// Deprecated: Use SomeService instead.
+type SomeServiceChannelClientInterface interface {
+    thrift.ClientInterface
+    SomeService
+}
+
+// Deprecated: Migrate to ChannelClient and use SomeServiceChannelClientInterface instead.
 type SomeServiceClientInterface interface {
     thrift.ClientInterface
     BounceMap(m included.SomeMap) (included.SomeMap, error)
@@ -42,7 +47,7 @@ type SomeServiceChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ SomeService = &SomeServiceChannelClient{}
+var _ SomeServiceChannelClientInterface = &SomeServiceChannelClient{}
 
 func NewSomeServiceChannelClient(channel thrift.RequestChannel) *SomeServiceChannelClient {
     return &SomeServiceChannelClient{

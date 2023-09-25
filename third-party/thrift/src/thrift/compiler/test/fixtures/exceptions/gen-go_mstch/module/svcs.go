@@ -31,7 +31,12 @@ type Raiser interface {
     Get500(ctx context.Context) (string, error)
 }
 
-// Deprecated: Use Raiser instead.
+type RaiserChannelClientInterface interface {
+    thrift.ClientInterface
+    Raiser
+}
+
+// Deprecated: Migrate to ChannelClient and use RaiserChannelClientInterface instead.
 type RaiserClientInterface interface {
     thrift.ClientInterface
     DoBland() (error)
@@ -44,7 +49,7 @@ type RaiserChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ Raiser = &RaiserChannelClient{}
+var _ RaiserChannelClientInterface = &RaiserChannelClient{}
 
 func NewRaiserChannelClient(channel thrift.RequestChannel) *RaiserChannelClient {
     return &RaiserChannelClient{

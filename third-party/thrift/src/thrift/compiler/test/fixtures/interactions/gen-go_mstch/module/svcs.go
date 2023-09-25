@@ -28,7 +28,12 @@ type MyService interface {
     Foo(ctx context.Context) (error)
 }
 
-// Deprecated: Use MyService instead.
+type MyServiceChannelClientInterface interface {
+    thrift.ClientInterface
+    MyService
+}
+
+// Deprecated: Migrate to ChannelClient and use MyServiceChannelClientInterface instead.
 type MyServiceClientInterface interface {
     thrift.ClientInterface
     Foo() (error)
@@ -38,7 +43,7 @@ type MyServiceChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyService = &MyServiceChannelClient{}
+var _ MyServiceChannelClientInterface = &MyServiceChannelClient{}
 
 func NewMyServiceChannelClient(channel thrift.RequestChannel) *MyServiceChannelClient {
     return &MyServiceChannelClient{

@@ -30,8 +30,13 @@
     {{/service:functions}}
 }
 
+type {{service:go_name}}ChannelClientInterface interface {
+    thrift.ClientInterface
+    {{service:go_name}}
+}
+
 {{! COMPAT: backwards compatibility - remove once all code is migrated to ChannelClient. }}
-// Deprecated: Use {{service:go_name}} instead.
+// Deprecated: Migrate to ChannelClient and use {{service:go_name}}ChannelClientInterface instead.
 type {{service:go_name}}ClientInterface interface {
     thrift.ClientInterface
     {{^program:compat?}}

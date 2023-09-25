@@ -28,7 +28,12 @@ type Service interface {
     Func(ctx context.Context, arg1 StringWithAdapter_7208, arg2 string, arg3 *Foo) (MyI32_4873, error)
 }
 
-// Deprecated: Use Service instead.
+type ServiceChannelClientInterface interface {
+    thrift.ClientInterface
+    Service
+}
+
+// Deprecated: Migrate to ChannelClient and use ServiceChannelClientInterface instead.
 type ServiceClientInterface interface {
     thrift.ClientInterface
     Func(arg1 StringWithAdapter_7208, arg2 string, arg3 *Foo) (MyI32_4873, error)
@@ -38,7 +43,7 @@ type ServiceChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ Service = &ServiceChannelClient{}
+var _ ServiceChannelClientInterface = &ServiceChannelClient{}
 
 func NewServiceChannelClient(channel thrift.RequestChannel) *ServiceChannelClient {
     return &ServiceChannelClient{
@@ -735,7 +740,12 @@ type AdapterService interface {
     AdaptedTypes(ctx context.Context, arg *HeapAllocated) (*HeapAllocated, error)
 }
 
-// Deprecated: Use AdapterService instead.
+type AdapterServiceChannelClientInterface interface {
+    thrift.ClientInterface
+    AdapterService
+}
+
+// Deprecated: Migrate to ChannelClient and use AdapterServiceChannelClientInterface instead.
 type AdapterServiceClientInterface interface {
     thrift.ClientInterface
     Count() (*CountingStruct, error)
@@ -746,7 +756,7 @@ type AdapterServiceChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ AdapterService = &AdapterServiceChannelClient{}
+var _ AdapterServiceChannelClientInterface = &AdapterServiceChannelClient{}
 
 func NewAdapterServiceChannelClient(channel thrift.RequestChannel) *AdapterServiceChannelClient {
     return &AdapterServiceChannelClient{

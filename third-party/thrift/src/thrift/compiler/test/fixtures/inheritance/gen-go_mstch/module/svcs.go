@@ -28,7 +28,12 @@ type MyRoot interface {
     DoRoot(ctx context.Context) (error)
 }
 
-// Deprecated: Use MyRoot instead.
+type MyRootChannelClientInterface interface {
+    thrift.ClientInterface
+    MyRoot
+}
+
+// Deprecated: Migrate to ChannelClient and use MyRootChannelClientInterface instead.
 type MyRootClientInterface interface {
     thrift.ClientInterface
     DoRoot() (error)
@@ -38,7 +43,7 @@ type MyRootChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyRoot = &MyRootChannelClient{}
+var _ MyRootChannelClientInterface = &MyRootChannelClient{}
 
 func NewMyRootChannelClient(channel thrift.RequestChannel) *MyRootChannelClient {
     return &MyRootChannelClient{
@@ -422,7 +427,12 @@ type MyNode interface {
     DoMid(ctx context.Context) (error)
 }
 
-// Deprecated: Use MyNode instead.
+type MyNodeChannelClientInterface interface {
+    thrift.ClientInterface
+    MyNode
+}
+
+// Deprecated: Migrate to ChannelClient and use MyNodeChannelClientInterface instead.
 type MyNodeClientInterface interface {
     thrift.ClientInterface
     DoMid() (error)
@@ -434,7 +444,7 @@ type MyNodeChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyNode = &MyNodeChannelClient{}
+var _ MyNodeChannelClientInterface = &MyNodeChannelClient{}
 
 func NewMyNodeChannelClient(channel thrift.RequestChannel) *MyNodeChannelClient {
     return &MyNodeChannelClient{
@@ -797,7 +807,12 @@ type MyLeaf interface {
     DoLeaf(ctx context.Context) (error)
 }
 
-// Deprecated: Use MyLeaf instead.
+type MyLeafChannelClientInterface interface {
+    thrift.ClientInterface
+    MyLeaf
+}
+
+// Deprecated: Migrate to ChannelClient and use MyLeafChannelClientInterface instead.
 type MyLeafClientInterface interface {
     thrift.ClientInterface
     DoLeaf() (error)
@@ -809,7 +824,7 @@ type MyLeafChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyLeaf = &MyLeafChannelClient{}
+var _ MyLeafChannelClientInterface = &MyLeafChannelClient{}
 
 func NewMyLeafChannelClient(channel thrift.RequestChannel) *MyLeafChannelClient {
     return &MyLeafChannelClient{

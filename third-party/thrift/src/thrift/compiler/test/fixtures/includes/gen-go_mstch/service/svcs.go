@@ -33,7 +33,12 @@ type MyService interface {
     HasArgDocs(ctx context.Context, s *module.MyStruct, i *includes.Included) (error)
 }
 
-// Deprecated: Use MyService instead.
+type MyServiceChannelClientInterface interface {
+    thrift.ClientInterface
+    MyService
+}
+
+// Deprecated: Migrate to ChannelClient and use MyServiceChannelClientInterface instead.
 type MyServiceClientInterface interface {
     thrift.ClientInterface
     Query(s *module.MyStruct, i *includes.Included) (error)
@@ -44,7 +49,7 @@ type MyServiceChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyService = &MyServiceChannelClient{}
+var _ MyServiceChannelClientInterface = &MyServiceChannelClient{}
 
 func NewMyServiceChannelClient(channel thrift.RequestChannel) *MyServiceChannelClient {
     return &MyServiceChannelClient{

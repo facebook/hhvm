@@ -29,7 +29,12 @@ type C interface {
     Thing(ctx context.Context, a int32, b string, c []int32) (string, error)
 }
 
-// Deprecated: Use C instead.
+type CChannelClientInterface interface {
+    thrift.ClientInterface
+    C
+}
+
+// Deprecated: Migrate to ChannelClient and use CChannelClientInterface instead.
 type CClientInterface interface {
     thrift.ClientInterface
     F() (error)
@@ -40,7 +45,7 @@ type CChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ C = &CChannelClient{}
+var _ CChannelClientInterface = &CChannelClient{}
 
 func NewCChannelClient(channel thrift.RequestChannel) *CChannelClient {
     return &CChannelClient{

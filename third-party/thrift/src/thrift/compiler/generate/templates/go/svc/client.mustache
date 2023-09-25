@@ -29,7 +29,7 @@ type {{service:go_name}}ChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ {{service:go_name}} = &{{service:go_name}}ChannelClient{}
+var _ {{service:go_name}}ChannelClientInterface = &{{service:go_name}}ChannelClient{}
 
 func New{{service:go_name}}ChannelClient(channel thrift.RequestChannel) *{{service:go_name}}ChannelClient {
     return &{{service:go_name}}ChannelClient{

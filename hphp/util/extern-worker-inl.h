@@ -1145,7 +1145,7 @@ Client::exec(const Job<C>& job,
           r->m_fromFallback = true;
           r->m_id = std::move(stores[idx++]);
         }
-        } else {
+      } else {
         static_assert(IsRef<Type>::value);
         if (!r.m_fromFallback) {
           assertx(idx < stores.size());

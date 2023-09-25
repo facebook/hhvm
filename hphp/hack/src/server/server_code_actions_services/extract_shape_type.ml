@@ -1,20 +1,10 @@
 open Hh_prelude
 
-(** Don't truncate types in printing unless they are really big,
-so we almost always generate valid code.
-The number is somewhat arbitrary: it's the smallest power of 2
-that could print without truncation for
-extract_shape_type_13.php in our test suite.
-We *do* want to truncate at some finite number so editors can
-handle that much text. *)
-let lots_of_typing_print_fuel = 2048
-
 type candidate =
   | Of_expr of {
-      tast_env: Tast_env.t;
       (* the function or class containing the shape expression *)
       expr_container_pos: Pos.t;
-      shape_ty: Typing_defs.locl_ty;
+      shape_ty_string: Code_action_types.Type_string.t;
     }
   | Of_hint of {
       hint_container_pos: Pos.t;
@@ -110,8 +100,12 @@ let find_candidate ~(selection : Pos.t) ~entry ctx : candidate option =
             Searching
               (Some
                  ( expr_pos,
-                   Of_expr { tast_env = env; expr_container_pos; shape_ty = ty }
-                 ))
+                   Of_expr
+                     {
+                       expr_container_pos;
+                       shape_ty_string =
+                         Code_action_types.Type_string.of_locl_ty env ty;
+                     } ))
           | _ -> Selected_non_shape_type expr_pos
         else
           super#on_expr env expr
@@ -132,28 +126,15 @@ let range_of_container_pos container_pos : Lsp.range =
   let pos = Pos.shrink_to_start container_pos in
   Lsp_helpers.hack_pos_to_lsp_range ~equal:Relative_path.equal pos
 
-let with_typing_print_fuel (tenv : Typing_env_types.env) ~(fuel : int) :
-    Typing_env_types.env =
-  (* let genv = tenv.Typing_env_types.genv in *)
-  Typing_env.map_tcopt tenv ~f:(fun tcopt ->
-      { tcopt with GlobalOptions.tco_type_printer_fuel = fuel })
-
 let edit_of_candidate source_text ~path candidate : Lsp.WorkspaceEdit.t =
   let sub_of_pos = Full_fidelity_source_text.sub_of_pos source_text in
   let edits =
     match candidate with
-    | Of_expr { shape_ty; expr_container_pos; tast_env } ->
+    | Of_expr { shape_ty_string; expr_container_pos } ->
       let range = range_of_container_pos expr_container_pos in
       let text =
-        let ty_text =
-          let tenv =
-            tast_env
-            |> Tast_env.tast_env_as_typing_env
-            |> with_typing_print_fuel ~fuel:lots_of_typing_print_fuel
-          in
-          Typing_print.full_strip_ns tenv shape_ty
-        in
-        snippet_for_decl_of ty_text
+        snippet_for_decl_of
+          (Code_action_types.Type_string.to_string shape_ty_string)
       in
       [Lsp.TextEdit.{ range; newText = text }]
     | Of_hint { hint_container_pos; hint_pos } ->

@@ -7,7 +7,6 @@ use ast_scope::Scope;
 use hhbc::ClassishKind;
 use hhbc::SpecialClsRef;
 use hhbc_string_utils as string_utils;
-use instruction_sequence::InstrSeq;
 use naming_special_names_rust::classes;
 use naming_special_names_rust::user_attributes;
 use oxidized::aast::*;
@@ -18,14 +17,14 @@ use string_utils::reified::ReifiedTparam;
 use crate::emitter::Emitter;
 
 #[derive(Debug)]
-pub enum ClassExpr<'arena> {
+pub enum ClassExpr {
     Special(SpecialClsRef),
     Id(ast_defs::Id),
     Expr(ast::Expr),
-    Reified(InstrSeq<'arena>),
+    Reified(ast_defs::Id),
 }
 
-impl<'arena> ClassExpr<'arena> {
+impl ClassExpr {
     fn get_original_class_name(
         emitter: &Emitter<'_, '_>,
         scope: &Scope<'_, '_>,
@@ -114,6 +113,8 @@ impl<'arena> ClassExpr<'arena> {
                         Some(name) => Self::Id(ast_defs::Id(pos, name)),
                         None => Self::Special(SpecialClsRef::SelfCls),
                     }
+                } else if Self::get_reified_tparam(scope, &id).is_some() {
+                    Self::Reified(ast_defs::Id(pos, id))
                 } else {
                     Self::Id(ast_defs::Id(pos, id))
                 }
@@ -123,8 +124,8 @@ impl<'arena> ClassExpr<'arena> {
     }
 
     pub fn class_id_to_class_expr<'a, 'decl>(
-        emitter: &Emitter<'arena, 'decl>,
-        scope: &Scope<'a, 'arena>,
+        emitter: &Emitter<'_, 'decl>,
+        scope: &Scope<'a, '_>,
         check_traits: bool,
         resolve_self: bool,
         cid: &ast::ClassId,
@@ -141,7 +142,7 @@ impl<'arena> ClassExpr<'arena> {
     }
 
     pub fn get_reified_tparam<'a>(
-        scope: &Scope<'a, 'arena>,
+        scope: &Scope<'a, '_>,
         name: &str,
     ) -> Option<(ReifiedTparam, bool)> {
         fn soft(tp: &ast::Tparam) -> bool {
@@ -162,7 +163,7 @@ impl<'arena> ClassExpr<'arena> {
         None
     }
 
-    pub fn is_reified_tparam<'a>(scope: &Scope<'a, 'arena>, name: &str) -> bool {
+    pub fn is_reified_tparam<'a>(scope: &Scope<'a, '_>, name: &str) -> bool {
         Self::get_reified_tparam(scope, name).is_some()
     }
 }

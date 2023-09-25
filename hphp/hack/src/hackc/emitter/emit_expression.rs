@@ -24,7 +24,6 @@ use hhbc::BareThisOp;
 use hhbc::CollectionType;
 use hhbc::FCallArgs;
 use hhbc::FCallArgsFlags;
-use hhbc::HasGenericsOp;
 use hhbc::IncDecOp;
 use hhbc::IncludePath;
 use hhbc::Instruct;
@@ -2089,12 +2088,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
         }
         Expr_::ClassConst(cls_const) => {
             let (cid, (_, id)) = &**cls_const;
-            let mut cexpr = ClassExpr::class_id_to_class_expr(e, &env.scope, false, false, cid);
-            if let ClassExpr::Id(ast_defs::Id(_, name)) = &cexpr {
-                if let Some(reified_var_cexpr) = get_reified_var_cexpr(e, env, pos, name)? {
-                    cexpr = reified_var_cexpr;
-                }
-            }
+            let cexpr = ClassExpr::class_id_to_class_expr(e, &env.scope, false, false, cid);
             let method_name =
                 hhbc::MethodName::new(Str::new_str(alloc, string_utils::strip_global_ns(id)));
             Ok(match cexpr {
@@ -2136,13 +2130,13 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                         ]),
                     )
                 }
-                ClassExpr::Reified(instrs) => {
+                ClassExpr::Reified(ast::Id(pos, name)) => {
                     let tmp = e.local_gen_mut().get_unnamed();
                     (
                         InstrSeq::gather(vec![
                             instr::null_uninit(),
                             instr::null_uninit(),
-                            instrs,
+                            get_reified_var_cexpr(e, env, &pos, &name)?,
                             instr::pop_l(tmp),
                         ]),
                         InstrSeq::gather(vec![
@@ -2160,12 +2154,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
         Expr_::ClassGet(c) if c.as_ref().2 == ast::PropOrMethod::IsMethod => {
             // Case Foo::bar(...).
             let (cid, cls_get_expr, _) = &**c;
-            let mut cexpr = ClassExpr::class_id_to_class_expr(e, &env.scope, false, false, cid);
-            if let ClassExpr::Id(ast_defs::Id(_, name)) = &cexpr {
-                if let Some(reified_var_cexpr) = get_reified_var_cexpr(e, env, pos, name)? {
-                    cexpr = reified_var_cexpr;
-                }
-            }
+            let cexpr = ClassExpr::class_id_to_class_expr(e, &env.scope, false, false, cid);
             let emit_meth_name = |e: &mut Emitter<'arena, 'decl>| match &cls_get_expr {
                 ast::ClassGetExpr::CGstring((pos, id)) => {
                     Ok(emit_pos_then(pos, instr::c_get_l(e.named_local(id.into()))))
@@ -2230,14 +2219,14 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                         ]),
                     )
                 }
-                ClassExpr::Reified(instrs) => {
+                ClassExpr::Reified(ast::Id(pos, name)) => {
                     let cls = e.local_gen_mut().get_unnamed();
                     let meth = e.local_gen_mut().get_unnamed();
                     (
                         InstrSeq::gather(vec![
                             instr::null_uninit(),
                             instr::null_uninit(),
-                            instrs,
+                            get_reified_var_cexpr(e, env, &pos, &name)?,
                             instr::pop_l(cls),
                             emit_meth_name(e)?,
                             instr::pop_l(meth),
@@ -2295,18 +2284,16 @@ fn get_reified_var_cexpr<'a, 'arena>(
     env: &Env<'a, 'arena>,
     pos: &Pos,
     name: &str,
-) -> Result<Option<ClassExpr<'arena>>> {
-    Ok(emit_reified_type_opt(e, env, pos, name)?.map(|instrs| {
-        ClassExpr::Reified(InstrSeq::gather(vec![
-            instrs,
-            instr::base_c(0, MOpMode::Warn),
-            instr::query_m(
-                1,
-                QueryMOp::CGet,
-                MemberKey::ET(Str::from("classname"), ReadonlyOp::Any),
-            ),
-        ]))
-    }))
+) -> Result<InstrSeq<'arena>> {
+    Ok(InstrSeq::gather(vec![
+        emit_reified_type(e, env, pos, name)?,
+        instr::base_c(0, MOpMode::Warn),
+        instr::query_m(
+            1,
+            QueryMOp::CGet,
+            MemberKey::ET(Str::from("classname"), ReadonlyOp::Any),
+        ),
+    ]))
 }
 
 fn emit_args_inout_setters<'a, 'arena, 'decl>(
@@ -2857,14 +2844,9 @@ fn emit_class_meth_native<'a, 'arena, 'decl>(
     targs: &[ast::Targ],
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
-    let mut cexpr = ClassExpr::class_id_to_class_expr(e, &env.scope, false, true, cid);
-    if let ClassExpr::Id(ast_defs::Id(_, name)) = &cexpr {
-        if let Some(reified_var_cexpr) = get_reified_var_cexpr(e, env, pos, name)? {
-            cexpr = reified_var_cexpr;
-        }
-    }
+    let cexpr = ClassExpr::class_id_to_class_expr(e, &env.scope, false, true, cid);
     let has_generics = has_non_tparam_generics_targs(env, targs);
-    let mut emit_generics = || -> Result<InstrSeq<'arena>> {
+    let emit_generics = |e| -> Result<InstrSeq<'arena>> {
         emit_reified_targs(e, env, pos, targs.iter().map(|targ| &targ.1))
     };
     Ok(match cexpr {
@@ -2873,7 +2855,7 @@ fn emit_class_meth_native<'a, 'arena, 'decl>(
             method_name,
         ),
         ClassExpr::Id(ast_defs::Id(_, name)) => InstrSeq::gather(vec![
-            emit_generics()?,
+            emit_generics(e)?,
             instr::resolve_r_cls_method_d(
                 hhbc::ClassName::<'arena>::from_ast_name_and_mangle(alloc, &name),
                 method_name,
@@ -2883,18 +2865,18 @@ fn emit_class_meth_native<'a, 'arena, 'decl>(
             instr::resolve_cls_method_s(clsref, method_name)
         }
         ClassExpr::Special(clsref) => InstrSeq::gather(vec![
-            emit_generics()?,
+            emit_generics(e)?,
             instr::resolve_r_cls_method_s(clsref, method_name),
         ]),
-        ClassExpr::Reified(instrs) if !has_generics => InstrSeq::gather(vec![
-            instrs,
+        ClassExpr::Reified(ast_defs::Id(pos, name)) if !has_generics => InstrSeq::gather(vec![
+            get_reified_var_cexpr(e, env, &pos, &name)?,
             instr::class_get_c(),
             instr::resolve_cls_method(method_name),
         ]),
-        ClassExpr::Reified(instrs) => InstrSeq::gather(vec![
-            instrs,
+        ClassExpr::Reified(ast_defs::Id(pos, name)) => InstrSeq::gather(vec![
+            get_reified_var_cexpr(e, env, &pos, &name)?,
             instr::class_get_c(),
-            emit_generics()?,
+            emit_generics(e)?,
             instr::resolve_r_cls_method(method_name),
         ]),
         ClassExpr::Expr(_) => {
@@ -3457,16 +3439,6 @@ fn emit_reified_type<'a, 'arena>(
     pos: &Pos,
     name: &str,
 ) -> Result<InstrSeq<'arena>> {
-    emit_reified_type_opt(e, env, pos, name)?
-        .ok_or_else(|| Error::fatal_runtime(&Pos::NONE, "Invalid reified param"))
-}
-
-fn emit_reified_type_opt<'a, 'arena>(
-    e: &Emitter<'arena, '_>,
-    env: &Env<'a, 'arena>,
-    pos: &Pos,
-    name: &str,
-) -> Result<Option<InstrSeq<'arena>>> {
     let is_in_lambda = env.scope.is_in_lambda();
     let cget_instr = |i| {
         instr::c_get_l(
@@ -3477,31 +3449,25 @@ fn emit_reified_type_opt<'a, 'arena>(
             ),
         )
     };
-    let check = |is_soft| -> Result<()> {
-        if is_soft {
-            Err(Error::fatal_parse(
-                pos,
-                format!(
-                    "{} is annotated to be a soft reified generic, it cannot be used until the __Soft annotation is removed",
-                    name
-                ),
-            ))
-        } else {
-            Ok(())
-        }
-    };
-    let result = match ClassExpr::get_reified_tparam(&env.scope, name) {
+    match ClassExpr::get_reified_tparam(&env.scope, name) {
         Some((i, is_soft)) => {
-            check(is_soft)?;
-            Some(if is_in_lambda {
-                cget_instr(i)
+            if is_soft {
+                return Err(Error::fatal_parse(
+                    pos,
+                    format!(
+                        "{} is annotated to be a soft reified generic, it cannot be used until the __Soft annotation is removed",
+                        name
+                    ),
+                ));
+            }
+            if is_in_lambda {
+                Ok(cget_instr(i))
             } else {
-                emit_reified_generic_instrs(e, pos, i)
-            })
+                Ok(emit_reified_generic_instrs(e, pos, i))
+            }
         }
-        None => None,
-    };
-    Ok(result)
+        None => Err(Error::fatal_runtime(pos, "Invalid reified param")),
+    }
 }
 
 fn emit_known_class_id<'arena, 'decl>(
@@ -3519,23 +3485,27 @@ fn emit_load_class_ref<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
-    cexpr: ClassExpr<'arena>,
+    cexpr: ClassExpr,
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
     let instrs = match cexpr {
-        ClassExpr::Special(SpecialClsRef::SelfCls) => instr::self_cls(),
-        ClassExpr::Special(SpecialClsRef::LateBoundCls) => instr::late_bound_cls(),
-        ClassExpr::Special(SpecialClsRef::ParentCls) => instr::parent_cls(),
+        ClassExpr::Special(clsref) => match clsref {
+            SpecialClsRef::SelfCls => instr::self_cls(),
+            SpecialClsRef::LateBoundCls => instr::late_bound_cls(),
+            SpecialClsRef::ParentCls => instr::parent_cls(),
+            _ => unreachable!(),
+        },
         ClassExpr::Id(id) => emit_known_class_id(alloc, e, &id),
         ClassExpr::Expr(expr) => InstrSeq::gather(vec![
             emit_pos(pos),
             emit_expr(e, env, &expr)?,
             instr::class_get_c(),
         ]),
-        ClassExpr::Reified(instrs) => {
-            InstrSeq::gather(vec![emit_pos(pos), instrs, instr::class_get_c()])
-        }
-        _ => panic!("Enum value does not match one of listed variants"),
+        ClassExpr::Reified(ast::Id(p, name)) => InstrSeq::gather(vec![
+            emit_pos(pos),
+            get_reified_var_cexpr(e, env, &p, &name)?,
+            instr::class_get_c(),
+        ]),
     };
     Ok(emit_pos_then(pos, instrs))
 }
@@ -3584,25 +3554,7 @@ fn emit_new<'a, 'arena, 'decl>(
         },
         _ => true,
     };
-    use HasGenericsOp as H;
     let cexpr = ClassExpr::class_id_to_class_expr(e, &env.scope, false, resolve_self, cid);
-    let (cexpr, has_generics) = match &cexpr {
-        ClassExpr::Id(ast_defs::Id(_, name)) => match emit_reified_type_opt(e, env, pos, name)? {
-            Some(instrs) => {
-                if targs.is_empty() {
-                    (ClassExpr::Reified(instrs), H::MaybeGenerics)
-                } else {
-                    return Err(Error::fatal_parse(
-                        pos,
-                        "Cannot have higher kinded reified generics",
-                    ));
-                }
-            }
-            None if !has_non_tparam_generics_targs(env, targs) => (cexpr, H::NoGenerics),
-            None => (cexpr, H::HasGenerics),
-        },
-        _ => (cexpr, H::NoGenerics),
-    };
     if is_reflection_class_builtin {
         scope::with_unnamed_locals(e, |e| {
             let instr_args = emit_exprs(e, env, args)?;
@@ -3621,27 +3573,29 @@ fn emit_new<'a, 'arena, 'decl>(
             ClassExpr::Id(ast_defs::Id(_, cname)) => {
                 let id = hhbc::ClassName::<'arena>::from_ast_name_and_mangle(alloc, &cname);
                 e.add_class_ref(id);
-                let targs = match has_generics {
-                    H::NoGenerics => None,
-                    H::HasGenerics => Some(targs),
-                    H::MaybeGenerics => {
-                        return Err(Error::unrecoverable(
-                            "Internal error: This case should have been transformed",
-                        ));
-                    }
+                let targs = if has_non_tparam_generics_targs(env, targs) {
+                    Some(targs)
+                } else {
+                    None
                 };
                 emit_new_obj_reified_instrs(e, env, pos, NewObjOpInfo::NewObjD(&id, targs))?
             }
             ClassExpr::Special(cls_ref) => {
                 emit_new_obj_reified_instrs(e, env, pos, NewObjOpInfo::NewObjS(cls_ref))?
             }
-            ClassExpr::Reified(instrs) if has_generics == H::MaybeGenerics => {
+            ClassExpr::Reified(ast::Id(p, name)) => {
+                if !targs.is_empty() {
+                    return Err(Error::fatal_parse(
+                        pos,
+                        "Cannot have higher kinded reified generics",
+                    ));
+                }
                 InstrSeq::gather(vec![
-                    instrs,
+                    emit_reified_type(e, env, &p, &name)?,
                     emit_new_obj_reified_instrs(e, env, pos, NewObjOpInfo::NewObj(true))?,
                 ])
             }
-            _ => InstrSeq::gather(vec![
+            ClassExpr::Expr(_) => InstrSeq::gather(vec![
                 emit_load_class_ref(e, env, pos, cexpr)?,
                 emit_new_obj_reified_instrs(e, env, pos, NewObjOpInfo::NewObj(false))?,
             ]),
@@ -4593,12 +4547,7 @@ fn emit_class_const<'a, 'arena, 'decl>(
     id: &ast_defs::Pstring,
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
-    let mut cexpr = ClassExpr::class_id_to_class_expr(e, &env.scope, false, true, cid);
-    if let ClassExpr::Id(ast_defs::Id(_, name)) = &cexpr {
-        if let Some(reified_var_cexpr) = get_reified_var_cexpr(e, env, pos, name)? {
-            cexpr = reified_var_cexpr;
-        }
-    }
+    let cexpr = ClassExpr::class_id_to_class_expr(e, &env.scope, false, true, cid);
     match cexpr {
         ClassExpr::Id(ast_defs::Id(pos, name)) => {
             let cid = hhbc::ClassName::from_ast_name_and_mangle(alloc, &name);
@@ -6326,7 +6275,7 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena, 'decl>(
 fn emit_class_expr<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
-    cexpr: ClassExpr<'arena>,
+    cexpr: ClassExpr,
     prop: &ast::ClassGetExpr,
 ) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>)> {
     let load_prop = |e: &mut Emitter<'arena, 'decl>| match prop {

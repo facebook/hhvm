@@ -235,14 +235,6 @@ pub enum MemberKey<'arena> {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
 #[repr(C)]
-pub enum HasGenericsOp {
-    NoGenerics,
-    MaybeGenerics,
-    HasGenerics,
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
-#[repr(C)]
 pub enum ClassishKind {
     Class, // c.f. ast_defs::ClassishKind - may need Abstraction (Concrete, Abstract)
     Interface,

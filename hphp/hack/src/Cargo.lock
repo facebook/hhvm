@@ -1734,7 +1734,6 @@ dependencies = [
  "hhbc",
  "hhbc_string_utils",
  "indexmap",
- "instruction_sequence",
  "naming_special_names_rust",
  "options",
  "oxidized",

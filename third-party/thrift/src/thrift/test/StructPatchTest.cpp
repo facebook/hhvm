@@ -1362,5 +1362,21 @@ TEST(PatchDiscrepancy, EnsureUnionField) {
   EXPECT_EQ(dynFoo.as_object()[FieldId{1}].as_i32(), 1);
 }
 
+TEST(StructPatchTest, SerializationExample) {
+  MyDataPatch patch;
+
+  patch.ensure<ident::data1>();
+  patch.ensure<ident::data3>("20");
+
+  auto expected = CompactSerializer::serialize<std::string>(patch.toThrift());
+
+  folly::IOBufQueue queue;
+  CompactProtocolWriter proto;
+  proto.setOutput(&queue);
+  op::encode<type::infer_tag<MyDataPatch>>(proto, patch);
+  auto buf = queue.move();
+  EXPECT_EQ(buf->to<std::string>(), expected);
+}
+
 } // namespace
 } // namespace apache::thrift

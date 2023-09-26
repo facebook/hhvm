@@ -15,9 +15,12 @@ includes = ["foo", "bar"]
 [packages.bat]
 uses=["z.*"]
 
+[packages.default]
+uses = ["*"]
+
 [deployments]
 
 [deployments.my-prod]
-packages = ["foo", "bar"]
+packages = ["foo", "bar", "default"]
 soft_packages=["bat"]
 domains = ['www\.my-prod\.com', '.*\.website\.com$']

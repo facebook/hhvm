@@ -11,6 +11,10 @@ Packages
     includes => [bar, foo]
     soft_includes => []
     uses => [x.*, y.*]
+  default
+    includes => []
+    soft_includes => []
+    uses => [*]
   foo
     includes => []
     soft_includes => []
@@ -18,5 +22,5 @@ Packages
 Deployments
   my-prod
     domains => [.*\.website\.com$, www\.my-prod\.com]
-    packages => [bar, foo]
+    packages => [bar, default, foo]
     soft_packages => [bat]

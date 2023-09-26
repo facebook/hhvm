@@ -1,0 +1,9 @@
+[packages]
+
+[packages.default]
+uses = ["*"]
+
+[deployments]
+
+[deployments.my-prod]
+packages = ["default"]

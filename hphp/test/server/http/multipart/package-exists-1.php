@@ -10,10 +10,13 @@ uses = ["a.*"]
 uses = ["b.*"]
 includes = ["foo"]
 
+[packages.default]
+uses = ["*"]
+
 [deployments]
 
 [deployments.my-prod]
-packages = ["foo"]
+packages = ["foo", "default"]
 domains = ['.*\.facebook\.com$']
 
 

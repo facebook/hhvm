@@ -23,6 +23,7 @@ namespace HPHP {
 
 struct Func;
 struct Class;
+struct PackageInfo;
 struct Unit;
 struct StringData;
 struct ObjectData;
@@ -49,6 +50,7 @@ enum class MethodLookupErrorOptions {
 const Func* lookupMethodCtx(const Class* cls,
                             const StringData* methodName,
                             const MemberLookupContext& callCtx,
+                            const PackageInfo& packageInfo,
                             CallType lookupType,
                             MethodLookupErrorOptions raise);
 
@@ -56,6 +58,7 @@ LookupResult lookupObjMethod(const Func*& f,
                              const Class* cls,
                              const StringData* methodName,
                              const MemberLookupContext& callCtx,
+                             const PackageInfo& packageInfo,
                              MethodLookupErrorOptions raise);
 
 /*
@@ -94,6 +97,7 @@ ImmutableObjMethodLookup
 lookupImmutableObjMethod(const Class* cls,
                          const StringData* name,
                          const MemberLookupContext& callCtx,
+                         const PackageInfo& packageInfo,
                          bool exactClass);
 
 LookupResult lookupClsMethod(const Func*& f,
@@ -101,6 +105,7 @@ LookupResult lookupClsMethod(const Func*& f,
                              const StringData* methodName,
                              ObjectData* this_,
                              const MemberLookupContext& callCtx,
+                             const PackageInfo& packageInfo,
                              MethodLookupErrorOptions raise);
 
 /*
@@ -124,11 +129,13 @@ LookupResult lookupClsMethod(const Func*& f,
 const Func* lookupImmutableClsMethod(const Class* cls,
                                      const StringData* name,
                                      const MemberLookupContext& callCtx,
+                                     const PackageInfo& packageInfo,
                                      bool exactClass);
 
 LookupResult lookupCtorMethod(const Func*& f,
                               const Class* cls,
                               const MemberLookupContext& callCtx,
+                              const PackageInfo& packageInfo,
                               MethodLookupErrorOptions raise);
 
 /*

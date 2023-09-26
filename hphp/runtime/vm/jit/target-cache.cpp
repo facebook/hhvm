@@ -213,8 +213,10 @@ namespace {
 
 NEVER_INLINE
 const Func* lookup(const Class* cls, const StringData* name,
-                   const MemberLookupContext& callCtx) {
-  auto const func = lookupMethodCtx(cls, name, callCtx, CallType::ObjMethod,
+                   const MemberLookupContext& callCtx,
+                   const PackageInfo& packageInfo) {
+  auto const func = lookupMethodCtx(cls, name, callCtx, packageInfo,
+                                    CallType::ObjMethod,
                                     MethodLookupErrorOptions::RaiseOnNotFound);
   assertx(func);
   if (UNLIKELY(func->isStaticInPrologue())) {
@@ -273,7 +275,7 @@ handleDynamicCall(const Class* cls, const StringData* name,
                   const Class* ctx, const Func* callerFunc) {
   auto const callCtx = MemberLookupContext(ctx, callerFunc);
   // Perform lookup without any caching.
-  return lookup(cls, name, callCtx);
+  return lookup(cls, name, callCtx, g_context->getPackageInfo());
 }
 
 EXTERNALLY_VISIBLE const Func*
@@ -284,12 +286,13 @@ handleStaticCall(const Class* cls, const StringData* name,
   assertx(cls);
   auto& mce = rds::handleToRef<Entry, rds::Mode::Normal>(mceHandle);
   auto const callCtx = MemberLookupContext(ctx, callerFunc);
+  auto const& packageInfo = g_context->getPackageInfo();
   if (!rds::isHandleInit(mceHandle, rds::NormalTag{})) {
     // If the low bit is set in mcePrime, we have not yet smashed the immediate
     // into the TC, or the value was not cacheable.
     if (UNLIKELY(mcePrime & 0x1)) {
       // First fill the request local cache for this call.
-      auto const func = lookup(cls, name, callCtx);
+      auto const func = lookup(cls, name, callCtx, packageInfo);
       if (Module::warningsEnabled(func) &&
           will_symbol_raise_module_boundary_violation(func, &callCtx)) {
         // If we raised a warning, do not cache/smash the func
@@ -297,7 +300,6 @@ handleStaticCall(const Class* cls, const StringData* name,
       }
       // Call to systemlib functions will never violate deployment boundary.
       if (!func->unit()->isSystemLib()) {
-        auto const& packageInfo = g_context->getPackageInfo();
         if (RO::EvalEnforceDeployment &&
             packageInfo.outsideActiveDeployment(*func)) {
           // If we raised an exception, do not cache/smash the func.
@@ -329,14 +331,14 @@ handleStaticCall(const Class* cls, const StringData* name,
   // Note: if you manually CSE oldFunc->methodSlot() here, gcc 4.8
   // will strangely generate two loads instead of one.
   if (UNLIKELY(cls->numMethods() <= oldFunc->methodSlot())) {
-    auto const func = lookup(cls, name, callCtx);
+    auto const func = lookup(cls, name, callCtx, packageInfo);
     if (Module::warningsEnabled(func) &&
         will_symbol_raise_module_boundary_violation(func, &callCtx)) {
       // If we raised a warning, do not cache the func
       return func;
     }
     if (RO::EvalEnforceDeployment &&
-        g_context->getPackageInfo().outsideActiveDeployment(*cls)) {
+        packageInfo.outsideActiveDeployment(*cls)) {
       // If we raised an exception, do not cache the func.
       return func;
     }
@@ -428,7 +430,7 @@ handleStaticCall(const Class* cls, const StringData* name,
     }
   }
 
-  auto const func = lookup(cls, name, callCtx);
+  auto const func = lookup(cls, name, callCtx, packageInfo);
   if (Module::warningsEnabled(func) &&
       will_symbol_raise_module_boundary_violation(func, &callCtx)) {
     // If we raised a warning, do not cache the func
@@ -464,7 +466,8 @@ const Func*
 StaticMethodCache::lookup(rds::Handle handle, const NamedType *ne,
                           const StringData* clsName,
                           const StringData* methName, const Class* ctx,
-                          const Func* callerFunc) {
+                          const Func* callerFunc,
+                          const PackageInfo& packageInfo) {
   assertx(rds::isNormalHandle(handle));
   auto thiz = rds::handleToPtr<StaticMethodCache, rds::Mode::Normal>(handle);
   Stats::inc(Stats::TgtCache_StaticMethodMiss);
@@ -488,6 +491,7 @@ StaticMethodCache::lookup(rds::Handle handle, const NamedType *ne,
                                               // this, but we can just fall
                                               // through in that case.
                                      callCtx,
+                                     packageInfo,
                                      MethodLookupErrorOptions::None);
   if (LIKELY(res == LookupResult::MethodFoundNoThis &&
              !f->isAbstract() &&
@@ -510,7 +514,7 @@ StaticMethodCache::lookup(rds::Handle handle, const NamedType *ne,
 const Func*
 StaticMethodFCache::lookup(rds::Handle handle, const Class* cls,
                            const StringData* methName, const Class* ctx,
-                           const Func* callerFunc) {
+                           const Func* callerFunc, const PackageInfo& packageInfo) {
   assertx(cls);
   assertx(rds::isNormalHandle(handle));
   auto thiz = rds::handleToPtr<StaticMethodFCache, rds::Mode::Normal>(handle);
@@ -522,6 +526,7 @@ StaticMethodFCache::lookup(rds::Handle handle, const Class* cls,
   LookupResult res = lookupClsMethod(f, cls, methName,
                                      nullptr,
                                      callCtx,
+                                     packageInfo,
                                      MethodLookupErrorOptions::None);
   assertx(res != LookupResult::MethodFoundWithThis); // Not possible: no this.
   if (LIKELY(res == LookupResult::MethodFoundNoThis && !f->isAbstract())) {

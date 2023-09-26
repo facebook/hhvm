@@ -300,7 +300,8 @@ const Func* vm_decode_func_from_name(
   auto const moduleName =
     ar ? ar->func()->unit()->moduleName() : (const StringData*)nullptr;
   auto const callCtx = MemberLookupContext(ctx, moduleName);
-  auto f = lookupMethodCtx(cc, funcName.get(), callCtx, lookupType,
+  auto const& packageInfo = g_context->getPackageInfo();
+  auto f = lookupMethodCtx(cc, funcName.get(), callCtx, packageInfo, lookupType,
                            MethodLookupErrorOptions::NoErrorOnModule);
   if (f && (f->attrs() & AttrStatic)) {
     // If we found a method and its static, null out this_

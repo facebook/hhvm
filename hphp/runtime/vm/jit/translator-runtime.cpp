@@ -495,8 +495,10 @@ const Func* loadClassCtor(Class* cls, Func* ctxFunc) {
   const Func* f = cls->getCtor();
   if (UNLIKELY(!(f->attrs() & AttrPublic))) {
     auto const callCtx = MemberLookupContext(ctxFunc->cls(), ctxFunc);
+    auto const& packageInfo = g_context->getPackageInfo();
     UNUSED auto func =
-      lookupMethodCtx(cls, nullptr, callCtx, CallType::CtorMethod,
+      lookupMethodCtx(cls, nullptr, callCtx, packageInfo,
+                      CallType::CtorMethod,
                       MethodLookupErrorOptions::RaiseOnNotFound);
     assertx(func == f);
   }
@@ -508,6 +510,7 @@ const Func* lookupClsMethodHelper(const Class* cls, const StringData* methName,
   const Func* f;
   auto const callCtx = MemberLookupContext(ctxFunc->cls(), ctxFunc);
   auto const res = lookupClsMethod(f, cls, methName, obj, callCtx,
+                                   g_context->getPackageInfo(),
                                    MethodLookupErrorOptions::RaiseOnNotFound);
 
   if (res == LookupResult::MethodFoundWithThis) {
@@ -521,6 +524,14 @@ const Func* lookupClsMethodHelper(const Class* cls, const StringData* methName,
   }
 
   return f;
+}
+
+const Func* lookupClsMethodCacheHelper(rds::Handle handle, const NamedType *ne,
+                                       const StringData* clsName,
+                                       const StringData* methName, const Class* ctx,
+                                       const Func* callerFunc) {
+  auto const& packageInfo = g_context->getPackageInfo();
+  return StaticMethodCache::lookup(handle, ne, clsName, methName, ctx, callerFunc, packageInfo);
 }
 
 //////////////////////////////////////////////////////////////////////

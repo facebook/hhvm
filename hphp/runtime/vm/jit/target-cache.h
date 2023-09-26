@@ -24,6 +24,7 @@ struct ArrayData;
 struct Class;
 struct Func;
 struct NamedType;
+struct PackageInfo;
 struct StringData;
 struct TypedValue;
 }
@@ -109,7 +110,7 @@ struct StaticMethodCache {
   static const Func* lookup(rds::Handle chand,
                             const NamedType* ne, const StringData* cls,
                             const StringData* meth, const Class* ctx,
-                            const Func* callerFunc);
+                            const Func* callerFunc, const PackageInfo& packageInfo);
 };
 
 struct StaticMethodFCache {
@@ -121,7 +122,7 @@ struct StaticMethodFCache {
                       const StringData* ctxName);
   static const Func* lookup(rds::Handle chand, const Class* cls,
                             const StringData* meth, const Class* ctx,
-                            const Func* callerFunc);
+                            const Func* callerFunc, const PackageInfo& packageInfo);
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -156,4 +157,3 @@ const Func* handleStaticCall(const Class* cls,
 //////////////////////////////////////////////////////////////////////
 
 }
-

@@ -3125,23 +3125,47 @@ and stmt_ env pos st =
   | Try (tb, cl, fb) ->
     let (env, ttb, tcl, tfb) = try_catch ~join_pos:pos env tb cl fb in
     (env, Aast.Try (ttb, tcl, tfb))
-  | Awaitall (el, b) ->
-    let env = might_throw ~join_pos:pos env in
-    let (env, el) =
-      List.fold_left el ~init:(env, []) ~f:(fun (env, tel) (e1, e2) ->
-          let (env, te2, ty2) = expr env e2 in
-          let (_, pos2, _) = e2 in
-          let (env, ty2) =
-            Async.overload_extract_from_awaitable env ~p:pos2 ty2
-          in
-          let pos = fst e1 in
-          let (env, _, _, ty_mismatch_opt) =
-            assign pos env ((), pos, Lvar e1) pos2 ty2
-          in
-          (env, (e1, hole_on_ty_mismatch ~ty_mismatch_opt te2) :: tel))
+  | Concurrent b ->
+    let check_expr_rhs env s =
+      match s with
+      | ( _pos,
+          ( Expr ((), _, Binop { bop = Ast_defs.Eq _; lhs = _; rhs = e })
+          | Expr (((), _, _) as e) ) ) ->
+        let (env, te, ty) = expr env e in
+        (env, Some (te, ty))
+      | _ -> (env, None)
     in
-    let (env, b) = block env b in
-    (env, Aast.Awaitall (el, b))
+    let check_assign env ((((pos : Pos.t), s_) as s), te_ty_opt) =
+      match s_ with
+      | Expr (((), _, Binop { bop = Ast_defs.Eq op; lhs; rhs = _ }) as outer) ->
+        (match te_ty_opt with
+        | Some (te, ty) ->
+          let (env, te, _ty) =
+            check_binop
+              ~check_defined:true
+              env
+              outer
+              pos
+              (Ast_defs.Eq op)
+              lhs
+              (Stdlib.Either.Right (te, ty))
+          in
+          (env, (pos, Expr te))
+        | None ->
+          Errors.internal_error pos "Missing type while checking Concurrent";
+          stmt env s)
+      | Expr _e ->
+        (match te_ty_opt with
+        | Some (te, _ty) -> (env, (pos, Expr te))
+        | None ->
+          Errors.internal_error pos "Missing type while checking Concurrent";
+          stmt env s)
+      | _ -> stmt env s
+    in
+    let env = might_throw ~join_pos:pos env in
+    let (env, te_tyl) = List.map_env env b ~f:check_expr_rhs in
+    let (env, b) = List.map_env env (List.zip_exn b te_tyl) ~f:check_assign in
+    (env, Aast.Concurrent b)
   | Throw e ->
     let (_, p, _) = e in
     let (env, te, ty) = expr env e in
@@ -3176,6 +3200,7 @@ and stmt_ env pos st =
     let env = set_valid_rvalue ~is_defined p env lvar (Some hty) ety in
     (env, Aast.Declare_local ((p, lvar), hint, te))
   | Match _ -> failwith "TODO(jakebailey): match statements"
+  | Awaitall _
   | Block _
   | Markup _ ->
     failwith

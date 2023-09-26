@@ -384,6 +384,7 @@ and stmt env acc st =
     let acc = List.fold_left el ~init:acc ~f:(fun acc (_, e2) -> expr acc e2) in
     let acc = block acc b in
     acc
+  | Concurrent b -> block acc b
   | If (e1, b1, b2) ->
     let acc = expr acc e1 in
     let b1 = block acc b1 in

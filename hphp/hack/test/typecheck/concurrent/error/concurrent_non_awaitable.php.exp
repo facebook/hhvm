@@ -1,6 +1,6 @@
-File "concurrent_non_awaitable.php", line 8, characters 16-20:
+File "concurrent_non_awaitable.php", line 8, characters 10-20:
 `await` can only operate on an `Awaitable` (Typing[4110])
-  File "concurrent_non_awaitable.php", line 8, characters 16-20:
+  File "concurrent_non_awaitable.php", line 8, characters 10-20:
   Expected `Awaitable<nothing>`
   File "concurrent_non_awaitable.php", line 3, characters 17-19:
   But got `int`

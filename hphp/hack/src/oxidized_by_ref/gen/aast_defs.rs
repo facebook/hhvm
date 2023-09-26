@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8039c93f2e76a801231f88880a49e6db>>
+// @generated SignedSource<<80adbbacd1ed14196b309da45c15313e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -192,6 +192,16 @@ pub enum Stmt_<'a, Ex, En> {
             &'a Block<'a, Ex, En>,
         ),
     ),
+    /// Concurrent block. All the await expressions are awaited at the
+    /// same time, similar to genva().
+    ///
+    ///     concurrent {
+    ///       $foo = await f();
+    ///       $bar = await g();
+    ///       await h();
+    ///     }
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Concurrent(&'a Block<'a, Ex, En>),
     /// If statement.
     ///
     ///     if ($foo) { ... } else { ... }

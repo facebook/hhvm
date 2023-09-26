@@ -1,57 +1,73 @@
 [(Fun
     { fd_namespace =
-      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
-        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None;
         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:16-22], "\\genInt");
       fd_fun =
-      { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((Awaitable<~int>), (Some ([3:26-40], (Happly (([3:26-35], "\\HH\\Awaitable"), [([3:36-39], (Hprim Tint))]))))); 
-        f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-12], (Return (Some ((int), [4:10-11], (Int "1")))))] }; 
-        f_fun_kind = FAsync; f_user_attributes = [{ ua_name = ([3:16-22], "__SupportDynamicType"); ua_params = [] }]; 
+      { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = ();
+        f_readonly_ret = None; f_ret = ((Awaitable<~int>), (Some ([3:26-40], (Happly (([3:26-35], "\\HH\\Awaitable"), [([3:36-39], (Hprim Tint))])))));
+        f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-12], (Return (Some ((int), [4:10-11], (Int "1")))))] };
+        f_fun_kind = FAsync; f_user_attributes = [{ ua_name = ([3:16-22], "__SupportDynamicType"); ua_params = [] }];
         f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
-       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
-         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None;
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([7:16-25], "\\genString");
        fd_fun =
-       { f_span = [7:1-9:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((Awaitable<~string>), (Some ([7:29-46], (Happly (([7:29-38], "\\HH\\Awaitable"), [([7:39-45], (Hprim Tstring))]))))); 
-         f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([8:3-16], (Return (Some ((string), [8:10-15], (String "foo")))))] }; 
-         f_fun_kind = FAsync; f_user_attributes = [{ ua_name = ([7:16-25], "__SupportDynamicType"); ua_params = [] }]; 
+       { f_span = [7:1-9:2]; f_readonly_this = None; f_annotation = ();
+         f_readonly_ret = None; f_ret = ((Awaitable<~string>), (Some ([7:29-46], (Happly (([7:29-38], "\\HH\\Awaitable"), [([7:39-45], (Hprim Tstring))])))));
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([8:3-16], (Return (Some ((string), [8:10-15], (String "foo")))))] };
+         f_fun_kind = FAsync; f_user_attributes = [{ ua_name = ([7:16-25], "__SupportDynamicType"); ua_params = [] }];
          f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
-       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
-         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None;
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([11:16-17], "\\f");
        fd_fun =
-       { f_span = [11:1-17:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((Awaitable<~void>), (Some ([11:21-36], (Happly (([11:21-30], "\\HH\\Awaitable"), [([11:31-35], (Hprim Tvoid))]))))); 
+       { f_span = [11:1-17:2]; f_readonly_this = None; f_annotation = ();
+         f_readonly_ret = None; f_ret = ((Awaitable<~void>), (Some ([11:21-36], (Happly (([11:21-30], "\\HH\\Awaitable"), [([11:31-35], (Hprim Tvoid))])))));
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
-           [([12:3-13],
-             (Awaitall (
-                [(([15:16-27], __tmp$3),
-                  ((Awaitable<string>), [15:16-27], (Call { func = (((function(): Awaitable<string>)), [15:16-25], (Id ([15:16-25], "\\genString"))); targs = []; args = []; unpacked_arg = None })));
-                  (([14:11-22], __tmp$2),
-                   ((Awaitable<string>), [14:11-22], (Call { func = (((function(): Awaitable<string>)), [14:11-20], (Id ([14:11-20], "\\genString"))); targs = []; args = []; unpacked_arg = None })));
-                  (([13:16-24], __tmp$1),
-                   ((Awaitable<int>), [13:16-24], (Call { func = (((function(): Awaitable<int>)), [13:16-22], (Id ([13:16-22], "\\genInt"))); targs = []; args = []; unpacked_arg = None })))
-                  ],
-                [([14:5-23], (Expr ((null), [14:5-22], Null)));
-                  ([13:5-25], (Expr ((int), [13:5-24], (Binop { bop = (Eq None); lhs = ((int), [13:5-7], (Lvar ([13:5-7], $a))); rhs = ((int), [13:10-24], (Lvar ([13:10-24], __tmp$1))) }))));
-                  ([15:5-28], (Expr ((string), [15:5-27], (Binop { bop = (Eq None); lhs = ((string), [15:5-7], (Lvar ([15:5-7], $c))); rhs = ((string), [15:10-27], (Lvar ([15:10-27], __tmp$3))) }))))
-                  ]
-                )))
+            [([12:3-16:4],
+             (Concurrent
+                [([13:5-25],
+                  (Expr
+                     ((int), [13:5-25],
+                      (Binop
+                         { bop = (Eq None); lhs = ((int), [13:5-7], (Lvar ([13:5-7], $a)));
+                           rhs =
+                           ((int), [13:10-24],
+                            (Await
+                               ((Awaitable<int>), [13:16-24], (Call { func = (((function(): Awaitable<int>)), [13:16-22], (Id ([13:16-22], "\\genInt"))); targs = []; args = []; unpacked_arg = None }))))
+                           }))));
+                  ([14:5-23],
+                   (Expr
+                      ((string), [14:5-22],
+                       (Await
+                          ((Awaitable<string>), [14:11-22],
+                           (Call { func = (((function(): Awaitable<string>)), [14:11-20], (Id ([14:11-20], "\\genString"))); targs = []; args = []; unpacked_arg = None }))))));
+                  ([15:5-28],
+                   (Expr
+                      ((string), [15:5-28],
+                       (Binop
+                          { bop = (Eq None); lhs = ((string), [15:5-7], (Lvar ([15:5-7], $c)));
+                            rhs =
+                            ((string), [15:10-27],
+                             (Await
+                                ((Awaitable<string>), [15:16-27],
+                                 (Call { func = (((function(): Awaitable<string>)), [15:16-25], (Id ([15:16-25], "\\genString"))); targs = []; args = []; unpacked_arg = None }))))
+                            }))))
+                  ]))
              ]
            };
-         f_fun_kind = FAsync; f_user_attributes = [{ ua_name = ([11:16-17], "__SupportDynamicType"); ua_params = [] }]; 
+         f_fun_kind = FAsync; f_user_attributes = [{ ua_name = ([11:16-17], "__SupportDynamicType"); ua_params = [] }];
          f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

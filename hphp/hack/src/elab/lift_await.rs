@@ -505,6 +505,10 @@ impl<'a> VisitorMut<'a> for LiftAwait {
                 *elem = Stmt(pos, stmt_);
                 Ok(())
             }
+            // The lowerer converts concurrent statements to Awaitall when hackc
+            // is going to generate bytecode (instead of type checking/TAST
+            // generating), which is the only case we should be lifting awaits.
+            | Stmt_::Concurrent(_) => panic!("Concurrent statement in lift_await"),
         }
     }
 }
@@ -513,16 +517,6 @@ pub fn elaborate_program(env: &mut Env, program: &mut nast::Program) {
     let mut tl: LiftAwait = Default::default();
     tl.visit_program(env, program).unwrap();
 }
-
-// pub fn elaborate_fun_def(env: &mut Env, f: &mut nast::FunDef) {
-//     let mut tl: LiftAwait = Default::default();
-//     tl.visit_fun_def(env, f).unwrap();
-// }
-
-// pub fn elaborate_class_(env: &mut Env, c: &mut nast::Class_) {
-//     let mut tl: LiftAwait = Default::default();
-//     tl.visit_class_(env, c).unwrap();
-// }
 
 #[cfg(test)]
 mod tests {

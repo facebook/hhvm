@@ -17,6 +17,7 @@ let stmt_name = function
   | A.Return _ -> "Return"
   | A.Yield_break -> "Yield_break"
   | A.Awaitall _ -> "Awaitall"
+  | A.Concurrent _ -> "Concurrent"
   | A.If _ -> "If"
   | A.Do _ -> "Do"
   | A.While _ -> "While"

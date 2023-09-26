@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<76de4eaa565c4b38584fcf107b8b4463>>
+// @generated SignedSource<<ab1c980501ced775166a711ab7e70b43>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2088,6 +2088,7 @@ impl<P: Params> Node<P> for Stmt_<P::Ex, P::En> {
             Stmt_::Return(a0) => a0.accept(c, v),
             Stmt_::YieldBreak => Ok(()),
             Stmt_::Awaitall(a) => helper0(a, c, v),
+            Stmt_::Concurrent(a0) => a0.accept(c, v),
             Stmt_::If(a) => helper1(a, c, v),
             Stmt_::Do(a) => helper2(a, c, v),
             Stmt_::While(a) => helper3(a, c, v),

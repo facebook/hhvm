@@ -627,6 +627,7 @@ impl<'a> VisitorMut<'a> for TypedLocal {
             // Just need to visit these, no additional logic is required
             Stmt_::Fallthrough
             | Stmt_::Awaitall(_)
+            | Stmt_::Concurrent(_)
             | Stmt_::Break
             | Stmt_::Continue
             | Stmt_::Throw(_)

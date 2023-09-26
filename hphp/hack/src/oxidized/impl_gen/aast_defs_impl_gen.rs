@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<37999f22710ff75daa4028659dff0164>>
+// @generated SignedSource<<115b2381a563cd54fd73b8583e38148d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -35,6 +35,9 @@ impl<Ex, En> Stmt_<Ex, En> {
     }
     pub fn mk_awaitall(p0: Vec<(Lid, Expr<Ex, En>)>, p1: Block<Ex, En>) -> Self {
         Stmt_::Awaitall(Box::new((p0, p1)))
+    }
+    pub fn mk_concurrent(p0: Block<Ex, En>) -> Self {
+        Stmt_::Concurrent(p0)
     }
     pub fn mk_if(p0: Expr<Ex, En>, p1: Block<Ex, En>, p2: Block<Ex, En>) -> Self {
         Stmt_::If(Box::new((p0, p1, p2)))
@@ -132,6 +135,12 @@ impl<Ex, En> Stmt_<Ex, En> {
     pub fn is_awaitall(&self) -> bool {
         match self {
             Stmt_::Awaitall(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_concurrent(&self) -> bool {
+        match self {
+            Stmt_::Concurrent(..) => true,
             _ => false,
         }
     }
@@ -240,6 +249,12 @@ impl<Ex, En> Stmt_<Ex, En> {
     pub fn as_awaitall(&self) -> Option<(&Vec<(Lid, Expr<Ex, En>)>, &Block<Ex, En>)> {
         match self {
             Stmt_::Awaitall(p0) => Some((&p0.0, &p0.1)),
+            _ => None,
+        }
+    }
+    pub fn as_concurrent(&self) -> Option<&Block<Ex, En>> {
+        match self {
+            Stmt_::Concurrent(p0) => Some(p0),
             _ => None,
         }
     }
@@ -357,6 +372,12 @@ impl<Ex, En> Stmt_<Ex, En> {
     ) -> Option<(&mut Vec<(Lid, Expr<Ex, En>)>, &mut Block<Ex, En>)> {
         match self {
             Stmt_::Awaitall(p0) => Some((&mut p0.0, &mut p0.1)),
+            _ => None,
+        }
+    }
+    pub fn as_concurrent_mut(&mut self) -> Option<&mut Block<Ex, En>> {
+        match self {
+            Stmt_::Concurrent(p0) => Some(p0),
             _ => None,
         }
     }
@@ -484,6 +505,12 @@ impl<Ex, En> Stmt_<Ex, En> {
     pub fn as_awaitall_into(self) -> Option<(Vec<(Lid, Expr<Ex, En>)>, Block<Ex, En>)> {
         match self {
             Stmt_::Awaitall(p0) => Some(((*p0).0, (*p0).1)),
+            _ => None,
+        }
+    }
+    pub fn as_concurrent_into(self) -> Option<Block<Ex, En>> {
+        match self {
+            Stmt_::Concurrent(p0) => Some(p0),
             _ => None,
         }
     }

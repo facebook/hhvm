@@ -1,8 +1,10 @@
-File "concurrent_not_async.php", line 7, characters 3-12:
+File "concurrent_not_async.php", line 8, characters 10-21:
+`await` can only be used inside `async` functions (NastCheck[3003])
+File "concurrent_not_async.php", line 9, characters 10-21:
 `await` can only be used inside `async` functions (NastCheck[3003])
 File "concurrent_not_async.php", line 11, characters 10-16:
 Invalid return type (Typing[4110])
-File "concurrent_not_async.php", line 6, characters 17-30:
-Expected `Awaitable<int>`
-File "concurrent_not_async.php", line 11, characters 10-16:
-But got `int` because this is the result of an integer arithmetic operation
+  File "concurrent_not_async.php", line 6, characters 17-30:
+  Expected `Awaitable<int>`
+  File "concurrent_not_async.php", line 11, characters 10-16:
+  But got `int` because this is the result of an integer arithmetic operation

@@ -27,8 +27,6 @@ async function f(): Awaitable<void> {
 async function f2(): Awaitable<void> {
   concurrent {
     let $a:int = 1;
-    $a = await h(); // would like a type error, but the lowerer generates mangled code
-    // when there are not awaitable expressions on the rhs. This is
-    // true without let
+    $a = await h();  // error, we require $a : int
   }
 }

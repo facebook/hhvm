@@ -138,6 +138,9 @@ pub fn emit_stmt<'a, 'arena, 'decl>(
         a::Stmt_::Switch(x) => emit_switch(e, env, pos, &x.0, &x.1, &x.2),
         a::Stmt_::Foreach(x) => emit_foreach(e, env, pos, &x.0, &x.1, &x.2),
         a::Stmt_::Awaitall(x) => emit_awaitall(e, env, pos, &x.0, &x.1),
+        // The lowerer converts concurrent statements to Awaitall when
+        // elaboration is going to generate bytecode.
+        a::Stmt_::Concurrent(_) => panic!("Concurrent statement in emit_statement"),
         a::Stmt_::Markup(x) => emit_markup(e, env, x, false),
         a::Stmt_::Fallthrough | a::Stmt_::Noop => Ok(instr::empty()),
         a::Stmt_::AssertEnv(_) => Ok(instr::empty()),

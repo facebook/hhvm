@@ -3057,7 +3057,7 @@ fn p_try_stmt<'a>(
 
 fn p_concurrent_stmt<'a>(
     env: &mut Env<'a>,
-    _pos: Pos,
+    pos: Pos,
     c: &'a ConcurrentStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
     _node: S<'a>,
 ) -> Result<ast::Stmt> {
@@ -3065,147 +3065,160 @@ fn p_concurrent_stmt<'a>(
     use ast::Stmt_ as S_;
     let new = Stmt::new;
 
-    let keyword_pos = p_pos(&c.keyword, env);
+    if env.codegen {
+        // If we're generating bytecode, convert Concurrent into Awaitall. If
+        // we aren't generating code (and so doing typechecking/TAST building)
+        // we'll leave Concurrent in.
+        let keyword_pos = p_pos(&c.keyword, env);
 
-    if env.parser_options.po_unwrap_concurrent {
-        return p_stmt(&c.statement, env);
-    }
+        if env.parser_options.po_unwrap_concurrent {
+            return p_stmt(&c.statement, env);
+        }
 
-    let (lifted_awaits, Stmt(stmt_pos, stmt)) =
-        with_new_concurrent_scope(env, |e| p_stmt(&c.statement, e))?;
-    let scope = lifted_awaits
-        .iter()
-        .map(|lifted_await| lifted_await.0.clone())
-        .collect();
-    let stmt = match stmt {
-        S_::Block(box (_, stmts)) => {
-            use ast::Bop::Eq;
-            /* Reuse tmp vars from lifted_awaits, this is safe because there will
-             * always be more awaits with tmp vars than statements with assignments. */
-            let mut tmp_vars = lifted_awaits.iter().map(|lifted_await| &lifted_await.0.1);
-            let mut body_stmts = vec![];
-            let mut assign_stmts = vec![];
-            for n in stmts.into_iter() {
-                if !n.is_assign_expr() && !n.is_declare_local_stmt() {
-                    if n.is_null_expr() {
-                        tmp_vars.next();
+        let (lifted_awaits, Stmt(stmt_pos, stmt)) =
+            with_new_concurrent_scope(env, |e| p_stmt(&c.statement, e))?;
+        let scope = lifted_awaits
+            .iter()
+            .map(|lifted_await| lifted_await.0.clone())
+            .collect();
+        let stmt = match stmt {
+            S_::Block(box (_, stmts)) => {
+                use ast::Bop::Eq;
+                /* Reuse tmp vars from lifted_awaits, this is safe because there will
+                 * always be more awaits with tmp vars than statements with assignments. */
+                let mut tmp_vars = lifted_awaits.iter().map(|lifted_await| &lifted_await.0.1);
+                let mut body_stmts = vec![];
+                let mut assign_stmts = vec![];
+                for n in stmts.into_iter() {
+                    if !n.is_assign_expr() && !n.is_declare_local_stmt() {
+                        if n.is_null_expr() {
+                            tmp_vars.next();
+                        }
+                        body_stmts.push(n);
+                        continue;
                     }
-                    body_stmts.push(n);
-                    continue;
-                }
 
-                match n {
-                    Stmt(p1, S_::Expr(expr)) => {
-                        if let Expr((), p2, Expr_::Binop(bop)) = *expr {
-                            if let Binop {
-                                bop: Eq(op),
-                                lhs: e1,
-                                rhs: e2,
-                            } = *bop
-                            {
-                                if let Some(tv) = tmp_vars.next() {
-                                    let tmp_n = Expr::mk_lvar(&e2.1, &(tv.1));
-                                    if tmp_n.lvar_name() != e2.lvar_name() {
-                                        let new_n = new(
-                                            p1.clone(),
+                    match n {
+                        Stmt(p1, S_::Expr(expr)) => {
+                            if let Expr((), p2, Expr_::Binop(bop)) = *expr {
+                                if let Binop {
+                                    bop: Eq(op),
+                                    lhs: e1,
+                                    rhs: e2,
+                                } = *bop
+                                {
+                                    if let Some(tv) = tmp_vars.next() {
+                                        let tmp_n = Expr::mk_lvar(&e2.1, &(tv.1));
+                                        if tmp_n.lvar_name() != e2.lvar_name() {
+                                            let new_n = new(
+                                                p1.clone(),
+                                                S_::mk_expr(Expr::new(
+                                                    (),
+                                                    p2.clone(),
+                                                    Expr_::mk_binop(Binop {
+                                                        bop: Eq(None),
+                                                        lhs: tmp_n.clone(),
+                                                        rhs: e2.clone(),
+                                                    }),
+                                                )),
+                                            );
+                                            body_stmts.push(new_n);
+                                        }
+                                        let assign_stmt = new(
+                                            p1,
                                             S_::mk_expr(Expr::new(
                                                 (),
-                                                p2.clone(),
+                                                p2,
                                                 Expr_::mk_binop(Binop {
-                                                    bop: Eq(None),
-                                                    lhs: tmp_n.clone(),
-                                                    rhs: e2.clone(),
+                                                    bop: Eq(op),
+                                                    lhs: e1,
+                                                    rhs: tmp_n,
                                                 }),
                                             )),
                                         );
-                                        body_stmts.push(new_n);
-                                    }
-                                    let assign_stmt = new(
-                                        p1,
-                                        S_::mk_expr(Expr::new(
-                                            (),
-                                            p2,
-                                            Expr_::mk_binop(Binop {
-                                                bop: Eq(op),
-                                                lhs: e1,
-                                                rhs: tmp_n,
-                                            }),
-                                        )),
-                                    );
-                                    assign_stmts.push(assign_stmt);
-                                } else {
-                                    raise_parsing_error_pos(
+                                        assign_stmts.push(assign_stmt);
+                                    } else {
+                                        raise_parsing_error_pos(
                                         &stmt_pos,
                                         env,
                                         &syntax_error::statement_without_await_in_concurrent_block,
                                     );
-                                    assign_stmts.push(Stmt(
-                                        p1,
-                                        S_::Expr(Box::new(Expr(
-                                            (),
-                                            p2,
-                                            Expr_::Binop(Box::new(Binop {
-                                                bop: Eq(op),
-                                                lhs: e1,
-                                                rhs: e2,
-                                            })),
-                                        ))),
-                                    ))
+                                        assign_stmts.push(Stmt(
+                                            p1,
+                                            S_::Expr(Box::new(Expr(
+                                                (),
+                                                p2,
+                                                Expr_::Binop(Box::new(Binop {
+                                                    bop: Eq(op),
+                                                    lhs: e1,
+                                                    rhs: e2,
+                                                })),
+                                            ))),
+                                        ))
+                                    }
                                 }
                             }
                         }
-                    }
-                    Stmt(p1, S_::DeclareLocal(box (id, hint, Some(e2)))) => {
-                        if let Some(tv) = tmp_vars.next() {
-                            let tmp_n = Expr::mk_lvar(&e2.1, &(tv.1));
-                            if tmp_n.lvar_name() != e2.lvar_name() {
-                                let new_n = new(
-                                    p1.clone(),
-                                    S_::mk_expr(Expr::new(
-                                        (),
+                        Stmt(p1, S_::DeclareLocal(box (id, hint, Some(e2)))) => {
+                            if let Some(tv) = tmp_vars.next() {
+                                let tmp_n = Expr::mk_lvar(&e2.1, &(tv.1));
+                                if tmp_n.lvar_name() != e2.lvar_name() {
+                                    let new_n = new(
                                         p1.clone(),
-                                        Expr_::mk_binop(Binop {
-                                            bop: Eq(None),
-                                            lhs: tmp_n.clone(),
-                                            rhs: e2.clone(),
-                                        }),
-                                    )),
+                                        S_::mk_expr(Expr::new(
+                                            (),
+                                            p1.clone(),
+                                            Expr_::mk_binop(Binop {
+                                                bop: Eq(None),
+                                                lhs: tmp_n.clone(),
+                                                rhs: e2.clone(),
+                                            }),
+                                        )),
+                                    );
+                                    body_stmts.push(new_n);
+                                }
+                                let assign_stmt =
+                                    Stmt(p1, S_::DeclareLocal(Box::new((id, hint, Some(tmp_n)))));
+                                assign_stmts.push(assign_stmt);
+                            } else {
+                                raise_parsing_error_pos(
+                                    &stmt_pos,
+                                    env,
+                                    &syntax_error::statement_without_await_in_concurrent_block,
                                 );
-                                body_stmts.push(new_n);
+                                assign_stmts.push(Stmt(
+                                    p1,
+                                    S_::DeclareLocal(Box::new((id, hint, Some(e2)))),
+                                ))
                             }
-                            let assign_stmt =
-                                Stmt(p1, S_::DeclareLocal(Box::new((id, hint, Some(tmp_n)))));
-                            assign_stmts.push(assign_stmt);
-                        } else {
-                            raise_parsing_error_pos(
-                                &stmt_pos,
-                                env,
-                                &syntax_error::statement_without_await_in_concurrent_block,
-                            );
-                            assign_stmts
-                                .push(Stmt(p1, S_::DeclareLocal(Box::new((id, hint, Some(e2))))))
                         }
+                        Stmt(p1, S_::DeclareLocal(box (id, hint, None))) => {
+                            let assign_stmt =
+                                Stmt(p1, S_::DeclareLocal(Box::new((id, hint, None))));
+                            assign_stmts.push(assign_stmt);
+                        }
+                        _ => raise_missing_syntax("assignment statement", &c.keyword, env),
                     }
-                    Stmt(p1, S_::DeclareLocal(box (id, hint, None))) => {
-                        let assign_stmt = Stmt(p1, S_::DeclareLocal(Box::new((id, hint, None))));
-                        assign_stmts.push(assign_stmt);
-                    }
-                    _ => raise_missing_syntax("assignment statement", &c.keyword, env),
                 }
+                body_stmts.append(&mut assign_stmts);
+                new(stmt_pos, S_::mk_block(None, ast::Block(body_stmts)))
             }
-            body_stmts.append(&mut assign_stmts);
-            new(stmt_pos, S_::mk_block(None, ast::Block(body_stmts)))
-        }
-        _ => missing_syntax("block in concurrent", &c.keyword, env)?,
-    };
-    let awaitall_stmt = new(
-        keyword_pos.clone(),
-        S_::mk_awaitall(lifted_awaits, ast::Block(vec![stmt])),
-    );
-    Ok(new(
-        keyword_pos,
-        S_::mk_block(Some(scope), aast::Block(vec![awaitall_stmt])),
-    ))
+            _ => missing_syntax("block in concurrent", &c.keyword, env)?,
+        };
+        let awaitall_stmt = new(
+            keyword_pos.clone(),
+            S_::mk_awaitall(lifted_awaits, ast::Block(vec![stmt])),
+        );
+        Ok(new(
+            keyword_pos,
+            S_::mk_block(Some(scope), aast::Block(vec![awaitall_stmt])),
+        ))
+    } else {
+        Ok(new(
+            pos,
+            S_::mk_concurrent(p_block(true, &c.statement, env)?),
+        ))
+    }
 }
 
 fn p_unset_stmt<'a>(

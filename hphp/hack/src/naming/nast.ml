@@ -446,6 +446,8 @@ module Visitor_DEPRECATED = struct
 
       method on_awaitall : 'a -> (id * expr) list -> block -> 'a
 
+      method on_concurrent : 'a -> block -> 'a
+
       method on_stmt : 'a -> stmt -> 'a
 
       method on_stmt_ : 'a -> (unit, unit) stmt_ -> 'a
@@ -657,6 +659,8 @@ module Visitor_DEPRECATED = struct
         let acc = this#on_block acc b in
         acc
 
+      method on_concurrent acc b = this#on_block acc b
+
       method on_if acc e b1 b2 =
         let acc = this#on_expr acc e in
         let acc = this#on_block acc b1 in
@@ -786,6 +790,7 @@ module Visitor_DEPRECATED = struct
         | Noop -> this#on_noop acc
         | Fallthrough -> this#on_fallthrough acc
         | Awaitall (el, b) -> this#on_awaitall acc el b
+        | Concurrent b -> this#on_concurrent acc b
         | Declare_local (id, t, e) -> this#on_declare_local acc id t e
         | Block (Some lids, b) ->
           let acc = List.fold_left lids ~init:acc ~f:this#on_lvar in

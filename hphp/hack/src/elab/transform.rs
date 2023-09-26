@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<792c74b8f3cef5d315ed84c1ef179b2e>>
+// @generated SignedSource<<22dca923316e1bd97de79873f674fc04>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -231,6 +231,7 @@ impl Transform for Stmt_ {
             Stmt_::Return(ref mut __binding_0) => __binding_0.transform(env, pass),
             Stmt_::YieldBreak => {}
             Stmt_::Awaitall(ref mut __binding_0) => __binding_0.transform(env, pass),
+            Stmt_::Concurrent(ref mut __binding_0) => __binding_0.transform(env, pass),
             Stmt_::If(ref mut __binding_0) => __binding_0.transform(env, pass),
             Stmt_::Do(ref mut __binding_0) => __binding_0.transform(env, pass),
             Stmt_::While(ref mut __binding_0) => __binding_0.transform(env, pass),

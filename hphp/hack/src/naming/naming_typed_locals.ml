@@ -197,6 +197,7 @@ let rec check_stmt on_expr env (id_pos, stmt_) =
     List.iter ~f:(fun (_, e) -> on_expr env e) inits;
     check_block env block
   | Block (_, block) -> check_block env block
+  | Concurrent block -> check_block env block
   | Return (Some expr)
   | Throw expr ->
     on_expr env expr;

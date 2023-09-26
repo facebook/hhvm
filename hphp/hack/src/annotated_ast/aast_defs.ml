@@ -151,6 +151,15 @@ and ('ex, 'en) stmt_ =
        *       $bar = await g();
        *       await h();
        *     } *)
+  | Concurrent of ('ex, 'en) block
+      (** Concurrent block. All the await expressions are awaited at the
+       * same time, similar to genva().
+       *
+       *     concurrent {
+       *       $foo = await f();
+       *       $bar = await g();
+       *       await h();
+       *     } *)
   | If of ('ex, 'en) expr * ('ex, 'en) block * ('ex, 'en) block
       (** If statement.
        *

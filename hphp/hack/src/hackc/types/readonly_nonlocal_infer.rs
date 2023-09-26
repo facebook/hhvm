@@ -607,6 +607,10 @@ impl<'decl> Infer<'decl> {
                 let await_all = Awaitall(Box::new((assigns, block)));
                 (await_all, ctx)
             }
+            // The lowerer converts concurrent statements to Awaitall when hackc
+            // is going to generate bytecode (instead of type checking/TAST
+            // generating)
+            Concurrent(_) => panic!("Concurrent statement in readonly_nonlocal_infer"),
             If(box (expr, stmts1, stmts2)) => {
                 let (e, _e_ty, ctx) = self.infer_expr(expr, ctx, next_where);
                 let (stmts1, child_ctx_1) = self.infer_stmts_block(stmts1, ctx.clone(), next_where);

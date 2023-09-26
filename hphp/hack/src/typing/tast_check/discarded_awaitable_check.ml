@@ -122,6 +122,7 @@ let visitor =
 
     method! on_expr (env, ctx) ((ty, p, e) as te) =
       match e with
+      | Await e -> this#on_expr (env, allow_awaitable) e
       | Unop (Ast_defs.Unot, e)
       | Binop { bop = Ast_defs.Eqeqeq; lhs = e; rhs = (_, _, Null) }
       | Binop { bop = Ast_defs.Eqeqeq; lhs = (_, _, Null); rhs = e }

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5c33c0eb722888e69313857583a47877>>
+// @generated SignedSource<<720516b1b79a37a8cd9c7a4e573bf78a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -159,6 +159,15 @@ pub enum Stmt_<Ex, En> {
     ///     }
     #[rust_to_ocaml(inline_tuple)]
     Awaitall(Box<(Vec<(Lid, Expr<Ex, En>)>, Block<Ex, En>)>),
+    /// Concurrent block. All the await expressions are awaited at the
+    /// same time, similar to genva().
+    ///
+    ///     concurrent {
+    ///       $foo = await f();
+    ///       $bar = await g();
+    ///       await h();
+    ///     }
+    Concurrent(Block<Ex, En>),
     /// If statement.
     ///
     ///     if ($foo) { ... } else { ... }

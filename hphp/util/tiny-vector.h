@@ -167,12 +167,18 @@ struct TinyVector {
     for (auto const& elem : il) push_back(elem);
   }
 
-  size_t size() const { return m_impl.m_data.size(); }
+  size_t size() const {
+    if (auto const p = m_impl.m_data.ptr()) {
+      assertx(!m_impl.m_data.size());
+      return p->size;
+    }
+    return m_impl.m_data.size();
+  }
   bool empty() const { return !size(); }
 
   void swap(TinyVector& o) noexcept {
-    auto const size1 = m_impl.m_data.size();
-    auto const size2 = o.m_impl.m_data.size();
+    auto const size1 = size();
+    auto const size2 = o.size();
     auto const internal1 = std::min<size_t>(size1, InternalSize);
     auto const internal2 = std::min<size_t>(size2, InternalSize);
 
@@ -186,7 +192,7 @@ struct TinyVector {
     // Move data out of the vector with more initialized inline data into the
     // one with less. Then destroy the moved from data.
     if (internal1 > internal2) {
-      uninitialized_move_n(
+      std::uninitialized_move_n(
         location(internal2),
         internal1 - internal2,
         o.location(internal2)
@@ -195,7 +201,7 @@ struct TinyVector {
         for (size_t i = internal2; i < internal1; ++i) location(i)->~T();
       }
     } else {
-      uninitialized_move_n(
+      std::uninitialized_move_n(
         o.location(internal1),
         internal2 - internal1,
         location(internal1)
@@ -217,7 +223,7 @@ struct TinyVector {
   const_iterator end()   const { return const_iterator(this); }
 
   T& operator[](size_t index) {
-    assert(index < size());
+    assertx(index < size());
     return *location(index);
   }
 
@@ -231,11 +237,11 @@ struct TinyVector {
       for (size_t i = 0; i < current; ++i) location(i)->~T();
     }
 
-    if (HeapData* p = m_impl.m_data.ptr()) {
+    if (auto p = m_impl.m_data.ptr()) {
       alloc_traits<Impl>::deallocate(m_impl, reinterpret_cast<AllocPtr>(p),
                                      allocSize(p->capacity));
     }
-    m_impl.m_data.set(0, 0);
+    m_impl.m_data.set(0, nullptr);
   }
 
   template <typename U>
@@ -244,7 +250,7 @@ struct TinyVector {
     reserve(current + 1);
     auto ptr = location(current);
     ::new (ptr) T(u);
-    m_impl.m_data.set(current + 1, m_impl.m_data.ptr());
+    setSize(current + 1);
     return *ptr;
   }
 
@@ -254,7 +260,7 @@ struct TinyVector {
     reserve(current + 1);
     auto ptr = location(current);
     ::new (ptr) T(std::move(u));
-    m_impl.m_data.set(current + 1, m_impl.m_data.ptr());
+    setSize(current + 1);
     return *ptr;
   }
 
@@ -264,7 +270,7 @@ struct TinyVector {
     reserve(current + 1);
     auto ptr = location(current);
     ::new (ptr) T(std::forward<Args>(args)...);
-    m_impl.m_data.set(current + 1, m_impl.m_data.ptr());
+    setSize(current + 1);
     return *ptr;
   }
 
@@ -274,28 +280,28 @@ struct TinyVector {
   }
 
   void pop_back() {
-    assert(!empty());
+    assertx(!empty());
     location(size() - 1)->~T();
-    m_impl.m_data.set(size() - 1, m_impl.m_data.ptr());
+    setSize(size() - 1);
   }
 
   T& back() {
-    assert(!empty());
+    assertx(!empty());
     return (*this)[size() - 1];
   }
 
   const T& back() const {
-    assert(!empty());
+    assertx(!empty());
     return (*this)[size() - 1];
   }
 
   T& front() {
-    assert(!empty());
+    assertx(!empty());
     return (*this)[0];
   }
 
   const T& front() const {
-    assert(!empty());
+    assertx(!empty());
     return (*this)[0];
   }
 
@@ -305,14 +311,12 @@ struct TinyVector {
   }
 
   void reserve(size_t sz) {
-    if (sz < InternalSize) return;
+    if (sz <= InternalSize) return;
 
     const size_t currentHeap =
       m_impl.m_data.ptr() ? m_impl.m_data.ptr()->capacity : 0;
     const size_t neededHeap = sz - InternalSize;
-    if (neededHeap <= currentHeap) {
-      return;
-    }
+    if (neededHeap <= currentHeap) return;
 
     const size_t newCapacity = std::max(
       currentHeap ? currentHeap * 4 / 3
@@ -322,10 +326,12 @@ struct TinyVector {
     auto newHeap = reinterpret_cast<HeapData*>(AT::allocate(m_impl, requested));
     const size_t usableSize = AT::usable_size(m_impl, newHeap, requested);
     newHeap->capacity = (usableSize - offsetof(HeapData, vals)) / sizeof(T);
+    newHeap->size = size();
 
     if (auto p = m_impl.m_data.ptr()) {
-      auto const current = size();
-      uninitialized_move_n(
+      assertx(!m_impl.m_data.size());
+      auto const current = newHeap->size;
+      std::uninitialized_move_n(
         &m_impl.m_data.ptr()->vals[0],
         current - InternalSize,
         &newHeap->vals[0]
@@ -339,7 +345,7 @@ struct TinyVector {
         allocSize(p->capacity)
       );
     }
-    m_impl.m_data.set(size(), newHeap);
+    m_impl.m_data.set(0, newHeap);
   }
 
   template<size_t isize, size_t minheap, typename origalloc>
@@ -371,6 +377,7 @@ struct TinyVector {
 
 private:
   struct HeapData {
+    uint32_t size; // complete size, including InternalSize
     uint32_t capacity; // numbers of vals---excludes this capacity field
     T vals[0];
   };
@@ -379,40 +386,36 @@ private:
     return sizeof(HeapData) + sizeof(T) * capacity;
   }
 
+  void setSize(size_t s) {
+    if (auto p = m_impl.m_data.ptr()) {
+      assertx(!m_impl.m_data.size());
+      assertx(s <= p->capacity + InternalSize);
+      p->size = s;
+    } else {
+      assertx(s <= InternalSize);
+      m_impl.m_data.set(s, m_impl.m_data.ptr());
+    }
+  }
+
   T* location(size_t index) {
     return (index < InternalSize)
       ? folly::launder(reinterpret_cast<T*>(&m_impl.m_vals[index]))
       : &m_impl.m_data.ptr()->vals[index - InternalSize];
   }
 
-  // Replace with std::uninitialized_move_n in c++17
-  template<typename InputIt, typename ForwardIt>
-  static void uninitialized_move_n(InputIt first,
-                                   size_t count,
-                                   ForwardIt d_first) {
-    using Value = typename std::iterator_traits<ForwardIt>::value_type;
-    auto current = d_first;
-    try {
-      for (; count > 0; ++first, ++current, --count) {
-        ::new (static_cast<void*>(std::addressof(*current)))
-          Value(std::move(*first));
-      }
-    } catch (...) {
-      for (; d_first != current; ++d_first) {
-        d_first->~Value();
-      }
-      throw;
-    }
-  }
-
   using RawBuffer = typename std::aligned_storage<sizeof(T), alignof(T)>::type;
   using InternalStorage = RawBuffer[InternalSize];
 
   struct Impl : Allocator {
+    // If m_data.ptr() is null, the size of m_data.size(). Otherwise
+    // the size is stored within HeapData.
     CompactSizedPtr<HeapData> m_data;
     InternalStorage m_vals;
   };
   Impl m_impl;
+
+  static_assert(InternalSize <= CompactSizedPtr<HeapData>::kMaxSize,
+                "TinyVector does not support such a large internal size");
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -458,7 +461,7 @@ private:
   }
 
   bool equal(const iterator& o) const {
-    assert(m_p == o.m_p);
+    assertx(m_p == o.m_p);
     return m_idx == o.m_idx;
   }
 
@@ -512,7 +515,7 @@ private:
   }
 
   bool equal(const const_iterator& o) const {
-    assert(m_p == o.m_p);
+    assertx(m_p == o.m_p);
     return m_idx == o.m_idx;
   }
 

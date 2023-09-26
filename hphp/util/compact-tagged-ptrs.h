@@ -107,7 +107,12 @@ private:
  */
 template<class T>
 struct CompactSizedPtr {
-  void set(uint32_t size, T* ptr) { m_data.set(size, ptr); }
+  static constexpr size_t kMaxSize = std::numeric_limits<uint16_t>::max();
+
+  void set(uint32_t size, T* ptr) {
+    assertx(size <= kMaxSize);
+    m_data.set(size, ptr);
+  }
 
   uint32_t size() const { return m_data.tag(); }
   const T* ptr()  const { return m_data.ptr(); }
@@ -118,7 +123,7 @@ struct CompactSizedPtr {
   }
 
 private:
-  CompactTaggedPtr<T> m_data;
+  CompactTaggedPtr<T, uint16_t> m_data;
 };
 
 //////////////////////////////////////////////////////////////////////

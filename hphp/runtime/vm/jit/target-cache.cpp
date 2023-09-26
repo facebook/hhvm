@@ -297,7 +297,7 @@ handleStaticCall(const Class* cls, const StringData* name,
       }
       // Call to systemlib functions will never violate deployment boundary.
       if (!func->unit()->isSystemLib()) {
-        auto const packageInfo = g_context->getPackageInfo();
+        auto const& packageInfo = g_context->getPackageInfo();
         if (RO::EvalEnforceDeployment &&
             packageInfo.outsideActiveDeployment(*func)) {
           // If we raised an exception, do not cache/smash the func.

@@ -345,7 +345,7 @@ SSATmp* simplifyCallViolatesModuleBoundary(State& env,
 
 SSATmp* simplifyCallViolatesDeploymentBoundary(State& env,
                                                const IRInstruction* inst) {
-  auto const packageInfo = env.unit.packageInfo();
+  auto const& packageInfo = env.unit.packageInfo();
   if (inst->src(0)->hasConstVal(TFunc)) {
     auto const symbol = inst->src(0)->funcVal();
     return cns(env,

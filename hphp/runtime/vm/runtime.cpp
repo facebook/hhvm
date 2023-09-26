@@ -512,7 +512,7 @@ void raiseModuleBoundaryViolation(const Class* cls,
 
 void raiseDeploymentBoundaryViolation(const Func* callee) {
   if (!RO::EvalEnforceDeployment) return;
-  auto const packageInfo = g_context->getPackageInfo();
+  auto const& packageInfo = g_context->getPackageInfo();
   assertx(callee && !callee->isMethod());
   auto const soft = packageInfo.moduleInASoftPackage(callee->moduleName());
   auto const calleeName = folly::sformat("function {}", callee->name());
@@ -528,7 +528,7 @@ void raiseDeploymentBoundaryViolation(const Func* callee) {
 
 void raiseDeploymentBoundaryViolation(const Class* cls) {
   if (!RO::EvalEnforceDeployment) return;
-  auto const packageInfo = g_context->getPackageInfo();
+  auto const& packageInfo = g_context->getPackageInfo();
   auto const soft = packageInfo.moduleInASoftPackage(cls->moduleName());
   auto const symbolType =
     isEnum(cls) ? "enum" : (isEnumClass(cls) ? "enum class" : "class");

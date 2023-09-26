@@ -57,40 +57,41 @@ module Value = struct
 
   type value = t
 
-  (* design choice: could check for cases of type null rather than the null
-     literal expression. Ultimately we think case branches should only allow
-     literals or class constants, and so disregard non-literal expressions *)
+  (* design choice: case expressions should only allow literals or class
+     constants, and so disregard non-literal expressions *)
   let and_literal_of_ast_case env ((ty, _, expr) : ast_case) :
-      t * literal option =
+      t list * literal option =
     let open EnumErr.Const in
     match expr with
-    | Null -> (Null, Some Null)
-    | True -> (Bool true, Some (Bool true))
-    | False -> (Bool false, Some (Bool false))
+    | Null -> ([Null], Some Null)
+    | True -> ([Bool true], Some (Bool true))
+    | False -> ([Bool false], Some (Bool false))
     | Int literal ->
       (* we rely on the fact that there are no underscores in the string literal,
          so that "1_0_0", "100" and "10_0" are considered the same *)
       assert (not @@ String.contains literal '_');
-      (Int, Some (Int (Some literal)))
-    | String literal -> (String, Some (String (Some literal)))
+      ([Int], Some (Int (Some literal)))
+    | String literal -> ([String], Some (String (Some literal)))
     | Class_const ((_, _, CI (_, class_)), (_, const)) ->
       let is_sub env ty mk_ty =
         Typing_subtype.is_sub_type env ty (mk_ty Reason.Rnone)
       in
 
-      let value : value =
+      let values : value list =
         (* necessary to check this to partition class constants correctly
            according to type *)
         if is_sub env ty Typing_make_type.int then
-          Int
+          [Int]
         else if is_sub env ty Typing_make_type.string then
-          String
+          [String]
+        else if is_sub env ty Typing_make_type.arraykey then
+          [Int; String]
         else
-          Other
+          [Other]
       in
 
-      (value, Some (Label { class_; const }))
-    | _ -> (Other, None)
+      (values, Some (Label { class_; const }))
+    | _ -> ([Other], None)
 end
 
 module ValueSet = struct
@@ -143,10 +144,12 @@ let rec symbolic_dnf_values env ty : ValueSet.t =
   | Tnonnull -> ValueSet.(symbolic_diff universe (singleton Value.Null))
   | Toption ty -> begin
     match Typing_defs.get_node ty with
-    (* this won't work when dealing with types that are semantically the same as
+    (* This won't work when dealing with types that are semantically the same as
        nonnull, but are syntactically different. For instance if a generic or type
        constant ends up with a equality bound of nonnull (can happen via use of
-       where constraints). *)
+       where constraints). This can be generalised by checking subtyping both ways
+       (ty <: nonnull && nonnull <: ty) but for now it's not clear if it affects
+       expressivity in a tangible way. *)
     | Tnonnull -> ValueSet.universe
     | _ -> ValueSet.(add (symbolic_dnf_values env ty) Value.Null)
   end
@@ -193,14 +196,15 @@ let partition_cases env (cases : (ast_case * _) list) values =
 
   let unused_cases =
     List.fold_left cases ~init:[] ~f:(fun unused (((ty, pos, _) as case), _) ->
-        let (key, lit) = Value.and_literal_of_ast_case env case in
+        let (keys, lit) = Value.and_literal_of_ast_case env case in
         match lit with
         | None -> (ty, pos, None) :: unused
         | Some lit ->
-          if key_present_data_consed partitions ~key ~data:(pos, lit) then
-            unused
-          else
-            (ty, pos, Some lit) :: unused)
+          List.fold_left keys ~init:unused ~f:(fun unused key ->
+              if key_present_data_consed partitions ~key ~data:(pos, lit) then
+                unused
+              else
+                (ty, pos, Some lit) :: unused))
   in
   (partitions, unused_cases)
 

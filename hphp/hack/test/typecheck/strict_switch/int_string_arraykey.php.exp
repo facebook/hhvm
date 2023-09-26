@@ -1,1 +1,20 @@
-No errors
+File "int_string_arraykey.php", line 56, characters 11-12:
+`switch` statement nonexhaustive; at least the following cases are missing: `default` (Typing[4019])
+  File "int_string_arraykey.php", line 56, characters 11-12:
+  only unions and intersections of bool, null and enums can be switched on without a default
+File "int_string_arraykey.php", line 103, characters 10-12:
+Redundant `case` statement (Typing[4021])
+  File "int_string_arraykey.php", line 99, characters 10-12:
+  `0` already handled here
+File "int_string_arraykey.php", line 105, characters 10-10:
+Redundant `case` statement (Typing[4021])
+  File "int_string_arraykey.php", line 101, characters 10-10:
+  `0` already handled here
+File "int_string_arraykey.php", line 115, characters 10-13:
+Switching on `arraykey` but using constant from `bool` (Typing[4023])
+  File "int_string_arraykey.php", line 113, characters 31-38:
+  expecting `arraykey` based on this
+File "int_string_arraykey.php", line 117, characters 10-13:
+Switching on `arraykey` but using constant from `null` (Typing[4023])
+  File "int_string_arraykey.php", line 113, characters 31-38:
+  expecting `arraykey` based on this

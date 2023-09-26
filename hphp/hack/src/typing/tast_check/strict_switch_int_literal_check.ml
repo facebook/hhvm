@@ -10,7 +10,8 @@ open Aast
 
 (* Checks that all integer literals are in the same format (hex, bin, oct, dec).
    Relied upon by `Strict_switch_check.ml` because otherwise int literals could
-   represent the same value (e.g. "0b10" and "2") but not be caught as redundant. *)
+   represent the same value (e.g. "0b10" and "2") but not be caught as redundant.
+   Ideally we simply store Int64 values in the AST to avoid this: T163916090 *)
 let check_int_literal_format_same
     env (cases : ((Tast.ty, Tast.saved_env) Aast.expr * _) list) =
   let f case acc =

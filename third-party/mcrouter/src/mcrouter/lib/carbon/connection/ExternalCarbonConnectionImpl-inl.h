@@ -248,6 +248,10 @@ class Impl {
       facebook::memcache::ConnectionOptions connectionOptions,
       ExternalCarbonConnectionImplOptions options) {
     auto pool = detail::ThreadPool::getInstance();
+    if (!pool) {
+      throw CarbonConnectionException(
+          "Failed to init Impl due to Singleton<ThreadPool> was destroyed!");
+    }
 
     auto info = pool->createClient<Transport>(connectionOptions, options);
     client_ = info.first;

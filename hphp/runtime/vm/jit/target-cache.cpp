@@ -298,13 +298,10 @@ handleStaticCall(const Class* cls, const StringData* name,
         // If we raised a warning, do not cache/smash the func
         return func;
       }
-      // Call to systemlib functions will never violate deployment boundary.
-      if (!func->unit()->isSystemLib()) {
-        if (RO::EvalEnforceDeployment &&
-            packageInfo.outsideActiveDeployment(*func)) {
-          // If we raised an exception, do not cache/smash the func.
-          return func;
-        }
+      if (RO::EvalEnforceDeployment &&
+          packageInfo.outsideActiveDeployment(*func)) {
+        // If we raised an exception, do not cache/smash the func.
+        return func;
       }
       mce = Entry { cls, func };
       rds::initHandle(mceHandle);

@@ -17,11 +17,6 @@ module SN = Naming_special_names
 module MakeType = Typing_make_type
 module Reason = Typing_reason
 
-type kind =
-  | Enum
-  | EnumClass
-  | EnumClassLabel
-
 (* This is used for a heuristic to handle a common case in enum refinements.
    So, it identifies the common enum bounds, namely, arraykey, string, and int.
 
@@ -53,9 +48,9 @@ let is_like_enum env ty =
 let get_constant env tc kind (seen, has_default) case =
   let (kind, is_enum_class_label) =
     match kind with
-    | Enum -> ("enum ", false)
-    | EnumClass -> ("enum class ", false)
-    | EnumClassLabel -> ("enum class ", true)
+    | If_enum_or_enum_class.Enum -> ("enum ", false)
+    | If_enum_or_enum_class.EnumClass -> ("enum class ", false)
+    | If_enum_or_enum_class.EnumClassLabel -> ("enum class ", true)
   in
   let check_case pos cls const =
     (* wish:T109260699 *)
@@ -108,9 +103,9 @@ let check_enum_exhaustiveness
     env pos tc kind (caselist, dfl) coming_from_unresolved =
   let str_kind =
     match kind with
-    | Enum -> "Enum"
-    | EnumClass
-    | EnumClassLabel ->
+    | If_enum_or_enum_class.Enum -> "Enum"
+    | If_enum_or_enum_class.EnumClass
+    | If_enum_or_enum_class.EnumClassLabel ->
       "Enum class"
   in
   (* If this check comes from an enum inside a Tunion, then
@@ -182,25 +177,6 @@ let check_enum_exhaustiveness
 (* Wrapper to share the logic that detects if a type is an enum or an enum
  * class, or something else.
  *)
-let apply_if_enum_or_enum_class
-    env ~(default : 'a) ~(f : kind -> Env.env -> string -> 'a) name args =
-  let check_ec kind = function
-    | [enum; _interface] -> begin
-      match get_node enum with
-      | Tclass ((_, cid), _, _) when Env.is_enum_class env cid -> f kind env cid
-      | _ -> default
-    end
-    | _ -> default
-  in
-  if Env.is_enum env name then
-    f Enum env name
-  else if String.equal name SN.Classes.cMemberOf then
-    check_ec EnumClass args
-  else if String.equal name SN.Classes.cEnumClassLabel then
-    check_ec EnumClassLabel args
-  else
-    default
-
 let rec check_exhaustiveness_
     env pos ty caselist enum_coming_from_unresolved ~outcomes =
   (* Right now we only do exhaustiveness checking for enums. *)
@@ -240,7 +216,7 @@ let rec check_exhaustiveness_
                 let (_, cur_ty) = Env.expand_type env cur_ty in
                 match get_node cur_ty with
                 | Tnewtype (name, args, _) ->
-                  apply_if_enum_or_enum_class
+                  If_enum_or_enum_class.apply
                     env
                     ~default:false
                     ~f:(fun _ _ _ -> true)
@@ -283,7 +259,7 @@ let rec check_exhaustiveness_
                ~outcomes,
              () ))
   | Tnewtype (name, args, _) ->
-    apply_if_enum_or_enum_class
+    If_enum_or_enum_class.apply
       env
       ~default:(outcomes, env)
       ~f:(check ~outcomes)

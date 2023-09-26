@@ -95,6 +95,7 @@ class BitSet {
   explicit BitSet(T value) : int_(value) {}
 
   BitSet(const BitSet&) = default;
+  BitSet& operator=(const BitSet& other) = default;
 
   class reference {
    public:

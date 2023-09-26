@@ -238,6 +238,13 @@ void JobBase::serialize(const T& v, ISink& sink) {
 
 //////////////////////////////////////////////////////////////////////
 
+inline
+RefId::RefId(const std::array<uint8_t, RefId::kDigestLen>& digest, size_t size)
+  : m_id{(const char*)digest.data(), digest.size()}
+  , m_size{size}
+  , m_extra{RefId::kDigestSentinel}
+{}
+
 inline RefId::RefId(std::string id, size_t size, size_t extra)
   : m_id{std::move(id)}, m_size{size}, m_extra{extra}
 {}
@@ -272,10 +279,13 @@ inline std::string RefId::toString() const {
   // Don't print out the extra field if it's zero, to avoid clutter
   // for implementations which don't use it. The id might contain
   // binary data, so escape it before printing.
-  if (m_extra) {
-    return folly::sformat("{}:{}:{}", folly::humanify(m_id), m_extra, m_size);
-  } else {
+  switch (m_extra) {
+  case kDigestSentinel:
+    return folly::sformat("{}:{}", folly::hexlify(m_id), m_size);
+  case 0:
     return folly::sformat("{}:{}", folly::humanify(m_id), m_size);
+  default:
+    return folly::sformat("{}:{}:{}", folly::humanify(m_id), m_extra, m_size);
   }
 }
 

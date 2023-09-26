@@ -214,6 +214,9 @@ struct Multi {
 // Identifier for a Ref. Used by the implementation to track them. The
 // meaning of the identifier is private to the implementation.
 struct RefId {
+  static constexpr size_t kDigestLen = 32;
+  static constexpr size_t kDigestSentinel = ~size_t(0);
+  RefId(const std::array<uint8_t, kDigestLen>&, size_t);
   RefId(std::string, size_t, size_t extra = 0);
 
   std::string toString() const;

@@ -29,6 +29,7 @@
 #include "watchman/PDU.h"
 #include "watchman/PerfSample.h"
 #include "watchman/ProcessLock.h"
+#include "watchman/ProcessUtil.h"
 #include "watchman/ThreadPool.h"
 #include "watchman/UserDir.h"
 #include "watchman/WatchmanConfig.h"
@@ -107,7 +108,27 @@ void detect_low_process_priority() {
 #endif
 }
 
-[[noreturn]] static void run_service(ProcessLock::Handle&&) {
+/*
+ * Detect the command that starts watchman
+ */
+std::optional<std::string> detect_starting_command(pid_t ppid) {
+#ifndef _WIN32
+  try {
+    auto processInfo = lookupProcessInfo(ppid).get();
+    return processInfo.name;
+  } catch (const std::exception& e) {
+    logf(
+        ERR,
+        "Failed to lookup process info for pid {} exception {} \n",
+        ppid,
+        e.what());
+  }
+
+#endif
+  return std::nullopt;
+}
+
+[[noreturn]] static void run_service(ProcessLock::Handle&&, pid_t ppid) {
 #ifndef _WIN32
   // Before we redirect stdin/stdout to the log files, move any inetd-provided
   // socket to a different descriptor number.
@@ -149,16 +170,18 @@ void detect_low_process_priority() {
     char hostname[256];
     gethostname(hostname, sizeof(hostname));
     hostname[sizeof(hostname) - 1] = '\0';
+    auto startingCommandName = detect_starting_command(ppid);
     logf(
         ERR,
-        "Watchman {} {} starting up on {}\n",
+        "Watchman {} {} starting up on {} by command {}\n",
         PACKAGE_VERSION,
 #ifdef WATCHMAN_BUILD_INFO
         WATCHMAN_BUILD_INFO,
 #else
         "<no build info set>",
 #endif
-        hostname);
+        hostname,
+        startingCommandName.value_or("<unknown_command>"));
   }
 
 #ifndef _WIN32
@@ -247,7 +270,7 @@ static void close_random_fds() {
 
   auto& pid_file = get_pid_file();
   auto processLock = ProcessLock::acquire(pid_file);
-  run_service(processLock.writePid(pid_file));
+  run_service(processLock.writePid(pid_file), getppid());
 }
 
 namespace {
@@ -296,6 +319,7 @@ static SpawnResult run_service_as_daemon() {
   }
 
   auto& processLock = std::get<ProcessLock>(acquireResult);
+  auto parentPid = getppid();
 
   // the double-fork-and-setsid trick establishes a
   // child process that runs in its own process group
@@ -319,7 +343,7 @@ static SpawnResult run_service_as_daemon() {
 
   // We are the child. Let's populate the pid file and start listening on the
   // socket.
-  run_service(processLock.writePid(get_pid_file()));
+  run_service(processLock.writePid(get_pid_file()), parentPid);
 }
 #endif
 

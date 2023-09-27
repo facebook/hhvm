@@ -468,17 +468,9 @@ let load ~silent options : t * ServerLocalConfig.t =
   in
   let global_opts =
     let tco_custom_error_config = CustomErrorConfig.load_and_parse () in
-    let glean_reponame =
-      (* TODO(ljw): remove this after rollout complete; T158354704 *)
-      if local_config.glean_v2 then
-        Some "www.hack.light"
-      else
-        None
-    in
     let local_config_opts =
       GlobalOptions.set
         ?so_naming_sqlite_path:local_config.naming_sqlite_path
-        ?glean_reponame
         ?tco_log_large_fanouts_threshold:
           local_config.log_large_fanouts_threshold
         ~tco_remote_old_decls_no_limit:

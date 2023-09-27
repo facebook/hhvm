@@ -1039,39 +1039,49 @@ std::unique_ptr<t_program_bundle> parse_ast(
   include_handler on_include = [&](source_range range,
                                    const std::string& include_path,
                                    const t_program& parent) {
-    auto found_or_error = sm.find_include_file(
+    auto path_or_error = sm.find_include_file(
         include_path, parent.path(), params.incl_searchpath);
-    if (found_or_error.index() == 1) {
-      diags.error(range.begin, "{}", std::get<1>(found_or_error));
+    if (path_or_error.index() == 1) {
+      diags.error(range.begin, "{}", std::get<1>(path_or_error));
       if (!params.allow_missing_includes) {
         end_parsing();
       }
     }
 
     // Skip already parsed files.
-    if (auto program = programs->find_program(include_path)) {
+    t_program* program = programs->find_program(include_path);
+    const std::string* resolved_path = &include_path;
+    if (!program && path_or_error.index() == 0) {
+      program = programs->find_program(std::get<0>(path_or_error));
+      if (program) {
+        // We've already seen this program but know it by another path.
+        resolved_path = &std::get<0>(path_or_error);
+      }
+    }
+    if (program) {
       if (program == programs->get_root_program()) {
         // If we're including the root program we must have a dependency cycle.
-        assert(circular_deps.count(include_path));
+        assert(circular_deps.count(*resolved_path));
       } else {
         return program;
       }
     }
 
     // Fail on circular dependencies.
-    if (!circular_deps.insert(include_path).second) {
+    if (!circular_deps.insert(*resolved_path).second) {
       diags.error(
           range.begin,
           "Circular dependency found: file `{}` is already parsed.",
-          include_path);
+          *resolved_path);
       end_parsing();
     }
 
     // Create a new program for a Thrift file in an include statement and
     // set its include_prefix by parsing the directory which it is
     // included from.
-    auto included_program = std::make_unique<t_program>(include_path, &parent);
-    t_program* program = included_program.get();
+    auto included_program =
+        std::make_unique<t_program>(*resolved_path, &parent);
+    program = included_program.get();
     programs->add_program(std::move(included_program));
 
     try {
@@ -1083,7 +1093,7 @@ std::unique_ptr<t_program_bundle> parse_ast(
       }
     }
 
-    circular_deps.erase(include_path);
+    circular_deps.erase(*resolved_path);
     return program;
   };
 

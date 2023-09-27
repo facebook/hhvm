@@ -195,6 +195,17 @@ function check_nothing(): nothing {
   invariant(false, "bad");
 }
 
+// TEST-CHECK-BAL: define $root.check_noreturn
+// CHECK: define $root.check_noreturn($this: *void) : *noreturn {
+// CHECK: #b0:
+// CHECK:   n0 = $root.HH::invariant_violation(null, $builtins.hack_string("bad"))
+// CHECK:   n1 = $builtins.hhbc_fatal($builtins.hack_string("invariant_violation"))
+// CHECK:   unreachable
+// CHECK: }
+function check_noreturn(): noreturn {
+  invariant(false, "bad");
+}
+
 // TEST-CHECK-1: global global::_SERVER
 // CHECK: global global::_SERVER : *HackMixed
 

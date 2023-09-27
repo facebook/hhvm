@@ -461,7 +461,10 @@ impl LowerInstrs<'_> {
 
     fn verify_ret_type_c(&self, builder: &mut FuncBuilder<'_>, obj: ValueId, loc: LocId) -> Instr {
         let return_type = builder.func.return_type.enforced.clone();
-        let pred = builder.emit_is(obj, &return_type, loc);
+        let pred = match return_type.ty {
+            ir::BaseType::Noreturn => builder.emit_constant(Constant::Bool(false)),
+            _ => builder.emit_is(obj, &return_type, loc),
+        };
         builder.emit_hack_builtin(hack::Builtin::VerifyTypePred, &[obj, pred], loc);
         Instr::copy(obj)
     }

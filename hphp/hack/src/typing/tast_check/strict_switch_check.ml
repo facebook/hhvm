@@ -19,7 +19,7 @@ type case = Pos.t * literal
 
 module Value = struct
   type t =
-    | Other  (** requires default case *)
+    | Unsupported  (** requires default case *)
     | Null
     | Bool of bool
     | Int
@@ -28,10 +28,10 @@ module Value = struct
 
   let bools = [Bool true; Bool false]
 
-  let universe = Other :: Null :: Int :: String :: bools
+  let universe = Unsupported :: Null :: Int :: String :: bools
 
   let finite_or_dynamic = function
-    | Other
+    | Unsupported
     | Int
     | String ->
       false
@@ -40,7 +40,7 @@ module Value = struct
       true
 
   let to_json = function
-    | Other -> Hh_json.string_ "other"
+    | Unsupported -> Hh_json.string_ "Unsupported"
     | Null -> Hh_json.string_ "null"
     | Bool bool -> bool |> Bool.to_string |> Hh_json.string_
     | Int -> Hh_json.string_ "int"
@@ -53,7 +53,7 @@ module Value = struct
     | Bool b -> Some (Bool b)
     | Int -> Some (Int None)
     | String -> Some (String None)
-    | Other -> None
+    | Unsupported -> None
 
   type value = t
 
@@ -87,11 +87,11 @@ module Value = struct
         else if is_sub env ty Typing_make_type.arraykey then
           [Int; String]
         else
-          [Other]
+          [Unsupported]
       in
 
       (values, Some (Label { class_; const }))
-    | _ -> ([Other], None)
+    | _ -> ([Unsupported], None)
 end
 
 module ValueSet = struct
@@ -108,9 +108,9 @@ module ValueSet = struct
 
   let symbolic_diff value_set1 value_set2 =
     let non_sym_diff = non_symbolic_diff value_set1 value_set2 in
-    (* so { Other } - { Other }  is safely over-approximated to { Other } *)
-    if mem value_set1 Value.Other then
-      add non_sym_diff Value.Other
+    (* so { Unsupported } - { Unsupported }  is safely over-approximated to { Unsupported } *)
+    if mem value_set1 Value.Unsupported then
+      add non_sym_diff Value.Unsupported
     else
       non_sym_diff
 end
@@ -122,14 +122,14 @@ let prim_to_values = function
     ValueSet.singleton Value.Null
   | Tbool -> ValueSet.bools
   | Tint -> ValueSet.singleton Value.Int
-  | Tnum -> ValueSet.of_list Value.[Int; Other]
+  | Tnum -> ValueSet.of_list Value.[Int; Unsupported]
   | Tstring -> ValueSet.singleton Value.String
   (* arraykey is the supertype of strings, ints, and all enums,
-     so this overapproximates "all enums" with Value.Other for now *)
-  | Tarraykey -> ValueSet.of_list Value.[Int; String; Other]
+     so this overapproximates "all enums" with Value.Unsupported for now *)
+  | Tarraykey -> ValueSet.of_list Value.[Int; String; Unsupported]
   | Tfloat
   | Tresource ->
-    ValueSet.singleton Value.Other
+    ValueSet.singleton Value.Unsupported
 
 (* Symbolically evaluate the values corresponding to a given type; the result is
    essentially in disjunctive normal form, so that cases can be partitioned
@@ -169,7 +169,7 @@ let rec symbolic_dnf_values env ty : ValueSet.t =
   | Tgeneric _
   | Tdependent _
   | Taccess _ ->
-    ValueSet.singleton Value.Other
+    ValueSet.singleton Value.Unsupported
   | Tunapplied_alias _ ->
     Typing_defs.error_Tunapplied_alias_in_illegal_context ()
 

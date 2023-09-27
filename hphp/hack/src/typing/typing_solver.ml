@@ -365,7 +365,7 @@ let ty_equal_shallow env ty1 ty2 =
     | (Tprim p1, Tprim p2) -> Aast_defs.equal_tprim p1 p2
     | (Tclass (x_sub, exact_sub, _), Tclass (x_super, exact_super, _)) ->
       String.equal (snd x_sub) (snd x_super)
-      && equal_exact exact_sub exact_super
+      && exact_equal exact_sub exact_super
     | (Tfun fty1, Tfun fty2) -> Int.equal fty1.ft_flags fty2.ft_flags
     | ( Tshape { s_origin = _; s_unknown_value = shape_kind1; s_fields = fdm1 },
         Tshape { s_origin = _; s_unknown_value = shape_kind2; s_fields = fdm2 }

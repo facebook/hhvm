@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a93abfd5636a811ddbd1577130bd86b2>>
+// @generated SignedSource<<c876bad7623c92231281de177a4b7f97>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -481,17 +481,111 @@ impl<'a> Node<'a> for WhereConstraint<'a> {
         }
     }
 }
-impl<'a> Node<'a> for Ty<'a> {
+impl<'a> Node<'a> for Capability<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_ty(self)
+        v.visit_capability(self)
     }
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
-            Ty(ref __binding_0, ref __binding_1) => {
+            Capability::CapDefaults(ref __binding_0) => __binding_0.accept(v),
+            Capability::CapTy(ref __binding_0) => __binding_0.accept(v),
+        }
+    }
+}
+impl<'a> Node<'a> for FunImplicitParams<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_fun_implicit_params(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            FunImplicitParams {
+                capability: ref __binding_0,
+            } => __binding_0.accept(v),
+        }
+    }
+}
+impl<'a> Node<'a> for PossiblyEnforcedTy<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_possibly_enforced_ty(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            PossiblyEnforcedTy {
+                enforced: ref __binding_0,
+                type_: ref __binding_1,
+            } => {
                 {
                     __binding_0.accept(v)
                 }
                 { __binding_1.accept(v) }
+            }
+        }
+    }
+}
+impl<'a> Node<'a> for FunParam<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_fun_param(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            FunParam {
+                pos: ref __binding_0,
+                name: ref __binding_1,
+                type_: ref __binding_2,
+                flags: ref __binding_3,
+            } => {
+                {
+                    __binding_0.accept(v)
+                }
+                {
+                    __binding_1.accept(v)
+                }
+                {
+                    __binding_2.accept(v)
+                }
+                { __binding_3.accept(v) }
+            }
+        }
+    }
+}
+impl<'a> Node<'a> for FunType<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_fun_type(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            FunType {
+                tparams: ref __binding_0,
+                where_constraints: ref __binding_1,
+                params: ref __binding_2,
+                implicit_params: ref __binding_3,
+                ret: ref __binding_4,
+                flags: ref __binding_5,
+                ifc_decl: ref __binding_6,
+                cross_package: ref __binding_7,
+            } => {
+                {
+                    __binding_0.accept(v)
+                }
+                {
+                    __binding_1.accept(v)
+                }
+                {
+                    __binding_2.accept(v)
+                }
+                {
+                    __binding_3.accept(v)
+                }
+                {
+                    __binding_4.accept(v)
+                }
+                {
+                    __binding_5.accept(v)
+                }
+                {
+                    __binding_6.accept(v)
+                }
+                { __binding_7.accept(v) }
             }
         }
     }
@@ -504,6 +598,21 @@ impl<'a> Node<'a> for NegType<'a> {
         match self {
             NegType::NegPrim(ref __binding_0) => __binding_0.accept(v),
             NegType::NegClass(ref __binding_0) => __binding_0.accept(v),
+        }
+    }
+}
+impl<'a> Node<'a> for Ty<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_ty(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            Ty(ref __binding_0, ref __binding_1) => {
+                {
+                    __binding_0.accept(v)
+                }
+                { __binding_1.accept(v) }
+            }
         }
     }
 }
@@ -662,115 +771,6 @@ impl<'a> Node<'a> for ShapeType<'a> {
                     __binding_1.accept(v)
                 }
                 { __binding_2.accept(v) }
-            }
-        }
-    }
-}
-impl<'a> Node<'a> for Capability<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_capability(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            Capability::CapDefaults(ref __binding_0) => __binding_0.accept(v),
-            Capability::CapTy(ref __binding_0) => __binding_0.accept(v),
-        }
-    }
-}
-impl<'a> Node<'a> for FunImplicitParams<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_fun_implicit_params(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            FunImplicitParams {
-                capability: ref __binding_0,
-            } => __binding_0.accept(v),
-        }
-    }
-}
-impl<'a> Node<'a> for FunType<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_fun_type(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            FunType {
-                tparams: ref __binding_0,
-                where_constraints: ref __binding_1,
-                params: ref __binding_2,
-                implicit_params: ref __binding_3,
-                ret: ref __binding_4,
-                flags: ref __binding_5,
-                ifc_decl: ref __binding_6,
-                cross_package: ref __binding_7,
-            } => {
-                {
-                    __binding_0.accept(v)
-                }
-                {
-                    __binding_1.accept(v)
-                }
-                {
-                    __binding_2.accept(v)
-                }
-                {
-                    __binding_3.accept(v)
-                }
-                {
-                    __binding_4.accept(v)
-                }
-                {
-                    __binding_5.accept(v)
-                }
-                {
-                    __binding_6.accept(v)
-                }
-                { __binding_7.accept(v) }
-            }
-        }
-    }
-}
-impl<'a> Node<'a> for PossiblyEnforcedTy<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_possibly_enforced_ty(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            PossiblyEnforcedTy {
-                enforced: ref __binding_0,
-                type_: ref __binding_1,
-            } => {
-                {
-                    __binding_0.accept(v)
-                }
-                { __binding_1.accept(v) }
-            }
-        }
-    }
-}
-impl<'a> Node<'a> for FunParam<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_fun_param(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            FunParam {
-                pos: ref __binding_0,
-                name: ref __binding_1,
-                type_: ref __binding_2,
-                flags: ref __binding_3,
-            } => {
-                {
-                    __binding_0.accept(v)
-                }
-                {
-                    __binding_1.accept(v)
-                }
-                {
-                    __binding_2.accept(v)
-                }
-                { __binding_3.accept(v) }
             }
         }
     }

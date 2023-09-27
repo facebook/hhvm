@@ -81,7 +81,7 @@ type const_decl = {
   cd_pos: Pos_or_decl.t;
   cd_type: decl_ty;
 }
-[@@deriving show]
+[@@deriving show, eq]
 
 type class_elt = {
   ce_visibility: ce_visibility;
@@ -105,7 +105,7 @@ type fun_elt = {
   fe_no_auto_dynamic: bool;
   fe_no_auto_likes: bool;
 }
-[@@deriving show]
+[@@deriving show, eq]
 
 (* TODO(T71787342) This is temporary. It is necessary because legacy decl
  * uses Typing_defs types to represent folded inherited members. This will
@@ -155,26 +155,29 @@ type module_def_type = {
  * }
  * ```
  *)
-type requirement = Pos_or_decl.t * decl_ty
+type requirement = Pos_or_decl.t * decl_ty [@@deriving show]
 
-and abstract_typeconst = {
+type abstract_typeconst = {
   atc_as_constraint: decl_ty option;
   atc_super_constraint: decl_ty option;
   atc_default: decl_ty option;
 }
+[@@deriving eq, show]
 
-and concrete_typeconst = { tc_type: decl_ty }
+type concrete_typeconst = { tc_type: decl_ty } [@@deriving eq, show]
 
-and partially_abstract_typeconst = {
+type partially_abstract_typeconst = {
   patc_constraint: decl_ty;
   patc_type: decl_ty;
 }
+[@@deriving show]
 
-and typeconst =
+type typeconst =
   | TCAbstract of abstract_typeconst
   | TCConcrete of concrete_typeconst
+[@@deriving eq, show]
 
-and typeconst_type = {
+type typeconst_type = {
   ttc_synthesized: bool;
   ttc_name: pos_id;
   ttc_kind: typeconst;
@@ -202,13 +205,14 @@ and typeconst_type = {
   ttc_concretized: bool;
   ttc_is_ctx: bool;
 }
+[@@deriving show]
 
-and enum_type = {
+type enum_type = {
   te_base: decl_ty;
   te_constraint: decl_ty option;
   te_includes: decl_ty list;
 }
-[@@deriving show]
+[@@deriving eq, show]
 
 type typedef_type = {
   td_module: Ast_defs.id option;
@@ -223,7 +227,7 @@ type typedef_type = {
   td_internal: bool;
   td_docs_url: string option;
 }
-[@@deriving show]
+[@@deriving eq, show]
 
 type phase_ty =
   | DeclTy of decl_ty
@@ -603,11 +607,6 @@ and unknown_field_type_is_denotable ty =
   end
   | _ -> false
 
-let same_type_origin orig1 orig2 =
-  match orig1 with
-  | Missing_origin -> false
-  | _ -> equal_type_origin orig1 orig2
-
 module ShapeFieldMap = struct
   include TShapeMap
 
@@ -664,680 +663,12 @@ end
 (* Set to true when we are trying to infer the missing type hints. *)
 let is_suggest_mode = ref false
 
-(* Ordinal value for type constructor *)
-let ty_con_ordinal_ : type a. a ty_ -> int = function
-  (* only decl constructors *)
-  | Tthis -> 100
-  | Tapply _ -> 101
-  | Tmixed -> 102
-  | Tlike _ -> 103
-  | Trefinement _ -> 104
-  | Twildcard -> 105
-  (* exist in both phases *)
-  | Tany _ -> 0
-  | Toption t -> begin
-    match get_node t with
-    | Tnonnull -> 1
-    | _ -> 4
-  end
-  | Tnonnull -> 2
-  | Tdynamic -> 3
-  | Tprim _ -> 5
-  | Tfun _ -> 6
-  | Ttuple _ -> 7
-  | Tshape _ -> 8
-  | Tvar _ -> 9
-  | Tgeneric _ -> 11
-  | Tunion _ -> 13
-  | Tintersection _ -> 14
-  | Taccess _ -> 24
-  | Tvec_or_dict _ -> 25
-  (* only locl constructors *)
-  | Tunapplied_alias _ -> 200
-  | Tnewtype _ -> 201
-  | Tdependent _ -> 202
-  | Tclass _ -> 204
-  | Tneg _ -> 205
-
-let compare_neg_type neg1 neg2 =
-  match (neg1, neg2) with
-  | (Neg_prim tp1, Neg_prim tp2) -> Aast.compare_tprim tp1 tp2
-  | (Neg_class c1, Neg_class c2) -> String.compare (snd c1) (snd c2)
-  | (Neg_prim _, Neg_class _) -> -1
-  | (Neg_class _, Neg_prim _) -> 1
-
-(* Compare two types syntactically, ignoring reason information and other
- * small differences that do not affect type inference behaviour. This
- * comparison function can be used to construct tree-based sets of types,
- * or to compare two types for "exact" equality.
- * Note that this function does *not* expand type variables, or type
- * aliases.
- * But if ty_compare ty1 ty2 = 0, then the types must not be distinguishable
- * by any typing rules.
- *)
-let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
- fun ?(normalize_lists = false) ty_1 ty_2 ->
-  let rec ty__compare : type a. a ty_ -> a ty_ -> int =
-   fun ty_1 ty_2 ->
-    match (ty_1, ty_2) with
-    (* Only in Declared Phase *)
-    | (Tthis, Tthis) -> 0
-    | (Tapply (id1, tyl1), Tapply (id2, tyl2)) -> begin
-      match String.compare (snd id1) (snd id2) with
-      | 0 -> tyl_compare ~sort:normalize_lists ~normalize_lists tyl1 tyl2
-      | n -> n
-    end
-    | (Trefinement (ty1, r1), Trefinement (ty2, r2)) -> begin
-      match ty_compare ty1 ty2 with
-      | 0 -> class_refinement_compare r1 r2
-      | n -> n
-    end
-    | (Tmixed, Tmixed) -> 0
-    | (Twildcard, Twildcard) -> 0
-    | (Tlike ty1, Tlike ty2) -> ty_compare ty1 ty2
-    | ((Tthis | Tapply _ | Tmixed | Twildcard | Tlike _), _)
-    | (_, (Tthis | Tapply _ | Tmixed | Twildcard | Tlike _)) ->
-      ty_con_ordinal_ ty_1 - ty_con_ordinal_ ty_2
-    (* Both or in Localized Phase *)
-    | (Tprim ty1, Tprim ty2) -> Aast_defs.compare_tprim ty1 ty2
-    | (Toption ty, Toption ty2) -> ty_compare ty ty2
-    | (Tvec_or_dict (tk, tv), Tvec_or_dict (tk2, tv2)) -> begin
-      match ty_compare tk tk2 with
-      | 0 -> ty_compare tv tv2
-      | n -> n
-    end
-    | (Tfun fty, Tfun fty2) -> tfun_compare fty fty2
-    | (Tunion tyl1, Tunion tyl2)
-    | (Tintersection tyl1, Tintersection tyl2)
-    | (Ttuple tyl1, Ttuple tyl2) ->
-      tyl_compare ~sort:normalize_lists ~normalize_lists tyl1 tyl2
-    | (Tgeneric (n1, args1), Tgeneric (n2, args2)) -> begin
-      match String.compare n1 n2 with
-      | 0 -> tyl_compare ~sort:false ~normalize_lists args1 args2
-      | n -> n
-    end
-    | (Tnewtype (id, tyl, cstr1), Tnewtype (id2, tyl2, cstr2)) -> begin
-      match String.compare id id2 with
-      | 0 ->
-        (match tyl_compare ~sort:false tyl tyl2 with
-        | 0 -> ty_compare cstr1 cstr2
-        | n -> n)
-      | n -> n
-    end
-    | (Tdependent (d1, cstr1), Tdependent (d2, cstr2)) -> begin
-      match compare_dependent_type d1 d2 with
-      | 0 -> ty_compare cstr1 cstr2
-      | n -> n
-    end
-    (* An instance of a class or interface, ty list are the arguments *)
-    | (Tclass (id, exact, tyl), Tclass (id2, exact2, tyl2)) -> begin
-      match String.compare (snd id) (snd id2) with
-      | 0 -> begin
-        match tyl_compare ~sort:false tyl tyl2 with
-        | 0 -> exact_compare exact exact2
-        | n -> n
-      end
-      | n -> n
-    end
-    | (Tshape s1, Tshape s2) -> shape_type_compare s1 s2
-    | (Tvar v1, Tvar v2) -> compare v1 v2
-    | (Tunapplied_alias n1, Tunapplied_alias n2) -> String.compare n1 n2
-    | (Taccess (ty1, id1), Taccess (ty2, id2)) -> begin
-      match ty_compare ty1 ty2 with
-      | 0 -> String.compare (snd id1) (snd id2)
-      | n -> n
-    end
-    | (Tneg neg1, Tneg neg2) -> compare_neg_type neg1 neg2
-    | (Tnonnull, Tnonnull) -> 0
-    | (Tdynamic, Tdynamic) -> 0
-    | ( ( Tprim _ | Toption _ | Tvec_or_dict _ | Tfun _ | Tintersection _
-        | Tunion _ | Ttuple _ | Tgeneric _ | Tnewtype _ | Tdependent _
-        | Tclass _ | Tshape _ | Tvar _ | Tunapplied_alias _ | Tnonnull
-        | Tdynamic | Taccess _ | Tany _ | Tneg _ | Trefinement _ ),
-        _ ) ->
-      ty_con_ordinal_ ty_1 - ty_con_ordinal_ ty_2
-  and shape_field_type_compare :
-      type a. a shape_field_type -> a shape_field_type -> int =
-   fun sft1 sft2 ->
-    let { sft_ty = ty1; sft_optional = optional1 } = sft1 in
-    let { sft_ty = ty2; sft_optional = optional2 } = sft2 in
-    match ty_compare ty1 ty2 with
-    | 0 -> Bool.compare optional1 optional2
-    | n -> n
-  and shape_type_compare : type a. a shape_type -> a shape_type -> int =
-   fun s1 s2 ->
-    let {
-      s_origin = shape_origin1;
-      s_unknown_value = unknown_fields_type1;
-      s_fields = fields1;
-    } =
-      s1
-    in
-    let {
-      s_origin = shape_origin2;
-      s_unknown_value = unknown_fields_type2;
-      s_fields = fields2;
-    } =
-      s2
-    in
-    if same_type_origin shape_origin1 shape_origin2 then
-      0
-    else begin
-      match ty_compare unknown_fields_type1 unknown_fields_type2 with
-      | 0 ->
-        List.compare
-          (fun (k1, v1) (k2, v2) ->
-            match TShapeField.compare k1 k2 with
-            | 0 -> shape_field_type_compare v1 v2
-            | n -> n)
-          (TShapeMap.elements fields1)
-          (TShapeMap.elements fields2)
-      | n -> n
-    end
-  and user_attribute_param_compare p1 p2 =
-    let dest_user_attribute_param p =
-      match p with
-      | Classname s -> (0, s)
-      | EnumClassLabel s -> (1, s)
-      | String s -> (2, s)
-      | Int i -> (3, i)
-    in
-    let (id1, s1) = dest_user_attribute_param p1 in
-    let (id2, s2) = dest_user_attribute_param p2 in
-    match Int.compare id1 id2 with
-    | 0 -> String.compare s1 s2
-    | n -> n
-  and user_attribute_compare ua1 ua2 =
-    let { ua_name = name1; ua_params = params1 } = ua1 in
-    let { ua_name = name2; ua_params = params2 } = ua2 in
-    match String.compare (snd name1) (snd name2) with
-    | 0 -> List.compare user_attribute_param_compare params1 params2
-    | n -> n
-  and user_attributes_compare ual1 ual2 =
-    List.compare user_attribute_compare ual1 ual2
-  and tparam_compare : type a. a ty tparam -> a ty tparam -> int =
-   fun tp1 tp2 ->
-    let {
-      (* Type parameters on functions are always marked invariant *)
-      tp_variance = _;
-      tp_name = name1;
-      tp_tparams = tparams1;
-      tp_constraints = constraints1;
-      tp_reified = reified1;
-      tp_user_attributes = user_attributes1;
-    } =
-      tp1
-    in
-    let {
-      tp_variance = _;
-      tp_name = name2;
-      tp_tparams = tparams2;
-      tp_constraints = constraints2;
-      tp_reified = reified2;
-      tp_user_attributes = user_attributes2;
-    } =
-      tp2
-    in
-    match String.compare (snd name1) (snd name2) with
-    | 0 -> begin
-      match tparams_compare tparams1 tparams2 with
-      | 0 -> begin
-        match constraints_compare constraints1 constraints2 with
-        | 0 -> begin
-          match user_attributes_compare user_attributes1 user_attributes2 with
-          | 0 -> Aast_defs.compare_reify_kind reified1 reified2
-          | n -> n
-        end
-        | n -> n
-      end
-      | n -> n
-    end
-    | n -> n
-  and tparams_compare : type a. a ty tparam list -> a ty tparam list -> int =
-   (fun tpl1 tpl2 -> List.compare tparam_compare tpl1 tpl2)
-  and constraints_compare :
-      type a.
-      (Ast_defs.constraint_kind * a ty) list ->
-      (Ast_defs.constraint_kind * a ty) list ->
-      int =
-   (fun cl1 cl2 -> List.compare constraint_compare cl1 cl2)
-  and constraint_compare :
-      type a.
-      Ast_defs.constraint_kind * a ty -> Ast_defs.constraint_kind * a ty -> int
-      =
-   fun (ck1, ty1) (ck2, ty2) ->
-    match Ast_defs.compare_constraint_kind ck1 ck2 with
-    | 0 -> ty_compare ty1 ty2
-    | n -> n
-  and where_constraint_compare :
-      type a b.
-      a ty * Ast_defs.constraint_kind * b ty ->
-      a ty * Ast_defs.constraint_kind * b ty ->
-      int =
-   fun (ty1a, ck1, ty1b) (ty2a, ck2, ty2b) ->
-    match Ast_defs.compare_constraint_kind ck1 ck2 with
-    | 0 -> begin
-      match ty_compare ty1a ty2a with
-      | 0 -> ty_compare ty1b ty2b
-      | n -> n
-    end
-    | n -> n
-  and where_constraints_compare :
-      type a b.
-      (a ty * Ast_defs.constraint_kind * b ty) list ->
-      (a ty * Ast_defs.constraint_kind * b ty) list ->
-      int =
-   (fun cl1 cl2 -> List.compare where_constraint_compare cl1 cl2)
-  (* We match every field rather than using field selection syntax. This guards against future additions to function type elements *)
-  and tfun_compare : type a. a ty fun_type -> a ty fun_type -> int =
-   fun fty1 fty2 ->
-    let {
-      ft_ret = ret1;
-      ft_params = params1;
-      ft_flags = flags1;
-      ft_implicit_params = implicit_params1;
-      ft_ifc_decl = ifc_decl1;
-      ft_tparams = tparams1;
-      ft_where_constraints = where_constraints1;
-      ft_cross_package = cross_package1;
-    } =
-      fty1
-    in
-    let {
-      ft_ret = ret2;
-      ft_params = params2;
-      ft_flags = flags2;
-      ft_implicit_params = implicit_params2;
-      ft_ifc_decl = ifc_decl2;
-      ft_tparams = tparams2;
-      ft_where_constraints = where_constraints2;
-      ft_cross_package = cross_package2;
-    } =
-      fty2
-    in
-    match possibly_enforced_ty_compare ret1 ret2 with
-    | 0 -> begin
-      match ft_params_compare params1 params2 with
-      | 0 -> begin
-        match tparams_compare tparams1 tparams2 with
-        | 0 -> begin
-          match
-            where_constraints_compare where_constraints1 where_constraints2
-          with
-          | 0 -> begin
-            match Int.compare flags1 flags2 with
-            | 0 ->
-              let { capability = capability1 } = implicit_params1 in
-              let { capability = capability2 } = implicit_params2 in
-              begin
-                match capability_compare capability1 capability2 with
-                | 0 -> begin
-                  match compare_ifc_fun_decl ifc_decl1 ifc_decl2 with
-                  | 0 ->
-                    compare_cross_package_decl cross_package1 cross_package2
-                  | n -> n
-                end
-                | n -> n
-              end
-            | n -> n
-          end
-          | n -> n
-        end
-        | n -> n
-      end
-      | n -> n
-    end
-    | n -> n
-  and capability_compare : type a. a ty capability -> a ty capability -> int =
-   fun cap1 cap2 ->
-    match (cap1, cap2) with
-    | (CapDefaults _, CapDefaults _) -> 0
-    | (CapDefaults _, CapTy _) -> -1
-    | (CapTy _, CapDefaults _) -> 1
-    | (CapTy ty1, CapTy ty2) -> ty_compare ty1 ty2
-  and ty_compare : type a. a ty -> a ty -> int =
-   (fun ty1 ty2 -> ty__compare (get_node ty1) (get_node ty2))
-  in
-  ty__compare ty_1 ty_2
-
-and ty_compare : type a. ?normalize_lists:bool -> a ty -> a ty -> int =
- fun ?(normalize_lists = false) ty1 ty2 ->
-  ty__compare ~normalize_lists (get_node ty1) (get_node ty2)
-
-and tyl_compare :
-    type a. sort:bool -> ?normalize_lists:bool -> a ty list -> a ty list -> int
-    =
- fun ~sort ?(normalize_lists = false) tyl1 tyl2 ->
-  let (tyl1, tyl2) =
-    if sort then
-      (List.sort ~compare:ty_compare tyl1, List.sort ~compare:ty_compare tyl2)
-    else
-      (tyl1, tyl2)
-  in
-  List.compare (ty_compare ~normalize_lists) tyl1 tyl2
-
-and possibly_enforced_ty_compare :
-    type a.
-    ?normalize_lists:bool ->
-    a ty possibly_enforced_ty ->
-    a ty possibly_enforced_ty ->
-    int =
- fun ?(normalize_lists = false) ety1 ety2 ->
-  match ty_compare ~normalize_lists ety1.et_type ety2.et_type with
-  | 0 -> compare_enforcement ety1.et_enforced ety2.et_enforced
-  | n -> n
-
-and ft_param_compare :
-    type a. ?normalize_lists:bool -> a ty fun_param -> a ty fun_param -> int =
- fun ?(normalize_lists = false) param1 param2 ->
-  match
-    possibly_enforced_ty_compare ~normalize_lists param1.fp_type param2.fp_type
-  with
-  | 0 -> Int.compare param1.fp_flags param2.fp_flags
-  | n -> n
-
-and ft_params_compare :
-    type a.
-    ?normalize_lists:bool -> a ty fun_param list -> a ty fun_param list -> int =
- fun ?(normalize_lists = false) params1 params2 ->
-  List.compare (ft_param_compare ~normalize_lists) params1 params2
-
-and refined_const_compare : type a. a refined_const -> a refined_const -> int =
- fun a b ->
-  (* Note: `rc_is_ctx` is not used for typing inference, so we can safely ignore it *)
-  match (a.rc_bound, b.rc_bound) with
-  | (TRexact _, TRloose _) -> -1
-  | (TRloose _, TRexact _) -> 1
-  | (TRloose b1, TRloose b2) -> begin
-    match tyl_compare ~sort:true b1.tr_lower b2.tr_lower with
-    | 0 -> tyl_compare ~sort:true b1.tr_upper b2.tr_upper
-    | n -> n
-  end
-  | (TRexact ty1, TRexact ty2) -> ty_compare ty1 ty2
-
-and class_refinement_compare :
-    type a. a class_refinement -> a class_refinement -> int =
- fun { cr_consts = rcs1 } { cr_consts = rcs2 } ->
-  SMap.compare refined_const_compare rcs1 rcs2
-
-and exact_compare e1 e2 =
-  match (e1, e2) with
-  | (Exact, Exact) -> 0
-  | (Nonexact _, Exact) -> 1
-  | (Exact, Nonexact _) -> -1
-  | (Nonexact r1, Nonexact r2) -> class_refinement_compare r1 r2
-
-(* Dedicated functions with more easily discoverable names *)
-let compare_locl_ty : ?normalize_lists:bool -> locl_ty -> locl_ty -> int =
-  ty_compare
-
-let compare_decl_ty : ?normalize_lists:bool -> decl_ty -> decl_ty -> int =
-  ty_compare
-
-let tyl_equal tyl1 tyl2 = Int.equal 0 @@ tyl_compare ~sort:false tyl1 tyl2
-
-let compare_exact = exact_compare
-
-let equal_exact e1 e2 = Int.equal 0 (compare_exact e1 e2)
-
-let class_id_con_ordinal cid =
-  match cid with
-  | Aast.CIparent -> 0
-  | Aast.CIself -> 1
-  | Aast.CIstatic -> 2
-  | Aast.CIexpr _ -> 3
-  | Aast.CI _ -> 4
-
-let class_id_compare cid1 cid2 =
-  match (cid1, cid2) with
-  | (Aast.CIexpr _e1, Aast.CIexpr _e2) -> 0
-  | (Aast.CI (_, id1), Aast.CI (_, id2)) -> String.compare id1 id2
-  | _ -> class_id_con_ordinal cid2 - class_id_con_ordinal cid1
-
-let class_id_equal cid1 cid2 = Int.equal (class_id_compare cid1 cid2) 0
-
-let has_member_compare ~normalize_lists hm1 hm2 =
-  let ty_compare = ty_compare ~normalize_lists in
-  let {
-    hm_name = (_, m1);
-    hm_type = ty1;
-    hm_class_id = cid1;
-    hm_explicit_targs = targs1;
-  } =
-    hm1
-  in
-  let {
-    hm_name = (_, m2);
-    hm_type = ty2;
-    hm_class_id = cid2;
-    hm_explicit_targs = targs2;
-  } =
-    hm2
-  in
-  let targ_compare (_, (_, hint1)) (_, (_, hint2)) =
-    Aast_defs.compare_hint_ hint1 hint2
-  in
-  match String.compare m1 m2 with
-  | 0 ->
-    (match ty_compare ty1 ty2 with
-    | 0 ->
-      (match class_id_compare cid1 cid2 with
-      | 0 -> Option.compare (List.compare targ_compare) targs1 targs2
-      | comp -> comp)
-    | comp -> comp)
-  | comp -> comp
-
-let can_index_compare ~normalize_lists ci1 ci2 =
-  match ty_compare ~normalize_lists ci1.ci_key ci2.ci_key with
-  | 0 ->
-    (match ty_compare ~normalize_lists ci1.ci_val ci2.ci_val with
-    | 0 -> Option.compare compare_tshape_field_name ci1.ci_shape ci2.ci_shape
-    | comp -> comp)
-  | comp -> comp
-
-let can_traverse_compare ~normalize_lists ct1 ct2 =
-  match Option.compare (ty_compare ~normalize_lists) ct1.ct_key ct2.ct_key with
-  | 0 ->
-    (match ty_compare ~normalize_lists ct1.ct_val ct2.ct_val with
-    | 0 -> Bool.compare ct1.ct_is_await ct2.ct_is_await
-    | comp -> comp)
-  | comp -> comp
-
-let destructure_compare ~normalize_lists d1 d2 =
-  let {
-    d_required = tyl1;
-    d_optional = tyl_opt1;
-    d_variadic = ty_opt1;
-    d_kind = e1;
-  } =
-    d1
-  in
-  let {
-    d_required = tyl2;
-    d_optional = tyl_opt2;
-    d_variadic = ty_opt2;
-    d_kind = e2;
-  } =
-    d2
-  in
-  match tyl_compare ~normalize_lists ~sort:false tyl1 tyl2 with
-  | 0 ->
-    (match tyl_compare ~normalize_lists ~sort:false tyl_opt1 tyl_opt2 with
-    | 0 ->
-      (match Option.compare ty_compare ty_opt1 ty_opt2 with
-      | 0 -> compare_destructure_kind e1 e2
-      | comp -> comp)
-    | comp -> comp)
-  | comp -> comp
-
-let constraint_ty_con_ordinal cty =
-  match cty with
-  | Thas_member _ -> 0
-  | Tdestructure _ -> 1
-  | TCunion _ -> 2
-  | TCintersection _ -> 3
-  | Tcan_index _ -> 4
-  | Tcan_traverse _ -> 5
-  | Thas_type_member _ -> 6
-
-let rec constraint_ty_compare ?(normalize_lists = false) ty1 ty2 =
-  let (_, ty1) = deref_constraint_type ty1 in
-  let (_, ty2) = deref_constraint_type ty2 in
-  match (ty1, ty2) with
-  | (Thas_member hm1, Thas_member hm2) ->
-    has_member_compare ~normalize_lists hm1 hm2
-  | (Thas_type_member htm1, Thas_type_member htm2) ->
-    let { htm_id = id1; htm_lower = lower1; htm_upper = upper1 } = htm1
-    and { htm_id = id2; htm_lower = lower2; htm_upper = upper2 } = htm2 in
-    (match String.compare id1 id2 with
-    | 0 ->
-      (match ty_compare lower1 lower2 with
-      | 0 -> ty_compare upper1 upper2
-      | comp -> comp)
-    | comp -> comp)
-  | (Tcan_index ci1, Tcan_index ci2) ->
-    can_index_compare ~normalize_lists ci1 ci2
-  | (Tcan_traverse ct1, Tcan_traverse ct2) ->
-    can_traverse_compare ~normalize_lists ct1 ct2
-  | (Tdestructure d1, Tdestructure d2) ->
-    destructure_compare ~normalize_lists d1 d2
-  | (TCunion (lty1, cty1), TCunion (lty2, cty2))
-  | (TCintersection (lty1, cty1), TCintersection (lty2, cty2)) ->
-    let comp1 = ty_compare ~normalize_lists lty1 lty2 in
-    if not @@ Int.equal comp1 0 then
-      comp1
-    else
-      constraint_ty_compare ~normalize_lists cty1 cty2
-  | ( _,
-      ( Thas_member _ | Tcan_index _ | Tcan_traverse _ | Tdestructure _
-      | TCunion _ | TCintersection _ | Thas_type_member _ ) ) ->
-    constraint_ty_con_ordinal ty2 - constraint_ty_con_ordinal ty1
-
-let constraint_ty_equal ?(normalize_lists = false) ty1 ty2 =
-  Int.equal (constraint_ty_compare ~normalize_lists ty1 ty2) 0
-
-let ty_equal ?(normalize_lists = false) ty1 ty2 =
-  phys_equal (get_node ty1) (get_node ty2)
-  || Int.equal 0 (ty_compare ~normalize_lists ty1 ty2)
-
-let equal_internal_type ty1 ty2 =
-  match (ty1, ty2) with
-  | (LoclType ty1, LoclType ty2) -> ty_equal ~normalize_lists:true ty1 ty2
-  | (ConstraintType ty1, ConstraintType ty2) ->
-    constraint_ty_equal ~normalize_lists:true ty1 ty2
-  | (_, (LoclType _ | ConstraintType _)) -> false
-
-let equal_locl_ty : locl_ty -> locl_ty -> bool =
- (fun ty1 ty2 -> ty_equal ty1 ty2)
-
-let equal_locl_ty_ : locl_ty_ -> locl_ty_ -> bool =
- (fun ty_1 ty_2 -> Int.equal 0 (ty__compare ty_1 ty_2))
-
 let is_type_no_return : locl_ty_ -> bool = equal_locl_ty_ (Tprim Aast.Tnoreturn)
-
-let equal_decl_ty_ : decl_ty_ -> decl_ty_ -> bool =
- (fun ty1 ty2 -> Int.equal 0 (ty__compare ty1 ty2))
-
-let equal_decl_ty ty1 ty2 = equal_decl_ty_ (get_node ty1) (get_node ty2)
-
-let equal_shape_field_type sft1 sft2 =
-  equal_decl_ty sft1.sft_ty sft2.sft_ty
-  && Bool.equal sft1.sft_optional sft2.sft_optional
 
 let non_public_ifc ifc =
   match ifc with
   | FDPolicied (Some "PUBLIC") -> false
   | _ -> true
-
-let equal_decl_tyl tyl1 tyl2 = List.equal equal_decl_ty tyl1 tyl2
-
-let equal_decl_possibly_enforced_ty ety1 ety2 =
-  equal_decl_ty ety1.et_type ety2.et_type
-  && equal_enforcement ety1.et_enforced ety2.et_enforced
-
-let equal_decl_fun_param param1 param2 =
-  equal_decl_possibly_enforced_ty param1.fp_type param2.fp_type
-  && Int.equal param1.fp_flags param2.fp_flags
-
-let equal_decl_ft_params params1 params2 =
-  List.equal equal_decl_fun_param params1 params2
-
-let equal_decl_ft_implicit_params :
-    decl_ty fun_implicit_params -> decl_ty fun_implicit_params -> bool =
- fun { capability = cap1 } { capability = cap2 } ->
-  (* TODO(coeffects): could rework this so that implicit defaults and explicit
-   * [defaults] are considered equal *)
-  match (cap1, cap2) with
-  | (CapDefaults p1, CapDefaults p2) -> Pos_or_decl.equal p1 p2
-  | (CapTy c1, CapTy c2) -> equal_decl_ty c1 c2
-  | (CapDefaults _, CapTy _)
-  | (CapTy _, CapDefaults _) ->
-    false
-
-let equal_decl_fun_type fty1 fty2 =
-  equal_decl_possibly_enforced_ty fty1.ft_ret fty2.ft_ret
-  && equal_decl_ft_params fty1.ft_params fty2.ft_params
-  && equal_decl_ft_implicit_params
-       fty1.ft_implicit_params
-       fty2.ft_implicit_params
-  && Int.equal fty1.ft_flags fty2.ft_flags
-
-let equal_abstract_typeconst at1 at2 =
-  Option.equal equal_decl_ty at1.atc_as_constraint at2.atc_as_constraint
-  && Option.equal
-       equal_decl_ty
-       at1.atc_super_constraint
-       at2.atc_super_constraint
-  && Option.equal equal_decl_ty at1.atc_default at2.atc_default
-
-let equal_concrete_typeconst ct1 ct2 = equal_decl_ty ct1.tc_type ct2.tc_type
-
-let equal_typeconst t1 t2 =
-  match (t1, t2) with
-  | (TCAbstract at1, TCAbstract at2) -> equal_abstract_typeconst at1 at2
-  | (TCConcrete ct1, TCConcrete ct2) -> equal_concrete_typeconst ct1 ct2
-  | _ -> false
-
-let equal_enum_type et1 et2 =
-  equal_decl_ty et1.te_base et2.te_base
-  && Option.equal equal_decl_ty et1.te_constraint et2.te_constraint
-
-let equal_decl_where_constraint c1 c2 =
-  let (tya1, ck1, tyb1) = c1 in
-  let (tya2, ck2, tyb2) = c2 in
-  equal_decl_ty tya1 tya2
-  && Ast_defs.equal_constraint_kind ck1 ck2
-  && equal_decl_ty tyb1 tyb2
-
-let equal_decl_tparam tp1 tp2 =
-  Ast_defs.equal_variance tp1.tp_variance tp2.tp_variance
-  && equal_pos_id tp1.tp_name tp2.tp_name
-  && List.equal
-       (Tuple.T2.equal ~eq1:Ast_defs.equal_constraint_kind ~eq2:equal_decl_ty)
-       tp1.tp_constraints
-       tp2.tp_constraints
-  && Aast.equal_reify_kind tp1.tp_reified tp2.tp_reified
-  && List.equal
-       equal_user_attribute
-       tp1.tp_user_attributes
-       tp2.tp_user_attributes
-
-let equal_typedef_type tt1 tt2 =
-  Pos_or_decl.equal tt1.td_pos tt2.td_pos
-  && Aast.equal_typedef_visibility tt1.td_vis tt2.td_vis
-  && List.equal equal_decl_tparam tt1.td_tparams tt2.td_tparams
-  && Option.equal equal_decl_ty tt1.td_as_constraint tt2.td_as_constraint
-  && Option.equal equal_decl_ty tt1.td_super_constraint tt2.td_super_constraint
-  && equal_decl_ty tt1.td_type tt2.td_type
-
-let equal_fun_elt fe1 fe2 =
-  Option.equal String.equal fe1.fe_deprecated fe2.fe_deprecated
-  && equal_decl_ty fe1.fe_type fe2.fe_type
-  && Pos_or_decl.equal fe1.fe_pos fe2.fe_pos
-
-let equal_const_decl cd1 cd2 =
-  Pos_or_decl.equal cd1.cd_pos cd2.cd_pos
-  && equal_decl_ty cd1.cd_type cd2.cd_type
 
 let get_ce_abstract ce = ClassElt.is_abstract ce.ce_flags
 

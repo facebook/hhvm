@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<28eae49c7d4402a2792709c2d7e82dbc>>
+// @generated SignedSource<<85701bfef7f70f9f8dd315ff995575bc>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -443,8 +443,35 @@ arena_deserializer::impl_deserialize_in_arena!(Enforcement);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, hash)")]
+#[repr(C, u8)]
+pub enum Capability {
+    CapDefaults(pos_or_decl::PosOrDecl),
+    CapTy(Ty),
+}
+
+/// Companion to fun_params type, intended to consolidate checking of
+/// implicit params for functions.
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving (eq, hash)")]
 #[repr(C)]
-pub struct Ty(pub reason::T_, pub Box<Ty_>);
+pub struct FunImplicitParams {
+    pub capability: Capability,
+}
 
 #[derive(
     Clone,
@@ -461,7 +488,91 @@ pub struct Ty(pub reason::T_, pub Box<Ty_>);
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "deriving (eq, hash)")]
+#[rust_to_ocaml(prefix = "et_")]
+#[repr(C)]
+pub struct PossiblyEnforcedTy {
+    /// True if consumer of this type enforces it at runtime
+    pub enforced: Enforcement,
+    pub type_: Ty,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving (eq, hash)")]
+#[rust_to_ocaml(prefix = "fp_")]
+#[repr(C)]
+pub struct FunParam {
+    #[rust_to_ocaml(attr = "equal fun _ -> fun _ -> true")]
+    pub pos: pos_or_decl::PosOrDecl,
+    pub name: Option<String>,
+    pub type_: PossiblyEnforcedTy,
+    pub flags: typing_defs_flags::FunParamFlags,
+}
+
+#[rust_to_ocaml(attr = "deriving (eq, hash)")]
+pub type FunParams = Vec<FunParam>;
+
+/// The type of a function AND a method.
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving (eq, hash)")]
+#[rust_to_ocaml(prefix = "ft_")]
+#[repr(C)]
+pub struct FunType {
+    pub tparams: Vec<Tparam>,
+    pub where_constraints: Vec<WhereConstraint>,
+    pub params: FunParams,
+    pub implicit_params: FunImplicitParams,
+    /// Carries through the sync/async information from the aast
+    pub ret: PossiblyEnforcedTy,
+    pub flags: typing_defs_flags::FunTypeFlags,
+    pub ifc_decl: IfcFunDecl,
+    pub cross_package: CrossPackageDecl,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving hash")]
 #[repr(C, u8)]
 pub enum NegType {
     #[rust_to_ocaml(name = "Neg_prim")]
@@ -469,6 +580,24 @@ pub enum NegType {
     #[rust_to_ocaml(name = "Neg_class")]
     NegClass(PosId),
 }
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C)]
+pub struct Ty(pub reason::T_, pub Box<Ty_>);
 
 /// A shape may specify whether or not fields are required. For example, consider
 /// this typedef:
@@ -791,6 +920,7 @@ pub struct RefinedConstBounds {
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "deriving hash")]
 #[rust_to_ocaml(prefix = "s_")]
 #[repr(C)]
 pub struct ShapeType {
@@ -798,135 +928,6 @@ pub struct ShapeType {
     pub unknown_value: Ty,
     pub fields: t_shape_map::TShapeMap<ShapeFieldType>,
 }
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(and)]
-#[repr(C, u8)]
-pub enum Capability {
-    CapDefaults(pos_or_decl::PosOrDecl),
-    CapTy(Ty),
-}
-
-/// Companion to fun_params type, intended to consolidate checking of
-/// implicit params for functions.
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(and)]
-#[repr(C)]
-pub struct FunImplicitParams {
-    pub capability: Capability,
-}
-
-/// The type of a function AND a method.
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(and)]
-#[rust_to_ocaml(prefix = "ft_")]
-#[repr(C)]
-pub struct FunType {
-    pub tparams: Vec<Tparam>,
-    pub where_constraints: Vec<WhereConstraint>,
-    pub params: FunParams,
-    pub implicit_params: FunImplicitParams,
-    /// Carries through the sync/async information from the aast
-    pub ret: PossiblyEnforcedTy,
-    pub flags: typing_defs_flags::FunTypeFlags,
-    pub ifc_decl: IfcFunDecl,
-    pub cross_package: CrossPackageDecl,
-}
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(and)]
-#[rust_to_ocaml(prefix = "et_")]
-#[repr(C)]
-pub struct PossiblyEnforcedTy {
-    /// True if consumer of this type enforces it at runtime
-    pub enforced: Enforcement,
-    pub type_: Ty,
-}
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(and)]
-#[rust_to_ocaml(prefix = "fp_")]
-#[repr(C)]
-pub struct FunParam {
-    pub pos: pos_or_decl::PosOrDecl,
-    pub name: Option<String>,
-    pub type_: PossiblyEnforcedTy,
-    pub flags: typing_defs_flags::FunParamFlags,
-}
-
-#[rust_to_ocaml(and)]
-#[rust_to_ocaml(attr = "deriving hash")]
-pub type FunParams = Vec<FunParam>;
 
 #[derive(
     Clone,

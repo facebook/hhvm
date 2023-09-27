@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<972d3570ea7384cde1831dcc1d2b1197>>
+// @generated SignedSource<<e5d1ce3982857de2468f665c9516befc>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -350,22 +350,157 @@ pub use oxidized::typing_defs_core::Enforcement;
 
 #[derive(
     Clone,
+    Copy,
     Debug,
     Deserialize,
+    Eq,
     EqModuloPos,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, hash)")]
+#[repr(C, u8)]
+pub enum Capability<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    CapDefaults(&'a pos_or_decl::PosOrDecl<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    CapTy(&'a Ty<'a>),
+}
+impl<'a> TrivialDrop for Capability<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(Capability<'arena>);
+
+/// Companion to fun_params type, intended to consolidate checking of
+/// implicit params for functions.
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving (eq, hash)")]
 #[repr(C)]
-pub struct Ty<'a>(
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a reason::T_<'a>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub Ty_<'a>,
-);
-impl<'a> TrivialDrop for Ty<'a> {}
-arena_deserializer::impl_deserialize_in_arena!(Ty<'arena>);
+pub struct FunImplicitParams<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub capability: Capability<'a>,
+}
+impl<'a> TrivialDrop for FunImplicitParams<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(FunImplicitParams<'arena>);
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving (eq, hash)")]
+#[rust_to_ocaml(prefix = "et_")]
+#[repr(C)]
+pub struct PossiblyEnforcedTy<'a> {
+    /// True if consumer of this type enforces it at runtime
+    pub enforced: oxidized::typing_defs_core::Enforcement,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub type_: &'a Ty<'a>,
+}
+impl<'a> TrivialDrop for PossiblyEnforcedTy<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(PossiblyEnforcedTy<'arena>);
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving (eq, hash)")]
+#[rust_to_ocaml(prefix = "fp_")]
+#[repr(C)]
+pub struct FunParam<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(attr = "equal fun _ -> fun _ -> true")]
+    pub pos: &'a pos_or_decl::PosOrDecl<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub name: Option<&'a str>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub type_: &'a PossiblyEnforcedTy<'a>,
+    pub flags: typing_defs_flags::FunParamFlags,
+}
+impl<'a> TrivialDrop for FunParam<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(FunParam<'arena>);
+
+#[rust_to_ocaml(attr = "deriving (eq, hash)")]
+pub type FunParams<'a> = [&'a FunParam<'a>];
+
+/// The type of a function AND a method.
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving (eq, hash)")]
+#[rust_to_ocaml(prefix = "ft_")]
+#[repr(C)]
+pub struct FunType<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub tparams: &'a [&'a Tparam<'a>],
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub where_constraints: &'a [&'a WhereConstraint<'a>],
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub params: &'a FunParams<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub implicit_params: &'a FunImplicitParams<'a>,
+    /// Carries through the sync/async information from the aast
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub ret: &'a PossiblyEnforcedTy<'a>,
+    pub flags: typing_defs_flags::FunTypeFlags,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub ifc_decl: IfcFunDecl<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub cross_package: CrossPackageDecl<'a>,
+}
+impl<'a> TrivialDrop for FunType<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(FunType<'arena>);
 
 #[derive(
     Clone,
@@ -383,7 +518,7 @@ arena_deserializer::impl_deserialize_in_arena!(Ty<'arena>);
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "deriving hash")]
 #[repr(C, u8)]
 pub enum NegType<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -395,6 +530,25 @@ pub enum NegType<'a> {
 }
 impl<'a> TrivialDrop for NegType<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(NegType<'arena>);
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    EqModuloPos,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C)]
+pub struct Ty<'a>(
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a reason::T_<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub Ty_<'a>,
+);
+impl<'a> TrivialDrop for Ty<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(Ty<'arena>);
 
 /// A shape may specify whether or not fields are required. For example, consider
 /// this typedef:
@@ -774,6 +928,7 @@ arena_deserializer::impl_deserialize_in_arena!(RefinedConstBounds<'arena>);
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "deriving hash")]
 #[rust_to_ocaml(prefix = "s_")]
 #[repr(C)]
 pub struct ShapeType<'a> {
@@ -786,157 +941,3 @@ pub struct ShapeType<'a> {
 }
 impl<'a> TrivialDrop for ShapeType<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(ShapeType<'arena>);
-
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(and)]
-#[repr(C, u8)]
-pub enum Capability<'a> {
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    CapDefaults(&'a pos_or_decl::PosOrDecl<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    CapTy(&'a Ty<'a>),
-}
-impl<'a> TrivialDrop for Capability<'a> {}
-arena_deserializer::impl_deserialize_in_arena!(Capability<'arena>);
-
-/// Companion to fun_params type, intended to consolidate checking of
-/// implicit params for functions.
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(and)]
-#[repr(C)]
-pub struct FunImplicitParams<'a> {
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub capability: Capability<'a>,
-}
-impl<'a> TrivialDrop for FunImplicitParams<'a> {}
-arena_deserializer::impl_deserialize_in_arena!(FunImplicitParams<'arena>);
-
-/// The type of a function AND a method.
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(and)]
-#[rust_to_ocaml(prefix = "ft_")]
-#[repr(C)]
-pub struct FunType<'a> {
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub tparams: &'a [&'a Tparam<'a>],
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub where_constraints: &'a [&'a WhereConstraint<'a>],
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub params: &'a FunParams<'a>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub implicit_params: &'a FunImplicitParams<'a>,
-    /// Carries through the sync/async information from the aast
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub ret: &'a PossiblyEnforcedTy<'a>,
-    pub flags: typing_defs_flags::FunTypeFlags,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub ifc_decl: IfcFunDecl<'a>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub cross_package: CrossPackageDecl<'a>,
-}
-impl<'a> TrivialDrop for FunType<'a> {}
-arena_deserializer::impl_deserialize_in_arena!(FunType<'arena>);
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(and)]
-#[rust_to_ocaml(prefix = "et_")]
-#[repr(C)]
-pub struct PossiblyEnforcedTy<'a> {
-    /// True if consumer of this type enforces it at runtime
-    pub enforced: oxidized::typing_defs_core::Enforcement,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub type_: &'a Ty<'a>,
-}
-impl<'a> TrivialDrop for PossiblyEnforcedTy<'a> {}
-arena_deserializer::impl_deserialize_in_arena!(PossiblyEnforcedTy<'arena>);
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(and)]
-#[rust_to_ocaml(prefix = "fp_")]
-#[repr(C)]
-pub struct FunParam<'a> {
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub pos: &'a pos_or_decl::PosOrDecl<'a>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub name: Option<&'a str>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub type_: &'a PossiblyEnforcedTy<'a>,
-    pub flags: typing_defs_flags::FunParamFlags,
-}
-impl<'a> TrivialDrop for FunParam<'a> {}
-arena_deserializer::impl_deserialize_in_arena!(FunParam<'arena>);
-
-#[rust_to_ocaml(and)]
-#[rust_to_ocaml(attr = "deriving hash")]
-pub type FunParams<'a> = [&'a FunParam<'a>];

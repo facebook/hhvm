@@ -24,9 +24,9 @@ let set_bit bit value flags =
   else
     Int.bit_and (Int.bit_not bit) flags
 
-type fun_type_flags = int [@@deriving hash]
+type fun_type_flags = int [@@deriving eq, hash]
 
-type fun_param_flags = int [@@deriving hash]
+type fun_param_flags = int [@@deriving eq, hash]
 
 module ClassElt : sig
   type t [@@deriving show]

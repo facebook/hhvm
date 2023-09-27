@@ -44,7 +44,7 @@ type const_decl = {
   cd_pos: Pos_or_decl.t;
   cd_type: decl_ty;
 }
-[@@deriving show]
+[@@deriving eq, show]
 
 type class_elt = {
   ce_visibility: ce_visibility;
@@ -67,7 +67,7 @@ type fun_elt = {
   fe_no_auto_dynamic: bool;
   fe_no_auto_likes: bool;
 }
-[@@deriving show]
+[@@deriving eq, show]
 
 type class_const_kind =
   | CCAbstract of bool (* has default *)
@@ -97,26 +97,29 @@ type module_def_type = {
 }
 [@@deriving show]
 
-type requirement = Pos_or_decl.t * decl_ty
+type requirement = Pos_or_decl.t * decl_ty [@@deriving show]
 
-and abstract_typeconst = {
+type abstract_typeconst = {
   atc_as_constraint: decl_ty option;
   atc_super_constraint: decl_ty option;
   atc_default: decl_ty option;
 }
+[@@deriving show]
 
-and concrete_typeconst = { tc_type: decl_ty }
+type concrete_typeconst = { tc_type: decl_ty } [@@deriving show]
 
-and partially_abstract_typeconst = {
+type partially_abstract_typeconst = {
   patc_constraint: decl_ty;
   patc_type: decl_ty;
 }
+[@@deriving show]
 
-and typeconst =
+type typeconst =
   | TCAbstract of abstract_typeconst
   | TCConcrete of concrete_typeconst
+[@@deriving eq, show]
 
-and typeconst_type = {
+type typeconst_type = {
   ttc_synthesized: bool;
   ttc_name: pos_id;
   ttc_kind: typeconst;
@@ -126,13 +129,14 @@ and typeconst_type = {
   ttc_concretized: bool;
   ttc_is_ctx: bool;
 }
+[@@deriving show]
 
-and enum_type = {
+type enum_type = {
   te_base: decl_ty;
   te_constraint: decl_ty option;
   te_includes: decl_ty list;
 }
-[@@deriving show]
+[@@deriving eq, show]
 
 type typedef_type = {
   td_module: Ast_defs.id option;
@@ -147,7 +151,7 @@ type typedef_type = {
   td_internal: bool;
   td_docs_url: string option;
 }
-[@@deriving show]
+[@@deriving eq, show]
 
 type phase_ty =
   | DeclTy of decl_ty
@@ -304,11 +308,6 @@ module DependentKind : sig
   val is_generic_dep_ty : string -> bool
 end
 
-(** Returns [true] if both origins are available and identical.
-    If this function returns [true], the two types that have
-    the origins provided must be identical. *)
-val same_type_origin : type_origin -> type_origin -> bool
-
 module ShapeFieldMap : sig
   include module type of struct
     include TShapeMap
@@ -358,113 +357,9 @@ end
 
 val is_suggest_mode : bool Hh_prelude.ref
 
-val possibly_enforced_ty_compare :
-  ?normalize_lists:bool ->
-  'a ty possibly_enforced_ty ->
-  'a ty possibly_enforced_ty ->
-  Ppx_deriving_runtime.int
-
-val ft_param_compare :
-  ?normalize_lists:bool -> 'a ty fun_param -> 'a ty fun_param -> int
-
-val ft_params_compare :
-  ?normalize_lists:bool ->
-  'a ty fun_param list ->
-  'a ty fun_param list ->
-  Ppx_deriving_runtime.int
-
-val compare_locl_ty : ?normalize_lists:bool -> locl_ty -> locl_ty -> int
-
-val compare_decl_ty : ?normalize_lists:bool -> decl_ty -> decl_ty -> int
-
-val tyl_equal : 'a ty list -> 'a ty list -> bool
-
-val class_id_con_ordinal : ('a, 'b) Aast.class_id_ -> int
-
-val class_id_compare : ('a, 'b) Aast.class_id_ -> ('c, 'd) Aast.class_id_ -> int
-
-val class_id_equal : ('a, 'b) Aast.class_id_ -> ('c, 'd) Aast.class_id_ -> bool
-
-val has_member_compare :
-  normalize_lists:bool -> has_member -> has_member -> Ppx_deriving_runtime.int
-
-val can_index_compare :
-  normalize_lists:bool -> can_index -> can_index -> Ppx_deriving_runtime.int
-
-val destructure_compare :
-  normalize_lists:bool -> destructure -> destructure -> Ppx_deriving_runtime.int
-
-val constraint_ty_con_ordinal : constraint_type_ -> int
-
-val constraint_ty_compare :
-  ?normalize_lists:bool ->
-  constraint_type ->
-  constraint_type ->
-  Ppx_deriving_runtime.int
-
-val constraint_ty_equal :
-  ?normalize_lists:bool -> constraint_type -> constraint_type -> bool
-
-val ty_equal : ?normalize_lists:bool -> 'a ty -> 'a ty -> bool
-
-val compare_exact : exact -> exact -> int
-
-val equal_exact : exact -> exact -> bool
-
-val equal_internal_type : internal_type -> internal_type -> bool
-
-val equal_locl_ty : locl_ty -> locl_ty -> bool
-
-val equal_locl_ty_ : locl_ty_ -> locl_ty_ -> bool
-
 val is_type_no_return : locl_ty_ -> bool
 
-val equal_decl_ty_ :
-  decl_phase ty_ -> decl_phase ty_ -> Ppx_deriving_runtime.bool
-
-val equal_decl_ty : decl_phase ty -> decl_phase ty -> Ppx_deriving_runtime.bool
-
-val equal_shape_field_type :
-  decl_phase shape_field_type -> decl_phase shape_field_type -> bool
-
-val equal_decl_fun_type :
-  decl_phase ty fun_type -> decl_phase ty fun_type -> bool
-
 val non_public_ifc : ifc_fun_decl -> bool
-
-val equal_decl_tyl :
-  decl_phase ty Hh_prelude.List.t -> decl_phase ty Hh_prelude.List.t -> bool
-
-val equal_decl_possibly_enforced_ty :
-  decl_phase ty possibly_enforced_ty ->
-  decl_phase ty possibly_enforced_ty ->
-  bool
-
-val equal_decl_fun_param :
-  decl_phase ty fun_param -> decl_phase ty fun_param -> bool
-
-val equal_decl_ft_params :
-  decl_phase ty fun_params -> decl_phase ty fun_params -> bool
-
-val equal_decl_ft_implicit_params :
-  decl_ty fun_implicit_params -> decl_ty fun_implicit_params -> bool
-
-val equal_typeconst : typeconst -> typeconst -> bool
-
-val equal_enum_type : enum_type -> enum_type -> bool
-
-val equal_decl_where_constraint :
-  decl_phase ty * Ast_defs.constraint_kind * decl_phase ty ->
-  decl_phase ty * Ast_defs.constraint_kind * decl_phase ty ->
-  bool
-
-val equal_decl_tparam : decl_phase ty tparam -> decl_phase ty tparam -> bool
-
-val equal_typedef_type : typedef_type -> typedef_type -> bool
-
-val equal_fun_elt : fun_elt -> fun_elt -> bool
-
-val equal_const_decl : const_decl -> const_decl -> bool
 
 val get_ce_abstract : class_elt -> bool
 

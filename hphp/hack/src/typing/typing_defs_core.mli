@@ -92,13 +92,19 @@ type tshape_field_name =
     instead of Pos.t. Aast.ShapeField is used in shape expressions,
     while this is used in shape types. *)
 module TShapeField : sig
-  type t = tshape_field_name [@@deriving eq, ord]
+  type t = tshape_field_name
 
   val pos : t -> Pos_or_decl.t
 
   val name : t -> string
 
   val of_ast : (Pos.t -> Pos_or_decl.t) -> Ast_defs.shape_field_name -> t
+
+  (** Compare but ignore positions. *)
+  val compare : t -> t -> int
+
+  (** Whether two values are equal. Ignore positions. *)
+  val equal : t -> t -> bool
 end
 
 (** This is similar to Ast_defs.ShapeMap, but contains Pos_or_decl.t
@@ -172,28 +178,69 @@ type 'ty where_constraint = 'ty * Ast_defs.constraint_kind * 'ty
 [@@deriving eq, show]
 
 type enforcement =
-  (* The consumer doesn't enforce the type at runtime *)
-  | Unenforced
-  (* The consumer enforces the type at runtime *)
-  | Enforced
+  | Unenforced  (** The consumer doesn't enforce the type at runtime *)
+  | Enforced  (** The consumer enforces the type at runtime *)
 [@@deriving eq, show, ord]
-
-(* = Reason.t * 'phase ty_ *)
-type 'phase ty
-
-and decl_ty = decl_phase ty
-
-and locl_ty = locl_phase ty
 
 (** Negation types represent the type of values that fail an `is` test
     for either a primitive type, or a class-ish type C<_> *)
-and neg_type =
+type neg_type =
   | Neg_prim of Aast.tprim  (** The negation of a primitive type *)
   | Neg_class of pos_id
       (** The negation of a class. If we think of types as denoting sets
        of values, then (Neg_class C) is complement (Union tyl. C<tyl>), that is
        all values that are not in C<t1, ..., tn> for any application of C to type
        arguments. *)
+[@@deriving hash]
+
+(** Because Tfun is currently used as both a decl and locl ty, without this,
+  the HH\Contexts\defaults alias must be stored in shared memory for a
+  decl Tfun record. We can eliminate this if the majority of usages end up
+  explicit or if we separate decl and locl Tfuns. *)
+type 'ty capability =
+  | CapDefaults of Pos_or_decl.t  (** Should not be used for lambda inference *)
+  | CapTy of 'ty
+[@@deriving hash]
+
+(** Companion to fun_params type, intended to consolidate checking of
+  implicit params for functions. *)
+type 'ty fun_implicit_params = { capability: 'ty capability } [@@deriving hash]
+
+type 'ty possibly_enforced_ty = {
+  et_enforced: enforcement;
+  et_type: 'ty;
+}
+[@@deriving hash]
+
+type 'ty fun_param = {
+  fp_pos: Pos_or_decl.t;
+  fp_name: string option;
+  fp_type: 'ty possibly_enforced_ty;
+  fp_flags: int;
+}
+[@@deriving hash]
+
+type 'ty fun_params = 'ty fun_param list [@@deriving hash]
+
+(** The type of a function AND a method *)
+type 'ty fun_type = {
+  ft_tparams: 'ty tparam list;
+  ft_where_constraints: 'ty where_constraint list;
+  ft_params: 'ty fun_params;
+  ft_implicit_params: 'ty fun_implicit_params;
+  ft_ret: 'ty possibly_enforced_ty;
+  ft_flags: int;
+  ft_ifc_decl: ifc_fun_decl;
+  ft_cross_package: cross_package_decl;
+}
+[@@deriving hash]
+
+(** = Reason.t * 'phase ty_ *)
+type 'phase ty
+
+and decl_ty = decl_phase ty
+
+and locl_ty = locl_phase ty
 
 (* A shape may specify whether or not fields are required. For example, consider
    this typedef:
@@ -357,45 +404,22 @@ and 'phase shape_type = {
   s_unknown_value: 'phase ty;
   s_fields: 'phase shape_field_type TShapeMap.t;
 }
+[@@deriving hash]
 
-(* Because Tfun is currently used as both a decl and locl ty, without this,
- * the HH\Contexts\defaults alias must be stored in shared memory for a
- * decl Tfun record. We can eliminate this if the majority of usages end up
- * explicit or if we separate decl and locl Tfuns. *)
-and 'ty capability =
-  | CapDefaults of Pos_or_decl.t (* Should not be used for lambda inference *)
-  | CapTy of 'ty
+val equal_decl_ty : decl_ty -> decl_ty -> bool
 
-(** Companion to fun_params type, intended to consolidate checking of
- * implicit params for functions. *)
-and 'ty fun_implicit_params = { capability: 'ty capability }
+val ty_compare : ?normalize_lists:bool -> 'ph ty -> 'ph ty -> int
 
-(* The type of a function AND a method *)
-and 'ty fun_type = {
-  ft_tparams: 'ty tparam list;
-  ft_where_constraints: 'ty where_constraint list;
-  ft_params: 'ty fun_params;
-  ft_implicit_params: 'ty fun_implicit_params;
-  ft_ret: 'ty possibly_enforced_ty;
-  (* Carries through the sync/async information from the aast *)
-  ft_flags: int;
-  ft_ifc_decl: ifc_fun_decl;
-  ft_cross_package: cross_package_decl;
-}
+val ty__compare : ?normalize_lists:bool -> 'ph ty_ -> 'ph ty_ -> int
 
-and 'ty possibly_enforced_ty = {
-  et_enforced: enforcement;
-  et_type: 'ty;
-}
+val tyl_compare :
+  sort:bool -> ?normalize_lists:bool -> 'ph ty list -> 'ph ty list -> int
 
-and 'ty fun_param = {
-  fp_pos: Pos_or_decl.t;
-  fp_name: string option;
-  fp_type: 'ty possibly_enforced_ty;
-  fp_flags: int;
-}
+val equal_shape_field_type :
+  decl_phase shape_field_type -> decl_phase shape_field_type -> bool
 
-and 'ty fun_params = 'ty fun_param list [@@deriving hash]
+(** Whether equal modulo reason and position info. *)
+val exact_equal : exact -> exact -> bool
 
 val nonexact : exact
 
@@ -513,27 +537,27 @@ type decl_ty_ = decl_phase ty_
 
 type locl_ty_ = locl_phase ty_
 
-type decl_tparam = decl_ty tparam [@@deriving show]
+type decl_tparam = decl_ty tparam [@@deriving eq, show]
 
 type locl_tparam = locl_ty tparam
 
-type decl_where_constraint = decl_ty where_constraint [@@deriving show]
+type decl_where_constraint = decl_ty where_constraint [@@deriving eq, show]
 
 type locl_where_constraint = locl_ty where_constraint
 
-type decl_fun_type = decl_ty fun_type
+type decl_fun_type = decl_ty fun_type [@@deriving eq]
 
 type locl_fun_type = locl_ty fun_type
 
-type decl_possibly_enforced_ty = decl_ty possibly_enforced_ty
+type decl_possibly_enforced_ty = decl_ty possibly_enforced_ty [@@deriving eq]
 
 type locl_possibly_enforced_ty = locl_ty possibly_enforced_ty [@@deriving show]
 
-type decl_fun_param = decl_ty fun_param
+type decl_fun_param = decl_ty fun_param [@@deriving eq]
 
 type locl_fun_param = locl_ty fun_param
 
-type decl_fun_params = decl_ty fun_params
+type decl_fun_params = decl_ty fun_params [@@deriving eq]
 
 type locl_fun_params = locl_ty fun_params
 
@@ -649,10 +673,18 @@ type constraint_type_ =
 type internal_type =
   | LoclType of locl_ty
   | ConstraintType of constraint_type
-[@@deriving show]
+[@@deriving eq, show]
 
-(* Abstraction *)
-val compare_decl_ty : decl_ty -> decl_ty -> int
+(** Returns [true] if both origins are available and identical.
+    If this function returns [true], the two types that have
+    the origins provided must be identical. *)
+val same_type_origin : type_origin -> type_origin -> bool
+
+val ft_params_compare :
+  ?normalize_lists:bool ->
+  'a ty fun_param list ->
+  'a ty fun_param list ->
+  Ppx_deriving_runtime.int
 
 val mk : 'phase Reason.t_ * 'phase ty_ -> 'phase ty
 
@@ -679,3 +711,25 @@ val get_reason_i : internal_type -> Reason.t
 
 (** Hack keyword for this visibility *)
 val string_of_visibility : ce_visibility -> string
+
+val compare_locl_ty : ?normalize_lists:bool -> locl_ty -> locl_ty -> int
+
+val compare_decl_ty : ?normalize_lists:bool -> decl_ty -> decl_ty -> int
+
+val tyl_equal : 'a ty list -> 'a ty list -> bool
+
+val class_id_equal : ('a, 'b) Aast.class_id_ -> ('c, 'd) Aast.class_id_ -> bool
+
+val constraint_ty_compare :
+  ?normalize_lists:bool ->
+  constraint_type ->
+  constraint_type ->
+  Ppx_deriving_runtime.int
+
+val ty_equal : ?normalize_lists:bool -> 'a ty -> 'a ty -> bool
+
+val equal_locl_ty : locl_ty -> locl_ty -> bool
+
+val equal_locl_ty_ : locl_ty_ -> locl_ty_ -> bool
+
+val equal_decl_tyl : decl_ty list -> decl_ty list -> bool

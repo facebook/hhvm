@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0f6a7ecb7b50461b7df35f10267fc90b>>
+// @generated SignedSource<<214a083728e67bdd12a2d28fdf2ca93b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -84,10 +84,25 @@ pub trait Visitor<'a> {
     fn visit_where_constraint(&mut self, p: &'a WhereConstraint<'a>) {
         p.recurse(self.object())
     }
-    fn visit_ty(&mut self, p: &'a Ty<'a>) {
+    fn visit_capability(&mut self, p: &'a Capability<'a>) {
+        p.recurse(self.object())
+    }
+    fn visit_fun_implicit_params(&mut self, p: &'a FunImplicitParams<'a>) {
+        p.recurse(self.object())
+    }
+    fn visit_possibly_enforced_ty(&mut self, p: &'a PossiblyEnforcedTy<'a>) {
+        p.recurse(self.object())
+    }
+    fn visit_fun_param(&mut self, p: &'a FunParam<'a>) {
+        p.recurse(self.object())
+    }
+    fn visit_fun_type(&mut self, p: &'a FunType<'a>) {
         p.recurse(self.object())
     }
     fn visit_neg_type(&mut self, p: &'a NegType<'a>) {
+        p.recurse(self.object())
+    }
+    fn visit_ty(&mut self, p: &'a Ty<'a>) {
         p.recurse(self.object())
     }
     fn visit_shape_field_type(&mut self, p: &'a ShapeFieldType<'a>) {
@@ -115,21 +130,6 @@ pub trait Visitor<'a> {
         p.recurse(self.object())
     }
     fn visit_shape_type(&mut self, p: &'a ShapeType<'a>) {
-        p.recurse(self.object())
-    }
-    fn visit_capability(&mut self, p: &'a Capability<'a>) {
-        p.recurse(self.object())
-    }
-    fn visit_fun_implicit_params(&mut self, p: &'a FunImplicitParams<'a>) {
-        p.recurse(self.object())
-    }
-    fn visit_fun_type(&mut self, p: &'a FunType<'a>) {
-        p.recurse(self.object())
-    }
-    fn visit_possibly_enforced_ty(&mut self, p: &'a PossiblyEnforcedTy<'a>) {
-        p.recurse(self.object())
-    }
-    fn visit_fun_param(&mut self, p: &'a FunParam<'a>) {
         p.recurse(self.object())
     }
     fn visit_class_const_from(&mut self, p: &'a ClassConstFrom<'a>) {

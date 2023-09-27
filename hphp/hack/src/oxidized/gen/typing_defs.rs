@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a4ea892034ea9ce01ec09ff8408915d0>>
+// @generated SignedSource<<63fadae8d456c86768e01c614b4f715b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -104,7 +104,7 @@ pub struct ClassConstRef(pub ClassConstFrom, pub String);
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving show")]
+#[rust_to_ocaml(attr = "deriving (show, eq)")]
 #[rust_to_ocaml(prefix = "cd_")]
 #[repr(C)]
 pub struct ConstDecl {
@@ -156,7 +156,7 @@ pub struct ClassElt {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving show")]
+#[rust_to_ocaml(attr = "deriving (show, eq)")]
 #[rust_to_ocaml(prefix = "fe_")]
 #[repr(C)]
 pub struct FunElt {
@@ -300,6 +300,7 @@ pub struct ModuleDefType {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
 #[repr(C)]
 pub struct Requirement(pub pos_or_decl::PosOrDecl, pub Ty);
 
@@ -318,7 +319,7 @@ pub struct Requirement(pub pos_or_decl::PosOrDecl, pub Ty);
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[rust_to_ocaml(prefix = "atc_")]
 #[repr(C)]
 pub struct AbstractTypeconst {
@@ -342,7 +343,7 @@ pub struct AbstractTypeconst {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(C)]
 pub struct ConcreteTypeconst {
     pub tc_type: Ty,
@@ -363,7 +364,7 @@ pub struct ConcreteTypeconst {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "deriving show")]
 #[rust_to_ocaml(prefix = "patc_")]
 #[repr(C)]
 pub struct PartiallyAbstractTypeconst {
@@ -386,7 +387,7 @@ pub struct PartiallyAbstractTypeconst {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(C, u8)]
 pub enum Typeconst {
     TCAbstract(AbstractTypeconst),
@@ -408,7 +409,7 @@ pub enum Typeconst {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "deriving show")]
 #[rust_to_ocaml(prefix = "ttc_")]
 #[repr(C)]
 pub struct TypeconstType {
@@ -455,8 +456,7 @@ pub struct TypeconstType {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(and)]
-#[rust_to_ocaml(attr = "deriving show")]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[rust_to_ocaml(prefix = "te_")]
 #[repr(C)]
 pub struct EnumType {
@@ -480,7 +480,7 @@ pub struct EnumType {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving show")]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[rust_to_ocaml(prefix = "td_")]
 #[repr(C)]
 pub struct TypedefType {

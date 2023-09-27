@@ -23,6 +23,7 @@ let initialize
       SearchUtils.default_si_env with
       sie_provider = SearchUtils.provider_of_string provider_name;
       sie_quiet_mode = quiet;
+      sie_namespace_map = namespace_map;
       glean_reponame = GleanOptions.reponame gleanopt;
     }
   in
@@ -35,22 +36,6 @@ let initialize
     | LocalIndex ->
       sienv
   in
-  (* Fetch namespaces from provider-specific query *)
-  let namespace_list =
-    match sienv.sie_provider with
-    | CustomIndex -> CustomSearchService.fetch_namespaces ~sienv
-    | NoIndex
-    | MockIndex _
-    | LocalIndex ->
-      []
-  in
-  (* Register all namespaces *)
-  List.iter namespace_list ~f:(fun namespace ->
-      NamespaceSearchService.register_namespace ~sienv ~namespace);
-
-  (* Add namespace aliases from the .hhconfig file *)
-  List.iter namespace_map ~f:(fun (alias, target) ->
-      NamespaceSearchService.register_alias ~sienv ~alias ~target);
 
   (* Here's the initialized environment *)
   if not sienv.sie_quiet_mode then
@@ -96,7 +81,8 @@ let find_matching_symbols
       ],
       !is_complete )
   else
-    (* Potential namespace matches always show up first *)
+    (* Namespace aliases. For instance, if File is an alias for \FlibSL\File,
+       then "Fi|" will definitely show File. *)
     let namespace_results =
       match context with
       | Ac_workspace_symbol -> []
@@ -104,9 +90,17 @@ let find_matching_symbols
       | Acnew
       | Actype
       | Actrait_only ->
-        NamespaceSearchService.find_matching_namespaces
-          ~sienv:!sienv_ref
-          ~query_text
+        List.filter_map !sienv_ref.sie_namespace_map ~f:(fun (alias, map) ->
+            if String.is_prefix alias ~prefix:query_text then
+              Some
+                {
+                  si_name = alias;
+                  si_kind = SI_Namespace;
+                  si_file = SI_Filehash "0";
+                  si_fullname = map;
+                }
+            else
+              None)
     in
     (* The local index captures symbols in files that have been changed on disk.
      * Search it first for matches, then search global and add any elements
@@ -154,7 +148,7 @@ let find_matching_symbols
     in
     (* Strip namespace already typed from the results *)
     let (ns, _) = Utils.split_ns_from_name query_text in
-    let clean_results =
+    let results =
       if String.equal ns "" || String.equal ns "\\" then
         dedup_results
       else
@@ -162,7 +156,7 @@ let find_matching_symbols
             { s with si_name = String_utils.lstrip s.si_name ns })
     in
     (* Namespaces should always appear first *)
-    let results = List.append namespace_results clean_results in
+    let results = List.append namespace_results results in
     (List.take results max_results, !is_complete)
 
 let find_refs

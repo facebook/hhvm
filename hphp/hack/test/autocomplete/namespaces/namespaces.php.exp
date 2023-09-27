@@ -3,6 +3,9 @@ SecureRandom
   INSERT SecureRandom
   namespace
 //// SecureRandom.php
+SecureRandom
+  INSERT SecureRandom
+  namespace
 //// bSecureRando.php
 SecureRandom
   INSERT SecureRandom
@@ -12,9 +15,18 @@ Vec
   INSERT Vec
   namespace
 //// Vec.php
+Vec
+  INSERT Vec
+  namespace
 //// bVe.php
 Vec
   INSERT Vec
   namespace
 //// C.php
+C
+  INSERT C
+  namespace
 //// bC.php
+C
+  INSERT C
+  namespace

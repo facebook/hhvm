@@ -18,7 +18,6 @@
  (modules
   classMethodSearch
   customSearchService
-  namespaceSearchService
   symbolIndex)
  (libraries
   ast

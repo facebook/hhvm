@@ -157,16 +157,6 @@ module Tombstone_set = struct
   include Reordered_argument_set (Set.Make (Tombstone))
 end
 
-(* Information about one leaf in the namespace tree *)
-type nss_node = {
-  (* The name of just this leaf *)
-  nss_name: string;
-  (* The full name including all parent trunks above this leaf *)
-  nss_full_namespace: string;
-  (* A hashtable of all leaf elements below this branch *)
-  nss_children: (string, nss_node) Hashtbl.t;
-}
-
 (* Context information for the current symbol index *)
 type si_env = {
   sie_provider: search_provider;
@@ -193,6 +183,7 @@ type si_env = {
   sie_resolve_signatures: bool;
   sie_resolve_positions: bool;
   sie_resolve_local_decl: bool;
+  sie_namespace_map: (string * string) list;
   (* MockIndex *)
   mock_on_find: mock_on_find;
   (* LocalSearchService *)
@@ -204,8 +195,6 @@ type si_env = {
       this only exists for compatibility with stores (sql, www.autocomplete)
       that use filehashes, and won't be needed once we move solely
       to stures that use paths (local, www.hack.light). *)
-  (* NamespaceSearchService *)
-  nss_root_namespace: nss_node;
   (* CustomSearchService *)
   glean_reponame: string;
   glean_handle: Glean.handle option;
@@ -221,19 +210,13 @@ let default_si_env =
     sie_resolve_signatures = false;
     sie_resolve_positions = false;
     sie_resolve_local_decl = false;
+    sie_namespace_map = [];
     (* MockIndex *)
     mock_on_find = (fun ~query_text:_ ~context:_ ~kind_filter:_ -> []);
     (* LocalSearchService *)
     lss_fullitems = Relative_path.Map.empty;
     lss_tombstones = Relative_path.Set.empty;
     lss_tombstone_hashes = Tombstone_set.empty;
-    (* NamespaceSearchService *)
-    nss_root_namespace =
-      {
-        nss_name = "\\";
-        nss_full_namespace = "\\";
-        nss_children = Hashtbl.create 0;
-      };
     (* CustomSearchService *)
     glean_reponame = "";
     glean_handle = None;

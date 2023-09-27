@@ -188,92 +188,6 @@ let test_builder_names (harness : Test_harness.t) : bool =
   (* All good *)
   true
 
-(* Ensure that the namespace map handles common use cases *)
-let test_namespace_map (harness : Test_harness.t) : bool =
-  NamespaceSearchService.(
-    let _ = harness in
-    let sienv = SearchUtils.quiet_si_env in
-    (* Register a namespace and fetch it back exactly *)
-    register_namespace ~sienv ~namespace:"HH\\Lib\\Str\\fb";
-    let ns = find_exact_match ~sienv ~namespace:"HH" in
-    SA.assert_equals "\\HH" ns.nss_full_namespace "Basic match";
-    let ns = find_exact_match ~sienv ~namespace:"HH\\Lib" in
-    SA.assert_equals "\\HH\\Lib" ns.nss_full_namespace "Basic match";
-    let ns = find_exact_match ~sienv ~namespace:"HH\\Lib\\Str" in
-    SA.assert_equals "\\HH\\Lib\\Str" ns.nss_full_namespace "Basic match";
-    let ns = find_exact_match ~sienv ~namespace:"HH\\Lib\\Str\\fb" in
-    SA.assert_equals "\\HH\\Lib\\Str\\fb" ns.nss_full_namespace "Basic match";
-
-    (* Fetch back case insensitive *)
-    let ns = find_exact_match ~sienv ~namespace:"hh" in
-    SA.assert_equals "\\HH" ns.nss_full_namespace "Case insensitive";
-    let ns = find_exact_match ~sienv ~namespace:"hh\\lib" in
-    SA.assert_equals "\\HH\\Lib" ns.nss_full_namespace "Case insensitive";
-    let ns = find_exact_match ~sienv ~namespace:"hh\\lib\\str" in
-    SA.assert_equals "\\HH\\Lib\\Str" ns.nss_full_namespace "Case insensitive";
-    let ns = find_exact_match ~sienv ~namespace:"hh\\lib\\str\\FB" in
-    SA.assert_equals
-      "\\HH\\Lib\\Str\\fb"
-      ns.nss_full_namespace
-      "Case insensitive";
-
-    (* Register an alias and verify that it works as expected *)
-    register_alias ~sienv ~alias:"Str" ~target:"HH\\Lib\\Str";
-    let ns = find_exact_match ~sienv ~namespace:"Str" in
-    SA.assert_equals "\\HH\\Lib\\Str" ns.nss_full_namespace "Alias search";
-    let ns = find_exact_match ~sienv ~namespace:"Str\\fb" in
-    SA.assert_equals "\\HH\\Lib\\Str\\fb" ns.nss_full_namespace "Alias search";
-
-    (* Register an alias with a leading backslash *)
-    register_alias ~sienv ~alias:"StrFb" ~target:"\\HH\\Lib\\Str\\fb";
-    let ns = find_exact_match ~sienv ~namespace:"StrFb" in
-    SA.assert_equals "\\HH\\Lib\\Str\\fb" ns.nss_full_namespace "Alias search";
-
-    (* Add a new namespace under an alias, and make sure it's visible *)
-    register_namespace ~sienv ~namespace:"StrFb\\SecureRandom";
-    let ns =
-      find_exact_match ~sienv ~namespace:"\\hh\\lib\\str\\fb\\securerandom"
-    in
-    SA.assert_equals
-      "\\HH\\Lib\\Str\\fb\\SecureRandom"
-      ns.nss_full_namespace
-      "Late bound namespace";
-
-    (* Should always be able to find root *)
-    let ns = find_exact_match ~sienv ~namespace:"\\" in
-    SA.assert_equals "\\" ns.nss_full_namespace "Find root";
-    let ns = find_exact_match ~sienv ~namespace:"" in
-    SA.assert_equals "\\" ns.nss_full_namespace "Find root";
-    let ns = find_exact_match ~sienv ~namespace:"\\\\" in
-    SA.assert_equals "\\" ns.nss_full_namespace "Find root";
-
-    (* Test partial matches *)
-    let matches = find_matching_namespaces ~sienv ~query_text:"st" in
-    assert_ns_matches "Str" matches;
-
-    (* Assuming we're in a leaf node, find matches under that leaf node *)
-    let matches = find_matching_namespaces ~sienv ~query_text:"StrFb\\Secu" in
-    assert_ns_matches "SecureRandom" matches;
-
-    (* Special case: empty string always provides zero matches *)
-    let matches = find_matching_namespaces ~sienv ~query_text:"" in
-    IA.assert_equals 0 (List.length matches) "Empty string / zero matches";
-
-    (* Special case: single backslash should show at least these root namespaces *)
-    let matches = find_matching_namespaces ~sienv ~query_text:"\\" in
-    assert_ns_matches "Str" matches;
-    assert_ns_matches "StrFb" matches;
-    assert_ns_matches "HH" matches;
-
-    (* Normal use case *)
-    Hh_logger.log "Reached the hh section";
-    let matches = find_matching_namespaces ~sienv ~query_text:"hh" in
-    assert_ns_matches "Lib" matches;
-    let matches = find_matching_namespaces ~sienv ~query_text:"\\HH\\" in
-    assert_ns_matches "Lib" matches;
-
-    true)
-
 (* Rapid unit tests to verify docblocks are found and correct *)
 let test_docblock_finder (harness : Test_harness.t) : bool =
   let _ = harness in
@@ -324,12 +238,6 @@ let tests args =
           ~stop_server_in_teardown:false
           harness_config
           test_builder_names );
-    ( "test_namespace_map",
-      fun () ->
-        Test_harness.run_test
-          ~stop_server_in_teardown:false
-          harness_config
-          test_namespace_map );
     ( "test_docblock_finder",
       fun () ->
         Test_harness.run_test

@@ -155,42 +155,6 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
     method on_locl_ty_list env tyl = List.map_env env tyl ~f:this#on_type
   end
 
-(* Mixin class - adding it to shallow type mapper creates a mapper that
- * traverses the type by going inside Tunion *)
-class virtual ['env] tunion_type_mapper =
-  object (this)
-    method on_tunion env r tyl : 'env * locl_ty =
-      let (env, tyl) = this#on_locl_ty_list env tyl in
-      (env, mk (r, Tunion tyl))
-
-    method virtual on_locl_ty_list : 'env -> locl_ty list -> 'env * locl_ty list
-  end
-
-class virtual ['env] tinter_type_mapper =
-  object (this)
-    method on_tintersection env r tyl : 'env * locl_ty =
-      let (env, tyl) = this#on_locl_ty_list env tyl in
-      (env, mk (r, Tintersection tyl))
-
-    method virtual on_locl_ty_list : 'env -> locl_ty list -> 'env * locl_ty list
-  end
-
-(* Mixin that expands type variables. *)
-class virtual ['env] tvar_expanding_type_mapper =
-  object (this)
-    method on_tvar (env, expand) r n =
-      let (env, ty) = expand env r n in
-      if Typing_defs.is_tyvar ty then
-        ((env, expand), ty)
-      else
-        this#on_type (env, expand) ty
-
-    method virtual on_type
-        : 'env * ('env -> Reason.t -> int -> 'env * locl_ty) ->
-          locl_ty ->
-          ('env * ('env -> Reason.t -> int -> 'env * locl_ty)) * locl_ty
-  end
-
 (* Implementation of type_mapper that recursively visits everything in the
  * type.
  * NOTE: by default it doesn't to anything to Tvars. Include one of the mixins
@@ -199,9 +163,13 @@ class ['env] deep_type_mapper =
   object (this)
     inherit ['env] shallow_type_mapper
 
-    inherit! ['env] tunion_type_mapper
+    method! on_tunion env r tyl : 'env * locl_ty =
+      let (env, tyl) = List.map_env env tyl ~f:this#on_type in
+      (env, mk (r, Tunion tyl))
 
-    inherit! ['env] tinter_type_mapper
+    method! on_tintersection env r tyl : 'env * locl_ty =
+      let (env, tyl) = List.map_env env tyl ~f:this#on_type in
+      (env, mk (r, Tintersection tyl))
 
     method! on_ttuple env r tyl =
       let (env, tyl) = this#on_locl_ty_list env tyl in
@@ -353,8 +321,9 @@ class ['env] deep_type_mapper =
 
     method private on_possibly_enforced_ty
         env (x : locl_ty possibly_enforced_ty) =
-      let (env, et_type) = this#on_type env x.et_type in
-      (env, { x with et_type })
+      let { et_type; et_enforced } = x in
+      let (env, et_type) = this#on_type env et_type in
+      (env, { et_type; et_enforced })
   end
 
 class type ['env] constraint_type_mapper_type =

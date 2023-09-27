@@ -32,9 +32,7 @@ let enum_base_type env cid =
 
 let opaque_enum_expander =
   object
-    inherit Type_mapper.deep_type_mapper as super
-
-    inherit! Type_mapper.tvar_expanding_type_mapper
+    inherit Type_mapper.tvar_expanding_type_mapper as super
 
     method! on_tnewtype env r cid tyl cstr =
       match get_node cstr with

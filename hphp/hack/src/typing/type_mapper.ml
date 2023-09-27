@@ -30,37 +30,14 @@ class deep_type_mapper : type_mapper_type =
     inherit [env] Map.deep_type_mapper
   end
 
-class virtual tunion_type_mapper =
-  object
-    inherit [env] Map.tunion_type_mapper
-  end
-
-class virtual tinter_type_mapper =
-  object
-    inherit [env] Map.tinter_type_mapper
-  end
-
-(* Mixin that expands type variables. *)
-class virtual tvar_expanding_type_mapper =
+class tvar_expanding_type_mapper =
   object (this)
-    method on_tvar env (r : Reason.t) n =
+    inherit deep_type_mapper
+
+    method! on_tvar env r n =
       let (env, ty) = Env.get_type env r n in
-      if is_tyvar ty then
+      if Typing_defs.is_tyvar ty then
         (env, ty)
       else
         this#on_type env ty
-
-    method virtual on_type : env -> locl_ty -> result
-  end
-
-(** Type mapper which only maps types under combinations of unions, options and intersections. *)
-class union_inter_type_mapper =
-  object
-    inherit shallow_type_mapper
-
-    inherit! tunion_type_mapper
-
-    inherit! tinter_type_mapper
-
-    inherit! tvar_expanding_type_mapper
   end

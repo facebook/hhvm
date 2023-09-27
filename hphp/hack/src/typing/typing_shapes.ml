@@ -307,11 +307,7 @@ let remove_key p env shape_ty field =
 let to_collection env pos shape_ty res return_type =
   let mapper =
     object (self)
-      inherit Type_mapper.shallow_type_mapper as super
-
-      inherit! Type_mapper.tunion_type_mapper
-
-      inherit! Type_mapper.tvar_expanding_type_mapper
+      inherit Type_mapper.tvar_expanding_type_mapper as super
 
       method! on_tshape env r s =
         let { s_origin = _; s_unknown_value = shape_kind; s_fields = fdm } =

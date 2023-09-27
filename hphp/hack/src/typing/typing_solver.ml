@@ -973,7 +973,7 @@ let rec non_null env pos ty =
      types. *)
   let make_concrete_super_types_nonnull =
     object
-      inherit Type_mapper.union_inter_type_mapper as super
+      inherit Type_mapper.tvar_expanding_type_mapper as super
 
       method! on_tdependent env r dep cstr =
         let ty = mk (r, Tdependent (dep, cstr)) in

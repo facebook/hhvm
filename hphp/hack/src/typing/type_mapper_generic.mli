@@ -130,49 +130,6 @@ class type ['env] type_mapper_type =
  * types. *)
 class ['env] shallow_type_mapper : ['env] type_mapper_type
 
-(* Mixin class - adding it to shallow type mapper creates a mapper that
- * traverses the type by going inside Tunion *)
-class virtual ['env] tunion_type_mapper :
-  object
-    method on_tunion :
-      'env ->
-      Typing_reason.t ->
-      Typing_defs.locl_ty list ->
-      'env * Typing_defs.locl_ty
-
-    method virtual on_locl_ty_list :
-      'env -> Typing_defs.locl_ty list -> 'env * Typing_defs.locl_ty list
-  end
-
-class virtual ['env] tinter_type_mapper :
-  object
-    method on_tintersection :
-      'env ->
-      Typing_reason.t ->
-      Typing_defs.locl_ty list ->
-      'env * Typing_defs.locl_ty
-
-    method virtual on_locl_ty_list :
-      'env -> Typing_defs.locl_ty list -> 'env * Typing_defs.locl_ty list
-  end
-
-(* Mixin that expands type variables. *)
-class virtual ['env] tvar_expanding_type_mapper :
-  object
-    method on_tvar :
-      'env * ('env -> Typing_reason.t -> int -> 'env * Typing_defs.locl_ty) ->
-      Typing_reason.t ->
-      int ->
-      ('env * ('env -> Typing_reason.t -> int -> 'env * Typing_defs.locl_ty))
-      * Typing_defs.locl_ty
-
-    method virtual on_type :
-      'env * ('env -> Typing_reason.t -> int -> 'env * Typing_defs.locl_ty) ->
-      Typing_defs.locl_ty ->
-      ('env * ('env -> Typing_reason.t -> int -> 'env * Typing_defs.locl_ty))
-      * Typing_defs.locl_ty
-  end
-
 (* Implementation of type_mapper that recursively visits everything in the
  * type.
  * NOTE: by default it doesn't do anything to Tvars. Include one of the mixins

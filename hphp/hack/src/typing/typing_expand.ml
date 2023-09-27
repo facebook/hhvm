@@ -20,9 +20,7 @@ open Hh_prelude
 
 let visitor =
   object
-    inherit Type_mapper.deep_type_mapper
-
-    inherit! Type_mapper.tvar_expanding_type_mapper
+    inherit Type_mapper.tvar_expanding_type_mapper
   end
 
 (*****************************************************************************)

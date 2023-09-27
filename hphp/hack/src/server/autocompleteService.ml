@@ -1490,6 +1490,10 @@ let find_global_results
         None
     in
 
+    (* Note that we are called by a visitor on the TAST, and the TAST has already done namespace-aliasing elaboration.
+       For instance given source code "Vec\chAUTO332" and .hhconfig auto_namespace_map={"Vec":"FlibSL\\Vec"},
+       then the TAST will have a node with id "FLibSL\Vec\chAUTO332".
+       This then will be the [query_text] that we send to [find_matching_symbols]. *)
     let (results, is_complete) =
       SymbolIndex.find_matching_symbols
         ~sienv_ref

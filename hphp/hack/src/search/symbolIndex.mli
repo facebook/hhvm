@@ -24,7 +24,10 @@ val mock :
     SearchTypes.si_item list) ->
   SearchUtils.si_env
 
-(** This is the proper search function everyone should use *)
+(** This is the proper search function everyone should use.
+The caller is expected to have done any namespace aliasing already,
+e.g. if .hhconfig has auto_namespace_map={"Vec":"FlibSL\\Vec"}
+then this function will give answers for query_text="FLibSL\Vec\ch" but not "Vec\ch". *)
 val find_matching_symbols :
   sienv_ref:SearchUtils.si_env ref ->
   query_text:string ->

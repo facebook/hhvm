@@ -18,7 +18,8 @@
 
 #include <hphp/runtime/base/datatype.h>
 #include "hphp/runtime/base/annot-type.h"
-#include "hphp/runtime/vm/named-entity.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/type-constraint-flags.h"
 #include "hphp/runtime/vm/type-profile.h"
@@ -32,6 +33,7 @@
 
 namespace HPHP {
 struct Func;
+struct NamedType;
 struct StringData;
 }
 
@@ -70,39 +72,16 @@ struct TypeConstraint {
     LowPtr<const NamedType> m_namedType;
 
     ClassConstraint() = default;
-    explicit ClassConstraint(LowStringPtr typeName)
-      : ClassConstraint(nullptr, typeName, nullptr) {
-      assertx(!typeName || typeName->isStatic());
-    }
+    explicit ClassConstraint(LowStringPtr typeName);
     ClassConstraint(LowStringPtr clsName,
-                     LowStringPtr typeName,
-                     LowPtr<const NamedType> namedType)
-      : m_clsName(clsName)
-      , m_typeName(typeName)
-      , m_namedType(namedType)
-    {
-      assertx(!clsName || clsName->isStatic());
-      assertx(!typeName || typeName->isStatic());
-    }
+                    LowStringPtr typeName,
+                    LowPtr<const NamedType> namedType);
 
     size_t stableHash() const;
     bool operator==(const ClassConstraint& o) const;
 
-    template<class SerDe>
-    void serdeHelper(SerDe& sd, bool resolved) {
-      sd(m_typeName);
-      if (resolved) {
-        sd(m_clsName);
-      }
-    }
-
-    template<class SerDe>
-    void serdeHelper(SerDe& sd, bool resolved) const {
-      sd(m_typeName);
-      if (resolved) {
-        sd(m_clsName);
-      }
-    }
+    void serdeHelper(BlobDecoder& sd, bool resolved);
+    void serdeHelper(BlobEncoder& sd, bool resolved) const;
 
     void init(AnnotType type);
   };
@@ -165,97 +144,19 @@ struct TypeConstraint {
 
   static_assert(CheckSize<UnionConstraint, use_lowptr ? 12 : 24>(), "");
 
-  TypeConstraint()
-      : m_flags(NoFlags)
-      , m_u {
-          .single={
-            .type=Type::Nothing,
-            .class_=ClassConstraint{nullptr}
-          }
-        } {
-    init();
-  }
-
-  TypeConstraint(const StringData* typeName, TypeConstraintFlags flags)
-      : m_flags(flags)
-      , m_u {
-          .single={
-            .type=Type::Nothing,
-            .class_=ClassConstraint{typeName}
-          }
-        } {
-    init();
-  }
-
-  TypeConstraint(Type type, TypeConstraintFlags flags, ClassConstraint class_)
-    : m_flags(flags)
-      , m_u {
-          .single={
-            .type=type,
-            .class_=class_
-          }
-        } {
-  }
+  TypeConstraint();
+  TypeConstraint(const StringData* typeName, TypeConstraintFlags flags);
+  TypeConstraint(Type type, TypeConstraintFlags flags, ClassConstraint class_);
+  TypeConstraint(Type type,
+                 TypeConstraintFlags flags,
+                 const LowStringPtr typeName);
 
   static TypeConstraint makeUnion(LowStringPtr typeName, folly::Range<const TypeConstraint*> tcs);
+  static TypeConstraint makeMixed();
 
-  template<class SerDe>
-  void serde(SerDe& sd) {
-    sd(m_flags);
-    if (isUnion()) {
-      serdeUnion(sd);
-    } else {
-      serdeSingle(sd);
-    }
-  }
-
-  template<class SerDe>
-  void serdeUnion(SerDe& sd) {
-    sd(m_u.union_.m_mask);
-    sd(m_u.union_.m_typeName);
-
-    // m_classes
-    if constexpr (SerDe::deserializing) {
-      size_t sz;
-      sd(sz);
-      m_u.union_.m_classes = nullptr;
-      if (sz) {
-        std::vector<ClassConstraint> classes;
-        classes.reserve(sz);
-        bool resolved = (m_flags & TypeConstraintFlags::Resolved) != 0;
-        for (size_t i = 0; i < sz; ++i) {
-          ClassConstraint oc;
-          oc.serdeHelper(sd, resolved);
-          oc.init(resolved ? AnnotType::Object : AnnotType::Unresolved);
-          classes.emplace_back(std::move(oc));
-        }
-        m_u.union_.m_classes = UnionConstraint::allocObjects(std::move(classes));
-      }
-      initUnion();
-    } else {
-      auto classes = m_u.union_.m_classes;
-      size_t sz = classes ? classes->m_list.size() : 0;
-      sd(sz);
-      if (classes) {
-        bool resolved = (m_flags & TypeConstraintFlags::Resolved) != 0;
-        for (const ClassConstraint& oc : classes->m_list) {
-          oc.serdeHelper(sd, resolved);
-        }
-      }
-    }
-  }
-
-  template<class SerDe>
-  void serdeSingle(SerDe& sd) {
-    bool resolved = (m_flags & TypeConstraintFlags::Resolved) != 0;
-    if (resolved) {
-      sd(m_u.single.type);
-    }
-    m_u.single.class_.serdeHelper(sd, resolved);
-    if constexpr (SerDe::deserializing) {
-      initSingle();
-    }
-  }
+  template<class SerDe> void serde(SerDe& sd);
+  template<class SerDe> void serdeUnion(SerDe& sd);
+  template<class SerDe> void serdeSingle(SerDe& sd);
 
   TypeConstraint(const TypeConstraint&) = default;
   TypeConstraint& operator=(const TypeConstraint&) = default;
@@ -596,20 +497,13 @@ struct TypeConstraint {
   MaybeDataType asSystemlibType() const;
 
 private:
-  void init();
   void initSingle();
   void initUnion();
 
   TypeConstraint(TypeConstraintFlags flags,
                  UnionTypeMask mask,
                  LowStringPtr typeName,
-                 LowPtr<const UnionClassList> classes)
-    : m_flags(flags)
-    , m_u {
-        .union_={mask, typeName, classes}
-      } {
-    init();
-  }
+                 LowPtr<const UnionClassList> classes);
 
   // There are a few cases where a type constraint does not pass, but we don't
   // raise an error. Some of these cases are resolved by mutating val instead.

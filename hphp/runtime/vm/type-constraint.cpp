@@ -53,6 +53,59 @@ using UnionTypeMask = TypeConstraint::UnionTypeMask;
 
 const StaticString s___invoke("__invoke");
 
+TypeConstraint::TypeConstraint()
+  : m_flags(NoFlags)
+  , m_u {
+      .single={
+        .type=Type::Nothing,
+        .class_=ClassConstraint{nullptr}
+      }
+    } {
+  initSingle();
+}
+
+TypeConstraint::TypeConstraint(const StringData* typeName, TypeConstraintFlags flags)
+  : m_flags(flags)
+  , m_u {
+      .single={
+        .type=Type::Nothing,
+        .class_=ClassConstraint{typeName}
+      }
+    } {
+  assert(!isUnion());
+  initSingle();
+}
+
+TypeConstraint::TypeConstraint(Type type, TypeConstraintFlags flags, ClassConstraint class_)
+  : m_flags(flags)
+  , m_u {
+      .single={
+        .type=type,
+        .class_=class_
+      }
+    } {
+  assert(!isUnion());
+  initSingle();
+}
+
+TypeConstraint::TypeConstraint(Type type,
+                               TypeConstraintFlags flags,
+                               const LowStringPtr typeName)
+  : TypeConstraint(type, flags, ClassConstraint { typeName }) {
+}
+
+TypeConstraint::TypeConstraint(TypeConstraintFlags flags,
+                               UnionTypeMask mask,
+                               LowStringPtr typeName,
+                               LowPtr<const UnionClassList> classes)
+  : m_flags(flags)
+  , m_u {
+      .union_={mask, typeName, classes}
+    } {
+  assert(isUnion());
+  initUnion();
+}
+
 TypeConstraint TypeConstraint::makeUnion(LowStringPtr typeName, folly::Range<const TypeConstraint*> tcs) {
   assertx(typeName != nullptr);
   if (tcs.empty()) {
@@ -194,11 +247,106 @@ TypeConstraint TypeConstraint::makeUnion(LowStringPtr typeName, folly::Range<con
   return TypeConstraint{ flags, preciseTypeMask, typeName, classes };
 }
 
-void TypeConstraint::init() {
+TypeConstraint TypeConstraint::makeMixed() {
+  return TypeConstraint{
+    AnnotType::Mixed,
+    TypeConstraintFlags::Nullable,
+    LAZY_STATIC_STRING(annotTypeName(AnnotType::Mixed))
+  };
+}
+
+template<class SerDe>
+void TypeConstraint::serde(SerDe& sd) {
+  sd(m_flags);
   if (isUnion()) {
-    initUnion();
+    serdeUnion(sd);
   } else {
-    initSingle();
+    serdeSingle(sd);
+  }
+}
+
+template void TypeConstraint::serde(BlobEncoder&);
+template void TypeConstraint::serde(BlobDecoder&);
+
+template<class SerDe>
+void TypeConstraint::serdeUnion(SerDe& sd) {
+  sd(m_u.union_.m_mask);
+  sd(m_u.union_.m_typeName);
+
+  // m_classes
+  if constexpr (SerDe::deserializing) {
+    size_t sz;
+    sd(sz);
+    m_u.union_.m_classes = nullptr;
+    if (sz) {
+      std::vector<ClassConstraint> classes;
+      classes.reserve(sz);
+      bool resolved = (m_flags & TypeConstraintFlags::Resolved) != 0;
+      for (size_t i = 0; i < sz; ++i) {
+        ClassConstraint oc;
+        oc.serdeHelper(sd, resolved);
+        oc.init(resolved ? AnnotType::Object : AnnotType::Unresolved);
+        classes.emplace_back(std::move(oc));
+      }
+      m_u.union_.m_classes = UnionConstraint::allocObjects(std::move(classes));
+    }
+  } else {
+    auto classes = m_u.union_.m_classes;
+    size_t sz = classes ? classes->m_list.size() : 0;
+    sd(sz);
+    if (classes) {
+      bool resolved = (m_flags & TypeConstraintFlags::Resolved) != 0;
+      for (const ClassConstraint& oc : classes->m_list) {
+        oc.serdeHelper(sd, resolved);
+      }
+    }
+  }
+}
+
+template void TypeConstraint::serdeUnion(BlobEncoder&);
+template void TypeConstraint::serdeUnion(BlobDecoder&);
+
+template<class SerDe>
+void TypeConstraint::serdeSingle(SerDe& sd) {
+  sd(m_u.single.type);
+  bool resolved = (m_flags & TypeConstraintFlags::Resolved) != 0;
+  bool isObject = m_u.single.type == AnnotType::Object;
+  m_u.single.class_.serdeHelper(sd, resolved && isObject);
+  if constexpr (SerDe::deserializing) {
+    m_u.single.class_.init(m_u.single.type);
+  }
+}
+
+template void TypeConstraint::serdeSingle(BlobEncoder&);
+template void TypeConstraint::serdeSingle(BlobDecoder&);
+
+ClassConstraint::ClassConstraint(LowStringPtr typeName)
+  : ClassConstraint(nullptr, typeName, nullptr) {
+  assertx(!typeName || typeName->isStatic());
+}
+
+ClassConstraint::ClassConstraint(LowStringPtr clsName,
+                                 LowStringPtr typeName,
+                                 LowPtr<const NamedType> namedType)
+  : m_clsName(clsName)
+  , m_typeName(typeName)
+  , m_namedType(namedType)
+{
+  assertx(!clsName || clsName->isStatic());
+  assertx(!typeName || typeName->isStatic());
+}
+
+void ClassConstraint::serdeHelper(BlobDecoder& sd, bool resolved) {
+  sd(m_typeName);
+  if (resolved) {
+    sd(m_clsName);
+  }
+}
+
+void ClassConstraint::serdeHelper(BlobEncoder& sd, bool resolved) const {
+  sd(m_typeName);
+  if (resolved) {
+    sd(m_clsName);
   }
 }
 
@@ -221,7 +369,9 @@ void TypeConstraint::initUnion() {
 
 void TypeConstraint::initSingle() {
   auto& single = m_u.single;
-  if (single.class_.m_typeName == nullptr || isTypeVar() || isTypeConstant()) {
+  if (single.class_.m_typeName == nullptr
+      || isTypeVar()
+      || isTypeConstant()) {
     single.type = Type::Mixed;
     return;
   }
@@ -1843,6 +1993,8 @@ TcUnionPieceIterator TcUnionPieceView::begin() const {
 
 TcUnionPieceIterator TcUnionPieceView::end() const {
   TcUnionPieceIterator it;
+  it.m_classes = nullptr;
+  it.m_flags = NoFlags;
   it.m_mask = 0;
   it.m_nextClass = 0;
   return it;

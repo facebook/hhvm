@@ -9524,7 +9524,7 @@ private:
       return nullptr;
     }();
     if (isUnion) {
-      tc = TypeConstraint{AnnotType::Unresolved, tc.flags(), TypeConstraint::ClassConstraint{value}};
+      tc.unresolve();
     }
     tc.resolveType(
       tv.type,
@@ -9575,8 +9575,9 @@ private:
           flags |= TypeConstraintFlags::Nullable;
         }
         for (auto& tv : tm->typeAndValueUnion) {
-          TypeConstraint out = tc;
-          out.unresolve();
+          TypeConstraint out = tv.type == AnnotType::Object
+            ? TypeConstraint{tv.type, flags, TypeConstraint::ClassConstraint { tv.value, tv.value, nullptr } }
+            : TypeConstraint{tv.type, flags, tv.value};
           if (!resolveOne(out, tv, tm->firstEnum, tm->nullable, uses, isProp, true)) {
             return;
           }

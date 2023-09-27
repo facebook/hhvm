@@ -9,11 +9,13 @@
 
 #include <folly/MapUtil.h>
 
+#include "eden/common/utils/ProcessInfoCache.h"
 #include "watchman/Command.h"
 #include "watchman/Errors.h"
 #include "watchman/Logging.h"
 #include "watchman/MapUtil.h"
 #include "watchman/Poison.h"
+#include "watchman/ProcessUtil.h"
 #include "watchman/QueryableView.h"
 #include "watchman/Shutdown.h"
 #include "watchman/root/Root.h"
@@ -22,17 +24,6 @@
 namespace watchman {
 
 namespace {
-
-using namespace facebook::eden;
-
-ProcessInfoCache& getProcessInfoCache() {
-  static auto* pic = new ProcessInfoCache;
-  return *pic;
-}
-
-ProcessInfoHandle lookupProcessInfo(pid_t pid) {
-  return getProcessInfoCache().lookup(pid);
-}
 
 constexpr size_t kResponseLogLimit = 0;
 

@@ -605,6 +605,7 @@ watchman/PerfSample.cpp
 watchman/fs/ParallelWalk.cpp
 watchman/fs/Pipe.cpp
 watchman/ProcessLock.cpp
+watchman/ProcessUtil.cpp
 # PubSub.cpp  (in liblog)
 watchman/QueryableView.cpp
 watchman/SanityCheck.cpp

@@ -254,12 +254,7 @@ std::string PackageInfo::getPackageForModule(const StringData* module) const {
 bool PackageInfo::moduleInPackages(const StringData* module,
                                    const PackageSet& packageSet) const {
   auto const packageForModule = getPackageForModule(module);
-  for (auto const& package : packageSet) {
-    auto const it = packages().find(package);
-    if (it == end(packages())) continue;
-    if (package == packageForModule) return true;
-  }
-  return false;
+  return packageSet.contains(packageForModule);
 }
 
 bool PackageInfo::moduleInDeployment(const StringData* module,

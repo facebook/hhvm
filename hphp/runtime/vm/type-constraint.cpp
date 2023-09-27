@@ -837,7 +837,7 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
   // Common case is that we actually find the alias:
   if (td) {
     if (td->nullable && val.type() == KindOfNull) return true;
-    bool pass_and_raise_classname_notice = false;
+    std::optional<AnnotAction> fallback;
     for (auto const& [type, klass] : td->typeAndClassUnion()) {
       auto result = annotCompat(val.type(), type, klass ? klass->name() : nullptr);
       switch (result) {
@@ -850,27 +850,36 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
         case AnnotAction::ConvertClass:
         case AnnotAction::WarnLazyClass:
         case AnnotAction::ConvertLazyClass:
-          continue; // verifyFail will deal with the conversion/warning
+          // Defer the action to see if there's a more appropriate action later.
+          fallback = fallback ? std::min(*fallback, result) : result;
+          continue;
         case AnnotAction::WarnClassname:
           assertx(isClassType(val.type()) || isLazyClassType(val.type()));
           assertx(RuntimeOption::EvalClassPassesClassname);
           assertx(RuntimeOption::EvalClassnameNotices);
-          if (!Assert) {
-            pass_and_raise_classname_notice = true;
-            continue;
-          }
-          return true;
+          if (Assert) return true;
+          fallback = fallback ? std::min(*fallback, result) : result;
+          continue;
         case AnnotAction::ObjectCheck:
         case AnnotAction::Fallback:
         case AnnotAction::FallbackCoerce:
           not_reached();
       }
     }
-    if (pass_and_raise_classname_notice) {
-      raise_notice(Strings::CLASS_TO_CLASSNAME);
-      return true;
+
+    switch (fallback.value_or(AnnotAction::Fail)) {
+      case AnnotAction::WarnClass:
+      case AnnotAction::ConvertClass:
+      case AnnotAction::WarnLazyClass:
+      case AnnotAction::ConvertLazyClass:
+        // verifyFail will deal with the conversion/warning
+        return false;
+      case AnnotAction::WarnClassname:
+        raise_notice(Strings::CLASS_TO_CLASSNAME);
+        return true;
+      default:
+        return false;
     }
-    return false;
   }
 
   // Otherwise, this isn't a proper type alias, but it *might* be a
@@ -1035,6 +1044,7 @@ bool TypeConstraint::checkImpl(tv_rval val,
     not_reached();
   }
 
+  std::optional<AnnotAction> fallback;
   for (auto tc : eachTypeConstraintInUnion(*this)) {
     auto const name = tc.isObject() ? tc.clsName() : tc.typeName();
     auto const result = annotCompat(val.type(), tc.m_u.single.type, name);
@@ -1055,15 +1065,16 @@ bool TypeConstraint::checkImpl(tv_rval val,
       case AnnotAction::ConvertClass:
       case AnnotAction::WarnLazyClass:
       case AnnotAction::ConvertLazyClass:
-        // verifyFail will handle the conversion/warning
-        break;
+        // Defer the action to see if there's a more appropriate action later.
+        fallback = fallback ? std::min(*fallback, result) : result;
+        continue;
       case AnnotAction::WarnClassname:
         if (!isPasses) {
           assertx(isClassType(val.type()) || isLazyClassType(val.type()));
           assertx(RuntimeOption::EvalClassPassesClassname);
           assertx(RuntimeOption::EvalClassnameNotices);
-          if (!isAssert) raise_notice(Strings::CLASS_TO_CLASSNAME);
-          return true;
+          if (isAssert) return true;
+          fallback = fallback ? std::min(*fallback, result) : result;
         }
         break;
       case AnnotAction::ObjectCheck:
@@ -1071,7 +1082,19 @@ bool TypeConstraint::checkImpl(tv_rval val,
     }
   }
 
-  return false;
+  switch (fallback.value_or(AnnotAction::Fail)) {
+    case AnnotAction::WarnClass:
+    case AnnotAction::ConvertClass:
+    case AnnotAction::WarnLazyClass:
+    case AnnotAction::ConvertLazyClass:
+      // verifyFail will deal with the conversion/warning
+      return false;
+    case AnnotAction::WarnClassname:
+      raise_notice(Strings::CLASS_TO_CLASSNAME);
+      return true;
+    default:
+      return false;
+  }
 }
 
 template bool TypeConstraint::checkImpl<TypeConstraint::CheckMode::Exact>(
@@ -1306,7 +1329,7 @@ std::string describe_actual_type(tv_rval val) {
 }
 
 bool TypeConstraint::checkStringCompatible() const {
-  if (isString() || isArrayKey() ||
+  if (isString() || isArrayKey() || (isUnion() && unionHasString()) ||
       (isObject() && interface_supports_string(clsName())) ||
       (isUnresolved() && interface_supports_string(typeName()))) {
     return true;

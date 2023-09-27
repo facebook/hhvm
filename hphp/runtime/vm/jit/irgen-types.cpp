@@ -254,7 +254,6 @@ void verifyTypeImpl(IRGS& env,
 
       case AnnotAction::WarnClass:
       case AnnotAction::ConvertClass:
-        if (tc.isUnion()) not_implemented(); // TODO(T151885113)
         assertx(val->type() <= TCls);
         setVal(gen(env, LdClsName, val));
         if (result == AnnotAction::WarnClass) {
@@ -267,7 +266,6 @@ void verifyTypeImpl(IRGS& env,
 
       case AnnotAction::WarnLazyClass:
       case AnnotAction::ConvertLazyClass:
-        if (tc.isUnion()) not_implemented(); // TODO(T151885113)
         assertx(val->type() <= TLazyCls);
         setVal(gen(env, LdLazyClsName, val));
         if (result == AnnotAction::WarnLazyClass) {
@@ -279,7 +277,6 @@ void verifyTypeImpl(IRGS& env,
         return;
 
       case AnnotAction::WarnClassname:
-        if (tc.isUnion()) not_implemented(); // TODO(T151885113)
         assertx(val->type() <= TCls || val->type() <= TLazyCls);
         gen(env, RaiseNotice, cns(env, s_CLASS_TO_CLASSNAME.get()));
         return;
@@ -1309,9 +1306,8 @@ void emitThrowAsTypeStructException(IRGS& env) {
   auto const tsAndBlock = [&]() -> std::pair<SSATmp*, Block*> {
     if (arr->hasConstVal(TDict)) {
       auto const ts = arr->arrLikeVal();
-      auto maybe_resolved = ts;
       bool partial = true, invalidType = true;
-      maybe_resolved =
+      auto maybe_resolved =
         staticallyResolveTypeStructure(env, ts, partial, invalidType);
       if (!ts->same(maybe_resolved)) {
         auto const inputTS = cns(env, maybe_resolved);

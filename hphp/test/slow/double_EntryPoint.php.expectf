@@ -1,1 +1,1 @@
-Fatal error: Only one `__EntryPoint` annotation is permitted per file (previous `__EntryPoint` annotation in %s/test/slow/double_EntryPoint.php:2) in %s/test/slow/double_EntryPoint.php on line 9
+Fatal error: Only one `__EntryPoint` annotation is permitted per file (previous `__EntryPoint` annotation in %Stest/slow/double_EntryPoint.php:2) in %Stest/slow/double_EntryPoint.php on line 9

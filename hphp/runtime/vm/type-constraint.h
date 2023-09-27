@@ -433,6 +433,11 @@ struct TypeConstraint {
     return m_u.union_.m_mask & kUnionTypeThis;
   }
 
+  bool unionHasString() const {
+    assertx(isUnion());
+    return m_u.union_.m_mask & kUnionTypeString;
+  }
+
   AnnotType type()  const {
     assertx(!isUnion());
     return m_u.single.type;

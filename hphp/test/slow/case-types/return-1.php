@@ -14,10 +14,6 @@ function foo1(mixed $x):C1 { return $x; }
 function foo2(mixed $x):C2 { return $x; }
 function foo3(mixed $x):C3 { return $x; }
 
-function handler($errno, $errstr, $errfile, $errline, ...):noreturn {
-  throw new Exception($errstr);
-}
-
 function format($arg):string {
   if ($arg is bool) return $arg ? "true" : "false";
   if ($arg is string) return "\"".$arg."\"";
@@ -27,7 +23,8 @@ function format($arg):string {
 
 <<__EntryPoint>>
 function main():void {
-  set_error_handler(handler<>);
+  require "test.inc";
+  throw_errors();
 
   $funcs = vec[foo1<>, foo2<>, foo3<>];
   $args = vec[1, "foo", true, 1.1, new A, new B, new C];

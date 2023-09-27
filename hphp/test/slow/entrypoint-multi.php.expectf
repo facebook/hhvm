@@ -1,1 +1,0 @@
-Fatal error: Only one `__EntryPoint` annotation is permitted per file (previous `__EntryPoint` annotation in %s/test/slow/entrypoint-multi.php:3) in %s/test/slow/entrypoint-multi.php on line 7

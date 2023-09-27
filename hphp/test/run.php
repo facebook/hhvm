@@ -760,14 +760,19 @@ function find_file_for_dir(string $dir, string $name): ?string {
   // are running the test runner on a file from the same directory as
   // the test e.g., './mytest.php'. dirname() will give you the '.' when
   // you actually have a lot of path to traverse upwards like
-  // /home/you/code/tests/mytest.php. Use realpath() to get that.
-  $dir = realpath($dir);
-  while ($dir !== '/' && is_dir($dir)) {
+  // /home/you/code/tests/mytest.php. Don't use realpath() to get that because
+  // it will mess up relative paths.
+  $depth = count(explode('/', realpath($dir))) - 1;
+  for (; $dir !== '/' && is_dir($dir) && $depth; $depth--) {
     $file = "$dir/$name";
     if (is_file($file)) {
       return $file;
     }
-    $dir = dirname($dir);
+    if ($dir === '.' || substr($dir, -2) === '..') {
+      $dir = $dir . '/..';
+    } else {
+      $dir = dirname($dir);
+    }
   }
   $file = test_dir().'/'.$name;
   if (file_exists($file)) {

@@ -7,13 +7,10 @@ case type C = A | int;
 
 function foo(C $x): C { return $x; }
 
-function handler($errno, $errstr, $errfile, $errline, ...):noreturn {
-  throw new Exception($errstr);
-}
-
 <<__EntryPoint>>
 function main():void {
-  set_error_handler(handler<>);
+  require "test.inc";
+  throw_errors();
 
   foo(new A);
   foo(1);

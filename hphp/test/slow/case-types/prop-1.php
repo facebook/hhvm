@@ -24,26 +24,10 @@ class T0 {
   <<__LateInit>> public C7 $g;
 }
 
-function expect_exception((function(): void) $f, string $msg): void {
-  try {
-    $f();
-  } catch (Exception $e) {
-    $got = $e->getMessage();
-    if ($msg !== $got) {
-      throw new Exception("Exception caught but mismatched message:\nGot:      $got\nExpected: $msg");
-    }
-    return;
-  }
-  throw new Exception("Exception expected but not thrown");
-}
-
 <<__EntryPoint>>
 function main(): void {
-  set_error_handler(
-    ($_, string $what, $_, $_, $_) ==> {
-      throw new Exception($what);
-    },
-  );
+  require "test.inc";
+  throw_errors();
 
   $t = new T0();
   $t->a = 5;

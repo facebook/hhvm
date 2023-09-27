@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<17302596369fbcaef60c319d605205d2>>
+// @generated SignedSource<<a289959865446ef67ac05299621c481a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -40,7 +40,7 @@ pub type PosId = (pos_or_decl::PosOrDecl, ast_defs::Id_);
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, hash)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, show)")]
 #[repr(u8)]
 pub enum ArgPosition {
     Aonly,
@@ -65,7 +65,7 @@ arena_deserializer::impl_deserialize_in_arena!(ArgPosition);
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, hash)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, show)")]
 #[repr(C, u8)]
 pub enum ExprDepTypeReason {
     ERexpr(isize),
@@ -93,7 +93,7 @@ pub enum ExprDepTypeReason {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, hash)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, show)")]
 #[repr(u8)]
 pub enum BlameSource {
     BScall,
@@ -120,11 +120,17 @@ arena_deserializer::impl_deserialize_in_arena!(BlameSource);
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, hash)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, show)")]
 #[repr(C, u8)]
 pub enum Blame {
     Blame(pos::Pos, BlameSource),
 }
+
+#[rust_to_ocaml(attr = "deriving show")]
+pub type LazyString = lazy::Lazy<String>;
+
+#[rust_to_ocaml(attr = "deriving show")]
+pub type LazyStringList<A> = Vec<(A, lazy::Lazy<String>)>;
 
 /// The reason why something is expected to have a certain type
 #[derive(

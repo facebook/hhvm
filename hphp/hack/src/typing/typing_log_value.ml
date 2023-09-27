@@ -43,7 +43,7 @@ let subtype_prop_as_value prop = SubtypeProp prop
 let pos_as_value p = string_as_value (Pos.string (Pos.to_absolute p))
 
 let reason_as_value r =
-  string_as_value (Format.asprintf "%a" Typing_reason.pp r)
+  string_as_value (Format.asprintf "%a" Typing_reason.pp_t_ r)
 
 let local_id_as_string id =
   Printf.sprintf "%s[#%d]" (Local_id.get_name id) (Local_id.to_int id)

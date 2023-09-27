@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3a4dfa2e87ef77c367607023f710fddf>>
+// @generated SignedSource<<e619681b2474e419669022f2f5d8d7c9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -40,7 +40,7 @@ pub use oxidized::typing_reason::ArgPosition;
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, hash)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, show)")]
 #[repr(C, u8)]
 pub enum ExprDepTypeReason<'a> {
     ERexpr(isize),
@@ -75,7 +75,7 @@ pub use oxidized::typing_reason::BlameSource;
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, hash)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, show)")]
 #[repr(C, u8)]
 pub enum Blame<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -84,6 +84,12 @@ pub enum Blame<'a> {
 }
 impl<'a> TrivialDrop for Blame<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(Blame<'arena>);
+
+#[rust_to_ocaml(attr = "deriving show")]
+pub type LazyString<'a> = lazy::Lazy<&'a str>;
+
+#[rust_to_ocaml(attr = "deriving show")]
+pub type LazyStringList<'a, A> = [(A, &'a lazy::Lazy<&'a str>)];
 
 /// The reason why something is expected to have a certain type
 #[derive(

@@ -12,7 +12,7 @@ type arg_position =
   | Aonly
   | Afirst
   | Asecond
-[@@deriving eq]
+[@@deriving eq, show]
 
 type expr_dep_type_reason =
   | ERexpr of Ident_provider.Ident.t
@@ -21,16 +21,16 @@ type expr_dep_type_reason =
   | ERparent of string
   | ERself of string
   | ERpu of string
-[@@deriving eq]
+[@@deriving eq, show]
 
 type blame_source =
   | BScall
   | BSlambda
   | BSassignment
   | BSout_of_scope
-[@@deriving eq]
+[@@deriving eq, show]
 
-type blame = Blame of Pos.t * blame_source [@@deriving eq]
+type blame = Blame of Pos.t * blame_source [@@deriving eq, show]
 
 (* All the possible types, reason is a trace of why a type
    was inferred in a certain way.
@@ -167,9 +167,9 @@ type _ t_ =
       -> locl_phase t_
   | Rmissing_class : Pos.t -> locl_phase t_
   | Rinvalid : 'phase t_
-[@@deriving hash]
+[@@deriving hash, show]
 
-type t = locl_phase t_
+type t = locl_phase t_ [@@deriving show]
 
 type decl_t = decl_phase t_
 
@@ -191,8 +191,6 @@ val get_expr_display_id : Ident_provider.Ident.t -> int
 val get_expr_display_id_map : unit -> int Ident_provider.Ident.Map.t
 
 val to_constructor_string : 'phase t_ -> string
-
-val pp : Format.formatter -> 'phase t_ -> unit
 
 type ureason =
   | URnone

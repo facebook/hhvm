@@ -592,7 +592,7 @@ module Pp = struct
    fun fmt t ->
     let (a0, a1) = t in
     Format.fprintf fmt "(@[";
-    Reason.pp fmt a0;
+    Reason.pp_t_ fmt a0;
     Format.fprintf fmt ",@ ";
     pp_ty_ fmt a1;
     Format.fprintf fmt "@])"

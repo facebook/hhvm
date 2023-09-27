@@ -117,13 +117,26 @@ let default_derives () =
 
 let derive_copy ty = Convert_type.is_copy (Rust_type.rust_simple_type ty)
 
+let derive_default (ty : label) =
+  List.mem ["tast_hashes::ByNames"] ty ~equal:String.equal
+
 let is_by_box () = not (is_by_ref ())
 
 let additional_derives ty : (string option * string) list =
-  if derive_copy ty then
-    [(None, "Copy"); (Some "ocamlrep", "FromOcamlRepIn")]
-  else
-    []
+  let result = [] in
+  let result =
+    if derive_copy ty then
+      (None, "Copy") :: (Some "ocamlrep", "FromOcamlRepIn") :: result
+    else
+      result
+  in
+  let result =
+    if derive_default ty then
+      (None, "Default") :: result
+    else
+      result
+  in
+  result
 
 module DeriveSkipLists : sig
   val skip_derive : ty:string -> trait:string -> bool

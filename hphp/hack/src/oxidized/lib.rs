@@ -47,6 +47,7 @@ pub use manual::shape_map;
 pub use manual::symbol_name;
 pub use manual::t_shape_map;
 pub use manual::tany_sentinel;
+pub use manual::tast_hashes_impl;
 pub use manual::typing_defs_flags;
 pub use manual::typing_env;
 pub use manual::typing_logic;

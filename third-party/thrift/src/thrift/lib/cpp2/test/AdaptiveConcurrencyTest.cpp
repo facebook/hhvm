@@ -27,6 +27,9 @@ using namespace apache::thrift;
 using Clock = std::chrono::steady_clock;
 
 namespace apache::thrift {
+
+constexpr int defaultRequestCount = 200;
+
 class AdaptiveConcurrencyTestHelper {
  public:
   explicit AdaptiveConcurrencyTestHelper(AdaptiveConcurrencyController& c)
@@ -52,7 +55,9 @@ class AdaptiveConcurrencyBase : public testing::Test {
  protected:
   static constexpr Clock::duration kMinRtt = 1ms;
   static constexpr Clock::duration kIdealRtt = 10ms;
-  static constexpr uint32_t minConcurrency = MinConcurrency;
+  static constexpr size_t minConcurrency = MinConcurrency;
+
+  size_t maxConcurrency{0u};
 
   AdaptiveConcurrencyBase(uint32_t maxRequests = 0)
       : oMaxRequests(maxRequests) {}
@@ -64,13 +69,13 @@ class AdaptiveConcurrencyBase : public testing::Test {
   }
 
   void setConfig(
-      size_t concurrency,
+      size_t minConcurrency,
       double jitter = 0.0,
       std::chrono::milliseconds targetRttFixed = {},
       std::chrono::milliseconds minTargetRtt = {},
       double targetRttPercentile = 0.95) {
     oConfig.setValue(makeConfig(
-        concurrency,
+        minConcurrency,
         jitter,
         targetRttFixed,
         minTargetRtt,
@@ -79,13 +84,13 @@ class AdaptiveConcurrencyBase : public testing::Test {
   }
 
   static auto makeConfig(
-      size_t concurrency,
+      size_t minConcurrency,
       double jitter = 0.0,
       std::chrono::milliseconds targetRttFixed = {},
       std::chrono::milliseconds minTargetRtt = {},
       double targetRttPercentile = 0.95) {
     AdaptiveConcurrencyController::Config config;
-    config.minConcurrency = concurrency;
+    config.minConcurrency = minConcurrency;
     config.recalcPeriodJitter = jitter;
     config.targetRttFixed = targetRttFixed;
     config.minTargetRtt = minTargetRtt;
@@ -95,6 +100,7 @@ class AdaptiveConcurrencyBase : public testing::Test {
 
   folly::observer::SimpleObservable<AdaptiveConcurrencyController::Config>
       oConfig{makeConfig(MinConcurrency)};
+
   folly::observer::SimpleObservable<uint32_t> oMaxRequests{0u};
 
   apache::thrift::ThriftServerConfig serverConfig;
@@ -115,16 +121,16 @@ class AdaptiveConcurrencyBase : public testing::Test {
 
   void doSamplingRequests(
       Clock::duration latency = kIdealRtt,
-      EndState endState = EndState::SamplingScheduled) {
-    // execute 200 samples to collect stats, new ideal latency is recomputed
-    // at the end
+      EndState endState = EndState::SamplingScheduled,
+      int count = defaultRequestCount) {
     auto before = Clock::now();
 
-    for (int i = 0; i < 200; i++) {
+    for (int i = 0; i < count; i++) {
       EXPECT_GT(p(controller).samplingPeriodStart(), Clock::time_point{});
       EXPECT_LT(p(controller).samplingPeriodStart(), Clock::now());
       makeRequest(latency);
     }
+
     switch (endState) {
       case EndState::RecalcScheduled:
         EXPECT_EQ(
@@ -139,19 +145,20 @@ class AdaptiveConcurrencyBase : public testing::Test {
 
   void performSampling(
       Clock::duration latency = kIdealRtt,
+      int count = defaultRequestCount,
       EndState endState = EndState::SamplingScheduled) {
     auto concurrency = controller.getMaxRequests();
     folly::observer_detail::ObserverManager::waitForAllUpdates();
     EXPECT_EQ(concurrency, serverConfig.getMaxRequests().get());
     p(controller).samplingPeriodStart(Clock::now());
-    doSamplingRequests(latency, endState);
-    double slope = 1.0 * controller.targetRtt() / latency;
-    uint32_t expectConcurrency =
-        slope * concurrency + std::sqrt(slope * concurrency);
-    auto maxRequests = **oMaxRequests.getObserver();
-    expectConcurrency = std::min(
-        expectConcurrency,
-        (maxRequests == 0) ? 1000u : std::min(1000u, maxRequests));
+    doSamplingRequests(latency, endState, count);
+    double raw_gradient = 1.0 * controller.targetRtt() / latency;
+    double limit = raw_gradient * concurrency;
+    double headRoom = std::sqrt(limit);
+    size_t maxCon = controller.getOriginalMaxRequests();
+
+    size_t expectConcurrency = static_cast<size_t>(limit + headRoom);
+    expectConcurrency = std::min(maxCon, expectConcurrency);
     expectConcurrency = std::max(minConcurrency, expectConcurrency);
     checkMaxRequests(expectConcurrency);
     folly::observer_detail::ObserverManager::waitForAllUpdates();
@@ -186,84 +193,90 @@ class AdaptiveConcurrencyP : public AdaptiveConcurrencyBase<5>,
                              public ::testing::WithParamInterface<uint32_t> {
  public:
   AdaptiveConcurrencyP() : AdaptiveConcurrencyBase<5>{GetParam()} {}
+
+  void runSamplingTest(int requestCount) {
+    // calibrate ideal rtt
+    makeRequest();
+    doSamplingRequests(kIdealRtt);
+
+    uint32_t maxRequests = **oMaxRequests.getObserver();
+    maxRequests = maxRequests == 0 ? 1000u : std::min(maxRequests, 1000u);
+
+    // imitate low request latencies
+    // concurrency limit grows until reaching max of 1000 (or less if server
+    // provided maxRequests is smaller than 1000)
+    auto lowLatency = kIdealRtt;
+    performSampling(lowLatency, requestCount);
+    checkMaxRequests(13);
+
+    performSampling(lowLatency, requestCount);
+    checkMaxRequests(31);
+
+    performSampling(lowLatency, requestCount);
+    checkMaxRequests(69);
+    performSampling(lowLatency, requestCount);
+    checkMaxRequests(149);
+    performSampling(lowLatency, requestCount);
+    checkMaxRequests(315);
+    performSampling(lowLatency, requestCount);
+    checkMaxRequests(655);
+    performSampling(lowLatency, requestCount);
+    checkMaxRequests(maxRequests);
+    performSampling(lowLatency, requestCount);
+    checkMaxRequests(maxRequests);
+    performSampling(lowLatency, requestCount);
+    checkMaxRequests(maxRequests);
+
+    // imitate higher latencies
+    // concurrency limit drops until reaching min of 5
+    auto highLatency = 4 * kIdealRtt;
+    performSampling(highLatency, requestCount);
+    maxRequests = maxRequests / 2.0 + std::sqrt(maxRequests / 2.0);
+    checkMaxRequests(maxRequests);
+    performSampling(highLatency, requestCount);
+    maxRequests = maxRequests / 2.0 + std::sqrt(maxRequests / 2.0);
+    checkMaxRequests(maxRequests);
+    performSampling(highLatency, requestCount);
+    maxRequests = maxRequests / 2.0 + std::sqrt(maxRequests / 2.0);
+    checkMaxRequests(maxRequests);
+    performSampling(highLatency, requestCount);
+    maxRequests = maxRequests / 2.0 + std::sqrt(maxRequests / 2.0);
+    checkMaxRequests(maxRequests);
+    performSampling(highLatency, requestCount);
+    maxRequests = maxRequests / 2.0 + std::sqrt(maxRequests / 2.0);
+    checkMaxRequests(maxRequests);
+    performSampling(highLatency, requestCount);
+    maxRequests = maxRequests / 2.0 + std::sqrt(maxRequests / 2.0);
+    checkMaxRequests(maxRequests);
+    performSampling(highLatency, requestCount);
+    maxRequests = maxRequests / 2.0 + std::sqrt(maxRequests / 2.0);
+    checkMaxRequests(maxRequests);
+    performSampling(highLatency, requestCount);
+    maxRequests = maxRequests / 2.0 + std::sqrt(maxRequests / 2.0);
+    checkMaxRequests(maxRequests);
+    performSampling(highLatency, requestCount);
+    checkMaxRequests(7);
+    performSampling(highLatency, requestCount);
+    checkMaxRequests(5);
+    performSampling(highLatency, requestCount);
+    checkMaxRequests(5);
+    performSampling(highLatency, requestCount);
+    checkMaxRequests(5);
+
+    // validate making requests before sampling periods does not affect
+    // the sampling
+    performSampling(lowLatency, requestCount);
+    checkMaxRequests(13);
+    for (int i = 0; i < 200; ++i) {
+      makeRequest(highLatency);
+    }
+    performSampling(lowLatency, requestCount);
+    checkMaxRequests(31);
+  }
 };
 
 TEST_P(AdaptiveConcurrencyP, Sampling) {
-  // calibrate ideal rtt
-  makeRequest();
-  doSamplingRequests(kIdealRtt);
-
-  uint32_t maxRequests = **oMaxRequests.getObserver();
-  maxRequests = maxRequests == 0 ? 1000u : std::min(maxRequests, 1000u);
-
-  // imitate low request latencies
-  // concurrency limit grows until reaching max of 1000 (or less if server
-  // provided maxRequests is smaller than 1000)
-  auto lowLatency = kIdealRtt;
-  performSampling(lowLatency);
-  checkMaxRequests(13);
-  performSampling(lowLatency);
-  checkMaxRequests(31);
-  performSampling(lowLatency);
-  checkMaxRequests(69);
-  performSampling(lowLatency);
-  checkMaxRequests(149);
-  performSampling(lowLatency);
-  checkMaxRequests(315);
-  performSampling(lowLatency);
-  checkMaxRequests(655);
-  performSampling(lowLatency);
-  checkMaxRequests(maxRequests);
-  performSampling(lowLatency);
-  checkMaxRequests(maxRequests);
-  performSampling(lowLatency);
-  checkMaxRequests(maxRequests);
-
-  // imitate higher latencies
-  // concurrency limit drops until reaching min of 5
-  auto highLatency = 4 * kIdealRtt;
-  performSampling(highLatency);
-  maxRequests = maxRequests / 2.0 + std::sqrt(maxRequests / 2.0);
-  checkMaxRequests(maxRequests);
-  performSampling(highLatency);
-  maxRequests = maxRequests / 2.0 + std::sqrt(maxRequests / 2.0);
-  checkMaxRequests(maxRequests);
-  performSampling(highLatency);
-  maxRequests = maxRequests / 2.0 + std::sqrt(maxRequests / 2.0);
-  checkMaxRequests(maxRequests);
-  performSampling(highLatency);
-  maxRequests = maxRequests / 2.0 + std::sqrt(maxRequests / 2.0);
-  checkMaxRequests(maxRequests);
-  performSampling(highLatency);
-  maxRequests = maxRequests / 2.0 + std::sqrt(maxRequests / 2.0);
-  checkMaxRequests(maxRequests);
-  performSampling(highLatency);
-  maxRequests = maxRequests / 2.0 + std::sqrt(maxRequests / 2.0);
-  checkMaxRequests(maxRequests);
-  performSampling(highLatency);
-  maxRequests = maxRequests / 2.0 + std::sqrt(maxRequests / 2.0);
-  checkMaxRequests(maxRequests);
-  performSampling(highLatency);
-  maxRequests = maxRequests / 2.0 + std::sqrt(maxRequests / 2.0);
-  checkMaxRequests(maxRequests);
-  performSampling(highLatency);
-  checkMaxRequests(7);
-  performSampling(highLatency);
-  checkMaxRequests(5);
-  performSampling(highLatency);
-  checkMaxRequests(5);
-  performSampling(highLatency);
-  checkMaxRequests(5);
-
-  // validate making requests before sampling periods does not affect
-  // the sampling
-  performSampling(lowLatency);
-  checkMaxRequests(13);
-  for (int i = 0; i < 200; ++i) {
-    makeRequest(highLatency);
-  }
-  performSampling(lowLatency);
-  checkMaxRequests(31);
+  runSamplingTest(defaultRequestCount);
 }
 
 INSTANTIATE_TEST_CASE_P(
@@ -282,13 +295,13 @@ TEST_F(AdaptiveConcurrency, RttRecalibration) {
   EXPECT_GT(p(controller).nextRttRecalcStart(), before + 4min);
   EXPECT_LT(p(controller).nextRttRecalcStart(), after + 6min);
 
-  performSampling(kIdealRtt, EndState::SamplingScheduled);
+  performSampling(kIdealRtt, defaultRequestCount, EndState::SamplingScheduled);
   checkMaxRequests(13);
 
   // force entering calibration mode after the next sampling round
   // and perform sampling round
   p(controller).nextRttRecalcStart(Clock::now());
-  performSampling(kIdealRtt, EndState::RecalcScheduled);
+  performSampling(kIdealRtt, defaultRequestCount, EndState::RecalcScheduled);
 
   // next request will cause concurrency to reset to the minimum
   // also resets next recalibration target time
@@ -321,7 +334,7 @@ TEST_F(AdaptiveConcurrency, FixedTargetRtt) {
   EXPECT_EQ(p(controller).nextRttRecalcStart(), Clock::time_point{});
   checkMaxRequests(5);
 
-  performSampling(kIdealRtt, EndState::SamplingScheduled);
+  performSampling(kIdealRtt, defaultRequestCount, EndState::SamplingScheduled);
   checkMaxRequests(13);
   EXPECT_EQ(p(controller).nextRttRecalcStart(), Clock::time_point{});
 
@@ -345,7 +358,7 @@ TEST_F(AdaptiveConcurrency, FixedTargetRtt) {
   EXPECT_EQ(p(controller).nextRttRecalcStart(), Clock::time_point{});
   checkMaxRequests(5);
 
-  performSampling(kIdealRtt, EndState::SamplingScheduled);
+  performSampling(kIdealRtt, defaultRequestCount, EndState::SamplingScheduled);
   checkMaxRequests(13);
   EXPECT_EQ(p(controller).nextRttRecalcStart(), Clock::time_point{});
 }

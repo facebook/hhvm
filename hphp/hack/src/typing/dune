@@ -401,8 +401,12 @@
 (library
  (name typing_logic)
  (wrapped false)
- (modules typing_logic)
- (libraries typing_defs)
+ (modules
+  type_force_lazy_values
+  typing_logic)
+ (libraries
+  type_mapper_generic
+  typing_defs)
  (preprocess
   (pps ppx_deriving.std)))
 

@@ -136,3 +136,16 @@ let disj ~fail p1 p2 =
     | (_, Disj (_, ps)) -> Disj (fail, add_prop p1 ps)
     | (Disj (_, ps), _) -> Disj (fail, add_prop p2 ps)
     | (_, _) -> Disj (fail, [p1; p2])
+
+let rec force_lazy_values (prop : subtype_prop) =
+  match prop with
+  | IsSubtype (dir, ty1, ty2) ->
+    IsSubtype
+      ( dir,
+        Type_force_lazy_values.internal_type ty1,
+        Type_force_lazy_values.internal_type ty2 )
+  | Conj props -> Conj (List.map props ~f:force_lazy_values)
+  | Disj (_err, props) ->
+    Disj
+      ( (* TODO force lazy values in error *) None,
+        List.map props ~f:force_lazy_values )

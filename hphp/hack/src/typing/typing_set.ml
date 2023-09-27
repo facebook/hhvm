@@ -43,3 +43,5 @@ let hash_fold_t state x =
     (elements x |> List.sort ~compare:Ty_.compare)
 
 let hash = Hash.of_fold hash_fold_t
+
+let force_lazy_values t = map Type_force_lazy_values.locl_ty t

@@ -49,3 +49,5 @@ let pp fmt t =
   Format.fprintf fmt "@,}@]"
 
 let show = Format.asprintf "%a" pp
+
+let force_lazy_values t = map Type_force_lazy_values.internal_type t

@@ -425,3 +425,16 @@ let pp_tpenv fmt tpenv =
   Format.fprintf fmt " }@]"
 
 let pp = pp_tpenv
+
+let force_lazy_values_tparam_info (info : tparam_info) =
+  Typing_kinding_defs.force_lazy_values info
+
+let force_lazy_values (env : t) =
+  let { tparams; consistent } = env in
+  {
+    tparams =
+      SMap.map
+        (fun (p, info) -> (p, force_lazy_values_tparam_info info))
+        tparams;
+    consistent;
+  }

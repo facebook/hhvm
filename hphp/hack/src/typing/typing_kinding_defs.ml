@@ -160,3 +160,28 @@ module Simple = struct
 
   let with_dummy_name = with_dummy_name
 end
+
+let rec force_lazy_values (kind : kind) =
+  let {
+    lower_bounds;
+    upper_bounds;
+    reified;
+    enforceable;
+    newable;
+    require_dynamic;
+    parameters;
+  } =
+    kind
+  in
+  {
+    lower_bounds = TySet.force_lazy_values lower_bounds;
+    upper_bounds = TySet.force_lazy_values upper_bounds;
+    reified;
+    enforceable;
+    newable;
+    require_dynamic;
+    parameters = List.map parameters ~f:force_lazy_values_named_kind;
+  }
+
+and force_lazy_values_named_kind ((p, kind) : named_kind) =
+  (p, force_lazy_values kind)

@@ -103,3 +103,5 @@ module Simple : sig
 
   val with_dummy_name : kind -> named_kind
 end
+
+val force_lazy_values : kind -> kind

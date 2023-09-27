@@ -293,17 +293,15 @@ let to_nast_expr (tast : expr) : Nast.expr = nast_converter#on_expr () tast
 
 let to_nast_class_id_ cid = nast_converter#on_class_id_ () cid
 
-let force_lazy_values_ty (ty : Typing_defs_core.locl_ty) :
-    Typing_defs_core.locl_ty =
-  let visitor =
-    object
-      inherit [unit] Type_mapper_generic.deep_type_mapper
-
-      method! on_reason () r = ((), Typing_reason.force_lazy_values r)
-    end
-  in
-  let ((), ty) = visitor#on_type () ty in
-  ty
+let force_lazy_values_saved_env (saved_env : saved_env) : saved_env =
+  let { tcopt; inference_env; tpenv; fun_tast_info; checked } = saved_env in
+  {
+    tcopt;
+    inference_env = Typing_inference_env.force_lazy_values inference_env;
+    tpenv = Type_parameter_env.force_lazy_values tpenv;
+    fun_tast_info;
+    checked;
+  }
 
 (** Force any lazy value in the TAST. This is useful to serialize the TAST,
   for example prior to returning over RPC or storing in the shared heap. *)
@@ -312,9 +310,10 @@ let force_lazy_values (program : program) =
     object
       inherit [_] Aast.map
 
-      method on_'ex _env ty = force_lazy_values_ty ty
+      method on_'ex _env ty = Type_force_lazy_values.locl_ty ty
 
-      method on_'en _env (saved_env : saved_env) = saved_env
+      method on_'en _env (saved_env : saved_env) =
+        force_lazy_values_saved_env saved_env
     end
   in
   visitor#on_program () program

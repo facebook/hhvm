@@ -115,3 +115,5 @@ val remove : t -> tparam_name -> t
 val get_parameter_names : tparam_info -> tparam_name list
 
 val pp : Format.formatter -> t -> unit
+
+val force_lazy_values : t -> t

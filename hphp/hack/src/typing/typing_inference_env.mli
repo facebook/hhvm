@@ -171,3 +171,5 @@ val remove_var :
   search_in_upper_bounds_of:ISet.t ->
   search_in_lower_bounds_of:ISet.t ->
   t
+
+val force_lazy_values : t -> t

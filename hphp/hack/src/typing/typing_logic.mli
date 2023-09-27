@@ -53,3 +53,5 @@ val conj_list : subtype_prop list -> subtype_prop
 
 val disj :
   fail:Typing_error.t option -> subtype_prop -> subtype_prop -> subtype_prop
+
+val force_lazy_values : subtype_prop -> subtype_prop

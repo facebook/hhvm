@@ -1012,3 +1012,56 @@ let remove_var env var ~search_in_upper_bounds_of ~search_in_lower_bounds_of =
   let tyvars_stack = remove_var_from_tyvars_stack tyvars_stack var in
   let subtype_prop = replace_var_by_ty_in_prop subtype_prop var ty in
   { tvenv; tyvars_stack; tyvar_occurrences; subtype_prop }
+
+let force_lazy_values_tyvar_constraints (cstrs : tyvar_constraints) =
+  let {
+    appears_covariantly;
+    appears_contravariantly;
+    lower_bounds;
+    upper_bounds;
+    type_constants;
+  } =
+    cstrs
+  in
+  {
+    appears_covariantly;
+    appears_contravariantly;
+    lower_bounds = ITySet.force_lazy_values lower_bounds;
+    upper_bounds = ITySet.force_lazy_values upper_bounds;
+    type_constants =
+      SMap.map
+        (fun (p, ty) -> (p, Type_force_lazy_values.locl_ty ty))
+        type_constants;
+  }
+
+let force_lazy_values_solving_info (solving_info : solving_info) =
+  match solving_info with
+  | TVIType ty -> TVIType (Type_force_lazy_values.locl_ty ty)
+  | TVIConstraints cstrs ->
+    TVIConstraints (force_lazy_values_tyvar_constraints cstrs)
+
+let force_lazy_values_tyvar_info (tyvar_info : tyvar_info) =
+  let {
+    tyvar_pos : Pos.t;
+    eager_solve_failed : bool;
+    solving_info : solving_info;
+  } =
+    tyvar_info
+  in
+  {
+    tyvar_pos;
+    eager_solve_failed;
+    solving_info = force_lazy_values_solving_info solving_info;
+  }
+
+let force_lazy_values_tvenv (tvenv : tvenv) =
+  IMap.map force_lazy_values_tyvar_info tvenv
+
+let force_lazy_values (env : t) =
+  let { tvenv; tyvars_stack; subtype_prop; tyvar_occurrences } = env in
+  {
+    tvenv = force_lazy_values_tvenv tvenv;
+    tyvars_stack;
+    subtype_prop = TL.force_lazy_values subtype_prop;
+    tyvar_occurrences;
+  }

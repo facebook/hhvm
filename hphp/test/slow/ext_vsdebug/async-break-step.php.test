@@ -17,8 +17,32 @@ async function submain1() {
   await $b;
 }
 
+async function submain2() {
+  $a = foo();
+  $b = bar();
+  await $a;
+  await $b;
+}
+
+async function submain3() {
+  $a = foo();
+  $b = bar();
+  await $a;
+  await $b;
+}
+
+async function submain4() {
+  $a = foo();
+  $b = bar();
+  await $a;
+  await $b;
+}
+
 <<__EntryPoint>>
 async function main() {
   await submain1();
+  await submain2();
+  await submain3();
+  await submain4();
   echo "Done\n";
 }

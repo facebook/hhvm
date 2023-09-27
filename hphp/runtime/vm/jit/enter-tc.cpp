@@ -48,6 +48,15 @@ ALWAYS_INLINE void preEnter(JitResumeAddr start) {
     Trace::ringbufferEntry(Trace::RBTypeEnterTC, skData, (uint64_t)addr);
   }
 
+  // If stepping in the debugger, the next debugger interrpt check in JIT
+  // must bring the execution back to interpreter.
+  if (UNLIKELY(RuntimeOption::EnableVSDebugger &&
+               !RID().getVSDebugDisablesJit() &&
+               !g_context->m_dbgNoBreak &&
+               RID().getDebuggerStepIntr())) {
+    markFunctionWithDebuggerIntr(vmfp()->func());
+  }
+
   regState() = VMRegState::DIRTY;
 }
 

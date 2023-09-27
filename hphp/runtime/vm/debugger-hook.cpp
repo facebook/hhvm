@@ -198,11 +198,9 @@ void phpDebuggerOpcodeHook(const unsigned char* pc) {
     }
   }
 
-  // If the current state is OUT and we are still at a stack level less than the
-  // original, then we skip over the PopC opcode if it exists and then break
-  // (matching hphpd).
+  // If the current state is OUT, then we skip over the PopC opcode
+  // if it exists and then break (matching hphpd).
   if (UNLIKELY(req_data.getDebuggerStepOut() == StepOutState::Out &&
-      curStackDisp == StackDepthDisposition::Shallower &&
       peek_op(pc) != OpPopC)) {
     req_data.setDebuggerStepOut(StepOutState::None);
     if (!req_data.getDebuggerNext()) {

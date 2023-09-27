@@ -184,6 +184,17 @@ function check_file(): void {
   printf("FILE: %s\n", __FILE__);
 }
 
+// TEST-CHECK-BAL: define $root.check_nothing
+// CHECK: define $root.check_nothing($this: *void) : *noreturn {
+// CHECK: #b0:
+// CHECK:   n0 = $root.HH::invariant_violation(null, $builtins.hack_string("bad"))
+// CHECK:   n1 = $builtins.hhbc_fatal($builtins.hack_string("invariant_violation"))
+// CHECK:   unreachable
+// CHECK: }
+function check_nothing(): nothing {
+  invariant(false, "bad");
+}
+
 // TEST-CHECK-1: global global::_SERVER
 // CHECK: global global::_SERVER : *HackMixed
 

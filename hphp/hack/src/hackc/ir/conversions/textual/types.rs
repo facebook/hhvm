@@ -68,7 +68,7 @@ fn convert_base(ty: &BaseType) -> textual::Ty {
         | BaseType::VarrayOrDarray
         | BaseType::VecOrDict => textual::Ty::named_type_ptr(TypeName::UnmangledRef("HackArray")),
 
-        BaseType::Noreturn | BaseType::Nothing => textual::Ty::Noreturn,
+        BaseType::Noreturn | BaseType::Nothing => textual::Ty::ptr(textual::Ty::Noreturn),
 
         BaseType::Mixed
         | BaseType::None

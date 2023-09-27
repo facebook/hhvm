@@ -616,7 +616,11 @@ impl Ty {
     }
 
     pub(crate) fn named_type_ptr(name: TypeName) -> Ty {
-        Ty::Ptr(Box::new(Ty::Type(name)))
+        Self::ptr(Ty::Type(name))
+    }
+
+    pub(crate) fn ptr(sub: Ty) -> Ty {
+        Ty::Ptr(Box::new(sub))
     }
 
     pub(crate) fn unknown() -> Ty {

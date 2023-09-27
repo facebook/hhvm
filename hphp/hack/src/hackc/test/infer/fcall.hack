@@ -27,7 +27,7 @@ class D extends B {
   // CHECK: define D.inst_fcall_static($this: *D) : *void {
   // CHECK: #b0:
   // CHECK:   n0: *D = load &$this
-  // CHECK:   n1 = n0.D.bar()
+  // CHECK:   n1 = n0.?.bar()
   // CHECK:   ret null
   // CHECK: }
   public function inst_fcall_static(): void {
@@ -38,7 +38,7 @@ class D extends B {
   // CHECK: define D$static.static_fcall_static($this: *D$static) : *void {
   // CHECK: #b0:
   // CHECK:   n0: *D$static = load &$this
-  // CHECK:   n1 = n0.D$static.bar()
+  // CHECK:   n1 = n0.?.bar()
   // CHECK:   ret null
   // CHECK: }
   public static function static_fcall_static(): void {

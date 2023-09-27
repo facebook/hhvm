@@ -971,8 +971,14 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
             }
             SpecialClsRef::LateBoundCls => {
                 // static::foo() - Virtual call to the method in the current class.
-                let mi = state.expect_method_info();
-                let target = FunctionName::method(mi.class.name, mi.is_static, method);
+
+                // Note: Use an untyped method call instead of typed to make
+                // textual happier.
+                //
+                //   let mi = state.expect_method_info();
+                //   let target = FunctionName::method(mi.class.name, mi.is_static, method);
+                let target = FunctionName::untyped_method(method);
+
                 let this = state.load_this()?;
                 state.fb.call_virtual(&target, this.into(), args)?
             }

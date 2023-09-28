@@ -127,6 +127,7 @@ module DataTypeReason = struct
     | Nums
     | Arraykeys
     | SpecialInterface of string
+    | Cyclic
 
   type trail_kind =
     | VariantOfCaseType of string
@@ -143,12 +144,30 @@ module DataTypeReason = struct
   type 'phase trail = {
     origin: 'phase ty;
     instances: (trail_kind * Reason.t) list;
+    expansions: Type_expansions.t;
   }
 
   type 'phase t = subreason * 'phase trail
 
   let append ~trail ~reason kind =
-    { trail with instances = (kind, reason) :: trail.instances }
+    let (expansions, cycle) =
+      match kind with
+      | VariantOfCaseType name
+      | GenericUpperbound name
+      | UpperboundOfNewType name
+      | UpperboundOfEnum name
+      | SealedInterface name
+      | Requirement name ->
+        Type_expansions.add_and_check_cycles
+          trail.expansions
+          (Reason.to_pos reason, name)
+      | ExpansionOfTypeConstant _ -> (trail.expansions, None)
+    in
+    match cycle with
+    | None ->
+      Result.Ok
+        { trail with instances = (kind, reason) :: trail.instances; expansions }
+    | Some cycle -> Result.Error (reason, trail, cycle)
 
   let case_type ~trail reason name =
     append ~trail ~reason @@ VariantOfCaseType name
@@ -169,7 +188,8 @@ module DataTypeReason = struct
 
   let requirement ~trail reason name = append ~trail ~reason @@ Requirement name
 
-  let to_message env ~f ((subreason, { origin; instances = trail }), tag) =
+  let to_message
+      env ~f ((subreason, { origin; instances = trail; expansions = _ }), tag) =
     let ty_str = Typing_print.full_strip_ns_decl env origin in
     let pos = Reason.to_pos (get_reason origin) in
     let prefix = f ty_str in
@@ -183,6 +203,7 @@ module DataTypeReason = struct
       | Nullable -> " because it is a nullable type"
       | Nums -> " because nums are ints or floats"
       | Arraykeys -> " because arraykeys are ints or strings"
+      | Cyclic -> " because it is a cyclic type"
       | SpecialInterface name ->
         Printf.sprintf
           " because `%s` is a special interface that includes non-object values"
@@ -217,9 +238,10 @@ module DataTypeReason = struct
     in
     (pos, msg) :: trail_result
 
-  let make subreason trail = (subreason, trail)
+  let make subreason trail : 'phase t = (subreason, trail)
 
-  let make_trail origin = { origin; instances = [] }
+  let make_trail origin expansions : 'phase trail =
+    { origin; instances = []; expansions }
 end
 
 module DataType = struct
@@ -243,6 +265,22 @@ module DataType = struct
   (** `mixed` should cover all possible data types.
       Update [Tag.all_tags] if additional tags are added to [Tag.t] *)
   let mixed ~reason = Set.of_list ~reason Tag.all_tags
+
+  let cycle_handler ~f ~default ~env ~trail =
+    let report_cycle_error reason = function
+      | Some pos ->
+        Typing_error_utils.add_typing_error
+          ~env
+          Typing_error.(
+            primary
+            @@ Primary.Cyclic_typedef { pos; decl_pos = Reason.to_pos reason })
+      | None -> ()
+    in
+    match trail with
+    | Result.Ok trail -> f env trail
+    | Result.Error (reason, trail, pos_opt) ->
+      report_cycle_error reason pos_opt;
+      default ~reason:DataTypeReason.(make Cyclic trail)
 
   let prim_to_datatypes ~trail (prim : Aast.tprim) : 'phase t =
     let open Tag in
@@ -344,6 +382,7 @@ module DataType = struct
 
     let rec to_datatypes ~trail (env : env) cls : 'phase t =
       let open Tag in
+      let cycle_handler f = cycle_handler ~env ~f in
       let reason = DataTypeReason.(make NoSubreason trail) in
       match cls with
       | cls when String.equal cls SN.Collections.cDict ->
@@ -365,18 +404,17 @@ module DataType = struct
             Set.singleton ~reason @@ InstanceOf { name; kind = Class }
           | Ctrait
           | Cinterface -> begin
+            let default ~reason =
+              if is_c_trait (Cls.kind cls) then
+                Set.singleton ~reason ObjectData
+              else
+                Set.singleton ~reason @@ InstanceOf { name; kind = Interface }
+            in
             match Cls.sealed_whitelist cls with
             | None ->
               let reqs = Cls.all_ancestor_reqs cls in
               if List.is_empty reqs then
-                let default =
-                  if is_c_trait (Cls.kind cls) then
-                    Set.singleton ~reason ObjectData
-                  else
-                    Set.singleton ~reason
-                    @@ InstanceOf { name; kind = Interface }
-                in
-                default
+                default ~reason
               else
                 List.fold
                   ~init:(Set.singleton ~reason ObjectData)
@@ -390,6 +428,7 @@ module DataType = struct
                           (Reason.localize r)
                           name
                       in
+                      cycle_handler ~trail ~default @@ fun env trail ->
                       Set.inter acc @@ to_datatypes ~trail env req_cls)
                   reqs
             | Some whitelist ->
@@ -401,7 +440,8 @@ module DataType = struct
               in
               SSet.fold
                 (fun whitelist_cls acc ->
-                  Set.union (to_datatypes ~trail env whitelist_cls) acc)
+                  cycle_handler ~trail ~default @@ fun env trail ->
+                  Set.union acc @@ to_datatypes ~trail env whitelist_cls)
                 whitelist
                 Set.empty
           end
@@ -419,12 +459,13 @@ module DataType = struct
             cls
             ~default:(fun () -> special_interface_to_datatypes env cls)
         in
-        let set =
+        let set1 =
           Set.of_list
             ~reason:DataTypeReason.(make (SpecialInterface cls) trail)
             tags
         in
-        Set.union set @@ to_datatypes ~trail env cls
+        let set2 = to_datatypes ~trail env cls in
+        Set.union set1 set2
       else
         to_datatypes ~trail env cls
   end
@@ -433,6 +474,9 @@ module DataType = struct
     let open Tag in
     let (env, ty) = Env.expand_type env ty in
     let reason = DataTypeReason.(make NoSubreason trail) in
+    let cycle_handler ty =
+      cycle_handler ~default:mixed ~f:(fun env trail -> fromTy ~trail env ty)
+    in
     match get_node ty with
     | Tprim prim -> prim_to_datatypes ~trail prim
     | Tnonnull -> Set.of_list ~reason Tag.all_nonnull_tags
@@ -459,7 +503,7 @@ module DataType = struct
         List.map
           ~f:(fun ty ->
             let trail = DataTypeReason.generic ~trail (get_reason ty) name in
-            fromTy ~trail env ty)
+            cycle_handler ~env ~trail ty)
           upper_bounds
       in
       let result_opt = List.reduce ~f:Set.inter sets in
@@ -485,8 +529,11 @@ module DataType = struct
       let trail =
         DataTypeReason.type_constant ~trail (get_reason ty) root_ty (snd id)
       in
-      fromTy ~trail env ty
+      cycle_handler ~env ~trail ty
     | Tdependent (_, ty) -> fromTy ~trail env ty
+    | Tnewtype (name, _, as_ty)
+      when String.equal name Naming_special_names.Classes.cSupportDyn ->
+      fromTy ~trail env as_ty
     | Tnewtype (name, tyl, as_ty) -> begin
       match Env.get_typedef env name with
       (* When determining the datatype associated with a type we should
@@ -526,7 +573,7 @@ module DataType = struct
             let trail =
               DataTypeReason.case_type ~trail (get_reason variant) name
             in
-            Set.union acc @@ fromTy ~trail env variant)
+            Set.union acc @@ cycle_handler ~env ~trail variant)
       | _ ->
         let trail_f =
           if Env.is_enum env name || Env.is_enum_class env name then
@@ -534,13 +581,8 @@ module DataType = struct
           else
             DataTypeReason.newtype ~trail
         in
-        let trail =
-          if String.equal name Naming_special_names.Classes.cSupportDyn then
-            trail
-          else
-            trail_f (get_reason as_ty) name
-        in
-        fromTy ~trail env as_ty
+        let trail = trail_f (get_reason as_ty) name in
+        cycle_handler ~env ~trail as_ty
     end
     | Tunapplied_alias _ ->
       Typing_defs.error_Tunapplied_alias_in_illegal_context ()
@@ -558,11 +600,11 @@ module DataType = struct
     let ((env, _), ty) =
       Typing_utils.localize_no_subst env ~ignore_errors:true decl_ty
     in
-    let trail = DataTypeReason.make_trail decl_ty in
+    let trail = DataTypeReason.make_trail decl_ty Type_expansions.empty in
     fromTy ~trail env ty
 
   let fromTy env ty =
-    let trail = DataTypeReason.make_trail ty in
+    let trail = DataTypeReason.make_trail ty Type_expansions.empty in
     fromTy ~trail env ty
 end
 

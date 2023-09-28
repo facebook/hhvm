@@ -1,0 +1,22 @@
+File "case_type_cyclic_new_type.php--file2.php", line 10, characters 19-19:
+Invalid argument (Typing[4110])
+  File "case_type_cyclic_new_type.php--file2.php", line 10, characters 15-16:
+  Expected `CT`
+  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
+    via this generic `T`
+  File "case_type_cyclic_new_type.php--file2.php", line 10, characters 19-19:
+  But got `int`
+File "case_type_cyclic_new_type.php--file2.php", line 10, characters 5-20:
+hh_expect type mismatch (Typing[4453])
+  File "case_type_cyclic_new_type.php--file2.php", line 10, characters 15-16:
+  Expected `CT`
+  File "case_type_cyclic_new_type.php--file2.php", line 10, characters 19-19:
+  But got `int`
+File "case_type_cyclic_new_type.php--file2.php", line 4, characters 11-12:
+Invalid case type declaration. More than one variant of `CT` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_cyclic_new_type.php--file2.php", line 4, characters 16-24:
+  This is the type `Recursive`, which includes **strings**
+  File "case_type_cyclic_new_type.php--file1.php", line 3, characters 22-30:
+    via the constraint on the newtype `Recursive` because there was another error
+  File "case_type_cyclic_new_type.php--file2.php", line 4, characters 28-33:
+  It overlaps with `string`, which also includes **strings**

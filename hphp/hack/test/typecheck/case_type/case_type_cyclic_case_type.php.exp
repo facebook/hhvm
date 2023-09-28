@@ -1,0 +1,48 @@
+File "case_type_cyclic_case_type.php", line 4, characters 11-19:
+Cyclic type definition (Typing[4014])
+  File "case_type_cyclic_case_type.php", line 4, characters 23-31:
+  Cyclic use is here
+File "case_type_cyclic_case_type.php", line 12, characters 19-19:
+Invalid argument (Typing[4110])
+  File "case_type_cyclic_case_type.php", line 12, characters 15-16:
+  Expected `CT`
+  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
+    via this generic `T`
+  File "case_type_cyclic_case_type.php", line 12, characters 19-19:
+  But got `int`
+File "case_type_cyclic_case_type.php", line 13, characters 19-22:
+Invalid argument (Typing[4110])
+  File "case_type_cyclic_case_type.php", line 13, characters 15-16:
+  Expected `CT`
+  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
+    via this generic `T`
+  File "case_type_cyclic_case_type.php", line 13, characters 19-22:
+  But got `bool`
+File "case_type_cyclic_case_type.php", line 12, characters 5-20:
+hh_expect type mismatch (Typing[4453])
+  File "case_type_cyclic_case_type.php", line 12, characters 15-16:
+  Expected `CT`
+  File "case_type_cyclic_case_type.php", line 12, characters 19-19:
+  But got `int`
+File "case_type_cyclic_case_type.php", line 13, characters 5-23:
+hh_expect type mismatch (Typing[4453])
+  File "case_type_cyclic_case_type.php", line 13, characters 15-16:
+  Expected `CT`
+  File "case_type_cyclic_case_type.php", line 13, characters 19-22:
+  But got `bool`
+File "case_type_cyclic_case_type.php", line 4, characters 11-19:
+Invalid case type declaration. More than one variant of `Recursive` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_cyclic_case_type.php", line 4, characters 23-31:
+  This is the type `Recursive`, which includes **ints** because it is a cyclic type
+  File "case_type_cyclic_case_type.php", line 4, characters 23-31:
+    via this variant of the case type `Recursive`
+  File "case_type_cyclic_case_type.php", line 4, characters 35-37:
+  It overlaps with `int`, which also includes **ints**
+File "case_type_cyclic_case_type.php", line 6, characters 11-12:
+Invalid case type declaration. More than one variant of `CT` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_cyclic_case_type.php", line 6, characters 16-24:
+  This is the type `Recursive`, which includes **strings** because it is a cyclic type
+  File "case_type_cyclic_case_type.php", line 4, characters 23-31:
+    via this variant of the case type `Recursive`
+  File "case_type_cyclic_case_type.php", line 6, characters 28-33:
+  It overlaps with `string`, which also includes **strings**

@@ -175,6 +175,15 @@ module Type_expansions : sig
       to the LHS id, we are able to report a cycle. *)
   val empty_w_cycle_report : report_cycle:(Pos.t * string) option -> t
 
+  (** Returns:
+    - [None] if there was no cycle
+    - [Some None] if there was a cycle which did not involve the first
+      type expansion, i.e. error reporting should be done elsewhere
+    - [Some (Some pos)] if there was a cycle involving the first type
+      expansion in which case an error should be reported at [pos]. *)
+  val add_and_check_cycles :
+    t -> Pos_or_decl.t * string -> t * Pos.t option option
+
   val ids : t -> string list
 
   val positions : t -> Pos_or_decl.t list

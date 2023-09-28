@@ -26,6 +26,8 @@
 namespace apache {
 namespace thrift {
 
+using Clock = std::chrono::steady_clock;
+
 // Adaptive concurrency controller implements an algorithm that uses
 // observed latencies to protect servers against overload. The algorithm was
 // initially published by Netflix here (notice that original whitepaper is
@@ -74,8 +76,9 @@ class AdaptiveConcurrencyController {
    public:
     bool isEnabled() const { return minConcurrency != 0; }
 
-    // adaptive concurrency is enabled iff minConcurrency is != 0
+    // adaptive concurrency is enabled if minConcurrency is != 0
     size_t minConcurrency = 0;
+
     // ratio to use to buffer targetRtt from observed latency
     double targetRttFactor = 2.0;
     // alternatively, a fixed targetRtt can be configured. Takes
@@ -96,7 +99,6 @@ class AdaptiveConcurrencyController {
     std::chrono::milliseconds recalcInterval{5 * 60 * 1000};
   };
 
-  using Clock = std::chrono::steady_clock;
   explicit AdaptiveConcurrencyController(
       folly::observer::Observer<Config> config,
       folly::observer::Observer<uint32_t> maxRequestsLimit,
@@ -110,6 +112,7 @@ class AdaptiveConcurrencyController {
   bool enabled() const { return getMaxRequests(); }
   // concurrency that should be used by the server, 0 if disabled
   size_t getMaxRequests() const;
+  size_t getOriginalMaxRequests() const;
 
   // info helpers, to use in monitoring
   std::chrono::microseconds targetRtt() const;
@@ -146,12 +149,16 @@ class AdaptiveConcurrencyController {
   std::atomic<size_t> latencySamplesIdx_{0};
   alignas(folly::cacheline_align_v) std::atomic<size_t> latencySamplesCnt_{0};
 
+  // rttRecalcStart_ is used to indicate the point in time when the next RTT
+  // recalculation should occur.
   std::atomic<Clock::time_point> rttRecalcStart_{Clock::time_point{}};
+
   std::atomic<Clock::time_point> nextRttRecalcStart_{Clock::time_point{}};
   std::atomic<Clock::time_point> samplingPeriodStart_{Clock::time_point{}};
 
   folly::observer::Observer<Config> config_;
   folly::observer::Observer<uint32_t> maxRequestsLimit_;
+
   folly::observer::CallbackHandle enablingCallback_;
   std::function<void(folly::observer::Snapshot<Config>)> configUpdateCallback_;
 
@@ -168,6 +175,7 @@ class AdaptiveConcurrencyController {
   // and will be restored back concurrencyLimit_.
   std::atomic<size_t> concurrencyLimit_{0};
   std::atomic<size_t> maxRequests_{0};
+  size_t originalMaxRequestsLimit_;
 };
 
 namespace detail {

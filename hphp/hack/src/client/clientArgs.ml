@@ -338,7 +338,10 @@ let parse_check_args cmd ~from_default =
         " (mode) finds references of the provided class name" );
       ( "--find-refs",
         Arg.String (fun x -> set_mode (MODE_FIND_REFS x)),
-        " (mode) finds references of the provided method name" );
+        " (mode) finds references of the provided symbol; optionally specify the symbol kind like \"Kind|Symbol\" (looks for functions or methods if unspecified)"
+        ^ "; valid kinds are Method, Property, Class_const, Typeconst, Function, Class, ExplicitClass, and GConst"
+        ^ "; use ExplicitClass instead of Class to exclude references via self/static/parent"
+      );
       Common_argspecs.force_dormant_start force_dormant_start;
       ( "--format",
         (let format_from = ref 0 in

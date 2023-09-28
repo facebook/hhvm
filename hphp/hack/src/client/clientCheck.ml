@@ -58,7 +58,7 @@ let print_refs (results : (string * Pos.absolute) list) ~(json : bool) : unit =
   else
     FindRefsWireFormat.CliHumanReadable.print_results results
 
-let parse_function_or_method_id ~func_action ~meth_action name =
+let parse_name_or_member_id ~name_only_action ~name_and_member_action name =
   let pieces = Str.split (Str.regexp "::") name in
   let default_namespace str =
     match Str.first_chars str 1 with
@@ -67,9 +67,9 @@ let parse_function_or_method_id ~func_action ~meth_action name =
   in
   try
     match pieces with
-    | class_name :: method_name :: _ ->
-      meth_action (default_namespace class_name) method_name
-    | fun_name :: _ -> func_action (default_namespace fun_name)
+    | class_name :: member_name :: _ ->
+      name_and_member_action (default_namespace class_name) member_name
+    | name :: _ -> name_only_action (default_namespace name)
     | _ -> raise Exit
   with
   | _ ->
@@ -258,11 +258,38 @@ let main_internal
     Lwt.return (Exit_status.No_error, Telemetry.create ())
   | MODE_FIND_REFS name ->
     let open ServerCommandTypes.Find_refs in
+    let pieces = Str.split (Str.regexp "|") name in
+    let (kind, name) =
+      match pieces with
+      | [name] -> (None, name)
+      | [kind; name] -> (Some kind, name)
+      | _ ->
+        Printf.eprintf "Invalid input\n";
+        raise Exit_status.(Exit_with Input_error)
+    in
     let action =
-      parse_function_or_method_id
-        ~meth_action:(fun class_name method_name ->
-          Member (class_name, Method method_name))
-        ~func_action:(fun fun_name -> Function fun_name)
+      parse_name_or_member_id
+        ~name_and_member_action:(fun class_name member_name ->
+          let member =
+            match kind with
+            | Some "Method"
+            | None ->
+              Method member_name
+            | Some "Property" -> Property member_name
+            | Some "Class_const" -> Class_const member_name
+            | Some "Typeconst" -> Typeconst member_name
+            | Some _ -> raise Exit_status.(Exit_with Input_error)
+          in
+          Member (class_name, member))
+        ~name_only_action:(fun name ->
+          match kind with
+          | Some "Function"
+          | None ->
+            Function name
+          | Some "Class" -> Class name
+          | Some "ExplicitClass" -> ExplicitClass name
+          | Some "GConst" -> GConst name
+          | Some _ -> raise Exit_status.(Exit_with Input_error))
         name
     in
     let%lwt results = rpc_with_retry args @@ Rpc.FIND_REFS action in
@@ -287,11 +314,11 @@ let main_internal
     Lwt.return (Exit_status.No_error, Telemetry.create ())
   | MODE_GO_TO_IMPL_METHOD name ->
     let action =
-      parse_function_or_method_id
-        ~meth_action:(fun class_name method_name ->
+      parse_name_or_member_id
+        ~name_and_member_action:(fun class_name method_name ->
           ServerCommandTypes.Find_refs.Member
             (class_name, ServerCommandTypes.Find_refs.Method method_name))
-        ~func_action:(fun fun_name ->
+        ~name_only_action:(fun fun_name ->
           ServerCommandTypes.Find_refs.Function fun_name)
         name
     in
@@ -338,10 +365,10 @@ let main_internal
   | MODE_EXTRACT_STANDALONE name ->
     let open ServerCommandTypes.Extract_standalone in
     let target =
-      parse_function_or_method_id
-        ~meth_action:(fun class_name method_name ->
+      parse_name_or_member_id
+        ~name_and_member_action:(fun class_name method_name ->
           Method (class_name, method_name))
-        ~func_action:(fun fun_name -> Function fun_name)
+        ~name_only_action:(fun fun_name -> Function fun_name)
         name
     in
     let%lwt (pretty_printed_dependencies, telemetry) =
